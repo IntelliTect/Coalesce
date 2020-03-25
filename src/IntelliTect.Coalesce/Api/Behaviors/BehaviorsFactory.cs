@@ -31,12 +31,11 @@ namespace IntelliTect.Coalesce.Api.Behaviors
         {
             // If other kinds of default are handled here in the future, add them to the collection above.
 
-            var tContext = reflectionRepository.DbContexts.FirstOrDefault(c => c.Entities.Any(e => e.ClassViewModel.Equals(servedType)));
-            var BehaviorsType = typeof(IEntityFrameworkBehaviors<,>).MakeGenericType(
+            var tContext = reflectionRepository.EntityUsages[servedType].First().Context;
+            return typeof(IEntityFrameworkBehaviors<,>).MakeGenericType(
                 servedType.Type.TypeInfo,
                 tContext.ClassViewModel.Type.TypeInfo
             );
-            return BehaviorsType;
         }
 
         public object GetDefaultBehaviors(ClassViewModel servedType)

@@ -22,6 +22,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
         protected IReadOnlyCollection<PropertyViewModel> _Properties;
         protected IReadOnlyCollection<MethodViewModel> _Methods;
 
+        public ReflectionRepository ReflectionRepository => Type.ReflectionRepository;
+
         public abstract string Name { get; }
         public abstract string Comment { get; }
         public TypeViewModel Type { get; protected set; }
@@ -411,9 +413,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public bool IsDbMappedType => HasDbSet || (DtoBaseViewModel?.HasDbSet ?? false);
 
         /// <summary>
-        /// Has a DbSet property in the Context.
+        /// True if the type has a DbSet property on any discovered DbContext types.
         /// </summary>
-        public bool HasDbSet { get; internal set; }
+        public bool HasDbSet => ReflectionRepository?.EntityUsages.Contains(this) ?? false;
 
         private ClassSecurityInfo _securityInfo;
 

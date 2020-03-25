@@ -59,7 +59,9 @@ namespace IntelliTect.Coalesce
             var query = GetQuery(parameters);
             var canUseAsync = CanEvalQueryAsynchronously(query);
             var projectedQuery = ApplyProjection(query, parameters);
-            TDto mappedResult = canUseAsync ? await projectedQuery.FindItemAsync(id) : projectedQuery.FindItem(id);
+            TDto mappedResult = canUseAsync 
+                ? await projectedQuery.FindItemAsync(id, Context.ReflectionRepository) 
+                : projectedQuery.FindItem(id, Context.ReflectionRepository);
 
             if (mappedResult == null)
             {

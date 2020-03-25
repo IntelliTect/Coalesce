@@ -22,7 +22,7 @@ namespace IntelliTect.Coalesce.Tests.Util
         public static ReflectionRepository MakeFromSymbols()
         {
             var rr = new ReflectionRepository();
-            rr.DiscoverCoalescedTypes(Symbols.Select(s => new SymbolTypeViewModel(s)));
+            rr.DiscoverCoalescedTypes(Symbols.Select(s => new SymbolTypeViewModel(rr, s)));
             return rr;
         }
 

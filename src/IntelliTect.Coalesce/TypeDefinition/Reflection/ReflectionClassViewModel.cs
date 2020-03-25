@@ -11,10 +11,20 @@ namespace IntelliTect.Coalesce.TypeDefinition
     {
         protected Type Info { get; }
 
-        public ReflectionClassViewModel(Type type)
+        public ReflectionClassViewModel(Type type) : this(new ReflectionTypeViewModel(type))
         {
-            Info = type;
-            Type = new ReflectionTypeViewModel(type);
+        }
+
+        public ReflectionClassViewModel(ReflectionTypeViewModel typeViewModel)
+        {
+            Info = typeViewModel.Info;
+            Type = typeViewModel;
+        }
+
+        internal static ReflectionClassViewModel GetOrCreate(ReflectionRepository reflectionRepository, Type type)
+        {
+            return reflectionRepository?.GetClassViewModel(type) as ReflectionClassViewModel
+                ?? new ReflectionClassViewModel(type);
         }
 
         public override string Name => Info.Name;
@@ -23,20 +33,23 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         protected override IReadOnlyCollection<PropertyViewModel> RawProperties(ClassViewModel effectiveParent) => Info
             .GetProperties()
-            .Select((p, i) => new ReflectionPropertyViewModel(effectiveParent, new ReflectionTypeViewModel(p.DeclaringType).ClassViewModel, p){ ClassFieldOrder = i })
+            .Select((p, i) => new ReflectionPropertyViewModel(effectiveParent, this, p){ ClassFieldOrder = i })
             .Cast<PropertyViewModel>()
-            .ToList().AsReadOnly();
+            .ToList()
+            .AsReadOnly();
 
         protected override IReadOnlyCollection<MethodViewModel> RawMethods => Info
             .GetMethods()
             .Where(m => m.IsPublic && !m.IsSpecialName)
             .Select(m => new ReflectionMethodViewModel(this, m))
             .Cast<MethodViewModel>()
-            .ToList().AsReadOnly();
+            .ToList()
+            .AsReadOnly();
 
         protected override IReadOnlyCollection<TypeViewModel> RawNestedTypes => Info
             .GetNestedTypes()
-            .Select(t => new ReflectionTypeViewModel(t))
-            .ToList().AsReadOnly();
+            .Select(t => ReflectionTypeViewModel.GetOrCreate(ReflectionRepository, t))
+            .ToList()
+            .AsReadOnly();
     }
 }

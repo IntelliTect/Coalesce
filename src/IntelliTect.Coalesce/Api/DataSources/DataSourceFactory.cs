@@ -72,12 +72,11 @@ namespace IntelliTect.Coalesce.Api.DataSources
             }
 
             // FUTURE: If other kinds of default data sources are created, add them to the DefaultTypes dictionary above.
-            var tContext = reflectionRepository.DbContexts.FirstOrDefault(c => c.Entities.Any(e => e.ClassViewModel.Equals(servedType)));
-            var dataSourceType = typeof(IEntityFrameworkDataSource<,>).MakeGenericType(
+            var tContext = reflectionRepository.EntityUsages[servedType].First().Context;
+            return typeof(IEntityFrameworkDataSource<,>).MakeGenericType(
                 servedType.Type.TypeInfo,
                 tContext.ClassViewModel.Type.TypeInfo
             );
-            return dataSourceType;
         }
 
         public IDataSource<TServed> GetDefaultDataSource<TServed, TDeclaredFor>()

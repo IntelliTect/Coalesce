@@ -11,15 +11,21 @@ namespace IntelliTect.Coalesce.TypeDefinition
     {
         protected internal ITypeSymbol Symbol { get; internal set; }
 
-        public SymbolTypeViewModel(ITypeSymbol symbol)
+        public SymbolTypeViewModel(ITypeSymbol symbol) : this(null, symbol)
+        {
+        }
+
+        internal SymbolTypeViewModel(ReflectionRepository reflectionRepository, ITypeSymbol symbol) : base(reflectionRepository)
         {
             Symbol = symbol;
 
-            FirstTypeArgument = IsGeneric && NamedSymbol.Arity > 0 
-                ? new SymbolTypeViewModel(NamedSymbol.TypeArguments.First()) 
+            FirstTypeArgument = IsGeneric && NamedSymbol.Arity > 0
+                ? SymbolTypeViewModel.GetOrCreate(reflectionRepository, NamedSymbol.TypeArguments.First())
                 : null;
 
-            ArrayType = IsArray ? new SymbolTypeViewModel(((IArrayTypeSymbol)Symbol).ElementType) : null;
+            ArrayType = IsArray
+                ? SymbolTypeViewModel.GetOrCreate(reflectionRepository, ((IArrayTypeSymbol)Symbol).ElementType) 
+                : null;
 
             var types = new List<INamedTypeSymbol>();
             var target = Symbol as INamedTypeSymbol;
@@ -28,9 +34,21 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 types.Add(target);
                 target = target.BaseType;
             }
-            foreach (var iface in Symbol.AllInterfaces) types.Add(iface);
+            foreach (var iface in Symbol.AllInterfaces)
+            {
+                types.Add(iface);
+            }
             AssignableTo = types;
             AssignableToLookup = types.ToLookup(t => t.MetadataName);
+
+            ClassViewModel = ShouldCreateClassViewModel && Symbol is INamedTypeSymbol nts
+                ? new SymbolClassViewModel(this)
+                : null;
+        }
+
+        internal static SymbolTypeViewModel GetOrCreate(ReflectionRepository reflectionRepository, ITypeSymbol symbol)
+        {
+            return reflectionRepository?.GetOrAddType(symbol) ?? new SymbolTypeViewModel(reflectionRepository, symbol);
         }
 
         public INamedTypeSymbol NamedSymbol => Symbol as INamedTypeSymbol ?? throw new InvalidCastException("Cannot cast to INamedTypeSymbol");
@@ -105,10 +123,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public override TypeViewModel ArrayType { get; }
 
-        public override ClassViewModel ClassViewModel =>
-            HasClassViewModel && Symbol is INamedTypeSymbol nts
-                ? ReflectionRepository.Global.GetClassViewModel(nts)
-                : null;
+        public override ClassViewModel ClassViewModel { get; }
 
         public override object GetAttributeValue<TAttribute>(string valueName) =>
             Symbol.GetAttributeValue<TAttribute>(valueName);
@@ -153,7 +168,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public override TypeViewModel[] GenericArgumentsFor(Type type) =>
             GetSatisfyingBaseTypeSymbol(type)?
             .TypeArguments
-            .Select(t => new SymbolTypeViewModel(t))
+            .Select(t => SymbolTypeViewModel.GetOrCreate(ReflectionRepository, t))
             .ToArray();
 
         public override bool IsA(Type type) => GetSatisfyingBaseTypeSymbol(type) != null;

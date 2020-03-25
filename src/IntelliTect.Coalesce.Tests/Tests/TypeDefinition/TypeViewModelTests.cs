@@ -65,9 +65,9 @@ namespace IntelliTect.Coalesce.Tests.TypeDefinition
         [ClassViewModelData(typeof(double?))]
         public void IsNumber_TrueForNumbers(ClassViewModelData data)
         {
-            ClassViewModel vm = data;
+            TypeViewModel vm = data;
 
-            Assert.True(vm.Type.IsNumber);
+            Assert.True(vm.IsNumber);
         }
     }
 }

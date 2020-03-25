@@ -26,7 +26,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         
         public override bool IsStatic => Symbol.IsStatic;
 
-        public override TypeViewModel ReturnType => new SymbolTypeViewModel(Symbol.ReturnType);
+        public override TypeViewModel ReturnType => SymbolTypeViewModel.GetOrCreate(Parent.ReflectionRepository, Symbol.ReturnType);
 
         public override bool IsInternalUse => base.IsInternalUse || Symbol.DeclaredAccessibility != Accessibility.Public;
 

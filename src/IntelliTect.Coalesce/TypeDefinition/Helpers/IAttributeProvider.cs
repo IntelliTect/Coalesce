@@ -45,8 +45,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
             where TAttribute : Attribute
         {
             var value = obj.GetAttributeValue<TAttribute>(propertyExpression.GetExpressedProperty().Name);
-            if (value is Type reflectionValue) return new ReflectionTypeViewModel(reflectionValue);
-            if (value is ITypeSymbol symbolValue) return new SymbolTypeViewModel(symbolValue);
+            if (value is Type reflectionValue) return ReflectionRepository.Global.GetOrAddType(reflectionValue);
+            if (value is ITypeSymbol symbolValue) return ReflectionRepository.Global.GetOrAddType(symbolValue);
             return null;
         }
     }

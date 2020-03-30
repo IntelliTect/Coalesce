@@ -12,6 +12,7 @@ using IntelliTect.Coalesce.Utilities;
 using System.Collections.Concurrent;
 using IntelliTect.Coalesce.TypeUsage;
 using IntelliTect.Coalesce.Api;
+using System.Threading;
 
 namespace IntelliTect.Coalesce.TypeDefinition
 {
@@ -19,20 +20,27 @@ namespace IntelliTect.Coalesce.TypeDefinition
     {
         public static readonly ReflectionRepository Global = new ReflectionRepository();
 
+
         private readonly HashSet<DbContextTypeUsage> _contexts = new HashSet<DbContextTypeUsage>();
         private readonly HashSet<ClassViewModel> _entities = new HashSet<ClassViewModel>();
+        private ILookup<ClassViewModel, EntityTypeUsage> _entityUsages = null;
+
         private readonly HashSet<CrudStrategyTypeUsage> _behaviors = new HashSet<CrudStrategyTypeUsage>();
         private readonly HashSet<CrudStrategyTypeUsage> _dataSources = new HashSet<CrudStrategyTypeUsage>();
         private readonly HashSet<ClassViewModel> _externalTypes = new HashSet<ClassViewModel>();
         private readonly HashSet<ClassViewModel> _customDtos = new HashSet<ClassViewModel>();
         private readonly HashSet<ClassViewModel> _services = new HashSet<ClassViewModel>();
 
-        private readonly ConcurrentDictionary<object, ClassViewModel> _allClassViewModels
-            = new ConcurrentDictionary<object, ClassViewModel>();
+        private readonly ConcurrentDictionary<object, TypeViewModel> _allTypeViewModels
+            = new ConcurrentDictionary<object, TypeViewModel>();
 
         private readonly object _discoverLock = new object();
 
         public ReadOnlyHashSet<DbContextTypeUsage> DbContexts => new ReadOnlyHashSet<DbContextTypeUsage>(_contexts);
+        public ILookup<ClassViewModel, EntityTypeUsage> EntityUsages => _entityUsages ??= DbContexts
+            .SelectMany(contextUsage => contextUsage.Entities)
+            .ToLookup(entityUsage => entityUsage.ClassViewModel);
+
         public ReadOnlyHashSet<ClassViewModel> Entities => new ReadOnlyHashSet<ClassViewModel>(_entities);
         public ReadOnlyHashSet<CrudStrategyTypeUsage> Behaviors => new ReadOnlyHashSet<CrudStrategyTypeUsage>(_behaviors);
         public ReadOnlyHashSet<CrudStrategyTypeUsage> DataSources => new ReadOnlyHashSet<CrudStrategyTypeUsage>(_dataSources);
@@ -59,96 +67,132 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
         }
 
+        private HashSet<string> _rootTypeWhitelist = null;
+        internal void SetRootTypeWhitelist(IEnumerable<string> typeNames)
+        {
+            _rootTypeWhitelist = new HashSet<string>(typeNames);
+            if (!_rootTypeWhitelist.Any())
+            {
+                _rootTypeWhitelist = null;
+            }
+        }
+
         internal void DiscoverCoalescedTypes(IEnumerable<TypeViewModel> rootTypes)
         {
             lock (_discoverLock)
             {
-                foreach (var type in rootTypes
+                AddTypes(rootTypes
                     // For some reason, attribute checking can be really slow. We're talking ~350ms to determine that the DbContext type has a [Coalesce] attribute.
                     // Really not sure why, but lets parallelize to minimize that impact.
                     .AsParallel()
                     .Where(type => type.HasAttribute<CoalesceAttribute>())
-                )
+                );
+            }
+        }
+
+        public void AddTypes(IEnumerable<TypeViewModel> types)
+        {
+            foreach (var type in types) GetOrAddType(type);
+        }
+
+        public SymbolTypeViewModel GetOrAddType(ITypeSymbol symbol) =>
+            GetOrAddType(symbol, () => new SymbolTypeViewModel(this, symbol)) as SymbolTypeViewModel;
+
+        public ReflectionTypeViewModel GetOrAddType(Type type) =>
+            GetOrAddType(type, () => new ReflectionTypeViewModel(this, type)) as ReflectionTypeViewModel;
+
+        public TypeViewModel GetOrAddType(TypeViewModel type) => 
+            GetOrAddType(GetCacheKey(type), () => type);
+
+        private TypeViewModel GetOrAddType(object key, Func<TypeViewModel> factory)
+        {
+            // First, see if we already have the type. Do not invoke the factory for this check.
+            if (_allTypeViewModels.TryGetValue(key, out var existing)) return existing;
+
+            var newType = factory();
+            if (_allTypeViewModels.TryAdd(key, newType))
+            {
+                ProcessAddedType(newType);
+            }
+
+            // Re-fetch, because this isn't strictly the one that we maybe just added.
+            return _allTypeViewModels[key];
+        }
+
+        private void ProcessAddedType(TypeViewModel type)
+        {
+            if (!type.HasAttribute<CoalesceAttribute>())
+            {
+                return;
+            }
+
+            if (_rootTypeWhitelist != null && !_rootTypeWhitelist.Contains(type.Name))
+            {
+                return;
+            }
+
+            if (type.IsA<DbContext>())
+            {
+                var context = new DbContextTypeUsage(type.ClassViewModel);
+
+                var entityCvms = context.Entities.Select(e => GetOrAddType(e.TypeViewModel).ClassViewModel);
+                lock (_contexts)
                 {
-                    if (type.IsA<DbContext>())
-                    {
-                        var context = new DbContextTypeUsage(type.ClassViewModel);
-                        _contexts.Add(context);
-                        _entities.UnionWith(context.Entities.Select(e => e.ClassViewModel));
-
-                        // Force cache these since they have extra bits of info attached now.
-                        // TODO: eliminate the need for this.
-                        foreach (var e in context.Entities) Cache(e.ClassViewModel, force: true);
-
-                    }
-                    else if (AddCrudStrategy(typeof(IDataSource<>), type, _dataSources))
-                    {
-                        // Handled by helper
-                    }
-                    else if (AddCrudStrategy(typeof(IBehaviors<>), type, _behaviors))
-                    {
-                        // Handled by helper
-                    }
-                    else if (type.IsA(typeof(IClassDto<>)))
-                    {
-                        var classViewModel = type.ClassViewModel;
-
-                        // Force cache this since it has extra bits of info attached.
-                        _customDtos.Add(Cache(classViewModel, force: true));
-                    }
-                    else if (type.ClassViewModel?.IsService ?? false)
-                    {
-                        var classViewModel = type.ClassViewModel;
-                        _services.Add(Cache(classViewModel));
-                    }
+                    _contexts.Add(context);
+                    _entities.UnionWith(entityCvms);
+                    // Some of our entities may have gotten discovered as external types already.
+                    // Remove them from that set now that we know they're entities
+                    _externalTypes.ExceptWith(entityCvms);
                 }
 
-                foreach (var entity in ApiBackedClasses)
-                {
-                    DiscoverExternalMethodTypesOn(entity);
-                    DiscoverExternalPropertyTypesOn(entity);
-                    DiscoverNestedCrudStrategiesOn(entity);
-                }
+                // Null this out so it gets recomputed on next access.
+                _entityUsages = null;
 
-                foreach (var service in Services)
+                foreach (var entity in context.Entities)
                 {
-                    DiscoverExternalMethodTypesOn(service);
+                    DiscoverOnApiBackedClass(entity.TypeViewModel.ClassViewModel);
                 }
+            }
+            else if (AddCrudStrategy(typeof(IDataSource<>), type, _dataSources))
+            {
+                // Handled by helper
+            }
+            else if (AddCrudStrategy(typeof(IBehaviors<>), type, _behaviors))
+            {
+                // Handled by helper
+            }
+            else if (type.IsA(typeof(IClassDto<>)))
+            {
+                var classViewModel = type.ClassViewModel;
+                _customDtos.Add(classViewModel);
+                DiscoverOnApiBackedClass(classViewModel);
+            }
+            else if (type.ClassViewModel?.IsService ?? false)
+            {
+                var classViewModel = type.ClassViewModel;
+                _services.Add(classViewModel);
+                DiscoverExternalMethodTypesOn(classViewModel);
+            }
+
+            void DiscoverOnApiBackedClass(ClassViewModel classViewModel)
+            {
+                DiscoverExternalMethodTypesOn(classViewModel);
+                DiscoverExternalPropertyTypesOn(classViewModel);
+                DiscoverNestedCrudStrategiesOn(classViewModel);
             }
         }
 
         /// <summary>
-        /// Adds types from the assembly that defines the given type parameter.
+        /// Adds types from the assembly where type T resides.
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
-        internal void AddAssembly<T>() =>
-            DiscoverCoalescedTypes(typeof(T).Assembly.ExportedTypes.Select(t => new ReflectionTypeViewModel(t)));
+        public void AddAssembly<T>() =>
+            DiscoverCoalescedTypes(typeof(T).Assembly.ExportedTypes.Select(t => new ReflectionTypeViewModel(this, t)));
 
-        /// <summary>
-        /// Cache the given model so it can be reused when an instance representing its underlying type is requested.
-        /// </summary>
-        /// <param name="classViewModel">The ClassViewModel to cache.</param>
-        /// <param name="force">
-        /// True to override any existing object for the underlying type. 
-        /// False to preserve any existing object.
-        /// </param>
-        /// <returns>The ClassViewModel that was passed in, for convenience.</returns>
-        private ClassViewModel Cache(ClassViewModel classViewModel, bool force = false)
-        {
-            object key = GetCacheKey(classViewModel);
 
-            if (force)
-                _allClassViewModels[key] = classViewModel;
-            else
-                _allClassViewModels.GetOrAdd(key, classViewModel);
-
-            return classViewModel;
-        }
-
-        private object GetCacheKey(ClassViewModel classViewModel) => 
-            (classViewModel.Type as ReflectionTypeViewModel)?.Info as object
-            ?? (classViewModel.Type as SymbolTypeViewModel)?.Symbol as object
+        private object GetCacheKey(TypeViewModel typeViewModel) =>
+            (typeViewModel as ReflectionTypeViewModel)?.Info as object
+            ?? (typeViewModel as SymbolTypeViewModel)?.Symbol as object
             ?? throw new NotSupportedException("Unknown subtype of TypeViewModel");
 
 
@@ -169,7 +213,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 && !ExternalTypes.Contains(externalType)
                 )
             {
-                if (_externalTypes.Add(Cache(externalType)))
+                if (_externalTypes.Add(externalType))
                 {
                     DiscoverExternalPropertyTypesOn(externalType);
                 }
@@ -220,7 +264,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             {
                 throw new InvalidOperationException($"{servedType} is not a valid type argument for a {iface}.");
             }
-            var servedClass = Cache(servedType.ClassViewModel);
+            var servedClass = servedType.ClassViewModel;
 
             // See if we were expecting that the strategy be declared for a particular type
             // by virtue of its nesting. If this type has been overridden to something else by an attribute, then that's wrong.
@@ -242,7 +286,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     $"{strategyType} must satisfy {iface} with type parameter <{declaredFor.DtoBaseViewModel}>.");
             }
 
-            set.Add(new CrudStrategyTypeUsage(Cache(strategyType.ClassViewModel), servedClass, declaredFor));
+            set.Add(new CrudStrategyTypeUsage(strategyType.ClassViewModel, servedClass, declaredFor));
             return true;
         }
 
@@ -256,12 +300,13 @@ namespace IntelliTect.Coalesce.TypeDefinition
         }
 
         public ClassViewModel GetClassViewModel(Type classType) =>
-            _allClassViewModels.GetOrAdd(classType, _ => new ReflectionClassViewModel(classType));
+            GetOrAddType(classType).ClassViewModel;
 
         public ClassViewModel GetClassViewModel(INamedTypeSymbol classType) =>
-            _allClassViewModels.GetOrAdd(classType, _ => new SymbolClassViewModel(classType));
+            GetOrAddType(classType).ClassViewModel;
 
         public ClassViewModel GetClassViewModel<T>() => GetClassViewModel(typeof(T));
+
 
         /// <summary>
         /// Gets a propertyViewModel based on the property selector.

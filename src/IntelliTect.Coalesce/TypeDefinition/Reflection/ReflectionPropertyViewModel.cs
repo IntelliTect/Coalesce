@@ -16,7 +16,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             Parent = declaringParent;
             EffectiveParent = effectiveParent;
             Info = propetyInfo;
-            Type = new ReflectionTypeViewModel(Info.PropertyType);
+            Type = ReflectionTypeViewModel.GetOrCreate(declaringParent.ReflectionRepository, Info.PropertyType);
         }
 
         public override string Name => Info.Name;

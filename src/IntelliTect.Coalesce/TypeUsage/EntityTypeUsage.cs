@@ -7,13 +7,19 @@ namespace IntelliTect.Coalesce.TypeUsage
 {
     public class EntityTypeUsage
     {
-        public EntityTypeUsage(DbContextTypeUsage context, ClassViewModel classViewModel, string contextPropertyName)
+        public EntityTypeUsage(DbContextTypeUsage context, TypeViewModel typeViewModel, string contextPropertyName)
         {
-            ClassViewModel = classViewModel;
+            Context = context;
+            TypeViewModel = typeViewModel;
+            ClassViewModel = typeViewModel.ClassViewModel;
             ContextPropertyName = contextPropertyName;
         }
 
-        public ClassViewModel ClassViewModel { get; }
+        public DbContextTypeUsage Context { get; }
+
+        public TypeViewModel TypeViewModel { get; }
+
+        public ClassViewModel ClassViewModel { get; } 
 
         public string ContextPropertyName { get; }
     }

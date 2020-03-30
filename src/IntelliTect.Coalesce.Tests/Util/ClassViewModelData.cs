@@ -17,7 +17,8 @@ namespace IntelliTect.Coalesce.Tests.Util
         public Type TargetType { get; private set; }
         public Type ViewModelType { get; private set; }
 
-        public ClassViewModel ClassViewModel { get; private set; }
+        public TypeViewModel TypeViewModel { get; private set; }
+        public ClassViewModel ClassViewModel => TypeViewModel.ClassViewModel;
 
         public ClassViewModelData()
         {
@@ -34,7 +35,7 @@ namespace IntelliTect.Coalesce.Tests.Util
         {
             if (ViewModelType == typeof(ReflectionClassViewModel))
             {
-                ClassViewModel = ReflectionRepositoryFactory.Reflection.GetClassViewModel(TargetType);
+                TypeViewModel = ReflectionRepositoryFactory.Reflection.GetOrAddType(TargetType);
             }
             else if (ViewModelType == typeof(SymbolClassViewModel))
             {
@@ -50,7 +51,7 @@ namespace IntelliTect.Coalesce.Tests.Util
                     throw new ArgumentException($"Class {TargetType} ({fqn}) not found in any C# embedded resources.");
                 }
 
-                ClassViewModel = ReflectionRepositoryFactory.Symbol.GetClassViewModel(locatedSymbol);
+                TypeViewModel = ReflectionRepositoryFactory.Symbol.GetOrAddType(locatedSymbol);
             }
         }
 
@@ -88,6 +89,9 @@ namespace IntelliTect.Coalesce.Tests.Util
 
         public static implicit operator ClassViewModel(ClassViewModelData self)
             => self.ClassViewModel;
+
+        public static implicit operator TypeViewModel(ClassViewModelData self)
+            => self.TypeViewModel;
 
         public override string ToString() =>
             $"({(ViewModelType.Name.StartsWith("Sym") ? "Symbol" : "Reflect")}) {new ReflectionTypeViewModel(TargetType).FullyQualifiedName}";

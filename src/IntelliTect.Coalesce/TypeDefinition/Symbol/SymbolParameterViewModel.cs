@@ -13,7 +13,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public SymbolParameterViewModel(MethodViewModel parent, IParameterSymbol symbol) : base(parent)
         {
             Symbol = symbol;
-            Type = new SymbolTypeViewModel(symbol.Type);
+            Type = SymbolTypeViewModel.GetOrCreate(parent.Parent.ReflectionRepository, symbol.Type);
         }
 
         public override string Name => Symbol.Name;

@@ -67,7 +67,7 @@ namespace IntelliTect.Coalesce
         public virtual (SaveKind Kind, object IncomingKey) DetermineSaveKind<TDto>(TDto incomingDto)
             where TDto : class, IClassDto<T>, new()
         {
-            var dtoClassViewModel = ReflectionRepository.Global.GetClassViewModel<TDto>();
+            var dtoClassViewModel = Context.ReflectionRepository.GetClassViewModel<TDto>();
             object idValue = dtoClassViewModel.PrimaryKey.PropertyInfo.GetValue(incomingDto);
 
             // IsNullable handles nullable value types, and reference types (mainly strings).

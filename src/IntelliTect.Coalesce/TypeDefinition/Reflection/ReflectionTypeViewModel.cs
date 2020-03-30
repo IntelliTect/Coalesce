@@ -7,19 +7,26 @@ using Microsoft.CodeAnalysis;
 
 namespace IntelliTect.Coalesce.TypeDefinition
 {
-    internal class ReflectionTypeViewModel : TypeViewModel
+    public class ReflectionTypeViewModel : TypeViewModel
     {
         protected internal Type Info { get; internal set; }
 
-        public ReflectionTypeViewModel(Type type)
+        public ReflectionTypeViewModel(Type type) : this(null, type)
         {
+        }
+
+        internal ReflectionTypeViewModel(ReflectionRepository reflectionRepository, Type type) : base(reflectionRepository)
+        {
+            ReflectionRepository = reflectionRepository;
             Info = type;
 
             FirstTypeArgument = IsGeneric && Info.IsConstructedGenericType
-                ? new ReflectionTypeViewModel(Info.GenericTypeArguments[0])
+                ? ReflectionTypeViewModel.GetOrCreate(reflectionRepository, Info.GenericTypeArguments[0])
                 : null;
 
-            ArrayType = IsArray ? new ReflectionTypeViewModel(Info.GetElementType()) : null;
+            ArrayType = IsArray 
+                ? ReflectionTypeViewModel.GetOrCreate(reflectionRepository, Info.GetElementType()) 
+                : null;
 
             IEnumerable<Type> GetBaseClassesAndInterfaces(Type t)
             {
@@ -34,6 +41,15 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
 
             BaseClassesAndInterfaces = GetBaseClassesAndInterfaces(Info).Concat(new[] { Info }).ToList();
+
+            ClassViewModel = ShouldCreateClassViewModel
+                ? new ReflectionClassViewModel(this)
+                : null;
+        }
+
+        internal static ReflectionTypeViewModel GetOrCreate(ReflectionRepository reflectionRepository, Type type)
+        {
+            return reflectionRepository?.GetOrAddType(type) ?? new ReflectionTypeViewModel(reflectionRepository, type);
         }
 
 
@@ -63,7 +79,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public override TypeViewModel[] GenericArgumentsFor(Type type) =>
             GetSatisfyingBaseType(type)?
             .GenericTypeArguments
-            .Select(t => new ReflectionTypeViewModel(t))
+            .Select(t => ReflectionTypeViewModel.GetOrCreate(ReflectionRepository, t))
             .ToArray();
 
         public override bool IsA(Type type) => GetSatisfyingBaseType(type) != null;
@@ -148,8 +164,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public override TypeViewModel ArrayType { get; }
 
-        public override ClassViewModel ClassViewModel =>
-            HasClassViewModel ? ReflectionRepository.Global.GetClassViewModel(Info) : null;
+        public override ClassViewModel ClassViewModel { get; }
 
         public override Type TypeInfo => Info;
 

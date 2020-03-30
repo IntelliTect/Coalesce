@@ -10,6 +10,18 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
     public abstract class TypeViewModel : IAttributeProvider
     {
+        public TypeViewModel()
+        {
+
+        }
+
+        internal TypeViewModel(ReflectionRepository reflectionRepository) : this()
+        {
+            ReflectionRepository = reflectionRepository;
+        }
+
+        public ReflectionRepository ReflectionRepository { get; internal set; }
+
         public abstract string Name { get; }
 
         /// <summary>
@@ -180,7 +192,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public virtual bool IsInternalUse => HasAttribute<InternalUseAttribute>();
 
-        public bool HasClassViewModel => !IsPrimitive && IsPOCO;
+        protected bool ShouldCreateClassViewModel => !IsPrimitive && IsPOCO;
+
+        public bool HasClassViewModel => ClassViewModel != null;
 
         public abstract ClassViewModel ClassViewModel { get; }
 
@@ -287,7 +301,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         }
 
         /// <summary>
-        /// Returns true if the property is class outside the System namespace, and is not a string or array
+        /// Returns true if the type is class outside the System namespace.
         /// </summary>
         public bool IsPOCO => !IsArray && !IsCollection && !FullNamespace.StartsWith("System") && IsClass && !IsFile;
 

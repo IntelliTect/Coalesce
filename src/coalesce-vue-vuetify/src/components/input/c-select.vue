@@ -312,23 +312,23 @@ export default class CSelect extends MetadataComponent {
     // Without this, pressing backspace to delete the current value
     // will cause the search field to lose focus and further keyboard input will do nothing.
     if (!dontFocus) {
-    if (!value) {
-      this.focus()
-    } else {
-      this.blur();
-    }
+      if (!value) {
+        this.focus()
+      } else {
+        this.blur();
+      }
     }
   }
 
   focus() {
     // @ts-ignore
-    this.$nextTick(() => this.$children[0]?.onClick?.())
+    this.$nextTick(() => this.$children[0]?.onClick?.(new Event('fake')))
   }
 
   blur() {
     this.$nextTick(() => {
       // @ts-ignore
-      this.$children[0]?.onClick?.(); 
+      this.$children[0]?.onClick?.(new Event('fake')); 
       // @ts-ignore
       this.$children[0]?.onEscDown?.(new Event('fake'))
     })

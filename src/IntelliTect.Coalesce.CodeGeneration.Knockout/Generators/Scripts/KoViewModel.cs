@@ -188,7 +188,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
 
 
                 b.Line();
-                foreach (var method in Model.ClientMethods.Where(m => !m.IsStatic || m.ResultType.EqualsType(Model.Type)))
+                foreach (var method in Model.ClientMethods.Where(m => !m.IsStatic || m.ResultType == Model.Type))
                 {
                     WriteClientMethodDeclaration(b, method, Model.ViewModelGeneratedClassName, true, true);
                 }
@@ -340,7 +340,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
                                 b.Indented( "change.status, ");
                                 b.Indented($"this.{prop.JsVariable}, ");
                                 b.Indented($"{prop.Object.ViewModelClassName}, ");
-                                b.Indented($"'{prop.Object.ClientProperties.First(f => f.Type.EqualsType(Model.Type)).ForeignKeyProperty.JsVariable}',");
+                                b.Indented($"'{prop.Object.ClientProperties.First(f => f.Type == Model.Type).ForeignKeyProperty.JsVariable}',");
                                 b.Indented($"'{prop.ManyToManyCollectionProperty.ForeignKeyProperty.JsVariable}',");
                                 b.Indented($"change.value.{prop.ManyToManyCollectionProperty.Object.PrimaryKey.JsVariable}()");
                                 b.Line( ");");

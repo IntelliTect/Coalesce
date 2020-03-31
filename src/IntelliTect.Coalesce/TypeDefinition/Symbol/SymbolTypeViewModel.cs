@@ -44,7 +44,13 @@ namespace IntelliTect.Coalesce.TypeDefinition
             ClassViewModel = ShouldCreateClassViewModel && Symbol is INamedTypeSymbol nts
                 ? new SymbolClassViewModel(this)
                 : null;
-        }
+
+            // These are precomputed because they are used for .Equals() and the == operator.
+            FullyQualifiedName = Symbol.ToDisplayString(DefaultDisplayFormat);
+            // TODO: write tests that assert that this will format types the same 
+            // way as ReflectionTypeViewModel.VerboseFullyQualifiedName. Adjust either one as needed.
+            VerboseFullyQualifiedName = Symbol.ToDisplayString(VerboseDisplayFormat);
+    }
 
         internal static SymbolTypeViewModel GetOrCreate(ReflectionRepository reflectionRepository, ITypeSymbol symbol)
         {
@@ -105,16 +111,14 @@ namespace IntelliTect.Coalesce.TypeDefinition
             .WithGlobalNamespaceStyle(SymbolDisplayGlobalNamespaceStyle.OmittedAsContaining)
             .AddMiscellaneousOptions(SymbolDisplayMiscellaneousOptions.RemoveAttributeSuffix);
 
-        public override string FullyQualifiedName => Symbol.ToDisplayString(DefaultDisplayFormat);
+        public override string FullyQualifiedName { get; }
 
         public static readonly SymbolDisplayFormat VerboseDisplayFormat = DefaultDisplayFormat
             .RemoveMiscellaneousOptions(SymbolDisplayMiscellaneousOptions.UseSpecialTypes)
             .RemoveMiscellaneousOptions(SymbolDisplayMiscellaneousOptions.RemoveAttributeSuffix)
             .AddMiscellaneousOptions(SymbolDisplayMiscellaneousOptions.ExpandNullable);
 
-        // TODO: write tests that assert that this will format types the same 
-        // way as ReflectionTypeViewModel.VerboseFullyQualifiedName. Adjust either one as needed.
-        public override string VerboseFullyQualifiedName => Symbol.ToDisplayString(VerboseDisplayFormat);
+        public override string VerboseFullyQualifiedName { get; }
 
         public override string FullNamespace =>
             (Symbol is IArrayTypeSymbol array ? array.ElementType : Symbol.ContainingSymbol).ToDisplayString(DefaultDisplayFormat);
@@ -172,6 +176,13 @@ namespace IntelliTect.Coalesce.TypeDefinition
             .ToArray();
 
         public override bool IsA(Type type) => GetSatisfyingBaseTypeSymbol(type) != null;
+
+        public override bool Equals(object obj)
+        {
+            if (!(obj is SymbolTypeViewModel that)) return base.Equals(obj);
+
+            return SymbolEqualityComparer.IncludeNullability.Equals(Symbol, that.Symbol);
+        }
 
         public override bool EqualsType(TypeViewModel b) =>
             b is SymbolTypeViewModel s ? FullyQualifiedName == s.FullyQualifiedName : false;

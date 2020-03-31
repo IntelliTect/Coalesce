@@ -359,5 +359,20 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public abstract bool EqualsType(TypeViewModel b);
 
         public override string ToString() => FullyQualifiedName;
+
+        public static bool operator ==(TypeViewModel lhs, TypeViewModel rhs)
+        {
+            if (Object.ReferenceEquals(lhs, null))
+            {
+                return Object.ReferenceEquals(rhs, null);
+            }
+
+            return lhs.Equals(rhs);
+        }
+
+        public static bool operator !=(TypeViewModel o1, TypeViewModel o2)
+        {
+            return !o1.Equals(o2);
+        }
     }
 }

@@ -324,6 +324,50 @@ module ViewModels {
                 }
             };
         };
+        /**
+            Methods and properties for invoking server method MethodWithEntityParameter.
+            Gets all the first names starting with the characters.
+        */
+        public readonly methodWithEntityParameter = new PersonPartial.MethodWithEntityParameter(this);
+        public static MethodWithEntityParameter = class MethodWithEntityParameter extends Coalesce.ClientMethod<PersonPartial, ViewModels.Person> {
+            public readonly name = 'MethodWithEntityParameter';
+            public readonly verb = 'POST';
+            
+            /** Calls server method (MethodWithEntityParameter) with the given arguments */
+            public invoke = (person: ViewModels.Person | null, callback?: (result: ViewModels.Person) => void, reload: boolean = true): JQueryPromise<any> => {
+                return this.invokeWithData({ person: person ? person.saveToDto() : null }, callback, reload);
+            };
+            
+            /** Object that can be easily bound to fields to allow data entry for the method's parameters */
+            public args = new MethodWithEntityParameter.Args(); 
+            public static Args = class Args {
+                public person: KnockoutObservable<ViewModels.Person | null> = ko.observable(null);
+            };
+            
+            /** Calls server method (MethodWithEntityParameter) with an instance of MethodWithEntityParameter.Args, or the value of this.args if not specified. */
+            public invokeWithArgs = (args = this.args, callback?: (result: ViewModels.Person) => void, reload: boolean = true): JQueryPromise<any> => {
+                return this.invoke(args.person(), callback, reload);
+            }
+            
+            /** Invokes the method after displaying a browser-native prompt for each argument. */
+            public invokeWithPrompts = (callback?: (result: ViewModels.Person) => void, reload: boolean = true): JQueryPromise<any> | undefined => {
+                var $promptVal: string | null = null;
+                var person: null = null;
+                return this.invoke(person, callback, reload);
+            };
+            
+            protected loadResponse = (data: Coalesce.ItemResult, callback?: (result: ViewModels.Person) => void, reload: boolean = true) => {
+                if (!this.result()) {
+                    this.result(new ViewModels.Person(data.object));
+                } else {
+                    this.result().loadFromDto(data.object);
+                }
+                this.parent.loadFromDto(data.object, true)
+                if (typeof(callback) == 'function') {
+                    callback(this.result());
+                }
+            };
+        };
         
         /** 
             Load the ViewModel object from the DTO.

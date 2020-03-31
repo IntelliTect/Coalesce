@@ -291,6 +291,46 @@
                         <span class="label label-info" data-bind="fadeVisible: isLoading">Loading</span>
                     </td>
                 </tr>
+                <tr data-bind="with: methodWithEntityParameter">
+                    <td>
+                        <button class="btn btn-default btn-xs" data-bind="click: function(){ $('#method-MethodWithEntityParameter').modal() }">
+                            Method With Entity Parameter
+                        </button>
+                    </td>
+                    <td>
+                        <dl class="dl-horizontal" data-bind="with: result">
+                            <dt>Title</dt>
+                            <dd data-bind="text: title"></dd>
+                            <dt>First Name</dt>
+                            <dd data-bind="text: firstName"></dd>
+                            <dt>Last Name</dt>
+                            <dd data-bind="text: lastName"></dd>
+                            <dt>Email</dt>
+                            <dd data-bind="text: email"></dd>
+                            <dt>Gender</dt>
+                            <dd data-bind="text: gender"></dd>
+                            <dt>Cases Assigned</dt>
+                            <dd data-bind="text: casesAssigned"></dd>
+                            <dt>Cases Reported</dt>
+                            <dd data-bind="text: casesReported"></dd>
+                            <dt>Birth Date</dt>
+                            <dd data-bind="text: birthDate"></dd>
+                            <dt>Name</dt>
+                            <dd data-bind="text: name"></dd>
+                            <dt>Company</dt>
+                            <dd data-bind="text: company"></dd>
+                            <dt>Arbitrary Collection Of Strings</dt>
+                            <dd data-bind="text: arbitraryCollectionOfStrings"></dd>
+                        </dl>
+                    </td>
+                    <td>
+                        <span data-bind="text: wasSuccessful"></span>
+                        <span data-bind="text: message"></span>
+                    </td>
+                    <td>
+                        <span class="label label-info" data-bind="fadeVisible: isLoading">Loading</span>
+                    </td>
+                </tr>
                 <tr data-bind="with: searchPeople">
                     <td>
                         <button class="btn btn-default btn-xs" data-bind="click: function(){ $('#method-SearchPeople').modal() }">
@@ -415,6 +455,33 @@
                     <label class='col-md-4 control-label'>Characters</label>
                     <div class="col-md-8">
                         <input type="text" class="form-control" data-bind="value: characters" />
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type='button' class='btn btn-default' data-dismiss='modal'>Cancel</button>
+                <button type='button' class='btn btn-primary btn-ok'
+                    data-bind="click: invokeWithArgs.bind(this, args, function(){jQuery($element).closest('.modal').modal('hide')}, null)">
+                    OK
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for method: MethodWithEntityParameter -->
+<div class="modal fade" id="method-MethodWithEntityParameter" tabindex="-1" role="dialog" data-bind="with: methodWithEntityParameter">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type='button' class='close' data-dismiss='modal' aria-label='Close'><span aria-hidden='true'>&times;</span></button>
+                <h4 class='modal-title'>Method With Entity Parameter</h4>
+            </div>
+            <div class="modal-body form-horizontal" data-bind="with: args">
+                <div class="form-group">
+                    <label class='col-md-4 control-label'>Person</label>
+                    <div class="col-md-8">
+                        <input type="text" class="form-control" data-bind="value: person" />
                     </div>
                 </div>
             </div>

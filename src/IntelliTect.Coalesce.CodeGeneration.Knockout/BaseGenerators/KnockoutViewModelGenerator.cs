@@ -248,7 +248,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
                     b.Line("if (typeof(callback) == 'function')");
                     b.Indented("callback(this.result());");
                 }
-                else if (method.ResultType.EqualsType(method.Parent.Type) && methodLoadsParent)
+                else if (method.ResultType == method.Parent.Type && methodLoadsParent)
                 {
                     // The return type is the type of the method's parent. Load the parent with the results of the method.
                     // Parameter 'reload' has no meaning here, since we're reloading the object with the result of the method.

@@ -13,7 +13,7 @@ namespace IntelliTect.Coalesce.Api.CrudStrategy
         )
         {
             // Grab the type information about what we need to inject.
-            var parameterTypeViewModel = new ReflectionTypeViewModel(bindingContext.ModelType);
+            var parameterTypeViewModel = ReflectionRepository.Global.GetOrAddType(bindingContext.ModelType);
 
             // Figure out what type is satisfying the generic parameter of our strategy interface.
             // This is the type that our datasource/Behaviors needs to serve.

@@ -303,6 +303,22 @@ namespace Coalesce.Web.Api
         }
 
         /// <summary>
+        /// Method: MethodWithEntityParameter
+        /// </summary>
+        [HttpPost("MethodWithEntityParameter")]
+        [Authorize]
+        public virtual ItemResult<PersonDtoGen> MethodWithEntityParameter(PersonDtoGen person)
+        {
+            IncludeTree includeTree = null;
+            var _mappingContext = new MappingContext(User);
+            var methodResult = Coalesce.Domain.Person.MethodWithEntityParameter(Db, person.MapToModel(new Coalesce.Domain.Person(), _mappingContext));
+            var result = new ItemResult<PersonDtoGen>();
+            var mappingContext = new MappingContext(User, "");
+            result.Object = Mapper.MapToDto<Coalesce.Domain.Person, PersonDtoGen>(methodResult, mappingContext, includeTree);
+            return result;
+        }
+
+        /// <summary>
         /// Method: SearchPeople
         /// </summary>
         [HttpPost("SearchPeople")]

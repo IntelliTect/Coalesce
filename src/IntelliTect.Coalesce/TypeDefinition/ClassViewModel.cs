@@ -453,5 +453,20 @@ namespace IntelliTect.Coalesce.TypeDefinition
             || (obj is ClassViewModel that && this.Type.Equals(that.Type));
 
         public override int GetHashCode() => this.Type.GetHashCode();
+
+        public static bool operator == (ClassViewModel lhs, ClassViewModel rhs)
+        {
+            if (Object.ReferenceEquals(lhs, null))
+            {
+                return Object.ReferenceEquals(rhs, null);
+            }
+
+            return lhs.Equals(rhs);
+        }
+
+        public static bool operator != (ClassViewModel lhs, ClassViewModel rhs)
+        {
+            return !(lhs == rhs);
+        }
     }
 }

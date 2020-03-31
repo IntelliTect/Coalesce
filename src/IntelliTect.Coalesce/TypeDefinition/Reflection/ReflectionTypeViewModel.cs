@@ -45,6 +45,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
             ClassViewModel = ShouldCreateClassViewModel
                 ? new ReflectionClassViewModel(this)
                 : null;
+
+            // This is precomputed because it is used for .Equals() and the == operator.
+            FullyQualifiedName = GetFriendlyTypeName(Info);
         }
 
         internal static ReflectionTypeViewModel GetOrCreate(ReflectionRepository reflectionRepository, Type type)
@@ -154,7 +157,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             return builder.ToString();
         }
 
-        public override string FullyQualifiedName => GetFriendlyTypeName(Info);
+        public override string FullyQualifiedName { get; }
 
         // TODO: write tests that assert that this will format types the same 
         // way as SymbolTypeViewModel.VerboseFullyQualifiedName. Adjust either one as needed.
@@ -169,5 +172,12 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public override Type TypeInfo => Info;
 
         public override bool EqualsType(TypeViewModel b) => b is ReflectionTypeViewModel r ? Info == r.Info : false;
+
+        public override bool Equals(object obj)
+        {
+            if (!(obj is ReflectionTypeViewModel that)) return base.Equals(obj);
+
+            return Info == that.Info;
+        }
     }
 }

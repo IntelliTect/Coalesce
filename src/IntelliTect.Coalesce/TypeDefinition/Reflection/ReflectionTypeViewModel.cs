@@ -7,6 +7,9 @@ using Microsoft.CodeAnalysis;
 
 namespace IntelliTect.Coalesce.TypeDefinition
 {
+
+#pragma warning disable CS0659 // Intentionally using base class's GetHashCode
+
     public class ReflectionTypeViewModel : TypeViewModel
     {
         protected internal Type Info { get; internal set; }

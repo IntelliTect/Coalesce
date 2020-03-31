@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.TypeDefinition
 {
+
+#pragma warning disable CS0659 // Intentionally using base class's GetHashCode
+
     public class SymbolTypeViewModel : TypeViewModel
     {
         protected internal ITypeSymbol Symbol { get; internal set; }

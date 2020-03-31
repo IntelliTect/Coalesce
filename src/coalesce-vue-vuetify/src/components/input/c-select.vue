@@ -158,11 +158,11 @@ export default class CSelect extends MetadataComponent {
     if (this.valueMeta.role == "foreignKey") { 
       return "key";
     }
-    if (this.valueMeta.role == "referenceNavigation") {
+    if (this.valueMeta.type == "model") {
       return "model"
     }
 
-    throw "The 'role' of the metadata provided for c-select must be 'foreignKey' or 'referenceNavigation' "
+    throw "The 'role' of the metadata provided for c-select must be 'foreignKey', or the type must be 'model' "
   }
 
   /** The metadata of the type being selected by the dropdown. */
@@ -170,10 +170,10 @@ export default class CSelect extends MetadataComponent {
     var meta = this.valueMeta!;
     if (meta.role == "foreignKey" && "principalType" in meta) {
       return meta.principalType;
-    } else if (meta.role == "referenceNavigation") {
+    } else if (meta.type == "model") {
       return meta.typeDef;
     } else {
-      throw `Value ${meta.name} must be a foreignKey or referenceNavigation to use c-select.`
+      throw `Value ${meta.name} must be a foreignKey or model type to use c-select.`
     }
   }
 

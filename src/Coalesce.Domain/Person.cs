@@ -249,6 +249,14 @@ namespace Coalesce.Domain
             return db.People.Where(f => f.FirstName.StartsWith(characters)).Select(f => f.Name).ToList();
         }
 
+        /// <summary>
+        /// Gets all the first names starting with the characters.
+        /// </summary>
+        [Coalesce, Execute]
+        public static Person MethodWithEntityParameter(AppDbContext db, Person person)
+        {
+            return person;
+        }
 
         /// <summary>
         /// Gets people matching the criteria, paginated by parameter 'page'.

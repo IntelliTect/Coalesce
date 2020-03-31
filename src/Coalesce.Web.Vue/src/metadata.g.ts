@@ -975,6 +975,29 @@ export const Person = domain.types.Person = {
         },
       },
     },
+    methodWithEntityParameter: {
+      name: "methodWithEntityParameter",
+      displayName: "Method With Entity Parameter",
+      transportType: "item",
+      httpMethod: "POST",
+      isStatic: true,
+      params: {
+        person: {
+          name: "person",
+          displayName: "Person",
+          type: "model",
+          get typeDef() { return (domain.types.Person as ModelType) },
+          role: "value",
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        role: "value",
+        type: "model",
+        get typeDef() { return (domain.types.Person as ModelType) },
+      },
+    },
     searchPeople: {
       name: "searchPeople",
       displayName: "Search People",

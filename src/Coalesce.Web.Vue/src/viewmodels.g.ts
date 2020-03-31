@@ -392,6 +392,18 @@ export class PersonListViewModel extends ListViewModel<$models.Person, $apiClien
     return namesStartingWith
   }
   
+  /** Gets all the first names starting with the characters. */
+  public get methodWithEntityParameter() {
+    const methodWithEntityParameter = this.$apiClient.$makeCaller(
+      "item", 
+      (c, person: $models.Person | null) => c.methodWithEntityParameter(person),
+      () => ({person: null as $models.Person | null, }),
+      (c, args) => c.methodWithEntityParameter(args.person))
+    
+    Object.defineProperty(this, 'methodWithEntityParameter', {value: methodWithEntityParameter});
+    return methodWithEntityParameter
+  }
+  
   /** Gets people matching the criteria, paginated by parameter 'page'. */
   public get searchPeople() {
     const searchPeople = this.$apiClient.$makeCaller(

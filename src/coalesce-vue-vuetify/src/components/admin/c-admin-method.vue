@@ -66,6 +66,12 @@
             :options="resultDisplayOptions"
           />
           <span
+            v-else-if="methodMeta.return.type == 'void'.wasSuccessful != null"
+            class="c-method--result-void"
+          >
+            <v-alert type="success" dense>Success</v-alert>
+          </span>
+          <span
             v-else-if="caller.wasSuccessful != null && caller.result == null"
             class="c-method--result-null"
           >

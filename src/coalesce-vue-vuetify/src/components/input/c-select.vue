@@ -77,7 +77,8 @@ import {
   Model, ModelType, ForeignKeyProperty, ModelReferenceNavigationProperty, ListParameters, 
   mapParamsToDto, getMessageForError, 
   ViewModel, 
-  mapValueToModel
+  mapValueToModel,
+  ItemApiStateWithArgs
 } from 'coalesce-vue'
 
 @Component({
@@ -224,10 +225,13 @@ export default class CSelect extends MetadataComponent {
         return singleItem;
       }
 
-      if (!this.listCaller.isLoading) {
-        // Only request the single item if the list isn't currently loading.
+      if (!this.listCaller.isLoading && this.getCaller.args.id != this.internalKeyValue) {
+        // Only request the single item if the list isn't currently loading,
+        // and if the last requested key is not the key we're looking for.
+        // (this prevents an infinite loop of invokes if the call to the server fails.)
         // The single item may end up coming back from a pending list call.
-        this.getCaller();
+        this.getCaller.args.id = this.internalKeyValue
+        this.getCaller.invokeWithArgs()
       }
     }
     return null;
@@ -363,7 +367,7 @@ export default class CSelect extends MetadataComponent {
    * A caller that will be used to resolve the full object when the only thing
    * that has been provided to c-select is a primary key value.
    */
-  getCaller: ItemApiState<[], Model<ModelType>> & (() => ItemResultPromise<Model<ModelType>>) = null as any
+  getCaller: ItemApiStateWithArgs<[], {id: any}, Model<ModelType>> = null as any
 
   get createItemLabel() {
     if (!this.create || !this.search) return null;
@@ -397,9 +401,14 @@ export default class CSelect extends MetadataComponent {
     
     this.getCaller = new ModelApiClient(this.modelObjectMeta)
       .$withSimultaneousRequestCaching()
-      .$makeCaller("item", function (this: CSelect, c) {
-        return c.get(this.internalKeyValue)
-      })
+      .$makeCaller(
+        "item", 
+        function (this: CSelect, c) {
+          throw 'expected calls to be made with invokeWithArgs'
+        }, 
+        () => ({ id: null as any }),
+        (c, args) => c.get(args.id)
+      )
       .setConcurrency("debounce");
 
     this.listCaller = new ModelApiClient(this.modelObjectMeta)

@@ -54,10 +54,12 @@ jobs:
     COALESCE_VERSION: $[ dependencies.Meta.outputs['buildBaseVersion.COALESCE_VERSION'] ]
     
   steps:
-  - task: NodeTool@0
-    displayName: 'Use Node 10.x'
-    inputs:
-      versionSpec: 10.x
+  # https://github.com/nodejs/build/issues/2263
+  # this might not even be needed anymore
+  #- task: NodeTool@0
+  #  displayName: 'Use Node 10.x'
+  #  inputs:
+  #    versionSpec: 10.x
 
   # Install both 2.2 (for the cli, last version that supports DotnetCliToolReference) and 3.1 (everything else)
   - task: UseDotNet@2
@@ -121,10 +123,12 @@ jobs:
     csproj: src/Coalesce.Web/Coalesce.Web.csproj
     
   steps:
-  - task: NodeTool@0
-    displayName: 'Use Node 10.x'
-    inputs:
-      versionSpec: 10.x
+  # https://github.com/nodejs/build/issues/2263
+  # this might not even be needed anymore
+  #- task: NodeTool@0
+  #  displayName: 'Use Node 10.x'
+  #  inputs:
+  #    versionSpec: 10.x
 
   - task: UseDotNet@2
     inputs:
@@ -177,10 +181,12 @@ jobs:
     PACKAGE_DIR: src/$(PACKAGE_NAME)
 
   steps:
-  - task: NodeTool@0
-    displayName: 'Use Node 10.x'
-    inputs:
-      versionSpec: 10.x
+  # https://github.com/nodejs/build/issues/2263
+  # this might not even be needed anymore
+  #- task: NodeTool@0
+  #  displayName: 'Use Node 10.x'
+  #  inputs:
+  #    versionSpec: 10.x
 
   - script: npm ci
     displayName: npm ci
@@ -225,10 +231,12 @@ jobs:
     PACKAGE_DIR: src/$(PACKAGE_NAME)
 
   steps:
-  - task: NodeTool@0
-    displayName: 'Use Node 10.x'
-    inputs:
-      versionSpec: 10.x
+  # https://github.com/nodejs/build/issues/2263
+  # this might not even be needed anymore
+  #- task: NodeTool@0
+  #  displayName: 'Use Node 10.x'
+  #  inputs:
+  #    versionSpec: 10.x
 
   # build coalesce-vue
   - script: npm run build-local-deps

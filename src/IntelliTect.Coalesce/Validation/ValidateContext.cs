@@ -17,7 +17,7 @@ namespace IntelliTect.Coalesce.Validation
 
             assert.IsTrue(repository.DiscoveredClassViewModels.Any(), "No types were discovered. Make sure all models have a DbSet on the context.");
 
-            foreach (var model in repository.ApiBackedClasses)
+            foreach (var model in repository.CrudApiBackedClasses)
             {
                 assert.Area = model.ToString();
                 assert.IsTrue(!string.IsNullOrWhiteSpace(model.Name), $"Name not found.");

@@ -30,6 +30,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         private readonly HashSet<ClassViewModel> _externalTypes = new HashSet<ClassViewModel>();
         private readonly HashSet<ClassViewModel> _customDtos = new HashSet<ClassViewModel>();
         private readonly HashSet<ClassViewModel> _services = new HashSet<ClassViewModel>();
+        private readonly HashSet<TypeViewModel> _enums = new HashSet<TypeViewModel>();
 
         private readonly ConcurrentDictionary<object, TypeViewModel> _allTypeViewModels
             = new ConcurrentDictionary<object, TypeViewModel>();
@@ -48,16 +49,15 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public ReadOnlyHashSet<ClassViewModel> CustomDtos => new ReadOnlyHashSet<ClassViewModel>(_customDtos);
         public ReadOnlyHashSet<ClassViewModel> Services => new ReadOnlyHashSet<ClassViewModel>(_services);
 
-        public IEnumerable<ClassViewModel> ApiBackedClasses => Entities.Union(CustomDtos);
+        [Obsolete("Replaced by better-named property \"CrudApiBackedClasses\".")]
+        public IEnumerable<ClassViewModel> ApiBackedClasses => CrudApiBackedClasses;
+        public IEnumerable<ClassViewModel> CrudApiBackedClasses => Entities.Union(CustomDtos);
 
-        public IEnumerable<ClassViewModel> ClientClasses => ApiBackedClasses.Union(ExternalTypes);
+        public IEnumerable<ClassViewModel> ControllerBackedClasses => CrudApiBackedClasses.Union(Services);
 
-        public IEnumerable<TypeViewModel> ClientEnums => this.ClientClasses
-            .SelectMany(c => c.ClientProperties.Select(p => p.PureType.NullableUnderlyingType))
-            .Concat(ApiBackedClasses.SelectMany(c => c.ClientMethods).SelectMany(m => m.ClientParameters).Select(p => p.Type.NullableUnderlyingType))
-            .Concat(DataSources.SelectMany(c => c.StrategyClass.DataSourceParameters).Select(p => p.Type.NullableUnderlyingType))
-            .Where(t => t.IsEnum)
-            .Distinct();
+        public IEnumerable<ClassViewModel> ClientClasses => CrudApiBackedClasses.Union(ExternalTypes);
+
+        public ReadOnlyHashSet<TypeViewModel> ClientEnums => new ReadOnlyHashSet<TypeViewModel>(_enums);
 
         public IEnumerable<ClassViewModel> DiscoveredClassViewModels =>
             DbContexts.Select(t => t.ClassViewModel)
@@ -224,10 +224,16 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             foreach (var type in model
                 .ClientProperties
-                .Select(p => p.PureType)
-                .Where(t => t.HasClassViewModel))
+                .Select(p => p.PureType))
             {
-                ConditionallyAddAndDiscoverExternalPropertyTypesOn(type.ClassViewModel);
+                if (type.HasClassViewModel)
+                {
+                    ConditionallyAddAndDiscoverExternalPropertyTypesOn(type.ClassViewModel);
+                }
+                else if (type.IsEnum)
+                {
+                    _enums.Add(type.NullableUnderlyingType);
+                }
             }
         }
 
@@ -241,11 +247,22 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     // Return type looks like an external type.
                     ConditionallyAddAndDiscoverExternalPropertyTypesOn(returnType.ClassViewModel);
                 }
-
-                foreach (var arg in method.Parameters.Where(p => !p.IsDI && p.PureType.HasClassViewModel))
+                else if (returnType.IsEnum)
                 {
-                    // Parameter looks like an external type.
-                    ConditionallyAddAndDiscoverExternalPropertyTypesOn(arg.PureType.ClassViewModel);
+                    _enums.Add(returnType.NullableUnderlyingType);
+                }
+
+                foreach (var arg in method.Parameters.Where(p => !p.IsDI))
+                {
+                    if (arg.PureType.HasClassViewModel)
+                    {
+                        // Parameter looks like an external type.
+                        ConditionallyAddAndDiscoverExternalPropertyTypesOn(arg.PureType.ClassViewModel);
+                    }
+                    else if (arg.PureType.IsEnum)
+                    {
+                        _enums.Add(arg.PureType.NullableUnderlyingType);
+                    }
                 }
             }
         }
@@ -287,6 +304,18 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
 
             set.Add(new CrudStrategyTypeUsage(strategyType.ClassViewModel, servedClass, declaredFor));
+
+            if (strategyType.IsA(typeof(IDataSource<>)))
+            {
+                foreach (var parameter in strategyType.ClassViewModel.DataSourceParameters)
+                {
+                    if (parameter.PureType.IsEnum)
+                    {
+                        _enums.Add(parameter.PureType.NullableUnderlyingType);
+                    }
+                }
+            }
+
             return true;
         }
 

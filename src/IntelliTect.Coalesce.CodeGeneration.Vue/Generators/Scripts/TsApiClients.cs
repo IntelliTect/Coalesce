@@ -25,7 +25,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
             });
             b.Line();
 
-            foreach (var model in Model.ApiBackedClasses.OrderBy(e => e.ClientTypeName))
+            foreach (var model in Model.CrudApiBackedClasses.OrderBy(e => e.ClientTypeName))
             {
                 WriteApiClientClass(b, model, $"ModelApiClient<$models.{model.ClientTypeName}>");
 

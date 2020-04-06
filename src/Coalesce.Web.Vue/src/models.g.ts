@@ -8,6 +8,13 @@ export enum Genders {
 }
 
 
+export enum SkyConditions {
+  Cloudy = 0,
+  PartyCloudy = 1,
+  Sunny = 2,
+}
+
+
 export enum Statuses {
   Open = 0,
   InProgress = 1,

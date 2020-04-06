@@ -42,7 +42,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                 WriteEnumMetadata(b, model);
             }
 
-            foreach (var model in Model.ApiBackedClasses.OrderBy(e => e.ClientTypeName))
+            foreach (var model in Model.CrudApiBackedClasses.OrderBy(e => e.ClientTypeName))
             {
                 WriteApiBackedTypeMetadata(b, model);
             }

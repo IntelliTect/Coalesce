@@ -13,7 +13,7 @@ namespace Coalesce.Domain.Services
     {
         WeatherData GetWeather(AppDbContext parameterDbContext, Location location, DateTimeOffset? dateTime);
 
-        Task<WeatherData> GetWeatherAsync(AppDbContext parameterDbContext, Location location, DateTimeOffset? dateTime);
+        Task<WeatherData> GetWeatherAsync(AppDbContext parameterDbContext, Location location, DateTimeOffset? dateTime, SkyConditions? conditions);
     }
 
     public class WeatherService : IWeatherService
@@ -29,7 +29,7 @@ namespace Coalesce.Domain.Services
         public WeatherData GetWeather(AppDbContext parameterDbContext, Location location, DateTimeOffset? dateTime)
             => new WeatherData { TempFahrenheit = 42, Humidity = db.Cases.Count(), Location = location };
 
-        public async Task<WeatherData> GetWeatherAsync (AppDbContext parameterDbContext, Location location, DateTimeOffset? dateTime)
+        public async Task<WeatherData> GetWeatherAsync (AppDbContext parameterDbContext, Location location, DateTimeOffset? dateTime, SkyConditions? conditions)
         {
             await Task.Delay(2000);
             return GetWeather(parameterDbContext, location, dateTime);
@@ -50,5 +50,12 @@ namespace Coalesce.Domain.Services
         public double Humidity { get; set; }
         
         public Location Location { get; set; }
+    }
+
+    public enum SkyConditions
+    {
+        Cloudy,
+        PartyCloudy,
+        Sunny
     }
 }

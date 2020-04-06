@@ -24,7 +24,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
             b.Line("import { ViewModel, ListViewModel, ServiceViewModel, DeepPartial, defineProps } from 'coalesce-vue/lib/viewmodel'");
             b.Line();
 
-            foreach (var model in Model.ApiBackedClasses.OrderBy(e => e.ClientTypeName))
+            foreach (var model in Model.CrudApiBackedClasses.OrderBy(e => e.ClientTypeName))
             {
                 WriteViewModel(b, model);
                 WriteListViewModel(b, model);
@@ -39,14 +39,14 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
 
             using (b.Block("const viewModelTypeLookup = ViewModel.typeLookup ="))
             {
-                foreach (var model in Model.ApiBackedClasses.OrderBy(e => e.ClientTypeName))
+                foreach (var model in Model.CrudApiBackedClasses.OrderBy(e => e.ClientTypeName))
                 {
                     b.Line($"{model.ViewModelClassName}: {model.ViewModelClassName}ViewModel,");
                 }
             }
             using (b.Block("const listViewModelTypeLookup = ListViewModel.typeLookup ="))
             {
-                foreach (var model in Model.ApiBackedClasses.OrderBy(e => e.ClientTypeName))
+                foreach (var model in Model.CrudApiBackedClasses.OrderBy(e => e.ClientTypeName))
                 {
                     b.Line($"{model.ViewModelClassName}: {model.ListViewModelClassName}ViewModel,");
                 }

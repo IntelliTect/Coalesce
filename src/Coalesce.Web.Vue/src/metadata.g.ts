@@ -16,6 +16,16 @@ export const Genders = domain.enums.Genders = {
     { value: 2, strValue: 'Female', displayName: 'Female' },
   ]),
 }
+export const SkyConditions = domain.enums.SkyConditions = {
+  name: "SkyConditions",
+  displayName: "Sky Conditions",
+  type: "enum",
+  ...getEnumMeta<"Cloudy"|"PartyCloudy"|"Sunny">([
+    { value: 0, strValue: 'Cloudy', displayName: 'Cloudy' },
+    { value: 1, strValue: 'PartyCloudy', displayName: 'Party Cloudy' },
+    { value: 2, strValue: 'Sunny', displayName: 'Sunny' },
+  ]),
+}
 export const Statuses = domain.enums.Statuses = {
   name: "Statuses",
   displayName: "Statuses",
@@ -1372,6 +1382,13 @@ export const WeatherService = domain.services.WeatherService = {
           type: "date",
           role: "value",
         },
+        conditions: {
+          name: "conditions",
+          displayName: "Conditions",
+          type: "enum",
+          get typeDef() { return domain.enums.SkyConditions },
+          role: "value",
+        },
       },
       return: {
         name: "$return",
@@ -1387,6 +1404,7 @@ export const WeatherService = domain.services.WeatherService = {
 interface AppDomain extends Domain {
   enums: {
     Genders: typeof Genders
+    SkyConditions: typeof SkyConditions
     Statuses: typeof Statuses
     Titles: typeof Titles
   }

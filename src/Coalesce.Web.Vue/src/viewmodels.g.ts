@@ -460,9 +460,9 @@ export class WeatherServiceViewModel extends ServiceViewModel<typeof $metadata.W
   public get getWeatherAsync() {
     const getWeatherAsync = this.$apiClient.$makeCaller(
       "item", 
-      (c, location: $models.Location | null, dateTime: Date | null) => c.getWeatherAsync(location, dateTime),
-      () => ({location: null as $models.Location | null, dateTime: null as Date | null, }),
-      (c, args) => c.getWeatherAsync(args.location, args.dateTime))
+      (c, location: $models.Location | null, dateTime: Date | null, conditions: $models.SkyConditions | null) => c.getWeatherAsync(location, dateTime, conditions),
+      () => ({location: null as $models.Location | null, dateTime: null as Date | null, conditions: null as $models.SkyConditions | null, }),
+      (c, args) => c.getWeatherAsync(args.location, args.dateTime, args.conditions))
     
     Object.defineProperty(this, 'getWeatherAsync', {value: getWeatherAsync});
     return getWeatherAsync

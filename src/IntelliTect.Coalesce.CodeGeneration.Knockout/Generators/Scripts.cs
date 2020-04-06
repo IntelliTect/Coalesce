@@ -39,7 +39,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
         {
             string Partial(ClassViewModel model) => model.HasTypeScriptPartial ? ".Partial" : "";
 
-            foreach (var model in Model.ApiBackedClasses)
+            foreach (var model in Model.CrudApiBackedClasses)
             {
                 yield return Generator<KoViewModel>()
                     .WithModel(model)

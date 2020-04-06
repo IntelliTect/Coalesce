@@ -23,7 +23,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
         {
             yield return Generator<StaticApiViews>();
 
-            foreach (var model in this.Model.ApiBackedClasses)
+            foreach (var model in this.Model.CrudApiBackedClasses)
             {
                 yield return Generator<TableView>()
                     .WithModel(model)

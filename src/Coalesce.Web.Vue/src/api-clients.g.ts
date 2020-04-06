@@ -206,11 +206,12 @@ export class WeatherServiceApiClient extends ServiceApiClient<typeof $metadata.W
     return this.$invoke($method, $params, $config)
   }
   
-  public getWeatherAsync(location: $models.Location | null, dateTime: Date | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<$models.WeatherData>> {
+  public getWeatherAsync(location: $models.Location | null, dateTime: Date | null, conditions: $models.SkyConditions | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<$models.WeatherData>> {
     const $method = this.$metadata.methods.getWeatherAsync
     const $params =  {
       location,
       dateTime,
+      conditions,
     }
     return this.$invoke($method, $params, $config)
   }

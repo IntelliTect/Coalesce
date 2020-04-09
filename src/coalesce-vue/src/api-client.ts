@@ -43,11 +43,9 @@ import {
   Model,
   convertToModel,
   mapToDto,
-  mapValueToDto,
   DataSource,
-  convertValueToModel,
-  mapValueToModel,
-  mapToModel
+  mapToModel,
+  mapToDtoFiltered
 } from "./model";
 import { OwnProps, Indexable } from "./util";
 
@@ -239,7 +237,7 @@ export function mapParamsToDto(
       const paramMeta = paramsMeta[paramName];
       if (paramName in dataSource) {
         const paramValue = dataSource[paramName];
-        paramsObject["dataSource." + paramMeta.name] = mapValueToDto(
+        paramsObject["dataSource." + paramMeta.name] = mapToDto(
           paramValue,
           paramMeta
         ) as any;
@@ -295,7 +293,7 @@ export function mapQueryToParams<T extends DataSourceParameters>(
         if (key.startsWith("dataSource.")) {
           var paramName = key.replace("dataSource.", "");
           if (paramName in dataSource.$metadata.props) {
-            (dataSource as any)[paramName] = mapValueToModel(dto[key], dataSource.$metadata.props[paramName])
+            (dataSource as any)[paramName] = mapToModel(dto[key], dataSource.$metadata.props[paramName])
           }
         }
       }
@@ -695,7 +693,7 @@ export class ApiClient<T extends ApiRoutedType> {
    * @param params The values of the parameter to map
    */
   protected $mapParams(method: Method, params: { [paramName: string]: any }) {
-    const formatted: { [paramName: string]: ReturnType<typeof mapValueToDto> | File | Blob } = {};
+    const formatted: { [paramName: string]: ReturnType<typeof mapToDto> | File | Blob } = {};
     for (var paramName in method.params) {
       const paramMeta = method.params[paramName];
       const paramValue = params[paramName];
@@ -703,7 +701,7 @@ export class ApiClient<T extends ApiRoutedType> {
       if (paramMeta.type == "file") {
         formatted[paramName] = paramValue as File | Blob | null
       } else {
-        formatted[paramName] = mapValueToDto(paramValue, paramMeta);
+        formatted[paramName] = mapToDto(paramValue, paramMeta);
       }
     }
     return formatted;
@@ -747,7 +745,7 @@ export class ApiClient<T extends ApiRoutedType> {
     // Do nothing for void returns - there will be no object.
     if (metadata.type !== "void") {
       // This function is NOT PURE - we mutate the result object on the response.
-      value.data.object = convertValueToModel(value.data.object, metadata);
+      value.data.object = convertToModel(value.data.object, metadata);
     }
     return value;
   }
@@ -763,7 +761,7 @@ export class ApiClient<T extends ApiRoutedType> {
     }
 
     // This function is NOT PURE - we mutate the result object on the response.
-    value.data.list = convertValueToModel(value.data.list, metadata);
+    value.data.list = convertToModel(value.data.list, metadata);
     return value;
   }
 }
@@ -838,7 +836,7 @@ export class ModelApiClient<TModel extends Model<ModelType>> extends ApiClient<
 
     return AxiosClient.post(
       `/${this.$metadata.controllerRoute}/save`,
-      qs.stringify(mapToDto(item, fields)),
+      qs.stringify(mapToDtoFiltered(item, fields)),
       this.$options(params, config)
     ).then<AxiosItemResult<TModel>>(r =>
       this.$hydrateItemResult(r, this.$itemValueMeta)

@@ -203,11 +203,11 @@ class ModelConversionVisitor extends Visitor<any, any[] | null, any | null> {
     return super.visitValue(value, meta);
   }
 
-  public visitObject<TMeta extends ClassType>(value: null, meta: TMeta): null;
   public visitObject<TMeta extends ClassType>(
     value: object,
     meta: TMeta
   ): Model<TMeta>;
+  public visitObject<TMeta extends ClassType>(value: null, meta: TMeta): null;
   public visitObject<TMeta extends ClassType>(
     value: any,
     meta: TMeta
@@ -323,36 +323,33 @@ class ModelConversionVisitor extends Visitor<any, any[] | null, any | null> {
 }
 
 /**
- * Transforms a given object with data properties into a valid implemenation of TModel.
+ * Transforms a given object with data properties into a valid implementation of TModel.
  * This function mutates its input and all descendent properties of its input - it does not map to a new object.
- * @param object The object with data properties that should be converted to a TModel
+ * @param value The object with data properties that should be converted to a TModel
  * @param metadata The metadata describing the TModel that is desired
  */
 export function convertToModel<
   TMeta extends ClassType,
   TModel extends Model<TMeta>
->(object: { [k: string]: any }, metadata: TMeta): TModel {
-  if (object == null) {
-    throw `Cannot map null to model`;
-  }
-  return new ModelConversionVisitor("convert").visitObject(
-    object,
-    metadata
-  ) as TModel;
-}
-
+>(object: { [k: string]: any }, metadata: TMeta): TModel
 /**
- * Transforms a raw value into a valid implemenation of a model value.
+ * Transforms a raw value into a valid implementation of a model value.
  * This function mutates its input and all descendent properties of its input - it does not map to a new object.
  * @param value The value that should be converted
  * @param metadata The metadata describing the value
  */
-export function convertValueToModel(value: any, metadata: Value): any {
-  return new ModelConversionVisitor("convert").visitValue(value, metadata);
+export function convertToModel(value: any, metadata: Value): any
+export function convertToModel(value: any, metadata: Value | ClassType): any {
+  if ("props" in metadata) {
+    return new ModelConversionVisitor("convert").visitObject(value, metadata);
+  } else {
+    return new ModelConversionVisitor("convert").visitValue(value, metadata);
+  }
 }
+export { convertToModel as convertValueToModel };
 
 /**
- * Maps the given object with data properties into a valid implemenation of TModel.
+ * Maps the given object with data properties into a valid implementation of TModel.
  * This function returns a new copy of its input and all descendent properties of its input - it does not mutate its input.
  * @param object The object with data properties that should be mapped to a TModel
  * @param metadata The metadata describing the TModel that is desired
@@ -360,73 +357,23 @@ export function convertValueToModel(value: any, metadata: Value): any {
 export function mapToModel<
   TMeta extends ClassType,
   TModel extends Model<TMeta>
->(object: { [k: string]: any }, metadata: TMeta): TModel {
-  if (object == null) {
-    throw `Cannot map null to model`;
-  }
-  return new ModelConversionVisitor("map").visitObject(
-    object,
-    metadata
-  ) as TModel;
-}
-
+>(object: { [k: string]: any }, metadata: TMeta): TModel
 /**
- * Maps a raw value into a valid implemenation of a model value.
+ * Maps a raw value into a valid implementation of a model value.
  * This function returns a new copy of its input and all descendent properties of its input - it does not mutate its input.
  * @param value The value that should be converted
  * @param metadata The metadata describing the value
  */
-export function mapValueToModel(value: any, metadata: Value): any {
-  return new ModelConversionVisitor("map").visitValue(value, metadata);
+export function mapToModel(value: any, metadata: Value): any
+export function mapToModel(value: any, metadata: Value | ClassType): any {
+  if ("props" in metadata) {
+    return new ModelConversionVisitor("map").visitObject(value, metadata);
+  } else {
+    return new ModelConversionVisitor("map").visitValue(value, metadata);
+  }
 }
+export { mapToModel as mapValueToModel };
 
-/**
- * Updates the target model with values from the source model.
- * Any properties defined on the source will be copied to the target.
- * This perform a shallow copy of properties, using `Object.assign`.
- * @param target The model to be updated.
- * @param source The model whose values will be used to perform the update.
- */
-// export function updateFromModel<
-//   TMeta extends ClassType,
-//   TModel extends Model<TMeta>
-// >(target: TModel, source: TModel): TModel {
-//   return Object.assign(target, source);
-//   // I was going to go further with this and make it more like the Knockout code,
-//   // but I'm not sure that's whats best. The knockout code did what it did largely to trick
-//   // knockout into being performant. I think that if complex object merging strategies are needed,
-//   // we should build that as a configurable feature of the ViewModels, and not have it be the default behavior.
-//   // For now, we'll just object.assign and call it good.
-
-//   /*
-//     const metadata = target.$metadata;
-
-//     for (const prop of Object.values(metadata.props).filter(p => p.type == "collection")) {
-
-//         switch (prop.type) {
-//             case "collection":
-//                 switch (prop.role) {
-//                     case "value":
-//                         // something 
-//                         break;
-//                     case "collectionNavigation":
-//                         // something 
-//                         break;
-//                 }
-//                 break;
-//             case "model":
-//             case "object":
-//                 // something 
-//                 break;
-//             default: 
-//                 // @ts-ignore
-//                 target[propName] = source[propName];
-//         }
-//     }
-
-//     // Continue for objects, and then for values, in a similar fashion to the knockout code.
-//     */
-// }
 
 /** Visitor that maps a model to a DTO.
  * A DTO in this case is a POJO that is suitable for JSON stringification
@@ -439,7 +386,7 @@ class MapToDtoVisitor extends Visitor<
 > {
   private depth: number = 0;
 
-  public visitObject(value: any, meta: ClassType) {
+  public visitObject(value: any, meta: ClassType): {} | undefined {
     // If we've exceded max depth, return undefined to prevent the
     // creation of an entry in the parent object for this object.
     if (this.depth >= this.maxObjectDepth) return undefined;
@@ -544,24 +491,59 @@ class MapToDtoVisitor extends Visitor<
 
 /**
  * Maps the given object to a POJO suitable for JSON serialization.
- * Will not serialize child objects or collections.
+ * Will not serialize child objects or collections whose metadata includes `dontSerialize`.
+ * @param object The object to map.
+ */
+export function mapToDto<T extends Model<ClassType>>(object: T | null | undefined): null | undefined | ReturnType<MapToDtoVisitor["visitObject"]>
+/**
+ * Maps the given value to a representation suitable for JSON serialization.
+ * Will not serialize child objects or collections whose metadata includes `dontSerialize`.
+ * @param value The value to map.
+ * @param metadata The metadata that describes the value.
+ */
+export function mapToDto(value: any, metadata: Value): null | ReturnType<MapToDtoVisitor["visitValue"]>
+export function mapToDto(value: any, metadata?: Value | ClassType): any {
+  if (value == null) {
+    // Values (non-objects) (which require metadata) should return the original value - either null or undefined.
+    // I'm not sure how strictly necessary this is, but I didn't want to break the tests with this refactor.
+    if (metadata) return value;
+    // Objects always return null.
+    return null;
+  }
+
+  if (metadata === undefined) {
+    if ("$metadata" in value) {
+      metadata = value.$metadata
+    }
+  }
+
+  if (!metadata) {
+    throw "mapToDto requires metadata.";
+  }
+  
+  if ("props" in metadata) {
+    return new MapToDtoVisitor().visitObject(value, metadata);
+  } else {
+    return new MapToDtoVisitor().visitValue(value, metadata);
+  }
+}
+
+export { mapToDto as mapValueToDto }
+
+/**
+ * Maps the given object to a POJO suitable for JSON serialization.
+ * Will not serialize child objects or collections whose metadata includes `dontSerialize`.
  * @param object The object to map.
  * @param props A whitelisted set of props to include from the mapped object. 
  * Unspecified props will be ignored. If null or undefined, all props will be included.
  */
-export function mapToDto<T extends Model<ClassType>>(
+export function mapToDtoFiltered<T extends Model<ClassType>>(
   object: T | null | undefined,
   props?: PropNames<T["$metadata"]>[] | null
 ): {} | null {
-  if (object == null) return null;
+  var dto = mapToDto(object) as any;
 
-  if (!object.$metadata) {
-    throw "Object has no $metadata property.";
-  }
-
-  var dto = new MapToDtoVisitor().visitObject(object, object.$metadata);
-
-  if (props) {
+  if (props && dto) {
     const filteredDto: any = {}
     for (const field of props) {
       if (field in dto) {
@@ -574,18 +556,6 @@ export function mapToDto<T extends Model<ClassType>>(
   return dto;
 }
 
-/**
- * Maps the given value to a representation suitable for JSON serialization.
- * Will not serialize the children of any objects encountered.
- * Will serialize objects found in arrays.
- * @param object The object to map.
- */
-export function mapValueToDto(value: any, metadata: Value) {
-  if (value === null || value === undefined) {
-    return value as null | undefined;
-  }
-  return new MapToDtoVisitor().visitValue(value, metadata);
-}
 
 export interface DisplayOptions {
   /** Date format options. One of:
@@ -825,9 +795,9 @@ export function bindToQueryString(
 
             // Use metadata to format the value if the obj has any.
             : obj?.$metadata?.params?.[key]
-            ? mapValueToDto(v, obj.$metadata.params[key])?.toString()
+            ? mapToDto(v, obj.$metadata.params[key])?.toString()
             : obj?.$metadata?.props?.[key]
-            ? mapValueToDto(v, obj.$metadata.props[key])?.toString()
+            ? mapToDto(v, obj.$metadata.props[key])?.toString()
 
             // TODO: Add $metadata to DataSourceParameters/FilterParameters/ListParameters, and then support that as well.
             // Fallback to .tostring()
@@ -850,9 +820,9 @@ export function bindToQueryString(
         ? parse(v) 
         // Use metadata to parse the value if the obj is a DataSource.
         : obj?.$metadata?.params?.[key]
-        ? mapValueToModel(v, obj.$metadata.params[key])
+        ? mapToModel(v, obj.$metadata.params[key])
         : obj?.$metadata?.props?.[key]
-        ? mapValueToModel(v, obj.$metadata.props[key])
+        ? mapToModel(v, obj.$metadata.props[key])
         // TODO: Add $metadata to DataSourceParameters/FilterParameters/ListParameters, and then support that as well.
         // Fallback to the raw value
         : v

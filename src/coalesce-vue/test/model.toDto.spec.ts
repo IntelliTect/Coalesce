@@ -91,7 +91,7 @@ describe.each(<MappingData[]>[
 describe("mapToDto", () => {
   test("for object without $metadata, throws", () => {
     expect(() => model.mapToDto({} as any))
-      .toThrowError(/has no \$metadata/)
+      .toThrowError(/requires metadata/)
   });
 
   test("for no value, returns null", () => {
@@ -121,7 +121,7 @@ describe("mapToDto", () => {
   });
 
   test("for object with specific props, drops extra props", () => {
-    const mapped = model.mapToDto({
+    const mapped = model.mapToDtoFiltered({
       $metadata: $metadata.Student,
       studentId: 1,
       name: "Steve",

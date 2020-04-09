@@ -573,7 +573,7 @@ export interface DisplayOptions {
       };
 
   collection?: {
-    /** If not creating links, the maximum number of items to display individually. 
+    /** The maximum number of items to display individually. 
      * When there are more than this number of items, the count of items will be displayed instead. 
      * Default `5`. 
      * */
@@ -757,16 +757,16 @@ export function propDisplay<T extends Model<TMeta>, TMeta extends ClassType>(
  * Given a value and metadata which describes that value,
  * return a string representation of the value suitable for display.
  * @param value Any value which is valid for the metadata provided.
- * @param prop The metadata which describes the value given.
+ * @param metadata The metadata which describes the value given.
  */
 export function valueDisplay(
   value: any,
-  meta: Value,
+  metadata: Value,
   options?: DisplayOptions | null
 ) {
   return (options ? new DisplayVisitor(options) : displayVisitor).visitValue(
     value,
-    meta
+    metadata
   );
 }
 
@@ -777,7 +777,7 @@ export function bindToQueryString(
   obj: any, // TODO: Maybe only support objects with $metadata? Would eliminate need for `parse`, and could allow for very strong typings.
   key: string, 
   queryKey: string = key, 
-  parse?: (v: any) => any,
+  parse?: (v: string) => any,
   mode: 'push' | 'replace' = 'replace',
 ) {
   const defaultValue = obj[key];

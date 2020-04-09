@@ -57,8 +57,21 @@ A full example of a ``coalesce.json`` file, along with an explanation of each pr
             // Optional: Build configuration to use when evaluating & building dependencies.
             // Defaults to "Release".
             "configuration": "Debug",
-        }
-        
+        },
+
+        // The name of the root generator to use. Defaults to "Knockout".
+        // Available values are "Vue" and "Knockout".
+        "rootGenerator": "Vue",
+                
+        // If set, specifies a list of whitelisted root type names that will restrict
+        // which types Coalesce will use for code generation. 
+        // Root types are those that must be annotated with [Coalesce].
+        // Useful if want to segment a single data project into multiple web projects, 
+        // or into different areas/directories within a single web project.
+        "rootTypesWhitelist": [
+            "MyDbContext", "MyCustomDto"
+        ],
+
         "generatorConfig": {
             // A set of objects keyed by generator name.
             // Generator names may optionally be qualified by their full namespace.
@@ -66,7 +79,10 @@ A full example of a ``coalesce.json`` file, along with an explanation of each pr
             // For example, "Views" or "IntelliTect.Coalesce.CodeGeneration.Knockout.Generators.Views".
             "GeneratorName": {
                 // Optional: true if the generator should be disabled.
-                "disabled": true
+                "disabled": true,
+                // Optional: Configues a path relative to the default output path for the generator
+                // where that generator's output should be placed instead.
+                "targetDirectory": "../DifferentFolder"
             },
             // Indentation for generated C# is configurable by type (API controllers, DTO classes and regular View controllers)
             // It defaults to 4 spaces

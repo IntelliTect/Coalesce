@@ -133,7 +133,7 @@ When you create a custom DTO, it will use the :ref:`StandardDataSource` and :ref
 ProjectedDtoDataSource
 ......................
 
-In addition to creating a :ref:`CustomDataSources` by deriving from :ref:`StandardDataSource`, there also exists a class :cs:`ProjectedDtoDataSource` that can be used to easily perform projection from EF model types to your custom DTO types using EF query projections. :cs:`ProjectedDtoDataSource` inherits from :ref:`StandardDataSource`.
+In addition to creating a :ref:`DataSources` by deriving from :ref:`StandardDataSource`, there also exists a class :cs:`ProjectedDtoDataSource` that can be used to easily perform projection from EF model types to your custom DTO types using EF query projections. :cs:`ProjectedDtoDataSource` inherits from :ref:`StandardDataSource`.
 
     .. code-block:: c#
 

@@ -59,7 +59,7 @@ Without an :csharp:`IncludeTree` present, Coalesce will map the entire object gr
 
     If you're already familiar with the fact that an :csharp:`IncludeTree` is implicitly created in this scenario, then imagine for a moment that this is not the case (if you're not familiar with this fact, then keep reading!).
 
-    After Coalesce has called your :ref:`CustomDataSources` and evaluated the EF IQueryable returned, there are now 35 objects loaded into the current :csharp:`DbContext` being used to handle this request - the 5 employees, 5 projects, and 25 relationships.
+    After Coalesce has called your :ref:`DataSources` and evaluated the EF IQueryable returned, there are now 35 objects loaded into the current :csharp:`DbContext` being used to handle this request - the 5 employees, 5 projects, and 25 relationships.
 
     To map these objects to DTOs, we start with the root (employee #1) and expand outward from there until the entire object graph has been faithfully re-created with DTO objects, including all navigation properties.
 

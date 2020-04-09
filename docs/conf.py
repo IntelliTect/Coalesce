@@ -112,6 +112,9 @@ htmlhelp_basename = 'Coalescedoc'
 
 rst_prolog = open('global.rst', 'r').read()
 
+smartquotes = False
+
+
 # -- Options for LaTeX output ---------------------------------------------
 
 latex_elements = {

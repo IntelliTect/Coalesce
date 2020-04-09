@@ -29,7 +29,6 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
         /// </summary>
         public string DefaultOutputPath { get; set; }
 
-         // todo: document this. 
         /// <summary>
         /// Configues a path relative to the default output path for a generator for that generator's output to be placed in.
         /// </summary>

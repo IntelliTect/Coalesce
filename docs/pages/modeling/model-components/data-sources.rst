@@ -1,5 +1,5 @@
 
-.. _CustomDataSources:
+.. _DataSources:
 
 Data Sources
 ------------
@@ -78,6 +78,7 @@ Standard Parameters
 
 All methods on :csharp:`IDataSource<T>` take a parameter that contains all the client-specified parameters for things paging, searching, sorting, and filtering information. Almost all overridable methods on :csharp:`StandardDataSource` are also passed the relevant set of parameters. 
 
+.. _DataSourceParameters:
 
 Custom Parameters
 .................
@@ -246,7 +247,7 @@ All of the methods outlined above can be overridden. A description of each of th
     
     :csharp:`TransformResults`
         Allows for transformation of a result set after the query has been evaluated. 
-        This will be called for both lists of items and for single items. This can be used for things like populating non-mapped properties on a model. This method is only called immediately before mapping to a DTO - if the data source is serving data without mapping (e.g. when invoked by :ref:`CustomBehaviors`) to a DTO, this will not be called..
+        This will be called for both lists of items and for single items. This can be used for things like populating non-mapped properties on a model. This method is only called immediately before mapping to a DTO - if the data source is serving data without mapping (e.g. when invoked by :ref:`Behaviors`) to a DTO, this will not be called..
 
         .. warning::
             

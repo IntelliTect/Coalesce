@@ -58,6 +58,10 @@ dd {
 }
 
 
+.code.literal {
+    white-space: pre-wrap;
+}
+
 
 /*
 

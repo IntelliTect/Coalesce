@@ -34,9 +34,9 @@ A summary is as follows:
     :csharp:`.AddContext<AppDbContext>()`
         Register services needed by Coalesce to use the specified context. This is done automatically when calling the :csharp:`services.AddCoalesce<AppDbContext>();` overload.
     :csharp:`.UseDefaultDataSource(typeof(MyDataSource<,>))` 
-        Overrides the default data source used, replacing the :ref:`StandardDataSource`. See :ref:`CustomDataSources` for more details.
+        Overrides the default data source used, replacing the :ref:`StandardDataSource`. See :ref:`DataSources` for more details.
     :csharp:`.UseDefaultBehaviors(typeof(MyBehaviors<,>))` 
-        Overrides the default behaviors used, replacing the :ref:`StandardBehaviors`. See :ref:`CustomBehaviors` for more details.
+        Overrides the default behaviors used, replacing the :ref:`StandardBehaviors`. See :ref:`Behaviors` for more details.
     :csharp:`.UseTimeZone(TimeZoneInfo.FindSystemTimeZoneById("Pacific Standard Time"))`
         Specify a static time zone that should be used when Coalesce is performing operations on dates/times that lack timezone information. For example, when a user inputs a search term that contains only a date, Coalesce needs to know what timezone's midnight to use when performing the search.
     :csharp:`.UseTimeZone<ITimeZoneResolver>()` 

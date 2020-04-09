@@ -1,7 +1,7 @@
 
 
 
-.. _Knockout: http://knockoutjs.com/
+
 
 .. role:: csharp(code)
    :language: c#
@@ -18,3 +18,6 @@
 
 .. role:: ctor
     :class: ctor-param
+
+.. role:: raw-html(raw)
+    :format: html

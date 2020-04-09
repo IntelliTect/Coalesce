@@ -55,10 +55,10 @@ Once you've got a solid data model in place, its time to start customizing the w
 Data Sources
 ~~~~~~~~~~~~
 
-The method by which you can control what data the users of your application can access through Coalesce's generated APIs is by creating custom data sources. These are classes that allow complete control over the way that data is retrieved from your database and provided to clients. Read :ref:`CustomDataSources` to learn more.
+The method by which you can control what data the users of your application can access through Coalesce's generated APIs is by creating custom data sources. These are classes that allow complete control over the way that data is retrieved from your database and provided to clients. Read :ref:`DataSources` to learn more.
 
 Behaviors
 ~~~~~~~~~~~~
 
-Behaviors in Coalesce are to mutating data as data sources are to reading data. Defining a behaviors class for a model allows complete control over the way that Coalesce will create, update, and delete your application's data in response to requests made through its generated API. Read :ref:`CustomBehaviors` to learn more.
+Behaviors in Coalesce are to mutating data as data sources are to reading data. Defining a behaviors class for a model allows complete control over the way that Coalesce will create, update, and delete your application's data in response to requests made through its generated API. Read :ref:`Behaviors` to learn more.
 

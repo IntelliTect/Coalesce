@@ -151,7 +151,7 @@ Model-Specific Members
         For each exposed :ref:`Static Method <ModelMethods>` on your POCO, the members outlined in :ref:`Methods - Generated TypeScript <ModelMethodTypeScript>` will be created.
 
     DataSources
-        For each of the :ref:`CustomDataSources` on the class, a corresponding class will be added to a namespace named ``ListViewModels.<ClassName>DataSources``. This namespace can always be accessed on both :ts:`ViewModel` and :ts:`ListViewModel` instances via the :ts:`dataSources` property, and class instances can be assigned to the :ts:`dataSource` property.
+        For each of the :ref:`DataSources` on the class, a corresponding class will be added to a namespace named ``ListViewModels.<ClassName>DataSources``. This namespace can always be accessed on both :ts:`ViewModel` and :ts:`ListViewModel` instances via the :ts:`dataSources` property, and class instances can be assigned to the :ts:`dataSource` property.
 
         .. code-block:: typescript
 

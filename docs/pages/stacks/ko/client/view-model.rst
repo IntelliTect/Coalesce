@@ -143,7 +143,7 @@ Model-Specific Members
                 = new Coalesce.ViewModelConfiguration<Person>(Person.coalesceConfig);
 
     DataSources
-        For each of the :ref:`CustomDataSources` for a model, a class will be added to a namespace named ``ListViewModels.<ClassName>DataSources``. This namespace can always be accessed on both :ts:`ViewModel` and :ts:`ListViewModel` instances via the :ts:`dataSources` property, and class instances can be assigned to the :ts:`dataSource` property.
+        For each of the :ref:`DataSources` for a model, a class will be added to a namespace named ``ListViewModels.<ClassName>DataSources``. This namespace can always be accessed on both :ts:`ViewModel` and :ts:`ListViewModel` instances via the :ts:`dataSources` property, and class instances can be assigned to the :ts:`dataSource` property.
 
         .. code-block:: typescript
 

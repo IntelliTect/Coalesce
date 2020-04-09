@@ -1,4 +1,4 @@
-.. _CustomBehaviors:
+.. _Behaviors:
 
 
 
@@ -11,7 +11,7 @@ Behaviors
 
 ----
 
-Coalesce separates out the parts of your API that read your data from the parts that mutate it. The read portion is performed by :ref:`CustomDataSources`, and the mutations are performed by behaviors. Like data sources, there exists a standard set of behaviors that Coalesce provides out-of-the-box that cover the most common use cases for creating, updating, and deleting objects in your data model.
+Coalesce separates out the parts of your API that read your data from the parts that mutate it. The read portion is performed by :ref:`DataSources`, and the mutations are performed by behaviors. Like data sources, there exists a standard set of behaviors that Coalesce provides out-of-the-box that cover the most common use cases for creating, updating, and deleting objects in your data model.
 
 Also like data sources, these functions can be easily overridden on a per-model basis, allowing complete control over the ways in which your data is mutated by the APIs that Coalesce generates. However, unlike data sources which can have as many implementations per model as you like, you can only have one set of behaviors.
 

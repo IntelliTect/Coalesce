@@ -188,22 +188,36 @@ From this point, one can start adding more fields, more features, and more flair
     :hidden:
     :maxdepth: 3
     :titlesonly:
-    :caption: Generated Code - Server
+    :caption: Server-side Generated Code
 
-    pages/topics/generation
-    pages/generated/server/dtos
+    pages/stacks/agnostic/generation
+    pages/stacks/agnostic/dtos
+
+.. toctree::
+    :hidden:
+    :maxdepth: 1
+    :titlesonly:
+    :caption: Client - Vue
+
+    pages/stacks/vue/overview
+    pages/stacks/vue/layers/metadata
+    pages/stacks/vue/layers/models
+    pages/stacks/vue/layers/api-clients
+    pages/stacks/vue/layers/viewmodels
+    pages/stacks/vue/coalesce-vue-vuetify/overview
 
 .. toctree::
     :hidden:
     :maxdepth: 3
     :titlesonly:
-    :caption: Generated Code - Client
+    :caption: Client - Knockout
 
-    pages/generated/client/view-model
-    pages/generated/client/list-view-model
-    pages/generated/client/external-view-model
-    pages/generated/client/model-config
-    pages/generated/client/bindings
+    pages/stacks/ko/overview
+    pages/stacks/ko/client/view-model
+    pages/stacks/ko/client/list-view-model
+    pages/stacks/ko/client/external-view-model
+    pages/stacks/ko/client/model-config
+    pages/stacks/ko/client/bindings
 
 .. toctree::
     :hidden:

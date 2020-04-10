@@ -72,6 +72,7 @@ The TypeScript ViewModels and ListViewModels have a property called :ts:`dataSou
         list.dataSource = new list.dataSources.NamesStartingWith();
         list.load();
 
+.. _DataSourceStandardParameters:
 
 Standard Parameters
 ...................

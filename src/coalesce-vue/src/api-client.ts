@@ -951,6 +951,10 @@ export abstract class ApiState<
    *
    * "cancel" - cancel the outstanding request first.
    *
+   * "debounce" - if a request is made while one is outstanding, enqueue it to start after the outstanding
+   * request is done. If another request is made while one is already enqueued, the enqueued request is abandoned
+   * and replaced by the last request that was made.
+   *
    * "disallow" - throw an error.
    *
    * "allow" - permit the second request to be made. The ultimate state of the state fields may not be representative of the last request made.

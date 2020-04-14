@@ -16,6 +16,7 @@ The model layer is fairly simple - the only main concept it introduces on top of
 Model
     An interface describing an instance of a class type from your application's data model. All Model interfaces contain members for all the :ref:`ModelProperties` of that type, as well as a :ts:`$metadata` property that references the metadata object for that type.
 
+.. _VueModelsDataSource:
 DataSource
     A representation of a :ref:`Data Source <DataSources>`, containing properties for any of the :ref:`DataSourceParameters` of the data source, as well as a :ts:`$metadata` property that references the metadata object for the data source.
     
@@ -101,7 +102,7 @@ The following options are available to functions in coalesce-vue that render a v
     Options to be used when formatting a date. One of:
 
     :ts:`string`
-        A `UTS#35 <https://unicode.org/reports/tr35/tr35-dates.html>`_ date format string, to be passed to `date-fns's format function <https://date-fns.org/docs/format>`_.
+        A `UTS#35 <http://unicode.org/reports/tr35/tr35-dates.html>`_ date format string, to be passed to `date-fns's format function <https://date-fns.org/docs/format>`_.
 
         Defaults to :ts:`"M/d/yyyy"` for date-only dates (specified with :ref:`DateTypeAttribute`), or :ts:`"M/d/yyyy h:mm:ss aaa"` otherwise. 
 

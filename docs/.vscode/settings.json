@@ -4,5 +4,6 @@
     "restructuredtext.confPath": "${workspaceFolder}",
     "restructuredtext.linter.sphinxTextRoles": [
         "csharp", "ts", "ref", "ctor", "html"
-      ]
+      ],
+      "restructuredtext.workspaceRoot": "c:\\src\\Coalesce\\docs"
 }

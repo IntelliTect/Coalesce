@@ -1,5 +1,14 @@
 
 
+.rst-content .section ul li p {
+    /* Remove weird whitespace between list item and its children. */
+    margin-bottom: 0 !important;
+}
+
+li > ul {
+    /* Add some room below child lists */
+    margin-bottom: 12px !important;
+}
 
 
 /* .c {

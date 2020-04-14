@@ -788,8 +788,6 @@ export abstract class ListViewModel<
         );
       }
     });
-  // TODO: merge in the result, don't replace the existing one
-  // .onFulfilled(() => { this.$data = this.$load.result || this.$data; this.$isDirty = false; })
 
   /**
    * A function for invoking the `/count` endpoint, and a set of properties about the state of the last call.

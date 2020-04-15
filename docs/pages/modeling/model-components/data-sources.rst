@@ -132,7 +132,7 @@ You can setup :ref:`TypeScriptListViewModels` to automatically reload from the s
 
     .. group-tab:: Vue
 
-        To automatically reload a :ref:`VueListViewModel` when data source parameters change, simply use the list's :ts:`$startAutoLoad` function:
+        To automatically reload a :ref:`ListViewModel <VueListViewModels>` when data source parameters change, simply use the list's :ts:`$startAutoLoad` function:
         
         .. code-block:: vue
         

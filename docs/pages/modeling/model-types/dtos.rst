@@ -130,6 +130,7 @@ When you create a custom DTO, it will use the :ref:`StandardDataSource` and :ref
             }
 
 .. _ProjectedDtoDataSource:
+
 ProjectedDtoDataSource
 ......................
 

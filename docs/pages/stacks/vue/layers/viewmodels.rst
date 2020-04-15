@@ -111,7 +111,7 @@ Parameters & API Callers
 .. _VueViewModelsAutoSave:
 
 Auto-save & Dirty Flags
-......................
+.......................
 
 :ts:`$startAutosave(vue: Vue, options: AutoSaveOptions<this> = {})`
     Starts auto-saving of the instance when its savable data properties become dirty. Saves are performed with the :ts:`$save` :ref:`API Caller <VueApiCallers>` (documented below) and will not be performed if the ViewModel has any validation errors - see :ref:`VueViewModelsValidation` below.
@@ -164,7 +164,8 @@ Auto-save & Dirty Flags
 .. _VueViewModelsValidation:
 
 Rules/Validation
-..........
+................
+
 :ts:`$addRule(prop: string | Property, identifier: string, rule: (val: any) => true | string)`
     Add a custom validation rule to the ViewModel for the spcified property. :ts:`identifier` should be a short, unique slug that describes the rule; it is not displayed in the UI, but is used if you wish to later remove the rule with :ts:`$removeRule()`.
 

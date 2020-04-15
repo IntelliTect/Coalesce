@@ -7,8 +7,6 @@ TypeScript ListViewModels
 
 In addition to :ref:`TypeScriptViewModels` for interacting with instances of your data classes in TypeScript, Coalesce will also generated a List ViewModel for loading searched, sorted, paginated data from the server.
 
-.. _Knockout: http://knockoutjs.com/
-
 These ListViewModels, like the ViewModels, are dependent on Knockout_ and are designed to be used directly from Knockout bindings in your HTML.
 
 
@@ -148,7 +146,7 @@ Filter Object
         - Date properties can specify an exact time, or a date with no time component. In the latter case, any times that fall within that day will be matched.
 
 Static Method Members
-    For each exposed :ref:`Static Method <ModelMethods>` on your POCO, the members outlined in :ref:`Methods - Generated TypeScript <ModelMethodTypeScript>` will be created.
+    For each exposed :ref:`Static Method <ModelMethods>` on your POCO, the members outlined in :ref:`Methods - Generated TypeScript <KoModelMethodTypeScript>` will be created.
 
 DataSources
     For each of the :ref:`DataSources` on the class, a corresponding class will be added to a namespace named ``ListViewModels.<ClassName>DataSources``. This namespace can always be accessed on both :ts:`ViewModel` and :ts:`ListViewModel` instances via the :ts:`dataSources` property, and class instances can be assigned to the :ts:`dataSource` property.

@@ -1,4 +1,4 @@
-.. _FileAttribute
+.. _FileAttribute:
 
 [File]
 ========
@@ -49,7 +49,10 @@ Additionally, Coalesce can store file metadata in optional properties that are s
     [File("video/mp4", nameof(VideoName), nameof(VideoHash), nameof(VideoSize))]
     public byte[] InstallationVideo { get; set; }
 
-    public string VideoName => $"Product{ProductId}.mp4";
+    public string VideoName 
+    {
+        get { return "Product" + ProductId + ".mp4" }
+    }
     public long VideoSize { get; set; }
     public string VideoHash { get; set; }
 

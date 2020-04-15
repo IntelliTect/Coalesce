@@ -85,12 +85,10 @@ You can implement role-based security on a method by placing the :ref:`ExecuteAt
 
 Security for instance methods is also controlled by the data source that loads the instance - if the data source can't provide an instance of the requested model, the method won't be executed.
 
-.. _ModelMethodTypeScript:
-
 Generated TypeScript
 --------------------
 
-See :ref:`VueApiCallers` and :ref:`VueViewModels` (Vue) or :ref:`ModelMethodTypeScript` (Knockout) for details on the code that is generated for your custom methods.
+See :ref:`VueApiCallers` and :ref:`VueViewModels` (Vue) or :ref:`KoModelMethodTypeScript` (Knockout) for details on the code that is generated for your custom methods.
 
 |
 

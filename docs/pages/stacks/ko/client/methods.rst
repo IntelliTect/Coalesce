@@ -1,5 +1,5 @@
 
-.. _ModelMethodTypeScript:
+.. _KoModelMethodTypeScript:
 
 TypeScript Method Objects
 =========================

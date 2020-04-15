@@ -121,7 +121,6 @@ html_static_path = ['_static']
 htmlhelp_basename = 'Coalescedoc'
 
 rst_prolog = open('global.rst', 'r').read()
-
 smartquotes = False
 
 

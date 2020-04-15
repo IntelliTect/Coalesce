@@ -3,19 +3,17 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-.. _IntelliTect:
-    https://intellitect.com
-
+.. _IntelliTect: https://intellitect.com
 
 Coalesce
 ========
 
 Designed to help you quickly build amazing web applications, Coalesce is a rapid-development code generation framework, created by IntelliTect_ and built on top of:
 
-    - ASP.NET Core
-    - EF Core
-    - TypeScript
-    - Vue_ or Knockout_
+- ASP.NET Core
+- EF Core
+- TypeScript
+- Vue_ or Knockout_
 
 
 What do I do?
@@ -58,14 +56,14 @@ The quickest and easiest way to create a new Coalesce application is to use the 
     :alt: Nuget
     :target: https://www.nuget.org/packages/IntelliTect.Coalesce.KnockoutJS.Template/
 
-`Vue <https://github.com/IntelliTect/Coalesce.Vue.Template>`_: |vuebadge|
+`Vue Template <https://github.com/IntelliTect/Coalesce.Vue.Template>`_: |vuebadge|
 
     .. code-block:: sh
 
         dotnet new --install IntelliTect.Coalesce.Vue.Template
         dotnet new coalescevue
 
-`Knockout <https://github.com/IntelliTect/Coalesce.KnockoutJS.Template>`_: |kobadge|
+`Knockout Template <https://github.com/IntelliTect/Coalesce.KnockoutJS.Template>`_: |kobadge|
     
     .. code-block:: sh
     

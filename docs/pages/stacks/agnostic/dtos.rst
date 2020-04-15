@@ -2,7 +2,7 @@
 .. _GenDTOs:
 
 Generated C# DTOs
---------------
+-----------------
 
 Data Transfer Objects, or DTOs, allow for transformations of data from the data store into a format more suited for transfer and use on the client side. This often means trimming properties and flattening structures to provide a leaner over-the-wire experience. Coalesce aims to support this as seamlessly as possible.
 

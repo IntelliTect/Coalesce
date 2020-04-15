@@ -18,7 +18,7 @@ Root Configuration
     | :ts:`Coalesce.GlobalConfiguration.app`
     |
     
-    The root configuration contains all configuration properties which apply to class category (:ref:`TypeScriptViewModel`, :ref:`TypeScriptListViewModel`, and :ref:`Services`). The :ts:`app` property contains global app configuration that exists independent of any models. Then, for each class kind, the following are available:
+    The root configuration contains all configuration properties which apply to class category (:ref:`TypeScriptViewModels`, :ref:`TypeScriptListViewModels`, and :ref:`Services`). The :ts:`app` property contains global app configuration that exists independent of any models. Then, for each class kind, the following are available:
 
 Root ViewModel/ListViewModel Configuration
     | :ts:`Coalesce.GlobalConfiguration.viewModel`

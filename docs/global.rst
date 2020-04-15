@@ -2,6 +2,8 @@
 
 
 .. _Knockout: http://knockoutjs.com/
+.. _Vue: https://vuejs.org/
+.. _GitHub: https://github.com/IntelliTect/Coalesce
 
 .. role:: csharp(code)
    :language: c#

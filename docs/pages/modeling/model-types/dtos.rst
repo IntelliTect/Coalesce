@@ -3,7 +3,7 @@
 Custom DTOs
 ===========
 
-In addition to the generated :ref:`GenDTOs` that Coalesce will create for you, you may also create your own implementations of an :csharp:`IClassDto`. These types are first-class citizens in Coalesce - you will get a full suite of features surrounding them as if they were entities. This includes generated API Controllers, Admin Views, and full :ref:`TypeScriptViewModel` and :ref:`TypeScriptListViewModel`.
+In addition to the generated :ref:`GenDTOs` that Coalesce will create for you, you may also create your own implementations of an :csharp:`IClassDto`. These types are first-class citizens in Coalesce - you will get a full suite of features surrounding them as if they were entities. This includes generated API Controllers, Admin Views, and full :ref:`TypeScriptViewModels` and :ref:`TypeScriptListViewModels`.
 
 .. contents:: Contents
     :local:

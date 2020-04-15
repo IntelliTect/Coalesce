@@ -23,6 +23,6 @@ Example Usage
 Properties
 ----------
 
-    :csharp:`public bool WillCreateView { get; set; }` :ctor:`1`
+:csharp:`public bool WillCreateView { get; set; }` :ctor:`1`
 
-    :csharp:`public bool WillCreateApi { get; set; }` :ctor:`2`
+:csharp:`public bool WillCreateApi { get; set; }` :ctor:`2`

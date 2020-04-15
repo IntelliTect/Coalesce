@@ -1,5 +1,5 @@
 
-.. _TypeScriptViewModel:
+.. _KoTypeScriptViewModel:
 
 
 TypeScript ViewModels
@@ -134,7 +134,7 @@ Model-Specific Members
     Configuration
         A static configuration object for configuring all instances of the ViewModel's  type is created, as well as an instance configuration object for configuring specific instances of the ViewModel. See (see :ref:`TSModelConfig`) for more information.
 
-        .. code-block:: typescript
+        .. code-block:: knockout
 
             public static coalesceConfig: Coalesce.ViewModelConfiguration<Person>
                 = new Coalesce.ViewModelConfiguration<Person>(Coalesce.GlobalConfiguration.viewModel);
@@ -145,7 +145,7 @@ Model-Specific Members
     DataSources
         For each of the :ref:`DataSources` for a model, a class will be added to a namespace named ``ListViewModels.<ClassName>DataSources``. This namespace can always be accessed on both :ts:`ViewModel` and :ts:`ListViewModel` instances via the :ts:`dataSources` property, and class instances can be assigned to the :ts:`dataSource` property.
 
-        .. code-block:: typescript
+        .. code-block:: knockout
 
             public dataSources = ListViewModels.PersonDataSources;
             public dataSource: DataSource<Person> = new this.dataSources.Default();
@@ -153,7 +153,7 @@ Model-Specific Members
     Data Properties
         For each exposed property on the underlying EF POCO, a :ts:`KnockoutObservable<T>` property will exist on the TypeScript model. For navigation properties, these will be typed with the corresponding TypeScript ViewModel for the other end of the relationship. For collections (including collection navigation properties), these properties will be :ts:`KnockoutObservableArray<T>` objects.
 
-        .. code-block:: typescript
+        .. code-block:: knockout
 
             public personId: KnockoutObservable<number> = ko.observable(null);
             public fullName: KnockoutObservable<string> = ko.observable(null);
@@ -167,7 +167,7 @@ Model-Specific Members
     Computed Text Properties
         For each reference navigation property and each Enum property on your POCO, a :ts:`KnockoutComputed<string>` property will be created that will provide the text to display for that property. For navigation properties, this will be the property on the class annotated with :ref:`ListTextAttribute`.
 
-        .. code-block:: typescript
+        .. code-block:: knockout
 
             public companyText: () => string;
             public genderText: () => string;
@@ -177,13 +177,13 @@ Model-Specific Members
 
         - A method that will add a new object to that collection property. If :ts:`autoSave` is specified, the auto-save behavior of the new object will be set to that value. Otherwise, the inherited default will be used (see :ref:`TSModelConfig`)
 
-            .. code-block:: typescript
+            .. code-block:: knockout
 
                 public addToAddresses: (autoSave?: boolean) => ViewModels.Address;
 
         - A :ts:`KnockoutComputed<string>` that evaluates to a relative url for the generated table view that contains only the items that belong to the collection navigation property.
     
-            .. code-block:: typescript
+            .. code-block:: knockout
 
                 public addressesListUrl: KnockoutComputed<string>;
 
@@ -192,7 +192,7 @@ Model-Specific Members
 
         - A method that will call :ts:`showEditor` on that current value of the navigation property, or on a new instance if the current value is null.
     
-            .. code-block:: typescript
+            .. code-block:: knockout
 
                 public showCompanyEditor: (callback?: any) => void;
 
@@ -204,7 +204,7 @@ Model-Specific Members
 
         - A static array of objects with properties :ts:`id` and :ts:`value` that represent all the values of the enum.
     
-            .. code-block:: typescript
+            .. code-block:: knockout
 
                 public genderValues: Coalesce.EnumValue[] = [ 
                     { id: 1, value: 'Male' },
@@ -214,7 +214,7 @@ Model-Specific Members
 
         - A TypeScript enum that mirrors the C# enum directly. This enum is in a sub-namespace of :ts:`ViewModels` named the same as the class name.
     
-            .. code-block:: typescript
+            .. code-block:: knockout
 
                 export namespace Person {
                     export enum GenderEnum {

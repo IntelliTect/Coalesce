@@ -722,6 +722,22 @@ export abstract class ListViewModel<
   /** The parameters that will be passed to `/list` and `/count` calls. */
   public $params = new ListParameters();
 
+  /** Wrapper for `$params.dataSource` */
+  public get $dataSource() {
+    return this.$params.dataSource;
+  }
+  public set $dataSource(val) {
+    this.$params.dataSource = val;
+  }
+
+  /** Wrapper for `$params.includes` */
+  public get $includes() {
+    return this.$params.includes;
+  }
+  public set $includes(val) {
+    this.$params.includes = val;
+  }
+  
   /**
    * The current set of items that have been loaded into this ListViewModel.
    */

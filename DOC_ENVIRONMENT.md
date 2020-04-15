@@ -25,7 +25,7 @@ PS> python .\get-pip.py
 ```
 * Install Sphinx via Powershell:
 ```PowerShell
-PS> pip install sphinx
+PS> pip install sphinx sphinx-tabs
 ```
 * Install the reStructuredText linter using pip:
 ```PowerShell

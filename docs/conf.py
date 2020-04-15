@@ -32,8 +32,18 @@
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 import datetime
+import pprint
+import os 
+import sys
 
-extensions = []
+dir_path = os.path.dirname(os.path.realpath(__file__))
+
+from pygments.lexers._mapping import LEXERS
+
+sys.path.append(dir_path)
+LEXERS['Knockout'] = ('coalescelexers', 'Knockout', ('knockout',), (), ())
+LEXERS['Vue'] = ('coalescelexers', 'Vue', ('vue',), (), ())
+extensions = ['sphinx_tabs.tabs']
 
 def setup(app):
     app.add_stylesheet('custom.css')  # may also be an URL
@@ -164,6 +174,3 @@ texinfo_documents = [
      author, 'Coalesce', 'One line description of project.',
      'Miscellaneous'),
 ]
-
-
-

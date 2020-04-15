@@ -10,6 +10,18 @@ li > ul {
     margin-bottom: 12px !important;
 }
 
+.highlighted {
+    /* Remove lr-padding on highlighted phrases in search results */
+    padding: 0 !important;
+}
+
+.code-tab.tab.segment {
+    padding: 0 !important;
+}
+
+.code-tab.tab div[class^=highlight] {
+    margin: 0 0 1px 0;
+}
 
 /* .c {
     color: #998;
@@ -48,6 +60,10 @@ dt {
 dd {
     font-size: 16px;
 }
+
+
+/* Override the atrocious default yellow background on code blocks */
+.highlight  { background: #f8f8f8; }
 
 .k, .kt, .keyword, .keyword.type {
     color: #458;

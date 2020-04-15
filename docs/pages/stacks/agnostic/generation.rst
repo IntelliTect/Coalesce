@@ -12,20 +12,20 @@ Running Code Generation
 
 Coalesce's code generation is ran via a dotnet CLI tool, ``dotnet coalesce``. In order to invoke this tool, you must have the appropriate references to the package that provides it in your .csproj file:
 
-    .. code-block:: xml
+.. code-block:: xml
 
-        <Project Sdk="Microsoft.NET.Sdk.Web">
+    <Project Sdk="Microsoft.NET.Sdk.Web">
 
-            ...
+        ...
 
-            <ItemGroup>
-                <PackageReference Include="IntelliTect.Coalesce" Version="..." />
-            </ItemGroup>
+        <ItemGroup>
+            <PackageReference Include="IntelliTect.Coalesce" Version="..." />
+        </ItemGroup>
 
-            <ItemGroup>
-                <DotNetCliToolReference Include="IntelliTect.Coalesce.Tools" Version="..." />
-            </ItemGroup>  
-        </Project>
+        <ItemGroup>
+            <DotNetCliToolReference Include="IntelliTect.Coalesce.Tools" Version="..." />
+        </ItemGroup>  
+    </Project>
 
 CLI Options
 ...........

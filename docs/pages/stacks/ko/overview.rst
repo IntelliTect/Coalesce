@@ -16,15 +16,15 @@ TypeScript
 Coalesce generates a number of different types of TypeScript classes to support your data through the generated API.
 
 
-:ref:`ViewModels <TypeScriptViewModel>`
+:ref:`ViewModels <TypeScriptViewModels>`
     One view model class is generated for each of your :ref:`EntityModels` and :ref:`CustomDTOs`. These models contain fields for your model :ref:`ModelProperties`, and functions and other members for your model :ref:`ModelMethods`. They also contain a number of standard fields & functions inherited from :ts:`BaseViewModel` which offer basic loading & saving functionality, as well as other handy utility members for use with Knockout.
 
-    See :ref:`TypeScriptViewModel` for more details.
+    See :ref:`TypeScriptViewModels` for more details.
 
-:ref:`List ViewModels <TypeScriptListViewModel>`
+:ref:`List ViewModels <TypeScriptListViewModels>`
     One ListViewModel is generated for each of your :ref:`EntityModels` and :ref:`CustomDTOs`. These classes contain functionality for loading sets of objects from the server. They provide searching, paging, sorting, and filtering functionality.
 
-    See :ref:`TypeScriptListViewModel` for more details.
+    See :ref:`TypeScriptListViewModels` for more details.
 
 :ref:`External Type ViewModels <TypeScriptExternalViewModel>`
     Any non-primitive types which are not themselves a :ref:`EntityModels` or :ref:`CustomDTOs` which are accessible through the aforementioned types, either through one of its :ref:`ModelProperties`, or return value from one of its :ref:`ModelMethods`, will have a corresponding TypeScript ViewModel generated for it. These ViewModels only provide a :ts:`KnockoutObservable` field for each property on the C# class.

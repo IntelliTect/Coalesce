@@ -1,6 +1,6 @@
 
 
-.. _TypeScriptExternalViewModel:
+.. _KoExternalViewModel:
 
 TypeScript External ViewModels
 ------------------------------
@@ -12,7 +12,7 @@ These ViewModels are dependent on Knockout_, and are designed to be used directl
 Base Members
 ============
 
-    The TypeScript ViewModels for external types do not have a common base class, and do not have any of the behaviors or convenience properties that the regular :ref:`TypeScriptViewModel` for database-mapped classes have.
+    The TypeScript ViewModels for external types do not have a common base class, and do not have any of the behaviors or convenience properties that the regular :ref:`TypeScriptViewModels` for database-mapped classes have.
 
 
 Model-Specific Members
@@ -21,7 +21,7 @@ Model-Specific Members
     Data Properties
         For each exposed property on the underlying EF POCO, a :ts:`KnockoutObservable<T>` property will exist on the TypeScript model. For POCO properties, these will be typed with the corresponding TypeScript ViewModel for the other end of the relationship. For collections, these properties will be :ts:`KnockoutObservableArray<T>` objects.
 
-        .. code-block:: typescript
+        .. code-block:: knockout
 
             public personId: KnockoutObservable<number> = ko.observable(null);
             public fullName: KnockoutObservable<string> = ko.observable(null);
@@ -34,6 +34,6 @@ Model-Specific Members
     Computed Text Properties
         For each Enum property on your POCO, a :ts:`KnockoutComputed<string>` property will be created that will provide the text to display for that property.
 
-        .. code-block:: typescript
+        .. code-block:: knockout
 
             public genderText: () => string;

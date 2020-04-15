@@ -3,15 +3,19 @@
 ViewModel Layer
 ================
 
-The API client layer, generated as `viewmodels.g.ts`, exports for each :ref:`EntityModels` and :ref:`CustomDTOs` in your data model both a ViewModel class representing a single instance of the type, and a ListViewModel class that is used to interact with the list functionality in Coalesce. Additionally, each :ref:`Service <Services>` also has a ViewModel class generated.
+The ViewModel layer, generated as `viewmodels.g.ts`, exports for each :ref:`EntityModels` and :ref:`CustomDTOs` in your data model both a ViewModel class representing a single instance of the type, and a ListViewModel class that is used to interact with the list functionality in Coalesce. Additionally, each :ref:`Service <Services>` also has a ViewModel class generated.
 
-These classes provide a wide array of functionality that is useful when interacting with your data model through a user interface.
+These classes provide a wide array of functionality that is useful when interacting with your data model through a user interface. The generated ViewModels are the primary way that Coalesce is used when developing a Vue application.
 
 .. contents:: Contents
     :local:
 
+.. _VueInstanceViewModels:
+
 ViewModels 
 ----------
+
+The following members can be found on the generated ViewModels, exported from `viewmodels.g.ts` as :ts:`*TypeName*ViewModel`.
 
 Data Properties
 ...............
@@ -19,7 +23,7 @@ Data Properties
 Data Properties
     Each ViewModel class implements the corresponding interface from the :ref:`VueModels`, meaning that the ViewModel has a data property for each :ref:`Property <ModelProperties>` on the model. Object-typed properties will be typed as the corresponding generated ViewModel.
 
-    Changing the value of a property will automatically flag that property as dirty. See sections below on how property dirty flags are used.
+    Changing the value of a property will automatically flag that property as dirty. See :ref:`VueViewModelsAutoSave` below for information on how property dirty flags are used.
 
     There are a few special behaviors when assigning to different kinds of data properties on View Models as well:
 
@@ -51,6 +55,60 @@ Data Properties
     An immutable number that is unique among all ViewModel instances, regardless of type.
 
     Useful for uniquely identifying instances with ``:key="vm.$stableId"`` in a Vue component, especially for instances that lack a primary key.
+
+Parameters & API Callers
+........................
+:ts:`$load: ItemApiState`
+    An :ref:`API Caller <VueApiCallers>` for the ``/get`` endpoint. Accepts an optional :ts:`id` argument - if not provided, the ViewModel's :ts:`$primaryKey` is used instead. Uses the instance's :ts:`$params` object for the :ref:`DataSourceStandardParameters`.
+
+:ts:`$save: ItemApiState`
+    An :ref:`API Caller <VueApiCallers>` for the ``/save`` endpoint. Uses the instance's :ts:`$params` object for the :ref:`DataSourceStandardParameters`.
+
+    This caller is used for both manually-triggered saves in custom code and for auto-saves. If the :ref:`VueViewModelsValidation` report any errors when the caller is invoked, an error will be thrown.
+
+    When a save creates a new record and a new primary key is returned from the server, any entities attached to the current ViewModel via a collection navigation property will have their foreign keys set to the new primary key. This behavior, combined with the usage of deep auto-saves, allows for complex object graphs to be constructed even before any model in the graph has been created.
+
+    Saving behavior can be further customized with :ts:`$loadResponseFromSaves` and :ts:`$saveMode`, listed below.
+
+:ts:`$loadResponseFromSaves: boolean`
+    Default :ts:`true` - controls if a ViewModel will be loaded with the data from the model returned by the ``/save`` endpoint when saved with the :ts:`$save` API caller. There is seldom any reason to disable this.
+
+:ts:`$saveMode: "surgical" | "whole"`
+    Configures which properties of the model are sent to the server during a save.
+
+    :ts:`"surgical"` (default)
+        By default, only dirty properties (and always the primary key) are sent to the server when performing a save. 
+        
+        This improves the handling of concurrent changes being made by multiple users against different fields of the same entity at the same time - specifically, it prevents a user with a stale value of some field X from overwriting a more recent value of X in the database when the user is only making changes to some other property Y and has no intention of changing X. 
+        
+        Save mode :ts:`"surgical"` doesn't help when multiple users are editing field X at the same time - if such a scenario is applicable to your application, you must implement `more advanced handling of concurrency conflicts <https://docs.microsoft.com/en-us/ef/core/saving/concurrency>`_.
+
+        .. warning:: 
+
+            Surgical saves require DTOs on the server that are capable of determining which of their properties have been set by the model binder, as surgical saves are sent from the client by entirely omitting properties from the ``x-www-form-urlencoded`` body that is sent to the server.
+
+            The :ref:`GenDTOs` implement the necessary logic for this; however, any :ref:`CustomDTOs` you have written are unlikely to be implementing the same behavior. For :ref:`CustomDTOs`, either implement the same pattern that can be seen in the :ref:`GenDTOs`, or use save mode :ts:`"whole"` instead.
+
+    :ts:`"whole"`
+        All serializable properties of the object are sent back to the server with every save. 
+        
+
+:ts:`$delete: ItemApiState`
+    An :ref:`API Caller <VueApiCallers>` for the ``/delete`` endpoint. Uses the instance's :ts:`$params` object for the :ref:`DataSourceStandardParameters`.
+
+    If the object was loaded as a child of a collection, it will be removed from that collection upon being deleted. Note that ViewModels currently only support tracking of a single parent collection, so if an object is programatically added to additional collections, it will only be removed from one of them upon delete.
+
+:ts:`$params: DataSourceParameters`
+    An object containing the :ref:`DataSourceStandardParameters` to be used for the :ts:`$load`, :ts:`$save`, and :ts:`$delete` API callers.
+
+:ts:`$dataSource: DataSource`
+    Getter/setter wrapper around :ts:`$params.dataSource`. Takes an instance of a :ref:`Data Source <DataSources>` class :ref:`generated in the Model Layer <VueModelsDataSource>`.
+
+:ts:`$includes: string | null`
+    Getter/setter wrapper around :ts:`$params.includes`. See :ref:`Includes` for more information.
+
+
+.. _VueViewModelsAutoSave:
 
 Auto-save & Dirty Flags
 ......................
@@ -102,58 +160,6 @@ Auto-save & Dirty Flags
 :ts:`$loadDirtyData(source: {} | TModel)`
     Same as :ts:`$loadCleanData`, but does not clear any existing dirty flags, nor does it clear any dirty flags that will be set while mutating the data properties of any ViewModel instance that gets loaded.
 
-Parameters & API Callers
-........................
-
-:ts:`$params: DataSourceParameters`
-    An object containing the :ref:`DataSourceStandardParameters` to be used for the :ts:`$load`, :ts:`$save`, and :ts:`$delete` API callers.
-
-:ts:`$dataSource: DataSource`
-    Getter/setter wrapper around :ts:`$params.dataSource`. Takes an instance of a :ref:`Data Source <DataSources>` class :ref:`generated in the Model Layer <VueModelsDataSource>`.
-
-:ts:`$includes: string | null`
-    Getter/setter wrapper around :ts:`$params.includes`. See :ref:`Includes` for more information.
-
-:ts:`$load: ItemApiState`
-    An :ref:`API Caller <VueApiCallers>` for the ``/get`` endpoint. Accepts an optional :ts:`id` argument - if not provided, the ViewModel's :ts:`$primaryKey` is used instead. Uses the instance's :ts:`$params` object for the :ref:`DataSourceStandardParameters`.
-
-:ts:`$save: ItemApiState`
-    An :ref:`API Caller <VueApiCallers>` for the ``/save`` endpoint. Uses the instance's :ts:`$params` object for the :ref:`DataSourceStandardParameters`.
-
-    This caller is used for both manually-triggered saves in custom code and for auto-saves. If the :ref:`VueViewModelsValidation` report any errors when the caller is invoked, an error will be thrown.
-
-    When a save creates a new record and a new primary key is returned from the server, any entities attached to the current ViewModel via a collection navigation property will have their foreign keys set to the new primary key. This behavior, combined with the usage of deep auto-saves, allows for complex object graphs to be constructed even before any model in the graph has been created.
-
-    Saving behavior can be further customized with :ts:`$loadResponseFromSaves` and :ts:`$saveMode`, listed below.
-
-:ts:`$loadResponseFromSaves: boolean`
-    Default :ts:`true` - controls if a ViewModel will be loaded with the data from the model returned by the ``/save`` endpoint when saved with the :ts:`$save` API caller. There is seldom any reason to disable this.
-
-:ts:`$saveMode: "surgical" | "whole"`
-    Configures which properties of the model are sent to the server during a save.
-
-    :ts:`"surgical"` (default)
-        By default, only dirty properties (and always the primary key) are sent to the server when performing a save. 
-        
-        This improves the handling of concurrent changes being made by multiple users against different fields of the same entity at the same time - specifically, it prevents a user with a stale value of some field X from overwriting a more recent value of X in the database when the user is only making changes to some other property Y and has no intention of changing X. 
-        
-        Save mode :ts:`"surgical"` doesn't help when multiple users are editing field X at the same time - if such a scenario is applicable to your application, you must implement `more advanced handling of concurrency conflicts <https://docs.microsoft.com/en-us/ef/core/saving/concurrency>`_.
-
-        .. warning:: 
-
-            Surgical saves require DTOs on the server that are capable of determining which of their properties have been set by the model binder, as surgical saves are sent from the client by entirely omitting properties from the ``x-www-form-urlencoded`` body that is sent to the server.
-
-            The :ref:`GenDTOs` implement the necessary logic for this; however, any :ref:`CustomDTOs` you have written are unlikely to be implementing the same behavior. For :ref:`CustomDTOs`, either implement the same pattern that can be seen in the :ref:`GenDTOs`, or use save mode :ts:`"whole"` instead.
-
-    :ts:`"whole"`
-        All serializable properties of the object are sent back to the server with every save. 
-        
-
-:ts:`$delete: ItemApiState`
-    An :ref:`API Caller <VueApiCallers>` for the ``/delete`` endpoint. Uses the instance's :ts:`$params` object for the :ref:`DataSourceStandardParameters`.
-
-    If the object was loaded as a child of a collection, it will be removed from that collection upon being deleted. Note that ViewModels currently only support tracking of a single parent collection, so if an object is programatically added to additional collections, it will only be removed from one of them upon delete.
-
 
 .. _VueViewModelsValidation:
 
@@ -195,8 +201,16 @@ Method Callers
 Many-to-many helper collections
     For each :ref:`collection navigation property <ModelProperties>` annotated with :ref:`ManyToMany`, a getter-only property is generated that returns a collection of the object on the far side of the many-to-many relationship. Nulls are filtered from this collection.
 
+|
+
+
+
+.. _VueListViewModels:
+
 ListViewModels
 --------------
+
+The following members can be found on the generated ListViewModels, exported from `viewmodels.g.ts` as :ts:`*TypeName*ListViewModel`.
 
 Data Properties
 ...............
@@ -265,8 +279,16 @@ Method Callers
     For each of the static :ref:`ModelMethods` on the type, an :ref:`API Caller <VueApiCallers>` will be created.
 
 
+
+
+
+|
+
+
 Service ViewModels
 ------------------
+
+The following members can be found on the generated Service ViewModels, exported from `viewmodels.g.ts` as :ts:`*ServiceName*ViewModel`.
 
 Generated Members
 .................

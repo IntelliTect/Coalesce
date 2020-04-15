@@ -12,80 +12,80 @@ By default, the system will search any field with the name 'Name'. If this doesn
 
 The following types can be searched:
 
-    Strings
-        String fields will be searched based on the :csharp:`SearchMethod` property on the attribute. See below.
+Strings
+    String fields will be searched based on the :csharp:`SearchMethod` property on the attribute. See below.
 
-    Numeric Types
-        If the input is numeric, numeric fields will be searched for the exact value.
+Numeric Types
+    If the input is numeric, numeric fields will be searched for the exact value.
 
-    Enums
-        If the input is a valid name of an enum value for an enum property and that property is searchable, rows will be searched for the exact value.
+Enums
+    If the input is a valid name of an enum value for an enum property and that property is searchable, rows will be searched for the exact value.
 
-    Dates
-        If the input is a parsable date, rows will be searched based on that date.
-            
-        Date search will do its best to guess at the user's intentions:
+Dates
+    If the input is a parsable date, rows will be searched based on that date.
+        
+    Date search will do its best to guess at the user's intentions:
 
-            * Various forms of year/month combos are supported, and if only a year/month is inputted, it will look for all dates in that month, e.g. "Feb 2017" or "2016-11".
-            * A date without a time (or a time of exactly midnight) will search the entire day, e.g. "2017/4/18". 
-            * A date/time with minutes and seconds equal to 0 will search the entire hour, e.g. "April 7, 2017 11 AM".
+        * Various forms of year/month combos are supported, and if only a year/month is inputted, it will look for all dates in that month, e.g. "Feb 2017" or "2016-11".
+        * A date without a time (or a time of exactly midnight) will search the entire day, e.g. "2017/4/18". 
+        * A date/time with minutes and seconds equal to 0 will search the entire hour, e.g. "April 7, 2017 11 AM".
 
-        .. tip::
+    .. tip::
 
-            When searching on date properties, you should almost always set :csharp:`IsSplitOnSpaces = false` on the :csharp:`Search` attribute. This allows natural inputs like "July 21, 2017" to search correctly. Otherwise, only non-whitespaced date formats will work, like "2017/21/07".
+        When searching on date properties, you should almost always set :csharp:`IsSplitOnSpaces = false` on the :csharp:`Search` attribute. This allows natural inputs like "July 21, 2017" to search correctly. Otherwise, only non-whitespaced date formats will work, like "2017/21/07".
 
-    Reference Navigation Properties
-        When a reference navigation property is marked with :csharp:`[Search]`, searchable properties on the referenced object will also be searched. This behavior will go up to two levels away from the root object, and can be controlled with the :csharp:`RootWhitelist` and :csharp:`RootBlacklist` properties on the :csharp:`[Search]` attribute that are outlined below.
+Reference Navigation Properties
+    When a reference navigation property is marked with :csharp:`[Search]`, searchable properties on the referenced object will also be searched. This behavior will go up to two levels away from the root object, and can be controlled with the :csharp:`RootWhitelist` and :csharp:`RootBlacklist` properties on the :csharp:`[Search]` attribute that are outlined below.
 
-    Collection Navigation Properties
-        When a collection navigation property is marked with :csharp:`[Search]`, searchable properties on the child objects will also be searched. This behavior will go up to two levels away from the root object, and can be controlled with the :csharp:`RootWhitelist` and :csharp:`RootBlacklist` properties on the :csharp:`[Search]` attribute that are outlined below.
+Collection Navigation Properties
+    When a collection navigation property is marked with :csharp:`[Search]`, searchable properties on the child objects will also be searched. This behavior will go up to two levels away from the root object, and can be controlled with the :csharp:`RootWhitelist` and :csharp:`RootBlacklist` properties on the :csharp:`[Search]` attribute that are outlined below.
 
-        .. warning::
-            Searches on collection navigation properties usually don't translate well with EF Core, leading to potentially degraded performance. Use this feature cautiously.
+    .. warning::
+        Searches on collection navigation properties usually don't translate well with EF Core, leading to potentially degraded performance. Use this feature cautiously.
 
 
 Example Usage
 -------------
 
-    .. code-block:: c#
+.. code-block:: c#
 
-        public class Person
-        {
-            public int PersonId { get; set; }
+    public class Person
+    {
+        public int PersonId { get; set; }
 
-            [Search]
-            public string FirstName { get; set; }
+        [Search]
+        public string FirstName { get; set; }
 
-            [Search]
-            public string LastName { get; set; }
+        [Search]
+        public string LastName { get; set; }
 
-            [Search(IsSplitOnSpaces = false)]
-            public string BirthDate { get; set; }
+        [Search(IsSplitOnSpaces = false)]
+        public string BirthDate { get; set; }
 
-            public string Nickname { get; set; }
+        public string Nickname { get; set; }
 
-            [Search(RootWhitelist = nameof(Person))]
-            public ICollection<Address> Addresses { get; set; }
-        }
+        [Search(RootWhitelist = nameof(Person))]
+        public ICollection<Address> Addresses { get; set; }
+    }
 
 Properties
 ----------
 
-    .. _NameFalsehoods: https://www.kalzumeus.com/2010/06/17/falsehoods-programmers-believe-about-names/
-    __ NameFalsehoods_
+.. _NameFalsehoods: https://www.kalzumeus.com/2010/06/17/falsehoods-programmers-believe-about-names/
+__ NameFalsehoods_
 
-    :csharp:`public bool IsSplitOnSpaces { get; set; } = true;`
-        If set to true (the default), each word in the search terms will be searched for in each searchable field independently, and a row will only be considered a match if each word in the search term is a match on at least one searchable property where :csharp:`IsSplitOnSpaces == true`
-        
-        This is useful when searching for a full name across two or more fields. In the above example, using :csharp:`IsSplitOnSpaces = true` would provide more intuitive behavior since it will search both first name and last name for each word entered into the search field. But, `you probably shouldn't be doing that in the first place`__.
+:csharp:`public bool IsSplitOnSpaces { get; set; } = true;`
+    If set to true (the default), each word in the search terms will be searched for in each searchable field independently, and a row will only be considered a match if each word in the search term is a match on at least one searchable property where :csharp:`IsSplitOnSpaces == true`
+    
+    This is useful when searching for a full name across two or more fields. In the above example, using :csharp:`IsSplitOnSpaces = true` would provide more intuitive behavior since it will search both first name and last name for each word entered into the search field. But, `you probably shouldn't be doing that in the first place`__.
 
-    :csharp:`public SearchMethods SearchMethod { get; set; } = SearchMethods.BeginsWith;`
-        For string properties, specifies whether the value of the field will be checked using :csharp:`Contains` or using :csharp:`BeginsWith`.
-        
-        Note that standard database indexing can be used to speed up :csharp:`BeginsWith` searches. 
+:csharp:`public SearchMethods SearchMethod { get; set; } = SearchMethods.BeginsWith;`
+    For string properties, specifies whether the value of the field will be checked using :csharp:`Contains` or using :csharp:`BeginsWith`.
+    
+    Note that standard database indexing can be used to speed up :csharp:`BeginsWith` searches. 
 
-    :csharp:`public string RootWhitelist { get; set; } = null;`
-        A comma-delimited list of model class names that, if set, will prevent the targeted property from being searched unless the root object of the API call was one of the specified class names.
+:csharp:`public string RootWhitelist { get; set; } = null;`
+    A comma-delimited list of model class names that, if set, will prevent the targeted property from being searched unless the root object of the API call was one of the specified class names.
 
-    :csharp:`public string RootBlacklist { get; set; } = null;`
-        A comma-delimited list of model class names that, if set, will prevent the targeted property from being searched if the root object of the API call was one of the specified class names.
+:csharp:`public string RootBlacklist { get; set; } = null;`
+    A comma-delimited list of model class names that, if set, will prevent the targeted property from being searched if the root object of the API call was one of the specified class names.

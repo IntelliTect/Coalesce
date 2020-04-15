@@ -7,29 +7,37 @@ The model layer, generated as `models.g.ts`, contains a set of TypeScript interf
 
 The model layer also includes a TypeScript class for each type that can be used to easily instantiate a valid implementation of its corresponding interface. However, it is not necessary for the classes to be used, and all parts of Coalesce that interact with the model layer don't perform any `instanceof` checks against models - the :ts:`$metadata` property is used for this instead.
 
+.. contents:: Contents
+    :local:
+
 
 Concepts 
 --------
 
-The model layer is fairly simple - the only main concept it introduces on top of the :ref:`VueMetadata` is the notion of interfaces that mirror the C# types in your data model. As with the :ref:`VueMetadata`, the `source code of coalesce-vue <https://github.com/IntelliTect/Coalesce/blob/dev/src/coalesce-vue/src/model.ts>`_ provides the most authoritative source of truth about the model layer.
+The model layer is fairly simple - the only main concept it introduces on top of the :ref:`VueMetadata` is the notion of interfaces that mirror the C# types in your data model. As with the :ref:`VueMetadata`, the `source code of coalesce-vue <https://github.com/IntelliTect/Coalesce/blob/dev/src/coalesce-vue/src/model.ts>`_ is a great documentation supplement to this page.
 
 Model
-    An interface describing an instance of a class type from your application's data model. All Model interfaces contain members for all the :ref:`ModelProperties` of that type, as well as a :ts:`$metadata` property that references the metadata object for that type.
+.....
 
-.. _VueModelsDataSource:
+An interface describing an instance of a class type from your application's data model. All Model interfaces contain members for all the :ref:`ModelProperties` of that type, as well as a :ts:`$metadata` property that references the metadata object for that type.
+
+
+.. _VueModelsDataSource: 
+
 DataSource
-    A representation of a :ref:`Data Source <DataSources>`, containing properties for any of the :ref:`DataSourceParameters` of the data source, as well as a :ts:`$metadata` property that references the metadata object for the data source.
-    
-    Data sources are generated as concrete classes in a namespace named :ts:`DataSources` that is nested inside a namespace named after their parent model type. For example:
+..........
 
-    .. code-block:: typescript
+A representation of a :ref:`Data Source <DataSources>` containing properties for any of the :ref:`DataSourceParameters` of the data source, as well as a :ts:`$metadata` property that references the metadata object for the data source.
 
-        import { Person } from '@/models.g'
+Data sources are generated as concrete classes in a namespace named :ts:`DataSources` that is nested inside a namespace named after their parent model type. For example:
 
-        const dataSource = new Person.DataSources.NamesStartingWith;
-        dataSource.startsWith = "A";
-        // Provide the dataSource to an API Client or a ViewModel.
-        
+.. code-block:: typescript
+
+    import { Person } from '@/models.g'
+
+    const dataSource = new Person.DataSources.NamesStartingWith;
+    dataSource.startsWith = "A";
+    // Provide the dataSource to an API Client or a ViewModel...
 
 
 Model Functions

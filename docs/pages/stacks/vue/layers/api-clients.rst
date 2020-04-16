@@ -3,7 +3,7 @@
 API Client Layer
 ================
 
-The API client layer, generated as `api-clients.g.ts`, exports a class for each API controller that was generated for your data model. These classes are stateless, and provide one method for each API endpoint. This includes both the standard set of endpoints created for :ref:`EntityModels` and :ref:`CustomDTOs`, as well as any custom :ref:`ModelMethods` on the aforementioned types, as well as any methods on your :ref:`Services`.
+The API client layer, generated as `api-clients.g.ts`, exports a class for each API controller that was generated for your data model. These classes are stateless and provide one method for each API endpoint. This includes both the standard set of endpoints created for :ref:`EntityModels` and :ref:`CustomDTOs`, as well as any custom :ref:`ModelMethods` on the aforementioned types, as well as any methods on your :ref:`Services`.
 
 The API clients provided by Coalesce are based on `axios <https://github.com/axios/axios>`_. All API clients used a shared axios instance, exported from `coalesce-vue` as :ts:`AxiosClient`. This instance can be used to configure all HTTP requests made by Coalesce, including things like attaching `interceptors <https://github.com/axios/axios#interceptors>`_ to modify the requests being made, or configuring `defaults <https://github.com/axios/axios#config-defaults>`_.
 
@@ -45,7 +45,7 @@ Endpoint Invocation
 State management
     API Callers contain properties about the last request made, including things like ``wasSuccessful``, ``isLoading``, ``result``, and more.
 Concurrency Management
-    Using :ts:`$setConcurrency(mode)`, you can configure how each individual caller handles what happens when multiple requests are made simultaneously
+    Using :ts:`setConcurrency(mode)`, you can configure how each individual caller handles what happens when multiple requests are made simultaneously
 Argument Binding
     API Callers can be created so that they have an :ts:`args` object that can be bound to, using :ts:`.invokeWithArgs()` to make a request using those arguments as the API endpoint's parameters. The API Callers created for the :ref:`VueViewModels` are all created this way.
 
@@ -178,6 +178,13 @@ API callers have a :ts:`setConcurrency(mode: string)` method that allows you to 
 :ts:`"disallow"`
     The default behavior - simply throws an error for any secondary invocations.
 
+    .. note::
+
+        Having :ts:`"disallow"` as the default prevents the unexpected behavior that can happen in a number of ways with the other modes:
+        
+        - For requests that are performing data-mutating actions on the server, all other concurrency modes could lead to an unexpected end state of the data due to requests either being abandoned, cancelled, or potentially happening out-of-order.
+        - Throwing errors for multiple concurrent requests quickly surfaces issues during development where concurrent requests are not being correctly guarded against in a user interface - e.g. not disabling a "Save" or "Submit" button while the request is pending, which would otherwise lead to double-posts.
+
 :ts:`"debounce"`
     When a secondary invocation is performed, enqueue it after the current pending invocation completes.
 
@@ -193,14 +200,8 @@ API callers have a :ts:`setConcurrency(mode: string)` method that allows you to 
 
     The state of the properties on the caller at any time will reflect the most recent response received from the server, which is never guaranteed to correlate with the most recent request made to the server - that is, requests are not guaranteed to complete in the order they were made. In particular, the :ts:`isLoading` property will be :ts:`false` after the first response comes back, even if the second response has not yet been received.
 
-    For these reasons, it is generally not recommended to use :ts:`"allow"` unless you fully understand the drawbacks. This mode mirrors the legacy behavior of the Knockout stack for Coalesce.
-
-.. note::
-
-    Having :ts:`"disallow"` as the default prevents the unexpected behavior that can happen in a number of ways with the other modes:
-    
-    - For requests that are performing data-mutating actions on the server, all other concurrency modes could lead to an unexpected end state of the data due to requests either being abandoned, cancelled, or potentially happening out-of-order.
-    - Throwing errors for multiple concurrent requests quickly surfaces issues during development where such concurrent requests are not being correctly guarded against in a user interface - e.g. not disabling a "Save" or "Submit" button while the request is pending, which would otherwise lead to double-posts.
+    .. warning::
+        For the reasons outlined above, it is generally not recommended to use :ts:`"allow"` unless you fully understand the drawbacks. This mode mirrors the legacy behavior of the Knockout stack for Coalesce.
 
 Other Methods
 .............

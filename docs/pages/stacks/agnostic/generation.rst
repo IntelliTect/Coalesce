@@ -1,7 +1,7 @@
 Code Generation Overview
 ========================
 
-The primary function of Coalesce is as a code generation framework. Below, you find an overview of the different components of Coalesce's code generation features.
+One of the primary functions of Coalesce is as a code generation framework. Below, you find an overview of the different components of Coalesce's code generation features.
 
 .. contents:: Contents
     :local:

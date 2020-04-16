@@ -12,7 +12,7 @@ These ViewModels are dependent on Knockout_, and are designed to be used directl
 Base Members
 ============
 
-    The TypeScript ViewModels for external types do not have a common base class, and do not have any of the behaviors or convenience properties that the regular :ref:`TypeScriptViewModels` for database-mapped classes have.
+    The TypeScript ViewModels for external types do not have a common base class, and do not have any of the behaviors or convenience properties that the regular :ref:`KoTypeScriptViewModels` for database-mapped classes have.
 
 
 Model-Specific Members

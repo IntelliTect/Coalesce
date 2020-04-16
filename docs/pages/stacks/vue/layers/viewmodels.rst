@@ -17,30 +17,39 @@ ViewModels
 
 The following members can be found on the generated ViewModels, exported from `viewmodels.g.ts` as :ts:`*TypeName*ViewModel`.
 
-Data Properties
-...............
+Model Data Properties
+.....................
 
-Data Properties
-    Each ViewModel class implements the corresponding interface from the :ref:`VueModels`, meaning that the ViewModel has a data property for each :ref:`Property <ModelProperties>` on the model. Object-typed properties will be typed as the corresponding generated ViewModel.
+Each ViewModel class implements the corresponding interface from the :ref:`VueModels`, meaning that the ViewModel has a data property for each :ref:`Property <ModelProperties>` on the model. Object-typed properties will be typed as the corresponding generated ViewModel.
 
-    Changing the value of a property will automatically flag that property as dirty. See :ref:`VueViewModelsAutoSave` below for information on how property dirty flags are used.
+Changing the value of a property will automatically flag that property as dirty. See :ref:`VueViewModelsAutoSave` below for information on how property dirty flags are used.
 
-    There are a few special behaviors when assigning to different kinds of data properties on View Models as well:
+There are a few special behaviors when assigning to different kinds of data properties on View Models as well:
 
-    Model Object Properties
-        - If the object being assigned to the property is not a ViewModel instance, a new instance will be created automatically and used instead of the incoming object. 
-        - If the model property is a reference navigation, the corresponding foreign key property will automatically be set to the primary key of that object. If the incoming value was null, the foreign key will be set to null.
-        - If deep auto-saves are enabled on the instance being assigned to, auto-save will be spread to the incoming object, and to all other objects reachable from that object.
+Model Object Properties
+    - If the object being assigned to the property is not a ViewModel instance, a new instance will be created automatically and used instead of the incoming object. 
+    - If the model property is a reference navigation, the corresponding foreign key property will automatically be set to the primary key of that object. If the incoming value was null, the foreign key will be set to null.
+    - If deep auto-saves are enabled on the instance being assigned to, auto-save will be spread to the incoming object, and to all other objects reachable from that object.
 
-    Model Collection Properties
-        - When assigning an entire array, any items in the array that are not a ViewModel instance will have an instance created for them.
-        - The same rule goes for pushing items into the existing array for a model collection - a new ViewModel instance will be created and be used instead of the object(s) being pushed.
-        
-    Foreign Key Properties
-        If the corresponding navigation property contains an object, and that object's primary key doesn't match the new foreign key value being assigned, the navigation property will be set to null.
+Model Collection Properties
+    - When assigning an entire array, any items in the array that are not a ViewModel instance will have an instance created for them.
+    - The same rule goes for pushing items into the existing array for a model collection - a new ViewModel instance will be created and be used instead of the object(s) being pushed.
+    
+Foreign Key Properties
+    If the corresponding navigation property contains an object, and that object's primary key doesn't match the new foreign key value being assigned, the navigation property will be set to null.
+
+|
+
+Other Data Properties & Functions
+.................................
 
 :ts:`readonly $metadata: ModelType`
     The metadata object from the :ref:`VueMetadata` layer for the type represented by the ViewModel.
+
+:ts:`readonly $stableId: number`
+    An immutable number that is unique among all ViewModel instances, regardless of type.
+
+    Useful for uniquely identifying instances with ``:key="vm.$stableId"`` in a Vue component, especially for instances that lack a primary key.
 
 :ts:`$primaryKey: string | number`
     A getter/setter property that wraps the primary key of the model. Used to interact with the primary key of any ViewModel in a polymorphic way.
@@ -48,16 +57,14 @@ Data Properties
 :ts:`$display(prop?: string | Property): string`
     Returns a string representation of the object, or one of its properties if specified, suitable for display.
 
-:ts:`constructor(initialDirtyData?: {} | TModel | null)` (Constructor)
-    Create a new instance of the ViewModel, loading it with the given initial data (if any) and flagging any loaded properties as dirty (see below).
+:ts:`$addChild(prop: string | ModelCollectionNavigationProperty)`
+    Creates a new instance of an item for the specified child model collection, adds it to that collection, and returns the item.
 
-:ts:`readonly $stableId: number`
-    An immutable number that is unique among all ViewModel instances, regardless of type.
+|
 
-    Useful for uniquely identifying instances with ``:key="vm.$stableId"`` in a Vue component, especially for instances that lack a primary key.
-
-Parameters & API Callers
+API Callers & Parameters
 ........................
+
 :ts:`$load: ItemApiState`
     An :ref:`API Caller <VueApiCallers>` for the ``/get`` endpoint. Accepts an optional :ts:`id` argument - if not provided, the ViewModel's :ts:`$primaryKey` is used instead. Uses the instance's :ts:`$params` object for the :ref:`DataSourceStandardParameters`.
 
@@ -107,6 +114,8 @@ Parameters & API Callers
 :ts:`$includes: string | null`
     Getter/setter wrapper around :ts:`$params.includes`. See :ref:`Includes` for more information.
 
+
+|
 
 .. _VueViewModelsAutoSave:
 
@@ -160,6 +169,10 @@ Auto-save & Dirty Flags
 :ts:`$loadDirtyData(source: {} | TModel)`
     Same as :ts:`$loadCleanData`, but does not clear any existing dirty flags, nor does it clear any dirty flags that will be set while mutating the data properties of any ViewModel instance that gets loaded.
 
+:ts:`constructor(initialDirtyData?: {} | TModel | null)` (Constructor)
+    Create a new instance of the ViewModel, loading the given initial data with :ts:`$loadDirtyData()` if provided.
+
+|
 
 .. _VueViewModelsValidation:
 
@@ -190,6 +203,8 @@ Rules/Validation
     Indicates if any propertioes have validation errors.
 
 
+|
+
 Generated Members
 .................
 
@@ -218,6 +233,9 @@ Data Properties
 
 :ts:`$items`
     Collection holding the results of the last successful invocation of the :ts:`$load` :ref:`API Caller <VueApiCallers>`.
+
+
+|
 
 Parameters & API Callers
 ........................
@@ -250,6 +268,9 @@ Parameters & API Callers
 :ts:`readonly $pageCount: number`
     Shorthand for :ts:`$load.pageCount` - returns the page count reported by the last successful invocation of :ts:`$load`.
 
+
+|
+
 Auto-Load
 .........
 
@@ -272,6 +293,8 @@ Auto-Load
 :ts:`$stopAutoLoad()`
     Manually turns off auto-loading of the instance.
 
+
+|
 
 Generated Members
 .................

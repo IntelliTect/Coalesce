@@ -118,6 +118,8 @@ The following functions exported from ``coalesce-vue`` can be used with your mod
 
     Will not serialize child objects or collections whose metadata includes `dontSerialize`. Will only recurse to a maximum depth of 3.
 
+.. _VueModelDisplayFunctions:
+
 :ts:`modelDisplay(model: Model, options?: DisplayOptions): string` 
     Returns a string representing the :ts:`model` suitable for display in a user interface.
 

@@ -51,7 +51,7 @@ Display Components
     .. include:: ./components/c-table.rst
         :start-after: MARKER:summary
         :end-before: MARKER:summary-end
-    Full Documentation: :ref:`c-table`.
+    Full Documentation: :ref:`c-table`. 
 
 
 Input Components

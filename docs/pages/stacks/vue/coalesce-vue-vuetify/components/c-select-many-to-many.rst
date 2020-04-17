@@ -1,7 +1,7 @@
-.. _c-admin-table-page:
+.. _c-select-many-to-many:
 
-c-admin-table-page
-==================
+c-select-many-to-many
+=====================
 
 .. MARKER:summary
     

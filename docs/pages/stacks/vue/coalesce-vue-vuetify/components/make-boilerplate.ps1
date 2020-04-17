@@ -1,7 +1,14 @@
-.. _c-admin-table-page:
 
-c-admin-table-page
-==================
+# List component names here...
+$components =
+"",
+
+$components | % {
+
+".. _$($_):
+
+$_
+$('=' * $_.Length)
 
 .. MARKER:summary
     
@@ -21,4 +28,5 @@ Slots
 Examples
 --------
 
-
+" > "./$_.rst"
+}

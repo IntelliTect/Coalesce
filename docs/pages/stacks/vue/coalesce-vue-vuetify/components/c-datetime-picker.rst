@@ -1,7 +1,7 @@
-.. _c-admin-table-page:
+.. _c-datetime-picker:
 
-c-admin-table-page
-==================
+c-datetime-picker
+=================
 
 .. MARKER:summary
     

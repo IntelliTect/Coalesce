@@ -43,6 +43,7 @@ from pygments.lexers._mapping import LEXERS
 sys.path.append(dir_path)
 LEXERS['Knockout'] = ('coalescelexers', 'Knockout', ('knockout',), (), ())
 LEXERS['Vue'] = ('coalescelexers', 'Vue', ('vue',), (), ())
+LEXERS['VueSfc'] = ('coalescelexers', 'VueSfc', ('sfc','vuesfc',), (), ())
 extensions = ['sphinx_tabs.tabs']
 
 def setup(app):

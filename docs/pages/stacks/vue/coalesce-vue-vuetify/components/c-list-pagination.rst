@@ -1,7 +1,7 @@
-.. _c-admin-table-page:
+.. _c-list-pagination:
 
-c-admin-table-page
-==================
+c-list-pagination
+=================
 
 .. MARKER:summary
     

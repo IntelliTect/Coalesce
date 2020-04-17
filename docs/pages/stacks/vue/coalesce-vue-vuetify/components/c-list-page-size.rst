@@ -1,7 +1,7 @@
-.. _c-admin-table-page:
+.. _c-list-page-size:
 
-c-admin-table-page
-==================
+c-list-page-size
+================
 
 .. MARKER:summary
     

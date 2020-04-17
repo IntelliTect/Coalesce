@@ -72,7 +72,7 @@ Lets say we've created a :ref:`model <EntityModels>` called :csharp:`Person` as 
 
 We can create a details page for a Person by creating a `Single File Component <https://vuejs.org/v2/guide/single-file-components.html>`_ in ``MyApplication.Web/src/views/person-details.vue``:
 
-.. code-block:: html
+.. code-block:: sfc  
 
   <template>
     <dl>
@@ -88,7 +88,7 @@ We can create a details page for a Person by creating a `Single File Component <
     </dl>
   </template>
 
-  <script lang="ts">
+  <script lang="ts"> 
   import { Vue, Component, Watch, Prop } from "vue-property-decorator";
   import { PersonViewModel } from "@/viewmodels.g";
 

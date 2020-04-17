@@ -1,7 +1,7 @@
-.. _c-admin-table-page:
+.. _c-select-string-value:
 
-c-admin-table-page
-==================
+c-select-string-value
+=====================
 
 .. MARKER:summary
     

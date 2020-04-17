@@ -1,7 +1,7 @@
-.. _c-admin-table-page:
+.. _c-admin-table:
 
-c-admin-table-page
-==================
+c-admin-table
+=============
 
 .. MARKER:summary
     

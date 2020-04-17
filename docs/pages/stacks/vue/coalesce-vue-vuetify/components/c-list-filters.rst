@@ -1,7 +1,7 @@
-.. _c-admin-table-page:
+.. _c-list-filters:
 
-c-admin-table-page
-==================
+c-list-filters
+==============
 
 .. MARKER:summary
     

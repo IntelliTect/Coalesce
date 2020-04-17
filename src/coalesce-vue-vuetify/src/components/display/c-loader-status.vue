@@ -66,6 +66,19 @@ class Flags {
   initialContent = true;
 }
 
+
+/*
+  TODO: This component could use a bit of a rewrite (again).
+  Leave the existing component as it is for backwards compat - 
+  instead, make a new one with the following changes:
+    - New name: c-caller-status 
+    - Rename prop loaders => callers
+    - Allow defining flags as props on the components, preferably directly as flags like <c-caller-status :callers="[list.$load]" no-initial-progress />.
+      - This is a new syntax in addition to the current flags dictionary syntax, which needs to be preserved to support advanced use cases.
+
+
+*/
+
 @Component({name: 'c-loader-status'})
 export default class extends Vue {
 

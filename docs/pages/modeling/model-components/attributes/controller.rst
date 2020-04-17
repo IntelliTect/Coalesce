@@ -51,4 +51,4 @@ Properties
 
     .. note::
 
-        If you inherit from the generated API controllers and override their methods without setting :csharp:`ApiActionsProtected = true`, all non-overriden actions from the generated controller will still be exposed as normal.
+        If you inherit from the generated API controllers and override their methods without setting :csharp:`ApiActionsProtected = true`, all non-overridden actions from the generated controller will still be exposed as normal.

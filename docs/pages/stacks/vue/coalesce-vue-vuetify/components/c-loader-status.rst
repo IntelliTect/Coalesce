@@ -8,10 +8,12 @@ c-loader-status
 A component for displaying progress and error information for one or more :ref:`VueApiCallers`.
 
 .. tip:: 
-    It is highly recommended that all :ref:`VueApiCallers` utilized by your application that don't have any other kind of error handling be represented by a :ref:`c-loader-status` so that users can be aware that something went wrong when an error occurs.
+    It is highly recommended that all :ref:`VueApiCallers` utilized by your application that don't have any other kind of error handling should be represented by a :ref:`c-loader-status` so that users can be aware of any errors that occur.
 
 .. MARKER:summary-end
 
+.. note:: 
+    This component uses the legacy term "loader" to refer to :ref:`VueApiCallers`. A new ``c-caller-status`` component may be coming in the future with a few usability improvements - if that happens, `c-loader-status` will be preserved for backwards compatibility.
 
 .. contents:: Contents
     :local:
@@ -101,7 +103,7 @@ Slots
 -----
 
 ``default``
-    Provide the content that is dependent on the supplied :ref:`VueApiCallers` to the default slot. It will be shown or hidden according to the flags defined for each loader.
+    Accepts the content whose visibility is controlled by the state of the supplied :ref:`VueApiCallers`. It will be shown or hidden according to the flags defined for each caller.
 
     .. important:: 
     

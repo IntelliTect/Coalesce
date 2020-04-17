@@ -3,7 +3,7 @@
 ==================
 
 By default an API and View controller are both created. This allows for
-supressing the creation of either or both of these.
+suppressing the creation of either or both of these.
 
 
 Example Usage

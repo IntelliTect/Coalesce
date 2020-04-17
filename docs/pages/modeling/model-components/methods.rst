@@ -34,7 +34,7 @@ Files
     If a parameter is marked with the :ref:`InjectAttribute` attribute, it will be injected from the application's :csharp:`IServiceProvider`.
 
 :csharp:`out IncludeTree includeTree`
-    If the method has an :csharp:`out IncludeTree includeTree` parameter, then the :csharp:`IncludeTree` that is passed out will be used to control serialization. See :ref:`GenDTOs` and :ref:`IncludeTree` for more information. If the method returns an :csharp:`IQueryable`, the out parameter will supercede the include tree obtained from inspecting the query.
+    If the method has an :csharp:`out IncludeTree includeTree` parameter, then the :csharp:`IncludeTree` that is passed out will be used to control serialization. See :ref:`GenDTOs` and :ref:`IncludeTree` for more information. If the method returns an :csharp:`IQueryable`, the out parameter will supersede the include tree obtained from inspecting the query.
 
 |
 

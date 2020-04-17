@@ -80,7 +80,7 @@ A full example of a ``coalesce.json`` file, along with an explanation of each pr
             "GeneratorName": {
                 // Optional: true if the generator should be disabled.
                 "disabled": true,
-                // Optional: Configues a path relative to the default output path for the generator
+                // Optional: Configures a path relative to the default output path for the generator
                 // where that generator's output should be placed instead.
                 "targetDirectory": "../DifferentFolder"
             },

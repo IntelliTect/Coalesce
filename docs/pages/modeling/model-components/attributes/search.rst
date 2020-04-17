@@ -32,7 +32,7 @@ Dates
 
     .. tip::
 
-        When searching on date properties, you should almost always set :csharp:`IsSplitOnSpaces = false` on the :csharp:`Search` attribute. This allows natural inputs like "July 21, 2017" to search correctly. Otherwise, only non-whitespaced date formats will work, like "2017/21/07".
+        When searching on date properties, you should almost always set :csharp:`IsSplitOnSpaces = false` on the :csharp:`Search` attribute. This allows natural inputs like "July 21, 2017" to search correctly. Otherwise, only non-whitespace date formats will work, like "2017/21/07".
 
 Reference Navigation Properties
     When a reference navigation property is marked with :csharp:`[Search]`, searchable properties on the referenced object will also be searched. This behavior will go up to two levels away from the root object, and can be controlled with the :csharp:`RootWhitelist` and :csharp:`RootBlacklist` properties on the :csharp:`[Search]` attribute that are outlined below.

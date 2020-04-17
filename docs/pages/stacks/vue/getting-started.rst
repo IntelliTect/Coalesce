@@ -1,8 +1,8 @@
 
 .. _VueGettingStarted:
 
-Gettting Started with Vue
-=========================
+Getting Started with Vue
+========================
 
 Creating a Project
 ------------------
@@ -10,7 +10,7 @@ Creating a Project
 The quickest and easiest way to create a new Coalesce Vue application is to use the ``dotnet new`` template. In your favorite shell:
 
 .. |vuebadge| image:: https://img.shields.io/nuget/v/IntelliTect.Coalesce.Vue.Template   
-    :alt: Nuget
+    :alt: NuGet
     :target: https://www.nuget.org/packages/IntelliTect.Coalesce.Vue.Template/
     
 .. code-block:: sh
@@ -119,12 +119,12 @@ We can create a details page for a Person by creating a `Single File Component <
 
 We then need to add route to this new view. In ``MyApplication.Web/src/router.ts``, add a new item to the :ts:`routes` array:
 
-.. code-block:: knockout
+.. code-block:: vue
 
   // At the top of the file, import the component:
   import PersonDetails from '@/views/person-details.vue';
 
-.. code-block:: knockout
+.. code-block:: vue
 
   // In the `routes` array, add the following item:
   {

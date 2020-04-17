@@ -5,20 +5,24 @@ c-admin-table
 
 .. MARKER:summary
     
-TODO: Documentation forthcoming
+An full-featured table for a :ref:`ListViewModel <VueListViewModels>`, including a :ref:`c-admin-table-toolbar`, :ref:`c-table`, and :ref:`c-list-pagination`.
 
 .. MARKER:summary-end
 
 .. contents:: Contents
     :local:
 
+Examples
+--------
+
+.. code-block:: sfc
+
+    <c-admin-table :model="personList" />
+
 Props
 -----
 
-Slots
------
-
-Examples
---------
+:ts:`list: ListViewModel`
+    The :ref:`ListViewModel <VueListViewModels>` to render a table for.
 
 

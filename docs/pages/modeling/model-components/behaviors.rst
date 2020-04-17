@@ -162,7 +162,7 @@ All of the methods outlined above can be overridden. A description of each of th
 
     .. warning::
 
-        Setting :csharp:`ref T item` to null will prevent the new object from being returned - be aware that this can be harmful in create scenarios since it prevents the client from recieving the primary key of the newly created item. If autoSave is enabled on the client, this could cause a large number of duplicate objects to be created in the database, since each subsequent save by the client will be treated as a create when the incoming object lacks a primary key.
+        Setting :csharp:`ref T item` to null will prevent the new object from being returned - be aware that this can be harmful in create scenarios since it prevents the client from receiving the primary key of the newly created item. If autoSave is enabled on the client, this could cause a large number of duplicate objects to be created in the database, since each subsequent save by the client will be treated as a create when the incoming object lacks a primary key.
 
 :csharp:`DeleteAsync`
     Deletes the given item.
@@ -171,7 +171,7 @@ All of the methods outlined above can be overridden. A description of each of th
     Provides an easy way to intercept a delete request and potentially reject it.
 
 :csharp:`ExecuteDeleteAsync`
-    Performs the delete action aginst the database. The implementation of this method removes the item from its corresponding :csharp:`DbSet<T>`, and then calls :csharp:`Db.SaveChangesAsync()`. 
+    Performs the delete action against the database. The implementation of this method removes the item from its corresponding :csharp:`DbSet<T>`, and then calls :csharp:`Db.SaveChangesAsync()`. 
 
     Overriding this allows for changing this row-deletion implementation to something else, like setting of a soft delete flag, or copying the data into another archival table before deleting.
 

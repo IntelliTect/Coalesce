@@ -25,7 +25,7 @@ export default Vue.extend({
       // If no model and no value were provided, just display nothing.
       // This isn't an error case - it just means the thing we're tring to display 
       // is `null`-ish, and should be treated the same way that vue would treat {{null}}
-      return h('span');
+      return h(props.element);
     }
 
     const modelMeta = model ? model.$metadata : null;
@@ -35,7 +35,7 @@ export default Vue.extend({
     }
 
     if (!meta) {
-      throw "Provided model has no $metadata property, and no specific value was provided via the 'for' component prop to c-display.";
+      throw Error("Provided model has no $metadata property, and no specific value was provided via the 'for' component prop to c-display.");
     }
 
     if ("params" in meta) {

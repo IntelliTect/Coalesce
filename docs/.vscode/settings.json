@@ -5,5 +5,21 @@
     "restructuredtext.linter.sphinxTextRoles": [
         "csharp", "ts", "ref", "ctor", "html"
       ],
-      "restructuredtext.workspaceRoot": "c:\\src\\Coalesce\\docs"
+      "restructuredtext.workspaceRoot": "c:\\src\\Coalesce\\docs",
+      "cSpell.words": [
+        "Axios",
+        "Coalesce's",
+        "POCOs",
+        "Vuetify's",
+        "nameof",
+        "queryable",
+        "readonly",
+        "typeof",
+        "viewmodels",
+        "vuetify"
+      ],
+      "cSpell.ignoreWords": [
+        "datetime"
+      ],
+      "cSpell.enabled": true
 }

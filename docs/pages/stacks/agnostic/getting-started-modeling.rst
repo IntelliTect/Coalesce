@@ -1,35 +1,4 @@
 
-.. MARKER:creating-project
-
-Creating a Project
-------------------
-
-The quickest and easiest way to create a new Coalesce application is to use the ``dotnet new`` templates that have been created. In your favorite shell:
-
-.. |vuebadge| image:: https://img.shields.io/nuget/v/IntelliTect.Coalesce.Vue.Template   
-    :alt: Nuget
-    :target: https://www.nuget.org/packages/IntelliTect.Coalesce.Vue.Template/
-
-.. |kobadge| image:: https://img.shields.io/nuget/v/IntelliTect.Coalesce.KnockoutJS.Template   
-    :alt: Nuget
-    :target: https://www.nuget.org/packages/IntelliTect.Coalesce.KnockoutJS.Template/
-
-`Vue Template <https://github.com/IntelliTect/Coalesce.Vue.Template>`_: |vuebadge|
-
-    .. code-block:: sh
-
-        dotnet new --install IntelliTect.Coalesce.Vue.Template
-        dotnet new coalescevue
-
-`Knockout Template <https://github.com/IntelliTect/Coalesce.KnockoutJS.Template>`_: |kobadge|
-    
-    .. code-block:: sh
-    
-        dotnet new --install IntelliTect.Coalesce.KnockoutJS.Template
-        dotnet new coalesceko
-
-.. MARKER:creating-project-end
-
 
 .. MARKER:data-modeling
 

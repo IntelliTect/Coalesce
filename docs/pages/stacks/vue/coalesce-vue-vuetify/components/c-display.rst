@@ -45,7 +45,7 @@ Props
 :ts:`for: string | Property | Value`
     A metadata specifier for the value being bound. Either a direct reference to the metadata object, or a string with the name of the value belonging to :ts:`model`, or a string in dot-notation that starts with a type name.
 
-:ts:`model: Model | DataSource | null | undefined`
+:ts:`model?: Model | DataSource`
     An object owning the value that was specified by the :ts:`for` prop.
 
 :ts:`format: DisplayOptions["format"]`
@@ -59,7 +59,7 @@ Props
 :ts:`value: any`
     Can be provided the value to be displayed in conjunction with the :ts:`for` prop, as an alternative to the :ts:`model` prop.
 
-    This is an uncommmon scenario - it is generally easier to use the :ts:`for`/:ts:`model` props together.
+    This is an uncommon scenario - it is generally easier to use the :ts:`for`/:ts:`model` props together.
 
 Slots
 -----

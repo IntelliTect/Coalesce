@@ -20,6 +20,7 @@ import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
 import MetadataComponent from '../c-metadata-component'
 import { ListViewModel, ItemApiState, ModelApiClient, ItemResultPromise } from 'coalesce-vue';
 
+const MODEL_REQUIRED_MESSAGE = "c-select-string-value requires a model to be provided via the `model` prop."
     
 @Component({
   name: 'c-select-string-value',
@@ -27,9 +28,6 @@ import { ListViewModel, ItemApiState, ModelApiClient, ItemResultPromise } from '
   }
 })
 export default class CSelectStringValue extends MetadataComponent { 
-  @Prop({required: false})
-  public value?: any
-
   @Prop({required: true, type: String})
   public method!: string;
 
@@ -45,7 +43,7 @@ export default class CSelectStringValue extends MetadataComponent {
 
   created() {
     if (!this.modelMeta || this.modelMeta.type != 'model') {
-      throw Error("c-select-string-value requires a model to be provided via the `model` prop.")
+      throw Error(MODEL_REQUIRED_MESSAGE)
     }
 
     const methodMeta = this.modelMeta.methods[this.method];
@@ -97,7 +95,8 @@ export default class CSelectStringValue extends MetadataComponent {
     if (this.model && this.valueMeta) {
       return (this.model as any)[this.valueMeta.name];
     }
-    return this.value;
+
+    throw Error(MODEL_REQUIRED_MESSAGE)
   }
 
   onInput(value: string) {

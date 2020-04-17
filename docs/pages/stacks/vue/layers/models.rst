@@ -46,7 +46,7 @@ Model Functions
 The following functions exported from ``coalesce-vue`` can be used with your models:
 
 :ts:`bindToQueryString(vue: Vue, obj: {}, key: string, queryKey: string = key, parse?: (v: any) => any, mode: 'push' | 'replace' = 'replace')`
-    Binds property :ts:`key` of :ts:`obj` to query string parameter :ts:`queryKey`. When the object's value changes, the query string will be updated using `vue-router <https://router.vuejs.org/>`_. When the query string changes, the object's value will be updated.
+    Binds property :ts:`key` of :ts:`obj` to query string parameter :ts:`queryKey`. When the object's value changes, the query string will be updated using vue-router_. When the query string changes, the object's value will be updated.
 
     The query string will be updated using either :ts:`router.push` or :ts:`router.replace` depending on the value of parameter :ts:`mode`.
     
@@ -87,7 +87,7 @@ The following functions exported from ``coalesce-vue`` can be used with your mod
         }
 
     .. note::
-        The route will be replaced directly via the `HTML5 History API <https://developer.mozilla.org/en-US/docs/Web/API/History_API>`_ such that `vue-router <https://router.vuejs.org/>`_ will not observe the change as an actual route change, preventing the current view from being recreated if a path-based key is being used on the application's :code:`<router-view>` component.
+        The route will be replaced directly via the `HTML5 History API <https://developer.mozilla.org/en-US/docs/Web/API/History_API>`_ such that vue-router_ will not observe the change as an actual route change, preventing the current view from being recreated if a path-based key is being used on the application's :code:`<router-view>` component.
 
 
 Advanced Model Functions

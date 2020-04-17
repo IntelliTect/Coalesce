@@ -103,7 +103,7 @@ API Callers & Parameters
 :ts:`$delete: ItemApiState`
     An :ref:`API Caller <VueApiCallers>` for the ``/delete`` endpoint. Uses the instance's :ts:`$params` object for the :ref:`DataSourceStandardParameters`.
 
-    If the object was loaded as a child of a collection, it will be removed from that collection upon being deleted. Note that ViewModels currently only support tracking of a single parent collection, so if an object is programatically added to additional collections, it will only be removed from one of them upon delete.
+    If the object was loaded as a child of a collection, it will be removed from that collection upon being deleted. Note that ViewModels currently only support tracking of a single parent collection, so if an object is programmatically added to additional collections, it will only be removed from one of them upon delete.
 
 :ts:`$params: DataSourceParameters`
     An object containing the :ref:`DataSourceStandardParameters` to be used for the :ts:`$load`, :ts:`$save`, and :ts:`$delete` API callers.
@@ -180,14 +180,14 @@ Rules/Validation
 ................
 
 :ts:`$addRule(prop: string | Property, identifier: string, rule: (val: any) => true | string)`
-    Add a custom validation rule to the ViewModel for the spcified property. :ts:`identifier` should be a short, unique slug that describes the rule; it is not displayed in the UI, but is used if you wish to later remove the rule with :ts:`$removeRule()`.
+    Add a custom validation rule to the ViewModel for the specified property. :ts:`identifier` should be a short, unique slug that describes the rule; it is not displayed in the UI, but is used if you wish to later remove the rule with :ts:`$removeRule()`.
 
     The function you provide should take a single argument that contains the current value of the property, and should either return :ts:`true` to indicate that the validation rule has succeeded, or a string that will be displayed as an error message to the user.
 
     Any failing validation rules on a ViewModel will prevent that ViewModel's :ts:`$save` caller from being invoked.
 
 :ts:`$removeRule(prop: string | Property, identifier: string)`
-    Remove a validation rule from the ViewModel for the spcified property with the specified identifier.
+    Remove a validation rule from the ViewModel for the specified property with the specified identifier.
 
     This can be used to remove from the ViewModel instance either a rule that was provided by the generated :ref:`VueMetadata`, or a custom rule that was added by :ts:`$addRule`. Reference your generated metadata file `metadata.g.ts` to see any generated rules and the identifiers they use.
 
@@ -200,7 +200,7 @@ Rules/Validation
     .. tip:: You can obtain an array from a generator with :ts:`Array.from(vm.$getErrors())` or :ts:`[...vm.$getErrors()]`
 
 :ts:`readonly $hasError: boolean`
-    Indicates if any propertioes have validation errors.
+    Indicates if any properties have validation errors.
 
 
 |
@@ -246,7 +246,7 @@ Parameters & API Callers
 :ts:`$load: ListApiState`
     An :ref:`API Caller <VueApiCallers>` for the ``/list`` endpoint. Uses the instance's :ts:`$params` object for the :ref:`DataSourceStandardParameters`.
 
-    Results are available in the :ts:`$items` property. The :ts:`result` property of the :ts:`$load` API Caller contains the raw results and is not recommended for use in general development - :ts:`$items` should always be prefered.
+    Results are available in the :ts:`$items` property. The :ts:`result` property of the :ts:`$load` API Caller contains the raw results and is not recommended for use in general development - :ts:`$items` should always be preferred.
 
 :ts:`$count: ItemApiState`
     An :ref:`API Caller <VueApiCallers>` for the ``/count`` endpoint. Uses the instance's :ts:`$params` object for the :ref:`DataSourceStandardParameters`.

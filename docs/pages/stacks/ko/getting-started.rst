@@ -1,8 +1,8 @@
 
 .. _KoGettingStarted:
 
-Gettting Started with Knockout
-==============================
+Getting Started with Knockout
+=============================
 
 Creating a Project
 ------------------
@@ -10,7 +10,7 @@ Creating a Project
 The quickest and easiest way to create a new Coalesce Knockout application is to use the ``dotnet new`` template. In your favorite shell:
 
 .. |kobadge| image:: https://img.shields.io/nuget/v/IntelliTect.Coalesce.KnockoutJS.Template   
-    :alt: Nuget
+    :alt: NuGet
     :target: https://www.nuget.org/packages/IntelliTect.Coalesce.KnockoutJS.Template/
     
 .. code-block:: sh

@@ -36,7 +36,7 @@ API Callers/API States
 API Callers
 -----------
 
-API Callers (typed with the name :ts:`ApiState` in `coalesce-vue`, sometimes also referred to as API Invokers) are stateful functions for invoking an API endpoint, created with the :ts:`$makeCaller` function on an API Client. 
+API Callers (typed with the name :ts:`ApiState` in `coalesce-vue`, sometimes also referred to as "loaders" or "invokers") are stateful functions for invoking an API endpoint, created with the :ts:`$makeCaller` function on an API Client. 
 
 A summary of features:
 
@@ -173,7 +173,7 @@ ListResult-based Callers
 Concurrency Mode
 ................
 
-API callers have a :ts:`setConcurrency(mode: string)` method that allows you to customize how they behave when additional invocations are performed when there is already a request pending. There are four options avaiable, with :ts:`"disallow"` being the default:
+API callers have a :ts:`setConcurrency(mode: string)` method that allows you to customize how they behave when additional invocations are performed when there is already a request pending. There are four options available, with :ts:`"disallow"` being the default:
 
 :ts:`"disallow"`
     The default behavior - simply throws an error for any secondary invocations.

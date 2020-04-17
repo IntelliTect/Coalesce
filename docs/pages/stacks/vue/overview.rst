@@ -23,7 +23,7 @@ TypeScript Layers
    :target: https://www.npmjs.com/package/coalesce-vue
 
 
-The generated code for the Vue stack all builds on the coalesce-vue_ NPM package which contains most of the core functionality of the Vue stack.  Its version should generally be kept in sync with the `IntelliTect.Coalesce Nuget packages <https://www.nuget.org/packages/IntelliTect.Coalesce/>`_ in your project.
+The generated code for the Vue stack all builds on the coalesce-vue_ NPM package which contains most of the core functionality of the Vue stack.  Its version should generally be kept in sync with the `IntelliTect.Coalesce NuGet packages <https://www.nuget.org/packages/IntelliTect.Coalesce/>`_ in your project.
 
 Both the generated code and coalesce-vue_ are split into four layers, with each layer building on the layers underneath. From the bottom, these layers are:
 
@@ -42,7 +42,7 @@ The metadata layer, generated as `metadata.g.ts`, contains a minimal set of meta
 :ref:`VueModels`
 .........................
 
-The model layer, generated as `models.g.ts`, contains a set of TypeScript interfaces that represent each client-exposed type in your data model. Each interface delcares all the :ref:`ModelProperties` of that type, as well as a :ts:`$metadata` property that references the metadata object for that type. Enums and :ref:`DataSources` are also represented in the model layer.
+The model layer, generated as `models.g.ts`, contains a set of TypeScript interfaces that represent each client-exposed type in your data model. Each interface declares all the :ref:`ModelProperties` of that type, as well as a :ts:`$metadata` property that references the metadata object for that type. Enums and :ref:`DataSources` are also represented in the model layer.
 
 :ref:`Read more about the Model layer <VueModels>`
 
@@ -70,10 +70,9 @@ These ViewModels contain the majority of functionality that you will use on a da
 Vue Components
 --------------
 
-.. image:: https://img.shields.io/npm/v/coalesce-vue-vuetify/dev?color=42b883&label=coalesce-vue-vuetify@dev
-   :target: https://www.npmjs.com/package/coalesce-vue-vuetify
-
-The Vue_ stack also provides a set of :ref:`components <VuetifyOverview>` based on Vuetify_, packaged up in an NPM package coalesce-vue-vuetify_. These components are driven primarily by the :ref:`VueMetadata`, and include both low level input and display components like :ref:`c-input` and :ref:`c-display` that are highly resuable in the custom pages you'll build in your application, as well as high-level components that can drive a whole page. See the Admin Views section just below for details on those.
+.. include:: ./coalesce-vue-vuetify/overview.rst
+   :start-after: MARKER:summary
+   :end-before: MARKER:summary-end
 
 :ref:`Read more about the Vuetify Components here <VuetifyOverview>`.
 

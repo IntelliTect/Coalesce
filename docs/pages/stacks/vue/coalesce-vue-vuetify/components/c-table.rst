@@ -5,7 +5,7 @@ c-table
 
 .. MARKER:summary
     
-A table component for displaying the contents of a :ref:`ListViewModel <VueListViewModels>`. Also supports modifying the list's :ref:`sort parameters <DataSourceStandardParameters>` by clicking on column headers.
+A table component for displaying the contents of a :ref:`ListViewModel <VueListViewModels>`. Also supports modifying the list's :ref:`sort parameters <DataSourceStandardParameters>` by clicking on column headers. Pairs well with a :ref:`c-list-pagination`.
 
 .. MARKER:summary-end
 

@@ -67,25 +67,21 @@ Usage with ``v-model`` (this scenario is atypical - the model/for pair of props 
 Props
 -----
 
-.. .. include:: ./c-input.rst
-..    :start-after: MARKER:c-formodel-props
-..    :end-before: MARKER:c-formodel-props-end
-
-.. MARKER:c-formodel-props
+.. MARKER:c-for-model-props
 
 :ts:`for?: string | Property | Value`
     A metadata specifier for the value being bound. One of:
     
-    - A direct reference to a metadata object, 
-    - A string with the name of the value belonging to :ts:`model`, 
+    - A string with the name of the value belonging to :ts:`model`.
+    - A direct reference to a metadata object.
     - A string in dot-notation that starts with a type name.
 
 :ts:`model?: Model | DataSource`
     An object owning the value that was specified by the :ts:`for` prop. If provided, the input will be bound to the corresponding property on the :ts:`model` object.
 
-.. MARKER:c-formodel-props-end
+.. MARKER:c-for-model-props-end
 
-:ts:`value: any`
+:ts:`value?: any`
     If binding the component with ``v-model``, accepts the ``value`` part of ``v-model``.
 
 Slots

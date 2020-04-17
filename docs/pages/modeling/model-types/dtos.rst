@@ -12,7 +12,7 @@ The difference between a Custom DTO and the underlying entity that they represen
 
     - The only time your custom DTO will be served is when it is requested directly from one of the endpoints on its generated controller. It will not be used when making a call to an API endpoint that was generated from an entity.
     
-    - When mapping data from your database, or unmapping data from the client, the DTO itself must manually map all properties, since there is no corresponding :ref:`Generated DTO <GenDTOs>`. Attributes like :ref:`DtoIncludesExcludesAttr` and property-level security through :ref:`SecurityAttributes` have no effect on custom DTOs, since those attribute only affect what get generated for :ref:`GenDTOs`.
+    - When mapping data from your database, or mapping data incoming from the client, the DTO itself must manually map all properties, since there is no corresponding :ref:`Generated DTO <GenDTOs>`. Attributes like :ref:`DtoIncludesExcludesAttr` and property-level security through :ref:`SecurityAttributes` have no effect on custom DTOs, since those attribute only affect what get generated for :ref:`GenDTOs`.
 
 
 Creating a Custom DTO

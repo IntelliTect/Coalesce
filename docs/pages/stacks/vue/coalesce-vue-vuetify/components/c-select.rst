@@ -21,26 +21,26 @@ Binding to a navigation property or foreign key of a model:
 
 .. code-block:: sfc
 
-  <c-input :model="person" for="company" />
+  <c-select :model="person" for="company" />
   <!-- OR: -->
-  <c-input :model="person" for="companyId" />
+  <c-select :model="person" for="companyId" />
 
 Binding an arbitrary primary key value or an arbitrary object:
 
 .. code-block:: sfc
 
   <!-- Binding a key: -->
-  <c-input for="Person" :key-value.sync="selectedPersonId" />
+  <c-select for="Person" :key-value.sync="selectedPersonId" />
 
   <!-- Binding an object: -->
-  <c-input for="Person" :object-value.sync="selectedPerson" />
-  <c-input for="Person" v-model="selectedPerson" />
+  <c-select for="Person" :object-value.sync="selectedPerson" />
+  <c-select for="Person" v-model="selectedPerson" />
 
 Examples of other props:
 
 .. code-block:: sfc
 
-  <c-input 
+  <c-select 
     for="Person" 
     v-model="selectedPerson"
     :clearable="false"

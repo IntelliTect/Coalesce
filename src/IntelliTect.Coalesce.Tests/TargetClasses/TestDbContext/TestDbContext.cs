@@ -22,5 +22,9 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         public TestDbContext(string memoryDatabaseName)
             : base(new DbContextOptionsBuilder<TestDbContext>().UseInMemoryDatabase(memoryDatabaseName).Options)
         { }
+
+        public TestDbContext(DbContextOptions<TestDbContext> options)
+            : base(options)
+        { }
     }
 }

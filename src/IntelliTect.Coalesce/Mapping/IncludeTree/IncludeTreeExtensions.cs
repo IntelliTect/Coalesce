@@ -14,69 +14,81 @@ namespace IntelliTect.Coalesce
     {
         public static IncludeTree GetIncludeTree(this IQueryable queryable, string rootName = null)
         {
-            if (!(queryable.Provider is IncludableQueryProvider) && !(queryable.Provider is EntityQueryProvider) && !(queryable.Provider is EnumerableQuery))
-            {
-                throw new ArgumentException(
-                    $"Can't get an IncludeTree from an IQueryable with an IQueryProvider of type {queryable.Provider.GetType().Name}. "
-                    + "Try using .IncludedSeparately(...) and .ThenIncluded(...) to capture includes.");
-            }
-
             var expression = queryable.Expression;
-            IncludeTree root = (queryable.Provider as IncludableQueryProvider)?.IncludeTree ?? new IncludeTree { PropertyName = rootName };
+            IncludeTree root = new IncludeTree { PropertyName = rootName };
             IncludeTree currentNode = null;
+            IncludeTree head, tail;
 
             // When we get to the root of the queryable, it won't be a MethodCallExpression.
-            while (expression is MethodCallExpression)
+            while (true)
             {
-                // callExpr.Arguments[0] is the entire previous query.
-                // callExpr.Arguments[1] is the lambda for the property specifier
-                var callExpr = expression as MethodCallExpression;
-
-                if (callExpr.Method.Name == nameof(EntityFrameworkQueryableExtensions.Include)
-                 || callExpr.Method.Name == nameof(EntityFrameworkQueryableExtensions.ThenInclude))
+                switch (expression)
                 {
-                    IncludeTree head, tail;
-                    MemberExpression body;
-                    if (callExpr.Arguments[1] is UnaryExpression unary)
-                    {
-                        // I'm like a wizard with all these casts.
-                        body = ((MemberExpression)((LambdaExpression)unary.Operand).Body);
-                        head = IncludeTree.ParseMemberExpression(body, out tail);
-                    }
-                    else if (callExpr.Arguments[1] is ConstantExpression constant)
-                    {
-                        head = IncludeTree.ParseConstantExpression(constant, out tail);
-                    }
-                    else
-                    {
-                        throw new InvalidOperationException($"Unhandled .{callExpr.Method.Name} expression type {callExpr.Arguments[1].GetType()}");
-                    }
+                    case MethodCallExpression callExpr:
+                        // callExpr.Arguments[0] is the entire previous query.
+                        // callExpr.Arguments[1] is the lambda for the property specifier
+
+                        if (callExpr.Method.Name == nameof(EntityFrameworkQueryableExtensions.Include)
+                         || callExpr.Method.Name == nameof(EntityFrameworkQueryableExtensions.ThenInclude))
+                        {
+                            if (callExpr.Arguments[1] is UnaryExpression unary)
+                            {
+                                // I'm like a wizard with all these casts.
+                                var body = ((MemberExpression)((LambdaExpression)unary.Operand).Body);
+                                head = IncludeTree.ParseMemberExpression(body, out tail);
+                            }
+                            else if (callExpr.Arguments[1] is ConstantExpression constant)
+                            {
+                                head = IncludeTree.ParseConstantExpression(constant, out tail);
+                            }
+                            else
+                            {
+                                throw new InvalidOperationException($"Unhandled .{callExpr.Method.Name} expression type {callExpr.Arguments[1].GetType()}");
+                            }
                     
-                    // If we had a child from a ThenInclude, add it to the tail of this node.
-                    if (currentNode != null)
-                        tail.AddChild(currentNode);
+                            // If we had a child from a ThenInclude, add it to the tail of this node.
+                            if (currentNode != null)
+                                tail.AddChild(currentNode);
 
-                    // Save the head of this expression in case we're parsing a ThenInclude.
-                    currentNode = head;
+                            // Save the head of this expression in case we're parsing a ThenInclude.
+                            currentNode = head;
 
-                    if (callExpr.Method.Name == nameof(EntityFrameworkQueryableExtensions.Include))
-                    {
-                        // Finally, add the current node to the root, since a .Include doesn't have parents.
-                        root.AddChild(head);
-                        currentNode = null;
-                    }
+                            if (callExpr.Method.Name == nameof(EntityFrameworkQueryableExtensions.Include))
+                            {
+                                // Finally, add the current node to the root, since a .Include doesn't have parents.
+                                root.AddChild(head);
+                                currentNode = null;
+                            }
+                        }
+
+                        expression = callExpr.Arguments[0];
+                        break;
+
+                    case IncludedSeparatelyExpression includeExpr:
+                        head = IncludeTree.ParseMemberExpression(includeExpr.IncludedExpression, out tail);
+
+                        // If we had a child from a ThenInclude, add it to the tail of this node.
+                        if (currentNode != null)
+                            tail.AddChild(currentNode);
+
+                        // Save the head of this expression in case we're parsing a ThenInclude.
+                        currentNode = head;
+
+                        if (includeExpr.IsRoot)
+                        {
+                            // Finally, add the current node to the root, since a .Include doesn't have parents.
+                            root.AddChild(head);
+                            currentNode = null;
+                        }
+
+                        // Reduce will give us the previous expression.
+                        expression = includeExpr.Reduce();
+                        break;
+
+                    default:
+                        return root;
                 }
-
-                expression = callExpr.Arguments[0];
             }
-
-            return root;
-        }
-
-
-        internal static IQueryable<T> CaptureSeparateIncludes<T>(this IQueryable<T> queryable)
-        {
-            return new IncludableQueryProvider.WrappedProviderQueryable<T>(queryable, new IncludableQueryProvider(queryable.Provider as IQueryProvider));
         }
 
         /// <summary>
@@ -98,36 +110,47 @@ namespace IntelliTect.Coalesce
             this IQueryable<TEntity> query,
             Expression<Func<TEntity, TProperty>> expr) where TEntity : class
         {
-            var provider = query.Provider as IncludableQueryProvider;
-            if (provider == null)
-            {
-                query = query.CaptureSeparateIncludes();
-                provider = query.Provider as IncludableQueryProvider;
-            }
-
             var body = ((MemberExpression)expr.Body);
-            var head = IncludeTree.ParseMemberExpression(body, out IncludeTree tail);
 
-            // Add the head of this expression to the root includetree for the query.
-            tail = provider.IncludeTree.AddLinearChild(head);
+            return new IncludedSeparatelyQueryable<TEntity, TProperty>(query.Provider.CreateQuery<TEntity>(
+                new IncludedSeparatelyExpression(query.Expression, body, true)
+            ));
 
-
-            return new IncludedSeparatelyQueryable<TEntity, TProperty>(query) { IncludeTree = tail };
         }
 
         public static IIncludedSeparatelyQueryable<TEntity, TProperty> ThenIncluded<TEntity, TPreviousProperty, TProperty>(
-               this IIncludedSeparatelyQueryable<TEntity, IEnumerable<TPreviousProperty>> source,
+               this IIncludedSeparatelyQueryable<TEntity, IEnumerable<TPreviousProperty>> query,
                Expression<Func<TPreviousProperty, TProperty>> navigationPropertyPath)
             where TEntity : class
         {
-
             var body = ((MemberExpression)navigationPropertyPath.Body);
-            var head = IncludeTree.ParseMemberExpression(body, out IncludeTree tail);
 
-            // Merge in the head of this tree as a child of the parent tree.
-            tail = source.IncludeTree.AddLinearChild(head);
-
-            return new IncludedSeparatelyQueryable<TEntity, TProperty>(source) { IncludeTree = tail };
+            return new IncludedSeparatelyQueryable<TEntity, TProperty>(query.Provider.CreateQuery<TEntity>(
+                new IncludedSeparatelyExpression(query.Expression, body, false)
+            ));
         }
+    }
+
+    class IncludedSeparatelyExpression : Expression
+    {
+        private readonly Expression expression;
+
+        public MemberExpression IncludedExpression { get; }
+        public bool IsRoot { get; }
+
+        public IncludedSeparatelyExpression(Expression expression, MemberExpression includedExpression, bool isRoot)
+        {
+            this.expression = expression;
+            IncludedExpression = includedExpression;
+            IsRoot = isRoot;
+        }
+
+        public override ExpressionType NodeType => ExpressionType.Extension;
+
+        public override Type Type => expression.Type;
+
+        public override bool CanReduce => true;
+
+        public override Expression Reduce() => expression;
     }
 }

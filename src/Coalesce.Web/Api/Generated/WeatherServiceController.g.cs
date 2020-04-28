@@ -52,11 +52,11 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpPost("GetWeatherAsync")]
         [Authorize]
-        public virtual async Task<ItemResult<WeatherDataDtoGen>> GetWeatherAsync([FromServices] Coalesce.Domain.AppDbContext parameterDbContext, LocationDtoGen location, System.DateTimeOffset? dateTime)
+        public virtual async Task<ItemResult<WeatherDataDtoGen>> GetWeatherAsync([FromServices] Coalesce.Domain.AppDbContext parameterDbContext, LocationDtoGen location, System.DateTimeOffset? dateTime, Coalesce.Domain.Services.SkyConditions? conditions)
         {
             IncludeTree includeTree = null;
             var _mappingContext = new MappingContext(User);
-            var methodResult = await Service.GetWeatherAsync(parameterDbContext, location.MapToModel(new Coalesce.Domain.Services.Location(), _mappingContext), dateTime);
+            var methodResult = await Service.GetWeatherAsync(parameterDbContext, location.MapToModel(new Coalesce.Domain.Services.Location(), _mappingContext), dateTime, conditions);
             var result = new ItemResult<WeatherDataDtoGen>();
             var mappingContext = new MappingContext(User, "");
             result.Object = Mapper.MapToDto<Coalesce.Domain.Services.WeatherData, WeatherDataDtoGen>(methodResult, mappingContext, includeTree);

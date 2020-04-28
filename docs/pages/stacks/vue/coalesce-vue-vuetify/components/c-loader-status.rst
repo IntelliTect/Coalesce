@@ -12,6 +12,8 @@ A component for displaying progress and error information for one or more :ref:`
 
 .. MARKER:summary-end
 
+Progress is indicated with a Vuetify_ `v-progress-linear <https://vuetifyjs.com/en/components/progress-linear>`_ component, and errors are displayed in a `v-alert <https://vuetifyjs.com/en/components/alerts/>`_. `Transitions <https://vuetifyjs.com/en/styles/transitions/>`_ are applied to smoothly fade between the different states the the caller can be in.
+
 .. note:: 
     This component uses the legacy term "loader" to refer to :ref:`VueApiCallers`. A new ``c-caller-status`` component may be coming in the future with a few usability improvements - if that happens, `c-loader-status` will be preserved for backwards compatibility.
 

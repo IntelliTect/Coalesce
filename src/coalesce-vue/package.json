@@ -47,7 +47,7 @@
   "scripts": {
     "build": "tsc -p ./tsconfig.build.json",
     "prepack": "npm run build",
-    "//": "No coverage by default because it breaks line numbers in error messages. `npm run test --coverage` to run it.",
+    "//": "No coverage by default because it breaks line numbers in error messages. `npm run test -- --coverage` to run it.",
     "test": "jest"
   },
   "jest": {

@@ -5,7 +5,9 @@ c-select
 
 .. MARKER:summary
     
-A dropdown component that allows for selecting values fetched from the generated ``/list`` API endpoints. Used both for selecting values of foreign key and navigation properties, and for selecting arbitrary objects or primary keys independent of having some other object.
+A dropdown component that allows for selecting values fetched from the generated ``/list`` API endpoints. 
+
+Used both for selecting values for foreign key and navigation properties, and for selecting arbitrary objects or primary keys independent of a parent or owning object.
 
 .. MARKER:summary-end
 

@@ -55,7 +55,7 @@ export default class extends MetadataComponent {
       this.listVM = this.list;
     } else {
       if (!this.type) {
-        throw Error("c-admin-table-page: If prop `list` is not provided, `model-name` is required.")
+        throw Error("c-admin-table-page: If prop `list` is not provided, `type` is required.")
       } else if (!ListViewModel.typeLookup![this.type]) {
         // TODO: Bake a `getOrThrow` into `typeLookup`.
         throw Error(`No model named ${this.type} is registered to ListViewModel.typeLookup`)

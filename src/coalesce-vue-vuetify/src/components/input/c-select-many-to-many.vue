@@ -7,7 +7,8 @@
     chips
     small-chips
     :deletable-chips="canDelete"
-    :loading="loading"
+    :loading="isLoading"
+    :error-messages="error"
     :items="listItems"
     :search-input.sync="search"
     :item-text="$attrs['item-text'] || itemText"
@@ -37,7 +38,9 @@ import {
   modelDisplay,
   ViewModel,
   ViewModelFactory,
-  BehaviorFlags
+  BehaviorFlags,
+  ItemApiState,
+  ApiState
 } from "coalesce-vue";
 
 @Component({
@@ -54,10 +57,6 @@ export default class CSelectManyToMany extends MetadataComponent {
 
   @Prop({ required: false })
   public params?: ListParameters;
-
-  get loading() {
-    return this.listCaller && this.listCaller.isLoading;
-  }
 
   get modelPkValue() {
     const model = this.model as Model<ModelType>;
@@ -98,6 +97,34 @@ export default class CSelectManyToMany extends MetadataComponent {
     return { pageSize: 100, ...this.params, search: this.search || undefined };
   }
 
+  currentLoaders: ApiState<any, any>[]  = [];
+  pushLoader(loader: ApiState<any, any>) {
+
+    // User performed an action to make this happen.
+    // Remove all loaders that aren't loading so that if there are any that are in an error state,
+    // the old error state is cleared out to make room for any future error states.
+    var newArray = this.currentLoaders.filter(l => l.isLoading)
+
+    // Reset the error message of the loader. If the attempt previously failed,
+    // we don't want to suddenly flash an old error message to the user.
+    loader.message = null;
+
+    newArray.push(loader);
+    this.currentLoaders = newArray;
+  }
+
+  get isLoading() {
+    return this.currentLoaders.some(l => l.isLoading);
+  }
+  get error() {
+    for (const loader of this.currentLoaders) {
+      if (!loader.wasSuccessful && loader.message) {
+        return [loader.message]
+      }
+    }
+    return null;
+  }
+
   created() {
     // This needs to be late initialized so we have the correct "this" reference.
     this.listCaller = new ModelApiClient(this.foreignItemModelType)
@@ -108,7 +135,10 @@ export default class CSelectManyToMany extends MetadataComponent {
 
     this.$watch(
       () => JSON.stringify(mapParamsToDto(this.listParams)),
-      () => this.listCaller!()
+      () => {
+        this.pushLoader(this.listCaller);
+        this.listCaller!()
+      }
     );
   }
 
@@ -144,15 +174,26 @@ export default class CSelectManyToMany extends MetadataComponent {
 
     const items: any[] = [];
 
-    this.internalValue.forEach(i => {
-      if (!newItems.has(i)) {
-        if (i instanceof ViewModel && this.canDelete) {
-          // TODO: Display the status of this somewhere.
-          // TODO: Add it back into the selected items if the delete fails?
-          i.$delete();
+    this.internalValue.forEach(vm => {
+      if (!newItems.has(vm)) {
+        if (vm instanceof ViewModel && this.canDelete) {
+
+          this.pushLoader(vm.$delete);
+          vm.$delete()
+            .then(() => {
+              // Delete successful. No need to keep the state around.
+              this.currentLoaders = this.currentLoaders.filter(l => l != vm.$delete);
+            })
+            .catch(() => {
+              // Item failed to delete. Re-add it to the selected set of values.
+              // Note that the item will be re-added to the end because we don't 
+              // know where for sure which index to re-insert it at.
+              // Because this is an error case, this is probably acceptable.
+              this.emitInput([...this.internalValue, vm]);
+            });
         }
       } else {
-        items.push(i);
+        items.push(vm);
       }
     });
 
@@ -171,12 +212,24 @@ export default class CSelectManyToMany extends MetadataComponent {
         );
         vm.$isDirty = true;
         items.push(vm);
-        // TODO: Display the status of this somewhere.
-        // TODO: Remove it from the selected items if the save fails?
-        vm.$save();
+
+        this.pushLoader(vm.$save);
+        vm.$save()
+          .then(() => {
+            // Save successful. No need to keep the state around.
+            this.currentLoaders = this.currentLoaders.filter(l => l != vm.$save);
+          })
+          .catch(() => {
+            // Item failed to save. Remove it from the selected set of values.
+            this.emitInput(this.internalValue.filter(i => i != vm));
+          });
       }
     });
 
+    this.emitInput(items);
+  }
+
+  emitInput(items: any[]) {
     if (this.model) {
       return ((this.model as any)[this.collectionMeta.name] = items);
     }

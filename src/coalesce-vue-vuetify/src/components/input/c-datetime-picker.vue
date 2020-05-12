@@ -114,6 +114,9 @@ export default class extends MetadataComponent {
   @Prop({type: Boolean}) 
   public disabled?: boolean;
 
+  @Prop({type: Boolean, default: null}) 
+  public closeOnDatePicked?: boolean | null;
+
   get interactive() {
     return !this.readonly && !this.disabled
   }
@@ -172,7 +175,7 @@ export default class extends MetadataComponent {
     })
   }
 
-  public error: string[] = []
+  error: string[] = []
 
   createDefaultDate() {
     const date = new Date()
@@ -250,6 +253,15 @@ export default class extends MetadataComponent {
     value = setDate(value, parseInt(parts[3]))
 
     this.emitInput(value)
+
+    // If closeOnDatePicked isn't specified, auto-close if only picking a date.
+    // Otherwise, respect closeOnDatePicked.
+    if (this.closeOnDatePicked == null 
+      ? this.internalDateKind == "date" 
+      : this.closeOnDatePicked
+    ) {
+      this.close()
+    }
   }
 
   private emitInput(value: any) {
@@ -259,6 +271,10 @@ export default class extends MetadataComponent {
     }
 
     this.$emit('input', value)
+  }
+
+  public close() {
+    this.menu = false;
   }
 
   menu = false

@@ -115,7 +115,7 @@ export default class extends MetadataComponent {
         .entries(mapParamsToDto(this.list.$params) || {})
         .filter(entry => entry[0].startsWith("filter."))
       )
-    }).href
+    }).resolved.fullPath
   }
 
   /** Calculated width for the "Page" text input, such that it fits the max page number. */

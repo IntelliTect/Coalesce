@@ -18,7 +18,7 @@
                 class="mx-1"
                 title="Edit"
                 text icon
-                :to="{name: 'coalesce-admin-item', params: { type: metadata.name, id: item.$primaryKey }}"
+                :to="editRoute(item)"
               >
                 <!-- Using an <i> directly is much more performant than v-icon. -->
                 <i aria-hidden="true" class="v-icon notranslate fa fa-edit"></i>
@@ -84,6 +84,21 @@ export default class extends Vue {
   }
   get hasInstanceMethods() {
     return this.metadata && Object.values(this.metadata.methods).some(m => !m.isStatic)
+  }
+
+  editRoute(item: ViewModel) {
+
+    // Resolve to an href to allow overriding of admin routes in userspace.
+    // If we just gave a named raw location, it would always use the coalesce admin route
+    // instead of the user-overridden one (that the user overrides by declaring another
+    // route with the same path).
+    return this.$router.resolve({
+      name: 'coalesce-admin-item', 
+      params: {
+        type: this.metadata.name,
+        id: item.$primaryKey
+      },
+    }).resolved.fullPath
   }
 
   created() {

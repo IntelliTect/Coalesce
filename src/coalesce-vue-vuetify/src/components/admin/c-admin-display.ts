@@ -53,7 +53,7 @@ export default Vue.extend({
                 name: 'coalesce-admin-list', 
                 params: { type: meta.itemType.typeDef.name },
                 query: { ['filter.' + meta.foreignKey.name]: pkValue }
-              }).href
+              }).resolved.fullPath
             } 
           },
           // Use `propDisplay` for our formatted count, forcing the count always by preventing enumeration.
@@ -83,7 +83,7 @@ export default Vue.extend({
                     type: meta.typeDef.name,
                     id: (model as any)[meta.foreignKey.name]
                   },
-                }).href
+                }).resolved.fullPath
               } 
             },
             propDisplay(model, meta) ?? fkValue

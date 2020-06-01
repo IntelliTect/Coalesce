@@ -27,7 +27,7 @@
     <template slot="prepend-item" v-if="createItemLabel">
       <v-list-item @click="createItem">
         <v-list-item-avatar class="mr-1 my-0">
-          <v-icon color="success">fal fa-plus</v-icon>
+          <v-icon color="success">fa fa-plus</v-icon>
         </v-list-item-avatar>
         <v-list-item-content>
           <v-list-item-title >

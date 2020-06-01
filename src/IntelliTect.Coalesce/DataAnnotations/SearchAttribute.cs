@@ -14,8 +14,37 @@ namespace IntelliTect.Coalesce.DataAnnotations
     {
         public enum SearchMethods
         {
+            /// <summary>
+            /// Search term will be checked for at the beginning of the field's value in a case insensitive manner.
+            /// </summary>
             BeginsWith = 1,
-            Contains = 2
+
+            /// <summary>
+            /// Search term will be checked for anywhere inside the field's value in a case insensitive manner.
+            /// </summary>
+            Contains = 2,
+
+            /// <summary>
+            /// Search term must match the field exactly in a case insensitive manner.
+            /// </summary>
+            Equals = 3,
+
+            /// <summary>
+            /// <para>
+            /// Search term must match exactly, using the natural casing handling of the evaulation envrionment.
+            /// </para>
+            /// 
+            /// <para>
+            /// Default database collation will be used if evaluated in SQL,
+            /// and exact casing will be used if evaluated in memory.
+            /// </para>
+            /// 
+            /// <para>
+            /// This allows index seeks to be used instead of index scans,
+            /// providing extra high performance searches against indexed columns.
+            /// </para>
+            /// </summary>
+            EqualsNatural = 4,
         };
 
         /// <summary>
@@ -24,7 +53,13 @@ namespace IntelliTect.Coalesce.DataAnnotations
         public bool IsSplitOnSpaces { get; set; } = true;
 
         /// <summary>
-        /// Specifies whether the value of the field will be checked using 'Contains' or using 'BeginsWith'.
+        /// <para>
+        /// Specifies how string columns are searched. See individual enum members for details.
+        /// </para>
+        /// <para>
+        /// Has no effect on non-string values. Numbers, GUIDs, and enums are always searched with exact values. 
+        /// Dates are searched with lower and upper bounds if the user input could be parsed as a partial or complete date.
+        /// </para>
         /// </summary>
         public SearchMethods SearchMethod { get; set; } = SearchMethods.BeginsWith;
 

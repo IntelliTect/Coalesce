@@ -31,7 +31,7 @@ namespace IntelliTect.Coalesce.DataAnnotations
 
             /// <summary>
             /// <para>
-            /// Search term must match exactly, using the natural casing handling of the evaulation envrionment.
+            /// Search term must match exactly, using the natural casing handling of the evaluation environment.
             /// </para>
             /// 
             /// <para>

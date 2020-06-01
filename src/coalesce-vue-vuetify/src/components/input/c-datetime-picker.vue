@@ -74,7 +74,6 @@
 // Tedious imports for maximum tree shaking
 import {
   isValid,
-  toDate,
   format,
   parse,
   setYear,
@@ -86,15 +85,12 @@ import {
   startOfDay
 } from 'date-fns'
 
-// import { format, parse, isValid, setYear, setMonth, setDate, setHours, setMinutes } from 'date-fns'
 import { Vue, Component, Watch, Prop } from 'vue-property-decorator';
-// import CDisplay from '../display/c-display';
 import MetadataComponent from '../c-metadata-component'
 
 @Component({
     name: 'c-datetime-picker',
     components: {
-      // CDisplay
     }
 })
 export default class extends MetadataComponent {

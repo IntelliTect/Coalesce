@@ -123,8 +123,6 @@ namespace IntelliTect.Coalesce.Tests.Api
         public void Search_StringEqualsInsensitive_SearchesCorrectly(
             bool shouldMatch, string propValue, string inputValue)
         {
-            // Note about this test: the above tests cases should fail when
-            // casing matches because all these tests evaluate in memory.
             SearchHelper(
                 (ComplexModel t) => t.StringSearchedEqualsInsensitive,
                 inputValue,

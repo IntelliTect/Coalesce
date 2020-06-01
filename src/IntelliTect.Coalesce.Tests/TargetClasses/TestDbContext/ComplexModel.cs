@@ -58,6 +58,13 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
 
 
         public string String { get; set; }
+
+        [Search(SearchMethod = SearchAttribute.SearchMethods.Equals)]
+        public string StringSearchedEqualsInsensitive { get; set; }
+
+        [Search(SearchMethod = SearchAttribute.SearchMethods.EqualsNatural)]
+        public string StringSearchedEqualsNatural { get; set; }
+
         public int Int { get; set; }
         public int? IntNullable { get; set; }
         public decimal? DecimalNullable { get; set; }

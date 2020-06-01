@@ -116,6 +116,38 @@ namespace IntelliTect.Coalesce.Tests.Api
         }
 
         [Theory]
+        [InlineData(true, "a1", "a1")]
+        [InlineData(true, "A1", "a1")]
+        [InlineData(true, "a1", "A1")]
+        [InlineData(false, "a1b", "a1")]
+        public void Search_StringEqualsInsensitive_SearchesCorrectly(
+            bool shouldMatch, string propValue, string inputValue)
+        {
+            SearchHelper(
+                (ComplexModel t) => t.StringSearchedEqualsInsensitive,
+                inputValue,
+                propValue,
+                shouldMatch);
+        }
+
+        [Theory]
+        [InlineData(true, "a1", "a1")]
+        [InlineData(false, "A1", "a1")]
+        [InlineData(false, "a1", "A1")]
+        [InlineData(false, "a1b", "a1")]
+        public void Search_StringEqualsNatural_SearchesCorrectly(
+            bool shouldMatch, string propValue, string inputValue)
+        {
+            // Note about this test: the above tests cases should fail when
+            // casing matches because all these tests evaluate in memory.
+            SearchHelper(
+                (ComplexModel t) => t.StringSearchedEqualsNatural,
+                inputValue,
+                propValue,
+                shouldMatch);
+        }
+
+        [Theory]
         [InlineData(true, 0, "0")]
         [InlineData(true, int.MaxValue, "2147483647")]
         [InlineData(false, int.MaxValue, "2147483648")]

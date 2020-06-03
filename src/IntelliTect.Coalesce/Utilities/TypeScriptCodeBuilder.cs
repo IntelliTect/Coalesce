@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace IntelliTect.Coalesce.Utilities
@@ -54,20 +55,44 @@ namespace IntelliTect.Coalesce.Utilities
                 return this;
             }
 
-            // Always put a blank line before a doc comment.
-            Line().Append("/** ").Append(comment).Append(" */").Line();
+            var commentLines = comment.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
+            DocComment(commentLines);
             return this;
         }
 
         public TypeScriptCodeBuilder DocComment(string[] comment)
         {
+            // Skip all blank lines at the start or the end, but never in the middle.
+            var lines = comment
+                // Skip blank lines at the start
+                .SkipWhile(l => string.IsNullOrWhiteSpace(l))
+                // Reverse, then skip blank lines that will be at the end
+                .Reverse()
+                .SkipWhile(l => string.IsNullOrWhiteSpace(l))
+                // Restore original ordering.
+                .Reverse()
+                .ToArray();
+
+            if (lines.Length == 0) return this;
+
             // Always put a blank line before a doc comment.
-            Line().Line("/** ");
-            foreach (var line in comment)
+            Line();
+
+            if (lines.Length > 1)
             {
-                Indented(line);
+                Line("/** ");
+                foreach (var line in lines)
+                {
+                    Indented(line);
+                }
+                Line("*/");
             }
-            Line("*/");
+            else
+            {
+                // Comment is a one-liner. Keep it that way.
+                Append("/** ").Append(lines.Single()).Append(" */").Line();
+            }
+
             return this;
         }
     }

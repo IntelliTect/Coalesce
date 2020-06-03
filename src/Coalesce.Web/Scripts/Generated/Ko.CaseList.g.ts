@@ -54,9 +54,7 @@ module ListViewModels {
             = new Coalesce.ListViewModelConfiguration<CaseList, ViewModels.Case>(CaseList.coalesceConfig);
         
         
-        /**
-            Methods and properties for invoking server method GetSomeCases.
-        */
+        /** Methods and properties for invoking server method GetSomeCases. */
         public readonly getSomeCases = new CaseList.GetSomeCases(this);
         public static GetSomeCases = class GetSomeCases extends Coalesce.ClientMethod<CaseList, ViewModels.Case[]> {
             public readonly name = 'GetSomeCases';
@@ -79,9 +77,7 @@ module ListViewModels {
             };
         };
         
-        /**
-            Methods and properties for invoking server method GetAllOpenCasesCount.
-        */
+        /** Methods and properties for invoking server method GetAllOpenCasesCount. */
         public readonly getAllOpenCasesCount = new CaseList.GetAllOpenCasesCount(this);
         public static GetAllOpenCasesCount = class GetAllOpenCasesCount extends Coalesce.ClientMethod<CaseList, number> {
             public readonly name = 'GetAllOpenCasesCount';
@@ -103,9 +99,7 @@ module ListViewModels {
             };
         };
         
-        /**
-            Methods and properties for invoking server method RandomizeDatesAndStatus.
-        */
+        /** Methods and properties for invoking server method RandomizeDatesAndStatus. */
         public readonly randomizeDatesAndStatus = new CaseList.RandomizeDatesAndStatus(this);
         public static RandomizeDatesAndStatus = class RandomizeDatesAndStatus extends Coalesce.ClientMethod<CaseList, void> {
             public readonly name = 'RandomizeDatesAndStatus';
@@ -127,8 +121,9 @@ module ListViewModels {
             };
         };
         
-        /**
+        /** 
             Methods and properties for invoking server method GetCaseSummary.
+            
             Returns a list of summary information about Cases
         */
         public readonly getCaseSummary = new CaseList.GetCaseSummary(this);

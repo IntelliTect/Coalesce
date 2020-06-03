@@ -50,9 +50,12 @@ module ListViewModels {
             = new Coalesce.ListViewModelConfiguration<PersonList, ViewModels.Person>(PersonList.coalesceConfig);
         
         
-        /**
+        /** 
             Methods and properties for invoking server method Add.
+            
             Adds two numbers.
+            
+            This comment also includes multiple lines so I can test multi-line xmldoc comments.
         */
         public readonly add = new PersonList.Add(this);
         public static Add = class Add extends Coalesce.ClientMethod<PersonList, number> {
@@ -99,8 +102,9 @@ module ListViewModels {
             };
         };
         
-        /**
+        /** 
             Methods and properties for invoking server method GetUser.
+            
             Returns the user name
         */
         public readonly getUser = new PersonList.GetUser(this);
@@ -124,9 +128,7 @@ module ListViewModels {
             };
         };
         
-        /**
-            Methods and properties for invoking server method PersonCount.
-        */
+        /** Methods and properties for invoking server method PersonCount. */
         public readonly personCount = new PersonList.PersonCount(this);
         public static PersonCount = class PersonCount extends Coalesce.ClientMethod<PersonList, number> {
             public readonly name = 'PersonCount';
@@ -168,9 +170,7 @@ module ListViewModels {
             };
         };
         
-        /**
-            Methods and properties for invoking server method RemovePersonById.
-        */
+        /** Methods and properties for invoking server method RemovePersonById. */
         public readonly removePersonById = new PersonList.RemovePersonById(this);
         public static RemovePersonById = class RemovePersonById extends Coalesce.ClientMethod<PersonList, boolean> {
             public readonly name = 'RemovePersonById';
@@ -212,8 +212,9 @@ module ListViewModels {
             };
         };
         
-        /**
+        /** 
             Methods and properties for invoking server method GetUserPublic.
+            
             Returns the user name
         */
         public readonly getUserPublic = new PersonList.GetUserPublic(this);
@@ -237,8 +238,9 @@ module ListViewModels {
             };
         };
         
-        /**
+        /** 
             Methods and properties for invoking server method NamesStartingWith.
+            
             Gets all the first names starting with the characters.
         */
         public readonly namesStartingWith = new PersonList.NamesStartingWith(this);
@@ -283,8 +285,9 @@ module ListViewModels {
             };
         };
         
-        /**
+        /** 
             Methods and properties for invoking server method MethodWithEntityParameter.
+            
             Gets all the first names starting with the characters.
         */
         public readonly methodWithEntityParameter = new PersonList.MethodWithEntityParameter(this);
@@ -330,8 +333,9 @@ module ListViewModels {
             };
         };
         
-        /**
+        /** 
             Methods and properties for invoking server method SearchPeople.
+            
             Gets people matching the criteria, paginated by parameter 'page'.
         */
         public readonly searchPeople = new PersonList.SearchPeople(this);

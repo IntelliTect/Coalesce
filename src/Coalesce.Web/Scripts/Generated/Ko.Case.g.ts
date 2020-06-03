@@ -206,9 +206,8 @@ module ViewModels {
         }
         
         
-        /**
-            Methods and properties for invoking server method UploadAttachment.
-        */
+        
+        /** Methods and properties for invoking server method UploadAttachment. */
         public readonly uploadAttachment = new Case.UploadAttachment(this);
         public static UploadAttachment = class UploadAttachment extends Coalesce.ClientMethod<Case, void> {
             public readonly name = 'UploadAttachment';

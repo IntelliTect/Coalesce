@@ -149,6 +149,8 @@ namespace Coalesce.Domain
 
         /// <summary>
         /// Adds two numbers.
+        /// 
+        /// This comment also includes multiple lines so I can test multi-line xmldoc comments.
         /// </summary>
         /// <param name="numberOne"></param>
         /// <param name="numberTwo"></param>

@@ -22,8 +22,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public override string Name => Symbol.Name;
 
-        public override string Comment =>
-            Regex.Replace(Symbol.ExtractXmlComments(), "\n(\\s+)", "\n        // ");
+        public override string Comment => Symbol.ExtractXmlComments();
 
         public override object GetAttributeValue<TAttribute>(string valueName) =>
             Symbol.GetAttributeValue<TAttribute>(valueName);

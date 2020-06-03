@@ -322,7 +322,11 @@ defineProps(PersonViewModel, $metadata.Person)
 
 export class PersonListViewModel extends ListViewModel<$models.Person, $apiClients.PersonApiClient, PersonViewModel> {
   
-  /** Adds two numbers. */
+  /** 
+    Adds two numbers.
+    
+    This comment also includes multiple lines so I can test multi-line xmldoc comments.
+  */
   public get add() {
     const add = this.$apiClient.$makeCaller(
       "item", 

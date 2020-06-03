@@ -57,11 +57,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
             string callbackAndReloadParam = $"callback?: (result: {method.ResultType.TsType}) => void{reloadParam}";
 
             // Default instance of the method class.
-            b.Line("/**");
-            b.Indented($"Methods and properties for invoking server method {method.Name}.");
-            if (method.Comment.Length > 0) b.Indented(method.Comment);
-            b.Line($"*/");
-
+            b.DocComment($"Methods and properties for invoking server method {method.Name}.\n\n{method.Comment}");
             b.Line($"public readonly {method.JsVariable} = new {parentClassName}.{method.Name}(this);");
 
             string methodBaseClass = returnIsListResult

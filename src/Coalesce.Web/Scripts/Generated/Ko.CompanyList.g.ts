@@ -42,9 +42,7 @@ module ListViewModels {
             = new Coalesce.ListViewModelConfiguration<CompanyList, ViewModels.Company>(CompanyList.coalesceConfig);
         
         
-        /**
-            Methods and properties for invoking server method GetCertainItems.
-        */
+        /** Methods and properties for invoking server method GetCertainItems. */
         public readonly getCertainItems = new CompanyList.GetCertainItems(this);
         public static GetCertainItems = class GetCertainItems extends Coalesce.ClientMethod<CompanyList, ViewModels.Company[]> {
             public readonly name = 'GetCertainItems';

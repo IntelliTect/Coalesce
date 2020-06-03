@@ -3,7 +3,7 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <!-- All these frameworks are included for testing code generation. 
     Override the used framework by specifying (framework: "tfm") in coalesce.json. -->
-    <TargetFrameworks>netcoreapp3.1;net471</TargetFrameworks>
+    <!--<TargetFrameworks>netcoreapp3.1;net471</TargetFrameworks>-->
     <RuntimeIdentifiers>win7-x86;win10-x64</RuntimeIdentifiers>
     <OutputType>Exe</OutputType>
     <PackageId>Coalesce.Web</PackageId>
@@ -22,7 +22,7 @@
   </ItemGroup>
   
   <ItemGroup>
-    <ProjectReference Include="..\Coalesce.Domain\Coalesce.Domain.csproj" >
+    <ProjectReference Include="..\Coalesce.Domain\Coalesce.Domain.csproj">
       <SetTargetFramework>TargetFramework=$(TargetFramework)</SetTargetFramework>
     </ProjectReference>
     <ProjectReference Include="..\IntelliTect.Coalesce.Knockout\IntelliTect.Coalesce.Knockout.csproj" />

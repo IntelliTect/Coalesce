@@ -15,9 +15,8 @@ module Services {
         public coalesceConfig: Coalesce.ServiceClientConfiguration<WeatherServiceClient>
             = new Coalesce.ServiceClientConfiguration<WeatherServiceClient>(WeatherServiceClient.coalesceConfig);
         
-        /**
-            Methods and properties for invoking server method GetWeather.
-        */
+        
+        /** Methods and properties for invoking server method GetWeather. */
         public readonly getWeather = new WeatherServiceClient.GetWeather(this);
         public static GetWeather = class GetWeather extends Coalesce.ClientMethod<WeatherServiceClient, ViewModels.WeatherData> {
             public readonly name = 'GetWeather';
@@ -60,9 +59,8 @@ module Services {
                     callback(this.result());
             };
         };
-        /**
-            Methods and properties for invoking server method GetWeatherAsync.
-        */
+        
+        /** Methods and properties for invoking server method GetWeatherAsync. */
         public readonly getWeatherAsync = new WeatherServiceClient.GetWeatherAsync(this);
         public static GetWeatherAsync = class GetWeatherAsync extends Coalesce.ClientMethod<WeatherServiceClient, ViewModels.WeatherData> {
             public readonly name = 'GetWeatherAsync';

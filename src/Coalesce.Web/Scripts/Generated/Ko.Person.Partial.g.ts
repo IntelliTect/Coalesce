@@ -159,8 +159,10 @@ module ViewModels {
         ];
         
         
-        /**
+        
+        /** 
             Methods and properties for invoking server method Rename.
+            
             Sets the FirstName to the given text.
         */
         public readonly rename = new PersonPartial.Rename(this);
@@ -205,8 +207,10 @@ module ViewModels {
                 }
             };
         };
-        /**
+        
+        /** 
             Methods and properties for invoking server method ChangeSpacesToDashesInName.
+            
             Removes spaces from the name and puts in dashes
         */
         public readonly changeSpacesToDashesInName = new PersonPartial.ChangeSpacesToDashesInName(this);
@@ -229,9 +233,8 @@ module ViewModels {
                 }
             };
         };
-        /**
-            Methods and properties for invoking server method FullNameAndAge.
-        */
+        
+        /** Methods and properties for invoking server method FullNameAndAge. */
         public readonly fullNameAndAge = new PersonPartial.FullNameAndAge(this);
         public static FullNameAndAge = class FullNameAndAge extends Coalesce.ClientMethod<PersonPartial, string> {
             public readonly name = 'FullNameAndAge';
@@ -252,9 +255,8 @@ module ViewModels {
                 }
             };
         };
-        /**
-            Methods and properties for invoking server method ObfuscateEmail.
-        */
+        
+        /** Methods and properties for invoking server method ObfuscateEmail. */
         public readonly obfuscateEmail = new PersonPartial.ObfuscateEmail(this);
         public static ObfuscateEmail = class ObfuscateEmail extends Coalesce.ClientMethod<PersonPartial, string> {
             public readonly name = 'ObfuscateEmail';
@@ -275,9 +277,8 @@ module ViewModels {
                 }
             };
         };
-        /**
-            Methods and properties for invoking server method ChangeFirstName.
-        */
+        
+        /** Methods and properties for invoking server method ChangeFirstName. */
         public readonly changeFirstName = new PersonPartial.ChangeFirstName(this);
         public static ChangeFirstName = class ChangeFirstName extends Coalesce.ClientMethod<PersonPartial, ViewModels.Person> {
             public readonly name = 'ChangeFirstName';
@@ -324,8 +325,10 @@ module ViewModels {
                 }
             };
         };
-        /**
+        
+        /** 
             Methods and properties for invoking server method MethodWithEntityParameter.
+            
             Gets all the first names starting with the characters.
         */
         public readonly methodWithEntityParameter = new PersonPartial.MethodWithEntityParameter(this);

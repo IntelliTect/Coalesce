@@ -62,7 +62,6 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
                 b.Line();
                 foreach (var method in Model.ClientMethods.Where(m => m.IsStatic))
                 {
-                    b.Line();
                     WriteClientMethodDeclaration(b, method, Model.ListViewModelClassName);
                 }
 

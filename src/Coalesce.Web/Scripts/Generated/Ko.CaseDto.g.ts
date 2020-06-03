@@ -34,9 +34,8 @@ module ViewModels {
         
         
         
-        /**
-            Methods and properties for invoking server method AsyncMethodOnIClassDto.
-        */
+        
+        /** Methods and properties for invoking server method AsyncMethodOnIClassDto. */
         public readonly asyncMethodOnIClassDto = new CaseDto.AsyncMethodOnIClassDto(this);
         public static AsyncMethodOnIClassDto = class AsyncMethodOnIClassDto extends Coalesce.ClientMethod<CaseDto, string> {
             public readonly name = 'AsyncMethodOnIClassDto';

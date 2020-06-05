@@ -26,7 +26,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <returns></returns>
         public static bool HasAttribute<TAttribute>(this ICustomAttributeProvider member) where TAttribute : Attribute
         {
-            return member.GetAttribute<TAttribute>() != null;
+            return member.IsDefined(typeof(TAttribute), true);
         }
 
         public static Object GetAttributeValue<TAttribute>(this ICustomAttributeProvider member, string valueName) where TAttribute : Attribute
@@ -38,7 +38,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 if (property == null) return null;
 
                 // TODO: Some properties throw an exception here. DisplayAttribute.Order. Not sure why.
-                try {
+                try 
+                {
                     return property.GetValue(attr, null);
                 }
                 catch (Exception)

@@ -366,15 +366,20 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 yield break;
             }
 
-            yield return new[]
+            var defaultProp = new[]
+                {
+                    PropertyByName("Name"),
+                    Properties.FirstOrDefault(p => p.Name == $"{p.Parent.Name}Name"),
+                    PrimaryKey
+                }
+                .Where(p => p != null && p.IsClientProperty && !p.HasNotMapped)
+                .Select(p => new SearchableValueProperty(p))
+                .FirstOrDefault();
+
+            if (defaultProp != null)
             {
-                PropertyByName("Name"),
-                Properties.FirstOrDefault(p => p.Name == $"{p.Parent.Name}Name"),
-                PrimaryKey
+                yield return defaultProp;
             }
-            .Where(p => p != null && p.IsClientProperty && !p.HasNotMapped)
-            .Select(p => new SearchableValueProperty(p))
-            .FirstOrDefault();
         }
 
         #endregion

@@ -2,7 +2,7 @@ import Vue from "vue";
 
 
 // This will tree shake correctly as of v2.0.0-alpha.21
-import { toDate, isValid, format, formatDistanceToNow, lightFormat } from "date-fns";
+import { format, formatDistanceToNow, lightFormat, parseISO } from "date-fns";
 
 import {
   ClassType,
@@ -176,7 +176,17 @@ export function parseValue(
         // it will parse any number as milliseconds since the epoch,
         // and parses `true` as the epoch.
         // So, we restrict parsing to strings only.
-        date = new Date(value)
+
+        // DO NOT USE `new Date()` here.
+        // Safari incorrectly interprets times without a timezone offset
+        // (i.e. DateTime objects in c#) as UTC instead of local time.
+        // Safari is the only browser that does that. IE,Chrome,Firefox,Edge 
+        // all do this correctly.
+        // The reason we originally used `new Date()` here was for sheet performance.
+        // This idea came from the Knockout stack where `moment(...)` is 20x slower than
+        // `new Date()` and it seemed at the time that the date ctor did behave the same
+        // across all browsers. However, this has proven not to be the case in practice.
+        date = parseISO(value);
       }
 
       // isNaN is what date-fn's `isValid` calls internally,

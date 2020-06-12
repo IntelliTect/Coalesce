@@ -186,6 +186,27 @@ namespace Coalesce.Web.Vue.Api
         }
 
         /// <summary>
+        /// Method: GetBirthdate
+        /// </summary>
+        [HttpPost("GetBirthdate")]
+        [Authorize]
+        public virtual async Task<ItemResult<System.DateTime>> GetBirthdate([FromServices] IDataSourceFactory dataSourceFactory, int id)
+        {
+            var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Person, Coalesce.Domain.Person>("Default");
+            var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
+            if (!itemResult.WasSuccessful)
+            {
+                return new ItemResult<System.DateTime>(itemResult);
+            }
+            var item = itemResult.Object;
+            var methodResult = item.GetBirthdate();
+            await Db.SaveChangesAsync();
+            var result = new ItemResult<System.DateTime>();
+            result.Object = methodResult;
+            return result;
+        }
+
+        /// <summary>
         /// Method: PersonCount
         /// </summary>
         [HttpGet("PersonCount")]

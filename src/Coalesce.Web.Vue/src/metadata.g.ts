@@ -223,7 +223,6 @@ export const Case = domain.types.Case = {
       return: {
         name: "$return",
         displayName: "Result",
-        role: "value",
         type: "collection",
         itemType: {
           name: "$collectionItem",
@@ -232,6 +231,7 @@ export const Case = domain.types.Case = {
           type: "model",
           get typeDef() { return (domain.types.Case as ModelType) },
         },
+        role: "value",
       },
     },
     getAllOpenCasesCount: {
@@ -245,8 +245,8 @@ export const Case = domain.types.Case = {
       return: {
         name: "$return",
         displayName: "Result",
-        role: "value",
         type: "number",
+        role: "value",
       },
     },
     randomizeDatesAndStatus: {
@@ -260,8 +260,8 @@ export const Case = domain.types.Case = {
       return: {
         name: "$return",
         displayName: "Result",
-        role: "value",
         type: "void",
+        role: "value",
       },
     },
     uploadAttachment: {
@@ -286,8 +286,8 @@ export const Case = domain.types.Case = {
       return: {
         name: "$return",
         displayName: "Result",
-        role: "value",
         type: "void",
+        role: "value",
       },
     },
     getCaseSummary: {
@@ -301,9 +301,9 @@ export const Case = domain.types.Case = {
       return: {
         name: "$return",
         displayName: "Result",
-        role: "value",
         type: "object",
         get typeDef() { return (domain.types.CaseSummary as ObjectType) },
+        role: "value",
       },
     },
   },
@@ -376,8 +376,8 @@ export const CaseDto = domain.types.CaseDto = {
       return: {
         name: "$return",
         displayName: "Result",
-        role: "value",
         type: "string",
+        role: "value",
       },
     },
   },
@@ -559,7 +559,6 @@ export const Company = domain.types.Company = {
       return: {
         name: "$return",
         displayName: "Result",
-        role: "value",
         type: "collection",
         itemType: {
           name: "$collectionItem",
@@ -568,6 +567,7 @@ export const Company = domain.types.Company = {
           type: "model",
           get typeDef() { return (domain.types.Company as ModelType) },
         },
+        role: "value",
       },
     },
   },
@@ -760,9 +760,9 @@ export const Person = domain.types.Person = {
       return: {
         name: "$return",
         displayName: "Result",
-        role: "value",
         type: "model",
         get typeDef() { return (domain.types.Person as ModelType) },
+        role: "value",
       },
     },
     changeSpacesToDashesInName: {
@@ -781,8 +781,8 @@ export const Person = domain.types.Person = {
       return: {
         name: "$return",
         displayName: "Result",
-        role: "value",
         type: "void",
+        role: "value",
       },
     },
     add: {
@@ -808,8 +808,8 @@ export const Person = domain.types.Person = {
       return: {
         name: "$return",
         displayName: "Result",
-        role: "value",
         type: "number",
+        role: "value",
       },
     },
     getUser: {
@@ -823,8 +823,30 @@ export const Person = domain.types.Person = {
       return: {
         name: "$return",
         displayName: "Result",
-        role: "value",
         type: "string",
+        role: "value",
+      },
+    },
+    getBirthdate: {
+      name: "getBirthdate",
+      displayName: "Get Birthdate",
+      transportType: "item",
+      httpMethod: "POST",
+      params: {
+        id: {
+          name: "id",
+          displayName: "Primary Key",
+          role: "value",
+          type: "number",
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        dateKind: "datetime",
+        noOffset: true,
+        type: "date",
+        role: "value",
       },
     },
     personCount: {
@@ -844,8 +866,8 @@ export const Person = domain.types.Person = {
       return: {
         name: "$return",
         displayName: "Result",
-        role: "value",
         type: "number",
+        role: "value",
       },
     },
     fullNameAndAge: {
@@ -864,8 +886,8 @@ export const Person = domain.types.Person = {
       return: {
         name: "$return",
         displayName: "Result",
-        role: "value",
         type: "string",
+        role: "value",
       },
     },
     removePersonById: {
@@ -885,8 +907,8 @@ export const Person = domain.types.Person = {
       return: {
         name: "$return",
         displayName: "Result",
-        role: "value",
         type: "boolean",
+        role: "value",
       },
     },
     obfuscateEmail: {
@@ -905,8 +927,8 @@ export const Person = domain.types.Person = {
       return: {
         name: "$return",
         displayName: "Result",
-        role: "value",
         type: "string",
+        role: "value",
       },
     },
     changeFirstName: {
@@ -938,9 +960,9 @@ export const Person = domain.types.Person = {
       return: {
         name: "$return",
         displayName: "Result",
-        role: "value",
         type: "model",
         get typeDef() { return (domain.types.Person as ModelType) },
+        role: "value",
       },
     },
     getUserPublic: {
@@ -954,8 +976,8 @@ export const Person = domain.types.Person = {
       return: {
         name: "$return",
         displayName: "Result",
-        role: "value",
         type: "string",
+        role: "value",
       },
     },
     namesStartingWith: {
@@ -975,7 +997,6 @@ export const Person = domain.types.Person = {
       return: {
         name: "$return",
         displayName: "Result",
-        role: "value",
         type: "collection",
         itemType: {
           name: "$collectionItem",
@@ -983,6 +1004,7 @@ export const Person = domain.types.Person = {
           role: "value",
           type: "string",
         },
+        role: "value",
       },
     },
     methodWithEntityParameter: {
@@ -1003,9 +1025,9 @@ export const Person = domain.types.Person = {
       return: {
         name: "$return",
         displayName: "Result",
-        role: "value",
         type: "model",
         get typeDef() { return (domain.types.Person as ModelType) },
+        role: "value",
       },
     },
     searchPeople: {
@@ -1032,7 +1054,6 @@ export const Person = domain.types.Person = {
       return: {
         name: "$return",
         displayName: "Result",
-        role: "value",
         type: "collection",
         itemType: {
           name: "$collectionItem",
@@ -1041,6 +1062,7 @@ export const Person = domain.types.Person = {
           type: "model",
           get typeDef() { return (domain.types.Person as ModelType) },
         },
+        role: "value",
       },
     },
   },
@@ -1357,9 +1379,9 @@ export const WeatherService = domain.services.WeatherService = {
       return: {
         name: "$return",
         displayName: "Result",
-        role: "value",
         type: "object",
         get typeDef() { return (domain.types.WeatherData as ObjectType) },
+        role: "value",
       },
     },
     getWeatherAsync: {
@@ -1393,9 +1415,9 @@ export const WeatherService = domain.services.WeatherService = {
       return: {
         name: "$return",
         displayName: "Result",
-        role: "value",
         type: "object",
         get typeDef() { return (domain.types.WeatherData as ObjectType) },
+        role: "value",
       },
     },
   },

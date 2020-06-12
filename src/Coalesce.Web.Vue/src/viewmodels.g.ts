@@ -281,6 +281,17 @@ export class PersonViewModel extends ViewModel<$models.Person, $apiClients.Perso
     return changeSpacesToDashesInName
   }
   
+  public get getBirthdate() {
+    const getBirthdate = this.$apiClient.$makeCaller(
+      "item", 
+      (c) => c.getBirthdate(this.$primaryKey, ),
+      () => ({}),
+      (c, args) => c.getBirthdate(this.$primaryKey, ))
+    
+    Object.defineProperty(this, 'getBirthdate', {value: getBirthdate});
+    return getBirthdate
+  }
+  
   public get fullNameAndAge() {
     const fullNameAndAge = this.$apiClient.$makeCaller(
       "item", 

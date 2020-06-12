@@ -178,6 +178,12 @@ namespace Coalesce.Domain
         }
 
         [Coalesce]
+        public DateTime GetBirthdate()
+        {
+            return BirthDate ?? DateTime.Now;
+        }
+
+        [Coalesce]
         [ControllerAction(Method = HttpMethod.Get)]
         public static long PersonCount(AppDbContext db, string lastNameStartsWith = "")
         {

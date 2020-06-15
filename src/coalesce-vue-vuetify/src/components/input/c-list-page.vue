@@ -14,13 +14,13 @@
       class="pt-0 d-none d-sm-inline-block current-page"
       type="number"
       min="1"
-      :max="list.$load.pageCount"
+      :max="list.$load.pageCount === -1 ? null : list.$load.pageCount"
       v-model.number="list.$page"
       hide-details outlined dense
       title="Current Page Number"
     ></v-text-field>
     <span class="text-no-wrap hidden-sm-and-up">{{list.$page}}</span>
-    <span class="text-no-wrap ml-0">of {{list.$load.pageCount}}</span>
+    <span class="text-no-wrap ml-0" v-if="list.$load.pageCount !== -1">of {{list.$load.pageCount}}</span>
 
     <v-btn 
       outlined small icon

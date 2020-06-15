@@ -17,7 +17,11 @@ namespace IntelliTect.Coalesce.Models
     {
         public int Page { get; set; }
         public int PageSize { get; set; }
-        public int PageCount => PageSize == 0 ? 0 : (TotalCount + PageSize - 1) / PageSize;
+        public int PageCount => 
+            TotalCount == -1 ? -1 
+            : PageSize == 0 ? 0 
+            : (TotalCount + PageSize - 1) / PageSize;
+
         public int TotalCount { get; set; }
 
         public IList<T> List { get; set; }

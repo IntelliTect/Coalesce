@@ -757,8 +757,11 @@ export abstract class ListViewModel<
   public get $hasPreviousPage() {
     return (this.$params.page || 1) > 1;
   }
-  /** True if the count retrieved from the last load indicates that there are pages after the page set in $params.page */
+  /** True if the count retrieved from the last load indicates that there may be pages after the page set in $params.page */
   public get $hasNextPage() {
+    // -1 is used to signal an unknown number of pages.
+    if (this.$load.pageCount === -1) return true;
+
     return (this.$params.page || 1) < (this.$load.pageCount || 0);
   }
 

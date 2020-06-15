@@ -48,36 +48,6 @@ export default class extends Vue {
     justify-content: space-between;
     align-items: center;
     font-size: 16px;
-
-    // .v-text-field {
-    //   margin-top: 0px
-    // }
-    
-    // > * {
-    //   display: flex;
-    //   align-items: center;
-    //   flex-grow: 1;
-    //   flex-basis:0;
-    //   // margin: 0 10px;
-    //   &:nth-child(2) > * {
-    //     margin: auto;
-    //   }
-    //   &:nth-child(3) > * {
-    //     margin-left: auto;
-    //   }
-    //   > * {
-    //     display: flex;
-    //     align-items: center;
-    //     // margin: 0 10px;
-    //   }
-    // }
-
-    // .page-size {
-    //   width: 100px;
-    // }
-    // .current-page {
-    //   width: 100px;
-    // }
   }
 </style>
 

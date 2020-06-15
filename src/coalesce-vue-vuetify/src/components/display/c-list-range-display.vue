@@ -10,10 +10,12 @@
       {{rangeEnd}}
     </span>
     
-    of
-    <span class="c-list-range-display--total">
-      {{list.$load.totalCount}}
-    </span>
+    <template v-if="list.$load.totalCount !== -1">
+      of
+      <span class="c-list-range-display--total">
+        {{list.$load.totalCount}}
+      </span>
+    </template>
   </span>
 </template>
 

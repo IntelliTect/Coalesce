@@ -22,7 +22,11 @@ export default Vue.extend({
 
   props: {
     for: <PropOptions<any>>{ required: false },
-    model: <PropOptions<Model<ClassType> | DataSource<DataSourceType> | AnyArgCaller>>{ type: Object },
+    model: <
+      | PropOptions<Model<ClassType> 
+      | DataSource<DataSourceType> 
+      | AnyArgCaller>
+    >{ required: false },
     value: <PropOptions<any>>{ required: false },
   },
 

@@ -195,8 +195,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
             using (b.Block($"public get {method.JsVariable}()"))
             {
                 b.Line($"const {method.JsVariable} = this.$apiClient.$makeCaller(");
-                // "item" or "list"
-                b.Indented($"\"{transportTypeSlug}\", ");
+                // The metadata of the method
+                b.Indented($"this.$metadata.methods.{method.JsVariable},");
                 // The invoker function when the caller is used directly like `caller(...)`, or via `caller.invoke(...)`
                 b.Indented($"(c{signature}) => c.{method.JsVariable}({pkArg}{string.Join(", ", method.ClientParameters.Select(p => p.Name))}),");
                 // The factory function to return a new args object. Args object lives on `caller.args`

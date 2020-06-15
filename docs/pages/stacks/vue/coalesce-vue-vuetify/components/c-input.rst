@@ -49,6 +49,14 @@ Binding to :ref:`API Caller <VueApiCallers>` args objects:
 .. code-block:: sfc
 
     <c-input 
+        :model="person.setFirstName" 
+        for="newName" />
+
+Or, using a more verbose syntax:
+
+.. code-block:: sfc
+
+    <c-input 
         :model="person.setFirstName.args" 
         for="Person.methods.setFirstName.newName" />
 

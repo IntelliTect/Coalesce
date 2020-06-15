@@ -2,7 +2,7 @@
 
 import Vue, { PropOptions } from "vue";
 import { getValueMeta } from "../c-metadata-component";
-import { Model, ViewModel, ClassType, DataSource, DataSourceType, ModelType, mapToModel, mapValueToModel } from "coalesce-vue";
+import { Model, ViewModel, ClassType, DataSource, DataSourceType, ModelType, mapToModel, mapValueToModel, AnyArgCaller, ApiState } from "coalesce-vue";
 
 import CSelect from './c-select.vue'
 import CSelectManyToMany from './c-select-many-to-many.vue'
@@ -22,15 +22,26 @@ export default Vue.extend({
 
   props: {
     for: <PropOptions<any>>{ required: false },
-    model: <PropOptions<Model<ClassType> | DataSource<DataSourceType>>>{ type: Object },
+    model: <PropOptions<Model<ClassType> | DataSource<DataSourceType> | AnyArgCaller>>{ type: Object },
     value: <PropOptions<any>>{ required: false },
   },
 
 	render(h, ctx) {
 
-    const model = ctx.props.model;
+    let model = ctx.props.model;
     const modelMeta = model ? model.$metadata : null;
     let valueMeta = getValueMeta(ctx.props.for, modelMeta, ctx.parent.$coalesce.metadata);
+
+    if (!valueMeta) {
+      throw Error("c-input requires value metadata. Specify it with the 'for' prop'");
+    }
+
+    // Support binding to method args via `:model="myModel.myMethod" for="myArg"`.
+    // getValueMeta will resolve to the metadata of the specific parameter;
+    // we then have to resolve the args object from the ApiState.
+    if (model instanceof ApiState && "args" in model && valueMeta.name in model.args) {
+      model = model.args
+    }
 
     if (!valueMeta || !("role" in valueMeta)) {
       throw Error("c-input requires value metadata. Specify it with the 'for' prop'");

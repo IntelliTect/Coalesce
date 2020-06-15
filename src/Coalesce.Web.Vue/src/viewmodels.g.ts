@@ -38,7 +38,7 @@ export class CaseViewModel extends ViewModel<$models.Case, $apiClients.CaseApiCl
   
   public get uploadAttachment() {
     const uploadAttachment = this.$apiClient.$makeCaller(
-      "item", 
+      this.$metadata.methods.uploadAttachment,
       (c, file: File | null) => c.uploadAttachment(this.$primaryKey, file),
       () => ({file: null as File | null, }),
       (c, args) => c.uploadAttachment(this.$primaryKey, args.file))
@@ -57,7 +57,7 @@ export class CaseListViewModel extends ListViewModel<$models.Case, $apiClients.C
   
   public get getSomeCases() {
     const getSomeCases = this.$apiClient.$makeCaller(
-      "item", 
+      this.$metadata.methods.getSomeCases,
       (c) => c.getSomeCases(),
       () => ({}),
       (c, args) => c.getSomeCases())
@@ -68,7 +68,7 @@ export class CaseListViewModel extends ListViewModel<$models.Case, $apiClients.C
   
   public get getAllOpenCasesCount() {
     const getAllOpenCasesCount = this.$apiClient.$makeCaller(
-      "item", 
+      this.$metadata.methods.getAllOpenCasesCount,
       (c) => c.getAllOpenCasesCount(),
       () => ({}),
       (c, args) => c.getAllOpenCasesCount())
@@ -79,7 +79,7 @@ export class CaseListViewModel extends ListViewModel<$models.Case, $apiClients.C
   
   public get randomizeDatesAndStatus() {
     const randomizeDatesAndStatus = this.$apiClient.$makeCaller(
-      "item", 
+      this.$metadata.methods.randomizeDatesAndStatus,
       (c) => c.randomizeDatesAndStatus(),
       () => ({}),
       (c, args) => c.randomizeDatesAndStatus())
@@ -91,7 +91,7 @@ export class CaseListViewModel extends ListViewModel<$models.Case, $apiClients.C
   /** Returns a list of summary information about Cases */
   public get getCaseSummary() {
     const getCaseSummary = this.$apiClient.$makeCaller(
-      "item", 
+      this.$metadata.methods.getCaseSummary,
       (c) => c.getCaseSummary(),
       () => ({}),
       (c, args) => c.getCaseSummary())
@@ -115,7 +115,7 @@ export class CaseDtoViewModel extends ViewModel<$models.CaseDto, $apiClients.Cas
   
   public get asyncMethodOnIClassDto() {
     const asyncMethodOnIClassDto = this.$apiClient.$makeCaller(
-      "item", 
+      this.$metadata.methods.asyncMethodOnIClassDto,
       (c, input: string | null) => c.asyncMethodOnIClassDto(this.$primaryKey, input),
       () => ({input: null as string | null, }),
       (c, args) => c.asyncMethodOnIClassDto(this.$primaryKey, args.input))
@@ -190,7 +190,7 @@ export class CompanyListViewModel extends ListViewModel<$models.Company, $apiCli
   
   public get getCertainItems() {
     const getCertainItems = this.$apiClient.$makeCaller(
-      "item", 
+      this.$metadata.methods.getCertainItems,
       (c, isDeleted: boolean | null) => c.getCertainItems(isDeleted),
       () => ({isDeleted: null as boolean | null, }),
       (c, args) => c.getCertainItems(args.isDeleted))
@@ -260,7 +260,7 @@ export class PersonViewModel extends ViewModel<$models.Person, $apiClients.Perso
   /** Sets the FirstName to the given text. */
   public get rename() {
     const rename = this.$apiClient.$makeCaller(
-      "item", 
+      this.$metadata.methods.rename,
       (c, name: string | null) => c.rename(this.$primaryKey, name),
       () => ({name: null as string | null, }),
       (c, args) => c.rename(this.$primaryKey, args.name))
@@ -272,7 +272,7 @@ export class PersonViewModel extends ViewModel<$models.Person, $apiClients.Perso
   /** Removes spaces from the name and puts in dashes */
   public get changeSpacesToDashesInName() {
     const changeSpacesToDashesInName = this.$apiClient.$makeCaller(
-      "item", 
+      this.$metadata.methods.changeSpacesToDashesInName,
       (c) => c.changeSpacesToDashesInName(this.$primaryKey, ),
       () => ({}),
       (c, args) => c.changeSpacesToDashesInName(this.$primaryKey, ))
@@ -283,7 +283,7 @@ export class PersonViewModel extends ViewModel<$models.Person, $apiClients.Perso
   
   public get getBirthdate() {
     const getBirthdate = this.$apiClient.$makeCaller(
-      "item", 
+      this.$metadata.methods.getBirthdate,
       (c) => c.getBirthdate(this.$primaryKey, ),
       () => ({}),
       (c, args) => c.getBirthdate(this.$primaryKey, ))
@@ -294,7 +294,7 @@ export class PersonViewModel extends ViewModel<$models.Person, $apiClients.Perso
   
   public get fullNameAndAge() {
     const fullNameAndAge = this.$apiClient.$makeCaller(
-      "item", 
+      this.$metadata.methods.fullNameAndAge,
       (c) => c.fullNameAndAge(this.$primaryKey, ),
       () => ({}),
       (c, args) => c.fullNameAndAge(this.$primaryKey, ))
@@ -305,7 +305,7 @@ export class PersonViewModel extends ViewModel<$models.Person, $apiClients.Perso
   
   public get obfuscateEmail() {
     const obfuscateEmail = this.$apiClient.$makeCaller(
-      "item", 
+      this.$metadata.methods.obfuscateEmail,
       (c) => c.obfuscateEmail(this.$primaryKey, ),
       () => ({}),
       (c, args) => c.obfuscateEmail(this.$primaryKey, ))
@@ -316,7 +316,7 @@ export class PersonViewModel extends ViewModel<$models.Person, $apiClients.Perso
   
   public get changeFirstName() {
     const changeFirstName = this.$apiClient.$makeCaller(
-      "item", 
+      this.$metadata.methods.changeFirstName,
       (c, firstName: string | null, title: $models.Titles | null) => c.changeFirstName(this.$primaryKey, firstName, title),
       () => ({firstName: null as string | null, title: null as $models.Titles | null, }),
       (c, args) => c.changeFirstName(this.$primaryKey, args.firstName, args.title))
@@ -340,7 +340,7 @@ export class PersonListViewModel extends ListViewModel<$models.Person, $apiClien
   */
   public get add() {
     const add = this.$apiClient.$makeCaller(
-      "item", 
+      this.$metadata.methods.add,
       (c, numberOne: number | null, numberTwo: number | null) => c.add(numberOne, numberTwo),
       () => ({numberOne: null as number | null, numberTwo: null as number | null, }),
       (c, args) => c.add(args.numberOne, args.numberTwo))
@@ -352,7 +352,7 @@ export class PersonListViewModel extends ListViewModel<$models.Person, $apiClien
   /** Returns the user name */
   public get getUser() {
     const getUser = this.$apiClient.$makeCaller(
-      "item", 
+      this.$metadata.methods.getUser,
       (c) => c.getUser(),
       () => ({}),
       (c, args) => c.getUser())
@@ -363,7 +363,7 @@ export class PersonListViewModel extends ListViewModel<$models.Person, $apiClien
   
   public get personCount() {
     const personCount = this.$apiClient.$makeCaller(
-      "item", 
+      this.$metadata.methods.personCount,
       (c, lastNameStartsWith: string | null) => c.personCount(lastNameStartsWith),
       () => ({lastNameStartsWith: null as string | null, }),
       (c, args) => c.personCount(args.lastNameStartsWith))
@@ -374,7 +374,7 @@ export class PersonListViewModel extends ListViewModel<$models.Person, $apiClien
   
   public get removePersonById() {
     const removePersonById = this.$apiClient.$makeCaller(
-      "item", 
+      this.$metadata.methods.removePersonById,
       (c, id: number | null) => c.removePersonById(id),
       () => ({id: null as number | null, }),
       (c, args) => c.removePersonById(args.id))
@@ -386,7 +386,7 @@ export class PersonListViewModel extends ListViewModel<$models.Person, $apiClien
   /** Returns the user name */
   public get getUserPublic() {
     const getUserPublic = this.$apiClient.$makeCaller(
-      "item", 
+      this.$metadata.methods.getUserPublic,
       (c) => c.getUserPublic(),
       () => ({}),
       (c, args) => c.getUserPublic())
@@ -398,7 +398,7 @@ export class PersonListViewModel extends ListViewModel<$models.Person, $apiClien
   /** Gets all the first names starting with the characters. */
   public get namesStartingWith() {
     const namesStartingWith = this.$apiClient.$makeCaller(
-      "item", 
+      this.$metadata.methods.namesStartingWith,
       (c, characters: string | null) => c.namesStartingWith(characters),
       () => ({characters: null as string | null, }),
       (c, args) => c.namesStartingWith(args.characters))
@@ -410,7 +410,7 @@ export class PersonListViewModel extends ListViewModel<$models.Person, $apiClien
   /** Gets all the first names starting with the characters. */
   public get methodWithEntityParameter() {
     const methodWithEntityParameter = this.$apiClient.$makeCaller(
-      "item", 
+      this.$metadata.methods.methodWithEntityParameter,
       (c, person: $models.Person | null) => c.methodWithEntityParameter(person),
       () => ({person: null as $models.Person | null, }),
       (c, args) => c.methodWithEntityParameter(args.person))
@@ -422,7 +422,7 @@ export class PersonListViewModel extends ListViewModel<$models.Person, $apiClien
   /** Gets people matching the criteria, paginated by parameter 'page'. */
   public get searchPeople() {
     const searchPeople = this.$apiClient.$makeCaller(
-      "list", 
+      this.$metadata.methods.searchPeople,
       (c, criteria: $models.PersonCriteria | null, page: number | null) => c.searchPeople(criteria, page),
       () => ({criteria: null as $models.PersonCriteria | null, page: null as number | null, }),
       (c, args) => c.searchPeople(args.criteria, args.page))
@@ -463,7 +463,7 @@ export class WeatherServiceViewModel extends ServiceViewModel<typeof $metadata.W
   
   public get getWeather() {
     const getWeather = this.$apiClient.$makeCaller(
-      "item", 
+      this.$metadata.methods.getWeather,
       (c, location: $models.Location | null, dateTime: Date | null) => c.getWeather(location, dateTime),
       () => ({location: null as $models.Location | null, dateTime: null as Date | null, }),
       (c, args) => c.getWeather(args.location, args.dateTime))
@@ -474,7 +474,7 @@ export class WeatherServiceViewModel extends ServiceViewModel<typeof $metadata.W
   
   public get getWeatherAsync() {
     const getWeatherAsync = this.$apiClient.$makeCaller(
-      "item", 
+      this.$metadata.methods.getWeatherAsync,
       (c, location: $models.Location | null, dateTime: Date | null, conditions: $models.SkyConditions | null) => c.getWeatherAsync(location, dateTime, conditions),
       () => ({location: null as $models.Location | null, dateTime: null as Date | null, conditions: null as $models.SkyConditions | null, }),
       (c, args) => c.getWeatherAsync(args.location, args.dateTime, args.conditions))

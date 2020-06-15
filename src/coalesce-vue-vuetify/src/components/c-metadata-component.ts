@@ -18,7 +18,7 @@ import {
 
 export function getValueMeta(
   forVal: undefined | null | string | Property | Value | Method, 
-  modelMeta: ObjectType | ModelType | DataSourceType | null,
+  modelMeta: ObjectType | ModelType | DataSourceType | Method | null | undefined,
   $metadata?: Domain
 ): Property | Value | Method | null {
 
@@ -48,7 +48,10 @@ export function getValueMeta(
   let tailKind: "type" | "method" | "property" | "value" | undefined = undefined;
 
   if (modelMeta) {
-    if (modelMeta.type == "object" || modelMeta.type == "model" || modelMeta.type == "dataSource") {
+    if ("params" in modelMeta) {
+      tail = modelMeta;
+      tailKind = "method";
+    } else if (modelMeta.type == "object" || modelMeta.type == "model" || modelMeta.type == "dataSource") {
       tail = modelMeta
       tailKind = "type"
     }

@@ -547,7 +547,7 @@ export class ApiClient<T extends ApiRoutedType> {
     }
 
     // Set this on the instance if we have it.
-    instance.metadata = meta;
+    instance.$metadata = meta;
 
     return instance as any;
   }
@@ -896,7 +896,7 @@ export abstract class ApiState<
   TResult
 > extends Function {
   /** The metadata of the method being called, if it was provided. */
-  metadata?: Method;
+  $metadata?: Method;
 
   /** True if a request is currently pending. */
   isLoading: boolean = false;
@@ -1199,7 +1199,7 @@ export class ItemApiState<
   TResult
 > extends ApiState<TArgs, TResult> {
   /** The metadata of the method being called, if it was provided. */
-  metadata?: ItemMethod;
+  $metadata?: ItemMethod;
 
   /** Validation issues returned by the previous request. */
   validationIssues: ValidationIssue[] | null = null;
@@ -1242,7 +1242,10 @@ export class ItemApiStateWithArgs<
   TArgsObj,
   TResult
 > extends ItemApiState<TArgs, TResult> {
+  /** Values that will be used as arguments if the method is invoked with `this.invokeWithArgs()`. */
   public args: TArgsObj = this.argsFactory();
+
+  /** Invoke the method. If `args` is not provided, the values in `this.args` will be used for the method's parameters. */
   public invokeWithArgs(args: TArgsObj = this.args) {
     args = { ...args }; // Copy args so that if we're debouncing,
     // the args at the point in time at which invokeWithArgs() was
@@ -1250,6 +1253,11 @@ export class ItemApiStateWithArgs<
     return this._invokeInternal(this, () =>
       this.argsInvoker.apply(this, [this.apiClient, args])
     );
+  }
+
+  /** Replace `this.args` with a new, blank object containing default values (typically nulls) */
+  public resetArgs() {
+    this.args = this.argsFactory();
   }
 
   constructor(
@@ -1273,7 +1281,7 @@ export class ListApiState<
   TResult
 > extends ApiState<TArgs, TResult> {
   /** The metadata of the method being called, if it was provided. */
-  metadata?: ListMethod;
+  $metadata?: ListMethod;
 
   /** Page number returned by the previous request. */
   page: number | null = null;
@@ -1322,7 +1330,10 @@ export class ListApiStateWithArgs<
   TArgsObj,
   TResult
 > extends ListApiState<TArgs, TResult> {
+  /** Values that will be used as arguments if the method is invoked with `this.invokeWithArgs()`. */
   public args: TArgsObj = this.argsFactory();
+
+  /** Invoke the method. If `args` is not provided, the values in `this.args` will be used for the method's parameters. */
   public invokeWithArgs(args: TArgsObj = this.args) {
     args = { ...args }; // Copy args so that if we're debouncing,
     // the args at the point in time at which invokeWithArgs() was
@@ -1330,6 +1341,11 @@ export class ListApiStateWithArgs<
     return this._invokeInternal(this, () =>
       this.argsInvoker.apply(this, [this.apiClient, args])
     );
+  }
+
+  /** Replace `this.args` with a new, blank object containing default values (typically nulls) */
+  public resetArgs() {
+    this.args = this.argsFactory();
   }
 
   constructor(
@@ -1346,3 +1362,11 @@ export class ListApiStateWithArgs<
     this._makeReactive();
   }
 }
+
+export type AnyArgCaller<
+  TArgs extends any[] = any[],
+  TArgsObj = any,
+  TResult = any
+> = 
+  | ListApiStateWithArgs<TArgs,TArgsObj,TResult> 
+  | ItemApiStateWithArgs<TArgs,TArgsObj,TResult>

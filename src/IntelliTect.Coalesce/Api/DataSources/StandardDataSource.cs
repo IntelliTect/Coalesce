@@ -533,7 +533,7 @@ namespace IntelliTect.Coalesce
             pageSize = Math.Max(pageSize, 1);
             
             // Cap the page number at the last item
-            if (totalCount.HasValue && (page - 1) * pageSize > totalCount)
+            if (totalCount.HasValue && totalCount != -1 && (page - 1) * pageSize > totalCount)
             {
                 page = (int)((totalCount - 1) / pageSize) + 1;
             }

@@ -29,7 +29,7 @@ export default Vue.extend({
     list: { required: true, type: Object }
   },
   computed: {
-    rangeStart(): string | number | null {
+    rangeStart(): number {
       const list = this.list as ListViewModel;
       const page = list.$load.page ?? 0;
       const pageSize = list.$load.pageSize ?? 0;
@@ -41,7 +41,7 @@ export default Vue.extend({
       return (page-1) * pageSize + 1
     },
 
-    rangeEnd(): string | number | null {
+    rangeEnd(): number {
       const list = this.list as ListViewModel;
       const page = list.$load.page ?? 0;
       const pageSize = list.$load.pageSize ?? 0;
@@ -50,12 +50,7 @@ export default Vue.extend({
         return 0;
       }
 
-      if (page == list.$load.pageCount) {
-        // We're on the last page. Cap the range at the total count.
-        return list.$load.totalCount;
-      }
-
-      return page * pageSize;
+      return this.rangeStart + list.$items.length - 1
     }
   }
 })

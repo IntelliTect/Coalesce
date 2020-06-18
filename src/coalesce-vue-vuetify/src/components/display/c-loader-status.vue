@@ -57,6 +57,8 @@ import { Component, Prop } from 'vue-property-decorator'
 import { ApiState, ItemApiState, ListApiState } from 'coalesce-vue';
 
 type AnyLoader = ItemApiState<any, any> | ListApiState<any, any>
+type AnyLoaderMaybe = AnyLoader | null | undefined
+
 class Flags {
   progress: boolean | null = null;
   initialProgress = true;
@@ -86,7 +88,7 @@ export default class extends Vue {
    * Loaders (docs forthcoming)
    */
   @Prop({required: true, type: Object })
-  loaders!: { [flags: string]: AnyLoader | AnyLoader[] };
+  loaders!: { [flags: string]: AnyLoaderMaybe | AnyLoaderMaybe[] };
 
   /**
    * If the loader is loading when it already has a result,
@@ -121,7 +123,9 @@ export default class extends Vue {
         loaders = [ loaders ]
       }
       for (const loader of loaders) {
-        ret.push([loader, flags as Flags] as const)
+        if (loader) {
+          ret.push([loader, flags as Flags] as const)
+        }
       }
     }
 

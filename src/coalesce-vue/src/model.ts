@@ -845,17 +845,19 @@ export function bindKeyToRouteOnCreate(
   vue: Vue,
   model: Model<ModelType>,
   routeParamName: string = 'id',
-  keepQuery: boolean = false
+  keepQuery: boolean = false,
+  routeName?: string,
 ) {
+  routeName = routeName ?? vue.$route.name 
   vue.$watch(
     () => (model as any)[model.$metadata.keyProp.name],
     (pk, o) => {
-      if (!vue.$route.name) {
+      if (!routeName) {
         throw Error("Cannot use bindKeyToRouteOnCreate with unnamed routes.")
       }
       if (pk && !o) {
         const { href } = vue.$router.resolve({
-          name: vue.$route.name,
+          name: routeName ?? vue.$route.name,
           query: keepQuery ? vue.$route.query : {},
           params: {
             ...vue.$route.params,

@@ -3,17 +3,27 @@ import Vue from "vue";
 
 // This will tree shake correctly as of v2.0.0-alpha.21
 import { format as baseFormat, formatDistanceToNow, lightFormat, parseISO } from "date-fns";
+import type * as dateFnsTz from 'date-fns-tz';
 
 // Optionally use date-fns-tz's format instead of the base format if it is available.
-let dateFnsTz: typeof import('date-fns-tz') | undefined;
-try {
-  dateFnsTz = require("date-fns-tz");
-} catch (e) {}
+let dateFnsTzLib: typeof dateFnsTz | undefined = undefined;
 
-const format: 
+/** Register `date-fns-tz` with `coalesce-vue` such that its additional timezone-aware format function
+ * can be used by coalesce-vue.
+ */
+export function useTimeZoneLib(tzLib: typeof dateFnsTz) {
+  dateFnsTzLib = tzLib;
+}
+
+type formatFnType = 
   | typeof import('date-fns').format 
-  | typeof import('date-fns-tz').format 
-  = dateFnsTz?.format ?? baseFormat;
+  | typeof import('date-fns-tz').format ;
+
+const format = function(this: any, ...args: Parameters<formatFnType>) {
+  return (dateFnsTzLib?.format ?? baseFormat as any).apply(this, args);
+} as formatFnType
+  
+
 
 
 import {
@@ -691,15 +701,20 @@ class DisplayVisitor extends Visitor<
       if ("format" in this.options.format) {
         const {format: fmt, ...options} = this.options.format;
         if ("timeZone" in options && options.timeZone) {
-          if (!dateFnsTz) {
-            throw Error("Could not find date-fns-tz, which is required when using the 'timeZone' date option.")
+          if (!dateFnsTzLib) {
+            throw Error(`To use the the 'timeZone' date option, you must register 'date-fns-tz' with coalesce-vue: 
+
+            import { useTimeZoneLib } from 'coalesce-vue';
+            import * as dateFnsTz from 'date-fns-tz';
+            useTimeZoneLib(dateFnsTz);
+            `)
           }
           // This is honestly so stupid that you have to manually convert the input
           // instead of the format function converting it for you based on the timeZone option 
           // that is being passed to it...
           // From the docs: 
           //    "To clarify, the format function will never change the underlying date, it must be changed to a zoned time before passing it to format."
-          return format(dateFnsTz.utcToZonedTime(parsed, options.timeZone), fmt, options as any);
+          return format(dateFnsTzLib.utcToZonedTime(parsed, options.timeZone), fmt, options as any);
         }
         return format(parsed, fmt, options as any);
       }

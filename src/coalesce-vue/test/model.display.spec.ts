@@ -4,6 +4,8 @@ import { ObjectValue, Value } from "../src/metadata";
 import { shortStringify } from "./test-utils";
 import { format, subYears } from "date-fns";
 import { toDate } from 'date-fns-tz';
+import * as dateFnsTz from 'date-fns-tz'
+model.useTimeZoneLib(dateFnsTz)
 
 const studentProps = $metadata.Student.props;
 

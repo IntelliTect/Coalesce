@@ -2,28 +2,8 @@ import Vue from "vue";
 
 
 // This will tree shake correctly as of v2.0.0-alpha.21
-import { format as baseFormat, formatDistanceToNow, lightFormat, parseISO } from "date-fns";
-import type * as dateFnsTz from 'date-fns-tz';
-
-// Optionally use date-fns-tz's format instead of the base format if it is available.
-let dateFnsTzLib: typeof dateFnsTz | undefined = undefined;
-
-/** Register `date-fns-tz` with `coalesce-vue` such that its additional timezone-aware format function
- * can be used by coalesce-vue.
- */
-export function useTimeZoneLib(tzLib: typeof dateFnsTz) {
-  dateFnsTzLib = tzLib;
-}
-
-type formatFnType = 
-  | typeof import('date-fns').format 
-  | typeof import('date-fns-tz').format ;
-
-const format = function(this: any, ...args: Parameters<formatFnType>) {
-  return (dateFnsTzLib?.format ?? baseFormat as any).apply(this, args);
-} as formatFnType
-  
-
+import { formatDistanceToNow, lightFormat, parseISO } from "date-fns";
+import { format, utcToZonedTime } from 'date-fns-tz';
 
 
 import {
@@ -592,7 +572,7 @@ export function mapToDtoFiltered<T extends Model<ClassType>>(
 export interface DisplayOptions {
   /** Date format options. One of:
    * - A UTS#35 date format string (https://date-fns.org/docs/format)
-   * - An object with options for https://date-fns.org/docs/format or https://github.com/marnusw/date-fns-tz#format, including a string `format` for the format itself.
+   * - An object with options for https://date-fns.org/docs/format or https://github.com/marnusw/date-fns-tz#format, including a string `format` for the format itself. If a `timeZone` option is provided per https://github.com/marnusw/date-fns-tz#format, the date being formatted will be converted to that timezone.
    * - An object with options for https://date-fns.org/docs/formatDistance */
   format?:
     | string
@@ -701,20 +681,12 @@ class DisplayVisitor extends Visitor<
       if ("format" in this.options.format) {
         const {format: fmt, ...options} = this.options.format;
         if ("timeZone" in options && options.timeZone) {
-          if (!dateFnsTzLib) {
-            throw Error(`To use the the 'timeZone' date option, you must register 'date-fns-tz' with coalesce-vue: 
-
-            import { useTimeZoneLib } from 'coalesce-vue';
-            import * as dateFnsTz from 'date-fns-tz';
-            useTimeZoneLib(dateFnsTz);
-            `)
-          }
           // This is honestly so stupid that you have to manually convert the input
           // instead of the format function converting it for you based on the timeZone option 
           // that is being passed to it...
           // From the docs: 
           //    "To clarify, the format function will never change the underlying date, it must be changed to a zoned time before passing it to format."
-          return format(dateFnsTzLib.utcToZonedTime(parsed, options.timeZone), fmt, options as any);
+          return format(utcToZonedTime(parsed, options.timeZone), fmt, options as any);
         }
         return format(parsed, fmt, options as any);
       }

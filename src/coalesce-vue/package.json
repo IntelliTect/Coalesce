@@ -23,13 +23,13 @@
     "@types/qs": "^6.5.3",
     "axios": "^0.19.1",
     "date-fns": "^2.14.0",
+    "date-fns-tz": "^1.0.10",
     "lodash-es": "^4.17.15",
     "qs": "^6.9.1",
     "tslib": "^1.10.0"
   },
   "peerDependencies": {
-    "vue": "^2.6.11",
-    "date-fns-tz": "^1.0.10"
+    "vue": "^2.6.11"
   },
   "optionalDependencies": {
     "vue-router": ">=3.0.0"
@@ -43,8 +43,7 @@
     "ts-jest": "^26.1.0",
     "typescript": "3.8.2",
     "vue": "^2.6.11",
-    "vue-router": "^3.1.5",
-    "date-fns-tz": "^1.0.10"
+    "vue-router": "^3.1.5"
   },
   "scripts": {
     "build": "tsc -p ./tsconfig.build.json",

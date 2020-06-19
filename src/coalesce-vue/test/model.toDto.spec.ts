@@ -3,7 +3,6 @@ import * as $metadata from "./targets.metadata";
 import { Value } from "../src/metadata";
 import { shortStringify } from "./test-utils";
 import { twoWayConversions, studentValue, MappingData } from "./model.shared";
-import { format } from "date-fns";
 
 const studentProps = $metadata.Student.props;
 

@@ -96,7 +96,7 @@ describe.each(<DisplayData[]>[
   { meta: studentProps.birthDate, model: undefined, display: null },
   { meta: studentProps.birthDate, model: new Date(1990, 0, 2, 3, 4, 5), display: "1/2/1990 3:04:05 AM" },
   { meta: studentProps.birthDate, model: new Date(1990, 0, 2, 3, 4, 5), display: "1990", options: {format: 'yyyy'} },
-  { meta: studentProps.birthDate, model: toDate('2014-10-25T13:46:20+02:00'), display: "2014-10-25 04:46:20 EDT", options: {format: {format: 'yyyy-MM-dd HH:mm:ss zzz', timeZone: 'America/New_York'}} },
+  { meta: studentProps.birthDate, model: toDate('2014-10-25T13:46:20+02:00'), display: "2014-10-25 07:46:20 EDT", options: {format: {format: 'yyyy-MM-dd HH:mm:ss zzz', timeZone: 'America/New_York'}} },
   { meta: studentProps.birthDate, model: subYears(new Date(), 2), display: "about 2 years ago", options: {format: {distance: true}} },
   { meta: studentProps.birthDate, model: subYears(new Date(), 2), display: "about 2 years", options: {format: {distance: true, addSuffix: false}} },
   { meta: studentProps.birthDate, 

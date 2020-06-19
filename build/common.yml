@@ -183,10 +183,10 @@ jobs:
   steps:
   # https://github.com/nodejs/build/issues/2263
   # this might not even be needed anymore
-  - task: NodeTool@0
-    displayName: 'Use Node 14.x'
-    inputs:
-      versionSpec: 14.x
+  #- task: NodeTool@0
+  #  displayName: 'Use Node 10.x'
+  #  inputs:
+  #    versionSpec: 10.x
 
   - script: npm ci
     displayName: npm ci

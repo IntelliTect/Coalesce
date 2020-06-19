@@ -5,7 +5,7 @@ import Vue from "vue";
 import { format as baseFormat, formatDistanceToNow, lightFormat, parseISO } from "date-fns";
 
 // Optionally use date-fns-tz's format instead of the base format if it is available.
-const dateFnsTz = require("date-fns-tz");
+const dateFnsTz: typeof import('date-fns-tz') | undefined = require("date-fns-tz");
 const format: 
   | typeof import('date-fns').format 
   | typeof import('date-fns-tz').format 
@@ -686,6 +686,17 @@ class DisplayVisitor extends Visitor<
 
       if ("format" in this.options.format) {
         const {format: fmt, ...options} = this.options.format;
+        if ("timeZone" in options && options.timeZone) {
+          if (!dateFnsTz) {
+            throw Error("Could not find date-fns-tz, which is required when using the 'timeZone' date option.")
+          }
+          // This is honestly so stupid that you have to manually convert the input
+          // instead of the format function converting it for you based on the timeZone option 
+          // that is being passed to it...
+          // From the docs: 
+          //    "To clarify, the format function will never change the underlying date, it must be changed to a zoned time before passing it to format."
+          return format(dateFnsTz.utcToZonedTime(parsed, options.timeZone), fmt, options as any);
+        }
         return format(parsed, fmt, options as any);
       }
 

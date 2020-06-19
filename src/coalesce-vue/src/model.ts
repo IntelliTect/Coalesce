@@ -2,7 +2,15 @@ import Vue from "vue";
 
 
 // This will tree shake correctly as of v2.0.0-alpha.21
-import { format, formatDistanceToNow, lightFormat, parseISO } from "date-fns";
+import { format as baseFormat, formatDistanceToNow, lightFormat, parseISO } from "date-fns";
+
+// Optionally use date-fns-tz's format instead of the base format if it is available.
+const dateFnsTz = require("date-fns-tz");
+const format: 
+  | typeof import('date-fns').format 
+  | typeof import('date-fns-tz').format 
+  = dateFnsTz?.format ?? baseFormat;
+
 
 import {
   ClassType,
@@ -570,11 +578,16 @@ export function mapToDtoFiltered<T extends Model<ClassType>>(
 export interface DisplayOptions {
   /** Date format options. One of:
    * - A UTS#35 date format string (https://date-fns.org/docs/format)
-   * - An object with options for https://date-fns.org/v2.9.0/docs/formatDistance */
+   * - An object with options for https://date-fns.org/docs/format or https://github.com/marnusw/date-fns-tz#format, including a string `format` for the format itself.
+   * - An object with options for https://date-fns.org/docs/formatDistance */
   format?:
     | string
+    | ({
+        /** A UTS#35 date format string (https://date-fns.org/docs/format) */
+        format: string;
+      } & Parameters<typeof format>[2] )
     | {
-        /** Format date with https://date-fns.org/v2.9.0/docs/formatDistanceToNow */
+        /** Format date with https://date-fns.org/docs/formatDistanceToNow */
         distance: true;
         /** Append/prepend `'in'` or `'ago'` if date is after/before now. Default `true`. */
         addSuffix?: boolean;
@@ -666,12 +679,17 @@ class DisplayVisitor extends Visitor<
   protected visitDateValue(value: any, meta: DateValue): string | null {
     const parsed = parseValue(value, meta);
     if (parsed == null) return null;
-    if (this.options) {
+    if (this.options?.format) {
       if (typeof this.options.format == "string") {
         return format(parsed, this.options.format);
       }
 
-      if (this.options.format?.distance) {
+      if ("format" in this.options.format) {
+        const {format: fmt, ...options} = this.options.format;
+        return format(parsed, fmt, options as any);
+      }
+
+      if ("distance" in this.options.format) {
         const {
           addSuffix = true, // Default addSuffix to true - most likely, it is desired.
           includeSeconds = false

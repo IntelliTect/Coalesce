@@ -5,7 +5,11 @@ import Vue from "vue";
 import { format as baseFormat, formatDistanceToNow, lightFormat, parseISO } from "date-fns";
 
 // Optionally use date-fns-tz's format instead of the base format if it is available.
-const dateFnsTz: typeof import('date-fns-tz') | undefined = require("date-fns-tz");
+let dateFnsTz: typeof import('date-fns-tz') | undefined;
+try {
+  dateFnsTz = require("date-fns-tz");
+} catch (e) {}
+
 const format: 
   | typeof import('date-fns').format 
   | typeof import('date-fns-tz').format 
@@ -875,7 +879,7 @@ export function bindKeyToRouteOnCreate(
   model: Model<ModelType>,
   routeParamName: string = 'id',
   keepQuery: boolean = false,
-  routeName?: string,
+  routeName?: string | null,
 ) {
   routeName = routeName ?? vue.$route.name 
   vue.$watch(

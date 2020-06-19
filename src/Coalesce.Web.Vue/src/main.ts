@@ -42,6 +42,9 @@ AxiosClient.defaults.withCredentials = true
 const router = new VueRouter({ mode: 'history', routes: [
   
   { path: '/', redirect: '/admin/Person' },
+  {
+    path: '/test',
+    component: () => import("./components/test.vue"),  },
 
   { path: '/admin/:type', 
     name: 'coalesce-admin-list', 

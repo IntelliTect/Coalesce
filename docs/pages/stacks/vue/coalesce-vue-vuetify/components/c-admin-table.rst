@@ -26,3 +26,6 @@ Props
     The :ref:`ListViewModel <VueListViewModels>` to render a table for.
 
 
+:ts:`pageSizes?: number[]`
+    An optional list of available page sizes to offer through the :ref:`c-list-pagination`'s :ref:`c-list-page-size` component. Defaults to :ts:`[10, 25, 100]`.
+

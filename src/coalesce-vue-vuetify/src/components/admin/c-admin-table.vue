@@ -38,7 +38,7 @@
         </template>
       </c-table>
 
-      <c-list-pagination :list="list" class="mt-4"></c-list-pagination>
+      <c-list-pagination :list="list" :pageSizes="pageSizes" class="mt-4"></c-list-pagination>
     </v-card-text>
   </v-card>
 </template>
@@ -59,6 +59,9 @@ import CAdminTableToolbar from './c-admin-table-toolbar.vue';
 export default class extends Vue {
   @Prop({required: true, type: Object})
   public list!: any;
+
+  @Prop({required: false})
+  pageSizes?: number[]
 
   get viewModel(): ListViewModel {
     if (this.list instanceof ListViewModel) return this.list;

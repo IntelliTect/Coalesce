@@ -32,7 +32,7 @@ export default Vue.extend({
 
 	render(h, ctx) {
 
-    let model = ctx.props.model;
+    let model = ctx.props.model; 
     const modelMeta = model ? model.$metadata : null;
     let valueMeta = getValueMeta(ctx.props.for, modelMeta, ctx.parent.$coalesce.metadata);
 
@@ -132,7 +132,7 @@ export default Vue.extend({
       }
     }
 
-    // Handle components that delegate immediately to 
+    // Handle components that delegate immediately to Vuetify
     switch (valueMeta.type) {
       case 'string':
       case 'number':
@@ -165,6 +165,9 @@ export default Vue.extend({
         return h('v-select', data);
 
       case 'file': 
+        // v-file-input uses 'change' as its event, not 'input'.
+        data.on.change = data.on.input;
+        delete data.on.input;
         return h('v-file-input', data);
     }
 

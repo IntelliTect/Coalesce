@@ -7,7 +7,7 @@
       Page Size
     </span>
 
-    <!-- Title on its own component because vuetify doesn't 
+    <!-- Title on its own element because vuetify doesn't 
     seem to want to accept a title on v-select? -->
     <span title="Current Page Size">
 

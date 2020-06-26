@@ -58,6 +58,9 @@ Props
 :ts:`extraHeaders?: string[]`
     The text contents of one or more extra ``th`` elements to render in the table. Should be used in conjunction with the ``item.append`` slot.
 
+:ts:`editable: boolean = false`
+    If true, properties in each table cell will be rendered with :ref:`c-input`. Non-editable properties will be rendered in accordance with the value of the :ts:`admin` prop.
+
 :ts:`admin: boolean = false`
     If true, properties in each table cell will be rendered with :ref:`c-admin-display` instead of :ref:`c-display`.
 

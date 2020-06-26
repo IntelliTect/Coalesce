@@ -448,7 +448,7 @@ export default class CSelect extends MetadataComponent {
 
 
 <style lang="scss">
-  .c-select input[type=text]:not(:first-child) {
+  .c-select.v-input--is-focused input[type=text]:not(:first-child) {
     padding-left: 10px;
     color: rgba(0,0,0,.54) !important;
   }

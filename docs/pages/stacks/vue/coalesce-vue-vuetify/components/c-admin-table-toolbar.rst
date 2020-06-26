@@ -17,7 +17,11 @@ Examples
 
 .. code-block:: sfc
 
-    <c-admin-table-toolbar :model="personList" />
+    <c-admin-table-toolbar :list="personList" />
+
+.. code-block:: sfc
+
+    <c-admin-table-toolbar :list="personList" color="pink" :editable.sync="isEditable" />
 
 Props
 -----
@@ -25,8 +29,11 @@ Props
 :ts:`list: ListViewModel`
     The :ref:`ListViewModel <VueListViewModels>` to render the toolbar for.
 
-:ts:`color: string = "primary darken-1"`
+:ts:`color: string = "primary"`
     The `color <https://vuetifyjs.com/en/styles/colors/>`_ of the toolbar.
+
+:ts:`editable?: boolean`
+    If provided, adds a button to toggle the value of this prop. Should be bound with the :ts:`.sync` modifier.
 
 
 

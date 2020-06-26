@@ -2,7 +2,9 @@
   <v-container fluid class="c-admin-table-page">
     <c-admin-table 
       class="c-admin-table-page--table"
-      :list="listVM">
+      :list="listVM"
+      query-bind
+    >
     </c-admin-table>
     
     <c-admin-methods 
@@ -62,30 +64,6 @@ export default class extends MetadataComponent {
       }
       this.listVM = new ListViewModel.typeLookup![this.type]
     }
-
-    // Pull initial parameters from the querystring before we setup watchers.
-    this.listVM.$params = mapQueryToParams(this.$route.query, ListParameters, this.listVM.$metadata)
-
-    this.$watch(
-      () => mapParamsToDto(this.listVM.$params),
-      (mappedParams) => {
-        this.$router.replace({query: {
-          // ...this.$route.query,
-          // mappedParams contains numbers and strings. 
-          // Vue-router only claims to accept strings. Vue-router can just deal with it.
-          ...(mappedParams as any)
-        }})
-      },
-      { deep: true }
-    )
-
-    // When the query changes, grab the new value.
-    this.$watch(
-      () => this.$route.query, 
-      (v: any) => {
-        this.listVM.$params = mapQueryToParams(v, ListParameters, this.listVM.$metadata)
-      }
-    );
   }
 
 }

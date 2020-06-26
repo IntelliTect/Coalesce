@@ -128,6 +128,7 @@ export default class CSelectManyToMany extends MetadataComponent {
   created() {
     // This needs to be late initialized so we have the correct "this" reference.
     this.listCaller = new ModelApiClient(this.foreignItemModelType)
+      .$withSimultaneousRequestCaching()
       .$makeCaller("list", function(this: CSelectManyToMany, c) {
         return c.list(this.listParams);
       })

@@ -80,6 +80,8 @@ import { Model, ClassType, ViewModel, Property, ModelType, BehaviorFlags, Hidden
 
 import CInput from '../input/c-input'
 import CAdminDisplay from './c-admin-display'
+
+import { isPropReadOnly } from '../../util'
     
 @Component({
   name: 'c-admin-editor',
@@ -121,10 +123,7 @@ export default class extends Vue {
 
   isPropReadOnly(p: Property) {
     if (!this.canEdit) return true;
-    
-    return p.dontSerialize 
-      && p.role !== "referenceNavigation" 
-      && p.role !== "collectionNavigation"
+    return isPropReadOnly(p)
   }
   
   get showProps() { 

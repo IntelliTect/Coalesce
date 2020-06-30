@@ -139,9 +139,9 @@ namespace IntelliTect.Coalesce
             return _children.GetEnumerator();
         }
 
-#pragma warning disable CS8614 // Nullability of reference types in type of parameter doesn't match implicitly implemented member.
+#pragma warning disable CS8767 // Nullability of reference types in type of parameter doesn't match implicitly implemented member.
         public bool TryGetValue(
-#pragma warning restore CS8614 // Nullability of reference types in type of parameter doesn't match implicitly implemented member.
+#pragma warning restore CS8767 // Nullability of reference types in type of parameter doesn't match implicitly implemented member.
             string key,
 #if NETCOREAPP3_1
             [System.Diagnostics.CodeAnalysis.NotNullWhen(true)]
@@ -158,9 +158,9 @@ namespace IntelliTect.Coalesce
 
         public IncludeTree? this[string key]
         {
-#pragma warning disable CS8613 // Nullability of reference types in return type doesn't match implicitly implemented member.
+#pragma warning disable CS8766 // Nullability of reference types in return type doesn't match implicitly implemented member.
             get
-#pragma warning restore CS8613 // Nullability of reference types in return type doesn't match implicitly implemented member.
+#pragma warning restore CS8766 // Nullability of reference types in return type doesn't match implicitly implemented member.
             {
                 if (!_children.ContainsKey(key)) return null;
                 return _children[key];

@@ -10,11 +10,11 @@ namespace Coalesce.Domain
         public int CaseId { get; set; }
 
         [Search]
-        public Case Case { get; set; }
+        public Case Case { get; set; } = null!;
 
         public int ProductId { get; set; }
 
         [Search]
-        public Product Product { get; set; }
+        public Product Product { get; set; } = null!;
     }
 }

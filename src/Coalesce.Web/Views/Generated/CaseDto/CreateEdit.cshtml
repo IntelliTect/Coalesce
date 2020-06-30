@@ -121,7 +121,7 @@
     {
         @:model.load('@ViewBag.Id');
     }
-    @foreach (var kvp in ViewBag.ParentIds)
+    @foreach (KeyValuePair<string, Microsoft.Extensions.Primitives.StringValues> kvp in ViewBag.ParentIds)
     {
         @:model.@(((string)(@kvp.Key)))(@kvp.Value);
     }

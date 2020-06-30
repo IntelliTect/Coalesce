@@ -11,6 +11,7 @@
     -->
     <TargetFrameworks>netcoreapp3.1;net471</TargetFrameworks>
     <IsPackable>false</IsPackable>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
   
 

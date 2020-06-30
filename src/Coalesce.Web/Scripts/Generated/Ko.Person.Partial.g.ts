@@ -234,6 +234,28 @@ module ViewModels {
             };
         };
         
+        /** Methods and properties for invoking server method GetBirthdate. */
+        public readonly getBirthdate = new PersonPartial.GetBirthdate(this);
+        public static GetBirthdate = class GetBirthdate extends Coalesce.ClientMethod<PersonPartial, moment.Moment> {
+            public readonly name = 'GetBirthdate';
+            public readonly verb = 'POST';
+            
+            /** Calls server method (GetBirthdate) with the given arguments */
+            public invoke = (callback?: (result: moment.Moment) => void, reload: boolean = true): JQueryPromise<any> => {
+                return this.invokeWithData({ id: this.parent[this.parent.primaryKeyName]() }, callback, reload);
+            };
+            
+            protected loadResponse = (data: Coalesce.ItemResult, callback?: (result: moment.Moment) => void, reload: boolean = true) => {
+                this.result(data.object);
+                if (reload) {
+                    var result = this.result();
+                    this.parent.load(null, typeof(callback) == 'function' ? () => callback(result) : undefined);
+                } else if (typeof(callback) == 'function') {
+                    callback(this.result());
+                }
+            };
+        };
+        
         /** Methods and properties for invoking server method FullNameAndAge. */
         public readonly fullNameAndAge = new PersonPartial.FullNameAndAge(this);
         public static FullNameAndAge = class FullNameAndAge extends Coalesce.ClientMethod<PersonPartial, string> {

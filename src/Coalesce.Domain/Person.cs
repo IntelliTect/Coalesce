@@ -16,6 +16,7 @@ namespace Coalesce.Domain
     [TypeScriptPartial]
     public class Person
     {
+#nullable disable
         public enum Genders
         {
             NonSpecified = 0,
@@ -121,6 +122,14 @@ namespace Coalesce.Domain
         /// </summary>
         public Company Company { get; set; }
 
+#nullable restore
+
+        // Ad-hoc test case for https://github.com/IntelliTect/Coalesce/issues/109
+        // Migrate to a real test case once real tests exist for the code gen.
+        [NotMapped]
+        public ICollection<string> ArbitraryCollectionOfStrings { get; set; }
+
+
         /// <summary>
         /// Sets the FirstName to the given text.
         /// </summary>
@@ -131,11 +140,6 @@ namespace Coalesce.Domain
             includeTree = IncludeTree.For<Person>(p => p.IncludedSeparately(x => x.Company));
             return this;
         }
-
-        // Ad-hoc test case for https://github.com/IntelliTect/Coalesce/issues/109
-        // Migrate to a real test case once real tests exist for the code gen.
-        [NotMapped]
-        public ICollection<string> ArbitraryCollectionOfStrings { get; set; }
 
         /// <summary>
         /// Removes spaces from the name and puts in dashes
@@ -308,7 +312,7 @@ namespace Coalesce.Domain
         {
             public Behaviors(CrudContext<AppDbContext> context) : base(context) { }
 
-            public override ItemResult BeforeSave(SaveKind kind, Person oldItem, Person item)
+            public override ItemResult BeforeSave(SaveKind kind, Person? oldItem, Person item)
             {
                 if (kind == SaveKind.Update && item.FirstName != null && item.FirstName.Length < 2)
                 {
@@ -317,7 +321,7 @@ namespace Coalesce.Domain
 
                 if (item.FirstName?.Contains("[user]") ?? false)
                 {
-                    item.FirstName = item.FirstName.Replace("[user]", User.Identity.Name);
+                    item.FirstName = item.FirstName.Replace("[user]", User?.Identity.Name);
                 }
                 return true;
             }
@@ -358,8 +362,8 @@ namespace Coalesce.Domain
 
     public class PersonCriteria
     {
-        public string Name { get; set; }
+        public string? Name { get; set; }
         public int? BirthdayMonth { get; set; }
-        public string EmailDomain { get; set; }
+        public string? EmailDomain { get; set; }
     }
 }

@@ -149,6 +149,23 @@
                         <span class="label label-info" data-bind="fadeVisible: isLoading">Loading</span>
                     </td>
                 </tr>
+                <tr data-bind="with: getBirthdate">
+                    <td>
+                        <button class="btn btn-default btn-xs" data-bind="click: function(){ invoke() }">
+                            Get Birthdate
+                        </button>
+                    </td>
+                    <td>
+                        <span data-bind="text: result"></span>
+                    </td>
+                    <td>
+                        <span data-bind="text: wasSuccessful"></span>
+                        <span data-bind="text: message"></span>
+                    </td>
+                    <td>
+                        <span class="label label-info" data-bind="fadeVisible: isLoading">Loading</span>
+                    </td>
+                </tr>
                 <tr data-bind="with: fullNameAndAge">
                     <td>
                         <button class="btn btn-default btn-xs" data-bind="click: function(){ invoke() }">
@@ -316,7 +333,7 @@
     {
         @:model.load('@ViewBag.Id');
     }
-    @foreach (var kvp in ViewBag.ParentIds)
+    @foreach (KeyValuePair<string, Microsoft.Extensions.Primitives.StringValues> kvp in ViewBag.ParentIds)
     {
         @:model.@(((string)(@kvp.Key)))(@kvp.Value);
     }

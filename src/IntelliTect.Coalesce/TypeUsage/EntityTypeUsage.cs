@@ -11,7 +11,7 @@ namespace IntelliTect.Coalesce.TypeUsage
         {
             Context = context;
             TypeViewModel = typeViewModel;
-            ClassViewModel = typeViewModel.ClassViewModel;
+            ClassViewModel = typeViewModel.ClassViewModel ?? throw new ArgumentException("Entity is not a class", nameof(typeViewModel));
             ContextPropertyName = contextPropertyName;
         }
 

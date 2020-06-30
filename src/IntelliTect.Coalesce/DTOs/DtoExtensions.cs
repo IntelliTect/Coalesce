@@ -19,6 +19,7 @@ namespace IntelliTect.Coalesce
         /// Get the value of a value type on a generic DTO. Allows accessing properties where the implementation type of the DTO is not known.
         /// </summary>
         public static TValue? GetValue<TObject, TValue>(this IClassDto<TObject> dto, Expression<Func<TObject, TValue>> property)
+            where TObject : class
             where TValue : struct
             => GetPropertyInfo(dto, property).GetValue(dto) as TValue?;
 
@@ -27,6 +28,7 @@ namespace IntelliTect.Coalesce
         /// Allows accessing properties where the implementation type of the DTO is not known.
         /// </summary>
         public static TValue? GetValue<TObject, TValue>(this IClassDto<TObject> dto, Expression<Func<TObject, TValue?>> property)
+            where TObject : class
             where TValue : struct
             => GetPropertyInfo(dto, property).GetValue(dto) as TValue?;
 
@@ -35,6 +37,7 @@ namespace IntelliTect.Coalesce
         /// Allows accessing properties where the implementation type of the DTO is not known.
         /// </summary>
         public static string GetValue<TObject>(this IClassDto<TObject> dto, Expression<Func<TObject, string>> property)
+            where TObject : class
             // This is just a "nice" alias for GetObject so you can still invoke a method called "GetValue" for strings.
             => dto.GetObject(property);
 
@@ -43,14 +46,16 @@ namespace IntelliTect.Coalesce
         /// Allows accessing properties where the implementation type of the DTO is not known.
         /// </summary>
         public static TValue GetObject<TObject, TValue>(this IClassDto<TObject> dto, Expression<Func<TObject, TValue>> property)
+            where TObject : class
             where TValue : class
-            => GetPropertyInfo(dto, property).GetValue(dto) as TValue;
+            => (TValue)GetPropertyInfo(dto, property).GetValue(dto)!;
 
         /// <summary>
         /// Check if the value of a property on a DTO is not null.
         /// Allows accessing properties where the implementation type of the DTO is not known.
         /// </summary>
         public static bool HasValue<TObject, TValue>(this IClassDto<TObject> dto, Expression<Func<TObject, TValue>> property)
+            where TObject : class
             => !(GetPropertyInfo(dto, property).GetValue(dto) is null);
 
 
@@ -69,7 +74,7 @@ namespace IntelliTect.Coalesce
             Type dtoType = dto.GetType();
             string propertyName = property.GetExpressedProperty(paramType: null).Name;
             var propViewModel = ReflectionRepository.Global
-                .GetClassViewModel(dtoType)
+                .GetClassViewModel(dtoType)?
                 .PropertyByName(propertyName);
 
             if (propViewModel == null) 

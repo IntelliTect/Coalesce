@@ -23,27 +23,27 @@ namespace IntelliTect.Coalesce
         /// If set, this data source will be used in place of the supplied data source
         /// when retrieving an object that will be updated in a Save operation.
         /// </summary>
-        public IDataSource<T> OverrideFetchForUpdateDataSource { get; protected set; }
+        public IDataSource<T>? OverrideFetchForUpdateDataSource { get; protected set; }
 
         /// <summary>
         /// If set, this data source will be used in place of the supplied data source
         /// when retrieving an object that will be deleted.
         /// </summary>
-        public IDataSource<T> OverrideFetchForDeleteDataSource { get; protected set; }
+        public IDataSource<T>? OverrideFetchForDeleteDataSource { get; protected set; }
 
         /// <summary>
         /// If set, this data source will be used in place of the supplied data source
         /// when reloading an object after a save operation has completed.
         /// This is not recommended, as it can cause a client to recieve unexpected results.
         /// </summary>
-        public IDataSource<T> OverridePostSaveResultDataSource { get; protected set; }
+        public IDataSource<T>? OverridePostSaveResultDataSource { get; protected set; }
 
         /// <summary>
         /// If set, this data source will be used in place of the supplied data source
         /// when reloading an object after a delete operation has completed.
         /// This is not recommended, as it can cause a client to recieve unexpected results.
         /// </summary>
-        public IDataSource<T> OverridePostDeleteResultDataSource { get; protected set; }
+        public IDataSource<T>? OverridePostDeleteResultDataSource { get; protected set; }
 
 
         public StandardBehaviors(CrudContext<TContext> context) : base(context)
@@ -64,17 +64,17 @@ namespace IntelliTect.Coalesce
         /// <param name="incomingDto">The incoming DTO to obtain a primary key from.</param>
         /// <returns>A SaveKind indicating either Create or Update, 
         /// and the value of the primary key that can be used for database lookups.</returns>
-        public virtual (SaveKind Kind, object IncomingKey) DetermineSaveKind<TDto>(TDto incomingDto)
+        public virtual (SaveKind Kind, object? IncomingKey) DetermineSaveKind<TDto>(TDto incomingDto)
             where TDto : class, IClassDto<T>, new()
         {
-            var dtoClassViewModel = Context.ReflectionRepository.GetClassViewModel<TDto>();
-            object idValue = dtoClassViewModel.PrimaryKey.PropertyInfo.GetValue(incomingDto);
+            var dtoClassViewModel = Context.ReflectionRepository.GetClassViewModel<TDto>()!;
+            object? idValue = dtoClassViewModel.PrimaryKey.PropertyInfo.GetValue(incomingDto);
 
             // IsNullable handles nullable value types, and reference types (mainly strings).
             // !IsNullable handles non-Nullable<T> value types.
             if (dtoClassViewModel.PrimaryKey.Type.IsNullable
                 ? idValue == null
-                : idValue.Equals(Activator.CreateInstance(dtoClassViewModel.PrimaryKey.Type.TypeInfo)))
+                : idValue!.Equals(Activator.CreateInstance(dtoClassViewModel.PrimaryKey.Type.TypeInfo)))
             {
                 return (SaveKind.Create, null);
             }
@@ -104,11 +104,11 @@ namespace IntelliTect.Coalesce
         )
             where TDto : class, IClassDto<T>, new()
         {
-            (SaveKind kind, object idValue) = DetermineSaveKind(incomingDto);
+            (SaveKind kind, object? idValue) = DetermineSaveKind(incomingDto);
 
-            T originalItem = null;
+            T? originalItem = null;
             T item;
-            IncludeTree includeTree;
+            IncludeTree? includeTree;
 
             var includes = parameters.Includes;
             var dbSet = GetDbSet();
@@ -121,12 +121,12 @@ namespace IntelliTect.Coalesce
             else
             {
                 // Primary Key was defined. This object should exist in the database.
-                var (existingItem, _) = await (OverrideFetchForUpdateDataSource ?? dataSource).GetItemAsync(idValue, parameters);
+                var (existingItem, _) = await (OverrideFetchForUpdateDataSource ?? dataSource).GetItemAsync(idValue!, parameters);
                 if (!existingItem.WasSuccessful)
                 {
                     return new ItemResult<TDto>(existingItem);
                 }
-                item = existingItem.Object;
+                item = existingItem.Object ?? throw new InvalidOperationException("Expected ItemResult.Object to be non-null when GetItemAsync returns success.");
 
                 // Ensure that the entity is tracked.
                 // We want to allow for item retrieval from data sources that build their query with .AsNoTracking().
@@ -167,13 +167,12 @@ namespace IntelliTect.Coalesce
             // Pull the object to get any changes.
             ItemResult<T> newItem;
             (newItem, includeTree) = await FetchObjectAfterSaveAsync(dataSource, parameters, item);
-
             if (!newItem.WasSuccessful)
             {
                 return $"The item was saved, but could not be loaded with the requested data source: {newItem.Message}";
             }
 
-            item = newItem.Object;
+            item = newItem.Object ?? throw new InvalidOperationException("Expected ItemResult.Object to be non-null when FetchObjectAfterSaveAsync returns success.");
 
             // Call the AfterSave method to allow the user to
             // modify the returned object, the include tree,
@@ -207,9 +206,9 @@ namespace IntelliTect.Coalesce
         /// <param name="dataSource">The data source that will be used when loading the item.</param>
         /// <param name="parameters">The parameters to be passed to the data source when loading the item.</param>
         /// <param name="item">The saved item to reload</param>
-        protected virtual Task<(ItemResult<T> Item, IncludeTree IncludeTree)> FetchObjectAfterSaveAsync(IDataSource<T> dataSource, IDataSourceParameters parameters, T item)
+        protected virtual Task<(ItemResult<T> Item, IncludeTree? IncludeTree)> FetchObjectAfterSaveAsync(IDataSource<T> dataSource, IDataSourceParameters parameters, T item)
         {
-            var newItemId = ClassViewModel.PrimaryKey.PropertyInfo.GetValue(item);
+            var newItemId = ClassViewModel.PrimaryKey.PropertyInfo.GetValue(item)!;
             return (OverridePostSaveResultDataSource ?? dataSource).GetItemAsync(newItemId, parameters);
         }
 
@@ -248,7 +247,7 @@ namespace IntelliTect.Coalesce
         /// If kind == SaveKind.Create, this will be null.</param>
         /// <param name="item">A DbContext-tracked entity with its properties set to incoming, new values.</param>
         /// <returns>An ItemResult potentially indicating failure, upon which the save operation will halt without persisting changes.</returns>
-        public virtual ItemResult BeforeSave(SaveKind kind, T oldItem, T item) => true;
+        public virtual ItemResult BeforeSave(SaveKind kind, T? oldItem, T item) => true;
 
         /// <summary>
         /// Code to run before committing a save to the database.
@@ -260,7 +259,7 @@ namespace IntelliTect.Coalesce
         /// If kind == SaveKind.Create, this will be null.</param>
         /// <param name="item">A DbContext-tracked entity with its properties set to incoming, new values.</param>
         /// <returns>An ItemResult potentially indicating failure, upon which the save operation will halt without persisting changes.</returns>
-        public virtual Task<ItemResult> BeforeSaveAsync(SaveKind kind, T oldItem, T item) => Task.FromResult(BeforeSave(kind, oldItem, item));
+        public virtual Task<ItemResult> BeforeSaveAsync(SaveKind kind, T? oldItem, T item) => Task.FromResult(BeforeSave(kind, oldItem, item));
 
         /// <summary>
         /// Code to run after a save has been committed to the database.
@@ -282,7 +281,7 @@ namespace IntelliTect.Coalesce
         /// This ref parameter may have its value changed to send a different object structure to the client.
         /// </param>
         /// <returns>An ItemResult potentially indicating failure. A failure response will be returned immediately without the updatedItem attached to the response.</returns>
-        public virtual ItemResult AfterSave(SaveKind kind, T oldItem, ref T item, ref IncludeTree includeTree) => true;
+        public virtual ItemResult AfterSave(SaveKind kind, T? oldItem, ref T item, ref IncludeTree? includeTree) => true;
 
         #endregion
 
@@ -308,7 +307,7 @@ namespace IntelliTect.Coalesce
                 return existingItem.Message;
             }
 
-            var item = existingItem.Object;
+            var item = existingItem.Object ?? throw new InvalidOperationException("Expected ItemResult.Object to be non-null when GetItemAsync returns success.");
 
             var beforeDelete = await BeforeDeleteAsync(item);
             if (beforeDelete == null)
@@ -418,7 +417,7 @@ namespace IntelliTect.Coalesce
         /// This ref parameter may have its value changed to send a different object structure to the client.
         /// In the case where the deleted item was not retrieved from the database, changing this will have no effect.
         /// </param>
-        public virtual void AfterDelete(ref T item, ref IncludeTree includeTree) { }
+        public virtual void AfterDelete(ref T item, ref IncludeTree? includeTree) { }
 
         #endregion
 

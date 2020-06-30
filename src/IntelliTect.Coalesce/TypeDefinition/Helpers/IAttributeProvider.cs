@@ -9,7 +9,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 {
     public interface IAttributeProvider
     {
-        object GetAttributeValue<TAttribute>(string valueName) where TAttribute : Attribute;
+        object? GetAttributeValue<TAttribute>(string valueName) where TAttribute : Attribute;
 
         bool HasAttribute<TAttribute>() where TAttribute : Attribute;
     }
@@ -35,13 +35,13 @@ namespace IntelliTect.Coalesce.TypeDefinition
             return obj.GetAttributeValue<TAttribute, T>(propertyExpression.GetExpressedProperty().Name);
         }
 
-        public static string GetAttributeValue<TAttribute>(this IAttributeProvider obj, Expression<Func<TAttribute, string>> propertyExpression)
+        public static string? GetAttributeValue<TAttribute>(this IAttributeProvider obj, Expression<Func<TAttribute, string?>> propertyExpression)
             where TAttribute : Attribute
         {
             return obj.GetAttributeValue<TAttribute>(propertyExpression.GetExpressedProperty().Name) as string;
         }
 
-        public static TypeViewModel GetAttributeValue<TAttribute>(this IAttributeProvider obj, Expression<Func<TAttribute, Type>> propertyExpression)
+        public static TypeViewModel? GetAttributeValue<TAttribute>(this IAttributeProvider obj, Expression<Func<TAttribute, Type>> propertyExpression)
             where TAttribute : Attribute
         {
             var value = obj.GetAttributeValue<TAttribute>(propertyExpression.GetExpressedProperty().Name);

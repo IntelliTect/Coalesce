@@ -118,7 +118,7 @@ namespace IntelliTect.Coalesce.DataAnnotations
             => new InvalidOperationException(
                 $"Cannot emit an annotation for permission level {SecurityPermissionLevels.DenyAll}. Templates shouldn't emit anything in such cases.");
 
-        public bool IsReadAllowed(ClaimsPrincipal user = null)
+        public bool IsReadAllowed(ClaimsPrincipal? user = null)
         {
             if (Read.HasAttribute)
             {
@@ -130,13 +130,13 @@ namespace IntelliTect.Coalesce.DataAnnotations
             return user == null || (user.Identity?.IsAuthenticated ?? false);
         }
 
-        public bool IsCreateAllowed(ClaimsPrincipal user = null) => IsMutationActionAllowed(Create, user);
+        public bool IsCreateAllowed(ClaimsPrincipal? user = null) => IsMutationActionAllowed(Create, user);
 
-        public bool IsDeleteAllowed(ClaimsPrincipal user = null) => IsMutationActionAllowed(Delete, user);
+        public bool IsDeleteAllowed(ClaimsPrincipal? user = null) => IsMutationActionAllowed(Delete, user);
 
-        public bool IsEditAllowed(ClaimsPrincipal user = null) => IsMutationActionAllowed(Edit, user);
+        public bool IsEditAllowed(ClaimsPrincipal? user = null) => IsMutationActionAllowed(Edit, user);
 
-        private bool IsMutationActionAllowed(SecurityPermission action, ClaimsPrincipal user = null)
+        private bool IsMutationActionAllowed(SecurityPermission action, ClaimsPrincipal? user = null)
         {
             if (action.HasAttribute)
             {

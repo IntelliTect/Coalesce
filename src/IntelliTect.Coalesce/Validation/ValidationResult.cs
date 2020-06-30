@@ -9,8 +9,8 @@ namespace IntelliTect.Coalesce.Validation
     {
         public bool WasSuccessful { get; set; }
         public bool IsWarning { get; set; }
-        public string Area { get; set; }
-        public string Message { get; set; }
+        public string? Area { get; set; }
+        public string? Message { get; set; }
 
         public override string ToString()
         {

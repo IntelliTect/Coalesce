@@ -13,13 +13,13 @@ namespace IntelliTect.Coalesce.DataAnnotations
         /// <summary>
         /// If set, will determine the name of the generated API controller.
         /// </summary>
-        public string ApiControllerName { get; set; } = null;
+        public string? ApiControllerName { get; set; } = null;
 
         /// <summary>
         /// If set, will append this value to the default name of the generated API controller.
         /// This value will not be used if ApiControllerName is set.
         /// </summary>
-        public string ApiControllerSuffix { get; set; } = null;
+        public string? ApiControllerSuffix { get; set; } = null;
 
         /// <summary>
         /// If true, generated actions will be marked protected instead of public.

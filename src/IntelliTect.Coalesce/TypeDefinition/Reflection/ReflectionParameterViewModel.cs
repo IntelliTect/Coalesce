@@ -12,25 +12,25 @@ namespace IntelliTect.Coalesce.TypeDefinition
     {
         protected internal ParameterInfo Info { get; internal set; }
 
-        public ReflectionParameterViewModel(MethodViewModel parent, ParameterInfo info) : base(parent)
+        public ReflectionParameterViewModel(MethodViewModel parent, ParameterInfo info) 
+            : base(parent, ReflectionTypeViewModel.GetOrCreate(
+                parent.Parent.ReflectionRepository,
+                info.ParameterType.IsByRef
+                    ? info.ParameterType.GetElementType()!
+                    : info.ParameterType
+            ))
         {
             Info = info;
-            Type = ReflectionTypeViewModel.GetOrCreate(
-                Parent.Parent.ReflectionRepository, 
-                info.ParameterType.IsByRef 
-                    ? info.ParameterType.GetElementType() 
-                    : info.ParameterType
-            );
 
         }
 
-        public override string Name => Info.Name;
+        public override string Name => Info.Name ?? throw new Exception("Parameter has no name???");
 
         public override bool HasDefaultValue => Info.HasDefaultValue;
 
-        protected override object RawDefaultValue => Info.RawDefaultValue;
+        protected override object? RawDefaultValue => Info.RawDefaultValue;
 
-        public override object GetAttributeValue<TAttribute>(string valueName)
+        public override object? GetAttributeValue<TAttribute>(string valueName)
         {
             return Info.GetAttributeValue<TAttribute>(valueName);
         }

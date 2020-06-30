@@ -15,11 +15,11 @@ namespace IntelliTect.Coalesce.Helpers
             HasAttribute = false;
         }
 
-        public SecurityPermission(SecurityPermissionLevels level, string roles, string name)
+        public SecurityPermission(SecurityPermissionLevels level, string? roles, string name)
         {
             HasAttribute = true;
             PermissionLevel = level;
-            Roles = PermissionLevel != SecurityPermissionLevels.DenyAll ? roles : string.Empty;
+            Roles = PermissionLevel != SecurityPermissionLevels.DenyAll ? roles ?? "" : string.Empty;
             Name = name;
         }
 
@@ -31,10 +31,9 @@ namespace IntelliTect.Coalesce.Helpers
 
         public bool AllowAnonymous => PermissionLevel == SecurityPermissionLevels.AllowAll;
         public bool NoAccess => PermissionLevel == SecurityPermissionLevels.DenyAll;
-        public bool HasRoles => RoleList.Any();
+        public bool HasRoles => RoleList.Count > 0;
 
-        private IReadOnlyList<string> _roleList = null;
-
+        private IReadOnlyList<string>? _roleList = null;
         public IReadOnlyList<string> RoleList
         {
             get

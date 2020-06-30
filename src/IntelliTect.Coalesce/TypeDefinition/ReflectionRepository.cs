@@ -23,7 +23,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         private readonly HashSet<DbContextTypeUsage> _contexts = new HashSet<DbContextTypeUsage>();
         private readonly HashSet<ClassViewModel> _entities = new HashSet<ClassViewModel>();
-        private ILookup<ClassViewModel, EntityTypeUsage> _entityUsages = null;
+        private ILookup<ClassViewModel, EntityTypeUsage>? _entityUsages = null;
 
         private readonly HashSet<CrudStrategyTypeUsage> _behaviors = new HashSet<CrudStrategyTypeUsage>();
         private readonly HashSet<CrudStrategyTypeUsage> _dataSources = new HashSet<CrudStrategyTypeUsage>();
@@ -67,7 +67,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
         }
 
-        private HashSet<string> _rootTypeWhitelist = null;
+        private HashSet<string>? _rootTypeWhitelist = null;
         internal void SetRootTypeWhitelist(IEnumerable<string> typeNames)
         {
             _rootTypeWhitelist = new HashSet<string>(typeNames);
@@ -96,18 +96,19 @@ namespace IntelliTect.Coalesce.TypeDefinition
         }
 
         public SymbolTypeViewModel GetOrAddType(ITypeSymbol symbol) =>
-            GetOrAddType(symbol, () => new SymbolTypeViewModel(this, symbol)) as SymbolTypeViewModel;
+            GetOrAddType(symbol, () => new SymbolTypeViewModel(this, symbol));
 
         public ReflectionTypeViewModel GetOrAddType(Type type) =>
-            GetOrAddType(type, () => new ReflectionTypeViewModel(this, type)) as ReflectionTypeViewModel;
+            GetOrAddType(type, () => new ReflectionTypeViewModel(this, type));
 
         public TypeViewModel GetOrAddType(TypeViewModel type) => 
             GetOrAddType(GetCacheKey(type), () => type);
 
-        private TypeViewModel GetOrAddType(object key, Func<TypeViewModel> factory)
+        private T GetOrAddType<T>(object key, Func<T> factory)
+            where T : TypeViewModel
         {
             // First, see if we already have the type. Do not invoke the factory for this check.
-            if (_allTypeViewModels.TryGetValue(key, out var existing)) return existing;
+            if (_allTypeViewModels.TryGetValue(key, out var existing)) return (T)existing;
 
             var newType = factory();
             if (_allTypeViewModels.TryAdd(key, newType))
@@ -116,7 +117,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
 
             // Re-fetch, because this isn't strictly the one that we maybe just added.
-            return _allTypeViewModels[key];
+            return (T)_allTypeViewModels[key];
         }
 
         private void ProcessAddedType(TypeViewModel type)
@@ -133,9 +134,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
             if (type.IsA<DbContext>())
             {
-                var context = new DbContextTypeUsage(type.ClassViewModel);
+                var context = new DbContextTypeUsage(type.ClassViewModel!);
 
-                var entityCvms = context.Entities.Select(e => GetOrAddType(e.TypeViewModel).ClassViewModel);
+                var entityCvms = context.Entities.Select(e => GetOrAddType(e.TypeViewModel).ClassViewModel!);
                 lock (_contexts)
                 {
                     _contexts.Add(context);
@@ -150,7 +151,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
                 foreach (var entity in context.Entities)
                 {
-                    DiscoverOnApiBackedClass(entity.TypeViewModel.ClassViewModel);
+                    DiscoverOnApiBackedClass(entity.TypeViewModel.ClassViewModel!);
                 }
             }
             else if (AddCrudStrategy(typeof(IDataSource<>), type, _dataSources))
@@ -163,7 +164,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
             else if (type.IsA(typeof(IClassDto<>)))
             {
-                var classViewModel = type.ClassViewModel;
+                var classViewModel = type.ClassViewModel!;
                 _customDtos.Add(classViewModel);
                 DiscoverOnApiBackedClass(classViewModel);
             }
@@ -226,7 +227,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 .ClientProperties
                 .Select(p => p.PureType))
             {
-                if (type.HasClassViewModel)
+                if (type.ClassViewModel != null)
                 {
                     ConditionallyAddAndDiscoverExternalPropertyTypesOn(type.ClassViewModel);
                 }
@@ -242,7 +243,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             foreach (var method in model.ClientMethods)
             {
                 var returnType = method.ResultType.PureType;
-                if (returnType.HasClassViewModel)
+                if (returnType.ClassViewModel != null)
                 {
                     // Return type looks like an external type.
                     ConditionallyAddAndDiscoverExternalPropertyTypesOn(returnType.ClassViewModel);
@@ -254,7 +255,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
                 foreach (var arg in method.Parameters.Where(p => !p.IsDI))
                 {
-                    if (arg.PureType.HasClassViewModel)
+                    if (arg.PureType.ClassViewModel != null)
                     {
                         // Parameter looks like an external type.
                         ConditionallyAddAndDiscoverExternalPropertyTypesOn(arg.PureType.ClassViewModel);
@@ -271,17 +272,17 @@ namespace IntelliTect.Coalesce.TypeDefinition
             Type iface,
             TypeViewModel strategyType,
             HashSet<CrudStrategyTypeUsage> set,
-            ClassViewModel declaredFor = null
+            ClassViewModel? declaredFor = null
         )
         {
-            if (!strategyType.IsA(iface)) return false;
+            if (!strategyType.IsA(iface) || strategyType.ClassViewModel == null) return false;
 
             var servedType = strategyType.GenericArgumentsFor(iface).Single();
-            if (!servedType.HasClassViewModel)
+            var servedClass = servedType.ClassViewModel;
+            if (servedClass == null)
             {
                 throw new InvalidOperationException($"{servedType} is not a valid type argument for a {iface}.");
             }
-            var servedClass = servedType.ClassViewModel;
 
             // See if we were expecting that the strategy be declared for a particular type
             // by virtue of its nesting. If this type has been overridden to something else by an attribute, then that's wrong.
@@ -328,13 +329,13 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
         }
 
-        public ClassViewModel GetClassViewModel(Type classType) =>
+        public ClassViewModel? GetClassViewModel(Type classType) =>
             GetOrAddType(classType).ClassViewModel;
 
-        public ClassViewModel GetClassViewModel(INamedTypeSymbol classType) =>
+        public ClassViewModel? GetClassViewModel(INamedTypeSymbol classType) =>
             GetOrAddType(classType).ClassViewModel;
 
-        public ClassViewModel GetClassViewModel<T>() => GetClassViewModel(typeof(T));
+        public ClassViewModel? GetClassViewModel<T>() => GetClassViewModel(typeof(T));
 
 
         /// <summary>
@@ -346,7 +347,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <returns></returns>
         public PropertyViewModel PropertyBySelector<T, TProperty>(Expression<Func<T, TProperty>> propertySelector)
         {
-            var objModel = GetClassViewModel<T>();
+            // Nullability note - making a consession here that someone wouldn't do this
+            // on something like .PropertyBySelector<string, int>(s => s.Length).
+            var objModel = GetClassViewModel<T>()!;
             return objModel.PropertyBySelector(propertySelector);
         }
     }

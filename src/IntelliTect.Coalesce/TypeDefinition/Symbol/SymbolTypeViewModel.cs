@@ -18,7 +18,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
         }
 
-        internal SymbolTypeViewModel(ReflectionRepository reflectionRepository, ITypeSymbol symbol) : base(reflectionRepository)
+        internal SymbolTypeViewModel(ReflectionRepository? reflectionRepository, ITypeSymbol symbol) : base(reflectionRepository)
         {
             Symbol = symbol;
 
@@ -55,7 +55,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             VerboseFullyQualifiedName = Symbol.ToDisplayString(VerboseDisplayFormat);
     }
 
-        internal static SymbolTypeViewModel GetOrCreate(ReflectionRepository reflectionRepository, ITypeSymbol symbol)
+        internal static SymbolTypeViewModel GetOrCreate(ReflectionRepository? reflectionRepository, ITypeSymbol symbol)
         {
             return reflectionRepository?.GetOrAddType(symbol) ?? new SymbolTypeViewModel(reflectionRepository, symbol);
         }
@@ -98,7 +98,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 {
                     foreach (var member in symbol.GetMembers().OfType<IFieldSymbol>())
                     {
-                        result.Add((int)member.ConstantValue, member.Name);
+                        result.Add((int)member.ConstantValue!, member.Name);
                     }
                 }
 
@@ -126,13 +126,13 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public override string FullNamespace =>
             (Symbol is IArrayTypeSymbol array ? array.ElementType : Symbol.ContainingSymbol).ToDisplayString(DefaultDisplayFormat);
 
-        public override TypeViewModel FirstTypeArgument { get; }
+        public override TypeViewModel? FirstTypeArgument { get; }
 
-        public override TypeViewModel ArrayType { get; }
+        public override TypeViewModel? ArrayType { get; }
 
-        public override ClassViewModel ClassViewModel { get; }
+        public override ClassViewModel? ClassViewModel { get; }
 
-        public override object GetAttributeValue<TAttribute>(string valueName) =>
+        public override object? GetAttributeValue<TAttribute>(string valueName) =>
             Symbol.GetAttributeValue<TAttribute>(valueName);
 
         public override bool HasAttribute<TAttribute>() =>
@@ -176,18 +176,16 @@ namespace IntelliTect.Coalesce.TypeDefinition
             GetSatisfyingBaseTypeSymbol(type)?
             .TypeArguments
             .Select(t => SymbolTypeViewModel.GetOrCreate(ReflectionRepository, t))
-            .ToArray();
+            .ToArray()
+            ?? Array.Empty<TypeViewModel>();
 
         public override bool IsA(Type type) => GetSatisfyingBaseTypeSymbol(type) != null;
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             if (!(obj is SymbolTypeViewModel that)) return base.Equals(obj);
 
             return SymbolEqualityComparer.IncludeNullability.Equals(Symbol, that.Symbol);
         }
-
-        public override bool EqualsType(TypeViewModel b) =>
-            b is SymbolTypeViewModel s ? FullyQualifiedName == s.FullyQualifiedName : false;
     }
 }

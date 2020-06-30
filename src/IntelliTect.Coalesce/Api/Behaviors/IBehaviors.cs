@@ -16,7 +16,7 @@ namespace IntelliTect.Coalesce
         /// <typeparam name="TDto"></typeparam>
         /// <param name="incomingDto"></param>
         /// <returns></returns>
-        (SaveKind Kind, object IncomingKey) DetermineSaveKind<TDto>(TDto incomingDto)
+        (SaveKind Kind, object? IncomingKey) DetermineSaveKind<TDto>(TDto incomingDto)
             where TDto : class, IClassDto<T>, new();
 
         /// <summary>

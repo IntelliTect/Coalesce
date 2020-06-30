@@ -13,18 +13,16 @@ namespace IntelliTect.Coalesce.TypeDefinition
         protected IPropertySymbol Symbol;
 
         public SymbolPropertyViewModel(ClassViewModel effectiveParent, ClassViewModel declaringParent, IPropertySymbol symbol)
+            : base(effectiveParent, declaringParent, SymbolTypeViewModel.GetOrCreate(declaringParent.ReflectionRepository, symbol.Type))
         {
-            Parent = declaringParent;
-            EffectiveParent = effectiveParent;
             Symbol = symbol;
-            Type = SymbolTypeViewModel.GetOrCreate(declaringParent.ReflectionRepository, Symbol.Type);
         }
 
         public override string Name => Symbol.Name;
 
         public override string Comment => Symbol.ExtractXmlComments();
 
-        public override object GetAttributeValue<TAttribute>(string valueName) =>
+        public override object? GetAttributeValue<TAttribute>(string valueName) =>
             Symbol.GetAttributeValue<TAttribute>(valueName);
         
         public override bool HasAttribute<TAttribute>() => Symbol.HasAttribute<TAttribute>();
@@ -33,7 +31,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public override bool HasSetter => !Symbol.IsReadOnly;
 
-        public override bool HasPublicSetter => HasSetter && Symbol.SetMethod.DeclaredAccessibility == Accessibility.Public;
+        public override bool HasPublicSetter => HasSetter && Symbol.SetMethod?.DeclaredAccessibility == Accessibility.Public;
 
         public override bool IsStatic => Symbol.IsStatic;
 

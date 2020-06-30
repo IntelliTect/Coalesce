@@ -15,8 +15,9 @@ namespace IntelliTect.Coalesce
     {
         private readonly Dictionary<string, IncludeTree> _children = new Dictionary<string, IncludeTree>();
 
-        public string PropertyName { get; set; }
+        public string? PropertyName { get; set; }
 
+#nullable disable warnings
         public void AddChild(IncludeTree tree)
         {
             if (_children.ContainsKey(tree.PropertyName))
@@ -56,6 +57,7 @@ namespace IntelliTect.Coalesce
                 return _children[tree.PropertyName];
             }
         }
+#nullable enable warnings
 
         /// <summary>
         /// Shorthand for <code>Enumerable.Empty&lt;T&gt;().AsQueryable()</code>,
@@ -101,10 +103,10 @@ namespace IntelliTect.Coalesce
 
         public static IncludeTree ParseConstantExpression(ConstantExpression expr, out IncludeTree tail)
         {
-            var members = expr.Value.ToString().Split('.');
+            var members = expr.Value.ToString()!.Split('.');
 
-            IncludeTree head = null;
-            tail = null;
+            IncludeTree? head = null;
+            tail = null!;
 
             foreach (var member in members)
             {
@@ -115,6 +117,11 @@ namespace IntelliTect.Coalesce
                 if (head == null) head = newNode;
                 tail?.AddChild(newNode);
                 tail = newNode;
+            }
+
+            if (head == null || tail == null)
+            {
+                throw new ArgumentException("Unable to parse constant expression", nameof(expr));
             }
 
             return head;
@@ -132,7 +139,14 @@ namespace IntelliTect.Coalesce
             return _children.GetEnumerator();
         }
 
-        public bool TryGetValue(string key, out IncludeTree value)
+#pragma warning disable CS8614 // Nullability of reference types in type of parameter doesn't match implicitly implemented member.
+        public bool TryGetValue(
+#pragma warning restore CS8614 // Nullability of reference types in type of parameter doesn't match implicitly implemented member.
+            string key,
+#if NETCOREAPP3_1
+            [System.Diagnostics.CodeAnalysis.NotNullWhen(true)]
+#endif 
+            out IncludeTree? value)
         {
             return _children.TryGetValue(key, out value);
         }
@@ -142,9 +156,11 @@ namespace IntelliTect.Coalesce
             return _children.GetEnumerator();
         }
 
-        public IncludeTree this[string key]
+        public IncludeTree? this[string key]
         {
+#pragma warning disable CS8613 // Nullability of reference types in return type doesn't match implicitly implemented member.
             get
+#pragma warning restore CS8613 // Nullability of reference types in return type doesn't match implicitly implemented member.
             {
                 if (!_children.ContainsKey(key)) return null;
                 return _children[key];

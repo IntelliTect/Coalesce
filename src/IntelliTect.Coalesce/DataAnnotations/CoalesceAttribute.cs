@@ -14,6 +14,6 @@ namespace IntelliTect.Coalesce
         /// <summary>
         /// When placed on a type, overrides the name of the type used in client-side code.
         /// </summary>
-        public string ClientTypeName { get; set; }
+        public string? ClientTypeName { get; set; }
     }
 }

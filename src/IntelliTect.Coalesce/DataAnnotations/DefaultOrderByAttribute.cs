@@ -23,7 +23,7 @@ namespace IntelliTect.Coalesce.DataAnnotations
         /// <summary>
         /// When using the DefaultOrderByAttribute on an object property, specifies the field on the object to use for sorting.
         /// </summary>
-        public string FieldName { get; set; }
+        public string? FieldName { get; set; }
 
         public DefaultOrderByAttribute(int fieldOrder = 0, OrderByDirections orderByDirection = OrderByDirections.Ascending)
         {
@@ -35,11 +35,12 @@ namespace IntelliTect.Coalesce.DataAnnotations
 
     public class OrderByInformation
     {
-        public string FieldName { get; set; }
-        public string FieldChildName { get; set; }
+        public string? FieldName { get; set; }
+
+        public string? FieldChildName { get; set; }
         public DefaultOrderByAttribute.OrderByDirections OrderByDirection { get; set; }
         public int FieldOrder { get; set; }
-        public string ObjectDefaultValue { get; internal set; }
+        public string? ObjectDefaultValue { get; internal set; }
 
         public string OrderExpression(string prependText = "")
         {

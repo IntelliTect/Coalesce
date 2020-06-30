@@ -17,7 +17,7 @@ namespace IntelliTect.Coalesce.Utilities
 
         public static MemberInfo GetExpressedMember(this LambdaExpression memberLambda)
         {
-            MemberExpression member;
+            MemberExpression? member;
 
             // Check to see if the node type is a Convert type (this is the case with enums)
             if (memberLambda.Body.NodeType == ExpressionType.Convert)
@@ -36,10 +36,10 @@ namespace IntelliTect.Coalesce.Utilities
             return member.Member;
         }
 
-        public static PropertyInfo GetExpressedProperty(this LambdaExpression lambda, Type paramType)
+        public static PropertyInfo GetExpressedProperty(this LambdaExpression lambda, Type? paramType)
         {
             MemberInfo member = GetExpressedMember(lambda);
-            PropertyInfo propInfo = member as PropertyInfo;
+            PropertyInfo? propInfo = member as PropertyInfo;
 
             if (propInfo == null)
                 throw new ArgumentException($"Expression '{lambda}' doesn't refer to a property.");
@@ -47,7 +47,7 @@ namespace IntelliTect.Coalesce.Utilities
             // If paramType is null, don't check this. Just a safety check where it makes sense, but sometimes, its ok not to check.
             if (   paramType != null 
                 && paramType != propInfo.ReflectedType 
-                && !paramType.IsSubclassOf(propInfo.ReflectedType))
+                && !paramType.IsSubclassOf(propInfo.ReflectedType!))
                 throw new ArgumentException($"Expression '{lambda}' refers to a property that is not from type {paramType}.");
 
             return propInfo;
@@ -56,7 +56,7 @@ namespace IntelliTect.Coalesce.Utilities
         public static MethodInfo GetExpressedMethod(this LambdaExpression lambda)
             => GetExpressedMember(lambda) as MethodInfo ?? throw new ArgumentException($"Expression '{lambda}' doesn't refer to a method.");
 
-        public static string GetDebugView(this Expression exp)
+        public static string? GetDebugView(this Expression exp)
         {
             if (exp == null)
             {
@@ -64,7 +64,7 @@ namespace IntelliTect.Coalesce.Utilities
             }
 
             var propertyInfo = typeof(Expression).GetProperty("DebugView", BindingFlags.Instance | BindingFlags.NonPublic);
-            return propertyInfo.GetValue(exp) as string;
+            return propertyInfo?.GetValue(exp) as string;
         }
     }
 }

@@ -7,7 +7,7 @@ namespace IntelliTect.Coalesce.Api.DataSources
 {
     public class DataSourceModelBinderProvider : IModelBinderProvider
     {
-        public IModelBinder GetBinder(ModelBinderProviderContext context)
+        public IModelBinder? GetBinder(ModelBinderProviderContext context)
         {
             if (context == null)
             {

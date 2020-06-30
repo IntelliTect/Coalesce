@@ -8,7 +8,7 @@ namespace IntelliTect.Coalesce.Utilities
 {
     public static class ClaimsPrincipalExtensions
     {
-        public static string GetUserId(this ClaimsPrincipal principal)
+        public static string? GetUserId(this ClaimsPrincipal principal)
         {
             if (principal == null) throw new ArgumentNullException(nameof(principal));
 

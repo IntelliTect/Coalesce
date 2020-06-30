@@ -10,19 +10,19 @@ namespace IntelliTect.Coalesce.TypeDefinition
     {
         protected internal IParameterSymbol Symbol { get; internal set; }
 
-        public SymbolParameterViewModel(MethodViewModel parent, IParameterSymbol symbol) : base(parent)
+        public SymbolParameterViewModel(MethodViewModel parent, IParameterSymbol symbol)
+            : base(parent, SymbolTypeViewModel.GetOrCreate(parent.Parent.ReflectionRepository, symbol.Type))
         {
             Symbol = symbol;
-            Type = SymbolTypeViewModel.GetOrCreate(parent.Parent.ReflectionRepository, symbol.Type);
         }
 
         public override string Name => Symbol.Name;
 
         public override bool HasDefaultValue => Symbol.HasExplicitDefaultValue;
 
-        protected override object RawDefaultValue => Symbol.ExplicitDefaultValue;
+        protected override object? RawDefaultValue => Symbol.ExplicitDefaultValue;
 
-        public override object GetAttributeValue<TAttribute>(string valueName)
+        public override object? GetAttributeValue<TAttribute>(string valueName)
         {
             return Symbol.GetAttributeValue<TAttribute>(valueName);
         }

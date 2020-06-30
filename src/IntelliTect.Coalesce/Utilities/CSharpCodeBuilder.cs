@@ -10,7 +10,7 @@ namespace IntelliTect.Coalesce.Utilities
         /// Writes the given text, followed by a space, opening brace, and newline.
         /// Increases indentation one level, returning an object that can be disposed to decrease indentation and write a closing curly brace
         /// </summary>
-        public IDisposable Block(string blockPreamble, string closeWith = null)
+        public IDisposable Block(string blockPreamble)
         {
             if (!onNewLine)
             {

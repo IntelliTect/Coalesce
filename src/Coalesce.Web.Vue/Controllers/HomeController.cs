@@ -7,9 +7,9 @@ namespace Coalesce.Web.Vue.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly IHostingEnvironment hostingEnvironment;
+        private readonly IWebHostEnvironment hostingEnvironment;
 
-        public HomeController(IHostingEnvironment hostingEnvironment)
+        public HomeController(IWebHostEnvironment hostingEnvironment)
         {
             this.hostingEnvironment = hostingEnvironment;
         }

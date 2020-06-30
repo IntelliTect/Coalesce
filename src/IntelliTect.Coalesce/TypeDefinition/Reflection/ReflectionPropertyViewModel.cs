@@ -11,12 +11,10 @@ namespace IntelliTect.Coalesce.TypeDefinition
     {
         protected PropertyInfo Info { get; }
 
-        public ReflectionPropertyViewModel(ClassViewModel effectiveParent, ClassViewModel declaringParent, PropertyInfo propetyInfo)
+        public ReflectionPropertyViewModel(ClassViewModel effectiveParent, ClassViewModel declaringParent, PropertyInfo propertyInfo)
+            : base (effectiveParent, declaringParent, ReflectionTypeViewModel.GetOrCreate(declaringParent.ReflectionRepository, propertyInfo.PropertyType))
         {
-            Parent = declaringParent;
-            EffectiveParent = effectiveParent;
-            Info = propetyInfo;
-            Type = ReflectionTypeViewModel.GetOrCreate(declaringParent.ReflectionRepository, Info.PropertyType);
+            Info = propertyInfo;
         }
 
         public override string Name => Info.Name;
@@ -27,7 +25,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public override bool HasSetter => Info.CanWrite;
 
-        public override bool HasPublicSetter => HasSetter && Info.SetMethod.IsPublic;
+        public override bool HasPublicSetter => HasSetter && Info.SetMethod?.IsPublic == true;
 
         public override PropertyInfo PropertyInfo => Info;
         
@@ -35,9 +33,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public override bool IsStatic => Info.GetGetMethod()?.IsStatic ?? Info.GetSetMethod()?.IsStatic ?? false;
 
-        public override bool IsInternalUse => base.IsInternalUse || !Info.GetGetMethod(true).IsPublic;
+        public override bool IsInternalUse => base.IsInternalUse || Info.GetGetMethod(true)?.IsPublic != true;
 
-        public override object GetAttributeValue<TAttribute>(string valueName)
+        public override object? GetAttributeValue<TAttribute>(string valueName)
             => Info.GetAttributeValue<TAttribute>(valueName);
         
         public override bool HasAttribute<TAttribute>() =>

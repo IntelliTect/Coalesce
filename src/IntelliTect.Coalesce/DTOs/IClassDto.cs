@@ -6,9 +6,10 @@ using System.Security.Claims;
 namespace IntelliTect.Coalesce
 {
     public interface IClassDto<in T>
+         where T : class
     {
         void MapTo(T obj, IMappingContext context);
 
-        void MapFrom(T obj, IMappingContext context, IncludeTree tree = null);
+        void MapFrom(T obj, IMappingContext context, IncludeTree? tree = null);
     }
 }

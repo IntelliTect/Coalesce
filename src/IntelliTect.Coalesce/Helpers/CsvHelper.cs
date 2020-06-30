@@ -21,7 +21,7 @@ namespace IntelliTect.Coalesce.Helpers
 
         private static ClassMap CreateMap<T>()
         {
-            var vm = ReflectionRepository.Global.GetClassViewModel<T>();
+            var vm = ReflectionRepository.Global.GetClassViewModel<T>() ?? throw new InvalidOperationException("Class has no ClassViewModel");
 
             var map = new GenericMap<T>();
 

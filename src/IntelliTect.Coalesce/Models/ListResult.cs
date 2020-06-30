@@ -24,18 +24,18 @@ namespace IntelliTect.Coalesce.Models
 
         public int TotalCount { get; set; }
 
-        public IList<T> List { get; set; }
+        public IList<T>? List { get; set; }
         
         public ListResult(): base() { }
 
-        public ListResult(bool wasSuccessful, string message = null) : base(wasSuccessful, message) { }
+        public ListResult(bool wasSuccessful, string? message = null) : base(wasSuccessful, message) { }
 
         public ListResult(string message) : base(message) { }
 
-        public ListResult(IListResult result, IList<T> items = null)
-            : this(items, page: result.Page, pageSize: result.PageSize, totalCount: result.TotalCount, wasSuccessful: result.WasSuccessful, message: result.Message) { }
+        public ListResult(IListResult result, IList<T>? items = null)
+            : this(items, page: result.Page, totalCount: result.TotalCount, pageSize: result.PageSize, wasSuccessful: result.WasSuccessful, message: result.Message) { }
 
-        public ListResult(IList<T> items, int page, int totalCount, int pageSize, bool wasSuccessful = true, string message = null)
+        public ListResult(IList<T>? items, int page, int totalCount, int pageSize, bool wasSuccessful = true, string? message = null)
         {
             List = items;
             WasSuccessful = wasSuccessful;

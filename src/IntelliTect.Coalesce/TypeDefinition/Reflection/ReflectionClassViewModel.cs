@@ -15,10 +15,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
         }
 
-        public ReflectionClassViewModel(ReflectionTypeViewModel typeViewModel)
+        public ReflectionClassViewModel(ReflectionTypeViewModel typeViewModel) : base (typeViewModel)
         {
             Info = typeViewModel.Info;
-            Type = typeViewModel;
         }
 
         internal static ReflectionClassViewModel GetOrCreate(ReflectionRepository reflectionRepository, Type type)

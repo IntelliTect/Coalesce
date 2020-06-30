@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.SpaServices.Webpack;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 
@@ -62,11 +63,12 @@ namespace Coalesce.Web.Vue
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+#pragma warning disable CS0618 // Type or member is obsolete
                 app.UseWebpackDevMiddleware(new WebpackDevMiddlewareOptions
                 {
                     HotModuleReplacement = true,
@@ -74,6 +76,7 @@ namespace Coalesce.Web.Vue
                     // Use a slightly-tweaked version of vue-cli's webpack config to work around a few bugs.
                     ConfigFile = "webpack.config.aspnetcore-hmr.js"
                 });
+#pragma warning restore CS0618 // Type or member is obsolete
             }
             else
             {
@@ -85,7 +88,10 @@ namespace Coalesce.Web.Vue
 
             // *** DEMO ONLY ***
             app.UseAuthentication();
+#pragma warning disable ASP0001 // Authorization middleware is incorrectly configured.
+            // ... no it isnt, it very much is between UseRouting and UseEndpoints.
             app.UseAuthorization();
+#pragma warning restore ASP0001 // Authorization middleware is incorrectly configured.
             app.UseMiddleware<DemoMiddleware>();
 
             app.UseEndpoints(endpoints =>

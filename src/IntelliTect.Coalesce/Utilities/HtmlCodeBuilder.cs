@@ -11,14 +11,14 @@ namespace IntelliTect.Coalesce.Utilities
         {
         }
 
-        private void TagStart(string elName, object attributes = null)
+        private void TagStart(string elName, object? attributes = null)
         {
             Append("<").Append(elName);
             if (attributes != null)
             {
                 foreach (var prop in attributes.GetType().GetProperties())
                 {
-                    object value = prop.GetValue(attributes);
+                    object? value = prop.GetValue(attributes);
                     if (value != null)
                     {
                         Append(" ").Append(prop.Name.Replace("_", "-")).Append("=\"");
@@ -50,12 +50,12 @@ namespace IntelliTect.Coalesce.Utilities
             return new TagBlockScope(this, null, new Indentation(this, $"</{tagName}>"));
         }
 
-        public ITagBlockChainBuilder TagBlock(string tagName, string @class = null, string dataBind = null, string style = null)
+        public ITagBlockChainBuilder TagBlock(string tagName, string? @class = null, string? dataBind = null, string? style = null)
         {
             return TagBlock(tagName, new { @class, style, data_bind = dataBind });
         }
 
-        public HtmlCodeBuilder EmptyTag(string tagName, object attributes = null)
+        public HtmlCodeBuilder EmptyTag(string tagName, object? attributes = null)
         {
             TagStart(tagName, attributes);
             Line(" />");
@@ -69,10 +69,10 @@ namespace IntelliTect.Coalesce.Utilities
         private class TagBlockScope : ITagBlockChainBuilder, IDisposable
         {
             private readonly HtmlCodeBuilder b;
-            private readonly ITagBlockChainBuilder parent;
+            private readonly ITagBlockChainBuilder? parent;
             private readonly IDisposable block;
 
-            public TagBlockScope(HtmlCodeBuilder b, ITagBlockChainBuilder parent, IDisposable block)
+            public TagBlockScope(HtmlCodeBuilder b, ITagBlockChainBuilder? parent, IDisposable block)
             {
                 this.b = b ?? throw new ArgumentNullException(nameof(b));
                 this.parent = parent; // Parent is optional
@@ -88,7 +88,7 @@ namespace IntelliTect.Coalesce.Utilities
             public ITagBlockChainBuilder TagBlock(string tagName, object attributes)
                 => new TagBlockScope(b, this, b.TagBlock(tagName, attributes));
 
-            public ITagBlockChainBuilder TagBlock(string tagName, string @class = null, string dataBind = null, string style = null)
+            public ITagBlockChainBuilder TagBlock(string tagName, string? @class = null, string? dataBind = null, string? style = null)
                 => new TagBlockScope(b, this, b.TagBlock(tagName, @class: @class, dataBind: dataBind, style: style));
         }
     }
@@ -96,6 +96,6 @@ namespace IntelliTect.Coalesce.Utilities
     public interface ITagBlockChainBuilder : IDisposable
     {
         ITagBlockChainBuilder TagBlock(string tagName, object attributes);
-        ITagBlockChainBuilder TagBlock(string tagName, string @class = null, string dataBind = null, string style = null);
+        ITagBlockChainBuilder TagBlock(string tagName, string? @class = null, string? dataBind = null, string? style = null);
     }
 }

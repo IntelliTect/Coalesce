@@ -13,7 +13,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// </summary>
         /// <typeparam name="TAttribute"></typeparam>
         /// <returns></returns>
-        public static TAttribute GetAttribute<TAttribute>(this ICustomAttributeProvider member) where TAttribute : Attribute
+        public static TAttribute? GetAttribute<TAttribute>(this ICustomAttributeProvider member) where TAttribute : Attribute
         {
             var attributes = member.GetCustomAttributes(typeof(TAttribute), true);
             return attributes.FirstOrDefault() as TAttribute;
@@ -29,7 +29,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             return member.IsDefined(typeof(TAttribute), true);
         }
 
-        public static Object GetAttributeValue<TAttribute>(this ICustomAttributeProvider member, string valueName) where TAttribute : Attribute
+        public static object? GetAttributeValue<TAttribute>(this ICustomAttributeProvider member, string valueName) where TAttribute : Attribute
         {
             var attr = member.GetAttribute<TAttribute>();
             if (attr != null)
@@ -37,8 +37,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 var property = attr.GetType().GetProperty(valueName);
                 if (property == null) return null;
 
-                // TODO: Some properties throw an exception here. DisplayAttribute.Order. Not sure why.
-                try 
+                // Some attributes have getters that throw if the value was never set, hence the try/catch.
+                // E.g. DisplayAttribute.Order
+                try
                 {
                     return property.GetValue(attr, null);
                 }

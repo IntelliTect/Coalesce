@@ -12,11 +12,11 @@ namespace IntelliTect.Coalesce
 {
     public static class IncludeTreeExtensions
     {
-        public static IncludeTree GetIncludeTree(this IQueryable queryable, string rootName = null)
+        public static IncludeTree GetIncludeTree(this IQueryable queryable, string? rootName = null)
         {
             var expression = queryable.Expression;
             IncludeTree root = new IncludeTree { PropertyName = rootName };
-            IncludeTree currentNode = null;
+            IncludeTree? currentNode = null;
             IncludeTree head, tail;
 
             // When we get to the root of the queryable, it won't be a MethodCallExpression.

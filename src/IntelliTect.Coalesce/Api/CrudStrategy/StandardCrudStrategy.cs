@@ -13,8 +13,11 @@ namespace IntelliTect.Coalesce.Api
     {
         public StandardCrudStrategy(CrudContext<TContext> context)
         {
-            Context = context ?? throw new ArgumentNullException(nameof(context));
-            ClassViewModel = Context.ReflectionRepository.GetClassViewModel<T>();
+            Context = context 
+                ?? throw new ArgumentNullException(nameof(context));
+
+            ClassViewModel = Context.ReflectionRepository.GetClassViewModel<T>() 
+                ?? throw new ArgumentException("Generic type T has no ClassViewModel.", nameof(T));
 
             // Ensure that the DbContext is in the ReflectionRepository.
             // We do this so that unit tests will work without having to always do this manually.
@@ -35,7 +38,7 @@ namespace IntelliTect.Coalesce.Api
         /// <summary>
         /// The user making the request.
         /// </summary>
-        public ClaimsPrincipal User => Context.User;
+        public ClaimsPrincipal? User => Context.User;
 
         /// <summary>
         /// A ClassViewModel representing the type T that is handled by these strategies.

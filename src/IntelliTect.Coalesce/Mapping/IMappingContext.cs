@@ -13,7 +13,7 @@ namespace IntelliTect.Coalesce
 
         void AddMapping(object sourceObject, object mappedObject);
 
-        public bool TryGetMapping<TDto>(
+        bool TryGetMapping<TDto>(
             object sourceObject,
 #if NETCOREAPP3_1
             [System.Diagnostics.CodeAnalysis.NotNullWhen(true)]

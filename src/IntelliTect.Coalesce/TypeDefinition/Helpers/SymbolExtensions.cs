@@ -54,28 +54,30 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public static string ExtractXmlComments(this ISymbol symbol)
         {
-            string returnValue = "";
-            XmlDocument xmlDocumentation = new XmlDocument();
-            var xmlDocs = symbol.GetDocumentationCommentXml();
-            if (!string.IsNullOrEmpty(xmlDocs))
+            string? xmlDocs = symbol.GetDocumentationCommentXml();
+            if (string.IsNullOrEmpty(xmlDocs))
             {
-                try
-                {
-                    xmlDocumentation.LoadXml(xmlDocs);
-                    returnValue = xmlDocumentation.SelectSingleNode("/member/summary")?.InnerText.Trim() ?? "";
-                }
-                catch (Exception)
-                {
-                    // Non-critical error. Write it out and ignore.
-                    // Usually this is because of a badly-formed XML comment in the source code.
-                    Console.Error.WriteLine($"Error trying to parse XML Comments for symbol {symbol.ToDisplayString()}:");
-                    Console.Error.WriteLine(xmlDocs);
-                    // The full exception isn't really important. Usually the error will be an XML comment inside of xmlDocs.
-                    //Console.Error.WriteLine(ex);
-                }
+                return "";
             }
 
-            return Regex.Replace(returnValue, "\n( +)", "\n");
+            try
+            {
+                XmlDocument xmlDocumentation = new XmlDocument();
+                xmlDocumentation.LoadXml(xmlDocs);
+                string summary = xmlDocumentation.SelectSingleNode("/member/summary")?.InnerText.Trim() ?? "";
+                return Regex.Replace(summary, "\n( +)", "\n");
+            }
+            catch (Exception)
+            {
+                // Non-critical error. Write it out and ignore.
+                // Usually this is because of a badly-formed XML comment in the source code.
+                Console.Error.WriteLine($"Error trying to parse XML Comments for symbol {symbol.ToDisplayString()}:");
+                Console.Error.WriteLine(xmlDocs);
+                // The full exception isn't really important. Usually the error will be an XML comment inside of xmlDocs.
+                //Console.Error.WriteLine(ex);
+            }
+
+            return "";
         }
     }
 }

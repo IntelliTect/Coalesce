@@ -16,7 +16,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 {
     public abstract class ParameterViewModel : IAttributeProvider, IValueViewModel
     {
-        public ParameterViewModel(MethodViewModel parent, TypeViewModel type)
+        private protected ParameterViewModel(MethodViewModel parent, TypeViewModel type)
         {
             Parent = parent;
             Type = type;
@@ -40,7 +40,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public string DisplayName =>
             this.GetAttributeValue<DisplayNameAttribute>(a => a.DisplayName) ??
             this.GetAttributeValue<DisplayAttribute>(a => a.Name) ??
-            Name.ToProperCase()!;
+            Name.ToProperCase();
 
         /// <summary>
         /// True if this is a parameter to the method on the model that is not represented in the controller action signature.

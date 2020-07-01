@@ -349,7 +349,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             // Nullability note - making a consession here that someone wouldn't do this
             // on something like .PropertyBySelector<string, int>(s => s.Length).
-            var objModel = GetClassViewModel<T>()!;
+            var objModel = GetClassViewModel<T>() ?? throw new ArgumentException("Provided type T has no ClassViewModel.");
             return objModel.PropertyBySelector(propertySelector);
         }
     }

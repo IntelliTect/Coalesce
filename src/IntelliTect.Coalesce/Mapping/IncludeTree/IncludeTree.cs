@@ -17,9 +17,13 @@ namespace IntelliTect.Coalesce
 
         public string? PropertyName { get; set; }
 
-#nullable disable warnings
         public void AddChild(IncludeTree tree)
         {
+            if (string.IsNullOrWhiteSpace(tree.PropertyName))
+            {
+                throw new ArgumentException("New child IncludeTree must have a PropertyName");
+            }
+
             if (_children.ContainsKey(tree.PropertyName))
             {
                 // Recursively merge into the existing tree.
@@ -41,6 +45,11 @@ namespace IntelliTect.Coalesce
         /// <returns></returns>
         public IncludeTree AddLinearChild(IncludeTree tree)
         {
+            if (string.IsNullOrWhiteSpace(tree.PropertyName))
+            {
+                throw new ArgumentException("New child IncludeTree must have a PropertyName");
+            }
+
             if (!_children.ContainsKey(tree.PropertyName))
             {
                 _children[tree.PropertyName] = new IncludeTree { PropertyName = tree.PropertyName };
@@ -57,7 +66,6 @@ namespace IntelliTect.Coalesce
                 return _children[tree.PropertyName];
             }
         }
-#nullable enable warnings
 
         /// <summary>
         /// Shorthand for <code>Enumerable.Empty&lt;T&gt;().AsQueryable()</code>,
@@ -78,7 +86,7 @@ namespace IntelliTect.Coalesce
             return builder(Enumerable.Empty<T>().AsQueryable()).GetIncludeTree();
         }
 
-        public static IncludeTree ParseMemberExpression(MemberExpression expr, out IncludeTree tail)
+        internal static IncludeTree ParseMemberExpression(MemberExpression expr, out IncludeTree tail)
         {
             var newNode = tail = new IncludeTree();
 
@@ -93,7 +101,7 @@ namespace IntelliTect.Coalesce
 
                 newNode.AddChild(head);
 
-                expr = ((MemberExpression)expr.Expression);
+                expr = (MemberExpression)expr.Expression;
                 newNode.PropertyName = expr.Member.Name;
                 head = newNode;
             }
@@ -101,12 +109,16 @@ namespace IntelliTect.Coalesce
             return head;
         }
 
-        public static IncludeTree ParseConstantExpression(ConstantExpression expr, out IncludeTree tail)
+        internal static IncludeTree ParseConstantExpression(ConstantExpression expr, out IncludeTree tail)
         {
-            var members = expr.Value.ToString()!.Split('.');
+            if (!(expr.Value is string stringValue))
+            {
+                throw new ArgumentException("Cannot parse constant expression with non-string values.");
+            }
 
-            IncludeTree? head = null;
-            tail = null!;
+            var members = stringValue.Split('.');
+
+            IncludeTree? first = null, last = null;
 
             foreach (var member in members)
             {
@@ -114,17 +126,19 @@ namespace IntelliTect.Coalesce
                 {
                     PropertyName = member
                 };
-                if (head == null) head = newNode;
-                tail?.AddChild(newNode);
-                tail = newNode;
+                first ??= newNode;
+
+                last?.AddChild(newNode);
+                last = newNode;
             }
 
-            if (head == null || tail == null)
+            if (first == null || last == null)
             {
                 throw new ArgumentException("Unable to parse constant expression", nameof(expr));
             }
 
-            return head;
+            tail = last;
+            return first;
         }
 
         #region IReadOnlyDictionary
@@ -139,14 +153,12 @@ namespace IntelliTect.Coalesce
             return _children.GetEnumerator();
         }
 
-#pragma warning disable CS8767 // Nullability of reference types in type of parameter doesn't match implicitly implemented member.
         public bool TryGetValue(
-#pragma warning restore CS8767 // Nullability of reference types in type of parameter doesn't match implicitly implemented member.
             string key,
 #if NETCOREAPP3_1
-            [System.Diagnostics.CodeAnalysis.NotNullWhen(true)]
+            [System.Diagnostics.CodeAnalysis.MaybeNullWhen(false)]
 #endif 
-            out IncludeTree? value)
+            out IncludeTree value)
         {
             return _children.TryGetValue(key, out value);
         }

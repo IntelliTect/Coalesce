@@ -59,9 +59,9 @@ namespace IntelliTect.Coalesce.Api.Controllers
         {
             var kind = behaviors.DetermineSaveKind(dto).Kind;
 
-            if (GeneratedForClassViewModel == null)
+            if (GeneratedForClassViewModel is null)
             {
-                throw new InvalidOperationException("GeneratedForClassViewModel must be set");
+                throw new InvalidOperationException($"{nameof(GeneratedForClassViewModel)} must be set.");
             }
 
             if (kind == SaveKind.Create && !GeneratedForClassViewModel.SecurityInfo.IsCreateAllowed(User))

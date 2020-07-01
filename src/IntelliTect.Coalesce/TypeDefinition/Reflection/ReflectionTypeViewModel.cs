@@ -139,7 +139,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
             if (!type.IsGenericType)
             {
-                return type.FullName!;
+                return type.FullName ?? "";
             }
 
             var builder = new System.Text.StringBuilder();

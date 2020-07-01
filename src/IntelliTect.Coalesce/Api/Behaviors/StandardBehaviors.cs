@@ -126,7 +126,8 @@ namespace IntelliTect.Coalesce
                 {
                     return new ItemResult<TDto>(existingItem);
                 }
-                item = existingItem.Object ?? throw new InvalidOperationException("Expected ItemResult.Object to be non-null when GetItemAsync returns success.");
+                item = existingItem.Object ?? throw new InvalidOperationException(
+                    $"Expected {nameof(ItemResult)}{nameof(ItemResult<T>.Object)} to be non-null when {nameof(dataSource.GetItemAsync)} returns success.");
 
                 // Ensure that the entity is tracked.
                 // We want to allow for item retrieval from data sources that build their query with .AsNoTracking().
@@ -172,7 +173,8 @@ namespace IntelliTect.Coalesce
                 return $"The item was saved, but could not be loaded with the requested data source: {newItem.Message}";
             }
 
-            item = newItem.Object ?? throw new InvalidOperationException("Expected ItemResult.Object to be non-null when FetchObjectAfterSaveAsync returns success.");
+            item = newItem.Object ?? throw new InvalidOperationException(
+                $"Expected {nameof(ItemResult)}{nameof(ItemResult<T>.Object)} to be non-null when {nameof(FetchObjectAfterSaveAsync)} returns success.");
 
             // Call the AfterSave method to allow the user to
             // modify the returned object, the include tree,
@@ -307,7 +309,8 @@ namespace IntelliTect.Coalesce
                 return existingItem.Message;
             }
 
-            var item = existingItem.Object ?? throw new InvalidOperationException("Expected ItemResult.Object to be non-null when GetItemAsync returns success.");
+            var item = existingItem.Object ?? throw new InvalidOperationException(
+                $"Expected {nameof(ItemResult)}{nameof(ItemResult<T>.Object)} to be non-null when {nameof(dataSource.GetItemAsync)} returns success.");
 
             var beforeDelete = await BeforeDeleteAsync(item);
             if (beforeDelete == null)

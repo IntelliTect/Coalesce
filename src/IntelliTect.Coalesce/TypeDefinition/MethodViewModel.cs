@@ -83,12 +83,23 @@ namespace IntelliTect.Coalesce.TypeDefinition
             {
                 var retType = TaskUnwrappedReturnType;
 
-                return
-                      // For ReturnsListResult, the result will be a constructed generic IList<T>
-                      ReturnsListResult ? retType.ClassViewModel!.PropertyByName(nameof(ListResult<object>.List))!.Type :
-                      retType.IsA(typeof(ItemResult<>)) ? retType.FirstTypeArgument! :
-                      retType.IsA(typeof(ItemResult)) ? ReflectionTypeViewModel.GetOrCreate(Parent.ReflectionRepository, typeof(void)) :
-                      retType;
+                if (ReturnsListResult)
+                {
+                    // For ReturnsListResult, the result will be a constructed generic IList<T>
+                    return retType.ClassViewModel!.PropertyByName(nameof(ListResult<object>.List))!.Type;
+                }
+
+                if (retType.IsA(typeof(ItemResult<>)))
+                {
+                    return retType.FirstTypeArgument!;
+                }
+
+                if (retType.IsA(typeof(ItemResult)))
+                {
+                    return ReflectionTypeViewModel.GetOrCreate(Parent.ReflectionRepository, typeof(void));
+                }
+
+                return retType;
             }
         }
 

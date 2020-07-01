@@ -46,7 +46,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// Excludes <see cref="string"/> and <see cref="T:byte[]"/>
         /// </para>
         /// </summary>
-        public bool IsCollection => IsA<IEnumerable>() && !IsString && !IsByteArray;
+        public bool IsCollection => IsA(typeof(IEnumerable<>)) && !IsString && !IsByteArray;
 
         public abstract bool IsArray { get; }
 

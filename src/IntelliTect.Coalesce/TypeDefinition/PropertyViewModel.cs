@@ -20,7 +20,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
     {
         private const string ConventionalIdSuffix = "Id";
 
-        protected PropertyViewModel(ClassViewModel effectiveParent, ClassViewModel declaringParent, TypeViewModel type)
+        private protected PropertyViewModel(ClassViewModel effectiveParent, ClassViewModel declaringParent, TypeViewModel type)
         {
             Parent = declaringParent;
             EffectiveParent = effectiveParent;
@@ -334,13 +334,13 @@ namespace IntelliTect.Coalesce.TypeDefinition
             var whitelist = this.GetAttributeValue<SearchAttribute>(a => a.RootWhitelist);
             if (!string.IsNullOrWhiteSpace(whitelist))
             {
-                return whitelist!.Split(',').Contains(rootModelName);
+                return whitelist.Split(',').Contains(rootModelName);
             }
 
             var blacklist = this.GetAttributeValue<SearchAttribute>(a => a.RootBlacklist);
             if (!string.IsNullOrWhiteSpace(blacklist))
             {
-                return !blacklist!.Split(',').Contains(rootModelName);
+                return !blacklist.Split(',').Contains(rootModelName);
             }
 
             return true;

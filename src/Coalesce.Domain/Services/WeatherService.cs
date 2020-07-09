@@ -38,9 +38,9 @@ namespace Coalesce.Domain.Services
 
     public class Location
     {
-        public string City { get; set; }
-        public string State { get; set; }
-        public string Zip { get; set; }
+        public string? City { get; set; }
+        public string? State { get; set; }
+        public string? Zip { get; set; }
     }
 
     public class WeatherData
@@ -49,7 +49,7 @@ namespace Coalesce.Domain.Services
 
         public double Humidity { get; set; }
         
-        public Location Location { get; set; }
+        public Location? Location { get; set; }
     }
 
     public enum SkyConditions

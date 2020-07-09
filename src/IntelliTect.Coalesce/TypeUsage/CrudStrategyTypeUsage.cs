@@ -36,7 +36,7 @@ namespace IntelliTect.Coalesce.TypeUsage
         public override int GetHashCode() => 
             unchecked(StrategyClass.GetHashCode() + ServedType.GetHashCode() + DeclaredFor.GetHashCode());
 
-        public override bool Equals(object obj) =>
+        public override bool Equals(object? obj) =>
             obj is CrudStrategyTypeUsage that 
             && StrategyClass.Equals(that.StrategyClass) 
             && ServedType.Equals(that.ServedType)

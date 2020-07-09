@@ -23,7 +23,7 @@ namespace IntelliTect.Coalesce.Api.Controllers
         protected BaseApiController(TContext db)
         {
             Db = db;
-            EntityClassViewModel = ReflectionRepository.Global.GetClassViewModel<T>();
+            EntityClassViewModel = ReflectionRepository.Global.GetClassViewModel<T>()!;
         }
 
         public TContext Db { get; }
@@ -38,7 +38,7 @@ namespace IntelliTect.Coalesce.Api.Controllers
         /// For generated controllers, the type that the controller was generated for.
         /// For custom IClassDtos, this is the DTO type. Otherwise, this is the entity type.
         /// </summary>
-        protected ClassViewModel GeneratedForClassViewModel { get; set; }
+        protected ClassViewModel? GeneratedForClassViewModel { get; set; }
 
         protected Task<ItemResult<TDto>> GetImplementation(object id, DataSourceParameters parameters, IDataSource<T> dataSource)
         {
@@ -58,6 +58,11 @@ namespace IntelliTect.Coalesce.Api.Controllers
         protected Task<ItemResult<TDto>> SaveImplementation(TDto dto, DataSourceParameters parameters, IDataSource<T> dataSource, IBehaviors<T> behaviors)
         {
             var kind = behaviors.DetermineSaveKind(dto).Kind;
+
+            if (GeneratedForClassViewModel is null)
+            {
+                throw new InvalidOperationException($"{nameof(GeneratedForClassViewModel)} must be set.");
+            }
 
             if (kind == SaveKind.Create && !GeneratedForClassViewModel.SecurityInfo.IsCreateAllowed(User))
             {
@@ -87,7 +92,11 @@ namespace IntelliTect.Coalesce.Api.Controllers
         protected async Task<string> CsvTextImplementation(ListParameters parameters, IDataSource<T> dataSource)
         {
             var listResult = await ListImplementation(parameters, dataSource);
-            return IntelliTect.Coalesce.Helpers.CsvHelper.CreateCsv(listResult.List);
+            if (!listResult.WasSuccessful)
+            {
+                throw new InvalidOperationException("Unable to fetch items for CSV endpoint");
+            }
+            return IntelliTect.Coalesce.Helpers.CsvHelper.CreateCsv(listResult.List!);
         }
 
         protected async Task<IEnumerable<ItemResult>> CsvUploadImplementation(

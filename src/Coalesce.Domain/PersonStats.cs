@@ -12,7 +12,7 @@ namespace Coalesce.Domain
         //public int PersonStatsId { get; set; }
         public double Height { get; set; }
         public double Weight { get; set; }
-        public string Name { get; set; }
+        public string? Name { get; set; }
 
         // public PersonLocation PersonLocation { get; set; }
     }

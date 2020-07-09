@@ -14,15 +14,15 @@ namespace IntelliTect.Coalesce.Api
         public int? PageSize { get; set; }
 
         /// <inheritdoc />
-        public string OrderBy { get; set; }
+        public string? OrderBy { get; set; }
 
         /// <inheritdoc />
-        public string OrderByDescending { get; set; }
+        public string? OrderByDescending { get; set; }
         
         /// <inheritdoc />
-        public string Fields { get; set; }
+        public string? Fields { get; set; }
 
-        private IReadOnlyCollection<string> _fieldList;
+        private IReadOnlyCollection<string>? _fieldList;
         /// <inheritdoc cref="IListParameters.Fields" />
         public IReadOnlyCollection<string> FieldList
         {

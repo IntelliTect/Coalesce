@@ -66,7 +66,7 @@ namespace IntelliTect.Coalesce.Api.DataSources
 
             // From our concrete dataSource, figure out which properties on it are injectable parameters.
             var desiredPropertyViewModels = 
-                new ReflectionTypeViewModel(dataSourceType).ClassViewModel.DataSourceParameters;
+                new ReflectionTypeViewModel(dataSourceType).ClassViewModel!.DataSourceParameters;
 
             // Get the ASP.NET MVC metadata objects for these properties.
             var desiredPropertiesMetadata = desiredPropertyViewModels
@@ -119,6 +119,7 @@ namespace IntelliTect.Coalesce.Api.DataSources
                     .GetType()
                     .GetMethod("BindModelCoreAsync", BindingFlags.NonPublic | BindingFlags.Instance);
 
+#nullable disable warnings
                 if (bindModelCoreAsync.GetParameters().Length == 2)
                 {
                     // aspnetcore 3+
@@ -129,7 +130,8 @@ namespace IntelliTect.Coalesce.Api.DataSources
                     // aspnetcore 2
                     await (bindModelCoreAsync.Invoke(childBinder, new[] { bindingContext }) as Task);
                 }
-                // await childBinder.BindModelAsync(bindingContext);
+#nullable restore warnings
+
             }
 
             // Everything worked out; we have a dataSource!

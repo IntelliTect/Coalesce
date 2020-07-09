@@ -8,8 +8,9 @@ using System.Threading.Tasks;
 namespace IntelliTect.Coalesce.Models
 {
     public abstract class GeneratedDto<T> : IClassDto<T>
+        where T : class
     {
-        public abstract void MapFrom(T obj, IMappingContext context, IncludeTree tree = null);
+        public abstract void MapFrom(T obj, IMappingContext context, IncludeTree? tree = null);
         public abstract void MapTo(T obj, IMappingContext context);
 
         private readonly HashSet<string> _changedProperties = new HashSet<string>();

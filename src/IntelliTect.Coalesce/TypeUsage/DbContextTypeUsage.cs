@@ -32,7 +32,7 @@ namespace IntelliTect.Coalesce.TypeUsage
 
         public IReadOnlyList<EntityTypeUsage> Entities { get; }
 
-        public override bool Equals(object obj) => obj is DbContextTypeUsage that && that.ClassViewModel.Equals(ClassViewModel);
+        public override bool Equals(object? obj) => obj is DbContextTypeUsage that && that.ClassViewModel.Equals(ClassViewModel);
 
         public override int GetHashCode() => ClassViewModel.GetHashCode();
     }

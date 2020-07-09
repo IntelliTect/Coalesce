@@ -33,8 +33,8 @@
                 <br />
                 <br />
                 <ul style="list-style: disc; font-size: 24px; font-weight: lighter">
-                    <li>ASP.NET Core @(AppDomain.CurrentDomain.GetAssemblies().First(a => a.FullName.StartsWith("Microsoft.AspNetCore.Server.Kestrel")).GetName().Version.ToString(3))</li>
-                    <li>EF Core @(AppDomain.CurrentDomain.GetAssemblies().First(a => a.GetName().Name == "Microsoft.EntityFrameworkCore").GetName().Version.ToString(3))</li>
+                    <li>ASP.NET Core @(AppDomain.CurrentDomain.GetAssemblies().First(a => a.FullName!.StartsWith("Microsoft.AspNetCore.Server.Kestrel")).GetName().Version!.ToString(3))</li>
+                    <li>EF Core @(AppDomain.CurrentDomain.GetAssemblies().First(a => a.GetName().Name == "Microsoft.EntityFrameworkCore").GetName().Version!.ToString(3))</li>
                     <li>TypeScript</li>
                     <li>Vue or Knockout</li>
                 </ul>

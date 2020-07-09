@@ -13,16 +13,14 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
         }
 
-        public SymbolClassViewModel(SymbolTypeViewModel typeViewModel)
+        public SymbolClassViewModel(SymbolTypeViewModel typeViewModel) : base(typeViewModel)
         {
             Symbol = typeViewModel.Symbol;
-            Type = typeViewModel;
         }
 
-        internal static SymbolClassViewModel GetOrCreate(ReflectionRepository reflectionRepository, INamedTypeSymbol symbol)
+        internal static SymbolClassViewModel? GetOrCreate(ReflectionRepository? reflectionRepository, INamedTypeSymbol symbol)
         {
-            return reflectionRepository?.GetClassViewModel(symbol) as SymbolClassViewModel 
-                ?? new SymbolClassViewModel(reflectionRepository.GetOrAddType(symbol));
+            return (reflectionRepository ?? ReflectionRepository.Global).GetClassViewModel(symbol) as SymbolClassViewModel;
         }
 
         public override string Name => Symbol.Name;
@@ -42,7 +40,10 @@ namespace IntelliTect.Coalesce.TypeDefinition
             if (Symbol.BaseType != null && Symbol.BaseType.Name != "Object")
             {
                 var parentSymbol = GetOrCreate(ReflectionRepository, Symbol.BaseType);
-                result.AddRange(parentSymbol.RawProperties(effectiveParent));
+                if (parentSymbol != null)
+                {
+                    result.AddRange(parentSymbol.RawProperties(effectiveParent));
+                }
             }
             return result.AsReadOnly();
         }
@@ -61,11 +62,14 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 void AddSymbolMethods(INamedTypeSymbol symbol)
                 {
                     var parentSymbol = GetOrCreate(ReflectionRepository, symbol);
-                    result.AddRange(parentSymbol.Methods
-                        .Cast<SymbolMethodViewModel>()
-                        // Don't add overriden methods
-                        .Where(baseMethod => !result.Any(method => SymbolEqualityComparer.Default.Equals(method.Symbol.OverriddenMethod, baseMethod.Symbol))
-                    ));
+                    if (parentSymbol != null)
+                    {
+                        result.AddRange(parentSymbol.Methods
+                            .Cast<SymbolMethodViewModel>()
+                            // Don't add overriden methods
+                            .Where(baseMethod => !result.Any(method => SymbolEqualityComparer.Default.Equals(method.Symbol.OverriddenMethod, baseMethod.Symbol))
+                        ));
+                    }
                 }
 
                 // Add methods from the base class

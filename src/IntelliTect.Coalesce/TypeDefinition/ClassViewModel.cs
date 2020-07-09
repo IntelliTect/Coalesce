@@ -19,10 +19,15 @@ namespace IntelliTect.Coalesce.TypeDefinition
 {
     public abstract class ClassViewModel : IAttributeProvider
     {
-        protected IReadOnlyCollection<PropertyViewModel> _Properties;
-        protected IReadOnlyCollection<MethodViewModel> _Methods;
+        protected IReadOnlyCollection<PropertyViewModel>? _Properties;
+        protected IReadOnlyCollection<MethodViewModel>? _Methods;
 
-        public ReflectionRepository ReflectionRepository => Type.ReflectionRepository;
+        public ReflectionRepository? ReflectionRepository => Type.ReflectionRepository;
+
+        protected ClassViewModel(TypeViewModel type)
+        {
+            Type = type;
+        }
 
         public abstract string Name { get; }
         public abstract string Comment { get; }
@@ -69,7 +74,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public string DtoName => IsDto ? FullyQualifiedName : $"{Name}DtoGen";
 
-        public ClassViewModel BaseViewModel => IsDto ? DtoBaseViewModel : this;
+        public ClassViewModel BaseViewModel => IsDto ? DtoBaseViewModel! : this;
 
         /// <summary>
         /// If this class implements IClassDto, return true.
@@ -79,7 +84,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// If this class implements IClassDto, return the ClassViewModel for the type that this DTO is based upon.
         /// </summary>
-        public ClassViewModel DtoBaseViewModel => IsDto
+        public ClassViewModel? DtoBaseViewModel => IsDto
             ? Type.GenericArgumentsFor(typeof(IClassDto<>)).First().ClassViewModel
             : null;
 
@@ -229,7 +234,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// </summary>
         /// <param name="key"></param>
         /// <returns></returns>
-        public PropertyViewModel PropertyByName(string key)
+        public PropertyViewModel? PropertyByName(string? key)
         {
             if (string.IsNullOrEmpty(key)) return null;
             return Properties.FirstOrDefault(f => string.Equals(f.Name, key, StringComparison.OrdinalIgnoreCase));
@@ -261,7 +266,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             PropertyInfo propInfo = propertySelector.GetExpressedProperty();
             if (propInfo == null) throw new ArgumentException("Could not find property");
-            return PropertyByName(propInfo.Name);
+            return PropertyByName(propInfo.Name)!;
         }
 
         #endregion
@@ -272,7 +277,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// Returns an expression suitable for usage with LINQ Dynamic
         /// that represents the default sort ordering of instances of the class.
         /// </summary>
-        public string DefaultOrderByClause(string prependText = "")
+        public string? DefaultOrderByClause(string prependText = "")
         {
             var defaultOrderBy = DefaultOrderBy.ToList();
 
@@ -346,7 +351,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// If it doesn't find those, it will look for a property called Name or {Class}Name.
         /// If none of those are found, it will result in returning the property that is the primary key for the object
         /// </summary>
-        public IEnumerable<SearchableProperty> SearchProperties(ClassViewModel rootModel = null, int depth = 0, int maxDepth = 2)
+        public IEnumerable<SearchableProperty> SearchProperties(ClassViewModel? rootModel = null, int depth = 0, int maxDepth = 2)
         {
             // Only go down three levels.
             if (depth == 3) yield break;
@@ -373,7 +378,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     PrimaryKey
                 }
                 .Where(p => p != null && p.IsClientProperty && !p.HasNotMapped)
-                .Select(p => new SearchableValueProperty(p))
+                .Select(p => new SearchableValueProperty(p!))
                 .FirstOrDefault();
 
             if (defaultProp != null)
@@ -422,7 +427,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// </summary>
         public bool HasDbSet => ReflectionRepository?.EntityUsages.Contains(this) ?? false;
 
-        private ClassSecurityInfo _securityInfo;
+        private ClassSecurityInfo? _securityInfo;
 
         public ClassSecurityInfo SecurityInfo => _securityInfo ?? (_securityInfo = new ClassSecurityInfo(
             this.GetSecurityPermission<ReadAttribute>(),
@@ -435,7 +440,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public bool IsDefaultDataSource => HasAttribute<DefaultDataSourceAttribute>();
 
-        public object GetAttributeValue<TAttribute>(string valueName) where TAttribute : Attribute =>
+        public object? GetAttributeValue<TAttribute>(string valueName) where TAttribute : Attribute =>
             Type.GetAttributeValue<TAttribute>(valueName);
 
         public bool HasAttribute<TAttribute>() where TAttribute : Attribute =>
@@ -453,13 +458,13 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public override string ToString() => FullyQualifiedName;
 
-        public override bool Equals(object obj) =>
+        public override bool Equals(object? obj) =>
             Object.ReferenceEquals(this, obj)
             || (obj is ClassViewModel that && this.Type.Equals(that.Type));
 
         public override int GetHashCode() => this.Type.GetHashCode();
 
-        public static bool operator == (ClassViewModel lhs, ClassViewModel rhs)
+        public static bool operator == (ClassViewModel? lhs, ClassViewModel? rhs)
         {
             if (Object.ReferenceEquals(lhs, null))
             {
@@ -469,7 +474,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             return lhs.Equals(rhs);
         }
 
-        public static bool operator != (ClassViewModel lhs, ClassViewModel rhs)
+        public static bool operator != (ClassViewModel? lhs, ClassViewModel? rhs)
         {
             return !(lhs == rhs);
         }

@@ -12,11 +12,11 @@ namespace IntelliTect.Coalesce
 {
     public static class IncludeTreeExtensions
     {
-        public static IncludeTree GetIncludeTree(this IQueryable queryable, string rootName = null)
+        public static IncludeTree GetIncludeTree(this IQueryable queryable, string? rootName = null)
         {
             var expression = queryable.Expression;
             IncludeTree root = new IncludeTree { PropertyName = rootName };
-            IncludeTree currentNode = null;
+            IncludeTree? currentNode = null;
             IncludeTree head, tail;
 
             // When we get to the root of the queryable, it won't be a MethodCallExpression.
@@ -34,7 +34,7 @@ namespace IntelliTect.Coalesce
                             if (callExpr.Arguments[1] is UnaryExpression unary)
                             {
                                 // I'm like a wizard with all these casts.
-                                var body = ((MemberExpression)((LambdaExpression)unary.Operand).Body);
+                                var body = (MemberExpression)((LambdaExpression)unary.Operand).Body;
                                 head = IncludeTree.ParseMemberExpression(body, out tail);
                             }
                             else if (callExpr.Arguments[1] is ConstantExpression constant)
@@ -48,7 +48,9 @@ namespace IntelliTect.Coalesce
                     
                             // If we had a child from a ThenInclude, add it to the tail of this node.
                             if (currentNode != null)
+                            {
                                 tail.AddChild(currentNode);
+                            }
 
                             // Save the head of this expression in case we're parsing a ThenInclude.
                             currentNode = head;
@@ -110,7 +112,7 @@ namespace IntelliTect.Coalesce
             this IQueryable<TEntity> query,
             Expression<Func<TEntity, TProperty>> expr) where TEntity : class
         {
-            var body = ((MemberExpression)expr.Body);
+            var body = (MemberExpression)expr.Body;
 
             return new IncludedSeparatelyQueryable<TEntity, TProperty>(query.Provider.CreateQuery<TEntity>(
                 new IncludedSeparatelyExpression(query.Expression, body, true)
@@ -123,7 +125,7 @@ namespace IntelliTect.Coalesce
                Expression<Func<TPreviousProperty, TProperty>> navigationPropertyPath)
             where TEntity : class
         {
-            var body = ((MemberExpression)navigationPropertyPath.Body);
+            var body = (MemberExpression)navigationPropertyPath.Body;
 
             return new IncludedSeparatelyQueryable<TEntity, TProperty>(query.Provider.CreateQuery<TEntity>(
                 new IncludedSeparatelyExpression(query.Expression, body, false)

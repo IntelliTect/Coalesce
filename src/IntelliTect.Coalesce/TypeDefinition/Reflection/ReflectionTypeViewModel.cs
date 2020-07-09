@@ -18,7 +18,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
         }
 
-        internal ReflectionTypeViewModel(ReflectionRepository reflectionRepository, Type type) : base(reflectionRepository)
+        internal ReflectionTypeViewModel(ReflectionRepository? reflectionRepository, Type type) : base(reflectionRepository)
         {
             ReflectionRepository = reflectionRepository;
             Info = type;
@@ -28,7 +28,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 : null;
 
             ArrayType = IsArray 
-                ? ReflectionTypeViewModel.GetOrCreate(reflectionRepository, Info.GetElementType()) 
+                ? ReflectionTypeViewModel.GetOrCreate(reflectionRepository, Info.GetElementType()!) 
                 : null;
 
             IEnumerable<Type> GetBaseClassesAndInterfaces(Type t)
@@ -53,7 +53,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             FullyQualifiedName = GetFriendlyTypeName(Info);
         }
 
-        internal static ReflectionTypeViewModel GetOrCreate(ReflectionRepository reflectionRepository, Type type)
+        internal static ReflectionTypeViewModel GetOrCreate(ReflectionRepository? reflectionRepository, Type type)
         {
             return reflectionRepository?.GetOrAddType(type) ?? new ReflectionTypeViewModel(reflectionRepository, type);
         }
@@ -63,7 +63,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         // - If we're removing arity, we should remove any arity.
         public override string Name => Info.Name.Replace("`1", "");
 
-        public override object GetAttributeValue<TAttribute>(string valueName) =>
+        public override object? GetAttributeValue<TAttribute>(string valueName) =>
             Info.GetAttributeValue<TAttribute>(valueName);
 
         public override bool HasAttribute<TAttribute>() =>
@@ -84,9 +84,10 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public override TypeViewModel[] GenericArgumentsFor(Type type) =>
             GetSatisfyingBaseType(type)?
-            .GenericTypeArguments
-            .Select(t => ReflectionTypeViewModel.GetOrCreate(ReflectionRepository, t))
-            .ToArray();
+                .GenericTypeArguments
+                .Select(t => ReflectionTypeViewModel.GetOrCreate(ReflectionRepository, t))
+                .ToArray() 
+            ?? Array.Empty<TypeViewModel>();
 
         public override bool IsA(Type type) => GetSatisfyingBaseType(type) != null;
 
@@ -112,11 +113,11 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 var info = Info;
                 if (IsNullableType)
                 {
-                    info = Nullable.GetUnderlyingType(info);
+                    info = Nullable.GetUnderlyingType(info)!;
                 }
                 foreach (var value in Enum.GetValues(info))
                 {
-                    result.Add((int)value, value.ToString());
+                    result.Add((int)value!, value.ToString()!);
                 }
                 return result;
             }
@@ -125,7 +126,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public override bool IsEnum =>
             IsNullableType ? NullableUnderlyingType.IsEnum : Info.IsEnum;
 
-        public override string FullNamespace => Info.Namespace;
+        public override string FullNamespace => Info.Namespace ?? "";
 
         private static string GetFriendlyTypeName(Type type)
         {
@@ -138,7 +139,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
             if (!type.IsGenericType)
             {
-                return type.FullName;
+                return type.FullName ?? "";
             }
 
             var builder = new System.Text.StringBuilder();
@@ -166,17 +167,15 @@ namespace IntelliTect.Coalesce.TypeDefinition
         // way as SymbolTypeViewModel.VerboseFullyQualifiedName. Adjust either one as needed.
         public override string VerboseFullyQualifiedName => FullyQualifiedName;
 
-        public override TypeViewModel FirstTypeArgument { get; }
+        public override TypeViewModel? FirstTypeArgument { get; }
 
-        public override TypeViewModel ArrayType { get; }
+        public override TypeViewModel? ArrayType { get; }
 
-        public override ClassViewModel ClassViewModel { get; }
+        public override ClassViewModel? ClassViewModel { get; }
 
         public override Type TypeInfo => Info;
 
-        public override bool EqualsType(TypeViewModel b) => b is ReflectionTypeViewModel r ? Info == r.Info : false;
-
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             if (!(obj is ReflectionTypeViewModel that)) return base.Equals(obj);
 

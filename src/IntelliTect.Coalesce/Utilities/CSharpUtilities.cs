@@ -15,7 +15,7 @@ namespace IntelliTect.Coalesce.Utilities
         /// <param name="type">The type of the literal value.</param>
         /// <param name="value">The literal value to represent as a C# constant expression.</param>
         /// <returns></returns>
-        public static string GetCSharpLiteral(TypeViewModel type, object value)
+        public static string GetCSharpLiteral(TypeViewModel type, object? value)
         {
             // We want a ReferenceEquals null check here to avoid poorly-implemented equality operator overloads.
             if (value is null) return "null";
@@ -48,7 +48,7 @@ namespace IntelliTect.Coalesce.Utilities
             
             if (type.IsIntegral)
             {
-                return value.ToString();
+                return value.ToString()!;
             }
 
             if (type.IsBool)

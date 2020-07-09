@@ -4,17 +4,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Dynamic.Core;
-using System.Security.Claims;
-using System.Text;
 using System.Threading.Tasks;
 using IntelliTect.Coalesce.TypeDefinition;
-using Microsoft.EntityFrameworkCore.Query.Internal;
-using IntelliTect.Coalesce.Mapping.IncludeTrees;
 using IntelliTect.Coalesce.Mapping;
 using IntelliTect.Coalesce.Api;
-using IntelliTect.Coalesce.Utilities;
 using System.Collections.ObjectModel;
-using IntelliTect.Coalesce.Api.DataSources;
 
 namespace IntelliTect.Coalesce
 {
@@ -202,7 +196,7 @@ namespace IntelliTect.Coalesce
                         // The exact value "null" should match null values exactly.
                         if (prop.Type.IsNullable && item.Trim().Equals("null", StringComparison.InvariantCultureIgnoreCase))
                         {
-                            return (Success: true, Result: null);
+                            return (Success: true, Result: (object?)null);
                         }
 
                         if (prop.Type.IsEnum)
@@ -228,8 +222,8 @@ namespace IntelliTect.Coalesce
 
                         try
                         {
-                            object result =
-                                type == typeof(Guid) ? Guid.Parse(item)
+                            object result = type == typeof(Guid) 
+                                ? Guid.Parse(item)
                                 : Convert.ChangeType(item, type);
 
                             return (Success: true, Result: result);
@@ -416,7 +410,7 @@ namespace IntelliTect.Coalesce
                     // Validate that the field accessor is a valid property
                     // that the current user is allowed to read.
                     var parts = fieldName.Split('.');
-                    PropertyViewModel prop = null;
+                    PropertyViewModel? prop = null;
                     foreach (var part in parts)
                     {
                         if (prop != null && !prop.IsPOCO)
@@ -435,21 +429,26 @@ namespace IntelliTect.Coalesce
                         }
 
                         // If the prop is an object that isn't readable, then this is no good.
-                        if (prop.IsPOCO && !prop.Object.SecurityInfo.IsReadAllowed(User))
+                        if (prop.IsPOCO && prop.Object?.SecurityInfo.IsReadAllowed(User) != true)
                         {
                             return null;
                         }
+                    }
+
+                    if (prop == null)
+                    {
+                        return null;
                     }
 
                     if (prop.IsPOCO)
                     {
                         // The property is a POCO, not a value.
                         // Get the default order by for the object's type to figure out what field to sort by.
-                        string clause = prop.Type.ClassViewModel.DefaultOrderByClause($"{fieldName}.");
-
+                        string? clause = prop.Type.ClassViewModel?.DefaultOrderByClause($"{fieldName}.");
+                        
                         // The default order by clause has an order associated, but we want to override it
                         // with the order that the client specified. A string replacement will do.
-                        return clause
+                        return clause?
                             .Replace("ASC", direction.ToUpper())
                             .Replace("DESC", direction.ToUpper());
                     }
@@ -618,7 +617,7 @@ namespace IntelliTect.Coalesce
         /// <param name="parameters">The parameters by which to query.</param>
         /// <returns>The IncludeTree that will be used to shape the serialized DTOs.</returns>
         /// <see href="http://coalesce.readthedocs.io/en/latest/pages/loading-and-serialization/include-tree/"/>
-        public virtual IncludeTree GetIncludeTree(IQueryable<T> query, IDataSourceParameters parameters) => query.GetIncludeTree();
+        public virtual IncludeTree? GetIncludeTree(IQueryable<T> query, IDataSourceParameters parameters) => query.GetIncludeTree();
 
         /// <summary>
         /// Evaluate the given query to determine the total count of items to report to the client.
@@ -638,7 +637,7 @@ namespace IntelliTect.Coalesce
         /// </summary>
         /// <returns>A ListResult with the requested data and paging information,
         /// and an IncludeTree to be used when mapping/serializing the data.</returns>
-        public virtual async Task<(ListResult<T> List, IncludeTree IncludeTree)> GetListAsync(IListParameters parameters)
+        public virtual async Task<(ListResult<T> List, IncludeTree? IncludeTree)> GetListAsync(IListParameters parameters)
         {
             var query = GetQuery(parameters);
 
@@ -713,7 +712,7 @@ namespace IntelliTect.Coalesce
         /// <param name="parameters">The parameters by which to query.</param>
         /// <returns>The requested item
         /// and an IncludeTree to be used when mapping/serializing the item.</returns>
-        public virtual async Task<(ItemResult<T> Item, IncludeTree IncludeTree)> GetItemAsync(object id, IDataSourceParameters parameters)
+        public virtual async Task<(ItemResult<T> Item, IncludeTree? IncludeTree)> GetItemAsync(object id, IDataSourceParameters parameters)
         {
             var query = GetQuery(parameters);
             T result = await EvaluateItemQueryAsync(id, query);

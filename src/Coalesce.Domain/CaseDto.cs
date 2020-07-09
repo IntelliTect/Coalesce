@@ -14,6 +14,9 @@ namespace Coalesce.Domain
     [Coalesce]
     public class CaseDto : IClassDto<Case>
     {
+
+#nullable disable
+
         [Key]
         public int CaseId { get; set; }
 
@@ -21,6 +24,8 @@ namespace Coalesce.Domain
 
         [ReadOnly(true)]
         public string AssignedToName { get; set; }
+
+#nullable restore
 
         [Coalesce]
         public async Task<string> AsyncMethodOnIClassDto(string input)
@@ -34,7 +39,7 @@ namespace Coalesce.Domain
             obj.Title = Title;
         }
 
-        public void MapFrom(Case obj, IMappingContext context = null, IncludeTree tree = null)
+        public void MapFrom(Case obj, IMappingContext context, IncludeTree? tree = null)
         {
             CaseId = obj.CaseKey;
             Title = obj.Title;
@@ -75,7 +80,7 @@ namespace Coalesce.Domain
         {
         }
 
-        public override ItemResult BeforeSave(SaveKind kind, Case oldItem, Case item)
+        public override ItemResult BeforeSave(SaveKind kind, Case? oldItem, Case item)
         {
             return true;
         }

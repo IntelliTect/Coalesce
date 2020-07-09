@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.Mapping.IncludeTrees
 {
-    public class IncludedSeparatelyQueryable<T, TProperty> : IQueryable<T>, IIncludedSeparatelyQueryable<T, TProperty>
+    public class IncludedSeparatelyQueryable<T, TProperty> : IIncludedSeparatelyQueryable<T, TProperty>
     {
         private readonly IQueryable<T> _queryable;
 
@@ -16,7 +16,6 @@ namespace IntelliTect.Coalesce.Mapping.IncludeTrees
             _queryable = queryable;
         }
 
-        public IncludeTree IncludeTree { get; set; }
         public Expression Expression => _queryable.Expression;
         public Type ElementType => _queryable.ElementType;
         public IQueryProvider Provider => _queryable.Provider;

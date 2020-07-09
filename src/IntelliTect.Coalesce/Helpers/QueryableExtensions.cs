@@ -19,14 +19,14 @@ namespace IntelliTect.Coalesce
         /// <summary>
         /// Includes immediate children, as well as the other side of many-to-many relationships.
         /// </summary>
-        public static IQueryable<T> IncludeChildren<T>(this IQueryable<T> query, ReflectionRepository reflectionRepository = null) where T : class
+        public static IQueryable<T> IncludeChildren<T>(this IQueryable<T> query, ReflectionRepository? reflectionRepository = null) where T : class
         {
-            var model = (reflectionRepository ?? ReflectionRepository.Global).GetClassViewModel<T>();
-            foreach (var prop in model.ClientProperties.Where(f => !f.IsStatic && f.Object != null && f.Object.HasDbSet && !f.HasNotMapped))
+            var model = (reflectionRepository ?? ReflectionRepository.Global).GetClassViewModel<T>() ?? throw new ArgumentException("Queried type is not a class");
+            foreach (var prop in model.ClientProperties.Where(f => !f.IsStatic && f.Object?.HasDbSet == true && !f.HasNotMapped))
             {
                 if (prop.IsManytoManyCollection)
                 {
-                    query = query.Include(prop.Name + "." + prop.ManyToManyCollectionProperty.Name);
+                    query = query.Include(prop.Name + "." + prop.ManyToManyCollectionProperty!.Name);
                 }
                 else
                 {
@@ -40,9 +40,9 @@ namespace IntelliTect.Coalesce
         /// Filters a query by a given primary key value.
         /// </summary>
         /// <returns>The filtered query.</returns>
-        public static IQueryable<T> WherePrimaryKeyIs<T>(this IQueryable<T> query, object id, ReflectionRepository reflectionRepository = null)
+        public static IQueryable<T> WherePrimaryKeyIs<T>(this IQueryable<T> query, object id, ReflectionRepository? reflectionRepository = null)
         {
-            var classViewModel = (reflectionRepository ?? ReflectionRepository.Global).GetClassViewModel<T>();
+            var classViewModel = (reflectionRepository ?? ReflectionRepository.Global).GetClassViewModel<T>() ?? throw new ArgumentException("Queried type is not a class");
             var pkProp = classViewModel.PrimaryKey.PropertyInfo;
             return query.Where($"{pkProp.Name} == @0", id);
         }
@@ -51,7 +51,7 @@ namespace IntelliTect.Coalesce
         /// Asynchronously finds an object based on a specific primary key value.
         /// </summary>
         /// <returns>The desired item, or null if it was not found.</returns>
-        public static Task<T> FindItemAsync<T>(this IQueryable<T> query, object id, ReflectionRepository reflectionRepository = null)
+        public static Task<T> FindItemAsync<T>(this IQueryable<T> query, object id, ReflectionRepository? reflectionRepository = null)
         {
             return query.WherePrimaryKeyIs(id, reflectionRepository).FirstOrDefaultAsync();
         }
@@ -60,7 +60,7 @@ namespace IntelliTect.Coalesce
         /// Finds an object based on a specific primary key value.
         /// </summary>
         /// <returns>The desired item, or null if it was not found.</returns>
-        public static T FindItem<T>(this IQueryable<T> query, object id, ReflectionRepository reflectionRepository = null)
+        public static T FindItem<T>(this IQueryable<T> query, object id, ReflectionRepository? reflectionRepository = null)
         {
             return query.WherePrimaryKeyIs(id, reflectionRepository).FirstOrDefault();
         }

@@ -10,7 +10,7 @@ namespace IntelliTect.Coalesce
         /// <summary>
         /// A free-form search string.
         /// </summary>
-        string Search { get; }
+        string? Search { get; }
 
         /// <summary>
         /// A mapping of values, keyed by field name, on which to filter.

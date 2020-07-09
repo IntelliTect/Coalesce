@@ -7,7 +7,7 @@ namespace IntelliTect.Coalesce.Api.Behaviors
 {
     public class BehaviorsModelBinderProvider : IModelBinderProvider
     {
-        public IModelBinder GetBinder(ModelBinderProviderContext context)
+        public IModelBinder? GetBinder(ModelBinderProviderContext context)
         {
             if (context == null)
             {

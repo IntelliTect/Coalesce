@@ -37,7 +37,7 @@ namespace IntelliTect.Coalesce.Utilities
         /// </summary>
         /// <param name="line"></param>
         /// <returns></returns>
-        public CodeBuilder Line(string line)
+        public CodeBuilder Line(string? line)
         {
             if (onNewLine)
             {
@@ -61,7 +61,7 @@ namespace IntelliTect.Coalesce.Utilities
         /// Write a line that is indented one level past the current indentation level.
         /// </summary>
         /// <exception cref="InvalidOperationException">Not currently at the start of a blank line - cannot add indented text at the current location.</exception>
-        public CodeBuilder Indented(string line)
+        public CodeBuilder Indented(string? line)
         {
             // NOTE: this method's name is deliberate - it is excactly 8 characters, while the regular "Line" method is 4 characters.
             // This lines up exactly with standard indentation size of 4 chars, so usages of this method are visually consistent with their output.
@@ -92,7 +92,7 @@ namespace IntelliTect.Coalesce.Utilities
         /// <summary>
         /// Write text to the current line. If currently on a new, blank line, the current indentation will be added.
         /// </summary>
-        public CodeBuilder Append(string text)
+        public CodeBuilder Append(string? text)
         {
             if (onNewLine)
             {
@@ -113,9 +113,9 @@ namespace IntelliTect.Coalesce.Utilities
         protected class Indentation : IDisposable
         {
             private readonly CodeBuilder parent;
-            private readonly string closeWith;
+            private readonly string? closeWith;
 
-            public Indentation(CodeBuilder parent, string closeWith = null)
+            public Indentation(CodeBuilder parent, string? closeWith = null)
             {
                 this.parent = parent;
                 this.closeWith = closeWith;

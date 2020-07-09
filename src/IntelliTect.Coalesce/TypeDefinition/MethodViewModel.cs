@@ -55,7 +55,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             {
                 if (!IsAwaitable) return ReturnType;
 
-                if (ReturnType.IsA(typeof(Task<>))) return ReturnType.FirstTypeArgument;
+                if (ReturnType.IsA(typeof(Task<>))) return ReturnType.FirstTypeArgument!;
 
                 // Return type is a task, but not a generic task. Effective type is void.
                 return ReflectionTypeViewModel.GetOrCreate(Parent.ReflectionRepository, typeof(void));
@@ -83,12 +83,23 @@ namespace IntelliTect.Coalesce.TypeDefinition
             {
                 var retType = TaskUnwrappedReturnType;
 
-                return
-                      // For ReturnsListResult, the result will be a constructed generic IList<T>
-                      ReturnsListResult ? retType.ClassViewModel.PropertyByName(nameof(ListResult<object>.List)).Type
-                    : retType.IsA(typeof(ItemResult<>)) ? retType.FirstTypeArgument
-                    : retType.IsA(typeof(ItemResult)) ? ReflectionTypeViewModel.GetOrCreate(Parent.ReflectionRepository, typeof(void))
-                    : retType;
+                if (ReturnsListResult)
+                {
+                    // For ReturnsListResult, the result will be a constructed generic IList<T>
+                    return retType.ClassViewModel!.PropertyByName(nameof(ListResult<object>.List))!.Type;
+                }
+
+                if (retType.IsA(typeof(ItemResult<>)))
+                {
+                    return retType.FirstTypeArgument!;
+                }
+
+                if (retType.IsA(typeof(ItemResult)))
+                {
+                    return ReflectionTypeViewModel.GetOrCreate(Parent.ReflectionRepository, typeof(void));
+                }
+
+                return retType;
             }
         }
 
@@ -176,7 +187,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public string DisplayName =>
             this.GetAttributeValue<DisplayNameAttribute>(a => a.DisplayName) ??
             this.GetAttributeValue<DisplayAttribute>(a => a.Name) ??
-            Name.ToProperCase();
+            Name.ToProperCase()!;
 
         /// <summary>
         /// For the specified area, returns true if the property has a hidden attribute.
@@ -211,7 +222,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
         }
 
-        public abstract object GetAttributeValue<TAttribute>(string valueName) where TAttribute : Attribute;
+        public abstract object? GetAttributeValue<TAttribute>(string valueName) where TAttribute : Attribute;
         public abstract bool HasAttribute<TAttribute>() where TAttribute : Attribute;
 
         public override string ToString()

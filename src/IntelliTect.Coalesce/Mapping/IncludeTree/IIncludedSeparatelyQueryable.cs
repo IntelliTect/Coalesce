@@ -6,8 +6,7 @@ using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.Mapping.IncludeTrees
 {
-    public interface IIncludedSeparatelyQueryable<out TEntity, out TProperty> : IQueryable<TEntity>, IEnumerable<TEntity>, IEnumerable, IQueryable
+    public interface IIncludedSeparatelyQueryable<out TEntity, out TProperty> : IQueryable<TEntity>
     {
-        IncludeTree IncludeTree { get; set; }
     }
 }

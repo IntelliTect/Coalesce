@@ -113,7 +113,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
             b.Line("    {");
             b.Line("        @:model.load(\'@ViewBag.Id\');");
             b.Line("    }");
-            b.Line("    @foreach (var kvp in ViewBag.ParentIds)");
+            b.Line("    @foreach (KeyValuePair<string, Microsoft.Extensions.Primitives.StringValues> kvp in ViewBag.ParentIds)");
             b.Line("    {");
             b.Line("        @:model.@(((string)(@kvp.Key)))(@kvp.Value);");
             b.Line("    }");

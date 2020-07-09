@@ -35,6 +35,8 @@ namespace Coalesce.Domain
             Cancelled
         }
 
+#nullable disable
+
         /// <summary>
         /// The Primary key for the Case object
         /// </summary>
@@ -122,6 +124,7 @@ namespace Coalesce.Domain
         public TimeSpan Duration { get; set; }
 
 
+#nullable restore
 
         // Arbitrary endpoint to "test" method collection return types.
         [Coalesce]
@@ -149,6 +152,11 @@ namespace Coalesce.Domain
         [Coalesce]
         public async Task UploadAttachment(IFile file)
         {
+            if (file.Content == null)
+            {
+                return;
+            }
+
             var ms = new MemoryStream();
             await file.Content.CopyToAsync(ms);
             Attachment = ms.ToArray();

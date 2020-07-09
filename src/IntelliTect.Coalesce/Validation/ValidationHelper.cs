@@ -12,10 +12,10 @@ namespace IntelliTect.Coalesce.Validation
     {
         public string Area { get; set; } = "";
 
-        public bool IsTrue(bool expression, string message, bool isWarning = false)
+        public bool IsTrue(bool? expression, string message, bool isWarning = false)
         {
             bool result;
-            if (expression)
+            if (expression == true)
             {
                 result = true;
             }
@@ -28,17 +28,17 @@ namespace IntelliTect.Coalesce.Validation
             return result;
         }
 
-        public bool AreNotEqual(object obj1, object obj2, string message, bool isWarning = false)
+        public bool AreNotEqual(object? obj1, object? obj2, string message, bool isWarning = false)
         {
             return IsTrue(obj1 != obj2, message, isWarning);
         }
 
-        public bool IsNotNull(object obj, string message, bool isWarning = false)
+        public bool IsNotNull(object? obj, string message, bool isWarning = false)
         {
             return IsTrue(obj != null, message, isWarning);
         }
 
-        public bool IsNull(object obj, string message, bool isWarning = false)
+        public bool IsNull(object? obj, string message, bool isWarning = false)
         {
             return IsTrue(obj == null, message, isWarning);
         }

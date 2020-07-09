@@ -40,7 +40,7 @@ namespace Coalesce.Domain
         {
         }
 
-        public override ItemResult BeforeSave(SaveKind kind, T oldItem, T item)
+        public override ItemResult BeforeSave(SaveKind kind, T? oldItem, T item)
         {
             // Do nothing - just testing that our custom behaviors will get injected.
             return base.BeforeSave(kind, oldItem, item);

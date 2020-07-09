@@ -7,7 +7,10 @@ namespace IntelliTect.Coalesce.Utilities
     public static class StringExtensions
     {
         // Convert the string to Pascal case.
-        public static string ToPascalCase(this string theString)
+#if NETCOREAPP3_1
+        [return: System.Diagnostics.CodeAnalysis.NotNullIfNotNull("theString")]
+#endif
+        public static string? ToPascalCase(this string? theString)
         {
             // If there are 0 or 1 characters, just return the string.
             if (theString == null) return null;
@@ -68,7 +71,10 @@ namespace IntelliTect.Coalesce.Utilities
 
         // Capitalize the first character and add a space before
         // each capitalized letter (except the first character).
-        public static string ToProperCase(this string theString)
+#if NETCOREAPP3_1
+        [return: System.Diagnostics.CodeAnalysis.NotNullIfNotNull("theString")]
+#endif
+        public static string? ToProperCase(this string? theString)
         {
             // If there are 0 or 1 characters, just return the string.
             if (theString == null) return null;
@@ -87,15 +93,24 @@ namespace IntelliTect.Coalesce.Utilities
             return result;
         }
 
-        public static string EscapeStringLiteralForLinqDynamic(this string str) => str?
+#if NETCOREAPP3_1
+        [return: System.Diagnostics.CodeAnalysis.NotNullIfNotNull("str")]
+#endif
+        public static string? EscapeStringLiteralForLinqDynamic(this string? str) => str?
             .Replace(@"\", @"\\")
             .Replace("\"", "\"\"");
-        
-        public static string EscapeStringLiteralForCSharp(this string str) => str?
+
+#if NETCOREAPP3_1
+        [return: System.Diagnostics.CodeAnalysis.NotNullIfNotNull("str")]
+#endif
+        public static string? EscapeStringLiteralForCSharp(this string? str) => str?
             .Replace(@"\", @"\\")
             .Replace("\"", "\\\"");
 
-        public static string EscapeStringLiteralForTypeScript(this string str) => str?
+#if NETCOREAPP3_1
+        [return: System.Diagnostics.CodeAnalysis.NotNullIfNotNull("str")]
+#endif
+        public static string? EscapeStringLiteralForTypeScript(this string? str) => str?
             .Replace(@"\", @"\\")
             .Replace("\"", "\\\"");
 
@@ -105,7 +120,7 @@ namespace IntelliTect.Coalesce.Utilities
         /// <param name="string">The string to convert</param>
         /// <param name="prefix">(Optional) string to prefix the identifier with.</param>
         /// <returns>A valid C# identifier</returns>
-        public static string GetValidCSharpIdentifier(this string @string, string prefix = null)
+        public static string GetValidCSharpIdentifier(this string @string, string? prefix = null)
         {
             if (!string.IsNullOrWhiteSpace(prefix))
             {

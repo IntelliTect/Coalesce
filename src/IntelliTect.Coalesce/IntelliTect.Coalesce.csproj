@@ -3,6 +3,8 @@
     <Description>Core framework library for IntelliTect.Coalesce</Description>
     <TargetFrameworks>netstandard2.0;netcoreapp3.1</TargetFrameworks>
     <PlatformTarget>AnyCPU</PlatformTarget>
+
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">

@@ -49,10 +49,10 @@ namespace IntelliTect.Coalesce.Api.DataSources
             where TServed : class, new()
             where TDeclaredFor : class, new()
         {
-            return GetDataSource(
-                reflectionRepository.GetClassViewModel<TServed>(),
-                reflectionRepository.GetClassViewModel<TDeclaredFor>(),
-                dataSourceName) as IDataSource<TServed>;
+            return (IDataSource<TServed>)GetDataSource(
+                reflectionRepository.GetClassViewModel<TServed>()!,
+                reflectionRepository.GetClassViewModel<TDeclaredFor>()!,
+                dataSourceName);
         }
 
         public object GetDataSource(ClassViewModel servedType, ClassViewModel declaredFor, string dataSourceName)
@@ -83,10 +83,10 @@ namespace IntelliTect.Coalesce.Api.DataSources
             where TServed : class, new()
             where TDeclaredFor : class, new()
         {
-            return GetDefaultDataSource(
-                reflectionRepository.GetClassViewModel<TServed>(), 
-                reflectionRepository.GetClassViewModel<TDeclaredFor>()
-            ) as IDataSource<TServed>;
+            return (IDataSource<TServed>)GetDefaultDataSource(
+                reflectionRepository.GetClassViewModel<TServed>()!, 
+                reflectionRepository.GetClassViewModel<TDeclaredFor>()!
+            );
         }
 
         public object GetDefaultDataSource(ClassViewModel servedType, ClassViewModel declaredFor)

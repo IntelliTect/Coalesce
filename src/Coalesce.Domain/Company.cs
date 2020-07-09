@@ -11,6 +11,7 @@ namespace Coalesce.Domain
     [Create(PermissionLevel = SecurityPermissionLevels.DenyAll)]
     public class Company
     {
+#nullable disable
         public int CompanyId { get; set; }
         public string Name { get; set; }
         public string Address1 { get; set; }
@@ -30,6 +31,8 @@ namespace Coalesce.Domain
         [NotMapped]
         [ListText]
         public string AltName => Name + ": " + City;
+
+#nullable enable
 
         [Coalesce]
         public static ICollection<Company> GetCertainItems(AppDbContext db, bool isDeleted = false)

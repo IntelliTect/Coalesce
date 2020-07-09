@@ -21,12 +21,12 @@ namespace IntelliTect.Coalesce
         /// A comma-delimited list of field names to sort by.
         /// Each field name may be followed by "ASC" or "DESC" (case insensitive), specifying direction.
         /// </summary>
-        string OrderBy { get; }
+        string? OrderBy { get; }
         
         /// <summary>
         /// A comma-delimited list of field names to sort by in DESCENDING order.
         /// </summary>
-        string OrderByDescending { get; }
+        string? OrderByDescending { get; }
         
         /// <summary>
         /// An interpreted list of both OrderBy and OrderByDescending.

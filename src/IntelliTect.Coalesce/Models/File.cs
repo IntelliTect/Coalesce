@@ -12,12 +12,12 @@ namespace IntelliTect.Coalesce.Models
     /// </summary>
     public class File : IFile
     {
-        public string Name { get; set; }
+        public string? Name { get; set; }
 
         public long Length { get; set; }
 
-        public string ContentType { get; set; }
+        public string? ContentType { get; set; }
 
-        public Stream Content { get; set; }
+        public Stream? Content { get; set; }
     }
 }

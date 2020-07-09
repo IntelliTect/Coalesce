@@ -15,12 +15,12 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         }
 
-        internal TypeViewModel(ReflectionRepository reflectionRepository) : this()
+        internal TypeViewModel(ReflectionRepository? reflectionRepository) : this()
         {
             ReflectionRepository = reflectionRepository;
         }
 
-        public ReflectionRepository ReflectionRepository { get; internal set; }
+        public ReflectionRepository? ReflectionRepository { get; internal set; }
 
         public abstract string Name { get; }
 
@@ -46,7 +46,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// Excludes <see cref="string"/> and <see cref="T:byte[]"/>
         /// </para>
         /// </summary>
-        public bool IsCollection => IsA<IEnumerable>() && !IsString && !IsByteArray;
+        public bool IsCollection => IsA(typeof(IEnumerable<>)) && !IsString && !IsByteArray;
 
         public abstract bool IsArray { get; }
 
@@ -67,9 +67,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public abstract bool IsEnum { get; }
 
-        public abstract TypeViewModel FirstTypeArgument { get; }
+        public abstract TypeViewModel? FirstTypeArgument { get; }
 
-        public abstract TypeViewModel ArrayType { get; }
+        public abstract TypeViewModel? ArrayType { get; }
 
         public abstract bool IsA(Type type);
 
@@ -101,9 +101,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
             IsVoid ? TypeDiscriminator.Void :
             IsFile ? TypeDiscriminator.File :
             IsCollection ? TypeDiscriminator.Collection :
-            HasClassViewModel ? (
-                ClassViewModel.IsDbMappedType ? TypeDiscriminator.Model : TypeDiscriminator.Object
-            ) : TypeDiscriminator.Unknown;
+            ClassViewModel != null 
+                ? (ClassViewModel.IsDbMappedType ? TypeDiscriminator.Model : TypeDiscriminator.Object) 
+                : TypeDiscriminator.Unknown;
 
         public string CsDefaultValue
         {
@@ -196,7 +196,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public bool HasClassViewModel => ClassViewModel != null;
 
-        public abstract ClassViewModel ClassViewModel { get; }
+        public abstract ClassViewModel? ClassViewModel { get; }
 
 
         /// <summary>
@@ -231,7 +231,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// Returns true if class is a Byte[]
         /// </summary>
-        public bool IsByteArray => IsArray && ArrayType.IsA<Byte>();
+        public bool IsByteArray => IsArray && ArrayType!.IsA<Byte>();
 
         /// <summary>
         /// Returns true if the type is an <see cref="IntelliTect.Coalesce.Models.IFile"/>
@@ -277,7 +277,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// If this represents a nullable type, returns the underlying type that is nullable.
         /// Otherwise, returns the current instance.
         /// </summary>
-        public TypeViewModel NullableUnderlyingType => IsNullableType ? FirstTypeArgument : this;
+        public TypeViewModel NullableUnderlyingType => IsNullableType ? FirstTypeArgument! : this;
 
         /// <summary>
         /// Gets the type name without any collection or nullable around it.
@@ -288,12 +288,12 @@ namespace IntelliTect.Coalesce.TypeDefinition
             {
                 if (IsArray)
                 {
-                    return ArrayType;
+                    return ArrayType!;
                 }
 
                 if (IsGeneric && (IsCollection || IsNullable))
                 {
-                    return FirstTypeArgument;
+                    return FirstTypeArgument!;
                 }
 
                 return this;
@@ -309,7 +309,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public string TsDeclarationPlain(string parameterName) => $"{parameterName}: {TsTypePlain}";
         
-        public abstract object GetAttributeValue<TAttribute>(string valueName) where TAttribute : Attribute;
+        public abstract object? GetAttributeValue<TAttribute>(string valueName) where TAttribute : Attribute;
 
         public abstract bool HasAttribute<TAttribute>() where TAttribute : Attribute;
 
@@ -317,7 +317,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             // We assume ICollection for all collections. If this doesn't work in a particular context,
             // consider that whatever you're assigning to this type should probably be assignable to ICollection if it is indeed a collection.
             ? $"ICollection<{PureType.DtoFullyQualifiedName}>" 
-            : (HasClassViewModel ? ClassViewModel.DtoName : FullyQualifiedName);
+            : (ClassViewModel != null ? ClassViewModel.DtoName : FullyQualifiedName);
 
         public string NullableTypeForDto(string dtoNamespace)
         {
@@ -346,7 +346,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             if (!(obj is TypeViewModel that)) return false;
 
@@ -355,12 +355,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public override int GetHashCode() => VerboseFullyQualifiedName.GetHashCode();
 
-        // TODO: maybe retire this in favor of plain .Equals? Make sure that ReflectionTypeViewModel.FullyQualifiedName is correct, first.
-        public abstract bool EqualsType(TypeViewModel b);
-
         public override string ToString() => FullyQualifiedName;
 
-        public static bool operator ==(TypeViewModel lhs, TypeViewModel rhs)
+        public static bool operator ==(TypeViewModel? lhs, TypeViewModel? rhs)
         {
             if (Object.ReferenceEquals(lhs, null))
             {
@@ -370,9 +367,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
             return lhs.Equals(rhs);
         }
 
-        public static bool operator !=(TypeViewModel o1, TypeViewModel o2)
+        public static bool operator !=(TypeViewModel? o1, TypeViewModel? o2)
         {
-            return !o1.Equals(o2);
+            return !(o1 == o2);
         }
     }
 }

@@ -16,9 +16,10 @@ namespace IntelliTect.Coalesce.TypeDefinition
 {
     public abstract class ParameterViewModel : IAttributeProvider, IValueViewModel
     {
-        public ParameterViewModel(MethodViewModel parent)
+        private protected ParameterViewModel(MethodViewModel parent, TypeViewModel type)
         {
             Parent = parent;
+            Type = type;
         }
 
         public MethodViewModel Parent { get; }
@@ -154,7 +155,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public string CsParameterName => Name.ToCamelCase();
 
         public abstract bool HasDefaultValue { get; }
-        protected abstract object RawDefaultValue { get; }
+        protected abstract object? RawDefaultValue { get; }
 
         /// <summary>
         /// C# compile-time constant expression representing the default value of the parameter if HasDefaultValue == true.
@@ -170,7 +171,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public override string ToString() => $"{Type} {Name}";
 
-        public abstract object GetAttributeValue<TAttribute>(string valueName) where TAttribute : Attribute;
+        public abstract object? GetAttributeValue<TAttribute>(string valueName) where TAttribute : Attribute;
         public abstract bool HasAttribute<TAttribute>() where TAttribute : Attribute;
     }
 }

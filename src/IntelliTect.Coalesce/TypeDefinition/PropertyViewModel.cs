@@ -20,6 +20,13 @@ namespace IntelliTect.Coalesce.TypeDefinition
     {
         private const string ConventionalIdSuffix = "Id";
 
+        private protected PropertyViewModel(ClassViewModel effectiveParent, ClassViewModel declaringParent, TypeViewModel type)
+        {
+            Parent = declaringParent;
+            EffectiveParent = effectiveParent;
+            Type = type;
+        }
+
         /// <summary>
         /// Name of the property
         /// </summary>
@@ -118,7 +125,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// Gets the ClassViewModel associated with the Object
         /// </summary>
-        public ClassViewModel Object => PureType.ClassViewModel;
+        public ClassViewModel? Object => PureType.ClassViewModel;
         
         /// <summary>
         /// Returns true if this property is a collection and has the ManyToMany Attribute 
@@ -134,13 +141,13 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// Returns the name of the collection to map as a direct many-to-many collection
         /// </summary>
-        public string ManyToManyCollectionName => this.GetAttributeValue<ManyToManyAttribute>(a => a.CollectionName);
+        public string? ManyToManyCollectionName => this.GetAttributeValue<ManyToManyAttribute>(a => a.CollectionName);
 
         /// <summary>
         /// Property on the other side of the many-to-many relationship.
         /// </summary>
-        public PropertyViewModel ManyToManyCollectionProperty =>
-            Object.Properties.FirstOrDefault(prop => prop.IsPOCO && !prop.Object.Equals(Parent));
+        public PropertyViewModel? ManyToManyCollectionProperty =>
+            Object?.Properties.FirstOrDefault(prop => prop.IsPOCO && prop.Object?.Equals(Parent) != true);
 
         /// <summary>
         /// True if the property is read only.
@@ -180,7 +187,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             && HasPublicSetter
             // Exclude object properties with setters that aren't DB mapped - 
             // these are probably Owned Types, which we don't currently support editing.
-            && (!IsPOCO || Object.HasDbSet) 
+            && (!IsPOCO || Object?.HasDbSet == true) 
             // The PK is excluded here because clients don't get to choose values for the PK.
             // All PKs in Coalesce are assumed to be database-generated.
             && !IsPrimaryKey 
@@ -193,7 +200,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// </summary>
         public bool IsFile => this.HasAttribute<FileAttribute>() && Type.IsByteArray;
 
-        public string FileMimeType
+        public string? FileMimeType
         {
             get
             {
@@ -202,13 +209,13 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 return attrValue;
             }
         }
-        private string FileNamePropertyName => this.GetAttributeValue<FileAttribute>(f => f.NameProperty);
-        private string FileHashPropertyName => this.GetAttributeValue<FileAttribute>(f => f.HashProperty);
-        private string FileSizePropertyName => this.GetAttributeValue<FileAttribute>(f => f.SizeProperty);
+        private string? FileNamePropertyName => this.GetAttributeValue<FileAttribute>(f => f.NameProperty);
+        private string? FileHashPropertyName => this.GetAttributeValue<FileAttribute>(f => f.HashProperty);
+        private string? FileSizePropertyName => this.GetAttributeValue<FileAttribute>(f => f.SizeProperty);
 
-        public PropertyViewModel FileNameProperty => this.Parent.PropertyByName(this.FileNamePropertyName);
-        public PropertyViewModel FileHashProperty => this.Parent.PropertyByName(this.FileHashPropertyName);
-        public PropertyViewModel FileSizeProperty => this.Parent.PropertyByName(this.FileSizePropertyName);
+        public PropertyViewModel? FileNameProperty => this.Parent.PropertyByName(this.FileNamePropertyName);
+        public PropertyViewModel? FileHashProperty => this.Parent.PropertyByName(this.FileHashPropertyName);
+        public PropertyViewModel? FileSizeProperty => this.Parent.PropertyByName(this.FileSizePropertyName);
         
         public bool HasFileNameProperty => !string.IsNullOrWhiteSpace(this.FileNamePropertyName);
         public bool HasFileHashProperty => !string.IsNullOrWhiteSpace(this.FileHashPropertyName);
@@ -303,7 +310,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// Returns the range of valid values or null if they don't exist. (min, max)
         /// </summary>
-        public Tuple<object, object> Range
+        public Tuple<object, object>? Range
         {
             get
             {
@@ -317,7 +324,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// Returns true if this property is marked with the Search attribute.
         /// </summary>
-        public bool IsSearchable(ClassViewModel rootModel)
+        public bool IsSearchable(ClassViewModel? rootModel)
         {
             if (!HasAttribute<SearchAttribute>()) return false;
 
@@ -367,7 +374,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// Returns the fields to search for this object. This could be just the field itself 
         /// or a number of child fields if this is an object or collection.
         /// </summary>
-        public IEnumerable<SearchableProperty> SearchProperties(ClassViewModel rootModel, int depth = 0, int maxDepth = 2, bool force = false)
+        public IEnumerable<SearchableProperty> SearchProperties(ClassViewModel? rootModel, int depth = 0, int maxDepth = 2, bool force = false)
         {
             if (!force && !IsSearchable(rootModel)) yield break;
 
@@ -377,7 +384,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 if (depth < maxDepth)
                 {
                     // Remove this item and add the child's search items with a prepended property name
-                    var childProperties = this.Type.PureType.ClassViewModel.SearchProperties(rootModel, depth + 1, maxDepth);
+                    var childProperties = this.PureType.ClassViewModel!.SearchProperties(rootModel, depth + 1, maxDepth);
 
                     if (this.Type.IsCollection)
                     {
@@ -439,7 +446,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// If this is a reference navigation property, returns the property that holds the foreign key. 
         /// </summary>
-        public PropertyViewModel ForeignKeyProperty
+        public PropertyViewModel? ForeignKeyProperty
         {
             get
             {
@@ -479,7 +486,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// Gets the property that is the object reference for this ID property.
         /// </summary>
-        public PropertyViewModel ReferenceNavigationProperty
+        public PropertyViewModel? ReferenceNavigationProperty
         {
             get
             {
@@ -527,7 +534,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         }
 
 
-        public OrderByInformation DefaultOrderBy
+        public OrderByInformation? DefaultOrderBy
         {
             get
             {
@@ -539,7 +546,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     var name = Name;
                     if (fieldName != null)
                     {
-                        string defaultValue = Type.ClassViewModel?.PropertyByName(fieldName).Type.CsDefaultValue ?? "\"\"";
+                        string defaultValue = Type.ClassViewModel?.PropertyByName(fieldName)?.Type.CsDefaultValue ?? "\"\"";
                         
                         return new OrderByInformation()
                         {
@@ -572,10 +579,15 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// "many" end of the one-to-many relationship.
         /// </para>
         /// </summary>
-        public PropertyViewModel InverseProperty
+        public PropertyViewModel? InverseProperty
         {
             get
             {
+                if (Object == null)
+                {
+                    return null;
+                }
+
                 var name = this.GetAttributeValue<InversePropertyAttribute>(a => a.Property);
                 if (name != null)
                 {
@@ -588,10 +600,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     // whose name is the same as the type name of this prop's owner.
                     // This serves to pick up the standard convention of props like
                     // public Widget Widget { get; set; }
-                    if (Object != null)
-                    {
-                        return Object.PropertyByName(Parent.Name);
-                    }
+                    return Object.PropertyByName(Parent.Name);
                 }
                 else if (Role == PropertyRole.ReferenceNavigation)
                 {
@@ -615,7 +624,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// For a collection navigation property, this is the ID reference to this object from the contained object.
         /// </summary>
-        public PropertyViewModel InverseIdProperty
+        public PropertyViewModel? InverseIdProperty
         {
             get
             {
@@ -724,7 +733,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
         }
 
-        public abstract object GetAttributeValue<TAttribute>(string valueName) where TAttribute : Attribute;
+        public abstract object? GetAttributeValue<TAttribute>(string valueName) where TAttribute : Attribute;
         public abstract bool HasAttribute<TAttribute>() where TAttribute : Attribute;
     }
 }

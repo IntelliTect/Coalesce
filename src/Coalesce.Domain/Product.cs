@@ -2,6 +2,8 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using IntelliTect.Coalesce.DataAnnotations;
 
+#nullable disable
+
 namespace Coalesce.Domain
 {
     [Table("Product")]

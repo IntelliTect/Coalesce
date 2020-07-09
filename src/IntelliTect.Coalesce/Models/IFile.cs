@@ -7,9 +7,9 @@ namespace IntelliTect.Coalesce.Models
     /// </summary>
     public interface IFile
     {
-        Stream Content { get; }
-        string ContentType { get; }
-        string Name { get; }
+        Stream? Content { get; }
+        string? ContentType { get; }
+        string? Name { get; }
         long Length { get; }
     }
 }

@@ -85,7 +85,7 @@ namespace IntelliTect.Coalesce.DataAnnotations
         /// </summary>
         /// <param name="user"></param>
         /// <returns></returns>
-        public bool IsEditable(ClaimsPrincipal user)
+        public bool IsEditable(ClaimsPrincipal? user)
         {
             if (!IsSecuredProperty) return true;
             if (string.IsNullOrEmpty(EditRoles))
@@ -104,7 +104,7 @@ namespace IntelliTect.Coalesce.DataAnnotations
         }
 
         // If true, the user can view the property
-        public bool IsReadable(ClaimsPrincipal user)
+        public bool IsReadable(ClaimsPrincipal? user)
         {
             if (!IsSecuredProperty) return true;
             if (!string.IsNullOrEmpty(ReadRoles))

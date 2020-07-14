@@ -617,18 +617,29 @@ export const Person = domain.types.Person = {
       displayName: "First Name",
       type: "string",
       role: "value",
+      rules: {
+        minLength: val => !val || val.length >= 2 || "First Name must be at least 2 characters.",
+        maxLength: val => !val || val.length <= 75 || "First Name may not be more than 75 characters.",
+      }
     },
     lastName: {
       name: "lastName",
       displayName: "Last Name",
       type: "string",
       role: "value",
+      rules: {
+        minLength: val => !val || val.length >= 3 || "Last Name must be at least 3 characters.",
+        maxLength: val => !val || val.length <= 100 || "Last Name may not be more than 100 characters.",
+      }
     },
     email: {
       name: "email",
       displayName: "Email",
       type: "string",
       role: "value",
+      rules: {
+        email: val => !val || /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<> ()\[\]\\.,;:\s@"]+)*)|(".+ "))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(val.trim()) || "Email must be a valid email address.",
+      }
     },
     gender: {
       name: "gender",

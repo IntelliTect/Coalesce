@@ -69,6 +69,7 @@ namespace Coalesce.Domain
         /// <summary>
         /// Email address of the person
         /// </summary>
+        [ClientValidation(IsEmail = true)]
         public string Email { get; set; }
 
         /// <summary>

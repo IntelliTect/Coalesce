@@ -276,39 +276,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
 
                 if (prop.IsClientWritable)
                 {
-                    // TODO: Handle all the rest (where it makes sense, anyway) of ClientValidationAttribute
-
-                    // TODO: Handle 'ClientValidationAllowSave' by placing a field on the 
-                    // validator function that contains the value of this flag.
-
-                    var isRequired = prop.GetAttributeValue<ClientValidationAttribute, bool>(a => a.IsRequired);
-                    var errorMessage = prop.GetAttributeValue<ClientValidationAttribute>(a => a.ErrorMessage);
-
-                    var rules = new List<string>();
-
-                    // A simple falsey check will treat a numeric zero as "absent," so we explicitly check for
-                    // null/undefined instead.
-                    var requiredPredicate = prop.Type.IsString ? "(val != null && val !== '')" : "val != null";
-
-                    if (isRequired == true)
-                    {
-                        rules.Add($"required: val => {requiredPredicate} || \"{(errorMessage ?? $"{(prop.ReferenceNavigationProperty ?? prop).DisplayName} is required.").EscapeStringLiteralForTypeScript()}\"");
-                    }
-                    else if (prop.IsRequired)
-                    {
-                        string message = null;
-                        if (prop.HasAttribute<RequiredAttribute>())
-                        {
-                            message = prop.GetAttributeValue<RequiredAttribute>(a => a.ErrorMessage);
-                        }
-                        if (string.IsNullOrWhiteSpace(message))
-                        {
-                            var name = (prop.ReferenceNavigationProperty ?? prop).DisplayName;
-                            message = $"{name} is required.";
-                        }
-
-                        rules.Add($"required: val => {requiredPredicate} || \"{message.EscapeStringLiteralForTypeScript()}\"");
-                    }
+                    List<string> rules = GetValidationRules(prop);
 
                     if (rules.Count > 0)
                     {
@@ -323,6 +291,146 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                     }
                 }
             }
+        }
+
+        private static List<string> GetValidationRules(PropertyViewModel prop)
+        {
+            var propName = (prop.ReferenceNavigationProperty ?? prop).DisplayName;
+
+            // TODO: Handle 'ClientValidationAllowSave' by placing a field on the 
+            // validator function that contains the value of this flag.
+
+            var errorMessage = prop.GetAttributeValue<ClientValidationAttribute>(a => a.ErrorMessage);
+
+            var rules = new List<string>();
+            string Error(string message, string fallback)
+            {
+                if (string.IsNullOrWhiteSpace(message))
+                {
+                    message = fallback;
+                }
+
+                return $"|| \"{message.EscapeStringLiteralForTypeScript()}\"";
+            }
+
+
+            // A simple falsey check will treat a numeric zero as "absent", so we explicitly check for
+            // null/undefined instead.
+            var requiredPredicate = prop.Type.IsString ? "(val != null && val !== '')" : "val != null";
+
+            var isRequired = prop.GetAttributeValue<ClientValidationAttribute, bool>(a => a.IsRequired);
+            if (isRequired == true)
+            {
+                rules.Add($"required: val => {requiredPredicate} {Error(errorMessage, $"{propName} is required.")}");
+            }
+            else if (prop.IsRequired)
+            {
+                string message = null;
+                if (prop.HasAttribute<RequiredAttribute>())
+                {
+                    message = prop.GetAttributeValue<RequiredAttribute>(a => a.ErrorMessage);
+                }
+                if (string.IsNullOrWhiteSpace(message))
+                {
+                    var name = (prop.ReferenceNavigationProperty ?? prop).DisplayName;
+                    message = $"{name} is required.";
+                }
+
+                rules.Add($"required: val => {requiredPredicate} || \"{message.EscapeStringLiteralForTypeScript()}\"");
+            }
+
+
+            if (prop.Type.IsString)
+            {
+                void Min(object value, string error) => rules.Add($"minLength: val => !val || val.length >= {value} {Error(error, $"{propName} must be at least {value} characters.")}");
+                void Max(object value, string error) => rules.Add($"maxLength: val => !val || val.length <= {value} {Error(error, $"{propName} may not be more than {value} characters.")}");
+
+                if (prop.Range != null)
+                {
+                    var message = prop.GetAttributeValue<RangeAttribute>(a => a.ErrorMessage);
+                    Min(prop.Range.Item1, message);
+                    Max(prop.Range.Item2, message);
+                    goto RangeDone;
+                }
+
+                if (prop.HasAttribute<StringLengthAttribute>())
+                {
+                    var stringError = prop.GetAttributeValue<StringLengthAttribute>(a => a.ErrorMessage);
+                    var stringMin = prop.GetAttributeValue<StringLengthAttribute, int>(a => a.MinimumLength);
+                    if (stringMin.HasValue)
+                    {
+                        Min(stringMin.Value, stringError);
+                    }
+                    var stringMax = prop.GetAttributeValue<StringLengthAttribute, int>(a => a.MaximumLength);
+                    if (stringMax.HasValue)
+                    {
+                        Max(stringMax.Value, stringError);
+                    }
+
+                    goto RangeDone;
+                }
+
+                var minLength = prop.GetAttributeValue<ClientValidationAttribute, int>(a => a.MinLength);
+                var maxLength = prop.GetAttributeValue<ClientValidationAttribute, int>(a => a.MaxLength);
+
+                if (prop.MinLength.HasValue)
+                {
+                    Min(prop.MinLength.Value, prop.GetAttributeValue<MinLengthAttribute>(a => a.ErrorMessage));
+                }
+                else if (minLength.HasValue && minLength.Value != int.MaxValue)
+                {
+                    Min(minLength.Value, errorMessage);
+                }
+
+                if (prop.MaxLength.HasValue)
+                {
+                    Max(prop.MaxLength.Value, prop.GetAttributeValue<MaxLengthAttribute>(a => a.ErrorMessage));
+                }
+                else if (maxLength.HasValue && maxLength.Value != int.MinValue)
+                {
+                    Max(maxLength.Value, errorMessage);
+                }
+            }
+            else if (prop.Type.IsNumber)
+            {
+                void Min(object value, string error) => rules.Add($"min: val == null || val >= {value} {Error(error, $"{propName} must be at least {value}.")}");
+                void Max(object value, string error) => rules.Add($"max: val == null || val <= {value} {Error(error, $"{propName} may not be more than {value}.")}");
+
+                if (prop.Range != null)
+                {
+                    var message = prop.GetAttributeValue<RangeAttribute>(a => a.ErrorMessage);
+                    Min(prop.Range.Item1, message);
+                    Max(prop.Range.Item2, message);
+                    goto RangeDone;
+                }
+
+                var minValue = prop.GetAttributeValue<ClientValidationAttribute, double>(a => a.MinValue);
+                var maxValue = prop.GetAttributeValue<ClientValidationAttribute, double>(a => a.MaxValue);
+
+                if (minValue.HasValue && minValue.Value != double.MaxValue)
+                    Min(minValue.Value, errorMessage);
+                if (maxValue.HasValue && maxValue.Value != double.MinValue)
+                    Max(maxValue.Value, errorMessage);
+            }
+
+            RangeDone:
+
+            var pattern = prop.GetAttributeValue<ClientValidationAttribute>(a => a.Pattern);
+            if (pattern != null)
+                rules.Add($"pattern: val => !val || /{pattern}/.test(val) {Error(errorMessage, $"{propName} does not match expected format.")}");
+
+            // https://emailregex.com/
+            const string emailRegex = @"^(([^<>()\[\]\\.,;:\s@""]+(\.[^<> ()\[\]\\.,;:\s@""]+)*)|("".+ ""))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$";
+            var isEmail = prop.GetAttributeValue<ClientValidationAttribute, bool>(a => a.IsEmail);
+            if (isEmail.HasValue && isEmail.Value)
+                rules.Add($"email: val => !val || /{emailRegex}/.test(val.trim()) {Error(errorMessage, $"{propName} must be a valid email address.")}");
+
+            const string phoneRegex = @"^(1-?)?(\([2-9]\d{2}\)|[2-9]\d{2})-?[2-9]\d{2}-?\d{4}$";
+            var isPhoneUs = prop.GetAttributeValue<ClientValidationAttribute, bool>(a => a.IsPhoneUs);
+            if (isPhoneUs.HasValue && isPhoneUs.Value)
+                rules.Add($"phone: val => !val || /{phoneRegex}/.test(val.replace(/\\s+/g, '')) {Error(errorMessage, $"{propName} must be a valid US phone number.")}");
+
+            return rules;
         }
 
         /// <summary>

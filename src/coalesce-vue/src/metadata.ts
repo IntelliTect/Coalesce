@@ -233,9 +233,17 @@ export interface MethodReturnValue {
     readonly name: "$return"
 }
 
+export type Rule<T> = (val: T | null | undefined) => true | string
+
 export interface Rules {
-  required?: (val: any) => true | string
-  // TODO: Add all the other [ClientValidation] rules
+  required?: Rule<any>
+  minLength?: Rule<string>
+  maxLength?: Rule<string>
+  min?: Rule<number>
+  max?: Rule<number>
+  pattern?: Rule<string>
+  email?: Rule<string>
+  phone?: Rule<string>
 }
 
 /**

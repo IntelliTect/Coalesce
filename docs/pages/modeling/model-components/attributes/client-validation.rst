@@ -101,11 +101,16 @@ Validation Rule Properties
 
     .. group-tab:: Vue
 
-        At the moment, the only property supported in the Vue stack is :csharp:`IsRequired`. All other rule properties will be ignored.
-
-        However, you can always customize validation on a per-instance basis of the :ref:`VueInstanceViewModels` using the :ref:`VueViewModelsValidation` methods.
+        In addition to the following properties, you also customize validation on a per-instance basis of the :ref:`VueInstanceViewModels` using the :ref:`VueViewModelsValidation` methods.
 
         .. code-block:: c#
 
             public bool IsRequired { get; set; }
+            public double MinValue { get; set; } = double.MaxValue;
+            public double MaxValue { get; set; } = double.MinValue;
+            public double MinLength { get; set; } = double.MaxValue;
+            public double MaxLength { get; set; } = double.MinValue;
+            public string Pattern { get; set; }
+            public bool IsEmail { get; set; }
+            public bool IsPhoneUs { get; set; }
 

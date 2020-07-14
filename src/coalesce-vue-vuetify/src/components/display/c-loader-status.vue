@@ -1,63 +1,63 @@
 <template>
-  <transition-group 
-    class="c-loader-status c-loader-status--transition-group" 
-    name="c-loader-status-fade" mode="out-in" tag="div" 
+  <transition-group
+    class="c-loader-status c-loader-status--transition-group"
+    name="c-loader-status-fade"
+    mode="out-in"
+    tag="div"
     :class="{
       'has-progress-placeholder': usePlaceholder
     }"
   >
-    <div
-      v-if="errorMessages.length" 
+    <v-alert
+      v-if="errorMessages.length"
       key="error"
+      :value="true"
+      type="error"
+      class="c-loader-status--errors"
     >
-      <v-alert :value="true" type="error" >
-        <ul>
-          <li 
-            v-for="message in errorMessages" 
-            class="c-loader-status--error-message" 
-            v-text="message"></li>
-        </ul>
-      </v-alert>
-    </div>
-    
+      <ul>
+        <li
+          v-for="message in errorMessages"
+          class="c-loader-status--error-message"
+          v-text="message"
+        ></li>
+      </ul>
+    </v-alert>
+
     <!-- This nested transition allows us to transition between 
         the progress loader and the placeholder independent of the 
         main outer transition between content/error/loaders -->
-    <transition-group 
+    <transition-group
       class="c-loader-status--transition-group"
       key="loading"
       v-if="showLoading || usePlaceholder"
-      name="c-loader-status-fade" mode="out-in" tag="div"
+      name="c-loader-status-fade"
+      mode="out-in"
+      tag="div"
     >
-      <v-progress-linear 
+      <v-progress-linear
         key="progress"
         v-if="showLoading"
-        indeterminate :height="height">
+        indeterminate
+        :height="height"
+      >
       </v-progress-linear>
-      <div 
-        key="placeholder"
-        v-else
-        :style="{height: height + 'px'}"
-      ></div>
+      <div key="placeholder" v-else :style="{ height: height + 'px' }"></div>
     </transition-group>
 
-    <div 
-      v-if="showContent"  
-      key="normal"
-      class="c-loader-status--content"
-    >
+    <div v-if="showContent" key="normal" class="c-loader-status--content">
       <slot></slot>
     </div>
   </transition-group>
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import { Component, Prop } from 'vue-property-decorator'
-import { ApiState, ItemApiState, ListApiState } from 'coalesce-vue';
+import Vue from "vue";
+import { Component, Prop } from "vue-property-decorator";
+import { ApiState, ItemApiState, ListApiState } from "coalesce-vue";
 
-type AnyLoader = ItemApiState<any, any> | ListApiState<any, any>
-type AnyLoaderMaybe = AnyLoader | null | undefined
+type AnyLoader = ItemApiState<any, any> | ListApiState<any, any>;
+type AnyLoaderMaybe = AnyLoader | null | undefined;
 
 class Flags {
   progress: boolean | null = null;
@@ -67,7 +67,6 @@ class Flags {
   errorContent = true;
   initialContent = true;
 }
-
 
 /*
   TODO: This component could use a bit of a rewrite (again).
@@ -81,50 +80,49 @@ class Flags {
 
 */
 
-@Component({name: 'c-loader-status'})
+@Component({ name: "c-loader-status" })
 export default class extends Vue {
-
   /**
    * Loaders (docs forthcoming)
    */
-  @Prop({required: true, type: Object })
+  @Prop({ required: true, type: Object })
   loaders!: { [flags: string]: AnyLoaderMaybe | AnyLoaderMaybe[] };
 
   /**
    * If the loader is loading when it already has a result,
    * keep the default slot visible.
    */
-  @Prop({required: false, type: Boolean, default: true})
+  @Prop({ required: false, type: Boolean, default: true })
   progressPlaceholder!: boolean;
 
-  @Prop({required: false, type: [Number, String], default: 10})
+  @Prop({ required: false, type: [Number, String], default: 10 })
   height!: number | string;
 
   get loaderFlags() {
-    var ret = []
+    var ret = [];
     for (const flagsStr in this.loaders) {
       const flagsArr = flagsStr.split(" ");
-      const flags: any = new Flags;
+      const flags: any = new Flags();
       for (const flagName in flags) {
         const kebabFlag = flagName.replace(
-          /([A-Z])/g, 
-          m => '-' + m.toLowerCase()
+          /([A-Z])/g,
+          m => "-" + m.toLowerCase()
         );
 
         if (flagsArr.includes(kebabFlag)) {
           flags[flagName] = true;
-        } else if (flagsArr.includes('no-' + kebabFlag)) {
+        } else if (flagsArr.includes("no-" + kebabFlag)) {
           flags[flagName] = false;
         }
       }
 
       let loaders = this.loaders[flagsStr];
       if (!Array.isArray(loaders)) {
-        loaders = [ loaders ]
+        loaders = [loaders];
       }
       for (const loader of loaders) {
         if (loader) {
-          ret.push([loader, flags as Flags] as const)
+          ret.push([loader, flags as Flags] as const);
         }
       }
     }
@@ -133,13 +131,13 @@ export default class extends Vue {
   }
 
   get anyFailed() {
-    return this.loaderFlags.some(f => f[0].wasSuccessful === false)
+    return this.loaderFlags.some(f => f[0].wasSuccessful === false);
   }
 
   get errorMessages() {
     return this.loaderFlags
       .filter(f => f[0].wasSuccessful === false)
-      .map(f => f[0].message)
+      .map(f => f[0].message);
   }
 
   get showLoading() {
@@ -149,78 +147,90 @@ export default class extends Vue {
 
       const isLoading = loader.isLoading;
       return (
-          (flags.initialProgress && isLoading && loader.wasSuccessful == null)
-        || (flags.secondaryProgress && isLoading && loader.wasSuccessful != null)
-      )
-    })
+        (flags.initialProgress && isLoading && loader.wasSuccessful == null) ||
+        (flags.secondaryProgress && isLoading && loader.wasSuccessful != null)
+      );
+    });
   }
 
   get usePlaceholder() {
-    return this.progressPlaceholder && this.loaderFlags.some(f => 
-      (f[1].progress !== false && f[1].secondaryProgress) && f[1].loadingContent
-    )
+    return (
+      this.progressPlaceholder &&
+      this.loaderFlags.some(
+        f =>
+          f[1].progress !== false &&
+          f[1].secondaryProgress &&
+          f[1].loadingContent
+      )
+    );
   }
 
   get showContent() {
-    
     return this.loaderFlags.every(([loader, flags]) => {
       if (loader.isLoading && !flags.loadingContent) {
         // loader is loading, and loading content is off.
-        return false
+        return false;
       }
       if (loader.wasSuccessful === false && !flags.errorContent) {
         // loader has an error, and error content is off
-        return false
+        return false;
       }
       if (loader.wasSuccessful == null && !flags.initialContent) {
         // loader has not yet loaded, and initial content is off
-        return false
+        return false;
       }
       return true;
-    })
+    });
   }
 }
 </script>
 
 <style lang="scss">
-  .c-loader-status--transition-group {
-    > * {
-      flex-shrink: 0;
-      transition: all .2s, opacity .2s ease-in .2s;
+.c-loader-status--transition-group {
+  > * {
+    flex-shrink: 0;
+    transition: all 0.2s, opacity 0.2s ease-in 0.2s;
+  }
+}
+
+.c-loader-status-fade-enter,
+.c-loader-status-fade-leave-to {
+  opacity: 0;
+}
+.c-loader-status-fade-leave-active {
+  // Important because vuetify specifies position:relative on .v-progress-linear
+  position: absolute !important;
+  transition-delay: 0s !important;
+}
+
+.c-loader-status {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  font-weight: 400;
+
+  .c-loader-status--content {
+    flex-grow: 1;
+    flex-shrink: 1;
+
+    // Prevents small block-level content from losing its parent width
+    // when the wrapper becomes positioned absolutely during the transition.
+    width: 100%;
+
+    // overflow:hidden breaks nested elements that use position: sticky.
+    // My removal of this maybe? broke something somewhere that needs this.
+
+    // overflow: hidden;
+  }
+
+  .c-loader-status--error-message {
+    white-space: pre-wrap;
+
+    // Remove bulleting when there's only one error.
+    &:only-child {
+      list-style: none;
+      margin-left: -20px;
     }
   }
-
-  .c-loader-status-fade-enter, .c-loader-status-fade-leave-to {
-    opacity: 0;
-  }
-  .c-loader-status-fade-leave-active {
-    // Important because vuetify specifies position:relative on .v-progress-linear
-    position: absolute !important; 
-    transition-delay: 0s !important;
-  }
-
-  .c-loader-status {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    font-weight: 400;
-    
-    .c-loader-status--content {
-      flex-grow: 1;
-      flex-shrink: 1;
-
-      // Prevents small block-level content from losing its parent width 
-      // when the wrapper becomes positioned absolutely during the transition.
-      width: 100%;
-
-      // overflow:hidden breaks nested elements that use position: sticky.
-      // My removal of this maybe? broke something somewhere that needs this.
-
-      // overflow: hidden;
-    }
-
-    .c-loader-status--error-message {
-      white-space: pre-wrap;
-    }
-  }
+}
 </style>

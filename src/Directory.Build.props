@@ -33,7 +33,10 @@
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
-  
+
+  <ItemGroup>
+    <SourceRoot Include="$(MSBuildThisFileDirectory)/../"/>
+  </ItemGroup>
   
   <PropertyGroup Condition="'$(TF_BUILD)' == 'true'">
     <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>

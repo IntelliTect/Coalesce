@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
     <!-- All these frameworks are included for testing code generation.
     Override the used framework by specifying (framework: "tfm") in coalesce.json. -->
     <!--
@@ -9,16 +9,19 @@
       dotnet ef database update - -framework netcoreapp2.1 
       (no space between the dashes; space is there because double dash is illegal in XML comments).
     -->
-    <TargetFrameworks>netcoreapp3.1;net471</TargetFrameworks>
+    <TargetFrameworks>netcoreapp3.1;netcoreapp2.2;net471</TargetFrameworks>
     <IsPackable>false</IsPackable>
     <Nullable>enable</Nullable>
   </PropertyGroup>
   
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp3.1' ">
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.*" />
+    <!--<PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.*" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="3.1.*" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.*" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.*" />-->
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="2.2.*" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="2.2.*" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="2.2.*" />  
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp3.1' ">
     <ProjectReference Include="..\IntelliTect.Coalesce\IntelliTect.Coalesce.csproj">
@@ -36,9 +39,12 @@
       <SetTargetFramework>TargetFramework=netstandard2.0</SetTargetFramework>
     </ProjectReference>
   </ItemGroup>
-  
+
   <ItemGroup>
     <PackageReference Include="GenFu" Version="1.4.22" />
+    
+    <!-- Necessary because GenFu has a hard dep against NETStandard.Library 1.6, which screws up a lot of things. -->
+    <PackageReference Include="NETStandard.Library" Version="2.0.3" />
   </ItemGroup>
   
 </Project>

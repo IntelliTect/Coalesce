@@ -459,6 +459,26 @@ export class ProductListViewModel extends ListViewModel<$models.Product, $apiCli
 }
 
 
+export interface ZipCodeViewModel extends $models.ZipCode {
+  zip: string | null;
+  state: string | null;
+}
+export class ZipCodeViewModel extends ViewModel<$models.ZipCode, $apiClients.ZipCodeApiClient, string> implements $models.ZipCode  {
+  
+  constructor(initialData?: DeepPartial<$models.ZipCode> | null) {
+    super($metadata.ZipCode, new $apiClients.ZipCodeApiClient(), initialData)
+  }
+}
+defineProps(ZipCodeViewModel, $metadata.ZipCode)
+
+export class ZipCodeListViewModel extends ListViewModel<$models.ZipCode, $apiClients.ZipCodeApiClient, ZipCodeViewModel> {
+  
+  constructor() {
+    super($metadata.ZipCode, new $apiClients.ZipCodeApiClient())
+  }
+}
+
+
 export class WeatherServiceViewModel extends ServiceViewModel<typeof $metadata.WeatherService, $apiClients.WeatherServiceApiClient> {
   
   public get getWeather() {
@@ -496,6 +516,7 @@ const viewModelTypeLookup = ViewModel.typeLookup = {
   Company: CompanyViewModel,
   Person: PersonViewModel,
   Product: ProductViewModel,
+  ZipCode: ZipCodeViewModel,
 }
 const listViewModelTypeLookup = ListViewModel.typeLookup = {
   Case: CaseListViewModel,
@@ -504,6 +525,7 @@ const listViewModelTypeLookup = ListViewModel.typeLookup = {
   Company: CompanyListViewModel,
   Person: PersonListViewModel,
   Product: ProductListViewModel,
+  ZipCode: ZipCodeListViewModel,
 }
 const serviceViewModelTypeLookup = ServiceViewModel.typeLookup = {
   WeatherService: WeatherServiceViewModel,

@@ -28,7 +28,6 @@ namespace Coalesce.Domain
         public StreetAddress ManufacturingAddress { get; set; }
 
         public StreetAddress CompanyHqAddress { get; set; }
-
     }
 
     public class StreetAddress

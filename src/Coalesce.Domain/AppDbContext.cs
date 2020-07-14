@@ -13,6 +13,7 @@ namespace Coalesce.Domain
         public DbSet<Company> Companies { get; set; }
         public DbSet<Product> Products { get; set; }
         public DbSet<CaseProduct> CaseProducts { get; set; }
+        public DbSet<ZipCode> ZipCodes { get; set; }
 #nullable restore
 
         public AppDbContext()

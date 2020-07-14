@@ -38,7 +38,7 @@
                 v-if="editable"
                 :model="item"
                 :for="prop"
-                :readonly="isPropReadOnly(prop)"
+                :readonly="isPropReadOnly(prop, item)"
                 label=""
               >
                 <c-admin-display v-if="admin" :model="item" :for="prop" />
@@ -89,7 +89,8 @@ import {
   Property,
   ModelType,
   HiddenAreas,
-  BehaviorFlags
+  BehaviorFlags,
+  ViewModel
 } from "coalesce-vue";
 
 import CAdminDisplay from "../admin/c-admin-display";
@@ -124,21 +125,15 @@ export default class extends Vue {
     return this.list.$metadata;
   }
 
-  isPropReadOnly(p: Property) {
-    const metadata = this.metadata;
-
-    return (
-      (metadata.behaviorFlags & BehaviorFlags.Edit) == 0 || isPropReadOnly(p)
-    );
+  isPropReadOnly(p: Property, model: ViewModel) {
+    return isPropReadOnly(p, model);
   }
 
   get effectiveProps() {
     return Object.values(this.metadata.props).filter((p: Property) =>
       this.props
         ? this.props.indexOf(p.name) >= 0
-        : p.role != "primaryKey" &&
-          p.role != "foreignKey" &&
-          (p.hidden === undefined || (p.hidden & HiddenAreas.List) == 0)
+        : (p.hidden === undefined || (p.hidden & HiddenAreas.List) == 0)
     );
   }
 

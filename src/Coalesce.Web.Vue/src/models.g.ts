@@ -280,6 +280,29 @@ export class Product {
 }
 
 
+export interface ZipCode extends Model<typeof metadata.ZipCode> {
+  zip: string | null
+  state: string | null
+}
+export class ZipCode {
+  
+  /** Mutates the input object and its descendents into a valid ZipCode implementation. */
+  static convert(data?: Partial<ZipCode>): ZipCode {
+    return convertToModel(data || {}, metadata.ZipCode) 
+  }
+  
+  /** Maps the input object and its descendents to a new, valid ZipCode implementation. */
+  static map(data?: Partial<ZipCode>): ZipCode {
+    return mapToModel(data || {}, metadata.ZipCode) 
+  }
+  
+  /** Instantiate a new ZipCode, optionally basing it on the given data. */
+  constructor(data?: Partial<ZipCode> | {[k: string]: any}) {
+      Object.assign(this, ZipCode.map(data || {}));
+  }
+}
+
+
 export interface CaseSummary extends Model<typeof metadata.CaseSummary> {
   caseSummaryId: number | null
   openCases: number | null

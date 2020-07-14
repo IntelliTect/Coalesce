@@ -27,4 +27,6 @@
 /// <reference path="Generated/Ko.StreetAddress.g.ts" />
 /// <reference path="Generated/Ko.WeatherData.g.ts" />
 /// <reference path="Generated/Ko.WeatherServiceClient.g.ts" />
+/// <reference path="Generated/Ko.ZipCode.g.ts" />
+/// <reference path="Generated/Ko.ZipCodeList.g.ts" />
 /// <reference path="Partials/Ko.Person.partial.ts" />

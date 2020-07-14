@@ -63,6 +63,7 @@ export const Case = domain.types.Case = {
       displayName: "Case Key",
       type: "number",
       role: "primaryKey",
+      hidden: 3,
     },
     title: {
       name: "title",
@@ -94,6 +95,7 @@ export const Case = domain.types.Case = {
       get principalKey() { return (domain.types.Person as ModelType).props.personId as PrimaryKeyProperty },
       get principalType() { return (domain.types.Person as ModelType) },
       get navigationProp() { return (domain.types.Case as ModelType).props.assignedTo as ModelReferenceNavigationProperty },
+      hidden: 3,
     },
     assignedTo: {
       name: "assignedTo",
@@ -114,6 +116,7 @@ export const Case = domain.types.Case = {
       get principalKey() { return (domain.types.Person as ModelType).props.personId as PrimaryKeyProperty },
       get principalType() { return (domain.types.Person as ModelType) },
       get navigationProp() { return (domain.types.Case as ModelType).props.reportedBy as ModelReferenceNavigationProperty },
+      hidden: 3,
     },
     reportedBy: {
       name: "reportedBy",
@@ -338,6 +341,7 @@ export const CaseDto = domain.types.CaseDto = {
       displayName: "Case Id",
       type: "number",
       role: "primaryKey",
+      hidden: 3,
     },
     title: {
       name: "title",
@@ -405,6 +409,7 @@ export const CaseProduct = domain.types.CaseProduct = {
       displayName: "Case Product Id",
       type: "number",
       role: "primaryKey",
+      hidden: 3,
     },
     caseId: {
       name: "caseId",
@@ -414,6 +419,7 @@ export const CaseProduct = domain.types.CaseProduct = {
       get principalKey() { return (domain.types.Case as ModelType).props.caseKey as PrimaryKeyProperty },
       get principalType() { return (domain.types.Case as ModelType) },
       get navigationProp() { return (domain.types.CaseProduct as ModelType).props.case as ModelReferenceNavigationProperty },
+      hidden: 3,
       rules: {
         required: val => val != null || "Case is required.",
       }
@@ -437,6 +443,7 @@ export const CaseProduct = domain.types.CaseProduct = {
       get principalKey() { return (domain.types.Product as ModelType).props.productId as PrimaryKeyProperty },
       get principalType() { return (domain.types.Product as ModelType) },
       get navigationProp() { return (domain.types.CaseProduct as ModelType).props.product as ModelReferenceNavigationProperty },
+      hidden: 3,
       rules: {
         required: val => val != null || "Product is required.",
       }
@@ -471,6 +478,7 @@ export const Company = domain.types.Company = {
       displayName: "Company Id",
       type: "number",
       role: "primaryKey",
+      hidden: 3,
     },
     name: {
       name: "name",
@@ -595,6 +603,7 @@ export const Person = domain.types.Person = {
       displayName: "Person Id",
       type: "number",
       role: "primaryKey",
+      hidden: 3,
     },
     title: {
       name: "title",
@@ -709,6 +718,7 @@ export const Person = domain.types.Person = {
       get principalKey() { return (domain.types.Company as ModelType).props.companyId as PrimaryKeyProperty },
       get principalType() { return (domain.types.Company as ModelType) },
       get navigationProp() { return (domain.types.Person as ModelType).props.company as ModelReferenceNavigationProperty },
+      hidden: 3,
       rules: {
         required: val => val != null || "Company is required.",
       }
@@ -1105,6 +1115,7 @@ export const Product = domain.types.Product = {
       displayName: "Product Id",
       type: "number",
       role: "primaryKey",
+      hidden: 3,
     },
     name: {
       name: "name",
@@ -1123,6 +1134,36 @@ export const Product = domain.types.Product = {
     uniqueId: {
       name: "uniqueId",
       displayName: "Unique Id",
+      type: "string",
+      role: "value",
+    },
+  },
+  methods: {
+  },
+  dataSources: {
+  },
+}
+export const ZipCode = domain.types.ZipCode = {
+  name: "ZipCode",
+  displayName: "Zip Code",
+  get displayProp() { return this.props.zip }, 
+  type: "model",
+  controllerRoute: "ZipCode",
+  get keyProp() { return this.props.zip }, 
+  behaviorFlags: 7,
+  props: {
+    zip: {
+      name: "zip",
+      displayName: "Zip",
+      type: "string",
+      role: "primaryKey",
+      rules: {
+        required: val => (val != null && val !== '') || "Zip is required.",
+      }
+    },
+    state: {
+      name: "state",
+      displayName: "State",
       type: "string",
       role: "value",
     },
@@ -1445,6 +1486,7 @@ interface AppDomain extends Domain {
     ProductDetails: typeof ProductDetails
     StreetAddress: typeof StreetAddress
     WeatherData: typeof WeatherData
+    ZipCode: typeof ZipCode
   }
   services: {
     WeatherService: typeof WeatherService

@@ -14,10 +14,15 @@ namespace IntelliTect.Coalesce
         /// is a create or update action. If an update action, also provide the key of the existing item to be updated.
         /// </summary>
         /// <typeparam name="TDto"></typeparam>
-        /// <param name="incomingDto"></param>
+        /// <param name="incomingDto">The DTO containing the properties to update.</param>
+        /// <param name="dataSource">The data source that will be used when loading the item to be updated.</param>
+        /// <param name="parameters">The parameters to be passed to the data source when loading the item.</param>
         /// <returns></returns>
-        (SaveKind Kind, object? IncomingKey) DetermineSaveKind<TDto>(TDto incomingDto)
-            where TDto : class, IClassDto<T>, new();
+        Task<(SaveKind Kind, object? IncomingKey)> DetermineSaveKindAsync<TDto>(
+            TDto incomingDto,
+            IDataSource<T> dataSource,
+            IDataSourceParameters parameters
+        ) where TDto : class, IClassDto<T>, new();
 
         /// <summary>
         /// Save an item to the database.

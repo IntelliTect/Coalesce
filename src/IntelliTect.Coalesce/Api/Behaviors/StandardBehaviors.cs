@@ -8,6 +8,7 @@ using IntelliTect.Coalesce.Utilities;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
@@ -61,14 +62,48 @@ namespace IntelliTect.Coalesce
         /// Also discerns the primary key of the object that is being operated upon.
         /// </summary>
         /// <typeparam name="TDto">The type of the incoming DTO.</typeparam>
-        /// <param name="incomingDto">The incoming DTO to obtain a primary key from.</param>
+        /// <param name="incomingDto">The DTO to obtain a primary key from.</param>
+        /// <param name="dataSource">The data source that will be used to check if the item exists if the item does not use a database-generated primary key.</param>
+        /// <param name="parameters">The parameters to be passed to the data source when loading the item.</param>
         /// <returns>A SaveKind indicating either Create or Update, 
         /// and the value of the primary key that can be used for database lookups.</returns>
-        public virtual (SaveKind Kind, object? IncomingKey) DetermineSaveKind<TDto>(TDto incomingDto)
+        public virtual async Task<(SaveKind Kind, object? IncomingKey)> DetermineSaveKindAsync<TDto>(
+            TDto incomingDto,
+            IDataSource<T> dataSource,
+            IDataSourceParameters parameters
+        )
             where TDto : class, IClassDto<T>, new()
         {
             var dtoClassViewModel = Context.ReflectionRepository.GetClassViewModel<TDto>()!;
-            object? idValue = dtoClassViewModel.PrimaryKey.PropertyInfo.GetValue(incomingDto);
+            var pkInfo = dtoClassViewModel.PrimaryKey;
+
+            object? idValue = pkInfo.PropertyInfo.GetValue(incomingDto);
+
+            if (ClassViewModel.PrimaryKey.DatabaseGenerated == DatabaseGeneratedOption.None)
+            {
+                // PK is not database generated.
+                // We have to look for the existing object to determine if
+                // this is a create or update.
+
+                if (idValue == null)
+                {
+                    // Pretend this is a create, even though it will definitely fail.
+                    // We just don't really want to handle the error in this method,
+                    // largely because it does not return an ItemResult.
+                    // So, we'll pass it down the line as if it was a create and let the
+                    // database and/or other parts of the behaviors (including any custom validation)
+                    // handle this as an error.
+                    return (SaveKind.Create, null);
+                }
+
+                var (existingItem, _) = await (OverrideFetchForUpdateDataSource ?? dataSource).GetItemAsync(idValue, parameters);
+                if (existingItem.WasSuccessful && existingItem.Object != null)
+                {
+                    return (SaveKind.Update, idValue);
+                }
+
+                return (SaveKind.Create, null);
+            }
 
             // IsNullable handles nullable value types, and reference types (mainly strings).
             // !IsNullable handles non-Nullable<T> value types.
@@ -104,7 +139,7 @@ namespace IntelliTect.Coalesce
         )
             where TDto : class, IClassDto<T>, new()
         {
-            (SaveKind kind, object? idValue) = DetermineSaveKind(incomingDto);
+            (SaveKind kind, object? idValue) = await DetermineSaveKindAsync(incomingDto, dataSource, parameters);
 
             T? originalItem = null;
             T item;
@@ -116,7 +151,6 @@ namespace IntelliTect.Coalesce
             if (kind == SaveKind.Create)
             {
                 item = new T();
-                dbSet.Add(item);
             }
             else
             {
@@ -141,7 +175,7 @@ namespace IntelliTect.Coalesce
             var validateDto = ValidateDto(kind, incomingDto);
             if (validateDto == null)
             {
-                throw new InvalidOperationException("Recieved null from result of ValidateDto. Expected an ItemResult.");
+                throw new InvalidOperationException("Received null from result of ValidateDto. Expected an ItemResult.");
             }
 
             if (!validateDto.WasSuccessful)
@@ -156,11 +190,19 @@ namespace IntelliTect.Coalesce
             var beforeSave = await BeforeSaveAsync(kind, originalItem, item);
             if (beforeSave == null)
             {
-                throw new InvalidOperationException("Recieved null from result of BeforeSave. Expected an ItemResult.");
+                throw new InvalidOperationException("Received null from result of BeforeSave. Expected an ItemResult.");
             }
             else if (!beforeSave.WasSuccessful)
             {
                 return new ItemResult<TDto>(beforeSave);
+            }
+
+            if (kind == SaveKind.Create)
+            {
+                // In order to support non-db-generated primary keys, 
+                // we have to wait to attach a new entity to the context until it has a PK.
+                // We do this after BeforeSaveAsync to give it a chance to intercept the new item and modify it.
+                dbSet.Add(item);
             }
 
             await Db.SaveChangesAsync();
@@ -182,7 +224,7 @@ namespace IntelliTect.Coalesce
             var afterSave = AfterSave(kind, originalItem, ref item, ref includeTree);
             if (afterSave == null)
             {
-                throw new InvalidOperationException("Recieved null from result of AfterSave. Expected an ItemResult<TDto>.");
+                throw new InvalidOperationException("Received null from result of AfterSave. Expected an ItemResult<TDto>.");
             }
             else if (!afterSave.WasSuccessful)
             {
@@ -315,7 +357,7 @@ namespace IntelliTect.Coalesce
             var beforeDelete = await BeforeDeleteAsync(item);
             if (beforeDelete == null)
             {
-                throw new InvalidOperationException("Recieved null from result of BeforeDelete. Expected an ItemResult.");
+                throw new InvalidOperationException("Received null from result of BeforeDelete. Expected an ItemResult.");
             }
 
             if (!beforeDelete.WasSuccessful)

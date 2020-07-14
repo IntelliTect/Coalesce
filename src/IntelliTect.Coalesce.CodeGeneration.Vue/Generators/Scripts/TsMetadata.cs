@@ -260,19 +260,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                         break;
                 }
 
-                int hiddenAreaFlags = 0;
-                switch (prop.GetAttributeValue<HiddenAttribute, HiddenAttribute.Areas>(a => a.Area))
-                {
-                    case HiddenAttribute.Areas.List:
-                        hiddenAreaFlags = 1 << 0;
-                        break;
-                    case HiddenAttribute.Areas.Edit:
-                        hiddenAreaFlags = 1 << 1;
-                        break;
-                    case HiddenAttribute.Areas.All:
-                        hiddenAreaFlags = (1 << 0 | 1 << 1);
-                        break;
-                }
+                int hiddenAreaFlags = (int)prop.HiddenAreas;
                 if (hiddenAreaFlags != 0)
                 {
                     b.Prop("hidden", hiddenAreaFlags.ToString());

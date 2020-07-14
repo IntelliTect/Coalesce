@@ -55,9 +55,9 @@ namespace IntelliTect.Coalesce.Api.Controllers
             return dataSource.GetCountAsync(parameters);
         }
 
-        protected Task<ItemResult<TDto>> SaveImplementation(TDto dto, DataSourceParameters parameters, IDataSource<T> dataSource, IBehaviors<T> behaviors)
+        protected async Task<ItemResult<TDto>> SaveImplementation(TDto dto, DataSourceParameters parameters, IDataSource<T> dataSource, IBehaviors<T> behaviors)
         {
-            var kind = behaviors.DetermineSaveKind(dto).Kind;
+            var kind = (await behaviors.DetermineSaveKindAsync(dto, dataSource, parameters)).Kind;
 
             if (GeneratedForClassViewModel is null)
             {
@@ -67,15 +67,15 @@ namespace IntelliTect.Coalesce.Api.Controllers
             if (kind == SaveKind.Create && !GeneratedForClassViewModel.SecurityInfo.IsCreateAllowed(User))
             {
                 Response.StatusCode = (int)HttpStatusCode.Unauthorized;
-                return Task.FromResult<ItemResult<TDto>>($"Creation of {GeneratedForClassViewModel.DisplayName} items not allowed.");
+                return $"Creation of {GeneratedForClassViewModel.DisplayName} items not allowed.";
             }
             if (kind == SaveKind.Update && !GeneratedForClassViewModel.SecurityInfo.IsEditAllowed(User))
             {
                 Response.StatusCode = (int)HttpStatusCode.Unauthorized;
-                return Task.FromResult<ItemResult<TDto>>($"Editing of {GeneratedForClassViewModel.DisplayName} items not allowed.");
+                return $"Editing of {GeneratedForClassViewModel.DisplayName} items not allowed.";
             }
 
-            return behaviors.SaveAsync(dto, dataSource, parameters);
+            return await behaviors.SaveAsync(dto, dataSource, parameters);
         }
 
         protected Task<ItemResult<TDto>> DeleteImplementation(object id, DataSourceParameters parameters, IDataSource<T> dataSource, IBehaviors<T> behaviors)

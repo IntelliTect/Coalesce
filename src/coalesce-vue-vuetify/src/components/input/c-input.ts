@@ -140,6 +140,15 @@ export default Vue.extend({
           // For numeric values, use a numeric text field.
           attrs.type == 'number'
         }
+
+        if (valueMeta.role == "primaryKey") { 
+          // If this is an editable primary key, emit the value on change (leaving the field)
+          // instead of on every keystroke. If we were to emit on every keystroke,
+          // the very first character the user types would end up as the PK.
+          data.on.change = data.on.input;
+          delete data.on.input;
+        }
+
         if ('textarea' in attrs && attrs.textarea !== false) {
           return h('v-textarea', data);
         }

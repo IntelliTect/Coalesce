@@ -646,8 +646,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     // This serves to pick up the standard convention of props like
                     // public Widget Widget { get; set; }
                     return Object.ClientProperties.FirstOrDefault(p =>
-                        p.Role == PropertyRole.ReferenceNavigation
+                        p.Type == this.Parent.Type
                         && p.Name == Parent.Name
+                        && p.Role == PropertyRole.ReferenceNavigation
                     );
                 }
                 else if (Role == PropertyRole.ReferenceNavigation)

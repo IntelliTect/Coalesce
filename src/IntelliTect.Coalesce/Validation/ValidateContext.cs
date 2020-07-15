@@ -46,7 +46,7 @@ namespace IntelliTect.Coalesce.Validation
 
                         if (prop.IsPOCO)
                         {
-                            assert.IsNotNull(prop.Object?.ListTextProperty, "The target object for the property has no discernable display text. Add a [ListTextAttribute] to one of its properties.");
+                            assert.IsNotNull(prop.Object?.ListTextProperty, "The target object for the property has no discernible display text. Add a [ListTextAttribute] to one of its properties.");
                             if (!prop.IsReadOnly && !prop.HasNotMapped && prop.Object?.HasDbSet == true)
                             {
                                 // Validate navigation properties

@@ -645,21 +645,19 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     // whose name is the same as the type name of this prop's owner.
                     // This serves to pick up the standard convention of props like
                     // public Widget Widget { get; set; }
-                    return Object.PropertyByName(Parent.Name);
+                    return Object.ClientProperties.FirstOrDefault(p =>
+                        p.Role == PropertyRole.ReferenceNavigation
+                        && p.Name == Parent.Name
+                    );
                 }
                 else if (Role == PropertyRole.ReferenceNavigation)
                 {
                     // Try to find the inverse by looking for a collection on the
                     // referenced type of this property whose inverse is this property.
-                    var prop = Object.ClientProperties.FirstOrDefault(p =>
+                    return Object.ClientProperties.FirstOrDefault(p =>
                         p.Role == PropertyRole.CollectionNavigation
                         && p.InverseProperty == this
                     );
-
-                    if (prop != null)
-                    {
-                        return prop;
-                    }
                 }
 
                 return null;

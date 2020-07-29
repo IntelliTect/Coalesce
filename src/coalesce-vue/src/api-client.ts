@@ -267,7 +267,7 @@ export function mapQueryToParams<T extends DataSourceParameters>(
   if (parameters instanceof FilterParameters) {
     if ('search' in dto) parameters.search = dto.search;
     for (const key in dto) {
-      if (key.startsWith("filter.")) {
+      if (key.startsWith("filter.") && dto[key] !== undefined) {
         parameters.filter = parameters.filter ?? {}
         parameters.filter[key.replace("filter.", "")] = dto[key]
       }

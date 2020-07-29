@@ -32,7 +32,7 @@
           class="py-2"
         >
           <v-col 
-            class="text-no-wrap flex-grow-0 pr-4 " 
+            class="flex-grow-0 pr-4 " 
             style="max-width: 170px" 
           >
             <span class="">

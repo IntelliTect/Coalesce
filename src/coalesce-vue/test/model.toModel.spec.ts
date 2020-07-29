@@ -33,6 +33,8 @@ const dtoToModelMappings = <MappingData[]>[
 
   // Number
   { meta: studentProps.studentId, dto: "1", model: 1 },
+  { meta: studentProps.studentId, dto: "", model: null },
+  { meta: studentProps.studentId, dto: " ", model: null },
   ...unparsable(
     studentProps.studentId,
     true,

@@ -44,6 +44,8 @@ describe.each(<MappingData[]>[
 
   // Number
   { meta: studentProps.studentId, model: "123", dto: 123 },
+  { meta: studentProps.studentId, model: "", dto: null },
+  { meta: studentProps.studentId, model: " ", dto: null },
   ...unmappable(studentProps.studentId, new Date(), [], {}, "abc" ),
   
   // Enum

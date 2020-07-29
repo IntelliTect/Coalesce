@@ -22,7 +22,7 @@ import {
   FileValue,
   ModelType
 } from "./metadata";
-import { Indexable } from "./util";
+import { Indexable, isNullOrWhitespace } from "./util";
 
 /**
  * Represents a model with metadata information.
@@ -139,6 +139,13 @@ export function parseValue(
         throw parseError(value, meta);
       }
 
+      // Parse empty/blank as null, not zero.
+      // If we parsed it as zero, clearing out an number input field
+      // would default numbers to zero, even if that number is nullable.
+      if (isNullOrWhitespace(value)) {
+        return null;
+      }
+      
       const parsed = Number(value);
       if (isNaN(parsed)) {
         throw parseError(value, meta);

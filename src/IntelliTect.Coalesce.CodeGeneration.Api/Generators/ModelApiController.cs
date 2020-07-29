@@ -123,23 +123,26 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                 b.Indented($"=> DeleteImplementation(id, new DataSourceParameters(), dataSource, behaviors);");
             }
 
-            // ENDPOINT: /csvDownload
-            b.DocComment($"Downloads CSV of {Model.DtoName}");
-            b.Line("[HttpGet(\"csvDownload\")]");
-            b.Line($"{securityInfo.ReadAnnotation}");
-            b.Line($"{Model.ApiActionAccessModifier} virtual Task<FileResult> CsvDownload(");
-            b.Indented($"ListParameters parameters,");
-            b.Indented($"{dataSourceParameter})");
-            b.Indented($"=> CsvDownloadImplementation(parameters, dataSource);");
+            if (securityInfo.IsReadAllowed())
+            {
+                // ENDPOINT: /csvDownload
+                b.DocComment($"Downloads CSV of {Model.DtoName}");
+                b.Line("[HttpGet(\"csvDownload\")]");
+                b.Line($"{securityInfo.ReadAnnotation}");
+                b.Line($"{Model.ApiActionAccessModifier} virtual Task<FileResult> CsvDownload(");
+                b.Indented($"ListParameters parameters,");
+                b.Indented($"{dataSourceParameter})");
+                b.Indented($"=> CsvDownloadImplementation(parameters, dataSource);");
 
-            // ENDPOINT: /csvText
-            b.DocComment($"Returns CSV text of {Model.DtoName}");
-            b.Line("[HttpGet(\"csvText\")]");
-            b.Line($"{securityInfo.ReadAnnotation}");
-            b.Line($"{Model.ApiActionAccessModifier} virtual Task<string> CsvText(");
-            b.Indented($"ListParameters parameters,");
-            b.Indented($"{dataSourceParameter})");
-            b.Indented($"=> CsvTextImplementation(parameters, dataSource);");
+                // ENDPOINT: /csvText
+                b.DocComment($"Returns CSV text of {Model.DtoName}");
+                b.Line("[HttpGet(\"csvText\")]");
+                b.Line($"{securityInfo.ReadAnnotation}");
+                b.Line($"{Model.ApiActionAccessModifier} virtual Task<string> CsvText(");
+                b.Indented($"ListParameters parameters,");
+                b.Indented($"{dataSourceParameter})");
+                b.Indented($"=> CsvTextImplementation(parameters, dataSource);");
+            }
 
             if (securityInfo.IsCreateAllowed() || securityInfo.IsEditAllowed())
             {

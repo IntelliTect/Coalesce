@@ -51,7 +51,7 @@ Props
     The :ref:`ListViewModel <VueListViewModels>` to display pagination information for.
 
 :ts:`props?: string[]`
-    If provided, specifies which properties should be given a column in the table. 
+    If provided, specifies which properties, and their ordering, should be given a column in the table. 
     
     If not provided, all non-key columns that aren't annotated with :ref:`[Hidden(HiddenAttribute.Areas.List)] <HiddenAttribute>` are given a column.
 

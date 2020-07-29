@@ -177,7 +177,6 @@ namespace IntelliTect.Coalesce.Validation
                 assert.IsTrue(model.DtoBaseViewModel == null, $"{model.FullyQualifiedName} appears to be a DTO but isn't marked with [Coalesce].");
             }
 
-            // Validate the objects found that is not on the context. 
             foreach (var model in repository.Services)
             {
                 assert.Area = $"Service: {model}";

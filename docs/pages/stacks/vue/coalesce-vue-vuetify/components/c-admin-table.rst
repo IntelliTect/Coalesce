@@ -19,7 +19,7 @@ Examples
 
 .. code-block:: sfc
 
-    <c-admin-table :model="personList" />
+    <c-admin-table :list="personList" />
 
 Props
 -----
@@ -31,5 +31,5 @@ Props
     An optional list of available page sizes to offer through the :ref:`c-list-pagination`'s :ref:`c-list-page-size` component. Defaults to :ts:`[10, 25, 100]`.
 
 :ts:`queryBind?: boolean`
-    If true, the :ref:`Data Source Standard Parameters <DataSourceStandardParameters>` of the provided :ref:`ListViewModel <VueListViewModels>` will be read from and written to the query string. The "Editable" state of the table will also be bound to the query string.
+    If true, the :ref:`Data Source Standard Parameters <DataSourceStandardParameters>` of the provided :ref:`ListViewModel <VueListViewModels>` will be read from and written to the window's query string. The "Editable" state of the table will also be bound to the query string.
 

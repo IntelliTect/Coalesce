@@ -130,10 +130,14 @@ export default class extends Vue {
   }
 
   get effectiveProps() {
-    return Object.values(this.metadata.props).filter((p: Property) =>
-      this.props
-        ? this.props.indexOf(p.name) >= 0
-        : (p.hidden === undefined || (p.hidden & HiddenAreas.List) == 0)
+    if (this.props && this.props.length) {
+      return this.props
+        .map(propName => this.metadata.props[propName])
+        .filter(prop => !!prop);
+    }
+
+    return Object.values(this.metadata.props).filter(
+      (p) => p.hidden === undefined || (p.hidden & HiddenAreas.List) == 0
     );
   }
 

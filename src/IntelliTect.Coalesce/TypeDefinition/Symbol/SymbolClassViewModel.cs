@@ -27,6 +27,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public override string Comment => Symbol.ExtractXmlComments();
 
+        public override bool IsStatic => Symbol.IsStatic;
+
         protected override IReadOnlyCollection<PropertyViewModel> RawProperties(ClassViewModel effectiveParent)
         {
             var result = Symbol.GetMembers()

@@ -30,6 +30,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public override string Comment => "";
 
+        public override bool IsStatic => Info.IsAbstract && Info.IsSealed;
+
         protected override IReadOnlyCollection<PropertyViewModel> RawProperties(ClassViewModel effectiveParent) => Info
             .GetProperties()
             .Select((p, i) => new ReflectionPropertyViewModel(effectiveParent, this, p){ ClassFieldOrder = i })

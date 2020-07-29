@@ -32,8 +32,10 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public abstract string Name { get; }
         public abstract string Comment { get; }
         public TypeViewModel Type { get; protected set; }
+        public abstract bool IsStatic { get; }
 
         public string FullyQualifiedName => Type.FullyQualifiedName;
+
 
         /// <summary>
         /// Returns the name of the type to be used by the client, or in other cases

@@ -90,6 +90,10 @@ Generated TypeScript
 
 See :ref:`VueApiCallers` and :ref:`VueViewModels` (Vue) or :ref:`KoModelMethodTypeScript` (Knockout) for details on the code that is generated for your custom methods.
 
+.. tip::
+
+    Any Task-returning methods with "Async" as a suffix to the C# method's name will have the "Async" suffix stripped from the generated Typescript.
+
 |
 
 Instance Methods

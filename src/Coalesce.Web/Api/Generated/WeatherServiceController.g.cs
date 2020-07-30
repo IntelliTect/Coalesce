@@ -41,11 +41,10 @@ namespace Coalesce.Web.Api
         {
             IncludeTree includeTree = null;
             var _mappingContext = new MappingContext(User);
-            var methodResult = await Service.GetWeatherAsync(parameterDbContext, location.MapToModel(new Coalesce.Domain.Services.Location(), _mappingContext), dateTime, conditions);
-            var result = new ItemResult<WeatherDataDtoGen>();
-            var mappingContext = new MappingContext(User, "");
-            result.Object = Mapper.MapToDto<Coalesce.Domain.Services.WeatherData, WeatherDataDtoGen>(methodResult, mappingContext, includeTree);
-            return result;
+            var _methodResult = await Service.GetWeatherAsync(parameterDbContext, location.MapToModel(new Coalesce.Domain.Services.Location(), _mappingContext), dateTime, conditions);
+            var _result = new ItemResult<WeatherDataDtoGen>();
+            _result.Object = Mapper.MapToDto<Coalesce.Domain.Services.WeatherData, WeatherDataDtoGen>(_methodResult, _mappingContext, includeTree);
+            return _result;
         }
     }
 }

@@ -86,11 +86,11 @@ namespace Coalesce.Web.Vue.Api
                 return new ItemResult<string>(itemResult);
             }
             var item = itemResult.Object;
-            var methodResult = await item.AsyncMethodOnIClassDto(input);
+            var _methodResult = await item.AsyncMethodOnIClassDto(input);
             await Db.SaveChangesAsync();
-            var result = new ItemResult<string>();
-            result.Object = methodResult;
-            return result;
+            var _result = new ItemResult<string>();
+            _result.Object = _methodResult;
+            return _result;
         }
     }
 }

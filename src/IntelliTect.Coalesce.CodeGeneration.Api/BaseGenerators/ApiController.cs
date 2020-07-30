@@ -91,7 +91,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
             b.Line($"{method.SecurityInfo.ExecuteAnnotation}");
         }
 
-        public const string MethodResultVar = "methodResult";
+        public const string MethodResultVar = "_methodResult";
+        public const string MappingContextVar = "_mappingContext";
 
         /// <summary>
         /// For a method invocation controller action, writes the actual invocation of the method.
@@ -109,9 +110,11 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
                 b.Line("IncludeTree includeTree = null;");
             }
 
-            if (method.Parameters.Any(p => !p.IsDI && p.PureType.HasClassViewModel))
+            if (method.Parameters.Any(p => !p.IsDI && p.PureType.HasClassViewModel)
+                || method.ResultType.PureType.HasClassViewModel
+            )
             {
-                b.Line($"var _mappingContext = new {nameof(MappingContext)}(User);");
+                b.Line($"var {MappingContextVar} = new {nameof(MappingContext)}(User);");
             }
 
             // Don't try to store the result in the variable if the method returns void.
@@ -152,12 +155,12 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
             {
                 // For any ApiResult return type, pass it to our ApiResult ctor to grab the WasSuccessful and Message props.
                 // For list results, this also copies paging information.
-                b.Line($"var result = new {method.ApiActionReturnTypeDeclaration}({MethodResultVar});");
+                b.Line($"var _result = new {method.ApiActionReturnTypeDeclaration}({MethodResultVar});");
             }
             else
             {
                 // Return type isn't an ApiResult - just create a 'blank' object.
-                b.Line($"var result = new {method.ApiActionReturnTypeDeclaration}();");
+                b.Line($"var _result = new {method.ApiActionReturnTypeDeclaration}();");
             }
 
             if (resultType.IsVoid)
@@ -176,10 +179,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
                 if (resultType.PureType.HasClassViewModel && !resultType.PureType.ClassViewModel.IsDto)
                 {
                     // Return type is a collection of models that need to be mapped to a DTO.
-                    b.Line("var mappingContext = new MappingContext(User, \"\");");
-
                     // ToList the result (because it might be IQueryable - we need to execute the query before mapping)
-                    b.Append($"result.{resultProp} = {resultVar}?.ToList().Select(o => ");
+                    b.Append($"_result.{resultProp} = {resultVar}?.ToList().Select(o => ");
                     b.Append($"Mapper.MapToDto<{resultType.PureType.ClassViewModel.FullyQualifiedName}, {resultType.PureType.ClassViewModel.DtoName}>");
 
                     // Only attempt to pull the include tree out of the result if the user actually typed their return type as an IQueryable.
@@ -187,7 +188,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
                         ? $"includeTree ?? ({resultVar} as IQueryable)?.GetIncludeTree()"
                         : "includeTree";
 
-                    b.Append($"(o, mappingContext, {includeTreeForMapping})).ToList();");
+                    b.Append($"(o, {MappingContextVar}, {includeTreeForMapping})).ToList();");
                     b.Line();
                 }
                 else
@@ -195,7 +196,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
                     // Return type is a collection of primitives or IClassDtos.
                     // This ToList() may end up being redundant, but it is guaranteed to be safe.
                     // The minimum type required here that handles all cases is IList<T> (required by a ListResult<T> return type).
-                    b.Line($"result.{resultProp} = {resultVar}?.ToList();");
+                    b.Line($"_result.{resultProp} = {resultVar}?.ToList();");
                 }
             }
             else
@@ -203,17 +204,16 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
                 if (resultType.HasClassViewModel && !resultType.ClassViewModel.IsDto)
                 {
                     // Return type is a model that needs to be mapped to a DTO.
-                    b.Line("var mappingContext = new MappingContext(User, \"\");");
-                    b.Line($"result.{resultProp} = Mapper.MapToDto<{resultType.ClassViewModel.FullyQualifiedName}, {resultType.ClassViewModel.DtoName}>({resultVar}, mappingContext, includeTree);");
+                    b.Line($"_result.{resultProp} = Mapper.MapToDto<{resultType.ClassViewModel.FullyQualifiedName}, {resultType.ClassViewModel.DtoName}>({resultVar}, {MappingContextVar}, includeTree);");
                 }
                 else
                 {
                     // Return type is primitive or an IClassDto
-                    b.Line($"result.{resultProp} = {resultVar};");
+                    b.Line($"_result.{resultProp} = {resultVar};");
                 }
             }
 
-            b.Append("return result;");
+            b.Append("return _result;");
         }
     }
 }

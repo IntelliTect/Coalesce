@@ -80,11 +80,11 @@ namespace Coalesce.Web.Api
         public virtual ItemResult<ICollection<CompanyDtoGen>> GetCertainItems(bool isDeleted = false)
         {
             IncludeTree includeTree = null;
-            var methodResult = Coalesce.Domain.Company.GetCertainItems(Db, isDeleted);
-            var result = new ItemResult<ICollection<CompanyDtoGen>>();
-            var mappingContext = new MappingContext(User, "");
-            result.Object = methodResult?.ToList().Select(o => Mapper.MapToDto<Coalesce.Domain.Company, CompanyDtoGen>(o, mappingContext, includeTree)).ToList();
-            return result;
+            var _mappingContext = new MappingContext(User);
+            var _methodResult = Coalesce.Domain.Company.GetCertainItems(Db, isDeleted);
+            var _result = new ItemResult<ICollection<CompanyDtoGen>>();
+            _result.Object = _methodResult?.ToList().Select(o => Mapper.MapToDto<Coalesce.Domain.Company, CompanyDtoGen>(o, _mappingContext, includeTree)).ToList();
+            return _result;
         }
     }
 }

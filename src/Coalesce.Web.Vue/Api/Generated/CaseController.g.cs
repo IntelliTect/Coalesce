@@ -80,11 +80,11 @@ namespace Coalesce.Web.Vue.Api
         public virtual ItemResult<ICollection<CaseDtoGen>> GetSomeCases()
         {
             IncludeTree includeTree = null;
-            var methodResult = Coalesce.Domain.Case.GetSomeCases(Db);
-            var result = new ItemResult<ICollection<CaseDtoGen>>();
-            var mappingContext = new MappingContext(User, "");
-            result.Object = methodResult?.ToList().Select(o => Mapper.MapToDto<Coalesce.Domain.Case, CaseDtoGen>(o, mappingContext, includeTree)).ToList();
-            return result;
+            var _mappingContext = new MappingContext(User);
+            var _methodResult = Coalesce.Domain.Case.GetSomeCases(Db);
+            var _result = new ItemResult<ICollection<CaseDtoGen>>();
+            _result.Object = _methodResult?.ToList().Select(o => Mapper.MapToDto<Coalesce.Domain.Case, CaseDtoGen>(o, _mappingContext, includeTree)).ToList();
+            return _result;
         }
 
         /// <summary>
@@ -94,10 +94,10 @@ namespace Coalesce.Web.Vue.Api
         [Authorize]
         public virtual ItemResult<int> GetAllOpenCasesCount()
         {
-            var methodResult = Coalesce.Domain.Case.GetAllOpenCasesCount(Db);
-            var result = new ItemResult<int>();
-            result.Object = methodResult;
-            return result;
+            var _methodResult = Coalesce.Domain.Case.GetAllOpenCasesCount(Db);
+            var _result = new ItemResult<int>();
+            _result.Object = _methodResult;
+            return _result;
         }
 
         /// <summary>
@@ -108,8 +108,8 @@ namespace Coalesce.Web.Vue.Api
         public virtual ItemResult RandomizeDatesAndStatus()
         {
             Coalesce.Domain.Case.RandomizeDatesAndStatus(Db);
-            var result = new ItemResult();
-            return result;
+            var _result = new ItemResult();
+            return _result;
         }
 
         /// <summary>
@@ -128,8 +128,8 @@ namespace Coalesce.Web.Vue.Api
             var item = itemResult.Object;
             await item.UploadAttachment(file == null ? null : new File { Name = file.FileName, ContentType = file.ContentType, Length = file.Length, Content = file.OpenReadStream() });
             await Db.SaveChangesAsync();
-            var result = new ItemResult();
-            return result;
+            var _result = new ItemResult();
+            return _result;
         }
 
         /// <summary>
@@ -140,11 +140,11 @@ namespace Coalesce.Web.Vue.Api
         public virtual ItemResult<CaseSummaryDtoGen> GetCaseSummary()
         {
             IncludeTree includeTree = null;
-            var methodResult = Coalesce.Domain.Case.GetCaseSummary(Db);
-            var result = new ItemResult<CaseSummaryDtoGen>();
-            var mappingContext = new MappingContext(User, "");
-            result.Object = Mapper.MapToDto<Coalesce.Domain.CaseSummary, CaseSummaryDtoGen>(methodResult, mappingContext, includeTree);
-            return result;
+            var _mappingContext = new MappingContext(User);
+            var _methodResult = Coalesce.Domain.Case.GetCaseSummary(Db);
+            var _result = new ItemResult<CaseSummaryDtoGen>();
+            _result.Object = Mapper.MapToDto<Coalesce.Domain.CaseSummary, CaseSummaryDtoGen>(_methodResult, _mappingContext, includeTree);
+            return _result;
         }
 
         /// <summary>

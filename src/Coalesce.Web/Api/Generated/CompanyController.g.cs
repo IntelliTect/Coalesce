@@ -70,50 +70,6 @@ namespace Coalesce.Web.Api
             IDataSource<Coalesce.Domain.Company> dataSource)
             => DeleteImplementation(id, new DataSourceParameters(), dataSource, behaviors);
 
-        /// <summary>
-        /// Downloads CSV of CompanyDtoGen
-        /// </summary>
-        [HttpGet("csvDownload")]
-        [Authorize]
-        public virtual Task<FileResult> CsvDownload(
-            ListParameters parameters,
-            IDataSource<Coalesce.Domain.Company> dataSource)
-            => CsvDownloadImplementation(parameters, dataSource);
-
-        /// <summary>
-        /// Returns CSV text of CompanyDtoGen
-        /// </summary>
-        [HttpGet("csvText")]
-        [Authorize]
-        public virtual Task<string> CsvText(
-            ListParameters parameters,
-            IDataSource<Coalesce.Domain.Company> dataSource)
-            => CsvTextImplementation(parameters, dataSource);
-
-        /// <summary>
-        /// Saves CSV data as an uploaded file
-        /// </summary>
-        [HttpPost("csvUpload")]
-        [Authorize]
-        public virtual Task<IEnumerable<ItemResult>> CsvUpload(
-            IFormFile file,
-            IDataSource<Coalesce.Domain.Company> dataSource,
-            IBehaviors<Coalesce.Domain.Company> behaviors,
-            bool hasHeader = true)
-            => CsvUploadImplementation(file, dataSource, behaviors, hasHeader);
-
-        /// <summary>
-        /// Saves CSV data as a posted string
-        /// </summary>
-        [HttpPost("csvSave")]
-        [Authorize]
-        public virtual Task<IEnumerable<ItemResult>> CsvSave(
-            string csv,
-            IDataSource<Coalesce.Domain.Company> dataSource,
-            IBehaviors<Coalesce.Domain.Company> behaviors,
-            bool hasHeader = true)
-            => CsvSaveImplementation(csv, dataSource, behaviors, hasHeader);
-
         // Methods from data class exposed through API Controller.
 
         /// <summary>

@@ -1118,60 +1118,6 @@ module Coalesce {
             }
         };
 
-        /** Returns URL to download a CSV for the current list with all items. */
-        public downloadAllCsvUrl: KnockoutComputed<string> = ko.computed<string>(() => {
-            var url = this.coalesceConfig.baseApiUrl() + this.apiController + "/CsvDownload?" + this.queryParams('list', 10000);
-            return url;
-        }, null, { deferEvaluation: true });
-
-        /** Prompts to the user for a file to upload as a CSV. */
-        public csvUploadUi = (callback?: () => void): void => {
-            // Remove the form if it exists.
-            $('#csv-upload').remove();
-            // Add the form to the page to take the input
-            $('body')
-                .append('<form id="csv-upload" display="none"></form>');
-            $('#csv-upload')
-                .attr("action", this.coalesceConfig.baseApiUrl() + this.apiController + "/CsvUpload").attr("method", "post")
-                .append('<input type="file" style="visibility: hidden;" name="file"/>');
-
-            // Set up the click callback.
-            $('#csv-upload input[type=file]').change(() => {
-                // Get the files
-                var fileInput = $('#csv-upload input[type=file]')[0] as any;
-                var file = fileInput.files[0];
-                if (file) {
-                    var formData = new FormData();
-                    formData.append('file', file);
-                    this.coalesceConfig.onStartBusy()(this);
-                    this.isLoading(true);
-                    $.ajax({
-                        url: this.coalesceConfig.baseApiUrl() + this.apiController + "/CsvUpload",
-                        data: formData,
-                        processData: false,
-                        contentType: false,
-                        type: 'POST'
-                    } as any)
-                        .done((data) => {
-                            this.isLoading(false);
-                            if (typeof (callback) == "function") callback();
-                        })
-                        .fail((data) => {
-                            if (this.coalesceConfig.showFailureAlerts())
-                                this.coalesceConfig.onFailure()(this, "CSV Upload Failed");
-                        })
-                        .always(() => {
-                            this.load();
-                            this.coalesceConfig.onFinishBusy()(this);
-                        });
-                }
-                // Remove the form
-                $('#csv-upload').remove();
-            });
-            // Click on the input box
-            $('#csv-upload input[type=file]').click();
-        };
-
         private loadTimeout: any = 0;
 
         /** reloads the list after a slight delay (100ms default) to ensure that all changes are made. */

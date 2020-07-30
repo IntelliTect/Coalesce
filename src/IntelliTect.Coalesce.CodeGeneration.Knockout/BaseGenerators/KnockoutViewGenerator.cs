@@ -74,24 +74,6 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
                     }
 
                     b.Line("<input class=\"form-control pull-right\" style=\"width: 250px; margin-left: 20px\" data-bind=\"textInput: search\" placeholder=\"Search\" />");
-
-                    // Create / Refresh / CSV buttons
-                    using (b.TagBlock("div", "btn-group pull-right"))
-                    {
-                        if (Model.SecurityInfo.IsCreateAllowed())
-                        {
-                            b.Line($"<a href=\"~/{Model.ControllerName}/CreateEdit?@(ViewBag.Query)\" role=\"button\" class=\"btn btn-sm btn-default \"><i class=\"fa fa-plus\"></i> Create</a>");
-                        }
-                        b.Line("<button data-bind=\"click:load\" class=\"btn btn-sm btn-default \"><i class=\"fa fa-refresh\"></i> Refresh</button>");
-
-                        additionalButtons?.Invoke();
-
-                        b.Line("<a href=\"#\" role=\"button\" class=\"btn btn-sm btn-default \" data-bind=\"attr:{href: downloadAllCsvUrl}\"><i class=\"fa fa-download\"></i> CSV</a>");
-                        if (Model.SecurityInfo.IsCreateAllowed() && Model.SecurityInfo.IsEditAllowed())
-                        {
-                            b.Line("<button role=\"button\" class=\"btn btn-sm btn-default \" data-bind=\"click: csvUploadUi\"><i class=\"fa fa-upload\"></i> CSV</button>");
-                        }
-                    }
                 }
             }
         }

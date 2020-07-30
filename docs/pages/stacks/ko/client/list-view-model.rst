@@ -93,14 +93,6 @@ The following members are defined on :ts:`BaseListViewModel<>` and are available
     
 :ts:`orderByToggle: (field: string): void`
     Toggles sorting between ascending, descending, and no order on the specified field.
-    
-
-:ts:`csvUploadUi: (callback?: () => void): void`
-    Prompts to the user for a file to upload as a CSV.
-    
-:ts:`downloadAllCsvUrl: KnockoutComputed<string>`
-    Returns URL to download a CSV for the current list with all items.
-
         
 
 Model-Specific Members

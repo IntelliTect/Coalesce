@@ -147,7 +147,7 @@ namespace IntelliTect.Coalesce.Validation
                         }
 
                         // TODO: Assert that the method name isn't a reserved endpoint name:
-                        // get, save, delete, list, count, csv{...}
+                        // get, save, delete, list, count
                         foreach (var param in method.Parameters)
                         {
                             assert.Area = $"{model}: {method}: {param}";

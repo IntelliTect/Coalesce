@@ -9,13 +9,6 @@
     <AssemblyName>dotnet-coalesce</AssemblyName>
     <PackageId>IntelliTect.Coalesce.Tools</PackageId>
     <PackageType>DotnetCliTool</PackageType>
-    <!--<GeneratePackageOnBuild>True</GeneratePackageOnBuild>-->
-  </PropertyGroup>
-
-  <PropertyGroup>
-    <PublishRepositoryUrl>true</PublishRepositoryUrl>
-    <DebugType>embedded</DebugType>
-    <EmbedUntrackedSources>true</EmbedUntrackedSources>
   </PropertyGroup>
 
   <ItemGroup>

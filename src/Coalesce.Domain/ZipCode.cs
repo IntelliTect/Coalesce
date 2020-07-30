@@ -12,8 +12,8 @@ namespace Coalesce.Domain
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.None)]
         [ListText]
-        public string Zip { get; set; }
+        public string Zip { get; set; } = null!;
 
-        public string State { get; set; }
+        public string State { get; set; } = null!;
     }
 }

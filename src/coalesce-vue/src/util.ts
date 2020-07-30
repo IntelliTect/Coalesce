@@ -24,7 +24,7 @@ export function isNullOrWhitespace(value: string | null | undefined) {
       case "\t":
       case "\r":
       case "\n":
-        break;
+        continue;
       default:
         return false;
     }

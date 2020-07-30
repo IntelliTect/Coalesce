@@ -80,5 +80,7 @@ namespace IntelliTect.Coalesce.Models
         public static implicit operator ItemResult<T>(bool success) => new ItemResult<T>(success);
 
         public static implicit operator ItemResult<T>(string? message) => new ItemResult<T>(message);
+
+        public static implicit operator ItemResult<T>(T obj) => new ItemResult<T>(obj);
     }
 }

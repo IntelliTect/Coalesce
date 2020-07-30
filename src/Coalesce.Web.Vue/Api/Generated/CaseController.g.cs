@@ -70,50 +70,6 @@ namespace Coalesce.Web.Vue.Api
             IDataSource<Coalesce.Domain.Case> dataSource)
             => DeleteImplementation(id, new DataSourceParameters(), dataSource, behaviors);
 
-        /// <summary>
-        /// Downloads CSV of CaseDtoGen
-        /// </summary>
-        [HttpGet("csvDownload")]
-        [AllowAnonymous]
-        public virtual Task<FileResult> CsvDownload(
-            ListParameters parameters,
-            IDataSource<Coalesce.Domain.Case> dataSource)
-            => CsvDownloadImplementation(parameters, dataSource);
-
-        /// <summary>
-        /// Returns CSV text of CaseDtoGen
-        /// </summary>
-        [HttpGet("csvText")]
-        [AllowAnonymous]
-        public virtual Task<string> CsvText(
-            ListParameters parameters,
-            IDataSource<Coalesce.Domain.Case> dataSource)
-            => CsvTextImplementation(parameters, dataSource);
-
-        /// <summary>
-        /// Saves CSV data as an uploaded file
-        /// </summary>
-        [HttpPost("csvUpload")]
-        [AllowAnonymous]
-        public virtual Task<IEnumerable<ItemResult>> CsvUpload(
-            IFormFile file,
-            IDataSource<Coalesce.Domain.Case> dataSource,
-            IBehaviors<Coalesce.Domain.Case> behaviors,
-            bool hasHeader = true)
-            => CsvUploadImplementation(file, dataSource, behaviors, hasHeader);
-
-        /// <summary>
-        /// Saves CSV data as a posted string
-        /// </summary>
-        [HttpPost("csvSave")]
-        [AllowAnonymous]
-        public virtual Task<IEnumerable<ItemResult>> CsvSave(
-            string csv,
-            IDataSource<Coalesce.Domain.Case> dataSource,
-            IBehaviors<Coalesce.Domain.Case> behaviors,
-            bool hasHeader = true)
-            => CsvSaveImplementation(csv, dataSource, behaviors, hasHeader);
-
         // Methods from data class exposed through API Controller.
 
         /// <summary>
@@ -404,7 +360,7 @@ namespace Coalesce.Web.Vue.Api
         /// <summary>
         /// File Download: RestrictedDownloadAttachment
         /// </summary>
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,OtherRole")]
         [HttpGet("RestrictedDownloadAttachment")]
         public virtual async Task<IActionResult> RestrictedDownloadAttachmentGet(int id, IDataSource<Coalesce.Domain.Case> dataSource)
         {

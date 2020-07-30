@@ -37,10 +37,10 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         [NotMapped]
         public string UnmappedSettableString { get; set; }
 
-        [Read(Roles = RoleNames.Admin)]
+        [Read(RoleNames.Admin)]
         public string AdminReadableString { get; set; }
 
-        [Read(Roles = RoleNames.Admin)]
+        [Read(RoleNames.Admin)]
         public int? AdminReadableReferenceNavigationId { get; set; }
 
         [Read(Roles = RoleNames.Admin)]

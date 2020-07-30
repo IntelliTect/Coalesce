@@ -9,5 +9,18 @@ namespace IntelliTect.Coalesce.DataAnnotations
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Class)]
     public class EditAttribute: SecurityAttribute
     {
+        public EditAttribute()
+        {
+        }
+
+        public EditAttribute(SecurityPermissionLevels permissionLevel)
+        {
+            PermissionLevel = permissionLevel;
+        }
+
+        public EditAttribute(params string[] roles)
+        {
+            Roles = string.Join(",", roles);
+        }
     }
 }

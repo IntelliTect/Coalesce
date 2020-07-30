@@ -38,18 +38,23 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 return namedArgument.Value.Value;
             }
 
-            TypedConstant constructorArgument = attributeData
+            TypedConstant? constructorArgument = attributeData
                 .AttributeConstructor.Parameters
                 .Zip(attributeData.ConstructorArguments, Tuple.Create)
                 // Look for ctor params with a matching name (case insensitive)
                 .FirstOrDefault(t => string.Equals(t.Item1.Name, propertyName, StringComparison.OrdinalIgnoreCase))
                 ?.Item2
                 // If we didn't find one, see if there is just a single ctor param. If so, this is almost certainly what we were looking for.
-                ?? (attributeData.ConstructorArguments.Length == 1 ? attributeData.ConstructorArguments.SingleOrDefault() : default);
+                ;//?? (attributeData.ConstructorArguments.Length == 1 ? attributeData.ConstructorArguments.SingleOrDefault() : default);
 
-            if (constructorArgument.IsNull) return defaultValue;
+            if (constructorArgument == null || constructorArgument.Value.IsNull) return defaultValue;
+            var arg = constructorArgument.Value;
 
-            return constructorArgument.Value;
+            if (arg.Kind == TypedConstantKind.Array)
+            {
+                return arg.Values.Select(v => v.Value).ToArray();
+            }
+            return arg.Value;
         }
 
         public static string ExtractXmlComments(this ISymbol symbol)

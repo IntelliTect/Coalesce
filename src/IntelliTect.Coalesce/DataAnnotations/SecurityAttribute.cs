@@ -1,6 +1,8 @@
 ﻿using IntelliTect.Coalesce.Helpers;
 using IntelliTect.Coalesce.TypeDefinition;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace IntelliTect.Coalesce.DataAnnotations
 {
@@ -10,20 +12,39 @@ namespace IntelliTect.Coalesce.DataAnnotations
     {
         public virtual SecurityPermissionLevels PermissionLevel { get; set; } = SecurityPermissionLevels.AllowAuthorized;
 
-        public virtual string Roles { get; set; } = "";
+        public string Roles { get; set; } = "";
     }
 
     public static class SecurityAttributeExtensions
     {
         public static SecurityPermission GetSecurityPermission<TAttribute>(this IAttributeProvider parent)
-            where TAttribute : SecurityAttribute =>
-            !parent.HasAttribute<TAttribute>()
-            ? new SecurityPermission()
-            : new SecurityPermission(
+            where TAttribute : SecurityAttribute
+        {
+            if (!parent.HasAttribute<TAttribute>())
+            {
+                return new SecurityPermission();
+            }
+
+            var level = parent.GetAttributeValue<TAttribute, SecurityPermissionLevels>(a => a.PermissionLevel) ?? SecurityPermissionLevels.AllowAuthorized;
+            object attributeRoles = parent.GetAttributeValue<TAttribute>(nameof(SecurityAttribute.Roles)) ?? "";
+
+            // This will happen in roslyn-based contexts due to us also accepting string arrays for the roles.
+            if (attributeRoles is IEnumerable<object> objects && objects.All(v => v is string))
+            {
+                attributeRoles = string.Join(",", objects);
+            }
+
+            if (!(attributeRoles is string rolesString))
+            {
+                throw new InvalidCastException("Unknown type of 'roles' on SecurityAttribute");
+            }
+
+            return new SecurityPermission(
                 level: parent.GetAttributeValue<TAttribute, SecurityPermissionLevels>(a => a.PermissionLevel) ?? SecurityPermissionLevels.AllowAuthorized,
-                roles: parent.GetAttributeValue<TAttribute>(a => a.Roles),
+                roles: rolesString,
                 name: typeof(TAttribute).Name.Replace("Attribute", string.Empty)
             );
+        }
     }
 
     public enum SecurityPermissionLevels

@@ -9,5 +9,18 @@ namespace IntelliTect.Coalesce.DataAnnotations
     [AttributeUsage(AttributeTargets.Class)]
     public class DeleteAttribute : SecurityAttribute
     {
+        public DeleteAttribute()
+        {
+        }
+
+        public DeleteAttribute(SecurityPermissionLevels permissionLevel)
+        {
+            PermissionLevel = permissionLevel;
+        }
+
+        public DeleteAttribute(params string[] roles)
+        {
+            Roles = string.Join(",", roles);
+        }
     }
 }

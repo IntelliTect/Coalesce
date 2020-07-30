@@ -360,7 +360,7 @@ namespace Coalesce.Web.Api
         /// <summary>
         /// File Download: RestrictedDownloadAttachment
         /// </summary>
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,OtherRole")]
         [HttpGet("RestrictedDownloadAttachment")]
         public virtual async Task<IActionResult> RestrictedDownloadAttachmentGet(int id, IDataSource<Coalesce.Domain.Case> dataSource)
         {

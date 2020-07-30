@@ -86,7 +86,7 @@ namespace Coalesce.Domain
         public string AttachmentName { get; set; }
 
         [Edit(PermissionLevel = SecurityPermissionLevels.AllowAuthorized)]
-        [Read(PermissionLevel = SecurityPermissionLevels.AllowAll)]
+        [Read(SecurityPermissionLevels.AllowAll)]
         [File("text/plain")]
         public byte[] PlainAttachment { get; set; }
 
@@ -94,7 +94,7 @@ namespace Coalesce.Domain
         [File]
         public byte[] RestrictedUploadAttachment { get; set; }
 
-        [Read(PermissionLevel = SecurityPermissionLevels.AllowAuthorized, Roles = "Admin")]
+        [Read("Admin", "OtherRole")]
         [File]
         public byte[] RestrictedDownloadAttachment { get; set; }
 

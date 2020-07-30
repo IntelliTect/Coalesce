@@ -11,5 +11,18 @@ namespace IntelliTect.Coalesce.DataAnnotations
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Class)]
     public class ReadAttribute : SecurityAttribute
     {
+        public ReadAttribute()
+        {
+        }
+
+        public ReadAttribute(SecurityPermissionLevels permissionLevel)
+        {
+            PermissionLevel = permissionLevel;
+        }
+
+        public ReadAttribute(params string[] roles)
+        {
+            Roles = string.Join(",", roles);
+        }
     }
 }

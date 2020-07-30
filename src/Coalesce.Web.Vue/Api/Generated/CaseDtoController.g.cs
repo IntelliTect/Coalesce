@@ -70,50 +70,6 @@ namespace Coalesce.Web.Vue.Api
             [DeclaredFor(typeof(Coalesce.Domain.CaseDto))] IDataSource<Coalesce.Domain.Case> dataSource)
             => DeleteImplementation(id, new DataSourceParameters(), dataSource, behaviors);
 
-        /// <summary>
-        /// Downloads CSV of Coalesce.Domain.CaseDto
-        /// </summary>
-        [HttpGet("csvDownload")]
-        [Authorize]
-        public virtual Task<FileResult> CsvDownload(
-            ListParameters parameters,
-            [DeclaredFor(typeof(Coalesce.Domain.CaseDto))] IDataSource<Coalesce.Domain.Case> dataSource)
-            => CsvDownloadImplementation(parameters, dataSource);
-
-        /// <summary>
-        /// Returns CSV text of Coalesce.Domain.CaseDto
-        /// </summary>
-        [HttpGet("csvText")]
-        [Authorize]
-        public virtual Task<string> CsvText(
-            ListParameters parameters,
-            [DeclaredFor(typeof(Coalesce.Domain.CaseDto))] IDataSource<Coalesce.Domain.Case> dataSource)
-            => CsvTextImplementation(parameters, dataSource);
-
-        /// <summary>
-        /// Saves CSV data as an uploaded file
-        /// </summary>
-        [HttpPost("csvUpload")]
-        [Authorize]
-        public virtual Task<IEnumerable<ItemResult>> CsvUpload(
-            IFormFile file,
-            [DeclaredFor(typeof(Coalesce.Domain.CaseDto))] IDataSource<Coalesce.Domain.Case> dataSource,
-            [DeclaredFor(typeof(Coalesce.Domain.CaseDto))] IBehaviors<Coalesce.Domain.Case> behaviors,
-            bool hasHeader = true)
-            => CsvUploadImplementation(file, dataSource, behaviors, hasHeader);
-
-        /// <summary>
-        /// Saves CSV data as a posted string
-        /// </summary>
-        [HttpPost("csvSave")]
-        [Authorize]
-        public virtual Task<IEnumerable<ItemResult>> CsvSave(
-            string csv,
-            [DeclaredFor(typeof(Coalesce.Domain.CaseDto))] IDataSource<Coalesce.Domain.Case> dataSource,
-            [DeclaredFor(typeof(Coalesce.Domain.CaseDto))] IBehaviors<Coalesce.Domain.Case> behaviors,
-            bool hasHeader = true)
-            => CsvSaveImplementation(csv, dataSource, behaviors, hasHeader);
-
         // Methods from data class exposed through API Controller.
 
         /// <summary>

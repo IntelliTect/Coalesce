@@ -9,5 +9,18 @@ namespace IntelliTect.Coalesce.DataAnnotations
     [AttributeUsage(AttributeTargets.Class)]
     public sealed class CreateAttribute : SecurityAttribute
     {
+        public CreateAttribute()
+        {
+        }
+
+        public CreateAttribute(SecurityPermissionLevels permissionLevel)
+        {
+            PermissionLevel = permissionLevel;
+        }
+
+        public CreateAttribute(params string[] roles)
+        {
+            Roles = string.Join(",", roles);
+        }
     }
 }

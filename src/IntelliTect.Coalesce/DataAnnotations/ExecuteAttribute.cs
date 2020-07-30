@@ -11,6 +11,18 @@ namespace IntelliTect.Coalesce.DataAnnotations
     [System.AttributeUsage(System.AttributeTargets.Method)]
     public class ExecuteAttribute : SecurityAttribute
     {
+        public ExecuteAttribute()
+        {
+        }
 
+        public ExecuteAttribute(SecurityPermissionLevels permissionLevel)
+        {
+            PermissionLevel = permissionLevel;
+        }
+
+        public ExecuteAttribute(params string[] roles)
+        {
+            Roles = string.Join(",", roles);
+        }
     }
 }

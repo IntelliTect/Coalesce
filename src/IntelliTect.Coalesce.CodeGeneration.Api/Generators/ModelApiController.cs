@@ -179,10 +179,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                     returnType = $"async Task<{returnType}>";
                 }
 
-                b.DocComment($"Method: {method.Name}");
-                b.Line($"[{method.ApiActionHttpMethodAnnotation}(\"{method.Name}\")]");
-                b.Line($"{method.SecurityInfo.ExecuteAnnotation}");
-                using (b.Block($"{Model.ApiActionAccessModifier} virtual {returnType} {method.Name} ({method.CsParameters})"))
+                WriteMethodDeclarationPreamble(b, method);
+                using (b.Block($"{Model.ApiActionAccessModifier} virtual {returnType} {method.NameWithoutAsync} ({method.CsParameters})"))
                 {
                     if (method.IsStatic)
                     {
@@ -317,8 +315,6 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                 }
             }
         }
-
-
 
         private bool AllowAnonymousAll(PropertySecurityInfo securityInfo)
         {

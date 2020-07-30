@@ -78,6 +78,19 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
             }
         }
 
+        protected static void WriteMethodDeclarationPreamble(CSharpCodeBuilder b, MethodViewModel method)
+        {
+            b.DocComment($"Method: {method.Name}");
+            b.Line($"[{method.ApiActionHttpMethodAnnotation}(\"{method.NameWithoutAsync}\")]");
+            if (method.Name != method.NameWithoutAsync)
+            {
+                // Add a route attribute that includes "Async" if it exists in the method name
+                // for backwards compatibility (3.0 breaking change).
+                b.Line($"[{method.ApiActionHttpMethodAnnotation}(\"{method.Name}\")]");
+            }
+            b.Line($"{method.SecurityInfo.ExecuteAnnotation}");
+        }
+
         public const string MethodResultVar = "methodResult";
 
         /// <summary>

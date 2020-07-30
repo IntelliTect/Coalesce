@@ -1427,35 +1427,6 @@ export const WeatherService = domain.services.WeatherService = {
           type: "date",
           role: "value",
         },
-      },
-      return: {
-        name: "$return",
-        displayName: "Result",
-        type: "object",
-        get typeDef() { return (domain.types.WeatherData as ObjectType) },
-        role: "value",
-      },
-    },
-    getWeatherAsync: {
-      name: "getWeatherAsync",
-      displayName: "Get Weather Async",
-      transportType: "item",
-      httpMethod: "POST",
-      params: {
-        location: {
-          name: "location",
-          displayName: "Location",
-          type: "object",
-          get typeDef() { return (domain.types.Location as ObjectType) },
-          role: "value",
-        },
-        dateTime: {
-          name: "dateTime",
-          displayName: "Date Time",
-          dateKind: "datetime",
-          type: "date",
-          role: "value",
-        },
         conditions: {
           name: "conditions",
           displayName: "Conditions",

@@ -87,7 +87,7 @@
                     <tr data-bind="css: {'btn-warning': errorMessage()}, attr: {id: zip}">
                         @if (@ViewBag.Editable)
                         {
-                            <td class="prop-zip">@(Knockout.DisplayFor<Coalesce.Domain.ZipCode>(p => p.Zip, true))</td>
+                            <td class="prop-zip">@(Knockout.InputFor<Coalesce.Domain.ZipCode>(p => p.Zip))</td>
                             <td class="prop-state">@(Knockout.InputFor<Coalesce.Domain.ZipCode>(p => p.State))</td>
                         }
                         else

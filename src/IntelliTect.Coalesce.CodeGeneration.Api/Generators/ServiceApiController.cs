@@ -31,8 +31,6 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
             }
         }
 
-
-
         private void WriteClassContents(CSharpCodeBuilder b)
         {
             b.Line($"protected {Model.FullyQualifiedName} Service {{ get; }}");
@@ -50,10 +48,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                     returnType = $"async Task<{returnType}>";
                 }
 
-                b.DocComment($"Method: {method.Name}");
-                b.Line($"[{method.ApiActionHttpMethodAnnotation}(\"{method.Name}\")]");
-                b.Line($"{method.SecurityInfo.ExecuteAnnotation}");
-                using (b.Block($"{Model.ApiActionAccessModifier} virtual {returnType} {method.Name} ({method.CsParameters})"))
+                WriteMethodDeclarationPreamble(b, method);
+                using (b.Block($"{Model.ApiActionAccessModifier} virtual {returnType} {method.NameWithoutAsync} ({method.CsParameters})"))
                 {
                     WriteMethodInvocation(b, method, "Service");
 

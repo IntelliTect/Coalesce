@@ -28,7 +28,7 @@
             </div>
             <div class="form-group">
                 <label class="col-md-4 control-label">Zip</label>
-                <div class="col-md-8 prop-zip">@(Knockout.DisplayFor<Coalesce.Domain.ZipCode>(p => p.Zip, false))</div>
+                <div class="col-md-8 prop-zip">@(Knockout.InputFor<Coalesce.Domain.ZipCode>(p => p.Zip))</div>
             </div>
             <div class="form-group">
                 <label class="col-md-4 control-label">State</label>

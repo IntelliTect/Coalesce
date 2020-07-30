@@ -81,6 +81,7 @@ module ViewModels {
         public setupValidation(): void {
             if (this.errors !== null) return;
             this.errors = ko.validation.group([
+                this.zip.extend({ required: {params: true, message: "Zip is required."} }),
             ]);
             this.warnings = ko.validation.group([
             ]);
@@ -96,6 +97,7 @@ module ViewModels {
             
             
             
+            self.zip.subscribe(self.autoSave);
             self.state.subscribe(self.autoSave);
             
             if (newItem) {

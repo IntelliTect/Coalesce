@@ -100,6 +100,35 @@ namespace IntelliTect.Coalesce.Validation
                     }
                 }
 
+                assert.IsTrue(
+                    model.ClientDataSources(repository).Count(s => s.IsDefaultDataSource) <= 1,
+                    $"Cannot have multiple default data sources for {model}");
+
+                foreach (var source in model.ClientDataSources(repository))
+                {
+                    // Prevent data sources named "Default" that aren't actually default.
+                    assert.IsTrue(
+                        source.IsDefaultDataSource || !source.ClientTypeName.Equals(DataSourceFactory.DefaultSourceName, StringComparison.InvariantCultureIgnoreCase),
+                        $"Data sources can't be named {DataSourceFactory.DefaultSourceName} unless they're marked with {nameof(DefaultDataSourceAttribute)}"
+                    );
+                }
+            }
+
+            // Validate the non-DbSet items (DTOs)
+            foreach (var model in repository.CustomDtos)
+            {
+                assert.Area = $"DTO: {model}";
+
+                // Make sure the key matches the object
+                assert.IsTrue(model.DtoBaseViewModel != null, $"Cannot find base model for DTO {model}. Add the base model as a DbSet to the context.");
+                if (model.DtoBaseViewModel != null)
+                {
+                    assert.IsTrue(model.PrimaryKey != null, $"Cannot find primary key for DTO {model}. It must be the [name]Id, [base model]Id or marked with the [Key] attribute. ");
+                }
+            }
+
+            foreach (var model in repository.ControllerBackedClasses)
+            {
                 foreach (var method in model.Methods)
                 {
                     assert.Area = $"{model}: {method}";
@@ -107,6 +136,15 @@ namespace IntelliTect.Coalesce.Validation
                     if (method.IsClientMethod)
                     {
                         assert.IsFalse(method.ResultType.IsFile, "IFile is not currently supported as a method return type - only as a parameter.");
+
+                        if (method.Name != method.NameWithoutAsync)
+                        {
+                            // If the name and name w/o async are different, this method has "Async" at the end.
+                            // Assert that there isn't also a method that exists without "Async" at the end,
+                            // as this will cause name conflicts caused by the fact that we drop "Async" from method names.
+                            assert.IsNull(model.MethodByName(method.NameWithoutAsync), 
+                                "Do not expose both an async and non-async version of the same method. Prefer the async version.");
+                        }
 
                         // TODO: Assert that the method name isn't a reserved endpoint name:
                         // get, save, delete, list, count, csv{...}
@@ -139,32 +177,6 @@ namespace IntelliTect.Coalesce.Validation
                             "Non-exposed method has the [ControllerAction] attribute - did you forget to add [Coalesce]?",
                             isWarning: true);
                     }
-                }
-
-                assert.IsTrue(
-                    model.ClientDataSources(repository).Count(s => s.IsDefaultDataSource) <= 1,
-                    $"Cannot have multiple default data sources for {model}");
-
-                foreach (var source in model.ClientDataSources(repository))
-                {
-                    // Prevent data sources named "Default" that aren't actually default.
-                    assert.IsTrue(
-                        source.IsDefaultDataSource || !source.ClientTypeName.Equals(DataSourceFactory.DefaultSourceName, StringComparison.InvariantCultureIgnoreCase),
-                        $"Data sources can't be named {DataSourceFactory.DefaultSourceName} unless they're marked with {nameof(DefaultDataSourceAttribute)}"
-                    );
-                }
-            }
-
-            // Validate the non-DbSet items (DTOs)
-            foreach (var model in repository.CustomDtos)
-            {
-                assert.Area = $"DTO: {model}";
-
-                // Make sure the key matches the object
-                assert.IsTrue(model.DtoBaseViewModel != null, $"Cannot find base model for DTO {model}. Add the base model as a DbSet to the context.");
-                if (model.DtoBaseViewModel != null)
-                {
-                    assert.IsTrue(model.PrimaryKey != null, $"Cannot find primary key for DTO {model}. It must be the [name]Id, [base model]Id or marked with the [Key] attribute. ");
                 }
             }
 

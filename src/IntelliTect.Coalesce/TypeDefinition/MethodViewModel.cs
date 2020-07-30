@@ -41,6 +41,10 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public abstract string Name { get; }
 
+        public string NameWithoutAsync => Name.EndsWith("Async") && IsAwaitable
+            ? Name.Remove(Name.Length - 5)
+            : Name;
+
         /// <summary>
         /// Provides the raw, unaltered return type of the method.
         /// </summary>
@@ -144,7 +148,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public virtual MethodInfo MethodInfo => 
             throw new InvalidOperationException("MethodInfo not available in the current context");
 
-        public string JsVariable => Name.ToCamelCase();
+        public string JsVariable => NameWithoutAsync.ToCamelCase();
 
         /// <summary>
         /// List of parameters that are not Dependency Injected (DI)
@@ -187,7 +191,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public string DisplayName =>
             this.GetAttributeValue<DisplayNameAttribute>(a => a.DisplayName) ??
             this.GetAttributeValue<DisplayAttribute>(a => a.Name) ??
-            Name.ToProperCase()!;
+            NameWithoutAsync.ToProperCase()!;
 
         /// <summary>
         /// For the specified area, returns true if the property has a hidden attribute.

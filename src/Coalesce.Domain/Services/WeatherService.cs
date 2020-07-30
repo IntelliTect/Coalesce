@@ -11,8 +11,6 @@ namespace Coalesce.Domain.Services
     [Coalesce, Service]
     public interface IWeatherService
     {
-        WeatherData GetWeather(AppDbContext parameterDbContext, Location location, DateTimeOffset? dateTime);
-
         Task<WeatherData> GetWeatherAsync(AppDbContext parameterDbContext, Location location, DateTimeOffset? dateTime, SkyConditions? conditions);
     }
 

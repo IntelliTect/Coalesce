@@ -570,11 +570,11 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
         {
             if (elementId == null)
             {
-                elementId = $"method-{method.Name}";
+                elementId = $"method-{method.NameWithoutAsync}";
             }
 
             var b = new HtmlCodeBuilder();
-            b.Line($"<!-- Modal for method: {method.Name} -->");
+            b.Line($"<!-- Modal for method: {method.NameWithoutAsync} -->");
             string withBinding = includeWithBinding ? $"with: {method.JsVariable}" : null;
 
             using (b
@@ -586,7 +586,7 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
                 using (b.TagBlock("div", "modal-header"))
                 {
                     b.Line("<button type='button' class='close' data-dismiss='modal' aria-label='Close'><span aria-hidden='true'>&times;</span></button>");
-                    b.Line($"<h4 class='modal-title'>{method.Name.ToProperCase()}</h4>");
+                    b.Line($"<h4 class='modal-title'>{method.NameWithoutAsync.ToProperCase()}</h4>");
                 }
 
                 using (b.TagBlock("div", "modal-body form-horizontal", "with: args"))

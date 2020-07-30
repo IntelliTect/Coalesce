@@ -57,8 +57,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
             string callbackAndReloadParam = $"callback?: (result: {method.ResultType.TsType}) => void{reloadParam}";
 
             // Default instance of the method class.
-            b.DocComment($"Methods and properties for invoking server method {method.Name}.\n\n{method.Comment}");
-            b.Line($"public readonly {method.JsVariable} = new {parentClassName}.{method.Name}(this);");
+            b.DocComment($"Methods and properties for invoking server method {method.NameWithoutAsync}.\n\n{method.Comment}");
+            b.Line($"public readonly {method.JsVariable} = new {parentClassName}.{method.NameWithoutAsync}(this);");
 
             string methodBaseClass = returnIsListResult
                 ? "ClientListMethod"
@@ -66,9 +66,9 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
 
             // Not wrapping this in a using since it is used by nearly this entire method. Will manually dispose.
             var classBlock = b.Block(
-                $"public static {method.Name} = class {method.Name} extends Coalesce.{methodBaseClass}<{parentClassName}, {method.ResultType.TsType}>", ';');
+                $"public static {method.NameWithoutAsync} = class {method.NameWithoutAsync} extends Coalesce.{methodBaseClass}<{parentClassName}, {method.ResultType.TsType}>", ';');
 
-            b.Line($"public readonly name = '{method.Name}';");
+            b.Line($"public readonly name = '{method.NameWithoutAsync}';");
             b.Line($"public readonly verb = '{method.ApiActionHttpMethodName}';");
 
             if (method.ResultType.IsCollection)
@@ -80,7 +80,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
             // Standard invoke method - all CS method parameters as TS method parameters.
             // ----------------------
             b.Line();
-            b.Line($"/** Calls server method ({method.Name}) with the given arguments */");
+            b.Line($"/** Calls server method ({method.NameWithoutAsync}) with the given arguments */");
 
             string parameters = "";
             parameters = string.Join(", ", method.ClientParameters.Select(f => $"{f.Name}: {f.Type.TsType} | null"));
@@ -125,7 +125,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
                 // ----------------------
                 // Args class, and default instance
                 b.Line($"/** Object that can be easily bound to fields to allow data entry for the method's parameters */");
-                b.Line($"public args = new {method.Name}.Args(); ");
+                b.Line($"public args = new {method.NameWithoutAsync}.Args(); ");
 
                 using (b.Block("public static Args = class Args", ';'))
                 {
@@ -164,7 +164,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
                 // invokeWithArgs method
                 // ----------------------
                 b.Line();
-                b.Line($"/** Calls server method ({method.Name}) with an instance of {method.Name}.Args, or the value of this.args if not specified. */");
+                b.Line($"/** Calls server method ({method.NameWithoutAsync}) with an instance of {method.NameWithoutAsync}.Args, or the value of this.args if not specified. */");
                 // We can't explicitly declare the type of the args parameter here - TypeScript doesn't allow it.
                 // Thankfully, we can implicitly type using the default.
                 using (b.Block($"public invokeWithArgs = (args = this.args, {callbackAndReloadParam}): JQueryPromise<any> =>"))

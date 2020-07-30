@@ -16,7 +16,7 @@ module Demo {
             location.city("Spokane");
             location.state("WA");
             location.zip("99201");
-            this.weatherService.getWeather.invoke(location, null);
+            this.weatherService.getWeather.invoke(location, null, null);
         }
     }
 

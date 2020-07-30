@@ -522,6 +522,7 @@ module ViewModels {
             this.errors = ko.validation.group([
                 this.firstName.extend({ minLength: 2, maxLength: 75 }),
                 this.lastName.extend({ minLength: 3, maxLength: 100 }),
+                this.email.extend({ email: true }),
                 this.birthDate.extend({ moment: { unix: true } }),
                 this.lastBath.extend({ moment: { unix: true } }),
                 this.nextUpgrade.extend({ moment: { unix: true } }),

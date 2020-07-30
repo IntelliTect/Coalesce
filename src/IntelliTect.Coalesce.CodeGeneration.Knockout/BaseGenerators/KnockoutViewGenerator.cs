@@ -169,7 +169,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
                                 using (b.TagBlock("td"))
                                 {
                                     string clickBinding = method.ClientParameters.Any()
-                                        ? $"click: function(){{ $('#method-{method.Name}').modal() }}"
+                                        ? $"click: function(){{ $('#method-{method.NameWithoutAsync}').modal() }}"
                                         : $"click: function(){{ invoke() }}";
 
                                     using (b.TagBlock("button", "btn btn-default btn-xs", dataBind: clickBinding))

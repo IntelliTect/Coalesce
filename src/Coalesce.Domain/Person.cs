@@ -165,7 +165,7 @@ namespace Coalesce.Domain
         {
             try
             {
-                return new ItemResult<int>(numberOne + numberTwo);
+                return numberOne + numberTwo;
             }
             catch
             {

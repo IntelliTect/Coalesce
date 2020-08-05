@@ -49,6 +49,18 @@
                 <option value="1000">1000</option>
             </select>
             <input class="form-control pull-right" style="width: 250px; margin-left: 20px" data-bind="textInput: search" placeholder="Search" />
+            <div class="btn-group pull-right">
+                <a href="~/CaseDto/CreateEdit?@(ViewBag.Query)" role="button" class="btn btn-sm btn-default "><i class="fa fa-plus"></i> Create</a>
+                <button data-bind="click:load" class="btn btn-sm btn-default "><i class="fa fa-refresh"></i> Refresh</button>
+                @if (ViewBag.Editable)
+                {
+                    <a href="~/CaseDto/Table?@(ViewBag.Query)" role="button" class="btn btn-sm btn-default "><i class="fa fa-lock"></i> Make Read-only</a>
+                }
+                else
+                {
+                    <a href="~/CaseDto/TableEdit?@ViewBag.Query" role="button" class="btn btn-sm btn-default "><i class="fa fa-pencil"></i> Make Editable</a>
+                }
+            </div>
         </div>
     </div>
     <hr />

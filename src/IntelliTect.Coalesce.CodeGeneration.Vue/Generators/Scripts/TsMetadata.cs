@@ -393,8 +393,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
             }
             else if (prop.Type.IsNumber)
             {
-                void Min(object value, string error) => rules.Add($"min: val == null || val >= {value} {Error(error, $"{propName} must be at least {value}.")}");
-                void Max(object value, string error) => rules.Add($"max: val == null || val <= {value} {Error(error, $"{propName} may not be more than {value}.")}");
+                void Min(object value, string error) => rules.Add($"min: val => val == null || val >= {value} {Error(error, $"{propName} must be at least {value}.")}");
+                void Max(object value, string error) => rules.Add($"max: val => val == null || val <= {value} {Error(error, $"{propName} may not be more than {value}.")}");
 
                 if (prop.Range != null)
                 {

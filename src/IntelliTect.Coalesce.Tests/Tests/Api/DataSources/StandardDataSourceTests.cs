@@ -11,6 +11,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Security.Claims;
 using System.Text;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace IntelliTect.Coalesce.Tests.Api.DataSources
@@ -34,6 +35,15 @@ namespace IntelliTect.Coalesce.Tests.Api.DataSources
         public void GetQuery_WhenIncludesStringNone_DoesNotIncludeChildren(string includes)
         {
             var query = Source<Case>().GetQuery(new DataSourceParameters { Includes = includes });
+            Assert.Empty(query.GetIncludeTree());
+        }
+
+        [Theory]
+        [InlineData("none")]
+        [InlineData("NONE")]
+        public async Task GetQueryAsync_WhenIncludesStringNone_DoesNotIncludeChildren(string includes)
+        {
+            var query = await Source<Case>().GetQueryAsync(new DataSourceParameters { Includes = includes });
             Assert.Empty(query.GetIncludeTree());
         }
 

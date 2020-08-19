@@ -64,7 +64,14 @@ namespace IntelliTect.Coalesce
         /// Get the initial query that will be compounded upon with various other
         /// clauses in order to ultimately retrieve the final resulting data.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>The initial query.</returns>
+        public virtual Task<IQueryable<T>> GetQueryAsync(IDataSourceParameters parameters) => Task.FromResult(GetQuery(parameters));
+
+        /// <summary>
+        /// Get the initial query that will be compounded upon with various other
+        /// clauses in order to ultimately retrieve the final resulting data.
+        /// </summary>
+        /// <returns>The initial query.</returns>
         public virtual IQueryable<T> GetQuery(IDataSourceParameters parameters)
         {
             IQueryable<T> query = Db.Set<T>();
@@ -639,7 +646,7 @@ namespace IntelliTect.Coalesce
         /// and an IncludeTree to be used when mapping/serializing the data.</returns>
         public virtual async Task<(ListResult<T> List, IncludeTree? IncludeTree)> GetListAsync(IListParameters parameters)
         {
-            var query = GetQuery(parameters);
+            var query = await GetQueryAsync(parameters);
 
             query = ApplyListFiltering(query, parameters);
 
@@ -714,7 +721,7 @@ namespace IntelliTect.Coalesce
         /// and an IncludeTree to be used when mapping/serializing the item.</returns>
         public virtual async Task<(ItemResult<T> Item, IncludeTree? IncludeTree)> GetItemAsync(object id, IDataSourceParameters parameters)
         {
-            var query = GetQuery(parameters);
+            var query = await GetQueryAsync(parameters);
             T result = await EvaluateItemQueryAsync(id, query);
 
             if (result == null)
@@ -753,7 +760,7 @@ namespace IntelliTect.Coalesce
 
         public virtual async Task<ItemResult<int>> GetCountAsync(IFilterParameters parameters)
         {
-            var query = GetQuery(parameters);
+            var query = await GetQueryAsync(parameters);
             query = ApplyListFiltering(query, parameters);
 
             return new ItemResult<int>(await GetListTotalCountAsync(query, parameters));

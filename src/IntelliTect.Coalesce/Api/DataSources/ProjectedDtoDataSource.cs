@@ -56,7 +56,7 @@ namespace IntelliTect.Coalesce
         {
             AssertTMatchesTDto<TRequestedDto>();
 
-            var query = GetQuery(parameters);
+            var query = await GetQueryAsync(parameters);
             var canUseAsync = CanEvalQueryAsynchronously(query);
             var projectedQuery = ApplyProjection(query, parameters);
             TDto mappedResult = canUseAsync 
@@ -81,7 +81,7 @@ namespace IntelliTect.Coalesce
         {
             AssertTMatchesTDto<TRequestedDto>();
 
-            var query = GetQuery(parameters);
+            var query = await GetQueryAsync(parameters);
 
             query = ApplyListFiltering(query, parameters);
 

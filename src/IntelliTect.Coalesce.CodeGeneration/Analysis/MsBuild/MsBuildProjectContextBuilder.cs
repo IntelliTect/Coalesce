@@ -28,7 +28,6 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.MsBuild
     public class MsBuildProjectContextBuilder
     {
         private readonly ProjectContext _context;
-        public string TargetsLocation { get; private set; }
         public string Configuration { get; private set; } = "Debug";
         public string Framework { get; private set; } = null;
         public ILogger Logger { get; }
@@ -53,14 +52,9 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.MsBuild
             return this;
         }
 
-        public MsBuildProjectContextBuilder InstallTargets(string targetLocation)
+        private string InstallTargets()
         {
-            if (string.IsNullOrEmpty(targetLocation))
-            {
-                throw new ArgumentNullException(nameof(targetLocation));
-            }
-
-            TargetsLocation = targetLocation;
+            string targetLocation = Path.Combine(_context.ProjectPath, "obj", "Coalesce");
 
             var toolType = typeof(MsBuildProjectContextBuilder);
             var thisAssembly = toolType.GetTypeInfo().Assembly;
@@ -77,19 +71,29 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.MsBuild
 
             Parallel.ForEach(files, file =>
             {
-                using (var stream = thisAssembly.GetManifestResourceStream($"{baseResourceName}.{file.Replace("/", ".")}"))
+                using var stream = thisAssembly.GetManifestResourceStream($"{baseResourceName}.{file.Replace("/", ".")}");
+                var fileBytes = new byte[stream.Length];
+                stream.Read(fileBytes, 0, fileBytes.Length);
+
+                var filePath = Path.Combine(targetLocation, file);
+                Directory.CreateDirectory(Path.GetDirectoryName(filePath));
+
+                if (!File.Exists(filePath) || !File.ReadAllBytes(filePath).SequenceEqual(fileBytes))
                 {
-                    var targetBytes = new byte[stream.Length];
-                    stream.Read(targetBytes, 0, targetBytes.Length);
-                    var filePath = Path.Combine(targetLocation, file);
-                    Directory.CreateDirectory(Path.GetDirectoryName(filePath));
-                    File.WriteAllBytes(filePath, targetBytes);
+                    File.WriteAllBytes(filePath, fileBytes);
+                }
+                else
+                {
+                    // Skipping the write here avoids updating the file timestamp,
+                    // which then in turn allows MSBuild to skip builds of our dependencies.
+                    // Since MSBuild considers the target files we inject to be build inputs,
+                    // it factors their file timestamps when determining whether existing build output is stale or not.
+                    Logger.LogDebug($"Skipped writing target {file}, output is identical.");
                 }
             });
 
-            return this;
+            return targetLocation;
         }
-
 
         public MsBuildProjectContextBuilder RestoreProjectPackages()
         {
@@ -125,14 +129,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.MsBuild
             timer.Start();
              
             var projectPath = _context.ProjectFilePath;
-
-            var cleanupTargets = false;
-            if (TargetsLocation == null)
-            {
-                cleanupTargets = true;
-                TargetsLocation = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
-                InstallTargets(TargetsLocation);
-            }
+            
+            var targetsLocation = InstallTargets();
 
             var line = $"   {(projectPath)}";
             if (Framework != null) line += $" ({Framework})";
@@ -145,9 +143,9 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.MsBuild
                 "/nologo",
                 "/v:q",
                 $"/t:EvaluateProjectInfoForCodeGeneration",
-                $"/p:CustomBeforeMicrosoftCSharpTargets={TargetsLocation}\\Imports.targets",
+                $"/p:CustomBeforeMicrosoftCSharpTargets={targetsLocation}\\Imports.targets",
                 $"/p:OutputFile={projectInfoFile}",
-                $"/p:CodeGenerationTargetLocation={TargetsLocation}",
+                $"/p:CodeGenerationTargetLocation={targetsLocation}",
                 $"/p:Configuration={Configuration}"
             };
             if (Framework != null) args.Add($"/p:TargetFramework={Framework}");
@@ -178,11 +176,6 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.MsBuild
             {
                 Logger.LogDebug($"Project analysis for {projectPath} took {timer.ElapsedMilliseconds}ms");
                 File.Delete(projectInfoFile);
-                if (cleanupTargets)
-                {
-                    Directory.Delete(TargetsLocation, true);
-                    TargetsLocation = null;
-                }
             }
         }
     }

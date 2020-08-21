@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace IntelliTect.Coalesce.TypeDefinition
 {
@@ -21,6 +22,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public override bool HasDefaultValue => Symbol.HasExplicitDefaultValue;
 
         protected override object? RawDefaultValue => Symbol.ExplicitDefaultValue;
+
+        public override string CsDefaultValue => ((ParameterSyntax)Symbol.DeclaringSyntaxReferences[0].GetSyntax()).Default.Value.ToString();
 
         public override object? GetAttributeValue<TAttribute>(string valueName)
         {

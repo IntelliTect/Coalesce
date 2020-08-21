@@ -10,6 +10,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Security.Claims;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.TypeDefinition
@@ -62,7 +63,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// True if the parameter is NOT provided by the calling client.
         /// </summary>
-        public bool IsDI => IsNonArgumentDI || ShouldInjectFromServices;
+        public bool IsDI => IsNonArgumentDI || ShouldInjectFromServices || Type.IsA<CancellationToken>();
 
         /// <summary>
         /// True if the method is a <see cref="DbContext"/> that should be automatically injected, not needing an <see cref="InjectAttribute"/>.
@@ -160,7 +161,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// C# compile-time constant expression representing the default value of the parameter if HasDefaultValue == true.
         /// </summary>
-        public string CsDefaultValue
+        public virtual string CsDefaultValue
         {
             get
             {

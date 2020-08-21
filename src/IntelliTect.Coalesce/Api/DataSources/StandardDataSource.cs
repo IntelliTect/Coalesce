@@ -66,7 +66,7 @@ namespace IntelliTect.Coalesce
         }
 
         /// <summary>
-        /// Allows the cancellation token to be used to cancel running queries.
+        /// Returns the cancellation token to be used to cancel running queries.
         /// Defaults to CancellationToken.None due to poor experience related to https://github.com/dotnet/efcore/issues/19526.
         /// If cancellation based on the current web request is desired, override to use <see cref="CancellationToken"/>.
         /// </summary>

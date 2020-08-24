@@ -60,7 +60,7 @@ namespace IntelliTect.Coalesce
             var canUseAsync = CanEvalQueryAsynchronously(query);
             var projectedQuery = ApplyProjection(query, parameters);
             TDto mappedResult = canUseAsync 
-                ? await projectedQuery.FindItemAsync(id, Context.ReflectionRepository) 
+                ? await projectedQuery.FindItemAsync(id, Context.ReflectionRepository, GetEffectiveCancellationToken(parameters)) 
                 : projectedQuery.FindItem(id, Context.ReflectionRepository);
 
             if (mappedResult == null)
@@ -94,7 +94,7 @@ namespace IntelliTect.Coalesce
 
             var canUseAsync = CanEvalQueryAsynchronously(query);
             var projectedQuery = ApplyProjection(query, parameters);
-            IList<TDto> mappedList = canUseAsync ? await projectedQuery.ToListAsync() : projectedQuery.ToList();
+            IList<TDto> mappedList = canUseAsync ? await projectedQuery.ToListAsync(GetEffectiveCancellationToken(parameters)) : projectedQuery.ToList();
 
             mappedList = TrimListFields(mappedList, parameters);
 
@@ -103,17 +103,17 @@ namespace IntelliTect.Coalesce
 
         public sealed override IncludeTree GetIncludeTree(IQueryable<T> query, IDataSourceParameters parameters)
         {
-            throw new NotSupportedException($"StandardDtoDataSource does not utilize {nameof(IncludeTree)} - tree trimming is performed in {nameof(ApplyProjection)}");
+            throw new NotSupportedException($"ProjectedDtoDataSource does not utilize {nameof(IncludeTree)} - tree trimming is performed in {nameof(ApplyProjection)}");
         }
 
         public sealed override void TransformResults(IReadOnlyList<T> results, IDataSourceParameters parameters)
         {
-            throw new NotSupportedException($"StandardDtoDataSource does not utilize {nameof(TransformResults)} - transformations should be performed in {nameof(ApplyProjection)}");
+            throw new NotSupportedException($"ProjectedDtoDataSource does not utilize {nameof(TransformResults)} - transformations should be performed in {nameof(ApplyProjection)}");
         }
 
         public sealed override Task TransformResultsAsync(IReadOnlyList<T> results, IDataSourceParameters parameters)
         {
-            throw new NotSupportedException($"StandardDtoDataSource does not utilize {nameof(TransformResultsAsync)} - transformations should be performed in {nameof(ApplyProjection)}");
+            throw new NotSupportedException($"ProjectedDtoDataSource does not utilize {nameof(TransformResultsAsync)} - transformations should be performed in {nameof(ApplyProjection)}");
         }
 
         protected void AssertTMatchesTDto<TActual>()

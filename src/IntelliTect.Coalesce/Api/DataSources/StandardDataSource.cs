@@ -9,6 +9,8 @@ using IntelliTect.Coalesce.TypeDefinition;
 using IntelliTect.Coalesce.Mapping;
 using IntelliTect.Coalesce.Api;
 using System.Collections.ObjectModel;
+using System.Threading;
+using Microsoft.EntityFrameworkCore.Query.Internal;
 
 namespace IntelliTect.Coalesce
 {
@@ -38,6 +40,11 @@ namespace IntelliTect.Coalesce
         /// </summary>
         public int MaxPageSize { get; set; } = 10_000;
 
+        /// <summary>
+        /// A <see cref="CancellationToken"/> that can be observed to see if the underlying request has been canceled.
+        /// </summary>
+        public CancellationToken CancellationToken => Context.CancellationToken;
+
         static StandardDataSource()
         {
             // Fixes EF Core query caching issues: https://dzone.com/articles/investigating-a-memory-leak-in-entity-framework-co
@@ -55,9 +62,17 @@ namespace IntelliTect.Coalesce
         /// <param name="query"></param>
         protected virtual bool CanEvalQueryAsynchronously(IQueryable<T> query)
         {
-            // Async disabled because of https://github.com/aspnet/EntityFrameworkCore/issues/9038.
-            // Renable once microsoft releases the fix and we upgrade our references.
-            return false; // query.Provider is IAsyncQueryProvider;
+            return query.Provider is IAsyncQueryProvider;
+        }
+
+        /// <summary>
+        /// Returns the cancellation token to be used to cancel running queries.
+        /// Defaults to CancellationToken.None due to poor experience related to https://github.com/dotnet/efcore/issues/19526.
+        /// If cancellation based on the current web request is desired, override to use <see cref="CancellationToken"/>.
+        /// </summary>
+        protected virtual CancellationToken GetEffectiveCancellationToken(IDataSourceParameters parameters)
+        {
+            return CancellationToken.None;
         }
 
         /// <summary>
@@ -635,7 +650,7 @@ namespace IntelliTect.Coalesce
         public virtual Task<int> GetListTotalCountAsync(IQueryable<T> query, IFilterParameters parameters)
         {
             var canUseAsync = CanEvalQueryAsynchronously(query);
-            return canUseAsync ? query.CountAsync() : Task.FromResult(query.Count());
+            return canUseAsync ? query.CountAsync(GetEffectiveCancellationToken(parameters)) : Task.FromResult(query.Count());
         }
 
 
@@ -658,7 +673,7 @@ namespace IntelliTect.Coalesce
             query = ApplyListPaging(query, parameters, totalCount, out int page, out int pageSize);
             
             var canUseAsync = CanEvalQueryAsynchronously(query);
-            List<T> result = canUseAsync ? await query.ToListAsync() : query.ToList();
+            List<T> result = canUseAsync ? await query.ToListAsync(GetEffectiveCancellationToken(parameters)) : query.ToList();
 
             var tree = GetIncludeTree(query, parameters);
             return (new ListResult<T>(result, page: page, totalCount: totalCount, pageSize: pageSize), tree);
@@ -703,12 +718,13 @@ namespace IntelliTect.Coalesce
         /// </summary>
         /// <param name="id">The primary key to find the desired item by.</param>
         /// <param name="query">The query to query.</param>
+        /// <param name="cancellationToken">A CancellationToken to use.</param>
         /// <returns>The requested object, or null if it was not found.</returns>
-        protected virtual async Task<T> EvaluateItemQueryAsync(object id, IQueryable<T> query)
+        protected virtual async Task<T> EvaluateItemQueryAsync(object id, IQueryable<T> query, CancellationToken cancellationToken = default)
         {
             var canUseAsync = CanEvalQueryAsynchronously(query);
             return canUseAsync
-                ? await query.FindItemAsync(id, Context.ReflectionRepository) 
+                ? await query.FindItemAsync(id, Context.ReflectionRepository, cancellationToken) 
                 : query.FindItem(id, Context.ReflectionRepository);
         }
 
@@ -722,7 +738,7 @@ namespace IntelliTect.Coalesce
         public virtual async Task<(ItemResult<T> Item, IncludeTree? IncludeTree)> GetItemAsync(object id, IDataSourceParameters parameters)
         {
             var query = await GetQueryAsync(parameters);
-            T result = await EvaluateItemQueryAsync(id, query);
+            T result = await EvaluateItemQueryAsync(id, query, GetEffectiveCancellationToken(parameters));
 
             if (result == null)
             {

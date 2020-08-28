@@ -1330,7 +1330,6 @@ export const ProductDetails = domain.types.ProductDetails = {
       type: "object",
       get typeDef() { return (domain.types.StreetAddress as ObjectType) },
       role: "value",
-      dontSerialize: true,
     },
     companyHqAddress: {
       name: "companyHqAddress",
@@ -1338,7 +1337,6 @@ export const ProductDetails = domain.types.ProductDetails = {
       type: "object",
       get typeDef() { return (domain.types.StreetAddress as ObjectType) },
       role: "value",
-      dontSerialize: true,
     },
   },
 }
@@ -1397,7 +1395,6 @@ export const WeatherData = domain.types.WeatherData = {
       type: "object",
       get typeDef() { return (domain.types.Location as ObjectType) },
       role: "value",
-      dontSerialize: true,
     },
   },
 }

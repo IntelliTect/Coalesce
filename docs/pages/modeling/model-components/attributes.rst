@@ -69,7 +69,7 @@ Normally, Coalesce figures out which properties are foreign keys, but if you don
 Sometimes, Coalesce (and EF, too) can have trouble figuring out what the foreign key is supposed to be for a collection navigation property. See the `Entity Framework Relationships`_ documentation for details on how and why to use :csharp:`[InverseProperty]`.
 
 [DatabaseGenerated]
-.................
+...................
 
 Primary Keys with :csharp:`[DatabaseGenerated(DatabaseGeneratedOption.None)]` will be settable on the client and will be appropriately handled by the :ref:`StandardBehaviors` on the server. Currently unsupported on the :ref:`Knockout front-end stack <KoOverview>`.
 

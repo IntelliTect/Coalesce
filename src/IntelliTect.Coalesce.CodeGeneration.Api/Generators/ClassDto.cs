@@ -164,13 +164,34 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
         /// <param name="property">The property to map</param>
         private (string conditional, string setter) DtoToModelPropertySetter(PropertyViewModel property)
         {
-            var name = property.Name;
-            var newValue = name;
-            if (!property.Type.IsNullable && property.Type.CsDefaultValue != "null")
+            string name = property.Name;
+            string targetProp = $"entity.{name}";
+
+            string setter;
+            if (property.Object != null)
             {
-                newValue = $"({newValue} ?? entity.{name})";
+                string mapCall = $"MapToModel<{property.PureType.FullyQualifiedName}, {property.Object.DtoName}>({targetProp} ?? new {property.Type.FullyQualifiedName}(), context)";
+                if (property.Type.IsCollection)
+                {
+                    setter = $"{targetProp} = {name}?.Select(f => f.{mapCall}).ToList();";
+                }
+                else
+                {
+                    setter = $"{targetProp} = {name}?.{mapCall};";
+                }
             }
-            var setter = $"if (ShouldMapTo(nameof({name}))) entity.{name} = {newValue};";
+            else
+            {
+                var newValue = name;
+                if (!property.Type.IsNullable && property.Type.CsDefaultValue != "null")
+                {
+                    newValue = $"({newValue} ?? {targetProp})";
+                }
+                setter = $"{targetProp} = {newValue};";
+            }
+
+
+            setter = $"if (ShouldMapTo(nameof({name}))) " + setter;
 
             var statement = GetPropertySetterConditional(property, true);
             if (!string.IsNullOrWhiteSpace(statement))
@@ -234,7 +255,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                             sb.Indented(string.Concat(orderByStatements));
                         }
 
-                        sb.Indented($".Select(f => f.MapToDto<{property.PureType.FullyQualifiedName}, {property.PureType.Name}DtoGen>(context, tree?[nameof({objectName}.{name})])).ToList();");
+                        sb.Indented($".Select(f => f.MapToDto<{property.PureType.FullyQualifiedName}, {property.Object.DtoName}>(context, tree?[nameof({objectName}.{name})])).ToList();");
                     }
 
                     if (property.Object.HasDbSet)
@@ -242,7 +263,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                         // If we know for sure that we're loading these things (becuse the IncludeTree said so),
                         // but EF didn't load any, then add a blank collection so the client will delete any that already exist.
                         sb.Line($"}} else if (propVal{name} == null && tree?[nameof({objectName}.{name})] != null) {{");
-                        sb.Indented($"{objectName}.{name} = new {property.PureType.Name}DtoGen[0];");
+                        sb.Indented($"{objectName}.{name} = new {property.Object.DtoName}[0];");
                         sb.Line("}");
                     }
                     else

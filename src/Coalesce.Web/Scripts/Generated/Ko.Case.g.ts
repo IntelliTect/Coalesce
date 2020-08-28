@@ -461,6 +461,7 @@ module ViewModels {
             self.severity.subscribe(self.autoSave);
             self.status.subscribe(self.autoSave);
             self.devTeamAssignedId.subscribe(self.autoSave);
+            self.devTeamAssigned.subscribe(self.autoSave);
             self.duration.subscribe(self.autoSave);
             
             self.products.subscribe<KnockoutArrayChange<Product>[]>(changes => {

@@ -25,7 +25,7 @@ Collection Navigation Properties
     Collection navigation properties can be used in a straightforward manner. In the event where the inverse property on the other side of the relationship cannot be determined, :csharp:`[InversePropertyAttribute]` will need to be used. `EF Core provides documentation <https://docs.microsoft.com/en-us/ef/core/modeling/relationships#data-annotations>`_ on how to use this attribute. Errors will be displayed at generation time if an inverse property cannot be determined without the attribute. We recommend recommended that you declare the type of collection navigations as :csharp:`ICollection<T>`.
 
 Non-mapped POCOs
-    Properties of a type that are not on your :csharp:`DbContext` will also have corresponding properties generated on the :ref:`TypeScriptViewModels` typed as :ref:`TypeScriptExternalViewModel`, and the values of such properties will be sent with the object to the client when requested.
+    Properties of a type that are not on your :csharp:`DbContext` will also have corresponding properties generated on the :ref:`TypeScriptViewModels` typed as :ref:`TypeScriptExternalViewModel`, and the values of such properties will be sent with the object to the client when requested. Properties of this type will also be sent back to the server by the client when they are encountered (currently supported by the :ref:`Vue Stack <VueOverview>` only).
 
     See :ref:`ExternalTypes` for more information.
 

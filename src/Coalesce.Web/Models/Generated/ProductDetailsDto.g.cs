@@ -54,6 +54,8 @@ namespace Coalesce.Web.Models
 
             if (OnUpdate(entity, context)) return;
 
+            if (ShouldMapTo(nameof(ManufacturingAddress))) entity.ManufacturingAddress = ManufacturingAddress?.MapToModel<Coalesce.Domain.StreetAddress, StreetAddressDtoGen>(entity.ManufacturingAddress ?? new Coalesce.Domain.StreetAddress(), context);
+            if (ShouldMapTo(nameof(CompanyHqAddress))) entity.CompanyHqAddress = CompanyHqAddress?.MapToModel<Coalesce.Domain.StreetAddress, StreetAddressDtoGen>(entity.CompanyHqAddress ?? new Coalesce.Domain.StreetAddress(), context);
         }
     }
 }

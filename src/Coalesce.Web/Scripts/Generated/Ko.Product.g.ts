@@ -120,6 +120,7 @@ module ViewModels {
             
             
             self.name.subscribe(self.autoSave);
+            self.details.subscribe(self.autoSave);
             self.uniqueId.subscribe(self.autoSave);
             
             if (newItem) {

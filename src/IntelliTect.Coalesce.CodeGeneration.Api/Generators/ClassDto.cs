@@ -170,13 +170,14 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
             string setter;
             if (property.Object != null)
             {
-                string mapCall = $"MapToModel<{property.PureType.FullyQualifiedName}, {property.Object.DtoName}>({targetProp} ?? new {property.Type.FullyQualifiedName}(), context)";
                 if (property.Type.IsCollection)
                 {
+                    string mapCall = $"MapToModel<{property.PureType.FullyQualifiedName}, {property.Object.DtoName}>(new {property.Object.FullyQualifiedName}(), context)";
                     setter = $"{targetProp} = {name}?.Select(f => f.{mapCall}).ToList();";
                 }
                 else
                 {
+                    string mapCall = $"MapToModel<{property.PureType.FullyQualifiedName}, {property.Object.DtoName}>({targetProp} ?? new {property.Type.FullyQualifiedName}(), context)";
                     setter = $"{targetProp} = {name}?.{mapCall};";
                 }
             }

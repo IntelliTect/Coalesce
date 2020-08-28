@@ -98,7 +98,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 {
                     foreach (var member in symbol.GetMembers().OfType<IFieldSymbol>())
                     {
-                        result.Add((int)member.ConstantValue!, member.Name);
+                        result.Add(Convert.ToInt32(member.ConstantValue!), member.Name);
                     }
                 }
 

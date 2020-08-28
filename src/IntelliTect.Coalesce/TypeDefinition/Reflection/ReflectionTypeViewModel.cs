@@ -117,7 +117,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 }
                 foreach (var value in Enum.GetValues(info))
                 {
-                    result.Add((int)value!, value.ToString()!);
+                    result.Add(Convert.ToInt32(value!), value.ToString()!);
                 }
                 return result;
             }

@@ -27,7 +27,7 @@ namespace IntelliTect.Coalesce.Validation
                     assert.IsTrue(model.PrimaryKey.IsClientProperty, "Model primary keys must be exposed to the client.");
                 }
 
-                assert.IsNotNull(model.DbContext, "Cannot determine the DbContext for model.");
+                assert.IsNotNull(model.DbContext, "Cannot determine the DbContext that provides this type.");
 
                 // Check object references to see if they all have keys and remote keys
                 foreach (var prop in model.ClientProperties)

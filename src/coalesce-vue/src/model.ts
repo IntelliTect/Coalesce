@@ -405,12 +405,13 @@ class MapToDtoVisitor extends Visitor<
 > {
   private depth: number = 0;
 
-  public visitObject(value: any, meta: ClassType): {} | undefined {
+  public visitObject(value: any, meta: ClassType): {} | null | undefined {
     // If we've exceded max depth, return undefined to prevent the
     // creation of an entry in the parent object for this object.
     if (this.depth >= this.maxObjectDepth) return undefined;
     this.depth++;
 
+    if (value == null) return null;
     const props = meta.props;
     const output: any = {};
     for (const propName in props) {

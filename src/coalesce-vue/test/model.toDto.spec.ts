@@ -1,6 +1,6 @@
 import * as model from "../src/model";
 import * as $metadata from "./targets.metadata";
-import { Value } from "../src/metadata";
+import { Value, ModelType } from "../src/metadata";
 import { shortStringify } from "./test-utils";
 import { twoWayConversions, studentValue, MappingData } from "./model.shared";
 
@@ -36,6 +36,32 @@ describe.each(<MappingData[]>[
     },
     dto: { name: "Steve", studentId: 1, studentAdvisorId: 1, }
   },
+
+  // Serialized child object with a non-null value
+  {
+    meta: {role: 'value', typeDef: $metadata.DisplaysStudentSerializesChild, type: 'object' },
+    model: {
+      $metadata: $metadata.DisplaysStudentSerializesChild,
+      name: "Steve",
+      student: {
+        $metadata: $metadata.Student,
+        name: "Steve",
+      },
+    },
+    dto: { name: "Steve", student: { name: "Steve" } }
+  },
+  // Serialized child object with a null value
+  {
+    meta: {role: 'value', typeDef: $metadata.DisplaysStudentSerializesChild, type: 'object' },
+    model: {
+      $metadata: $metadata.DisplaysStudentSerializesChild,
+      name: "Steve",
+      student: null,
+    },
+    dto: { name: "Steve", student: null }
+  },
+  // Null object
+  { meta: studentValue, model: null, dto: null },
 
   // String
   { meta: studentProps.name, model: 123, dto: "123" },

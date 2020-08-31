@@ -272,6 +272,17 @@ export const DisplaysStudent = domain.types.DisplaysStudent = <ObjectType>{
   }
 };
 
+export const DisplaysStudentSerializesChild = <ObjectType>{
+  ...DisplaysStudent,
+  props: {
+    ...DisplaysStudent.props,
+    student: {
+    ...DisplaysStudent.props.student,
+      dontSerialize: false,
+    }
+  }
+};
+
 interface AppDomain extends Domain {
   enums: {
   }

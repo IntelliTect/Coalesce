@@ -69,7 +69,5 @@ namespace Coalesce.Web.Api
             IBehaviors<Coalesce.Domain.Product> behaviors,
             IDataSource<Coalesce.Domain.Product> dataSource)
             => DeleteImplementation(id, new DataSourceParameters(), dataSource, behaviors);
-
-        // Methods from data class exposed through API Controller.
     }
 }

@@ -14,6 +14,7 @@ using Microsoft.CodeAnalysis;
 using IntelliTect.Coalesce.Helpers;
 using IntelliTect.Coalesce.Helpers.Search;
 using Microsoft.EntityFrameworkCore;
+using IntelliTect.Coalesce.TypeUsage;
 
 namespace IntelliTect.Coalesce.TypeDefinition
 {
@@ -86,9 +87,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// If this class implements IClassDto, return the ClassViewModel for the type that this DTO is based upon.
         /// </summary>
-        public ClassViewModel? DtoBaseViewModel => IsDto
-            ? Type.GenericArgumentsFor(typeof(IClassDto<>)).First().ClassViewModel
-            : null;
+        public ClassViewModel? DtoBaseViewModel =>
+            Type.GenericArgumentsFor(typeof(IClassDto<>))?[0].ClassViewModel;
 
         /// <summary>
         /// Name of the ViewModelClass
@@ -422,12 +422,27 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// </summary>
         public string DisplayName => ClientTypeName.ToProperCase();
 
-        public bool IsDbMappedType => HasDbSet || (DtoBaseViewModel?.HasDbSet ?? false);
+        public bool IsDbMappedType => DbContext != null;
 
         /// <summary>
         /// True if the type has a DbSet property on any discovered DbContext types.
         /// </summary>
-        public bool HasDbSet => ReflectionRepository?.EntityUsages.Contains(this) ?? false;
+        public bool HasDbSet => DbContextUsage != null;
+
+        /// <summary>
+        /// Metadata about the usage of this type in a <see cref="DbSet{TEntity}"/> on a <see cref="Microsoft.EntityFrameworkCore.DbContext"/>
+        /// </summary>
+        public EntityTypeUsage? DbContextUsage => ReflectionRepository?.EntityUsages[this].FirstOrDefault();
+
+        /// <summary>
+        /// The DbContext associated with the type. 
+        /// For entities, the context that owns the DbSet by which the entity was discovered.
+        /// For DTOs, the context that owns the underlying entity, or the explicitly provided context.
+        /// </summary>
+        public ClassViewModel? DbContext => 
+            DbContextUsage?.Context.ClassViewModel
+            ?? Type.GenericArgumentsFor(typeof(IClassDto<,>))?[1].ClassViewModel
+            ?? DtoBaseViewModel?.DbContext;
 
         private ClassSecurityInfo? _securityInfo;
 

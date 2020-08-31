@@ -94,7 +94,7 @@ namespace IntelliTect.Coalesce.Swashbuckle
 
                 var declaredFor =
                     paramVm.GetAttributeValue<DeclaredForAttribute>(a => a.DeclaredFor)
-                    ?? paramVm.Type.GenericArgumentsFor(typeof(IDataSource<>)).Single();
+                    ?? paramVm.Type.GenericArgumentsFor(typeof(IDataSource<>))!.Single();
 
                 var dataSources = declaredFor.ClassViewModel.ClientDataSources(ReflectionRepository);
 

@@ -60,6 +60,11 @@ export class CaseDtoApiClient extends ModelApiClient<$models.CaseDto> {
 }
 
 
+export class CaseDtoStandaloneApiClient extends ModelApiClient<$models.CaseDtoStandalone> {
+  constructor() { super($metadata.CaseDtoStandalone) }
+}
+
+
 export class CaseProductApiClient extends ModelApiClient<$models.CaseProduct> {
   constructor() { super($metadata.CaseProduct) }
 }

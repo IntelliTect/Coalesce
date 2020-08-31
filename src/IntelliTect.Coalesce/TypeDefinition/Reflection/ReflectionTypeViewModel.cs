@@ -82,12 +82,11 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 );
         }
 
-        public override TypeViewModel[] GenericArgumentsFor(Type type) =>
+        public override TypeViewModel[]? GenericArgumentsFor(Type type) =>
             GetSatisfyingBaseType(type)?
                 .GenericTypeArguments
                 .Select(t => ReflectionTypeViewModel.GetOrCreate(ReflectionRepository, t))
-                .ToArray() 
-            ?? Array.Empty<TypeViewModel>();
+                .ToArray();
 
         public override bool IsA(Type type) => GetSatisfyingBaseType(type) != null;
 
@@ -117,7 +116,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 }
                 foreach (var value in Enum.GetValues(info))
                 {
-                    result.Add(Convert.ToInt32(value!), value.ToString()!);
+                    result.Add(Convert.ToInt32(value!), value!.ToString()!);
                 }
                 return result;
             }

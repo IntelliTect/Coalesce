@@ -41,7 +41,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
             {
                 types.Add(iface);
             }
-            AssignableTo = types;
             AssignableToLookup = types.ToLookup(t => t.MetadataName);
 
             ClassViewModel = ShouldCreateClassViewModel && Symbol is INamedTypeSymbol nts
@@ -139,12 +138,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
             Symbol.HasAttribute<TAttribute>();
 
         /// <summary>
-        /// The set of types that an object of the current represented type is assignable to.
-        /// </summary>
-        private ICollection<INamedTypeSymbol> AssignableTo { get; }
-
-        /// <summary>
-        /// A lookup based on <see cref="AssignableTo"/>, keyed by <see cref="ISymbol.MetadataName"/>
+        /// The set of types that an object of the current represented type is assignable to, 
+        /// keyed by a base type's <see cref="ISymbol.MetadataName"/>.
         /// </summary>
         private ILookup<string, INamedTypeSymbol> AssignableToLookup { get; }
 
@@ -172,12 +167,11 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// Get the generic parameters used to satisfy the inheritance relationship with the given type.
         /// </summary>
-        public override TypeViewModel[] GenericArgumentsFor(Type type) =>
+        public override TypeViewModel[]? GenericArgumentsFor(Type type) =>
             GetSatisfyingBaseTypeSymbol(type)?
             .TypeArguments
             .Select(t => SymbolTypeViewModel.GetOrCreate(ReflectionRepository, t))
-            .ToArray()
-            ?? Array.Empty<TypeViewModel>();
+            .ToArray();
 
         public override bool IsA(Type type) => GetSatisfyingBaseTypeSymbol(type) != null;
 

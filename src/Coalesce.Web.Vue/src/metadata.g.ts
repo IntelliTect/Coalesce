@@ -395,6 +395,34 @@ export const CaseDto = domain.types.CaseDto = {
     },
   },
 }
+export const CaseDtoStandalone = domain.types.CaseDtoStandalone = {
+  name: "CaseDtoStandalone",
+  displayName: "Case Dto Standalone",
+  get displayProp() { return this.props.caseId }, 
+  type: "model",
+  controllerRoute: "CaseDtoStandalone",
+  get keyProp() { return this.props.caseId }, 
+  behaviorFlags: 7,
+  props: {
+    caseId: {
+      name: "caseId",
+      displayName: "Case Id",
+      type: "number",
+      role: "primaryKey",
+      hidden: 3,
+    },
+    title: {
+      name: "title",
+      displayName: "Title",
+      type: "string",
+      role: "value",
+    },
+  },
+  methods: {
+  },
+  dataSources: {
+  },
+}
 export const CaseProduct = domain.types.CaseProduct = {
   name: "CaseProduct",
   displayName: "Case Product",
@@ -1453,6 +1481,7 @@ interface AppDomain extends Domain {
   types: {
     Case: typeof Case
     CaseDto: typeof CaseDto
+    CaseDtoStandalone: typeof CaseDtoStandalone
     CaseProduct: typeof CaseProduct
     CaseSummary: typeof CaseSummary
     Company: typeof Company

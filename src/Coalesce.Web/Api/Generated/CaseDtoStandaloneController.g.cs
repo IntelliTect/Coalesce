@@ -20,54 +20,54 @@ using System.Threading.Tasks;
 
 namespace Coalesce.Web.Api
 {
-    [Route("api/CaseProduct")]
+    [Route("api/CaseDtoStandalone")]
     [Authorize]
     [ServiceFilter(typeof(IApiActionFilter))]
-    public partial class CaseProductController
-        : BaseApiController<Coalesce.Domain.CaseProduct, CaseProductDtoGen, Coalesce.Domain.AppDbContext>
+    public partial class CaseDtoStandaloneController
+        : BaseApiController<Coalesce.Domain.Case, Coalesce.Domain.CaseDtoStandalone, Coalesce.Domain.AppDbContext>
     {
-        public CaseProductController(Coalesce.Domain.AppDbContext db) : base(db)
+        public CaseDtoStandaloneController(Coalesce.Domain.AppDbContext db) : base(db)
         {
-            GeneratedForClassViewModel = ReflectionRepository.Global.GetClassViewModel<Coalesce.Domain.CaseProduct>();
+            GeneratedForClassViewModel = ReflectionRepository.Global.GetClassViewModel<Coalesce.Domain.CaseDtoStandalone>();
         }
 
         [HttpGet("get/{id}")]
         [Authorize]
-        public virtual Task<ItemResult<CaseProductDtoGen>> Get(
+        public virtual Task<ItemResult<Coalesce.Domain.CaseDtoStandalone>> Get(
             int id,
             DataSourceParameters parameters,
-            IDataSource<Coalesce.Domain.CaseProduct> dataSource)
+            [DeclaredFor(typeof(Coalesce.Domain.CaseDtoStandalone))] IDataSource<Coalesce.Domain.Case> dataSource)
             => GetImplementation(id, parameters, dataSource);
 
         [HttpGet("list")]
         [Authorize]
-        public virtual Task<ListResult<CaseProductDtoGen>> List(
+        public virtual Task<ListResult<Coalesce.Domain.CaseDtoStandalone>> List(
             ListParameters parameters,
-            IDataSource<Coalesce.Domain.CaseProduct> dataSource)
+            [DeclaredFor(typeof(Coalesce.Domain.CaseDtoStandalone))] IDataSource<Coalesce.Domain.Case> dataSource)
             => ListImplementation(parameters, dataSource);
 
         [HttpGet("count")]
         [Authorize]
         public virtual Task<ItemResult<int>> Count(
             FilterParameters parameters,
-            IDataSource<Coalesce.Domain.CaseProduct> dataSource)
+            [DeclaredFor(typeof(Coalesce.Domain.CaseDtoStandalone))] IDataSource<Coalesce.Domain.Case> dataSource)
             => CountImplementation(parameters, dataSource);
 
         [HttpPost("save")]
         [Authorize]
-        public virtual Task<ItemResult<CaseProductDtoGen>> Save(
-            CaseProductDtoGen dto,
+        public virtual Task<ItemResult<Coalesce.Domain.CaseDtoStandalone>> Save(
+            Coalesce.Domain.CaseDtoStandalone dto,
             [FromQuery] DataSourceParameters parameters,
-            IDataSource<Coalesce.Domain.CaseProduct> dataSource,
-            IBehaviors<Coalesce.Domain.CaseProduct> behaviors)
+            [DeclaredFor(typeof(Coalesce.Domain.CaseDtoStandalone))] IDataSource<Coalesce.Domain.Case> dataSource,
+            [DeclaredFor(typeof(Coalesce.Domain.CaseDtoStandalone))] IBehaviors<Coalesce.Domain.Case> behaviors)
             => SaveImplementation(dto, parameters, dataSource, behaviors);
 
         [HttpPost("delete/{id}")]
         [Authorize]
-        public virtual Task<ItemResult<CaseProductDtoGen>> Delete(
+        public virtual Task<ItemResult<Coalesce.Domain.CaseDtoStandalone>> Delete(
             int id,
-            IBehaviors<Coalesce.Domain.CaseProduct> behaviors,
-            IDataSource<Coalesce.Domain.CaseProduct> dataSource)
+            [DeclaredFor(typeof(Coalesce.Domain.CaseDtoStandalone))] IBehaviors<Coalesce.Domain.Case> behaviors,
+            [DeclaredFor(typeof(Coalesce.Domain.CaseDtoStandalone))] IDataSource<Coalesce.Domain.Case> dataSource)
             => DeleteImplementation(id, new DataSourceParameters(), dataSource, behaviors);
     }
 }

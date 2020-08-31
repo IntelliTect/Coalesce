@@ -126,6 +126,7 @@ export class CaseDtoViewModel extends ViewModel<$models.CaseDto, $apiClients.Cas
   
   constructor(initialData?: DeepPartial<$models.CaseDto> | null) {
     super($metadata.CaseDto, new $apiClients.CaseDtoApiClient(), initialData)
+    this.$saveMode = "whole"
   }
 }
 defineProps(CaseDtoViewModel, $metadata.CaseDto)
@@ -134,6 +135,27 @@ export class CaseDtoListViewModel extends ListViewModel<$models.CaseDto, $apiCli
   
   constructor() {
     super($metadata.CaseDto, new $apiClients.CaseDtoApiClient())
+  }
+}
+
+
+export interface CaseDtoStandaloneViewModel extends $models.CaseDtoStandalone {
+  caseId: number | null;
+  title: string | null;
+}
+export class CaseDtoStandaloneViewModel extends ViewModel<$models.CaseDtoStandalone, $apiClients.CaseDtoStandaloneApiClient, number> implements $models.CaseDtoStandalone  {
+  
+  constructor(initialData?: DeepPartial<$models.CaseDtoStandalone> | null) {
+    super($metadata.CaseDtoStandalone, new $apiClients.CaseDtoStandaloneApiClient(), initialData)
+    this.$saveMode = "whole"
+  }
+}
+defineProps(CaseDtoStandaloneViewModel, $metadata.CaseDtoStandalone)
+
+export class CaseDtoStandaloneListViewModel extends ListViewModel<$models.CaseDtoStandalone, $apiClients.CaseDtoStandaloneApiClient, CaseDtoStandaloneViewModel> {
+  
+  constructor() {
+    super($metadata.CaseDtoStandalone, new $apiClients.CaseDtoStandaloneApiClient())
   }
 }
 
@@ -501,6 +523,7 @@ export class WeatherServiceViewModel extends ServiceViewModel<typeof $metadata.W
 const viewModelTypeLookup = ViewModel.typeLookup = {
   Case: CaseViewModel,
   CaseDto: CaseDtoViewModel,
+  CaseDtoStandalone: CaseDtoStandaloneViewModel,
   CaseProduct: CaseProductViewModel,
   Company: CompanyViewModel,
   Person: PersonViewModel,
@@ -510,6 +533,7 @@ const viewModelTypeLookup = ViewModel.typeLookup = {
 const listViewModelTypeLookup = ListViewModel.typeLookup = {
   Case: CaseListViewModel,
   CaseDto: CaseDtoListViewModel,
+  CaseDtoStandalone: CaseDtoStandaloneListViewModel,
   CaseProduct: CaseProductListViewModel,
   Company: CompanyListViewModel,
   Person: PersonListViewModel,

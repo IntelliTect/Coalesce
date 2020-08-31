@@ -10,46 +10,8 @@ using System.Text;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
 {
-    public class Controllers : CompositeGenerator<ReflectionRepository>
+    public class Controllers : IntelliTect.Coalesce.CodeGeneration.Api.Generators.Controllers
     {
         public Controllers(CompositeGeneratorServices services) : base(services) { }
-
-        public override IEnumerable<ICleaner> GetCleaners()
-        {
-            yield return Cleaner<DirectoryCleaner>()
-                .AppendTargetPath("Api/Generated");
-        }
-
-        public override IEnumerable<IGenerator> GetGenerators()
-        {
-            foreach (var context in this.Model.DbContexts)
-            {
-                var entityLookup = context.Entities.ToLookup(e => e.ClassViewModel);
-
-                var contextTypes = context.Entities
-                    .Select(e => e.ClassViewModel)
-                    .Union(Model.CustomDtos.Where(dto => 
-                        entityLookup.Contains(dto.DtoBaseViewModel)
-                    ));
-                
-                foreach (var model in contextTypes)
-                {
-                    if (model.WillCreateApiController)
-                    {
-                        yield return Generator<ModelApiController>()
-                            .WithModel(model)
-                            .WithDbContext(context.ClassViewModel)
-                            .AppendOutputPath($"Api/Generated/{model.ClientTypeName}Controller.g.cs");
-                    }
-                }
-            }
-
-            foreach (var model in Model.Services)
-            {
-                yield return Generator<ServiceApiController>()
-                    .WithModel(model)
-                    .AppendOutputPath($"Api/Generated/{model.ApiControllerClassName}.g.cs");
-            }
-        }
     }
 }

@@ -9,14 +9,13 @@ using System.Text;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
 {
-    public class Controllers : CompositeGenerator<ReflectionRepository>
+    public class Controllers : IntelliTect.Coalesce.CodeGeneration.Api.Generators.Controllers
     {
         public Controllers(CompositeGeneratorServices services) : base(services) { }
 
         public override IEnumerable<ICleaner> GetCleaners()
         {
-            yield return Cleaner<DirectoryCleaner>()
-                .AppendTargetPath("Api/Generated");
+            foreach (var cleaner in base.GetCleaners()) yield return cleaner;
             
             yield return Cleaner<DirectoryCleaner>()
                 .AppendTargetPath("Controllers/Generated");
@@ -24,40 +23,16 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
 
         public override IEnumerable<IGenerator> GetGenerators()
         {
-            foreach (var context in this.Model.DbContexts)
-            {
-                var entityLookup = context.Entities.ToLookup(e => e.ClassViewModel);
+            foreach (var generator in base.GetGenerators()) yield return generator;
 
-                var contextTypes = context.Entities
-                    .Select(e => e.ClassViewModel)
-                    .Union(Model.CustomDtos.Where(dto => 
-                        entityLookup.Contains(dto.DtoBaseViewModel)
-                    ));
-                
-                foreach (var model in contextTypes)
+            foreach (var model in Model.CrudApiBackedClasses)
+            {
+                if (model.WillCreateViewController)
                 {
-                    if (model.WillCreateApiController)
-                    {
-                        yield return Generator<ModelApiController>()
-                            .WithModel(model)
-                            .WithDbContext(context.ClassViewModel)
-                            .AppendOutputPath($"Api/Generated/{model.ApiControllerClassName}.g.cs");
-                    }
-
-                    if (model.WillCreateViewController)
-                    {
-                        yield return Generator<ViewController>()
-                            .WithModel(model)
-                            .AppendOutputPath($"Controllers/Generated/{model.ViewControllerClassName}.g.cs");
-                    }
+                    yield return Generator<ViewController>()
+                        .WithModel(model)
+                        .AppendOutputPath($"Controllers/Generated/{model.ViewControllerClassName}.g.cs");
                 }
-            }
-
-            foreach (var model in Model.Services)
-            {
-                yield return Generator<ServiceApiController>()
-                    .WithModel(model)
-                    .AppendOutputPath($"Api/Generated/{model.ApiControllerClassName}.g.cs");
             }
         }
     }

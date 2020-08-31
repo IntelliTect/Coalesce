@@ -114,6 +114,29 @@ export namespace CaseDto {
 }
 
 
+export interface CaseDtoStandalone extends Model<typeof metadata.CaseDtoStandalone> {
+  caseId: number | null
+  title: string | null
+}
+export class CaseDtoStandalone {
+  
+  /** Mutates the input object and its descendents into a valid CaseDtoStandalone implementation. */
+  static convert(data?: Partial<CaseDtoStandalone>): CaseDtoStandalone {
+    return convertToModel(data || {}, metadata.CaseDtoStandalone) 
+  }
+  
+  /** Maps the input object and its descendents to a new, valid CaseDtoStandalone implementation. */
+  static map(data?: Partial<CaseDtoStandalone>): CaseDtoStandalone {
+    return mapToModel(data || {}, metadata.CaseDtoStandalone) 
+  }
+  
+  /** Instantiate a new CaseDtoStandalone, optionally basing it on the given data. */
+  constructor(data?: Partial<CaseDtoStandalone> | {[k: string]: any}) {
+      Object.assign(this, CaseDtoStandalone.map(data || {}));
+  }
+}
+
+
 export interface CaseProduct extends Model<typeof metadata.CaseProduct> {
   caseProductId: number | null
   caseId: number | null

@@ -18,7 +18,7 @@ The difference between a Custom DTO and the underlying entity that they represen
 Creating a Custom DTO
 ---------------------
 
-To create a custom DTO, define a class that implements :csharp:`IClassDTO<T>`, where :csharp:`T` is an EF Core POCO, and annotate it with :csharp:`[Coalesce]` . Add any :ref:`ModelProperties` to it just as you would add :ref:`model properties <ModelProperties>` to a regular EF model.
+To create a custom DTO, define a class annotated with :ref:`CoalesceAttribute` that implements :csharp:`IClassDTO<T>`, where :csharp:`T` is an EF Core POCO with a corresponding :csharp:`DbSet<T>` on a :csharp:`DbContext` that has also been exposed with :ref:`CoalesceAttribute`. Add any :ref:`ModelProperties` to it just as you would add :ref:`model properties <ModelProperties>` to a regular EF model. If you are not exposing a :csharp:`DbContext` class with :ref:`CoalesceAttribute` but still wish to create a Custom DTO based upon one of its entities, you can inherit from :csharp:`IClassDTO<T, TContext>` instead as a means of explicitly declaring the type of the DbContext.
 
 Next, ensure that one property is annotated with :csharp:`[Key]` so that Coalesce can know the primary key of your DTO in order to perform database lookups and keep track of your object uniquely in the client-side TypeScript.
 

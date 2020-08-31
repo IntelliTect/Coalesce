@@ -277,7 +277,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             if (!strategyType.IsA(iface) || strategyType.ClassViewModel == null) return false;
 
-            var servedType = strategyType.GenericArgumentsFor(iface).Single();
+            var servedType = strategyType.GenericArgumentsFor(iface)!.Single();
             var servedClass = servedType.ClassViewModel;
             if (servedClass == null)
             {

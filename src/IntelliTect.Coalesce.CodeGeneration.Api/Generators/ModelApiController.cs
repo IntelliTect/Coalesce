@@ -14,14 +14,6 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
     {
         public ModelApiController(GeneratorServices services) : base(services) { }
 
-        public ClassViewModel DbContext { get; set; }
-
-        public ModelApiController WithDbContext(ClassViewModel contextViewModel)
-        {
-            DbContext = contextViewModel;
-            return this;
-        }
-
         public override void BuildOutput(CSharpCodeBuilder b)
         {
             var securityInfo = Model.SecurityInfo;
@@ -35,7 +27,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                 b.Line("[ServiceFilter(typeof(IApiActionFilter))]");
 
                 b.Line($"public partial class {Model.ApiControllerClassName} ");
-                b.Line($"    : BaseApiController<{Model.BaseViewModel.FullyQualifiedName}, {Model.DtoName}, {DbContext.Type.FullyQualifiedName}>");
+                b.Indented($": BaseApiController<{Model.BaseViewModel.FullyQualifiedName}, {Model.DtoName}, {Model.DbContext.Type.FullyQualifiedName}>");
 
 
                 // b.Block() has no contents here because we put the base class on a separate line to avoid really long lines.
@@ -60,7 +52,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                 behaviorsParameter = declaredForAttr + behaviorsParameter;
             }
 
-            using (b.Block($"public {Model.ApiControllerClassName}({DbContext.Type.FullyQualifiedName} db) : base(db)"))
+            using (b.Block($"public {Model.ApiControllerClassName}({Model.DbContext.Type.FullyQualifiedName} db) : base(db)"))
             {
                 b.Line($"GeneratedForClassViewModel = ReflectionRepository.Global.GetClassViewModel<{Model.FullyQualifiedName}>();");
             }
@@ -123,8 +115,11 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                 b.Indented($"=> DeleteImplementation(id, new DataSourceParameters(), dataSource, behaviors);");
             }
 
-            b.Line();
-            b.Line("// Methods from data class exposed through API Controller.");
+            if (Model.ClientMethods.Any())
+            {
+                b.Line();
+                b.Line("// Methods from data class exposed through API Controller.");
+            }
             foreach (var method in Model.ClientMethods)
             {
                 var returnType = method.ApiActionReturnTypeDeclaration;

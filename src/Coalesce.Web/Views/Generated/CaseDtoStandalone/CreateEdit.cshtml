@@ -1,0 +1,71 @@
+@using IntelliTect.Coalesce.Knockout.Helpers
+
+<style>
+    img.form-control-static {
+        max-width: 100px;
+        max-height: 100px;
+    }
+    .coalesce-upload-icon {
+        cursor: pointer;
+    }
+</style>
+<div class="card">
+    <div class="card-heading">
+        <div class="btn-group pull-right">
+            <button onclick="window.history.back()" class="btn btn-xs btn-default"><i class="fa fa-arrow-left"></i> Back</button>
+            <button data-bind="click:function() { load(); }" class="btn btn-xs btn-default"><i class="fa fa-refresh"></i> Refresh</button>
+        </div>
+        <h1 class="card-title clearfix" style="display:inline-block;">Case Dto Standalone</h1>
+        <span class="label label-info" data-bind="fadeVisible: isLoading()">Loading...</span>
+    </div>
+    <div class="card-body">
+        <div class="form-horizontal">
+            <div class="form-group btn-warning" style="display: none" data-bind="if: errorMessage(), visible: errorMessage()">
+                <label class="col-md-4 control-label">Error</label>
+                <div class="col-md-8">
+                    <div class="form-control-static" data-bind="text: errorMessage"></div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-4 control-label">Title</label>
+                <div class="col-md-8 prop-title">@(Knockout.InputFor<Coalesce.Domain.CaseDtoStandalone>(p => p.Title))</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+@section Scripts
+{
+<script>
+    var model = new ViewModels.CaseDtoStandalone();
+    model.includes = "Editor";
+    model.saveCallbacks.push(function(obj){
+        // If there is a new id, set the one for this page
+        if (!Coalesce.Utilities.GetUrlParameter('id')){
+            if (model.myId) {
+                var newUrl = Coalesce.Utilities.SetUrlParameter(window.location.href, "id", model.myId);
+                window.history.replaceState(null, window.document.title, newUrl);
+            }
+        }
+    });
+    @if (ViewBag.Id != null)
+    {
+        @:model.load('@ViewBag.Id');
+    }
+    @foreach (KeyValuePair<string, Microsoft.Extensions.Primitives.StringValues> kvp in ViewBag.ParentIds)
+    {
+        @:model.@(((string)(@kvp.Key)))(@kvp.Value);
+    }
+
+    window.onbeforeunload = function(){
+        if (model.isDirty()) model.save();
+    }
+    model.coalesceConfig.autoSaveEnabled(false);
+    model.loadChildren(function() {
+        ko.applyBindings(model, document.body);
+        model.coalesceConfig.autoSaveEnabled(true);
+    });
+</script>
+}

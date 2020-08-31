@@ -69,7 +69,5 @@ namespace Coalesce.Web.Vue.Api
             IBehaviors<Coalesce.Domain.ZipCode> behaviors,
             IDataSource<Coalesce.Domain.ZipCode> dataSource)
             => DeleteImplementation(id, new DataSourceParameters(), dataSource, behaviors);
-
-        // Methods from data class exposed through API Controller.
     }
 }

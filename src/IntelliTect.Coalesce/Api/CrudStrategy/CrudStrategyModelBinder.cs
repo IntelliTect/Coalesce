@@ -17,7 +17,7 @@ namespace IntelliTect.Coalesce.Api.CrudStrategy
 
             // Figure out what type is satisfying the generic parameter of our strategy interface.
             // This is the type that our datasource/Behaviors needs to serve.
-            var servedType = parameterTypeViewModel.GenericArgumentsFor(strategyInterface).Single().ClassViewModel!;
+            var servedType = parameterTypeViewModel.GenericArgumentsFor(strategyInterface)!.Single().ClassViewModel!;
 
             // Examine the parameter for any attributes.
             var parameterDescriptor = bindingContext.ActionContext.ActionDescriptor.Parameters

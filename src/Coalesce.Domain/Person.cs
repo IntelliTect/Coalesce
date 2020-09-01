@@ -87,7 +87,7 @@ namespace Coalesce.Domain
         /// List of cases reported by the person.
         /// </summary>
         [InverseProperty("ReportedBy")]
-        public ICollection<Case> CasesReported { get; set; }
+        public List<Case> CasesReported { get; set; }
 
         [DateType(DateTypeAttribute.DateTypes.DateOnly)]
         public DateTime? BirthDate { get; set; }

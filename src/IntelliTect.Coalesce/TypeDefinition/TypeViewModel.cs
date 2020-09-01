@@ -321,6 +321,11 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public string NullableTypeForDto(string dtoNamespace)
         {
+            if (IsCollection)
+            {
+                return $"System.Collections.Generic.ICollection<{PureType.NullableTypeForDto(dtoNamespace)}>";
+            }
+
             var model = this.PureType.ClassViewModel;
             if (model != null)
             {

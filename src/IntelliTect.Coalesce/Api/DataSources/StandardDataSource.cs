@@ -62,7 +62,11 @@ namespace IntelliTect.Coalesce
         /// <param name="query"></param>
         protected virtual bool CanEvalQueryAsynchronously(IQueryable<T> query)
         {
-            return query.Provider is IAsyncQueryProvider;
+            // Do not use a straight " is IAsyncQueryProvider " check,
+            // as this type changed namespace in EF 5 and so cannot be compatible
+            // with both EF 2 and EF 5 at the same time.
+
+            return query.Provider.GetType().GetInterface("IAsyncQueryProvider") != null;
         }
 
         /// <summary>

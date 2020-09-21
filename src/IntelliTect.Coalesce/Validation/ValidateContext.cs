@@ -67,7 +67,7 @@ namespace IntelliTect.Coalesce.Validation
                             assert.AreNotEqual(prop.Type.FullyQualifiedName, prop.PureType.FullyQualifiedName, "Collection is not defined correctly.");
                             if (!prop.IsReadOnly && !prop.HasNotMapped && prop.PureTypeOnContext)
                             {
-                                assert.IsNotNull(prop.InverseProperty, $"A Inverse Property named '{prop.Parent.Name}' was not found on {prop.Object}. " +
+                                assert.IsNotNull(prop.InverseProperty, $"An Inverse Property named '{prop.Parent.Name}' was not found on {prop.Object}. " +
                                     $"Add an InverseProperty attribute on {prop.Parent.Name}.{prop.Name} to specify the actual name of the inverse property.", isWarning: true);
                             }
                         }
@@ -113,19 +113,6 @@ namespace IntelliTect.Coalesce.Validation
                         source.IsDefaultDataSource || !source.ClientTypeName.Equals(DataSourceFactory.DefaultSourceName, StringComparison.InvariantCultureIgnoreCase),
                         $"Data sources can't be named {DataSourceFactory.DefaultSourceName} unless they're marked with {nameof(DefaultDataSourceAttribute)}"
                     );
-                }
-            }
-
-            // Validate the non-DbSet items (DTOs)
-            foreach (var model in repository.CustomDtos)
-            {
-                assert.Area = $"DTO: {model}";
-
-                // Make sure the key matches the object
-                assert.IsTrue(model.DtoBaseViewModel != null, $"Cannot find base model for DTO {model}. Add the base model as a DbSet to the context.");
-                if (model.DtoBaseViewModel != null)
-                {
-                    assert.IsTrue(model.PrimaryKey != null, $"Cannot find primary key for DTO {model}. It must be the [name]Id, [base model]Id or marked with the [Key] attribute. ");
                 }
             }
 

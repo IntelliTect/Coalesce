@@ -15,6 +15,7 @@ using IntelliTect.Coalesce.Api;
 using IntelliTect.Coalesce.Utilities;
 using System.Collections.ObjectModel;
 using IntelliTect.Coalesce.Api.DataSources;
+using System.Threading;
 
 namespace IntelliTect.Coalesce
 {
@@ -59,9 +60,7 @@ namespace IntelliTect.Coalesce
             var query = await GetQueryAsync(parameters);
             var canUseAsync = CanEvalQueryAsynchronously(query);
             var projectedQuery = ApplyProjection(query, parameters);
-            TDto mappedResult = canUseAsync 
-                ? await projectedQuery.FindItemAsync(id, Context.ReflectionRepository, GetEffectiveCancellationToken(parameters)) 
-                : projectedQuery.FindItem(id, Context.ReflectionRepository);
+            TDto mappedResult = await EvaluateItemQueryAsync(id, projectedQuery, canUseAsync, GetEffectiveCancellationToken(parameters));
 
             if (mappedResult == null)
             {
@@ -69,6 +68,21 @@ namespace IntelliTect.Coalesce
             }
 
             return new ItemResult<TRequestedDto>(true, mappedResult as TRequestedDto);
+        }
+
+        /// <summary>
+        /// Evaluate the given query to find the single object corresponding to the given primary key.
+        /// </summary>
+        /// <param name="id">The primary key to find the desired item by.</param>
+        /// <param name="query">The query to query.</param>
+        /// <param name="canUseAsync">True if CanEvalQueryAsynchronously returned true for the underlying entity query.</param>
+        /// <param name="cancellationToken">A CancellationToken to use.</param>
+        /// <returns>The requested object, or null if it was not found.</returns>
+        protected virtual async Task<TDto> EvaluateItemQueryAsync(object id, IQueryable<TDto> query, bool canUseAsync, CancellationToken cancellationToken = default)
+        {
+            return canUseAsync
+                ? await query.FindItemAsync(id, Context.ReflectionRepository, cancellationToken)
+                : query.FindItem(id, Context.ReflectionRepository);
         }
 
 

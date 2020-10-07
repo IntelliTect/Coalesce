@@ -87,6 +87,7 @@ import {
 
 import { Vue, Component, Watch, Prop } from 'vue-property-decorator';
 import MetadataComponent from '../c-metadata-component'
+import { parseDateUserInput } from 'coalesce-vue/util'
 
 @Component({
     name: 'c-datetime-picker',
@@ -188,6 +189,17 @@ export default class extends MetadataComponent {
       value = null
     } else {
       value = parse(val, this.internalFormat, startOfDay(this.createDefaultDate()))
+
+      // If failed, try normalizing common separators to the same symbol in 
+      // both the format string and user input.
+      if (!isValid(value)) {
+        const separatorRegex = /[\-\\\/\.]/g;
+        value = parse(
+          val.replace(separatorRegex, '-'), 
+          this.internalFormat.replace(separatorRegex, '-'), 
+          startOfDay(this.createDefaultDate())
+        )
+      }
       
       // If the input didn't match our format exactly, 
       // try parsing user input with general formatting interpretation (trying to be a good citizen).
@@ -202,7 +214,7 @@ export default class extends MetadataComponent {
         // but the user only entered "yy" (or entered 3 digits by accident, hence checking 1000 instead of 100).
         || value.getFullYear() <= 1000
       ) && this.internalFormat != "time") {
-        value = new Date(val)
+        value = parseDateUserInput(val, this.createDefaultDate())
       }
       
       // If that didn't work, don't change the underlying value. Instead, display an error.

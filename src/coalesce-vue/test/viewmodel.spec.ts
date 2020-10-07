@@ -1092,6 +1092,7 @@ describe("ViewModel", () => {
       // AFTER the FK prop.
       // First, remove and re-add the nav prop so it lands at the end.
       const navProp = metadata.Student.props.advisor;
+      //@ts-expect-error deleting a non-optional prop
       delete metadata.Student.props.advisor;
       metadata.Student.props.advisor = navProp;
 

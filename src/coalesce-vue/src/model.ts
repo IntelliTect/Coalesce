@@ -191,7 +191,7 @@ export function parseValue(
         // (i.e. DateTime objects in c#) as UTC instead of local time.
         // Safari is the only browser that does that. IE,Chrome,Firefox,Edge 
         // all do this correctly.
-        // The reason we originally used `new Date()` here was for sheet performance.
+        // The reason we originally used `new Date()` here was for sheer performance.
         // This idea came from the Knockout stack where `moment(...)` is 20x slower than
         // `new Date()` and it seemed at the time that the date ctor did behave the same
         // across all browsers. However, this has proven not to be the case in practice.

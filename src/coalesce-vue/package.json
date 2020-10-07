@@ -37,11 +37,11 @@
   "devDependencies": {
     "@types/jest": "^24.0.25",
     "cross-blob": "^1.2.1",
-    "jest": "^26.4.2",
+    "jest": "^26.0.1",
     "jest-junit": "^10.0.0",
     "lodash": "^4.17.15",
-    "ts-jest": "^26.4.0",
-    "typescript": "4.0.3",
+    "ts-jest": "^26.1.0",
+    "typescript": "3.8.2",
     "vue": "^2.6.11",
     "vue-router": "^3.1.5"
   },

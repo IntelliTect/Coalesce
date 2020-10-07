@@ -87,7 +87,7 @@ import {
 
 import { Vue, Component, Watch, Prop } from 'vue-property-decorator';
 import MetadataComponent from '../c-metadata-component'
-import { parseDateUserInput } from 'coalesce-vue/util'
+import { parseDateUserInput } from 'coalesce-vue'
 
 @Component({
     name: 'c-datetime-picker',

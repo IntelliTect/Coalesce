@@ -1,5 +1,5 @@
 {
-    "typescript.tsdk": "c:\\src\\Coalesce\\src\\coalesce-vue\\node_modules\\typescript\\lib",
+    "typescript.tsdk": "node_modules\\typescript\\lib",
     "[typescript]": {
         "editor.insertSpaces": true,
         "editor.tabSize": 2,

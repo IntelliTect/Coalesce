@@ -35,9 +35,9 @@ namespace IntelliTect.Coalesce.Api.Controllers
 
                 if (errors.Any())
                 {
-                    // TODO: this could be more robust.
-                    // Lots of client methods in the typescript aren't expecting an object that looks like this.
+                    // Lots of client methods in the knockout typescript aren't expecting an object that looks like this.
                     // Anything that takes a SaveResult or ListResult should be fine, but other things (Count) won't handle this.
+                    // The Vue typescript should handle this just fine.
                     context.Result = new BadRequestObjectResult(
                         new ApiResult(string.Join("; ", errors.Select(e => $"Invalid value for parameter {e.key}: {e.error}")))
                     );
@@ -68,7 +68,12 @@ namespace IntelliTect.Coalesce.Api.Controllers
                 context.ExceptionHandled = true;
                 response.StatusCode = (int)HttpStatusCode.InternalServerError;
 
-                if (context.Result == null)
+                var customResult = options.Value.ExceptionResponseFactory?.Invoke(context);
+                if (customResult != null)
+                {
+                    context.Result = new JsonResult(customResult);
+                }
+                else if (context.Result == null)
                 {
                     var requestId = context.HttpContext.TraceIdentifier;
                     if (options.Value.DetailedExceptionMessages)
@@ -112,7 +117,7 @@ namespace IntelliTect.Coalesce.Api.Controllers
                     // so we intercept to return an ApiResult so that Coalesce can understand it.
 
                     // An IAlwaysRunResultFilter is the only way we can intercept this response
-                    // and turn it into a ProblemDetails.
+                    // and turn it into a ApiResult.
 
                     statusCode = StatusCodes.Status401Unauthorized;
                     result = new ApiResult("Unauthorized.");
@@ -124,7 +129,7 @@ namespace IntelliTect.Coalesce.Api.Controllers
                     // or when authorization fails via the [Authorize] attribute.
 
                     // An IAlwaysRunResultFilter is the only way we can intercept this response
-                    // and turn it into a ProblemDetails.
+                    // and turn it into a ApiResult.
 
                     statusCode = StatusCodes.Status403Forbidden;
                     result = new ApiResult("Access Denied.");

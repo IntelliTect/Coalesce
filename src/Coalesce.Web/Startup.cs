@@ -15,6 +15,7 @@ using Coalesce.Domain.Services;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Swagger;
 using Microsoft.OpenApi.Models;
+using System.IO;
 
 namespace Coalesce.Web
 {
@@ -54,6 +55,15 @@ namespace Coalesce.Web
                     .Configure(o =>
                     {
                         o.DetailedExceptionMessages = true;
+                        o.ExceptionResponseFactory = ctx =>
+                        {
+                            if (ctx.Exception is FileNotFoundException)
+                            {
+                                ctx.HttpContext.Response.StatusCode = 404;
+                                return new IntelliTect.Coalesce.Models.ApiResult(false, "File not found");
+                            }
+                            return null;
+                        };
                     });
 
                 // This breaks on non-windows platforms, see https://github.com/dotnet/corefx/issues/11897

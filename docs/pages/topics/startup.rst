@@ -26,6 +26,19 @@ This registers all the basic services that Coalesce needs in order to work with 
                 .UseDefaultDataSource(typeof(MyDataSource<,>))
                 .UseDefaultBehaviors(typeof(MyBehaviors<,>))
                 .UseTimeZone(TimeZoneInfo.FindSystemTimeZoneById("Pacific Standard Time"))
+                .Configure(o =>
+                {
+                    o.DetailedExceptionMessages = true;
+                    o.ExceptionResponseFactory = ctx =>
+                    {
+                        if (ctx.Exception is FileNotFoundException)
+                        {
+                            ctx.HttpContext.Response.StatusCode = 404; // Optional - set a specific response code.
+                            return new IntelliTect.Coalesce.Models.ApiResult(false, "File not found");
+                        }
+                        return null;
+                    };
+                });
             );
         }
 
@@ -41,4 +54,6 @@ A summary is as follows:
         Specify a static time zone that should be used when Coalesce is performing operations on dates/times that lack timezone information. For example, when a user inputs a search term that contains only a date, Coalesce needs to know what timezone's midnight to use when performing the search.
     :csharp:`.UseTimeZone<ITimeZoneResolver>()` 
         Specify a service implementation to use to resolve the current timezone. This should be a scoped service, and will be automatically registered if it is not already. This allows retrieving timezone information on a per-request basis from HTTP headers, Cookies, or any other source.
+    :csharp:`.Configure(...)` 
+        Configure additional options for Coalesce runtime behavior. Current options include those around exception handling. See individual members for details.
 

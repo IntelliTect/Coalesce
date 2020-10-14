@@ -1,5 +1,4 @@
 ﻿using IntelliTect.Coalesce.Models;
-using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,10 +8,11 @@ using IntelliTect.Coalesce.TypeDefinition;
 using IntelliTect.Coalesce.Mapping;
 using System.Collections.ObjectModel;
 using System.Threading;
+using IntelliTect.Coalesce.Api;
 
 namespace IntelliTect.Coalesce
 {
-    public abstract class StandardDataSource<T> : QueryableDataSourceBase<T>, IDataSource<T>
+    public abstract class StandardDataSource<T> : QueryableDataSourceBase<T>, IDataSource<T>, IStandardCrudStrategy
         where T : class, new()
     {
         public StandardDataSource(CrudContext context) : base(context)
@@ -122,10 +122,8 @@ namespace IntelliTect.Coalesce
         /// <returns>The total count of items represented by the query.</returns>
         public virtual Task<int> GetListTotalCountAsync(IQueryable<T> query, IFilterParameters parameters)
         {
-            var canUseAsync = CanEvalQueryAsynchronously(query);
-            return canUseAsync ? query.CountAsync(GetEffectiveCancellationToken(parameters)) : Task.FromResult(query.Count());
+            return Task.FromResult(query.Count());
         }
-
 
         /// <summary>
         /// Get an unmapped list of results using all the functionality defined in the DataSource.
@@ -145,11 +143,21 @@ namespace IntelliTect.Coalesce
             query = ApplyListSorting(query, parameters);
             query = ApplyListPaging(query, parameters, totalCount, out int page, out int pageSize);
 
-            var canUseAsync = CanEvalQueryAsynchronously(query);
-            List<T> result = canUseAsync ? await query.ToListAsync(GetEffectiveCancellationToken(parameters)) : query.ToList();
+            List<T> result = await EvaluateListQueryAsync(query, GetEffectiveCancellationToken(parameters));
 
             var tree = GetIncludeTree(query, parameters);
             return (new ListResult<T>(result, page: page, totalCount: totalCount, pageSize: pageSize), tree);
+        }
+
+        /// <summary>
+        /// Evaluate the given query to obtain all its resultant objects.
+        /// </summary>
+        /// <param name="query">The query to evaluate.</param>
+        /// <param name="cancellationToken">A CancellationToken to use.</param>
+        /// <returns>The requested list.</returns>
+        protected virtual Task<List<T>> EvaluateListQueryAsync(IQueryable<T> query, CancellationToken cancellationToken = default)
+        {
+            return Task.FromResult(query.ToList());
         }
 
         /// <summary>
@@ -193,12 +201,9 @@ namespace IntelliTect.Coalesce
         /// <param name="query">The query to query.</param>
         /// <param name="cancellationToken">A CancellationToken to use.</param>
         /// <returns>The requested object, or null if it was not found.</returns>
-        protected virtual async Task<T> EvaluateItemQueryAsync(object id, IQueryable<T> query, CancellationToken cancellationToken = default)
+        protected virtual Task<T> EvaluateItemQueryAsync(object id, IQueryable<T> query, CancellationToken cancellationToken = default)
         {
-            var canUseAsync = CanEvalQueryAsynchronously(query);
-            return canUseAsync
-                ? await query.FindItemAsync(id, Context.ReflectionRepository, cancellationToken)
-                : query.FindItem(id, Context.ReflectionRepository);
+            return Task.FromResult(query.FindItem(id, Context.ReflectionRepository));
         }
 
         /// <summary>

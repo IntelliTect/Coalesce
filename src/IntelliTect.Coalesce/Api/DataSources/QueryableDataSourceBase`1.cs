@@ -66,19 +66,6 @@ namespace IntelliTect.Coalesce
         }
 
         /// <summary>
-        /// Allows overriding of whether or not queries will run using EF Core Async methods.
-        /// </summary>
-        /// <param name="query"></param>
-        protected virtual bool CanEvalQueryAsynchronously(IQueryable<T> query)
-        {
-            // Do not use a straight " is IAsyncQueryProvider " check,
-            // as this type changed namespace in EF 5 and so cannot be compatible
-            // with both EF 2 and EF 5 at the same time.
-
-            return query.Provider.GetType().GetInterface("IAsyncQueryProvider") != null;
-        }
-
-        /// <summary>
         /// Applies the "filter.propertyName=exactValue" filters to a query.
         /// These filters may be set when making a list request, and are found in ListParameters.Filters.
         /// This is called by ApplyListFiltering when constructing a list result.

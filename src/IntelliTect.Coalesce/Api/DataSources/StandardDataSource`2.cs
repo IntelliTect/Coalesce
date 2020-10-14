@@ -15,7 +15,7 @@ using System.Security.Claims;
 
 namespace IntelliTect.Coalesce
 {
-    public class StandardDataSource<T, TContext> : StandardDataSource<T>, IStandardCrudStrategy, IEntityFrameworkDataSource<T, TContext>
+    public class StandardDataSource<T, TContext> : StandardDataSource<T>, IEntityFrameworkDataSource<T, TContext>
         where T : class, new()
         where TContext : DbContext
     {
@@ -65,6 +65,39 @@ namespace IntelliTect.Coalesce
             }
 
             return query;
+        }
+
+        /// <summary>
+        /// Allows overriding of whether or not queries will run using EF Core Async methods.
+        /// </summary>
+        /// <param name="query"></param>
+        protected virtual bool CanEvalQueryAsynchronously(IQueryable<T> query)
+        {
+            // Do not use a straight " is IAsyncQueryProvider " check,
+            // as this type changed namespace in EF 5 and so cannot be compatible
+            // with both EF 2 and EF 5 at the same time.
+
+            return query.Provider.GetType().GetInterface("IAsyncQueryProvider") != null;
+        }
+
+        public override Task<int> GetListTotalCountAsync(IQueryable<T> query, IFilterParameters parameters)
+        {
+            var canUseAsync = CanEvalQueryAsynchronously(query);
+            return canUseAsync ? query.CountAsync(GetEffectiveCancellationToken(parameters)) : Task.FromResult(query.Count());
+        }
+
+        protected override Task<T> EvaluateItemQueryAsync(object id, IQueryable<T> query, CancellationToken cancellationToken = default)
+        {
+            var canUseAsync = CanEvalQueryAsynchronously(query);
+            return canUseAsync
+                ? query.FindItemAsync(id, Context.ReflectionRepository, cancellationToken)
+                : Task.FromResult(query.FindItem(id, Context.ReflectionRepository));
+        }
+
+        protected override Task<List<T>> EvaluateListQueryAsync(IQueryable<T> query, CancellationToken cancellationToken = default)
+        {
+            var canUseAsync = CanEvalQueryAsynchronously(query);
+            return canUseAsync ? query.ToListAsync(cancellationToken) : Task.FromResult(query.ToList());
         }
     }
 }

@@ -1,24 +1,33 @@
 ﻿using IntelliTect.Coalesce.Api;
-using IntelliTect.Coalesce.Api.Behaviors;
 using IntelliTect.Coalesce.Helpers;
 using IntelliTect.Coalesce.Mapping;
 using IntelliTect.Coalesce.Models;
 using IntelliTect.Coalesce.TypeDefinition;
-using IntelliTect.Coalesce.Utilities;
-using Microsoft.EntityFrameworkCore;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Security.Claims;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce
 {
-    public class StandardBehaviors<T, TContext> : StandardCrudStrategy<T, TContext>, IEntityFrameworkBehaviors<T, TContext>
+    public abstract class StandardBehaviors<T> : IStandardCrudStrategy
         where T : class, new()
-        where TContext : DbContext
     {
+        /// <summary>
+        /// Contains contextual information about the request.
+        /// </summary>
+        public CrudContext Context { get; }
+
+        /// <summary>
+        /// The user making the request.
+        /// </summary>
+        public ClaimsPrincipal? User => Context.User;
+
+        /// <summary>
+        /// A ClassViewModel representing the type T that is handled by the behaviors.
+        /// </summary>
+        public ClassViewModel ClassViewModel { get; set; }
+
 
         /// <summary>
         /// If set, this data source will be used in place of the supplied data source
@@ -46,16 +55,17 @@ namespace IntelliTect.Coalesce
         /// </summary>
         public IDataSource<T>? OverridePostDeleteResultDataSource { get; protected set; }
 
-
-        public StandardBehaviors(CrudContext<TContext> context) : base(context)
+        public StandardBehaviors(CrudContext context)
         {
+            Context = context
+                ?? throw new ArgumentNullException(nameof(context));
+
+            ClassViewModel = Context.ReflectionRepository.GetClassViewModel<T>()
+                ?? throw new ArgumentException("Generic type T has no ClassViewModel.", nameof(T));
         }
 
-        /// <summary>
-        /// Get a DbSet representing the type handled by these behaviors.
-        /// </summary>
-        /// <returns></returns>
-        protected virtual DbSet<T> GetDbSet() => Db.Set<T>();
+
+        #region Save
 
         /// <summary>
         /// From the incoming DTO, determines if the operation should be a create or update operation.
@@ -119,7 +129,66 @@ namespace IntelliTect.Coalesce
             }
         }
 
-        #region Save
+        /// <summary>
+        /// Fetches a fresh copy of the object from the data source after a save has been performed.
+        /// </summary>
+        /// <param name="dataSource">The data source that will be used when loading the item.</param>
+        /// <param name="parameters">The parameters to be passed to the data source when loading the item.</param>
+        /// <param name="item">The saved item to reload</param>
+        protected virtual Task<(ItemResult<T> Item, IncludeTree? IncludeTree)> FetchObjectAfterSaveAsync(IDataSource<T> dataSource, IDataSourceParameters parameters, T item)
+        {
+            var newItemId = ClassViewModel.PrimaryKey.PropertyInfo.GetValue(item)!;
+            return (OverridePostSaveResultDataSource ?? dataSource).GetItemAsync(newItemId, parameters);
+        }
+
+        /// <summary>
+        /// Maps the incoming DTO's properties to the item that will be saved to the database.
+        /// </summary>
+        /// <param name="kind">Descriminator between a create and a update operation.</param>
+        /// <param name="item">The item that will be saved to the database.</param>
+        /// <param name="dto">The incoming item from the client.</param>
+        /// <param name="parameters">The additional parameters sent by the client.</param>
+        protected virtual void MapIncomingDto<TDto>(SaveKind kind, T item, TDto dto, IDataSourceParameters parameters)
+            where TDto : class, IClassDto<T>, new()
+        {
+            dto.MapToModel(item, new MappingContext(User, parameters));
+        }
+
+        /// <summary>
+        /// Code to run before mapping the DTO to its model type.
+        /// Allows for the chance to perform validation on the DTO itself rather than the mapped model in <see cref="BeforeSave(SaveKind, T, T)"/>.
+        /// For generated DTOs where the type is not available, there are a variety of methods for retrieving expected 
+        /// properties from the object based on its model type, although reflection is always an option as well.
+        /// For behaviors on custom DTOs, a simple cast will allow access to all properties.
+        /// </summary>
+        /// <param name="kind">Descriminator between a create and a update operation.</param>
+        /// <param name="dto">The incoming item from the client.</param>
+        /// <returns></returns>
+        public virtual ItemResult ValidateDto(SaveKind kind, IClassDto<T> dto) => true;
+
+        /// <summary>
+        /// Code to run before committing a save to the database.
+        /// Any changes made to the properties of <c>item</c> will be persisted to the database.
+        /// The return a failure result will halt the save operation and return any associated message to the client.
+        /// </summary>
+        /// <param name="kind">Descriminator between a create and a update operation.</param>
+        /// <param name="oldItem">A shallow copy of the original item as it was retrieved from the database.
+        /// If kind == SaveKind.Create, this will be null.</param>
+        /// <param name="item">An entity instance with its properties set to incoming, new values.</param>
+        /// <returns>An ItemResult potentially indicating failure, upon which the save operation will halt without persisting changes.</returns>
+        public virtual ItemResult BeforeSave(SaveKind kind, T? oldItem, T item) => true;
+
+        /// <summary>
+        /// Code to run before committing a save to the database.
+        /// Any changes made to the properties of <c>item</c> will be persisted to the database.
+        /// The return a failure result will halt the save operation and return any associated message to the client.
+        /// </summary>
+        /// <param name="kind">Descriminator between a create and a update operation.</param>
+        /// <param name="oldItem">A shallow copy of the original item as it was retrieved from the database.
+        /// If kind == SaveKind.Create, this will be null.</param>
+        /// <param name="item">An entity instance with its properties set to incoming, new values.</param>
+        /// <returns>An ItemResult potentially indicating failure, upon which the save operation will halt without persisting changes.</returns>
+        public virtual Task<ItemResult> BeforeSaveAsync(SaveKind kind, T? oldItem, T item) => Task.FromResult(BeforeSave(kind, oldItem, item));
 
         /// <summary>
         /// Save the specified item to the database.
@@ -146,7 +215,6 @@ namespace IntelliTect.Coalesce
             IncludeTree? includeTree;
 
             var includes = parameters.Includes;
-            var dbSet = GetDbSet();
 
             if (kind == SaveKind.Create)
             {
@@ -162,10 +230,6 @@ namespace IntelliTect.Coalesce
                 }
                 item = existingItem.Object ?? throw new InvalidOperationException(
                     $"Expected {nameof(ItemResult)}{nameof(ItemResult<T>.Object)} to be non-null when {nameof(dataSource.GetItemAsync)} returns success.");
-
-                // Ensure that the entity is tracked.
-                // We want to allow for item retrieval from data sources that build their query with .AsNoTracking().
-                Db.Entry(item).State = EntityState.Unchanged;
 
                 // Create a shallow copy.
                 originalItem = item.Copy();
@@ -197,15 +261,7 @@ namespace IntelliTect.Coalesce
                 return new ItemResult<TDto>(beforeSave);
             }
 
-            if (kind == SaveKind.Create)
-            {
-                // In order to support non-db-generated primary keys, 
-                // we have to wait to attach a new entity to the context until it has a PK.
-                // We do this after BeforeSaveAsync to give it a chance to intercept the new item and modify it.
-                dbSet.Add(item);
-            }
-
-            await Db.SaveChangesAsync();
+            await ExecuteSaveAsync(kind, originalItem, item);
 
             // Pull the object to get any changes.
             ItemResult<T> newItem;
@@ -245,65 +301,13 @@ namespace IntelliTect.Coalesce
         }
 
         /// <summary>
-        /// Fetches a fresh copy of the object from the <see cref="DbContext" /> after a save has been performed.
-        /// </summary>
-        /// <param name="dataSource">The data source that will be used when loading the item.</param>
-        /// <param name="parameters">The parameters to be passed to the data source when loading the item.</param>
-        /// <param name="item">The saved item to reload</param>
-        protected virtual Task<(ItemResult<T> Item, IncludeTree? IncludeTree)> FetchObjectAfterSaveAsync(IDataSource<T> dataSource, IDataSourceParameters parameters, T item)
-        {
-            var newItemId = ClassViewModel.PrimaryKey.PropertyInfo.GetValue(item)!;
-            return (OverridePostSaveResultDataSource ?? dataSource).GetItemAsync(newItemId, parameters);
-        }
-
-        /// <summary>
-        /// Maps the incoming DTO's properties to the item that will be saved to the database.
-        /// </summary>
-        /// <param name="kind">Descriminator between a create and a update operation.</param>
-        /// <param name="item">The item that will be saved to the database.</param>
-        /// <param name="dto">The incoming item from the client.</param>
-        /// <param name="parameters">The additional parameters sent by the client.</param>
-        protected virtual void MapIncomingDto<TDto>(SaveKind kind, T item, TDto dto, IDataSourceParameters parameters) 
-            where TDto : class, IClassDto<T>, new()
-        {
-            dto.MapToModel(item, new MappingContext(User, parameters));
-        }
-
-        /// <summary>
-        /// Code to run before mapping the DTO to its model type.
-        /// Allows for the chance to perform validation on the DTO itself rather than the mapped model in <see cref="BeforeSave(SaveKind, T, T)"/>.
-        /// For generated DTOs where the type is not available, there are a variety of methods for retrieving expected 
-        /// properties from the object based on its model type, although reflection is always an option as well.
-        /// For behaviors on custom DTOs, a simple cast will allow access to all properties.
-        /// </summary>
-        /// <param name="kind">Descriminator between a create and a update operation.</param>
-        /// <param name="dto">The incoming item from the client.</param>
-        /// <returns></returns>
-        public virtual ItemResult ValidateDto(SaveKind kind, IClassDto<T> dto) => true;
-
-        /// <summary>
-        /// Code to run before committing a save to the database.
-        /// Any changes made to the properties of <c>item</c> will be persisted to the database.
-        /// The return a failure result will halt the save operation and return any associated message to the client.
+        /// Executes the save action against the database and persists the changes.
         /// </summary>
         /// <param name="kind">Descriminator between a create and a update operation.</param>
         /// <param name="oldItem">A shallow copy of the original item as it was retrieved from the database.
         /// If kind == SaveKind.Create, this will be null.</param>
-        /// <param name="item">A DbContext-tracked entity with its properties set to incoming, new values.</param>
-        /// <returns>An ItemResult potentially indicating failure, upon which the save operation will halt without persisting changes.</returns>
-        public virtual ItemResult BeforeSave(SaveKind kind, T? oldItem, T item) => true;
-
-        /// <summary>
-        /// Code to run before committing a save to the database.
-        /// Any changes made to the properties of <c>item</c> will be persisted to the database.
-        /// The return a failure result will halt the save operation and return any associated message to the client.
-        /// </summary>
-        /// <param name="kind">Descriminator between a create and a update operation.</param>
-        /// <param name="oldItem">A shallow copy of the original item as it was retrieved from the database.
-        /// If kind == SaveKind.Create, this will be null.</param>
-        /// <param name="item">A DbContext-tracked entity with its properties set to incoming, new values.</param>
-        /// <returns>An ItemResult potentially indicating failure, upon which the save operation will halt without persisting changes.</returns>
-        public virtual Task<ItemResult> BeforeSaveAsync(SaveKind kind, T? oldItem, T item) => Task.FromResult(BeforeSave(kind, oldItem, item));
+        /// <param name="item">An entity instance with its properties set to incoming, new values.</param>
+        public abstract Task ExecuteSaveAsync(SaveKind kind, T? oldItem, T item);
 
         /// <summary>
         /// Code to run after a save has been committed to the database.
@@ -370,7 +374,7 @@ namespace IntelliTect.Coalesce
             // This might be overridden to set a deleted flag on the object instead.
             await ExecuteDeleteAsync(item);
 
-            
+
 
             // Pull the object to see if it can still be seen by the user.
             // If so, the operation was a soft delete and the user is allowed to see soft-deleted items.
@@ -401,14 +405,13 @@ namespace IntelliTect.Coalesce
                 // This is fine, and is documented behavior.
                 if (deletedItem == null)
                 {
-                     return true;
+                    return true;
                 }
 
                 return new ItemResult<TDto>(
                     deletedItem.MapToDto<T, TDto>(new MappingContext(User, parameters.Includes), includeTree)
                 );
             }
-
         }
 
         /// <summary>
@@ -431,6 +434,7 @@ namespace IntelliTect.Coalesce
         /// <returns>An ItemResult that, if indicating failure, will halt the delete operation.</returns>
         public virtual Task<ItemResult> BeforeDeleteAsync(T item) => Task.FromResult(BeforeDelete(item));
 
+
         /// <summary>
         /// Executes the delete action against the database and saves the change.
         /// This may be overridden to change what action is actually performed against the database 
@@ -438,11 +442,7 @@ namespace IntelliTect.Coalesce
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
-        public virtual Task ExecuteDeleteAsync(T item)
-        {
-            GetDbSet().Remove(item);
-            return Db.SaveChangesAsync();
-        }
+        public abstract Task ExecuteDeleteAsync(T item);
 
         /// <summary>
         /// Code to run after the delete operation is committed to the database.
@@ -465,12 +465,5 @@ namespace IntelliTect.Coalesce
         public virtual void AfterDelete(ref T item, ref IncludeTree? includeTree) { }
 
         #endregion
-
-    }
-
-    public enum SaveKind
-    {
-        Create,
-        Update,
     }
 }

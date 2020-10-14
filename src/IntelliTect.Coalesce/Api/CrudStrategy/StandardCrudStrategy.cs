@@ -7,7 +7,20 @@ using System.Text;
 
 namespace IntelliTect.Coalesce.Api
 {
-    public abstract class StandardCrudStrategy<T, TContext>
+    public interface IStandardCrudStrategy
+    {
+        /// <summary>
+        /// The user making the request.
+        /// </summary>
+        ClaimsPrincipal? User { get; }
+
+        /// <summary>
+        /// A ClassViewModel representing the type T that is handled by these strategies.
+        /// </summary>
+        ClassViewModel ClassViewModel { get; }
+    }
+
+    public abstract class StandardCrudStrategy<T, TContext> : IStandardCrudStrategy
         where T : class, new()
         where TContext : DbContext
     {

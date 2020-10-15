@@ -445,7 +445,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             get
             {
                 // EffectiveParent used here because primary keys may be declared on a base class (as they are with AspNetCore.Identity).
-                if (!EffectiveParent.IsDbMappedType && !Parent.IsDto)
+                if (!EffectiveParent.IsDbMappedType && !Parent.IsDto && !Parent.IsStandaloneEntity)
                     return false;
                 if (this.HasAttribute<KeyAttribute>())
                     return true;

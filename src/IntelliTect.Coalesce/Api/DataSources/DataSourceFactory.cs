@@ -63,12 +63,17 @@ namespace IntelliTect.Coalesce.Api.DataSources
 
         protected Type GetDefaultDataSourceType(ClassViewModel servedType, ClassViewModel declaredFor)
         {
-            var dataSources = declaredFor.ClientDataSources(reflectionRepository);
+            var dataSources = declaredFor.ClientDataSources(reflectionRepository).ToList();
             var defaultSource = dataSources.SingleOrDefault(s => s.IsDefaultDataSource);
 
             if (defaultSource != null)
             {
                 return defaultSource.Type.TypeInfo;
+            }
+
+            if (declaredFor.IsStandaloneEntity && dataSources.Count == 1)
+            {
+                return dataSources[0].Type.TypeInfo;
             }
 
             // FUTURE: If other kinds of default data sources are created, add them to the DefaultTypes dictionary above.

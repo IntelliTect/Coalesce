@@ -1182,6 +1182,89 @@ export const Product = domain.types.Product = {
   dataSources: {
   },
 }
+export const StandaloneReadonly = domain.types.StandaloneReadonly = {
+  name: "StandaloneReadonly",
+  displayName: "Standalone Readonly",
+  get displayProp() { return this.props.name }, 
+  type: "model",
+  controllerRoute: "StandaloneReadonly",
+  get keyProp() { return this.props.id }, 
+  behaviorFlags: 0,
+  props: {
+    id: {
+      name: "id",
+      displayName: "Id",
+      type: "number",
+      role: "primaryKey",
+      hidden: 3,
+    },
+    name: {
+      name: "name",
+      displayName: "Name",
+      type: "string",
+      role: "value",
+    },
+    description: {
+      name: "description",
+      displayName: "Description",
+      type: "string",
+      role: "value",
+    },
+  },
+  methods: {
+  },
+  dataSources: {
+    defaultSource: {
+      type: "dataSource",
+      name: "DefaultSource",
+      displayName: "Default Source",
+      props: {
+      },
+    },
+  },
+}
+export const StandaloneReadWrite = domain.types.StandaloneReadWrite = {
+  name: "StandaloneReadWrite",
+  displayName: "Standalone Read Write",
+  get displayProp() { return this.props.name }, 
+  type: "model",
+  controllerRoute: "StandaloneReadWrite",
+  get keyProp() { return this.props.id }, 
+  behaviorFlags: 0,
+  props: {
+    id: {
+      name: "id",
+      displayName: "Id",
+      type: "number",
+      role: "primaryKey",
+      hidden: 3,
+    },
+    name: {
+      name: "name",
+      displayName: "Name",
+      type: "string",
+      role: "value",
+    },
+    date: {
+      name: "date",
+      displayName: "Date",
+      dateKind: "datetime",
+      type: "date",
+      role: "value",
+    },
+  },
+  methods: {
+  },
+  dataSources: {
+    defaultSource: {
+      type: "dataSource",
+      name: "DefaultSource",
+      displayName: "Default Source",
+      props: {
+      },
+    },
+  },
+}
 export const ZipCode = domain.types.ZipCode = {
   name: "ZipCode",
   displayName: "Zip Code",
@@ -1492,6 +1575,8 @@ interface AppDomain extends Domain {
     PersonStats: typeof PersonStats
     Product: typeof Product
     ProductDetails: typeof ProductDetails
+    StandaloneReadonly: typeof StandaloneReadonly
+    StandaloneReadWrite: typeof StandaloneReadWrite
     StreetAddress: typeof StreetAddress
     WeatherData: typeof WeatherData
     ZipCode: typeof ZipCode

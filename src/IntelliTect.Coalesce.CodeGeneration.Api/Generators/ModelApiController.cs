@@ -27,7 +27,14 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                 b.Line("[ServiceFilter(typeof(IApiActionFilter))]");
 
                 b.Line($"public partial class {Model.ApiControllerClassName} ");
-                b.Indented($": BaseApiController<{Model.BaseViewModel.FullyQualifiedName}, {Model.DtoName}, {Model.DbContext.Type.FullyQualifiedName}>");
+                if (Model.DbContext != null)
+                {
+                    b.Indented($": BaseApiController<{Model.BaseViewModel.FullyQualifiedName}, {Model.DtoName}, {Model.DbContext.Type.FullyQualifiedName}>");
+                }
+                else
+                {
+                    b.Indented($": BaseApiController<{Model.BaseViewModel.FullyQualifiedName}, {Model.DtoName}>");
+                }
 
 
                 // b.Block() has no contents here because we put the base class on a separate line to avoid really long lines.
@@ -52,7 +59,10 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                 behaviorsParameter = declaredForAttr + behaviorsParameter;
             }
 
-            using (b.Block($"public {Model.ApiControllerClassName}({Model.DbContext.Type.FullyQualifiedName} db) : base(db)"))
+            using (b.Block(Model.DbContext != null 
+                ? $"public {Model.ApiControllerClassName}({Model.DbContext.Type.FullyQualifiedName} db) : base(db)"
+                : $"public {Model.ApiControllerClassName}() : base()"
+            ))
             {
                 b.Line($"GeneratedForClassViewModel = ReflectionRepository.Global.GetClassViewModel<{Model.FullyQualifiedName}>();");
             }

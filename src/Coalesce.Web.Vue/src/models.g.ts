@@ -470,6 +470,70 @@ export class ProductDetails {
 }
 
 
+export interface StandaloneReadonly extends Model<typeof metadata.StandaloneReadonly> {
+  id: number | null
+  name: string | null
+  description: string | null
+}
+export class StandaloneReadonly {
+  
+  /** Mutates the input object and its descendents into a valid StandaloneReadonly implementation. */
+  static convert(data?: Partial<StandaloneReadonly>): StandaloneReadonly {
+    return convertToModel(data || {}, metadata.StandaloneReadonly) 
+  }
+  
+  /** Maps the input object and its descendents to a new, valid StandaloneReadonly implementation. */
+  static map(data?: Partial<StandaloneReadonly>): StandaloneReadonly {
+    return mapToModel(data || {}, metadata.StandaloneReadonly) 
+  }
+  
+  /** Instantiate a new StandaloneReadonly, optionally basing it on the given data. */
+  constructor(data?: Partial<StandaloneReadonly> | {[k: string]: any}) {
+      Object.assign(this, StandaloneReadonly.map(data || {}));
+  }
+}
+export namespace StandaloneReadonly {
+  export namespace DataSources {
+    
+    export class DefaultSource implements DataSource<typeof metadata.StandaloneReadonly.dataSources.defaultSource> {
+      readonly $metadata = metadata.StandaloneReadonly.dataSources.defaultSource
+    }
+  }
+}
+
+
+export interface StandaloneReadWrite extends Model<typeof metadata.StandaloneReadWrite> {
+  id: number | null
+  name: string | null
+  date: Date | null
+}
+export class StandaloneReadWrite {
+  
+  /** Mutates the input object and its descendents into a valid StandaloneReadWrite implementation. */
+  static convert(data?: Partial<StandaloneReadWrite>): StandaloneReadWrite {
+    return convertToModel(data || {}, metadata.StandaloneReadWrite) 
+  }
+  
+  /** Maps the input object and its descendents to a new, valid StandaloneReadWrite implementation. */
+  static map(data?: Partial<StandaloneReadWrite>): StandaloneReadWrite {
+    return mapToModel(data || {}, metadata.StandaloneReadWrite) 
+  }
+  
+  /** Instantiate a new StandaloneReadWrite, optionally basing it on the given data. */
+  constructor(data?: Partial<StandaloneReadWrite> | {[k: string]: any}) {
+      Object.assign(this, StandaloneReadWrite.map(data || {}));
+  }
+}
+export namespace StandaloneReadWrite {
+  export namespace DataSources {
+    
+    export class DefaultSource implements DataSource<typeof metadata.StandaloneReadWrite.dataSources.defaultSource> {
+      readonly $metadata = metadata.StandaloneReadWrite.dataSources.defaultSource
+    }
+  }
+}
+
+
 export interface StreetAddress extends Model<typeof metadata.StreetAddress> {
   address: string | null
   city: string | null

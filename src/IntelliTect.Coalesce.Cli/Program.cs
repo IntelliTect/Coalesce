@@ -119,10 +119,6 @@ namespace IntelliTect.Coalesce.Cli
                 return -1;
             }
 
-            if (!Debugger.IsAttached) return 0;
-            Console.WriteLine("Press Enter to quit");
-            Console.Read();
-
             return 0;
         }
 

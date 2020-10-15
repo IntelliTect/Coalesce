@@ -118,6 +118,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public string ListViewModelClassName => ClientTypeName + "List";
 
         public bool IsService => HasAttribute<CoalesceAttribute>() && HasAttribute<ServiceAttribute>();
+        public bool IsStandaloneEntity => HasAttribute<CoalesceAttribute>() && HasAttribute<StandaloneEntityAttribute>();
 
         public string ServiceClientClassName => ClientTypeName + "Client";
 
@@ -446,12 +447,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         private ClassSecurityInfo? _securityInfo;
 
-        public ClassSecurityInfo SecurityInfo => _securityInfo ?? (_securityInfo = new ClassSecurityInfo(
-            this.GetSecurityPermission<ReadAttribute>(),
-            this.GetSecurityPermission<EditAttribute>(),
-            this.GetSecurityPermission<DeleteAttribute>(),
-            this.GetSecurityPermission<CreateAttribute>()
-        ));
+        public ClassSecurityInfo SecurityInfo => _securityInfo ?? (_securityInfo = new ClassSecurityInfo(this));
 
         public ExecuteSecurityInfo ExecuteSecurity => new ExecuteSecurityInfo(this.GetSecurityPermission<ExecuteAttribute>());
 

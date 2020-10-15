@@ -27,7 +27,19 @@ namespace IntelliTect.Coalesce.Validation
                     assert.IsTrue(model.PrimaryKey.IsClientProperty, "Model primary keys must be exposed to the client.");
                 }
 
-                assert.IsNotNull(model.DbContext, "Cannot determine the DbContext that provides this type.");
+                if (model.IsStandaloneEntity)
+                {
+                    var dataSources = model.ClientDataSources(repository).ToList();
+                    assert.IsTrue(dataSources.Any(), "Standalone entities must declare at least one data source.");
+                    if (dataSources.Count > 1)
+                    {
+                        assert.IsTrue(dataSources.Count(s => s.IsDefaultDataSource) == 1, "Standalone entities that declare multiple data sources must mark exactly one as the [DefaultDataSource]");
+                    }
+                }
+                else
+                {
+                    assert.IsNotNull(model.DbContext, "Cannot determine the DbContext that provides this type.");
+                }
 
                 // Check object references to see if they all have keys and remote keys
                 foreach (var prop in model.ClientProperties)

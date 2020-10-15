@@ -62,3 +62,61 @@ Behaviors
 
 Behaviors in Coalesce are to mutating data as data sources are to reading data. Defining a behaviors class for a model allows complete control over the way that Coalesce will create, update, and delete your application's data in response to requests made through its generated API. Read :ref:`Behaviors` to learn more.
 
+
+Standalone Entities
+-------------------
+
+In Coalesce, Standalone Entities are entity types that are not based on Entity Framework. For these types, you must define at least one custom :ref:`Data Source <DataSources>`, and optionally a :ref:`Behaviors` class as well. These entities are discovered by Coalesce by annotating them with :csharp:`[Coalesce, StandaloneEntity]`.
+
+To define data sources and behaviors for Standalone Entities, it is recommended you inherit from :cs:`StandardDataSource<T>` and :cs:`StandardBehaviors<T>`, respectively. For example:
+
+.. code-block:: c#
+
+    [Coalesce, StandaloneEntity]
+    public class StandaloneExample
+    {
+        public int Id { get; set; }
+
+        [Search(SearchMethod = SearchAttribute.SearchMethods.Contains), ListText]
+        public string Name { get; set; } = "";
+
+        [DefaultOrderBy]
+        public DateTimeOffset Date { get; set; }
+
+        private static int nextId = 0;
+        private static ConcurrentDictionary<int, StandaloneExample> backingStore = new ConcurrentDictionary<int, StandaloneExample>();
+
+        public class DefaultSource : StandardDataSource<StandaloneExample>
+        {
+            public DefaultSource(CrudContext context) : base(context) { }
+
+            public override Task<IQueryable<StandaloneExample>> GetQueryAsync(IDataSourceParameters parameters)
+                => Task.FromResult(backingStore.Values.AsQueryable());
+        }
+
+        public class Behaviors : StandardBehaviors<StandaloneExample>
+        {
+            public Behaviors(CrudContext context) : base(context) { }
+
+            public override Task ExecuteDeleteAsync(StandaloneExample item)
+            {
+                backingStore.TryRemove(item.Id, out _);
+                return Task.CompletedTask;
+            }
+
+            public override Task ExecuteSaveAsync(SaveKind kind, StandaloneExample? oldItem, StandaloneExample item)
+            {
+                if (kind == SaveKind.Create)
+                {
+                    item.Id = Interlocked.Increment(ref nextId);
+                    backingStore.TryAdd(item.Id, item);
+                }
+                else
+                {
+                    backingStore.TryRemove(item.Id, out _);
+                    backingStore.TryAdd(item.Id, item);
+                }
+                return Task.CompletedTask;
+            }
+        }
+    }

@@ -82,7 +82,7 @@ All behaviors are instantiated using dependency injection and your application's
 Standard Behaviors
 ------------------
 
-The standard behaviors, :csharp:`IntelliTect.Coalesce.StandardBehaviors<T, TContext>`, contains a significant number of properties and methods that can be utilized and/or overridden at your leisure.
+The standard behaviors, :csharp:`IntelliTect.Coalesce.StandardBehaviors<T>` and its EntityFramework-supporting sibling :csharp:`IntelliTect.Coalesce.StandardBehaviors<T, TContext>`, contain a significant number of properties and methods that can be utilized and/or overridden at your leisure.
 
 Properties
 ''''''''''
@@ -118,15 +118,18 @@ These methods often call one another, so overriding one method may cause some ot
 .. code-block:: none
 
     SaveAsync
-        DetermineSaveKind
+        DetermineSaveKindAsync
         GetDbSet
         ValidateDto
         MapIncomingDto
-        BeforeSave
+        BeforeSaveAsync
+            BeforeSave
+        ExecuteSaveAsync
         AfterSave
 
     DeleteAsync
-        BeforeDelete
+        BeforeDeleteAsync
+            BeforeDelete
         ExecuteDeleteAsync
             GetDbSet
         AfterDelete
@@ -140,7 +143,7 @@ All of the methods outlined above can be overridden. A description of each of th
 :csharp:`SaveAsync`
     Save the given item. This is the main entry point for saving, and takes a DTO as a parameter. This method is responsible for performing mapping to your EF models and ultimately saving to your database. If it is required that you access properties from the incoming DTO in this method, a set of extension methods :csharp:`GetValue` and :csharp:`GetObject` are available on the DTO for accessing properties that are mapped 1:1 with your EF models.
 
-:csharp:`DetermineSaveKind`
+:csharp:`DetermineSaveKindAsync`
     Given the incoming DTO on which Save has been called, examine its properties to determine if the operation is meant to be a create or an update operation. Return this distinction along with the key that was used to make the distinction.
 
     This method is called outside of the standard data source by the base API controller to perform role-based security on saves at the controller level.
@@ -154,7 +157,7 @@ All of the methods outlined above can be overridden. A description of each of th
 :csharp:`MapIncomingDto`
     Map the properties of the incoming DTO to the model that will be saved to the database. By default, this will call the :csharp:`MapTo` method on the DTO, but if more precise control is needed, the :csharp:`IClassDto<T>` extension methods or a cast to a known type can be used to get specific values. If all else fails, the DTO can be reflected upon.
 
-:csharp:`BeforeSave`
+:csharp:`BeforeSaveAsync`/:csharp:`BeforeSave`
     Provides an easy way for derived classes to intercept a save attempt and either reject it by returning an unsuccessful result, or approve it by returning success. The incoming item can also be modified at will in this method to override changes that the client made as desired.    
 
 :csharp:`AfterSave`

@@ -1230,7 +1230,7 @@ export const StandaloneReadWrite = domain.types.StandaloneReadWrite = {
   type: "model",
   controllerRoute: "StandaloneReadWrite",
   get keyProp() { return this.props.id }, 
-  behaviorFlags: 0,
+  behaviorFlags: 7,
   props: {
     id: {
       name: "id",

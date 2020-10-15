@@ -26,10 +26,8 @@ namespace IntelliTect.Coalesce
         {
             ReflectionRepository.Global.AddAssembly<TContext>();
             Services.AddScoped(sp => new CrudContext<TContext>(
-                 sp.GetRequiredService<TContext>(),
-                 () => sp.GetRequiredService<Microsoft.AspNetCore.Http.IHttpContextAccessor>().HttpContext?.User,
-                 sp.GetService<ITimeZoneResolver>()?.GetTimeZoneInfo() ?? TimeZoneInfo.Local,
-                 sp.GetRequiredService<Microsoft.AspNetCore.Http.IHttpContextAccessor>().HttpContext?.RequestAborted ?? default
+                 sp.GetRequiredService<CrudContext>(),
+                 sp.GetRequiredService<TContext>()
              ));
 
             return this;
@@ -88,7 +86,6 @@ namespace IntelliTect.Coalesce
 
             return this;
         }
-
 
         /// <summary>
         /// Use the given data source type as the default implementation where suitable.

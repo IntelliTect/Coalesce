@@ -31,6 +31,18 @@ namespace IntelliTect.Coalesce
             CancellationToken = cancellationToken;
         }
 
+        internal CrudContext(CrudContext baseContext)
+        {
+            if (baseContext == null)
+            {
+                throw new ArgumentNullException(nameof(baseContext));
+            }
+
+            lazyUser = baseContext.lazyUser;
+            TimeZone = baseContext.TimeZone;
+            CancellationToken = baseContext.CancellationToken;
+        }
+
         /// <summary>
         /// The user making the request for a CRUD action.
         /// </summary>
@@ -68,6 +80,15 @@ namespace IntelliTect.Coalesce
             CancellationToken cancellationToken = default
         )
             : base(userAccessor, timeZone, cancellationToken)
+        {
+            DbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
+        }
+
+        internal CrudContext(
+            CrudContext baseContext,
+            TContext dbContext
+        )
+            : base(baseContext)
         {
             DbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
         }

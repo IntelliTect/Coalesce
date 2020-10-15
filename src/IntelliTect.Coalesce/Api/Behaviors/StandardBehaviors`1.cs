@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce
 {
-    public abstract class StandardBehaviors<T> : IStandardCrudStrategy
+    public abstract class StandardBehaviors<T> : IBehaviors<T>, IStandardCrudStrategy
         where T : class, new()
     {
         /// <summary>

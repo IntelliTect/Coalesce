@@ -1,5 +1,7 @@
 ﻿using IntelliTect.Coalesce.Helpers;
+using IntelliTect.Coalesce.TypeDefinition;
 using IntelliTect.Coalesce.Utilities;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,19 +15,20 @@ namespace IntelliTect.Coalesce.DataAnnotations
     /// </summary>
     public class ClassSecurityInfo
     {
-        public ClassSecurityInfo(SecurityPermission read, SecurityPermission edit,
-            SecurityPermission delete, SecurityPermission create)
+        public ClassSecurityInfo(ClassViewModel classViewModel)
         {
-            Read = read;
-            Edit = edit;
-            Delete = delete;
-            Create = create;
+            ClassViewModel = classViewModel;
+            Read = classViewModel.GetSecurityPermission<ReadAttribute>();
+            Edit = classViewModel.GetSecurityPermission<EditAttribute>();
+            Delete = classViewModel.GetSecurityPermission<DeleteAttribute>();
+            Create = classViewModel.GetSecurityPermission<CreateAttribute>();
         }
 
-        public SecurityPermission Read { get; set; }
-        public SecurityPermission Edit { get; set; }
-        public SecurityPermission Delete { get; set; }
-        public SecurityPermission Create { get; set; }
+        public ClassViewModel ClassViewModel { get; }
+        public SecurityPermission Read { get; }
+        public SecurityPermission Edit { get; }
+        public SecurityPermission Delete { get; }
+        public SecurityPermission Create { get; }
 
 
         public string ClassAnnotation
@@ -138,6 +141,12 @@ namespace IntelliTect.Coalesce.DataAnnotations
 
         private bool IsMutationActionAllowed(SecurityPermission action, ClaimsPrincipal? user = null)
         {
+            if (ClassViewModel.IsStandaloneEntity && 
+                ClassViewModel.ReflectionRepository?.GetBehaviorsDeclaredFor(ClassViewModel) == null)
+            {
+                return false;
+            }
+
             if (action.HasAttribute)
             {
                 if (action.NoAccess) return false;

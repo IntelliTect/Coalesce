@@ -1,0 +1,143 @@
+@using IntelliTect.Coalesce.Knockout.Helpers
+
+@{ ViewBag.Fluid = true; }
+
+<style>
+    td div a {
+        display: block;
+    }
+    th.sortable-header {
+        cursor: pointer;
+    }
+    th.sortable-header:hover {
+        background-color: #e6e6e6
+    }
+    .table-view-header {
+        padding: 10px 15px;
+    }
+    img.form-control-static {
+        max-width: 100px;
+        max-height: 100px;
+    }
+    .coalesce-upload-icon {
+        cursor: pointer;
+    }
+</style>
+<div class="table-view obj-standaloneReadonly">
+    <div class="table-view-header">
+        <div class="clearfix">
+            <h1 style="display: inline-block">
+                Standalone Readonly List
+            </h1>
+        </div>
+        <div class="clearfix">
+            <div style="display: inline-block; font-size: 1.1em; margin-right: 10px;">
+                <i class="fa fa-arrow-circle-left" data-bind="enabled: previousPageEnabled() && !isLoading(), click: previousPage"></i>
+                Page
+                <input data-bind="value: page" style="width: 35px">
+                of
+                <span data-bind="text: pageCount"></span>
+                <i class="fa fa-arrow-circle-right" data-bind="enabled: nextPageEnabled() && !isLoading(), click: nextPage"></i>
+            </div>
+            <select class="form-control" style="width: 100px; display: inline-block;" data-bind="value: pageSize">
+                <option value="1">1</option>
+                <option value="5">5</option>
+                <option value="10">10</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+                <option value="500">500</option>
+                <option value="1000">1000</option>
+            </select>
+            <input class="form-control pull-right" style="width: 250px; margin-left: 20px" data-bind="textInput: search" placeholder="Search" />
+            <div class="btn-group pull-right">
+                <button data-bind="click:load" class="btn btn-sm btn-default "><i class="fa fa-refresh"></i> Refresh</button>
+                @if (ViewBag.Editable)
+                {
+                    <a href="~/StandaloneReadonly/Table?@(ViewBag.Query)" role="button" class="btn btn-sm btn-default "><i class="fa fa-lock"></i> Make Read-only</a>
+                }
+            </div>
+        </div>
+    </div>
+    <hr />
+    <div class="card table-view-body">
+        <div class="card-body">
+            <table class="table @(ViewBag.Editable ? "editable" : "" )">
+                <thead>
+                    <tr>
+                        <th class="sortable-header" data-bind="click: function(){orderByToggle('Name')}">
+                            Name
+                            <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'Name', 'fa-caret-down': orderByDescending() == 'Name'}"></i>
+                        </th>
+                        <th class="sortable-header" data-bind="click: function(){orderByToggle('Description')}">
+                            Description
+                            <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'Description', 'fa-caret-down': orderByDescending() == 'Description'}"></i>
+                        </th>
+                        <th style="width: 1%">
+                        </th>
+                    </tr>
+                </thead>
+                <tbody data-bind="foreach: items">
+                    <tr data-bind="css: {'btn-warning': errorMessage()}, attr: {id: id}">
+                        @if (@ViewBag.Editable)
+                        {
+                            <td class="prop-name">@(Knockout.InputFor<Coalesce.Domain.StandaloneReadonly>(p => p.Name))</td>
+                            <td class="prop-description">@(Knockout.InputFor<Coalesce.Domain.StandaloneReadonly>(p => p.Description))</td>
+                        }
+                        else
+                        {
+                            <td class="prop-name">@(Knockout.DisplayFor<Coalesce.Domain.StandaloneReadonly>(p => p.Name, true))</td>
+                            <td class="prop-description">@(Knockout.DisplayFor<Coalesce.Domain.StandaloneReadonly>(p => p.Description, true))</td>
+                        }
+                        <td>
+                            <!-- Editor buttons -->
+                            <div class="btn-group pull-right" role="group" style="display: inline-flex">
+                            </div>
+                            <div class="form-control-static" data-bind="text: errorMessage"></div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts
+{
+    <script>
+        @if (!ViewBag.Editable)
+        {
+            @:Coalesce.GlobalConfiguration.viewModel.setupValidationAutomatically(false);
+        }
+        var standaloneReadonlyList = new ListViewModels.StandaloneReadonlyList();
+        
+        // Set up parent info based on the URL.
+        @if (ViewBag.Query != null)
+        {
+            @:standaloneReadonlyList.queryString = "@(ViewBag.Query)";
+        }
+        
+        // Save and restore values from the URL:
+        var urlVariables = ['page', 'pageSize', 'search', 'orderBy', 'orderByDescending'];
+        $.each(urlVariables, function(){
+            var param = Coalesce.Utilities.GetUrlParameter(this);
+            if (param) {standaloneReadonlyList[this](param);}
+        })
+        standaloneReadonlyList.isLoading.subscribe(function(){
+            var newUrl = window.location.href;
+        
+            $.each(urlVariables, function(){
+                var param = standaloneReadonlyList[this]();
+                newUrl = Coalesce.Utilities.SetUrlParameter(newUrl, this, param);
+            })
+            history.replaceState(null, document.title, newUrl);
+        });
+        
+        standaloneReadonlyList.isSavingAutomatically = false;
+        ko.applyBindings(standaloneReadonlyList, document.body);
+        standaloneReadonlyList.isSavingAutomatically = true;
+        
+        standaloneReadonlyList.includes = "StandaloneReadonlyListGen";
+        standaloneReadonlyList.load();
+    </script>
+}

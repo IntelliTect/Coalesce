@@ -481,6 +481,48 @@ export class ProductListViewModel extends ListViewModel<$models.Product, $apiCli
 }
 
 
+export interface StandaloneReadonlyViewModel extends $models.StandaloneReadonly {
+  id: number | null;
+  name: string | null;
+  description: string | null;
+}
+export class StandaloneReadonlyViewModel extends ViewModel<$models.StandaloneReadonly, $apiClients.StandaloneReadonlyApiClient, number> implements $models.StandaloneReadonly  {
+  
+  constructor(initialData?: DeepPartial<$models.StandaloneReadonly> | null) {
+    super($metadata.StandaloneReadonly, new $apiClients.StandaloneReadonlyApiClient(), initialData)
+  }
+}
+defineProps(StandaloneReadonlyViewModel, $metadata.StandaloneReadonly)
+
+export class StandaloneReadonlyListViewModel extends ListViewModel<$models.StandaloneReadonly, $apiClients.StandaloneReadonlyApiClient, StandaloneReadonlyViewModel> {
+  
+  constructor() {
+    super($metadata.StandaloneReadonly, new $apiClients.StandaloneReadonlyApiClient())
+  }
+}
+
+
+export interface StandaloneReadWriteViewModel extends $models.StandaloneReadWrite {
+  id: number | null;
+  name: string | null;
+  date: Date | null;
+}
+export class StandaloneReadWriteViewModel extends ViewModel<$models.StandaloneReadWrite, $apiClients.StandaloneReadWriteApiClient, number> implements $models.StandaloneReadWrite  {
+  
+  constructor(initialData?: DeepPartial<$models.StandaloneReadWrite> | null) {
+    super($metadata.StandaloneReadWrite, new $apiClients.StandaloneReadWriteApiClient(), initialData)
+  }
+}
+defineProps(StandaloneReadWriteViewModel, $metadata.StandaloneReadWrite)
+
+export class StandaloneReadWriteListViewModel extends ListViewModel<$models.StandaloneReadWrite, $apiClients.StandaloneReadWriteApiClient, StandaloneReadWriteViewModel> {
+  
+  constructor() {
+    super($metadata.StandaloneReadWrite, new $apiClients.StandaloneReadWriteApiClient())
+  }
+}
+
+
 export interface ZipCodeViewModel extends $models.ZipCode {
   zip: string | null;
   state: string | null;
@@ -528,6 +570,8 @@ const viewModelTypeLookup = ViewModel.typeLookup = {
   Company: CompanyViewModel,
   Person: PersonViewModel,
   Product: ProductViewModel,
+  StandaloneReadonly: StandaloneReadonlyViewModel,
+  StandaloneReadWrite: StandaloneReadWriteViewModel,
   ZipCode: ZipCodeViewModel,
 }
 const listViewModelTypeLookup = ListViewModel.typeLookup = {
@@ -538,6 +582,8 @@ const listViewModelTypeLookup = ListViewModel.typeLookup = {
   Company: CompanyListViewModel,
   Person: PersonListViewModel,
   Product: ProductListViewModel,
+  StandaloneReadonly: StandaloneReadonlyListViewModel,
+  StandaloneReadWrite: StandaloneReadWriteListViewModel,
   ZipCode: ZipCodeListViewModel,
 }
 const serviceViewModelTypeLookup = ServiceViewModel.typeLookup = {

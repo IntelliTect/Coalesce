@@ -174,6 +174,13 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 _services.Add(classViewModel);
                 DiscoverExternalMethodTypesOn(classViewModel);
             }
+            else if (type.ClassViewModel?.IsStandaloneEntity ?? false)
+            {
+                var classViewModel = type.ClassViewModel;
+                _entities.Add(classViewModel);
+                _externalTypes.Remove(classViewModel);
+                DiscoverOnApiBackedClass(classViewModel);
+            }
 
             void DiscoverOnApiBackedClass(ClassViewModel classViewModel)
             {
@@ -351,6 +358,13 @@ namespace IntelliTect.Coalesce.TypeDefinition
             // on something like .PropertyBySelector<string, int>(s => s.Length).
             var objModel = GetClassViewModel<T>() ?? throw new ArgumentException("Provided type T has no ClassViewModel.");
             return objModel.PropertyBySelector(propertySelector);
+        }
+
+        public ClassViewModel? GetBehaviorsDeclaredFor(ClassViewModel declaredFor)
+        {
+            return Behaviors
+                .SingleOrDefault(usage => usage.DeclaredFor == declaredFor)
+                ?.StrategyClass;
         }
     }
 }

@@ -47,9 +47,7 @@ namespace IntelliTect.Coalesce.Api.Behaviors
 
         protected Type GetBehaviorsType(ClassViewModel servedType, ClassViewModel declaredFor)
         {
-            var behaviorsClassViewModel = reflectionRepository.Behaviors
-                .SingleOrDefault(usage => usage.DeclaredFor == declaredFor)
-                ?.StrategyClass;
+            var behaviorsClassViewModel = reflectionRepository.GetBehaviorsDeclaredFor(declaredFor);
 
             if (behaviorsClassViewModel == null)
             {

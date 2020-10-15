@@ -15,18 +15,14 @@ using Microsoft.AspNetCore.Hosting;
 
 namespace IntelliTect.Coalesce.Api.Controllers
 {
-    public abstract class BaseApiController<T, TDto, TContext> : Controller
+    public abstract class BaseApiController<T, TDto> : Controller
         where T : class, new()
         where TDto : class, IClassDto<T>, new()
-        where TContext : DbContext
     {
-        protected BaseApiController(TContext db)
+        protected BaseApiController()
         {
-            Db = db;
             EntityClassViewModel = ReflectionRepository.Global.GetClassViewModel<T>()!;
         }
-
-        public TContext Db { get; }
 
         /// <summary>
         /// A ClassViewModel representing the entity type T that is served by this controller,
@@ -82,5 +78,18 @@ namespace IntelliTect.Coalesce.Api.Controllers
         {
             return behaviors.DeleteAsync<TDto>(id, dataSource, parameters);
         }
+    }
+
+    public abstract class BaseApiController<T, TDto, TContext> : BaseApiController<T, TDto>
+        where T : class, new()
+        where TDto : class, IClassDto<T>, new()
+        where TContext : DbContext
+    {
+        protected BaseApiController(TContext db) : base()
+        {
+            Db = db;
+        }
+
+        public TContext Db { get; }
     }
 }

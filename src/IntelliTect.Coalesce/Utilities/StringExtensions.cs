@@ -98,7 +98,7 @@ namespace IntelliTect.Coalesce.Utilities
 #endif
         public static string? EscapeStringLiteralForLinqDynamic(this string? str) => str?
             .Replace(@"\", @"\\")
-            .Replace("\"", "\"\"");
+            .Replace("\"", "\\\"");
 
 #if NETCOREAPP3_1
         [return: System.Diagnostics.CodeAnalysis.NotNullIfNotNull("str")]

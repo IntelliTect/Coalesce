@@ -167,7 +167,7 @@ You can setup :ref:`TypeScriptListViewModels` to automatically reload from the s
 Standard Data Source
 ....................
 
-The standard data source, :csharp:`IntelliTect.Coalesce.StandardDataSource<T, TContext>`, contains a significant number of properties and methods that can be utilized and/or overridden at your leisure.
+The standard data sources, :csharp:`IntelliTect.Coalesce.StandardDataSource<T>` and its EntityFramework-supporting sibling :csharp:`IntelliTect.Coalesce.StandardDataSource<T, TContext>`, contain a significant number of properties and methods that can be utilized and/or overridden at your leisure.
 
 
 
@@ -215,13 +215,15 @@ These methods often call one another, so overriding one method may cause some ot
 
     GetMappedItemAsync
         GetItemAsync
-            GetQuery
+            GetQueryAsync
+                GetQuery
             GetIncludeTree
         TransformResults
 
     GetMappedListAsync
         GetListAsync
-            GetQuery
+            GetQueryAsync
+                GetQuery
             ApplyListFiltering
                 ApplyListPropertyFilters
                     ApplyListPropertyFilter
@@ -236,7 +238,8 @@ These methods often call one another, so overriding one method may cause some ot
         TransformResults
     
     GetCountAsync
-        GetQuery
+        GetQueryAsync
+            GetQuery
         ApplyListFiltering
             ApplyListPropertyFilters
                 ApplyListPropertyFilter
@@ -248,8 +251,8 @@ Method Details
 
 All of the methods outlined above can be overridden. A description of each of the non-interface inner methods is as follows:
     
-:csharp:`GetQuery`
-    The method is the one that you will most commonly be override in order to implement custom query logic. From this method, you could:
+:csharp:`GetQuery`/:csharp:`GetQueryAsync`
+    The method is the one that you will most commonly be override in order to implement custom query logic. The default implementation of GetQueryAsync simply calls GetQuery - be aware of this in cases of complex overrides/inheritance. From this method, you could:
 
         - Specify additional query filtering such as row-level security or soft-delete logic. Or, restrict the data source entirely for users or whole roles by returning an empty query.
         - Include additional data using EF's :csharp:`.Include()` and :csharp:`.ThenInclude()`.

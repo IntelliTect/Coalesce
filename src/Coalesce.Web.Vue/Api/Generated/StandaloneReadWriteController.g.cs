@@ -52,5 +52,22 @@ namespace Coalesce.Web.Vue.Api
             FilterParameters parameters,
             IDataSource<Coalesce.Domain.StandaloneReadWrite> dataSource)
             => CountImplementation(parameters, dataSource);
+
+        [HttpPost("save")]
+        [Authorize]
+        public virtual Task<ItemResult<StandaloneReadWriteDtoGen>> Save(
+            StandaloneReadWriteDtoGen dto,
+            [FromQuery] DataSourceParameters parameters,
+            IDataSource<Coalesce.Domain.StandaloneReadWrite> dataSource,
+            IBehaviors<Coalesce.Domain.StandaloneReadWrite> behaviors)
+            => SaveImplementation(dto, parameters, dataSource, behaviors);
+
+        [HttpPost("delete/{id}")]
+        [Authorize]
+        public virtual Task<ItemResult<StandaloneReadWriteDtoGen>> Delete(
+            int id,
+            IBehaviors<Coalesce.Domain.StandaloneReadWrite> behaviors,
+            IDataSource<Coalesce.Domain.StandaloneReadWrite> dataSource)
+            => DeleteImplementation(id, new DataSourceParameters(), dataSource, behaviors);
     }
 }

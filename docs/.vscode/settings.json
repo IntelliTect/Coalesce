@@ -1,26 +1,27 @@
 {
-    "restructuredtext.updateOnTextChanged"    : "false",
-    "restructuredtext.languageServer.disabled": false,
-    "restructuredtext.confPath": "${workspaceFolder}",
-    "restructuredtext.linter.sphinxTextRoles": [
-        "csharp", "ts", "ref", "ctor", "html"
-      ],
-      "restructuredtext.workspaceRoot": "c:\\src\\Coalesce\\docs",
-      "cSpell.words": [
-        "Axios",
-        "Coalesce's",
-        "POCOs",
-        "Vuetify's",
-        "nameof",
-        "queryable",
-        "readonly",
-        "typeof",
-        "viewmodels",
-        "vuetify"
-      ],
-      "cSpell.ignoreWords": [
-        "datetime"
-      ],
-      "cSpell.enabled": true,
-      "python.pythonPath": "C:\\Python27\\python.exe"
+  "restructuredtext.updateOnTextChanged": "false",
+  "restructuredtext.languageServer.disabled": false,
+  "restructuredtext.confPath": "${workspaceFolder}",
+  "restructuredtext.linter.sphinxTextRoles": [
+    "csharp",
+    "ts",
+    "ref",
+    "ctor",
+    "html"
+  ],
+  "restructuredtext.workspaceRoot": "c:\\src\\Coalesce\\docs",
+  "cSpell.words": [
+    "Axios",
+    "Coalesce's",
+    "POCOs",
+    "Vuetify's",
+    "nameof",
+    "queryable",
+    "readonly",
+    "typeof",
+    "viewmodels",
+    "vuetify"
+  ],
+  "cSpell.ignoreWords": ["datetime"],
+  "cSpell.enabled": true
 }

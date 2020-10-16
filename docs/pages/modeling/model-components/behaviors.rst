@@ -183,8 +183,8 @@ All of the methods outlined above can be overridden. A description of each of th
 
 
 
-Replacing the Standard Behaviors
-................................
+Globally Replacing the Standard Behaviors
+-----------------------------------------
 
 You can, of course, create a custom base behaviors class that all your custom implementations inherit from. But, what if you want to override the standard behaviors across your entire application, so that :csharp:`StandardBehaviors<,>` will never be instantiated? You can do that too!
 

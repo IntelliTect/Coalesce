@@ -1,19 +1,18 @@
 
 .. _EntityModels:
 
-EF Entity Models
+Entity Models
 ================
 
-Overview
---------
+Models are the core business objects of your application - they serve as the fundamental representation of data in your application. The design of your models is very important. In `Entity Framework Core`_ (EF), data models are just Plain Old CLR Objects (POCOs).
 
-Models are the core business objects of your application - they serve as the fundamental representation of data in your application. The design of your models is very important. In `Entity Framework Core`_, data models are just Plain Old CLR Objects (POCOs).
+.. contents:: Contents
+    :local:
 
 .. _Entity Framework Core:
 .. _EF Core:
 .. _EF:
     https://docs.microsoft.com/en-us/ef/core/
-
 
 
 Building a Data Model
@@ -63,10 +62,12 @@ Behaviors
 Behaviors in Coalesce are to mutating data as data sources are to reading data. Defining a behaviors class for a model allows complete control over the way that Coalesce will create, update, and delete your application's data in response to requests made through its generated API. Read :ref:`Behaviors` to learn more.
 
 
-Standalone Entities
--------------------
+Standalone (non-EF) Entities
+----------------------------
 
-In Coalesce, Standalone Entities are entity types that are not based on Entity Framework. For these types, you must define at least one custom :ref:`Data Source <DataSources>`, and optionally a :ref:`Behaviors` class as well. These entities are discovered by Coalesce by annotating them with :csharp:`[Coalesce, StandaloneEntity]`.
+In Coalesce, Standalone Entities are entity types that are not based on Entity Framework. These types are discovered by Coalesce by annotating them with :csharp:`[Coalesce, StandaloneEntity]`.
+
+For these types, you must define at least one custom :ref:`Data Source <DataSources>`, and optionally a :ref:`Behaviors` class as well. If no behaviors are defined, the type is implicitly read-only, equivalent to turning off create/edit/delete via the :ref:`SecurityAttributes`.
 
 To define data sources and behaviors for Standalone Entities, it is recommended you inherit from :cs:`StandardDataSource<T>` and :cs:`StandardBehaviors<T>`, respectively. For example:
 
@@ -120,3 +121,5 @@ To define data sources and behaviors for Standalone Entities, it is recommended 
             }
         }
     }
+
+The above example is admittedly contrived, as it is unlikely that you would be using an in-memory collection as a data persistence mechanism. A more likely real-world scenario would be to inject an interface to some other data store. Data Source and Behavior classes are instantiated using your application's service provider, so any registered service can be injected.

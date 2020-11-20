@@ -10,11 +10,7 @@
   >
     <template #activator="{ on }">
       <v-text-field
-        v-on="{
-          ...$listeners,
-          ...on,
-          input: undefined /* prevent v-model from getting bound to the text field */
-        }"
+        v-on="inputBindListeners(on)"
         v-bind="inputBindAttrs"
         :value="displayedValue"
         :error-messages="error"
@@ -117,6 +113,18 @@ export default class extends MetadataComponent {
 
   @Prop({ type: Boolean, default: null })
   public closeOnDatePicked?: boolean | null;
+
+  inputBindListeners(on: any) {
+    const ret = {
+      ...this.$listeners,
+      ...on,
+    };
+    
+    // prevent v-model from getting bound to the text field (via $listeners)
+    delete ret.input;
+
+    return ret;
+  }
 
   get interactive() {
     return !this.readonly && !this.disabled;

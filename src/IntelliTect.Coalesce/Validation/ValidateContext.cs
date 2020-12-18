@@ -87,7 +87,15 @@ namespace IntelliTect.Coalesce.Validation
                         {
                             assert.IsNotNull(prop.ManyToManyCollectionName, $"Many to Many collection name does not exist");
                             assert.IsNotNull(prop.ManyToManyCollectionProperty?.Object?.ViewModelClassName, $"Many to Many contained type is: {prop.ManyToManyCollectionProperty?.Object?.ViewModelClassName}");
+
+                            var farNavigation = prop.ManyToManyCollectionProperty;
+                            assert.IsNotNull(farNavigation.ForeignKeyProperty, $"Many-to-many property's far-side navigation property ({farNavigation.Parent}.{farNavigation}) has no corresponding foreign key property.");
+
+                            var nearNavigation = prop.Object.ClientProperties.FirstOrDefault(f => f.Type == model.Type);
+                            assert.IsNotNull(nearNavigation.ForeignKeyProperty, $"Many-to-many property's near-side navigation property doesn't exist (expected a prop of type {model.Type} to be found on {prop.Object}).");
+                            assert.IsNotNull(nearNavigation.ForeignKeyProperty, $"Many-to-many property's near-side navigation property ({nearNavigation}) has no corresponding foreign key property.");
                         }
+
                         if (prop.IsFile)
                         {
                             if (prop.HasFileNameProperty)

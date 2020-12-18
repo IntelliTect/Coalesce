@@ -202,6 +202,30 @@ export namespace Company {
 }
 
 
+export interface Log extends Model<typeof metadata.Log> {
+  logId: number | null
+  level: string | null
+  message: string | null
+}
+export class Log {
+  
+  /** Mutates the input object and its descendents into a valid Log implementation. */
+  static convert(data?: Partial<Log>): Log {
+    return convertToModel(data || {}, metadata.Log) 
+  }
+  
+  /** Maps the input object and its descendents to a new, valid Log implementation. */
+  static map(data?: Partial<Log>): Log {
+    return mapToModel(data || {}, metadata.Log) 
+  }
+  
+  /** Instantiate a new Log, optionally basing it on the given data. */
+  constructor(data?: Partial<Log> | {[k: string]: any}) {
+      Object.assign(this, Log.map(data || {}));
+  }
+}
+
+
 export interface Person extends Model<typeof metadata.Person> {
   
   /** ID for the person object. */

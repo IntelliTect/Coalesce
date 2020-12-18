@@ -1,6 +1,10 @@
 <template>
   <v-card class="c-admin-table">
-    <c-admin-table-toolbar :list="viewModel" :editable.sync="editable" />
+    <c-admin-table-toolbar
+      :list="viewModel"
+      @update:editable="editable = $event"
+      :editable="canEdit ? editable : null"
+    />
 
     <v-card-text class="pt-3">
       <c-loader-status

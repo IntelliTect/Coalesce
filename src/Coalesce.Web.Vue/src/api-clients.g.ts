@@ -83,6 +83,11 @@ export class CompanyApiClient extends ModelApiClient<$models.Company> {
 }
 
 
+export class LogApiClient extends ModelApiClient<$models.Log> {
+  constructor() { super($metadata.Log) }
+}
+
+
 export class PersonApiClient extends ModelApiClient<$models.Person> {
   constructor() { super($metadata.Person) }
   public rename(id: number, name: string | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<$models.Person>> {

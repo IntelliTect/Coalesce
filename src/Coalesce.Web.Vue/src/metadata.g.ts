@@ -617,6 +617,40 @@ export const Company = domain.types.Company = {
     },
   },
 }
+export const Log = domain.types.Log = {
+  name: "Log",
+  displayName: "Log",
+  get displayProp() { return this.props.logId }, 
+  type: "model",
+  controllerRoute: "Log",
+  get keyProp() { return this.props.logId }, 
+  behaviorFlags: 0,
+  props: {
+    logId: {
+      name: "logId",
+      displayName: "Log Id",
+      type: "number",
+      role: "primaryKey",
+      hidden: 3,
+    },
+    level: {
+      name: "level",
+      displayName: "Level",
+      type: "string",
+      role: "value",
+    },
+    message: {
+      name: "message",
+      displayName: "Message",
+      type: "string",
+      role: "value",
+    },
+  },
+  methods: {
+  },
+  dataSources: {
+  },
+}
 export const Person = domain.types.Person = {
   name: "Person",
   displayName: "Person",
@@ -1570,6 +1604,7 @@ interface AppDomain extends Domain {
     Company: typeof Company
     DevTeam: typeof DevTeam
     Location: typeof Location
+    Log: typeof Log
     Person: typeof Person
     PersonCriteria: typeof PersonCriteria
     PersonStats: typeof PersonStats

@@ -227,6 +227,27 @@ export class CompanyListViewModel extends ListViewModel<$models.Company, $apiCli
 }
 
 
+export interface LogViewModel extends $models.Log {
+  logId: number | null;
+  level: string | null;
+  message: string | null;
+}
+export class LogViewModel extends ViewModel<$models.Log, $apiClients.LogApiClient, number> implements $models.Log  {
+  
+  constructor(initialData?: DeepPartial<$models.Log> | null) {
+    super($metadata.Log, new $apiClients.LogApiClient(), initialData)
+  }
+}
+defineProps(LogViewModel, $metadata.Log)
+
+export class LogListViewModel extends ListViewModel<$models.Log, $apiClients.LogApiClient, LogViewModel> {
+  
+  constructor() {
+    super($metadata.Log, new $apiClients.LogApiClient())
+  }
+}
+
+
 export interface PersonViewModel extends $models.Person {
   
   /** ID for the person object. */
@@ -568,6 +589,7 @@ const viewModelTypeLookup = ViewModel.typeLookup = {
   CaseDtoStandalone: CaseDtoStandaloneViewModel,
   CaseProduct: CaseProductViewModel,
   Company: CompanyViewModel,
+  Log: LogViewModel,
   Person: PersonViewModel,
   Product: ProductViewModel,
   StandaloneReadonly: StandaloneReadonlyViewModel,
@@ -580,6 +602,7 @@ const listViewModelTypeLookup = ListViewModel.typeLookup = {
   CaseDtoStandalone: CaseDtoStandaloneListViewModel,
   CaseProduct: CaseProductListViewModel,
   Company: CompanyListViewModel,
+  Log: LogListViewModel,
   Person: PersonListViewModel,
   Product: ProductListViewModel,
   StandaloneReadonly: StandaloneReadonlyListViewModel,

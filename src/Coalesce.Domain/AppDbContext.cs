@@ -14,6 +14,7 @@ namespace Coalesce.Domain
         public DbSet<Product> Products { get; set; }
         public DbSet<CaseProduct> CaseProducts { get; set; }
         public DbSet<ZipCode> ZipCodes { get; set; }
+        public DbSet<Log> Logs { get; set; }
 #nullable restore
 
         public AppDbContext()

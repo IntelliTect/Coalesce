@@ -16,6 +16,8 @@ namespace Coalesce.Web.Vue.Models
         private double? _Height;
         private double? _Weight;
         private string _Name;
+        private System.Collections.Generic.ICollection<System.DateTimeOffset?> _NullableValueTypeCollection;
+        private System.Collections.Generic.ICollection<System.DateTimeOffset> _ValueTypeCollection;
 
         public double? Height
         {
@@ -32,6 +34,16 @@ namespace Coalesce.Web.Vue.Models
             get => _Name;
             set { _Name = value; Changed(nameof(Name)); }
         }
+        public System.Collections.Generic.ICollection<System.DateTimeOffset?> NullableValueTypeCollection
+        {
+            get => _NullableValueTypeCollection;
+            set { _NullableValueTypeCollection = value; Changed(nameof(NullableValueTypeCollection)); }
+        }
+        public System.Collections.Generic.ICollection<System.DateTimeOffset> ValueTypeCollection
+        {
+            get => _ValueTypeCollection;
+            set { _ValueTypeCollection = value; Changed(nameof(ValueTypeCollection)); }
+        }
 
         /// <summary>
         /// Map from the domain object to the properties of the current DTO instance.
@@ -46,6 +58,8 @@ namespace Coalesce.Web.Vue.Models
             this.Height = obj.Height;
             this.Weight = obj.Weight;
             this.Name = obj.Name;
+            this.NullableValueTypeCollection = obj.NullableValueTypeCollection;
+            this.ValueTypeCollection = obj.ValueTypeCollection;
         }
 
         /// <summary>
@@ -60,6 +74,8 @@ namespace Coalesce.Web.Vue.Models
             if (ShouldMapTo(nameof(Height))) entity.Height = (Height ?? entity.Height);
             if (ShouldMapTo(nameof(Weight))) entity.Weight = (Weight ?? entity.Weight);
             if (ShouldMapTo(nameof(Name))) entity.Name = Name;
+            if (ShouldMapTo(nameof(NullableValueTypeCollection))) entity.NullableValueTypeCollection = NullableValueTypeCollection;
+            if (ShouldMapTo(nameof(ValueTypeCollection))) entity.ValueTypeCollection = ValueTypeCollection;
         }
     }
 }

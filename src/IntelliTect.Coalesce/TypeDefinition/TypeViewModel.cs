@@ -319,11 +319,11 @@ namespace IntelliTect.Coalesce.TypeDefinition
             ? $"ICollection<{PureType.DtoFullyQualifiedName}>" 
             : (ClassViewModel != null ? ClassViewModel.DtoName : FullyQualifiedName);
 
-        public string NullableTypeForDto(string dtoNamespace)
+        public string NullableTypeForDto(string dtoNamespace, bool inCollection = false)
         {
             if (IsCollection)
             {
-                return $"System.Collections.Generic.ICollection<{PureType.NullableTypeForDto(dtoNamespace)}>";
+                return $"System.Collections.Generic.ICollection<{PureType.NullableTypeForDto(dtoNamespace, true)}>";
             }
 
             var model = this.PureType.ClassViewModel;
@@ -344,7 +344,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
             else
             {
-                if (IsNullable || IsArray)
+                if (inCollection || IsNullable || IsArray)
                     return FullyQualifiedName;
                 else
                     return FullyQualifiedName + "?";

@@ -451,6 +451,8 @@ export interface PersonStats extends Model<typeof metadata.PersonStats> {
   height: number | null
   weight: number | null
   name: string | null
+  nullableValueTypeCollection: Date[] | null
+  valueTypeCollection: Date[] | null
 }
 export class PersonStats {
   

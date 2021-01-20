@@ -14,6 +14,11 @@ namespace Coalesce.Domain
         public double Weight { get; set; }
         public string? Name { get; set; }
 
+        [NotMapped]
+        public ICollection<DateTimeOffset?> NullableValueTypeCollection { get; set; }
+
+        public ICollection<DateTimeOffset> ValueTypeCollection { get; set; }
+
         // public PersonLocation PersonLocation { get; set; }
     }
 

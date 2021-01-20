@@ -1461,6 +1461,30 @@ export const PersonStats = domain.types.PersonStats = {
       type: "string",
       role: "value",
     },
+    nullableValueTypeCollection: {
+      name: "nullableValueTypeCollection",
+      displayName: "Nullable Value Type Collection",
+      type: "collection",
+      itemType: {
+        name: "$collectionItem",
+        displayName: "",
+        role: "value",
+        type: "date",
+      },
+      role: "value",
+    },
+    valueTypeCollection: {
+      name: "valueTypeCollection",
+      displayName: "Value Type Collection",
+      type: "collection",
+      itemType: {
+        name: "$collectionItem",
+        displayName: "",
+        role: "value",
+        type: "date",
+      },
+      role: "value",
+    },
   },
 }
 export const ProductDetails = domain.types.ProductDetails = {

@@ -20,11 +20,23 @@ namespace IntelliTect.Coalesce.Tests.Util
 
         public static readonly ReflectionRepository Symbol = MakeFromSymbols();
         public static readonly ReflectionRepository Reflection = MakeFromReflection();
+
+        public const string SymbolDiscoveryAssemblyName = "SymbolAsm";
         
         public static ReflectionRepository MakeFromSymbols()
         {
             var rr = new ReflectionRepository();
-            rr.DiscoverCoalescedTypes(Symbols.Select(s => new SymbolTypeViewModel(rr, s)));
+            rr.DiscoverCoalescedTypes(Symbols
+                .Select(s => new SymbolTypeViewModel(rr, s))
+                .Where(s => 
+                    // For classes inside the TargetClasses namespace, only include those from
+                    // the symbol discovery assembly, not the copies that were included from the 
+                    // assembly metadata of this very test assembly (IntelliTect.Coalesce.Tests),
+                    // as the versions derived from assembly metadata behave slightly differently
+                    // and are also just otherwise redundant.
+                    !s.FullNamespace.StartsWith("IntelliTect.Coalesce.Tests.TargetClasses") || 
+                    s.Symbol.ContainingAssembly.MetadataName == SymbolDiscoveryAssemblyName)
+            );
             return rr;
         }
 
@@ -60,14 +72,12 @@ namespace IntelliTect.Coalesce.Tests.Util
             Assembly.Load("System.Linq.Queryable");
 
             return CSharpCompilation.Create(
-                "SymbolAsm",
+                SymbolDiscoveryAssemblyName,
                 trees.Concat(ModelSyntaxTrees),
                 AppDomain.CurrentDomain
                     .GetAssemblies()
-                    // Exclude dynamic assemblies (they can't possibly be relevant here),
-                    // and exclude this assembly (because otherwise we'll get duplicate copies
-                    // of all the classes in the TargetClasses namespace/directory).
-                    .Where(a => !a.IsDynamic && a.GetName().Name != "IntelliTect.Coalesce.Tests")
+                    // Exclude dynamic assemblies (they can't possibly be relevant here)
+                    .Where(a => !a.IsDynamic)
                     .Select(a => MetadataReference.CreateFromFile(a.Location)).ToArray(),
                 new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
             );

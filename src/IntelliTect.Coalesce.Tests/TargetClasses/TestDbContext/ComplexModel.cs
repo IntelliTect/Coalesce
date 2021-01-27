@@ -2,8 +2,10 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+
 
 namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
 {
@@ -76,5 +78,14 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         public Case.Statuses? EnumNullable { get; set; }
 
         // Add other kinds of properties, relationships, etc... as needed.
+
+        [Coalesce, Execute]
+        public ExternalParent MethodWithExternalTypeParams(
+            ExternalParent single, 
+            ICollection<ExternalParent> collection
+        )
+        {
+            return collection.FirstOrDefault() ?? single;
+        }
     }
 }

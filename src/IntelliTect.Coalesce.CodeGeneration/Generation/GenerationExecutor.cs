@@ -29,10 +29,25 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
         {
             Config = config;
             this.logLevel = logLevel;
+
+            var services = new ServiceCollection();
+            services.AddLogging(builder => builder
+                .SetMinimumLevel(logLevel)
+                .AddProvider(new SimpleConsoleLoggerProvider()));
+
+            services.AddSingleton(Config);
+            services.AddSingleton(ReflectionRepository.Global);
+            services.AddSingleton<ITemplateResolver, TemplateResolver>();
+            services.AddSingleton<GeneratorServices>();
+            services.AddSingleton<CompositeGeneratorServices>();
+            services.AddSingleton<GenerationContext>();
+            services.AddTransient<IProjectContextFactory, RoslynProjectContextFactory>();
+            ServiceProvider = services.BuildServiceProvider();
         }
 
         public CoalesceConfiguration Config { get; }
         public ILogger<GenerationExecutor> Logger { get; private set; }
+        public ServiceProvider ServiceProvider { get; private set; }
 
         public Task GenerateAsync<TGenerator>()
             where TGenerator : IRootGenerator
@@ -52,30 +67,16 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
                 throw new ArgumentException("type is not an IRootGenerator");
             }
 
-            var services = new ServiceCollection();
-            services.AddLogging(builder => builder
-                .SetMinimumLevel(logLevel)
-                .AddProvider(new SimpleConsoleLoggerProvider()));
-
-            services.AddSingleton(Config);
-            services.AddSingleton(ReflectionRepository.Global);
-            services.AddSingleton<ITemplateResolver, TemplateResolver>();
-            services.AddSingleton<GeneratorServices>();
-            services.AddSingleton<CompositeGeneratorServices>();
-            services.AddSingleton<GenerationContext>();
-            services.AddTransient<IProjectContextFactory, RoslynProjectContextFactory>();
-
 
             // TODO: extension point for people implementing their own generators?
             // would allow for overriding any of the services used. For example, the template resolver.
 
-            var provider = services.BuildServiceProvider();
 
-            Logger = provider.GetRequiredService<ILogger<GenerationExecutor>>();
-            var genContext = provider.GetRequiredService<GenerationContext>();
+            Logger = ServiceProvider.GetRequiredService<ILogger<GenerationExecutor>>();
+            var genContext = ServiceProvider.GetRequiredService<GenerationContext>();
 
             Logger.LogInformation("Loading Projects:");
-            await LoadProjects(provider, Logger, genContext);
+            await LoadProjects(Logger, genContext);
 
             // TODO: make GetAllTypes return TypeViewModels, and move this to the TypeLocator base class.
             Logger.LogInformation("Gathering Types");
@@ -116,7 +117,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
             }
 
             var generator =
-                (ActivatorUtilities.CreateInstance(provider, rootGenerator) as IRootGenerator)
+                (ActivatorUtilities.CreateInstance(ServiceProvider, rootGenerator) as IRootGenerator)
                 .WithModel(rr)
                 .WithOutputPath(outputPath);
 
@@ -128,7 +129,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
 
         }
 
-        private async Task LoadProjects(ServiceProvider provider, ILogger<GenerationExecutor> logger, GenerationContext genContext)
+        private async Task LoadProjects(ILogger<GenerationExecutor> logger, GenerationContext genContext)
         {
             const int maxProjectLoadRetries = 10;
             const int projectLoadRetryDelayMs = 1000;
@@ -159,7 +160,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
                 {
                     try
                     {
-                        var projectContext = provider.GetRequiredService<IProjectContextFactory>().CreateContext(config, restorePackages);
+                        var projectContext = ServiceProvider.GetRequiredService<IProjectContextFactory>().CreateContext(config, restorePackages);
 
                         // Warn if the Coalesce versions referenced in the project don't
                         // match the version of the code generation being ran.

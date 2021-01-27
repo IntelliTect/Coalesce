@@ -173,7 +173,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                 if (property.Type.IsCollection)
                 {
                     string mapCall = $"MapToModel<{property.PureType.FullyQualifiedName}, {property.Object.DtoName}>(new {property.Object.FullyQualifiedName}(), context)";
-                    setter = $"{targetProp} = {name}?.Select(f => f.{mapCall}).ToList();";
+                    setter = $"{targetProp} = {name}?.Select(f => f.{mapCall}).{(property.Type.IsArray ? "ToArray" : "ToList")}();";
                 }
                 else
                 {
@@ -256,7 +256,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                             sb.Indented(string.Concat(orderByStatements));
                         }
 
-                        sb.Indented($".Select(f => f.MapToDto<{property.PureType.FullyQualifiedName}, {property.Object.DtoName}>(context, tree?[nameof({objectName}.{name})])).ToList();");
+                        sb.Indented($".Select(f => f.MapToDto<{property.PureType.FullyQualifiedName}, {property.Object.DtoName}>(context, tree?[nameof({objectName}.{name})])).{(property.Type.IsArray ? "ToArray" : "ToList")}();");
                     }
 
                     if (property.Object.HasDbSet)

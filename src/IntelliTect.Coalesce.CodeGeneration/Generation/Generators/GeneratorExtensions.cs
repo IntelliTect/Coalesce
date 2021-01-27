@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -67,6 +68,50 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
 
             generator.Model = model;
             return generator;
+        }
+
+
+        /// <summary>
+        /// Flatten out all generators.
+        /// This includes all FileGenerators and all CompositeGenerators in the hierarchy.
+        /// </summary>
+        public static IEnumerable<IGenerator> GetGeneratorsFlattened(this ICompositeGenerator generator, ILogger logger = null)
+        {
+            IEnumerable<IGenerator> Flatten(ICompositeGenerator composite, int depth = 0)
+            {
+                var prefix = string.Concat(Enumerable.Repeat("  |", depth));
+
+                if (composite.IsDisabled)
+                {
+                    logger?.LogDebug($"{prefix} {composite.GetType().FullName} => DISABLED");
+                    yield break;
+                }
+
+                logger?.LogDebug($"{prefix} {composite.GetType().FullName} => {composite.EffectiveOutputPath}");
+
+                prefix = string.Concat(Enumerable.Repeat("  |", depth + 1));
+
+                foreach (var generator in composite.GetGenerators().OrderBy(g => g.GetType().FullName))
+                {
+                    if (generator.IsDisabled)
+                    {
+                        logger?.LogDebug($"{prefix} {generator.GetType().FullName} => DISABLED");
+                        continue;
+                    }
+                    else if (generator is ICompositeGenerator childComposite)
+                    {
+                        foreach (var childGen in Flatten(childComposite, depth + 1)) yield return childGen;
+                    }
+                    else
+                    {
+                        logger?.LogDebug($"{prefix} {generator.GetType().FullName} => {generator.EffectiveOutputPath}");
+                    }
+
+                    yield return generator;
+                }
+            }
+
+            return Flatten(generator);
         }
     }
 

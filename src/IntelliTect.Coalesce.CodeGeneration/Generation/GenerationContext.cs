@@ -21,7 +21,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
 
         public ProjectContext DataProject { get; internal set; }
 
-        public string OutputNamespaceRoot => WebProject.RootNamespace;
+        public string OutputNamespaceRoot => CoalesceConfiguration.WebProject?.RootNamespace ?? WebProject.RootNamespace;
 
         public string AreaName => CoalesceConfiguration.Output.AreaName;
 

@@ -323,7 +323,12 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             if (IsCollection)
             {
-                return $"System.Collections.Generic.ICollection<{PureType.NullableTypeForDto(dtoNamespace, true)}>";
+                var innerType = PureType.NullableTypeForDto(dtoNamespace, true);
+                if (IsArray)
+                {
+                    return $"{innerType}[]";
+                }
+                return $"System.Collections.Generic.ICollection<{innerType}>";
             }
 
             var model = this.PureType.ClassViewModel;

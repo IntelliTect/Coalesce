@@ -60,11 +60,11 @@ namespace IntelliTect.Coalesce.Cli
             Console.WriteLine();
 
 
-            string configFilePath = LocateConfigFile(ConfigFile);
+            FileInfo configFile = LocateConfigFile(ConfigFile);
 
             CoalesceConfiguration config;
 
-            using (var reader = new StreamReader(configFilePath))
+            using (var reader = new StreamReader(configFile.FullName))
             using (var jsonReader = new JsonTextReader(reader))
             {
                 var serializer = new JsonSerializer();
@@ -72,16 +72,10 @@ namespace IntelliTect.Coalesce.Cli
             }
 
             // Must go AFTER we load in the config file, since if the config file was a relative path, changing this ruins that.
-            var desiredDirectory = Path.GetDirectoryName(configFilePath);
-            if (!string.IsNullOrWhiteSpace(desiredDirectory))
-            {
-                // If we're already in the desired working directory, desiredDirectory will be String.Empty,
-                // and an exception would be thrown. So, we check before calling this.
-                Directory.SetCurrentDirectory(desiredDirectory);
-            }
+            Directory.SetCurrentDirectory(configFile.DirectoryName);
 
             Console.WriteLine(
-                $"Working in '{Directory.GetCurrentDirectory()}', using '{Path.GetFileName(configFilePath)}'");
+                $"Working in '{Directory.GetCurrentDirectory()}', using '{Path.GetFileName(configFile.FullName)}'");
 
             if (!Enum.TryParse(LogLevelOption, true, out LogLevel logLevel)) logLevel = LogLevel.Information;
 
@@ -140,24 +134,23 @@ namespace IntelliTect.Coalesce.Cli
             }
         }
 
-        private static string LocateConfigFile(string explicitLocation)
+        private static FileInfo LocateConfigFile(string explicitLocation)
         {
+            FileInfo file = null;
             if (!string.IsNullOrWhiteSpace(explicitLocation))
             {
-                if (!File.Exists(explicitLocation))
+                file = new FileInfo(explicitLocation);
+                if (!file.Exists)
                     throw new FileNotFoundException("Couldn't find Coalesce configuration file",
-                        Path.GetFullPath(explicitLocation));
-                return explicitLocation;
+                        file.FullName);
+                return file;
             }
 
-            var curDirectory = new DirectoryInfo(Directory.GetCurrentDirectory());
             const string configFileName = "coalesce.json";
-            while (curDirectory != null)
-            {
-                List<FileInfo> matchingFiles = curDirectory.EnumerateFiles(configFileName).ToList();
-                if (matchingFiles.Any()) return matchingFiles.First().FullName;
-                curDirectory = curDirectory.Parent;
-            }
+            file = new DirectoryInfo(Directory.GetCurrentDirectory())
+                .FindFileInAncestorDirectory(configFileName);
+
+            if (file != null) return file;
 
             throw new FileNotFoundException("Couldn't locate a coalesce.json configuration file");
         }

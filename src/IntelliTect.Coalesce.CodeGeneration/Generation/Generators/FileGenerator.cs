@@ -54,7 +54,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
 
             using (var contents = await GetOutputAsync().ConfigureAwait(false))
             {
-                Logger.LogTrace($"Got output for {this}");
+                Logger?.LogTrace($"Got output for {this}");
 
                 if (!(await FileUtilities.HasDifferencesAsync(contents, await outputExistingContents)))
                 {

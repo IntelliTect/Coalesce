@@ -11,9 +11,11 @@ using System.Text;
 
 namespace IntelliTect.Coalesce.Tests.Util
 {
-    internal static class ReflectionRepositoryFactory
+    public static class ReflectionRepositoryFactory
     {
-        internal static readonly CSharpCompilation Compilation = GetCompilation();
+        public static readonly IReadOnlyCollection<SyntaxTree> ModelSyntaxTrees = GetModelSyntaxTrees();
+
+        internal static readonly CSharpCompilation Compilation = GetCompilation(new SyntaxTree[0]);
         internal static readonly IEnumerable<INamedTypeSymbol> Symbols = GetAllSymbols();
 
         public static readonly ReflectionRepository Symbol = MakeFromSymbols();
@@ -35,11 +37,11 @@ namespace IntelliTect.Coalesce.Tests.Util
             return rr;
         }
 
-        private static CSharpCompilation GetCompilation()
+        private static IReadOnlyCollection<SyntaxTree> GetModelSyntaxTrees()
         {
             var asm = Assembly.GetExecutingAssembly();
 
-            var trees = asm.GetManifestResourceNames()
+            return asm.GetManifestResourceNames()
                 .AsParallel()
                 .Where(name => name.EndsWith(".cs"))
                 .Select(name =>
@@ -47,15 +49,27 @@ namespace IntelliTect.Coalesce.Tests.Util
                     using var stream = asm.GetManifestResourceStream(name);
                     return CSharpSyntaxTree.ParseText(SourceText.From(stream));
                 })
-                .ToList();
+                .ToList()
+                .AsReadOnly();
+        }
+
+        public static CSharpCompilation GetCompilation(IEnumerable<SyntaxTree> trees)
+        {
+            // Essential asemblies that aren't otherwise being loaded already:
+            Assembly.Load("Microsoft.EntityFrameworkCore.InMemory");
+            Assembly.Load("System.Linq.Queryable");
 
             return CSharpCompilation.Create(
                 "SymbolAsm",
-                trees,
+                trees.Concat(ModelSyntaxTrees),
                 AppDomain.CurrentDomain
                     .GetAssemblies()
-                    .Where(a => !a.IsDynamic)
-                    .Select(a => MetadataReference.CreateFromFile(a.Location)).ToArray()
+                    // Exclude dynamic assemblies (they can't possibly be relevant here),
+                    // and exclude this assembly (because otherwise we'll get duplicate copies
+                    // of all the classes in the TargetClasses namespace/directory).
+                    .Where(a => !a.IsDynamic && a.GetName().Name != "IntelliTect.Coalesce.Tests")
+                    .Select(a => MetadataReference.CreateFromFile(a.Location)).ToArray(),
+                new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
             );
         }
 

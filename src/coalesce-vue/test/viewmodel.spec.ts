@@ -583,6 +583,35 @@ describe("ViewModel", () => {
       await waitFor(100);
       expect(saveMock).toBeCalledTimes(1);
     })
+    
+
+    test("debounces correctly", async () => {
+      var student = new StudentViewModel({
+        studentId: 1, name: "bob",
+      });
+      student.$isDirty = false;
+      const saveMock = student.$apiClient.save = 
+        jest.fn().mockResolvedValue(<AxiosItemResult<any>>{data: {wasSuccessful: true}});
+      const vue = new Vue({ data: { student } });
+
+      student.$startAutoSave(vue, {wait: 50, debounce: { trailing: true, maxWait: 300 }});
+      // Dirty the model every 5 ms.
+      const userInputSimulator = setInterval(() => {
+        student.name = Math.random().toString()
+      }, 5);
+      
+      // Our maxWait has been passed so we expect one save to have been made:
+      waitFor(330).then(() => expect(saveMock).toBeCalledTimes(1));
+
+      // Stop user input. This will cause the next save to happen in `wait`ms (50):
+      waitFor(450).then(() => clearInterval(userInputSimulator));
+
+      // The second save should have happened. Await this one so it blocks the test completion.
+      // 550 was chosen because its less than 2x `maxWait`, but still more than `wait`ms after we
+      // stopped user input.
+      await waitFor(550);
+      expect(saveMock).toBeCalledTimes(2);
+    })
 
     describe("deep", () => {
       test("propagates to existing related objects", async () => {

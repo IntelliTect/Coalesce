@@ -559,10 +559,9 @@ export abstract class ViewModel<
     state = this._autoSaveState = new AutoCallState<AutoSaveOptions<any>>()
     state.options = options;
 
-    let isPending = false;
     let ranOnce = false
+    
     const enqueueSave = debounce(() => {
-      isPending = false;
       if (!state?.active) return;
 
       /*
@@ -603,12 +602,16 @@ export abstract class ViewModel<
       }
     }, Math.max(1, wait), debounceOptions);
 
+    let isPending = false;
     state.trigger = function() {
       if (isPending) return;
       isPending = true;
       // This MUST happen on next tick in case $isDirty was set to true automatically
       // and is about to be manually (or by $loadFromModel) set to false.
-      vue.$nextTick(enqueueSave)
+      vue.$nextTick(() => {
+        isPending = false;
+        enqueueSave();
+      })
     }
 
     startAutoCall(state, vue, undefined, enqueueSave);

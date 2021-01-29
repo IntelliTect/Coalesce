@@ -10,6 +10,7 @@ namespace Coalesce.Domain
     [Delete(PermissionLevel = SecurityPermissionLevels.DenyAll)]
     public class Log
     {
+#nullable disable
         public int LogId { get; set; }
         public string Level { get; set; }
         public string Message { get; set; }

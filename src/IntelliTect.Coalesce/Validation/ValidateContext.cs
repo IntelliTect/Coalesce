@@ -85,21 +85,28 @@ namespace IntelliTect.Coalesce.Validation
                             }
                             if (prop.Role == PropertyRole.CollectionNavigation)
                             {
-                                assert.IsTrue(prop.InverseProperty.IsPOCO, "The inverse property of a collection navigation should reference the corresponding reference navigation on the other side of the relationship.");
+                                assert.IsTrue(prop.InverseProperty!.IsPOCO, "The inverse property of a collection navigation should reference the corresponding reference navigation on the other side of the relationship.");
                                 assert.IsNotNull(prop.InverseProperty.ForeignKeyProperty, "Could not find the foreign key of the referenced inverse property");
                             }
                         }
                         if (prop.IsManytoManyCollection)
                         {
                             assert.IsNotNull(prop.ManyToManyCollectionName, $"Many to Many collection name does not exist");
-                            assert.IsNotNull(prop.ManyToManyCollectionProperty?.Object?.ViewModelClassName, $"Many to Many contained type is: {prop.ManyToManyCollectionProperty?.Object?.ViewModelClassName}");
+
 
                             var farNavigation = prop.ManyToManyCollectionProperty;
-                            assert.IsNotNull(farNavigation.ForeignKeyProperty, $"Many-to-many property's far-side navigation property ({farNavigation.Parent}.{farNavigation}) has no corresponding foreign key property.");
+                            assert.IsNotNull(farNavigation?.Object?.ViewModelClassName, $"Many to Many contained type is: {prop.ManyToManyCollectionProperty?.Object?.ViewModelClassName}");
+                            if (farNavigation != null)
+                            {
+                                assert.IsNotNull(farNavigation.ForeignKeyProperty, $"Many-to-many property's far-side navigation property ({farNavigation.Parent}.{farNavigation}) has no corresponding foreign key property.");
+                            }
 
-                            var nearNavigation = prop.Object.ClientProperties.FirstOrDefault(f => f.Type == model.Type);
-                            assert.IsNotNull(nearNavigation.ForeignKeyProperty, $"Many-to-many property's near-side navigation property doesn't exist (expected a prop of type {model.Type} to be found on {prop.Object}).");
-                            assert.IsNotNull(nearNavigation.ForeignKeyProperty, $"Many-to-many property's near-side navigation property ({nearNavigation}) has no corresponding foreign key property.");
+                            var nearNavigation = prop.Object?.ClientProperties.FirstOrDefault(f => f.Type == model.Type);
+                            assert.IsNotNull(nearNavigation, $"Many-to-many property's near-side navigation property doesn't exist (expected a prop of type {model.Type} to be found on {prop.Object}).");
+                            if (nearNavigation != null)
+                            {
+                                assert.IsNotNull(nearNavigation.ForeignKeyProperty, $"Many-to-many property's near-side navigation property ({nearNavigation}) has no corresponding foreign key property.");
+                            }
                         }
 
                         if (prop.IsFile)

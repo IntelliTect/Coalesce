@@ -14,7 +14,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
     {
         public static AttributeData? GetAttribute<TAttribute>(this ISymbol symbol)
         {
-            return symbol.GetAttributes().SingleOrDefault(a => a.AttributeClass.Name == typeof(TAttribute).Name);
+            return symbol.GetAttributes().SingleOrDefault(a => a.AttributeClass?.Name == typeof(TAttribute).Name);
         }
 
         public static bool HasAttribute<TAttribute>(this ISymbol symbol)
@@ -39,7 +39,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
 
             TypedConstant? constructorArgument = attributeData
-                .AttributeConstructor.Parameters
+                .AttributeConstructor?.Parameters
                 .Zip(attributeData.ConstructorArguments, Tuple.Create)
                 // Look for ctor params with a matching name (case insensitive)
                 .FirstOrDefault(t => string.Equals(t.Item1.Name, propertyName, StringComparison.OrdinalIgnoreCase))

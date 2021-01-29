@@ -8,7 +8,7 @@ namespace IntelliTect.Coalesce
 {
     public static class FilesystemExtensions
     {
-        public static FileInfo FindFileInAncestorDirectory(
+        public static FileInfo? FindFileInAncestorDirectory(
             this DirectoryInfo directory, string fileName)
         {
             var curDirectory = directory;

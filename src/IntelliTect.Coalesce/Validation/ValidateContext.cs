@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using IntelliTect.Coalesce.TypeDefinition;
 using IntelliTect.Coalesce.DataAnnotations;
 using IntelliTect.Coalesce.Api.DataSources;
+using IntelliTect.Coalesce.TypeDefinition.Enums;
 
 namespace IntelliTect.Coalesce.Validation
 {
@@ -81,6 +82,11 @@ namespace IntelliTect.Coalesce.Validation
                             {
                                 assert.IsNotNull(prop.InverseProperty, $"An Inverse Property named '{prop.Parent.Name}' was not found on {prop.Object}. " +
                                     $"Add an InverseProperty attribute on {prop.Parent.Name}.{prop.Name} to specify the actual name of the inverse property.", isWarning: true);
+                            }
+                            if (prop.Role == PropertyRole.CollectionNavigation)
+                            {
+                                assert.IsTrue(prop.InverseProperty.IsPOCO, "The inverse property of a collection navigation should reference the corresponding reference navigation on the other side of the relationship.");
+                                assert.IsNotNull(prop.InverseProperty.ForeignKeyProperty, "Could not find the foreign key of the referenced inverse property");
                             }
                         }
                         if (prop.IsManytoManyCollection)

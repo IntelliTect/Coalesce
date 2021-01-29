@@ -35,7 +35,7 @@ import {
 } from "./model";
 import { Indexable } from "./util";
 import debounce from "lodash-es/debounce";
-import type { Cancelable } from "lodash";
+import type { Cancelable, DebounceSettings } from "lodash";
 
 export { DeepPartial } from "./util";
 
@@ -552,7 +552,7 @@ export abstract class ViewModel<
       return;
     }
 
-    const { wait = 1000, predicate = undefined, deep = false } = options;
+    const { wait = 1000, predicate = undefined, debounce: debounceOptions } = options;
 
     this.$stopAutoSave();
 
@@ -601,7 +601,7 @@ export abstract class ViewModel<
           // Otherwise, jest will fail tests as soon as it sees an unhandled promise rejection.
           .catch(() => {  });
       }
-    }, Math.max(1, wait));
+    }, Math.max(1, wait), debounceOptions);
 
     state.trigger = function() {
       if (isPending) return;
@@ -824,7 +824,7 @@ export abstract class ListViewModel<
    * @param options Options that control the auto-load behavior.
    */
   public $startAutoLoad(vue: Vue, options: AutoLoadOptions<this> = {}) {
-    const { wait = 1000, predicate = undefined } = options;
+    const { wait = 1000, predicate = undefined, debounce: debounceOptions } = options;
     this.$stopAutoLoad();
 
     const enqueueLoad = debounce(() => {
@@ -842,7 +842,7 @@ export abstract class ListViewModel<
         // No loads in progress, or concurrency is set to cancel - go for it.
         this.$load();
       }
-    }, wait);
+    }, wait, debounceOptions);
 
     const onChange = () => {
       if (predicate && !predicate(this)) {
@@ -1095,17 +1095,19 @@ export class ViewModelCollection<T extends ViewModel> extends Array<T> {
   }
 }
 
-interface AutoLoadOptions<TThis> {
-  /** Time, in milliseconds, to debounce loads for.  */
+type DebounceOptions = {
+  /** Time, in milliseconds, to delay. Passed as the second parameter to lodash's `debounce` function. */
   wait?: number;
+  /** Additional options to pass to the third parameter of lodash's `debounce` function. */
+  debounce?: DebounceSettings;
+}
+
+type AutoLoadOptions<TThis> = DebounceOptions & {
   /** A function that will be called before autoloading that can return false to prevent a load. */
   predicate?: (viewModel: TThis) => boolean;
 }
 
-type AutoSaveOptions<TThis> = {
-  /** Time, in milliseconds, to debounce saves for.  */
-  wait?: number;
-} & ({
+type AutoSaveOptions<TThis> = DebounceOptions & ({
   /** A function that will be called before autosaving that can return false to prevent a save. */
   predicate?: (viewModel: TThis) => boolean;
 

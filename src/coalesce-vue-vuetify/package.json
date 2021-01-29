@@ -25,7 +25,7 @@
     "coalesce-vue": "../coalesce-vue"
   },
   "optionalDependencies": {
-    "vue-router": "^3.1.5"
+    "vue-router": ">=3.0.0"
   },
   "devDependencies": {
     "@babel/preset-env": "7.10.2",

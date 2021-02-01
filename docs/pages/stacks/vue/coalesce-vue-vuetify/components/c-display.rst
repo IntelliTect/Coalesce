@@ -39,6 +39,12 @@ A contrived example of using c-display to render the result of an :ref:`API Call
         element="div"
     />
 
+Displaying a standalone date value without a model or other source of metadata:
+
+.. code-block:: sfc
+
+    <c-display :value="dateProp" format="M/d/yyyy" />
+
 Props
 -----
 

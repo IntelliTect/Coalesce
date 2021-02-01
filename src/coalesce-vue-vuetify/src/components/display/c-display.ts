@@ -1,6 +1,8 @@
 import Vue, { PropOptions } from "vue";
 import { getValueMeta } from "../c-metadata-component";
-import { propDisplay, valueDisplay, Property, DisplayOptions, Model, ClassType } from "coalesce-vue";
+import { propDisplay, valueDisplay, Property, DisplayOptions, Model, ClassType, DateValue } from "coalesce-vue";
+
+const standaloneDateValueMeta = <DateValue>{ name: '', displayName: '', type: 'date', dateKind: 'datetime' };
 
 export default Vue.extend({
   name: "c-display",
@@ -32,6 +34,11 @@ export default Vue.extend({
     let meta = getValueMeta(props.for, modelMeta, ctx.parent.$coalesce.metadata);
     if (!meta && modelMeta && "displayProp" in modelMeta) {
       meta = modelMeta.displayProp || null;
+    }
+
+    if (!meta && valueProp instanceof Date) {
+      // Allow direct formatting of dates with <c-display :value="date" />
+      meta = standaloneDateValueMeta
     }
 
     if (!meta) {

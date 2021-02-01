@@ -53,7 +53,7 @@ Props
 
     See :ref:`DisplayOptions` for details on the options available for :ts:`format`.
 
-:ts:`format: DisplayOptions`
+:ts:`options: DisplayOptions`
     Specify options for formatting some kinds of values, including dates. See :ref:`DisplayOptions` for details.
 
 :ts:`value: any`

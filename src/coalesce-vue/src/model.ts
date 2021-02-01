@@ -609,6 +609,15 @@ export interface DisplayOptions {
   }
 }
 
+let defaultTimeZone: string | null = null;
+/** Set the timezone that will be used to display dates
+ * via the `modelDisplay`/`propDisplay`/`valueDisplay` functions
+ * if no other timezone is provided as a parameter.
+ */
+export function setDefaultTimeZone(tzName: string | null) {
+  defaultTimeZone = tzName;
+}
+
 /** Visitor that maps its input to a string representation of its value, suitable for display. */
 class DisplayVisitor extends Visitor<
   string | null,
@@ -681,40 +690,56 @@ class DisplayVisitor extends Visitor<
   protected visitDateValue(value: any, meta: DateValue): string | null {
     const parsed = parseValue(value, meta);
     if (parsed == null) return null;
-    if (this.options?.format) {
-      if (typeof this.options.format == "string") {
-        return format(parsed, this.options.format);
-      }
 
-      if ("format" in this.options.format) {
-        const {format: fmt, ...options} = this.options.format;
-        if ("timeZone" in options && options.timeZone) {
-          // This is honestly so stupid that you have to manually convert the input
-          // instead of the format function converting it for you based on the timeZone option 
-          // that is being passed to it...
-          // From the docs: 
-          //    "To clarify, the format function will never change the underlying date, it must be changed to a zoned time before passing it to format."
-          return format(utcToZonedTime(parsed, options.timeZone), fmt, options as any);
+    let formatString: string | undefined;
+    let formatOptions: Parameters<typeof format>[2] | undefined;
+    let isLightFormatString = false;
+
+    if (this.options) {
+      let { format: formatOptionInput } = this.options;
+      if (formatOptionInput) {
+        if (typeof formatOptionInput == "string") {
+          formatString = formatOptionInput
+        } else if ("distance" in formatOptionInput) {
+          const {
+            addSuffix = true, // Default addSuffix to true - most likely, it is desired.
+            includeSeconds = false
+          } = formatOptionInput;
+          return formatDistanceToNow(parsed, { addSuffix, includeSeconds });
+        } else {
+          formatString = formatOptionInput.format
+          formatOptions = formatOptionInput;
         }
-        return format(parsed, fmt, options as any);
-      }
-
-      if ("distance" in this.options.format) {
-        const {
-          addSuffix = true, // Default addSuffix to true - most likely, it is desired.
-          includeSeconds = false
-        } = this.options.format;
-
-        return formatDistanceToNow(parsed, { addSuffix, includeSeconds });
       }
     }
-
-    switch (meta.dateKind) {
-      case "date":
-        return lightFormat(parsed, "M/d/yyyy");
-      default:
-        return lightFormat(parsed, "M/d/yyyy h:mm:ss aaa");
+    if (!formatString) {
+      isLightFormatString = true;
+      switch (meta.dateKind) {
+        case "date":
+          formatString = "M/d/yyyy";
+        default:
+          formatString = "M/d/yyyy h:mm:ss aaa";
+      }
     }
+    
+    if (defaultTimeZone && !formatOptions?.timeZone) {
+      formatOptions = {...formatOptions, timeZone: defaultTimeZone}
+    }
+
+    if (isLightFormatString && !formatOptions) {
+      return lightFormat(parsed, formatString);
+    }
+
+    if (formatOptions?.timeZone) {
+      // This is honestly so stupid that you have to manually convert the input
+      // instead of the format function converting it for you based on the timeZone option 
+      // that is being passed to it...
+      // From the docs: 
+      //    "To clarify, the format function will never change the underlying date, it must be changed to a zoned time before passing it to format."
+      return format(utcToZonedTime(parsed, formatOptions.timeZone), formatString, formatOptions);
+    }
+
+    return format(parsed, formatString, formatOptions);
   }
 
   protected visitFileValue(value: any, meta: FileValue): string | null {

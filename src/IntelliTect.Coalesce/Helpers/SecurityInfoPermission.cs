@@ -43,8 +43,11 @@ namespace IntelliTect.Coalesce.Helpers
                 var list = new List<string>();
                 if (!string.IsNullOrEmpty(Roles))
                 {
+                    // Logic here should mirror ASP.NET Core:
+                    // split on commas, then trim each item.
+                    // https://github.com/dotnet/aspnetcore/blob/d88935709b8908f371aa97e32a3ce4a74af2368f/src/Security/Authorization/Core/src/AuthorizationPolicy.cs#L155
                     var roles = Roles.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-                    list.AddRange(roles.Distinct());
+                    list.AddRange(roles.Where(r => !string.IsNullOrWhiteSpace(r)).Select(r => r.Trim()).Distinct());
                 }
                 return _roleList = list.AsReadOnly();
             }

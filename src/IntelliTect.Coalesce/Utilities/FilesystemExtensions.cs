@@ -14,7 +14,7 @@ namespace IntelliTect.Coalesce
             var curDirectory = directory;
             while (curDirectory != null)
             {
-                FileInfo matchingFile = curDirectory.EnumerateFiles(fileName).FirstOrDefault();
+                FileInfo? matchingFile = curDirectory.EnumerateFiles(fileName).FirstOrDefault();
                 if (matchingFile != null) return matchingFile;
                 curDirectory = curDirectory.Parent;
             }

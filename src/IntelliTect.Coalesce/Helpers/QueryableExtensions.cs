@@ -43,7 +43,7 @@ namespace IntelliTect.Coalesce
         public static IQueryable<T> WherePrimaryKeyIs<T>(this IQueryable<T> query, object id, ReflectionRepository? reflectionRepository = null)
         {
             var classViewModel = (reflectionRepository ?? ReflectionRepository.Global).GetClassViewModel<T>() ?? throw new ArgumentException("Queried type is not a class");
-            var pkProp = classViewModel.PrimaryKey.PropertyInfo;
+            var pkProp = classViewModel.PrimaryKey?.PropertyInfo ?? throw new ArgumentException("Unable to determine primary key of the queried type");
             return query.Where($"{pkProp.Name} == @0", id);
         }
 
@@ -51,16 +51,18 @@ namespace IntelliTect.Coalesce
         /// Asynchronously finds an object based on a specific primary key value.
         /// </summary>
         /// <returns>The desired item, or null if it was not found.</returns>
-        public static Task<T> FindItemAsync<T>(this IQueryable<T> query, object id, ReflectionRepository? reflectionRepository = null, CancellationToken cancellationToken = default)
+        public static Task<T?> FindItemAsync<T>(this IQueryable<T> query, object id, ReflectionRepository? reflectionRepository = null, CancellationToken cancellationToken = default)
+            where T : class
         {
-            return query.WherePrimaryKeyIs(id, reflectionRepository).FirstOrDefaultAsync(cancellationToken);
+            return query.WherePrimaryKeyIs(id, reflectionRepository).FirstOrDefaultAsync(cancellationToken)!;
         }
 
         /// <summary>
         /// Finds an object based on a specific primary key value.
         /// </summary>
         /// <returns>The desired item, or null if it was not found.</returns>
-        public static T FindItem<T>(this IQueryable<T> query, object id, ReflectionRepository? reflectionRepository = null)
+        public static T? FindItem<T>(this IQueryable<T> query, object id, ReflectionRepository? reflectionRepository = null)
+            where T : class
         {
             return query.WherePrimaryKeyIs(id, reflectionRepository).FirstOrDefault();
         }

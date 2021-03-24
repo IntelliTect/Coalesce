@@ -45,7 +45,7 @@ namespace IntelliTect.Coalesce.DataAnnotations
                     return Execute.RoleList.Any(s => user.IsInRole(s));
             }
 
-            return user.Identity.IsAuthenticated;
+            return user.Identity?.IsAuthenticated ?? false;
         }
 
         public override string ToString() => $"Execute: {Execute} ";

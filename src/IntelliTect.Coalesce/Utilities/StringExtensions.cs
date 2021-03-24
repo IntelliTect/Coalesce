@@ -7,7 +7,7 @@ namespace IntelliTect.Coalesce.Utilities
     public static class StringExtensions
     {
         // Convert the string to Pascal case.
-#if NETCOREAPP3_1
+#if NETCOREAPP
         [return: System.Diagnostics.CodeAnalysis.NotNullIfNotNull("theString")]
 #endif
         public static string? ToPascalCase(this string? theString)
@@ -71,7 +71,7 @@ namespace IntelliTect.Coalesce.Utilities
 
         // Capitalize the first character and add a space before
         // each capitalized letter (except the first character).
-#if NETCOREAPP3_1
+#if NETCOREAPP
         [return: System.Diagnostics.CodeAnalysis.NotNullIfNotNull("theString")]
 #endif
         public static string? ToProperCase(this string? theString)
@@ -93,21 +93,21 @@ namespace IntelliTect.Coalesce.Utilities
             return result;
         }
 
-#if NETCOREAPP3_1
+#if NETCOREAPP
         [return: System.Diagnostics.CodeAnalysis.NotNullIfNotNull("str")]
 #endif
         public static string? EscapeStringLiteralForLinqDynamic(this string? str) => str?
             .Replace(@"\", @"\\")
             .Replace("\"", "\\\"");
 
-#if NETCOREAPP3_1
+#if NETCOREAPP
         [return: System.Diagnostics.CodeAnalysis.NotNullIfNotNull("str")]
 #endif
         public static string? EscapeStringLiteralForCSharp(this string? str) => str?
             .Replace(@"\", @"\\")
             .Replace("\"", "\\\"");
 
-#if NETCOREAPP3_1
+#if NETCOREAPP
         [return: System.Diagnostics.CodeAnalysis.NotNullIfNotNull("str")]
 #endif
         public static string? EscapeStringLiteralForTypeScript(this string? str) => str?

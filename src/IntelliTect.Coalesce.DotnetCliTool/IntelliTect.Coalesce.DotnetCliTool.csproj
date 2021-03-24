@@ -1,0 +1,36 @@
+﻿<Project>
+  
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
+  
+  <Import Project="../Cli.Common.Props" />
+  
+  <!-- 
+    This builds the legacy-style DotNetCliToolReference version of the coalesce CLI.
+  -->
+  
+  <PropertyGroup>
+    <TargetFrameworks>netcoreapp2.1;netcoreapp2.2;netcoreapp3.1;net5.0</TargetFrameworks>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+
+    <AssemblyName>dotnet-coalesce</AssemblyName>
+    <PackageId>IntelliTect.Coalesce.Tools</PackageId>
+    <PackageType>DotnetCliTool</PackageType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="../IntelliTect.Coalesce.DotnetTool/*.cs" />
+  </ItemGroup>
+  
+  <!-- 
+    Because Microsoft ignored all feedback on why this format was still useful
+    (donet/sdk issue #3115), we'll hack around their arbitrary limitation
+    so we can keep building against newer frameworks.
+  -->
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
+  <Target Name="_PackProjectToolValidation">
+     <!-- 
+      This is the target in the .NET SDK that performs this validation. 
+      Blank it out.
+     -->
+  </Target>
+</Project>

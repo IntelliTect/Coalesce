@@ -80,7 +80,6 @@ namespace IntelliTect.Coalesce.Api.DataSources
                 Strategy = new SelectivePropertyComplexObjectValidationStrategy(desiredPropertiesMetadata)
             };
 
-            // Hijack ComplexTypeModelBinder to do our binding for us on the properties we care about.
             var childBinder = new ComplexTypeModelBinder(desiredPropertiesMetadata.ToDictionary(
                 property => property,
                 property => modelBinderFactory.CreateBinder(new ModelBinderFactoryContext

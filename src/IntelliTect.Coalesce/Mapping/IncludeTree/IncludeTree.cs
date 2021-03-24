@@ -95,7 +95,7 @@ namespace IntelliTect.Coalesce
 
             // If this lambda was a multi-level property specifier, walk up the chain and add each property as the parent of currentNode.
             // For example, .Include(e => e.Application.ApplicationType)
-            while (expr.Expression.NodeType != ExpressionType.Parameter)
+            while (expr.Expression!.NodeType != ExpressionType.Parameter)
             {
                 newNode = new IncludeTree();
 
@@ -155,7 +155,7 @@ namespace IntelliTect.Coalesce
 
         public bool TryGetValue(
             string key,
-#if NETCOREAPP3_1
+#if NETCOREAPP
             [System.Diagnostics.CodeAnalysis.MaybeNullWhen(false)]
 #endif 
             out IncludeTree value)

@@ -253,7 +253,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <param name="isStatic">Whether to look for a static or instance method. 
         /// If null, the first match will be returned.</param>
         /// <returns></returns>
-        public MethodViewModel MethodByName(string name, bool? isStatic = null)
+        public MethodViewModel? MethodByName(string name, bool? isStatic = null)
         {
             return ClientMethods.FirstOrDefault(f =>
                 string.Equals(f.Name, name, StringComparison.OrdinalIgnoreCase)
@@ -395,12 +395,12 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// Returns the property ID field.
         /// </summary>
-        public PropertyViewModel PrimaryKey => Properties.FirstOrDefault(f => f.IsPrimaryKey);
+        public PropertyViewModel? PrimaryKey => Properties.FirstOrDefault(f => f.IsPrimaryKey);
 
         /// <summary>
         /// Use the ListText Attribute first, then Name and then ID.
         /// </summary>
-        public PropertyViewModel ListTextProperty =>
+        public PropertyViewModel? ListTextProperty =>
             ClientProperties.FirstOrDefault(f => f.IsListText) ??
             ClientProperties.FirstOrDefault(f => f.Name == "Name") ??
             PrimaryKey;

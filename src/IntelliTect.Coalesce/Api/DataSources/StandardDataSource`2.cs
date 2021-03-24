@@ -86,7 +86,7 @@ namespace IntelliTect.Coalesce
             return canUseAsync ? query.CountAsync(GetEffectiveCancellationToken(parameters)) : Task.FromResult(query.Count());
         }
 
-        protected override Task<T> EvaluateItemQueryAsync(object id, IQueryable<T> query, CancellationToken cancellationToken = default)
+        protected override Task<T?> EvaluateItemQueryAsync(object id, IQueryable<T> query, CancellationToken cancellationToken = default)
         {
             var canUseAsync = CanEvalQueryAsynchronously(query);
             return canUseAsync

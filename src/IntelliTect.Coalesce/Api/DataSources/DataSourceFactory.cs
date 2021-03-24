@@ -30,7 +30,7 @@ namespace IntelliTect.Coalesce.Api.DataSources
             // Future: may be other kinds of defaults (non-EF)
         };
 
-        protected Type GetDataSourceType(ClassViewModel servedType, ClassViewModel declaredFor, string dataSourceName)
+        protected Type GetDataSourceType(ClassViewModel servedType, ClassViewModel declaredFor, string? dataSourceName)
         {
             if (string.IsNullOrEmpty(dataSourceName) || dataSourceName.Equals(DefaultSourceName, InvariantCultureIgnoreCase))
             {
@@ -45,7 +45,7 @@ namespace IntelliTect.Coalesce.Api.DataSources
             return dataSourceClassViewModel.Type.TypeInfo;
         }
 
-        public IDataSource<TServed> GetDataSource<TServed, TDeclaredFor>(string dataSourceName)
+        public IDataSource<TServed> GetDataSource<TServed, TDeclaredFor>(string? dataSourceName)
             where TServed : class, new()
             where TDeclaredFor : class, new()
         {
@@ -55,7 +55,7 @@ namespace IntelliTect.Coalesce.Api.DataSources
                 dataSourceName);
         }
 
-        public object GetDataSource(ClassViewModel servedType, ClassViewModel declaredFor, string dataSourceName)
+        public object GetDataSource(ClassViewModel servedType, ClassViewModel declaredFor, string? dataSourceName)
         {
             var dataSourceType = GetDataSourceType(servedType, declaredFor, dataSourceName);
             return ActivatorUtilities.GetServiceOrCreateInstance(serviceProvider, dataSourceType);

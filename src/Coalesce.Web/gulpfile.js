@@ -159,8 +159,8 @@ exports.coalesceCleanBuild = function coalesceCleanBuild() {
 exports.coalesceBuild = gulp.series(
     exports.coalesceCleanBuild,
     shell.task([
-            'dotnet restore --verbosity quiet "../IntelliTect.Coalesce.Cli"',
-            `dotnet build "../IntelliTect.Coalesce.Cli/IntelliTect.Coalesce.Cli.csproj" -o "${coalesceBuildDir}"`
+            'dotnet restore --verbosity quiet "../IntelliTect.Coalesce.DotnetTool"',
+            `dotnet build "../IntelliTect.Coalesce.DotnetTool/IntelliTect.Coalesce.DotnetTool.csproj" -f net5.0 -o "${coalesceBuildDir}"`
         ],{ verbose: true }
     )
 )

@@ -81,10 +81,10 @@ namespace IntelliTect.Coalesce
             if (parameters.Fields.Count > 0)
             {
                 var allDtoProps = typeof(TDto).GetProperties();
-                var requestedProps = parameters.Fields
+                List<System.Reflection.PropertyInfo> requestedProps = parameters.Fields
                     .Select(field => allDtoProps.FirstOrDefault(p => string.Equals(p.Name, field, StringComparison.OrdinalIgnoreCase)))
                     .Where(prop => prop != null)
-                    .ToList();
+                    .ToList()!;
 
                 return mappedResult
                     .Select(dto =>
@@ -178,7 +178,7 @@ namespace IntelliTect.Coalesce
             await TransformResultsAsync(new ReadOnlyCollection<T>(result.List), parameters);
 
             var mappingContext = new MappingContext(Context.User, parameters.Includes);
-            IList<TDto> mappedResult = result.List.Select(obj => obj.MapToDto<T, TDto>(mappingContext, tree)).ToList();
+            IList<TDto> mappedResult = result.List.Select(obj => obj.MapToDto<T, TDto>(mappingContext, tree)!).ToList();
             mappedResult = TrimListFields(mappedResult, parameters);
 
             return new ListResult<TDto>(result, mappedResult);
@@ -201,7 +201,7 @@ namespace IntelliTect.Coalesce
         /// <param name="query">The query to query.</param>
         /// <param name="cancellationToken">A CancellationToken to use.</param>
         /// <returns>The requested object, or null if it was not found.</returns>
-        protected virtual Task<T> EvaluateItemQueryAsync(object id, IQueryable<T> query, CancellationToken cancellationToken = default)
+        protected virtual Task<T?> EvaluateItemQueryAsync(object id, IQueryable<T> query, CancellationToken cancellationToken = default)
         {
             return Task.FromResult(query.FindItem(id, Context.ReflectionRepository));
         }
@@ -216,7 +216,7 @@ namespace IntelliTect.Coalesce
         public virtual async Task<(ItemResult<T> Item, IncludeTree? IncludeTree)> GetItemAsync(object id, IDataSourceParameters parameters)
         {
             var query = await GetQueryAsync(parameters);
-            T result = await EvaluateItemQueryAsync(id, query, GetEffectiveCancellationToken(parameters));
+            T? result = await EvaluateItemQueryAsync(id, query, GetEffectiveCancellationToken(parameters));
 
             if (result == null)
             {

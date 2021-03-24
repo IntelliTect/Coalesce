@@ -51,7 +51,7 @@ namespace IntelliTect.Coalesce.Api.Controllers
             return dataSource.GetCountAsync(parameters);
         }
 
-        protected async Task<ItemResult<TDto>> SaveImplementation(TDto dto, DataSourceParameters parameters, IDataSource<T> dataSource, IBehaviors<T> behaviors)
+        protected async Task<ItemResult<TDto?>> SaveImplementation(TDto dto, DataSourceParameters parameters, IDataSource<T> dataSource, IBehaviors<T> behaviors)
         {
             var kind = (await behaviors.DetermineSaveKindAsync(dto, dataSource, parameters)).Kind;
 
@@ -74,7 +74,7 @@ namespace IntelliTect.Coalesce.Api.Controllers
             return await behaviors.SaveAsync(dto, dataSource, parameters);
         }
 
-        protected Task<ItemResult<TDto>> DeleteImplementation(object id, DataSourceParameters parameters, IDataSource<T> dataSource, IBehaviors<T> behaviors)
+        protected Task<ItemResult<TDto?>> DeleteImplementation(object id, DataSourceParameters parameters, IDataSource<T> dataSource, IBehaviors<T> behaviors)
         {
             return behaviors.DeleteAsync<TDto>(id, dataSource, parameters);
         }

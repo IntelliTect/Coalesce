@@ -148,7 +148,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// </summary>
         /// <param name="typeToCheck"></param>
         /// <returns></returns>
-        private INamedTypeSymbol GetSatisfyingBaseTypeSymbol(Type typeToCheck)
+        private INamedTypeSymbol? GetSatisfyingBaseTypeSymbol(Type typeToCheck)
         {
             if (typeToCheck.IsConstructedGenericType)
             {

@@ -6,7 +6,7 @@ namespace IntelliTect.Coalesce.Mapping
 {
     public static class Mapper
     {
-#if NETCOREAPP3_1
+#if NETCOREAPP
         [return: System.Diagnostics.CodeAnalysis.NotNullIfNotNull("obj")]
 #endif
         public static TDto? MapToDto<T, TDto>(this T? obj, IMappingContext context, IncludeTree? tree = null)

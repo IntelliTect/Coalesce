@@ -9,7 +9,7 @@ namespace IntelliTect.Coalesce.Helpers
 {
     public static class EnumExtensions
     {
-        public static string GetDisplayName(this Enum value)
+        public static string? GetDisplayName(this Enum value)
         {
             var customAttribute = value.GetType()
                                         .GetMember(value.ToString())

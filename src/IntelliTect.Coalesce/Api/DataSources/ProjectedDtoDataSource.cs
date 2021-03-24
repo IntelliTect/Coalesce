@@ -60,7 +60,7 @@ namespace IntelliTect.Coalesce
             var query = await GetQueryAsync(parameters);
             var canUseAsync = CanEvalQueryAsynchronously(query);
             var projectedQuery = ApplyProjection(query, parameters);
-            TDto mappedResult = await EvaluateItemQueryAsync(id, projectedQuery, canUseAsync, GetEffectiveCancellationToken(parameters));
+            TDto? mappedResult = await EvaluateItemQueryAsync(id, projectedQuery, canUseAsync, GetEffectiveCancellationToken(parameters));
 
             if (mappedResult == null)
             {
@@ -78,7 +78,7 @@ namespace IntelliTect.Coalesce
         /// <param name="canUseAsync">True if CanEvalQueryAsynchronously returned true for the underlying entity query.</param>
         /// <param name="cancellationToken">A CancellationToken to use.</param>
         /// <returns>The requested object, or null if it was not found.</returns>
-        protected virtual async Task<TDto> EvaluateItemQueryAsync(object id, IQueryable<TDto> query, bool canUseAsync, CancellationToken cancellationToken = default)
+        protected virtual async Task<TDto?> EvaluateItemQueryAsync(object id, IQueryable<TDto> query, bool canUseAsync, CancellationToken cancellationToken = default)
         {
             return canUseAsync
                 ? await query.FindItemAsync(id, Context.ReflectionRepository, cancellationToken)

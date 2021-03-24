@@ -23,7 +23,7 @@ namespace Coalesce.Web
     {
         public IConfigurationRoot Configuration { get; set; }
 
-#if NETCOREAPP3_1
+#if NETCOREAPP
         public Startup(IWebHostEnvironment env)
 #else
         public Startup(IHostingEnvironment env)
@@ -111,7 +111,7 @@ namespace Coalesce.Web
             app.UseDeveloperExceptionPage();
             app.UseStaticFiles();
 
-#if NETCOREAPP3_1
+#if NETCOREAPP
             app.UseRouting();
 
             // *** DEMO ONLY ***

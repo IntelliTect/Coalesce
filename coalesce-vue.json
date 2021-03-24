@@ -1,7 +1,7 @@
 {
   "webProject": {
     "projectFile": "./src/Coalesce.Web.Vue/Coalesce.Web.Vue.csproj",
-    "framework": "netcoreapp3.1"
+    "framework": "net5.0"
   },
   "dataProject": {
     "projectFile": "./src/Coalesce.Domain/Coalesce.Domain.csproj",

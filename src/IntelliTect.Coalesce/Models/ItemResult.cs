@@ -35,7 +35,7 @@ namespace IntelliTect.Coalesce.Models
 
     public class ItemResult<T> : ItemResult
     {
-#if NETCOREAPP3_1
+#if NETCOREAPP
         [System.Diagnostics.CodeAnalysis.AllowNull]
         [System.Diagnostics.CodeAnalysis.MaybeNull]
 #endif 
@@ -49,7 +49,7 @@ namespace IntelliTect.Coalesce.Models
 
         public ItemResult(
             ItemResult result,
-#if NETCOREAPP3_1
+#if NETCOREAPP
             [System.Diagnostics.CodeAnalysis.AllowNull]
 #endif  
             T obj = default
@@ -61,7 +61,7 @@ namespace IntelliTect.Coalesce.Models
         public ItemResult(
             bool wasSuccessful, 
             string? message = null,
-#if NETCOREAPP3_1
+#if NETCOREAPP
             [System.Diagnostics.CodeAnalysis.AllowNull]
 #endif 
             T obj = default, 

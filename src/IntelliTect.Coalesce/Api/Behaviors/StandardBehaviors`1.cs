@@ -85,11 +85,11 @@ namespace IntelliTect.Coalesce
             where TDto : class, IClassDto<T>, new()
         {
             var dtoClassViewModel = Context.ReflectionRepository.GetClassViewModel<TDto>()!;
-            var pkInfo = dtoClassViewModel.PrimaryKey;
+            var dtoPkInfo = dtoClassViewModel.PrimaryKey ?? throw new InvalidOperationException("Data sources cannot save items that lack a PK");
 
-            object? idValue = pkInfo.PropertyInfo.GetValue(incomingDto);
+            object? idValue = dtoPkInfo.PropertyInfo.GetValue(incomingDto);
 
-            if (ClassViewModel.PrimaryKey.DatabaseGenerated == DatabaseGeneratedOption.None)
+            if (ClassViewModel.PrimaryKey?.DatabaseGenerated == DatabaseGeneratedOption.None)
             {
                 // PK is not database generated.
                 // We have to look for the existing object to determine if
@@ -117,7 +117,7 @@ namespace IntelliTect.Coalesce
 
             // IsNullable handles nullable value types, and reference types (mainly strings).
             // !IsNullable handles non-Nullable<T> value types.
-            if (dtoClassViewModel.PrimaryKey.Type.IsNullable
+            if (dtoPkInfo.Type.IsNullable
                 ? idValue == null
                 : idValue!.Equals(Activator.CreateInstance(dtoClassViewModel.PrimaryKey.Type.TypeInfo)))
             {
@@ -137,7 +137,7 @@ namespace IntelliTect.Coalesce
         /// <param name="item">The saved item to reload</param>
         protected virtual Task<(ItemResult<T> Item, IncludeTree? IncludeTree)> FetchObjectAfterSaveAsync(IDataSource<T> dataSource, IDataSourceParameters parameters, T item)
         {
-            var newItemId = ClassViewModel.PrimaryKey.PropertyInfo.GetValue(item)!;
+            var newItemId = ClassViewModel.PrimaryKey!.PropertyInfo.GetValue(item)!;
             return (OverridePostSaveResultDataSource ?? dataSource).GetItemAsync(newItemId, parameters);
         }
 
@@ -201,7 +201,7 @@ namespace IntelliTect.Coalesce
         /// <param name="dataSource">The data source that will be used when loading the item to be updated.</param>
         /// <param name="parameters">The parameters to be passed to the data source when loading the item.</param>
         /// <returns>A result indicating success or failure, as well as an up-to-date copy of the object being saved.</returns>
-        public virtual async Task<ItemResult<TDto>> SaveAsync<TDto>(
+        public virtual async Task<ItemResult<TDto?>> SaveAsync<TDto>(
             TDto incomingDto,
             IDataSource<T> dataSource,
             IDataSourceParameters parameters
@@ -226,7 +226,7 @@ namespace IntelliTect.Coalesce
                 var (existingItem, _) = await (OverrideFetchForUpdateDataSource ?? dataSource).GetItemAsync(idValue!, parameters);
                 if (!existingItem.WasSuccessful)
                 {
-                    return new ItemResult<TDto>(existingItem);
+                    return new ItemResult<TDto?>(existingItem);
                 }
                 item = existingItem.Object ?? throw new InvalidOperationException(
                     $"Expected {nameof(ItemResult)}{nameof(ItemResult<T>.Object)} to be non-null when {nameof(dataSource.GetItemAsync)} returns success.");
@@ -244,7 +244,7 @@ namespace IntelliTect.Coalesce
 
             if (!validateDto.WasSuccessful)
             {
-                return new ItemResult<TDto>(validateDto);
+                return new ItemResult<TDto?>(validateDto);
             }
 
             // Set all properties on the DB-mapped object to the incoming values.
@@ -258,7 +258,7 @@ namespace IntelliTect.Coalesce
             }
             else if (!beforeSave.WasSuccessful)
             {
-                return new ItemResult<TDto>(beforeSave);
+                return new ItemResult<TDto?>(beforeSave);
             }
 
             await ExecuteSaveAsync(kind, originalItem, item);
@@ -284,7 +284,7 @@ namespace IntelliTect.Coalesce
             }
             else if (!afterSave.WasSuccessful)
             {
-                return new ItemResult<TDto>(afterSave);
+                return new ItemResult<TDto?>(afterSave);
             }
 
             // If the user nulled out the item in their AfterSave,
@@ -295,7 +295,7 @@ namespace IntelliTect.Coalesce
                 return true;
             }
 
-            return new ItemResult<TDto>(
+            return new ItemResult<TDto?>(
                 item.MapToDto<T, TDto>(new MappingContext(User, includes), includeTree)
             );
         }
@@ -343,7 +343,7 @@ namespace IntelliTect.Coalesce
         /// <param name="parameters">The parameters to be passed to the data source when loading the item.</param>
         /// <returns>A result indicating success or failure, 
         /// potentially including an up-to-date copy of the item being deleted if the delete action is non-destructive.</returns>
-        public virtual async Task<ItemResult<TDto>> DeleteAsync<TDto>(
+        public virtual async Task<ItemResult<TDto?>> DeleteAsync<TDto>(
             object id,
             IDataSource<T> dataSource,
             IDataSourceParameters parameters)
@@ -366,7 +366,7 @@ namespace IntelliTect.Coalesce
 
             if (!beforeDelete.WasSuccessful)
             {
-                return new ItemResult<TDto>(beforeDelete);
+                return new ItemResult<TDto?>(beforeDelete);
             }
 
             // Perform the delete operation against the database.
@@ -408,7 +408,7 @@ namespace IntelliTect.Coalesce
                     return true;
                 }
 
-                return new ItemResult<TDto>(
+                return new ItemResult<TDto?>(
                     deletedItem.MapToDto<T, TDto>(new MappingContext(User, parameters.Includes), includeTree)
                 );
             }

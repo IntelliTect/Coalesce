@@ -1,14 +1,11 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project>
+  <!--
+    Common build props used by both IntelliTect.Coalesce.Cli and IntelliTect.Coalesce.Cli.Legacy
+  -->
+  
   <PropertyGroup>
     <Description>.NET Core command-line tooling for IntelliTect.Coalesce code generation</Description>
-
-    <TargetFramework>netcoreapp2.2</TargetFramework>
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <OutputType>Exe</OutputType>
-
-    <AssemblyName>dotnet-coalesce</AssemblyName>
-    <PackageId>IntelliTect.Coalesce.Tools</PackageId>
-    <PackageType>DotnetCliTool</PackageType>
   </PropertyGroup>
 
   <ItemGroup>

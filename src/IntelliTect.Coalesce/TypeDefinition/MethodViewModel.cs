@@ -171,7 +171,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 if (IsModelInstanceMethod)
                 {
                     outParameters.Add("[FromServices] IDataSourceFactory dataSourceFactory");
-                    outParameters.Add($"{Parent.PrimaryKey.PureType.FullyQualifiedName} id");
+                    outParameters.Add($"{Parent.PrimaryKey!.PureType.FullyQualifiedName} id");
                 }
                 outParameters.AddRange(parameters.Select(f => f.CsDeclaration));
                 return string.Join(", ", outParameters);

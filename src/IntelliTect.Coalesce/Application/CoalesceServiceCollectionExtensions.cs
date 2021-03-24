@@ -24,7 +24,7 @@ namespace IntelliTect.Coalesce
             if (services == null) throw new ArgumentNullException(nameof(services));
             if (builder == null) throw new ArgumentNullException(nameof(builder));
 
-#if NETCOREAPP3_1
+#if NETCOREAPP
             services.AddOptions<CoalesceOptions>().Configure<IWebHostEnvironment>((opts, hosting) =>
             {
                 opts.DetailedExceptionMessages = 

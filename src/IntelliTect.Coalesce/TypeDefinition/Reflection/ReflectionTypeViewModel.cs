@@ -71,7 +71,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         private ICollection<Type> BaseClassesAndInterfaces { get; }
 
-        private Type GetSatisfyingBaseType(Type type)
+        private Type? GetSatisfyingBaseType(Type type)
         {
             return BaseClassesAndInterfaces
                 .FirstOrDefault(x =>

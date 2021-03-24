@@ -512,7 +512,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
                     // See if this is a one-to-one using the parent's key
                     // Look up the other object and check the key
-                    ?? (Object?.IsOneToOne ?? false ? EffectiveParent.PrimaryKey.Name : null)
+                    ?? (Object?.IsOneToOne ?? false ? EffectiveParent.PrimaryKey?.Name : null)
 
                     // Look for a property that follows convention.
                     ?? Name + ConventionalIdSuffix;

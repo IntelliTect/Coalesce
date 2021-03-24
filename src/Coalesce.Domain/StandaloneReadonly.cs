@@ -28,16 +28,16 @@ namespace Coalesce.Domain
             {
             }
 
-            public override async Task<IQueryable<StandaloneReadonly>> GetQueryAsync(IDataSourceParameters parameters)
+            public override Task<IQueryable<StandaloneReadonly>> GetQueryAsync(IDataSourceParameters parameters)
             {
-                return Enumerable.Range(1, 100)
+                return Task.FromResult(Enumerable.Range(1, 100)
                     .Select(i => new StandaloneReadonly
                     {
                         Id = i,
                         Name = $"Item {i}",
                         Description = $"The {i}th item"
                     })
-                    .AsQueryable();
+                    .AsQueryable());
             }
         }
     }

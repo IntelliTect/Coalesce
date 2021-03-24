@@ -14,6 +14,8 @@ module ViewModels {
         public height: KnockoutObservable<number | null> = ko.observable(null);
         public weight: KnockoutObservable<number | null> = ko.observable(null);
         public name: KnockoutObservable<string | null> = ko.observable(null);
+        public nullableValueTypeCollection: KnockoutObservableArray<moment.Moment> = ko.observableArray([]);
+        public valueTypeCollection: KnockoutObservableArray<moment.Moment> = ko.observableArray([]);
         
         /** 
             Load the object from the DTO.
@@ -26,6 +28,8 @@ module ViewModels {
             this.height(data.height);
             this.weight(data.weight);
             this.name(data.name);
+            this.nullableValueTypeCollection(data.nullableValueTypeCollection);
+            this.valueTypeCollection(data.valueTypeCollection);
             
         };
         
@@ -36,6 +40,8 @@ module ViewModels {
             dto.height = this.height();
             dto.weight = this.weight();
             dto.name = this.name();
+            dto.nullableValueTypeCollection = this.nullableValueTypeCollection();
+            dto.valueTypeCollection = this.valueTypeCollection();
             
             return dto;
         }

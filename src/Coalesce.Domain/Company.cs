@@ -40,6 +40,7 @@ namespace Coalesce.Domain
             return db.Companies.Where(f => f.IsDeleted == isDeleted).ToList();
         }
 
+        [DefaultDataSource]
         public class DefaultSource : StandardDataSource<Company, AppDbContext>
         {
             public DefaultSource(CrudContext<AppDbContext> context) : base(context) { }

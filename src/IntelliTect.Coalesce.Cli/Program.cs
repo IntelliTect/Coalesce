@@ -112,6 +112,11 @@ namespace IntelliTect.Coalesce.Cli
                 executor.Logger.LogError(e.Message);
                 return -1;
             }
+            catch (Exception e)
+            {
+                executor.Logger.LogError(e.ToString());
+                return -1;
+            }
 
             return 0;
         }

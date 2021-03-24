@@ -107,6 +107,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
             if (issues.Any(i => !i.IsWarning))
             {
                 Logger.LogError("Model validation failed. Exiting.");
+                Environment.Exit(-1);
                 return;
             }
 

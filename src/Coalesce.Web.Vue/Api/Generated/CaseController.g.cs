@@ -325,7 +325,7 @@ namespace Coalesce.Web.Vue.Api
         /// <summary>
         /// File Upload: RestrictedUploadAttachment
         /// </summary>
-        [Authorize(Roles = "Admin, SuperUser")]
+        [Authorize(Roles = "Admin,SuperUser")]
         [HttpPut("RestrictedUploadAttachment")]
         public virtual async Task<ItemResult<CaseDtoGen>> RestrictedUploadAttachmentPut(int id, IFormFile file, IDataSource<Coalesce.Domain.Case> dataSource, IBehaviors<Coalesce.Domain.Case> behaviors)
         {

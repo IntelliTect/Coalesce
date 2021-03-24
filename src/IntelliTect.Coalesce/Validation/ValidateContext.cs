@@ -21,25 +21,12 @@ namespace IntelliTect.Coalesce.Validation
             foreach (var model in repository.CrudApiBackedClasses)
             {
                 assert.Area = model.ToString();
+
                 assert.IsTrue(!string.IsNullOrWhiteSpace(model.Name), $"Name not found.");
                 assert.IsNotNull(model.PrimaryKey, $"Primary key not found for {model}. Primary key should be named 'Id', '{model.Name}Id' or have the [Key] attribute.");
                 if (model.PrimaryKey != null)
                 {
                     assert.IsTrue(model.PrimaryKey.IsClientProperty, "Model primary keys must be exposed to the client.");
-                }
-
-                if (model.IsStandaloneEntity)
-                {
-                    var dataSources = model.ClientDataSources(repository).ToList();
-                    assert.IsTrue(dataSources.Any(), "Standalone entities must declare at least one data source.");
-                    if (dataSources.Count > 1)
-                    {
-                        assert.IsTrue(dataSources.Count(s => s.IsDefaultDataSource) == 1, "Standalone entities that declare multiple data sources must mark exactly one as the [DefaultDataSource]");
-                    }
-                }
-                else
-                {
-                    assert.IsNotNull(model.DbContext, "Cannot determine the DbContext that provides this type.");
                 }
 
                 // Check object references to see if they all have keys and remote keys
@@ -135,16 +122,39 @@ namespace IntelliTect.Coalesce.Validation
                     }
                 }
 
+                var dataSources = model.ClientDataSources(repository).ToList();
+                if (model.IsStandaloneEntity)
+                {
+                    assert.IsTrue(dataSources.Any(), "Standalone entities must declare at least one data source.");
+                    if (dataSources.Count > 1)
+                    {
+                        assert.IsTrue(dataSources.Count(s => s.IsDefaultDataSource) == 1, "Standalone entities that declare multiple data sources must mark exactly one as the [DefaultDataSource]");
+                    }
+                }
+                else
+                {
+                    assert.IsNotNull(model.DbContext, "Cannot determine the DbContext that provides this type.");
+                }
+
                 assert.IsTrue(
                     model.ClientDataSources(repository).Count(s => s.IsDefaultDataSource) <= 1,
                     $"Cannot have multiple default data sources for {model}");
 
-                foreach (var source in model.ClientDataSources(repository))
+                foreach (var source in dataSources)
                 {
+                    assert.Area = source.ToString();
                     // Prevent data sources named "Default" that aren't actually default.
+
+                    // Furthermore, prevent non-default data sources whose name contains "Default",
+                    // as it suggests an intent that won't actually be fulfilled
+                    // and therefore might be resulting in a security hole if a "default"-named
+                    // data source is implementing security rules but is in fact not
+                    // being enforced as a default.
                     assert.IsTrue(
-                        source.IsDefaultDataSource || !source.ClientTypeName.Equals(DataSourceFactory.DefaultSourceName, StringComparison.InvariantCultureIgnoreCase),
-                        $"Data sources can't be named {DataSourceFactory.DefaultSourceName} unless they're marked with {nameof(DefaultDataSourceAttribute)}"
+                        source.IsDefaultDataSource 
+                        || (model.IsStandaloneEntity && dataSources.Count() == 1) // A lone datasource for a standalone entity is also treated as the default.
+                        || source.ClientTypeName.IndexOf(DataSourceFactory.DefaultSourceName, StringComparison.InvariantCultureIgnoreCase) == -1,
+                        $"Data sources can't contain {DataSourceFactory.DefaultSourceName} in their name unless they're marked with {nameof(DefaultDataSourceAttribute)}"
                     );
                 }
             }

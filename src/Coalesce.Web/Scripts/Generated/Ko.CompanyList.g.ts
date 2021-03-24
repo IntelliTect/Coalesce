@@ -6,9 +6,9 @@
 module ListViewModels {
     
     export namespace CompanyDataSources {
-        export class Default extends Coalesce.DataSource<ViewModels.Company> { }
         export class DefaultSource extends Coalesce.DataSource<ViewModels.Company> {
         }
+        export const Default = DefaultSource;
     }
     
     export class CompanyList extends Coalesce.BaseListViewModel<ViewModels.Company> {

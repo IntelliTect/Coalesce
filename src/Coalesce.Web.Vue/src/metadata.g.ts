@@ -612,6 +612,7 @@ export const Company = domain.types.Company = {
       type: "dataSource",
       name: "DefaultSource",
       displayName: "Default Source",
+      isDefault: true,
       props: {
       },
     },

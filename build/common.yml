@@ -72,6 +72,10 @@ jobs:
       packageType: 'sdk'
       version: '2.2.x'
 
+  - task: UseDotNet@2
+    inputs:
+      packageType: 'sdk'
+      version: '5.0.x'
 
   - task: DotNetCoreCLI@2
     displayName: 'dotnet restore'
@@ -138,7 +142,7 @@ jobs:
   - task: UseDotNet@2
     inputs:
       packageType: 'sdk'
-      version: '2.2.x'
+      version: '5.0.x'
 
   - task: DotNetCoreCLI@2
     displayName: 'dotnet restore'
@@ -147,7 +151,7 @@ jobs:
       verbosityRestore: normal
       projects: |
         '$(csproj)'
-        src/IntelliTect.Coalesce.Cli/*.csproj
+        src/IntelliTect.Coalesce.DotnetTool/*.csproj
 
   - script: npm ci
     displayName: 'Coalesce.Web: npm ci'

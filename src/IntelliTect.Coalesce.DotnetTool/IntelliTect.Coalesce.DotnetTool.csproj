@@ -1,5 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="../Cli.Common.Props" />
+  <Import Project="../Cli.Common.props" />
   
   <!--
     This builds the new style of .NET tools, aka a "local tool" or "global tool".

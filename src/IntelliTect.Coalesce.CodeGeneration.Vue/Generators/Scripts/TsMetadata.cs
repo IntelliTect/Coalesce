@@ -476,7 +476,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                             b.StringProp("name", "id");
                             b.StringProp("displayName", "Primary Key"); // TODO: Is this what we want? Also, i18n.
                             b.StringProp("role", "value");
-                            WriteTypeCommonMetadata(b, model.PrimaryKey.Type);
+                            WriteTypeCommonMetadata(b, model.PrimaryKey.Type, null);
                         }
                     }
 
@@ -578,33 +578,14 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
             b.StringProp("name", value.JsVariable);
             b.StringProp("displayName", value.DisplayName);
 
-            if (value.Type.IsDate)
-            {
-                var dateType = value.GetAttributeValue<DateTypeAttribute, DateTypes>(a => a.DateType);
-                switch (dateType)
-                {
-                    case DateTypes.DateOnly:
-                        b.StringProp("dateKind", "date");
-                        break;
-                    default:
-                        b.StringProp("dateKind", "datetime");
-                        break;
-                }
-
-                if (value.Type.IsDateTime)
-                {
-                    b.Prop("noOffset", "true");
-                }
-            }
-
-            WriteTypeCommonMetadata(b, value.Type);
+            WriteTypeCommonMetadata(b, value.Type, value);
         }
 
         /// <summary>
         /// Write metadata common to all type representations, 
         /// like properties, method parameters, method returns, etc.
         /// </summary>
-        private void WriteTypeCommonMetadata(TypeScriptCodeBuilder b, TypeViewModel type)
+        private void WriteTypeCommonMetadata(TypeScriptCodeBuilder b, TypeViewModel type, IValueViewModel definingMember)
         {
             void WriteTypeDiscriminator(string propName, TypeViewModel t)
             {
@@ -640,6 +621,25 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
             }
 
 
+            if (type.IsDate)
+            {
+                var dateType = definingMember.GetAttributeValue<DateTypeAttribute, DateTypes>(a => a.DateType);
+                switch (dateType)
+                {
+                    case DateTypes.DateOnly:
+                        b.StringProp("dateKind", "date");
+                        break;
+                    default:
+                        b.StringProp("dateKind", "datetime");
+                        break;
+                }
+
+                if (type.IsDateTime)
+                {
+                    b.Prop("noOffset", "true");
+                }
+            }
+
             WriteTypeDiscriminator("type", type);
             WriteTypeDef("typeDef", type);
 
@@ -656,7 +656,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                     b.StringProp("name", "$collectionItem");
                     b.StringProp("displayName", "");
                     b.StringProp("role", "value");
-                    WriteTypeCommonMetadata(b, type.PureType);
+                    WriteTypeCommonMetadata(b, type.PureType, definingMember);
                 }
             }
         }

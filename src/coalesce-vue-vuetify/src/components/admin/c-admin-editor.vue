@@ -39,7 +39,7 @@
           }"
         >
           <template #default>
-            <v-row v-for="prop in showProps" :key="prop.name" class="py-1">
+            <v-row v-for="prop in showProps" :key="prop.name" class="py-1 my-0">
               <v-col
                 cols="12"
                 md="2"

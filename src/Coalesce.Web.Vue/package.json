@@ -17,7 +17,7 @@
     "vue-class-component": "7.0.2",
     "vue-property-decorator": "8.1.0",
     "vue-router": "^3.3.4",
-    "vuetify": "^2.3.1"
+    "vuetify": "2.4.8"
   },
   "devDependencies": {
     "@babel/plugin-proposal-nullish-coalescing-operator": "^7.10.1",

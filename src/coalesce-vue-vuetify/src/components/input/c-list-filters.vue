@@ -172,6 +172,7 @@ interface FilterInfo {
   displayName: string,
   isDefined: boolean,
   isActive: boolean,
+  isNull: boolean,
   value?: any,
   propMeta?: Property
 }

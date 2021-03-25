@@ -1,12 +1,12 @@
 
 <template>
   <div class="c-method">
-    <v-row class="c-method--section c-method--params" v-if="filteredParams.length">
+    <v-row class="my-0 c-method--section c-method--params" v-if="filteredParams.length">
       <v-col>
         Parameters
       </v-col>
       <v-col class="py-0">
-        <v-row >
+        <v-row class="my-0">
           <v-col
             v-for="param in filteredParams"
             :key="param.name"
@@ -21,25 +21,8 @@
         </v-row>
       </v-col>
     </v-row>
-<!-- 
-    <v-row class="c-method--section c-method--execute">
-      <v-col>
-        Execute
-      </v-col>
-      <v-col>
-        <v-btn  
-          class="mr-3"
-          color="primary" 
-          @click="caller.invokeWithArgs()"
-          :loading="caller.isLoading">
-          Execute
-        </v-btn>
-        
-      </v-col>
-    </v-row> -->
 
-
-    <v-row class="c-method--section c-method--results">
+    <v-row class="my-0 c-method--section c-method--results">
       <v-col>
         <v-btn  
           color="primary" 

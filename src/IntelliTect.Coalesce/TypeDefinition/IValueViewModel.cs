@@ -11,6 +11,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
         string JsVariable { get; }
 
         string DisplayName { get; }
+        
+        string? Description { get; }
 
         TypeViewModel Type { get; }
 

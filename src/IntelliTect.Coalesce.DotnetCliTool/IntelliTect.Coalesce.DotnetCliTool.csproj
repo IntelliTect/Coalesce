@@ -1,5 +1,6 @@
 ﻿<Project>
   
+  <!-- Technique for overriding SDK targets from https://stackoverflow.com/a/47619786/2465631 -->
   <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
   
   <Import Project="../Cli.Common.props" />
@@ -26,6 +27,7 @@
     (donet/sdk issue #3115), we'll hack around their arbitrary limitation
     so we can keep building against newer frameworks.
   -->
+  <!-- Technique for overriding SDK targets from https://stackoverflow.com/a/47619786/2465631 -->
   <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
   <Target Name="_PackProjectToolValidation">
      <!-- 

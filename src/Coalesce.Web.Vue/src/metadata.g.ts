@@ -77,12 +77,14 @@ export const Case = domain.types.Case = {
     description: {
       name: "description",
       displayName: "Description",
+      description: "User-provided description of the issue",
       type: "string",
       role: "value",
     },
     openedAt: {
       name: "openedAt",
       displayName: "Opened At",
+      description: "Date and time when the case was opened",
       dateKind: "datetime",
       type: "date",
       role: "value",
@@ -100,6 +102,7 @@ export const Case = domain.types.Case = {
     assignedTo: {
       name: "assignedTo",
       displayName: "Assigned To",
+      description: "Person who originally reported the case",
       type: "model",
       get typeDef() { return (domain.types.Person as ModelType) },
       role: "referenceNavigation",

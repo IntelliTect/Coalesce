@@ -50,9 +50,11 @@ namespace Coalesce.Domain
         public string Title { get; set; }
 
         [Search]
+        [Display(Description = "User-provided description of the issue")]
         public string Description { get; set; }
 
         [DateType(), DefaultOrderBy(OrderByDirection = DefaultOrderByAttribute.OrderByDirections.Descending, FieldOrder = 1)]
+        [Display(Description = "Date and time when the case was opened")]
         public DateTimeOffset OpenedAt { get; set; }
 
         public int? AssignedToId { get; set; }
@@ -66,7 +68,7 @@ namespace Coalesce.Domain
 
         [ForeignKey("ReportedById")]
         [DtoExcludes("PersonListGen")]
-        [Display(Name = "Reported By")]
+        [Display(Name = "Reported By", Description = "Person who originally reported the case")]
         public Person ReportedBy { get; set; }
 
         [File("image/jpeg", nameof(ImageName), nameof(ImageHash), nameof(ImageSize))]

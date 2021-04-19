@@ -32,15 +32,15 @@
             </div>
             <div class="form-group">
                 <label class="col-md-4 control-label">Description</label>
-                <div class="col-md-8 prop-description">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.Description))</div>
+                <div class="col-md-8 prop-description">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.Description))<p class='help-block'>User-provided description of the issue</p></div>
             </div>
             <div class="form-group">
                 <label class="col-md-4 control-label">Opened At</label>
-                <div class="col-md-8 prop-openedAt">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.OpenedAt))</div>
+                <div class="col-md-8 prop-openedAt">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.OpenedAt))<p class='help-block'>Date and time when the case was opened</p></div>
             </div>
             <div class="form-group">
                 <label class="col-md-4 control-label">Assigned To</label>
-                <div class="col-md-7 prop-assignedTo">@(Knockout.SelectForObject<Coalesce.Domain.Case>(p => p.AssignedTo))</div>
+                <div class="col-md-7 prop-assignedTo">@(Knockout.SelectForObject<Coalesce.Domain.Case>(p => p.AssignedTo))<p class='help-block'>Person who originally reported the case</p></div>
                 <div class="col-md-1" data-bind="with: assignedTo">
                     <a data-bind="attr: {href: editUrl}" class="btn btn-default pull-right"><i class="fa fa-ellipsis-h "></i></a>
                 </div>

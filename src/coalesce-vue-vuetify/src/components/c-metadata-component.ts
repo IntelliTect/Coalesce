@@ -13,7 +13,8 @@ import {
   DataSourceType, 
 
   ViewModel, 
-  Domain 
+  Domain, 
+  AnyArgCaller
 } from 'coalesce-vue';
 
 export function getValueMeta(
@@ -169,6 +170,40 @@ export function getValueMeta(
   }
 }
 
+
+export function buildVuetifyAttrs(
+  valueMeta: Property | Value | null, 
+  model: Model<ClassType> | AnyArgCaller | null,
+  attrs?: {},
+  injections?: {[s: string]: any},
+): {[s: string]: any} {
+
+  if (!valueMeta) {
+    return {
+      ...injections?.['c-input-props'],
+      ...attrs,
+    }
+  }
+
+  const modelMeta = model ? model.$metadata : null;
+
+  return {
+    // If a label is not provided to the component, default to the displayName of the value. 
+    label: valueMeta?.displayName,
+    hint: valueMeta?.description,
+    persistentHint: !!valueMeta?.description,
+
+    rules: model && model instanceof ViewModel && valueMeta.name in (modelMeta as ModelType)!.props
+      ? model.$getRules(valueMeta.name)
+      : 'rules' in valueMeta && valueMeta.rules
+        ? Object.values(valueMeta.rules)
+        : undefined,
+
+    ...injections?.['c-input-props'],
+    ...attrs,
+  }
+}
+
 @Component({
   inject: {
     'c-input-props': { default: {} }
@@ -186,37 +221,14 @@ export default class extends Vue {
    * The corresponding property is specified via prop `for`,
    * and should be accessed via `valueMeta`
    */
-  @Prop({required: false, /*type: Object*/})
-  public model!: Model<ClassType>;
+  @Prop({required: false, default: null, /*type: Object*/})
+  public model!: Model<ClassType> | null;
 
-  @Prop({required: false, /*type: [String, Object]*/})
-  public for?: string | Property | Value;
+  @Prop({required: false, default: null, /*type: [String, Object]*/})
+  public for?: string | Property | Value | null;
 
   get inputBindAttrs() {
-    const model = this.model;
-    const modelMeta = model ? model.$metadata : null;
-    const valueMeta = this.valueMeta;
-
-    if (!valueMeta) {
-      return {
-        ...(this as any)['c-input-props'],
-        ...this.$attrs,
-      }
-    }
-
-    return {
-      // If a label is not provided to the component, default to the displayName of the value. 
-      label: valueMeta?.displayName,
-
-      rules: model && model instanceof ViewModel && valueMeta.name in modelMeta!.props
-        ? model.$getRules(valueMeta.name)
-        : 'rules' in valueMeta && valueMeta.rules
-          ? Object.values(valueMeta.rules)
-          : undefined,
-
-      ...(this as any)['c-input-props'],
-      ...this.$attrs,
-    }
+    return buildVuetifyAttrs(this.valueMeta, this.model, this.$attrs, this);
   }
 
   get modelMeta(): ClassType | null {

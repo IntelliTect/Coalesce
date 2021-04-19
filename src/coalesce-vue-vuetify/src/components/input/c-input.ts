@@ -1,7 +1,7 @@
 
 
 import Vue, { PropOptions } from "vue";
-import { getValueMeta } from "../c-metadata-component";
+import { buildVuetifyAttrs, getValueMeta } from "../c-metadata-component";
 import { Model, ViewModel, ClassType, DataSource, DataSourceType, ModelType, mapToModel, mapValueToModel, AnyArgCaller, ApiState } from "coalesce-vue";
 
 import CSelect from './c-select.vue'
@@ -109,19 +109,7 @@ export default Vue.extend({
     // attributes via c-metadata-component's inputBindAttrs.
     // We now need to compute them in order to render components 
     // that delegate directly to vuetify components.
-    const attrs = data.attrs = {
-      // If a label is not provided to the component, default to the displayName of the value. 
-      label: valueMeta.displayName,
-
-      rules: model && model instanceof ViewModel && valueMeta.name in (modelMeta as ModelType)!.props
-        ? model.$getRules(valueMeta.name)
-        : 'rules' in valueMeta && valueMeta.rules
-          ? Object.values(valueMeta.rules)
-          : undefined,
-
-      ...ctx.injections?.['c-input-props'],
-      ...ctxData.attrs,
-    } as Exclude<typeof ctxData.attrs, undefined>
+    const attrs = data.attrs = buildVuetifyAttrs(valueMeta, model, ctxData.attrs, ctx.injections)
 
     data.on.input = function(value: any) {
       if (model && valueMeta) {

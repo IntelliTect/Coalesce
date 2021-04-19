@@ -43,8 +43,8 @@
               <v-col
                 cols="12"
                 md="2"
-                class="py-0 font-weight-bold text-md-right"
-                align-self="center"
+                class="py-0 py-md-3 font-weight-bold text-md-right"
+                align-self="start"
               >
                 {{ prop.displayName }}
               </v-col>

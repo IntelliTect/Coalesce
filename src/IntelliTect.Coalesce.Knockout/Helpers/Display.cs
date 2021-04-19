@@ -20,7 +20,7 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
         {
             if (prop.Type.IsCollection && !prop.IsManytoManyCollection)
             {
-                var result = $@"<a data-bind = 'attr: {{href: {prop.ListEditorUrlName()}}}, text: {prop.JsVariableForBinding()}().length + "" - Edit""' class='btn btn-default btn-sm'></a>";
+                var result = $@"<a data-bind='attr: {{href: {prop.ListEditorUrlName()}}}, text: {prop.JsVariableForBinding()}().length + "" - Edit""' class='btn btn-default btn-sm'></a>";
                 return new HtmlString(result);
             }
             else if (editable && prop.IsClientWritable && !prop.IsInternalUse)
@@ -150,7 +150,8 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
         public static string PropertyHelperWithSurroundingDiv(PropertyViewModel prop, bool editable, string areaName = "", int cols = 8)
         {
             var propertyHelper = PropertyHelper(prop, editable, areaName);
-            return $"<div class=\"col-md-{cols} prop-{prop.JsonName}\">{propertyHelper}</div>";
+            string description = !string.IsNullOrWhiteSpace(prop.Description) ? $"<p class='help-block'>{prop.Description.EscapeForHtml()}</p>" : "";
+            return $"<div class=\"col-md-{cols} prop-{prop.JsonName}\">{propertyHelper}{description}</div>";
         }
     }
 }

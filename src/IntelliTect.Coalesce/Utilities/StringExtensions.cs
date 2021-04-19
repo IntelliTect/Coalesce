@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text.RegularExpressions;
+using System.Web;
 using Microsoft.CodeAnalysis.CSharp;
 
 namespace IntelliTect.Coalesce.Utilities
@@ -113,6 +114,12 @@ namespace IntelliTect.Coalesce.Utilities
         public static string? EscapeStringLiteralForTypeScript(this string? str) => str?
             .Replace(@"\", @"\\")
             .Replace("\"", "\\\"");
+
+#if NETCOREAPP
+        [return: System.Diagnostics.CodeAnalysis.NotNullIfNotNull("str")]
+#endif
+        public static string? EscapeForHtml(this string? str) =>
+            str == null ? null : HttpUtility.HtmlEncode(str);
 
         /// <summary>
         /// Convert a string to a valid C# identifier that conforms to language specification 2.4.2

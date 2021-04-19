@@ -577,6 +577,11 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
         {
             b.StringProp("name", value.JsVariable);
             b.StringProp("displayName", value.DisplayName);
+            
+            if (!string.IsNullOrWhiteSpace(value.Description))
+            {
+                b.StringProp("description", value.Description);
+            }
 
             WriteTypeCommonMetadata(b, value.Type, value);
         }
@@ -667,6 +672,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
         /// </summary>
         private class MethodReturnViewModel : IValueViewModel
         {
+#nullable enable
             public MethodReturnViewModel(MethodViewModel method)
             {
                 Method = method;
@@ -679,13 +685,15 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
 
             public string DisplayName => "Result"; // TODO: i18n
 
+            public string? Description => null;
+
             public TypeViewModel Type { get; }
 
             public TypeViewModel PureType => Type.PureType;
 
             public MethodViewModel Method { get; }
 
-            public object GetAttributeValue<TAttribute>(string valueName) where TAttribute : Attribute
+            public object? GetAttributeValue<TAttribute>(string valueName) where TAttribute : Attribute
                 => Method.GetAttributeValue<TAttribute>(valueName);
 
             public bool HasAttribute<TAttribute>() where TAttribute : Attribute

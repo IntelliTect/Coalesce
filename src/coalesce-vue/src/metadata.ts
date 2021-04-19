@@ -212,7 +212,7 @@ export type CustomType = ClassType | EnumType
  * Not be included in the standard unions of all `Value` kinds,
  * since its usage only applies to method returns - it should instead 
  * only be included in unions where its usage is applicable.
- * Also note that its `type` propety is not part of `TypeDiscriminator`.
+ * Also note that its `type` property is not part of `TypeDiscriminator`.
  */
 export interface VoidValue extends Metadata {
     readonly role: "value"
@@ -259,6 +259,7 @@ export interface ValueMeta<TType extends TypeDiscriminator> extends Metadata {
      */
     readonly role: ValueRole
     readonly type: TType
+    readonly description?: string
 }
 
 /**

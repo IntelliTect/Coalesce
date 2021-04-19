@@ -29,7 +29,7 @@ Coalesce also supports a number of the built-in :csharp:`System.ComponentModel.D
 [Display]
 .........
 
-The displayed name of a property, as well as the order in which it appears in generated views, can be set via the :csharp:`[Display]` attribute. By default, properties will be displayed in the order in which they are defined in their class.
+The displayed name and description of a property, as well as the order in which it appears in generated views, can be set via the :csharp:`[Display]` attribute. By default, properties will be displayed in the order in which they are defined in their class.
 
 [DisplayName]
 .............

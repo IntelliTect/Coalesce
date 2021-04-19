@@ -246,6 +246,11 @@ namespace IntelliTect.Coalesce.TypeDefinition
             Name.ToProperCase();
 
         /// <summary>
+        /// Returns the description from the DisplayAttribute, if present.
+        /// </summary>
+        public string? Description => this.GetAttributeValue<DisplayAttribute>(a => a.Description);
+
+        /// <summary>
         /// If true, there is an API controller that is serving this type of data.
         /// </summary>
         public bool HasValidValues => IsManytoManyCollection || ((Object?.IsDbMappedType ?? false) && IsPOCO);

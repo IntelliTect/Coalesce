@@ -44,6 +44,11 @@ namespace IntelliTect.Coalesce.TypeDefinition
             Name.ToProperCase();
 
         /// <summary>
+        /// Returns the description from the DisplayAttribute, if present.
+        /// </summary>
+        public string? Description => this.GetAttributeValue<DisplayAttribute>(a => a.Description);
+
+        /// <summary>
         /// True if this is a parameter to the method on the model that is not represented in the controller action signature.
         /// It should instead be passed to the method using a value already available 
         /// either property on the controller or a local variable in the body of the generated action.

@@ -46,6 +46,7 @@ export interface Case extends Model<typeof metadata.Case> {
   imageName: string | null
   imageSize: number | null
   imageHash: string | null
+  attachment: string | null
   attachmentName: string | null
   severity: string | null
   status: Statuses | null

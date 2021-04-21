@@ -9,10 +9,12 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Utils
     public class VueType
     {
         private readonly TypeViewModel type;
+        private readonly Flags flags;
 
-        public VueType(TypeViewModel type)
+        public VueType(TypeViewModel type, Flags flags = Flags.None)
         {
             this.type = type;
+            this.flags = flags;
         }
 
         public string TsType(string modelPrefix = null, bool viewModel = false)
@@ -29,7 +31,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Utils
 
         private string TsType(TypeViewModel type, string modelPrefix, bool viewModel)
         {
-            if (type.IsByteArray) return "string";
+            if (type.IsByteArray) return flags.HasFlag(Flags.RawBinary) ? "string | Uint8Array" : "string";
             if (type.IsCollection) return TsTypePlain(type.PureType, modelPrefix, viewModel) + "[]";
             return TsTypePlain(type, modelPrefix, viewModel);
         }
@@ -42,8 +44,17 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Utils
             if (type.IsEnum) return modelPrefix + type.NullableUnderlyingType.ClientTypeName;
             if (type.IsNumber) return "number";
             if (type.IsGuid) return "string";
-            if (type.IsFile) return "File";
             if (type.IsVoid) return "void";
+            if (type.IsFile)
+            {
+                return flags.HasFlag(Flags.RawBinary)
+                    ? "File"
+                    : throw new InvalidOperationException("File not supported in context that doesn't allow raw binary");
+            }
+            if (type.IsByteArray)
+            {
+                throw new InvalidOperationException("Collections of byte[] are not supported.");
+            }
             if (type.IsPOCO)
             {
                 string viewModelAppend = "";
@@ -56,6 +67,13 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Utils
             }
             if (type.IsClass) return type.PureType.Name;
             return "any";
+        }
+
+        [Flags]
+        public enum Flags
+        {
+            None = 0,
+            RawBinary = 1 << 0,
         }
     }
 }

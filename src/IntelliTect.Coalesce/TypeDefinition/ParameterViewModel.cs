@@ -79,83 +79,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public bool IsAnIncludeTree => Type.IsA<IncludeTree>();
 
-        /// <summary>
-        /// Returns the parameter to pass to the actual method accounting for DI.
-        /// </summary>
-        public string CsArgument
-        {
-            get
-            {
-                if (IsNonArgumentDI)
-                {
-                    // We expect these to either be present on the controller which we're generating for,
-                    // or in the contents of the generated action method.
-                    if (IsAutoInjectedContext) return "Db";
-                    if (IsAUser) return "User";
-                    if (IsAnIncludeTree) return "out includeTree";
-                }
-
-                if (IsDI)
-                {
-                    return CsParameterName;
-                }
-
-                var ret = CsParameterName;
-
-                if (Type.IsFile)
-                {
-                    ret = $"{ret} == null ? null : new File {{ Name = {ret}.FileName, ContentType = {ret}.ContentType, Length = {ret}.Length, Content = file.OpenReadStream() }} ";
-                }
-
-                if (Type.PureType.HasClassViewModel)
-                {
-                    if (Type.IsCollection)
-                    {
-                        ret = $"{CsParameterName}.Select(_m => _m.{nameof(Mapper.MapToModel)}(new {Type.PureType.FullyQualifiedName}(), _mappingContext))";
-                    }
-                    else
-                    {
-                        ret = $"{CsParameterName}.{nameof(Mapper.MapToModel)}(new {Type.FullyQualifiedName}(), _mappingContext)";
-                    }
-                }
-
-                if (Type.IsCollection)
-                {
-                    if (Type.IsArray)
-                        ret += ".ToArray()";
-                    else
-                        ret += ".ToList()";
-                }
-
-                return ret;
-            }
-        }
-
         public string PascalCaseName => Name.ToPascalCase();
 
         public bool ConvertsFromJsString => Type.IsNumber || Type.IsString || Type.IsGuid || Type.IsDate || Type.IsBool || Type.IsEnum;
-
-        public string CsDeclaration
-        {
-            get
-            {
-                string typeName;
-                if (Type.IsFile)
-                {
-                    typeName = new ReflectionTypeViewModel(typeof(Microsoft.AspNetCore.Http.IFormFile)).FullyQualifiedName;
-                }
-                else if (IsDI)
-                {
-                    typeName = Type.FullyQualifiedName;
-                }
-                else
-                {
-                    typeName = Type.DtoFullyQualifiedName;
-                }
-
-                return $"{(ShouldInjectFromServices ? "[FromServices] " : "")}{typeName} {CsParameterName}{(HasDefaultValue ? " = " + CsDefaultValue : "")}";
-            }
-        }
 
         public string JsVariable => Name.ToCamelCase();
         public string CsParameterName => Name.ToCamelCase();

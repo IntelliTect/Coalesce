@@ -133,6 +133,26 @@ namespace Coalesce.Web.Api
         }
 
         /// <summary>
+        /// Method: UploadByteArray
+        /// </summary>
+        [HttpPost("UploadByteArray")]
+        [Authorize]
+        public virtual async Task<ItemResult> UploadByteArray([FromServices] IDataSourceFactory dataSourceFactory, int id, byte[] file)
+        {
+            var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Case, Coalesce.Domain.Case>("Default");
+            var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
+            if (!itemResult.WasSuccessful)
+            {
+                return new ItemResult(itemResult);
+            }
+            var item = itemResult.Object;
+            item.UploadByteArray(file ?? await ((await Request.ReadFormAsync()).Files[nameof(file)]?.OpenReadStream().ReadAllBytesAsync(true) ?? Task.FromResult<byte[]>(null)));
+            await Db.SaveChangesAsync();
+            var _result = new ItemResult();
+            return _result;
+        }
+
+        /// <summary>
         /// Method: GetCaseSummary
         /// </summary>
         [HttpPost("GetCaseSummary")]
@@ -203,60 +223,6 @@ namespace Coalesce.Web.Api
             itemResult.Object.ImageHash = null;
             itemResult.Object.ImageSize = 0;
             itemResult.Object.Image = null;
-            await Db.SaveChangesAsync();
-            return Ok();
-        }
-
-        /// <summary>
-        /// File Download: Attachment
-        /// </summary>
-        [Authorize]
-        [HttpGet("Attachment")]
-        public virtual async Task<IActionResult> AttachmentGet(int id, IDataSource<Coalesce.Domain.Case> dataSource)
-        {
-            var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
-            if (itemResult.Object?.Attachment == null) return NotFound();
-            string contentType = "application/octet-stream";
-            if (!(new Microsoft.AspNetCore.StaticFiles.FileExtensionContentTypeProvider().TryGetContentType(itemResult.Object.AttachmentName, out contentType)))
-            {
-                contentType = "application/octet-stream";
-            }
-            return File(itemResult.Object.Attachment, contentType, itemResult.Object.AttachmentName);
-        }
-
-        /// <summary>
-        /// File Upload: Attachment
-        /// </summary>
-        [Authorize]
-        [HttpPut("Attachment")]
-        public virtual async Task<ItemResult<CaseDtoGen>> AttachmentPut(int id, IFormFile file, IDataSource<Coalesce.Domain.Case> dataSource, IBehaviors<Coalesce.Domain.Case> behaviors)
-        {
-            var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
-            if (!itemResult.WasSuccessful) return new ItemResult<CaseDtoGen>(itemResult);
-            using (var stream = new System.IO.MemoryStream())
-            {
-                await file.CopyToAsync(stream);
-                itemResult.Object.Attachment = stream.ToArray();
-                itemResult.Object.AttachmentName = file.FileName;
-                await Db.SaveChangesAsync();
-            }
-            var result = new ItemResult<CaseDtoGen>();
-            var mappingContext = new MappingContext(User);
-            result.Object = Mapper.MapToDto<Coalesce.Domain.Case, CaseDtoGen>(itemResult.Object, mappingContext, null);
-            return result;
-        }
-
-        /// <summary>
-        /// File Delete: Attachment
-        /// </summary>
-        [Authorize]
-        [HttpDelete("Attachment")]
-        public virtual async Task<IActionResult> AttachmentDelete(int id, IDataSource<Coalesce.Domain.Case> dataSource, IBehaviors<Coalesce.Domain.Case> behaviors)
-        {
-            var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
-            if (!itemResult.WasSuccessful) return NotFound();
-            itemResult.Object.AttachmentName = null;
-            itemResult.Object.Attachment = null;
             await Db.SaveChangesAsync();
             return Ok();
         }

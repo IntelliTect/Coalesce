@@ -158,33 +158,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public bool IsModelInstanceMethod => !IsStatic && !Parent.IsService;
 
         /// <summary>
-        /// Gets the CS parameters for this method call.
-        /// </summary>
-        public string CsParameters
-        {
-            get
-            {
-                var parameters = Parameters.Where(f => !f.IsNonArgumentDI).ToArray();
-                var outParameters = new List<string>();
-
-                // For entity instance methods, add an id that specifies the object to work on, and a data source factory.
-                if (IsModelInstanceMethod)
-                {
-                    outParameters.Add("[FromServices] IDataSourceFactory dataSourceFactory");
-                    outParameters.Add($"{Parent.PrimaryKey!.PureType.FullyQualifiedName} id");
-                }
-                outParameters.AddRange(parameters.Select(f => f.CsDeclaration));
-                return string.Join(", ", outParameters);
-            }
-        }
-
-        /// <summary>
-        /// Gets the CS arguments passed to this method call.
-        /// </summary>
-        public string CsArguments => string.Join(", ", Parameters.Select(f => f.CsArgument));
-
-
-        /// <summary>
         /// Returns the DisplayName Attribute or 
         /// puts a space before every upper class letter aside from the first one.
         /// </summary>

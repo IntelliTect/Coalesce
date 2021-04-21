@@ -37,6 +37,7 @@ module ViewModels {
         public imageName: KnockoutObservable<string | null> = ko.observable(null);
         public imageSize: KnockoutObservable<number | null> = ko.observable(null);
         public imageHash: KnockoutObservable<string | null> = ko.observable(null);
+        public attachment: KnockoutObservable<string | null> = ko.observable(null);
         public attachmentName: KnockoutObservable<string | null> = ko.observable(null);
         public severity: KnockoutObservable<string | null> = ko.observable(null);
         public status: KnockoutObservable<number | null> = ko.observable(null);
@@ -104,25 +105,6 @@ module ViewModels {
             $.ajax( {
                 type: "PUT",
                 url: this.coalesceConfig.baseApiUrl() + this.apiController + '/Image?id=' + this.caseKey(),
-                contentType: false,
-                processData: false,
-                data: formData,
-            })
-        }
-        
-        
-        /** URL for file 'Attachment' */
-        public attachmentUrl: KnockoutComputed<string> = ko.pureComputed(() => 
-            this.coalesceConfig.baseApiUrl() + this.apiController + '/Attachment?id=' + this.caseKey() + '&' + this.dataSource.getQueryString()
-        );
-        
-        /** Upload file 'Attachment' */
-        public attachmentUpload = (file: File): void => {
-            let formData = new FormData();
-            formData.append("file", file);
-            $.ajax( {
-                type: "PUT",
-                url: this.coalesceConfig.baseApiUrl() + this.apiController + '/Attachment?id=' + this.caseKey(),
                 contentType: false,
                 processData: false,
                 data: formData,
@@ -247,6 +229,46 @@ module ViewModels {
             };
         };
         
+        /** Methods and properties for invoking server method UploadByteArray. */
+        public readonly uploadByteArray = new Case.UploadByteArray(this);
+        public static UploadByteArray = class UploadByteArray extends Coalesce.ClientMethod<Case, void> {
+            public readonly name = 'UploadByteArray';
+            public readonly verb = 'POST';
+            
+            /** Calls server method (UploadByteArray) with the given arguments */
+            public invoke = (file: string | null, callback?: (result: void) => void, reload: boolean = true): JQueryPromise<any> => {
+                return this.invokeWithData({ id: this.parent[this.parent.primaryKeyName](), file: file }, callback, reload);
+            };
+            
+            /** Object that can be easily bound to fields to allow data entry for the method's parameters */
+            public args = new UploadByteArray.Args(); 
+            public static Args = class Args {
+                public file: KnockoutObservable<string | null> = ko.observable(null);
+            };
+            
+            /** Calls server method (UploadByteArray) with an instance of UploadByteArray.Args, or the value of this.args if not specified. */
+            public invokeWithArgs = (args = this.args, callback?: (result: void) => void, reload: boolean = true): JQueryPromise<any> => {
+                return this.invoke(args.file(), callback, reload);
+            }
+            
+            /** Invokes the method after displaying a browser-native prompt for each argument. */
+            public invokeWithPrompts = (callback?: (result: void) => void, reload: boolean = true): JQueryPromise<any> | undefined => {
+                var $promptVal: string | null = null;
+                var file: null = null;
+                return this.invoke(file, callback, reload);
+            };
+            
+            protected loadResponse = (data: Coalesce.ItemResult, callback?: (result: void) => void, reload: boolean = true) => {
+                this.result(data.object);
+                if (reload) {
+                    var result = this.result();
+                    this.parent.load(null, typeof(callback) == 'function' ? () => callback(result) : undefined);
+                } else if (typeof(callback) == 'function') {
+                    callback(this.result());
+                }
+            };
+        };
+        
         /** 
             Load the ViewModel object from the DTO.
             @param data: The incoming data object to load.
@@ -325,6 +347,7 @@ module ViewModels {
             this.imageName(data.imageName);
             this.imageSize(data.imageSize);
             this.imageHash(data.imageHash);
+            this.attachment(data.attachment);
             this.attachmentName(data.attachmentName);
             this.severity(data.severity);
             this.status(data.status);
@@ -357,6 +380,7 @@ module ViewModels {
             }
             dto.imageSize = this.imageSize();
             dto.imageHash = this.imageHash();
+            dto.attachment = this.attachment();
             dto.attachmentName = this.attachmentName();
             dto.severity = this.severity();
             dto.status = this.status();
@@ -457,6 +481,7 @@ module ViewModels {
             self.reportedBy.subscribe(self.autoSave);
             self.imageSize.subscribe(self.autoSave);
             self.imageHash.subscribe(self.autoSave);
+            self.attachment.subscribe(self.autoSave);
             self.attachmentName.subscribe(self.autoSave);
             self.severity.subscribe(self.autoSave);
             self.status.subscribe(self.autoSave);

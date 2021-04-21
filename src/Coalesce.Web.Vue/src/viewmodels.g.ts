@@ -17,6 +17,7 @@ export interface CaseViewModel extends $models.Case {
   imageName: string | null;
   imageSize: number | null;
   imageHash: string | null;
+  attachment: string | null;
   attachmentName: string | null;
   severity: string | null;
   status: $models.Statuses | null;
@@ -45,6 +46,17 @@ export class CaseViewModel extends ViewModel<$models.Case, $apiClients.CaseApiCl
     
     Object.defineProperty(this, 'uploadAttachment', {value: uploadAttachment});
     return uploadAttachment
+  }
+  
+  public get uploadByteArray() {
+    const uploadByteArray = this.$apiClient.$makeCaller(
+      this.$metadata.methods.uploadByteArray,
+      (c, file: string | Uint8Array | null) => c.uploadByteArray(this.$primaryKey, file),
+      () => ({file: null as string | Uint8Array | null, }),
+      (c, args) => c.uploadByteArray(this.$primaryKey, args.file))
+    
+    Object.defineProperty(this, 'uploadByteArray', {value: uploadByteArray});
+    return uploadByteArray
   }
   
   constructor(initialData?: DeepPartial<$models.Case> | null) {

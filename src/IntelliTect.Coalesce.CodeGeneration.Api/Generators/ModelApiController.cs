@@ -132,14 +132,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
             }
             foreach (var method in Model.ClientMethods)
             {
-                var returnType = method.ApiActionReturnTypeDeclaration;
-                if (!method.IsStatic || method.IsAwaitable)
-                {
-                    returnType = $"async Task<{returnType}>";
-                }
-
-                WriteMethodDeclarationPreamble(b, method);
-                using (b.Block($"{Model.ApiActionAccessModifier} virtual {returnType} {method.NameWithoutAsync} ({method.CsParameters})"))
+                using (WriteControllerActionBlock(b, method))
                 {
                     if (method.IsStatic)
                     {

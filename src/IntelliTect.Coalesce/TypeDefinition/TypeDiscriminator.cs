@@ -12,7 +12,8 @@
         Model,
         Object,
         Collection,
-        File
+        File,
+        Binary
     }
 
     public static class TypeDiscriminatorExtensions

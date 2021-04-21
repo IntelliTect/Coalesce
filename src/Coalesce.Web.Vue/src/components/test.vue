@@ -70,87 +70,92 @@
 
 <script lang="ts">
 
-import { Vue, Component, Watch } from 'vue-property-decorator';
-import { ApiClient, convertToModel, ModelType, ModelApiClient } from 'coalesce-vue'
-import { Person } from '../metadata.g';
-import * as metadata from '../metadata.g';
-import * as models from '../models.g';
+  import { Vue, Component, Watch } from 'vue-property-decorator';
+  import { ApiClient, convertToModel, ModelType, ModelApiClient } from 'coalesce-vue'
+  import { Person } from '../metadata.g';
+  import * as metadata from '../metadata.g';
+  import * as models from '../models.g';
 
-import { PersonViewModel, CaseViewModel, CompanyViewModel } from '../viewmodels.g'
-import { PersonApiClient } from '../api-clients.g';
+  import { PersonViewModel, CaseViewModel, CompanyViewModel } from '../viewmodels.g'
+  import { PersonApiClient } from '../api-clients.g';
 
 
-@Component({
-  name: 'admin-table-page',
-  components: { }
-})
-export default class extends Vue {
+  @Component({
+    name: 'admin-table-page',
+    components: {}
+  })
+  export default class extends Vue {
     metadata = metadata.Person
     company = new CompanyViewModel();
-  person: PersonViewModel = new PersonViewModel();
-  isLoading: boolean = false;
-  
-  pagination = {
-    sortBy: '', 
-    page: 1, 
-    rowsPerPage: 10, 
-    descending: false
-  };
-  count: number = 0;
-  search: string = "";
-  nextPage(){}
-  previousPage(){}
+    person: PersonViewModel = new PersonViewModel();
+    isLoading: boolean = false;
 
-  get showProps() { return Object
-    .values(metadata.Person.props)
-    .filter(p => p.role != "primaryKey" && p.role != "foreignKey"); 
-  };
+    pagination = {
+      sortBy: '',
+      page: 1,
+      rowsPerPage: 10,
+      descending: false
+    };
+    count: number = 0;
+    search: string = "";
+    nextPage() { }
+    previousPage() { }
 
-  get headers() { return this.showProps.map(o => ({text: o.displayName, value: o.name})) };
+    get showProps() {
+      return Object
+        .values(metadata.Person.props)
+        .filter(p => p.role != "primaryKey" && p.role != "foreignKey");
+    };
 
-  @Watch('pagination')
-  getData() {
-    this.isLoading = true;
+    get headers() { return this.showProps.map(o => ({ text: o.displayName, value: o.name })) };
 
-    new PersonApiClient()
-      .list({
-        page: this.pagination.page,
-        pageSize: this.pagination.rowsPerPage,
-        search: this.search,
-        orderBy: this.pagination.descending ? undefined : this.pagination.sortBy,
-        orderByDescending: this.pagination.descending ? this.pagination.sortBy : undefined,
-      })
-      .then(res => {
-        const listResult = res.data;
-        const list = listResult.list;
-        this.isLoading = false;
-        if (!list) return;
+    @Watch('pagination')
+    getData() {
+      this.isLoading = true;
 
-        this.items = list;
-        this.pagination.page = listResult.page;
-        this.pagination.rowsPerPage = listResult.pageSize;
-        this.count = listResult.totalCount;
-        
-        // this.person = new PersonViewModel(list[0]);
-      })
-  }
+      new PersonApiClient()
+        .list({
+          page: this.pagination.page,
+          pageSize: this.pagination.rowsPerPage,
+          search: this.search,
+          orderBy: this.pagination.descending ? undefined : this.pagination.sortBy,
+          orderByDescending: this.pagination.descending ? this.pagination.sortBy : undefined,
+        })
+        .then(res => {
+          const listResult = res.data;
+          const list = listResult.list;
+          this.isLoading = false;
+          if (!list) return;
+
+          this.items = list;
+          this.pagination.page = listResult.page;
+          this.pagination.rowsPerPage = listResult.pageSize;
+          this.count = listResult.totalCount;
+
+          // this.person = new PersonViewModel(list[0]);
+        })
+    }
 
     async mounted() {
-        await this.company.$load(1);
+      await this.company.$load(1);
 
-        await this.person.$load(1)
+      await this.person.$load(1)
 
-          //var caller = this.person!.$apiClient.$makeCaller("item", c => c.changeSpacesToDashesInName(1));
-          //caller.result
-    
-        this.person.$startAutoSave(this, { wait: 0 })
-    
+      //new CaseViewModel({ caseKey: 1 }).uploadByteArray(new Uint8Array([60, 61, 62, 63]))
+      //new CaseViewModel({ caseKey: 1 }).uploadByteArray("abcd")
+      new CaseViewModel({ caseKey: 1 }).uploadByteArray(null)
+
+      //var caller = this.person!.$apiClient.$makeCaller("item", c => c.changeSpacesToDashesInName(1));
+      //caller.result
+
+      this.person.$startAutoSave(this, { wait: 0 })
+
+    }
+
+
+
+    items: models.Person[] = [];
   }
-
-  
-
-  items: models.Person[] = [];
-}
 
 
 </script>

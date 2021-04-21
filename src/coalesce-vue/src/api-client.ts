@@ -37,7 +37,8 @@ import {
   mapToDto,
   DataSource,
   mapToModel,
-  mapToDtoFiltered
+  mapToDtoFiltered,
+  parseValue
 } from "./model";
 import { OwnProps, Indexable, objectToQueryString } from "./util";
 
@@ -583,8 +584,8 @@ export class ApiClient<T extends ApiRoutedType> {
       // The HTTP method has a body.
 
       query = undefined;
-      if (Object.values(method.params).some(p => p.type == "file")) {
-        // If the endpoint has any files, we need to craft a FormData.
+      if (Object.values(mappedParams).some(p => p instanceof Blob || p instanceof Uint8Array)) {
+        // If the endpoint has any files or raw binary, we need to craft a FormData.
         const formData = body = new FormData;
 
         for (const key in mappedParams) {
@@ -592,6 +593,9 @@ export class ApiClient<T extends ApiRoutedType> {
           if (value instanceof Blob) {
             // Add files normally.
             formData.append(key, value)
+          } else if (value instanceof Uint8Array) {
+            // Add raw binary as blobs
+            formData.append(key, new Blob([value]))
           } else {
             // For non-files, stringify to get properly formatted key/value pairs
             // and then merge them into the formdata.
@@ -605,7 +609,7 @@ export class ApiClient<T extends ApiRoutedType> {
           }
         }
       } else {
-        // No Files. just handle the params normally.
+        // No top-level special values - just handle the params normally.
         body = objectToQueryString(mappedParams)
       }
     } else {
@@ -683,13 +687,14 @@ export class ApiClient<T extends ApiRoutedType> {
    * @param params The values of the parameter to map
    */
   protected $mapParams(method: Method, params: { [paramName: string]: any }) {
-    const formatted: { [paramName: string]: ReturnType<typeof mapToDto> | File | Blob } = {};
+    const formatted: { [paramName: string]: ReturnType<typeof mapToDto> | File | Blob | Uint8Array } = {};
     for (var paramName in method.params) {
       const paramMeta = method.params[paramName];
       const paramValue = params[paramName];
 
-      if (paramMeta.type == "file") {
-        formatted[paramName] = paramValue as File | Blob | null
+      if (paramMeta.type == "file" || paramMeta.type == "binary") {
+        // Preserve top-level files and binary as their original format
+        formatted[paramName] = parseValue(paramValue, paramMeta)
       } else {
         formatted[paramName] = mapToDto(paramValue, paramMeta);
       }

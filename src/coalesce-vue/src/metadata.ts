@@ -29,7 +29,7 @@ export interface Domain {
 export type NativePrimitiveTypeDiscriminator = "string" | "number" | "boolean"
 
 /** Type discriminators of object types that exist natively in javascript. */
-export type NativeObjectTypeDiscriminator = "date" | "file"
+export type NativeObjectTypeDiscriminator = "date" | "file" | "binary"
 
 /** 
  * Type discriminators of types that do not have a `CustomType` representation in the metadata.
@@ -59,6 +59,7 @@ export type TypeDiscriminatorToType<T> =
 : T extends "boolean" ? boolean
 : T extends "date" ? Date
 : T extends "file" ? File
+: T extends "binary" ? (Uint8Array | string)
 : any
 
 
@@ -292,6 +293,13 @@ export interface FileValue extends ValueMeta<"file"> {
     readonly role: "value"
 }
 
+export interface BinaryValue extends ValueMeta<"binary"> { 
+    readonly role: "value"
+
+    /** True if the value only supports base64 representation (and not raw formats like ArrayBuffer) */
+    readonly base64?: boolean
+}
+
 /** Represents the usage of an enum */
 export interface EnumValue extends ValueMetaWithTypeDef<"enum", EnumType> { 
     readonly role: "value"
@@ -331,6 +339,7 @@ export type NonCollectionValue =
 | PrimitiveValue
 | DateValue
 | FileValue
+| BinaryValue
 | CustomTypeValue
 
 /** Union of all representations of the usage of a type */
@@ -389,6 +398,11 @@ export interface EnumProperty extends PropertyBase, EnumValue { }
 
 /** Represents an object property */
 export interface ObjectProperty extends PropertyBase, ObjectValue { }
+
+/** Represents a binary property */
+export interface BinaryProperty extends PropertyBase, BinaryValue {
+  readonly base64: true;
+}
 
 /** 
  * Represents a model property that simply exists as a value,
@@ -460,6 +474,7 @@ export type Property =
 | DateProperty
 | EnumProperty
 | ObjectProperty
+| BinaryProperty
 | ModelValueProperty
 | ModelReferenceNavigationProperty
 | CollectionProperty

@@ -91,6 +91,48 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
             b.Line($"{method.SecurityInfo.ExecuteAnnotation}");
         }
 
+
+        protected IDisposable WriteControllerActionBlock(CSharpCodeBuilder b, MethodViewModel method)
+        {
+            var parameters = method.Parameters.Where(f => !f.IsNonArgumentDI).ToArray();
+            var actionParameters = new List<string>();
+
+            // For entity instance methods, add an id that specifies the object to work on, and a data source factory.
+            if (method.IsModelInstanceMethod)
+            {
+                actionParameters.Add("[FromServices] IDataSourceFactory dataSourceFactory");
+                actionParameters.Add($"{method.Parent.PrimaryKey!.PureType.FullyQualifiedName} id");
+            }
+
+            actionParameters.AddRange(parameters.Select(param =>
+            {
+                string typeName;
+                if (param.Type.IsFile)
+                {
+                    typeName = new ReflectionTypeViewModel(typeof(Microsoft.AspNetCore.Http.IFormFile)).FullyQualifiedName;
+                }
+                else if (param.IsDI)
+                {
+                    typeName = param.Type.FullyQualifiedName;
+                }
+                else
+                {
+                    typeName = param.Type.DtoFullyQualifiedName;
+                }
+
+                return $"{(param.ShouldInjectFromServices ? "[FromServices] " : "")}{typeName} {param.CsParameterName}{(param.HasDefaultValue ? " = " + param.CsDefaultValue : "")}";
+            }));
+
+            var returnType = method.ApiActionReturnTypeDeclaration;
+            if (method.IsAwaitable || method.IsModelInstanceMethod || method.Parameters.Any(p => p.Type.IsByteArray))
+            {
+                returnType = $"async Task<{returnType}>";
+            }
+
+            WriteMethodDeclarationPreamble(b, method);
+            return b.Block($"{Model.ApiActionAccessModifier} virtual {returnType} {method.NameWithoutAsync} ({string.Join(", ", actionParameters)})");
+        }
+
         public const string MethodResultVar = "_methodResult";
         public const string MappingContextVar = "_mappingContext";
 
@@ -124,7 +166,82 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
             }
 
             var awaitSymbol = method.IsAwaitable ? "await " : "";
-            b.Line($"{awaitSymbol}{owningMember}.{method.Name}({method.CsArguments});");
+            b.Append($"{awaitSymbol}{owningMember}.{method.Name}(");
+
+            var parameters = method.Parameters.ToList();
+            using (b.Indented())
+            {
+                for (int i = 0; i < parameters.Count; i++)
+                {
+                    if (i != 0) b.Append(", ");
+                    //b.Line(); // Uncomment for parameter-per-line
+                    b.Append(GetMethodInvocationParameterExpression(parameters[i]));
+                }
+            }
+            //if (parameters.Any()) b.Line(); // Uncomment for parameter-per-line
+            b.Line(");");
+        }
+
+
+        /// <summary>
+        /// For a method invocation controller action, builds an expression for the given parameter
+        /// that maps the controller input to the argument of method being called.
+        /// </summary>
+        public string GetMethodInvocationParameterExpression(ParameterViewModel param)
+        {
+            if (param.IsNonArgumentDI)
+            {
+                // We expect these to either be present on the controller which we're generating for,
+                // or in the contents of the generated action method.
+                if (param.IsAutoInjectedContext) return "Db";
+                else if (param.IsAUser) return "User";
+                else if (param.IsAnIncludeTree) return "out includeTree";
+                else throw new ArgumentException("Unknown type of NonArgumentDI");
+            }
+
+            if (param.IsDI)
+            {
+                return param.CsParameterName;
+            }
+
+            var ret = param.CsParameterName;
+
+            if (param.Type.IsFile)
+            {
+                ret = $"{ret} == null ? null : new File {{ Name = {ret}.FileName, ContentType = {ret}.ContentType, Length = {ret}.Length, Content = file.OpenReadStream() }} ";
+            }
+
+            if (param.Type.IsByteArray)
+            {
+                // For binary data posted as a JS Blob, it comes across as a file.
+                // Such files must be manually pulled out of the form data
+                // because the model binder by default will only bind byte[]
+                // as base64 data. However, we want to support receiving either
+                // raw binary OR base64 without knowing ahead of time what we'll get.
+                ret += $" ?? await ((await Request.ReadFormAsync()).Files[nameof({param.CsParameterName})]?.OpenReadStream().ReadAllBytesAsync(true) ?? Task.FromResult<{param.Type.FullyQualifiedName}>(null))";
+            }
+
+            if (param.Type.PureType.HasClassViewModel)
+            {
+                if (param.Type.IsCollection)
+                {
+                    ret = $"{param.CsParameterName}.Select(_m => _m.{nameof(Mapper.MapToModel)}(new {param.Type.PureType.FullyQualifiedName}(), _mappingContext))";
+                }
+                else
+                {
+                    ret = $"{param.CsParameterName}.{nameof(Mapper.MapToModel)}(new {param.Type.FullyQualifiedName}(), _mappingContext)";
+                }
+            }
+
+            if (param.Type.IsCollection)
+            {
+                if (param.Type.IsArray)
+                    ret += ".ToArray()";
+                else
+                    ret += ".ToList()";
+            }
+
+            return ret;
         }
 
         /// <summary>

@@ -184,12 +184,13 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
 
         private static void WriteMethodCaller(TypeScriptCodeBuilder b, MethodViewModel method)
         {
-            string signature =
-                        string.Concat(method.ClientParameters.Select(f => $", {f.Name}: {new VueType(f.Type).TsType("$models")} | null"));
+            string signature = string.Concat(method.ClientParameters.Select(f => 
+                $", {f.Name}: {new VueType(f.Type, VueType.Flags.RawBinary).TsType("$models")} | null"
+            ));
 
             string argsConstructor =
                 "({" +
-                string.Concat(method.ClientParameters.Select(f => $"{f.Name}: null as {new VueType(f.Type).TsType("$models")} | null, ")) +
+                string.Concat(method.ClientParameters.Select(f => $"{f.Name}: null as {new VueType(f.Type, VueType.Flags.RawBinary).TsType("$models")} | null, ")) +
                 "})";
 
             string pkArg = method.IsModelInstanceMethod ? "this.$primaryKey, " : "";

@@ -36,6 +36,15 @@ export class CaseApiClient extends ModelApiClient<$models.Case> {
     return this.$invoke($method, $params, $config)
   }
   
+  public uploadByteArray(id: number, file: string | Uint8Array | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<void>> {
+    const $method = this.$metadata.methods.uploadByteArray
+    const $params =  {
+      id,
+      file,
+    }
+    return this.$invoke($method, $params, $config)
+  }
+  
   public getCaseSummary($config?: AxiosRequestConfig): AxiosPromise<ItemResult<$models.CaseSummary>> {
     const $method = this.$metadata.methods.getCaseSummary
     const $params =  {

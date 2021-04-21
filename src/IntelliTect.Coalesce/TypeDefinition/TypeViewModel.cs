@@ -93,7 +93,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public TypeDiscriminator TsTypeKind =>
             IsString ? TypeDiscriminator.String :
             IsGuid ? TypeDiscriminator.String :
-            IsByteArray ? TypeDiscriminator.String :
+            IsByteArray ? TypeDiscriminator.Binary :
             IsNumber ? TypeDiscriminator.Number :
             IsBool ? TypeDiscriminator.Boolean :
             IsDate ? TypeDiscriminator.Date :

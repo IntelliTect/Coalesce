@@ -592,77 +592,72 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
         /// </summary>
         private void WriteTypeCommonMetadata(TypeScriptCodeBuilder b, TypeViewModel type, IValueViewModel definingMember)
         {
-            void WriteTypeDiscriminator(string propName, TypeViewModel t)
+            var kind = type.TsTypeKind;
+            switch (kind)
             {
-                var kind = t.TsTypeKind;
-                switch (kind)
-                {
-                    case TypeDiscriminator.Unknown:
-                        // We assume any unknown props are strings.
-                        b.Line("// Type not supported natively by Coalesce - falling back to string.");
-                        b.StringProp(propName, "string");
-                        break;
+                case TypeDiscriminator.Unknown:
+                    // We assume any unknown props are strings.
+                    b.Line("// Type not supported natively by Coalesce - falling back to string.");
+                    b.StringProp("type", "string");
+                    break;
 
-                    default:
-                        b.StringProp(propName, kind.ToString().ToLowerInvariant());
-                        break;
-                }
+                default:
+                    b.StringProp("type", kind.ToString().ToLowerInvariant());
+                    break;
             }
 
-            void WriteTypeDef(string propName, TypeViewModel t)
+            switch (kind)
             {
-                var kind = t.TsTypeKind;
-                switch (kind)
-                {
-                    case TypeDiscriminator.Enum:
-                        b.Line($"get {propName}() {{ return domain.enums.{t.ClientTypeName} }},");
-                        break;
+                case TypeDiscriminator.Enum:
+                    b.Line($"get typeDef() {{ return domain.enums.{type.ClientTypeName} }},");
+                    break;
 
-                    case TypeDiscriminator.Model:
-                    case TypeDiscriminator.Object:
-                        b.Line($"get {propName}() {{ return {GetClassMetadataRef(t.ClassViewModel)} }},");
-                        break;
-                }
-            }
+                case TypeDiscriminator.Model:
+                case TypeDiscriminator.Object:
+                    b.Line($"get typeDef() {{ return {GetClassMetadataRef(type.ClassViewModel)} }},");
+                    break;
 
+                case TypeDiscriminator.Collection:
+                    // For collections, write the references to the underlying type.
+                    if (type.PureType.TsTypeKind == TypeDiscriminator.Collection)
+                    {
+                        throw new InvalidOperationException("Collections of collections aren't supported by Coalesce as exposed types");
+                    }
 
-            if (type.IsDate)
-            {
-                var dateType = definingMember.GetAttributeValue<DateTypeAttribute, DateTypes>(a => a.DateType);
-                switch (dateType)
-                {
-                    case DateTypes.DateOnly:
-                        b.StringProp("dateKind", "date");
-                        break;
-                    default:
-                        b.StringProp("dateKind", "datetime");
-                        break;
-                }
+                    using (b.Block($"itemType:", ','))
+                    {
+                        b.StringProp("name", "$collectionItem");
+                        b.StringProp("displayName", "");
+                        b.StringProp("role", "value");
+                        WriteTypeCommonMetadata(b, type.PureType, definingMember);
+                    }
+                    break;
 
-                if (type.IsDateTime)
-                {
-                    b.Prop("noOffset", "true");
-                }
-            }
+                case TypeDiscriminator.Date:
+                    var dateType = definingMember.GetAttributeValue<DateTypeAttribute, DateTypes>(a => a.DateType);
+                    switch (dateType)
+                    {
+                        case DateTypes.DateOnly:
+                            b.StringProp("dateKind", "date");
+                            break;
+                        default:
+                            b.StringProp("dateKind", "datetime");
+                            break;
+                    }
 
-            WriteTypeDiscriminator("type", type);
-            WriteTypeDef("typeDef", type);
+                    if (type.IsDateTime)
+                    {
+                        b.Prop("noOffset", "true");
+                    }
+                    break;
 
-            // For collections, write the references to the underlying type.
-            if (type.TsTypeKind == TypeDiscriminator.Collection)
-            {
-                if (type.PureType.TsTypeKind == TypeDiscriminator.Collection)
-                {
-                    throw new InvalidOperationException("Collections of collections aren't supported by Coalesce as exposed types");
-                }
+                case TypeDiscriminator.Binary:
+                    if (definingMember is PropertyViewModel)
+                    {
+                        b.Prop("base64", "true");
+                    }
+                    break;
 
-                using (b.Block($"itemType:", ','))
-                {
-                    b.StringProp("name", "$collectionItem");
-                    b.StringProp("displayName", "");
-                    b.StringProp("role", "value");
-                    WriteTypeCommonMetadata(b, type.PureType, definingMember);
-                }
             }
         }
 

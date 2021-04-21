@@ -20,7 +20,8 @@ import {
   ModelValue,
   ObjectValue,
   FileValue,
-  ModelType
+  ModelType,
+  BinaryValue
 } from "./metadata";
 import { Indexable, isNullOrWhitespace } from "./util";
 
@@ -60,6 +61,9 @@ abstract class Visitor<TValue = any, TArray = any[], TObject = any> {
       case "file":
         return this.visitFileValue(value, meta);
 
+      case "binary":
+        return this.visitBinaryValue(value, meta);
+
       default:
         return this.visitPrimitiveValue(value, meta);
     }
@@ -81,13 +85,15 @@ abstract class Visitor<TValue = any, TArray = any[], TObject = any> {
   
   protected abstract visitFileValue(value: any, meta: FileValue): TValue;
 
+  protected abstract visitBinaryValue(value: any, meta: BinaryValue): TValue;
+
   protected abstract visitEnumValue(value: any, meta: EnumValue): TValue;
 }
 
-function parseError(value: any, meta: { type: string; name: string }) {
+function parseError(value: any, meta: { type: string; name: string }, details?: string) {
   return new Error(`Encountered unparsable ${typeof value} \`${value}\` for ${
     meta.type
-  } '${meta.name}'`);
+  } '${meta.name}'. ${details || ""}`);
 }
 
 /**
@@ -115,6 +121,7 @@ export function parseValue(
 export function parseValue(value: any, meta: EnumValue): null | number;
 export function parseValue(value: any, meta: DateValue): null | Date;
 export function parseValue(value: any, meta: FileValue): null | Blob | File;
+export function parseValue(value: any, meta: BinaryValue): null | Uint8Array | string;
 export function parseValue(value: any, meta: ModelValue): null | object;
 export function parseValue(value: any, meta: ObjectValue): null | object;
 export function parseValue(value: any[], meta: CollectionValue): Array<any>;
@@ -208,6 +215,14 @@ export function parseValue(
 
     case "file":
       if (value instanceof Blob) return value;
+      throw parseError(value, meta);
+
+    case "binary":
+      if (typeof value == "string" || value instanceof Uint8Array) return value;
+      if (meta.base64 && typeof value !== "string") {
+        throw parseError(value, meta, "Value only allows base64 string representations.");
+      }
+      if (value instanceof ArrayBuffer) return new Uint8Array(value);
       throw parseError(value, meta);
   }
 }
@@ -333,6 +348,10 @@ class ModelConversionVisitor extends Visitor<any, any[] | null, any | null> {
   }
 
   protected visitFileValue(value: any, meta: FileValue) {
+    return parseValue(value, meta);
+  }
+
+  protected visitBinaryValue(value: any, meta: BinaryValue) {
     return parseValue(value, meta);
   }
 
@@ -486,6 +505,18 @@ class MapToDtoVisitor extends Visitor<
 
   protected visitFileValue(value: any, meta: FileValue): undefined {
     throw new Error("Files cannot be serialized to JSON.")
+  }
+
+  protected visitBinaryValue(value: any, meta: BinaryValue) {
+    const parsed = parseValue(value, meta);
+    if (parsed == null) return null;
+
+    if (typeof parsed == "string") {
+      // Assume strings in the position of a binary are base64.
+      return parsed;
+    }
+
+    throw new Error("Unexpected raw binary value in JSON context")
   }
 
   protected visitPrimitiveValue(value: any, meta: PrimitiveValue) {
@@ -755,6 +786,18 @@ class DisplayVisitor extends Visitor<
     }
 
     return null;
+  }
+
+  protected visitBinaryValue(value: any, meta: BinaryValue): string | null {
+    const parsed = parseValue(value, meta);
+    if (parsed == null) return null;
+
+    if (typeof parsed == "string") {
+      const bytesApprox = Math.ceil(3 * (parsed.length / 4));
+      return `${bytesApprox} bytes`
+    }
+
+    return `${parsed.byteLength} bytes`
   }
 
   protected visitPrimitiveValue(

@@ -24,6 +24,7 @@ namespace Coalesce.Web.Vue.Models
         private string _ImageName;
         private long? _ImageSize;
         private string _ImageHash;
+        private byte[] _Attachment;
         private string _AttachmentName;
         private string _Severity;
         private Coalesce.Domain.Case.Statuses? _Status;
@@ -87,6 +88,11 @@ namespace Coalesce.Web.Vue.Models
             get => _ImageHash;
             set { _ImageHash = value; Changed(nameof(ImageHash)); }
         }
+        public byte[] Attachment
+        {
+            get => _Attachment;
+            set { _Attachment = value; Changed(nameof(Attachment)); }
+        }
         public string AttachmentName
         {
             get => _AttachmentName;
@@ -142,6 +148,7 @@ namespace Coalesce.Web.Vue.Models
             this.ImageName = obj.ImageName;
             this.ImageSize = obj.ImageSize;
             this.ImageHash = obj.ImageHash;
+            this.Attachment = obj.Attachment;
             this.AttachmentName = obj.AttachmentName;
             this.Severity = obj.Severity;
             this.Status = obj.Status;
@@ -190,6 +197,7 @@ namespace Coalesce.Web.Vue.Models
             if (ShouldMapTo(nameof(ReportedById))) entity.ReportedById = ReportedById;
             if (ShouldMapTo(nameof(ImageSize))) entity.ImageSize = (ImageSize ?? entity.ImageSize);
             if (ShouldMapTo(nameof(ImageHash))) entity.ImageHash = ImageHash;
+            if (ShouldMapTo(nameof(Attachment))) entity.Attachment = Attachment;
             if (ShouldMapTo(nameof(AttachmentName))) entity.AttachmentName = AttachmentName;
             if (ShouldMapTo(nameof(Severity))) entity.Severity = Severity;
             if (ShouldMapTo(nameof(Status))) entity.Status = (Status ?? entity.Status);

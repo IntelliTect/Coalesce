@@ -83,7 +83,6 @@ namespace Coalesce.Domain
         public long ImageSize { get; set; }
         public string ImageHash { get; set; }
 
-        [File(NameProperty = nameof(AttachmentName))]
         public byte[] Attachment { get; set; }
         public string AttachmentName { get; set; }
 
@@ -163,6 +162,12 @@ namespace Coalesce.Domain
             await file.Content.CopyToAsync(ms);
             Attachment = ms.ToArray();
             AttachmentName = file.Name;
+        }
+
+        [Coalesce]
+        public void UploadByteArray(byte[] file)
+        {
+            Attachment = file;
         }
 
         public class AllOpenCases : StandardDataSource<Case, AppDbContext>

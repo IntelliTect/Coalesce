@@ -341,7 +341,9 @@ describe("ViewModel", () => {
       });
 
       // Start autosave on the whole tree (could have just as well done it on the advisor only)
-      student.$startAutoSave(vue, { deep: true, wait: 0 })
+      // We use a big delay because the only thing that matters here is that autosave
+      // is enabled. A save doesn't (and shouldn't) be actually performed during this test.
+      student.$startAutoSave(vue, { deep: true, wait: 1000000 })
 
       // Arbitrarily set the advisor as dirty. We don't actually need to modify a property.
       student.advisor!.$isDirty = true;

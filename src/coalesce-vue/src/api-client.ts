@@ -39,7 +39,7 @@ import {
   mapToModel,
   mapToDtoFiltered
 } from "./model";
-import { OwnProps, Indexable } from "./util";
+import { OwnProps, Indexable, objectToQueryString } from "./util";
 
 import axios, {
   AxiosPromise,
@@ -52,7 +52,6 @@ import axios, {
   AxiosInstance,
   Cancel
 } from "axios";
-import * as qs from "qs";
 
 /* Api Response Objects */
 
@@ -594,11 +593,11 @@ export class ApiClient<T extends ApiRoutedType> {
             // Add files normally.
             formData.append(key, value)
           } else {
-            // For non-files, stringify with qs to get properly formatted key/value pairs
+            // For non-files, stringify to get properly formatted key/value pairs
             // and then merge them into the formdata.
             // This is done because value could be a complex object that will result in 
             // lots of flattened key/value pairs
-            const formPairs = qs.stringify({[key]: value}).split("&");
+            const formPairs = objectToQueryString({[key]: value}).split("&");
             for (const pair of formPairs) {
               const [k,v] = pair.split("=")
               formData.append(decodeURIComponent(k), decodeURIComponent(v));
@@ -607,7 +606,7 @@ export class ApiClient<T extends ApiRoutedType> {
         }
       } else {
         // No Files. just handle the params normally.
-        body = qs.stringify(mappedParams)
+        body = objectToQueryString(mappedParams)
       }
     } else {
       // The HTTP method has no body.
@@ -649,7 +648,7 @@ export class ApiClient<T extends ApiRoutedType> {
     let cacheKey: string;
     
     if (method === "GET" && this._simultaneousGetCaching && !config) {
-      cacheKey = url + "?" + qs.stringify(parameters)
+      cacheKey = url + "?" + objectToQueryString(parameters)
       if (simultaneousGetCache.has(cacheKey)) {
         return simultaneousGetCache.get(cacheKey)!
       } else {
@@ -827,7 +826,7 @@ export class ModelApiClient<TModel extends Model<ModelType>> extends ApiClient<
 
     return AxiosClient.post(
       `/${this.$metadata.controllerRoute}/save`,
-      qs.stringify(mapToDtoFiltered(item, fields)),
+      objectToQueryString(mapToDtoFiltered(item, fields)),
       this.$options(params, config)
     ).then<AxiosItemResult<TModel>>(r =>
       this.$hydrateItemResult(r, this.$itemValueMeta)

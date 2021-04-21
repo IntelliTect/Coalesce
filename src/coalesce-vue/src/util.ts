@@ -75,3 +75,72 @@ export function parseDateUserInput(input: string, defaultDate: Date) {
 
   return new Date(input);
 }
+
+/** 
+ * Converts deep Javascript objects to URL encoded query strings.
+ * Code extracted from jQuery.param() and boiled down to bare metal js.
+ * Should handle deep/nested objects and arrays in the same manner as jQuery's ajax functionality.
+ * Origin: https://gist.github.com/dgs700/4677933
+ * Replaces NPM module "qs" after it became bloated with dependencies in a commit dated 3/18/2021.
+ * @license MIT
+ */
+export function objectToQueryString(a: Array<any> | { [s: string]: any } | null) {
+  var items: Array<any> = [];
+  const add = function (key: string, value: any) {
+    // If value is a function, invoke it and return its value
+    value = typeof value == "function" ? value() : value == null ? "" : value;
+    items[items.length] =
+      encodeURIComponent(key) +
+      "=" +
+      encodeURIComponent(value == null ? "" : value);
+  };
+
+  if (a == null) {
+    return "";
+  }
+
+  if (a instanceof Array) {
+    for (const name in a) {
+      add(name, a[name]);
+    }
+  } else {
+    for (const prefix in a) {
+      buildParams(prefix, a[prefix], add);
+    }
+  }
+
+  return items.join("&");
+}
+
+const rbracket = /\[\]$/;
+function buildParams(
+  prefix: string,
+  obj: any,
+  add: (key: string, value: any) => void
+) {
+  var name, i, l;
+  if (obj instanceof Array) {
+    for (i = 0, l = obj.length; i < l; i++) {
+      const v = obj[i];
+      if (rbracket.test(prefix)) {
+        // Treat each array item as a scalar.
+        add(prefix, v);
+      } else {
+        // Item is non-scalar (array or object), encode its numeric index.
+        buildParams(
+          prefix + "[" + (typeof v === "object" && v != null ? i : "") + "]",
+          v,
+          add
+        );
+      }
+    }
+  } else if (typeof obj == "object") {
+    // Serialize object item.
+    for (name in obj) {
+      buildParams(prefix + "[" + name + "]", obj[name], add);
+    }
+  } else {
+    // Serialize scalar item.
+    add(prefix, obj);
+  }
+}

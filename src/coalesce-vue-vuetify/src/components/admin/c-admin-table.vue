@@ -192,6 +192,10 @@ export default class extends Vue {
               // Then layer on any new params, overwriting any that got set to undefined previously.
               ...(mappedParams as any)
             }
+          }).catch(err => {
+            // Ignore errors about duplicate navigations. These are annoying and useless.
+            if (err.name === 'NavigationDuplicated') return;
+            throw err;
           });
         },
         { deep: true }

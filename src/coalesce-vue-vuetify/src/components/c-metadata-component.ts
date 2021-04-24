@@ -134,7 +134,7 @@ export function getValueMeta(
       }
     }
 
-    throw Error(`Could not resolve token '${forPart}'${forVal != forPart ? ` in '${forVal}'` : ''} from ${tailKind} '${tail?.name}'`)
+    throw Error(`Could not resolve token '${forPart}'${forVal != forPart ? ' in ' + forVal : ''} from ${tailKind} '${tail?.name}'`)
   }
 
   if (!tail) {

@@ -2,6 +2,7 @@
   "name": "coalesce-vue-vuetify",
   "version": "0.2.0",
   "main": "./dist/coalesce-vue-vuetify.common.js",
+  "module": "./dist/coalesce-vue-vuetify.esm.js",
   "typings": "./src/index.ts",
   "files": [
     "dist",
@@ -9,7 +10,7 @@
     "test"
   ],
   "scripts": {
-    "build": "vue-cli-service build --target lib --name coalesce-vue-vuetify ./src/index.ts",
+    "build": "rollup -c",
     "build-local-deps": "cd ../coalesce-vue && npm ci && npm run build",
     "test:unit": "vue-cli-service test:unit"
   },
@@ -31,29 +32,29 @@
   },
   "devDependencies": {
     "@babel/preset-env": "7.10.2",
-    "@vue/cli-plugin-babel": "4.5.15",
-    "@vue/cli-plugin-eslint": "4.5.15",
-    "@vue/cli-plugin-typescript": "4.5.15",
-    "@vue/cli-service": "4.5.15",
-    "@vue/eslint-config-typescript": "7.0.0",
-    "@vue/test-utils": "1.2.2",
+    "@rollup/plugin-babel": "^5.3.0",
+    "@rollup/plugin-typescript": "^8.2.1",
+    "@vue/babel-preset-app": "^4.5.12",
+    "@vue/eslint-config-typescript": "^5.0.2",
+    "@vue/test-utils": "^1.0.0-beta.31",
+    "autoprefixer": "^10.2.5",
     "coalesce-vue": "../coalesce-vue",
     "eslint": "^6.7.2",
     "eslint-plugin-vue": "^6.2.2",
+    "postcss": "^8.2.11",
+    "rollup": "^2.45.2",
+    "rollup-plugin-postcss": "^4.0.0",
+    "rollup-plugin-sourcemaps": "^0.6.3",
+    "rollup-plugin-typescript2": "^0.30.0",
+    "rollup-plugin-vue": "5.1.9",
+    "rollup-plugin-vuetify": "^0.2.4",
     "sass": "^1.26.1",
-    "sass-loader": "^8.0.2",
     "typescript": "4.4.3",
     "vue": "^2.6.11",
     "vue-cli-plugin-vuetify": "^2.0.3",
     "vue-router": "^3.1.5",
     "vue-template-compiler": "^2.6.11",
     "vuetify": "^2.2.4",
-    "vuetify-loader": "^1.4.3",
-    "webpack-node-externals": "2.5.2"
-  },
-  "postcss": {
-    "plugins": {
-      "autoprefixer": {}
-    }
+    "vuetify-loader": "^1.4.3"
   }
 }

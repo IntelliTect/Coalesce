@@ -3,6 +3,7 @@ using IntelliTect.Coalesce.Utilities;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace IntelliTect.Coalesce.TypeDefinition
@@ -47,6 +48,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// </para>
         /// </summary>
         public bool IsCollection => IsA(typeof(IEnumerable<>)) && !IsString && !IsByteArray;
+
+        public bool IsDictionary => IsA(typeof(IDictionary<,>));
 
         public abstract bool IsArray { get; }
 
@@ -291,9 +294,20 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     return ArrayType!;
                 }
 
-                if (IsGeneric && (IsCollection || IsNullable))
+                if (IsGeneric)
                 {
-                    return FirstTypeArgument!;
+                    if (IsCollection)
+                    {
+                        return (
+                            GenericArgumentsFor(typeof(ICollection<>))
+                            ?? GenericArgumentsFor(typeof(IEnumerable<>))
+                        )?[0]
+                        ?? FirstTypeArgument!;
+                    }
+                    if (IsNullable)
+                    {
+                        return FirstTypeArgument!;
+                    }
                 }
 
                 return this;
@@ -313,14 +327,16 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public abstract bool HasAttribute<TAttribute>() where TAttribute : Attribute;
 
-        public string DtoFullyQualifiedName => IsCollection
-            // We assume ICollection for all collections. If this doesn't work in a particular context,
-            // consider that whatever you're assigning to this type should probably be assignable to ICollection if it is indeed a collection.
-            ? $"ICollection<{PureType.DtoFullyQualifiedName}>" 
-            : (ClassViewModel != null ? ClassViewModel.DtoName : FullyQualifiedName);
+        public string DtoFullyQualifiedName => NullableTypeForDto(null, true);
 
-        public string NullableTypeForDto(string dtoNamespace, bool inCollection = false)
+        public string NullableTypeForDto(string? dtoNamespace, bool dontEmitNullable = false)
         {
+            if (IsDictionary)
+            {
+                var args = GenericArgumentsFor(typeof(IDictionary<,>))!;
+                return $"System.Collections.Generic.IDictionary<{args[0].NullableTypeForDto(dtoNamespace, true)}, {args[1].NullableTypeForDto(dtoNamespace, true)}>";
+            }
+
             if (IsCollection)
             {
                 var innerType = PureType.NullableTypeForDto(dtoNamespace, true);
@@ -328,6 +344,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 {
                     return $"{innerType}[]";
                 }
+
+                // We assume ICollection for all collections. If this doesn't work in a particular context,
+                // consider that whatever you're assigning to this type should probably be assignable to ICollection if it is indeed a collection.
                 return $"System.Collections.Generic.ICollection<{innerType}>";
             }
 
@@ -349,7 +368,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
             else
             {
-                if (inCollection || IsNullable || IsArray)
+                if (dontEmitNullable || IsNullable || IsArray)
                     return FullyQualifiedName;
                 else
                     return FullyQualifiedName + "?";

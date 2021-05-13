@@ -357,6 +357,7 @@ export interface CaseSummary extends Model<typeof metadata.CaseSummary> {
   caseCount: number | null
   closeCases: number | null
   description: string | null
+  testDict: any[] | null
 }
 export class CaseSummary {
   

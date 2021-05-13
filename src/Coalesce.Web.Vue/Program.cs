@@ -21,12 +21,13 @@ namespace Coalesce.Web.Vue
 
                 try
                 {
-                    SampleData.Initialize(services.GetService<AppDbContext>());
+                    SampleData.Initialize(services.GetRequiredService<AppDbContext>());
                 }
                 catch (Exception ex)
                 {
                     var logger = services.GetRequiredService<ILogger<Program>>();
                     logger.LogError(ex, "An error occurred seeding the DB.");
+                    throw;
                 }
             }
 

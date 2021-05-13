@@ -77,12 +77,12 @@ namespace Coalesce.Web.Vue.Api
         /// </summary>
         [HttpPost("GetSomeCases")]
         [Authorize]
-        public virtual ItemResult<ICollection<CaseDtoGen>> GetSomeCases()
+        public virtual ItemResult<System.Collections.Generic.ICollection<CaseDtoGen>> GetSomeCases()
         {
             IncludeTree includeTree = null;
             var _mappingContext = new MappingContext(User);
             var _methodResult = Coalesce.Domain.Case.GetSomeCases(Db);
-            var _result = new ItemResult<ICollection<CaseDtoGen>>();
+            var _result = new ItemResult<System.Collections.Generic.ICollection<CaseDtoGen>>();
             _result.Object = _methodResult?.ToList().Select(o => Mapper.MapToDto<Coalesce.Domain.Case, CaseDtoGen>(o, _mappingContext, includeTree)).ToList();
             return _result;
         }

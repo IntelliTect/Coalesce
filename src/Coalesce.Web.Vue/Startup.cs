@@ -95,7 +95,7 @@ namespace Coalesce.Web.Vue
                 endpoints.MapDefaultControllerRoute();
             });
 
-            app.MapWhen(x => !x.Request.Path.Value.StartsWith("/api"), builder =>
+            app.MapWhen(x => x.Request.Path.Value?.StartsWith("/api") == true, builder =>
             {
                 builder.UseRouting();
                 builder.UseEndpoints(endpoints =>

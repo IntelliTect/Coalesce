@@ -15,6 +15,20 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
         {
         }
 
+        protected string DtoNamespace
+        {
+            get
+            {
+                string namespaceName = Namespace;
+                if (!string.IsNullOrWhiteSpace(AreaName))
+                {
+                    namespaceName += "." + AreaName;
+                }
+                namespaceName += ".Models";
+                return namespaceName;
+            }
+        }
+
         public override void BuildOutput(CSharpCodeBuilder b)
         {
             var namespaces = new List<string>
@@ -33,20 +47,14 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                 b.Line($"using {ns};");
             }
 
-            string namespaceName = Namespace;
-            if (!string.IsNullOrWhiteSpace(AreaName))
-            {
-                namespaceName += "." + AreaName;
-            }
-            namespaceName += ".Models";
             b.Line();
-            using (b.Block($"namespace {namespaceName}"))
+            using (b.Block($"namespace {DtoNamespace}"))
             {
-                WriteDtoClass(b, namespaceName);
+                WriteDtoClass(b);
             }
         }
 
-        private void WriteDtoClass(CSharpCodeBuilder b, string namespaceName)
+        private void WriteDtoClass(CSharpCodeBuilder b)
         {
             using (b.Block($"public partial class {Model.DtoName} : GeneratedDto<{Model.FullyQualifiedName}>"))
             {
@@ -55,13 +63,13 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                 b.Line();
                 foreach (PropertyViewModel prop in Model.ClientProperties)
                 {
-                    b.Line($"private {prop.Type.NullableTypeForDto(namespaceName)} _{prop.Name};");
+                    b.Line($"private {prop.Type.NullableTypeForDto(DtoNamespace)} _{prop.Name};");
                 }
 
                 b.Line();
                 foreach (PropertyViewModel prop in Model.ClientProperties)
                 {
-                    using (b.Block($"public {prop.Type.NullableTypeForDto(namespaceName)} {prop.Name}"))
+                    using (b.Block($"public {prop.Type.NullableTypeForDto(DtoNamespace)} {prop.Name}"))
                     {
                         b.Line($"get => _{prop.Name};");
                         b.Line($"set {{ _{prop.Name} = value; Changed(nameof({prop.Name})); }}");
@@ -168,16 +176,25 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
             string targetProp = $"entity.{name}";
 
             string setter;
-            if (property.Object != null)
+            if (property.Type.IsDictionary)
+            {
+                // Dictionaries aren't officially supported by Coalesce.
+                // This only supports dictionaries of types that require no type mapping.
+                // This is only a stop-gap to bridge apparent functionality that existed in 2.x versions
+                // of Coalesce where Dictionaries apparently "accidentally" worked to a limited extent.
+                // There is no frontend support at all.
+                setter = $"{targetProp} = {name}?.ToDictionary(k => k.Key, v => v.Value);";
+            }
+            else if (property.Object != null)
             {
                 if (property.Type.IsCollection)
                 {
-                    string mapCall = $"MapToModel<{property.PureType.FullyQualifiedName}, {property.Object.DtoName}>(new {property.Object.FullyQualifiedName}(), context)";
+                    string mapCall = $"MapToModel<{property.PureType.FullyQualifiedName}, {property.PureType.NullableTypeForDto(DtoNamespace, true)}> (new {property.Object.FullyQualifiedName}(), context)";
                     setter = $"{targetProp} = {name}?.Select(f => f.{mapCall}).{(property.Type.IsArray ? "ToArray" : "ToList")}();";
                 }
                 else
                 {
-                    string mapCall = $"MapToModel<{property.PureType.FullyQualifiedName}, {property.Object.DtoName}>({targetProp} ?? new {property.Type.FullyQualifiedName}(), context)";
+                    string mapCall = $"MapToModel<{property.PureType.FullyQualifiedName}, {property.PureType.NullableTypeForDto(DtoNamespace, true)}>({targetProp} ?? new {property.Type.FullyQualifiedName}(), context)";
                     setter = $"{targetProp} = {name}?.{mapCall};";
                 }
             }

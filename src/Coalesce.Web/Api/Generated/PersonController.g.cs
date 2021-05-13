@@ -271,10 +271,10 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpPost("NamesStartingWith")]
         [Authorize]
-        public virtual ItemResult<ICollection<string>> NamesStartingWith(string characters)
+        public virtual ItemResult<System.Collections.Generic.ICollection<string>> NamesStartingWith(string characters)
         {
             var _methodResult = Coalesce.Domain.Person.NamesStartingWith(Db, characters);
-            var _result = new ItemResult<ICollection<string>>();
+            var _result = new ItemResult<System.Collections.Generic.ICollection<string>>();
             _result.Object = _methodResult?.ToList();
             return _result;
         }

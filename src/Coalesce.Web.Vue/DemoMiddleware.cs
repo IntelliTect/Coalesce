@@ -21,7 +21,7 @@ namespace Coalesce.Web.Vue
         public async Task Invoke(HttpContext context)
         {
             var validRoles = new List<string> { "Admin", "User", "None" };
-            var wasLoggedIn = context.User.Identity.IsAuthenticated;
+            var wasLoggedIn = context.User.Identity?.IsAuthenticated == true;
 
             var cookie = context.Request.Cookies.FirstOrDefault(c => c.Key == "SecurityTestRole");
             if (!cookie.Equals(default(KeyValuePair<string, string>))
@@ -49,7 +49,7 @@ namespace Coalesce.Web.Vue
                 }
             }
 
-            var isLoggedIn = context.User.Identity.IsAuthenticated;
+            var isLoggedIn = context.User.Identity?.IsAuthenticated == true;
             if (!wasLoggedIn && isLoggedIn) context.Response.Redirect("/");
             else await _next(context);
         }

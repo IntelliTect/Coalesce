@@ -61,7 +61,7 @@ namespace Coalesce.Web.Vue.Models
 
             if (ShouldMapTo(nameof(TempFahrenheit))) entity.TempFahrenheit = (TempFahrenheit ?? entity.TempFahrenheit);
             if (ShouldMapTo(nameof(Humidity))) entity.Humidity = (Humidity ?? entity.Humidity);
-            if (ShouldMapTo(nameof(Location))) entity.Location = Location?.MapToModel<Coalesce.Domain.Services.Location, LocationDtoGen>(entity.Location ?? new Coalesce.Domain.Services.Location(), context);
+            if (ShouldMapTo(nameof(Location))) entity.Location = Location?.MapToModel<Coalesce.Domain.Services.Location, Coalesce.Web.Vue.Models.LocationDtoGen>(entity.Location ?? new Coalesce.Domain.Services.Location(), context);
         }
     }
 }

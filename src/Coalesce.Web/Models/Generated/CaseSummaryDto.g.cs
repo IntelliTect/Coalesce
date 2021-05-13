@@ -18,6 +18,7 @@ namespace Coalesce.Web.Models
         private int? _CaseCount;
         private int? _CloseCases;
         private string _Description;
+        private System.Collections.Generic.IDictionary<string, int> _TestDict;
 
         public int? CaseSummaryId
         {
@@ -44,6 +45,11 @@ namespace Coalesce.Web.Models
             get => _Description;
             set { _Description = value; Changed(nameof(Description)); }
         }
+        public System.Collections.Generic.IDictionary<string, int> TestDict
+        {
+            get => _TestDict;
+            set { _TestDict = value; Changed(nameof(TestDict)); }
+        }
 
         /// <summary>
         /// Map from the domain object to the properties of the current DTO instance.
@@ -60,6 +66,7 @@ namespace Coalesce.Web.Models
             this.CaseCount = obj.CaseCount;
             this.CloseCases = obj.CloseCases;
             this.Description = obj.Description;
+            this.TestDict = obj.TestDict;
         }
 
         /// <summary>
@@ -76,6 +83,7 @@ namespace Coalesce.Web.Models
             if (ShouldMapTo(nameof(CaseCount))) entity.CaseCount = (CaseCount ?? entity.CaseCount);
             if (ShouldMapTo(nameof(CloseCases))) entity.CloseCases = (CloseCases ?? entity.CloseCases);
             if (ShouldMapTo(nameof(Description))) entity.Description = Description;
+            if (ShouldMapTo(nameof(TestDict))) entity.TestDict = TestDict?.ToDictionary(k => k.Key, v => v.Value);
         }
     }
 }

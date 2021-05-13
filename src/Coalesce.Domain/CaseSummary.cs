@@ -14,6 +14,8 @@ namespace Coalesce.Domain
         public int CloseCases { get; set; }
         public string? Description { get; set; }
 
+        public IDictionary<string, int> TestDict { get; set; } = new Dictionary<string, int>();
+
         [Coalesce]
         public static CaseSummary GetCaseSummary(AppDbContext db)
         {

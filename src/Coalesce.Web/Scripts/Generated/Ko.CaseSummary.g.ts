@@ -16,6 +16,7 @@ module ViewModels {
         public caseCount: KnockoutObservable<number | null> = ko.observable(null);
         public closeCases: KnockoutObservable<number | null> = ko.observable(null);
         public description: KnockoutObservable<string | null> = ko.observable(null);
+        public testDict: KnockoutObservableArray<any> = ko.observableArray([]);
         
         /** 
             Load the object from the DTO.
@@ -30,6 +31,7 @@ module ViewModels {
             this.caseCount(data.caseCount);
             this.closeCases(data.closeCases);
             this.description(data.description);
+            this.testDict(data.testDict);
             
         };
         
@@ -42,6 +44,7 @@ module ViewModels {
             dto.caseCount = this.caseCount();
             dto.closeCases = this.closeCases();
             dto.description = this.description();
+            dto.testDict = this.testDict();
             
             return dto;
         }

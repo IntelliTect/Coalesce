@@ -77,12 +77,12 @@ namespace Coalesce.Web.Api
         /// </summary>
         [HttpPost("GetCertainItems")]
         [Authorize]
-        public virtual ItemResult<ICollection<CompanyDtoGen>> GetCertainItems(bool isDeleted = false)
+        public virtual ItemResult<System.Collections.Generic.ICollection<CompanyDtoGen>> GetCertainItems(bool isDeleted = false)
         {
             IncludeTree includeTree = null;
             var _mappingContext = new MappingContext(User);
             var _methodResult = Coalesce.Domain.Company.GetCertainItems(Db, isDeleted);
-            var _result = new ItemResult<ICollection<CompanyDtoGen>>();
+            var _result = new ItemResult<System.Collections.Generic.ICollection<CompanyDtoGen>>();
             _result.Object = _methodResult?.ToList().Select(o => Mapper.MapToDto<Coalesce.Domain.Company, CompanyDtoGen>(o, _mappingContext, includeTree)).ToList();
             return _result;
         }

@@ -8,11 +8,8 @@ import { ViewModelCollection } from '../src/viewmodel';
 import { StudentViewModel, CourseViewModel, AdvisorViewModel, StudentListViewModel } from './targets.viewmodels';
 import { Student, Advisor, Course } from './targets.models';
 import * as metadata from './targets.metadata';
+import { delay } from './test-utils';
 
-
-async function waitFor(ms: number) {
-   await new Promise(resolve => setTimeout(resolve, ms));
-}
 
 function mockItemResult<T>(success: boolean, object: T) {
   return jest.fn().mockResolvedValue(<AxiosItemResult<T>>{data: {
@@ -267,7 +264,7 @@ describe("ViewModel", () => {
           )
         });
 
-      const waitTick = async () => await new Promise(resolve => setTimeout(resolve, tickLength))
+      const waitTick = () => delay(30)
 
       student.$startAutoSave(vue, { wait: tickLength/2 });
       expect(student.$isDirty).toBe(false);
@@ -410,7 +407,7 @@ describe("ViewModel", () => {
 
       studentModel.name = "NewName";
       student.$loadCleanData(studentModel);
-      await waitFor(10);
+      await delay(10);
 
       expect(saveMock).toBeCalledTimes(0);
     })
@@ -431,7 +428,7 @@ describe("ViewModel", () => {
 
       studentModel.advisor!.name = "NewName";
       student.$loadCleanData(studentModel);
-      await waitFor(10);
+      await delay(10);
       
       expect(saveMock).toBeCalledTimes(0);
     })
@@ -451,7 +448,7 @@ describe("ViewModel", () => {
 
       studentModel.courses![0].name = "NewName";
       student.$loadCleanData(studentModel);
-      await waitFor(10);
+      await delay(10);
       
       expect(saveMock).toBeCalledTimes(0);
     })
@@ -468,7 +465,7 @@ describe("ViewModel", () => {
       // Start auto save. Model shouldn't be dirty, so it shouldn't hit the API.
       expect(student.$isDirty).toBe(false);
       student.$startAutoSave(vue, {wait: 0});
-      await waitFor(10);
+      await delay(10);
       expect(saveMock).toBeCalledTimes(0);
 
       // Reset autosave, dirty the model, and restart autosave.
@@ -477,7 +474,7 @@ describe("ViewModel", () => {
       student.name += "2";
       expect(student.$isDirty).toBe(true);
       student.$startAutoSave(vue, {wait: 0});
-      await waitFor(10);
+      await delay(10);
       expect(saveMock).toBeCalledTimes(1);
     })
 
@@ -509,7 +506,7 @@ describe("ViewModel", () => {
       expect(student.$isDirty).toBe(false);
       expect(student.$primaryKey).toBeFalsy();
       student.$startAutoSave(vue, {wait: 0});
-      await waitFor(10);
+      await delay(10);
       expect(saveMock).toBeCalledTimes(1);
     })
 
@@ -533,7 +530,7 @@ describe("ViewModel", () => {
 
       student.$load(1);
       student.$startAutoSave(vue, {wait: 0});
-      await waitFor(10);
+      await delay(10);
       expect(saveMock).toBeCalledTimes(0);
     })
 
@@ -547,7 +544,7 @@ describe("ViewModel", () => {
 
       student.$startAutoSave(vue, {wait: 0});
       student.$load(1);
-      await waitFor(10);
+      await delay(10);
       expect(saveMock).toBeCalledTimes(0);
     })
 
@@ -562,12 +559,12 @@ describe("ViewModel", () => {
 
       viewModel.$startAutoSave(vue, {wait: 0});
       expect([...viewModel.$getErrors()]).toHaveLength(1)
-      await waitFor(10);
+      await delay(10);
       expect(saveMock).toBeCalledTimes(0);
 
       viewModel.name = "Bob";
       expect([...viewModel.$getErrors()]).toHaveLength(0)
-      await waitFor(10);
+      await delay(10);
       expect(saveMock).toBeCalledTimes(1);
     })
 
@@ -582,7 +579,7 @@ describe("ViewModel", () => {
       student.$startAutoSave(vue, {wait: 0});
 
       student.name = "bob";
-      await waitFor(100);
+      await delay(100);
       expect(saveMock).toBeCalledTimes(1);
     })
     
@@ -603,15 +600,15 @@ describe("ViewModel", () => {
       }, 5);
       
       // Our maxWait has been passed so we expect one save to have been made:
-      waitFor(330).then(() => expect(saveMock).toBeCalledTimes(1));
+      delay(330).then(() => expect(saveMock).toBeCalledTimes(1));
 
       // Stop user input. This will cause the next save to happen in `wait`ms (50):
-      waitFor(450).then(() => clearInterval(userInputSimulator));
+      delay(450).then(() => clearInterval(userInputSimulator));
 
       // The second save should have happened. Await this one so it blocks the test completion.
       // 550 was chosen because its less than 2x `maxWait`, but still more than `wait`ms after we
       // stopped user input.
-      await waitFor(550);
+      await delay(550);
       expect(saveMock).toBeCalledTimes(2);
     })
 
@@ -638,7 +635,7 @@ describe("ViewModel", () => {
         student.advisor!.name = "NewName";
         student.name = "NewName";
 
-        await waitFor(10);
+        await delay(10);
         
         // One save expected for each model that changed.
         expect(saveMock).toBeCalledTimes(3);
@@ -659,7 +656,7 @@ describe("ViewModel", () => {
           newModel.$apiClient.save = 
           jest.fn().mockResolvedValue(<AxiosItemResult<any>>{data: {wasSuccessful: true}});
 
-        await waitFor(10);
+        await delay(10);
         
         // Autosave should have triggered for the new object.
         expect(saveMock).toBeCalledTimes(1);
@@ -684,7 +681,7 @@ describe("ViewModel", () => {
 
         // Dirty the model to ensure that it has a reason to trigger.
         newModel.name = "bob";
-        await waitFor(10);
+        await delay(10);
         
         // Autosave should have triggered for the new object.
         expect(saveMock).toBeCalledTimes(1);

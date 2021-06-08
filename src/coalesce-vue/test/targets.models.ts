@@ -35,6 +35,20 @@ export class Student {
   }
 }
 
+export namespace Student {
+  export namespace DataSources {
+    
+    export class Search implements DataSource<typeof metadata.Student.dataSources.search> {
+      readonly $metadata = metadata.Student.dataSources.search
+      nameStart: string | null = null
+    }
+    
+    export class DefaultSource implements DataSource<typeof metadata.Student.dataSources.defaultSource> {
+      readonly $metadata = metadata.Student.dataSources.defaultSource
+    }
+  }
+}
+
 export interface Advisor extends Model<typeof metadata.Advisor> {
   advisorId: number | null
   name: string | null

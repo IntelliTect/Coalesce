@@ -119,7 +119,6 @@ export const Student = domain.types.Student = {
     return this.props.studentId;
   },
   controllerRoute: "Students",
-  dataSources: {},
   methods: {
     personCount: {
       name: "personCount",
@@ -152,6 +151,27 @@ export const Student = domain.types.Student = {
           displayName: "Primary Key",
           role: "value",
           type: "number",
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        role: "value",
+        type: "string",
+      },
+    },
+    getWithObjParam: {
+      name: "getWithObjParam",
+      displayName: "setAdvisor",
+      transportType: "item",
+      httpMethod: "GET",
+      params: {
+        advisor: {
+          name: "advisor",
+          displayName: "Advisor",
+          type: "model",
+          role: "value",
+          typeDef: Advisor
         },
       },
       return: {
@@ -249,7 +269,30 @@ export const Student = domain.types.Student = {
       get principalType() { return domain.types.Advisor as ModelType },
       get principalKey() { return Advisor.keyProp as PrimaryKeyProperty }
     }
-  }
+  },
+  dataSources: {
+    search: {
+      type: "dataSource",
+      name: "Search",
+      displayName: "Search",
+      props: {
+        nameStart: {
+          name: "nameStart",
+          displayName: "Name Start",
+          type: "string",
+          role: "value",
+        },
+      },
+    },
+    defaultSource: {
+      type: "dataSource",
+      name: "DefaultSource",
+      displayName: "Default Source",
+      isDefault: true,
+      props: {
+      },
+    },
+  },
 };
 
 export const DisplaysStudent = domain.types.DisplaysStudent = <ObjectType>{

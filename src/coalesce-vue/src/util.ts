@@ -87,8 +87,7 @@ export function parseDateUserInput(input: string, defaultDate: Date) {
 export function objectToQueryString(a: Array<any> | { [s: string]: any } | null) {
   var items: Array<any> = [];
   const add = function (key: string, value: any) {
-    // If value is a function, invoke it and return its value
-    value = typeof value == "function" ? value() : value == null ? "" : value;
+    value = value == null ? "" : value;
     items[items.length] =
       encodeURIComponent(key) +
       "=" +
@@ -100,12 +99,14 @@ export function objectToQueryString(a: Array<any> | { [s: string]: any } | null)
   }
 
   if (a instanceof Array) {
-    for (const name in a) {
-      add(name, a[name]);
+    for (let i = 0, l = a.length; i < l; i++) {
+      add(i.toString(), a[i]);
     }
   } else {
     for (const prefix in a) {
-      buildParams(prefix, a[prefix], add);
+      if (a.hasOwnProperty(prefix)) {
+        buildParams(prefix, a[prefix], add);
+      }
     }
   }
 
@@ -137,7 +138,9 @@ function buildParams(
   } else if (typeof obj == "object") {
     // Serialize object item.
     for (name in obj) {
-      buildParams(prefix + "[" + name + "]", obj[name], add);
+      if (obj.hasOwnProperty(name)) {
+        buildParams(prefix + "[" + name + "]", obj[name], add);
+      }
     }
   } else {
     // Serialize scalar item.

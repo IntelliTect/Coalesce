@@ -622,7 +622,7 @@ export class ApiClient<T extends ApiRoutedType> {
     return this._possiblyCachedRequest(
       method.httpMethod,
       url,
-      params,
+      mappedParams,
       config,
       () => AxiosClient.request({
           method: method.httpMethod,

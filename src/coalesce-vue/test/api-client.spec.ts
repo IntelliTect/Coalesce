@@ -3,11 +3,12 @@
 import Vue from 'vue';
 
 import { ItemMethod } from '../src/metadata'
-import { AxiosClient, ItemResult, ItemResultPromise } from '../src/api-client'
+import { AxiosClient, ItemResult, ItemResultPromise, ListParameters, AxiosListResult } from '../src/api-client'
 import { StudentApiClient } from './targets.apiclients';
 import { Student as StudentMeta } from './targets.metadata'
-import { AxiosError, AxiosResponse } from 'axios';
-import { Student } from './targets.models';
+import { AxiosError, AxiosResponse, AxiosAdapter } from 'axios';
+import { Student, Advisor } from './targets.models';
+import { delay } from './test-utils';
 
 
 function makeEndpointMock() {
@@ -27,6 +28,89 @@ describe("error handling", () => {
 
     await expect(new StudentApiClient().get(1))
       .rejects.toThrow("Unexpected raw string response from server.")
+  })
+})
+
+describe("$withSimultaneousRequestCaching", () => {
+  test("uses proper cache key for standard method", async () => {
+    const mock = AxiosClient.defaults.adapter = 
+      jest.fn().mockImplementation(async () => {
+        // Delay so the calls don't complete instantly (which would subvert request caching).
+        await delay(30);
+        return <AxiosListResult<Student>>{
+          data: {wasSuccessful: true, list: [] as Student[], page: 1, pageCount: 0, pageSize: 10 },
+          status: 200
+        }
+      })
+
+    var client = new StudentApiClient()
+      .$withSimultaneousRequestCaching();
+
+    const invoker = (nameStart: string) => {
+      const params = new ListParameters;
+      const ds = params.dataSource = new Student.DataSources.Search
+      ds.nameStart = nameStart
+      params.fields = ["name", "birthDate"];
+      return client.list(params);
+    }
+
+    // Act
+    await Promise.all([
+      invoker("bob"),
+      invoker("bob"),
+      invoker("steve"),
+      invoker("steve"),
+      invoker("bob"),
+    ])
+
+    // Assert
+    expect(mock).toBeCalledTimes(2); // 2 distinct sets of parameters => 2 calls
+    const actualParams = mock.mock.calls[0] as Parameters<AxiosAdapter>;
+    expect(actualParams[0].params["dataSource"]).toBe("Search")
+    expect(actualParams[0].params["dataSource.nameStart"]).toBe("bob")
+    expect(actualParams[0].params["fields"]).toBe("name,birthDate")
+    expect(actualParams[0].params["page"]).toBe("1")
+    expect(actualParams[0].params["pageSize"]).toBe('10')
+  })
+
+
+  test("uses proper cache key for custom method", async () => {
+    const mock = AxiosClient.defaults.adapter = 
+      jest.fn().mockImplementation(async () => {
+        // Delay so the calls don't complete instantly (which would subvert request caching).
+        await delay(30);
+        return <AxiosResponse<any>>{
+          data: {wasSuccessful: true, object: ''},
+          status: 200
+        }
+      })
+
+    var client = new StudentApiClient()
+      .$withSimultaneousRequestCaching();
+
+    const invoker = (advisorId: number) => client.$invoke(
+      StudentMeta.methods.getWithObjParam,
+      { advisor: new Advisor({name: 'Ad Visor', advisorId}) }
+    )
+
+    // Act
+    await Promise.all([
+      invoker(3),
+      invoker(3),
+      invoker(4),
+      invoker(4),
+    ])
+
+    // Assert
+    expect(mock).toBeCalledTimes(2); // 2 distinct sets of parameters => 2 calls
+    const actualParams = mock.mock.calls[0] as Parameters<AxiosAdapter>;
+    expect(actualParams[0].params).toMatchObject({
+      "advisor": {
+        "advisorId": 3, 
+        "name": "Ad Visor", 
+        "studentWrapperObject": null
+      }
+    })
   })
 })
 
@@ -107,9 +191,6 @@ describe("$invoke", () => {
 })
 
 describe("$makeCaller", () => {
-
-  const wait = async (wait: number) => await new Promise(resolve => setTimeout(resolve, wait))
-
   test("passes parameters to invoker func", () => {
     const endpointMock = makeEndpointMock();
     const caller = new StudentApiClient().$makeCaller("item", (c, num: number) => {
@@ -155,7 +236,7 @@ describe("$makeCaller", () => {
       caller: new StudentApiClient()
         .$makeCaller("item", function(this: any, c) { return endpointMock(42) })
         .onFulfilled(async () => {
-          await wait(50);
+          await delay(50);
           awaited = true;
         })
     }
@@ -171,7 +252,7 @@ describe("$makeCaller", () => {
       caller: new StudentApiClient()
         .$makeCaller("item", function(this: any, c) { throw Error() })
         .onRejected(async () => {
-          await wait(50);
+          await delay(50);
           awaited = true;
         })
     }
@@ -237,7 +318,7 @@ describe("$makeCaller", () => {
     const endpointMock = makeEndpointMock();
     const caller = new StudentApiClient()
       .$makeCaller("item", async (c, param: number) => { 
-        await wait(20)
+        await delay(20)
         return await endpointMock(param) 
       })
       .setConcurrency("debounce")
@@ -266,7 +347,7 @@ describe("$makeCaller", () => {
     const endpointMock = makeEndpointMock();
     const caller = new StudentApiClient()
       .$makeCaller("item", async (c, param: number) => { 
-        await wait(20)
+        await delay(20)
         // endpointMock in this case is just being used to record our parameter's value.
         // In a real world case, the endpoint itself would throw.
         await endpointMock(param)
@@ -311,7 +392,7 @@ describe("$makeCaller", () => {
     
     AxiosClient.defaults.adapter = 
       jest.fn().mockImplementation(async () => {
-        await wait(20);
+        await delay(20);
         return <AxiosResponse<any>>{
           data: { wasSuccessful: true, object: { personId: 1 }},
           status: 200
@@ -349,13 +430,7 @@ describe("$makeCaller", () => {
 
 
 describe("$makeCaller with args object", () => {
-  
-  const wait = async (wait: number) => await new Promise(resolve => setTimeout(resolve, wait))
-
-
   describe.each<"item" | "list">(["item", "list"])("for %s transport", (type) => {
-
-
     test("uses own args if args not specified", () => {
       const endpointMock = makeEndpointMock();
       const caller = new StudentApiClient().$makeCaller(
@@ -440,7 +515,7 @@ describe("$makeCaller with args object", () => {
           (c, num: number) => endpointMock(num),
           () => ({num: null as number | null}),
           async (c, args) => {
-            await wait(20)
+            await delay(20)
             return await endpointMock(args.num) 
           },
         )

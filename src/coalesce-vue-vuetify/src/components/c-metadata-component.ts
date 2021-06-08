@@ -191,7 +191,13 @@ export function buildVuetifyAttrs(
     // If a label is not provided to the component, default to the displayName of the value. 
     label: valueMeta?.displayName,
     hint: valueMeta?.description,
-    persistentHint: !!valueMeta?.description,
+
+    // Normalize multi-word name based on what might exist in `attrs`
+    // (so that it can be overridden using either casing style).
+    // Use kebab style if the camel version isn't detected.
+    [attrs && 'persistentHint' in attrs 
+      ? 'persistentHint' 
+      : 'persistent-hint']: !!valueMeta?.description,
 
     rules: model && model instanceof ViewModel && valueMeta.name in (modelMeta as ModelType)!.props
       ? model.$getRules(valueMeta.name)

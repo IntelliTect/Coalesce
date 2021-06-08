@@ -119,9 +119,9 @@ function buildParams(
   obj: any,
   add: (key: string, value: any) => void
 ) {
-  var name, i, l;
+  var name;
   if (obj instanceof Array) {
-    for (i = 0, l = obj.length; i < l; i++) {
+    for (let i = 0, l = obj.length; i < l; i++) {
       const v = obj[i];
       if (rbracket.test(prefix)) {
         // Treat each array item as a scalar.

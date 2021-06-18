@@ -82,12 +82,11 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
                         foreach (var prop in Model.AdminPageProperties.Where(f => !f.IsHidden(HiddenAttribute.Areas.List)).OrderBy(f => f.EditorOrder))
                         {
                             if (!prop.Type.IsCollection)
-                            {
-                                string sortIconVisibleLogic = $"orderBy() != '{prop.Name}' &&  orderByDescending() != '{prop.Name}'";
+                            {                           
                                 using (b.TagBlock("th", "sortable-header", dataBind: $"click: function(){{orderByToggle('{prop.Name}')}}"))
                                 {
                                     b.Line($"<span>{prop.DisplayName}&nbsp;&nbsp;");
-                                    b.Line($@"<i class=""fa"" data-bind=""css:{{'fa-caret-up': orderBy() == '{prop.Name}', 'fa-caret-down': orderByDescending() == '{prop.Name}', 'fa-sort': {sortIconVisibleLogic} }}"" style =""float: right; padding: .3em 0 0 0 ""></i>");
+                                    b.Line($@"<i class=""fa"" data-bind=""css: orderBy() == '{prop.Name}' ? 'fa-caret-up' : orderByDescending() == '{prop.Name}' ? 'fa-caret-down' : 'fa-sort'"" style=""float: right; padding: .3em 0 0 0 ""></i>");
                                     b.Line("</span>");
                                 }
                             }

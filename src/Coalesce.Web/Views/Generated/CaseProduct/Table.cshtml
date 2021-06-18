@@ -22,6 +22,9 @@
     .coalesce-upload-icon {
         cursor: pointer;
     }
+    .fa-sort {
+        color: lightgray;
+    }
 </style>
 <div class="table-view obj-caseProduct">
     <div class="table-view-header">
@@ -66,48 +69,52 @@
     <hr />
     <div class="card table-view-body">
         <div class="card-body">
-            <table class="table @(ViewBag.Editable ? "editable" : "" )">
-                <thead>
-                    <tr>
-                        <th class="sortable-header" data-bind="click: function(){orderByToggle('Case')}">
-                            Case
-                            <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'Case', 'fa-caret-down': orderByDescending() == 'Case'}"></i>
-                        </th>
-                        <th class="sortable-header" data-bind="click: function(){orderByToggle('Product')}">
-                            Product
-                            <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'Product', 'fa-caret-down': orderByDescending() == 'Product'}"></i>
-                        </th>
-                        <th style="width: 1%">
-                        </th>
-                    </tr>
-                </thead>
-                <tbody data-bind="foreach: items">
-                    <tr data-bind="css: {'btn-warning': errorMessage()}, attr: {id: caseProductId}">
-                        @if (@ViewBag.Editable)
-                        {
-                            <td class="prop-case">@(Knockout.SelectForObject<Coalesce.Domain.CaseProduct>(p => p.Case))</td>
-                            <td class="prop-product">@(Knockout.SelectForObject<Coalesce.Domain.CaseProduct>(p => p.Product))</td>
-                        }
-                        else
-                        {
-                            <td class="prop-case">@(Knockout.DisplayFor<Coalesce.Domain.CaseProduct>(p => p.Case, true))</td>
-                            <td class="prop-product">@(Knockout.DisplayFor<Coalesce.Domain.CaseProduct>(p => p.Product, true))</td>
-                        }
-                        <td>
-                            <!-- Editor buttons -->
-                            <div class="btn-group pull-right" role="group" style="display: inline-flex">
-                                <a class="btn btn-sm btn-default" data-bind="attr: { href: editUrl }">
-                                    <i class="fa fa-pencil"></i>
-                                </a>
-                                <button class="btn btn-sm btn-danger" data-bind="click: deleteItemWithConfirmation">
-                                    <i class="fa fa-remove"></i>
-                                </button>
-                            </div>
-                            <div class="form-control-static" data-bind="text: errorMessage"></div>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+            <div class="table-responsive">
+                <table class="table @(ViewBag.Editable ? "editable" : "" )">
+                    <thead>
+                        <tr>
+                            <th class="sortable-header" data-bind="click: function(){orderByToggle('Case')}">
+                                <span>Case&nbsp;&nbsp;
+                                <i class="fa" data-bind="css: orderBy() == 'Case' ? 'fa-caret-up' : orderByDescending() == 'Case' ? 'fa-caret-down' : 'fa-sort'" style="float: right; padding: .3em 0 0 0 "></i>
+                                </span>
+                            </th>
+                            <th class="sortable-header" data-bind="click: function(){orderByToggle('Product')}">
+                                <span>Product&nbsp;&nbsp;
+                                <i class="fa" data-bind="css: orderBy() == 'Product' ? 'fa-caret-up' : orderByDescending() == 'Product' ? 'fa-caret-down' : 'fa-sort'" style="float: right; padding: .3em 0 0 0 "></i>
+                                </span>
+                            </th>
+                            <th style="width: 1%">
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody data-bind="foreach: items">
+                        <tr data-bind="css: {'btn-warning': errorMessage()}, attr: {id: caseProductId}">
+                            @if (@ViewBag.Editable)
+                            {
+                                <td class="prop-case">@(Knockout.SelectForObject<Coalesce.Domain.CaseProduct>(p => p.Case))</td>
+                                <td class="prop-product">@(Knockout.SelectForObject<Coalesce.Domain.CaseProduct>(p => p.Product))</td>
+                            }
+                            else
+                            {
+                                <td class="prop-case">@(Knockout.DisplayFor<Coalesce.Domain.CaseProduct>(p => p.Case, true))</td>
+                                <td class="prop-product">@(Knockout.DisplayFor<Coalesce.Domain.CaseProduct>(p => p.Product, true))</td>
+                            }
+                            <td>
+                                <!-- Editor buttons -->
+                                <div class="btn-group pull-right" role="group" style="display: inline-flex">
+                                    <a class="btn btn-sm btn-default" data-bind="attr: { href: editUrl }">
+                                        <i class="fa fa-pencil"></i>
+                                    </a>
+                                    <button class="btn btn-sm btn-danger" data-bind="click: deleteItemWithConfirmation">
+                                        <i class="fa fa-remove"></i>
+                                    </button>
+                                </div>
+                                <div class="form-control-static" data-bind="text: errorMessage"></div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>

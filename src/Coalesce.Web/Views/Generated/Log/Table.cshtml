@@ -22,6 +22,9 @@
     .coalesce-upload-icon {
         cursor: pointer;
     }
+    .fa-sort {
+        color: lightgray;
+    }
 </style>
 <div class="table-view obj-log">
     <div class="table-view-header">
@@ -61,42 +64,46 @@
     <hr />
     <div class="card table-view-body">
         <div class="card-body">
-            <table class="table @(ViewBag.Editable ? "editable" : "" )">
-                <thead>
-                    <tr>
-                        <th class="sortable-header" data-bind="click: function(){orderByToggle('Level')}">
-                            Level
-                            <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'Level', 'fa-caret-down': orderByDescending() == 'Level'}"></i>
-                        </th>
-                        <th class="sortable-header" data-bind="click: function(){orderByToggle('Message')}">
-                            Message
-                            <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'Message', 'fa-caret-down': orderByDescending() == 'Message'}"></i>
-                        </th>
-                        <th style="width: 1%">
-                        </th>
-                    </tr>
-                </thead>
-                <tbody data-bind="foreach: items">
-                    <tr data-bind="css: {'btn-warning': errorMessage()}, attr: {id: logId}">
-                        @if (@ViewBag.Editable)
-                        {
-                            <td class="prop-level">@(Knockout.InputFor<Coalesce.Domain.Log>(p => p.Level))</td>
-                            <td class="prop-message">@(Knockout.InputFor<Coalesce.Domain.Log>(p => p.Message))</td>
-                        }
-                        else
-                        {
-                            <td class="prop-level">@(Knockout.DisplayFor<Coalesce.Domain.Log>(p => p.Level, true))</td>
-                            <td class="prop-message">@(Knockout.DisplayFor<Coalesce.Domain.Log>(p => p.Message, true))</td>
-                        }
-                        <td>
-                            <!-- Editor buttons -->
-                            <div class="btn-group pull-right" role="group" style="display: inline-flex">
-                            </div>
-                            <div class="form-control-static" data-bind="text: errorMessage"></div>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+            <div class="table-responsive">
+                <table class="table @(ViewBag.Editable ? "editable" : "" )">
+                    <thead>
+                        <tr>
+                            <th class="sortable-header" data-bind="click: function(){orderByToggle('Level')}">
+                                <span>Level&nbsp;&nbsp;
+                                <i class="fa" data-bind="css: orderBy() == 'Level' ? 'fa-caret-up' : orderByDescending() == 'Level' ? 'fa-caret-down' : 'fa-sort'" style="float: right; padding: .3em 0 0 0 "></i>
+                                </span>
+                            </th>
+                            <th class="sortable-header" data-bind="click: function(){orderByToggle('Message')}">
+                                <span>Message&nbsp;&nbsp;
+                                <i class="fa" data-bind="css: orderBy() == 'Message' ? 'fa-caret-up' : orderByDescending() == 'Message' ? 'fa-caret-down' : 'fa-sort'" style="float: right; padding: .3em 0 0 0 "></i>
+                                </span>
+                            </th>
+                            <th style="width: 1%">
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody data-bind="foreach: items">
+                        <tr data-bind="css: {'btn-warning': errorMessage()}, attr: {id: logId}">
+                            @if (@ViewBag.Editable)
+                            {
+                                <td class="prop-level">@(Knockout.InputFor<Coalesce.Domain.Log>(p => p.Level))</td>
+                                <td class="prop-message">@(Knockout.InputFor<Coalesce.Domain.Log>(p => p.Message))</td>
+                            }
+                            else
+                            {
+                                <td class="prop-level">@(Knockout.DisplayFor<Coalesce.Domain.Log>(p => p.Level, true))</td>
+                                <td class="prop-message">@(Knockout.DisplayFor<Coalesce.Domain.Log>(p => p.Message, true))</td>
+                            }
+                            <td>
+                                <!-- Editor buttons -->
+                                <div class="btn-group pull-right" role="group" style="display: inline-flex">
+                                </div>
+                                <div class="form-control-static" data-bind="text: errorMessage"></div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>

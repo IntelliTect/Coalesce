@@ -84,10 +84,9 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
                             if (!prop.Type.IsCollection)
                             {                           
                                 using (b.TagBlock("th", "sortable-header", dataBind: $"click: function(){{orderByToggle('{prop.Name}')}}"))
-                                {
-                                    b.Line($"<span>{prop.DisplayName}&nbsp;&nbsp;");
-                                    b.Line($@"<i class=""fa"" data-bind=""css: orderBy() == '{prop.Name}' ? 'fa-caret-up' : orderByDescending() == '{prop.Name}' ? 'fa-caret-down' : 'fa-sort'"" style=""float: right; padding: .3em 0 0 0 ""></i>");
-                                    b.Line("</span>");
+                                {                                  
+                                    b.Line(prop.DisplayName);                                   
+                                    b.Line($@"<i class=""fa"" data-bind=""css: orderBy() == '{prop.Name}' ? 'fa-caret-up' : orderByDescending() == '{prop.Name}' ? 'fa-caret-down' : 'fa-sort'"" style=""float: right; padding: .3em 0 0 0 ""></i>");                                 
                                 }
                             }
                             else

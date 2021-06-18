@@ -22,6 +22,9 @@
     .coalesce-upload-icon {
         cursor: pointer;
     }
+    .fa-sort {
+        color: lightgray;
+    }
 </style>
 <div class="table-view obj-company">
     <div class="table-view-header">
@@ -65,75 +68,77 @@
     <hr />
     <div class="card table-view-body">
         <div class="card-body">
-            <table class="table @(ViewBag.Editable ? "editable" : "" )">
-                <thead>
-                    <tr>
-                        <th class="sortable-header" data-bind="click: function(){orderByToggle('Name')}">
-                            Name
-                            <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'Name', 'fa-caret-down': orderByDescending() == 'Name'}"></i>
-                        </th>
-                        <th class="sortable-header" data-bind="click: function(){orderByToggle('Address1')}">
-                            Address1
-                            <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'Address1', 'fa-caret-down': orderByDescending() == 'Address1'}"></i>
-                        </th>
-                        <th class="sortable-header" data-bind="click: function(){orderByToggle('Address2')}">
-                            Address2
-                            <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'Address2', 'fa-caret-down': orderByDescending() == 'Address2'}"></i>
-                        </th>
-                        <th class="sortable-header" data-bind="click: function(){orderByToggle('State')}">
-                            State
-                            <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'State', 'fa-caret-down': orderByDescending() == 'State'}"></i>
-                        </th>
-                        <th class="sortable-header" data-bind="click: function(){orderByToggle('IsDeleted')}">
-                            Is Deleted
-                            <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'IsDeleted', 'fa-caret-down': orderByDescending() == 'IsDeleted'}"></i>
-                        </th>
-                        <th>Employees</th>
-                        <th class="sortable-header" data-bind="click: function(){orderByToggle('AltName')}">
-                            Alt Name
-                            <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'AltName', 'fa-caret-down': orderByDescending() == 'AltName'}"></i>
-                        </th>
-                        <th style="width: 1%">
-                        </th>
-                    </tr>
-                </thead>
-                <tbody data-bind="foreach: items">
-                    <tr data-bind="css: {'btn-warning': errorMessage()}, attr: {id: companyId}">
-                        @if (@ViewBag.Editable)
-                        {
-                            <td class="prop-name">@(Knockout.InputFor<Coalesce.Domain.Company>(p => p.Name))</td>
-                            <td class="prop-address1">@(Knockout.InputFor<Coalesce.Domain.Company>(p => p.Address1))</td>
-                            <td class="prop-address2">@(Knockout.InputFor<Coalesce.Domain.Company>(p => p.Address2))</td>
-                            <td class="prop-state">@(Knockout.InputFor<Coalesce.Domain.Company>(p => p.State))</td>
-                            <td class="prop-isDeleted">@(Knockout.InputFor<Coalesce.Domain.Company>(p => p.IsDeleted))</td>
-                            <td class="prop-employees"><a data-bind='attr: {href: employeesListUrl}, text: employees().length + " - Edit"' class='btn btn-default btn-sm'></a></td>
-                            <td class="prop-altName">@(Knockout.DisplayFor<Coalesce.Domain.Company>(p => p.AltName, true))</td>
-                        }
-                        else
-                        {
-                            <td class="prop-name">@(Knockout.DisplayFor<Coalesce.Domain.Company>(p => p.Name, true))</td>
-                            <td class="prop-address1">@(Knockout.DisplayFor<Coalesce.Domain.Company>(p => p.Address1, true))</td>
-                            <td class="prop-address2">@(Knockout.DisplayFor<Coalesce.Domain.Company>(p => p.Address2, true))</td>
-                            <td class="prop-state">@(Knockout.DisplayFor<Coalesce.Domain.Company>(p => p.State, true))</td>
-                            <td class="prop-isDeleted">@(Knockout.DisplayFor<Coalesce.Domain.Company>(p => p.IsDeleted, true))</td>
-                            <td class="prop-employees"><a data-bind='attr: {href: employeesListUrl}, text: employees().length + " - Edit"' class='btn btn-default btn-sm'></a></td>
-                            <td class="prop-altName">@(Knockout.DisplayFor<Coalesce.Domain.Company>(p => p.AltName, true))</td>
-                        }
-                        <td>
-                            <!-- Editor buttons -->
-                            <div class="btn-group pull-right" role="group" style="display: inline-flex">
-                                <a class="btn btn-sm btn-default" data-bind="attr: { href: editUrl }">
-                                    <i class="fa fa-pencil"></i>
-                                </a>
-                                <button class="btn btn-sm btn-danger" data-bind="click: deleteItemWithConfirmation">
-                                    <i class="fa fa-remove"></i>
-                                </button>
-                            </div>
-                            <div class="form-control-static" data-bind="text: errorMessage"></div>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+            <div class="table-responsive">
+                <table class="table @(ViewBag.Editable ? "editable" : "" )">
+                    <thead>
+                        <tr>
+                            <th class="sortable-header" data-bind="click: function(){orderByToggle('Name')}">
+                                Name
+                                <i class="fa" data-bind="css: orderBy() == 'Name' ? 'fa-caret-up' : orderByDescending() == 'Name' ? 'fa-caret-down' : 'fa-sort'" style="float: right; padding: .3em 0 0 0 "></i>
+                            </th>
+                            <th class="sortable-header" data-bind="click: function(){orderByToggle('Address1')}">
+                                Address1
+                                <i class="fa" data-bind="css: orderBy() == 'Address1' ? 'fa-caret-up' : orderByDescending() == 'Address1' ? 'fa-caret-down' : 'fa-sort'" style="float: right; padding: .3em 0 0 0 "></i>
+                            </th>
+                            <th class="sortable-header" data-bind="click: function(){orderByToggle('Address2')}">
+                                Address2
+                                <i class="fa" data-bind="css: orderBy() == 'Address2' ? 'fa-caret-up' : orderByDescending() == 'Address2' ? 'fa-caret-down' : 'fa-sort'" style="float: right; padding: .3em 0 0 0 "></i>
+                            </th>
+                            <th class="sortable-header" data-bind="click: function(){orderByToggle('State')}">
+                                State
+                                <i class="fa" data-bind="css: orderBy() == 'State' ? 'fa-caret-up' : orderByDescending() == 'State' ? 'fa-caret-down' : 'fa-sort'" style="float: right; padding: .3em 0 0 0 "></i>
+                            </th>
+                            <th class="sortable-header" data-bind="click: function(){orderByToggle('IsDeleted')}">
+                                Is Deleted
+                                <i class="fa" data-bind="css: orderBy() == 'IsDeleted' ? 'fa-caret-up' : orderByDescending() == 'IsDeleted' ? 'fa-caret-down' : 'fa-sort'" style="float: right; padding: .3em 0 0 0 "></i>
+                            </th>
+                            <th>Employees</th>
+                            <th class="sortable-header" data-bind="click: function(){orderByToggle('AltName')}">
+                                Alt Name
+                                <i class="fa" data-bind="css: orderBy() == 'AltName' ? 'fa-caret-up' : orderByDescending() == 'AltName' ? 'fa-caret-down' : 'fa-sort'" style="float: right; padding: .3em 0 0 0 "></i>
+                            </th>
+                            <th style="width: 1%">
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody data-bind="foreach: items">
+                        <tr data-bind="css: {'btn-warning': errorMessage()}, attr: {id: companyId}">
+                            @if (@ViewBag.Editable)
+                            {
+                                <td class="prop-name">@(Knockout.InputFor<Coalesce.Domain.Company>(p => p.Name))</td>
+                                <td class="prop-address1">@(Knockout.InputFor<Coalesce.Domain.Company>(p => p.Address1))</td>
+                                <td class="prop-address2">@(Knockout.InputFor<Coalesce.Domain.Company>(p => p.Address2))</td>
+                                <td class="prop-state">@(Knockout.InputFor<Coalesce.Domain.Company>(p => p.State))</td>
+                                <td class="prop-isDeleted">@(Knockout.InputFor<Coalesce.Domain.Company>(p => p.IsDeleted))</td>
+                                <td class="prop-employees"><a data-bind='attr: {href: employeesListUrl}, text: employees().length + " - Edit"' class='btn btn-default btn-sm'></a></td>
+                                <td class="prop-altName">@(Knockout.DisplayFor<Coalesce.Domain.Company>(p => p.AltName, true))</td>
+                            }
+                            else
+                            {
+                                <td class="prop-name">@(Knockout.DisplayFor<Coalesce.Domain.Company>(p => p.Name, true))</td>
+                                <td class="prop-address1">@(Knockout.DisplayFor<Coalesce.Domain.Company>(p => p.Address1, true))</td>
+                                <td class="prop-address2">@(Knockout.DisplayFor<Coalesce.Domain.Company>(p => p.Address2, true))</td>
+                                <td class="prop-state">@(Knockout.DisplayFor<Coalesce.Domain.Company>(p => p.State, true))</td>
+                                <td class="prop-isDeleted">@(Knockout.DisplayFor<Coalesce.Domain.Company>(p => p.IsDeleted, true))</td>
+                                <td class="prop-employees"><a data-bind='attr: {href: employeesListUrl}, text: employees().length + " - Edit"' class='btn btn-default btn-sm'></a></td>
+                                <td class="prop-altName">@(Knockout.DisplayFor<Coalesce.Domain.Company>(p => p.AltName, true))</td>
+                            }
+                            <td>
+                                <!-- Editor buttons -->
+                                <div class="btn-group pull-right" role="group" style="display: inline-flex">
+                                    <a class="btn btn-sm btn-default" data-bind="attr: { href: editUrl }">
+                                        <i class="fa fa-pencil"></i>
+                                    </a>
+                                    <button class="btn btn-sm btn-danger" data-bind="click: deleteItemWithConfirmation">
+                                        <i class="fa fa-remove"></i>
+                                    </button>
+                                </div>
+                                <div class="form-control-static" data-bind="text: errorMessage"></div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>

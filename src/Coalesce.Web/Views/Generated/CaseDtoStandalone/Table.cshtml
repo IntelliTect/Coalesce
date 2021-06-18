@@ -22,6 +22,9 @@
     .coalesce-upload-icon {
         cursor: pointer;
     }
+    .fa-sort {
+        color: lightgray;
+    }
 </style>
 <div class="table-view obj-caseDtoStandalone">
     <div class="table-view-header">
@@ -66,42 +69,44 @@
     <hr />
     <div class="card table-view-body">
         <div class="card-body">
-            <table class="table @(ViewBag.Editable ? "editable" : "" )">
-                <thead>
-                    <tr>
-                        <th class="sortable-header" data-bind="click: function(){orderByToggle('Title')}">
-                            Title
-                            <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'Title', 'fa-caret-down': orderByDescending() == 'Title'}"></i>
-                        </th>
-                        <th style="width: 1%">
-                        </th>
-                    </tr>
-                </thead>
-                <tbody data-bind="foreach: items">
-                    <tr data-bind="css: {'btn-warning': errorMessage()}, attr: {id: caseId}">
-                        @if (@ViewBag.Editable)
-                        {
-                            <td class="prop-title">@(Knockout.InputFor<Coalesce.Domain.CaseDtoStandalone>(p => p.Title))</td>
-                        }
-                        else
-                        {
-                            <td class="prop-title">@(Knockout.DisplayFor<Coalesce.Domain.CaseDtoStandalone>(p => p.Title, true))</td>
-                        }
-                        <td>
-                            <!-- Editor buttons -->
-                            <div class="btn-group pull-right" role="group" style="display: inline-flex">
-                                <a class="btn btn-sm btn-default" data-bind="attr: { href: editUrl }">
-                                    <i class="fa fa-pencil"></i>
-                                </a>
-                                <button class="btn btn-sm btn-danger" data-bind="click: deleteItemWithConfirmation">
-                                    <i class="fa fa-remove"></i>
-                                </button>
-                            </div>
-                            <div class="form-control-static" data-bind="text: errorMessage"></div>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+            <div class="table-responsive">
+                <table class="table @(ViewBag.Editable ? "editable" : "" )">
+                    <thead>
+                        <tr>
+                            <th class="sortable-header" data-bind="click: function(){orderByToggle('Title')}">
+                                Title
+                                <i class="fa" data-bind="css: orderBy() == 'Title' ? 'fa-caret-up' : orderByDescending() == 'Title' ? 'fa-caret-down' : 'fa-sort'" style="float: right; padding: .3em 0 0 0 "></i>
+                            </th>
+                            <th style="width: 1%">
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody data-bind="foreach: items">
+                        <tr data-bind="css: {'btn-warning': errorMessage()}, attr: {id: caseId}">
+                            @if (@ViewBag.Editable)
+                            {
+                                <td class="prop-title">@(Knockout.InputFor<Coalesce.Domain.CaseDtoStandalone>(p => p.Title))</td>
+                            }
+                            else
+                            {
+                                <td class="prop-title">@(Knockout.DisplayFor<Coalesce.Domain.CaseDtoStandalone>(p => p.Title, true))</td>
+                            }
+                            <td>
+                                <!-- Editor buttons -->
+                                <div class="btn-group pull-right" role="group" style="display: inline-flex">
+                                    <a class="btn btn-sm btn-default" data-bind="attr: { href: editUrl }">
+                                        <i class="fa fa-pencil"></i>
+                                    </a>
+                                    <button class="btn btn-sm btn-danger" data-bind="click: deleteItemWithConfirmation">
+                                        <i class="fa fa-remove"></i>
+                                    </button>
+                                </div>
+                                <div class="form-control-static" data-bind="text: errorMessage"></div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>

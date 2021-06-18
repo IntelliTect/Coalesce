@@ -22,6 +22,9 @@
     .coalesce-upload-icon {
         cursor: pointer;
     }
+    .fa-sort {
+        color: lightgray;
+    }
 </style>
 <div class="table-view obj-person">
     <div class="table-view-header">
@@ -66,107 +69,109 @@
     <hr />
     <div class="card table-view-body">
         <div class="card-body">
-            <table class="table @(ViewBag.Editable ? "editable" : "" )">
-                <thead>
-                    <tr>
-                        <th class="sortable-header" data-bind="click: function(){orderByToggle('Title')}">
-                            Title
-                            <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'Title', 'fa-caret-down': orderByDescending() == 'Title'}"></i>
-                        </th>
-                        <th class="sortable-header" data-bind="click: function(){orderByToggle('FirstName')}">
-                            First Name
-                            <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'FirstName', 'fa-caret-down': orderByDescending() == 'FirstName'}"></i>
-                        </th>
-                        <th class="sortable-header" data-bind="click: function(){orderByToggle('LastName')}">
-                            Last Name
-                            <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'LastName', 'fa-caret-down': orderByDescending() == 'LastName'}"></i>
-                        </th>
-                        <th class="sortable-header" data-bind="click: function(){orderByToggle('Email')}">
-                            Email
-                            <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'Email', 'fa-caret-down': orderByDescending() == 'Email'}"></i>
-                        </th>
-                        <th class="sortable-header" data-bind="click: function(){orderByToggle('Gender')}">
-                            Gender
-                            <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'Gender', 'fa-caret-down': orderByDescending() == 'Gender'}"></i>
-                        </th>
-                        <th>Cases Assigned</th>
-                        <th>Cases Reported</th>
-                        <th class="sortable-header" data-bind="click: function(){orderByToggle('BirthDate')}">
-                            Birth Date
-                            <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'BirthDate', 'fa-caret-down': orderByDescending() == 'BirthDate'}"></i>
-                        </th>
-                        <th class="sortable-header" data-bind="click: function(){orderByToggle('Name')}">
-                            Name
-                            <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'Name', 'fa-caret-down': orderByDescending() == 'Name'}"></i>
-                        </th>
-                        <th class="sortable-header" data-bind="click: function(){orderByToggle('Company')}">
-                            Company
-                            <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'Company', 'fa-caret-down': orderByDescending() == 'Company'}"></i>
-                        </th>
-                        <th>Arbitrary Collection Of Strings</th>
-                        <th style="width: 1%">
-                        </th>
-                    </tr>
-                </thead>
-                <tbody data-bind="foreach: items">
-                    <tr data-bind="css: {'btn-warning': errorMessage()}, attr: {id: personId}">
-                        @if (@ViewBag.Editable)
-                        {
-                            <td class="prop-title">@(Knockout.SelectFor<Coalesce.Domain.Person>(p => p.Title))</td>
-                            <td class="prop-firstName">@(Knockout.InputFor<Coalesce.Domain.Person>(p => p.FirstName))</td>
-                            <td class="prop-lastName">@(Knockout.InputFor<Coalesce.Domain.Person>(p => p.LastName))</td>
-                            <td class="prop-email">@(Knockout.InputFor<Coalesce.Domain.Person>(p => p.Email))</td>
-                            <td class="prop-gender">@(Knockout.SelectFor<Coalesce.Domain.Person>(p => p.Gender))</td>
-                            <td class="prop-casesAssigned"><a data-bind='attr: {href: casesAssignedListUrl}, text: casesAssigned().length + " - Edit"' class='btn btn-default btn-sm'></a></td>
-                            <td class="prop-casesReported"><a data-bind='attr: {href: casesReportedListUrl}, text: casesReported().length + " - Edit"' class='btn btn-default btn-sm'></a></td>
-                            <td class="prop-birthDate">@(Knockout.InputFor<Coalesce.Domain.Person>(p => p.BirthDate))</td>
-                            <td class="prop-name">@(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.Name, true))</td>
-                            <td class="prop-company">@(Knockout.SelectForObject<Coalesce.Domain.Person>(p => p.Company))</td>
-                            <td class="prop-arbitraryCollectionOfStrings"><div class='form-control-static' style='font-family: monospace; white-space: nowrap' data-bind='text: (arbitraryCollectionOfStrings() || []).length + " Items"' ></div></td>
-                        }
-                        else
-                        {
-                            <td class="prop-title">@(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.Title, true))</td>
-                            <td class="prop-firstName">@(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.FirstName, true))</td>
-                            <td class="prop-lastName">@(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.LastName, true))</td>
-                            <td class="prop-email">@(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.Email, true))</td>
-                            <td class="prop-gender">@(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.Gender, true))</td>
-                            <td class="prop-casesAssigned"><a data-bind='attr: {href: casesAssignedListUrl}, text: casesAssigned().length + " - Edit"' class='btn btn-default btn-sm'></a></td>
-                            <td class="prop-casesReported"><a data-bind='attr: {href: casesReportedListUrl}, text: casesReported().length + " - Edit"' class='btn btn-default btn-sm'></a></td>
-                            <td class="prop-birthDate">@(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.BirthDate, true))</td>
-                            <td class="prop-name">@(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.Name, true))</td>
-                            <td class="prop-company">@(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.Company, true))</td>
-                            <td class="prop-arbitraryCollectionOfStrings"><div class='form-control-static' style='font-family: monospace; white-space: nowrap' data-bind='text: (arbitraryCollectionOfStrings() || []).length + " Items"' ></div></td>
-                        }
-                        <td>
-                            <!-- Editor buttons -->
-                            <div class="btn-group pull-right" role="group" style="display: inline-flex">
-                                <!-- Action buttons -->
-                                <div class="btn-group" role="group">
-                                    <button type="button" class="btn btn-sm btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                        Actions <span class="caret"></span>
+            <div class="table-responsive">
+                <table class="table @(ViewBag.Editable ? "editable" : "" )">
+                    <thead>
+                        <tr>
+                            <th class="sortable-header" data-bind="click: function(){orderByToggle('Title')}">
+                                Title
+                                <i class="fa" data-bind="css: orderBy() == 'Title' ? 'fa-caret-up' : orderByDescending() == 'Title' ? 'fa-caret-down' : 'fa-sort'" style="float: right; padding: .3em 0 0 0 "></i>
+                            </th>
+                            <th class="sortable-header" data-bind="click: function(){orderByToggle('FirstName')}">
+                                First Name
+                                <i class="fa" data-bind="css: orderBy() == 'FirstName' ? 'fa-caret-up' : orderByDescending() == 'FirstName' ? 'fa-caret-down' : 'fa-sort'" style="float: right; padding: .3em 0 0 0 "></i>
+                            </th>
+                            <th class="sortable-header" data-bind="click: function(){orderByToggle('LastName')}">
+                                Last Name
+                                <i class="fa" data-bind="css: orderBy() == 'LastName' ? 'fa-caret-up' : orderByDescending() == 'LastName' ? 'fa-caret-down' : 'fa-sort'" style="float: right; padding: .3em 0 0 0 "></i>
+                            </th>
+                            <th class="sortable-header" data-bind="click: function(){orderByToggle('Email')}">
+                                Email
+                                <i class="fa" data-bind="css: orderBy() == 'Email' ? 'fa-caret-up' : orderByDescending() == 'Email' ? 'fa-caret-down' : 'fa-sort'" style="float: right; padding: .3em 0 0 0 "></i>
+                            </th>
+                            <th class="sortable-header" data-bind="click: function(){orderByToggle('Gender')}">
+                                Gender
+                                <i class="fa" data-bind="css: orderBy() == 'Gender' ? 'fa-caret-up' : orderByDescending() == 'Gender' ? 'fa-caret-down' : 'fa-sort'" style="float: right; padding: .3em 0 0 0 "></i>
+                            </th>
+                            <th>Cases Assigned</th>
+                            <th>Cases Reported</th>
+                            <th class="sortable-header" data-bind="click: function(){orderByToggle('BirthDate')}">
+                                Birth Date
+                                <i class="fa" data-bind="css: orderBy() == 'BirthDate' ? 'fa-caret-up' : orderByDescending() == 'BirthDate' ? 'fa-caret-down' : 'fa-sort'" style="float: right; padding: .3em 0 0 0 "></i>
+                            </th>
+                            <th class="sortable-header" data-bind="click: function(){orderByToggle('Name')}">
+                                Name
+                                <i class="fa" data-bind="css: orderBy() == 'Name' ? 'fa-caret-up' : orderByDescending() == 'Name' ? 'fa-caret-down' : 'fa-sort'" style="float: right; padding: .3em 0 0 0 "></i>
+                            </th>
+                            <th class="sortable-header" data-bind="click: function(){orderByToggle('Company')}">
+                                Company
+                                <i class="fa" data-bind="css: orderBy() == 'Company' ? 'fa-caret-up' : orderByDescending() == 'Company' ? 'fa-caret-down' : 'fa-sort'" style="float: right; padding: .3em 0 0 0 "></i>
+                            </th>
+                            <th>Arbitrary Collection Of Strings</th>
+                            <th style="width: 1%">
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody data-bind="foreach: items">
+                        <tr data-bind="css: {'btn-warning': errorMessage()}, attr: {id: personId}">
+                            @if (@ViewBag.Editable)
+                            {
+                                <td class="prop-title">@(Knockout.SelectFor<Coalesce.Domain.Person>(p => p.Title))</td>
+                                <td class="prop-firstName">@(Knockout.InputFor<Coalesce.Domain.Person>(p => p.FirstName))</td>
+                                <td class="prop-lastName">@(Knockout.InputFor<Coalesce.Domain.Person>(p => p.LastName))</td>
+                                <td class="prop-email">@(Knockout.InputFor<Coalesce.Domain.Person>(p => p.Email))</td>
+                                <td class="prop-gender">@(Knockout.SelectFor<Coalesce.Domain.Person>(p => p.Gender))</td>
+                                <td class="prop-casesAssigned"><a data-bind='attr: {href: casesAssignedListUrl}, text: casesAssigned().length + " - Edit"' class='btn btn-default btn-sm'></a></td>
+                                <td class="prop-casesReported"><a data-bind='attr: {href: casesReportedListUrl}, text: casesReported().length + " - Edit"' class='btn btn-default btn-sm'></a></td>
+                                <td class="prop-birthDate">@(Knockout.InputFor<Coalesce.Domain.Person>(p => p.BirthDate))</td>
+                                <td class="prop-name">@(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.Name, true))</td>
+                                <td class="prop-company">@(Knockout.SelectForObject<Coalesce.Domain.Person>(p => p.Company))</td>
+                                <td class="prop-arbitraryCollectionOfStrings"><div class='form-control-static' style='font-family: monospace; white-space: nowrap' data-bind='text: (arbitraryCollectionOfStrings() || []).length + " Items"' ></div></td>
+                            }
+                            else
+                            {
+                                <td class="prop-title">@(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.Title, true))</td>
+                                <td class="prop-firstName">@(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.FirstName, true))</td>
+                                <td class="prop-lastName">@(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.LastName, true))</td>
+                                <td class="prop-email">@(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.Email, true))</td>
+                                <td class="prop-gender">@(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.Gender, true))</td>
+                                <td class="prop-casesAssigned"><a data-bind='attr: {href: casesAssignedListUrl}, text: casesAssigned().length + " - Edit"' class='btn btn-default btn-sm'></a></td>
+                                <td class="prop-casesReported"><a data-bind='attr: {href: casesReportedListUrl}, text: casesReported().length + " - Edit"' class='btn btn-default btn-sm'></a></td>
+                                <td class="prop-birthDate">@(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.BirthDate, true))</td>
+                                <td class="prop-name">@(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.Name, true))</td>
+                                <td class="prop-company">@(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.Company, true))</td>
+                                <td class="prop-arbitraryCollectionOfStrings"><div class='form-control-static' style='font-family: monospace; white-space: nowrap' data-bind='text: (arbitraryCollectionOfStrings() || []).length + " Items"' ></div></td>
+                            }
+                            <td>
+                                <!-- Editor buttons -->
+                                <div class="btn-group pull-right" role="group" style="display: inline-flex">
+                                    <!-- Action buttons -->
+                                    <div class="btn-group" role="group">
+                                        <button type="button" class="btn btn-sm btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            Actions <span class="caret"></span>
+                                        </button>
+                                        <ul class="dropdown-menu">
+                                            <li><a href="#" data-bind='click: function(){ rename.invokeWithPrompts() }'>Rename</a></li>
+                                            <li><a href="#" data-bind='click: function(){ changeSpacesToDashesInName.invoke() }'>Change Spaces To Dashes In Name</a></li>
+                                            <li><a href="#" data-bind='click: function(){ getBirthdate.invoke() }'>Get Birthdate</a></li>
+                                            <li><a href="#" data-bind='click: function(){ fullNameAndAge.invoke() }'>Full Name And Age</a></li>
+                                            <li><a href="#" data-bind='click: function(){ obfuscateEmail.invoke() }'>Obfuscate Email</a></li>
+                                            <li><a href="#" data-bind='click: function(){ changeFirstName.invokeWithPrompts() }'>Change First Name</a></li>
+                                        </ul>
+                                    </div>
+                                    <a class="btn btn-sm btn-default" data-bind="attr: { href: editUrl }">
+                                        <i class="fa fa-pencil"></i>
+                                    </a>
+                                    <button class="btn btn-sm btn-danger" data-bind="click: deleteItemWithConfirmation">
+                                        <i class="fa fa-remove"></i>
                                     </button>
-                                    <ul class="dropdown-menu">
-                                        <li><a href="#" data-bind='click: function(){ rename.invokeWithPrompts() }'>Rename</a></li>
-                                        <li><a href="#" data-bind='click: function(){ changeSpacesToDashesInName.invoke() }'>Change Spaces To Dashes In Name</a></li>
-                                        <li><a href="#" data-bind='click: function(){ getBirthdate.invoke() }'>Get Birthdate</a></li>
-                                        <li><a href="#" data-bind='click: function(){ fullNameAndAge.invoke() }'>Full Name And Age</a></li>
-                                        <li><a href="#" data-bind='click: function(){ obfuscateEmail.invoke() }'>Obfuscate Email</a></li>
-                                        <li><a href="#" data-bind='click: function(){ changeFirstName.invokeWithPrompts() }'>Change First Name</a></li>
-                                    </ul>
                                 </div>
-                                <a class="btn btn-sm btn-default" data-bind="attr: { href: editUrl }">
-                                    <i class="fa fa-pencil"></i>
-                                </a>
-                                <button class="btn btn-sm btn-danger" data-bind="click: deleteItemWithConfirmation">
-                                    <i class="fa fa-remove"></i>
-                                </button>
-                            </div>
-                            <div class="form-control-static" data-bind="text: errorMessage"></div>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+                                <div class="form-control-static" data-bind="text: errorMessage"></div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>

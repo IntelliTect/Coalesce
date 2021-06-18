@@ -43,6 +43,9 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
                     "}",
                     ".coalesce-upload-icon {",
                     "    cursor: pointer;",
+                    "}",
+                    ".fa-sort {",
+                    "    color: lightgray;",
                     "}"
                 );
             }
@@ -69,6 +72,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
                 using (b
                     .TagBlock("div", "card table-view-body")
                     .TagBlock("div", "card-body")
+                    .TagBlock("div", "table-responsive")
                     .TagBlock("table", "table @(ViewBag.Editable ? \"editable\" : \"\" )")
                 )
                 {
@@ -78,11 +82,11 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
                         foreach (var prop in Model.AdminPageProperties.Where(f => !f.IsHidden(HiddenAttribute.Areas.List)).OrderBy(f => f.EditorOrder))
                         {
                             if (!prop.Type.IsCollection)
-                            {
+                            {                           
                                 using (b.TagBlock("th", "sortable-header", dataBind: $"click: function(){{orderByToggle('{prop.Name}')}}"))
-                                {
-                                    b.Line(prop.DisplayName);
-                                    b.Line($"<i class=\"pull-right fa\" data-bind=\"css:{{'fa-caret-up': orderBy() == '{prop.Name}', 'fa-caret-down': orderByDescending() == '{prop.Name}'}}\"></i>");
+                                {                                  
+                                    b.Line(prop.DisplayName);                                   
+                                    b.Line($@"<i class=""fa"" data-bind=""css: orderBy() == '{prop.Name}' ? 'fa-caret-up' : orderByDescending() == '{prop.Name}' ? 'fa-caret-down' : 'fa-sort'"" style=""float: right; padding: .3em 0 0 0 ""></i>");                                 
                                 }
                             }
                             else

@@ -22,6 +22,9 @@
     .coalesce-upload-icon {
         cursor: pointer;
     }
+    .fa-sort {
+        color: lightgray;
+    }
 </style>
 <div class="table-view obj-zipCode">
     <div class="table-view-header">
@@ -66,48 +69,50 @@
     <hr />
     <div class="card table-view-body">
         <div class="card-body">
-            <table class="table @(ViewBag.Editable ? "editable" : "" )">
-                <thead>
-                    <tr>
-                        <th class="sortable-header" data-bind="click: function(){orderByToggle('Zip')}">
-                            Zip
-                            <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'Zip', 'fa-caret-down': orderByDescending() == 'Zip'}"></i>
-                        </th>
-                        <th class="sortable-header" data-bind="click: function(){orderByToggle('State')}">
-                            State
-                            <i class="pull-right fa" data-bind="css:{'fa-caret-up': orderBy() == 'State', 'fa-caret-down': orderByDescending() == 'State'}"></i>
-                        </th>
-                        <th style="width: 1%">
-                        </th>
-                    </tr>
-                </thead>
-                <tbody data-bind="foreach: items">
-                    <tr data-bind="css: {'btn-warning': errorMessage()}, attr: {id: zip}">
-                        @if (@ViewBag.Editable)
-                        {
-                            <td class="prop-zip">@(Knockout.InputFor<Coalesce.Domain.ZipCode>(p => p.Zip))</td>
-                            <td class="prop-state">@(Knockout.InputFor<Coalesce.Domain.ZipCode>(p => p.State))</td>
-                        }
-                        else
-                        {
-                            <td class="prop-zip">@(Knockout.DisplayFor<Coalesce.Domain.ZipCode>(p => p.Zip, true))</td>
-                            <td class="prop-state">@(Knockout.DisplayFor<Coalesce.Domain.ZipCode>(p => p.State, true))</td>
-                        }
-                        <td>
-                            <!-- Editor buttons -->
-                            <div class="btn-group pull-right" role="group" style="display: inline-flex">
-                                <a class="btn btn-sm btn-default" data-bind="attr: { href: editUrl }">
-                                    <i class="fa fa-pencil"></i>
-                                </a>
-                                <button class="btn btn-sm btn-danger" data-bind="click: deleteItemWithConfirmation">
-                                    <i class="fa fa-remove"></i>
-                                </button>
-                            </div>
-                            <div class="form-control-static" data-bind="text: errorMessage"></div>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+            <div class="table-responsive">
+                <table class="table @(ViewBag.Editable ? "editable" : "" )">
+                    <thead>
+                        <tr>
+                            <th class="sortable-header" data-bind="click: function(){orderByToggle('Zip')}">
+                                Zip
+                                <i class="fa" data-bind="css: orderBy() == 'Zip' ? 'fa-caret-up' : orderByDescending() == 'Zip' ? 'fa-caret-down' : 'fa-sort'" style="float: right; padding: .3em 0 0 0 "></i>
+                            </th>
+                            <th class="sortable-header" data-bind="click: function(){orderByToggle('State')}">
+                                State
+                                <i class="fa" data-bind="css: orderBy() == 'State' ? 'fa-caret-up' : orderByDescending() == 'State' ? 'fa-caret-down' : 'fa-sort'" style="float: right; padding: .3em 0 0 0 "></i>
+                            </th>
+                            <th style="width: 1%">
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody data-bind="foreach: items">
+                        <tr data-bind="css: {'btn-warning': errorMessage()}, attr: {id: zip}">
+                            @if (@ViewBag.Editable)
+                            {
+                                <td class="prop-zip">@(Knockout.InputFor<Coalesce.Domain.ZipCode>(p => p.Zip))</td>
+                                <td class="prop-state">@(Knockout.InputFor<Coalesce.Domain.ZipCode>(p => p.State))</td>
+                            }
+                            else
+                            {
+                                <td class="prop-zip">@(Knockout.DisplayFor<Coalesce.Domain.ZipCode>(p => p.Zip, true))</td>
+                                <td class="prop-state">@(Knockout.DisplayFor<Coalesce.Domain.ZipCode>(p => p.State, true))</td>
+                            }
+                            <td>
+                                <!-- Editor buttons -->
+                                <div class="btn-group pull-right" role="group" style="display: inline-flex">
+                                    <a class="btn btn-sm btn-default" data-bind="attr: { href: editUrl }">
+                                        <i class="fa fa-pencil"></i>
+                                    </a>
+                                    <button class="btn btn-sm btn-danger" data-bind="click: deleteItemWithConfirmation">
+                                        <i class="fa fa-remove"></i>
+                                    </button>
+                                </div>
+                                <div class="form-control-static" data-bind="text: errorMessage"></div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>

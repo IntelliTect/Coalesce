@@ -74,105 +74,85 @@
                     <thead>
                         <tr>
                             <th class="sortable-header" data-bind="click: function(){orderByToggle('Title')}">
-                                <span>Title&nbsp;&nbsp;
+                                Title
                                 <i class="fa" data-bind="css: orderBy() == 'Title' ? 'fa-caret-up' : orderByDescending() == 'Title' ? 'fa-caret-down' : 'fa-sort'" style="float: right; padding: .3em 0 0 0 "></i>
-                                </span>
                             </th>
                             <th class="sortable-header" data-bind="click: function(){orderByToggle('Description')}">
-                                <span>Description&nbsp;&nbsp;
+                                Description
                                 <i class="fa" data-bind="css: orderBy() == 'Description' ? 'fa-caret-up' : orderByDescending() == 'Description' ? 'fa-caret-down' : 'fa-sort'" style="float: right; padding: .3em 0 0 0 "></i>
-                                </span>
                             </th>
                             <th class="sortable-header" data-bind="click: function(){orderByToggle('OpenedAt')}">
-                                <span>Opened At&nbsp;&nbsp;
+                                Opened At
                                 <i class="fa" data-bind="css: orderBy() == 'OpenedAt' ? 'fa-caret-up' : orderByDescending() == 'OpenedAt' ? 'fa-caret-down' : 'fa-sort'" style="float: right; padding: .3em 0 0 0 "></i>
-                                </span>
                             </th>
                             <th class="sortable-header" data-bind="click: function(){orderByToggle('AssignedTo')}">
-                                <span>Assigned To&nbsp;&nbsp;
+                                Assigned To
                                 <i class="fa" data-bind="css: orderBy() == 'AssignedTo' ? 'fa-caret-up' : orderByDescending() == 'AssignedTo' ? 'fa-caret-down' : 'fa-sort'" style="float: right; padding: .3em 0 0 0 "></i>
-                                </span>
                             </th>
                             <th class="sortable-header" data-bind="click: function(){orderByToggle('ReportedBy')}">
-                                <span>Reported By&nbsp;&nbsp;
+                                Reported By
                                 <i class="fa" data-bind="css: orderBy() == 'ReportedBy' ? 'fa-caret-up' : orderByDescending() == 'ReportedBy' ? 'fa-caret-down' : 'fa-sort'" style="float: right; padding: .3em 0 0 0 "></i>
-                                </span>
                             </th>
                             <th class="sortable-header" data-bind="click: function(){orderByToggle('Image')}">
-                                <span>Image&nbsp;&nbsp;
+                                Image
                                 <i class="fa" data-bind="css: orderBy() == 'Image' ? 'fa-caret-up' : orderByDescending() == 'Image' ? 'fa-caret-down' : 'fa-sort'" style="float: right; padding: .3em 0 0 0 "></i>
-                                </span>
                             </th>
                             <th class="sortable-header" data-bind="click: function(){orderByToggle('ImageName')}">
-                                <span>Image Name&nbsp;&nbsp;
+                                Image Name
                                 <i class="fa" data-bind="css: orderBy() == 'ImageName' ? 'fa-caret-up' : orderByDescending() == 'ImageName' ? 'fa-caret-down' : 'fa-sort'" style="float: right; padding: .3em 0 0 0 "></i>
-                                </span>
                             </th>
                             <th class="sortable-header" data-bind="click: function(){orderByToggle('ImageSize')}">
-                                <span>Image Size&nbsp;&nbsp;
+                                Image Size
                                 <i class="fa" data-bind="css: orderBy() == 'ImageSize' ? 'fa-caret-up' : orderByDescending() == 'ImageSize' ? 'fa-caret-down' : 'fa-sort'" style="float: right; padding: .3em 0 0 0 "></i>
-                                </span>
                             </th>
                             <th class="sortable-header" data-bind="click: function(){orderByToggle('ImageHash')}">
-                                <span>Image Hash&nbsp;&nbsp;
+                                Image Hash
                                 <i class="fa" data-bind="css: orderBy() == 'ImageHash' ? 'fa-caret-up' : orderByDescending() == 'ImageHash' ? 'fa-caret-down' : 'fa-sort'" style="float: right; padding: .3em 0 0 0 "></i>
-                                </span>
                             </th>
                             <th class="sortable-header" data-bind="click: function(){orderByToggle('Attachment')}">
-                                <span>Attachment&nbsp;&nbsp;
+                                Attachment
                                 <i class="fa" data-bind="css: orderBy() == 'Attachment' ? 'fa-caret-up' : orderByDescending() == 'Attachment' ? 'fa-caret-down' : 'fa-sort'" style="float: right; padding: .3em 0 0 0 "></i>
-                                </span>
                             </th>
                             <th class="sortable-header" data-bind="click: function(){orderByToggle('AttachmentName')}">
-                                <span>Attachment Name&nbsp;&nbsp;
+                                Attachment Name
                                 <i class="fa" data-bind="css: orderBy() == 'AttachmentName' ? 'fa-caret-up' : orderByDescending() == 'AttachmentName' ? 'fa-caret-down' : 'fa-sort'" style="float: right; padding: .3em 0 0 0 "></i>
-                                </span>
                             </th>
                             <th class="sortable-header" data-bind="click: function(){orderByToggle('PlainAttachment')}">
-                                <span>Plain Attachment&nbsp;&nbsp;
+                                Plain Attachment
                                 <i class="fa" data-bind="css: orderBy() == 'PlainAttachment' ? 'fa-caret-up' : orderByDescending() == 'PlainAttachment' ? 'fa-caret-down' : 'fa-sort'" style="float: right; padding: .3em 0 0 0 "></i>
-                                </span>
                             </th>
                             <th class="sortable-header" data-bind="click: function(){orderByToggle('RestrictedUploadAttachment')}">
-                                <span>Restricted Upload Attachment&nbsp;&nbsp;
+                                Restricted Upload Attachment
                                 <i class="fa" data-bind="css: orderBy() == 'RestrictedUploadAttachment' ? 'fa-caret-up' : orderByDescending() == 'RestrictedUploadAttachment' ? 'fa-caret-down' : 'fa-sort'" style="float: right; padding: .3em 0 0 0 "></i>
-                                </span>
                             </th>
                             <th class="sortable-header" data-bind="click: function(){orderByToggle('RestrictedDownloadAttachment')}">
-                                <span>Restricted Download Attachment&nbsp;&nbsp;
+                                Restricted Download Attachment
                                 <i class="fa" data-bind="css: orderBy() == 'RestrictedDownloadAttachment' ? 'fa-caret-up' : orderByDescending() == 'RestrictedDownloadAttachment' ? 'fa-caret-down' : 'fa-sort'" style="float: right; padding: .3em 0 0 0 "></i>
-                                </span>
                             </th>
                             <th class="sortable-header" data-bind="click: function(){orderByToggle('RestrictedMetaAttachment')}">
-                                <span>Restricted Meta Attachment&nbsp;&nbsp;
+                                Restricted Meta Attachment
                                 <i class="fa" data-bind="css: orderBy() == 'RestrictedMetaAttachment' ? 'fa-caret-up' : orderByDescending() == 'RestrictedMetaAttachment' ? 'fa-caret-down' : 'fa-sort'" style="float: right; padding: .3em 0 0 0 "></i>
-                                </span>
                             </th>
                             <th class="sortable-header" data-bind="click: function(){orderByToggle('Severity')}">
-                                <span>Severity&nbsp;&nbsp;
+                                Severity
                                 <i class="fa" data-bind="css: orderBy() == 'Severity' ? 'fa-caret-up' : orderByDescending() == 'Severity' ? 'fa-caret-down' : 'fa-sort'" style="float: right; padding: .3em 0 0 0 "></i>
-                                </span>
                             </th>
                             <th class="sortable-header" data-bind="click: function(){orderByToggle('Status')}">
-                                <span>Status&nbsp;&nbsp;
+                                Status
                                 <i class="fa" data-bind="css: orderBy() == 'Status' ? 'fa-caret-up' : orderByDescending() == 'Status' ? 'fa-caret-down' : 'fa-sort'" style="float: right; padding: .3em 0 0 0 "></i>
-                                </span>
                             </th>
                             <th>Case Products</th>
                             <th class="sortable-header" data-bind="click: function(){orderByToggle('DevTeamAssignedId')}">
-                                <span>Dev Team Assigned Id&nbsp;&nbsp;
+                                Dev Team Assigned Id
                                 <i class="fa" data-bind="css: orderBy() == 'DevTeamAssignedId' ? 'fa-caret-up' : orderByDescending() == 'DevTeamAssignedId' ? 'fa-caret-down' : 'fa-sort'" style="float: right; padding: .3em 0 0 0 "></i>
-                                </span>
                             </th>
                             <th class="sortable-header" data-bind="click: function(){orderByToggle('DevTeamAssigned')}">
-                                <span>Dev Team Assigned&nbsp;&nbsp;
+                                Dev Team Assigned
                                 <i class="fa" data-bind="css: orderBy() == 'DevTeamAssigned' ? 'fa-caret-up' : orderByDescending() == 'DevTeamAssigned' ? 'fa-caret-down' : 'fa-sort'" style="float: right; padding: .3em 0 0 0 "></i>
-                                </span>
                             </th>
                             <th class="sortable-header" data-bind="click: function(){orderByToggle('Duration')}">
-                                <span>Duration&nbsp;&nbsp;
+                                Duration
                                 <i class="fa" data-bind="css: orderBy() == 'Duration' ? 'fa-caret-up' : orderByDescending() == 'Duration' ? 'fa-caret-down' : 'fa-sort'" style="float: right; padding: .3em 0 0 0 "></i>
-                                </span>
                             </th>
                             <th style="width: 1%">
                             </th>

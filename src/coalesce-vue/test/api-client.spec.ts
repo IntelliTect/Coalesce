@@ -179,7 +179,7 @@ describe("$invoke", () => {
     const file = new File([new ArrayBuffer(1)], "fileName", { type: "application/pdf" });
 
     var response = await new StudentApiClient().$invoke(methodMeta, { 
-      id:42, file, student: <Student>{ name: "bob&bob=bob" } 
+      id:42, file, student: <Student>{ name: "bob&bob=bob", studentAdvisorId: null },
     });
 
     expect(mock).toBeCalledTimes(1);
@@ -187,6 +187,24 @@ describe("$invoke", () => {
     expect((mock.mock.calls[0][0].data as FormData).get('id')).toBe("42")
     expect((mock.mock.calls[0][0].data as FormData).get('file')).toBe(file)
     expect((mock.mock.calls[0][0].data as FormData).get('student[name]')).toBe("bob&bob=bob")
+    expect((mock.mock.calls[0][0].data as FormData).get('student[studentAdvisorId]')).toBe("")
+  })
+
+  test("POST passes null correctly", async () => {
+    // This makes sure that we correctly send NULL fields the server.
+    // When I migrated away from the `qs` lib, I broke this... oops.
+    const mock = AxiosClient.defaults.adapter = 
+      jest.fn().mockResolvedValue(<AxiosResponse<any>>{
+        data: {wasSuccessful: true, object: {}},
+        status: 200
+      })
+
+    var result = await new StudentApiClient().save(new Student({
+      studentAdvisorId: null,
+      name: "bob"
+    }), {fields: ["studentAdvisorId", "name"]});
+
+    expect(mock.mock.calls[0][0].data).toBe("studentAdvisorId=&name=bob");
   })
 })
 

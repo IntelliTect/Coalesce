@@ -135,6 +135,10 @@ function buildParams(
         );
       }
     }
+  } else if (obj === null) {
+    // Handle null before typeof obj == "object", which will be the case for null.
+    // Serialize scalar item.
+    add(prefix, obj);
   } else if (typeof obj == "object") {
     // Serialize object item.
     for (name in obj) {

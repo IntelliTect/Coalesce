@@ -95,9 +95,10 @@ export default class extends Vue {
     if (!this.viewModel) return false;
 
     return this.metadata && (this.metadata.behaviorFlags & 
-      this.viewModel.$primaryKey ? BehaviorFlags.Edit : BehaviorFlags.Create
+      (this.viewModel.$primaryKey ? BehaviorFlags.Edit : BehaviorFlags.Create)
     ) != 0
   }
+  
   get hasInstanceMethods() {
     return !this.isCreate && this.metadata && Object.values(this.metadata.methods).some(m => !m.isStatic)
   }

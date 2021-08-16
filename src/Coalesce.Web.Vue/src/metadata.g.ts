@@ -1699,4 +1699,4 @@ interface AppDomain extends Domain {
 
 solidify(domain)
 
-export default domain as AppDomain
+export default domain as unknown as AppDomain

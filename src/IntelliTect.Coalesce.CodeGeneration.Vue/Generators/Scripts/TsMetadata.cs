@@ -87,7 +87,10 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
             b.Line();
             b.Line("solidify(domain)");
             b.Line();
-            b.Line("export default domain as AppDomain");
+            // "as unknown" needed for some change in Typescript after around 3.8?
+            // This weirdly isn't needed in Coalese.Web.Vue, but is needed in basically
+            // all other consuming projects.
+            b.Line("export default domain as unknown as AppDomain");
 
 
             return Task.FromResult(b.ToString());

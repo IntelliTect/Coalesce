@@ -27,7 +27,8 @@ namespace IntelliTect.Coalesce
         public abstract Task<IQueryable<T>> GetQueryAsync(IDataSourceParameters parameters);
 
         /// <summary>
-        /// A <see cref="CancellationToken"/> that can be observed to see if the underlying request has been canceled.
+        /// A <see cref="System.Threading.CancellationToken"/> that can be 
+        /// observed to see if the underlying request has been canceled.
         /// </summary>
         public CancellationToken CancellationToken => Context.CancellationToken;
 

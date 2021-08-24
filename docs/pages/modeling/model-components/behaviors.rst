@@ -43,7 +43,7 @@ To create your own behaviors, you simply need to define a class that implements 
     [Coalesce]
     public class CaseBehaviors : StandardBehaviors<Case, AppDbContext>
     {
-        public Behaviors(CrudContext<AppDbContext> context) : base(context) { }
+        public CaseBehaviors(CrudContext<AppDbContext> context) : base(context) { }
 
         public override ItemResult BeforeSave(SaveKind kind, Case oldItem, Case item)
         {

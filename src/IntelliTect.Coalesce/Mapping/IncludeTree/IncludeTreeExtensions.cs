@@ -33,12 +33,13 @@ namespace IntelliTect.Coalesce
                         {
                             if (callExpr.Arguments[1] is UnaryExpression unary)
                             {
-                                // I'm like a wizard with all these casts.
-                                var body = (MemberExpression)((LambdaExpression)unary.Operand).Body;
+                                // Handles lambda includes
+                                var body = FindMemberAccessExpression(unary.Operand);
                                 head = IncludeTree.ParseMemberExpression(body, out tail);
                             }
                             else if (callExpr.Arguments[1] is ConstantExpression constant)
                             {
+                                // Handles string includes
                                 head = IncludeTree.ParseConstantExpression(constant, out tail);
                             }
                             else
@@ -112,7 +113,7 @@ namespace IntelliTect.Coalesce
             this IQueryable<TEntity> query,
             Expression<Func<TEntity, TProperty>> expr) where TEntity : class
         {
-            var body = (MemberExpression)expr.Body;
+            var body = FindMemberAccessExpression(expr);
 
             return new IncludedSeparatelyQueryable<TEntity, TProperty>(query.Provider.CreateQuery<TEntity>(
                 new IncludedSeparatelyExpression(query.Expression, body, true)
@@ -125,11 +126,29 @@ namespace IntelliTect.Coalesce
                Expression<Func<TPreviousProperty, TProperty>> navigationPropertyPath)
             where TEntity : class
         {
-            var body = (MemberExpression)navigationPropertyPath.Body;
+            var body = FindMemberAccessExpression(navigationPropertyPath);
 
             return new IncludedSeparatelyQueryable<TEntity, TProperty>(query.Provider.CreateQuery<TEntity>(
                 new IncludedSeparatelyExpression(query.Expression, body, false)
             ));
+        }
+
+        /// <summary>
+        /// Walks down an method chain expression tree, returning the original member
+        /// that the first chained method was called upon.
+        /// </summary>
+        private static MemberExpression FindMemberAccessExpression(Expression expr)
+        {
+            return expr switch
+            {
+                // This is what we're after:
+                MemberExpression member => member,
+                // The root expression
+                LambdaExpression lambda => FindMemberAccessExpression(lambda.Body),
+                // For chained LINQ methods, the previous method call is the first argument.
+                MethodCallExpression methodCall => FindMemberAccessExpression(methodCall.Arguments.First()),
+                _ => throw new ArgumentException($"Unsupported expression type {expr.NodeType} encounted while building IncludeTree.")
+            };
         }
     }
 

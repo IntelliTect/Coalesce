@@ -66,18 +66,16 @@ namespace IntelliTect.Coalesce.CodeGeneration.Tests
                 .GetDiagnostics()
                 .Where(d => d.Severity >= Microsoft.CodeAnalysis.DiagnosticSeverity.Error);
 
-            foreach (var error in errors)
+            Assert.All(errors, error =>
             {
                 var loc = error.Location;
 
-
-
-                Assert.False(true, "\"" + error.ToString() + 
-                    $"\" near:```\n" + 
+                Assert.False(true, "\"" + error.ToString() +
+                    $"\" near:```\n" +
                     loc.SourceTree.ToString().Substring(loc.SourceSpan.Start, loc.SourceSpan.Length) +
                     "\n```"
                 );
-            }
+            });
         }
     }
 }

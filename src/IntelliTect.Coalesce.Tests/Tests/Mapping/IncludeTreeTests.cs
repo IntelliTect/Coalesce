@@ -91,5 +91,44 @@ namespace IntelliTect.Coalesce.Tests.Mapping
 
             AssertBasicChecks(tree);
         }
+
+        [Fact]
+        public void IncludeTree_FilteredIncludeChecks()
+        {
+            IQueryable<Person> queryable = db.People
+                .Where(e => e.FirstName != null)
+                .Include(p => p.Company)
+                .Include(p => p.CasesAssigned
+                    // Exhaustive list of all filtered include operations:
+                    // https://docs.microsoft.com/en-us/ef/core/querying/related-data/eager#filtered-include
+                    .Where(c => c.Description != null)
+                    .OrderBy(c => c.OpenedAt)
+                    .ThenBy(c => c.ReportedById)
+                    .OrderByDescending(c => c.AssignedToId)
+                    .ThenByDescending(c => c.CaseKey)
+                    .Skip(1)
+                    .Take(2)
+                ).ThenInclude(c => c.CaseProducts.OrderBy(c => c.ProductId)).ThenInclude(c => c.Case.AssignedTo)
+                .Include(p => p.CasesAssigned).ThenInclude(c => c.CaseProducts).ThenInclude(c => c.Case.ReportedBy)
+                .IncludedSeparately(e => e.CasesReported
+                    .Where(c => c.Description != null)
+                    .OrderBy(c => c.OpenedAt)
+                    .ThenBy(c => c.ReportedById)
+                    .OrderByDescending(c => c.AssignedToId)
+                    .ThenByDescending(c => c.CaseKey)
+                    .Skip(1)
+                    .Take(2)).ThenIncluded(c => c.ReportedBy.Company)
+                .IncludedSeparately(e => e.CasesReported).ThenIncluded(c => c.ReportedBy.CasesAssigned.Where(c => c.Description != null))
+                .Where(e => e.LastName != null);
+
+#if NET5_0_OR_GREATER
+            // Just calling this to make sure the query can execute.
+            // There might not be any items that match our precidate, but so long as we don't get exceptions, we don't care what the result is.
+            Person obj = queryable.FirstOrDefault();
+#endif
+
+            IncludeTree tree = queryable.GetIncludeTree();
+            AssertBasicChecks(tree);
+        }
     }
 }

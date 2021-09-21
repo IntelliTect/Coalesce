@@ -68,7 +68,7 @@ Consuming Data Sources
 
         .. code-block:: vue
 
-            import { Person } from '@/viewmodels.g'
+            import { Person } from '@/models.g'
             import { PersonViewModel, PersonListViewModel } from '@/viewmodels.g'
         
             var viewModel = new PersonViewModel();

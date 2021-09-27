@@ -101,6 +101,19 @@ ViewModelConfiguration
 saveTimeoutMs - :ts:`500`
     Time to wait after a change is seen before auto-saving (if :ts:`autoSaveEnabled` is true). Acts as a debouncing timer for multiple simultaneous changes.
 
+saveIncludedFields - :ts:`null`
+    An array of property names that, if set, will determine which fields will be sent to the server when saving. Only those values that are actually sent to the server will be mapped to the underlying entity.
+
+    This can improves the handling of concurrent changes being made by multiple users against different fields of the same entity. Specifically, if one page is designed to edit fields A and B, and another page is designed for editing fields C and D, you can configure this setting appropriately on each page to only save the corresponding fields.
+
+    Due to design limitations, this cannot be determined dynamically like it can with :ref:`Vue's $saveMode property <VueInstanceViewModels>`
+
+    .. warning:: 
+
+        Surgical saves require DTOs on the server that are capable of determining which of their properties have been set by the model binder, as surgical saves are sent from the client by entirely omitting properties from the ``x-www-form-urlencoded`` body that is sent to the server.
+
+        The :ref:`GenDTOs` implement the necessary logic for this; however, any :ref:`CustomDTOs` you have written are unlikely to be implementing the same behavior. For :ref:`CustomDTOs`, either implement the same pattern that can be seen in the :ref:`GenDTOs`, or do not use this setting.
+
 autoSaveEnabled - :ts:`true`
     Determines whether changes to a model will be automatically saved after :ts:`saveTimeoutMs` milliseconds have elapsed.
 

@@ -76,6 +76,11 @@ module Coalesce {
         /** Time to wait after a change is seen before auto-saving (if autoSaveEnabled is true). Acts as a debouncing timer for multiple simultaneous changes. */
         public saveTimeoutMs = this.prop<number>("saveTimeoutMs");
 
+        /** If set and non-empty, the set of fields that will be included when saving.
+            Does not affect which properties trigger auto-save. See docs for full details.
+        */
+        public saveIncludedFields = this.prop<string[] | null>("saveIncludedFields");
+
         /** Determines whether changes to a model will be automatically saved after saveTimeoutMs milliseconds have elapsed. */
         public autoSaveEnabled = this.prop<boolean>("autoSaveEnabled");
 
@@ -578,7 +583,17 @@ module Coalesce {
                     this.cancelAutoSave();
                     this.isSaving(true);
                     var url = `${this.coalesceConfig.baseApiUrl()}${this.apiController}/Save?includes=${this.includes}&${this.dataSource.getQueryString()}`
-                    return $.ajax({ method: "POST", url: url, data: this.saveToDto(), xhrFields: { withCredentials: true } })
+                    var dto = this.saveToDto();
+                    var fields = this.coalesceConfig.saveIncludedFields();
+                    if (fields && fields.length) {
+                        var filteredDto = {[this.primaryKeyName]: dto[this.primaryKeyName]}
+                        for (let i = 0; i < fields.length; i++) {
+                            const key = fields[i];
+                            filteredDto[key] = dto[key]
+                        }
+                        dto = filteredDto;
+                    }
+                    return $.ajax({ method: "POST", url: url, data: dto, xhrFields: { withCredentials: true } })
                         .done((data: ItemResult) => {
                             this.isDirty(false);
                             this.errorMessage(null);

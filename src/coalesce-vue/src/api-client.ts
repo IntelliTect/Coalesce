@@ -369,30 +369,42 @@ type ResultPromiseType<
   ? ListResultPromise<TResult>
   : never;
 
+
+type InvokerReturnType<
+  T extends TransportTypeSpecifier<any>,
+  TResult
+> = T extends ItemTransportTypeSpecifier<any>
+  ? ItemResultPromise<TResult>
+  : T extends ListTransportTypeSpecifier<any>
+  ? ListResultPromise<TResult>
+  : never;
+
+type InvokerType<
+  T extends TransportTypeSpecifier<any>,
+  TArgs extends any[],
+  TResult
+> = TCall<TArgs, InvokerReturnType<T, TResult>>;
+
 type ApiStateType<
   T extends TransportTypeSpecifier<any>,
   TArgs extends any[],
   TResult
-> = T extends ItemTransportTypeSpecifier<any>
-  ? ItemApiState<TArgs, TResult> &
-    TCall<TArgs, ItemResultPromise<TResult>>
+> = (T extends ItemTransportTypeSpecifier<any>
+  ? ItemApiState<TArgs, TResult>
   : T extends ListTransportTypeSpecifier<any>
-  ? ListApiState<TArgs, TResult> &
-    TCall<TArgs, ListResultPromise<TResult>>
-  : never;
+  ? ListApiState<TArgs, TResult>
+  : never) & InvokerType<T, TArgs, TResult>;
 
 type ApiStateTypeWithArgs<
   T extends TransportTypeSpecifier<any>,
   TArgs extends any[],
   TArgsObj,
   TResult
-> = T extends ItemTransportTypeSpecifier<any>
-  ? ItemApiStateWithArgs<TArgs, TArgsObj, TResult> &
-    TCall<TArgs, ItemResultPromise<TResult>>
+> = (T extends ItemTransportTypeSpecifier<any>
+  ? ItemApiStateWithArgs<TArgs, TArgsObj, TResult>
   : T extends ListTransportTypeSpecifier<any>
-  ? ListApiStateWithArgs<TArgs, TArgsObj, TResult> &
-    TCall<TArgs, ListResultPromise<TResult>>
-  : never;
+  ? ListApiStateWithArgs<TArgs, TArgsObj, TResult>
+  : never) & InvokerType<T, TArgs, TResult>;
 
 
 const simultaneousGetCache: Map<string, AxiosPromise<any>> = new Map;
@@ -1249,7 +1261,7 @@ export class ItemApiStateWithArgs<
   public args: TArgsObj = this.argsFactory();
 
   /** Invoke the method. If `args` is not provided, the values in `this.args` will be used for the method's parameters. */
-  public invokeWithArgs(args: TArgsObj = this.args) {
+  public invokeWithArgs(args: TArgsObj = this.args): InvokerReturnType<"item", TResult> {
     args = { ...args }; // Copy args so that if we're debouncing,
     // the args at the point in time at which invokeWithArgs() was
     // called will be used, rather than the state at the time when the actual API call gets made.
@@ -1267,12 +1279,11 @@ export class ItemApiStateWithArgs<
     apiClient: ApiClient<any>,
     invoker: TInvoker<TArgs, ItemResultPromise<TResult>, ApiClient<any>>,
     private argsFactory: () => TArgsObj,
-    private argsInvoker: any
-    // TArgsInvoker<
-    //   TArgsObj,
-    //   ItemResultPromise<TResult>,
-    //   TClient
-    // >
+    private argsInvoker: TArgsInvoker<
+      TArgsObj,
+      ItemResultPromise<TResult>,
+      ApiClient<any>
+    >
   ) {
     super(apiClient, invoker);
     this._makeReactive();
@@ -1337,7 +1348,7 @@ export class ListApiStateWithArgs<
   public args: TArgsObj = this.argsFactory();
 
   /** Invoke the method. If `args` is not provided, the values in `this.args` will be used for the method's parameters. */
-  public invokeWithArgs(args: TArgsObj = this.args) {
+  public invokeWithArgs(args: TArgsObj = this.args): InvokerReturnType<"list", TResult> {
     args = { ...args }; // Copy args so that if we're debouncing,
     // the args at the point in time at which invokeWithArgs() was
     // called will be used, rather than the state at the time when the actual API call gets made.

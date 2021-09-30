@@ -12,9 +12,9 @@ import { delay } from './test-utils';
 
 
 function makeEndpointMock() {
-  return jest.fn().mockResolvedValue({ data: <ItemResult>{
+  return jest.fn<ItemResultPromise<string>, [number | undefined | null]>().mockResolvedValue({ data: <ItemResult>{
     wasSuccessful: true, object: "foo"
-  }});
+  }, status: 200, statusText: "OK", headers: {}, config:{}});
 }
 
 
@@ -448,15 +448,32 @@ describe("$makeCaller", () => {
 
 
 describe("$makeCaller with args object", () => {
-  describe.each<"item" | "list">(["item", "list"])("for %s transport", (type) => {
-    test("uses own args if args not specified", () => {
-      const endpointMock = makeEndpointMock();
-      const caller = new StudentApiClient().$makeCaller(
+  test("is typed properly", async () => {
+    const endpointMock = makeEndpointMock();
+    const caller = new StudentApiClient().$makeCaller(
+      "item", 
+      (c, num: number) => endpointMock(num),
+      () => ({num: null as number | null}),
+      (c, args) => endpointMock(args.num),
+    )
+
+    caller.args.num = 42;
+    const result = await caller.invokeWithArgs();
+    expect(result.data.object).toBe("foo");
+  })
+
+  describe.each(["item", "list"] as const)("for %s transport", (type) => {
+    const makeCaller = (endpointMock: ReturnType<typeof makeEndpointMock>) =>
+      new StudentApiClient().$makeCaller(
         type, 
         (c, num: number) => endpointMock(num),
         () => ({num: null as number | null}),
         (c, args) => endpointMock(args.num),
-      )
+      );
+
+    test("uses own args if args not specified", () => {
+      const endpointMock = makeEndpointMock();
+      const caller = makeCaller(endpointMock);
 
       caller.args.num = 42;
       caller.invokeWithArgs();
@@ -465,12 +482,7 @@ describe("$makeCaller with args object", () => {
 
     test("own args are reactive", async () => {
       const endpointMock = makeEndpointMock();
-      const caller = new StudentApiClient().$makeCaller(
-        type, 
-        (c, num: number) => endpointMock(num),
-        () => ({num: null as number | null}),
-        (c, args) => endpointMock(args.num),
-      )
+      const caller = makeCaller(endpointMock);
 
       const vue = new Vue({
         data: {
@@ -494,12 +506,7 @@ describe("$makeCaller with args object", () => {
 
     test("uses custom args if specified", () => {
       const endpointMock = makeEndpointMock();
-      const caller = new StudentApiClient().$makeCaller(
-        type, 
-        (c, num: number) => endpointMock(num),
-        () => ({num: null as number | null}),
-        (c, args) => endpointMock(args.num),
-      )
+      const caller = makeCaller(endpointMock);
 
       caller.args.num = 42;
       caller.invokeWithArgs({
@@ -510,12 +517,7 @@ describe("$makeCaller with args object", () => {
 
     test("sets state properties appropriately", async () => {
       const endpointMock = makeEndpointMock();
-      const caller = new StudentApiClient().$makeCaller(
-        type, 
-        (c, num: number) => endpointMock(num),
-        () => ({num: null as number | null}),
-        (c, args) => endpointMock(args.num),
-      )
+      const caller = makeCaller(endpointMock);
 
       caller.args.num = 42;
       const promise = caller.invokeWithArgs();

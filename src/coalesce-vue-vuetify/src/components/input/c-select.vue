@@ -15,7 +15,7 @@
     :error-messages="error"
     no-filter
     @keydown.native.delete.stop="!search ? onInput(null) : void 0"
-    open-on-clear
+    :open-on-clear="openOnClear"
     v-bind="inputBindAttrs"
   >
     <template slot="no-data">
@@ -103,10 +103,13 @@ export default class CSelect extends MetadataComponent {
   public objectValue?: any
 
   @Prop({ required: false, type: Boolean, default: false })
-  public preselectFirst?: false;
+  public preselectFirst?: boolean;
 
   @Prop({ required: false, type: Boolean, default: false })
-  public preselectSingle?: false;
+  public preselectSingle?: boolean;
+
+  @Prop({ required: false, type: Boolean, default: true })
+  public openOnClear?: boolean;
 
   @Prop({required: false})
   public params?: ListParameters

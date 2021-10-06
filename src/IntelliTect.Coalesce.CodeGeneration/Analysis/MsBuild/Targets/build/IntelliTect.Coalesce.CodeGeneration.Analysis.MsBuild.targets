@@ -64,6 +64,7 @@ Outputs the Project Information needed for CodeGeneration to a file.
     <WriteLinesToFile Encoding="Unicode" File="$(OutputFile)" Lines="OutputType: %22$(OutputType)%22," />
     <WriteLinesToFile Encoding="Unicode" File="$(OutputFile)" Lines="Platform: %22$(Platform)%22," />
     <WriteLinesToFile Encoding="Unicode" File="$(OutputFile)" Lines="TargetFramework: '$(TargetFramework)',"/>
+    <WriteLinesToFile Encoding="Unicode" File="$(OutputFile)" Lines="LangVersion: '$(LangVersion)',"/>
     <WriteLinesToFile Encoding="Unicode" File="$(OutputFile)" Lines="Configuration: %22$(Configuration)%22," />
     <WriteLinesToFile Encoding="Unicode" File="$(OutputFile)" Lines="RootNamespace: %22$(RootNamespace)%22," />
     <WriteLinesToFile Encoding="Unicode" File="$(OutputFile)" Lines="TargetDirectory: %22$(TargetDir.Replace('\', '/'))%22," />

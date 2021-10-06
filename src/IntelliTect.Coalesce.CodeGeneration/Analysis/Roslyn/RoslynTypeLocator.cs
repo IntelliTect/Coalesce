@@ -10,6 +10,7 @@ using IntelliTect.Coalesce.CodeGeneration.Analysis.Base;
 using Microsoft.VisualStudio.Web.CodeGeneration.Utils;
 using System.Threading.Tasks;
 using System.Collections.Concurrent;
+using Microsoft.CodeAnalysis.CSharp;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Analysis.Roslyn
 {
@@ -37,6 +38,11 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.Roslyn
             if (project == null)
             {
                 throw new FileNotFoundException($"Couldn't find project in workspace with project file name {projectFileName}");
+            }
+
+            if (_projectContext.LangVersion != null)
+            {
+                project = project.WithParseOptions(((CSharpParseOptions)project.ParseOptions).WithLanguageVersion(_projectContext.LangVersion.Value));
             }
 
             _compilation = project

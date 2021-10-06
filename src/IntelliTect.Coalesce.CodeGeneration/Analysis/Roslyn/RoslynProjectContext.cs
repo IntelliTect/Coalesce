@@ -11,6 +11,7 @@ using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
 using IntelliTect.Coalesce.CodeGeneration.Analysis.Base;
 using IntelliTect.Coalesce.CodeGeneration.Configuration;
 using IntelliTect.Coalesce.CodeGeneration.Analysis.MsBuild;
+using Microsoft.CodeAnalysis.CSharp;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Analysis.Roslyn
 {
@@ -26,7 +27,9 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.Roslyn
 
         public override string RootNamespace => ProjectConfiguration.RootNamespace ?? MsBuildProjectContext.RootNamespace;
 
-        public IProjectContext MsBuildProjectContext { get; internal set; }
+        public MsBuildProjectContext MsBuildProjectContext { get; internal set; }
+
+        public LanguageVersion? LangVersion { get; internal set; }
 
         public ICollection<MetadataReference> GetMetadataReferences()
         {

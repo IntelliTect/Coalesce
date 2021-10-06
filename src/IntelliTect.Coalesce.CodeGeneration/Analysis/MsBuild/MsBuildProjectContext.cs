@@ -40,6 +40,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.MsBuild
         public string RuntimeConfig { get; set; }
         public string Configuration { get; set; }
         public string TargetFramework { get; set; }
+        public string LangVersion { get; set; }
 
         public bool IsClassLibrary => "Library".Equals(OutputType, StringComparison.OrdinalIgnoreCase);
         public string Config => AssemblyFullPath + ".config";

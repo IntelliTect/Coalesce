@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using IntelliTect.Coalesce.CodeGeneration.Configuration;
 using IntelliTect.Coalesce.CodeGeneration.Analysis.MsBuild;
 using Microsoft.Extensions.Logging;
+using Microsoft.CodeAnalysis.CSharp;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Analysis.Roslyn
 {
@@ -28,7 +29,16 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.Roslyn
                 builder = builder.RestoreProjectPackages();
             }
 
-            context.MsBuildProjectContext = builder.BuildProjectContext();
+            var msbContext = context.MsBuildProjectContext = builder.BuildProjectContext();
+
+            if (!LanguageVersionFacts.TryParse(msbContext.LangVersion, out var langVersion))
+            {
+                Logger.LogWarning($"Unknown or unsupported C# Language version '{msbContext.LangVersion}' specified by {msbContext.ProjectName}. Code generation may malfunction.");
+            }
+            else
+            {
+                context.LangVersion = langVersion;
+            }
 
             return context;
         }

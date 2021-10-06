@@ -388,7 +388,7 @@ export default class CSelect extends MetadataComponent {
       const item = await this.create!.getItem(this.search!, this.createItemLabel);
       if (!item) return;
       this.onInput(item);
-    } catch (e) {
+    } catch (e: unknown) {
       this.error = [getMessageForError(e)]
     }
   }

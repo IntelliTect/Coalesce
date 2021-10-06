@@ -296,22 +296,28 @@ export function mapQueryToParams<T extends DataSourceParameters>(
 
 
 
-export function getMessageForError(error: AxiosError | ApiResult | Error | string) {
-  if (typeof error === "string") return error;
-
-  if ("response" in error) {
-    const result = error.response as
-      | AxiosResponse<ListResult<any> | ItemResult<any>>
-      | undefined;
-
-    if (result && typeof result.data === "object") {
-      return result.data.message || "Unknown Error"
-    }
+export function getMessageForError(error: unknown): string {
+  // AxiosError | ApiResult | Error | string
+  if (typeof error === "string") {
+    return error;
   }
+  else if (typeof error === "object" && error != null) {
+    if ("response" in error) {
+      const result = (error as AxiosError).response as
+        | AxiosResponse<ListResult<any> | ItemResult<any>>
+        | undefined;
 
-  return typeof error.message === "string"
-    ? error.message
-    : "A network error occurred"; // TODO: i18n
+      if (result && typeof result.data === "object") {
+        return result.data.message || "Unknown Error"
+      }
+    }
+
+    return typeof (error as ApiResult).message === "string"
+      ? (error as ApiResult).message!
+      : "A network error occurred"; // TODO: i18n
+  } else {
+    return "An unknown error occurred";
+  }
 }
 
 export type AxiosItemResult<T> = AxiosResponse<ItemResult<T>>;

@@ -167,21 +167,23 @@ export default class extends Vue {
 
   get showContent() {
     return this.loaderFlags.every(([loader, flags]) => {
-      if (loader.isLoading && !flags.loadingContent) {
+      if (!flags.loadingContent && loader.isLoading) {
         // loader is loading, and loading content is off.
         return false;
       }
-      if (loader.wasSuccessful === false && !flags.errorContent) {
+      if (!flags.errorContent && loader.wasSuccessful === false) {
         // loader has an error, and error content is off
         return false;
       }
       if (
-        // loader has not yet loaded, and initial content is off
-        (loader.wasSuccessful == null && !flags.initialContent) || 
+        // initial content is off, and either:
+        !flags.initialContent && (
+        // loader has not yet loaded
+        (loader.wasSuccessful == null) || 
         // or loader has loaded, but it errored and there's no current result
         // (implying it has never successfully loaded).
         (loader.wasSuccessful === false && !loader.hasResult)
-      ) {
+      )) {
         return false;
       }
       return true;

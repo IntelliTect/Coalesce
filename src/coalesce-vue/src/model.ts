@@ -21,7 +21,8 @@ import {
   ObjectValue,
   FileValue,
   ModelType,
-  BinaryValue
+  BinaryValue,
+  UnknownValue
 } from "./metadata";
 import { Indexable, isNullOrWhitespace } from "./util";
 

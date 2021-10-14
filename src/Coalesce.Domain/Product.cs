@@ -20,6 +20,9 @@ namespace Coalesce.Domain
 
         [Column("ProductUniqueId")]
         public Guid UniqueId { get; set; }
+
+        [NotMapped]
+        public object Unknown { get; set; } = "unknown value";
     }
 
     public class ProductDetails

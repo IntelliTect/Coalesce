@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "experimentalDecorators": true,
+    "noImplicitOverride": true,
     "emitDecoratorMetadata": true,
     "downlevelIteration": true,
     "importHelpers": true,

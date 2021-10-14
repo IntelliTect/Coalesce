@@ -24,7 +24,7 @@ export interface CaseViewModel extends $models.Case {
   caseProducts: CaseProductViewModel[] | null;
   devTeamAssignedId: number | null;
   devTeamAssigned: $models.DevTeam | null;
-  duration: any | null;
+  duration: unknown | null;
 }
 export class CaseViewModel extends ViewModel<$models.Case, $apiClients.CaseApiClient, number> implements $models.Case  {
   
@@ -497,6 +497,7 @@ export interface ProductViewModel extends $models.Product {
   name: string | null;
   details: $models.ProductDetails | null;
   uniqueId: string | null;
+  unknown: unknown | null;
 }
 export class ProductViewModel extends ViewModel<$models.Product, $apiClients.ProductApiClient, number> implements $models.Product  {
   

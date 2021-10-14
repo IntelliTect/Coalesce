@@ -19,7 +19,7 @@ export function shortStringify(value: any, maxLen = 55) {
 
 
 export function expectDeepMatch(actual: any, expected: any) {
-  if (typeof expected == "object" && expected.constructor === Object) {
+  if (expected && typeof expected == "object" && expected.constructor === Object) {
     for (const k in expected) {
       if (k == "$metadata") {
         // Don't recurse into metadata because it will infinitely recurse.

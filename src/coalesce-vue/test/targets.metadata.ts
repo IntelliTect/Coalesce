@@ -268,6 +268,12 @@ export const Student = domain.types.Student = {
       get navigationProp() { return domain.types.Student.props.advisor as ModelReferenceNavigationProperty },
       get principalType() { return domain.types.Advisor as ModelType },
       get principalKey() { return Advisor.keyProp as PrimaryKeyProperty }
+    },
+    unknownObj: {
+      name: "unknownObj",
+      displayName: "Unknown Obj",
+      type: "unknown",
+      role: "value"
     }
   },
   dataSources: {

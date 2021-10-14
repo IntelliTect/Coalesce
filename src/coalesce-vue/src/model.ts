@@ -64,6 +64,9 @@ abstract class Visitor<TValue = any, TArray = any[], TObject = any> {
       case "binary":
         return this.visitBinaryValue(value, meta);
 
+      case "unknown":
+        return this.visitUnknownValue(value, meta);
+
       default:
         return this.visitPrimitiveValue(value, meta);
     }
@@ -88,6 +91,8 @@ abstract class Visitor<TValue = any, TArray = any[], TObject = any> {
   protected abstract visitBinaryValue(value: any, meta: BinaryValue): TValue;
 
   protected abstract visitEnumValue(value: any, meta: EnumValue): TValue;
+
+  protected abstract visitUnknownValue(value: any, meta: UnknownValue): TValue;
 }
 
 function parseError(value: any, meta: { type: string; name: string }, details?: string) {
@@ -124,11 +129,12 @@ export function parseValue(value: any, meta: FileValue): null | Blob | File;
 export function parseValue(value: any, meta: BinaryValue): null | Uint8Array | string;
 export function parseValue(value: any, meta: ModelValue): null | object;
 export function parseValue(value: any, meta: ObjectValue): null | object;
+export function parseValue(value: any, meta: UnknownValue): null | unknown;
 export function parseValue(value: any[], meta: CollectionValue): Array<any>;
 export function parseValue(
   value: any,
   meta: Value
-): null | string | number | boolean | object | Date | Array<any> {
+): null | string | number | boolean | object | Date | Array<any> | unknown {
   if (value == null) {
     return null;
   }
@@ -230,7 +236,7 @@ export function parseValue(
 class ModelConversionVisitor extends Visitor<any, any[] | null, any | null> {
   private objects = new Map<object, object>();
 
-  public visitValue(value: any, meta: Value): any {
+  public override visitValue(value: any, meta: Value): any {
     // Models shouldn't contain undefined - only nulls where a value isn't present.
     if (value === undefined) return null;
 
@@ -353,6 +359,10 @@ class ModelConversionVisitor extends Visitor<any, any[] | null, any | null> {
 
   protected visitBinaryValue(value: any, meta: BinaryValue) {
     return parseValue(value, meta);
+  }
+
+  protected visitUnknownValue(value: any, meta: UnknownValue) {
+    return value;
   }
 
   constructor(private mode: "map" | "convert") {
@@ -525,6 +535,10 @@ class MapToDtoVisitor extends Visitor<
 
   protected visitEnumValue(value: any, meta: EnumValue) {
     return parseValue(value, meta);
+  }
+
+  protected visitUnknownValue(value: any, meta: UnknownValue) {
+    return value;
   }
 
   /**
@@ -816,6 +830,13 @@ class DisplayVisitor extends Visitor<
       return parsed.toString();
     }
     return parsed.toLocaleString();
+  }
+
+  protected visitUnknownValue(value: unknown, meta: UnknownValue) {
+    if (typeof value == "string") return value;
+    if (typeof value == "number") return value.toString();
+    if (typeof value == "object" && value) return value.toString();
+    return null;
   }
 }
 

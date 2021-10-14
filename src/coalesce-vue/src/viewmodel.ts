@@ -1037,7 +1037,7 @@ export class ViewModelCollection<T extends ViewModel> extends Array<T> {
   $hasLoaded!: boolean;
 
 
-  push(...items: T[]): number {
+  override push(...items: T[]): number {
     // MUST evaluate the .map() before grabbing the .push()
     // method from the proto. See test "newly loaded additional items are reactive".
     const viewModelItems = viewModelCollectionMapItems(items, this, true);
@@ -1045,7 +1045,7 @@ export class ViewModelCollection<T extends ViewModel> extends Array<T> {
     return resolveProto(this).push.apply(this, viewModelItems);
   }
 
-  splice(start: number, deleteCount?: number, ...items: T[]): T[] {
+  override splice(start: number, deleteCount?: number, ...items: T[]): T[] {
     // MUST evaluate the .map() before grabbing the .push()
     // method from the proto. See test "newly loaded additional items are reactive".
     const viewModelItems: any[] = items
@@ -1498,6 +1498,9 @@ export function updateViewModelFromModel<
               // implementations of the setters for referenceNavigation properties on ViewModel instances.
               currentValue.$loadFromModel(incomingValue, isCleanData);
             }
+
+            // TODO (maybe): Check if target.$parent is the expected value of this navigation prop,
+            // and if it is, update $parent? This is what the KO stack did. Maybe we want to do the same?
           } else {
             // We allow the existing value of the navigation prop to stick around
             // if the server didn't send it back.

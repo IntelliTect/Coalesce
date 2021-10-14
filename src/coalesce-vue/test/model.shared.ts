@@ -93,6 +93,13 @@ export const twoWayConversions = <MappingData[]>[
     }
   },
 
+  // Unknown
+  {
+    meta: studentProps.unknownObj,
+    dto: { anyProp: "bob", num: 2, anyOtherProp: null },
+    model: { anyProp: "bob", num: 2, anyOtherProp: null },
+  },
+
   // null props off of the root object
   {
     meta: studentValue,

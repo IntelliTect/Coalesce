@@ -38,13 +38,17 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Utils
 
         private string TsTypePlain(TypeViewModel type, string modelPrefix, bool viewModel)
         {
-            if (type.IsString) return "string";
-            if (type.IsBool) return "boolean";
-            if (type.IsDate) return "Date";
-            if (type.IsEnum) return modelPrefix + type.NullableUnderlyingType.ClientTypeName;
-            if (type.IsNumber) return "number";
-            if (type.IsGuid) return "string";
-            if (type.IsVoid) return "void";
+            switch (type.TsTypeKind)
+            {
+                case TypeDiscriminator.String: return "string";
+                case TypeDiscriminator.Boolean: return "boolean";
+                case TypeDiscriminator.Date: return "Date";
+                case TypeDiscriminator.Enum: return modelPrefix + type.NullableUnderlyingType.ClientTypeName;
+                case TypeDiscriminator.Number: return "number";
+                case TypeDiscriminator.Void: return "void";
+                case TypeDiscriminator.Unknown: return "unknown";
+            }
+
             if (type.IsFile)
             {
                 return flags.HasFlag(Flags.RawBinary)
@@ -66,7 +70,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Utils
                 return modelPrefix + type.PureType.Name + viewModelAppend;
             }
             if (type.IsClass) return type.PureType.Name;
-            return "any";
+            return "unknown";
         }
 
         [Flags]

@@ -917,7 +917,7 @@ export abstract class ApiState<
   TResult
 > extends Function {
   /** The metadata of the method being called, if it was provided. */
-  $metadata?: Method;
+  abstract $metadata?: Method;
 
   /** True if a request is currently pending. */
   isLoading: boolean = false;

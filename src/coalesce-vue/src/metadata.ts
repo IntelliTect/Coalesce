@@ -47,7 +47,7 @@ export type ClassTypeDiscriminator = "model" | "object"
 export type CustomTypeDiscriminator = ClassTypeDiscriminator | "enum"
 
 /** Type discriminator of all non-collection types */
-export type NonCollectionTypeDiscriminator = ValueTypeDiscriminator | ClassTypeDiscriminator
+export type NonCollectionTypeDiscriminator = ValueTypeDiscriminator | ClassTypeDiscriminator | "unknown"
 
 /** Union of all valid type discriminators. */
 export type TypeDiscriminator = NonCollectionTypeDiscriminator | "collection"
@@ -59,6 +59,7 @@ export type TypeDiscriminatorToType<T> =
 : T extends "boolean" ? boolean
 : T extends "date" ? Date
 : T extends "file" ? File
+: T extends "unknown" ? unknown
 : T extends "binary" ? (Uint8Array | string)
 : any
 
@@ -300,6 +301,12 @@ export interface BinaryValue extends ValueMeta<"binary"> {
     readonly base64?: boolean
 }
 
+/** Represents the usage of an unknown type, i.e. an object declared as `object` in C#. 
+ * Such types have no metadata and their values only exist as their JSON representation. */
+export interface UnknownValue extends ValueMeta<"unknown"> { 
+    readonly role: "value"
+}
+
 /** Represents the usage of an enum */
 export interface EnumValue extends ValueMetaWithTypeDef<"enum", EnumType> { 
     readonly role: "value"
@@ -340,6 +347,7 @@ export type NonCollectionValue =
 | DateValue
 | FileValue
 | BinaryValue
+| UnknownValue
 | CustomTypeValue
 
 /** Union of all representations of the usage of a type */
@@ -398,6 +406,9 @@ export interface EnumProperty extends PropertyBase, EnumValue { }
 
 /** Represents an object property */
 export interface ObjectProperty extends PropertyBase, ObjectValue { }
+
+/** Represents an unknown property */
+export interface UnknownProperty extends PropertyBase, UnknownValue { }
 
 /** Represents a binary property */
 export interface BinaryProperty extends PropertyBase, BinaryValue {
@@ -474,6 +485,7 @@ export type Property =
 | DateProperty
 | EnumProperty
 | ObjectProperty
+| UnknownProperty
 | BinaryProperty
 | ModelValueProperty
 | ModelReferenceNavigationProperty

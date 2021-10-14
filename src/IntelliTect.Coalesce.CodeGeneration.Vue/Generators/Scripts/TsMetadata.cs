@@ -599,9 +599,13 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
             switch (kind)
             {
                 case TypeDiscriminator.Unknown:
-                    // We assume any unknown props are strings.
-                    b.Line("// Type not supported natively by Coalesce - falling back to string.");
-                    b.StringProp("type", "string");
+                    if (type.FullyQualifiedName != "System.Object")
+                    {
+                        // System.Object technically _is_ supported via "unknown", but any derived type
+                        // that isn't otherwise explicitly supported by Coalesce should have this message.
+                        b.Line("// Type not supported natively by Coalesce - falling back to unknown.");
+                    }
+                    b.StringProp("type", "unknown");
                     break;
 
                 default:

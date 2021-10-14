@@ -219,8 +219,8 @@ export const Case = domain.types.Case = {
     duration: {
       name: "duration",
       displayName: "Duration",
-      // Type not supported natively by Coalesce - falling back to string.
-      type: "string",
+      // Type not supported natively by Coalesce - falling back to unknown.
+      type: "unknown",
       role: "value",
     },
   },
@@ -1247,6 +1247,13 @@ export const Product = domain.types.Product = {
       type: "string",
       role: "value",
     },
+    unknown: {
+      name: "unknown",
+      displayName: "Unknown",
+      // Type not supported natively by Coalesce - falling back to unknown.
+      type: "unknown",
+      role: "value",
+    },
   },
   methods: {
   },
@@ -1409,8 +1416,8 @@ export const CaseSummary = domain.types.CaseSummary = {
         name: "$collectionItem",
         displayName: "",
         role: "value",
-        // Type not supported natively by Coalesce - falling back to string.
-        type: "string",
+        // Type not supported natively by Coalesce - falling back to unknown.
+        type: "unknown",
       },
       role: "value",
     },

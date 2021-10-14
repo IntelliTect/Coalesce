@@ -53,7 +53,7 @@ export interface Case extends Model<typeof metadata.Case> {
   caseProducts: CaseProduct[] | null
   devTeamAssignedId: number | null
   devTeamAssigned: DevTeam | null
-  duration: any | null
+  duration: unknown | null
 }
 export class Case {
   
@@ -308,6 +308,7 @@ export interface Product extends Model<typeof metadata.Product> {
   name: string | null
   details: ProductDetails | null
   uniqueId: string | null
+  unknown: unknown | null
 }
 export class Product {
   
@@ -357,7 +358,7 @@ export interface CaseSummary extends Model<typeof metadata.CaseSummary> {
   caseCount: number | null
   closeCases: number | null
   description: string | null
-  testDict: any[] | null
+  testDict: unknown[] | null
 }
 export class CaseSummary {
   

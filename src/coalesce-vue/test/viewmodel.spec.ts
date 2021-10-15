@@ -647,6 +647,7 @@ describe("ViewModel", () => {
           studentId: 1,
         });
         var student = new StudentViewModel(studentModel);
+        student.$isDirty = false;
         const vue = new Vue({ data: { student } });
 
         student.$startAutoSave(vue, { wait: 0, deep: true });
@@ -668,6 +669,7 @@ describe("ViewModel", () => {
           studentId: 1,
         });
         var student = new StudentViewModel(studentModel);
+        student.$isDirty = false;
         const vue = new Vue({ data: { student } });
 
         student.$startAutoSave(vue, { wait: 0, deep: true });

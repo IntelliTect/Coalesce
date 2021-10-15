@@ -1,6 +1,8 @@
-﻿using System;
+﻿using IntelliTect.Coalesce.Utilities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Threading.Tasks;
 
@@ -49,6 +51,12 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 }
             }
             return null;
+        }
+
+        public static string? GetAttributeValue<TAttribute>(this ICustomAttributeProvider member, Expression<Func<TAttribute, string?>> propertyExpression)
+            where TAttribute : Attribute
+        {
+            return GetAttributeValue<TAttribute>(member, propertyExpression.GetExpressedProperty().Name) as string;
         }
 
     }

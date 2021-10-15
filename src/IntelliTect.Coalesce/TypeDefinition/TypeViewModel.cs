@@ -66,7 +66,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// </summary>
         public abstract bool IsVoid { get; }
 
-        public abstract Dictionary<int, string> EnumValues { get; }
+        public abstract IReadOnlyList<EnumMember> EnumValues { get; }
 
         public abstract bool IsEnum { get; }
 
@@ -180,13 +180,18 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             get
             {
-                if (IsString) return "string";
-                if (IsBool) return "boolean";
-                if (IsDate) return "moment.Moment";
-                if (IsEnum) return "number";
-                if (IsNumber) return "number";
-                if (IsVoid) return "void";
-                if (IsFile) return "File";
+                switch (TsTypeKind)
+                {
+                    case TypeDiscriminator.String: return "string";
+                    case TypeDiscriminator.Boolean: return "boolean";
+                    case TypeDiscriminator.Date: return "moment.Moment";
+                    case TypeDiscriminator.Enum: return "number";
+                    case TypeDiscriminator.Number: return "number";
+                    case TypeDiscriminator.Void: return "void";
+                    case TypeDiscriminator.File: return "File";
+                    case TypeDiscriminator.Unknown: return "any";
+                }
+
                 if (IsPOCO) return $"ViewModels.{PureType.Name}";
                 if (IsClass) return PureType.Name;
                 return "any";

@@ -1,7 +1,10 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using IntelliTect.Coalesce.Utilities;
+using Microsoft.CodeAnalysis;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -80,25 +83,28 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public override bool IsVoid => Symbol.SpecialType == SpecialType.System_Void;
 
-        public override Dictionary<int, string> EnumValues
+        public override IReadOnlyList<EnumMember> EnumValues
         {
             get
             {
                 if (IsNullableType) return NullableUnderlyingType.EnumValues;
 
-                var result = new Dictionary<int, string>();
+                var result = new List<EnumMember>();
 
                 if (!IsEnum) return result;
 
                 var enumType = NamedSymbol.EnumUnderlyingType;
-                var symbol = Symbol;
+                if (enumType == null) return result;
 
-                if (enumType != null)
+                foreach (var member in Symbol.GetMembers().OfType<IFieldSymbol>())
                 {
-                    foreach (var member in symbol.GetMembers().OfType<IFieldSymbol>())
-                    {
-                        result.Add(Convert.ToInt32(member.ConstantValue!), member.Name);
-                    }
+                    result.Add(new EnumMember(
+                        member.Name, 
+                        member.ConstantValue!,
+                        member.GetAttributeValue<DisplayNameAttribute>(a => a.DisplayName) ??
+                            member.GetAttributeValue<DisplayAttribute>(a => a.Name) ??
+                            member.Name.ToProperCase()
+                    ));
                 }
 
                 return result;

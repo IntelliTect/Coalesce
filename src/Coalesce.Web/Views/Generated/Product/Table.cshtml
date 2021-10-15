@@ -85,6 +85,10 @@
                                 Unique Id
                                 <i class="fa" data-bind="css: orderBy() == 'UniqueId' ? 'fa-caret-up' : orderByDescending() == 'UniqueId' ? 'fa-caret-down' : 'fa-sort'" style="float: right; padding: .3em 0 0 0 "></i>
                             </th>
+                            <th class="sortable-header" data-bind="click: function(){orderByToggle('Unknown')}">
+                                Unknown
+                                <i class="fa" data-bind="css: orderBy() == 'Unknown' ? 'fa-caret-up' : orderByDescending() == 'Unknown' ? 'fa-caret-down' : 'fa-sort'" style="float: right; padding: .3em 0 0 0 "></i>
+                            </th>
                             <th style="width: 1%">
                             </th>
                         </tr>
@@ -96,12 +100,14 @@
                                 <td class="prop-name">@(Knockout.InputFor<Coalesce.Domain.Product>(p => p.Name))</td>
                                 <td class="prop-details">@(Knockout.InputFor<Coalesce.Domain.Product>(p => p.Details))</td>
                                 <td class="prop-uniqueId">@(Knockout.InputFor<Coalesce.Domain.Product>(p => p.UniqueId))</td>
+                                <td class="prop-unknown">@(Knockout.InputFor<Coalesce.Domain.Product>(p => p.Unknown))</td>
                             }
                             else
                             {
                                 <td class="prop-name">@(Knockout.DisplayFor<Coalesce.Domain.Product>(p => p.Name, true))</td>
                                 <td class="prop-details">@(Knockout.DisplayFor<Coalesce.Domain.Product>(p => p.Details, true))</td>
                                 <td class="prop-uniqueId">@(Knockout.DisplayFor<Coalesce.Domain.Product>(p => p.UniqueId, true))</td>
+                                <td class="prop-unknown">@(Knockout.DisplayFor<Coalesce.Domain.Product>(p => p.Unknown, true))</td>
                             }
                             <td>
                                 <!-- Editor buttons -->

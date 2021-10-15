@@ -28,6 +28,7 @@ module ViewModels {
         public name: KnockoutObservable<string | null> = ko.observable(null);
         public details: KnockoutObservable<ViewModels.ProductDetails | null> = ko.observable(null);
         public uniqueId: KnockoutObservable<string | null> = ko.observable(null);
+        public unknown: KnockoutObservable<any | null> = ko.observable(null);
         
         
         /** Display text for Details */
@@ -66,6 +67,7 @@ module ViewModels {
             // The rest of the objects are loaded now.
             this.name(data.name);
             this.uniqueId(data.uniqueId);
+            this.unknown(data.unknown);
             if (this.coalesceConfig.onLoadFromDto()){
                 this.coalesceConfig.onLoadFromDto()(this as any);
             }
@@ -81,6 +83,7 @@ module ViewModels {
             
             dto.name = this.name();
             dto.uniqueId = this.uniqueId();
+            dto.unknown = this.unknown();
             
             return dto;
         }
@@ -122,6 +125,7 @@ module ViewModels {
             self.name.subscribe(self.autoSave);
             self.details.subscribe(self.autoSave);
             self.uniqueId.subscribe(self.autoSave);
+            self.unknown.subscribe(self.autoSave);
             
             if (newItem) {
                 self.loadFromDto(newItem, true);

@@ -149,7 +149,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
                     b.Line($"public {prop.JsVariable}Values: Coalesce.EnumValue[] = [ ");
                     foreach (var kvp in prop.Type.EnumValues)
                     {
-                        b.Indented($"{{ id: {kvp.Key}, value: '{kvp.Value.ToProperCase()}' }},");
+                        b.Indented($"{{ id: {kvp.Value}, value: '{kvp.DisplayName}' }},");
                     }
                     b.Line("];");
                 }
@@ -367,7 +367,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
                     {
                         foreach (var kvp in prop.Type.EnumValues)
                         {
-                            b.Line($"{kvp.Value} = {kvp.Key},");
+                            b.Line($"{kvp.Name} = {kvp.Value},");
                         }
                     }
                 }

@@ -27,7 +27,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                 {
                     foreach (var value in model.EnumValues)
                     {
-                        b.Line($"{value.Value} = {value.Key},");
+                        b.Line($"{value.Name} = {value.Value},");
                     }
                 }
 

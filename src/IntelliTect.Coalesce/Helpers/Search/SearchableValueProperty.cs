@@ -166,10 +166,10 @@ namespace IntelliTect.Coalesce.Helpers.Search
             else if (propType.IsEnum)
             {
                 var enumValuePair = propType.EnumValues
-                    .FirstOrDefault(kvp => string.Equals(kvp.Value, rawSearchTerm, StringComparison.OrdinalIgnoreCase));
+                    .FirstOrDefault(kvp => string.Equals(kvp.Name, rawSearchTerm, StringComparison.OrdinalIgnoreCase));
                 
                 // If the input string mapped to a valid enum value, search by the int value of that enum value.
-                if (enumValuePair.Value != null)
+                if (enumValuePair != null)
                 {
                     yield return (Property, $"({propertyAccessor} == \"{enumValuePair.Value}\")");
                 }

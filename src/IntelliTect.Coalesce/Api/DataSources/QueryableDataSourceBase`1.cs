@@ -188,13 +188,12 @@ namespace IntelliTect.Coalesce
 
                         if (prop.Type.IsEnum)
                         {
-                            var inputIsInt = int.TryParse(item, out int intVal);
-
+                            var isLong = long.TryParse(item, out long longVal);
                             var enumString = prop.Type.EnumValues.SingleOrDefault(ev =>
-                                inputIsInt
-                                    ? ev.Key == intVal
-                                    : ev.Value.Equals(item.Trim(), StringComparison.InvariantCultureIgnoreCase)
-                                ).Value;
+                                isLong
+                                    ? longVal.Equals(Convert.ToInt64(ev.Value))
+                                    : ev.Name.Equals(item.Trim(), StringComparison.InvariantCultureIgnoreCase)
+                                )?.Name;
 
                             // If SingleOrDefault doesn't match anything,
                             // `.Value` will be default(string), which is null.

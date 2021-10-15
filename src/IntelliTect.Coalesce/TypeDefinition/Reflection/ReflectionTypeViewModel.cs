@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
+using IntelliTect.Coalesce.Utilities;
 using Microsoft.CodeAnalysis;
 
 namespace IntelliTect.Coalesce.TypeDefinition
@@ -104,11 +107,11 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public override bool IsVoid => Info == typeof(void);
 
-        public override Dictionary<int, string> EnumValues
+        public override IReadOnlyList<EnumMember> EnumValues
         {
             get
             {
-                var result = new Dictionary<int, string>();
+                var result = new List<EnumMember>();
                 var info = Info;
                 if (IsNullableType)
                 {
@@ -116,7 +119,15 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 }
                 foreach (var value in Enum.GetValues(info))
                 {
-                    result.Add(Convert.ToInt32(value!), value!.ToString()!);
+                    var name = value!.ToString()!;
+                    var member = info.GetMember(name)[0];
+                    result.Add(new EnumMember(
+                        name, 
+                        value, 
+                        member.GetAttributeValue<DisplayNameAttribute>(a => a.DisplayName) ??
+                            member.GetAttributeValue<DisplayAttribute>(a => a.Name) ??
+                            member.Name.ToProperCase()
+                    ));
                 }
                 return result;
             }

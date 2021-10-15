@@ -88,7 +88,7 @@ module ViewModels {
             { id: 0, value: 'Open' },
             { id: 1, value: 'In Progress' },
             { id: 2, value: 'Resolved' },
-            { id: 3, value: 'Closed No Solution' },
+            { id: 3, value: 'Closed, No Solution' },
             { id: 4, value: 'Cancelled' },
         ];
         

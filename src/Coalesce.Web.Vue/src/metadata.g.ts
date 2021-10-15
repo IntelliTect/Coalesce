@@ -34,7 +34,7 @@ export const Statuses = domain.enums.Statuses = {
     { value: 0, strValue: 'Open', displayName: 'Open' },
     { value: 1, strValue: 'InProgress', displayName: 'In Progress' },
     { value: 2, strValue: 'Resolved', displayName: 'Resolved' },
-    { value: 3, strValue: 'ClosedNoSolution', displayName: 'Closed No Solution' },
+    { value: 3, strValue: 'ClosedNoSolution', displayName: 'Closed, No Solution' },
     { value: 4, strValue: 'Cancelled', displayName: 'Cancelled' },
   ]),
 }

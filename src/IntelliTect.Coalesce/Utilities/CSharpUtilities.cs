@@ -31,18 +31,18 @@ namespace IntelliTect.Coalesce.Utilities
             {
                 // Coalesce assumes all enums are int32 based.
                 // Roslyn handles them as uint64 (search for ConvertEnumUnderlyingTypeToUInt64) - perhaps we should too?
-                var int32Value = Convert.ToInt32(value);
+                var int64Value = Convert.ToInt64(value);
                 // Find an explicit enum value.
-                var enumValue = type.EnumValues.FirstOrDefault(e => e.Key.Equals(int32Value));
-                if (enumValue.Value != null)
+                var enumValue = type.EnumValues.FirstOrDefault(e => e.Value.Equals(int64Value));
+                if (enumValue != null)
                 {
                     // Found a named enum value.
-                    return $"{type.FullyQualifiedName}.{enumValue.Value}";
+                    return $"{type.FullyQualifiedName}.{enumValue.Name}";
                 }
                 else
                 {
                     // Can't find a named value. Use a cast instead.
-                    return $"({type.FullyQualifiedName}){int32Value.ToString()}";
+                    return $"({type.FullyQualifiedName}){int64Value.ToString()}";
                 }
             }
             

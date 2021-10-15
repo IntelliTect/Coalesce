@@ -22,10 +22,18 @@ namespace IntelliTect.Coalesce.TypeDefinition
             return symbol.GetAttribute<TAttribute>() != null;
         }
 
-        public static object? GetAttributeValue<TAttribute>(this ISymbol symbol, string valueName) where TAttribute : Attribute
+        public static object? GetAttributeValue<TAttribute>(this ISymbol symbol, string valueName) 
+            where TAttribute : Attribute
         {
             var attributeData = symbol.GetAttribute<TAttribute>();
             return attributeData?.GetPropertyValue(valueName, null);
+        }
+
+        public static string? GetAttributeValue<TAttribute>(this ISymbol symbol, Expression<Func<TAttribute, string?>> propertyExpression) 
+            where TAttribute : Attribute
+        {
+            var attributeData = symbol.GetAttribute<TAttribute>();
+            return attributeData?.GetPropertyValue(propertyExpression.GetExpressedProperty().Name, null) as string;
         }
 
         public static object? GetPropertyValue(this AttributeData attributeData, string propertyName, object? defaultValue)

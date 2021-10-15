@@ -659,9 +659,9 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
                     data-bind=""select2: {bindingValue}"" 
                     placeholder=""{placeholder}"">");
 
-            foreach (KeyValuePair<int, string> item in type.EnumValues)
+            foreach (var item in type.EnumValues)
             {
-                sb.AppendLine($@"<option value=""{item.Key}"">{item.Value.ToProperCase()}</option>");
+                sb.AppendLine($@"<option value=""{item.Value}"">{item.DisplayName}</option>");
             }
             sb.AppendLine("</select>");
             return new HtmlString(sb.ToString());

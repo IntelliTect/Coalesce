@@ -17,6 +17,7 @@ namespace Coalesce.Web.Models
         private string _Name;
         private Coalesce.Web.Models.ProductDetailsDtoGen _Details;
         private System.Guid? _UniqueId;
+        private object _Unknown;
 
         public int? ProductId
         {
@@ -38,6 +39,11 @@ namespace Coalesce.Web.Models
             get => _UniqueId;
             set { _UniqueId = value; Changed(nameof(UniqueId)); }
         }
+        public object Unknown
+        {
+            get => _Unknown;
+            set { _Unknown = value; Changed(nameof(Unknown)); }
+        }
 
         /// <summary>
         /// Map from the domain object to the properties of the current DTO instance.
@@ -52,6 +58,7 @@ namespace Coalesce.Web.Models
             this.ProductId = obj.ProductId;
             this.Name = obj.Name;
             this.UniqueId = obj.UniqueId;
+            this.Unknown = obj.Unknown;
 
             this.Details = obj.Details.MapToDto<Coalesce.Domain.ProductDetails, ProductDetailsDtoGen>(context, tree?[nameof(this.Details)]);
 
@@ -69,6 +76,7 @@ namespace Coalesce.Web.Models
             if (ShouldMapTo(nameof(ProductId))) entity.ProductId = (ProductId ?? entity.ProductId);
             if (ShouldMapTo(nameof(Name))) entity.Name = Name;
             if (ShouldMapTo(nameof(UniqueId))) entity.UniqueId = (UniqueId ?? entity.UniqueId);
+            if (ShouldMapTo(nameof(Unknown))) entity.Unknown = Unknown;
         }
     }
 }

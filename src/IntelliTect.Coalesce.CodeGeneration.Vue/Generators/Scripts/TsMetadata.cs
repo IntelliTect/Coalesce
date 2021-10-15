@@ -150,12 +150,12 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                 b.StringProp("displayName", model.DisplayName);
                 b.StringProp("type", "enum");
 
-                string enumShape = string.Join("|", model.EnumValues.Select(ev => $"\"{ev.Value}\""));
+                string enumShape = string.Join("|", model.EnumValues.Select(ev => $"\"{ev.Name}\""));
                 b.Line($"...getEnumMeta<{enumShape}>([");
                 foreach (var value in model.EnumValues)
                 {
                     // TODO: allow for localization of displayName
-                    b.Indented($"{{ value: {value.Key}, strValue: '{value.Value}', displayName: '{value.Value.ToProperCase()}' }},");
+                    b.Indented($"{{ value: {value.Value}, strValue: '{value.Name}', displayName: '{value.DisplayName}' }},");
                 }
                 b.Line("]),");
             }

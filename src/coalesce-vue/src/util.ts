@@ -4,7 +4,7 @@ export type OwnProps<T, TExclude> = Pick<T, Exclude<keyof T, keyof TExclude>>;
 
 export type Indexable<T> = { [k: string]: any | undefined } & T;
 
-export type DeepPartial<T> = {
+export type DeepPartial<T> = T | {
   [P in keyof T]?: T[P] extends Array<infer U>
     ? Array<DeepPartial<U>>
     : T[P] extends ReadonlyArray<infer U>

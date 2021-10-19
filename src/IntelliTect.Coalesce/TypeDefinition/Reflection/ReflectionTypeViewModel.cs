@@ -111,16 +111,15 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             get
             {
+                if (IsNullableType) return NullableUnderlyingType.EnumValues;
+
                 var result = new List<EnumMember>();
-                var info = Info;
-                if (IsNullableType)
-                {
-                    info = Nullable.GetUnderlyingType(info)!;
-                }
-                foreach (var value in Enum.GetValues(info))
+                if (!IsEnum) return result;
+
+                foreach (var value in Enum.GetValues(Info))
                 {
                     var name = value!.ToString()!;
-                    var member = info.GetMember(name)[0];
+                    var member = Info.GetMember(name)[0];
                     result.Add(new EnumMember(
                         name, 
                         value, 

@@ -310,10 +310,35 @@ namespace IntelliTect.Coalesce.TypeDefinition
             get
             {
                 var result = new List<OrderByInformation>();
-                foreach (var prop in Properties)
+                foreach (var p in Properties
+                    .Select(p => new { Prop = p, p.DefaultOrderBy })
+                    .Where(p => p.DefaultOrderBy != null)
+                    .OrderBy(p => p.DefaultOrderBy!.FieldOrder)
+                )
                 {
-                    var orderInfo = prop.DefaultOrderBy;
-                    if (orderInfo != null)
+                    var prop = p.Prop;
+                    var orderInfo = p.DefaultOrderBy!;
+                    if (
+                        // Ordering by a POCO prop
+                        prop.Type.ClassViewModel != null &&
+                        // The POCO prop isn't already opinionated about its
+                        // nested prop (via DefaultOrderByAttribute.FieldName)
+                        orderInfo.Properties.Count == 1 &&
+                        // The target type *does* have specific fields that it likes to order by
+                        prop.Type.ClassViewModel.DefaultOrderBy.Any()
+                    )
+                    {
+                        foreach (var nestedOrderBy in prop.Type.ClassViewModel.DefaultOrderBy.OrderBy(p => p.FieldOrder))
+                        {
+                            result.Add(new OrderByInformation()
+                            {
+                                Properties = new[] { prop }.Concat(nestedOrderBy.Properties).ToList(),
+                                FieldOrder = result.Count + 1,
+                                OrderByDirection = nestedOrderBy.OrderByDirection
+                            });
+                        }
+                    }
+                    else
                     {
                         result.Add(orderInfo);
                     }
@@ -321,16 +346,16 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
                 if (result.Count > 0)
                 {
-                    return result.OrderBy(f => f.FieldOrder).ToList();
+                    return result.ToList();
                 }
 
                 // Nothing found, order by ListText and then ID.
                 var nameProp = PropertyByName("Name");
-                if (nameProp?.HasNotMapped == false && nameProp.IsClientProperty)
+                if (nameProp?.IsDbMapped == true && nameProp.IsClientProperty)
                 {
                     result.Add(new OrderByInformation()
                     {
-                        FieldName = "Name",
+                        Properties = { nameProp },
                         OrderByDirection = DefaultOrderByAttribute.OrderByDirections.Ascending,
                         FieldOrder = 1
                     });
@@ -339,7 +364,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 {
                     result.Add(new OrderByInformation()
                     {
-                        FieldName = PrimaryKey.Name,
+                        Properties = { PrimaryKey },
                         OrderByDirection = DefaultOrderByAttribute.OrderByDirections.Ascending,
                         FieldOrder = 1
                     });

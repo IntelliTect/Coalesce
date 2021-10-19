@@ -430,8 +430,8 @@ namespace IntelliTect.Coalesce.Tests.Api.DataSources
             // Precondition:
             var defaultOrdering = source.ClassViewModel.DefaultOrderBy.ToList();
             Assert.Equal(2, defaultOrdering.Count);
-            Assert.Equal(nameof(ComplexModel.Name), defaultOrdering[0].FieldName);
-            Assert.Equal(nameof(ComplexModel.ComplexModelId), defaultOrdering[1].FieldName);
+            Assert.Equal(nameof(ComplexModel.Name), defaultOrdering[0].Properties[0].Name);
+            Assert.Equal(nameof(ComplexModel.ComplexModelId), defaultOrdering[1].Properties[0].Name);
 
             source.User.LogIn();
             source
@@ -459,8 +459,8 @@ namespace IntelliTect.Coalesce.Tests.Api.DataSources
             // Precondition:
             var defaultOrdering = source.ClassViewModel.DefaultOrderBy.ToList();
             Assert.Equal(2, defaultOrdering.Count());
-            Assert.Equal(nameof(ComplexModel.Name), defaultOrdering[0].FieldName);
-            Assert.Equal(nameof(ComplexModel.ComplexModelId), defaultOrdering[1].FieldName);
+            Assert.Equal(nameof(ComplexModel.Name), defaultOrdering[0].Properties[0].Name);
+            Assert.Equal(nameof(ComplexModel.ComplexModelId), defaultOrdering[1].Properties[0].Name);
 
             source.User.LogIn();
             source
@@ -485,7 +485,7 @@ namespace IntelliTect.Coalesce.Tests.Api.DataSources
             // Precondition:
             var defaultOrdering = source.ClassViewModel.DefaultOrderBy.ToList();
             Assert.Single(defaultOrdering);
-            Assert.Equal(nameof(Product.Name), defaultOrdering[0].FieldName);
+            Assert.Equal(nameof(Product.Name), defaultOrdering[0].Properties[0].Name);
 
             source.User.LogIn();
             source
@@ -510,7 +510,7 @@ namespace IntelliTect.Coalesce.Tests.Api.DataSources
             // Precondition:
             var defaultOrdering = source.ClassViewModel.DefaultOrderBy.ToList();
             Assert.Single(defaultOrdering);
-            Assert.Equal(nameof(Person.PersonId), defaultOrdering[0].FieldName);
+            Assert.Equal(nameof(Person.PersonId), defaultOrdering[0].Properties[0].Name);
 
             source.User.LogIn();
             source

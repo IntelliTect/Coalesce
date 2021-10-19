@@ -1,4 +1,5 @@
-﻿using System;
+﻿using IntelliTect.Coalesce.TypeDefinition;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -30,26 +31,33 @@ namespace IntelliTect.Coalesce.DataAnnotations
             this.OrderByDirection = orderByDirection;
             this.FieldOrder = fieldOrder;
         }
-
     }
 
     public class OrderByInformation
     {
-        public string? FieldName { get; set; }
+        /// <summary>
+        /// The property to order by. If this contains multiple properties,
+        /// it represents chained ancestor properties of the desired property.
+        /// </summary>
+        public List<PropertyViewModel> Properties { get; set; } = new List<PropertyViewModel>();
 
-        public string? FieldChildName { get; set; }
         public DefaultOrderByAttribute.OrderByDirections OrderByDirection { get; set; }
         public int FieldOrder { get; set; }
-        public string? ObjectDefaultValue { get; internal set; }
 
         public string OrderExpression(string prependText = "")
         {
-            if (FieldChildName != null)
+            string text = Properties.Count > 1 ? "(" : "";
+            string propAccessor = prependText;
+            propAccessor += (propAccessor == "" ? "" : ".")  + Properties[0].Name;
+            foreach (var prop in Properties.Skip(1))
             {
-                return $"({prependText}{FieldName} == null ? {ObjectDefaultValue}: {prependText}{FieldName}.{FieldChildName})";
+                text += $"{propAccessor} == null ? {prop.Type.CsDefaultValue} : ";
+                propAccessor += (propAccessor == "" ? "" : ".") + prop.Name;
             }
 
-            return prependText + FieldName;
+            text += propAccessor + (Properties.Count > 1 ? ")" : "");
+
+            return text;
         }
 
     }

@@ -262,11 +262,11 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
 
                                     if (orderInfo.OrderByDirection == DefaultOrderByAttribute.OrderByDirections.Ascending)
                                     {
-                                        return $"{prefix}(f => {orderInfo.OrderExpression("f.")})";
+                                        return $"{prefix}(f => {orderInfo.OrderExpression("f")})";
                                     }
                                     else
                                     {
-                                        return $"{prefix}Descending(f => {orderInfo.OrderExpression("f.")})";
+                                        return $"{prefix}Descending(f => {orderInfo.OrderExpression("f")})";
                                     }
                                 });
 

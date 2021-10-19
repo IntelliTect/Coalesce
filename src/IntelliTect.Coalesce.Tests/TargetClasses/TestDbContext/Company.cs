@@ -10,6 +10,7 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
     public class Company
     {
         public int CompanyId { get; set; }
+        [DefaultOrderBy]
         public string Name { get; set; }
         public string Address1 { get; set; }
         public string Address2 { get; set; }

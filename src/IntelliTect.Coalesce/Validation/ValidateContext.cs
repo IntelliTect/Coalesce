@@ -115,6 +115,11 @@ namespace IntelliTect.Coalesce.Validation
                                 assert.IsTrue(prop.FileHashProperty?.Type.IsNumber, $"File Size property must be a number: {prop.Parent.Name}.{prop.FileNameProperty} for {prop.Name}");
                             }
                         }
+
+                        if (prop.DefaultOrderBy != null && model.IsDbMappedType)
+                        {
+                            assert.IsTrue(prop.IsDbMapped, "Property with [DefaultOrderBy] must be DB mapped.");
+                        }
                     }
                     catch (Exception ex)
                     {

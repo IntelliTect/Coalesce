@@ -15,6 +15,7 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         public int ProductId { get; set; }
 
         [Search(SearchMethod = SearchAttribute.SearchMethods.Contains)]
+        [DefaultOrderBy]
         public string Name { get; set; }
     }
 }

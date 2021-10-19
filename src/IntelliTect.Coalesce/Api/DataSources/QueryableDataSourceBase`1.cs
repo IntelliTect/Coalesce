@@ -432,7 +432,7 @@ namespace IntelliTect.Coalesce
                     {
                         // The property is a POCO, not a value.
                         // Get the default order by for the object's type to figure out what field to sort by.
-                        string? clause = prop.Type.ClassViewModel?.DefaultOrderByClause($"{fieldName}.");
+                        string? clause = prop.Type.ClassViewModel?.DefaultOrderByClause($"{fieldName}");
 
                         // The default order by clause has an order associated, but we want to override it
                         // with the order that the client specified. A string replacement will do.

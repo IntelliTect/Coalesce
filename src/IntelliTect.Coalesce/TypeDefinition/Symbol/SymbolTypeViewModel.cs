@@ -90,7 +90,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 if (IsNullableType) return NullableUnderlyingType.EnumValues;
 
                 var result = new List<EnumMember>();
-
                 if (!IsEnum) return result;
 
                 var enumType = NamedSymbol.EnumUnderlyingType;

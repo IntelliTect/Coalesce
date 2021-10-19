@@ -595,19 +595,23 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     var name = Name;
                     if (fieldName != null)
                     {
-                        string defaultValue = Type.ClassViewModel?.PropertyByName(fieldName)?.Type.CsDefaultValue ?? "\"\"";
-                        
-                        return new OrderByInformation()
+                        // TODO: What if fieldName is a dotted, chained property expression?
+                        // TODO: What if fieldName refers to a nested POCO?
+                        var childField = Type.ClassViewModel?.PropertyByName(fieldName);
+                        if (childField != null)
                         {
-                            FieldName = name,
-                            FieldChildName = fieldName,
-                            ObjectDefaultValue = defaultValue,
-                            FieldOrder = order.Value,
-                            OrderByDirection = direction.Value
-                        };
+                            return new OrderByInformation()
+                            {
+                                Properties = { this, childField },
+                                FieldOrder = order.Value,
+                                OrderByDirection = direction.Value
+                            };
+                        }
                     }
-                    return new OrderByInformation() {
-                        FieldName = name,
+
+                    return new OrderByInformation()
+                    {
+                        Properties = { this },
                         FieldOrder = order.Value,
                         OrderByDirection = direction.Value
                     };
@@ -718,7 +722,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// </summary>
         public bool HasNotMapped => HasAttribute<NotMappedAttribute>();
 
-        public bool IsDbMapped => !HasNotMapped && (Object?.IsDbMappedType ?? true);
+        public bool IsDbMapped => !HasNotMapped && HasSetter && (Object?.IsDbMappedType ?? true);
 
         /// <summary>
         /// If true, this property should be filterable on the URL line via "filter.{UrlParameterName}. 

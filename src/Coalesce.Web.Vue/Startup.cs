@@ -1,10 +1,12 @@
 using System;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using Coalesce.Domain;
 using IntelliTect.Coalesce;
 using IntelliTect.Coalesce.DataAnnotations;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SpaServices.Webpack;
 using Microsoft.EntityFrameworkCore;
@@ -83,25 +85,18 @@ namespace Coalesce.Web.Vue
 
             // *** DEMO ONLY ***
             app.UseAuthentication();
-#pragma warning disable ASP0001 // Authorization middleware is incorrectly configured.
-            // ... no it isnt, it very much is between UseRouting and UseEndpoints.
             app.UseAuthorization();
-#pragma warning restore ASP0001 // Authorization middleware is incorrectly configured.
             app.UseMiddleware<DemoMiddleware>();
+
 
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
-                endpoints.MapDefaultControllerRoute();
-            });
 
-            app.MapWhen(x => x.Request.Path.Value?.StartsWith("/api") == true, builder =>
-            {
-                builder.UseRouting();
-                builder.UseEndpoints(endpoints =>
-                {
-                    endpoints.MapFallbackToController("Index", "Home");
-                });
+                // API fallback to prevent serving SPA fallback to 404 hits on API endpoints.
+                endpoints.Map("api/{**any}", ctx => { ctx.Response.StatusCode = StatusCodes.Status404NotFound; return Task.CompletedTask; });
+
+                endpoints.MapFallbackToController("Index", "Home");
             });
         }
     }

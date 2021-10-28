@@ -11,9 +11,21 @@ export const Genders = domain.enums.Genders = {
   displayName: "Genders",
   type: "enum",
   ...getEnumMeta<"NonSpecified"|"Male"|"Female">([
-    { value: 0, strValue: 'NonSpecified', displayName: 'Non Specified' },
-    { value: 1, strValue: 'Male', displayName: 'Male' },
-    { value: 2, strValue: 'Female', displayName: 'Female' },
+  {
+    value: 0,
+    strValue: "NonSpecified",
+    displayName: "Non Specified",
+  },
+  {
+    value: 1,
+    strValue: "Male",
+    displayName: "Male",
+  },
+  {
+    value: 2,
+    strValue: "Female",
+    displayName: "Female",
+  },
   ]),
 }
 export const SkyConditions = domain.enums.SkyConditions = {
@@ -21,9 +33,21 @@ export const SkyConditions = domain.enums.SkyConditions = {
   displayName: "Sky Conditions",
   type: "enum",
   ...getEnumMeta<"Cloudy"|"PartyCloudy"|"Sunny">([
-    { value: 0, strValue: 'Cloudy', displayName: 'Cloudy' },
-    { value: 1, strValue: 'PartyCloudy', displayName: 'Party Cloudy' },
-    { value: 2, strValue: 'Sunny', displayName: 'Sunny' },
+  {
+    value: 0,
+    strValue: "Cloudy",
+    displayName: "Cloudy",
+  },
+  {
+    value: 1,
+    strValue: "PartyCloudy",
+    displayName: "Party Cloudy",
+  },
+  {
+    value: 2,
+    strValue: "Sunny",
+    displayName: "Sunny",
+  },
   ]),
 }
 export const Statuses = domain.enums.Statuses = {
@@ -31,11 +55,32 @@ export const Statuses = domain.enums.Statuses = {
   displayName: "Statuses",
   type: "enum",
   ...getEnumMeta<"Open"|"InProgress"|"Resolved"|"ClosedNoSolution"|"Cancelled">([
-    { value: 0, strValue: 'Open', displayName: 'Open' },
-    { value: 1, strValue: 'InProgress', displayName: 'In Progress' },
-    { value: 2, strValue: 'Resolved', displayName: 'Resolved' },
-    { value: 3, strValue: 'ClosedNoSolution', displayName: 'Closed, No Solution' },
-    { value: 4, strValue: 'Cancelled', displayName: 'Cancelled' },
+  {
+    value: 0,
+    strValue: "Open",
+    displayName: "Open",
+  },
+  {
+    value: 1,
+    strValue: "InProgress",
+    displayName: "In Progress",
+  },
+  {
+    value: 2,
+    strValue: "Resolved",
+    displayName: "Resolved",
+  },
+  {
+    value: 3,
+    strValue: "ClosedNoSolution",
+    displayName: "Closed, No Solution",
+    description: "The case was closed without being solved.",
+  },
+  {
+    value: 4,
+    strValue: "Cancelled",
+    displayName: "Cancelled",
+  },
   ]),
 }
 export const Titles = domain.enums.Titles = {
@@ -43,10 +88,26 @@ export const Titles = domain.enums.Titles = {
   displayName: "Titles",
   type: "enum",
   ...getEnumMeta<"Mr"|"Ms"|"Mrs"|"Miss">([
-    { value: 0, strValue: 'Mr', displayName: 'Mr' },
-    { value: 1, strValue: 'Ms', displayName: 'Ms' },
-    { value: 2, strValue: 'Mrs', displayName: 'Mrs' },
-    { value: 4, strValue: 'Miss', displayName: 'Miss' },
+  {
+    value: 0,
+    strValue: "Mr",
+    displayName: "Mr",
+  },
+  {
+    value: 1,
+    strValue: "Ms",
+    displayName: "Ms",
+  },
+  {
+    value: 2,
+    strValue: "Mrs",
+    displayName: "Mrs",
+  },
+  {
+    value: 4,
+    strValue: "Miss",
+    displayName: "Miss",
+  },
   ]),
 }
 export const Case = domain.types.Case = {

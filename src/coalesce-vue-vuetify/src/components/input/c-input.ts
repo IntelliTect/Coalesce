@@ -159,6 +159,14 @@ export default Vue.extend({
         data.props.items = valueMeta.typeDef.values
         data.props['item-text'] = 'displayName';
         data.props['item-value'] = 'value';
+        if (valueMeta.typeDef.values.some(v => v.description)) {
+          data.scopedSlots = {
+            item: ({item}) => h('v-list-item-content', [
+              h('v-list-item-title', [item.displayName]),
+              item.description ? h('v-list-item-subtitle', [item.description]) : h(),
+            ])
+          };
+        }
         return h('v-select', data);
 
       case 'file': 

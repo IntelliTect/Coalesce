@@ -29,7 +29,7 @@ namespace Coalesce.Domain
 
             Resolved,
 
-            [Display(Name = "Closed, No Solution")]
+            [Display(Name = "Closed, No Solution", Description = "The case was closed without being solved.")]
             ClosedNoSolution,
 
             Cancelled

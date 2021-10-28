@@ -17,19 +17,19 @@ namespace IntelliTect.Coalesce.Utilities
         /// Increases indentation one level, returning an object that can be disposed to decrease indentation and write a closing curly brace
         /// </summary>
         public IDisposable Block(string blockPreamble, char closeWith) => Block(blockPreamble, closeWith.ToString());
-        
+
         /// <summary>
         /// Writes the given text, followed by a space, opening brace, and newline.
         /// Increases indentation one level, returning an object that can be disposed to decrease indentation and write a closing curly brace
         /// </summary>
-        public IDisposable Block(string blockPreamble, string? closeWith = null)
+        public IDisposable Block(string blockPreamble, string? closeWith = null, bool leadingSpace = true)
         {
             if (!onNewLine)
             {
                 throw new InvalidOperationException("Cannot start a block on a line that isn't empty");
             }
 
-            Append(blockPreamble).Append(" {").Line();
+            Append(blockPreamble).Append(leadingSpace ? " {" : "{").Line();
             Level++;
 
             return new Indentation(this, closeWith != null ? "}" + closeWith : "}");

@@ -154,8 +154,16 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                 b.Line($"...getEnumMeta<{enumShape}>([");
                 foreach (var value in model.EnumValues)
                 {
-                    // TODO: allow for localization of displayName
-                    b.Indented($"{{ value: {value.Value}, strValue: '{value.Name}', displayName: '{value.DisplayName}' }},");
+                    using (b.Block("", ",", leadingSpace: false))
+                    {
+                        b.Prop("value", value.Value.ToString());
+                        b.StringProp("strValue", value.Name);
+                        b.StringProp("displayName", value.DisplayName);
+                        if (!string.IsNullOrWhiteSpace(value.Description))
+                        {
+                            b.StringProp("description", value.Description);
+                        }
+                    }
                 }
                 b.Line("]),");
             }

@@ -122,10 +122,11 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     var member = Info.GetMember(name)[0];
                     result.Add(new EnumMember(
                         name, 
-                        value, 
+                        value,
                         member.GetAttributeValue<DisplayNameAttribute>(a => a.DisplayName) ??
                             member.GetAttributeValue<DisplayAttribute>(a => a.Name) ??
-                            member.Name.ToProperCase()
+                            member.Name.ToProperCase(),
+                        member.GetAttributeValue<DisplayAttribute>(a => a.Description)
                     ));
                 }
                 return result;

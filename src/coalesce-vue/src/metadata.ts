@@ -155,9 +155,10 @@ export interface Service extends Metadata, ApiRoutedType {
 
 /** Represents a value of an enum */
 export interface EnumMember {
+    readonly value: number
     readonly strValue: string
     readonly displayName: string
-    readonly value: number
+    readonly description?: string
 }
 
 /** A dictionary with both string and numeric keys for looking up `EnumValue` objects by their string or numeric value. */

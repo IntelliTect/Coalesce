@@ -112,9 +112,10 @@ namespace IntelliTect.Coalesce
             if (prop.Type.IsDate)
             {
                 // Literal string "null" should match null values if the prop is nullable.
-                if (prop.Type.IsNullable && value.Trim().Equals("null", StringComparison.InvariantCultureIgnoreCase))
+                if (value.Trim().Equals("null", StringComparison.InvariantCultureIgnoreCase))
                 {
-                    return query.Where($"it.{prop.Name} = null");
+                    if (prop.Type.IsNullable) return query.Where($"it.{prop.Name} = null");
+                    else return query.Where(_ => false);
                 }
 
                 // See if they just passed in a date or a date and a time
@@ -181,9 +182,10 @@ namespace IntelliTect.Coalesce
                         var type = prop.Type.NullableUnderlyingType.TypeInfo;
 
                         // The exact value "null" should match null values exactly.
-                        if (prop.Type.IsNullable && item.Trim().Equals("null", StringComparison.InvariantCultureIgnoreCase))
+                        if (item.Trim().Equals("null", StringComparison.InvariantCultureIgnoreCase))
                         {
-                            return (Success: true, Result: (object?)null);
+                            if (prop.Type.IsNullable) return (Success: true, Result: (object?)null);
+                            else return (Success: false, Result: null);
                         }
 
                         if (prop.Type.IsEnum)

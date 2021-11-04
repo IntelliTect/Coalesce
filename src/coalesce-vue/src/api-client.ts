@@ -297,23 +297,32 @@ export function mapQueryToParams<T extends DataSourceParameters>(
 
 
 export function getMessageForError(error: unknown): string {
-  // AxiosError | ApiResult | Error | string
-  if (typeof error === "string") {
-    return error;
+  const e = error as AxiosError | ApiResult | Error | string
+  
+  if (typeof e === "string") {
+    return e;
   }
-  else if (typeof error === "object" && error != null) {
-    if ("response" in error) {
-      const result = (error as AxiosError).response as
+  else if (typeof e === "object" && e != null) {
+    if ("isAxiosError" in e) {
+      const result = e.response as
         | AxiosResponse<ListResult<any> | ItemResult<any>>
         | undefined;
 
       if (result && typeof result.data === "object") {
         return result.data.message || "Unknown Error"
       }
+
+      // Axios normally returns a message like "Request failed with status code 403".
+      // We can get the status text out of the response to make this a little nicer.
+      // (appending "(Forbidden)", etc. to the end of the message.)
+      const statusText = e.response?.statusText;
+      if (statusText && e.message && !e.message.includes(statusText)) {
+        return `${e.message} (${statusText})`
+      }
     }
 
-    return typeof (error as ApiResult).message === "string"
-      ? (error as ApiResult).message!
+    return ("message" in e) && typeof e.message === "string"
+      ? e.message!
       : "A network error occurred"; // TODO: i18n
   } else {
     return "An unknown error occurred";
@@ -333,6 +342,29 @@ export type ApiResultPromise<T> = Promise<
 /** Axios instance to be used by all Coalesce API requests. Can be configured as needed. */
 export const AxiosClient = axios.create();
 AxiosClient.defaults.baseURL = "/api";
+
+// Set X-Requested-With: XmlHttpRequest to prevent aspnetcore from serving HTML and redirects to API requests.
+// https://github.com/dotnet/aspnetcore/blob/c440ebcf49badd49f0e2cdde1b0a74992af04158/src/Security/Authentication/Cookies/src/CookieAuthenticationEvents.cs#L107-L111
+AxiosClient.interceptors.request.use((config) => {
+  const url = (config.baseURL ?? '') + (config.url ?? '');
+  if (url && !url.startsWith('/')) {
+    // Url is not relative. We want to parse it and determine what its origin is.
+
+    if (!URL || new URL(url).origin !== window?.location?.origin) {
+      // The origin check is because we don't want to trigger CORS preflights for this.
+      // If this IS important for someone on the very unlikely scenario of CORS w/ Coalesce,
+      // they can just configure this behavior on the server by overriding the CookieAuthenticationEvents.
+      return config;
+    }
+  }
+  return {
+    ...config,
+    headers: {
+      ...config.headers,
+      ['X-Requested-With']: 'XmlHttpRequest',
+    },
+  };
+});
 
 export type ItemApiReturnType<
   T extends (this: null, ...args: any[]) => ItemResultPromise<any>

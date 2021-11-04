@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "esnext",
+    "target": "ES2020", // not esnext because of https://github.com/microsoft/TypeScript/issues/45297
     "module": "esnext",
     "strict": true,
     "jsx": "preserve",
@@ -24,12 +24,12 @@
       "vue-router": [ "node_modules/vue-router" ],
       "vue-router/*": [ "node_modules/vue-router/*" ],
       "axios": [ "node_modules/axios" ],
-      
+
       "coalesce-vue": [ "../coalesce-vue/src" ],
       "coalesce-vue/*": [ "../coalesce-vue/src/*" ],
       "coalesce-vue/lib/*": [ "../coalesce-vue/src/*" ],
       "coalesce-vue-vuetify": [ "../coalesce-vue-vuetify/src" ],
-      "coalesce-vue-vuetify/*": [ "../coalesce-vue-vuetify/src/*" ],
+      "coalesce-vue-vuetify/*": [ "../coalesce-vue-vuetify/src/*" ]
     }
   },
   "include": [

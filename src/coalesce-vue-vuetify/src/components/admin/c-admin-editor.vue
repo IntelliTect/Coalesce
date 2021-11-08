@@ -1,5 +1,5 @@
 <template>
-  <v-card class="c-admin-editor hide-non-error-details">
+  <v-card class="c-admin-editor">
     <v-toolbar
       class="c-admin-editor-page--toolbar"
       dense
@@ -39,7 +39,7 @@
           }"
         >
           <template #default>
-            <v-row v-for="prop in showProps" :key="prop.name" class="py-1 my-0">
+            <v-row v-for="prop in showProps" :key="prop.name" class="c-admin-editor--row">
               <v-col
                 cols="12"
                 md="2"
@@ -54,6 +54,7 @@
                   :for="prop"
                   v-bind="propInputBinds(prop)"
                   label=""
+                  hide-details="auto"
                 >
                   <c-admin-display :model="model" :for="prop" />
                 </c-input>
@@ -173,5 +174,22 @@ export default class extends Vue {
 <style lang="scss">
 .c-admin-editor--ref-nav-link {
   height: 40px !important;
+}
+.c-admin-editor--row {
+  // Center each row so that things are nicely aligned,
+  // especially in the case where labels are long enough to have to wrap.
+  align-items: center;
+  padding: 4px 0;
+
+  // Remove extra padding on the top of v-switch components
+  // so they align nicely with other components.
+  .v-input--switch,
+  .v-input--checkbox {
+    margin-top: 0;
+    padding-top: 0px;
+    td & {
+      padding-top: 0;
+    }
+  }
 }
 </style>

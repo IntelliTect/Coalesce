@@ -26,7 +26,7 @@
           </tr>
         </thead>
 
-        <tbody class="hide-non-error-details">
+        <tbody>
           <tr v-for="(item, index) in list.$items" :key="index">
             <td
               v-for="prop in effectiveProps"
@@ -40,6 +40,7 @@
                 :for="prop"
                 :readonly="isPropReadOnly(prop, item)"
                 label=""
+                hide-details="auto"
               >
                 <c-admin-display v-if="admin" :model="item" :for="prop" />
                 <c-display v-else :model="item" :for="prop" />

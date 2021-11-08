@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -20,7 +21,12 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         public TestDbContext() : this(Guid.NewGuid().ToString()) { }
 
         public TestDbContext(string memoryDatabaseName)
-            : base(new DbContextOptionsBuilder<TestDbContext>().UseInMemoryDatabase(memoryDatabaseName).Options)
+            : base(new DbContextOptionsBuilder<TestDbContext>().UseInMemoryDatabase(memoryDatabaseName).ConfigureWarnings(w =>
+            {
+#if NET5_0_OR_GREATER
+            w.Ignore(CoreEventId.NavigationBaseIncludeIgnored);
+#endif
+            }).Options)
         { }
 
         public TestDbContext(DbContextOptions<TestDbContext> options)

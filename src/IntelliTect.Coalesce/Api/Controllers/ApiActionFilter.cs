@@ -29,8 +29,8 @@ namespace IntelliTect.Coalesce.Api.Controllers
             if (!context.ModelState.IsValid)
             {
                 var errors = context.ModelState
-                    .Where(v => v.Value.Errors.Any() && v.Key.StartsWith("dataSource", StringComparison.InvariantCultureIgnoreCase))
-                    .SelectMany(v => v.Value.Errors.Select(e => (key: v.Key, error: e.ErrorMessage)))
+                    .Where(v => v.Value?.Errors.Any() == true && v.Key.StartsWith("dataSource", StringComparison.InvariantCultureIgnoreCase))
+                    .SelectMany(v => v.Value!.Errors.Select(e => (key: v.Key, error: e.ErrorMessage)))
                     .ToList();
 
                 if (errors.Any())

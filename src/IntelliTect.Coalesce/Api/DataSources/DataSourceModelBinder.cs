@@ -80,6 +80,9 @@ namespace IntelliTect.Coalesce.Api.DataSources
                 Strategy = new SelectivePropertyComplexObjectValidationStrategy(desiredPropertiesMetadata)
             };
 
+#pragma warning disable CS0618 // Type or member is obsolete:
+            // Will keep using until ComplexTypeModelBinder is fully gone, 
+            // in order to maintain compat with all targeted .NET versions.
             var childBinder = new ComplexTypeModelBinder(desiredPropertiesMetadata.ToDictionary(
                 property => property,
                 property => modelBinderFactory.CreateBinder(new ModelBinderFactoryContext
@@ -95,6 +98,7 @@ namespace IntelliTect.Coalesce.Api.DataSources
                     CacheToken = property,
                 })
             ), new LoggerFactory() );
+#pragma warning restore CS0618 // Type or member is obsolete
 
             // Enter a nested scope for binding the properties on our dataSource
             // (we're now 1 level deep instead of 0 levels deep).

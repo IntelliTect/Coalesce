@@ -15,3 +15,9 @@ dotnet_diagnostic.RCS1037.severity = none
 
 # RCS1160: Abstract type should not have public constructors.
 dotnet_diagnostic.RCS1160.severity = none
+
+# RS1024: Compare symbols correctly
+dotnet_diagnostic.RS1024.severity = suggestion
+
+# RCS1090: Call 'ConfigureAwait(false)'.
+dotnet_diagnostic.RCS1090.severity = none

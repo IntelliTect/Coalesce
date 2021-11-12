@@ -4,6 +4,9 @@
   "description": "Coalesce core scripts for Vue.js",
   "main": "./lib/index.js",
   "exports": {
+    ".": "./lib/index.js",
+    "./lib/*": "./lib/*.js",
+    "./vite": "./lib/vite.js",
     "./": "./lib/"
   },
   "types": "./lib/index.d.ts",
@@ -41,6 +44,7 @@
     "lodash": "^4.17.15",
     "ts-jest": "27.0.4",
     "typescript": "4.4.3",
+    "vite": "^2.6.14",
     "vue": "2.6.11",
     "vue-router": "^3.1.5"
   },

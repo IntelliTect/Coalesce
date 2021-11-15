@@ -2,18 +2,32 @@
   "name": "coalesce-vue",
   "version": "0.1.0-local",
   "description": "Coalesce core scripts for Vue.js",
-  "main": "./lib/index.js",
+  "main": "./lib/cjs/index.js",
+  "module": "./lib/index.js",
   "exports": {
-    ".": "./lib/index.js",
-    "./lib/*": "./lib/*.js",
-    "./vite": "./lib/vite.js",
-    "./": "./lib/"
+    ".": {
+      "import": "./lib/index.js",
+      "require": "./lib/cjs/index.js"
+    },
+    "./lib/*": {
+      "import": "./lib/*.js",
+      "require": "./lib/cjs/*.js"
+    },
+    "./": {
+      "import": "./lib/esm/",
+      "require": "./lib/cjs/"
+    }
   },
-  "types": "./lib/index.d.ts",
   "repository": "https://github.com/IntelliTect/Coalesce",
   "author": "IntelliTect",
   "license": "Apache-2.0",
   "private": false,
+  "scripts": {
+    "build": "tsc -p ./tsconfig.build.json && tsc -p ./tsconfig.build.cjs.json",
+    "prepack": "npm run build",
+    "//": "No coverage by default because it breaks line numbers in error messages. `npm run test -- --coverage` to run it.",
+    "test": "jest"
+  },
   "files": [
     "lib",
     "src",
@@ -47,12 +61,6 @@
     "vite": "^2.6.14",
     "vue": "2.6.11",
     "vue-router": "^3.1.5"
-  },
-  "scripts": {
-    "build": "tsc -p ./tsconfig.build.json",
-    "prepack": "npm run build",
-    "//": "No coverage by default because it breaks line numbers in error messages. `npm run test -- --coverage` to run it.",
-    "test": "jest"
   },
   "jest": {
     "testEnvironment": "jsdom",

@@ -101,19 +101,31 @@ export async function getCertPaths() {
   const keyFilePath = path.join(baseFolder, `${certificateName}.key`);
 
   if (!existsSync(certFilePath) || !existsSync(keyFilePath)) {
-    spawn(
-      "dotnet",
-      [
-        "dev-certs",
-        "https",
-        "--export-path",
-        certFilePath,
-        "--format",
-        "Pem",
-        "--no-password",
-      ],
-      { stdio: "inherit" }
-    ).on("exit", (code) => process.exit(code ?? -1));
+    console.log("Launching dotnet dev-certs to generate local certs");
+    await new Promise((resolve) => {
+      const proc = spawn(
+        "dotnet",
+        [
+          "dev-certs",
+          "https",
+          "--export-path",
+          certFilePath,
+          "--format",
+          "Pem",
+          "--no-password",
+        ],
+        { stdio: "inherit" }
+      );
+
+      proc.on("exit", (code) => {
+        if (code !== null && code !== 0) {
+          resolve(code);
+          console.log(`dotnet dev-certs exited with code ${code}`);
+        } else {
+          resolve(0);
+        }
+      });
+    });
   }
 
   return {

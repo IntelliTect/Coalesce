@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using IntelliTect.Coalesce.DataAnnotations;
 
@@ -16,6 +17,7 @@ namespace Coalesce.Domain
         [Search(SearchMethod = SearchAttribute.SearchMethods.Contains)]
         public string Name { get; set; }
 
+        [Required]
         public ProductDetails Details { get; set; }
 
         [Column("ProductUniqueId")]

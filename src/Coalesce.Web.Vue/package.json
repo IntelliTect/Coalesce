@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^5.13.1",
-    "axios": "0.21.1",
+    "axios": "0.24.0",
     "coalesce-vue": "../coalesce-vue",
     "coalesce-vue-vuetify": "../coalesce-vue-vuetify",
     "typeface-roboto": "0.0.75",

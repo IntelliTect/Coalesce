@@ -96,6 +96,9 @@ Props
 :ts:`preselectSingle?: boolean = false`
     If true, then when the first list results for the component are received by the client just after the component is created, if the results contained exactly one item, c-select will emit that only item as the selected value.
 
+:ts:`reloadOnOpen?: boolean = false`
+    If true, the list results will be reloaded when the dropdown menu is opened. By default, list results are loaded when the component is mounted and also when any of its parameters change (either search input or the :ts:`params` prop).
+
 :ts:`params?: ListParameters`
     An optional set of :ref:`Data Source Standard Parameters <DataSourceStandardParameters>` to pass to API calls made to the server.
 

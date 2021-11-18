@@ -4,7 +4,6 @@
     :value="internalModelValue"
     @input="onInput"
     v-on="{...$listeners}"
-
     :loading="loading"
     :items="listItems"
     :search-input.sync="search"
@@ -80,6 +79,7 @@ import {
   mapValueToModel,
   ItemApiStateWithArgs
 } from 'coalesce-vue'
+import type VAutoComplete from 'vuetify/src/components/VAutocomplete'
 
 @Component({
   name: 'c-select',
@@ -110,6 +110,9 @@ export default class CSelect extends MetadataComponent {
 
   @Prop({ required: false, type: Boolean, default: true })
   public openOnClear?: boolean;
+
+  @Prop({ required: false, type: Boolean, default: false })
+  public reloadOnOpen?: boolean;
 
   @Prop({required: false})
   public params?: ListParameters
@@ -327,17 +330,18 @@ export default class CSelect extends MetadataComponent {
     }
   }
 
+  get vAutocomplete() {
+    return this.$children[0] as InstanceType<typeof VAutoComplete> | undefined
+  }
+
   focus() {
-    // @ts-ignore
-    this.$nextTick(() => this.$children[0]?.onClick?.(new Event('fake')))
+    this.$nextTick(() => this.vAutocomplete?.onClick?.(new Event('fake')))
   }
 
   blur() {
     this.$nextTick(() => {
-      // @ts-ignore
-      this.$children[0]?.onClick?.(new Event('fake')); 
-      // @ts-ignore
-      this.$children[0]?.onEscDown?.(new Event('fake'))
+      this.vAutocomplete?.onClick?.(new Event('fake')); 
+      this.vAutocomplete?.onEscDown?.(new Event('fake'))
     })
   }
 
@@ -428,9 +432,6 @@ export default class CSelect extends MetadataComponent {
       () => JSON.stringify(mapParamsToDto(this.params)), 
       () => this.listCaller()
     );
-  // }
-
-  // mounted() {
 
     // Load the initial contents of the list.
     this.listCaller().then(() => {
@@ -444,7 +445,15 @@ export default class CSelect extends MetadataComponent {
         this.onInput(first, true);
       }
     });
+  }
 
+  mounted() {
+    // This is dependent upon $children, and so cannot be done until after mount
+    // ($children and $refs are not reactive).
+    this.$watch(
+      () => this.vAutocomplete?.isMenuActive, 
+      (v) => { if (v && this.reloadOnOpen) this.listCaller() }
+    );
   }
 }
 </script>

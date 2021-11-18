@@ -79,7 +79,6 @@ import {
   mapValueToModel,
   ItemApiStateWithArgs
 } from 'coalesce-vue'
-import type VAutoComplete from 'vuetify/src/components/VAutocomplete'
 
 @Component({
   name: 'c-select',
@@ -331,7 +330,7 @@ export default class CSelect extends MetadataComponent {
   }
 
   get vAutocomplete() {
-    return this.$children[0] as InstanceType<typeof VAutoComplete> | undefined
+    return this.$children[0] as any | undefined
   }
 
   focus() {

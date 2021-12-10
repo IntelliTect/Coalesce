@@ -689,7 +689,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
         }
 
-        public override string ToString() => $"{Name} : {Type.FullyQualifiedName}";
+        public override string ToString() => $"{Name} ({Type.FullyQualifiedName})";
 
         public string SecurityToString() => $"Read: {SecurityReadToString()}  Edit: {SecurityEditToString()}";
 

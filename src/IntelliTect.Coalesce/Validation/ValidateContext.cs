@@ -32,7 +32,7 @@ namespace IntelliTect.Coalesce.Validation
                 // Check object references to see if they all have keys and remote keys
                 foreach (var prop in model.ClientProperties)
                 {
-                    assert.Area = $"{model}.{prop}";
+                    assert.Area = $"{model}.{prop.Name}";
                     try
                     {
                         assert.IsNull(prop.GetAttributeValue<ReadAttribute, SecurityPermissionLevels>(a => a.PermissionLevel),
@@ -76,11 +76,11 @@ namespace IntelliTect.Coalesce.Validation
                                 assert.IsNotNull(prop.InverseProperty.ForeignKeyProperty, "Could not find the foreign key of the referenced inverse property");
                             }
                         }
-                        if (prop.IsManytoManyCollection)
+                        if (prop.IsManytoManyCollection &&
+                            assert.IsNotNull(prop.ManyToManyCollectionName, $"Many to Many collection name does not exist") &&
+                            assert.IsTrue(prop.PureTypeOnContext, $"ManyToManyAttribute cannot be used on {prop.PureType} because the type is not DB-mapped.")
+                        )
                         {
-                            assert.IsNotNull(prop.ManyToManyCollectionName, $"Many to Many collection name does not exist");
-
-
                             var farNavigation = prop.ManyToManyCollectionProperty;
                             assert.IsNotNull(farNavigation?.Object?.ViewModelClassName, $"Many to Many contained type is: {prop.ManyToManyCollectionProperty?.Object?.ViewModelClassName}");
                             if (farNavigation != null)
@@ -168,7 +168,7 @@ namespace IntelliTect.Coalesce.Validation
             {
                 foreach (var method in model.Methods)
                 {
-                    assert.Area = $"{model}: {method}";
+                    assert.Area = $"{model}.{method.ToStringWithoutReturn()}";
 
                     if (method.IsClientMethod)
                     {

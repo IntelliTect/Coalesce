@@ -203,6 +203,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public abstract bool HasAttribute<TAttribute>() where TAttribute : Attribute;
 
         public override string ToString()
-            => $"{ReturnType} {Name}({string.Join(",", Parameters)})";
+            => $"{ReturnType} {ToStringWithoutReturn()}";
+
+        public string ToStringWithoutReturn()
+            => $"{Name}({string.Join(", ", Parameters)})";
     }
 }

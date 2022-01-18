@@ -77,8 +77,11 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
 
         public Case.Statuses? EnumNullable { get; set; }
 
+        [NotMapped]
         public IReadOnlyCollection<string> ReadOnlyPrimitiveCollection { get; set; }
+        [NotMapped]
         public ICollection<string> MutablePrimitiveCollection { get; set; }
+        [NotMapped]
         public IEnumerable<string> PrimitiveEnumerable { get; set; }
 
 

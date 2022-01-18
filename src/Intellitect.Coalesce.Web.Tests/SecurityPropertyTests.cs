@@ -25,6 +25,7 @@ namespace IntelliTect.Coalesce.Web.Tests
                 "ADMIN, SuperUser"
             };
         }
+
         [Theory]
         [MemberData(nameof(RestrictedDownloadHasRoles))]
         public void PropertyHasRoleRetriction_GeneratedControllerHasRoles(

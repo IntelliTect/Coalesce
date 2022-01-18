@@ -293,7 +293,22 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                 }
                 else
                 {
-                    setter = $"{objectName}.{name} = obj.{name};";
+                    if (
+                        property.Type.IsA(typeof(IReadOnlyCollection<>)) ||
+                        property.Type.IsA(typeof(ICollection<>))
+                    )
+                    {
+                        // Collection types which emit properly compatible property types on the DTO.
+                        // No coersion to a real collection type required.
+                        setter = $"{objectName}.{name} = obj.{name};";
+                    }
+                    else
+                    {
+                        // Collection is not really a collection. Probably an IEnumerable.
+                        // We will have emitted the property type as ICollection,
+                        // so we need to do a ToList() so that it can be assigned.
+                        setter = $"{objectName}.{name} = obj.{name}?.ToList();";
+                    }
                 }
 
             }

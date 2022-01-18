@@ -35,7 +35,7 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
 
         [InternalUse]
         public string InternalUseProperty { get; set; }
-        
+
         [NotMapped]
         public string UnmappedSettableString { get; set; }
 
@@ -48,7 +48,7 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         [Read(Roles = RoleNames.Admin)]
         [ForeignKey(nameof(AdminReadableReferenceNavigationId))]
         public ComplexModel AdminReadableReferenceNavigation { get; set; }
-        
+
         public int? ReferenceNavigationId { get; set; }
         [ForeignKey(nameof(ReferenceNavigationId))]
         public ComplexModel ReferenceNavigation { get; set; }
@@ -76,6 +76,11 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
 
 
         public Case.Statuses? EnumNullable { get; set; }
+
+        public IReadOnlyCollection<string> ReadOnlyPrimitiveCollection { get; set; }
+        public ICollection<string> MutablePrimitiveCollection { get; set; }
+        public IEnumerable<string> PrimitiveEnumerable { get; set; }
+
 
         // Add other kinds of properties, relationships, etc... as needed.
 

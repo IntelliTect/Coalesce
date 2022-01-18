@@ -361,7 +361,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 }
 
                 // ¯\_(ツ)_/¯
-                throw new InvalidOperationException($"Unable to determine approprate DTO collection type for original type {this}");
+                return $"System.Collections.Generic.ICollection<{innerType}>";
             }
 
             var model = this.PureType.ClassViewModel;

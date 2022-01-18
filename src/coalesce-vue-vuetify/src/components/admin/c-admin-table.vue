@@ -7,6 +7,8 @@
     />
 
     <v-card-text class="pt-3">
+      <!-- TODO: c-table also has a loader, making it so we have 2 different loaders, 
+      each with its own 10px placeholder. Figure out how to combine them into one. -->
       <c-loader-status
         :loaders="{
           '': [

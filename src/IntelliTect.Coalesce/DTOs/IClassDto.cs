@@ -17,7 +17,7 @@ namespace IntelliTect.Coalesce
     /// <summary>
     /// Marker interface for an <see cref="IClassDto{T}"/> that is based on a <see cref="DbContext"/>
     /// where that <see cref="DbContext"/> is not exposed directly with Coalesce or if the <see cref="DbContext"/>
-    /// owniung the type <typeparamref name="T"/> cannot otherwise be determined.
+    /// owning the type <typeparamref name="T"/> cannot otherwise be determined.
     /// </summary>
     /// <typeparam name="T">The entity type that the DTO is based upon.</typeparam>
     /// <typeparam name="TContext">The <see cref="DbContext"/> that provides the entity described by <typeparamref name="T"/></typeparam>

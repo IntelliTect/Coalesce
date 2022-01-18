@@ -350,14 +350,25 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     return $"{innerType}[]";
                 }
 
-                // We assume ICollection for all collections. If this doesn't work in a particular context,
-                // consider that whatever you're assigning to this type should probably be assignable to ICollection if it is indeed a collection.
-                return $"System.Collections.Generic.ICollection<{innerType}>";
+                if (IsA(typeof(System.Collections.Generic.ICollection<>)))
+                {
+                    return $"System.Collections.Generic.ICollection<{innerType}>";
+                }
+
+                if (IsA(typeof(System.Collections.Generic.IReadOnlyCollection<>)))
+                {
+                    return $"System.Collections.Generic.IReadOnlyCollection<{innerType}>";
+                }
+
+                // ¯\_(ツ)_/¯
+                throw new InvalidOperationException($"Unable to determine approprate DTO collection type for original type {this}");
             }
 
             var model = this.PureType.ClassViewModel;
             if (model != null)
             {
+                if (model.IsDto) return FullyQualifiedName;
+
                 string typeName;
 
                 if (IsNullable || IsArray || IsCollection)

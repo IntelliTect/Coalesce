@@ -29,6 +29,27 @@ namespace IntelliTect.Coalesce.Validation
                     assert.IsTrue(model.PrimaryKey.IsClientProperty, "Model primary keys must be exposed to the client.");
                 }
 
+                var dataSources = model.ClientDataSources(repository).ToList();
+                if (model.IsStandaloneEntity)
+                {
+                    assert.IsTrue(dataSources.Any(), "Standalone entities must declare at least one data source.");
+                    if (dataSources.Count > 1)
+                    {
+                        assert.IsTrue(dataSources.Count(s => s.IsDefaultDataSource) == 1, "Standalone entities that declare multiple data sources must mark exactly one as the [DefaultDataSource]");
+                    }
+                }
+                else
+                {
+                    assert.IsNotNull(model.DbContext, 
+                        "Cannot determine the DbContext that provides this type. " 
+                        + (model.IsDto ? "Try using IClassDto<T, TDbContext> for this type instead." : "")
+                    );
+                }
+
+                assert.IsTrue(
+                    model.ClientDataSources(repository).Count(s => s.IsDefaultDataSource) <= 1,
+                    $"Cannot have multiple default data sources for {model}");
+
                 // Check object references to see if they all have keys and remote keys
                 foreach (var prop in model.ClientProperties)
                 {
@@ -126,24 +147,6 @@ namespace IntelliTect.Coalesce.Validation
                         assert.IsTrue(false, $"Exception property validation. {ex.Message}");
                     }
                 }
-
-                var dataSources = model.ClientDataSources(repository).ToList();
-                if (model.IsStandaloneEntity)
-                {
-                    assert.IsTrue(dataSources.Any(), "Standalone entities must declare at least one data source.");
-                    if (dataSources.Count > 1)
-                    {
-                        assert.IsTrue(dataSources.Count(s => s.IsDefaultDataSource) == 1, "Standalone entities that declare multiple data sources must mark exactly one as the [DefaultDataSource]");
-                    }
-                }
-                else
-                {
-                    assert.IsNotNull(model.DbContext, "Cannot determine the DbContext that provides this type.");
-                }
-
-                assert.IsTrue(
-                    model.ClientDataSources(repository).Count(s => s.IsDefaultDataSource) <= 1,
-                    $"Cannot have multiple default data sources for {model}");
 
                 foreach (var source in dataSources)
                 {

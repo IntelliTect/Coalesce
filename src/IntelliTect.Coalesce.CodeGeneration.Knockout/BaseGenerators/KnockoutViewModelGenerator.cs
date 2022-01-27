@@ -278,47 +278,61 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
         public void WriteMethod_SaveToDto(TypeScriptCodeBuilder b)
         {
             b.DocComment($"Saves this object into a data transfer object to send to the server.");
-            using (b.Block($"public saveToDto = (): any =>"))
+            using var _ = b.Block($"public saveToDto = (): any =>");
+
+            b.Line("var dto: any = {};");
+            if (Model.PrimaryKey != null)
             {
-                b.Line("var dto: any = {};");
-                if (Model.PrimaryKey != null)
+                b.Line($"dto.{Model.PrimaryKey.JsonName} = this.{Model.PrimaryKey.JsVariable}();");
+            }
+
+            b.Line();
+
+            // Objects are skipped in the loop because objects will be examined
+            // at the same time that their corresponding foreign key is examined.
+            // The PrimaryKey is skipped because it is handled first (above).
+            foreach (PropertyViewModel prop in Model.ClientProperties.Where(f =>
+                f.IsClientSerializable && f != Model.PrimaryKey
+            ))
+            {
+                if (prop.Type.IsDate)
                 {
-                    b.Line($"dto.{Model.PrimaryKey.JsonName} = this.{Model.PrimaryKey.JsVariable}();");
+                    b.Line($"if (!this.{prop.JsVariable}()) dto.{prop.JsonName} = null;");
+                    b.Line($"else dto.{prop.JsonName} = this.{prop.JsVariable}()!.format('YYYY-MM-DDTHH:mm:ss{(prop.Type.IsDateTimeOffset ? "ZZ" : "")}');");
                 }
-
-                b.Line();
-
-                // Objects are skipped in the loop because objects will be examined
-                // at the same time that their corresponding foreign key is examined.
-                // The PrimaryKey is skipped because it is handled first (above).
-                foreach (PropertyViewModel prop in Model.ClientProperties.Where(f =>
-                    f.IsClientSerializable && f.Object == null && f != Model.PrimaryKey
-                ))
+                else if (prop.IsForeignKey)
                 {
-                    if (prop.Type.IsDate)
-                    {
-                        b.Line($"if (!this.{prop.JsVariable}()) dto.{prop.JsonName} = null;");
-                        b.Line($"else dto.{prop.JsonName} = this.{prop.JsVariable}()!.format('YYYY-MM-DDTHH:mm:ss{(prop.Type.IsDateTimeOffset ? "ZZ" : "")}');");
-                    }
-                    else if (prop.IsForeignKey)
-                    {
-                        var navigationProp = prop.ReferenceNavigationProperty;
+                    var navigationProp = prop.ReferenceNavigationProperty;
 
-                        b.Line($"dto.{prop.JsonName} = this.{prop.JsVariable}();");
-                        // If the Id isn't set, use the object and see if that is set. Allows a child to get an Id after the fact.
-                        using (b.Block($"if (!dto.{prop.JsonName} && this.{navigationProp.JsVariable}())"))
-                        {
-                            b.Line($"dto.{prop.JsonName} = this.{navigationProp.JsVariable}()!.{navigationProp.Object.PrimaryKey.JsVariable}();");
-                        }
+                    b.Line($"dto.{prop.JsonName} = this.{prop.JsVariable}();");
+                    // If the Id isn't set, use the object and see if that is set. Allows a child to get an Id after the fact.
+                    using (b.Block($"if (!dto.{prop.JsonName} && this.{navigationProp.JsVariable}())"))
+                    {
+                        b.Line($"dto.{prop.JsonName} = this.{navigationProp.JsVariable}()!.{navigationProp.Object.PrimaryKey.JsVariable}();");
+                    }
+                }
+                else if (prop.Type.IsCollection)
+                {
+                    if (prop.PureType.IsPOCO)
+                    {
+                        b.Line($"dto.{prop.JsonName} = this.{prop.JsVariable}()?.map(x => x.saveToDto());");
                     }
                     else
                     {
                         b.Line($"dto.{prop.JsonName} = this.{prop.JsVariable}();");
                     }
                 }
-                b.Line();
-                b.Line($"return dto;");
+                else if (prop.Object != null)
+                {
+                    b.Line($"dto.{prop.JsonName} = this.{prop.JsVariable}()?.saveToDto();");
+                }
+                else
+                {
+                    b.Line($"dto.{prop.JsonName} = this.{prop.JsVariable}();");
+                }
             }
+            b.Line();
+            b.Line($"return dto;");
         }
     }
 

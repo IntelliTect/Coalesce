@@ -1,5 +1,6 @@
 ﻿using IntelliTect.Coalesce.CodeGeneration.Generation;
 using IntelliTect.Coalesce.Tests.Util;
+using IntelliTect.Coalesce.Validation;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Text;
 using System;
@@ -28,7 +29,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Tests
             );
         }
 
-        protected async Task AssertSuiteOutputCompiles(ICompositeGenerator suite)
+        protected async Task AssertSuiteOutputCompiles(IRootGenerator suite)
         {
             var project = new DirectoryInfo(Directory.GetCurrentDirectory())
                 .FindFileInAncestorDirectory("IntelliTect.Coalesce.CodeGeneration.Tests.csproj")
@@ -38,6 +39,9 @@ namespace IntelliTect.Coalesce.CodeGeneration.Tests
 
             suite = suite
                 .WithOutputPath(Path.Combine(project.FullName, "out", suiteName));
+
+            var validationResult = ValidateContext.Validate(suite.Model);
+            Assert.Empty(validationResult.Where(r => r.IsError));
 
             await suite.GenerateAsync();
             var generators = suite

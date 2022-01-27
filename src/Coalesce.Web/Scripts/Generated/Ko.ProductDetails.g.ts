@@ -39,6 +39,8 @@ module ViewModels {
         public saveToDto = (): any => {
             var dto: any = {};
             
+            dto.manufacturingAddress = this.manufacturingAddress()?.saveToDto();
+            dto.companyHqAddress = this.companyHqAddress()?.saveToDto();
             
             return dto;
         }

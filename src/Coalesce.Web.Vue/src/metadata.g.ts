@@ -1440,6 +1440,7 @@ export const ZipCode = domain.types.ZipCode = {
 export const CaseSummary = domain.types.CaseSummary = {
   name: "CaseSummary",
   displayName: "Case Summary",
+  get displayProp() { return this.props.description }, 
   type: "object",
   props: {
     caseSummaryId: {

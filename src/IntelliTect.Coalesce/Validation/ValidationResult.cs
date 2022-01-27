@@ -12,6 +12,8 @@ namespace IntelliTect.Coalesce.Validation
         public string? Area { get; set; }
         public string? Message { get; set; }
 
+        public bool IsError => !WasSuccessful && !IsWarning;
+
         public override string ToString()
         {
             if (WasSuccessful)

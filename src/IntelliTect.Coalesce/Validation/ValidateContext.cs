@@ -65,6 +65,23 @@ namespace IntelliTect.Coalesce.Validation
                         assert.IsFalse(prop.HasAttribute<DeleteAttribute>(),
                             "Property-level security doesn't support DeleteAttribute");
 
+                        if (model.IsDto)
+                        {
+                            const string dtoPropSecWarningPreamble =
+                                "Property-level security for an IClassDto must be implemented in MapTo/MapFrom, or in a DataSource or Behaviors. ";
+
+                            assert.IsFalse(prop.HasAttribute<ReadAttribute>(),
+                                dtoPropSecWarningPreamble + "ReadAttribute has no effect here.");
+
+                            assert.IsFalse(prop.HasAttribute<EditAttribute>(),
+                                dtoPropSecWarningPreamble + "EditAttribute has no effect here.");
+
+                            assert.IsFalse(prop.HasAttribute<DtoIncludesAttribute>(),
+                                "[DtoIncludesAttribute] has no effect on an IClassDto. This logic must be implemented manually in MapFrom.");
+                            assert.IsFalse(prop.HasAttribute<DtoExcludesAttribute>(),
+                                "[DtoExcludesAttribute] has no effect on an IClassDto. This logic must be implemented manually in MapFrom.");
+                        }
+
                         assert.IsFalse(prop.Type.IsFile, "IFile is not supported as a property.");
 
                         if (prop.IsPOCO)

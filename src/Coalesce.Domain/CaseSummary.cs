@@ -1,4 +1,5 @@
 ﻿using IntelliTect.Coalesce;
+using IntelliTect.Coalesce.DataAnnotations;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,6 +13,8 @@ namespace Coalesce.Domain
         public int OpenCases { get; set; }
         public int CaseCount { get; set; }
         public int CloseCases { get; set; }
+
+        [ListText]
         public string? Description { get; set; }
 
         public IDictionary<string, int> TestDict { get; set; } = new Dictionary<string, int>();

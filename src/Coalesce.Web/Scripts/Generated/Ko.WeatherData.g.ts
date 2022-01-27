@@ -39,6 +39,7 @@ module ViewModels {
             
             dto.tempFahrenheit = this.tempFahrenheit();
             dto.humidity = this.humidity();
+            dto.location = this.location()?.saveToDto();
             
             return dto;
         }

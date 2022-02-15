@@ -1301,9 +1301,6 @@ export const Product = domain.types.Product = {
       get typeDef() { return (domain.types.ProductDetails as ObjectType) },
       role: "value",
       dontSerialize: true,
-      rules: {
-        required: val => val != null || "Details is required.",
-      }
     },
     uniqueId: {
       name: "uniqueId",

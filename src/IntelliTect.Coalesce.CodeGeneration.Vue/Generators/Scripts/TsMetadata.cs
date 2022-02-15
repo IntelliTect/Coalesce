@@ -285,7 +285,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                 }
 
 
-                if (prop.IsClientWritable)
+                if (prop.IsClientWritable && prop.IsClientSerializable)
                 {
                     List<string> rules = GetValidationRules(prop);
 

@@ -1266,7 +1266,7 @@ export function defineProps<T extends new () => ViewModel<any, any>>(
               return;
             }
 
-            if (prop.type == "object" && !("$metadata" in incomingValue)) {
+            if (prop.type == "object" && incomingValue != null && !("$metadata" in incomingValue)) {
               convertToModel(incomingValue, prop.typeDef);
             }
 

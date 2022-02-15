@@ -848,6 +848,22 @@ describe("ViewModel", () => {
         expect(advisor.studentWrapperObject!.$metadata).toBe(metadata.DisplaysStudent)
         expect(advisor.studentWrapperObject!.student?.$metadata).toBe(metadata.Student)
       })
+
+      test("object setter does not throw when newValue is null and oldValue is non-null", () => {
+        var advisor = new AdvisorViewModel();
+        advisor.$loadCleanData({
+          studentWrapperObject: {
+            name: "bob",
+            student: {
+              studentId: 1,
+              name: "bob"
+            }
+          }
+        })
+
+        advisor.studentWrapperObject!.student = null;
+        advisor.studentWrapperObject = null;
+      })
     })
 
     describe("collection navigation getter/setters", () => {

@@ -111,12 +111,9 @@ export default Vue.extend({
     // that delegate directly to vuetify components.
     const attrs = data.attrs = buildVuetifyAttrs(valueMeta, model, ctxData.attrs, ctx.injections)
 
-    data.on.input = function(value: any) {
+    const onInput = function(value: any) {
       if (model && valueMeta) {
         (model as any)[valueMeta.name] = value;
-      }
-      if (ctxOn && typeof ctxOn.input == 'function') {
-        ctxOn.input.apply(null, arguments);
       }
     }
 
@@ -133,8 +130,9 @@ export default Vue.extend({
           // If this is an editable primary key, emit the value on change (leaving the field)
           // instead of on every keystroke. If we were to emit on every keystroke,
           // the very first character the user types would end up as the PK.
-          data.on.change = data.on.input;
-          delete data.on.input;
+          addHandler(data.on, "change", onInput);
+        } else {
+          addHandler(data.on, "input", onInput);
         }
 
         if ('textarea' in attrs && attrs.textarea !== false) {
@@ -144,8 +142,7 @@ export default Vue.extend({
 
       case 'boolean':
         // v-switch uses 'change' as its event, not 'input'.
-        data.on.change = data.on.input;
-        delete data.on.input;
+        addHandler(data.on, "change", onInput);
         // It also uses 'input-value' instead of 'value' for its value prop.
         data.props['input-value'] = data.props.value;
         delete data.props.value;
@@ -156,6 +153,7 @@ export default Vue.extend({
         return h('v-switch', data);
       
       case 'enum':
+        addHandler(data.on, "input", onInput);
         data.props.items = valueMeta.typeDef.values
         data.props['item-text'] = 'displayName';
         data.props['item-value'] = 'value';
@@ -171,8 +169,7 @@ export default Vue.extend({
 
       case 'file': 
         // v-file-input uses 'change' as its event, not 'input'.
-        data.on.change = data.on.input;
-        delete data.on.input;
+        addHandler(data.on, "change", onInput);
         return h('v-file-input', data);
     }
 
@@ -201,3 +198,15 @@ export default Vue.extend({
     )
   }
 });
+
+function addHandler(on: { [key: string]: Function | Function[]; }, eventName: string, handler: Function) {
+  const oldValue = on[eventName];
+  if (oldValue == null) {
+    on[eventName] = handler;
+  } else if (typeof oldValue == "function") {
+    on[eventName] = [oldValue, handler];
+  } else {
+    oldValue.push(handler);
+  }
+}
+

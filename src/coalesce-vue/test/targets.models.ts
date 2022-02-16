@@ -53,6 +53,7 @@ export interface Advisor extends Model<typeof metadata.Advisor> {
   advisorId: number | null
   name: string | null
   students: Student[]
+  studentsNonNavigation: Student[]
   studentWrapperObject: DisplaysStudent | null
 }
 export class Advisor {

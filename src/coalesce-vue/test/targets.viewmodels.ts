@@ -47,6 +47,7 @@ export interface AdvisorViewModel extends models.Advisor {
   advisorId: number | null;
   name: string | null;
   students: StudentViewModel[],
+  studentsNonNavigation: StudentViewModel[],
   studentWrapperObject: models.DisplaysStudent | null
 }
 export class AdvisorViewModel extends ViewModel<models.Advisor, apiClients.AdvisorApiClient, number> {

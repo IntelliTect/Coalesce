@@ -98,6 +98,21 @@ export const Advisor = domain.types.Advisor = {
         get typeDef() { return (domain.types.Student as ModelType) },
       }
     },
+    studentsNonNavigation: {
+      // A collection of models that doesn't function as a navigation property.
+      name: 'studentsNonNavigation',
+      displayName: 'Students NonNav',
+      role: "value",
+      type: "collection",
+      dontSerialize: true,
+      itemType: {
+        name: '$collectionValue',
+        role: 'value',
+        displayName: "",
+        type: "model",
+        get typeDef() { return (domain.types.Student as ModelType) },
+      }
+    },
     studentWrapperObject: {
       name: 'studentWrapperObject',
       displayName: 'Student Wrapper Object',

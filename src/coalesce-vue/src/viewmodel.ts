@@ -1205,9 +1205,7 @@ export function defineProps<T extends new () => ViewModel<any, any>>(
               }
             }
 
-          // TODO: This should probably be checking prop.type=='collection' && prop.itemType.type == 'model' 
-          // (it shouldn't care about relationalness in the same way that the setter for 'model' also doesn't care.).
-          : prop.role == "collectionNavigation"
+          : prop.type == "collection" && prop.itemType.type == 'model'
           ? function(this: InstanceType<T>, incomingValue: any) {
               let hasLoaded = false;
               if (incomingValue == null) {
@@ -1231,7 +1229,7 @@ export function defineProps<T extends new () => ViewModel<any, any>>(
                 return;
               }
 
-              const vmc = new ViewModelCollection(prop, this);
+              const vmc = new ViewModelCollection(prop as ModelCollectionValue, this);
               // Mark the collection so that we can determine that it has been loaded,
               // versus a collection that was never loaded because the server never populated it.
               // This lets us tell if the collection is truly empty, or empty because it isn't loaded.

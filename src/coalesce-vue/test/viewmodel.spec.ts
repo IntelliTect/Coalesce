@@ -925,6 +925,31 @@ describe("ViewModel", () => {
       })
     })
 
+    describe("model collection (non-navigation) getter/setters", () => {
+      test("setter creates new ViewModelCollection", () => {
+        var advisor = new AdvisorViewModel();
+        advisor.studentsNonNavigation = [];
+
+        expect(advisor.studentsNonNavigation.push).not.toBe(Array.prototype.push);
+        expect(advisor.studentsNonNavigation.push).toBe(ViewModelCollection.prototype.push);
+      })
+
+      test("collection creates ViewModel when Model is pushed", () => {
+        var advisor = new AdvisorViewModel();
+        advisor.studentsNonNavigation = [];
+
+        // The typings don't explicitly allow this, so we must cast to any.
+        // The use case is an input component that provides models (instead of ViewModels).
+        advisor.studentsNonNavigation.push(new Student({
+          studentId: 1,
+          name: "Seagull"
+        }) as any);
+
+        expect(advisor.studentsNonNavigation[0]).toBeInstanceOf(StudentViewModel);
+        expect(advisor.studentsNonNavigation[0].name).toBe("Seagull");
+      })
+    })
+
     describe("reference navigation & FK getter/setters", () => {
       test("setter copies foreign key", () => {
         var student = new StudentViewModel();
@@ -1570,6 +1595,3 @@ describe("ListViewModel", () => {
 
   })
 })
-
-/* TODO: 
-  Deep autosave (propagate a parent's autosave state to its related models) */

@@ -6,16 +6,14 @@
   "module": "./lib/index.js",
   "exports": {
     ".": {
+      "types": "./lib/index.d.ts",
       "import": "./lib/index.js",
       "require": "./lib/cjs/index.js"
     },
     "./lib/*": {
+      "types": "./lib/*.d.ts",
       "import": "./lib/*.js",
       "require": "./lib/cjs/*.js"
-    },
-    "./": {
-      "import": "./lib/esm/",
-      "require": "./lib/cjs/"
     }
   },
   "repository": "https://github.com/IntelliTect/Coalesce",

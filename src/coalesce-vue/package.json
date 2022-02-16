@@ -2,8 +2,8 @@
   "name": "coalesce-vue",
   "version": "0.1.0-local",
   "description": "Coalesce core scripts for Vue.js",
-  "main": "./lib/cjs/index.js",
-  "module": "./lib/index.js",
+  "main": "./lib/index.js",
+  "types": "./lib/index.d.ts",
   "exports": {
     ".": {
       "types": "./lib/index.d.ts",

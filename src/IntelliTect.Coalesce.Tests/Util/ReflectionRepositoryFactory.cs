@@ -16,7 +16,7 @@ namespace IntelliTect.Coalesce.Tests.Util
         public static readonly IReadOnlyCollection<SyntaxTree> ModelSyntaxTrees = GetModelSyntaxTrees();
 
         internal static readonly CSharpCompilation Compilation = GetCompilation(new SyntaxTree[0]);
-        internal static readonly IEnumerable<INamedTypeSymbol> Symbols = GetAllSymbols();
+        internal static readonly IEnumerable<ITypeSymbol> Symbols = GetAllSymbols();
 
         public static readonly ReflectionRepository Symbol = MakeFromSymbols();
         public static readonly ReflectionRepository Reflection = MakeFromReflection();
@@ -27,15 +27,16 @@ namespace IntelliTect.Coalesce.Tests.Util
         {
             var rr = new ReflectionRepository();
             rr.DiscoverCoalescedTypes(Symbols
-                .Select(s => new SymbolTypeViewModel(rr, s))
                 .Where(s => 
                     // For classes inside the TargetClasses namespace, only include those from
                     // the symbol discovery assembly, not the copies that were included from the 
                     // assembly metadata of this very test assembly (IntelliTect.Coalesce.Tests),
                     // as the versions derived from assembly metadata behave slightly differently
                     // and are also just otherwise redundant.
-                    !s.FullNamespace.StartsWith("IntelliTect.Coalesce.Tests.TargetClasses") || 
-                    s.Symbol.ContainingAssembly.MetadataName == SymbolDiscoveryAssemblyName)
+                    !s.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat).Contains("IntelliTect.Coalesce.Tests.TargetClasses") || 
+                    (s is IArrayTypeSymbol ats ? ats.ElementType : s).ContainingAssembly.MetadataName == SymbolDiscoveryAssemblyName
+                )
+                .Select(s => new SymbolTypeViewModel(rr, s))
             );
             return rr;
         }
@@ -71,60 +72,78 @@ namespace IntelliTect.Coalesce.Tests.Util
             Assembly.Load("Microsoft.EntityFrameworkCore.InMemory");
             Assembly.Load("System.Linq.Queryable");
 
+            var current = Assembly.GetExecutingAssembly();
+            var assemblies = AppDomain.CurrentDomain
+                .GetAssemblies()
+                // Exclude dynamic assemblies (they can't possibly be relevant here)
+                .Where(a => !a.IsDynamic)
+                .Select(a => MetadataReference.CreateFromFile(a.Location))
+                .ToArray();
+
             return CSharpCompilation.Create(
                 SymbolDiscoveryAssemblyName,
                 trees.Concat(ModelSyntaxTrees),
-                AppDomain.CurrentDomain
-                    .GetAssemblies()
-                    // Exclude dynamic assemblies (they can't possibly be relevant here)
-                    .Where(a => !a.IsDynamic)
-                    .Select(a => MetadataReference.CreateFromFile(a.Location)).ToArray(),
+                assemblies,
                 new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
             );
         }
 
-        private static List<INamedTypeSymbol> GetAllSymbols()
+        private static List<ITypeSymbol> GetAllSymbols()
         {
             // Assembly.GlobalNamespace restricts us to only types declared in the C# files 
             // that are being included.
             // compilation.GlobalNamespace gives us ALL CLR types
             // that are accessible, which is way more useful.
             //return Compilation.Assembly.GlobalNamespace
-            return Compilation.GlobalNamespace
-                .Accept(new SymbolDiscoveryVisitor())
-                .ToList();
+            var visitor = new SymbolDiscoveryVisitor();
+            Compilation.GlobalNamespace.Accept(visitor);
+            return visitor.Symbols.ToList();
         }
 
 
-        // TODO: this is duplicated from RoslynTypeLocator.cs in Coalesce.CodeGeneration. 
-        // can we avoid this duplication?
-        private class SymbolDiscoveryVisitor : SymbolVisitor<IEnumerable<INamedTypeSymbol>>
+        private class SymbolDiscoveryVisitor : SymbolVisitor
         {
-            public override IEnumerable<INamedTypeSymbol> VisitNamespace(INamespaceSymbol symbol)
+            public HashSet<ITypeSymbol> Symbols = new HashSet<ITypeSymbol>(SymbolEqualityComparer.IncludeNullability);
+
+            public override void VisitNamespace(INamespaceSymbol symbol)
             {
                 foreach (var childSymbol in symbol.GetMembers())
                 {
-                    //We must implement the visitor pattern ourselves and 
-                    //accept the child symbols in order to visit their children
-                    foreach (var result in childSymbol.Accept(this)) yield return result;
+                    childSymbol.Accept(this);
                 }
             }
 
-            public override IEnumerable<INamedTypeSymbol> VisitNamedType(INamedTypeSymbol symbol)
+            public override void VisitNamedType(INamedTypeSymbol symbol)
             {
-                yield return symbol;
+                if (!Symbols.Add(symbol)) return;
 
                 foreach (var childSymbol in symbol.GetMembers())
                 {
-                    var accept = childSymbol.Accept(this);
-                    if (accept != null)
-                    {
-                        foreach (var result in accept) yield return result;
-                    }
+                    childSymbol.Accept(this);
                 }
             }
 
-            public override IEnumerable<INamedTypeSymbol> VisitMethod(IMethodSymbol symbol)
+            public override void VisitArrayType(IArrayTypeSymbol symbol)
+            {
+                if (!Symbols.Add(symbol)) return;
+                symbol.ElementType.Accept(this);
+            }
+
+            public override void VisitProperty(IPropertySymbol symbol)
+            {
+                if (symbol.Type.OriginalDefinition != symbol.Type)
+                {
+
+                    symbol.Type.Accept(this);
+                }
+                else
+                {
+
+                    symbol.Type.Accept(this);
+                }
+            }
+
+            public override void VisitMethod(IMethodSymbol symbol)
             {
                 // Hack to pick up any arbitrary constructed generic types
                 // that were specified as parameters to [ClassViewModelDataAttribute] in tests.
@@ -133,7 +152,7 @@ namespace IntelliTect.Coalesce.Tests.Util
                     if (attr.AttributeClass.Name == nameof(ClassViewModelDataAttribute))
                     {
                         var value = attr.GetPropertyValue("targetClass", null);
-                        if (value is INamedTypeSymbol namedType) yield return namedType;
+                        if (value is ITypeSymbol type) type.Accept(this);
                     }
                 }
             }

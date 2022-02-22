@@ -53,7 +53,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 : null;
 
             // This is precomputed because it is used for .Equals() and the == operator.
-            FullyQualifiedName = GetFriendlyTypeName(Info);
+            FullyQualifiedName = GetVerboseTypeName(Info);
         }
 
         internal static ReflectionTypeViewModel GetOrCreate(ReflectionRepository? reflectionRepository, Type type)
@@ -138,13 +138,18 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public override string FullNamespace => Info.Namespace ?? "";
 
-        private static string GetFriendlyTypeName(Type type)
+        private static string GetVerboseTypeName(Type type)
         {
             // From https://stackoverflow.com/questions/401681
 
             if (type.IsGenericParameter)
             {
                 return type.Name;
+            }
+
+            if (type.IsArray)
+            {
+                return GetVerboseTypeName(type.GetElementType()) + "[" + new string(',', type.GetArrayRank() - 1) + "]";
             }
 
             if (!type.IsGenericType)
@@ -164,7 +169,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 {
                     builder.Append(',');
                 }
-                builder.Append(GetFriendlyTypeName(arg));
+                builder.Append(GetVerboseTypeName(arg));
                 first = false;
             }
             builder.Append('>');
@@ -173,8 +178,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public override string FullyQualifiedName { get; }
 
-        // TODO: write tests that assert that this will format types the same 
-        // way as SymbolTypeViewModel.VerboseFullyQualifiedName. Adjust either one as needed.
         public override string VerboseFullyQualifiedName => FullyQualifiedName;
 
         public override TypeViewModel? FirstTypeArgument { get; }

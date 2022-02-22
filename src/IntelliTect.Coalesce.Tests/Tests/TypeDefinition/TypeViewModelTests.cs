@@ -1,4 +1,5 @@
-﻿using IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext;
+﻿using IntelliTect.Coalesce.Tests.TargetClasses;
+using IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext;
 using IntelliTect.Coalesce.Tests.Util;
 using IntelliTect.Coalesce.TypeDefinition;
 using System;
@@ -88,6 +89,28 @@ namespace IntelliTect.Coalesce.Tests.TypeDefinition
         }
 
         [Theory]
+        [ClassViewModelData(typeof(bool), "System.Boolean")]
+        [ClassViewModelData(typeof(bool?), "System.Nullable<System.Boolean>")]
+        [ClassViewModelData(typeof(bool[]), "System.Boolean[]")]
+        [ClassViewModelData(typeof(bool[,]), "System.Boolean[,]")]
+        [ClassViewModelData(typeof(bool?[]), "System.Nullable<System.Boolean>[]")]
+        [ClassViewModelData(typeof(System.Collections.Generic.ICollection<bool>), "System.Collections.Generic.ICollection<System.Boolean>")]
+        [ClassViewModelData(typeof(System.Collections.Generic.ICollection<bool?>), "System.Collections.Generic.ICollection<System.Nullable<System.Boolean>>")]
+        [ClassViewModelData(typeof(Bools), "IntelliTect.Coalesce.Tests.TargetClasses.Bools")]
+        [ClassViewModelData(typeof(System.Collections.Generic.ICollection<ExternalParent>),
+            "System.Collections.Generic.ICollection<IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext.ExternalParent>")]
+        public void VerboseFullyQualifiedName_HasCorrectValue(
+            ClassViewModelData data,
+            string expectedTypeName
+        )
+        {
+            TypeViewModel vm = data;
+            var value = vm.VerboseFullyQualifiedName;
+
+            Assert.Equal(expectedTypeName, value);
+        }
+
+        [Theory]
         [ClassViewModelData(typeof(decimal))]
         [ClassViewModelData(typeof(decimal?))]
         [ClassViewModelData(typeof(int))]
@@ -99,7 +122,6 @@ namespace IntelliTect.Coalesce.Tests.TypeDefinition
         public void IsNumber_TrueForNumbers(ClassViewModelData data)
         {
             TypeViewModel vm = data;
-
             Assert.True(vm.IsNumber);
         }
     }

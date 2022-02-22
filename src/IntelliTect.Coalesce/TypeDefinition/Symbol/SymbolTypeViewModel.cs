@@ -52,8 +52,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
             // These are precomputed because they are used for .Equals() and the == operator.
             FullyQualifiedName = Symbol.ToDisplayString(DefaultDisplayFormat);
-            // TODO: write tests that assert that this will format types the same 
-            // way as ReflectionTypeViewModel.VerboseFullyQualifiedName. Adjust either one as needed.
             VerboseFullyQualifiedName = Symbol.ToDisplayString(VerboseDisplayFormat);
     }
 

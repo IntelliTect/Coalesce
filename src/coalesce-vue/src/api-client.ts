@@ -40,7 +40,7 @@ import {
   mapToDtoFiltered,
   parseValue
 } from "./model";
-import { OwnProps, Indexable, objectToQueryString } from "./util";
+import { OwnProps, Indexable, objectToQueryString, objectToFormData } from "./util";
 
 import axios, {
   AxiosPromise,
@@ -634,32 +634,18 @@ export class ApiClient<T extends ApiRoutedType> {
       // The HTTP method has a body.
 
       query = undefined;
-      if (Object.values(mappedParams).some(p => p instanceof Blob || p instanceof Uint8Array)) {
-        // If the endpoint has any files or raw binary, we need to craft a FormData.
-        const formData = body = new FormData;
 
-        for (const key in mappedParams) {
-          const value = mappedParams[key];
-          if (value instanceof Blob) {
-            // Add files normally.
-            formData.append(key, value)
-          } else if (value instanceof Uint8Array) {
-            // Add raw binary as blobs
-            formData.append(key, new Blob([value]))
-          } else {
-            // For non-files, stringify to get properly formatted key/value pairs
-            // and then merge them into the formdata.
-            // This is done because value could be a complex object that will result in 
-            // lots of flattened key/value pairs
-            const formPairs = objectToQueryString({[key]: value}).split("&");
-            for (const pair of formPairs) {
-              const [k,v] = pair.split("=")
-              formData.append(decodeURIComponent(k), decodeURIComponent(v));
-            }
-          }
-        }
+      const formData = objectToFormData(mappedParams);
+      let hasFile = false;
+      formData.forEach(v => hasFile ||= v instanceof File);
+      
+      if (hasFile) {
+        // If the endpoint has any files or raw binary, we need to use a FormData.
+        // This will form a multipart/form-data response.
+        body = formData;
       } else {
         // No top-level special values - just handle the params normally.
+        // This will form a application/x-www-form-urlencoded response.
         body = objectToQueryString(mappedParams)
       }
     } else {
@@ -742,8 +728,9 @@ export class ApiClient<T extends ApiRoutedType> {
       const paramMeta = method.params[paramName];
       const paramValue = params[paramName];
 
-      if (paramMeta.type == "file" || paramMeta.type == "binary") {
-        // Preserve top-level files and binary as their original format
+      const pureType = paramMeta.type == "collection" ? paramMeta.itemType : paramMeta;
+      if (pureType.type == "file" || pureType.type == "binary") {
+        // Preserve top-level files and binary (and arrays of such) as their original format
         formatted[paramName] = parseValue(paramValue, paramMeta)
       } else {
         formatted[paramName] = mapToDto(paramValue, paramMeta);

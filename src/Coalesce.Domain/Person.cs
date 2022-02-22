@@ -262,6 +262,12 @@ namespace Coalesce.Domain
             return db.People.Where(f => f.FirstName.StartsWith(characters)).Select(f => f.Name).ToList();
         }
 
+        [Coalesce, Execute]
+        public static string[] MethodWithStringArrayParameter(AppDbContext db, string[] strings)
+        {
+            return strings;
+        }
+
         /// <summary>
         /// Gets all the first names starting with the characters.
         /// </summary>

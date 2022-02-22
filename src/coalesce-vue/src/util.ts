@@ -94,26 +94,31 @@ export function objectToQueryString(a: Array<any> | { [s: string]: any } | null)
       encodeURIComponent(value == null ? "" : value);
   };
 
-  if (a == null) {
-    return "";
-  }
-
-  if (a instanceof Array) {
-    for (let i = 0, l = a.length; i < l; i++) {
-      add(i.toString(), a[i]);
-    }
-  } else {
-    for (const prefix in a) {
-      if (a.hasOwnProperty(prefix)) {
-        buildParams(prefix, a[prefix], add);
-      }
-    }
-  }
+  buildParams("", a, add);
 
   return items.join("&");
 }
 
+export function objectToFormData(a: Array<any> | { [s: string]: any } | null) {
+  var items = new FormData;
+  const add = function (key: string, value: any) {
+    if (value instanceof Uint8Array) {
+      // Add raw binary as blobs
+      value = new Blob([value])
+    }
+
+    items.append(key, value == null ? "" : value);
+  };
+
+  buildParams("", a, add);
+
+  return items;
+}
+
 const rbracket = /\[\]$/;
+function isScalarFormValue(obj: any) {
+  return obj instanceof Blob || obj instanceof Uint8Array || typeof obj !== "object"
+}
 function buildParams(
   prefix: string,
   obj: any,
@@ -121,15 +126,17 @@ function buildParams(
 ) {
   var name;
   if (obj instanceof Array) {
+    var isScalarArray = obj.every(isScalarFormValue);
     for (let i = 0, l = obj.length; i < l; i++) {
       const v = obj[i];
-      if (rbracket.test(prefix)) {
+      if (isScalarArray || rbracket.test(prefix)) {
         // Treat each array item as a scalar.
         add(prefix, v);
       } else {
         // Item is non-scalar (array or object), encode its numeric index.
+        const k = (typeof v === "object" && v != null ? i.toString() : "");
         buildParams(
-          prefix + "[" + (typeof v === "object" && v != null ? i : "") + "]",
+          prefix ? prefix + "[" + k + "]" : k,
           v,
           add
         );
@@ -139,11 +146,11 @@ function buildParams(
     // Handle null before typeof obj == "object", which will be the case for null.
     // Serialize scalar item.
     add(prefix, obj);
-  } else if (typeof obj == "object") {
+  } else if (typeof obj == "object" && !isScalarFormValue(obj)) {
     // Serialize object item.
     for (name in obj) {
       if (obj.hasOwnProperty(name)) {
-        buildParams(prefix + "[" + name + "]", obj[name], add);
+        buildParams(prefix ? prefix + "[" + name + "]" : name, obj[name], add);
       }
     }
   } else {

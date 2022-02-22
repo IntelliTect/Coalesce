@@ -1,11 +1,12 @@
 ﻿using IntelliTect.Coalesce.DataAnnotations;
+using IntelliTect.Coalesce.Models;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
-
+using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
 {
@@ -94,6 +95,18 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         )
         {
             return collection.FirstOrDefault() ?? single;
+        }
+
+        [Coalesce, Execute]
+        public void MethodWithSingleFileParameter(IFile file) { }
+
+        [Coalesce, Execute]
+        public void MethodWithMultiFileParameter(ICollection<IFile> files) { }
+
+        [Coalesce, Execute]
+        public static string[] MethodWithStringArrayParameterAndReturn1(string[] strings)
+        {
+            return strings;
         }
     }
 }

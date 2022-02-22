@@ -48,6 +48,17 @@ export class CaseViewModel extends ViewModel<$models.Case, $apiClients.CaseApiCl
     return uploadAttachment
   }
   
+  public get uploadAttachments() {
+    const uploadAttachments = this.$apiClient.$makeCaller(
+      this.$metadata.methods.uploadAttachments,
+      (c, files: File[] | null) => c.uploadAttachments(this.$primaryKey, files),
+      () => ({files: null as File[] | null, }),
+      (c, args) => c.uploadAttachments(this.$primaryKey, args.files))
+    
+    Object.defineProperty(this, 'uploadAttachments', {value: uploadAttachments});
+    return uploadAttachments
+  }
+  
   public get uploadByteArray() {
     const uploadByteArray = this.$apiClient.$makeCaller(
       this.$metadata.methods.uploadByteArray,
@@ -460,6 +471,17 @@ export class PersonListViewModel extends ListViewModel<$models.Person, $apiClien
     
     Object.defineProperty(this, 'namesStartingWith', {value: namesStartingWith});
     return namesStartingWith
+  }
+  
+  public get methodWithStringArrayParameter() {
+    const methodWithStringArrayParameter = this.$apiClient.$makeCaller(
+      this.$metadata.methods.methodWithStringArrayParameter,
+      (c, strings: string[] | null) => c.methodWithStringArrayParameter(strings),
+      () => ({strings: null as string[] | null, }),
+      (c, args) => c.methodWithStringArrayParameter(args.strings))
+    
+    Object.defineProperty(this, 'methodWithStringArrayParameter', {value: methodWithStringArrayParameter});
+    return methodWithStringArrayParameter
   }
   
   /** Gets all the first names starting with the characters. */

@@ -24,6 +24,9 @@ Objects
 Files
     Methods can accept file uploads by using a parameter of type :csharp:`IntelliTect.Coalesce.Models.IFile` (or any derived type, like :csharp:`IntelliTect.Coalesce.Models.File`).
 
+:csharp:`ICollection<T>` or :csharp:`IEnumerable<T>`
+    Collections of any of the above valid return types above are also valid return types.
+
 :csharp:`<YourDbContext> db`
     If the method has a parameter of the same type as your DbContext class, the current DbContext will be passed to the method call. For :ref:`Services` which don't have a defined backing EF context, this is treated as having an implicit :csharp:`[Inject]` attribute.
 

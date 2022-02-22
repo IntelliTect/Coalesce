@@ -157,7 +157,7 @@ describe("$invoke", () => {
     expect(mock.mock.calls[0][0]).toMatchObject({ params: { id: 1 } });
   })
 
-  test("passes files as FormData", async() => {
+  test("passes single file as FormData", async() => {
     const mock = AxiosClient.defaults.adapter = 
       jest.fn().mockResolvedValue(<AxiosResponse<any>>{
         data: {wasSuccessful: true, object: ''},
@@ -183,11 +183,88 @@ describe("$invoke", () => {
     });
 
     expect(mock).toBeCalledTimes(1);
-    expect(mock.mock.calls[0][0].data).toBeInstanceOf(FormData)
-    expect((mock.mock.calls[0][0].data as FormData).get('id')).toBe("42")
-    expect((mock.mock.calls[0][0].data as FormData).get('file')).toBe(file)
-    expect((mock.mock.calls[0][0].data as FormData).get('student[name]')).toBe("bob&bob=bob")
-    expect((mock.mock.calls[0][0].data as FormData).get('student[studentAdvisorId]')).toBe("")
+    const formData = (mock.mock.calls[0][0].data as FormData);
+    expect(formData).toBeInstanceOf(FormData)
+    expect(formData.get('id')).toBe("42")
+    expect(formData.get('file')).toBe(file)
+    expect(formData.get('student[name]')).toBe("bob&bob=bob")
+    expect(formData.get('student[studentAdvisorId]')).toBe("")
+  })
+
+  test("passes file array as FormData", async() => {
+    const mock = AxiosClient.defaults.adapter = 
+      jest.fn().mockResolvedValue(<AxiosResponse<any>>{
+        data: {wasSuccessful: true, object: ''},
+        status: 200
+      })
+
+    const methodMeta: ItemMethod = {
+      name: 'test', 
+      displayName: '', 
+      httpMethod: 'POST', 
+      return: { displayName: '', name: '$return', type: 'void', role: 'value' },
+      transportType: 'item',
+      params: {
+        id: { type: 'number', role: 'value', displayName: '', name: 'id' },
+        files: { type: 'collection', role: 'value', displayName: '', name: 'file', itemType: {
+          name: "$collectionItem",
+          displayName: '',
+          role: 'value',
+          type: "file",
+        } },
+      }
+    };
+
+    const file1 = new File([new ArrayBuffer(1)], "fileName1", { type: "application/pdf" });
+    const file2 = new File([new ArrayBuffer(2)], "fileName2", { type: "application/pdf" });
+
+    var response = await new StudentApiClient().$invoke(methodMeta, { 
+      id:42, files: [file1, file2]
+    });
+
+    expect(mock).toBeCalledTimes(1);
+    const formData = (mock.mock.calls[0][0].data as FormData);
+    expect(formData).toBeInstanceOf(FormData)
+    expect(formData.get('id')).toBe("42")
+    // Aspnetcore will not bind the files correctly if they're keyed as 
+    // files[0] and files[1]. They must use the same key (matching the param name).
+    // Untested: keying them as `files[]` might also work.
+    expect(formData.getAll('files')).toEqual([file1, file2])
+  })
+
+  test("passes Uint8Array as FormData", async() => {
+    const mock = AxiosClient.defaults.adapter = 
+      jest.fn().mockResolvedValue(<AxiosResponse<any>>{
+        data: {wasSuccessful: true, object: ''},
+        status: 200
+      })
+
+    const methodMeta: ItemMethod = {
+      name: 'test', 
+      displayName: '', 
+      httpMethod: 'POST', 
+      return: { displayName: '', name: '$return', type: 'void', role: 'value' },
+      transportType: 'item',
+      params: {
+        id: { type: 'number', role: 'value', displayName: '', name: 'id' },
+        bin: { type: 'binary', role: 'value', displayName: '', name: 'file' },
+      }
+    };
+
+    const bin = new Uint8Array([0x11, 0x22, 0x33]);
+    var response = await new StudentApiClient().$invoke(methodMeta, { id:42, bin });
+
+    expect(mock).toBeCalledTimes(1);
+    const formData = (mock.mock.calls[0][0].data as FormData);
+    expect(formData).toBeInstanceOf(FormData)
+    expect(formData.get('id')).toBe("42")
+
+    // This can only assert on size, not content,
+    // since jsdom's Blob/File classes don't properly implement the spec
+    // (https://w3c.github.io/FileAPI/#stream-method-algo). 
+    // https://github.com/jsdom/jsdom/issues/2555.
+    // This is cast as File because FormData converts Blob to File.
+    expect((formData.get('bin') as File).size).toBe(3)
   })
 
   test("POST passes null correctly", async () => {

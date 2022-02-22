@@ -97,7 +97,11 @@ export default Vue.extend({
 
         if ('manyToMany' in valueMeta) {
           return h(CSelectManyToMany, data);
-        } else if (valueMeta.itemType.type != 'model' && valueMeta.itemType.type != 'object') {
+        } else if (
+          valueMeta.itemType.type != 'model' && 
+          valueMeta.itemType.type != 'object' && 
+          valueMeta.itemType.type != 'file'
+        ) {
           return h(CSelectValues, data);
         } else {
           // console.warn(`Unsupported collection type ${valueMeta.itemType.type} for v-input`)
@@ -171,6 +175,19 @@ export default Vue.extend({
         // v-file-input uses 'change' as its event, not 'input'.
         addHandler(data.on, "change", onInput);
         return h('v-file-input', data);
+
+      case 'collection': 
+        if (valueMeta.itemType.type == 'file') {
+          // This is how static bool flag props are passed in vue.
+          // We don't use `props` because `multiple` as an explicit prop
+          // for `v-file-input` was only added quite recently.
+          // Doing it like this will work in older vuetify versions too.
+          data.attrs.multiple = "";
+
+          // v-file-input uses 'change' as its event, not 'input'.
+          addHandler(data.on, "change", onInput);
+          return h('v-file-input', data);
+        }
     }
 
     // Fall back to just displaying the value.

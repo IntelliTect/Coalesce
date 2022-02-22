@@ -364,6 +364,38 @@ export const Case = domain.types.Case = {
         role: "value",
       },
     },
+    uploadAttachments: {
+      name: "uploadAttachments",
+      displayName: "Upload Attachments",
+      transportType: "item",
+      httpMethod: "POST",
+      params: {
+        id: {
+          name: "id",
+          displayName: "Primary Key",
+          role: "value",
+          type: "number",
+        },
+        files: {
+          name: "files",
+          displayName: "Files",
+          type: "collection",
+          itemType: {
+            name: "$collectionItem",
+            displayName: "",
+            role: "value",
+            type: "file",
+          },
+          role: "value",
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "void",
+        role: "value",
+      },
+    },
     uploadByteArray: {
       name: "uploadByteArray",
       displayName: "Upload Byte Array",
@@ -1172,6 +1204,39 @@ export const Person = domain.types.Person = {
           name: "characters",
           displayName: "Characters",
           type: "string",
+          role: "value",
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "collection",
+        itemType: {
+          name: "$collectionItem",
+          displayName: "",
+          role: "value",
+          type: "string",
+        },
+        role: "value",
+      },
+    },
+    methodWithStringArrayParameter: {
+      name: "methodWithStringArrayParameter",
+      displayName: "Method With String Array Parameter",
+      transportType: "item",
+      httpMethod: "POST",
+      isStatic: true,
+      params: {
+        strings: {
+          name: "strings",
+          displayName: "Strings",
+          type: "collection",
+          itemType: {
+            name: "$collectionItem",
+            displayName: "",
+            role: "value",
+            type: "string",
+          },
           role: "value",
         },
       },

@@ -165,6 +165,15 @@ namespace Coalesce.Domain
         }
 
         [Coalesce]
+        public async Task UploadAttachments(ICollection<IFile> files)
+        {
+            foreach (var file in files)
+            {
+                await UploadAttachment(file);
+            }
+        }
+
+        [Coalesce]
         public void UploadByteArray(byte[] file)
         {
             Attachment = file;

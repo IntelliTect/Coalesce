@@ -1,6 +1,5 @@
 import * as $metadata from './metadata.g'
 import * as $models from './models.g'
-import * as qs from 'qs'
 import { AxiosClient, ModelApiClient, ServiceApiClient, ItemResult, ListResult } from 'coalesce-vue/lib/api-client'
 import { AxiosPromise, AxiosResponse, AxiosRequestConfig } from 'axios'
 
@@ -32,6 +31,15 @@ export class CaseApiClient extends ModelApiClient<$models.Case> {
     const $params =  {
       id,
       file,
+    }
+    return this.$invoke($method, $params, $config)
+  }
+  
+  public uploadAttachments(id: number, files: File[] | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<void>> {
+    const $method = this.$metadata.methods.uploadAttachments
+    const $params =  {
+      id,
+      files,
     }
     return this.$invoke($method, $params, $config)
   }
@@ -193,6 +201,14 @@ export class PersonApiClient extends ModelApiClient<$models.Person> {
     const $method = this.$metadata.methods.namesStartingWith
     const $params =  {
       characters,
+    }
+    return this.$invoke($method, $params, $config)
+  }
+  
+  public methodWithStringArrayParameter(strings: string[] | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<string[]>> {
+    const $method = this.$metadata.methods.methodWithStringArrayParameter
+    const $params =  {
+      strings,
     }
     return this.$invoke($method, $params, $config)
   }

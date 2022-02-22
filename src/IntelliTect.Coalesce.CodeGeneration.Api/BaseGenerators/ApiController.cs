@@ -107,9 +107,11 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
             actionParameters.AddRange(parameters.Select(param =>
             {
                 string typeName;
-                if (param.Type.IsFile)
+                if (param.PureType.IsFile)
                 {
-                    typeName = new ReflectionTypeViewModel(typeof(Microsoft.AspNetCore.Http.IFormFile)).FullyQualifiedName;
+                    typeName = param.Type.IsCollection 
+                        ? new ReflectionTypeViewModel(typeof(ICollection<Microsoft.AspNetCore.Http.IFormFile>)).FullyQualifiedName
+                        : new ReflectionTypeViewModel(typeof(Microsoft.AspNetCore.Http.IFormFile)).FullyQualifiedName;
                 }
                 else if (param.IsDI)
                 {
@@ -206,9 +208,14 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
 
             var ret = param.CsParameterName;
 
-            if (param.Type.IsFile)
+            if (param.PureType.IsFile)
             {
-                ret = $"{ret} == null ? null : new File {{ Name = {ret}.FileName, ContentType = {ret}.ContentType, Length = {ret}.Length, Content = file.OpenReadStream() }} ";
+                ret = $"{ret} == null ? null : " + (param.Type.IsCollection
+                    ? $"{ret}.Select(f => ({param.PureType.FullyQualifiedName}){FileCtor("f")})"
+                    : $"{FileCtor(ret)} ");
+
+                static string FileCtor(string x) =>
+                    $"new File {{ Name = {x}.FileName, ContentType = {x}.ContentType, Length = {x}.Length, Content = {x}.OpenReadStream() }}";
             }
 
             if (param.Type.IsByteArray)
@@ -305,16 +312,18 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
                         ? $"includeTree ?? ({resultVar} as IQueryable)?.GetIncludeTree()"
                         : "includeTree";
 
-                    b.Append($"(o, {MappingContextVar}, {includeTreeForMapping})).ToList();");
-                    b.Line();
+                    b.Append($"(o, {MappingContextVar}, {includeTreeForMapping}))");
                 }
                 else
                 {
                     // Return type is a collection of primitives or IClassDtos.
-                    // This ToList() may end up being redundant, but it is guaranteed to be safe.
-                    // The minimum type required here that handles all cases is IList<T> (required by a ListResult<T> return type).
-                    b.Line($"_result.{resultProp} = {resultVar}?.ToList();");
+                    b.Append($"_result.{resultProp} = {resultVar}?");
                 }
+
+                if (resultType.IsArray)
+                    b.Line(".ToArray();");
+                else
+                    b.Line(".ToList();");
             }
             else
             {

@@ -361,7 +361,7 @@ AxiosClient.interceptors.request.use((config) => {
     ...config,
     headers: {
       ...config.headers,
-      ['X-Requested-With']: 'XmlHttpRequest',
+      ['X-Requested-With']: 'XMLHttpRequest',
     },
   };
 });

@@ -136,6 +136,18 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
 
         }
 
+        public static string MethodFileResult(MethodViewModel method)
+        {
+            return $@"
+                <!-- ko if: resultObjectUrl() && result().type.indexOf('video') >= 0 -->
+                <video style=""max-width: 100%"" data-bind=""attr: {{src: resultObjectUrl }}"" controls>
+                </video>
+                <!-- /ko -->
+                <!-- ko if: resultObjectUrl() && result().type.indexOf('image') >= 0 -->
+                <img style=""max-width: 100%; max-height: 300px"" data-bind=""attr: {{src: resultObjectUrl }}"" />
+                <!-- /ko -->";
+        }
+
         /// <summary>
         /// Adds a button for a method
         /// </summary>

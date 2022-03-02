@@ -172,7 +172,7 @@ module ViewModels {
             
             /** Calls server method (Rename) with the given arguments */
             public invoke = (name: string | null, callback?: (result: ViewModels.Person) => void, reload: boolean = true): JQueryPromise<any> => {
-                return this.invokeWithData({ id: this.parent[this.parent.primaryKeyName](), name: name }, callback, reload);
+                return this.invokeWithData({ id: this.parent.personId(), name: name }, callback, reload);
             };
             
             /** Object that can be easily bound to fields to allow data entry for the method's parameters */
@@ -195,7 +195,7 @@ module ViewModels {
                 return this.invoke(name, callback, reload);
             };
             
-            protected loadResponse = (data: Coalesce.ItemResult, callback?: (result: ViewModels.Person) => void, reload: boolean = true) => {
+            protected loadResponse = (data: Coalesce.ItemResult, jqXHR: JQuery.jqXHR, callback?: (result: ViewModels.Person) => void, reload: boolean = true) => {
                 if (!this.result()) {
                     this.result(new ViewModels.Person(data.object));
                 } else {
@@ -220,10 +220,10 @@ module ViewModels {
             
             /** Calls server method (ChangeSpacesToDashesInName) with the given arguments */
             public invoke = (callback?: (result: void) => void, reload: boolean = true): JQueryPromise<any> => {
-                return this.invokeWithData({ id: this.parent[this.parent.primaryKeyName]() }, callback, reload);
+                return this.invokeWithData({ id: this.parent.personId() }, callback, reload);
             };
             
-            protected loadResponse = (data: Coalesce.ItemResult, callback?: (result: void) => void, reload: boolean = true) => {
+            protected loadResponse = (data: Coalesce.ItemResult, jqXHR: JQuery.jqXHR, callback?: (result: void) => void, reload: boolean = true) => {
                 this.result(data.object);
                 if (reload) {
                     var result = this.result();
@@ -242,10 +242,10 @@ module ViewModels {
             
             /** Calls server method (GetBirthdate) with the given arguments */
             public invoke = (callback?: (result: moment.Moment) => void, reload: boolean = true): JQueryPromise<any> => {
-                return this.invokeWithData({ id: this.parent[this.parent.primaryKeyName]() }, callback, reload);
+                return this.invokeWithData({ id: this.parent.personId() }, callback, reload);
             };
             
-            protected loadResponse = (data: Coalesce.ItemResult, callback?: (result: moment.Moment) => void, reload: boolean = true) => {
+            protected loadResponse = (data: Coalesce.ItemResult, jqXHR: JQuery.jqXHR, callback?: (result: moment.Moment) => void, reload: boolean = true) => {
                 this.result(data.object);
                 if (reload) {
                     var result = this.result();
@@ -264,10 +264,10 @@ module ViewModels {
             
             /** Calls server method (FullNameAndAge) with the given arguments */
             public invoke = (callback?: (result: string) => void, reload: boolean = true): JQueryPromise<any> => {
-                return this.invokeWithData({ id: this.parent[this.parent.primaryKeyName](),  }, callback, reload);
+                return this.invokeWithData({ id: this.parent.personId() }, callback, reload);
             };
             
-            protected loadResponse = (data: Coalesce.ItemResult, callback?: (result: string) => void, reload: boolean = true) => {
+            protected loadResponse = (data: Coalesce.ItemResult, jqXHR: JQuery.jqXHR, callback?: (result: string) => void, reload: boolean = true) => {
                 this.result(data.object);
                 if (reload) {
                     var result = this.result();
@@ -276,6 +276,12 @@ module ViewModels {
                     callback(this.result());
                 }
             };
+            
+            /** URL for method 'FullNameAndAge' */
+            public url: KnockoutComputed<string> = ko.pureComputed(() => 
+                this.parent.coalesceConfig.baseApiUrl() + this.parent.apiController + '/' + this.name + '?'
+                + $.param({ id: this.parent.personId() })
+            );
         };
         
         /** Methods and properties for invoking server method ObfuscateEmail. */
@@ -286,10 +292,10 @@ module ViewModels {
             
             /** Calls server method (ObfuscateEmail) with the given arguments */
             public invoke = (callback?: (result: string) => void, reload: boolean = true): JQueryPromise<any> => {
-                return this.invokeWithData({ id: this.parent[this.parent.primaryKeyName](),  }, callback, reload);
+                return this.invokeWithData({ id: this.parent.personId() }, callback, reload);
             };
             
-            protected loadResponse = (data: Coalesce.ItemResult, callback?: (result: string) => void, reload: boolean = true) => {
+            protected loadResponse = (data: Coalesce.ItemResult, jqXHR: JQuery.jqXHR, callback?: (result: string) => void, reload: boolean = true) => {
                 this.result(data.object);
                 if (reload) {
                     var result = this.result();
@@ -308,7 +314,7 @@ module ViewModels {
             
             /** Calls server method (ChangeFirstName) with the given arguments */
             public invoke = (firstName: string | null, title: number | null, callback?: (result: ViewModels.Person) => void, reload: boolean = true): JQueryPromise<any> => {
-                return this.invokeWithData({ id: this.parent[this.parent.primaryKeyName](), firstName: firstName, title: title }, callback, reload);
+                return this.invokeWithData({ id: this.parent.personId(), firstName: firstName, title: title }, callback, reload);
             };
             
             /** Object that can be easily bound to fields to allow data entry for the method's parameters */
@@ -335,7 +341,7 @@ module ViewModels {
                 return this.invoke(firstName, title, callback, reload);
             };
             
-            protected loadResponse = (data: Coalesce.ItemResult, callback?: (result: ViewModels.Person) => void, reload: boolean = true) => {
+            protected loadResponse = (data: Coalesce.ItemResult, jqXHR: JQuery.jqXHR, callback?: (result: ViewModels.Person) => void, reload: boolean = true) => {
                 if (!this.result()) {
                     this.result(new ViewModels.Person(data.object));
                 } else {
@@ -360,7 +366,7 @@ module ViewModels {
             
             /** Calls server method (MethodWithEntityParameter) with the given arguments */
             public invoke = (person: ViewModels.Person | null, callback?: (result: ViewModels.Person) => void, reload: boolean = true): JQueryPromise<any> => {
-                return this.invokeWithData({ person: person ? person.saveToDto() : null }, callback, reload);
+                return this.invokeWithData({ person: person?.saveToDto() }, callback, reload);
             };
             
             /** Object that can be easily bound to fields to allow data entry for the method's parameters */
@@ -381,7 +387,7 @@ module ViewModels {
                 return this.invoke(person, callback, reload);
             };
             
-            protected loadResponse = (data: Coalesce.ItemResult, callback?: (result: ViewModels.Person) => void, reload: boolean = true) => {
+            protected loadResponse = (data: Coalesce.ItemResult, jqXHR: JQuery.jqXHR, callback?: (result: ViewModels.Person) => void, reload: boolean = true) => {
                 if (!this.result()) {
                     this.result(new ViewModels.Person(data.object));
                 } else {
@@ -484,11 +490,11 @@ module ViewModels {
             dto.email = this.email();
             dto.gender = this.gender();
             if (!this.birthDate()) dto.birthDate = null;
-            else dto.birthDate = this.birthDate()!.format('YYYY-MM-DDTHH:mm:ss');
+            else dto.birthDate = this.birthDate()!.format('YYYY-MM-DDTHH:mm:ss.SSS');
             if (!this.lastBath()) dto.lastBath = null;
-            else dto.lastBath = this.lastBath()!.format('YYYY-MM-DDTHH:mm:ss');
+            else dto.lastBath = this.lastBath()!.format('YYYY-MM-DDTHH:mm:ss.SSS');
             if (!this.nextUpgrade()) dto.nextUpgrade = null;
-            else dto.nextUpgrade = this.nextUpgrade()!.format('YYYY-MM-DDTHH:mm:ssZZ');
+            else dto.nextUpgrade = this.nextUpgrade()!.format('YYYY-MM-DDTHH:mm:ss.SSSZZ');
             dto.companyId = this.companyId();
             if (!dto.companyId && this.company()) {
                 dto.companyId = this.company()!.companyId();

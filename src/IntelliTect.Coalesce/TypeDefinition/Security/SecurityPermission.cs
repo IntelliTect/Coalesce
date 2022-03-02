@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace IntelliTect.Coalesce.Helpers
+namespace IntelliTect.Coalesce.TypeDefinition
 {
     public class SecurityPermission
     {
@@ -53,7 +53,7 @@ namespace IntelliTect.Coalesce.Helpers
             }
         }
 
-        public string ExternalRoleList => string.Join(",", RoleList);
+        public string AttributeRoleList => string.Join(",", RoleList);
 
         public string ToStringWithName() => $"{Name}: {ToString()}";
 
@@ -61,9 +61,9 @@ namespace IntelliTect.Coalesce.Helpers
         {
             if (HasAttribute)
             {
-                if (PermissionLevel == SecurityPermissionLevels.AllowAll) return $"Allow All ";
-                else if (PermissionLevel == SecurityPermissionLevels.DenyAll) return $"Deny All ";
-                else return $"Allow Authorized Roles: {ExternalRoleList} ";
+                if (PermissionLevel == SecurityPermissionLevels.AllowAll) return $"Allow All";
+                else if (PermissionLevel == SecurityPermissionLevels.DenyAll) return $"Deny All";
+                else return $"Allow Authorized Roles: {string.Join(", ", RoleList)}";
             }
             return $"Allow All Authorized";
         }

@@ -69,7 +69,12 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
                 $"public static {method.NameWithoutAsync} = class {method.NameWithoutAsync} extends Coalesce.{methodBaseClass}<{parentClassName}, {method.ResultType.TsType}>", ';');
 
             b.Line($"public readonly name = '{method.NameWithoutAsync}';");
-            b.Line($"public readonly verb = '{method.ApiActionHttpMethodName}';");
+            b.Line($"public readonly verb = '{method.ApiActionHttpMethod.ToString().ToUpperInvariant()}';");
+
+            if (method.ResultType.IsFile)
+            {
+                b.Line($"protected readonly returnsFile = true;");
+            }
 
             if (method.ResultType.IsCollection)
             {
@@ -90,25 +95,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
             using (b.Block($"public invoke = ({parameters}): JQueryPromise<any> =>", ';'))
             {
                 string jsPostObject = "{ ";
-                if (method.IsModelInstanceMethod)
-                {
-                    jsPostObject += "id: this.parent[this.parent.primaryKeyName]()";
-                    if (method.Parameters.Any()) jsPostObject += ", ";
-                }
-
-                string TsConversion(ParameterViewModel param)
-                {
-                    string argument = param.JsVariable;
-                    if (param.Type.IsCollection && param.Type.PureType.HasClassViewModel)
-                        return $"{argument} ? {argument}.map($ => $.saveToDto()) : null";
-                    if (param.Type.HasClassViewModel)
-                        return $"{argument} ? {argument}.saveToDto() : null";
-                    if (param.Type.IsDate)
-                        return $"{argument} ? {argument}.format() : null";
-                    return argument;
-                }
-
-                jsPostObject += string.Join(", ", method.ClientParameters.Select(f => $"{f.JsVariable}: {TsConversion(f)}"));
+                jsPostObject += string.Join(", ", method.ApiParameters.Select(f => $"{f.JsVariable}: {GetMethodParameterMapping(f)}"));
                 jsPostObject += " }";
 
                 b.Line($"return this.invokeWithData({jsPostObject}, callback{reloadArg});");
@@ -205,7 +192,12 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
             // Method response handler - highly dependent on what the response type actually is.
             // ----------------------
             b.Line();
-            using (b.Block($"protected loadResponse = (data: Coalesce.{(returnIsListResult ? "List" : "Item")}Result, {callbackAndReloadParam}) =>", ';'))
+
+            var loadResponseType = 
+                method.ResultType.IsFile ? "Blob" :
+                $"Coalesce.{(returnIsListResult ? "List" : "Item")}Result";
+
+            using (b.Block($"protected loadResponse = (data: {loadResponseType}, jqXHR: JQuery.jqXHR, {callbackAndReloadParam}) =>", ';'))
             {
                 var incomingMainData = returnIsListResult
                     ? "data.list || []"
@@ -231,6 +223,13 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
                     b.Line("} else {");
                     b.Indented($"this.result().loadFromDto({incomingMainData});");
                     b.Line("}");
+                }
+                else if (method.ResultType.IsFile)
+                {
+                    b.Line("const file = new File([data], Coalesce.Utilities.getFileNameFromContentDisposition(jqXHR.getResponseHeader('content-disposition')), { type: data.type });");
+                    b.Line("this.result(file);");
+                    b.Line("if (this.resultObjectUrl()) URL.revokeObjectURL(this.resultObjectUrl()!);");
+                    b.Line("this.resultObjectUrl(URL.createObjectURL(file));");
                 }
                 else
                 {
@@ -270,10 +269,51 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
                 }
             }
 
+            if (method.ResultType.IsFile)
+            {
+                b.DocComment($"An object URL (https://developer.mozilla.org/en-US/docs/Web/API/URL/createObjectURL) representing the last successful response file.");
+                b.Line("public resultObjectUrl: KnockoutObservable<string | null> = ko.observable(null);");
+            }
+
+
+            if (method.ApiActionHttpMethod == DataAnnotations.HttpMethod.Get)
+            {
+                b.DocComment($"URL for method '{method.NameWithoutAsync}'");
+                b.Line($"public url: KnockoutComputed<string> = ko.pureComputed(() => ");
+                var fileUrl = $"this.parent.coalesceConfig.baseApiUrl() + this.parent.apiController + '/' + this.name + '?'";
+
+                string jsPostObject = "{ ";
+                jsPostObject += string.Join(", ", method.ApiParameters.Select(f => $"{f.JsVariable}: {GetMethodParameterMapping(f, "this.args.")}"));
+                jsPostObject += " }";
+
+                b.Indented(fileUrl);
+                b.Indented($"+ $.param({jsPostObject})");
+                b.Line(");");
+            }
+
 
             // End of the method class declaration.
             classBlock.Dispose();
+
         }
+
+        private string GetMethodParameterMapping(ParameterViewModel param, string prefix = "")
+        {
+            string argument = prefix + param.JsVariable;
+            if (param.ParentSourceProp != null)
+            {
+                argument = $"this.parent.{param.ParentSourceProp.JsVariable}()";
+            }
+            if (param.Type.IsCollection && param.Type.PureType.HasClassViewModel)
+                return $"{argument}?.map($ => $.saveToDto())";
+            if (param.Type.HasClassViewModel)
+                return $"{argument}?.saveToDto()";
+            if (param.Type.IsDate)
+                return $"{argument}?.format({MomentDateDtoFormat(param.Type)})";
+            return argument;
+        }
+
+        protected string MomentDateDtoFormat(TypeViewModel type) => $"'YYYY-MM-DDTHH:mm:ss.SSS{(type.IsDateTimeOffset ? "ZZ" : "")}'";
 
         public void WriteMethod_SaveToDto(TypeScriptCodeBuilder b)
         {
@@ -298,7 +338,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
                 if (prop.Type.IsDate)
                 {
                     b.Line($"if (!this.{prop.JsVariable}()) dto.{prop.JsonName} = null;");
-                    b.Line($"else dto.{prop.JsonName} = this.{prop.JsVariable}()!.format('YYYY-MM-DDTHH:mm:ss{(prop.Type.IsDateTimeOffset ? "ZZ" : "")}');");
+                    b.Line($"else dto.{prop.JsonName} = this.{prop.JsVariable}()!.format({MomentDateDtoFormat(prop.Type)});");
                 }
                 else if (prop.IsForeignKey)
                 {

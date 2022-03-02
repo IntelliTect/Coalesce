@@ -37,7 +37,6 @@ module ViewModels {
         public imageName: KnockoutObservable<string | null> = ko.observable(null);
         public imageSize: KnockoutObservable<number | null> = ko.observable(null);
         public imageHash: KnockoutObservable<string | null> = ko.observable(null);
-        public attachment: KnockoutObservable<string | null> = ko.observable(null);
         public attachmentName: KnockoutObservable<string | null> = ko.observable(null);
         public severity: KnockoutObservable<string | null> = ko.observable(null);
         public status: KnockoutObservable<number | null> = ko.observable(null);
@@ -93,120 +92,25 @@ module ViewModels {
         ];
         
         
-        /** URL for file 'Image' */
-        public imageUrl: KnockoutComputed<string> = ko.pureComputed(() => 
-            this.coalesceConfig.baseApiUrl() + this.apiController + '/Image?id=' + this.caseKey() + '&' + this.dataSource.getQueryString() + '&hash=' + this.imageHash()
-        );
         
-        /** Upload file 'Image' */
-        public imageUpload = (file: File): void => {
-            let formData = new FormData();
-            formData.append("file", file);
-            $.ajax( {
-                type: "PUT",
-                url: this.coalesceConfig.baseApiUrl() + this.apiController + '/Image?id=' + this.caseKey(),
-                contentType: false,
-                processData: false,
-                data: formData,
-            })
-        }
-        
-        
-        /** URL for file 'PlainAttachment' */
-        public plainAttachmentUrl: KnockoutComputed<string> = ko.pureComputed(() => 
-            this.coalesceConfig.baseApiUrl() + this.apiController + '/PlainAttachment?id=' + this.caseKey() + '&' + this.dataSource.getQueryString()
-        );
-        
-        /** Upload file 'PlainAttachment' */
-        public plainAttachmentUpload = (file: File): void => {
-            let formData = new FormData();
-            formData.append("file", file);
-            $.ajax( {
-                type: "PUT",
-                url: this.coalesceConfig.baseApiUrl() + this.apiController + '/PlainAttachment?id=' + this.caseKey(),
-                contentType: false,
-                processData: false,
-                data: formData,
-            })
-        }
-        
-        
-        /** URL for file 'RestrictedUploadAttachment' */
-        public restrictedUploadAttachmentUrl: KnockoutComputed<string> = ko.pureComputed(() => 
-            this.coalesceConfig.baseApiUrl() + this.apiController + '/RestrictedUploadAttachment?id=' + this.caseKey() + '&' + this.dataSource.getQueryString()
-        );
-        
-        /** Upload file 'RestrictedUploadAttachment' */
-        public restrictedUploadAttachmentUpload = (file: File): void => {
-            let formData = new FormData();
-            formData.append("file", file);
-            $.ajax( {
-                type: "PUT",
-                url: this.coalesceConfig.baseApiUrl() + this.apiController + '/RestrictedUploadAttachment?id=' + this.caseKey(),
-                contentType: false,
-                processData: false,
-                data: formData,
-            })
-        }
-        
-        
-        /** URL for file 'RestrictedDownloadAttachment' */
-        public restrictedDownloadAttachmentUrl: KnockoutComputed<string> = ko.pureComputed(() => 
-            this.coalesceConfig.baseApiUrl() + this.apiController + '/RestrictedDownloadAttachment?id=' + this.caseKey() + '&' + this.dataSource.getQueryString()
-        );
-        
-        /** Upload file 'RestrictedDownloadAttachment' */
-        public restrictedDownloadAttachmentUpload = (file: File): void => {
-            let formData = new FormData();
-            formData.append("file", file);
-            $.ajax( {
-                type: "PUT",
-                url: this.coalesceConfig.baseApiUrl() + this.apiController + '/RestrictedDownloadAttachment?id=' + this.caseKey(),
-                contentType: false,
-                processData: false,
-                data: formData,
-            })
-        }
-        
-        
-        /** URL for file 'RestrictedMetaAttachment' */
-        public restrictedMetaAttachmentUrl: KnockoutComputed<string> = ko.pureComputed(() => 
-            this.coalesceConfig.baseApiUrl() + this.apiController + '/RestrictedMetaAttachment?id=' + this.caseKey() + '&' + this.dataSource.getQueryString()
-        );
-        
-        /** Upload file 'RestrictedMetaAttachment' */
-        public restrictedMetaAttachmentUpload = (file: File): void => {
-            let formData = new FormData();
-            formData.append("file", file);
-            $.ajax( {
-                type: "PUT",
-                url: this.coalesceConfig.baseApiUrl() + this.apiController + '/RestrictedMetaAttachment?id=' + this.caseKey(),
-                contentType: false,
-                processData: false,
-                data: formData,
-            })
-        }
-        
-        
-        
-        /** Methods and properties for invoking server method UploadAttachment. */
-        public readonly uploadAttachment = new Case.UploadAttachment(this);
-        public static UploadAttachment = class UploadAttachment extends Coalesce.ClientMethod<Case, void> {
-            public readonly name = 'UploadAttachment';
+        /** Methods and properties for invoking server method UploadImage. */
+        public readonly uploadImage = new Case.UploadImage(this);
+        public static UploadImage = class UploadImage extends Coalesce.ClientMethod<Case, void> {
+            public readonly name = 'UploadImage';
             public readonly verb = 'POST';
             
-            /** Calls server method (UploadAttachment) with the given arguments */
+            /** Calls server method (UploadImage) with the given arguments */
             public invoke = (file: File | null, callback?: (result: void) => void, reload: boolean = true): JQueryPromise<any> => {
-                return this.invokeWithData({ id: this.parent[this.parent.primaryKeyName](), file: file }, callback, reload);
+                return this.invokeWithData({ id: this.parent.caseKey(), file: file }, callback, reload);
             };
             
             /** Object that can be easily bound to fields to allow data entry for the method's parameters */
-            public args = new UploadAttachment.Args(); 
+            public args = new UploadImage.Args(); 
             public static Args = class Args {
                 public file: KnockoutObservable<File | null> = ko.observable(null);
             };
             
-            /** Calls server method (UploadAttachment) with an instance of UploadAttachment.Args, or the value of this.args if not specified. */
+            /** Calls server method (UploadImage) with an instance of UploadImage.Args, or the value of this.args if not specified. */
             public invokeWithArgs = (args = this.args, callback?: (result: void) => void, reload: boolean = true): JQueryPromise<any> => {
                 return this.invoke(args.file(), callback, reload);
             }
@@ -218,7 +122,129 @@ module ViewModels {
                 return this.invoke(file, callback, reload);
             };
             
-            protected loadResponse = (data: Coalesce.ItemResult, callback?: (result: void) => void, reload: boolean = true) => {
+            protected loadResponse = (data: Coalesce.ItemResult, jqXHR: JQuery.jqXHR, callback?: (result: void) => void, reload: boolean = true) => {
+                this.result(data.object);
+                if (reload) {
+                    var result = this.result();
+                    this.parent.load(null, typeof(callback) == 'function' ? () => callback(result) : undefined);
+                } else if (typeof(callback) == 'function') {
+                    callback(this.result());
+                }
+            };
+        };
+        
+        /** Methods and properties for invoking server method UploadAndDownload. */
+        public readonly uploadAndDownload = new Case.UploadAndDownload(this);
+        public static UploadAndDownload = class UploadAndDownload extends Coalesce.ClientMethod<Case, File> {
+            public readonly name = 'UploadAndDownload';
+            public readonly verb = 'POST';
+            protected readonly returnsFile = true;
+            
+            /** Calls server method (UploadAndDownload) with the given arguments */
+            public invoke = (file: File | null, callback?: (result: File) => void, reload: boolean = true): JQueryPromise<any> => {
+                return this.invokeWithData({ id: this.parent.caseKey(), file: file }, callback, reload);
+            };
+            
+            /** Object that can be easily bound to fields to allow data entry for the method's parameters */
+            public args = new UploadAndDownload.Args(); 
+            public static Args = class Args {
+                public file: KnockoutObservable<File | null> = ko.observable(null);
+            };
+            
+            /** Calls server method (UploadAndDownload) with an instance of UploadAndDownload.Args, or the value of this.args if not specified. */
+            public invokeWithArgs = (args = this.args, callback?: (result: File) => void, reload: boolean = true): JQueryPromise<any> => {
+                return this.invoke(args.file(), callback, reload);
+            }
+            
+            /** Invokes the method after displaying a browser-native prompt for each argument. */
+            public invokeWithPrompts = (callback?: (result: File) => void, reload: boolean = true): JQueryPromise<any> | undefined => {
+                var $promptVal: string | null = null;
+                var file: null = null;
+                return this.invoke(file, callback, reload);
+            };
+            
+            protected loadResponse = (data: Blob, jqXHR: JQuery.jqXHR, callback?: (result: File) => void, reload: boolean = true) => {
+                const file = new File([data], Coalesce.Utilities.getFileNameFromContentDisposition(jqXHR.getResponseHeader('content-disposition')), { type: data.type });
+                this.result(file);
+                if (this.resultObjectUrl()) URL.revokeObjectURL(this.resultObjectUrl()!);
+                this.resultObjectUrl(URL.createObjectURL(file));
+                if (reload) {
+                    var result = this.result();
+                    this.parent.load(null, typeof(callback) == 'function' ? () => callback(result) : undefined);
+                } else if (typeof(callback) == 'function') {
+                    callback(this.result());
+                }
+            };
+            
+            /** An object URL (https://developer.mozilla.org/en-US/docs/Web/API/URL/createObjectURL) representing the last successful response file. */
+            public resultObjectUrl: KnockoutObservable<string | null> = ko.observable(null);
+        };
+        
+        /** Methods and properties for invoking server method DownloadImage. */
+        public readonly downloadImage = new Case.DownloadImage(this);
+        public static DownloadImage = class DownloadImage extends Coalesce.ClientMethod<Case, File> {
+            public readonly name = 'DownloadImage';
+            public readonly verb = 'GET';
+            protected readonly returnsFile = true;
+            
+            /** Calls server method (DownloadImage) with the given arguments */
+            public invoke = (callback?: (result: File) => void, reload: boolean = true): JQueryPromise<any> => {
+                return this.invokeWithData({ id: this.parent.caseKey(), etag: this.parent.imageHash() }, callback, reload);
+            };
+            
+            protected loadResponse = (data: Blob, jqXHR: JQuery.jqXHR, callback?: (result: File) => void, reload: boolean = true) => {
+                const file = new File([data], Coalesce.Utilities.getFileNameFromContentDisposition(jqXHR.getResponseHeader('content-disposition')), { type: data.type });
+                this.result(file);
+                if (this.resultObjectUrl()) URL.revokeObjectURL(this.resultObjectUrl()!);
+                this.resultObjectUrl(URL.createObjectURL(file));
+                if (reload) {
+                    var result = this.result();
+                    this.parent.load(null, typeof(callback) == 'function' ? () => callback(result) : undefined);
+                } else if (typeof(callback) == 'function') {
+                    callback(this.result());
+                }
+            };
+            
+            /** An object URL (https://developer.mozilla.org/en-US/docs/Web/API/URL/createObjectURL) representing the last successful response file. */
+            public resultObjectUrl: KnockoutObservable<string | null> = ko.observable(null);
+            
+            /** URL for method 'DownloadImage' */
+            public url: KnockoutComputed<string> = ko.pureComputed(() => 
+                this.parent.coalesceConfig.baseApiUrl() + this.parent.apiController + '/' + this.name + '?'
+                + $.param({ id: this.parent.caseKey(), etag: this.parent.imageHash() })
+            );
+        };
+        
+        /** Methods and properties for invoking server method UploadImages. */
+        public readonly uploadImages = new Case.UploadImages(this);
+        public static UploadImages = class UploadImages extends Coalesce.ClientMethod<Case, void> {
+            public readonly name = 'UploadImages';
+            public readonly verb = 'POST';
+            
+            /** Calls server method (UploadImages) with the given arguments */
+            public invoke = (files: File[] | null, callback?: (result: void) => void, reload: boolean = true): JQueryPromise<any> => {
+                return this.invokeWithData({ id: this.parent.caseKey(), files: files }, callback, reload);
+            };
+            
+            /** Object that can be easily bound to fields to allow data entry for the method's parameters */
+            public args = new UploadImages.Args(); 
+            public static Args = class Args {
+                public files: KnockoutObservableArray<File> = ko.observableArray([]);
+            };
+            
+            /** Calls server method (UploadImages) with an instance of UploadImages.Args, or the value of this.args if not specified. */
+            public invokeWithArgs = (args = this.args, callback?: (result: void) => void, reload: boolean = true): JQueryPromise<any> => {
+                return this.invoke(args.files(), callback, reload);
+            }
+            
+            /** Invokes the method after displaying a browser-native prompt for each argument. */
+            public invokeWithPrompts = (callback?: (result: void) => void, reload: boolean = true): JQueryPromise<any> | undefined => {
+                var $promptVal: string | null = null;
+                var files: null = null;
+                return this.invoke(files, callback, reload);
+            };
+            
+            protected loadResponse = (data: Coalesce.ItemResult, jqXHR: JQuery.jqXHR, callback?: (result: void) => void, reload: boolean = true) => {
                 this.result(data.object);
                 if (reload) {
                     var result = this.result();
@@ -237,7 +263,7 @@ module ViewModels {
             
             /** Calls server method (UploadByteArray) with the given arguments */
             public invoke = (file: string | null, callback?: (result: void) => void, reload: boolean = true): JQueryPromise<any> => {
-                return this.invokeWithData({ id: this.parent[this.parent.primaryKeyName](), file: file }, callback, reload);
+                return this.invokeWithData({ id: this.parent.caseKey(), file: file }, callback, reload);
             };
             
             /** Object that can be easily bound to fields to allow data entry for the method's parameters */
@@ -258,7 +284,7 @@ module ViewModels {
                 return this.invoke(file, callback, reload);
             };
             
-            protected loadResponse = (data: Coalesce.ItemResult, callback?: (result: void) => void, reload: boolean = true) => {
+            protected loadResponse = (data: Coalesce.ItemResult, jqXHR: JQuery.jqXHR, callback?: (result: void) => void, reload: boolean = true) => {
                 this.result(data.object);
                 if (reload) {
                     var result = this.result();
@@ -347,7 +373,6 @@ module ViewModels {
             this.imageName(data.imageName);
             this.imageSize(data.imageSize);
             this.imageHash(data.imageHash);
-            this.attachment(data.attachment);
             this.attachmentName(data.attachmentName);
             this.severity(data.severity);
             this.status(data.status);
@@ -369,7 +394,7 @@ module ViewModels {
             dto.title = this.title();
             dto.description = this.description();
             if (!this.openedAt()) dto.openedAt = null;
-            else dto.openedAt = this.openedAt()!.format('YYYY-MM-DDTHH:mm:ssZZ');
+            else dto.openedAt = this.openedAt()!.format('YYYY-MM-DDTHH:mm:ss.SSSZZ');
             dto.assignedToId = this.assignedToId();
             if (!dto.assignedToId && this.assignedTo()) {
                 dto.assignedToId = this.assignedTo()!.personId();
@@ -380,7 +405,6 @@ module ViewModels {
             }
             dto.imageSize = this.imageSize();
             dto.imageHash = this.imageHash();
-            dto.attachment = this.attachment();
             dto.attachmentName = this.attachmentName();
             dto.severity = this.severity();
             dto.status = this.status();
@@ -481,7 +505,6 @@ module ViewModels {
             self.reportedBy.subscribe(self.autoSave);
             self.imageSize.subscribe(self.autoSave);
             self.imageHash.subscribe(self.autoSave);
-            self.attachment.subscribe(self.autoSave);
             self.attachmentName.subscribe(self.autoSave);
             self.severity.subscribe(self.autoSave);
             self.status.subscribe(self.autoSave);

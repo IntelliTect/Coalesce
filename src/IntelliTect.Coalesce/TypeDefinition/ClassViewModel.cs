@@ -182,12 +182,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// Properties on the class that are available on the admin page. This is not filtered by IsHidden.
         /// </summary>
-        public IEnumerable<PropertyViewModel> AdminPageProperties => Properties.Where(p => p.IsClientProperty || p.IsFile);
-
-        /// <summary>
-        /// Properties on the class that are marked with the [File] attribute.
-        /// </summary>
-        public IEnumerable<PropertyViewModel> FileProperties => Properties.Where(p => p.IsFile);
+        public IEnumerable<PropertyViewModel> AdminPageProperties => Properties.Where(p => p.IsClientProperty);
 
         public IEnumerable<PropertyViewModel> DataSourceParameters => Properties
             .Where(p =>
@@ -472,9 +467,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         private ClassSecurityInfo? _securityInfo;
 
-        public ClassSecurityInfo SecurityInfo => _securityInfo ?? (_securityInfo = new ClassSecurityInfo(this));
-
-        public ExecuteSecurityInfo ExecuteSecurity => new ExecuteSecurityInfo(this.GetSecurityPermission<ExecuteAttribute>());
+        public ClassSecurityInfo SecurityInfo => _securityInfo ??= new ClassSecurityInfo(this);
 
         public bool IsDefaultDataSource => HasAttribute<DefaultDataSourceAttribute>();
 
@@ -497,16 +490,16 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public override string ToString() => FullyQualifiedName;
 
         public override bool Equals(object? obj) =>
-            Object.ReferenceEquals(this, obj)
+            ReferenceEquals(this, obj)
             || (obj is ClassViewModel that && this.Type.Equals(that.Type));
 
         public override int GetHashCode() => this.Type.GetHashCode();
 
         public static bool operator == (ClassViewModel? lhs, ClassViewModel? rhs)
         {
-            if (Object.ReferenceEquals(lhs, null))
+            if (lhs is null)
             {
-                return Object.ReferenceEquals(rhs, null);
+                return rhs is null;
             }
 
             return lhs.Equals(rhs);

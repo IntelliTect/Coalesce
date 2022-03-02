@@ -59,6 +59,7 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         [DefaultOrderBy(FieldOrder = 1)]
         public string Name { get; set; }
 
+        public byte[] ByteArrayProp { get; set; }
 
         public string String { get; set; }
 
@@ -104,9 +105,44 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         public void MethodWithMultiFileParameter(ICollection<IFile> files) { }
 
         [Coalesce, Execute]
-        public static string[] MethodWithStringArrayParameterAndReturn1(string[] strings)
+        public static string[] MethodWithStringArrayParameterAndReturn(string[] strings)
         {
             return strings;
+        }
+
+        [Coalesce]
+        public IFile DownloadAttachment() => new File(ByteArrayProp) { Name = Name };
+
+        [Coalesce]
+        [ControllerAction(HttpMethod.Get, VaryByProperty = nameof(ByteArrayProp))]
+        public IFile DownloadAttachment_VaryByteArray() => new File(ByteArrayProp) { Name = Name };
+
+        [Coalesce]
+        [ControllerAction(HttpMethod.Get, VaryByProperty = nameof(DateTimeOffset))]
+        public IFile DownloadAttachment_VaryDate() => new File(ByteArrayProp) { Name = Name };
+
+        [Coalesce]
+        [ControllerAction(HttpMethod.Get, VaryByProperty = nameof(Name))]
+        public IFile DownloadAttachment_VaryString() => new File(ByteArrayProp) { Name = Name };
+
+        [Coalesce]
+        [ControllerAction(HttpMethod.Get, VaryByProperty = nameof(Int))]
+        public IFile DownloadAttachment_VaryInt() => new File(ByteArrayProp) { Name = Name };
+
+        [Coalesce]
+        [ControllerAction(HttpMethod.Get, VaryByProperty = nameof(Guid))]
+        public IFile DownloadAttachment_VaryGuid() => new File(ByteArrayProp) { Name = Name };
+
+        [Coalesce]
+        public ItemResult<IFile> DownloadAttachmentItemResult()
+        {
+            return new File(ByteArrayProp) { Name = Name };
+        }
+
+        [Coalesce]
+        public static ItemResult<IFile> DownloadAttachmentStatic()
+        {
+            return new File(new byte[] { 0x42 }) { Name = "42.png" };
         }
     }
 }

@@ -21,7 +21,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         ListResult,
     }
 
-    public abstract class MethodViewModel : IAttributeProvider
+    public abstract partial class MethodViewModel : IAttributeProvider
     {
         internal MethodViewModel(ClassViewModel parent)
         {
@@ -130,8 +130,10 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public HttpMethod ApiActionHttpMethod =>
             this.GetAttributeValue<ControllerActionAttribute, HttpMethod>(a => a.Method) ?? HttpMethod.Post;
 
-        public string ApiActionHttpMethodName => ApiActionHttpMethod.ToString().ToUpper();
-        public string ApiActionHttpMethodAnnotation => $"Http{ApiActionHttpMethod.ToString()}";
+        public PropertyViewModel? VaryByProperty =>
+            !IsModelInstanceMethod ? null :
+            ApiActionHttpMethod != HttpMethod.Get ? null :
+            Parent.PropertyByName(this.GetAttributeValue<ControllerActionAttribute>(a => a.VaryByProperty));
 
         /// <summary>
         /// Return type of the controller action for the method.
@@ -153,7 +155,42 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// List of parameters that are not Dependency Injected (DI)
         /// </summary>
-        public IEnumerable<ParameterViewModel> ClientParameters => Parameters.Where(f => !f.IsDI);
+        public IEnumerable<ParameterViewModel> ClientParameters => Parameters
+            .Where(f => !f.IsDI);
+
+        /// <summary>
+        /// List of parameters that are part of the endpoint's API surface.
+        /// Includes implicit parameters that are not defined on the underlying implementation.
+        /// </summary>
+        public IEnumerable<ParameterViewModel> ApiParameters
+        {
+            get
+            {
+                var parameters = ClientParameters;
+                if (IsModelInstanceMethod)
+                {
+                    parameters = new[]
+                    {
+                        new ImplicitParameterViewModel(
+                            this,
+                            Parent.PrimaryKey!,
+                            "id", 
+                            "Primary Key" // TODO: Is this what we want? Also, i18n.
+                        )
+                    }.Concat(parameters);
+                }
+
+                if (VaryByProperty != null && VaryByProperty.IsClientProperty)
+                {
+                    parameters = parameters.Concat(new[]
+                    {
+                        new ImplicitParameterViewModel(this, VaryByProperty, "etag")
+                    });
+                }
+
+                return parameters;
+            }
+        }
 
         public bool IsModelInstanceMethod => !IsStatic && !Parent.IsService;
 
@@ -178,7 +215,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             return hiddenArea.Value == HiddenAttribute.Areas.All || hiddenArea.Value == area;
         }
 
-        public ExecuteSecurityInfo SecurityInfo => new ExecuteSecurityInfo(this.GetSecurityPermission<ExecuteAttribute>());
+        public MethodSecurityInfo SecurityInfo => new MethodSecurityInfo(this.GetSecurityPermission<ExecuteAttribute>());
 
         /// <summary>
         /// If true, this is a method that may be called by a client.

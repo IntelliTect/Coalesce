@@ -184,17 +184,18 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
 
         private static void WriteMethodCaller(TypeScriptCodeBuilder b, MethodViewModel method)
         {
-            string signature = string.Concat(method.ClientParameters.Select(f => 
-                $", {f.Name}: {new VueType(f.Type, VueType.Flags.RawBinary).TsType("$models")} | null"
-            ));
+            var inputParams = method.ApiParameters
+                .Where(p => p.ParentSourceProp is null);
+
+            string signature = string.Concat(inputParams
+                .Select(p => $", {p.Name}: {new VueType(p.Type, VueType.Flags.RawBinary).TsType("$models")} | null")
+            );
 
             string argsConstructor =
                 "({" +
-                string.Concat(method.ClientParameters.Select(f => $"{f.Name}: null as {new VueType(f.Type, VueType.Flags.RawBinary).TsType("$models")} | null, ")) +
+                string.Concat(inputParams.Select(f => $"{f.Name}: null as {new VueType(f.Type, VueType.Flags.RawBinary).TsType("$models")} | null, ")) +
                 "})";
 
-            string pkArg = method.IsModelInstanceMethod ? "this.$primaryKey, " : "";
-            
             var transportTypeSlug = method.TransportType.ToString().Replace("Result", "").ToLower();
 
             b.DocComment(method.Comment, true);
@@ -203,18 +204,41 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                 b.Line($"const {method.JsVariable} = this.$apiClient.$makeCaller(");
                 // The metadata of the method
                 b.Indented($"this.$metadata.methods.{method.JsVariable},");
+
                 // The invoker function when the caller is used directly like `caller(...)`, or via `caller.invoke(...)`
-                b.Indented($"(c{signature}) => c.{method.JsVariable}({pkArg}{string.Join(", ", method.ClientParameters.Select(p => p.Name))}),");
+                var positionalParams = string.Join(", ", method.ApiParameters.Select(p => PropValue(p, "")));
+                b.Indented($"(c{signature}) => c.{method.JsVariable}({positionalParams}),");
+
                 // The factory function to return a new args object. Args object lives on `caller.args`
                 b.Indented($"() => {argsConstructor},");
+
                 // The invoker function when the caller is invoked with args with `caller.invokeWithArgs(args?)`
-                b.Indented($"(c, args) => c.{method.JsVariable}({pkArg}{string.Join(", ", method.ClientParameters.Select(p => "args." + p.Name))}))");
+                var argsParams = string.Join(", ", method.ApiParameters.Select(p => PropValue(p, "args.")));
+                b.Indented($"(c, args) => c.{method.JsVariable}({argsParams}))");
 
                 // Lazy getter technique - don't create the caller until/unless it is needed,
                 // since creation of api callers is a little expensive.
                 b.Line();
                 b.Line($"Object.defineProperty(this, '{method.JsVariable}', {{value: {method.JsVariable}}});");
                 b.Line($"return {method.JsVariable}");
+
+                static string PropValue(ParameterViewModel p, string prefix)
+                {
+                    if (p.ParentSourceProp is { } src)
+                    {
+                        if (src.IsPrimaryKey)
+                        {
+                            // TODO This is a bit of a hack, because right now $primaryKey is unfortunately typed without "null",
+                            // and the api clients emit the PK parameters without allowing null.
+                            // After a bit of a refactor that introduced "ParentSourceProp", I'm keeping the generated output here
+                            // the same in order to keep taking advantage of this misfortune until we can add in proper parameter null checking
+                            // and also fix the type of $primaryKey to include null.
+                            return "this.$primaryKey";
+                        }
+                        return $"this.{src.JsVariable}";
+                    }
+                    return prefix + p.JsVariable;
+                }
             }
         }
     }

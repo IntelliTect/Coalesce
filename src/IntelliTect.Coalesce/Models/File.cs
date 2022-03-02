@@ -12,6 +12,16 @@ namespace IntelliTect.Coalesce.Models
     /// </summary>
     public class File : IFile
     {
+        public File() { }
+
+        public File(Stream content)
+        {
+            Content = content;
+            Length = content.Length;
+        }
+
+        public File(byte[] content) : this(new MemoryStream(content ?? Array.Empty<byte>())) { }
+
         public string? Name { get; set; }
 
         public long Length { get; set; }

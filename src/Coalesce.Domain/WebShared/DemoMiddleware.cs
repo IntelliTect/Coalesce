@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 
-namespace Coalesce.Web.Vue
+namespace Coalesce.Domain.WebShared
 {
     public class DemoMiddleware
     {
@@ -70,6 +70,16 @@ namespace Coalesce.Web.Vue
             }
 
             var identity = new ClaimsIdentity(claims, "AutoSignIn");
+            if (
+                context.User.Claims.All(c1 => claims.Any(c2 => c1.Type == c2.Type && c1.Value == c2.Value)) &&
+                claims.All(c1 => context.User.Claims.Any(c2 => c1.Type == c2.Type && c1.Value == c2.Value))
+            )
+            {
+                // Already signed in with the same claims. Do nothing. 
+                // Signing in with cookies force sets all caching headers to no-cache, 
+                // which we don't want to do unless we really need to change user.
+                return;
+            }
             await context.SignInAsync(AuthenticationScheme, new ClaimsPrincipal(identity));
         }
     }

@@ -16,6 +16,7 @@ using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Swagger;
 using Microsoft.OpenApi.Models;
 using System.IO;
+using Coalesce.Domain.WebShared;
 
 namespace Coalesce.Web
 {

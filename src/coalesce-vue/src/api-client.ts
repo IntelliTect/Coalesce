@@ -451,8 +451,11 @@ const simultaneousGetCache: Map<string, AxiosPromise<any>> = new Map;
 export class ApiClient<T extends ApiRoutedType> {
   constructor(public $metadata: T) {}
 
-  /** Cancellation token to inject into the next request. */
-  private _nextCancelToken?: CancelTokenSource;
+  /** Configuration to inject into the next request. */
+  private _nextRequestConfig?: Partial<AxiosRequestConfig>;
+
+  /** If true, the next invocation will resolve immediately with no response payload. */
+  private _nextRequestDryRun?: boolean;
 
   /** Flag to enable global caching of identical GET requests
    * that have been made simultaneously.
@@ -655,17 +658,50 @@ export class ApiClient<T extends ApiRoutedType> {
       query = mappedParams
     }
 
+    const axiosRequest = <AxiosRequestConfig>{
+      method: method.httpMethod,
+      url: url,
+      data: body,
+      responseType: method.return.type == "file" ? "blob" : "json",
+      ...this.$options(undefined, config, query)
+    };
+
+    if (this._requestParametersCapture) {
+      this._requestParametersCapture.push(axiosRequest);
+      return new Promise(() => { /* never resolve */ });
+    }
+
     return this._possiblyCachedRequest(
       method.httpMethod,
       url,
       mappedParams,
       config,
-      () => AxiosClient.request({
-          method: method.httpMethod,
-          url: url,
-          data: body,
-          ...this.$options(undefined, config, query)
-        }).then(r => {
+      () => AxiosClient.request(axiosRequest).then(r => {
+          if (method.return.type == "file") {
+            if (typeof r.data !== "object") {
+              // This case usually only happens if the endpoint doesn't exist on the server,
+              // causing the server to return a SPA fallback route (as HTML) with a 200 status.
+              throw new Error(`Unexpected raw ${typeof r.data} response from server.`)
+            }
+
+            // https://stackoverflow.com/a/40940790
+            let disposition = r.headers["content-disposition"];
+            let filename = "";
+            if (disposition && disposition.indexOf('attachment') !== -1) {
+              var filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
+              var matches = filenameRegex.exec(disposition);
+              if (matches != null && matches[1]) { 
+                filename = matches[1].replace(/['"]/g, '');
+              }
+            }
+          
+            const blob: Blob = r.data;
+            r.data = <ItemResult<File>>{
+              wasSuccessful: true,
+              object: new File([blob], filename, { type: blob.type })
+            };
+            return r;
+          }
           switch (method.transportType) {
             case "item":
               return this.$hydrateItemResult(r, (method as ItemMethod).return);
@@ -674,6 +710,21 @@ export class ApiClient<T extends ApiRoutedType> {
           }
         })
     );
+  }
+
+  // NOTE: DO NOT init _requestParametersCapture to null. This _should_ be nonreactive.
+  private _requestParametersCapture?: AxiosRequestConfig[];
+  /** Invokes `func`, but instead of performing any API calls within $invoke() invocations,
+   * instead captures the parameters and returns a never-resolving promise to the invocations.
+   */
+  private _captureRequestParameters(func: Function) {
+    try {
+      this._requestParametersCapture = [];
+      func();
+      return this._requestParametersCapture;
+    } finally {
+      delete this._requestParametersCapture;
+    }
   }
 
   /** Wraps a request, performing caching as needed according to _simultaneousGetCaching  */
@@ -751,7 +802,7 @@ export class ApiClient<T extends ApiRoutedType> {
     queryParams?: any
   ): AxiosRequestConfig {
     return {
-      cancelToken: this._nextCancelToken?.token ?? undefined,
+      ...this._nextRequestConfig,
       ...config,
 
       // Merge standard Coalesce params with general configured params if there are any.
@@ -774,11 +825,14 @@ export class ApiClient<T extends ApiRoutedType> {
       throw new Error(`Unexpected raw ${typeof value.data} response from server.`)
     }
 
-    // Do nothing for void returns - there will be no object.
-    if (metadata.type !== "void") {
-      // This function is NOT PURE - we mutate the result object on the response.
-      value.data.object = convertToModel(value.data.object, metadata);
+    if (metadata.type === "void") {
+      // Do nothing for void returns - there will be no object.
+      return value;
     }
+
+    // This function is NOT PURE - we mutate the result object on the response.
+    value.data.object = convertToModel(value.data.object, metadata);
+
     return value;
   }
 
@@ -1038,6 +1092,21 @@ export abstract class ApiState<
   }
 
   protected abstract setResponseProps(data: ApiResult): void;
+  private async _setResponseProps(data: any) {
+    if (data instanceof Blob) {
+      // For file-returning endpoints, we ask axios to return us a Blob.
+      // However, this means that if the endpoint fails and returns JSON,
+      // it will return the ApiResult's JSON inside a blob. This extracts it back out.
+      data = await new Promise(resolve => {
+        let reader = new FileReader()
+        reader.onload = () => {
+          resolve(JSON.parse(reader.result as string))
+        }
+        reader.readAsText(data)
+      })
+    }
+    return this.setResponseProps(data);
+  }
 
   public invoke!: this;
 
@@ -1094,8 +1163,11 @@ export abstract class ApiState<
 
     // Inject a cancellation token into the request.
     try {
-      const token = ((this
-        .apiClient as any)._nextCancelToken = axios.CancelToken.source());
+      const token = axios.CancelToken.source();
+      (this.apiClient as any)._nextRequestConfig = <AxiosRequestConfig>{
+        cancelToken: token.token
+      };
+
       this._cancelToken = token;
       const promise = callInvoker();
 
@@ -1109,7 +1181,7 @@ export abstract class ApiState<
       const data = resp.data;
       delete this._cancelToken;
 
-      this.setResponseProps(data);
+      await this._setResponseProps(data);
 
       const onFulfilled = this._callbacks.onFulfilled;
       for (let i = 0; i < onFulfilled.length; i++) {
@@ -1153,7 +1225,7 @@ export abstract class ApiState<
             | undefined
           : undefined;
         if (result && typeof result.data === "object") {
-          this.setResponseProps(result.data);
+          await this._setResponseProps(result.data);
         } else {
           this.message = getMessageForError(error)
         }
@@ -1172,7 +1244,7 @@ export abstract class ApiState<
 
       throw error;
     } finally {
-      delete (this.apiClient as any)._nextCancelToken;
+      delete (this.apiClient as any)._nextRequestConfig;
 
       if (this._debounceSignal) {
         this._debounceSignal.resolve();
@@ -1298,6 +1370,27 @@ export class ItemApiStateWithArgs<
   /** Replace `this.args` with a new, blank object containing default values (typically nulls) */
   public resetArgs() {
     this.args = this.argsFactory();
+  }
+   
+  /** Returns the URL for the endpoint, including querystring parameters, if invoked using `this.args`. */
+  get url() { 
+    // @ts-expect-error
+    var requests: AxiosRequestConfig[] = this.apiClient._captureRequestParameters(() => {
+      this.argsInvoker.apply(this, [this.apiClient, this.args]);
+    });
+
+    var request = requests[0];
+    if (!request) return null;
+    let url = AxiosClient.getUri(request);
+
+    // Workaround for https://github.com/axios/axios/issues/2468.
+    // Prepend the baseURL if not already present 
+    // (It might be present e.g. if the above issue gets fixed).
+    let baseURL = AxiosClient.defaults.baseURL;
+    if (baseURL && !url.startsWith(baseURL)){
+      url = baseURL.replace(/\/+$/, '') + url
+    }
+    return url;
   }
 
   constructor(

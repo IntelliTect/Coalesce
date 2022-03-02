@@ -1,13 +1,18 @@
 ﻿using IntelliTect.Coalesce.DataAnnotations;
 using IntelliTect.Coalesce.Mapping;
 using IntelliTect.Coalesce.Mapping.IncludeTrees;
+using IntelliTect.Coalesce.Models;
+using IntelliTect.Coalesce.TypeDefinition;
 using IntelliTect.Coalesce.Utilities;
+using Microsoft.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
+using System.Reflection;
 using System.Security.Claims;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -30,6 +35,12 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public TypeViewModel Type { get; protected set; }
 
         /// <summary>
+        /// If set, this parameter's value is automatically populated from the referenced 
+        /// property on the parent model's ViewModel instance.
+        /// </summary>
+        public PropertyViewModel? ParentSourceProp { get; protected set; }
+
+        /// <summary>
         /// Gets the type name without any collection around it.
         /// </summary>
         public TypeViewModel PureType => Type.PureType;
@@ -38,7 +49,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// Returns the DisplayName Attribute or 
         /// puts a space before every upper class letter aside from the first one.
         /// </summary>
-        public string DisplayName =>
+        public virtual string DisplayName =>
             this.GetAttributeValue<DisplayNameAttribute>(a => a.DisplayName) ??
             this.GetAttributeValue<DisplayAttribute>(a => a.Name) ??
             Name.ToProperCase();

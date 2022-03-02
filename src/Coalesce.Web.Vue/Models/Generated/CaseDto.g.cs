@@ -21,6 +21,7 @@ namespace Coalesce.Web.Vue.Models
         private Coalesce.Web.Vue.Models.PersonDtoGen _AssignedTo;
         private int? _ReportedById;
         private Coalesce.Web.Vue.Models.PersonDtoGen _ReportedBy;
+        private byte[] _Image;
         private string _ImageName;
         private long? _ImageSize;
         private string _ImageHash;
@@ -72,6 +73,11 @@ namespace Coalesce.Web.Vue.Models
         {
             get => _ReportedBy;
             set { _ReportedBy = value; Changed(nameof(ReportedBy)); }
+        }
+        public byte[] Image
+        {
+            get => _Image;
+            set { _Image = value; Changed(nameof(Image)); }
         }
         public string ImageName
         {
@@ -145,6 +151,7 @@ namespace Coalesce.Web.Vue.Models
             this.OpenedAt = obj.OpenedAt;
             this.AssignedToId = obj.AssignedToId;
             this.ReportedById = obj.ReportedById;
+            this.Image = obj.Image;
             this.ImageName = obj.ImageName;
             this.ImageSize = obj.ImageSize;
             this.ImageHash = obj.ImageHash;
@@ -195,6 +202,7 @@ namespace Coalesce.Web.Vue.Models
             if (ShouldMapTo(nameof(OpenedAt))) entity.OpenedAt = (OpenedAt ?? entity.OpenedAt);
             if (ShouldMapTo(nameof(AssignedToId))) entity.AssignedToId = AssignedToId;
             if (ShouldMapTo(nameof(ReportedById))) entity.ReportedById = ReportedById;
+            if (ShouldMapTo(nameof(Image))) entity.Image = Image;
             if (ShouldMapTo(nameof(ImageSize))) entity.ImageSize = (ImageSize ?? entity.ImageSize);
             if (ShouldMapTo(nameof(ImageHash))) entity.ImageHash = ImageHash;
             if (ShouldMapTo(nameof(Attachment))) entity.Attachment = Attachment;

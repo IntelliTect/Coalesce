@@ -24,7 +24,7 @@ module Services {
             
             /** Calls server method (GetWeather) with the given arguments */
             public invoke = (location: ViewModels.Location | null, dateTime: moment.Moment | null, conditions: number | null, callback?: (result: ViewModels.WeatherData) => void): JQueryPromise<any> => {
-                return this.invokeWithData({ location: location ? location.saveToDto() : null, dateTime: dateTime ? dateTime.format() : null, conditions: conditions }, callback);
+                return this.invokeWithData({ location: location?.saveToDto(), dateTime: dateTime?.format('YYYY-MM-DDTHH:mm:ss.SSSZZ'), conditions: conditions }, callback);
             };
             
             /** Object that can be easily bound to fields to allow data entry for the method's parameters */
@@ -53,7 +53,7 @@ module Services {
                 return this.invoke(location, dateTime, conditions, callback);
             };
             
-            protected loadResponse = (data: Coalesce.ItemResult, callback?: (result: ViewModels.WeatherData) => void) => {
+            protected loadResponse = (data: Coalesce.ItemResult, jqXHR: JQuery.jqXHR, callback?: (result: ViewModels.WeatherData) => void) => {
                 if (!this.result()) {
                     this.result(new ViewModels.WeatherData(data.object));
                 } else {

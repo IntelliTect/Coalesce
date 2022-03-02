@@ -71,7 +71,7 @@ module ViewModels {
             
             dto.name = this.name();
             if (!this.date()) dto.date = null;
-            else dto.date = this.date()!.format('YYYY-MM-DDTHH:mm:ssZZ');
+            else dto.date = this.date()!.format('YYYY-MM-DDTHH:mm:ss.SSSZZ');
             
             return dto;
         }

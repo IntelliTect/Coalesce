@@ -12,6 +12,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 
 namespace Coalesce.Domain
@@ -71,7 +72,7 @@ namespace Coalesce.Domain
         [Display(Name = "Reported By", Description = "Person who originally reported the case")]
         public Person ReportedBy { get; set; }
 
-        [File("image/jpeg", nameof(ImageName), nameof(ImageHash), nameof(ImageSize))]
+        [InternalUse]
         public byte[] Image { get; set; }
         public string ImageName
         {
@@ -83,24 +84,20 @@ namespace Coalesce.Domain
         public long ImageSize { get; set; }
         public string ImageHash { get; set; }
 
+        [InternalUse]
         public byte[] Attachment { get; set; }
         public string AttachmentName { get; set; }
 
-        [Edit(PermissionLevel = SecurityPermissionLevels.AllowAuthorized)]
-        [Read(SecurityPermissionLevels.AllowAll)]
-        [File("text/plain")]
+        [InternalUse]
         public byte[] PlainAttachment { get; set; }
 
-        [Edit(PermissionLevel = SecurityPermissionLevels.AllowAuthorized, Roles = "Admin, SuperUser")]
-        [File]
+        [InternalUse]
         public byte[] RestrictedUploadAttachment { get; set; }
 
-        [Read("Admin", "OtherRole")]
-        [File]
+        [InternalUse]
         public byte[] RestrictedDownloadAttachment { get; set; }
 
-        [File(NameProperty = nameof(InternalUseFileName),
-            SizeProperty = nameof(InternalUseFileSize))]
+        [InternalUse]
         public byte[] RestrictedMetaAttachment { get; set; }
         [InternalUse]
         public string InternalUseFileName { get; set; }
@@ -151,7 +148,7 @@ namespace Coalesce.Domain
         }
 
         [Coalesce]
-        public async Task UploadAttachment(IFile file)
+        public async Task UploadImage(IFile file)
         {
             if (file.Content == null)
             {
@@ -160,16 +157,46 @@ namespace Coalesce.Domain
 
             var ms = new MemoryStream();
             await file.Content.CopyToAsync(ms);
-            Attachment = ms.ToArray();
+            Image = ms.ToArray();
             AttachmentName = file.Name;
+            ImageSize = file.Length;
+            ImageHash = Convert.ToBase64String(MD5.Create().ComputeHash(Image));
         }
 
         [Coalesce]
-        public async Task UploadAttachments(ICollection<IFile> files)
+        public async Task<ItemResult<IFile>> UploadAndDownload(IFile file)
+        {
+            await UploadImage(file);
+            return new ItemResult<IFile>(DownloadImage());
+        }
+
+        [Coalesce]
+        [ControllerAction(HttpMethod.Get, VaryByProperty = nameof(ImageHash))]
+        public IFile DownloadImage()
+        {
+            return new IntelliTect.Coalesce.Models.File(Image) 
+            {
+                //ContentType = "image/jpg"
+                Name = AttachmentName,
+            };
+
+            // TODO: lazy stream support
+
+            //return new IntelliTect.Coalesce.Models.File(() =>
+            //{
+            //    db.ImageContents.Single(alksdjalskd).Bytes;
+            //})
+            //{
+            //    Name = AttachmentName
+            //};
+        }
+
+        [Coalesce]
+        public async Task UploadImages(ICollection<IFile> files)
         {
             foreach (var file in files)
             {
-                await UploadAttachment(file);
+                await UploadImage(file);
             }
         }
 

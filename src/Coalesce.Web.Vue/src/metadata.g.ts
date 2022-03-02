@@ -193,6 +193,13 @@ export const Case = domain.types.Case = {
       get inverseNavigation() { return (domain.types.Person as ModelType).props.casesReported as ModelCollectionNavigationProperty },
       dontSerialize: true,
     },
+    image: {
+      name: "image",
+      displayName: "Image",
+      type: "binary",
+      base64: true,
+      role: "value",
+    },
     imageName: {
       name: "imageName",
       displayName: "Image Name",
@@ -347,8 +354,9 @@ export const Case = domain.types.Case = {
         id: {
           name: "id",
           displayName: "Primary Key",
-          role: "value",
           type: "number",
+          role: "value",
+          source: "caseKey",
         },
         file: {
           name: "file",
@@ -364,6 +372,62 @@ export const Case = domain.types.Case = {
         role: "value",
       },
     },
+    uploadAndDownload: {
+      name: "uploadAndDownload",
+      displayName: "Upload And Download",
+      transportType: "item",
+      httpMethod: "POST",
+      params: {
+        id: {
+          name: "id",
+          displayName: "Primary Key",
+          type: "number",
+          role: "value",
+          source: "caseKey",
+        },
+        file: {
+          name: "file",
+          displayName: "File",
+          type: "file",
+          role: "value",
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "file",
+        role: "value",
+      },
+    },
+    downloadAttachment: {
+      name: "downloadAttachment",
+      displayName: "Download Attachment",
+      transportType: "item",
+      httpMethod: "GET",
+      params: {
+        id: {
+          name: "id",
+          displayName: "Primary Key",
+          type: "number",
+          role: "value",
+          source: "caseKey",
+        },
+        etag: {
+          name: "etag",
+          displayName: "Etag",
+          type: "date",
+          dateKind: "datetime",
+          role: "value",
+          source: "openedAt",
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "file",
+        role: "value",
+      },
+    },
     uploadAttachments: {
       name: "uploadAttachments",
       displayName: "Upload Attachments",
@@ -373,8 +437,9 @@ export const Case = domain.types.Case = {
         id: {
           name: "id",
           displayName: "Primary Key",
-          role: "value",
           type: "number",
+          role: "value",
+          source: "caseKey",
         },
         files: {
           name: "files",
@@ -405,8 +470,9 @@ export const Case = domain.types.Case = {
         id: {
           name: "id",
           displayName: "Primary Key",
-          role: "value",
           type: "number",
+          role: "value",
+          source: "caseKey",
         },
         file: {
           name: "file",
@@ -496,8 +562,9 @@ export const CaseDto = domain.types.CaseDto = {
         id: {
           name: "id",
           displayName: "Primary Key",
-          role: "value",
           type: "number",
+          role: "value",
+          source: "caseId",
         },
         input: {
           name: "input",
@@ -960,8 +1027,9 @@ export const Person = domain.types.Person = {
         id: {
           name: "id",
           displayName: "Primary Key",
-          role: "value",
           type: "number",
+          role: "value",
+          source: "personId",
         },
         name: {
           name: "name",
@@ -987,8 +1055,9 @@ export const Person = domain.types.Person = {
         id: {
           name: "id",
           displayName: "Primary Key",
-          role: "value",
           type: "number",
+          role: "value",
+          source: "personId",
         },
       },
       return: {
@@ -1049,8 +1118,9 @@ export const Person = domain.types.Person = {
         id: {
           name: "id",
           displayName: "Primary Key",
-          role: "value",
           type: "number",
+          role: "value",
+          source: "personId",
         },
       },
       return: {
@@ -1092,8 +1162,9 @@ export const Person = domain.types.Person = {
         id: {
           name: "id",
           displayName: "Primary Key",
-          role: "value",
           type: "number",
+          role: "value",
+          source: "personId",
         },
       },
       return: {
@@ -1133,8 +1204,9 @@ export const Person = domain.types.Person = {
         id: {
           name: "id",
           displayName: "Primary Key",
-          role: "value",
           type: "number",
+          role: "value",
+          source: "personId",
         },
       },
       return: {
@@ -1153,8 +1225,9 @@ export const Person = domain.types.Person = {
         id: {
           name: "id",
           displayName: "Primary Key",
-          role: "value",
           type: "number",
+          role: "value",
+          source: "personId",
         },
         firstName: {
           name: "firstName",

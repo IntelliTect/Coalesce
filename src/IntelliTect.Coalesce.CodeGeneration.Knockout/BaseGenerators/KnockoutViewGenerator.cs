@@ -192,6 +192,10 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
                                             }
                                         }
                                     }
+                                    else if (method.ResultType.IsFile)
+                                    {
+                                        b.Line(Display.MethodFileResult(method));
+                                    }
                                     else
                                     {
                                         b.Line("<span data-bind=\"text: result\"></span>");

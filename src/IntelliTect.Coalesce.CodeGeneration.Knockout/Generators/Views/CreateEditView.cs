@@ -82,6 +82,17 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
                             }
                         }
                     }
+
+                    // Maybe we'll use this, maybe not. Puts file-returning methods as first-class citizens up with the object's properties.
+                    // Perhaps this should be attribute controllable?
+                    //foreach (var method in GetFileDownloadMethods())
+                    //{
+                    //    using (b.TagBlock("div", "form-group"))
+                    //    {
+                    //        b.Line($"<label class=\"col-md-4 control-label\">{method.DisplayName}</label>");
+                    //        b.Line($"<div class=\"col-md-8 method-{method.JsVariable}\" data-bind=\"with: {method.JsVariable}\">{Display.MethodFileResult(method)}</div>");
+                    //    }
+                    //}
                 }
             }
             
@@ -98,36 +109,62 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
             b.Line("@section Scripts");
             b.Line("{");
             b.Line("<script>");
-            b.Line($"    var model = new {viewModelsNamespace}.{Model.ViewModelClassName}();");
-            b.Line("    model.includes = \"Editor\";");
-            b.Line("    model.saveCallbacks.push(function(obj){");
-            b.Line("        // If there is a new id, set the one for this page");
-            b.Line("        if (!Coalesce.Utilities.GetUrlParameter('id')){");
-            b.Line("            if (model.myId) {");
-            b.Line("                var newUrl = Coalesce.Utilities.SetUrlParameter(window.location.href, \"id\", model.myId);");
-            b.Line("                window.history.replaceState(null, window.document.title, newUrl);");
-            b.Line("            }");
-            b.Line("        }");
-            b.Line("    });");
-            b.Line("    @if (ViewBag.Id != null)");
-            b.Line("    {");
-            b.Line("        @:model.load(\'@ViewBag.Id\');");
-            b.Line("    }");
-            b.Line("    @foreach (KeyValuePair<string, Microsoft.Extensions.Primitives.StringValues> kvp in ViewBag.ParentIds)");
-            b.Line("    {");
-            b.Line("        @:model.@(((string)(@kvp.Key)))(@kvp.Value);");
-            b.Line("    }");
-            b.Line();
-            b.Line("    window.onbeforeunload = function(){");
-            b.Line("        if (model.isDirty()) model.save();");
-            b.Line("    }");
-            b.Line("    model.coalesceConfig.autoSaveEnabled(false);");
-            b.Line("    model.loadChildren(function() {");
-            b.Line("        ko.applyBindings(model, document.body);");
-            b.Line("        model.coalesceConfig.autoSaveEnabled(true);");
-            b.Line("    });");
+            using (b.Indented())
+            {
+                b.Line($"var model = new {viewModelsNamespace}.{Model.ViewModelClassName}();");
+                b.Line("model.includes = \"Editor\";");
+                b.Line("model.saveCallbacks.push(function(obj){");
+                b.Line("    // If there is a new id, set the one for this page");
+                b.Line("    if (!Coalesce.Utilities.GetUrlParameter('id')){");
+                b.Line("        if (model.myId) {");
+                b.Line("            var newUrl = Coalesce.Utilities.SetUrlParameter(window.location.href, \"id\", model.myId);");
+                b.Line("            window.history.replaceState(null, window.document.title, newUrl);");
+                b.Line("        }");
+                b.Line("    }");
+                b.Line("});");
+
+                foreach (var method in GetFileDownloadMethods())
+                {
+                    b.Line($"model.{method.JsVariable}.url.subscribe(() => model.myId && setTimeout(() => !model.isLoading() && !model.{method.JsVariable}.isLoading() && model.{method.JsVariable}.invoke(undefined, false), 1))");
+                }
+
+                b.Line("@if (ViewBag.Id != null)");
+                b.Line("{");
+                b.Line("    @:model.load(\'@ViewBag.Id\');");
+                b.Line("}");
+                b.Line("@foreach (KeyValuePair<string, Microsoft.Extensions.Primitives.StringValues> kvp in ViewBag.ParentIds)");
+                b.Line("{");
+                b.Line("    @:model.@(((string)(@kvp.Key)))(@kvp.Value);");
+                b.Line("}");
+                b.Line();
+                b.Line("window.onbeforeunload = function(){");
+                b.Line("    if (model.isDirty()) model.save();");
+                b.Line("}");
+                b.Line("model.coalesceConfig.autoSaveEnabled(false);");
+                b.Line("model.loadChildren(function() {");
+                b.Line("    ko.applyBindings(model, document.body);");
+                b.Line("    model.coalesceConfig.autoSaveEnabled(true);");
+                b.Line("});");
+            }
             b.Line("</script>");
             b.Line("}");
+        }
+
+        /// <summary>
+        /// Gets the methods that should be automatically invoked when their URL changes.
+        /// The effect of this is that methods that download a file that we can detect changes in (via VaryByProperty)
+        /// get auto loaded. If they're images or videos, they'll get rendered in the method result area.
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerable<MethodViewModel> GetFileDownloadMethods()
+        {
+            return Model.ClientMethods.Where(m => 
+                m.IsModelInstanceMethod && 
+                m.ResultType.IsFile && 
+                m.ApiActionHttpMethod == HttpMethod.Get && 
+                m.VaryByProperty?.IsClientProperty == true &&
+                !m.ClientParameters.Any()
+            );
         }
     }
 }

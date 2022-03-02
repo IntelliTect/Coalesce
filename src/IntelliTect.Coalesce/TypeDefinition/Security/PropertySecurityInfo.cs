@@ -6,19 +6,17 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
-namespace IntelliTect.Coalesce.DataAnnotations
+namespace IntelliTect.Coalesce.TypeDefinition
 {
     /// <summary>
     /// Class that contains security information for a class or property based on the Read and Edit attributes
     /// </summary>
     public class PropertySecurityInfo
     {
-        public PropertySecurityInfo(SecurityPermission read, SecurityPermission edit,
-            SecurityPermission delete)
+        public PropertySecurityInfo(SecurityPermission read, SecurityPermission edit)
         {
             Read = read;
             Edit = edit;
-            Delete = delete;
 
             IsRead = !read.NoAccess;
             ReadRoles = read.Roles;
@@ -34,6 +32,7 @@ namespace IntelliTect.Coalesce.DataAnnotations
                 EditRoles = edit.Roles;
             }
         }
+
         public bool IsEdit { get; set; } = false;
         public bool IsRead { get; set; } = false;
         public string EditRoles { get; set; } = "";
@@ -41,7 +40,6 @@ namespace IntelliTect.Coalesce.DataAnnotations
 
         public SecurityPermission Read { get; set; }
         public SecurityPermission Edit { get; set; }
-        public SecurityPermission Delete { get; set; }
 
         public List<string> EditRolesList
         {

@@ -7,6 +7,7 @@ using IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators;
 using IntelliTect.Coalesce.Utilities;
 using System.Linq;
 using IntelliTect.Coalesce.DataAnnotations;
+using Microsoft.AspNetCore.WebUtilities;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
 {
@@ -47,7 +48,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
             }
         }
 
-        private void WriteClassContents(CSharpCodeBuilder b, DataAnnotations.ClassSecurityInfo securityInfo)
+        private void WriteClassContents(CSharpCodeBuilder b, ClassSecurityInfo securityInfo)
         {
             var primaryKeyParameter = $"{Model.PrimaryKey.Type.FullyQualifiedName} id";
             var dataSourceParameter = $"IDataSource<{Model.BaseViewModel.FullyQualifiedName}> dataSource";
@@ -132,7 +133,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
             }
             foreach (var method in Model.ClientMethods)
             {
-                using (WriteControllerActionBlock(b, method))
+                using (WriteControllerActionSignature(b, method))
                 {
                     if (method.IsStatic)
                     {
@@ -157,168 +158,94 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                             b.Line($"return new {method.ApiActionReturnTypeDeclaration}(itemResult);");
                         }
                         b.Line("var item = itemResult.Object;");
+
+
                         WriteMethodInvocation(b, method, "item");
                         b.Line("await Db.SaveChangesAsync();");
+
+                        var varyByProperty = method.VaryByProperty;
+                        if (varyByProperty != null)
+                        {
+                            WriteEtagProcessing(b, method, varyByProperty);
+                        }
                     }
 
                     WriteMethodResultProcessBlock(b, method);
                 }
             }
+        }
 
+        private static void WriteEtagProcessing(CSharpCodeBuilder b, MethodViewModel method, PropertyViewModel varyByProperty)
+        {
+            b.Line();
 
-            foreach (var fileProperty in Model.FileProperties)
+            b.Line($"var _currentVaryValue = item.{varyByProperty.Name};");
+            using (b.Block("if (_currentVaryValue != default)"))
             {
-                var returnType = $"Task<ItemResult<{Model.DtoName}>>";
-
-                if (fileProperty.SecurityInfo.IsRead)
+                string eTagString = varyByProperty.Type switch
                 {
-                    b.DocComment($"File Download: {fileProperty.Name}");
-                    b.Line($"{ReadAnnotation(fileProperty.SecurityInfo)}");
-                    b.Line($"[HttpGet(\"{fileProperty.FileControllerMethodName}\")]");
-                    using (b.Block($"{Model.ApiActionAccessModifier} virtual async Task<IActionResult> {fileProperty.FileControllerMethodName}Get ({primaryKeyParameter}, {dataSourceParameter})"))
+                    { IsByteArray: true } => "_currentVaryValue",
+                    { IsString: true } => "System.Text.Encoding.UTF8.GetBytes(_currentVaryValue)",
+                    _ => "System.Text.Encoding.UTF8.GetBytes(_currentVaryValue.ToString())",
+                };
+
+                // Always base64 the etag because otherwise its just too hard to prevent invalid characters leaking in.
+                // Quotes, mismatches slashes (which mess up escape sequences), and ASCII control characters all make this hard
+                eTagString = $"{typeof(Base64UrlTextEncoder).FullName}.Encode({eTagString})";
+
+                // I'm so sorry about the escape sequence here.
+                // We have to have code that replaces quotes within the value with slash-escaped quotes.
+                // In order to write that code in C#, we have to escape the literal quotes and slashes.
+                // And then we have to escape THOSE slashes AGAIN because we're writing a C# string that
+                // will itself output a C# string.
+                /* test cases for this (should write some unit tests at some point i guess?)
+                 * "foo"
+                 * "foo\""
+                 * "foo\\\"" // this case fails if we don't also escape slashes. just escaping quotes isnt enough.
+                 * "foo\\\\\""
+                 */
+                b.Line($"var _expectedEtagHeader = new EntityTagHeaderValue('\"' + {eTagString} + '\"');");
+
+                if (varyByProperty.IsClientProperty)
+                {
+                    // Max age of zero forces a re-request always,
+                    // but if the etag matches we can still return a 304.
+                    b.Line("var _cacheControlHeader = new CacheControlHeaderValue { Private = true, MaxAge = TimeSpan.Zero };");
+
+                    string varyValueComparison = varyByProperty.Type switch
                     {
-                        b.Line($"var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());");
-                        b.Line($"if (itemResult.Object?.{fileProperty.Name} == null) return NotFound();");
-                        b.Line($"string contentType = \"{fileProperty.FileMimeType}\";");
+                        // JS dates only have millisecond precision, so truncate the server value to milliseconds.
+                        // Truncation is what happens on the JS side to anything more precise than a millisecond.
+                        { IsDateTimeOffset: true } => 
+                            "_currentVaryValue.AddTicks(-_currentVaryValue.Ticks % TimeSpan.TicksPerMillisecond) == etag",
+                        { IsByteArray: true } => "_currentVaryValue.SequenceEqual(etag)",
+                        _ => "_currentVaryValue == etag"
+                    };
 
-                        if (fileProperty.FileNameProperty == null)
-                        {
-                            b.Line($"return File(itemResult.Object.{fileProperty.Name}, contentType);");
-                        }
-                        else
-                        {
-                            using (b.Block($"if (!(new Microsoft.AspNetCore.StaticFiles.FileExtensionContentTypeProvider().TryGetContentType(itemResult.Object.{fileProperty.FileNameProperty.Name}, out contentType)))"))
-                            {
-                                b.Line($"contentType = \"{fileProperty.FileMimeType}\";");
-                            }
-
-                            b.Line($"return File(itemResult.Object.{fileProperty.Name}, contentType, itemResult.Object.{fileProperty.FileNameProperty.Name});");
-                        }
+                    using (b.Block($"if (etag != default && {varyValueComparison})"))
+                    {
+                        // If the client is including the correct etag in the querystring,
+                        // we can give them a long term cache duration
+                        // so they can avoid having to make any request at all
+                        // (with just etag alone, the client still has to check if
+                        // the etag is still valid, but including the correct hash
+                        // in the querystring this means the client has prior knowledge
+                        // about the current version via the VaryByProperty's value).
+                        b.Line("_cacheControlHeader.MaxAge = TimeSpan.FromDays(30);");
                     }
+
+                    b.Line("Response.GetTypedHeaders().CacheControl = _cacheControlHeader;");
                 }
 
-                if (securityInfo.IsCreateAllowed() || securityInfo.IsEditAllowed())
+                b.Line("Response.GetTypedHeaders().ETag = _expectedEtagHeader;");
+
+                using (b.Block("if (Request.GetTypedHeaders().IfNoneMatch.Any(value => value.Compare(_expectedEtagHeader, true)))"))
                 {
-                    b.DocComment($"File Upload: {fileProperty.Name}");
-                    b.Line($"{EditAnnotation(fileProperty.SecurityInfo)}");
-                    b.Line($"[HttpPut(\"{fileProperty.FileControllerMethodName}\")]");
-                    using (b.Block($"{Model.ApiActionAccessModifier} virtual async {returnType} {fileProperty.FileControllerMethodName}Put ({primaryKeyParameter}, IFormFile file, {dataSourceParameter}, IBehaviors<{Model.FullyQualifiedName}> behaviors)"))
-                    {
-                        b.Line("var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());");
-                        b.Line($"if (!itemResult.WasSuccessful) return new ItemResult<{Model.DtoName}>(itemResult);");
-                        using (b.Block("using (var stream = new System.IO.MemoryStream())"))
-                        {
-                            b.Line("await file.CopyToAsync(stream);");
-
-                            b.Line($"itemResult.Object.{fileProperty.Name} = stream.ToArray();");
-
-                            if (fileProperty.FileNameProperty?.HasPublicSetter ?? false)
-                            {
-                                b.Line($"itemResult.Object.{fileProperty.FileNameProperty.Name} = file.FileName;");
-                            }
-
-                            if (fileProperty.FileHashProperty?.HasPublicSetter ?? false)
-                            {
-                                using (b.Block("using (var sha256Hash = System.Security.Cryptography.SHA256.Create())"))
-                                {
-                                    b.Line($"var hash = sha256Hash.ComputeHash(itemResult.Object.{fileProperty.Name});");
-                                    b.Line($"itemResult.Object.{fileProperty.FileHashProperty.Name} = Convert.ToBase64String(hash);");
-                                }
-                            }
-
-                            if (fileProperty.FileSizeProperty?.HasPublicSetter ?? false)
-                            {
-                                b.Line($"itemResult.Object.{fileProperty.FileSizeProperty.Name} = file.Length;");
-                            }
-
-                            b.Line("await Db.SaveChangesAsync();");
-                        }
-                        b.Line($"var result = new ItemResult<{Model.DtoName}>();");
-                        b.Line("var mappingContext = new MappingContext(User);");
-                        b.Line($"result.Object = Mapper.MapToDto<{Model.BaseViewModel.FullyQualifiedName}, {Model.DtoName}>(itemResult.Object, mappingContext, null);");
-                        b.Line("return result;");
-                    }
-
-                    b.DocComment($"File Delete: {fileProperty.Name}");
-                    b.Line($"{securityInfo.DeleteAnnotation}");
-                    b.Line($"[HttpDelete (\"{fileProperty.FileControllerMethodName}\")]");
-                    using (b.Block($"{Model.ApiActionAccessModifier} virtual async Task<IActionResult> {fileProperty.FileControllerMethodName}Delete ({primaryKeyParameter}, {dataSourceParameter}, IBehaviors<{Model.FullyQualifiedName}> behaviors)"))
-                    {
-                        b.Line($"var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());");
-                        b.Line($"if (!itemResult.WasSuccessful) return NotFound();");
-
-                        if (fileProperty.FileNameProperty?.HasPublicSetter ?? false)
-                        {
-                            b.Line($"itemResult.Object.{fileProperty.FileNameProperty.Name} = null;");
-                        }
-                        if (fileProperty.FileHashProperty?.HasPublicSetter ?? false)
-                        {
-                            b.Line($"itemResult.Object.{fileProperty.FileHashProperty.Name} = null;");
-                        }
-                        if (fileProperty.FileSizeProperty?.HasPublicSetter ?? false)
-                        {
-                            b.Line($"itemResult.Object.{fileProperty.FileSizeProperty.Name} = 0;");
-                        }
-                        b.Line($"itemResult.Object.{fileProperty.Name} = null;");
-
-                        b.Line("await Db.SaveChangesAsync();");
-                        b.Line("return Ok();");
-                    }
+                    // The client already has the current response cached. Tell them to use it.
+                    b.Line("return StatusCode(StatusCodes.Status304NotModified);");
                 }
             }
+            b.Line();
         }
-
-        private bool AllowAnonymousAll(PropertySecurityInfo securityInfo)
-        {
-            return securityInfo.Read.AllowAnonymous &&
-                securityInfo.Edit.AllowAnonymous &&
-                securityInfo.Delete.AllowAnonymous;
-        }
-
-        /// <summary>
-        /// Returns an annotation for reading things (List/Get)
-        /// </summary>
-        private string ReadAnnotation(PropertySecurityInfo securityInfo)
-        {
-            if (securityInfo.Read.NoAccess) throw NoAccessException();
-            if (AllowAnonymousAll(securityInfo)) return string.Empty;
-            if (securityInfo.Read.AllowAnonymous || securityInfo.Edit.AllowAnonymous) return "[AllowAnonymous]";
-            if (securityInfo.Read.HasRoles) return $"[Authorize(Roles=\"{AllRoles(securityInfo)}\")]";
-
-            return "[Authorize]";
-        }
-
-        /// <summary>
-        /// Returns an annotation for editing things
-        /// </summary>
-        private string EditAnnotation(PropertySecurityInfo securityInfo)
-        {
-            
-            if (securityInfo.Edit.NoAccess) throw NoAccessException();
-            if (AllowAnonymousAll(securityInfo)) return string.Empty;
-            if (securityInfo.Edit.AllowAnonymous) return "[AllowAnonymous]";
-            if (securityInfo.Edit.HasRoles) return $"[Authorize(Roles=\"{securityInfo.Edit.ExternalRoleList}\")]";
-
-            return "[Authorize]";
-        }
-
-        private string AllRoles(PropertySecurityInfo securityInfo)
-        {
-
-            var result = securityInfo.Read.RoleList
-                .Union(securityInfo.Delete.RoleList)
-                .ToList();
-
-            if (result.Count() == 0) return "";
-            return string.Join(",", result);
-        }
-
-        /// <summary>
-        /// This is checked, and this exception thrown, to prevent accidents in code generation.
-        /// </summary>
-        /// <returns></returns>
-        private Exception NoAccessException()
-            => new InvalidOperationException(
-                $"Cannot emit an annotation for permission level {SecurityPermissionLevels.DenyAll}. Templates shouldn't emit anything in such cases.");
     }
 }

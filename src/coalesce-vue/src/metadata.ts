@@ -498,6 +498,12 @@ export type Property =
    -----------------------------
 */
 
+type MethodParameter = Value & {
+  /** If specified, the name of a property on the model that owns the parameter's method
+   * that the value of this parameter should be automatically sourced from when invoked on viewmodels.
+   */
+  source?: string
+}
 export interface MethodBase extends Metadata {
 
     /** The HTTP method to use when calling the method. */
@@ -507,7 +513,7 @@ export interface MethodBase extends Metadata {
     readonly isStatic?: boolean,
 
     /** The parameters of the method */
-    readonly params: { [paramName in string]: Value } 
+    readonly params: { [paramName in string]: MethodParameter } 
 }
 
 export interface ItemMethod extends MethodBase  {

@@ -264,7 +264,7 @@
             <div class="modal-footer">
                 <button type='button' class='btn btn-default' data-dismiss='modal'>Cancel</button>
                 <button type='button' class='btn btn-primary btn-ok'
-                    data-bind="click: invokeWithArgs.bind(this, args, function(){jQuery($element).closest('.modal').modal('hide')}, null)">
+                    data-bind="click: invokeWithArgs.bind(this, args, function(){jQuery($element).closest('.modal').modal('hide')})">
                     OK
                 </button>
             </div>
@@ -306,7 +306,7 @@
             <div class="modal-footer">
                 <button type='button' class='btn btn-default' data-dismiss='modal'>Cancel</button>
                 <button type='button' class='btn btn-primary btn-ok'
-                    data-bind="click: invokeWithArgs.bind(this, args, function(){jQuery($element).closest('.modal').modal('hide')}, null)">
+                    data-bind="click: invokeWithArgs.bind(this, args, function(){jQuery($element).closest('.modal').modal('hide')})">
                     OK
                 </button>
             </div>
@@ -337,7 +337,7 @@
     {
         @:model.@(((string)(@kvp.Key)))(@kvp.Value);
     }
-
+    
     window.onbeforeunload = function(){
         if (model.isDirty()) model.save();
     }

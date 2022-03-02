@@ -97,7 +97,9 @@ namespace IntelliTect.Coalesce.Api.Controllers
                 && !apiResult.WasSuccessful
             )
             {
-                response.StatusCode = (int)HttpStatusCode.BadRequest;
+                result.StatusCode = 
+                response.StatusCode = 
+                    (int)HttpStatusCode.BadRequest;
             }
         }
 

@@ -53,10 +53,6 @@
                 </div>
             </div>
             <div class="form-group">
-                <label class="col-md-4 control-label">Image</label>
-                <div class="col-md-8 prop-image">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.Image))</div>
-            </div>
-            <div class="form-group">
                 <label class="col-md-4 control-label">Image Name</label>
                 <div class="col-md-8 prop-imageName">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.ImageName, false))</div>
             </div>
@@ -69,28 +65,8 @@
                 <div class="col-md-8 prop-imageHash">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.ImageHash))</div>
             </div>
             <div class="form-group">
-                <label class="col-md-4 control-label">Attachment</label>
-                <div class="col-md-8 prop-attachment">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.Attachment))</div>
-            </div>
-            <div class="form-group">
                 <label class="col-md-4 control-label">Attachment Name</label>
                 <div class="col-md-8 prop-attachmentName">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.AttachmentName))</div>
-            </div>
-            <div class="form-group">
-                <label class="col-md-4 control-label">Plain Attachment</label>
-                <div class="col-md-8 prop-plainAttachment">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.PlainAttachment))</div>
-            </div>
-            <div class="form-group">
-                <label class="col-md-4 control-label">Restricted Upload Attachment</label>
-                <div class="col-md-8 prop-restrictedUploadAttachment">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.RestrictedUploadAttachment))</div>
-            </div>
-            <div class="form-group">
-                <label class="col-md-4 control-label">Restricted Download Attachment</label>
-                <div class="col-md-8 prop-restrictedDownloadAttachment">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.RestrictedDownloadAttachment, false))</div>
-            </div>
-            <div class="form-group">
-                <label class="col-md-4 control-label">Restricted Meta Attachment</label>
-                <div class="col-md-8 prop-restrictedMetaAttachment">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.RestrictedMetaAttachment))</div>
             </div>
             <div class="form-group">
                 <label class="col-md-4 control-label">Severity</label>
@@ -135,10 +111,75 @@
                 </tr>
             </thead>
             <tbody>
-                <tr data-bind="with: uploadAttachment">
+                <tr data-bind="with: uploadImage">
                     <td>
-                        <button class="btn btn-default btn-xs" data-bind="click: function(){ $('#method-UploadAttachment').modal() }">
-                            Upload Attachment
+                        <button class="btn btn-default btn-xs" data-bind="click: function(){ $('#method-UploadImage').modal() }">
+                            Upload Image
+                        </button>
+                    </td>
+                    <td>
+                        <span data-bind="text: result"></span>
+                    </td>
+                    <td>
+                        <span data-bind="text: wasSuccessful"></span>
+                        <span data-bind="text: message"></span>
+                    </td>
+                    <td>
+                        <span class="label label-info" data-bind="fadeVisible: isLoading">Loading</span>
+                    </td>
+                </tr>
+                <tr data-bind="with: uploadAndDownload">
+                    <td>
+                        <button class="btn btn-default btn-xs" data-bind="click: function(){ $('#method-UploadAndDownload').modal() }">
+                            Upload And Download
+                        </button>
+                    </td>
+                    <td>
+                        
+                <!-- ko if: resultObjectUrl() && result().type.indexOf('video') >= 0 -->
+                <video style="max-width: 100%" data-bind="attr: {src: resultObjectUrl }" controls>
+                </video>
+                <!-- /ko -->
+                <!-- ko if: resultObjectUrl() && result().type.indexOf('image') >= 0 -->
+                <img style="max-width: 100%; max-height: 300px" data-bind="attr: {src: resultObjectUrl }" />
+                <!-- /ko -->
+                    </td>
+                    <td>
+                        <span data-bind="text: wasSuccessful"></span>
+                        <span data-bind="text: message"></span>
+                    </td>
+                    <td>
+                        <span class="label label-info" data-bind="fadeVisible: isLoading">Loading</span>
+                    </td>
+                </tr>
+                <tr data-bind="with: downloadImage">
+                    <td>
+                        <button class="btn btn-default btn-xs" data-bind="click: function(){ invoke() }">
+                            Download Image
+                        </button>
+                    </td>
+                    <td>
+                        
+                <!-- ko if: resultObjectUrl() && result().type.indexOf('video') >= 0 -->
+                <video style="max-width: 100%" data-bind="attr: {src: resultObjectUrl }" controls>
+                </video>
+                <!-- /ko -->
+                <!-- ko if: resultObjectUrl() && result().type.indexOf('image') >= 0 -->
+                <img style="max-width: 100%; max-height: 300px" data-bind="attr: {src: resultObjectUrl }" />
+                <!-- /ko -->
+                    </td>
+                    <td>
+                        <span data-bind="text: wasSuccessful"></span>
+                        <span data-bind="text: message"></span>
+                    </td>
+                    <td>
+                        <span class="label label-info" data-bind="fadeVisible: isLoading">Loading</span>
+                    </td>
+                </tr>
+                <tr data-bind="with: uploadImages">
+                    <td>
+                        <button class="btn btn-default btn-xs" data-bind="click: function(){ $('#method-UploadImages').modal() }">
+                            Upload Images
                         </button>
                     </td>
                     <td>
@@ -174,13 +215,13 @@
     </div>
 </div>
 
-<!-- Modal for method: UploadAttachment -->
-<div class="modal fade" id="method-UploadAttachment" tabindex="-1" role="dialog" data-bind="with: uploadAttachment">
+<!-- Modal for method: UploadImage -->
+<div class="modal fade" id="method-UploadImage" tabindex="-1" role="dialog" data-bind="with: uploadImage">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
                 <button type='button' class='close' data-dismiss='modal' aria-label='Close'><span aria-hidden='true'>&times;</span></button>
-                <h4 class='modal-title'>Upload Attachment</h4>
+                <h4 class='modal-title'>Upload Image</h4>
             </div>
             <div class="modal-body form-horizontal" data-bind="with: args">
                 <div class="form-group">
@@ -193,7 +234,61 @@
             <div class="modal-footer">
                 <button type='button' class='btn btn-default' data-dismiss='modal'>Cancel</button>
                 <button type='button' class='btn btn-primary btn-ok'
-                    data-bind="click: invokeWithArgs.bind(this, args, function(){jQuery($element).closest('.modal').modal('hide')}, null)">
+                    data-bind="click: invokeWithArgs.bind(this, args, function(){jQuery($element).closest('.modal').modal('hide')})">
+                    OK
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for method: UploadAndDownload -->
+<div class="modal fade" id="method-UploadAndDownload" tabindex="-1" role="dialog" data-bind="with: uploadAndDownload">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type='button' class='close' data-dismiss='modal' aria-label='Close'><span aria-hidden='true'>&times;</span></button>
+                <h4 class='modal-title'>Upload And Download</h4>
+            </div>
+            <div class="modal-body form-horizontal" data-bind="with: args">
+                <div class="form-group">
+                    <label class='col-md-4 control-label'>File</label>
+                    <div class="col-md-8">
+                        <input type="file" data-bind="fileInput: file" />
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type='button' class='btn btn-default' data-dismiss='modal'>Cancel</button>
+                <button type='button' class='btn btn-primary btn-ok'
+                    data-bind="click: invokeWithArgs.bind(this, args, function(){jQuery($element).closest('.modal').modal('hide')})">
+                    OK
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for method: UploadImages -->
+<div class="modal fade" id="method-UploadImages" tabindex="-1" role="dialog" data-bind="with: uploadImages">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type='button' class='close' data-dismiss='modal' aria-label='Close'><span aria-hidden='true'>&times;</span></button>
+                <h4 class='modal-title'>Upload Images</h4>
+            </div>
+            <div class="modal-body form-horizontal" data-bind="with: args">
+                <div class="form-group">
+                    <label class='col-md-4 control-label'>Files</label>
+                    <div class="col-md-8">
+                        <input type="text" class="form-control" data-bind="value: files" />
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type='button' class='btn btn-default' data-dismiss='modal'>Cancel</button>
+                <button type='button' class='btn btn-primary btn-ok'
+                    data-bind="click: invokeWithArgs.bind(this, args, function(){jQuery($element).closest('.modal').modal('hide')})">
                     OK
                 </button>
             </div>
@@ -220,7 +315,7 @@
             <div class="modal-footer">
                 <button type='button' class='btn btn-default' data-dismiss='modal'>Cancel</button>
                 <button type='button' class='btn btn-primary btn-ok'
-                    data-bind="click: invokeWithArgs.bind(this, args, function(){jQuery($element).closest('.modal').modal('hide')}, null)">
+                    data-bind="click: invokeWithArgs.bind(this, args, function(){jQuery($element).closest('.modal').modal('hide')})">
                     OK
                 </button>
             </div>
@@ -243,6 +338,7 @@
             }
         }
     });
+    model.downloadImage.url.subscribe(() => model.myId && setTimeout(() => !model.isLoading() && !model.downloadImage.isLoading() && model.downloadImage.invoke(undefined, false), 1))
     @if (ViewBag.Id != null)
     {
         @:model.load('@ViewBag.Id');
@@ -251,7 +347,7 @@
     {
         @:model.@(((string)(@kvp.Key)))(@kvp.Value);
     }
-
+    
     window.onbeforeunload = function(){
         if (model.isDirty()) model.save();
     }

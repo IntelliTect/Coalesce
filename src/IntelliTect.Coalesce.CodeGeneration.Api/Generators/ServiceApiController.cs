@@ -42,7 +42,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
 
             foreach (var method in Model.ClientMethods)
             {
-                using (WriteControllerActionBlock(b, method))
+                using (WriteControllerActionSignature(b, method))
                 {
                     WriteMethodInvocation(b, method, "Service");
 

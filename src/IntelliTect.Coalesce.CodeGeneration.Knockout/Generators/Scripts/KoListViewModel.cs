@@ -107,7 +107,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
                                     if (prop.Type.IsDate)
                                     {
                                         b.Line($"if (!this.{prop.JsVariable}()) dto.{prop.JsonName} = null;");
-                                        b.Line($"else dto.{prop.JsonName} = this.{prop.JsVariable}()!.format('YYYY-MM-DDTHH:mm:ss{(prop.Type.IsDateTimeOffset ? "ZZ" : "")}');");
+                                        b.Line($"else dto.{prop.JsonName} = this.{prop.JsVariable}()!.format({MomentDateDtoFormat(prop.Type)});");
                                     }
                                     else
                                     {

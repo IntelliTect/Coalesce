@@ -93,6 +93,10 @@
                                 Reported By
                                 <i class="fa" data-bind="css: orderBy() == 'ReportedBy' ? 'fa-caret-up' : orderByDescending() == 'ReportedBy' ? 'fa-caret-down' : 'fa-sort'" style="float: right; padding: .3em 0 0 0 "></i>
                             </th>
+                            <th class="sortable-header" data-bind="click: function(){orderByToggle('Image')}">
+                                Image
+                                <i class="fa" data-bind="css: orderBy() == 'Image' ? 'fa-caret-up' : orderByDescending() == 'Image' ? 'fa-caret-down' : 'fa-sort'" style="float: right; padding: .3em 0 0 0 "></i>
+                            </th>
                             <th class="sortable-header" data-bind="click: function(){orderByToggle('ImageName')}">
                                 Image Name
                                 <i class="fa" data-bind="css: orderBy() == 'ImageName' ? 'fa-caret-up' : orderByDescending() == 'ImageName' ? 'fa-caret-down' : 'fa-sort'" style="float: right; padding: .3em 0 0 0 "></i>
@@ -105,9 +109,29 @@
                                 Image Hash
                                 <i class="fa" data-bind="css: orderBy() == 'ImageHash' ? 'fa-caret-up' : orderByDescending() == 'ImageHash' ? 'fa-caret-down' : 'fa-sort'" style="float: right; padding: .3em 0 0 0 "></i>
                             </th>
+                            <th class="sortable-header" data-bind="click: function(){orderByToggle('Attachment')}">
+                                Attachment
+                                <i class="fa" data-bind="css: orderBy() == 'Attachment' ? 'fa-caret-up' : orderByDescending() == 'Attachment' ? 'fa-caret-down' : 'fa-sort'" style="float: right; padding: .3em 0 0 0 "></i>
+                            </th>
                             <th class="sortable-header" data-bind="click: function(){orderByToggle('AttachmentName')}">
                                 Attachment Name
                                 <i class="fa" data-bind="css: orderBy() == 'AttachmentName' ? 'fa-caret-up' : orderByDescending() == 'AttachmentName' ? 'fa-caret-down' : 'fa-sort'" style="float: right; padding: .3em 0 0 0 "></i>
+                            </th>
+                            <th class="sortable-header" data-bind="click: function(){orderByToggle('PlainAttachment')}">
+                                Plain Attachment
+                                <i class="fa" data-bind="css: orderBy() == 'PlainAttachment' ? 'fa-caret-up' : orderByDescending() == 'PlainAttachment' ? 'fa-caret-down' : 'fa-sort'" style="float: right; padding: .3em 0 0 0 "></i>
+                            </th>
+                            <th class="sortable-header" data-bind="click: function(){orderByToggle('RestrictedUploadAttachment')}">
+                                Restricted Upload Attachment
+                                <i class="fa" data-bind="css: orderBy() == 'RestrictedUploadAttachment' ? 'fa-caret-up' : orderByDescending() == 'RestrictedUploadAttachment' ? 'fa-caret-down' : 'fa-sort'" style="float: right; padding: .3em 0 0 0 "></i>
+                            </th>
+                            <th class="sortable-header" data-bind="click: function(){orderByToggle('RestrictedDownloadAttachment')}">
+                                Restricted Download Attachment
+                                <i class="fa" data-bind="css: orderBy() == 'RestrictedDownloadAttachment' ? 'fa-caret-up' : orderByDescending() == 'RestrictedDownloadAttachment' ? 'fa-caret-down' : 'fa-sort'" style="float: right; padding: .3em 0 0 0 "></i>
+                            </th>
+                            <th class="sortable-header" data-bind="click: function(){orderByToggle('RestrictedMetaAttachment')}">
+                                Restricted Meta Attachment
+                                <i class="fa" data-bind="css: orderBy() == 'RestrictedMetaAttachment' ? 'fa-caret-up' : orderByDescending() == 'RestrictedMetaAttachment' ? 'fa-caret-down' : 'fa-sort'" style="float: right; padding: .3em 0 0 0 "></i>
                             </th>
                             <th class="sortable-header" data-bind="click: function(){orderByToggle('Severity')}">
                                 Severity
@@ -143,10 +167,16 @@
                                 <td class="prop-openedAt">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.OpenedAt))</td>
                                 <td class="prop-assignedTo">@(Knockout.SelectForObject<Coalesce.Domain.Case>(p => p.AssignedTo))</td>
                                 <td class="prop-reportedBy">@(Knockout.SelectForObject<Coalesce.Domain.Case>(p => p.ReportedBy))</td>
+                                <td class="prop-image">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.Image))</td>
                                 <td class="prop-imageName">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.ImageName, true))</td>
                                 <td class="prop-imageSize">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.ImageSize))</td>
                                 <td class="prop-imageHash">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.ImageHash))</td>
+                                <td class="prop-attachment">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.Attachment))</td>
                                 <td class="prop-attachmentName">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.AttachmentName))</td>
+                                <td class="prop-plainAttachment">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.PlainAttachment))</td>
+                                <td class="prop-restrictedUploadAttachment">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.RestrictedUploadAttachment))</td>
+                                <td class="prop-restrictedDownloadAttachment">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.RestrictedDownloadAttachment, true))</td>
+                                <td class="prop-restrictedMetaAttachment">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.RestrictedMetaAttachment))</td>
                                 <td class="prop-severity">@(Knockout.InputFor<Coalesce.Domain.Case>(p => p.Severity))</td>
                                 <td class="prop-status">@(Knockout.SelectFor<Coalesce.Domain.Case>(p => p.Status))</td>
                                 <td class="prop-caseProducts">@(Knockout.SelectForManyToMany<Coalesce.Domain.Case>(p => p.CaseProducts))</td>
@@ -161,10 +191,16 @@
                                 <td class="prop-openedAt">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.OpenedAt, true))</td>
                                 <td class="prop-assignedTo">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.AssignedTo, true))</td>
                                 <td class="prop-reportedBy">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.ReportedBy, true))</td>
+                                <td class="prop-image">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.Image, true))</td>
                                 <td class="prop-imageName">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.ImageName, true))</td>
                                 <td class="prop-imageSize">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.ImageSize, true))</td>
                                 <td class="prop-imageHash">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.ImageHash, true))</td>
+                                <td class="prop-attachment">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.Attachment, true))</td>
                                 <td class="prop-attachmentName">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.AttachmentName, true))</td>
+                                <td class="prop-plainAttachment">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.PlainAttachment, true))</td>
+                                <td class="prop-restrictedUploadAttachment">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.RestrictedUploadAttachment, true))</td>
+                                <td class="prop-restrictedDownloadAttachment">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.RestrictedDownloadAttachment, true))</td>
+                                <td class="prop-restrictedMetaAttachment">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.RestrictedMetaAttachment, true))</td>
                                 <td class="prop-severity">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.Severity, true))</td>
                                 <td class="prop-status">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.Status, true))</td>
                                 <td class="prop-caseProducts">@(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.CaseProducts, true))</td>
@@ -181,10 +217,7 @@
                                             Actions <span class="caret"></span>
                                         </button>
                                         <ul class="dropdown-menu">
-                                            <li><a href="#" data-bind='click: function(){ uploadImage.invokeWithPrompts() }'>Upload Image</a></li>
-                                            <li><a href="#" data-bind='click: function(){ uploadAndDownload.invokeWithPrompts() }'>Upload And Download</a></li>
-                                            <li><a href="#" data-bind='click: function(){ downloadImage.invoke() }'>Download Image</a></li>
-                                            <li><a href="#" data-bind='click: function(){ uploadImages.invokeWithPrompts() }'>Upload Images</a></li>
+                                            <li><a href="#" data-bind='click: function(){ uploadAttachment.invokeWithPrompts() }'>Upload Attachment</a></li>
                                             <li><a href="#" data-bind='click: function(){ uploadByteArray.invokeWithPrompts() }'>Upload Byte Array</a></li>
                                         </ul>
                                     </div>

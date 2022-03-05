@@ -14,12 +14,9 @@ export interface CaseViewModel extends $models.Case {
   assignedTo: PersonViewModel | null;
   reportedById: number | null;
   reportedBy: PersonViewModel | null;
-  image: string | null;
-  imageName: string | null;
-  imageSize: number | null;
-  imageHash: string | null;
-  attachment: string | null;
+  attachmentSize: number | null;
   attachmentName: string | null;
+  attachmentHash: string | null;
   severity: string | null;
   status: $models.Statuses | null;
   caseProducts: CaseProductViewModel[] | null;
@@ -38,15 +35,26 @@ export class CaseViewModel extends ViewModel<$models.Case, $apiClients.CaseApiCl
     return (this.caseProducts || []).map($ => $.product!).filter($ => $)
   }
   
-  public get uploadAttachment() {
-    const uploadAttachment = this.$apiClient.$makeCaller(
-      this.$metadata.methods.uploadAttachment,
-      (c, file: File | null) => c.uploadAttachment(this.$primaryKey, file),
+  public get uploadImage() {
+    const uploadImage = this.$apiClient.$makeCaller(
+      this.$metadata.methods.uploadImage,
+      (c, file: File | null) => c.uploadImage(this.$primaryKey, file),
       () => ({file: null as File | null, }),
-      (c, args) => c.uploadAttachment(this.$primaryKey, args.file))
+      (c, args) => c.uploadImage(this.$primaryKey, args.file))
     
-    Object.defineProperty(this, 'uploadAttachment', {value: uploadAttachment});
-    return uploadAttachment
+    Object.defineProperty(this, 'uploadImage', {value: uploadImage});
+    return uploadImage
+  }
+  
+  public get downloadImage() {
+    const downloadImage = this.$apiClient.$makeCaller(
+      this.$metadata.methods.downloadImage,
+      (c) => c.downloadImage(this.$primaryKey, this.attachmentHash),
+      () => ({}),
+      (c, args) => c.downloadImage(this.$primaryKey, this.attachmentHash))
+    
+    Object.defineProperty(this, 'downloadImage', {value: downloadImage});
+    return downloadImage
   }
   
   public get uploadAndDownload() {
@@ -60,26 +68,15 @@ export class CaseViewModel extends ViewModel<$models.Case, $apiClients.CaseApiCl
     return uploadAndDownload
   }
   
-  public get downloadAttachment() {
-    const downloadAttachment = this.$apiClient.$makeCaller(
-      this.$metadata.methods.downloadAttachment,
-      (c) => c.downloadAttachment(this.$primaryKey, this.openedAt),
-      () => ({}),
-      (c, args) => c.downloadAttachment(this.$primaryKey, this.openedAt))
-    
-    Object.defineProperty(this, 'downloadAttachment', {value: downloadAttachment});
-    return downloadAttachment
-  }
-  
-  public get uploadAttachments() {
-    const uploadAttachments = this.$apiClient.$makeCaller(
-      this.$metadata.methods.uploadAttachments,
-      (c, files: File[] | null) => c.uploadAttachments(this.$primaryKey, files),
+  public get uploadImages() {
+    const uploadImages = this.$apiClient.$makeCaller(
+      this.$metadata.methods.uploadImages,
+      (c, files: File[] | null) => c.uploadImages(this.$primaryKey, files),
       () => ({files: null as File[] | null, }),
-      (c, args) => c.uploadAttachments(this.$primaryKey, args.files))
+      (c, args) => c.uploadImages(this.$primaryKey, args.files))
     
-    Object.defineProperty(this, 'uploadAttachments', {value: uploadAttachments});
-    return uploadAttachments
+    Object.defineProperty(this, 'uploadImages', {value: uploadImages});
+    return uploadImages
   }
   
   public get uploadByteArray() {

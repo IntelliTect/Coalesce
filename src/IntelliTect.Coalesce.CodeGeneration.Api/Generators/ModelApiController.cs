@@ -204,13 +204,13 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                  * "foo\\\"" // this case fails if we don't also escape slashes. just escaping quotes isnt enough.
                  * "foo\\\\\""
                  */
-                b.Line($"var _expectedEtagHeader = new EntityTagHeaderValue('\"' + {eTagString} + '\"');");
+                b.Line($"var _expectedEtagHeader = new Microsoft.Net.Http.Headers.EntityTagHeaderValue('\"' + {eTagString} + '\"');");
 
                 if (varyByProperty.IsClientProperty)
                 {
                     // Max age of zero forces a re-request always,
                     // but if the etag matches we can still return a 304.
-                    b.Line("var _cacheControlHeader = new CacheControlHeaderValue { Private = true, MaxAge = TimeSpan.Zero };");
+                    b.Line("var _cacheControlHeader = new Microsoft.Net.Http.Headers.CacheControlHeaderValue { Private = true, MaxAge = TimeSpan.Zero };");
 
                     string varyValueComparison = varyByProperty.Type switch
                     {

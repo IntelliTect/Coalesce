@@ -39,7 +39,6 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
                 "Microsoft.AspNetCore.Authorization",
                 "Microsoft.AspNetCore.Mvc",
                 "Microsoft.AspNetCore.Http",
-                "Microsoft.Net.Http.Headers",
                 "System",
                 "System.Linq",
                 "System.Collections.Generic",
@@ -303,8 +302,11 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
                         b.Line($"_contentType = \"application/octet-stream\";");
                     }
 
-
-                    b.Line($"return File({resultVar}.{nameof(IFile.Content)}, _contentType, {fileNameVar});");
+                    var contentStreamVar = $"{resultVar}.{nameof(IFile.Content)}";
+                    // Use range processing if the result stream isn't a MemoryStream.
+                    // MemoryStreams are just going to mean we're dumping the whole byte array straight back to the client.
+                    // Other streams might be more elegant, e.g. QueryableContentStream 
+                    b.Line($"return File({contentStreamVar}, _contentType, {fileNameVar}, !({contentStreamVar} is System.IO.MemoryStream));");
                 }
             }
 

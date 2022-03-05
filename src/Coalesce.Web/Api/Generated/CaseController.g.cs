@@ -11,7 +11,6 @@ using IntelliTect.Coalesce.TypeDefinition;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Net.Http.Headers;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -114,11 +113,11 @@ namespace Coalesce.Web.Api
         }
 
         /// <summary>
-        /// Method: UploadImage
+        /// Method: UploadAttachment
         /// </summary>
-        [HttpPost("UploadImage")]
+        [HttpPost("UploadAttachment")]
         [Authorize]
-        public virtual async Task<ItemResult> UploadImage([FromServices] IDataSourceFactory dataSourceFactory, int id, Microsoft.AspNetCore.Http.IFormFile file)
+        public virtual async Task<ItemResult> UploadAttachment([FromServices] IDataSourceFactory dataSourceFactory, int id, Microsoft.AspNetCore.Http.IFormFile file)
         {
             var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Case, Coalesce.Domain.Case>("Default");
             var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
@@ -127,111 +126,7 @@ namespace Coalesce.Web.Api
                 return new ItemResult(itemResult);
             }
             var item = itemResult.Object;
-            await item.UploadImage(file == null ? null : new File { Name = file.FileName, ContentType = file.ContentType, Length = file.Length, Content = file.OpenReadStream() });
-            await Db.SaveChangesAsync();
-            var _result = new ItemResult();
-            return _result;
-        }
-
-        /// <summary>
-        /// Method: UploadAndDownload
-        /// </summary>
-        [HttpPost("UploadAndDownload")]
-        [Authorize]
-        public virtual async Task<ActionResult<ItemResult<IntelliTect.Coalesce.Models.IFile>>> UploadAndDownload([FromServices] IDataSourceFactory dataSourceFactory, int id, Microsoft.AspNetCore.Http.IFormFile file)
-        {
-            var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Case, Coalesce.Domain.Case>("Default");
-            var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
-            if (!itemResult.WasSuccessful)
-            {
-                return new ItemResult<IntelliTect.Coalesce.Models.IFile>(itemResult);
-            }
-            var item = itemResult.Object;
-            var _methodResult = await item.UploadAndDownload(file == null ? null : new File { Name = file.FileName, ContentType = file.ContentType, Length = file.Length, Content = file.OpenReadStream() });
-            await Db.SaveChangesAsync();
-            if (_methodResult.Object != null)
-            {
-                string _contentType = _methodResult.Object.ContentType;
-                if (string.IsNullOrWhiteSpace(_contentType) && (
-                    string.IsNullOrWhiteSpace(_methodResult.Object.Name) ||
-                    !(new Microsoft.AspNetCore.StaticFiles.FileExtensionContentTypeProvider().TryGetContentType(_methodResult.Object.Name, out _contentType))
-                ))
-                {
-                    _contentType = "application/octet-stream";
-                }
-                return File(_methodResult.Object.Content, _contentType, _methodResult.Object.Name);
-            }
-            var _result = new ItemResult<IntelliTect.Coalesce.Models.IFile>(_methodResult);
-            _result.Object = _methodResult.Object;
-            return _result;
-        }
-
-        /// <summary>
-        /// Method: DownloadImage
-        /// </summary>
-        [HttpGet("DownloadImage")]
-        [Authorize]
-        public virtual async Task<ActionResult<ItemResult<IntelliTect.Coalesce.Models.IFile>>> DownloadImage([FromServices] IDataSourceFactory dataSourceFactory, int id, string etag)
-        {
-            var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Case, Coalesce.Domain.Case>("Default");
-            var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
-            if (!itemResult.WasSuccessful)
-            {
-                return new ItemResult<IntelliTect.Coalesce.Models.IFile>(itemResult);
-            }
-            var item = itemResult.Object;
-            var _methodResult = item.DownloadImage();
-            await Db.SaveChangesAsync();
-
-            var _currentVaryValue = item.ImageHash;
-            if (_currentVaryValue != default)
-            {
-                var _expectedEtagHeader = new EntityTagHeaderValue('"' + Microsoft.AspNetCore.WebUtilities.Base64UrlTextEncoder.Encode(System.Text.Encoding.UTF8.GetBytes(_currentVaryValue)) + '"');
-                var _cacheControlHeader = new CacheControlHeaderValue { Private = true, MaxAge = TimeSpan.Zero };
-                if (etag != default && _currentVaryValue == etag)
-                {
-                    _cacheControlHeader.MaxAge = TimeSpan.FromDays(30);
-                }
-                Response.GetTypedHeaders().CacheControl = _cacheControlHeader;
-                Response.GetTypedHeaders().ETag = _expectedEtagHeader;
-                if (Request.GetTypedHeaders().IfNoneMatch.Any(value => value.Compare(_expectedEtagHeader, true)))
-                {
-                    return StatusCode(StatusCodes.Status304NotModified);
-                }
-            }
-
-            if (_methodResult != null)
-            {
-                string _contentType = _methodResult.ContentType;
-                if (string.IsNullOrWhiteSpace(_contentType) && (
-                    string.IsNullOrWhiteSpace(_methodResult.Name) ||
-                    !(new Microsoft.AspNetCore.StaticFiles.FileExtensionContentTypeProvider().TryGetContentType(_methodResult.Name, out _contentType))
-                ))
-                {
-                    _contentType = "application/octet-stream";
-                }
-                return File(_methodResult.Content, _contentType, _methodResult.Name);
-            }
-            var _result = new ItemResult<IntelliTect.Coalesce.Models.IFile>();
-            _result.Object = _methodResult;
-            return _result;
-        }
-
-        /// <summary>
-        /// Method: UploadImages
-        /// </summary>
-        [HttpPost("UploadImages")]
-        [Authorize]
-        public virtual async Task<ItemResult> UploadImages([FromServices] IDataSourceFactory dataSourceFactory, int id, System.Collections.Generic.ICollection<Microsoft.AspNetCore.Http.IFormFile> files)
-        {
-            var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Case, Coalesce.Domain.Case>("Default");
-            var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
-            if (!itemResult.WasSuccessful)
-            {
-                return new ItemResult(itemResult);
-            }
-            var item = itemResult.Object;
-            await item.UploadImages(files == null ? null : files.Select(f => (IntelliTect.Coalesce.Models.IFile)new File { Name = f.FileName, ContentType = f.ContentType, Length = f.Length, Content = f.OpenReadStream() }).ToList());
+            await item.UploadAttachment(file == null ? null : new File { Name = file.FileName, ContentType = file.ContentType, Length = file.Length, Content = file.OpenReadStream() });
             await Db.SaveChangesAsync();
             var _result = new ItemResult();
             return _result;
@@ -270,6 +165,266 @@ namespace Coalesce.Web.Api
             var _result = new ItemResult<CaseSummaryDtoGen>();
             _result.Object = Mapper.MapToDto<Coalesce.Domain.CaseSummary, CaseSummaryDtoGen>(_methodResult, _mappingContext, includeTree);
             return _result;
+        }
+
+        /// <summary>
+        /// File Download: Image
+        /// </summary>
+        [Authorize]
+        [HttpGet("Image")]
+        public virtual async Task<IActionResult> ImageGet(int id, IDataSource<Coalesce.Domain.Case> dataSource)
+        {
+            var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
+            if (itemResult.Object?.Image == null) return NotFound();
+            string contentType = "image/jpeg";
+            if (!(new Microsoft.AspNetCore.StaticFiles.FileExtensionContentTypeProvider().TryGetContentType(itemResult.Object.ImageName, out contentType)))
+            {
+                contentType = "image/jpeg";
+            }
+            return File(itemResult.Object.Image, contentType, itemResult.Object.ImageName);
+        }
+
+        /// <summary>
+        /// File Upload: Image
+        /// </summary>
+        [Authorize]
+        [HttpPut("Image")]
+        public virtual async Task<ItemResult<CaseDtoGen>> ImagePut(int id, IFormFile file, IDataSource<Coalesce.Domain.Case> dataSource, IBehaviors<Coalesce.Domain.Case> behaviors)
+        {
+            var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
+            if (!itemResult.WasSuccessful) return new ItemResult<CaseDtoGen>(itemResult);
+            using (var stream = new System.IO.MemoryStream())
+            {
+                await file.CopyToAsync(stream);
+                itemResult.Object.Image = stream.ToArray();
+                using (var sha256Hash = System.Security.Cryptography.SHA256.Create())
+                {
+                    var hash = sha256Hash.ComputeHash(itemResult.Object.Image);
+                    itemResult.Object.ImageHash = Convert.ToBase64String(hash);
+                }
+                itemResult.Object.ImageSize = file.Length;
+                await Db.SaveChangesAsync();
+            }
+            var result = new ItemResult<CaseDtoGen>();
+            var mappingContext = new MappingContext(User);
+            result.Object = Mapper.MapToDto<Coalesce.Domain.Case, CaseDtoGen>(itemResult.Object, mappingContext, null);
+            return result;
+        }
+
+        /// <summary>
+        /// File Delete: Image
+        /// </summary>
+        [Authorize]
+        [HttpDelete("Image")]
+        public virtual async Task<IActionResult> ImageDelete(int id, IDataSource<Coalesce.Domain.Case> dataSource, IBehaviors<Coalesce.Domain.Case> behaviors)
+        {
+            var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
+            if (!itemResult.WasSuccessful) return NotFound();
+            itemResult.Object.ImageHash = null;
+            itemResult.Object.ImageSize = 0;
+            itemResult.Object.Image = null;
+            await Db.SaveChangesAsync();
+            return Ok();
+        }
+
+        /// <summary>
+        /// File Download: PlainAttachment
+        /// </summary>
+        [AllowAnonymous]
+        [HttpGet("PlainAttachment")]
+        public virtual async Task<IActionResult> PlainAttachmentGet(int id, IDataSource<Coalesce.Domain.Case> dataSource)
+        {
+            var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
+            if (itemResult.Object?.PlainAttachment == null) return NotFound();
+            string contentType = "text/plain";
+            return File(itemResult.Object.PlainAttachment, contentType);
+        }
+
+        /// <summary>
+        /// File Upload: PlainAttachment
+        /// </summary>
+        [Authorize]
+        [HttpPut("PlainAttachment")]
+        public virtual async Task<ItemResult<CaseDtoGen>> PlainAttachmentPut(int id, IFormFile file, IDataSource<Coalesce.Domain.Case> dataSource, IBehaviors<Coalesce.Domain.Case> behaviors)
+        {
+            var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
+            if (!itemResult.WasSuccessful) return new ItemResult<CaseDtoGen>(itemResult);
+            using (var stream = new System.IO.MemoryStream())
+            {
+                await file.CopyToAsync(stream);
+                itemResult.Object.PlainAttachment = stream.ToArray();
+                await Db.SaveChangesAsync();
+            }
+            var result = new ItemResult<CaseDtoGen>();
+            var mappingContext = new MappingContext(User);
+            result.Object = Mapper.MapToDto<Coalesce.Domain.Case, CaseDtoGen>(itemResult.Object, mappingContext, null);
+            return result;
+        }
+
+        /// <summary>
+        /// File Delete: PlainAttachment
+        /// </summary>
+        [Authorize]
+        [HttpDelete("PlainAttachment")]
+        public virtual async Task<IActionResult> PlainAttachmentDelete(int id, IDataSource<Coalesce.Domain.Case> dataSource, IBehaviors<Coalesce.Domain.Case> behaviors)
+        {
+            var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
+            if (!itemResult.WasSuccessful) return NotFound();
+            itemResult.Object.PlainAttachment = null;
+            await Db.SaveChangesAsync();
+            return Ok();
+        }
+
+        /// <summary>
+        /// File Download: RestrictedUploadAttachment
+        /// </summary>
+        [Authorize]
+        [HttpGet("RestrictedUploadAttachment")]
+        public virtual async Task<IActionResult> RestrictedUploadAttachmentGet(int id, IDataSource<Coalesce.Domain.Case> dataSource)
+        {
+            var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
+            if (itemResult.Object?.RestrictedUploadAttachment == null) return NotFound();
+            string contentType = "application/octet-stream";
+            return File(itemResult.Object.RestrictedUploadAttachment, contentType);
+        }
+
+        /// <summary>
+        /// File Upload: RestrictedUploadAttachment
+        /// </summary>
+        [Authorize(Roles = "Admin,SuperUser")]
+        [HttpPut("RestrictedUploadAttachment")]
+        public virtual async Task<ItemResult<CaseDtoGen>> RestrictedUploadAttachmentPut(int id, IFormFile file, IDataSource<Coalesce.Domain.Case> dataSource, IBehaviors<Coalesce.Domain.Case> behaviors)
+        {
+            var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
+            if (!itemResult.WasSuccessful) return new ItemResult<CaseDtoGen>(itemResult);
+            using (var stream = new System.IO.MemoryStream())
+            {
+                await file.CopyToAsync(stream);
+                itemResult.Object.RestrictedUploadAttachment = stream.ToArray();
+                await Db.SaveChangesAsync();
+            }
+            var result = new ItemResult<CaseDtoGen>();
+            var mappingContext = new MappingContext(User);
+            result.Object = Mapper.MapToDto<Coalesce.Domain.Case, CaseDtoGen>(itemResult.Object, mappingContext, null);
+            return result;
+        }
+
+        /// <summary>
+        /// File Delete: RestrictedUploadAttachment
+        /// </summary>
+        [Authorize]
+        [HttpDelete("RestrictedUploadAttachment")]
+        public virtual async Task<IActionResult> RestrictedUploadAttachmentDelete(int id, IDataSource<Coalesce.Domain.Case> dataSource, IBehaviors<Coalesce.Domain.Case> behaviors)
+        {
+            var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
+            if (!itemResult.WasSuccessful) return NotFound();
+            itemResult.Object.RestrictedUploadAttachment = null;
+            await Db.SaveChangesAsync();
+            return Ok();
+        }
+
+        /// <summary>
+        /// File Download: RestrictedDownloadAttachment
+        /// </summary>
+        [Authorize(Roles = "Admin,OtherRole")]
+        [HttpGet("RestrictedDownloadAttachment")]
+        public virtual async Task<IActionResult> RestrictedDownloadAttachmentGet(int id, IDataSource<Coalesce.Domain.Case> dataSource)
+        {
+            var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
+            if (itemResult.Object?.RestrictedDownloadAttachment == null) return NotFound();
+            string contentType = "application/octet-stream";
+            return File(itemResult.Object.RestrictedDownloadAttachment, contentType);
+        }
+
+        /// <summary>
+        /// File Upload: RestrictedDownloadAttachment
+        /// </summary>
+        [Authorize]
+        [HttpPut("RestrictedDownloadAttachment")]
+        public virtual async Task<ItemResult<CaseDtoGen>> RestrictedDownloadAttachmentPut(int id, IFormFile file, IDataSource<Coalesce.Domain.Case> dataSource, IBehaviors<Coalesce.Domain.Case> behaviors)
+        {
+            var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
+            if (!itemResult.WasSuccessful) return new ItemResult<CaseDtoGen>(itemResult);
+            using (var stream = new System.IO.MemoryStream())
+            {
+                await file.CopyToAsync(stream);
+                itemResult.Object.RestrictedDownloadAttachment = stream.ToArray();
+                await Db.SaveChangesAsync();
+            }
+            var result = new ItemResult<CaseDtoGen>();
+            var mappingContext = new MappingContext(User);
+            result.Object = Mapper.MapToDto<Coalesce.Domain.Case, CaseDtoGen>(itemResult.Object, mappingContext, null);
+            return result;
+        }
+
+        /// <summary>
+        /// File Delete: RestrictedDownloadAttachment
+        /// </summary>
+        [Authorize]
+        [HttpDelete("RestrictedDownloadAttachment")]
+        public virtual async Task<IActionResult> RestrictedDownloadAttachmentDelete(int id, IDataSource<Coalesce.Domain.Case> dataSource, IBehaviors<Coalesce.Domain.Case> behaviors)
+        {
+            var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
+            if (!itemResult.WasSuccessful) return NotFound();
+            itemResult.Object.RestrictedDownloadAttachment = null;
+            await Db.SaveChangesAsync();
+            return Ok();
+        }
+
+        /// <summary>
+        /// File Download: RestrictedMetaAttachment
+        /// </summary>
+        [Authorize]
+        [HttpGet("RestrictedMetaAttachment")]
+        public virtual async Task<IActionResult> RestrictedMetaAttachmentGet(int id, IDataSource<Coalesce.Domain.Case> dataSource)
+        {
+            var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
+            if (itemResult.Object?.RestrictedMetaAttachment == null) return NotFound();
+            string contentType = "application/octet-stream";
+            if (!(new Microsoft.AspNetCore.StaticFiles.FileExtensionContentTypeProvider().TryGetContentType(itemResult.Object.InternalUseFileName, out contentType)))
+            {
+                contentType = "application/octet-stream";
+            }
+            return File(itemResult.Object.RestrictedMetaAttachment, contentType, itemResult.Object.InternalUseFileName);
+        }
+
+        /// <summary>
+        /// File Upload: RestrictedMetaAttachment
+        /// </summary>
+        [Authorize]
+        [HttpPut("RestrictedMetaAttachment")]
+        public virtual async Task<ItemResult<CaseDtoGen>> RestrictedMetaAttachmentPut(int id, IFormFile file, IDataSource<Coalesce.Domain.Case> dataSource, IBehaviors<Coalesce.Domain.Case> behaviors)
+        {
+            var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
+            if (!itemResult.WasSuccessful) return new ItemResult<CaseDtoGen>(itemResult);
+            using (var stream = new System.IO.MemoryStream())
+            {
+                await file.CopyToAsync(stream);
+                itemResult.Object.RestrictedMetaAttachment = stream.ToArray();
+                itemResult.Object.InternalUseFileName = file.FileName;
+                itemResult.Object.InternalUseFileSize = file.Length;
+                await Db.SaveChangesAsync();
+            }
+            var result = new ItemResult<CaseDtoGen>();
+            var mappingContext = new MappingContext(User);
+            result.Object = Mapper.MapToDto<Coalesce.Domain.Case, CaseDtoGen>(itemResult.Object, mappingContext, null);
+            return result;
+        }
+
+        /// <summary>
+        /// File Delete: RestrictedMetaAttachment
+        /// </summary>
+        [Authorize]
+        [HttpDelete("RestrictedMetaAttachment")]
+        public virtual async Task<IActionResult> RestrictedMetaAttachmentDelete(int id, IDataSource<Coalesce.Domain.Case> dataSource, IBehaviors<Coalesce.Domain.Case> behaviors)
+        {
+            var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
+            if (!itemResult.WasSuccessful) return NotFound();
+            itemResult.Object.InternalUseFileName = null;
+            itemResult.Object.InternalUseFileSize = 0;
+            itemResult.Object.RestrictedMetaAttachment = null;
+            await Db.SaveChangesAsync();
+            return Ok();
         }
     }
 }

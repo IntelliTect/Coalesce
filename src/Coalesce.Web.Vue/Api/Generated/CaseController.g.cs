@@ -11,7 +11,6 @@ using IntelliTect.Coalesce.TypeDefinition;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Net.Http.Headers;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -114,11 +113,11 @@ namespace Coalesce.Web.Vue.Api
         }
 
         /// <summary>
-        /// Method: UploadAttachment
+        /// Method: UploadImage
         /// </summary>
-        [HttpPost("UploadAttachment")]
+        [HttpPost("UploadImage")]
         [Authorize]
-        public virtual async Task<ItemResult> UploadAttachment([FromServices] IDataSourceFactory dataSourceFactory, int id, Microsoft.AspNetCore.Http.IFormFile file)
+        public virtual async Task<ItemResult> UploadImage([FromServices] IDataSourceFactory dataSourceFactory, int id, Microsoft.AspNetCore.Http.IFormFile file)
         {
             var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Case, Coalesce.Domain.Case>("Default");
             var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
@@ -127,18 +126,18 @@ namespace Coalesce.Web.Vue.Api
                 return new ItemResult(itemResult);
             }
             var item = itemResult.Object;
-            await item.UploadAttachment(file == null ? null : new File { Name = file.FileName, ContentType = file.ContentType, Length = file.Length, Content = file.OpenReadStream() });
+            await item.UploadImage(Db, file == null ? null : new File { Name = file.FileName, ContentType = file.ContentType, Length = file.Length, Content = file.OpenReadStream() });
             await Db.SaveChangesAsync();
             var _result = new ItemResult();
             return _result;
         }
 
         /// <summary>
-        /// Method: UploadAndDownload
+        /// Method: DownloadImage
         /// </summary>
-        [HttpPost("UploadAndDownload")]
+        [HttpGet("DownloadImage")]
         [Authorize]
-        public virtual async Task<ActionResult<ItemResult<IntelliTect.Coalesce.Models.IFile>>> UploadAndDownload([FromServices] IDataSourceFactory dataSourceFactory, int id, Microsoft.AspNetCore.Http.IFormFile file)
+        public virtual async Task<ActionResult<ItemResult<IntelliTect.Coalesce.Models.IFile>>> DownloadImage([FromServices] IDataSourceFactory dataSourceFactory, int id, byte[] etag)
         {
             var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Case, Coalesce.Domain.Case>("Default");
             var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
@@ -147,48 +146,15 @@ namespace Coalesce.Web.Vue.Api
                 return new ItemResult<IntelliTect.Coalesce.Models.IFile>(itemResult);
             }
             var item = itemResult.Object;
-            var _methodResult = await item.UploadAndDownload(file == null ? null : new File { Name = file.FileName, ContentType = file.ContentType, Length = file.Length, Content = file.OpenReadStream() });
-            await Db.SaveChangesAsync();
-            if (_methodResult.Object != null)
-            {
-                string _contentType = _methodResult.Object.ContentType;
-                if (string.IsNullOrWhiteSpace(_contentType) && (
-                    string.IsNullOrWhiteSpace(_methodResult.Object.Name) ||
-                    !(new Microsoft.AspNetCore.StaticFiles.FileExtensionContentTypeProvider().TryGetContentType(_methodResult.Object.Name, out _contentType))
-                ))
-                {
-                    _contentType = "application/octet-stream";
-                }
-                return File(_methodResult.Object.Content, _contentType, _methodResult.Object.Name);
-            }
-            var _result = new ItemResult<IntelliTect.Coalesce.Models.IFile>(_methodResult);
-            _result.Object = _methodResult.Object;
-            return _result;
-        }
-
-        /// <summary>
-        /// Method: DownloadAttachment
-        /// </summary>
-        [HttpGet("DownloadAttachment")]
-        [Authorize]
-        public virtual async Task<ActionResult<ItemResult<IntelliTect.Coalesce.Models.IFile>>> DownloadAttachment([FromServices] IDataSourceFactory dataSourceFactory, int id, System.DateTimeOffset etag)
-        {
-            var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Case, Coalesce.Domain.Case>("Default");
-            var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
-            if (!itemResult.WasSuccessful)
-            {
-                return new ItemResult<IntelliTect.Coalesce.Models.IFile>(itemResult);
-            }
-            var item = itemResult.Object;
-            var _methodResult = item.DownloadAttachment();
+            var _methodResult = item.DownloadImage(Db);
             await Db.SaveChangesAsync();
 
-            var _currentVaryValue = item.OpenedAt;
+            var _currentVaryValue = item.AttachmentHash;
             if (_currentVaryValue != default)
             {
-                var _expectedEtagHeader = new EntityTagHeaderValue('"' + Microsoft.AspNetCore.WebUtilities.Base64UrlTextEncoder.Encode(System.Text.Encoding.UTF8.GetBytes(_currentVaryValue.ToString())) + '"');
-                var _cacheControlHeader = new CacheControlHeaderValue { Private = true, MaxAge = TimeSpan.Zero };
-                if (etag != default && _currentVaryValue.AddTicks(-_currentVaryValue.Ticks % TimeSpan.TicksPerMillisecond) == etag)
+                var _expectedEtagHeader = new Microsoft.Net.Http.Headers.EntityTagHeaderValue('"' + Microsoft.AspNetCore.WebUtilities.Base64UrlTextEncoder.Encode(_currentVaryValue) + '"');
+                var _cacheControlHeader = new Microsoft.Net.Http.Headers.CacheControlHeaderValue { Private = true, MaxAge = TimeSpan.Zero };
+                if (etag != default && _currentVaryValue.SequenceEqual(etag))
                 {
                     _cacheControlHeader.MaxAge = TimeSpan.FromDays(30);
                 }
@@ -210,7 +176,7 @@ namespace Coalesce.Web.Vue.Api
                 {
                     _contentType = "application/octet-stream";
                 }
-                return File(_methodResult.Content, _contentType, _methodResult.Name);
+                return File(_methodResult.Content, _contentType, _methodResult.Name, !(_methodResult.Content is System.IO.MemoryStream));
             }
             var _result = new ItemResult<IntelliTect.Coalesce.Models.IFile>();
             _result.Object = _methodResult;
@@ -218,11 +184,44 @@ namespace Coalesce.Web.Vue.Api
         }
 
         /// <summary>
-        /// Method: UploadAttachments
+        /// Method: UploadAndDownload
         /// </summary>
-        [HttpPost("UploadAttachments")]
+        [HttpPost("UploadAndDownload")]
         [Authorize]
-        public virtual async Task<ItemResult> UploadAttachments([FromServices] IDataSourceFactory dataSourceFactory, int id, System.Collections.Generic.ICollection<Microsoft.AspNetCore.Http.IFormFile> files)
+        public virtual async Task<ActionResult<ItemResult<IntelliTect.Coalesce.Models.IFile>>> UploadAndDownload([FromServices] IDataSourceFactory dataSourceFactory, int id, Microsoft.AspNetCore.Http.IFormFile file)
+        {
+            var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Case, Coalesce.Domain.Case>("Default");
+            var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
+            if (!itemResult.WasSuccessful)
+            {
+                return new ItemResult<IntelliTect.Coalesce.Models.IFile>(itemResult);
+            }
+            var item = itemResult.Object;
+            var _methodResult = await item.UploadAndDownload(Db, file == null ? null : new File { Name = file.FileName, ContentType = file.ContentType, Length = file.Length, Content = file.OpenReadStream() });
+            await Db.SaveChangesAsync();
+            if (_methodResult.Object != null)
+            {
+                string _contentType = _methodResult.Object.ContentType;
+                if (string.IsNullOrWhiteSpace(_contentType) && (
+                    string.IsNullOrWhiteSpace(_methodResult.Object.Name) ||
+                    !(new Microsoft.AspNetCore.StaticFiles.FileExtensionContentTypeProvider().TryGetContentType(_methodResult.Object.Name, out _contentType))
+                ))
+                {
+                    _contentType = "application/octet-stream";
+                }
+                return File(_methodResult.Object.Content, _contentType, _methodResult.Object.Name, !(_methodResult.Object.Content is System.IO.MemoryStream));
+            }
+            var _result = new ItemResult<IntelliTect.Coalesce.Models.IFile>(_methodResult);
+            _result.Object = _methodResult.Object;
+            return _result;
+        }
+
+        /// <summary>
+        /// Method: UploadImages
+        /// </summary>
+        [HttpPost("UploadImages")]
+        [Authorize]
+        public virtual async Task<ItemResult> UploadImages([FromServices] IDataSourceFactory dataSourceFactory, int id, System.Collections.Generic.ICollection<Microsoft.AspNetCore.Http.IFormFile> files)
         {
             var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Case, Coalesce.Domain.Case>("Default");
             var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
@@ -231,7 +230,7 @@ namespace Coalesce.Web.Vue.Api
                 return new ItemResult(itemResult);
             }
             var item = itemResult.Object;
-            await item.UploadAttachments(files == null ? null : files.Select(f => (IntelliTect.Coalesce.Models.IFile)new File { Name = f.FileName, ContentType = f.ContentType, Length = f.Length, Content = f.OpenReadStream() }).ToList());
+            await item.UploadImages(Db, files == null ? null : files.Select(f => (IntelliTect.Coalesce.Models.IFile)new File { Name = f.FileName, ContentType = f.ContentType, Length = f.Length, Content = f.OpenReadStream() }).ToList());
             await Db.SaveChangesAsync();
             var _result = new ItemResult();
             return _result;

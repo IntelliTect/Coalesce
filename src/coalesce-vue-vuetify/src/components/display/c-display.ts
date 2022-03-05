@@ -2,8 +2,6 @@ import Vue, { PropOptions } from "vue";
 import { getValueMeta } from "../c-metadata-component";
 import { propDisplay, valueDisplay, Property, DisplayOptions, Model, ClassType, DateValue } from "coalesce-vue";
 
-import CFileDisplay from "./c-file-display";
-
 const standaloneDateValueMeta = <DateValue>{ name: '', displayName: '', type: 'date', dateKind: 'datetime' };
 
 export default Vue.extend({
@@ -36,17 +34,6 @@ export default Vue.extend({
     let meta = getValueMeta(props.for, modelMeta, ctx.parent.$coalesce.metadata);
     if (!meta && modelMeta && "displayProp" in modelMeta) {
       meta = modelMeta.displayProp || null;
-    }
-
-    const value = valueProp 
-      ?? (modelMeta && meta ? (model as any)[meta!.name] : null);
-
-    if (value instanceof File) {
-      // Delegate files to c-file-display so that they can manage the lifetime
-      // of their requisite URL.createObjectURL() instances.
-      return h(CFileDisplay, {
-        props: { value }
-      })
     }
 
     if (!meta && valueProp instanceof Date) {

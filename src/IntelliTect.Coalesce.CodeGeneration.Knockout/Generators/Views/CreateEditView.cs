@@ -82,17 +82,6 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
                             }
                         }
                     }
-
-                    // Maybe we'll use this, maybe not. Puts file-returning methods as first-class citizens up with the object's properties.
-                    // Perhaps this should be attribute controllable?
-                    //foreach (var method in GetFileDownloadMethods())
-                    //{
-                    //    using (b.TagBlock("div", "form-group"))
-                    //    {
-                    //        b.Line($"<label class=\"col-md-4 control-label\">{method.DisplayName}</label>");
-                    //        b.Line($"<div class=\"col-md-8 method-{method.JsVariable}\" data-bind=\"with: {method.JsVariable}\">{Display.MethodFileResult(method)}</div>");
-                    //    }
-                    //}
                 }
             }
             
@@ -123,9 +112,13 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
                 b.Line("    }");
                 b.Line("});");
 
-                foreach (var method in GetFileDownloadMethods())
+                foreach (var method in GetFileAutoDownloadMethods())
                 {
-                    b.Line($"model.{method.JsVariable}.url.subscribe(() => model.myId && setTimeout(() => !model.isLoading() && !model.{method.JsVariable}.isLoading() && model.{method.JsVariable}.invoke(undefined, false), 1))");
+                    // Reload parameterless file downloads when their url changes.
+                    // The setTimeout is because knockout doesn't batch its subscriptions (unlike vue's watchers),
+                    // so when the model comes back from the server it will trigger this multiple times
+                    // as each dependent property gets loaded.
+                    b.Line($"model.{method.JsVariable}.url.extend({{ throttle: 1 }}).subscribe(() => model.myId && model.{method.JsVariable}.invoke(undefined, false))");
                 }
 
                 b.Line("@if (ViewBag.Id != null)");
@@ -156,8 +149,11 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
         /// get auto loaded. If they're images or videos, they'll get rendered in the method result area.
         /// </summary>
         /// <returns></returns>
-        public IEnumerable<MethodViewModel> GetFileDownloadMethods()
+        public IEnumerable<MethodViewModel> GetFileAutoDownloadMethods()
         {
+            // TODO: We could add HTTP HEAD support to file-returning GET endpoints
+            // and then look at the size on the client to determine if an auto-download is practical.
+
             return Model.ClientMethods.Where(m => 
                 m.IsModelInstanceMethod && 
                 m.ResultType.IsFile && 

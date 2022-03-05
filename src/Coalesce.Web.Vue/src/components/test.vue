@@ -1,5 +1,12 @@
 <template>
   <v-container grid-list-lg>
+    
+    <video v-if="caseVm.caseKey" :src="caseVm.downloadImage.url" controls style="max-width: 100%">
+    </video>
+<!-- 
+    <video v-if="caseVm.caseKey" :src="caseVm.downloadImage.getResultObjectUrl(this)" controls style="max-width: 100%">
+    </video> -->
+<!-- 
     <v-layout v-if="person != null" >
       <v-flex xs12>
         <v-card >
@@ -19,7 +26,6 @@
               <v-icon left>cancel</v-icon>
               Cancel
             </v-btn>
-            <!-- <c-input :model="personList.personCount" for="lastNameStartsWith" /> -->
             <v-btn flat color="primary"
                    @click.native="person.$save()"
                    :loading="person.$save.isLoading"
@@ -33,7 +39,6 @@
       
     </v-layout>
     
-            <img :src="caseVm.downloadAttachment.url">
     <v-layout >
 
       <v-flex xs12>
@@ -62,7 +67,7 @@
           </template>
         </v-data-table>
       </v-flex>
-    </v-layout>
+    </v-layout> -->
     
   </v-container>
 
@@ -142,7 +147,7 @@
 
     async created() {
       
-      this.caseVm.$load(1);
+      await this.caseVm.$load(16);
       await this.company.$load(1);
 
       await this.person.$load(1)

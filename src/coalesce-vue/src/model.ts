@@ -810,11 +810,13 @@ class DisplayVisitor extends Visitor<
     if (parsed == null) return null;
 
     if (typeof parsed == "string") {
-      const bytesApprox = Math.ceil(3 * (parsed.length / 4));
-      return `${bytesApprox} bytes`
+      let padding = 0;
+      while (parsed[parsed.length - 1 - padding] == '=') padding++;
+      const bytes = (3 * (parsed.length / 4)) - (padding);
+      return `${bytes.toLocaleString()} bytes`
     }
 
-    return `${parsed.byteLength} bytes`
+    return `${parsed.byteLength.toLocaleString()} bytes`
   }
 
   protected visitPrimitiveValue(

@@ -58,7 +58,7 @@
     {
         @:model.@(((string)(@kvp.Key)))(@kvp.Value);
     }
-    
+
     window.onbeforeunload = function(){
         if (model.isDirty()) model.save();
     }

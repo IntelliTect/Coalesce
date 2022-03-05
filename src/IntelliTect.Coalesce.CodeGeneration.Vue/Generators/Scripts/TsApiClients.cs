@@ -62,10 +62,13 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
 
         private static void WriteApiEndpointFunction(TypeScriptCodeBuilder b, ClassViewModel model, MethodViewModel method)
         {
+            var paramTypeFlags = VueType.Flags.None;
+            if (method.HasHttpRequestBody) paramTypeFlags |= VueType.Flags.RawBinary;
+
             string signature =
                 string.Concat(method.ApiParameters.Select(f => 
                     $"{f.JsVariable}: " +
-                    $"{new VueType(f.Type, VueType.Flags.RawBinary).TsType("$models")}" +
+                    $"{new VueType(f.Type, paramTypeFlags).TsType("$models")}" +
                     (f.ParentSourceProp?.IsPrimaryKey == true ? "" : " | null") +  
                     ", "
                 ))

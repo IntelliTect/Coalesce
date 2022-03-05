@@ -34,10 +34,9 @@ module ViewModels {
         public assignedTo: KnockoutObservable<ViewModels.Person | null> = ko.observable(null);
         public reportedById: KnockoutObservable<number | null> = ko.observable(null);
         public reportedBy: KnockoutObservable<ViewModels.Person | null> = ko.observable(null);
-        public imageName: KnockoutObservable<string | null> = ko.observable(null);
-        public imageSize: KnockoutObservable<number | null> = ko.observable(null);
-        public imageHash: KnockoutObservable<string | null> = ko.observable(null);
+        public attachmentSize: KnockoutObservable<number | null> = ko.observable(null);
         public attachmentName: KnockoutObservable<string | null> = ko.observable(null);
+        public attachmentHash: KnockoutObservable<string | null> = ko.observable(null);
         public severity: KnockoutObservable<string | null> = ko.observable(null);
         public status: KnockoutObservable<number | null> = ko.observable(null);
         
@@ -133,6 +132,41 @@ module ViewModels {
             };
         };
         
+        /** Methods and properties for invoking server method DownloadImage. */
+        public readonly downloadImage = new Case.DownloadImage(this);
+        public static DownloadImage = class DownloadImage extends Coalesce.ClientMethod<Case, File> {
+            public readonly name = 'DownloadImage';
+            public readonly verb = 'GET';
+            protected readonly returnsFile = true;
+            
+            /** Calls server method (DownloadImage) with the given arguments */
+            public invoke = (callback?: (result: File) => void, reload: boolean = true): JQueryPromise<any> => {
+                return this.invokeWithData({ id: this.parent.caseKey(), etag: this.parent.attachmentHash() }, callback, reload);
+            };
+            
+            protected loadResponse = (data: Blob, jqXHR: JQuery.jqXHR, callback?: (result: File) => void, reload: boolean = true) => {
+                const file = new File([data], Coalesce.Utilities.getFileNameFromContentDisposition(jqXHR.getResponseHeader('content-disposition')), { type: data.type });
+                this.result(file);
+                if (this.resultObjectUrl()) URL.revokeObjectURL(this.resultObjectUrl()!);
+                this.resultObjectUrl(URL.createObjectURL(file));
+                if (reload) {
+                    var result = this.result();
+                    this.parent.load(null, typeof(callback) == 'function' ? () => callback(result) : undefined);
+                } else if (typeof(callback) == 'function') {
+                    callback(this.result());
+                }
+            };
+            
+            /** An object URL (https://developer.mozilla.org/en-US/docs/Web/API/URL/createObjectURL) representing the last successful response file. */
+            public resultObjectUrl: KnockoutObservable<string | null> = ko.observable(null);
+            
+            /** URL for method 'DownloadImage' */
+            public url: KnockoutComputed<string> = ko.pureComputed(() => 
+                this.parent.coalesceConfig.baseApiUrl() + this.parent.apiController + '/' + this.name + '?'
+                + $.param({ id: this.parent.caseKey(), etag: this.parent.attachmentHash() })
+            );
+        };
+        
         /** Methods and properties for invoking server method UploadAndDownload. */
         public readonly uploadAndDownload = new Case.UploadAndDownload(this);
         public static UploadAndDownload = class UploadAndDownload extends Coalesce.ClientMethod<Case, File> {
@@ -178,41 +212,6 @@ module ViewModels {
             
             /** An object URL (https://developer.mozilla.org/en-US/docs/Web/API/URL/createObjectURL) representing the last successful response file. */
             public resultObjectUrl: KnockoutObservable<string | null> = ko.observable(null);
-        };
-        
-        /** Methods and properties for invoking server method DownloadImage. */
-        public readonly downloadImage = new Case.DownloadImage(this);
-        public static DownloadImage = class DownloadImage extends Coalesce.ClientMethod<Case, File> {
-            public readonly name = 'DownloadImage';
-            public readonly verb = 'GET';
-            protected readonly returnsFile = true;
-            
-            /** Calls server method (DownloadImage) with the given arguments */
-            public invoke = (callback?: (result: File) => void, reload: boolean = true): JQueryPromise<any> => {
-                return this.invokeWithData({ id: this.parent.caseKey(), etag: this.parent.imageHash() }, callback, reload);
-            };
-            
-            protected loadResponse = (data: Blob, jqXHR: JQuery.jqXHR, callback?: (result: File) => void, reload: boolean = true) => {
-                const file = new File([data], Coalesce.Utilities.getFileNameFromContentDisposition(jqXHR.getResponseHeader('content-disposition')), { type: data.type });
-                this.result(file);
-                if (this.resultObjectUrl()) URL.revokeObjectURL(this.resultObjectUrl()!);
-                this.resultObjectUrl(URL.createObjectURL(file));
-                if (reload) {
-                    var result = this.result();
-                    this.parent.load(null, typeof(callback) == 'function' ? () => callback(result) : undefined);
-                } else if (typeof(callback) == 'function') {
-                    callback(this.result());
-                }
-            };
-            
-            /** An object URL (https://developer.mozilla.org/en-US/docs/Web/API/URL/createObjectURL) representing the last successful response file. */
-            public resultObjectUrl: KnockoutObservable<string | null> = ko.observable(null);
-            
-            /** URL for method 'DownloadImage' */
-            public url: KnockoutComputed<string> = ko.pureComputed(() => 
-                this.parent.coalesceConfig.baseApiUrl() + this.parent.apiController + '/' + this.name + '?'
-                + $.param({ id: this.parent.caseKey(), etag: this.parent.imageHash() })
-            );
         };
         
         /** Methods and properties for invoking server method UploadImages. */
@@ -370,10 +369,9 @@ module ViewModels {
             }
             this.assignedToId(data.assignedToId);
             this.reportedById(data.reportedById);
-            this.imageName(data.imageName);
-            this.imageSize(data.imageSize);
-            this.imageHash(data.imageHash);
+            this.attachmentSize(data.attachmentSize);
             this.attachmentName(data.attachmentName);
+            this.attachmentHash(data.attachmentHash);
             this.severity(data.severity);
             this.status(data.status);
             this.devTeamAssignedId(data.devTeamAssignedId);
@@ -403,9 +401,6 @@ module ViewModels {
             if (!dto.reportedById && this.reportedBy()) {
                 dto.reportedById = this.reportedBy()!.personId();
             }
-            dto.imageSize = this.imageSize();
-            dto.imageHash = this.imageHash();
-            dto.attachmentName = this.attachmentName();
             dto.severity = this.severity();
             dto.status = this.status();
             dto.devTeamAssignedId = this.devTeamAssignedId();
@@ -503,9 +498,6 @@ module ViewModels {
             self.assignedTo.subscribe(self.autoSave);
             self.reportedById.subscribe(self.autoSave);
             self.reportedBy.subscribe(self.autoSave);
-            self.imageSize.subscribe(self.autoSave);
-            self.imageHash.subscribe(self.autoSave);
-            self.attachmentName.subscribe(self.autoSave);
             self.severity.subscribe(self.autoSave);
             self.status.subscribe(self.autoSave);
             self.devTeamAssignedId.subscribe(self.autoSave);

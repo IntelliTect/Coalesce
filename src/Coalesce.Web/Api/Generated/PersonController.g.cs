@@ -11,7 +11,6 @@ using IntelliTect.Coalesce.TypeDefinition;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Net.Http.Headers;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -277,19 +276,6 @@ namespace Coalesce.Web.Api
             var _methodResult = Coalesce.Domain.Person.NamesStartingWith(Db, characters);
             var _result = new ItemResult<System.Collections.Generic.ICollection<string>>();
             _result.Object = _methodResult?.ToList();
-            return _result;
-        }
-
-        /// <summary>
-        /// Method: MethodWithStringArrayParameter
-        /// </summary>
-        [HttpPost("MethodWithStringArrayParameter")]
-        [Authorize]
-        public virtual ItemResult<string[]> MethodWithStringArrayParameter(string[] strings)
-        {
-            var _methodResult = Coalesce.Domain.Person.MethodWithStringArrayParameter(Db, strings.ToArray());
-            var _result = new ItemResult<string[]>();
-            _result.Object = _methodResult?.ToArray();
             return _result;
         }
 

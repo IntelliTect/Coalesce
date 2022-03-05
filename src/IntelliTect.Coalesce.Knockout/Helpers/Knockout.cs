@@ -824,23 +824,6 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
                 <!-- Attempted to Display: {bindingValue} -->");
         }
 
-        //public static HtmlString DisplayFileImage(PropertyViewModel propertyModel)
-        //{
-        //    var result = new HtmlString($@"
-        //        <img class=""form-control-static"" data-bind=""attr: {{src: {propertyModel.JsUrlPropertyName}}}"" />");
-        //    // Prevent request for unbound images.
-        //    return new HtmlString($@"
-        //        <!-- ko if: {propertyModel.Parent.PrimaryKey.JsVariable}() -->
-        //        {result}
-        //        <!-- /ko -->
-        //    ");
-        //}
-
-        //public static HtmlString DisplayFileDownloadButton(PropertyViewModel propertyModel)
-        //{
-        //    return DisplayFileDownload(propertyModel, "btn btn-default coalesce-download-button");
-        //}
-
         #endregion
     }
 }

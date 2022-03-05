@@ -81,6 +81,10 @@ namespace Coalesce.Web
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
             });
 
+            services.Configure<Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerOptions>(options =>
+            {
+                options.Limits.MaxRequestBodySize = int.MaxValue; // testing big file uploads/downloads
+            });
 
 #if NETCOREAPP3_1
             services.AddMvc()

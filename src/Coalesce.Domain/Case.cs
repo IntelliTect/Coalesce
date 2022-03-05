@@ -72,37 +72,21 @@ namespace Coalesce.Domain
         [Display(Name = "Reported By", Description = "Person who originally reported the case")]
         public Person ReportedBy { get; set; }
 
-        [InternalUse]
-        public byte[] Image { get; set; }
-        public string ImageName
-        {
-            get
-            {
-                return $"Case{CaseKey}.jpg";
-            }
-        }
-        public long ImageSize { get; set; }
-        public string ImageHash { get; set; }
-
-        [InternalUse]
-        public byte[] Attachment { get; set; }
+        [Read]
+        public long AttachmentSize { get; set; }
+        [Read]
         public string AttachmentName { get; set; }
+        [Read]
+        public byte[] AttachmentHash { get; set; }
+        [InternalUse]
+        public CaseAttachmentContent AttachmentContent { get; set; }
+        public class CaseAttachmentContent
+        {
+            public int CaseKey { get; set; }
+            [Required]
+            public byte[] Content { get; set; }
+        }
 
-        [InternalUse]
-        public byte[] PlainAttachment { get; set; }
-
-        [InternalUse]
-        public byte[] RestrictedUploadAttachment { get; set; }
-
-        [InternalUse]
-        public byte[] RestrictedDownloadAttachment { get; set; }
-
-        [InternalUse]
-        public byte[] RestrictedMetaAttachment { get; set; }
-        [InternalUse]
-        public string InternalUseFileName { get; set; }
-        [InternalUse]
-        public long InternalUseFileSize { get; set; }
 
         public string Severity { get; set; }
 
@@ -148,7 +132,7 @@ namespace Coalesce.Domain
         }
 
         [Coalesce]
-        public async Task UploadImage(IFile file)
+        public async Task UploadImage(AppDbContext db, IFile file)
         {
             if (file.Content == null)
             {
@@ -157,54 +141,65 @@ namespace Coalesce.Domain
 
             var ms = new MemoryStream();
             await file.Content.CopyToAsync(ms);
-            Image = ms.ToArray();
+            var content = ms.ToArray();
+            db.Cases.Include(c => c.AttachmentContent).WherePrimaryKeyIs(CaseKey).Load();
+            AttachmentContent = new CaseAttachmentContent() { Content = content };
             AttachmentName = file.Name;
-            ImageSize = file.Length;
-            ImageHash = Convert.ToBase64String(MD5.Create().ComputeHash(Image));
+            AttachmentSize = file.Length;
+            AttachmentHash = MD5.Create().ComputeHash(content);
         }
 
         [Coalesce]
-        public async Task<ItemResult<IFile>> UploadAndDownload(IFile file)
+        [ControllerAction(HttpMethod.Get, VaryByProperty = nameof(AttachmentHash))]
+        public IFile DownloadImage(AppDbContext db)
         {
-            await UploadImage(file);
-            return new ItemResult<IFile>(DownloadImage());
-        }
-
-        [Coalesce]
-        [ControllerAction(HttpMethod.Get, VaryByProperty = nameof(ImageHash))]
-        public IFile DownloadImage()
-        {
-            return new IntelliTect.Coalesce.Models.File(Image) 
+            /*
+            TODO:
+            - Documentation
+            - Rework vue metadata - `source` should return a reference to a `Prop` like the rest of the metadata does. Shouldn't return just a string.
+             */
+            return new IntelliTect.Coalesce.Models.File(db.Cases
+                .WherePrimaryKeyIs(CaseKey)
+                .Select(c => c.AttachmentContent.Content)
+#if !NET5_0_OR_GREATER
+                .First()
+#endif
+            )
             {
-                //ContentType = "image/jpg"
                 Name = AttachmentName,
             };
-
-            // TODO: lazy stream support
-
-            //return new IntelliTect.Coalesce.Models.File(() =>
-            //{
-            //    db.ImageContents.Single(alksdjalskd).Bytes;
-            //})
-            //{
-            //    Name = AttachmentName
-            //};
         }
 
         [Coalesce]
-        public async Task UploadImages(ICollection<IFile> files)
+        public async Task<ItemResult<IFile>> UploadAndDownload(AppDbContext db, IFile file)
+        {
+            await UploadImage(db, file);
+            return new ItemResult<IFile>(DownloadImage(db));
+        }
+
+        [Coalesce]
+        public async Task UploadImages(AppDbContext db, ICollection<IFile> files)
         {
             foreach (var file in files)
             {
-                await UploadImage(file);
+                await UploadImage(db, file);
             }
         }
 
         [Coalesce]
         public void UploadByteArray(byte[] file)
         {
-            Attachment = file;
+            AttachmentContent = new CaseAttachmentContent() { Content = file };
         }
+
+        //[DefaultDataSource]
+        //public class DefaultSource : StandardDataSource<Case, AppDbContext>
+        //{
+        //    public DefaultSource(CrudContext<AppDbContext> context) : base(context) { }
+
+        //    // Disabled due to presence of byte[]s and SqlClient's horrible async performance on large fields.
+        //    protected override bool CanEvalQueryAsynchronously(IQueryable<Case> query) => false;
+        //}
 
         public class AllOpenCases : StandardDataSource<Case, AppDbContext>
         {

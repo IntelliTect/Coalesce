@@ -26,11 +26,20 @@ export class CaseApiClient extends ModelApiClient<$models.Case> {
     return this.$invoke($method, $params, $config)
   }
   
-  public uploadAttachment(id: number, file: File | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<void>> {
-    const $method = this.$metadata.methods.uploadAttachment
+  public uploadImage(id: number, file: File | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<void>> {
+    const $method = this.$metadata.methods.uploadImage
     const $params =  {
       id,
       file,
+    }
+    return this.$invoke($method, $params, $config)
+  }
+  
+  public downloadImage(id: number, etag: string | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<File>> {
+    const $method = this.$metadata.methods.downloadImage
+    const $params =  {
+      id,
+      etag,
     }
     return this.$invoke($method, $params, $config)
   }
@@ -44,17 +53,8 @@ export class CaseApiClient extends ModelApiClient<$models.Case> {
     return this.$invoke($method, $params, $config)
   }
   
-  public downloadAttachment(id: number, etag: Date | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<File>> {
-    const $method = this.$metadata.methods.downloadAttachment
-    const $params =  {
-      id,
-      etag,
-    }
-    return this.$invoke($method, $params, $config)
-  }
-  
-  public uploadAttachments(id: number, files: File[] | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<void>> {
-    const $method = this.$metadata.methods.uploadAttachments
+  public uploadImages(id: number, files: File[] | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<void>> {
+    const $method = this.$metadata.methods.uploadImages
     const $params =  {
       id,
       files,

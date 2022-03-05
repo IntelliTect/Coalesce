@@ -644,6 +644,7 @@ export class ApiClient<T extends ApiRoutedType> {
       
       if (hasFile) {
         // If the endpoint has any files or raw binary, we need to use a FormData.
+        // (Blobs become Files when put into FormData, and we serialize UInt8Array into a Blob)
         // This will form a multipart/form-data response.
         body = formData;
       } else {
@@ -1331,6 +1332,45 @@ export class ItemApiState<
     this._makeReactive();
   }
 
+  private _objectUrl?: { url: string, target: TResult, destroy: Function };
+  /** If the result is a blob or file, returns an Object URL representing that result. 
+   * @see https://developer.mozilla.org/en-US/docs/Web/API/URL/createObjectURL 
+   * @param vue A Vue instance through which the lifecycle of the object URL will be managed.
+   */
+  public getResultObjectUrl(vue: Vue): TResult extends Blob ? string | undefined : undefined {
+    const result = this.result;
+
+    if (result == this._objectUrl?.target) {
+      // @ts-expect-error TS can't infer that this is correct.
+      return this._objectUrl?.url;
+    }
+    
+    if (this._objectUrl) {
+      this._objectUrl.destroy();
+      this._objectUrl = undefined;
+    }
+
+    if (result instanceof Blob) {
+      // Result is useful as an object url. Make one!
+      const objUrl = this._objectUrl = {
+        url: URL.createObjectURL(result),
+        target: result,
+        destroy() {
+          // Revoke the URL so we're not leaking memory.
+          URL.revokeObjectURL(this.url);
+          vue.$off("hook:beforeDestroy", this.destroy);
+        }
+      }
+
+      vue.$on("hook:beforeDestroy", objUrl.destroy);
+
+      // @ts-expect-error TS can't figure out that we correctly narrowed on TResult here.
+      return this._objectUrl.url
+    }
+
+    return undefined;
+  }
+
   protected setResponseProps(data: ItemResult<TResult>) {
     this.wasSuccessful = data.wasSuccessful;
     this.message = data.message || null;
@@ -1374,7 +1414,7 @@ export class ItemApiStateWithArgs<
    
   /** Returns the URL for the endpoint, including querystring parameters, if invoked using `this.args`. */
   get url() { 
-    // @ts-expect-error
+    // @ts-expect-error: _captureRequestParameters is private (since TS has no "internal")
     var requests: AxiosRequestConfig[] = this.apiClient._captureRequestParameters(() => {
       this.argsInvoker.apply(this, [this.apiClient, this.args]);
     });

@@ -81,17 +81,17 @@
 
             <br>
             
-            <template v-if="fileDownloadKind == 'preview'">
+            <template v-if="fileDownloadKind == 'preview' && 'getResultObjectUrl' in caller">
               <img 
                 v-if="caller.result.type.indexOf('image') >= 0" 
-                :src="resultBlobUrl" 
+                :src="caller.getResultObjectUrl(this)" 
                 :alt="caller.result.name"
                 class="elevation-1"
                 style="max-width: 100%"
               >
               <video 
                 v-else-if="caller.result.type.indexOf('video') >= 0" 
-                :src="resultBlobUrl" 
+                :src="caller.getResultObjectUrl(this)" 
                 :alt="caller.result.name"
                 class="elevation-1" controls
                 style="max-width: 100%"
@@ -133,7 +133,7 @@
 
 import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
 import MetadataComponent, { getValueMeta } from '../c-metadata-component'
-import {  ViewModel,  ListViewModel, DisplayOptions, AnyArgCaller } from 'coalesce-vue';
+import {  ViewModel,  ListViewModel, DisplayOptions, AnyArgCaller, ItemApiState } from 'coalesce-vue';
 import CInput from '../input/c-input'
 
 const resultDisplayOptions = <DisplayOptions>{
@@ -199,42 +199,22 @@ export default class CAdminMethod extends MetadataComponent {
       this.viewModel.$load();
     }
 
-    // Wait for the watcher on caller.result to create resultBlobUrl
-    // so that we're not creating two of them.
-    await this.$nextTick();
     this.downloadFileResult();
   }
 
   downloadFileResult() {
-    const file: File = this.caller.result;
+    const caller = this.caller as ItemApiState<any, File>;
+    const file = caller.result;
+    if (!(file instanceof File)) return;
+
     const a = document.createElement('a');
     document.body.appendChild(a);
-    a.href = this.resultBlobUrl!;
+    a.href = caller.getResultObjectUrl(this)!;
     a.download = file.name;
     a.click();
     setTimeout(() => {
       document.body.removeChild(a);
     }, 1)
-  }
-
-  resultBlobUrl: null | string = null;
-
-  @Watch("caller.result")
-  onResultChanged(v: any) {
-    this.revokeBlobUrl();
-    if (v instanceof File) {
-      this.resultBlobUrl = URL.createObjectURL(v);
-    }
-  }
-
-  revokeBlobUrl() {
-    if (this.resultBlobUrl) {
-      URL.revokeObjectURL(this.resultBlobUrl);
-    }
-  }
-
-  beforeDestroy() {
-    this.revokeBlobUrl();
   }
 }
 

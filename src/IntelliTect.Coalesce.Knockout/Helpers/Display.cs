@@ -139,13 +139,21 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
         public static string MethodFileResult(MethodViewModel method)
         {
             return $@"
-                <!-- ko if: resultObjectUrl() && result().type.indexOf('video') >= 0 -->
+                <!-- ko if: resultObjectUrl() -->
+                <span style=""font-family: monospace"">
+                    <span data-bind=""text: result().name""></span> • 
+                    <span data-bind=""text: result().type""></span> • 
+                    <span data-bind=""text: result().size.toLocaleString()""></span> bytes
+                </span>
+                <!-- ko if: result().type.indexOf('video', 0) >= 0 -->
                 <video style=""max-width: 100%"" data-bind=""attr: {{src: resultObjectUrl }}"" controls>
                 </video>
                 <!-- /ko -->
-                <!-- ko if: resultObjectUrl() && result().type.indexOf('image') >= 0 -->
+                <!-- ko if: result().type.indexOf('image', 0) >= 0 -->
                 <img style=""max-width: 100%; max-height: 300px"" data-bind=""attr: {{src: resultObjectUrl }}"" />
-                <!-- /ko -->";
+                <!-- /ko -->
+                <!-- /ko -->
+            ";
         }
 
         /// <summary>

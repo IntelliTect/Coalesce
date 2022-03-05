@@ -91,6 +91,10 @@
                     <dd>
                         @(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.ImageHash, false))
                     </dd>
+                    <dt>Attachment</dt>
+                    <dd>
+                        @(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.Attachment, false))
+                    </dd>
                     <dt>Attachment Name</dt>
                     <dd>
                         @(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.AttachmentName, false))
@@ -130,10 +134,7 @@
                                 Actions <span class="caret"></span>
                             </button>
                             <ul class="dropdown-menu">
-                                <li><a href="#" data-bind='click: function(){ uploadImage.invokeWithPrompts() }'>Upload Image</a></li>
-                                <li><a href="#" data-bind='click: function(){ uploadAndDownload.invokeWithPrompts() }'>Upload And Download</a></li>
-                                <li><a href="#" data-bind='click: function(){ downloadImage.invoke() }'>Download Image</a></li>
-                                <li><a href="#" data-bind='click: function(){ uploadImages.invokeWithPrompts() }'>Upload Images</a></li>
+                                <li><a href="#" data-bind='click: function(){ uploadAttachment.invokeWithPrompts() }'>Upload Attachment</a></li>
                                 <li><a href="#" data-bind='click: function(){ uploadByteArray.invokeWithPrompts() }'>Upload Byte Array</a></li>
                             </ul>
                         </div>

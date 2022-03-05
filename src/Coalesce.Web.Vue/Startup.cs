@@ -43,6 +43,12 @@ namespace Coalesce.Web.Vue
             services.AddDbContext<AppDbContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
+
+            services.Configure<Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerOptions>(options =>
+            {
+                options.Limits.MaxRequestBodySize = int.MaxValue; // testing big file uploads/downloads
+            });
+
             services.AddCoalesce(builder =>
             {
                 builder

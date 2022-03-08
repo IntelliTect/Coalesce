@@ -177,7 +177,7 @@ export const Student = domain.types.Student = {
     },
     getWithObjParam: {
       name: "getWithObjParam",
-      displayName: "setAdvisor",
+      displayName: "getWithObjParam",
       transportType: "item",
       httpMethod: "GET",
       params: {
@@ -194,6 +194,34 @@ export const Student = domain.types.Student = {
         displayName: "Result",
         role: "value",
         type: "string",
+      },
+    },
+    getFile: {
+      name: "getFile",
+      displayName: "getFile",
+      transportType: "item",
+      httpMethod: "GET",
+      params: {
+        id: {
+          name: "id",
+          displayName: "id",
+          type: "number",
+          role: "value",
+          get source() { return (domain.types.Student as ModelType).props.studentId },
+        },
+        etag: {
+          name: "etag",
+          displayName: "Etag",
+          type: "string",
+          role: "value",
+          get source() { return (domain.types.Student as ModelType).props.name },
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        role: "value",
+        type: "file",
       },
     },
   },

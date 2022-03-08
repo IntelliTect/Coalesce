@@ -295,7 +295,7 @@ export function mapQueryToParams<T extends DataSourceParameters>(
   return parameters as T;
 }
 
-async function parseApiResultResult(data: any): Promise<ApiResult | null> {
+async function parseApiResult(data: any): Promise<ApiResult | null> {
   if (data instanceof Blob && data.size > 0 && data.type == "application/json") {
     // For file-returning endpoints, we ask axios to return us a Blob.
     // However, this means that if the endpoint fails and returns JSON,
@@ -322,7 +322,6 @@ async function parseApiResultResult(data: any): Promise<ApiResult | null> {
 
 export function getMessageForError(error: unknown): string {
   const e = error as AxiosError | ApiResult | Error | string
-  
   if (typeof e === "string") {
     return e;
   } else if (typeof e === "object" && e != null) {
@@ -703,8 +702,7 @@ export class ApiClient<T extends ApiRoutedType> {
       () => AxiosClient.request(axiosRequest).then(r => {
           if (method.return.type == "file") {
             if (typeof r.data !== "object") {
-              // This case usually only happens if the endpoint doesn't exist on the server,
-              // causing the server to return a SPA fallback route (as HTML) with a 200 status.
+              // This should be impossible since we asked axios to provide us a blob.
               throw new Error(`Unexpected raw ${typeof r.data} response from server.`)
             }
 
@@ -1236,7 +1234,7 @@ export abstract class ApiState<
           : undefined;
 
         let resultJson;
-        if (result && (resultJson = await parseApiResultResult(result.data))) {
+        if (result && (resultJson = await parseApiResult(result.data))) {
           await this.setResponseProps(resultJson);
         } else {
           this.message = getMessageForError(error)
@@ -1353,6 +1351,7 @@ export class ItemApiState<
 
     if (result == this._objectUrl?.target) {
       // We have a stored URL, and the current result is what that URL was made for.
+      // OR, we have no stored URL, and the current result is also null-ish.
       // Return that stored URL.
 
       // @ts-expect-error TS can't infer that this is correct.
@@ -1371,10 +1370,10 @@ export class ItemApiState<
       const objUrl = this._objectUrl = {
         url: URL.createObjectURL(result),
         target: result,
-        destroy() {
+        destroy: () => {
           // Revoke the URL so we're not leaking memory.
-          URL.revokeObjectURL(this.url);
-          vue.$off("hook:beforeDestroy", this.destroy);
+          URL.revokeObjectURL(objUrl.url);
+          vue.$off("hook:beforeDestroy", objUrl.destroy);
         }
       }
 

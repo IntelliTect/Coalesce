@@ -53,7 +53,6 @@
           :loading="caller.isLoading"
           sm
         >
-          <span v-if="filteredParams.length"></span>
           Execute
         </v-btn>
       </v-col>

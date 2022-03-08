@@ -109,7 +109,6 @@ namespace IntelliTect.Coalesce.Models
                     _cmd.CommandText = cmdText
                         .Insert(fromStart, $", {_position + 1}, {Length - _position}) ")
                         .Insert(selectEnd, $" substr(");
-                    goto openReader;
                 }
                 else
                 {
@@ -117,7 +116,7 @@ namespace IntelliTect.Coalesce.Models
                     throw new NotSupportedException("Unknown or unsupported database provider for file streaming: " + connectionTypeName);
                 }
             }
-        openReader:
+
             _reader = _cmd.ExecuteReader(System.Data.CommandBehavior.SequentialAccess);
             return _queryStream = _reader.Read() && !_reader.IsDBNull(0)
                 ? _reader.GetStream(0)

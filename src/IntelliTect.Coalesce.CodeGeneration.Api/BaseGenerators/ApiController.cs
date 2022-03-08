@@ -276,7 +276,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
             var resultProp = "Object";
             var resultType = method.ResultType;
 
-             // For methods that return ItemResult<> or ListResult<>, grab the core result data from the appropriate member.
+            // For methods that return ItemResult<> or ListResult<>, grab the core result data from the appropriate member.
             if (method.TaskUnwrappedReturnType.IsA(typeof(ItemResult<>)))
             {
                 resultVar += ".Object";

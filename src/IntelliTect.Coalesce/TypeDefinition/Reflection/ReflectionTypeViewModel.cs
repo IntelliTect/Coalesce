@@ -149,7 +149,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
             if (type.IsArray)
             {
-                return GetVerboseTypeName(type.GetElementType()) + "[" + new string(',', type.GetArrayRank() - 1) + "]";
+                return GetVerboseTypeName(type.GetElementType()!) + "[" + new string(',', type.GetArrayRank() - 1) + "]";
             }
 
             if (!type.IsGenericType)

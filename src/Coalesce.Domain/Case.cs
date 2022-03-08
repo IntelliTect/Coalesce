@@ -12,6 +12,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 
 namespace Coalesce.Domain
@@ -71,41 +72,22 @@ namespace Coalesce.Domain
         [Display(Name = "Reported By", Description = "Person who originally reported the case")]
         public Person ReportedBy { get; set; }
 
-        [File("image/jpeg", nameof(ImageName), nameof(ImageHash), nameof(ImageSize))]
-        public byte[] Image { get; set; }
-        public string ImageName
-        {
-            get
-            {
-                return $"Case{CaseKey}.jpg";
-            }
-        }
-        public long ImageSize { get; set; }
-        public string ImageHash { get; set; }
-
-        public byte[] Attachment { get; set; }
+        [Read]
+        public long AttachmentSize { get; set; }
+        [Read]
         public string AttachmentName { get; set; }
-
-        [Edit(PermissionLevel = SecurityPermissionLevels.AllowAuthorized)]
-        [Read(SecurityPermissionLevels.AllowAll)]
-        [File("text/plain")]
-        public byte[] PlainAttachment { get; set; }
-
-        [Edit(PermissionLevel = SecurityPermissionLevels.AllowAuthorized, Roles = "Admin, SuperUser")]
-        [File]
-        public byte[] RestrictedUploadAttachment { get; set; }
-
-        [Read("Admin", "OtherRole")]
-        [File]
-        public byte[] RestrictedDownloadAttachment { get; set; }
-
-        [File(NameProperty = nameof(InternalUseFileName),
-            SizeProperty = nameof(InternalUseFileSize))]
-        public byte[] RestrictedMetaAttachment { get; set; }
+        public string AttachmentType { get; set; }
+        [Read, MaxLength(32)]
+        public byte[] AttachmentHash { get; set; }
         [InternalUse]
-        public string InternalUseFileName { get; set; }
-        [InternalUse]
-        public long InternalUseFileSize { get; set; }
+        public CaseAttachmentContent AttachmentContent { get; set; } 
+        public class CaseAttachmentContent
+        {
+            public int CaseKey { get; set; }
+            [Required]
+            public byte[] Content { get; set; }
+        }
+
 
         public string Severity { get; set; }
 
@@ -151,33 +133,70 @@ namespace Coalesce.Domain
         }
 
         [Coalesce]
-        public async Task UploadAttachment(IFile file)
+        public async Task UploadImage(AppDbContext db, IFile file)
         {
             if (file.Content == null)
             {
                 return;
             }
 
-            var ms = new MemoryStream();
-            await file.Content.CopyToAsync(ms);
-            Attachment = ms.ToArray();
+            var content = new byte[file.Length];
+            await file.Content.ReadAsync(content.AsMemory());
+
+            AttachmentContent = new CaseAttachmentContent() { CaseKey = CaseKey, Content = content };
             AttachmentName = file.Name;
+            AttachmentSize = file.Length;
+            AttachmentType = file.ContentType;
+            AttachmentHash = SHA256.Create().ComputeHash(content);
         }
 
         [Coalesce]
-        public async Task UploadAttachments(ICollection<IFile> files)
+        [ControllerAction(HttpMethod.Get, VaryByProperty = nameof(AttachmentHash))]
+        public IFile DownloadImage(AppDbContext db)
+        {
+            return new IntelliTect.Coalesce.Models.File(db.Cases
+                .WherePrimaryKeyIs(CaseKey)
+                .Select(c => c.AttachmentContent.Content)
+#if !NET5_0_OR_GREATER
+                .First()
+#endif
+            )
+            {
+                Name = AttachmentName,
+                ContentType = AttachmentType
+            };
+        }
+
+        [Coalesce]
+        public async Task<ItemResult<IFile>> UploadAndDownload(AppDbContext db, IFile file)
+        {
+            await UploadImage(db, file);
+            return new ItemResult<IFile>(DownloadImage(db));
+        }
+
+        [Coalesce]
+        public async Task UploadImages(AppDbContext db, ICollection<IFile> files)
         {
             foreach (var file in files)
             {
-                await UploadAttachment(file);
+                await UploadImage(db, file);
             }
         }
 
         [Coalesce]
         public void UploadByteArray(byte[] file)
         {
-            Attachment = file;
+            AttachmentContent = new CaseAttachmentContent() { Content = file };
         }
+
+        //[DefaultDataSource]
+        //public class DefaultSource : StandardDataSource<Case, AppDbContext>
+        //{
+        //    public DefaultSource(CrudContext<AppDbContext> context) : base(context) { }
+
+        //    // Disabled due to presence of byte[]s and SqlClient's horrible async performance on large fields.
+        //    protected override bool CanEvalQueryAsynchronously(IQueryable<Case> query) => false;
+        //}
 
         public class AllOpenCases : StandardDataSource<Case, AppDbContext>
         {

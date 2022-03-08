@@ -91,7 +91,7 @@ module ListViewModels {
                 return this.invoke(numberOne, numberTwo, callback, reload);
             };
             
-            protected loadResponse = (data: Coalesce.ItemResult, callback?: (result: number) => void, reload: boolean = true) => {
+            protected loadResponse = (data: Coalesce.ItemResult, jqXHR: JQuery.jqXHR, callback?: (result: number) => void, reload: boolean = true) => {
                 this.result(data.object);
                 if (reload) {
                     var result = this.result();
@@ -117,7 +117,7 @@ module ListViewModels {
                 return this.invokeWithData({  }, callback, reload);
             };
             
-            protected loadResponse = (data: Coalesce.ItemResult, callback?: (result: string) => void, reload: boolean = true) => {
+            protected loadResponse = (data: Coalesce.ItemResult, jqXHR: JQuery.jqXHR, callback?: (result: string) => void, reload: boolean = true) => {
                 this.result(data.object);
                 if (reload) {
                     var result = this.result();
@@ -159,7 +159,7 @@ module ListViewModels {
                 return this.invoke(lastNameStartsWith, callback, reload);
             };
             
-            protected loadResponse = (data: Coalesce.ItemResult, callback?: (result: number) => void, reload: boolean = true) => {
+            protected loadResponse = (data: Coalesce.ItemResult, jqXHR: JQuery.jqXHR, callback?: (result: number) => void, reload: boolean = true) => {
                 this.result(data.object);
                 if (reload) {
                     var result = this.result();
@@ -168,6 +168,12 @@ module ListViewModels {
                     callback(this.result());
                 }
             };
+            
+            /** URL for method 'PersonCount' */
+            public url: KnockoutComputed<string> = ko.pureComputed(() => 
+                this.parent.coalesceConfig.baseApiUrl() + this.parent.apiController + '/' + this.name + '?'
+                + $.param({ lastNameStartsWith: this.args.lastNameStartsWith })
+            );
         };
         
         /** Methods and properties for invoking server method RemovePersonById. */
@@ -201,7 +207,7 @@ module ListViewModels {
                 return this.invoke(id, callback, reload);
             };
             
-            protected loadResponse = (data: Coalesce.ItemResult, callback?: (result: boolean) => void, reload: boolean = true) => {
+            protected loadResponse = (data: Coalesce.ItemResult, jqXHR: JQuery.jqXHR, callback?: (result: boolean) => void, reload: boolean = true) => {
                 this.result(data.object);
                 if (reload) {
                     var result = this.result();
@@ -227,7 +233,7 @@ module ListViewModels {
                 return this.invokeWithData({  }, callback, reload);
             };
             
-            protected loadResponse = (data: Coalesce.ItemResult, callback?: (result: string) => void, reload: boolean = true) => {
+            protected loadResponse = (data: Coalesce.ItemResult, jqXHR: JQuery.jqXHR, callback?: (result: string) => void, reload: boolean = true) => {
                 this.result(data.object);
                 if (reload) {
                     var result = this.result();
@@ -274,7 +280,48 @@ module ListViewModels {
                 return this.invoke(characters, callback, reload);
             };
             
-            protected loadResponse = (data: Coalesce.ItemResult, callback?: (result: string[]) => void, reload: boolean = true) => {
+            protected loadResponse = (data: Coalesce.ItemResult, jqXHR: JQuery.jqXHR, callback?: (result: string[]) => void, reload: boolean = true) => {
+                this.result(data.object);
+                if (reload) {
+                    var result = this.result();
+                    this.parent.load(typeof(callback) == 'function' ? () => callback(result) : undefined);
+                } else if (typeof(callback) == 'function') {
+                    callback(this.result());
+                }
+            };
+        };
+        
+        /** Methods and properties for invoking server method MethodWithStringArrayParameter. */
+        public readonly methodWithStringArrayParameter = new PersonList.MethodWithStringArrayParameter(this);
+        public static MethodWithStringArrayParameter = class MethodWithStringArrayParameter extends Coalesce.ClientMethod<PersonList, string[]> {
+            public readonly name = 'MethodWithStringArrayParameter';
+            public readonly verb = 'POST';
+            public result: KnockoutObservableArray<string> = ko.observableArray([]);
+            
+            /** Calls server method (MethodWithStringArrayParameter) with the given arguments */
+            public invoke = (strings: string[] | null, callback?: (result: string[]) => void, reload: boolean = true): JQueryPromise<any> => {
+                return this.invokeWithData({ strings: strings }, callback, reload);
+            };
+            
+            /** Object that can be easily bound to fields to allow data entry for the method's parameters */
+            public args = new MethodWithStringArrayParameter.Args(); 
+            public static Args = class Args {
+                public strings: KnockoutObservableArray<string> = ko.observableArray([]);
+            };
+            
+            /** Calls server method (MethodWithStringArrayParameter) with an instance of MethodWithStringArrayParameter.Args, or the value of this.args if not specified. */
+            public invokeWithArgs = (args = this.args, callback?: (result: string[]) => void, reload: boolean = true): JQueryPromise<any> => {
+                return this.invoke(args.strings(), callback, reload);
+            }
+            
+            /** Invokes the method after displaying a browser-native prompt for each argument. */
+            public invokeWithPrompts = (callback?: (result: string[]) => void, reload: boolean = true): JQueryPromise<any> | undefined => {
+                var $promptVal: string | null = null;
+                var strings: null = null;
+                return this.invoke(strings, callback, reload);
+            };
+            
+            protected loadResponse = (data: Coalesce.ItemResult, jqXHR: JQuery.jqXHR, callback?: (result: string[]) => void, reload: boolean = true) => {
                 this.result(data.object);
                 if (reload) {
                     var result = this.result();
@@ -297,7 +344,7 @@ module ListViewModels {
             
             /** Calls server method (MethodWithEntityParameter) with the given arguments */
             public invoke = (person: ViewModels.Person | null, callback?: (result: ViewModels.Person) => void, reload: boolean = true): JQueryPromise<any> => {
-                return this.invokeWithData({ person: person ? person.saveToDto() : null }, callback, reload);
+                return this.invokeWithData({ person: person?.saveToDto() }, callback, reload);
             };
             
             /** Object that can be easily bound to fields to allow data entry for the method's parameters */
@@ -318,7 +365,7 @@ module ListViewModels {
                 return this.invoke(person, callback, reload);
             };
             
-            protected loadResponse = (data: Coalesce.ItemResult, callback?: (result: ViewModels.Person) => void, reload: boolean = true) => {
+            protected loadResponse = (data: Coalesce.ItemResult, jqXHR: JQuery.jqXHR, callback?: (result: ViewModels.Person) => void, reload: boolean = true) => {
                 if (!this.result()) {
                     this.result(new ViewModels.Person(data.object));
                 } else {
@@ -346,7 +393,7 @@ module ListViewModels {
             
             /** Calls server method (SearchPeople) with the given arguments */
             public invoke = (criteria: ViewModels.PersonCriteria | null, page: number | null, callback?: (result: ViewModels.Person[]) => void, reload: boolean = true): JQueryPromise<any> => {
-                return this.invokeWithData({ criteria: criteria ? criteria.saveToDto() : null, page: page }, callback, reload);
+                return this.invokeWithData({ criteria: criteria?.saveToDto(), page: page }, callback, reload);
             };
             
             /** Object that can be easily bound to fields to allow data entry for the method's parameters */
@@ -371,7 +418,7 @@ module ListViewModels {
                 return this.invoke(criteria, page, callback, reload);
             };
             
-            protected loadResponse = (data: Coalesce.ListResult, callback?: (result: ViewModels.Person[]) => void, reload: boolean = true) => {
+            protected loadResponse = (data: Coalesce.ListResult, jqXHR: JQuery.jqXHR, callback?: (result: ViewModels.Person[]) => void, reload: boolean = true) => {
                 Coalesce.KnockoutUtilities.RebuildArray(this.result, data.list || [], 'personId', ViewModels.Person, this, true);
                 if (reload) {
                     var result = this.result();

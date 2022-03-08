@@ -74,7 +74,7 @@ module ListViewModels {
                 return this.invoke(isDeleted, callback, reload);
             };
             
-            protected loadResponse = (data: Coalesce.ItemResult, callback?: (result: ViewModels.Company[]) => void, reload: boolean = true) => {
+            protected loadResponse = (data: Coalesce.ItemResult, jqXHR: JQuery.jqXHR, callback?: (result: ViewModels.Company[]) => void, reload: boolean = true) => {
                 Coalesce.KnockoutUtilities.RebuildArray(this.result, data.object, 'companyId', ViewModels.Company, this, true);
                 if (reload) {
                     var result = this.result();

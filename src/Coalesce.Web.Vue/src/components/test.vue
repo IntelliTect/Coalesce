@@ -1,5 +1,12 @@
 <template>
   <v-container grid-list-lg>
+    
+    <video v-if="caseVm.caseKey" :src="caseVm.downloadImage.url" controls style="max-width: 100%">
+    </video>
+ 
+    <!--<video v-if="caseVm.caseKey" :src="caseVm.downloadImage.getResultObjectUrl(this)" controls style="max-width: 100%">
+    </video>--> 
+<!-- 
     <v-layout v-if="person != null" >
       <v-flex xs12>
         <v-card >
@@ -14,25 +21,24 @@
             </v-container>
           </v-card-actions>
           <v-card-actions right>
-              <v-spacer />
-              <v-btn flat>
-                  <v-icon left>cancel</v-icon>
-                  Cancel
-              </v-btn>
-
-              {{person.$save.isLoading}}
-              <v-btn flat color="primary"
-                     @click.native="person.$save()"
-                     :loading="person.$save.isLoading"
-                     :disabled="person.$save.isLoading">
-                  <v-icon left>save</v-icon>
-                  Save
-              </v-btn>
+            <v-spacer />
+            <v-btn flat>
+              <v-icon left>cancel</v-icon>
+              Cancel
+            </v-btn>
+            <v-btn flat color="primary"
+                   @click.native="person.$save()"
+                   :loading="person.$save.isLoading"
+                   :disabled="person.$save.isLoading">
+              <v-icon left>save</v-icon>
+              Save
+            </v-btn>
           </v-card-actions>
         </v-card>
       </v-flex>
       
     </v-layout>
+    
     <v-layout >
 
       <v-flex xs12>
@@ -61,7 +67,7 @@
           </template>
         </v-data-table>
       </v-flex>
-    </v-layout>
+    </v-layout> -->
     
   </v-container>
 
@@ -76,8 +82,8 @@
   import * as metadata from '../metadata.g';
   import * as models from '../models.g';
 
-  import { PersonViewModel, CaseViewModel, CompanyViewModel } from '../viewmodels.g'
-  import { PersonApiClient } from '../api-clients.g';
+  import { PersonViewModel, CaseViewModel, CompanyViewModel, PersonListViewModel } from '../viewmodels.g'
+  import { CaseApiClient, PersonApiClient } from '../api-clients.g';
 
 
   @Component({
@@ -88,7 +94,10 @@
     metadata = metadata.Person
     company = new CompanyViewModel();
     person: PersonViewModel = new PersonViewModel();
+    personList = new PersonListViewModel();
     isLoading: boolean = false;
+
+    caseVm = new CaseViewModel();
 
     pagination = {
       sortBy: '',
@@ -136,14 +145,19 @@
         })
     }
 
-    async mounted() {
+    async created() {
+      
+      await this.caseVm.$load(16);
+      //await this.caseVm.downloadImage()
       await this.company.$load(1);
 
       await this.person.$load(1)
+    }
+
+    async mounted() {
 
       //new CaseViewModel({ caseKey: 1 }).uploadByteArray(new Uint8Array([60, 61, 62, 63]))
       //new CaseViewModel({ caseKey: 1 }).uploadByteArray("abcd")
-      new CaseViewModel({ caseKey: 1 }).uploadByteArray(null)
 
       //var caller = this.person!.$apiClient.$makeCaller("item", c => c.changeSpacesToDashesInName(1));
       //caller.result

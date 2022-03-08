@@ -62,30 +62,28 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
 
         private static void WriteApiEndpointFunction(TypeScriptCodeBuilder b, ClassViewModel model, MethodViewModel method)
         {
-            var returnIsListResult = method.ReturnsListResult;
-            string signature =
-                string.Concat(method.ClientParameters.Select(f => $"{f.JsVariable}: {new VueType(f.Type, VueType.Flags.RawBinary).TsType("$models")} | null, "))
-                + "$config?: AxiosRequestConfig";
+            var paramTypeFlags = VueType.Flags.None;
+            if (method.HasHttpRequestBody) paramTypeFlags |= VueType.Flags.RawBinary;
 
-            if (method.IsModelInstanceMethod)
-            {
-                signature = $"id: {new VueType(model.PrimaryKey.Type).TsType(null)}, " + signature;
-            }
+            string signature =
+                string.Concat(method.ApiParameters.Select(f => 
+                    $"{f.JsVariable}: " +
+                    $"{new VueType(f.Type, paramTypeFlags).TsType("$models")}" +
+                    (f.ParentSourceProp?.IsPrimaryKey == true ? "" : " | null") +  
+                    ", "
+                ))
+                + "$config?: AxiosRequestConfig";
 
             string resultType = method.TransportTypeGenericParameter.IsVoid
                 ? $"{method.TransportType}<void>"
-                : $"{method.TransportType}<{new VueType(method.TransportTypeGenericParameter).TsType("$models")}>";
+                : $"{method.TransportType}<{new VueType(method.TransportTypeGenericParameter, VueType.Flags.RawBinary).TsType("$models")}>";
 
             using (b.Block($"public {method.JsVariable}({signature}): AxiosPromise<{resultType}>"))
             {
                 b.Line($"const $method = this.$metadata.methods.{method.JsVariable}");
                 using (b.Block($"const $params = "))
                 {
-                    if (method.IsModelInstanceMethod)
-                    {
-                        b.Line($"id,");
-                    }
-                    foreach (var param in method.ClientParameters)
+                    foreach (var param in method.ApiParameters)
                     {
                         b.Line($"{param.JsVariable},");
                     }

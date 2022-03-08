@@ -21,11 +21,9 @@ namespace Coalesce.Web.Models
         private Coalesce.Web.Models.PersonDtoGen _AssignedTo;
         private int? _ReportedById;
         private Coalesce.Web.Models.PersonDtoGen _ReportedBy;
-        private string _ImageName;
-        private long? _ImageSize;
-        private string _ImageHash;
-        private byte[] _Attachment;
+        private long? _AttachmentSize;
         private string _AttachmentName;
+        private byte[] _AttachmentHash;
         private string _Severity;
         private Coalesce.Domain.Case.Statuses? _Status;
         private System.Collections.Generic.ICollection<Coalesce.Web.Models.CaseProductDtoGen> _CaseProducts;
@@ -73,30 +71,20 @@ namespace Coalesce.Web.Models
             get => _ReportedBy;
             set { _ReportedBy = value; Changed(nameof(ReportedBy)); }
         }
-        public string ImageName
+        public long? AttachmentSize
         {
-            get => _ImageName;
-            set { _ImageName = value; Changed(nameof(ImageName)); }
-        }
-        public long? ImageSize
-        {
-            get => _ImageSize;
-            set { _ImageSize = value; Changed(nameof(ImageSize)); }
-        }
-        public string ImageHash
-        {
-            get => _ImageHash;
-            set { _ImageHash = value; Changed(nameof(ImageHash)); }
-        }
-        public byte[] Attachment
-        {
-            get => _Attachment;
-            set { _Attachment = value; Changed(nameof(Attachment)); }
+            get => _AttachmentSize;
+            set { _AttachmentSize = value; Changed(nameof(AttachmentSize)); }
         }
         public string AttachmentName
         {
             get => _AttachmentName;
             set { _AttachmentName = value; Changed(nameof(AttachmentName)); }
+        }
+        public byte[] AttachmentHash
+        {
+            get => _AttachmentHash;
+            set { _AttachmentHash = value; Changed(nameof(AttachmentHash)); }
         }
         public string Severity
         {
@@ -145,11 +133,9 @@ namespace Coalesce.Web.Models
             this.OpenedAt = obj.OpenedAt;
             this.AssignedToId = obj.AssignedToId;
             this.ReportedById = obj.ReportedById;
-            this.ImageName = obj.ImageName;
-            this.ImageSize = obj.ImageSize;
-            this.ImageHash = obj.ImageHash;
-            this.Attachment = obj.Attachment;
+            this.AttachmentSize = obj.AttachmentSize;
             this.AttachmentName = obj.AttachmentName;
+            this.AttachmentHash = obj.AttachmentHash;
             this.Severity = obj.Severity;
             this.Status = obj.Status;
             this.DevTeamAssignedId = obj.DevTeamAssignedId;
@@ -195,10 +181,6 @@ namespace Coalesce.Web.Models
             if (ShouldMapTo(nameof(OpenedAt))) entity.OpenedAt = (OpenedAt ?? entity.OpenedAt);
             if (ShouldMapTo(nameof(AssignedToId))) entity.AssignedToId = AssignedToId;
             if (ShouldMapTo(nameof(ReportedById))) entity.ReportedById = ReportedById;
-            if (ShouldMapTo(nameof(ImageSize))) entity.ImageSize = (ImageSize ?? entity.ImageSize);
-            if (ShouldMapTo(nameof(ImageHash))) entity.ImageHash = ImageHash;
-            if (ShouldMapTo(nameof(Attachment))) entity.Attachment = Attachment;
-            if (ShouldMapTo(nameof(AttachmentName))) entity.AttachmentName = AttachmentName;
             if (ShouldMapTo(nameof(Severity))) entity.Severity = Severity;
             if (ShouldMapTo(nameof(Status))) entity.Status = (Status ?? entity.Status);
             if (ShouldMapTo(nameof(DevTeamAssignedId))) entity.DevTeamAssignedId = DevTeamAssignedId;

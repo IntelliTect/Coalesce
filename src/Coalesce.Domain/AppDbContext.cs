@@ -35,6 +35,17 @@ namespace Coalesce.Domain
                 cb.OwnsOne(c => c.CompanyHqAddress);
             });
 
+            modelBuilder
+                .Entity<Case>()
+                .ToTable("Case")
+                .HasOne(c => c.AttachmentContent)
+                .WithOne()
+                .HasForeignKey<Case.CaseAttachmentContent>(c => c.CaseKey);
+            modelBuilder
+                .Entity<Case.CaseAttachmentContent>()
+                .ToTable("Case")
+                .HasKey(d => d.CaseKey);
+
         }
     }
 }

@@ -80,31 +80,34 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
 
         protected static void WriteMethodDeclarationPreamble(CSharpCodeBuilder b, MethodViewModel method)
         {
+            var methodAnnotationName = $"Http{method.ApiActionHttpMethod}";
+
             b.DocComment($"Method: {method.Name}");
-            b.Line($"[{method.ApiActionHttpMethodAnnotation}(\"{method.NameWithoutAsync}\")]");
+            b.Line($"[{methodAnnotationName}(\"{method.NameWithoutAsync}\")]");
             if (method.Name != method.NameWithoutAsync)
             {
                 // Add a route attribute that includes "Async" if it exists in the method name
                 // for backwards compatibility (3.0 breaking change).
-                b.Line($"[{method.ApiActionHttpMethodAnnotation}(\"{method.Name}\")]");
+                b.Line($"[{methodAnnotationName}(\"{method.Name}\")]");
             }
             b.Line($"{method.SecurityInfo.ExecuteAnnotation}");
         }
 
 
-        protected IDisposable WriteControllerActionBlock(CSharpCodeBuilder b, MethodViewModel method)
+        protected IDisposable WriteControllerActionSignature(CSharpCodeBuilder b, MethodViewModel method)
         {
             var parameters = method.Parameters.Where(f => !f.IsNonArgumentDI).ToArray();
             var actionParameters = new List<string>();
 
-            // For entity instance methods, add an id that specifies the object to work on, and a data source factory.
             if (method.IsModelInstanceMethod)
             {
                 actionParameters.Add("[FromServices] IDataSourceFactory dataSourceFactory");
-                actionParameters.Add($"{method.Parent.PrimaryKey!.PureType.FullyQualifiedName} id");
             }
 
-            actionParameters.AddRange(parameters.Select(param =>
+            actionParameters.AddRange(method.Parameters
+                .Where(f => f.IsDI && !f.IsNonArgumentDI)
+                .Concat(method.ApiParameters)
+                .Select(param =>
             {
                 string typeName;
                 if (param.PureType.IsFile)
@@ -126,6 +129,15 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
             }));
 
             var returnType = method.ApiActionReturnTypeDeclaration;
+            if (method.ResultType.IsFile)
+            {
+                // Wrap the signature in ActionResult<> since file-returning methods
+                // have mixed return types due to use of the File() method on controllers.
+                // This is not baked into ApiActionReturnTypeDeclaration because it ONLY affects
+                // the signature, but not the places within the method that we instantiate the return type
+                // due to the implcit conversions from T to ActionResult<T>.
+                returnType = $"ActionResult<{returnType}>";
+            }
             if (method.IsAwaitable || method.IsModelInstanceMethod || method.Parameters.Any(p => p.Type.IsByteArray))
             {
                 returnType = $"async Task<{returnType}>";
@@ -273,6 +285,40 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
             {
                 resultProp = "List";
                 resultVar += ".List";
+            }
+
+            if (method.ResultType.IsFile)
+            {
+                using (b.Block($"if ({resultVar} != null)"))
+                {
+                    var fileNameVar = $"{resultVar}.{nameof(IFile.Name)}";
+                    b.Line($"string _contentType = {resultVar}.{nameof(IFile.ContentType)};");
+
+                    b.Line($"if (string.IsNullOrWhiteSpace(_contentType) && (");
+                    b.Indented($"string.IsNullOrWhiteSpace({fileNameVar}) ||");
+                    b.Indented($"!(new Microsoft.AspNetCore.StaticFiles.FileExtensionContentTypeProvider().TryGetContentType({fileNameVar}, out _contentType))");
+                    using (b.Block("))"))
+                    {
+                        b.Line($"_contentType = \"application/octet-stream\";");
+                    }
+
+                    var contentStreamVar = $"{resultVar}.{nameof(IFile.Content)}";
+                    // Use range processing if the result stream isn't a MemoryStream.
+                    // MemoryStreams are just going to mean we're dumping the whole byte array straight back to the client.
+                    // Other streams might be more elegant, e.g. QueryableContentStream 
+                    b.Line($"return File({contentStreamVar}, _contentType, {fileNameVar}, !({contentStreamVar} is System.IO.MemoryStream));");
+                }
+
+                if (!method.TaskUnwrappedReturnType.IsA<ApiResult>())
+                {
+                    using (b.Block($"else"))
+                    {
+                        // Method doesn't return an ItemResult, so has no way to explicitly signal failure
+                        // aside from returning `null`. Return a 404, since otherwise we'd fall through below
+                        // and serve a blank {wasSuccessful: true} response.
+                        b.Line($"return NotFound();");
+                    }
+                }
             }
 
             if (method.TaskUnwrappedReturnType.IsA<ApiResult>())

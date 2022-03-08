@@ -1,5 +1,4 @@
 {
-  "restructuredtext.updateOnTextChanged": "false",
   "restructuredtext.languageServer.disabled": false,
   "restructuredtext.confPath": "${workspaceFolder}",
   "restructuredtext.linter.sphinxTextRoles": [
@@ -9,7 +8,6 @@
     "ctor",
     "html"
   ],
-  "restructuredtext.workspaceRoot": "c:\\src\\Coalesce\\docs",
   "cSpell.words": [
     "Axios",
     "Coalesce's",
@@ -23,5 +21,9 @@
     "vuetify"
   ],
   "cSpell.ignoreWords": ["datetime"],
-  "cSpell.enabled": true
+  "cSpell.enabled": true,
+  "esbonio.server.enabled": true,
+  "esbonio.sphinx.confDir": "c:\\src\\Coalesce\\docs",
+  "restructuredtext.preview.scrollEditorWithPreview": false,
+  "restructuredtext.preview.scrollPreviewWithEditor": false,
 }

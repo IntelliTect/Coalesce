@@ -478,20 +478,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
 
                 using (b.Block("params:", ','))
                 {
-                    // TODO: should we be writing out the implicit 'id' param as metadata? Or handling some other way?
-                    // If we do keep it as metadata, should probably add some prop to mark it as what it is.
-                    if (method.IsModelInstanceMethod)
-                    {
-                        using (b.Block($"id:", ','))
-                        {
-                            b.StringProp("name", "id");
-                            b.StringProp("displayName", "Primary Key"); // TODO: Is this what we want? Also, i18n.
-                            b.StringProp("role", "value");
-                            WriteTypeCommonMetadata(b, model.PrimaryKey.Type, null);
-                        }
-                    }
-
-                    foreach (var param in method.ClientParameters)
+                    foreach (var param in method.ApiParameters)
                     {
                         WriteMethodParameterMetadata(b, method, param);
                     }
@@ -514,6 +501,10 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
             {
                 WriteValueCommonMetadata(b, parameter);
                 b.StringProp("role", "value");
+                if (parameter.ParentSourceProp != null)
+                {
+                    b.Line($"get source() {{ return {GetClassMetadataRef(method.Parent)}.props.{parameter.ParentSourceProp.JsVariable} }},");
+                }
             }
         }
 

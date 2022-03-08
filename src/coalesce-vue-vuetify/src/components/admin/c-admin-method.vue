@@ -24,7 +24,30 @@
 
     <v-row class="my-0 c-method--section c-method--results">
       <v-col>
+        <template v-if="methodMeta.return.type == 'file' && !filteredParams.length">
+          <v-btn  
+            color="primary" 
+            @click="invoke"
+            :loading="caller.isLoading"
+          >
+            <span v-if="filteredParams.length">Execute</span>
+            <span v-else>
+              <v-icon left>fa fa-search</v-icon>
+              Preview
+            </span>
+          </v-btn>
+          <v-btn  
+            class="mt-1"
+            color="primary" 
+            @click="invokeAndDownload"
+            :loading="caller.isLoading"
+          >
+            <v-icon left>fa fa-download</v-icon>
+            Download
+          </v-btn>
+        </template>
         <v-btn  
+          v-else
           color="primary" 
           @click="invoke"
           :loading="caller.isLoading"
@@ -39,15 +62,52 @@
           :loaders="{'no-initial-content no-error-content no-loading-content': [caller]}"
           style="min-height: 55px"
         >
-          <h3>Result:</h3>
+          <h3>
+            Result:
+            <v-btn 
+              v-if="caller.result && methodMeta.return.type == 'file'"
+              color="primary" 
+              @click="downloadFileResult"
+              :loading="caller.isLoading"
+              x-small outlined
+            >
+              <v-icon left small>fa fa-download</v-icon>
+              Save to Disk
+            </v-btn>
+          </h3>
+          <div v-if="caller.result && methodMeta.return.type == 'file'">
+            <pre>{{caller.result.name}} • {{caller.result.type}} • {{caller.result.size.toLocaleString()}} bytes</pre>
+
+            <br>
+            
+            <template v-if="fileDownloadKind == 'preview' && 'getResultObjectUrl' in caller">
+              <img 
+                v-if="caller.result.type.indexOf('image') >= 0" 
+                :src="caller.getResultObjectUrl(this)" 
+                :alt="caller.result.name"
+                class="elevation-1"
+                style="max-width: 100%"
+              >
+              <video 
+                v-else-if="caller.result.type.indexOf('video') >= 0" 
+                :src="caller.getResultObjectUrl(this)" 
+                :alt="caller.result.name"
+                class="elevation-1" controls
+                style="max-width: 100%"
+              />
+              <pre v-else>Unable to show preview.</pre>
+            </template>
+          </div>
+
           <c-display 
-            v-if="caller.result != null"
+            v-else-if="caller.result != null"
             element="pre"
             class="c-method--result-value"
             v-model="caller.result" 
             :for="methodMeta.return"
             :options="resultDisplayOptions"
           />
+
           <span
             v-else-if="methodMeta.return.type == 'void' && caller.wasSuccessful != null"
             class="c-method--result-void"
@@ -72,7 +132,7 @@
 
 import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
 import MetadataComponent, { getValueMeta } from '../c-metadata-component'
-import { Model, ClassType, ViewModel, Property, Method, ModelType, ListViewModel, DisplayOptions } from 'coalesce-vue';
+import {  ViewModel,  ListViewModel, DisplayOptions, AnyArgCaller, ItemApiState } from 'coalesce-vue';
 import CInput from '../input/c-input'
 
 const resultDisplayOptions = <DisplayOptions>{
@@ -87,7 +147,7 @@ const resultDisplayOptions = <DisplayOptions>{
     CInput
   }
 })
-export default class CMethod extends MetadataComponent {
+export default class CAdminMethod extends MetadataComponent {
   resultDisplayOptions = resultDisplayOptions;
   
   @Prop({required: false, type: Boolean, default: false})
@@ -104,11 +164,10 @@ export default class CMethod extends MetadataComponent {
   get filteredParams() {
     return Object
       .values(this.methodMeta.params)
-      // For model instance methods, don't include an input for the primary key, since it is implicit.
-      .filter(p => !this.methodMeta.isStatic ? p.name != 'id' : true)
+      .filter(p => !p.source)
   }
 
-  get caller() {
+  get caller(): AnyArgCaller {
     const caller = (this.viewModel as any)[this.methodMeta.name];
     if (!caller) throw Error(`Method '${this.methodMeta.name}' doesn't exist on provided model.`);
     return caller;
@@ -120,11 +179,41 @@ export default class CMethod extends MetadataComponent {
     throw Error("c-method: prop `model` is required, and must be a ViewModel or ListViewModel.");
   }
 
+  fileDownloadKind = "preview";
+
   async invoke() {
+    this.fileDownloadKind = "preview";
     await this.caller.invokeWithArgs()
     if (this.autoReloadModel) {
       await this.viewModel.$load();
     }
+  }
+
+  async invokeAndDownload() {
+    this.fileDownloadKind = "download";
+    await this.caller.invokeWithArgs()
+    
+    if (this.autoReloadModel) {
+      // Don't await. Just do this in the background while we setup the file download.
+      this.viewModel.$load();
+    }
+
+    this.downloadFileResult();
+  }
+
+  downloadFileResult() {
+    const caller = this.caller as ItemApiState<any, File>;
+    const file = caller.result;
+    if (!(file instanceof File)) return;
+
+    const a = document.createElement('a');
+    document.body.appendChild(a);
+    a.href = caller.getResultObjectUrl(this)!;
+    a.download = file.name;
+    a.click();
+    setTimeout(() => {
+      document.body.removeChild(a);
+    }, 1)
   }
 }
 
@@ -135,7 +224,7 @@ export default class CMethod extends MetadataComponent {
   > .col:first-child {
     font-size: 18px;
     flex-grow: 0;
-    min-width: 150px;
+    min-width: 170px;
     text-align: right;
   }
 }

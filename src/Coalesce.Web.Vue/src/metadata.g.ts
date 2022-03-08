@@ -193,37 +193,33 @@ export const Case = domain.types.Case = {
       get inverseNavigation() { return (domain.types.Person as ModelType).props.casesReported as ModelCollectionNavigationProperty },
       dontSerialize: true,
     },
-    imageName: {
-      name: "imageName",
-      displayName: "Image Name",
-      type: "string",
-      role: "value",
-      dontSerialize: true,
-    },
-    imageSize: {
-      name: "imageSize",
-      displayName: "Image Size",
+    attachmentSize: {
+      name: "attachmentSize",
+      displayName: "Attachment Size",
       type: "number",
       role: "value",
-    },
-    imageHash: {
-      name: "imageHash",
-      displayName: "Image Hash",
-      type: "string",
-      role: "value",
-    },
-    attachment: {
-      name: "attachment",
-      displayName: "Attachment",
-      type: "binary",
-      base64: true,
-      role: "value",
+      dontSerialize: true,
     },
     attachmentName: {
       name: "attachmentName",
       displayName: "Attachment Name",
       type: "string",
       role: "value",
+      dontSerialize: true,
+    },
+    attachmentType: {
+      name: "attachmentType",
+      displayName: "Attachment Type",
+      type: "string",
+      role: "value",
+    },
+    attachmentHash: {
+      name: "attachmentHash",
+      displayName: "Attachment Hash",
+      type: "binary",
+      base64: true,
+      role: "value",
+      dontSerialize: true,
     },
     severity: {
       name: "severity",
@@ -338,17 +334,18 @@ export const Case = domain.types.Case = {
         role: "value",
       },
     },
-    uploadAttachment: {
-      name: "uploadAttachment",
-      displayName: "Upload Attachment",
+    uploadImage: {
+      name: "uploadImage",
+      displayName: "Upload Image",
       transportType: "item",
       httpMethod: "POST",
       params: {
         id: {
           name: "id",
           displayName: "Primary Key",
-          role: "value",
           type: "number",
+          role: "value",
+          get source() { return (domain.types.Case as ModelType).props.caseKey },
         },
         file: {
           name: "file",
@@ -364,17 +361,73 @@ export const Case = domain.types.Case = {
         role: "value",
       },
     },
-    uploadAttachments: {
-      name: "uploadAttachments",
-      displayName: "Upload Attachments",
+    downloadImage: {
+      name: "downloadImage",
+      displayName: "Download Image",
+      transportType: "item",
+      httpMethod: "GET",
+      params: {
+        id: {
+          name: "id",
+          displayName: "Primary Key",
+          type: "number",
+          role: "value",
+          get source() { return (domain.types.Case as ModelType).props.caseKey },
+        },
+        etag: {
+          name: "etag",
+          displayName: "Etag",
+          type: "binary",
+          role: "value",
+          get source() { return (domain.types.Case as ModelType).props.attachmentHash },
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "file",
+        role: "value",
+      },
+    },
+    uploadAndDownload: {
+      name: "uploadAndDownload",
+      displayName: "Upload And Download",
       transportType: "item",
       httpMethod: "POST",
       params: {
         id: {
           name: "id",
           displayName: "Primary Key",
-          role: "value",
           type: "number",
+          role: "value",
+          get source() { return (domain.types.Case as ModelType).props.caseKey },
+        },
+        file: {
+          name: "file",
+          displayName: "File",
+          type: "file",
+          role: "value",
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "file",
+        role: "value",
+      },
+    },
+    uploadImages: {
+      name: "uploadImages",
+      displayName: "Upload Images",
+      transportType: "item",
+      httpMethod: "POST",
+      params: {
+        id: {
+          name: "id",
+          displayName: "Primary Key",
+          type: "number",
+          role: "value",
+          get source() { return (domain.types.Case as ModelType).props.caseKey },
         },
         files: {
           name: "files",
@@ -405,8 +458,9 @@ export const Case = domain.types.Case = {
         id: {
           name: "id",
           displayName: "Primary Key",
-          role: "value",
           type: "number",
+          role: "value",
+          get source() { return (domain.types.Case as ModelType).props.caseKey },
         },
         file: {
           name: "file",
@@ -496,8 +550,9 @@ export const CaseDto = domain.types.CaseDto = {
         id: {
           name: "id",
           displayName: "Primary Key",
-          role: "value",
           type: "number",
+          role: "value",
+          get source() { return (domain.types.CaseDto as ModelType).props.caseId },
         },
         input: {
           name: "input",
@@ -960,8 +1015,9 @@ export const Person = domain.types.Person = {
         id: {
           name: "id",
           displayName: "Primary Key",
-          role: "value",
           type: "number",
+          role: "value",
+          get source() { return (domain.types.Person as ModelType).props.personId },
         },
         name: {
           name: "name",
@@ -987,8 +1043,9 @@ export const Person = domain.types.Person = {
         id: {
           name: "id",
           displayName: "Primary Key",
-          role: "value",
           type: "number",
+          role: "value",
+          get source() { return (domain.types.Person as ModelType).props.personId },
         },
       },
       return: {
@@ -1049,8 +1106,9 @@ export const Person = domain.types.Person = {
         id: {
           name: "id",
           displayName: "Primary Key",
-          role: "value",
           type: "number",
+          role: "value",
+          get source() { return (domain.types.Person as ModelType).props.personId },
         },
       },
       return: {
@@ -1092,8 +1150,9 @@ export const Person = domain.types.Person = {
         id: {
           name: "id",
           displayName: "Primary Key",
-          role: "value",
           type: "number",
+          role: "value",
+          get source() { return (domain.types.Person as ModelType).props.personId },
         },
       },
       return: {
@@ -1133,8 +1192,9 @@ export const Person = domain.types.Person = {
         id: {
           name: "id",
           displayName: "Primary Key",
-          role: "value",
           type: "number",
+          role: "value",
+          get source() { return (domain.types.Person as ModelType).props.personId },
         },
       },
       return: {
@@ -1153,8 +1213,9 @@ export const Person = domain.types.Person = {
         id: {
           name: "id",
           displayName: "Primary Key",
-          role: "value",
           type: "number",
+          role: "value",
+          get source() { return (domain.types.Person as ModelType).props.personId },
         },
         firstName: {
           name: "firstName",

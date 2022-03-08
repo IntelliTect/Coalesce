@@ -14,11 +14,10 @@ export interface CaseViewModel extends $models.Case {
   assignedTo: PersonViewModel | null;
   reportedById: number | null;
   reportedBy: PersonViewModel | null;
-  imageName: string | null;
-  imageSize: number | null;
-  imageHash: string | null;
-  attachment: string | null;
+  attachmentSize: number | null;
   attachmentName: string | null;
+  attachmentType: string | null;
+  attachmentHash: string | null;
   severity: string | null;
   status: $models.Statuses | null;
   caseProducts: CaseProductViewModel[] | null;
@@ -37,26 +36,48 @@ export class CaseViewModel extends ViewModel<$models.Case, $apiClients.CaseApiCl
     return (this.caseProducts || []).map($ => $.product!).filter($ => $)
   }
   
-  public get uploadAttachment() {
-    const uploadAttachment = this.$apiClient.$makeCaller(
-      this.$metadata.methods.uploadAttachment,
-      (c, file: File | null) => c.uploadAttachment(this.$primaryKey, file),
+  public get uploadImage() {
+    const uploadImage = this.$apiClient.$makeCaller(
+      this.$metadata.methods.uploadImage,
+      (c, file: File | null) => c.uploadImage(this.$primaryKey, file),
       () => ({file: null as File | null, }),
-      (c, args) => c.uploadAttachment(this.$primaryKey, args.file))
+      (c, args) => c.uploadImage(this.$primaryKey, args.file))
     
-    Object.defineProperty(this, 'uploadAttachment', {value: uploadAttachment});
-    return uploadAttachment
+    Object.defineProperty(this, 'uploadImage', {value: uploadImage});
+    return uploadImage
   }
   
-  public get uploadAttachments() {
-    const uploadAttachments = this.$apiClient.$makeCaller(
-      this.$metadata.methods.uploadAttachments,
-      (c, files: File[] | null) => c.uploadAttachments(this.$primaryKey, files),
-      () => ({files: null as File[] | null, }),
-      (c, args) => c.uploadAttachments(this.$primaryKey, args.files))
+  public get downloadImage() {
+    const downloadImage = this.$apiClient.$makeCaller(
+      this.$metadata.methods.downloadImage,
+      (c) => c.downloadImage(this.$primaryKey, this.attachmentHash),
+      () => ({}),
+      (c, args) => c.downloadImage(this.$primaryKey, this.attachmentHash))
     
-    Object.defineProperty(this, 'uploadAttachments', {value: uploadAttachments});
-    return uploadAttachments
+    Object.defineProperty(this, 'downloadImage', {value: downloadImage});
+    return downloadImage
+  }
+  
+  public get uploadAndDownload() {
+    const uploadAndDownload = this.$apiClient.$makeCaller(
+      this.$metadata.methods.uploadAndDownload,
+      (c, file: File | null) => c.uploadAndDownload(this.$primaryKey, file),
+      () => ({file: null as File | null, }),
+      (c, args) => c.uploadAndDownload(this.$primaryKey, args.file))
+    
+    Object.defineProperty(this, 'uploadAndDownload', {value: uploadAndDownload});
+    return uploadAndDownload
+  }
+  
+  public get uploadImages() {
+    const uploadImages = this.$apiClient.$makeCaller(
+      this.$metadata.methods.uploadImages,
+      (c, files: File[] | null) => c.uploadImages(this.$primaryKey, files),
+      () => ({files: null as File[] | null, }),
+      (c, args) => c.uploadImages(this.$primaryKey, args.files))
+    
+    Object.defineProperty(this, 'uploadImages', {value: uploadImages});
+    return uploadImages
   }
   
   public get uploadByteArray() {
@@ -339,9 +360,9 @@ export class PersonViewModel extends ViewModel<$models.Person, $apiClients.Perso
   public get changeSpacesToDashesInName() {
     const changeSpacesToDashesInName = this.$apiClient.$makeCaller(
       this.$metadata.methods.changeSpacesToDashesInName,
-      (c) => c.changeSpacesToDashesInName(this.$primaryKey, ),
+      (c) => c.changeSpacesToDashesInName(this.$primaryKey),
       () => ({}),
-      (c, args) => c.changeSpacesToDashesInName(this.$primaryKey, ))
+      (c, args) => c.changeSpacesToDashesInName(this.$primaryKey))
     
     Object.defineProperty(this, 'changeSpacesToDashesInName', {value: changeSpacesToDashesInName});
     return changeSpacesToDashesInName
@@ -350,9 +371,9 @@ export class PersonViewModel extends ViewModel<$models.Person, $apiClients.Perso
   public get getBirthdate() {
     const getBirthdate = this.$apiClient.$makeCaller(
       this.$metadata.methods.getBirthdate,
-      (c) => c.getBirthdate(this.$primaryKey, ),
+      (c) => c.getBirthdate(this.$primaryKey),
       () => ({}),
-      (c, args) => c.getBirthdate(this.$primaryKey, ))
+      (c, args) => c.getBirthdate(this.$primaryKey))
     
     Object.defineProperty(this, 'getBirthdate', {value: getBirthdate});
     return getBirthdate
@@ -361,9 +382,9 @@ export class PersonViewModel extends ViewModel<$models.Person, $apiClients.Perso
   public get fullNameAndAge() {
     const fullNameAndAge = this.$apiClient.$makeCaller(
       this.$metadata.methods.fullNameAndAge,
-      (c) => c.fullNameAndAge(this.$primaryKey, ),
+      (c) => c.fullNameAndAge(this.$primaryKey),
       () => ({}),
-      (c, args) => c.fullNameAndAge(this.$primaryKey, ))
+      (c, args) => c.fullNameAndAge(this.$primaryKey))
     
     Object.defineProperty(this, 'fullNameAndAge', {value: fullNameAndAge});
     return fullNameAndAge
@@ -372,9 +393,9 @@ export class PersonViewModel extends ViewModel<$models.Person, $apiClients.Perso
   public get obfuscateEmail() {
     const obfuscateEmail = this.$apiClient.$makeCaller(
       this.$metadata.methods.obfuscateEmail,
-      (c) => c.obfuscateEmail(this.$primaryKey, ),
+      (c) => c.obfuscateEmail(this.$primaryKey),
       () => ({}),
-      (c, args) => c.obfuscateEmail(this.$primaryKey, ))
+      (c, args) => c.obfuscateEmail(this.$primaryKey))
     
     Object.defineProperty(this, 'obfuscateEmail', {value: obfuscateEmail});
     return obfuscateEmail

@@ -43,7 +43,7 @@ module ViewModels {
             
             /** Calls server method (AsyncMethodOnIClassDto) with the given arguments */
             public invoke = (input: string | null, callback?: (result: string) => void, reload: boolean = true): JQueryPromise<any> => {
-                return this.invokeWithData({ id: this.parent[this.parent.primaryKeyName](), input: input }, callback, reload);
+                return this.invokeWithData({ id: this.parent.caseId(), input: input }, callback, reload);
             };
             
             /** Object that can be easily bound to fields to allow data entry for the method's parameters */
@@ -66,7 +66,7 @@ module ViewModels {
                 return this.invoke(input, callback, reload);
             };
             
-            protected loadResponse = (data: Coalesce.ItemResult, callback?: (result: string) => void, reload: boolean = true) => {
+            protected loadResponse = (data: Coalesce.ItemResult, jqXHR: JQuery.jqXHR, callback?: (result: string) => void, reload: boolean = true) => {
                 this.result(data.object);
                 if (reload) {
                     var result = this.result();

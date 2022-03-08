@@ -126,6 +126,20 @@ module Coalesce {
                 }
             });
         }
+
+        export function getFileNameFromContentDisposition(disposition?: string | null) {
+            if (!disposition) return "";
+            // https://stackoverflow.com/a/40940790
+            let filename = "";
+            if (disposition && disposition.indexOf('attachment') !== -1) {
+                var filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
+                var matches = filenameRegex.exec(disposition);
+                if (matches != null && matches[1]) {
+                    filename = matches[1].replace(/['"]/g, '');
+                }
+            }
+            return filename;
+        }
     }
 
     export module ModalHelpers {

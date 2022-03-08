@@ -54,18 +54,18 @@ export default Vue.extend({
       options = {...options, format: props.format as any};
     }
 
-    let value = model && "role" in meta
+    let valueString = model && "role" in meta
       ? propDisplay(model, meta as Property, options)
       : valueDisplay(valueProp, meta, options);
 
     if (meta.type === "boolean") {
-      if (value === "true") {
-        value = "✓";
-      } else if (value === "false") {
-        value = "✗";
+      if (valueString === "true") {
+        valueString = "✓";
+      } else if (valueString === "false") {
+        valueString = "✗";
       }
     }
 
-    return h(props.element, ctx.data, value || ctx.children);
+    return h(props.element, ctx.data, valueString || ctx.children);
   }
 });

@@ -43,11 +43,10 @@ export interface Case extends Model<typeof metadata.Case> {
   assignedTo: Person | null
   reportedById: number | null
   reportedBy: Person | null
-  imageName: string | null
-  imageSize: number | null
-  imageHash: string | null
-  attachment: string | null
+  attachmentSize: number | null
   attachmentName: string | null
+  attachmentType: string | null
+  attachmentHash: string | null
   severity: string | null
   status: Statuses | null
   caseProducts: CaseProduct[] | null

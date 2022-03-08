@@ -224,6 +224,7 @@ module Coalesce {
 
     export abstract class ClientMethod<TParent extends ClientMethodParent, TResult> {
         public abstract readonly name: string;
+        protected readonly returnsFile: boolean = false;
 
         /** HTTP method to be used when calling the API endpoint. */
         public readonly verb: string = "POST";
@@ -245,9 +246,9 @@ module Coalesce {
 
         constructor(protected parent: TParent) { }
 
-        protected abstract loadResponse: (data: ApiResult, callback?: (result: TResult) => void, reload?: boolean) => void;
+        protected abstract loadResponse: (data: TResult extends File ? Blob : ApiResult, jqXHR: JQuery.jqXHR, callback?: (result: TResult) => void, reload?: boolean) => void;
 
-        protected loadStandardResponse = (data: ApiResult) => { /* Nothing, normally. Other abstract derived classes can use this for non-specific result loading. */ };
+        protected loadStandardResponse = (data: TResult extends File ? Blob : ApiResult) => { /* Nothing, normally. Other abstract derived classes can use this for non-specific result loading. */ };
 
         protected invokeWithData(postData: object, callback?: (result: TResult) => void, reload?: boolean) {
             this.isLoading(true);
@@ -287,9 +288,18 @@ module Coalesce {
                 // https://stackoverflow.com/a/8244082
                 processData: hasFile ? false : undefined,
                 contentType: hasFile ? false : undefined,
-                xhrFields: { withCredentials: true }
+                xhrFields: { withCredentials: true },
+                xhr: () => {
+                    var xhr = new XMLHttpRequest();
+                    xhr.onreadystatechange = () => {
+                        if (xhr.readyState == 2 && xhr.status < 400 && this.returnsFile) {
+                            xhr.responseType = "blob";
+                        }
+                    };
+                    return xhr;
+                },
             })
-                .done((data: ApiResult) => {
+                .done((data: any, _, jqXHR) => {
                     // This is here because it was migrated from the old client method calls.
                     // Whether or not this should be done remains to be see, but it was kept to reduce
                     // the number of breaking changes being made.
@@ -300,7 +310,7 @@ module Coalesce {
                     this.message('');
                     this.wasSuccessful(true);
                     this.loadStandardResponse(data);
-                    this.loadResponse(data, callback, reload);
+                    this.loadResponse(data, jqXHR, callback, reload);
                 })
                 .fail((xhr) => {
                     var errorMsg = "Unknown Error";
@@ -318,7 +328,7 @@ module Coalesce {
         }
     }
 
-    export abstract class ClientListMethod<TParent extends ClientMethodParent, TResult> extends ClientMethod<TParent, TResult> {
+    export abstract class ClientListMethod<TParent extends ClientMethodParent, TResult extends Array<any>> extends ClientMethod<TParent, TResult> {
         /** Page number. */
         public page: KnockoutObservable<number | null> = ko.observable(null);
         /** Number of items on a page. */

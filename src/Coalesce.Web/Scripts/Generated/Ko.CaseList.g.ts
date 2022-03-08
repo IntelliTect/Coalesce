@@ -12,7 +12,7 @@ module ListViewModels {
             public saveToDto = () => {
                 var dto: any = {};
                 if (!this.minDate()) dto.minDate = null;
-                else dto.minDate = this.minDate()!.format('YYYY-MM-DDTHH:mm:ssZZ');
+                else dto.minDate = this.minDate()!.format('YYYY-MM-DDTHH:mm:ss.SSSZZ');
                 return dto;
             }
         }
@@ -31,9 +31,7 @@ module ListViewModels {
             openedAt?: string;
             assignedToId?: string;
             reportedById?: string;
-            imageName?: string;
-            imageSize?: string;
-            imageHash?: string;
+            attachmentSize?: string;
             attachmentName?: string;
             severity?: string;
             status?: string;
@@ -66,7 +64,7 @@ module ListViewModels {
                 return this.invokeWithData({  }, callback, reload);
             };
             
-            protected loadResponse = (data: Coalesce.ItemResult, callback?: (result: ViewModels.Case[]) => void, reload: boolean = true) => {
+            protected loadResponse = (data: Coalesce.ItemResult, jqXHR: JQuery.jqXHR, callback?: (result: ViewModels.Case[]) => void, reload: boolean = true) => {
                 Coalesce.KnockoutUtilities.RebuildArray(this.result, data.object, 'caseKey', ViewModels.Case, this, true);
                 if (reload) {
                     var result = this.result();
@@ -88,7 +86,7 @@ module ListViewModels {
                 return this.invokeWithData({  }, callback, reload);
             };
             
-            protected loadResponse = (data: Coalesce.ItemResult, callback?: (result: number) => void, reload: boolean = true) => {
+            protected loadResponse = (data: Coalesce.ItemResult, jqXHR: JQuery.jqXHR, callback?: (result: number) => void, reload: boolean = true) => {
                 this.result(data.object);
                 if (reload) {
                     var result = this.result();
@@ -110,7 +108,7 @@ module ListViewModels {
                 return this.invokeWithData({  }, callback, reload);
             };
             
-            protected loadResponse = (data: Coalesce.ItemResult, callback?: (result: void) => void, reload: boolean = true) => {
+            protected loadResponse = (data: Coalesce.ItemResult, jqXHR: JQuery.jqXHR, callback?: (result: void) => void, reload: boolean = true) => {
                 this.result(data.object);
                 if (reload) {
                     var result = this.result();
@@ -136,7 +134,7 @@ module ListViewModels {
                 return this.invokeWithData({  }, callback, reload);
             };
             
-            protected loadResponse = (data: Coalesce.ItemResult, callback?: (result: ViewModels.CaseSummary) => void, reload: boolean = true) => {
+            protected loadResponse = (data: Coalesce.ItemResult, jqXHR: JQuery.jqXHR, callback?: (result: ViewModels.CaseSummary) => void, reload: boolean = true) => {
                 if (!this.result()) {
                     this.result(new ViewModels.CaseSummary(data.object));
                 } else {

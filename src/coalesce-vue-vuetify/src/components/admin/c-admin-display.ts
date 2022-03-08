@@ -18,7 +18,7 @@ export default Vue.extend({
 
     if (model == null) {
       // If no model was provided, just display nothing.
-      // This isn't an error case - it just means the thing we're tring to display 
+      // This isn't an error case - it just means the thing we're trying to display 
       // is `null`-ish, and should be treated the same way that vue would treat {{null}}
       return h('span');
     }

@@ -1,15 +1,16 @@
-﻿using IntelliTect.Coalesce.Helpers;
+﻿using IntelliTect.Coalesce.DataAnnotations;
+using IntelliTect.Coalesce.Helpers;
 using IntelliTect.Coalesce.TypeDefinition;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 
-namespace IntelliTect.Coalesce.DataAnnotations
+namespace IntelliTect.Coalesce.TypeDefinition
 {
-    public class ExecuteSecurityInfo
+    public class MethodSecurityInfo
     {
-        public ExecuteSecurityInfo(SecurityPermission execute)
+        public MethodSecurityInfo(SecurityPermission execute)
         {
             Execute = execute;
         }
@@ -26,7 +27,7 @@ namespace IntelliTect.Coalesce.DataAnnotations
             {
                 if (Execute.NoAccess) throw new InvalidOperationException($"Cannot emit an annotation for security level {SecurityPermissionLevels.DenyAll}");
                 if (Execute.AllowAnonymous) return "[AllowAnonymous]";
-                if (Execute.HasRoles) return $"[Authorize(Roles=\"{Execute.ExternalRoleList}\")]";
+                if (Execute.HasRoles) return $"[Authorize(Roles=\"{Execute.AttributeRoleList}\")]";
                 return "[Authorize]";
             }
         }

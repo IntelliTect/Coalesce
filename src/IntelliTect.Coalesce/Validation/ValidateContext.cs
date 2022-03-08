@@ -134,26 +134,6 @@ namespace IntelliTect.Coalesce.Validation
                             }
                         }
 
-                        if (prop.IsFile)
-                        {
-                            if (prop.HasFileNameProperty)
-                            {
-                                assert.IsNotNull(prop.FileNameProperty, $"Cannot find filename property: {prop.Parent.Name}.{prop.FileNameProperty} for {prop.Name}");
-                                assert.IsTrue(prop.FileNameProperty?.Type.TypeInfo == typeof(string), $"Filename property must be a string: {prop.Parent.Name}.{prop.FileNameProperty} for {prop.Name}");
-                            }
-
-                            if (prop.HasFileHashProperty)
-                            {
-                                assert.IsNotNull(prop.FileHashProperty, $"Cannot find file hash property: {prop.Parent.Name}.{prop.FileHashProperty} for {prop.Name}");
-                                assert.IsTrue(prop.FileHashProperty?.Type.TypeInfo == typeof(string), $"File Hash property must be a string: {prop.Parent.Name}.{prop.FileNameProperty} for {prop.Name}");
-                            }
-                            if (prop.HasFileSizeProperty)
-                            {
-                                assert.IsNotNull(prop.FileSizeProperty, $"Cannot find file size property: {prop.Parent.Name}.{prop.FileSizeProperty} for {prop.Name}");
-                                assert.IsTrue(prop.FileHashProperty?.Type.IsNumber, $"File Size property must be a number: {prop.Parent.Name}.{prop.FileNameProperty} for {prop.Name}");
-                            }
-                        }
-
                         if (prop.DefaultOrderBy != null && model.IsDbMappedType)
                         {
                             assert.IsTrue(prop.IsDbMapped, "Property with [DefaultOrderBy] must be DB mapped.");
@@ -192,8 +172,6 @@ namespace IntelliTect.Coalesce.Validation
 
                     if (method.IsClientMethod)
                     {
-                        assert.IsFalse(method.ResultType.IsFile, "IFile is not currently supported as a method return type - only as a parameter.");
-
                         if (method.Name != method.NameWithoutAsync)
                         {
                             // If the name and name w/o async are different, this method has "Async" at the end.
@@ -203,6 +181,13 @@ namespace IntelliTect.Coalesce.Validation
                                 "Do not expose both an async and non-async version of the same method. Prefer the async version.");
                         }
 
+                        assert.IsFalse(
+                            method.GetAttributeValue<ControllerActionAttribute>(a => a.VaryByProperty) != null && 
+                            method.VaryByProperty == null,
+                            $"{nameof(ControllerActionAttribute.VaryByProperty)} is only applicable to HTTP GET model instance methods, " +
+                            $"and must reference a property on the parent instance."
+                        );
+
                         // TODO: Assert that the method name isn't a reserved endpoint name:
                         // get, save, delete, list, count
                         foreach (var param in method.Parameters)
@@ -211,10 +196,11 @@ namespace IntelliTect.Coalesce.Validation
 
                             if (method.IsModelInstanceMethod)
                             {
-                                var reserved = new[] {
+                                var reserved = new List<string> {
                                     "id",
                                     "dataSourceFactory"
                                 };
+                                if (method.VaryByProperty?.IsClientProperty == true) reserved.Add("etag");
                                 foreach (var name in reserved)
                                 {
                                     assert.AreNotEqual(name, param.Name, $"{name} is a reserved parameter name");

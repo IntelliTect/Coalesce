@@ -608,7 +608,7 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
                 {
                     b.Line("<button type='button' class='btn btn-default' data-dismiss='modal'>Cancel</button>");
                     b.Line("<button type='button' class='btn btn-primary btn-ok'");
-                    b.Indented(@"data-bind=""click: invokeWithArgs.bind(this, args, function(){jQuery($element).closest('.modal').modal('hide')}, null)"">");
+                    b.Indented(@"data-bind=""click: invokeWithArgs.bind(this, args, function(){jQuery($element).closest('.modal').modal('hide')})"">");
                     b.Indented("OK");
                     b.Line("</button>");
                 }
@@ -623,13 +623,6 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
         {
             PropertyViewModel propertyModel = ReflectionRepository.Global.PropertyBySelector(propertySelector);
             return TextInput(propertyModel.JsVariableForBinding(), bindingName);
-        }
-
-        public static HtmlString InputFor<T>(Expression<Func<T, byte[]>> propertySelector,
-            string bindingName = "fileUpload")
-        {
-            PropertyViewModel propertyModel = ReflectionRepository.Global.PropertyBySelector(propertySelector);
-            return new HtmlString(DisplayFile(propertyModel).ToString() + FileUploadButton(propertyModel.JsUrlPropertyName, bindingName).ToString());
         }
 
         public static HtmlString SelectWithLabelFor<T>(Expression<Func<T, Enum>> propertySelector,
@@ -777,10 +770,6 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
             {
                 return DisplayEnum(propertyModel);
             }
-            else if (propertyModel.IsFile)
-            {
-                return DisplayFile(propertyModel);
-            }
             else
             {
                 return DisplayText(propertyModel.JsVariableForBinding());
@@ -835,55 +824,6 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
                 <!-- Attempted to Display: {bindingValue} -->");
         }
 
-        public static HtmlString DisplayFile(PropertyViewModel propertyModel)
-        {
-            var mimeType = propertyModel.GetAttributeValue<FileAttribute>(f => f.MimeType);
-            if (mimeType != null && mimeType.IndexOf("image", StringComparison.OrdinalIgnoreCase) >= 0)
-            {
-                return DisplayFileImage(propertyModel);
-            }
-            else
-            {
-                return DisplayFileDownloadButton(propertyModel);
-            }
-        }
-
-        public static HtmlString DisplayFileImage(PropertyViewModel propertyModel)
-        {
-            var result = new HtmlString($@"
-                <img class=""form-control-static"" data-bind=""attr: {{src: {propertyModel.JsUrlPropertyName}}}"" />");
-            // Prevent request for unbound images.
-            return new HtmlString($@"
-                <!-- ko if: {propertyModel.Parent.PrimaryKey.JsVariable}() -->
-                {result}
-                <!-- /ko -->
-            ");
-        }
-
-        public static HtmlString DisplayFileDownloadButton(PropertyViewModel propertyModel)
-        {
-            return DisplayFileDownload(propertyModel, "btn btn-default coalesce-download-button");
-        }
-
-        public static HtmlString DisplayFileDownload(PropertyViewModel propertyModel, string classes)
-        {
-            var result = new HtmlString($@"
-                <a class=""{classes}"" data-bind=""attr: {{href: {propertyModel.JsUrlPropertyName}}}"" download><i class=""fa fa-download""></i></a>");
-            if (propertyModel.FileHashProperty?.IsClientProperty ?? false)
-            {
-                result = new HtmlString($@"
-                    <!-- ko if: {propertyModel.FileHashProperty.JsVariable}() -->
-                    {result}
-                    <!-- /ko -->
-                ");
-            }
-            return result;
-        }
-
-
-
-
         #endregion
-
     }
 }

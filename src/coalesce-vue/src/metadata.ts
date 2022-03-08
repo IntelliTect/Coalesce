@@ -498,6 +498,13 @@ export type Property =
    -----------------------------
 */
 
+export type MethodParameter = Value & {
+  /** If specified, the name of a property on the model that owns the parameter's method
+   * that the value of this parameter should be automatically sourced from when invoked on viewmodels.
+   */
+  source?: Property
+}
+
 export interface MethodBase extends Metadata {
 
     /** The HTTP method to use when calling the method. */
@@ -507,7 +514,7 @@ export interface MethodBase extends Metadata {
     readonly isStatic?: boolean,
 
     /** The parameters of the method */
-    readonly params: { [paramName in string]: Value } 
+    readonly params: { [paramName in string]: MethodParameter } 
 }
 
 export interface ItemMethod extends MethodBase  {
@@ -580,7 +587,7 @@ export function solidify<T>(root: T): T {
 
     // Store that we've visited the object.
     // This lets us avoid infinite recursion.
-    // We can't use the frozen status to check for recusion
+    // We can't use the frozen status to check for recursion
     // because we can't freeze the object until we're done changing its props.
     map.set(o, o);
 

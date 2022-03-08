@@ -374,7 +374,6 @@ describe("$makeCaller", () => {
     expect(fulfilledMock.mock.calls[0][0]).toBe(model.caller);
   })
 
-
   test("preserves getter/setter behavior on ApiState after _makeReactive()", () => {
     const endpointMock = makeEndpointMock();
     const caller = new StudentApiClient().$makeCaller("item", (c, num: number) => endpointMock(num))
@@ -482,7 +481,6 @@ describe("$makeCaller", () => {
     expect(calls[2]).rejects.toBe("thrown");
   })
 
-
   test("concurrencyMode 'cancel' cancels all previous requests", async () => {
     
     AxiosClient.defaults.adapter = 
@@ -520,7 +518,99 @@ describe("$makeCaller", () => {
     expect(res3).toBeTruthy();
   })
 
+  test("handles successful file response", async () => {
+    let blob = new Blob(["foo"]);
 
+    AxiosClient.defaults.adapter = jest.fn().mockImplementation(async () => <AxiosResponse<any>>{
+      data: blob,
+      status: 200,
+      headers: {'content-disposition': "attachment; filename=\"sample-mp4-file small.mp4\"; filename*=UTF-8''sample-mp4-file%20small.mp4"}
+    })
+
+    const caller = new StudentApiClient().$makeCaller("item", (c) => c.getFile(42, 'bob'))
+
+    await caller();
+
+    expect(caller.wasSuccessful).toBeTruthy();
+    expect(caller.result!.size).toBe(3);
+    expect(caller.result!.name).toBe('sample-mp4-file small.mp4');
+  })
+
+  test("handles failed file response", async () => {
+    let blob = new Blob(['{ "wasSuccessful": false, "message": "broken" }'], {type: "application/json"});
+
+    AxiosClient.defaults.adapter = jest.fn().mockImplementation(async () => {
+      throw {
+        isAxiosError: true,
+        code: 400,
+        response: <AxiosResponse<any>>{
+          data: blob,
+          status: 400,
+        }
+      }
+    })
+
+    const caller = new StudentApiClient().$makeCaller("item", (c) => c.getFile(42, 'bob'))
+
+    await expect(caller()).rejects.toBeTruthy()
+
+    expect(caller.result).toBeNull();
+    expect(caller.wasSuccessful).toBeFalsy();
+    expect(caller.message).toBe('broken');
+  })
+
+  test("getResultObjectUrl", async () => {
+    let currentBlob = new Blob(["foo"]);
+
+    AxiosClient.defaults.adapter = jest.fn().mockImplementation(async () => <AxiosResponse<any>>{
+      data: currentBlob,
+      status: 200,
+      headers: {}
+    })
+
+    const createUrlMock = URL.createObjectURL = jest.fn().mockImplementation(() =>
+      `blob://${Math.random().toString(36).slice(2)}`)
+    const revokeUrlMock = URL.revokeObjectURL = jest.fn()
+    
+    const caller = new StudentApiClient().$makeCaller(
+      "item", 
+      (c) => c.getFile(42, 'bob'),
+    )
+    const vue = new Vue();
+    const $onSpy = jest.spyOn(vue, "$on");
+    const $offSpy = jest.spyOn(vue, "$off");
+
+    // Act/assert - before any invocation.
+    expect(caller.getResultObjectUrl(vue)).toBeUndefined();
+    expect($onSpy).toBeCalledTimes(0);
+    expect($offSpy).toBeCalledTimes(0);
+
+    // Act/Assert - first invocation
+    await caller();
+    const url1 = caller.getResultObjectUrl(vue);
+    expect(createUrlMock).toBeCalledWith(caller.result);
+    expect($onSpy).toBeCalledTimes(1);
+    expect($offSpy).toBeCalledTimes(0);
+
+    // Act/Assert - second invocation revokes first url and creates a second
+    currentBlob = new Blob(["bar"]);
+    await caller();
+    const url2 = caller.getResultObjectUrl(vue);
+    expect(revokeUrlMock).toBeCalledWith(url1);
+    expect(createUrlMock).toBeCalledWith(caller.result);
+    expect($onSpy).toBeCalledTimes(2);
+    expect($offSpy).toBeCalledTimes(1);
+
+    // Multiple invocations keep the same URL
+    const url2_again = caller.getResultObjectUrl(vue);
+    expect(url2_again).toBe(url2);
+
+    // Act/Assert - Teardown
+    vue.$destroy();
+    expect(revokeUrlMock).toBeCalledWith(url2);
+    expect($onSpy).toBeCalledTimes(2);
+    expect($offSpy).toBeCalledTimes(3); // This is 3 because vue itself will also call $off() with no params when a component is destroyed.
+  })
 })
 
 
@@ -537,6 +627,21 @@ describe("$makeCaller with args object", () => {
     caller.args.num = 42;
     const result = await caller.invokeWithArgs();
     expect(result.data.object).toBe("foo");
+  })
+
+  test("item caller url returns correct url", async () => {
+    // Should never be called:
+    const adapter = AxiosClient.defaults.adapter = jest.fn().mockResolvedValue('foo')
+
+    const caller = new StudentApiClient().$makeCaller(
+      "item", 
+      (c) => c.getFile(42, 'bob'),
+      () => ({}),
+      (c, args) => c.getFile(42, 'bob'),
+    )
+
+    expect(caller.url).toBe("/api/Students/getFile?id=42&etag=bob")
+    expect(adapter).toBeCalledTimes(0);
   })
 
   describe.each(["item", "list"] as const)("for %s transport", (type) => {

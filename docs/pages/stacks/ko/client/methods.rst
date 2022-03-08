@@ -37,6 +37,16 @@ The following members are only generated for methods with arguments:
 :ts:`public invokeWithPrompts: (callback: (result: string) => void = null, reload: boolean = true) => JQueryPromise<any>`
     Simple interface using browser :ts:`prompt()` input boxes to prompt the user for the required data for the method call. The call is then made with the data provided.
 
+The following member is generated for methods that return a file:
+
+:ts:`public resultObjectUrl: KnockoutObservable<string | null>`
+    Observable that will contain an `Object URL <https://developer.mozilla.org/en-US/docs/Web/API/URL/createObjectURL>`_ representing the last successful invocation result.
+
+The following member is generated for methods exposed by HTTP GET:
+
+:ts:`public url: KnockoutComputed<string>`
+    The URL for the method. Can be useful for using as the `src` attribute of an `image` or `video` HTML element for file-downloading methods. Any arguments will be populated from :ts:`this.args`.
+
 Base Class Members
 ..................
 

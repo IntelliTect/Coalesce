@@ -2,6 +2,7 @@ using System;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Coalesce.Domain;
+using Coalesce.Domain.WebShared;
 using IntelliTect.Coalesce;
 using IntelliTect.Coalesce.DataAnnotations;
 using Microsoft.AspNetCore.Builder;
@@ -41,6 +42,12 @@ namespace Coalesce.Web.Vue
 
             services.AddDbContext<AppDbContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+
+
+            services.Configure<Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerOptions>(options =>
+            {
+                options.Limits.MaxRequestBodySize = int.MaxValue; // testing big file uploads/downloads
+            });
 
             services.AddCoalesce(builder =>
             {
@@ -91,7 +98,7 @@ namespace Coalesce.Web.Vue
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapControllers();
+                endpoints.MapDefaultControllerRoute();
 
                 // API fallback to prevent serving SPA fallback to 404 hits on API endpoints.
                 endpoints.Map("api/{**any}", ctx => { ctx.Response.StatusCode = StatusCodes.Status404NotFound; return Task.CompletedTask; });

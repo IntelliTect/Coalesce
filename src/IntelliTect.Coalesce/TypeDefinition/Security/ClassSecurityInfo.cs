@@ -1,4 +1,5 @@
-﻿using IntelliTect.Coalesce.Helpers;
+﻿using IntelliTect.Coalesce.DataAnnotations;
+using IntelliTect.Coalesce.Helpers;
 using IntelliTect.Coalesce.TypeDefinition;
 using IntelliTect.Coalesce.Utilities;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -8,7 +9,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
-namespace IntelliTect.Coalesce.DataAnnotations
+namespace IntelliTect.Coalesce.TypeDefinition
 {
     /// <summary>
     /// Class that contains security information for a class or property based on the Read and Edit attributes
@@ -69,7 +70,7 @@ namespace IntelliTect.Coalesce.DataAnnotations
                 if (Edit.NoAccess) throw NoAccessException();
                 if (AllowAnonymousAll) return string.Empty;
                 if (Edit.AllowAnonymous) return "[AllowAnonymous]";
-                if (Edit.HasRoles) return $"[Authorize(Roles=\"{Edit.ExternalRoleList}\")]";
+                if (Edit.HasRoles) return $"[Authorize(Roles=\"{Edit.AttributeRoleList}\")]";
 
                 return "[Authorize]";
             }
@@ -85,7 +86,7 @@ namespace IntelliTect.Coalesce.DataAnnotations
                 if (Delete.NoAccess) throw NoAccessException();
                 if (AllowAnonymousAll) return string.Empty;
                 if (Delete.AllowAnonymous) return "[AllowAnonymous]";
-                if (Delete.HasRoles) return $"[Authorize(Roles=\"{Delete.ExternalRoleList}\")]";
+                if (Delete.HasRoles) return $"[Authorize(Roles=\"{Delete.AttributeRoleList}\")]";
 
                 return "[Authorize]";
             }
@@ -162,8 +163,6 @@ namespace IntelliTect.Coalesce.DataAnnotations
 
         public bool AllowAnonymousAll => Read.AllowAnonymous && Edit.AllowAnonymous && Delete.AllowAnonymous && Create.AllowAnonymous;
 
-        private bool AllHaveRoles => Read.HasRoles && Edit.HasRoles && Create.HasRoles && Delete.HasRoles;
-
         private string AllRoles()
         {
             var result = Read.RoleList
@@ -188,7 +187,7 @@ namespace IntelliTect.Coalesce.DataAnnotations
 
         public override string ToString()
         {
-            return $"Read: {Read.ToString()}  Edit:{Edit.ToString()}  Delete: {Delete.ToString()} + Create: {Create.ToString()}";
+            return $"Read:{Read}  Edit:{Edit}  Delete:{Delete}  Create:{Create}";
         }
 
     }

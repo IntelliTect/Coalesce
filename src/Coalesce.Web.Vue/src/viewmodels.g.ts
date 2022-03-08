@@ -16,6 +16,7 @@ export interface CaseViewModel extends $models.Case {
   reportedBy: PersonViewModel | null;
   attachmentSize: number | null;
   attachmentName: string | null;
+  attachmentType: string | null;
   attachmentHash: string | null;
   severity: string | null;
   status: $models.Statuses | null;

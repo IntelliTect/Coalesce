@@ -23,6 +23,7 @@ namespace Coalesce.Web.Vue.Models
         private Coalesce.Web.Vue.Models.PersonDtoGen _ReportedBy;
         private long? _AttachmentSize;
         private string _AttachmentName;
+        private string _AttachmentType;
         private byte[] _AttachmentHash;
         private string _Severity;
         private Coalesce.Domain.Case.Statuses? _Status;
@@ -81,6 +82,11 @@ namespace Coalesce.Web.Vue.Models
             get => _AttachmentName;
             set { _AttachmentName = value; Changed(nameof(AttachmentName)); }
         }
+        public string AttachmentType
+        {
+            get => _AttachmentType;
+            set { _AttachmentType = value; Changed(nameof(AttachmentType)); }
+        }
         public byte[] AttachmentHash
         {
             get => _AttachmentHash;
@@ -135,6 +141,7 @@ namespace Coalesce.Web.Vue.Models
             this.ReportedById = obj.ReportedById;
             this.AttachmentSize = obj.AttachmentSize;
             this.AttachmentName = obj.AttachmentName;
+            this.AttachmentType = obj.AttachmentType;
             this.AttachmentHash = obj.AttachmentHash;
             this.Severity = obj.Severity;
             this.Status = obj.Status;
@@ -181,6 +188,7 @@ namespace Coalesce.Web.Vue.Models
             if (ShouldMapTo(nameof(OpenedAt))) entity.OpenedAt = (OpenedAt ?? entity.OpenedAt);
             if (ShouldMapTo(nameof(AssignedToId))) entity.AssignedToId = AssignedToId;
             if (ShouldMapTo(nameof(ReportedById))) entity.ReportedById = ReportedById;
+            if (ShouldMapTo(nameof(AttachmentType))) entity.AttachmentType = AttachmentType;
             if (ShouldMapTo(nameof(Severity))) entity.Severity = Severity;
             if (ShouldMapTo(nameof(Status))) entity.Status = (Status ?? entity.Status);
             if (ShouldMapTo(nameof(DevTeamAssignedId))) entity.DevTeamAssignedId = DevTeamAssignedId;

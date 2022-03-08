@@ -159,15 +159,14 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                         }
                         b.Line("var item = itemResult.Object;");
 
-
-                        WriteMethodInvocation(b, method, "item");
-                        b.Line("await Db.SaveChangesAsync();");
-
                         var varyByProperty = method.VaryByProperty;
                         if (varyByProperty != null)
                         {
                             WriteEtagProcessing(b, method, varyByProperty);
                         }
+
+                        WriteMethodInvocation(b, method, "item");
+                        b.Line("await Db.SaveChangesAsync();");
                     }
 
                     WriteMethodResultProcessBlock(b, method);

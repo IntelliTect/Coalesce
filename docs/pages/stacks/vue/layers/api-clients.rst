@@ -152,6 +152,12 @@ All Callers
 
     Only exists if the caller was created with the option of being invoked with an args object as described in the sections above.
 
+:ts:`url: string`
+    Returns the URL for the method's HTTP endpoint. Any parameters are sourced from the :ts:`args` object. Useful for binding file-returning HTTP GET methods directly to `image` or `video` HTML elements.
+
+    Only exists if the caller was created with the option of being invoked with an args object as described in the sections above.
+    
+
 ItemResult-based Callers
 ''''''''''''''''''''''''
 
@@ -224,5 +230,10 @@ API Callers have a few other methods available as well:
 
 :ts:`invokeWithArgs(args?: {})`
     If called a parameter, that parameter will be used as the args object. Otherwise, :ts:`caller.args` will be used.
+
+    Only exists if the caller was created with the option of being invoked with an args object as described in the sections above.
+
+:ts:`getResultObjectUrl(vue: Vue)`
+    If the method returns a file, this method will return an `Object URL <https://developer.mozilla.org/en-US/docs/Web/API/URL/createObjectURL>`_ representing the value of the :ts:`result` prop. Requires a `Vue` instance to be provided in order to manage the lifecycle of the URL, since object URLs must be manually released to avoid memory leaks. When the provided Vue component is destroyed, the object URL will be destroyed.
 
     Only exists if the caller was created with the option of being invoked with an args object as described in the sections above.

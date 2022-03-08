@@ -45,6 +45,7 @@ export interface Case extends Model<typeof metadata.Case> {
   reportedBy: Person | null
   attachmentSize: number | null
   attachmentName: string | null
+  attachmentType: string | null
   attachmentHash: string | null
   severity: string | null
   status: Statuses | null

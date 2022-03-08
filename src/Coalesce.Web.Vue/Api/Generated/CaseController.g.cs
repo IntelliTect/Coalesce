@@ -146,8 +146,6 @@ namespace Coalesce.Web.Vue.Api
                 return new ItemResult<IntelliTect.Coalesce.Models.IFile>(itemResult);
             }
             var item = itemResult.Object;
-            var _methodResult = item.DownloadImage(Db);
-            await Db.SaveChangesAsync();
 
             var _currentVaryValue = item.AttachmentHash;
             if (_currentVaryValue != default)
@@ -166,6 +164,8 @@ namespace Coalesce.Web.Vue.Api
                 }
             }
 
+            var _methodResult = item.DownloadImage(Db);
+            await Db.SaveChangesAsync();
             if (_methodResult != null)
             {
                 string _contentType = _methodResult.ContentType;
@@ -177,6 +177,10 @@ namespace Coalesce.Web.Vue.Api
                     _contentType = "application/octet-stream";
                 }
                 return File(_methodResult.Content, _contentType, _methodResult.Name, !(_methodResult.Content is System.IO.MemoryStream));
+            }
+            else
+            {
+                return NotFound();
             }
             var _result = new ItemResult<IntelliTect.Coalesce.Models.IFile>();
             _result.Object = _methodResult;

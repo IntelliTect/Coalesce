@@ -53,6 +53,7 @@ import axios, {
   AxiosInstance,
   Cancel
 } from "axios";
+import { reject } from "lodash";
 
 /* Api Response Objects */
 
@@ -294,21 +295,43 @@ export function mapQueryToParams<T extends DataSourceParameters>(
   return parameters as T;
 }
 
+async function parseApiResultResult(data: any): Promise<ApiResult | null> {
+  if (data instanceof Blob && data.size > 0 && data.type == "application/json") {
+    // For file-returning endpoints, we ask axios to return us a Blob.
+    // However, this means that if the endpoint fails and returns JSON,
+    // it will return the ApiResult's JSON inside a blob. This extracts it back out.
+    data = await new Promise((resolve, reject) => {
+      let reader = new FileReader()
+      reader.onload = () => {
+        try {
+          resolve(JSON.parse(reader.result as string))
+        } catch (e) {
+          reject(e)
+        }
+      }
+      reader.readAsText(data)
+    })
+  }
 
+  if (typeof data !== "object" || !("wasSuccessful" in data)) {
+    return null;
+  }
+
+  return data;
+}
 
 export function getMessageForError(error: unknown): string {
   const e = error as AxiosError | ApiResult | Error | string
   
   if (typeof e === "string") {
     return e;
-  }
-  else if (typeof e === "object" && e != null) {
+  } else if (typeof e === "object" && e != null) {
     if ("isAxiosError" in e) {
       const result = e.response as
         | AxiosResponse<ListResult<any> | ItemResult<any>>
         | undefined;
 
-      if (result && typeof result.data === "object") {
+      if (result && typeof result.data === "object" && "message" in result.data) {
         return result.data.message || "Unknown Error"
       }
 
@@ -719,12 +742,13 @@ export class ApiClient<T extends ApiRoutedType> {
    * instead captures the parameters and returns a never-resolving promise to the invocations.
    */
   private _captureRequestParameters(func: Function) {
+    const old = this._requestParametersCapture;
     try {
-      this._requestParametersCapture = [];
+      const capture = this._requestParametersCapture = [];
       func();
-      return this._requestParametersCapture;
+      return capture;
     } finally {
-      delete this._requestParametersCapture;
+      this._requestParametersCapture = old;
     }
   }
 
@@ -1093,21 +1117,6 @@ export abstract class ApiState<
   }
 
   protected abstract setResponseProps(data: ApiResult): void;
-  private async _setResponseProps(data: any) {
-    if (data instanceof Blob) {
-      // For file-returning endpoints, we ask axios to return us a Blob.
-      // However, this means that if the endpoint fails and returns JSON,
-      // it will return the ApiResult's JSON inside a blob. This extracts it back out.
-      data = await new Promise(resolve => {
-        let reader = new FileReader()
-        reader.onload = () => {
-          resolve(JSON.parse(reader.result as string))
-        }
-        reader.readAsText(data)
-      })
-    }
-    return this.setResponseProps(data);
-  }
 
   public invoke!: this;
 
@@ -1182,7 +1191,7 @@ export abstract class ApiState<
       const data = resp.data;
       delete this._cancelToken;
 
-      await this._setResponseProps(data);
+      await this.setResponseProps(data);
 
       const onFulfilled = this._callbacks.onFulfilled;
       for (let i = 0; i < onFulfilled.length; i++) {
@@ -1210,7 +1219,7 @@ export abstract class ApiState<
         // If a compelling case for invoking callbacks on cancel is found,
         // it should probably be implemented as a separate set of callbacks.
         // We don't set isLoading to false here - we set it in the cancel() method to ensure that we don't set isLoading=false for a subsequent call,
-        // since the promise won't reject immediately after requesting cancelation. There could already be another request pending when this code is being executed.
+        // since the promise won't reject immediately after requesting cancellation. There could already be another request pending when this code is being executed.
         return;
       } else {
         var error = thrown as AxiosError | ApiResult | Error | string;
@@ -1225,8 +1234,10 @@ export abstract class ApiState<
             | ItemResult<TResult>>
             | undefined
           : undefined;
-        if (result && typeof result.data === "object") {
-          await this._setResponseProps(result.data);
+
+        let resultJson;
+        if (result && (resultJson = await parseApiResultResult(result.data))) {
+          await this.setResponseProps(resultJson);
         } else {
           this.message = getMessageForError(error)
         }
@@ -1341,11 +1352,16 @@ export class ItemApiState<
     const result = this.result;
 
     if (result == this._objectUrl?.target) {
+      // We have a stored URL, and the current result is what that URL was made for.
+      // Return that stored URL.
+
       // @ts-expect-error TS can't infer that this is correct.
       return this._objectUrl?.url;
     }
     
     if (this._objectUrl) {
+      // If we got this far and we have a stored URL, it doesn't match the current result.
+      // Destroy that URL and then we'll make a new one.
       this._objectUrl.destroy();
       this._objectUrl = undefined;
     }

@@ -3,9 +3,9 @@
     
     <video v-if="caseVm.caseKey" :src="caseVm.downloadImage.url" controls style="max-width: 100%">
     </video>
-<!-- 
-    <video v-if="caseVm.caseKey" :src="caseVm.downloadImage.getResultObjectUrl(this)" controls style="max-width: 100%">
-    </video> -->
+ 
+    <!--<video v-if="caseVm.caseKey" :src="caseVm.downloadImage.getResultObjectUrl(this)" controls style="max-width: 100%">
+    </video>--> 
 <!-- 
     <v-layout v-if="person != null" >
       <v-flex xs12>
@@ -148,6 +148,7 @@
     async created() {
       
       await this.caseVm.$load(16);
+      //await this.caseVm.downloadImage()
       await this.company.$load(1);
 
       await this.person.$load(1)
@@ -157,7 +158,6 @@
 
       //new CaseViewModel({ caseKey: 1 }).uploadByteArray(new Uint8Array([60, 61, 62, 63]))
       //new CaseViewModel({ caseKey: 1 }).uploadByteArray("abcd")
-      //new CaseViewModel({ caseKey: 1 }).uploadByteArray(null)
 
       //var caller = this.person!.$apiClient.$makeCaller("item", c => c.changeSpacesToDashesInName(1));
       //caller.result

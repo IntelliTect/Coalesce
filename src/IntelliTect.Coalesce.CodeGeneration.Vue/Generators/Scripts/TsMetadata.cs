@@ -503,7 +503,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                 b.StringProp("role", "value");
                 if (parameter.ParentSourceProp != null)
                 {
-                    b.StringProp("source", parameter.ParentSourceProp.JsVariable);
+                    b.Line($"get source() {{ return {GetClassMetadataRef(method.Parent)}.props.{parameter.ParentSourceProp.JsVariable} }},");
                 }
             }
         }

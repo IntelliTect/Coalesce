@@ -207,6 +207,12 @@ export const Case = domain.types.Case = {
       role: "value",
       dontSerialize: true,
     },
+    attachmentType: {
+      name: "attachmentType",
+      displayName: "Attachment Type",
+      type: "string",
+      role: "value",
+    },
     attachmentHash: {
       name: "attachmentHash",
       displayName: "Attachment Hash",
@@ -339,7 +345,7 @@ export const Case = domain.types.Case = {
           displayName: "Primary Key",
           type: "number",
           role: "value",
-          source: "caseKey",
+          get source() { return (domain.types.Case as ModelType).props.caseKey },
         },
         file: {
           name: "file",
@@ -366,14 +372,14 @@ export const Case = domain.types.Case = {
           displayName: "Primary Key",
           type: "number",
           role: "value",
-          source: "caseKey",
+          get source() { return (domain.types.Case as ModelType).props.caseKey },
         },
         etag: {
           name: "etag",
           displayName: "Etag",
           type: "binary",
           role: "value",
-          source: "attachmentHash",
+          get source() { return (domain.types.Case as ModelType).props.attachmentHash },
         },
       },
       return: {
@@ -394,7 +400,7 @@ export const Case = domain.types.Case = {
           displayName: "Primary Key",
           type: "number",
           role: "value",
-          source: "caseKey",
+          get source() { return (domain.types.Case as ModelType).props.caseKey },
         },
         file: {
           name: "file",
@@ -421,7 +427,7 @@ export const Case = domain.types.Case = {
           displayName: "Primary Key",
           type: "number",
           role: "value",
-          source: "caseKey",
+          get source() { return (domain.types.Case as ModelType).props.caseKey },
         },
         files: {
           name: "files",
@@ -454,7 +460,7 @@ export const Case = domain.types.Case = {
           displayName: "Primary Key",
           type: "number",
           role: "value",
-          source: "caseKey",
+          get source() { return (domain.types.Case as ModelType).props.caseKey },
         },
         file: {
           name: "file",
@@ -546,7 +552,7 @@ export const CaseDto = domain.types.CaseDto = {
           displayName: "Primary Key",
           type: "number",
           role: "value",
-          source: "caseId",
+          get source() { return (domain.types.CaseDto as ModelType).props.caseId },
         },
         input: {
           name: "input",
@@ -1011,7 +1017,7 @@ export const Person = domain.types.Person = {
           displayName: "Primary Key",
           type: "number",
           role: "value",
-          source: "personId",
+          get source() { return (domain.types.Person as ModelType).props.personId },
         },
         name: {
           name: "name",
@@ -1039,7 +1045,7 @@ export const Person = domain.types.Person = {
           displayName: "Primary Key",
           type: "number",
           role: "value",
-          source: "personId",
+          get source() { return (domain.types.Person as ModelType).props.personId },
         },
       },
       return: {
@@ -1102,7 +1108,7 @@ export const Person = domain.types.Person = {
           displayName: "Primary Key",
           type: "number",
           role: "value",
-          source: "personId",
+          get source() { return (domain.types.Person as ModelType).props.personId },
         },
       },
       return: {
@@ -1146,7 +1152,7 @@ export const Person = domain.types.Person = {
           displayName: "Primary Key",
           type: "number",
           role: "value",
-          source: "personId",
+          get source() { return (domain.types.Person as ModelType).props.personId },
         },
       },
       return: {
@@ -1188,7 +1194,7 @@ export const Person = domain.types.Person = {
           displayName: "Primary Key",
           type: "number",
           role: "value",
-          source: "personId",
+          get source() { return (domain.types.Person as ModelType).props.personId },
         },
       },
       return: {
@@ -1209,7 +1215,7 @@ export const Person = domain.types.Person = {
           displayName: "Primary Key",
           type: "number",
           role: "value",
-          source: "personId",
+          get source() { return (domain.types.Person as ModelType).props.personId },
         },
         firstName: {
           name: "firstName",

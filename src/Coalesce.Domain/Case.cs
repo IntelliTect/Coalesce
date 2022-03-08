@@ -76,10 +76,11 @@ namespace Coalesce.Domain
         public long AttachmentSize { get; set; }
         [Read]
         public string AttachmentName { get; set; }
-        [Read]
+        public string AttachmentType { get; set; }
+        [Read, MaxLength(32)]
         public byte[] AttachmentHash { get; set; }
         [InternalUse]
-        public CaseAttachmentContent AttachmentContent { get; set; }
+        public CaseAttachmentContent AttachmentContent { get; set; } 
         public class CaseAttachmentContent
         {
             public int CaseKey { get; set; }
@@ -139,25 +140,20 @@ namespace Coalesce.Domain
                 return;
             }
 
-            var ms = new MemoryStream();
-            await file.Content.CopyToAsync(ms);
-            var content = ms.ToArray();
-            db.Cases.Include(c => c.AttachmentContent).WherePrimaryKeyIs(CaseKey).Load();
-            AttachmentContent = new CaseAttachmentContent() { Content = content };
+            var content = new byte[file.Length];
+            await file.Content.ReadAsync(content.AsMemory());
+
+            AttachmentContent = new CaseAttachmentContent() { CaseKey = CaseKey, Content = content };
             AttachmentName = file.Name;
             AttachmentSize = file.Length;
-            AttachmentHash = MD5.Create().ComputeHash(content);
+            AttachmentType = file.ContentType;
+            AttachmentHash = SHA256.Create().ComputeHash(content);
         }
 
         [Coalesce]
         [ControllerAction(HttpMethod.Get, VaryByProperty = nameof(AttachmentHash))]
         public IFile DownloadImage(AppDbContext db)
         {
-            /*
-            TODO:
-            - Documentation
-            - Rework vue metadata - `source` should return a reference to a `Prop` like the rest of the metadata does. Shouldn't return just a string.
-             */
             return new IntelliTect.Coalesce.Models.File(db.Cases
                 .WherePrimaryKeyIs(CaseKey)
                 .Select(c => c.AttachmentContent.Content)
@@ -167,6 +163,7 @@ namespace Coalesce.Domain
             )
             {
                 Name = AttachmentName,
+                ContentType = AttachmentType
             };
         }
 

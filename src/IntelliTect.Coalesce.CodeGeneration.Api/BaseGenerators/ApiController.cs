@@ -308,6 +308,17 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
                     // Other streams might be more elegant, e.g. QueryableContentStream 
                     b.Line($"return File({contentStreamVar}, _contentType, {fileNameVar}, !({contentStreamVar} is System.IO.MemoryStream));");
                 }
+
+                if (!method.TaskUnwrappedReturnType.IsA<ApiResult>())
+                {
+                    using (b.Block($"else"))
+                    {
+                        // Method doesn't return an ItemResult, so has no way to explicitly signal failure
+                        // aside from returning `null`. Return a 404, since otherwise we'd fall through below
+                        // and serve a blank {wasSuccessful: true} response.
+                        b.Line($"return NotFound();");
+                    }
+                }
             }
 
             if (method.TaskUnwrappedReturnType.IsA<ApiResult>())

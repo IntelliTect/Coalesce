@@ -476,9 +476,6 @@ export class ApiClient<T extends ApiRoutedType> {
   /** Configuration to inject into the next request. */
   private _nextRequestConfig?: Partial<AxiosRequestConfig>;
 
-  /** If true, the next invocation will resolve immediately with no response payload. */
-  private _nextRequestDryRun?: boolean;
-
   /** Flag to enable global caching of identical GET requests
    * that have been made simultaneously.
    */

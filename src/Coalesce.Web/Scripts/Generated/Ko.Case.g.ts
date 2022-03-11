@@ -36,6 +36,7 @@ module ViewModels {
         public reportedBy: KnockoutObservable<ViewModels.Person | null> = ko.observable(null);
         public attachmentSize: KnockoutObservable<number | null> = ko.observable(null);
         public attachmentName: KnockoutObservable<string | null> = ko.observable(null);
+        public attachmentType: KnockoutObservable<string | null> = ko.observable(null);
         public attachmentHash: KnockoutObservable<string | null> = ko.observable(null);
         public severity: KnockoutObservable<string | null> = ko.observable(null);
         public status: KnockoutObservable<number | null> = ko.observable(null);
@@ -371,6 +372,7 @@ module ViewModels {
             this.reportedById(data.reportedById);
             this.attachmentSize(data.attachmentSize);
             this.attachmentName(data.attachmentName);
+            this.attachmentType(data.attachmentType);
             this.attachmentHash(data.attachmentHash);
             this.severity(data.severity);
             this.status(data.status);
@@ -401,6 +403,7 @@ module ViewModels {
             if (!dto.reportedById && this.reportedBy()) {
                 dto.reportedById = this.reportedBy()!.personId();
             }
+            dto.attachmentType = this.attachmentType();
             dto.severity = this.severity();
             dto.status = this.status();
             dto.devTeamAssignedId = this.devTeamAssignedId();
@@ -498,6 +501,7 @@ module ViewModels {
             self.assignedTo.subscribe(self.autoSave);
             self.reportedById.subscribe(self.autoSave);
             self.reportedBy.subscribe(self.autoSave);
+            self.attachmentType.subscribe(self.autoSave);
             self.severity.subscribe(self.autoSave);
             self.status.subscribe(self.autoSave);
             self.devTeamAssignedId.subscribe(self.autoSave);

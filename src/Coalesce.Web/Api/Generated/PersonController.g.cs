@@ -280,6 +280,19 @@ namespace Coalesce.Web.Api
         }
 
         /// <summary>
+        /// Method: MethodWithStringArrayParameter
+        /// </summary>
+        [HttpPost("MethodWithStringArrayParameter")]
+        [Authorize]
+        public virtual ItemResult<string[]> MethodWithStringArrayParameter(string[] strings)
+        {
+            var _methodResult = Coalesce.Domain.Person.MethodWithStringArrayParameter(Db, strings.ToArray());
+            var _result = new ItemResult<string[]>();
+            _result.Object = _methodResult?.ToArray();
+            return _result;
+        }
+
+        /// <summary>
         /// Method: MethodWithEntityParameter
         /// </summary>
         [HttpPost("MethodWithEntityParameter")]

@@ -26,6 +26,7 @@ module ListViewModels {
             reportedById?: string;
             attachmentSize?: string;
             attachmentName?: string;
+            attachmentType?: string;
             severity?: string;
             status?: string;
             devTeamAssignedId?: string;

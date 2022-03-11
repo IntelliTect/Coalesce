@@ -79,25 +79,21 @@
                     <dd>
                         @(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.ReportedBy, false))
                     </dd>
-                    <dt>Image Name</dt>
+                    <dt>Attachment Size</dt>
                     <dd>
-                        @(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.ImageName, false))
-                    </dd>
-                    <dt>Image Size</dt>
-                    <dd>
-                        @(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.ImageSize, false))
-                    </dd>
-                    <dt>Image Hash</dt>
-                    <dd>
-                        @(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.ImageHash, false))
-                    </dd>
-                    <dt>Attachment</dt>
-                    <dd>
-                        @(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.Attachment, false))
+                        @(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.AttachmentSize, false))
                     </dd>
                     <dt>Attachment Name</dt>
                     <dd>
                         @(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.AttachmentName, false))
+                    </dd>
+                    <dt>Attachment Type</dt>
+                    <dd>
+                        @(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.AttachmentType, false))
+                    </dd>
+                    <dt>Attachment Hash</dt>
+                    <dd>
+                        @(Knockout.DisplayFor<Coalesce.Domain.Case>(p => p.AttachmentHash, false))
                     </dd>
                     <dt>Severity</dt>
                     <dd>
@@ -134,7 +130,10 @@
                                 Actions <span class="caret"></span>
                             </button>
                             <ul class="dropdown-menu">
-                                <li><a href="#" data-bind='click: function(){ uploadAttachment.invokeWithPrompts() }'>Upload Attachment</a></li>
+                                <li><a href="#" data-bind='click: function(){ uploadImage.invokeWithPrompts() }'>Upload Image</a></li>
+                                <li><a href="#" data-bind='click: function(){ downloadImage.invoke() }'>Download Image</a></li>
+                                <li><a href="#" data-bind='click: function(){ uploadAndDownload.invokeWithPrompts() }'>Upload And Download</a></li>
+                                <li><a href="#" data-bind='click: function(){ uploadImages.invokeWithPrompts() }'>Upload Images</a></li>
                                 <li><a href="#" data-bind='click: function(){ uploadByteArray.invokeWithPrompts() }'>Upload Byte Array</a></li>
                             </ul>
                         </div>

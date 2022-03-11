@@ -78,7 +78,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
             }
         }
 
-        protected static void WriteMethodDeclarationPreamble(CSharpCodeBuilder b, MethodViewModel method)
+        protected static void WriteControllerActionPreamble(CSharpCodeBuilder b, MethodViewModel method)
         {
             var methodAnnotationName = $"Http{method.ApiActionHttpMethod}";
 
@@ -90,7 +90,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
                 // for backwards compatibility (3.0 breaking change).
                 b.Line($"[{methodAnnotationName}(\"{method.Name}\")]");
             }
-            b.Line($"{method.SecurityInfo.ExecuteAnnotation}");
+            b.Line(method.SecurityInfo.Execute.MvcAnnotation);
         }
 
 
@@ -144,7 +144,6 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
                 returnType = $"async Task<{returnType}>";
             }
 
-            WriteMethodDeclarationPreamble(b, method);
             return b.Block($"{Model.ApiActionAccessModifier} virtual {returnType} {method.NameWithoutAsync} ({string.Join(", ", actionParameters)})");
         }
 

@@ -182,7 +182,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// Properties on the class that are available on the admin page. This is not filtered by IsHidden.
         /// </summary>
-        public IEnumerable<PropertyViewModel> AdminPageProperties => Properties.Where(p => p.IsClientProperty);
+        public IEnumerable<PropertyViewModel> AdminPageProperties => ClientProperties;
 
         public IEnumerable<PropertyViewModel> DataSourceParameters => Properties
             .Where(p =>

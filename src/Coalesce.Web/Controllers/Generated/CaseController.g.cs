@@ -21,19 +21,19 @@ namespace Coalesce.Web.Controllers
         }
 
 
-        [Authorize]
+        [AllowAnonymous]
         public ActionResult TableEdit()
         {
             return IndexImplementation(true, @"~/Views/Generated/Case/Table.cshtml");
         }
 
-        [Authorize]
+        [AllowAnonymous]
         public ActionResult CreateEdit()
         {
             return CreateEditImplementation(@"~/Views/Generated/Case/CreateEdit.cshtml");
         }
 
-        [Authorize]
+        [AllowAnonymous]
         public ActionResult EditorHtml(bool simple = false)
         {
             return EditorHtmlImplementation(simple);

@@ -4,18 +4,18 @@ using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 
 namespace IntelliTect.Coalesce.TypeDefinition
 {
-    public class SecurityPermission
+    public class SecurityPermission : SecurityPermissionBase
     {
-
-        public SecurityPermission()
+        internal SecurityPermission()
         {
             HasAttribute = false;
         }
 
-        public SecurityPermission(SecurityPermissionLevels level, string? roles, string name)
+        internal SecurityPermission(SecurityPermissionLevels level, string? roles, string name)
         {
             HasAttribute = true;
             PermissionLevel = level;
@@ -23,49 +23,55 @@ namespace IntelliTect.Coalesce.TypeDefinition
             Name = name;
         }
 
-        public bool HasAttribute { get; } = false;
+        public bool HasAttribute { get; }
         public SecurityPermissionLevels PermissionLevel { get; } = SecurityPermissionLevels.AllowAuthorized;
-        public string Roles { get; } = "";
-        public string Name { get; } = "";
-                
 
         public bool AllowAnonymous => PermissionLevel == SecurityPermissionLevels.AllowAll;
         public bool NoAccess => PermissionLevel == SecurityPermissionLevels.DenyAll;
-        public bool HasRoles => RoleList.Count > 0;
 
-        private IReadOnlyList<string>? _roleList = null;
-        public IReadOnlyList<string> RoleList
+        /// <summary>
+        /// C# code representing a Microsoft.AspNetCore.Authorization annotation that will apply security to an action on a controller.
+        /// </summary>
+        public string MvcAnnotation
         {
             get
             {
-                if (_roleList != null) return _roleList;
-
-                var list = new List<string>();
-                if (!string.IsNullOrEmpty(Roles))
-                {
-                    // Logic here should mirror ASP.NET Core:
-                    // split on commas, then trim each item.
-                    // https://github.com/dotnet/aspnetcore/blob/d88935709b8908f371aa97e32a3ce4a74af2368f/src/Security/Authorization/Core/src/AuthorizationPolicy.cs#L155
-                    var roles = Roles.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-                    list.AddRange(roles.Where(r => !string.IsNullOrWhiteSpace(r)).Select(r => r.Trim()).Distinct());
-                }
-                return _roleList = list.AsReadOnly();
+                if (NoAccess) throw new InvalidOperationException($"Cannot emit an annotation for security level {SecurityPermissionLevels.DenyAll}");
+                if (AllowAnonymous) return "[AllowAnonymous]";
+                if (HasRoles) return $"[Authorize(Roles={string.Join(",", RoleList).QuotedStringLiteralForCSharp()})]";
+                return "[Authorize]";
             }
         }
 
-        public string AttributeRoleList => string.Join(",", RoleList);
+        /// <summary>
+        /// Return whether the action is generally allowed, without taking into account any particular user.
+        /// </summary>
+        public bool IsAllowed() => !NoAccess;
 
-        public string ToStringWithName() => $"{Name}: {ToString()}";
+        /// <summary>
+        /// Return whether the action is allowed for the specified user.
+        /// </summary>
+        public bool IsAllowed(ClaimsPrincipal? user)
+        {
+            if (NoAccess) return false;
+            if (AllowAnonymous) return true;
+
+            var userIsAuthenticated = user?.Identity?.IsAuthenticated ?? false;
+
+            if (HasRoles)
+            {
+                return userIsAuthenticated && RoleList.Any(s => user!.IsInRole(s));
+            }
+
+            return userIsAuthenticated;
+        }
 
         public override string ToString()
         {
-            if (HasAttribute)
-            {
-                if (PermissionLevel == SecurityPermissionLevels.AllowAll) return $"Allow All";
-                else if (PermissionLevel == SecurityPermissionLevels.DenyAll) return $"Deny All";
-                else return $"Allow Authorized Roles: {string.Join(", ", RoleList)}";
-            }
-            return $"Allow All Authorized";
+            if (NoAccess) return $"Deny All";
+            if (AllowAnonymous) return $"Allow All (Including Anonymous)";
+            if (HasRoles) return $"Allow Only Authorized Roles: {string.Join(", ", RoleList)}";
+            return $"Allow All Authenticated Users";
         }
     }
 }

@@ -36,54 +36,46 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
                 {
                     b.Line($"[Area(\"{AreaName}\")]");
                 }
-                b.Line($"{Model.SecurityInfo.ClassAnnotation}");
+                b.Line("[Authorize]");
 
                 using (b.Block($"public partial class {Model.ViewControllerClassName} : BaseViewController<{Model.FullyQualifiedName}>"))
                 {
-                    b.Line($"{Model.SecurityInfo.ReadAnnotation}");
+                    b.Line($"{Model.SecurityInfo.Read.MvcAnnotation}");
                     using (b.Block("public ActionResult Cards()"))
                     {
                         b.Line($"return IndexImplementation(false, @\"{viewLocation}/Generated/{Model.ClientTypeName}/Cards.cshtml\");");
                     }
 
                     b.Line();
-                    b.Line($"{Model.SecurityInfo.ReadAnnotation}");
+                    b.Line($"{Model.SecurityInfo.Read.MvcAnnotation}");
                     using (b.Block("public ActionResult Table()"))
                     {
                         b.Line($"return IndexImplementation(false, @\"{viewLocation}/Generated/{Model.ClientTypeName}/Table.cshtml\");");
                     }
 
                     b.Line();
-                    if (Model.SecurityInfo.IsEditAllowed())
+                    if (Model.SecurityInfo.Save.IsAllowed())
                     {
                         b.Line();
-                        b.Line($"{Model.SecurityInfo.EditAnnotation}");
+                        b.Line($"{Model.SecurityInfo.Save.MvcAnnotation}");
                         using (b.Block("public ActionResult TableEdit()"))
                         {
                             b.Line($"return IndexImplementation(true, @\"{viewLocation}/Generated/{Model.ClientTypeName}/Table.cshtml\");");
                         }
 
                         b.Line();
-                        b.Line($"{Model.SecurityInfo.EditAnnotation}");
+                        b.Line($"{Model.SecurityInfo.Save.MvcAnnotation}");
                         using (b.Block("public ActionResult CreateEdit()"))
                         {
                             b.Line($"return CreateEditImplementation(@\"{viewLocation}/Generated/{Model.ClientTypeName}/CreateEdit.cshtml\");");
                         }
 
                         b.Line();
-                        b.Line($"{Model.SecurityInfo.EditAnnotation}");
+                        b.Line($"{Model.SecurityInfo.Save.MvcAnnotation}");
                         using (b.Block("public ActionResult EditorHtml(bool simple = false)"))
                         {
                             b.Line("return EditorHtmlImplementation(simple);");
                         }
-
-                        // This is defunct.
-                        //b.Line();
-                        //b.Line($"{Model.SecurityInfo.EditAnnotation}");
-                        //using (b.Block("public ActionResult Docs([FromServices] IHostingEnvironment hostingEnvironment)"))
-                        //{
-                        //    b.Line("return DocsImplementation(hostingEnvironment);");
-                        //}
                     }
                 }
             }

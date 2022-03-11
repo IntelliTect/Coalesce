@@ -143,15 +143,12 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
             string RoleCheck(string role) => $"context.IsInRoleCached(\"{role.EscapeStringLiteralForCSharp()}\")";
             string IncludesCheck(string include) => $"includes == \"{include.EscapeStringLiteralForCSharp()}\"";
 
-            string readRoles = default, editRoles = default;
-            if (property.SecurityInfo.IsSecuredProperty)
-            {
-                readRoles = string.Join(" || ", property.SecurityInfo.ReadRolesList.Select(RoleCheck));
+            string readRoles = string.Join(" || ", property.SecurityInfo.Read.RoleList.Select(RoleCheck));
 
-                if (isForEdit)
-                {
-                    editRoles = string.Join(" || ", property.SecurityInfo.EditRolesList.Select(RoleCheck));
-                }
+            string editRoles = default;
+            if (isForEdit)
+            {
+                editRoles = string.Join(" || ", property.SecurityInfo.Edit.RoleList.Select(RoleCheck));
             }
 
             var includes = string.Join(" || ", property.DtoIncludes.Select(IncludesCheck));

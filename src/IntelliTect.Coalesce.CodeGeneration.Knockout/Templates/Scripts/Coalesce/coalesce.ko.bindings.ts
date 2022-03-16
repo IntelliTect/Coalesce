@@ -484,14 +484,6 @@ ko.bindingHandlers.select2AjaxText = {
                     },
                     processResults: function (data: any, page: any) {
                         var result = [];
-                        if (allowClear && !myParams.term) {
-                            // Add a blank item
-                            var blank = {
-                                id: null,
-                                text: 'No Selection'
-                            };
-                            result.unshift(blank);
-                        }
                         var perfectMatch = false;
 
                         var items: any[];

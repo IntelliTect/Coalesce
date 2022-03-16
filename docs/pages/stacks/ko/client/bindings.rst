@@ -146,6 +146,9 @@ select2AjaxText
     resultField
         If provided, specifies a field on the objects returned from the API to pull the string values from. See examples in ``url`` above.
 
+    allowCustom
+        Default ``true``. If ``false``, the user's search input will not be presented as a valid selectable value. Only the exact values obtained from the API endpoint will be selectable.
+
     selectOnClose
         Directly maps to select2 option ``selectOnClose``
 

@@ -460,6 +460,7 @@ ko.bindingHandlers.select2AjaxText = {
         const allowClear = allBindings.has("allowClear") ? allBindings.get("allowClear") : true;
         const placeholder = $(element).attr('placeholder') || "select";
         const resultField = allBindings.has("resultField") ? allBindings.get("resultField") : null;
+        const allowCustom = allBindings.has("allowCustom") ? allBindings.get("allowCustom") : true;
 
         var myParams: any;
 
@@ -486,7 +487,7 @@ ko.bindingHandlers.select2AjaxText = {
                         if (allowClear && !myParams.term) {
                             // Add a blank item
                             var blank = {
-                                id: 0,
+                                id: null,
                                 text: 'No Selection'
                             };
                             result.unshift(blank);
@@ -530,7 +531,7 @@ ko.bindingHandlers.select2AjaxText = {
                                 result.push({ id: item, text: item });
                             }
                         }
-                        if (!perfectMatch && myParams.term) {
+                        if (!perfectMatch && myParams.term && allowCustom) {
                             result.push({ id: myParams.term, text: myParams.term, selected: true });
                         }
                         return { results: result };

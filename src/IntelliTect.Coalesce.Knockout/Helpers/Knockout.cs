@@ -406,6 +406,35 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
             return SelectString(propertyModel, endpointName: endpointName, placeholder: placeholder);
         }
 
+        /// <summary>
+        /// Generate a dropdown input for <paramref name="propertySelector"/> that will 
+        /// source its valid values from the field and type specified by <paramref name="sourcePropertySelector"/>.
+        /// </summary>
+        /// <typeparam name="T">The type of the object being edited.</typeparam>
+        /// <typeparam name="TSource">The type of the model that owns the list of valid values.</typeparam>
+        /// <param name="propertySelector">Property selector for the property being edited.</param>
+        /// <param name="sourcePropertySelector">Property selector for the valid values.</param>
+        /// <param name="placeholder">Placeholder on the select element</param>
+        /// <param name="allowCustom">Whether to allow any user input to be selected as a value, or only the values sourced from <paramref name="sourcePropertySelector"/>. </param>
+        public static HtmlString SelectFor<T, TSource>(
+            Expression<Func<T, string>> propertySelector,
+            Expression<Func<TSource, string>> sourcePropertySelector,
+            string placeholder = "",
+            bool allowCustom = true
+        )
+        {
+            PropertyViewModel propertyModel = ReflectionRepository.Global.PropertyBySelector(propertySelector);
+            PropertyViewModel sourceProperty = ReflectionRepository.Global.PropertyBySelector(sourcePropertySelector);
+            placeholder ??= propertyModel.DisplayName;
+
+            string url = $"/{sourceProperty.Parent.ApiRouteControllerPart}/list?fields={sourceProperty.JsonName}";
+
+            return new HtmlString($@"
+                <select class=""form-control"" placeholder=""{placeholder}""
+                    data-bind=""select2AjaxText: {propertyModel.JsVariableForBinding()}, url: coalesceConfig.baseApiUrl() + '{url}', resultField: '{sourceProperty.JsonName}', allowCustom: {allowCustom.ToString().ToLower()}"">
+                </select>");
+        }
+
         public static HtmlString SelectWithLabelFor<T>(Expression<Func<T, string>> propertySelector,
             string endpointActionName = null,
             int? labelCols = null, int? inputCols = null, string label = null, string placeholder = "")

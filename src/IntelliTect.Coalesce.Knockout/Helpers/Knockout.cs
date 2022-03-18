@@ -414,7 +414,7 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
         /// <typeparam name="TSource">The type of the model that owns the list of valid values.</typeparam>
         /// <param name="propertySelector">Property selector for the property being edited.</param>
         /// <param name="sourcePropertySelector">Property selector for the valid values.</param>
-        /// <param name="placeholder">Placeholder on the select element</param>
+        /// <param name="placeholder">Placeholder on the select element. Defaults to the property referenced by <paramref name="propertySelector"/>. </param>
         /// <param name="allowCustom">Whether to allow any user input to be selected as a value, or only the values sourced from <paramref name="sourcePropertySelector"/>. </param>
         public static HtmlString SelectFor<T, TSource>(
             Expression<Func<T, string>> propertySelector,

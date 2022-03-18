@@ -23,7 +23,7 @@
   "cSpell.ignoreWords": ["datetime"],
   "cSpell.enabled": true,
   "esbonio.server.enabled": true,
-  "esbonio.sphinx.confDir": "c:\\src\\Coalesce\\docs",
+  "esbonio.sphinx.confDir": "${workspaceFolder}",
   "restructuredtext.preview.scrollEditorWithPreview": false,
   "restructuredtext.preview.scrollPreviewWithEditor": false,
 }

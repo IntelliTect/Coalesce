@@ -124,5 +124,26 @@ namespace IntelliTect.Coalesce.Tests.TypeDefinition
             TypeViewModel vm = data;
             Assert.True(vm.IsNumber);
         }
+
+        [Theory]
+        // System structs
+        [ClassViewModelData(typeof(byte), false)]
+        [ClassViewModelData(typeof(byte[]), false)]
+        // System classes
+        [ClassViewModelData(typeof(string), false)]
+        [ClassViewModelData(typeof(string[]), false)]
+        [ClassViewModelData(typeof(List<string>), false)]
+        // Custom classes
+        [ClassViewModelData(typeof(InternalClass), true)]
+        [ClassViewModelData(typeof(InternalClass[]), true)]
+        [ClassViewModelData(typeof(List<InternalClass>), true)]
+        [ClassViewModelData(typeof(InternalUseClass), true)]
+        [ClassViewModelData(typeof(InternalUseClass[]), true)]
+        [ClassViewModelData(typeof(List<InternalClass>), true)]
+        public void IsInternalUse_IsCorrectForAllTypeCombinations(ClassViewModelData data, bool isInternalUse)
+        {
+            TypeViewModel vm = data;
+            Assert.Equal(isInternalUse, vm.IsInternalUse);
+        }
     }
 }

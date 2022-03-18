@@ -82,7 +82,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// Returns whether or not the property may be exposed to the client.
         /// </summary>
-        public bool IsClientProperty => !IsInternalUse && HasGetter;
+        public bool IsClientProperty => !IsInternalUse && HasGetter && !Type.IsInternalUse;
 
         /// <summary>
         /// Gets the type name without any collection around it.

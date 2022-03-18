@@ -77,7 +77,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public override bool IsInterface => Symbol.TypeKind == TypeKind.Interface;
 
-        public override bool IsInternalUse => base.IsInternalUse || Symbol.DeclaredAccessibility != Accessibility.Public;
+        public override bool IsInternalUse => base.IsInternalUse || 
+            (Symbol.DeclaredAccessibility != Accessibility.Public && Symbol.DeclaredAccessibility != Accessibility.NotApplicable);
 
         public override bool IsVoid => Symbol.SpecialType == SpecialType.System_Void;
 

@@ -4,7 +4,7 @@
 [InternalUse]
 =============
 
-Used to mark a property or method for internal use. Internal Use members are:
+Used to mark a type, property or method for internal use. Internal Use members are:
 
 - Not exposed via the API.
 - Not present in the generated TypeScript view models.

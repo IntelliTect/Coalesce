@@ -142,7 +142,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// Property on the other side of the many-to-many relationship.
         /// </summary>
         public PropertyViewModel? ManyToManyCollectionProperty =>
-            Object?.Properties.FirstOrDefault(prop => prop.IsPOCO && prop.Object?.Equals(Parent) != true);
+            Object?.ClientProperties.FirstOrDefault(prop => prop.IsPOCO && prop.Object?.Equals(Parent) != true);
 
         /// <summary>
         /// True if the property is read only.

@@ -188,11 +188,18 @@ namespace IntelliTect.Coalesce.Validation
                             $"and must reference a property on the parent instance."
                         );
 
+                        assert.IsFalse(method.ResultType.IsInternalUse, "Method return types cannot be internal use.");
+
                         // TODO: Assert that the method name isn't a reserved endpoint name:
                         // get, save, delete, list, count
                         foreach (var param in method.Parameters)
                         {
                             assert.Area = $"{model}: {method}: {param}";
+
+                            if (!param.IsDI)
+                            {
+                                assert.IsFalse(param.Type.IsInternalUse, "Method parameters cannot be internal use.");
+                            }
 
                             if (method.IsModelInstanceMethod)
                             {

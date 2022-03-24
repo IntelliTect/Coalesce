@@ -18,7 +18,7 @@
 <script lang="ts">
 import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
 import MetadataComponent from '../c-metadata-component'
-import { Model, ClassType, ListViewModel, Property, ModelType, ViewModel, BehaviorFlags, mapParamsToDto, mapQueryToParams, ListParameters } from 'coalesce-vue';
+import { ListViewModel, ModelType } from 'coalesce-vue';
 
 import CAdminMethods from './c-admin-methods.vue';
 import CAdminTable from './c-admin-table.vue';

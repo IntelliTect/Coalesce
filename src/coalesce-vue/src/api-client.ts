@@ -280,6 +280,7 @@ export function mapQueryToParams<T extends DataSourceParameters>(
 
     if ('dataSource' in dto && dto.dataSource in modelMeta.dataSources) {
       const dataSource = mapToModel({}, modelMeta.dataSources[dto.dataSource])
+      parameters.dataSource = dataSource;
       
       for (const key in dto) {
         if (key.startsWith("dataSource.")) {

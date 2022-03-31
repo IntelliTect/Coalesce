@@ -148,8 +148,9 @@ namespace Coalesce.Domain
         [Coalesce, LoadFromDataSource(typeof(WithoutCases))]
         public ItemResult ChangeSpacesToDashesInName()
         {
+            var old = FirstName;
             FirstName = FirstName.Replace(" ", "-");
-            return true;
+            return new ItemResult(true, $"Changed name from {old} to {FirstName}");
         }
 
         /// <summary>

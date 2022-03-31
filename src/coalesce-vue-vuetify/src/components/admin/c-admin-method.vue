@@ -75,6 +75,15 @@
               Save to Disk
             </v-btn>
           </h3>
+
+          
+          <span
+            v-if="caller.wasSuccessful && (methodMeta.return.type == 'void' || caller.message)"
+            class="c-method--result-success"
+          >
+            <v-alert type="success" dense>{{caller.message || 'Success'}}</v-alert>
+          </span>
+
           <div v-if="caller.result && methodMeta.return.type == 'file'">
             <pre>{{caller.result.name}} • {{caller.result.type}} • {{caller.result.size.toLocaleString()}} bytes</pre>
 
@@ -109,13 +118,7 @@
           />
 
           <span
-            v-else-if="methodMeta.return.type == 'void' && caller.wasSuccessful != null"
-            class="c-method--result-void"
-          >
-            <v-alert type="success" dense>Success</v-alert>
-          </span>
-          <span
-            v-else-if="caller.wasSuccessful != null && caller.result == null"
+            v-else-if="caller.wasSuccessful != null && caller.result == null && methodMeta.return.type !== 'void'"
             class="c-method--result-null"
           >
             <pre>{{"" + caller.result}}</pre>

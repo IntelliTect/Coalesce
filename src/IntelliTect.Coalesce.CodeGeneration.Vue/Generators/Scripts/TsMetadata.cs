@@ -187,7 +187,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
         {
             using (b.Block("props:", ','))
             {
-                foreach (var prop in model.ClientProperties)
+                foreach (var prop in model.ClientProperties.OrderBy(f => f.EditorOrder))
                 {
                     WriteClassPropertyMetadata(b, model, prop);
                 }

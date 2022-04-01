@@ -845,13 +845,6 @@ export const Person = domain.types.Person = {
   get keyProp() { return this.props.personId }, 
   behaviorFlags: 7,
   props: {
-    personId: {
-      name: "personId",
-      displayName: "Person Id",
-      type: "number",
-      role: "primaryKey",
-      hidden: 3,
-    },
     title: {
       name: "title",
       displayName: "Title",
@@ -878,6 +871,13 @@ export const Person = domain.types.Person = {
         minLength: val => !val || val.length >= 3 || "Last Name must be at least 3 characters.",
         maxLength: val => !val || val.length <= 100 || "Last Name may not be more than 100 characters.",
       }
+    },
+    personId: {
+      name: "personId",
+      displayName: "Person Id",
+      type: "number",
+      role: "primaryKey",
+      hidden: 3,
     },
     email: {
       name: "email",

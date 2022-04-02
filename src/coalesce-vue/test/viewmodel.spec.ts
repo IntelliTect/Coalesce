@@ -1,7 +1,7 @@
 
 
 import Vue from 'vue';
-import { AxiosItemResult, AxiosListResult, ItemApiState } from '../src/api-client'
+import { AxiosClient, AxiosItemResult, AxiosListResult, ItemApiState } from '../src/api-client'
 import { mapToModel } from '../src/model';
 import { ViewModelCollection } from '../src/viewmodel';
 
@@ -9,6 +9,7 @@ import { StudentViewModel, CourseViewModel, AdvisorViewModel, StudentListViewMod
 import { Student, Advisor, Course } from './targets.models';
 import * as metadata from './targets.metadata';
 import { delay } from './test-utils';
+import { AxiosResponse } from 'axios';
 
 
 function mockItemResult<T>(success: boolean, object: T) {
@@ -61,7 +62,63 @@ describe("ViewModel", () => {
     })
   })
 
-  describe("save", () => {
+  describe.each(['$load', '$save'] as const)("%s", (callerName) => {
+    describe("model props are set when watchers observe end of loading", () => {
+      
+      AxiosClient.defaults.adapter = 
+        jest.fn().mockImplementation(async () => {
+          return <AxiosResponse<any>>{
+            data: {wasSuccessful: true, object: <Student>{studentId: 1, name: 'Bob'}},
+            status: 200
+          }
+        })
+
+      test("isLoading==false", async () => {
+        const student = new StudentViewModel({studentId: 1});
+        const vue = new Vue({ data: { student } });
+
+        let capturedName;
+        const callbackFn = jest.fn((n) => {
+          if (n === false) {
+            // DO NOT ASSERT INSIDE THE WATCHER CALLBACK. Vue will swallow the error.
+            capturedName = student.name;
+          }
+        });
+        vue.$watch(`student.${callerName}.isLoading`, callbackFn);
+        student[callerName]();
+        
+        // Run a bunch of cycles to let everything flush through.
+        for (let i = 0; i < 10; i++) await vue.$nextTick();
+
+        // Watcher should have been triggered for isLoading=true, then isLoading=false.
+        expect(callbackFn).toHaveBeenNthCalledWith(1, true, false);
+        expect(callbackFn).toHaveBeenNthCalledWith(2, false, true);
+        expect(capturedName).toBe('Bob')
+      })
+
+      test("wasSuccessful==true", async () => {
+        const student = new StudentViewModel({studentId: 1});
+        const vue = new Vue({ data: { student } });
+        
+        let capturedName;
+        const callbackFn = jest.fn((n) => {
+          // DO NOT ASSERT INSIDE THE WATCHER CALLBACK. Vue will swallow the error.
+          capturedName = student.name;
+        }); 
+        vue.$watch(`student.${callerName}.wasSuccessful`, callbackFn);
+        student[callerName]();
+        
+        // Run a bunch of cycles to let everything flush through.
+        for (let i = 0; i < 10; i++) await vue.$nextTick();
+
+        // Watcher should have been triggered for isLoading=true, then isLoading=false.
+        expect(callbackFn).toHaveBeenNthCalledWith(1, true, null);
+        expect(capturedName).toBe('Bob')
+      })
+    })
+  })
+
+  describe("$save", () => {
     const saveMock = mockItemResult(true, <Student>{
       studentId: 3,
       name: "Bob",

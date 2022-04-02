@@ -1187,7 +1187,7 @@ export abstract class ApiState<
       const data = resp.data;
       delete this._cancelToken;
 
-      await this.setResponseProps(data);
+      this.setResponseProps(data);
 
       const onFulfilled = this._callbacks.onFulfilled;
       for (let i = 0; i < onFulfilled.length; i++) {
@@ -1233,7 +1233,7 @@ export abstract class ApiState<
 
         let resultJson;
         if (result && (resultJson = await parseApiResult(result.data))) {
-          await this.setResponseProps(resultJson);
+          this.setResponseProps(resultJson);
         } else {
           this.message = getMessageForError(error)
         }

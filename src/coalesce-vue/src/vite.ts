@@ -2,6 +2,8 @@ import type { Plugin, ViteDevServer } from "vite";
 import path from "path";
 import { existsSync, readFileSync, writeFile } from "fs";
 import { spawn } from "child_process";
+import { TLSSocket } from "tls";
+import { addHours } from "date-fns";
 
 export function createAspNetCoreHmrPlugin() {
   return <Plugin>{
@@ -80,7 +82,7 @@ async function writeHtml(server: ViteDevServer) {
 export async function getCertPaths() {
   // Technique is adapted from MSFT's SPA templates. 
   // https://github.com/dotnet/spa-templates/blob/800ef5837e1a23da863001d2448df67ec31ce2a2/src/content/Angular-CSharp/ClientApp/aspnetcore-https.js
-  
+
   const baseFolder =
     process.env.APPDATA !== undefined && process.env.APPDATA !== ""
       ? `${process.env.APPDATA}/ASP.NET/https`
@@ -103,7 +105,26 @@ export async function getCertPaths() {
   const certFilePath = path.join(baseFolder, `${certificateName}.pem`);
   const keyFilePath = path.join(baseFolder, `${certificateName}.key`);
 
-  if (!existsSync(certFilePath) || !existsSync(keyFilePath)) {
+  let valid = existsSync(certFilePath) && existsSync(keyFilePath);
+
+  if (valid) {
+    // The certs exist. Check that they're not expired.
+    
+    // Passing null to TLSSocket here doesn't seem to cause any errors.
+    // Since we're not actually communicating over the socket, no reason to provide a real stream.
+    const socket = new TLSSocket(null as any, {
+      cert: readFileSync(certFilePath),
+    });
+    const cert = socket.getCertificate();
+    socket.destroy();
+
+    if (cert && 'valid_to' in cert && new Date(cert.valid_to) < addHours(new Date(), 4)) {
+      console.log("Local certs are expired, or almost expired. Will regenerate.");
+      valid = false;
+    }
+  }
+
+  if (!valid) {
     console.log("Launching dotnet dev-certs to generate local certs");
     await new Promise((resolve) => {
       const proc = spawn(

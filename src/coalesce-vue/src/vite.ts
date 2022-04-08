@@ -78,6 +78,9 @@ async function writeHtml(server: ViteDevServer) {
  * the browser isn't trying to connect to the HMR server's websocket endpoint as mixed content (which fails).
  */
 export async function getCertPaths() {
+  // Technique is adapted from MSFT's SPA templates. 
+  // https://github.com/dotnet/spa-templates/blob/800ef5837e1a23da863001d2448df67ec31ce2a2/src/content/Angular-CSharp/ClientApp/aspnetcore-https.js
+  
   const baseFolder =
     process.env.APPDATA !== undefined && process.env.APPDATA !== ""
       ? `${process.env.APPDATA}/ASP.NET/https`

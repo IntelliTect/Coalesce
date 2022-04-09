@@ -9,6 +9,7 @@ import CSelectManyToMany from './c-select-many-to-many.vue'
 import CSelectValues from './c-select-values.vue'
 import CDisplay from '../display/c-display';
 import CDatetimePicker from './c-datetime-picker.vue';
+import { VTextarea, VTextField, VCheckbox, VSwitch, VListItemContent, VListItemTitle, VListItemSubtitle, VSelect, VFileInput } from "vuetify/lib";
 
 const primitiveTypes = ["string", "number", "date", "enum", "boolean"];
 
@@ -140,9 +141,9 @@ export default Vue.extend({
         }
 
         if ('textarea' in attrs && attrs.textarea !== false) {
-          return h('v-textarea', data);
+          return h(process.env.TREESHAKE ? VTextarea : 'v-textarea', data);
         }
-        return h('v-text-field', data);
+        return h(process.env.TREESHAKE ? VTextField : 'v-text-field', data);
 
       case 'boolean':
         // v-switch uses 'change' as its event, not 'input'.
@@ -152,9 +153,9 @@ export default Vue.extend({
         delete data.props.value;
         
         if ('checkbox' in attrs && attrs.checkbox !== false) {
-          return h('v-checkbox', data);
+          return h(process.env.TREESHAKE ? VCheckbox : 'v-checkbox', data);
         }
-        return h('v-switch', data);
+        return h(process.env.TREESHAKE ? VSwitch : 'v-switch', data);
       
       case 'enum':
         addHandler(data.on, "input", onInput);
@@ -163,18 +164,18 @@ export default Vue.extend({
         data.props['item-value'] = 'value';
         if (valueMeta.typeDef.values.some(v => v.description)) {
           data.scopedSlots = {
-            item: ({item}) => h('v-list-item-content', [
-              h('v-list-item-title', [item.displayName]),
-              item.description ? h('v-list-item-subtitle', [item.description]) : h(),
+            item: ({item}) => h(process.env.TREESHAKE ? VListItemContent : 'v-list-item-content', [
+              h(process.env.TREESHAKE ? VListItemTitle : 'v-list-item-title', [item.displayName]),
+              item.description ? h(process.env.TREESHAKE ? VListItemSubtitle : 'v-list-item-subtitle', [item.description]) : h(),
             ])
           };
         }
-        return h('v-select', data);
+        return h(process.env.TREESHAKE ? VSelect : 'v-select', data);
 
       case 'file': 
         // v-file-input uses 'change' as its event, not 'input'.
         addHandler(data.on, "change", onInput);
-        return h('v-file-input', data);
+        return h(process.env.TREESHAKE ? VFileInput : 'v-file-input', data);
 
       case 'collection': 
         if (valueMeta.itemType.type == 'file') {
@@ -186,7 +187,7 @@ export default Vue.extend({
 
           // v-file-input uses 'change' as its event, not 'input'.
           addHandler(data.on, "change", onInput);
-          return h('v-file-input', data);
+          return h(process.env.TREESHAKE ? VFileInput : 'v-file-input', data);
         }
     }
 

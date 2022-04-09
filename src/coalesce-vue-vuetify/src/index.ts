@@ -2,7 +2,7 @@ import { PluginObject } from 'vue';
 import { Domain } from 'coalesce-vue';
 import ComponentsInstaller from './components';
 
-
+// Import of a type from vue-router is needed for Vue.$router component instance prop to be typed during build.
 import type { Route } from 'vue-router';
 
 export interface CoalesceVuetifyOptions {

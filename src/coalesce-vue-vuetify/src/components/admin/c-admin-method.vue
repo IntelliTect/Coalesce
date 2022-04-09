@@ -135,7 +135,7 @@
 
 import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
 import MetadataComponent, { getValueMeta } from '../c-metadata-component'
-import {  ViewModel,  ListViewModel, DisplayOptions, AnyArgCaller, ItemApiState } from 'coalesce-vue';
+import { ViewModel, ListViewModel, DisplayOptions, AnyArgCaller, ItemApiState } from 'coalesce-vue';
 import CInput from '../input/c-input'
 
 const resultDisplayOptions = <DisplayOptions>{
@@ -150,7 +150,7 @@ const resultDisplayOptions = <DisplayOptions>{
     CInput
   }
 })
-export default class CAdminMethod extends MetadataComponent {
+export default class extends MetadataComponent {
   resultDisplayOptions = resultDisplayOptions;
   
   @Prop({required: false, type: Boolean, default: false})

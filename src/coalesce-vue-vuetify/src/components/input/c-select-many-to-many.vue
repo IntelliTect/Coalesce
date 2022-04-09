@@ -49,7 +49,7 @@ import {
     CDisplay
   }
 })
-export default class CSelectManyToMany extends MetadataComponent {
+export default class extends MetadataComponent {
   public search: string | null = null;
 
   @Prop({ required: false })
@@ -126,10 +126,11 @@ export default class CSelectManyToMany extends MetadataComponent {
   }
 
   created() {
+    type self = this;
     // This needs to be late initialized so we have the correct "this" reference.
     this.listCaller = new ModelApiClient(this.foreignItemModelType)
       .$withSimultaneousRequestCaching()
-      .$makeCaller("list", function(this: CSelectManyToMany, c) {
+      .$makeCaller("list", function(this: self, c) {
         return c.list(this.listParams);
       })
       .setConcurrency("debounce");

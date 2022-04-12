@@ -2,26 +2,26 @@
   "name": "coalesce-vue-vuetify",
   "version": "0.2.0",
   "main": "./dist/index.js",
-  "module": "./dist/index.mjs",
-  "types": "./src/index.ts",
+  "types": "./dist/index.d.ts",
+  "type": "module",
   "sideEffects": [
     "*.css"
   ],
   "exports": {
     ".": {
       "types": "./dist/index.dist.d.ts",
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.js"
+      "import": "./dist/index.js",
+      "require": "./dist/cjs/index.js"
     },
     "./lib/build": {
       "types": "./lib/build.d.ts",
-      "import": "./lib/build.mjs",
-      "require": "./lib/build.js"
+      "import": "./lib/build.js",
+      "require": "./lib/cjs/build.js"
     },
     "./lib": {
       "types": "./lib/index.d.ts",
-      "import": "./lib/index.mjs",
-      "require": "./lib/index.js"
+      "import": "./lib/index.js",
+      "require": "./lib/cjs/index.js"
     },
     "./dist/coalesce-vue-vuetify.css": "./dist/coalesce-vue-vuetify.css"
   },

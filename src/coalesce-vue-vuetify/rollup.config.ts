@@ -55,27 +55,6 @@ const external = [
 ];
 
 export default [
-  // {
-  //   // Build utilities for direct consumption by node (e.g. in vite.config.js).
-  //   input: "src/build.ts",
-  //   plugins: [
-  //     ...sharedPlugins(["src/index.ts"])
-  //   ],
-  //   external,
-
-  //   output: [
-  //     {
-  //       sourcemap: true,
-  //       file: "lib/build.js",
-  //       format: "cjs"
-  //     },
-  //     {
-  //       sourcemap: true,
-  //       file: "dist/index.mjs",
-  //       format: "esm"
-  //     }
-  //   ]
-  // },
   {
     // Non-treeshaking build, for use with `import Vuetify from 'vuetify'`.
     // Referenced vuetify components will be referenced by name, expecting global registrations.
@@ -88,12 +67,12 @@ export default [
     output: [
       {
         sourcemap: true,
-        file: "dist/index.js",
+        file: "dist/cjs/index.js",
         format: "cjs"
       },
       {
         sourcemap: true,
-        file: "dist/index.mjs",
+        file: "dist/index.js",
         format: "esm"
       }
     ]
@@ -101,6 +80,9 @@ export default [
   {
     // Treeshaking build, for use with `import Vuetify from 'vuetify/lib'`.
     // Referenced vuetify components will be imported from 'vuetify/lib'.
+
+    // Also builds `build.ts`, a standalone script for use in build configs like vite.
+    
     input: ["src/index.ts", "src/build.ts"],
     plugins: [
       ...sharedPlugins(["src/index.dist.ts"]),
@@ -114,14 +96,14 @@ export default [
     output: [
       {
         sourcemap: true,
-        dir: "lib",
+        dir: "lib/cjs",
         entryFileNames: '[name].js',
         format: "cjs"
       },
       {
         sourcemap: true,
         dir: "lib",
-        entryFileNames: '[name].mjs',
+        entryFileNames: '[name].js',
         format: "esm"
       }
     ]

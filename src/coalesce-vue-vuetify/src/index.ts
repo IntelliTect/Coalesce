@@ -1,3 +1,10 @@
+/** index.ts is a treeshakable version of coalesce-vue-vuetify, 
+ * intended for use with the treeshakable version of vuetify (e.g. `vuetify/lib` import).
+ * It does not register its own components globally, requiring use of techniques like 
+ * unplugin-vue-components (or tedious manual imports, or manual global imports) in consuming projects.
+ * 
+*/
+
 import { PluginObject } from 'vue';
 import { Domain } from 'coalesce-vue';
 

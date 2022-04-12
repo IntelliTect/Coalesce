@@ -51,7 +51,7 @@ import CAdminMethod from './c-admin-method.vue'
     CAdminMethod
   }
 })
-export default class extends Vue {
+export default class CMethods extends Vue {
   @Prop({required: true, type: Object})
   public model!: ViewModel<Model<ModelType>> | ListViewModel;
 

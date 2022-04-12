@@ -1,3 +1,6 @@
+/** index.dist.ts is a non-treeshakable version of coalesce-vue-vuetify, 
+ * intended for use with the non-treeshakable version of vuetify (e.g. non `/lib` import.) */
+
 import { PluginObject } from 'vue';
 
 import BasePlugin, { CoalesceVuetifyOptions } from './index';

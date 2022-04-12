@@ -27,7 +27,7 @@ import { convertValueToModel } from 'coalesce-vue';
     CDisplay
   }
 })
-export default class extends MetadataComponent { 
+export default class CSelectValues extends MetadataComponent { 
   @Prop({required: false})
   public value?: any
 

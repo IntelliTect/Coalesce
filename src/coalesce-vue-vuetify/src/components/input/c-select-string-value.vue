@@ -27,7 +27,7 @@ const MODEL_REQUIRED_MESSAGE = "c-select-string-value requires a model to be pro
   components: {
   }
 })
-export default class extends MetadataComponent { 
+export default class CSelectStringValue extends MetadataComponent { 
   @Prop({required: true, type: String})
   public method!: string;
 
@@ -56,10 +56,9 @@ export default class extends MetadataComponent {
       throw Error("c-select-string-value requires a static model method that returns an array of strings.")
     }
 
-    type self = this;
     this.caller = new ModelApiClient(this.modelMeta)
       .$withSimultaneousRequestCaching()
-      .$makeCaller("item", function (this: self, c, page: number, search: string) {
+      .$makeCaller("item", function (this: CSelectStringValue, c, page: number, search: string) {
         return c.$invoke(methodMeta, {page, search, ...this.params}) as ItemResultPromise<string[]>
         // (c as any)[methodMeta.name](page, search) as ListResultPromise<string>
       })

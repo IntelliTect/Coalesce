@@ -86,7 +86,7 @@ import {
     CDisplay
   }
 })
-export default class extends MetadataComponent {
+export default class CSelect extends MetadataComponent {
   public search: string | null = null;
 
   @Prop({required: false, default: undefined, type: Boolean})
@@ -404,12 +404,12 @@ export default class extends MetadataComponent {
     
     // This needs to be late initialized so we have the correct "this" reference.
     
-    type self = this;
+    
     this.getCaller = new ModelApiClient(this.modelObjectMeta)
       .$withSimultaneousRequestCaching()
       .$makeCaller(
         "item", 
-        function (this: self, c) {
+        function (this: CSelect, c) {
           throw 'expected calls to be made with invokeWithArgs'
         }, 
         () => ({ id: null as any }),
@@ -419,10 +419,10 @@ export default class extends MetadataComponent {
 
     this.listCaller = new ModelApiClient(this.modelObjectMeta)
       .$withSimultaneousRequestCaching()
-      .$makeCaller("list", function (this: self, c) {
+      .$makeCaller("list", function (this: CSelect, c) {
         return c.list({pageSize: 100, ...this.params, search: this.search || undefined})
       })
-      .onRejected(function(this: self, state) {
+      .onRejected(function(this: CSelect, state) {
         this.error = [state.message || "Unknown Error"]
       })
       .setConcurrency("debounce");

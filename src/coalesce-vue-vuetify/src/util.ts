@@ -30,7 +30,7 @@ export function isPropReadOnly(p: Property, model: ViewModel) {
     ) {
       return true;
     }
-    
+
     // If there's no PK, one has yet to be entered.
     // If there is a PK but it is dirty, it has yet to be saved.
     if (!model.$primaryKey || model.$getPropDirty(p.name)) {

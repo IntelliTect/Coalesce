@@ -2,14 +2,13 @@
 
 import Vue, { PropOptions } from "vue";
 import { buildVuetifyAttrs, getValueMeta } from "../c-metadata-component";
-import { Model, ViewModel, ClassType, DataSource, DataSourceType, ModelType, mapToModel, mapValueToModel, AnyArgCaller, ApiState } from "coalesce-vue";
+import { Model, ClassType, DataSource, DataSourceType, mapValueToModel, AnyArgCaller, ApiState } from "coalesce-vue";
 
 import CSelect from './c-select.vue'
 import CSelectManyToMany from './c-select-many-to-many.vue'
 import CSelectValues from './c-select-values.vue'
 import CDisplay from '../display/c-display';
 import CDatetimePicker from './c-datetime-picker.vue';
-import { VTextarea, VTextField, VCheckbox, VSwitch, VListItemContent, VListItemTitle, VListItemSubtitle, VSelect, VFileInput } from "vuetify/lib";
 
 const primitiveTypes = ["string", "number", "date", "enum", "boolean"];
 
@@ -31,7 +30,8 @@ export default Vue.extend({
     value: <PropOptions<any>>{ required: false },
   },
 
-	render(h, ctx) {
+	render(_c, ctx) {
+    // NOTE: CreateElement fn must be named `_c` for unplugin-vue-components to work correctly.
 
     let model = ctx.props.model; 
     const modelMeta = model ? model.$metadata : null;
@@ -83,13 +83,13 @@ export default Vue.extend({
         data.attrs = {...ctxData.attrs};
         data.props.model = ctx.props.model;
         data.props.for = ctx.props.for;
-        return h(CDatetimePicker, data);
+        return _c(CDatetimePicker, data);
 
       case 'model':
         data.attrs = {...ctxData.attrs};
         data.props.model = ctx.props.model;
         data.props.for = ctx.props.for;
-        return h(CSelect, data);
+        return _c(CSelect, data);
 
       case 'collection':
         data.attrs = {...ctxData.attrs};
@@ -97,13 +97,13 @@ export default Vue.extend({
         data.props.for = ctx.props.for;
 
         if ('manyToMany' in valueMeta) {
-          return h(CSelectManyToMany, data);
+          return _c(CSelectManyToMany, data);
         } else if (
           valueMeta.itemType.type != 'model' && 
           valueMeta.itemType.type != 'object' && 
           valueMeta.itemType.type != 'file'
         ) {
-          return h(CSelectValues, data);
+          return _c(CSelectValues, data);
         } else {
           // console.warn(`Unsupported collection type ${valueMeta.itemType.type} for v-input`)
         }
@@ -141,9 +141,9 @@ export default Vue.extend({
         }
 
         if ('textarea' in attrs && attrs.textarea !== false) {
-          return h(process.env.TREESHAKE ? VTextarea : 'v-textarea', data);
+          return _c('v-textarea', data);
         }
-        return h(process.env.TREESHAKE ? VTextField : 'v-text-field', data);
+        return _c('v-text-field', data);
 
       case 'boolean':
         // v-switch uses 'change' as its event, not 'input'.
@@ -153,9 +153,9 @@ export default Vue.extend({
         delete data.props.value;
         
         if ('checkbox' in attrs && attrs.checkbox !== false) {
-          return h(process.env.TREESHAKE ? VCheckbox : 'v-checkbox', data);
+          return _c('v-checkbox', data);
         }
-        return h(process.env.TREESHAKE ? VSwitch : 'v-switch', data);
+        return _c('v-switch', data);
       
       case 'enum':
         addHandler(data.on, "input", onInput);
@@ -164,18 +164,18 @@ export default Vue.extend({
         data.props['item-value'] = 'value';
         if (valueMeta.typeDef.values.some(v => v.description)) {
           data.scopedSlots = {
-            item: ({item}) => h(process.env.TREESHAKE ? VListItemContent : 'v-list-item-content', [
-              h(process.env.TREESHAKE ? VListItemTitle : 'v-list-item-title', [item.displayName]),
-              item.description ? h(process.env.TREESHAKE ? VListItemSubtitle : 'v-list-item-subtitle', [item.description]) : h(),
+            item: ({item}) => _c('v-list-item-content', [
+              _c('v-list-item-title', [item.displayName]),
+              item.description ? _c('v-list-item-subtitle', [item.description]) : _c(),
             ])
           };
         }
-        return h(process.env.TREESHAKE ? VSelect : 'v-select', data);
+        return _c('v-select', data);
 
       case 'file': 
         // v-file-input uses 'change' as its event, not 'input'.
         addHandler(data.on, "change", onInput);
-        return h(process.env.TREESHAKE ? VFileInput : 'v-file-input', data);
+        return _c('v-file-input', data);
 
       case 'collection': 
         if (valueMeta.itemType.type == 'file') {
@@ -187,7 +187,7 @@ export default Vue.extend({
 
           // v-file-input uses 'change' as its event, not 'input'.
           addHandler(data.on, "change", onInput);
-          return h(process.env.TREESHAKE ? VFileInput : 'v-file-input', data);
+          return _c('v-file-input', data);
         }
     }
 
@@ -196,14 +196,14 @@ export default Vue.extend({
     // abusing its internal classes to try to emulate the look of a text field,
     // but this hasn't been updated for 2.0.
     if (ctx.children) {
-      return h("div", {}, ctx.children)
+      return _c("div", {}, ctx.children)
     }
-    return h('div', {
+    return _c('div', {
         staticClass:"input-group input-group--dirty input-group--text-field"
       },[
-        h('label', attrs.label),
-        h('p', [
-          h(CDisplay, {
+        _c('label', attrs.label),
+        _c('p', [
+          _c(CDisplay, {
             staticClass: "subtitle-1",
             props:{
               value: data.props.value,

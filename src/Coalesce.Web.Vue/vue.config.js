@@ -5,12 +5,23 @@ module.exports = {
   outputDir: 'wwwroot',
   publicPath: "/",
   configureWebpack: {
+    plugins: [
+      require('unplugin-vue-components/webpack')({ resolvers: [
+        //VuetifyResolver(), 
+        require('coalesce-vue-vuetify/lib/build').CoalesceVuetifyResolver()
+      ] }),
+    ],
     resolve: {
       symlinks: false,
       alias: { 
-        'coalesce-vue/lib': path.resolve(__dirname, '../coalesce-vue/src'),
-        'coalesce-vue': path.resolve(__dirname, '../coalesce-vue/src'),
-        'coalesce-vue-vuetify': path.resolve(__dirname, '../coalesce-vue-vuetify/src'),
+        'coalesce-vue/lib': path.resolve(__dirname, '../coalesce-vue/lib'),
+        'coalesce-vue': path.resolve(__dirname, '../coalesce-vue'),
+        'coalesce-vue-vuetify/lib': path.resolve(__dirname, '../coalesce-vue-vuetify/lib'),
+        'coalesce-vue-vuetify': path.resolve(__dirname, '../coalesce-vue-vuetify'),
+        // 'coalesce-vue/lib': path.resolve(__dirname, '../coalesce-vue/src'),
+        // 'coalesce-vue': path.resolve(__dirname, '../coalesce-vue/src'),
+        // 'coalesce-vue-vuetify/lib': path.resolve(__dirname, '../coalesce-vue-vuetify/src/index.ts'),
+        // 'coalesce-vue-vuetify': path.resolve(__dirname, '../coalesce-vue-vuetify/src/index.dist.ts'),
         'vue': path.resolve(__dirname, 'node_modules/vue'),
         'vue-router': path.resolve(__dirname, 'node_modules/vue-router'),
       }

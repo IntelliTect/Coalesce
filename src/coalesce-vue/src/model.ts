@@ -23,8 +23,8 @@ import {
   ModelType,
   BinaryValue,
   UnknownValue
-} from "./metadata";
-import { Indexable, isNullOrWhitespace } from "./util";
+} from "./metadata.js";
+import { Indexable, isNullOrWhitespace } from "./util.js";
 
 /**
  * Represents a model with metadata information.

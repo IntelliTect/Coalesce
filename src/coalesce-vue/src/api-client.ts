@@ -1,19 +1,5 @@
 import Vue from "vue";
 
-// Undocumented (but exposed) vue method for making properties reactive.
-declare module "vue/types/vue" {
-  interface VueConstructor {
-    util: {
-      defineReactive: (
-        obj: any,
-        key: string,
-        val: any,
-        setter?: Function | null,
-        shallow?: boolean
-      ) => void;
-    };
-  }
-}
 
 import {
   ModelType,
@@ -30,7 +16,7 @@ import {
   ListMethod,
   TypeDiscriminatorToType,
   PropNames
-} from "./metadata";
+} from "./metadata.js";
 import {
   Model,
   convertToModel,
@@ -39,21 +25,16 @@ import {
   mapToModel,
   mapToDtoFiltered,
   parseValue
-} from "./model";
-import { OwnProps, Indexable, objectToQueryString, objectToFormData } from "./util";
+} from "./model.js";
+import { OwnProps, Indexable, objectToQueryString, objectToFormData } from "./util.js";
 
 import axios, {
   AxiosPromise,
   AxiosResponse,
   AxiosError,
   AxiosRequestConfig,
-  Canceler,
   CancelTokenSource,
-  CancelToken,
-  AxiosInstance,
-  Cancel
 } from "axios";
-import { reject } from "lodash";
 
 /* Api Response Objects */
 
@@ -1279,6 +1260,7 @@ export abstract class ApiState<
         typeof value !== "object" ||
         !Object.isSealed(value)
       ) {
+        // @ts-expect-error Undocumented (but exposed) vue method for making properties reactive.
         Vue.util.defineReactive(this, key, value);
       }
     }

@@ -1,23 +1,26 @@
 import { babel } from "@rollup/plugin-babel";
 import { nodeResolve } from "@rollup/plugin-node-resolve";
-import replace from "@rollup/plugin-replace";
 import typescript from "rollup-plugin-typescript2";
 import sourcemaps from "rollup-plugin-sourcemaps";
 import postcss from "rollup-plugin-postcss";
 import autoprefixer from "autoprefixer";
 import vue from "rollup-plugin-vue";
-import vuetify from "rollup-plugin-vuetify";
+import Components from "unplugin-vue-components/rollup";
+import { VuetifyResolver } from "unplugin-vue-components/resolvers";
 
 import pkg from "./package.json";
 
-const sharedPlugins = [
+const sharedPlugins = (exclude) => [
   nodeResolve(),
   vue({
-    css: false
+    css: false,
   }),
   typescript({
     typescript: require("typescript"),
-    tsconfig: "tsconfig.build.json"
+    tsconfig: "tsconfig.build.json",
+    tsconfigOverride: {
+      exclude
+    }
   }),
   sourcemaps(),
   postcss({
@@ -30,7 +33,7 @@ const sharedPlugins = [
     extensions: [".js", ".ts", ".vue"],
     plugins: [
       // Needed for vue-cli support, since vue-cli is based on webpack4 and webpack4 can't
-      // parse these syntax features
+      // parse these syntax features. https://github.com/webpack/webpack/issues/10227
       "@babel/plugin-proposal-optional-chaining",
       "@babel/plugin-proposal-nullish-coalescing-operator"
     ],
@@ -52,34 +55,45 @@ const external = [
 ];
 
 export default [
+  // {
+  //   // Build utilities for direct consumption by node (e.g. in vite.config.js).
+  //   input: "src/build.ts",
+  //   plugins: [
+  //     ...sharedPlugins(["src/index.ts"])
+  //   ],
+  //   external,
+
+  //   output: [
+  //     {
+  //       sourcemap: true,
+  //       file: "lib/build.js",
+  //       format: "cjs"
+  //     },
+  //     {
+  //       sourcemap: true,
+  //       file: "dist/index.mjs",
+  //       format: "esm"
+  //     }
+  //   ]
+  // },
   {
     // Non-treeshaking build, for use with `import Vuetify from 'vuetify'`.
     // Referenced vuetify components will be referenced by name, expecting global registrations.
-    input: "src/index.ts",
+    input: "src/index.dist.ts",
     plugins: [
-      replace({
-        "process.env.TREESHAKE": false
-      }),
-      ...sharedPlugins
+      ...sharedPlugins(["src/index.ts", "src/build.ts"])
     ],
     external,
-
-    treeshake: {
-      // Strips the unused import of "vuetify/lib" that will be left over after all usages of imports from it
-      // are stripped out by `process.env.TREESHAKE = false`.
-      // If we don't do this, vite will inline an extra, unused copy of vuetify into coalesce-vue-vuetify...
-      moduleSideEffects: false
-    },
 
     output: [
       {
         sourcemap: true,
-        file: "dist/coalesce-vue-vuetify.common.js",
+        file: "dist/index.js",
         format: "cjs"
       },
       {
         sourcemap: true,
-        file: "dist/coalesce-vue-vuetify.esm.js",
+        file: "dist/index.mjs",
         format: "esm"
       }
     ]
@@ -87,24 +101,27 @@ export default [
   {
     // Treeshaking build, for use with `import Vuetify from 'vuetify/lib'`.
     // Referenced vuetify components will be imported from 'vuetify/lib'.
-    input: "src/index.ts",
+    input: ["src/index.ts", "src/build.ts"],
     plugins: [
-      replace({
-        "process.env.TREESHAKE": true
-      }),
-      ...sharedPlugins,
-      vuetify()
+      ...sharedPlugins(["src/index.dist.ts"]),
+      Components({
+        dts: false,
+        resolvers: [VuetifyResolver()],
+        include: [/\.vue$/, /\.ts$/, /\.vue\?vue/],
+      })
     ],
     external,
     output: [
       {
         sourcemap: true,
-        file: "lib/coalesce-vue-vuetify.common.js",
+        dir: "lib",
+        entryFileNames: '[name].js',
         format: "cjs"
       },
       {
         sourcemap: true,
-        file: "lib/coalesce-vue-vuetify.esm.js",
+        dir: "lib",
+        entryFileNames: '[name].mjs',
         format: "esm"
       }
     ]

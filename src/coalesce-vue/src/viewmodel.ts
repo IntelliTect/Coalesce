@@ -13,7 +13,7 @@ import {
   ModelCollectionValue,
   Service,
   Property
-} from "./metadata";
+} from "./metadata.js";
 import {
   ModelApiClient,
   ListParameters,
@@ -24,7 +24,7 @@ import {
   ItemResultPromise,
   ListResultPromise,
   ServiceApiClient
-} from "./api-client";
+} from "./api-client.js";
 import {
   Model,
   modelDisplay,
@@ -32,18 +32,18 @@ import {
   mapToDto,
   convertToModel,
   mapToModel
-} from "./model";
-import { Indexable } from "./util";
-import debounce from "lodash-es/debounce";
+} from "./model.js";
+import { Indexable } from "./util.js";
+import { debounce } from "lodash-es";
 import type { Cancelable, DebounceSettings } from "lodash";
 
-export { DeepPartial } from "./util";
+export { DeepPartial } from "./util.js";
 
 // These imports allow TypeScript to correctly name types in the generated declarations.
 // Without them, it will generate some horrible, huge relative paths that won't work on any other machine.
 // For example: import("../../../../Coalesce/src/coalesce-vue/src/api-client").ItemResult<TModel>
-import * as apiClient from "./api-client";
-import * as axios from "axios";
+import type * as apiClient from "./api-client.js";
+import type * as axios from "axios";
 
 /*
 DESIGN NOTES

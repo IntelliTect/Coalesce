@@ -102,7 +102,7 @@ describe.each(<DisplayData[]>[
   { meta: studentProps.birthDate, 
     model: "1990-01-02T03:04:05.000-08:00", 
     // We define the expected using date-fns's format to make this test timezone-independent.
-    display: format(new Date("1990-01-02T03:04:05.000-08:00"), "M/d/yyyy h:mm:ss aaa") },
+    display: format(new Date("1990-01-02T03:04:05.000-08:00"), "M/d/yyyy h:mm:ss aa") },
   ...undisplayable(studentProps.birthDate, true, 123, "abc", {}, [], new Date("!!Invalid") ),
   
   { meta: studentProps.grade, model: undefined, display: null },

@@ -765,7 +765,7 @@ class DisplayVisitor extends Visitor<
           formatString = "M/d/yyyy";
           break;
         default:
-          formatString = "M/d/yyyy h:mm:ss aaa";
+          formatString = "M/d/yyyy h:mm:ss aa";
           break;
       }
     }

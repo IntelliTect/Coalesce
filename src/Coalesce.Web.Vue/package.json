@@ -30,9 +30,10 @@
     "@vue/cli-service": "4.5.13",
     "@vue/test-utils": "1.2.2",
     "aspnet-webpack": "^3.0.0",
-    "sass": "^1.26.8",
+    "sass": "1.32.13",
     "sass-loader": "^8.0.2",
     "typescript": "4.4.3",
+    "unplugin-vue-components": "^0.19.2",
     "vue-template-compiler": "2.6.11",
     "webpack-hot-middleware": "^2.22.3"
   },

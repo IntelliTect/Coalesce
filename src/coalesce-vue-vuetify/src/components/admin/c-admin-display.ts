@@ -12,7 +12,9 @@ export default Vue.extend({
     model: <PropOptions<Model<ClassType>>>{ type: Object },
   },
 
-	render(h, ctx) {
+	render(_c, ctx) {
+    // NOTE: CreateElement fn must be named `_c` for unplugin-vue-components to work correctly.
+    
     const props = ctx.props;
     const { model } = props;
 
@@ -20,7 +22,7 @@ export default Vue.extend({
       // If no model was provided, just display nothing.
       // This isn't an error case - it just means the thing we're trying to display 
       // is `null`-ish, and should be treated the same way that vue would treat {{null}}
-      return h('span');
+      return _c('span');
     }
 
     const modelMeta = model ? model.$metadata : null;
@@ -42,7 +44,7 @@ export default Vue.extend({
 
       // Display collection navigations as counts with links to the c-admin-table-page for the collection
       if (pkValue && meta.role == "collectionNavigation" && "foreignKey" in meta) {
-        return h(
+        return _c(
           'router-link', {
             props: {
               // Resolve to an href to allow overriding of admin routes in userspace.
@@ -70,7 +72,7 @@ export default Vue.extend({
       if (pkValue && meta.role == "referenceNavigation" && "foreignKey" in meta) {
         const fkValue = (model as any)[meta.foreignKey.name]
         if (fkValue) {
-          return h(
+          return _c(
             'router-link', {
               props: {
                 // Resolve to an href to allow overriding of admin routes in userspace.
@@ -92,6 +94,6 @@ export default Vue.extend({
       }
     }
     
-    return h(CDisplay, { props: props, ...ctx.data }, ctx.children);
+    return _c(CDisplay, { props: props, ...ctx.data }, ctx.children);
   }
 });

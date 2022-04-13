@@ -6,6 +6,7 @@ import Vue from 'vue';
 import 'typeface-roboto';
 import 'typeface-roboto-mono';
 import '@fortawesome/fontawesome-free/css/all.css'
+//import 'coalesce-vue-vuetify/dist/coalesce-vue-vuetify.css'
 
 // Vuetify imports
 import Vuetify from 'vuetify'

@@ -19,7 +19,9 @@ export default Vue.extend({
     value: <PropOptions<any>>{ required: false }
   },
 
-	render(h, ctx) {
+	render(_c, ctx) {
+    // NOTE: CreateElement fn must be named `_c` for unplugin-vue-components to work correctly.
+
     const props = ctx.props;
     const { model, value: valueProp } = props;
 
@@ -27,7 +29,7 @@ export default Vue.extend({
       // If no model and no value were provided, just display nothing.
       // This isn't an error case - it just means the thing we're trying to display 
       // is `null`-ish, and should be treated the same way that vue would treat {{null}}
-      return h(props.element);
+      return _c(props.element);
     }
 
     const modelMeta = model ? model.$metadata : null;
@@ -66,6 +68,6 @@ export default Vue.extend({
       }
     }
 
-    return h(props.element, ctx.data, valueString || ctx.children);
+    return _c(props.element, ctx.data, valueString || ctx.children);
   }
 });

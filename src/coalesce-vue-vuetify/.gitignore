@@ -1,6 +1,17 @@
 .DS_Store
 node_modules
-/dist
+
+#build outputs
+!/dist
+/dist/*
+!/dist/cjs
+/dist/cjs/*
+!/dist/cjs/package.json
+
+/lib/*
+!/lib/cjs
+/lib/cjs/*
+!/lib/cjs/package.json
 
 # local env files
 .env.local

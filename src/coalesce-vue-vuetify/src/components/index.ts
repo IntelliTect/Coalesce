@@ -52,30 +52,3 @@ export {
   CSelect,
   CTable,
 };
-
-export default function install(Vue: typeof _Vue) {
-  // In alphabetical order:
-  Vue.component('c-admin-display', CAdminDisplay);
-  Vue.component('c-admin-editor-page', CAdminEditorPage);
-  Vue.component('c-admin-editor', CAdminEditor);
-  Vue.component('c-admin-method', CAdminMethod);
-  Vue.component('c-admin-methods', CAdminMethods);
-  Vue.component('c-admin-table-page', CAdminTablePage);
-  Vue.component('c-admin-table-toolbar', CAdminTableToolbar);
-  Vue.component('c-admin-table', CAdminTable);
-  Vue.component('c-datetime-picker', CDatetimePicker);
-  Vue.component('c-display', CDisplay);
-  // Vue.component('c-editor-dialog', CEditorDialog);
-  Vue.component('c-input-props-provider', CInputPropsProvider);
-  Vue.component('c-input', CInput);
-  Vue.component('c-loader-status', CLoaderStatus);
-  // Vue.component('c-methods-dialog', CMethodsDialog);
-  Vue.component('c-list-page', CListPage);
-  Vue.component('c-list-page-size', CListPageSize);
-  Vue.component('c-list-range-display', CListRangeDisplay);
-  Vue.component('c-list-pagination', CListPagination);
-  Vue.component('c-select-many-to-many', CSelectManyToMany);
-  Vue.component('c-select-string-value', CSelectStringValue);
-  Vue.component('c-select', CSelect);
-  Vue.component('c-table', CTable);
-}

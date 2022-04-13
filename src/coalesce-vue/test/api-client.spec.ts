@@ -524,6 +524,8 @@ describe("$makeCaller", () => {
     AxiosClient.defaults.adapter = jest.fn().mockImplementation(async () => <AxiosResponse<any>>{
       data: blob,
       status: 200,
+      statusText: "OK",
+      config: {},
       headers: {'content-disposition': "attachment; filename=\"sample-mp4-file small.mp4\"; filename*=UTF-8''sample-mp4-file%20small.mp4"}
     })
 

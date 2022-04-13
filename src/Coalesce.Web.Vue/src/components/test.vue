@@ -6,7 +6,7 @@
  
     <!--<video v-if="caseVm.caseKey" :src="caseVm.downloadImage.getResultObjectUrl(this)" controls style="max-width: 100%">
     </video>--> 
-<!-- 
+
     <v-layout v-if="person != null" >
       <v-flex xs12>
         <v-card >
@@ -44,7 +44,7 @@
       <v-flex xs12>
         <v-data-table
           :headers="headers"
-          :items="company.employeesViewModels"
+          :items="company.employees"
           :search="search"
           :pagination.sync="pagination"
           :total-items="count"
@@ -67,7 +67,7 @@
           </template>
         </v-data-table>
       </v-flex>
-    </v-layout> -->
+    </v-layout>
     
   </v-container>
 

@@ -23,8 +23,8 @@ import {
   ModelType,
   BinaryValue,
   UnknownValue
-} from "./metadata";
-import { Indexable, isNullOrWhitespace } from "./util";
+} from "./metadata.js";
+import { Indexable, isNullOrWhitespace } from "./util.js";
 
 /**
  * Represents a model with metadata information.
@@ -765,7 +765,7 @@ class DisplayVisitor extends Visitor<
           formatString = "M/d/yyyy";
           break;
         default:
-          formatString = "M/d/yyyy h:mm:ss aaa";
+          formatString = "M/d/yyyy h:mm:ss aa";
           break;
       }
     }

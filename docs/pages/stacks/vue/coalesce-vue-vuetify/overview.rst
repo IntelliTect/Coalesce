@@ -48,18 +48,50 @@ Also ensure that you have setup Vuetify_ correctly in your application as `descr
 
 .. note::
     An important note if you're using Vuetify_'s `A-la-carte builds <https://vuetifyjs.com/en/customization/a-la-carte/>`_:
+ 
+    Similar to importing Vuetify from :ts:`'vuetify/lib'` rather than :ts:`'vuetify'`, you should import :ts:`'coalesce-vue-vuetify'` from :ts:`'coalesce-vue-vuetify/lib'`. This is an alternate build that itself imports Vuetify components from :ts:`'vuetify/lib'`, therefore preventing duplication of components. Similar to Vuetify, this build also does not register the Coalesce components globally, allowing them to also be treeshaken.
 
-    coalesce-vue-vuetify_ expects that the Vuetify components that :ref:`c-input` can delegate directly to have been registered globally. Currently, `vuetify-loader <https://vuetifyjs.com/en/customization/a-la-carte/#vuetify-loader>`_ is not capable of picking up these particular references.
+    For Vue CLI-based projects:
 
-    To make things work correctly, do the following when you :ts:`Vue.use(Vuetify)`:
+    Install ``unplugin-vue-components``, and add the following configuration to ``vue.config.js``:
 
-    .. code-block:: vue
-    
-        import Vuetify, { VTextField, VTextarea, VCheckbox, VSwitch, VSelect, VFileInput } from 'vuetify/lib';
+    .. code-block:: ts
+        
+        // vue.config.js
 
-        Vue.use(Vuetify, {
-            components: { VTextField, VTextarea, VCheckbox, VSwitch, VSelect, VFileInput },
-        });
+        configureWebpack: {
+            plugins: [
+                require('unplugin-vue-components/webpack')({
+                    dts: false,
+                    resolvers: [
+                        // If VuetifyResolver is used, `vuetify-loader` + `vue-cli-plugin-vuetify` can be uninstalled.
+                        require('unplugin-vue-components/resolvers').VuetifyResolver(),
+                        require('coalesce-vue-vuetify/lib/build').CoalesceVuetifyResolver(),
+                    ],
+                }),
+            ],
+        }
+
+    For Vite projects:
+
+    Install ``unplugin-vue-components``, and add it to your ``vite.config.ts``:
+
+    .. code-block:: ts
+
+        // vite.config.js
+        import Components from "unplugin-vue-components/vite";
+        import { VuetifyResolver } from "unplugin-vue-components/resolvers";
+        import { CoalesceVuetifyResolver } from "coalesce-vue-vuetify/lib/build";
+
+        // defineConfig
+        plugins: [
+            // createVuePlugin(), etc...
+            Components({
+                dts: false,
+                resolvers: [VuetifyResolver(), CoalesceVuetifyResolver()],
+            }),
+        ]
+
 
 You're now ready to start using the components that coalesce-vue-vuetify_ provides! See the list below for a summary of each component and links to dive deeper into each component.
 

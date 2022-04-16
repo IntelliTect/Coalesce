@@ -5,6 +5,12 @@ import { spawn } from "child_process";
 import { TLSSocket } from "tls";
 import { addHours } from "date-fns";
 
+/**
+ * A plugin that works with IntelliTect.Coalesce.Vue.ViteDevelopmentServerMiddleware:
+ * - Writes `index.html` to the build output directory during HMR development, 
+ *   allowing any transformations in HomeController.cs to work identically in both dev and prod.
+ * - Shuts down the HMR server when the parent ASP.NET Core application shuts down, preventing process orphaning.
+ */
 export function createAspNetCoreHmrPlugin() {
   return <Plugin>{
     name: "aspnetcore-hmr",
@@ -53,8 +59,8 @@ export function createAspNetCoreHmrPlugin() {
   };
 }
 
-/** Write the index.html file to the server's web root so that it can be 
- * picked up normally as the fallback file during development in the same 
+/** Write the index.html file to the server's web root so that it can be
+ * picked up normally as the fallback file during development in the same
  * way that happens in production. */
 async function writeHtml(server: ViteDevServer) {
   const filename = server.config.root + "/index.html";
@@ -80,7 +86,7 @@ async function writeHtml(server: ViteDevServer) {
  * the browser isn't trying to connect to the HMR server's websocket endpoint as mixed content (which fails).
  */
 export async function getCertPaths() {
-  // Technique is adapted from MSFT's SPA templates. 
+  // Technique is adapted from MSFT's SPA templates.
   // https://github.com/dotnet/spa-templates/blob/800ef5837e1a23da863001d2448df67ec31ce2a2/src/content/Angular-CSharp/ClientApp/aspnetcore-https.js
 
   const baseFolder =
@@ -109,7 +115,7 @@ export async function getCertPaths() {
 
   if (valid) {
     // The certs exist. Check that they're not expired.
-    
+
     // Passing null to TLSSocket here doesn't seem to cause any errors.
     // Since we're not actually communicating over the socket, no reason to provide a real stream.
     const socket = new TLSSocket(null as any, {
@@ -118,8 +124,14 @@ export async function getCertPaths() {
     const cert = socket.getCertificate();
     socket.destroy();
 
-    if (cert && 'valid_to' in cert && new Date(cert.valid_to) < addHours(new Date(), 4)) {
-      console.log("Local certs are expired, or almost expired. Will regenerate.");
+    if (
+      cert &&
+      "valid_to" in cert &&
+      new Date(cert.valid_to) < addHours(new Date(), 4)
+    ) {
+      console.log(
+        "Local certs are expired, or almost expired. Will regenerate."
+      );
       valid = false;
     }
   }

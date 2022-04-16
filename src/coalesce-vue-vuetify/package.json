@@ -79,6 +79,9 @@
     "vuetify": "2.6.4"
   },
   "postcss": {
-    "//": "This is needed for direct consumption by source from Coalesce.Web.Vue. Otherwise, does nothing."
+    "//": "This is to silence warnings when consuming directly from Coalesce.Web.Vue. Otherwise, not needed.",
+    "plugins": {
+      "autoprefixer": {}
+    }
   }
 }

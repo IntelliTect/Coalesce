@@ -6,6 +6,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
@@ -144,5 +145,9 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         {
             return new File(new byte[] { 0x42 }) { Name = "42.png" };
         }
+
+        [ControllerAction(Method = HttpMethod.Get)]
+        [Coalesce]
+        public Task MethodWithOptionalCancellationToken(string q, CancellationToken cancellationToken = default) => Task.CompletedTask;
     }
 }

@@ -107,6 +107,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
             actionParameters.AddRange(method.Parameters
                 .Where(f => f.IsDI && !f.IsNonArgumentDI)
                 .Concat(method.ApiParameters)
+                .OrderBy(p => p.HasDefaultValue)
                 .Select(param =>
             {
                 string typeName;

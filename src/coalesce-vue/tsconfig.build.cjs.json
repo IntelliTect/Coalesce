@@ -4,5 +4,8 @@
     "outDir": "./lib/cjs",
     "module": "commonjs",
     "target": "es2015"
-  }
+  },
+  "include": [
+    "src/**/*"
+  ]
 }

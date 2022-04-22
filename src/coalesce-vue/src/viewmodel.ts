@@ -471,7 +471,7 @@ export abstract class ViewModel<
    * Data is loaded in a surgical fashion that will preserve existing instances
    * of objects and arrays found on navigation properties.
    */
-  private $loadFromModel(source: {} | TModel, isCleanData: boolean = true) {
+  public $loadFromModel(source: {} | TModel, isCleanData: boolean = true) {
     if (this.$isDirty && this._autoSaveState?.active) {
       updateViewModelFromModel(this as any, source, true, isCleanData);
     } else {
@@ -717,7 +717,7 @@ export abstract class ViewModel<
 export abstract class ListViewModel<
   TModel extends Model<ModelType> = Model<ModelType>,
   TApi extends ModelApiClient<TModel> = ModelApiClient<TModel>,
-  TItem extends ViewModel = ViewModel<TModel, TApi>
+  TItem extends ViewModel<TModel, TApi> = ViewModel<TModel, TApi>
 > {
   /** Static lookup of all generated ListViewModel types. */
   public static typeLookup: ListViewModelTypeLookup | null = null;
@@ -1324,10 +1324,13 @@ export type ModelOf<T> = T extends ViewModel<infer TModel> ? TModel : never;
  * Doesn't strictly return collections of ViewModels,
  * but instead expects the receiving setter of the array to be a ViewModelCollection.
  */
-function rebuildModelCollectionForViewModelCollection(
+function rebuildModelCollectionForViewModelCollection<
+  TModel extends Model<ModelType> = any,
+  TItem extends ViewModel<TModel, any, any> = any
+>(
   type: ModelType,
-  currentValue: any[],
-  incomingValue: any[],
+  currentValue: Array<TItem>,
+  incomingValue: Array<any>,
   isCleanData: boolean
 ) {
   if (!Array.isArray(currentValue)) {
@@ -1340,11 +1343,11 @@ function rebuildModelCollectionForViewModelCollection(
   // There are existing items. We need to surgically merge in the incoming items,
   // keeping existing ViewModels the same based on keys.
   const pkName = type.keyProp.name;
-  const existingItemsMap = new Map();
+  const existingItemsMap = new Map<any, TItem>();
   const existingItemsWithoutPk = [];
   for (let i = 0; i < currentLength; i++) {
     const item = currentValue[i];
-    const itemPk = item[pkName];
+    const itemPk = item.$primaryKey;
     if (itemPk) {
       existingItemsMap.set(itemPk, item);
     } else {
@@ -1457,8 +1460,8 @@ export function updateViewModelFromModel<
       const propName = prop.name as keyof typeof target & string;
       // Hit $data directly since this is internal code.
       // Avoids a redundant function call against the ViewModel's prop getter.
-      const currentValue = (target as any).$data[propName] as any;
-      let incomingValue = (source as any)[propName];
+      const currentValue = (target as any).$data[propName];
+      let incomingValue = source[propName];
 
       // Sanitize incomingValue to not be undefined (to not break Vue's reactivity),
       // since `source` isn't guaranteed to be a model and thus isn't guaranteed that
@@ -1568,7 +1571,7 @@ class AutoCallState<TOptions = any> {
   trigger: (() => void) | null = null;
 
   constructor() {
-    // Seal to prevent unnessecary reactivity
+    // Seal to prevent unnecessary reactivity
     return Object.seal(this);
   }
 }

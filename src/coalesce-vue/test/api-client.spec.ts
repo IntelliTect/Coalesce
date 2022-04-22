@@ -12,9 +12,15 @@ import { delay } from './test-utils';
 
 
 function makeEndpointMock() {
-  return jest.fn<ItemResultPromise<string>, [number | undefined | null]>().mockResolvedValue({ data: <ItemResult>{
-    wasSuccessful: true, object: "foo"
-  }, status: 200, statusText: "OK", headers: {}, config:{}});
+  return jest.fn<ItemResultPromise<number>, [number | undefined | null]>().mockImplementation(arg => {
+    return Promise.resolve({ 
+      data: <ItemResult>{ wasSuccessful: true, object: arg}, 
+      status: 200, 
+      statusText: "OK", 
+      headers: {}, 
+      config:{}
+    })
+  });
 }
 
 
@@ -286,15 +292,22 @@ describe("$invoke", () => {
 })
 
 describe("$makeCaller", () => {
-  test("passes parameters to invoker func", () => {
+  test("passes parameters to invoker func", async () => {
     const endpointMock = makeEndpointMock();
     const caller = new StudentApiClient().$makeCaller("item", (c, num: number) => {
-      endpointMock(num)
+      return endpointMock(num)
     })
 
     const arg = 42;
-    caller(arg);
+    await caller(arg);
     expect(endpointMock.mock.calls[0][0]).toBe(arg);
+    expect(caller.result).toBe(arg);
+
+    // Typescript typing tests - all of these are valid types of `result`.
+    caller.result = null;
+    caller.result = 13;
+    //@ts-expect-error `undefined` is not a valid value of `result`
+    caller.result = undefined;
   })
 
   test("failed requests re-throw errors", async () => {
@@ -308,20 +321,32 @@ describe("$makeCaller", () => {
     await expect(caller(42)).rejects.toBeTruthy();
   })
 
-  test("allows return undefined from invoker func", () => {
+  test("allows return undefined from invoker func", async () => {
     const endpointMock = makeEndpointMock();
     const caller = new StudentApiClient().$makeCaller("item", (c, num: number) => {
       if (num == 42) {
         return;
       }
-      return (endpointMock(num) as ItemResultPromise<string>)
+      return endpointMock(num)
     })
 
     const arg = 42;
-    const result = caller(arg);
+    const result = await caller(arg);
 
-    expect(result).resolves.toBeUndefined();
+    // The typings are actually wrong at the moment - `undefined` is not one of the types of `result`, but it should be.
+    expect(result).toBeUndefined();
+    
     expect(endpointMock.mock.calls.length).toBe(0);
+    expect(caller.result).toBeNull();
+
+    // Typescript typing tests - all of these are valid types of `result`.
+    // Note that Typescript intellisense in VS code seems to be really messed up
+    // right now and shows that `result` is only `string`.:
+    caller.result = null;
+    caller.result = 13;
+
+    //@ts-expect-error `undefined` is not a valid value of `result`, even if the invoker doesn't always return.
+    caller.result = undefined;
   })
 
   test("onFulfilled callbacks are awaited when promises returned", async () => {
@@ -330,7 +355,17 @@ describe("$makeCaller", () => {
     const model = {
       caller: new StudentApiClient()
         .$makeCaller("item", function(this: any, c) { return endpointMock(42) })
-        .onFulfilled(async () => {
+        .onFulfilled(async (caller) => {
+          
+          expect(caller.isLoading).toBe(true)
+
+          // @ts-expect-error Assert that the parameter is typed properly.
+          caller.propThatDoesNotExist?.toString()
+          // @ts-expect-error Assert that the parameter is typed properly.
+          caller.result?.includes?.("x")
+          // Assert that the parameter is typed properly.
+          caller.result?.toExponential()
+
           await delay(50);
           awaited = true;
         })
@@ -628,7 +663,38 @@ describe("$makeCaller with args object", () => {
 
     caller.args.num = 42;
     const result = await caller.invokeWithArgs();
-    expect(result.data.object).toBe("foo");
+    expect(result.data.object).toBe(42);
+  })
+
+  test("allows return undefined from args invoker func", async () => {
+    const endpointMock = makeEndpointMock();
+    const caller = new StudentApiClient().$makeCaller(
+      StudentMeta.methods.fullNameAndAge,
+      (c, num: number) => endpointMock(num), 
+      () => ({num: null as null | number}), (c, args) => {
+      if (args.num == 42) {
+        return;
+      }
+      return (endpointMock(args.num))
+    })
+
+    const arg = 42;
+    const result = await caller.invokeWithArgs({num: arg});
+
+    // The typings are actually wrong at the moment - `undefined` is not one of the types of `result`, but it should be.
+    expect(result).toBeUndefined();
+
+    expect(endpointMock.mock.calls.length).toBe(0);
+    expect(caller.result).toBeNull();
+
+    // Typescript typing tests - all of these are valid types of `result`.
+    // Note that Typescript intellisense in VS code seems to be really messed up
+    // right now and shows that `result` is only `string`.:
+    caller.result = null;
+    caller.result = 13;
+
+    //@ts-expect-error `undefined` is not a valid value of `result`, even if the invoker doesn't always return.
+    caller.result = undefined;
   })
 
   test("item caller url returns correct url", async () => {

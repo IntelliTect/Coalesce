@@ -440,7 +440,7 @@ type ApiStateType<
 type ApiStateTypeWithArgs<
   T extends TransportTypeSpecifier<any>,
   TArgs extends any[],
-  TArgsObj,
+  TArgsObj extends {},
   TResult
 > = (T extends ItemTransportTypeSpecifier<any>
   ? ItemApiStateWithArgs<TArgs, TArgsObj, TResult>
@@ -501,7 +501,7 @@ export class ApiClient<T extends ApiRoutedType> {
       ResultPromiseType<TTransportType, TResult> | undefined | void,
       this
     >
-  ): ApiStateType<TTransportType, TArgs, TResult | undefined>;
+  ): ApiStateType<TTransportType, TArgs, TResult>;
 
   /**
    * Create a wrapper function for an API call. This function maintains properties which represent the state of its previous invocation.
@@ -525,6 +525,28 @@ export class ApiClient<T extends ApiRoutedType> {
     >
   ): ApiStateTypeWithArgs<TTransportType, TArgs, TArgsObj, TResult>;
 
+  /**
+   * Create a wrapper function for an API call. This function maintains properties which represent the state of its previous invocation.
+   * @param resultType An indicator of whether the API endpoint returns an ItemResult<T> or a ListResult<T>
+   * @param invokerFactory method that will call the API. The signature of the function, minus the apiClient parameter, will be the call signature of the wrapper.
+   * @param invokerFactory method that will call the API with an args object as the only parameter. This may be called by using `.withArgs()` on the function that is returned from `$makeCaller`. The value of the args object will default to `.args` if not specified.
+   */
+  $makeCaller<
+    TArgs extends any[],
+    TArgsObj extends {},
+    TResult,
+    TTransportType extends TransportTypeSpecifier<T>
+  >(
+    resultType: TTransportType,
+    invoker: TInvoker<TArgs, ResultPromiseType<TTransportType, TResult> | undefined | void, this>,
+    argsFactory?: () => TArgsObj,
+    argsInvoker?: TArgsInvoker<
+      TArgsObj,
+      ResultPromiseType<TTransportType, TResult> | undefined | void,
+      this
+    >
+  ): ApiStateTypeWithArgs<TTransportType, TArgs, TArgsObj, TResult>;
+
 
   $makeCaller<
     TArgs extends any[],
@@ -541,7 +563,7 @@ export class ApiClient<T extends ApiRoutedType> {
     argsFactory?: () => TArgsObj,
     argsInvoker?: TArgsInvoker<
       TArgsObj,
-      ResultPromiseType<TTransportType, TResult>,
+      ResultPromiseType<TTransportType, TResult> | undefined | void,
       this
     >
   ): any {
@@ -1075,7 +1097,7 @@ export abstract class ApiState<
    * Attach a callback to be invoked when the request to this endpoint succeeds.
    * @param callback A callback to be called when a request to this endpoint succeeds.
    */
-  onFulfilled(callback: ApiStateHook<any>): this {
+  onFulfilled(callback: ApiStateHook<this>): this {
     if (!this._callbacks.onFulfilled.includes(callback)) {
       this._callbacks.onFulfilled.push(callback);
     }
@@ -1086,7 +1108,7 @@ export abstract class ApiState<
    * Attach a callback to be invoked when the request to this endpoint fails.
    * @param callback A callback to be called when a request to this endpoint fails.
    */
-  onRejected(callback: ApiStateHook<any>): this {
+  onRejected(callback: ApiStateHook<this>): this {
     if (!this._callbacks.onRejected.includes(callback)) {
       this._callbacks.onRejected.push(callback);
     }
@@ -1268,12 +1290,12 @@ export abstract class ApiState<
 
   constructor(
     protected readonly apiClient: ApiClient<any>,
-    private readonly invoker: any
-    // TInvoker<
-    //   TArgs,
-    //   ApiResultPromise<TResult> | undefined | void,
-    //   TClient
-    // >
+    private readonly invoker: 
+    TInvoker<
+      TArgs,
+      ApiResultPromise<TResult> | undefined | void,
+      ApiClient<any>
+    >
   ) {
     super();
 
@@ -1288,7 +1310,7 @@ export abstract class ApiState<
     } as TCall<TArgs, ApiResultPromise<TResult>>;
 
     // Copy all properties from the class to the function.
-    const invoke = Object.assign(invokeFunc, this);
+    const invoke = Object.assign(invokeFunc, this) as this;
     invoke.invoke = invoke;
 
     Object.setPrototypeOf(invoke, new.target.prototype);

@@ -20,8 +20,7 @@ export class StudentViewModel extends ViewModel<models.Student, apiClients.Stude
 }
 defineProps(StudentViewModel, metadata.Student);
 
-export class StudentListViewModel extends ListViewModel<models.Student,
-apiClients.StudentApiClient, StudentViewModel> {
+export class StudentListViewModel extends ListViewModel<models.Student, apiClients.StudentApiClient, StudentViewModel> {
   
   constructor() {
     super(metadata.Student, new apiClients.StudentApiClient())

@@ -90,6 +90,30 @@ namespace IntelliTect.Coalesce.Tests.TypeDefinition
         }
 
         [Theory]
+        [ClassViewModelData(typeof(void), "void")]
+        [ClassViewModelData(typeof(bool), "bool")]
+        [ClassViewModelData(typeof(bool?), "bool?")]
+        [ClassViewModelData(typeof(bool[]), "bool[]")]
+        [ClassViewModelData(typeof(bool[,]), "bool[,]")]
+        [ClassViewModelData(typeof(bool?[]), "bool?[]")]
+        [ClassViewModelData(typeof(System.Collections.Generic.ICollection<bool>), "System.Collections.Generic.ICollection<bool>")]
+        [ClassViewModelData(typeof(System.Collections.Generic.ICollection<bool?>), "System.Collections.Generic.ICollection<bool?>")]
+        [ClassViewModelData(typeof(Bools), "IntelliTect.Coalesce.Tests.TargetClasses.Bools")]
+        [ClassViewModelData(typeof(System.Collections.Generic.ICollection<ExternalParent>),
+            "System.Collections.Generic.ICollection<IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext.ExternalParent>")]
+        public void FullyQualifiedName_HasCorrectValue(
+            ClassViewModelData data,
+            string expectedTypeName
+        )
+        {
+            TypeViewModel vm = data;
+            var value = vm.FullyQualifiedName;
+
+            Assert.Equal(expectedTypeName, value);
+        }
+
+        [Theory]
+        [ClassViewModelData(typeof(void), "System.Void")]
         [ClassViewModelData(typeof(bool), "System.Boolean")]
         [ClassViewModelData(typeof(bool?), "System.Nullable<System.Boolean>")]
         [ClassViewModelData(typeof(bool[]), "System.Boolean[]")]

@@ -53,8 +53,15 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public IEnumerable<ClassViewModel> ApiBackedClasses => CrudApiBackedClasses;
         public IEnumerable<ClassViewModel> CrudApiBackedClasses => Entities.Union(CustomDtos);
 
+        /// <summary>
+        /// Types that have a generated API controller.
+        /// </summary>
         public IEnumerable<ClassViewModel> ControllerBackedClasses => CrudApiBackedClasses.Union(Services);
 
+        /// <summary>
+        /// Types that have a generated model class or inteface that includes the type's exposed properties.
+        /// Does not include [Service]s.
+        /// </summary>
         public IEnumerable<ClassViewModel> ClientClasses => CrudApiBackedClasses.Union(ExternalTypes);
 
         public ReadOnlyHashSet<TypeViewModel> ClientEnums => new ReadOnlyHashSet<TypeViewModel>(_enums);

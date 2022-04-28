@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Coalesce Security Overview</title>
+
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+      crossorigin="anonymous"
+    />
+    <style>
+      [v-cloak] {
+        display: none;
+      }
+
+      a {
+        text-decoration: none;
+      }
+
+      .toc a {
+        transition: all 50ms ease-in-out;
+        letter-spacing: 0.04rem;
+      }
+      .toc a.active {
+        font-weight: 500;
+        letter-spacing: 0rem;
+      }
+    </style>
+  </head>
+  <body>
+    <h1 id="top" class="display-1 text-center">Coalesce Security Overview</h1>
+
+    <div id="app" class="mt-1" v-cloak>
+      <div class="row m-0">
+        <div class="col" style="max-width: 220px">
+          <nav
+            class="toc p-2"
+            style="
+              position: sticky;
+              top: 0px;
+              overflow-y: auto;
+              max-height: calc(100vh - 16px);
+            "
+          >
+            <a href="#top">Top</a>
+
+            <h6 class="mt-4">Entities &amp; Custom DTOs</h6>
+            <div v-for="type in crudTypes">
+              <a :href="'#type-' + type.name">{{type.name}}</a>
+            </div>
+
+            <h6 class="mt-4">Services</h6>
+            <div v-for="type in serviceTypes">
+              <a :href="'#type-' + type.name">{{type.name}}</a>
+            </div>
+
+            <h6 class="mt-4">External Types</h6>
+            <div v-for="type in externalTypes">
+              <a :href="'#type-' + type.name">{{type.name}}</a>
+            </div>
+          </nav>
+        </div>
+        <div class="col">
+          <div class="">
+            <p>
+              Below you will find an overview of all the types in your data
+              model that are exposed by Coalesce's generated API endpoints.
+              Included in this overview are the static security restrictions
+              defined using
+              <a
+                href="https://coalesce.readthedocs.io/en/latest/pages/modeling/model-components/attributes/security-attribute"
+                >attributes</a
+              >.
+            </p>
+            <p>
+              Due to their nature, dynamically implemented security rules are
+              not accounted for - for example, custom logic implemented inside
+              <a
+                href="https://coalesce.readthedocs.io/en/latest/pages/modeling/model-components/data-sources/"
+              >
+                Data Sources
+              </a>
+              end
+              <a
+                href="https://coalesce.readthedocs.io/en/latest/pages/modeling/model-components/behaviors/"
+              >
+                Behaviors </a
+              >.
+            </p>
+
+            <div class="alert alert-warning" role="alert">
+              IMPORTANT: <strong>If the generated code is stale</strong>, the
+              information on this page may match not actual application
+              functionality.
+            </div>
+
+            <section
+              v-for="type in crudTypes"
+              class="mb-5"
+              :id="'type-' + type.name"
+            >
+              <h1>
+                {{type.name}}
+                <small class="text-muted">/api/{{type.route}}</small>
+              </h1>
+              <div class="row">
+                <div
+                  class="col col-3"
+                  v-for="{action, subtitle} in [
+                    {action: type.read, subtitle: '/get, /list, /count'},
+                    {action: type.create, subtitle: '/save'},
+                    {action: type.edit, subtitle: '/save'},
+                    {action: type.delete, subtitle: '/delete'}
+                  ]"
+                >
+                  <div class="card mb-4">
+                    <!-- :class="action.allowAnonymous ? 'border-warning' : action.noAccess ? 'border-danger' : 'border-success'" -->
+                    <div class="card-body">
+                      <h4 class="card-title">
+                        {{action.name}}
+                        <small class="text-muted float-end">{{subtitle}}</small>
+                      </h4>
+                      <p class="card-text">
+                        <security-badge :action="action"></security-badge>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col col-4">
+                  <div class="card mb-4">
+                    <div class="card-body">
+                      <h4 class="card-title">Generated DTO Properties</h4>
+                      <properties-table
+                        :properties="type.properties"
+                      ></properties-table>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col col-4">
+                  <div class="card mb-4">
+                    <div class="card-body">
+                      <h4 class="card-title">Methods</h4>
+                      <methods-table :methods="type.methods"></methods-table>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col col-4">
+                  <div class="card mb-4">
+                    <div class="card-body">
+                      <template v-if="type.behaviorsTypeName">
+                        <h4 class="card-title">Behaviors</h4>
+                        <span class=" text-break">
+                          {{type.behaviorsTypeName}}
+                        </span>
+                        <br>
+                        <br>
+                      </template>
+
+                      <h4 class="card-title">Data Sources</h4>
+                      <table class="table table-sm table-hover">
+                        <thead>
+                          <tr>
+                            <th>Name</th>
+                            <th>Parameters</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr v-for="ds in type.dataSources">
+                            <td>
+                              <strong class="text-break">
+                                {{ds.names.join(', ')}}
+                                <span
+                                  v-if="ds.isDefault"
+                                  class="badge bg-secondary"
+                                >
+                                  Default
+                                </span>
+                              </strong>
+                              <br />
+                              <small class="text-muted text-break">
+                                {{ds.className}}
+                              </small>
+                            </td>
+                            <td>
+                              {{ds.parameters.map(p => p.name).join(', ')}}
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section
+              v-for="type in serviceTypes"
+              class="mb-5"
+              :id="'type-' + type.name"
+            >
+              <h1>
+                {{type.name}}
+                <small class="text-muted">/api/{{type.route}}</small>
+              </h1>
+
+              <div class="row">
+                <div class="col col-4">
+                  <div class="card mb-4">
+                    <div class="card-body">
+                      <h4 class="card-title">Methods</h4>
+                      <methods-table :methods="type.methods"></methods-table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section
+              v-for="type in externalTypes"
+              class="mb-5"
+              :id="'type-' + type.name"
+            >
+              <h1>{{type.name}}</h1>
+
+              <div class="row">
+                <div class="col col-4">
+                  <div class="card mb-4">
+                    <div class="card-body">
+                      <h4 class="card-title">Generated DTO Properties</h4>
+                      <properties-table
+                        :properties="type.properties"
+                      ></properties-table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script type="text/html" id="methods-table">
+      <table class="table table-sm table-hover">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Execute</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="method in methods">
+            <td>
+              <strong class="text-break">{{method.name}}</strong>
+              <br />
+              <small>
+                (<template v-for="(param, idx) in method.parameters">
+                  <span v-if="idx > 0">, </span>
+                  <type-display :member="param.type"></type-display> </template
+                >) => <type-display :member="method.return"></type-display>
+              </small>
+            </td>
+            <td>
+              <security-badge :action="method.execute"></security-badge>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </script>
+
+    <script type="text/html" id="properties-table">
+      <table class="table table-sm table-hover">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th width="100px">Read</th>
+            <th width="100px">Write</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="prop in properties">
+            <td>
+              <strong class="text-break">{{prop.name}}</strong>
+              <br />
+              <small>
+                <type-display :member="prop.type"></type-display>
+              </small>
+            </td>
+            <td v-for="action in [prop.read, prop.edit]">
+              <security-badge :action="action"></security-badge>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </script>
+
+    <script type="text/html" id="type-display">
+      <span>
+        <a v-if="member.linkedType" :href="'#type-' + member.linkedType">
+          {{member.display}}
+        </a>
+        <span v-else class="text-muted"> {{member.display}} </span>
+      </span>
+    </script>
+
+    <script type="text/html" id="security-badge">
+      <span>
+        <span
+          v-if="action.noAccess"
+          class="badge border border-danger text-dark"
+        >
+          Deny
+        </span>
+        <span v-else-if="action.allowAnonymous" class="badge bg-danger">
+          Allow Anonymous
+        </span>
+        <span v-else class="badge bg-success">
+          Allow {{'allowAnonymous' in action ? 'Authenticated' : ''}}
+          <div v-if="action.roleList.length" class="fw-normal text-start">
+            {{action.roles}}
+          </div>
+        </span>
+      </span>
+    </script>
+
+    <script src="https://unpkg.com/vue@3"></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
+      crossorigin="anonymous"
+    ></script>
+
+    <script>
+      const app = Vue.createApp({
+        data() {
+          // DATA is injected by the route handler that serves this content.
+          return DATA;
+        },
+        mounted() {
+          // Scroll to hash after page load - this won't otherwise happen since there's a delay in mounting the vue app.
+          // setTimeout(() => {
+          //   const hash = window.location.hash;
+          //   if (hash)
+          //     document
+          //       .getElementById(hash.replace("#", ""))
+          //       .scrollIntoView({ behavior: "instant" });
+          // }, 100);
+        },
+      });
+      app.component("security-badge", {
+        template: "#security-badge",
+        props: ["action"],
+      });
+      app.component("methods-table", {
+        template: "#methods-table",
+        props: ["methods"],
+      });
+      app.component("properties-table", {
+        template: "#properties-table",
+        props: ["properties"],
+      });
+      app.component("type-display", {
+        template: "#type-display",
+        props: ["member"],
+      });
+      app.directive("tooltip", {
+        mounted(el, binding) {
+          new bootstrap.Tooltip(el, {
+            title: binding.value,
+            placement: binding.arg ?? "top",
+            html: binding.modifiers.html ?? false,
+            container: el.parentElement,
+          });
+        },
+        unmounted(el, binding) {
+          var tooltip = bootstrap.Tooltip.getInstance(el);
+          tooltip?.dispose();
+        },
+      });
+      app.mount("#app");
+
+      // https://css-tricks.com/sticky-table-of-contents-with-scrolling-active-states/
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          const id = entry.target.getAttribute("id");
+          if (entry.intersectionRatio > 0) {
+            document
+              .querySelector(`nav a[href="#${id}"]`)
+              .classList.add("active");
+          } else {
+            document
+              .querySelector(`nav a[href="#${id}"]`)
+              .classList.remove("active");
+          }
+        });
+      });
+
+      // Track all sections that have an `id` applied
+      document.querySelectorAll("section[id]").forEach((section) => {
+        observer.observe(section);
+      });
+    </script>
+  </body>
+</html>

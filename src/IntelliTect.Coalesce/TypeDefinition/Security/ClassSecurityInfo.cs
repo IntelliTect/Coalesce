@@ -34,10 +34,16 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 notMutable = ClassViewModel.ReflectionRepository?.GetBehaviorsDeclaredFor(ClassViewModel) == null;
             }
 
+            if (!ClassViewModel.WillCreateApiController)
+            {
+                notMutable = true;
+            }
+
             var allowAnonymousAny = readAttribute.AllowAnonymous || editAttribute.AllowAnonymous || deleteAttribute.AllowAnonymous || createAttribute.AllowAnonymous;
 
             Read = new SecurityPermission(
                 level:
+                    !ClassViewModel.WillCreateApiController ? SecurityPermissionLevels.DenyAll :
                     readAttribute.NoAccess ? SecurityPermissionLevels.DenyAll :
                     allowAnonymousAny ? SecurityPermissionLevels.AllowAll :
                     SecurityPermissionLevels.AllowAuthorized,

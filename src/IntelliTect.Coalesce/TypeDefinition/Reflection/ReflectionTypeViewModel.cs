@@ -53,7 +53,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 : null;
 
             // This is precomputed because it is used for .Equals() and the == operator.
-            FullyQualifiedName = GetVerboseTypeName(Info);
+            FullyQualifiedName = GetTypeName(Info);
+            VerboseFullyQualifiedName = GetVerboseTypeName(Info);
         }
 
         internal static ReflectionTypeViewModel GetOrCreate(ReflectionRepository? reflectionRepository, Type type)
@@ -138,6 +139,64 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public override string FullNamespace => Info.Namespace ?? "";
 
+        private static string GetTypeName(Type type)
+        {
+            if (type.IsGenericParameter)
+            {
+                return type.Name;
+            }
+
+            if (type.IsArray)
+            {
+                return GetTypeName(type.GetElementType()!) + "[" + new string(',', type.GetArrayRank() - 1) + "]";
+            }
+
+            if (Nullable.GetUnderlyingType(type) is Type nullableUnderlying && nullableUnderlying != null)
+            {
+                return GetTypeName(nullableUnderlying) + "?";
+            }
+
+            if (!type.IsGenericType)
+            {
+                if (type == typeof(void)) return "void";
+                return Type.GetTypeCode(type) switch
+                {
+                    TypeCode.Boolean => "bool",
+                    TypeCode.Int16 => "short",
+                    TypeCode.Int32 => "int",
+                    TypeCode.Int64 => "long",
+                    TypeCode.UInt16 => "ushort",
+                    TypeCode.UInt32 => "uint",
+                    TypeCode.UInt64 => "ulong",
+                    TypeCode.Single => "float",
+                    TypeCode.Double => "double",
+                    TypeCode.Decimal => "decimal",
+                    TypeCode.Byte => "byte",
+                    TypeCode.SByte => "sbyte",
+                    TypeCode.String => "string",
+                    _ => type.FullName ?? ""
+                };
+            }
+
+            var builder = new System.Text.StringBuilder();
+            var name = type.Name;
+            var index = name.IndexOf("`");
+            builder.AppendFormat("{0}.{1}", type.Namespace, name.Substring(0, index));
+            builder.Append('<');
+            var first = true;
+            foreach (var arg in type.GetGenericArguments())
+            {
+                if (!first)
+                {
+                    builder.Append(',');
+                }
+                builder.Append(GetTypeName(arg));
+                first = false;
+            }
+            builder.Append('>');
+            return builder.ToString();
+        }
+
         private static string GetVerboseTypeName(Type type)
         {
             // From https://stackoverflow.com/questions/401681
@@ -178,7 +237,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public override string FullyQualifiedName { get; }
 
-        public override string VerboseFullyQualifiedName => FullyQualifiedName;
+        public override string VerboseFullyQualifiedName { get; }
 
         public override TypeViewModel? FirstTypeArgument { get; }
 

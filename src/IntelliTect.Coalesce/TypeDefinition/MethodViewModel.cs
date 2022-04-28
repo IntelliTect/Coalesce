@@ -223,7 +223,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// If true, this is a method that may be called by a client.
         /// </summary>
         public bool IsClientMethod => 
-            !IsInternalUse && 
+            !IsInternalUse &&
+            Parent.WillCreateApiController &&
             !SecurityInfo.Execute.NoAccess && 
             // Services only have instance methods - no static methods.
             (!Parent.IsService || !IsStatic) && 

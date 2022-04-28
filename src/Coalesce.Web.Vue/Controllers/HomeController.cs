@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Linq;
+using System.Text.RegularExpressions;
 using IntelliTect.Coalesce.Api.DataSources;
 using IntelliTect.Coalesce.TypeDefinition;
 using IntelliTect.Coalesce.Utilities;
@@ -40,101 +41,6 @@ namespace Coalesce.Web.Vue.Controllers
         {
             ViewData["RequestId"] = Activity.Current?.Id ?? HttpContext.TraceIdentifier;
             return View();
-        }
-
-        public IActionResult SecurityOverview()
-        {
-            // TODO: TEMPORARY WIP.
-
-            var repo = ReflectionRepository.Global;
-            var crudClasses = repo
-                .CrudApiBackedClasses
-                .OrderBy(c => c.Name)
-                .Select(c =>
-                {
-                    var actualDefaultSource = new ReflectionClassViewModel(HttpContext.RequestServices
-                        .GetRequiredService<IDataSourceFactory>()
-                        .GetDefaultDataSource(c.BaseViewModel, c).GetType()
-                    );
-
-                    return new
-                    {
-                        Name = c.Name,
-                        Route = c.ApiRouteControllerPart,
-                        c.SecurityInfo.Read,
-                        c.SecurityInfo.Create,
-                        c.SecurityInfo.Edit,
-                        c.SecurityInfo.Delete,
-                        DataSources = c
-                            .ClientDataSources(repo)
-                            .Select(ds => new
-                            {
-                                ds.FullyQualifiedName,
-                                Name = ds.ClientTypeName,
-                                IsDefault = ds.IsDefaultDataSource,
-                                Parameters = ds.DataSourceParameters.Select(p => new
-                                {
-                                    p.Name
-                                })
-                            })
-                            .Prepend(new
-                            {
-                                // Put the resolved default FIRST (.Prepend) so that the
-                                // effective default for StandaloneEntities is correctly tagged.
-                                actualDefaultSource.FullyQualifiedName,
-                                Name = DataSourceFactory.DefaultSourceName,
-                                IsDefault = true,
-                                Parameters = actualDefaultSource.DataSourceParameters.Select(p => new
-                                {
-                                    p.Name
-                                })
-                            })
-                            .DistinctBy(c => c.FullyQualifiedName)
-                            .OrderByDescending(c => c.IsDefault),
-                            // TODO: behaviors
-                        Methods = c.ClientMethods.Select(m => new
-                        {
-                            m.Name,
-                            m.LoadFromDataSourceName,
-                            Execute = m.SecurityInfo.Execute,
-                            HttpMethod = m.ApiActionHttpMethod
-                        }),
-                        Properties = c.ClientProperties.Select(p => new
-                        {
-                            p.Name, 
-                            p.SecurityInfo.Read,
-                            p.SecurityInfo.Edit,
-                        })
-                    };
-                })
-                .ToList();
-
-            var settings = new JsonSerializerSettings();
-            settings.Formatting = Formatting.Indented;
-            settings.ContractResolver = new CamelCasePropertyNamesContractResolver();
-            settings.Converters.Add(new StringEnumConverter());
-
-            return Json(new
-            {
-                CrudTypes = crudClasses,
-                ServiceTypes = repo.Services
-                    .OrderBy(c => c.Name)
-                    .Select(c =>
-                    {
-                        return new
-                        {
-                            Name = c.Name,
-                            Route = c.ApiRouteControllerPart,
-                            Methods = c.ClientMethods.Select(m => new
-                            {
-                                m.Name,
-                                Execute = m.SecurityInfo.Execute,
-                                HttpMethod = m.ApiActionHttpMethod
-                            })
-                        };
-                    })
-                    .ToList()
-            }, settings);
         }
     }
 }

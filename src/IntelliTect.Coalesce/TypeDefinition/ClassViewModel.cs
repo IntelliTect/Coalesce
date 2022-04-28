@@ -477,16 +477,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public bool HasAttribute<TAttribute>() where TAttribute : Attribute =>
             Type.HasAttribute<TAttribute>();
 
-        protected SecurityPermission GetSecurityAttribute<TAttribute>()
-            where TAttribute : SecurityAttribute =>
-            !HasAttribute<TAttribute>()
-            ? new SecurityPermission()
-            : new SecurityPermission(
-                level: this.GetAttributeValue<TAttribute, SecurityPermissionLevels>(a => a.PermissionLevel) ?? SecurityPermissionLevels.AllowAuthorized,
-                roles: this.GetAttributeValue<TAttribute>(a => a.Roles),
-                name: typeof(TAttribute).Name.Replace("Attribute", string.Empty)
-            );
-
         public override string ToString() => FullyQualifiedName;
 
         public override bool Equals(object? obj) =>

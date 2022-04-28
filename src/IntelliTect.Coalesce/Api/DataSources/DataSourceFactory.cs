@@ -76,11 +76,15 @@ namespace IntelliTect.Coalesce.Api.DataSources
                 return dataSources[0].Type.TypeInfo;
             }
 
+            if (servedType.DbContext is null)
+            {
+                throw new ArgumentException("Requested type is not served by a DbContext and has no explicitly declared data source.");
+            }
+
             // FUTURE: If other kinds of default data sources are created, add them to the DefaultTypes dictionary above.
-            var tContext = reflectionRepository.EntityUsages[servedType].First().Context;
             return typeof(IEntityFrameworkDataSource<,>).MakeGenericType(
                 servedType.Type.TypeInfo,
-                tContext.ClassViewModel.Type.TypeInfo
+                servedType.DbContext.Type.TypeInfo
             );
         }
 

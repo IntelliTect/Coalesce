@@ -73,7 +73,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// </summary>
         public override bool IsNullable => Symbol.IsReferenceType || IsNullableType;
 
-        public override bool IsClass => IsArray || Symbol.IsReferenceType;
+        public override bool IsClass => IsArray || Symbol.TypeKind == TypeKind.Class;
 
         public override bool IsInterface => Symbol.TypeKind == TypeKind.Interface;
 

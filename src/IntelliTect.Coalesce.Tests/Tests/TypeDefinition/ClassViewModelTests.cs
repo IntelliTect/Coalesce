@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using Xunit;
 
-namespace IntelliTect.Coalesce.Tests.Tests.TypeDefinition
+namespace IntelliTect.Coalesce.Tests.TypeDefinition
 {
     public class ClassViewModelTests
     {

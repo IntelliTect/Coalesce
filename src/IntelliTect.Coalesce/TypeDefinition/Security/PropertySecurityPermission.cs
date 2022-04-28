@@ -12,17 +12,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             Name = name;
         }
 
-        public bool NoAccess { get; }
-
-        /// <summary>
-        /// Return whether the action is generally allowed, without taking into account any particular user.
-        /// </summary>
-        public bool IsAllowed() => !NoAccess;
-
-        /// <summary>
-        /// Return whether the action is allowed for the specified user.
-        /// </summary>
-        public bool IsAllowed(ClaimsPrincipal? user)
+        public override bool IsAllowed(ClaimsPrincipal? user)
         {
             if (NoAccess) return false;
             if (RoleList.Count == 0) return true;
@@ -32,7 +22,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public override string ToString()
         {
             if (NoAccess) return $"Deny";
-            if (HasRoles) return $"Allow Only Authorized Roles: {string.Join(", ", RoleList)}";
+            if (HasRoles) return $"Allow Roles: {string.Join(", ", RoleList)}";
             return $"Allow";
         }
     }

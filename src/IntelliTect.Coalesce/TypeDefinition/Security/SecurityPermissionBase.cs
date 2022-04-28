@@ -1,7 +1,9 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using IntelliTect.Coalesce.TypeDefinition;
+using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 
 namespace IntelliTect.Coalesce.TypeDefinition
 {
@@ -10,6 +12,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public string Roles { get; protected set; } = "";
         public string Name { get; protected set; } = "";
         public bool HasRoles => RoleList.Count > 0;
+
+        public bool NoAccess { get; protected set; }
 
         private IReadOnlyList<string>? _roleList;
         public IReadOnlyList<string> RoleList
@@ -31,6 +35,19 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
         }
 
+        // For inclusion of the string representation when serializing
+        public string Display => ToString();
+
         public string ToStringWithName() => $"{Name}: {ToString()}";
+
+        /// <summary>
+        /// Return whether the action is generally allowed, without taking into account any particular user.
+        /// </summary>
+        public bool IsAllowed() => !NoAccess;
+
+        /// <summary>
+        /// Return whether the action is allowed for the specified user.
+        /// </summary>
+        public abstract bool IsAllowed(ClaimsPrincipal? user);
     }
 }

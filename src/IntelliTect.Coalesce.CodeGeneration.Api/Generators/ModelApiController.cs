@@ -73,7 +73,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                 // ENDPOINT: /get/{id}
                 b.Line();
                 b.Line("[HttpGet(\"get/{id}\")]");
-                b.Line($"{securityInfo.Read.MvcAnnotation}");
+                b.Line($"{securityInfo.Read.MvcAnnotation()}");
                 b.Line($"{Model.ApiActionAccessModifier} virtual Task<ItemResult<{Model.DtoName}>> Get(");
                 b.Indented($"{primaryKeyParameter},");
                 b.Indented($"DataSourceParameters parameters,");
@@ -83,7 +83,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                 // ENDPOINT: /list
                 b.Line();
                 b.Line("[HttpGet(\"list\")]");
-                b.Line($"{securityInfo.Read.MvcAnnotation}");
+                b.Line($"{securityInfo.Read.MvcAnnotation()}");
                 b.Line($"{Model.ApiActionAccessModifier} virtual Task<ListResult<{Model.DtoName}>> List(");
                 b.Indented($"ListParameters parameters,");
                 b.Indented($"{dataSourceParameter})");
@@ -92,7 +92,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                 // ENDPOINT: /count
                 b.Line();
                 b.Line("[HttpGet(\"count\")]");
-                b.Line($"{securityInfo.Read.MvcAnnotation}");
+                b.Line($"{securityInfo.Read.MvcAnnotation()}");
                 b.Line($"{Model.ApiActionAccessModifier} virtual Task<ItemResult<int>> Count(");
                 b.Indented($"FilterParameters parameters,");
                 b.Indented($"{dataSourceParameter})");
@@ -104,7 +104,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                 // ENDPOINT: /save
                 b.Line();
                 b.Line("[HttpPost(\"save\")]");
-                b.Line($"{securityInfo.Save.MvcAnnotation}");
+                b.Line($"{securityInfo.Save.MvcAnnotation()}");
                 b.Line($"{Model.ApiActionAccessModifier} virtual Task<ItemResult<{Model.DtoName}>> Save(");
                 b.Indented($"{Model.DtoName} dto,");
                 b.Indented($"[FromQuery] DataSourceParameters parameters,");
@@ -118,7 +118,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                 // ENDPOINT: /delete/{id}
                 b.Line();
                 b.Line("[HttpPost(\"delete/{id}\")]");
-                b.Line($"{securityInfo.Delete.MvcAnnotation}");
+                b.Line($"{securityInfo.Delete.MvcAnnotation()}");
                 b.Line($"{Model.ApiActionAccessModifier} virtual Task<ItemResult<{Model.DtoName}>> Delete(");
                 b.Indented($"{primaryKeyParameter},");
                 b.Indented($"{behaviorsParameter},");

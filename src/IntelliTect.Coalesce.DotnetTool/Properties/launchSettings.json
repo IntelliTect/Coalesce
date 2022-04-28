@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "IntelliTect.Coalesce.DotnetTool": {
+      "commandName": "Project",
+      "commandLineArgs": "coalesce-private.json",
+      "workingDirectory": "C:\\src\\Ticketing"
+    }
+  }
+}

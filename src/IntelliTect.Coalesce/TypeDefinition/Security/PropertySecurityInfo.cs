@@ -3,6 +3,7 @@ using IntelliTect.Coalesce.Helpers;
 using IntelliTect.Coalesce.Utilities;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -14,49 +15,57 @@ namespace IntelliTect.Coalesce.TypeDefinition
     /// </summary>
     public class PropertySecurityInfo
     {
-        public PropertySecurityInfo(SecurityPermission read, SecurityPermission edit)
+        public PropertySecurityInfo(PropertyViewModel prop)
         {
-            IsRead = !read.NoAccess;
-            ReadRoles = read.Roles;
+            var read = prop.GetSecurityPermission<ReadAttribute>();
+            var edit = prop.GetSecurityPermission<EditAttribute>();
 
-            if (read.HasAttribute && !edit.HasAttribute)
+            if (
+                read.NoAccess ||
+                !prop.IsClientProperty
+            )
             {
-                IsEdit = false;
-                EditRoles = "";
+                Read = new PropertySecurityPermission(false, null, read.Name);
             }
             else
             {
-                IsEdit = !edit.NoAccess;
-                EditRoles = edit.Roles;
+                Read = new PropertySecurityPermission(true, read.Roles, read.Name);
             }
 
-            Read = new PropertySecurityPermission(
-                allow: !read.NoAccess,
-                roles: read.Roles,
-                name: read.Name
-            );
+            if (
+                edit.NoAccess ||
+                !prop.IsClientProperty ||
+                !prop.HasPublicSetter ||
 
-            Edit = new PropertySecurityPermission(
-                allow:
-                    // A [Read] attribute without an [Edit] signifies read-only:
-                    read.HasAttribute && !edit.HasAttribute ? false :
-                    !edit.NoAccess,
-                roles: edit.Roles,
-                name: edit.Name
-            );
+                // Properties with a [Read] attribute but no [Edit] attribute
+                // are read-only. This is for multiple reasons:
+                // 1) The syntax feels natural - seeing a property with [Read] and no other attributes
+                //    just /feels/ like it should be read-only.
+                // 2) It avoids accidents by omission - applying specific permissions for reading
+                //    but not applying permissions for editing is probably an accident that would otherwise introduce a security hole.
+                (read.HasAttribute && !edit.HasAttribute) ||
+
+                prop.HasAttribute<ReadOnlyAttribute>() ||
+
+#pragma warning disable CS0618 // Type or member is obsolete
+                prop.HasAttribute<ReadOnlyApiAttribute>() ||
+#pragma warning restore CS0618 // Type or member is obsolete
+
+                // Non-value properties arent writable unless they're owned by an external type,
+                // or the type of the property is an external type.
+                (prop.PureType.IsPOCO && (prop.Parent.IsDbMappedType || prop.Object!.IsDbMappedType))
+            )
+            {
+                Edit = new PropertySecurityPermission(false, null, edit.Name);
+            }
+            else
+            {
+                Edit = new PropertySecurityPermission(true, edit.Roles, edit.Name);
+            }
         }
-
-        public bool IsEdit { get; }
-        public bool IsRead { get; }
-        public string EditRoles { get; }
-        public string ReadRoles { get; }
 
         public PropertySecurityPermission Read { get; }
         public PropertySecurityPermission Edit { get; }
-
-        public IReadOnlyList<string> EditRolesList => Edit.RoleList;
-
-        public IReadOnlyList<string> ReadRolesList => Read.RoleList;
 
         /// <summary>
         /// If true, the user can read the field.

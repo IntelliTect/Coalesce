@@ -100,7 +100,6 @@ module ViewModels {
         public setupValidation(): void {
             if (this.errors !== null) return;
             this.errors = ko.validation.group([
-                this.details.extend({ required: {params: true, message: "Details is required."} }),
             ]);
             this.warnings = ko.validation.group([
             ]);
@@ -124,7 +123,6 @@ module ViewModels {
             
             
             self.name.subscribe(self.autoSave);
-            self.details.subscribe(self.autoSave);
             self.uniqueId.subscribe(self.autoSave);
             self.unknown.subscribe(self.autoSave);
             

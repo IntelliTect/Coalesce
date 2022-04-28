@@ -82,7 +82,7 @@ namespace IntelliTect.Coalesce.Models
 
             if (_position > 0)
             {
-                var connectionTypeName = _cmd.Connection.GetType().FullName;
+                var connectionTypeName = _cmd.Connection.GetType().FullName ?? "";
                 var cmdText = _cmd.CommandText;
                 var selectEnd = cmdText.IndexOf("SELECT") + 7;
                 var fromStart = cmdText.IndexOf("FROM");

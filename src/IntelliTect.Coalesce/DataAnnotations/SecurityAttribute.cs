@@ -20,9 +20,10 @@ namespace IntelliTect.Coalesce.DataAnnotations
         public static SecurityPermission GetSecurityPermission<TAttribute>(this IAttributeProvider parent)
             where TAttribute : SecurityAttribute
         {
+            var name = typeof(TAttribute).Name.Replace("Attribute", string.Empty);
             if (!parent.HasAttribute<TAttribute>())
             {
-                return new SecurityPermission();
+                return new SecurityPermission(name);
             }
 
             var level = parent.GetAttributeValue<TAttribute, SecurityPermissionLevels>(a => a.PermissionLevel) ?? SecurityPermissionLevels.AllowAuthorized;
@@ -42,7 +43,7 @@ namespace IntelliTect.Coalesce.DataAnnotations
             return new SecurityPermission(
                 level: parent.GetAttributeValue<TAttribute, SecurityPermissionLevels>(a => a.PermissionLevel) ?? SecurityPermissionLevels.AllowAuthorized,
                 roles: rolesString,
-                name: typeof(TAttribute).Name.Replace("Attribute", string.Empty)
+                name: name
             );
         }
     }

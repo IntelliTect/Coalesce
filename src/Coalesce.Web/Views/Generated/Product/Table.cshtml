@@ -98,7 +98,7 @@
                             @if (@ViewBag.Editable)
                             {
                                 <td class="prop-name">@(Knockout.InputFor<Coalesce.Domain.Product>(p => p.Name))</td>
-                                <td class="prop-details">@(Knockout.InputFor<Coalesce.Domain.Product>(p => p.Details))</td>
+                                <td class="prop-details">@(Knockout.DisplayFor<Coalesce.Domain.Product>(p => p.Details, true))</td>
                                 <td class="prop-uniqueId">@(Knockout.InputFor<Coalesce.Domain.Product>(p => p.UniqueId))</td>
                                 <td class="prop-unknown">@(Knockout.InputFor<Coalesce.Domain.Product>(p => p.Unknown))</td>
                             }

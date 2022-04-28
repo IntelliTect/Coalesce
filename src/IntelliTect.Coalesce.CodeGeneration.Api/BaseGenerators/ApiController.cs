@@ -1,4 +1,5 @@
 ﻿using IntelliTect.Coalesce.CodeGeneration.Generation;
+using IntelliTect.Coalesce.DataAnnotations;
 using IntelliTect.Coalesce.Mapping;
 using IntelliTect.Coalesce.Models;
 using IntelliTect.Coalesce.TypeDefinition;
@@ -90,7 +91,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
                 // for backwards compatibility (3.0 breaking change).
                 b.Line($"[{methodAnnotationName}(\"{method.Name}\")]");
             }
-            b.Line(method.SecurityInfo.Execute.MvcAnnotation);
+            b.Line(method.SecurityInfo.Execute.MvcAnnotation());
         }
 
 

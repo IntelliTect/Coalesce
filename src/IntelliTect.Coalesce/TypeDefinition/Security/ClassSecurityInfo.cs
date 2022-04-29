@@ -26,6 +26,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             var createAttribute = classViewModel.GetSecurityPermission<CreateAttribute>();
 
             var notMutable = false;
+            var notReadable = false;
             if (ClassViewModel.IsStandaloneEntity)
             {
                 // Standalone entities are only mutable if they have a behaviors class.
@@ -37,13 +38,41 @@ namespace IntelliTect.Coalesce.TypeDefinition
             if (!ClassViewModel.WillCreateApiController)
             {
                 notMutable = true;
+                notReadable = true;
             }
+
+            //if (!classViewModel.IsStandaloneEntity && !classViewModel.IsDbMappedType)
+            //{
+            //    notMutable |= classViewModel._Usages.All(u =>
+            //    {
+            //        var u2 = DetermineUsage(u).isWrite;
+            //        return u2 != true;
+            //    });
+            //    notReadable |= classViewModel._Usages.All(u =>
+            //    {
+            //        var u2 = DetermineUsage(u).isRead;
+            //        return u2 != true;
+            //    });
+
+            //    bool IsCircular(ClassViewModel value, HashSet<ClassViewModel> visited) 
+            //        => value == classViewModel ? true : visited.Add(value) && value._Usages.OfType<PropertyViewModel>().Any(u => u.PureType.HasClassViewModel && IsCircular(u.EffectiveParent, visited));
+
+            //    (bool? isRead, bool? isWrite) DetermineUsage(IValueViewModel value) => value switch
+            //    {
+            //        ParameterViewModel p => (false, true),
+            //        MethodReturnViewModel r => (true, false),
+            //        PropertyViewModel p => !IsCircular(p.EffectiveParent, new HashSet<ClassViewModel>())
+            //            ? (p.SecurityInfo.Read.IsAllowed(), p.SecurityInfo.Edit.IsAllowed())
+            //            : ((bool?)null, (bool?)null),
+            //        _ => (true, true)
+            //    };
+            //}
 
             var allowAnonymousAny = readAttribute.AllowAnonymous || editAttribute.AllowAnonymous || deleteAttribute.AllowAnonymous || createAttribute.AllowAnonymous;
 
             Read = new SecurityPermission(
                 level:
-                    !ClassViewModel.WillCreateApiController ? SecurityPermissionLevels.DenyAll :
+                    notReadable ? SecurityPermissionLevels.DenyAll :
                     readAttribute.NoAccess ? SecurityPermissionLevels.DenyAll :
                     allowAnonymousAny ? SecurityPermissionLevels.AllowAll :
                     SecurityPermissionLevels.AllowAuthorized,

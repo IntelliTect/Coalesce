@@ -14,8 +14,14 @@ namespace IntelliTect.Coalesce.TypeDefinition
         
         string? Description { get; }
 
+        /// <summary>
+        /// Gets the raw, unaltered type of the value.
+        /// </summary>
         TypeViewModel Type { get; }
 
+        /// <summary>
+        /// Gets the type without any collection around it.
+        /// </summary>
         TypeViewModel PureType { get; }
     }
 }

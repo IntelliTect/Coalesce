@@ -45,6 +45,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
             ? Name.Remove(Name.Length - 5)
             : Name;
 
+        public abstract IEnumerable<ParameterViewModel> Parameters { get; }
+
         /// <summary>
         /// Provides the raw, unaltered return type of the method.
         /// </summary>
@@ -66,7 +68,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
         }
 
-        public abstract IEnumerable<ParameterViewModel> Parameters { get; }
+        public MethodReturnViewModel Return => new MethodReturnViewModel(this);
 
         /// <summary>
         /// True if the method's return type is a <see cref="ListResult{T}"/>

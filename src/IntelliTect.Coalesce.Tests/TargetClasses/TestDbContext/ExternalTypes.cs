@@ -22,4 +22,29 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         public ICollection<ExternalChild?> RefNullableICollection { get; set; }
         public ICollection<ExternalChild>? RefICollectionNullable { get; set; }
     }
+
+    public class ExternalChild
+    {
+        public string Value { get; set; }
+    }
+
+    public class ExternalParentAsInputOnly
+    {
+        public ExternalChildAsInputOnly Child { get; set; }
+    }
+    public class ExternalChildAsInputOnly
+    {
+        public string Value { get; set; }
+        public ExternalParentAsInputOnly Recursive { get; set; }
+    }
+
+    public class ExternalParentAsOutputOnly
+    {
+        public ExternalChildAsOutputOnly Child { get; set; }
+    }
+    public class ExternalChildAsOutputOnly 
+    { 
+        public string Value { get; set; }
+        public ExternalParentAsOutputOnly Recursive { get; set; }
+    }
 }

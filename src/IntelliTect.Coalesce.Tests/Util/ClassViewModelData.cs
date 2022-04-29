@@ -1,4 +1,5 @@
-﻿using IntelliTect.Coalesce.TypeDefinition;
+﻿using IntelliTect.Coalesce.Models;
+using IntelliTect.Coalesce.TypeDefinition;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -60,7 +61,9 @@ namespace IntelliTect.Coalesce.Tests.Util
             var targetType = info.GetValue<string>(nameof(TargetType));
             var viewModelType = info.GetValue<string>(nameof(ViewModelType));
 
-            TargetType = Type.GetType(targetType);
+            TargetType = Type.GetType(targetType) ??
+                typeof(ApiResult).Assembly.GetType(targetType) ??
+                throw new Exception($"Unable to locate type {targetType}");
 
             switch (viewModelType)
             {

@@ -1,4 +1,5 @@
-﻿using IntelliTect.Coalesce.Tests.Util;
+﻿using IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext;
+using IntelliTect.Coalesce.Tests.Util;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -43,6 +44,20 @@ namespace IntelliTect.Coalesce.Tests.TypeDefinition
                     Assert.Equal("Parent", prop.Name);
                 }
             );
+        }
+
+        [Theory]
+        [ClassViewModelData(typeof(ExternalParentAsInputOnly), false, true)]
+        [ClassViewModelData(typeof(ExternalChildAsInputOnly), false, true)]
+        [ClassViewModelData(typeof(ExternalParentAsOutputOnly), true, false)]
+        [ClassViewModelData(typeof(ExternalChildAsOutputOnly), true, false)]
+        public void ExternalType_PropertySecurityReflectsActualUsage(ClassViewModelData data, bool read, bool write)
+        {
+            Assert.All(data.ClassViewModel.ClientProperties, p =>
+            {
+                Assert.Equal(read, !p.SecurityInfo.Read.IsUnused);
+                Assert.Equal(write, !p.SecurityInfo.Edit.IsUnused);
+            });
         }
     }
 }

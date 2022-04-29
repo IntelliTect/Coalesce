@@ -17,6 +17,7 @@
       <div class="nav-items">
 
         <v-btn text to="/">Home</v-btn>
+        <v-btn text href="/coalesce-security">Security Overview</v-btn>
 
         <v-menu offset-y>
           <template #activator="{on}">

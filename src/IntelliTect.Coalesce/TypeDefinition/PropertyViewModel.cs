@@ -84,9 +84,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// </summary>
         public bool IsClientProperty => !IsInternalUse && HasGetter && !Type.IsInternalUse;
 
-        /// <summary>
-        /// Gets the type name without any collection around it.
-        /// </summary>
         public TypeViewModel PureType => Type.PureType;
         
         public bool PureTypeOnContext => Object?.IsDbMappedType ?? false;

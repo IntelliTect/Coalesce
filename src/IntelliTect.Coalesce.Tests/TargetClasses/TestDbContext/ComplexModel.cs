@@ -100,6 +100,15 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         }
 
         [Coalesce, Execute]
+        public ExternalParentAsOutputOnly MethodWithExternalTypesWithSinglePurpose(
+            ExternalParentAsInputOnly single,
+            ICollection<ExternalParentAsInputOnly> collection
+        )
+        {
+            return new ExternalParentAsOutputOnly();
+        }
+
+        [Coalesce, Execute]
         public void MethodWithSingleFileParameter(IFile file) { }
 
         [Coalesce, Execute]

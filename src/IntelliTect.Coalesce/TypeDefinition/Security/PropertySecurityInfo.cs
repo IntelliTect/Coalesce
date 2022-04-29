@@ -25,11 +25,12 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 !prop.IsClientProperty
             )
             {
-                Read = new PropertySecurityPermission(false, null, read.Name);
+                Read = new PropertySecurityPermission(prop, false, null, read.Name);
             }
             else
             {
-                Read = new PropertySecurityPermission(true, read.Roles, read.Name);
+
+                Read = new PropertySecurityPermission(prop, true, read.Roles, read.Name, IsReadUnused);
             }
 
             if (
@@ -56,11 +57,11 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 (prop.PureType.IsPOCO && (prop.Parent.IsDbMappedType || prop.Object!.IsDbMappedType))
             )
             {
-                Edit = new PropertySecurityPermission(false, null, edit.Name);
+                Edit = new PropertySecurityPermission(prop, false, null, edit.Name);
             }
             else
             {
-                Edit = new PropertySecurityPermission(true, edit.Roles, edit.Name);
+                Edit = new PropertySecurityPermission(prop, true, edit.Roles, edit.Name, IsEditUnused);
             }
         }
 
@@ -77,6 +78,57 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// </summary>
         public bool IsEditable(ClaimsPrincipal? user) => Edit.IsAllowed(user);
 
+        private static bool? IsReadUnused(IValueViewModel value, HashSet<PropertyViewModel> visited)
+        {
+            // The client only needs to Edit/Write to parameters, so read IS unused.
+            if (value is ParameterViewModel) return true;
+            // The client needs to Read from method returns, so read is not unused.
+            if (value is MethodReturnViewModel) return false;
+
+            if (value is PropertyViewModel p)
+            {
+                if (!visited.Add(p)) return null;
+                if (visited.Count > 1 && !p.SecurityInfo.Read.IsAllowed()) return true;
+
+                if (p.EffectiveParent is { IsDbMappedType: true } or { IsStandaloneEntity: true })
+                {
+                    // Reads will be done by generated APIs
+                    return p.EffectiveParent.SecurityInfo.Read.NoAccess;
+                }
+
+                foreach (var usage in p.EffectiveParent._Usages)
+                {
+                    if (IsReadUnused(usage, visited) == false) return false;
+                }
+            }
+            return true;
+        }
+
+        private static bool? IsEditUnused(IValueViewModel value, HashSet<PropertyViewModel> visited)
+        {
+            // The client needs to Edit/Write to parameters, so edit is NOT unused.
+            if (value is ParameterViewModel) return false;
+            // The client only needs to Read from method returns, so edit IS unused.
+            if (value is MethodReturnViewModel) return true;
+
+            if (value is PropertyViewModel p)
+            {
+                if (!visited.Add(p)) return null;
+                if (visited.Count > 1 && !p.SecurityInfo.Edit.IsAllowed()) return true;
+
+                if (p.EffectiveParent is { IsDbMappedType: true } or { IsStandaloneEntity: true })
+                {
+                    // Edits will be done by generated APIs
+                    return p.EffectiveParent.SecurityInfo.Save.NoAccess;
+                }
+
+                foreach (var usage in p.EffectiveParent._Usages)
+                {
+                    if (IsEditUnused(usage, visited) == false) return false;
+                }
+            }
+            return true;
+        }
 
         public override string ToString()
         {

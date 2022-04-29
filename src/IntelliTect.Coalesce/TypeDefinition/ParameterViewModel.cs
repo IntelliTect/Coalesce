@@ -40,9 +40,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// </summary>
         public PropertyViewModel? ParentSourceProp { get; protected set; }
 
-        /// <summary>
-        /// Gets the type name without any collection around it.
-        /// </summary>
         public TypeViewModel PureType => Type.PureType;
 
         /// <summary>

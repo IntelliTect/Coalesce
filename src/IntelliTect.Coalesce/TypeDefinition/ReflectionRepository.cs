@@ -210,45 +210,45 @@ namespace IntelliTect.Coalesce.TypeDefinition
             ?? (typeViewModel as SymbolTypeViewModel)?.Symbol as object
             ?? throw new NotSupportedException("Unknown subtype of TypeViewModel");
 
-
         /// <summary>
         /// Attempt to add the given ClassViewModel as an ExternalType if it isn't already known.
         /// If its a newly discovered type, recurse into that type's properties as well.
         /// </summary>
-        /// <param name="externalType"></param>
-        private void ConditionallyAddAndDiscoverExternalPropertyTypesOn(ClassViewModel externalType)
+        private void ConditionallyAddAndDiscoverTypesOn(IValueViewModel typeUsage)
         {
-            // Don't dig in if:
-            //  - This is a known entity type (its not external)
-            //  - This is a known custom DTO type (again, not external)
-            //  - This is already a known external type (don't infinitely recurse).
-            if (
-                !Entities.Contains(externalType)
-                && !CustomDtos.Contains(externalType)
-                && !ExternalTypes.Contains(externalType)
-                )
+            var type = typeUsage.PureType;
+            var classViewModel = type.ClassViewModel;
+            if (classViewModel != null)
             {
-                if (_externalTypes.Add(externalType))
+                classViewModel._Usages.Add(typeUsage);
+
+                // Don't dig in if:
+                //  - This is a known entity type (its not external)
+                //  - This is a known custom DTO type (again, not external)
+                //  - This is already a known external type (don't infinitely recurse).
+                if (
+                    !Entities.Contains(classViewModel)
+                    && !CustomDtos.Contains(classViewModel)
+                    && !ExternalTypes.Contains(classViewModel)
+                    )
                 {
-                    DiscoverExternalPropertyTypesOn(externalType);
+                    if (_externalTypes.Add(classViewModel))
+                    {
+                        DiscoverExternalPropertyTypesOn(classViewModel);
+                    }
                 }
+            }
+            else if (type.IsEnum)
+            {
+                _enums.Add(type.NullableUnderlyingType);
             }
         }
 
         private void DiscoverExternalPropertyTypesOn(ClassViewModel model)
         {
-            foreach (var type in model
-                .ClientProperties
-                .Select(p => p.PureType))
+            foreach (var prop in model.ClientProperties)
             {
-                if (type.ClassViewModel != null)
-                {
-                    ConditionallyAddAndDiscoverExternalPropertyTypesOn(type.ClassViewModel);
-                }
-                else if (type.IsEnum)
-                {
-                    _enums.Add(type.NullableUnderlyingType);
-                }
+                ConditionallyAddAndDiscoverTypesOn(prop);
             }
         }
 
@@ -256,28 +256,11 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             foreach (var method in model.ClientMethods)
             {
-                var returnType = method.ResultType.PureType;
-                if (returnType.ClassViewModel != null)
-                {
-                    // Return type looks like an external type.
-                    ConditionallyAddAndDiscoverExternalPropertyTypesOn(returnType.ClassViewModel);
-                }
-                else if (returnType.IsEnum)
-                {
-                    _enums.Add(returnType.NullableUnderlyingType);
-                }
+                ConditionallyAddAndDiscoverTypesOn(method.Return);
 
-                foreach (var arg in method.Parameters.Where(p => !p.IsDI))
+                foreach (var arg in method.ApiParameters)
                 {
-                    if (arg.PureType.ClassViewModel != null)
-                    {
-                        // Parameter looks like an external type.
-                        ConditionallyAddAndDiscoverExternalPropertyTypesOn(arg.PureType.ClassViewModel);
-                    }
-                    else if (arg.PureType.IsEnum)
-                    {
-                        _enums.Add(arg.PureType.NullableUnderlyingType);
-                    }
+                    ConditionallyAddAndDiscoverTypesOn(arg);
                 }
             }
         }

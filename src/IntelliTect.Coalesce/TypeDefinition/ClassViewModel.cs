@@ -23,6 +23,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
         protected IReadOnlyCollection<PropertyViewModel>? _Properties;
         protected IReadOnlyCollection<MethodViewModel>? _Methods;
 
+        internal HashSet<IValueViewModel> _Usages = new HashSet<IValueViewModel>();
+
         public ReflectionRepository? ReflectionRepository => Type.ReflectionRepository;
 
         protected ClassViewModel(TypeViewModel type)
@@ -178,11 +180,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// Properties on the class that are permitted to be exposed to the client.
         /// </summary>
         public IEnumerable<PropertyViewModel> ClientProperties => Properties.Where(p => p.IsClientProperty);
-
-        /// <summary>
-        /// Properties on the class that are available on the admin page. This is not filtered by IsHidden.
-        /// </summary>
-        public IEnumerable<PropertyViewModel> AdminPageProperties => ClientProperties;
 
         public IEnumerable<PropertyViewModel> DataSourceParameters => Properties
             .Where(p =>

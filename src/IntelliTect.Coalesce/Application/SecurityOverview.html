@@ -23,11 +23,9 @@
 
       .toc a {
         transition: all 50ms ease-in-out;
-        letter-spacing: 0.04rem;
       }
       .toc a.active {
         font-weight: 500;
-        letter-spacing: 0rem;
       }
     </style>
   </head>
@@ -73,7 +71,7 @@
               defined using
               <a
                 href="https://coalesce.readthedocs.io/en/latest/pages/modeling/model-components/attributes/security-attribute"
-                > attributes </a
+                >attributes</a
               >.
             </p>
             <p>
@@ -81,15 +79,14 @@
               not accounted for - for example, custom logic implemented inside
               <a
                 href="https://coalesce.readthedocs.io/en/latest/pages/modeling/model-components/data-sources/"
+                >Data Sources</a
               >
-                Data Sources
-              </a>
               and
               <a
                 href="https://coalesce.readthedocs.io/en/latest/pages/modeling/model-components/behaviors/"
-              >
-                Behaviors </a
-              >. You should write automated tests to verify the proper functioning of your custom code.
+                >Behaviors</a
+              >. You should write automated tests to verify the proper
+              functioning of your custom code.
             </p>
 
             <div class="alert alert-warning" role="alert">
@@ -133,7 +130,7 @@
               </div>
 
               <div class="row">
-                <div class="col col-4">
+                <div class="col" style="flex-basis: 450px; max-width: 700px">
                   <div class="card mb-4">
                     <div class="card-body">
                       <h4 class="card-title">Generated DTO Properties</h4>
@@ -144,7 +141,7 @@
                   </div>
                 </div>
 
-                <div class="col col-4">
+                <div class="col" style="flex-basis: 450px; max-width: 700px">
                   <div class="card mb-4">
                     <div class="card-body">
                       <h4 class="card-title">Methods</h4>
@@ -153,16 +150,16 @@
                   </div>
                 </div>
 
-                <div class="col col-4">
+                <div class="col" style="flex-basis: 500px">
                   <div class="card mb-4">
                     <div class="card-body">
                       <template v-if="type.behaviorsTypeName">
                         <h4 class="card-title">Behaviors</h4>
-                        <span class=" text-break">
+                        <span class="text-break">
                           {{type.behaviorsTypeName}}
                         </span>
-                        <br>
-                        <br>
+                        <br />
+                        <br />
                       </template>
 
                       <h4 class="card-title">Data Sources</h4>
@@ -213,7 +210,7 @@
               </h1>
 
               <div class="row">
-                <div class="col col-4">
+                <div class="col" style="flex-basis: 450px; max-width: 700px">
                   <div class="card mb-4">
                     <div class="card-body">
                       <h4 class="card-title">Methods</h4>
@@ -232,7 +229,7 @@
               <h1>{{type.name}}</h1>
 
               <div class="row">
-                <div class="col col-4">
+                <div class="col" style="flex-basis: 450px; max-width: 700px">
                   <div class="card mb-4">
                     <div class="card-body">
                       <h4 class="card-title">Generated DTO Properties</h4>
@@ -265,7 +262,7 @@
               <small>
                 (<template v-for="(param, idx) in method.parameters">
                   <span v-if="idx > 0">, </span>
-                  <type-display :member="param.type"></type-display> </template
+                  <type-display :member="param.type"></type-display> {{param.name}} </template
                 >) => <type-display :member="method.return"></type-display>
               </small>
             </td>
@@ -323,7 +320,12 @@
         <span v-else-if="action.allowAnonymous" class="badge bg-danger">
           Allow Anonymous
         </span>
-        <span v-else class="badge bg-success">
+        <span
+          v-else
+          class="badge"
+          :class="action.isUnused ? 'border border-success text-dark' : 'bg-success'"
+          :title="action.isUnused ? 'Analyzed as unused by any API endpoint.' : ''"
+        >
           Allow {{'allowAnonymous' in action ? 'Authenticated' : ''}}
           <div v-if="action.roleList.length" class="fw-normal text-start">
             {{action.roles}}

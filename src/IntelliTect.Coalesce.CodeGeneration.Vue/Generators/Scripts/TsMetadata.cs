@@ -486,7 +486,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
 
                 using (b.Block("return:", ','))
                 {
-                    WriteValueCommonMetadata(b, new MethodReturnViewModel(method));
+                    WriteValueCommonMetadata(b, method.Return);
                     b.StringProp("role", "value");
                 }
             }
@@ -665,40 +665,6 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                     break;
 
             }
-        }
-
-        /// <summary>
-        /// Shim of a method's return value so its metadata can be emitted
-        /// with WriteValueCommonMetadata
-        /// </summary>
-        private class MethodReturnViewModel : IValueViewModel
-        {
-#nullable enable
-            public MethodReturnViewModel(MethodViewModel method)
-            {
-                Method = method;
-                Type = method.ResultType;
-            }
-
-            public string Name => "$return";
-
-            public string JsVariable => Name;
-
-            public string DisplayName => "Result"; // TODO: i18n
-
-            public string? Description => null;
-
-            public TypeViewModel Type { get; }
-
-            public TypeViewModel PureType => Type.PureType;
-
-            public MethodViewModel Method { get; }
-
-            public object? GetAttributeValue<TAttribute>(string valueName) where TAttribute : Attribute
-                => Method.GetAttributeValue<TAttribute>(valueName);
-
-            public bool HasAttribute<TAttribute>() where TAttribute : Attribute
-                => Method.HasAttribute<TAttribute>();
         }
     }
 }

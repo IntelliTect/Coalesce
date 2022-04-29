@@ -1,5 +1,6 @@
 ﻿using IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext;
 using IntelliTect.Coalesce.Tests.Util;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -58,6 +59,20 @@ namespace IntelliTect.Coalesce.Tests.TypeDefinition
                 Assert.Equal(read, !p.SecurityInfo.Read.IsUnused);
                 Assert.Equal(write, !p.SecurityInfo.Edit.IsUnused);
             });
+        }
+
+        [Theory]
+        [ClassViewModelData(typeof(TestDbContext))]
+        public void PropertyParent_IsCorrect(ClassViewModelData data)
+        {
+            var directlyDeclaredProp = data.ClassViewModel.PropertyByName(nameof(TestDbContext.People));
+            Assert.Equal(data.ClassViewModel, directlyDeclaredProp.Parent);
+            Assert.Equal(data.ClassViewModel, directlyDeclaredProp.EffectiveParent);
+
+            var inheritedProp = data.ClassViewModel.PropertyByName(nameof(TestDbContext.Database));
+            Assert.Equal(nameof(DbContext), inheritedProp.Parent.Name);
+            Assert.NotEqual(data.ClassViewModel, inheritedProp.Parent);
+            Assert.Equal(data.ClassViewModel, inheritedProp.EffectiveParent);
         }
     }
 }

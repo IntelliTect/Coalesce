@@ -20,7 +20,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             Info = typeViewModel.Info;
         }
 
-        internal static ReflectionClassViewModel GetOrCreate(ReflectionRepository reflectionRepository, Type type)
+        internal static ReflectionClassViewModel GetOrCreate(ReflectionRepository? reflectionRepository, Type type)
         {
             return reflectionRepository?.GetClassViewModel(type) as ReflectionClassViewModel
                 ?? new ReflectionClassViewModel(type);
@@ -34,7 +34,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         protected override IReadOnlyCollection<PropertyViewModel> RawProperties(ClassViewModel effectiveParent) => Info
             .GetProperties()
-            .Select((p, i) => new ReflectionPropertyViewModel(effectiveParent, this, p){ ClassFieldOrder = i })
+            .Select((p, i) => new ReflectionPropertyViewModel(effectiveParent, GetOrCreate(ReflectionRepository, p.DeclaringType!), p){ ClassFieldOrder = i })
             .Cast<PropertyViewModel>()
             .ToList()
             .AsReadOnly();

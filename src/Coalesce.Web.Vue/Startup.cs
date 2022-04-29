@@ -95,7 +95,6 @@ namespace Coalesce.Web.Vue
             app.UseAuthorization();
             app.UseMiddleware<DemoMiddleware>();
 
-
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapDefaultControllerRoute();

@@ -1,7 +1,9 @@
-﻿using IntelliTect.Coalesce.Helpers;
+﻿using IntelliTect.Coalesce.DataAnnotations;
+using IntelliTect.Coalesce.Helpers;
 using IntelliTect.Coalesce.Utilities;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -13,130 +15,72 @@ namespace IntelliTect.Coalesce.TypeDefinition
     /// </summary>
     public class PropertySecurityInfo
     {
-        public PropertySecurityInfo(SecurityPermission read, SecurityPermission edit)
+        public PropertySecurityInfo(PropertyViewModel prop)
         {
-            Read = read;
-            Edit = edit;
+            var read = prop.GetSecurityPermission<ReadAttribute>();
+            var edit = prop.GetSecurityPermission<EditAttribute>();
 
-            IsRead = !read.NoAccess;
-            ReadRoles = read.Roles;
-
-            if (read.HasAttribute && !edit.HasAttribute)
+            if (
+                read.NoAccess ||
+                !prop.IsClientProperty
+            )
             {
-                IsEdit = false;
-                EditRoles = "";
+                Read = new PropertySecurityPermission(false, null, read.Name);
             }
             else
             {
-                IsEdit = !edit.NoAccess;
-                EditRoles = edit.Roles;
+                Read = new PropertySecurityPermission(true, read.Roles, read.Name);
             }
-        }
 
-        public bool IsEdit { get; set; } = false;
-        public bool IsRead { get; set; } = false;
-        public string EditRoles { get; set; } = "";
-        public string ReadRoles { get; set; } = "";
+            if (
+                edit.NoAccess ||
+                !prop.IsClientProperty ||
+                !prop.HasPublicSetter ||
 
-        public SecurityPermission Read { get; set; }
-        public SecurityPermission Edit { get; set; }
+                // Properties with a [Read] attribute but no [Edit] attribute
+                // are read-only. This is for multiple reasons:
+                // 1) The syntax feels natural - seeing a property with [Read] and no other attributes
+                //    just /feels/ like it should be read-only.
+                // 2) It avoids accidents by omission - applying specific permissions for reading
+                //    but not applying permissions for editing is probably an accident that would otherwise introduce a security hole.
+                (read.HasAttribute && !edit.HasAttribute) ||
 
-        public List<string> EditRolesList
-        {
-            get
+                prop.HasAttribute<ReadOnlyAttribute>() ||
+
+#pragma warning disable CS0618 // Type or member is obsolete
+                prop.HasAttribute<ReadOnlyApiAttribute>() ||
+#pragma warning restore CS0618 // Type or member is obsolete
+
+                // Non-value properties arent writable unless they're owned by an external type,
+                // or the type of the property is an external type.
+                (prop.PureType.IsPOCO && (prop.Parent.IsDbMappedType || prop.Object!.IsDbMappedType))
+            )
             {
-                if (!string.IsNullOrEmpty(EditRoles))
-                {
-                    return EditRoles
-                        .Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
-                        .Distinct()
-                        .ToList();
-                }
-                return new List<string>();
+                Edit = new PropertySecurityPermission(false, null, edit.Name);
             }
-        }
-
-
-        public List<string> ReadRolesList
-        {
-            get
+            else
             {
-                if (!string.IsNullOrEmpty(ReadRoles))
-                {
-                    return ReadRoles
-                        .Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
-                        .Distinct()
-                        .ToList();
-                }
-                return new List<string>();
+                Edit = new PropertySecurityPermission(true, edit.Roles, edit.Name);
             }
         }
+
+        public PropertySecurityPermission Read { get; }
+        public PropertySecurityPermission Edit { get; }
 
         /// <summary>
-        /// Returns true for a property if this property has some sort of security.
+        /// If true, the user can read the field.
         /// </summary>
-        /// <returns></returns>
-        public bool IsSecuredProperty => IsEdit || IsRead;
+        public bool IsReadable(ClaimsPrincipal? user) => Read.IsAllowed(user);
 
         /// <summary>
         /// If true, the user can edit the field.
         /// </summary>
-        /// <param name="user"></param>
-        /// <returns></returns>
-        public bool IsEditable(ClaimsPrincipal? user)
-        {
-            if (!IsSecuredProperty) return true;
-            if (string.IsNullOrEmpty(EditRoles))
-            {
-                // This field just has a read on it, so no one can edit it.
-                return false;
-            }
-            else
-            {
-                if (user == null || !EditRolesList.Any(f => user.IsInRole(f)))
-                {
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        // If true, the user can view the property
-        public bool IsReadable(ClaimsPrincipal? user)
-        {
-            if (!IsSecuredProperty) return true;
-            if (!string.IsNullOrEmpty(ReadRoles))
-            {
-                try
-                {
-                    if (user == null || !ReadRolesList.Any(f => user.IsInRole(f)))
-                    {
-                        return false;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    // This happens when the trust is lost between the client and the domain.
-                    if (ex.Message.Contains("trust")) return false;
-                    throw new Exception("Could not authenticate with roles list", ex);
-                }
-            }
-            return true;
-        }
-
-
-        public string ReadRolesExternal => string.Join(",", ReadRolesList);
-
-        public string EditRolesExternal => string.Join(",", EditRolesList);
+        public bool IsEditable(ClaimsPrincipal? user) => Edit.IsAllowed(user);
 
 
         public override string ToString()
         {
-            string result = "";
-            if (IsRead) { result += $"Read: {ReadRoles} "; }
-            if (IsEdit) { result += $"Edit: {EditRoles} "; }
-            if (result == "") result = "None";
-            return result;
+            return $"Read:{Read}  Edit:{Edit}";
         }
 
     }

@@ -322,7 +322,12 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// Returns true if the type is class outside the System namespace.
         /// </summary>
-        public bool IsPOCO => !IsArray && !IsCollection && !FullNamespace.StartsWith("System") && IsClass && !IsFile;
+        public bool IsPOCO => 
+            (IsClass || IsInterface) && 
+            !IsArray && 
+            !IsCollection && 
+            !FullNamespace.StartsWith("System") && 
+            !IsFile;
 
         public string TsDeclaration => $"{Name}: {TsType}";
 

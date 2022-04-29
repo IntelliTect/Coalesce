@@ -17,38 +17,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public SecurityPermission Execute { get; }
 
+        public bool IsExecuteAllowed(ClaimsPrincipal? user) => Execute.IsAllowed(user);
 
-        /// <summary>
-        /// Returns an MVC Action annotation for executing methods
-        /// </summary>
-        public string ExecuteAnnotation
-        {
-            get
-            {
-                if (Execute.NoAccess) throw new InvalidOperationException($"Cannot emit an annotation for security level {SecurityPermissionLevels.DenyAll}");
-                if (Execute.AllowAnonymous) return "[AllowAnonymous]";
-                if (Execute.HasRoles) return $"[Authorize(Roles=\"{Execute.AttributeRoleList}\")]";
-                return "[Authorize]";
-            }
-        }
-
-        public bool IsExecuteAllowed(ClaimsPrincipal user)
-        {
-            if (user == null)
-            {
-                throw new ArgumentNullException(nameof(user));
-            }
-
-            if (Execute.HasAttribute)
-            {
-                if (Execute.AllowAnonymous) return true;
-                if (Execute.HasRoles)
-                    return Execute.RoleList.Any(s => user.IsInRole(s));
-            }
-
-            return user.Identity?.IsAuthenticated ?? false;
-        }
-
-        public override string ToString() => $"Execute: {Execute} ";
+        public override string ToString() => $"Execute: {Execute}";
     }
 }

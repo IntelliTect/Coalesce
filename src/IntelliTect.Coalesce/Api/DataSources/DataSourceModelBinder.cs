@@ -114,7 +114,7 @@ namespace IntelliTect.Coalesce.Api.DataSources
                 // "BindModelAsync" performs a check to see if we should bother instantiating the root model (our dataSource).
                 // We already instantiated our dataSource, so this check is meaningless. The consequence of this frivolous check is that 
                 // it causeses validation of client parameter properties
-                // to not occurr if the client didn't provide any values for those parameters.
+                // to not occur if the client didn't provide any values for those parameters.
 
                 // The alternative to do this would be to make a full copy of ComplexTypeModelBinder.cs and
                 // change out the desired pieces.

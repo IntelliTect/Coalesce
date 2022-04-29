@@ -1,6 +1,6 @@
 ﻿# Suppress: EC112
 
-[*.{vue,ts,js,scss}]
+[*.{vue,ts,js,scss,html}]
 indent_style = space
 indent_size = 2
 

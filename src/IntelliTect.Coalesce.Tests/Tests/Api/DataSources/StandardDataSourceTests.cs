@@ -121,7 +121,7 @@ namespace IntelliTect.Coalesce.Tests.Api.DataSources
 
             // Preconditions
             Assert.False(CrudContext.User.IsInRole(role));
-            Assert.Collection(prop.SecurityInfo.ReadRolesList, r => Assert.Equal(role, r));
+            Assert.Collection(prop.SecurityInfo.Read.RoleList, r => Assert.Equal(role, r));
             
             Assert.Single(query);
         }
@@ -136,7 +136,7 @@ namespace IntelliTect.Coalesce.Tests.Api.DataSources
                 m => m.AdminReadableString, "propValue", "inputValue");
 
             // Precondition
-            Assert.Collection(prop.SecurityInfo.ReadRolesList, r => Assert.Equal(role, r));
+            Assert.Collection(prop.SecurityInfo.Read.RoleList, r => Assert.Equal(role, r));
             
             Assert.Empty(query);
         }
@@ -547,7 +547,7 @@ namespace IntelliTect.Coalesce.Tests.Api.DataSources
             const string role = RoleNames.Admin;
             Assert.False(CrudContext.User.IsInRole(role));
             Assert.True(prop.SearchMethod == DataAnnotations.SearchAttribute.SearchMethods.BeginsWith);
-            Assert.Collection(prop.SecurityInfo.ReadRolesList, r => Assert.Equal(role, r));
+            Assert.Collection(prop.SecurityInfo.Read.RoleList, r => Assert.Equal(role, r));
 
             // Since searching by prop isn't valid for this specific property,
             // the search will instead treat the entire input as the search term.

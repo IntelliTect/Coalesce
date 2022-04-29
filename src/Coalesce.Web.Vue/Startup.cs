@@ -5,6 +5,7 @@ using Coalesce.Domain;
 using Coalesce.Domain.WebShared;
 using IntelliTect.Coalesce;
 using IntelliTect.Coalesce.DataAnnotations;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -32,7 +33,6 @@ namespace Coalesce.Web.Vue
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc()
-                .SetCompatibilityVersion(CompatibilityVersion.Version_3_0)
                 .AddNewtonsoftJson(options =>
                 {
                     options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
@@ -95,10 +95,13 @@ namespace Coalesce.Web.Vue
             app.UseAuthorization();
             app.UseMiddleware<DemoMiddleware>();
 
-
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapDefaultControllerRoute();
+
+                endpoints.MapCoalesceSecurityOverview("coalesce-security").RequireAuthorization(
+                    new AuthorizeAttribute { Roles = env.IsDevelopment() ? null : "Admin" }
+                );
 
                 // API fallback to prevent serving SPA fallback to 404 hits on API endpoints.
                 endpoints.Map("api/{**any}", ctx => { ctx.Response.StatusCode = StatusCodes.Status404NotFound; return Task.CompletedTask; });

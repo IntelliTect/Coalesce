@@ -1,4 +1,5 @@
-﻿using IntelliTect.Coalesce.Tests.TargetClasses;
+﻿using IntelliTect.Coalesce.Models;
+using IntelliTect.Coalesce.Tests.TargetClasses;
 using IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext;
 using IntelliTect.Coalesce.Tests.Util;
 using IntelliTect.Coalesce.TypeDefinition;
@@ -89,6 +90,30 @@ namespace IntelliTect.Coalesce.Tests.TypeDefinition
         }
 
         [Theory]
+        [ClassViewModelData(typeof(void), "void")]
+        [ClassViewModelData(typeof(bool), "bool")]
+        [ClassViewModelData(typeof(bool?), "bool?")]
+        [ClassViewModelData(typeof(bool[]), "bool[]")]
+        [ClassViewModelData(typeof(bool[,]), "bool[,]")]
+        [ClassViewModelData(typeof(bool?[]), "bool?[]")]
+        [ClassViewModelData(typeof(System.Collections.Generic.ICollection<bool>), "System.Collections.Generic.ICollection<bool>")]
+        [ClassViewModelData(typeof(System.Collections.Generic.ICollection<bool?>), "System.Collections.Generic.ICollection<bool?>")]
+        [ClassViewModelData(typeof(Bools), "IntelliTect.Coalesce.Tests.TargetClasses.Bools")]
+        [ClassViewModelData(typeof(System.Collections.Generic.ICollection<ExternalParent>),
+            "System.Collections.Generic.ICollection<IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext.ExternalParent>")]
+        public void FullyQualifiedName_HasCorrectValue(
+            ClassViewModelData data,
+            string expectedTypeName
+        )
+        {
+            TypeViewModel vm = data;
+            var value = vm.FullyQualifiedName;
+
+            Assert.Equal(expectedTypeName, value);
+        }
+
+        [Theory]
+        [ClassViewModelData(typeof(void), "System.Void")]
         [ClassViewModelData(typeof(bool), "System.Boolean")]
         [ClassViewModelData(typeof(bool?), "System.Nullable<System.Boolean>")]
         [ClassViewModelData(typeof(bool[]), "System.Boolean[]")]
@@ -145,5 +170,45 @@ namespace IntelliTect.Coalesce.Tests.TypeDefinition
             TypeViewModel vm = data;
             Assert.Equal(isInternalUse, vm.IsInternalUse);
         }
+
+        [Theory]
+        [ClassViewModelData(typeof(int), false)]
+        [ClassViewModelData(typeof(int?), false)]
+        [ClassViewModelData(typeof(IWeatherService), true)]
+        [ClassViewModelData(typeof(WeatherService), false)]
+        public void IsInterface_IsCorrect(ClassViewModelData data, bool expected)
+            => Assert.Equal(expected, ((TypeViewModel)data).IsInterface);
+
+        [Theory]
+        [ClassViewModelData(typeof(int), false)]
+        [ClassViewModelData(typeof(int?), false)]
+        [ClassViewModelData(typeof(IWeatherService), false)]
+        [ClassViewModelData(typeof(WeatherService), true)]
+        public void IsClass_IsCorrect(ClassViewModelData data, bool expected)
+            => Assert.Equal(expected, ((TypeViewModel)data).IsClass);
+
+        [Theory]
+        [ClassViewModelData(typeof(int), false)]
+        [ClassViewModelData(typeof(int?), false)]
+        [ClassViewModelData(typeof(DateTime), false)]
+        [ClassViewModelData(typeof(string), false)]
+        [ClassViewModelData(typeof(IFile), false)]
+        [ClassViewModelData(typeof(string[]), false)]
+        [ClassViewModelData(typeof(List<string>), false)]
+        [ClassViewModelData(typeof(IWeatherService), true)]
+        [ClassViewModelData(typeof(WeatherService), true)]
+        public void IsPoco_IsCorrect(ClassViewModelData data, bool expected)
+            => Assert.Equal(expected, ((TypeViewModel)data).IsPOCO);
+
+        [Theory]
+        [ClassViewModelData(typeof(int), false)]
+        [ClassViewModelData(typeof(int?), false)]
+        [ClassViewModelData(typeof(DateTime), false)]
+        [ClassViewModelData(typeof(string), false)]
+        [ClassViewModelData(typeof(WeatherService[]), false)]
+        [ClassViewModelData(typeof(IWeatherService), true)]
+        [ClassViewModelData(typeof(WeatherService), true)]
+        public void HasClassViewModel_IsCorrect(ClassViewModelData data, bool expected)
+            => Assert.Equal(expected, ((TypeViewModel)data).HasClassViewModel);
     }
 }

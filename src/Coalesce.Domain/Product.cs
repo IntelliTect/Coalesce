@@ -21,6 +21,7 @@ namespace Coalesce.Domain
         public ProductDetails Details { get; set; }
 
         [Column("ProductUniqueId")]
+        [Edit(Roles = "Admin")]
         public Guid UniqueId { get; set; }
 
         [NotMapped]

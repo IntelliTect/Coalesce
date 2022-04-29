@@ -64,7 +64,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
                         b.Line("</div>");
                     }
 
-                    foreach (var prop in Model.AdminPageProperties.Where(f => !f.IsHidden(HiddenAttribute.Areas.Edit)).OrderBy(f => f.EditorOrder))
+                    foreach (var prop in Model.ClientProperties.Where(f => !f.IsHidden(HiddenAttribute.Areas.Edit)).OrderBy(f => f.EditorOrder))
                     {
                         using (b.TagBlock("div", "form-group"))
                         {

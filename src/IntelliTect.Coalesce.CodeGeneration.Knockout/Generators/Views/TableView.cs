@@ -79,7 +79,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
                     using (b.TagBlock("thead").TagBlock("tr"))
                     {
                         // Data column headers
-                        foreach (var prop in Model.AdminPageProperties.Where(f => !f.IsHidden(HiddenAttribute.Areas.List)).OrderBy(f => f.EditorOrder))
+                        foreach (var prop in Model.ClientProperties.Where(f => !f.IsHidden(HiddenAttribute.Areas.List)).OrderBy(f => f.EditorOrder))
                         {
                             if (!prop.Type.IsCollection)
                             {                           
@@ -105,7 +105,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
                         .TagBlock("tr", dataBind: $"css: {{'btn-warning': errorMessage()}}, attr: {{id: {Model.PrimaryKey.Name.ToCamelCase()}}}")
                     )
                     {
-                        var properties = Model.AdminPageProperties
+                        var properties = Model.ClientProperties
                             .Where(f => !f.IsHidden(HiddenAttribute.Areas.List))
                             .OrderBy(f => f.EditorOrder);
 

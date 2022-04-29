@@ -6,6 +6,8 @@ using IntelliTect.Coalesce;
 using IntelliTect.Coalesce.DataAnnotations;
 using IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext;
 
+#nullable enable
+
 namespace IntelliTect.Coalesce.Tests.TargetClasses
 {
     [Coalesce]

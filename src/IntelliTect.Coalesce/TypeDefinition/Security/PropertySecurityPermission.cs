@@ -9,7 +9,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 {
     public class PropertySecurityPermission : SecurityPermissionBase
     {
-        private readonly Func<PropertyViewModel, HashSet<PropertyViewModel>, bool?>? computeIsUnused;
+        private readonly Func<PropertyViewModel, HashSet<PropertyViewModel>, bool?> computeIsUnused;
         private PropertyViewModel prop { get; }
 
         internal PropertySecurityPermission(

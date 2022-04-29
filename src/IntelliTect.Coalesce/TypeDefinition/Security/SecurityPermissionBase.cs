@@ -36,7 +36,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         }
 
         // For inclusion of the string representation when serializing
-        public string Display => ToString();
+        public string Display => ToString() ?? "";
 
         public string ToStringWithName() => $"{Name}: {ToString()}";
 

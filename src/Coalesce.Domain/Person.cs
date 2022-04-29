@@ -329,7 +329,7 @@ namespace Coalesce.Domain
 
                 if (item.FirstName?.Contains("[user]") ?? false)
                 {
-                    item.FirstName = item.FirstName.Replace("[user]", User?.Identity.Name);
+                    item.FirstName = item.FirstName.Replace("[user]", User?.Identity?.Name);
                 }
                 return true;
             }

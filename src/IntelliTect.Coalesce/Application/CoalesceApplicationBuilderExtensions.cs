@@ -50,7 +50,8 @@ public static class CoalesceApplicationBuilderExtensions
 
                         return new
                         {
-                            Name = c.Name,
+                            c.Name,
+                            DtoBaseType = GetTypeInfo(c.DtoBaseViewModel?.Type),
                             Route = c.ApiRouteControllerPart,
                             c.SecurityInfo.Read,
                             c.SecurityInfo.Create,
@@ -86,7 +87,7 @@ public static class CoalesceApplicationBuilderExtensions
                                 .Select(c => new
                                 {
                                     Names = c.Where(ds => ds.Name != DataSourceFactory.DefaultSourceName || c.Count() == 1).Select(c => c.Name).ToList(),
-                                    ClassName = Regex.Replace(c.Key.FullyQualifiedName, "<.*", ""),
+                                    ClassName = StripNamespacesFromTypeParams(c.Key.FullyQualifiedName),
                                     IsDefault = c.Any(x => x.IsDefault),
                                     c.First().Parameters,
                                     c.First().Kind,
@@ -99,8 +100,8 @@ public static class CoalesceApplicationBuilderExtensions
                                 !behaviors.FullyQualifiedName.StartsWith("IntelliTect.Coalesce") ? "custom-fallback" :
                                 "default",
                             BehaviorsTypeName = 
-                                behaviors is null ? null : 
-                                Regex.Replace(behaviors.FullyQualifiedName, "<.*", ""),
+                                behaviors is null ? null :
+                                StripNamespacesFromTypeParams(behaviors.FullyQualifiedName),
 
                             Methods = c.ClientMethods.Select(GetMethodInfo),
                             Properties = c.ClientProperties.Select(GetPropertyInfo),
@@ -149,6 +150,10 @@ public static class CoalesceApplicationBuilderExtensions
 
             await content.CopyToAsync(context.Response.Body);
 
+            string StripNamespacesFromTypeParams(string s) => s.IndexOf('<') is int start and >= 0
+                ? new Regex(@"[^<>,+\s]*\.").Replace(s, "", 5, start)
+                : s;
+
             object GetUsageInfo(IValueViewModel v) => v switch
             {
                 PropertyViewModel p => new { Type = GetTypeInfo(p.EffectiveParent.Type), Property = GetPropertyInfo(p) },
@@ -161,7 +166,7 @@ public static class CoalesceApplicationBuilderExtensions
                 p.Name,
                 Type = GetTypeInfo(p.Type),
                 p.SecurityInfo.Read,
-                p.SecurityInfo.Edit,
+                p.SecurityInfo.Edit
             };
 
             object GetMethodInfo(MethodViewModel m) => new
@@ -181,7 +186,7 @@ public static class CoalesceApplicationBuilderExtensions
                 Return = GetTypeInfo(m.ResultType),
             };
 
-            object GetTypeInfo(TypeViewModel t) => new
+            object? GetTypeInfo(TypeViewModel? t) => t is null ? null : new
             {
                 // Strip out namespaces:
                 Display = Regex.Replace(t.FullyQualifiedName, @"[^<>,+]*\.", ""),

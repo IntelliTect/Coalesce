@@ -81,7 +81,7 @@ namespace IntelliTect.Coalesce
                 var prop = ClassViewModel.PropertyByName(clause.Key);
                 if (prop != null
                     && prop.IsUrlFilterParameter
-                    && prop.SecurityInfo.IsReadable(User))
+                    && prop.SecurityInfo.IsReadAllowed(User))
                 {
                     query = ApplyListPropertyFilter(query, prop, clause.Value);
                 }
@@ -413,7 +413,7 @@ namespace IntelliTect.Coalesce
                         prop = (prop?.Object ?? ClassViewModel).PropertyByName(part);
 
                         // Check if the new prop exists and is readable by user.
-                        if (prop == null || !prop.IsClientProperty || !prop.SecurityInfo.IsReadable(User))
+                        if (prop == null || !prop.IsClientProperty || !prop.SecurityInfo.IsReadAllowed(User))
                         {
                             return null;
                         }

@@ -70,7 +70,7 @@ namespace IntelliTect.Coalesce.Helpers.Search
         public override IEnumerable<(PropertyViewModel property, string statement)> GetLinqDynamicSearchStatements(
             ClaimsPrincipal? user, TimeZoneInfo timeZone, string? propertyParent, string rawSearchTerm)
         {
-            if (!Property.SecurityInfo.IsReadable(user))
+            if (!Property.SecurityInfo.IsReadAllowed(user))
             {
                 yield break;
             }

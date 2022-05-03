@@ -43,6 +43,19 @@
       th {
         font-weight: 400;
       }
+
+      .bg-custom-code {
+        background: hsl(269deg 69% 31%);
+      }
+      .bg-stock {
+        background: #0d6efd;
+      }
+      @media print {
+        section {
+          page-break-after: always;
+          page-break-inside: avoid;
+        }
+      }
     </style>
   </head>
   <body>
@@ -50,7 +63,7 @@
 
     <div id="app" class="mt-1" v-cloak>
       <div class="row m-0">
-        <div class="col" style="max-width: 240px">
+        <div class="col d-print-none" style="max-width: 240px">
           <nav
             class="toc p-2"
             style="
@@ -119,6 +132,12 @@
               <h1>
                 {{type.name}}
                 <small class="text-muted">/api/{{type.route}}</small>
+                <div v-if="type.dtoBaseType" class="text-muted mb-2 fs-6 px-1">
+                  IClassDto&lt;<type-display
+                    :member="type.dtoBaseType"
+                  ></type-display
+                  >&gt;
+                </div>
               </h1>
 
               <div class="row">
@@ -151,26 +170,26 @@
                       <template v-if="type.behaviorsTypeName">
                         <span class="float-end">
                           <span
-                            class="badge bg-success"
+                            class="badge bg-custom-code"
                             v-if="type.behaviorsKind == 'custom'"
                           >
                             Dedicated Custom Behaviors
                           </span>
                           <span
-                            class="badge bg-success"
+                            class="badge bg-custom-code"
                             v-if="type.behaviorsKind == 'custom-fallback'"
                           >
                             Fallback Custom Behaviors
                           </span>
                           <span
-                            class="badge bg-primary"
+                            class="badge bg-stock"
                             v-if="type.behaviorsKind == 'default'"
                           >
                             Coalesce Standard Behaviors
                           </span>
                         </span>
                         <h4 class="card-title mb-0">Behaviors</h4>
-                        <small class="text-break text-muted mb-4 d-block">
+                        <small class="text-break text-muted mb-4 d-block px-1">
                           {{type.behaviorsTypeName}}
                         </small>
                       </template>
@@ -179,22 +198,22 @@
                       <table class="table table-sm table-hover">
                         <tbody>
                           <tr v-for="ds in type.dataSources">
-                            <td class="px-0">
+                            <td>
                               <span class="float-end">
                                 <span
-                                  class="badge bg-success"
+                                  class="badge bg-custom-code"
                                   v-if="ds.kind == 'custom'"
                                 >
                                   Dedicated Custom DS
                                 </span>
                                 <span
-                                  class="badge bg-success"
+                                  class="badge bg-custom-code"
                                   v-if="ds.kind == 'custom-fallback'"
                                 >
                                   Fallback Custom DS
                                 </span>
                                 <span
-                                  class="badge bg-primary"
+                                  class="badge bg-stock"
                                   v-if="ds.kind == 'default'"
                                 >
                                   Coalesce Standard DS
@@ -233,10 +252,25 @@
                 <div class="col" style="flex-basis: 450px; max-width: 500px">
                   <div class="card mb-4">
                     <div class="card-body">
-                      <h4 class="card-title">Generated DTO Properties</h4>
-                      <properties-table
-                        :properties="type.properties"
-                      ></properties-table>
+                      <h4 class="card-title" v-if="type.dtoBaseType">
+                        Manually Mapped Properties
+                      </h4>
+                      <h4 class="card-title" v-else>
+                        Generated DTO Properties
+                      </h4>
+
+                      <properties-table :type="type"></properties-table>
+
+                      <div
+                        v-if="type.dtoBaseType"
+                        class="caption small mt-3 text-muted"
+                      >
+                        NOTE: Filtering, sorting, and searching are performed
+                        against
+                        <type-display :member="type.dtoBaseType"></type-display
+                        >'s properties and property security attributes (unless
+                        overridden in a custom data source).
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -286,9 +320,7 @@
                   <div class="card mb-4">
                     <div class="card-body">
                       <h4 class="card-title">Generated DTO Properties</h4>
-                      <properties-table
-                        :properties="type.properties"
-                      ></properties-table>
+                      <properties-table :type="type"></properties-table>
                     </div>
                   </div>
                 </div>
@@ -386,7 +418,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="prop in properties">
+          <tr v-for="prop in type.properties">
             <td>
               <strong class="text-break">{{prop.name}}</strong>
               <br />
@@ -394,9 +426,15 @@
                 <type-display :member="prop.type"></type-display>
               </small>
             </td>
-            <td v-for="action in [prop.read, prop.edit]">
-              <security-badge :action="action"></security-badge>
-            </td>
+            <template v-if="type.dtoBaseType">
+              <td><span class="badge bg-custom-code">Custom</span></td>
+              <td><span class="badge bg-custom-code">Custom</span></td>
+            </template>
+            <template v-else>
+              <td v-for="action in [prop.read, prop.edit]">
+                <security-badge :action="action"></security-badge>
+              </td>
+            </template>
           </tr>
         </tbody>
       </table>
@@ -426,7 +464,7 @@
           v-else
           class="badge"
           :class="action.isUnused ? 'border border-success text-dark' : !action.hasRoles ? 'bg-success' : 'bg-success'"
-          :title="action.isUnused ? 'Analyzed as unused by any API endpoint.' : !action.hasRoles ? 'No specific role requirements' : 'One of these roles is required: ' + action.roles"
+          :title="action.isUnused ? 'Analyzed as unused by any API endpoint.' : !action.hasRoles ? 'No specific role requirements' : 'One of these roles is required: \n' + action.roleList.join('\n')"
         >
           Allow {{'allowAnonymous' in action ? 'Authenticated' : ''}}
           <div v-if="action.roleList.length" class="fw-normal text-start">
@@ -470,7 +508,7 @@
       });
       app.component("properties-table", {
         template: "#properties-table",
-        props: ["properties"],
+        props: ["type"],
       });
       app.component("usages-table", {
         template: "#usages-table",

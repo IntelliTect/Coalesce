@@ -71,12 +71,12 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// If true, the user can read the field.
         /// </summary>
-        public bool IsReadable(ClaimsPrincipal? user) => Read.IsAllowed(user);
+        public bool IsReadAllowed(ClaimsPrincipal? user) => Read.IsAllowed(user);
 
         /// <summary>
         /// If true, the user can edit the field.
         /// </summary>
-        public bool IsEditable(ClaimsPrincipal? user) => Edit.IsAllowed(user);
+        public bool IsEditAllowed(ClaimsPrincipal? user) => Edit.IsAllowed(user);
 
         private static bool? IsReadUnused(IValueViewModel value, HashSet<PropertyViewModel> visited)
         {

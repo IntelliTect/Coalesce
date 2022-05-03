@@ -188,7 +188,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             {
                 if (!first)
                 {
-                    builder.Append(',');
+                    builder.Append(", ");
                 }
                 builder.Append(GetTypeName(arg));
                 first = false;
@@ -226,7 +226,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             {
                 if (!first)
                 {
-                    builder.Append(',');
+                    builder.Append(", ");
                 }
                 builder.Append(GetVerboseTypeName(arg));
                 first = false;

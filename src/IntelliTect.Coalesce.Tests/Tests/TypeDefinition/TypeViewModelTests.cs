@@ -97,6 +97,8 @@ namespace IntelliTect.Coalesce.Tests.TypeDefinition
         [ClassViewModelData(typeof(Bools), "IntelliTect.Coalesce.Tests.TargetClasses.Bools")]
         [ClassViewModelData(typeof(System.Collections.Generic.ICollection<ExternalParent>),
             "System.Collections.Generic.ICollection<IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext.ExternalParent>")]
+        [ClassViewModelData(typeof(IEntityFrameworkBehaviors<Exception, TestDbContext>),
+            "IntelliTect.Coalesce.IEntityFrameworkBehaviors<System.Exception, IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext.TestDbContext>")]
         public void FullyQualifiedName_HasCorrectValue(
             ClassViewModelData data,
             string expectedTypeName
@@ -120,6 +122,8 @@ namespace IntelliTect.Coalesce.Tests.TypeDefinition
         [ClassViewModelData(typeof(Bools), "IntelliTect.Coalesce.Tests.TargetClasses.Bools")]
         [ClassViewModelData(typeof(System.Collections.Generic.ICollection<ExternalParent>),
             "System.Collections.Generic.ICollection<IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext.ExternalParent>")]
+        [ClassViewModelData(typeof(IEntityFrameworkBehaviors<Exception, TestDbContext>),
+            "IntelliTect.Coalesce.IEntityFrameworkBehaviors<System.Exception, IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext.TestDbContext>")]
         public void VerboseFullyQualifiedName_HasCorrectValue(
             ClassViewModelData data,
             string expectedTypeName

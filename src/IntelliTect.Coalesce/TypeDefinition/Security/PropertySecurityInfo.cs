@@ -96,7 +96,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     return p.EffectiveParent.SecurityInfo.Read.NoAccess;
                 }
 
-                foreach (var usage in p.EffectiveParent._Usages)
+                foreach (var usage in p.EffectiveParent.Usages)
                 {
                     if (IsReadUnused(usage, visited) == false) return false;
                 }
@@ -122,7 +122,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     return p.EffectiveParent.SecurityInfo.Save.NoAccess;
                 }
 
-                foreach (var usage in p.EffectiveParent._Usages)
+                foreach (var usage in p.EffectiveParent.Usages)
                 {
                     if (IsEditUnused(usage, visited) == false) return false;
                 }

@@ -11,152 +11,186 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 
+namespace IntelliTect.Coalesce;
 
-namespace IntelliTect.Coalesce
+public static class CoalesceApplicationBuilderExtensions
 {
-    public static class CoalesceApplicationBuilderExtensions
+    public static IEndpointConventionBuilder MapCoalesceSecurityOverview(this IEndpointRouteBuilder builder, string pattern)
     {
-        public static IEndpointConventionBuilder MapCoalesceSecurityOverview(this IEndpointRouteBuilder builder, string pattern)
+        return builder.MapGet(pattern, async context =>
         {
-            return builder.MapGet(pattern, async context =>
+            var repo = context.RequestServices.GetRequiredService<ReflectionRepository>();
+            var dsFactory = context.RequestServices.GetRequiredService<IDataSourceFactory>();
+            var behaviorsFactory = context.RequestServices.GetRequiredService<IBehaviorsFactory>();
+
+            var data = new
             {
-                var repo = context.RequestServices.GetRequiredService<ReflectionRepository>();
-                var dsFactory = context.RequestServices.GetRequiredService<IDataSourceFactory>();
-                var behaviorsFactory = context.RequestServices.GetRequiredService<IBehaviorsFactory>();
+                CrudTypes = repo
+                    .CrudApiBackedClasses
+                    .OrderBy(c => c.Name)
+                    .Select(c =>
+                    {
+                        var actualDefaultSource = new ReflectionClassViewModel(
+                            dsFactory.GetDefaultDataSource(c.BaseViewModel, c).GetType()
+                        );
 
-                var data = new
-                {
-                    CrudTypes = repo
-                        .CrudApiBackedClasses
-                        .OrderBy(c => c.Name)
-                        .Select(c =>
+                        var behaviors = c.SecurityInfo is
                         {
-                            var actualDefaultSource = new ReflectionClassViewModel(
-                                dsFactory.GetDefaultDataSource(c.BaseViewModel, c).GetType()
-                            );
+                            Create.NoAccess: true,
+                            Edit.NoAccess: true,
+                            Save.NoAccess: true,
+                            Delete.NoAccess: true
+                        } ? null : new ReflectionClassViewModel(behaviorsFactory.GetBehaviors(c.BaseViewModel, c).GetType());
+                        var declaredBehaviors = repo.GetBehaviorsDeclaredFor(c);
 
-                            var behavious = c.SecurityInfo is
-                            {
-                                Create: { NoAccess: true },
-                                Edit: { NoAccess: true },
-                                Save: { NoAccess: true },
-                                Delete: { NoAccess: true }
-                            } ? null : new ReflectionClassViewModel(behaviorsFactory.GetBehaviors(c.BaseViewModel, c).GetType());
-
-                            return new
-                            {
-                                Name = c.Name,
-                                Route = c.ApiRouteControllerPart,
-                                c.SecurityInfo.Read,
-                                c.SecurityInfo.Create,
-                                c.SecurityInfo.Edit,
-                                c.SecurityInfo.Delete,
-                                DataSources = c
-                                    .ClientDataSources(repo)
-                                    .Select(ds => new
-                                    {
-                                        ds.FullyQualifiedName,
-                                        Name = ds.ClientTypeName,
-                                        IsDefault = ds.IsDefaultDataSource,
-                                        Parameters = ds.DataSourceParameters.Select(p => new
-                                        {
-                                            p.Name
-                                        })
-                                    })
-                                    .Prepend(new
-                                    {
-                                        actualDefaultSource.FullyQualifiedName,
-                                        Name = DataSourceFactory.DefaultSourceName,
-                                        IsDefault = true,
-                                        Parameters = actualDefaultSource.DataSourceParameters.Select(p => new
-                                        {
-                                            p.Name
-                                        })
-                                    })
-                                    .GroupBy(c => new { c.FullyQualifiedName })
-                                    .Select(c => new
-                                    {
-                                        Names = c.Select(c => c.Name).ToList(),
-                                        ClassName = Regex.Replace(c.Key.FullyQualifiedName, "<.*", ""),
-                                        IsDefault = c.Any(x => x.IsDefault),
-                                        c.First().Parameters,
-                                    })
-                                    .OrderByDescending(c => c.IsDefault),
-                                BehaviorsTypeName = behavious == null ? null : Regex.Replace(behavious.FullyQualifiedName, "<.*", ""),
-                                Methods = c.ClientMethods.Select(GetMethodInfo),
-                                Properties = c.ClientProperties.Select(GetPropertyInfo)
-                            };
-                        }),
-                    ExternalTypes = repo.ExternalTypes
-                        .OrderBy(c => c.Name)
-                        .Select(c => new
-                        {
-                            Name = c.Name,
-                            Properties = c.ClientProperties.Select(GetPropertyInfo)
-                        }),
-                    ServiceTypes = repo.Services
-                        .OrderBy(c => c.Name)
-                        .Select(c => new
+                        return new
                         {
                             Name = c.Name,
                             Route = c.ApiRouteControllerPart,
-                            Methods = c.ClientMethods.Select(GetMethodInfo)
-                        })
-                }; 
-                
-                var serializeOptions = new JsonSerializerOptions
-                {
-                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-                };
+                            c.SecurityInfo.Read,
+                            c.SecurityInfo.Create,
+                            c.SecurityInfo.Edit,
+                            c.SecurityInfo.Delete,
+                            DataSources = c
+                                .ClientDataSources(repo)
+                                .Select(ds => new
+                                {
+                                    ds.FullyQualifiedName,
+                                    Name = ds.ClientTypeName,
+                                    IsDefault = ds.IsDefaultDataSource,
+                                    Kind = "custom",
+                                    Parameters = ds.DataSourceParameters.Select(p => new
+                                    {
+                                        p.Name
+                                    })
+                                })
+                                .Append(new
+                                {
+                                    actualDefaultSource.FullyQualifiedName,
+                                    Name = DataSourceFactory.DefaultSourceName,
+                                    IsDefault = true,
+                                    Kind = !actualDefaultSource.FullyQualifiedName.StartsWith("IntelliTect.Coalesce") 
+                                        ? "custom-fallback" 
+                                        : "default",
+                                    Parameters = actualDefaultSource.DataSourceParameters.Select(p => new
+                                    {
+                                        p.Name
+                                    })
+                                })
+                                .GroupBy(c => new { c.FullyQualifiedName })
+                                .Select(c => new
+                                {
+                                    Names = c.Where(ds => ds.Name != DataSourceFactory.DefaultSourceName || c.Count() == 1).Select(c => c.Name).ToList(),
+                                    ClassName = Regex.Replace(c.Key.FullyQualifiedName, "<.*", ""),
+                                    IsDefault = c.Any(x => x.IsDefault),
+                                    c.First().Parameters,
+                                    c.First().Kind,
+                                })
+                                .OrderByDescending(c => c.IsDefault),
 
-                context.Response.StatusCode = 200;
-                context.Response.ContentType = "text/html";
-                await context.Response.WriteAsync("<script>DATA=");
-                await JsonSerializer.SerializeAsync(context.Response.Body, data, serializeOptions);
-                await context.Response.WriteAsync("</script>\n");
+                            BehaviorsKind =
+                                behaviors is null ? null :
+                                declaredBehaviors is not null ? "custom" :
+                                !behaviors.FullyQualifiedName.StartsWith("IntelliTect.Coalesce") ? "custom-fallback" :
+                                "default",
+                            BehaviorsTypeName = 
+                                behaviors is null ? null : 
+                                Regex.Replace(behaviors.FullyQualifiedName, "<.*", ""),
 
-                var content = Assembly
-                    .GetExecutingAssembly()
-                    .GetManifestResourceStream("IntelliTect.Coalesce.Application.SecurityOverview.html")!;
-                await content.CopyToAsync(context.Response.Body);
+                            Methods = c.ClientMethods.Select(GetMethodInfo),
+                            Properties = c.ClientProperties.Select(GetPropertyInfo),
+                            Usages = c.Usages.OrderBy(u => u.GetType().Name).Select(GetUsageInfo)
+                        };
+                    }),
+                ExternalTypes = repo.ExternalTypes
+                    .OrderBy(c => c.Name)
+                    .Select(c => new
+                    {
+                        Name = c.Name,
+                        Properties = c.ClientProperties.Select(GetPropertyInfo),
+                        Usages = c.Usages.OrderBy(u => u.GetType().Name).Select(GetUsageInfo)
+                    }),
+                ServiceTypes = repo.Services
+                    .OrderBy(c => c.Name)
+                    .Select(c => new
+                    {
+                        Name = c.Name,
+                        Route = c.ApiRouteControllerPart,
+                        Methods = c.ClientMethods.Select(GetMethodInfo)
+                    })
+            }; 
+            
+            var serializeOptions = new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            };
 
-                object GetPropertyInfo(PropertyViewModel p) => new
+            context.Response.StatusCode = 200;
+            context.Response.ContentType = "text/html";
+            await context.Response.WriteAsync("<script>DATA=");
+            await JsonSerializer.SerializeAsync(context.Response.Body, data, serializeOptions);
+            await context.Response.WriteAsync("</script>\n");
+
+#if DEBUG
+            static string GetThisFilePath([CallerFilePath] string path = null) => path;
+            var thisSourceFilePath = GetThisFilePath();
+            var file = new System.IO.FileInfo(thisSourceFilePath).Directory?.EnumerateFiles("SecurityOverview.html").FirstOrDefault();
+            using var content = file?.OpenRead() ?? throw new Exception("SecurityOverview.html not found on disk.");
+#else
+            var content = Assembly
+                .GetExecutingAssembly()
+                .GetManifestResourceStream("IntelliTect.Coalesce.Application.SecurityOverview.html")!;
+#endif
+
+            await content.CopyToAsync(context.Response.Body);
+
+            object GetUsageInfo(IValueViewModel v) => v switch
+            {
+                PropertyViewModel p => new { Type = GetTypeInfo(p.EffectiveParent.Type), Property = GetPropertyInfo(p) },
+                ParameterViewModel p => new { Type = GetTypeInfo(p.Parent.Parent.Type), Method = GetMethodInfo(p.Parent), Parameter = p.Name },
+                MethodReturnViewModel p => new { Type = GetTypeInfo(p.Method.Parent.Type), Method = GetMethodInfo(p.Method), IsReturn = true },
+            };
+
+            object GetPropertyInfo(PropertyViewModel p) => new
+            {
+                p.Name,
+                Type = GetTypeInfo(p.Type),
+                p.SecurityInfo.Read,
+                p.SecurityInfo.Edit,
+            };
+
+            object GetMethodInfo(MethodViewModel m) => new
+            {
+                m.Name,
+                Execute = m.SecurityInfo.Execute,
+                HttpMethod = m.ApiActionHttpMethod,
+
+                m.LoadFromDataSourceName,
+                m.IsModelInstanceMethod,
+
+                Parameters = m.ApiParameters.Select(p => new
                 {
                     p.Name,
-                    Type = GetTypeInfo(p.Type),
-                    p.SecurityInfo.Read,
-                    p.SecurityInfo.Edit,
-                };
+                    Type = GetTypeInfo(p.Type)
+                }),
+                Return = GetTypeInfo(m.ResultType),
+            };
 
-                object GetMethodInfo(MethodViewModel m) => new
-                {
-                    m.Name,
-                    Execute = m.SecurityInfo.Execute,
-                    HttpMethod = m.ApiActionHttpMethod,
-
-                    m.LoadFromDataSourceName,
-                    m.IsModelInstanceMethod,
-
-                    Parameters = m.ApiParameters.Select(p => new
-                    {
-                        p.Name,
-                        Type = GetTypeInfo(p.Type)
-                    }),
-                    Return = GetTypeInfo(m.ResultType),
-                };
-
-                object GetTypeInfo(TypeViewModel t) => new
-                {
-                    // Strip out namespaces:
-                    Display = Regex.Replace(t.FullyQualifiedName, @"[^<>,+]*\.", ""),
-                    LinkedType = repo.ClientClasses.Contains(t.PureType.ClassViewModel) ? t.PureType.Name : null,
-                };
-            });
-        }
+            object GetTypeInfo(TypeViewModel t) => new
+            {
+                // Strip out namespaces:
+                Display = Regex.Replace(t.FullyQualifiedName, @"[^<>,+]*\.", ""),
+                LinkedType = 
+                    repo.ClientClasses.Contains(t.PureType.ClassViewModel) ||
+                    repo.Services.Contains(t.PureType.ClassViewModel) 
+                    ? t.PureType.Name : null,
+            };
+        });
     }
 }
 

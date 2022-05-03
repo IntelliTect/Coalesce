@@ -220,7 +220,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             var classViewModel = type.ClassViewModel;
             if (classViewModel != null)
             {
-                classViewModel._Usages.Add(typeUsage);
+                classViewModel.Usages.Add(typeUsage);
 
                 // Don't dig in if:
                 //  - This is a known entity type (its not external)

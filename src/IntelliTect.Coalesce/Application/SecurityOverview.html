@@ -27,6 +27,22 @@
       .toc a.active {
         font-weight: 500;
       }
+      .small {
+        font-size: 0.875em;
+      }
+
+      .card .table tr:last-child td {
+        border-bottom: none !important;
+      }
+      .card .table {
+        margin-bottom: 0;
+      }
+      .card-body {
+        padding: 0.5rem 1rem;
+      }
+      th {
+        font-weight: 400;
+      }
     </style>
   </head>
   <body>
@@ -104,33 +120,117 @@
                 {{type.name}}
                 <small class="text-muted">/api/{{type.route}}</small>
               </h1>
+
               <div class="row">
-                <div
-                  class="col col-3"
-                  v-for="{action, subtitle} in [
-                    {action: type.read, subtitle: '/get, /list, /count'},
-                    {action: type.create, subtitle: '/save'},
-                    {action: type.edit, subtitle: '/save'},
-                    {action: type.delete, subtitle: '/delete'}
-                  ]"
-                >
+                <div class="col" style="flex-basis: 450px; max-width: 500px">
+                  <div class="card mb-4 px-2">
+                    <table class="table">
+                      <tr
+                        v-for="({action, subtitle}, idx) in [
+                          {action: type.read, subtitle: '/get, /list, /count'},
+                          {action: type.create, subtitle: '/save'},
+                          {action: type.edit, subtitle: '/save'},
+                          {action: type.delete, subtitle: '/delete'}
+                        ]"
+                      >
+                        <td>
+                          <h4 class="mb-0">{{action.name}}</h4>
+                        </td>
+                        <td style="vertical-align: middle">
+                          <small class="text-muted small">{{subtitle}}</small>
+                        </td>
+                        <td class="">
+                          <security-badge :action="action"></security-badge>
+                        </td>
+                      </tr>
+                    </table>
+                  </div>
+
                   <div class="card mb-4">
-                    <!-- :class="action.allowAnonymous ? 'border-warning' : action.noAccess ? 'border-danger' : 'border-success'" -->
                     <div class="card-body">
-                      <h4 class="card-title">
-                        {{action.name}}
-                        <small class="text-muted float-end">{{subtitle}}</small>
-                      </h4>
-                      <p class="card-text">
-                        <security-badge :action="action"></security-badge>
-                      </p>
+                      <template v-if="type.behaviorsTypeName">
+                        <span class="float-end">
+                          <span
+                            class="badge bg-success"
+                            v-if="type.behaviorsKind == 'custom'"
+                          >
+                            Dedicated Custom Behaviors
+                          </span>
+                          <span
+                            class="badge bg-success"
+                            v-if="type.behaviorsKind == 'custom-fallback'"
+                          >
+                            Fallback Custom Behaviors
+                          </span>
+                          <span
+                            class="badge bg-primary"
+                            v-if="type.behaviorsKind == 'default'"
+                          >
+                            Coalesce Standard Behaviors
+                          </span>
+                        </span>
+                        <h4 class="card-title mb-0">Behaviors</h4>
+                        <small class="text-break text-muted mb-4 d-block">
+                          {{type.behaviorsTypeName}}
+                        </small>
+                      </template>
+
+                      <h4 class="card-title">Data Sources</h4>
+                      <table class="table table-sm table-hover">
+                        <tbody>
+                          <tr v-for="ds in type.dataSources">
+                            <td class="px-0">
+                              <span class="float-end">
+                                <span
+                                  class="badge bg-success"
+                                  v-if="ds.kind == 'custom'"
+                                >
+                                  Dedicated Custom DS
+                                </span>
+                                <span
+                                  class="badge bg-success"
+                                  v-if="ds.kind == 'custom-fallback'"
+                                >
+                                  Fallback Custom DS
+                                </span>
+                                <span
+                                  class="badge bg-primary"
+                                  v-if="ds.kind == 'default'"
+                                >
+                                  Coalesce Standard DS
+                                </span>
+                              </span>
+
+                              <strong class="text-break">
+                                {{ds.names.join(', ')}}
+                                <span
+                                  v-if="ds.isDefault"
+                                  class="badge bg-secondary"
+                                  title="This data source will be used when the client does not specify a data source."
+                                >
+                                  Default
+                                </span>
+                              </strong>
+                              <br />
+                              <small class="text-muted text-break">
+                                {{ds.className}}
+                              </small>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+
+                  <div class="card mb-4" v-if="type.methods.length">
+                    <div class="card-body">
+                      <h4 class="card-title">Methods</h4>
+                      <methods-table :methods="type.methods"></methods-table>
                     </div>
                   </div>
                 </div>
-              </div>
 
-              <div class="row">
-                <div class="col" style="flex-basis: 450px; max-width: 700px">
+                <div class="col" style="flex-basis: 450px; max-width: 500px">
                   <div class="card mb-4">
                     <div class="card-body">
                       <h4 class="card-title">Generated DTO Properties</h4>
@@ -144,55 +244,8 @@
                 <div class="col" style="flex-basis: 450px; max-width: 700px">
                   <div class="card mb-4">
                     <div class="card-body">
-                      <h4 class="card-title">Methods</h4>
-                      <methods-table :methods="type.methods"></methods-table>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="col" style="flex-basis: 500px">
-                  <div class="card mb-4">
-                    <div class="card-body">
-                      <template v-if="type.behaviorsTypeName">
-                        <h4 class="card-title">Behaviors</h4>
-                        <span class="text-break">
-                          {{type.behaviorsTypeName}}
-                        </span>
-                        <br />
-                        <br />
-                      </template>
-
-                      <h4 class="card-title">Data Sources</h4>
-                      <table class="table table-sm table-hover">
-                        <thead>
-                          <tr>
-                            <th>Name</th>
-                            <th>Parameters</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          <tr v-for="ds in type.dataSources">
-                            <td>
-                              <strong class="text-break">
-                                {{ds.names.join(', ')}}
-                                <span
-                                  v-if="ds.isDefault"
-                                  class="badge bg-secondary"
-                                >
-                                  Default
-                                </span>
-                              </strong>
-                              <br />
-                              <small class="text-muted text-break">
-                                {{ds.className}}
-                              </small>
-                            </td>
-                            <td>
-                              {{ds.parameters.map(p => p.name).join(', ')}}
-                            </td>
-                          </tr>
-                        </tbody>
-                      </table>
+                      <h4 class="card-title">Usages</h4>
+                      <usages-table :usages="type.usages"></usages-table>
                     </div>
                   </div>
                 </div>
@@ -239,12 +292,60 @@
                     </div>
                   </div>
                 </div>
+
+                <div class="col" style="flex-basis: 450px; max-width: 700px">
+                  <div class="card mb-4">
+                    <div class="card-body">
+                      <h4 class="card-title">Usages</h4>
+                      <usages-table :usages="type.usages"></usages-table>
+                    </div>
+                  </div>
+                </div>
               </div>
             </section>
           </div>
         </div>
       </div>
     </div>
+
+    <script type="text/html" id="usages-table">
+      <div v-if="!usages.length" class="text-muted">
+        No references from other types
+      </div>
+      <table v-else class="table table-sm table-hover">
+        <thead>
+          <tr>
+            <th>Name</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="usage in usages">
+            <td class="text-break">
+              <type-display :member="usage.type"></type-display>
+              <span v-if="usage.property">
+                <strong>.{{usage.property.name}} </strong>
+                <small> &nbsp; {{usage.property.type.display}} </small>
+              </span>
+              <span v-else-if="usage.method">
+                <span>.{{usage.method.name}}</span>(<template
+                  v-for="(param, idx) in usage.method.parameters"
+                >
+                  <span v-if="idx > 0">, </span>
+                  <span
+                    :class="usage.parameter == param.name ? 'fw-bold' : 'text-muted small'"
+                  >
+                    {{param.type.display}} {{param.name}}
+                  </span> </template
+                >) =>
+                <span :class="usage.isReturn ? 'fw-bold' : 'text-muted small'">
+                  {{usage.method.return.display}}
+                </span>
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </script>
 
     <script type="text/html" id="methods-table">
       <table class="table table-sm table-hover">
@@ -262,7 +363,8 @@
               <small>
                 (<template v-for="(param, idx) in method.parameters">
                   <span v-if="idx > 0">, </span>
-                  <type-display :member="param.type"></type-display> {{param.name}} </template
+                  <type-display :member="param.type"></type-display>
+                  {{param.name}} </template
                 >) => <type-display :member="method.return"></type-display>
               </small>
             </td>
@@ -323,8 +425,8 @@
         <span
           v-else
           class="badge"
-          :class="action.isUnused ? 'border border-success text-dark' : 'bg-success'"
-          :title="action.isUnused ? 'Analyzed as unused by any API endpoint.' : ''"
+          :class="action.isUnused ? 'border border-success text-dark' : !action.hasRoles ? 'bg-success' : 'bg-success'"
+          :title="action.isUnused ? 'Analyzed as unused by any API endpoint.' : !action.hasRoles ? 'No specific role requirements' : 'One of these roles is required: ' + action.roles"
         >
           Allow {{'allowAnonymous' in action ? 'Authenticated' : ''}}
           <div v-if="action.roleList.length" class="fw-normal text-start">
@@ -369,6 +471,18 @@
       app.component("properties-table", {
         template: "#properties-table",
         props: ["properties"],
+      });
+      app.component("usages-table", {
+        template: "#usages-table",
+        props: ["usages"],
+        methods: {
+          getMethod(type, methodName) {
+            return [...DATA.crudTypes, ...DATA.serviceTypes]
+              .filter((t) => t.name == type)
+              .reduce((p, c) => [...p, ...c.methods], [])
+              .filter((m) => m.name == methodName)[0];
+          },
+        },
       });
       app.component("type-display", {
         template: "#type-display",

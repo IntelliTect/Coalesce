@@ -53,8 +53,9 @@ namespace Coalesce.Web.Vue
             {
                 builder
                     .AddContext<AppDbContext>()
-                    .UseDefaultDataSource(typeof(MyDataSource<,>))
-                    .UseDefaultBehaviors(typeof(MyBehaviors<,>));
+                   // .UseDefaultDataSource(typeof(MyDataSource<,>))
+                   // .UseDefaultBehaviors(typeof(MyBehaviors<,>))
+                    ;
 
                 // This breaks on non-windows platforms, see https://github.com/dotnet/corefx/issues/11897
                 builder.UseTimeZone(RuntimeInformation.IsOSPlatform(OSPlatform.Windows)

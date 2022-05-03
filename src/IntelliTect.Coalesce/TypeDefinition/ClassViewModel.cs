@@ -23,7 +23,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         protected IReadOnlyCollection<PropertyViewModel>? _Properties;
         protected IReadOnlyCollection<MethodViewModel>? _Methods;
 
-        internal HashSet<IValueViewModel> _Usages = new HashSet<IValueViewModel>();
+        internal HashSet<IValueViewModel> Usages = new HashSet<IValueViewModel>();
 
         public ReflectionRepository? ReflectionRepository => Type.ReflectionRepository;
 

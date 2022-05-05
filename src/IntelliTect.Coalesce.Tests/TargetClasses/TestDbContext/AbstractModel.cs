@@ -3,5 +3,9 @@
     public abstract class AbstractModel
     {
         public int Id { get; set; }
+
+        public string Discriminatior { get; set; }
     }
+
+    public class AbstractImpl : AbstractModel { }
 }

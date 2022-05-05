@@ -16,7 +16,7 @@ using System.Security.Claims;
 namespace IntelliTect.Coalesce
 {
     public abstract class QueryableDataSourceBase<T>
-        where T : class, new()
+        where T : class
     {
         /// <summary>
         /// When performing searches that are split on spaces [Search(IsSplitOnSpaces = true)],

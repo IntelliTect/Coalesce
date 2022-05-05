@@ -24,7 +24,11 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
         {
             foreach (var model in Model.CrudApiBackedClasses)
             {
-                if (model.WillCreateApiController)
+                if (model.WillCreateApiController && (
+                    model.SecurityInfo.IsReadAllowed() ||
+                    model.SecurityInfo.IsSaveAllowed() ||
+                    model.SecurityInfo.IsDeleteAllowed()
+                ))
                 {
                     yield return Generator<ModelApiController>()
                         .WithModel(model)

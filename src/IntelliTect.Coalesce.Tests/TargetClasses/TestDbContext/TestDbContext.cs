@@ -18,6 +18,8 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         public DbSet<ComplexModel> ComplexModels { get; set; }
         public DbSet<Test> Tests { get; set; }
 
+        public DbSet<AbstractModel> AbstractModels { get; set; }
+
         public TestDbContext() : this(Guid.NewGuid().ToString()) { }
 
         public TestDbContext(string memoryDatabaseName)

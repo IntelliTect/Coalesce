@@ -7,7 +7,7 @@ namespace IntelliTect.Coalesce
 {
 
     public interface IDataSource<T>
-        where T : class, new()
+        where T : class
     {
         Task<(ItemResult<T> Item, IncludeTree? IncludeTree)> GetItemAsync(object id, IDataSourceParameters parameters);
 

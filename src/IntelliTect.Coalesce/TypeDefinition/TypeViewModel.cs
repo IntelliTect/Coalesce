@@ -40,6 +40,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public abstract bool IsGeneric { get; }
 
+        public abstract bool IsAbstract { get; }
+
         /// <summary>
         /// True if the type is <see cref="IEnumerable"/> and behaves like a collection.
         /// Does not necessarily mean the type is an <see cref="ICollection"/> or <see cref="ICollection{T}"/>.

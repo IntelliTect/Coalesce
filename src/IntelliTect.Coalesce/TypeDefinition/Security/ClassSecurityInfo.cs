@@ -35,38 +35,21 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 notMutable = ClassViewModel.ReflectionRepository?.GetBehaviorsDeclaredFor(ClassViewModel) == null;
             }
 
+            if (ClassViewModel.Type.IsAbstract)
+            {
+                notMutable = true;
+
+                // Abstract classes currently can't be readable because BaseApiController
+                // has a `new()` constraint on its `T` (because of its usage of Behaviors<T>).
+                // If this ever became important, we could do some refactoring to make this possible.
+                notReadable = true; 
+            }
+
             if (!ClassViewModel.WillCreateApiController)
             {
                 notMutable = true;
                 notReadable = true;
             }
-
-            //if (!classViewModel.IsStandaloneEntity && !classViewModel.IsDbMappedType)
-            //{
-            //    notMutable |= classViewModel._Usages.All(u =>
-            //    {
-            //        var u2 = DetermineUsage(u).isWrite;
-            //        return u2 != true;
-            //    });
-            //    notReadable |= classViewModel._Usages.All(u =>
-            //    {
-            //        var u2 = DetermineUsage(u).isRead;
-            //        return u2 != true;
-            //    });
-
-            //    bool IsCircular(ClassViewModel value, HashSet<ClassViewModel> visited) 
-            //        => value == classViewModel ? true : visited.Add(value) && value._Usages.OfType<PropertyViewModel>().Any(u => u.PureType.HasClassViewModel && IsCircular(u.EffectiveParent, visited));
-
-            //    (bool? isRead, bool? isWrite) DetermineUsage(IValueViewModel value) => value switch
-            //    {
-            //        ParameterViewModel p => (false, true),
-            //        MethodReturnViewModel r => (true, false),
-            //        PropertyViewModel p => !IsCircular(p.EffectiveParent, new HashSet<ClassViewModel>())
-            //            ? (p.SecurityInfo.Read.IsAllowed(), p.SecurityInfo.Edit.IsAllowed())
-            //            : ((bool?)null, (bool?)null),
-            //        _ => (true, true)
-            //    };
-            //}
 
             var allowAnonymousAny = readAttribute.AllowAnonymous || editAttribute.AllowAnonymous || deleteAttribute.AllowAnonymous || createAttribute.AllowAnonymous;
 

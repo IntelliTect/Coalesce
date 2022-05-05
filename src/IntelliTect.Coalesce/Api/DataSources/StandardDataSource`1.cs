@@ -13,7 +13,7 @@ using IntelliTect.Coalesce.Api;
 namespace IntelliTect.Coalesce
 {
     public abstract class StandardDataSource<T> : QueryableDataSourceBase<T>, IDataSource<T>, IStandardCrudStrategy
-        where T : class, new()
+        where T : class
     {
         public StandardDataSource(CrudContext context) : base(context)
         {

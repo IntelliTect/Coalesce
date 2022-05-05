@@ -64,6 +64,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public override bool IsGeneric => (Symbol as INamedTypeSymbol)?.IsGenericType ?? false;
 
+        public override bool IsAbstract => Symbol.IsAbstract;
+
         public override string Name => Symbol.Name;
 
         public override bool IsArray => Symbol.TypeKind == TypeKind.Array;

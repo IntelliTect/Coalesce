@@ -28,24 +28,56 @@ public static class CoalesceApplicationBuilderExtensions
             var dsFactory = context.RequestServices.GetRequiredService<IDataSourceFactory>();
             var behaviorsFactory = context.RequestServices.GetRequiredService<IBehaviorsFactory>();
 
-            var data = new
+            var data = GetSecurityOverviewData(repo, dsFactory, behaviorsFactory); 
+            
+            var serializeOptions = new JsonSerializerOptions
             {
-                CrudTypes = repo
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            };
+
+            context.Response.StatusCode = 200;
+            context.Response.ContentType = "text/html";
+            await context.Response.WriteAsync("<script>DATA=");
+            await JsonSerializer.SerializeAsync(context.Response.Body, data, serializeOptions);
+            await context.Response.WriteAsync("</script>\n");
+
+#if DEBUG
+            static string GetThisFilePath([CallerFilePath] string? path = null) => path!;
+            var thisSourceFilePath = GetThisFilePath();
+            var file = new System.IO.FileInfo(thisSourceFilePath).Directory?.EnumerateFiles("SecurityOverview.html").FirstOrDefault();
+            using var content = file?.OpenRead() ?? throw new Exception("SecurityOverview.html not found on disk.");
+#else
+            var content = Assembly
+                .GetExecutingAssembly()
+                .GetManifestResourceStream("IntelliTect.Coalesce.Application.SecurityOverview.html")!;
+#endif
+
+            await content.CopyToAsync(context.Response.Body);
+        });
+    }
+
+    internal static object GetSecurityOverviewData(ReflectionRepository repo, IDataSourceFactory dsFactory, IBehaviorsFactory behaviorsFactory)
+    {
+        return new
+        {
+            CrudTypes = repo
                     .CrudApiBackedClasses
                     .OrderBy(c => c.Name)
                     .Select(c =>
                     {
-                        var actualDefaultSource = new ReflectionClassViewModel(
-                            dsFactory.GetDefaultDataSource(c.BaseViewModel, c).GetType()
-                        );
-
-                        var behaviors = c.SecurityInfo is
+                        var isImmutable = c.SecurityInfo is
                         {
                             Create.NoAccess: true,
                             Edit.NoAccess: true,
                             Save.NoAccess: true,
                             Delete.NoAccess: true
-                        } ? null : new ReflectionClassViewModel(behaviorsFactory.GetBehaviors(c.BaseViewModel, c).GetType());
+                        };
+
+                        var actualDefaultSource = isImmutable && c.SecurityInfo.Read.NoAccess
+                            ? null
+                            : new ReflectionClassViewModel(dsFactory.GetDefaultDataSource(c.BaseViewModel, c).GetType());
+
+                        var behaviors = isImmutable ? null : new ReflectionClassViewModel(behaviorsFactory.GetBehaviors(c.BaseViewModel, c).GetType());
                         var declaredBehaviors = repo.GetBehaviorsDeclaredFor(c);
 
                         return new
@@ -70,19 +102,20 @@ public static class CoalesceApplicationBuilderExtensions
                                         p.Name
                                     })
                                 })
-                                .Append(new
+                                .Append(actualDefaultSource is null ? null : new
                                 {
                                     actualDefaultSource.FullyQualifiedName,
                                     Name = DataSourceFactory.DefaultSourceName,
                                     IsDefault = true,
-                                    Kind = !actualDefaultSource.FullyQualifiedName.StartsWith("IntelliTect.Coalesce") 
-                                        ? "custom-fallback" 
+                                    Kind = !actualDefaultSource.FullyQualifiedName.StartsWith("IntelliTect.Coalesce")
+                                        ? "custom-fallback"
                                         : "default",
                                     Parameters = actualDefaultSource.DataSourceParameters.Select(p => new
                                     {
                                         p.Name
                                     })
                                 })
+                                .Where(c => c != null).Select(c => c!)
                                 .GroupBy(c => new { c.FullyQualifiedName })
                                 .Select(c => new
                                 {
@@ -99,7 +132,7 @@ public static class CoalesceApplicationBuilderExtensions
                                 declaredBehaviors is not null ? "custom" :
                                 !behaviors.FullyQualifiedName.StartsWith("IntelliTect.Coalesce") ? "custom-fallback" :
                                 "default",
-                            BehaviorsTypeName = 
+                            BehaviorsTypeName =
                                 behaviors is null ? null :
                                 StripNamespacesFromTypeParams(behaviors.FullyQualifiedName),
 
@@ -108,7 +141,7 @@ public static class CoalesceApplicationBuilderExtensions
                             Usages = c.Usages.OrderBy(u => u.GetType().Name).Select(GetUsageInfo)
                         };
                     }),
-                ExternalTypes = repo.ExternalTypes
+            ExternalTypes = repo.ExternalTypes
                     .OrderBy(c => c.Name)
                     .Select(c => new
                     {
@@ -116,7 +149,7 @@ public static class CoalesceApplicationBuilderExtensions
                         Properties = c.ClientProperties.Select(GetPropertyInfo),
                         Usages = c.Usages.OrderBy(u => u.GetType().Name).Select(GetUsageInfo)
                     }),
-                ServiceTypes = repo.Services
+            ServiceTypes = repo.Services
                     .OrderBy(c => c.Name)
                     .Select(c => new
                     {
@@ -124,78 +157,54 @@ public static class CoalesceApplicationBuilderExtensions
                         Route = c.ApiRouteControllerPart,
                         Methods = c.ClientMethods.Select(GetMethodInfo)
                     })
-            }; 
-            
-            var serializeOptions = new JsonSerializerOptions
-            {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-            };
+        };
 
-            context.Response.StatusCode = 200;
-            context.Response.ContentType = "text/html";
-            await context.Response.WriteAsync("<script>DATA=");
-            await JsonSerializer.SerializeAsync(context.Response.Body, data, serializeOptions);
-            await context.Response.WriteAsync("</script>\n");
+        string StripNamespacesFromTypeParams(string s) => s.IndexOf('<') is int start and >= 0
+            ? new Regex(@"[^<>,+\s]*\.").Replace(s, "", 5, start)
+            : s;
 
-#if DEBUG
-            static string GetThisFilePath([CallerFilePath] string path = null) => path;
-            var thisSourceFilePath = GetThisFilePath();
-            var file = new System.IO.FileInfo(thisSourceFilePath).Directory?.EnumerateFiles("SecurityOverview.html").FirstOrDefault();
-            using var content = file?.OpenRead() ?? throw new Exception("SecurityOverview.html not found on disk.");
-#else
-            var content = Assembly
-                .GetExecutingAssembly()
-                .GetManifestResourceStream("IntelliTect.Coalesce.Application.SecurityOverview.html")!;
-#endif
+        object GetUsageInfo(IValueViewModel v) => v switch
+        {
+            PropertyViewModel p => new { Type = GetTypeInfo(p.EffectiveParent.Type), Property = GetPropertyInfo(p) },
+            ParameterViewModel p => new { Type = GetTypeInfo(p.Parent.Parent.Type), Method = GetMethodInfo(p.Parent), Parameter = p.Name },
+            MethodReturnViewModel p => new { Type = GetTypeInfo(p.Method.Parent.Type), Method = GetMethodInfo(p.Method), IsReturn = true },
+            _ => throw new NotImplementedException(),
+        };
 
-            await content.CopyToAsync(context.Response.Body);
+        object GetPropertyInfo(PropertyViewModel p) => new
+        {
+            p.Name,
+            Type = GetTypeInfo(p.Type),
+            p.SecurityInfo.Read,
+            p.SecurityInfo.Edit
+        };
 
-            string StripNamespacesFromTypeParams(string s) => s.IndexOf('<') is int start and >= 0
-                ? new Regex(@"[^<>,+\s]*\.").Replace(s, "", 5, start)
-                : s;
+        object GetMethodInfo(MethodViewModel m) => new
+        {
+            m.Name,
+            Execute = m.SecurityInfo.Execute,
+            HttpMethod = m.ApiActionHttpMethod,
 
-            object GetUsageInfo(IValueViewModel v) => v switch
-            {
-                PropertyViewModel p => new { Type = GetTypeInfo(p.EffectiveParent.Type), Property = GetPropertyInfo(p) },
-                ParameterViewModel p => new { Type = GetTypeInfo(p.Parent.Parent.Type), Method = GetMethodInfo(p.Parent), Parameter = p.Name },
-                MethodReturnViewModel p => new { Type = GetTypeInfo(p.Method.Parent.Type), Method = GetMethodInfo(p.Method), IsReturn = true },
-            };
+            m.LoadFromDataSourceName,
+            m.IsModelInstanceMethod,
 
-            object GetPropertyInfo(PropertyViewModel p) => new
+            Parameters = m.ApiParameters.Select(p => new
             {
                 p.Name,
-                Type = GetTypeInfo(p.Type),
-                p.SecurityInfo.Read,
-                p.SecurityInfo.Edit
-            };
+                Type = GetTypeInfo(p.Type)
+            }),
+            Return = GetTypeInfo(m.ResultType),
+        };
 
-            object GetMethodInfo(MethodViewModel m) => new
-            {
-                m.Name,
-                Execute = m.SecurityInfo.Execute,
-                HttpMethod = m.ApiActionHttpMethod,
-
-                m.LoadFromDataSourceName,
-                m.IsModelInstanceMethod,
-
-                Parameters = m.ApiParameters.Select(p => new
-                {
-                    p.Name,
-                    Type = GetTypeInfo(p.Type)
-                }),
-                Return = GetTypeInfo(m.ResultType),
-            };
-
-            object? GetTypeInfo(TypeViewModel? t) => t is null ? null : new
-            {
-                // Strip out namespaces:
-                Display = Regex.Replace(t.FullyQualifiedName, @"[^<>,+]*\.", ""),
-                LinkedType = 
-                    repo.ClientClasses.Contains(t.PureType.ClassViewModel) ||
-                    repo.Services.Contains(t.PureType.ClassViewModel) 
-                    ? t.PureType.Name : null,
-            };
-        });
+        object? GetTypeInfo(TypeViewModel? t) => t is null ? null : new
+        {
+            // Strip out namespaces:
+            Display = Regex.Replace(t.FullyQualifiedName, @"[^<>,+]*\.", ""),
+            LinkedType =
+                repo.ClientClasses.Contains(t.PureType.ClassViewModel) ||
+                repo.Services.Contains(t.PureType.ClassViewModel!)
+                ? t.PureType.Name : null,
+        };
     }
 }
 

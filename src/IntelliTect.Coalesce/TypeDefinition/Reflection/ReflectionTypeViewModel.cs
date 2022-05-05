@@ -96,6 +96,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public override bool IsGeneric => Info.IsGenericType;
 
+        public override bool IsAbstract => Info.IsAbstract;
+
         public override bool IsArray => Info.IsArray;
 
         public override bool IsNullable => Info.IsClass || IsNullableType;

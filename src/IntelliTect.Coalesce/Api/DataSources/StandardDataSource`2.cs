@@ -16,7 +16,7 @@ using System.Security.Claims;
 namespace IntelliTect.Coalesce
 {
     public class StandardDataSource<T, TContext> : StandardDataSource<T>, IEntityFrameworkDataSource<T, TContext>
-        where T : class, new()
+        where T : class
         where TContext : DbContext
     {
         /// <summary>

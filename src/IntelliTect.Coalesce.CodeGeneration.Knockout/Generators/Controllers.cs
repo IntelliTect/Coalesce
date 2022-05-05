@@ -27,7 +27,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
 
             foreach (var model in Model.CrudApiBackedClasses)
             {
-                if (model.WillCreateViewController)
+                if (model.WillCreateViewController && model.SecurityInfo.IsReadAllowed())
                 {
                     yield return Generator<ViewController>()
                         .WithModel(model)

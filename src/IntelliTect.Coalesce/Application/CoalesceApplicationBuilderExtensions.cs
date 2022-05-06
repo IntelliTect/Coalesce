@@ -61,102 +61,102 @@ public static class CoalesceApplicationBuilderExtensions
         return new
         {
             CrudTypes = repo
-                    .CrudApiBackedClasses
-                    .OrderBy(c => c.Name)
-                    .Select(c =>
+                .CrudApiBackedClasses
+                .OrderBy(c => c.Name)
+                .Select(c =>
+                {
+                    var isImmutable = c.SecurityInfo is
                     {
-                        var isImmutable = c.SecurityInfo is
-                        {
-                            Create.NoAccess: true,
-                            Edit.NoAccess: true,
-                            Save.NoAccess: true,
-                            Delete.NoAccess: true
-                        };
+                        Create.NoAccess: true,
+                        Edit.NoAccess: true,
+                        Save.NoAccess: true,
+                        Delete.NoAccess: true
+                    };
 
-                        var actualDefaultSource = isImmutable && c.SecurityInfo.Read.NoAccess
-                            ? null
-                            : new ReflectionClassViewModel(dsFactory.GetDefaultDataSource(c.BaseViewModel, c).GetType());
+                    var actualDefaultSource = isImmutable && c.SecurityInfo.Read.NoAccess
+                        ? null
+                        : new ReflectionClassViewModel(dsFactory.GetDefaultDataSource(c.BaseViewModel, c).GetType());
 
-                        var behaviors = isImmutable ? null : new ReflectionClassViewModel(behaviorsFactory.GetBehaviors(c.BaseViewModel, c).GetType());
-                        var declaredBehaviors = repo.GetBehaviorsDeclaredFor(c);
+                    var behaviors = isImmutable ? null : new ReflectionClassViewModel(behaviorsFactory.GetBehaviors(c.BaseViewModel, c).GetType());
+                    var declaredBehaviors = repo.GetBehaviorsDeclaredFor(c);
 
-                        return new
-                        {
-                            c.Name,
-                            DtoBaseType = GetTypeInfo(c.DtoBaseViewModel?.Type),
-                            Route = c.ApiRouteControllerPart,
-                            c.SecurityInfo.Read,
-                            c.SecurityInfo.Create,
-                            c.SecurityInfo.Edit,
-                            c.SecurityInfo.Delete,
-                            DataSources = c
-                                .ClientDataSources(repo)
-                                .Select(ds => new
-                                {
-                                    ds.FullyQualifiedName,
-                                    Name = ds.ClientTypeName,
-                                    IsDefault = ds.IsDefaultDataSource,
-                                    Kind = "custom",
-                                    Parameters = ds.DataSourceParameters.Select(p => new
-                                    {
-                                        p.Name
-                                    })
-                                })
-                                .Append(actualDefaultSource is null ? null : new
-                                {
-                                    actualDefaultSource.FullyQualifiedName,
-                                    Name = DataSourceFactory.DefaultSourceName,
-                                    IsDefault = true,
-                                    Kind = !actualDefaultSource.FullyQualifiedName.StartsWith("IntelliTect.Coalesce")
-                                        ? "custom-fallback"
-                                        : "default",
-                                    Parameters = actualDefaultSource.DataSourceParameters.Select(p => new
-                                    {
-                                        p.Name
-                                    })
-                                })
-                                .Where(c => c != null).Select(c => c!)
-                                .GroupBy(c => new { c.FullyQualifiedName })
-                                .Select(c => new
-                                {
-                                    Names = c.Where(ds => ds.Name != DataSourceFactory.DefaultSourceName || c.Count() == 1).Select(c => c.Name).ToList(),
-                                    ClassName = StripNamespacesFromTypeParams(c.Key.FullyQualifiedName),
-                                    IsDefault = c.Any(x => x.IsDefault),
-                                    c.First().Parameters,
-                                    c.First().Kind,
-                                })
-                                .OrderByDescending(c => c.IsDefault),
-
-                            BehaviorsKind =
-                                behaviors is null ? null :
-                                declaredBehaviors is not null ? "custom" :
-                                !behaviors.FullyQualifiedName.StartsWith("IntelliTect.Coalesce") ? "custom-fallback" :
-                                "default",
-                            BehaviorsTypeName =
-                                behaviors is null ? null :
-                                StripNamespacesFromTypeParams(behaviors.FullyQualifiedName),
-
-                            Methods = c.ClientMethods.Select(GetMethodInfo),
-                            Properties = c.ClientProperties.Select(GetPropertyInfo),
-                            Usages = c.Usages.OrderBy(u => u.GetType().Name).Select(GetUsageInfo)
-                        };
-                    }),
-            ExternalTypes = repo.ExternalTypes
-                    .OrderBy(c => c.Name)
-                    .Select(c => new
+                    return new
                     {
-                        Name = c.Name,
+                        c.Name,
+                        DtoBaseType = GetTypeInfo(c.DtoBaseViewModel?.Type),
+                        Route = c.ApiRouteControllerPart,
+                        c.SecurityInfo.Read,
+                        c.SecurityInfo.Create,
+                        c.SecurityInfo.Edit,
+                        c.SecurityInfo.Delete,
+                        DataSources = c
+                            .ClientDataSources(repo)
+                            .Select(ds => new
+                            {
+                                ds.FullyQualifiedName,
+                                Name = ds.ClientTypeName,
+                                IsDefault = ds.IsDefaultDataSource,
+                                Kind = "custom",
+                                Parameters = ds.DataSourceParameters.Select(p => new
+                                {
+                                    p.Name
+                                })
+                            })
+                            .Append(actualDefaultSource is null ? null : new
+                            {
+                                actualDefaultSource.FullyQualifiedName,
+                                Name = DataSourceFactory.DefaultSourceName,
+                                IsDefault = true,
+                                Kind = !actualDefaultSource.FullyQualifiedName.StartsWith("IntelliTect.Coalesce")
+                                    ? "custom-fallback"
+                                    : "default",
+                                Parameters = actualDefaultSource.DataSourceParameters.Select(p => new
+                                {
+                                    p.Name
+                                })
+                            })
+                            .Where(c => c != null).Select(c => c!)
+                            .GroupBy(c => new { c.FullyQualifiedName })
+                            .Select(c => new
+                            {
+                                Names = c.Where(ds => ds.Name != DataSourceFactory.DefaultSourceName || c.Count() == 1).Select(c => c.Name).ToList(),
+                                ClassName = StripNamespacesFromTypeParams(c.Key.FullyQualifiedName),
+                                IsDefault = c.Any(x => x.IsDefault),
+                                c.First().Parameters,
+                                c.First().Kind,
+                            })
+                            .OrderByDescending(c => c.IsDefault),
+
+                        BehaviorsKind =
+                            behaviors is null ? null :
+                            declaredBehaviors is not null ? "custom" :
+                            !behaviors.FullyQualifiedName.StartsWith("IntelliTect.Coalesce") ? "custom-fallback" :
+                            "default",
+                        BehaviorsTypeName =
+                            behaviors is null ? null :
+                            StripNamespacesFromTypeParams(behaviors.FullyQualifiedName),
+
+                        Methods = c.ClientMethods.Select(GetMethodInfo),
                         Properties = c.ClientProperties.Select(GetPropertyInfo),
                         Usages = c.Usages.OrderBy(u => u.GetType().Name).Select(GetUsageInfo)
-                    }),
+                    };
+                }),
+            ExternalTypes = repo.ExternalTypes
+                .OrderBy(c => c.Name)
+                .Select(c => new
+                {
+                    Name = c.Name,
+                    Properties = c.ClientProperties.Select(GetPropertyInfo),
+                    Usages = c.Usages.OrderBy(u => u.GetType().Name).Select(GetUsageInfo)
+                }),
             ServiceTypes = repo.Services
-                    .OrderBy(c => c.Name)
-                    .Select(c => new
-                    {
-                        Name = c.Name,
-                        Route = c.ApiRouteControllerPart,
-                        Methods = c.ClientMethods.Select(GetMethodInfo)
-                    })
+                .OrderBy(c => c.Name)
+                .Select(c => new
+                {
+                    Name = c.Name,
+                    Route = c.ApiRouteControllerPart,
+                    Methods = c.ClientMethods.Select(GetMethodInfo)
+                })
         };
 
         string StripNamespacesFromTypeParams(string s) => s.IndexOf('<') is int start and >= 0

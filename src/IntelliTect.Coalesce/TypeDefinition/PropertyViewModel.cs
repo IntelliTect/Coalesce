@@ -223,14 +223,18 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     throw new InvalidOperationException("Cannot evaluate the hidden state of an InternalUse prop.");
                 }
 
+                if (this.GetAttributeValue<HiddenAttribute, HiddenAttribute.Areas>(a => a.Area) is HiddenAttribute.Areas value)
+                {
+                    // Take the attribute value first to allow for overrides of the default behavior below
+                    return value;
+                }
+
                 if (IsForeignKey || (IsPrimaryKey && DatabaseGenerated == DatabaseGeneratedOption.Identity))
                 {
                     return HiddenAttribute.Areas.All;
                 }
 
-                return 
-                    this.GetAttributeValue<HiddenAttribute, HiddenAttribute.Areas>(a => a.Area) 
-                    ?? HiddenAttribute.Areas.None;
+                return HiddenAttribute.Areas.None;
             }
         }
 

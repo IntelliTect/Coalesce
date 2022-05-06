@@ -77,7 +77,8 @@ import {
   mapParamsToDto, getMessageForError, 
   ViewModel, 
   mapValueToModel,
-  ItemApiStateWithArgs
+  ItemApiStateWithArgs,
+  Indexable
 } from 'coalesce-vue'
 
 @Component({
@@ -269,11 +270,19 @@ export default class CSelect extends MetadataComponent {
     // If we were explicitly given rules, use those.
     if (this.inputBindAttrs.rules) return this.inputBindAttrs.rules;
 
-    // We're binding to a ViewModel instance.
-    // Grab the rules from the instance, because it may contain custom rules
-    // and/or other rule changes that have been customized in userland beyond what the metadata provides.
     if (this.model instanceof ViewModel && this.modelKeyProp) {
-      return this.model.$getRules(this.modelKeyProp)
+      // We're binding to a ViewModel instance.
+      // Grab the rules from the instance, because it may contain custom rules
+      // and/or other rule changes that have been customized in userland beyond what the metadata provides.
+
+      // Since the v-autocomplete is always bound to a model instance,
+      // vuetify will invoke the rules using the model object as the arg to the rule function.
+      // However, we use the validation rules of the foreign key since the FK
+      // is the actual scalar value that gets sent to the server,
+      // and is the prop that we generate things like `required` onto.
+      // We need to translate the rule functions to pass the selected FK instead
+      // of the selected model object.
+      return this.model.$getRules(this.modelKeyProp)?.map(rule => (() => rule(this.internalKeyValue)))
     }
     
     // Look for validation rules from the metadata on the key prop.

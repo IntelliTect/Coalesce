@@ -1,0 +1,17 @@
+{
+  "name": "coalesce-docs",
+  "version": "1.0.0",
+  "description": "",
+  "private": true,
+  "repository": "https://github.com/IntelliTect/Coalesce",
+  "author": "IntelliTect",
+  "license": "Apache-2.0",
+  "scripts": {
+    "dev": "vuepress dev",
+    "build": "vuepress build"
+  },
+  "devDependencies": {
+    "vitepress": "^0.22.4",
+    "vuepress": "^2.0.0-beta.43"
+  }
+}

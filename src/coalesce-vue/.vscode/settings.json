@@ -3,7 +3,7 @@
     "[typescript]": {
         "editor.insertSpaces": true,
         "editor.tabSize": 2,
-        "editor.autoIndent": false
+        "editor.autoIndent": "advanced"
     },
     "workbench.colorCustomizations": {
         "titleBar.activeBackground": "#a82e1f",

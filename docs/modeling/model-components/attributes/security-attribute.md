@@ -31,7 +31,7 @@ Class vs. Property Security
 
 .. important::
 
-    There are important differences between class-level security and property-level security, beyond the usage of the attributes themselves. In general, class-level security is implemented in the generated API Controllers as `[Authorize]` attributes on the generated actions. Property security attributes are implemented in the :ref:`GenDTOs`.
+    There are important differences between class-level security and property-level security, beyond the usage of the attributes themselves. In general, class-level security is implemented in the generated API Controllers as `[Authorize]` attributes on the generated actions. Property security attributes are implemented in the [Generated C# DTOs](/stacks/agnostic/dtos.md).
 
 
 Implementations
@@ -47,7 +47,7 @@ For **property-level** security only, if a `[Read]` attribute is present without
 Example Usage
 .............
 
-.. code-block:: c#
+``` c#
 
     [Read(Roles = "Management", PermissionLevel = SecurityPermissionLevels.AllowAuthorized)]
     public class Employee
@@ -59,6 +59,9 @@ Example Usage
         
         ...
     }
+
+
+```
 
 |
 
@@ -72,7 +75,7 @@ For **property-level** security only, if a `[Read]` attribute is present, one of
 Example Usage
 .............
 
-.. code-block:: c#
+``` c#
 
     [Edit(Roles = "Management,Payroll", PermissionLevel = SecurityPermissionLevels.AllowAuthorized)]
     public class Employee
@@ -86,6 +89,9 @@ Example Usage
     }
 
 
+
+```
+
 |
 
 Create
@@ -96,7 +102,7 @@ Controls permissions for deletion of an object of the targeted type through the 
 Example Usage
 .............
 
-.. code-block:: c#
+``` c#
 
     [Create(Roles = "HumanResources", PermissionLevel = SecurityPermissionLevels.AllowAuthorized)]
     public class Employee
@@ -104,6 +110,9 @@ Example Usage
         ...
     }
 
+
+
+```
 
 |
 
@@ -115,7 +124,7 @@ Controls permissions for deletion of an object of the targeted type through the 
 Example Usage
 .............
 
-.. code-block:: c#
+``` c#
 
     [Delete(Roles = "HumanResources,Management", PermissionLevel = SecurityPermissionLevels.AllowAuthorized)]
     public class Employee
@@ -124,7 +133,10 @@ Example Usage
     }
 
 
+
+```
+
 Execute
 -------
 
-A separate attribute for controlling method execution exists. Its documentation may be found on the :ref:`ExecuteAttribute` page.
+A separate attribute for controlling method execution exists. Its documentation may be found on the [[Execute]](/modeling/model-components/attributes/execute.md) page.

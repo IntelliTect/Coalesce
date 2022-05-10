@@ -11,14 +11,13 @@ Effectively, this is a server-driven autocomplete list.
 
 .. MARKER:summary-end
 
-.. contents:: Contents
-    :local:
+[[toc]]
 
 Examples
 --------
 
 
-.. code-block:: sfc
+``` vue-html
 
     <c-select-string-value 
         :model="person" 
@@ -27,7 +26,10 @@ Examples
     />
     
 
-.. code-block:: c#
+
+```
+
+``` c#
 
     class Person 
     {
@@ -48,6 +50,9 @@ Examples
         }
     }
 
+
+```
+
 Props
 -----
 
@@ -62,10 +67,10 @@ Props
     An object owning the value that was specified by the `for` prop. If provided, the input will be bound to the corresponding property on the `model` object.
 
 `method: string`
-    The camel-cased name of the :ref:`Custom Method <ModelMethods>` to invoke to get the list of valid values. Will be passed a single string parameter `search`. Must be a static method on the type of the provided `model` object that returns a collection of strings.
+    The camel-cased name of the [Custom Method](/modeling/model-components/methods.md) to invoke to get the list of valid values. Will be passed a single string parameter `search`. Must be a static method on the type of the provided `model` object that returns a collection of strings.
 
 `params?: DataSourceParameters`
-    An optional set of :ref:`Data Source Standard Parameters <DataSourceStandardParameters>` to pass to API calls made to the server.
+    An optional set of [Data Source Standard Parameters](/modeling/model-components/data-sources.md) to pass to API calls made to the server.
 
 `listWhenEmpty?: boolean = false`
     True if the method should be invoked and the list displayed when the entered search term is blank.

@@ -18,7 +18,7 @@ Root Configuration
     | `Coalesce.GlobalConfiguration.app`
     |
     
-    The root configuration contains all configuration properties which apply to class category (:ref:`KoTypeScriptViewModels`, :ref:`KoTypeScriptListViewModels`, and :ref:`Services`). The `app` property contains global app configuration that exists independent of any models. Then, for each class kind, the following are available:
+    The root configuration contains all configuration properties which apply to class category ([TypeScript ViewModels](/stacks/ko/client/view-model.md), [TypeScript ListViewModels](/stacks/ko/client/list-view-model.md), and [Services](/modeling/model-types/services.md)). The `app` property contains global app configuration that exists independent of any models. Then, for each class kind, the following are available:
 
 Root ViewModel/ListViewModel Configuration
     | `Coalesce.GlobalConfiguration.viewModel`
@@ -91,7 +91,7 @@ App Configuration
 These properties on `Coalesce.GlobalConfiguration.app` are not hierarchical - they govern the entire Coalesce application:
 
 select2Theme - `null`
-    The theme parameter to select2's constructor when called by Coalesce's select2 :ref:`KnockoutBindings`.
+    The theme parameter to select2's constructor when called by Coalesce's select2 [Knockout Bindings](/stacks/ko/client/bindings.md).
 
 
 ViewModelConfiguration
@@ -106,13 +106,13 @@ saveIncludedFields - `null`
 
     This can improves the handling of concurrent changes being made by multiple users against different fields of the same entity. Specifically, if one page is designed to edit fields A and B, and another page is designed for editing fields C and D, you can configure this setting appropriately on each page to only save the corresponding fields.
 
-    Due to design limitations, this cannot be determined dynamically like it can with :ref:`Vue's $saveMode property <VueInstanceViewModels>`
+    Due to design limitations, this cannot be determined dynamically like it can with [Vue's $saveMode property](/stacks/vue/layers/viewmodels.md)
 
     .. warning:: 
 
         Surgical saves require DTOs on the server that are capable of determining which of their properties have been set by the model binder, as surgical saves are sent from the client by entirely omitting properties from the ``x-www-form-urlencoded`` body that is sent to the server.
 
-        The :ref:`GenDTOs` implement the necessary logic for this; however, any :ref:`CustomDTOs` you have written are unlikely to be implementing the same behavior. For :ref:`CustomDTOs`, either implement the same pattern that can be seen in the :ref:`GenDTOs`, or do not use this setting.
+        The [Generated C# DTOs](/stacks/agnostic/dtos.md) implement the necessary logic for this; however, any [Custom DTOs](/modeling/model-types/dtos.md) you have written are unlikely to be implementing the same behavior. For [Custom DTOs](/modeling/model-types/dtos.md), either implement the same pattern that can be seen in the [Generated C# DTOs](/stacks/agnostic/dtos.md), or do not use this setting.
 
 autoSaveEnabled - `true`
     Determines whether changes to a model will be automatically saved after `saveTimeoutMs` milliseconds have elapsed.

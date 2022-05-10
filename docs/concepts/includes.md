@@ -7,8 +7,7 @@ Includes String
 Coalesce provides a number of extension points for loading & serialization which make use of a concept called an "includes string" (also referred to as "include string" or just "includes").
 
 
-.. contents:: Contents
-    :local:
+[[toc]]
     
 
 Includes String
@@ -16,25 +15,32 @@ Includes String
 
 The includes string is simply a string which can be set to any arbitrary value. It is passed from the client to the server in order to control data loading and serialization. It can be set on both the TypeScript ViewModels and the ListViewModels.
 
-.. tabs::
+<CodeTabs>
+<template #vue>
 
-    .. code-tab:: vue
+``` ts
+import { PersonViewModel, PersonListViewModel } from '@/viewmodels.g'
 
-        import { PersonViewModel, PersonListViewModel } from '@/viewmodels.g'
-        
-        var person = new PersonViewModel();
-        person.$includes = "details";
+var person = new PersonViewModel();
+person.$includes = "details";
 
-        var personList = new PersonListViewModel();
-        personList.$includes = "details";
+var personList = new PersonListViewModel();
+personList.$includes = "details";
+```
 
-    .. code-tab:: knockout
+</template>
+<template #knockout>
 
-        var person = new ViewModels.Person();
-        person.includes = "details";
+``` ts
+var person = new ViewModels.Person();
+person.includes = "details";
 
-        var personList = new ListViewModels.PersonList();
-        personList.includes = "details";
+var personList = new ListViewModels.PersonList();
+personList.includes = "details";
+```
+
+</template>
+</CodeTabs>
 
 The default value (i.e. no action) is the empty string.
 
@@ -43,24 +49,18 @@ Special Values
 
 There are a few values of `includes` that are either set by default in the auto-generated views, or otherwise have special meaning:
 
-    :code:`none`
-        Setting `includes` to ``none`` suppresses the :ref:`DefaultLoadingBehavior` provided by the :ref:`StandardDataSource` - The resulting data will be the requested object (or list of objects) and nothing more.
+| Value | Description |
+|------|---|
+| `'none'` | Setting `includes` to ``none`` suppresses the [Default Loading Behavior](/modeling/model-components/data-sources.md) provided by the [Standard Data Source](/modeling/model-components/data-sources.md) - The resulting data will be the requested object (or list of objects) and nothing more. |
+| `'Editor'` | Used when loading an object in the generated Knockout CreateEdit views.  |
+| `'<ModelName>ListGen'` | Used when loading a list of objects in the generated Knockout Table and Cards views. For example, `PersonListGen` |
 
-    :code:`Editor`
-        Used when loading an object in the generated Knockout CreateEdit views.
-        
-    :code:`<ModelName>ListGen`
-        Used when loading a list of objects in the generated Knockout Table and Cards views.
-        For example, :code:`PersonListGen`
-    
-|
 
 DtoIncludes & DtoExcludes
 -------------------------
 
-Main document: :ref:`DtoIncludesExcludesAttr`.
+Main document: [[DtoIncludes] & [DtoExcludes]](/modeling/model-components/attributes/dto-includes-excludes.md).
 
 There are two C# attributes, `DtoIncludes` and `DtoExcludes`, that can be used to annotate your data model in order to control what data gets put into the DTOs and ultimately serialized to JSON and sent out to the client.
 
-.. include:: ../modeling/model-components/attributes/dto-includes-excludes.rst
-    :start-after: see :ref:`Includes`.
+@[import-md{see [Includes String]}](../modeling/model-components/attributes/dto-includes-excludes.md)

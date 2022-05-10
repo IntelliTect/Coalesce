@@ -26,78 +26,77 @@ Contents
 A full example of a ``coalesce.json`` file, along with an explanation of each property, is as follows:
 
 
-.. code-block:: javascript
+``` js
+{
+    "webProject": {
+        // Required: Path to the csproj of the web project. Path is relative to location of this coalesce.json file.
+        "projectFile": "src/Coalesce.Web/Coalesce.Web.csproj",
 
-    {
-        "webProject": {
-            // Required: Path to the csproj of the web project. Path is relative to location of this coalesce.json file.
-            "projectFile": "src/Coalesce.Web/Coalesce.Web.csproj",
+        // Optional: Framework to use when evaluating & building dependencies.
+        // Not needed if your project only specifies a single framework - only required for multi-targeting projects.
+        "framework": "netcoreapp2.0",
 
-            // Optional: Framework to use when evaluating & building dependencies.
-            // Not needed if your project only specifies a single framework - only required for multi-targeting projects.
-            "framework": "netcoreapp2.0",
+        // Optional: Build configuration to use when evaluating & building dependencies.
+        // Defaults to "Debug".
+        "configuration": "Debug",
 
-            // Optional: Build configuration to use when evaluating & building dependencies.
-            // Defaults to "Debug".
-            "configuration": "Debug",
+        // Optional: Override the namespace prefix for generated C# code.
+        // Defaults to MSBuild's `$(RootNamespace)` for the project.
+        "rootNamespace": "MyCompany.Coalesce.Web",
+    },
 
-            // Optional: Override the namespace prefix for generated C# code.
-            // Defaults to MSBuild's `$(RootNamespace)` for the project.
-            "rootNamespace": "MyCompany.Coalesce.Web",
+    "dataProject": {
+        // Required: Path to the csproj of the data project. Path is relative to location of this coalesce.json file.
+        "projectFile": "src/Coalesce.Domain/Coalesce.Domain.csproj",
+
+        // Optional: Framework to use when evaluating & building dependencies.
+        // Not needed if your project only specifies a single framework - only required for multi-targeting projects.
+        "framework": "netstandard2.0",
+
+        // Optional: Build configuration to use when evaluating & building dependencies.
+        // Defaults to "Release".
+        "configuration": "Debug",
+    },
+
+    // The name of the root generator to use. Defaults to "Knockout".
+    // Available values are "Vue" and "Knockout".
+    "rootGenerator": "Vue",
+            
+    // If set, specifies a list of whitelisted root type names that will restrict
+    // which types Coalesce will use for code generation. 
+    // Root types are those that must be annotated with [Coalesce].
+    // Useful if want to segment a single data project into multiple web projects, 
+    // or into different areas/directories within a single web project.
+    "rootTypesWhitelist": [
+        "MyDbContext", "MyCustomDto"
+    ],
+
+    "generatorConfig": {
+        // A set of objects keyed by generator name.
+        // Generator names may optionally be qualified by their full namespace.
+        // All generators are listed when running 'dotnet coalesce' with '--verbosity debug'.
+        // For example, "Views" or "IntelliTect.Coalesce.CodeGeneration.Knockout.Generators.Views".
+        "GeneratorName": {
+            // Optional: true if the generator should be disabled.
+            "disabled": true,
+            // Optional: Configures a path relative to the default output path for the generator
+            // where that generator's output should be placed instead.
+            "targetDirectory": "../DifferentFolder"
         },
-
-        "dataProject": {
-            // Required: Path to the csproj of the data project. Path is relative to location of this coalesce.json file.
-            "projectFile": "src/Coalesce.Domain/Coalesce.Domain.csproj",
-
-            // Optional: Framework to use when evaluating & building dependencies.
-            // Not needed if your project only specifies a single framework - only required for multi-targeting projects.
-            "framework": "netstandard2.0",
-
-            // Optional: Build configuration to use when evaluating & building dependencies.
-            // Defaults to "Release".
-            "configuration": "Debug",
+        // Indentation for generated C# is configurable by type (API controllers, DTO classes and regular View controllers)
+        // It defaults to 4 spaces
+        "ApiController": {
+            "indentationSize": 2 
         },
-
-        // The name of the root generator to use. Defaults to "Knockout".
-        // Available values are "Vue" and "Knockout".
-        "rootGenerator": "Vue",
-                
-        // If set, specifies a list of whitelisted root type names that will restrict
-        // which types Coalesce will use for code generation. 
-        // Root types are those that must be annotated with [Coalesce].
-        // Useful if want to segment a single data project into multiple web projects, 
-        // or into different areas/directories within a single web project.
-        "rootTypesWhitelist": [
-            "MyDbContext", "MyCustomDto"
-        ],
-
-        "generatorConfig": {
-            // A set of objects keyed by generator name.
-            // Generator names may optionally be qualified by their full namespace.
-            // All generators are listed when running 'dotnet coalesce' with '--verbosity debug'.
-            // For example, "Views" or "IntelliTect.Coalesce.CodeGeneration.Knockout.Generators.Views".
-            "GeneratorName": {
-                // Optional: true if the generator should be disabled.
-                "disabled": true,
-                // Optional: Configures a path relative to the default output path for the generator
-                // where that generator's output should be placed instead.
-                "targetDirectory": "../DifferentFolder"
-            },
-            // Indentation for generated C# is configurable by type (API controllers, DTO classes and regular View controllers)
-            // It defaults to 4 spaces
-            "ApiController": {
-                "indentationSize": 2 
-            },
-            "ClassDto": {
-                "indentationSize": 2 
-            },
-            "ViewController" : {
-                "indentationSize": 2
-            }
+        "ClassDto": {
+            "indentationSize": 2 
+        },
+        "ViewController" : {
+            "indentationSize": 2
         }
     }
-
+}
+```
 
 Additional CLI Options
 ----------------------

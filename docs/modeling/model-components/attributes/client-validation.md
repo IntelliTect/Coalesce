@@ -11,20 +11,19 @@ The `[IntelliTect.Coalesce.DataAnnotations.ClientValidation]`
 attribute is used to control the behavior of client-side model validation
 and to add additional client-only validation parameters. Database validation is available via standard `System.ComponentModel.DataAnnotations` annotations. 
 
-These propagate to the client as validations in TypeScript via generated :ref:`Metadata <VueMetadata>` and :ref:`ViewModel rules <VueViewModelsValidation>` (for Vue) or Knockout-Validation_ rules (for Knockout). For both stacks, any failing validation rules prevent saves from going to the server. 
+These propagate to the client as validations in TypeScript via generated [Metadata](/stacks/vue/layers/metadata.md) and [ViewModel rules](/stacks/vue/layers/viewmodels.md) (for Vue) or Knockout-Validation_ rules (for Knockout). For both stacks, any failing validation rules prevent saves from going to the server. 
 
 .. warning::
 
-    This attribute controls client-side validation only. To perform server-side validation, create a custom :ref:`Behaviors` for your types.
+    This attribute controls client-side validation only. To perform server-side validation, create a custom [Behaviors](/modeling/model-components/behaviors.md) for your types.
 
-.. contents:: Contents
-    :local:
+[[toc]]
     
 
 Example Usage
 -------------
 
-.. code-block:: c#
+``` c#
     
     public class Person
     {
@@ -37,6 +36,9 @@ Example Usage
         public string LastName { get; set; }
     }
 
+
+
+```
 
 Properties
 ----------
@@ -60,57 +62,58 @@ Behavioral Properties
 Validation Rule Properties
 ..........................
 
-.. tabs::
+<CodeTabs>
+<template #vue>
 
-    .. group-tab:: Knockout
+In addition to the following properties, you also customize validation on a per-instance basis of the [ViewModels](/stacks/vue/layers/viewmodels.md) using the [Rules/Validation](/stacks/vue/layers/viewmodels.md) methods.
 
-        The following attribute properties all map directly to Knockout-Validation_ properties.
+``` c#
+public bool IsRequired { get; set; }
+public double MinValue { get; set; } = double.MaxValue;
+public double MaxValue { get; set; } = double.MinValue;
+public double MinLength { get; set; } = double.MaxValue;
+public double MaxLength { get; set; } = double.MinValue;
+public string Pattern { get; set; }
+public bool IsEmail { get; set; }
+public bool IsPhoneUs { get; set; }
+```
 
-        .. code-block:: c#
+</template>
+<template #knockout>
 
-            public bool IsRequired { get; set; }
-            public double MinValue { get; set; } = double.MaxValue;
-            public double MaxValue { get; set; } = double.MinValue;
-            public double MinLength { get; set; } = double.MaxValue;
-            public double MaxLength { get; set; } = double.MinValue;
-            public double Step { get; set; }
-            public string Pattern { get; set; }
-            public bool IsEmail { get; set; }
-            public bool IsPhoneUs { get; set; }
-            public bool IsDate { get; set; }
-            public bool IsDateIso { get; set; }
-            public bool IsNumber { get; set; }
-            public bool IsDigit { get; set; }
+The following attribute properties all map directly to Knockout-Validation_ properties.
 
-        The following attribute properties are outputted to TypeScript unquoted. If you need to assert equality to a string, wrap the value you set to this property in quotes. Other literals (numerics, bools, etc) need no wrapping.
+``` c#
+public bool IsRequired { get; set; }
+public double MinValue { get; set; } = double.MaxValue;
+public double MaxValue { get; set; } = double.MinValue;
+public double MinLength { get; set; } = double.MaxValue;
+public double MaxLength { get; set; } = double.MinValue;
+public double Step { get; set; }
+public string Pattern { get; set; }
+public bool IsEmail { get; set; }
+public bool IsPhoneUs { get; set; }
+public bool IsDate { get; set; }
+public bool IsDateIso { get; set; }
+public bool IsNumber { get; set; }
+public bool IsDigit { get; set; }
+```
 
-        .. code-block:: c#
+The following attribute properties are outputted to TypeScript unquoted. If you need to assert equality to a string, wrap the value you set to this property in quotes. Other literals (numerics, bools, etc) need no wrapping.
 
-            public string Equal { get; set; }
-            public string NotEqual { get; set; }
+``` c#
+public string Equal { get; set; }
+public string NotEqual { get; set; }
+```
 
-                    
-        The following two properties may be used together to specify a custom Knockout-Validation_ property.
+The following two properties may be used together to specify a custom Knockout-Validation_ property.
 
-        It will be emitted into the TypeScript as `this.extend({ CustomName: CustomValue })`. Neither value will be quoted in the emitted TypeScript - add quotes to your value as needed to generate valid TypeScript.
+It will be emitted into the TypeScript as `this.extend({ CustomName: CustomValue })`. Neither value will be quoted in the emitted TypeScript - add quotes to your value as needed to generate valid TypeScript.
 
-        .. code-block:: c#
+``` c#
+public string CustomName { get; set; }
+public string CustomValue { get; set; }
+```
 
-            public string CustomName { get; set; }
-            public string CustomValue { get; set; }
-
-    .. group-tab:: Vue
-
-        In addition to the following properties, you also customize validation on a per-instance basis of the :ref:`VueInstanceViewModels` using the :ref:`VueViewModelsValidation` methods.
-
-        .. code-block:: c#
-
-            public bool IsRequired { get; set; }
-            public double MinValue { get; set; } = double.MaxValue;
-            public double MaxValue { get; set; } = double.MinValue;
-            public double MinLength { get; set; } = double.MaxValue;
-            public double MaxLength { get; set; } = double.MinValue;
-            public string Pattern { get; set; }
-            public bool IsEmail { get; set; }
-            public bool IsPhoneUs { get; set; }
-
+</template>
+</CodeTabs>

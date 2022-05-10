@@ -6,12 +6,12 @@ Allows setting of the default manner in which the data returned to the client wi
 
 This affects the sort order both when requesting a list of the model itself, as well as when the model appears as a child collection off of a navigation property of another object.
 
-In the first case (a list of the model itself), this can be overridden by setting the `orderBy` or `orderByDescending` property on the TypeScript `ListViewModel` - see :ref:`TypeScriptListViewModels`.
+In the first case (a list of the model itself), this can be overridden by setting the `orderBy` or `orderByDescending` property on the TypeScript `ListViewModel` - see [TypeScript List ViewModels](/stacks/disambiguation/list-view-model.md).
 
 Example Usage
 -------------
 
-.. code-block:: c#
+``` c#
 
     public class Person
     {
@@ -26,16 +26,26 @@ Example Usage
         public string LastName { get; set; }
     }
     
-.. code-block:: c#
 
-    public class LoginHistory
+```
+
+``` c#
+
+    public class Person
     {
-        public int LoginHistoryId {get; set;}
+        public int PersonId { get; set; }
         
-        [DefaultOrderBy(OrderByDirection = DefaultOrderByAttribute.OrderByDirections.Descending)]
-        public DateTime Date {get; set;}
-    }
+        public int DepartmentId { get; set; }
 
+        [DefaultOrderBy(FieldOrder = 0, FieldName = nameof(Department.Order))]
+        public Department Department { get; set; }
+        
+        [DefaultOrderBy(FieldOrder = 1)]
+        public string LastName { get; set; }
+    }
+    
+
+```
 
 Properties
 ----------

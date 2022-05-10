@@ -7,14 +7,14 @@ TypeScript ViewModels
 
 For each database-mapped type in your model, Coalesce will generate a TypeScript class that provides a multitude of functionality for interacting with the data on the client.
 
-These ViewModels are dependent on Knockout_, and are designed to be used directly from Knockout bindings in your HTML. All data properties on the generated model are Knockout observables.
+These ViewModels are dependent on [Knockout](http://knockoutjs.com/), and are designed to be used directly from Knockout bindings in your HTML. All data properties on the generated model are Knockout observables.
 
 
 Base Members
 ============
 
 `includes: string`
-    String that will be passed to the server when loading and saving that allows for data trimming via C# Attributes. See :ref:`Includes` for more information.
+    String that will be passed to the server when loading and saving that allows for data trimming via C# Attributes. See [Includes String](/concepts/includes.md) for more information.
 
 `isChecked: KnockoutObservable<boolean>`
     Flag to use to determine if this item is checked. Only provided for convenience.
@@ -132,9 +132,9 @@ Model-Specific Members
 ======================
 
 Configuration
-    A static configuration object for configuring all instances of the ViewModel's  type is created, as well as an instance configuration object for configuring specific instances of the ViewModel. See (see :ref:`TSModelConfig`) for more information.
+    A static configuration object for configuring all instances of the ViewModel's  type is created, as well as an instance configuration object for configuring specific instances of the ViewModel. See (see [ViewModel Configuration](/stacks/ko/client/model-config.md)) for more information.
 
-    .. code-block:: knockout
+    ``` ts
 
         public static coalesceConfig: Coalesce.ViewModelConfiguration<Person>
             = new Coalesce.ViewModelConfiguration<Person>(Coalesce.GlobalConfiguration.viewModel);
@@ -142,18 +142,24 @@ Configuration
         public coalesceConfig: Coalesce.ViewModelConfiguration<Person>
             = new Coalesce.ViewModelConfiguration<Person>(Person.coalesceConfig);
 
-DataSources
-    For each of the :ref:`DataSources` for a model, a class will be added to a namespace named ``ListViewModels.<ClassName>DataSources``. This namespace can always be accessed on both `ViewModel` and `ListViewModel` instances via the `dataSources` property, and class instances can be assigned to the `dataSource` property.
 
-    .. code-block:: knockout
+    ```
+
+DataSources
+    For each of the [Data Sources](/modeling/model-components/data-sources.md) for a model, a class will be added to a namespace named ``ListViewModels.<ClassName>DataSources``. This namespace can always be accessed on both `ViewModel` and `ListViewModel` instances via the `dataSources` property, and class instances can be assigned to the `dataSource` property.
+
+    ``` ts
 
         public dataSources = ListViewModels.PersonDataSources;
         public dataSource: DataSource<Person> = new this.dataSources.Default();
 
+
+    ```
+
 Data Properties
     For each exposed property on the underlying EF POCO, a `KnockoutObservable<T>` property will exist on the TypeScript model. For navigation properties, these will be typed with the corresponding TypeScript ViewModel for the other end of the relationship. For collections (including collection navigation properties), these properties will be `KnockoutObservableArray<T>` objects.
 
-    .. code-block:: knockout
+    ``` ts
 
         public personId: KnockoutObservable<number> = ko.observable(null);
         public fullName: KnockoutObservable<string> = ko.observable(null);
@@ -163,49 +169,64 @@ Data Properties
         public addresses: KnockoutObservableArray<ViewModels.Address> = ko.observableArray([]);
         public birthDate: KnockoutObservable<moment.Moment> = ko.observable(moment());
 
+
+    ```
+
 .. _TypeScriptViewModelComputedText:
 
 Computed Text Properties
-    For each reference navigation property and each Enum property on your POCO, a `KnockoutComputed<string>` property will be created that will provide the text to display for that property. For navigation properties, this will be the property on the class annotated with :ref:`ListTextAttribute`.
+    For each reference navigation property and each Enum property on your POCO, a `KnockoutComputed<string>` property will be created that will provide the text to display for that property. For navigation properties, this will be the property on the class annotated with [[ListText]](/modeling/model-components/attributes/list-text.md).
 
-    .. code-block:: knockout
+    ``` ts
 
         public companyText: () => string;
         public genderText: () => string;
 
+
+    ```
+
 Collection Navigation Property Helpers
     For each collection navigation property on the POCO, the following members will be created:
 
-    - A method that will add a new object to that collection property. If `autoSave` is specified, the auto-save behavior of the new object will be set to that value. Otherwise, the inherited default will be used (see :ref:`TSModelConfig`)
+    - A method that will add a new object to that collection property. If `autoSave` is specified, the auto-save behavior of the new object will be set to that value. Otherwise, the inherited default will be used (see [ViewModel Configuration](/stacks/ko/client/model-config.md))
 
-    .. code-block:: knockout
+    ``` ts
 
         public addToAddresses: (autoSave?: boolean) => ViewModels.Address;
 
+
+    ```
+
     - A `KnockoutComputed<string>` that evaluates to a relative url for the generated table view that contains only the items that belong to the collection navigation property.
 
-    .. code-block:: knockout
+    ``` ts
 
         public addressesListUrl: KnockoutComputed<string>;
+
+
+    ```
 
 Reference Navigation Property Helpers
     For each reference navigation property on the POCO, the following members will be created:
 
     - A method that will call `showEditor` on that current value of the navigation property, or on a new instance if the current value is null.
 
-    .. code-block:: knockout
+    ``` ts
 
         public showCompanyEditor: (callback?: any) => void;
 
+
+    ```
+
 Instance Method Members
-    For each :ref:`Instance Method <ModelMethods>` on your POCO, the members outlined in :ref:`Methods - Generated TypeScript <KoModelMethodTypeScript>` will be created.
+    For each [Instance Method](/modeling/model-components/methods.md) on your POCO, the members outlined in [Methods - Generated TypeScript](/stacks/ko/client/methods.md) will be created.
 
 Enum Members
     For each `enum` property on your POCO, the following will be created:
 
     - A static array of objects with properties `id` and `value` that represent all the values of the enum.
 
-    .. code-block:: knockout
+    ``` ts
 
         public genderValues: Coalesce.EnumValue[] = [ 
             { id: 1, value: 'Male' },
@@ -213,9 +234,12 @@ Enum Members
             { id: 3, value: 'Other' },
         ];
 
+
+    ```
+
     - A TypeScript enum that mirrors the C# enum directly. This enum is in a sub-namespace of `ViewModels` named the same as the class name.
 
-    .. code-block:: knockout
+    ``` ts
 
         export namespace Person {
             export enum GenderEnum {
@@ -224,4 +248,7 @@ Enum Members
                 Other = 3,
             };
         }
+
+
+    ```
 

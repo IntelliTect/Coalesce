@@ -5,18 +5,17 @@ c-datetime-picker
 
 .. MARKER:summary
     
-A general, all-purpose date/time input component that can be used either with :ref:`models <VueModels>` and :ref:`metadata <VueMetadata>` or as a standalone component using only ``v-model``.
+A general, all-purpose date/time input component that can be used either with [models](/stacks/vue/layers/models.md) and [metadata](/stacks/vue/layers/metadata.md) or as a standalone component using only ``v-model``.
 
 .. MARKER:summary-end
 
-.. contents:: Contents
-    :local:
+[[toc]]
 
 
 Examples
 --------
 
-.. code-block:: sfc
+``` vue-html
 
     <c-datetime-picker :model="person" for="birthDate" />
     
@@ -27,6 +26,9 @@ Examples
         date-kind="time"
         date-format="h:mm a"
     />
+
+
+```
 
 Props
 -----
@@ -47,7 +49,7 @@ Props
 `dateKind?: "date" | "time" | "datetime" = "datetime"`
     Whether the date is only a date, only a time, or contains significant date `and` time information.
 
-    If the component was bound with metadata using the `for` prop, this will default to the kind specified by :ref:`DateTypeAttribute`.
+    If the component was bound with metadata using the `for` prop, this will default to the kind specified by [[DateType]](/modeling/model-components/attributes/date-type.md).
 
 `dateFormat?: string`
     The format of the date that will be rendered in the component's text field, and the format that will be attempted first when parsing user input in the text field.
@@ -62,7 +64,7 @@ Props
 
         When parsing a user's text input into the text field, c-datetime-picker will first attempt to parse it with the format specified by `dateFormat`, or the default as described above if not explicitly specified.
         
-        If this fails, the date will be parsed with the `Date constructor <https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/Date>`_, but only if the `dateKind` is ``datetime`` or ``date``. This works fairly well on all modern browsers, but can still occasionally have issues. c-datetime-picker tries its best to filter out bad parses from the Date constructor, like dates with a year earlier than 1000.
+        If this fails, the date will be parsed with the [Date constructor](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/Date), but only if the `dateKind` is ``datetime`` or ``date``. This works fairly well on all modern browsers, but can still occasionally have issues. c-datetime-picker tries its best to filter out bad parses from the Date constructor, like dates with a year earlier than 1000.
 
 `readonly?: boolean`
     True if the component should be read-only.

@@ -6,32 +6,37 @@ c-display
 
 .. MARKER:summary
 
-A general-purpose component for displaying any :ref:`VueMetadataValue` by rendering the value to a string with the :ref:`display functions from the Models Layer <VueModelDisplayFunctions>`. For string and number :ref:`values <VueMetadataValue>`, usage of this component is largely superfluous. For all other value types including dates, booleans, enums, objects, and collections, it is very handy.
+A general-purpose component for displaying any [Value](/stacks/vue/layers/metadata.md) by rendering the value to a string with the :ref:`display functions from the Models Layer <VueModelDisplayFunctions>`. For string and number [values](/stacks/vue/layers/metadata.md), usage of this component is largely superfluous. For all other value types including dates, booleans, enums, objects, and collections, it is very handy.
 
 .. MARKER:summary-end
 
 
-.. contents:: Contents
-    :local:
+[[toc]]
 
 Examples
 --------
 
 Typical usage, providing an object and a property on that object:
 
-.. code-block:: sfc
+``` vue-html
 
     <c-display :model="person" for="gender" />
 
+
+```
+
 Customizing date formatting:
 
-.. code-block:: sfc
+``` vue-html
 
     <c-display :model="person" for="birthDate" format="M/d/yyyy" />
 
-A contrived example of using c-display to render the result of an :ref:`API Caller <VueApiCallers>`:
 
-.. code-block:: sfc
+```
+
+A contrived example of using c-display to render the result of an [API Caller](/stacks/vue/layers/api-clients.md):
+
+``` vue-html
 
     <c-display 
         :value="person.setFirstName.result" 
@@ -39,11 +44,17 @@ A contrived example of using c-display to render the result of an :ref:`API Call
         element="div"
     />
 
+
+```
+
 Displaying a standalone date value without a model or other source of metadata:
 
-.. code-block:: sfc
+``` vue-html
 
     <c-display :value="dateProp" format="M/d/yyyy" />
+
+
+```
 
 Props
 -----
@@ -57,10 +68,10 @@ Props
 `format: DisplayOptions["format"]`
     Shorthand for `:options="{ format: format }"`, allowing for specification of the format to be used when displaying dates.
 
-    See :ref:`DisplayOptions` for details on the options available for `format`.
+    See [DisplayOptions](/stacks/vue/layers/models.md) for details on the options available for `format`.
 
 `options: DisplayOptions`
-    Specify options for formatting some kinds of values, including dates. See :ref:`DisplayOptions` for details.
+    Specify options for formatting some kinds of values, including dates. See [DisplayOptions](/stacks/vue/layers/models.md) for details.
 
 `value: any`
     Can be provided the value to be displayed in conjunction with the `for` prop, as an alternative to the `model` prop.

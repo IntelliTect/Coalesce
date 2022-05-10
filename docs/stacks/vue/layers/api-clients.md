@@ -3,14 +3,13 @@
 API Client Layer
 ================
 
-The API client layer, generated as `api-clients.g.ts`, exports a class for each API controller that was generated for your data model. These classes are stateless and provide one method for each API endpoint. This includes both the standard set of endpoints created for :ref:`EntityModels` and :ref:`CustomDTOs`, as well as any custom :ref:`ModelMethods` on the aforementioned types, as well as any methods on your :ref:`Services`.
+The API client layer, generated as `api-clients.g.ts`, exports a class for each API controller that was generated for your data model. These classes are stateless and provide one method for each API endpoint. This includes both the standard set of endpoints created for [Entity Models](/modeling/model-types/entities.md) and [Custom DTOs](/modeling/model-types/dtos.md), as well as any custom [Methods](/modeling/model-components/methods.md) on the aforementioned types, as well as any methods on your [Services](/modeling/model-types/services.md).
 
-The API clients provided by Coalesce are based on `axios <https://github.com/axios/axios>`_. All API clients used a shared axios instance, exported from `coalesce-vue` as `AxiosClient`. This instance can be used to configure all HTTP requests made by Coalesce, including things like attaching `interceptors <https://github.com/axios/axios#interceptors>`_ to modify the requests being made, or configuring `defaults <https://github.com/axios/axios#config-defaults>`_.
+The API clients provided by Coalesce are based on [axios](https://github.com/axios/axios). All API clients used a shared axios instance, exported from `coalesce-vue` as `AxiosClient`. This instance can be used to configure all HTTP requests made by Coalesce, including things like attaching [interceptors](https://github.com/axios/axios#interceptors) to modify the requests being made, or configuring [defaults](https://github.com/axios/axios#config-defaults).
 
-As with all the layers, the `source code of coalesce-vue <https://github.com/IntelliTect/Coalesce/blob/dev/src/coalesce-vue/src/api-client.ts>`_ is also a great supplement to this documentation.
+As with all the layers, the [source code of coalesce-vue](https://github.com/IntelliTect/Coalesce/blob/dev/src/coalesce-vue/src/api-client.ts) is also a great supplement to this documentation.
 
-.. contents:: Contents
-    :local:
+[[toc]]
 
 Concepts 
 --------
@@ -20,14 +19,14 @@ API Client
 
     Each method on the API client takes in the regular parameters of the method as you would expect, as well as an optional `AxiosRequestConfig` parameter at the end that can be used to provide additional configuration for the single request, if needed.
 
-    For the methods that correspond to the standard set of CRUD endpoints that Coalesce provides (``get``, ``list``, ``count``, ``save``, ``delete``), an additional parameter `parameters` is available that accepts the set of :ref:`DataSourceStandardParameters` appropriate for the endpoint.
+    For the methods that correspond to the standard set of CRUD endpoints that Coalesce provides (``get``, ``list``, ``count``, ``save``, ``delete``), an additional parameter `parameters` is available that accepts the set of [Standard Parameters](/modeling/model-components/data-sources.md) appropriate for the endpoint.
 
-    Each method returns a `Promise<AxiosResponse<TApiResult>>` where `TApiResult` is either `ItemResult`, `ItemResult<T>`, or `ListResult<T>`, depending on the return type of the API endpoint. `AxiosResponse` is the `response object from axios <https://github.com/axios/axios#response-schema>`_, containing the `TApiResult` in its `data` property, as well as other properties like `headers`. The returned type `T` is automatically converted into valid :ref:`Model implementations <VueModels>` for you.
+    Each method returns a `Promise<AxiosResponse<TApiResult>>` where `TApiResult` is either `ItemResult`, `ItemResult<T>`, or `ListResult<T>`, depending on the return type of the API endpoint. `AxiosResponse` is the [response object from axios](https://github.com/axios/axios#response-schema), containing the `TApiResult` in its `data` property, as well as other properties like `headers`. The returned type `T` is automatically converted into valid [Model implementations](/stacks/vue/layers/models.md) for you.
 
 API Callers/API States
     A stateful function for invoking an API endpoint, created with the `$makeCaller` function on an API Client. API Callers provide a wide array of functionality that is useful for working with API endpoints that are utilized by a user interface.
 
-    Because they are such an integral part of the overall picture of `coalesce-vue`, they have :ref:`their own section below <VueApiCallers>` where they are explained in much greater detail.
+    Because they are such an integral part of the overall picture of `coalesce-vue`, they have [their own section below](/stacks/vue/layers/api-clients.md) where they are explained in much greater detail.
 
 
 
@@ -47,7 +46,7 @@ State management
 Concurrency Management
     Using `setConcurrency(mode)`, you can configure how each individual caller handles what happens when multiple requests are made simultaneously
 Argument Binding
-    API Callers can be created so that they have an `args` object that can be bound to, using `.invokeWithArgs()` to make a request using those arguments as the API endpoint's parameters. The API Callers created for the :ref:`VueViewModels` are all created this way.
+    API Callers can be created so that they have an `args` object that can be bound to, using `.invokeWithArgs()` to make a request using those arguments as the API endpoint's parameters. The API Callers created for the [ViewModel Layer](/stacks/vue/layers/viewmodels.md) are all created this way.
 
 
 Creating and Invoking API Caller
@@ -57,19 +56,22 @@ API Callers can be created with the `$makeCaller` method of an API Client. The w
 
 .. tip:: 
 
-    During typical development, it is unlikely that you'll need to make a custom API Caller - the ones created for you on the generated :ref:`VueViewModels` will usually suffice. However, creating your own can allow for some more advanced functionality.
+    During typical development, it is unlikely that you'll need to make a custom API Caller - the ones created for you on the generated [ViewModel Layer](/stacks/vue/layers/viewmodels.md) will usually suffice. However, creating your own can allow for some more advanced functionality.
 
 Some examples:
 
-.. code-block:: typescript
+``` ts
 
     // Preamble for all the examples below:
     import { PersonApiClient } from '@/api-clients.g';
     const client = new PersonApiClient;
 
+
+```
+
 A caller that takes no additional parameters:
 
-.. code-block:: typescript
+``` ts
 
     const caller = client.$makeCaller(
         "item", 
@@ -79,9 +81,12 @@ A caller that takes no additional parameters:
     await caller();
     console.log(caller.result)
 
+
+```
+
 A caller that takes custom parameters:
 
-.. code-block:: typescript
+``` ts
 
     const caller = client.$makeCaller(
         methods => methods.namesStartingWith, 
@@ -91,9 +96,12 @@ A caller that takes custom parameters:
     await caller("Rob");
     console.log(caller.result)
 
-A caller that has an args object that can be bound to. This is how the generated API Callers in the :ref:`VueViewModels` are created:
 
-.. code-block:: typescript
+```
+
+A caller that has an args object that can be bound to. This is how the generated API Callers in the [ViewModel Layer](/stacks/vue/layers/viewmodels.md) are created:
+
+``` ts
 
     const caller = client.$makeCaller("item", 
         // The parameter-based version is always required, even if it won't be used.
@@ -109,9 +117,12 @@ A caller that has an args object that can be bound to. This is how the generated
     await caller.invokeWithArgs();
     console.log(caller.result)
 
+
+```
+
 A caller that performs multiple async operations:
 
-.. code-block:: typescript
+``` ts
 
     const deleteFirstNameStartingWith = client.$makeCaller(
         "item",
@@ -123,6 +134,9 @@ A caller that performs multiple async operations:
 
     await caller("Rob");
     console.log(caller.result)
+
+
+```
 
 The first parameter, `resultType`, can either be one of `"item"` or `"list"`, indicating whether the method returns a `ItemResult` or `ListResult` (examples #1 and #3 above). It can also be a function which accepts the set of method metadata for the API Client and which returns the specific method metadata (example #2 above), or it can be a direct reference to a specific method metadata object.
 
@@ -165,7 +179,7 @@ ItemResult-based Callers
     The principal data returned by the previous request. Will be set to null if the last response received returned no data (e.g. if the response was an error response)
 
 `validationIssues: ValidationIssue[] | null`
-    Any validation issues returned by the previous request. This is never populated automatically by Coalesce, and is therefore is only used if you have written custom code to populate it in your :ref:`Behaviors` or :ref:`ModelMethods`.
+    Any validation issues returned by the previous request. This is never populated automatically by Coalesce, and is therefore is only used if you have written custom code to populate it in your [Behaviors](/modeling/model-components/behaviors.md) or [Methods](/modeling/model-components/methods.md).
 
 ListResult-based Callers
 ''''''''''''''''''''''''
@@ -199,7 +213,7 @@ API callers have a `setConcurrency(mode: string)` method that allows you to cust
 `"cancel"`
     When a secondary invocation is performed, cancel the current pending invocation. 
 
-    This completely aborts the request, propagating all the way back to the server where cancellation can be observed with `HttpContext.RequestAborted <https://docs.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.http.httpcontext.requestaborted?view=aspnetcore-3.1>`_. The promise of the cancelled invocation will be resolved with `undefined` (it is NOT rejected).
+    This completely aborts the request, propagating all the way back to the server where cancellation can be observed with [HttpContext.RequestAborted](https://docs.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.http.httpcontext.requestaborted?view=aspnetcore-3.1). The promise of the cancelled invocation will be resolved with `undefined` (it is NOT rejected).
 
 `"allow"`
     When a secondary invocation is performed, always continue normally, sending the request to the server.
@@ -234,6 +248,6 @@ API Callers have a few other methods available as well:
     Only exists if the caller was created with the option of being invoked with an args object as described in the sections above.
 
 `getResultObjectUrl(vue: Vue)`
-    If the method returns a file, this method will return an `Object URL <https://developer.mozilla.org/en-US/docs/Web/API/URL/createObjectURL>`_ representing the value of the `result` prop. Requires a `Vue` instance to be provided in order to manage the lifecycle of the URL, since object URLs must be manually released to avoid memory leaks. When the provided Vue component is destroyed, the object URL will be destroyed.
+    If the method returns a file, this method will return an [Object URL](https://developer.mozilla.org/en-US/docs/Web/API/URL/createObjectURL) representing the value of the `result` prop. Requires a `Vue` instance to be provided in order to manage the lifecycle of the URL, since object URLs must be manually released to avoid memory leaks. When the provided Vue component is destroyed, the object URL will be destroyed.
 
     Only exists if the caller was created with the option of being invoked with an args object as described in the sections above.

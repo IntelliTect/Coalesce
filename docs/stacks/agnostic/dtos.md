@@ -9,8 +9,8 @@ Data Transfer Objects, or DTOs, allow for transformations of data from the data 
 Coalesce supports two types of DTOs:
 
 -  DTOs that are automatically generated for each POCO database object.
-   These are controlled via :ref:`ModelAttributes` on the POCO. These are outlined below.
--  DTOs that you create with IClassDto and create unique ViewModels. These are outlined at :ref:`CustomDTOs`.
+   These are controlled via [Attributes](/modeling/model-components/attributes.md) on the POCO. These are outlined below.
+-  DTOs that you create with IClassDto and create unique ViewModels. These are outlined at [Custom DTOs](/modeling/model-types/dtos.md).
 
 
 Automatically Generated DTOs
@@ -18,5 +18,5 @@ Automatically Generated DTOs
 
 Every class that is exposed through Coalesce's generated API will have a corresponding DTO generated for it. These DTOs are used to shuttle data back and forth to the client. They are generated classes that have nullable versions of all the properties on the POCO class.
 
-:ref:`DtoIncludesExcludesAttr` and the :ref:`Includes` infrastructure can be used to indicate which properties should be transferred to the client in which cases, and :ref:`IncludeTree` is used to dictate how these DTOs are constructed from POCOs retrieved from the database.
+[[DtoIncludes] & [DtoExcludes]](/modeling/model-components/attributes/dto-includes-excludes.md) and the [Includes String](/concepts/includes.md) infrastructure can be used to indicate which properties should be transferred to the client in which cases, and [Include Tree](/concepts/include-tree.md) is used to dictate how these DTOs are constructed from POCOs retrieved from the database.
 

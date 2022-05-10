@@ -11,8 +11,7 @@ Coalesce provides a number of knockout bindings that make common model binding a
 Editors Note: On this page, some bindings are split into their requisite HTML component with their ``data-bind`` component listed immediately after. Keep this in mind when reading.
 
 
-.. contents:: Contents
-    :local:
+[[toc]]
 
 
 Input Bindings
@@ -21,7 +20,7 @@ Input Bindings
 select2Ajax
 ...........
 
-| :html:`<select data-bind="..."></select>`
+| `<select data-bind="..."></select>`
 | `select2Ajax: personId, url: '/api/Person/list', idField: 'personId', textField: 'Name', object: person, allowClear: true`
 |
 
@@ -76,7 +75,7 @@ select2Ajax
 select2AjaxMultiple
 ...................
 
-| :html:`<select multiple="multiple" data-bind="..."></select>`
+| `<select multiple="multiple" data-bind="..."></select>`
 | `select2AjaxMultiple: people, url: '/api/Person/list', idField: 'personId', textField: 'Name', itemViewModel: ViewModels.PersonCase`
 |
 
@@ -124,7 +123,7 @@ select2AjaxMultiple
 select2AjaxText
 ...............
 
-| :html:`<select data-bind="..."></select>`
+| `<select data-bind="..."></select>`
 | `select2AjaxText: schoolName, url: '/api/Person/SchoolNames'`
 |
 
@@ -168,11 +167,11 @@ select2AjaxText
 select2
 .......
 
-| :html:`<select data-bind="..."></select>`
+| `<select data-bind="..."></select>`
 | `select2: personId`
 |
 
-    Sets up a basic select2 dropdown on an HTML select element. Dropdown contents should be populated through other means - either using stock Knockout_ bindings or server-side static contents (via cshtml).
+    Sets up a basic select2 dropdown on an HTML select element. Dropdown contents should be populated through other means - either using stock [Knockout](http://knockoutjs.com/) bindings or server-side static contents (via cshtml).
 
     selectOnClose
         Directly maps to select2 option ``selectOnClose``
@@ -189,7 +188,7 @@ select2
 datePicker
 ..........
 
-    .. code-block:: html
+    ``` html
 
         <div class="input-group date">
             <input data-bind="datePicker: birthDate" type="text" class="form-control" />
@@ -197,6 +196,9 @@ datePicker
                 <span class="fa fa-calendar"></span>
             </span>
         </div>
+
+
+    ```
 
     .. _bootstrap-datetimepicker: https://eonasdan.github.io/bootstrap-datetimepicker/
 
@@ -230,24 +232,30 @@ datePicker
 saveImmediately
 ...............
 
-    .. code-block:: html
+    ``` html
 
         <div data-bind="with: product">
             <input type="text" data-bind="textValue: description, saveImmediately: true" />
         </div>
 
-    When used in a context where `$data` is a `Coalesce.BaseViewModel`, that object's `saveTimeoutMs` configuration property (see :ref:`TSModelConfig`) will be set to `0` when the element it is placed on gains focus. This value will be reverted to its previous value when the element loses focus. This will cause any changes to the object, including any observable bound as input on the element, to trigger a save immediately rather than after a delay (defaults to 500ms). 
+
+    ```
+
+    When used in a context where `$data` is a `Coalesce.BaseViewModel`, that object's `saveTimeoutMs` configuration property (see [ViewModel Configuration](/stacks/ko/client/model-config.md)) will be set to `0` when the element it is placed on gains focus. This value will be reverted to its previous value when the element loses focus. This will cause any changes to the object, including any observable bound as input on the element, to trigger a save immediately rather than after a delay (defaults to 500ms). 
 
 delaySave
 .........
 
-    .. code-block:: html
+    ``` html
 
         <div data-bind="with: product">
             <input type="text" data-bind="textValue: description, delaySave: true" />
         </div>
 
-    When used in a context where `$data` is a `Coalesce.BaseViewModel`, that object's `autoSaveEnabled` configuration property (see :ref:`TSModelConfig`) will be set to `false` when the element it is placed on gains focus. This will cause any changes to the object, including any observable bound as input on the element, to not trigger auto saves while the element has focus. When the element loses focus, the `autoSaveEnabled` flag will be reverted to its previous value and an attempt will be made to save the object. 
+
+    ```
+
+    When used in a context where `$data` is a `Coalesce.BaseViewModel`, that object's `autoSaveEnabled` configuration property (see [ViewModel Configuration](/stacks/ko/client/model-config.md)) will be set to `false` when the element it is placed on gains focus. This will cause any changes to the object, including any observable bound as input on the element, to not trigger auto saves while the element has focus. When the element loses focus, the `autoSaveEnabled` flag will be reverted to its previous value and an attempt will be made to save the object. 
     
 
 
@@ -261,7 +269,7 @@ tooltip
 | `tooltip: {title: note, placement: 'bottom', animation: false}`
 |
 
-    Wrapper around the `Bootstrap tooltip component <https://getbootstrap.com/docs/3.3/javascript/#tooltips>`_. Binding can either be simply a string (or observable string), or it can be an object that will be passed directly to the Bootstrap tooltip component.
+    Wrapper around the [Bootstrap tooltip component](https://getbootstrap.com/docs/3.3/javascript/#tooltips). Binding can either be simply a string (or observable string), or it can be an object that will be passed directly to the Bootstrap tooltip component.
 
 fadeVisible
 ...........
@@ -282,7 +290,7 @@ slideVisible
 moment
 ......
 
-| :html:`<span data-bind="moment: momentObservable"></span>`
+| `<span data-bind="moment: momentObservable"></span>`
 | `moment: momentObservable`
 | `moment: momentObservable, format: 'MM/DD/YYYY hh:mm a'`
 |
@@ -292,7 +300,7 @@ moment
 momentFromNow
 .............
 
-| :html:`<span data-bind="momentFromNow: momentObservable"></span>`
+| `<span data-bind="momentFromNow: momentObservable"></span>`
 | `momentFromNow: momentObservable`
 | `momentFromNow: momentObservable, shorten: true`
 |
@@ -312,7 +320,7 @@ let
 
     The let binding is a somewhat common construct used in Knockout applications, but isn't part of Knockout itself. It effectively allows the creation of variables in the binding context, allowing complex statements which may be used multiple times to be aliased for both clarity of code and better performance.
 
-    .. code-block:: html
+    ``` html
 
         <div class="item">
             <!-- ko let: { showControls: $data.isEditing() || $parent.editingChildren() } -->
@@ -324,6 +332,9 @@ let
 
 
 
+
+    ```
+
 Knockout Binding Defaults
 -------------------------
 
@@ -331,11 +342,14 @@ These are static properties on `IntelliTect.Coalesce.Knockout.Helpers.Knockout` 
 
 The date/time picker properties can be coupled with ``DateTimeOffset`` model properties to display time values localized for the current user's locale.  If you want to make the localization static, simply include a script block in your ``_Layout.cshtml`` or in a specific view that sets the default for Moment.js:
 
-.. code-block:: html
+``` html
 
     <script>
         moment.tz.setDefault("America/Chicago");
     </script>
+
+
+```
 
 .. note:: This needs to happen *after* Moment is loaded, but *before* the bootstrap-datetimepicker script is loaded.
 
@@ -361,7 +375,7 @@ DefaultDateFormat
 | `public static string DefaultDateFormat { get; set; } = "M/D/YYYY";`
 |
 
-    Sets the default date-only format to be used by all date/time pickers.  This only applies to models with a date-only :ref:`[DateType] <DateTypeAttribute>` attribute.
+    Sets the default date-only format to be used by all date/time pickers.  This only applies to models with a date-only [[DateType]](/modeling/model-components/attributes/date-type.md) attribute.
 
 DefaultTimeFormat
 .................
@@ -369,7 +383,7 @@ DefaultTimeFormat
 | `public static string DefaultTimeFormat { get; set; } = "h:mm a";`
 |
 
-    Sets the default time-only format to be used by all date/time pickers.  This only applies to models with a time-only :ref:`[DateType] <DateTypeAttribute>` attribute.
+    Sets the default time-only format to be used by all date/time pickers.  This only applies to models with a time-only [[DateType]](/modeling/model-components/attributes/date-type.md) attribute.
 
 DefaultDateTimeFormat
 .....................
@@ -377,6 +391,6 @@ DefaultDateTimeFormat
 | `public static string DefaultDateTimeFormat { get; set; } = "M/D/YYYY h:mm a"`
 |
     
-    Sets the default date/time format to be used by all date/time pickers.  This only applies to ``DateTimeOffset`` model properties that do not have a limiting :ref:`[DateType] <DateTypeAttribute>` attribute.
+    Sets the default date/time format to be used by all date/time pickers.  This only applies to ``DateTimeOffset`` model properties that do not have a limiting [[DateType]](/modeling/model-components/attributes/date-type.md) attribute.
 
-.. note:: ``DefaultDateFormat``, ``DefaultTimeFormat`` and ``DefaultDateTimeFormat`` all take various formatting strings from the Moment.js library.  A full listing can be found on the `Moment website <https://momentjs.com/docs/#/displaying/format/>`_.
+.. note:: ``DefaultDateFormat``, ``DefaultTimeFormat`` and ``DefaultDateTimeFormat`` all take various formatting strings from the Moment.js library.  A full listing can be found on the [Moment website](https://momentjs.com/docs/#/displaying/format/).

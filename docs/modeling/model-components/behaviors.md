@@ -11,13 +11,12 @@ Behaviors
 
 ----
 
-Coalesce separates out the parts of your API that read your data from the parts that mutate it. The read portion is performed by :ref:`DataSources`, and the mutations are performed by behaviors. Like data sources, there exists a standard set of behaviors that Coalesce provides out-of-the-box that cover the most common use cases for creating, updating, and deleting objects in your data model.
+Coalesce separates out the parts of your API that read your data from the parts that mutate it. The read portion is performed by [Data Sources](/modeling/model-components/data-sources.md), and the mutations are performed by behaviors. Like data sources, there exists a standard set of behaviors that Coalesce provides out-of-the-box that cover the most common use cases for creating, updating, and deleting objects in your data model.
 
 Also like data sources, these functions can be easily overridden on a per-model basis, allowing complete control over the ways in which your data is mutated by the APIs that Coalesce generates. However, unlike data sources which can have as many implementations per model as you like, you can only have one set of behaviors.
 
 
-.. contents:: Contents
-    :local:
+[[toc]]
 
 Defining Behaviors
 ------------------
@@ -26,11 +25,11 @@ By default, each of your models that Coalesce exposes will utilize the standard 
 
 .. note::
 
-    When you define a set of custom behaviors, take note that these are only used by the standard set of API endpoints that Coalesce always provides. They will not be used to handle any mutations in any :ref:`ModelMethods` you write for your models.
+    When you define a set of custom behaviors, take note that these are only used by the standard set of API endpoints that Coalesce always provides. They will not be used to handle any mutations in any [Methods](/modeling/model-components/methods.md) you write for your models.
 
 To create your own behaviors, you simply need to define a class that implements `IntelliTect.Coalesce.IBehaviors<T>`. To expose your behaviors to Coalesce, either place it as a nested class of the type `T` that your behaviors are for, or annotate it with the `[Coalesce]` attribute. Of course, the easiest way to create behaviors that doesn't require you to re-engineer a great deal of logic would be to inherit from `IntelliTect.Coalesce.StandardBehaviors<T, TContext>`, and then override only the parts that you need.
 
-.. code-block:: c#
+``` c#
 
     public class Case
     {
@@ -70,6 +69,9 @@ To create your own behaviors, you simply need to define a class that implements 
             return Db.SaveChangesAsync();
         }
     }
+
+
+```
 
 Dependency Injection
 ''''''''''''''''''''
@@ -115,7 +117,7 @@ The standard behaviors implementation contains many different methods which can 
 
 These methods often call one another, so overriding one method may cause some other method to no longer be called. The hierarchy of method calls, ignoring any logic or conditions contained within, is as follows:
 
-.. code-block:: none
+``` :no-line-numbers
 
     SaveAsync
         DetermineSaveKindAsync
@@ -133,6 +135,9 @@ These methods often call one another, so overriding one method may cause some ot
         ExecuteDeleteAsync
             GetDbSet
         AfterDelete
+
+
+```
 
 Method Details
 ''''''''''''''
@@ -152,7 +157,7 @@ All of the methods outlined above can be overridden. A description of each of th
     Fetch a `DbSet<T>` that items can be added to (creates) or remove from (deletes).
 
 `ValidateDto`
-    Provides a chance to validate the properties of the DTO object itself, as opposed to the properties of the model after the DTO has been mapped to it in `BeforeSave`. A number of extension methods on `IClassDto<T>` can be used to access the value of the properties of :ref:`GenDTOs`. For behaviors on :ref:`CustomDTOs` where the DTO type is known, simply cast to the correct type. 
+    Provides a chance to validate the properties of the DTO object itself, as opposed to the properties of the model after the DTO has been mapped to it in `BeforeSave`. A number of extension methods on `IClassDto<T>` can be used to access the value of the properties of [Generated C# DTOs](/stacks/agnostic/dtos.md). For behaviors on [Custom DTOs](/modeling/model-types/dtos.md) where the DTO type is known, simply cast to the correct type. 
 
 `MapIncomingDto`
     Map the properties of the incoming DTO to the model that will be saved to the database. By default, this will call the `MapTo` method on the DTO, but if more precise control is needed, the `IClassDto<T>` extension methods or a cast to a known type can be used to get specific values. If all else fails, the DTO can be reflected upon.
@@ -161,7 +166,7 @@ All of the methods outlined above can be overridden. A description of each of th
     Provides an easy way for derived classes to intercept a save attempt and either reject it by returning an unsuccessful result, or approve it by returning success. The incoming item can also be modified at will in this method to override changes that the client made as desired.    
 
 `AfterSave`
-    Provides an easy way for derived classes to perform actions after a save operation has been completed. Failure results returned here will present an error to the client, but will not prevent modifications to the database since changes have already been saved at this point. This method can optionally modify or replace the item that is sent back to the client after a save by setting `ref T item` to another object or to null. Setting `ref IncludeTree includeTree` will override the :ref:`IncludeTree` used to shape the response object.
+    Provides an easy way for derived classes to perform actions after a save operation has been completed. Failure results returned here will present an error to the client, but will not prevent modifications to the database since changes have already been saved at this point. This method can optionally modify or replace the item that is sent back to the client after a save by setting `ref T item` to another object or to null. Setting `ref IncludeTree includeTree` will override the [Include Tree](/concepts/include-tree.md) used to shape the response object.
 
     .. warning::
 
@@ -179,7 +184,7 @@ All of the methods outlined above can be overridden. A description of each of th
     Overriding this allows for changing this row-deletion implementation to something else, like setting of a soft delete flag, or copying the data into another archival table before deleting.
 
 `AfterDelete`
-    Allows for performing any sort of cleanup actions after a delete has completed. If the item was still able to be retrieved from the database after the delete operation completed, this method allows lets you modify or replace the item that is sent back to the client by setting `ref T item` to another object or to null. Setting `ref IncludeTree includeTree` will override the :ref:`IncludeTree` used to shape the response object.
+    Allows for performing any sort of cleanup actions after a delete has completed. If the item was still able to be retrieved from the database after the delete operation completed, this method allows lets you modify or replace the item that is sent back to the client by setting `ref T item` to another object or to null. Setting `ref IncludeTree includeTree` will override the [Include Tree](/concepts/include-tree.md) used to shape the response object.
 
 
 
@@ -191,7 +196,7 @@ You can, of course, create a custom base behaviors class that all your custom im
 Simply create a class that implements `IEntityFrameworkBehaviors<,>` (the `StandardBehaviors<,>` already does - feel free to inherit from it), then register it at application startup like so:
 
 
-.. code-block:: c#
+``` c#
 
     public class MyBehaviors<T, TContext> : StandardBehaviors<T, TContext>
         where T : class, new()
@@ -204,7 +209,10 @@ Simply create a class that implements `IEntityFrameworkBehaviors<,>` (the `Stand
         ...
     }
 
-.. code-block:: c#
+
+```
+
+``` c#
 
     public void ConfigureServices(IServiceCollection services)
     {
@@ -213,5 +221,8 @@ Simply create a class that implements `IEntityFrameworkBehaviors<,>` (the `Stand
             b.AddContext<AppDbContext>();
             b.UseDefaultBehaviors(typeof(MyBehaviors<,>));
         });
+
+
+```
 
 Your custom behaviors class must have the same generic type parameters - `<T, TContext>`. Otherwise, the Microsoft.Extensions.DependencyInjection service provider won't know how to inject it.

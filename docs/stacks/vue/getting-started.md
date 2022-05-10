@@ -13,7 +13,7 @@ The quickest and easiest way to create a new Coalesce Vue application is to use 
     :alt: NuGet
     :target: https://www.nuget.org/packages/IntelliTect.Coalesce.Vue.Template/
     
-.. code-block:: sh
+``` sh
 
     mkdir MyCompany.MyProject
     cd MyCompany.MyProject
@@ -22,14 +22,17 @@ The quickest and easiest way to create a new Coalesce Vue application is to use 
     cd *.Web
     npm ci
 
-|vuebadge| • `View on GitHub <https://github.com/IntelliTect/Coalesce.Vue.Template>`_ 
+
+```
+
+|vuebadge| • [View on GitHub](https://github.com/IntelliTect/Coalesce.Vue.Template) 
 
 Project Structure
 -----------------
 
 .. important::
   
-  The Vue template is based on `Vue CLI <https://cli.vuejs.org/>`_. You are strongly encouraged to read through at least the first few pages of the `Vue CLI Documentation <https://cli.vuejs.org/guide/>`_ before getting started on any development.
+  The Vue template is based on [Vue CLI](https://cli.vuejs.org/). You are strongly encouraged to read through at least the first few pages of the [Vue CLI Documentation](https://cli.vuejs.org/guide/) before getting started on any development.
 
 The structure of the Web project follows the conventions of both ASP.NET Core and Vue CLI. The Vue-specific folders are as follows:
 
@@ -56,9 +59,9 @@ During development, no special tooling is required to build your frontend code. 
 Building Pages & Features
 -------------------------
 
-Lets say we've created a :ref:`model <EntityModels>` called `Person` as follows, and we've ran code generation with ``dotnet coalesce``:
+Lets say we've created a [model](/modeling/model-types/entities.md) called `Person` as follows, and we've ran code generation with ``dotnet coalesce``:
 
-.. code-block:: c#
+``` c#
 
     namespace MyApplication.Data.Models 
     {
@@ -70,10 +73,12 @@ Lets say we've created a :ref:`model <EntityModels>` called `Person` as follows,
         }
     }
 
-We can create a details page for a Person by creating a `Single File Component <https://vuejs.org/v2/guide/single-file-components.html>`_ in ``MyApplication.Web/src/views/person-details.vue``:
 
-.. code-block:: sfc  
+```
 
+We can create a details page for a Person by creating a [Single File Component](https://vuejs.org/v2/guide/single-file-components.html) in ``MyApplication.Web/src/views/person-details.vue``:
+
+``` vue
   <template>
     <dl>
       <dt>Name</dt>
@@ -104,18 +109,19 @@ We can create a details page for a Person by creating a `Single File Component <
     }
   }
   </script>
+```
 
 .. note::
 
-  In the code above, :ref:`c-display` is a component that comes from the :ref:`Vuetify Components <VuetifyOverview>` for Coalesce.
+  In the code above, [c-display](/stacks/vue/coalesce-vue-vuetify/components/c-display.md) is a component that comes from the [Vuetify Components](/stacks/vue/coalesce-vue-vuetify/overview.md) for Coalesce.
 
-  For simple property types like `string` and `number` you can always use simple template interpolation syntax, but for more complex properties like dates, :ref:`c-display` is handy to use because it includes features like built-in date formatting.
+  For simple property types like `string` and `number` you can always use simple template interpolation syntax, but for more complex properties like dates, [c-display](/stacks/vue/coalesce-vue-vuetify/components/c-display.md) is handy to use because it includes features like built-in date formatting.
 
 .. tip::
 
-  The code above uses `vue-class-component <https://class-component.vuejs.org/>`_ and `vue-property-decorator <https://github.com/kaorun343/vue-property-decorator>`_ to define the component.
+  The code above uses [vue-class-component](https://class-component.vuejs.org/) and [vue-property-decorator](https://github.com/kaorun343/vue-property-decorator) to define the component.
 
-  These libraries provide an alternative to the default component declaration syntax in Vue_. However, you must be aware of the `Caveats <https://class-component.vuejs.org/guide/caveats.html>`_ if you want to use these tools to build your own class-style components.
+  These libraries provide an alternative to the default component declaration syntax in [Vue](https://vuejs.org/). However, you must be aware of the [Caveats](https://class-component.vuejs.org/guide/caveats.html) if you want to use these tools to build your own class-style components.
 
 We then need to add route to this new view. In ``MyApplication.Web/src/router.ts``, add a new item to the `routes` array:
 
@@ -136,4 +142,4 @@ We then need to add route to this new view. In ``MyApplication.Web/src/router.ts
 
 With these pieces in place, we now have a functioning page that will display details about a person. We can start up the application (or, if it was already running, refresh the page) and navigate to ``/person/1`` (assuming a person with ID 1 exists - if not, navigate to ``/admin/Person`` and create one).
 
-From this point, you can start adding more fields, more features, and more flair to the page. Check out all the other documentation in the sidebar to see what else Coalesce has to offer, including the :ref:`VueOverview`.
+From this point, you can start adding more fields, more features, and more flair to the page. Check out all the other documentation in the sidebar to see what else Coalesce has to offer, including the [Vue Overview](/stacks/vue/overview.md).

@@ -10,20 +10,22 @@ A multi-select input component for collections of non-object values (primarily s
 .. MARKER:summary-end
 
 .. tip:: 
-    It is unlikely that you'll ever need to use this component directly - it is highly recommended that you use :ref:`c-input` instead and let it delegate to :ref:`c-select-values` for you.
+    It is unlikely that you'll ever need to use this component directly - it is highly recommended that you use [c-input](/stacks/vue/coalesce-vue-vuetify/components/c-input.md) instead and let it delegate to [c-select-values](/stacks/vue/coalesce-vue-vuetify/components/c-select-values.md) for you.
 
-.. contents:: Contents
-    :local:
+[[toc]]
 
 Examples
 --------
 
-.. code-block:: sfc
+``` vue-html
 
     <c-select-values 
         :model="post.setTags.args" 
         for="Post.methods.setTags.params.tagNames" 
     />
+
+
+```
 
 Props
 -----

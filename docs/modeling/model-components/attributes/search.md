@@ -47,7 +47,7 @@ Collection Navigation Properties
 Example Usage
 -------------
 
-.. code-block:: c#
+``` c#
 
     public class Person
     {
@@ -67,6 +67,9 @@ Example Usage
         [Search(RootWhitelist = nameof(Person))]
         public ICollection<Address> Addresses { get; set; }
     }
+
+
+```
 
 Properties
 ----------

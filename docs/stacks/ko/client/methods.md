@@ -4,17 +4,20 @@
 TypeScript Method Objects
 =========================
 
-For each :ref:`Custom Method <ModelMethods>` you define, a class will be created on the corresponding TypeScript ViewModel (instance methods) or ListViewModel (static methods) that contains the properties and functions for interaction with the method. This class is accessible through a static property named after the method. An instance of this class will also be created on each instance of its parent - this instance is in a property with the camel-cased name of the method.
+For each [Custom Method](/modeling/model-components/methods.md) you define, a class will be created on the corresponding TypeScript ViewModel (instance methods) or ListViewModel (static methods) that contains the properties and functions for interaction with the method. This class is accessible through a static property named after the method. An instance of this class will also be created on each instance of its parent - this instance is in a property with the camel-cased name of the method.
 
 Here's an example for a method called Rename that takes a single parameter 'string name' and returns a string.
 
-.. code-block:: c#
+``` c#
 
         public string Rename(string name)
         {
             FirstName = name;
             return FullName; // Return the new full name of the person.
         }
+
+
+```
 
 Method-specific Members
 .......................
@@ -40,7 +43,7 @@ The following members are only generated for methods with arguments:
 The following member is generated for methods that return a file:
 
 `public resultObjectUrl: KnockoutObservable<string | null>`
-    Observable that will contain an `Object URL <https://developer.mozilla.org/en-US/docs/Web/API/URL/createObjectURL>`_ representing the last successful invocation result.
+    Observable that will contain an [Object URL](https://developer.mozilla.org/en-US/docs/Web/API/URL/createObjectURL) representing the last successful invocation result.
 
 The following member is generated for methods exposed by HTTP GET:
 
@@ -61,7 +64,7 @@ Base Class Members
 `public wasSuccessful: KnockoutObservable<boolean>`
     Observable boolean that indicates whether the method call was successful or not.
 
-ListResult<T> Method Members
+`ListResult<T>` Method Members
 ............................
 
 `public page: KnockoutObservable<number>`

@@ -9,7 +9,7 @@ specified data source when invoked from an API endpoint. By default, the default
 Example Usage
 -------------
 
-.. code-block:: c#
+``` c#
 
     public class Person
     {
@@ -22,6 +22,9 @@ Example Usage
             FirstName = FirstName.Replace(" ", "-");
         }
     }
+
+
+```
 
 Properties
 ----------

@@ -3,13 +3,13 @@
 [ControllerAction]
 ==================
 
-Specifies how a :ref:`custom method <ModelMethods>` is exposed via HTTP. Can be used to customize the HTTP method/verb for the method, as well as caching behavior.
+Specifies how a [custom method](/modeling/model-components/methods.md) is exposed via HTTP. Can be used to customize the HTTP method/verb for the method, as well as caching behavior.
 
 
 Example Usage
 -------------
 
-.. code-block:: c#
+``` c#
 
     public class Person
     {
@@ -39,6 +39,9 @@ Example Usage
         }
     }
 
+
+```
+
 Properties
 ----------
 
@@ -53,6 +56,6 @@ Properties
         - `HttpMethod.Patch` Use the PATCH method.
 
 `public string VaryByProperty { get; set; }`
-    For HTTP GET model instance methods, if `VaryByProperty` is set to the name of a property on the parent model class, `ETag headers <https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/ETag>`_ based on the value of this property will be used to implement caching. If the client provides a matching `If-None-Match` Header with the request, the method will not be invoked and HTTP Status `304 Not Modified`` will be returned.
+    For HTTP GET model instance methods, if `VaryByProperty` is set to the name of a property on the parent model class, [ETag headers](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/ETag) based on the value of this property will be used to implement caching. If the client provides a matching `If-None-Match` Header with the request, the method will not be invoked and HTTP Status `304 Not Modified`` will be returned.
 
-    Additionally, if the `VaryByProperty` is set to a client-exposed :ref:`property <ModelProperties>`, the value of the property will be included in the query string when performing API calls to invoke the method. If the query string value matches the current value on the model, a long-term `Cache-Control` header will be set on the response, allowing the client to avoid making future invocations to the same method while the value of the `VaryByProperty` remains the same.
+    Additionally, if the `VaryByProperty` is set to a client-exposed [property](/modeling/model-components/properties.md), the value of the property will be included in the query string when performing API calls to invoke the method. If the query string value matches the current value on the model, a long-term `Cache-Control` header will be set on the response, allowing the client to avoid making future invocations to the same method while the value of the `VaryByProperty` remains the same.

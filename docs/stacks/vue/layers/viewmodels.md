@@ -3,12 +3,11 @@
 ViewModel Layer
 ================
 
-The ViewModel layer, generated as `viewmodels.g.ts`, exports for each :ref:`EntityModels` and :ref:`CustomDTOs` in your data model both a ViewModel class representing a single instance of the type, and a ListViewModel class that is used to interact with the list functionality in Coalesce. Additionally, each :ref:`Service <Services>` also has a ViewModel class generated.
+The ViewModel layer, generated as `viewmodels.g.ts`, exports for each [Entity Models](/modeling/model-types/entities.md) and [Custom DTOs](/modeling/model-types/dtos.md) in your data model both a ViewModel class representing a single instance of the type, and a ListViewModel class that is used to interact with the list functionality in Coalesce. Additionally, each [Service](/modeling/model-types/services.md) also has a ViewModel class generated.
 
 These classes provide a wide array of functionality that is useful when interacting with your data model through a user interface. The generated ViewModels are the primary way that Coalesce is used when developing a Vue application.
 
-.. contents:: Contents
-    :local:
+[[toc]]
 
 .. _VueInstanceViewModels:
 
@@ -20,9 +19,9 @@ The following members can be found on the generated ViewModels, exported from `v
 Model Data Properties
 .....................
 
-Each ViewModel class implements the corresponding interface from the :ref:`VueModels`, meaning that the ViewModel has a data property for each :ref:`Property <ModelProperties>` on the model. Object-typed properties will be typed as the corresponding generated ViewModel.
+Each ViewModel class implements the corresponding interface from the [Model Layer](/stacks/vue/layers/models.md), meaning that the ViewModel has a data property for each [Property](/modeling/model-components/properties.md) on the model. Object-typed properties will be typed as the corresponding generated ViewModel.
 
-Changing the value of a property will automatically flag that property as dirty. See :ref:`VueViewModelsAutoSave` below for information on how property dirty flags are used.
+Changing the value of a property will automatically flag that property as dirty. See [Auto-save & Dirty Flags](/stacks/vue/layers/viewmodels.md) below for information on how property dirty flags are used.
 
 There are a few special behaviors when assigning to different kinds of data properties on View Models as well:
 
@@ -44,7 +43,7 @@ Other Data Properties & Functions
 .................................
 
 `readonly $metadata: ModelType`
-    The metadata object from the :ref:`VueMetadata` layer for the type represented by the ViewModel.
+    The metadata object from the [Metadata Layer](/stacks/vue/layers/metadata.md) layer for the type represented by the ViewModel.
 
 `readonly $stableId: number`
     An immutable number that is unique among all ViewModel instances, regardless of type.
@@ -66,12 +65,12 @@ API Callers & Parameters
 ........................
 
 `$load: ItemApiState`
-    An :ref:`API Caller <VueApiCallers>` for the ``/get`` endpoint. Accepts an optional `id` argument - if not provided, the ViewModel's `$primaryKey` is used instead. Uses the instance's `$params` object for the :ref:`DataSourceStandardParameters`.
+    An [API Caller](/stacks/vue/layers/api-clients.md) for the ``/get`` endpoint. Accepts an optional `id` argument - if not provided, the ViewModel's `$primaryKey` is used instead. Uses the instance's `$params` object for the [Standard Parameters](/modeling/model-components/data-sources.md).
 
 `$save: ItemApiState`
-    An :ref:`API Caller <VueApiCallers>` for the ``/save`` endpoint. Uses the instance's `$params` object for the :ref:`DataSourceStandardParameters`.
+    An [API Caller](/stacks/vue/layers/api-clients.md) for the ``/save`` endpoint. Uses the instance's `$params` object for the [Standard Parameters](/modeling/model-components/data-sources.md).
 
-    This caller is used for both manually-triggered saves in custom code and for auto-saves. If the :ref:`VueViewModelsValidation` report any errors when the caller is invoked, an error will be thrown.
+    This caller is used for both manually-triggered saves in custom code and for auto-saves. If the [Rules/Validation](/stacks/vue/layers/viewmodels.md) report any errors when the caller is invoked, an error will be thrown.
 
     When a save creates a new record and a new primary key is returned from the server, any entities attached to the current ViewModel via a collection navigation property will have their foreign keys set to the new primary key. This behavior, combined with the usage of deep auto-saves, allows for complex object graphs to be constructed even before any model in the graph has been created.
 
@@ -88,31 +87,31 @@ API Callers & Parameters
         
         This improves the handling of concurrent changes being made by multiple users against different fields of the same entity at the same time - specifically, it prevents a user with a stale value of some field X from overwriting a more recent value of X in the database when the user is only making changes to some other property Y and has no intention of changing X. 
         
-        Save mode `"surgical"` doesn't help when multiple users are editing field X at the same time - if such a scenario is applicable to your application, you must implement `more advanced handling of concurrency conflicts <https://docs.microsoft.com/en-us/ef/core/saving/concurrency>`_.
+        Save mode `"surgical"` doesn't help when multiple users are editing field X at the same time - if such a scenario is applicable to your application, you must implement [more advanced handling of concurrency conflicts](https://docs.microsoft.com/en-us/ef/core/saving/concurrency).
 
         .. warning:: 
 
             Surgical saves require DTOs on the server that are capable of determining which of their properties have been set by the model binder, as surgical saves are sent from the client by entirely omitting properties from the ``x-www-form-urlencoded`` body that is sent to the server.
 
-            The :ref:`GenDTOs` implement the necessary logic for this; however, any :ref:`CustomDTOs` you have written are unlikely to be implementing the same behavior. For :ref:`CustomDTOs`, either implement the same pattern that can be seen in the :ref:`GenDTOs`, or use save mode `"whole"` instead.
+            The [Generated C# DTOs](/stacks/agnostic/dtos.md) implement the necessary logic for this; however, any [Custom DTOs](/modeling/model-types/dtos.md) you have written are unlikely to be implementing the same behavior. For [Custom DTOs](/modeling/model-types/dtos.md), either implement the same pattern that can be seen in the [Generated C# DTOs](/stacks/agnostic/dtos.md), or use save mode `"whole"` instead.
 
     `"whole"`
         All serializable properties of the object are sent back to the server with every save. 
         
 
 `$delete: ItemApiState`
-    An :ref:`API Caller <VueApiCallers>` for the ``/delete`` endpoint. Uses the instance's `$params` object for the :ref:`DataSourceStandardParameters`.
+    An [API Caller](/stacks/vue/layers/api-clients.md) for the ``/delete`` endpoint. Uses the instance's `$params` object for the [Standard Parameters](/modeling/model-components/data-sources.md).
 
     If the object was loaded as a child of a collection, it will be removed from that collection upon being deleted. Note that ViewModels currently only support tracking of a single parent collection, so if an object is programmatically added to additional collections, it will only be removed from one of them upon delete.
 
 `$params: DataSourceParameters`
-    An object containing the :ref:`DataSourceStandardParameters` to be used for the `$load`, `$save`, and `$delete` API callers.
+    An object containing the [Standard Parameters](/modeling/model-components/data-sources.md) to be used for the `$load`, `$save`, and `$delete` API callers.
 
 `$dataSource: DataSource`
-    Getter/setter wrapper around `$params.dataSource`. Takes an instance of a :ref:`Data Source <DataSources>` class :ref:`generated in the Model Layer <VueModelsDataSource>`.
+    Getter/setter wrapper around `$params.dataSource`. Takes an instance of a [Data Source](/modeling/model-components/data-sources.md) class [generated in the Model Layer](/stacks/vue/layers/models.md).
 
 `$includes: string | null`
-    Getter/setter wrapper around `$params.includes`. See :ref:`Includes` for more information.
+    Getter/setter wrapper around `$params.includes`. See [Includes String](/concepts/includes.md) for more information.
 
 
 |
@@ -123,11 +122,11 @@ Auto-save & Dirty Flags
 .......................
 
 `$startAutosave(vue: Vue, options: AutoSaveOptions<this> = {})`
-    Starts auto-saving of the instance when its savable data properties become dirty. Saves are performed with the `$save` :ref:`API Caller <VueApiCallers>` (documented below) and will not be performed if the ViewModel has any validation errors - see :ref:`VueViewModelsValidation` below.
+    Starts auto-saving of the instance when its savable data properties become dirty. Saves are performed with the `$save` [API Caller](/stacks/vue/layers/api-clients.md) (documented below) and will not be performed if the ViewModel has any validation errors - see [Rules/Validation](/stacks/vue/layers/viewmodels.md) below.
 
     Requires a reference to a Vue instance in order to manage lifetime (auto-save hooks will be destroyed when the Vue component provided is destroyed). Options are as follows:
 
-    .. code-block:: typescript
+    ``` ts
 
         { 
             /** Time, in milliseconds, to debounce saves for.  */
@@ -142,6 +141,9 @@ Auto-save & Dirty Flags
             */
             predicate?: (viewModel: TThis) => boolean;
         }
+
+
+    ```
 
 `$stopAutosave()`
     Turns off auto-saving of the instance. Does not recursively disable auto-saves on related instances if `deep` was used when auto-save was enabled.
@@ -189,13 +191,13 @@ Rules/Validation
 `$removeRule(prop: string | Property, identifier: string)`
     Remove a validation rule from the ViewModel for the specified property with the specified identifier.
 
-    This can be used to remove from the ViewModel instance either a rule that was provided by the generated :ref:`VueMetadata`, or a custom rule that was added by `$addRule`. Reference your generated metadata file `metadata.g.ts` to see any generated rules and the identifiers they use.
+    This can be used to remove from the ViewModel instance either a rule that was provided by the generated [Metadata Layer](/stacks/vue/layers/metadata.md), or a custom rule that was added by `$addRule`. Reference your generated metadata file `metadata.g.ts` to see any generated rules and the identifiers they use.
 
 `$getRules(prop: string | Property)`
     Returns an array of active rule functions for the specified property, or `undefined` if the property has no active validation rules.
 
 `$getErrors(prop?: string | Property): Generator<string>`
-    Returns a `generator <https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Generator>`_ that provides all error messages for either a specific property (if provided) or the entire model (if no prop argument is provided).
+    Returns a [generator](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Generator) that provides all error messages for either a specific property (if provided) or the entire model (if no prop argument is provided).
 
     .. tip:: You can obtain an array from a generator with `Array.from(vm.$getErrors())` or `[...vm.$getErrors()]`
 
@@ -209,13 +211,13 @@ Generated Members
 .................
 
 Method Callers
-    For each of the instance :ref:`ModelMethods` of the type, an :ref:`API Caller <VueApiCallers>` will be generated.
+    For each of the instance [Methods](/modeling/model-components/methods.md) of the type, an [API Caller](/stacks/vue/layers/api-clients.md) will be generated.
 
 `addTo*()`
-    For each :ref:`collection navigation property <ModelProperties>`, a method is generated that will create a new instance of the ViewModel for the collected type, add it to the collection, and then return the new object.
+    For each [collection navigation property](/modeling/model-components/properties.md), a method is generated that will create a new instance of the ViewModel for the collected type, add it to the collection, and then return the new object.
     
 Many-to-many helper collections
-    For each :ref:`collection navigation property <ModelProperties>` annotated with :ref:`ManyToMany`, a getter-only property is generated that returns a collection of the object on the far side of the many-to-many relationship. Nulls are filtered from this collection.
+    For each [collection navigation property](/modeling/model-components/properties.md) annotated with [[ManyToMany]](/modeling/model-components/attributes/many-to-many.md), a getter-only property is generated that returns a collection of the object on the far side of the many-to-many relationship. Nulls are filtered from this collection.
 
 |
 
@@ -232,7 +234,7 @@ Data Properties
 ...............
 
 `$items`
-    Collection holding the results of the last successful invocation of the `$load` :ref:`API Caller <VueApiCallers>`.
+    Collection holding the results of the last successful invocation of the `$load` [API Caller](/stacks/vue/layers/api-clients.md).
 
 
 |
@@ -241,15 +243,15 @@ Parameters & API Callers
 ........................
 
 `$params: DataSourceParameters`
-    An object containing the :ref:`DataSourceStandardParameters` to be used for the `$load` and `$count` API callers.
+    An object containing the [Standard Parameters](/modeling/model-components/data-sources.md) to be used for the `$load` and `$count` API callers.
 
 `$load: ListApiState`
-    An :ref:`API Caller <VueApiCallers>` for the ``/list`` endpoint. Uses the instance's `$params` object for the :ref:`DataSourceStandardParameters`.
+    An [API Caller](/stacks/vue/layers/api-clients.md) for the ``/list`` endpoint. Uses the instance's `$params` object for the [Standard Parameters](/modeling/model-components/data-sources.md).
 
     Results are available in the `$items` property. The `result` property of the `$load` API Caller contains the raw results and is not recommended for use in general development - `$items` should always be preferred.
 
 `$count: ItemApiState`
-    An :ref:`API Caller <VueApiCallers>` for the ``/count`` endpoint. Uses the instance's `$params` object for the :ref:`DataSourceStandardParameters`.
+    An [API Caller](/stacks/vue/layers/api-clients.md) for the ``/count`` endpoint. Uses the instance's `$params` object for the [Standard Parameters](/modeling/model-components/data-sources.md).
 
     The result is available in `$count.result` - this API Caller does not interact with other properties on the ListViewModel like `$pageSize` or `$pageCount`.
 
@@ -275,11 +277,11 @@ Auto-Load
 .........
 
 `$startAutoLoad(vue: Vue, options: AutoLoadOptions<this> = {})`
-    Starts auto-loading of the list as changes to its parameters occur. Loads are performed with the `$load` :ref:`API Caller <VueApiCallers>`.
+    Starts auto-loading of the list as changes to its parameters occur. Loads are performed with the `$load` [API Caller](/stacks/vue/layers/api-clients.md).
 
     Requires a reference to a Vue instance in order to manage lifetime (auto-load hooks will be destroyed when the Vue component provided is destroyed). Options are as follows:
 
-    .. code-block:: typescript
+    ``` ts
 
         { 
             /** Time, in milliseconds, to debounce loads for.  */
@@ -289,6 +291,9 @@ Auto-Load
             */
             predicate?: (viewModel: TThis) => boolean;
         }
+
+
+    ```
 
 `$stopAutoLoad()`
     Manually turns off auto-loading of the instance.
@@ -300,7 +305,7 @@ Generated Members
 .................
 
 Method Callers
-    For each of the static :ref:`ModelMethods` on the type, an :ref:`API Caller <VueApiCallers>` will be created.
+    For each of the static [Methods](/modeling/model-components/methods.md) on the type, an [API Caller](/stacks/vue/layers/api-clients.md) will be created.
 
 
 
@@ -318,4 +323,4 @@ Generated Members
 .................
 
 Method Callers
-    For each method of the :ref:`Service <Services>`, an :ref:`API Caller <VueApiCallers>` will be created.
+    For each method of the [Service](/modeling/model-types/services.md), an [API Caller](/stacks/vue/layers/api-clients.md) will be created.

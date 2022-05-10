@@ -8,7 +8,7 @@ Specifies whether a DateTime type will have a date and a time, or only a date.
 Example Usage
 -------------
 
-.. code-block:: c#
+``` c#
 
     public class Person
     {
@@ -17,6 +17,9 @@ Example Usage
         [DateType(DateTypeAttribute.DateTypes.DateOnly)]
         public DateTimeOffset? BirthDate { get; set; }
     }
+
+
+```
 
 Properties
 ----------

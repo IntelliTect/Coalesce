@@ -37,7 +37,7 @@ The Read and Edit attributes can be combined to only allow edits for
 certain users. Below is an example of how to allow read access to anyone
 and write access only for administrators.
 
-    .. code-block:: c#
+    ``` c#
 
         [Edit(Roles='Admin')] [Read(AllowAnonymous = true)]
         public class Person
@@ -46,6 +46,9 @@ and write access only for administrators.
             public string FirstName { get; set; }
             public string LastName { get; set; }
         }
+
+
+    ```
 
 Additionally the Edit attribute has an Allow property that can be set to
 false to disallow all edits. In fact this removes the API controller
@@ -62,7 +65,7 @@ must be secured if limited access to certain properties is desired.
 The example below allows only admins to edit the last name.
 Additionally, only admins can read and consequently edit the gender.
 
-    .. code-block:: c#
+    ``` c#
 
         [Edit(Roles='Admin')] [Read(AllowAnonymous = true)]
         public class Person
@@ -75,6 +78,9 @@ Additionally, only admins can read and consequently edit the gender.
             public string Gender { get; set; }
         }
 
+
+    ```
+
 Methods
 ~~~~~~~
 
@@ -83,7 +89,7 @@ argument to specify the list of valid roles that can access the method.
 
 The example below allows only admins to access the method.
 
-    .. code-block:: c#
+    ``` c#
 
         public class Person
         {
@@ -95,6 +101,9 @@ The example below allows only admins to access the method.
             }
         }
 
+
+    ```
+
 Using AuthorizeAttribute
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -105,7 +114,10 @@ work in Startup.cs to create policies
 The example below maps the "User" role to an internal AD role name of
 AllUsers.
 
-    .. code-block:: c#
+    ``` c#
 
         RoleMapping.Add("User", "AllUsers");  // Interactive user.
+
+
+    ```
 

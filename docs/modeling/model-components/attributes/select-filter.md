@@ -23,7 +23,7 @@ Example Usage
 
 In this example, a dropdown for `EmployeeRank` created using ``@Knockout.SelectForObject`` in cshtml files will only present possible values of `EmployeeRank` which are valid for the `EmployeeType` of the `Employee`.
 
-.. code-block:: c#
+``` c#
 
     public class Employee
     {
@@ -43,11 +43,17 @@ In this example, a dropdown for `EmployeeRank` created using ``@Knockout.SelectF
         public EmployeeType EmployeeType { get; set; }
     }
 
-.. code-block:: html
+
+```
+
+``` html
 
     <div>
         @(Knockout.SelectForObject<Models.Employee>(e => e.EmployeeRank))
     </div>
+
+
+```
 
 Properties
 ----------

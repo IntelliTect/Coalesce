@@ -5,27 +5,26 @@ c-loader-status
 
 .. MARKER:summary
     
-A component for displaying progress and error information for one or more :ref:`VueApiCallers`.
+A component for displaying progress and error information for one or more [API Callers](/stacks/vue/layers/api-clients.md).
 
 .. tip:: 
-    It is highly recommended that all :ref:`VueApiCallers` utilized by your application that don't have any other kind of error handling should be represented by a :ref:`c-loader-status` so that users can be aware of any errors that occur.
+    It is highly recommended that all [API Callers](/stacks/vue/layers/api-clients.md) utilized by your application that don't have any other kind of error handling should be represented by a [c-loader-status](/stacks/vue/coalesce-vue-vuetify/components/c-loader-status.md) so that users can be aware of any errors that occur.
 
 .. MARKER:summary-end
 
-Progress is indicated with a Vuetify_ `v-progress-linear <https://vuetifyjs.com/en/components/progress-linear>`_ component, and errors are displayed in a `v-alert <https://vuetifyjs.com/en/components/alerts/>`_. `Transitions <https://vuetifyjs.com/en/styles/transitions/>`_ are applied to smoothly fade between the different states the the caller can be in.
+Progress is indicated with a [Vuetify](https://vuetifyjs.com/) [v-progress-linear](https://vuetifyjs.com/en/components/progress-linear) component, and errors are displayed in a [v-alert](https://vuetifyjs.com/en/components/alerts/). [Transitions](https://vuetifyjs.com/en/styles/transitions/) are applied to smoothly fade between the different states the the caller can be in.
 
 .. note:: 
-    This component uses the legacy term "loader" to refer to :ref:`VueApiCallers`. A new ``c-caller-status`` component may be coming in the future with a few usability improvements - if that happens, `c-loader-status` will be preserved for backwards compatibility.
+    This component uses the legacy term "loader" to refer to [API Callers](/stacks/vue/layers/api-clients.md). A new ``c-caller-status`` component may be coming in the future with a few usability improvements - if that happens, `c-loader-status` will be preserved for backwards compatibility.
 
-.. contents:: Contents
-    :local:
+[[toc]]
 
 Examples
 --------
 
 Wrap contents of a details/edit page:
 
-.. code-block:: sfc
+``` vue-html
 
     <h1>Person Details</h1>
     <c-loader-status
@@ -40,19 +39,25 @@ Wrap contents of a details/edit page:
         Employer: {{ person.company.name }}
     </c-loader-status>
     
+
+```
+
 |
 
 Use ``c-loader-status`` to render a progress bar and any error messages, but don't use it to control content:
 
-.. code-block:: sfc
+``` vue-html
 
     <c-loader-status :loaders="{'': [list.$load]}" />
+
+
+```
 
 |
 
 Wrap a save/submit button:
 
-.. code-block:: sfc
+``` vue-html
 
     <c-loader-status
         :loaders="{ 'no-loading-content': [person.$save] }"
@@ -60,11 +65,14 @@ Wrap a save/submit button:
         <button> Save </button>
     </c-loader-status>
     
+
+```
+
 |
 
 Hides the table before the first load has completed, or if loading the list encountered an error. Don't show the progress bar after we've already loaded the list for the first time (useful for loads that occur without user interaction, e.g. `setInterval`).:
 
-.. code-block:: sfc
+``` vue-html
 
     <c-loader-status
         :loaders="{
@@ -77,11 +85,14 @@ Hides the table before the first load has completed, or if loading the list enco
         </table>
     </c-loader-status>
 
+
+```
+
 Props
 -----
 
 `loaders: { [flags: string]: ApiCaller | ApiCaller[] }`
-    A dictionary object with entries mapping zero or more flags to one or more :ref:`VueApiCallers`. Multiple entries of flags/caller pairs may be specified in the dictionary to give different behavior to different API callers.
+    A dictionary object with entries mapping zero or more flags to one or more [API Callers](/stacks/vue/layers/api-clients.md). Multiple entries of flags/caller pairs may be specified in the dictionary to give different behavior to different API callers.
     
     The available flags are as follows. All flags may be prefixed with ``no-`` to set the flag to ``false`` instead of ``true``. Multiple flags may be specified at once by delimiting them with spaces.
 
@@ -99,14 +110,14 @@ Props
     Specify if space should be reserved for the progress indicator. If set to false, the content in the default slot may jump up and down slightly as the progress indicator shows and hides.
 
 `height: number = 10`
-    Specifies the height in pixels of the `v-progress-linear <https://vuetifyjs.com/en/components/progress-linear>`_ used to indicate progress.
+    Specifies the height in pixels of the [v-progress-linear](https://vuetifyjs.com/en/components/progress-linear) used to indicate progress.
 
 Slots
 -----
 
 ``default``
-    Accepts the content whose visibility is controlled by the state of the supplied :ref:`VueApiCallers`. It will be shown or hidden according to the flags defined for each caller.
+    Accepts the content whose visibility is controlled by the state of the supplied [API Callers](/stacks/vue/layers/api-clients.md). It will be shown or hidden according to the flags defined for each caller.
 
     .. important:: 
     
-        Define the default slot as a `scoped slot <https://vuejs.org/v2/guide/components-slots.html#Scoped-Slots>`_ (e.g. with ``#default`` or ``v-slot:default`` on the ``c-loader-status``) to prevent the VNode tree from being created when the content should be hidden. This improves performances and helps avoid null reference errors that can be caused when trying to render objects that haven't been loaded yet.
+        Define the default slot as a [scoped slot](https://vuejs.org/v2/guide/components-slots.html#Scoped-Slots) (e.g. with ``#default`` or ``v-slot:default`` on the ``c-loader-status``) to prevent the VNode tree from being created when the content should be hidden. This improves performances and helps avoid null reference errors that can be caused when trying to render objects that haven't been loaded yet.

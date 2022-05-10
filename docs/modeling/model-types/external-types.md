@@ -8,7 +8,7 @@ In Coalesce, any type which is connected to your data model but is not directly 
 
 The collection of external types for a data model looks like this:
     
-    #. Take all of the api-served types in your data model. This includes :ref:`EntityModels` and :ref:`CustomDTOs`.
+    #. Take all of the api-served types in your data model. This includes [Entity Models](/modeling/model-types/entities.md) and [Custom DTOs](/modeling/model-types/dtos.md).
     #. Take all of the property types, method parameters, and method return types of these types.
     #. Any of these types which are not primitives and not database-mapped types are external types.
     #. For any external type, any of the property types which qualify under the above rules are also external types.
@@ -18,7 +18,7 @@ The collection of external types for a data model looks like this:
 
     Be careful when using types that you do not own for properties and method returns in your data model. When Coalesce generates external type ViewModels and DTOs, it will not stop until it has exhausted all paths that can be reached by following public property types and method returns.
 
-    In general, you should only expose types that you have created so that you will always have full control over them. Mark any properties you don't wish to expose with :ref:`InternalUse`, or make those members non-public.
+    In general, you should only expose types that you have created so that you will always have full control over them. Mark any properties you don't wish to expose with [[InternalUse]](/modeling/model-components/attributes/internal-use.md), or make those members non-public.
 
 
 Generated Code
@@ -26,8 +26,8 @@ Generated Code
 
 For each external type found in your application's model, Coalesce will generate:
 
-    * A :ref:`Generated DTO <GenDTOs>`
-    * A :ref:`TypeScript Model <TypeScriptExternalViewModel>`
+    * A [Generated DTO](/stacks/agnostic/dtos.md)
+    * A [TypeScript Model](/stacks/disambiguation/external-view-model.md)
 
 
 Example Data Model
@@ -41,7 +41,7 @@ For example, in the following scenario, the following classes are considered as 
 `PluginHandler` is not because it not exposed by the model, neither directly nor through any of the other external types.
 
 
-.. code-block:: c#
+``` c#
 
     public class AppDbContext : DbContext {
         public DbSet<Application> Applications { get; set; }
@@ -86,7 +86,10 @@ For example, in the following scenario, the following classes are considered as 
     }
 
             
+
+```
+
 Loading & Serialization
 =======================
 
-External types have slightly different behavior when undergoing serialization to be sent to the client. Unlike database-mapped types which are subject to the rules of :ref:`IncludeTree`, external types ignore the Include Tree when being mapped to DTOs for serialization. Read :ref:`IncludeTree`/:ref:`ExternalTypeIncludeTreeCaveats` for a more detailed explanation of this exception.
+External types have slightly different behavior when undergoing serialization to be sent to the client. Unlike database-mapped types which are subject to the rules of [Include Tree](/concepts/include-tree.md), external types ignore the Include Tree when being mapped to DTOs for serialization. Read [Include Tree](/concepts/include-tree.md)/[External Type Caveats](/concepts/include-tree.md#external-type-caveats) for a more detailed explanation of this exception.

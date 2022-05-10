@@ -7,7 +7,7 @@ Application Configuration
 
 In order for Coalesce to work in your application, you must register the needed services in your ``Startup.cs`` file. Doing so is simple:
 
-    .. code-block:: c#
+    ``` c#
 
         public void ConfigureServices(IServiceCollection services)
         {
@@ -15,9 +15,12 @@ In order for Coalesce to work in your application, you must register the needed 
             ...
         }
 
+
+    ```
+
 This registers all the basic services that Coalesce needs in order to work with your EF DbContext. However, there are many more options available. Here's a more complete invocation of `AddCoalesce` that takes advantage of many of the options available:
 
-    .. code-block:: c#
+    ``` c#
 
         public void ConfigureServices(IServiceCollection services)
         {
@@ -42,14 +45,17 @@ This registers all the basic services that Coalesce needs in order to work with 
             );
         }
 
+
+    ```
+
 A summary is as follows:
 
     `.AddContext<AppDbContext>()`
         Register services needed by Coalesce to use the specified context. This is done automatically when calling the `services.AddCoalesce<AppDbContext>();` overload.
     `.UseDefaultDataSource(typeof(MyDataSource<,>))` 
-        Overrides the default data source used, replacing the :ref:`StandardDataSource`. See :ref:`DataSources` for more details.
+        Overrides the default data source used, replacing the [Standard Data Source](/modeling/model-components/data-sources.md). See [Data Sources](/modeling/model-components/data-sources.md) for more details.
     `.UseDefaultBehaviors(typeof(MyBehaviors<,>))` 
-        Overrides the default behaviors used, replacing the :ref:`StandardBehaviors`. See :ref:`Behaviors` for more details.
+        Overrides the default behaviors used, replacing the [Standard Behaviors](/modeling/model-components/behaviors.md). See [Behaviors](/modeling/model-components/behaviors.md) for more details.
     `.UseTimeZone(TimeZoneInfo.FindSystemTimeZoneById("Pacific Standard Time"))`
         Specify a static time zone that should be used when Coalesce is performing operations on dates/times that lack timezone information. For example, when a user inputs a search term that contains only a date, Coalesce needs to know what timezone's midnight to use when performing the search.
     `.UseTimeZone<ITimeZoneResolver>()` 
@@ -65,7 +71,7 @@ Security Overview Page
 
 Coalesce provides batteries-included page that you can view to review the security rules in place for all the Coalesce-generated code in your project. Add this page to your application by mapping it as a route, either directly on `WebHost` in .NET 6+, or in `UseEndpoints` for 3.1+.
 
-    .. code-block:: c#
+    ``` c#
 
         // .NET 6 Program.cs:
 
@@ -75,7 +81,10 @@ Coalesce provides batteries-included page that you can view to review the securi
             new AuthorizeAttribute { Roles = env.IsDevelopment() ? null : "Admin" }
         );
 
-    .. code-block:: c#
+
+    ```
+
+    ``` c#
 
         // .NET 3.1+ Startup.cs:
 
@@ -89,3 +98,6 @@ Coalesce provides batteries-included page that you can view to review the securi
 
             // ... Other endpoints
         });
+
+    ```
+

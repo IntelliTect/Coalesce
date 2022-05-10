@@ -4,13 +4,12 @@
 Data Sources
 ------------
 
-In Coalesce, all data that is retrieved from your database through the generated controllers is done so by a data source. These data sources control what data gets loaded and how it gets loaded. By default, there is a single generic data source that serves all data for your models in a generic way that fits many of the most common use cases - the :ref:`StandardDataSource`.
+In Coalesce, all data that is retrieved from your database through the generated controllers is done so by a data source. These data sources control what data gets loaded and how it gets loaded. By default, there is a single generic data source that serves all data for your models in a generic way that fits many of the most common use cases - the [Standard Data Source](/modeling/model-components/data-sources.md).
 
 In addition to this standard data source, Coalesce allows you to create custom data sources that provide complete control over the way data is loaded and serialized for transfer to a requesting client. These data sources are defined on a per-model basis, and you can have as many of them as you like for each model.
 
 
-.. contents:: Contents
-    :local:
+[[toc]]
 
 Defining Data Sources
 .....................
@@ -19,7 +18,7 @@ By default, each of your models that Coalesce exposes will expose the standard d
 
 To implement your own custom data source, you simply need to define a class that implements `IntelliTect.Coalesce.IDataSource<T>`. To expose your data source to Coalesce, either place it as a nested class of the type `T` that you data source serves, or annotate it with the `[Coalesce]` attribute. Of course, the easiest way to create a data source that doesn't require you to re-engineer a great deal of logic would be to inherit from `IntelliTect.Coalesce.StandardDataSource<T, TContext>`, and then override only the parts that you need.
 
-.. code-block:: c#
+``` c#
 
     public class Person
     {
@@ -45,7 +44,10 @@ To implement your own custom data source, you simply need to define a class that
             => Db.People.Include(f => f.Siblings).Where(f => f.FirstName.StartsWith("A"));
     }
 
-The structure of the `IQueryable` built by the various methods of `StandardDataSource` is used to shape and trim the structure of the DTO as it is serialized and sent out to the client. One may also override method `IncludeTree GetIncludeTree(IQueryable<Person> query, IDataSourceParameters parameters)` to control this explicitly. See :ref:`IncludeTree` for more information on how this works.
+
+```
+
+The structure of the `IQueryable` built by the various methods of `StandardDataSource` is used to shape and trim the structure of the DTO as it is serialized and sent out to the client. One may also override method `IncludeTree GetIncludeTree(IQueryable<Person> query, IDataSourceParameters parameters)` to control this explicitly. See [Include Tree](/concepts/include-tree.md) for more information on how this works.
 
 .. warning::
     If you create a custom data source that has custom logic for securing your data, be aware that the default implementation of `StandardDataSource` (or your custom default implementation - see below) is still exposed unless you annotate one of your custom data sources with `[DefaultDataSource]`. Doing so will replace the default data source with the annotated class for your type `T`.
@@ -60,38 +62,41 @@ All data sources are instantiated using dependency injection and your applicatio
 Consuming Data Sources
 ......................
 
-.. tabs::
+<CodeTabs>
+<template #vue>
 
-    .. group-tab:: Vue
-                    
-        The :ref:`VueInstanceViewModels` and :ref:`VueListViewModels` each have a property called `$dataSource`. This property accepts an instance of a :ref:`VueModelsDataSource` class generated in the :ref:`VueModels`.
+The [ViewModels](/stacks/vue/layers/viewmodels.md) and [ListViewModels](/stacks/vue/layers/viewmodels.md) each have a property called `$dataSource`. This property accepts an instance of a [DataSource](/stacks/vue/layers/models.md) class generated in the [Model Layer](/stacks/vue/layers/models.md).
 
-        .. code-block:: vue
+``` ts
+import { Person } from '@/models.g'
+import { PersonViewModel, PersonListViewModel } from '@/viewmodels.g'
 
-            import { Person } from '@/models.g'
-            import { PersonViewModel, PersonListViewModel } from '@/viewmodels.g'
-        
-            var viewModel = new PersonViewModel();
-            viewModel.$dataSource = new Person.DataSources.IncludeFamily();
-            viewModel.$load(1);
+var viewModel = new PersonViewModel();
+viewModel.$dataSource = new Person.DataSources.IncludeFamily();
+viewModel.$load(1);
 
-            var list = new PersonListViewModel();
-            list.$dataSource = new Person.DataSources.NamesStartingWith();
-            list.$load(1);
+var list = new PersonListViewModel();
+list.$dataSource = new Person.DataSources.NamesStartingWith();
+list.$load(1);
+```
 
-    .. group-tab:: Knockout
+</template>
+<template #knockout>
 
-        The :ref:`KoTypeScriptViewModels` and :ref:`KoTypeScriptListViewModels` each have a property called `dataSource`. These properties accept an instance of a `Coalesce.DataSource<T>`. Generated classes that satisfy this relationship for all the data sources that were defined in C# may be found in the `dataSources` property on an instance of a ViewModel or ListViewModel, or in `ListViewModels.<ModelName>DataSources`
+The [TypeScript ViewModels](/stacks/ko/client/view-model.md) and [TypeScript ListViewModels](/stacks/ko/client/list-view-model.md) each have a property called `dataSource`. These properties accept an instance of a `Coalesce.DataSource<T>`. Generated classes that satisfy this relationship for all the data sources that were defined in C# may be found in the `dataSources` property on an instance of a ViewModel or ListViewModel, or in `ListViewModels.<ModelName>DataSources`
 
-        .. code-block:: knockout
+``` ts
+var viewModel = new ViewModels.Person();
+viewModel.dataSource = new viewModel.dataSources.IncludeFamily();
+viewModel.load(1);
 
-            var viewModel = new ViewModels.Person();
-            viewModel.dataSource = new viewModel.dataSources.IncludeFamily();
-            viewModel.load(1);
+var list = new ListViewModels.PersonList();
+list.dataSource = new list.dataSources.NamesStartingWith();
+list.load();
+```
 
-            var list = new ListViewModels.PersonList();
-            list.dataSource = new list.dataSources.NamesStartingWith();
-            list.load();
+</template>
+</CodeTabs>
 
 
 .. _DataSourceStandardParameters:
@@ -108,7 +113,7 @@ Custom Parameters
 
 On any data source that you create, you may add additional properties annotated with `[Coalesce]` that will then be exposed as parameters to the client. These property parameters are currently restricted to primitives (numeric types, strings) and dates (DateTime, DateTimeOffset). Property parameter primitives may be expanded to allow for more types in the future.
     
-.. code-block:: c#
+``` c#
 
     [Coalesce]
     public class NamesStartingWith : StandardDataSource<Person, AppDbContext>
@@ -123,43 +128,48 @@ On any data source that you create, you may add additional properties annotated 
             .Where(f => string.IsNullOrWhitespace(StartsWith) ? true : f.FirstName.StartsWith(StartsWith));
     }
 
+
+```
+
 List Auto-loading
 '''''''''''''''''
 
-You can setup :ref:`TypeScriptListViewModels` to automatically reload from the server when data source parameters change:
+You can setup [TypeScript List ViewModels](/stacks/disambiguation/list-view-model.md) to automatically reload from the server when data source parameters change:
 
-.. tabs::
+<CodeTabs>
+<template #vue>
 
-    .. group-tab:: Vue
+To automatically reload a [ListViewModel](/stacks/vue/layers/viewmodels.md) when data source parameters change, simply use the list's `$startAutoLoad` function:
 
-        To automatically reload a :ref:`ListViewModel <VueListViewModels>` when data source parameters change, simply use the list's `$startAutoLoad` function:
-        
-        .. code-block:: vue
-        
-            import { Person } from '@/models.g';
-            import { PersonListViewModel } from '@/viewmodels.g';
+``` ts
 
-            const list = new PersonListViewModel;
-            const dataSource = list.$dataSource = new Person.DataSources.NamesStartingWith
-            list.$startAutoLoad(this);
+    import { Person } from '@/models.g';
+    import { PersonListViewModel } from '@/viewmodels.g';
 
-            // Trigger a reload:
-            dataSource.startsWith = "Jo";
+    const list = new PersonListViewModel;
+    const dataSource = list.$dataSource = new Person.DataSources.NamesStartingWith
+    list.$startAutoLoad(this);
 
-    .. group-tab:: Knockout
+    // Trigger a reload:
+    dataSource.startsWith = "Jo";
+```
 
-        The properties created on the TypeScript objects are observables so they may be bound to directly. In order to automatically reload a list when a data source parameter changes, you must explicitly subscribe to it:
+</template>
+<template #knockout>
 
-        .. code-block:: knockout
+The properties created on the TypeScript objects are observables so they may be bound to directly. In order to automatically reload a list when a data source parameter changes, you must explicitly subscribe to it:
 
-            var list = new ListViewModels.PersonList();
-            var dataSource = new list.dataSources.NamesStartingWith();
-            dataSource.startsWith("Jo");
-            dataSource.subscribe(list); // Enables automatic reloading.
-            list.dataSource = dataSource;
-            list.load();
+``` ts
+    var list = new ListViewModels.PersonList();
+    var dataSource = new list.dataSources.NamesStartingWith();
+    dataSource.startsWith("Jo");
+    dataSource.subscribe(list); // Enables automatic reloading.
+    list.dataSource = dataSource;
+    list.load();
+```
 
-
+</template>
+</CodeTabs>
 
 
 .. _StandardDataSource:
@@ -176,7 +186,7 @@ The standard data sources, `IntelliTect.Coalesce.StandardDataSource<T>` and its 
 Default Loading Behavior
 ''''''''''''''''''''''''
 
-When an object or list of objects is requested, the default behavior of the the `StandardDataSource` is to load all of the immediate relationships of the object (parent objects and child collections), as well as the far side of many-to-many relationships. This can be suppressed by settings `includes = "none"` on your TypeScript :ref:`ViewModel <TypeScriptViewModels>` or :ref:`ListViewModel <TypeScriptListViewModels>` when making a request.
+When an object or list of objects is requested, the default behavior of the the `StandardDataSource` is to load all of the immediate relationships of the object (parent objects and child collections), as well as the far side of many-to-many relationships. This can be suppressed by settings `includes = "none"` on your TypeScript [ViewModel](/stacks/disambiguation/view-model.md) or [ListViewModel](/stacks/disambiguation/list-view-model.md) when making a request.
 
 In most cases, however, you'll probably want more or less data than what the default behavior provides. You can achieve this by overriding the `GetQuery` method, outlined below.
 
@@ -211,7 +221,7 @@ The standard data source contains 19 different methods which can be overridden i
 
 These methods often call one another, so overriding one method may cause some other method to no longer be called. The hierarchy of method calls, ignoring any logic or conditions contained within, is as follows:
 
-.. code-block:: none
+``` :no-line-numbers
 
     GetMappedItemAsync
         GetItemAsync
@@ -246,6 +256,9 @@ These methods often call one another, so overriding one method may cause some ot
             ApplyListSearchTerm
         GetListTotalCountAsync
 
+
+```
+
 Method Details
 ''''''''''''''
 
@@ -260,10 +273,10 @@ All of the methods outlined above can be overridden. A description of each of th
     
     .. note::
 
-        When `GetQuery` is overridden, the :ref:`DefaultLoadingBehavior` is overridden as well. To restore this behavior, use the `IQueryable<T>.IncludeChildren()` extension method to build your query.
+        When `GetQuery` is overridden, the [Default Loading Behavior](/modeling/model-components/data-sources.md) is overridden as well. To restore this behavior, use the `IQueryable<T>.IncludeChildren()` extension method to build your query.
 
 `GetIncludeTree`
-    Allows for explicitly specifying the :ref:`IncludeTree` that will be used when serializing results obtained from this data source into DTOs. By default, the query that is build up through all the other methods in the data source will be used to build the include tree.
+    Allows for explicitly specifying the [Include Tree](/concepts/include-tree.md) that will be used when serializing results obtained from this data source into DTOs. By default, the query that is build up through all the other methods in the data source will be used to build the include tree.
 
 `CanEvalQueryAsynchronously`
     Called by other methods in the standard data source to determine whether or not EF Core async methods will be used to evaluate queries. This may be globally disabled when bugs like https://github.com/aspnet/EntityFrameworkCore/issues/9038 are present in EF Core.
@@ -284,16 +297,16 @@ All of the methods outlined above can be overridden. A description of each of th
         - Numeric values will match exactly. Multiple comma-delimited values will create a filter that will match on any of the provided values.
 
 `ApplyListSearchTerm`
-    Applies filters to the query based on the specified search term. See :ref:`Searching` for a detailed look at how searching works in Coalesce.
+    Applies filters to the query based on the specified search term. See [[Search]](/modeling/model-components/attributes/search.md) for a detailed look at how searching works in Coalesce.
 
 `ApplyListSorting`
     If any client-specified sort orders are present, invokes `ApplyListClientSpecifiedSorting`. Otherwise, invokes `ApplyListDefaultSorting`.
 
 `ApplyListClientSpecifiedSorting`
-    Applies sorting to the query based on sort orders specified by the client. If the client specified :code:`"none"` as the sort field, no sorting will take place.
+    Applies sorting to the query based on sort orders specified by the client. If the client specified `"none"` as the sort field, no sorting will take place.
     
 `ApplyListDefaultSorting`
-    Applies default sorting behavior to the query, including behavior defined with use of `[DefaultOrderBy]` in C# POCOs, as well as fallback sorting to :code:`"Name"` or primary key properties.
+    Applies default sorting behavior to the query, including behavior defined with use of `[DefaultOrderBy]` in C# POCOs, as well as fallback sorting to `"Name"` or primary key properties.
 
 .. TODO - need a centralized doc page about sorting in Coalesce.
 
@@ -305,7 +318,7 @@ All of the methods outlined above can be overridden. A description of each of th
 
 `TransformResults`
     Allows for transformation of a result set after the query has been evaluated. 
-    This will be called for both lists of items and for single items. This can be used for things like populating non-mapped properties on a model. This method is only called immediately before mapping to a DTO - if the data source is serving data without mapping (e.g. when invoked by :ref:`Behaviors`) to a DTO, this will not be called..
+    This will be called for both lists of items and for single items. This can be used for things like populating non-mapped properties on a model. This method is only called immediately before mapping to a DTO - if the data source is serving data without mapping (e.g. when invoked by [Behaviors](/modeling/model-components/behaviors.md)) to a DTO, this will not be called..
 
     .. warning::
         
@@ -323,7 +336,7 @@ You can, of course, create a custom base data source that all your custom implem
 Simply create a class that implements `IEntityFrameworkDataSource<,>` (the `StandardDataSource<,>` already does - feel free to inherit from it), then register it at application startup like so:
 
 
-.. code-block:: c#
+``` c#
 
     public class MyDataSource<T, TContext> : StandardDataSource<T, TContext>
         where T : class, new()
@@ -336,7 +349,10 @@ Simply create a class that implements `IEntityFrameworkDataSource<,>` (the `Stan
         ...
     }
 
-.. code-block:: c#
+
+```
+
+``` c#
 
     public void ConfigureServices(IServiceCollection services)
     {
@@ -345,5 +361,8 @@ Simply create a class that implements `IEntityFrameworkDataSource<,>` (the `Stan
             b.AddContext<AppDbContext>();
             b.UseDefaultDataSource(typeof(MyDataSource<,>));
         });
+
+
+```
 
 Your custom data source must have the same generic type parameters - `<T, TContext>`. Otherwise, the Microsoft.Extensions.DependencyInjection service provider won't know how to inject it.

@@ -1,12 +1,9 @@
 
-.. _DtoIncludesExcludesAttr:
-
-[DtoIncludes] & [DtoExcludes]
-=============================
+# [DtoIncludes] & [DtoExcludes]
 
 Allows for easily controlling what data gets set to the client. When requesting data from the generated client-side list view models, you can specify an `includes` property on the ViewModel or ListViewModel. 
 
-For more information about the includes string, see :ref:`Includes`.
+For more information about the includes string, see [Includes String](/concepts/includes.md).
 
 When the database entries are returned to the client they will be trimmed based on the requested includes string and the values in `DtoExcludes` and `DtoIncludes`.
 
@@ -14,16 +11,16 @@ When the database entries are returned to the client they will be trimmed based 
 
     These attributes are **not security attributes** - consumers of your application's API can set the includes string to any value when making a request.
 
-    Do not use them to keep certain data private - use the :ref:`SecurityAttribute` family of attributes for that.
+    Do not use them to keep certain data private - use the [Security Attributes](/modeling/model-components/attributes/security-attribute.md) family of attributes for that.
    
 
 It is important to note that the value of the includes string will match against these attributes on *any* of your models that appears in the object graph being mapped to DTOs - it is not limited only to the model type of the root object.
 
-Example Usage
-.............
+## Example Usage
 
-.. code-block:: c#
+Server code:
 
+``` c#
     public class Person
     {
         // Don't include CreatedBy when editing - will be included for all other views
@@ -43,43 +40,50 @@ Example Usage
         [DtoIncludes("details")]
         public ICollection<Person> People { get; set; }
     }
+```
 
-In TypeScript:
+Client code:
 
-.. tabs::
+<CodeTabs>
+<template #vue>
 
-    .. code-tab:: vue
+``` ts
+import { PersonListViewModel } from '@/viewmodels.g'
 
-        import { PersonListViewModel } from '@/viewmodels.g'
-        
-        const personList = new PersonListViewModel();
-        personList.$includes = "Editor";
-        await personList.$load();
-        // Objects in personList.$items will not contain CreatedBy nor Department objects.
+const personList = new PersonListViewModel();
+personList.$includes = "Editor";
+await personList.$load();
+// Objects in personList.$items will not contain CreatedBy nor Department objects.
 
-        const personList2 = new PersonListViewModel();
-        personList2.$includes = "details";
-        await personList.$load();
-        // Objects in personList2.items will be allowed to contain both CreatedBy and Department objects. 
-        // Department will be allowed to include its other Person objects.
+const personList2 = new PersonListViewModel();
+personList2.$includes = "details";
+await personList.$load();
+// Objects in personList2.items will be allowed to contain both CreatedBy and Department objects. 
+// Department will be allowed to include its other Person objects.
+```
 
-    .. code-tab:: knockout
+</template>
+<template #knockout>
 
-        var personList = new ListViewModels.PersonList();
-        personList.includes = "Editor";
-        personList.load(() => {
-            // objects in personList.items will not contain CreatedBy nor Department objects.
-        });
-        
-        var personList2 = new ListViewModels.PersonList();
-        personList2.includes = "details";
-        personList2.load(() => {
-            // objects in personList2.items will be allowed to contain both CreatedBy and Department objects. Department will be allowed to include its other Person objects.
-        });
+``` ts
+var personList = new ListViewModels.PersonList();
+personList.includes = "Editor";
+personList.load(() => {
+    // objects in personList.items will not contain CreatedBy nor Department objects.
+});
+
+var personList2 = new ListViewModels.PersonList();
+personList2.includes = "details";
+personList2.load(() => {
+    // objects in personList2.items will be allowed to contain both CreatedBy and Department objects. Department will be allowed to include its other Person objects.
+});
+```
+
+</template>
+</CodeTabs>
 
 
-Properties
-..........
+## Properties
 
 `public string ContentViews { get; set; }` :ctor:`1`
     A comma-delimited list of values of `includes` on which to operate.
@@ -88,6 +92,6 @@ Properties
 
     .. important::
     
-        `DtoIncludes` does not ensure that specific data will be loaded from the database. Only data loaded into current EF DbContext can possibly be returned from the API. See :ref:`DataSources` for more information.
+        `DtoIncludes` does not ensure that specific data will be loaded from the database. Only data loaded into current EF DbContext can possibly be returned from the API. See [Data Sources](/modeling/model-components/data-sources.md) for more information.
 
     For `DtoExcludes`, this will be the values of `includes` for which this property will **never** be serialized and sent to the client.

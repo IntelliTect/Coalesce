@@ -5,31 +5,33 @@ c-admin-table
 
 .. MARKER:summary
     
-An full-featured table for a :ref:`ListViewModel <VueListViewModels>`, including a :ref:`c-admin-table-toolbar`, :ref:`c-table`, and :ref:`c-list-pagination`.
+An full-featured table for a [ListViewModel](/stacks/vue/layers/viewmodels.md), including a [c-admin-table-toolbar](/stacks/vue/coalesce-vue-vuetify/components/c-admin-table-toolbar.md), [c-table](/stacks/vue/coalesce-vue-vuetify/components/c-table.md), and [c-list-pagination](/stacks/vue/coalesce-vue-vuetify/components/c-list-pagination.md).
 
 .. MARKER:summary-end
 
-The table can be in read mode (default), or toggled into edit mode with the button provided by the :ref:`c-admin-table-toolbar`. When placed into edit mode, :ref:`auto-save <VueViewModelsAutoSave>` is enabled.
+The table can be in read mode (default), or toggled into edit mode with the button provided by the [c-admin-table-toolbar](/stacks/vue/coalesce-vue-vuetify/components/c-admin-table-toolbar.md). When placed into edit mode, [auto-save](/stacks/vue/layers/viewmodels.md) is enabled.
 
-.. contents:: Contents
-    :local:
+[[toc]]
 
 Examples
 --------
 
-.. code-block:: sfc
+``` vue-html
 
     <c-admin-table :list="personList" />
+
+
+```
 
 Props
 -----
 
 `list: ListViewModel`
-    The :ref:`ListViewModel <VueListViewModels>` to render a table for.
+    The [ListViewModel](/stacks/vue/layers/viewmodels.md) to render a table for.
 
 `pageSizes?: number[]`
-    An optional list of available page sizes to offer through the :ref:`c-list-pagination`'s :ref:`c-list-page-size` component. Defaults to `[10, 25, 100]`.
+    An optional list of available page sizes to offer through the [c-list-pagination](/stacks/vue/coalesce-vue-vuetify/components/c-list-pagination.md)'s [c-list-page-size](/stacks/vue/coalesce-vue-vuetify/components/c-list-page-size.md) component. Defaults to `[10, 25, 100]`.
 
 `queryBind?: boolean`
-    If true, the :ref:`Data Source Standard Parameters <DataSourceStandardParameters>` of the provided :ref:`ListViewModel <VueListViewModels>` will be read from and written to the window's query string. The "Editable" state of the table will also be bound to the query string.
+    If true, the [Data Source Standard Parameters](/modeling/model-components/data-sources.md) of the provided [ListViewModel](/stacks/vue/layers/viewmodels.md) will be read from and written to the window's query string. The "Editable" state of the table will also be bound to the query string.
 

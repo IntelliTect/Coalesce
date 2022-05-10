@@ -13,12 +13,15 @@ The quickest and easiest way to create a new Coalesce Knockout application is to
     :alt: NuGet
     :target: https://www.nuget.org/packages/IntelliTect.Coalesce.KnockoutJS.Template/
     
-.. code-block:: sh
+``` sh
 
     dotnet new --install IntelliTect.Coalesce.KnockoutJS.Template
     dotnet new coalesceko
 
-|kobadge| • `View on GitHub <https://github.com/IntelliTect/Coalesce.KnockoutJS.Template>`_ 
+
+```
+
+|kobadge| • [View on GitHub](https://github.com/IntelliTect/Coalesce.KnockoutJS.Template) 
 
 
 
@@ -29,9 +32,9 @@ The quickest and easiest way to create a new Coalesce Knockout application is to
 Building Pages & Features
 -------------------------
 
-Lets say we've created a :ref:`model <EntityModels>` called `Person` as follows, and we've ran code generation with ``dotnet coalesce``:
+Lets say we've created a [model](/modeling/model-types/entities.md) called `Person` as follows, and we've ran code generation with ``dotnet coalesce``:
 
-.. code-block:: c#
+``` c#
 
     namespace MyApplication.Data.Models 
     {
@@ -43,11 +46,14 @@ Lets say we've created a :ref:`model <EntityModels>` called `Person` as follows,
         }
     }
 
+
+```
+
 We can create a details page for a Person by creating:
 
 - A controller in ``src/MyApplication.Web/Controllers/PersonController.cs``:
 
-    .. code-block:: c#
+    ``` c#
 
         namespace MyApplication.Web.Controllers
         {
@@ -57,9 +63,12 @@ We can create a details page for a Person by creating:
             }
         }
 
+
+    ```
+
 - A view in ``src/MyApplication.Web/Views/Person/Details.cshtml``:
 
-    .. code-block:: html
+    ``` html
                 
         <h1>Person Details</h1>
 
@@ -85,9 +94,12 @@ We can create a details page for a Person by creating:
         </script>
         }
     
+
+    ```
+
 - And a script in ``src/MyApplication.Web/Scripts/person.details.ts``:
 
-    .. code-block:: knockout
+    ``` ts
 
         /// <reference path="viewmodels.generated.d.ts" />
 
@@ -104,6 +116,9 @@ We can create a details page for a Person by creating:
             }
         }
 
+
+    ```
+
 With these pieces in place, we now have a functioning page that will display details about a person. We can start up the application and navigate to ``/Person/Details?id=1`` (assuming a person with ID 1 exists - if not, navigate to ``/Person/Table`` and create one).
 
-From this point, one can start adding more fields, more features, and more flair to the page. Check out all the other documentation in the sidebar to see what else Coalesce has to offer, including the :ref:`KoOverview`.
+From this point, one can start adding more fields, more features, and more flair to the page. Check out all the other documentation in the sidebar to see what else Coalesce has to offer, including the [Knockout Overview](/stacks/ko/overview.md).

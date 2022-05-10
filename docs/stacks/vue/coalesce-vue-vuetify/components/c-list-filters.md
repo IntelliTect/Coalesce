@@ -5,25 +5,27 @@ c-list-filters
 
 .. MARKER:summary
     
-A component that provides an interface for modifying the `filters` prop of a :ref:`ListViewModel <VueListViewModels>`'s :ref:`parameters <DataSourceStandardParameters>`.
+A component that provides an interface for modifying the `filters` prop of a [ListViewModel](/stacks/vue/layers/viewmodels.md)'s [parameters](/modeling/model-components/data-sources.md).
 
 .. MARKER:summary-end
 
-.. contents:: Contents
-    :local:
+[[toc]]
 
 Examples
 --------
 
-.. code-block:: sfc
+``` vue-html
 
   <c-list-filters :list="list" />
+
+
+```
 
 Props
 -----
 
 `list: ListViewModel`
-    The :ref:`ListViewModel <VueListViewModels>` whose filters will be editable.
+    The [ListViewModel](/stacks/vue/layers/viewmodels.md) whose filters will be editable.
 
 
 

@@ -10,13 +10,13 @@ Mark an property as hidden from the edit, List or All areas.
 
     This attribute is **not a security attribute** - it only affects the rendering of the admin pages. It has no impact on data visibility in the API.
 
-    Do not use it to keep certain data private - use the :ref:`SecurityAttribute` family of attributes for that.
+    Do not use it to keep certain data private - use the [Security Attributes](/modeling/model-components/attributes/security-attribute.md) family of attributes for that.
    
 
 Example Usage
 -------------
 
-.. code-block:: c#
+``` c#
 
     public class Person
     {
@@ -25,6 +25,9 @@ Example Usage
         [Hidden(HiddenAttribute.Areas.All)]
         public int? IncomeLevelId { get; set; }
     }
+
+
+```
 
 Properties
 ----------

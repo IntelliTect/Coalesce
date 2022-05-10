@@ -6,7 +6,7 @@
 
 When a dropdown list is used to select a related object, this controls the text shown in the dropdown by default. When using these dropdown, only the key and this field are returned as search results by the API.
 
-The property with this attribute will also be used as the displayed text for reference navigation properties when they are displayed as text using the :ref:`Computed Text Properties <TypeScriptViewModelComputedText>` properties on the :ref:`TypeScriptViewModels`.
+The property with this attribute will also be used as the displayed text for reference navigation properties when they are displayed as text using the :ref:`Computed Text Properties <TypeScriptViewModelComputedText>` properties on the [TypeScript ViewModels](/stacks/disambiguation/view-model.md).
 
 If this attribute is not used, and a property named "Name" exists on the model, that property will be used. Otherwise, the primary key will be used.
 
@@ -14,7 +14,7 @@ If this attribute is not used, and a property named "Name" exists on the model, 
 Example Usage
 -------------
 
-.. code-block:: c#
+``` c#
 
     public class Person
     {
@@ -27,4 +27,7 @@ Example Usage
         [ListText]
         [NotMapped]
         public string Name => FirstName + " " + LastName
+
+```
+
     }

@@ -39,22 +39,22 @@ The displayed name of a property can also be set via the `[DisplayName]` attribu
 [Required]
 ..........
 
-Properties with `[Required]` will generate client validation rules. See :ref:`ClientValidation`.
+Properties with `[Required]` will generate client validation rules. See [[ClientValidation]](/modeling/model-components/attributes/client-validation.md).
 
 [Range]
 .......
 
-Properties with `[Range]` will generate client validation rules. See :ref:`ClientValidation`.
+Properties with `[Range]` will generate client validation rules. See [[ClientValidation]](/modeling/model-components/attributes/client-validation.md).
 
 [MinLength]
 ...........
 
-Properties with `[MinLength]` will generate client validation rules. See :ref:`ClientValidation`.
+Properties with `[MinLength]` will generate client validation rules. See [[ClientValidation]](/modeling/model-components/attributes/client-validation.md).
 
 [MaxLength]
 ...........
 
-Properties with `[MaxLength]` will generate client validation rules. See :ref:`ClientValidation`.
+Properties with `[MaxLength]` will generate client validation rules. See [[ClientValidation]](/modeling/model-components/attributes/client-validation.md).
 
 .. _Entity Framework Relationships: https://docs.microsoft.com/en-us/ef/core/modeling/relationships
 
@@ -71,9 +71,9 @@ Sometimes, Coalesce (and EF, too) can have trouble figuring out what the foreign
 [DatabaseGenerated]
 ...................
 
-Primary Keys with `[DatabaseGenerated(DatabaseGeneratedOption.None)]` will be settable on the client and will be appropriately handled by the :ref:`StandardBehaviors` on the server. Currently unsupported on the :ref:`Knockout front-end stack <KoOverview>`.
+Primary Keys with `[DatabaseGenerated(DatabaseGeneratedOption.None)]` will be settable on the client and will be appropriately handled by the [Standard Behaviors](/modeling/model-components/behaviors.md) on the server. Currently unsupported on the [Knockout front-end stack](/stacks/ko/overview.md).
 
 [NotMapped]
 ...........
 
-Model properties that aren't mapped to the database should be marked with `[NotMapped]` so that Coalesce doesn't try to load them from the database when :ref:`searching <Searching>` or carrying out the :ref:`DefaultLoadingBehavior`.
+Model properties that aren't mapped to the database should be marked with `[NotMapped]` so that Coalesce doesn't try to load them from the database when [searching](/modeling/model-components/attributes/search.md) or carrying out the [Default Loading Behavior](/modeling/model-components/data-sources.md).

@@ -11,23 +11,25 @@ Used both for selecting values for foreign key and navigation properties, and fo
 
 .. MARKER:summary-end
 
-.. contents:: Contents
-    :local:
+[[toc]]
 
 Examples
 --------
 
 Binding to a navigation property or foreign key of a model:
 
-.. code-block:: sfc
+``` vue-html
 
   <c-select :model="person" for="company" />
   <!-- OR: -->
   <c-select :model="person" for="companyId" />
 
+
+```
+
 Binding an arbitrary primary key value or an arbitrary object:
 
-.. code-block:: sfc
+``` vue-html
 
   <!-- Binding a key: -->
   <c-select for="Person" :key-value.sync="selectedPersonId" />
@@ -36,9 +38,12 @@ Binding an arbitrary primary key value or an arbitrary object:
   <c-select for="Person" :object-value.sync="selectedPerson" />
   <c-select for="Person" v-model="selectedPerson" />
 
+
+```
+
 Examples of other props:
 
-.. code-block:: sfc
+``` vue-html
 
   <c-select 
     for="Person" 
@@ -53,6 +58,9 @@ Examples of other props:
   />
   <!-- `createMethods` is defined in the docs of `create` below -->
 
+
+
+```
 
 Props
 -----
@@ -80,15 +88,15 @@ Props
     When binding the component with ``v-model``, accepts the ``value`` part of ``v-model``. If `for` was specified as a foreign key, this will expect a key; likewise, if `for` was specified as a type or as a navigation property, this will expect an object.
 
 `keyValue?: any`
-    When bound with :html:`:key-value.sync="keyValue"`, allows binding the primary key of the selected object explicitly.
+    When bound with `:key-value.sync="keyValue"`, allows binding the primary key of the selected object explicitly.
 
 `objectValue?: any`
-    When bound with :html:`:object-value.sync="objectValue"`, allows binding the selected object explicitly.
+    When bound with `:object-value.sync="objectValue"`, allows binding the selected object explicitly.
 
 `clearable?: boolean`
     Whether the selection can be cleared or not, emitting `null` as the input value.
 
-    If not specified and the component is bound to a foreign key or reference navigation property, defaults to whether or not the foreign key has a ``required`` validation rule defined in its :ref:`Metadata <VueMetadata>`.
+    If not specified and the component is bound to a foreign key or reference navigation property, defaults to whether or not the foreign key has a ``required`` validation rule defined in its [Metadata](/stacks/vue/layers/metadata.md).
 
 `preselectFirst?: boolean = false`
     If true, then when the first list results for the component are received by the client just after the component is created, c-select will emit the first item in the list as the selected value.
@@ -100,7 +108,7 @@ Props
     If true, the list results will be reloaded when the dropdown menu is opened. By default, list results are loaded when the component is mounted and also when any of its parameters change (either search input or the `params` prop).
 
 `params?: ListParameters`
-    An optional set of :ref:`Data Source Standard Parameters <DataSourceStandardParameters>` to pass to API calls made to the server.
+    An optional set of [Data Source Standard Parameters](/modeling/model-components/data-sources.md) to pass to API calls made to the server.
 
 `create?`
 
@@ -120,23 +128,23 @@ Props
   
   For example:
 
-  .. code-block:: vue
-
-    createMethods = {
-      getLabel(search: string, items: Person[]) {
-        const searchLower = search.toLowerCase();
-        if (items.some(a => a.name?.toLowerCase().indexOf(searchLower) == 0)) {
-          return false;
-        }
-        return search;
-      },
-      async getItem(search: string, label: string) {
-        const client = new PersonApiClient();
-        return (await client.addPersonByName(label)).data.object!;
+  ```ts
+  createMethods = {
+    getLabel(search: string, items: Person[]) {
+      const searchLower = search.toLowerCase();
+      if (items.some(a => a.name?.toLowerCase().indexOf(searchLower) == 0)) {
+        return false;
       }
+      return search;
+    },
+    async getItem(search: string, label: string) {
+      const client = new PersonApiClient();
+      return (await client.addPersonByName(label)).data.object!;
     }
+  }
+  ```
 
 Slots
 -----
 
-:html:`#item="{ item }"` - Slot used to customize the text of both items inside the list, as well as the text of selected items. By default, items are rendered with :ref:`c-display`. Slot is passed a single parameter `item` containing a :ref:`model instance <VueModels>`.
+`#item="{ item }"` - Slot used to customize the text of both items inside the list, as well as the text of selected items. By default, items are rendered with [c-display](/stacks/vue/coalesce-vue-vuetify/components/c-display.md). Slot is passed a single parameter `item` containing a [model instance](/stacks/vue/layers/models.md).

@@ -11,7 +11,11 @@
     "build": "vuepress build"
   },
   "devDependencies": {
-    "vitepress": "^0.22.4",
+    "@vuepress/plugin-register-components": "^2.0.0-beta.43",
+    "@vuepress/plugin-shiki": "^2.0.0-beta.43",
     "vuepress": "^2.0.0-beta.43"
+  },
+  "dependencies": {
+    "glob": "^8.0.1"
   }
 }

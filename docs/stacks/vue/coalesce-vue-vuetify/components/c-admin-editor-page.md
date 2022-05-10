@@ -5,17 +5,16 @@ c-admin-editor-page
 
 .. MARKER:summary
     
-A page for a creating/editing single :ref:`ViewModel <VueInstanceViewModels>` instance. Provides a :ref:`c-admin-editor` and a :ref:`c-admin-methods` for the instance. Designed to be routed to directly with vue-router_.
+A page for a creating/editing single [ViewModel](/stacks/vue/layers/viewmodels.md) instance. Provides a [c-admin-editor](/stacks/vue/coalesce-vue-vuetify/components/c-admin-editor.md) and a [c-admin-methods](/stacks/vue/coalesce-vue-vuetify/components/c-admin-methods.md) for the instance. Designed to be routed to directly with vue-router_.
 
 .. MARKER:summary-end
 
-.. contents:: Contents
-    :local:
+[[toc]]
 
 Examples
 --------
 
-.. code-block:: vue
+``` ts
 
     // router.ts or main.ts
 
@@ -33,6 +32,9 @@ Examples
             },
         ]
     })
+
+
+```
 
 Props
 -----

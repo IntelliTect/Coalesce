@@ -5,32 +5,37 @@ c-admin-table-toolbar
 
 .. MARKER:summary
     
-A full-featured toolbar for a :ref:`ListViewModel <VueListViewModels>` designed to be used on an admin page, including "Create" and "Reload" buttons, a :ref:`c-list-range-display`, a :ref:`c-list-page`, a search field, :ref:`c-list-filters`, and a :ref:`c-list-page-size`.
+A full-featured toolbar for a [ListViewModel](/stacks/vue/layers/viewmodels.md) designed to be used on an admin page, including "Create" and "Reload" buttons, a [c-list-range-display](/stacks/vue/coalesce-vue-vuetify/components/c-list-range-display.md), a [c-list-page](/stacks/vue/coalesce-vue-vuetify/components/c-list-page.md), a search field, [c-list-filters](/stacks/vue/coalesce-vue-vuetify/components/c-list-filters.md), and a [c-list-page-size](/stacks/vue/coalesce-vue-vuetify/components/c-list-page-size.md).
 
 .. MARKER:summary-end
 
-.. contents:: Contents
-    :local:
+[[toc]]
 
 Examples
 --------
 
-.. code-block:: sfc
+``` vue-html
 
     <c-admin-table-toolbar :list="personList" />
 
-.. code-block:: sfc
 
-    <c-admin-table-toolbar :list="personList" color="pink" :editable.sync="isEditable" />
+```
+
+``` vue-html
+
+    <c-admin-table-toolbar :list="personList" />
+
+
+```
 
 Props
 -----
 
 `list: ListViewModel`
-    The :ref:`ListViewModel <VueListViewModels>` to render the toolbar for.
+    The [ListViewModel](/stacks/vue/layers/viewmodels.md) to render the toolbar for.
 
 `color: string = "primary"`
-    The `color <https://vuetifyjs.com/en/styles/colors/>`_ of the toolbar.
+    The [color](https://vuetifyjs.com/en/styles/colors/) of the toolbar.
 
 `editable?: boolean`
     If provided, adds a button to toggle the value of this prop. Should be bound with the `.sync` modifier.

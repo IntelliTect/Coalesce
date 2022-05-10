@@ -1,9 +1,24 @@
 import { defaultTheme } from '@vuepress/theme-default'
-
+import { shikiPlugin } from '@vuepress/plugin-shiki'
+import { registerComponentsPlugin } from '@vuepress/plugin-register-components'
+import { importMdPlugin } from './import-md-plugin/importCodePlugin'
+import path from 'path'
+ 
 export default {
   lang: 'en-US',
   title: 'Hello, VuePress!',
   description: 'This is my first VuePress site',
+  plugins: [
+    importMdPlugin(),
+    shikiPlugin({
+      theme: 'dark-plus'
+    }),
+    registerComponentsPlugin({
+      components: {
+        CodeTabs: path.resolve(__dirname, './components/code-tabs.vue'),
+      },
+    }),
+  ],
   theme: defaultTheme({
     sidebar: [
       "/",
@@ -53,30 +68,30 @@ export default {
         text: 'Client - Knockout',
         // collapsible: false,
         children: [
-          'stacks/ko/overview',
-          'stacks/ko/getting-started',
-          'stacks/ko/client/view-model',
-          'stacks/ko/client/list-view-model',
-          'stacks/ko/client/external-view-model',
-          'stacks/ko/client/methods',
-          'stacks/ko/client/model-config',
-          'stacks/ko/client/bindings',
+          '/stacks/ko/overview',
+          '/stacks/ko/getting-started',
+          '/stacks/ko/client/view-model',
+          '/stacks/ko/client/list-view-model',
+          '/stacks/ko/client/external-view-model',
+          '/stacks/ko/client/methods',
+          '/stacks/ko/client/model-config',
+          '/stacks/ko/client/bindings',
          ],
       },
       {
         text: 'Concepts',
         // collapsible: false,
         children: [
-          'concepts/include-tree',
-          'concepts/includes',
+          '/concepts/include-tree',
+          '/concepts/includes',
          ],
       },
       {
         text: 'Configuration',
         // collapsible: false,
         children: [
-          'topics/startup',
-          'topics/coalesce-json',
+          '/topics/startup',
+          '/topics/coalesce-json',
          ],
       }
     ]

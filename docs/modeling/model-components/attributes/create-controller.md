@@ -9,7 +9,7 @@ suppressing the creation of either or both of these.
 Example Usage
 -------------
 
-.. code-block:: c#
+``` c#
 
     [CreateController(view: false, api: true)]
     public class Person
@@ -19,6 +19,9 @@ Example Usage
         ...
     }
 
+
+
+```
 
 Properties
 ----------

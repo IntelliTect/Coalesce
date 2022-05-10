@@ -5,13 +5,12 @@ Metadata Layer
 
 The metadata layer, generated as `metadata.g.ts`, contains a minimal set of metadata to represent your data model on the front-end. Because Vue applications are typically statically compiled, it is necessary for the frontend code to have a representation of your data model as an analog to the `ReflectionRepository` available at runtime to Knockout apps that utilize `.cshtml` files.
 
-.. contents:: Contents
-    :local:
+[[toc]]
 
 Concepts 
 --------
 
-The following is a non-exhaustive list of the general concepts used by the metadata layer. The `source code of coalesce-vue <https://github.com/IntelliTect/Coalesce/blob/dev/src/coalesce-vue/src/metadata.ts>`_ provides the most exhaustive set of documentation about the metadata layer: 
+The following is a non-exhaustive list of the general concepts used by the metadata layer. The [source code of coalesce-vue](https://github.com/IntelliTect/Coalesce/blob/dev/src/coalesce-vue/src/metadata.ts) provides the most exhaustive set of documentation about the metadata layer: 
 
 Metadata
 ........
@@ -21,7 +20,7 @@ All objects in the metadata layer that represent any kind of metadata have, at t
 Type
 ....
 
-All custom types exposed by your application's data model will have a Type metadata object generated. This includes both C# classes, and C# enums. Class types include `model` (for :ref:`EntityModels` and :ref:`CustomDTOs`) and `object` (for :ref:`ExternalTypes`).
+All custom types exposed by your application's data model will have a Type metadata object generated. This includes both C# classes, and C# enums. Class types include `model` (for [Entity Models](/modeling/model-types/entities.md) and [Custom DTOs](/modeling/model-types/dtos.md)) and `object` (for [External Types](/modeling/model-types/external-types.md)).
 
 .. _VueMetadataValue:
 

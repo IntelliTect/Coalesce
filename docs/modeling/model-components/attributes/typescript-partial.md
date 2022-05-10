@@ -14,7 +14,7 @@ This behavior allows you to extend the behavior of the generated TypeScript view
 Example Usage
 -------------
 
-.. code-block:: c#
+``` c#
 
     [TypeScriptPartial]
     public class Employee
@@ -23,6 +23,9 @@ Example Usage
 
         ...
     }
+
+
+```
 
 Properties
 ----------

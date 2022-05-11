@@ -121,7 +121,7 @@ No more extra data trailing off the end of the projects' employees!
 
 ### Custom Data Sources
 
-In most cases, you don't have to worry about creating an `IncludeTree`. When using the [Standard Data Source](/modeling/model-components/data-sources.md) (or a derivative), the structure of the `.Include` and `.ThenInclude` calls will be captured automatically and be turned into an `IncludeTree`.
+In most cases, you don't have to worry about creating an `IncludeTree`. When using the [Standard Data Source](/modeling/model-components/data-sources.md#standard-data-source) (or a derivative), the structure of the `.Include` and `.ThenInclude` calls will be captured automatically and be turned into an `IncludeTree`.
 
 However, there are sometimes cases where you perform complex loading in these methods that involves loading data into the current `DbContext` outside of the `IQueryable` that is returned from the method. The most common situation for this is needing to conditionally load related data - for example, load all children of an object where the child has a certain value of a Status property.
 
@@ -146,7 +146,7 @@ public override IQueryable<Employee> GetQuery()
 }
 ```
 
-You can also override the `GetIncludeTree` method of the [Standard Data Source](/modeling/model-components/data-sources.md) to achieve the same result:
+You can also override the `GetIncludeTree` method of the [Standard Data Source](/modeling/model-components/data-sources.md#standard-data-source) to achieve the same result:
 
 ``` c#
 public override IncludeTree GetIncludeTree(IQueryable<T> query, IDataSourceParameters parameters) => Db

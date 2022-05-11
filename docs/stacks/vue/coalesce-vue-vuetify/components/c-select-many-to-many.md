@@ -58,7 +58,7 @@ If binding the component with ``v-model``, accepts the ``value`` part of ``v-mod
     
 <Prop def="params?: ListParameters" lang="ts" />
 
-An optional set of [Data Source Standard Parameters](/modeling/model-components/data-sources.md) to pass to API calls made to the server.
+An optional set of [Data Source Standard Parameters](/modeling/model-components/data-sources.md#standard-parameters) to pass to API calls made to the server.
     
 
 

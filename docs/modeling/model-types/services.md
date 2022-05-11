@@ -7,15 +7,15 @@ Instead, Coalesce allows you to generate API Controllers and a TypeScript client
 
 The instance methods of these services conform exactly to the specifications outlined in [Methods](/modeling/model-components/methods.md) with a few exceptions:
 
-    * TypeScript functions for invoking the endpoint have no `reload: boolean` parameter.
-    * Instance methods don't operate on an instance of some model with a known key, but instead on an injected instance of the service.
+* TypeScript functions for invoking the endpoint have no `reload: boolean` parameter.
+* Instance methods don't operate on an instance of some model with a known key, but instead on an injected instance of the service.
 
 ## Generated Code
 
 For each external type found in your application's model, Coalesce will generate:
 
-    * An API controller with endpoints that correspond to the service's instance methods.
-    * A TypeScript client containing the members outlined in [Methods](/modeling/model-components/methods.md) for invoking these endpoints.
+* An API controller with endpoints that correspond to the service's instance methods.
+* A TypeScript client containing the members outlined in [Methods](/modeling/model-components/methods.md) for invoking these endpoints.
 
 
 ## Example Service

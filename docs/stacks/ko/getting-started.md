@@ -34,67 +34,60 @@ We can create a details page for a Person by creating:
 - A controller in ``src/MyApplication.Web/Controllers/PersonController.cs``:
 
     ``` c#
-        namespace MyApplication.Web.Controllers
+    namespace MyApplication.Web.Controllers
+    {
+        public partial class PersonController
         {
-            public partial class PersonController
-            {
-                public IActionResult Details() => View();
-            }
+            public IActionResult Details() => View();
         }
-
-
+    }
     ```
 
 - A view in ``src/MyApplication.Web/Views/Person/Details.cshtml``:
 
-    ``` html
-                
-        <h1>Person Details</h1>
+    ``` razor
+    <h1>Person Details</h1>
 
-        <div data-bind="with: person">
-            <dl class="dl-horizontal">
-                <dt>Name </dt>
-                <dd data-bind="text: name"></dd>
+    <div data-bind="with: person">
+        <dl class="dl-horizontal">
+            <dt>Name </dt>
+            <dd data-bind="text: name"></dd>
 
-                <dt>Date of Birth </dt>
-                <dd data-bind="moment: birthDate, format: 'MM/DD/YYYY hh:mm a'"></dd>
-            </dl>
-        </div>
+            <dt>Date of Birth </dt>
+            <dd data-bind="moment: birthDate, format: 'MM/DD/YYYY hh:mm a'"></dd>
+        </dl>
+    </div>
 
-        @section Scripts
-        {
-        <script src="~/js/person.details.js"></script>
-        <script>
-            $(function () {
-                var vm = new MyApplication.PersonDetails();
-                ko.applyBindings(vm);
-                vm.load();
-            });
-        </script>
-        }
-    
-
+    @section Scripts
+    {
+    <script src="~/js/person.details.js"></script>
+    <script>
+        $(function () {
+            var vm = new MyApplication.PersonDetails();
+            ko.applyBindings(vm);
+            vm.load();
+        });
+    </script>
+    }
     ```
 
 - And a script in ``src/MyApplication.Web/Scripts/person.details.ts``:
 
     ``` ts
-        /// <reference path="viewmodels.generated.d.ts" />
+    /// <reference path="viewmodels.generated.d.ts" />
 
-        module MyApplication {
-            export class PersonDetails {
-                public person = new ViewModels.Person();
+    module MyApplication {
+        export class PersonDetails {
+            public person = new ViewModels.Person();
 
-                load() {
-                    var id = Coalesce.Utilities.GetUrlParameter("id");
-                    if (id != null && id != '') {
-                        this.person.load(id);
-                    }
+            load() {
+                var id = Coalesce.Utilities.GetUrlParameter("id");
+                if (id != null && id != '') {
+                    this.person.load(id);
                 }
             }
         }
-
-
+    }
     ```
 
 With these pieces in place, we now have a functioning page that will display details about a person. We can start up the application and navigate to ``/Person/Details?id=1`` (assuming a person with ID 1 exists - if not, navigate to ``/Person/Table`` and create one).

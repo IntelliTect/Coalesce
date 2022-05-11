@@ -6,12 +6,15 @@ For each database-mapped type in your model, Coalesce will generate a TypeScript
 
 These ViewModels are dependent on [Knockout](http://knockoutjs.com/), and are designed to be used directly from Knockout bindings in your HTML. All data properties on the generated model are Knockout observables.
 
+[[toc]]
 
 ## Base Members
 
+The following base members are available to all generated ViewModel classes:
+
 <Prop def="includes: string" lang="ts" />
 
-String that will be passed to the server when loading and saving that allows for data trimming via C# Attributes. See [Includes String](/concepts/includes.md) for more information.
+String that will be passed to the server when loading and saving that allows for data trimming via C# Attributes. See [Includes String](/concepts/includes.md).
 
 <Prop def="isChecked: KnockoutObservable<boolean>" lang="ts" />
 
@@ -88,8 +91,8 @@ Loads any child objects that have an ID set, but not the full object. This is us
 
 Loads this object from a data transfer object received from the server. 
 
-    * `force` - Will override the check against isLoading that is done to prevent recursion.
-    * `allowCollectionDeletes` - Set true when entire collections are loaded. True is the default. In some cases only a partial collection is returned, set to false to only add/update collections.
+* `force` - Will override the check against isLoading that is done to prevent recursion.
+* `allowCollectionDeletes` - Set true when entire collections are loaded. True is the default. In some cases only a partial collection is returned, set to false to only add/update collections.
 
 
 <Prop def="deleteItem: callback?: (self: T) => void): JQueryPromise<any> | undefined" lang="ts" />
@@ -108,7 +111,7 @@ Contains the error message from the last failed call to the server.
 <Prop def="onSave: callback: (self: T) => void): boolean" lang="ts" />
 
 Register a callback to be called when a save is done.
-    Returns `true` if the callback was registered, or `false` if the callback was already registered.
+Returns `true` if the callback was registered, or `false` if the callback was already registered.
 
 <Prop def="saveToDto: () => any" lang="ts" />
 
@@ -158,95 +161,94 @@ List of errors found during validation. Any errors present will prevent saving.
 
 ## Model-Specific Members
 
-Configuration
-    A static configuration object for configuring all instances of the ViewModel's  type is created, as well as an instance configuration object for configuring specific instances of the ViewModel. See (see [ViewModel Configuration](/stacks/ko/client/model-config.md)) for more information.
+The following members are generated for each generated ViewModel class and are unique to each class. The examples below are based on a type named `Person`.
 
-    ``` ts
-    public static coalesceConfig: Coalesce.ViewModelConfiguration<Person>
-        = new Coalesce.ViewModelConfiguration<Person>(Coalesce.GlobalConfiguration.viewModel);
+### Configuration
 
-    public coalesceConfig: Coalesce.ViewModelConfiguration<Person>
-        = new Coalesce.ViewModelConfiguration<Person>(Person.coalesceConfig);
-    ```
+<Prop def="static coalesceConfig: Coalesce.ViewModelConfiguration<Person>" lang="ts" />
 
-DataSources
-    For each of the [Data Sources](/modeling/model-components/data-sources.md) for a model, a class will be added to a namespace named ``ListViewModels.<ClassName>DataSources``. This namespace can always be accessed on both `ViewModel` and `ListViewModel` instances via the `dataSources` property, and class instances can be assigned to the `dataSource` property.
+A static configuration object for configuring all instances of the ViewModel's type is created. See [ViewModel Configuration](/stacks/ko/client/model-config.md).
 
-    ``` ts
-    public dataSources = ListViewModels.PersonDataSources;
-    public dataSource: DataSource<Person> = new this.dataSources.Default();
-    ```
+<Prop def="coalesceConfig: Coalesce.ViewModelConfiguration<Person>" lang="ts" />
 
-Data Properties
-    For each exposed property on the underlying EF POCO, a `KnockoutObservable<T>` property will exist on the TypeScript model. For navigation properties, these will be typed with the corresponding TypeScript ViewModel for the other end of the relationship. For collections (including collection navigation properties), these properties will be `KnockoutObservableArray<T>` objects.
+An per-instance configuration object for configuring each specific ViewModel instance is created. See [ViewModel Configuration](/stacks/ko/client/model-config.md).
 
-    ``` ts
-    public personId: KnockoutObservable<number> = ko.observable(null);
-    public fullName: KnockoutObservable<string> = ko.observable(null);
-    public gender: KnockoutObservable<number> = ko.observable(null);
-    public companyId: KnockoutObservable<number> = ko.observable(null);
-    public company: KnockoutObservable<ViewModels.Company> = ko.observable(null);
-    public addresses: KnockoutObservableArray<ViewModels.Address> = ko.observableArray([]);
-    public birthDate: KnockoutObservable<moment.Moment> = ko.observable(moment());
-    ```
+### DataSources
+<Prop def="
+public dataSources = ListViewModels.PersonDataSources;
+public dataSource: DataSource<Person> = new this.dataSources.Default();" lang="ts" />
 
-Computed Text Properties
-    For each reference navigation property and each Enum property on your POCO, a `KnockoutComputed<string>` property will be created that will provide the text to display for that property. For navigation properties, this will be the property on the class annotated with [[ListText]](/modeling/model-components/attributes/list-text.md).
+For each of the [Data Sources](/modeling/model-components/data-sources.md) for a model, a class will be added to a namespace named `ListViewModels.<ClassName>DataSources`. This namespace can always be accessed on both `ViewModel` and `ListViewModel` instances via the `dataSources` property, and class instances can be assigned to the `dataSource` property.
 
-    ``` ts
-    public companyText: () => string;
-    public genderText: () => string;
-    ```
 
-Collection Navigation Property Helpers
-    For each collection navigation property on the POCO, the following members will be created:
+### Data Properties
+<Prop def="
+public personId: KnockoutObservable<number | null> = ko.observable(null);
+public fullName: KnockoutObservable<string | null> = ko.observable(null);
+public gender: KnockoutObservable<number | null> = ko.observable(null);
+public companyId: KnockoutObservable<number | null> = ko.observable(null);
+public company: KnockoutObservable<ViewModels.Company | null> = ko.observable(null);
+public addresses: KnockoutObservableArray<ViewModels.Address> = ko.observableArray([]);
+public birthDate: KnockoutObservable<moment.Moment | null> = ko.observable(moment());" lang="ts" />
 
-    - A method that will add a new object to that collection property. If `autoSave` is specified, the auto-save behavior of the new object will be set to that value. Otherwise, the inherited default will be used (see [ViewModel Configuration](/stacks/ko/client/model-config.md))
+For each exposed property on the underlying EF POCO, a `KnockoutObservable<T>` property will exist on the TypeScript model. For navigation properties, these will be typed with the corresponding TypeScript ViewModel for the other end of the relationship. For collections (including collection navigation properties), these properties will be `KnockoutObservableArray<T>` objects.
 
-    ``` ts
-    public addToAddresses: (autoSave?: boolean) => ViewModels.Address;
-    ```
 
-    - A `KnockoutComputed<string>` that evaluates to a relative url for the generated table view that contains only the items that belong to the collection navigation property.
+### Enum Members
+For each `enum` property on your POCO, the following will be created:
 
-    ``` ts
-    public addressesListUrl: KnockoutComputed<string>;
-    ```
+<Prop def="public genderText: KnockoutComputed<string | null>" lang="ts" />
 
-Reference Navigation Property Helpers
-    For each reference navigation property on the POCO, the following members will be created:
+A `KnockoutComputed<string>` property that will provide the text to display for that property.
 
-    - A method that will call `showEditor` on that current value of the navigation property, or on a new instance if the current value is null.
+<Prop def="public genderValues: Coalesce.EnumValue[] = [ 
+    { id: 1, value: 'Male' },
+    { id: 2, value: 'Female' },
+    { id: 3, value: 'Other' },
+];" lang="ts" />
 
-    ``` ts
-    public showCompanyEditor: (callback?: any) => void;
-    ```
+A static array of objects with properties `id` and `value` that represent all the values of the enum.
 
-Instance Method Members
-    For each [Instance Method](/modeling/model-components/methods.md) on your POCO, the members outlined in [Methods - Generated TypeScript](/stacks/ko/client/methods.md) will be created.
+<Prop def="export namespace Person {
+    export enum GenderEnum {
+        Male = 1,
+        Female = 2,
+        Other = 3,
+    };
+}" lang="ts" no-class />
 
-Enum Members
-    For each `enum` property on your POCO, the following will be created:
+A TypeScript enum that mirrors the C# enum directly. This enum is in a sub-namespace of `ViewModels` named the same as the class name.
 
-    - A static array of objects with properties `id` and `value` that represent all the values of the enum.
 
-    ``` ts
-    public genderValues: Coalesce.EnumValue[] = [ 
-        { id: 1, value: 'Male' },
-        { id: 2, value: 'Female' },
-        { id: 3, value: 'Other' },
-    ];
-    ```
+### Collection Navigation Property Helpers
+For each collection navigation property on the POCO, the following members will be created:
 
-    - A TypeScript enum that mirrors the C# enum directly. This enum is in a sub-namespace of `ViewModels` named the same as the class name.
+<Prop def="public addToAddresses: (autoSave?: boolean) => ViewModels.Address;" lang="ts" />
 
-    ``` ts
-    export namespace Person {
-        export enum GenderEnum {
-            Male = 1,
-            Female = 2,
-            Other = 3,
-        };
-    }
-    ```
+A method that will add a new object to that collection property. If `autoSave` is specified, the auto-save behavior of the new object will be set to that value. Otherwise, the inherited default will be used (see [ViewModel Configuration](/stacks/ko/client/model-config.md))
+
+
+<Prop def="public addressesListUrl: KnockoutComputed<string>;" lang="ts" />
+
+A `KnockoutComputed<string>` that evaluates to a relative url for the generated table view that contains only the items that belong to the collection navigation property.
+
+
+### Reference Navigation Property Helpers
+
+<Prop def="public showCompanyEditor: (callback?: any) => void;" lang="ts" />
+
+For each reference navigation property on the POCO a method will be created that will call `showEditor` on that current value of the navigation property, or on a new instance if the current value is null.
+
+<Prop def="public companyText: KnockoutComputed<string>;" lang="ts" />
+
+For each reference navigation property, a `KnockoutComputed<string>` property will be created that will provide the text to display for that property. This will be the property on the class annotated with [[ListText]](/modeling/model-components/attributes/list-text.md).
+
+
+### Instance Method Members
+
+<Prop def="public readonly getBirthdate = new Person.GetBirthdate(this);
+public static GetBirthdate = class GetBirthdate extends Coalesce.ClientMethod<Person, moment.Moment> { ... };" lang="ts" />
+
+For each [Instance Method](/modeling/model-components/methods.md) on your POCO, a class and instance member will be created as described in [Methods - Generated TypeScript](/stacks/ko/client/methods.md).
+
 

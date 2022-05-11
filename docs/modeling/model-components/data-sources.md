@@ -1,6 +1,6 @@
 # Data Sources
 
-In Coalesce, all data that is retrieved from your database through the generated controllers is done so by a data source. These data sources control what data gets loaded and how it gets loaded. By default, there is a single generic data source that serves all data for your models in a generic way that fits many of the most common use cases - the [Standard Data Source](/modeling/model-components/data-sources.md).
+In Coalesce, all data that is retrieved from your database through the generated controllers is done so by a data source. These data sources control what data gets loaded and how it gets loaded. By default, there is a single generic data source that serves all data for your models in a generic way that fits many of the most common use cases - the [Standard Data Source](/modeling/model-components/data-sources.md#standard-data-source).
 
 In addition to this standard data source, Coalesce allows you to create custom data sources that provide complete control over the way data is loaded and serialized for transfer to a requesting client. These data sources are defined on a per-model basis, and you can have as many of them as you like for each model.
 
@@ -56,7 +56,7 @@ All data sources are instantiated using dependency injection and your applicatio
 <CodeTabs>
 <template #vue>
 
-The [ViewModels](/stacks/vue/layers/viewmodels.md) and [ListViewModels](/stacks/vue/layers/viewmodels.md) each have a property called `$dataSource`. This property accepts an instance of a [DataSource](/stacks/vue/layers/models.md) class generated in the [Model Layer](/stacks/vue/layers/models.md).
+The [ViewModels](/stacks/vue/layers/viewmodels.md#viewmodels) and [ListViewModels](/stacks/vue/layers/viewmodels.md#listviewmodels) each have a property called `$dataSource`. This property accepts an instance of a [DataSource](/stacks/vue/layers/models.md) class generated in the [Model Layer](/stacks/vue/layers/models.md).
 
 ``` ts
 import { Person } from '@/models.g'
@@ -242,7 +242,8 @@ GetCountAsync
 
 All of the methods outlined above can be overridden. A description of each of the non-interface inner methods is as follows:
     
-<Prop def="IQueryable<T> GetQuery(IDataSourceParameters parameters);&#10;Task<IQueryable<T>> GetQueryAsync(IDataSourceParameters parameters);" />
+<Prop def="IQueryable<T> GetQuery(IDataSourceParameters parameters);
+Task<IQueryable<T>> GetQueryAsync(IDataSourceParameters parameters);" />
 
 The method is the one that you will most commonly be override in order to implement custom query logic. The default implementation of GetQueryAsync simply calls GetQuery - be aware of this in cases of complex overrides/inheritance. From this method, you could:
 
@@ -251,7 +252,7 @@ The method is the one that you will most commonly be override in order to implem
 - Add additional edges to the serialized object graph using Coalesce's `.IncludedSeparately()` and `.ThenIncluded()`.
 
 ::: tip Note
-When `GetQuery` is overridden, the [Default Loading Behavior](/modeling/model-components/data-sources.md) is overridden as well. To restore this behavior, use the `IQueryable<T>.IncludeChildren()` extension method to build your query.
+When `GetQuery` is overridden, the [Default Loading Behavior](/modeling/model-components/data-sources.md#default-loading-behavior) is overridden as well. To restore this behavior, use the `IQueryable<T>.IncludeChildren()` extension method to build your query.
 :::
 
 <Prop def="IncludeTree? GetIncludeTree(IQueryable<T> query, IDataSourceParameters parameters)" />
@@ -277,11 +278,13 @@ For each value in `parameters.Filter`, invoke `ApplyListPropertyFilter` to apply
 
 Given a property and a client-provided string value, perform some filtering on that property.
 
+<!-- MARKER:filter-behaviors -->
 - Dates with a time component will be matched exactly.
 - Dates with no time component will match any dates that fell on that day.
 - Strings will match exactly unless an asterisk is found, in which case they will be matched with `string.StartsWith`.
 - Enums will match by string or numeric value. Multiple comma-delimited values will create a filter that will match on any of the provided values.
 - Numeric values will match exactly. Multiple comma-delimited values will create a filter that will match on any of the provided values.
+<!-- MARKER:end-filter-behaviors -->
 
 
 <Prop def="IQueryable<T> ApplyListSearchTerm(IQueryable<T> query, IFilterParameters parameters)" />
@@ -316,7 +319,8 @@ Applies paging to the query based on incoming parameters. Provides the actual pa
 Simple wrapper around invoking `.Count()` on a query. 
 
 
-<Prop def="void TransformResults(IReadOnlyList<T> results, IDataSourceParameters parameters);&#10;Task TransformResultsAsync(IReadOnlyList<T> results, IDataSourceParameters parameters)" />
+<Prop def="void TransformResults(IReadOnlyList<T> results, IDataSourceParameters parameters);
+Task TransformResultsAsync(IReadOnlyList<T> results, IDataSourceParameters parameters);" />
 
 Allows for transformation of a result set after the query has been evaluated. 
 This will be called for both lists of items and for single items. This can be used for things like populating non-mapped properties on a model. This method is only called immediately before mapping to a DTO - if the data source is serving data without mapping (e.g. when invoked by [Behaviors](/modeling/model-components/behaviors.md)) to a DTO, this will not be called..

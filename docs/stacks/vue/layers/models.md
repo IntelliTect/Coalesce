@@ -19,7 +19,7 @@ An interface describing an instance of a class type from your application's data
 
 ### DataSource
 
-A class-based representation of a [Data Source](/modeling/model-components/data-sources.md) containing properties for any of the [Custom Parameters](/modeling/model-components/data-sources.md) of the data source, as well as a `$metadata` property that references the metadata object for the data source.
+A class-based representation of a [Data Source](/modeling/model-components/data-sources.md) containing properties for any of the [Custom Parameters](/modeling/model-components/data-sources.md#custom-parameters) of the data source, as well as a `$metadata` property that references the metadata object for the data source.
 
 Data sources are generated as concrete classes in a namespace named `DataSources` that is nested inside a namespace named after their parent model type. For example:
 

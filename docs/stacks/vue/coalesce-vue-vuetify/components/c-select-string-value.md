@@ -12,14 +12,12 @@ Effectively, this is a server-driven autocomplete list.
 
 ## Examples
 
-
 ``` vue-html
 <c-select-string-value 
     :model="person" 
     for="jobTitle"
     method="getSuggestedJobTitles"
 />
-
 ```
 
 ``` c#
@@ -63,7 +61,7 @@ The camel-cased name of the [Custom Method](/modeling/model-components/methods.m
 
 <Prop def="params?: DataSourceParameters" lang="ts" />
 
-An optional set of [Data Source Standard Parameters](/modeling/model-components/data-sources.md) to pass to API calls made to the server.
+An optional set of [Data Source Standard Parameters](/modeling/model-components/data-sources.md#standard-parameters) to pass to API calls made to the server.
 
 <Prop def="listWhenEmpty?: boolean = false" lang="ts" />
 

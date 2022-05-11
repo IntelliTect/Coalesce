@@ -26,5 +26,5 @@ An optional list of available page sizes to offer through the [c-list-pagination
 
 <Prop def="queryBind?: boolean" lang="ts" />
 
-If true, the [Data Source Standard Parameters](/modeling/model-components/data-sources.md) of the provided [ListViewModel](/stacks/vue/layers/viewmodels.md) will be read from and written to the window's query string. The "Editable" state of the table will also be bound to the query string.
+If true, the [Data Source Standard Parameters](/modeling/model-components/data-sources.md#standard-parameters) of the provided [ListViewModel](/stacks/vue/layers/viewmodels.md) will be read from and written to the window's query string. The "Editable" state of the table will also be bound to the query string.
 

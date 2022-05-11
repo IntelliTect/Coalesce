@@ -49,8 +49,8 @@ Sometimes, Coalesce (and EF, too) can have trouble figuring out what the foreign
 
 ### [DatabaseGenerated]
 
-Primary Keys with `[DatabaseGenerated(DatabaseGeneratedOption.None)]` will be settable on the client and will be appropriately handled by the [Standard Behaviors](/modeling/model-components/behaviors.md) on the server. Currently unsupported on the [Knockout front-end stack](/stacks/ko/overview.md).
+Primary Keys with `[DatabaseGenerated(DatabaseGeneratedOption.None)]` will be settable on the client and will be appropriately handled by the [Standard Behaviors](/modeling/model-components/behaviors.md#standard-behaviors) on the server. Currently unsupported on the [Knockout front-end stack](/stacks/ko/overview.md).
 
 ### [NotMapped]
 
-Model properties that aren't mapped to the database should be marked with `[NotMapped]` so that Coalesce doesn't try to load them from the database when [searching](/modeling/model-components/attributes/search.md) or carrying out the [Default Loading Behavior](/modeling/model-components/data-sources.md).
+Model properties that aren't mapped to the database should be marked with `[NotMapped]` so that Coalesce doesn't try to load them from the database when [searching](/modeling/model-components/attributes/search.md) or carrying out the [Default Loading Behavior](/modeling/model-components/data-sources.md#default-loading-behavior).

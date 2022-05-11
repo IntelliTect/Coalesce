@@ -2,7 +2,7 @@
 
 <!-- MARKER:summary -->
     
-A component that provides an interface for modifying the `filters` prop of a [ListViewModel](/stacks/vue/layers/viewmodels.md)'s [parameters](/modeling/model-components/data-sources.md).
+A component that provides an interface for modifying the `filters` prop of a [ListViewModel](/stacks/vue/layers/viewmodels.md)'s [parameters](/modeling/model-components/data-sources.md#standard-parameters).
 
 <!-- MARKER:summary-end -->
 

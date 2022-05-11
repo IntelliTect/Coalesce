@@ -16,7 +16,7 @@ A class, generated for each controller-backed type in your data model as `<Model
 
 Each method on the API client takes in the regular parameters of the method as you would expect, as well as an optional `AxiosRequestConfig` parameter at the end that can be used to provide additional configuration for the single request, if needed.
 
-For the methods that correspond to the standard set of CRUD endpoints that Coalesce provides (``get``, ``list``, ``count``, ``save``, ``delete``), an additional parameter `parameters` is available that accepts the set of [Standard Parameters](/modeling/model-components/data-sources.md) appropriate for the endpoint.
+For the methods that correspond to the standard set of CRUD endpoints that Coalesce provides (``get``, ``list``, ``count``, ``save``, ``delete``), an additional parameter `parameters` is available that accepts the set of [Standard Parameters](/modeling/model-components/data-sources.md#standard-parameters) appropriate for the endpoint.
 
 Each method returns a `Promise<AxiosResponse<TApiResult>>` where `TApiResult` is either `ItemResult`, `ItemResult<T>`, or `ListResult<T>`, depending on the return type of the API endpoint. `AxiosResponse` is the [response object from axios](https://github.com/axios/axios#response-schema), containing the `TApiResult` in its `data` property, as well as other properties like `headers`. The returned type `T` is automatically converted into valid [Model implementations](/stacks/vue/layers/models.md) for you.
 

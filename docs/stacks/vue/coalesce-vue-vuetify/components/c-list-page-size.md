@@ -2,7 +2,7 @@
 
 <!-- MARKER:summary -->
     
-A component that provides an dropdown for modifying the `pageSize` [parameter](/modeling/model-components/data-sources.md) prop of a [ListViewModel](/stacks/vue/layers/viewmodels.md).
+A component that provides an dropdown for modifying the `pageSize` [parameter](/modeling/model-components/data-sources.md#standard-parameters) prop of a [ListViewModel](/stacks/vue/layers/viewmodels.md).
 
 <!-- MARKER:summary-end -->
 

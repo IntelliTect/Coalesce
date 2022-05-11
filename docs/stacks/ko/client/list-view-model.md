@@ -6,6 +6,7 @@ In addition to [TypeScript ViewModels](/stacks/ko/client/view-model.md) for inte
 
 These ListViewModels, like the ViewModels, are dependent on Knockout and are designed to be used directly from Knockout bindings in your HTML.
 
+[[toc]]
 
 ## Base Members
 
@@ -104,7 +105,7 @@ Number of items on a page.
 
 Name of a field by which this list will be loaded in ascending order.
 
-    If set to `"none"`, default sorting behavior, including behavior defined with use of `[DefaultOrderBy]` in C# POCOs, is suppressed.
+If set to `"none"`, default sorting behavior, including behavior defined with use of [[DefaultOrderBy]](/modeling/model-components/attributes/default-order-by.md) in C# POCOs, is suppressed.
     
 <Prop def="orderByDescending: KnockoutObservable<string>" lang="ts" />
 
@@ -117,68 +118,54 @@ Toggles sorting between ascending, descending, and no order on the specified fie
 
 ## Model-Specific Members
 
-Configuration
-    A static configuration object for configuring all instances of the ListViewModel's  type is created, as well as an instance configuration object for configuring specific instances of the ListViewModel. See (see [ViewModel Configuration](/stacks/ko/client/model-config.md)) for more information.
+### Configuration
 
-    ``` ts
-    public static coalesceConfig = new Coalesce.ListViewModelConfiguration<PersonList, ViewModels.Person>(Coalesce.GlobalConfiguration.listViewModel);
+<Prop def="static coalesceConfig: Coalesce.ListViewModelConfiguration<PersonList, ViewModels.Person>" lang="ts" />
 
-    public coalesceConfig = new Coalesce.ListViewModelConfiguration<PersonList, ViewModels.Person>(PersonList.coalesceConfig);
-    ```
+A static configuration object for configuring all instances of the ListViewModel's type is created. See [ViewModel Configuration](/stacks/ko/client/model-config.md).
+
+<Prop def="coalesceConfig: Coalesce.ListViewModelConfiguration<PersonList, ViewModels.Person>" lang="ts" />
+
+An per-instance configuration object for configuring each specific ListViewModel instance is created. See [ViewModel Configuration](/stacks/ko/client/model-config.md).
 
 
-Filter Object
-    For each exposed value type instance property on the underlying EF POCO, a property named `filter` will have a property declaration generated for that property. If the `filter` object is set, requests made to the server to retrieve data will be passed all the values in this object via the URL's query string. These parameters will filter the resulting data to only rows where the parameter values match the row's values. For example, if `filter.companyId` is set to a value, only people from that company will be returned.
-    
-    ``` ts
-    public filter: {
-        personId?: string
-        firstName?: string
-        lastName?: string
-        gender?: string
-        companyId?: string
-    } = null;
+### Filter Object
+<Prop def="public filter: {
+    personId?: string
+    firstName?: string
+    lastName?: string
+    gender?: string
+    companyId?: string
+} = null;" lang="ts" />
 
-    ```
+For each exposed scalar property on the underlying EF POCO, `filter` will have a corresponding property. If the `filter` object is set, requests made to the server to retrieve data will be passed all the values in this object via the URL's query string. These parameters will filter the resulting data to only rows where the parameter values match the row's values. For example, if `filter.companyId` is set to a value, only people from that company will be returned.
 
-    ``` ts
-    var list = new ListViewModels.PersonList();
-    list.filter = {
-        lastName: "Erickson",
-    };
-    list.load();
-    ```
+These parameters all allow for freeform string values, allowing the server to implement any kind of filtering logic desired. The [Standard Data Source](/modeling/model-components/data-sources.md#standard-data-source) will perform the following depending on the property type:
 
-    These parameters all allow for freeform string values, allowing the server to implement any kind of filtering logic desired. The [Standard Data Source](/modeling/model-components/data-sources.md) will perform simple equality checks, but also the following:
+@[import-md "after":"MARKER:filter-behaviors", "before":"MARKER:end-filter-behaviors"](../../../modeling/model-components/data-sources.md) 
 
-        - Enum properties may have a filter that contains either enum names or integer values. There may be a single such value, or multiple, comma-delimited values where the actual value may match any of the filter values.
-        - The same goes for numeric properties - you can specify a comma-delimited list of numbers to match on any of those values.
-        - Date properties can specify an exact time, or a date with no time component. In the latter case, any times that fall within that day will be matched.
+Example usage:
+``` ts
+var list = new ListViewModels.PersonList();
+list.filter = { lastName: "Erickson" };
+list.load();
+```
 
-Static Method Members
-    For each exposed [Static Method](/modeling/model-components/methods.md) on your POCO, the members outlined in [Methods - Generated TypeScript](/stacks/ko/client/methods.md) will be created.
 
-DataSources
-    For each of the [Data Sources](/modeling/model-components/data-sources.md) on the class, a corresponding class will be added to a namespace named ``ListViewModels.<ClassName>DataSources``. This namespace can always be accessed on both `ViewModel` and `ListViewModel` instances via the `dataSources` property, and class instances can be assigned to the `dataSource` property.
+### Static Method Members
 
-    ``` ts
-    module ListViewModels {
-        export namespace PersonDataSources {
-                    
-            export class WithoutCases extends Coalesce.DataSource<ViewModels.Person> { }
-            export const Default = WithoutCases;
-            
-            export class NamesStartingWithAWithCases extends Coalesce.DataSource<ViewModels.Person> { }
-            
-            /** People whose last name starts with B or c */
-            export class BorCPeople extends Coalesce.DataSource<ViewModels.Person> { }
-        }
+<Prop def="public readonly namesStartingWith = new Person.GetBirthdate(this);
+public static NamesStartingWith = class NamesStartingWith extends Coalesce.ClientMethod<PersonList, string[]> { ... };" lang="ts" />
 
-        export class PersonList extends Coalesce.BaseListViewModel<PersonList, ViewModels.Person> {
-            public dataSources = PersonDataSources;
-            public dataSource: PersonDataSources = new this.dataSources.Default();
-        }
-    }
-    ```
+For each exposed [Static Method](/modeling/model-components/methods.md#static-methods) on your POCO, the members outlined in [Methods - Generated TypeScript](/stacks/ko/client/methods.md) will be created.
+
+
+### DataSources
+<Prop def="
+public dataSources = ListViewModels.PersonDataSources;
+public dataSource: DataSource<Person> = new this.dataSources.Default();" lang="ts" />
+
+For each of the [Data Sources](/modeling/model-components/data-sources.md) on the class, a corresponding class will be added to a namespace named `ListViewModels.<ClassName>DataSources`. This namespace can always be accessed on both `ViewModel` and `ListViewModel` instances via the `dataSources` property, and class instances can be assigned to the `dataSource` property.
+
 
         

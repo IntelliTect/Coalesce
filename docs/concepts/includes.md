@@ -41,7 +41,7 @@ There are a few values of `includes` that are either set by default in the auto-
 
 | Value | Description |
 |------|---|
-| `'none'` | Setting `includes` to ``none`` suppresses the [Default Loading Behavior](/modeling/model-components/data-sources.md) provided by the [Standard Data Source](/modeling/model-components/data-sources.md) - The resulting data will be the requested object (or list of objects) and nothing more. |
+| `'none'` | Setting `includes` to ``none`` suppresses the [Default Loading Behavior](/modeling/model-components/data-sources.md#default-loading-behavior) provided by the [Standard Data Source](/modeling/model-components/data-sources.md#standard-data-source) - The resulting data will be the requested object (or list of objects) and nothing more. |
 | `'Editor'` | Used when loading an object in the generated Knockout CreateEdit views.  |
 | `'<ModelName>ListGen'` | Used when loading a list of objects in the generated Knockout Table and Cards views. For example, `PersonListGen` |
 

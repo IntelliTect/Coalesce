@@ -61,36 +61,36 @@ namespace MyApplication.Data.Models
 We can create a details page for a Person by creating a [Single File Component](https://vuejs.org/v2/guide/single-file-components.html) in ``MyApplication.Web/src/views/person-details.vue``:
 
 ``` vue
-  <template>
-    <dl>
-      <dt>Name</dt>
-      <dd>
-        <c-display :model="person" for="name" />
-      </dd>
+<template>
+  <dl>
+    <dt>Name</dt>
+    <dd>
+      <c-display :model="person" for="name" />
+    </dd>
 
-      <dt>Date of Birth</dt>
-      <dd>
-        <c-display :model="person" for="birthDate" format="M/d/yyyy" />
-      </dd>
-    </dl>
-  </template>
+    <dt>Date of Birth</dt>
+    <dd>
+      <c-display :model="person" for="birthDate" format="M/d/yyyy" />
+    </dd>
+  </dl>
+</template>
 
-  <script lang="ts"> 
-  import { Vue, Component, Watch, Prop } from "vue-property-decorator";
-  import { PersonViewModel } from "@/viewmodels.g";
+<script lang="ts"> 
+import { Vue, Component, Watch, Prop } from "vue-property-decorator";
+import { PersonViewModel } from "@/viewmodels.g";
 
-  @Component({})
-  export default class extends Vue {
-    @Prop({ required: true, type: Number })
-    id!: number;
+@Component({})
+export default class extends Vue {
+  @Prop({ required: true, type: Number })
+  id!: number;
 
-    person = new PersonViewModel();
+  person = new PersonViewModel();
 
-    created() {
-      this.person.$load(this.id);
-    }
+  created() {
+    this.person.$load(this.id);
   }
-  </script>
+}
+</script>
 ```
 
 ::: tip Note

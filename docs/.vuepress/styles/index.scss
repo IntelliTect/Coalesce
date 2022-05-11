@@ -1,0 +1,21 @@
+html.dark {
+  --c-warning-bg: #6a4b16;
+  --c-warning-title: #fff4ce;
+  --c-warning-text: #e6e6e6;
+
+  --c-danger-bg: #5a0001;
+  --c-danger-title: #fde7e9;
+  --c-danger-text: #e6e6e6;
+
+  .custom-container a {
+    color: var(--c-text-accent);
+  }
+
+  code {
+    color: #e6e6e6;
+  }
+}
+
+code {
+  padding: 0.1em 0.2em;
+}

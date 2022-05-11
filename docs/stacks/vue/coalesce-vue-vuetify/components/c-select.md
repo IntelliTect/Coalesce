@@ -101,7 +101,7 @@ If true, the list results will be reloaded when the dropdown menu is opened. By 
 
 <Prop def="params?: ListParameters" lang="ts" />
 
-An optional set of [Data Source Standard Parameters](/modeling/model-components/data-sources.md) to pass to API calls made to the server.
+An optional set of [Data Source Standard Parameters](/modeling/model-components/data-sources.md#standard-parameters) to pass to API calls made to the server.
 
 <Prop def="create?: {&#010;    getLabel: (search: string, items: TModel[]) => string | false,&#010;    getItem: (search: string, label: string) => Promise<TModel> &#010;}" lang="ts" />
 

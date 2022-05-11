@@ -66,12 +66,12 @@ Creates a new instance of an item for the specified child model collection, adds
 
 <Prop def="$load: ItemApiState" lang="ts" />
 
-An [API Caller](/stacks/vue/layers/api-clients.md#api-callers) for the ``/get`` endpoint. Accepts an optional `id` argument - if not provided, the ViewModel's `$primaryKey` is used instead. Uses the instance's `$params` object for the [Standard Parameters](/modeling/model-components/data-sources.md).
+An [API Caller](/stacks/vue/layers/api-clients.md#api-callers) for the ``/get`` endpoint. Accepts an optional `id` argument - if not provided, the ViewModel's `$primaryKey` is used instead. Uses the instance's `$params` object for the [Standard Parameters](/modeling/model-components/data-sources.md#standard-parameters).
 
 
 <Prop def="$save: ItemApiState" lang="ts" />
 
-An [API Caller](/stacks/vue/layers/api-clients.md#api-callers) for the ``/save`` endpoint. Uses the instance's `$params` object for the [Standard Parameters](/modeling/model-components/data-sources.md).
+An [API Caller](/stacks/vue/layers/api-clients.md#api-callers) for the ``/save`` endpoint. Uses the instance's `$params` object for the [Standard Parameters](/modeling/model-components/data-sources.md#standard-parameters).
 
 This caller is used for both manually-triggered saves in custom code and for auto-saves. If the [Rules/Validation](/stacks/vue/layers/viewmodels.md) report any errors when the caller is invoked, an error will be thrown.
 
@@ -100,9 +100,7 @@ This improves the handling of concurrent changes being made by multiple users ag
 Save mode `"surgical"` doesn't help when multiple users are editing field X at the same time - if such a scenario is applicable to your application, you must implement [more advanced handling of concurrency conflicts](https://docs.microsoft.com/en-us/ef/core/saving/concurrency).
 
 ::: warning
-Surgical saves require DTOs on the server that are capable of determining which of their properties have been set by the model binder, as surgical saves are sent from the client by entirely omitting properties from the ``x-www-form-urlencoded`` body that is sent to the server.
-
-The [Generated C# DTOs](/stacks/agnostic/dtos.md) implement the necessary logic for this; however, any [Custom DTOs](/modeling/model-types/dtos.md) you have written are unlikely to be implementing the same behavior. For [Custom DTOs](/modeling/model-types/dtos.md), either implement the same pattern that can be seen in the [Generated C# DTOs](/stacks/agnostic/dtos.md), or use save mode `"whole"` instead.
+@[import-md "after":"MARKER:surgical-saves-warning", "before":"MARKER:end-surgical-saves-warning"](../../../modeling/model-types/dtos.md)
 ::: 
 
 `"whole"`
@@ -113,14 +111,14 @@ All serializable properties of the object are sent back to the server with every
 
 <Prop def="$delete: ItemApiState" lang="ts" />
 
-An [API Caller](/stacks/vue/layers/api-clients.md#api-callers) for the ``/delete`` endpoint. Uses the instance's `$params` object for the [Standard Parameters](/modeling/model-components/data-sources.md).
+An [API Caller](/stacks/vue/layers/api-clients.md#api-callers) for the ``/delete`` endpoint. Uses the instance's `$params` object for the [Standard Parameters](/modeling/model-components/data-sources.md#standard-parameters).
 
 If the object was loaded as a child of a collection, it will be removed from that collection upon being deleted. Note that ViewModels currently only support tracking of a single parent collection, so if an object is programmatically added to additional collections, it will only be removed from one of them upon delete.
 
 
 <Prop def="$params: DataSourceParameters" lang="ts" />
 
-An object containing the [Standard Parameters](/modeling/model-components/data-sources.md) to be used for the `$load`, `$save`, and `$delete` API callers.
+An object containing the [Standard Parameters](/modeling/model-components/data-sources.md#standard-parameters) to be used for the `$load`, `$save`, and `$delete` API callers.
 
 
 <Prop def="$dataSource: DataSource" lang="ts" />
@@ -139,7 +137,7 @@ Getter/setter wrapper around `$params.includes`. See [Includes String](/concepts
 
 <Prop def="$startAutosave(vue: Vue, options: AutoSaveOptions<this> = {})" lang="ts" />
 
-Starts auto-saving of the instance when its savable data properties become dirty. Saves are performed with the `$save` [API Caller](/stacks/vue/layers/api-clients.md#api-callers) (documented below) and will not be performed if the ViewModel has any validation errors - see [Rules/Validation](/stacks/vue/layers/viewmodels.md) below.
+Starts auto-saving of the instance when its savable data properties become dirty. Saves are performed with the `$save` [API Caller](/stacks/vue/layers/api-clients.md#api-callers) (documented above) and will not be performed if the ViewModel has any validation errors - see [Rules/Validation](/stacks/vue/layers/viewmodels.md) below.
 
 Requires a reference to a Vue instance in order to manage lifetime (auto-save hooks will be destroyed when the Vue component provided is destroyed). Options are as follows:
 
@@ -269,28 +267,30 @@ Collection holding the results of the last successful invocation of the `$load` 
 
 <Prop def="$params: DataSourceParameters" lang="ts" />
 
-An object containing the [Standard Parameters](/modeling/model-components/data-sources.md) to be used for the `$load` and `$count` API callers.
+An object containing the [Standard Parameters](/modeling/model-components/data-sources.md#standard-parameters) to be used for the `$load` and `$count` API callers.
 
 
 <Prop def="$load: ListApiState" lang="ts" />
 
-An [API Caller](/stacks/vue/layers/api-clients.md#api-callers) for the ``/list`` endpoint. Uses the instance's `$params` object for the [Standard Parameters](/modeling/model-components/data-sources.md).
+An [API Caller](/stacks/vue/layers/api-clients.md#api-callers) for the ``/list`` endpoint. Uses the instance's `$params` object for the [Standard Parameters](/modeling/model-components/data-sources.md#standard-parameters).
 
 Results are available in the `$items` property. The `result` property of the `$load` API Caller contains the raw results and is not recommended for use in general development - `$items` should always be preferred.
 
 
 <Prop def="$count: ItemApiState" lang="ts" />
 
-An [API Caller](/stacks/vue/layers/api-clients.md#api-callers) for the ``/count`` endpoint. Uses the instance's `$params` object for the [Standard Parameters](/modeling/model-components/data-sources.md).
+An [API Caller](/stacks/vue/layers/api-clients.md#api-callers) for the ``/count`` endpoint. Uses the instance's `$params` object for the [Standard Parameters](/modeling/model-components/data-sources.md#standard-parameters).
 
 The result is available in `$count.result` - this API Caller does not interact with other properties on the ListViewModel like `$pageSize` or `$pageCount`.
 
 
-<Prop def="readonly $hasPreviousPage: boolean &#10;readonly $hasNextPage: boolean" lang="ts" />
+<Prop def="readonly $hasPreviousPage: boolean 
+readonly $hasNextPage: boolean" lang="ts" />
 
 Properties which indicate if `$page` can be decremented or incremented, respectively. `$pageCount` and `$page` are used to make this determination.
 
-<Prop def="$previousPage() &#10;$nextPage()" lang="ts" />
+<Prop def="$previousPage(): void 
+$nextPage(): void" lang="ts" />
 
 Methods that will decrement or increment `$page`, respectively. Each does nothing if there is no previous or next page as returned by `$hasPreviousPage` and `$hasNextPage`.
 
@@ -353,5 +353,6 @@ The following members can be found on the generated Service ViewModels, exported
 
 ### Generated Members
 
-Method Callers
-    For each method of the [Service](/modeling/model-types/services.md), an [API Caller](/stacks/vue/layers/api-clients.md#api-callers) will be created.
+#### Method Callers
+    
+For each method of the [Service](/modeling/model-types/services.md), an [API Caller](/stacks/vue/layers/api-clients.md#api-callers) will be created.

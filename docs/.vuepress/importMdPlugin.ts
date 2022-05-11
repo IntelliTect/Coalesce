@@ -126,20 +126,14 @@ function resolveImportCode (
     // if the importPath is relative path, we need to resolve it
     // according to the markdown filePath
     if (!filePath) {
-      return {
-        importFilePath: null,
-        importCode: 'Error when resolving path',
-      }
+      throw new Error(`import-md: Error when resolving path ${importPath}`);
     }
     importFilePath = path.resolve(filePath, '..', importPath)
   }
 
   // check file existence
   if (!fs.existsSync(importFilePath)) {
-    return {
-      importFilePath,
-      importCode: 'File not found',
-    }
+    throw new Error(`import-md: File ${importFilePath} not found`);
   }
 
   // read file content
@@ -158,22 +152,32 @@ function resolveImportCode (
     return line.includes(query);
   }
 
-  const firstLine = lines.findIndex(l => match(start ?? after, l)) + (start ? 0 : 1)
+  let firstLine = lines.findIndex(l => match(start ?? after, l)) 
+  if (firstLine == -1) {
+    throw new Error(`import-md: start/after delimiter not found (importing ${importPath})`);
+  }
+  firstLine += (start ? 0 : 1)
 
   const lastLine = (before ?? end)
     ? firstLine + lines.slice(firstLine).findIndex(l => match(before ?? end, l)) + (end ? 1 : 0)
     : lines.length - 1
 
+  const content = lines
+    .slice(firstLine, lastLine)
+    .join('\n')
+    .replace(/\n?$/, '\n');
+  
+  if (!content.trim()) {
+    throw new Error(`import-md: Imported content was empty Perhaps the delimiters are incorrect? (importing ${importPath})`);
+  }
+
   // resolve partial import
   return {
     importFilePath,
     importCode: 
-    (prepend ? prepend + "\n" : '') +
-    lines
-      .slice(firstLine, lastLine)
-      .join('\n')
-      .replace(/\n?$/, '\n') + 
-    (append ? append : ''),
+      (prepend ? prepend + "\n" : '') +
+      content + 
+      (append ? append : ''),
   }
 }
   

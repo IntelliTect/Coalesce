@@ -53,7 +53,7 @@ Set an error message to be used if any client validations fail
 <CodeTabs>
 <template #vue>
 
-In addition to the following properties, you also customize validation on a per-instance basis of the [ViewModels](/stacks/vue/layers/viewmodels.md) using the [Rules/Validation](/stacks/vue/layers/viewmodels.md) methods.
+In addition to the following properties, you also customize validation on a per-instance basis of the [ViewModels](/stacks/vue/layers/viewmodels.md#viewmodels) using the [Rules/Validation](/stacks/vue/layers/viewmodels.md) methods.
 
 ``` c#
 public bool IsRequired { get; set; }

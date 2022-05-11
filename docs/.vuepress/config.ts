@@ -1,14 +1,15 @@
-import { defaultTheme, SidebarGroup } from '@vuepress/theme-default'
+import { defaultTheme, DefaultThemeOptions, SidebarGroup } from '@vuepress/theme-default'
 import { shikiPlugin } from '@vuepress/plugin-shiki'
 import { registerComponentsPlugin } from '@vuepress/plugin-register-components'
-import { importMdPlugin } from './import-md-plugin'
+import { importMdPlugin } from './importMdPlugin'
 import path from 'path'
 import fs from 'fs'
+import { defineUserConfig } from 'vuepress'
  
-export default {
+export default defineUserConfig({
   lang: 'en-US',
-  title: 'Hello, VuePress!',
-  description: 'This is my first VuePress site',
+  title: 'Coalesce',
+  description: 'Documentation for IntelliTect.Coalesce',
   plugins: [
     importMdPlugin(),
     shikiPlugin({
@@ -19,8 +20,19 @@ export default {
     }),
   ],
   theme: defaultTheme({
+    contributors: false,
+    repo: 'intellitect/coalesce',
+    docsDir: 'docs',
+    docsBranch: 'dev',
     sidebar: [
-      "/",
+      {
+        text: "Introduction",
+        link: "/",
+        children: [
+          '/stacks/vue/getting-started',
+          '/stacks/ko/getting-started',
+        ]
+      },
       {
         text: 'Model Types',
         children: [ 
@@ -60,7 +72,6 @@ export default {
         // collapsible: false,
         children: [
           '/stacks/vue/overview',
-          '/stacks/vue/getting-started',
           '/stacks/vue/layers/metadata',
           '/stacks/vue/layers/models',
           '/stacks/vue/layers/api-clients',
@@ -80,7 +91,6 @@ export default {
         collapsible: true,
         children: [
           '/stacks/ko/overview',
-          '/stacks/ko/getting-started',
           '/stacks/ko/client/view-model',
           '/stacks/ko/client/list-view-model',
           '/stacks/ko/client/external-view-model',
@@ -107,4 +117,4 @@ export default {
       }
     ]
   }),
-}
+})

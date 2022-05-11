@@ -4,10 +4,10 @@ In Coalesce, any type which is connected to your data model but is not directly 
 
 The collection of external types for a data model looks like this:
     
-    #. Take all of the api-served types in your data model. This includes [Entity Models](/modeling/model-types/entities.md) and [Custom DTOs](/modeling/model-types/dtos.md).
-    #. Take all of the property types, method parameters, and method return types of these types.
-    #. Any of these types which are not primitives and not database-mapped types are external types.
-    #. For any external type, any of the property types which qualify under the above rules are also external types.
+1. Take all of the api-served types in your data model. This includes [Entity Models](/modeling/model-types/entities.md) and [Custom DTOs](/modeling/model-types/dtos.md).
+2. Take all of the property types, method parameters, and method return types of these types.
+3. Any of these types which are not built-in scalar types and not one of the aforementioned api-served types are external types.
+4. For any external type discovered, any of the property types which qualify under the above rules are also external types.
 
 
 ::: warning
@@ -21,16 +21,16 @@ In general, you should only expose types that you have created so that you will 
 
 For each external type found in your application's model, Coalesce will generate:
 
-    * A [Generated DTO](/stacks/agnostic/dtos.md)
-    * A [TypeScript Model](/stacks/disambiguation/external-view-model.md)
+* A [Generated DTO](/stacks/agnostic/dtos.md)
+* A [TypeScript Model](/stacks/disambiguation/external-view-model.md)
 
 
 ## Example Data Model
 
 For example, in the following scenario, the following classes are considered as external types:
 
-    * `PluginMetadata`, exposed through a getter-only property on `ApplicationPlugin`.
-    * `PluginResult`, exposed through a method return on `ApplicationPlugin`. 
+* `PluginMetadata`, exposed through a getter-only property on `ApplicationPlugin`.
+* `PluginResult`, exposed through a method return on `ApplicationPlugin`. 
 
 `PluginHandler` is not because it not exposed by the model, neither directly nor through any of the other external types.
 
@@ -77,10 +77,8 @@ public abstract class PluginResult {
     public bool Success { get; set; }
     public string Message { get; set; }
 }
-
-        
 ```
 
 ## Loading & Serialization
 
-External types have slightly different behavior when undergoing serialization to be sent to the client. Unlike database-mapped types which are subject to the rules of [Include Tree](/concepts/include-tree.md), external types ignore the Include Tree when being mapped to DTOs for serialization. Read [Include Tree](/concepts/include-tree.md)/[External Type Caveats](/concepts/include-tree.md#external-type-caveats) for a more detailed explanation of this exception.
+External types have slightly different behavior when undergoing serialization to be sent to the client. Unlike database-mapped types which are subject to the rules of [Include Tree](/concepts/include-tree.md), external types ignore the Include Tree when being mapped to DTOs for serialization. Read [External Type Caveats](/concepts/include-tree.md#external-type-caveats) for a more detailed explanation of this exception.

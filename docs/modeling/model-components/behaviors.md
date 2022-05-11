@@ -158,7 +158,8 @@ Provides a chance to validate the properties of the DTO object itself, as oppose
 Map the properties of the incoming DTO to the model that will be saved to the database. By default, this will call the `MapTo` method on the DTO, but if more precise control is needed, the `IClassDto<T>` extension methods or a cast to a known type can be used to get specific values. If all else fails, the DTO can be reflected upon.
 
 
-<Prop def="Task<ItemResult> BeforeSaveAsync(SaveKind kind, T? oldItem, T item);&#10;ItemResult BeforeSave(SaveKind kind, T? oldItem, T item)" />
+<Prop def="Task<ItemResult> BeforeSaveAsync(SaveKind kind, T? oldItem, T item);
+ItemResult BeforeSave(SaveKind kind, T? oldItem, T item)" />
 
 Provides an easy way for derived classes to intercept a save attempt and either reject it by returning an unsuccessful result, or approve it by returning success. The incoming item can also be modified at will in this method to override changes that the client made as desired.    
 
@@ -177,7 +178,8 @@ Setting `ref T item` to null will prevent the new object from being returned - b
 Deletes the given item.
 
 
-<Prop def="Task<ItemResult> BeforeDeleteAsync(T item);&#10;ItemResult BeforeDelete(T item)" />
+<Prop def="Task<ItemResult> BeforeDeleteAsync(T item);
+ItemResult BeforeDelete(T item)" />
 
 Provides an easy way to intercept a delete request and potentially reject it (by returning a non-success ItemResult).
 

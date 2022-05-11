@@ -62,7 +62,7 @@ Collections of any of the above valid return types above are also valid return t
 Queryables of the valid return types above are valid return types. The query will be evaluated, and Coalesce will attempt to pull an [Include Tree](/concepts/include-tree.md) from the queryable to shape the response. When [Include Tree](/concepts/include-tree.md) functionality is needed to shape the response but an `IQueryable<>` return type is not feasible, an `out IncludeTree includeTree` parameter will do the trick as well.
 
 ### Files
-Methods can return file downloads using type `IntelliTect.Coalesce.Models.IFile` (or any derived type, like `IntelliTect.Coalesce.Models.File`). Please see the [File Downloads](/modeling/model-components/methods.md) section below for more details 
+Methods can return file downloads using type `IntelliTect.Coalesce.Models.IFile` (or any derived type, like `IntelliTect.Coalesce.Models.File`). Please see the [File Downloads](#file-downloads) section below for more details 
 
 ### `ItemResult<T>` or `ItemResult`
 An `IntelliTect.Coalesce.Models.ItemResult<T>`, or its non-generic variant `ItemResult` of any of the valid return types above, including collections, is valid. The `WasSuccessful` and `Message` properties on the result object will be sent along to the client to indicate success or failure of the method. The type `T` will be mapped to the appropriate DTO object before being serialized as normal.
@@ -81,7 +81,7 @@ Security for instance methods is also controlled by the data source that loads t
 
 ## Generated TypeScript
 
-See [API Callers](/stacks/vue/layers/api-clients.md) and [ViewModel Layer](/stacks/vue/layers/viewmodels.md) (Vue) or [TypeScript Method Objects](/stacks/ko/client/methods.md) (Knockout) for details on the code that is generated for your custom methods.
+See [API Callers](/stacks/vue/layers/api-clients.md#api-callers) and [ViewModel Layer](/stacks/vue/layers/viewmodels.md) (Vue) or [TypeScript Method Objects](/stacks/ko/client/methods.md) (Knockout) for details on the code that is generated for your custom methods.
 
 ::: tip Note
 Any Task-returning methods with "Async" as a suffix to the C# method's name will have the "Async" suffix stripped from the generated Typescript.
@@ -90,7 +90,7 @@ Any Task-returning methods with "Async" as a suffix to the C# method's name will
 
 ## Instance Methods
 
-The instance of the model will be loaded using the data source specified by an attribute `[LoadFromDataSource(typeof(MyDataSource))]` if present. Otherwise, the model instance will be loaded using the default data source for the POCO's type. If you have a [Custom Data Source](/modeling/model-components/data-sources.md) annotated with `[DefaultDataSource]`, that data source will be used. Otherwise, the [Standard Data Source](/modeling/model-components/data-sources.md) will be used.
+The instance of the model will be loaded using the data source specified by an attribute `[LoadFromDataSource(typeof(MyDataSource))]` if present. Otherwise, the model instance will be loaded using the default data source for the POCO's type. If you have a [Custom Data Source](/modeling/model-components/data-sources.md#defining-data-sources) annotated with `[DefaultDataSource]`, that data source will be used. Otherwise, the [Standard Data Source](/modeling/model-components/data-sources.md#standard-data-source) will be used.
 
 Instance methods are generated onto the TypeScript ViewModels.
 
@@ -140,7 +140,7 @@ There are a few conveniences for easily consuming downloaded files from your cus
 <CodeTabs>
 <template #vue>
 
-The [API Callers](/stacks/vue/layers/api-clients.md) have a property `url`. This can be provided directly to your HTML template, with the browser invoking the endpoint automatically.
+The [API Callers](/stacks/vue/layers/api-clients.md#api-callers) have a property `url`. This can be provided directly to your HTML template, with the browser invoking the endpoint automatically.
 
 
 ``` ts
@@ -153,7 +153,7 @@ viewModel.$load(1);
 <img :src="downloadPicture.url">
 ```
 ----
-Alternatively, the [API Callers](/stacks/vue/layers/api-clients.md) for file-returning methods have a method `getResultObjectUrl(vue)`. If the method was invoked programmatically (i.e. via `caller()`, `caller.invoke()`, or `caller.invokeWithArgs()`), this property contains an [Object URL](https://developer.mozilla.org/en-US/docs/Web/API/URL/createObjectURL) that can be set as the `src` of an `image` or `video` HTML tag.
+Alternatively, the [API Callers](/stacks/vue/layers/api-clients.md#api-callers) for file-returning methods have a method `getResultObjectUrl(vue)`. If the method was invoked programmatically (i.e. via `caller()`, `caller.invoke()`, or `caller.invokeWithArgs()`), this property contains an [Object URL](https://developer.mozilla.org/en-US/docs/Web/API/URL/createObjectURL) that can be set as the `src` of an `image` or `video` HTML tag.
 
 ``` ts
 import { PersonViewModel } from '@/viewmodels.g'

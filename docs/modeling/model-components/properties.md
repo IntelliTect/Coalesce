@@ -46,7 +46,7 @@ Coalesce provides a number of [Attributes](/modeling/model-components/attributes
 Properties will not be sent to the client and/or will be ignored if received by the client if authorization checks against any property-level [Security Attributes](/modeling/model-components/attributes/security-attribute.md) present fail. This security is handled by the [Generated C# DTOs](/stacks/agnostic/dtos.md).
 
 ### Loading & Serialization
-The [Default Loading Behavior](/modeling/model-components/data-sources.md), any functionality defined in [Data Sources](/modeling/model-components/data-sources.md), and [[DtoIncludes] & [DtoExcludes]](/modeling/model-components/attributes/dto-includes-excludes.md) may also restrict which properties are sent to the client when requested.
+The [Default Loading Behavior](/modeling/model-components/data-sources.md#default-loading-behavior), any custom functionality defined in [Data Sources](/modeling/model-components/data-sources.md), and [[DtoIncludes] & [DtoExcludes]](/modeling/model-components/attributes/dto-includes-excludes.md) may also restrict which properties are sent to the client when requested.
 
 ### NotMapped
 While Coalesce does not do anything special for the `[NotMapped]` attribute, it is still and important attribute to keep in mind while building your model, as it prevents EF Core from doing anything with the property.

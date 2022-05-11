@@ -55,7 +55,7 @@ Or, using a more verbose syntax:
     for="Person.methods.setFirstName.newName" />
 ```
 
-Binding to [Data Source Parameters](/modeling/model-components/data-sources.md):
+Binding to [Data Source Parameters](/modeling/model-components/data-sources.md#custom-parameters):
 
 ``` vue-html
 <c-input :model="personList.$dataSource" for="startsWith" />

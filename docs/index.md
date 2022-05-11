@@ -38,7 +38,7 @@ monotonous to build:
 
 # Getting Started
 
-To get started with Coalesce, you first must choose which front-end stack you wish to use - [Vue](https://vuejs.org/), or [Knockout](http://knockoutjs.com/). While the [Knockout](http://knockoutjs.com/) stack is still fully supported, the [Vue](https://vuejs.org/) stack is the newer, more modern stack and [Vue](https://vuejs.org/) itself has a much bigger worldwide community and ecosystem of libraries, components, plugins, support, and more. The [Vue](https://vuejs.org/)-based stack is the one that will be receiving the bulk of development effort in Coalesce going forward. 
+To get started with Coalesce, you first must choose which front-end stack you wish to use - [Vue](https://vuejs.org/), or [Knockout](http://knockoutjs.com/). While the Knockout stack is still fully supported, the Vue stack is the newer, more modern stack and Vue itself has a much bigger worldwide community and ecosystem of libraries, components, plugins, support, and more. The Vue-based stack is the one that will be receiving the bulk of development effort in Coalesce going forward. 
 
 If you still need help choosing, check out the overviews for each stack:
 

@@ -13,58 +13,11 @@ public string Rename(string name)
 }
 ```
 
-## Method-specific Members
+[[toc]]
 
-<Prop def="public static Rename = class Rename extends Coalesce.ClientMethod<Person, string> { ... }" lang="ts" />
+## Base Members
 
-Declaration of class that provides invocation methods and status properties for the method.
-
-
-<Prop def="public readonly rename = new Person.Rename(this)" lang="ts" />
-
-Default instance of the method for easy calling of the method without needing to manually instantiate the class.
-
-
-<Prop def="public invoke: (name: string, callback: (result: string) => void = null, reload: boolean = true): JQueryPromise<any>" lang="ts" />
-
-Function that takes all the method parameters and a callback. If `reload` is true, the ViewModel or ListViewModel that owns the method will be reloaded after the call is complete, and only after that happens will the callback be called.
-
-The following members are only generated for methods with arguments:
-
-
-<Prop def="public static Args = class Args { public name: KnockoutObservable<string> = ko.observable(null); }" lang="ts" />
-
-Class with one observable member per method argument for binding method arguments to user input.
-
-
-<Prop def="public args = new Rename.Args()" lang="ts" />
-
-Default instance of the args class.
-
-<Prop def="public invokeWithArgs: (args = this.args, callback?: (result: string) => void, reload: boolean = true) => JQueryPromise<any>" lang="ts" />
-
-Function for invoking the method using the args class. The default instance of the args class will be used if none is provided.
-
-<Prop def="public invokeWithPrompts: (callback: (result: string) => void = null, reload: boolean = true) => JQueryPromise<any>" lang="ts" />
-
-Simple interface using browser `prompt()` input boxes to prompt the user for the required data for the method call. The call is then made with the data provided.
-
-The following member is generated for methods that return a file:
-
-
-<Prop def="public resultObjectUrl: KnockoutObservable<string | null>" lang="ts" />
-
-Observable that will contain an [Object URL](https://developer.mozilla.org/en-US/docs/Web/API/URL/createObjectURL) representing the last successful invocation result.
-
-The following member is generated for methods exposed by HTTP GET:
-
-
-<Prop def="public url: KnockoutComputed<string>" lang="ts" />
-
-The URL for the method. Can be useful for using as the `src` attribute of an `image` or `video` HTML element for file-downloading methods. Any arguments will be populated from `this.args`.
-
-## Base Class Members
-
+The following members are available on the method object for all client methods:
 
 <Prop def="public result: KnockoutObservable<string>" lang="ts" />
 
@@ -86,8 +39,10 @@ If the method was not successful, this contains exception information.
 
 Observable boolean that indicates whether the method call was successful or not.
 
-## `ListResult<T>` Method Members
 
+## `ListResult<T>` Base Members
+
+For methods that return a `ListResult<T>`, the following additional members on the method object will be available:
 
 <Prop def="public page: KnockoutObservable<number>" lang="ts" />
 
@@ -105,4 +60,50 @@ Total number of possible result pages.
 
 Total number of results.
 
-|
+
+## Method-specific Members
+
+<Prop def="public static Rename = class Rename extends Coalesce.ClientMethod<Person, string> { ... }" lang="ts" />
+
+Declaration of the method object class. This will be generated on the parent [ViewModel](./view-model.md) or [ListViewModel](./list-view-model.md).
+
+
+<Prop def="public readonly rename = new Person.Rename(this)" lang="ts" />
+
+Default instance of the method for easy calling of the method without needing to manually instantiate the class. This will be generated on the parent [ViewModel](./view-model.md) or [ListViewModel](./list-view-model.md).
+
+
+<Prop def="public invoke: (name: string, callback: (result: string) => void = null, reload: boolean = true): JQueryPromise<any>" lang="ts" />
+
+Function that takes all the method parameters and a callback. If `reload` is true, the ViewModel or ListViewModel that owns the method will be reloaded after the call is complete, and only after that happens will the callback be called.
+
+
+
+<Prop def="public static Args = class Args { public name: KnockoutObservable<string> = ko.observable(null); }" lang="ts" />
+
+Class with one observable member per method argument for binding method arguments to user input. Only generated for methods with arguments.
+
+
+<Prop def="public args = new Rename.Args()" lang="ts" />
+
+Default instance of the args class. Only generated for methods with arguments.
+
+<Prop def="public invokeWithArgs: (args = this.args, callback?: (result: string) => void, reload: boolean = true) => JQueryPromise<any>" lang="ts" />
+
+Function for invoking the method using the args class. The default instance of the args class will be used if none is provided. Only generated for methods with arguments.
+
+<Prop def="public invokeWithPrompts: (callback: (result: string) => void = null, reload: boolean = true) => JQueryPromise<any>" lang="ts" />
+
+Simple interface using browser `prompt()` input boxes to prompt the user for the required data for the method call. The call is then made with the data provided. Only generated for methods with arguments.
+
+
+
+<Prop def="public resultObjectUrl: KnockoutObservable<string | null>" lang="ts" />
+
+Observable that will contain an [Object URL](https://developer.mozilla.org/en-US/docs/Web/API/URL/createObjectURL) representing the last successful invocation result. Only generated for [methods that return a file](/modeling/model-components/methods.md#file-downloads).
+
+
+
+<Prop def="public url: KnockoutComputed<string>" lang="ts" />
+
+The URL for the method. Can be useful for using as the `src` attribute of an `image` or `video` HTML element for file-downloading methods. Any arguments will be populated from `this.args`. Only generated for HTTP GET methods, as configured by [[ControllerAction]](/modeling/model-components/attributes/controller-action.md).

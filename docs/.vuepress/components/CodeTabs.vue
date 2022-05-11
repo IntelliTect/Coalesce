@@ -95,11 +95,9 @@
     top: 5px;
   }
   
-  // Apply a padding for when the immediate child isn't code,
-  // and then undo that padding with negative margin when the immediate child *is* code
-  padding: 20px;
-  > .line-numbers-mode {
-    margin: -20px;
+  // Give some horizontal padding to items that arent code
+  > :not(.line-numbers-mode) {
+    padding: 0 20px
   }
 
   pre, pre + div {
@@ -120,7 +118,8 @@ import { reactive, effect } from 'vue'
 
 const options = {
   groups: {
-    default: { vue: "Vue", knockout: "Knockout" }
+    default: { vue: "Vue", knockout: "Knockout" },
+    'vue-bundler': { vuecli: 'Vue CLI', vite: 'Vite'}
   },
 };
 
@@ -144,8 +143,8 @@ export default {
 
   data() {
     return {
-      selectedLanguage: this.languages ? Object.keys(this.languages)[0] : null,
-      actualLanguages: this.languages,
+      selectedLanguage: null,
+      actualLanguages: {},
     };
   },
 
@@ -170,16 +169,17 @@ export default {
     setConfiguredDefaultLanguages() {
       // No need to override the language list if we already have manually
       // specified languages
-      if (this.languages) return;
-
-      if (options && options.groups && options.groups[this.name]) {
+      if (this.languages) {
+        this.actualLanguages = this.languages;
+      } else if (options && options.groups && options.groups[this.name]) {
         this.actualLanguages = options.groups[this.name];
-        this.selectedLanguage = Object.keys(this.actualLanguages)[0];
+      }
 
-        // Set default selected tab for this group
-        if (!selected[this.name]) {
-          selected[this.name] = this.selectedLanguage;
-        }
+      this.selectedLanguage = Object.keys(this.actualLanguages)[0];
+
+      // Set default selected tab for this group
+      if (!selected[this.name]) {
+        selected[this.name] = this.selectedLanguage;
       }
     },
   },

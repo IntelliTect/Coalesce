@@ -1,25 +1,19 @@
 
-.. _KoOverview:
-
-Knockout Overview
-=================
+# Knockout Overview
 
 The [Knockout](http://knockoutjs.com/) stack for Coalesce offers the ability to build pages with the time-tested [Knockout](http://knockoutjs.com/) JavaScript library using all of the features of the Coalesce generated APIs and [ViewModels](/stacks/disambiguation/view-model.md). It can be used for anything between adding simple interactive augmentations of MVC pages to building a full MPA-SPA hybrid application.
 
 [[toc]]
 
-Getting Started
----------------
+## Getting Started
 
 Check out [Getting Started with Knockout](/stacks/ko/getting-started.md) if you haven't already to learn how to get a new Coalesce Knockout project up and running.
 
-Generated Code
---------------
+## Generated Code
 
 Below you will find a brief overview of each of the different pieces of code that Coalesce will generate for you when you choose the Knockout stack.
 
-TypeScript
-..........
+### TypeScript
 
 Coalesce generates a number of different types of TypeScript classes to support your data through the generated API.
 
@@ -40,16 +34,14 @@ Coalesce generates a number of different types of TypeScript classes to support 
     see [TypeScript External ViewModels](/stacks/ko/client/external-view-model.md) for more details.
 
 
-View Controllers
-................
+### View Controllers
 
 For each of your [Entity Models](/modeling/model-types/entities.md) and [Custom DTOs](/modeling/model-types/dtos.md), a controller is created in the ``/Controllers/Generated`` directory of your web project. These controllers provide routes for the generated admin views.
 
 As you add your own pages to your application, you should add additional partial classes in the ``/Controllers`` that extend these generated partial classes to expose those pages.
 
 
-Admin Views
-...........
+### Admin Views
 
 For each of your [Entity Models](/modeling/model-types/entities.md) and [Custom DTOs](/modeling/model-types/dtos.md), a number of views are generated to provide administrative-level access to your data.
 

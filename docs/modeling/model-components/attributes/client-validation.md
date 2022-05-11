@@ -1,66 +1,54 @@
-
-
-.. _Knockout-Validation: https://github.com/Knockout-Contrib/Knockout-Validation/
-
-.. _ClientValidation:
-
-[ClientValidation]
-==================
+# [ClientValidation]
 
 The `[IntelliTect.Coalesce.DataAnnotations.ClientValidation]`
 attribute is used to control the behavior of client-side model validation
 and to add additional client-only validation parameters. Database validation is available via standard `System.ComponentModel.DataAnnotations` annotations. 
 
-These propagate to the client as validations in TypeScript via generated [Metadata](/stacks/vue/layers/metadata.md) and [ViewModel rules](/stacks/vue/layers/viewmodels.md) (for Vue) or Knockout-Validation_ rules (for Knockout). For both stacks, any failing validation rules prevent saves from going to the server. 
+These propagate to the client as validations in TypeScript via generated [Metadata](/stacks/vue/layers/metadata.md) and [ViewModel rules](/stacks/vue/layers/viewmodels.md) (for Vue) or [Knockout-Validation](https://github.com/Knockout-Contrib/Knockout-Validation/) rules (for Knockout). For both stacks, any failing validation rules prevent saves from going to the server. 
 
-.. warning::
-
-    This attribute controls client-side validation only. To perform server-side validation, create a custom [Behaviors](/modeling/model-components/behaviors.md) for your types.
+::: warning
+This attribute controls client-side validation only. To perform server-side validation, create a custom [Behaviors](/modeling/model-components/behaviors.md) for your types.
+:::
 
 [[toc]]
     
 
-Example Usage
--------------
+## Example Usage
 
 ``` c#
-    
-    public class Person
-    {
-        public int PersonId { get; set; }
+public class Person
+{
+    public int PersonId { get; set; }
 
-        [ClientValidation(IsRequired = true, AllowSave = true)]
-        public string FirstName { get; set; }
+    [ClientValidation(IsRequired = true, AllowSave = true)]
+    public string FirstName { get; set; }
 
-        [ClientValidation(IsRequired = true, AllowSave = false, MinLength = 1, MaxLength = 100)]
-        public string LastName { get; set; }
-    }
-
-
-
+    [ClientValidation(IsRequired = true, AllowSave = false, MinLength = 1, MaxLength = 100)]
+    public string LastName { get; set; }
+}
 ```
 
-Properties
-----------
+## Properties
 
-Behavioral Properties
-.....................
+### Behavioral Properties
 
-`public bool AllowSave { get; set; };` (Knockout Only)
-    If set to `true`, any client validation errors on the property will not prevent saving on the client. This includes **all** client-side validation, including null-checking for required foreign keys and other validations that are implicit. This also includes other explicit validation from `System.ComponentModel.DataAnnotations` annotations.
+<Prop def="public bool AllowSave { get; set; } // Knockout Only" />
+
+If set to `true`, any client validation errors on the property will not prevent saving on the client. This includes **all** client-side validation, including null-checking for required foreign keys and other validations that are implicit. This also includes other explicit validation from `System.ComponentModel.DataAnnotations` annotations.
     
-    Instead, validation errors will be treated only as warnings, and will be available through the `warnings: KnockoutValidationErrors` property on the TypeScript ViewModel.
+Instead, validation errors will be treated only as warnings, and will be available through the `warnings: KnockoutValidationErrors` property on the TypeScript ViewModel.
 
-    .. tip::
+::: tip Note
+Use `AllowSave = true` to allow partially complete data to still be saved, protecting your user from data loss upon navigation while still hinting to them that they are not done filling out data.
+:::
 
-        Use `AllowSave = true` to allow partially complete data to still be saved, protecting your user from data loss upon navigation while still hinting to them that they are not done filling out data.
+
+<Prop def="public string ErrorMessage { get; set; }" />
+
+Set an error message to be used if any client validations fail
 
 
-`public string ErrorMessage { get; set; }`
-    Set an error message to be used if any client validations fail
-
-Validation Rule Properties
-..........................
+### Validation Rule Properties
 
 <CodeTabs>
 <template #vue>
@@ -81,7 +69,7 @@ public bool IsPhoneUs { get; set; }
 </template>
 <template #knockout>
 
-The following attribute properties all map directly to Knockout-Validation_ properties.
+The following attribute properties all map directly to [Knockout-Validation](https://github.com/Knockout-Contrib/Knockout-Validation/) properties.
 
 ``` c#
 public bool IsRequired { get; set; }
@@ -106,7 +94,7 @@ public string Equal { get; set; }
 public string NotEqual { get; set; }
 ```
 
-The following two properties may be used together to specify a custom Knockout-Validation_ property.
+The following two properties may be used together to specify a custom [Knockout-Validation](https://github.com/Knockout-Contrib/Knockout-Validation/) property.
 
 It will be emitted into the TypeScript as `this.extend({ CustomName: CustomValue })`. Neither value will be quoted in the emitted TypeScript - add quotes to your value as needed to generate valid TypeScript.
 

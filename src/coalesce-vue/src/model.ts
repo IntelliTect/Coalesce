@@ -650,7 +650,7 @@ export interface DisplayOptions {
      * */
     enumeratedItemsMax?: number
 
-    /** The seaprator to place between enumerated items. Default `', '` */
+    /** The separator to place between enumerated items. Default `', '` */
     enumeratedItemsSeparator?: string
   }
 }

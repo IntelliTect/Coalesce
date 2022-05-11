@@ -1,17 +1,9 @@
 
-
-.. _CoalesceJson:
-
-Code Generation Configuration
-=============================
-
+# Code Generation Configuration
 
 In Coalesce, all configuration of the code generation is done in a JSON file. This file is typically named ``coalesce.json`` and is typically placed in the solution root.
 
-
-
-File Resolution
----------------
+## File Resolution
 
 When the code generation is run by invoking ``dotnet coalesce``, Coalesce will try to find a configuration file via the following means:
 
@@ -20,8 +12,7 @@ When the code generation is run by invoking ``dotnet coalesce``, Coalesce will t
 #. If no file is found in the working directory, Coalesce will crawl up the directory tree from the working directory until a file named ``coalesce.json`` is found. If such a file is never found, an error will be thrown.
 
 
-Contents
---------
+## Contents
 
 A full example of a ``coalesce.json`` file, along with an explanation of each property, is as follows:
 
@@ -98,8 +89,7 @@ A full example of a ``coalesce.json`` file, along with an explanation of each pr
 }
 ```
 
-Additional CLI Options
-----------------------
+## Additional CLI Options
 
 There are a couple of extra options which are only available as CLI parameters to ``dotnet coalesce``. These options do not affect the behavior of the code generation - only the behavior of the CLI itself.
 

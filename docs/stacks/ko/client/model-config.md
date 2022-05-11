@@ -1,15 +1,11 @@
 
-.. _TSModelConfig:
 
-
-ViewModel Configuration
------------------------
+# ViewModel Configuration
 
 
 A crucial part of the generated TypeScript ViewModels that Coalesce creates for you is the hierarchical configuration system that allows coarse-grained or fine-grained control over their behaviors.
 
-Hierarchy
-.........
+## Hierarchy
 
 The configuration system has four levels where configuration can be performed, structured as follows:
 
@@ -44,8 +40,7 @@ Instance Configuration
 
 
 
-Evaluation
-..........
+## Evaluation
 
 All configuration properties are Knockout `ComputedObservable<T>` objects. These observables behave like any other observable - call them with no parameter to obtain the value, call with a parameter to set their value.
 
@@ -56,13 +51,11 @@ When a configuration property is given a value, that value is established on tha
 To obtain the raw value for a specific configuration property, call the `raw()` method on the observable: `model.coalesceConfig.autoSaveEnabled.raw()`.
 
 
-Available Properties & Defaults
-...............................
+## Available Properties & Defaults
 
 The following configuration properties are available. Their default values are also listed.
 
-Root Configuration
-~~~~~~~~~~~~~~~~~~
+### Root Configuration
 
 These properties on `Coalesce.GlobalConfiguration` are available to both ViewModelConfiguration, ListViewModelConfiguration, and ServiceClientConfiguration.
 
@@ -85,8 +78,7 @@ onFinishBusy - `obj => Coalesce.Utilities.hideBusy()`
     A callback to be called when an AJAX request completes.
 
 
-App Configuration
-~~~~~~~~~~~~~~~~~
+### App Configuration
 
 These properties on `Coalesce.GlobalConfiguration.app` are not hierarchical - they govern the entire Coalesce application:
 
@@ -94,8 +86,7 @@ select2Theme - `null`
     The theme parameter to select2's constructor when called by Coalesce's select2 [Knockout Bindings](/stacks/ko/client/bindings.md).
 
 
-ViewModelConfiguration
-~~~~~~~~~~~~~~~~~~~~~~
+### ViewModelConfiguration
 
 
 saveTimeoutMs - `500`
@@ -108,11 +99,11 @@ saveIncludedFields - `null`
 
     Due to design limitations, this cannot be determined dynamically like it can with [Vue's $saveMode property](/stacks/vue/layers/viewmodels.md)
 
-    .. warning:: 
+    ::: warning
+    Surgical saves require DTOs on the server that are capable of determining which of their properties have been set by the model binder, as surgical saves are sent from the client by entirely omitting properties from the ``x-www-form-urlencoded`` body that is sent to the server.
 
-        Surgical saves require DTOs on the server that are capable of determining which of their properties have been set by the model binder, as surgical saves are sent from the client by entirely omitting properties from the ``x-www-form-urlencoded`` body that is sent to the server.
-
-        The [Generated C# DTOs](/stacks/agnostic/dtos.md) implement the necessary logic for this; however, any [Custom DTOs](/modeling/model-types/dtos.md) you have written are unlikely to be implementing the same behavior. For [Custom DTOs](/modeling/model-types/dtos.md), either implement the same pattern that can be seen in the [Generated C# DTOs](/stacks/agnostic/dtos.md), or do not use this setting.
+    The [Generated C# DTOs](/stacks/agnostic/dtos.md) implement the necessary logic for this; however, any [Custom DTOs](/modeling/model-types/dtos.md) you have written are unlikely to be implementing the same behavior. For [Custom DTOs](/modeling/model-types/dtos.md), either implement the same pattern that can be seen in the [Generated C# DTOs](/stacks/agnostic/dtos.md), or do not use this setting.
+    ::: 
 
 autoSaveEnabled - `true`
     Determines whether changes to a model will be automatically saved after `saveTimeoutMs` milliseconds have elapsed.
@@ -139,12 +130,10 @@ initialDataSource = `null`
     The dataSource (either an instance or a type) that will be used as the initial dataSource when a new object of this type is created. Not valid for global configuration; recommended to be used on class-level configuration. E.g. `ViewModels.MyModel.coalesceConfig.initialDataSource(MyModel.dataSources.MyDataSource);`
 
 
-ListViewModelConfiguration
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+### ListViewModelConfiguration
 
-    No special configuration is currently available for ListViewModels.
+No special configuration is currently available for ListViewModels.
 
-ServiceClientConfiguration
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+### ServiceClientConfiguration
 
-    No special configuration is currently available for ServiceClients.
+No special configuration is currently available for ServiceClients.

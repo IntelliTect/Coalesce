@@ -1,31 +1,22 @@
-.. _c-list-filters:
+# c-list-filters
 
-c-list-filters
-==============
-
-.. MARKER:summary
+<!-- MARKER:summary -->
     
 A component that provides an interface for modifying the `filters` prop of a [ListViewModel](/stacks/vue/layers/viewmodels.md)'s [parameters](/modeling/model-components/data-sources.md).
 
-.. MARKER:summary-end
+<!-- MARKER:summary-end -->
 
-[[toc]]
-
-Examples
---------
+## Example Usage
 
 ``` vue-html
-
-  <c-list-filters :list="list" />
-
-
+<c-list-filters :list="list" />
 ```
 
-Props
------
+## Props
 
-`list: ListViewModel`
-    The [ListViewModel](/stacks/vue/layers/viewmodels.md) whose filters will be editable.
+<Prop def="list: ListViewModel" lang="ts" />
+
+The [ListViewModel](/stacks/vue/layers/viewmodels.md) whose filters will be editable.
 
 
 

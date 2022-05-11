@@ -1,9 +1,6 @@
+<!-- MARKER:data-modeling -->
 
-
-.. MARKER:data-modeling
-
-Data Modeling
--------------
+# Data Modeling
 
 At this point, you can open up the newly-created solution in Visual Studio and run your application. However, your application won't do much without a data model, so you will probably want to do the following before running:
 
@@ -19,4 +16,4 @@ At this point, you can open up the newly-created solution in Visual Studio and r
 You're now at a point where you can start creating your own pages!
 
 
-.. MARKER:data-modeling-end
+<!-- MARKER:data-modeling-end -->

@@ -1,8 +1,4 @@
-
-.. _ExternalTypes:
-
-External Types
---------------
+# External Types
 
 In Coalesce, any type which is connected to your data model but is not directly part of it is considered to be an "external type".
 
@@ -14,15 +10,14 @@ The collection of external types for a data model looks like this:
     #. For any external type, any of the property types which qualify under the above rules are also external types.
 
 
-.. warning::
+::: warning
+Be careful when using types that you do not own for properties and method returns in your data model. When Coalesce generates external type ViewModels and DTOs, it will not stop until it has exhausted all paths that can be reached by following public property types and method returns.
 
-    Be careful when using types that you do not own for properties and method returns in your data model. When Coalesce generates external type ViewModels and DTOs, it will not stop until it has exhausted all paths that can be reached by following public property types and method returns.
+In general, you should only expose types that you have created so that you will always have full control over them. Mark any properties you don't wish to expose with [[InternalUse]](/modeling/model-components/attributes/internal-use.md), or make those members non-public.
+:::
 
-    In general, you should only expose types that you have created so that you will always have full control over them. Mark any properties you don't wish to expose with [[InternalUse]](/modeling/model-components/attributes/internal-use.md), or make those members non-public.
 
-
-Generated Code
-==============
+## Generated Code
 
 For each external type found in your application's model, Coalesce will generate:
 
@@ -30,8 +25,7 @@ For each external type found in your application's model, Coalesce will generate
     * A [TypeScript Model](/stacks/disambiguation/external-view-model.md)
 
 
-Example Data Model
-==================
+## Example Data Model
 
 For example, in the following scenario, the following classes are considered as external types:
 
@@ -42,54 +36,51 @@ For example, in the following scenario, the following classes are considered as 
 
 
 ``` c#
+public class AppDbContext : DbContext {
+    public DbSet<Application> Applications { get; set; }
+    public DbSet<ApplicationPlugin> ApplicationPlugins { get; set; }
+}
 
-    public class AppDbContext : DbContext {
-        public DbSet<Application> Applications { get; set; }
-        public DbSet<ApplicationPlugin> ApplicationPlugins { get; set; }
-    }
+public class Application {
+    public int ApplicationId { get; set; }
+    public string Name { get; set; }
+    public ICollection<ApplicationPlugin> Plugins { get; set; }
+}
 
-    public class Application {
-        public int ApplicationId { get; set; }
-        public string Name { get; set; }
-        public ICollection<ApplicationPlugin> Plugins { get; set; }
-    }
+public class ApplicationPlugin {
+    public int ApplicationPluginId { get; set; }
+    public int ApplicationId { get; set; }
+    public Application Application { get; set; }
 
-    public class ApplicationPlugin {
-        public int ApplicationPluginId { get; set; }
-        public int ApplicationId { get; set; }
-        public Application Application { get; set; }
+    public string TypeName { get; set; }
 
-        public string TypeName { get; set; }
+    private PluginHandler GetInstance() => 
+        ((PluginHandler)Activator.CreateInstance(Type.GetType(TypeName)));
 
-        private PluginHandler GetInstance() => 
-            ((PluginHandler)Activator.CreateInstance(Type.GetType(TypeName)));
+    public PluginMetadata Metadata => GetInstance().GetMetadata();
 
-        public PluginMetadata Metadata => GetInstance().GetMetadata();
+    public PluginResult Invoke(string action, string data) => GetInstance().Invoke(Application, action, data);
+}
 
-        public PluginResult Invoke(string action, string data) => GetInstance().Invoke(Application, action, data);
-    }
+public abstract class PluginHandler { 
+    public abstract PluginMetadata GetMetadata();
+    public abstract PluginResult Invoke(Application app, string action, string data);
+}
 
-    public abstract class PluginHandler { 
-        public abstract PluginMetadata GetMetadata();
-        public abstract PluginResult Invoke(Application app, string action, string data);
-    }
+public abstract class PluginMetadata { 
+    public bool Name { get; set; }
+    public string Version { get; set; }
+    public ICollection<string> Actions { get; set; }
+}
 
-    public abstract class PluginMetadata { 
-        public bool Name { get; set; }
-        public string Version { get; set; }
-        public ICollection<string> Actions { get; set; }
-    }
+public abstract class PluginResult { 
+    public bool Success { get; set; }
+    public string Message { get; set; }
+}
 
-    public abstract class PluginResult { 
-        public bool Success { get; set; }
-        public string Message { get; set; }
-    }
-
-            
-
+        
 ```
 
-Loading & Serialization
-=======================
+## Loading & Serialization
 
 External types have slightly different behavior when undergoing serialization to be sent to the client. Unlike database-mapped types which are subject to the rules of [Include Tree](/concepts/include-tree.md), external types ignore the Include Tree when being mapped to DTOs for serialization. Read [Include Tree](/concepts/include-tree.md)/[External Type Caveats](/concepts/include-tree.md#external-type-caveats) for a more detailed explanation of this exception.

@@ -4,12 +4,9 @@ title: Coalesce Documentation
 description: Documentation home page for IntelliTect.Coalesce
 ---
 
-.. _IntelliTect: https://intellitect.com
+# Coalesce
 
-Coalesce
-========
-
-Designed to help you quickly build amazing web applications, Coalesce is a rapid-development code generation framework, created by IntelliTect_ and built on top of:
+Designed to help you quickly build amazing web applications, Coalesce is a rapid-development code generation framework, created by [IntelliTect](https://intellitect.com) and built on top of:
 
 - ASP.NET Core
 - EF Core
@@ -17,8 +14,7 @@ Designed to help you quickly build amazing web applications, Coalesce is a rapid
 - [Vue](https://vuejs.org/) or [Knockout](http://knockoutjs.com/)
 
 
-What do I do?
--------------
+## What do I do?
 
 You are responsible for the interesting parts of your application:
 
@@ -29,8 +25,7 @@ You are responsible for the interesting parts of your application:
 -  Site Design
 -  Custom Scripting
 
-What is done for me?
---------------------
+## What is done for me?
 
 Coalesce builds the part of your application that are mundane and
 monotonous to build:
@@ -41,8 +36,7 @@ monotonous to build:
 -  A complete set of admin pages are provided, allowing you to read, create, edit, and delete data straight away without writing any additional code.
 
 
-Getting Started
-===============
+# Getting Started
 
 To get started with Coalesce, you first must choose which front-end stack you wish to use - [Vue](https://vuejs.org/), or [Knockout](http://knockoutjs.com/). While the [Knockout](http://knockoutjs.com/) stack is still fully supported, the [Vue](https://vuejs.org/) stack is the newer, more modern stack and [Vue](https://vuejs.org/) itself has a much bigger worldwide community and ecosystem of libraries, components, plugins, support, and more. The [Vue](https://vuejs.org/)-based stack is the one that will be receiving the bulk of development effort in Coalesce going forward. 
 

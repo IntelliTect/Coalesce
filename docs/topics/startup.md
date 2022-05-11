@@ -1,52 +1,42 @@
-
-
-
-Application Configuration
-=========================
+# Application Configuration
 
 
 In order for Coalesce to work in your application, you must register the needed services in your ``Startup.cs`` file. Doing so is simple:
 
-    ``` c#
-
-        public void ConfigureServices(IServiceCollection services)
-        {
-            services.AddCoalesce<AppDbContext>();
-            ...
-        }
-
-
-    ```
+``` c#
+public void ConfigureServices(IServiceCollection services)
+{
+    services.AddCoalesce<AppDbContext>();
+    ...
+}
+```
 
 This registers all the basic services that Coalesce needs in order to work with your EF DbContext. However, there are many more options available. Here's a more complete invocation of `AddCoalesce` that takes advantage of many of the options available:
 
-    ``` c#
-
-        public void ConfigureServices(IServiceCollection services)
+``` c#
+public void ConfigureServices(IServiceCollection services)
+{
+    services.AddCoalesce(builder => builder
+        .AddContext<AppDbContext>()
+        .UseDefaultDataSource(typeof(MyDataSource<,>))
+        .UseDefaultBehaviors(typeof(MyBehaviors<,>))
+        .UseTimeZone(TimeZoneInfo.FindSystemTimeZoneById("Pacific Standard Time"))
+        .Configure(o =>
         {
-            services.AddCoalesce(builder => builder
-                .AddContext<AppDbContext>()
-                .UseDefaultDataSource(typeof(MyDataSource<,>))
-                .UseDefaultBehaviors(typeof(MyBehaviors<,>))
-                .UseTimeZone(TimeZoneInfo.FindSystemTimeZoneById("Pacific Standard Time"))
-                .Configure(o =>
+            o.DetailedExceptionMessages = true;
+            o.ExceptionResponseFactory = ctx =>
+            {
+                if (ctx.Exception is FileNotFoundException)
                 {
-                    o.DetailedExceptionMessages = true;
-                    o.ExceptionResponseFactory = ctx =>
-                    {
-                        if (ctx.Exception is FileNotFoundException)
-                        {
-                            ctx.HttpContext.Response.StatusCode = 404; // Optional - set a specific response code.
-                            return new IntelliTect.Coalesce.Models.ApiResult(false, "File not found");
-                        }
-                        return null;
-                    };
-                });
-            );
-        }
-
-
-    ```
+                    ctx.HttpContext.Response.StatusCode = 404; // Optional - set a specific response code.
+                    return new IntelliTect.Coalesce.Models.ApiResult(false, "File not found");
+                }
+                return null;
+            };
+        });
+    );
+}
+```
 
 A summary is as follows:
 
@@ -64,40 +54,33 @@ A summary is as follows:
         Configure additional options for Coalesce runtime behavior. Current options include those around exception handling. See individual members for details.
 
 
-.. _SecurityOverviewPage: 
 
-Security Overview Page
-----------------------
+## Security Overview Page
 
 Coalesce provides batteries-included page that you can view to review the security rules in place for all the Coalesce-generated code in your project. Add this page to your application by mapping it as a route, either directly on `WebHost` in .NET 6+, or in `UseEndpoints` for 3.1+.
 
-    ``` c#
+``` c#
+// .NET 6 Program.cs:
 
-        // .NET 6 Program.cs:
+// If exposing in production, it is strongly encourage to apply an authorization policy like this one.
+// Alternative, make the entire endpoint conditional upon the environment.
+app.MapCoalesceSecurityOverview("coalesce-security").RequireAuthorization(
+    new AuthorizeAttribute { Roles = env.IsDevelopment() ? null : "Admin" }
+);
+```
 
-        // If exposing in production, it is strongly encourage to apply an authorization policy like this one.
-        // Alternative, make the entire endpoint conditional upon the environment.
-        app.MapCoalesceSecurityOverview("coalesce-security").RequireAuthorization(
-            new AuthorizeAttribute { Roles = env.IsDevelopment() ? null : "Admin" }
-        );
+``` c#
+// .NET 3.1+ Startup.cs:
 
+app.UseEndpoints(endpoints =>
+{
+    // If exposing in production, it is strongly encourage to apply an authorization policy like this one.
+    // Alternative, make the entire endpoint conditional upon the environment.
+    endpoints.MapCoalesceSecurityOverview("coalesce-security").RequireAuthorization(
+        new AuthorizeAttribute { Roles = env.IsDevelopment() ? null : "Admin" }
+    );
 
-    ```
-
-    ``` c#
-
-        // .NET 3.1+ Startup.cs:
-
-        app.UseEndpoints(endpoints =>
-        {
-            // If exposing in production, it is strongly encourage to apply an authorization policy like this one.
-            // Alternative, make the entire endpoint conditional upon the environment.
-            endpoints.MapCoalesceSecurityOverview("coalesce-security").RequireAuthorization(
-                new AuthorizeAttribute { Roles = env.IsDevelopment() ? null : "Admin" }
-            );
-
-            // ... Other endpoints
-        });
-
-    ```
+    // ... Other endpoints
+});
+```
 

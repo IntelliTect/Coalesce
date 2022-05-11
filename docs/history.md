@@ -1,11 +1,5 @@
 
-.. Coalesce documentation master file, created by
-   sphinx-quickstart on Mon May 22 10:25:25 2017.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
-Welcome to Coalesce's documentation!
-====================================
+# Welcome to Coalesce's documentation!
 
 Coalesce is a framework based on ASP.NET Core that makes rapidly building awesome websites much easier. A project that would take a 3 months to complete now takes 1 month. We built this because we got tired of writing all the boiler plate code that is necessary to make amazing sites. 
 
@@ -18,8 +12,7 @@ Here is a typical workflow
    4. Rinse and repeat
 
 
-Core Features
--------------
+## Core Features
    * Built on the latest Microsoft ASP.NET Core
    * Easy to learn
    * TypeScript from the ground up
@@ -35,8 +28,7 @@ Core Features
    * Open source
 
 
-Is Coalesce for Everyone and Every Project?
--------------------------------------------
+## Is Coalesce for Everyone and Every Project?
 
 Coalesce was designed to create line-of-business applications. It provides a more customizable and maintainable alternative to off the shelf customizable products like SharePoint and Sales Force. 
 
@@ -47,8 +39,7 @@ You should consider using Coalesce if your project:
    * Needs to get started quickly with functional prototypes that can become production software
 
 
-Design Decisions and Limitations
---------------------------------
+## Design Decisions and Limitations
 
 Coalesce is specifically designed to meet the needs of web developers. However, there are lots of ways to do this. We have made a set of decisions which we believe makes for a great development experience
 
@@ -60,8 +51,7 @@ Coalesce is specifically designed to meet the needs of web developers. However, 
    * Coalesce is designed for relational databases. This might change in the future, but not until we have a compelling use case.
 
 
-How Does it Work?
------------------
+## How Does it Work?
 
 After you create your classes and the EF data context, Coalesce uses this information to geneate code. When the Coalesce CLI (command line interface) is run, the following things happen:
 
@@ -73,8 +63,7 @@ After you create your classes and the EF data context, Coalesce uses this inform
    6. Finally, the CSHTML views for the controller are created. These are the actual CSHTML for the above controllers. These not only provide administrative view and editing features, but also serve as an example of how to use the framework
 
 
-General Guidance
-----------------
+## General Guidance
 
 Here are a few things we have found helpful when using Coalesce
 
@@ -85,24 +74,20 @@ Here are a few things we have found helpful when using Coalesce
    * Don't be afraid to fall back to building parts of your site using traditional methods. Coalesce isn't right for everything. But, honestly, we have only done this a few times, like 3. 
 
 
-The Story
-=========
+# The Story
 
-Why Coalesce
-------------
+## Why Coalesce
 
 In 2014 several developers from IntelliTect got together to talk about our craft. There were lots of different backgrounds, but recently we had all been writing web code in C#. We discussed things we enjoyed and things we dreaded. There was an underlying commitment to providing customers with great sites at a reasonable cost. However, those things often seemed at odds because of the complexity of web development.
 
-The Problem
------------
+## The Problem
 
 For example, writing AJAX drop down lists with type ahead takes quite a bit of plumbing. Layer onto this the need for view models that allow for validation and saving as the user moves from field to field. We absolutely want want to deliver visually pleasing sites with complex UI paradigms. However, all this excellence adds up: complex view models, complex APIs, data binding, ugh. 
 
 Then there is that sinking feeling when you have to add another class to the project knowing that you are going to need to create all this yet again and you consider taking short cuts. Will there really be more than about 20 items in this table, maybe we don't need paging. Inevitably, the customer asks for admin screens. We consider giving them SQL Server Management Console and then consider using the built in ASP.NET list and editor pages. Better sense wins out and we end up spending two weeks building slick admin pages with paging, searching, sorting, etc. 
 
 
-The Path to the Solution
-------------------------
+## The Path to the Solution
 
 That evening we starting talking about the things we loved to do:
   * Data modeling
@@ -120,16 +105,14 @@ We also lists things that we didn't enjoy
 Over the next few months we talked about this issue, but couldn't find the right abstration. We talked about other solutions that solve parts of the problem and considered putting together something from several pieces. Nothing felt unified and we ended up with leaky abstractions. We needed some way to divide the problem so that we could build the fun stuff and have something generate the boring stuff. This solution needed to be robust enough to satisfy our customer's needs and also be of use to developers without their needing to know the inner workings of the system.
 
 
-Our Solution
-------------
+## Our Solution
 
 What if we could build the models and business logic and have a tool build everything except the UI? There are great tools like Entity Framework for modeling and good tooling for minimzing duplicate code in user interfaces. And so Coalesce was born, a tool that would bring together the backend and front end development. '
 
 Coalesce takes Entity Framework Core models and builds controllers, TypeScript view models, and admin pages automatically. These are built in a general way so that they can be applied to many different scenarios. There will always be pages that need to be written by hand and we intentionally don't support many edge cases in order to keep things simple. There is nothing wrong with building something by hand. 
 
 
-How has it Worked?
-------------------
+## How has it Worked?
 
 We have been using Coalesce for many of our web projects with great success. Typically, a project is taking about 1/3 the time it was taking before once developers ramp up. The ramp up on Coalesce has typically been a couple of days. We realized that in order for Coalesce to be useful it need to be intuitive to use and easy to understand. We have intentionally used simple paradigms to minimize the learning curve. There are complex bits, but hopefully, those are well hidden and documented as needed.
 

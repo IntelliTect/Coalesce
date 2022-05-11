@@ -1,5 +1,3 @@
-
-
 # Include Tree
 
 When Coalesce maps from the your POCO objects that are returned from EF Core queries, it will follow a structure called an `IncludeTree` to determine what relationships to follow and how deep to go in re-creating that structure in the mapped DTOs.
@@ -132,7 +130,6 @@ In these cases, Coalesce provides a pair of extension methods, `.IncludedSeparat
 For example:
 
 ``` c#
-
 public override IQueryable<Employee> GetQuery()
 {
     // Load all projects that are complete, and their members, into the db context.
@@ -190,11 +187,11 @@ public class Employee
 }
 ```
 
-.. tip:: 
+::: tip
+An `IncludeTree` can be obtained from any `IQueryable` by calling the `GetIncludeTree` extension method (`using IntelliTect.Coalesce.Helpers.IncludeTree`).
 
-    An `IncludeTree` can be obtained from any `IQueryable` by calling the `GetIncludeTree` extension method (`using IntelliTect.Coalesce.Helpers.IncludeTree`).
-
-    In situations where your root object isn't on your `DbContext` (see [External Types](/modeling/model-types/external-types.md)), you can use `Enumerable.Empty<MyNonDbClass>().AsQueryable()` to get an `IQueryable` to start from. When you do this, you **must** use `IncludedSeparately` - the regular EF `Include` method won't work without a `DbSet`.
+In situations where your root object isn't on your `DbContext` (see [External Types](/modeling/model-types/external-types.md)), you can use `Enumerable.Empty<MyNonDbClass>().AsQueryable()` to get an `IQueryable` to start from. When you do this, you **must** use `IncludedSeparately` - the regular EF `Include` method won't work without a `DbSet`.
+:::
 
 Without the outputted `IncludeTree` in this scenario, the object graph received by the client would have ended up looking like this:
     

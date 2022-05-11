@@ -1,8 +1,9 @@
-import { defaultTheme } from '@vuepress/theme-default'
+import { defaultTheme, SidebarGroup } from '@vuepress/theme-default'
 import { shikiPlugin } from '@vuepress/plugin-shiki'
 import { registerComponentsPlugin } from '@vuepress/plugin-register-components'
-import { importMdPlugin } from './import-md-plugin/importCodePlugin'
+import { importMdPlugin } from './import-md-plugin'
 import path from 'path'
+import fs from 'fs'
  
 export default {
   lang: 'en-US',
@@ -14,9 +15,7 @@ export default {
       theme: 'dark-plus'
     }),
     registerComponentsPlugin({
-      components: {
-        CodeTabs: path.resolve(__dirname, './components/code-tabs.vue'),
-      },
+      componentsDir: path.resolve(__dirname, './components'),
     }),
   ],
   theme: defaultTheme({
@@ -24,7 +23,6 @@ export default {
       "/",
       {
         text: 'Model Types',
-        // collapsible: false,
         children: [ 
           '/modeling/model-types/entities',
           '/modeling/model-types/external-types',
@@ -34,17 +32,23 @@ export default {
       },
       {
         text: 'Model Components',
-        // collapsible: false,
         children: [
           '/modeling/model-components/properties',
-          '/modeling/model-components/attributes',
+          {
+            text: "Attributes",
+            link: '/modeling/model-components/attributes',
+            collapsible: true,
+            children: fs
+              .readdirSync(path.resolve(__dirname, '../modeling/model-components/attributes'))
+              .map(f => '/modeling/model-components/attributes/' + f)
+          } as SidebarGroup /* https://github.com/vuepress/vuepress-next/issues/883 */,
           '/modeling/model-components/methods',
           '/modeling/model-components/data-sources',
           '/modeling/model-components/behaviors'
          ],
       },
       {
-        text: 'Server-side Generated Code',
+        text: 'Generated Code',
         // collapsible: false,
         children: [
           '/stacks/agnostic/generation',
@@ -61,12 +65,19 @@ export default {
           '/stacks/vue/layers/models',
           '/stacks/vue/layers/api-clients',
           '/stacks/vue/layers/viewmodels',
-          '/stacks/vue/coalesce-vue-vuetify/overview'
+          {
+            text: "Vuetify Components",
+            link: '/stacks/vue/coalesce-vue-vuetify/overview',
+            collapsible: true,
+            children: fs
+              .readdirSync(path.resolve(__dirname, '../stacks/vue/coalesce-vue-vuetify/components'))
+              .map(f => '/stacks/vue/coalesce-vue-vuetify/components/' + f)
+          } as SidebarGroup /* https://github.com/vuepress/vuepress-next/issues/883 */,
          ],
       },
       {
         text: 'Client - Knockout',
-        // collapsible: false,
+        collapsible: true,
         children: [
           '/stacks/ko/overview',
           '/stacks/ko/getting-started',

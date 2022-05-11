@@ -1,271 +1,300 @@
-.. _VuetifyOverview:
+# Vuetify Components
 
-Vuetify Components
-==================
+<!-- MARKER:summary -->
 
-.. MARKER:summary
-
-.. image:: https://img.shields.io/npm/v/coalesce-vue-vuetify/dev?color=42b883&label=coalesce-vue-vuetify@dev
-   :target: https://www.npmjs.com/package/coalesce-vue-vuetify
+[![](https://img.shields.io/npm/v/coalesce-vue-vuetify/dev?color=42b883&label=coalesce-vue-vuetify%40dev)](https://www.npmjs.com/package/coalesce-vue-vuetify)
 
 The [Vue](https://vuejs.org/) stack for Coalesce provides [a set of components](/stacks/vue/coalesce-vue-vuetify/overview.md) based on [Vuetify](https://vuetifyjs.com/), packaged up in an NPM package [coalesce-vue-vuetify](https://www.npmjs.com/package/coalesce-vue-vuetify). These components are driven primarily by the [Metadata Layer](/stacks/vue/layers/metadata.md), and include both low level input and display components like [c-input](/stacks/vue/coalesce-vue-vuetify/components/c-input.md) and [c-display](/stacks/vue/coalesce-vue-vuetify/components/c-display.md) that are highly reusable in the custom pages you'll build in your application, as well as high-level components like [c-admin-table-page](/stacks/vue/coalesce-vue-vuetify/components/c-admin-table-page.md) and [c-admin-editor-page](/stacks/vue/coalesce-vue-vuetify/components/c-admin-editor-page.md) that constitute entire pages. 
 
-.. MARKER:summary-end
+<!-- MARKER:summary-end -->
 
 [[toc]]
 
-.. toctree::
-    :hidden:
-    :maxdepth: 1
-    :titlesonly:
-    :glob:
+## Setup
 
-    ./components/*
-
-Setup
------
-
-.. tip::
-    The template described in [Getting Started with Vue](/stacks/vue/getting-started.md) already includes all the necessary setup. You can skip this section if you started from the template.
+::: tip
+The template described in [Getting Started with Vue](/stacks/vue/getting-started.md) already includes all the necessary setup. You can skip this section if you started from the template.
+:::
 
 First, ensure that NPM package [coalesce-vue-vuetify](https://www.npmjs.com/package/coalesce-vue-vuetify) is installed in your project.
+
+### Setup with Vuetify A-la-carte
+If you're using [Vuetify](https://vuetifyjs.com/)'s [A-la-carte builds](https://vuetifyjs.com/en/customization/a-la-carte/), then similar to importing Vuetify from `'vuetify/lib'` rather than `'vuetify'`, you should import `'coalesce-vue-vuetify'` from `'coalesce-vue-vuetify/lib'`. 
+
+This is an alternate build that itself imports Vuetify components from `'vuetify/lib'`, therefore preventing duplication of components. Similar to Vuetify, this build also does not register the Coalesce components globally, allowing them to also be treeshaken.
+
+<CodeTabs name="vue-bundler">
+<template #vuecli>
+
+Install `unplugin-vue-components`, and add the following configuration to `vue.config.js`:
+
+``` ts
+// vue.config.js
+configureWebpack: {
+  plugins: [
+    require('unplugin-vue-components/webpack')({
+      dts: false,
+      resolvers: [
+        // If VuetifyResolver is used, `vuetify-loader` + `vue-cli-plugin-vuetify` can be uninstalled.
+        require('unplugin-vue-components/resolvers').VuetifyResolver(),
+        require('coalesce-vue-vuetify/lib/build').CoalesceVuetifyResolver(),
+      ],
+    }),
+  ],
+}
+```
+
+</template>
+<template #vite>
+
+Install `unplugin-vue-components`, and add it to your `vite.config.ts`:
+
+``` ts
+// vite.config.js
+import Components from "unplugin-vue-components/vite";
+import { VuetifyResolver } from "unplugin-vue-components/resolvers";
+import { CoalesceVuetifyResolver } from "coalesce-vue-vuetify/lib/build";
+
+// defineConfig
+plugins: [
+  // createVuePlugin(), etc...
+  Components({
+    dts: false,
+    resolvers: [VuetifyResolver(), CoalesceVuetifyResolver()],
+  }),
+]
+```
+
+</template>
+</CodeTabs>
 
 Then, in your [Vue](https://vuejs.org/) application's ``main.ts`` file, you need to add the ``coalesce-vue-vuetify`` [plugin](https://vuejs.org/v2/guide/plugins.html) to your application, like so:
 
 ``` ts
+import $metadata from '@/metadata.g';
+// viewmodels.g has side-effects - it populates the global lookup on ViewModel and ListViewModel. 
+// It must be imported for c-admin-editor-page and c-admin-table-page to work correctly.
+import '@/viewmodels.g';
 
-    import $metadata from '@/metadata.g';
-    // viewmodels.g has side-effects - it populates the global lookup on ViewModel and ListViewModel. 
-    // It must be imported for c-admin-editor-page and c-admin-table-page to work correctly.
-    import '@/viewmodels.g';
+import CoalesceVuetify from 'coalesce-vue-vuetify/lib';
+Vue.use(CoalesceVuetify, { metadata: $metadata, });
+```
 
-    import CoalesceVuetify from 'coalesce-vue-vuetify';
-    Vue.use(CoalesceVuetify, { metadata: $metadata, });
+If you have routes to [c-admin-editor-page](./components/c-admin-editor-page.md) or [c-admin-table-page](./components/c-admin-table-page.md), make sure that those components are also imported from `coalesce-vue-vuetify/lib`.
 
 
+### Setup without Vuetify A-la-carte
+
+In your [Vue](https://vuejs.org/) application's ``main.ts`` file, you need to add the ``coalesce-vue-vuetify`` [plugin](https://vuejs.org/v2/guide/plugins.html) to your application, like so:
+
+``` ts
+import $metadata from '@/metadata.g';
+// viewmodels.g has side-effects - it populates the global lookup on ViewModel and ListViewModel. 
+// It must be imported for c-admin-editor-page and c-admin-table-page to work correctly.
+import '@/viewmodels.g';
+
+import CoalesceVuetify from 'coalesce-vue-vuetify';
+Vue.use(CoalesceVuetify, { metadata: $metadata, });
 ```
 
 Also ensure that you have setup [Vuetify](https://vuetifyjs.com/) correctly in your application as [described in Vuetify's documentation](https://vuetifyjs.com/en/getting-started/quick-start/).
 
 
-.. note::
-    An important note if you're using [Vuetify](https://vuetifyjs.com/)'s [A-la-carte builds](https://vuetifyjs.com/en/customization/a-la-carte/):
- 
-    Similar to importing Vuetify from `'vuetify/lib'` rather than `'vuetify'`, you should import `'coalesce-vue-vuetify'` from `'coalesce-vue-vuetify/lib'`. This is an alternate build that itself imports Vuetify components from `'vuetify/lib'`, therefore preventing duplication of components. Similar to Vuetify, this build also does not register the Coalesce components globally, allowing them to also be treeshaken.
-
-    For Vue CLI-based projects:
-
-    Install ``unplugin-vue-components``, and add the following configuration to ``vue.config.js``:
-
-    ``` ts
-        
-        // vue.config.js
-
-        configureWebpack: {
-            plugins: [
-                require('unplugin-vue-components/webpack')({
-                    dts: false,
-                    resolvers: [
-                        // If VuetifyResolver is used, `vuetify-loader` + `vue-cli-plugin-vuetify` can be uninstalled.
-                        require('unplugin-vue-components/resolvers').VuetifyResolver(),
-                        require('coalesce-vue-vuetify/lib/build').CoalesceVuetifyResolver(),
-                    ],
-                }),
-            ],
-        }
 
 
-    ```
+## Display Components
 
-    For Vite projects:
+<table>
+<thead><tr><th width="170px">Component</th><th>Description</th></tr></thead>
+<tr><td>
 
-    Install ``unplugin-vue-components``, and add it to your ``vite.config.ts``:
+[c-display](./components/c-display.md)
+</td>
+<td> 
 
-    ``` ts
+@[import-md "after":"MARKER:summary", "before":"MARKER:summary-end"](./components/c-display.md) 
+</td></tr>
+<tr><td>
 
-        // vite.config.js
-        import Components from "unplugin-vue-components/vite";
-        import { VuetifyResolver } from "unplugin-vue-components/resolvers";
-        import { CoalesceVuetifyResolver } from "coalesce-vue-vuetify/lib/build";
+[c-loader-status](./components/c-loader-status.md)
+</td>
+<td> 
 
-        // defineConfig
-        plugins: [
-            // createVuePlugin(), etc...
-            Components({
-                dts: false,
-                resolvers: [VuetifyResolver(), CoalesceVuetifyResolver()],
-            }),
-        ]
+@[import-md "after":"MARKER:summary", "before":"MARKER:summary-end"](./components/c-loader-status.md) 
+</td></tr>
+<tr><td>
 
+[c-list-range-display](./components/c-list-range-display.md)
+</td>
+<td> 
 
+@[import-md "after":"MARKER:summary", "before":"MARKER:summary-end"](./components/c-list-range-display.md) 
+</td></tr>
+<tr><td>
 
-    ```
+[c-table](./components/c-table.md)
+</td>
+<td> 
 
-You're now ready to start using the components that [coalesce-vue-vuetify](https://www.npmjs.com/package/coalesce-vue-vuetify) provides! See the list below for a summary of each component and links to dive deeper into each component.
-
-Display Components
-------------------
-
-[c-display](/stacks/vue/coalesce-vue-vuetify/components/c-display.md)
-................
-    .. include:: ./components/c-display.rst
-        :start-after: MARKER:summary
-        :end-before: MARKER:summary-end
-    Full Documentation: [c-display](/stacks/vue/coalesce-vue-vuetify/components/c-display.md).
-
-[c-loader-status](/stacks/vue/coalesce-vue-vuetify/components/c-loader-status.md)
-......................
-    .. include:: ./components/c-loader-status.rst
-        :start-after: MARKER:summary
-        :end-before: MARKER:summary-end
-    Full Documentation: [c-loader-status](/stacks/vue/coalesce-vue-vuetify/components/c-loader-status.md).
+@[import-md "after":"MARKER:summary", "before":"MARKER:summary-end"](./components/c-table.md) 
+</td></tr>
+</table>
 
 
-[c-list-range-display](/stacks/vue/coalesce-vue-vuetify/components/c-list-range-display.md)
-...........................
-    .. include:: ./components/c-list-range-display.rst
-        :start-after: MARKER:summary
-        :end-before: MARKER:summary-end
-    Full Documentation: [c-list-range-display](/stacks/vue/coalesce-vue-vuetify/components/c-list-range-display.md).
+## Input Components
 
-[c-table](/stacks/vue/coalesce-vue-vuetify/components/c-table.md)
-..............
-    .. include:: ./components/c-table.rst
-        :start-after: MARKER:summary
-        :end-before: MARKER:summary-end
-    Full Documentation: [c-table](/stacks/vue/coalesce-vue-vuetify/components/c-table.md). 
+<table>
+<thead><tr><th width="170px">Component</th><th>Description</th></tr></thead>
+<tr><td>
 
+[c-input](./components/c-input.md)
+</td>
+<td> 
 
-Input Components
-----------------
+@[import-md "after":"MARKER:summary", "before":"MARKER:summary-end"](./components/c-input.md) 
+</td></tr>
+<tr><td>
 
+[c-select](./components/c-select.md)
+</td>
+<td> 
 
-[c-input](/stacks/vue/coalesce-vue-vuetify/components/c-input.md)
-..............
-    .. include:: ./components/c-input.rst
-        :start-after: MARKER:summary
-        :end-before: MARKER:summary-end
-    Full Documentation: [c-input](/stacks/vue/coalesce-vue-vuetify/components/c-input.md).
+@[import-md "after":"MARKER:summary", "before":"MARKER:summary-end"](./components/c-select.md) 
+</td></tr>
+<tr><td>
 
-[c-select](/stacks/vue/coalesce-vue-vuetify/components/c-select.md)
-...............
-    .. include:: ./components/c-select.rst
-        :start-after: MARKER:summary
-        :end-before: MARKER:summary-end
-    Full Documentation: [c-select](/stacks/vue/coalesce-vue-vuetify/components/c-select.md).
+[c-datetime-picker](./components/c-datetime-picker.md)
+</td>
+<td> 
 
-[c-datetime-picker](/stacks/vue/coalesce-vue-vuetify/components/c-datetime-picker.md)
-........................
-    .. include:: ./components/c-datetime-picker.rst
-        :start-after: MARKER:summary
-        :end-before: MARKER:summary-end
-    Full Documentation: [c-datetime-picker](/stacks/vue/coalesce-vue-vuetify/components/c-datetime-picker.md).
+@[import-md "after":"MARKER:summary", "before":"MARKER:summary-end"](./components/c-datetime-picker.md) 
+</td></tr>
+<tr><td>
 
-[c-select-many-to-many](/stacks/vue/coalesce-vue-vuetify/components/c-select-many-to-many.md)
-............................
-    .. include:: ./components/c-select-many-to-many.rst
-        :start-after: MARKER:summary
-        :end-before: MARKER:summary-end
-    Full Documentation: [c-select-many-to-many](/stacks/vue/coalesce-vue-vuetify/components/c-select-many-to-many.md).
+[c-select-many-to-many](./components/c-select-many-to-many.md)
+</td>
+<td> 
 
-[c-select-string-value](/stacks/vue/coalesce-vue-vuetify/components/c-select-string-value.md)
-............................
-    .. include:: ./components/c-select-string-value.rst
-        :start-after: MARKER:summary
-        :end-before: MARKER:summary-end
-    Full Documentation: [c-select-string-value](/stacks/vue/coalesce-vue-vuetify/components/c-select-string-value.md).
+@[import-md "after":"MARKER:summary", "before":"MARKER:summary-end"](./components/c-select-many-to-many.md) 
+</td></tr>
+<tr><td>
 
-[c-select-values](/stacks/vue/coalesce-vue-vuetify/components/c-select-values.md)
-......................
-    .. include:: ./components/c-select-values.rst
-        :start-after: MARKER:summary
-        :end-before: MARKER:summary-end
-    Full Documentation: [c-select-values](/stacks/vue/coalesce-vue-vuetify/components/c-select-values.md).
+[c-select-string-value](./components/c-select-string-value.md)
+</td>
+<td> 
 
-[c-list-filters](/stacks/vue/coalesce-vue-vuetify/components/c-list-filters.md)
-.....................
-    .. include:: ./components/c-list-filters.rst
-        :start-after: MARKER:summary
-        :end-before: MARKER:summary-end
-    Full Documentation: [c-list-filters](/stacks/vue/coalesce-vue-vuetify/components/c-list-filters.md).
+@[import-md "after":"MARKER:summary", "before":"MARKER:summary-end"](./components/c-select-string-value.md) 
+</td></tr>
+<tr><td>
 
-[c-list-pagination](/stacks/vue/coalesce-vue-vuetify/components/c-list-pagination.md)
-........................
-    .. include:: ./components/c-list-pagination.rst
-        :start-after: MARKER:summary
-        :end-before: MARKER:summary-end
-    Full Documentation: [c-list-pagination](/stacks/vue/coalesce-vue-vuetify/components/c-list-pagination.md).
+[c-select-values](./components/c-select-values.md)
+</td>
+<td> 
 
-[c-list-page-size](/stacks/vue/coalesce-vue-vuetify/components/c-list-page-size.md)
-.......................
-    .. include:: ./components/c-list-page-size.rst
-        :start-after: MARKER:summary
-        :end-before: MARKER:summary-end
-    Full Documentation: [c-list-page-size](/stacks/vue/coalesce-vue-vuetify/components/c-list-page-size.md).
+@[import-md "after":"MARKER:summary", "before":"MARKER:summary-end"](./components/c-select-values.md) 
+</td></tr>
+<tr><td>
 
-[c-list-page](/stacks/vue/coalesce-vue-vuetify/components/c-list-page.md)
-..................
-    .. include:: ./components/c-list-page.rst
-        :start-after: MARKER:summary
-        :end-before: MARKER:summary-end
-    Full Documentation: [c-list-page](/stacks/vue/coalesce-vue-vuetify/components/c-list-page.md).
+[c-list-filters](./components/c-list-filters.md)
+</td>
+<td> 
 
-Admin Components
-----------------
+@[import-md "after":"MARKER:summary", "before":"MARKER:summary-end"](./components/c-list-filters.md) 
+</td></tr>
+<tr><td>
+
+[c-list-pagination](./components/c-list-pagination.md)
+</td>
+<td> 
+
+@[import-md "after":"MARKER:summary", "before":"MARKER:summary-end"](./components/c-list-pagination.md) 
+</td></tr>
+<tr><td>
+
+[c-list-page-size](./components/c-list-page-size.md)
+</td>
+<td> 
+
+@[import-md "after":"MARKER:summary", "before":"MARKER:summary-end"](./components/c-list-page-size.md) 
+</td></tr>
+<tr><td>
+
+[c-list-page](./components/c-list-page.md)
+</td>
+<td> 
+
+@[import-md "after":"MARKER:summary", "before":"MARKER:summary-end"](./components/c-list-page.md) 
+</td></tr>
+
+</table>
 
 
-[c-admin-method](/stacks/vue/coalesce-vue-vuetify/components/c-admin-method.md)
-.....................
-    .. include:: ./components/c-admin-method.rst
-        :start-after: MARKER:summary
-        :end-before: MARKER:summary-end
-    Full Documentation: [c-admin-method](/stacks/vue/coalesce-vue-vuetify/components/c-admin-method.md).
+## Admin Components
 
-[c-admin-methods](/stacks/vue/coalesce-vue-vuetify/components/c-admin-methods.md)
-......................
-    .. include:: ./components/c-admin-methods.rst
-        :start-after: MARKER:summary
-        :end-before: MARKER:summary-end
-    Full Documentation: [c-admin-methods](/stacks/vue/coalesce-vue-vuetify/components/c-admin-methods.md).
+<table>
+<thead><tr><th width="170px">Component</th><th>Description</th></tr></thead>
+<tr><td>
 
-[c-admin-display](/stacks/vue/coalesce-vue-vuetify/components/c-admin-display.md)
-......................
-    .. include:: ./components/c-admin-display.rst
-        :start-after: MARKER:summary
-        :end-before: MARKER:summary-end
-    Full Documentation: [c-admin-display](/stacks/vue/coalesce-vue-vuetify/components/c-admin-display.md).
+[c-admin-method](./components/c-admin-method.md)
+</td>
+<td> 
 
-[c-admin-editor](/stacks/vue/coalesce-vue-vuetify/components/c-admin-editor.md)
-.....................
-    .. include:: ./components/c-admin-editor.rst
-        :start-after: MARKER:summary
-        :end-before: MARKER:summary-end
-    Full Documentation: [c-admin-editor](/stacks/vue/coalesce-vue-vuetify/components/c-admin-editor.md).
+@[import-md "after":"MARKER:summary", "before":"MARKER:summary-end"](./components/c-admin-method.md) 
+</td></tr>
+<tr><td>
 
-[c-admin-editor-page](/stacks/vue/coalesce-vue-vuetify/components/c-admin-editor-page.md)
-..........................
-    .. include:: ./components/c-admin-editor-page.rst
-        :start-after: MARKER:summary
-        :end-before: MARKER:summary-end
-    Full Documentation: [c-admin-editor-page](/stacks/vue/coalesce-vue-vuetify/components/c-admin-editor-page.md).
+[c-admin-methods](./components/c-admin-methods.md)
+</td>
+<td> 
 
-[c-admin-table](/stacks/vue/coalesce-vue-vuetify/components/c-admin-table.md)
-....................
-    .. include:: ./components/c-admin-table.rst
-        :start-after: MARKER:summary
-        :end-before: MARKER:summary-end
-    Full Documentation: [c-admin-table](/stacks/vue/coalesce-vue-vuetify/components/c-admin-table.md).
+@[import-md "after":"MARKER:summary", "before":"MARKER:summary-end"](./components/c-admin-methods.md) 
+</td></tr>
+<tr><td>
 
-[c-admin-table-toolbar](/stacks/vue/coalesce-vue-vuetify/components/c-admin-table-toolbar.md)
-............................
-    .. include:: ./components/c-admin-table-toolbar.rst
-        :start-after: MARKER:summary
-        :end-before: MARKER:summary-end
-    Full Documentation: [c-admin-table-toolbar](/stacks/vue/coalesce-vue-vuetify/components/c-admin-table-toolbar.md).
+[c-admin-display](./components/c-admin-display.md)
+</td>
+<td> 
 
-[c-admin-table-page](/stacks/vue/coalesce-vue-vuetify/components/c-admin-table-page.md)
-.........................
-    .. include:: ./components/c-admin-table-page.rst
-        :start-after: MARKER:summary
-        :end-before: MARKER:summary-end
-    Full Documentation: [c-admin-table-page](/stacks/vue/coalesce-vue-vuetify/components/c-admin-table-page.md).
+@[import-md "after":"MARKER:summary", "before":"MARKER:summary-end"](./components/c-admin-display.md) 
+</td></tr>
+<tr><td>
+
+[c-admin-editor](./components/c-admin-editor.md)
+</td>
+<td> 
+
+@[import-md "after":"MARKER:summary", "before":"MARKER:summary-end"](./components/c-admin-editor.md) 
+</td></tr>
+<tr><td>
+
+[c-admin-editor-page](./components/c-admin-editor-page.md)
+</td>
+<td> 
+
+@[import-md "after":"MARKER:summary", "before":"MARKER:summary-end"](./components/c-admin-editor-page.md) 
+</td></tr>
+<tr><td>
+
+[c-admin-table](./components/c-admin-table.md)
+</td>
+<td> 
+
+@[import-md "after":"MARKER:summary", "before":"MARKER:summary-end"](./components/c-admin-table.md) 
+</td></tr>
+<tr><td>
+
+[c-admin-table-toolbar](./components/c-admin-table-toolbar.md)
+</td>
+<td> 
+
+@[import-md "after":"MARKER:summary", "before":"MARKER:summary-end"](./components/c-admin-table-toolbar.md) 
+</td></tr>
+<tr><td>
+
+[c-admin-table-page](./components/c-admin-table-page.md)
+</td>
+<td> 
+
+@[import-md "after":"MARKER:summary", "before":"MARKER:summary-end"](./components/c-admin-table-page.md) 
+</td></tr>
+</table>

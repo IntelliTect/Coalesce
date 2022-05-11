@@ -1,31 +1,22 @@
-.. _c-list-page:
+# c-list-page
 
-c-list-page
-===========
-
-.. MARKER:summary
+<!-- MARKER:summary -->
     
 A component that provides previous/next buttons and a text field for modifying the `page` [parameter](/modeling/model-components/data-sources.md) prop of a [ListViewModel](/stacks/vue/layers/viewmodels.md).
 
-.. MARKER:summary-end
+<!-- MARKER:summary-end -->
 
-[[toc]]
-
-Examples
---------
+## Example Usage
 
 ``` vue-html
-
-  <c-list-page :list="list" />
-
-
+<c-list-page :list="list" />
 ```
 
-Props
------
+## Props
 
-`list: ListViewModel`
-    The [ListViewModel](/stacks/vue/layers/viewmodels.md) whose current page will be changeable with the component.
+<Prop def="list: ListViewModel" lang="ts" />
+
+The [ListViewModel](/stacks/vue/layers/viewmodels.md) whose current page will be changeable with the component.
 
 
 

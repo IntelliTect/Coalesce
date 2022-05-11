@@ -1,34 +1,26 @@
-.. _c-list-page-size:
+# c-list-page-size
 
-c-list-page-size
-================
-
-.. MARKER:summary
+<!-- MARKER:summary -->
     
 A component that provides an dropdown for modifying the `pageSize` [parameter](/modeling/model-components/data-sources.md) prop of a [ListViewModel](/stacks/vue/layers/viewmodels.md).
 
-.. MARKER:summary-end
+<!-- MARKER:summary-end -->
 
-[[toc]]
-
-Examples
---------
+## Example Usage
 
 ``` vue-html
-
-  <c-list-page-size :list="list" />
-
-
+<c-list-page-size :list="list" />
 ```
 
-Props
------
+## Props
 
-`list: ListViewModel`
-    The [ListViewModel](/stacks/vue/layers/viewmodels.md) whose pagination will be editable.
+<Prop def="list: ListViewModel" lang="ts" />
 
-`pageSizes?: number[]`
-    An optional list of available page sizes to offer through [c-list-page-size](/stacks/vue/coalesce-vue-vuetify/components/c-list-page-size.md). Defaults to `[10, 25, 100]`.
+The [ListViewModel](/stacks/vue/layers/viewmodels.md) whose pagination will be editable.
+
+<Prop def="pageSizes?: number[]" lang="ts" />
+
+An optional list of available page sizes to offer through [c-list-page-size](/stacks/vue/coalesce-vue-vuetify/components/c-list-page-size.md). Defaults to `[10, 25, 100]`.
 
 
 

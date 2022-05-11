@@ -2,8 +2,27 @@ import { Plugin } from 'vuepress'
 import { path } from '@vuepress/utils'
 import * as fs from 'fs';
 import type { RuleBlock } from 'markdown-it/lib/parser_block'
-import type { ImportCodeTokenMeta } from './types'
 import type { MarkdownEnv } from '@vuepress/markdown/lib/types'
+
+interface ImportCodeTokenMeta {
+  importPath: string;
+
+  /// Substring of line at which to start including content (inclusive)
+  start?: string;
+  /// Substring of line to stop including content (inclusive)
+  end?: string;
+
+  /// Line after which to start including content (exclusive)
+  after?: string;
+  /// Line up until which content will be included (exclusive)
+  before?: string;
+
+  /// Markup to prepend to the extracted content
+  prepend?: string;
+
+  /// Markup to append to the extracted content
+  append?: string;
+}
 
 // min length of the import code syntax, i.e. '@[import-md]()'
 const MIN_LENGTH = 11
@@ -12,7 +31,7 @@ const MIN_LENGTH = 11
 const START_CODES = [64, 91, 105, 109, 112, 111, 114, 116, 45, 109, 100]
 
 // regexp to match the import syntax
-const SYNTAX_RE = /^@\[import-md(?:{([^{}]+)?})?(?:{([^{}]+)?})?(?:([^\]]+))?\]\(([^)]*)\)/
+const SYNTAX_RE = /^@\[import-md (.+)\]\(([^)]*)\)/
 
 const createImportCodeBlockRule = (): RuleBlock =>
   (state, startLine, endLine, silent): boolean => {
@@ -42,11 +61,17 @@ const createImportCodeBlockRule = (): RuleBlock =>
   // return true as we have matched the syntax
   if (silent) return true
 
-  const [, lineStart, lineEnd, info, importPath] = match
+  const [, data, importPath] = match
+
+  let jsonData;
+  try {
+    jsonData = JSON.parse('{' + data + '}')
+  } catch {
+    throw Error("Unable to parse import-md data: " + data)
+  }
   const meta: ImportCodeTokenMeta = {
-    importPath: importPath,
-    lineStart: lineStart,
-    lineEnd: lineEnd,
+    ...jsonData,
+    importPath
   }
 
   // Find the current heading that we're under
@@ -60,7 +85,7 @@ const createImportCodeBlockRule = (): RuleBlock =>
 
   
   const importedCode = resolveImportCode(meta, state.env);
-  // TODO: If this is supposed to make HMR work... it isnt.
+  // TODO: If this is supposed to make HMR work... it doesnt.
   // if (importedCode.importFilePath) {
   //   const importedFiles = state.env.importedFiles || (state.env.importedFiles = [])
   //   importedFiles.push(importedCode.importFilePath)
@@ -92,7 +117,7 @@ const createImportCodeBlockRule = (): RuleBlock =>
 }
 
 function resolveImportCode (
-  { importPath, lineStart, lineEnd }: ImportCodeTokenMeta,
+  { importPath, start, end, after, before, prepend, append }: ImportCodeTokenMeta,
   { filePath }: MarkdownEnv
 ) {
   let importFilePath = importPath
@@ -120,16 +145,35 @@ function resolveImportCode (
   // read file content
   const fileContent = fs.readFileSync(importFilePath).toString()
   const lines = fileContent.split('\n')
-  const firstLine = lines.findIndex(l => l.includes(lineStart)) + 1
-  const lastLine = lineEnd ? lines.findIndex(l => l.includes(lineEnd)) : lines.length - 1
+
+  const match = (query: string, line: string) => {
+    const matchStart = query.startsWith('\n')
+    const matchEnd = query.endsWith('\n')
+    query = matchStart ? query.substring(1) : query;
+    query = matchEnd ? query.substring(0, query.length - 1) : query;
+
+    if (matchStart && matchEnd) return line == query;
+    if (matchStart) return line.startsWith(query);
+    if (matchEnd) return line.endsWith(query);
+    return line.includes(query);
+  }
+
+  const firstLine = lines.findIndex(l => match(start ?? after, l)) + (start ? 0 : 1)
+
+  const lastLine = (before ?? end)
+    ? firstLine + lines.slice(firstLine).findIndex(l => match(before ?? end, l)) + (end ? 1 : 0)
+    : lines.length - 1
 
   // resolve partial import
   return {
     importFilePath,
-    importCode: lines
-      .slice(firstLine, lastLine - firstLine)
+    importCode: 
+    (prepend ? prepend + "\n" : '') +
+    lines
+      .slice(firstLine, lastLine)
       .join('\n')
-      .replace(/\n?$/, '\n'),
+      .replace(/\n?$/, '\n') + 
+    (append ? append : ''),
   }
 }
   

@@ -1,13 +1,10 @@
-.. _c-input:
+# c-input
 
-c-input
-=======
-
-.. MARKER:summary
+<!-- MARKER:summary -->
     
 A general-purpose input component for most [Values](/stacks/vue/layers/metadata.md). c-input does not have much functionality of its own - instead, it delegates to the right kind of component based on the type of value to which it is bound. This includes both other [Coalesce Vuetify Components](VuetifyOverview) as well as direct usages of some [Vuetify](https://vuetifyjs.com/) components.
 
-.. MARKER:summary-end
+<!-- MARKER:summary-end -->
 
 All attributes are passed through to the delegated-to component, allowing for full customization of the underlying [Vuetify](https://vuetifyjs.com/) component.
 
@@ -28,91 +25,72 @@ When bound to a [ViewModel](/stacks/vue/layers/viewmodels.md), the [validation r
 
 [[toc]]
 
-Examples
---------
+## Examples
 
 Typical usage, providing an object and a property on that object:
 
 ``` vue-html
-
-    <c-input :model="person" for="firstName" />
-
-
+<c-input :model="person" for="firstName" />
 ```
 
 Customizing the [Vuetify](https://vuetifyjs.com/) component used:
 
 ``` vue-html
-
-    <c-input :model="comment" for="content" textarea solo />
-
-
+<c-input :model="comment" for="content" textarea solo />
 ```
 
-Binding to [API Caller](/stacks/vue/layers/api-clients.md) args objects:
+Binding to [API Caller](/stacks/vue/layers/api-clients.md#api-callers) args objects:
 
 ``` vue-html
-
-    <c-input 
-        :model="person.setFirstName" 
-        for="newName" />
-
-
+<c-input 
+    :model="person.setFirstName" 
+    for="newName" />
 ```
 
 Or, using a more verbose syntax:
 
 ``` vue-html
-
-    <c-input 
-        :model="person.setFirstName.args" 
-        for="Person.methods.setFirstName.newName" />
-
-
+<c-input 
+    :model="person.setFirstName.args" 
+    for="Person.methods.setFirstName.newName" />
 ```
 
 Binding to [Data Source Parameters](/modeling/model-components/data-sources.md):
 
 ``` vue-html
-
-    <c-input :model="personList.$dataSource" for="startsWith" />
-
-
+<c-input :model="personList.$dataSource" for="startsWith" />
 ```
 
 Usage with ``v-model`` (this scenario is atypical - the model/for pair of props are used in almost all scenarios):
 
 ``` vue-html
-
-    <c-input v-model="person.firstName" for="Person.firstName" />
-
-
+<c-input v-model="person.firstName" for="Person.firstName" />
 ```
 
-Props
------
+## Props
 
-.. MARKER:c-for-model-props
+<!-- MARKER:c-for-model-props -->
 
-`for?: string | Property | Value`
-    A metadata specifier for the value being bound. One of:
+<Prop def="for?: string | Property | Value" lang="ts" />
+
+A metadata specifier for the value being bound. One of:
     
     - A string with the name of the value belonging to `model`.
     - A direct reference to a metadata object.
     - A string in dot-notation that starts with a type name.
 
-`model?: Model | DataSource`
-    An object owning the value that was specified by the `for` prop. If provided, the input will be bound to the corresponding property on the `model` object.
+<Prop def="model?: Model | DataSource" lang="ts" />
 
-.. MARKER:c-for-model-props-end
+An object owning the value that was specified by the `for` prop. If provided, the input will be bound to the corresponding property on the `model` object.
 
-`value?: any`
-    If binding the component with ``v-model``, accepts the ``value`` part of ``v-model``.
+<!-- MARKER:c-for-model-props-end -->
 
-Slots
------
+<Prop def="value?: any" lang="ts" />
 
-``default``
-    Used to display fallback content if c-input does not support the type of the value being bound. Generally this does not need to be used, as you should avoid creating c-input components for unsupported types in the first place.
+If binding the component with ``v-model``, accepts the ``value`` part of ``v-model``.
+
+## Slots
+
+``default`` - Used to display fallback content if c-input does not support the type of the value being bound. Generally this does not need to be used, as you should avoid creating c-input components for unsupported types in the first place.
 
 

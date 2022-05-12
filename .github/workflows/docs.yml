@@ -47,6 +47,7 @@ jobs:
           target_branch: gh-pages
           # deploy the default output of VuePress
           build_dir: docs/.vuepress/dist/Coalesce
+          jekyll: false
         env:
           # @see https://docs.github.com/en/actions/reference/authentication-in-a-workflow#about-the-github_token-secret
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

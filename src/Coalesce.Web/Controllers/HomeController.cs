@@ -20,7 +20,7 @@ namespace Coalesce.Web.Controllers
 
         public IActionResult Documentation()
         {
-            return Redirect("https://coalesce.readthedocs.io");
+            return Redirect("https://intellitect.github.io/Coalesce");
         }
     }
 }

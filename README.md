@@ -1,6 +1,6 @@
 # Coalesce  
 
-[Home](http://coalesce.intellitect.com/) &middot; [Documentation](http://coalesce.readthedocs.io) &middot; [Get Started](#Get-Started) &middot; [Builds](#Builds)
+[Home](http://coalesce.intellitect.com/) &middot; [Documentation](https://intellitect.github.io/Coalesce) &middot; [Get Started](#Get-Started) &middot; [Builds](#Builds)
 
 Coalesce is a framework for rapid-development of ASP.NET Core web applications. It works from the Entity Framework Core data model that you design, automating the creation of the glue - DTOs, API Controllers, and TypeScript - that sit between your data and the UI of your application. 
 
@@ -12,10 +12,10 @@ Coalesce is a framework for rapid-development of ASP.NET Core web applications. 
 
 ## Features
 
-* **CRUD for EF models**: For each `DbSet<>` on your `DbContext`, a full set of `/get`, `/save`, `/delete`, `/count`, and `/list` endpoints are created. Each can be secured or omitted entirely via attributes, or customized with much greater granularity with custom [Data Sources](http://coalesce.readthedocs.io/en/latest/pages/modeling/model-components/data-sources/) and/or [Behaviors](http://coalesce.readthedocs.io/en/latest/pages/modeling/model-components/behaviors/). `/list` and `/count` have paging, searching, sorting, and filtering built-in.
-* **Endpoints for Methods**: For client requests that don't fit the mold of a simple CRUD action against an entity, place [methods on your entities](http://coalesce.readthedocs.io/en/latest/pages/modeling/model-components/methods/) and annotate with `[Coalesce]` - controllers and TypeScript will be built for those as well. Have functions that don't belong on an entity class? Place them in a [service class](http://coalesce.readthedocs.io/en/latest/pages/modeling/model-types/services/) marked with `[Coalesce]` instead - you'll get the same set of features.
+* **CRUD for EF models**: For each `DbSet<>` on your `DbContext`, a full set of `/get`, `/save`, `/delete`, `/count`, and `/list` endpoints are created. Each can be secured or omitted entirely via attributes, or customized with much greater granularity with custom [Data Sources](https://intellitect.github.io/Coalesce/modeling/model-components/data-sources/) and/or [Behaviors](https://intellitect.github.io/Coalesce/modeling/model-components/behaviors). `/list` and `/count` have paging, searching, sorting, and filtering built-in.
+* **Endpoints for Methods**: For client requests that don't fit the mold of a simple CRUD action against an entity, place [methods on your entities](https://intellitect.github.io/Coalesce/modeling/model-components/methods/) and annotate with `[Coalesce]` - controllers and TypeScript will be built for those as well. Have functions that don't belong on an entity class? Place them in a [service class](https://intellitect.github.io/Coalesce/modeling/model-types/services/) marked with `[Coalesce]` instead - you'll get the same set of features.
 * **Choose your Front-end**: Coalesce supports both Vue and Knockout. While the paradigms used in the TypeScript code generated for each are quite different, they both make requests against the same API. At the end of the day, they both can accomplish the same tasks. The Vue stack is the recommended stack when creating new applications.
-* **... and more!** Check out the documentation to see all of Coalesce's features in-depth: http://coalesce.readthedocs.io
+* **... and more!** Check out the documentation to see all of Coalesce's features in-depth: https://intellitect.github.io/Coalesce
 
 ## Get Started
 
@@ -24,7 +24,7 @@ The best way to get started with Coalesce is using the `dotnet new` templates th
 * [Vue](https://github.com/IntelliTect/Coalesce.Vue.Template): `dotnet new --install IntelliTect.Coalesce.Vue.Template; dotnet new coalescevue`
 * [Knockout](https://github.com/IntelliTect/Coalesce.KnockoutJS.Template): `dotnet new --install IntelliTect.Coalesce.KnockoutJS.Template; dotnet new coalesceko`
 
-After you create your project, you should start reading through [the Documentation](http://coalesce.readthedocs.io) to see all the things that Coalesce can do.
+After you create your project, you should start reading through [the Documentation](https://intellitect.github.io/Coalesce) to see all the things that Coalesce can do.
 
 ## Builds
 |channel|build|IntelliTect.Coalesce|coalesce-vue

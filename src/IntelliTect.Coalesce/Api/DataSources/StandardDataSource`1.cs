@@ -112,7 +112,7 @@ namespace IntelliTect.Coalesce
         /// <param name="query">The query that may be used to get the IncludeTree from.</param>
         /// <param name="parameters">The parameters by which to query.</param>
         /// <returns>The IncludeTree that will be used to shape the serialized DTOs.</returns>
-        /// <see href="http://coalesce.readthedocs.io/en/latest/pages/loading-and-serialization/include-tree/"/>
+        /// <see href="https://intellitect.github.io/Coalesce/loading-and-serialization/include-tree/"/>
         public virtual IncludeTree? GetIncludeTree(IQueryable<T> query, IDataSourceParameters parameters) => query.GetIncludeTree();
 
         /// <summary>

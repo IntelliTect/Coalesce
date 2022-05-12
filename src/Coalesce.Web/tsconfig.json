@@ -9,6 +9,7 @@
     "sourceMap": true,
     "module": "system",
     "target": "es5",
+    "moduleResolution": "node",
     "types": ["bootstrap", "bootstrap.v3.datetimepicker", "jquery", "knockout", "knockout.validation", "moment", "select2"]
   },
   "include": [

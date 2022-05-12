@@ -311,6 +311,7 @@ export interface PersonViewModel extends $models.Person {
   
   /** Genetic Gender of the person. */
   gender: $models.Genders | null;
+  height: number | null;
   
   /** List of cases assigned to the person */
   casesAssigned: CaseViewModel[] | null;

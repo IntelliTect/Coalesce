@@ -7,6 +7,8 @@
     <!--<video v-if="caseVm.caseKey" :src="caseVm.downloadImage.getResultObjectUrl(this)" controls style="max-width: 100%">
     </video>--> 
 
+    <c-input :model="person" for="height" />
+
     <v-layout v-if="person != null" >
       <v-flex xs12>
         <v-card >
@@ -41,13 +43,14 @@
     
     <v-layout >
 
-      <v-flex xs12>
+      <!--<v-flex xs12>
         <v-data-table
+                      v-if="company.employees"
           :headers="headers"
           :items="company.employees"
           :search="search"
           :pagination.sync="pagination"
-          :total-items="count"
+          :server-items-length="count"
           :loading="isLoading"
           class="elevation-1"
           >
@@ -66,7 +69,7 @@
             </td>
           </template>
         </v-data-table>
-      </v-flex>
+      </v-flex>-->
     </v-layout>
     
   </v-container>
@@ -162,7 +165,7 @@
       //var caller = this.person!.$apiClient.$makeCaller("item", c => c.changeSpacesToDashesInName(1));
       //caller.result
 
-      this.person.$startAutoSave(this, { wait: 0 })
+      //this.person.$startAutoSave(this, { wait: 0 })
 
     }
 

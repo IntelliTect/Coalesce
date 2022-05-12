@@ -298,7 +298,8 @@ ko.bindingHandlers.select2AjaxMultiple = {
                     data: function (params: any) {
                         var data: any = {
                             search: params.term,
-                            page: params.page
+                            page: params.page,
+                            pageSize: pageSize
                         };
                         if (!allBindings.has('cache') || allBindings.get('cache'))
                             data["_"] = new Date().getTime();

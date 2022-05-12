@@ -246,8 +246,8 @@ For each reference navigation property, a `KnockoutComputed<string>` property wi
 
 ### Instance Method Members
 
-<Prop def="public readonly getBirthdate = new Person.GetBirthdate(this);
-public static GetBirthdate = class GetBirthdate extends Coalesce.ClientMethod<Person, moment.Moment> { ... };" lang="ts" />
+<Prop def="public readonly getBirthDate = new Person.GetBirthDate(this);
+public static GetBirthDate = class GetBirthDate extends Coalesce.ClientMethod<Person, moment.Moment> { ... };" lang="ts" />
 
 For each [Instance Method](/modeling/model-components/methods.md) on your POCO, a class and instance member will be created as described in [Methods - Generated TypeScript](/stacks/ko/client/methods.md).
 

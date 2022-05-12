@@ -24,7 +24,7 @@ If you're using [Vuetify](https://vuetifyjs.com/)'s [A-la-carte builds](https://
 This is an alternate build that itself imports Vuetify components from `'vuetify/lib'`, therefore preventing duplication of components. Similar to Vuetify, this build also does not register the Coalesce components globally, allowing them to also be treeshaken.
 
 <CodeTabs name="vue-bundler">
-<template #vuecli>
+<template #vue-cli>
 
 Install `unplugin-vue-components`, and add the following configuration to `vue.config.js`:
 

@@ -80,7 +80,7 @@ For string properties, specifies how the value in the property/column will be ma
 - `BeginsWith`: Search term will be checked for at the beginning of the field's value in a case insensitive manner.
 - `Equals`: Search term must match the field exactly in a case insensitive manner.
 - `EqualsNatural`: Search term must match exactly, using the natural casing handling of the evaluation environment. Default database collation will be used if evaluated in SQL, and exact casing will be used if evaluated in memory. This allows index seeks to be used instead of index scans, providing extra high performance searches against indexed columns
-- `Contains`: Search term will be checked for anywhere inside the field's value in a case insensitive manner. **Will be slow against large databasets - performance cannot be improved with database indexing.**
+- `Contains`: Search term will be checked for anywhere inside the field's value in a case insensitive manner. **Will be slow against large databases - performance cannot be improved with database indexing.**
 
 
 <Prop def="public string RootWhitelist { get; set; } = null;" />

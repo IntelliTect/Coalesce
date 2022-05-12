@@ -55,7 +55,7 @@ public class WeatherService : IWeatherService
         return response.Body.SerializeTo<WeatherData>();
     }
 
-    public void MethodThatIsntExposedBecauseItIsntOnTheExposedInterface() {  }
+    public void MethodThatIsNotExposedBecauseItIsNotOnTheExposedInterface() {  }
 }
 ```
 

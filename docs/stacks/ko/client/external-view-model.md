@@ -1,7 +1,7 @@
 
 # TypeScript External ViewModels
 
-For all [External Types](/modeling/model-types/external-types.md) in your model, Coalesce will generate a TypeScript class that provides a barebones representation of that type's properties.
+For all [External Types](/modeling/model-types/external-types.md) in your model, Coalesce will generate a TypeScript class that provides a bare-bones representation of that type's properties.
 
 These ViewModels are dependent on [Knockout](http://knockoutjs.com/), and are designed to be used directly from Knockout bindings in your HTML. All data properties on the generated model are Knockout observables.
 

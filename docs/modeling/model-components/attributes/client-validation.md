@@ -87,7 +87,7 @@ public bool IsNumber { get; set; }
 public bool IsDigit { get; set; }
 ```
 
-The following attribute properties are outputted to TypeScript unquoted. If you need to assert equality to a string, wrap the value you set to this property in quotes. Other literals (numerics, bools, etc) need no wrapping.
+The following attribute properties are outputted to TypeScript unquoted. If you need to assert equality to a string, wrap the value you set to this property in quotes. Other literals (numerics, booleans, etc) need no wrapping.
 
 ``` c#
 public string Equal { get; set; }

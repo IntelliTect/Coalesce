@@ -1,0 +1,52 @@
+{
+    "version": "0.2",
+    "language": "en",
+    "words": [
+        "Vuetify",
+        "Axios",
+        "Coalesce",
+        "IntelliTect",
+        "EF",
+        "vite",
+        "unplugin",
+
+        "POCOs",
+        "dtos",
+        "viewmodels",
+        "treeshaken",
+        "coalesceko",
+        "coalescevue",
+        "querystring",
+        "bootstrap-datetimepicker",
+
+        "nameof",
+        "queryable",
+        "queryables",
+        "enumerables",
+        "readonly",
+        "typeof",
+        "instanceof",
+
+        "autosave",
+        "autosaving",
+        "dontSerialize",
+
+        "netcoreapp",
+        "netstandard",
+        "mkdir",
+        "wwwroot",
+    ],
+    "ignorePaths": [
+        "node_modules"
+    ],
+    "languageSettings": [
+        {
+            "languageId": "markdown",
+            "ignoreRegExpList": [
+                // Hashes in URLs, which for PascalCase headers get transformed into lowercase 
+                // (which then to cspell looks like a single word.)
+                "/(\\.md|\\()#[-\\w]+/mig",
+             ]
+        }
+    ]
+}

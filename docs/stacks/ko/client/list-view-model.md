@@ -154,7 +154,7 @@ list.load();
 
 ### Static Method Members
 
-<Prop def="public readonly namesStartingWith = new Person.GetBirthdate(this);
+<Prop def="public readonly namesStartingWith = new Person.NamesStartingWith(this);
 public static NamesStartingWith = class NamesStartingWith extends Coalesce.ClientMethod<PersonList, string[]> { ... };" lang="ts" />
 
 For each exposed [Static Method](/modeling/model-components/methods.md#static-methods) on your POCO, the members outlined in [Methods - Generated TypeScript](/stacks/ko/client/methods.md) will be created.

@@ -93,7 +93,7 @@ list.load();
 
 ## Standard Parameters
 
-All methods on `IDataSource<T>` take a parameter that contains all the client-specified parameters for things paging, searching, sorting, and filtering information. Almost all overridable methods on `StandardDataSource` are also passed the relevant set of parameters. 
+All methods on `IDataSource<T>` take a parameter that contains all the client-specified parameters for things paging, searching, sorting, and filtering information. Almost all virtual methods on `StandardDataSource` are also passed the relevant set of parameters. 
 
 
 ## Custom Parameters

@@ -16,7 +16,7 @@ Here is a typical workflow
    * Built on the latest Microsoft ASP.NET Core
    * Easy to learn
    * TypeScript from the ground up
-   * Flexibility to use MVVM or MVC patterns as required
+   * Flexibility to use MVC patterns as required
    * Admin pages for all your models are build automatically and include features like searching, sorting, and paging
    * Robust documentation for the framework
    * Automatically generated documentation for the API layer and TypeScript view models
@@ -35,7 +35,7 @@ Coalesce was designed to create line-of-business applications. It provides a mor
 You should consider using Coalesce if your project:
    * Is small to medium size (1-200 classes)
    * Requires an interactive user experience
-   * Has data entry requirements, espcially forms, tables, etc.
+   * Has data entry requirements, especially forms, tables, etc.
    * Needs to get started quickly with functional prototypes that can become production software
 
 
@@ -53,7 +53,7 @@ Coalesce is specifically designed to meet the needs of web developers. However, 
 
 ## How Does it Work?
 
-After you create your classes and the EF data context, Coalesce uses this information to geneate code. When the Coalesce CLI (command line interface) is run, the following things happen:
+After you create your classes and the EF data context, Coalesce uses this information to generate code. When the Coalesce CLI (command line interface) is run, the following things happen:
 
    1. The model is validated to ensure that all the Coalesce specific requirements are met. This includes things like ensuring that all classes have a primary key assigned, validating that linked child objects have a key to their parent, etc. If issues are found, generation stops and the errors are displayed with advise to fix the issues.
    2. The core files needed for Coalesce are copied to the target project. This includes TypeScript base classes, customizable templates, and other files for extension points. Each file is copied twice, once as a file that can be modified in the project and once as an original file. This ensures that if any changes are made by the user these files Coalesce will not overwrite the your changes.
@@ -69,7 +69,7 @@ Here are a few things we have found helpful when using Coalesce
 
    * Learn and embrace the Coalesce paradigm and work with it rather than trying to do things another way.
    * Following what we refer to as the 'well worn path' is very helpful. Try to stick to standard ways to do things rather than trying to use esoteric features.
-   * Keep your models as consistent and straighforward as possible. Use relational modeling best practices.
+   * Keep your models as consistent and straightforward as possible. Use relational modeling best practices.
    * Remember that public methods on your class models are added to the client side view models and this makes calling business logic from the client really easy.
    * Don't be afraid to fall back to building parts of your site using traditional methods. Coalesce isn't right for everything. But, honestly, we have only done this a few times, like 3. 
 
@@ -102,12 +102,12 @@ We also lists things that we didn't enjoy
   * Putting sorting and paging on every admin page
   * Basically doing anything that feels repetitive or boilerplate
 
-Over the next few months we talked about this issue, but couldn't find the right abstration. We talked about other solutions that solve parts of the problem and considered putting together something from several pieces. Nothing felt unified and we ended up with leaky abstractions. We needed some way to divide the problem so that we could build the fun stuff and have something generate the boring stuff. This solution needed to be robust enough to satisfy our customer's needs and also be of use to developers without their needing to know the inner workings of the system.
+Over the next few months we talked about this issue, but couldn't find the right abstraction. We talked about other solutions that solve parts of the problem and considered putting together something from several pieces. Nothing felt unified and we ended up with leaky abstractions. We needed some way to divide the problem so that we could build the fun stuff and have something generate the boring stuff. This solution needed to be robust enough to satisfy our customer's needs and also be of use to developers without their needing to know the inner workings of the system.
 
 
 ## Our Solution
 
-What if we could build the models and business logic and have a tool build everything except the UI? There are great tools like Entity Framework for modeling and good tooling for minimzing duplicate code in user interfaces. And so Coalesce was born, a tool that would bring together the backend and front end development. '
+What if we could build the models and business logic and have a tool build everything except the UI? There are great tools like Entity Framework for modeling and good tooling for minimizing duplicate code in user interfaces. And so Coalesce was born, a tool that would bring together the backend and front end development. '
 
 Coalesce takes Entity Framework Core models and builds controllers, TypeScript view models, and admin pages automatically. These are built in a general way so that they can be applied to many different scenarios. There will always be pages that need to be written by hand and we intentionally don't support many edge cases in order to keep things simple. There is nothing wrong with building something by hand. 
 

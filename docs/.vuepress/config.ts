@@ -1,22 +1,49 @@
+import { defineUserConfig } from 'vuepress'
+
 import { defaultTheme, DefaultThemeOptions, SidebarGroup } from '@vuepress/theme-default'
 import { shikiPlugin } from '@vuepress/plugin-shiki'
 import { registerComponentsPlugin } from '@vuepress/plugin-register-components'
+import { searchPlugin } from '@vuepress/plugin-search'
+
 import { importMdPlugin } from './importMdPlugin'
+
 import path from 'path'
 import fs from 'fs'
-import { defineUserConfig } from 'vuepress'
- 
+
+const baseUrl = "/Coalesce" // for GH pages
+
 export default defineUserConfig({
+  base: `${baseUrl}/`,
   lang: 'en-US',
   title: 'Coalesce',
   description: 'Documentation for IntelliTect.Coalesce',
   plugins: [
     importMdPlugin(),
+    {
+      // Workaround for https://github.com/vuepress/vuepress-next/issues/653
+      // Prepend absolute URLs with our GH pages base URL.
+      name: "baseify-link",
+      extendsMarkdown(md) {
+        const old = md.normalizeLink;
+        md.normalizeLink = (url) => {
+          url = old(url);
+          if (url.startsWith("/") && !url.startsWith(baseUrl)) {
+            url = baseUrl + url
+          }
+          return url;
+        }
+      }
+    },
     shikiPlugin({
       theme: 'dark-plus'
     }),
     registerComponentsPlugin({
       componentsDir: path.resolve(__dirname, './components'),
+    }),
+    // Temporary until we deploy out on GH and can then apply for algolia
+    searchPlugin({
+      // options
+      getExtraFields: (page) => [...page.contentRendered.matchAll(/def="(.*?)"/g)].map(result => result[1]),
     }),
   ],
   theme: defaultTheme({
@@ -48,7 +75,7 @@ export default defineUserConfig({
           '/modeling/model-components/properties',
           {
             text: "Attributes",
-            link: '/modeling/model-components/attributes',
+            link: '/modeling/model-components/attributes.html',
             collapsible: true,
             children: fs
               .readdirSync(path.resolve(__dirname, '../modeling/model-components/attributes'))
@@ -78,7 +105,7 @@ export default defineUserConfig({
           '/stacks/vue/layers/viewmodels',
           {
             text: "Vuetify Components",
-            link: '/stacks/vue/coalesce-vue-vuetify/overview',
+            link: '/stacks/vue/coalesce-vue-vuetify/overview.html',
             collapsible: true,
             children: fs
               .readdirSync(path.resolve(__dirname, '../stacks/vue/coalesce-vue-vuetify/components'))

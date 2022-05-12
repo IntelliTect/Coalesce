@@ -9,7 +9,7 @@ dotnet new --install IntelliTect.Coalesce.KnockoutJS.Template
 dotnet new coalesceko
 ```
 
-[![](https://img.shields.io/nuget/v/IntelliTect.Coalesce.KnockoutJS.Template)](https://www.nuget.org/packages/IntelliTect.Coalesce.KnockoutJS.Template/) • [View on GitHub](https://github.com/IntelliTect/IntelliTect.Coalesce.KnockoutJS.Template) 
+[![](https://img.shields.io/nuget/v/IntelliTect.Coalesce.KnockoutJS.Template)](https://www.nuget.org/packages/IntelliTect.Coalesce.KnockoutJS.Template/) • [View on GitHub](https://github.com/IntelliTect/Coalesce.KnockoutJS.Template) 
 
 @[import-md "after":"MARKER:data-modeling", "before":"MARKER:data-modeling-end"](../agnostic/getting-started-modeling.md)
 

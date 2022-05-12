@@ -96,5 +96,5 @@ Specifies the height in pixels of the [v-progress-linear](https://vuetifyjs.com/
 ``default`` - Accepts the content whose visibility is controlled by the state of the supplied [API Callers](/stacks/vue/layers/api-clients.md#api-callers). It will be shown or hidden according to the flags defined for each caller.
 
 ::: tip
-Define the default slot as a [scoped slot](https://vuejs.org/v2/guide/components-slots.html#Scoped-Slots) (e.g. with ``#default`` or ``v-slot:default`` on the ``c-loader-status``) to prevent the VNode tree from being created when the content should be hidden. This improves performance and helps avoid null reference errors that can be caused when trying to render objects that haven't been loaded yet.
+Define the default slot as a [scoped slot](https://v2.vuejs.org/v2/guide/components-slots.html#Scoped-Slots) (e.g. with ``#default`` or ``v-slot:default`` on the ``c-loader-status``) to prevent the VNode tree from being created when the content should be hidden. This improves performance and helps avoid null reference errors that can be caused when trying to render objects that haven't been loaded yet.
 :::

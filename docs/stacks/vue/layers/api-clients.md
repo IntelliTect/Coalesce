@@ -2,7 +2,7 @@
 
 The API client layer, generated as `api-clients.g.ts`, exports a class for each API controller that was generated for your data model. These classes are stateless and provide one method for each API endpoint. This includes both the standard set of endpoints created for [Entity Models](/modeling/model-types/entities.md) and [Custom DTOs](/modeling/model-types/dtos.md), as well as any custom [Methods](/modeling/model-components/methods.md) on the aforementioned types, as well as any methods on your [Services](/modeling/model-types/services.md).
 
-The API clients provided by Coalesce are based on [axios](https://github.com/axios/axios). All API clients used a shared axios instance, exported from `coalesce-vue` as `AxiosClient`. This instance can be used to configure all HTTP requests made by Coalesce, including things like attaching [interceptors](https://github.com/axios/axios#interceptors) to modify the requests being made, or configuring [defaults](https://github.com/axios/axios#config-defaults).
+The API clients provided by Coalesce are based on [axios](https://github.com/axios/axios). All API clients used a shared axios instance, exported from `coalesce-vue` as `AxiosClient`. This instance can be used to configure all HTTP requests made by Coalesce, including things like attaching [interceptors](https://axios-http.com/docs/interceptors) to modify the requests being made, or configuring [defaults](https://axios-http.com/docs/config_defaults).
 
 As with all the layers, the [source code of coalesce-vue](https://github.com/IntelliTect/Coalesce/blob/dev/src/coalesce-vue/src/api-client.ts) is also a great supplement to this documentation.
 
@@ -18,7 +18,7 @@ Each method on the API client takes in the regular parameters of the method as y
 
 For the methods that correspond to the standard set of CRUD endpoints that Coalesce provides (``get``, ``list``, ``count``, ``save``, ``delete``), an additional parameter `parameters` is available that accepts the set of [Standard Parameters](/modeling/model-components/data-sources.md#standard-parameters) appropriate for the endpoint.
 
-Each method returns a `Promise<AxiosResponse<TApiResult>>` where `TApiResult` is either `ItemResult`, `ItemResult<T>`, or `ListResult<T>`, depending on the return type of the API endpoint. `AxiosResponse` is the [response object from axios](https://github.com/axios/axios#response-schema), containing the `TApiResult` in its `data` property, as well as other properties like `headers`. The returned type `T` is automatically converted into valid [Model implementations](/stacks/vue/layers/models.md) for you.
+Each method returns a `Promise<AxiosResponse<TApiResult>>` where `TApiResult` is either `ItemResult`, `ItemResult<T>`, or `ListResult<T>`, depending on the return type of the API endpoint. `AxiosResponse` is the [response object from axios](https://axios-http.com/docs/res_schema), containing the `TApiResult` in its `data` property, as well as other properties like `headers`. The returned type `T` is automatically converted into valid [Model implementations](/stacks/vue/layers/models.md) for you.
 
 ### API Callers/API States
 

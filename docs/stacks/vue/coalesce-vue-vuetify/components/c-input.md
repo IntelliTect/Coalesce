@@ -2,7 +2,7 @@
 
 <!-- MARKER:summary -->
     
-A general-purpose input component for most [Values](/stacks/vue/layers/metadata.md). c-input does not have much functionality of its own - instead, it delegates to the right kind of component based on the type of value to which it is bound. This includes both other [Coalesce Vuetify Components](VuetifyOverview) as well as direct usages of some [Vuetify](https://vuetifyjs.com/) components.
+A general-purpose input component for most [Values](/stacks/vue/layers/metadata.md). c-input does not have much functionality of its own - instead, it delegates to the right kind of component based on the type of value to which it is bound. This includes both other [Coalesce Vuetify Components](/stacks/vue/coalesce-vue-vuetify/overview.md) as well as direct usages of some [Vuetify](https://vuetifyjs.com/) components.
 
 <!-- MARKER:summary-end -->
 
@@ -21,7 +21,7 @@ A summary of the components delegated to, by type:
 
 Any other unsupported type will simply be displayed with [c-display](/stacks/vue/coalesce-vue-vuetify/components/c-display.md), unless a [default slot](https://vuejs.org/v2/guide/components-slots.html) is provided - in that case, the default slot will be rendered instead.
 
-When bound to a [ViewModel](/stacks/vue/layers/viewmodels.md), the [validation rules](/stacks/vue/layers/viewmodels.md) for the bound property will be obtained from the [ViewModel](/stacks/vue/layers/viewmodels.md) and passed to [Vuetify](https://vuetifyjs.com/)'s ``rules`` prop.
+When bound to a [ViewModel](/stacks/vue/layers/viewmodels.md), the [validation rules](/stacks/vue/layers/viewmodels.md#rules-validation) for the bound property will be obtained from the [ViewModel](/stacks/vue/layers/viewmodels.md#rules-validation) and passed to [Vuetify](https://vuetifyjs.com/)'s `rules` prop.
 
 [[toc]]
 
@@ -75,9 +75,9 @@ Usage with ``v-model`` (this scenario is atypical - the model/for pair of props 
 
 A metadata specifier for the value being bound. One of:
     
-    - A string with the name of the value belonging to `model`.
-    - A direct reference to a metadata object.
-    - A string in dot-notation that starts with a type name.
+- A string with the name of the value belonging to `model`.
+- A direct reference to a metadata object.
+- A string in dot-notation that starts with a type name.
 
 <Prop def="model?: Model | DataSource" lang="ts" />
 

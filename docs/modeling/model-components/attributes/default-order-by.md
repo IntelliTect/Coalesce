@@ -21,7 +21,6 @@ public class Person
     [DefaultOrderBy(FieldOrder = 1)]
     public string LastName { get; set; }
 }
-
 ```
 
 ``` c#
@@ -37,7 +36,6 @@ public class Person
     [DefaultOrderBy(FieldOrder = 1)]
     public string LastName { get; set; }
 }
-
 ```
 
 ## Properties

@@ -7,7 +7,7 @@ and to add additional client-only validation parameters. Database validation is 
 These propagate to the client as validations in TypeScript via generated [Metadata](/stacks/vue/layers/metadata.md) and [ViewModel rules](/stacks/vue/layers/viewmodels.md) (for Vue) or [Knockout-Validation](https://github.com/Knockout-Contrib/Knockout-Validation/) rules (for Knockout). For both stacks, any failing validation rules prevent saves from going to the server. 
 
 ::: warning
-This attribute controls client-side validation only. To perform server-side validation, create a custom [Behaviors](/modeling/model-components/behaviors.md) for your types.
+This attribute controls client-side validation only. To perform server-side validation, create a custom [Behaviors class](/modeling/model-components/behaviors.md) for your types.
 :::
 
 [[toc]]

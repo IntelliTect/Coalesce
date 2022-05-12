@@ -164,7 +164,7 @@ The standard data sources, `IntelliTect.Coalesce.StandardDataSource<T>` and its 
 
 ### Default Loading Behavior
 
-When an object or list of objects is requested, the default behavior of the the `StandardDataSource` is to load all of the immediate relationships of the object (parent objects and child collections), as well as the far side of many-to-many relationships. This can be suppressed by settings `includes = "none"` on your TypeScript [ViewModel](/stacks/disambiguation/view-model.md) or [ListViewModel](/stacks/disambiguation/list-view-model.md) when making a request.
+When an object or list of objects is requested, the default behavior of the the `StandardDataSource` is to load all of the immediate relationships of the object (parent objects and child collections), as well as the far side of [many-to-many](attributes/many-to-many.md) relationships. This can be suppressed by settings `includes = "none"` on your TypeScript [ViewModel](/stacks/disambiguation/view-model.md) or [ListViewModel](/stacks/disambiguation/list-view-model.md) when making a request.
 
 In most cases, however, you'll probably want more or less data than what the default behavior provides. You can achieve this by overriding the `GetQuery` method, outlined below.
 

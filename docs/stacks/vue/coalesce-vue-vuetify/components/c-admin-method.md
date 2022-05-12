@@ -20,9 +20,9 @@ For each parameter of a method, a [c-input](/stacks/vue/coalesce-vue-vuetify/com
 
 A metadata specifier for the method. One of:
     
-    - A string with the name of the method belonging to `model`. 
-    - A direct reference to a method's metadata object.
-    - A string in dot-notation that starts with a type name and ending with a method name.
+- A string with the name of the method belonging to `model`. 
+- A direct reference to a method's metadata object.
+- A string in dot-notation that starts with a type name and ending with a method name.
 
 <Prop def="model: ViewModel | ListViewModel" lang="ts" />
 

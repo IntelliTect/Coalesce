@@ -895,6 +895,16 @@ export const Person = domain.types.Person = {
       get typeDef() { return domain.enums.Genders },
       role: "value",
     },
+    height: {
+      name: "height",
+      displayName: "Height",
+      type: "number",
+      role: "value",
+      rules: {
+        required: val => val != null || "Height has to be a number.",
+        pattern: val => !val || /^[+]?([0-9]+(?:[\.][0-9]*)?|\.[0-9]+)$/.test(val) || "Height has to be a number.",
+      }
+    },
     casesAssigned: {
       name: "casesAssigned",
       displayName: "Cases Assigned",

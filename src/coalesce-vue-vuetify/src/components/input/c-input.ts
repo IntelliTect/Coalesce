@@ -2,7 +2,7 @@
 
 import Vue, { PropOptions } from "vue";
 import { buildVuetifyAttrs, getValueMeta } from "../c-metadata-component";
-import { Model, ClassType, DataSource, DataSourceType, mapValueToModel, AnyArgCaller, ApiState } from "coalesce-vue";
+import { Model, ClassType, DataSource, DataSourceType, mapValueToModel, AnyArgCaller, ApiState, parseValue } from "coalesce-vue";
 
 import CSelect from './c-select.vue'
 import CSelectManyToMany from './c-select-many-to-many.vue'
@@ -35,21 +35,18 @@ export default Vue.extend({
 
     let model = ctx.props.model; 
     const modelMeta = model ? model.$metadata : null;
-    let valueMeta = getValueMeta(ctx.props.for, modelMeta, ctx.parent.$coalesce.metadata);
 
-    if (!valueMeta) {
+    let _valueMeta = getValueMeta(ctx.props.for, modelMeta, ctx.parent.$coalesce.metadata);
+    if (!_valueMeta || !("role" in _valueMeta)) {
       throw Error("c-input requires value metadata. Specify it with the 'for' prop'");
     }
+    const valueMeta = _valueMeta; // Alias so type inside closures will be correct;
 
     // Support binding to method args via `:model="myModel.myMethod" for="myArg"`.
     // getValueMeta will resolve to the metadata of the specific parameter;
     // we then have to resolve the args object from the ApiState.
     if (model instanceof ApiState && "args" in model && valueMeta.name in model.args) {
       model = model.args
-    }
-
-    if (!valueMeta || !("role" in valueMeta)) {
-      throw Error("c-input requires value metadata. Specify it with the 'for' prop'");
     }
 
     const { on: ctxOn, props: ctxProps, ...ctxData } = ctx.data;
@@ -118,7 +115,7 @@ export default Vue.extend({
 
     const onInput = function(value: any) {
       if (model && valueMeta) {
-        (model as any)[valueMeta.name] = value;
+        (model as any)[valueMeta.name] = parseValue(value, valueMeta);
       }
     }
 
@@ -128,7 +125,7 @@ export default Vue.extend({
       case 'number':
         if (valueMeta.type == 'number') {
           // For numeric values, use a numeric text field.
-          attrs.type == 'number'
+          attrs.type = 'number'
         }
 
         if (valueMeta.role == "primaryKey") { 
@@ -199,7 +196,7 @@ export default Vue.extend({
       return _c("div", {}, ctx.children)
     }
     return _c('div', {
-        staticClass:"input-group input-group--dirty input-group--text-field"
+        staticClass: "input-group input-group--dirty input-group--text-field"
       },[
         _c('label', attrs.label),
         _c('p', [

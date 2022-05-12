@@ -245,6 +245,7 @@ export interface Person extends Model<typeof metadata.Person> {
   
   /** Genetic Gender of the person. */
   gender: Genders | null
+  height: number | null
   
   /** List of cases assigned to the person */
   casesAssigned: Case[] | null

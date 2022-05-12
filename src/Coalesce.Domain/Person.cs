@@ -77,6 +77,14 @@ namespace Coalesce.Domain
         /// </summary>
         public Genders Gender { get; set; }
 
+        [ClientValidation(
+            Pattern = @"^[+]?([0-9]+(?:[\.][0-9]*)?|\.[0-9]+)$",
+            ErrorMessage = "Height has to be a number.",
+            IsRequired = true
+        )]
+        [NotMapped]
+        public double Height { get; set; }
+
         /// <summary>
         /// List of cases assigned to the person
         /// </summary>

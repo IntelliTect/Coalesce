@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "vuepress dev",
     "linkcheck": "linkcheck localhost:8080/Coalesce -e --skip-file ./.vuepress/linkcheck-skip-file.txt",
-    "build": "cspell **/*.md && vuepress build -d .vuepress/dist/Coalesce && start-server-and-test 'http-server ./.vuepress/dist --silent' 8080 linkcheck"
+    "build": "cspell '**/*.md' && vuepress build -d .vuepress/dist/Coalesce && start-server-and-test 'http-server ./.vuepress/dist --silent' 8080 linkcheck"
   },
   "devDependencies": {
     "@vuepress/plugin-register-components": "^2.0.0-beta.43",

@@ -1,20 +1,22 @@
 Contributing
 ============
 
-* [Prerequisites](#prerequisites)
-* [Code](#code)
-  * [Code style](#code-style)
-  * [Dependencies](#dependencies)
-  * [Unit tests](#unit-tests)
-* [Contributing process](#contributing-process)
-  * [Get buyoff or find open community issues or features](#get-buyoff-or-find-open-community-issues-or-features)
-  * [Set up your environment](#set-up-your-environment)
-  * [Prepare commits](#prepare-commits)
-  * [Submit pull request](#Submit-pull-request)
-  * [Respond to feedback on pull request](#respond-to-feedback-on-pull-request)
-* [NuGet](#nuget)
-* [Other general information](#other-general-information)
-* [Acknowledgement](#acknowledgement)
+- [Contributing](#contributing)
+  - [Prerequisites](#prerequisites)
+  - [Code](#code)
+    - [Code style](#code-style)
+    - [Dependencies](#dependencies)
+    - [Unit tests](#unit-tests)
+  - [Contributing process](#contributing-process)
+    - [Get buyoff or find open community issues or features](#get-buyoff-or-find-open-community-issues-or-features)
+    - [Set up your environment](#set-up-your-environment)
+    - [Update documentation](#update-documentation)
+    - [Prepare commits](#prepare-commits)
+    - [Submit pull request](#submit-pull-request)
+    - [Respond to feedback on pull request](#respond-to-feedback-on-pull-request)
+  - [NuGet](#nuget)
+  - [Other general information](#other-general-information)
+  - [Acknowledgement](#acknowledgement)
 
 ## Prerequisites
 
@@ -66,11 +68,14 @@ Any new code should also have reasonable unit test coverage.
    You can't go wrong emulating one of the existing tests and then changing it specific to the behavior you are testing.
  * See the [debugging/environment guide](ENVIRONMENT.md) for more details.
 
- ### Update documentation
- * Make sure you update or add documentation for the feature or bug you are fixing.
- * For help in setting up an environment to edit reStructuredText (VS Code is the recommended platform), see the [documentation environment guide](DOC_ENVIRONMENT.md) for more details.
+### Update documentation
+* Make sure you update or add documentation for the feature or bug you are fixing.
+* The documentation is built with [VuePress 2](https://v2.vuepress.vuejs.org/). To develop locally:
+  * Open the `docs` folder as a workspace in VS code.
+  * `npm ci && npm run dev`. Open the URL it provides you in your browser.
+  * You can now develop the documentation. Changes will be reflected in your browser as you save via HMR.
 
- ### Prepare commits
+### Prepare commits
 This section serves to help you understand what makes a good commit.
 
 A commit should observe the following:

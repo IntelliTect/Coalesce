@@ -112,7 +112,7 @@ namespace IntelliTect.Coalesce
         /// <param name="query">The query that may be used to get the IncludeTree from.</param>
         /// <param name="parameters">The parameters by which to query.</param>
         /// <returns>The IncludeTree that will be used to shape the serialized DTOs.</returns>
-        /// <see href="https://intellitect.github.io/Coalesce/loading-and-serialization/include-tree/"/>
+        /// <see href="https://intellitect.github.io/Coalesce/concepts/include-tree/"/>
         public virtual IncludeTree? GetIncludeTree(IQueryable<T> query, IDataSourceParameters parameters) => query.GetIncludeTree();
 
         /// <summary>
@@ -221,11 +221,11 @@ namespace IntelliTect.Coalesce
 
             if (result == null)
             {
-                return (GetNotFoundMessage(id), null);
+                return (new ItemResult<T>(wasSuccessful: false, message: GetNotFoundMessage(id)), null);
             }
 
             var tree = GetIncludeTree(query, parameters);
-            return (new ItemResult<T>(result), tree);
+            return (new ItemResult<T>(wasSuccessful: true, obj: result), tree);
         }
 
         /// <summary>

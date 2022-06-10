@@ -154,7 +154,7 @@ Only exists if the caller was created with the option of being invoked with an a
 
 #### ItemResult-based Callers
 
-<Prop def="result: T | null" lang="ts" />
+<Prop def="result: T | null" lang="ts" id="member-result-item" />
 
 The principal data returned by the previous request. Will be set to null if the last response received returned no data (e.g. if the response was an error response)
 
@@ -164,14 +164,17 @@ Any validation issues returned by the previous request. This is never populated 
 
 #### ListResult-based Callers
 
-<Prop def="result: Array<T> | null" lang="ts" />
+<Prop def="result: Array<T> | null" lang="ts" id="member-result-list" />
 
 The principal data returned by the previous request. Will be set to null if the last response received returned no data (e.g. if the response was an error response).
 
 
-<Prop def="page, pageSize, pageCount, totalCount: number | null" lang="ts" />
+<Prop def="page, pageSize, pageCount, totalCount: number | null" lang="ts" id="members-pagination" />
 
 Properties which contain the pagination information returned by the previous request.
+
+
+
 
 ### Concurrency Mode
 

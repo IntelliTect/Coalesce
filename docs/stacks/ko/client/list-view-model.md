@@ -120,11 +120,11 @@ Toggles sorting between ascending, descending, and no order on the specified fie
 
 ### Configuration
 
-<Prop def="static coalesceConfig: Coalesce.ListViewModelConfiguration<PersonList, ViewModels.Person>" lang="ts" />
+<Prop def="static coalesceConfig: Coalesce.ListViewModelConfiguration<PersonList, ViewModels.Person>" lang="ts" id="member-class-config" />
 
 A static configuration object for configuring all instances of the ListViewModel's type is created. See [ViewModel Configuration](/stacks/ko/client/model-config.md).
 
-<Prop def="coalesceConfig: Coalesce.ListViewModelConfiguration<PersonList, ViewModels.Person>" lang="ts" />
+<Prop def="coalesceConfig: Coalesce.ListViewModelConfiguration<PersonList, ViewModels.Person>" lang="ts" id="member-instance-config" />
 
 An per-instance configuration object for configuring each specific ListViewModel instance is created. See [ViewModel Configuration](/stacks/ko/client/model-config.md).
 
@@ -136,7 +136,7 @@ An per-instance configuration object for configuring each specific ListViewModel
     lastName?: string
     gender?: string
     companyId?: string
-} = null;" lang="ts" />
+} = null;" lang="ts" id="code-filter-object" />
 
 For each exposed scalar property on the underlying EF POCO, `filter` will have a corresponding property. If the `filter` object is set, requests made to the server to retrieve data will be passed all the values in this object via the URL's query string. These parameters will filter the resulting data to only rows where the parameter values match the row's values. For example, if `filter.companyId` is set to a value, only people from that company will be returned.
 
@@ -155,7 +155,7 @@ list.load();
 ### Static Method Members
 
 <Prop def="public readonly namesStartingWith = new Person.NamesStartingWith(this);
-public static NamesStartingWith = class NamesStartingWith extends Coalesce.ClientMethod<PersonList, string[]> { ... };" lang="ts" />
+public static NamesStartingWith = class NamesStartingWith extends Coalesce.ClientMethod<PersonList, string[]> { ... };" lang="ts" id="code-static-method-members" />
 
 For each exposed [Static Method](/modeling/model-components/methods.md#static-methods) on your POCO, the members outlined in [Methods - Generated TypeScript](/stacks/ko/client/methods.md) will be created.
 
@@ -163,7 +163,7 @@ For each exposed [Static Method](/modeling/model-components/methods.md#static-me
 ### DataSources
 <Prop def="
 public dataSources = ListViewModels.PersonDataSources;
-public dataSource: DataSource<Person> = new this.dataSources.Default();" lang="ts" />
+public dataSource: DataSource<Person> = new this.dataSources.Default();" lang="ts" id="code-data-source-members" />
 
 For each of the [Data Sources](/modeling/model-components/data-sources.md) on the class, a corresponding class will be added to a namespace named `ListViewModels.<ClassName>DataSources`. This namespace can always be accessed on both `ViewModel` and `ListViewModel` instances via the `dataSources` property, and class instances can be assigned to the `dataSource` property.
 

@@ -9,17 +9,17 @@
   "scripts": {
     "dev": "vuepress dev",
     "linkcheck": "linkcheck localhost:8080/Coalesce -e --skip-file ./.vuepress/linkcheck-skip-file.txt",
-    "build": "cspell '**/*.md' && vuepress build -d .vuepress/dist/Coalesce && start-server-and-test 'http-server ./.vuepress/dist --silent' 8080 linkcheck"
+    "build": "cspell \"**/*.md\" && vuepress build -d .vuepress/dist/Coalesce && start-server-and-test 'http-server ./.vuepress/dist --silent' 8080 linkcheck"
   },
   "devDependencies": {
-    "@vuepress/plugin-register-components": "^2.0.0-beta.43",
-    "@vuepress/plugin-search": "^2.0.0-beta.43",
-    "@vuepress/plugin-shiki": "^2.0.0-beta.43",
+    "@vuepress/plugin-docsearch": "2.0.0-beta.43",
+    "@vuepress/plugin-register-components": "2.0.0-beta.43",
+    "@vuepress/plugin-shiki": "2.0.0-beta.43",
     "cspell": "^5.20.0",
     "glob": "^8.0.1",
     "http-server": "^14.1.0",
     "linkcheck-bin": "^2.0.20",
     "start-server-and-test": "^1.14.0",
-    "vuepress": "^2.0.0-beta.43"
+    "vuepress": "2.0.0-beta.43"
   }
 }

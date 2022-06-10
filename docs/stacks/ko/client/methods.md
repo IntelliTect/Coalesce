@@ -63,12 +63,12 @@ Total number of results.
 
 ## Method-specific Members
 
-<Prop def="public static Rename = class Rename extends Coalesce.ClientMethod<Person, string> { ... }" lang="ts" />
+<Prop def="public static Rename = class Rename extends Coalesce.ClientMethod<Person, string> { ... }" lang="ts" id="method-object-class-declaration" />
 
 Declaration of the method object class. This will be generated on the parent [ViewModel](./view-model.md) or [ListViewModel](./list-view-model.md).
 
 
-<Prop def="public readonly rename = new Person.Rename(this)" lang="ts" />
+<Prop def="public readonly rename = new Person.Rename(this)" lang="ts" id="method-object-instance" />
 
 Default instance of the method for easy calling of the method without needing to manually instantiate the class. This will be generated on the parent [ViewModel](./view-model.md) or [ListViewModel](./list-view-model.md).
 
@@ -79,12 +79,12 @@ Function that takes all the method parameters and a callback. If `reload` is tru
 
 
 
-<Prop def="public static Args = class Args { public name: KnockoutObservable<string> = ko.observable(null); }" lang="ts" />
+<Prop def="public static Args = class Args { public name: KnockoutObservable<string> = ko.observable(null); }" lang="ts" id="method-args-class-declaration" />
 
 Class with one observable member per method argument for binding method arguments to user input. Only generated for methods with arguments.
 
 
-<Prop def="public args = new Rename.Args()" lang="ts" />
+<Prop def="public args = new Rename.Args()" lang="ts" id="method-args-instance" />
 
 Default instance of the args class. Only generated for methods with arguments.
 

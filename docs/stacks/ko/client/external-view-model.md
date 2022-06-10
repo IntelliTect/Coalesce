@@ -23,7 +23,7 @@ public gender: KnockoutObservable<number | null> = ko.observable(null);
 public companyId: KnockoutObservable<number | null> = ko.observable(null);
 public company: KnockoutObservable<ViewModels.Company | null> = ko.observable(null);
 public addresses: KnockoutObservableArray<ViewModels.Address> = ko.observableArray([]);
-public birthDate: KnockoutObservable<moment.Moment | null> = ko.observable(moment());" lang="ts" />
+public birthDate: KnockoutObservable<moment.Moment | null> = ko.observable(moment());" lang="ts" id="data-property-members" />
 
 For each exposed property on the underlying EF POCO, a `KnockoutObservable<T>` property will exist on the TypeScript model. For navigation properties, these will be typed with the corresponding TypeScript ViewModel for the other end of the relationship. For collections (including collection navigation properties), these properties will be `KnockoutObservableArray<T>` objects.
 

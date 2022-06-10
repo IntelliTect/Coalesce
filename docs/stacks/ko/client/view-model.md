@@ -165,18 +165,18 @@ The following members are generated for each generated ViewModel class and are u
 
 ### Configuration
 
-<Prop def="static coalesceConfig: Coalesce.ViewModelConfiguration<Person>" lang="ts" />
+<Prop def="static coalesceConfig: Coalesce.ViewModelConfiguration<Person>" lang="ts" id="member-class-config" />
 
 A static configuration object for configuring all instances of the ViewModel's type is created. See [ViewModel Configuration](/stacks/ko/client/model-config.md).
 
-<Prop def="coalesceConfig: Coalesce.ViewModelConfiguration<Person>" lang="ts" />
+<Prop def="coalesceConfig: Coalesce.ViewModelConfiguration<Person>" lang="ts" id="member-instance-config" />
 
 An per-instance configuration object for configuring each specific ViewModel instance is created. See [ViewModel Configuration](/stacks/ko/client/model-config.md).
 
 ### DataSources
 <Prop def="
 public dataSources = ListViewModels.PersonDataSources;
-public dataSource: DataSource<Person> = new this.dataSources.Default();" lang="ts" />
+public dataSource: DataSource<Person> = new this.dataSources.Default();" lang="ts" id="code-data-source-members" />
 
 For each of the [Data Sources](/modeling/model-components/data-sources.md) for a model, a class will be added to a namespace named `ListViewModels.<ClassName>DataSources`. This namespace can always be accessed on both `ViewModel` and `ListViewModel` instances via the `dataSources` property, and class instances can be assigned to the `dataSource` property.
 
@@ -189,7 +189,7 @@ public gender: KnockoutObservable<number | null> = ko.observable(null);
 public companyId: KnockoutObservable<number | null> = ko.observable(null);
 public company: KnockoutObservable<ViewModels.Company | null> = ko.observable(null);
 public addresses: KnockoutObservableArray<ViewModels.Address> = ko.observableArray([]);
-public birthDate: KnockoutObservable<moment.Moment | null> = ko.observable(moment());" lang="ts" />
+public birthDate: KnockoutObservable<moment.Moment | null> = ko.observable(moment());" lang="ts" id="code-data-members" />
 
 For each exposed property on the underlying EF POCO, a `KnockoutObservable<T>` property will exist on the TypeScript model. For navigation properties, these will be typed with the corresponding TypeScript ViewModel for the other end of the relationship. For collections (including collection navigation properties), these properties will be `KnockoutObservableArray<T>` objects.
 
@@ -205,7 +205,7 @@ A `KnockoutComputed<string>` property that will provide the text to display for 
     { id: 1, value: 'Male' },
     { id: 2, value: 'Female' },
     { id: 3, value: 'Other' },
-];" lang="ts" />
+];" lang="ts" id="code-enum-members" />
 
 A static array of objects with properties `id` and `value` that represent all the values of the enum.
 
@@ -215,7 +215,7 @@ A static array of objects with properties `id` and `value` that represent all th
         Female = 2,
         Other = 3,
     };
-}" lang="ts" no-class />
+}" lang="ts" no-class id="code-enum-def" />
 
 A TypeScript enum that mirrors the C# enum directly. This enum is in a sub-namespace of `ViewModels` named the same as the class name.
 
@@ -247,7 +247,7 @@ For each reference navigation property, a `KnockoutComputed<string>` property wi
 ### Instance Method Members
 
 <Prop def="public readonly getBirthDate = new Person.GetBirthDate(this);
-public static GetBirthDate = class GetBirthDate extends Coalesce.ClientMethod<Person, moment.Moment> { ... };" lang="ts" />
+public static GetBirthDate = class GetBirthDate extends Coalesce.ClientMethod<Person, moment.Moment> { ... };" lang="ts" id="code-instance-method-members" />
 
 For each [Instance Method](/modeling/model-components/methods.md) on your POCO, a class and instance member will be created as described in [Methods - Generated TypeScript](/stacks/ko/client/methods.md).
 

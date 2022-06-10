@@ -1,7 +1,8 @@
 <template>
-  <h4 v-if="html" v-html="html" class="c-sharp-prop">
+  <h4 v-if="html" v-html="html" class="c-sharp-prop" :id="idAttr">
   </h4>
-  <h4 v-else class="c-sharp-prop">
+  <h4 v-else class="c-sharp-prop" :id="idAttr">
+    <!-- Temporary uncolored content that matches the result as best as possible to avoid FOUC -->
     <pre class="shiki" style="background-color: #1E1E1E; line-height: 1.18; padding-top: 1px; padding-bottom: 4px;">
       <code>
         {{def}}
@@ -46,19 +47,25 @@
 import { defineComponent } from 'vue'
 import type {Highlighter} from 'shiki';
 
-var highlighters = new Map<string, Highlighter>();
-async function getHighlighter(lang) {
+var highlighters = new Map<string, PromiseLike<Highlighter>>();
+function getHighlighter(lang) {
   if (highlighters.has(lang)) return highlighters.get(lang);
   
-  // Dynamic import to avoid dependency in production builds
-  const shiki = await import('shiki')
-  shiki.setCDN('https://unpkg.com/shiki/');
-  const highlighter = await shiki.getHighlighter({
-    theme: 'dark-plus',
-    langs: [lang]
-  });
-  highlighters.set(lang, highlighter);
-  return highlighter;
+  // cache the promise itself so multiple concurrent invocations
+  // don't make multiple requests to the CDN
+  const getter = async () => {
+    // Dynamic import to avoid dependency in production builds
+    const shiki = await import('shiki')
+    shiki.setCDN('https://unpkg.com/shiki/');
+    const highlighter = await shiki.getHighlighter({
+      theme: 'dark-plus',
+      langs: [lang]
+    });
+    return highlighter;
+  }
+  const promise = getter();
+  highlighters.set(lang, promise);
+  return promise;
 }
 
 export default defineComponent({
@@ -79,11 +86,20 @@ export default defineComponent({
       type: Boolean,
       default: false,
     },
+    id: {
+      type: String,
+      default: null,
+    },
+    idPrefix: {
+      type: String,
+      default: 'member',
+    },
   },
 
 
   data() {
     return {
+      idAttr: '',
       html: ''
     }
   },
@@ -94,6 +110,8 @@ export default defineComponent({
   beforeMount() {
     // Copy pre-rendered HTML from the static render if it is present.
     this.html = this.$el?.innerHTML
+    this.idAttr = this.$el?.id
+
     if (!this.html) {
       // If pre-rendered HTML is not present, dynamically render it.
       // We set a watcher on the definition for better development experience
@@ -121,7 +139,37 @@ export default defineComponent({
         + '\n' + this.def 
         + (this.noClass ? '' : '\n}' );
 
-      this.html = highlighter.codeToHtml(code, 
+
+      if (this.id) {
+        this.idAttr = this.id
+      } else if (this.lang == "ts") {
+        // Typescript is pretty nice in that the member name is always first in its declaration.
+        // No types on the left hand side.
+        // "namespace" is included as part of the attr if present.
+        const result = /(?:(?:readonly|public|static|protected|private|abstract|export) )*((?:namespace )?[\w$]+)/.exec(this.def);
+        this.idAttr = result ? this.idPrefix + '-' + result[1] : null
+      } else if (this.lang == "c#") {
+        // For C#, there's always a type on the left hand side.
+        // The name should be immediately preceded by a space, 
+        // and followed by a:
+        // - `<` (generic method) 
+        // - `(` (nongeneric method) 
+        // - ` {` (prop definition) 
+        // - `<eol>` (field definition, or prop where {get;set;} were omitted from the def)
+        const result = / (\w+)(?:<|\(| \{|$)/.exec(this.def);
+        this.idAttr = result ? this.idPrefix + '-' + result[1] : null
+      }
+
+      if (!this.idAttr) {
+        throw new Error("Unable to compute id for Prop " + this.def)
+      }
+
+      this.idAttr = this.idAttr
+        .toLowerCase()
+        .replace(/[ &<>"']/g,'-')
+        .replace(/\$/g,'_')
+
+      let html = highlighter.codeToHtml(code, 
       { 
         lang: this.lang,
         lineOptions: this.noClass ? [] : [
@@ -129,6 +177,8 @@ export default defineComponent({
           {line: code.split('\n').length, classes: ['hidden']},
         ]
       })
+      
+      this.html = `<a class="header-anchor" href="#${this.idAttr}" aria-hidden="true">#</a>${html}`;
     }
   }
 });

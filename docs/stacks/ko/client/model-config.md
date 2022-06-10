@@ -12,28 +12,28 @@ The configuration system has four levels where configuration can be performed, s
 
 
 <Prop def="Coalesce.GlobalConfiguration: ModelConfiguration<any>
-Coalesce.GlobalConfiguration.app: AppConfiguration" lang="ts" /> 
+Coalesce.GlobalConfiguration.app: AppConfiguration" lang="ts" id="code-root-config" /> 
     
 The root configuration contains all configuration properties which apply to class category ([TypeScript ViewModels](/stacks/ko/client/view-model.md), [TypeScript ListViewModels](/stacks/ko/client/list-view-model.md), and [Services](/modeling/model-types/services.md)). The `app` property contains global app configuration that exists independent of any models. Then, for each class kind, the following are available:
 
 ### Root ViewModel/ListViewModel Configuration
 <Prop def="Coalesce.GlobalConfiguration.viewModel: ViewModelConfiguration<BaseViewModel>
 Coalesce.GlobalConfiguration.listViewModel: ListViewModelConfiguration<BaseListViewModel<BaseViewModel>, BaseViewModel>
-Coalesce.GlobalConfiguration.serviceClient: ServiceClientConfiguration<ServiceClient>" lang="ts" /> 
+Coalesce.GlobalConfiguration.serviceClient: ServiceClientConfiguration<ServiceClient>" lang="ts" id="code-global-config" /> 
     
 Additional root configuration objects exist, one for each class kind. These configuration objects govern behavior that applies to only objects of these types. Root configuration *can* be overridden using these objects, although the practicality of doing so is dubious.
 
 ### Class Configuration
 <Prop def="ViewModels.ClassName.coalesceConfig: ViewModelConfiguration<ViewModels.ClassName>
 ListViewModels.ClassNameList.coalesceConfig: ListViewModelConfiguration<ListViewModels.ClassNameList, ViewModels.ClassName>
-Services.ServiceNameClient.coalesceConfig: ServiceClientConfiguration<ServiceName>" lang="ts" /> 
+Services.ServiceNameClient.coalesceConfig: ServiceClientConfiguration<ServiceName>" lang="ts" id="code-class-config" /> 
 
 Each class kind has a static property named `coalesceConfig` that controls behavior for all instances of that class.
 
 ### Instance Configuration
 <Prop def="instance.coalesceConfig: ViewModelConfiguration<ViewModels.ClassName>
 listInstance.coalesceConfig: ListViewModelConfiguration<ListViewModels.ClassNameList, ViewModels.ClassName>
-serviceInstance.coalesceConfig: ServiceClientConfiguration<ServiceName>" lang="ts" /> 
+serviceInstance.coalesceConfig: ServiceClientConfiguration<ServiceName>" lang="ts" id="code-instance-config" /> 
 
 Each instance of these classes also has a `coalesceConfig` property that controls behaviors for that instance only.
 

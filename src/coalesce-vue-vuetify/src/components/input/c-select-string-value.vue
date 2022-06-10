@@ -37,7 +37,7 @@ export default class CSelectStringValue extends MetadataComponent {
   @Prop({required: false, default: false, type: Boolean})
   public listWhenEmpty!: boolean;
 
-  caller!: ItemApiState<[number|null, string|null], string[]>;
+  caller!: ItemApiState<[number, string], string[]>;
 
   public search: string | null = null;
 

@@ -64,7 +64,7 @@ Creates a new instance of an item for the specified child model collection, adds
 ### API Callers & Parameters
 
 
-<Prop def="$load: ItemApiState" lang="ts" />
+<Prop def="$load: ItemApiState" lang="ts" idPrefix="member-item" />
 
 An [API Caller](/stacks/vue/layers/api-clients.md#api-callers) for the ``/get`` endpoint. Accepts an optional `id` argument - if not provided, the ViewModel's `$primaryKey` is used instead. Uses the instance's `$params` object for the [Standard Parameters](/modeling/model-components/data-sources.md#standard-parameters).
 
@@ -116,17 +116,17 @@ An [API Caller](/stacks/vue/layers/api-clients.md#api-callers) for the ``/delete
 If the object was loaded as a child of a collection, it will be removed from that collection upon being deleted. Note that ViewModels currently only support tracking of a single parent collection, so if an object is programmatically added to additional collections, it will only be removed from one of them upon delete.
 
 
-<Prop def="$params: DataSourceParameters" lang="ts" />
+<Prop def="$params: DataSourceParameters" lang="ts" idPrefix="member-item" />
 
 An object containing the [Standard Parameters](/modeling/model-components/data-sources.md#standard-parameters) to be used for the `$load`, `$save`, and `$delete` API callers.
 
 
-<Prop def="$dataSource: DataSource" lang="ts" />
+<Prop def="$dataSource: DataSource" lang="ts" idPrefix="member-item" />
 
 Getter/setter wrapper around `$params.dataSource`. Takes an instance of a [Data Source](/modeling/model-components/data-sources.md) class [generated in the Model Layer](/stacks/vue/layers/models.md).
 
 
-<Prop def="$includes: string | null" lang="ts" />
+<Prop def="$includes: string | null" lang="ts" idPrefix="member-item" />
 
 Getter/setter wrapper around `$params.includes`. See [Includes String](/concepts/includes.md) for more information.
 
@@ -265,12 +265,22 @@ Collection holding the results of the last successful invocation of the `$load` 
 ### Parameters & API Callers
 
 
-<Prop def="$params: DataSourceParameters" lang="ts" />
+<Prop def="$params: ListParameters" lang="ts" idPrefix="member-list" />
 
 An object containing the [Standard Parameters](/modeling/model-components/data-sources.md#standard-parameters) to be used for the `$load` and `$count` API callers.
 
 
-<Prop def="$load: ListApiState" lang="ts" />
+<Prop def="$dataSource: DataSource" lang="ts" idPrefix="member-list" />
+
+Getter/setter wrapper around `$params.dataSource`. Takes an instance of a [Data Source](/modeling/model-components/data-sources.md) class [generated in the Model Layer](/stacks/vue/layers/models.md).
+
+
+<Prop def="$includes: string | null" lang="ts" idPrefix="member-list" />
+
+Getter/setter wrapper around `$params.includes`. See [Includes String](/concepts/includes.md) for more information.
+
+
+<Prop def="$load: ListApiState" lang="ts" idPrefix="member-list" />
 
 An [API Caller](/stacks/vue/layers/api-clients.md#api-callers) for the ``/list`` endpoint. Uses the instance's `$params` object for the [Standard Parameters](/modeling/model-components/data-sources.md#standard-parameters).
 

@@ -103,7 +103,10 @@ If true, the list results will be reloaded when the dropdown menu is opened. By 
 
 An optional set of [Data Source Standard Parameters](/modeling/model-components/data-sources.md#standard-parameters) to pass to API calls made to the server.
 
-<Prop def="create?: {&#010;    getLabel: (search: string, items: TModel[]) => string | false,&#010;    getItem: (search: string, label: string) => Promise<TModel> &#010;}" lang="ts" />
+<Prop def="create?: {
+  getLabel: (search: string, items: TModel[]) => string | false,
+  getItem: (search: string, label: string) => Promise<TModel>
+}" lang="ts" />
 
 A object containing a pair of methods that allowing users to create new items from directly within the c-select if a matching object is not found. 
 
@@ -111,13 +114,13 @@ The object must contain the following two methods. You should define these in yo
 
 <div style="margin-left: 20px">
 
-<Prop def="create.getLabel: (search: string, items: TModel[]) => string | false" lang="ts" />
+<Prop def="create.getLabel: (search: string, items: TModel[]) => string | false" lang="ts" id="member-create-getLabel" />
 
 A function that will be called with the user's current search term, as well as the collection of currently loaded items being presented to the user as valid selection options.
 
 It should return either a `string` that will be presented to the user as an option in the dropdown that can be clicked to invoke the `getItem` function below, or it should return `false` to prevent such an option from being shown to the user.
 
-<Prop def="create.getItem: (search: string, label: string) => Promise<TModel>" lang="ts" />
+<Prop def="create.getItem: (search: string, label: string) => Promise<TModel>" lang="ts" id="member-create-getItem"  />
 
 A function that will be invoked when the user clicks the option in the dropdown list described by `getLabel`. It will be given the user's current search term as well as the value of the label returned from `getLabel` as parameters. It must perform the necessary operations to create the new object on the server and then return a reference to that object.
 

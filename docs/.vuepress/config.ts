@@ -3,7 +3,7 @@ import { defineUserConfig } from 'vuepress'
 import { defaultTheme, DefaultThemeOptions, SidebarGroup } from '@vuepress/theme-default'
 import { shikiPlugin } from '@vuepress/plugin-shiki'
 import { registerComponentsPlugin } from '@vuepress/plugin-register-components'
-import { searchPlugin } from '@vuepress/plugin-search'
+import { docsearchPlugin } from '@vuepress/plugin-docsearch'
 
 import { importMdPlugin } from './importMdPlugin'
 
@@ -34,16 +34,29 @@ export default defineUserConfig({
         }
       }
     },
+    {
+      name: 'duplicate-anchor-checker',
+      onGenerated(app) {
+        for (const page of app.pages) {
+          var content = fs.readFileSync(page.htmlFilePath, {encoding: 'utf-8'});
+          // Parsing HTML with regex is definitely the best way to parse HTML!
+          const result = /id="([^"]+)"(?:\r|\n|.)+id="\1"/.exec(content);
+          if (result) {
+            throw new Error(`page ${page.filePath} appears to produce multiple HTML elements with the same id attribute: ${result[1]}`)
+          }
+        }
+      }
+    },
     shikiPlugin({
       theme: 'dark-plus'
     }),
     registerComponentsPlugin({
       componentsDir: path.resolve(__dirname, './components'),
     }),
-    // Temporary until we deploy out on GH and can then apply for algolia
-    searchPlugin({
-      // options
-      getExtraFields: (page) => [...page.contentRendered.matchAll(/def="(.*?)"/g)].map(result => result[1]),
+    docsearchPlugin({
+      appId: 'SDGLJOI8GP',
+      apiKey: '7aac3b70e2be40bd6bb55bc603e7bf46',
+      indexName: 'coalesce'
     }),
   ],
   theme: defaultTheme({

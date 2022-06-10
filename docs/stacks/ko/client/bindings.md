@@ -26,81 +26,84 @@ Editors Note: On this page, some bindings are split into their requisite HTML co
 
 Creates a select2 dropdown using the specified url and fields that can be used to select an object from the endpoint specified. Additional complimentary bindings include:
 
-<Prop def="url: string" lang="ts" />
+<Prop def="url: string" lang="ts" id-prefix="select2Ajax" />
 
 The Coalesce List API url to call to populate the contents of the dropdown.
 
 
-<Prop def="idField: string" lang="ts" />
+<Prop def="idField: string" lang="ts" id-prefix="select2Ajax" />
 
 The name of the field on each item in the results of the AJAX call which contains the ID of the option. The value of this field will be set on the observable specified for the main ``select2Ajax`` binding.
 
 
-<Prop def="textField: string" lang="ts" />
+<Prop def="textField: string" lang="ts" id-prefix="select2Ajax" />
 
 The name of the field on each item in the results of the AJAX call which contains the text to be displayed for each option.
 
 
-<Prop def="object?: KnockoutObservable<Coalesce.BaseViewModel | null>" lang="ts" />
+<Prop def="object?: KnockoutObservable<Coalesce.BaseViewModel | null>" lang="ts" id-prefix="select2Ajax" />
 
 An observable that holds the full object corresponding to the foreign key property being bound to. If the selected value changes, this will be set to null to avoid representation of incorrect data (unless `setObject` is used - see below).
 
 
-<Prop def="setObject: boolean = false" lang="ts" />
+<Prop def="setObject: boolean = false" lang="ts" id-prefix="select2Ajax" />
 
 If true, the observable specified by the `object` binding will be set to the selected data when an option is chosen in the dropdown. Binding `itemViewModel` is required if this binding is set.
 
 Additionally, requests to the API to populate the dropdown will request the entire object, as opposed to only the two fields specified for `idField` and `textField` like is normally done when this binding is missing or set to false. To override this behavior and continue requesting only specific fields even when `setObject` is true, add `fields=field1,field2,...` to the query string of the `url` binding.
 
 
-<Prop def="itemViewModel?: (new (newItem: object) => Coalesce.BaseViewModel)" lang="ts" />
+<Prop def="itemViewModel?: (new (newItem: object) => Coalesce.BaseViewModel)" lang="ts" id-prefix="select2Ajax" />
 
 A reference to the class that represents the type of the object held in the `object` observable. This is used when constructing new objects from the results of the API call. Not used if `setObject` is false or unspecified. For example, `setObject: true, itemViewModel: ViewModels.Person`.
 
 
-<!-- MARKER:select-params -->
-
-<Prop def="pageSize: number = 25" lang="ts" />
+<Prop def="pageSize: number = 25" lang="ts" id-prefix="select2Ajax" />
 
 The number of items to request in each call to the server.
 
-<Prop def="format: string = '{0}'" lang="ts" />
+
+<Prop def="format: string = '{0}'" lang="ts" id-prefix="select2Ajax" />
 
 A string containing the substring `{0}`, which will be replaced with the text value of an option in the dropdown list when the option is displayed.
 
 
-<Prop def="selectionFormat: string = '{0}'" lang="ts" />
+<Prop def="selectionFormat: string = '{0}'" lang="ts" id-prefix="select2Ajax" />
 
 A string containing the substring `{0}`, which will be replaced with the text value of the selected option of the dropdown list.
 
-<Prop def="cache: boolean = true" lang="ts" />
+
+<Prop def="cache: boolean = true" lang="ts" id-prefix="select2Ajax" />
 
 If true, a cache-busting querystring parameter will be included in AJAX requests.
 
-<!-- MARKER:select2-params -->
 
-<Prop def="selectOnClose: boolean = false" lang="ts" />
+<Prop def="selectOnClose: boolean = false" lang="ts" id-prefix="select2Ajax" />
 
 Directly maps to select2 option `selectOnClose`.
    
 
-<Prop def="allowClear: boolean = true" lang="ts" />
+<Prop def="allowClear: boolean = true" lang="ts" id-prefix="select2Ajax" />
 
 Whether or not to allow the current select to be set to null. Directly maps to select2 option `allowClear`.
     
 
-<Prop def="placeholder: string = 'select'" lang="ts" />
+<Prop def="placeholder: string = 'select'" lang="ts" id-prefix="select2Ajax" />
 
 Placeholder when nothing is selected. Directly maps to select2 option `placeholder`.
 
 
-<Prop def="openOnFocus: boolean = false" lang="ts" />
+<Prop def="openOnFocus: boolean = false" lang="ts" id-prefix="select2Ajax" />
 
 If true, the dropdown will open when tabbed to. Browser support may be incomplete in some versions of IE.
     
 
-<!-- MARKER:end-select-params -->
-        
+
+
+
+
+
+
 
 ### select2AjaxMultiple
 
@@ -118,24 +121,67 @@ Creates a select2 multi-select input for choosing objects that participate as th
 
 Additional complimentary bindings include:
 
-<Prop def="url: string" lang="ts" />
+<Prop def="url: string" lang="ts" id-prefix="select2AjaxMultiple" />
 
 The Coalesce List API url to call to populate the contents of the dropdown. In order to only receive specific fields from the server, add ``fields=field1,field2,...`` to the query string of the url, ensuring that at least the ``idField`` and ``textField`` are included in that collection.
 
-<Prop def="idField: string" lang="ts" />
+<Prop def="idField: string" lang="ts" id-prefix="select2AjaxMultiple" />
 
 The name of the field on each item in the results of the AJAX call which contains the ID of the option. The value of this field will be set as the key of the foreign object in the many-to-many relationship.
 
 
-<Prop def="textField: string" lang="ts" />
+<Prop def="textField: string" lang="ts" id-prefix="select2AjaxMultiple" />
 
 The name of the field on each item in the results of the AJAX call which contains the text to be displayed for each option.
 
-<Prop def="itemViewModel: (new (newItem: object) => Coalesce.BaseViewModel)" lang="ts" />
+<Prop def="itemViewModel: (new (newItem: object) => Coalesce.BaseViewModel)" lang="ts" id-prefix="select2AjaxMultiple" />
 
 A reference to the class that represents the types in the supplied collection. For example, a many-to-many between ``Person`` and ``Case`` objects where ``Case`` is the object being bound to and ``Person`` is the type represented by a child collection, the correct value is  ``ViewModels.Person``. This is used when constructing new objects representing the relationship when a new item is selected.
 
-@[import-md "after":"MARKER:select-params", "before":"MARKER:end-select-params"](./bindings.md) 
+
+<Prop def="pageSize: number = 25" lang="ts" id-prefix="select2AjaxMultiple" />
+
+The number of items to request in each call to the server.
+
+<Prop def="format: string = '{0}'" lang="ts" id-prefix="select2AjaxMultiple" />
+
+A string containing the substring `{0}`, which will be replaced with the text value of an option in the dropdown list when the option is displayed.
+
+
+<Prop def="selectionFormat: string = '{0}'" lang="ts" id-prefix="select2AjaxMultiple" />
+
+A string containing the substring `{0}`, which will be replaced with the text value of the selected option of the dropdown list.
+
+<Prop def="cache: boolean = true" lang="ts" id-prefix="select2AjaxMultiple" />
+
+If true, a cache-busting querystring parameter will be included in AJAX requests.
+
+
+<Prop def="selectOnClose: boolean = false" lang="ts" id-prefix="select2AjaxMultiple" />
+
+Directly maps to select2 option `selectOnClose`.
+   
+
+<Prop def="allowClear: boolean = true" lang="ts" id-prefix="select2AjaxMultiple" />
+
+Whether or not to allow the current select to be set to null. Directly maps to select2 option `allowClear`.
+    
+
+<Prop def="placeholder: string = 'select'" lang="ts" id-prefix="select2AjaxMultiple" />
+
+Placeholder when nothing is selected. Directly maps to select2 option `placeholder`.
+
+
+<Prop def="openOnFocus: boolean = false" lang="ts" id-prefix="select2AjaxMultiple" />
+
+If true, the dropdown will open when tabbed to. Browser support may be incomplete in some versions of IE.
+
+
+
+
+
+
+
 
 
 ### select2AjaxText
@@ -150,7 +196,7 @@ A reference to the class that represents the types in the supplied collection. F
 Creates a select2 dropdown against the specified url where the url returns a collection of string values that are potential selection candidates. The dropdown also allows the user to input any value they choose - the API simply serves suggested values.
 
 
-<Prop def="url: string" lang="ts" />
+<Prop def="url: string" lang="ts" id-prefix="select2AjaxText" />
 
 The url to call to populate the contents of the dropdown. This should be an endpoint that returns one of the following:
 
@@ -165,15 +211,38 @@ The url will also be passed a ``search`` parameter and a ``page`` parameter appe
 The cases listed above that accept arrays of objects (as opposed to arrays of strings) require that the ``resultField`` binding is also used. These are designed for obtaining string values from objects obtained from the standard ``list`` endpoint.
 
 
-<Prop def="resultField?: string" lang="ts" />
+<Prop def="resultField?: string" lang="ts" id-prefix="select2AjaxText" />
 
 If provided, specifies a field on the objects returned from the API to pull the string values from. See examples in ``url`` above.
 
-<Prop def="allowCustom: boolean = true" lang="ts" />
+<Prop def="allowCustom: boolean = true" lang="ts" id-prefix="select2AjaxText" />
 
 If ``false``, the user's search input will not be presented as a valid selectable value; only the exact values obtained from the API endpoint will be selectable.
 
-@[import-md "after":"MARKER:select2-params", "before":"MARKER:end-select-params"](./bindings.md) 
+
+<Prop def="selectOnClose: boolean = false" lang="ts" id-prefix="select2AjaxText" />
+
+Directly maps to select2 option `selectOnClose`.
+   
+
+<Prop def="allowClear: boolean = true" lang="ts" id-prefix="select2AjaxText" />
+
+Whether or not to allow the current select to be set to null. Directly maps to select2 option `allowClear`.
+    
+
+<Prop def="placeholder: string = 'select'" lang="ts" id-prefix="select2AjaxText" />
+
+Placeholder when nothing is selected. Directly maps to select2 option `placeholder`.
+
+
+<Prop def="openOnFocus: boolean = false" lang="ts" id-prefix="select2AjaxText" />
+
+If true, the dropdown will open when tabbed to. Browser support may be incomplete in some versions of IE.
+
+
+
+
+
 
 ### select2
 
@@ -186,13 +255,35 @@ If ``false``, the user's search input will not be presented as a valid selectabl
 
 Sets up a basic select2 dropdown on an HTML select element. Dropdown contents should be populated through other means - either using stock [Knockout](http://knockoutjs.com/) bindings or server-side static contents (via cshtml).
 
-@[import-md "after":"MARKER:select2-params", "before":"MARKER:end-select-params"](./bindings.md) 
+
+<Prop def="selectOnClose: boolean = false" lang="ts" id-prefix="select2" />
+
+Directly maps to select2 option `selectOnClose`.
+   
+
+<Prop def="allowClear: boolean = true" lang="ts" id-prefix="select2" />
+
+Whether or not to allow the current select to be set to null. Directly maps to select2 option `allowClear`.
+    
+
+<Prop def="placeholder: string = 'select'" lang="ts" id-prefix="select2" />
+
+Placeholder when nothing is selected. Directly maps to select2 option `placeholder`.
+
+
+<Prop def="openOnFocus: boolean = false" lang="ts" id-prefix="select2" />
+
+If true, the dropdown will open when tabbed to. Browser support may be incomplete in some versions of IE.
+
+
+
+
 
 ### datePicker
 
 ``` html
 <div class="input-group date">
-    <input data-bind="datePicker: birthDate" type="text" class="form-control" />
+    <input data-bind="datePicker: birthDate" type="text" class="form-control" id-prefix="datePicker" />
     <span class="input-group-addon">
         <span class="fa fa-calendar"></span>
     </span>
@@ -202,42 +293,42 @@ Sets up a basic select2 dropdown on an HTML select element. Dropdown contents sh
 Creates a date/time picker for changing a `moment.Moment` property. The control used is [bootstrap-datetimepicker](https://www.npmjs.com/package/eonasdan-bootstrap-datetimepicker)
 
 
-<Prop def="preserveDate: boolean = false" lang="ts" />
+<Prop def="preserveDate: boolean = false" lang="ts" id-prefix="date-picker" />
 
 If true, the date portion of the `moment.Moment` object will be preserved by the date picker. Only the time portion will be changed by user input.
 
 
-<Prop def="preserveTime: boolean = false" lang="ts" />
+<Prop def="preserveTime: boolean = false" lang="ts" id-prefix="date-picker" />
 
 If true, the time portion of the `moment.Moment` object will be preserved by the date picker. Only the date portion will be changed by user input.
 
 
-<Prop def="format: string = 'M/D/YY h:mm a'" lang="ts" />
+<Prop def="format: string = 'M/D/YY h:mm a'" lang="ts" id-prefix="date-picker" />
 
 Specify the moment-compatible format string to be used as the display format for the text value shown on the date picker. Defaults to ``M/D/YY h:mm a``. Direct pass-through to [bootstrap-datetimepicker](https://www.npmjs.com/package/eonasdan-bootstrap-datetimepicker).
 
 
-<Prop def="sideBySide: boolean = false" lang="ts" />
+<Prop def="sideBySide: boolean = false" lang="ts" id-prefix="date-picker" />
 
 If true, places the time picker next to the date picker, visible at the same time. Direct pass-through to corresponding [bootstrap-datetimepicker](https://www.npmjs.com/package/eonasdan-bootstrap-datetimepicker) option.
 
 
-<Prop def="stepping: number = 1" lang="ts" />
+<Prop def="stepping: number = 1" lang="ts" id-prefix="date-picker" />
 
 Direct pass-through to corresponding [bootstrap-datetimepicker](https://www.npmjs.com/package/eonasdan-bootstrap-datetimepicker) option.
 
 
-<Prop def="timeZone: string = ''" lang="ts" />
+<Prop def="timeZone: string = ''" lang="ts" id-prefix="date-picker" />
 
 Direct pass-through to corresponding [bootstrap-datetimepicker](https://www.npmjs.com/package/eonasdan-bootstrap-datetimepicker) option.
 
 
-<Prop def="keyBinds = { left: null, right: null, delete: null }" lang="ts" />
+<Prop def="keyBinds = { left: null, right: null, delete: null }" lang="ts" id-prefix="date-picker" />
 
 Override key bindings of the date picker. Direct pass-through to corresponding [bootstrap-datetimepicker](https://www.npmjs.com/package/eonasdan-bootstrap-datetimepicker) option. 
 
 
-<Prop def="updateImmediate: boolean = false" lang="ts" />
+<Prop def="updateImmediate: boolean = false" lang="ts" id-prefix="date-picker" />
 
 If true, the datePicker will update the underlying observable on each input change. Otherwise, the observable will only be changed when the datePicker loses focus (on `blur`).
 

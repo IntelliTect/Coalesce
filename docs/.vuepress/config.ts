@@ -64,6 +64,10 @@ export default defineUserConfig({
     repo: 'intellitect/coalesce',
     docsDir: 'docs',
     docsBranch: 'dev',
+    themePlugins: {
+      activeHeaderLinks: false,
+      mediumZoom: false,
+    },
     sidebar: [
       {
         text: "Introduction",

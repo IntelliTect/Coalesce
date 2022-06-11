@@ -126,7 +126,7 @@ DeleteAsync
     AfterDelete
 ```
 
-### Method Details(?:^|> )(\w+)(?:<|\(| \{).*$
+### Method Details
 
 All of the methods outlined above can be overridden. A description of each of the methods is as follows:
 

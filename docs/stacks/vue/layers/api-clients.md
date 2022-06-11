@@ -41,7 +41,7 @@ Using `setConcurrency(mode)`, you can configure how each individual caller handl
 API Callers can be created so that they have an `args` object that can be bound to, using `.invokeWithArgs()` to make a request using those arguments as the API endpoint's parameters. The API Callers created for the [ViewModel Layer](/stacks/vue/layers/viewmodels.md) are all created this way.
 
 
-### Creating and Invoking API Caller
+### Creating and Invoking an API Caller
 
 API Callers can be created with the `$makeCaller` method of an API Client. The way in which it was created affects how it is invoked, as the parameters that the caller accepts are defined when it is created. 
 

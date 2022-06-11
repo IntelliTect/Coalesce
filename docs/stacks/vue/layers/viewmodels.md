@@ -73,7 +73,7 @@ An [API Caller](/stacks/vue/layers/api-clients.md#api-callers) for the ``/get`` 
 
 An [API Caller](/stacks/vue/layers/api-clients.md#api-callers) for the ``/save`` endpoint. Uses the instance's `$params` object for the [Standard Parameters](/modeling/model-components/data-sources.md#standard-parameters).
 
-This caller is used for both manually-triggered saves in custom code and for auto-saves. If the [Rules/Validation](/stacks/vue/layers/viewmodels.md) report any errors when the caller is invoked, an error will be thrown.
+This caller is used for both manually-triggered saves in custom code and for auto-saves. If the [Rules/Validation](/stacks/vue/layers/viewmodels.md#rules-validation) report any errors when the caller is invoked, an error will be thrown.
 
 When a save creates a new record and a new primary key is returned from the server, any entities attached to the current ViewModel via a collection navigation property will have their foreign keys set to the new primary key. This behavior, combined with the usage of deep auto-saves, allows for complex object graphs to be constructed even before any model in the graph has been created.
 
@@ -137,7 +137,7 @@ Getter/setter wrapper around `$params.includes`. See [Includes String](/concepts
 
 <Prop def="$startAutosave(vue: Vue, options: AutoSaveOptions<this> = {})" lang="ts" />
 
-Starts auto-saving of the instance when its savable data properties become dirty. Saves are performed with the `$save` [API Caller](/stacks/vue/layers/api-clients.md#api-callers) (documented above) and will not be performed if the ViewModel has any validation errors - see [Rules/Validation](/stacks/vue/layers/viewmodels.md) below.
+Starts auto-saving of the instance when its savable data properties become dirty. Saves are performed with the `$save` [API Caller](/stacks/vue/layers/api-clients.md#api-callers) (documented above) and will not be performed if the ViewModel has any validation errors - see [Rules/Validation](/stacks/vue/layers/viewmodels.md#rules-validation) below.
 
 Requires a reference to a Vue instance in order to manage lifetime (auto-save hooks will be destroyed when the Vue component provided is destroyed). Options are as follows:
 
@@ -213,9 +213,9 @@ Any failing validation rules on a ViewModel will prevent that ViewModel's `$save
 
 <Prop def="$removeRule(prop: string | Property, identifier: string)" lang="ts" />
 
-Remove a validation rule from the ViewModel for the specified property with the specified identifier.
+Remove a validation rule from the ViewModel for the specified property and rule identifier.
 
-This can be used to remove from the ViewModel instance either a rule that was provided by the generated [Metadata Layer](/stacks/vue/layers/metadata.md), or a custom rule that was added by `$addRule`. Reference your generated metadata file `metadata.g.ts` to see any generated rules and the identifiers they use.
+This can be used to remove either a rule that was provided by the generated [Metadata Layer](/stacks/vue/layers/metadata.md), or a custom rule that was added by `$addRule`. Reference your generated metadata file `metadata.g.ts` to see any generated rules and the identifiers they use.
 
 
 <Prop def="$getRules(prop: string | Property): ((val: any) => string | true)[]" lang="ts" />

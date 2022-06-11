@@ -1,7 +1,7 @@
 <template>
-  <h4 v-if="html" v-html="html" class="c-sharp-prop" :id="idAttr">
+  <h4 v-if="html" v-html="html" class="code-prop" :id="idAttr">
   </h4>
-  <h4 v-else class="c-sharp-prop" :id="idAttr">
+  <h4 v-else class="code-prop" :id="idAttr">
     <!-- Temporary uncolored content that matches the result as best as possible to avoid FOUC -->
     <pre class="shiki" style="background-color: #1E1E1E; line-height: 1.18; padding-top: 1px; padding-bottom: 4px;">
       <code>
@@ -13,7 +13,7 @@
 
 
 <style lang="scss">
-.c-sharp-prop {
+.code-prop {
   margin-top: 10px;
   .shiki {
     margin: 0;
@@ -24,11 +24,8 @@
       white-space: pre-wrap;
     }
   }
-  .line.hidden {
-    display: none;
-  }
 
-  $selector: ".c-sharp-prop,h1,h2,h3,h4,h5";
+  $selector: ".code-prop,h1,h2,h3,h4,h5";
 
   + :not(#{$selector}),
   + :not(#{$selector}) + :not(#{$selector}),
@@ -36,6 +33,8 @@
   + :not(#{$selector}) + :not(#{$selector}) + :not(#{$selector}) + :not(#{$selector}),
   + :not(#{$selector}) + :not(#{$selector}) + :not(#{$selector}) + :not(#{$selector}) + :not(#{$selector})
   {
+    // Position the elements following the <Prop> to be left-indented past the code block,
+    // and reduce the top margin to be a little closer to the code block.
     margin-top: 4px;
     margin-left: 20px;
   }
@@ -45,25 +44,26 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import type {Highlighter} from 'shiki';
+import type { Highlighter, renderToHtml } from 'shiki';
 
-var highlighters = new Map<string, PromiseLike<Highlighter>>();
+var highlighters = new Map<string, ReturnType<typeof highlighterFactory>>();
+async function highlighterFactory(lang) {
+  // Dynamic import to avoid dependency in production builds
+  const shiki = await import('shiki')
+  shiki.setCDN('https://unpkg.com/shiki/');
+  const highlighter = await shiki.getHighlighter({
+    theme: 'dark-plus',
+    langs: [lang]
+  });
+  return { highlighter, shiki };
+}
+
 function getHighlighter(lang) {
   if (highlighters.has(lang)) return highlighters.get(lang);
   
   // cache the promise itself so multiple concurrent invocations
   // don't make multiple requests to the CDN
-  const getter = async () => {
-    // Dynamic import to avoid dependency in production builds
-    const shiki = await import('shiki')
-    shiki.setCDN('https://unpkg.com/shiki/');
-    const highlighter = await shiki.getHighlighter({
-      theme: 'dark-plus',
-      langs: [lang]
-    });
-    return highlighter;
-  }
-  const promise = getter();
+  const promise = highlighterFactory(lang);
   highlighters.set(lang, promise);
   return promise;
 }
@@ -121,9 +121,6 @@ export default defineComponent({
 
   methods: {
     async renderHtml() {
-      const highlighter = this.highlighter ?? await getHighlighter(this.lang);
-      // Wrap in a class so the syntax is highlighted correctly
-
       var ctorDesc = null;
       if (this.ctor) {
         ctorDesc = '// Also settable via constructor parameter #' + this.ctor;
@@ -133,6 +130,7 @@ export default defineComponent({
         }
       }
 
+      // Wrap in a class so the syntax is highlighted correctly
       const code = 
         (this.noClass ? '' : 'public class x {' )
         + (ctorDesc ? '\n' + ctorDesc : '')
@@ -169,13 +167,19 @@ export default defineComponent({
         .replace(/[ &<>"']/g,'-')
         .replace(/\$/g,'_')
 
-      let html = highlighter.codeToHtml(code, 
-      { 
-        lang: this.lang,
-        lineOptions: this.noClass ? [] : [
-          {line: 1, classes: ['hidden']},
-          {line: code.split('\n').length, classes: ['hidden']},
-        ]
+      const { highlighter, shiki } = await getHighlighter(this.lang);
+      const tokens = highlighter.codeToThemedTokens(code, this.lang)
+      
+      if (!this.noClass) {
+        // Strip out the fake class wrapper that was added to get the colors right:
+        tokens.shift();
+        tokens.pop();
+      }
+
+      const theme = highlighter.getTheme();
+      let html = shiki.renderToHtml(tokens, {
+        fg: theme.fg,
+        bg: theme.bg
       })
       
       this.html = `<a class="header-anchor" href="#${this.idAttr}" aria-hidden="true">#</a>${html}`;

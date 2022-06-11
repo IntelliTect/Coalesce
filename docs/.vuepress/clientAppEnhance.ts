@@ -11,13 +11,19 @@ export default defineClientAppEnhance(({ app, router, siteData }) => {
       // https://github.com/vuejs/router/issues/1411#issuecomment-1132582259
       await delay(0)
 
+
       let behavior: 'smooth' | 'auto' = 'smooth';
-      console.log(from.path)
-      if (from?.path && from?.path != '/' && from.path != to.path) {
+      if (
+        // Fresh page loads look as if they came from the root route (but without a name).
+        // We don't want to delay on a fresh page load.
+        from?.path && (from.path != '/' || from.name) && 
+        from.path != to.path
+      ) {
         // When changing pages, perform the scroll when the transition is fully faded out before the new page fades in.
         await delay(200);
         behavior = "auto";
       }
+      
 
       if (to.hash) {
         // If scrolling to a hash, wait until the target is rendered, up to 2 seconds

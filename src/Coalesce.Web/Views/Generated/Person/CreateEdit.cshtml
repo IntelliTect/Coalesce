@@ -47,6 +47,10 @@
                 <div class="col-md-8 prop-gender">@(Knockout.SelectFor<Coalesce.Domain.Person>(p => p.Gender))</div>
             </div>
             <div class="form-group">
+                <label class="col-md-4 control-label">Height</label>
+                <div class="col-md-8 prop-height">@(Knockout.InputFor<Coalesce.Domain.Person>(p => p.Height))</div>
+            </div>
+            <div class="form-group">
                 <label class="col-md-4 control-label">Cases Assigned</label>
                 <div class="col-md-8 prop-casesAssigned"><a data-bind='attr: {href: casesAssignedListUrl}, text: casesAssigned().length + " - Edit"' class='btn btn-default btn-sm'></a></div>
             </div>
@@ -110,6 +114,8 @@
                             <dd data-bind="text: email"></dd>
                             <dt>Gender</dt>
                             <dd data-bind="text: gender"></dd>
+                            <dt>Height</dt>
+                            <dd data-bind="text: height"></dd>
                             <dt>Cases Assigned</dt>
                             <dd data-bind="text: casesAssigned"></dd>
                             <dt>Cases Reported</dt>
@@ -218,6 +224,8 @@
                             <dd data-bind="text: email"></dd>
                             <dt>Gender</dt>
                             <dd data-bind="text: gender"></dd>
+                            <dt>Height</dt>
+                            <dd data-bind="text: height"></dd>
                             <dt>Cases Assigned</dt>
                             <dd data-bind="text: casesAssigned"></dd>
                             <dt>Cases Reported</dt>

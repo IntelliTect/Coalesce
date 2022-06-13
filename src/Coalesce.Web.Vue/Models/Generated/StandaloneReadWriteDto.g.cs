@@ -1,7 +1,6 @@
 using IntelliTect.Coalesce;
 using IntelliTect.Coalesce.Mapping;
 using IntelliTect.Coalesce.Models;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;

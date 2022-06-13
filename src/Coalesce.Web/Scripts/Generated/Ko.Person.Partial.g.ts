@@ -62,6 +62,7 @@ module ViewModels {
             }
             return null;
         });
+        public height: KnockoutObservable<number | null> = ko.observable(null);
         
         /** List of cases assigned to the person */
         public casesAssigned: KnockoutObservableArray<ViewModels.Case> = ko.observableArray([]);
@@ -456,6 +457,7 @@ module ViewModels {
             this.lastName(data.lastName);
             this.email(data.email);
             this.gender(data.gender);
+            this.height(data.height);
             if (data.birthDate == null) this.birthDate(null);
             else if (this.birthDate() == null || this.birthDate()!.valueOf() != new Date(data.birthDate).getTime()){
                 this.birthDate(moment(new Date(data.birthDate)));
@@ -489,6 +491,7 @@ module ViewModels {
             dto.lastName = this.lastName();
             dto.email = this.email();
             dto.gender = this.gender();
+            dto.height = this.height();
             if (!this.birthDate()) dto.birthDate = null;
             else dto.birthDate = this.birthDate()!.format('YYYY-MM-DDTHH:mm:ss.SSS');
             if (!this.lastBath()) dto.lastBath = null;
@@ -529,6 +532,7 @@ module ViewModels {
                 this.firstName.extend({ minLength: 2, maxLength: 75 }),
                 this.lastName.extend({ minLength: 3, maxLength: 100 }),
                 this.email.extend({ email: true }),
+                this.height.extend({ required: {params: true, message: "Height has to be a number."}, pattern: {params: '^[+]?([0-9]+(?:[\.][0-9]*)?|\.[0-9]+)$', message: "Height has to be a number."} }),
                 this.birthDate.extend({ moment: { unix: true } }),
                 this.lastBath.extend({ moment: { unix: true } }),
                 this.nextUpgrade.extend({ moment: { unix: true } }),
@@ -605,6 +609,7 @@ module ViewModels {
             self.lastName.subscribe(self.autoSave);
             self.email.subscribe(self.autoSave);
             self.gender.subscribe(self.autoSave);
+            self.height.subscribe(self.autoSave);
             self.birthDate.subscribe(self.autoSave);
             self.lastBath.subscribe(self.autoSave);
             self.nextUpgrade.subscribe(self.autoSave);

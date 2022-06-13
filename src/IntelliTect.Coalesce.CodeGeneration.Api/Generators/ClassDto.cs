@@ -36,7 +36,6 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                 "IntelliTect.Coalesce",
                 "IntelliTect.Coalesce.Mapping",
                 "IntelliTect.Coalesce.Models",
-                "Newtonsoft.Json",
                 "System",
                 "System.Linq",
                 "System.Collections.Generic",

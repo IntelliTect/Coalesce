@@ -1,7 +1,6 @@
 using IntelliTect.Coalesce;
 using IntelliTect.Coalesce.Mapping;
 using IntelliTect.Coalesce.Models;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,6 +18,7 @@ namespace Coalesce.Web.Models
         private string _LastName;
         private string _Email;
         private Coalesce.Domain.Person.Genders? _Gender;
+        private double? _Height;
         private System.Collections.Generic.ICollection<Coalesce.Web.Models.CaseDtoGen> _CasesAssigned;
         private System.Collections.Generic.ICollection<Coalesce.Web.Models.CaseDtoGen> _CasesReported;
         private System.DateTime? _BirthDate;
@@ -59,6 +59,11 @@ namespace Coalesce.Web.Models
         {
             get => _Gender;
             set { _Gender = value; Changed(nameof(Gender)); }
+        }
+        public double? Height
+        {
+            get => _Height;
+            set { _Height = value; Changed(nameof(Height)); }
         }
         public System.Collections.Generic.ICollection<Coalesce.Web.Models.CaseDtoGen> CasesAssigned
         {
@@ -127,6 +132,7 @@ namespace Coalesce.Web.Models
             this.LastName = obj.LastName;
             this.Email = obj.Email;
             this.Gender = obj.Gender;
+            this.Height = obj.Height;
             this.BirthDate = obj.BirthDate;
             this.LastBath = obj.LastBath;
             this.NextUpgrade = obj.NextUpgrade;
@@ -180,6 +186,7 @@ namespace Coalesce.Web.Models
             if (ShouldMapTo(nameof(LastName))) entity.LastName = LastName;
             if (ShouldMapTo(nameof(Email))) entity.Email = Email;
             if (ShouldMapTo(nameof(Gender))) entity.Gender = (Gender ?? entity.Gender);
+            if (ShouldMapTo(nameof(Height))) entity.Height = (Height ?? entity.Height);
             if (ShouldMapTo(nameof(BirthDate))) entity.BirthDate = BirthDate;
             if (ShouldMapTo(nameof(LastBath))) entity.LastBath = LastBath;
             if (ShouldMapTo(nameof(NextUpgrade))) entity.NextUpgrade = NextUpgrade;

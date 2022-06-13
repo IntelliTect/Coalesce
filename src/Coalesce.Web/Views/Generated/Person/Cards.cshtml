@@ -79,6 +79,10 @@
                     <dd>
                         @(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.Gender, false))
                     </dd>
+                    <dt>Height</dt>
+                    <dd>
+                        @(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.Height, false))
+                    </dd>
                     <dt>Cases Assigned</dt>
                     <dd>
                         <a data-bind='attr: {href: casesAssignedListUrl}, text: casesAssigned().length + " - Edit"' class='btn btn-default btn-sm'></a>
@@ -292,6 +296,8 @@
                             <dd data-bind="text: email"></dd>
                             <dt>Gender</dt>
                             <dd data-bind="text: gender"></dd>
+                            <dt>Height</dt>
+                            <dd data-bind="text: height"></dd>
                             <dt>Cases Assigned</dt>
                             <dd data-bind="text: casesAssigned"></dd>
                             <dt>Cases Reported</dt>

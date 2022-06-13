@@ -93,6 +93,10 @@
                                 Gender
                                 <i class="fa" data-bind="css: orderBy() == 'Gender' ? 'fa-caret-up' : orderByDescending() == 'Gender' ? 'fa-caret-down' : 'fa-sort'" style="float: right; padding: .3em 0 0 0 "></i>
                             </th>
+                            <th class="sortable-header" data-bind="click: function(){orderByToggle('Height')}">
+                                Height
+                                <i class="fa" data-bind="css: orderBy() == 'Height' ? 'fa-caret-up' : orderByDescending() == 'Height' ? 'fa-caret-down' : 'fa-sort'" style="float: right; padding: .3em 0 0 0 "></i>
+                            </th>
                             <th>Cases Assigned</th>
                             <th>Cases Reported</th>
                             <th class="sortable-header" data-bind="click: function(){orderByToggle('BirthDate')}">
@@ -121,6 +125,7 @@
                                 <td class="prop-lastName">@(Knockout.InputFor<Coalesce.Domain.Person>(p => p.LastName))</td>
                                 <td class="prop-email">@(Knockout.InputFor<Coalesce.Domain.Person>(p => p.Email))</td>
                                 <td class="prop-gender">@(Knockout.SelectFor<Coalesce.Domain.Person>(p => p.Gender))</td>
+                                <td class="prop-height">@(Knockout.InputFor<Coalesce.Domain.Person>(p => p.Height))</td>
                                 <td class="prop-casesAssigned"><a data-bind='attr: {href: casesAssignedListUrl}, text: casesAssigned().length + " - Edit"' class='btn btn-default btn-sm'></a></td>
                                 <td class="prop-casesReported"><a data-bind='attr: {href: casesReportedListUrl}, text: casesReported().length + " - Edit"' class='btn btn-default btn-sm'></a></td>
                                 <td class="prop-birthDate">@(Knockout.InputFor<Coalesce.Domain.Person>(p => p.BirthDate))</td>
@@ -135,6 +140,7 @@
                                 <td class="prop-lastName">@(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.LastName, true))</td>
                                 <td class="prop-email">@(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.Email, true))</td>
                                 <td class="prop-gender">@(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.Gender, true))</td>
+                                <td class="prop-height">@(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.Height, true))</td>
                                 <td class="prop-casesAssigned"><a data-bind='attr: {href: casesAssignedListUrl}, text: casesAssigned().length + " - Edit"' class='btn btn-default btn-sm'></a></td>
                                 <td class="prop-casesReported"><a data-bind='attr: {href: casesReportedListUrl}, text: casesReported().length + " - Edit"' class='btn btn-default btn-sm'></a></td>
                                 <td class="prop-birthDate">@(Knockout.DisplayFor<Coalesce.Domain.Person>(p => p.BirthDate, true))</td>
@@ -332,6 +338,8 @@
                             <dd data-bind="text: email"></dd>
                             <dt>Gender</dt>
                             <dd data-bind="text: gender"></dd>
+                            <dt>Height</dt>
+                            <dd data-bind="text: height"></dd>
                             <dt>Cases Assigned</dt>
                             <dd data-bind="text: casesAssigned"></dd>
                             <dt>Cases Reported</dt>

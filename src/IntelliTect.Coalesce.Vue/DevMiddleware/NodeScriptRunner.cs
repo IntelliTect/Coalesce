@@ -71,6 +71,8 @@ namespace IntelliTect.Coalesce.Vue.DevMiddleware
                 WorkingDirectory = workingDirectory,
                 Environment =
                 {
+                    // The PID of the parent aspnetcore app is passed so that the vite server
+                    // can shut itself down when the parent shuts down.
                     ["ASPNETCORE_VITE_PID"] = Environment.ProcessId.ToString()
                 }
             };

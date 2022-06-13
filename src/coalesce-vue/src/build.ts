@@ -1,25 +1,53 @@
-import type { Plugin, ViteDevServer } from "vite";
+import type { Plugin, ServerOptions, ViteDevServer } from "vite";
 import path from "path";
 import { existsSync, readFileSync, writeFile } from "fs";
 import { spawn } from "child_process";
 import { TLSSocket } from "tls";
 import { addHours } from "date-fns";
 
+import type * as https from 'https';
+
+function getParentPid() {
+  // We are passed in the parent .NET process's PID so that when it aborts,
+  // we can shut ourselves down. Otherwise the vite server will end up orphaned.
+  // Technique adopted from https://github.com/dotnet/aspnetcore/blob/v3.0.0/src/Middleware/NodeServices/src/Content/Node/entrypoint-http.js#L369-L395
+  return process.env.ASPNETCORE_VITE_PID;
+}
+
 /**
  * A plugin that works with IntelliTect.Coalesce.Vue.ViteDevelopmentServerMiddleware:
  * - Writes `index.html` to the build output directory during HMR development, 
  *   allowing any transformations in HomeController.cs to work identically in both dev and prod.
  * - Shuts down the HMR server when the parent ASP.NET Core application shuts down, preventing process orphaning.
+ * - Automatically obtains certs from `dotnet-devcerts` and injects them into the Vite configuration.
  */
 export function createAspNetCoreHmrPlugin() {
   return <Plugin>{
     name: "aspnetcore-hmr",
+    async config(config, env) {
+      if (!getParentPid()) return;
+
+      const server = config.server ??= {};
+      
+      // The development server launched by UseViteDevelopmentServer must be HTTPS
+      // to avoid issues with mixed content:
+      if (server.https != false) {
+        const https = (server.https ??= {}) as https.ServerOptions;
+          
+        const { keyFilePath, certFilePath } = await getCertPaths();
+
+        https.key ??= readFileSync(keyFilePath);
+        https.cert ??= readFileSync(certFilePath);
+      }
+    },
+
     async configureServer(server) {
       // We are passed in the parent .NET process's PID so that when it aborts,
       // we can shut ourselves down. Otherwise the vite server will end up orphaned.
       // Technique adopted from https://github.com/dotnet/aspnetcore/blob/v3.0.0/src/Middleware/NodeServices/src/Content/Node/entrypoint-http.js#L369-L395
-      const parentPid = process.env.ASPNETCORE_VITE_PID;
+      const parentPid = getParentPid();
       if (!parentPid) return;
+
       setInterval(async function () {
         let parentExists = true;
         try {
@@ -85,7 +113,7 @@ async function writeHtml(server: ViteDevServer) {
  * The vite server needs to run as HTTPS so that if the aspnetcore server is also HTTPS,
  * the browser isn't trying to connect to the HMR server's websocket endpoint as mixed content (which fails).
  */
-export async function getCertPaths() {
+export async function getCertPaths(certName?: string) {
   // Technique is adapted from MSFT's SPA templates.
   // https://github.com/dotnet/spa-templates/blob/800ef5837e1a23da863001d2448df67ec31ce2a2/src/content/Angular-CSharp/ClientApp/aspnetcore-https.js
 
@@ -94,16 +122,15 @@ export async function getCertPaths() {
       ? `${process.env.APPDATA}/ASP.NET/https`
       : `${process.env.HOME}/.aspnet/https`;
 
-  const certificateArg = process.argv
+  const certificateArg = certName ?? process.argv
     .map((arg) => arg.match(/--name=(?<value>.+)/i))
-    .filter(Boolean)[0];
-  const certificateName = certificateArg
-    ? certificateArg.groups?.value
-    : process.env.npm_package_name;
+    .filter(Boolean)[0]?.groups?.value;
+
+  const certificateName = certificateArg || process.env.npm_package_name;
 
   if (!certificateName) {
     console.error(
-      "Invalid certificate name. Run this script in the context of an npm/yarn script or pass --name=<<app>> explicitly."
+      "getCertPaths: Invalid certificate name. Run this script in the context of an npm/yarn script or pass --name=<<app>> explicitly."
     );
     process.exit(-1);
   }

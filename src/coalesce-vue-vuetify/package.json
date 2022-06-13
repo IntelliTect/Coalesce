@@ -64,7 +64,6 @@
     "coalesce-vue": "../coalesce-vue",
     "eslint": "8.13.0",
     "eslint-plugin-vue": "8.6.0",
-    "postcss": "8.4.12",
     "rollup": "2.70.1",
     "rollup-plugin-postcss": "4.0.2",
     "rollup-plugin-sourcemaps": "0.6.3",

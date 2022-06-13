@@ -37,7 +37,7 @@ import { Indexable } from "./util.js";
 import { debounce } from "lodash-es";
 import type { Cancelable, DebounceSettings } from "lodash";
 
-export { DeepPartial } from "./util.js";
+export type { DeepPartial } from "./util.js";
 
 // These imports allow TypeScript to correctly name types in the generated declarations.
 // Without them, it will generate some horrible, huge relative paths that won't work on any other machine.

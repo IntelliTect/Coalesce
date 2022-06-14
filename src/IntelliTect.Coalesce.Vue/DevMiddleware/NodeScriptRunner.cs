@@ -105,24 +105,7 @@ namespace IntelliTect.Coalesce.Vue.DevMiddleware
             {
                 Console.Write("\u001b[31mvite\u001b[0m: " + line);
             };
-
-            // But when it emits incomplete lines, assume this is progress information and
-            // hence just pass it through to StdOut regardless of logger config.
-            //StdErr.OnReceivedChunk += chunk =>
-            //{
-            //    Debug.Assert(chunk.Array != null);
-
-            //    var containsNewline = Array.IndexOf(
-            //        chunk.Array, '\n', chunk.Offset, chunk.Count) >= 0;
-            //    if (!containsNewline)
-            //    {
-            //        Console.Write(chunk.Array, chunk.Offset, chunk.Count);
-            //    }
-            //};
         }
-
-        private static string StripAnsiColors(string line)
-            => AnsiColorRegex.Replace(line, string.Empty);
 
         private static Process LaunchNodeProcess(ProcessStartInfo startInfo, string commandName)
         {

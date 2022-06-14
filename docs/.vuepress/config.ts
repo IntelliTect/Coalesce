@@ -20,21 +20,6 @@ export default defineUserConfig({
   plugins: [
     importMdPlugin(),
     {
-      // Workaround for https://github.com/vuepress/vuepress-next/issues/653
-      // Prepend absolute URLs with our GH pages base URL.
-      name: "baseify-link",
-      extendsMarkdown(md) {
-        const old = md.normalizeLink;
-        md.normalizeLink = (url) => {
-          url = old(url);
-          if (url.startsWith("/") && !url.startsWith(baseUrl)) {
-            url = baseUrl + url
-          }
-          return url;
-        }
-      }
-    },
-    {
       name: 'duplicate-anchor-checker',
       onGenerated(app) {
         for (const page of app.pages) {

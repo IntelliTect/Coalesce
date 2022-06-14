@@ -107,16 +107,13 @@ namespace IntelliTect.Coalesce.Vue.DevMiddleware
                 null,
                 pkgManagerCommand,
                 applicationStoppingToken);
+
             scriptRunner.AttachToLogger(logger);
 
             using (var stdErrReader = new EventedStreamStringReader(scriptRunner.StdErr))
             {
                 try
                 {
-                    // Although the React dev server may eventually tell us the URL it's listening on,
-                    // it doesn't do so until it's finished compiling, and even then only if there were
-                    // no compiler warnings. So instead of waiting for that, consider it ready as soon
-                    // as it starts listening for requests.
                     await scriptRunner.StdOut.WaitForMatch(
                         new Regex(options.OutputOnReady, RegexOptions.None, TimeSpan.FromSeconds(5)));
                 }

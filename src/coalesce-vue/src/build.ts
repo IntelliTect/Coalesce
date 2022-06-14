@@ -21,7 +21,7 @@ export function createAspNetCoreHmrPlugin({
 
   /** If true (default), will inject https key and cert from `dotnet dev-certs` */
   https = true 
-}) {
+} = {}) {
   // We are passed in the PID of the parent .NET process so that when it aborts,
   // we can shut ourselves down. Otherwise the vite server will end up orphaned.
   // Technique adopted from https://github.com/dotnet/aspnetcore/blob/v3.0.0/src/Middleware/NodeServices/src/Content/Node/entrypoint-http.js#L369-L395

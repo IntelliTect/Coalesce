@@ -7,13 +7,6 @@ import { addHours } from "date-fns";
 
 import type * as https from 'https';
 
-function getParentPid() {
-  // We are passed in the parent .NET process's PID so that when it aborts,
-  // we can shut ourselves down. Otherwise the vite server will end up orphaned.
-  // Technique adopted from https://github.com/dotnet/aspnetcore/blob/v3.0.0/src/Middleware/NodeServices/src/Content/Node/entrypoint-http.js#L369-L395
-  return process.env.ASPNETCORE_VITE_PID;
-}
-
 /**
  * A plugin that works with IntelliTect.Coalesce.Vue.ViteDevelopmentServerMiddleware:
  * - Writes `index.html` to the build output directory during HMR development, 
@@ -21,23 +14,36 @@ function getParentPid() {
  * - Shuts down the HMR server when the parent ASP.NET Core application shuts down, preventing process orphaning.
  * - Automatically obtains certs from `dotnet-devcerts` and injects them into the Vite configuration.
  */
-export function createAspNetCoreHmrPlugin() {
-  return <Plugin>{
-    name: "aspnetcore-hmr",
-    async config(config, env) {
-      if (!getParentPid()) return;
+export function createAspNetCoreHmrPlugin({
+  /** The base path for vite when running with HMR. 
+   * Must correlate with `ViteServerOptions.PathBase` in aspnetcore. */
+  base = '/vite_hmr/',
 
+  /** If true (default), will inject https key and cert from `dotnet dev-certs` */
+  https = true 
+}) {
+  // We are passed in the PID of the parent .NET process so that when it aborts,
+  // we can shut ourselves down. Otherwise the vite server will end up orphaned.
+  // Technique adopted from https://github.com/dotnet/aspnetcore/blob/v3.0.0/src/Middleware/NodeServices/src/Content/Node/entrypoint-http.js#L369-L395
+  const parentPid = process.env.ASPNETCORE_VITE_PID;
+  if (!parentPid) return;
+
+  return <Plugin>{
+    name: "coalesce-vite-hmr",
+    async config(config, env) {
       const server = config.server ??= {};
+
+      config.base = base;
       
       // The development server launched by UseViteDevelopmentServer must be HTTPS
       // to avoid issues with mixed content:
-      if (server.https != false) {
-        const https = (server.https ??= {}) as https.ServerOptions;
+      if (https && server.https != false) {
+        const httpsOptions = (server.https ??= {}) as https.ServerOptions;
           
         const { keyFilePath, certFilePath } = await getCertPaths();
 
-        https.key ??= readFileSync(keyFilePath);
-        https.cert ??= readFileSync(certFilePath);
+        httpsOptions.key ??= readFileSync(keyFilePath);
+        httpsOptions.cert ??= readFileSync(certFilePath);
       }
     },
 
@@ -45,8 +51,6 @@ export function createAspNetCoreHmrPlugin() {
       // We are passed in the parent .NET process's PID so that when it aborts,
       // we can shut ourselves down. Otherwise the vite server will end up orphaned.
       // Technique adopted from https://github.com/dotnet/aspnetcore/blob/v3.0.0/src/Middleware/NodeServices/src/Content/Node/entrypoint-http.js#L369-L395
-      const parentPid = getParentPid();
-      if (!parentPid) return;
 
       setInterval(async function () {
         let parentExists = true;
@@ -78,6 +82,7 @@ export function createAspNetCoreHmrPlugin() {
       // Write the index.html file once on startup so it can be picked up immediately by aspnetcore.
       writeHtml(server);
     },
+
     async handleHotUpdate(ctx) {
       if (ctx.server.config.root + "/index.html" == ctx.file) {
         // Rewrite the index.html file whenever it changes.

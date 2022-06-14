@@ -20,6 +20,11 @@ namespace IntelliTect.Coalesce;
 
 public static class CoalesceApplicationBuilderExtensions
 {
+    /// <summary>
+    /// Map a route that will present an HTML page featuring a high level overview of all 
+    /// types exposed by Coalesce and the static security rules that govern them.
+    /// Security can be added by chaining a call to .RequireAuthorization(new AuthorizeAttribute { ... }) for example.
+    /// </summary>
     public static IEndpointConventionBuilder MapCoalesceSecurityOverview(this IEndpointRouteBuilder builder, string pattern)
     {
         return builder.MapGet(pattern, async context =>

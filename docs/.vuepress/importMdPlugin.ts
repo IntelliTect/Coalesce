@@ -140,7 +140,9 @@ function resolveImportCode (
   const fileContent = fs.readFileSync(importFilePath).toString()
   const lines = fileContent.split('\n')
 
-  const match = (query: string, line: string) => {
+  const match = (line: string, query?: string) => {
+    if (!query) return;
+
     const matchStart = query.startsWith('\n')
     const matchEnd = query.endsWith('\n')
     query = matchStart ? query.substring(1) : query;
@@ -152,14 +154,14 @@ function resolveImportCode (
     return line.includes(query);
   }
 
-  let firstLine = lines.findIndex(l => match(start ?? after, l)) 
+  let firstLine = lines.findIndex(l => match(l, start ?? after)) 
   if (firstLine == -1) {
     throw new Error(`import-md: start/after delimiter not found (importing ${importPath})`);
   }
   firstLine += (start ? 0 : 1)
 
   const lastLine = (before ?? end)
-    ? firstLine + lines.slice(firstLine).findIndex(l => match(before ?? end, l)) + (end ? 1 : 0)
+    ? firstLine + lines.slice(firstLine).findIndex(l => match(l, before ?? end)) + (end ? 1 : 0)
     : lines.length - 1
 
   const content = lines

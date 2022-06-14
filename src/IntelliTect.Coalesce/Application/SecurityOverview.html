@@ -76,16 +76,19 @@
             <a href="#top">Top</a>
 
             <h6 class="mt-4">Entities &amp; Custom DTOs</h6>
+            <div v-if="!crudTypes.length" class="text-muted">None</div>
             <div v-for="type in crudTypes">
               <a :href="'#type-' + type.name">{{type.name}}</a>
             </div>
 
             <h6 class="mt-4">Services</h6>
+            <div v-if="!serviceTypes.length" class="text-muted">None</div>
             <div v-for="type in serviceTypes">
               <a :href="'#type-' + type.name">{{type.name}}</a>
             </div>
 
             <h6 class="mt-4">External Types</h6>
+            <div v-if="!externalTypes.length" class="text-muted">None</div>
             <div v-for="type in externalTypes">
               <a :href="'#type-' + type.name">{{type.name}}</a>
             </div>

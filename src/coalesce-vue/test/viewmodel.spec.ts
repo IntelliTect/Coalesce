@@ -1214,20 +1214,14 @@ describe("ViewModel", () => {
       expect(student.advisor).toBe(advisor);
     })
 
-    test("updates foreign keys from navigation props' PKs when navigation prop is iterated second", () => {
+    test("updates foreign keys from navigation props' PKs when navigation prop is iterated first", () => {
 
       // Precondition: This tests the behavior if the navigation prop is iterated
-      // AFTER the FK prop.
-      // First, remove and re-add the nav prop so it lands at the end.
-      const navProp = metadata.Student.props.advisor;
-      // @ts-expect-error deleting a non-optional prop
-      delete metadata.Student.props.advisor;
-      metadata.Student.props.advisor = navProp;
-
-      // Then, assert that the precondition now holds.
+      // BEFORE the FK prop.
+      // Assert that the precondition now holds.
       const values = Object.values(metadata.Student.props);
       expect(values.indexOf(metadata.Student.props.advisor))
-        .toBeGreaterThan(values.indexOf(metadata.Student.props.studentAdvisorId))
+        .toBeLessThan(values.indexOf(metadata.Student.props.studentAdvisorId))
 
       var studentModel = new Student({
         studentId: 1,
@@ -1247,6 +1241,64 @@ describe("ViewModel", () => {
       // There was a bug where the PK was being sourced from the wrong object.
       // This only happened in rare cases where the nav prop was iterated before the FK prop.
       expect(student.studentAdvisorId).toBe(4);
+    })
+
+    test("updates foreign keys from navigation props' PKs when navigation prop is iterated second", () => {
+
+      // Precondition: This tests the behavior if the navigation prop is iterated
+      // AFTER the FK prop.
+      // Assert that the precondition holds.
+      const values = Object.values(metadata.Course.props);
+      expect(values.indexOf(metadata.Course.props.student))
+        .toBeGreaterThan(values.indexOf(metadata.Course.props.studentId))
+
+      var courseModel = new Course({
+        courseId: 1,
+        studentId: 3,
+        student: { studentId: 3, name: "Delphine", }
+      });
+      var course = new CourseViewModel(courseModel);
+
+      courseModel.studentId = 4;
+      courseModel.student!.studentId = 4;
+      courseModel.student!.name = "Beth";
+      debugger;
+      course.$loadCleanData(courseModel);
+
+      // FK on course should have been updated
+      // with the PK from the student object.
+
+      // There was a bug where the PK was being sourced from the wrong object.
+      // This only happened in rare cases where the nav prop was iterated before the FK prop.
+      expect(course.studentId).toBe(4);
+    })
+
+    test("sets FK and navigation when loading object with only navigation property when navigation prop is iterated first", () => {
+      // Assert that the precondition now holds.
+      const values = Object.values(metadata.Student.props);
+      expect(values.indexOf(metadata.Student.props.advisor))
+        .toBeLessThan(values.indexOf(metadata.Student.props.studentAdvisorId))
+        
+      var advisor = new AdvisorViewModel({ advisorId: 1, name: "Steve", });
+      var student = new StudentViewModel();
+      student.$loadCleanData({ advisor });
+
+      expect(student.advisor).toBe(advisor);
+      expect(student.studentAdvisorId).toBe(1);
+    })
+
+    test("sets FK and navigation when loading object with only navigation property when navigation prop is iterated second", () => {
+      // Assert that the precondition now holds.
+      const values = Object.values(metadata.Course.props);
+      expect(values.indexOf(metadata.Course.props.student))
+        .toBeGreaterThan(values.indexOf(metadata.Course.props.studentId))
+        
+      var student = new StudentViewModel({ studentId: 1, name: "Steve", });
+      var course = new CourseViewModel();
+      course.$loadCleanData({ student });
+
+      expect(course.student).toBe(student);
+      expect(course.studentId).toBe(1);
     })
 
     test("preserves existing collection navigation when incoming is null", () => {

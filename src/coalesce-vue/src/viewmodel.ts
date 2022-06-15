@@ -1548,6 +1548,16 @@ export function updateViewModelFromModel<
           break;
 
         default:
+          if (prop.role == "foreignKey") {
+            if (incomingValue == null && prop.navigationProp && source[prop.navigationProp.name]) {
+              // A value for the navigation property was provided,
+              // but a foreign key was not. Do not set the FK to null,
+              // since depending on the order of property iteration, doing so might
+              // null out the navigation property if the navigation property was already set.
+              break;
+            }
+          }
+
           // We check against currentValue here for a minor perf increase - 
           // Even though this is redundant with the ViewModel's setters,
           // it avoids calling into the setter if we don't have to,

@@ -1,4 +1,4 @@
-import { ObjectType, BasicCollectionProperty, getEnumMeta, ObjectProperty, ModelType, ModelCollectionNavigationProperty, ClassType, Domain, ForeignKeyProperty, PrimaryKeyProperty, ModelReferenceNavigationProperty } from "../src/metadata";
+import { ObjectType, BasicCollectionProperty, getEnumMeta, ObjectProperty, ModelType, ModelCollectionNavigationProperty, ClassType, Domain, ForeignKeyProperty, PrimaryKeyProperty, ModelReferenceNavigationProperty, solidify } from "../src/metadata";
 
 const metaBase = (name: string = "model") => { 
   return {
@@ -48,9 +48,20 @@ export const Course = domain.types.Course = {
       displayName: "StudentId",
       type: "number",
       role: "foreignKey",
+      get navigationProp() { return domain.types.Course.props.student as ModelReferenceNavigationProperty },
       get principalType() { return domain.types.Student as ModelType },
       get principalKey() { return (domain.types.Student as ModelType).keyProp as PrimaryKeyProperty }
-    }
+    },
+    student: {
+      name: "student",
+      displayName: "Student",
+      type: "model",
+      role: "referenceNavigation",
+      dontSerialize: true,
+      get foreignKey() { return domain.types.Course.props.studentId as ForeignKeyProperty },
+      get principalKey() { return (domain.types.Student as ModelType).keyProp as PrimaryKeyProperty },
+      get typeDef() { return domain.types.Student as ModelType }
+    },
   }
 };
 
@@ -387,5 +398,7 @@ interface AppDomain extends Domain {
   services: {
   }
 }
+
+solidify(domain);
 
 export default domain as AppDomain

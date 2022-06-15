@@ -1,95 +1,162 @@
-import type { Plugin, ServerOptions, ViteDevServer } from "vite";
+import type { Plugin, ViteDevServer } from "vite";
 import path from "path";
 import { existsSync, readFileSync, writeFile } from "fs";
 import { spawn } from "child_process";
 import { TLSSocket } from "tls";
 import { addHours } from "date-fns";
+import MagicString from "magic-string";
 
-import type * as https from 'https';
+import type * as https from "https";
+
+export interface AspNetCoreHmrPluginOptions {
+  /** The base path for vite when running with HMR.
+   * Must correlate with `ViteServerOptions.PathBase` in aspnetcore. */
+  base?: string;
+
+  /** If true (default), will inject https key and cert from `dotnet dev-certs` */
+  https?: boolean;
+
+  /** If true (default), most relative imports will be rewritten to include the host
+   * of the underlying Vite dev server, allowing these requests to bypass the
+   * ASP.NET Core Server. This results in a significant performance boost when a debugger is attached to .NET.
+   */
+  assetBypass?: boolean;
+}
 
 /**
  * A plugin that works with IntelliTect.Coalesce.Vue.ViteDevelopmentServerMiddleware:
- * - Writes `index.html` to the build output directory during HMR development, 
+ * - Writes `index.html` to the build output directory during HMR development,
  *   allowing any transformations in HomeController.cs to work identically in both dev and prod.
  * - Shuts down the HMR server when the parent ASP.NET Core application shuts down, preventing process orphaning.
  * - Automatically obtains certs from `dotnet-devcerts` and injects them into the Vite configuration.
  */
 export function createAspNetCoreHmrPlugin({
-  /** The base path for vite when running with HMR. 
-   * Must correlate with `ViteServerOptions.PathBase` in aspnetcore. */
-  base = '/vite_hmr/',
-
-  /** If true (default), will inject https key and cert from `dotnet dev-certs` */
-  https = true 
-} = {}) {
+  base = "/vite_hmr/",
+  https = true,
+  assetBypass = true,
+}: AspNetCoreHmrPluginOptions = {}) {
   // We are passed in the PID of the parent .NET process so that when it aborts,
   // we can shut ourselves down. Otherwise the vite server will end up orphaned.
   // Technique adopted from https://github.com/dotnet/aspnetcore/blob/v3.0.0/src/Middleware/NodeServices/src/Content/Node/entrypoint-http.js#L369-L395
   const parentPid = process.env.ASPNETCORE_VITE_PID;
   if (!parentPid) return;
 
-  return <Plugin>{
-    name: "coalesce-vite-hmr",
-    async config(config, env) {
-      const server = config.server ??= {};
+  const plugins = <Plugin[]>[
+    {
+      name: "coalesce-vite-hmr",
+      async config(config, env) {
+        const server = (config.server ??= {});
 
-      config.base = base;
-      
-      // The development server launched by UseViteDevelopmentServer must be HTTPS
-      // to avoid issues with mixed content:
-      if (https && server.https != false) {
-        const httpsOptions = (server.https ??= {}) as https.ServerOptions;
-          
-        const { keyFilePath, certFilePath } = await getCertPaths();
+        config.base = base;
 
-        httpsOptions.key ??= readFileSync(keyFilePath);
-        httpsOptions.cert ??= readFileSync(certFilePath);
-      }
-    },
+        // The development server launched by UseViteDevelopmentServer must be HTTPS
+        // to avoid issues with mixed content:
+        if (https && server.https != false) {
+          const httpsOptions = (server.https ??= {}) as https.ServerOptions;
 
-    async configureServer(server) {
-      // We are passed in the parent .NET process's PID so that when it aborts,
-      // we can shut ourselves down. Otherwise the vite server will end up orphaned.
-      // Technique adopted from https://github.com/dotnet/aspnetcore/blob/v3.0.0/src/Middleware/NodeServices/src/Content/Node/entrypoint-http.js#L369-L395
+          const { keyFilePath, certFilePath } = await getCertPaths();
 
-      setInterval(async function () {
-        let parentExists = true;
-        try {
-          // Sending signal 0 - on all platforms - tests whether the process exists. As long as it doesn't
-          // throw, that means it does exist.
-          process.kill(+parentPid, 0);
-          parentExists = true;
-        } catch (ex) {
-          // If the reason for the error is that we don't have permission to ask about this process,
-          // report that as a separate problem.
-          if ((ex as any).code === "EPERM") {
-            throw new Error(
-              `Attempted to check whether process ${parentPid} was running, but got a permissions error.`
-            );
-          }
-          parentExists = false;
+          httpsOptions.key ??= readFileSync(keyFilePath);
+          httpsOptions.cert ??= readFileSync(certFilePath);
         }
+      },
 
-        if (!parentExists) {
+      async configureServer(server) {
+        // We are passed in the parent .NET process's PID so that when it aborts,
+        // we can shut ourselves down. Otherwise the vite server will end up orphaned.
+        // Technique adopted from https://github.com/dotnet/aspnetcore/blob/v3.0.0/src/Middleware/NodeServices/src/Content/Node/entrypoint-http.js#L369-L395
+
+        setInterval(async function () {
+          let parentExists = true;
           try {
-            await server.close();
-          } finally {
-            process.exit(0);
+            // Sending signal 0 - on all platforms - tests whether the process exists. As long as it doesn't
+            // throw, that means it does exist.
+            process.kill(+parentPid, 0);
+            parentExists = true;
+          } catch (ex) {
+            // If the reason for the error is that we don't have permission to ask about this process,
+            // report that as a separate problem.
+            if ((ex as any).code === "EPERM") {
+              throw new Error(
+                `Attempted to check whether process ${parentPid} was running, but got a permissions error.`
+              );
+            }
+            parentExists = false;
           }
+
+          if (!parentExists) {
+            try {
+              await server.close();
+            } finally {
+              process.exit(0);
+            }
+          }
+        }, 1000);
+
+        // Write the index.html file once on startup so it can be picked up immediately by aspnetcore.
+        writeHtml(server);
+      },
+
+      async handleHotUpdate(ctx) {
+        if (ctx.server.config.root + "/index.html" == ctx.file) {
+          // Rewrite the index.html file whenever it changes.
+          writeHtml(ctx.server);
         }
-      }, 1000);
-
-      // Write the index.html file once on startup so it can be picked up immediately by aspnetcore.
-      writeHtml(server);
+      },
     },
+  ];
 
-    async handleHotUpdate(ctx) {
-      if (ctx.server.config.root + "/index.html" == ctx.file) {
-        // Rewrite the index.html file whenever it changes.
-        writeHtml(ctx.server);
-      }
-    },
-  };
+  if (assetBypass) {
+    let port: number | undefined;
+    let base: string;
+    let https = true;
+
+    plugins.push({
+      name: "coalesce-vite-hmr-bypass",
+      configResolved(config) {
+        const plugins = config.plugins as any[];
+        // HACK: Forcibly move this plugin to the end, after the built-in importAnalysisPlugin
+        // Even if we used `enforce: "post"`, we otherwise wouldn't be able to run late enough.
+        plugins.push(...plugins.splice(plugins.indexOf(this), 1));
+        port = config.server.port;
+        base = config.base;
+        https = !!config.server.https
+      },
+      transform(code, id) {
+        // Search for strings like:
+        // - `"/vite_hmr/..."` (double quote import in js, etc)
+        // - `'/vite_hmr/...'` (single quote import in js, etc)
+        // - `=/vite_hmr/...` (HTML src attibutes)
+        const regex = new RegExp(`(["'=])(${escapeRegex(base)})`, 'g');
+        let s: MagicString | undefined;
+        let match;
+        while ((match = regex.exec(code))) {
+          s ??= new MagicString(code);
+          // Insert the hostname of the vite server at the start of the relative path
+          // so that the request will go directly to the vite server
+          // rather than having to traverse the aspnetcore server proxy first.
+          s.appendLeft(
+            match.index + match[1].length,
+            `http${https ? 's' : ''}://localhost:${port}`
+          );
+        }
+        return s
+          ? {
+              code: s.toString(),
+              // Including sourcemaps is generating frivolous warnings
+              // about missing sources. Maybe revisit for Vite3?
+              //map: s.generateMap({ hires: true }),
+            }
+          : undefined;
+      },
+    });
+  }
+
+  return plugins;
+}
+
+function escapeRegex(string: string) {
+  return string.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
 }
 
 /** Write the index.html file to the server's web root so that it can be
@@ -127,9 +194,11 @@ export async function getCertPaths(certName?: string) {
       ? `${process.env.APPDATA}/ASP.NET/https`
       : `${process.env.HOME}/.aspnet/https`;
 
-  const certificateArg = certName ?? process.argv
-    .map((arg) => arg.match(/--name=(?<value>.+)/i))
-    .filter(Boolean)[0]?.groups?.value;
+  const certificateArg =
+    certName ??
+    process.argv
+      .map((arg) => arg.match(/--name=(?<value>.+)/i))
+      .filter(Boolean)[0]?.groups?.value;
 
   const certificateName = certificateArg || process.env.npm_package_name;
 

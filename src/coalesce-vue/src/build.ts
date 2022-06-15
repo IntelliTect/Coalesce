@@ -111,35 +111,74 @@ export function createAspNetCoreHmrPlugin({
     let base: string;
     let https = true;
 
+    function transformCode(code: string) {
+      // Search for strings like:
+      // - `"/vite_hmr/..."` (double quote import in js, etc)
+      // - `'/vite_hmr/...'` (single quote import in js, etc)
+      // - `=/vite_hmr/...` (HTML src attibutes)
+      const regex = new RegExp(`(["'=])(${escapeRegex(base)})`, "g");
+      let s: MagicString | undefined;
+      let match;
+      while ((match = regex.exec(code))) {
+        s ??= new MagicString(code);
+        // Insert the hostname of the vite server at the start of the relative path
+        // so that the request will go directly to the vite server
+        // rather than having to traverse the aspnetcore server proxy first.
+        s.appendLeft(
+          match.index + match[1].length,
+          `http${https ? "s" : ""}://localhost:${port}`
+        );
+      }
+
+      return s;
+    }
+
+    function escapeRegex(string: string) {
+      return string.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&");
+    }
+
+    // Transform imports in index.html.
+    // Ideally we'd do this in transformIndexHtml, but cant because of
+    // https://github.com/vitejs/vite/issues/5851 (fix merged, but not yet released).
+    // For this workaround, this must go before coalesce-vite-hmr so we can hook 
+    // transformIndexHtml before coalesce-vite-hmr attempts to read from it.
+    // NOTE: This seemed like a good idea, until I realized that the file gets written to disk
+    // and will reference a port number that will be different each time the app starts.
+    // So in actuality, its a horrible idea.
+    // plugins.unshift({
+    //   name: "coalesce-vite-hmr-bypass-html",
+    //   enforce: "pre",
+    //   configResolved(config) {
+    //     port = config.server.port;
+    //     base = config.base;
+    //     https = !!config.server.https;
+    //   },
+    //   configureServer(server) {
+    //     const original = server.transformIndexHtml;
+    //     debugger;
+    //     server.transformIndexHtml = async function (...args) {
+    //       debugger;
+    //       const res = await original.apply(this, args);
+    //       return transformCode(res)?.toString() ?? res;
+    //     };
+    //   },
+    // });
+
+    // This can be registered in any order because it will move itself to the end.
     plugins.push({
       name: "coalesce-vite-hmr-bypass",
       configResolved(config) {
         const plugins = config.plugins as any[];
         // HACK: Forcibly move this plugin to the end, after the built-in importAnalysisPlugin
         // Even if we used `enforce: "post"`, we otherwise wouldn't be able to run late enough.
+        // We have to run late because importAnalysisPlugin is what puts `base` in the import paths.
         plugins.push(...plugins.splice(plugins.indexOf(this), 1));
         port = config.server.port;
         base = config.base;
-        https = !!config.server.https
+        https = !!config.server.https;
       },
       transform(code, id) {
-        // Search for strings like:
-        // - `"/vite_hmr/..."` (double quote import in js, etc)
-        // - `'/vite_hmr/...'` (single quote import in js, etc)
-        // - `=/vite_hmr/...` (HTML src attibutes)
-        const regex = new RegExp(`(["'=])(${escapeRegex(base)})`, 'g');
-        let s: MagicString | undefined;
-        let match;
-        while ((match = regex.exec(code))) {
-          s ??= new MagicString(code);
-          // Insert the hostname of the vite server at the start of the relative path
-          // so that the request will go directly to the vite server
-          // rather than having to traverse the aspnetcore server proxy first.
-          s.appendLeft(
-            match.index + match[1].length,
-            `http${https ? 's' : ''}://localhost:${port}`
-          );
-        }
+        const s = transformCode(code);
         return s
           ? {
               code: s.toString(),
@@ -153,10 +192,6 @@ export function createAspNetCoreHmrPlugin({
   }
 
   return plugins;
-}
-
-function escapeRegex(string: string) {
-  return string.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
 }
 
 /** Write the index.html file to the server's web root so that it can be

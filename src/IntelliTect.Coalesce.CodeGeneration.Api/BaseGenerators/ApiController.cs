@@ -215,7 +215,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
             }
 
             if (param.IsDI)
-            {
+            { 
                 return param.CsParameterName;
             }
 
@@ -228,7 +228,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
                     : $"{FileCtor(ret)} ");
 
                 static string FileCtor(string x) =>
-                    $"new File {{ Name = {x}.FileName, ContentType = {x}.ContentType, Length = {x}.Length, Content = {x}.OpenReadStream() }}";
+                    $"new IntelliTect.Coalesce.Models.File {{ Name = {x}.FileName, ContentType = {x}.ContentType, Length = {x}.Length, Content = {x}.OpenReadStream() }}";
             }
 
             if (param.Type.IsByteArray)

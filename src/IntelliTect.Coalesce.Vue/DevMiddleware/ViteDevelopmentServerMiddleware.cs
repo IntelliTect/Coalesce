@@ -115,8 +115,12 @@ namespace IntelliTect.Coalesce.Vue.DevMiddleware
             {
                 try
                 {
-                    await scriptRunner.StdOut.WaitForMatch(
-                        new Regex(options.OutputOnReady, RegexOptions.None, TimeSpan.FromSeconds(5)));
+                    var match = await scriptRunner.StdOut.WaitForMatch(
+                        new Regex(options.OutputOnReady, RegexOptions.None, TimeSpan.FromSeconds(2)));
+                    if (match.Groups.Count > 0)
+                    {
+                        return int.Parse(match.Groups[0].Value);
+                    }
                 }
                 catch (EndOfStreamException ex)
                 {
@@ -127,8 +131,6 @@ namespace IntelliTect.Coalesce.Vue.DevMiddleware
                 }
             }
 
-            // TODO: Vite will pick another port if the requested one is not in use.
-            // We need to parse its output rather than expecting the one we provided is correct.
             return portNumber.Value;
         }
     }

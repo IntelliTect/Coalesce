@@ -34,10 +34,11 @@ namespace IntelliTect.Coalesce
         public int? DevServerPort { get; set; }
 
         /// <summary>
-        /// Text to watch for in the stdout of the vite server that signifies
+        /// Regex to watch for in the stdout of the vite server that signifies
         /// that it is ready to start serving requests.
+        /// A capture group can specify the actual port that the server chose to listen on.
         /// </summary>
-        public string OutputOnReady { get; set; } = "dev server running at";
+        public string OutputOnReady { get; set; } = "//localhost:([0-9]+)/";
 
         /// <summary>
         /// If true, requests with Accept: text/html will be delayed until the dev server

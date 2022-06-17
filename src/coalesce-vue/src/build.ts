@@ -232,7 +232,7 @@ async function writeHtml(server: ViteDevServer) {
       }
     );
     server.config.logger.info(
-      `Wrote index.html to ${server.config.build.outDir}`
+      `  Coalesce: Wrote index.html to ${server.config.build.outDir}`
     );
   }
 }

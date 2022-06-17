@@ -58,6 +58,7 @@ namespace IntelliTect.Coalesce.Vue.DevMiddleware
 
             onReceivedLineHandler = line =>
             {
+                line = StripAnsiColors(line);
                 var match = regex.Match(line);
                 if (match.Success)
                 {
@@ -75,6 +76,12 @@ namespace IntelliTect.Coalesce.Vue.DevMiddleware
 
             return tcs.Task;
         }
+
+
+        private static readonly Regex AnsiColorRegex = new Regex("\x001b\\[[0-9;]*m", RegexOptions.None, TimeSpan.FromSeconds(1));
+
+        private static string StripAnsiColors(string line)
+            => AnsiColorRegex.Replace(line, string.Empty);
 
         private async Task Run()
         {

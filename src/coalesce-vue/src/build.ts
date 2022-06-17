@@ -21,6 +21,13 @@ export interface AspNetCoreHmrPluginOptions {
    * ASP.NET Core Server. This results in a significant performance boost when a debugger is attached to .NET.
    */
   assetBypass?: boolean;
+
+  /** If true (default), index.html will be written to the output path on disk as it updates.
+   * This mirrors production behavior where index.html will be served from wwwroot.
+   * However, during development, if the port of the HMR server ever changes, the copy on disk will briefly
+   * contain the wrong port on app startup.
+   */
+  writeIndexHtmlToDisk?: boolean;
 }
 
 /**
@@ -34,6 +41,7 @@ export function createAspNetCoreHmrPlugin({
   base = "/vite_hmr/",
   https = true,
   assetBypass = true,
+  writeIndexHtmlToDisk = true,
 }: AspNetCoreHmrPluginOptions = {}) {
   // We are passed in the PID of the parent .NET process so that when it aborts,
   // we can shut ourselves down. Otherwise the vite server will end up orphaned.
@@ -50,7 +58,7 @@ export function createAspNetCoreHmrPlugin({
         config.base = base;
 
         // The development server launched by UseViteDevelopmentServer must be HTTPS
-        // to avoid issues with mixed content:
+        // if the aspnetcore server is HTTPs to avoid issues with mixed content:
         if (https && server.https != false) {
           const httpsOptions = (server.https ??= {}) as https.ServerOptions;
 
@@ -94,11 +102,16 @@ export function createAspNetCoreHmrPlugin({
         }, 1000);
 
         // Write the index.html file once on startup so it can be picked up immediately by aspnetcore.
-        writeHtml(server);
+        if (writeIndexHtmlToDisk) {
+          writeHtml(server);
+        }
       },
 
       async handleHotUpdate(ctx) {
-        if (ctx.server.config.root + "/index.html" == ctx.file) {
+        if (
+          writeIndexHtmlToDisk &&
+          ctx.server.config.root + "/index.html" == ctx.file
+        ) {
           // Rewrite the index.html file whenever it changes.
           writeHtml(ctx.server);
         }
@@ -137,58 +150,66 @@ export function createAspNetCoreHmrPlugin({
       return string.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&");
     }
 
-    // Transform imports in index.html.
-    // Ideally we'd do this in transformIndexHtml, but cant because of
-    // https://github.com/vitejs/vite/issues/5851 (fix merged, but not yet released).
-    // For this workaround, this must go before coalesce-vite-hmr so we can hook 
-    // transformIndexHtml before coalesce-vite-hmr attempts to read from it.
-    // NOTE: This seemed like a good idea, until I realized that the file gets written to disk
-    // and will reference a port number that will be different each time the app starts.
-    // So in actuality, its a horrible idea.
-    // plugins.unshift({
-    //   name: "coalesce-vite-hmr-bypass-html",
-    //   enforce: "pre",
-    //   configResolved(config) {
-    //     port = config.server.port;
-    //     base = config.base;
-    //     https = !!config.server.https;
-    //   },
-    //   configureServer(server) {
-    //     const original = server.transformIndexHtml;
-    //     debugger;
-    //     server.transformIndexHtml = async function (...args) {
-    //       debugger;
-    //       const res = await original.apply(this, args);
-    //       return transformCode(res)?.toString() ?? res;
-    //     };
-    //   },
-    // });
-
-    // This can be registered in any order because it will move itself to the end.
-    plugins.push({
-      name: "coalesce-vite-hmr-bypass",
+    plugins.unshift({
+      name: "coalesce-vite-hmr-bypass-html",
+      enforce: "pre",
       configResolved(config) {
-        const plugins = config.plugins as any[];
-        // HACK: Forcibly move this plugin to the end, after the built-in importAnalysisPlugin
-        // Even if we used `enforce: "post"`, we otherwise wouldn't be able to run late enough.
-        // We have to run late because importAnalysisPlugin is what puts `base` in the import paths.
-        plugins.push(...plugins.splice(plugins.indexOf(this), 1));
+        // This might be wrong if no port was provided or if this port wasn't available.
+        // Will get overridden with the real port below.
         port = config.server.port;
         base = config.base;
         https = !!config.server.https;
       },
-      transform(code, id) {
-        const s = transformCode(code);
-        return s
-          ? {
-              code: s.toString(),
-              // Including sourcemaps is generating frivolous warnings
-              // about missing sources. Maybe revisit for Vite3?
-              //map: s.generateMap({ hires: true }),
-            }
-          : undefined;
+
+      configureServer(server) {
+        // Transform imports in index.html to go to the HMR server instead of the aspnetcore server.
+        // Ideally we'd do this in the transformIndexHtml hook, but cant because of
+        // https://github.com/vitejs/vite/issues/5851 (fix merged, but not yet released).
+        // For this workaround, this must go before coalesce-vite-hmr so we can hook
+        // transformIndexHtml before coalesce-vite-hmr attempts to read from it.
+        const original = server.transformIndexHtml;
+        server.transformIndexHtml = async function (...args) {
+          const res = await original.apply(this, args);
+          return transformCode(res)?.toString() ?? res;
+        };
+
+        // Transform assets (fonts, mainly) to go to the HMR server instead of the aspnetcore server.
+        server.httpServer!.on("listening", () => {
+          port = (server.httpServer!.address() as any)?.port;
+          // Static assets are loaded relative to the browser's origin
+          // since they're often originating from things like font rules in <style> tags.
+          // This will repoint them at the HMR server.
+          server.config.server.origin = `http${
+            server.config.server.https ? "s" : ""
+          }://localhost:${port}`;
+        });
       },
     });
+
+    // This should be unnecessary as long as all non-script assets obey `server.origin`
+    // and all script assets are loaded as descendants of index.html.
+    // This can be registered in any order because it will move itself to the end.
+    // plugins.push({
+    //   name: "coalesce-vite-hmr-bypass",
+    //   configResolved(config) {
+    //     const plugins = config.plugins as any[];
+    //     // HACK: Forcibly move this plugin to the end, after the built-in importAnalysisPlugin
+    //     // Even if we used `enforce: "post"`, we otherwise wouldn't be able to run late enough.
+    //     // We have to run late because importAnalysisPlugin is what puts `base` in the import paths.
+    //     plugins.push(...plugins.splice(plugins.indexOf(this), 1));
+    //   },
+    //   transform(code, id) {
+    //     const s = transformCode(code);
+    //     return s
+    //       ? {
+    //           code: s.toString(),
+    //           // Including sourcemaps is generating frivolous warnings
+    //           // about missing sources. Maybe revisit for Vite3?
+    //           //map: s.generateMap({ hires: true }),
+    //         }
+    //       : undefined;
+    //   },
+    // });
   }
 
   return plugins;

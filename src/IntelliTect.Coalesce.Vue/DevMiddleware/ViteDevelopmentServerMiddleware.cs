@@ -24,14 +24,14 @@ namespace IntelliTect.Coalesce.Vue.DevMiddleware
     {
         private const string LogCategoryName = "IntelliTect.Coalesce.Vue";
 
-        public static void Attach(
+        public static Task<int> Attach(
             ISpaBuilder spaBuilder,
             ViteServerOptions options
         )
         {
             var pkgManagerCommand = spaBuilder.Options.PackageManagerCommand;
             var sourcePath = spaBuilder.Options.SourcePath;
-            var devServerPort = spaBuilder.Options.DevServerPort;
+            var devServerPort = options.DevServerPort;
             if (string.IsNullOrEmpty(sourcePath))
             {
                 throw new ArgumentException("Property 'SourcePath' cannot be null or empty", nameof(spaBuilder));
@@ -63,9 +63,11 @@ namespace IntelliTect.Coalesce.Vue.DevMiddleware
 
                 return new UriBuilder(options.UseHttps ? "https" : "http", "localhost", port).Uri;
             });
+
+            return portTask;
         }
 
-        private static ILogger GetOrCreateLogger(IApplicationBuilder appBuilder)
+        internal static ILogger GetOrCreateLogger(IApplicationBuilder appBuilder)
         {
             // If the DI system gives us a logger, use it. Otherwise, set up a default one
             var loggerFactory = appBuilder.ApplicationServices.GetService<ILoggerFactory>();
@@ -90,11 +92,11 @@ namespace IntelliTect.Coalesce.Vue.DevMiddleware
             ViteServerOptions options,
             string sourcePath,
             string pkgManagerCommand,
-            int portNumber,
+            int? portNumber,
             ILogger logger,
             CancellationToken applicationStoppingToken)
         {
-            if (portNumber == default(int))
+            if (!portNumber.HasValue || portNumber == 0)
             {
                 portNumber = FindAvailablePort();
             }
@@ -107,7 +109,6 @@ namespace IntelliTect.Coalesce.Vue.DevMiddleware
                 null,
                 pkgManagerCommand,
                 applicationStoppingToken);
-
             scriptRunner.AttachToLogger(logger);
 
             using (var stdErrReader = new EventedStreamStringReader(scriptRunner.StdErr))
@@ -126,7 +127,9 @@ namespace IntelliTect.Coalesce.Vue.DevMiddleware
                 }
             }
 
-            return portNumber;
+            // TODO: Vite will pick another port if the requested one is not in use.
+            // We need to parse its output rather than expecting the one we provided is correct.
+            return portNumber.Value;
         }
     }
 

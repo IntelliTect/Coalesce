@@ -1,4 +1,4 @@
-import Vue from "vue";
+import type Vue from "vue";
 
 
 // This will tree shake correctly as of v2.0.0-alpha.21
@@ -6,11 +6,10 @@ import { formatDistanceToNow, lightFormat, parseISO } from "date-fns";
 import { format, utcToZonedTime } from 'date-fns-tz';
 
 
-import {
+import type {
   ClassType,
   Property,
   PropNames,
-  resolvePropMeta,
   Value,
   EnumValue,
   PrimitiveValue,
@@ -24,7 +23,10 @@ import {
   BinaryValue,
   UnknownValue
 } from "./metadata.js";
-import { Indexable, isNullOrWhitespace } from "./util.js";
+import {
+  resolvePropMeta,
+} from "./metadata.js";
+import { type Indexable, isNullOrWhitespace } from "./util.js";
 
 /**
  * Represents a model with metadata information.

@@ -111,24 +111,30 @@ namespace IntelliTect.Coalesce.Vue.DevMiddleware
                 applicationStoppingToken);
             scriptRunner.AttachToLogger(logger);
 
-            using (var stdErrReader = new EventedStreamStringReader(scriptRunner.StdErr))
+            using var stdErrReader = new EventedStreamStringReader(scriptRunner.StdErr);
+            try
             {
-                try
+                var match = await scriptRunner.StdOut.WaitForMatch(
+                    new Regex(options.OutputOnReady, RegexOptions.None, TimeSpan.FromSeconds(2)));
+                if (match.Groups.Count > 0)
                 {
-                    var match = await scriptRunner.StdOut.WaitForMatch(
-                        new Regex(options.OutputOnReady, RegexOptions.None, TimeSpan.FromSeconds(2)));
-                    if (match.Groups.Count > 0)
+                    var capture = match.Groups[1].Value;
+                    if (!int.TryParse(capture, out int port))
                     {
-                        return int.Parse(match.Groups[0].Value);
+                        throw new InvalidOperationException(
+                            $"The OutputOnReady regex {options.OutputOnReady} produced a capture group, " +
+                            $"but it is expected to yield an integer representing a port number. " +
+                            $"The value it actually produced was {capture}");
                     }
+                    return port;
                 }
-                catch (EndOfStreamException ex)
-                {
-                    throw new InvalidOperationException(
-                        $"The {pkgManagerCommand} script '{options.NpmScriptName}' exited without indicating that the " +
-                        "server was listening for requests. The error output was: " +
-                        $"{stdErrReader.ReadAsString()}", ex);
-                }
+            }
+            catch (EndOfStreamException ex)
+            {
+                throw new InvalidOperationException(
+                    $"The {pkgManagerCommand} script '{options.NpmScriptName}' exited without indicating that the " +
+                    "server was listening for requests. The error output was: " +
+                    $"{stdErrReader.ReadAsString()}", ex);
             }
 
             return portNumber.Value;

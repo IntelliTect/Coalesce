@@ -95,12 +95,16 @@ import {
 } from "coalesce-vue";
 
 import CAdminDisplay from "../admin/c-admin-display";
+import CInput from "../input/c-input";
 
 import { isPropReadOnly } from "../../util";
 
 @Component({
   name: "c-table",
-  components: { CAdminDisplay }
+  components: {
+    CAdminDisplay,
+    CInput
+  }
 })
 export default class extends Vue {
   @Prop({ required: true, type: Object })

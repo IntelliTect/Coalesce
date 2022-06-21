@@ -18,8 +18,10 @@ import {
   DataSourceParameters,
   ServiceApiClient
 } from "./api-client.js";
+import type {
+  Model
+} from "./model.js";
 import {
-  type Model,
   modelDisplay,
   propDisplay,
   convertToModel,

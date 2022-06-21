@@ -26,7 +26,8 @@ import type {
 import {
   resolvePropMeta,
 } from "./metadata.js";
-import { type Indexable, isNullOrWhitespace } from "./util.js";
+import type { Indexable } from "./util.js";
+import { isNullOrWhitespace } from "./util.js";
 
 /**
  * Represents a model with metadata information.

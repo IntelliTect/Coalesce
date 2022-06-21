@@ -101,6 +101,7 @@ import {
 
 import CInput from "../input/c-input";
 import CAdminDisplay from "./c-admin-display";
+import CDisplay from "../display/c-display";
 
 import { isPropReadOnly } from "../../util";
 
@@ -108,7 +109,8 @@ import { isPropReadOnly } from "../../util";
   name: "c-admin-editor",
   components: {
     CInput,
-    CAdminDisplay
+    CAdminDisplay,
+    CDisplay
   }
 })
 export default class extends Vue {

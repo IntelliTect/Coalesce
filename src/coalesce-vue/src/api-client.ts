@@ -1009,10 +1009,68 @@ export type TCall<TArgs extends any[], TReturn> = (
 
 type ApiStateHook<TThis> = (this: any, state: TThis) => void | Promise<any>
 
-export abstract class ApiState<
+
+// Base class for ApiState that contains nothing but the logic for 
+// subclassing Function. Specifically, we do this to avoid a need to call
+// `super()`, which triggers CSP unsafe-eval.
+abstract class ApiStateBase<
   TArgs extends any[],
   TResult
 > extends Function {
+
+  public readonly invoke!: this;
+
+  protected readonly apiClient!: ApiClient<any>;
+  protected readonly invoker!: 
+    TInvoker<
+      TArgs,
+      ApiResultPromise<TResult> | undefined | void,
+      ApiClient<any>
+    >;
+  protected abstract _invokeInternal(thisArg: any, callInvoker: () => any): ApiResultPromise<TResult>;
+  
+  // @ts-expect-error Don't call super() - it triggers CSP unsafe-eval (even though nothing is being eval'd)
+  constructor(
+    apiClient: ApiClient<any>,
+    invoker: 
+    TInvoker<
+      TArgs,
+      ApiResultPromise<TResult> | undefined | void,
+      ApiClient<any>
+    >
+  ) {
+    // Don't call super - this will trigger CSP unsafe-eval.
+    // super();
+
+    // Create our invoker function that will ultimately be our instance object.
+    const invokeFunc: TCall<
+      TArgs,
+      ApiResultPromise<TResult>
+    > = function invokeFunc(this: any, ...args: TArgs) {
+      return invoke._invokeInternal(this, () => {
+        return (invoker as any).apply(this, [apiClient, ...args]);
+      });
+    } as TCall<TArgs, ApiResultPromise<TResult>>;
+
+    const invoke = invokeFunc as unknown as this;
+
+    // Manually assign ctor props
+    // @ts-expect-error
+    invoke.invoke = invoke;
+    // @ts-expect-error
+    invoke.invoker = invoker;
+    // @ts-expect-error
+    invoke.apiClient = apiClient;
+
+    Object.setPrototypeOf(invoke, new.target.prototype);
+    return invoke;
+  }
+}
+
+export abstract class ApiState<
+  TArgs extends any[],
+  TResult
+> extends ApiStateBase<TArgs, TResult> {
   /** The metadata of the method being called, if it was provided. */
   abstract $metadata?: Method;
 
@@ -1116,8 +1174,6 @@ export abstract class ApiState<
   }
 
   protected abstract setResponseProps(data: ApiResult): void;
-
-  public invoke!: this;
 
   private _debounceSignal: {
     promise: Promise<void>;
@@ -1289,32 +1345,15 @@ export abstract class ApiState<
   }
 
   constructor(
-    protected readonly apiClient: ApiClient<any>,
-    private readonly invoker: 
+    apiClient: ApiClient<any>,
+    invoker: 
     TInvoker<
       TArgs,
       ApiResultPromise<TResult> | undefined | void,
       ApiClient<any>
     >
   ) {
-    super();
-
-    // Create our invoker function that will ultimately be our instance object.
-    const invokeFunc: TCall<
-      TArgs,
-      ApiResultPromise<TResult>
-    > = function invokeFunc(this: any, ...args: TArgs) {
-      return invoke._invokeInternal(this, () => {
-        return (invoker as any).apply(this, [apiClient, ...args]);
-      });
-    } as TCall<TArgs, ApiResultPromise<TResult>>;
-
-    // Copy all properties from the class to the function.
-    const invoke = Object.assign(invokeFunc, this) as this;
-    invoke.invoke = invoke;
-
-    Object.setPrototypeOf(invoke, new.target.prototype);
-    return invoke;
+    super(apiClient, invoker);
   }
 }
 

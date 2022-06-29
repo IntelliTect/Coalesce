@@ -44,11 +44,13 @@
 import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
 import { Model, ClassType, ViewModel, Property, Method, ModelType, ListViewModel } from 'coalesce-vue';
 import CAdminMethod from './c-admin-method.vue'
+import CDisplay from "../display/c-display";
 
 @Component({
   name: 'c-admin-methods',
   components: {
-    CAdminMethod
+    CAdminMethod,
+    CDisplay
   }
 })
 export default class CMethods extends Vue {

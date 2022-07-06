@@ -158,5 +158,8 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         [ControllerAction(Method = HttpMethod.Get)]
         [Coalesce]
         public Task MethodWithOptionalCancellationToken(string q, CancellationToken cancellationToken = default) => Task.CompletedTask;
+
+        [Coalesce]
+        public Task MethodWithOptionalEnumParam(Case.Statuses status = Case.Statuses.Open) => Task.CompletedTask;
     }
 }

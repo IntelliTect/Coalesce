@@ -99,6 +99,7 @@ namespace IntelliTect.Coalesce.Tests.TypeDefinition
             "System.Collections.Generic.ICollection<IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext.ExternalParent>")]
         [ClassViewModelData(typeof(IEntityFrameworkBehaviors<Exception, TestDbContext>),
             "IntelliTect.Coalesce.IEntityFrameworkBehaviors<System.Exception, IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext.TestDbContext>")]
+        [ClassViewModelData(typeof(Case.Statuses), "IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext.Case.Statuses")]
         public void FullyQualifiedName_HasCorrectValue(
             ClassViewModelData data,
             string expectedTypeName

@@ -158,6 +158,11 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 return GetTypeName(nullableUnderlying) + "?";
             }
 
+            if (type.IsEnum)
+            {
+                return type.FullName?.Replace('+', '.') ?? "";
+            }
+
             if (!type.IsGenericType)
             {
                 if (type == typeof(void)) return "void";
@@ -176,7 +181,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     TypeCode.Byte => "byte",
                     TypeCode.SByte => "sbyte",
                     TypeCode.String => "string",
-                    _ => type.FullName ?? ""
+                    _ => type.FullName?.Replace('+', '.') ?? ""
                 };
             }
 
@@ -215,7 +220,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
             if (!type.IsGenericType)
             {
-                return type.FullName ?? "";
+                return type.FullName.Replace('+', '.') ?? "";
             }
 
             var builder = new System.Text.StringBuilder();

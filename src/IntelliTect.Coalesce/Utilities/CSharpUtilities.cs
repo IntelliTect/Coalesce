@@ -18,7 +18,7 @@ namespace IntelliTect.Coalesce.Utilities
         public static string GetCSharpLiteral(TypeViewModel type, object? value)
         {
             // We want a ReferenceEquals null check here to avoid poorly-implemented equality operator overloads.
-            if (value is null) return "null";
+            if (value is null) return "default";
 
             if (type.IsString) return $"\"{value.ToString().EscapeStringLiteralForCSharp()}\"";
 
@@ -33,7 +33,7 @@ namespace IntelliTect.Coalesce.Utilities
                 // Roslyn handles them as uint64 (search for ConvertEnumUnderlyingTypeToUInt64) - perhaps we should too?
                 var int64Value = Convert.ToInt64(value);
                 // Find an explicit enum value.
-                var enumValue = type.EnumValues.FirstOrDefault(e => e.Value.Equals(int64Value));
+                var enumValue = type.EnumValues.FirstOrDefault(e => Convert.ToInt64(e.Value) == int64Value);
                 if (enumValue != null)
                 {
                     // Found a named enum value.

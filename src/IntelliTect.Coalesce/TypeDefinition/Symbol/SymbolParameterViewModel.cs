@@ -23,10 +23,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         protected override object? RawDefaultValue => Symbol.ExplicitDefaultValue;
 
-        public override string CsDefaultValue => 
-            ((ParameterSyntax)Symbol.DeclaringSyntaxReferences[0].GetSyntax()).Default?.Value.ToString()
-            ?? throw new InvalidOperationException("Parameter has no default value");
-
         public override object? GetAttributeValue<TAttribute>(string valueName)
         {
             return Symbol.GetAttributeValue<TAttribute>(valueName);

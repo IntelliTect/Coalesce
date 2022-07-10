@@ -24,6 +24,8 @@ The best way to get started with Coalesce is using the `dotnet new` templates th
 * [Vue](https://github.com/IntelliTect/Coalesce.Vue.Template): `dotnet new --install IntelliTect.Coalesce.Vue.Template; dotnet new coalescevue`
 * [Knockout](https://github.com/IntelliTect/Coalesce.KnockoutJS.Template): `dotnet new --install IntelliTect.Coalesce.KnockoutJS.Template; dotnet new coalesceko`
 
+This command will use the current folder name for the project names, namespaces, etc. It will create a solution in the current folder with .Data and .Web projects.
+
 After you create your project, you should start reading through [the Documentation](https://intellitect.github.io/Coalesce) to see all the things that Coalesce can do.
 
 ## Builds

@@ -6,7 +6,7 @@ import { mapToModel } from '../src/model';
 import { ViewModelCollection } from '../src/viewmodel';
 
 import { StudentViewModel, CourseViewModel, AdvisorViewModel, StudentListViewModel } from './targets.viewmodels';
-import { Student, Advisor, Course } from './targets.models';
+import { Student, Advisor, Course, Grade } from './targets.models';
 import * as metadata from './targets.metadata';
 import { delay } from './test-utils';
 import { AxiosResponse } from 'axios';
@@ -64,7 +64,6 @@ describe("ViewModel", () => {
 
   describe.each(['$load', '$save'] as const)("%s", (callerName) => {
     describe("model props are set when watchers observe end of loading", () => {
-      
       AxiosClient.defaults.adapter = 
         jest.fn().mockImplementation(async () => {
           return <AxiosResponse<any>>{
@@ -85,7 +84,7 @@ describe("ViewModel", () => {
           }
         });
         vue.$watch(`student.${callerName}.isLoading`, callbackFn);
-        student[callerName]();
+        student[callerName].apply(student); // .apply() works around https://github.com/microsoft/TypeScript/issues/49866
         
         // Run a bunch of cycles to let everything flush through.
         for (let i = 0; i < 10; i++) await vue.$nextTick();
@@ -106,7 +105,7 @@ describe("ViewModel", () => {
           capturedName = student.name;
         }); 
         vue.$watch(`student.${callerName}.wasSuccessful`, callbackFn);
-        student[callerName]();
+        student[callerName].apply(student); // .apply() works around https://github.com/microsoft/TypeScript/issues/49866
         
         // Run a bunch of cycles to let everything flush through.
         for (let i = 0; i < 10; i++) await vue.$nextTick();
@@ -173,6 +172,8 @@ describe("ViewModel", () => {
     })
 
     test("saves initialData by default", async () => {
+      // This test ensures that the initial data for a model is saved by surgical saves.
+
       const student = new StudentViewModel({
         studentId: 1,
         name: "Bob",
@@ -205,7 +206,10 @@ describe("ViewModel", () => {
 
       student.$saveMode = "surgical";
       student.$setPropDirty("name");
-      await student.$save()
+      const promise = student.$save()
+      expect(student.$savingProps).toEqual(new Set(["studentId", "name"]))
+      await promise;
+      expect(student.$savingProps).toEqual(new Set())
 
       expect(saveMock.mock.calls[0][0]).toBe(student);
       // Fields should contain only dirty props.
@@ -242,7 +246,10 @@ describe("ViewModel", () => {
       });
 
       student.$saveMode = "whole";
-      await student.$save()
+      const promise = student.$save()
+      expect(student.$savingProps).toEqual(new Set(["name"]))
+      await promise;
+      expect(student.$savingProps).toEqual(new Set())
 
       expect(saveMock.mock.calls[0][0]).toBe(student);
       // Save was not made with specific fields.
@@ -271,6 +278,51 @@ describe("ViewModel", () => {
         expect(student.$isDirty).toBe(true);
         expect(student.$getPropDirty("name")).toBe(true);
       }
+    })
+
+    test("saves override data when save mode is 'whole'", async () => {
+      const student = new StudentViewModel({
+        name: "Bob",
+      });
+
+      const saveMock = student.$apiClient.save = mockItemResult(true, <Student>{
+        studentId: 1,
+        name: "Bob",
+      });
+
+      student.$saveMode = "whole";
+      const promise = student.$save({grade: Grade.Freshman})
+      expect(student.$savingProps).toEqual(new Set(["name", "grade"]))
+      await promise;
+      expect(student.$savingProps).toEqual(new Set())
+
+      expect(saveMock.mock.calls[0][0].name).toBe("Bob");
+      expect(saveMock.mock.calls[0][0].grade).toBe(Grade.Freshman);
+      // Save was not made with specific fields.
+      expect(saveMock.mock.calls[0][1].fields).toBeFalsy();
+    })
+
+    test("saves override data when save mode is 'surgical'", async () => {
+      const student = new StudentViewModel({
+        studentId: 1,
+        name: "Bob",
+      });
+
+      const saveMock = student.$apiClient.save = mockItemResult(true, <Student>{
+        studentId: 1,
+        name: "Bob",
+      });
+
+      student.$saveMode = "surgical";
+      const promise = student.$save({grade: Grade.Freshman})
+      expect(student.$savingProps).toEqual(new Set(["studentId", "name", "grade"]))
+      await promise;
+      expect(student.$savingProps).toEqual(new Set())
+
+      expect(saveMock.mock.calls[0][0].name).toBe("Bob");
+      expect(saveMock.mock.calls[0][0].grade).toBe(Grade.Freshman);
+      // Save includes our override field.
+      expect(saveMock.mock.calls[0][1].fields).toMatchObject(["studentId", "name", "grade"]);
     })
   })
 
@@ -1262,7 +1314,6 @@ describe("ViewModel", () => {
       courseModel.studentId = 4;
       courseModel.student!.studentId = 4;
       courseModel.student!.name = "Beth";
-      debugger;
       course.$loadCleanData(courseModel);
 
       // FK on course should have been updated

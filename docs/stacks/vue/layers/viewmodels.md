@@ -64,18 +64,24 @@ Creates a new instance of an item for the specified child model collection, adds
 ### API Callers & Parameters
 
 
-<Prop def="$load: ItemApiState" lang="ts" idPrefix="member-item" />
+<Prop def="$load: ItemApiState;
+$load(id?: TKey) => ItemResultPromise<TModel>;" lang="ts" idPrefix="member-item" />
 
 An [API Caller](/stacks/vue/layers/api-clients.md#api-callers) for the ``/get`` endpoint. Accepts an optional `id` argument - if not provided, the ViewModel's `$primaryKey` is used instead. Uses the instance's `$params` object for the [Standard Parameters](/modeling/model-components/data-sources.md#standard-parameters).
 
 
-<Prop def="$save: ItemApiState" lang="ts" />
+<Prop def="$save: ItemApiState;
+$save(overrideProps?: Partial<TModel>) => ItemResultPromise<TModel>;" lang="ts" idPrefix="member-item" />
 
 An [API Caller](/stacks/vue/layers/api-clients.md#api-callers) for the ``/save`` endpoint. Uses the instance's `$params` object for the [Standard Parameters](/modeling/model-components/data-sources.md#standard-parameters).
 
 This caller is used for both manually-triggered saves in custom code and for auto-saves. If the [Rules/Validation](/stacks/vue/layers/viewmodels.md#rules-validation) report any errors when the caller is invoked, an error will be thrown.
 
+`overrideProps` can provide properties to save that override the [data properties](#model-data-properties) on the ViewModel instance. This allows for manually saving a change to a property without setting the property on the ViewModel instance into a dirty state. This makes it easier to handle some scenarios where changing the value of the property may put the UI into a logically inconsistent state until the save response has been returned from the server - for example, if a change to one property affects the computed value of other properties.
+
 When a save creates a new record and a new primary key is returned from the server, any entities attached to the current ViewModel via a collection navigation property will have their foreign keys set to the new primary key. This behavior, combined with the usage of deep auto-saves, allows for complex object graphs to be constructed even before any model in the graph has been created.
+
+When a save is in progress, the names of properties being saved are in contained in `$savingProps`.
 
 Saving behavior can be further customized with `$loadResponseFromSaves` and `$saveMode`, listed below.
 
@@ -109,7 +115,16 @@ All serializable properties of the object are sent back to the server with every
         
 </div>
 
-<Prop def="$delete: ItemApiState" lang="ts" />
+
+<Prop def="$savingProps: ReadonlySet<string>" lang="ts" />
+
+When `$save.isLoading == true`, contains the properties of the model currently being saved by `$save` (including autosaves). Does not include non-dirty properties even if `$saveMode == 'whole'`.
+
+This can be used to make per-property UI state changes during saves - for example, displaying progress indicators on/near individual inputs, or disabling input controls.
+
+
+<Prop def="$delete: ItemApiState;
+$delete() => ItemResultPromise<TModel>;" lang="ts" idPrefix="member-item" />
 
 An [API Caller](/stacks/vue/layers/api-clients.md#api-callers) for the ``/delete`` endpoint. Uses the instance's `$params` object for the [Standard Parameters](/modeling/model-components/data-sources.md#standard-parameters).
 
@@ -280,14 +295,16 @@ Getter/setter wrapper around `$params.dataSource`. Takes an instance of a [Data 
 Getter/setter wrapper around `$params.includes`. See [Includes String](/concepts/includes.md) for more information.
 
 
-<Prop def="$load: ListApiState" lang="ts" idPrefix="member-list" />
+<Prop def="$load: ListApiState;
+$load() => ListResultPromise<TModel>" lang="ts" idPrefix="member-list" />
 
 An [API Caller](/stacks/vue/layers/api-clients.md#api-callers) for the ``/list`` endpoint. Uses the instance's `$params` object for the [Standard Parameters](/modeling/model-components/data-sources.md#standard-parameters).
 
 Results are available in the `$items` property. The `result` property of the `$load` API Caller contains the raw results and is not recommended for use in general development - `$items` should always be preferred.
 
 
-<Prop def="$count: ItemApiState" lang="ts" />
+<Prop def="$count: ItemApiState;
+$count() => ItemResultPromise<number>" lang="ts" />
 
 An [API Caller](/stacks/vue/layers/api-clients.md#api-callers) for the ``/count`` endpoint. Uses the instance's `$params` object for the [Standard Parameters](/modeling/model-components/data-sources.md#standard-parameters).
 

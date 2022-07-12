@@ -27,7 +27,7 @@ import {
   convertToModel,
   mapToModel
 } from "./model.js";
-import type { Indexable } from "./util.js";
+import type { DeepPartial, Indexable } from "./util.js";
 import { debounce } from "lodash-es";
 import type { Cancelable, DebounceSettings } from "lodash";
 
@@ -51,6 +51,7 @@ DESIGN NOTES
 
 
 let nextStableId = 1;
+const emptySet: ReadonlySet<string> = new Set();
 
 export abstract class ViewModel<
   TModel extends Model<ModelType> = any,
@@ -349,12 +350,18 @@ export abstract class ViewModel<
    */
   public $saveMode: "surgical" | "whole" = "surgical";
 
+  /** When `$save.isLoading == true`, contains the properties of the model currently being saved by `$save` (including autosaves). 
+   * 
+   * Does not include non-dirty properties even if `$saveMode == 'whole'`.
+  */
+  public $savingProps: ReadonlySet<string> = emptySet;
+
   /**
    * A function for invoking the `/save` endpoint, and a set of properties about the state of the last call.
    */
   get $save() {
     const $save = this.$apiClient
-      .$makeCaller("item", async function(this: ViewModel, c) {
+      .$makeCaller("item", async function(this: ViewModel, c, overrideProps?: Partial<TModel>) {
 
         if (this.$hasError) {
           throw Error("Cannot save - validation failed: " + [...this.$getErrors()].join(", "))
@@ -363,17 +370,34 @@ export abstract class ViewModel<
         // Capture the dirty props before we set $isDirty = false;
         const dirtyProps = [...this._dirtyProps];
 
-        // Save only the dirty props if we're doing surgical saves
-        // and the item already has a PK.
-        const propsToSave = this.$saveMode == "surgical" && !!this.$primaryKey
-          ? [
-              // Add the PK if it isn't already marked dirty.
-              ...(this.$getPropDirty(this.$metadata.keyProp.name) 
-                ? [] 
-                : [this.$metadata.keyProp.name]
-              ), 
-              ...dirtyProps
-            ]
+        // Copy the dirty props into a list that we'll be mutating 
+        // into the list of ALL props that we would need to send
+        // for surgical saves.
+        const propsToSave = [...dirtyProps];
+
+        // If we were passed any override props, send those too.
+        // Use case of override props is changing some field
+        // where we don't want the local UI to reflect that new value
+        // until we know that value has been saved to the server.
+        // A further example is saving some property that will have sever-determined effects
+        // on other properties on the model where we don't want an inconsistent intermediate state.
+        let data: TModel = this as any;
+        if (overrideProps) {
+          data = { ...this.$data, ...overrideProps, $metadata: this.$metadata };
+          propsToSave.push(...Object.keys(overrideProps))
+        }
+
+        // We always send the PK if it exists, regardless of dirty status or save mode.
+        if (this.$primaryKey != null) {
+          propsToSave.push(this.$metadata.keyProp.name)
+        };
+
+        this.$savingProps = new Set(propsToSave);
+
+        // If doing surgical saves and the object already has a known PK,
+        // only save the props that are dirty and/or explicitly requested.
+        const fields = this.$saveMode == "surgical" && this.$primaryKey != null 
+          ? [...this.$savingProps] as any 
           : null;
 
         // Before we make the save call, set isDirty = false.
@@ -381,7 +405,7 @@ export abstract class ViewModel<
         // If the model is dirty when the request completes, we'll not load the response from the server.
         this.$isDirty = false;
         try {
-          return await c.save((this as any) as TModel, { fields: propsToSave, ...this.$params });
+          return await c.save(data, { fields, ...this.$params });
         } catch (e) {
           for (const prop of dirtyProps) {
             this.$setPropDirty(
@@ -397,6 +421,8 @@ export abstract class ViewModel<
             );
           }
           throw e;
+        } finally {
+          this.$savingProps = emptySet;
         }
       })
       .onFulfilled(function(this: ViewModel) {
@@ -415,7 +441,6 @@ export abstract class ViewModel<
           this.$loadCleanData(this.$save.result);
           this.updatedRelatedForeignKeysWithCurrentPrimaryKey();
         }
-
       });
 
     // Lazy getter technique - don't create the caller until/unless it is needed,
@@ -465,7 +490,7 @@ export abstract class ViewModel<
    * Data is loaded in a surgical fashion that will preserve existing instances
    * of objects and arrays found on navigation properties.
    */
-  public $loadFromModel(source: {} | TModel, isCleanData: boolean = true) {
+  public $loadFromModel(source: DeepPartial<TModel>, isCleanData: boolean = true) {
     if (this.$isDirty && this._autoSaveState?.active) {
       updateViewModelFromModel(this as any, source, true, isCleanData);
     } else {
@@ -482,7 +507,7 @@ export abstract class ViewModel<
    * Data is loaded in a surgical fashion that will preserve existing instances
    * of objects and arrays found on navigation properties.
    */
-  public $loadCleanData(source: {} | TModel) {
+  public $loadCleanData(source: DeepPartial<TModel>) {
     return this.$loadFromModel(source, true);
   }
 
@@ -493,7 +518,7 @@ export abstract class ViewModel<
    * Data is loaded in a surgical fashion that will preserve existing instances
    * of objects and arrays found on navigation properties.
    */
-  public $loadDirtyData(source: {} | TModel) {
+  public $loadDirtyData(source: DeepPartial<TModel>) {
     return this.$loadFromModel(source, false);
   }
 
@@ -693,7 +718,7 @@ export abstract class ViewModel<
     /** Instance of an API client for the model through which direct, stateless API requests may be made. */
     public readonly $apiClient: TApi,
 
-    initialDirtyData?: {} | TModel | null
+    initialDirtyData?: DeepPartial<TModel> | null
   ) {
     Object.defineProperty(this, '$stableId', {
       enumerable: false,

@@ -285,6 +285,25 @@ export const Student = domain.types.Student = {
         typeDef: Course,
       }
     },
+    currentCourse: {
+      name: "currentCourse",
+      displayName: "Current Course",
+      type: "model",
+      role: "referenceNavigation",
+      dontSerialize: true,
+      get foreignKey() { return domain.types.Student.props.currentCourseId as ForeignKeyProperty },
+      get principalKey() { return Course.keyProp as PrimaryKeyProperty },
+      typeDef: Course
+    },
+    currentCourseId: {
+      name: "currentCourseId",
+      displayName: "Current Course ID",
+      type: "number",
+      role: "foreignKey",
+      get navigationProp() { return domain.types.Student.props.currentCourse as ModelReferenceNavigationProperty },
+      get principalType() { return domain.types.Course as ModelType },
+      get principalKey() { return Course.keyProp as PrimaryKeyProperty }
+    },
     grade: {
       name: 'grade',
       displayName: 'Grade',

@@ -9,6 +9,8 @@ export interface StudentViewModel extends models.Student {
   isEnrolled: boolean | null;
   birthDate: Date | null;
   courses: CourseViewModel[] | null;
+  currentCourseId: number | null;
+  currentCourse: CourseViewModel | null;
   grade: models.Grade | null;
   advisor: AdvisorViewModel | null;
   studentAdvisorId: number | null;

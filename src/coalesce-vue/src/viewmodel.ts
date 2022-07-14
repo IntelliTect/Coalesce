@@ -949,7 +949,7 @@ export class ViewModelFactory {
       // There is no current factory. Make a new one.
       ViewModelFactory.current = new ViewModelFactory(isCleanData);
       try {
-        // Perform the action, and when we're done, destory the factory.
+        // Perform the action, and when we're done, destroy the factory.
         return action(ViewModelFactory.current);
       } finally {
         ViewModelFactory.current = null;
@@ -1501,26 +1501,26 @@ export function updateViewModelFromModel<
 
               // The setter on the viewmodel will handle the conversion to a ViewModel.
               target[propName] = incomingValue;
-              if (!isCleanData && !(incomingValue instanceof ViewModel)) {
-                // The setter on the viewmodel will assume clean by default.
-                // If the data isn't clean, and the incoming value wasn't already
-                // a ViewModel that is capable of tracking its own dirty state,
-                // explicitly dirty the model.
-
-                // This might be redundant with the fact that the newly created
-                // ViewModel would have been created in our current ViewModelFactory scope,
-                // which itself will flag the incoming data as dirty.
-                // TODO: Test if this is redundant, and remove it if it is.
-                (target[propName] as any as ViewModel).$isDirty = true;
-              }
             } else {
               // `currentValue` is guaranteed to be a ViewModel by virtue of the
               // implementations of the setters for referenceNavigation properties on ViewModel instances.
               currentValue.$loadFromModel(incomingValue, isCleanData);
             }
 
-            // TODO (maybe): Check if target.$parent is the expected value of this navigation prop,
-            // and if it is, update $parent? This is what the KO stack did. Maybe we want to do the same?
+            // Check if target.$parent is the expected value of this navigation prop,
+            // and if it is, update $parent. (The KO stack does this too).
+            // @ts-expect-error
+            const parent = target.$parent
+            const newValue = target[propName] as any as ViewModel;
+            if (
+              parent && newValue && 
+              parent.$metadata === newValue.$metadata && 
+              newValue.$primaryKey === parent.$primaryKey && 
+              parent !== newValue
+            ) {
+              parent.$loadFromModel(incomingValue, isCleanData);
+            }
+            
           } else {
             // We allow the existing value of the navigation prop to stick around
             // if the server didn't send it back.
@@ -1560,7 +1560,7 @@ export function updateViewModelFromModel<
           break;
 
         case "primaryKey":
-          // Always update the PK, even if skipSelf is true.
+          // Always update the PK, even if skipDirty is true.
           if (currentValue !== incomingValue) {
             target[propName] = incomingValue;
           }

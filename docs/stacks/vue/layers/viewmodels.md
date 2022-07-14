@@ -118,7 +118,7 @@ All serializable properties of the object are sent back to the server with every
 
 <Prop def="$savingProps: ReadonlySet<string>" lang="ts" />
 
-When `$save.isLoading == true`, contains the properties of the model currently being saved by `$save` (including autosaves). Does not include non-dirty properties even if `$saveMode == 'whole'`.
+When `$save.isLoading == true`, contains the properties of the model currently being saved by `$save` (including auto-saves). Does not include non-dirty properties even if `$saveMode == 'whole'`.
 
 This can be used to make per-property UI state changes during saves - for example, displaying progress indicators on/near individual inputs, or disabling input controls.
 

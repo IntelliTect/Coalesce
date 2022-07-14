@@ -14,6 +14,8 @@ export interface Student extends Model<typeof metadata.Student> {
   isEnrolled: boolean | null
   birthDate: Date | null
   courses: Course[] | null
+  currentCourseId: number | null
+  currentCourse: Course | null
   grade: Grade | null
   advisor: Advisor | null
   studentAdvisorId: number | null

@@ -521,7 +521,7 @@ describe("ViewModel", () => {
       expect(saveMock).toBeCalledTimes(0);
     })
 
-    test("$loadFromModel won't trigger autosave on ref nav", async () => {
+    test("$loadCleanData won't trigger autosave on ref nav", async () => {
       var studentModel = new Student({
         studentId: 1,
         studentAdvisorId: 3,
@@ -542,7 +542,7 @@ describe("ViewModel", () => {
       expect(saveMock).toBeCalledTimes(0);
     })
 
-    test("$loadFromModel won't trigger autosave on collection nav", async () => {
+    test("$loadCleanData won't trigger autosave on collection nav", async () => {
       var studentModel = new Student({
         studentId: 1,
         courses: [ { courseId: 7, name: "foo" }, ]
@@ -796,6 +796,56 @@ describe("ViewModel", () => {
         
         // Autosave should have triggered for the new object.
         expect(saveMock).toBeCalledTimes(1);
+      })
+
+      test("when autosave of child returns different PK, does not trigger save of parent", async () => {
+        var parent = new StudentViewModel({
+          studentId: 2,
+          name: 'Steve',
+          currentCourseId: 10,
+          currentCourse: {
+            courseId: 10,
+            studentId: 2,
+            name: 'Physics'
+          }
+        })
+
+        const childSaveMock = 
+          parent.currentCourse!.$apiClient.save = 
+          jest.fn().mockResolvedValue(<AxiosItemResult<Course>>{data: {
+            wasSuccessful: true,
+            object: {
+              // Saving the child returns a different object.
+              // Common pattern for immutable records in Coalesce.
+              courseId: 11,
+              name: 'Math',
+              studentId: 2,
+              student: {
+                studentId: 2,
+                name: 'Steve',
+                currentCourseId: 11,
+              }
+            }
+          }});
+
+        const parentSaveMock = parent.$apiClient.save = 
+          jest.fn().mockImplementation((dto: any) => { throw "Save shouldn't have been called" });
+
+        parent.$isDirty = false;
+        parent.currentCourse!.$isDirty = false;
+        const vue = new Vue({ data: { parent } });
+        parent.$startAutoSave(vue, { wait: 1, deep: true });
+        
+        // Dirty the model to trigger autosave
+        parent.currentCourse!.name = "Math";
+        await delay(100);
+        
+        expect(childSaveMock).toHaveBeenCalledTimes(1);
+        expect(parentSaveMock).toHaveBeenCalledTimes(0);
+
+        expect(parent.currentCourseId).toBe(11);
+        expect(parent.currentCourse?.courseId).toBe(11);
+        expect(parent.currentCourse?.name).toBe('Math');
       })
     })
   })

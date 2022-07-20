@@ -1511,7 +1511,7 @@ export function updateViewModelFromModel<
             // and if it is, update $parent. (The KO stack does this too).
             // @ts-expect-error
             const parent = target.$parent
-            const newValue = target[propName] as any as ViewModel;
+            const newValue = currentValue ?? target[propName] as any as ViewModel;
             if (
               parent && newValue && 
               parent.$metadata === newValue.$metadata && 

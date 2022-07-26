@@ -228,6 +228,10 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
             string objectName = "this";
 
             string setter;
+            string mapCall() => property.Object.IsDto
+                ? "" // If we hang an IClassDto off an external type, or another IClassDto, no mapping needed - it is already the desired type.
+                : $".MapToDto<{property.Object.FullyQualifiedName}, {property.Object.DtoName}>(context, tree?[nameof({objectName}.{name})])";
+
             if (property.Type.IsCollection)
             {
                 if (property.Object != null)
@@ -269,7 +273,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                             sb.Indented(string.Concat(orderByStatements));
                         }
 
-                        sb.Indented($".Select(f => f.MapToDto<{property.PureType.FullyQualifiedName}, {property.Object.DtoName}>(context, tree?[nameof({objectName}.{name})])).{(property.Type.IsArray ? "ToArray" : "ToList")}();");
+                        sb.Indented($".Select(f => f{mapCall()}).{(property.Type.IsArray ? "ToArray" : "ToList")}();");
                     }
 
                     if (property.Object.HasDbSet)
@@ -317,7 +321,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                     : "";
 
                 setter = $@"{treeCheck}
-                {objectName}.{name} = obj.{name}.MapToDto<{property.Type.FullyQualifiedName}, {property.Type.ClassViewModel.DtoName}>(context, tree?[nameof({objectName}.{name})]);
+                {objectName}.{name} = obj.{name}{mapCall()};
 ";
             }
             else

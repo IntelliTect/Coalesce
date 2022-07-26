@@ -29,4 +29,9 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses
             Title = obj.Title;
         }
     }
+
+    public class ExternalTypeWithDtoProp
+    {
+        public CaseDtoStandalone Case { get; set; }
+    }
 }

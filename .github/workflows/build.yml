@@ -88,8 +88,8 @@ jobs:
 
     - run: dotnet restore
     - run: dotnet build --no-restore --configuration Release
-    - run: dotnet test --no-build
-    - run: dotnet pack --no-build -o out/packages
+    - run: dotnet test --no-build --configuration Release
+    - run: dotnet pack --no-build --configuration Release -o out/packages
 
     - name: 'Upload Artifact: NuGet Packages'
       uses: actions/upload-artifact@v3

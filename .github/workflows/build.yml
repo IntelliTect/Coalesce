@@ -29,7 +29,7 @@ jobs:
         $rev = curl -s `
           -H "Accept: application/vnd.github+json" `
           -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" `
-          "https://api.github.com/repos/${{GITHUB_REPOSITORY}}/actions/workflows/${{GITHUB_WORKFLOW}}/runs?per_page=100&created=$(Get-Date -Format yyyy-MM-dd)" `
+          "${{ github.api_url }}/repos/${{ github.repository }}/actions/workflows/${{ github.workflow }}/runs?per_page=100&created=$(Get-Date -Format yyyy-MM-dd)" `
           | jq .total_count
 
         $path = "build/version.txt";

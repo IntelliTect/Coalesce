@@ -16,6 +16,8 @@ jobs:
       COALESCE_VERSION: ${{ steps.version.outputs.COALESCE_VERSION }}
 
     steps:
+    - uses: actions/checkout@v3
+    
     - name: "Verify and set COALESCE_VERSION variable"
       id: version
       shell: pwsh
@@ -69,6 +71,7 @@ jobs:
       COALESCE_VERSION: ${{needs.meta.outputs.COALESCE_VERSION}}
       
     steps:
+    - uses: actions/checkout@v3
 
     # Install both 2.2 (for the cli, last version that supports DotnetCliToolReference) and 3.1 (everything else)
     - name: Setup dotnet
@@ -112,6 +115,8 @@ jobs:
       csproj: src/Coalesce.Web/Coalesce.Web.csproj
       
     steps:
+    - uses: actions/checkout@v3
+
     - name: Setup dotnet
       uses: actions/setup-dotnet@v2
       with:
@@ -147,6 +152,7 @@ jobs:
       PACKAGE_DIR: src/$(PACKAGE_NAME)
 
     steps:
+    - uses: actions/checkout@v3
     
     - run: npm ci
     
@@ -188,6 +194,7 @@ jobs:
       PACKAGE_DIR: src/$(PACKAGE_NAME)
 
     steps:
+    - uses: actions/checkout@v3
 
     # build coalesce-vue
     - run: npm run build-local-deps

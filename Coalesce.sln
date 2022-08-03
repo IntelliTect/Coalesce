@@ -49,8 +49,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{6AE7A58D
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IntelliTect.Coalesce.Swashbuckle", "src\IntelliTect.Coalesce.Swashbuckle\IntelliTect.Coalesce.Swashbuckle.csproj", "{7A0788D7-D705-476B-8D89-A0D49A1F201F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IntelliTect.Coalesce.Web.Tests", "src\IntelliTect.Coalesce.Web.Tests\IntelliTect.Coalesce.Web.Tests.csproj", "{F3EB3AE9-0241-445B-8BED-3329E88D6E76}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IntelliTect.Coalesce.CodeGeneration.Tests", "src\IntelliTect.Coalesce.CodeGeneration.Tests\IntelliTect.Coalesce.CodeGeneration.Tests.csproj", "{E29B88BB-24E8-492F-A807-86C9D7C220B8}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "cli", "cli", "{C13AAB2B-5F4A-43D2-87D5-C58A5C61F8C7}"
@@ -62,7 +60,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IntelliTect.Coalesce.Dotnet
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IntelliTect.Coalesce.DotnetTool", "src\IntelliTect.Coalesce.DotnetTool\IntelliTect.Coalesce.DotnetTool.csproj", "{3AD8C418-9065-45FE-9857-CDEC4996286D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IntelliTect.Coalesce.Vue", "src\IntelliTect.Coalesce.Vue\IntelliTect.Coalesce.Vue.csproj", "{29C706A3-B8A7-43EF-A4AA-F8264DF0ADCA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IntelliTect.Coalesce.Vue", "src\IntelliTect.Coalesce.Vue\IntelliTect.Coalesce.Vue.csproj", "{29C706A3-B8A7-43EF-A4AA-F8264DF0ADCA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -114,10 +112,6 @@ Global
 		{7A0788D7-D705-476B-8D89-A0D49A1F201F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7A0788D7-D705-476B-8D89-A0D49A1F201F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7A0788D7-D705-476B-8D89-A0D49A1F201F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F3EB3AE9-0241-445B-8BED-3329E88D6E76}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F3EB3AE9-0241-445B-8BED-3329E88D6E76}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F3EB3AE9-0241-445B-8BED-3329E88D6E76}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F3EB3AE9-0241-445B-8BED-3329E88D6E76}.Release|Any CPU.Build.0 = Release|Any CPU
 		{E29B88BB-24E8-492F-A807-86C9D7C220B8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{E29B88BB-24E8-492F-A807-86C9D7C220B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E29B88BB-24E8-492F-A807-86C9D7C220B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -150,7 +144,6 @@ Global
 		{C2259B45-4507-43C3-BA19-D3F07BE1C010} = {18165BA2-31FA-4D8E-94BE-AAD008D6BCEB}
 		{2F87C06D-22C5-453C-94DB-D78B1D8CAED6} = {18165BA2-31FA-4D8E-94BE-AAD008D6BCEB}
 		{7A0788D7-D705-476B-8D89-A0D49A1F201F} = {18165BA2-31FA-4D8E-94BE-AAD008D6BCEB}
-		{F3EB3AE9-0241-445B-8BED-3329E88D6E76} = {CCBE3CC2-7DA3-4BA1-96A1-7BAAF8533D58}
 		{E29B88BB-24E8-492F-A807-86C9D7C220B8} = {CCBE3CC2-7DA3-4BA1-96A1-7BAAF8533D58}
 		{370CB66D-74B2-4B85-94D3-BCB0EBADFFD2} = {C13AAB2B-5F4A-43D2-87D5-C58A5C61F8C7}
 		{3AD8C418-9065-45FE-9857-CDEC4996286D} = {C13AAB2B-5F4A-43D2-87D5-C58A5C61F8C7}

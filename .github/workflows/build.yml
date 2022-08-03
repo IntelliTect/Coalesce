@@ -84,16 +84,16 @@ jobs:
           6.0.x
 
     - name: dotnet restore
-      run: dotnet restore src/IntelliTect.Coalesce*/*.csproj
+      run: for p in src/IntelliTect.Coalesce*/*.csproj; do dotnet restore $p; done
     
     - name: dotnet build
-      run: dotnet build src/IntelliTect.Coalesce*/*.csproj --configuration Release
+      run: for p in src/IntelliTect.Coalesce*/*.csproj; do dotnet build $p --configuration Release; done
     
     - name: dotnet test
-      run: dotnet test src/IntelliTect.Coalesce*Test*/*.csproj --no-build
+      run: for p in src/IntelliTect.Coalesce*Test*/*.csproj; do dotnet test $p --no-build; done
     
     - name: dotnet pack
-      run: dotnet pack src/IntelliTect.Coalesce*/*.csproj --no-build -o out/packages --version $(COALESCE_VERSION)
+      run: for p in src/IntelliTect.Coalesce*/*.csproj; do dotnet pack $p --no-build -o out/packages --version $(COALESCE_VERSION); done
 
     - name: 'Upload Artifact: NuGet Packages'
       uses: actions/upload-artifact@v3

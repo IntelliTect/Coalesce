@@ -62,7 +62,6 @@ jobs:
 
 
   build-dotnet: 
-    displayName: IntelliTect.Coalesce.*
     needs: Meta
     runs-on: ubuntu-latest
 
@@ -102,7 +101,6 @@ jobs:
 
 
   validate-ko-demo: 
-    displayName: Coalesce.Web (Knockout Demo)
     needs: Meta
     runs-on: ubuntu-latest
     defaults:

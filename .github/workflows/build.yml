@@ -32,7 +32,7 @@ jobs:
           "${{ github.api_url }}/repos/${{ github.repository }}/actions/workflows/${{ github.workflow }}/runs?per_page=100&created=$(Get-Date -Format yyyy-MM-dd)" `
           | jq .total_count
 
-        $path = "build/version.txt";
+        $path = "version.txt";
         $version = "$((cat $path).Trim())"
         $date = Get-Date -Format yyyyMMdd
         $prereleaseSlug = ${{ inputs.prereleaseSlug }}

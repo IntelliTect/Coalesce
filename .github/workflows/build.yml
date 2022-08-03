@@ -11,9 +11,17 @@ on:
 jobs:
   meta:
     runs-on: ubuntu-latest
+    
+    outputs:
+      COALESCE_VERSION: ${{ steps.version.outputs.COALESCE_VERSION }}
 
     steps:
-    - run: >
+    - name: "Verify and set COALESCE_VERSION variable"
+      id: version
+      shell: pwsh
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: >
         # Get how many runs of this workflow have happened today
         # TODO: Pull the date that we check for from the GH API response about the current run,
         # since around midnight, the created date of the workflow and the current date will be different
@@ -21,7 +29,7 @@ jobs:
         $rev = curl -s `
           -H "Accept: application/vnd.github+json" `
           -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" `
-          "${{GITHUB_API_URL}}/repos/${{GITHUB_REPOSITORY}}/actions/workflows/${{GITHUB_WORKFLOW}}/runs?per_page=100&created=$(Get-Date -Format yyyy-MM-dd)" `
+          "https://api.github.com/repos/${{GITHUB_REPOSITORY}}/actions/workflows/${{GITHUB_WORKFLOW}}/runs?per_page=100&created=$(Get-Date -Format yyyy-MM-dd)" `
           | jq .total_count
 
         $path = "build/version.txt";
@@ -51,13 +59,6 @@ jobs:
 
         echo "::set-output name=COALESCE_VERSION::$version";
         echo "#Version $version" >> $GITHUB_STEP_SUMMARY
-      id: version
-      shell: pwsh
-      displayName: "Verify and set COALESCE_VERSION variable"
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    outputs:
-      COALESCE_VERSION: ${{ steps.version.outputs.COALESCE_VERSION }}
 
 
   build-dotnet: 

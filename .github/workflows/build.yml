@@ -24,20 +24,19 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        # Get how many runs of this workflow have happened today
-        # TODO: Pull the date that we check for from the GH API response about the current run,
-        # since around midnight, the created date of the workflow and the current date will be different
+        $apiBaseUrl = "${{ github.api_url }}/repos/${{ github.repository }}/actions"
+        $runInfo = curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "$apiBaseUrl/runs/${{ github.run_id }}";
 
-        $revRequestUrl = "${{ github.api_url }}/repos/${{ github.repository }}/actions/workflows/${{ github.workflow }}/runs?per_page=100&created=$(Get-Date -Format yyyy-MM-dd)";
-        $rev = curl -s `
-          -H "Accept: application/vnd.github+json" `
-          -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" `
-          $revRequestUrl `
-          | jq .total_count
+        $workflowId = $runInfo | jq .workflow_id;
+        $createdAt = $runInfo | jq .created_at;
+          
+        # Get how many runs of this workflow have happened today
+        $revRequestUrl = "$apiBaseUrl/workflows/$workflowId/runs?created=$(Get-Date -Date $createdAt -Format yyyy-MM-dd)";
+        $rev = curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" $revRequestUrl | jq .total_count;
 
         $path = "version.txt";
         $version = "$((cat $path).Trim())"
-        $date = Get-Date -Format yyyyMMdd
+        $date = Get-Date -Date $createdAt -Format yyyyMMdd
         $prereleaseSlug = "${{ inputs.prereleaseSlug }}"
         echo "Version from $($path): $version";
         echo "Prerelease: $prereleaseSlug";
@@ -85,16 +84,16 @@ jobs:
           6.0.x
 
     - name: dotnet restore
-      run: for p in src/IntelliTect.Coalesce*/*.csproj; do dotnet restore $p; done
+      run: for p in src/IntelliTect.Coalesce*/*.csproj; do dotnet restore $p || exit 1; done
     
     - name: dotnet build
-      run: for p in src/IntelliTect.Coalesce*/*.csproj; do dotnet build $p --configuration Release; done
+      run: for p in src/IntelliTect.Coalesce*/*.csproj; do dotnet build $p --configuration Release || exit 1; done
     
     - name: dotnet test
-      run: for p in src/IntelliTect.Coalesce*Test*/*.csproj; do dotnet test $p --no-build; done
+      run: for p in src/IntelliTect.Coalesce*Test*/*.csproj; do dotnet test $p --no-build || exit 1; done
     
     - name: dotnet pack
-      run: for p in src/IntelliTect.Coalesce*/*.csproj; do dotnet pack $p --no-build -o out/packages --version $(COALESCE_VERSION); done
+      run: for p in src/IntelliTect.Coalesce*/*.csproj; do dotnet pack $p --no-build -o out/packages --version $COALESCE_VERSION || exit 1; done
 
     - name: 'Upload Artifact: NuGet Packages'
       uses: actions/upload-artifact@v3
@@ -149,8 +148,6 @@ jobs:
 
     env:
       COALESCE_VERSION: ${{needs.meta.outputs.COALESCE_VERSION}}
-      PACKAGE_NAME: coalesce-vue
-      PACKAGE_DIR: src/$(PACKAGE_NAME)
 
     steps:
     - uses: actions/checkout@v3
@@ -158,7 +155,7 @@ jobs:
     - run: npm ci
     
     - name: npm version
-      run: npm version $(COALESCE_VERSION) --no-git-tag-version
+      run: npm version $COALESCE_VERSION --no-git-tag-version
     
     - name: npm run test
       run: npm run test -- --coverage --reporters=default --reporters=jest-junit
@@ -171,14 +168,13 @@ jobs:
         path: '**/junit.xml'
         reporter: jest-junit
 
-    - name: npm pack
-      run: npm pack --pack-destination out/packages
+    - run: npm pack
 
-    - name: 'Upload Artifact: $(PACKAGE_NAME)'
+    - name: Upload Artifact
       uses: actions/upload-artifact@v3
       with:
-        name: $(PACKAGE_NAME)
-        path: src/coalesce-vue/out/packages
+        name: coalesce-vue
+        path: src/coalesce-vue/coalesce-vue-vuetify*.tgz
 
 
 
@@ -191,8 +187,6 @@ jobs:
 
     env:
       COALESCE_VERSION: ${{needs.meta.outputs.COALESCE_VERSION}}
-      PACKAGE_NAME: coalesce-vue-vuetify
-      PACKAGE_DIR: src/$(PACKAGE_NAME)
 
     steps:
     - uses: actions/checkout@v3
@@ -210,16 +204,15 @@ jobs:
     # Change the package.json with the correct version of coalesce-vue, 
     # but do not use any npm commands to do so as they'll freak out that the version isn't published.
     - name: update *dependencies["coalesce-vue"] version
-      run: cat <<< "$(cat package.json | jq '.peerDependencies["coalesce-vue"] = "$(COALESCE_VERSION)" | .devDependencies["coalesce-vue"] = "$(COALESCE_VERSION)" ')" > package.json
+      run: cat <<< "$(cat package.json | jq '.peerDependencies["coalesce-vue"] = "$COALESCE_VERSION" | .devDependencies["coalesce-vue"] = "$COALESCE_VERSION" ')" > package.json
 
     - name: npm version
-      run: npm version $(COALESCE_VERSION) --no-git-tag-version
+      run: npm version $COALESCE_VERSION --no-git-tag-version
 
-    - name: npm pack
-      run: npm pack --pack-destination out/packages
+    - run: npm pack
 
-    - name: 'Upload Artifact: $(PACKAGE_NAME)'
+    - name: Upload Artifact
       uses: actions/upload-artifact@v3
       with:
-        name: $(PACKAGE_NAME)
-        path: src/coalesce-vue-vuetify/out/packages
+        name: coalesce-vue-vuetify
+        path: src/coalesce-vue-vuetify/coalesce-vue-vuetify*.tgz

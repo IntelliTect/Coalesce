@@ -21,7 +21,7 @@ jobs:
       shell: pwsh
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: >
+      run: |
         # Get how many runs of this workflow have happened today
         # TODO: Pull the date that we check for from the GH API response about the current run,
         # since around midnight, the created date of the workflow and the current date will be different

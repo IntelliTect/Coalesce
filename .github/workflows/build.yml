@@ -27,8 +27,8 @@ jobs:
         $apiBaseUrl = "${{ github.api_url }}/repos/${{ github.repository }}/actions"
         $runInfo = curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "$apiBaseUrl/runs/${{ github.run_id }}";
 
-        $workflowId = $runInfo | jq .workflow_id;
-        $createdAt = $runInfo | jq .created_at;
+        $workflowId = $runInfo | jq -r .workflow_id;
+        $createdAt = $runInfo | jq -r .created_at;
           
         # Get how many runs of this workflow have happened today
         $revRequestUrl = "$apiBaseUrl/workflows/$workflowId/runs?created=$(Get-Date -Date $createdAt -Format yyyy-MM-dd)";

@@ -33,5 +33,8 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses
     public class ExternalTypeWithDtoProp
     {
         public CaseDtoStandalone Case { get; set; }
+        public ICollection<CaseDtoStandalone> Cases { get; set; }
+        public List<CaseDtoStandalone> CasesList { get; set; }
+        public CaseDtoStandalone[] CasesArray { get; set; }
     }
 }

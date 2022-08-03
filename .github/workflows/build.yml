@@ -37,7 +37,7 @@ jobs:
         $path = "version.txt";
         $version = "$((cat $path).Trim())"
         $date = Get-Date -Format yyyyMMdd
-        $prereleaseSlug = ${{ inputs.prereleaseSlug }}
+        $prereleaseSlug = "${{ inputs.prereleaseSlug }}"
         echo "Version from $($path): $version";
         echo "Prerelease: $prereleaseSlug";
         echo "Date: $date";

@@ -1,3 +1,5 @@
+name: build-alpha
+
 on:
   push:
     branches:
@@ -7,6 +9,7 @@ on:
 jobs:
   alpha:
     uses: ./.github/workflows/build.yml
+    secrets: inherit
     with:
       prereleaseSlug: alpha
 

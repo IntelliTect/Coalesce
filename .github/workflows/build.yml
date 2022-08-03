@@ -1,0 +1,219 @@
+on:
+  workflow_call:
+    inputs:
+      prereleaseSlug:
+        required: false
+        type: string
+    secrets: inherit
+
+
+# todo: tagging
+
+jobs:
+  meta:
+    runs-on: ubuntu-latest
+
+    steps:
+    - run: >
+        # Get how many runs of this workflow have happened today
+        # TODO: Pull the date that we check for from the GH API response about the current run,
+        # since around midnight, the created date of the workflow and the current date will be different
+
+        $rev = curl -s `
+          -H "Accept: application/vnd.github+json" `
+          -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" `
+          "${{GITHUB_API_URL}}/repos/${{GITHUB_REPOSITORY}}/actions/workflows/${{GITHUB_WORKFLOW}}/runs?per_page=100&created=$(Get-Date -Format yyyy-MM-dd)" `
+          | jq .total_count
+
+        $path = "build/version.txt";
+        $version = "$((cat $path).Trim())"
+        $date = Get-Date -Format yyyyMMdd
+        $prereleaseSlug = ${{ inputs.prereleaseSlug }}
+        echo "Version from $path: $version";
+        echo "Prerelease: $prereleaseSlug";
+        echo "Date: $date";
+        echo "Rev: $rev";
+
+        if ($prereleaseSlug) {
+          $version = "$version-$prereleaseSlug.$date.$rev"
+        }
+
+        echo "Computed version: $version";
+
+        try
+        {
+            [System.Management.Automation.SemanticVersion]::Parse($version);
+        }
+        catch
+        {
+            Write-Error "'$version' is an invalid SemVer version"
+            exit 1
+        }
+
+        echo "::set-output name=COALESCE_VERSION::$version";
+        echo "#Version $version" >> $GITHUB_STEP_SUMMARY
+      id: version
+      shell: pwsh
+      displayName: "Verify and set COALESCE_VERSION variable"
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    outputs:
+      COALESCE_VERSION: ${{ steps.version.outputs.COALESCE_VERSION }}
+
+
+  build-dotnet: 
+    displayName: IntelliTect.Coalesce.*
+    needs: Meta
+    runs-on: ubuntu-latest
+
+    env:
+      COALESCE_VERSION: ${{needs.meta.outputs.COALESCE_VERSION}}
+      
+    steps:
+
+    # Install both 2.2 (for the cli, last version that supports DotnetCliToolReference) and 3.1 (everything else)
+    - name: Setup dotnet
+      uses: actions/setup-dotnet@v2
+      with:
+        dotnet-version: | 
+          2.2.x
+          3.1.x
+          5.0.x
+          6.0.x
+
+    - name: dotnet restore
+      run: dotnet restore src/IntelliTect.Coalesce*/*.csproj
+    
+    - name: dotnet build
+      run: dotnet build src/IntelliTect.Coalesce*/*.csproj --configuration Release
+    
+    - name: dotnet test
+      run: dotnet test src/IntelliTect.Coalesce*Test*/*.csproj --no-build
+    
+    - name: dotnet pack
+      run: dotnet pack src/IntelliTect.Coalesce*/*.csproj --no-build -o out/packages --version $(COALESCE_VERSION)
+
+    - name: 'Upload Artifact: NuGet Packages'
+      uses: actions/upload-artifact@v3
+      with:
+        name: packages
+        path: out/packages
+
+
+
+  validate-ko-demo: 
+    displayName: Coalesce.Web (Knockout Demo)
+    needs: Meta
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: src/Coalesce.Web
+
+    env:
+      dir: src/Coalesce.Web
+      csproj: src/Coalesce.Web/Coalesce.Web.csproj
+      
+    steps:
+    - name: Setup dotnet
+      uses: actions/setup-dotnet@v2
+      with:
+        dotnet-version: | 
+          3.1.x
+          5.0.x
+          6.0.x
+
+    - name: 'Coalesce.Web: npm ci'
+      run: npm ci
+
+    - name: 'Coalesce.Web: npx gulp coalesceKo'
+      run: npx gulp coalesceKo
+
+    - name: 'Coalesce.Web: npx gulp copyAll'
+      run: npx gulp copyAll
+
+    - name: dotnet build
+      run: dotnet build --configuration Release
+
+
+
+  build-coalesce-vue:
+    needs: Meta
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: src/coalesce-vue
+
+    env:
+      COALESCE_VERSION: ${{needs.meta.outputs.COALESCE_VERSION}}
+      PACKAGE_NAME: coalesce-vue
+      PACKAGE_DIR: src/$(PACKAGE_NAME)
+
+    steps:
+    
+    - run: npm ci
+    
+    - name: npm version
+      run: npm version $(COALESCE_VERSION) --no-git-tag-version
+    
+    - name: npm run test
+      run: npm run test -- --coverage --reporters=default --reporters=jest-junit
+
+    - name: Publish Test Results
+      uses: dorny/test-reporter@v1
+      if: success() || failure() # run this step even if previous step failed
+      with:
+        name: coalesce-vue tests
+        path: '**/junit.xml'
+        reporter: jest-junit
+
+    - name: npm pack
+      run: npm pack --pack-destination out/packages
+
+    - name: 'Upload Artifact: $(PACKAGE_NAME)'
+      uses: actions/upload-artifact@v3
+      with:
+        name: $(PACKAGE_NAME)
+        path: src/coalesce-vue/out/packages
+
+
+
+  build-coalesce-vue-vuetify:
+    needs: Meta
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: src/coalesce-vue-vuetify
+
+    env:
+      COALESCE_VERSION: ${{needs.meta.outputs.COALESCE_VERSION}}
+      PACKAGE_NAME: coalesce-vue-vuetify
+      PACKAGE_DIR: src/$(PACKAGE_NAME)
+
+    steps:
+
+    # build coalesce-vue
+    - run: npm run build-local-deps
+
+    - run: npm ci
+
+    # coalesce-vue-vuetify currently has no tests.
+
+    - run: npm run build
+
+    # now we'll setup the real versions of things.
+    # Change the package.json with the correct version of coalesce-vue, 
+    # but do not use any npm commands to do so as they'll freak out that the version isn't published.
+    - name: update *dependencies["coalesce-vue"] version
+      run: cat <<< "$(cat package.json | jq '.peerDependencies["coalesce-vue"] = "$(COALESCE_VERSION)" | .devDependencies["coalesce-vue"] = "$(COALESCE_VERSION)" ')" > package.json
+
+    - name: npm version
+      run: npm version $(COALESCE_VERSION) --no-git-tag-version
+
+    - name: npm pack
+      run: npm pack --pack-destination out/packages
+
+    - name: 'Upload Artifact: $(PACKAGE_NAME)'
+      uses: actions/upload-artifact@v3
+      with:
+        name: $(PACKAGE_NAME)
+        path: src/coalesce-vue-vuetify/out/packages

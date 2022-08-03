@@ -1,10 +1,14 @@
-trigger:
-  - dev
-  
-variables:
-  BuildConfiguration: Release
-  BuildTag: alpha
-  VersionSuffix: -alpha.$(Build.BuildNumber)
+on:
+  push:
+    branches:
+      - dev
 
 jobs:
-- template: common.yml
+  alpha:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: ./.github/workflows/build.yml
+        with:
+          prereleaseSlug: alpha
+

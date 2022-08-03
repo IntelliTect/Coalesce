@@ -1,0 +1,12 @@
+on:
+  push:
+    branches:
+      - dev
+      - gh-actions
+
+jobs:
+  alpha:
+    uses: ./.github/workflows/build.yml
+    with:
+      prereleaseSlug: alpha
+

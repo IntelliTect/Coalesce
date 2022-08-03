@@ -36,7 +36,7 @@ jobs:
         $version = "$((cat $path).Trim())"
         $date = Get-Date -Format yyyyMMdd
         $prereleaseSlug = ${{ inputs.prereleaseSlug }}
-        echo "Version from $path: $version";
+        echo "Version from $($path): $version";
         echo "Prerelease: $prereleaseSlug";
         echo "Date: $date";
         echo "Rev: $rev";

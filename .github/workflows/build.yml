@@ -28,10 +28,11 @@ jobs:
         # TODO: Pull the date that we check for from the GH API response about the current run,
         # since around midnight, the created date of the workflow and the current date will be different
 
+        $revRequestUrl = "${{ github.api_url }}/repos/${{ github.repository }}/actions/workflows/${{ github.workflow }}/runs?per_page=100&created=$(Get-Date -Format yyyy-MM-dd)";
         $rev = curl -s `
           -H "Accept: application/vnd.github+json" `
           -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" `
-          "${{ github.api_url }}/repos/${{ github.repository }}/actions/workflows/${{ github.workflow }}/runs?per_page=100&created=$(Get-Date -Format yyyy-MM-dd)" `
+          $revRequestUrl `
           | jq .total_count
 
         $path = "version.txt";

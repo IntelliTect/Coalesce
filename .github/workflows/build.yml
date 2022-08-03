@@ -4,7 +4,6 @@ on:
       prereleaseSlug:
         required: false
         type: string
-    secrets: inherit
 
 
 # todo: tagging

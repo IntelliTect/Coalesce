@@ -27,22 +27,21 @@ jobs:
         $apiBaseUrl = "${{ github.api_url }}/repos/${{ github.repository }}/actions"
         $runInfo = curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "$apiBaseUrl/runs/${{ github.run_id }}";
 
-        # Calculate timezones in PST/PDT
-        sudo timedatectl set-timezone "America/Los_Angeles"
-
         $workflowId = $runInfo | jq -r .workflow_id;
         $createdAt = $runInfo | jq -r .created_at;
+        $createdAtPST = [System.TimeZoneInfo]::ConvertTimeBySystemTimeZoneId( [System.DateTimeOffset](Get-Date -Date $createdAt), "America/Los_Angeles" );
 
         echo "workflowId: $workflowId";
-        echo "createdAt: $createdAt";
+        echo "createdAt: $createdAt ($createdAtPST)";
           
         # Get how many runs of this workflow have happened today
-        $revRequestUrl = "$apiBaseUrl/workflows/$workflowId/runs?created=$(Get-Date -Date $createdAt -Format yyyy-MM-dd)";
+        $dateFormat = "yyyy-MM-ddT00:00:00K"
+        $revRequestUrl = "$apiBaseUrl/workflows/$workflowId/runs?created=$($createdAtPST.ToString($dateFormat))..$($createdAtPST.AddDays(1).ToString($dateFormat))";
         $rev = curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" $revRequestUrl | jq .total_count;
 
         $path = "version.txt";
         $version = "$((cat $path).Trim())"
-        $date = Get-Date -Date $createdAt -Format yyyyMMdd
+        $date = $createdAtPST.ToString("yyyyMMdd")
         $prereleaseSlug = "${{ inputs.prereleaseSlug }}"
         echo "Version from $($path): $version";
         echo "Prerelease: $prereleaseSlug";

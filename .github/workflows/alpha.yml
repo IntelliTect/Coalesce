@@ -5,11 +5,50 @@ on:
     branches:
       - dev
       - gh-actions
+    paths-ignore:
+      - 'docs/**'
+  pull_request:
+    branches:
+      - dev
 
 jobs:
-  alpha:
+  build:
     uses: ./.github/workflows/build.yml
     secrets: inherit
     with:
       prereleaseSlug: alpha
+
+  publish-npm:
+    if: success() && github.event_name == 'push'
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Download all workflow run artifacts
+      uses: actions/download-artifact@v3
+
+    - uses: actions/setup-node@v3
+
+    - name: npm publish
+      run: npm publish ./coalesce-vue/*.tgz --tag dev --access public
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+    - name: npm publish
+      run: npm publish ./coalesce-vue-vuetify/*.tgz --tag dev --access public
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+
+  publish-nuget:
+    if: success() && github.event_name == 'push'
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Download all workflow run artifacts
+      uses: actions/download-artifact@v3
+
+    - name: dotnet nuget push
+      run: dotnet nuget push "**/*.nupkg" --api-key ${{ secrets.NUGET_TOKEN }}
 

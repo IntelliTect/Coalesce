@@ -47,6 +47,7 @@ jobs:
         echo "Prerelease: $prereleaseSlug";
         echo "Date: $date";
         echo "Rev: $rev";
+        echo "checkTagIsUnique: ${{ inputs.checkTagIsUnique }}";
 
         if ($prereleaseSlug) {
           $version = "$version-$prereleaseSlug.$date.$rev"
@@ -66,7 +67,7 @@ jobs:
 
         if (${{ inputs.checkTagIsUnique }}) {
           if (git tag -l "$version") {
-            echo "::error Tag $version already exists.";
+            Write-Error "Tag $version already exists.";
             exit 1;
           }
         }

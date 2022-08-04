@@ -28,6 +28,8 @@ jobs:
       uses: actions/download-artifact@v3
 
     - uses: actions/setup-node@v3
+      with:
+        registry-url: 'https://registry.npmjs.org'
 
     - name: npm publish
       run: npm publish ./coalesce-vue/*.tgz --tag dev --access public
@@ -50,5 +52,5 @@ jobs:
       uses: actions/download-artifact@v3
 
     - name: dotnet nuget push
-      run: dotnet nuget push "**/*.nupkg" --api-key ${{ secrets.NUGET_TOKEN }}
+      run: dotnet nuget push "**/*.nupkg" -s https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_TOKEN }}
 

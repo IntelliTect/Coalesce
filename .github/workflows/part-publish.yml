@@ -1,0 +1,35 @@
+on:
+  workflow_call
+
+jobs:
+  npm:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Download all workflow run artifacts
+      uses: actions/download-artifact@v3
+
+    - uses: actions/setup-node@v3
+      with:
+        registry-url: 'https://registry.npmjs.org'
+
+    - name: npm publish
+      run: npm publish ./coalesce-vue/*.tgz --tag dev --access public
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+    - name: npm publish
+      run: npm publish ./coalesce-vue-vuetify/*.tgz --tag dev --access public
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+
+  nuget:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Download all workflow run artifacts
+      uses: actions/download-artifact@v3
+
+    - name: dotnet nuget push
+      run: dotnet nuget push "**/*.nupkg" -s https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_TOKEN }}

@@ -168,7 +168,7 @@ jobs:
 
     - name: Publish Test Results
       uses: dorny/test-reporter@v1
-      if: success() || failure() # run this step even if previous step failed
+      if: always() && github.event_name != 'pull_request'
       with:
         name: coalesce-vue tests
         path: '**/junit.xml'

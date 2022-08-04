@@ -170,8 +170,7 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: coalesce-vue
-        path: src/coalesce-vue/coalesce-vue-vuetify*.tgz
-
+        path: src/coalesce-vue/coalesce-vue*.tgz
 
 
   build-coalesce-vue-vuetify:

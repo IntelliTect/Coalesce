@@ -9,6 +9,6 @@
     "@types/knockout": "^3.4.47",
     "@types/knockout.validation": "0.0.36",
     "@types/select2": "^4.0.41",
-    "moment": "2.29.3"
+    "moment": "^2.29.4"
   }
 }

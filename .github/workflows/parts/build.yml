@@ -4,9 +4,9 @@ on:
       prereleaseSlug:
         required: false
         type: string
-
-
-# todo: tagging
+      checkTagIsUnique:
+        required: false
+        type: boolean
 
 jobs:
   meta:
@@ -62,6 +62,13 @@ jobs:
         {
             Write-Error "'$version' is an invalid SemVer version"
             exit 1
+        }
+
+        if (${{ inputs.checkTagIsUnique }}) {
+          if (git tag -l "$version") {
+            echo "::error Tag $version already exists.";
+            exit 1;
+          }
         }
 
         echo "::set-output name=COALESCE_VERSION::$version";

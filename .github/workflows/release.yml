@@ -15,7 +15,7 @@ on:
 
 jobs:
   build:
-    uses: ./.github/workflows/parts/build.yml
+    uses: ./.github/workflows/parts/part-build.yml
     secrets: inherit
     with:
       prereleaseSlug: ${{ inputs.prereleaseSlug }}
@@ -23,5 +23,5 @@ jobs:
 
   publish:
     if: success() && github.event_name == 'push'
-    uses: ./.github/workflows/parts/publish.yml
+    uses: ./.github/workflows/parts/part-publish.yml
     secrets: inherit 

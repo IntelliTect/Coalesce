@@ -65,7 +65,7 @@ jobs:
             exit 1
         }
 
-        if (${{ inputs.checkTagIsUnique }}) {
+        if ("${{ inputs.checkTagIsUnique }}" -eq "true") {
           if (git tag -l "$version") {
             Write-Error "Tag $version already exists.";
             exit 1;

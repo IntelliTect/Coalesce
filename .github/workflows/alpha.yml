@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - dev
+      - gh-actions
     paths-ignore:
       - 'docs/**'
   pull_request:

@@ -24,4 +24,4 @@ jobs:
   publish:
     if: success() && github.event_name == 'push'
     uses: ./.github/workflows/parts/publish.yml
-    secrets: inherit
+    secrets: inherit 

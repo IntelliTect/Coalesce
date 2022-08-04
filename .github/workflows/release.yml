@@ -1,0 +1,27 @@
+name: release
+
+on:
+  workflow_dispatch:
+    inputs:
+      logLevel:
+        description: 'Prerelease slug (optional)'
+        required: false
+        default: ''
+        type: choice
+        options:
+        - ''
+        - rc
+        - beta
+
+jobs:
+  build:
+    uses: ./.github/workflows/parts/build.yml
+    secrets: inherit
+    with:
+      prereleaseSlug: ${{ inputs.prereleaseSlug }}
+      checkTagIsUnique: true
+
+  publish:
+    if: success() && github.event_name == 'push'
+    uses: ./.github/workflows/parts/publish.yml
+    secrets: inherit

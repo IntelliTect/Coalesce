@@ -27,6 +27,9 @@ jobs:
         $apiBaseUrl = "${{ github.api_url }}/repos/${{ github.repository }}/actions"
         $runInfo = curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "$apiBaseUrl/runs/${{ github.run_id }}";
 
+        # Calculate timezones in PST/PDT
+        set-timezone -Name "Pacific Standard Time"
+
         $workflowId = $runInfo | jq -r .workflow_id;
         $createdAt = $runInfo | jq -r .created_at;
 

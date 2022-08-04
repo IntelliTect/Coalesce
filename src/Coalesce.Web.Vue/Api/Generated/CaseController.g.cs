@@ -126,7 +126,7 @@ namespace Coalesce.Web.Vue.Api
                 return new ItemResult(itemResult);
             }
             var item = itemResult.Object;
-            await item.UploadImage(Db, file == null ? null : new File { Name = file.FileName, ContentType = file.ContentType, Length = file.Length, Content = file.OpenReadStream() });
+            await item.UploadImage(Db, file == null ? null : new IntelliTect.Coalesce.Models.File { Name = file.FileName, ContentType = file.ContentType, Length = file.Length, Content = file.OpenReadStream() });
             await Db.SaveChangesAsync();
             var _result = new ItemResult();
             return _result;
@@ -201,7 +201,7 @@ namespace Coalesce.Web.Vue.Api
                 return new ItemResult<IntelliTect.Coalesce.Models.IFile>(itemResult);
             }
             var item = itemResult.Object;
-            var _methodResult = await item.UploadAndDownload(Db, file == null ? null : new File { Name = file.FileName, ContentType = file.ContentType, Length = file.Length, Content = file.OpenReadStream() });
+            var _methodResult = await item.UploadAndDownload(Db, file == null ? null : new IntelliTect.Coalesce.Models.File { Name = file.FileName, ContentType = file.ContentType, Length = file.Length, Content = file.OpenReadStream() });
             await Db.SaveChangesAsync();
             if (_methodResult.Object != null)
             {
@@ -234,7 +234,7 @@ namespace Coalesce.Web.Vue.Api
                 return new ItemResult(itemResult);
             }
             var item = itemResult.Object;
-            await item.UploadImages(Db, files == null ? null : files.Select(f => (IntelliTect.Coalesce.Models.IFile)new File { Name = f.FileName, ContentType = f.ContentType, Length = f.Length, Content = f.OpenReadStream() }).ToList());
+            await item.UploadImages(Db, files == null ? null : files.Select(f => (IntelliTect.Coalesce.Models.IFile)new IntelliTect.Coalesce.Models.File { Name = f.FileName, ContentType = f.ContentType, Length = f.Length, Content = f.OpenReadStream() }).ToList());
             await Db.SaveChangesAsync();
             var _result = new ItemResult();
             return _result;

@@ -161,5 +161,8 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
 
         [Coalesce]
         public Task MethodWithOptionalEnumParam(Case.Statuses status = Case.Statuses.Open) => Task.CompletedTask;
+
+        [Coalesce]
+        public ExternalTypeWithDtoProp ReturnsExternalTypeWithDtoProp() => new ExternalTypeWithDtoProp();
     }
 }

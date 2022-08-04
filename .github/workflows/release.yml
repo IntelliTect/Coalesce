@@ -1,0 +1,35 @@
+name: release
+
+on:
+  workflow_dispatch:
+    inputs:
+      logLevel:
+        description: 'Prerelease slug (optional)'
+        required: false
+        default: ''
+        type: choice
+        options:
+        - ''
+        - rc
+        - beta
+
+jobs:
+  build:
+    uses: ./.github/workflows/part-build.yml
+    secrets: inherit
+    with:
+      prereleaseSlug: ${{ inputs.prereleaseSlug }}
+      checkTagIsUnique: true
+
+  publish:
+    if: success() && github.event_name == 'push'
+    uses: ./.github/workflows/part-publish.yml
+    needs: build
+    secrets: inherit 
+
+  create-release:
+    needs: [meta, publish]
+    steps:
+    - uses: rickstaa/action-create-tag@v1
+      with:
+        tag: ${{ needs.meta.outputs.COALESCE_VERSION }}

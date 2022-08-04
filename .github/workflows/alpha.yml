@@ -1,0 +1,25 @@
+name: build-alpha
+
+on:
+  push:
+    branches:
+      - dev
+    paths-ignore:
+      - 'docs/**'
+  pull_request:
+    branches:
+      - dev
+  workflow_dispatch:
+
+jobs:
+  build:
+    uses: ./.github/workflows/part-build.yml
+    secrets: inherit
+    with:
+      prereleaseSlug: alpha
+
+  publish:
+    if: success() && github.event_name == 'push'
+    uses: ./.github/workflows/part-publish.yml
+    needs: build
+    secrets: inherit

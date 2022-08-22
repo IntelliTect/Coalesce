@@ -211,7 +211,7 @@ jobs:
     # Change the package.json with the correct version of coalesce-vue, 
     # but do not use any npm commands to do so as they'll freak out that the version isn't published.
     - name: update *dependencies["coalesce-vue"] version
-      run: cat <<< "$(cat package.json | jq '.peerDependencies["coalesce-vue"] = "$COALESCE_VERSION" | .devDependencies["coalesce-vue"] = "$COALESCE_VERSION" ')" > package.json
+      run: cat <<< "$(cat package.json | jq ".peerDependencies[\"coalesce-vue\"] = \"$COALESCE_VERSION\" | .devDependencies[\"coalesce-vue\"] = \"$COALESCE_VERSION\" ")" > package.json
 
     - name: npm version
       run: npm version $COALESCE_VERSION --no-git-tag-version

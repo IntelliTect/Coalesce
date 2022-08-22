@@ -222,4 +222,4 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: coalesce-vue-vuetify
-        path: src/coalesce-vue-vuetify/coalesce-vue-vuetify*.tgz
+        path: src/coalesce-vue-vuetify2/*.tgz

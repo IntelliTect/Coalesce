@@ -13,13 +13,13 @@ jobs:
       with:
         registry-url: 'https://registry.npmjs.org'
 
-    - name: npm publish
+    - name: npm publish coalesce-vue
       run: npm publish ./coalesce-vue/*.tgz --tag dev --access public
       env:
         NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-    - name: npm publish
-      run: npm publish ./coalesce-vue-vuetify/*.tgz --tag dev --access public
+    - name: npm publish coalesce-vue-vuetify
+      run: for f in ./coalesce-vue-vuetify/*.tgz; do npm publish $f --tag dev --access public; done 
       env:
         NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 

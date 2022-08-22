@@ -3,7 +3,6 @@ import path from "path";
 import { existsSync, readFileSync, writeFile } from "fs";
 import { spawn } from "child_process";
 import { TLSSocket } from "tls";
-import { addHours } from "date-fns";
 import MagicString from "magic-string";
 
 import type * as https from "https";
@@ -284,7 +283,8 @@ export async function getCertPaths(certName?: string) {
     if (
       cert &&
       "valid_to" in cert &&
-      new Date(cert.valid_to) < addHours(new Date(), 4)
+      // Expires within 4 hours
+      (new Date(cert.valid_to).valueOf() - new Date().valueOf()) / 36e5 < 4
     ) {
       console.log(
         "Local certs are expired, or almost expired. Will regenerate."

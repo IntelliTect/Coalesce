@@ -88,6 +88,7 @@ export default [
       ...sharedPlugins(["src/index.dist.ts"]),
       Components({
         dts: false,
+        extensions: ['vue', 'ts'],
         resolvers: [VuetifyResolver()],
         include: [/\.vue$/, /\.ts$/, /\.vue\?vue/],
       })

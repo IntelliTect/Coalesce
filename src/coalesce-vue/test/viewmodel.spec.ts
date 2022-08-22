@@ -1,83 +1,94 @@
+import Vue, { defineComponent, nextTick, watch } from "vue";
+import {
+  AxiosClient,
+  AxiosItemResult,
+  AxiosListResult,
+  ItemApiState,
+} from "../src/api-client";
+import { mapToModel } from "../src/model";
+import { ViewModelCollection } from "../src/viewmodel";
 
+import {
+  StudentViewModel,
+  CourseViewModel,
+  AdvisorViewModel,
+  StudentListViewModel,
+} from "./targets.viewmodels";
+import { Student, Advisor, Course, Grade } from "./targets.models";
+import * as metadata from "./targets.metadata";
+import { delay, mountData } from "./test-utils";
+import { AxiosResponse } from "axios";
 
-import Vue from 'vue';
-import { AxiosClient, AxiosItemResult, AxiosListResult, ItemApiState } from '../src/api-client'
-import { mapToModel } from '../src/model';
-import { ViewModelCollection } from '../src/viewmodel';
-
-import { StudentViewModel, CourseViewModel, AdvisorViewModel, StudentListViewModel } from './targets.viewmodels';
-import { Student, Advisor, Course, Grade } from './targets.models';
-import * as metadata from './targets.metadata';
-import { delay } from './test-utils';
-import { AxiosResponse } from 'axios';
-
+import { mount } from "@vue/test-utils";
 
 function mockItemResult<T>(success: boolean, object: T) {
-  return jest.fn().mockResolvedValue(<AxiosItemResult<T>>{data: {
-    wasSuccessful: success,
-    object: object
-  }})
+  return vitest.fn().mockResolvedValue(<AxiosItemResult<T>>{
+    data: {
+      wasSuccessful: success,
+      object: object,
+    },
+  });
 }
 
 describe("ViewModel", () => {
-
-  describe.each(
-    ['$load', '$save', '$delete',] as const
-  )("%s", (callerName) => {
+  describe.each(["$load", "$save", "$delete"] as const)("%s", (callerName) => {
     test("caller is lazily created", async () => {
       // This test ensures that vue doesn't create them for us
       // as a consequence of it trying to enumerate properties
       // on our objects in order to add reactivity.
 
-      const vue = new Vue({
-        data: {
-          student: new StudentViewModel
-        }
+      const vue = mountData({
+        student: new StudentViewModel(),
       });
 
       // ViewModel shouldn't have its own property descriptor for callerName.
       // The descriptor will be on the prototype.
-      expect(Object.getOwnPropertyDescriptor(vue.student, callerName))
-        .toBeUndefined()
+      expect(
+        Object.getOwnPropertyDescriptor(vue.student, callerName)
+      ).toBeUndefined();
 
       // Access the caller to cause it to be created.
       vue.student[callerName];
 
       // Instance should now have its own caller.
-      expect(Object.getOwnPropertyDescriptor(vue.student, callerName))
-        .not.toBeUndefined();
+      expect(
+        Object.getOwnPropertyDescriptor(vue.student, callerName)
+      ).not.toBeUndefined();
       expect(vue.student[callerName]).toBeInstanceOf(ItemApiState);
-      
+
       // Multiple access should yield the same instance.
       expect(vue.student[callerName]).toBe(vue.student[callerName]);
 
       // Instances should be reactive:
-      const callbackFn = jest.fn();
+      const callbackFn = vitest.fn();
       vue.$watch(`student.${callerName}.isLoading`, callbackFn);
       vue.student[callerName].isLoading = true;
       await vue.$nextTick();
       // Watcher should have been triggered for isLoading.
       expect(callbackFn).toBeCalledTimes(1);
+    });
+  });
 
-    })
-  })
-
-  describe.each(['$load', '$save'] as const)("%s", (callerName) => {
+  describe.each(["$load", "$save"] as const)("%s", (callerName) => {
     describe("model props are set when watchers observe end of loading", () => {
-      AxiosClient.defaults.adapter = 
-        jest.fn().mockImplementation(async () => {
+      AxiosClient.defaults.adapter = vitest
+        .fn()
+        .mockImplementation(async () => {
           return <AxiosResponse<any>>{
-            data: {wasSuccessful: true, object: <Student>{studentId: 1, name: 'Bob'}},
-            status: 200
-          }
-        })
+            data: {
+              wasSuccessful: true,
+              object: <Student>{ studentId: 1, name: "Bob" },
+            },
+            status: 200,
+          };
+        });
 
       test("isLoading==false", async () => {
-        const student = new StudentViewModel({studentId: 1});
-        const vue = new Vue({ data: { student } });
+        const student = new StudentViewModel({ studentId: 1 });
+        const vue = mountData({ student });
 
         let capturedName;
-        const callbackFn = jest.fn((n) => {
+        const callbackFn = vitest.fn((n) => {
           if (n === false) {
             // DO NOT ASSERT INSIDE THE WATCHER CALLBACK. Vue will swallow the error.
             capturedName = student.name;
@@ -85,37 +96,36 @@ describe("ViewModel", () => {
         });
         vue.$watch(`student.${callerName}.isLoading`, callbackFn);
         student[callerName].apply(student); // .apply() works around https://github.com/microsoft/TypeScript/issues/49866
-        
+
         // Run a bunch of cycles to let everything flush through.
         for (let i = 0; i < 10; i++) await vue.$nextTick();
 
         // Watcher should have been triggered for isLoading=true, then isLoading=false.
-        expect(callbackFn).toHaveBeenNthCalledWith(1, true, false);
-        expect(callbackFn).toHaveBeenNthCalledWith(2, false, true);
-        expect(capturedName).toBe('Bob')
-      })
+        expect(callbackFn.mock.calls[0][0]).toBe(true);
+        expect(callbackFn.mock.calls[1][0]).toBe(false);
+        expect(capturedName).toBe("Bob");
+      });
 
       test("wasSuccessful==true", async () => {
-        const student = new StudentViewModel({studentId: 1});
-        const vue = new Vue({ data: { student } });
-        
+        const student = new StudentViewModel({ studentId: 1 });
+        const vue = mountData({ student });
+
         let capturedName;
-        const callbackFn = jest.fn((n) => {
+        const callbackFn = vitest.fn((n) => {
           // DO NOT ASSERT INSIDE THE WATCHER CALLBACK. Vue will swallow the error.
           capturedName = student.name;
-        }); 
+        });
         vue.$watch(`student.${callerName}.wasSuccessful`, callbackFn);
         student[callerName].apply(student); // .apply() works around https://github.com/microsoft/TypeScript/issues/49866
-        
+
         // Run a bunch of cycles to let everything flush through.
         for (let i = 0; i < 10; i++) await vue.$nextTick();
 
-        // Watcher should have been triggered for isLoading=true, then isLoading=false.
-        expect(callbackFn).toHaveBeenNthCalledWith(1, true, null);
-        expect(capturedName).toBe('Bob')
-      })
-    })
-  })
+        expect(callbackFn.mock.calls[0][0]).toBe(true);
+        expect(capturedName).toBe("Bob");
+      });
+    });
+  });
 
   describe("$save", () => {
     const saveMock = mockItemResult(true, <Student>{
@@ -128,10 +138,7 @@ describe("ViewModel", () => {
     test("updates collection navigation entities with new PK", async () => {
       const student = new StudentViewModel({
         name: "Bob",
-        courses: [
-          { name: "a", },
-          { name: "b", },
-        ]
+        courses: [{ name: "a" }, { name: "b" }],
       });
 
       student.$apiClient.save = mockItemResult(true, <Student>{
@@ -143,14 +150,14 @@ describe("ViewModel", () => {
         studentAdvisorId: null,
         advisor: null,
       });
-      await student.$save()
+      await student.$save();
 
       expect(student.courses).toHaveLength(2);
       expect(student.courses![0].name).toBe("a");
       expect(student.courses![0].studentId).toBe(3);
       expect(student.courses![1].name).toBe("b");
       expect(student.courses![1].studentId).toBe(3);
-    })
+    });
 
     test("updates $parent's FK prop with new PK", async () => {
       const student = new StudentViewModel({
@@ -165,11 +172,11 @@ describe("ViewModel", () => {
         advisorId: 3,
         name: "Phoebe",
       });
-      await advisor.$save()
+      await advisor.$save();
 
       expect(advisor.advisorId).toBe(3);
       expect(student.studentAdvisorId).toBe(3);
-    })
+    });
 
     test("saves initialData by default", async () => {
       // This test ensures that the initial data for a model is saved by surgical saves.
@@ -179,19 +186,22 @@ describe("ViewModel", () => {
         name: "Bob",
       });
 
-      const saveMock 
-        = student.$apiClient.save 
-        = mockItemResult(true, <Student>{
-          studentId: 1,
-          name: "Bob",
-        });
+      const saveMock = (student.$apiClient.save = mockItemResult(true, <
+        Student
+      >{
+        studentId: 1,
+        name: "Bob",
+      }));
 
-      await student.$save()
+      await student.$save();
 
       expect(saveMock.mock.calls[0][0]).toBe(student);
       // This could also be null
-      expect(saveMock.mock.calls[0][1].fields).toMatchObject(["studentId", "name"]);
-    })
+      expect(saveMock.mock.calls[0][1].fields).toMatchObject([
+        "studentId",
+        "name",
+      ]);
+    });
 
     test("when save mode is 'surgical', saves only dirty props", async () => {
       const student = new StudentViewModel({
@@ -199,57 +209,66 @@ describe("ViewModel", () => {
         name: "Bob",
       });
 
-      const saveMock = student.$apiClient.save = mockItemResult(true, <Student>{
+      const saveMock = (student.$apiClient.save = mockItemResult(true, <
+        Student
+      >{
         studentId: 1,
         name: "Bob",
-      });
+      }));
 
       student.$saveMode = "surgical";
       student.$setPropDirty("name");
-      const promise = student.$save()
-      expect(student.$savingProps).toEqual(new Set(["studentId", "name"]))
+      const promise = student.$save();
+      expect(student.$savingProps).toEqual(new Set(["studentId", "name"]));
       await promise;
-      expect(student.$savingProps).toEqual(new Set())
+      expect(student.$savingProps).toEqual(new Set());
 
       expect(saveMock.mock.calls[0][0]).toBe(student);
       // Fields should contain only dirty props.
-      expect(saveMock.mock.calls[0][1].fields).toMatchObject(["studentId", "name"]);
-    })
+      expect(saveMock.mock.calls[0][1].fields).toMatchObject([
+        "studentId",
+        "name",
+      ]);
+    });
 
     test("when save mode is 'surgical' and model lacks PK, saves all props", async () => {
       const student = new StudentViewModel({
         name: "Bob",
       });
 
-      const saveMock = student.$apiClient.save = mockItemResult(true, <Student>{
+      const saveMock = (student.$apiClient.save = mockItemResult(true, <
+        Student
+      >{
         studentId: 1,
         name: "Bob",
-      });
+      }));
 
       student.$saveMode = "surgical";
       student.$setPropDirty("name");
-      await student.$save()
+      await student.$save();
 
       expect(saveMock.mock.calls[0][0]).toBe(student);
       // Fields should be null, causing all props to be saved.
       expect(saveMock.mock.calls[0][1].fields).toBeNull();
-    })
+    });
 
     test("when save mode is 'whole', saves all props", async () => {
       const student = new StudentViewModel({
         name: "Bob",
       });
 
-      const saveMock = student.$apiClient.save = mockItemResult(true, <Student>{
+      const saveMock = (student.$apiClient.save = mockItemResult(true, <
+        Student
+      >{
         studentId: 1,
         name: "Bob",
-      });
+      }));
 
       student.$saveMode = "whole";
-      const promise = student.$save()
-      expect(student.$savingProps).toEqual(new Set(["name"]))
+      const promise = student.$save();
+      expect(student.$savingProps).toEqual(new Set(["name"]));
       await promise;
-      expect(student.$savingProps).toEqual(new Set())
+      expect(student.$savingProps).toEqual(new Set());
 
       expect(saveMock.mock.calls[0][0]).toBe(student);
       // Save was not made with specific fields.
@@ -257,7 +276,7 @@ describe("ViewModel", () => {
       // Dirty flags were cleared.
       expect(student.$getPropDirty("name")).toBe(false);
       expect(student.$isDirty).toBe(false);
-    })
+    });
 
     test("when save fails, dirty props stay dirty", async () => {
       const student = new StudentViewModel({
@@ -265,12 +284,14 @@ describe("ViewModel", () => {
       });
 
       try {
-        student.$apiClient.save = jest.fn().mockRejectedValue(new Error("reject"));
-          
+        student.$apiClient.save = vitest
+          .fn()
+          .mockRejectedValue(new Error("reject"));
+
         student.$saveMode = "surgical";
         expect(student.$getPropDirty("name")).toBe(true);
 
-        await student.$save()
+        await student.$save();
       } catch {
         // Ignore the expected error
       } finally {
@@ -278,29 +299,31 @@ describe("ViewModel", () => {
         expect(student.$isDirty).toBe(true);
         expect(student.$getPropDirty("name")).toBe(true);
       }
-    })
+    });
 
     test("saves override data when save mode is 'whole'", async () => {
       const student = new StudentViewModel({
         name: "Bob",
       });
 
-      const saveMock = student.$apiClient.save = mockItemResult(true, <Student>{
+      const saveMock = (student.$apiClient.save = mockItemResult(true, <
+        Student
+      >{
         studentId: 1,
         name: "Bob",
-      });
+      }));
 
       student.$saveMode = "whole";
-      const promise = student.$save({grade: Grade.Freshman})
-      expect(student.$savingProps).toEqual(new Set(["name", "grade"]))
+      const promise = student.$save({ grade: Grade.Freshman });
+      expect(student.$savingProps).toEqual(new Set(["name", "grade"]));
       await promise;
-      expect(student.$savingProps).toEqual(new Set())
+      expect(student.$savingProps).toEqual(new Set());
 
       expect(saveMock.mock.calls[0][0].name).toBe("Bob");
       expect(saveMock.mock.calls[0][0].grade).toBe(Grade.Freshman);
       // Save was not made with specific fields.
       expect(saveMock.mock.calls[0][1].fields).toBeFalsy();
-    })
+    });
 
     test("saves override data when save mode is 'surgical'", async () => {
       const student = new StudentViewModel({
@@ -308,26 +331,33 @@ describe("ViewModel", () => {
         name: "Bob",
       });
 
-      const saveMock = student.$apiClient.save = mockItemResult(true, <Student>{
+      const saveMock = (student.$apiClient.save = mockItemResult(true, <
+        Student
+      >{
         studentId: 1,
         name: "Bob",
-      });
+      }));
 
       student.$saveMode = "surgical";
-      const promise = student.$save({grade: Grade.Freshman})
-      expect(student.$savingProps).toEqual(new Set(["studentId", "name", "grade"]))
+      const promise = student.$save({ grade: Grade.Freshman });
+      expect(student.$savingProps).toEqual(
+        new Set(["studentId", "name", "grade"])
+      );
       await promise;
-      expect(student.$savingProps).toEqual(new Set())
+      expect(student.$savingProps).toEqual(new Set());
 
       expect(saveMock.mock.calls[0][0].name).toBe("Bob");
       expect(saveMock.mock.calls[0][0].grade).toBe(Grade.Freshman);
       // Save includes our override field.
-      expect(saveMock.mock.calls[0][1].fields).toMatchObject(["studentId", "name", "grade"]);
-    })
-  })
+      expect(saveMock.mock.calls[0][1].fields).toMatchObject([
+        "studentId",
+        "name",
+        "grade",
+      ]);
+    });
+  });
 
   describe("autoSave", () => {
-
     test("when model is dirtied while creation save is in-flight, new PK is still set", async () => {
       // When an auto-save is performed on a new object (i.e. a create, not an update),
       // and then that object is modified while the save is in flight,
@@ -339,50 +369,46 @@ describe("ViewModel", () => {
       // If the PK doesn't get set, the second save for the newly-dirty data
       // will also trigger a create, instead of updating the newly-created object.
 
-        
       const student = new StudentViewModel();
-      const vue = new Vue({
-        data: {
-          student
-        }
-      });
+      const vue = mountData({ student });
 
       // Length of a "tick" in milliseconds. Smaller == faster test run.
       // If this is too small then the test wont work.
       const tickLength = 30;
 
       var savePromise: Promise<any>;
-      const saveMock = student.$apiClient.save = jest
+      const saveMock = (student.$apiClient.save = vitest
         .fn()
         .mockImplementation((dto: any) => {
           // Map the parameter to a new model to simulate the save response.
           // This MUST be a mapping to prevent issues with same object references.
           const result = {
             ...mapToModel(dto, student.$metadata),
-            studentId: 1
+            studentId: 1,
           };
 
-          return savePromise = new Promise(resolve => setTimeout(() => {
-            resolve(<AxiosItemResult<Student>> {
-              data: {
-                wasSuccessful: true,
-                object: result
-              }
-            })
-          }, tickLength)
-          )
-        });
+          return (savePromise = new Promise((resolve) =>
+            setTimeout(() => {
+              resolve(<AxiosItemResult<Student>>{
+                data: {
+                  wasSuccessful: true,
+                  object: result,
+                },
+              });
+            }, tickLength)
+          ));
+        }));
 
-      const waitTick = () => delay(30)
+      const waitTick = () => delay(30);
 
-      student.$startAutoSave(vue, { wait: tickLength/2 });
+      student.$startAutoSave(vue, { wait: tickLength / 2 });
       expect(student.$isDirty).toBe(false);
 
       student.name = "Steve";
       expect(student.$isDirty).toBe(true);
       expect(student.$getPropDirty("name")).toBe(true);
 
-      await waitTick()
+      await waitTick();
       expect(saveMock).toBeCalledTimes(1);
       // First save should have been "Steve", with no PK.
       expect((saveMock.mock.calls[0][0] as Student).name).toBe("Steve");
@@ -396,13 +422,13 @@ describe("ViewModel", () => {
       await savePromise!;
       // Wait a little longer after the save resolves
       // for the API client to process the response, for the next save to kick off, etc.
-      await waitTick()
+      await waitTick();
 
       // There should be another save in flight now.
       // Model shouldn't be dirty since we just sent off the current state.
       expect(student.$isDirty).toBe(false);
       await savePromise!;
-      await waitTick()
+      await waitTick();
 
       expect(saveMock).toBeCalledTimes(2);
 
@@ -413,9 +439,8 @@ describe("ViewModel", () => {
 
       // For good measure.
       student.$stopAutoSave();
-    })
+    });
 
-    
     test("when nested model is autosaving and dirty when parent model is reloaded, nested model is not updated", async () => {
       // If hierarchy of models is reloaded by virtue of some root model being reloaded,
       // but a child model has been editing and its changes are still pending a save,
@@ -432,24 +457,18 @@ describe("ViewModel", () => {
         advisor: {
           advisorId: 1,
           name: "child",
-          students: [
-            {studentId: 2, name: "grandchild"}
-          ]
-        }
-      }
+          students: [{ studentId: 2, name: "grandchild" }],
+        },
+      };
       const student = new StudentViewModel();
       student.$loadCleanData(studentData);
 
-      const vue = new Vue({
-        data: {
-          student
-        }
-      });
+      const vue = mountData({ student });
 
       // Start autosave on the whole tree (could have just as well done it on the advisor only)
       // We use a big delay because the only thing that matters here is that autosave
       // is enabled. A save doesn't (and shouldn't) be actually performed during this test.
-      student.$startAutoSave(vue, { deep: true, wait: 1000000 })
+      student.$startAutoSave(vue, { deep: true, wait: 1000000 });
 
       // Arbitrarily set the advisor as dirty. We don't actually need to modify a property.
       student.advisor!.$isDirty = true;
@@ -458,7 +477,7 @@ describe("ViewModel", () => {
       studentData.name = "root-updated";
       studentData.advisor.name = "child-updated";
       studentData.advisor.students[0].name = "grandchild-updated";
-      student.$loadCleanData(studentData)
+      student.$loadCleanData(studentData);
 
       // The two non-dirty models should have been updated with the new data.
       expect(student.name).toBe("root-updated");
@@ -470,20 +489,20 @@ describe("ViewModel", () => {
       // and it should still be marked dirty.
       expect(student.advisor!.name).toBe("child");
       expect(student.advisor!.$isDirty).toBeTruthy();
-    })
+    });
 
     test("non-saved properties cannot be marked dirty", async () => {
       // Rationale: non-saved properties have no important distinction between clean and dirty,
       // as they're only ever read from the server - never are they sent to the server.
 
       // If non-saved properties can be marked dirty, we can land in a state where they
-      // will never be refreshed with the most recent server value via $loadCleanData 
+      // will never be refreshed with the most recent server value via $loadCleanData
       // when $loadCleanData is being called by hand outside of a $save().
 
       var studentModel = new Student({
         studentId: 1,
         studentAdvisorId: 3,
-        advisor: { advisorId: 3, name: "Delphine", }
+        advisor: { advisorId: 3, name: "Delphine" },
       });
       var student = new StudentViewModel();
       student.$loadCleanData(studentModel);
@@ -498,82 +517,95 @@ describe("ViewModel", () => {
       // Neither should explicit targeting of the prop directly.
       student.$setPropDirty("advisor", true);
       expect(student.$getPropDirty("advisor")).toBeFalsy();
-    })
+    });
 
     test("$loadCleanData won't trigger autosave on root", async () => {
       var studentModel = new Student({
         studentId: 1,
         studentAdvisorId: 3,
-        advisor: { advisorId: 3, name: "Delphine", }
+        advisor: { advisorId: 3, name: "Delphine" },
       });
       var student = new StudentViewModel();
       student.$loadCleanData(studentModel);
-      const saveMock = student.$apiClient.save = 
-        jest.fn().mockImplementation((dto: any) => { throw "Save shouldn't have been called" });
-      const vue = new Vue({ data: { student } });
+      const saveMock = (student.$apiClient.save = vitest
+        .fn()
+        .mockImplementation((dto: any) => {
+          throw "Save shouldn't have been called";
+        }));
+      const vue = mountData({ student });
 
-      student.$startAutoSave(vue, {wait: 0});
+      student.$startAutoSave(vue, { wait: 0 });
 
       studentModel.name = "NewName";
       student.$loadCleanData(studentModel);
       await delay(10);
 
       expect(saveMock).toBeCalledTimes(0);
-    })
+    });
 
     test("$loadCleanData won't trigger autosave on ref nav", async () => {
       var studentModel = new Student({
         studentId: 1,
         studentAdvisorId: 3,
-        advisor: { advisorId: 3, name: "Delphine", }
+        advisor: { advisorId: 3, name: "Delphine" },
       });
       var student = new StudentViewModel();
       student.$loadCleanData(studentModel);
-      const saveMock = student.advisor!.$apiClient.save = 
-        jest.fn().mockImplementation((dto: any) => { throw "Save shouldn't have been called" });
-      const vue = new Vue({ data: { student } });
+      const saveMock = (student.advisor!.$apiClient.save = vitest
+        .fn()
+        .mockImplementation((dto: any) => {
+          throw "Save shouldn't have been called";
+        }));
+      const vue = mountData({ student });
 
-      student.advisor!.$startAutoSave(vue, {wait: 0});
+      student.advisor!.$startAutoSave(vue, { wait: 0 });
 
       studentModel.advisor!.name = "NewName";
       student.$loadCleanData(studentModel);
       await delay(10);
-      
+
       expect(saveMock).toBeCalledTimes(0);
-    })
+    });
 
     test("$loadCleanData won't trigger autosave on collection nav", async () => {
       var studentModel = new Student({
         studentId: 1,
-        courses: [ { courseId: 7, name: "foo" }, ]
+        courses: [{ courseId: 7, name: "foo" }],
       });
       var student = new StudentViewModel();
       student.$loadCleanData(studentModel);
-      const saveMock = student.courses![0].$apiClient.save = 
-        jest.fn().mockImplementation((dto: any) => { throw "Save shouldn't have been called" });
-      const vue = new Vue({ data: { student } });
+      const saveMock = (student.courses![0].$apiClient.save = vitest
+        .fn()
+        .mockImplementation((dto: any) => {
+          throw "Save shouldn't have been called";
+        }));
+      const vue = mountData({ student });
 
-      student.courses![0].$startAutoSave(vue, {wait: 0});
+      student.courses![0].$startAutoSave(vue, { wait: 0 });
 
       studentModel.courses![0].name = "NewName";
       student.$loadCleanData(studentModel);
       await delay(10);
-      
+
       expect(saveMock).toBeCalledTimes(0);
-    })
+    });
 
     test("triggers save immediately if model is dirty", async () => {
       var student = new StudentViewModel({
-        studentId: 1, name: "bob",
+        studentId: 1,
+        name: "bob",
       });
       student.$isDirty = false;
-      const saveMock = student.$apiClient.save = 
-        jest.fn().mockResolvedValue(<AxiosItemResult<any>>{data: {wasSuccessful: true}});
-      const vue = new Vue({ data: { student } });
+      const saveMock = (student.$apiClient.save = vitest
+        .fn()
+        .mockResolvedValue(<AxiosItemResult<any>>{
+          data: { wasSuccessful: true },
+        }));
+      const vue = mountData({ student });
 
       // Start auto save. Model shouldn't be dirty, so it shouldn't hit the API.
       expect(student.$isDirty).toBe(false);
-      student.$startAutoSave(vue, {wait: 0});
+      student.$startAutoSave(vue, { wait: 0 });
       await delay(10);
       expect(saveMock).toBeCalledTimes(0);
 
@@ -582,10 +614,10 @@ describe("ViewModel", () => {
       student.$stopAutoSave();
       student.name += "2";
       expect(student.$isDirty).toBe(true);
-      student.$startAutoSave(vue, {wait: 0});
+      student.$startAutoSave(vue, { wait: 0 });
       await delay(10);
       expect(saveMock).toBeCalledTimes(1);
-    })
+    });
 
     test("triggers save immediately if model lacks a PK", async () => {
       /*
@@ -605,109 +637,128 @@ describe("ViewModel", () => {
               in order to prevent this behavior - just add an explicit check for $isDirty.
       */
       var student = new StudentViewModel();
-      student.$loadCleanData({name: "bob"});
+      student.$loadCleanData({ name: "bob" });
 
-      const saveMock = student.$apiClient.save = 
-        mockItemResult(true, {studentId: 1, name: "bob"});
-      const vue = new Vue({ data: { student } });
+      const saveMock = (student.$apiClient.save = mockItemResult(true, {
+        studentId: 1,
+        name: "bob",
+      }));
+      const vue = mountData({ student });
 
       // Start auto save. Model shouldn't be dirty, but does lack a PK, so autosave should trigger.
       expect(student.$isDirty).toBe(false);
       expect(student.$primaryKey).toBeFalsy();
-      student.$startAutoSave(vue, {wait: 0});
+      student.$startAutoSave(vue, { wait: 0 });
       await delay(10);
       expect(saveMock).toBeCalledTimes(1);
-    })
+    });
 
-
-    const loadMock = 
-      jest.fn().mockResolvedValue(<AxiosItemResult<Student>>{data: {
+    const loadMock = vitest.fn().mockResolvedValue(<AxiosItemResult<Student>>{
+      data: {
         wasSuccessful: true,
         object: {
           studentId: 1,
-          name: 'bob'
-        }
-      }});
+          name: "bob",
+        },
+      },
+    });
 
     test("does not trigger if enabled while model load is pending", async () => {
       var student = new StudentViewModel();
-      const saveMock = student.$apiClient.save = 
-        jest.fn().mockResolvedValue(<AxiosItemResult<Student>>{data: {wasSuccessful: true}});
+      const saveMock = (student.$apiClient.save = vitest
+        .fn()
+        .mockResolvedValue(<AxiosItemResult<Student>>{
+          data: { wasSuccessful: true },
+        }));
       student.$apiClient.get = loadMock;
 
-      const vue = new Vue({ data: { student } });
+      const vue = mountData({ student });
 
       student.$load(1);
-      student.$startAutoSave(vue, {wait: 0});
+      student.$startAutoSave(vue, { wait: 0 });
       await delay(10);
       expect(saveMock).toBeCalledTimes(0);
-    })
+    });
 
     test("does not trigger if enabled just before loading model", async () => {
       var student = new StudentViewModel();
-      const saveMock = student.$apiClient.save = 
-        jest.fn().mockResolvedValue(<AxiosItemResult<Student>>{data: {wasSuccessful: true}});
+      const saveMock = (student.$apiClient.save = vitest
+        .fn()
+        .mockResolvedValue(<AxiosItemResult<Student>>{
+          data: { wasSuccessful: true },
+        }));
       student.$apiClient.get = loadMock;
 
-      const vue = new Vue({ data: { student } });
+      const vue = mountData({ student });
 
-      student.$startAutoSave(vue, {wait: 0});
+      student.$startAutoSave(vue, { wait: 0 });
       student.$load(1);
       await delay(10);
       expect(saveMock).toBeCalledTimes(0);
-    })
+    });
 
     test("does not trigger if model has errors", async () => {
       var viewModel = new AdvisorViewModel({
-        advisorId: 1, name: null
+        advisorId: 1,
+        name: null,
       });
-      const saveMock = viewModel.$apiClient.save = 
-        jest.fn().mockResolvedValue(<AxiosItemResult<Advisor>>{data: {wasSuccessful: true}});
+      const saveMock = (viewModel.$apiClient.save = vitest
+        .fn()
+        .mockResolvedValue(<AxiosItemResult<Advisor>>{
+          data: { wasSuccessful: true },
+        }));
 
-      const vue = new Vue({ data: { viewModel } });
+      const vue = mountData({ viewModel });
 
-      viewModel.$startAutoSave(vue, {wait: 0});
-      expect([...viewModel.$getErrors()]).toHaveLength(1)
+      viewModel.$startAutoSave(vue, { wait: 0 });
+      expect([...viewModel.$getErrors()]).toHaveLength(1);
       await delay(10);
       expect(saveMock).toBeCalledTimes(0);
 
       viewModel.name = "Bob";
-      expect([...viewModel.$getErrors()]).toHaveLength(0)
+      expect([...viewModel.$getErrors()]).toHaveLength(0);
       await delay(10);
       expect(saveMock).toBeCalledTimes(1);
-    })
+    });
 
     test("does not infinitely trigger if API call fails", async () => {
       var student = new StudentViewModel({
-        name: "bob"
+        name: "bob",
       });
-      const saveMock = student.$apiClient.save = 
-        jest.fn().mockRejectedValue(new Error);
+      const saveMock = (student.$apiClient.save = vitest
+        .fn()
+        .mockRejectedValue(new Error()));
 
-      const vue = new Vue({ data: { student } });
-      student.$startAutoSave(vue, {wait: 0});
+      const vue = mountData({ student });
+      student.$startAutoSave(vue, { wait: 0 });
 
       student.name = "bob";
       await delay(100);
       expect(saveMock).toBeCalledTimes(1);
-    })
-    
+    });
 
     test("debounces correctly", async () => {
       var student = new StudentViewModel({
-        studentId: 1, name: "bob",
+        studentId: 1,
+        name: "bob",
       });
       student.$isDirty = false;
-      const saveMock = student.$apiClient.save = 
-        jest.fn().mockResolvedValue(<AxiosItemResult<any>>{data: {wasSuccessful: true}});
-      const vue = new Vue({ data: { student } });
+      const saveMock = (student.$apiClient.save = vitest
+        .fn()
+        .mockResolvedValue(<AxiosItemResult<any>>{
+          data: { wasSuccessful: true },
+        }));
+      const vue = mountData({ student });
 
-      student.$startAutoSave(vue, {wait: 50, debounce: { trailing: true, maxWait: 300 }});
+      student.$startAutoSave(vue, {
+        wait: 50,
+        debounce: { trailing: true, maxWait: 300 },
+      });
       // Dirty the model every 5 ms.
       const userInputSimulator = setInterval(() => {
-        student.name = Math.random().toString()
+        student.name = Math.random().toString();
       }, 5);
-      
+
       // Our maxWait has been passed so we expect one save to have been made:
       delay(330).then(() => expect(saveMock).toBeCalledTimes(1));
 
@@ -719,24 +770,25 @@ describe("ViewModel", () => {
       // stopped user input.
       await delay(550);
       expect(saveMock).toBeCalledTimes(2);
-    })
+    });
 
     describe("deep", () => {
       test("propagates to existing related objects", async () => {
-      
         var studentModel = new Student({
           studentId: 1,
-          courses: [ { studentId: 1, courseId: 7, name: "foo" }, ],
+          courses: [{ studentId: 1, courseId: 7, name: "foo" }],
           studentAdvisorId: 3,
-          advisor: { advisorId: 3, name: "Bob" }
+          advisor: { advisorId: 3, name: "Bob" },
         });
         var student = new StudentViewModel(studentModel);
-        const saveMock = 
-          student.courses![0].$apiClient.save = 
-          student.advisor!.$apiClient.save = 
-          student.$apiClient.save = 
-          jest.fn().mockResolvedValue(<AxiosItemResult<any>>{data: {wasSuccessful: true}});
-        const vue = new Vue({ data: { student } });
+        const saveMock =
+          (student.courses![0].$apiClient.save =
+          student.advisor!.$apiClient.save =
+          student.$apiClient.save =
+            vitest.fn().mockResolvedValue(<AxiosItemResult<any>>{
+              data: { wasSuccessful: true },
+            }));
+        const vue = mountData({ student });
 
         student.$startAutoSave(vue, { wait: 0, deep: true });
 
@@ -745,119 +797,125 @@ describe("ViewModel", () => {
         student.name = "NewName";
 
         await delay(10);
-        
+
         // One save expected for each model that changed.
         expect(saveMock).toBeCalledTimes(3);
-      })
+      });
 
       test("propagates to new collection navigation items", async () => {
-      
         var studentModel = new Student({
           studentId: 1,
         });
         var student = new StudentViewModel(studentModel);
         student.$isDirty = false;
-        const vue = new Vue({ data: { student } });
+        const vue = mountData({ student });
 
         student.$startAutoSave(vue, { wait: 0, deep: true });
 
         const newModel = student.$addChild("courses");
-        const saveMock = 
-          newModel.$apiClient.save = 
-          jest.fn().mockResolvedValue(<AxiosItemResult<any>>{data: {wasSuccessful: true}});
+        const saveMock = (newModel.$apiClient.save = vitest
+          .fn()
+          .mockResolvedValue(<AxiosItemResult<any>>{
+            data: { wasSuccessful: true },
+          }));
 
         await delay(10);
-        
+
         // Autosave should have triggered for the new object.
         expect(saveMock).toBeCalledTimes(1);
-      })
+      });
 
       test("propagates to new reference navigation items", async () => {
-      
         var studentModel = new Student({
           studentId: 1,
         });
         var student = new StudentViewModel(studentModel);
         student.$isDirty = false;
-        const vue = new Vue({ data: { student } });
+        const vue = mountData({ student });
 
         student.$startAutoSave(vue, { wait: 0, deep: true });
 
-        const newModel = student.advisor = new AdvisorViewModel();
-        const saveMock = 
-          newModel.$apiClient.save = 
-          jest.fn().mockResolvedValue(<AxiosItemResult<Student>>{data: {
-            wasSuccessful: true,
-          }});
+        const newModel = (student.advisor = new AdvisorViewModel());
+        const saveMock = (newModel.$apiClient.save = vitest
+          .fn()
+          .mockResolvedValue(<AxiosItemResult<Student>>{
+            data: {
+              wasSuccessful: true,
+            },
+          }));
 
         // Dirty the model to ensure that it has a reason to trigger.
         newModel.name = "bob";
         await delay(10);
-        
+
         // Autosave should have triggered for the new object.
         expect(saveMock).toBeCalledTimes(1);
-      })
+      });
 
       test("when autosave of child returns different PK, does not trigger save of parent", async () => {
         var parent = new StudentViewModel({
           studentId: 2,
-          name: 'Steve',
+          name: "Steve",
           currentCourseId: 10,
           currentCourse: {
             courseId: 10,
             studentId: 2,
-            name: 'Physics'
-          }
-        })
+            name: "Physics",
+          },
+        });
 
-        const childSaveMock = 
-          parent.currentCourse!.$apiClient.save = 
-          jest.fn().mockResolvedValue(<AxiosItemResult<Course>>{data: {
-            wasSuccessful: true,
-            object: {
-              // Saving the child returns a different object.
-              // Common pattern for immutable records in Coalesce.
-              courseId: 11,
-              name: 'Math',
-              studentId: 2,
-              student: {
+        const childSaveMock = (parent.currentCourse!.$apiClient.save = vitest
+          .fn()
+          .mockResolvedValue(<AxiosItemResult<Course>>{
+            data: {
+              wasSuccessful: true,
+              object: {
+                // Saving the child returns a different object.
+                // Common pattern for immutable records in Coalesce.
+                courseId: 11,
+                name: "Math",
                 studentId: 2,
-                name: 'Steve',
-                currentCourseId: 11,
-              }
-            }
-          }});
+                student: {
+                  studentId: 2,
+                  name: "Steve",
+                  currentCourseId: 11,
+                },
+              },
+            },
+          }));
 
-        const parentSaveMock = parent.$apiClient.save = 
-          jest.fn().mockImplementation((dto: any) => { throw "Save shouldn't have been called" });
+        const parentSaveMock = (parent.$apiClient.save = vitest
+          .fn()
+          .mockImplementation((dto: any) => {
+            throw "Save shouldn't have been called";
+          }));
 
         parent.$isDirty = false;
         parent.currentCourse!.$isDirty = false;
-        const vue = new Vue({ data: { parent } });
+        const vue = mountData({ parent });
         parent.$startAutoSave(vue, { wait: 1, deep: true });
-        
+
         // Dirty the model to trigger autosave
         parent.currentCourse!.name = "Math";
         await delay(100);
-        
+
         expect(childSaveMock).toHaveBeenCalledTimes(1);
         expect(parentSaveMock).toHaveBeenCalledTimes(0);
 
         expect(parent.currentCourseId).toBe(11);
         expect(parent.currentCourse?.courseId).toBe(11);
-        expect(parent.currentCourse?.name).toBe('Math');
-      })
-    })
-  })
+        expect(parent.currentCourse?.name).toBe("Math");
+      });
+    });
+  });
 
   describe("$addChild", () => {
-
     test("creates ViewModels", () => {
       var student = new StudentViewModel();
       const course = student.$addChild("courses");
 
       expect(course).toBeInstanceOf(CourseViewModel);
-    })
+    });
 
     test("new model has $parent and $parentCollection set", () => {
       var student = new StudentViewModel();
@@ -867,129 +925,123 @@ describe("ViewModel", () => {
       expect(course.$parent).toBe(student);
       // @ts-ignore testing private field
       expect(course.$parentCollection).toBe(student.courses);
-    })
+    });
 
     test("new model has foreign key and $isDirty set", () => {
-      var student = new StudentViewModel({studentId: 3});
+      var student = new StudentViewModel({ studentId: 3 });
       const course = student.$addChild("courses") as CourseViewModel;
 
       expect(course).toBeInstanceOf(CourseViewModel);
       expect(course.studentId).toBe(student.studentId);
       expect(course.$isDirty).toBe(true);
       expect(course.$getPropDirty("studentId")).toBe(true);
-    })
+    });
 
     test("new model has collections initialized to empty arrays", () => {
-      var advisor = new AdvisorViewModel({advisorId: 3});
+      var advisor = new AdvisorViewModel({ advisorId: 3 });
       const student = advisor.$addChild("students") as StudentViewModel;
-      
+
       expect(student.courses).not.toBeNull();
       expect(student.courses).toHaveLength(0);
-    })
-  })
+    });
+  });
 
   describe("validation", () => {
     test("$removeRule adds ignore for metadata-provided rule", () => {
       var viewModel = new AdvisorViewModel();
-      expect([...viewModel.$getErrors()]).toHaveLength(1)
+      expect([...viewModel.$getErrors()]).toHaveLength(1);
 
-      viewModel.$removeRule('name', 'required');
-      expect([...viewModel.$getErrors()]).toHaveLength(0)
-    })
+      viewModel.$removeRule("name", "required");
+      expect([...viewModel.$getErrors()]).toHaveLength(0);
+    });
 
     test("$removeRule removes custom rule", () => {
       var viewModel = new AdvisorViewModel();
-      viewModel.$addRule('name', 'required2', v => !!v || 'custom');
+      viewModel.$addRule("name", "required2", (v) => !!v || "custom");
       expect([...viewModel.$getErrors()]).toEqual([
-        'Name is required.',
-        'custom'
-      ])
+        "Name is required.",
+        "custom",
+      ]);
 
-      viewModel.$removeRule('name', 'required2');
-      expect([...viewModel.$getErrors()]).toEqual([
-        'Name is required.'
-      ])
-    })
+      viewModel.$removeRule("name", "required2");
+      expect([...viewModel.$getErrors()]).toEqual(["Name is required."]);
+    });
 
     test("$removeRule removes metadata rule and leaves custom rule", () => {
       var viewModel = new AdvisorViewModel();
-      viewModel.$addRule('name', 'required2', v => !!v || 'custom');
+      viewModel.$addRule("name", "required2", (v) => !!v || "custom");
       expect([...viewModel.$getErrors()]).toEqual([
-        'Name is required.',
-        'custom'
-      ])
+        "Name is required.",
+        "custom",
+      ]);
 
-      viewModel.$removeRule('name', 'required');
-      expect([...viewModel.$getErrors()]).toEqual([
-        'custom'
-      ])
-    })
+      viewModel.$removeRule("name", "required");
+      expect([...viewModel.$getErrors()]).toEqual(["custom"]);
+    });
 
     test("$addRule overrides metadata-provided rule", () => {
       var viewModel = new AdvisorViewModel();
-      expect([...viewModel.$getErrors()]).toEqual([
-        'Name is required.'
-      ])
+      expect([...viewModel.$getErrors()]).toEqual(["Name is required."]);
 
-      viewModel.$addRule('name', 'required', v => !!v || 'custom');
-      expect([...viewModel.$getErrors()]).toEqual([
-        'custom'
-      ])
-    })
+      viewModel.$addRule("name", "required", (v) => !!v || "custom");
+      expect([...viewModel.$getErrors()]).toEqual(["custom"]);
+    });
 
     test("$addRule adds additional rules when prop has metadata-provided rules", () => {
       var viewModel = new AdvisorViewModel();
-      expect([...viewModel.$getErrors()]).toEqual([
-        'Name is required.'
-      ])
+      expect([...viewModel.$getErrors()]).toEqual(["Name is required."]);
 
-      viewModel.$addRule('name', 'required2', v => !!v || 'custom');
+      viewModel.$addRule("name", "required2", (v) => !!v || "custom");
       expect([...viewModel.$getErrors()]).toEqual([
-        'Name is required.',
-        'custom'
-      ])
-    })
+        "Name is required.",
+        "custom",
+      ]);
+    });
 
     test("$addRule adds rules when prop has no metadata-provided rules", () => {
       var viewModel = new AdvisorViewModel();
-      expect([...viewModel.$getErrors()]).toEqual([
-        'Name is required.'
-      ])
+      expect([...viewModel.$getErrors()]).toEqual(["Name is required."]);
 
-      viewModel.$addRule('advisorId', 'required', v => !!v || 'custom');
+      viewModel.$addRule("advisorId", "required", (v) => !!v || "custom");
       expect([...viewModel.$getErrors()]).toEqual([
-        'custom',
-        'Name is required.',
-      ])
-    })
-  })
+        "custom",
+        "Name is required.",
+      ]);
+    });
+  });
 
   describe("getters/setters", () => {
-    
     describe("value getters/setters", () => {
       test.each([
-        ["number", () => new Student({studentId: 1})],
-        ["string", () => new Student({studentId: 1, name: "bob"})],
-        ["boolean", () => new Student({studentId: 1, isEnrolled: true})],
-        ["date", () => new Student({studentId: 1, birthDate: new Date("1990-01-02T03:04:05.000-08:00")})]
-      ])("%s setter doesn't trigger reactivity for unchanged value", async (_, factory) => {
-        // Workaround for Jest's bad typescript support.
-        const modelFactory = factory as unknown as () => Student
+        ["number", () => new Student({ studentId: 1 })],
+        ["string", () => new Student({ studentId: 1, name: "bob" })],
+        ["boolean", () => new Student({ studentId: 1, isEnrolled: true })],
+        [
+          "date",
+          () =>
+            new Student({
+              studentId: 1,
+              birthDate: new Date("1990-01-02T03:04:05.000-08:00"),
+            }),
+        ],
+      ])(
+        "%s setter doesn't trigger reactivity for unchanged value",
+        async (_, factory) => {
+          var student = new StudentViewModel();
+          student.$loadCleanData(factory());
 
-        var student = new StudentViewModel();
-        student.$loadCleanData(modelFactory());
-        
-        const vue = new Vue({ data: { student } });
-        const watchCallback = jest.fn();
-        vue.$watch('student', watchCallback, { deep: true });
+          const vue = mountData({ student });
+          const watchCallback = vitest.fn();
+          vue.$watch("student", watchCallback, { deep: true });
 
-        student.$loadCleanData(modelFactory());
-        await vue.$nextTick();
+          student.$loadCleanData(factory());
+          await vue.$nextTick();
 
-        // Exact same model was reloaded. There should be no changes.
-        expect(watchCallback).toBeCalledTimes(0);
-      })
-    })
+          // Exact same model was reloaded. There should be no changes.
+          expect(watchCallback).toBeCalledTimes(0);
+        }
+      );
+    });
 
     describe("object getter/setters", () => {
       test("object setter converts to Model", () => {
@@ -999,14 +1051,18 @@ describe("ViewModel", () => {
             name: "bob",
             student: {
               studentId: 1,
-              name: "bob"
-            }
-          }
-        })
+              name: "bob",
+            },
+          },
+        });
 
-        expect(advisor.studentWrapperObject!.$metadata).toBe(metadata.DisplaysStudent)
-        expect(advisor.studentWrapperObject!.student?.$metadata).toBe(metadata.Student)
-      })
+        expect(advisor.studentWrapperObject!.$metadata).toBe(
+          metadata.DisplaysStudent
+        );
+        expect(advisor.studentWrapperObject!.student?.$metadata).toBe(
+          metadata.Student
+        );
+      });
 
       test("object setter does not throw when newValue is null and oldValue is non-null", () => {
         var advisor = new AdvisorViewModel();
@@ -1015,15 +1071,15 @@ describe("ViewModel", () => {
             name: "bob",
             student: {
               studentId: 1,
-              name: "bob"
-            }
-          }
-        })
+              name: "bob",
+            },
+          },
+        });
 
         advisor.studentWrapperObject!.student = null;
         advisor.studentWrapperObject = null;
-      })
-    })
+      });
+    });
 
     describe("collection navigation getter/setters", () => {
       test("setter creates new ViewModelCollection", () => {
@@ -1031,8 +1087,9 @@ describe("ViewModel", () => {
         student.courses = [];
 
         expect(student.courses.push).not.toBe(Array.prototype.push);
-        expect(student.courses.push).toBe(ViewModelCollection.prototype.push);
-      })
+        //@ts-expect-error
+        expect(student.courses.$metadata).toBe(metadata.Student.props.courses);
+      });
 
       test("collection creates ViewModel when Model is pushed", () => {
         var student = new StudentViewModel();
@@ -1040,14 +1097,16 @@ describe("ViewModel", () => {
 
         // The typings don't explicitly allow this, so we must cast to any.
         // The use case is an input component that provides models (instead of ViewModels).
-        student.courses.push(new Course({
-          courseId: 1,
-          name: "Seagull"
-        }) as any);
+        student.courses.push(
+          new Course({
+            courseId: 1,
+            name: "Seagull",
+          }) as any
+        );
 
         expect(student.courses[0]).toBeInstanceOf(CourseViewModel);
         expect(student.courses[0].name).toBe("Seagull");
-      })
+      });
 
       test("collection creates ViewModel when array containing a Model is set", () => {
         var student = new StudentViewModel();
@@ -1057,41 +1116,47 @@ describe("ViewModel", () => {
         student.courses = [
           new Course({
             courseId: 1,
-            name: "Seagull"
-          }) as any
+            name: "Seagull",
+          }) as any,
         ];
 
         expect(student.courses[0]).toBeInstanceOf(CourseViewModel);
         expect(student.courses[0].name).toBe("Seagull");
         expect((student.courses[0] as any).$parent).toBe(student);
-        expect((student.courses[0] as any).$parentCollection).toBe(student.courses);
-      })
+        expect((student.courses[0] as any).$parentCollection).toBe(
+          student.courses
+        );
+      });
 
       test("collection is reactive for push", async () => {
         var student = new StudentViewModel();
         student.courses = [];
 
-        const vue = new Vue({ data: { student } });
-        const watchCallback = jest.fn();
-        vue.$watch('student.courses', watchCallback);
+        const watchCallback = vitest.fn();
+        watch(student.courses, watchCallback);
 
-        student.courses.push(new CourseViewModel);
+        student.courses.push(new CourseViewModel());
 
-        await vue.$nextTick();
+        await nextTick();
 
         expect(watchCallback).toBeCalledTimes(1);
         expect(student.courses).toHaveLength(1);
-      })
-    })
+      });
+    });
 
     describe("model collection (non-navigation) getter/setters", () => {
       test("setter creates new ViewModelCollection", () => {
         var advisor = new AdvisorViewModel();
         advisor.studentsNonNavigation = [];
 
-        expect(advisor.studentsNonNavigation.push).not.toBe(Array.prototype.push);
-        expect(advisor.studentsNonNavigation.push).toBe(ViewModelCollection.prototype.push);
-      })
+        expect(advisor.studentsNonNavigation.push).not.toBe(
+          Array.prototype.push
+        );
+        //@ts-expect-error
+        expect(advisor.studentsNonNavigation.$metadata).toBe(
+          metadata.Advisor.props.studentsNonNavigation
+        );
+      });
 
       test("collection creates ViewModel when Model is pushed", () => {
         var advisor = new AdvisorViewModel();
@@ -1099,27 +1164,31 @@ describe("ViewModel", () => {
 
         // The typings don't explicitly allow this, so we must cast to any.
         // The use case is an input component that provides models (instead of ViewModels).
-        advisor.studentsNonNavigation.push(new Student({
-          studentId: 1,
-          name: "Seagull"
-        }) as any);
+        advisor.studentsNonNavigation.push(
+          new Student({
+            studentId: 1,
+            name: "Seagull",
+          }) as any
+        );
 
-        expect(advisor.studentsNonNavigation[0]).toBeInstanceOf(StudentViewModel);
+        expect(advisor.studentsNonNavigation[0]).toBeInstanceOf(
+          StudentViewModel
+        );
         expect(advisor.studentsNonNavigation[0].name).toBe("Seagull");
-      })
-    })
+      });
+    });
 
     describe("reference navigation & FK getter/setters", () => {
       test("setter copies foreign key", () => {
         var student = new StudentViewModel();
-        var advisor = new AdvisorViewModel({advisorId: 3});
+        var advisor = new AdvisorViewModel({ advisorId: 3 });
         student.advisor = advisor;
         expect(student.studentAdvisorId).toBe(advisor.advisorId);
-      })
+      });
 
       test("setter creates ViewModel when provided a Model", () => {
         var student = new StudentViewModel();
-        var advisor: Advisor = mapToModel({advisorId: 3}, metadata.Advisor);
+        var advisor: Advisor = mapToModel({ advisorId: 3 }, metadata.Advisor);
 
         // The typings don't explicitly allow this, so we must cast to any.
         // The use case is an input component that provides models (instead of ViewModels).
@@ -1127,85 +1196,91 @@ describe("ViewModel", () => {
 
         expect(advisor).not.toBeInstanceOf(AdvisorViewModel);
         expect(student.advisor).toBeInstanceOf(AdvisorViewModel);
-      })
+      });
 
       test("clears FK when reference is nulled", () => {
         var student = new StudentViewModel({
           studentAdvisorId: 3,
-          advisor: { advisorId: 3, name: "Delphine", }
+          advisor: { advisorId: 3, name: "Delphine" },
         });
 
         student.advisor = null;
         expect(student.studentAdvisorId).toBeNull();
-      })
+      });
 
       test("updates FK when reference is changed", () => {
         var student = new StudentViewModel({
           studentAdvisorId: 3,
-          advisor: { advisorId: 3, name: "Delphine", }
+          advisor: { advisorId: 3, name: "Delphine" },
         });
 
-        student.advisor = { advisorId: 4, name: "Beth", } as any;
+        student.advisor = { advisorId: 4, name: "Beth" } as any;
         expect(student.studentAdvisorId).toBe(4);
-      })
+      });
 
       test("clears reference when FK is nulled", () => {
         var student = new StudentViewModel({
           studentAdvisorId: 3,
-          advisor: { advisorId: 3, name: "Delphine", }
+          advisor: { advisorId: 3, name: "Delphine" },
         });
 
         student.studentAdvisorId = null;
         expect(student.advisor).toBeNull();
-      })
+      });
 
       test("maintains reference when FK is nulled if reference has null PK", () => {
         var student = new StudentViewModel();
 
-        student.advisor = new AdvisorViewModel({ advisorId: null, name: "Beth" });
+        student.advisor = new AdvisorViewModel({
+          advisorId: null,
+          name: "Beth",
+        });
         student.studentAdvisorId = null;
         expect(student.advisor!.name).toBe("Beth");
-      })
+      });
 
       test("sets null FK when reference with null PK is set", () => {
         var student = new StudentViewModel({
-          studentAdvisorId: 3
+          studentAdvisorId: 3,
         });
 
-        student.advisor = new AdvisorViewModel({ advisorId: null, name: "Beth" });
+        student.advisor = new AdvisorViewModel({
+          advisorId: null,
+          name: "Beth",
+        });
         expect(student.advisor!.name).toBe("Beth");
         expect(student.studentAdvisorId).toBeNull();
-      })
+      });
 
       test("clears reference when FK no longer matches", () => {
         var student = new StudentViewModel({
           studentAdvisorId: 3,
-          advisor: { advisorId: 3, name: "Delphine", }
+          advisor: { advisorId: 3, name: "Delphine" },
         });
 
         student.studentAdvisorId = 4;
         expect(student.advisor).toBeNull();
-      })
+      });
 
       test("maintains reference when FK is set to same value", () => {
         var student = new StudentViewModel({
           studentAdvisorId: 3,
-          advisor: { advisorId: 3, name: "Delphine", }
+          advisor: { advisorId: 3, name: "Delphine" },
         });
 
         const originalAdvisor = student.advisor;
         student.studentAdvisorId = 3;
         expect(student.advisor).toBe(originalAdvisor);
-      })
-    })
-  })
+      });
+    });
+  });
 
   describe("$loadFromModel", () => {
     test("preserves & updates existing reference navigations when key is same", () => {
       var studentModel = new Student({
         studentId: 1,
         studentAdvisorId: 3,
-        advisor: { advisorId: 3, name: "Delphine", }
+        advisor: { advisorId: 3, name: "Delphine" },
       });
       var student = new StudentViewModel(studentModel);
 
@@ -1218,13 +1293,13 @@ describe("ViewModel", () => {
       // Properties should be updated, and model shoudn't have been marked dirty.
       expect(student.advisor!.name).toBe("Beth");
       expect(student.advisor!.$isDirty).toBe(false);
-    })
+    });
 
     test("overwrites existing reference navigations when key is different", () => {
       var studentModel = new Student({
         studentId: 1,
         studentAdvisorId: 3,
-        advisor: { advisorId: 3, name: "Delphine", }
+        advisor: { advisorId: 3, name: "Delphine" },
       });
       var student = new StudentViewModel(studentModel);
 
@@ -1239,13 +1314,13 @@ describe("ViewModel", () => {
       // Properties should be updated, and new model shoudn't be dirty.
       expect(student.advisor!.name).toBe("Beth");
       expect(student.advisor!.$isDirty).toBe(false);
-    })
+    });
 
     test("preserves existing reference navigation when incoming ref is null but key is same and non-null", () => {
       var studentModel = new Student({
         studentId: 1,
         studentAdvisorId: 3,
-        advisor: { advisorId: 3, name: "Delphine", }
+        advisor: { advisorId: 3, name: "Delphine" },
       });
       var student = new StudentViewModel(studentModel);
 
@@ -1255,13 +1330,13 @@ describe("ViewModel", () => {
 
       // Reference should be the same.
       expect(student.advisor).toBe(currentAdvisor);
-    })
+    });
 
     test("clears existing reference navigation when incoming ref is null but key doesn't match", () => {
       var studentModel = new Student({
         studentId: 1,
         studentAdvisorId: 3,
-        advisor: { advisorId: 3, name: "Delphine", }
+        advisor: { advisorId: 3, name: "Delphine" },
       });
       var student = new StudentViewModel(studentModel);
 
@@ -1273,13 +1348,13 @@ describe("ViewModel", () => {
 
       // Reference should have been cleared out.
       expect(student.advisor).toBeNull();
-    })
+    });
 
     test("clears existing reference navigation when incoming ref and key are null, and existing object has a PK", () => {
       var studentModel = new Student({
         studentId: 1,
         studentAdvisorId: 3,
-        advisor: { advisorId: 3, name: "Delphine", }
+        advisor: { advisorId: 3, name: "Delphine" },
       });
       var student = new StudentViewModel(studentModel);
       expect(student.advisor).not.toBeNull();
@@ -1291,7 +1366,7 @@ describe("ViewModel", () => {
       // Reference should have been cleared out.
       expect(student.advisor).toBeNull();
       expect(student.studentAdvisorId).toBeNull();
-    })
+    });
 
     test("preserves existing reference navigation when incoming ref and key are null, and existing object has no PK", () => {
       /*
@@ -1308,27 +1383,31 @@ describe("ViewModel", () => {
         when the first save against the Student finishes.
       */
       var student = new StudentViewModel();
-      var advisor = student.advisor = new AdvisorViewModel();
+      var advisor = (student.advisor = new AdvisorViewModel());
 
       // Simulate first save against Student.
-      student.$loadCleanData({studentId: 1, studentAdvisorId: null, advisor: null});
+      student.$loadCleanData({
+        studentId: 1,
+        studentAdvisorId: null,
+        advisor: null,
+      });
       // Advisor reference should have been preserved because Advisor is an unsaved model with a null PK.
       expect(student.advisor).toBe(advisor);
-    })
+    });
 
     test("updates foreign keys from navigation props' PKs when navigation prop is iterated first", () => {
-
       // Precondition: This tests the behavior if the navigation prop is iterated
       // BEFORE the FK prop.
       // Assert that the precondition now holds.
       const values = Object.values(metadata.Student.props);
-      expect(values.indexOf(metadata.Student.props.advisor))
-        .toBeLessThan(values.indexOf(metadata.Student.props.studentAdvisorId))
+      expect(values.indexOf(metadata.Student.props.advisor)).toBeLessThan(
+        values.indexOf(metadata.Student.props.studentAdvisorId)
+      );
 
       var studentModel = new Student({
         studentId: 1,
         studentAdvisorId: 3,
-        advisor: { advisorId: 3, name: "Delphine", }
+        advisor: { advisorId: 3, name: "Delphine" },
       });
       var student = new StudentViewModel(studentModel);
 
@@ -1337,27 +1416,27 @@ describe("ViewModel", () => {
       studentModel.advisor!.name = "Beth";
       student.$loadCleanData(studentModel);
 
-      // FK on student should have been updated
-      // with the PK from the advisor object.
+      // FK on course should have been updated
+      // with the PK from the student object.
 
       // There was a bug where the PK was being sourced from the wrong object.
       // This only happened in rare cases where the nav prop was iterated before the FK prop.
       expect(student.studentAdvisorId).toBe(4);
-    })
+    });
 
     test("updates foreign keys from navigation props' PKs when navigation prop is iterated second", () => {
-
       // Precondition: This tests the behavior if the navigation prop is iterated
       // AFTER the FK prop.
       // Assert that the precondition holds.
       const values = Object.values(metadata.Course.props);
-      expect(values.indexOf(metadata.Course.props.student))
-        .toBeGreaterThan(values.indexOf(metadata.Course.props.studentId))
+      expect(values.indexOf(metadata.Course.props.student)).toBeGreaterThan(
+        values.indexOf(metadata.Course.props.studentId)
+      );
 
       var courseModel = new Course({
         courseId: 1,
         studentId: 3,
-        student: { studentId: 3, name: "Delphine", }
+        student: { studentId: 3, name: "Delphine" },
       });
       var course = new CourseViewModel(courseModel);
 
@@ -1372,43 +1451,43 @@ describe("ViewModel", () => {
       // There was a bug where the PK was being sourced from the wrong object.
       // This only happened in rare cases where the nav prop was iterated before the FK prop.
       expect(course.studentId).toBe(4);
-    })
+    });
 
     test("sets FK and navigation when loading object with only navigation property when navigation prop is iterated first", () => {
       // Assert that the precondition now holds.
       const values = Object.values(metadata.Student.props);
-      expect(values.indexOf(metadata.Student.props.advisor))
-        .toBeLessThan(values.indexOf(metadata.Student.props.studentAdvisorId))
-        
-      var advisor = new AdvisorViewModel({ advisorId: 1, name: "Steve", });
+      expect(values.indexOf(metadata.Student.props.advisor)).toBeLessThan(
+        values.indexOf(metadata.Student.props.studentAdvisorId)
+      );
+
+      var advisor = new AdvisorViewModel({ advisorId: 1, name: "Steve" });
       var student = new StudentViewModel();
       student.$loadCleanData({ advisor });
 
       expect(student.advisor).toBe(advisor);
       expect(student.studentAdvisorId).toBe(1);
-    })
+    });
 
     test("sets FK and navigation when loading object with only navigation property when navigation prop is iterated second", () => {
       // Assert that the precondition now holds.
       const values = Object.values(metadata.Course.props);
-      expect(values.indexOf(metadata.Course.props.student))
-        .toBeGreaterThan(values.indexOf(metadata.Course.props.studentId))
-        
-      var student = new StudentViewModel({ studentId: 1, name: "Steve", });
+      expect(values.indexOf(metadata.Course.props.student)).toBeGreaterThan(
+        values.indexOf(metadata.Course.props.studentId)
+      );
+
+      var student = new StudentViewModel({ studentId: 1, name: "Steve" });
       var course = new CourseViewModel();
       course.$loadCleanData({ student });
 
       expect(course.student).toBe(student);
       expect(course.studentId).toBe(1);
-    })
+    });
 
     test("preserves existing collection navigation when incoming is null", () => {
       var studentModel = new Student({
         studentId: 1,
         studentAdvisorId: 3,
-        courses: [
-          { courseId: 7, name: "foo" },
-        ]
+        courses: [{ courseId: 7, name: "foo" }],
       });
       var student = new StudentViewModel(studentModel);
       const existingCollection = student.courses;
@@ -1420,15 +1499,13 @@ describe("ViewModel", () => {
       expect(student.courses).not.toBeNull();
       expect(student.courses).toBe(existingCollection);
       expect(student.courses![0].courseId).toBe(7);
-    })
+    });
 
     test("clears existing collection navigation when incoming is []", () => {
       var studentModel = new Student({
         studentId: 1,
         studentAdvisorId: 3,
-        courses: [
-          { courseId: 7, name: "foo" },
-        ]
+        courses: [{ courseId: 7, name: "foo" }],
       });
       var student = new StudentViewModel(studentModel);
       const existingCollection = student.courses;
@@ -1440,15 +1517,15 @@ describe("ViewModel", () => {
       expect(student.courses).not.toBeNull();
       expect(student.courses).toBe(existingCollection);
       expect(student.courses).toHaveLength(0);
-    })
+    });
 
     test("preserves existing collection navigation items when keys are same", () => {
       var studentModel = new Student({
         studentId: 1,
         courses: [
           { courseId: 7, name: "foo" },
-          { courseId: 9, name: "bar" }
-        ]
+          { courseId: 9, name: "bar" },
+        ],
       });
       var student = new StudentViewModel(studentModel);
       const existingCollection = student.courses;
@@ -1464,14 +1541,14 @@ describe("ViewModel", () => {
       // Collection instance should have been kept the same.
       expect(student.courses).toBe(existingCollection);
       expect(student.courses).toHaveLength(2);
-      
+
       // Key maintained: reference should be the same.
       expect(student.courses![0]).toBe(originalFoo);
       // Properties should be updated, and model shoudn't be marked dirty.
       expect(student.courses![0].name).toBe("baz");
       expect(student.courses![0].$isDirty).toBe(false);
 
-      // Original item not present in updated items. 
+      // Original item not present in updated items.
       // Should not be same reference.
       expect(student.courses![1]).not.toBe(originalFoo);
       expect(student.courses![1]).not.toBe(originalBar);
@@ -1479,95 +1556,95 @@ describe("ViewModel", () => {
       expect(student.courses![1].courseId).toBe(11);
       expect(student.courses![1].name).toBe("biz");
       expect(student.courses![1].$isDirty).toBe(false);
-    })
+    });
 
     test.each([
-      [ "delete from start", [{ courseId: 8 }, { courseId: 9 }] ],
-      [ "delete from middle", [{ courseId: 7 }, { courseId: 9 }] ],
-      [ "delete from end", [{ courseId: 7 }, { courseId: 8 }] ],
-      [ "delete multiple", [{ courseId: 7 }] ],
-      [ "replace start", [{ courseId: 1 }, { courseId: 8 }, { courseId: 9 }] ],
-      [ "replace middle", [{ courseId: 7 }, { courseId: 1 }, { courseId: 9 }] ],
-      [ "replace end", [{ courseId: 7 }, { courseId: 8 }, { courseId: 1 }] ],
-      [ "add start", [{ courseId: 1 }, { courseId: 7 }, { courseId: 8 }, { courseId: 9 }] ],
-      [ "add middle", [{ courseId: 7 }, { courseId: 1 }, { courseId: 8 }, { courseId: 9 }] ],
-      [ "add end", [{ courseId: 7 }, { courseId: 8 }, { courseId: 9 }, { courseId: 1 }] ],
-      [ "reorder", [{ courseId: 9 }, { courseId: 8 }, { courseId: 7 }] ],
-      [ "reorder", [{ courseId: 7 }, { courseId: 9 }, { courseId: 8 }] ],
-      [ "reorder", [{ courseId: 9 }, { courseId: 7 }, { courseId: 8 }] ],
-      [ "reorder", [{ courseId: 8 }, { courseId: 7 }, { courseId: 9 }] ],
-      [ "reorder", [{ courseId: 8 }, { courseId: 9 }, { courseId: 7 }] ],
-    ])
-      ("collection navigation is reactive to %s", async (name, data) => {
+      ["delete from start", [{ courseId: 8 }, { courseId: 9 }]],
+      ["delete from middle", [{ courseId: 7 }, { courseId: 9 }]],
+      ["delete from end", [{ courseId: 7 }, { courseId: 8 }]],
+      ["delete multiple", [{ courseId: 7 }]],
+      ["replace start", [{ courseId: 1 }, { courseId: 8 }, { courseId: 9 }]],
+      ["replace middle", [{ courseId: 7 }, { courseId: 1 }, { courseId: 9 }]],
+      ["replace end", [{ courseId: 7 }, { courseId: 8 }, { courseId: 1 }]],
+      [
+        "add start",
+        [{ courseId: 1 }, { courseId: 7 }, { courseId: 8 }, { courseId: 9 }],
+      ],
+      [
+        "add middle",
+        [{ courseId: 7 }, { courseId: 1 }, { courseId: 8 }, { courseId: 9 }],
+      ],
+      [
+        "add end",
+        [{ courseId: 7 }, { courseId: 8 }, { courseId: 9 }, { courseId: 1 }],
+      ],
+      ["reorder", [{ courseId: 9 }, { courseId: 8 }, { courseId: 7 }]],
+      ["reorder", [{ courseId: 7 }, { courseId: 9 }, { courseId: 8 }]],
+      ["reorder", [{ courseId: 9 }, { courseId: 7 }, { courseId: 8 }]],
+      ["reorder", [{ courseId: 8 }, { courseId: 7 }, { courseId: 9 }]],
+      ["reorder", [{ courseId: 8 }, { courseId: 9 }, { courseId: 7 }]],
+    ])("collection navigation is reactive to %s", async (name, data) => {
       var studentModel = new Student({
         studentId: 1,
-        courses: [
-          { courseId: 7 },
-          { courseId: 8 },
-          { courseId: 9 }
-        ]
+        courses: [{ courseId: 7 }, { courseId: 8 }, { courseId: 9 }],
       });
       var student = new StudentViewModel(studentModel);
       const existingCollection = student.courses;
 
-      const vue = new Vue({
-        data: { student },
-      });
-      const watchCallback = jest.fn();
-      vue.$watch('student.courses', watchCallback);
+      const vue = mountData({ student });
+      const watchCallback = vitest.fn();
+      watch(student.courses!, watchCallback);
 
-      studentModel.courses = (data as any[]).map(x => new Course(x));
+      studentModel.courses = (data as any[]).map((x) => new Course(x));
       student.$loadCleanData(studentModel);
-      
-      await vue.$nextTick()
+
+      await vue.$nextTick();
 
       // Collection instance should have been kept the same.
       expect(student.courses).toBe(existingCollection);
 
       // Verify that instances look right.
-      student.courses!.forEach(c => {
+      student.courses!.forEach((c) => {
         expect(c).toBeInstanceOf(CourseViewModel);
         expect((c as any).$parent).toBe(student);
         expect((c as any).$parentCollection).toBe(student.courses);
-      })
+      });
 
       // Watcher should have been triggered because its contents changed
       expect(watchCallback).toBeCalledTimes(1);
-    })
+    });
 
     test("collection navigation is not reactive when nothing changes", async () => {
       var studentModel = new Student({
         studentId: 1,
         courses: [
           { courseId: 7, name: "foo" },
-          { courseId: 9, name: "bar" }
-        ]
+          { courseId: 9, name: "bar" },
+        ],
       });
       var student = new StudentViewModel(studentModel);
       const existingCollection = student.courses;
 
-      const vue = new Vue({
-        data: { student },
-      });
-      const watchCallback = jest.fn();
-      vue.$watch('student.courses', watchCallback);
+      const vue = mountData({ student });
+      const watchCallback = vitest.fn();
+      vue.$watch("student.courses", watchCallback);
 
       student.$loadCleanData(studentModel);
 
-      await vue.$nextTick()
+      await vue.$nextTick();
 
       // Collection instance should have been kept the same.
       expect(student.courses).toBe(existingCollection);
 
       // Watcher should not have been triggered because its contents shouldnt have changed
       expect(watchCallback).toBeCalledTimes(0);
-    })
+    });
 
-    test('doesnt stackoverflow on recursive object structures', () => {
+    test("doesnt stackoverflow on recursive object structures", () => {
       var studentModel = new Student({
         studentId: 1,
         studentAdvisorId: 1,
-        advisor: {name: "Seagull", advisorId: 1},
+        advisor: { name: "Seagull", advisorId: 1 },
       });
       studentModel.advisor!.students = [studentModel];
 
@@ -1580,45 +1657,55 @@ describe("ViewModel", () => {
 
       // The root VM (`student`) should also be subject to this logic,
       // so the root should be the same instance seen in the advisor's students array.
-      expect(student).toBe(student.advisor!.students[0]);    
+      expect(student).toBe(student.advisor!.students[0]);
     });
-  })
+  });
 
   describe("$delete", () => {
     test("removes deleted item from parent collection if item has PK", async () => {
-      var student = new StudentViewModel(new Student({
-        studentId: 1,
-        courses: [ { courseId: 7, name: "foo" }, ]
-      }));
+      var student = new StudentViewModel(
+        new Student({
+          studentId: 1,
+          courses: [{ courseId: 7, name: "foo" }],
+        })
+      );
 
       const course = student.courses![0];
 
-      const deleteMock = course.$apiClient.delete = 
-        jest.fn().mockResolvedValue(<AxiosItemResult<any>>{ data: { wasSuccessful: true } });
+      const deleteMock = (course.$apiClient.delete = vitest
+        .fn()
+        .mockResolvedValue(<AxiosItemResult<any>>{
+          data: { wasSuccessful: true },
+        }));
 
       await course.$delete();
 
       expect(deleteMock).toBeCalledTimes(1);
       expect(student.courses).toHaveLength(0);
-    })
-    
+    });
+
     test("removes deleted item from parent collection if item has no PK", async () => {
-      var student = new StudentViewModel(new Student({
-        studentId: 1,
-        courses: [ { name: "foo" }, ]
-      }));
+      var student = new StudentViewModel(
+        new Student({
+          studentId: 1,
+          courses: [{ name: "foo" }],
+        })
+      );
 
       const course = student.courses![0];
 
-      const deleteMock = course.$apiClient.delete = 
-        jest.fn().mockResolvedValue(<AxiosItemResult<any>>{ data: { wasSuccessful: true } });
+      const deleteMock = (course.$apiClient.delete = vitest
+        .fn()
+        .mockResolvedValue(<AxiosItemResult<any>>{
+          data: { wasSuccessful: true },
+        }));
 
       await course.$delete();
 
       expect(deleteMock).toBeCalledTimes(0);
       expect(student.courses).toHaveLength(0);
-    })
-  })
+    });
+  });
 
   describe("ctor", () => {
     test("preserves ViewModel instances in initialData", () => {
@@ -1628,59 +1715,61 @@ describe("ViewModel", () => {
       });
 
       var studentVM = new StudentViewModel({
-        advisor: advisorVM
+        advisor: advisorVM,
       });
 
       // Should be the exact same reference.
       expect(studentVM.advisor).toBe(advisorVM);
-    })
-  })
-})
+    });
+  });
+});
 
 describe("ListViewModel", () => {
   describe("$load & $items", () => {
-
     let list: StudentListViewModel;
     let includeAdditionalItemAtStart: boolean;
 
     beforeEach(() => {
       includeAdditionalItemAtStart = false;
-      list = new StudentListViewModel;
-      list.$apiClient.list = jest
-        .fn()
-        .mockImplementation((dto: any) => {
-          return Promise.resolve(<AxiosListResult<Student>> {
-            data: {
-              wasSuccessful: true,
-              list: [
-                ...(includeAdditionalItemAtStart 
-                  ? [new Student({studentId:3, name: 'John'})]
-                  : []),
-                new Student({studentId:1, name: 'Steve'}),
-                new Student({studentId:2, name: 'Bob'}),
-              ],
-              page: 1,
-              pageSize: 10,
-              pageCount: 1,
-              totalCount: 2,
-            }
-          })
+      list = new StudentListViewModel();
+      list.$apiClient.list = vitest.fn().mockImplementation((dto: any) => {
+        return Promise.resolve(<AxiosListResult<Student>>{
+          data: {
+            wasSuccessful: true,
+            list: [
+              ...(includeAdditionalItemAtStart
+                ? [new Student({ studentId: 3, name: "John" })]
+                : []),
+              new Student({ studentId: 1, name: "Steve" }),
+              new Student({ studentId: 2, name: "Bob" }),
+            ],
+            page: 1,
+            pageSize: 10,
+            pageCount: 1,
+            totalCount: 2,
+          },
         });
-    })
+      });
+    });
 
     test("props on objects in $items are reactive", async () => {
       await list.$load();
 
-      const vue = new Vue({
-        data: { list },
-        computed: {
-          name() {
-            return this.list.$items[1].name
-          }
-        }
-      });
-      const watchCallback = jest.fn();
-      vue.$watch('name', watchCallback);
+      const vue = mount(
+        defineComponent({
+          template: "<div></div>",
+          data() {
+            return { list };
+          },
+          computed: {
+            name() {
+              return this.list.$items[1].name;
+            },
+          },
+        })
+      ).vm;
+      const watchCallback = vitest.fn();
+      vue.$watch("name", watchCallback);
 
       await vue.$nextTick();
       expect(watchCallback).toBeCalledTimes(0);
@@ -1690,38 +1779,36 @@ describe("ListViewModel", () => {
 
       expect(watchCallback).toBeCalledTimes(1);
       expect(list.$items[1].name).toBe("Heidi");
-    })
+    });
 
     test("$items is reactive", async () => {
       await list.$load();
 
-      const vue = new Vue({data: { list }});
-      const watchCallback = jest.fn();
-      vue.$watch('list.$items', watchCallback);
+      const vue = mountData({ list });
+      const watchCallback = vitest.fn();
+      watch(list.$items, watchCallback);
 
-      list.$items.push(new StudentViewModel({studentId: 3, name: "Heidi"}))
+      list.$items.push(new StudentViewModel({ studentId: 3, name: "Heidi" }));
 
       await vue.$nextTick();
 
       expect(watchCallback).toBeCalledTimes(1);
       expect(list.$items).toHaveLength(3);
-    })
+    });
 
     test("identical loads do not trigger reactivity on $items", async () => {
       // This tests a performance scenario - avoid triggering
       // reactivity on list.$items if absolutely nothing changed.
 
-      const vue = new Vue({
-        data: { list }
-      });
-        
+      const vue = mountData({ list });
+
       // First load. Will only include the first 2 items.
       await list.$load();
 
       // Start watching the list's items collection
       await vue.$nextTick();
-      const watchCallback = jest.fn();
-      vue.$watch('list.$items', watchCallback);
+      const watchCallback = vitest.fn();
+      vue.$watch("list.$items", watchCallback);
 
       // Reload the list with the exact same response from the API.
       await vue.$nextTick();
@@ -1730,10 +1817,10 @@ describe("ListViewModel", () => {
 
       // The watcher should not have been triggered.
       expect(watchCallback).toBeCalledTimes(0);
-    })
+    });
 
     test("newly loaded additional items are reactive", async () => {
-      // This test is a doozy. 
+      // This test is a doozy.
       // There was an issue where if a list endpoint returns a new,
       // never-before-seen item at the start of its result set
       // when the result set also includes items that it HAS already seen,
@@ -1751,20 +1838,25 @@ describe("ListViewModel", () => {
       // 4) After mapping all items to either new or updated ViewModels,
       //    the results of the map() call are passed to the `.push()` method of the VMC.
       //    However, this is the `.push()` method from BEFORE the VMC was made reactive.
-      //    
+      //
       // The issue is that we were grabbing the `.push()` method before doing the mapping,
       // not accounting for the fact that the .push() on the VMC could change as part of the mapping.
-      
-      const vue = new Vue({
-        data: { list },
-        computed: {
-          name() {
-            return this.list.$items[0].name
-          }
-        }
-      });
-      const watchCallback = jest.fn();
-        
+
+      const vue = mount(
+        defineComponent({
+          template: "<div></div>",
+          data() {
+            return { list };
+          },
+          computed: {
+            name() {
+              return this.list.$items[0].name;
+            },
+          },
+        })
+      ).vm;
+      const watchCallback = vitest.fn();
+
       // First load. Will only include the first 2 items.
       await list.$load();
       expect(list.$items).toHaveLength(2);
@@ -1776,21 +1868,21 @@ describe("ListViewModel", () => {
 
       // Start watching the name of the first item in the list.
       await vue.$nextTick();
-      vue.$watch('name', watchCallback);
+      vue.$watch("name", watchCallback);
 
       // Change the name of the first item in the list.
-      list.$items[0].name = "Heidi"
+      list.$items[0].name = "Heidi";
       await vue.$nextTick();
 
       // The watcher should have been triggered.
       expect(watchCallback).toBeCalledTimes(1);
-    })
+    });
 
     test("preserves same objects for same-keyed results", async () => {
       await list.$load();
 
-      const item0 = list.$items[0]
-      , item1 = list.$items[1];
+      const item0 = list.$items[0],
+        item1 = list.$items[1];
 
       // Modify a prop in the initial set of items to
       // make sure that the objects are reloaded with the incoming data.
@@ -1800,8 +1892,7 @@ describe("ListViewModel", () => {
 
       expect(item0).toBe(list.$items[0]);
       expect(item1).toBe(list.$items[1]);
-      expect(item0.name).toBe('Steve');
-    })
-
-  })
-})
+      expect(item0.name).toBe("Steve");
+    });
+  });
+});

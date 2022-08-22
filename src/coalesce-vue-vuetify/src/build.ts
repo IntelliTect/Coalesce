@@ -1,4 +1,3 @@
-
 /** Component name resolver for unplugin-vue-components. */
 
 export function CoalesceVuetifyResolver() {

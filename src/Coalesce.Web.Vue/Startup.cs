@@ -73,15 +73,8 @@ namespace Coalesce.Web.Vue
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-#pragma warning disable CS0618 // Type or member is obsolete
-                app.UseWebpackDevMiddleware(new WebpackDevMiddlewareOptions
-                {
-                    HotModuleReplacement = true,
 
-                    // Use a slightly-tweaked version of vue-cli's webpack config to work around a few bugs.
-                    ConfigFile = "webpack.config.aspnetcore-hmr.js"
-                });
-#pragma warning restore CS0618 // Type or member is obsolete
+                app.UseViteDevelopmentServer();
             }
             else
             {

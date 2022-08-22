@@ -82,9 +82,6 @@ export default class App extends Vue {
 </script>
 
 <style lang="scss">
-  #vue-app {
-  }
-
   .v-app-bar {
     padding-top: 0;
     padding-bottom: 0;

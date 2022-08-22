@@ -1,16 +1,19 @@
 import { addYears } from "date-fns";
+import { type ComponentPublicInstance, type ReactiveFlags, version } from "vue";
 
 export type OwnProps<T, TExclude> = Pick<T, Exclude<keyof T, keyof TExclude>>;
 
 export type Indexable<T> = { [k: string]: any | undefined } & T;
 
-export type DeepPartial<T> = T | {
-  [P in keyof T]?: T[P] extends Array<infer U>
-    ? Array<DeepPartial<U>>
-    : T[P] extends ReadonlyArray<infer U>
-    ? ReadonlyArray<DeepPartial<U>>
-    : DeepPartial<T[P]>;
-};
+export type DeepPartial<T> =
+  | T
+  | {
+      [P in keyof T]?: T[P] extends Array<infer U>
+        ? Array<DeepPartial<U>>
+        : T[P] extends ReadonlyArray<infer U>
+        ? ReadonlyArray<DeepPartial<U>>
+        : DeepPartial<T[P]>;
+    };
 
 export function isNullOrWhitespace(value: string | null | undefined) {
   // Manually looping here is leagues faster than using a regex or .trim().
@@ -54,7 +57,7 @@ export function parseDateUserInput(input: string, defaultDate: Date) {
     // they most likely meant Dec 20 2019, not Dec 20 2020.
     // Likewise, If the current date is Dec 20 2019 and the user enters 1/1,
     // they most likely meant Jan 1 2020, not Jan 1 2019.
-    const bestGuessMaxDiffMs = 120*24*60*60*1000;
+    const bestGuessMaxDiffMs = 120 * 24 * 60 * 60 * 1000;
     let bestMatch: Date = parsed;
     let bestMatchDiff = Math.pow(2, 52);
     for (const candidate of [
@@ -62,9 +65,7 @@ export function parseDateUserInput(input: string, defaultDate: Date) {
       parsed,
       addYears(parsed, -1),
     ]) {
-      const diff = Math.abs(
-        defaultDate.valueOf() - candidate.valueOf()
-      );
+      const diff = Math.abs(defaultDate.valueOf() - candidate.valueOf());
       if (diff < bestMatchDiff && diff <= bestGuessMaxDiffMs) {
         bestMatch = candidate;
         bestMatchDiff = diff;
@@ -76,7 +77,7 @@ export function parseDateUserInput(input: string, defaultDate: Date) {
   return new Date(input);
 }
 
-/** 
+/**
  * Converts deep Javascript objects to URL encoded query strings.
  * Code extracted from jQuery.param() and boiled down to bare metal js.
  * Should handle deep/nested objects and arrays in the same manner as jQuery's ajax functionality.
@@ -84,7 +85,9 @@ export function parseDateUserInput(input: string, defaultDate: Date) {
  * Replaces NPM module "qs" after it became bloated with dependencies in a commit dated 3/18/2021.
  * @license MIT
  */
-export function objectToQueryString(a: Array<any> | { [s: string]: any } | null) {
+export function objectToQueryString(
+  a: Array<any> | { [s: string]: any } | null
+) {
   var items: Array<any> = [];
   const add = function (key: string, value: any) {
     value = value == null ? "" : value;
@@ -100,11 +103,11 @@ export function objectToQueryString(a: Array<any> | { [s: string]: any } | null)
 }
 
 export function objectToFormData(a: Array<any> | { [s: string]: any } | null) {
-  var items = new FormData;
+  var items = new FormData();
   const add = function (key: string, value: any) {
     if (value instanceof Uint8Array) {
       // Add raw binary as blobs
-      value = new Blob([value])
+      value = new Blob([value]);
     }
 
     items.append(key, value == null ? "" : value);
@@ -117,7 +120,9 @@ export function objectToFormData(a: Array<any> | { [s: string]: any } | null) {
 
 const rbracket = /\[\]$/;
 function isScalarFormValue(obj: any) {
-  return obj instanceof Blob || obj instanceof Uint8Array || typeof obj !== "object"
+  return (
+    obj instanceof Blob || obj instanceof Uint8Array || typeof obj !== "object"
+  );
 }
 function buildParams(
   prefix: string,
@@ -134,12 +139,8 @@ function buildParams(
         add(prefix, v);
       } else {
         // Item is non-scalar (array or object), encode its numeric index.
-        const k = (typeof v === "object" && v != null ? i.toString() : "");
-        buildParams(
-          prefix ? prefix + "[" + k + "]" : k,
-          v,
-          add
-        );
+        const k = typeof v === "object" && v != null ? i.toString() : "";
+        buildParams(prefix ? prefix + "[" + k + "]" : k, v, add);
       }
     }
   } else if (obj === null) {
@@ -158,3 +159,37 @@ function buildParams(
     add(prefix, obj);
   }
 }
+
+/** This is the property added by `markRaw`.
+ * We use it directly so we can declare it on the proto of ViewModel/ListViewModel
+ * rather than calling markRaw on each instance.
+ *
+ * We make these classes nonreactive with Vue, preventing ViewModel instance from being wrapped with a Proxy.
+ * To achieve reactivity, we instead make individual members reactive with `reactive`/`ref`.
+ *
+ * We have to do this because `reactive` doesn't play nice with prototyped objects.
+ * Any sets to a setter on the ViewModel class will trigger the reactive proxy,
+ * and since the setter is defined on the prototype and Vue checks hasOwnProperty
+ * when determining if a field is new on an object, all setters trigger reactivity
+ * even if the value didn't change.
+ *
+ * We cant use the export of ReactiveFlags from vue because of https://github.com/vuejs/core/issues/1228
+ */
+export const ReactiveFlags_SKIP = "__v_skip" as ReactiveFlags.SKIP;
+
+/** A type that very vaguely matches a component instance in both Vue2 and Vue3. */
+type RequiredVueInstanceMembers = "$nextTick" | "$watch";
+export type VueInstanceLike = any;
+// & Partial<Pick<ComponentPublicInstance, "$router"|"$route">>
+// & Pick<ComponentPublicInstance, RequiredVueInstanceMembers>
+
+export function getInternalInstance(vue: VueInstanceLike) {
+  // @ts-ignore vue2/vue3 compat shim.
+  if ("$" in vue) return vue.$ as any;
+  // Vue2.7 doesn't have a notion of InternalInstance,
+  // so places that use it in Vue3 use the public instance instead.
+  return vue;
+}
+
+export const IsVue2 = version.charAt(0) == "2";
+export const IsVue3 = version.charAt(0) == "3";

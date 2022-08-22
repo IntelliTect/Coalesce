@@ -3,110 +3,121 @@
     class="c-select-string-value"
     :value="internalValue"
     @input="onInput"
-
     :loading="loading"
     :items="items"
     :search-input.sync="search"
     v-bind="inputBindAttrs"
   >
   </v-combobox>
-    <!-- no-filter -->
-
+  <!-- no-filter -->
 </template>
 
 <script lang="ts">
+import { defineComponent } from "vue";
+import { ItemApiState, ModelApiClient, ItemResultPromise } from "coalesce-vue";
+import { makeMetadataProps, useMetadataProps } from "../c-metadata-component";
 
-import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
-import MetadataComponent from '../c-metadata-component'
-import { ListViewModel, ItemApiState, ModelApiClient, ItemResultPromise } from 'coalesce-vue';
+const MODEL_REQUIRED_MESSAGE =
+  "c-select-string-value requires a model to be provided via the `model` prop.";
 
-const MODEL_REQUIRED_MESSAGE = "c-select-string-value requires a model to be provided via the `model` prop."
-    
-@Component({
-  name: 'c-select-string-value',
-  components: {
-  }
-})
-export default class CSelectStringValue extends MetadataComponent { 
-  @Prop({required: true, type: String})
-  public method!: string;
+export default defineComponent({
+  name: "c-select-string-value",
 
-  @Prop({required: false, type: Object})
-  public params?: {}
+  setup(props) {
+    return { ...useMetadataProps(props) };
+  },
 
-  @Prop({required: false, default: false, type: Boolean})
-  public listWhenEmpty!: boolean;
+  props: {
+    ...makeMetadataProps(),
+    method: { required: true, type: String },
+    params: { required: false, type: Object },
+    listWhenEmpty: { required: false, default: false, type: Boolean },
+  },
 
-  caller!: ItemApiState<[number, string], string[]>;
+  data() {
+    return {
+      caller: null! as ItemApiState<[number, string], string[]>,
+      search: null as string | null,
+    };
+  },
 
-  public search: string | null = null;
+  watch: {
+    search(newVal: string, oldVal: string) {
+      if (!newVal && !this.listWhenEmpty) {
+        return;
+      }
+
+      if (newVal != oldVal) {
+        // Single equals intended. Works around https://github.com/vuetifyjs/vuetify/issues/7344,
+        // since null == undefined, the transition from undefined to null will fail.
+        this.caller(1, newVal);
+      }
+    },
+  },
+
+  computed: {
+    loading() {
+      return this.caller.isLoading;
+    },
+
+    items() {
+      if (!this.search && !this.listWhenEmpty) return [];
+      return this.caller.result || [];
+    },
+
+    internalValue(): string | null {
+      if (this.model && this.valueMeta) {
+        return (this.model as any)[this.valueMeta.name];
+      }
+
+      throw Error(MODEL_REQUIRED_MESSAGE);
+    },
+  },
+
+  methods: {
+    onInput(value: string) {
+      if (this.model && this.valueMeta) {
+        return ((this.model as any)[this.valueMeta.name] = value);
+      }
+
+      this.$emit("input", value);
+    },
+  },
 
   created() {
-    if (!this.modelMeta || this.modelMeta.type != 'model') {
-      throw Error(MODEL_REQUIRED_MESSAGE)
+    if (!this.modelMeta || this.modelMeta.type != "model") {
+      throw Error(MODEL_REQUIRED_MESSAGE);
     }
 
     const methodMeta = this.modelMeta.methods[this.method];
 
-    if (!methodMeta
-      || !methodMeta.isStatic
-      || methodMeta.transportType != "item"
-      || methodMeta.return.type != "collection"
-      || methodMeta.return.itemType.type != "string") {
-      throw Error("c-select-string-value requires a static model method that returns an array of strings.")
+    if (
+      !methodMeta ||
+      !methodMeta.isStatic ||
+      methodMeta.transportType != "item" ||
+      methodMeta.return.type != "collection" ||
+      methodMeta.return.itemType.type != "string"
+    ) {
+      throw Error(
+        "c-select-string-value requires a static model method that returns an array of strings."
+      );
     }
 
     this.caller = new ModelApiClient(this.modelMeta)
       .$withSimultaneousRequestCaching()
-      .$makeCaller("item", function (this: CSelectStringValue, c, page: number, search: string) {
-        return c.$invoke(methodMeta, {page, search, ...this.params}) as ItemResultPromise<string[]>
+      .$makeCaller("item", (c, page: number, search: string) => {
+        return c.$invoke(methodMeta, {
+          page,
+          search,
+          ...this.params,
+        }) as ItemResultPromise<string[]>;
         // (c as any)[methodMeta.name](page, search) as ListResultPromise<string>
       })
       .setConcurrency("debounce");
-  }
+  },
 
   mounted() {
     this.caller();
-  }
-  
-  @Watch('search')
-  searchChanged(newVal: any, oldVal: any) {
-    if (!newVal && !this.listWhenEmpty) {
-      return;
-    }
-    
-    if (newVal != oldVal) {
-      // Single equals intended. Works around https://github.com/vuetifyjs/vuetify/issues/7344,
-      // since null == undefined, the transition from undefined to null will fail.
-      this.caller(1, newVal);
-    }
-  }
-
-  get loading() {
-    return this.caller.isLoading;
-  }
-
-  get items() {
-    if (!this.search && !this.listWhenEmpty) return [];
-    return this.caller.result || [];
-  }
-
-  get internalValue(): string | null {
-    if (this.model && this.valueMeta) {
-      return (this.model as any)[this.valueMeta.name];
-    }
-
-    throw Error(MODEL_REQUIRED_MESSAGE)
-  }
-
-  onInput(value: string) {
-    if (this.model && this.valueMeta) {
-      return (this.model as any)[this.valueMeta.name] = value;
-    }
-    
-    this.$emit('input', value);
-  }
-}
-
+  },
+});
 </script>
-

@@ -1,54 +1,24 @@
-
-import _Vue from "vue";
-
 // In alphabetical order:
-import CAdminDisplay from './admin/c-admin-display';
-import CAdminEditorPage from './admin/c-admin-editor-page.vue';
-import CAdminEditor from './admin/c-admin-editor.vue';
-import CAdminMethod from './admin/c-admin-method.vue';
-import CAdminMethods from './admin/c-admin-methods.vue';
-import CAdminTablePage from './admin/c-admin-table-page.vue';
-import CAdminTableToolbar from './admin/c-admin-table-toolbar.vue';
-import CAdminTable from './admin/c-admin-table.vue';
-import CDatetimePicker from './input/c-datetime-picker.vue';
-import CDisplay from './display/c-display'
-// import CEditorDialog from './admin/c-editor-dialog.vue';
-import CInputPropsProvider from './input/c-input-props-provider.vue';
-import CInput from './input/c-input';
-import CLoaderStatus from './display/c-loader-status.vue';
-// import CMethodsDialog from './admin/c-methods-dialog.vue';
-import CListPage from './input/c-list-page.vue';
-import CListPageSize from './input/c-list-page-size.vue';
-import CListRangeDisplay from './display/c-list-range-display.vue';
-import CListPagination from './input/c-list-pagination.vue';
-import CSelectManyToMany from './input/c-select-many-to-many.vue';
-import CSelectStringValue from './input/c-select-string-value.vue';
-import CSelect from './input/c-select.vue';
-import CTable from './display/c-table.vue';
-
-
-export {
-  CAdminDisplay,
-  CAdminEditorPage,
-  CAdminEditor,
-  CAdminMethod,
-  CAdminMethods,
-  CAdminTablePage,
-  CAdminTableToolbar,
-  CAdminTable,
-  CDatetimePicker,
-  CDisplay,
-  // CEditorDialog,
-  CInputPropsProvider,
-  CInput,
-  CLoaderStatus,
-  // CMethodsDialog,
-  CListPage,
-  CListPageSize,
-  CListRangeDisplay,
-  CListPagination,
-  CSelectManyToMany,
-  CSelectStringValue,
-  CSelect,
-  CTable,
-};
+export { default as CAdminDisplay } from "./admin/c-admin-display";
+export { default as CAdminEditor } from "./admin/c-admin-editor.vue";
+export { default as CAdminEditorPage } from "./admin/c-admin-editor-page.vue";
+export { default as CAdminMethod } from "./admin/c-admin-method.vue";
+export { default as CAdminMethods } from "./admin/c-admin-methods.vue";
+export { default as CAdminTable } from "./admin/c-admin-table.vue";
+export { default as CAdminTablePage } from "./admin/c-admin-table-page.vue";
+export { default as CAdminTableToolbar } from "./admin/c-admin-table-toolbar.vue";
+export { default as CDatetimePicker } from "./input/c-datetime-picker.vue";
+export { default as CDisplay } from "./display/c-display";
+export { default as CInput } from "./input/c-input";
+export { default as CInputPropsProvider } from "./input/c-input-props-provider.vue";
+export { default as CListFilters } from "./input/c-list-filters.vue";
+export { default as CListPage } from "./input/c-list-page.vue";
+export { default as CListPageSize } from "./input/c-list-page-size.vue";
+export { default as CListPagination } from "./input/c-list-pagination.vue";
+export { default as CListRangeDisplay } from "./display/c-list-range-display.vue";
+export { default as CLoaderStatus } from "./display/c-loader-status.vue";
+export { default as CSelect } from "./input/c-select.vue";
+export { default as CSelectManyToMany } from "./input/c-select-many-to-many.vue";
+export { default as CSelectStringValue } from "./input/c-select-string-value.vue";
+export { default as CSelectValues } from "./input/c-select-values.vue";
+export { default as CTable } from "./display/c-table.vue";

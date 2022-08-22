@@ -1,16 +1,13 @@
-
 <template>
-
   <v-expand-transition>
     <v-expansion-panels v-if="methods.length" class="c-methods">
       <v-toolbar
         class="c-admin-editor-page--toolbar"
-        dense color="primary darken-1" dark
+        dense
+        color="primary darken-1"
+        dark
       >
-
-        <v-toolbar-title >
-          Actions
-        </v-toolbar-title>
+        <v-toolbar-title> Actions </v-toolbar-title>
 
         <v-divider class="mx-4 my-0" vertical></v-divider>
 
@@ -18,12 +15,9 @@
           <c-display :model="model"></c-display>
         </v-toolbar-title>
       </v-toolbar>
-      <v-expansion-panel
-        v-for="method in methods"
-        :key="method.name"
-      >
+      <v-expansion-panel v-for="method in methods" :key="method.name">
         <v-expansion-panel-header>
-          <div>{{method.displayName}}</div>
+          <div>{{ method.displayName }}</div>
         </v-expansion-panel-header>
         <v-expansion-panel-content>
           <c-admin-method
@@ -38,54 +32,49 @@
   </v-expand-transition>
 </template>
 
-
 <script lang="ts">
+import { defineComponent, PropType } from "vue";
+import { Model, ViewModel, ModelType, ListViewModel } from "coalesce-vue";
 
-import { Vue, Component, Watch, Prop } from 'vue-property-decorator'
-import { Model, ClassType, ViewModel, Property, Method, ModelType, ListViewModel } from 'coalesce-vue';
-import CAdminMethod from './c-admin-method.vue'
-import CDisplay from "../display/c-display";
+export default defineComponent({
+  name: "c-admin-methods",
 
-@Component({
-  name: 'c-admin-methods',
-  components: {
-    CAdminMethod,
-    CDisplay
-  }
-})
-export default class CMethods extends Vue {
-  @Prop({required: true, type: Object})
-  public model!: ViewModel<Model<ModelType>> | ListViewModel;
+  props: {
+    model: {
+      required: true,
+      type: Object as PropType<ViewModel<Model<ModelType>> | ListViewModel>,
+    },
+    autoReloadModel: { required: false, type: Boolean, default: false },
+  },
 
-  @Prop({required: false, type: Boolean, default: false})
-  public autoReloadModel!: boolean;
+  computed: {
+    viewModel(): ViewModel | ListViewModel {
+      if (this.model instanceof ViewModel) return this.model;
+      if (this.model instanceof ListViewModel) return this.model;
+      throw Error(
+        "c-method: prop `model` is required, and must be a ViewModel or ListViewModel."
+      );
+    },
 
-  get viewModel(): ViewModel | ListViewModel {
-    if (this.model instanceof ViewModel) return this.model;
-    if (this.model instanceof ListViewModel) return this.model;
-    throw Error("c-method: prop `model` is required, and must be a ViewModel or ListViewModel.");
-  }
+    metadata() {
+      return this.viewModel.$metadata as ModelType;
+    },
 
-  get metadata() {
-    return this.viewModel.$metadata as ModelType;
-  }
+    isStatic() {
+      return this.viewModel instanceof ListViewModel;
+    },
 
-  get isStatic() {
-    return this.viewModel instanceof ListViewModel
-  }
+    methods() {
+      if (this.viewModel instanceof ViewModel && !this.viewModel.$primaryKey) {
+        return [];
+      }
 
-  get methods() {
-    if (this.viewModel instanceof ViewModel && !this.viewModel.$primaryKey) {
-      return []
-    }
-
-    return Object
-      .values(this.metadata.methods)
-      .filter(m => !!m.isStatic == this.isStatic)
-  }
-}
-
+      return Object.values(this.metadata.methods).filter(
+        (m) => !!m.isStatic == this.isStatic
+      );
+    },
+  },
+});
 </script>
 
-<style lang="scss">
-</style>
+<style lang="scss"></style>

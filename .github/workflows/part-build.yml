@@ -163,15 +163,16 @@ jobs:
     - name: npm version
       run: npm version $COALESCE_VERSION --no-git-tag-version
     
-    - name: npm run test
-      run: npm run test -- --coverage --reporters=default --reporters=jest-junit
+    - name: npm run test (Vue2)
+      run: npm run test -- --coverage --reporter=default --reporter=junit --outputFile coalesce-vue2.results.xml
+    
 
     - name: Publish Test Results
       uses: dorny/test-reporter@v1
       if: always() && github.event_name != 'pull_request'
       with:
         name: coalesce-vue tests
-        path: '**/junit.xml'
+        path: '**/*.results.xml'
         reporter: jest-junit
 
     - run: npm pack
@@ -183,12 +184,12 @@ jobs:
         path: src/coalesce-vue/coalesce-vue*.tgz
 
 
-  build-coalesce-vue-vuetify:
+  build-coalesce-vue-vuetify2:
     needs: meta
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: src/coalesce-vue-vuetify
+        working-directory: src/coalesce-vue-vuetify2
 
     env:
       COALESCE_VERSION: ${{needs.meta.outputs.COALESCE_VERSION}}

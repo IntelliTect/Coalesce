@@ -12,7 +12,14 @@ import {
   Domain,
   AnyArgCaller,
 } from "coalesce-vue";
-import { computed, PropType, useAttrs, ExtractPropTypes, inject } from "vue";
+import {
+  computed,
+  PropType,
+  useAttrs,
+  ExtractPropTypes,
+  inject,
+  getCurrentInstance,
+} from "vue";
 
 export type ForSpec = undefined | null | string | Property | Value | Method;
 
@@ -244,7 +251,11 @@ export function useMetadataProps(
   });
 
   const valueMeta = computed((() => {
-    const valueMeta = getValueMeta(props.for, modelMeta.value);
+    const valueMeta = getValueMeta(
+      props.for,
+      modelMeta.value,
+      getCurrentInstance()!.proxy.$coalesce.metadata
+    );
     if (valueMeta && "role" in valueMeta) {
       return valueMeta;
     }
@@ -254,7 +265,7 @@ export function useMetadataProps(
   const inputBindAttrs = computed(() =>
     buildVuetifyAttrs(valueMeta.value, props.model, {
       ...useAttrs(),
-      ...inject("c-input-props"),
+      ...inject("c-input-props", {}),
     })
   );
 

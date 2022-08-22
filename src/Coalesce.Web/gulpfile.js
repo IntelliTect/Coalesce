@@ -178,10 +178,13 @@ exports.coalesceKo = gulp.series(
 
 const coalesceVueGen = shell.task(`${dotnetCoalesce} ../../coalesce-vue.json `, { verbose: true });
 coalesceVueGen.displayName = "coalesceVueGen";
+const coalesceVue3Gen = shell.task(`${dotnetCoalesce} ../../coalesce-vue3.json `, { verbose: true });
+coalesceVue3Gen.displayName = "coalesceVue3Gen";
 exports.coalesceVue = gulp.parallel(
     gulp.series(
         exports.coalesceBuild,
         coalesceVueGen,
+        coalesceVue3Gen,
     )
     // TODO: This may not be needed anymore?
     //,gulp.series(

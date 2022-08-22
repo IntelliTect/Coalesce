@@ -2,8 +2,8 @@ import { addYears } from "date-fns";
 import {
   type ComponentPublicInstance,
   type ReactiveFlags,
+  type CreateComponentPublicInstance,
   version,
-  CreateComponentPublicInstance,
 } from "vue";
 
 export type OwnProps<T, TExclude> = Pick<T, Exclude<keyof T, keyof TExclude>>;

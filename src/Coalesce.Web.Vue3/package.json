@@ -1,0 +1,50 @@
+{
+  "name": "coalesce-web-vue3",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "serve": "vite preview",
+    "build": "vite build",
+    "lint": "eslint src",
+    "coverage": "vitest run --coverage",
+    "dev": "vite",
+    "lint:fix": "eslint src --fix",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "@fortawesome/fontawesome-free": "5.15.4",
+    "@mdi/font": "5.9.55",
+    "axios": "0.24.0",
+    "coalesce-vue": "../coalesce-vue",
+    "coalesce-vue-vuetify": "../coalesce-vue-vuetify3",
+    "roboto-fontface": "*",
+    "typeface-roboto": "1.1.13",
+    "typeface-roboto-mono": "0.0.75",
+    "vue": "3.2.37",
+    "vue-facing-decorator": "^2.0.4",
+    "vue-router": "4.0.16",
+    "vuetify": "3.0.0-beta.4",
+    "webfontloader": "^1.0.0"
+  },
+  "devDependencies": {
+    "@types/webfontloader": "^1.0.0",
+    "@typescript-eslint/eslint-plugin": "5.4.0",
+    "@vitejs/plugin-vue": "^2.3.3",
+    "@vue/eslint-config-prettier": "7.0.0",
+    "@vue/eslint-config-typescript": "10.0.0",
+    "@vue/test-utils": "2.0.0",
+    "c8": "^7.11.3",
+    "esbuild-sass-plugin": "^2.2.6",
+    "eslint": "8.2.0",
+    "eslint-plugin-vue": "8.0.3",
+    "prettier": "2.4.1",
+    "sass": "1.50.0",
+    "typescript": "4.4.4",
+    "unplugin-vue-components": "^0.19.2",
+    "vite": "2.9.12",
+    "vite-plugin-checker": "0.4.6",
+    "vite-plugin-vuetify": "1.0.0-alpha.12",
+    "vitest": "^0.15.1",
+    "vue-cli-plugin-vuetify": "~2.5.1"
+  }
+}

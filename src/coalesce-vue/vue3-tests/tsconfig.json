@@ -1,0 +1,12 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    // We only want to do TS builds for validation of type compatibility with vue3, not for emitting.
+    "noEmit": true
+  },
+  
+  "include": [
+    "../src/**/*",
+    "../test/**/*"
+  ]
+}

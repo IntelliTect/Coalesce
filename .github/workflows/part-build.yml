@@ -223,3 +223,43 @@ jobs:
       with:
         name: coalesce-vue-vuetify
         path: src/coalesce-vue-vuetify2/*.tgz
+
+
+  build-coalesce-vue-vuetify3:
+    needs: meta
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: src/coalesce-vue-vuetify3
+
+    env:
+      COALESCE_VERSION: ${{needs.meta.outputs.COALESCE_VERSION}}
+
+    steps:
+    - uses: actions/checkout@v3
+
+    # build coalesce-vue
+    - run: npm run build-local-deps
+
+    - run: npm ci
+
+    # coalesce-vue-vuetify currently has no tests.
+
+    - run: npm run build
+
+    # now we'll setup the real versions of things.
+    # Change the package.json with the correct version of coalesce-vue, 
+    # but do not use any npm commands to do so as they'll freak out that the version isn't published.
+    - name: update *dependencies["coalesce-vue"] version
+      run: cat <<< "$(cat package.json | jq '.peerDependencies["coalesce-vue"] = "$COALESCE_VERSION" | .devDependencies["coalesce-vue"] = "$COALESCE_VERSION" ')" > package.json
+
+    - name: npm version
+      run: npm version $COALESCE_VERSION --no-git-tag-version
+
+    - run: npm pack
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: coalesce-vue-vuetify
+        path: src/coalesce-vue-vuetify3/*.tgz

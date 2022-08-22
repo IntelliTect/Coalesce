@@ -63,6 +63,10 @@ When parsing a user's text input into the text field, c-datetime-picker will fir
 If this fails, the date will be parsed with the [Date constructor](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/Date), but only if the `dateKind` is ``datetime`` or ``date``. This works fairly well on all modern browsers, but can still occasionally have issues. c-datetime-picker tries its best to filter out bad parses from the Date constructor, like dates with a year earlier than 1000.
 :::
 
+<Prop def="native?: boolean" lang="ts" />
+
+True if a native HTML5 input should be used instead of a popup menu with Vuetify date/time pickers inside of it.
+
 <Prop def="readonly?: boolean" lang="ts" />
 
 True if the component should be read-only.

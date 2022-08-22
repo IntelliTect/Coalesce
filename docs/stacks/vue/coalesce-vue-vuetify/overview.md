@@ -2,7 +2,7 @@
 
 <!-- MARKER:summary -->
 
-[![](https://img.shields.io/npm/v/coalesce-vue-vuetify/dev?color=42b883&label=coalesce-vue-vuetify%40dev)](https://www.npmjs.com/package/coalesce-vue-vuetify)
+[![](https://img.shields.io/npm/v/coalesce-vue-vuetify2/dev?color=42b883&label=coalesce-vue-vuetify2%40dev)](https://www.npmjs.com/package/coalesce-vue-vuetify2)
 
 The [Vue](https://vuejs.org/) stack for Coalesce provides [a set of components](/stacks/vue/coalesce-vue-vuetify/overview.md) based on [Vuetify](https://vuetifyjs.com/), packaged up in an NPM package [coalesce-vue-vuetify](https://www.npmjs.com/package/coalesce-vue-vuetify). These components are driven primarily by the [Metadata Layer](/stacks/vue/layers/metadata.md), and include both low level input and display components like [c-input](/stacks/vue/coalesce-vue-vuetify/components/c-input.md) and [c-display](/stacks/vue/coalesce-vue-vuetify/components/c-display.md) that are highly reusable in the custom pages you'll build in your application, as well as high-level components like [c-admin-table-page](/stacks/vue/coalesce-vue-vuetify/components/c-admin-table-page.md) and [c-admin-editor-page](/stacks/vue/coalesce-vue-vuetify/components/c-admin-editor-page.md) that constitute entire pages. 
 
@@ -16,7 +16,7 @@ The [Vue](https://vuejs.org/) stack for Coalesce provides [a set of components](
 The template described in [Getting Started with Vue](/stacks/vue/getting-started.md) already includes all the necessary setup. You can skip this section if you started from the template.
 :::
 
-First, ensure that NPM package [coalesce-vue-vuetify](https://www.npmjs.com/package/coalesce-vue-vuetify) is installed in your project.
+First, ensure that NPM package [coalesce-vue-vuetify2](https://www.npmjs.com/package/coalesce-vue-vuetify2) is installed in your project. The examples below assume it has been aliased to `coalesce-vue-vuetify` - in your package.json: `"coalesce-vue-vuetify": "npm:coalesce-vue-vuetify2@some.version"`. If you do not alias it, adjust the import/require statements accordingly.
 
 ### Setup with Vuetify A-la-carte
 If you're using [Vuetify](https://vuetifyjs.com/)'s [A-la-carte builds](https://vuetifyjs.com/en/customization/a-la-carte/), then similar to importing Vuetify from `'vuetify/lib'` rather than `'vuetify'`, you should import `'coalesce-vue-vuetify'` from `'coalesce-vue-vuetify/lib'`. 

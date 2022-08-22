@@ -167,13 +167,14 @@ jobs:
       run: npm run test -- --coverage --reporter=default --reporter=junit --outputFile coalesce-vue2.results.xml
     
 
-    - name: Publish Test Results
-      uses: dorny/test-reporter@v1
-      if: always() && github.event_name != 'pull_request'
-      with:
-        name: coalesce-vue tests
-        path: '**/*.results.xml'
-        reporter: jest-junit
+    # Currently broken: https://github.com/dorny/test-reporter/issues/187
+    # - name: Publish Test Results
+    #   uses: dorny/test-reporter@v1
+    #   if: always() && github.event_name != 'pull_request'
+    #   with:
+    #     name: coalesce-vue tests
+    #     path: '**/*.results.xml'
+    #     reporter: jest-junit
 
     - run: npm pack
 

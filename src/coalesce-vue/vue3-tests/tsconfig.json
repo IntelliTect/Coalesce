@@ -2,7 +2,12 @@
   "extends": "../tsconfig.json",
   "compilerOptions": {
     // We only want to do TS builds for validation of type compatibility with vue3, not for emitting.
-    "noEmit": true
+    "noEmit": true,
+    "paths": {
+      "@vue/test-utils": [ "./node_modules/@vue/test-utils" ],
+      "vue": [ "./node_modules/vue" ],
+      "vue-router": [ "./node_modules/vue-router" ]
+    }
   },
   
   "include": [

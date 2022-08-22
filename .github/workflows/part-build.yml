@@ -166,8 +166,22 @@ jobs:
     - name: npm run test (Vue2)
       run: npm run test -- --coverage --reporter=default --reporter=junit --outputFile coalesce-vue2.results.xml
     
+    - name: npm run test (Vue3)
+      run: |
+        set -e;
 
-    # Currently broken: https://github.com/dorny/test-reporter/issues/187
+        cd vue3-tests
+        npm ci;
+
+        # Run a build to check the TS types, since vitest doesn't do full typechecking.
+        npm run build;
+
+        # no coverage on this one, since it'll be identical to vue2 and also doesn't work
+        # since it ignores the files from outside the vue3-tests directory.
+        npm run test -- --reporter=default --reporter=junit --outputFile coalesce-vue3.results.xml
+    
+
+    # Currently broken with vitest: https://github.com/dorny/test-reporter/issues/187
     # - name: Publish Test Results
     #   uses: dorny/test-reporter@v1
     #   if: always() && github.event_name != 'pull_request'

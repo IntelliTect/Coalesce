@@ -989,7 +989,7 @@ export function bindKeyToRouteOnCreate(
   model: Model<ModelType>,
   routeParamName: string = "id",
   keepQuery: boolean = false,
-  routeName?: string | null
+  routeName?: VueInstance["$route"]["name"]
 ) {
   if (!vue.$router || !vue.$route) {
     throw new Error(

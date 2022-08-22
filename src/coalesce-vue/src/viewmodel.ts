@@ -26,7 +26,7 @@ import {
 import {
   type Indexable,
   type DeepPartial,
-  type VueInstanceLike,
+  type VueInstance,
   ReactiveFlags_SKIP,
   getInternalInstance,
   IsVue2,
@@ -599,10 +599,7 @@ export abstract class ViewModel<
    * @param vue A Vue instance through which the lifecycle of the watcher will be managed.
    * @param options Options to control how the auto-saving is performed.
    */
-  public $startAutoSave(
-    vue: VueInstanceLike,
-    options: AutoSaveOptions<this> = {}
-  ) {
+  public $startAutoSave(vue: VueInstance, options: AutoSaveOptions<this> = {}) {
     let state = this._autoSaveState;
 
     if (state?.active && state.options === options) {
@@ -909,10 +906,7 @@ export abstract class ListViewModel<
    * @param vue A Vue instance through which the lifecycle of the watcher will be managed.
    * @param options Options that control the auto-load behavior.
    */
-  public $startAutoLoad(
-    vue: VueInstanceLike,
-    options: AutoLoadOptions<this> = {}
-  ) {
+  public $startAutoLoad(vue: VueInstance, options: AutoLoadOptions<this> = {}) {
     const {
       wait = 1000,
       predicate = undefined,
@@ -1725,8 +1719,8 @@ export function updateViewModelFromModel<
 class AutoCallState<TOptions = any> {
   active: boolean = false;
   cleanup: Function | null = null;
-  vue: VueInstanceLike | null = null;
-  hooked = new WeakSet<VueInstanceLike>();
+  vue: VueInstance | null = null;
+  hooked = new WeakSet<VueInstance>();
   options: TOptions | null = null;
   trigger: (() => void) | null = null;
 
@@ -1738,7 +1732,7 @@ class AutoCallState<TOptions = any> {
 
 function startAutoCall(
   state: AutoCallState,
-  vue: VueInstanceLike,
+  vue: VueInstance,
   watcher?: () => void,
   debouncer?: Cancelable
 ) {

@@ -1,5 +1,10 @@
 import { addYears } from "date-fns";
-import { type ComponentPublicInstance, type ReactiveFlags, version } from "vue";
+import {
+  type ComponentPublicInstance,
+  type ReactiveFlags,
+  version,
+  CreateComponentPublicInstance,
+} from "vue";
 
 export type OwnProps<T, TExclude> = Pick<T, Exclude<keyof T, keyof TExclude>>;
 
@@ -177,15 +182,14 @@ function buildParams(
  */
 export const ReactiveFlags_SKIP = "__v_skip" as ReactiveFlags.SKIP;
 
-/** A type that very vaguely matches a component instance in both Vue2 and Vue3. */
-type RequiredVueInstanceMembers = "$nextTick" | "$watch";
-export type VueInstanceLike = any;
-// & Partial<Pick<ComponentPublicInstance, "$router"|"$route">>
-// & Pick<ComponentPublicInstance, RequiredVueInstanceMembers>
+/** A type that accepts a component instance in both Vue2 and Vue3. Notably, the type of `this` in methods in the options API is not assignable to ComponentPublicInstance, but it is to CreateComponentPublicInstance. */
+export type VueInstance =
+  | ComponentPublicInstance
+  | CreateComponentPublicInstance;
 
-export function getInternalInstance(vue: VueInstanceLike) {
+export function getInternalInstance(vue: VueInstance) {
   // @ts-ignore vue2/vue3 compat shim.
-  if ("$" in vue) return vue.$ as any;
+  if ("$" in vue) return vue.$;
   // Vue2.7 doesn't have a notion of InternalInstance,
   // so places that use it in Vue3 use the public instance instead.
   return vue;

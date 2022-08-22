@@ -32,7 +32,7 @@ import {
   objectToFormData,
   ReactiveFlags_SKIP,
   getInternalInstance,
-  VueInstanceLike,
+  VueInstance,
 } from "./util.js";
 
 import axios, {
@@ -1417,7 +1417,7 @@ export class ItemApiState<TArgs extends any[], TResult> extends ApiState<
   private _objectUrl?: {
     url?: string;
     target?: TResult;
-    hooked: WeakSet<VueInstanceLike>;
+    hooked: WeakSet<VueInstance>;
     active: number;
   };
   /** If the result is a blob or file, returns an Object URL representing that result.
@@ -1425,7 +1425,7 @@ export class ItemApiState<TArgs extends any[], TResult> extends ApiState<
    * @param vue A Vue instance through which the lifecycle of the object URL will be managed.
    */
   public getResultObjectUrl(
-    vue: VueInstanceLike
+    vue: VueInstance
   ): TResult extends Blob ? string | undefined : undefined {
     const result = this.result;
     if (result == this._objectUrl?.target) {

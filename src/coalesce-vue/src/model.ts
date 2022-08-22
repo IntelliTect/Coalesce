@@ -23,7 +23,7 @@ import { resolvePropMeta } from "./metadata.js";
 import {
   type Indexable,
   isNullOrWhitespace,
-  type VueInstanceLike,
+  type VueInstance,
 } from "./util.js";
 
 /**
@@ -923,7 +923,7 @@ export function valueDisplay(
 import type VueRouter from "vue-router";
 
 export function bindToQueryString(
-  vue: VueInstanceLike,
+  vue: VueInstance,
   obj: any, // TODO: Maybe only support objects with $metadata? Would eliminate need for `parse`, and could allow for very strong typings.
   key: string,
   queryKey: string = key,
@@ -985,7 +985,7 @@ export function bindToQueryString(
 }
 
 export function bindKeyToRouteOnCreate(
-  vue: VueInstanceLike,
+  vue: VueInstance,
   model: Model<ModelType>,
   routeParamName: string = "id",
   keepQuery: boolean = false,

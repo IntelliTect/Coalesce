@@ -11,9 +11,10 @@
     "module": "esnext",
     "moduleResolution": "node",
     "esModuleInterop": true,
-    "target": "ES2015",
+    "target": "ES2020",
     "declaration": true,
-    "lib": ["es2015", "es2017", "dom"]
+    "lib": ["es2015", "es2017", "dom"],
+    "types": ["vitest/globals"]
   },
     
   "exclude": [

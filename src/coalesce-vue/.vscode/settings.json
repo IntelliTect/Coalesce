@@ -1,4 +1,9 @@
 {
+    "editor.formatOnPaste": false,
+    "editor.formatOnSave": true,
+    "editor.formatOnType": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "prettier.useEditorConfig": false,
     "typescript.tsdk": "node_modules\\typescript\\lib",
     "[typescript]": {
         "editor.insertSpaces": true,

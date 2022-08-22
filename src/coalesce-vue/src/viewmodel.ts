@@ -1,8 +1,6 @@
-import type Vue from "vue";
+import { onBeforeUnmount, reactive, ref, markRaw } from "vue";
 
-import {
-  resolvePropMeta,
-} from "./metadata.js";
+import { resolvePropMeta } from "./metadata.js";
 import type {
   ModelType,
   PropertyOrName,
@@ -10,24 +8,30 @@ import type {
   ModelCollectionNavigationProperty,
   ModelCollectionValue,
   Service,
-  Property
+  Property,
 } from "./metadata.js";
 import {
   ModelApiClient,
   ListParameters,
   DataSourceParameters,
-  ServiceApiClient
+  ServiceApiClient,
 } from "./api-client.js";
-import type {
-  Model
-} from "./model.js";
 import {
+  type Model,
   modelDisplay,
   propDisplay,
   convertToModel,
-  mapToModel
+  mapToModel,
 } from "./model.js";
-import type { DeepPartial, Indexable } from "./util.js";
+import {
+  type Indexable,
+  type DeepPartial,
+  type VueInstanceLike,
+  ReactiveFlags_SKIP,
+  getInternalInstance,
+  IsVue2,
+  IsVue3,
+} from "./util.js";
 import { debounce } from "lodash-es";
 import type { Cancelable, DebounceSettings } from "lodash";
 
@@ -49,7 +53,6 @@ DESIGN NOTES
         but without cluttering up tooltips with the entire type structure of the metadata.
 */
 
-
 let nextStableId = 1;
 const emptySet: ReadonlySet<string> = new Set();
 
@@ -57,7 +60,13 @@ export abstract class ViewModel<
   TModel extends Model<ModelType> = any,
   TApi extends ModelApiClient<TModel> = any,
   TPrimaryKey extends string | number = any
-> implements Model<TModel["$metadata"]> {
+> implements Model<TModel["$metadata"]>
+{
+  /** See comments on ReactiveFlags_SKIP for explanation.
+   * @internal
+   */
+  private readonly [ReactiveFlags_SKIP] = true;
+
   /** Static lookup of all generated ViewModel types. */
   public static typeLookup: ViewModelTypeLookup | null = null;
 
@@ -68,22 +77,24 @@ export abstract class ViewModel<
   // Underlying object which will hold the backing values
   // of the custom getters/setters. Not for external use.
   // Must exist in order to for Vue to pick it up and add reactivity.
-  private $data: TModel & {[propName: string]: any} = convertToModel({}, this.$metadata);
+  private $data: TModel & { [propName: string]: any } = reactive(
+    convertToModel({}, this.$metadata)
+  );
 
-  /** 
-   * A number unique among all ViewModel instances that will be unchanged for the instance's lifetime. 
+  /**
+   * A number unique among all ViewModel instances that will be unchanged for the instance's lifetime.
    * Can be used to uniquely identify objects with `:key` in Vue components.
-   * 
-   * Especially useful with `transition-group` where some elements of iteration may be unsaved 
+   *
+   * Especially useful with `transition-group` where some elements of iteration may be unsaved
    * and therefore not yet have a `$primaryKey`.
-  */
+   */
   public readonly $stableId!: number;
 
   /**
    * Gets or sets the primary key of the ViewModel's data.
    */
   public get $primaryKey() {
-    return ((this as any) as Indexable<TModel>)[
+    return (this as any as Indexable<TModel>)[
       this.$metadata.keyProp.name
     ] as TPrimaryKey;
   }
@@ -101,32 +112,36 @@ export abstract class ViewModel<
    * have changed since the last load, save, or the last time $isDirty was set to false.
    */
   public get $isDirty() {
-    return this._isDirty
+    return this._isDirty;
   }
   public set $isDirty(val) {
     if (!val) {
       this._dirtyProps.clear();
       this._isDirty = false;
     } else {
-      // When explicitly setting the whole model dirty, 
+      // When explicitly setting the whole model dirty,
       // we don't know which specific prop might be dirty,
       // so just set them all.
       for (const propName in this.$metadata.props) {
-        this.$setPropDirty(propName as any)
+        this.$setPropDirty(propName as any);
       }
     }
   }
 
-  public $setPropDirty(propName: PropNames<TModel["$metadata"]>, dirty = true, triggerAutosave = true) {
+  public $setPropDirty(
+    propName: PropNames<TModel["$metadata"]>,
+    dirty = true,
+    triggerAutosave = true
+  ) {
     const propMeta = this.$metadata.props[propName];
     if (propMeta.dontSerialize) {
       return;
     }
-    
+
     if (dirty) {
       this._dirtyProps.add(propName);
       this._isDirty = true;
-      
+
       if (triggerAutosave && this._autoSaveState?.active) {
         // If dirty, and autosave is enabled, queue an evaluation of autosave.
         this._autoSaveState.trigger?.();
@@ -168,19 +183,23 @@ export abstract class ViewModel<
    */
   private $ignoredRules: { [identifier: string]: boolean } | null = null;
 
-  /** 
+  /**
    * A two-layer map, the first layer being property names and the second layer being rule identifiers,
    * of custom validation rules that should be applied to this viewmodel instance.
    */
-  private $customRules: { [propName: string]: {
-    [identifier: string]: (val: any) => true | string
-  } } | null = null;
+  private $customRules: {
+    [propName: string]: {
+      [identifier: string]: (val: any) => true | string;
+    };
+  } | null = null;
 
   /**
    * Cached set of the effective rules for each property on the model.
    * Will be invalidated when custom rules and/or ignores are changed.
    */
-  private _effectiveRules: { [propName: string]: undefined | Array<(val: any) => true | string> } | null = null;
+  private _effectiveRules: {
+    [propName: string]: undefined | Array<(val: any) => true | string>;
+  } | null = null;
   private get $effectiveRules() {
     let effectiveRules = this._effectiveRules;
     if (effectiveRules) return effectiveRules;
@@ -198,11 +217,11 @@ export abstract class ViewModel<
 
         // Process metadata-provided rules
         for (const ruleName in rules!) {
-
           // Process ignores
           if (ignored) {
-            if (ignored[`${propName}.${ruleName}`]
-            || ignored[`${propName}.*`]
+            if (
+              ignored[`${propName}.${ruleName}`] ||
+              ignored[`${propName}.*`]
             ) {
               continue;
             }
@@ -231,36 +250,40 @@ export abstract class ViewModel<
       }
     }
 
-    return this._effectiveRules = effectiveRules;
+    return (this._effectiveRules = effectiveRules);
   }
 
-  public $addRule(prop: string | Property, identifier: string, rule: (val: any) => true | string) {
-    const propName = typeof prop == 'string' ? prop : prop.name;
+  public $addRule(
+    prop: string | Property,
+    identifier: string,
+    rule: (val: any) => true | string
+  ) {
+    const propName = typeof prop == "string" ? prop : prop.name;
 
-    // Add this as a custom rule. 
+    // Add this as a custom rule.
     // Because rules are keyed by propName and identifier,
     // the rule will not be duplicated.
     this.$customRules = {
       ...this.$customRules,
       [propName]: {
         ...this.$customRules?.[propName],
-        [identifier]: rule
-      }
-    }
+        [identifier]: rule,
+      },
+    };
 
     // Remove any ignore for this rule, if there is one:
     const ignoreSpec = `${propName}.${identifier}`;
     if (this.$ignoredRules && ignoreSpec in this.$ignoredRules) {
       let { [ignoreSpec]: removed, ...remainder } = this.$ignoredRules as any;
-      this.$ignoredRules = remainder
+      this.$ignoredRules = remainder;
     }
 
     // Force recompute of effective rules.
     this._effectiveRules = null;
   }
-  
+
   public $removeRule(prop: string | Property, identifier: string) {
-    const propName = typeof prop == 'string' ? prop : prop.name;
+    const propName = typeof prop == "string" ? prop : prop.name;
 
     // Remove any custom rule that may match this spec.
     const propRules = this.$customRules?.[propName] as any;
@@ -268,15 +291,15 @@ export abstract class ViewModel<
       let { [identifier]: removed, ...remainder } = propRules;
       this.$customRules = {
         ...this.$customRules,
-        [propName]: remainder
-      }
+        [propName]: remainder,
+      };
     }
 
     // Add an ignore to override any rules that are coming from metadata.
     this.$ignoredRules = {
       ...this.$ignoredRules,
-      [`${propName}.${identifier}`]: true
-    }
+      [`${propName}.${identifier}`]: true,
+    };
 
     // Force recompute of effective rules.
     this._effectiveRules = null;
@@ -288,7 +311,7 @@ export abstract class ViewModel<
     - Custom rules added by calling `$addRule`
     - Any rules that where ignored by calling `this.$removeRule`,*/
   public $getRules(prop: string | Property) {
-    return this.$effectiveRules[typeof prop == 'string' ? prop : prop.name]
+    return this.$effectiveRules[typeof prop == "string" ? prop : prop.name];
   }
 
   /** Returns a generator that provides all error messages for the current model
@@ -297,14 +320,16 @@ export abstract class ViewModel<
     - Custom rules added by calling `$addRule`
     - Any rules that where ignored by calling `this.$removeRule`,
   */
-  public *$getErrors(prop?: string | Property): Generator<string, void, unknown> {
+  public *$getErrors(
+    prop?: string | Property
+  ): Generator<string, void, unknown> {
     if (prop) {
-      const propName = typeof prop == 'string' ? prop : prop.name
+      const propName = typeof prop == "string" ? prop : prop.name;
 
-      const effectiveRules = this.$effectiveRules[propName]
+      const effectiveRules = this.$effectiveRules[propName];
       if (!effectiveRules) return;
 
-      for (const rule of effectiveRules){
+      for (const rule of effectiveRules) {
         const result = rule(this.$data[propName]);
         if (result !== true) yield result;
       }
@@ -317,7 +342,7 @@ export abstract class ViewModel<
 
   /** True if `this.$getErrors()` is returning at least one error. */
   public get $hasError() {
-    return !!this.$getErrors().next().value
+    return !!this.$getErrors().next().value;
   }
 
   /**
@@ -350,10 +375,10 @@ export abstract class ViewModel<
    */
   public $saveMode: "surgical" | "whole" = "surgical";
 
-  /** When `$save.isLoading == true`, contains the properties of the model currently being saved by `$save` (including autosaves). 
-   * 
+  /** When `$save.isLoading == true`, contains the properties of the model currently being saved by `$save` (including autosaves).
+   *
    * Does not include non-dirty properties even if `$saveMode == 'whole'`.
-  */
+   */
   public $savingProps: ReadonlySet<string> = emptySet;
 
   /**
@@ -361,71 +386,81 @@ export abstract class ViewModel<
    */
   get $save() {
     const $save = this.$apiClient
-      .$makeCaller("item", async function(this: ViewModel, c, overrideProps?: Partial<TModel>) {
-
-        if (this.$hasError) {
-          throw Error("Cannot save - validation failed: " + [...this.$getErrors()].join(", "))
-        }
-
-        // Capture the dirty props before we set $isDirty = false;
-        const dirtyProps = [...this._dirtyProps];
-
-        // Copy the dirty props into a list that we'll be mutating 
-        // into the list of ALL props that we would need to send
-        // for surgical saves.
-        const propsToSave = [...dirtyProps];
-
-        // If we were passed any override props, send those too.
-        // Use case of override props is changing some field
-        // where we don't want the local UI to reflect that new value
-        // until we know that value has been saved to the server.
-        // A further example is saving some property that will have sever-determined effects
-        // on other properties on the model where we don't want an inconsistent intermediate state.
-        let data: TModel = this as any;
-        if (overrideProps) {
-          data = { ...this.$data, ...overrideProps, $metadata: this.$metadata };
-          propsToSave.push(...Object.keys(overrideProps))
-        }
-
-        // We always send the PK if it exists, regardless of dirty status or save mode.
-        if (this.$primaryKey != null) {
-          propsToSave.push(this.$metadata.keyProp.name)
-        };
-
-        this.$savingProps = new Set(propsToSave);
-
-        // If doing surgical saves and the object already has a known PK,
-        // only save the props that are dirty and/or explicitly requested.
-        const fields = this.$saveMode == "surgical" && this.$primaryKey != null 
-          ? [...this.$savingProps] as any 
-          : null;
-
-        // Before we make the save call, set isDirty = false.
-        // This lets us detect changes that happen to the model while our save request is pending.
-        // If the model is dirty when the request completes, we'll not load the response from the server.
-        this.$isDirty = false;
-        try {
-          return await c.save(data, { fields, ...this.$params });
-        } catch (e) {
-          for (const prop of dirtyProps) {
-            this.$setPropDirty(
-              prop, 
-              true, 
-              // Don't re-trigger autosave on save failure. 
-              // Wait for next prop change to trigger it again.
-              // Otherwise, if the wait timeout is zero,
-              // the save will keep triggering as fast as possible.
-              // Note that this could be a candidate for a user-customizable option
-              // in the future.
-              false
+      .$makeCaller(
+        "item",
+        async function (this: ViewModel, c, overrideProps?: Partial<TModel>) {
+          if (this.$hasError) {
+            throw Error(
+              "Cannot save - validation failed: " +
+                [...this.$getErrors()].join(", ")
             );
           }
-          throw e;
-        } finally {
-          this.$savingProps = emptySet;
+
+          // Capture the dirty props before we set $isDirty = false;
+          const dirtyProps = [...this._dirtyProps];
+
+          // Copy the dirty props into a list that we'll be mutating
+          // into the list of ALL props that we would need to send
+          // for surgical saves.
+          const propsToSave = [...dirtyProps];
+
+          // If we were passed any override props, send those too.
+          // Use case of override props is changing some field
+          // where we don't want the local UI to reflect that new value
+          // until we know that value has been saved to the server.
+          // A further example is saving some property that will have sever-determined effects
+          // on other properties on the model where we don't want an inconsistent intermediate state.
+          let data: TModel = this as any;
+          if (overrideProps) {
+            data = {
+              ...this.$data,
+              ...overrideProps,
+              $metadata: this.$metadata,
+            };
+            propsToSave.push(...Object.keys(overrideProps));
+          }
+
+          // We always send the PK if it exists, regardless of dirty status or save mode.
+          if (this.$primaryKey != null) {
+            propsToSave.push(this.$metadata.keyProp.name);
+          }
+
+          this.$savingProps = new Set(propsToSave);
+
+          // If doing surgical saves and the object already has a known PK,
+          // only save the props that are dirty and/or explicitly requested.
+          const fields =
+            this.$saveMode == "surgical" && this.$primaryKey != null
+              ? ([...this.$savingProps] as any)
+              : null;
+
+          // Before we make the save call, set isDirty = false.
+          // This lets us detect changes that happen to the model while our save request is pending.
+          // If the model is dirty when the request completes, we'll not load the response from the server.
+          this.$isDirty = false;
+          try {
+            return await c.save(data, { fields, ...this.$params });
+          } catch (e) {
+            for (const prop of dirtyProps) {
+              this.$setPropDirty(
+                prop,
+                true,
+                // Don't re-trigger autosave on save failure.
+                // Wait for next prop change to trigger it again.
+                // Otherwise, if the wait timeout is zero,
+                // the save will keep triggering as fast as possible.
+                // Note that this could be a candidate for a user-customizable option
+                // in the future.
+                false
+              );
+            }
+            throw e;
+          } finally {
+            this.$savingProps = emptySet;
+          }
         }
-      })
-      .onFulfilled(function(this: ViewModel) {
+      )
+      .onFulfilled(function (this: ViewModel) {
         if (!this.$save.result) {
           // Can't do anything useful if the save returned no data.
           return;
@@ -457,25 +492,25 @@ export abstract class ViewModel<
     // Set the corresponding foreign key of all entities to the current PK value.
     for (const prop of Object.values(this.$metadata.props)) {
       if (prop.role != "collectionNavigation") continue;
-      
-      const value = (this as any)[prop.name]
+
+      const value = (this as any)[prop.name];
       if (value?.length) {
-        const fk = prop.foreignKey.name
+        const fk = prop.foreignKey.name;
         for (const child of value) {
-          child[fk] = pkValue
+          child[fk] = pkValue;
         }
       }
     }
 
     if (this.$parent?.$metadata?.props) {
-      const parent = this.$parent
+      const parent = this.$parent;
       for (const prop of Object.values(parent.$metadata.props) as Property[]) {
         if (prop.role != "referenceNavigation") continue;
-        
-        // The prop on the parent is a reference navigation. 
-        // If the value of the navigation is ourself, 
+
+        // The prop on the parent is a reference navigation.
+        // If the value of the navigation is ourself,
         // update the foreign key on the $parent with our new PK.
-        const value = parent[prop.name]
+        const value = parent[prop.name];
         if (value === this) {
           parent[prop.foreignKey.name] = pkValue;
         }
@@ -483,14 +518,17 @@ export abstract class ViewModel<
     }
   }
 
-  /** 
-   * Loads data from the provided model into the current ViewModel, 
+  /**
+   * Loads data from the provided model into the current ViewModel,
    * and then clears the $isDirty flag if `isCleanData` is not given as `false`.
-   * 
+   *
    * Data is loaded in a surgical fashion that will preserve existing instances
    * of objects and arrays found on navigation properties.
    */
-  public $loadFromModel(source: DeepPartial<TModel>, isCleanData: boolean = true) {
+  public $loadFromModel(
+    source: DeepPartial<TModel>,
+    isCleanData: boolean = true
+  ) {
     if (this.$isDirty && this._autoSaveState?.active) {
       updateViewModelFromModel(this as any, source, true, isCleanData);
     } else {
@@ -501,9 +539,9 @@ export abstract class ViewModel<
     }
   }
 
-  /** 
+  /**
    * Loads data from the provided model into the current ViewModel, and then clears $isDirty flags.
-   * 
+   *
    * Data is loaded in a surgical fashion that will preserve existing instances
    * of objects and arrays found on navigation properties.
    */
@@ -511,10 +549,10 @@ export abstract class ViewModel<
     return this.$loadFromModel(source, true);
   }
 
-  /** 
+  /**
    * Loads data from the provided model into the current ViewModel.
    * Does not clear $isDirty flags.
-   * 
+   *
    * Data is loaded in a surgical fashion that will preserve existing instances
    * of objects and arrays found on navigation properties.
    */
@@ -527,7 +565,7 @@ export abstract class ViewModel<
    */
   get $delete() {
     const $delete = this.$apiClient
-      .$makeCaller("item", function(this: ViewModel, c) {
+      .$makeCaller("item", function (this: ViewModel, c) {
         if (this.$primaryKey) {
           return c.delete(this.$primaryKey, this.$params);
         } else if (this.$parentCollection) {
@@ -537,7 +575,7 @@ export abstract class ViewModel<
           );
         }
       })
-      .onFulfilled(function(this: ViewModel) {
+      .onFulfilled(function (this: ViewModel) {
         if (this.$parentCollection) {
           this.$parentCollection.splice(
             this.$parentCollection.indexOf(this),
@@ -561,8 +599,10 @@ export abstract class ViewModel<
    * @param vue A Vue instance through which the lifecycle of the watcher will be managed.
    * @param options Options to control how the auto-saving is performed.
    */
-  public $startAutoSave(vue: Vue, options: AutoSaveOptions<this> = {}) {
-    
+  public $startAutoSave(
+    vue: VueInstanceLike,
+    options: AutoSaveOptions<this> = {}
+  ) {
     let state = this._autoSaveState;
 
     if (state?.active && state.options === options) {
@@ -571,19 +611,24 @@ export abstract class ViewModel<
       return;
     }
 
-    const { wait = 1000, predicate = undefined, debounce: debounceOptions } = options;
+    const {
+      wait = 1000,
+      predicate = undefined,
+      debounce: debounceOptions,
+    } = options;
 
     this.$stopAutoSave();
 
-    state = this._autoSaveState = new AutoCallState<AutoSaveOptions<any>>()
+    state = this._autoSaveState ??= new AutoCallState<AutoSaveOptions<any>>();
     state.options = options;
 
-    let ranOnce = false
-    
-    const enqueueSave = debounce(() => {
-      if (!state?.active) return;
+    let ranOnce = false;
 
-      /*
+    const enqueueSave = debounce(
+      () => {
+        if (!state?.active) return;
+
+        /*
         Try and save if:
           1) The model is dirty
           2) The model lacks a primary key, and we haven't yet tried to save it
@@ -591,38 +636,41 @@ export abstract class ViewModel<
             in case the Behaviors on the server are for some reason not configured
             to return responses from saves.
       */
-      if (this.$isDirty || (!ranOnce && !this.$primaryKey)) {
-        if (this.$hasError || (predicate && !predicate(this))) {
-          // There are validation errors, or a user-defined predicate failed. 
-          // Do nothing, and don't enqueue another attempt.
-          // The next attempt will be enqueued the next time a change is made to the data.
-          return;
-        }
+        if (this.$isDirty || (!ranOnce && !this.$primaryKey)) {
+          if (this.$hasError || (predicate && !predicate(this))) {
+            // There are validation errors, or a user-defined predicate failed.
+            // Do nothing, and don't enqueue another attempt.
+            // The next attempt will be enqueued the next time a change is made to the data.
+            return;
+          }
 
-        if (this.$save.isLoading || this.$load.isLoading) {
-          // Save already in progress, or model is currently loading. 
-          // Enqueue another attempt.
-          enqueueSave();
-          return;
-        }
+          if (this.$save.isLoading || this.$load.isLoading) {
+            // Save already in progress, or model is currently loading.
+            // Enqueue another attempt.
+            enqueueSave();
+            return;
+          }
 
-        // Everything should be good to go. Go forth and save!
-        ranOnce = true;
-        this.$save()
-          // After the save finishes, attempt another autosave.
-          // If the model has become dirty since the last save,
-          // we need to save again.
-          // This will happen if the state of the model changes while the save
-          // is in-flight.
-          .then(enqueueSave)
-          // We need a catch block so all of this is testable.
-          // Otherwise, jest will fail tests as soon as it sees an unhandled promise rejection.
-          .catch(() => {  });
-      }
-    }, Math.max(1, wait), debounceOptions);
+          // Everything should be good to go. Go forth and save!
+          ranOnce = true;
+          this.$save()
+            // After the save finishes, attempt another autosave.
+            // If the model has become dirty since the last save,
+            // we need to save again.
+            // This will happen if the state of the model changes while the save
+            // is in-flight.
+            .then(enqueueSave)
+            // We need a catch block so all of this is testable.
+            // Otherwise, jest will fail tests as soon as it sees an unhandled promise rejection.
+            .catch(() => {});
+        }
+      },
+      Math.max(1, wait),
+      debounceOptions
+    );
 
     let isPending = false;
-    state.trigger = function() {
+    state.trigger = function () {
       if (isPending) return;
       isPending = true;
       // This MUST happen on next tick in case $isDirty was set to true automatically
@@ -630,8 +678,8 @@ export abstract class ViewModel<
       vue.$nextTick(() => {
         isPending = false;
         enqueueSave();
-      })
-    }
+      });
+    };
 
     startAutoCall(state, vue, undefined, enqueueSave);
     state.trigger();
@@ -641,12 +689,12 @@ export abstract class ViewModel<
         const prop = this.$metadata.props[propName];
         if (prop.role == "collectionNavigation") {
           if ((this as any)[propName]) {
-            for (const child of ((this as any)[propName] as ViewModel[])) {
-              child.$startAutoSave(vue, options)
+            for (const child of (this as any)[propName] as ViewModel[]) {
+              child.$startAutoSave(vue, options);
             }
           }
         } else if (prop.role == "referenceNavigation") {
-          ((this as any)[propName] as ViewModel)?.$startAutoSave(vue, options)
+          ((this as any)[propName] as ViewModel)?.$startAutoSave(vue, options);
         }
       }
     }
@@ -654,10 +702,7 @@ export abstract class ViewModel<
 
   /** Stops auto-saving if it is currently enabled. */
   public $stopAutoSave() {
-    if (this._autoSaveState) {
-      stopAutoCall(this._autoSaveState);
-      this._autoSaveState = undefined;
-    }
+    this._autoSaveState?.cleanup!();
   }
 
   /**
@@ -684,9 +729,9 @@ export abstract class ViewModel<
       this.$metadata,
       prop
     );
-    var collection: Array<any> | undefined = ((this as any) as Indexable<
-      TModel
-    >)[propMeta.name];
+    var collection: Array<any> | undefined = (this as any as Indexable<TModel>)[
+      propMeta.name
+    ];
 
     if (!Array.isArray(collection)) {
       (this as any)[propMeta.name] = [];
@@ -701,7 +746,9 @@ export abstract class ViewModel<
       // The ViewModelCollection will handle create a new ViewModel,
       // and setting $parent, $parentCollection.
       // TODO: Should it also handle setting of the foreign key?
-      const newViewModel = collection[collection.push(newModel) - 1] as ViewModel;
+      const newViewModel = collection[
+        collection.push(newModel) - 1
+      ] as ViewModel;
       newViewModel.$setPropDirty(foreignKey.name);
       return newViewModel;
     } else {
@@ -720,12 +767,12 @@ export abstract class ViewModel<
 
     initialDirtyData?: DeepPartial<TModel> | null
   ) {
-    Object.defineProperty(this, '$stableId', {
+    Object.defineProperty(this, "$stableId", {
       enumerable: false,
       configurable: false,
       value: nextStableId++,
-      writable: false
-    })
+      writable: false,
+    });
 
     if (initialDirtyData) {
       this.$loadDirtyData(initialDirtyData);
@@ -738,11 +785,28 @@ export abstract class ListViewModel<
   TApi extends ModelApiClient<TModel> = ModelApiClient<TModel>,
   TItem extends ViewModel<TModel, TApi> = ViewModel<TModel, TApi>
 > {
+  /** Make nonreactive with Vue, preventing ViewModel instance from being wrapped with a Proxy.
+   * Instead, we make individual members reactive with `reactive`/`ref`.
+   *
+   * We have to do this because `reactive` doesn't play nice with prototyped objects.
+   * Any sets to a setter on the ViewModel class will trigger the reactive proxy,
+   * and since the setter is defined on the prototype and Vue checks hasOwnProperty
+   * when determining if a field is new on an object, all setters trigger reactivity
+   * even if the value didn't change.
+   */
+  private readonly [ReactiveFlags_SKIP] = true;
+
   /** Static lookup of all generated ListViewModel types. */
   public static typeLookup: ListViewModelTypeLookup | null = null;
 
   /** The parameters that will be passed to `/list` and `/count` calls. */
-  public $params = new ListParameters();
+  private _params = ref(new ListParameters());
+  public get $params() {
+    return this._params.value;
+  }
+  public set $params(val) {
+    this._params.value = val;
+  }
 
   /** Wrapper for `$params.dataSource` */
   public get $dataSource() {
@@ -759,20 +823,20 @@ export abstract class ListViewModel<
   public set $includes(val) {
     this.$params.includes = val;
   }
-  
+
   /**
    * The current set of items that have been loaded into this ListViewModel.
    */
-  private _items = new ViewModelCollection(this.$metadata, this);
+  private _items = ref(new ViewModelCollection(this.$metadata, this));
   public get $items(): TItem[] {
-    return (this._items as unknown) as TItem[];
+    return this._items.value as unknown as TItem[];
   }
   public set $items(val: TItem[]) {
-    if ((this._items as any) === val) return;
+    if ((this._items.value as any) === val) return;
 
     const vmc = new ViewModelCollection(this.$metadata, this);
     if (val) vmc.push(...val);
-    this._items = vmc;
+    this._items.value = vmc;
   }
 
   /** True if the page set in $params.page is greater than 1 */
@@ -818,8 +882,8 @@ export abstract class ListViewModel<
    * A function for invoking the `/load` endpoint, and a set of properties about the state of the last call.
    */
   public $load = this.$apiClient
-    .$makeCaller("list", c => c.list(this.$params))
-    .onFulfilled(state => {
+    .$makeCaller("list", (c) => c.list(this.$params))
+    .onFulfilled((state) => {
       if (state.result) {
         this.$items = rebuildModelCollectionForViewModelCollection(
           this.$metadata,
@@ -833,7 +897,7 @@ export abstract class ListViewModel<
   /**
    * A function for invoking the `/count` endpoint, and a set of properties about the state of the last call.
    */
-  public $count = this.$apiClient.$makeCaller("item", c =>
+  public $count = this.$apiClient.$makeCaller("item", (c) =>
     c.count(this.$params)
   );
 
@@ -845,26 +909,37 @@ export abstract class ListViewModel<
    * @param vue A Vue instance through which the lifecycle of the watcher will be managed.
    * @param options Options that control the auto-load behavior.
    */
-  public $startAutoLoad(vue: Vue, options: AutoLoadOptions<this> = {}) {
-    const { wait = 1000, predicate = undefined, debounce: debounceOptions } = options;
+  public $startAutoLoad(
+    vue: VueInstanceLike,
+    options: AutoLoadOptions<this> = {}
+  ) {
+    const {
+      wait = 1000,
+      predicate = undefined,
+      debounce: debounceOptions,
+    } = options;
     this.$stopAutoLoad();
 
-    const enqueueLoad = debounce(() => {
-      if (!this._autoLoadState.active) return;
+    const enqueueLoad = debounce(
+      () => {
+        if (!this._autoLoadState.active) return;
 
-      // Check the predicate again incase its state has changed while we were waiting for the debouncing timer.
-      if (predicate && !predicate(this)) {
-        return;
-      }
+        // Check the predicate again incase its state has changed while we were waiting for the debouncing timer.
+        if (predicate && !predicate(this)) {
+          return;
+        }
 
-      if (this.$load.isLoading && this.$load.concurrencyMode != "cancel") {
-        // Load already in progress. Enqueue another attempt.
-        enqueueLoad();
-      } else {
-        // No loads in progress, or concurrency is set to cancel - go for it.
-        this.$load();
-      }
-    }, wait, debounceOptions);
+        if (this.$load.isLoading && this.$load.concurrencyMode != "cancel") {
+          // Load already in progress. Enqueue another attempt.
+          enqueueLoad();
+        } else {
+          // No loads in progress, or concurrency is set to cancel - go for it.
+          this.$load();
+        }
+      },
+      wait,
+      debounceOptions
+    );
 
     const onChange = () => {
       if (predicate && !predicate(this)) {
@@ -879,7 +954,7 @@ export abstract class ListViewModel<
 
   /** Stops auto-loading if it is currently enabled. */
   public $stopAutoLoad() {
-    stopAutoCall(this._autoLoadState);
+    this._autoLoadState.cleanup?.();
   }
 
   constructor(
@@ -890,13 +965,26 @@ export abstract class ListViewModel<
 
     /** Instance of an API client for the model through which direct, stateless API requests may be made. */
     public readonly $apiClient: TApi
-  ) {}
+  ) {
+    markRaw(this);
+  }
 }
 
 export class ServiceViewModel<
   TMeta extends Service = Service,
   TApi extends ServiceApiClient<TMeta> = ServiceApiClient<TMeta>
 > {
+  /** Make nonreactive with Vue, preventing ViewModel instance from being wrapped with a Proxy.
+   * Instead, we make individual members reactive with `reactive`/`ref`.
+   *
+   * We have to do this because `reactive` doesn't play nice with prototyped objects.
+   * Any sets to a setter on the ViewModel class will trigger the reactive proxy,
+   * and since the setter is defined on the prototype and Vue checks hasOwnProperty
+   * when determining if a field is new on an object, all setters trigger reactivity
+   * even if the value didn't change.
+   */
+  private readonly [ReactiveFlags_SKIP] = true;
+
   /** Static lookup of all generated ServiceViewModel types. */
   public static typeLookup: ServiceViewModelTypeLookup | null = null;
 
@@ -906,7 +994,9 @@ export class ServiceViewModel<
 
     /** Instance of an API client for the model through which direct, stateless API requests may be made. */
     public readonly $apiClient: TApi
-  ) {}
+  ) {
+    markRaw(this);
+  }
 }
 
 /** Factory for creating new ViewModels from some initial data.
@@ -930,7 +1020,7 @@ export class ViewModelFactory {
       return map.get(initialData)!;
     }
     const vmCtor = ViewModel.typeLookup![typeName];
-    const vm = (new vmCtor() as unknown) as ViewModel;
+    const vm = new vmCtor() as unknown as ViewModel;
     map.set(initialData, vm);
 
     // @ts-ignore
@@ -944,7 +1034,10 @@ export class ViewModelFactory {
     this.map.set(initialData, vm);
   }
 
-  public static scope<TRet>(action: (factory: ViewModelFactory) => TRet, isCleanData: boolean) {
+  public static scope<TRet>(
+    action: (factory: ViewModelFactory) => TRet,
+    isCleanData: boolean
+  ) {
     if (!ViewModelFactory.current) {
       // There is no current factory. Make a new one.
       ViewModelFactory.current = new ViewModelFactory(isCleanData);
@@ -961,7 +1054,7 @@ export class ViewModelFactory {
   }
 
   public static get(typeName: string, initialData: any, isCleanData: boolean) {
-    return ViewModelFactory.scope(function(factory) {
+    return ViewModelFactory.scope(function (factory) {
       return factory.get(typeName, initialData);
     }, isCleanData);
   }
@@ -989,7 +1082,7 @@ function viewModelCollectionMapItems<T extends ViewModel>(
       ? vmc.$metadata
       : vmc.$metadata.itemType.typeDef;
 
-  return items.map(val => {
+  return items.map((val) => {
     if (val == null) {
       throw Error(`Cannot push null to a collection of ViewModels.`);
     }
@@ -998,7 +1091,7 @@ function viewModelCollectionMapItems<T extends ViewModel>(
       throw Error(
         `Cannot push a non-object to ${viewModelCollectionName(vmc.$metadata)}`
       );
-    } 
+    }
     // Sanity check. Probably not crucial if this ends up causing issues. A warning would probably suffice too.
     else if ("$metadata" in val && val.$metadata != collectedTypeMeta) {
       throw Error(
@@ -1017,7 +1110,11 @@ function viewModelCollectionMapItems<T extends ViewModel>(
           "Static `ViewModel.typeLookup` is not defined. It should get defined in viewmodels.g.ts."
         );
       }
-      val = (ViewModelFactory.get(collectedTypeMeta.name, val, isCleanData) as unknown) as T;
+      val = ViewModelFactory.get(
+        collectedTypeMeta.name,
+        val,
+        isCleanData
+      ) as unknown as T;
     }
 
     // $parent and $parentCollection are intentionally protected -
@@ -1028,16 +1125,18 @@ function viewModelCollectionMapItems<T extends ViewModel>(
     (val as any).$parentCollection = vmc;
 
     // If deep autosave is active, propagate it to the ViewModel instance being attached to the object graph.
-    const autoSaveState: AutoCallState<AutoSaveOptions<any>> = vmc.$parent._autoSaveState;
+    const autoSaveState: AutoCallState<AutoSaveOptions<any>> =
+      vmc.$parent._autoSaveState;
     if (autoSaveState?.active && autoSaveState.options?.deep) {
       val.$startAutoSave(autoSaveState.vue!, autoSaveState.options);
     }
-    
+
     return val;
   });
 }
 
 function resolveProto(obj: ViewModelCollection<any>): Array<any> {
+  if (IsVue3) return Array.prototype as any;
   // Babel does some stupid nonsense where it will wrap our proto
   // in another proto. This breaks things if coalesce-vue is imported from source,
   // or if we were to at some point in the future emit a esnext version of coalesce-vue.
@@ -1055,9 +1154,8 @@ export class ViewModelCollection<T extends ViewModel> extends Array<T> {
   readonly $parent!: any;
   $hasLoaded!: boolean;
 
-
   override push(...items: T[]): number {
-    // MUST evaluate the .map() before grabbing the .push()
+    // MUST evaluate the .map() before grabbing the .push() (Vue2 only limitation)
     // method from the proto. See test "newly loaded additional items are reactive".
     const viewModelItems = viewModelCollectionMapItems(items, this, true);
 
@@ -1065,15 +1163,15 @@ export class ViewModelCollection<T extends ViewModel> extends Array<T> {
   }
 
   override splice(start: number, deleteCount?: number, ...items: T[]): T[] {
-    // MUST evaluate the .map() before grabbing the .push()
-    // method from the proto. See test "newly loaded additional items are reactive".
     const viewModelItems: any[] = items
       ? viewModelCollectionMapItems(items, this, true)
       : items;
 
     return resolveProto(this).splice.call(
       this,
-      start, deleteCount as any, ...viewModelItems
+      start,
+      deleteCount as any,
+      ...viewModelItems
     );
   }
 
@@ -1087,33 +1185,41 @@ export class ViewModelCollection<T extends ViewModel> extends Array<T> {
         value: $metadata,
         enumerable: false,
         writable: false,
-        configurable: false
+        configurable: false,
       },
       $parent: {
         value: $parent,
         enumerable: false,
         writable: false,
-        configurable: false
+        configurable: false,
       },
       $hasLoaded: {
         value: false,
         enumerable: false,
         writable: true,
-        configurable: false
+        configurable: false,
       },
-      push: {
-        value: ViewModelCollection.prototype.push,
-        enumerable: false,
-        writable: false,
-        configurable: false
-      },
-      splice: {
-        value: ViewModelCollection.prototype.splice,
-        enumerable: false,
-        writable: false,
-        configurable: false
-      }
     });
+
+    if (IsVue2) {
+      Object.defineProperties(this, {
+        push: {
+          value: ViewModelCollection.prototype.push,
+          enumerable: false,
+          writable: false,
+          configurable: false,
+        },
+        splice: {
+          value: ViewModelCollection.prototype.splice,
+          enumerable: false,
+          writable: false,
+          configurable: false,
+        },
+      });
+      return this;
+    }
+
+    return reactive(this) as this;
   }
 }
 
@@ -1122,28 +1228,32 @@ type DebounceOptions = {
   wait?: number;
   /** Additional options to pass to the third parameter of lodash's `debounce` function. */
   debounce?: DebounceSettings;
-}
+};
 
 type AutoLoadOptions<TThis> = DebounceOptions & {
   /** A function that will be called before autoloading that can return false to prevent a load. */
   predicate?: (viewModel: TThis) => boolean;
-}
+};
 
-type AutoSaveOptions<TThis> = DebounceOptions & ({
-  /** A function that will be called before autosaving that can return false to prevent a save. */
-  predicate?: (viewModel: TThis) => boolean;
+type AutoSaveOptions<TThis> = DebounceOptions &
+  (
+    | {
+        /** A function that will be called before autosaving that can return false to prevent a save. */
+        predicate?: (viewModel: TThis) => boolean;
 
-  /** If true, auto-saving will also be enabled for all view models that are
-   * reachable from the navigation properties & collections of the current view model. */
-  deep?: false;
-} | {
-  /** A function that will be called before autosaving that can return false to prevent a save. */
-  predicate?: (viewModel: ViewModel) => boolean;
+        /** If true, auto-saving will also be enabled for all view models that are
+         * reachable from the navigation properties & collections of the current view model. */
+        deep?: false;
+      }
+    | {
+        /** A function that will be called before autosaving that can return false to prevent a save. */
+        predicate?: (viewModel: ViewModel) => boolean;
 
-  /** If true, auto-saving will also be enabled for all view models that are
-   * reachable from the navigation properties & collections of the current view model. */
-  deep: true;
-})
+        /** If true, auto-saving will also be enabled for all view models that are
+         * reachable from the navigation properties & collections of the current view model. */
+        deep: true;
+      }
+  );
 
 /**
  * Dynamically adds gettter/setter properties to a class. These properties wrap the properties in its instances' $data objects.
@@ -1163,12 +1273,12 @@ export function defineProps<T extends new () => ViewModel<any, any>>(
     descriptors[propName] = {
       enumerable: true,
       configurable: true,
-      get: function(this: InstanceType<T>) {
+      get: function (this: InstanceType<T>) {
         return (this as any).$data[propName];
       },
       set:
         prop.type == "model"
-          ? function(this: InstanceType<T>, incomingValue: any) {
+          ? function (this: InstanceType<T>, incomingValue: any) {
               if (incomingValue != null) {
                 if (typeof incomingValue !== "object") {
                   throw Error(
@@ -1197,9 +1307,14 @@ export function defineProps<T extends new () => ViewModel<any, any>>(
                 }
 
                 // If deep autosave is active, propagate it to the new ViewModel instance.
-                const autoSaveState: AutoCallState<AutoSaveOptions<any>> = (this as any)._autoSaveState;
+                const autoSaveState: AutoCallState<AutoSaveOptions<any>> = (
+                  this as any
+                )._autoSaveState;
                 if (autoSaveState?.active && autoSaveState.options?.deep) {
-                  incomingValue.$startAutoSave(autoSaveState.vue!, autoSaveState.options);
+                  incomingValue.$startAutoSave(
+                    autoSaveState.vue!,
+                    autoSaveState.options
+                  );
                 }
 
                 incomingValue.$parent = this;
@@ -1223,9 +1338,8 @@ export function defineProps<T extends new () => ViewModel<any, any>>(
                 (this as any)[prop.foreignKey.name] = incomingPk;
               }
             }
-
-          : prop.type == "collection" && prop.itemType.type == 'model'
-          ? function(this: InstanceType<T>, incomingValue: any) {
+          : prop.type == "collection" && prop.itemType.type == "model"
+          ? function (this: InstanceType<T>, incomingValue: any) {
               let hasLoaded = false;
               if (incomingValue == null) {
                 // Usability niceness - make an empty array if the incoming is null.
@@ -1248,78 +1362,82 @@ export function defineProps<T extends new () => ViewModel<any, any>>(
                 return;
               }
 
-              const vmc = new ViewModelCollection(prop as ModelCollectionValue, this);
+              const vmc = new ViewModelCollection(
+                prop as ModelCollectionValue,
+                this
+              );
               // Mark the collection so that we can determine that it has been loaded,
               // versus a collection that was never loaded because the server never populated it.
               // This lets us tell if the collection is truly empty, or empty because it isn't loaded.
-              vmc.$hasLoaded = hasLoaded
+              vmc.$hasLoaded = hasLoaded;
               vmc.push(...incomingValue);
               $data[propName] = vmc;
             }
+          : // : prop.role =="primaryKey"
+            // ? function(this: InstanceType<T>, incomingValue: any) {
+            //     const $data = (this as any).$data;
 
+            //     // Do nothing if the value is unchanged.
+            //     if ($data[propName] === incomingValue) {
+            //       return;
+            //     }
 
-          // : prop.role =="primaryKey"
-          // ? function(this: InstanceType<T>, incomingValue: any) {
-          //     const $data = (this as any).$data;
+            //     $data[propName] = incomingValue;
 
-          //     // Do nothing if the value is unchanged.
-          //     if ($data[propName] === incomingValue) {
-          //       return;
-          //     }
+            //     // TODO: Implement $emit?
+            //     // this.$emit('valueChanged', prop, value, val);
+            //   }
 
-          //     $data[propName] = incomingValue;
-            
-          //     // TODO: Implement $emit?
-          //     // this.$emit('valueChanged', prop, value, val);
-          //   }
+            function (this: InstanceType<T>, incomingValue: any) {
+              const $data = (this as any).$data;
+              const old = $data[propName];
 
+              // First, check strict equality. This will handle the 90% most common case.
+              if (old === incomingValue) {
+                return;
+              }
 
-          : function(this: InstanceType<T>, incomingValue: any) {
-            const $data = (this as any).$data;
-            const old = $data[propName];
+              if (
+                prop.type == "object" &&
+                incomingValue != null &&
+                !("$metadata" in incomingValue)
+              ) {
+                convertToModel(incomingValue, prop.typeDef);
+              }
 
-            // First, check strict equality. This will handle the 90% most common case.
-            if (old === incomingValue) {
-              return;
-            }
+              // If strict equality fails, try to use valueOf() to compare.
+              // valueOf() helps with Date instances that represent the same time value.
+              // If either side is null, it is ok to set $isDirty, since we
+              // know that if we got this var, BOTH sides aren't both null.
+              if (old?.valueOf() !== incomingValue?.valueOf()) {
+                $data[propName] = incomingValue;
 
-            if (prop.type == "object" && incomingValue != null && !("$metadata" in incomingValue)) {
-              convertToModel(incomingValue, prop.typeDef);
-            }
+                // TODO: Implement $emit?
+                // this.$emit('valueChanged', prop, value, val);
 
-            // If strict equality fails, try to use valueOf() to compare.
-            // valueOf() helps with Date instances that represent the same time value.
-            // If either side is null, it is ok to set $isDirty, since we
-            // know that if we got this var, BOTH sides aren't both null.
-            if (old?.valueOf() !== incomingValue?.valueOf()) {
-              $data[propName] = incomingValue;
-            
-              // TODO: Implement $emit?
-              // this.$emit('valueChanged', prop, value, val);
+                this.$setPropDirty(propName);
 
-              this.$setPropDirty(propName);
-
-              if (prop.role == "foreignKey" && prop.navigationProp) {
-                /*
+                if (prop.role == "foreignKey" && prop.navigationProp) {
+                  /*
                   If there's a navigation property for this FK,
                   we need to null it out if the current value of the 
                   navigation prop is non-null and the incoming value of the FK does not agree with the  PK on the value of the navigation prop.
                 */
-                const currentObject = $data[prop.navigationProp.name];
-                if (
-                  currentObject != null &&
-                  incomingValue != currentObject[prop.principalKey.name]
-                ) {
-                  // Set on `$data`, not `this`.
-                  // We don't want to trigger the "model" setter
-                  // since it basically does nothing when the value is null,
-                  // and it would also attempt to perform fixup of the FK prop,
-                  // but we're already doing just that.
-                  $data[prop.navigationProp.name] = null;
+                  const currentObject = $data[prop.navigationProp.name];
+                  if (
+                    currentObject != null &&
+                    incomingValue != currentObject[prop.principalKey.name]
+                  ) {
+                    // Set on `$data`, not `this`.
+                    // We don't want to trigger the "model" setter
+                    // since it basically does nothing when the value is null,
+                    // and it would also attempt to perform fixup of the FK prop,
+                    // but we're already doing just that.
+                    $data[prop.navigationProp.name] = null;
+                  }
                 }
               }
-            }
-          }
+            },
     };
   }
 
@@ -1370,7 +1488,7 @@ function rebuildModelCollectionForViewModelCollection<
     if (itemPk) {
       existingItemsMap.set(itemPk, item);
     } else {
-      existingItemsWithoutPk.push(item)
+      existingItemsWithoutPk.push(item);
     }
   }
 
@@ -1412,7 +1530,7 @@ function rebuildModelCollectionForViewModelCollection<
     // If this behavior is undesirable in a specific circumstance,
     // it is trivial to manually remove unsaved items after a .$save() is peformed.
 
-    const existingItemsLength = existingItemsWithoutPk.length
+    const existingItemsLength = existingItemsWithoutPk.length;
     for (let i = 0; i < existingItemsLength; i++) {
       let realIndex = incomingLength + i;
 
@@ -1445,18 +1563,18 @@ function rebuildModelCollectionForViewModelCollection<
  * Updates the target model with values from the source model.
  * @param target The viewmodel to be updated.
  * @param source The model whose values will be used to perform the update.
- * @param skipDirty If true, only non-dirty props, and related objects, will be updated. 
+ * @param skipDirty If true, only non-dirty props, and related objects, will be updated.
  * Basic properties on target that are dirty will be skipped.
  */
 export function updateViewModelFromModel<
   TViewModel extends ViewModel<Model<ModelType>>
 >(
-  target: TViewModel, 
-  source: Indexable<{}>, 
+  target: TViewModel,
+  source: Indexable<{}>,
   skipDirty = false,
   isCleanData = true
 ) {
-  ViewModelFactory.scope(function(factory) {
+  ViewModelFactory.scope(function (factory) {
     // Add the root ViewModel to the factory
     // so that when existing ViewModels are being updated,
     // duplicate VM instances won't be created needlessly.
@@ -1510,17 +1628,18 @@ export function updateViewModelFromModel<
             // Check if target.$parent is the expected value of this navigation prop,
             // and if it is, update $parent. (The KO stack does this too).
             // @ts-expect-error
-            const parent = target.$parent
-            const newValue = currentValue ?? target[propName] as any as ViewModel;
+            const parent = target.$parent;
+            const newValue =
+              currentValue ?? (target[propName] as any as ViewModel);
             if (
-              parent && newValue && 
-              parent.$metadata === newValue.$metadata && 
-              newValue.$primaryKey === parent.$primaryKey && 
+              parent &&
+              newValue &&
+              parent.$metadata === newValue.$metadata &&
+              newValue.$primaryKey === parent.$primaryKey &&
               parent !== newValue
             ) {
               parent.$loadFromModel(incomingValue, isCleanData);
             }
-            
           } else {
             // We allow the existing value of the navigation prop to stick around
             // if the server didn't send it back.
@@ -1540,23 +1659,27 @@ export function updateViewModelFromModel<
               // Note that this case is different from the incoming value being an empty array,
               // which should be used to explicitly clear our the existing collection.
             } else {
-              // Pass null directly through to the VM's setter. 
+              // Pass null directly through to the VM's setter.
               // The VM's setter will then populate the VM's data with an empty array rather than null.
               target[propName] = null as any;
             }
             break;
           }
-          
+
           if (!Array.isArray(incomingValue)) {
             throw `Expected array for incoming value for ${metadata.name}.${prop.name}`;
           }
 
-          target[propName] = rebuildModelCollectionForViewModelCollection(
+          const newCollection = rebuildModelCollectionForViewModelCollection(
             prop.itemType.typeDef,
             currentValue,
             incomingValue,
             isCleanData
           ) as any;
+
+          if (currentValue !== newCollection) {
+            target[propName] = newCollection;
+          }
           break;
 
         case "primaryKey":
@@ -1568,7 +1691,11 @@ export function updateViewModelFromModel<
 
         default:
           if (prop.role == "foreignKey") {
-            if (incomingValue == null && prop.navigationProp && source[prop.navigationProp.name]) {
+            if (
+              incomingValue == null &&
+              prop.navigationProp &&
+              source[prop.navigationProp.name]
+            ) {
               // A value for the navigation property was provided,
               // but a foreign key was not. Do not set the FK to null,
               // since depending on the order of property iteration, doing so might
@@ -1577,11 +1704,14 @@ export function updateViewModelFromModel<
             }
           }
 
-          // We check against currentValue here for a minor perf increase - 
+          // We check against currentValue here for a minor perf increase -
           // Even though this is redundant with the ViewModel's setters,
           // it avoids calling into the setter if we don't have to,
           // and handles the vast majority of cases.
-          if ((!skipDirty || !target.$getPropDirty(propName)) && currentValue !== incomingValue) {
+          if (
+            (!skipDirty || !target.$getPropDirty(propName)) &&
+            currentValue !== incomingValue
+          ) {
             target[propName] = incomingValue;
           }
           break;
@@ -1595,7 +1725,8 @@ export function updateViewModelFromModel<
 class AutoCallState<TOptions = any> {
   active: boolean = false;
   cleanup: Function | null = null;
-  vue: Vue | null = null;
+  vue: VueInstanceLike | null = null;
+  hooked = new WeakSet<VueInstanceLike>();
   options: TOptions | null = null;
   trigger: (() => void) | null = null;
 
@@ -1607,30 +1738,33 @@ class AutoCallState<TOptions = any> {
 
 function startAutoCall(
   state: AutoCallState,
-  vue: Vue,
+  vue: VueInstanceLike,
   watcher?: () => void,
   debouncer?: Cancelable
 ) {
-  const destroyHook = () => stopAutoCall(state);
+  if (!state.hooked.has(vue)) {
+    state.hooked.add(vue);
+    onBeforeUnmount(
+      // Only cleanup if the component instance on the state is the owner of the hook.
+      // Since we can't cleanup hooks in vue3, this hook may be firing for a component
+      // that no longer owns this autocall state, in which case it should be ignored.
+      () => state.vue === vue && state.cleanup!(),
+      getInternalInstance(vue)
+    );
+  }
 
-  vue.$on("hook:beforeDestroy", destroyHook);
   state.vue = vue;
   state.cleanup = () => {
     if (!state.active) return;
+
     // Destroy the watcher
     watcher?.();
+
     // Cancel the debouncing timer if there is one.
     if (debouncer) debouncer.cancel();
-    // Cleanup the hook, in case we're not responding to beforeDestroy but instead to a direct call to stopAutoCall.
-    // If we didn't do this, autosave could later get disabled when the original component is destroyed,
-    // even though if was later attached to a different component that is still alive.
-    vue.$off("hook:beforeDestroy", destroyHook);
+
+    state.active = false;
+    state.vue = null; // cleanup for GC
   };
   state.active = true;
-}
-
-function stopAutoCall(state: AutoCallState) {
-  if (!state.active) return;
-  state.cleanup!();
-  state.active = false;
 }

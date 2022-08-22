@@ -1,10 +1,6 @@
-import type Vue from "vue";
-
-
 // This will tree shake correctly as of v2.0.0-alpha.21
 import { formatDistanceToNow, lightFormat, parseISO } from "date-fns";
-import { format, utcToZonedTime } from 'date-fns-tz';
-
+import { format, utcToZonedTime } from "date-fns-tz";
 
 import type {
   ClassType,
@@ -21,13 +17,14 @@ import type {
   FileValue,
   ModelType,
   BinaryValue,
-  UnknownValue
+  UnknownValue,
 } from "./metadata.js";
+import { resolvePropMeta } from "./metadata.js";
 import {
-  resolvePropMeta,
-} from "./metadata.js";
-import type { Indexable } from "./util.js";
-import { isNullOrWhitespace } from "./util.js";
+  type Indexable,
+  isNullOrWhitespace,
+  type VueInstanceLike,
+} from "./util.js";
 
 /**
  * Represents a model with metadata information.
@@ -89,7 +86,7 @@ abstract class Visitor<TValue = any, TArray = any[], TObject = any> {
   ): TValue;
 
   protected abstract visitDateValue(value: any, meta: DateValue): TValue;
-  
+
   protected abstract visitFileValue(value: any, meta: FileValue): TValue;
 
   protected abstract visitBinaryValue(value: any, meta: BinaryValue): TValue;
@@ -99,10 +96,16 @@ abstract class Visitor<TValue = any, TArray = any[], TObject = any> {
   protected abstract visitUnknownValue(value: any, meta: UnknownValue): TValue;
 }
 
-function parseError(value: any, meta: { type: string; name: string }, details?: string) {
-  return new Error(`Encountered unparsable ${typeof value} \`${value}\` for ${
-    meta.type
-  } '${meta.name}'. ${details || ""}`);
+function parseError(
+  value: any,
+  meta: { type: string; name: string },
+  details?: string
+) {
+  return new Error(
+    `Encountered unparsable ${typeof value} \`${value}\` for ${meta.type} '${
+      meta.name
+    }'. ${details || ""}`
+  );
 }
 
 /**
@@ -130,7 +133,10 @@ export function parseValue(
 export function parseValue(value: any, meta: EnumValue): null | number;
 export function parseValue(value: any, meta: DateValue): null | Date;
 export function parseValue(value: any, meta: FileValue): null | Blob | File;
-export function parseValue(value: any, meta: BinaryValue): null | Uint8Array | string;
+export function parseValue(
+  value: any,
+  meta: BinaryValue
+): null | Uint8Array | string;
 export function parseValue(value: any, meta: ModelValue): null | object;
 export function parseValue(value: any, meta: ObjectValue): null | object;
 export function parseValue(value: any, meta: UnknownValue): null | unknown;
@@ -162,7 +168,7 @@ export function parseValue(
       if (isNullOrWhitespace(value)) {
         return null;
       }
-      
+
       const parsed = Number(value);
       if (isNaN(parsed)) {
         throw parseError(value, meta);
@@ -206,7 +212,7 @@ export function parseValue(
         // DO NOT USE `new Date()` here.
         // Safari incorrectly interprets times without a timezone offset
         // (i.e. DateTime objects in c#) as UTC instead of local time.
-        // Safari is the only browser that does that. IE,Chrome,Firefox,Edge 
+        // Safari is the only browser that does that. IE,Chrome,Firefox,Edge
         // all do this correctly.
         // The reason we originally used `new Date()` here was for sheer performance.
         // This idea came from the Knockout stack where `moment(...)` is 20x slower than
@@ -230,7 +236,11 @@ export function parseValue(
     case "binary":
       if (typeof value == "string" || value instanceof Uint8Array) return value;
       if (meta.base64 && typeof value !== "string") {
-        throw parseError(value, meta, "Value only allows base64 string representations.");
+        throw parseError(
+          value,
+          meta,
+          "Value only allows base64 string representations."
+        );
       }
       if (value instanceof ArrayBuffer) return new Uint8Array(value);
       throw parseError(value, meta);
@@ -270,17 +280,16 @@ class ModelConversionVisitor extends Visitor<any, any[] | null, any | null> {
     let target: Indexable<Model<TMeta>>;
     if (this.mode == "convert") {
       this.objects.set(value, value);
-      
+
       // If there already is metadata but it doesn't match,
       // this is bad - someone passed mismatched parameters.
-      
+
       if ("$metadata" in value) {
         if (value.$metadata !== meta) {
-          throw Error(`While trying to convert object, found metadata for ${
-            value.$metadata.name
-          } where metadata for ${meta.name} was expected.`);
+          throw Error(
+            `While trying to convert object, found metadata for ${value.$metadata.name} where metadata for ${meta.name} was expected.`
+          );
         } else {
-                
           // Performance optimization: If the object already looks like a model,
           // and we're converting, don't descend into its child props,
           // because they should already be correct.
@@ -296,11 +305,9 @@ class ModelConversionVisitor extends Visitor<any, any[] | null, any | null> {
         value.$metadata = meta;
         target = value;
       }
-
     } else if (this.mode == "map") {
       target = { $metadata: meta };
       this.objects.set(value, target);
-
     } else {
       throw `Unhandled mode ${this.mode}`;
     }
@@ -383,14 +390,14 @@ class ModelConversionVisitor extends Visitor<any, any[] | null, any | null> {
 export function convertToModel<
   TMeta extends ClassType,
   TModel extends Model<TMeta>
->(object: { [k: string]: any }, metadata: TMeta): TModel
+>(object: { [k: string]: any }, metadata: TMeta): TModel;
 /**
  * Transforms a raw value into a valid implementation of a model value.
  * This function mutates its input and all descendent properties of its input - it does not map to a new object.
  * @param value The value that should be converted
  * @param metadata The metadata describing the value
  */
-export function convertToModel(value: any, metadata: Value): any
+export function convertToModel(value: any, metadata: Value): any;
 export function convertToModel(value: any, metadata: Value | ClassType): any {
   if ("props" in metadata) {
     return new ModelConversionVisitor("convert").visitObject(value, metadata);
@@ -409,14 +416,14 @@ export { convertToModel as convertValueToModel };
 export function mapToModel<
   TMeta extends ClassType,
   TModel extends Model<TMeta>
->(object: { [k: string]: any }, metadata: TMeta): TModel
+>(object: { [k: string]: any }, metadata: TMeta): TModel;
 /**
  * Maps a raw value into a valid implementation of a model value.
  * This function returns a new copy of its input and all descendent properties of its input - it does not mutate its input.
  * @param value The value that should be converted
  * @param metadata The metadata describing the value
  */
-export function mapToModel(value: any, metadata: Value): any
+export function mapToModel(value: any, metadata: Value): any;
 export function mapToModel(value: any, metadata: Value | ClassType): any {
   if ("props" in metadata) {
     return new ModelConversionVisitor("map").visitObject(value, metadata);
@@ -425,7 +432,6 @@ export function mapToModel(value: any, metadata: Value | ClassType): any {
   }
 }
 export { mapToModel as mapValueToModel };
-
 
 /** Visitor that maps a model to a DTO.
  * A DTO in this case is a POJO that is suitable for JSON stringification
@@ -495,7 +501,7 @@ class MapToDtoVisitor extends Visitor<
 
     if (value == null) return null;
     const parsed = parseValue(value, meta);
-    
+
     const ret = [];
     for (let i = 0; i < parsed.length; i++) {
       ret[i] = this.visitValue(parsed[i], meta.itemType);
@@ -518,7 +524,7 @@ class MapToDtoVisitor extends Visitor<
   }
 
   protected visitFileValue(value: any, meta: FileValue): undefined {
-    throw new Error("Files cannot be serialized to JSON.")
+    throw new Error("Files cannot be serialized to JSON.");
   }
 
   protected visitBinaryValue(value: any, meta: BinaryValue) {
@@ -530,7 +536,7 @@ class MapToDtoVisitor extends Visitor<
       return parsed;
     }
 
-    throw new Error("Unexpected raw binary value in JSON context")
+    throw new Error("Unexpected raw binary value in JSON context");
   }
 
   protected visitPrimitiveValue(value: any, meta: PrimitiveValue) {
@@ -563,14 +569,19 @@ class MapToDtoVisitor extends Visitor<
  * Will not serialize child objects or collections whose metadata includes `dontSerialize`.
  * @param object The object to map.
  */
-export function mapToDto<T extends Model<ClassType>>(object: T | null | undefined): null | undefined | ReturnType<MapToDtoVisitor["visitObject"]>
+export function mapToDto<T extends Model<ClassType>>(
+  object: T | null | undefined
+): null | undefined | ReturnType<MapToDtoVisitor["visitObject"]>;
 /**
  * Maps the given value to a representation suitable for JSON serialization.
  * Will not serialize child objects or collections whose metadata includes `dontSerialize`.
  * @param value The value to map.
  * @param metadata The metadata that describes the value.
  */
-export function mapToDto(value: any, metadata: Value): null | ReturnType<MapToDtoVisitor["visitValue"]>
+export function mapToDto(
+  value: any,
+  metadata: Value
+): null | ReturnType<MapToDtoVisitor["visitValue"]>;
 export function mapToDto(value: any, metadata?: Value | ClassType): any {
   if (value == null) {
     // Values (non-objects) (which require metadata) should return the original value - either null or undefined.
@@ -582,14 +593,14 @@ export function mapToDto(value: any, metadata?: Value | ClassType): any {
 
   if (metadata === undefined) {
     if ("$metadata" in value) {
-      metadata = value.$metadata
+      metadata = value.$metadata;
     }
   }
 
   if (!metadata) {
     throw "mapToDto requires metadata.";
   }
-  
+
   if ("props" in metadata) {
     return new MapToDtoVisitor().visitObject(value, metadata);
   } else {
@@ -597,13 +608,13 @@ export function mapToDto(value: any, metadata?: Value | ClassType): any {
   }
 }
 
-export { mapToDto as mapValueToDto }
+export { mapToDto as mapValueToDto };
 
 /**
  * Maps the given object to a POJO suitable for JSON serialization.
  * Will not serialize child objects or collections whose metadata includes `dontSerialize`.
  * @param object The object to map.
- * @param props A whitelisted set of props to include from the mapped object. 
+ * @param props A whitelisted set of props to include from the mapped object.
  * Unspecified props will be ignored. If null or undefined, all props will be included.
  */
 export function mapToDtoFiltered<T extends Model<ClassType>>(
@@ -613,10 +624,10 @@ export function mapToDtoFiltered<T extends Model<ClassType>>(
   var dto = mapToDto(object) as any;
 
   if (props && dto) {
-    const filteredDto: any = {}
+    const filteredDto: any = {};
     for (const field of props) {
       if (field in dto) {
-        filteredDto[field] = dto[field]
+        filteredDto[field] = dto[field];
       }
     }
     return filteredDto;
@@ -624,7 +635,6 @@ export function mapToDtoFiltered<T extends Model<ClassType>>(
 
   return dto;
 }
-
 
 export interface DisplayOptions {
   /** Date format options. One of:
@@ -636,7 +646,7 @@ export interface DisplayOptions {
     | ({
         /** A UTS#35 date format string (https://date-fns.org/docs/format) */
         format: string;
-      } & Parameters<typeof format>[2] )
+      } & Parameters<typeof format>[2])
     | {
         /** Format date with https://date-fns.org/docs/formatDistanceToNow */
         distance: true;
@@ -647,15 +657,15 @@ export interface DisplayOptions {
       };
 
   collection?: {
-    /** The maximum number of items to display individually. 
-     * When there are more than this number of items, the count of items will be displayed instead. 
-     * Default `5`. 
+    /** The maximum number of items to display individually.
+     * When there are more than this number of items, the count of items will be displayed instead.
+     * Default `5`.
      * */
-    enumeratedItemsMax?: number
+    enumeratedItemsMax?: number;
 
     /** The separator to place between enumerated items. Default `', '` */
-    enumeratedItemsSeparator?: string
-  }
+    enumeratedItemsSeparator?: string;
+  };
 }
 
 let defaultTimeZone: string | null = null;
@@ -706,20 +716,20 @@ class DisplayVisitor extends Visitor<
     // Perhaps an prop that controls this would be best.
     if (value.length == 0) return "";
 
-    const { 
-      enumeratedItemsMax = 5, 
-      enumeratedItemsSeparator = ", "
-    } = this.options?.collection ?? { }
+    const { enumeratedItemsMax = 5, enumeratedItemsSeparator = ", " } =
+      this.options?.collection ?? {};
 
     if (value.length <= enumeratedItemsMax) {
       return value
         .map<string>(
-          childItem => this.visitValue(childItem, meta.itemType) || "???" // TODO: what should this be for un-displayable members of a collection?
+          (childItem) => this.visitValue(childItem, meta.itemType) || "???" // TODO: what should this be for un-displayable members of a collection?
         )
         .join(enumeratedItemsSeparator);
     }
 
-    return value.length.toLocaleString() + " item" + (value.length == 1 ? '' : "s"); // TODO: i18n
+    return (
+      value.length.toLocaleString() + " item" + (value.length == 1 ? "" : "s")
+    ); // TODO: i18n
   }
 
   protected visitEnumValue(value: any, meta: EnumValue): string | null {
@@ -748,15 +758,15 @@ class DisplayVisitor extends Visitor<
       let { format: formatOptionInput } = this.options;
       if (formatOptionInput) {
         if (typeof formatOptionInput == "string") {
-          formatString = formatOptionInput
+          formatString = formatOptionInput;
         } else if ("distance" in formatOptionInput) {
           const {
             addSuffix = true, // Default addSuffix to true - most likely, it is desired.
-            includeSeconds = false
+            includeSeconds = false,
           } = formatOptionInput;
           return formatDistanceToNow(parsed, { addSuffix, includeSeconds });
         } else {
-          formatString = formatOptionInput.format
+          formatString = formatOptionInput.format;
           formatOptions = formatOptionInput;
         }
       }
@@ -772,9 +782,9 @@ class DisplayVisitor extends Visitor<
           break;
       }
     }
-    
+
     if (defaultTimeZone && !formatOptions?.timeZone) {
-      formatOptions = {...formatOptions, timeZone: defaultTimeZone}
+      formatOptions = { ...formatOptions, timeZone: defaultTimeZone };
     }
 
     if (isLightFormatString && !formatOptions) {
@@ -783,11 +793,15 @@ class DisplayVisitor extends Visitor<
 
     if (formatOptions?.timeZone) {
       // This is honestly so stupid that you have to manually convert the input
-      // instead of the format function converting it for you based on the timeZone option 
+      // instead of the format function converting it for you based on the timeZone option
       // that is being passed to it...
-      // From the docs: 
+      // From the docs:
       //    "To clarify, the format function will never change the underlying date, it must be changed to a zoned time before passing it to format."
-      return format(utcToZonedTime(parsed, formatOptions.timeZone), formatString, formatOptions);
+      return format(
+        utcToZonedTime(parsed, formatOptions.timeZone),
+        formatString,
+        formatOptions
+      );
     }
 
     return format(parsed, formatString, formatOptions);
@@ -802,7 +816,7 @@ class DisplayVisitor extends Visitor<
     }
 
     if (parsed instanceof Blob) {
-      return `${parsed.type}, ${parsed.size} bytes`
+      return `${parsed.type}, ${parsed.size} bytes`;
     }
 
     return null;
@@ -814,12 +828,12 @@ class DisplayVisitor extends Visitor<
 
     if (typeof parsed == "string") {
       let padding = 0;
-      while (parsed[parsed.length - 1 - padding] == '=') padding++;
-      const bytes = (3 * (parsed.length / 4)) - (padding);
-      return `${bytes.toLocaleString()} bytes`
+      while (parsed[parsed.length - 1 - padding] == "=") padding++;
+      const bytes = 3 * (parsed.length / 4) - padding;
+      return `${bytes.toLocaleString()} bytes`;
     }
 
-    return `${parsed.byteLength.toLocaleString()} bytes`
+    return `${parsed.byteLength.toLocaleString()} bytes`;
   }
 
   protected visitPrimitiveValue(
@@ -905,96 +919,106 @@ export function valueDisplay(
   );
 }
 
-import type { Route } from 'vue-router';
+// Type import to get vue-router's type augmentations
+import type VueRouter from "vue-router";
 
 export function bindToQueryString(
-  vue: Vue,
+  vue: VueInstanceLike,
   obj: any, // TODO: Maybe only support objects with $metadata? Would eliminate need for `parse`, and could allow for very strong typings.
-  key: string, 
-  queryKey: string = key, 
+  key: string,
+  queryKey: string = key,
   parse?: (v: string) => any,
-  mode: 'push' | 'replace' = 'replace',
+  mode: "push" | "replace" = "replace"
 ) {
   const defaultValue = obj[key];
 
   // When the value changes, persist it to the query.
   vue.$watch(
-    () => obj[key], 
+    () => obj[key],
     (v: any) => {
-      vue.$router
-        [mode]({query: {
-          ...vue.$route.query, 
-          [queryKey]: 
+      if (!vue.$router || !vue.$route) {
+        throw new Error(
+          "Could not find $router or $route on the component instance. Is vue-router installed?"
+        );
+      }
+      vue.$router[mode]({
+        query: {
+          ...vue.$route.query,
+          [queryKey]:
             v == null || v === ""
-            ? undefined 
-
-            // Use metadata to format the value if the obj has any.
-            : obj?.$metadata?.params?.[key]
-            ? mapToDto(v, obj.$metadata.params[key])?.toString()
-            : obj?.$metadata?.props?.[key]
-            ? mapToDto(v, obj.$metadata.props[key])?.toString()
-
-            // TODO: Add $metadata to DataSourceParameters/FilterParameters/ListParameters, and then support that as well.
-            // Fallback to .tostring()
-            : (String(v) ?? undefined)
-        }})
-        .catch((err: any) => {})
+              ? undefined
+              : // Use metadata to format the value if the obj has any.
+              obj?.$metadata?.params?.[key]
+              ? mapToDto(v, obj.$metadata.params[key])?.toString()
+              : obj?.$metadata?.props?.[key]
+              ? mapToDto(v, obj.$metadata.props[key])?.toString()
+              : // TODO: Add $metadata to DataSourceParameters/FilterParameters/ListParameters, and then support that as well.
+                // Fallback to .tostring()
+                String(v) ?? undefined,
+        },
+      }).catch((err: any) => {});
     }
   );
 
   // When the query changes, grab the new value.
   vue.$watch(
-    () => vue.$route.query[queryKey], 
+    () => vue.$route?.query[queryKey],
     (v: any) => {
-      obj[key] = 
+      obj[key] =
         // Use the default value if null or undefined
         v == null
-        ? defaultValue
-        // Use provided parse function, if provided.
-        : parse 
-        ? parse(v) 
-        // Use metadata to parse the value if the obj is a DataSource.
-        : obj?.$metadata?.params?.[key]
-        ? mapToModel(v, obj.$metadata.params[key])
-        : obj?.$metadata?.props?.[key]
-        ? mapToModel(v, obj.$metadata.props[key])
-        // TODO: Add $metadata to DataSourceParameters/FilterParameters/ListParameters, and then support that as well.
-        // Fallback to the raw value
-        : v
+          ? defaultValue
+          : // Use provided parse function, if provided.
+          parse
+          ? parse(v)
+          : // Use metadata to parse the value if the obj is a DataSource.
+          obj?.$metadata?.params?.[key]
+          ? mapToModel(v, obj.$metadata.params[key])
+          : obj?.$metadata?.props?.[key]
+          ? mapToModel(v, obj.$metadata.props[key])
+          : // TODO: Add $metadata to DataSourceParameters/FilterParameters/ListParameters, and then support that as well.
+            // Fallback to the raw value
+            v;
     },
     { immediate: true }
   );
 }
 
 export function bindKeyToRouteOnCreate(
-  vue: Vue,
+  vue: VueInstanceLike,
   model: Model<ModelType>,
-  routeParamName: string = 'id',
+  routeParamName: string = "id",
   keepQuery: boolean = false,
-  routeName?: string | null,
+  routeName?: string | null
 ) {
-  routeName = routeName ?? vue.$route.name 
+  if (!vue.$router || !vue.$route) {
+    throw new Error(
+      "Could not find $router or $route on the component instance. Is vue-router installed?"
+    );
+  }
+
+  routeName = routeName ?? vue.$route.name;
   vue.$watch(
     () => (model as any)[model.$metadata.keyProp.name],
-    (pk, o) => {
+    (pk: any, o: any) => {
       if (!routeName) {
-        throw Error("Cannot use bindKeyToRouteOnCreate with unnamed routes.")
+        throw Error("Cannot use bindKeyToRouteOnCreate with unnamed routes.");
       }
       if (pk && !o) {
-        const { href } = vue.$router.resolve({
-          name: routeName ?? vue.$route.name,
-          query: keepQuery ? vue.$route.query : {},
+        const { href } = vue.$router!.resolve({
+          name: routeName ?? vue.$route!.name,
+          query: keepQuery ? vue.$route!.query : {},
           params: {
-            ...vue.$route.params,
-            [routeParamName]: pk
-          }
+            ...vue.$route!.params,
+            [routeParamName]: pk,
+          },
         });
         // Manually replace state with the HTML5 history API
         // so that vue-router doesn't notice the route change
         // and therefore won't trigger any route transitions
         // or router-view component reconstitutions.
-        window.history.replaceState(null, window.document.title, href)
+        window.history.replaceState(history.state, "", href);
       }
     }
-  )
+  );
 }

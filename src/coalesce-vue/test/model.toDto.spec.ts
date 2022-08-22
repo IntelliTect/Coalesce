@@ -6,17 +6,20 @@ import { twoWayConversions, studentValue, MappingData } from "./model.shared";
 
 const studentProps = $metadata.Student.props;
 
-
 function unmappable(meta: Value, ...values: any[]) {
-  return values.map(value => {
-    return { meta, model: value, error: `unparsable .* for ${meta.type} '${meta.name}'` };
+  return values.map((value) => {
+    return {
+      meta,
+      model: value,
+      error: `unparsable .* for ${meta.type} '${meta.name}'`,
+    };
   });
 }
 
 // Test some simple mappings from model to DTO.
 describe.each(<MappingData[]>[
   ...twoWayConversions,
-  
+
   // Ensure child objects and collections are dropped.
   // Also test that foreign keys are auto-populated
   // from their reference prop if the FK itself is null.
@@ -26,20 +29,24 @@ describe.each(<MappingData[]>[
       $metadata: $metadata.Student,
       studentId: 1,
       name: "Steve",
-      courses: [{$metadata: $metadata.Course, courseId: 1, name: "CS 101"}],
+      courses: [{ $metadata: $metadata.Course, courseId: 1, name: "CS 101" }],
       studentAdvisorId: null,
       advisor: {
         $metadata: $metadata.Advisor,
         advisorId: 1,
         name: "Joe",
-      }
+      },
     },
-    dto: { name: "Steve", studentId: 1, studentAdvisorId: 1, }
+    dto: { name: "Steve", studentId: 1, studentAdvisorId: 1 },
   },
 
   // Serialized child object with a non-null value
   {
-    meta: {role: 'value', typeDef: $metadata.DisplaysStudentSerializesChild, type: 'object' },
+    meta: {
+      role: "value",
+      typeDef: $metadata.DisplaysStudentSerializesChild,
+      type: "object",
+    },
     model: {
       $metadata: $metadata.DisplaysStudentSerializesChild,
       name: "Steve",
@@ -48,17 +55,21 @@ describe.each(<MappingData[]>[
         name: "Steve",
       },
     },
-    dto: { name: "Steve", student: { name: "Steve" } }
+    dto: { name: "Steve", student: { name: "Steve" } },
   },
   // Serialized child object with a null value
   {
-    meta: {role: 'value', typeDef: $metadata.DisplaysStudentSerializesChild, type: 'object' },
+    meta: {
+      role: "value",
+      typeDef: $metadata.DisplaysStudentSerializesChild,
+      type: "object",
+    },
     model: {
       $metadata: $metadata.DisplaysStudentSerializesChild,
       name: "Steve",
       student: null,
     },
-    dto: { name: "Steve", student: null }
+    dto: { name: "Steve", student: null },
   },
   // Null object
   { meta: studentValue, model: null, dto: null },
@@ -66,26 +77,32 @@ describe.each(<MappingData[]>[
   // String
   { meta: studentProps.name, model: 123, dto: "123" },
   { meta: studentProps.name, model: true, dto: "true" },
-  ...unmappable(studentProps.name, new Date(), [], {} ),
+  ...unmappable(studentProps.name, new Date(), [], {}),
 
   // Number
   { meta: studentProps.studentId, model: "123", dto: 123 },
   { meta: studentProps.studentId, model: "", dto: null },
   { meta: studentProps.studentId, model: " ", dto: null },
-  ...unmappable(studentProps.studentId, new Date(), [], {}, "abc" ),
-  
+  ...unmappable(studentProps.studentId, new Date(), [], {}, "abc"),
+
   // Enum
   { meta: studentProps.grade, model: "123", dto: 123 },
-  ...unmappable(studentProps.grade, new Date(), [], {}, "abc" ),
+  ...unmappable(studentProps.grade, new Date(), [], {}, "abc"),
 
   // Boolean
   { meta: studentProps.isEnrolled, model: "true", dto: true },
   { meta: studentProps.isEnrolled, model: "false", dto: false },
-  ...unmappable(studentProps.isEnrolled, new Date(), [], {}, "abc", 123 ),
+  ...unmappable(studentProps.isEnrolled, new Date(), [], {}, "abc", 123),
 
   // Date
-  ...unmappable(studentProps.birthDate, new Date("!!Invalid"), 123, "abc", [], {} ),
-
+  ...unmappable(
+    studentProps.birthDate,
+    new Date("!!Invalid"),
+    123,
+    "abc",
+    [],
+    {}
+  ),
 ])(
   "mapValueToDto",
   ({ meta: value, model: modelValue, dto: dtoValue, error }) => {
@@ -93,11 +110,12 @@ describe.each(<MappingData[]>[
       ? `throws /${error}/`
       : `returns ${shortStringify(dtoValue)}`;
 
-    const testTitle = `for ${shortStringify(modelValue)}, ${expectedOutcomeDesc}`;
+    const testTitle = `for ${shortStringify(
+      modelValue
+    )}, ${expectedOutcomeDesc}`;
 
     describe(value.type, () => {
       test(testTitle, () => {
-      
         const doMap = () => model.mapValueToDto(modelValue, value);
         if (error) {
           expect(doMap).toThrowError(new RegExp(error, "i"));
@@ -117,8 +135,7 @@ describe.each(<MappingData[]>[
 
 describe("mapToDto", () => {
   test("for object without $metadata, throws", () => {
-    expect(() => model.mapToDto({} as any))
-      .toThrowError(/requires metadata/)
+    expect(() => model.mapToDto({} as any)).toThrowError(/requires metadata/);
   });
 
   test("for no value, returns null", () => {
@@ -131,33 +148,36 @@ describe("mapToDto", () => {
       $metadata: $metadata.Student,
       studentId: 1,
       name: "Steve",
-      courses: [{$metadata: $metadata.Course, courseId: 1, name: "CS 101"}],
+      courses: [{ $metadata: $metadata.Course, courseId: 1, name: "CS 101" }],
       studentAdvisorId: null,
       advisor: {
         $metadata: $metadata.Advisor,
         advisorId: 1,
         name: "Joe",
-      }
+      },
     });
 
-    expect(mapped).toMatchObject({ 
-      name: "Steve", 
-      studentId: 1, 
-      studentAdvisorId: 1, 
-    })
+    expect(mapped).toMatchObject({
+      name: "Steve",
+      studentId: 1,
+      studentAdvisorId: 1,
+    });
   });
 
   test("for object with specific props, drops extra props", () => {
-    const mapped = model.mapToDtoFiltered({
-      $metadata: $metadata.Student,
-      studentId: 1,
-      name: "Steve",
-      studentAdvisorId: 3,
-    }, ["name", "studentId"]);
+    const mapped = model.mapToDtoFiltered(
+      {
+        $metadata: $metadata.Student,
+        studentId: 1,
+        name: "Steve",
+        studentAdvisorId: 3,
+      },
+      ["name", "studentId"]
+    );
 
-    expect(mapped).toMatchObject({ 
-      name: "Steve", 
-      studentId: 1, 
-    })
+    expect(mapped).toMatchObject({
+      name: "Steve",
+      studentId: 1,
+    });
   });
 });

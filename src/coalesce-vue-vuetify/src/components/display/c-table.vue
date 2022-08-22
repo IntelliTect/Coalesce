@@ -9,7 +9,7 @@
               :key="'header-' + header.value"
               class="text-left"
               :class="{
-                sortable: header.sortable
+                sortable: header.sortable,
               }"
               @click="header.sortable ? orderByToggle(header.value) : void 0"
             >
@@ -82,119 +82,85 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component, Watch, Prop } from "vue-property-decorator";
+import { defineComponent, PropType } from "vue";
 import {
-  Model,
-  ClassType,
   ListViewModel,
   Property,
   ModelType,
   HiddenAreas,
-  BehaviorFlags,
-  ViewModel
+  ViewModel,
 } from "coalesce-vue";
-
-import CAdminDisplay from "../admin/c-admin-display";
-import CInput from "../input/c-input";
 
 import { isPropReadOnly } from "../../util";
 
-@Component({
+export default defineComponent({
   name: "c-table",
-  components: {
-    CAdminDisplay,
-    CInput
-  }
-})
-export default class extends Vue {
-  @Prop({ required: true, type: Object })
-  public list!: ListViewModel<any, any>;
 
-  @Prop({ required: false, type: Array })
-  public props?: Array<string>;
+  props: {
+    list: { required: true, type: Object as PropType<ListViewModel<any, any>> },
+    props: { required: false, type: Array as PropType<Array<string>> },
+    admin: { required: false, type: Boolean },
+    editable: { required: false, type: Boolean },
+    extraHeaders: { required: false, type: Array as PropType<Array<string>> },
+  },
 
-  @Prop({ required: false, type: Boolean })
-  public admin?: boolean;
+  computed: {
+    metadata(): ModelType {
+      return this.list.$metadata;
+    },
 
-  @Prop({ required: false, type: Boolean })
-  public editable?: boolean;
+    effectiveProps() {
+      if (this.props && this.props.length) {
+        return this.props
+          .map((propName) => this.metadata.props[propName])
+          .filter((prop) => !!prop);
+      }
 
-  @Prop({ required: false, type: Array })
-  public extraHeaders?: Array<string>;
+      return Object.values(this.metadata.props).filter(
+        (p) => p.hidden === undefined || (p.hidden & HiddenAreas.List) == 0
+      );
+    },
 
-  // For v-data-table impl.
-  // sortBy: string | string[] = '';
-  // sortDesc: boolean | boolean[] = false;
+    headers() {
+      return [
+        ...this.effectiveProps.map((o) => ({
+          text: o.displayName,
+          value: o.name,
+          sortable: o.type != "collection",
+          align: "left",
+        })),
+        ...(this.extraHeaders || []).map((h) => ({
+          text: h,
+          value: h,
+          sortable: false,
+        })),
+      ];
+    },
+  },
 
-  get metadata(): ModelType {
-    return this.list.$metadata;
-  }
+  methods: {
+    isPropReadOnly(p: Property, model: ViewModel) {
+      return isPropReadOnly(p, model);
+    },
 
-  isPropReadOnly(p: Property, model: ViewModel) {
-    return isPropReadOnly(p, model);
-  }
+    // TODO: put orderByToggle on ListViewModel.
+    orderByToggle(field: string) {
+      const list = this.list;
+      const params = list.$params;
 
-  get effectiveProps() {
-    if (this.props && this.props.length) {
-      return this.props
-        .map(propName => this.metadata.props[propName])
-        .filter(prop => !!prop);
-    }
-
-    return Object.values(this.metadata.props).filter(
-      (p) => p.hidden === undefined || (p.hidden & HiddenAreas.List) == 0
-    );
-  }
-
-  get headers() {
-    return [
-      ...this.effectiveProps.map(o => ({
-        text: o.displayName,
-        value: o.name,
-        sortable: o.type != "collection",
-        align: "left"
-      })),
-      ...(this.extraHeaders || []).map(h => ({
-        text: h,
-        value: h,
-        sortable: false
-      }))
-    ];
-  }
-
-  // TODO: put orderByToggle on ListViewModel.
-  orderByToggle(field: string) {
-    const list = this.list;
-    const params = list.$params;
-
-    if (params.orderBy == field && !params.orderByDescending) {
-      params.orderBy = null;
-      params.orderByDescending = field;
-    } else if (!params.orderBy && params.orderByDescending == field) {
-      params.orderBy = null;
-      params.orderByDescending = null;
-    } else {
-      params.orderBy = field;
-      params.orderByDescending = null;
-    }
-  }
-
-  mounted() {
-    // For v-data-table impl
-    // this.$watch(() => [this.sortBy, this.sortDesc], () => {
-    //     // Always default to null to prevent reloading if this becomes emptystring
-    //     // (vuetify will set it to emptystring).
-    //     const unwrap = <T>(x: T | T[]) => Array.isArray(x) ? x[0] : x;
-    //     const sortBy = unwrap(this.sortBy);
-    //     const sortDesc = unwrap(this.sortDesc);
-    //     this.list.$params.orderBy = sortDesc
-    //       ? null : sortBy;
-    //     this.list.$params.orderByDescending = sortDesc
-    //       ? sortBy : null
-    //   }
-    // )
-  }
-}
+      if (params.orderBy == field && !params.orderByDescending) {
+        params.orderBy = null;
+        params.orderByDescending = field;
+      } else if (!params.orderBy && params.orderByDescending == field) {
+        params.orderBy = null;
+        params.orderByDescending = null;
+      } else {
+        params.orderBy = field;
+        params.orderByDescending = null;
+      }
+    },
+  },
+});
 </script>
 
 <style lang="scss">

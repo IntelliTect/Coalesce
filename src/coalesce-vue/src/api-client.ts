@@ -1,5 +1,4 @@
-import Vue from "vue";
-
+import { onBeforeUnmount, Ref, ref } from "vue";
 
 import {
   ModelType,
@@ -15,7 +14,7 @@ import {
   ItemMethod,
   ListMethod,
   TypeDiscriminatorToType,
-  PropNames
+  PropNames,
 } from "./metadata.js";
 import {
   Model,
@@ -24,9 +23,17 @@ import {
   DataSource,
   mapToModel,
   mapToDtoFiltered,
-  parseValue
+  parseValue,
 } from "./model.js";
-import { OwnProps, Indexable, objectToQueryString, objectToFormData } from "./util.js";
+import {
+  OwnProps,
+  Indexable,
+  objectToQueryString,
+  objectToFormData,
+  ReactiveFlags_SKIP,
+  getInternalInstance,
+  VueInstanceLike,
+} from "./util.js";
 
 import axios, {
   AxiosPromise,
@@ -80,15 +87,18 @@ export class DataSourceParameters {
   }
 }
 
-export interface SaveParameters<T extends Model<ModelType> = any> extends DataSourceParameters {
+export interface SaveParameters<T extends Model<ModelType> = any>
+  extends DataSourceParameters {
   /**
-   * A list of field names to save. 
+   * A list of field names to save.
    * If set, only the specified fields as well as any primary key
    * will be sent to the server. The server will ignore fields that are not set.
    */
   fields?: PropNames<T["$metadata"]>[] | null;
 }
-export class SaveParameters<T extends Model<ModelType>> extends DataSourceParameters {
+export class SaveParameters<
+  T extends Model<ModelType>
+> extends DataSourceParameters {
   constructor() {
     super();
     this.fields = null;
@@ -109,7 +119,7 @@ export class FilterParameters extends DataSourceParameters {
     this.filter = null;
   }
 }
- 
+
 export interface ListParameters extends FilterParameters {
   /** The page of data to request, starting at 1. */
   page?: number | null;
@@ -151,7 +161,11 @@ export class ListParameters extends FilterParameters {
  * @param parameters The parameters to map.
  */
 export function mapParamsToDto(
-  parameters?: ListParameters | FilterParameters | DataSourceParameters | SaveParameters
+  parameters?:
+    | ListParameters
+    | FilterParameters
+    | DataSourceParameters
+    | SaveParameters
 ) {
   if (!parameters) return null;
 
@@ -165,19 +179,16 @@ export function mapParamsToDto(
     "page",
     "pageSize",
     "orderBy",
-    "orderByDescending"
+    "orderByDescending",
   ] as const;
 
   // Map all the simple params to `paramsObject`
-  var paramsObject = simpleParams.reduce(
-    (obj, key) => {
-      if (key in wideParams && wideParams[key] != null) {
-        obj[key] = String(wideParams[key]);
-      }
-      return obj;
-    },
-    {} as { [s: string]: string }
-  );
+  var paramsObject = simpleParams.reduce((obj, key) => {
+    if (key in wideParams && wideParams[key] != null) {
+      obj[key] = String(wideParams[key]);
+    }
+    return obj;
+  }, {} as { [s: string]: string });
 
   // Map the 'filter' object, ensuring all values are strings.
   const filter = wideParams.filter;
@@ -221,7 +232,6 @@ export function mapParamsToDto(
   return paramsObject;
 }
 
-
 /**
  * Maps the given flat object of key-value pairs into an API parameters object.
  * @param dto The flat object to map.
@@ -230,44 +240,48 @@ export function mapParamsToDto(
  */
 export function mapQueryToParams<T extends DataSourceParameters>(
   flatQuery: any,
-  parametersType: new() => T,
-  modelMeta: ModelType,
+  parametersType: new () => T,
+  modelMeta: ModelType
 ): T {
   const dto = flatQuery; // alias for brevity
-  
-  const parameters: DataSourceParameters | FilterParameters | ListParameters
-    = new parametersType;
+
+  const parameters: DataSourceParameters | FilterParameters | ListParameters =
+    new parametersType();
 
   if (parameters instanceof ListParameters) {
-    if ('page' in dto) parameters.page = +dto.page;
-    if ('pageSize' in dto) parameters.pageSize = +dto.pageSize;
-    if ('orderBy' in dto) parameters.orderBy = dto.orderBy;
-    if ('orderByDescending' in dto) parameters.orderByDescending = dto.orderByDescending;
-    if ('fields' in dto) parameters.fields = String(dto.fields).split(",")
+    if ("page" in dto) parameters.page = +dto.page;
+    if ("pageSize" in dto) parameters.pageSize = +dto.pageSize;
+    if ("orderBy" in dto) parameters.orderBy = dto.orderBy;
+    if ("orderByDescending" in dto)
+      parameters.orderByDescending = dto.orderByDescending;
+    if ("fields" in dto) parameters.fields = String(dto.fields).split(",");
   }
 
   if (parameters instanceof FilterParameters) {
-    if ('search' in dto) parameters.search = dto.search;
+    if ("search" in dto) parameters.search = dto.search;
     for (const key in dto) {
       if (key.startsWith("filter.") && dto[key] !== undefined) {
-        parameters.filter = parameters.filter ?? {}
-        parameters.filter[key.replace("filter.", "")] = dto[key]
+        parameters.filter = parameters.filter ?? {};
+        parameters.filter[key.replace("filter.", "")] = dto[key];
       }
     }
   }
 
   if (parameters instanceof DataSourceParameters) {
-    if ('includes' in dto) parameters.includes = dto.includes;
+    if ("includes" in dto) parameters.includes = dto.includes;
 
-    if ('dataSource' in dto && dto.dataSource in modelMeta.dataSources) {
-      const dataSource = mapToModel({}, modelMeta.dataSources[dto.dataSource])
+    if ("dataSource" in dto && dto.dataSource in modelMeta.dataSources) {
+      const dataSource = mapToModel({}, modelMeta.dataSources[dto.dataSource]);
       parameters.dataSource = dataSource;
-      
+
       for (const key in dto) {
         if (key.startsWith("dataSource.")) {
           var paramName = key.replace("dataSource.", "");
           if (paramName in dataSource.$metadata.props) {
-            (dataSource as any)[paramName] = mapToModel(dto[key], dataSource.$metadata.props[paramName])
+            (dataSource as any)[paramName] = mapToModel(
+              dto[key],
+              dataSource.$metadata.props[paramName]
+            );
           }
         }
       }
@@ -278,21 +292,25 @@ export function mapQueryToParams<T extends DataSourceParameters>(
 }
 
 async function parseApiResult(data: any): Promise<ApiResult | null> {
-  if (data instanceof Blob && data.size > 0 && data.type == "application/json") {
+  if (
+    data instanceof Blob &&
+    data.size > 0 &&
+    data.type == "application/json"
+  ) {
     // For file-returning endpoints, we ask axios to return us a Blob.
     // However, this means that if the endpoint fails and returns JSON,
     // it will return the ApiResult's JSON inside a blob. This extracts it back out.
     data = await new Promise((resolve, reject) => {
-      let reader = new FileReader()
+      let reader = new FileReader();
       reader.onload = () => {
         try {
-          resolve(JSON.parse(reader.result as string))
+          resolve(JSON.parse(reader.result as string));
         } catch (e) {
-          reject(e)
+          reject(e);
         }
-      }
-      reader.readAsText(data)
-    })
+      };
+      reader.readAsText(data);
+    });
   }
 
   if (typeof data !== "object" || !("wasSuccessful" in data)) {
@@ -303,7 +321,7 @@ async function parseApiResult(data: any): Promise<ApiResult | null> {
 }
 
 export function getMessageForError(error: unknown): string {
-  const e = error as AxiosError | ApiResult | Error | string
+  const e = error as AxiosError | ApiResult | Error | string;
   if (typeof e === "string") {
     return e;
   } else if (typeof e === "object" && e != null) {
@@ -312,8 +330,12 @@ export function getMessageForError(error: unknown): string {
         | AxiosResponse<ListResult<any> | ItemResult<any>>
         | undefined;
 
-      if (result && typeof result.data === "object" && "message" in result.data) {
-        return result.data.message || "Unknown Error"
+      if (
+        result &&
+        typeof result.data === "object" &&
+        "message" in result.data
+      ) {
+        return result.data.message || "Unknown Error";
       }
 
       // Axios normally returns a message like "Request failed with status code 403".
@@ -321,11 +343,11 @@ export function getMessageForError(error: unknown): string {
       // (appending "(Forbidden)", etc. to the end of the message.)
       const statusText = e.response?.statusText;
       if (statusText && e.message && !e.message.includes(statusText)) {
-        return `${e.message} (${statusText})`
+        return `${e.message} (${statusText})`;
       }
     }
 
-    return ("message" in e) && typeof e.message === "string"
+    return "message" in e && typeof e.message === "string"
       ? e.message!
       : "A network error occurred"; // TODO: i18n
   } else {
@@ -350,8 +372,8 @@ AxiosClient.defaults.baseURL = "/api";
 // Set X-Requested-With: XmlHttpRequest to prevent aspnetcore from serving HTML and redirects to API requests.
 // https://github.com/dotnet/aspnetcore/blob/c440ebcf49badd49f0e2cdde1b0a74992af04158/src/Security/Authentication/Cookies/src/CookieAuthenticationEvents.cs#L107-L111
 AxiosClient.interceptors.request.use((config) => {
-  const url = (config.baseURL ?? '') + (config.url ?? '');
-  if (url && !url.startsWith('/')) {
+  const url = (config.baseURL ?? "") + (config.url ?? "");
+  if (url && !url.startsWith("/")) {
     // Url is not relative. We want to parse it and determine what its origin is.
 
     if (!URL || new URL(url).origin !== window?.location?.origin) {
@@ -365,7 +387,7 @@ AxiosClient.interceptors.request.use((config) => {
     ...config,
     headers: {
       ...config.headers,
-      ['X-Requested-With']: 'XMLHttpRequest',
+      ["X-Requested-With"]: "XMLHttpRequest",
     },
   };
 });
@@ -411,7 +433,6 @@ type ResultPromiseType<
   ? ListResultPromise<TResult>
   : never;
 
-
 type InvokerReturnType<
   T extends TransportTypeSpecifier<any>,
   TResult
@@ -427,7 +448,7 @@ type InvokerType<
   TResult
 > = TCall<TArgs, InvokerReturnType<T, TResult>>;
 
-type ApiStateType<
+export type ApiStateType<
   T extends TransportTypeSpecifier<any>,
   TArgs extends any[],
   TResult
@@ -435,9 +456,10 @@ type ApiStateType<
   ? ItemApiState<TArgs, TResult>
   : T extends ListTransportTypeSpecifier<any>
   ? ListApiState<TArgs, TResult>
-  : never) & InvokerType<T, TArgs, TResult>;
+  : never) &
+  InvokerType<T, TArgs, TResult>;
 
-type ApiStateTypeWithArgs<
+export type ApiStateTypeWithArgs<
   T extends TransportTypeSpecifier<any>,
   TArgs extends any[],
   TArgsObj extends {},
@@ -446,11 +468,10 @@ type ApiStateTypeWithArgs<
   ? ItemApiStateWithArgs<TArgs, TArgsObj, TResult>
   : T extends ListTransportTypeSpecifier<any>
   ? ListApiStateWithArgs<TArgs, TArgsObj, TResult>
-  : never) & InvokerType<T, TArgs, TResult>;
+  : never) &
+  InvokerType<T, TArgs, TResult>;
 
-
-const simultaneousGetCache: Map<string, AxiosPromise<any>> = new Map;
-
+const simultaneousGetCache: Map<string, AxiosPromise<any>> = new Map();
 
 export class ApiClient<T extends ApiRoutedType> {
   constructor(public $metadata: T) {}
@@ -463,7 +484,7 @@ export class ApiClient<T extends ApiRoutedType> {
    */
   protected _simultaneousGetCaching = false;
 
-  /** Enable simultaneous request caching, causing identical GET requests made 
+  /** Enable simultaneous request caching, causing identical GET requests made
    * at the same time across all ApiClient instances to be handled with the same AJAX request.
    */
   public $withSimultaneousRequestCaching(): this {
@@ -538,7 +559,11 @@ export class ApiClient<T extends ApiRoutedType> {
     TTransportType extends TransportTypeSpecifier<T>
   >(
     resultType: TTransportType,
-    invoker: TInvoker<TArgs, ResultPromiseType<TTransportType, TResult> | undefined | void, this>,
+    invoker: TInvoker<
+      TArgs,
+      ResultPromiseType<TTransportType, TResult> | undefined | void,
+      this
+    >,
     argsFactory?: () => TArgsObj,
     argsInvoker?: TArgsInvoker<
       TArgsObj,
@@ -546,7 +571,6 @@ export class ApiClient<T extends ApiRoutedType> {
       this
     >
   ): ApiStateTypeWithArgs<TTransportType, TArgs, TArgsObj, TResult>;
-
 
   $makeCaller<
     TArgs extends any[],
@@ -605,16 +629,10 @@ export class ApiClient<T extends ApiRoutedType> {
     } else {
       switch (localResultType) {
         case "item":
-          instance = new ItemApiState<TArgs, TResult>(
-            this,
-            invoker as any
-          );
+          instance = new ItemApiState<TArgs, TResult>(this, invoker as any);
           break;
         case "list":
-          instance = new ListApiState<TArgs, TResult>(
-            this,
-            invoker as any
-          );
+          instance = new ListApiState<TArgs, TResult>(this, invoker as any);
           break;
         default:
           throw `Unknown result type ${localResultType}`;
@@ -663,8 +681,8 @@ export class ApiClient<T extends ApiRoutedType> {
 
       const formData = objectToFormData(mappedParams);
       let hasFile = false;
-      formData.forEach(v => hasFile ||= v instanceof File);
-      
+      formData.forEach((v) => (hasFile ||= v instanceof File));
+
       if (hasFile) {
         // If the endpoint has any files or raw binary, we need to use a FormData.
         // (Blobs become Files when put into FormData, and we serialize UInt8Array into a Blob)
@@ -673,13 +691,13 @@ export class ApiClient<T extends ApiRoutedType> {
       } else {
         // No top-level special values - just handle the params normally.
         // This will form a application/x-www-form-urlencoded response.
-        body = objectToQueryString(mappedParams)
+        body = objectToQueryString(mappedParams);
       }
     } else {
       // The HTTP method has no body.
 
       body = undefined;
-      query = mappedParams
+      query = mappedParams;
     }
 
     const axiosRequest = <AxiosRequestConfig>{
@@ -687,12 +705,14 @@ export class ApiClient<T extends ApiRoutedType> {
       url: url,
       data: body,
       responseType: method.return.type == "file" ? "blob" : "json",
-      ...this.$options(undefined, config, query)
+      ...this.$options(undefined, config, query),
     };
 
     if (this._requestParametersCapture) {
       this._requestParametersCapture.push(axiosRequest);
-      return new Promise(() => { /* never resolve */ });
+      return new Promise(() => {
+        /* never resolve */
+      });
     }
 
     return this._possiblyCachedRequest(
@@ -700,28 +720,31 @@ export class ApiClient<T extends ApiRoutedType> {
       url,
       mappedParams,
       config,
-      () => AxiosClient.request(axiosRequest).then(r => {
+      () =>
+        AxiosClient.request(axiosRequest).then((r) => {
           if (method.return.type == "file") {
             if (typeof r.data !== "object") {
               // This should be impossible since we asked axios to provide us a blob.
-              throw new Error(`Unexpected raw ${typeof r.data} response from server.`)
+              throw new Error(
+                `Unexpected raw ${typeof r.data} response from server.`
+              );
             }
 
             // https://stackoverflow.com/a/40940790
             let disposition = r.headers["content-disposition"];
             let filename = "";
-            if (disposition && disposition.indexOf('attachment') !== -1) {
+            if (disposition && disposition.indexOf("attachment") !== -1) {
               var filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
               var matches = filenameRegex.exec(disposition);
-              if (matches != null && matches[1]) { 
-                filename = matches[1].replace(/['"]/g, '');
+              if (matches != null && matches[1]) {
+                filename = matches[1].replace(/['"]/g, "");
               }
             }
-          
+
             const blob: Blob = r.data;
             r.data = <ItemResult<File>>{
               wasSuccessful: true,
-              object: new File([blob], filename, { type: blob.type })
+              object: new File([blob], filename, { type: blob.type }),
             };
             return r;
           }
@@ -743,7 +766,7 @@ export class ApiClient<T extends ApiRoutedType> {
   private _captureRequestParameters(func: Function) {
     const old = this._requestParametersCapture;
     try {
-      const capture = this._requestParametersCapture = [];
+      const capture = (this._requestParametersCapture = []);
       func();
       return capture;
     } finally {
@@ -754,39 +777,42 @@ export class ApiClient<T extends ApiRoutedType> {
   /** Wraps a request, performing caching as needed according to _simultaneousGetCaching  */
   protected _possiblyCachedRequest(
     method: string,
-    url: string, 
-    parameters: any, 
-    config: AxiosRequestConfig | undefined, 
+    url: string,
+    parameters: any,
+    config: AxiosRequestConfig | undefined,
     promiseFactory: () => AxiosPromise<any>
-  ){
+  ) {
     let doCache = false;
     let cacheKey: string;
-    
+
     if (method === "GET" && this._simultaneousGetCaching && !config) {
-      cacheKey = url + "?" + objectToQueryString(parameters)
+      cacheKey = url + "?" + objectToQueryString(parameters);
       if (simultaneousGetCache.has(cacheKey)) {
-        return simultaneousGetCache.get(cacheKey)!
+        return simultaneousGetCache.get(cacheKey)!;
       } else {
         doCache = true;
       }
     }
-      
-    let promise = promiseFactory()
+
+    let promise = promiseFactory();
 
     if (doCache) {
       // Add the promise to the cache.
       simultaneousGetCache.set(cacheKey!, promise);
 
       // Remove the promise from the cache when it completes.
-      promise = promise.then(x => {
-        // Remove the request from the cache, because its done now.
-        simultaneousGetCache.delete(cacheKey);
-        return x;
-      }, e => {
-        simultaneousGetCache.delete(cacheKey);
-        // Re-throw the error so callers down the line can handle it.
-        throw e;
-      })
+      promise = promise.then(
+        (x) => {
+          // Remove the request from the cache, because its done now.
+          simultaneousGetCache.delete(cacheKey);
+          return x;
+        },
+        (e) => {
+          simultaneousGetCache.delete(cacheKey);
+          // Re-throw the error so callers down the line can handle it.
+          throw e;
+        }
+      );
     }
 
     return promise;
@@ -798,15 +824,22 @@ export class ApiClient<T extends ApiRoutedType> {
    * @param params The values of the parameter to map
    */
   protected $mapParams(method: Method, params: { [paramName: string]: any }) {
-    const formatted: { [paramName: string]: ReturnType<typeof mapToDto> | File | Blob | Uint8Array } = {};
+    const formatted: {
+      [paramName: string]:
+        | ReturnType<typeof mapToDto>
+        | File
+        | Blob
+        | Uint8Array;
+    } = {};
     for (var paramName in method.params) {
       const paramMeta = method.params[paramName];
       const paramValue = params[paramName];
 
-      const pureType = paramMeta.type == "collection" ? paramMeta.itemType : paramMeta;
+      const pureType =
+        paramMeta.type == "collection" ? paramMeta.itemType : paramMeta;
       if (pureType.type == "file" || pureType.type == "binary") {
         // Preserve top-level files and binary (and arrays of such) as their original format
-        formatted[paramName] = parseValue(paramValue, paramMeta)
+        formatted[paramName] = parseValue(paramValue, paramMeta);
       } else {
         formatted[paramName] = mapToDto(paramValue, paramMeta);
       }
@@ -834,8 +867,8 @@ export class ApiClient<T extends ApiRoutedType> {
       params: {
         ...queryParams,
         ...(config && config.params ? config.params : null),
-        ...mapParamsToDto(parameters)
-      }
+        ...mapParamsToDto(parameters),
+      },
     };
   }
 
@@ -846,7 +879,9 @@ export class ApiClient<T extends ApiRoutedType> {
     if (typeof value.data !== "object") {
       // This case usually only happens if the endpoint doesn't exist on the server,
       // causing the server to return a SPA fallback route (as HTML) with a 200 status.
-      throw new Error(`Unexpected raw ${typeof value.data} response from server.`)
+      throw new Error(
+        `Unexpected raw ${typeof value.data} response from server.`
+      );
     }
 
     if (metadata.type === "void") {
@@ -867,7 +902,9 @@ export class ApiClient<T extends ApiRoutedType> {
     if (typeof value.data !== "object") {
       // This case usually only happens if the endpoint doesn't exist on the server,
       // causing the server to return a SPA fallback route (as HTML) with a 200 status.
-      throw new Error(`Unexpected raw ${typeof value.data} response from server.`)
+      throw new Error(
+        `Unexpected raw ${typeof value.data} response from server.`
+      );
     }
 
     // This function is NOT PURE - we mutate the result object on the response.
@@ -879,9 +916,8 @@ export class ApiClient<T extends ApiRoutedType> {
 export type ParamsObject<TMethod extends Method> = {
   [P in keyof TMethod["params"]]: TypeDiscriminatorToType<
     TMethod["params"][P]["type"]
-  > | null
+  > | null;
 };
-
 
 export class ModelApiClient<TModel extends Model<ModelType>> extends ApiClient<
   TModel["$metadata"]
@@ -892,18 +928,11 @@ export class ModelApiClient<TModel extends Model<ModelType>> extends ApiClient<
     config?: AxiosRequestConfig
   ): ItemResultPromise<TModel> {
     let url = `/${this.$metadata.controllerRoute}/get/${id}`;
-    
-    return this._possiblyCachedRequest(
-      "GET",
-      url,
-      parameters,
-      config,
-      () => AxiosClient.get(
-          url,
-          this.$options(parameters, config)
-        ).then<AxiosItemResult<TModel>>(r =>
-          this.$hydrateItemResult(r, this.$itemValueMeta)
-        )
+
+    return this._possiblyCachedRequest("GET", url, parameters, config, () =>
+      AxiosClient.get(url, this.$options(parameters, config)).then<
+        AxiosItemResult<TModel>
+      >((r) => this.$hydrateItemResult(r, this.$itemValueMeta))
     );
   }
 
@@ -912,18 +941,11 @@ export class ModelApiClient<TModel extends Model<ModelType>> extends ApiClient<
     config?: AxiosRequestConfig
   ): ListResultPromise<TModel> {
     let url = `/${this.$metadata.controllerRoute}/list`;
-    
-    return this._possiblyCachedRequest(
-      "GET",
-      url,
-      parameters,
-      config,
-      () => AxiosClient.get(
-          url,
-          this.$options(parameters, config)
-        ).then<AxiosListResult<TModel>>(r =>
-          this.$hydrateListResult(r, this.$collectionValueMeta)
-        )
+
+    return this._possiblyCachedRequest("GET", url, parameters, config, () =>
+      AxiosClient.get(url, this.$options(parameters, config)).then<
+        AxiosListResult<TModel>
+      >((r) => this.$hydrateListResult(r, this.$collectionValueMeta))
     );
   }
 
@@ -948,7 +970,7 @@ export class ModelApiClient<TModel extends Model<ModelType>> extends ApiClient<
       `/${this.$metadata.controllerRoute}/save`,
       objectToQueryString(mapToDtoFiltered(item, fields)),
       this.$options(params, config)
-    ).then<AxiosItemResult<TModel>>(r =>
+    ).then<AxiosItemResult<TModel>>((r) =>
       this.$hydrateItemResult(r, this.$itemValueMeta)
     );
   }
@@ -962,7 +984,7 @@ export class ModelApiClient<TModel extends Model<ModelType>> extends ApiClient<
       `/${this.$metadata.controllerRoute}/delete/${id}`,
       null,
       this.$options(parameters, config)
-    ).then<AxiosItemResult<TModel>>(r =>
+    ).then<AxiosItemResult<TModel>>((r) =>
       this.$hydrateItemResult(r, this.$itemValueMeta)
     );
   }
@@ -973,7 +995,7 @@ export class ModelApiClient<TModel extends Model<ModelType>> extends ApiClient<
     displayName: "",
     type: "model",
     role: "value",
-    typeDef: this.$metadata
+    typeDef: this.$metadata,
   });
 
   /** Value metadata for handling ListResult returns from the standard API endpoints. */
@@ -982,13 +1004,13 @@ export class ModelApiClient<TModel extends Model<ModelType>> extends ApiClient<
     displayName: "",
     type: "collection",
     role: "value",
-    itemType: this.$itemValueMeta
+    itemType: this.$itemValueMeta,
   });
 }
 
-export abstract class ServiceApiClient<TMeta extends Service> extends ApiClient<
-  TMeta
-> {}
+export abstract class ServiceApiClient<
+  TMeta extends Service
+> extends ApiClient<TMeta> {}
 
 export type TInvoker<
   TArgs extends any[],
@@ -1007,33 +1029,29 @@ export type TCall<TArgs extends any[], TReturn> = (
   ...args: TArgs
 ) => TReturn;
 
-type ApiStateHook<TThis> = (this: any, state: TThis) => void | Promise<any>
+type ApiStateHook<TThis> = (this: any, state: TThis) => void | Promise<any>;
 
-
-// Base class for ApiState that contains nothing but the logic for 
+// Base class for ApiState that contains nothing but the logic for
 // subclassing Function. Specifically, we do this to avoid a need to call
 // `super()`, which triggers CSP unsafe-eval.
-abstract class ApiStateBase<
-  TArgs extends any[],
-  TResult
-> extends Function {
-
+abstract class ApiStateBase<TArgs extends any[], TResult> extends Function {
   public readonly invoke!: this;
 
   protected readonly apiClient!: ApiClient<any>;
-  protected readonly invoker!: 
-    TInvoker<
-      TArgs,
-      ApiResultPromise<TResult> | undefined | void,
-      ApiClient<any>
-    >;
-  protected abstract _invokeInternal(thisArg: any, callInvoker: () => any): ApiResultPromise<TResult>;
-  
+  protected readonly invoker!: TInvoker<
+    TArgs,
+    ApiResultPromise<TResult> | undefined | void,
+    ApiClient<any>
+  >;
+  protected abstract _invokeInternal(
+    thisArg: any,
+    callInvoker: () => any
+  ): ApiResultPromise<TResult>;
+
   // @ts-expect-error Don't call super() - it triggers CSP unsafe-eval (even though nothing is being eval'd)
   constructor(
     apiClient: ApiClient<any>,
-    invoker: 
-    TInvoker<
+    invoker: TInvoker<
       TArgs,
       ApiResultPromise<TResult> | undefined | void,
       ApiClient<any>
@@ -1071,23 +1089,52 @@ export abstract class ApiState<
   TArgs extends any[],
   TResult
 > extends ApiStateBase<TArgs, TResult> {
+  /** See comments on ReactiveFlags_SKIP for explanation.
+   * @internal
+   */
+  private readonly [ReactiveFlags_SKIP] = true;
+
   /** The metadata of the method being called, if it was provided. */
   abstract $metadata?: Method;
 
+  private readonly __isLoading = ref(false);
   /** True if a request is currently pending. */
-  isLoading: boolean = false;
+  get isLoading() {
+    return this.__isLoading.value;
+  }
+  set isLoading(v) {
+    this.__isLoading.value = v;
+  }
 
+  private readonly __wasSuccessful = ref<boolean | null>(null);
   /** True if the previous request was successful. */
-  wasSuccessful: boolean | null = null;
+  get wasSuccessful() {
+    return this.__wasSuccessful.value;
+  }
+  set wasSuccessful(v) {
+    this.__wasSuccessful.value = v;
+  }
 
+  private readonly __message = ref<string | null>(null);
   /** Error message returned by the previous request. */
-  message: string | null = null;
+  get message() {
+    return this.__message.value;
+  }
+  set message(v) {
+    this.__message.value = v;
+  }
 
+  private readonly __hasResult = ref<boolean>(false);
   /** Whether `.result` is null or not.
-   * Using this prop to check for a result avoids a subscription 
+   * Using this prop to check for a result avoids a subscription
    * against the whole result object, which will change each time the method is called.
    */
-  hasResult: boolean = false;
+  get hasResult() {
+    return this.__hasResult.value;
+  }
+  set hasResult(v) {
+    this.__hasResult.value = v;
+  }
 
   private _concurrencyMode: ApiCallerConcurrency = "disallow";
 
@@ -1142,14 +1189,12 @@ export abstract class ApiState<
     this.setConcurrency(val);
   }
 
-  // Undefined initially to prevent unneeded reactivity
   private _cancelToken: CancelTokenSource | undefined;
 
-  // Frozen to prevent unneeded reactivity.
   private _callbacks: {
     onFulfilled: Array<ApiStateHook<any>>;
     onRejected: Array<ApiStateHook<any>>;
-  } = Object.freeze({ onFulfilled: [], onRejected: [] });
+  } = { onFulfilled: [], onRejected: [] };
 
   /**
    * Attach a callback to be invoked when the request to this endpoint succeeds.
@@ -1230,7 +1275,7 @@ export abstract class ApiState<
     try {
       const token = axios.CancelToken.source();
       (this.apiClient as any)._nextRequestConfig = <AxiosRequestConfig>{
-        cancelToken: token.token
+        cancelToken: token.token,
       };
 
       this._cancelToken = token;
@@ -1279,22 +1324,22 @@ export abstract class ApiState<
       } else {
         var error = thrown as AxiosError | ApiResult | Error | string;
       }
-      
+
       try {
         delete this._cancelToken;
         this.wasSuccessful = false;
-        const result = typeof error === "object" && "response" in error 
-          ? error.response as
-            | AxiosResponse<ListResult<TResult> 
-            | ItemResult<TResult>>
-            | undefined
-          : undefined;
+        const result =
+          typeof error === "object" && "response" in error
+            ? (error.response as
+                | AxiosResponse<ListResult<TResult> | ItemResult<TResult>>
+                | undefined)
+            : undefined;
 
         let resultJson;
         if (result && (resultJson = await parseApiResult(result.data))) {
           this.setResponseProps(resultJson);
         } else {
-          this.message = getMessageForError(error)
+          this.message = getMessageForError(error);
         }
 
         const onRejected = this._callbacks.onRejected;
@@ -1320,34 +1365,9 @@ export abstract class ApiState<
     }
   }
 
-  protected _makeReactive() {
-    // Make properties reactive. Works around https://github.com/vuejs/vue/issues/6648
-
-    // Use Object.keys to mock the behavior of
-    // https://github.com/vuejs/vue/blob/4c7a87e2ef9c76b5b75d85102662a27165a23ec7/src/core/observer/index.js#L61
-    const keys = Object.keys(this);
-    for (let i = 0; i < keys.length; i++) {
-      const key = keys[i];
-
-      // @ts-ignore - Ignore indexer on type without indexer signature.
-      const value = this[key];
-
-      // Don't define sealed object properties (e.g. this._callbacks)
-      if (
-        value == null ||
-        typeof value !== "object" ||
-        !Object.isSealed(value)
-      ) {
-        // @ts-expect-error Undocumented (but exposed) vue method for making properties reactive.
-        Vue.util.defineReactive(this, key, value);
-      }
-    }
-  }
-
   constructor(
     apiClient: ApiClient<any>,
-    invoker: 
-    TInvoker<
+    invoker: TInvoker<
       TArgs,
       ApiResultPromise<TResult> | undefined | void,
       ApiClient<any>
@@ -1357,18 +1377,31 @@ export abstract class ApiState<
   }
 }
 
-export class ItemApiState<
-  TArgs extends any[],
+export class ItemApiState<TArgs extends any[], TResult> extends ApiState<
+  TArgs,
   TResult
-> extends ApiState<TArgs, TResult> {
+> {
   /** The metadata of the method being called, if it was provided. */
   $metadata?: ItemMethod;
 
+  private readonly __validationIssues = ref<ValidationIssue[] | null>(null);
   /** Validation issues returned by the previous request. */
-  validationIssues: ValidationIssue[] | null = null;
+  get validationIssues() {
+    return this.__validationIssues.value;
+  }
+  set validationIssues(v) {
+    this.__validationIssues.value = v;
+  }
 
+  private readonly __result = ref<TResult | null>(null) as Ref<TResult | null>;
   /** Principal data returned by the previous request. */
-  result: TResult | null = null;
+  get result() {
+    return this.__result.value;
+  }
+  set result(v) {
+    this.__result.value = v;
+    this.hasResult = v != null;
+  }
 
   constructor(
     apiClient: ApiClient<any>,
@@ -1379,17 +1412,22 @@ export class ItemApiState<
     >
   ) {
     super(apiClient, invoker);
-    this._makeReactive();
   }
 
-  private _objectUrl?: { url: string, target: TResult, destroy: Function };
-  /** If the result is a blob or file, returns an Object URL representing that result. 
-   * @see https://developer.mozilla.org/en-US/docs/Web/API/URL/createObjectURL 
+  private _objectUrl?: {
+    url?: string;
+    target?: TResult;
+    hooked: WeakSet<VueInstanceLike>;
+    active: number;
+  };
+  /** If the result is a blob or file, returns an Object URL representing that result.
+   * @see https://developer.mozilla.org/en-US/docs/Web/API/URL/createObjectURL
    * @param vue A Vue instance through which the lifecycle of the object URL will be managed.
    */
-  public getResultObjectUrl(vue: Vue): TResult extends Blob ? string | undefined : undefined {
+  public getResultObjectUrl(
+    vue: VueInstanceLike
+  ): TResult extends Blob ? string | undefined : undefined {
     const result = this.result;
-
     if (result == this._objectUrl?.target) {
       // We have a stored URL, and the current result is what that URL was made for.
       // OR, we have no stored URL, and the current result is also null-ish.
@@ -1398,30 +1436,39 @@ export class ItemApiState<
       // @ts-expect-error TS can't infer that this is correct.
       return this._objectUrl?.url;
     }
-    
-    if (this._objectUrl) {
+
+    if (this._objectUrl?.url) {
       // If we got this far and we have a stored URL, it doesn't match the current result.
       // Destroy that URL and then we'll make a new one.
-      this._objectUrl.destroy();
-      this._objectUrl = undefined;
+      URL.revokeObjectURL(this._objectUrl?.url);
     }
 
     if (result instanceof Blob) {
       // Result is useful as an object url. Make one!
-      const objUrl = this._objectUrl = {
-        url: URL.createObjectURL(result),
-        target: result,
-        destroy: () => {
-          // Revoke the URL so we're not leaking memory.
-          URL.revokeObjectURL(objUrl.url);
-          vue.$off("hook:beforeDestroy", objUrl.destroy);
-        }
+
+      this._objectUrl ??= {
+        hooked: new WeakSet(),
+        active: 0,
+      };
+      const objUrl = this._objectUrl!;
+      objUrl.url = URL.createObjectURL(result);
+      objUrl.target = result;
+
+      if (!objUrl.hooked.has(vue)) {
+        objUrl.active++;
+        objUrl.hooked.add(vue);
+        onBeforeUnmount(() => {
+          objUrl.active--;
+          if (objUrl.url && objUrl.active == 0) {
+            URL.revokeObjectURL(objUrl.url);
+            objUrl.url = undefined;
+            objUrl.target = undefined;
+          }
+        }, getInternalInstance(vue));
       }
 
-      vue.$on("hook:beforeDestroy", objUrl.destroy);
-
       // @ts-expect-error TS can't figure out that we correctly narrowed on TResult here.
-      return this._objectUrl.url
+      return this._objectUrl.url;
     }
 
     return undefined;
@@ -1450,14 +1497,24 @@ export class ItemApiStateWithArgs<
   TArgsObj,
   TResult
 > extends ItemApiState<TArgs, TResult> {
+  private readonly __args = ref<TArgsObj>(this.argsFactory()) as Ref<TArgsObj>;
   /** Values that will be used as arguments if the method is invoked with `this.invokeWithArgs()`. */
-  public args: TArgsObj = this.argsFactory();
+  get args() {
+    return this.__args.value;
+  }
+  set args(v) {
+    this.__args.value = v;
+  }
 
   /** Invoke the method. If `args` is not provided, the values in `this.args` will be used for the method's parameters. */
-  public invokeWithArgs(args: TArgsObj = this.args): InvokerReturnType<"item", TResult> {
-    args = { ...args }; // Copy args so that if we're debouncing,
+  public invokeWithArgs(
+    args: TArgsObj = this.args
+  ): InvokerReturnType<"item", TResult> {
+    // Copy args so that if we're debouncing,
     // the args at the point in time at which invokeWithArgs() was
     // called will be used, rather than the state at the time when the actual API call gets made.
+    args = { ...args };
+
     return this._invokeInternal(this, () =>
       this.argsInvoker.apply(this, [this.apiClient, args])
     );
@@ -1467,24 +1524,25 @@ export class ItemApiStateWithArgs<
   public resetArgs() {
     this.args = this.argsFactory();
   }
-   
+
   /** Returns the URL for the endpoint, including querystring parameters, if invoked using `this.args`. */
-  get url() { 
-    // @ts-expect-error: _captureRequestParameters is private (since TS has no "internal")
-    var requests: AxiosRequestConfig[] = this.apiClient._captureRequestParameters(() => {
-      this.argsInvoker.apply(this, [this.apiClient, this.args]);
-    });
+  get url() {
+    var requests: AxiosRequestConfig[] =
+      // @ts-expect-error: _captureRequestParameters is private (since TS has no "internal")
+      this.apiClient._captureRequestParameters(() => {
+        this.argsInvoker.apply(this, [this.apiClient, this.args]);
+      });
 
     var request = requests[0];
     if (!request) return null;
     let url = AxiosClient.getUri(request);
 
     // Workaround for https://github.com/axios/axios/issues/2468.
-    // Prepend the baseURL if not already present 
+    // Prepend the baseURL if not already present
     // (It might be present e.g. if the above issue gets fixed).
     let baseURL = AxiosClient.defaults.baseURL;
-    if (baseURL && !url.startsWith(baseURL)){
-      url = baseURL.replace(/\/+$/, '') + url
+    if (baseURL && !url.startsWith(baseURL)) {
+      url = baseURL.replace(/\/+$/, "") + url;
     }
     return url;
   }
@@ -1500,28 +1558,62 @@ export class ItemApiStateWithArgs<
     >
   ) {
     super(apiClient, invoker);
-    this._makeReactive();
   }
 }
 
-export class ListApiState<
-  TArgs extends any[],
+export class ListApiState<TArgs extends any[], TResult> extends ApiState<
+  TArgs,
   TResult
-> extends ApiState<TArgs, TResult> {
+> {
   /** The metadata of the method being called, if it was provided. */
   $metadata?: ListMethod;
 
+  private readonly __page = ref<number | null>(null);
   /** Page number returned by the previous request. */
-  page: number | null = null;
-  /** Page size returned by the previous request. */
-  pageSize: number | null = null;
-  /** Page count returned by the previous request. */
-  pageCount: number | null = null;
-  /** Total Count returned by the previous request. */
-  totalCount: number | null = null;
+  get page() {
+    return this.__page.value;
+  }
+  set page(v) {
+    this.__page.value = v;
+  }
 
+  private readonly __pageSize = ref<number | null>(null);
+  /** Page size returned by the previous request. */
+  get pageSize() {
+    return this.__pageSize.value;
+  }
+  set pageSize(v) {
+    this.__pageSize.value = v;
+  }
+
+  private readonly __pageCount = ref<number | null>(null);
+  /** Page count returned by the previous request. */
+  get pageCount() {
+    return this.__pageCount.value;
+  }
+  set pageCount(v) {
+    this.__pageCount.value = v;
+  }
+
+  private readonly __totalCount = ref<number | null>(null);
+  /** Total Count returned by the previous request. */
+  get totalCount() {
+    return this.__totalCount.value;
+  }
+  set totalCount(v) {
+    this.__totalCount.value = v;
+  }
+
+  private readonly __result = ref<TResult[] | null>(null) as Ref<
+    TResult[] | null
+  >;
   /** Principal data returned by the previous request. */
-  result: TResult[] | null = null;
+  get result() {
+    return this.__result.value;
+  }
+  set result(v) {
+    this.__result.value = v;
+  }
 
   constructor(
     apiClient: ApiClient<any>,
@@ -1532,7 +1624,6 @@ export class ListApiState<
     >
   ) {
     super(apiClient, invoker);
-    this._makeReactive();
   }
 
   protected setResponseProps(data: ListResult<TResult>) {
@@ -1558,11 +1649,19 @@ export class ListApiStateWithArgs<
   TArgsObj,
   TResult
 > extends ListApiState<TArgs, TResult> {
+  private readonly __args = ref<TArgsObj>(this.argsFactory()) as Ref<TArgsObj>;
   /** Values that will be used as arguments if the method is invoked with `this.invokeWithArgs()`. */
-  public args: TArgsObj = this.argsFactory();
+  get args() {
+    return this.__args.value;
+  }
+  set args(v) {
+    this.__args.value = v;
+  }
 
   /** Invoke the method. If `args` is not provided, the values in `this.args` will be used for the method's parameters. */
-  public invokeWithArgs(args: TArgsObj = this.args): InvokerReturnType<"list", TResult> {
+  public invokeWithArgs(
+    args: TArgsObj = this.args
+  ): InvokerReturnType<"list", TResult> {
     args = { ...args }; // Copy args so that if we're debouncing,
     // the args at the point in time at which invokeWithArgs() was
     // called will be used, rather than the state at the time when the actual API call gets made.
@@ -1587,7 +1686,6 @@ export class ListApiStateWithArgs<
     >
   ) {
     super(apiClient, invoker);
-    this._makeReactive();
   }
 }
 
@@ -1595,6 +1693,6 @@ export type AnyArgCaller<
   TArgs extends any[] = any[],
   TArgsObj = any,
   TResult = any
-> = 
-  | ListApiStateWithArgs<TArgs,TArgsObj,TResult> 
-  | ItemApiStateWithArgs<TArgs,TArgsObj,TResult>
+> =
+  | ListApiStateWithArgs<TArgs, TArgsObj, TResult>
+  | ItemApiStateWithArgs<TArgs, TArgsObj, TResult>;

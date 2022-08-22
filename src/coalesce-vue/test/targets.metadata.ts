@@ -1,9 +1,22 @@
-import { ObjectType, BasicCollectionProperty, getEnumMeta, ObjectProperty, ModelType, ModelCollectionNavigationProperty, ClassType, Domain, ForeignKeyProperty, PrimaryKeyProperty, ModelReferenceNavigationProperty, solidify } from "../src/metadata";
+import {
+  ObjectType,
+  BasicCollectionProperty,
+  getEnumMeta,
+  ObjectProperty,
+  ModelType,
+  ModelCollectionNavigationProperty,
+  ClassType,
+  Domain,
+  ForeignKeyProperty,
+  PrimaryKeyProperty,
+  ModelReferenceNavigationProperty,
+  solidify,
+} from "../src/metadata";
 
-const metaBase = (name: string = "model") => { 
+const metaBase = (name: string = "model") => {
   return {
     name: name,
-    displayName: name.substr(0, 1).toUpperCase() + name.substr(1)
+    displayName: name.substr(0, 1).toUpperCase() + name.substr(1),
   };
 };
 
@@ -11,13 +24,13 @@ const value = (name: string = "prop") => {
   return {
     name: name,
     displayName: name.substr(0, 1).toUpperCase() + name.substr(1),
-    role: "value"
+    role: "value",
   };
 };
 
-const domain: Domain = { enums: {}, types: {}, services: {} }
+const domain: Domain = { enums: {}, types: {}, services: {} };
 
-export const Course = domain.types.Course = {
+export const Course = (domain.types.Course = {
   ...metaBase("Course"),
   type: "model",
   behaviorFlags: 7,
@@ -32,25 +45,33 @@ export const Course = domain.types.Course = {
   methods: {},
   props: {
     courseId: {
-      name: 'courseId',
-      displayName: 'CourseId',
-      role: 'primaryKey',
-      type: "number"
+      name: "courseId",
+      displayName: "CourseId",
+      role: "primaryKey",
+      type: "number",
     },
     name: {
-      name: 'name',
-      displayName: 'Name',
-      role: 'value',
-      type: "string"
+      name: "name",
+      displayName: "Name",
+      role: "value",
+      type: "string",
     },
     studentId: {
       name: "studentId",
       displayName: "StudentId",
       type: "number",
       role: "foreignKey",
-      get navigationProp() { return domain.types.Course.props.student as ModelReferenceNavigationProperty },
-      get principalType() { return domain.types.Student as ModelType },
-      get principalKey() { return (domain.types.Student as ModelType).keyProp as PrimaryKeyProperty }
+      get navigationProp() {
+        return domain.types.Course.props
+          .student as ModelReferenceNavigationProperty;
+      },
+      get principalType() {
+        return domain.types.Student as ModelType;
+      },
+      get principalKey() {
+        return (domain.types.Student as ModelType)
+          .keyProp as PrimaryKeyProperty;
+      },
     },
     student: {
       name: "student",
@@ -58,14 +79,21 @@ export const Course = domain.types.Course = {
       type: "model",
       role: "referenceNavigation",
       dontSerialize: true,
-      get foreignKey() { return domain.types.Course.props.studentId as ForeignKeyProperty },
-      get principalKey() { return (domain.types.Student as ModelType).keyProp as PrimaryKeyProperty },
-      get typeDef() { return domain.types.Student as ModelType }
+      get foreignKey() {
+        return domain.types.Course.props.studentId as ForeignKeyProperty;
+      },
+      get principalKey() {
+        return (domain.types.Student as ModelType)
+          .keyProp as PrimaryKeyProperty;
+      },
+      get typeDef() {
+        return domain.types.Student as ModelType;
+      },
     },
-  }
-};
+  },
+});
 
-export const Advisor = domain.types.Advisor = {
+export const Advisor = (domain.types.Advisor = {
   ...metaBase("Advisor"),
   type: "model",
   behaviorFlags: 7,
@@ -80,61 +108,70 @@ export const Advisor = domain.types.Advisor = {
   methods: {},
   props: {
     advisorId: {
-      name: 'advisorId',
-      displayName: 'AdvisorId',
-      role: 'primaryKey',
-      type: "number"
+      name: "advisorId",
+      displayName: "AdvisorId",
+      role: "primaryKey",
+      type: "number",
     },
     name: {
-      name: 'name',
-      displayName: 'Name',
-      role: 'value',
+      name: "name",
+      displayName: "Name",
+      role: "value",
       type: "string",
       rules: {
-        required: val => !!val || "Name is required."
-      }
+        required: (val) => !!val || "Name is required.",
+      },
     },
     students: {
-      name: 'students',
-      displayName: 'Students',
+      name: "students",
+      displayName: "Students",
       role: "collectionNavigation",
       type: "collection",
       dontSerialize: true,
-      get foreignKey() { return (domain.types.Student as ModelType).props.studentAdvisorId as ForeignKeyProperty },
+      get foreignKey() {
+        return (domain.types.Student as ModelType).props
+          .studentAdvisorId as ForeignKeyProperty;
+      },
       itemType: {
-        name: '$collectionValue',
-        role: 'value',
+        name: "$collectionValue",
+        role: "value",
         displayName: "",
         type: "model",
-        get typeDef() { return (domain.types.Student as ModelType) },
-      }
+        get typeDef() {
+          return domain.types.Student as ModelType;
+        },
+      },
     },
     studentsNonNavigation: {
       // A collection of models that doesn't function as a navigation property.
-      name: 'studentsNonNavigation',
-      displayName: 'Students NonNav',
+      name: "studentsNonNavigation",
+      displayName: "Students NonNav",
       role: "value",
       type: "collection",
       dontSerialize: true,
       itemType: {
-        name: '$collectionValue',
-        role: 'value',
+        name: "$collectionValue",
+        role: "value",
         displayName: "",
         type: "model",
-        get typeDef() { return (domain.types.Student as ModelType) },
-      }
+        get typeDef() {
+          return domain.types.Student as ModelType;
+        },
+      },
     },
     studentWrapperObject: {
-      name: 'studentWrapperObject',
-      displayName: 'Student Wrapper Object',
-      role: 'value',
-      type: 'object',
-      get typeDef() { return domain.types.DisplaysStudent as ObjectType }
+      name: "studentWrapperObject",
+      displayName: "Student Wrapper Object",
+      role: "value",
+      type: "object",
+      get typeDef() {
+        return domain.types.DisplaysStudent as ObjectType;
+      },
     },
-  }
-};
+  },
+});
 
-export const Student = domain.types.Student = {
+export const Student = (domain.types.Student = {
   ...metaBase("Student"),
   type: "model",
   behaviorFlags: 7,
@@ -197,7 +234,7 @@ export const Student = domain.types.Student = {
           displayName: "Advisor",
           type: "model",
           role: "value",
-          typeDef: Advisor
+          typeDef: Advisor,
         },
       },
       return: {
@@ -218,14 +255,18 @@ export const Student = domain.types.Student = {
           displayName: "id",
           type: "number",
           role: "value",
-          get source() { return (domain.types.Student as ModelType).props.studentId },
+          get source() {
+            return (domain.types.Student as ModelType).props.studentId;
+          },
         },
         etag: {
           name: "etag",
           displayName: "Etag",
           type: "string",
           role: "value",
-          get source() { return (domain.types.Student as ModelType).props.name },
+          get source() {
+            return (domain.types.Student as ModelType).props.name;
+          },
         },
       },
       return: {
@@ -238,52 +279,55 @@ export const Student = domain.types.Student = {
   },
   props: {
     studentId: {
-      name: 'studentId',
-      displayName: 'StudentId',
-      role: 'primaryKey',
-      type: "number"
+      name: "studentId",
+      displayName: "StudentId",
+      role: "primaryKey",
+      type: "number",
     },
     name: {
-      name: 'name',
-      displayName: 'Name',
-      role: 'value',
-      type: "string"
+      name: "name",
+      displayName: "Name",
+      role: "value",
+      type: "string",
     },
     isEnrolled: {
-      name: 'isEnrolled',
-      displayName: 'IsEnrolled',
-      role: 'value',
-      type: "boolean"
+      name: "isEnrolled",
+      displayName: "IsEnrolled",
+      role: "value",
+      type: "boolean",
     },
     birthDate: {
-      name: 'birthDate',
-      displayName: 'BirthDate',
-      dateKind: 'datetime',
-      role: 'value',
-      type: "date"
+      name: "birthDate",
+      displayName: "BirthDate",
+      dateKind: "datetime",
+      role: "value",
+      type: "date",
     },
     dateNoOffset: {
-      name: 'dateNoOffset',
-      displayName: 'Date No Offset',
-      dateKind: 'datetime',
+      name: "dateNoOffset",
+      displayName: "Date No Offset",
+      dateKind: "datetime",
       noOffset: true,
-      role: 'value',
-      type: "date"
+      role: "value",
+      type: "date",
     },
     courses: {
-      name: 'courses',
+      name: "courses",
       displayName: "Courses",
       role: "collectionNavigation",
       type: "collection",
       dontSerialize: true,
-      get foreignKey() { return (domain.types.Course as ModelType).props.studentId as ForeignKeyProperty },
+      get foreignKey() {
+        return (domain.types.Course as ModelType).props
+          .studentId as ForeignKeyProperty;
+      },
       itemType: {
-        name: '$collectionValue',
-        role: 'value',
+        name: "$collectionValue",
+        role: "value",
         displayName: "",
         type: "model",
         typeDef: Course,
-      }
+      },
     },
     currentCourse: {
       name: "currentCourse",
@@ -291,23 +335,34 @@ export const Student = domain.types.Student = {
       type: "model",
       role: "referenceNavigation",
       dontSerialize: true,
-      get foreignKey() { return domain.types.Student.props.currentCourseId as ForeignKeyProperty },
-      get principalKey() { return Course.keyProp as PrimaryKeyProperty },
-      typeDef: Course
+      get foreignKey() {
+        return domain.types.Student.props.currentCourseId as ForeignKeyProperty;
+      },
+      get principalKey() {
+        return Course.keyProp as PrimaryKeyProperty;
+      },
+      typeDef: Course,
     },
     currentCourseId: {
       name: "currentCourseId",
       displayName: "Current Course ID",
       type: "number",
       role: "foreignKey",
-      get navigationProp() { return domain.types.Student.props.currentCourse as ModelReferenceNavigationProperty },
-      get principalType() { return domain.types.Course as ModelType },
-      get principalKey() { return Course.keyProp as PrimaryKeyProperty }
+      get navigationProp() {
+        return domain.types.Student.props
+          .currentCourse as ModelReferenceNavigationProperty;
+      },
+      get principalType() {
+        return domain.types.Course as ModelType;
+      },
+      get principalKey() {
+        return Course.keyProp as PrimaryKeyProperty;
+      },
     },
     grade: {
-      name: 'grade',
-      displayName: 'Grade',
-      role: 'value',
+      name: "grade",
+      displayName: "Grade",
+      role: "value",
       type: "enum",
       typeDef: {
         name: "grades",
@@ -317,9 +372,9 @@ export const Student = domain.types.Student = {
           { value: 9, strValue: "Freshman", displayName: "Freshman" },
           { value: 10, strValue: "Sophomore", displayName: "Sophomore" },
           { value: 11, strValue: "Junior", displayName: "Junior" },
-          { value: 12, strValue: "Senior", displayName: "Senior" }
-        ])
-      }
+          { value: 12, strValue: "Senior", displayName: "Senior" },
+        ]),
+      },
     },
     advisor: {
       name: "advisor",
@@ -327,9 +382,14 @@ export const Student = domain.types.Student = {
       type: "model",
       role: "referenceNavigation",
       dontSerialize: true,
-      get foreignKey() { return domain.types.Student.props.studentAdvisorId as ForeignKeyProperty },
-      get principalKey() { return Advisor.keyProp as PrimaryKeyProperty },
-      typeDef: Advisor
+      get foreignKey() {
+        return domain.types.Student.props
+          .studentAdvisorId as ForeignKeyProperty;
+      },
+      get principalKey() {
+        return Advisor.keyProp as PrimaryKeyProperty;
+      },
+      typeDef: Advisor,
     },
     // This is intentionally named weirdly as to not match the name of the PK of Advisor.
     // This helps eek out bugs where the wrong props names are used for setting/getting props.
@@ -338,16 +398,23 @@ export const Student = domain.types.Student = {
       displayName: "StudentAdvisorId",
       type: "number",
       role: "foreignKey",
-      get navigationProp() { return domain.types.Student.props.advisor as ModelReferenceNavigationProperty },
-      get principalType() { return domain.types.Advisor as ModelType },
-      get principalKey() { return Advisor.keyProp as PrimaryKeyProperty }
+      get navigationProp() {
+        return domain.types.Student.props
+          .advisor as ModelReferenceNavigationProperty;
+      },
+      get principalType() {
+        return domain.types.Advisor as ModelType;
+      },
+      get principalKey() {
+        return Advisor.keyProp as PrimaryKeyProperty;
+      },
     },
     unknownObj: {
       name: "unknownObj",
       displayName: "Unknown Obj",
       type: "unknown",
-      role: "value"
-    }
+      role: "value",
+    },
   },
   dataSources: {
     search: {
@@ -368,13 +435,12 @@ export const Student = domain.types.Student = {
       name: "DefaultSource",
       displayName: "Default Source",
       isDefault: true,
-      props: {
-      },
+      props: {},
     },
   },
-};
+});
 
-export const DisplaysStudent = domain.types.DisplaysStudent = <ObjectType>{
+export const DisplaysStudent = (domain.types.DisplaysStudent = <ObjectType>{
   ...metaBase("DisplaysStudent"),
   type: "object",
   get displayProp() {
@@ -383,41 +449,41 @@ export const DisplaysStudent = domain.types.DisplaysStudent = <ObjectType>{
   props: {
     name: {
       ...value("name"),
-      type: "string"
+      type: "string",
     },
     student: {
       ...value("student"),
       type: "model",
       dontSerialize: true,
-      get typeDef() { return Student }
-    }
-  }
-};
+      get typeDef() {
+        return Student;
+      },
+    },
+  },
+});
 
 export const DisplaysStudentSerializesChild = <ObjectType>{
   ...DisplaysStudent,
   props: {
     ...DisplaysStudent.props,
     student: {
-    ...DisplaysStudent.props.student,
+      ...DisplaysStudent.props.student,
       dontSerialize: false,
-    }
-  }
+    },
+  },
 };
 
 interface AppDomain extends Domain {
-  enums: {
-  }
+  enums: {};
   types: {
-    Student: typeof Student,
-    Advisor: typeof Advisor
-    Course: typeof Course,
-    DisplaysStudent: typeof DisplaysStudent,
-  }
-  services: {
-  }
+    Student: typeof Student;
+    Advisor: typeof Advisor;
+    Course: typeof Course;
+    DisplaysStudent: typeof DisplaysStudent;
+  };
+  services: {};
 }
 
 solidify(domain);
 
-export default domain as AppDomain
+export default domain as AppDomain;

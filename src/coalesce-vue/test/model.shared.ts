@@ -1,4 +1,3 @@
-
 import * as $metadata from "./targets.metadata";
 import { ObjectValue, Value, ModelValue } from "../src/metadata";
 import { format } from "date-fns";
@@ -10,7 +9,7 @@ export const studentValue = <ModelValue>{
   displayName: "Student",
   role: "value",
   type: "model",
-  typeDef: $metadata.Student
+  typeDef: $metadata.Student,
 };
 
 export const displaysStudentValue = <ObjectValue>{
@@ -18,15 +17,15 @@ export const displaysStudentValue = <ObjectValue>{
   displayName: "Student",
   role: "value",
   type: "object",
-  typeDef: $metadata.DisplaysStudent
+  typeDef: $metadata.DisplaysStudent,
 };
 
 /** Conversions which map the same in either direction between model and DTOs */
 export interface MappingData {
-    meta: Value;
-    model?: any;
-    dto: any;
-    error?: string;
+  meta: Value;
+  model?: any;
+  dto: any;
+  error?: string;
 }
 
 export const twoWayConversions = <MappingData[]>[
@@ -35,13 +34,19 @@ export const twoWayConversions = <MappingData[]>[
     meta: studentProps.birthDate,
     model: new Date("1990-01-02T03:04:05.000-08:00"),
     // We define the expected using date-fns's format to make this test timezone-independent.
-    dto: format(new Date("1990-01-02T03:04:05.000-08:00"), "yyyy-MM-dd'T'HH:mm:ss.SSSXXX"),
+    dto: format(
+      new Date("1990-01-02T03:04:05.000-08:00"),
+      "yyyy-MM-dd'T'HH:mm:ss.SSSXXX"
+    ),
   },
   {
     meta: studentProps.dateNoOffset,
     model: new Date("1990-01-02T03:04:05.000-08:00"),
     // We define the expected using date-fns's format to make this test timezone-independent.
-    dto: format(new Date("1990-01-02T03:04:05.000-08:00"), "yyyy-MM-dd'T'HH:mm:ss.SSS"),
+    dto: format(
+      new Date("1990-01-02T03:04:05.000-08:00"),
+      "yyyy-MM-dd'T'HH:mm:ss.SSS"
+    ),
   },
   { meta: studentProps.name, model: null, dto: null },
   { meta: studentProps.name, model: "Bob", dto: "Bob" },
@@ -64,16 +69,16 @@ export const twoWayConversions = <MappingData[]>[
         name: name,
         courseId: i,
         studentId: null,
-        student: null
+        student: null,
       };
     }),
     dto: ["CSCD 210", "CSCD 211", "MATH 301"].map((name, i) => {
       return {
         name: name,
         courseId: i,
-        studentId: null
+        studentId: null,
       };
-    })
+    }),
   },
 
   // Model
@@ -84,14 +89,17 @@ export const twoWayConversions = <MappingData[]>[
       $metadata: $metadata.Student,
       studentId: 1,
       name: "Steve",
-      birthDate: new Date("1990-01-02T03:04:05.000-08:00")
+      birthDate: new Date("1990-01-02T03:04:05.000-08:00"),
     },
-    dto: { 
-      name: "Steve", 
-      studentId: 1, 
+    dto: {
+      name: "Steve",
+      studentId: 1,
       // We define the expected using date-fns's format to make this test timezone-independent.
-      birthDate: format(new Date("1990-01-02T03:04:05.000-08:00"), "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
-    }
+      birthDate: format(
+        new Date("1990-01-02T03:04:05.000-08:00"),
+        "yyyy-MM-dd'T'HH:mm:ss.SSSXXX"
+      ),
+    },
   },
 
   // Unknown
@@ -113,18 +121,18 @@ export const twoWayConversions = <MappingData[]>[
       grade: null,
       courses: null,
     },
-    dto: { 
-      name: null, 
-      studentId: null, 
+    dto: {
+      name: null,
+      studentId: null,
       birthDate: null,
       isEnrolled: null,
       grade: null,
-    }
+    },
   },
   // null root objects
   { meta: studentValue, model: null, dto: null },
 
   // Object (model covers most of the cases here...
   // just need to test the few special branches at the start for model values)
-  { meta: displaysStudentValue, model: null, dto: null }
+  { meta: displaysStudentValue, model: null, dto: null },
 ];

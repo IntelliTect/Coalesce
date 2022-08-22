@@ -5,7 +5,7 @@
     mode="out-in"
     tag="div"
     :class="{
-      'has-progress-placeholder': usePlaceholder
+      'has-progress-placeholder': usePlaceholder,
     }"
   >
     <v-alert
@@ -52,9 +52,8 @@
 </template>
 
 <script lang="ts">
-import Vue from "vue";
-import { Component, Prop } from "vue-property-decorator";
-import { ApiState, ItemApiState, ListApiState } from "coalesce-vue";
+import Vue, { defineComponent, PropType } from "vue";
+import { ItemApiState, ListApiState } from "coalesce-vue";
 
 type AnyLoader = ItemApiState<any, any> | ListApiState<any, any>;
 type AnyLoaderMaybe = AnyLoader | null | undefined;
@@ -76,120 +75,123 @@ class Flags {
     - Rename prop loaders => callers
     - Allow defining flags as props on the components, preferably directly as flags like <c-caller-status :callers="[list.$load]" no-initial-progress />.
       - This is a new syntax in addition to the current flags dictionary syntax, which needs to be preserved to support advanced use cases.
-
-
 */
 
-@Component({ name: "c-loader-status" })
-export default class extends Vue {
-  /**
-   * Loaders (docs forthcoming)
-   */
-  @Prop({ required: true, type: Object })
-  loaders!: { [flags: string]: AnyLoaderMaybe | AnyLoaderMaybe[] };
+export default defineComponent({
+  name: "c-loader-status",
 
-  /**
-   * If the loader is loading when it already has a result,
-   * keep the default slot visible.
-   */
-  @Prop({ required: false, type: Boolean, default: true })
-  progressPlaceholder!: boolean;
+  props: {
+    loaders: {
+      required: true,
+      type: Object as PropType<{
+        [flags: string]: AnyLoaderMaybe | AnyLoaderMaybe[];
+      }>,
+    },
 
-  @Prop({ required: false, type: [Number, String], default: 10 })
-  height!: number | string;
+    /**
+     * If the loader is loading when it already has a result,
+     * keep the default slot visible.
+     */
+    progressPlaceholder: { required: false, type: Boolean, default: true },
+    height: { required: false, type: [Number, String], default: 10 },
+  },
 
-  get loaderFlags() {
-    var ret = [];
-    for (const flagsStr in this.loaders) {
-      const flagsArr = flagsStr.split(" ");
-      const flags: any = new Flags();
-      for (const flagName in flags) {
-        const kebabFlag = flagName.replace(
-          /([A-Z])/g,
-          m => "-" + m.toLowerCase()
+  computed: {
+    loaderFlags() {
+      var ret = [];
+      for (const flagsStr in this.loaders) {
+        const flagsArr = flagsStr.split(" ");
+        const flags: any = new Flags();
+        for (const flagName in flags) {
+          const kebabFlag = flagName.replace(
+            /([A-Z])/g,
+            (m) => "-" + m.toLowerCase()
+          );
+
+          if (flagsArr.includes(kebabFlag)) {
+            flags[flagName] = true;
+          } else if (flagsArr.includes("no-" + kebabFlag)) {
+            flags[flagName] = false;
+          }
+        }
+
+        let loaders = this.loaders[flagsStr];
+        if (!Array.isArray(loaders)) {
+          loaders = [loaders];
+        }
+        for (const loader of loaders) {
+          if (loader) {
+            ret.push([loader, flags as Flags] as const);
+          }
+        }
+      }
+
+      return ret;
+    },
+
+    anyFailed() {
+      return this.loaderFlags.some((f) => f[0].wasSuccessful === false);
+    },
+
+    errorMessages() {
+      return this.loaderFlags
+        .filter((f) => f[0].wasSuccessful === false)
+        .map((f) => f[0].message);
+    },
+
+    showLoading() {
+      return this.loaderFlags.some((f) => {
+        const [loader, flags] = f;
+        if (flags.progress === false) return false;
+
+        const isLoading = loader.isLoading;
+        return (
+          (flags.initialProgress &&
+            isLoading &&
+            loader.wasSuccessful == null) ||
+          (flags.secondaryProgress && isLoading && loader.wasSuccessful != null)
         );
+      });
+    },
 
-        if (flagsArr.includes(kebabFlag)) {
-          flags[flagName] = true;
-        } else if (flagsArr.includes("no-" + kebabFlag)) {
-          flags[flagName] = false;
-        }
-      }
-
-      let loaders = this.loaders[flagsStr];
-      if (!Array.isArray(loaders)) {
-        loaders = [loaders];
-      }
-      for (const loader of loaders) {
-        if (loader) {
-          ret.push([loader, flags as Flags] as const);
-        }
-      }
-    }
-
-    return ret;
-  }
-
-  get anyFailed() {
-    return this.loaderFlags.some(f => f[0].wasSuccessful === false);
-  }
-
-  get errorMessages() {
-    return this.loaderFlags
-      .filter(f => f[0].wasSuccessful === false)
-      .map(f => f[0].message);
-  }
-
-  get showLoading() {
-    return this.loaderFlags.some(f => {
-      const [loader, flags] = f;
-      if (flags.progress === false) return false;
-
-      const isLoading = loader.isLoading;
+    usePlaceholder() {
       return (
-        (flags.initialProgress && isLoading && loader.wasSuccessful == null) ||
-        (flags.secondaryProgress && isLoading && loader.wasSuccessful != null)
+        this.progressPlaceholder &&
+        this.loaderFlags.some(
+          (f) =>
+            f[1].progress !== false &&
+            f[1].secondaryProgress &&
+            f[1].loadingContent
+        )
       );
-    });
-  }
+    },
 
-  get usePlaceholder() {
-    return (
-      this.progressPlaceholder &&
-      this.loaderFlags.some(
-        f =>
-          f[1].progress !== false &&
-          f[1].secondaryProgress &&
-          f[1].loadingContent
-      )
-    );
-  }
-
-  get showContent() {
-    return this.loaderFlags.every(([loader, flags]) => {
-      if (!flags.loadingContent && loader.isLoading) {
-        // loader is loading, and loading content is off.
-        return false;
-      }
-      if (!flags.errorContent && loader.wasSuccessful === false) {
-        // loader has an error, and error content is off
-        return false;
-      }
-      if (
-        // initial content is off, and either:
-        !flags.initialContent && (
-        // loader has not yet loaded
-        (loader.wasSuccessful == null) || 
-        // or loader has loaded, but it errored and there's no current result
-        // (implying it has never successfully loaded).
-        (loader.wasSuccessful === false && !loader.hasResult)
-      )) {
-        return false;
-      }
-      return true;
-    });
-  }
-}
+    showContent() {
+      return this.loaderFlags.every(([loader, flags]) => {
+        if (!flags.loadingContent && loader.isLoading) {
+          // loader is loading, and loading content is off.
+          return false;
+        }
+        if (!flags.errorContent && loader.wasSuccessful === false) {
+          // loader has an error, and error content is off
+          return false;
+        }
+        if (
+          // initial content is off, and either:
+          !flags.initialContent &&
+          // loader has not yet loaded
+          (loader.wasSuccessful == null ||
+            // or loader has loaded, but it errored and there's no current result
+            // (implying it has never successfully loaded).
+            (loader.wasSuccessful === false && !loader.hasResult))
+        ) {
+          return false;
+        }
+        return true;
+      });
+    },
+  },
+});
 </script>
 
 <style lang="scss">

@@ -6,18 +6,15 @@
     "version": "0.2.0",
     "configurations": [
       {
-        "type": "node",
+        "type": "pwa-node",
         "request": "launch",
-        "name": "Debug Tests",
-        "program": "${workspaceRoot}/node_modules/jest/bin/jest.js",
-        "args": [
-          "--runInBand",
-          "--coverage", "false"
-        ],
-        "sourceMaps": true,
-        "outFiles": [
-          "${workspaceRoot}/build/**/*"
-        ]
+        "name": "Debug Current Test File",
+        "autoAttachChildProcesses": true,
+        "skipFiles": ["<node_internals>/**"],
+        "program": "${workspaceRoot}/node_modules/vitest/vitest.mjs",
+        "args": ["run", "${relativeFile}"],
+        "smartStep": true,
+        "console": "integratedTerminal",
       }
     ]
   }

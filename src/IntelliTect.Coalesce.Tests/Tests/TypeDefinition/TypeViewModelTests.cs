@@ -165,7 +165,7 @@ namespace IntelliTect.Coalesce.Tests.TypeDefinition
         [ClassViewModelData(typeof(List<InternalClass>), true)]
         [ClassViewModelData(typeof(InternalUseClass), true)]
         [ClassViewModelData(typeof(InternalUseClass[]), true)]
-        [ClassViewModelData(typeof(List<InternalClass>), true)]
+        [ClassViewModelData(typeof(List<InternalUseClass>), true)]
         public void IsInternalUse_IsCorrectForAllTypeCombinations(ClassViewModelData data, bool isInternalUse)
         {
             TypeViewModel vm = data;

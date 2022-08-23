@@ -21,11 +21,11 @@
       "vue-router/*": [ "node_modules/vue-router/*" ],
       "axios": [ "node_modules/axios" ],
 
-      "coalesce-vue": [ "../coalesce-vue/src" ],
-      "coalesce-vue/*": [ "../coalesce-vue/src/*" ],
-      "coalesce-vue/lib/*": [ "../coalesce-vue/src/*" ],
-      "coalesce-vue-vuetify": [ "../coalesce-vue-vuetify3/src" ],
-      "coalesce-vue-vuetify/*": [ "../coalesce-vue-vuetify3/src/*" ]
+      "coalesce-vue": [ "../../src/coalesce-vue/src" ],
+      "coalesce-vue/*": [ "../../src/coalesce-vue/src/*" ],
+      "coalesce-vue/lib/*": [ "../../src/coalesce-vue/src/*" ],
+      "coalesce-vue-vuetify": [ "../../src/coalesce-vue-vuetify3/src" ],
+      "coalesce-vue-vuetify/*": [ "../../src/coalesce-vue-vuetify3/src/*" ]
     }
   },
   "include": [

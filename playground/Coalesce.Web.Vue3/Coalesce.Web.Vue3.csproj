@@ -19,7 +19,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Coalesce.Domain\Coalesce.Domain.csproj" />
-    <ProjectReference Include="..\IntelliTect.Coalesce.Vue\IntelliTect.Coalesce.Vue.csproj" />
+    <ProjectReference Include="..\..\src\IntelliTect.Coalesce.Vue\IntelliTect.Coalesce.Vue.csproj" />
   </ItemGroup>
 
 </Project>

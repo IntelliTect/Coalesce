@@ -26,8 +26,8 @@
     <ProjectReference Include="..\Coalesce.Domain\Coalesce.Domain.csproj">
       <SetTargetFramework>TargetFramework=$(TargetFramework)</SetTargetFramework>
     </ProjectReference>
-    <ProjectReference Include="..\IntelliTect.Coalesce.Knockout\IntelliTect.Coalesce.Knockout.csproj" />
-    <ProjectReference Include="..\IntelliTect.Coalesce.Swashbuckle\IntelliTect.Coalesce.Swashbuckle.csproj" />
+    <ProjectReference Include="..\..\src\IntelliTect.Coalesce.Knockout\IntelliTect.Coalesce.Knockout.csproj" />
+    <ProjectReference Include="..\..\src\IntelliTect.Coalesce.Swashbuckle\IntelliTect.Coalesce.Swashbuckle.csproj" />
   </ItemGroup>
 
   <ItemGroup>

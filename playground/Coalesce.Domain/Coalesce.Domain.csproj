@@ -21,7 +21,7 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="2.2.*" />  
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\IntelliTect.Coalesce\IntelliTect.Coalesce.csproj">
+    <ProjectReference Include="..\..\src\IntelliTect.Coalesce\IntelliTect.Coalesce.csproj">
       <SetTargetFramework>TargetFramework=$(TargetFramework)</SetTargetFramework>
     </ProjectReference>
   </ItemGroup>

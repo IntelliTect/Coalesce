@@ -114,11 +114,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: src/Coalesce.Web
-
-    env:
-      dir: src/Coalesce.Web
-      csproj: src/Coalesce.Web/Coalesce.Web.csproj
+        working-directory: playground/Coalesce.Web
       
     steps:
     - uses: actions/checkout@v3
@@ -128,20 +124,12 @@ jobs:
       with:
         dotnet-version: | 
           3.1.x
-          5.0.x
           6.0.x
 
-    - name: 'Coalesce.Web: npm ci'
-      run: npm ci
-
-    - name: 'Coalesce.Web: npx gulp coalesceKo'
-      run: npx gulp coalesceKo
-
-    - name: 'Coalesce.Web: npx gulp copyAll'
-      run: npx gulp copyAll
-
-    - name: dotnet build
-      run: dotnet build --configuration Release
+    - run: npm ci
+    - run: npx gulp coalesceKo
+    - run: npx gulp copyAll
+    - run: dotnet build --configuration Release
 
 
 
@@ -214,11 +202,7 @@ jobs:
 
     # build coalesce-vue
     - run: npm run build-local-deps
-
     - run: npm ci
-
-    # coalesce-vue-vuetify currently has no tests.
-
     - run: npm run build
 
     # now we'll setup the real versions of things.
@@ -254,11 +238,7 @@ jobs:
 
     # build coalesce-vue
     - run: npm run build-local-deps
-
     - run: npm ci
-
-    # coalesce-vue-vuetify currently has no tests.
-
     - run: npm run build
 
     # now we'll setup the real versions of things.

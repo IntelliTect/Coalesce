@@ -15,6 +15,8 @@ import { sassPlugin } from "esbuild-sass-plugin";
 import type { InlineConfig as VitestInlineConfig } from "vitest";
 import type { StringOptions } from "sass";
 
+const libRoot = path.resolve(__dirname, '../../src/');
+
 export default defineConfig(async ({ command, mode }) => {
   return {
     build: {
@@ -70,11 +72,11 @@ export default defineConfig(async ({ command, mode }) => {
         { find: '@', replacement: path.resolve(__dirname, 'src') },
         {
           find: 'coalesce-vue/lib',
-          replacement: path.resolve(__dirname, '../coalesce-vue/src'),
+          replacement: libRoot + 'coalesce-vue/src',
         },
         {
           find: 'coalesce-vue',
-          replacement: path.resolve(__dirname, '../coalesce-vue/src'),
+          replacement: libRoot + 'coalesce-vue/src',
         },
         {
           find: /^coalesce-vue-vuetify/,
@@ -82,7 +84,7 @@ export default defineConfig(async ({ command, mode }) => {
             __dirname,
             // Import from the version of index with global restirations
             // since this app doesn't use alacarte registrations
-            '../coalesce-vue-vuetify2/src/index.dist.ts'
+            libRoot + 'coalesce-vue-vuetify2/src/index.dist.ts'
           ),
         },
         { find: /^vue$/, replacement: 'vue/dist/vue.runtime.common.js' },
@@ -95,7 +97,7 @@ export default defineConfig(async ({ command, mode }) => {
     server: {
       host: '0.0.0.0',
       fs: {
-        allow: ['../coalesce-vue', '../coalesce-vue-vuetify2', '.'],
+        allow: [libRoot + 'coalesce-vue', libRoot + 'coalesce-vue-vuetify2', '.'],
       },
     },
 

@@ -15,8 +15,7 @@ import { sassPlugin } from 'esbuild-sass-plugin';
 import type { InlineConfig as VitestInlineConfig } from 'vitest';
 import type { StringOptions } from 'sass';
 
-// https://github.com/vuetifyjs/vuetify-loader/tree/next/packages/vite-plugin
-import vuetify from 'vite-plugin-vuetify';
+const libRoot = path.resolve(__dirname, '../../src/');
 
 export default defineConfig(async ({ command, mode }) => {
   return {
@@ -73,18 +72,15 @@ export default defineConfig(async ({ command, mode }) => {
         { find: '@', replacement: path.resolve(__dirname, 'src') },
         {
           find: 'coalesce-vue/lib',
-          replacement: path.resolve(__dirname, '../coalesce-vue/src'),
+          replacement: libRoot + 'coalesce-vue/src',
         },
         {
           find: 'coalesce-vue',
-          replacement: path.resolve(__dirname, '../coalesce-vue/src'),
+          replacement: libRoot + 'coalesce-vue/src',
         },
         {
           find: 'coalesce-vue-vuetify',
-          replacement: path.resolve(
-            __dirname,
-            '../coalesce-vue-vuetify3/src/index.ts'
-          ),
+          replacement: libRoot + 'coalesce-vue-vuetify3/src/index.ts',
         },
         {
           find: 'vue',
@@ -99,7 +95,7 @@ export default defineConfig(async ({ command, mode }) => {
     server: {
       host: '0.0.0.0',
       fs: {
-        allow: ['../coalesce-vue', '../coalesce-vue-vuetify3', '.'],
+        allow: [libRoot + 'coalesce-vue', libRoot + 'coalesce-vue-vuetify3', '.'],
       },
     },
 

@@ -1,10 +1,10 @@
 {
   "webProject": {
-    "projectFile": "./src/Coalesce.Web.Vue3/Coalesce.Web.Vue3.csproj",
+    "projectFile": "./playground/Coalesce.Web.Vue3/Coalesce.Web.Vue3.csproj",
     "framework": "net6.0"
   },
   "dataProject": {
-    "projectFile": "./src/Coalesce.Domain/Coalesce.Domain.csproj",
+    "projectFile": "./playground/Coalesce.Domain/Coalesce.Domain.csproj",
     "framework": "net6.0"
   },
   //"rootTypesWhitelist": [

@@ -1,11 +1,11 @@
 {
   "webProject": {
-    "projectFile": "./src/Coalesce.Web/Coalesce.Web.csproj",
+    "projectFile": "./playground/Coalesce.Web/Coalesce.Web.csproj",
     "framework": "netcoreapp3.1",
     "configuration": "Debug"
   },
   "dataProject": {
-    "projectFile": "./src/Coalesce.Domain/Coalesce.Domain.csproj",
+    "projectFile": "./playground/Coalesce.Domain/Coalesce.Domain.csproj",
     "framework": "netcoreapp3.1",
     "configuration": "Debug"
   },

@@ -7,6 +7,10 @@ on:
       checkTagIsUnique:
         required: false
         type: boolean
+    outputs:
+      COALESCE_VERSION:
+        description: "COALESCE_VERSION"
+        value: ${{ jobs.meta.outputs.COALESCE_VERSION }}
 
 jobs:
   meta:

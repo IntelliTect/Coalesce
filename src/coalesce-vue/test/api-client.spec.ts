@@ -694,6 +694,7 @@ describe("$makeCaller", () => {
     const vue = wrapper.vm as ComponentPublicInstance;
 
     const beforeUnmountHooks = () =>
+      // @ts-ignore vue2/3 compat
       IsVue2 ? vue.$options.beforeDestroy : getInternalInstance(vue)["bum"];
 
     // Act/assert - before any invocation.
@@ -720,7 +721,7 @@ describe("$makeCaller", () => {
 
     // Act/Assert - Teardown
 
-    // @ts-expect-error vue2/3 compat
+    // @ts-ignore vue2/3 compat
     IsVue2 ? wrapper.destroy() : wrapper.unmount();
 
     expect(revokeUrlMock).toBeCalledWith(url2);

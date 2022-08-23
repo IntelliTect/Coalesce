@@ -1,4 +1,6 @@
-import { parseDateUserInput } from "../src/util";
+import { defineComponent, getCurrentInstance } from "vue";
+import { bindToQueryString } from "../src";
+import { IsVue2, parseDateUserInput } from "../src/util";
 
 describe("parseDateUserInput", () => {
   const defaultDefaultDate = new Date(2020, 10, 7);
@@ -14,3 +16,27 @@ describe("parseDateUserInput", () => {
     );
   });
 });
+
+describe("VueInstance", () => {
+  test("is assignable from defineComponent `this`", async () => {
+    defineComponent({
+      created() {
+        bindToQueryString(this, this, 'a')
+      }
+    })
+  })
+
+  test("is assignable from getCurrentInstance", async () => {
+    () => bindToQueryString(getCurrentInstance()!.proxy!, {}, 'a')
+  })
+
+  test("is not assignable from invalid object", async () => {
+    //@ts-expect-error
+    () => bindToQueryString(window, this, 'a')
+  })
+
+  test("is not assignable from invalid scalar", async () => {
+    //@ts-expect-error
+    () => bindToQueryString("foo", this, 'a')
+  })
+})

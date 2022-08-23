@@ -9,5 +9,6 @@ export default defineConfig({
     globals: true,
     environment: "jsdom",
     setupFiles: ["test/global-setup.ts"],
+    include: ['**/*.{test,spec}.{ts,js}', '**/*.{test,spec}.vue2.{ts,js}']
   },
 }) as UserConfig

@@ -1,0 +1,17 @@
+{
+  "name": "coalesce-vue3",
+  "version": "0.1.0-local",
+  "description": "Development only package for coalesce-vue for Vue3. Runs tests for vue3 against the polyglot package coalesce-vue. This exists because we have to install conflicting versions of vue, vue-router, and test-utils. NPM still enforces peerDependencies even when using aliased package names, which prevents us from installing them as aliases in the parent project.",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest",
+    "coverage": "vitest --coverage"
+  },
+  "devDependencies": {
+    "vue": "3.2.37",
+    "vue-router": "4.1.3",
+    "@vue/test-utils": "2.0.2"
+  }
+}

@@ -1,10 +1,12 @@
 import { addYears } from "date-fns";
-import {
-  type ComponentPublicInstance,
-  type ReactiveFlags,
-  version,
+import type Vue from "vue";
+import type {
+  ComponentPublicInstance,
+  ReactiveFlags,
   CreateComponentPublicInstance,
+  WatchOptions,
 } from "vue";
+import { version } from "vue";
 
 export type OwnProps<T, TExclude> = Pick<T, Exclude<keyof T, keyof TExclude>>;
 
@@ -182,10 +184,24 @@ function buildParams(
  */
 export const ReactiveFlags_SKIP = "__v_skip" as ReactiveFlags.SKIP;
 
+type RelevantVueProps = "$route" | "$router" | "$nextTick";
 /** A type that accepts a component instance in both Vue2 and Vue3. Notably, the type of `this` in methods in the options API is not assignable to ComponentPublicInstance, but it is to CreateComponentPublicInstance. */
-export type VueInstance =
-  | ComponentPublicInstance
-  | CreateComponentPublicInstance;
+export type VueInstance = Pick<
+  ComponentPublicInstance | CreateComponentPublicInstance,
+  RelevantVueProps
+> & {
+  // $watch is defined independently because its `this` type on the callback messes things up.
+  $watch(
+    expOrFn: string,
+    callback: (n: any, o: any) => void,
+    options?: WatchOptions
+  ): () => void;
+  $watch<T>(
+    expOrFn: () => T,
+    callback: (n: T, o: T) => void,
+    options?: WatchOptions
+  ): () => void;
+};
 
 export function getInternalInstance(vue: VueInstance) {
   // @ts-ignore vue2/vue3 compat shim.

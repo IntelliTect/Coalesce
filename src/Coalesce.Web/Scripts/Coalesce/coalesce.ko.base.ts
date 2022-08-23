@@ -772,7 +772,7 @@ module Coalesce {
             } else if (operation == 'deleted') {
                 var matchedItems = existingItems().filter((i: any) => i[localIdProp]() === currentId && i[foreignIdProp]() === foreignId);
                 if (matchedItems.length == 0) {
-                    throw `Couldn't find a ${constructor.toString()} object to delete with ${localIdProp}=${currentId} & ${foreignIdProp}=${foreignId}.`
+                    throw `Couldn't find a ${constructor.toString()} object to delete with ${String(localIdProp)}=${currentId} & ${String(foreignIdProp)}=${foreignId}.`
                 } else {
                     // If we matched more than one item, we're just going to operate on the first one.
                     var matcheditem = matchedItems[0];

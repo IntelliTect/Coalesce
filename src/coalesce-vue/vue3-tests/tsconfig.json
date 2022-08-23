@@ -13,5 +13,8 @@
   "include": [
     "../src/**/*",
     "../test/**/*"
+  ],
+  "exclude": [
+    "../test/**/*.spec.vue2.ts"
   ]
 }

@@ -15,5 +15,9 @@ export default defineConfig({
       find: pkgName,
       replacement: path.resolve(__dirname, "node_modules", pkgName),
     })),
+  },
+  test: {
+    ...config.test,
+    include: ['**/*.{test,spec}.{ts,js}', '**/*.{test,spec}.vue3.{ts,js}']
   }
 });

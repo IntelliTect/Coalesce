@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 
-namespace Coalesce.Web.Models
+namespace Coalesce.Web.Ko.Models
 {
     public partial class PersonDtoGen : GeneratedDto<Coalesce.Domain.Person>
     {
@@ -19,15 +19,15 @@ namespace Coalesce.Web.Models
         private string _Email;
         private Coalesce.Domain.Person.Genders? _Gender;
         private double? _Height;
-        private System.Collections.Generic.ICollection<Coalesce.Web.Models.CaseDtoGen> _CasesAssigned;
-        private System.Collections.Generic.ICollection<Coalesce.Web.Models.CaseDtoGen> _CasesReported;
+        private System.Collections.Generic.ICollection<Coalesce.Web.Ko.Models.CaseDtoGen> _CasesAssigned;
+        private System.Collections.Generic.ICollection<Coalesce.Web.Ko.Models.CaseDtoGen> _CasesReported;
         private System.DateTime? _BirthDate;
         private System.DateTime? _LastBath;
         private System.DateTimeOffset? _NextUpgrade;
-        private Coalesce.Web.Models.PersonStatsDtoGen _PersonStats;
+        private Coalesce.Web.Ko.Models.PersonStatsDtoGen _PersonStats;
         private string _Name;
         private int? _CompanyId;
-        private Coalesce.Web.Models.CompanyDtoGen _Company;
+        private Coalesce.Web.Ko.Models.CompanyDtoGen _Company;
         private System.Collections.Generic.ICollection<string> _ArbitraryCollectionOfStrings;
 
         public int? PersonId
@@ -65,12 +65,12 @@ namespace Coalesce.Web.Models
             get => _Height;
             set { _Height = value; Changed(nameof(Height)); }
         }
-        public System.Collections.Generic.ICollection<Coalesce.Web.Models.CaseDtoGen> CasesAssigned
+        public System.Collections.Generic.ICollection<Coalesce.Web.Ko.Models.CaseDtoGen> CasesAssigned
         {
             get => _CasesAssigned;
             set { _CasesAssigned = value; Changed(nameof(CasesAssigned)); }
         }
-        public System.Collections.Generic.ICollection<Coalesce.Web.Models.CaseDtoGen> CasesReported
+        public System.Collections.Generic.ICollection<Coalesce.Web.Ko.Models.CaseDtoGen> CasesReported
         {
             get => _CasesReported;
             set { _CasesReported = value; Changed(nameof(CasesReported)); }
@@ -90,7 +90,7 @@ namespace Coalesce.Web.Models
             get => _NextUpgrade;
             set { _NextUpgrade = value; Changed(nameof(NextUpgrade)); }
         }
-        public Coalesce.Web.Models.PersonStatsDtoGen PersonStats
+        public Coalesce.Web.Ko.Models.PersonStatsDtoGen PersonStats
         {
             get => _PersonStats;
             set { _PersonStats = value; Changed(nameof(PersonStats)); }
@@ -105,7 +105,7 @@ namespace Coalesce.Web.Models
             get => _CompanyId;
             set { _CompanyId = value; Changed(nameof(CompanyId)); }
         }
-        public Coalesce.Web.Models.CompanyDtoGen Company
+        public Coalesce.Web.Ko.Models.CompanyDtoGen Company
         {
             get => _Company;
             set { _Company = value; Changed(nameof(Company)); }

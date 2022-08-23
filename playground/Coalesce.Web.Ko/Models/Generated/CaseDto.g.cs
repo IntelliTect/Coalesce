@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 
-namespace Coalesce.Web.Models
+namespace Coalesce.Web.Ko.Models
 {
     public partial class CaseDtoGen : GeneratedDto<Coalesce.Domain.Case>
     {
@@ -17,18 +17,18 @@ namespace Coalesce.Web.Models
         private string _Description;
         private System.DateTimeOffset? _OpenedAt;
         private int? _AssignedToId;
-        private Coalesce.Web.Models.PersonDtoGen _AssignedTo;
+        private Coalesce.Web.Ko.Models.PersonDtoGen _AssignedTo;
         private int? _ReportedById;
-        private Coalesce.Web.Models.PersonDtoGen _ReportedBy;
+        private Coalesce.Web.Ko.Models.PersonDtoGen _ReportedBy;
         private long? _AttachmentSize;
         private string _AttachmentName;
         private string _AttachmentType;
         private byte[] _AttachmentHash;
         private string _Severity;
         private Coalesce.Domain.Case.Statuses? _Status;
-        private System.Collections.Generic.ICollection<Coalesce.Web.Models.CaseProductDtoGen> _CaseProducts;
+        private System.Collections.Generic.ICollection<Coalesce.Web.Ko.Models.CaseProductDtoGen> _CaseProducts;
         private int? _DevTeamAssignedId;
-        private Coalesce.Web.Models.DevTeamDtoGen _DevTeamAssigned;
+        private Coalesce.Web.Ko.Models.DevTeamDtoGen _DevTeamAssigned;
         private System.TimeSpan? _Duration;
 
         public int? CaseKey
@@ -56,7 +56,7 @@ namespace Coalesce.Web.Models
             get => _AssignedToId;
             set { _AssignedToId = value; Changed(nameof(AssignedToId)); }
         }
-        public Coalesce.Web.Models.PersonDtoGen AssignedTo
+        public Coalesce.Web.Ko.Models.PersonDtoGen AssignedTo
         {
             get => _AssignedTo;
             set { _AssignedTo = value; Changed(nameof(AssignedTo)); }
@@ -66,7 +66,7 @@ namespace Coalesce.Web.Models
             get => _ReportedById;
             set { _ReportedById = value; Changed(nameof(ReportedById)); }
         }
-        public Coalesce.Web.Models.PersonDtoGen ReportedBy
+        public Coalesce.Web.Ko.Models.PersonDtoGen ReportedBy
         {
             get => _ReportedBy;
             set { _ReportedBy = value; Changed(nameof(ReportedBy)); }
@@ -101,7 +101,7 @@ namespace Coalesce.Web.Models
             get => _Status;
             set { _Status = value; Changed(nameof(Status)); }
         }
-        public System.Collections.Generic.ICollection<Coalesce.Web.Models.CaseProductDtoGen> CaseProducts
+        public System.Collections.Generic.ICollection<Coalesce.Web.Ko.Models.CaseProductDtoGen> CaseProducts
         {
             get => _CaseProducts;
             set { _CaseProducts = value; Changed(nameof(CaseProducts)); }
@@ -111,7 +111,7 @@ namespace Coalesce.Web.Models
             get => _DevTeamAssignedId;
             set { _DevTeamAssignedId = value; Changed(nameof(DevTeamAssignedId)); }
         }
-        public Coalesce.Web.Models.DevTeamDtoGen DevTeamAssigned
+        public Coalesce.Web.Ko.Models.DevTeamDtoGen DevTeamAssigned
         {
             get => _DevTeamAssigned;
             set { _DevTeamAssigned = value; Changed(nameof(DevTeamAssigned)); }

@@ -159,8 +159,8 @@ exports.coalesceCleanBuild = function coalesceCleanBuild() {
 exports.coalesceBuild = gulp.series(
     exports.coalesceCleanBuild,
     shell.task([
-            'dotnet restore --verbosity quiet "../IntelliTect.Coalesce.DotnetTool"',
-            `dotnet build "../IntelliTect.Coalesce.DotnetTool/IntelliTect.Coalesce.DotnetTool.csproj" -f net6.0 -o "${coalesceBuildDir}"`
+            'dotnet restore --verbosity quiet "../../src/IntelliTect.Coalesce.DotnetTool"',
+            `dotnet build "../../src/IntelliTect.Coalesce.DotnetTool/IntelliTect.Coalesce.DotnetTool.csproj" -f net6.0 -o "${coalesceBuildDir}"`
         ],{ verbose: true }
     )
 )
@@ -176,7 +176,7 @@ exports.coalesceKo = gulp.series(
     exports.copyTs
 );
 
-const coalesceVueGen = shell.task(`${dotnetCoalesce} ../../coalesce-vue.json `, { verbose: true });
+const coalesceVueGen = shell.task(`${dotnetCoalesce} ../../coalesce-vue2.json `, { verbose: true });
 coalesceVueGen.displayName = "coalesceVueGen";
 const coalesceVue3Gen = shell.task(`${dotnetCoalesce} ../../coalesce-vue3.json `, { verbose: true });
 coalesceVue3Gen.displayName = "coalesceVue3Gen";

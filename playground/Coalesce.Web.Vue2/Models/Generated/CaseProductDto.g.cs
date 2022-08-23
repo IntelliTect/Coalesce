@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 
-namespace Coalesce.Web.Vue.Models
+namespace Coalesce.Web.Vue2.Models
 {
     public partial class CaseProductDtoGen : GeneratedDto<Coalesce.Domain.CaseProduct>
     {
@@ -14,9 +14,9 @@ namespace Coalesce.Web.Vue.Models
 
         private int? _CaseProductId;
         private int? _CaseId;
-        private Coalesce.Web.Vue.Models.CaseDtoGen _Case;
+        private Coalesce.Web.Vue2.Models.CaseDtoGen _Case;
         private int? _ProductId;
-        private Coalesce.Web.Vue.Models.ProductDtoGen _Product;
+        private Coalesce.Web.Vue2.Models.ProductDtoGen _Product;
 
         public int? CaseProductId
         {
@@ -28,7 +28,7 @@ namespace Coalesce.Web.Vue.Models
             get => _CaseId;
             set { _CaseId = value; Changed(nameof(CaseId)); }
         }
-        public Coalesce.Web.Vue.Models.CaseDtoGen Case
+        public Coalesce.Web.Vue2.Models.CaseDtoGen Case
         {
             get => _Case;
             set { _Case = value; Changed(nameof(Case)); }
@@ -38,7 +38,7 @@ namespace Coalesce.Web.Vue.Models
             get => _ProductId;
             set { _ProductId = value; Changed(nameof(ProductId)); }
         }
-        public Coalesce.Web.Vue.Models.ProductDtoGen Product
+        public Coalesce.Web.Vue2.Models.ProductDtoGen Product
         {
             get => _Product;
             set { _Product = value; Changed(nameof(Product)); }

@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Hosting;
 
-namespace Coalesce.Web.Controllers
+namespace Coalesce.Web.Ko.Controllers
 {
     [Authorize]
     public partial class PersonController : BaseViewController<Coalesce.Domain.Person>

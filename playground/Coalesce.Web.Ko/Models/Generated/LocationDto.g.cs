@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 
-namespace Coalesce.Web.Models
+namespace Coalesce.Web.Ko.Models
 {
     public partial class LocationDtoGen : GeneratedDto<Coalesce.Domain.Services.Location>
     {

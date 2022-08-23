@@ -1,5 +1,5 @@
 
-using Coalesce.Web.Models;
+using Coalesce.Web.Ko.Models;
 using IntelliTect.Coalesce;
 using IntelliTect.Coalesce.Api;
 using IntelliTect.Coalesce.Api.Controllers;
@@ -18,7 +18,7 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 
-namespace Coalesce.Web.Api
+namespace Coalesce.Web.Ko.Api
 {
     [Route("api/Person")]
     [Authorize]

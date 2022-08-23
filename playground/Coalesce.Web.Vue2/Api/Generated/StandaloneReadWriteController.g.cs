@@ -1,5 +1,5 @@
 
-using Coalesce.Web.Vue.Models;
+using Coalesce.Web.Vue2.Models;
 using IntelliTect.Coalesce;
 using IntelliTect.Coalesce.Api;
 using IntelliTect.Coalesce.Api.Controllers;
@@ -18,7 +18,7 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 
-namespace Coalesce.Web.Vue.Api
+namespace Coalesce.Web.Vue2.Api
 {
     [Route("api/StandaloneReadWrite")]
     [Authorize]

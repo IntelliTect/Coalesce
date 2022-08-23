@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 
-namespace Coalesce.Web.Vue.Models
+namespace Coalesce.Web.Vue3.Models
 {
     public partial class ProductDtoGen : GeneratedDto<Coalesce.Domain.Product>
     {
@@ -14,7 +14,7 @@ namespace Coalesce.Web.Vue.Models
 
         private int? _ProductId;
         private string _Name;
-        private Coalesce.Web.Vue.Models.ProductDetailsDtoGen _Details;
+        private Coalesce.Web.Vue3.Models.ProductDetailsDtoGen _Details;
         private System.Guid? _UniqueId;
         private object _Unknown;
 
@@ -28,7 +28,7 @@ namespace Coalesce.Web.Vue.Models
             get => _Name;
             set { _Name = value; Changed(nameof(Name)); }
         }
-        public Coalesce.Web.Vue.Models.ProductDetailsDtoGen Details
+        public Coalesce.Web.Vue3.Models.ProductDetailsDtoGen Details
         {
             get => _Details;
             set { _Details = value; Changed(nameof(Details)); }

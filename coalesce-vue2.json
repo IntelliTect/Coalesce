@@ -1,6 +1,6 @@
 {
   "webProject": {
-    "projectFile": "./playground/Coalesce.Web.Vue/Coalesce.Web.Vue.csproj",
+    "projectFile": "./playground/Coalesce.Web.Vue2/Coalesce.Web.Vue2.csproj",
     "framework": "net6.0"
   },
   "dataProject": {

@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 
-namespace Coalesce.Web.Vue.Models
+namespace Coalesce.Web.Vue3.Models
 {
     public partial class CompanyDtoGen : GeneratedDto<Coalesce.Domain.Company>
     {
@@ -20,7 +20,7 @@ namespace Coalesce.Web.Vue.Models
         private string _State;
         private string _ZipCode;
         private bool? _IsDeleted;
-        private System.Collections.Generic.ICollection<Coalesce.Web.Vue.Models.PersonDtoGen> _Employees;
+        private System.Collections.Generic.ICollection<Coalesce.Web.Vue3.Models.PersonDtoGen> _Employees;
         private string _AltName;
 
         public int? CompanyId
@@ -63,7 +63,7 @@ namespace Coalesce.Web.Vue.Models
             get => _IsDeleted;
             set { _IsDeleted = value; Changed(nameof(IsDeleted)); }
         }
-        public System.Collections.Generic.ICollection<Coalesce.Web.Vue.Models.PersonDtoGen> Employees
+        public System.Collections.Generic.ICollection<Coalesce.Web.Vue3.Models.PersonDtoGen> Employees
         {
             get => _Employees;
             set { _Employees = value; Changed(nameof(Employees)); }

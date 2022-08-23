@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 
-namespace Coalesce.Web.Vue.Models
+namespace Coalesce.Web.Vue3.Models
 {
     public partial class StandaloneReadWriteDtoGen : GeneratedDto<Coalesce.Domain.StandaloneReadWrite>
     {

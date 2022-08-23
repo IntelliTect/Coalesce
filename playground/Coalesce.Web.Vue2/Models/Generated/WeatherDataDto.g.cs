@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 
-namespace Coalesce.Web.Vue.Models
+namespace Coalesce.Web.Vue2.Models
 {
     public partial class WeatherDataDtoGen : GeneratedDto<Coalesce.Domain.Services.WeatherData>
     {
@@ -14,7 +14,7 @@ namespace Coalesce.Web.Vue.Models
 
         private double? _TempFahrenheit;
         private double? _Humidity;
-        private Coalesce.Web.Vue.Models.LocationDtoGen _Location;
+        private Coalesce.Web.Vue2.Models.LocationDtoGen _Location;
 
         public double? TempFahrenheit
         {
@@ -26,7 +26,7 @@ namespace Coalesce.Web.Vue.Models
             get => _Humidity;
             set { _Humidity = value; Changed(nameof(Humidity)); }
         }
-        public Coalesce.Web.Vue.Models.LocationDtoGen Location
+        public Coalesce.Web.Vue2.Models.LocationDtoGen Location
         {
             get => _Location;
             set { _Location = value; Changed(nameof(Location)); }
@@ -60,7 +60,7 @@ namespace Coalesce.Web.Vue.Models
 
             if (ShouldMapTo(nameof(TempFahrenheit))) entity.TempFahrenheit = (TempFahrenheit ?? entity.TempFahrenheit);
             if (ShouldMapTo(nameof(Humidity))) entity.Humidity = (Humidity ?? entity.Humidity);
-            if (ShouldMapTo(nameof(Location))) entity.Location = Location?.MapToModel<Coalesce.Domain.Services.Location, Coalesce.Web.Vue.Models.LocationDtoGen>(entity.Location ?? new Coalesce.Domain.Services.Location(), context);
+            if (ShouldMapTo(nameof(Location))) entity.Location = Location?.MapToModel<Coalesce.Domain.Services.Location, Coalesce.Web.Vue2.Models.LocationDtoGen>(entity.Location ?? new Coalesce.Domain.Services.Location(), context);
         }
     }
 }

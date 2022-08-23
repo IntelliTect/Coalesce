@@ -6,21 +6,21 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 
-namespace Coalesce.Web.Models
+namespace Coalesce.Web.Ko.Models
 {
     public partial class ProductDetailsDtoGen : GeneratedDto<Coalesce.Domain.ProductDetails>
     {
         public ProductDetailsDtoGen() { }
 
-        private Coalesce.Web.Models.StreetAddressDtoGen _ManufacturingAddress;
-        private Coalesce.Web.Models.StreetAddressDtoGen _CompanyHqAddress;
+        private Coalesce.Web.Ko.Models.StreetAddressDtoGen _ManufacturingAddress;
+        private Coalesce.Web.Ko.Models.StreetAddressDtoGen _CompanyHqAddress;
 
-        public Coalesce.Web.Models.StreetAddressDtoGen ManufacturingAddress
+        public Coalesce.Web.Ko.Models.StreetAddressDtoGen ManufacturingAddress
         {
             get => _ManufacturingAddress;
             set { _ManufacturingAddress = value; Changed(nameof(ManufacturingAddress)); }
         }
-        public Coalesce.Web.Models.StreetAddressDtoGen CompanyHqAddress
+        public Coalesce.Web.Ko.Models.StreetAddressDtoGen CompanyHqAddress
         {
             get => _CompanyHqAddress;
             set { _CompanyHqAddress = value; Changed(nameof(CompanyHqAddress)); }
@@ -53,8 +53,8 @@ namespace Coalesce.Web.Models
 
             if (OnUpdate(entity, context)) return;
 
-            if (ShouldMapTo(nameof(ManufacturingAddress))) entity.ManufacturingAddress = ManufacturingAddress?.MapToModel<Coalesce.Domain.StreetAddress, Coalesce.Web.Models.StreetAddressDtoGen>(entity.ManufacturingAddress ?? new Coalesce.Domain.StreetAddress(), context);
-            if (ShouldMapTo(nameof(CompanyHqAddress))) entity.CompanyHqAddress = CompanyHqAddress?.MapToModel<Coalesce.Domain.StreetAddress, Coalesce.Web.Models.StreetAddressDtoGen>(entity.CompanyHqAddress ?? new Coalesce.Domain.StreetAddress(), context);
+            if (ShouldMapTo(nameof(ManufacturingAddress))) entity.ManufacturingAddress = ManufacturingAddress?.MapToModel<Coalesce.Domain.StreetAddress, Coalesce.Web.Ko.Models.StreetAddressDtoGen>(entity.ManufacturingAddress ?? new Coalesce.Domain.StreetAddress(), context);
+            if (ShouldMapTo(nameof(CompanyHqAddress))) entity.CompanyHqAddress = CompanyHqAddress?.MapToModel<Coalesce.Domain.StreetAddress, Coalesce.Web.Ko.Models.StreetAddressDtoGen>(entity.CompanyHqAddress ?? new Coalesce.Domain.StreetAddress(), context);
         }
     }
 }

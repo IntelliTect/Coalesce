@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 
-namespace Coalesce.Web.Vue.Models
+namespace Coalesce.Web.Vue2.Models
 {
     public partial class DevTeamDtoGen : GeneratedDto<Coalesce.Domain.External.DevTeam>
     {

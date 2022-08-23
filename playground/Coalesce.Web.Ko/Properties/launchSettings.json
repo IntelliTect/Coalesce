@@ -11,6 +11,10 @@
     "IIS Express": {
       "commandName": "IISExpress",
       "launchBrowser": true,
+
+      // Disables injection of MSFT's malicious JS that force-refreshes the page when C# files are changed.
+      "hotReloadEnabled": false,
+
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "ASPNETCORE_HOSTINGSTARTUPASSEMBLIES": "Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation"
@@ -19,6 +23,10 @@
     "Coalesce.Web": {
       "commandName": "Project",
       "launchBrowser": true,
+
+      // Disables injection of MSFT's malicious JS that force-refreshes the page when C# files are changed.
+      "hotReloadEnabled": false,
+
       "launchUrl": "http://localhost:5000",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",

@@ -33,14 +33,12 @@
       </div>
     </v-app-bar>
 
-    <v-content>
-      <c-input-props-provider outlined dense>
-        <transition name="router-transition" mode="out-in" @enter="routerViewOnEnter" appear>
-          <!-- https://stackoverflow.com/questions/52847979/what-is-router-view-key-route-fullpath -->
-          <router-view ref="routerView" :key="$route.path" />
-        </transition>
-      </c-input-props-provider>
-    </v-content>
+    <v-main>
+      <transition name="router-transition" mode="out-in" @enter="routerViewOnEnter" appear>
+        <!-- https://stackoverflow.com/questions/52847979/what-is-router-view-key-route-fullpath -->
+        <router-view ref="routerView" :key="$route.path" />
+      </transition>
+    </v-main>
   </v-app>
 </template>
 

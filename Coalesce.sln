@@ -30,8 +30,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "playground", "playground", "{AC58582C-916B-432E-B379-0FD58A663BF1}"
 	ProjectSection(SolutionItems) = preProject
 		coalesce-ko.json = coalesce-ko.json
-		coalesce-vue.json = coalesce-vue.json
 		coalesce-vue3.json = coalesce-vue3.json
+		coalesce-vue2.json = coalesce-vue2.json
 		playground\Directory.Build.props = playground\Directory.Build.props
 	EndProjectSection
 EndProject

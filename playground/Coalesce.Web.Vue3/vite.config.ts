@@ -7,15 +7,17 @@ import createCheckerPlugin from 'vite-plugin-checker';
 import createVueComponentImporterPlugin from 'unplugin-vue-components/vite';
 import { Vuetify3Resolver } from 'unplugin-vue-components/resolvers';
 
-import { CoalesceVuetifyResolver } from '../coalesce-vue-vuetify3/src/build';
-import { createAspNetCoreHmrPlugin } from '../coalesce-vue/src/build';
+// jiti is a workaround for https://github.com/vitejs/vite/issues/9202
+import jiti from 'jiti';
+const { createAspNetCoreHmrPlugin } = jiti(__filename)('../../src/coalesce-vue/src/build.ts')
+const { CoalesceVuetifyResolver } = jiti(__filename)('../../src/coalesce-vue-vuetify3/src/build.ts')
 
 import { sassPlugin } from 'esbuild-sass-plugin';
 
 import type { InlineConfig as VitestInlineConfig } from 'vitest';
 import type { StringOptions } from 'sass';
 
-const libRoot = path.resolve(__dirname, '../../src/');
+const libRoot = path.resolve(__dirname, '../../src/') + "/";
 
 export default defineConfig(async ({ command, mode }) => {
   return {

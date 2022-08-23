@@ -30,7 +30,9 @@ namespace IntelliTect.Coalesce.Vue.DevMiddleware
 
         public EventedStreamReader(StreamReader streamReader)
         {
-            _streamReader = streamReader ?? throw new ArgumentNullException(nameof(streamReader));
+            // Read as UTF8 rather than whatever encoding windows defaults this to
+            // so that unicode chars aren't mangled.
+            _streamReader = new StreamReader(streamReader.BaseStream ?? throw new ArgumentNullException(nameof(streamReader)), Encoding.UTF8);
             _linesBuffer = new StringBuilder();
             Task.Factory.StartNew(Run, CancellationToken.None, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default);
         }

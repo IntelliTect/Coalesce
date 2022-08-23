@@ -182,9 +182,6 @@ namespace Coalesce.Web.Vue3.Api
             {
                 return NotFound();
             }
-            var _result = new ItemResult<IntelliTect.Coalesce.Models.IFile>();
-            _result.Object = _methodResult;
-            return _result;
         }
 
         /// <summary>

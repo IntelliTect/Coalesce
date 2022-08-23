@@ -28,16 +28,15 @@
       <span v-else></span>
     </template>
     <template #prepend-item v-if="createItemLabel">
+      <!-- TODO: This does not work because `prepend-item` currently doesn't exist. -->
       <v-list-item @click="createItem">
-        <v-list-item-avatar class="mr-1 my-0">
+        <v-list-item-media class="mr-1 my-0">
           <v-icon color="success">fa fa-plus</v-icon>
-        </v-list-item-avatar>
-        <v-list-item-header>
-          <v-list-item-title>
-            <span class="grey--text"> Create: </span>
-            {{ createItemLabel }}
-          </v-list-item-title>
-        </v-list-item-header>
+        </v-list-item-media>
+        <v-list-item-title>
+          <span class="grey--text"> Create: </span>
+          {{ createItemLabel }}
+        </v-list-item-title>
       </v-list-item>
     </template>
     <template #append-item>

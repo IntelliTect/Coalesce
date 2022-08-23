@@ -220,7 +220,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
             if (!type.IsGenericType)
             {
-                return type.FullName.Replace('+', '.') ?? "";
+                return type.FullName!.Replace('+', '.') ?? "";
             }
 
             var builder = new System.Text.StringBuilder();

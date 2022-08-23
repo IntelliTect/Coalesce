@@ -319,6 +319,10 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
                         // and serve a blank {wasSuccessful: true} response.
                         b.Line($"return NotFound();");
                     }
+                    
+                    // Stop generating, since all generated code paths have returned,
+                    // so we don't generate unreachable code.
+                    return;
                 }
             }
 

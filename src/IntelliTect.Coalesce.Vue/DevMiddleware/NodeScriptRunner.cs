@@ -93,7 +93,13 @@ namespace IntelliTect.Coalesce.Vue.DevMiddleware
 
         public void AttachToLogger(ILogger logger)
         {
-            // When the node task emits complete lines, pass them through to the real logger
+            // When the node task emits complete lines, pass them through to the real logger.
+
+            // Set the console output encoding to a unicode format so that glyphs like ➜
+            // that vite outputs aren't obliterated by the conhost.exe (it still can't render them,
+            // but this lets them show up as "?" rather than "Γ₧£", and lets them work properly in wt/pwsh/etc.)
+            Console.OutputEncoding = System.Text.Encoding.UTF8;
+
             StdOut.OnReceivedLine += line =>
             {
                 Console.Write("\u001b[32mvite\u001b[0m: " + line);

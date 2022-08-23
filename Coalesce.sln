@@ -56,7 +56,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IntelliTect.Coalesce.Vue", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Coalesce.Domain", "playground\Coalesce.Domain\Coalesce.Domain.csproj", "{B10E3C2F-95BB-4637-BB22-5ED5FDE7667C}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Coalesce.Web", "playground\Coalesce.Web\Coalesce.Web.csproj", "{459BB4FE-D267-4208-A223-8B825AE2B9A4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Coalesce.Web.Ko", "playground\Coalesce.Web.Ko\Coalesce.Web.Ko.csproj", "{459BB4FE-D267-4208-A223-8B825AE2B9A4}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Coalesce.Web.Vue3", "playground\Coalesce.Web.Vue3\Coalesce.Web.Vue3.csproj", "{E4CA7A20-C771-4F64-98E8-90495F1089CA}"
 EndProject

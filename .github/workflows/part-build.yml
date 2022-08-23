@@ -114,7 +114,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: playground/Coalesce.Web
+        working-directory: playground/Coalesce.Web.Ko
       
     steps:
     - uses: actions/checkout@v3

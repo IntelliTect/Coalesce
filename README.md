@@ -21,7 +21,7 @@ Coalesce is a framework for rapid-development of ASP.NET Core web applications. 
 
 The best way to get started with Coalesce is using the `dotnet new` templates that have been created:
 
-* [Vue](https://github.com/IntelliTect/Coalesce.Vue.Template): `dotnet new --install IntelliTect.Coalesce.Vue.Template; dotnet new coalescevue`
+* [Vue 2](https://github.com/IntelliTect/Coalesce.Vue.Template): `dotnet new --install IntelliTect.Coalesce.Vue.Template; dotnet new coalescevue`
 * [Knockout](https://github.com/IntelliTect/Coalesce.KnockoutJS.Template): `dotnet new --install IntelliTect.Coalesce.KnockoutJS.Template; dotnet new coalesceko`
 
 This command will use the current folder name for the project names, namespaces, etc. It will create a solution in the current folder with .Data and .Web projects.
@@ -31,8 +31,8 @@ After you create your project, you should start reading through [the Documentati
 ## Builds
 |channel|build|IntelliTect.Coalesce|coalesce-vue
 |:--:|:--:|:--:|:--:
-|master|[![Build status](https://intellitect.visualstudio.com/Coalesce/_apis/build/status/Production)](https://intellitect.visualstudio.com/Coalesce/_build/latest?definitionId=64)|[![NuGet](https://img.shields.io/nuget/v/IntelliTect.Coalesce.svg)](https://www.nuget.org/packages/IntelliTect.Coalesce)
-|dev|[![Build Status](https://intellitect.visualstudio.com/Coalesce/_apis/build/status/Alpha)](https://intellitect.visualstudio.com/Coalesce/_build/latest?definitionId=62)|[![MyGet](https://img.shields.io/myget/intellitect-coalesce/v/IntelliTect.Coalesce.svg?label=myget)](https://www.myget.org/feed/intellitect-coalesce/package/nuget/IntelliTect.Coalesce)|[![npm](https://img.shields.io/npm/v/coalesce-vue/dev.svg)](https://www.npmjs.com/package/coalesce-vue)
+|dev|[![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/IntelliTect/Coalesce/build-alpha/dev?label=Build%20Status&logo=github)](https://github.com/IntelliTect/Coalesce/actions/workflows/alpha.yml)|[![NuGet](https://img.shields.io/static/v1?color=blue&label=nuget&logo=nuget&message=alpha%20prereleases)](https://www.nuget.org/packages/IntelliTect.Coalesce)|[![npm](https://img.shields.io/npm/v/coalesce-vue/dev.svg)](https://www.npmjs.com/package/coalesce-vue)
+|master|[![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/IntelliTect/Coalesce/release/master?label=Build%20Status&logo=github)](https://github.com/IntelliTect/Coalesce/actions/workflows/release.yml)|[![NuGet](https://img.shields.io/nuget/v/IntelliTect.Coalesce.svg?label=nuget&logo=nuget)](https://www.nuget.org/packages/IntelliTect.Coalesce)
 
 
 ## Contributing

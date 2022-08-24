@@ -38,7 +38,7 @@ namespace IntelliTect.Coalesce
         /// that it is ready to start serving requests.
         /// A capture group can specify the actual port that the server chose to listen on.
         /// </summary>
-        public string OutputOnReady { get; set; } = "//localhost:([0-9]+)/";
+        public string OutputOnReady { get; set; } = @"//(?:localhost|127\.\d+\.\d+\.\d+):([0-9]+)/";
 
         /// <summary>
         /// If true, requests with Accept: text/html will be delayed until the dev server

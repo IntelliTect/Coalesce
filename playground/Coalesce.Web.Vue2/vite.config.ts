@@ -2,7 +2,7 @@ import path from "path";
 
 import { defineConfig } from "vite";
 
-import { createVuePlugin } from "vite-plugin-vue2";
+import createVuePlugin from "@vitejs/plugin-vue2";
 import createCheckerPlugin from "vite-plugin-checker";
 import createVueComponentImporterPlugin from "unplugin-vue-components/vite";
 import { VuetifyResolver } from "unplugin-vue-components/resolvers";
@@ -14,7 +14,6 @@ const { CoalesceVuetifyResolver } = jiti(__filename)('../../src/coalesce-vue-vue
 
 import { sassPlugin } from "esbuild-sass-plugin";
 
-import type { InlineConfig as VitestInlineConfig } from "vitest";
 import type { StringOptions } from "sass";
 
 const libRoot = path.resolve(__dirname, '../../src/') + "/";
@@ -38,7 +37,11 @@ export default defineConfig(async ({ command, mode }) => {
     },
 
     plugins: [
-      createVuePlugin(),
+      createVuePlugin({
+        script: {
+          sourceMap: false,
+        },
+      }),
 
       // This project is just a little bit too messed up to _also_ get alacarte components functional.
       // coalesce-vue-vuetify is included from source, but this doesn't seem able to properly transform
@@ -89,7 +92,7 @@ export default defineConfig(async ({ command, mode }) => {
             libRoot + 'coalesce-vue-vuetify2/src/index.dist.ts'
           ),
         },
-        { find: /^vue$/, replacement: 'vue/dist/vue.runtime.common.js' },
+        { find: /^vue$/, replacement: path.resolve(__dirname, 'node_modules/vue/dist/vue.runtime.common.js') },
         {
           find: /^vue-router/,
           replacement: path.resolve(__dirname, 'node_modules/vue-router'),
@@ -118,6 +121,7 @@ export default defineConfig(async ({ command, mode }) => {
       // See https://github.com/vitejs/vite/issues/7719
       extensions: [".scss", ".sass"],
       esbuildOptions: {
+        sourcemap: false,
         plugins: [
           sassPlugin({
             type: "style",

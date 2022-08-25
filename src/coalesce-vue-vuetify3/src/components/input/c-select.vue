@@ -1,64 +1,175 @@
 <template>
-  <v-autocomplete
+  <v-input
     class="c-select"
+    :class="{
+      'c-select--is-menu-active': menuOpen,
+    }"
+    @keydown="onInputKey"
+    @keydown.native.delete.stop="!search ? onInput(null) : void 0"
     v-bind="inputBindAttrs"
-    :model-value="internalModelValue"
-    @update:modelValue="onInput"
-    :loading="loading"
-    :items="listItems"
-    v-model:search="search"
-    :item-value="modelObjectMeta.keyProp.name"
-    :item-title="$attrs['item-title'] || modelDisplay"
-    :return-object="true"
-    :clearable="effectiveClearable"
     :error-messages="error"
-    no-filter
-    @keydown.delete.stop="!search ? onInput(null) : void 0"
-    @update:menu="onMenuUpdate"
-    :open-on-clear="openOnClear"
-    :rules="effectiveRules"
-    ref="vAutocomplete"
   >
-    <template #no-data>
-      <!-- TODO: i18n -->
-      <div class="grey--text px-4 my-3" v-if="!createItemLabel">
-        No results found.
+    <v-field
+      :active="!!internalModelValue"
+      :dirty="!!internalModelValue"
+      :clearable="effectiveClearable"
+      @click:clear.stop.prevent="onInput(null)"
+      append-inner-icon="$dropdown"
+      v-bind="inputBindAttrs"
+      :focused="focused"
+      style="
+        padding-top: calc(
+          var(--v-field-padding-top, 10px) + var(--v-input-padding-top, 0)
+        );
+        min-height: var(--v-input-control-height, 56px);
+        display: flex;
+        align-items: center;
+      "
+    >
+      <div class="v-field__input">
+        <slot name="item" :item="internalModelValue">
+          <c-display :model="internalModelValue" />
+        </slot>
+
+        <input
+          type="text"
+          v-model="mainValue"
+          @focus="focused = true"
+          @blur="focused = false"
+        />
       </div>
-      <!-- Must include an empty element so vuetify doesn't fall back to the slot's default -->
-      <span v-else></span>
-    </template>
-    <template #prepend-item v-if="createItemLabel">
-      <!-- TODO: This does not work because `prepend-item` currently doesn't exist. -->
-      <v-list-item @click="createItem">
-        <v-list-item-media class="mr-1 my-0">
-          <v-icon color="success">fa fa-plus</v-icon>
-        </v-list-item-media>
-        <v-list-item-title>
-          <span class="grey--text"> Create: </span>
-          {{ createItemLabel }}
-        </v-list-item-title>
-      </v-list-item>
-    </template>
-    <template #append-item>
-      <!-- TODO: i18n -->
-      <div
-        class="grey--text px-4 my-3"
-        v-if="listCaller.pageCount && listCaller.pageCount > 1"
+    </v-field>
+
+    <v-menu
+      :modelValue="menuOpen"
+      @update:modelValue="toggleMenu()"
+      activator="parent"
+      :close-on-content-click="false"
+      contentClass="c-select__menu-content"
+    >
+      <v-sheet
+        @keydown.capture.down.stop.prevent="
+          pendingSelection = Math.min(
+            listItems.length - 1,
+            pendingSelection + 1
+          )
+        "
+        @keydown.capture.up.stop.prevent="
+          pendingSelection = Math.max(0, pendingSelection - 1)
+        "
+        @keydown.capture.enter.stop.prevent="confirmPendingSelection"
+        @keydown.capture.tab.stop.prevent="confirmPendingSelection"
       >
-        Max {{ listCaller.pageSize }} items retrieved. Refine your search to
-        view more.
-      </div>
-    </template>
-    <template #selection="{ props, item }">
-      <slot name="item" :item="item.raw">
-        <c-display :model="item.raw" v-bind="props" />
-      </slot>
-    </template>
-  </v-autocomplete>
+        <v-text-field
+          v-model="search"
+          autofocus
+          hide-details="auto"
+          prepend-inner-icon="fa fa-search"
+          :loading="listCaller.isLoading"
+          :error-messages="
+            listCaller.wasSuccessful == false ? listCaller.message : ''
+          "
+          clearable
+          placeholder="Search"
+        >
+        </v-text-field>
+
+        <!-- TODO: i18n -->
+        <div
+          v-if="!createItemLabel && !listItems.length"
+          class="grey--text px-4 my-3 font-italic"
+        >
+          No results found.
+        </div>
+
+        <!-- This height shows 7 full items, with a final item partially out 
+        of the scroll area to improve visual hints to the user that the can scroll the list. -->
+        <v-list class="py-0" max-height="302" ref="listRef" density="compact">
+          <v-list-item
+            v-if="createItemLabel"
+            @click="createItem"
+            :loading="createItemLoading"
+          >
+            <template #prepend>
+              <v-progress-circular
+                class="mr-6"
+                indeterminate
+                v-if="createItemLoading"
+              ></v-progress-circular>
+              <v-icon v-else>$plus</v-icon>
+            </template>
+            <v-list-item-title>
+              {{ createItemLabel }}
+            </v-list-item-title>
+            <v-list-item-subtitle
+              v-if="createItemError"
+              class="text-error font-weight-bold"
+            >
+              {{ createItemError }}
+            </v-list-item-subtitle>
+          </v-list-item>
+
+          <v-list-item
+            v-for="(item, i) in listItems"
+            :key="item[modelObjectMeta.keyProp.name]"
+            @click="onInput(item)"
+            :value="i"
+            :active="pendingSelection == i"
+          >
+            <v-list-item-title>
+              <slot name="item" :item="item">
+                <c-display :model="item" />
+              </slot>
+            </v-list-item-title>
+          </v-list-item>
+
+          <!-- TODO: With this version of c-select (versus the v2 one),
+        we can implement infinite scroll much easier. Consider doing this instead of having this message. -->
+          <v-list-item
+            v-if="listCaller.pageCount && listCaller.pageCount > 1"
+            class="text-grey font-italic"
+          >
+            Max {{ listCaller.pageSize }} items retrieved. Refine your search to
+            view more.
+          </v-list-item>
+        </v-list>
+      </v-sheet>
+    </v-menu>
+  </v-input>
 </template>
 
+<style lang="scss">
+.c-select {
+  .v-field__field {
+    align-items: center;
+    input {
+      flex-basis: 10px;
+      &:focus {
+        outline: none;
+      }
+    }
+  }
+  .v-field__clearable,
+  .v-field__append-inner {
+    padding-top: 0;
+    .v-icon {
+      transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+  }
+
+  &.c-select--is-menu-active .v-field__append-inner > .v-icon {
+    transform: rotate(180deg);
+  }
+}
+.c-select__menu-content {
+  input {
+    padding-top: 8px;
+  }
+}
+</style>
+
 <script lang="ts">
-import { defineComponent, Prop, PropType } from "vue";
+import { ComponentPublicInstance, defineComponent, PropType, ref } from "vue";
 import { makeMetadataProps, useMetadataProps } from "../c-metadata-component";
 import {
   ModelApiClient,
@@ -82,6 +193,7 @@ export default defineComponent({
 
   setup(props) {
     return {
+      listRef: ref<ComponentPublicInstance>(),
       ...useMetadataProps(props),
     };
   },
@@ -89,9 +201,9 @@ export default defineComponent({
   props: {
     ...makeMetadataProps(),
     clearable: { required: false, default: undefined, type: Boolean },
-    value: <Prop<any>>{ required: false },
-    keyValue: <Prop<any>>{ required: false },
-    objectValue: <Prop<any>>{ required: false },
+    value: { required: false },
+    keyValue: { required: false },
+    objectValue: { required: false },
     preselectFirst: { required: false, type: Boolean, default: false },
     preselectSingle: { required: false, type: Boolean, default: false },
     openOnClear: { required: false, type: Boolean, default: true },
@@ -112,6 +224,12 @@ export default defineComponent({
 
       search: null as string | null,
       error: [] as string[],
+      focused: false,
+      menuOpen: false,
+      mainValue: "",
+      createItemLoading: false,
+      createItemError: "" as string | null,
+      pendingSelection: 0 as number | null,
 
       /** The model representing the current selected item
        * in the case that only the PK was provided to the component.
@@ -135,19 +253,9 @@ export default defineComponent({
     };
   },
 
-  watch: {
-    search(newVal: any, oldVal: any) {
-      if (newVal != oldVal) {
-        // Single equals intended. Works around https://github.com/vuetifyjs/vuetify/issues/7344,
-        // since null == undefined, the transition from undefined to null will fail.
-        this.listCaller();
-      }
-    },
-  },
-
   computed: {
     loading() {
-      return this.listCaller.isLoading || this.getCaller.isLoading;
+      return this.listCaller?.isLoading || this.getCaller?.isLoading;
     },
 
     /** The property on `this.model` which holds the foreign key being selected for, or `null` if there is no such property. */
@@ -336,25 +444,11 @@ export default defineComponent({
     },
 
     items() {
-      return this.listCaller.result || [];
+      return this.listCaller?.result || [];
     },
 
     listItems() {
-      const items = this.items.slice();
-      const selected = this.internalModelValue;
-      const selectedKey = this.internalKeyValue;
-
-      // Appending this to the bottom is intentional - chances are, if a person opens a dropdown that already has a value selected, they don't want to re-select the value that's already selected.
-      if (
-        selected &&
-        !items.some(
-          (i) => selectedKey == (i as any)[this.modelObjectMeta.keyProp.name]
-        )
-      ) {
-        items.push(selected);
-      }
-
-      return items;
+      return this.items;
     },
 
     createItemLabel() {
@@ -365,6 +459,36 @@ export default defineComponent({
         return result;
       }
       return null;
+    },
+
+    vAutocomplete() {
+      return this.$children[0] as any | undefined;
+    },
+  },
+
+  watch: {
+    search(newVal: any, oldVal: any) {
+      if (newVal != oldVal) {
+        // Single equals intended. Works around https://github.com/vuetifyjs/vuetify/issues/7344,
+        // since null == undefined, the transition from undefined to null will fail.
+        this.listCaller();
+      }
+    },
+    mainValue(val) {
+      // Transfer any input typed into the main input to the search input,
+      // and then open the menu. This has several jobs:
+      // - If the user starts typing while the main input is focused, we take it as a search query
+      // - We don't have to disable/readonly the main input
+      if (val) {
+        this.$nextTick(() => (this.mainValue = ""));
+        if (!this.menuOpen) {
+          this.search = val;
+          this.openMenu(false);
+        }
+      }
+    },
+    createItemLabel() {
+      this.createItemError = null;
     },
   },
 
@@ -389,26 +513,81 @@ export default defineComponent({
       }
 
       this.$emit("input", this.primaryBindKind == "key" ? key : value);
-      this.$emit("update:objectValue", value);
-      this.$emit("update:keyValue", key);
+      this.$emit("update:object-value", value);
+      this.$emit("update:key-value", key);
+      this.pendingSelection = value ? this.listItems.indexOf(value) : 0;
+
+      // When the input value is cleared, re-focus the dropdown
+      // to allow the user to enter new search input.
+      // Without this, pressing backspace to delete the current value
+      // will cause the search field to lose focus and further keyboard input will do nothing.
+      if (!dontFocus) {
+        if (!value) {
+          this.openMenu();
+        } else {
+          this.closeMenu();
+        }
+      }
+    },
+
+    /** When a key is pressed on the top level input */
+    onInputKey(event: KeyboardEvent) {
+      switch (event.key) {
+        case "Esc":
+        case "Escape":
+          this.closeMenu();
+          return;
+        case " ":
+        case "Enter":
+        case "Up":
+        case "ArrowUp":
+        case "Down":
+        case "ArrowDown":
+          this.openMenu();
+          return;
+      }
+    },
+
+    confirmPendingSelection() {
+      var item = this.listItems[this.pendingSelection];
+      if (!item) return;
+      this.onInput(item);
     },
 
     async createItem() {
       if (!this.createItemLabel) return;
       try {
+        this.createItemLoading = true;
         const item = await this.create!.getItem(
           this.search!,
           this.createItemLabel
         );
         if (!item) return;
         this.onInput(item);
+        this.listCaller(); // Refresh the list, because the new item is probably now in the results.
       } catch (e: unknown) {
-        this.error = [getMessageForError(e)];
+        this.createItemError = getMessageForError(e);
+      } finally {
+        this.createItemLoading = false;
       }
     },
 
-    onMenuUpdate(menuOpen: boolean) {
-      if (menuOpen && this.reloadOnOpen) this.listCaller();
+    async openMenu(select = true) {
+      if (this.menuOpen) return;
+      this.menuOpen = true;
+      if (this.reloadOnOpen) this.listCaller();
+    },
+
+    closeMenu() {
+      if (!this.menuOpen) return;
+      this.menuOpen = false;
+      //@ts-ignore
+      this.$el.querySelector("input").focus();
+    },
+
+    toggleMenu() {
+      if (this.menuOpen) this.closeMenu();
+      else this.openMenu();
     },
   },
 
@@ -440,6 +619,11 @@ export default defineComponent({
           search: this.search || undefined,
         });
       })
+      .onFulfilled(() => {
+        // Vuetify (2, anyway) is super buggy and won't highlight the first item
+        // if we just directly set this to 0. We have to null it, and then after a cycle set it to 0.
+        this.pendingSelection = 0;
+      })
       .onRejected((state) => {
         this.error = [state.message || "Unknown Error"];
       })
@@ -448,6 +632,21 @@ export default defineComponent({
     this.$watch(
       () => JSON.stringify(mapParamsToDto(this.params)),
       () => this.listCaller()
+    );
+
+    this.$watch(
+      () => this.pendingSelection,
+      async () => {
+        await this.$nextTick();
+        await this.$nextTick();
+        var listDiv = this.listRef?.$el as HTMLElement;
+        var selectedItem = listDiv?.querySelector(".v-list-item--active");
+        selectedItem?.scrollIntoView({
+          behavior: "auto",
+          block: "nearest",
+          inline: "nearest",
+        });
+      }
     );
 
     // Load the initial contents of the list.
@@ -467,5 +666,7 @@ export default defineComponent({
       }
     });
   },
+
+  mounted() {},
 });
 </script>

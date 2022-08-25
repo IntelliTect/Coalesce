@@ -14,7 +14,6 @@ const { CoalesceVuetifyResolver } = jiti(__filename)('../../src/coalesce-vue-vue
 
 import { sassPlugin } from 'esbuild-sass-plugin';
 
-import type { InlineConfig as VitestInlineConfig } from 'vitest';
 import type { StringOptions } from 'sass';
 
 const libRoot = path.resolve(__dirname, '../../src/') + "/";

@@ -93,7 +93,7 @@
     name: 'admin-table-page',
     components: {}
   })
-  export default class extends Vue {
+  export default class Test extends Vue {
     metadata = metadata.Person
     company = new CompanyViewModel();
     person: PersonViewModel = new PersonViewModel();

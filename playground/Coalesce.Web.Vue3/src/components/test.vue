@@ -78,6 +78,8 @@ export default class Test extends Base {
     async getItem(search: string, label: string) {
       var vm = new PersonViewModel();
       vm.firstName = label;
+      vm.height = 2;
+      vm.companyId = 3;
       await vm.$save();
       return vm;
     },

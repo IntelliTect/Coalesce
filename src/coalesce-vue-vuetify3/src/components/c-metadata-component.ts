@@ -192,7 +192,7 @@ export function getValueMeta(
 export function buildVuetifyAttrs(
   valueMeta: Property | Value | null,
   model: Model<ClassType> | AnyArgCaller | null | undefined,
-  data?: {}
+  attrs?: {}
 ): { [s: string]: any } {
   if (!valueMeta) {
     return {};
@@ -208,7 +208,7 @@ export function buildVuetifyAttrs(
     // Normalize multi-word name based on what might exist in `attrs`
     // (so that it can be overridden using either casing style).
     // Use kebab style if the camel version isn't detected.
-    [data && "persistentHint" in data ? "persistentHint" : "persistent-hint"]:
+    [attrs && "persistentHint" in attrs ? "persistentHint" : "persistent-hint"]:
       !!valueMeta?.description,
 
     rules:
@@ -221,6 +221,8 @@ export function buildVuetifyAttrs(
         "rules" in valueMeta && valueMeta.rules
         ? Object.values(valueMeta.rules)
         : undefined,
+        
+      ...attrs,
   };
 }
 

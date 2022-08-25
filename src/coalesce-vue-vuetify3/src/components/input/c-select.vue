@@ -10,7 +10,7 @@
     :error-messages="error"
   >
     <v-field
-      :active="!!internalModelValue"
+      :active="!!internalModelValue || focused"
       :dirty="!!internalModelValue"
       :clearable="effectiveClearable"
       @click:clear.stop.prevent="onInput(null)"
@@ -46,6 +46,8 @@
       activator="parent"
       :close-on-content-click="false"
       contentClass="c-select__menu-content"
+      origin="top"
+      location="top"
     >
       <v-sheet
         @keydown.capture.down.stop.prevent="
@@ -62,7 +64,7 @@
       >
         <v-text-field
           v-model="search"
-          autofocus
+          ref="searchRef"
           hide-details="auto"
           prepend-inner-icon="fa fa-search"
           :loading="listCaller.isLoading"
@@ -194,6 +196,7 @@ export default defineComponent({
   setup(props) {
     return {
       listRef: ref<ComponentPublicInstance>(),
+      searchRef: ref<ComponentPublicInstance>(),
       ...useMetadataProps(props),
     };
   },
@@ -229,7 +232,7 @@ export default defineComponent({
       mainValue: "",
       createItemLoading: false,
       createItemError: "" as string | null,
-      pendingSelection: 0 as number | null,
+      pendingSelection: 0,
 
       /** The model representing the current selected item
        * in the case that only the PK was provided to the component.
@@ -460,10 +463,6 @@ export default defineComponent({
       }
       return null;
     },
-
-    vAutocomplete() {
-      return this.$children[0] as any | undefined;
-    },
   },
 
   watch: {
@@ -484,6 +483,8 @@ export default defineComponent({
         if (!this.menuOpen) {
           this.search = val;
           this.openMenu(false);
+        } else {
+          this.search += val;
         }
       }
     },
@@ -575,7 +576,28 @@ export default defineComponent({
     async openMenu(select = true) {
       if (this.menuOpen) return;
       this.menuOpen = true;
+
       if (this.reloadOnOpen) this.listCaller();
+
+      await this.$nextTick();
+      const input = this.searchRef?.$el.querySelector(
+        "input"
+      ) as HTMLInputElement;
+
+      // Wait for the menu fade-in animation to unhide the content root.
+      // https://stackoverflow.com/questions/19669786/check-if-element-is-visible-in-dom
+      const start = performance.now();
+      while (
+        start + 100 > performance.now() &&
+        (!input.offsetParent || input != document.activeElement)
+      ) {
+        input.focus();
+        await new Promise((resolve) => setTimeout(resolve, 1));
+      }
+
+      if (select) {
+        input.select();
+      }
     },
 
     closeMenu() {

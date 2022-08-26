@@ -4,8 +4,8 @@ import { formatDistanceToNow, lightFormat, parseISO } from "date-fns";
 // These weird imports from date-fns-tz are needed because date-fns-tz
 // doesn't define its esm exports from its root correctly.
 // https://github.com/marnusw/date-fns-tz/blob/0577249fb6c47ad7b6a84826e90d976dac9ab52e/README.md#esm-and-commonjs
-import format from "date-fns-tz/esm/format/index.js";
-import utcToZonedTime from "date-fns-tz/esm/utcToZonedTime/index.js";
+import format from "date-fns-tz/esm/format";
+import utcToZonedTime from "date-fns-tz/esm/utcToZonedTime";
 
 import type {
   ClassType,

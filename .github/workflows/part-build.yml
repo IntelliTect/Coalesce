@@ -151,6 +151,10 @@ jobs:
         dotnet-version: 6.0.x
 
     - run: npm ci
+      working-directory: src/coalesce-vue
+    - run: npm ci
+      working-directory: src/coalesce-vue-vuetify2
+    - run: npm ci
     - run: npm run coalesce
     - run: npm run build
     - run: dotnet build --configuration Release
@@ -170,6 +174,10 @@ jobs:
       with:
         dotnet-version: 6.0.x
 
+    - run: npm ci
+      working-directory: src/coalesce-vue
+    - run: npm ci
+      working-directory: src/coalesce-vue-vuetify3
     - run: npm ci
     - run: npm run coalesce
     - run: npm run build

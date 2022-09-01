@@ -40,7 +40,7 @@ Properties with `[MaxLength]` will generate client validation rules. See [[Clien
 
 ### [DataType]
 
-The following values of `DataType` when provided to `DataTypeAttribute` on a `string` property will alter the behavior of the [Vue Components](/stacks/vue/coalesce-vue-vuetify/overview.md). See [c-display](/stacks/vue/coalesce-vue-vuetify/components/c-display.md) and See [c-display](/stacks/vue/coalesce-vue-vuetify/components/c-input.md) for details.
+Some values of `DataType` when provided to `DataTypeAttribute` on a `string` property will alter the behavior of the [Vue Components](/stacks/vue/coalesce-vue-vuetify/overview.md). See [c-display](/stacks/vue/coalesce-vue-vuetify/components/c-display.md) and See [c-display](/stacks/vue/coalesce-vue-vuetify/components/c-input.md) for details.
 
 
 ### [ForeignKey]

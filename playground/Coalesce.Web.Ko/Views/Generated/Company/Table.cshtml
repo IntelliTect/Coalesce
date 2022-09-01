@@ -88,6 +88,18 @@
                                 State
                                 <i class="fa" data-bind="css: orderBy() == 'State' ? 'fa-caret-up' : orderByDescending() == 'State' ? 'fa-caret-down' : 'fa-sort'" style="float: right; padding: .3em 0 0 0 "></i>
                             </th>
+                            <th class="sortable-header" data-bind="click: function(){orderByToggle('Phone')}">
+                                Phone
+                                <i class="fa" data-bind="css: orderBy() == 'Phone' ? 'fa-caret-up' : orderByDescending() == 'Phone' ? 'fa-caret-down' : 'fa-sort'" style="float: right; padding: .3em 0 0 0 "></i>
+                            </th>
+                            <th class="sortable-header" data-bind="click: function(){orderByToggle('WebsiteUrl')}">
+                                Website Url
+                                <i class="fa" data-bind="css: orderBy() == 'WebsiteUrl' ? 'fa-caret-up' : orderByDescending() == 'WebsiteUrl' ? 'fa-caret-down' : 'fa-sort'" style="float: right; padding: .3em 0 0 0 "></i>
+                            </th>
+                            <th class="sortable-header" data-bind="click: function(){orderByToggle('LogoUrl')}">
+                                Logo Url
+                                <i class="fa" data-bind="css: orderBy() == 'LogoUrl' ? 'fa-caret-up' : orderByDescending() == 'LogoUrl' ? 'fa-caret-down' : 'fa-sort'" style="float: right; padding: .3em 0 0 0 "></i>
+                            </th>
                             <th class="sortable-header" data-bind="click: function(){orderByToggle('IsDeleted')}">
                                 Is Deleted
                                 <i class="fa" data-bind="css: orderBy() == 'IsDeleted' ? 'fa-caret-up' : orderByDescending() == 'IsDeleted' ? 'fa-caret-down' : 'fa-sort'" style="float: right; padding: .3em 0 0 0 "></i>
@@ -109,6 +121,9 @@
                                 <td class="prop-address1">@(Knockout.InputFor<Coalesce.Domain.Company>(p => p.Address1))</td>
                                 <td class="prop-address2">@(Knockout.InputFor<Coalesce.Domain.Company>(p => p.Address2))</td>
                                 <td class="prop-state">@(Knockout.InputFor<Coalesce.Domain.Company>(p => p.State))</td>
+                                <td class="prop-phone">@(Knockout.InputFor<Coalesce.Domain.Company>(p => p.Phone))</td>
+                                <td class="prop-websiteUrl">@(Knockout.InputFor<Coalesce.Domain.Company>(p => p.WebsiteUrl))</td>
+                                <td class="prop-logoUrl">@(Knockout.InputFor<Coalesce.Domain.Company>(p => p.LogoUrl))</td>
                                 <td class="prop-isDeleted">@(Knockout.InputFor<Coalesce.Domain.Company>(p => p.IsDeleted))</td>
                                 <td class="prop-employees"><a data-bind='attr: {href: employeesListUrl}, text: employees().length + " - Edit"' class='btn btn-default btn-sm'></a></td>
                                 <td class="prop-altName">@(Knockout.DisplayFor<Coalesce.Domain.Company>(p => p.AltName, true))</td>
@@ -119,6 +134,9 @@
                                 <td class="prop-address1">@(Knockout.DisplayFor<Coalesce.Domain.Company>(p => p.Address1, true))</td>
                                 <td class="prop-address2">@(Knockout.DisplayFor<Coalesce.Domain.Company>(p => p.Address2, true))</td>
                                 <td class="prop-state">@(Knockout.DisplayFor<Coalesce.Domain.Company>(p => p.State, true))</td>
+                                <td class="prop-phone">@(Knockout.DisplayFor<Coalesce.Domain.Company>(p => p.Phone, true))</td>
+                                <td class="prop-websiteUrl">@(Knockout.DisplayFor<Coalesce.Domain.Company>(p => p.WebsiteUrl, true))</td>
+                                <td class="prop-logoUrl">@(Knockout.DisplayFor<Coalesce.Domain.Company>(p => p.LogoUrl, true))</td>
                                 <td class="prop-isDeleted">@(Knockout.DisplayFor<Coalesce.Domain.Company>(p => p.IsDeleted, true))</td>
                                 <td class="prop-employees"><a data-bind='attr: {href: employeesListUrl}, text: employees().length + " - Edit"' class='btn btn-default btn-sm'></a></td>
                                 <td class="prop-altName">@(Knockout.DisplayFor<Coalesce.Domain.Company>(p => p.AltName, true))</td>

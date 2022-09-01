@@ -148,51 +148,10 @@ exports.default = gulp.series(
     exports.copyAll, exports.watch
 );
 
-
-var coalesceBuildDir = `${require('os').tmpdir()}/CoalesceExe`;
-var dotnetCoalesce = `dotnet "${coalesceBuildDir}/dotnet-coalesce.dll"`;
-
-exports.coalesceCleanBuild = function coalesceCleanBuild() {
-    return del(coalesceBuildDir, { force: true });
-};
-
-exports.coalesceBuild = gulp.series(
-    exports.coalesceCleanBuild,
-    shell.task([
-            'dotnet restore --verbosity quiet "../../src/IntelliTect.Coalesce.DotnetTool"',
-            `dotnet build "../../src/IntelliTect.Coalesce.DotnetTool/IntelliTect.Coalesce.DotnetTool.csproj" -f net6.0 -o "${coalesceBuildDir}"`
-        ],{ verbose: true }
-    )
-)
-
-const coalesceKoGen = shell.task(`${dotnetCoalesce} ../../coalesce-ko.json `, { verbose: true });
+const coalesceKoGen = shell.task(`dotnet run --project ../../src/IntelliTect.Coalesce.DotnetTool --framework net6.0 -- ../../coalesce-ko.json`, { verbose: true });
 coalesceKoGen.displayName = "coalesceKoGen";
 
-exports.coalesceKo = gulp.series(
-    // Build is required every time because the templates are compiled into the dll.
-    // Sometimes the CoalesceExe folder doesn't get new DLLs and needs to have all files deleted.
-    exports.coalesceBuild,
+exports.coalesce = gulp.series(
     coalesceKoGen,
     exports.copyTs
 );
-
-const coalesceVueGen = shell.task(`${dotnetCoalesce} ../../coalesce-vue2.json `, { verbose: true });
-coalesceVueGen.displayName = "coalesceVueGen";
-const coalesceVue3Gen = shell.task(`${dotnetCoalesce} ../../coalesce-vue3.json `, { verbose: true });
-coalesceVue3Gen.displayName = "coalesceVue3Gen";
-exports.coalesceVue = gulp.parallel(
-    gulp.series(
-        exports.coalesceBuild,
-        coalesceVueGen,
-        coalesceVue3Gen,
-    )
-    // TODO: This may not be needed anymore?
-    //,gulp.series(
-    //   shell.task("cd ../Coalesce.Web.Vue && npm i")
-    //)
-);
-
-// gulp.task('coalesce:debug', ['coalesce:build'], shell.task(
-//     `${dotnetCoalesce} --debug --verbosity debug`,
-//     { verbose: true }
-// ));

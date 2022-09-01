@@ -8,9 +8,10 @@ A general-purpose input component for most [Values](/stacks/vue/layers/metadata.
 
 All attributes are passed through to the delegated-to component, allowing for full customization of the underlying [Vuetify](https://vuetifyjs.com/) component.
 
-A summary of the components delegated to, by type: 
+A summary of the components delegated to, by type:
 
-- string, number: [v-text-field](https://vuetifyjs.com/en/components/text-fields/), or [v-textarea](https://vuetifyjs.com/en/components/textarea/) if flag attribute ``textarea`` is provided to ``c-input``.
+- string: [v-text-field](https://vuetifyjs.com/en/components/text-fields/), or [v-textarea](https://vuetifyjs.com/en/components/textarea/) if flag attribute ``textarea`` is provided to ``c-input`` or if `[DataType(DataType.MultilineText)]` is present in C#.
+- number: [v-text-field](https://vuetifyjs.com/en/components/text-fields/).
 - boolean: [v-switch](https://vuetifyjs.com/en/components/selection-controls/), or [v-checkbox](https://vuetifyjs.com/en/components/selection-controls/) if flag attribute ``checkbox`` is provided to ``c-input``.
 - enum: [v-select](https://vuetifyjs.com/en/components/selects/)
 - file: [v-file-input](https://vuetifyjs.com/en/components/file-inputs/)

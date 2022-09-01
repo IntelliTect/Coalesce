@@ -427,8 +427,14 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
             RangeDone:
 
             var pattern = prop.GetAttributeValue<ClientValidationAttribute>(a => a.Pattern);
-            if (pattern != null)
+            if (pattern == null && prop.Type.IsGuid)
+            {
+                pattern = @"^\s*[{(]?[0-9A-Fa-f]{8}[-]?(?:[0-9A-Fa-f]{4}[-]?){3}[0-9A-Fa-f]{12}[)}]?\s*$";
+            }
+            if (!string.IsNullOrEmpty(pattern))
+            {
                 rules.Add($"pattern: val => !val || /{pattern}/.test(val) {Error(errorMessage, $"{propName} does not match expected format.")}");
+            }
 
             // https://emailregex.com/
             const string emailRegex = @"^(([^<>()\[\]\\.,;:\s@""]+(\.[^<> ()\[\]\\.,;:\s@""]+)*)|("".+ ""))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$";
@@ -595,6 +601,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
         private void WriteTypeCommonMetadata(TypeScriptCodeBuilder b, TypeViewModel type, IValueViewModel definingMember)
         {
             var kind = type.TsTypeKind;
+            var subtype = definingMember.GetAttributeValue<DataTypeAttribute, DataType>(a => a.DataType);
+
             switch (kind)
             {
                 case TypeDiscriminator.Unknown:
@@ -641,15 +649,14 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
 
                 case TypeDiscriminator.Date:
                     var dateType = definingMember.GetAttributeValue<DateTypeAttribute, DateTypes>(a => a.DateType);
-                    switch (dateType)
+
+                    b.StringProp("dateKind", ((dateType, subtype)) switch
                     {
-                        case DateTypes.DateOnly:
-                            b.StringProp("dateKind", "date");
-                            break;
-                        default:
-                            b.StringProp("dateKind", "datetime");
-                            break;
-                    }
+                        (DateTypes.DateOnly, _) => "date",
+                        (null, DataType.Date) => "date",
+                        (null, DataType.Time) => "time",
+                        _ => "datetime"
+                    });
 
                     if (type.IsDateTime)
                     {
@@ -664,6 +671,21 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                     }
                     break;
 
+                case TypeDiscriminator.String:
+                    b.StringProp("subtype", subtype switch
+                    {
+                        // HTML <input type="">s:
+                        DataType.Password => "password",
+                        DataType.Url => "url",
+                        DataType.EmailAddress => "email",
+                        DataType.PhoneNumber => "tel",
+
+                        // Others:
+                        DataType.MultilineText => "multiline",
+                        DataType.ImageUrl => "url-image",
+                        _ => null
+                    }, omitIfNull: true);
+                    break;
             }
         }
     }

@@ -19,6 +19,9 @@ namespace Coalesce.Web.Vue2.Models
         private string _City;
         private string _State;
         private string _ZipCode;
+        private string _Phone;
+        private string _WebsiteUrl;
+        private string _LogoUrl;
         private bool? _IsDeleted;
         private System.Collections.Generic.ICollection<Coalesce.Web.Vue2.Models.PersonDtoGen> _Employees;
         private string _AltName;
@@ -58,6 +61,21 @@ namespace Coalesce.Web.Vue2.Models
             get => _ZipCode;
             set { _ZipCode = value; Changed(nameof(ZipCode)); }
         }
+        public string Phone
+        {
+            get => _Phone;
+            set { _Phone = value; Changed(nameof(Phone)); }
+        }
+        public string WebsiteUrl
+        {
+            get => _WebsiteUrl;
+            set { _WebsiteUrl = value; Changed(nameof(WebsiteUrl)); }
+        }
+        public string LogoUrl
+        {
+            get => _LogoUrl;
+            set { _LogoUrl = value; Changed(nameof(LogoUrl)); }
+        }
         public bool? IsDeleted
         {
             get => _IsDeleted;
@@ -91,6 +109,9 @@ namespace Coalesce.Web.Vue2.Models
             this.City = obj.City;
             this.State = obj.State;
             this.ZipCode = obj.ZipCode;
+            this.Phone = obj.Phone;
+            this.WebsiteUrl = obj.WebsiteUrl;
+            this.LogoUrl = obj.LogoUrl;
             this.IsDeleted = obj.IsDeleted;
             this.AltName = obj.AltName;
             var propValEmployees = obj.Employees;
@@ -123,6 +144,9 @@ namespace Coalesce.Web.Vue2.Models
             if (ShouldMapTo(nameof(City))) entity.City = City;
             if (ShouldMapTo(nameof(State))) entity.State = State;
             if (ShouldMapTo(nameof(ZipCode))) entity.ZipCode = ZipCode;
+            if (ShouldMapTo(nameof(Phone))) entity.Phone = Phone;
+            if (ShouldMapTo(nameof(WebsiteUrl))) entity.WebsiteUrl = WebsiteUrl;
+            if (ShouldMapTo(nameof(LogoUrl))) entity.LogoUrl = LogoUrl;
             if (ShouldMapTo(nameof(IsDeleted))) entity.IsDeleted = (IsDeleted ?? entity.IsDeleted);
         }
     }

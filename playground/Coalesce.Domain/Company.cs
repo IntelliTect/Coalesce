@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using IntelliTect.Coalesce;
 using System.Threading.Tasks;
 using System.Linq;
+using System.ComponentModel.DataAnnotations;
 
 namespace Coalesce.Domain
 {
@@ -22,6 +23,15 @@ namespace Coalesce.Domain
         public string State { get; set; }
         [Hidden(HiddenAttribute.Areas.All)]
         public string ZipCode { get; set; }
+
+        [DataType(DataType.PhoneNumber)]
+        public string Phone { get; set; }
+
+        [DataType(DataType.Url)]
+        public string WebsiteUrl { get; set; }
+
+        [DataType(DataType.ImageUrl)]
+        public string LogoUrl { get; set; }
 
         public bool IsDeleted { get; set; }
 

@@ -140,6 +140,7 @@ export const Case = domain.types.Case = {
       displayName: "Description",
       description: "User-provided description of the issue",
       type: "string",
+      subtype: "multiline",
       role: "value",
     },
     openedAt: {
@@ -731,6 +732,27 @@ export const Company = domain.types.Company = {
       role: "value",
       hidden: 3,
     },
+    phone: {
+      name: "phone",
+      displayName: "Phone",
+      type: "string",
+      subtype: "tel",
+      role: "value",
+    },
+    websiteUrl: {
+      name: "websiteUrl",
+      displayName: "Website Url",
+      type: "string",
+      subtype: "url",
+      role: "value",
+    },
+    logoUrl: {
+      name: "logoUrl",
+      displayName: "Logo Url",
+      type: "string",
+      subtype: "url-image",
+      role: "value",
+    },
     isDeleted: {
       name: "isDeleted",
       displayName: "Is Deleted",
@@ -883,6 +905,7 @@ export const Person = domain.types.Person = {
       name: "email",
       displayName: "Email",
       type: "string",
+      subtype: "email",
       role: "value",
       rules: {
         email: val => !val || /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<> ()\[\]\\.,;:\s@"]+)*)|(".+ "))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(val.trim()) || "Email must be a valid email address.",
@@ -1442,7 +1465,11 @@ export const Product = domain.types.Product = {
       name: "uniqueId",
       displayName: "Unique Id",
       type: "string",
+      subtype: "password",
       role: "value",
+      rules: {
+        pattern: val => !val || /^\s*[{(]?[0-9A-Fa-f]{8}[-]?(?:[0-9A-Fa-f]{4}[-]?){3}[0-9A-Fa-f]{12}[)}]?\s*$/.test(val) || "Unique Id does not match expected format.",
+      }
     },
     unknown: {
       name: "unknown",

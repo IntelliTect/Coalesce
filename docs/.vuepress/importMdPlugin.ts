@@ -170,6 +170,7 @@ function resolveImportCode (
     .replace(/\n?$/, '\n');
   
   if (!content.trim()) {
+    debugger;
     throw new Error(`import-md: Imported content was empty Perhaps the delimiters are incorrect? (importing ${importPath})`);
   }
 

@@ -32,6 +32,24 @@ import {
 
 const primitiveTypes = ["string", "number", "date", "enum", "boolean"];
 
+const passwordWrapper = defineComponent({
+  name: "c-password-input",
+  data() {
+    return {
+      shown: false,
+    };
+  },
+  render() {
+    const data = {
+      ...this.$attrs,
+    } as Record<string, unknown>;
+    data["append-inner-icon"] ??= !this.shown ? "fa fa-eye" : "fa fa-eye-slash";
+    data.type = this.shown ? "text" : "password";
+    addHandler(data, "click:appendInner", () => (this.shown = !this.shown));
+    return _c(VTextField, data);
+  },
+});
+
 export default defineComponent({
   name: "c-input",
 
@@ -138,11 +156,6 @@ export default defineComponent({
     switch (valueMeta.type) {
       case "string":
       case "number":
-        if (valueMeta.type == "number") {
-          // For numeric values, use a numeric text field.
-          data.type = "number";
-        }
-
         if (valueMeta.role == "primaryKey") {
           // If this is an editable primary key, emit the value on change (leaving the field)
           // instead of on every keystroke. If we were to emit on every keystroke,
@@ -152,19 +165,36 @@ export default defineComponent({
           addHandler(data, "update:modelValue", onInput);
         }
 
-        if ("textarea" in data && data.textarea !== false) {
+        if (valueMeta.type == "number") {
+          // For numeric values, use a numeric text field.
+          data.type = "number";
+          return _c(VTextField, data);
+        }
+
+        if (
+          ("textarea" in data || valueMeta.subtype == "multiline") &&
+          data.textarea !== false
+        ) {
           return _c(VTextarea, data);
+        }
+
+        if (!data.type && valueMeta.subtype) {
+          switch (valueMeta.subtype) {
+            case "email":
+            case "tel":
+              data.type = valueMeta.subtype;
+              break;
+            case "url":
+            case "url-image":
+              data.type = "url";
+              break;
+            case "password":
+              return _c(passwordWrapper, data);
+          }
         }
         return _c(VTextField, data);
 
       case "boolean":
-        // TODO: I'd imagine these caveats are no longer true in 3?
-        // // v-switch uses 'change' as its event, not 'input'.
-        // addHandler(data, "change", onInput);
-        // // It also uses 'input-value' instead of 'value' for its value prop.
-        // data['input-value'] = data.value;
-        // delete data.value;
-
         if ("checkbox" in data && data.checkbox !== false) {
           return _c(VCheckbox, data);
         }

@@ -17,6 +17,43 @@ const standaloneDateValueMeta = <DateValue>{
   dateKind: "datetime",
 };
 
+const passwordWrapper = defineComponent({
+  name: "c-password-display",
+  props: {
+    element: { type: String, default: "span" },
+    value: { type: String, default: "" },
+  },
+  data() {
+    return {
+      shown: false,
+    };
+  },
+  render(_c) {
+    return _c(
+      this.element,
+      {
+        attrs: { ...this.$attrs },
+        on: { ...this.$listeners },
+      },
+      [
+        _c("i", {
+          class: !this.shown ? "fa fa-eye" : "fa fa-eye-slash",
+          staticClass: "pr-1",
+          attrs: {
+            role: "button",
+            pressed: this.shown,
+            title: !this.shown ? "Reveal" : "Hide",
+          },
+          on: {
+            click: () => (this.shown = !this.shown),
+          },
+        }),
+        !this.shown ? "•".repeat(10) : this.value,
+      ]
+    );
+  },
+});
+
 export default defineComponent({
   // name: "c-display",
   functional: true,
@@ -84,7 +121,53 @@ export default defineComponent({
         ? propDisplay(model, meta as Property, options)
         : valueDisplay(valueProp, meta, options);
 
-    if (meta.type === "boolean") {
+    if (meta.type === "string" && valueString) {
+      switch (meta.subtype) {
+        case "password":
+          return _c(passwordWrapper, {
+            ...ctx.data,
+            attrs: { ...ctx.data.attrs, value: valueString },
+          });
+        case "multiline":
+          return _c(
+            props.element,
+            {
+              ...ctx.data,
+              style: "white-space: pre-wrap",
+            },
+            valueString || ctx.children
+          );
+        case "url-image":
+          return _c("img", {
+            ...ctx.data,
+            attrs: { ...ctx.data.attrs, src: valueString, title: valueString },
+          });
+        case "url":
+        case "email":
+        case "tel":
+          let href;
+          if (meta.subtype == "url") {
+            href = valueString;
+          } else if (meta.subtype == "email") {
+            href = "mailto:" + valueString;
+          } else if (meta.subtype == "tel") {
+            href = "tel:" + valueString;
+          }
+          if (href) {
+            try {
+              new URL(valueString, window.location.origin);
+              return _c(
+                "a",
+                {
+                  ...ctx.data,
+                  attrs: { ...ctx.data.attrs, href },
+                },
+                valueString
+              );
+            } catch {}
+          }
+      }
+    } else if (meta.type === "boolean") {
       if (valueString === "true") {
         valueString = "✓";
       } else if (valueString === "false") {

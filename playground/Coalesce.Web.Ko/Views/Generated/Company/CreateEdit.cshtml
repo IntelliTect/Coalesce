@@ -43,6 +43,18 @@
                 <div class="col-md-8 prop-city">@(Knockout.InputFor<Coalesce.Domain.Company>(p => p.City))</div>
             </div>
             <div class="form-group">
+                <label class="col-md-4 control-label">Phone</label>
+                <div class="col-md-8 prop-phone">@(Knockout.InputFor<Coalesce.Domain.Company>(p => p.Phone))</div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-4 control-label">Website Url</label>
+                <div class="col-md-8 prop-websiteUrl">@(Knockout.InputFor<Coalesce.Domain.Company>(p => p.WebsiteUrl))</div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-4 control-label">Logo Url</label>
+                <div class="col-md-8 prop-logoUrl">@(Knockout.InputFor<Coalesce.Domain.Company>(p => p.LogoUrl))</div>
+            </div>
+            <div class="form-group">
                 <label class="col-md-4 control-label">Is Deleted</label>
                 <div class="col-md-8 prop-isDeleted">@(Knockout.InputFor<Coalesce.Domain.Company>(p => p.IsDeleted))</div>
             </div>

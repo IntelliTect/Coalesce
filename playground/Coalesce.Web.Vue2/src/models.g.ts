@@ -171,6 +171,9 @@ export interface Company extends Model<typeof metadata.Company> {
   city: string | null
   state: string | null
   zipCode: string | null
+  phone: string | null
+  websiteUrl: string | null
+  logoUrl: string | null
   isDeleted: boolean | null
   employees: Person[] | null
   altName: string | null

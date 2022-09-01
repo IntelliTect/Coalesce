@@ -2,11 +2,22 @@
 # c-display
 
 <!-- MARKER:summary -->
-A general-purpose component for displaying any [Value](/stacks/vue/layers/metadata.md#value) by rendering the value to a string with the [display functions from the Models Layer](/stacks/vue/layers/models.md#VueModelDisplayFunctions). For string and number [values](/stacks/vue/layers/metadata.md), usage of this component is largely superfluous. For all other value types including dates, booleans, enums, objects, and collections, it is very handy.
+A general-purpose component for displaying any [Value](/stacks/vue/layers/metadata.md#value) by rendering the value to a string with the [display functions from the Models Layer](/stacks/vue/layers/models.md#VueModelDisplayFunctions). For plain string and number [values](/stacks/vue/layers/metadata.md), usage of this component is largely superfluous. For all other value types including dates, booleans, enums, objects, and collections, it is very handy.
 <!-- MARKER:summary-end -->
 
 
 [[toc]]
+
+## [DataTypeAttribute]
+
+For properties and other values annotated with [DataTypeAttribute], the following special handling occurs based on the data type:
+
+* `DataType.MultilineText`: Renders with `white-space: pre-wrap`.
+* `DataType.Password`: Renders with a show/hide toggle (hidden by default), showing a fixed number of dot characters when hidden.
+* `DataType.Url`: Renders as a clickable link.
+* `DataType.EmailAddress`: Renders as a clickable `mailto` link.
+* `DataType.PhoneNumber`: Renders as a clickable `tel` link.
+* `DataType.ImageUrl`: Renders as an `img` element.
 
 ## Examples
 

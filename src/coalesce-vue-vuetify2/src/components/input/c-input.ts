@@ -1,4 +1,4 @@
-import { defineComponent, PropOptions } from "vue";
+import { defineComponent, type PropOptions, type VNodeData } from "vue";
 import { buildVuetifyAttrs, getValueMeta } from "../c-metadata-component";
 import {
   Model,
@@ -12,6 +12,28 @@ import {
 } from "coalesce-vue";
 
 const primitiveTypes = ["string", "number", "date", "enum", "boolean"];
+
+const passwordWrapper = defineComponent({
+  name: "c-password-input",
+  data() {
+    return {
+      shown: false,
+    };
+  },
+  render(_c) {
+    const data = {
+      attrs: { ...this.$attrs },
+      on: { ...this.$listeners },
+      scopedSlots: this.$scopedSlots,
+    } as VNodeData;
+    data.attrs!["append-icon"] ??= !this.shown
+      ? "fa fa-eye"
+      : "fa fa-eye-slash";
+    data.attrs!.type = this.shown ? "text" : "password";
+    addHandler(data.on!, "click:append", () => (this.shown = !this.shown));
+    return _c("v-text-field", data);
+  },
+});
 
 export default defineComponent({
   functional: true,
@@ -128,11 +150,6 @@ export default defineComponent({
     switch (valueMeta.type) {
       case "string":
       case "number":
-        if (valueMeta.type == "number") {
-          // For numeric values, use a numeric text field.
-          attrs.type = "number";
-        }
-
         if (valueMeta.role == "primaryKey") {
           // If this is an editable primary key, emit the value on change (leaving the field)
           // instead of on every keystroke. If we were to emit on every keystroke,
@@ -142,8 +159,33 @@ export default defineComponent({
           addHandler(data.on, "input", onInput);
         }
 
-        if ("textarea" in attrs && attrs.textarea !== false) {
+        if (valueMeta.type == "number") {
+          // For numeric values, use a numeric text field.
+          attrs.type = "number";
+          return _c("v-text-field", data);
+        }
+
+        if (
+          ("textarea" in attrs || valueMeta.subtype == "multiline") &&
+          attrs.textarea !== false
+        ) {
           return _c("v-textarea", data);
+        }
+
+        if (!attrs.type && valueMeta.subtype) {
+          switch (valueMeta.subtype) {
+            case "email":
+            case "tel":
+              attrs.type = valueMeta.subtype;
+              break;
+            case "url":
+            case "url-image":
+              attrs.type = "url";
+              break;
+            case "password":
+              data.attrs = { ...data.attrs, ...data.props };
+              return _c(passwordWrapper, data);
+          }
         }
         return _c("v-text-field", data);
 

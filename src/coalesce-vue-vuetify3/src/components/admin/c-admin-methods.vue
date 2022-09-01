@@ -1,5 +1,5 @@
 <template>
-  <div class="c-admin-methods">
+  <div class="c-admin-methods" v-if="methods.length">
     <v-toolbar class="c-admin-methods--toolbar">
       <v-toolbar-title style="flex: 0 1 auto"> Actions </v-toolbar-title>
 
@@ -9,7 +9,7 @@
         <c-display :model="model"></c-display>
       </v-toolbar-title>
     </v-toolbar>
-    <v-expansion-panels v-if="methods.length" class="c-methods">
+    <v-expansion-panels class="c-methods">
       <v-expansion-panel v-for="method in methods" :key="method.name">
         <v-expansion-panel-title>
           <div>{{ method.displayName }}</div>

@@ -89,6 +89,46 @@
                       <v-icon>fa fa-ellipsis-h</v-icon>
                     </v-btn>
                   </v-col>
+                  <v-col
+                    v-if="
+                      prop.type == 'string' &&
+                      (prop.subtype == 'url' ||
+                        prop.subtype == 'email' ||
+                        prop.subtype == 'tel')
+                    "
+                    class="flex-grow-0 pl-3"
+                    align-self="start"
+                  >
+                    <v-btn
+                      class="c-admin-editor--href-link"
+                      variant="outlined"
+                      :disabled="!model[prop.name]"
+                      :href="
+                        (prop.subtype == 'email'
+                          ? 'mailto:'
+                          : prop.subtype == 'tel'
+                          ? 'tel:'
+                          : '') + model[prop.name]
+                      "
+                    >
+                      <v-icon class="black--text"
+                        >fa fa-external-link-alt
+                      </v-icon>
+                    </v-btn>
+                  </v-col>
+                  <v-col
+                    v-if="prop.type == 'string' && prop.subtype == 'url-image'"
+                    class="flex-grow-0 pl-3"
+                    align-self="start"
+                  >
+                    <v-card outlined rounded>
+                      <c-display
+                        :model="model"
+                        :for="prop"
+                        style="max-width: 100px; display: block"
+                      ></c-display>
+                    </v-card>
+                  </v-col>
                 </v-row>
               </v-col>
             </v-row>

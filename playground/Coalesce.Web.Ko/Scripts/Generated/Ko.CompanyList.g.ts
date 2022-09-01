@@ -25,6 +25,9 @@ module ListViewModels {
             city?: string;
             state?: string;
             zipCode?: string;
+            phone?: string;
+            websiteUrl?: string;
+            logoUrl?: string;
             isDeleted?: string;
         } | null = null;
         

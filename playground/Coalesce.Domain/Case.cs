@@ -52,6 +52,7 @@ namespace Coalesce.Domain
 
         [Search]
         [Display(Description = "User-provided description of the issue")]
+        [DataType(DataType.MultilineText)]
         public string Description { get; set; }
 
         [DateType(), DefaultOrderBy(OrderByDirection = DefaultOrderByAttribute.OrderByDirections.Descending, FieldOrder = 1)]

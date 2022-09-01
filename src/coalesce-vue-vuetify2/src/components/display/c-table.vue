@@ -171,6 +171,11 @@ export default defineComponent({
     padding: 4px 8px;
     font-size: 12px;
   }
+  img {
+    // Images can come from c-display for a property with subtype `image-url`.
+    max-height: 50px;
+    max-width: 150px;
+  }
   &.c-table--editable {
     th,
     td {
@@ -178,6 +183,19 @@ export default defineComponent({
       .v-input__slot {
         margin-bottom: 0px;
       }
+      // Remove extra padding on the top of v-switch components
+      // so they align nicely with other components.
+      .v-input--switch,
+      .v-input--checkbox {
+        margin-top: 6px;
+      }
+
+      textarea {
+        line-height: 1.1;
+      }
+    }
+    td {
+      vertical-align: top;
     }
     td > *:not(.v-input) {
       padding: 4px 8px;

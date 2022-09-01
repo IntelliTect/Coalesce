@@ -60,7 +60,9 @@
                   label=""
                   hide-details="auto"
                 >
-                  <c-admin-display :model="model" :for="prop" />
+                  <div class="pt-md-3">
+                    <c-admin-display :model="model" :for="prop" />
+                  </div>
                 </c-input>
               </v-col>
               <v-col
@@ -82,6 +84,43 @@
                 >
                   <v-icon class="black--text">fa fa-ellipsis-h</v-icon>
                 </v-btn>
+              </v-col>
+              <v-col
+                v-if="
+                  prop.type == 'string' &&
+                  (prop.subtype == 'url' ||
+                    prop.subtype == 'email' ||
+                    prop.subtype == 'tel')
+                "
+                class="py-0 flex-grow-0"
+              >
+                <v-btn
+                  class="c-admin-editor--href-link"
+                  outlined
+                  color="grey"
+                  :disabled="!model[prop.name]"
+                  :href="
+                    (prop.subtype == 'email'
+                      ? 'mailto:'
+                      : prop.subtype == 'tel'
+                      ? 'tel:'
+                      : '') + model[prop.name]
+                  "
+                >
+                  <v-icon class="black--text">fa fa-external-link-alt </v-icon>
+                </v-btn>
+              </v-col>
+              <v-col
+                v-if="prop.type == 'string' && prop.subtype == 'url-image'"
+                class="py-0 flex-grow-0"
+              >
+                <v-card outlined rounded>
+                  <c-display
+                    :model="model"
+                    :for="prop"
+                    style="max-width: 100px; display: block"
+                  ></c-display>
+                </v-card>
               </v-col>
             </v-row>
           </template>
@@ -179,16 +218,14 @@ export default defineComponent({
   height: 40px !important;
 }
 .c-admin-editor--row {
-  // Center each row so that things are nicely aligned,
-  // especially in the case where labels are long enough to have to wrap.
-  align-items: center;
+  align-items: flex-start;
   padding: 4px 0;
 
   // Remove extra padding on the top of v-switch components
   // so they align nicely with other components.
   .v-input--switch,
   .v-input--checkbox {
-    margin-top: 0;
+    margin-top: 12px;
     padding-top: 0px;
     td & {
       padding-top: 0;

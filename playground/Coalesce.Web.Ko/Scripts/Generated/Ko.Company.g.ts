@@ -31,6 +31,9 @@ module ViewModels {
         public city: KnockoutObservable<string | null> = ko.observable(null);
         public state: KnockoutObservable<string | null> = ko.observable(null);
         public zipCode: KnockoutObservable<string | null> = ko.observable(null);
+        public phone: KnockoutObservable<string | null> = ko.observable(null);
+        public websiteUrl: KnockoutObservable<string | null> = ko.observable(null);
+        public logoUrl: KnockoutObservable<string | null> = ko.observable(null);
         public isDeleted: KnockoutObservable<boolean | null> = ko.observable(null);
         public employees: KnockoutObservableArray<ViewModels.Person> = ko.observableArray([]);
         public altName: KnockoutObservable<string | null> = ko.observable(null);
@@ -91,6 +94,9 @@ module ViewModels {
             this.city(data.city);
             this.state(data.state);
             this.zipCode(data.zipCode);
+            this.phone(data.phone);
+            this.websiteUrl(data.websiteUrl);
+            this.logoUrl(data.logoUrl);
             this.isDeleted(data.isDeleted);
             this.altName(data.altName);
             if (this.coalesceConfig.onLoadFromDto()){
@@ -112,6 +118,9 @@ module ViewModels {
             dto.city = this.city();
             dto.state = this.state();
             dto.zipCode = this.zipCode();
+            dto.phone = this.phone();
+            dto.websiteUrl = this.websiteUrl();
+            dto.logoUrl = this.logoUrl();
             dto.isDeleted = this.isDeleted();
             
             return dto;
@@ -166,6 +175,9 @@ module ViewModels {
             self.city.subscribe(self.autoSave);
             self.state.subscribe(self.autoSave);
             self.zipCode.subscribe(self.autoSave);
+            self.phone.subscribe(self.autoSave);
+            self.websiteUrl.subscribe(self.autoSave);
+            self.logoUrl.subscribe(self.autoSave);
             self.isDeleted.subscribe(self.autoSave);
             
             if (newItem) {

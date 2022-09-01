@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 
@@ -34,9 +35,14 @@ namespace IntelliTect.Coalesce.Utilities
 
             return new Indentation(this, closeWith != null ? "}" + closeWith : "}");
         }
-        
-        public TypeScriptCodeBuilder StringProp(string propName, string stringLiteral)
+
+        public TypeScriptCodeBuilder StringProp(
+            string propName,
+            string? stringLiteral,
+            bool omitIfNull = false)
         {
+            if (stringLiteral is null && omitIfNull) return this;
+
             Append(propName).Append(": \"").Append(stringLiteral.EscapeStringLiteralForTypeScript()).Append("\",").Line();
             return this;
         }

@@ -70,6 +70,7 @@ namespace Coalesce.Domain
         /// Email address of the person
         /// </summary>
         [ClientValidation(IsEmail = true)]
+        [DataType(DataType.EmailAddress)]
         public string Email { get; set; }
 
         /// <summary>

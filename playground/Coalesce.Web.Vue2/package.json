@@ -9,7 +9,8 @@
     "coverage": "vitest run --coverage",
     "dev": "vite",
     "lint:fix": "eslint src --fix",
-    "test": "vitest"
+    "test": "vitest",
+    "coalesce": "dotnet run --project ../../src/IntelliTect.Coalesce.DotnetTool --framework net6.0 -- ../../coalesce-vue2.json"
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^5.13.1",

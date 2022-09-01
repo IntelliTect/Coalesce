@@ -286,17 +286,40 @@ export interface ValueMetaWithTypeDef<
   readonly typeDef: TTypeDef;
 }
 
-/** Represents the usage of a primitive value (string, number, or bool) */
-export interface PrimitiveValue
-  extends ValueMeta<NativePrimitiveTypeDiscriminator> {
+/** Represents the usage of a string */
+export interface StringValue extends ValueMeta<"string"> {
+  readonly role: "value" | "foreignKey" | "primaryKey";
+
+  /** Details about the kind of data that the string represents. */
+  readonly subtype?:
+    | "password"
+    | "url"
+    | "email"
+    | "tel"
+    | "multiline"
+    | "url-image";
+
+  readonly rules?: Rules;
+}
+
+/** Represents the usage of a number */
+export interface NumberValue extends ValueMeta<"number"> {
   readonly role: "value" | "foreignKey" | "primaryKey";
   readonly rules?: Rules;
 }
 
+/** Represents the usage of a boolean */
+export interface BooleanValue extends ValueMeta<"boolean"> {
+  readonly rules?: Rules;
+}
+
+/** Represents the usage of a primitive value (string, number, or bool) */
+export type PrimitiveValue = StringValue | NumberValue | BooleanValue;
+
 /** Represents the usage of a date */
 export interface DateValue extends ValueMeta<"date"> {
   readonly role: "value";
-  readonly dateKind: "date" | "datetime";
+  readonly dateKind: "date" | "time" | "datetime";
 
   /** True if the date value is insensitive to timezone offsets
    * (i.e. the C# type is `DateTime`, not `DateTimeOffset`) */
@@ -388,24 +411,25 @@ export interface PropertyBase {
 }
 
 /** Represents a primitive property */
-export interface PrimitiveProperty extends PropertyBase, PrimitiveValue {
-  readonly role: "value";
-}
+export type PrimitiveProperty = PropertyBase &
+  PrimitiveValue & {
+    readonly role: "value";
+  };
 
 /** Represents a property that serves as a primary key */
-export interface PrimaryKeyProperty extends PropertyBase, PrimitiveValue {
-  readonly role: "primaryKey";
-  readonly type: "string" | "number";
-}
+export type PrimaryKeyProperty = PropertyBase &
+  (StringValue | NumberValue) & {
+    readonly role: "primaryKey";
+  };
 
 /** Represents a property that serves as a foreign key */
-export interface ForeignKeyProperty extends PropertyBase, PrimitiveValue {
-  readonly role: "foreignKey";
-  readonly type: "string" | "number";
-  readonly principalKey: PrimaryKeyProperty;
-  readonly principalType: ModelType;
-  readonly navigationProp?: ModelReferenceNavigationProperty;
-}
+export type ForeignKeyProperty = PropertyBase &
+  (StringValue | NumberValue) & {
+    readonly role: "foreignKey";
+    readonly principalKey: PrimaryKeyProperty;
+    readonly principalType: ModelType;
+    readonly navigationProp?: ModelReferenceNavigationProperty;
+  };
 
 /** Represents a date property */
 export interface DateProperty extends PropertyBase, DateValue {}

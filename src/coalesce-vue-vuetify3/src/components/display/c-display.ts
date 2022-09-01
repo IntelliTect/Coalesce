@@ -1,4 +1,4 @@
-import Vue, { defineComponent, Prop, h as _c, PropType } from "vue";
+import { defineComponent, Prop, h as _c, PropType } from "vue";
 import { ForSpec, getValueMeta } from "../c-metadata-component";
 import {
   propDisplay,
@@ -16,6 +16,31 @@ const standaloneDateValueMeta = <DateValue>{
   type: "date",
   dateKind: "datetime",
 };
+
+const passwordWrapper = defineComponent({
+  name: "c-password-display",
+  props: {
+    element: { type: String, default: "span" },
+    value: { type: String, default: "" },
+  },
+  data() {
+    return {
+      shown: false,
+    };
+  },
+  render() {
+    return _c(this.element, this.$attrs, [
+      _c("i", {
+        class: [!this.shown ? "fa fa-eye" : "fa fa-eye-slash", "pr-1"],
+        role: "button",
+        pressed: this.shown,
+        title: !this.shown ? "Reveal" : "Hide",
+        onClick: () => (this.shown = !this.shown),
+      }),
+      !this.shown ? "•".repeat(10) : this.value,
+    ]);
+  },
+});
 
 export const cDisplayProps = {
   element: { type: String, default: "span" },
@@ -88,7 +113,54 @@ export default defineComponent({
         ? propDisplay(model, meta as Property, options)
         : valueDisplay(valueProp, meta, options);
 
-    if (meta.type === "boolean") {
+    if (meta.type === "string" && valueString) {
+      switch (meta.subtype) {
+        case "password":
+          return _c(passwordWrapper, {
+            ...this.$attrs,
+            value: valueString,
+          });
+        case "multiline":
+          return _c(
+            props.element,
+            {
+              ...this.$attrs,
+              style: "white-space: pre-wrap",
+            },
+            valueString || this.$slots
+          );
+        case "url-image":
+          return _c("img", {
+            ...this.$attrs,
+            src: valueString,
+            title: valueString,
+          });
+        case "url":
+        case "email":
+        case "tel":
+          let href;
+          if (meta.subtype == "url") {
+            href = valueString;
+          } else if (meta.subtype == "email") {
+            href = "mailto:" + valueString;
+          } else if (meta.subtype == "tel") {
+            href = "tel:" + valueString;
+          }
+          if (href) {
+            try {
+              new URL(valueString, window.location.origin);
+              return _c(
+                "a",
+                {
+                  ...this.$attrs,
+                  href,
+                },
+                valueString
+              );
+            } catch {}
+          }
+      }
+    } else if (meta.type === "boolean") {
       if (valueString === "true") {
         valueString = "✓";
       } else if (valueString === "false") {

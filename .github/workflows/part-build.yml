@@ -113,7 +113,7 @@ jobs:
 
 
 
-  validate-ko-demo: 
+  validate-ko-playground: 
     needs: meta
     runs-on: ubuntu-latest
     defaults:
@@ -131,8 +131,48 @@ jobs:
           6.0.x
 
     - run: npm ci
-    - run: npx gulp coalesceKo
+    - run: npx gulp coalesce
     - run: npx gulp copyAll
+    - run: dotnet build --configuration Release
+
+
+  validate-vue2-playground: 
+    needs: meta
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: playground/Coalesce.Web.Vue2
+      
+    steps:
+    - uses: actions/checkout@v3
+
+    - uses: actions/setup-dotnet@v2
+      with:
+        dotnet-version: 6.0.x
+
+    - run: npm ci
+    - run: npm run coalesce
+    - run: npm run build
+    - run: dotnet build --configuration Release
+
+
+  validate-vue3-playground: 
+    needs: meta
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: playground/Coalesce.Web.Vue3
+      
+    steps:
+    - uses: actions/checkout@v3
+
+    - uses: actions/setup-dotnet@v2
+      with:
+        dotnet-version: 6.0.x
+
+    - run: npm ci
+    - run: npm run coalesce
+    - run: npm run build
     - run: dotnet build --configuration Release
 
 

@@ -21,7 +21,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                 .WithModel(Model)
                 .AppendOutputPath("src");
 
-            yield return Generator<Models>()
+            yield return Generator<Api.Generators.Models>()
                 .WithModel(Model)
                 .AppendOutputPath("Models");
 

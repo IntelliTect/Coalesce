@@ -7,7 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
-namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
+namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
 {
     public class Models : CompositeGenerator<ReflectionRepository>
     {

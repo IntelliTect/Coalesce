@@ -14,7 +14,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="5.4.1" />
+    <!-- 
+      This is deliberately Swashbuckle.AspNetCore and not Swashbuckle.AspNetCore.SwaggerGen 
+      so that it isn't necessary for consumers to install any additional packages,
+      which could increase the likelyhood of a version mismatch as projects mature.
+    -->
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
   </ItemGroup>
 
 </Project>

@@ -1,22 +1,19 @@
-﻿using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Configuration;
-using Coalesce.Domain;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using IntelliTect.Coalesce.DataAnnotations;
-using Newtonsoft.Json.Serialization;
-using Newtonsoft.Json;
-using System;
-using System.Runtime.InteropServices;
-using IntelliTect.Coalesce;
+﻿using Coalesce.Domain;
 using Coalesce.Domain.Services;
-using Microsoft.AspNetCore.Mvc;
-using Swashbuckle.AspNetCore.Swagger;
-using Microsoft.OpenApi.Models;
-using System.IO;
 using Coalesce.Domain.WebShared;
+using IntelliTect.Coalesce;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.OpenApi.Models;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
+using System;
+using System.IO;
+using System.Runtime.InteropServices;
 
 namespace Coalesce.Web
 {

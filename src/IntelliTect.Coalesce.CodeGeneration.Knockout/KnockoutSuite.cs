@@ -22,7 +22,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
                 .WithModel(Model)
                 .AppendOutputPath("Views");
 
-            yield return Generator<Models>()
+            yield return Generator<Api.Generators.Models>()
                 .WithModel(Model)
                 .AppendOutputPath("Models");
 

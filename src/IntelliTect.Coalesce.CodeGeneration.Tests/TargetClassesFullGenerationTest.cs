@@ -23,7 +23,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Tests
         {
             var executor = BuildExecutor();
 
-            var suite = new VueSuite(executor.ServiceProvider.GetService<CompositeGeneratorServices>())
+            var suite = executor.CreateRootGenerator<VueSuite>()
                 .WithModel(ReflectionRepositoryFactory.Symbol);
 
             await AssertSuiteOutputCompiles(suite);
@@ -34,7 +34,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Tests
         {
             var executor = BuildExecutor();
 
-            var suite = new KnockoutSuite(executor.ServiceProvider.GetService<CompositeGeneratorServices>())
+            var suite = executor.CreateRootGenerator<KnockoutSuite>()
                 .WithModel(ReflectionRepositoryFactory.Symbol);
 
             await AssertSuiteOutputCompiles(suite);

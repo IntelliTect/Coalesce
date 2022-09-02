@@ -43,7 +43,11 @@ namespace IntelliTect.Coalesce.CodeGeneration.Tests
             var validationResult = ValidateContext.Validate(suite.Model);
             Assert.Empty(validationResult.Where(r => r.IsError));
 
+            // While not needed for any test assertions,
+            // we actually generate the output to disk so that we can look at it
+            // in case we need to diagnose a failure or something.
             await suite.GenerateAsync();
+
             var generators = suite
                 .GetGeneratorsFlattened()
                 .OfType<IFileGenerator>()

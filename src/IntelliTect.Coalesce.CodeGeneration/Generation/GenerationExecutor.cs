@@ -54,17 +54,28 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
         {
             return GenerateAsync(typeof(TGenerator));
         }
-        
+
+        public TGenerator CreateRootGenerator<TGenerator>()
+            where TGenerator : IRootGenerator
+        {
+            return (TGenerator)CreateRootGenerator(typeof(TGenerator));
+        }
+
+        public IRootGenerator CreateRootGenerator(Type rootGenerator)
+        {
+            if (!typeof(IRootGenerator).IsAssignableFrom(rootGenerator))
+            {
+                throw new ArgumentException("type is not an IRootGenerator");
+            }
+
+            return ActivatorUtilities.CreateInstance(ServiceProvider, rootGenerator) as IRootGenerator;
+        }
+
         public async Task GenerateAsync(Type rootGenerator)
         {
             if (rootGenerator == null)
             {
                 throw new ArgumentNullException(nameof(rootGenerator));
-            }
-
-            if (!typeof(IRootGenerator).IsAssignableFrom(rootGenerator))
-            {
-                throw new ArgumentException("type is not an IRootGenerator");
             }
 
 
@@ -117,8 +128,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
                 outputPath = Path.Combine(outputPath, Config.Output.TargetDirectory);
             }
 
-            var generator =
-                (ActivatorUtilities.CreateInstance(ServiceProvider, rootGenerator) as IRootGenerator)
+            var generator = CreateRootGenerator(rootGenerator)
                 .WithModel(rr)
                 .WithOutputPath(outputPath);
 

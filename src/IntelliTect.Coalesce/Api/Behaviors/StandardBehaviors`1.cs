@@ -135,10 +135,18 @@ namespace IntelliTect.Coalesce
         /// <param name="dataSource">The data source that will be used when loading the item.</param>
         /// <param name="parameters">The parameters to be passed to the data source when loading the item.</param>
         /// <param name="item">The saved item to reload</param>
-        protected virtual Task<(ItemResult<T> Item, IncludeTree? IncludeTree)> FetchObjectAfterSaveAsync(IDataSource<T> dataSource, IDataSourceParameters parameters, T item)
+        protected virtual async Task<(ItemResult<T> Item, IncludeTree? IncludeTree)> FetchObjectAfterSaveAsync(IDataSource<T> dataSource, IDataSourceParameters parameters, T item)
         {
             var newItemId = ClassViewModel.PrimaryKey!.PropertyInfo.GetValue(item)!;
-            return (OverridePostSaveResultDataSource ?? dataSource).GetItemAsync(newItemId, parameters);
+            var ds = (OverridePostSaveResultDataSource ?? dataSource);
+            var result = await ds.GetItemAsync(newItemId, parameters);
+
+            if (result.Item.Object != null && ds is IResultTransformer<T> transformer)
+            {
+                await transformer.TransformResultsAsync(Array.AsReadOnly(new[] { result.Item.Object }), parameters);
+            }
+
+            return result;
         }
 
         /// <summary>
@@ -378,7 +386,8 @@ namespace IntelliTect.Coalesce
 
             // Pull the object to see if it can still be seen by the user.
             // If so, the operation was a soft delete and the user is allowed to see soft-deleted items.
-            var (postDeleteGetResult, includeTree) = await (OverridePostDeleteResultDataSource ?? dataSource).GetItemAsync(id, parameters);
+            var postDeleteDs = OverridePostDeleteResultDataSource ?? dataSource;
+            var (postDeleteGetResult, includeTree) = await postDeleteDs.GetItemAsync(id, parameters);
 
             var deletedItem = postDeleteGetResult.Object;
 
@@ -406,6 +415,11 @@ namespace IntelliTect.Coalesce
                 if (deletedItem == null)
                 {
                     return true;
+                }
+
+                if (postDeleteDs is IResultTransformer<T> transformer)
+                {
+                    await transformer.TransformResultsAsync(Array.AsReadOnly(new[] { deletedItem }), parameters);
                 }
 
                 return new ItemResult<TDto?>(

@@ -16,6 +16,7 @@ using Xunit;
 
 namespace IntelliTect.Coalesce.Tests.Api.DataSources
 {
+
     public class StandardDataSourceTests : TestDbContextFixture
     {
         public StandardDataSource<Case, TestDbContext> CaseSource { get; }

@@ -1,4 +1,5 @@
 ﻿using IntelliTect.Coalesce.Api;
+using IntelliTect.Coalesce.Models;
 using IntelliTect.Coalesce.Tests.Fixtures;
 using IntelliTect.Coalesce.Tests.TargetClasses;
 using IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext;
@@ -10,6 +11,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Security.Claims;
 using System.Text;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace IntelliTect.Coalesce.Tests.Util
@@ -88,6 +90,83 @@ namespace IntelliTect.Coalesce.Tests.Util
                 modelsList.Zip(expectedOrder, (model, expected) => model.Equals(expected)),
                 Assert.True
             );
+        }
+
+        /// <summary>
+        /// Asserts that the result was a failure.
+        /// </summary>
+        public static void AssertError(this ApiResult result)
+        {
+            Assert.False(result.WasSuccessful);
+        }
+
+        /// <summary>
+        /// Asserts that the result was a failure.
+        /// </summary>
+        public static void AssertError(this ApiResult result, string message)
+        {
+            result.AssertError();
+            Assert.Equal(message, result.Message);
+        }
+
+        /// <summary>
+        /// Asserts that the result was a failure.
+        /// </summary>
+        public static async Task AssertError<T>(this Task<T> resultTask, string message)
+            where T : ApiResult
+        {
+            var result = await resultTask;
+            result.AssertError();
+            Assert.Equal(message, result.Message);
+        }
+
+        /// <summary>
+        /// Asserts that the result was successful.
+        /// </summary>
+        public static void AssertSuccess(this ApiResult result, string? message = null)
+        {
+            // Returns a more useful assertion error than only checking WasSuccessful.
+            Assert.Equal(message, result.Message);
+            Assert.True(result.WasSuccessful);
+        }
+
+        /// <summary>
+        /// Asserts that the result was successful.
+        /// </summary>
+        public static T AssertSuccess<T>(this ItemResult<T> result)
+        {
+            Assert.Null(result.Message);
+            Assert.True(result.WasSuccessful);
+            return result.Object!;
+        }
+
+        /// <summary>
+        /// Asserts that the result was successful.
+        /// </summary>
+        public static async Task<T> AssertSuccess<T>(this Task<ItemResult<T>> resultTask)
+        {
+            var result = await resultTask;
+            Assert.Null(result.Message);
+            Assert.True(result.WasSuccessful);
+            return result.Object!;
+        }
+
+        /// <summary>
+        /// Asserts that the result was successful.
+        /// </summary>
+        public static async Task AssertSuccess(this Task<ItemResult> resultTask)
+        {
+            var result = await resultTask;
+            Assert.True(result.WasSuccessful);
+        }
+
+        /// <summary>
+        /// Asserts that the result was successful.
+        /// </summary>
+        public static void AssertSuccess<T>(this ItemResult<T> result, T value)
+        {
+            result.AssertSuccess();
+            Assert.Equal(value, result.Object);
         }
 
         public static void LogIn(this ClaimsPrincipal user, string role = RoleNames.Admin)

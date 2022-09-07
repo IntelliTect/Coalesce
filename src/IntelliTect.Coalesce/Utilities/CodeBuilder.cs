@@ -104,6 +104,18 @@ namespace IntelliTect.Coalesce.Utilities
         }
 
         /// <summary>
+        /// Trim the given string from the end of the output if it exists.
+        /// </summary>
+        public CodeBuilder TrimEnd(string text)
+        {
+            if (sb.ToString(sb.Length - text.Length, text.Length) == text)
+            {
+                sb.Remove(sb.Length - text.Length, text.Length);
+            }
+            return this;
+        }
+
+        /// <summary>
         /// Convert the value of the instance to a <see cref="System.String"/>.
         /// </summary>
         /// <returns></returns>

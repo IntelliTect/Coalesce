@@ -97,39 +97,6 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
 
         protected IDisposable WriteControllerActionSignature(CSharpCodeBuilder b, MethodViewModel method)
         {
-            var parameters = method.Parameters.Where(f => !f.IsNonArgumentDI).ToArray();
-            var actionParameters = new List<string>();
-
-            if (method.IsModelInstanceMethod)
-            {
-                actionParameters.Add("[FromServices] IDataSourceFactory dataSourceFactory");
-            }
-
-            actionParameters.AddRange(method.Parameters
-                .Where(f => f.IsDI && !f.IsNonArgumentDI)
-                .Concat(method.ApiParameters)
-                .OrderBy(p => p.HasDefaultValue)
-                .Select(param =>
-            {
-                string typeName;
-                if (param.PureType.IsFile)
-                {
-                    typeName = param.Type.IsCollection 
-                        ? new ReflectionTypeViewModel(typeof(ICollection<Microsoft.AspNetCore.Http.IFormFile>)).FullyQualifiedName
-                        : new ReflectionTypeViewModel(typeof(Microsoft.AspNetCore.Http.IFormFile)).FullyQualifiedName;
-                }
-                else if (param.IsDI)
-                {
-                    typeName = param.Type.FullyQualifiedName;
-                }
-                else
-                {
-                    typeName = param.Type.DtoFullyQualifiedName;
-                }
-
-                return $"{(param.ShouldInjectFromServices ? "[FromServices] " : "")}{typeName} {param.CsParameterName}{(param.HasDefaultValue ? " = " + param.CsDefaultValue : "")}";
-            }));
-
             var returnType = method.ApiActionReturnTypeDeclaration;
             if (method.ResultType.IsFile)
             {
@@ -145,7 +112,57 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
                 returnType = $"async Task<{returnType}>";
             }
 
-            return b.Block($"{Model.ApiActionAccessModifier} virtual {returnType} {method.NameWithoutAsync} ({string.Join(", ", actionParameters)})");
+            b.Append(Model.ApiActionAccessModifier);
+            b.Append(" virtual ");
+            b.Append(returnType);
+            b.Append(" ");
+            b.Append(method.NameWithoutAsync);
+            b.Append("(");
+
+            if (method.IsModelInstanceMethod)
+            {
+                b.Append("[FromServices] IDataSourceFactory dataSourceFactory, ");
+            }
+
+            foreach (var param in method.Parameters
+                .Where(f => f.IsDI && !f.IsNonArgumentDI)
+                .Concat(method.ApiParameters)
+                .OrderBy(p => p.HasDefaultValue))
+            {
+                string typeName;
+                if (param.PureType.IsFile)
+                {
+                    typeName = param.Type.IsCollection
+                        ? new ReflectionTypeViewModel(typeof(ICollection<Microsoft.AspNetCore.Http.IFormFile>)).FullyQualifiedName
+                        : new ReflectionTypeViewModel(typeof(Microsoft.AspNetCore.Http.IFormFile)).FullyQualifiedName;
+                }
+                else if (param.IsDI)
+                {
+                    typeName = param.Type.FullyQualifiedName;
+                }
+                else
+                {
+                    typeName = param.Type.DtoFullyQualifiedName;
+                }
+
+                if (param.ShouldInjectFromServices)
+                {
+                    b.Append("[FromServices] ");
+                }
+
+                b.Append(typeName);
+                b.Append(" ");
+                b.Append(param.CsParameterName);
+                if (param.HasDefaultValue)
+                {
+                    b.Append(" = ");
+                    b.Append(param.CsDefaultValue);
+                }
+                b.Append(", ");
+            }
+
+            b.TrimEnd(", ").Append(")");
+            return b.Block();
         }
 
         public const string MethodResultVar = "_methodResult";

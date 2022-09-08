@@ -107,6 +107,16 @@ export class CaseProductApiClient extends ModelApiClient<$models.CaseProduct> {
 
 export class CompanyApiClient extends ModelApiClient<$models.Company> {
   constructor() { super($metadata.Company) }
+  public conflictingParameterNames(id: number, companyParam: $models.Company | null, name: string | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<void>> {
+    const $method = this.$metadata.methods.conflictingParameterNames
+    const $params =  {
+      id,
+      companyParam,
+      name,
+    }
+    return this.$invoke($method, $params, $config)
+  }
+  
   public getCertainItems(isDeleted: boolean | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<$models.Company[]>> {
     const $method = this.$metadata.methods.getCertainItems
     const $params =  {

@@ -29,7 +29,7 @@ namespace IntelliTect.Coalesce.Tests.Api.DataSources
         {
             public TransformDs(CrudContext<TestDbContext> context) : base(context) { }
 
-            public override async Task TransformResultsAsync(IReadOnlyList<Case> results, IDataSourceParameters parameters)
+            public override Task TransformResultsAsync(IReadOnlyList<Case> results, IDataSourceParameters parameters)
             {
                 foreach (var result in results)
                 {
@@ -37,6 +37,7 @@ namespace IntelliTect.Coalesce.Tests.Api.DataSources
                     // but we need something obvious and easily assertable
                     result.Title = "TRANSFORMED";
                 }
+                return Task.CompletedTask;
             }
         }
 

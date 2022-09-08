@@ -28,7 +28,7 @@ namespace Coalesce.Domain
 
                 if (!context.Companies.Any())
                 {
-                    GenFu.GenFu.Configure<Company>().Fill(c => c.CompanyId, () => 0);
+                    GenFu.GenFu.Configure<Company>().Fill(c => c.Id, () => 0);
                     var companies = GenFu.GenFu.ListOf<Company>(10);
                     context.Companies.AddRange(companies);
                     context.SaveChanges();
@@ -144,7 +144,8 @@ namespace Coalesce.Domain
                         .Fill(p => p.Severity, c => severities[random.Next(0, severities.Length)])
                         .Fill(p => p.ReportedById, c => i)
                         .Fill(p => p.AssignedToId, c => i % 10 + 1)
-                        .Fill(p => p.DevTeamAssignedId, c => (i++ % 4) + 1);
+                        .Fill(p => p.DevTeamAssignedId, c => (i++ % 4) + 1)
+                        .Fill(p => p.AttachmentType, c => "text/plain");
 
                     var cases = GenFu.GenFu.ListOf<Case>(20);
 

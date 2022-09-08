@@ -1,12 +1,10 @@
-using IntelliTect.Coalesce.CodeGeneration.Api.Generators;
+﻿using IntelliTect.Coalesce.CodeGeneration.Api.Generators;
 using IntelliTect.Coalesce.CodeGeneration.Generation;
 using IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext;
 using IntelliTect.Coalesce.Tests.Util;
 using IntelliTect.Coalesce.TypeDefinition;
-using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Emit;
@@ -16,34 +14,22 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Microsoft.OpenApi.Readers;
 using System.Net;
-using System.Net.Http.Json;
 using System.Reflection;
 using Xunit;
 
 namespace IntelliTect.Coalesce.Swashbuckle.Tests
 {
-    public class SmokeTests
+    [CollectionDefinition(OpenApiFixture.Collection)]
+    public class OpenApiFixtureCollection : ICollectionFixture<OpenApiFixture> { }
+
+    public class OpenApiFixture
     {
-        public class ApiOnlySuite : CompositeGenerator<ReflectionRepository>, IRootGenerator
-        {
-            public ApiOnlySuite(CompositeGeneratorServices services) : base(services) { }
+        public const string Collection = "OpenApi";
 
-            public override IEnumerable<IGenerator> GetGenerators()
-            {
-                yield return Generator<IntelliTect.Coalesce.CodeGeneration.Api.Generators.Models>()
-                    .WithModel(Model)
-                    .AppendOutputPath("Models");
-
-                yield return Generator<Controllers>()
-                    .WithModel(Model);
-            }
-        }
-
-        [Fact]
-        public async Task ProducesOpenApiDocumentWithoutErrors()
+        public OpenApiFixture()
         {
             var generationTasks = new GenerationExecutor(
-                    new () { WebProject = new () { RootNamespace = "MyProject" } },
+                    new() { WebProject = new() { RootNamespace = "MyProject" } },
                     Microsoft.Extensions.Logging.LogLevel.Information
                 )
                 .CreateRootGenerator<ApiOnlySuite>()
@@ -53,7 +39,7 @@ namespace IntelliTect.Coalesce.Swashbuckle.Tests
                 .OfType<IFileGenerator>()
                 .Select(gen => (Generator: gen, Output: gen.GetOutputAsync()));
 
-            await Task.WhenAll(generationTasks.Select(t => t.Output));
+            Task.WaitAll(generationTasks.Select(t => t.Output).ToArray());
 
             var generatedFiles = generationTasks
                 .Select((task) => CSharpSyntaxTree.ParseText(
@@ -95,21 +81,41 @@ namespace IntelliTect.Coalesce.Swashbuckle.Tests
                     });
                 });
 
-            var app = hostBuilder.Start();
+            App = hostBuilder.Start();
+        }
 
-            var client = app.GetTestClient();
-            var landingPage = await client.GetAsync("/swagger/index.html");
-            Assert.Equal(HttpStatusCode.OK, landingPage.StatusCode);
+        public IHost App { get; }
+
+        public async Task<OpenApiDocument> GetDocumentAsync()
+        {
+            var client = App.GetTestClient();
 
             var openApiDoc = await client.GetAsync("/swagger/v1/swagger.json");
-            Assert.Equal(HttpStatusCode.OK, landingPage.StatusCode);
+            Assert.Equal(HttpStatusCode.OK, openApiDoc.StatusCode);
 
             // OpenApiDocument cannot be parsed directly with a JSON deserializer,
             // as it is a midly non-normalized format that requires special rules to understand.
-            var openApiDocument = new OpenApiStreamReader().Read(await openApiDoc.Content.ReadAsStreamAsync(), out var diagnostic);
+            var openApiDocument = new OpenApiStreamReader()
+                .Read(await openApiDoc.Content.ReadAsStreamAsync(), out var diagnostic);
             Assert.NotNull(openApiDocument);
             Assert.Empty(diagnostic.Errors);
             Assert.Empty(diagnostic.Warnings);
+            return openApiDocument;
+        }
+
+        public class ApiOnlySuite : CompositeGenerator<ReflectionRepository>, IRootGenerator
+        {
+            public ApiOnlySuite(CompositeGeneratorServices services) : base(services) { }
+
+            public override IEnumerable<IGenerator> GetGenerators()
+            {
+                yield return Generator<IntelliTect.Coalesce.CodeGeneration.Api.Generators.Models>()
+                    .WithModel(Model)
+                    .AppendOutputPath("Models");
+
+                yield return Generator<Controllers>()
+                    .WithModel(Model);
+            }
         }
     }
 }

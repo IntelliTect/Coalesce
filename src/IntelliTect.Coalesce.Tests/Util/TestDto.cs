@@ -1,5 +1,7 @@
 ﻿using System;
 
+#nullable enable
+
 namespace IntelliTect.Coalesce.Tests.Util
 {
     internal class TestDto<T> : IClassDto<T>
@@ -7,7 +9,7 @@ namespace IntelliTect.Coalesce.Tests.Util
     {
         public TestDto() { }
 
-        public TestDto(long? id, Action<T> mapTo = null)
+        public TestDto(long? id, Action<T>? mapTo = null)
         {
             Id = id;
             MapTo = mapTo;
@@ -17,10 +19,10 @@ namespace IntelliTect.Coalesce.Tests.Util
 
         public T? SourceEntity { get; private set; }
 
-        public Action<TestDto<T>, T> MapFrom { get; set; }
-        public Action<T> MapTo { get; set; }
+        public Action<TestDto<T>, T>? MapFrom { get; set; }
+        public Action<T>? MapTo { get; set; }
 
-        void IClassDto<T>.MapFrom(T obj, IMappingContext context, IncludeTree tree)
+        void IClassDto<T>.MapFrom(T obj, IMappingContext context, IncludeTree? tree)
         {
             SourceEntity = obj;
             MapFrom?.Invoke(this, obj);

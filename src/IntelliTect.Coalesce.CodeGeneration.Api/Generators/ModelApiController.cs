@@ -106,7 +106,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                 b.Line("[HttpPost(\"save\")]");
                 b.Line($"{securityInfo.Save.MvcAnnotation()}");
                 b.Line($"{Model.ApiActionAccessModifier} virtual Task<ItemResult<{Model.DtoName}>> Save(");
-                b.Indented($"{Model.DtoName} dto,");
+                b.Indented($"[FromForm] {Model.DtoName} dto,");
                 b.Indented($"[FromQuery] DataSourceParameters parameters,");
                 b.Indented($"{dataSourceParameter},");
                 b.Indented($"{behaviorsParameter})");

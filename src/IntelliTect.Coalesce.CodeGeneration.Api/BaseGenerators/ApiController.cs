@@ -117,11 +117,12 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
             b.Append(returnType);
             b.Append(" ");
             b.Append(method.NameWithoutAsync);
-            b.Append("(");
+            b.Line("(");
+            using var indent = b.Indented();
 
             if (method.IsModelInstanceMethod)
             {
-                b.Append("[FromServices] IDataSourceFactory dataSourceFactory, ");
+                b.Line("[FromServices] IDataSourceFactory dataSourceFactory,");
             }
 
             foreach (var param in method.Parameters
@@ -149,6 +150,20 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
                 {
                     b.Append("[FromServices] ");
                 }
+                else if (method.HasHttpRequestBody && !param.PureType.IsFile)
+                {
+                    // We must add [FromForm], because without it, AspNetCore's ApiExplorer, and subsequently Swashbuckle,
+                    // will assume these parameters to be from the querystring. This is well defined behavior in aspnetcore,
+                    // but is not what we ever want (https://docs.microsoft.com/en-us/aspnet/core/mvc/models/model-binding?view=aspnetcore-6.0#sources-1).
+
+                    // Furthermore, we must specify a Name because without it, top level parameters are ambiguous with nested parameters.
+                    // For example, for a custom method that takes a `class Case { string Name }` parameter and a `string name` parameter,
+                    // if the Case is passed as null and a name is passed a value, both the `name` parameter and `Case.Name` will be set to `name`.
+                    b.Append("[FromForm(Name = ").Append(param.CsParameterName.QuotedStringLiteralForCSharp()).Append(")] ");
+
+                    // File parameters must not be annotated with FromForm, as this will break their model binding.
+                    // They have their own special implicit model binder.
+                }
 
                 b.Append(typeName);
                 b.Append(" ");
@@ -158,10 +173,11 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
                     b.Append(" = ");
                     b.Append(param.CsDefaultValue);
                 }
-                b.Append(", ");
+                b.Line(",");
             }
 
-            b.TrimEnd(", ").Append(")");
+            b.TrimWhitespace().TrimEnd(",").Append(")");
+            indent.Dispose();
             return b.Block();
         }
 

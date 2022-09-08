@@ -14,11 +14,11 @@ module ListViewModels {
     export class CompanyList extends Coalesce.BaseListViewModel<ViewModels.Company> {
         public readonly modelName: string = "Company";
         public readonly apiController: string = "/Company";
-        public modelKeyName: string = "companyId";
+        public modelKeyName: string = "id";
         public itemClass: new () => ViewModels.Company = ViewModels.Company;
         
         public filter: {
-            companyId?: string;
+            id?: string;
             name?: string;
             address1?: string;
             address2?: string;
@@ -78,7 +78,7 @@ module ListViewModels {
             };
             
             protected loadResponse = (data: Coalesce.ItemResult, jqXHR: JQuery.jqXHR, callback?: (result: ViewModels.Company[]) => void, reload: boolean = true) => {
-                Coalesce.KnockoutUtilities.RebuildArray(this.result, data.object, 'companyId', ViewModels.Company, this, true);
+                Coalesce.KnockoutUtilities.RebuildArray(this.result, data.object, 'id', ViewModels.Company, this, true);
                 if (reload) {
                     var result = this.result();
                     this.parent.load(typeof(callback) == 'function' ? () => callback(result) : undefined);

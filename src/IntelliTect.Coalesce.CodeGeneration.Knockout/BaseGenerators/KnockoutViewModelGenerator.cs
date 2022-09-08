@@ -88,7 +88,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
             b.Line($"/** Calls server method ({method.NameWithoutAsync}) with the given arguments */");
 
             string parameters = "";
-            parameters = string.Join(", ", method.ClientParameters.Select(f => $"{f.Name}: {f.Type.TsType} | null"));
+            parameters = string.Join(", ", method.ClientParameters.Select(f => $"{f.JsVariable}: {f.Type.TsType} | null"));
             if (!string.IsNullOrWhiteSpace(parameters)) parameters += ", ";
             parameters += callbackAndReloadParam;
 
@@ -173,14 +173,14 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
                         b.Line($"$promptVal = {$"prompt('{param.Name.ToProperCase()}')"};");
                         // AES 1/23/2018 - why do we do this? what about optional params where no value is desired?
                         b.Line($"if ($promptVal === null) return;");
-                        b.Line($"var {param.Name}: {param.Type.TsType} = {param.Type.TsConvertFromString("$promptVal")};");
+                        b.Line($"var {param.JsVariable}: {param.Type.TsType} = {param.Type.TsConvertFromString("$promptVal")};");
                     }
 
                     // For all parameters that can't convert from a string (is this even possible with what we support for method parameters now?),
                     // pass null as the value. I guess we just let happen what's going to happen? Again, not sure when this case would ever be hit.
                     foreach (var param in method.ClientParameters.Where(f => !f.ConvertsFromJsString))
                     {
-                        b.Line($"var {param.Name}: null = null;");
+                        b.Line($"var {param.JsVariable}: null = null;");
                     }
                     b.Line($"return this.invoke({JsArguments("")}{reloadArg});");
                 }

@@ -116,6 +116,23 @@ namespace IntelliTect.Coalesce.Utilities
         }
 
         /// <summary>
+        /// Trim whitespace from the end of the output.
+        /// </summary>
+        public CodeBuilder TrimWhitespace()
+        {
+            int count = 0;
+            while (sb.Length - count > 0 && char.IsWhiteSpace(sb[sb.Length - 1 - count]))
+            {
+                count++;
+            }
+            if (count > 0)
+            {
+                sb.Remove(sb.Length - count, count);
+            }
+            return this;
+        }
+
+        /// <summary>
         /// Convert the value of the instance to a <see cref="System.String"/>.
         /// </summary>
         /// <returns></returns>

@@ -13,7 +13,8 @@ namespace Coalesce.Domain
     public class Company
     {
 #nullable disable
-        public int CompanyId { get; set; }
+        [Column("CompanyId")]
+        public int Id { get; set; }
         public string Name { get; set; }
         public string Address1 { get; set; }
         public string Address2 { get; set; }
@@ -43,6 +44,13 @@ namespace Coalesce.Domain
         public string AltName => Name + ": " + City;
 
 #nullable enable
+
+
+        [Coalesce]
+        public void ConflictingParameterNames(Company companyParam, string name)
+        {
+
+        }
 
         [Coalesce]
         public static ICollection<Company> GetCertainItems(AppDbContext db, bool isDeleted = false)

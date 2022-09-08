@@ -56,7 +56,7 @@ namespace Coalesce.Web.Vue3.Api
         [HttpPost("save")]
         [AllowAnonymous]
         public virtual Task<ItemResult<CaseDtoGen>> Save(
-            CaseDtoGen dto,
+            [FromForm] CaseDtoGen dto,
             [FromQuery] DataSourceParameters parameters,
             IDataSource<Coalesce.Domain.Case> dataSource,
             IBehaviors<Coalesce.Domain.Case> behaviors)
@@ -117,7 +117,10 @@ namespace Coalesce.Web.Vue3.Api
         /// </summary>
         [HttpPost("UploadImage")]
         [Authorize]
-        public virtual async Task<ItemResult> UploadImage([FromServices] IDataSourceFactory dataSourceFactory, int id, Microsoft.AspNetCore.Http.IFormFile file)
+        public virtual async Task<ItemResult> UploadImage(
+            [FromServices] IDataSourceFactory dataSourceFactory,
+            [FromForm(Name = "id")] int id,
+            Microsoft.AspNetCore.Http.IFormFile file)
         {
             var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Case, Coalesce.Domain.Case>("Default");
             var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
@@ -137,7 +140,10 @@ namespace Coalesce.Web.Vue3.Api
         /// </summary>
         [HttpGet("DownloadImage")]
         [Authorize]
-        public virtual async Task<ActionResult<ItemResult<IntelliTect.Coalesce.Models.IFile>>> DownloadImage([FromServices] IDataSourceFactory dataSourceFactory, int id, byte[] etag)
+        public virtual async Task<ActionResult<ItemResult<IntelliTect.Coalesce.Models.IFile>>> DownloadImage(
+            [FromServices] IDataSourceFactory dataSourceFactory,
+            int id,
+            byte[] etag)
         {
             var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Case, Coalesce.Domain.Case>("Default");
             var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
@@ -189,7 +195,10 @@ namespace Coalesce.Web.Vue3.Api
         /// </summary>
         [HttpPost("UploadAndDownload")]
         [Authorize]
-        public virtual async Task<ActionResult<ItemResult<IntelliTect.Coalesce.Models.IFile>>> UploadAndDownload([FromServices] IDataSourceFactory dataSourceFactory, int id, Microsoft.AspNetCore.Http.IFormFile file)
+        public virtual async Task<ActionResult<ItemResult<IntelliTect.Coalesce.Models.IFile>>> UploadAndDownload(
+            [FromServices] IDataSourceFactory dataSourceFactory,
+            [FromForm(Name = "id")] int id,
+            Microsoft.AspNetCore.Http.IFormFile file)
         {
             var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Case, Coalesce.Domain.Case>("Default");
             var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
@@ -222,7 +231,10 @@ namespace Coalesce.Web.Vue3.Api
         /// </summary>
         [HttpPost("UploadImages")]
         [Authorize]
-        public virtual async Task<ItemResult> UploadImages([FromServices] IDataSourceFactory dataSourceFactory, int id, System.Collections.Generic.ICollection<Microsoft.AspNetCore.Http.IFormFile> files)
+        public virtual async Task<ItemResult> UploadImages(
+            [FromServices] IDataSourceFactory dataSourceFactory,
+            [FromForm(Name = "id")] int id,
+            System.Collections.Generic.ICollection<Microsoft.AspNetCore.Http.IFormFile> files)
         {
             var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Case, Coalesce.Domain.Case>("Default");
             var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
@@ -242,7 +254,10 @@ namespace Coalesce.Web.Vue3.Api
         /// </summary>
         [HttpPost("UploadByteArray")]
         [Authorize]
-        public virtual async Task<ItemResult> UploadByteArray([FromServices] IDataSourceFactory dataSourceFactory, int id, byte[] file)
+        public virtual async Task<ItemResult> UploadByteArray(
+            [FromServices] IDataSourceFactory dataSourceFactory,
+            [FromForm(Name = "id")] int id,
+            [FromForm(Name = "file")] byte[] file)
         {
             var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Case, Coalesce.Domain.Case>("Default");
             var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());

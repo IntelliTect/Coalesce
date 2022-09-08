@@ -56,7 +56,7 @@ namespace Coalesce.Web.Vue3.Api
         [HttpPost("save")]
         [Authorize]
         public virtual Task<ItemResult<Coalesce.Domain.CaseDto>> Save(
-            Coalesce.Domain.CaseDto dto,
+            [FromForm] Coalesce.Domain.CaseDto dto,
             [FromQuery] DataSourceParameters parameters,
             [DeclaredFor(typeof(Coalesce.Domain.CaseDto))] IDataSource<Coalesce.Domain.Case> dataSource,
             [DeclaredFor(typeof(Coalesce.Domain.CaseDto))] IBehaviors<Coalesce.Domain.Case> behaviors)
@@ -77,7 +77,10 @@ namespace Coalesce.Web.Vue3.Api
         /// </summary>
         [HttpPost("AsyncMethodOnIClassDto")]
         [Authorize]
-        public virtual async Task<ItemResult<string>> AsyncMethodOnIClassDto([FromServices] IDataSourceFactory dataSourceFactory, int id, string input)
+        public virtual async Task<ItemResult<string>> AsyncMethodOnIClassDto(
+            [FromServices] IDataSourceFactory dataSourceFactory,
+            [FromForm(Name = "id")] int id,
+            [FromForm(Name = "input")] string input)
         {
             var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Case, Coalesce.Domain.CaseDto>("Default");
             var itemResult = await dataSource.GetMappedItemAsync<Coalesce.Domain.CaseDto>(id, new ListParameters());

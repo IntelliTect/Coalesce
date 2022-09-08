@@ -56,7 +56,7 @@ namespace Coalesce.Web.Vue3.Api
         [HttpPost("save")]
         [AllowAnonymous]
         public virtual Task<ItemResult<PersonDtoGen>> Save(
-            PersonDtoGen dto,
+            [FromForm] PersonDtoGen dto,
             [FromQuery] DataSourceParameters parameters,
             IDataSource<Coalesce.Domain.Person> dataSource,
             IBehaviors<Coalesce.Domain.Person> behaviors)
@@ -77,7 +77,10 @@ namespace Coalesce.Web.Vue3.Api
         /// </summary>
         [HttpPost("Rename")]
         [Authorize]
-        public virtual async Task<ItemResult<PersonDtoGen>> Rename([FromServices] IDataSourceFactory dataSourceFactory, int id, string name)
+        public virtual async Task<ItemResult<PersonDtoGen>> Rename(
+            [FromServices] IDataSourceFactory dataSourceFactory,
+            [FromForm(Name = "id")] int id,
+            [FromForm(Name = "name")] string name)
         {
             var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Person, Coalesce.Domain.Person>("Default");
             var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
@@ -100,7 +103,9 @@ namespace Coalesce.Web.Vue3.Api
         /// </summary>
         [HttpPost("ChangeSpacesToDashesInName")]
         [Authorize]
-        public virtual async Task<ItemResult> ChangeSpacesToDashesInName([FromServices] IDataSourceFactory dataSourceFactory, int id)
+        public virtual async Task<ItemResult> ChangeSpacesToDashesInName(
+            [FromServices] IDataSourceFactory dataSourceFactory,
+            [FromForm(Name = "id")] int id)
         {
             var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Person, Coalesce.Domain.Person>("WithoutCases");
             var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
@@ -120,7 +125,9 @@ namespace Coalesce.Web.Vue3.Api
         /// </summary>
         [HttpPost("Add")]
         [Authorize]
-        public virtual ItemResult<int> Add(int numberOne, int numberTwo)
+        public virtual ItemResult<int> Add(
+            [FromForm(Name = "numberOne")] int numberOne,
+            [FromForm(Name = "numberTwo")] int numberTwo)
         {
             var _methodResult = Coalesce.Domain.Person.Add(numberOne, numberTwo);
             var _result = new ItemResult<int>(_methodResult);
@@ -146,7 +153,9 @@ namespace Coalesce.Web.Vue3.Api
         /// </summary>
         [HttpPost("GetBirthdate")]
         [Authorize]
-        public virtual async Task<ItemResult<System.DateTime>> GetBirthdate([FromServices] IDataSourceFactory dataSourceFactory, int id)
+        public virtual async Task<ItemResult<System.DateTime>> GetBirthdate(
+            [FromServices] IDataSourceFactory dataSourceFactory,
+            [FromForm(Name = "id")] int id)
         {
             var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Person, Coalesce.Domain.Person>("Default");
             var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
@@ -167,7 +176,8 @@ namespace Coalesce.Web.Vue3.Api
         /// </summary>
         [HttpGet("PersonCount")]
         [Authorize]
-        public virtual ItemResult<long> PersonCount(string lastNameStartsWith = "")
+        public virtual ItemResult<long> PersonCount(
+            string lastNameStartsWith = "")
         {
             var _methodResult = Coalesce.Domain.Person.PersonCount(Db, lastNameStartsWith);
             var _result = new ItemResult<long>();
@@ -180,7 +190,9 @@ namespace Coalesce.Web.Vue3.Api
         /// </summary>
         [HttpGet("FullNameAndAge")]
         [Authorize]
-        public virtual async Task<ItemResult<string>> FullNameAndAge([FromServices] IDataSourceFactory dataSourceFactory, int id)
+        public virtual async Task<ItemResult<string>> FullNameAndAge(
+            [FromServices] IDataSourceFactory dataSourceFactory,
+            int id)
         {
             var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Person, Coalesce.Domain.Person>("Default");
             var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
@@ -201,7 +213,8 @@ namespace Coalesce.Web.Vue3.Api
         /// </summary>
         [HttpDelete("RemovePersonById")]
         [Authorize]
-        public virtual ItemResult<bool> RemovePersonById(int id)
+        public virtual ItemResult<bool> RemovePersonById(
+            int id)
         {
             var _methodResult = Coalesce.Domain.Person.RemovePersonById(Db, id);
             var _result = new ItemResult<bool>();
@@ -214,7 +227,9 @@ namespace Coalesce.Web.Vue3.Api
         /// </summary>
         [HttpPut("ObfuscateEmail")]
         [Authorize]
-        public virtual async Task<ItemResult<string>> ObfuscateEmail([FromServices] IDataSourceFactory dataSourceFactory, int id)
+        public virtual async Task<ItemResult<string>> ObfuscateEmail(
+            [FromServices] IDataSourceFactory dataSourceFactory,
+            [FromForm(Name = "id")] int id)
         {
             var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Person, Coalesce.Domain.Person>("Default");
             var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
@@ -235,7 +250,11 @@ namespace Coalesce.Web.Vue3.Api
         /// </summary>
         [HttpPatch("ChangeFirstName")]
         [Authorize]
-        public virtual async Task<ItemResult<PersonDtoGen>> ChangeFirstName([FromServices] IDataSourceFactory dataSourceFactory, int id, string firstName, Coalesce.Domain.Person.Titles? title)
+        public virtual async Task<ItemResult<PersonDtoGen>> ChangeFirstName(
+            [FromServices] IDataSourceFactory dataSourceFactory,
+            [FromForm(Name = "id")] int id,
+            [FromForm(Name = "firstName")] string firstName,
+            [FromForm(Name = "title")] Coalesce.Domain.Person.Titles? title)
         {
             var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Person, Coalesce.Domain.Person>("Default");
             var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
@@ -271,7 +290,8 @@ namespace Coalesce.Web.Vue3.Api
         /// </summary>
         [HttpPost("NamesStartingWith")]
         [Authorize]
-        public virtual ItemResult<System.Collections.Generic.ICollection<string>> NamesStartingWith(string characters)
+        public virtual ItemResult<System.Collections.Generic.ICollection<string>> NamesStartingWith(
+            [FromForm(Name = "characters")] string characters)
         {
             var _methodResult = Coalesce.Domain.Person.NamesStartingWith(Db, characters);
             var _result = new ItemResult<System.Collections.Generic.ICollection<string>>();
@@ -284,7 +304,8 @@ namespace Coalesce.Web.Vue3.Api
         /// </summary>
         [HttpPost("MethodWithStringArrayParameter")]
         [Authorize]
-        public virtual ItemResult<string[]> MethodWithStringArrayParameter(string[] strings)
+        public virtual ItemResult<string[]> MethodWithStringArrayParameter(
+            [FromForm(Name = "strings")] string[] strings)
         {
             var _methodResult = Coalesce.Domain.Person.MethodWithStringArrayParameter(Db, strings.ToArray());
             var _result = new ItemResult<string[]>();
@@ -297,7 +318,8 @@ namespace Coalesce.Web.Vue3.Api
         /// </summary>
         [HttpPost("MethodWithEntityParameter")]
         [Authorize]
-        public virtual ItemResult<PersonDtoGen> MethodWithEntityParameter(PersonDtoGen person)
+        public virtual ItemResult<PersonDtoGen> MethodWithEntityParameter(
+            [FromForm(Name = "person")] PersonDtoGen person)
         {
             IncludeTree includeTree = null;
             var _mappingContext = new MappingContext(User);
@@ -312,7 +334,9 @@ namespace Coalesce.Web.Vue3.Api
         /// </summary>
         [HttpPost("SearchPeople")]
         [Authorize]
-        public virtual ListResult<PersonDtoGen> SearchPeople(PersonCriteriaDtoGen criteria, int page)
+        public virtual ListResult<PersonDtoGen> SearchPeople(
+            [FromForm(Name = "criteria")] PersonCriteriaDtoGen criteria,
+            [FromForm(Name = "page")] int page)
         {
             IncludeTree includeTree = null;
             var _mappingContext = new MappingContext(User);

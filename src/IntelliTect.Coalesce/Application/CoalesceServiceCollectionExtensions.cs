@@ -14,6 +14,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.Mvc;
 using IntelliTect.Coalesce.Api.Behaviors;
 using IntelliTect.Coalesce.Api.Controllers;
+using Microsoft.AspNetCore.Mvc.ApiExplorer;
 
 namespace IntelliTect.Coalesce
 {
@@ -67,6 +68,10 @@ namespace IntelliTect.Coalesce
                  sp.GetRequiredService<Microsoft.AspNetCore.Http.IHttpContextAccessor>().HttpContext?.RequestAborted ?? default
              ));
 
+            // Workaround for https://github.com/dotnet/aspnetcore/issues/43815
+            services.TryAddEnumerable(
+                ServiceDescriptor.Transient<IApiDescriptionProvider, FromFormNameFixingApiDescriptionProvider>());
+
             return services;
         }
 
@@ -86,6 +91,37 @@ namespace IntelliTect.Coalesce
             {
                 options.ModelBinderProviders.Insert(0, new DataSourceModelBinderProvider());
                 options.ModelBinderProviders.Insert(0, new BehaviorsModelBinderProvider());
+            }
+        }
+
+        /// <summary>
+        /// Workaround for https://github.com/dotnet/aspnetcore/issues/43815
+        /// </summary>
+        private class FromFormNameFixingApiDescriptionProvider : IApiDescriptionProvider
+        {
+            public int Order => -999; // one after DefaultApiDescriptionProvider
+
+            public void OnProvidersExecuting(ApiDescriptionProviderContext context)
+            {
+                foreach (var result in context.Results)
+                {
+                    foreach (var parameter in result.ParameterDescriptions)
+                    {
+                        if (
+                            parameter.Source == Microsoft.AspNetCore.Mvc.ModelBinding.BindingSource.Form &&
+                            parameter.ParameterDescriptor.BindingInfo?.BinderModelName is string prefix &&
+                            parameter.ModelMetadata.ContainerType is not null &&
+                            !parameter.Name.StartsWith(prefix + ".", StringComparison.InvariantCultureIgnoreCase)
+                        )
+                        {
+                            parameter.Name = prefix + "." + parameter.Name;
+                        }
+                    }
+                }
+            }
+
+            public void OnProvidersExecuted(ApiDescriptionProviderContext context)
+            {
             }
         }
     }

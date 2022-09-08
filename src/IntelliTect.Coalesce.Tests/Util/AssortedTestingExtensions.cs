@@ -14,11 +14,10 @@ using System.Text;
 using System.Threading.Tasks;
 using Xunit;
 
+#nullable enable
+
 namespace IntelliTect.Coalesce.Tests.Util
 {
-
-
-
     internal static class AssortedTestingExtensions
     {
         public static StandardDataSource<TModel, TestDbContext> AddModel<TModel, TProp>(
@@ -76,7 +75,8 @@ namespace IntelliTect.Coalesce.Tests.Util
             Assert.Equal(expectedOrder.Length, modelsList.Count);
 
             Assert.All(
-                modelsList.Zip(expectedOrder, (model, expected) => propSelector(model).Equals(expected)),
+                // Model not null because we asserted the length matches
+                modelsList.Zip(expectedOrder, (model, expected) => propSelector(model!)!.Equals(expected)),
                 Assert.True
             );
         }
@@ -87,7 +87,7 @@ namespace IntelliTect.Coalesce.Tests.Util
             Assert.Equal(expectedOrder.Length, modelsList.Count);
 
             Assert.All(
-                modelsList.Zip(expectedOrder, (model, expected) => model.Equals(expected)),
+                modelsList.Zip(expectedOrder, (model, expected) => model!.Equals(expected)),
                 Assert.True
             );
         }

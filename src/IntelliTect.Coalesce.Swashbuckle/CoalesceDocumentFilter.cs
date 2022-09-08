@@ -11,8 +11,8 @@ namespace IntelliTect.Coalesce.Swashbuckle
         {
             // Get rid of the empty, pointless definitions for IBehaviors and IDataSource.
             var defsToRemove = swaggerDoc.Components.Schemas.Keys.Where(d =>
-                d.StartsWith($"{nameof(IDataSource<object>)}[") ||
-                d.StartsWith($"{nameof(IBehaviors<object>)}[") 
+                d.EndsWith(nameof(IDataSource<object>)) ||
+                d.EndsWith(nameof(IBehaviors<object>))
             )
             .ToList();
 

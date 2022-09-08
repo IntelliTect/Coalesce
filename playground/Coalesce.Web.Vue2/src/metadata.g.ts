@@ -683,12 +683,12 @@ export const Company = domain.types.Company = {
   get displayProp() { return this.props.altName }, 
   type: "model",
   controllerRoute: "Company",
-  get keyProp() { return this.props.companyId }, 
+  get keyProp() { return this.props.id }, 
   behaviorFlags: 6,
   props: {
-    companyId: {
-      name: "companyId",
-      displayName: "Company Id",
+    id: {
+      name: "id",
+      displayName: "Id",
       type: "number",
       role: "primaryKey",
       hidden: 3,
@@ -784,6 +784,40 @@ export const Company = domain.types.Company = {
     },
   },
   methods: {
+    conflictingParameterNames: {
+      name: "conflictingParameterNames",
+      displayName: "Conflicting Parameter Names",
+      transportType: "item",
+      httpMethod: "POST",
+      params: {
+        id: {
+          name: "id",
+          displayName: "Primary Key",
+          type: "number",
+          role: "value",
+          get source() { return (domain.types.Company as ModelType).props.id },
+        },
+        companyParam: {
+          name: "companyParam",
+          displayName: "Company Param",
+          type: "model",
+          get typeDef() { return (domain.types.Company as ModelType) },
+          role: "value",
+        },
+        name: {
+          name: "name",
+          displayName: "Name",
+          type: "string",
+          role: "value",
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "void",
+        role: "value",
+      },
+    },
     getCertainItems: {
       name: "getCertainItems",
       displayName: "Get Certain Items",
@@ -1006,7 +1040,7 @@ export const Person = domain.types.Person = {
       displayName: "Company Id",
       type: "number",
       role: "foreignKey",
-      get principalKey() { return (domain.types.Company as ModelType).props.companyId as PrimaryKeyProperty },
+      get principalKey() { return (domain.types.Company as ModelType).props.id as PrimaryKeyProperty },
       get principalType() { return (domain.types.Company as ModelType) },
       get navigationProp() { return (domain.types.Person as ModelType).props.company as ModelReferenceNavigationProperty },
       hidden: 3,
@@ -1021,7 +1055,7 @@ export const Person = domain.types.Person = {
       get typeDef() { return (domain.types.Company as ModelType) },
       role: "referenceNavigation",
       get foreignKey() { return (domain.types.Person as ModelType).props.companyId as ForeignKeyProperty },
-      get principalKey() { return (domain.types.Company as ModelType).props.companyId as PrimaryKeyProperty },
+      get principalKey() { return (domain.types.Company as ModelType).props.id as PrimaryKeyProperty },
       get inverseNavigation() { return (domain.types.Company as ModelType).props.employees as ModelCollectionNavigationProperty },
       dontSerialize: true,
     },

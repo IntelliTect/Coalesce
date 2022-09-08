@@ -56,7 +56,7 @@ namespace Coalesce.Web.Ko.Api
         [HttpPost("save")]
         [Authorize]
         public virtual Task<ItemResult<CompanyDtoGen>> Save(
-            CompanyDtoGen dto,
+            [FromForm] CompanyDtoGen dto,
             [FromQuery] DataSourceParameters parameters,
             IDataSource<Coalesce.Domain.Company> dataSource,
             IBehaviors<Coalesce.Domain.Company> behaviors)
@@ -73,11 +73,37 @@ namespace Coalesce.Web.Ko.Api
         // Methods from data class exposed through API Controller.
 
         /// <summary>
+        /// Method: ConflictingParameterNames
+        /// </summary>
+        [HttpPost("ConflictingParameterNames")]
+        [Authorize]
+        public virtual async Task<ItemResult> ConflictingParameterNames(
+            [FromServices] IDataSourceFactory dataSourceFactory,
+            [FromForm(Name = "id")] int id,
+            [FromForm(Name = "companyParam")] CompanyDtoGen companyParam,
+            [FromForm(Name = "name")] string name)
+        {
+            var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Company, Coalesce.Domain.Company>("Default");
+            var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());
+            if (!itemResult.WasSuccessful)
+            {
+                return new ItemResult(itemResult);
+            }
+            var item = itemResult.Object;
+            var _mappingContext = new MappingContext(User);
+            item.ConflictingParameterNames(companyParam.MapToModel(new Coalesce.Domain.Company(), _mappingContext), name);
+            await Db.SaveChangesAsync();
+            var _result = new ItemResult();
+            return _result;
+        }
+
+        /// <summary>
         /// Method: GetCertainItems
         /// </summary>
         [HttpPost("GetCertainItems")]
         [Authorize]
-        public virtual ItemResult<System.Collections.Generic.ICollection<CompanyDtoGen>> GetCertainItems(bool isDeleted = false)
+        public virtual ItemResult<System.Collections.Generic.ICollection<CompanyDtoGen>> GetCertainItems(
+            [FromForm(Name = "isDeleted")] bool isDeleted = false)
         {
             IncludeTree includeTree = null;
             var _mappingContext = new MappingContext(User);

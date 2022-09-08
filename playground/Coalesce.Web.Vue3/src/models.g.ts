@@ -164,7 +164,7 @@ export class CaseProduct {
 
 
 export interface Company extends Model<typeof metadata.Company> {
-  companyId: number | null
+  id: number | null
   name: string | null
   address1: string | null
   address2: string | null

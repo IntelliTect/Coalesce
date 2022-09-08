@@ -228,7 +228,7 @@ export class CaseProductListViewModel extends ListViewModel<$models.CaseProduct,
 
 
 export interface CompanyViewModel extends $models.Company {
-  companyId: number | null;
+  id: number | null;
   name: string | null;
   address1: string | null;
   address2: string | null;
@@ -247,6 +247,17 @@ export class CompanyViewModel extends ViewModel<$models.Company, $apiClients.Com
   
   public addToEmployees() {
     return this.$addChild('employees') as PersonViewModel
+  }
+  
+  public get conflictingParameterNames() {
+    const conflictingParameterNames = this.$apiClient.$makeCaller(
+      this.$metadata.methods.conflictingParameterNames,
+      (c, companyParam: $models.Company | null, name: string | null) => c.conflictingParameterNames(this.$primaryKey, companyParam, name),
+      () => ({companyParam: null as $models.Company | null, name: null as string | null, }),
+      (c, args) => c.conflictingParameterNames(this.$primaryKey, args.companyParam, args.name))
+    
+    Object.defineProperty(this, 'conflictingParameterNames', {value: conflictingParameterNames});
+    return conflictingParameterNames
   }
   
   constructor(initialData?: DeepPartial<$models.Company> | null) {

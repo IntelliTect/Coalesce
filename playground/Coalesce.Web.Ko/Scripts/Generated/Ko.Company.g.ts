@@ -7,7 +7,7 @@ module ViewModels {
     
     export class Company extends Coalesce.BaseViewModel {
         public readonly modelName = "Company";
-        public readonly primaryKeyName = "companyId";
+        public readonly primaryKeyName = "id";
         public readonly modelDisplayName = "Company";
         public readonly apiController = "/Company";
         public readonly viewController = "/Company";
@@ -24,7 +24,7 @@ module ViewModels {
         public dataSources: typeof ListViewModels.CompanyDataSources = ListViewModels.CompanyDataSources;
         
         
-        public companyId: KnockoutObservable<number | null> = ko.observable(null);
+        public id: KnockoutObservable<number | null> = ko.observable(null);
         public name: KnockoutObservable<string | null> = ko.observable(null);
         public address1: KnockoutObservable<string | null> = ko.observable(null);
         public address2: KnockoutObservable<string | null> = ko.observable(null);
@@ -49,7 +49,7 @@ module ViewModels {
             newItem.parent = this;
             newItem.parentCollection = this.employees;
             newItem.isExpanded(true);
-            newItem.companyId(this.companyId());
+            newItem.companyId(this.id());
             this.employees.push(newItem);
             return newItem;
         };
@@ -60,13 +60,57 @@ module ViewModels {
         
         /** Url for a table view of all members of collection Employees for the current object. */
         public employeesListUrl: KnockoutComputed<string> = ko.computed(
-            () => this.coalesceConfig.baseViewUrl() + '/Person/Table?filter.companyId=' + this.companyId(),
+            () => this.coalesceConfig.baseViewUrl() + '/Person/Table?filter.companyId=' + this.id(),
             null, { deferEvaluation: true }
         );
         
         
         
         
+        
+        /** Methods and properties for invoking server method ConflictingParameterNames. */
+        public readonly conflictingParameterNames = new Company.ConflictingParameterNames(this);
+        public static ConflictingParameterNames = class ConflictingParameterNames extends Coalesce.ClientMethod<Company, void> {
+            public readonly name = 'ConflictingParameterNames';
+            public readonly verb = 'POST';
+            
+            /** Calls server method (ConflictingParameterNames) with the given arguments */
+            public invoke = (companyParam: ViewModels.Company | null, name: string | null, callback?: (result: void) => void, reload: boolean = true): JQueryPromise<any> => {
+                return this.invokeWithData({ id: this.parent.id(), companyParam: companyParam?.saveToDto(), name: name }, callback, reload);
+            };
+            
+            /** Object that can be easily bound to fields to allow data entry for the method's parameters */
+            public args = new ConflictingParameterNames.Args(); 
+            public static Args = class Args {
+                public companyParam: KnockoutObservable<ViewModels.Company | null> = ko.observable(null);
+                public name: KnockoutObservable<string | null> = ko.observable(null);
+            };
+            
+            /** Calls server method (ConflictingParameterNames) with an instance of ConflictingParameterNames.Args, or the value of this.args if not specified. */
+            public invokeWithArgs = (args = this.args, callback?: (result: void) => void, reload: boolean = true): JQueryPromise<any> => {
+                return this.invoke(args.companyParam(), args.name(), callback, reload);
+            }
+            
+            /** Invokes the method after displaying a browser-native prompt for each argument. */
+            public invokeWithPrompts = (callback?: (result: void) => void, reload: boolean = true): JQueryPromise<any> | undefined => {
+                var $promptVal: string | null = null;
+                $promptVal = prompt('Name');
+                if ($promptVal === null) return;
+                var name: string = $promptVal;
+                var companyParam: null = null;
+                return this.invoke(companyParam, name, callback, reload);
+            };
+            
+            protected loadResponse = (data: Coalesce.ItemResult, jqXHR: JQuery.jqXHR, callback?: (result: void) => void, reload: boolean = true) => {
+                this.result(data.object);
+                if (reload) {
+                    var result = this.result();
+                    this.parent.load(null, typeof(callback) == 'function' ? () => callback(result) : undefined);
+                } else if (typeof(callback) == 'function') {
+                    callback(this.result());
+                }
+            };
+        };
         
         /** 
             Load the ViewModel object from the DTO.
@@ -79,8 +123,8 @@ module ViewModels {
             if (!data || (!force && this.isLoading())) return;
             this.isLoading(true);
             // Set the ID 
-            this.myId = data.companyId;
-            this.companyId(data.companyId);
+            this.myId = data.id;
+            this.id(data.id);
             // Load the lists of other objects
             if (data.employees != null) {
                 // Merge the incoming array
@@ -110,7 +154,7 @@ module ViewModels {
         /** Saves this object into a data transfer object to send to the server. */
         public saveToDto = (): any => {
             var dto: any = {};
-            dto.companyId = this.companyId();
+            dto.id = this.id();
             
             dto.name = this.name();
             dto.address1 = this.address1();
@@ -156,13 +200,13 @@ module ViewModels {
                 if (!_employeesList) {
                     _employeesList = new ListViewModels.PersonList();
                     if (loadImmediate) loadEmployeesList();
-                    self.companyId.subscribe(loadEmployeesList)
+                    self.id.subscribe(loadEmployeesList)
                 }
                 return _employeesList;
             }
             function loadEmployeesList() {
-                if (self.companyId()) {
-                    _employeesList.queryString = "filter.CompanyId=" + self.companyId();
+                if (self.id()) {
+                    _employeesList.queryString = "filter.CompanyId=" + self.id();
                     _employeesList.load();
                 }
             }

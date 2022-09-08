@@ -445,7 +445,7 @@ module ViewModels {
                 } else {
                     this.company()!.loadFromDto(data.company);
                 }
-                if (this.parent instanceof Company && this.parent !== this.company() && this.parent.companyId() == this.company()!.companyId())
+                if (this.parent instanceof Company && this.parent !== this.company() && this.parent.id() == this.company()!.id())
                 {
                     this.parent.loadFromDto(data.company, undefined, false);
                 }
@@ -500,7 +500,7 @@ module ViewModels {
             else dto.nextUpgrade = this.nextUpgrade()!.format('YYYY-MM-DDTHH:mm:ss.SSSZZ');
             dto.companyId = this.companyId();
             if (!dto.companyId && this.company()) {
-                dto.companyId = this.company()!.companyId();
+                dto.companyId = this.company()!.id();
             }
             dto.arbitraryCollectionOfStrings = this.arbitraryCollectionOfStrings();
             

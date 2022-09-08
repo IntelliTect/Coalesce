@@ -56,7 +56,7 @@ namespace Coalesce.Web.Vue3.Api
         [HttpPost("save")]
         [Authorize]
         public virtual Task<ItemResult<ZipCodeDtoGen>> Save(
-            ZipCodeDtoGen dto,
+            [FromForm] ZipCodeDtoGen dto,
             [FromQuery] DataSourceParameters parameters,
             IDataSource<Coalesce.Domain.ZipCode> dataSource,
             IBehaviors<Coalesce.Domain.ZipCode> behaviors)

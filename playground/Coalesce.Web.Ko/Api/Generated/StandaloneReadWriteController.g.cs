@@ -56,7 +56,7 @@ namespace Coalesce.Web.Ko.Api
         [HttpPost("save")]
         [Authorize]
         public virtual Task<ItemResult<StandaloneReadWriteDtoGen>> Save(
-            StandaloneReadWriteDtoGen dto,
+            [FromForm] StandaloneReadWriteDtoGen dto,
             [FromQuery] DataSourceParameters parameters,
             IDataSource<Coalesce.Domain.StandaloneReadWrite> dataSource,
             IBehaviors<Coalesce.Domain.StandaloneReadWrite> behaviors)

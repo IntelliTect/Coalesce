@@ -12,7 +12,7 @@ namespace Coalesce.Web.Vue2.Models
     {
         public CompanyDtoGen() { }
 
-        private int? _CompanyId;
+        private int? _Id;
         private string _Name;
         private string _Address1;
         private string _Address2;
@@ -26,10 +26,10 @@ namespace Coalesce.Web.Vue2.Models
         private System.Collections.Generic.ICollection<Coalesce.Web.Vue2.Models.PersonDtoGen> _Employees;
         private string _AltName;
 
-        public int? CompanyId
+        public int? Id
         {
-            get => _CompanyId;
-            set { _CompanyId = value; Changed(nameof(CompanyId)); }
+            get => _Id;
+            set { _Id = value; Changed(nameof(Id)); }
         }
         public string Name
         {
@@ -102,7 +102,7 @@ namespace Coalesce.Web.Vue2.Models
 
             // Fill the properties of the object.
 
-            this.CompanyId = obj.CompanyId;
+            this.Id = obj.Id;
             this.Name = obj.Name;
             this.Address1 = obj.Address1;
             this.Address2 = obj.Address2;
@@ -137,7 +137,7 @@ namespace Coalesce.Web.Vue2.Models
 
             if (OnUpdate(entity, context)) return;
 
-            if (ShouldMapTo(nameof(CompanyId))) entity.CompanyId = (CompanyId ?? entity.CompanyId);
+            if (ShouldMapTo(nameof(Id))) entity.Id = (Id ?? entity.Id);
             if (ShouldMapTo(nameof(Name))) entity.Name = Name;
             if (ShouldMapTo(nameof(Address1))) entity.Address1 = Address1;
             if (ShouldMapTo(nameof(Address2))) entity.Address2 = Address2;

@@ -164,5 +164,11 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
 
         [Coalesce]
         public ExternalTypeWithDtoProp ReturnsExternalTypeWithDtoProp() => new ExternalTypeWithDtoProp();
+
+        [Coalesce]
+        [ControllerAction(Method = HttpMethod.Post)]
+        public static ItemResult HasTopLevelParamWithSameNameAsObjectProp(
+            int complexModelId,
+            ComplexModel model) => true;
     }
 }

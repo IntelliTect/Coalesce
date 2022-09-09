@@ -54,6 +54,12 @@ export function createAspNetCoreHmrPlugin({
       async config(config, env) {
         const server = (config.server ??= {});
 
+        // Make sure we can listen on `localhost`, which is what is
+        // expected by ViteDevelopmentServerMiddleware.
+        // Listening on any host also allows for "local remote" development,
+        // e.g. pulling up the app on your phone to work on mobile interactions.
+        server.host ??= "0.0.0.0";
+
         config.base = base;
 
         // The development server launched by UseViteDevelopmentServer must be HTTPS

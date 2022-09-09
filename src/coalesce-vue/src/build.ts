@@ -236,6 +236,58 @@ async function writeHtml(server: ViteDevServer) {
   }
 }
 
+/** Create a plugin that will apply transforms to work around
+ * https://github.com/rollup/rollup/issues/4637, eliminating
+ * errors in production caused by class names getting mangled by Rollup
+ * (when those class names become component names via vue-class-component).
+ */
+export function createClassNameFixerPlugin() {
+  let command: string;
+  return {
+    name: "coalesce-vite-restore-class-names",
+    enforce: "post",
+    config(config, env) {
+      // Auto set esbuild to keep names as well,
+      // which is also an important part of making vue-class-component work.
+      config.esbuild ??= {};
+      config.esbuild.keepNames ??= true;
+    },
+    configResolved(config) {
+      command = config.command;
+    },
+    transform(code, id, options) {
+      // This part is only for https://github.com/rollup/rollup/issues/4637
+      // This is only an issue when rollup is involved.
+      if (command !== "build") return;
+
+      if (id.endsWith(".ts") && code.includes("__decorateClass")) {
+        const regex = /let (\w+) = class extends/g;
+        let s: MagicString | undefined;
+        let match;
+        while ((match = regex.exec(code))) {
+          s ??= new MagicString(code);
+          // Insert the hostname of the vite server at the start of the relative path
+          // so that the request will go directly to the vite server
+          // rather than having to traverse the aspnetcore server proxy first.
+          s.appendLeft(
+            match.index + match[0].length - "extends".length,
+            match[1] + " "
+          );
+        }
+
+        return s
+          ? {
+              code: s.toString(),
+              // Including sourcemaps is generating frivolous warnings
+              // about missing sources. Maybe revisit for Vite3?
+              map: s.generateMap({ hires: true }),
+            }
+          : undefined;
+      }
+    },
+  } as Plugin;
+}
+
 /** Use the dotnet CLI's `dev-certs` tool to create certs to use for the vite server.
  * The vite server needs to run as HTTPS so that if the aspnetcore server is also HTTPS,
  * the browser isn't trying to connect to the HMR server's websocket endpoint as mixed content (which fails).

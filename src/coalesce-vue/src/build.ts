@@ -284,8 +284,6 @@ export function createClassNameFixerPlugin() {
         return s
           ? {
               code: s.toString(),
-              // Including sourcemaps is generating frivolous warnings
-              // about missing sources. Maybe revisit for Vite3?
               map: s.generateMap({ hires: true }),
             }
           : undefined;

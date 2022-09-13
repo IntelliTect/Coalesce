@@ -105,19 +105,19 @@ export abstract class ViewModel<
   // This bool could be computed from the size of the set,
   // but this wouldn't trigger reactivity because Vue 2 doesn't have reactivity
   // for types like Set and Map.
-  private _isDirty = false;
+  private _isDirty = ref(false);
   private _dirtyProps = new Set<string>();
   /**
    * Returns true if the values of the savable data properties of this ViewModel
    * have changed since the last load, save, or the last time $isDirty was set to false.
    */
   public get $isDirty() {
-    return this._isDirty;
+    return this._isDirty.value;
   }
   public set $isDirty(val) {
     if (!val) {
       this._dirtyProps.clear();
-      this._isDirty = false;
+      this._isDirty.value = false;
     } else {
       // When explicitly setting the whole model dirty,
       // we don't know which specific prop might be dirty,
@@ -140,7 +140,7 @@ export abstract class ViewModel<
 
     if (dirty) {
       this._dirtyProps.add(propName);
-      this._isDirty = true;
+      this._isDirty.value = true;
 
       if (triggerAutosave && this._autoSaveState?.active) {
         // If dirty, and autosave is enabled, queue an evaluation of autosave.
@@ -149,7 +149,7 @@ export abstract class ViewModel<
     } else {
       this._dirtyProps.delete(propName);
       if (!this._dirtyProps.size) {
-        this._isDirty = false;
+        this._isDirty.value = false;
       }
     }
   }
@@ -157,8 +157,14 @@ export abstract class ViewModel<
     return this._dirtyProps.has(propName);
   }
 
+  private _params = ref(new DataSourceParameters());
   /** The parameters that will be passed to `/get`, `/save`, and `/delete` calls. */
-  public $params = new DataSourceParameters();
+  public get $params() {
+    return this._params.value;
+  }
+  public set $params(val) {
+    this._params.value = val;
+  }
 
   /** Wrapper for `$params.dataSource` */
   public get $dataSource() {
@@ -375,11 +381,17 @@ export abstract class ViewModel<
    */
   public $saveMode: "surgical" | "whole" = "surgical";
 
+  private _savingProps = ref<ReadonlySet<string>>(emptySet);
   /** When `$save.isLoading == true`, contains the properties of the model currently being saved by `$save` (including autosaves).
    *
    * Does not include non-dirty properties even if `$saveMode == 'whole'`.
    */
-  public $savingProps: ReadonlySet<string> = emptySet;
+  public get $savingProps() {
+    return this._savingProps.value;
+  }
+  public set $savingProps(value) {
+    this._savingProps.value = value;
+  }
 
   /**
    * A function for invoking the `/save` endpoint, and a set of properties about the state of the last call.
@@ -796,8 +808,8 @@ export abstract class ListViewModel<
   /** Static lookup of all generated ListViewModel types. */
   public static typeLookup: ListViewModelTypeLookup | null = null;
 
-  /** The parameters that will be passed to `/list` and `/count` calls. */
   private _params = ref(new ListParameters());
+  /** The parameters that will be passed to `/list` and `/count` calls. */
   public get $params() {
     return this._params.value;
   }

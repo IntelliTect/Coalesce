@@ -355,6 +355,25 @@ describe("ViewModel", () => {
         "grade",
       ]);
     });
+
+    test("$savingProps is reactive", async () => {
+      const student = new StudentViewModel({
+        name: "Bob",
+      });
+
+      student.$apiClient.save = mockItemResult(true, {});
+
+      let triggered = false;
+      watch(
+        () => student.$savingProps.has("name"),
+        () => (triggered = true)
+      );
+
+      student.$saveMode = "surgical";
+      const promise = student.$save();
+      await promise;
+      expect(triggered).toBeTruthy();
+    });
   });
 
   describe("autoSave", () => {
@@ -1704,6 +1723,23 @@ describe("ViewModel", () => {
 
       expect(deleteMock).toBeCalledTimes(0);
       expect(student.courses).toHaveLength(0);
+    });
+  });
+
+  describe("$isDirty", () => {
+    test("is reactive", async () => {
+      var vm = new StudentViewModel();
+      await delay(1);
+
+      let triggered = false;
+      watch(
+        () => vm.$isDirty,
+        () => (triggered = true)
+      );
+      vm.name = "bob";
+      await delay(1);
+
+      expect(triggered).toBeTruthy();
     });
   });
 

@@ -5,10 +5,7 @@ In a Coalesce, you are fairly likely to end up with a need for some API endpoint
 
 Instead, Coalesce allows you to generate API Controllers and a TypeScript client from a service. A service, in this case, is nothing more than a C# class or an interface with methods on it, annotated with `[Coalesce,Service]`. An implementation of this class or interface must be injectable from your application's service container, so a registration in Startup.cs is needed.
 
-The instance methods of these services conform exactly to the specifications outlined in [Methods](/modeling/model-components/methods.md) with a few exceptions:
-
-* TypeScript functions for invoking the endpoint have no `reload: boolean` parameter.
-* Instance methods don't operate on an instance of some model with a known key, but instead on an injected instance of the service.
+The instance methods of these services work just like other custom [Methods](/modeling/model-components/methods.md) in Coalesce, with one notable distinction: Instance methods don't operate on an instance of a model, but instead on a dependency injected instance of the service.
 
 ## Generated Code
 
@@ -21,14 +18,6 @@ For each external type found in your application's model, Coalesce will generate
 ## Example Service
 
 An example of a service might look something like this:
-
-``` c#
-[Coalesce, Service]
-public interface IWeatherService
-{
-    WeatherData GetWeather(string zipCode);
-}
-```
 
 ``` c#
 [Coalesce, Service]

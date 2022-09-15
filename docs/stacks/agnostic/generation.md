@@ -36,7 +36,7 @@ There are a couple of extra options which are only available as CLI parameters t
 
 ## Generated Code
 
-Coalesce has the option of two front-end stacks - either [Knockout](http://knockoutjs.com/), or [Vue](https://vuejs.org/). The Vue-based stack is the current focus of all development efforts against Coalesce going forward - the Knockout stack is effectively in maintenance-only mode.
+Coalesce has the option of two front-end stacks - either [Knockout](https://knockoutjs.com/), or [Vue](https://vuejs.org/). The Vue-based stack is the current focus of all development efforts against Coalesce going forward - the Knockout stack is effectively in maintenance-only mode.
 
 For either stack, Coalesce will generate a variety of different kinds of code for you:
 

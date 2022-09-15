@@ -253,7 +253,7 @@ If true, the dropdown will open when tabbed to. Browser support may be incomplet
 </select>
 ```
 
-Sets up a basic select2 dropdown on an HTML select element. Dropdown contents should be populated through other means - either using stock [Knockout](http://knockoutjs.com/) bindings or server-side static contents (via cshtml).
+Sets up a basic select2 dropdown on an HTML select element. Dropdown contents should be populated through other means - either using stock [Knockout](https://knockoutjs.com/) bindings or server-side static contents (via cshtml).
 
 
 <Prop def="selectOnClose: boolean = false" lang="ts" id-prefix="select2" />

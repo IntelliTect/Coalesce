@@ -64,7 +64,7 @@ These ViewModels contain the majority of functionality that you will use on a da
 
 The [Vue](https://vuejs.org/) stack for Coalesce does not generate any admin views for you like the [Knockout stack](/stacks/ko/overview.md) does. Instead, it provides some high level components that provide functionality of whole pages like [c-admin-table-page](/stacks/vue/coalesce-vue-vuetify/components/c-admin-table-page.md) and [c-admin-editor-page](/stacks/vue/coalesce-vue-vuetify/components/c-admin-editor-page.md) - these are the analogues of the generated admin Table and CreateEdit views in the [Knockout stack](/stacks/ko/overview.md). 
 
-These components are driven off of the generated layers described above rather than being statically generated like the [Knockout](http://knockoutjs.com/) admin pages - this allows us to keep bundle size to a minimum.
+These components are driven off of the generated layers described above rather than being statically generated like the [Knockout](https://knockoutjs.com/) admin pages - this allows us to keep bundle size to a minimum.
 
 The template described in [Getting Started with Vue](/stacks/vue/getting-started.md) comes with routes already in place for these page-level components. For example, ``/admin/Person`` for a table, ``/admin/Person/edit`` to create a new ``Person``, and ``/admin/Person/edit/:id`` to edit a ``Person``.
 

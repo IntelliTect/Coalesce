@@ -1,6 +1,6 @@
 github.com/intellitect/coalesce/edit
 
 # fails on github actions randomly:
-https://www.npmjs.com/package/
-https://knockoutjs.com/
+https://www.npmjs.com/package
+https://knockoutjs.com
 https://github.com/IntelliTect/Coalesce

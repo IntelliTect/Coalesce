@@ -19,7 +19,7 @@ jobs:
         NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
     - name: npm publish coalesce-vue-vuetify
-      run: for f in ./coalesce-vue-vuetify/*.tgz; do npm publish $f --tag dev --access public; done 
+      run: for f in ./coalesce-vue-vuetify/*.tgz; do npm publish $f --tag latest --access public; done 
       env:
         NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 

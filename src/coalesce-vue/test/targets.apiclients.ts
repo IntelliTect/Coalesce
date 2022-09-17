@@ -8,6 +8,30 @@ export class StudentApiClient extends ModelApiClient<$models.Student> {
     super($metadata.Student);
   }
 
+  public fullNameAndAge(
+    id: number,
+    $config?: AxiosRequestConfig
+  ): AxiosPromise<ItemResult<string>> {
+    const $method = this.$metadata.methods.fullNameAndAge;
+    const $params = {
+      id,
+    };
+    return this.$invoke($method, $params, $config);
+  }
+
+  public getWithObjParam(
+    id: number,
+    advisor?: $models.Advisor,
+    $config?: AxiosRequestConfig
+  ): AxiosPromise<ItemResult<$models.Advisor>> {
+    const $method = this.$metadata.methods.getWithObjParam;
+    const $params = {
+      id,
+      advisor,
+    };
+    return this.$invoke($method, $params, $config);
+  }
+
   public getFile(
     id: number,
     etag: string | null,

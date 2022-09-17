@@ -151,7 +151,7 @@ See [DisplayOptions](#displayoptions) for available options.
 The following options are available to functions in coalesce-vue that render a value or object for display:
 
 
-@[import-md "start":"interface DisplayOptions", "end":"\n}\n", "prepend":"``` ts", "append":"```"](../../../../src/coalesce-vue/src/model.ts)
+@[import-md "start":"export interface DisplayOptions", "end":"\n}\n", "prepend":"``` ts", "append":"```"](../../../../src/coalesce-vue/src/model.ts)
 
 ::: tip Note
 Dates rendered with `formatDistanceToNow` function into a Vue component will not automatically be updated in realtime. If this is needed, you should use a strategy like using a [key](https://v2.vuejs.org/v2/api/#key) that you periodically update to force a re-render.

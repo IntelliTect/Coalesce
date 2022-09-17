@@ -240,8 +240,9 @@ export const Student = (domain.types.Student = {
       return: {
         name: "$return",
         displayName: "Result",
+        type: "model",
         role: "value",
-        type: "string",
+        typeDef: Advisor,
       },
     },
     getFile: {

@@ -215,6 +215,24 @@ The state of the properties on the caller at any time will reflect the most rece
 For the reasons outlined above, it is generally not recommended to use `"allow"` unless you fully understand the drawbacks. This mode mirrors the legacy behavior of the Knockout stack for Coalesce.
 :::
 
+
+### Response Caching
+
+Response caching on API Callers is a feature that will save API responses to persistent storage (`sessionStorage` or `localStorage`). The next time a matching request is made, the `result` property of the API Caller will be populated with that saved response, allowing for a faster time to interactivity and reduced repaints and shifting of elements as initial data loads after a page navigation. It does not _prevent_ any HTTP requests from being made, and does not affect the `Promise` returned from `invoke` or `invokeWithArgs`.
+
+Common use cases include:
+- Site-wide status or alert messages
+- Server-provided configuration
+- Dashboard data, like statistics or graphs
+
+When a cached response is loaded, `result` is populated, `wasSuccessful` and `hasResult` are set to `true`, and `onFulfilled` callbacks are invoked.
+
+<Prop def="useResponseCaching(configuration?: ResponseCachingConfiguration | false)" lang="ts" />
+
+Enables response caching on the API Caller. Only [HTTP GET methods](/modeling/model-components/attributes/controller-action.md) are supported, and [file-returning methods](/modeling/model-components/methods.md#file-downloads) are not supported. Call with `false` to disable caching after it was previously enabled. The available options are as follows:
+
+@[import-md "start":"export type ResponseCachingConfiguration", "end":"\n};\n", "prepend":"``` ts", "append":"```"](../../../../src/coalesce-vue/src/api-client.ts)
+
 ### Other Methods
 
 API Callers have a few other methods available as well:
@@ -238,7 +256,7 @@ If a promise is returned, this promise will be awaited and will delay the settin
 
 <Prop def="invoke(...args: TArgs)" lang="ts" />
 
-The invoke function is a reference from the caller to itself - that is, `caller.invoke === caller`. This mirrors the syntax of the Knockout generated method classes.
+The invoke function is a reference from the caller to itself. In other words, `caller.invoke === caller`. This mirrors the syntax of the Knockout generated method classes.
 
 
 <Prop def="invokeWithArgs(args?: {})" lang="ts" />

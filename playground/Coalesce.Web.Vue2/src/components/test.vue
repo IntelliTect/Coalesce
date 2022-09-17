@@ -149,11 +149,12 @@
     }
 
     async created() {
-      
-      await this.caseVm.$load(16);
-      //await this.caseVm.downloadImage()
-      await this.company.$load(1);
 
+       this.caseVm.$load(16);
+      //await this.caseVm.downloadImage()
+       this.company.$load(1);
+
+      this.person.$load.useResponseCaching();
       await this.person.$load(1)
     }
 

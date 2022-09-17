@@ -1,5 +1,10 @@
 import { ComponentPublicInstance } from "vue";
-import { AxiosError, AxiosResponse, AxiosAdapter } from "axios";
+import {
+  AxiosError,
+  AxiosResponse,
+  AxiosAdapter,
+  AxiosRequestConfig,
+} from "axios";
 import { mount } from "@vue/test-utils";
 
 import { ItemMethod } from "../src/metadata";
@@ -18,10 +23,14 @@ import { Student, Advisor } from "./targets.models";
 
 import { delay, mountData } from "./test-utils";
 
-function makeEndpointMock() {
-  return vitest.fn((arg: number | undefined | null) => {
+function makeAdapterMock(result?: any) {
+  return makeEndpointMock<AxiosRequestConfig>(result);
+}
+
+function makeEndpointMock<TParam = number | undefined | null>(result?: any) {
+  return vitest.fn((arg?: TParam) => {
     return Promise.resolve({
-      data: <ItemResult>{ wasSuccessful: true, object: arg },
+      data: <ItemResult>{ wasSuccessful: true, object: result ?? arg },
       status: 200,
       statusText: "OK",
       headers: {},
@@ -100,7 +109,7 @@ describe("$withSimultaneousRequestCaching", () => {
         // Delay so the calls don't complete instantly (which would subvert request caching).
         await delay(30);
         return <AxiosResponse<any>>{
-          data: { wasSuccessful: true, object: "" },
+          data: { wasSuccessful: true, object: {} },
           status: 200,
         };
       }));
@@ -148,7 +157,7 @@ describe("$invoke", () => {
       )
     ).resolves.toBeTruthy();
 
-    expect(mock.mock.calls[0][0]).toMatchObject({ params: { id: undefined } });
+    expect(mock.mock.calls[0][0]).toMatchObject({ params: {} });
   });
 
   test("doesn't error when unexpected params are provided", async () => {
@@ -329,7 +338,7 @@ describe("$invoke", () => {
       { fields: ["studentAdvisorId", "name"] }
     );
 
-    expect(mock.mock.calls[0][0].data).toBe("studentAdvisorId=&name=bob");
+    expect(mock.mock.calls[0][0].data).toBe("name=bob&studentAdvisorId=");
   });
 });
 
@@ -727,6 +736,146 @@ describe("$makeCaller", () => {
     expect(revokeUrlMock).toBeCalledWith(url2);
     expect(beforeUnmountHooks()).toHaveLength(1);
   });
+
+  describe("useResponseCaching", () => {
+    test("dehydrates and hydrates object results", async () => {
+      let studentId = 1;
+      AxiosClient.defaults.adapter = () =>
+        makeEndpointMock({
+          name: "steve",
+          studentWrapperObject: {
+            name: "bob",
+            student: {
+              studentId: studentId++,
+              name: "bob",
+            },
+          },
+        } as Advisor)();
+
+      const runTest = () => {
+        const caller = new StudentApiClient().$makeCaller("item", (c) =>
+          c.getWithObjParam(42, new Advisor({ name: "steve" }))
+        );
+        caller.useResponseCaching();
+        return caller;
+      };
+
+      // Make the first caller and invoke it, which will populate the cache.
+      const caller1 = runTest();
+      expect(caller1.result).toBeNull();
+      await caller1();
+      expect(caller1.result).not.toBeNull();
+      const cacheValue = Object.values(sessionStorage)[0];
+      expect(cacheValue).not.toBeFalsy();
+      expect(cacheValue).not.toContain("$metadata");
+
+      // Make another caller. It will be dormant until invoked.
+      const caller2 = runTest();
+      expect(caller2.result).toBeNull();
+      expect(caller2.wasSuccessful).toBe(null);
+      expect(caller2.hasResult).toBe(false);
+      expect(caller2.isLoading).toBe(false);
+
+      // Invoke the caller. At this point, the cached response will get loaded.
+      const caller2Promise = caller2();
+      expect(caller2.result).toMatchObject(
+        new Advisor({
+          name: "steve",
+          studentWrapperObject: {
+            name: "bob",
+            student: {
+              studentId: 1,
+              name: "bob",
+            },
+          },
+        })
+      );
+      expect(caller2.wasSuccessful).toBe(true);
+      expect(caller2.hasResult).toBe(true);
+      expect(caller2.isLoading).toBe(true);
+
+      // Wait for the HTTP request to finish.
+      // Observe that the results are set with the new api response.
+      await caller2Promise;
+      expect(caller2.result).toMatchObject(
+        new Advisor({
+          name: "steve",
+          studentWrapperObject: {
+            name: "bob",
+            student: {
+              studentId: 2,
+              name: "bob",
+            },
+          },
+        })
+      );
+      expect(caller2.wasSuccessful).toBe(true);
+      expect(caller2.hasResult).toBe(true);
+      expect(caller2.isLoading).toBe(false);
+    });
+
+    test("respects stored max age", async () => {
+      AxiosClient.defaults.adapter = () => makeEndpointMock("asdf")();
+
+      const runTest = () => {
+        const caller = new StudentApiClient().$makeCaller("item", (c) =>
+          c.fullNameAndAge(42)
+        );
+        caller.useResponseCaching({ maxAgeSeconds: 0.4 });
+        return caller;
+      };
+
+      // Make the first caller and invoke it, which will populate the cache.
+      await runTest()();
+
+      // Make another caller. Since essentially no time has passed,
+      // the cached result will still be used.
+      const caller2 = runTest();
+      caller2();
+      expect(caller2.result).toBe("asdf");
+
+      // Make another caller, but this time wait for the cache to expire.
+      const caller3 = runTest();
+      // Since the stored max age is smaller, it is used instead of the configured max age.
+      caller3.useResponseCaching({ maxAgeSeconds: 20 });
+      await delay(500);
+      caller3();
+      // Since the stored value should now be expired, invoking the caller
+      // will not have hydrated `result` with a cached value.
+      expect(caller3.result).toBe(null);
+    });
+
+    test("respects configured max age if smaller than stored", async () => {
+      AxiosClient.defaults.adapter = () => makeEndpointMock("asdf")();
+
+      const runTest = () => {
+        const caller = new StudentApiClient().$makeCaller("item", (c) =>
+          c.fullNameAndAge(42)
+        );
+        caller.useResponseCaching({ maxAgeSeconds: 20 });
+        return caller;
+      };
+
+      // Make the first caller and invoke it, which will populate the cache.
+      await runTest()();
+
+      // Make another caller. Since essentially no time has passed,
+      // the cached result will still be used.
+      const caller2 = runTest();
+      caller2();
+      expect(caller2.result).toBe("asdf");
+
+      // Make another caller, but this time wait for the cache to expire.
+      const caller3 = runTest();
+      // Since the current max age is smaller, it is used instead of the stored max age.
+      caller3.useResponseCaching({ maxAgeSeconds: 0.4 });
+      await delay(500);
+      caller3();
+      // Since the stored value should now be expired, invoking the caller
+      // will not have hydrated `result` with a cached value.
+      expect(caller3.result).toBe(null);
+    });
+  });
 });
 
 describe("$makeCaller with args object", () => {
@@ -795,7 +944,11 @@ describe("$makeCaller with args object", () => {
   });
 
   describe.each(["item", "list"] as const)("for %s transport", (type) => {
-    const makeCaller = (endpointMock: ReturnType<typeof makeEndpointMock>) =>
+    const makeCaller = (
+      endpointMock: ReturnType<
+        typeof makeEndpointMock<number | null | undefined>
+      >
+    ) =>
       new StudentApiClient().$makeCaller(
         type,
         (c, num: number) => endpointMock(num),

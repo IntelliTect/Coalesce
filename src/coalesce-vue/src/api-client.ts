@@ -26,7 +26,6 @@ import {
   parseValue,
 } from "./model.js";
 import {
-  OwnProps,
   Indexable,
   objectToQueryString,
   objectToFormData,
@@ -648,13 +647,15 @@ export class ApiClient<T extends ApiRoutedType> {
   public $invoke<TMethod extends ItemMethod>(
     method: TMethod,
     params: ParamsObject<TMethod>,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig,
+    standardParameters?: DataSourceParameters
   ): AxiosPromise<ItemResult<any>>;
 
   public $invoke<TMethod extends ListMethod>(
     method: TMethod,
     params: ParamsObject<TMethod>,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig,
+    standardParameters?: DataSourceParameters
   ): AxiosPromise<ListResult<any>>;
 
   /**
@@ -666,7 +667,8 @@ export class ApiClient<T extends ApiRoutedType> {
   public $invoke<TMethod extends Method>(
     method: TMethod,
     params: ParamsObject<TMethod>,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig,
+    standardParameters?: DataSourceParameters
   ) {
     const mappedParams = this.$mapParams(method, params);
     const url = `/${this.$metadata.controllerRoute}/${method.name}`;
@@ -705,20 +707,22 @@ export class ApiClient<T extends ApiRoutedType> {
       url: url,
       data: body,
       responseType: method.return.type == "file" ? "blob" : "json",
-      ...this.$options(undefined, config, query),
+      ...this.$options(standardParameters, config, query),
     };
 
-    if (this._requestParametersCapture) {
-      this._requestParametersCapture.push(axiosRequest);
-      return new Promise(() => {
-        /* never resolve */
-      });
+    if (this._observedRequests) {
+      this._observedRequests.push({ request: axiosRequest, method: method });
+      if (!this._observedRequests.doRequest) {
+        return new Promise(() => {
+          /* never resolve */
+        });
+      }
     }
 
     return this._possiblyCachedRequest(
       method.httpMethod,
       url,
-      mappedParams,
+      { ...mappedParams, ...mapParamsToDto(standardParameters) },
       config,
       () =>
         AxiosClient.request(axiosRequest).then((r) => {
@@ -758,19 +762,35 @@ export class ApiClient<T extends ApiRoutedType> {
     );
   }
 
-  // NOTE: DO NOT init _requestParametersCapture to null. This _should_ be nonreactive.
-  private _requestParametersCapture?: AxiosRequestConfig[];
-  /** Invokes `func`, but instead of performing any API calls within $invoke() invocations,
-   * instead captures the parameters and returns a never-resolving promise to the invocations.
+  // NOTE: DO NOT init _observedRequests to null. This _should_ be nonreactive.
+  private _observedRequests?: {
+    request: AxiosRequestConfig;
+    method: Method;
+  }[] & {
+    readonly doRequest: boolean;
+  };
+
+  /** Invokes `func`, capturing the parameter of any API calls within $invoke() invocations.,
+   * If `capture` is true, no HTTP request will be made, being replaced by a never-resolving promise.
    */
-  private _captureRequestParameters(func: Function) {
-    const old = this._requestParametersCapture;
+  private _observeRequests<TFuncResult>(
+    func: () => TFuncResult,
+    capture = false
+  ): [TFuncResult, { request: AxiosRequestConfig; method: Method }[]] {
+    const old = this._observedRequests;
     try {
-      const capture = (this._requestParametersCapture = []);
-      func();
-      return capture;
+      const capturedRequests = (this._observedRequests = Object.defineProperty(
+        [] as any,
+        "doRequest",
+        {
+          enumerable: false,
+          value: capture,
+        }
+      ));
+      const result = func();
+      return [result, capturedRequests];
     } finally {
-      this._requestParametersCapture = old;
+      this._observedRequests = old;
     }
   }
 
@@ -834,6 +854,8 @@ export class ApiClient<T extends ApiRoutedType> {
     for (var paramName in method.params) {
       const paramMeta = method.params[paramName];
       const paramValue = params[paramName];
+
+      if (paramValue === undefined) continue;
 
       const pureType =
         paramMeta.type == "collection" ? paramMeta.itemType : paramMeta;
@@ -927,12 +949,24 @@ export class ModelApiClient<TModel extends Model<ModelType>> extends ApiClient<
     parameters?: DataSourceParameters,
     config?: AxiosRequestConfig
   ): ItemResultPromise<TModel> {
-    let url = `/${this.$metadata.controllerRoute}/get/${id}`;
-
-    return this._possiblyCachedRequest("GET", url, parameters, config, () =>
-      AxiosClient.get(url, this.$options(parameters, config)).then<
-        AxiosItemResult<TModel>
-      >((r) => this.$hydrateItemResult(r, this.$itemValueMeta))
+    return this.$invoke(
+      {
+        name: `get/${id}`,
+        displayName: "get",
+        transportType: "item",
+        httpMethod: "GET",
+        params: {},
+        return: {
+          name: "$return",
+          displayName: "Result",
+          type: "model",
+          typeDef: this.$metadata as ModelType,
+          role: "value",
+        },
+      },
+      {},
+      config,
+      parameters
     );
   }
 
@@ -940,12 +974,30 @@ export class ModelApiClient<TModel extends Model<ModelType>> extends ApiClient<
     parameters?: ListParameters,
     config?: AxiosRequestConfig
   ): ListResultPromise<TModel> {
-    let url = `/${this.$metadata.controllerRoute}/list`;
-
-    return this._possiblyCachedRequest("GET", url, parameters, config, () =>
-      AxiosClient.get(url, this.$options(parameters, config)).then<
-        AxiosListResult<TModel>
-      >((r) => this.$hydrateListResult(r, this.$collectionValueMeta))
+    return this.$invoke(
+      {
+        name: "list",
+        displayName: "list",
+        transportType: "list",
+        httpMethod: "GET",
+        params: {},
+        return: {
+          name: "$return",
+          displayName: "Result",
+          type: "collection",
+          itemType: {
+            name: "$collectionItem",
+            displayName: "",
+            type: "model",
+            typeDef: this.$metadata as ModelType,
+            role: "value",
+          },
+          role: "value",
+        },
+      },
+      {},
+      config,
+      parameters
     );
   }
 
@@ -953,9 +1005,23 @@ export class ModelApiClient<TModel extends Model<ModelType>> extends ApiClient<
     parameters?: FilterParameters,
     config?: AxiosRequestConfig
   ): ItemResultPromise<number> {
-    return AxiosClient.get<ItemResult<number>>(
-      `/${this.$metadata.controllerRoute}/count`,
-      this.$options(parameters, config)
+    return this.$invoke(
+      {
+        name: "count",
+        displayName: "count",
+        transportType: "item",
+        httpMethod: "GET",
+        params: {},
+        return: {
+          name: "$return",
+          displayName: "Result",
+          type: "number",
+          role: "value",
+        },
+      },
+      {},
+      config,
+      parameters
     );
   }
 
@@ -966,12 +1032,28 @@ export class ModelApiClient<TModel extends Model<ModelType>> extends ApiClient<
   ): ItemResultPromise<TModel> {
     const { fields, ...params } = parameters ?? new SaveParameters<TModel>();
 
-    return AxiosClient.post(
-      `/${this.$metadata.controllerRoute}/save`,
-      objectToQueryString(mapToDtoFiltered(item, fields)),
-      this.$options(params, config)
-    ).then<AxiosItemResult<TModel>>((r) =>
-      this.$hydrateItemResult(r, this.$itemValueMeta)
+    return this.$invoke(
+      {
+        name: "save",
+        displayName: "save",
+        transportType: "item",
+        httpMethod: "POST",
+        params: Object.fromEntries(
+          Object.entries(this.$metadata.props).filter(
+            (p) => !p[1].dontSerialize
+          )
+        ),
+        return: {
+          name: "$return",
+          displayName: "Result",
+          type: "model",
+          typeDef: this.$metadata as ModelType,
+          role: "value",
+        },
+      },
+      mapToDtoFiltered(item, fields)!,
+      config,
+      params
     );
   }
 
@@ -980,12 +1062,24 @@ export class ModelApiClient<TModel extends Model<ModelType>> extends ApiClient<
     parameters?: DataSourceParameters,
     config?: AxiosRequestConfig
   ): ItemResultPromise<TModel> {
-    return AxiosClient.post(
-      `/${this.$metadata.controllerRoute}/delete/${id}`,
-      null,
-      this.$options(parameters, config)
-    ).then<AxiosItemResult<TModel>>((r) =>
-      this.$hydrateItemResult(r, this.$itemValueMeta)
+    return this.$invoke(
+      {
+        name: `delete/${id}`,
+        displayName: "delete",
+        transportType: "item",
+        httpMethod: "POST",
+        params: {},
+        return: {
+          name: "$return",
+          displayName: "Result",
+          type: "model",
+          typeDef: this.$metadata as ModelType,
+          role: "value",
+        },
+      },
+      {},
+      config,
+      parameters
     );
   }
 
@@ -1085,6 +1179,24 @@ abstract class ApiStateBase<TArgs extends any[], TResult> extends Function {
   }
 }
 
+export type ResponseCachingConfiguration = {
+  /** Function that will determine the cache key used for a particular request.
+   * Return a falsy value to prevent caching. The default key is the request URL.
+   */
+  key?: (
+    req: AxiosRequestConfig,
+    defaultKey: string
+  ) => string | null | undefined;
+
+  /** The maximum age of a cached response. If null, the entry will not expire. Default 1 hour.
+   *
+   * The smallest of the current configured max age and the max age that was set at the time of the cached response is used. */
+  maxAgeSeconds?: number | null;
+
+  /** The Storage (default `sessionStorage`) that will hold cached responses. */
+  storage?: Storage;
+};
+
 export abstract class ApiState<
   TArgs extends any[],
   TResult
@@ -1096,6 +1208,8 @@ export abstract class ApiState<
 
   /** The metadata of the method being called, if it was provided. */
   abstract $metadata?: Method;
+
+  abstract result: TResult | TResult[] | null;
 
   private readonly __isLoading = ref(false);
   /** True if a request is currently pending. */
@@ -1136,17 +1250,29 @@ export abstract class ApiState<
     this.__hasResult.value = v;
   }
 
-  private _concurrencyMode: ApiCallerConcurrency = "disallow";
-
+  private __responseCacheConfig?: ResponseCachingConfiguration;
   /**
-   * Function that can be called to cancel a pending request.
+   * Enable response caching for the API caller,
+   * saving previous responses to persistent storage (default: `sessionStorage`) so they can later
+   * be used to populate `result` when an identical request is made but before a network response is received.
+   *
+   * Response caching does not prevent any HTTP requests from being made, but instead
+   * will temporarily load an old response while the fresh response is being fetched.
+   *
+   * Do not use for any endpoint that could contain sensitive data.
    */
-  cancel() {
-    if (this._cancelToken) {
-      this._cancelToken.cancel();
-      this.isLoading = false;
+  useResponseCaching(configuration?: ResponseCachingConfiguration | false) {
+    if (this.$metadata && this.$metadata.httpMethod != "GET") {
+      // Preemptively guard against this since it'll likely be a common mistake.
+      throw new Error("Response caching can only be used on HTTP GET methods.");
     }
+
+    this.__responseCacheConfig =
+      configuration === false ? undefined : configuration ?? {};
+    return this;
   }
+
+  private _concurrencyMode: ApiCallerConcurrency = "disallow";
 
   /**
    * Set the concurrency mode for this API caller. Default is "disallow".
@@ -1190,6 +1316,16 @@ export abstract class ApiState<
   }
 
   private _cancelToken: CancelTokenSource | undefined;
+
+  /**
+   * Function that can be called to cancel a pending request.
+   */
+  cancel() {
+    if (this._cancelToken) {
+      this._cancelToken.cancel();
+      this.isLoading = false;
+    }
+  }
 
   private _callbacks: {
     onFulfilled: Array<ApiStateHook<any>>;
@@ -1278,8 +1414,102 @@ export abstract class ApiState<
         cancelToken: token.token,
       };
 
+      const responseCacheConfig = this.__responseCacheConfig;
+      if (responseCacheConfig) {
+        const originalCallInvoker = callInvoker;
+        callInvoker = async () => {
+          //@ts-expect-error _observeRequests is private because TS has no `internal`.
+          const [promise, requests] = this.apiClient._observeRequests(
+            originalCallInvoker,
+            true
+          );
+          const { request, method } = requests[0];
+          if (!request || !promise) return promise;
+
+          const {
+            key: keyFunc,
+            storage = sessionStorage,
+            maxAgeSeconds: configuredMaxAge = 3600,
+          } = responseCacheConfig!;
+
+          if (request.method?.toUpperCase() != "GET") {
+            // We don't strictly NEED to limit this to GET,
+            // however, determining the cache key gets much harder when it isn't a GET,
+            // and in general you just probably shouldn't be caching the results of non-GETs.
+            console.warn(
+              "useResponseCaching cannot be used on ApiCallers that invoke a non-GET endpoint."
+            );
+            return promise;
+          }
+          if (method.return.type == "file" || method.return.type == "void") {
+            // Can't store files, and obviously caching void is meaningless.
+            console.warn(
+              `useResponseCaching cannot be used on ApiCallers that invoke a ${method.return.type}-returning endpoint.`
+            );
+            return promise;
+          }
+
+          const defaultKey = AxiosClient.getUri(request);
+          const userKey = keyFunc ? keyFunc(request, defaultKey) : defaultKey;
+          if (!userKey) return promise;
+
+          const key = `coalesce:${userKey}`;
+
+          const cachedValue = storage.getItem(key);
+          if (cachedValue) {
+            const {
+              time,
+              maxAge: storedMaxAge,
+              result,
+            } = JSON.parse(cachedValue);
+            const effectiveMaxAge = Math.min(
+              storedMaxAge || Number.MAX_VALUE,
+              configuredMaxAge || Number.MAX_VALUE
+            );
+            if (time >= Date.now() / 1000 - effectiveMaxAge) {
+              switch (method.transportType) {
+                case "item":
+                  convertToModel(result.object, method.return);
+                case "list":
+                  convertToModel(result.list, method.return);
+              }
+
+              this.setResponseProps(result);
+
+              // Invoke the fulfilled callbacks so that ViewModel.$load and ListViewModel.$load
+              // will work normally, populating the ViewModel with the results.
+              const onFulfilled = this._callbacks.onFulfilled;
+              for (let i = 0; i < onFulfilled.length; i++) {
+                const cb = onFulfilled[i];
+                const cbResult = cb.apply(thisArg, [this]);
+                if (cbResult instanceof Promise) {
+                  await cbResult;
+                }
+              }
+            }
+          }
+
+          const resp = await promise;
+
+          const data = resp.data;
+          storage.setItem(
+            key,
+            JSON.stringify(
+              {
+                time: Date.now() / 1000,
+                maxAge: configuredMaxAge,
+                result: data,
+              },
+              (key, value) => (key == "$metadata" ? undefined : value)
+            )
+          );
+
+          return resp;
+        };
+      }
+
       this._cancelToken = token;
-      const promise = callInvoker();
+      let promise = callInvoker();
 
       if (!promise) {
         this.isLoading = false;
@@ -1527,13 +1757,12 @@ export class ItemApiStateWithArgs<
 
   /** Returns the URL for the endpoint, including querystring parameters, if invoked using `this.args`. */
   get url() {
-    var requests: AxiosRequestConfig[] =
-      // @ts-expect-error: _captureRequestParameters is private (since TS has no "internal")
-      this.apiClient._captureRequestParameters(() => {
+    const request =
+      // @ts-expect-error: _observeRequests is private (since TS has no "internal")
+      this.apiClient._observeRequests(() => {
         this.argsInvoker.apply(this, [this.apiClient, this.args]);
-      });
+      }, false)[1][0].request;
 
-    var request = requests[0];
     if (!request) return null;
     let url = AxiosClient.getUri(request);
 

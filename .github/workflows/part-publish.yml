@@ -14,7 +14,7 @@ jobs:
         registry-url: 'https://registry.npmjs.org'
 
     - name: npm publish coalesce-vue
-      run: npm publish ./coalesce-vue/*.tgz --tag dev --access public
+      run: npm publish ./coalesce-vue/*.tgz --tag latest --access public
       env:
         NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 

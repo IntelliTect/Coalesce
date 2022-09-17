@@ -31,7 +31,7 @@ After you create your project, you should start reading through [the Documentati
 ## Builds
 |channel|build|IntelliTect.Coalesce|coalesce-vue
 |:--:|:--:|:--:|:--:
-|dev|[![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/IntelliTect/Coalesce/build-alpha/dev?label=Build%20Status&logo=github)](https://github.com/IntelliTect/Coalesce/actions/workflows/alpha.yml)|[![NuGet](https://img.shields.io/static/v1?color=blue&label=nuget&logo=nuget&message=alpha%20prereleases)](https://www.nuget.org/packages/IntelliTect.Coalesce)|[![npm](https://img.shields.io/npm/v/coalesce-vue/dev.svg)](https://www.npmjs.com/package/coalesce-vue)
+|dev|[![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/IntelliTect/Coalesce/build-alpha/dev?label=Build%20Status&logo=github)](https://github.com/IntelliTect/Coalesce/actions/workflows/alpha.yml)|[![NuGet](https://img.shields.io/static/v1?color=blue&label=nuget&logo=nuget&message=alpha%20prereleases)](https://www.nuget.org/packages/IntelliTect.Coalesce)|[![npm](https://img.shields.io/npm/v/coalesce-vue/latest.svg)](https://www.npmjs.com/package/coalesce-vue)
 |master|[![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/IntelliTect/Coalesce/release/master?label=Build%20Status&logo=github)](https://github.com/IntelliTect/Coalesce/actions/workflows/release.yml)|[![NuGet](https://img.shields.io/nuget/v/IntelliTect.Coalesce.svg?label=nuget&logo=nuget)](https://www.nuget.org/packages/IntelliTect.Coalesce)
 
 

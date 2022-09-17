@@ -138,7 +138,7 @@ function resolveImportCode (
 
   // read file content
   const fileContent = fs.readFileSync(importFilePath).toString()
-  const lines = fileContent.split('\n')
+  const lines = fileContent.replace(/\r/g, '').split('\n')
 
   const match = (line: string, query?: string) => {
     if (!query) return;

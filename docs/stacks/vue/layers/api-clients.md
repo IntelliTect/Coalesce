@@ -225,7 +225,7 @@ Common use cases include:
 - Server-provided configuration
 - Dashboard data, like statistics or graphs
 
-When a cached response is loaded, `result` is populated, `wasSuccessful` and `hasResult` are set to `true`, and `onFulfilled` callbacks are invoked.
+When a cached response is loaded, `result` is populated with that response's data, `wasSuccessful` and `hasResult` are set to `true`, and `onFulfilled` callbacks are invoked.
 
 <Prop def="useResponseCaching(configuration?: ResponseCachingConfiguration | false)" lang="ts" />
 

@@ -2,15 +2,12 @@ import { onBeforeUnmount, Ref, ref } from "vue";
 
 import {
   ModelType,
-  ClassType,
   Method,
   Service,
   ApiRoutedType,
   DataSourceType,
-  Value,
   ModelValue,
   CollectionValue,
-  VoidValue,
   ItemMethod,
   ListMethod,
   TypeDiscriminatorToType,
@@ -154,18 +151,18 @@ export class ListParameters extends FilterParameters {
   }
 }
 
+export type StandardParameters =
+  | ListParameters
+  | FilterParameters
+  | DataSourceParameters
+  | SaveParameters;
+
 /**
- * Maps the given API parameters object into an flat object of key-value pairs
+ * Maps the given API standard parameters object into an flat object of key-value pairs
  * that is suitable for use as a URL querystring.
  * @param parameters The parameters to map.
  */
-export function mapParamsToDto(
-  parameters?:
-    | ListParameters
-    | FilterParameters
-    | DataSourceParameters
-    | SaveParameters
-) {
+export function mapParamsToDto(parameters?: StandardParameters) {
   if (!parameters) return null;
 
   // Assume the widest type, which is ListParameters.
@@ -237,15 +234,14 @@ export function mapParamsToDto(
  * @param parametersType The constructor of the parameters object to create.
  * @param modelClass The generated model class (containing a `DataSources` namespace) 1
  */
-export function mapQueryToParams<T extends DataSourceParameters>(
+export function mapQueryToParams<T extends StandardParameters>(
   flatQuery: any,
   parametersType: new () => T,
   modelMeta: ModelType
 ): T {
   const dto = flatQuery; // alias for brevity
 
-  const parameters: DataSourceParameters | FilterParameters | ListParameters =
-    new parametersType();
+  const parameters = new parametersType();
 
   if (parameters instanceof ListParameters) {
     if ("page" in dto) parameters.page = +dto.page;
@@ -391,88 +387,72 @@ AxiosClient.interceptors.request.use((config) => {
   };
 });
 
-export type ItemApiReturnType<
-  T extends (this: null, ...args: any[]) => ItemResultPromise<any>
-> = ReturnType<T> extends void
-  ? void
-  : ReturnType<T> extends ItemResultPromise<infer R>
-  ? R
-  : any;
-
-export type ListApiReturnType<
-  T extends (this: null, ...args: any[]) => ListResultPromise<any>
-> = ReturnType<T> extends ListResultPromise<infer S> ? S : any;
-
-type AnyApiReturnType<
-  T extends (this: null, ...args: any[]) => ApiResultPromise<any>
-> = ReturnType<T> extends ApiResultPromise<infer S> ? S : any;
-
 export type ApiCallerConcurrency = "cancel" | "disallow" | "allow" | "debounce";
 
-type ItemTransportTypeSpecifier<T extends ApiRoutedType> =
+type ItemTransportTypeSpecifier<T extends ApiRoutedType = any> =
   | "item"
   | ItemMethod
   | ((methods: T["methods"]) => ItemMethod);
 
-type ListTransportTypeSpecifier<T extends ApiRoutedType> =
+type ListTransportTypeSpecifier<T extends ApiRoutedType = any> =
   | "list"
   | ListMethod
   | ((methods: T["methods"]) => ListMethod);
 
-type TransportTypeSpecifier<T extends ApiRoutedType> =
+type TransportTypeSpecifier<T extends ApiRoutedType = any> =
   | ItemTransportTypeSpecifier<T>
   | ListTransportTypeSpecifier<T>;
 
 type ResultPromiseType<
-  T extends TransportTypeSpecifier<any>,
+  T extends TransportTypeSpecifier,
   TResult
-> = T extends ItemTransportTypeSpecifier<any>
+> = T extends ItemTransportTypeSpecifier
   ? ItemResultPromise<TResult>
-  : T extends ListTransportTypeSpecifier<any>
+  : T extends ListTransportTypeSpecifier
   ? ListResultPromise<TResult>
   : never;
 
-type InvokerReturnType<
-  T extends TransportTypeSpecifier<any>,
-  TResult
-> = T extends ItemTransportTypeSpecifier<any>
-  ? ItemResultPromise<TResult>
-  : T extends ListTransportTypeSpecifier<any>
-  ? ListResultPromise<TResult>
-  : never;
-
-type InvokerType<
-  T extends TransportTypeSpecifier<any>,
+type ApiCallerInvoker<
   TArgs extends any[],
-  TResult
-> = TCall<TArgs, InvokerReturnType<T, TResult>>;
+  TReturn,
+  TClient extends ApiClient<any>
+> = (this: any, client: TClient, ...args: TArgs) => TReturn;
+
+type ApiCallerArgsInvoker<TArgs, TReturn, TClient extends ApiClient<any>> = (
+  this: any,
+  client: TClient,
+  args: TArgs
+) => TReturn;
 
 export type ApiStateType<
-  T extends TransportTypeSpecifier<any>,
+  T extends TransportTypeSpecifier,
   TArgs extends any[],
   TResult
-> = (T extends ItemTransportTypeSpecifier<any>
+> = T extends ItemTransportTypeSpecifier
   ? ItemApiState<TArgs, TResult>
-  : T extends ListTransportTypeSpecifier<any>
+  : T extends ListTransportTypeSpecifier
   ? ListApiState<TArgs, TResult>
-  : never) &
-  InvokerType<T, TArgs, TResult>;
+  : never;
 
 export type ApiStateTypeWithArgs<
-  T extends TransportTypeSpecifier<any>,
+  T extends TransportTypeSpecifier,
   TArgs extends any[],
   TArgsObj extends {},
   TResult
-> = (T extends ItemTransportTypeSpecifier<any>
+> = T extends ItemTransportTypeSpecifier
   ? ItemApiStateWithArgs<TArgs, TArgsObj, TResult>
-  : T extends ListTransportTypeSpecifier<any>
+  : T extends ListTransportTypeSpecifier
   ? ListApiStateWithArgs<TArgs, TArgsObj, TResult>
-  : never) &
-  InvokerType<T, TArgs, TResult>;
+  : never;
 
 const simultaneousGetCache: Map<string, AxiosPromise<any>> = new Map();
 
 export class ApiClient<T extends ApiRoutedType> {
+  /** See comments on ReactiveFlags_SKIP for explanation.
+   * @internal
+   */
+  private readonly [ReactiveFlags_SKIP] = true;
+
   constructor(public $metadata: T) {}
 
   /** Configuration to inject into the next request. */
@@ -502,7 +482,11 @@ export class ApiClient<T extends ApiRoutedType> {
     TTransportType extends TransportTypeSpecifier<T>
   >(
     resultType: TTransportType,
-    invoker: TInvoker<TArgs, ResultPromiseType<TTransportType, TResult>, this>
+    invoker: ApiCallerInvoker<
+      TArgs,
+      ResultPromiseType<TTransportType, TResult>,
+      this
+    >
   ): ApiStateType<TTransportType, TArgs, TResult>;
 
   /**
@@ -516,7 +500,7 @@ export class ApiClient<T extends ApiRoutedType> {
     TTransportType extends TransportTypeSpecifier<T>
   >(
     resultType: TTransportType,
-    invoker: TInvoker<
+    invoker: ApiCallerInvoker<
       TArgs,
       ResultPromiseType<TTransportType, TResult> | undefined | void,
       this
@@ -536,9 +520,13 @@ export class ApiClient<T extends ApiRoutedType> {
     TTransportType extends TransportTypeSpecifier<T>
   >(
     resultType: TTransportType,
-    invoker: TInvoker<TArgs, ResultPromiseType<TTransportType, TResult>, this>,
+    invoker: ApiCallerInvoker<
+      TArgs,
+      ResultPromiseType<TTransportType, TResult>,
+      this
+    >,
     argsFactory?: () => TArgsObj,
-    argsInvoker?: TArgsInvoker<
+    argsInvoker?: ApiCallerArgsInvoker<
       TArgsObj,
       ResultPromiseType<TTransportType, TResult>,
       this
@@ -558,13 +546,13 @@ export class ApiClient<T extends ApiRoutedType> {
     TTransportType extends TransportTypeSpecifier<T>
   >(
     resultType: TTransportType,
-    invoker: TInvoker<
+    invoker: ApiCallerInvoker<
       TArgs,
       ResultPromiseType<TTransportType, TResult> | undefined | void,
       this
     >,
     argsFactory?: () => TArgsObj,
-    argsInvoker?: TArgsInvoker<
+    argsInvoker?: ApiCallerArgsInvoker<
       TArgsObj,
       ResultPromiseType<TTransportType, TResult> | undefined | void,
       this
@@ -578,13 +566,13 @@ export class ApiClient<T extends ApiRoutedType> {
     TTransportType extends TransportTypeSpecifier<T>
   >(
     resultType: TTransportType,
-    invoker: TInvoker<
+    invoker: ApiCallerInvoker<
       TArgs,
       ResultPromiseType<TTransportType, TResult> | undefined | void,
       this
     >,
     argsFactory?: () => TArgsObj,
-    argsInvoker?: TArgsInvoker<
+    argsInvoker?: ApiCallerArgsInvoker<
       TArgsObj,
       ResultPromiseType<TTransportType, TResult> | undefined | void,
       this
@@ -649,14 +637,18 @@ export class ApiClient<T extends ApiRoutedType> {
     params: ParamsObject<TMethod>,
     config?: AxiosRequestConfig,
     standardParameters?: DataSourceParameters
-  ): AxiosPromise<ItemResult<any>>;
+  ): AxiosPromise<
+    ItemResult<TypeDiscriminatorToType<TMethod["return"]["type"]>>
+  >;
 
   public $invoke<TMethod extends ListMethod>(
     method: TMethod,
     params: ParamsObject<TMethod>,
     config?: AxiosRequestConfig,
     standardParameters?: DataSourceParameters
-  ): AxiosPromise<ListResult<any>>;
+  ): AxiosPromise<
+    ListResult<TypeDiscriminatorToType<TMethod["return"]["type"]>>
+  >;
 
   /**
    * Invoke the specified method using the provided set of parameters.
@@ -707,7 +699,13 @@ export class ApiClient<T extends ApiRoutedType> {
       url: url,
       data: body,
       responseType: method.return.type == "file" ? "blob" : "json",
-      ...this.$options(standardParameters, config, query),
+      ...this._nextRequestConfig,
+      ...config,
+      params: {
+        ...query,
+        ...(config && config.params ? config.params : null),
+        ...mapParamsToDto(standardParameters),
+      },
     };
 
     if (this._observedRequests) {
@@ -719,47 +717,90 @@ export class ApiClient<T extends ApiRoutedType> {
       }
     }
 
-    return this._possiblyCachedRequest(
-      method.httpMethod,
-      url,
-      { ...mappedParams, ...mapParamsToDto(standardParameters) },
-      config,
-      () =>
-        AxiosClient.request(axiosRequest).then((r) => {
-          if (method.return.type == "file") {
-            if (typeof r.data !== "object") {
-              // This should be impossible since we asked axios to provide us a blob.
-              throw new Error(
-                `Unexpected raw ${typeof r.data} response from server.`
-              );
-            }
+    let doCache = false;
+    let cacheKey: string;
 
-            // https://stackoverflow.com/a/40940790
-            let disposition = r.headers["content-disposition"];
-            let filename = "";
-            if (disposition && disposition.indexOf("attachment") !== -1) {
-              var filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
-              var matches = filenameRegex.exec(disposition);
-              if (matches != null && matches[1]) {
-                filename = matches[1].replace(/['"]/g, "");
-              }
-            }
+    if (
+      method.httpMethod === "GET" &&
+      this._simultaneousGetCaching &&
+      !config
+    ) {
+      cacheKey = AxiosClient.getUri(axiosRequest);
+      if (simultaneousGetCache.has(cacheKey)) {
+        return simultaneousGetCache.get(cacheKey)!;
+      } else {
+        doCache = true;
+      }
+    }
 
-            const blob: Blob = r.data;
-            r.data = <ItemResult<File>>{
-              wasSuccessful: true,
-              object: new File([blob], filename, { type: blob.type }),
-            };
-            return r;
+    let promise = AxiosClient.request(axiosRequest).then((r) => {
+      if (typeof r.data !== "object") {
+        // This case usually only happens if the endpoint doesn't exist on the server,
+        // causing the server to return a SPA fallback route (as HTML) with a 200 status.
+        throw new Error(
+          `Unexpected ${
+            r.headers?.["content-type"]
+          } ${typeof r.data} response from server.`
+        );
+      }
+
+      switch (method.return.type) {
+        case "file":
+          // Determine the name of the downloaded file.
+          // https://stackoverflow.com/a/40940790
+          let disposition = r.headers["content-disposition"];
+          let filename = "";
+          if (disposition && disposition.indexOf("attachment") !== -1) {
+            var filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
+            var matches = filenameRegex.exec(disposition);
+            if (matches != null && matches[1]) {
+              filename = matches[1].replace(/['"]/g, "");
+            }
           }
+
+          // Wrap the blob obtained from Axios into a Coalesce ItemResult.
+          const blob: Blob = r.data;
+          r.data = <ItemResult<File>>{
+            wasSuccessful: true,
+            object: new File([blob], filename, { type: blob.type }),
+          };
+          return r;
+
+        case "void":
+          return r;
+
+        default:
           switch (method.transportType) {
             case "item":
-              return this.$hydrateItemResult(r, (method as ItemMethod).return);
+              r.data.object = convertToModel(r.data.object, method.return);
+              return r;
             case "list":
-              return this.$hydrateListResult(r, (method as ListMethod).return);
+              r.data.list = convertToModel(r.data.list, method.return);
+              return r;
           }
-        })
-    );
+      }
+    });
+
+    if (doCache) {
+      // Add the promise to the cache.
+      simultaneousGetCache.set(cacheKey!, promise);
+
+      // Remove the promise from the cache when it completes.
+      promise = promise.then(
+        (x) => {
+          // Remove the request from the cache, because its done now.
+          simultaneousGetCache.delete(cacheKey);
+          return x;
+        },
+        (e) => {
+          simultaneousGetCache.delete(cacheKey);
+          // Re-throw the error so callers down the line can handle it.
+          throw e;
+        }
+      );
+    }
+
+    return promise;
   }
 
   // NOTE: DO NOT init _observedRequests to null. This _should_ be nonreactive.
@@ -794,50 +835,6 @@ export class ApiClient<T extends ApiRoutedType> {
     }
   }
 
-  /** Wraps a request, performing caching as needed according to _simultaneousGetCaching  */
-  protected _possiblyCachedRequest(
-    method: string,
-    url: string,
-    parameters: any,
-    config: AxiosRequestConfig | undefined,
-    promiseFactory: () => AxiosPromise<any>
-  ) {
-    let doCache = false;
-    let cacheKey: string;
-
-    if (method === "GET" && this._simultaneousGetCaching && !config) {
-      cacheKey = url + "?" + objectToQueryString(parameters);
-      if (simultaneousGetCache.has(cacheKey)) {
-        return simultaneousGetCache.get(cacheKey)!;
-      } else {
-        doCache = true;
-      }
-    }
-
-    let promise = promiseFactory();
-
-    if (doCache) {
-      // Add the promise to the cache.
-      simultaneousGetCache.set(cacheKey!, promise);
-
-      // Remove the promise from the cache when it completes.
-      promise = promise.then(
-        (x) => {
-          // Remove the request from the cache, because its done now.
-          simultaneousGetCache.delete(cacheKey);
-          return x;
-        },
-        (e) => {
-          simultaneousGetCache.delete(cacheKey);
-          // Re-throw the error so callers down the line can handle it.
-          throw e;
-        }
-      );
-    }
-
-    return promise;
-  }
-
   /**
    * Maps the given method parameters to values suitable for transport.
    * @param method The method whose parameters need mapping
@@ -868,71 +865,6 @@ export class ApiClient<T extends ApiRoutedType> {
     }
     return formatted;
   }
-
-  /**
-   * Combines the input into a single `AxiosRequestConfig` object.
-   * @param parameters The Coalesce parameters for the standard API endpoints.
-   * @param config A full `AxiosRequestConfig` to merge in.
-   * @param queryParams An object with an additional querystring parameters.
-   */
-  protected $options(
-    parameters?: ListParameters | FilterParameters | DataSourceParameters,
-    config?: AxiosRequestConfig,
-    queryParams?: any
-  ): AxiosRequestConfig {
-    return {
-      ...this._nextRequestConfig,
-      ...config,
-
-      // Merge standard Coalesce params with general configured params if there are any.
-      // Params come last to overwrite config.params with our merged params object.
-      params: {
-        ...queryParams,
-        ...(config && config.params ? config.params : null),
-        ...mapParamsToDto(parameters),
-      },
-    };
-  }
-
-  protected $hydrateItemResult<TResult>(
-    value: AxiosItemResult<TResult>,
-    metadata: Value | VoidValue
-  ) {
-    if (typeof value.data !== "object") {
-      // This case usually only happens if the endpoint doesn't exist on the server,
-      // causing the server to return a SPA fallback route (as HTML) with a 200 status.
-      throw new Error(
-        `Unexpected raw ${typeof value.data} response from server.`
-      );
-    }
-
-    if (metadata.type === "void") {
-      // Do nothing for void returns - there will be no object.
-      return value;
-    }
-
-    // This function is NOT PURE - we mutate the result object on the response.
-    value.data.object = convertToModel(value.data.object, metadata);
-
-    return value;
-  }
-
-  protected $hydrateListResult<TResult>(
-    value: AxiosListResult<TResult>,
-    metadata: CollectionValue
-  ) {
-    if (typeof value.data !== "object") {
-      // This case usually only happens if the endpoint doesn't exist on the server,
-      // causing the server to return a SPA fallback route (as HTML) with a 200 status.
-      throw new Error(
-        `Unexpected raw ${typeof value.data} response from server.`
-      );
-    }
-
-    // This function is NOT PURE - we mutate the result object on the response.
-    value.data.list = convertToModel(value.data.list, metadata);
-    return value;
-  }
 }
 
 export type ParamsObject<TMethod extends Method> = {
@@ -956,13 +888,7 @@ export class ModelApiClient<TModel extends Model<ModelType>> extends ApiClient<
         transportType: "item",
         httpMethod: "GET",
         params: {},
-        return: {
-          name: "$return",
-          displayName: "Result",
-          type: "model",
-          typeDef: this.$metadata as ModelType,
-          role: "value",
-        },
+        return: this.$itemValueMeta,
       },
       {},
       config,
@@ -981,19 +907,7 @@ export class ModelApiClient<TModel extends Model<ModelType>> extends ApiClient<
         transportType: "list",
         httpMethod: "GET",
         params: {},
-        return: {
-          name: "$return",
-          displayName: "Result",
-          type: "collection",
-          itemType: {
-            name: "$collectionItem",
-            displayName: "",
-            type: "model",
-            typeDef: this.$metadata as ModelType,
-            role: "value",
-          },
-          role: "value",
-        },
+        return: this.$collectionValueMeta,
       },
       {},
       config,
@@ -1043,13 +957,7 @@ export class ModelApiClient<TModel extends Model<ModelType>> extends ApiClient<
             (p) => !p[1].dontSerialize
           )
         ),
-        return: {
-          name: "$return",
-          displayName: "Result",
-          type: "model",
-          typeDef: this.$metadata as ModelType,
-          role: "value",
-        },
+        return: this.$itemValueMeta,
       },
       mapToDtoFiltered(item, fields)!,
       config,
@@ -1069,13 +977,7 @@ export class ModelApiClient<TModel extends Model<ModelType>> extends ApiClient<
         transportType: "item",
         httpMethod: "POST",
         params: {},
-        return: {
-          name: "$return",
-          displayName: "Result",
-          type: "model",
-          typeDef: this.$metadata as ModelType,
-          role: "value",
-        },
+        return: this.$itemValueMeta,
       },
       {},
       config,
@@ -1084,100 +986,33 @@ export class ModelApiClient<TModel extends Model<ModelType>> extends ApiClient<
   }
 
   /** Value metadata for handling ItemResult returns from the standard API endpoints. */
-  private $itemValueMeta = Object.freeze(<ModelValue>{
-    name: "object",
-    displayName: "",
-    type: "model",
-    role: "value",
-    typeDef: this.$metadata,
-  });
+  private get $itemValueMeta(): ModelValue {
+    return {
+      name: "object",
+      displayName: "",
+      type: "model",
+      role: "value",
+      typeDef: this.$metadata,
+    };
+  }
 
   /** Value metadata for handling ListResult returns from the standard API endpoints. */
-  private $collectionValueMeta = Object.freeze(<CollectionValue>{
-    name: "list",
-    displayName: "",
-    type: "collection",
-    role: "value",
-    itemType: this.$itemValueMeta,
-  });
+  private get $collectionValueMeta(): CollectionValue {
+    return {
+      name: "list",
+      displayName: "",
+      type: "collection",
+      role: "value",
+      itemType: this.$itemValueMeta,
+    };
+  }
 }
 
 export abstract class ServiceApiClient<
   TMeta extends Service
 > extends ApiClient<TMeta> {}
 
-export type TInvoker<
-  TArgs extends any[],
-  TReturn,
-  TClient extends ApiClient<any>
-> = (this: any, client: TClient, ...args: TArgs) => TReturn;
-
-export type TArgsInvoker<TArgs, TReturn, TClient extends ApiClient<any>> = (
-  this: any,
-  client: TClient,
-  args: TArgs
-) => TReturn;
-
-export type TCall<TArgs extends any[], TReturn> = (
-  this: any,
-  ...args: TArgs
-) => TReturn;
-
 type ApiStateHook<TThis> = (this: any, state: TThis) => void | Promise<any>;
-
-// Base class for ApiState that contains nothing but the logic for
-// subclassing Function. Specifically, we do this to avoid a need to call
-// `super()`, which triggers CSP unsafe-eval.
-abstract class ApiStateBase<TArgs extends any[], TResult> extends Function {
-  public readonly invoke!: this;
-
-  protected readonly apiClient!: ApiClient<any>;
-  protected readonly invoker!: TInvoker<
-    TArgs,
-    ApiResultPromise<TResult> | undefined | void,
-    ApiClient<any>
-  >;
-  protected abstract _invokeInternal(
-    thisArg: any,
-    callInvoker: () => any
-  ): ApiResultPromise<TResult>;
-
-  // @ts-expect-error Don't call super() - it triggers CSP unsafe-eval (even though nothing is being eval'd)
-  constructor(
-    apiClient: ApiClient<any>,
-    invoker: TInvoker<
-      TArgs,
-      ApiResultPromise<TResult> | undefined | void,
-      ApiClient<any>
-    >
-  ) {
-    // Don't call super - this will trigger CSP unsafe-eval.
-    // super();
-
-    // Create our invoker function that will ultimately be our instance object.
-    const invokeFunc: TCall<
-      TArgs,
-      ApiResultPromise<TResult>
-    > = function invokeFunc(this: any, ...args: TArgs) {
-      return invoke._invokeInternal(this, () => {
-        return (invoker as any).apply(this, [apiClient, ...args]);
-      });
-    } as TCall<TArgs, ApiResultPromise<TResult>>;
-
-    const invoke = invokeFunc as unknown as this;
-
-    // Manually assign ctor props
-    // @ts-expect-error
-    invoke.invoke = invoke;
-    // @ts-expect-error
-    invoke.invoker = invoker;
-    // @ts-expect-error
-    invoke.apiClient = apiClient;
-
-    Object.setPrototypeOf(invoke, new.target.prototype);
-    return invoke;
-  }
-}
 
 export type ResponseCachingConfiguration = {
   /** Function that will determine the cache key used for a particular request.
@@ -1196,6 +1031,58 @@ export type ResponseCachingConfiguration = {
   /** The Storage (default `sessionStorage`) that will hold cached responses. */
   storage?: Storage;
 };
+
+// Base class for ApiState that contains nothing but the logic for
+// subclassing Function. Specifically, we do this to avoid a need to call
+// `super()`, which triggers CSP unsafe-eval.
+abstract class ApiStateBase<TArgs extends any[], TResult> extends Function {
+  /** Invokes a call to this API endpoint. */
+  public readonly invoke!: this;
+
+  protected readonly apiClient!: ApiClient<any>;
+  protected readonly invoker!: ApiCallerInvoker<
+    TArgs,
+    ApiResultPromise<TResult> | undefined | void,
+    ApiClient<any>
+  >;
+  protected abstract _invokeInternal(
+    thisArg: any,
+    callInvoker: () => any
+  ): ApiResultPromise<TResult>;
+
+  // @ts-expect-error Don't call super() - it triggers CSP unsafe-eval (even though nothing is being eval'd)
+  constructor(
+    apiClient: ApiClient<any>,
+    invoker: ApiCallerInvoker<
+      TArgs,
+      ApiResultPromise<TResult> | undefined | void,
+      ApiClient<any>
+    >
+  ) {
+    // Don't call super - this will trigger CSP unsafe-eval.
+    // super();
+
+    // Create our invoker function that will ultimately be our instance object.
+    const invokeFunc = function invokeFunc(this: any, ...args: TArgs) {
+      return invoke._invokeInternal(this, () => {
+        return (invoker as any).apply(this, [apiClient, ...args]);
+      });
+    };
+
+    const invoke = invokeFunc as unknown as this;
+
+    // Manually assign ctor props
+    // @ts-expect-error
+    invoke.invoke = invoke;
+    // @ts-expect-error
+    invoke.invoker = invoker;
+    // @ts-expect-error
+    invoke.apiClient = apiClient;
+
+    Object.setPrototypeOf(invoke, new.target.prototype);
+    return invoke;
+  }
+}
 
 export abstract class ApiState<
   TArgs extends any[],
@@ -1369,7 +1256,6 @@ export abstract class ApiState<
           throw Error(
             `Request is already pending for invoker ${this.invoker.toString()}`
           );
-          break;
 
         case "cancel":
           this.cancel();
@@ -1397,7 +1283,7 @@ export abstract class ApiState<
             // Similar to the "cancel" mode,
             // aborted requests are not thrown as rejected promises,
             // but instead as a fulfilled promise with a void resolved value.
-            return void 0;
+            return undefined;
           }
       }
     }
@@ -1462,11 +1348,19 @@ export abstract class ApiState<
               maxAge: storedMaxAge,
               result,
             } = JSON.parse(cachedValue);
+
+            // Use the shortest of the two max ages (stored, and current config)
+            // to be sure that stale entries are never taken, even when the configured maxAge
+            // may have increased or decreased since the cache entry was saved.
             const effectiveMaxAge = Math.min(
               storedMaxAge || Number.MAX_VALUE,
               configuredMaxAge || Number.MAX_VALUE
             );
+
             if (time >= Date.now() / 1000 - effectiveMaxAge) {
+              // Cache entries are stripped of their metadata when saved, so they need to be re-converted to a model.
+              // We also need to perform this conversion in case the properties
+              // of the models have changed since this cache entry was created.
               switch (method.transportType) {
                 case "item":
                   convertToModel(result.object, method.return);
@@ -1491,6 +1385,7 @@ export abstract class ApiState<
 
           const resp = await promise;
 
+          // We didn't throw, so store the successful response in the cache
           const data = resp.data;
           storage.setItem(
             key,
@@ -1513,7 +1408,7 @@ export abstract class ApiState<
 
       if (!promise) {
         this.isLoading = false;
-        return void 0;
+        return undefined;
       }
 
       const resp = await promise;
@@ -1597,7 +1492,7 @@ export abstract class ApiState<
 
   constructor(
     apiClient: ApiClient<any>,
-    invoker: TInvoker<
+    invoker: ApiCallerInvoker<
       TArgs,
       ApiResultPromise<TResult> | undefined | void,
       ApiClient<any>
@@ -1607,6 +1502,10 @@ export abstract class ApiState<
   }
 }
 
+export interface ItemApiState<TArgs extends any[], TResult> {
+  /** Invokes a call to this API endpoint. */
+  (...args: TArgs): ItemResultPromise<TResult>;
+}
 export class ItemApiState<TArgs extends any[], TResult> extends ApiState<
   TArgs,
   TResult
@@ -1635,7 +1534,7 @@ export class ItemApiState<TArgs extends any[], TResult> extends ApiState<
 
   constructor(
     apiClient: ApiClient<any>,
-    invoker: TInvoker<
+    invoker: ApiCallerInvoker<
       TArgs,
       ApiResultPromise<TResult> | undefined | void,
       ApiClient<any>
@@ -1656,7 +1555,7 @@ export class ItemApiState<TArgs extends any[], TResult> extends ApiState<
    */
   public getResultObjectUrl(
     vue: VueInstance
-  ): TResult extends Blob ? string | undefined : undefined {
+  ): [TResult] extends [Blob] ? string | undefined : undefined {
     const result = this.result;
     if (result == this._objectUrl?.target) {
       // We have a stored URL, and the current result is what that URL was made for.
@@ -1736,10 +1635,11 @@ export class ItemApiStateWithArgs<
     this.__args.value = v;
   }
 
-  /** Invoke the method. If `args` is not provided, the values in `this.args` will be used for the method's parameters. */
+  /** Invokes a call to this API endpoint.
+   * If `args` is not provided, the values in `this.args` will be used for the method's parameters. */
   public invokeWithArgs(
     args: TArgsObj = this.args
-  ): InvokerReturnType<"item", TResult> {
+  ): ResultPromiseType<"item", TResult> {
     // Copy args so that if we're debouncing,
     // the args at the point in time at which invokeWithArgs() was
     // called will be used, rather than the state at the time when the actual API call gets made.
@@ -1778,9 +1678,13 @@ export class ItemApiStateWithArgs<
 
   constructor(
     apiClient: ApiClient<any>,
-    invoker: TInvoker<TArgs, ItemResultPromise<TResult>, ApiClient<any>>,
+    invoker: ApiCallerInvoker<
+      TArgs,
+      ItemResultPromise<TResult>,
+      ApiClient<any>
+    >,
     private argsFactory: () => TArgsObj,
-    private argsInvoker: TArgsInvoker<
+    private argsInvoker: ApiCallerArgsInvoker<
       TArgsObj,
       ItemResultPromise<TResult>,
       ApiClient<any>
@@ -1790,6 +1694,10 @@ export class ItemApiStateWithArgs<
   }
 }
 
+export interface ListApiState<TArgs extends any[], TResult> {
+  /** Invokes a call to this API endpoint. */
+  (...args: TArgs): ListResultPromise<TResult>;
+}
 export class ListApiState<TArgs extends any[], TResult> extends ApiState<
   TArgs,
   TResult
@@ -1846,7 +1754,7 @@ export class ListApiState<TArgs extends any[], TResult> extends ApiState<
 
   constructor(
     apiClient: ApiClient<any>,
-    invoker: TInvoker<
+    invoker: ApiCallerInvoker<
       TArgs,
       ApiResultPromise<TResult> | undefined | void,
       ApiClient<any>
@@ -1887,10 +1795,11 @@ export class ListApiStateWithArgs<
     this.__args.value = v;
   }
 
-  /** Invoke the method. If `args` is not provided, the values in `this.args` will be used for the method's parameters. */
+  /** Invokes a call to this API endpoint.
+   * If `args` is not provided, the values in `this.args` will be used for the method's parameters. */
   public invokeWithArgs(
     args: TArgsObj = this.args
-  ): InvokerReturnType<"list", TResult> {
+  ): ResultPromiseType<"list", TResult> {
     args = { ...args }; // Copy args so that if we're debouncing,
     // the args at the point in time at which invokeWithArgs() was
     // called will be used, rather than the state at the time when the actual API call gets made.
@@ -1906,9 +1815,13 @@ export class ListApiStateWithArgs<
 
   constructor(
     apiClient: ApiClient<any>,
-    invoker: TInvoker<TArgs, ListResultPromise<TResult>, ApiClient<any>>,
+    invoker: ApiCallerInvoker<
+      TArgs,
+      ListResultPromise<TResult>,
+      ApiClient<any>
+    >,
     private argsFactory: () => TArgsObj,
-    private argsInvoker: TArgsInvoker<
+    private argsInvoker: ApiCallerArgsInvoker<
       TArgsObj,
       ListResultPromise<TResult>,
       ApiClient<any>

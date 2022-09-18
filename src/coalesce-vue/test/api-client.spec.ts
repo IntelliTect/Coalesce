@@ -14,6 +14,7 @@ import {
   ItemResultPromise,
   ListParameters,
   AxiosListResult,
+  ListResultPromise,
 } from "../src/api-client";
 import { getInternalInstance, IsVue2 } from "../src/util";
 
@@ -46,10 +47,13 @@ describe("error handling", () => {
     >{
       data: "<!doctype html><html><body></body></html>",
       status: 200,
+      statusText: "OK",
+      config: {},
+      headers: { "content-type": "text/html" },
     });
 
     await expect(new StudentApiClient().get(1)).rejects.toThrow(
-      "Unexpected raw string response from server."
+      "Unexpected text/html string response from server."
     );
   });
 });
@@ -941,6 +945,42 @@ describe("$makeCaller with args object", () => {
 
     expect(caller.url).toBe("/api/Students/getFile?id=42&etag=bob");
     expect(adapter).toBeCalledTimes(0);
+  });
+
+  test("list caller types are correct", async () => {
+    const endpointMock = vitest.fn((arg?: number | null) => {
+      return Promise.resolve({
+        data: {
+          wasSuccessful: true,
+          list: [arg],
+          page: 1,
+          pageCount: 100,
+          pageSize: 1,
+          totalCount: 100,
+        },
+      }) as ListResultPromise<number>;
+    });
+
+    const caller = new StudentApiClient().$makeCaller(
+      "list",
+      (c, num: number) => endpointMock(num),
+      () => ({ num: null as number | null }),
+      (c, args) => endpointMock(args.num)
+    );
+
+    const result: number[] | null = caller.result;
+    const page: number | null = caller.page;
+    const pageCount: number | null = caller.pageCount;
+    const pageSize: number | null = caller.pageSize;
+    const totalCount: number | null = caller.totalCount;
+
+    await caller(42);
+    await caller.invoke(42);
+    await caller.invokeWithArgs({ num: 42 });
+    //@ts-expect-error
+    await caller("asdf");
+    //@ts-expect-error
+    await caller.invokeWithArgs({ num: "asdf" });
   });
 
   describe.each(["item", "list"] as const)("for %s transport", (type) => {

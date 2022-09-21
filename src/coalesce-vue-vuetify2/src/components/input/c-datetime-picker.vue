@@ -146,11 +146,19 @@ export default defineComponent({
 
   computed: {
     isReadonly() {
-      return this.readonly || this.form?.readonly;
+      return (
+        this.readonly ||
+        //@ts-expect-error `inject` is not typed in options API
+        this.form?.readonly
+      );
     },
 
     isDisabled() {
-      return this.disabled || this.form?.disabled;
+      return (
+        this.disabled ||
+        //@ts-expect-error `inject` is not typed in options API
+        this.form?.disabled
+      );
     },
 
     interactive() {

@@ -11,8 +11,8 @@
     :value="displayedValue"
     v-bind="inputBindAttrs"
     :error-messages="error"
-    :readonly="readonly"
-    :disabled="disabled"
+    :readonly="isReadonly"
+    :disabled="isDisabled"
     autocomplete="off"
     @change="textInputChanged"
     @click:append="menu = !menu"
@@ -25,7 +25,7 @@
     transition="slide-x-transition"
     offset-y
     offset-x
-    :disabled="disabled"
+    :disabled="isDisabled"
     min-width="290px"
   >
     <template #activator="{ on }">
@@ -34,14 +34,14 @@
         v-bind="inputBindAttrs"
         :value="displayedValue"
         :error-messages="error"
-        :readonly="readonly"
-        :disabled="disabled"
+        :readonly="isReadonly"
+        :disabled="isDisabled"
         autocomplete="off"
         :append-icon="
           internalDateKind == 'time' ? 'fa fa-clock' : 'fa fa-calendar-alt'
         "
         @change="textInputChanged"
-        @click:append="menu = !menu"
+        @click:append="if (interactive) menu = !menu;"
       ></v-text-field>
     </template>
 
@@ -129,6 +129,12 @@ export default defineComponent({
     native: { type: Boolean, default: false },
   },
 
+  inject: {
+    // Read `readonly` and `disabled` from Vuetify form.
+    // TODO: Port to Vue3
+    form: {},
+  },
+
   data() {
     return {
       hasMounted: false,
@@ -139,8 +145,16 @@ export default defineComponent({
   },
 
   computed: {
+    isReadonly() {
+      return this.readonly || this.form?.readonly;
+    },
+
+    isDisabled() {
+      return this.disabled || this.form?.disabled;
+    },
+
     interactive() {
-      return !this.readonly && !this.disabled;
+      return !this.isReadonly && !this.isDisabled;
     },
 
     dateMeta() {

@@ -1,4 +1,4 @@
-import { onBeforeUnmount, Ref, ref } from "vue";
+import { onBeforeUnmount, Ref, ref, markRaw } from "vue";
 
 import {
   ModelType,
@@ -1155,7 +1155,11 @@ export abstract class ApiState<
     }
 
     this.__responseCacheConfig =
-      configuration === false ? undefined : configuration ?? {};
+      configuration === false
+        ? undefined
+        : configuration === undefined
+        ? {}
+        : markRaw(configuration);
     return this;
   }
 
@@ -1555,7 +1559,7 @@ export class ItemApiState<TArgs extends any[], TResult> extends ApiState<
    */
   public getResultObjectUrl(
     vue: VueInstance
-  ): [TResult] extends [Blob] ? string | undefined : undefined {
+  ): undefined | (TResult extends Blob ? string : never) {
     const result = this.result;
     if (result == this._objectUrl?.target) {
       // We have a stored URL, and the current result is what that URL was made for.

@@ -78,7 +78,6 @@
                   filter.propMeta.role == 'primaryKey') &&
                 (!filter.value || filter.value.toString().indexOf(',') == -1)
               "
-              :keyValue="filter.value"
               v-model:keyValue="filter.value"
               :for="
                 filter.propMeta.role == 'primaryKey'
@@ -212,7 +211,7 @@ export default defineComponent({
           const value = filter[key];
           const propMeta = meta.props[key] ?? null;
 
-          return <FilterInfo>{
+          return {
             key,
             get value() {
               if (propMeta.type == "boolean") {
@@ -247,7 +246,7 @@ export default defineComponent({
               propMeta?.role == "foreignKey"
                 ? propMeta.navigationProp?.displayName
                 : propMeta?.displayName ?? key,
-          };
+          } as FilterInfo;
         })
         .sort((a, b) =>
           // a.isActive != b.isActive ? (b.isActive ? 1 : -1) :

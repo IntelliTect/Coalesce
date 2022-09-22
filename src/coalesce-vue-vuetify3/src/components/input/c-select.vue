@@ -69,7 +69,9 @@
           prepend-inner-icon="fa fa-search"
           :loading="listCaller.isLoading"
           :error-messages="
-            listCaller.wasSuccessful == false ? listCaller.message : ''
+            listCaller.wasSuccessful == false
+              ? listCaller.message ?? undefined
+              : ''
           "
           clearable
           placeholder="Search"
@@ -188,6 +190,7 @@ import {
   ItemApiStateWithArgs,
   ViewModel,
   modelDisplay,
+  Indexable,
 } from "coalesce-vue";
 
 export default defineComponent({
@@ -450,7 +453,7 @@ export default defineComponent({
       return this.listCaller?.result || [];
     },
 
-    listItems() {
+    listItems(): Indexable<Model<ModelType>>[] {
       return this.items;
     },
 

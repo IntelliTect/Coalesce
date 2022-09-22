@@ -20,7 +20,7 @@
     "dist"
   ],
   "scripts": {
-    "build": "vite build && npm run buildts",
+    "build": "vue-tsc --noEmit && vite build && npm run buildts",
     "buildts": "tsc ./src/build.ts --declaration --outDir ./dist",
     "build-local-deps": "cd ../coalesce-vue && npm ci && npm run build"
   },
@@ -52,6 +52,7 @@
     "vite-plugin-dts": "^1.4.1",
     "vue": "^3.2.34",
     "vue-router": "4.0.16",
+    "vue-tsc": "^0.40.13",
     "vuetify": "3.0.0-beta.8"
   },
   "postcss": {

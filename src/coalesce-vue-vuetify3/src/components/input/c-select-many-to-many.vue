@@ -11,7 +11,7 @@
     :error-messages="error"
     :items="listItems"
     v-model:search="search"
-    :item-title="$attrs['item-title'] || itemText"
+    :item-title="itemText"
     :item-value="itemValue"
     :return-object="true"
     :disabled="!modelPkValue"
@@ -198,6 +198,9 @@ export default defineComponent({
     },
 
     itemText(item: any) {
+      if (typeof this.$attrs["item-title"] === "function") {
+        return this.$attrs["item-title"](item);
+      }
       const display = modelDisplay(this.foreignItemOf(item) || item);
       return display;
     },

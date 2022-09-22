@@ -1,27 +1,23 @@
 {
   "compilerOptions": {
-    "target": "esnext",
+    "target": "ES2021",
     "module": "esnext",
     "strict": true,
     "jsx": "preserve",
     "importHelpers": true,
     "moduleResolution": "node",
     "sourceMap": true,
+    "skipLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": [ "src/*" ],
-      "coalesce-vue": [ "../coalesce-vue/src" ],
-      "coalesce-vue/*": [ "../coalesce-vue/src/*" ],
-      "vue": [ "node_modules/vue" ],
-      "vue/*": [ "node_modules/vue/*" ],
+      "@/*": ["src/*"],
+      "coalesce-vue": ["../coalesce-vue/src"],
+      "coalesce-vue/*": ["../coalesce-vue/src/*"],
+      "vue": ["node_modules/vue"],
+      "vue/*": ["node_modules/vue/*"]
     },
-    "lib": [
-      "esnext",
-      "dom",
-      "dom.iterable",
-      "scripthost"
-    ],
-    "types": ["node", "vue-router"]
+    "lib": ["esnext", "dom", "dom.iterable", "scripthost"],
+    "types": ["node", "vue-router", "vuetify"]
   },
   "include": [
     "src/**/*.ts",
@@ -30,7 +26,5 @@
     "tests/**/*.ts",
     "tests/**/*.tsx"
   ],
-  "exclude": [
-    "node_modules"
-  ]
+  "exclude": ["node_modules"]
 }

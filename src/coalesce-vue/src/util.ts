@@ -1,5 +1,4 @@
 import { addYears } from "date-fns";
-import type Vue from "vue";
 import type {
   ComponentPublicInstance,
   ReactiveFlags,

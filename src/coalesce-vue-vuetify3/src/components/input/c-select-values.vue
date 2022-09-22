@@ -56,7 +56,12 @@ export default defineComponent({
   },
 
   methods: {
-    onInput(value: any[]) {
+    // Typed as unknown because Vuetify's types are a little weird
+    onInput(value: unknown) {
+      if (!Array.isArray(value)) {
+        throw new Error("Got non-array from VCombobox's onUpdate:modelValue");
+      }
+
       const items: any[] = [];
       for (let i = 0; i < value.length; i++) {
         try {

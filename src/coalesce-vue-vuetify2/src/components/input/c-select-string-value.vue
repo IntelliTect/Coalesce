@@ -24,7 +24,40 @@ export default defineComponent({
   name: "c-select-string-value",
 
   setup(props) {
-    return { ...useMetadataProps(props) };
+    const metaProps = useMetadataProps(props);
+    const modelMeta = metaProps.modelMeta.value;
+
+    if (!modelMeta || modelMeta.type != "model") {
+      throw Error(MODEL_REQUIRED_MESSAGE);
+    }
+
+    const methodMeta = modelMeta.methods[props.method];
+
+    if (
+      !methodMeta ||
+      !methodMeta.isStatic ||
+      methodMeta.transportType != "item" ||
+      methodMeta.return.type != "collection" ||
+      methodMeta.return.itemType.type != "string"
+    ) {
+      throw Error(
+        "c-select-string-value requires a static model method that returns an array of strings."
+      );
+    }
+
+    const caller = new ModelApiClient(modelMeta)
+      .$withSimultaneousRequestCaching()
+      .$makeCaller("item", (c, page?: number, search?: string) => {
+        return c.$invoke(methodMeta, {
+          page,
+          search,
+          ...props.params,
+        }) as ItemResultPromise<string[]>;
+        // (c as any)[methodMeta.name](page, search) as ListResultPromise<string>
+      })
+      .setConcurrency("debounce");
+
+    return { ...metaProps, caller };
   },
 
   props: {
@@ -36,7 +69,6 @@ export default defineComponent({
 
   data() {
     return {
-      caller: null! as ItemApiState<[number, string], string[]>,
       search: null as string | null,
     };
   },
@@ -82,38 +114,6 @@ export default defineComponent({
 
       this.$emit("input", value);
     },
-  },
-
-  created() {
-    if (!this.modelMeta || this.modelMeta.type != "model") {
-      throw Error(MODEL_REQUIRED_MESSAGE);
-    }
-
-    const methodMeta = this.modelMeta.methods[this.method];
-
-    if (
-      !methodMeta ||
-      !methodMeta.isStatic ||
-      methodMeta.transportType != "item" ||
-      methodMeta.return.type != "collection" ||
-      methodMeta.return.itemType.type != "string"
-    ) {
-      throw Error(
-        "c-select-string-value requires a static model method that returns an array of strings."
-      );
-    }
-
-    this.caller = new ModelApiClient(this.modelMeta)
-      .$withSimultaneousRequestCaching()
-      .$makeCaller("item", (c, page: number, search: string) => {
-        return c.$invoke(methodMeta, {
-          page,
-          search,
-          ...this.params,
-        }) as ItemResultPromise<string[]>;
-        // (c as any)[methodMeta.name](page, search) as ListResultPromise<string>
-      })
-      .setConcurrency("debounce");
   },
 
   mounted() {

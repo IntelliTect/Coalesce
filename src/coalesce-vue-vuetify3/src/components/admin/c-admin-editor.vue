@@ -147,6 +147,7 @@ import {
   ModelType,
   BehaviorFlags,
   HiddenAreas,
+  Indexable,
 } from "coalesce-vue";
 
 import { isPropReadOnly } from "../../util";
@@ -162,7 +163,7 @@ export default defineComponent({
   props: {
     model: {
       required: true,
-      type: Object as PropType<ViewModel<Model<ModelType>>>,
+      type: Object as PropType<Indexable<ViewModel<Model<ModelType>>>>,
     },
   },
 

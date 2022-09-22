@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.NodeServices.Npm;
 using Microsoft.AspNetCore.NodeServices.Util;
 using Microsoft.AspNetCore.SpaServices.Extensions.Util;
@@ -23,16 +24,18 @@ namespace IntelliTect.Coalesce.Vue.DevMiddleware
     internal class NodeScriptRunner : IDisposable
     {
         private Process? _npmProcess;
-        public EventedStreamReader StdOut { get; }
-        public EventedStreamReader StdErr { get; }
+        public EventedStreamReader StdOut { get; private set;  }
+        public EventedStreamReader StdErr { get; private set; }
+
+        public event EventHandler Exited;
 
         public NodeScriptRunner(
             string workingDirectory,
             string scriptName,
             string? arguments,
             IDictionary<string, string>? envVars,
-            string pkgManagerCommand,
-            CancellationToken applicationStoppingToken)
+            string pkgManagerCommand
+        )
         {
             if (string.IsNullOrEmpty(workingDirectory))
             {
@@ -86,9 +89,11 @@ namespace IntelliTect.Coalesce.Vue.DevMiddleware
             _npmProcess = LaunchNodeProcess(processStartInfo, pkgManagerCommand);
             StdOut = new EventedStreamReader(_npmProcess.StandardOutput);
             StdErr = new EventedStreamReader(_npmProcess.StandardError);
-
-            AppDomain.CurrentDomain.ProcessExit += (_, _) => { ((IDisposable)this).Dispose(); };
-            applicationStoppingToken.Register(((IDisposable)this).Dispose);
+            _npmProcess.Exited += (sender, e) =>
+            {
+                Dispose();
+                Exited?.Invoke(sender, e);
+            };
         }
 
         public void AttachToLogger(ILogger logger)
@@ -111,13 +116,11 @@ namespace IntelliTect.Coalesce.Vue.DevMiddleware
             };
         }
 
-        private static Process LaunchNodeProcess(ProcessStartInfo startInfo, string commandName)
+        private Process LaunchNodeProcess(ProcessStartInfo startInfo, string commandName)
         {
             try
             {
                 var process = Process.Start(startInfo)!;
-
-                // See equivalent comment in OutOfProcessNodeInstance.cs for why
                 process.EnableRaisingEvents = true;
 
                 return process;
@@ -133,7 +136,7 @@ namespace IntelliTect.Coalesce.Vue.DevMiddleware
             }
         }
 
-        void IDisposable.Dispose()
+        public void Dispose()
         {
             if (_npmProcess != null && !_npmProcess.HasExited)
             {
@@ -144,7 +147,7 @@ namespace IntelliTect.Coalesce.Vue.DevMiddleware
 
         ~NodeScriptRunner()
         {
-            ((IDisposable)this).Dispose();
+            Dispose();
         }
     }
 }

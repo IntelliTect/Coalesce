@@ -33,7 +33,7 @@ namespace IntelliTect.Coalesce
                     filteredApp.UseSpa(spa =>
                     {
                         spa.Options.SourcePath = ".";
-                        var portTask = ViteDevelopmentServerMiddleware.Attach(spa, options);
+                        var getPortTask = ViteDevelopmentServerMiddleware.Attach(spa, options);
 
                         if (options.WaitForReady)
                         {
@@ -41,7 +41,7 @@ namespace IntelliTect.Coalesce
                             // to start before serving requests for HTML files (e.g. our SPA fallback route).
                             app.Use(async (context, next) =>
                             {
-                                if (portTask.IsCompleted)
+                                if (getPortTask().IsCompleted)
                                 {
                                     await next();
                                     return;
@@ -55,7 +55,7 @@ namespace IntelliTect.Coalesce
                                     ViteDevelopmentServerMiddleware
                                         .GetOrCreateLogger(app)
                                         .LogInformation($"Waiting for vite server to start listening...");
-                                    await portTask;
+                                    await getPortTask();
                                 }
 
                                 await next();

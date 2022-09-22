@@ -24,14 +24,14 @@ namespace IntelliTect.Coalesce.Vue.DevMiddleware
     {
         private const string LogCategoryName = "IntelliTect.Coalesce.Vue";
 
-        public static Task<int> Attach(
+        public static Func<Task<int>> Attach(
             ISpaBuilder spaBuilder,
             ViteServerOptions options
         )
         {
             var pkgManagerCommand = spaBuilder.Options.PackageManagerCommand;
             var sourcePath = spaBuilder.Options.SourcePath;
-            var devServerPort = options.DevServerPort;
+            var portNumber = options.DevServerPort;
             if (string.IsNullOrEmpty(sourcePath))
             {
                 throw new ArgumentException("Property 'SourcePath' cannot be null or empty", nameof(spaBuilder));
@@ -46,13 +46,73 @@ namespace IntelliTect.Coalesce.Vue.DevMiddleware
             var appBuilder = spaBuilder.ApplicationBuilder;
             var applicationStoppingToken = appBuilder.ApplicationServices.GetRequiredService<IHostApplicationLifetime>().ApplicationStopping;
             var logger = GetOrCreateLogger(appBuilder);
-            var portTask = StartViteServerAsync(
-                options,
-                sourcePath,
-                pkgManagerCommand,
-                devServerPort,
-                logger,
-                applicationStoppingToken);
+
+            if (!portNumber.HasValue || portNumber == 0)
+            {
+                portNumber = FindAvailablePort();
+            }
+            
+            Task<int> portTask = new TaskCompletionSource<int>().Task;
+            NodeScriptRunner? currentRunner = null;
+
+            AppDomain.CurrentDomain.ProcessExit += (_, _) => currentRunner?.Dispose();
+            applicationStoppingToken.Register(() => currentRunner?.Dispose());
+
+            void Launch()
+            {
+                portTask = Task.Run(async () =>
+                {
+                    logger.LogInformation($"Starting vite server on port {portNumber}...");
+
+                    var scriptRunner = new NodeScriptRunner(
+                        sourcePath,
+                        options.NpmScriptName,
+                        $" --port {portNumber}",
+                        null,
+                        pkgManagerCommand
+                    );
+                    scriptRunner.AttachToLogger(logger);
+                    scriptRunner.Exited += (sender, e) =>
+                    {
+                        // No dispose needed here - scriptRunner disposes itself before calling Exited.
+                        if (!applicationStoppingToken.IsCancellationRequested)
+                        {
+                            logger.LogError($"vite server appears to have crashed. Restarting...");
+                            Launch();
+                        }
+                    };
+                    currentRunner = scriptRunner;
+
+                    using var stdErrReader = new EventedStreamStringReader(scriptRunner.StdErr);
+                    try
+                    {
+                        var match = await scriptRunner.StdOut.WaitForMatch(
+                            new Regex(options.OutputOnReady, RegexOptions.None, TimeSpan.FromSeconds(2)));
+                        if (match.Groups.Count > 0)
+                        {
+                            var capture = match.Groups[1].Value;
+                            if (!int.TryParse(capture, out int port))
+                            {
+                                throw new InvalidOperationException(
+                                    $"The OutputOnReady regex {options.OutputOnReady} produced a capture group, " +
+                                    $"but it is expected to yield an integer representing a port number. " +
+                                    $"The value it actually produced was {capture}");
+                            }
+                            return port;
+                        }
+                    }
+                    catch (EndOfStreamException ex)
+                    {
+                        throw new InvalidOperationException(
+                            $"The {pkgManagerCommand} script '{options.NpmScriptName}' exited without indicating that the " +
+                            "server was listening for requests. The error output was: " +
+                            $"{stdErrReader.ReadAsString()}", ex);
+                    }
+
+                    return portNumber.Value;
+                });
+            }
+            Launch();
 
             SpaProxyingExtensions.UseProxyToSpaDevelopmentServer(spaBuilder, async () =>
             {
@@ -64,7 +124,7 @@ namespace IntelliTect.Coalesce.Vue.DevMiddleware
                 return new UriBuilder(options.UseHttps ? "https" : "http", "localhost", port).Uri;
             });
 
-            return portTask;
+            return () => portTask;
         }
 
         internal static ILogger GetOrCreateLogger(IApplicationBuilder appBuilder)
@@ -86,58 +146,6 @@ namespace IntelliTect.Coalesce.Vue.DevMiddleware
             {
                 listener.Stop();
             }
-        }
-
-        private static async Task<int> StartViteServerAsync(
-            ViteServerOptions options,
-            string sourcePath,
-            string pkgManagerCommand,
-            int? portNumber,
-            ILogger logger,
-            CancellationToken applicationStoppingToken)
-        {
-            if (!portNumber.HasValue || portNumber == 0)
-            {
-                portNumber = FindAvailablePort();
-            }
-            logger.LogInformation($"Starting vite server on port {portNumber}...");
-
-            var scriptRunner = new NodeScriptRunner(
-                sourcePath,
-                options.NpmScriptName,
-                $" --port {portNumber}",
-                null,
-                pkgManagerCommand,
-                applicationStoppingToken);
-            scriptRunner.AttachToLogger(logger);
-
-            using var stdErrReader = new EventedStreamStringReader(scriptRunner.StdErr);
-            try
-            {
-                var match = await scriptRunner.StdOut.WaitForMatch(
-                    new Regex(options.OutputOnReady, RegexOptions.None, TimeSpan.FromSeconds(2)));
-                if (match.Groups.Count > 0)
-                {
-                    var capture = match.Groups[1].Value;
-                    if (!int.TryParse(capture, out int port))
-                    {
-                        throw new InvalidOperationException(
-                            $"The OutputOnReady regex {options.OutputOnReady} produced a capture group, " +
-                            $"but it is expected to yield an integer representing a port number. " +
-                            $"The value it actually produced was {capture}");
-                    }
-                    return port;
-                }
-            }
-            catch (EndOfStreamException ex)
-            {
-                throw new InvalidOperationException(
-                    $"The {pkgManagerCommand} script '{options.NpmScriptName}' exited without indicating that the " +
-                    "server was listening for requests. The error output was: " +
-                    $"{stdErrReader.ReadAsString()}", ex);
-            }
-
-            return portNumber.Value;
         }
     }
 

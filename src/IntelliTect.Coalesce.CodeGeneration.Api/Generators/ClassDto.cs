@@ -194,6 +194,11 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                     setter = $"{targetProp} = {name}?.{mapCall};";
                 }
             }
+            else if (property.Type.IsA(typeof(List<>)))
+            {
+                // Lists of scalar values, whose DTO properties will be ICollection<>, preventing direct assignment.
+                setter = $"{targetProp} = {name}?.ToList();";
+            }
             else
             {
                 var newValue = name;

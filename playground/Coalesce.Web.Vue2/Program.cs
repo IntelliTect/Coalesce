@@ -37,6 +37,7 @@ namespace Coalesce.Web.Vue
         public static IWebHostBuilder CreateWebHostBuilder(string[] args)
         {
             return WebHost.CreateDefaultBuilder(args)
+                .UseWebRoot("wwwroot")
                 .ConfigureLogging((context, builder) =>
                 {
                     builder.AddConsole();

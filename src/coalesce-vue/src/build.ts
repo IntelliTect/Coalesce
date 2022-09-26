@@ -1,6 +1,7 @@
 import type { Plugin, ViteDevServer } from "vite";
 import path from "path";
-import { existsSync, readFileSync, writeFile } from "fs";
+import { existsSync } from "fs";
+import { readFile, writeFile, mkdir } from "fs/promises";
 import { spawn } from "child_process";
 import { TLSSocket } from "tls";
 import MagicString from "magic-string";
@@ -69,8 +70,8 @@ export function createAspNetCoreHmrPlugin({
 
           const { keyFilePath, certFilePath } = await getCertPaths();
 
-          httpsOptions.key ??= readFileSync(keyFilePath);
-          httpsOptions.cert ??= readFileSync(certFilePath);
+          httpsOptions.key ??= await readFile(keyFilePath);
+          httpsOptions.cert ??= await readFile(certFilePath);
         }
       },
 
@@ -226,19 +227,23 @@ export function createAspNetCoreHmrPlugin({
 async function writeHtml(server: ViteDevServer) {
   const filename = server.config.root + "/index.html";
   if (existsSync(filename)) {
-    let html = readFileSync(filename, "utf-8");
+    let html = await readFile(filename, "utf-8");
     html = await server.transformIndexHtml("/index.html", html, "/");
-    writeFile(
-      path.join(server.config.root, server.config.build.outDir, "index.html"),
-      html,
-      "utf-8",
-      () => {
-        /*nothing*/
+
+    const targetDir = path.join(server.config.root, server.config.build.outDir);
+
+    try {
+      if (!existsSync(targetDir)) {
+        await mkdir(targetDir);
       }
-    );
-    server.config.logger.info(
-      `  Coalesce: Wrote index.html to ${server.config.build.outDir}`
-    );
+
+      await writeFile(path.join(targetDir, "index.html"), html, "utf-8");
+      server.config.logger.info(`  Coalesce: Wrote index.html to ${targetDir}`);
+    } catch (e) {
+      server.config.logger.error(
+        `  Coalesce: Error writing index.html to ${targetDir}: ${e}`
+      );
+    }
   }
 }
 
@@ -331,7 +336,7 @@ export async function getCertPaths(certName?: string) {
     // Passing null to TLSSocket here doesn't seem to cause any errors.
     // Since we're not actually communicating over the socket, no reason to provide a real stream.
     const socket = new TLSSocket(null as any, {
-      cert: readFileSync(certFilePath),
+      cert: await readFile(certFilePath),
     });
     const cert = socket.getCertificate();
     socket.destroy();

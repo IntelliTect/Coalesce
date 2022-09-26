@@ -27,7 +27,7 @@ namespace IntelliTect.Coalesce.Vue.DevMiddleware
         public EventedStreamReader StdOut { get; private set;  }
         public EventedStreamReader StdErr { get; private set; }
 
-        public event EventHandler Exited;
+        public event EventHandler? Exited;
 
         public NodeScriptRunner(
             string workingDirectory,

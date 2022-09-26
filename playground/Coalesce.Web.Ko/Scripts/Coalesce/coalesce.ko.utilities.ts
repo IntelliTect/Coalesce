@@ -47,7 +47,7 @@ module Coalesce {
             return matchingItem;
         }
 
-        // Function to marge two arrays based on data from the server
+        // Function to merge two arrays based on data from the server
         export function RebuildArray<U extends LoadableViewModel, T extends object>(
             existingArray: KnockoutObservableArray<U>,
             incomingArray: T[],
@@ -85,6 +85,12 @@ module Coalesce {
             // Can't do for (var i in array) because IE sees new methods added on to the prototype as keys
             for (let i = 0; i < incomingArray.length; i++) {
                 var inItem = incomingArray[i];
+                if (inItem === null) {
+                  // Incoming item in a collection may be null if System.Text.Json is used on the server
+                  // (rather than Newtonsoft) due to https://github.com/dotnet/runtime/issues/66187
+                  continue;
+                }
+                
                 var matchingItem = GetMatchingItem(originalContent, inItem, i, originalLookup, idField, equalityComparer);
 
                 if (matchingItem == null) {

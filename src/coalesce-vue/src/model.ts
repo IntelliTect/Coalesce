@@ -322,7 +322,7 @@ class ModelConversionVisitor extends Visitor<any, any[] | null, any | null> {
     for (const propName in props) {
       const propVal = value[propName];
       if (!(propName in value) || propVal === undefined) {
-        // All propertes that are not defined need to be declared
+        // All properties that are not defined need to be declared
         // so that Vue's reactivity system can discover them.
         // Null is a valid type for all model properties (or at least generated models). Undefined is not.
         target[propName] = null;
@@ -340,9 +340,31 @@ class ModelConversionVisitor extends Visitor<any, any[] | null, any | null> {
 
     const ret = this.mode == "map" ? [] : parsed;
 
-    for (let i = 0; i < parsed.length; i++) {
-      ret[i] = this.visitValue(parsed[i], meta.itemType);
+    let j = 0;
+    for (let i = 0; i < parsed.length; i++, j++) {
+      const value = parsed[i];
+      if (
+        value === null &&
+        (meta.itemType.type === "object" || meta.itemType.type === "model")
+      ) {
+        // Skip nulls in collections, a workaround for
+        // https://github.com/dotnet/runtime/issues/66187
+        // https://github.com/dotnet/runtime/issues/76211
+        j--;
+        continue;
+      }
+      ret[j] = this.visitValue(value, meta.itemType);
     }
+
+    if (ret.length != j) {
+      // If we skipped one or more values above, shorten the array
+      // to the correct length in case we were in "convert" mode.
+      for (let i = j; i < ret.length; i++) {
+        delete ret[i];
+      }
+      ret.length = j;
+    }
+
     return ret;
   }
 

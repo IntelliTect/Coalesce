@@ -15,6 +15,8 @@ import {
   MappingData,
   displaysStudentValue,
 } from "./model.shared";
+import { Course } from "./targets.models";
+import { convertToModel } from "../src/model";
 
 const studentProps = $metadata.Student.props;
 
@@ -90,6 +92,21 @@ const dtoToModelMappings = <MappingData[]>[
   ),
 
   // Collection
+  {
+    // Collection with holes in it, likely caused by https://github.com/dotnet/runtime/issues/66187
+    meta: studentProps.courses,
+    dto: [null],
+    model: [],
+  },
+  {
+    // Collection with holes in it, likely caused by https://github.com/dotnet/runtime/issues/66187
+    meta: studentProps.courses,
+    dto: [{}, null, {}],
+    model: [
+      convertToModel({}, $metadata.Course),
+      convertToModel({}, $metadata.Course),
+    ],
+  },
   ...unparsable(studentProps.courses, "abc", 123, {}, true),
 
   // Model

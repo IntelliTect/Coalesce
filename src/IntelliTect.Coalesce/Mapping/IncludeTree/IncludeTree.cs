@@ -38,6 +38,8 @@ namespace IntelliTect.Coalesce
             }
         }
 
+        public void AddChild(string propertyName) => AddChild(new IncludeTree { PropertyName = propertyName });
+
         /// <summary>
         /// Merges in a linearly-structured IncludeTree, and returns the tail of that tree.
         /// </summary>
@@ -83,7 +85,7 @@ namespace IntelliTect.Coalesce
         /// </summary>
         public static IncludeTree For<T>(Func<IQueryable<T>, IIncludedSeparatelyQueryable<T, object>> builder)
         {
-            return builder(Enumerable.Empty<T>().AsQueryable()).GetIncludeTree();
+            return builder(QueryFor<T>()).GetIncludeTree();
         }
 
         internal static IncludeTree ParseMemberExpression(MemberExpression expr, out IncludeTree tail)

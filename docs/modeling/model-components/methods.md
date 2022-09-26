@@ -31,7 +31,7 @@ If the method has a parameter of type ClaimsPrincipal, the value of `HttpContext
 If a parameter is marked with the [[Inject]](/modeling/model-components/attributes/inject.md) attribute, it will be injected from the application's `IServiceProvider`.
 
 ### `out IncludeTree includeTree`
-If the method has an `out IncludeTree includeTree` parameter, then the `IncludeTree` that is passed out will be used to control serialization. See [Generated C# DTOs](/stacks/agnostic/dtos.md) and [Include Tree](/concepts/include-tree.md) for more information. If the method returns an `IQueryable`, the out parameter will supersede the include tree obtained from inspecting the query.
+If the method has an `out IncludeTree includeTree` parameter, then the `IncludeTree` that is passed out will be used to control serialization. See [Generated C# DTOs](/stacks/agnostic/dtos.md) and [Include Tree](/concepts/include-tree.md) for more information. It is recommended to instead use an `ItemResult<T>` return value with the `IncludeTree` set on the `ItemResult<T>` object, since out parameters cannot be used on async methods.
 
 
 ## Return Values
@@ -59,7 +59,7 @@ Mark any properties you don't want generated on these [TypeScript ViewModels](/s
 Collections of any of the above valid return types above are also valid return types. IEnumerables are useful for generator functions using `yield`. `ICollection` is highly suggested over `IEnumerable` whenever appropriate, though.
 
 ### `IQueryable<T>`
-Queryables of the valid return types above are valid return types. The query will be evaluated, and Coalesce will attempt to pull an [Include Tree](/concepts/include-tree.md) from the queryable to shape the response. When [Include Tree](/concepts/include-tree.md) functionality is needed to shape the response but an `IQueryable<>` return type is not feasible, an `out IncludeTree includeTree` parameter will do the trick as well.
+Queryables of the valid return types above are valid return types. The query will be evaluated, and Coalesce will attempt to pull an [Include Tree](/concepts/include-tree.md) from the queryable to shape the response. When [Include Tree](/concepts/include-tree.md) functionality is needed to shape the response but an `IQueryable<>` return type is not feasible, an `ItemResult` return value with an `IncludeTree` set on it will do the trick as well.
 
 ### Files
 Methods can return file downloads using type `IntelliTect.Coalesce.Models.IFile` (or any derived type, like `IntelliTect.Coalesce.Models.File`). Please see the [File Downloads](#file-downloads) section below for more details 

@@ -159,33 +159,7 @@ public override IncludeTree GetIncludeTree(IQueryable<T> query, IDataSourceParam
 
 ### Model Methods
 
-If you have instance or static methods on your models that return objects, you may also want to control the structure of the returned data when it is serialized. Fortunately, you can also use `IncludeTree` in these situations. Without an `IncludeTree`, the entire object graph is traversed and serialized without limit.
-
-To tell Coalesce about the structure of the data returned from a model method, simply add `out IncludeTree includeTree` to the signature of the method. Inside your method, set `includeTree` to an instance of an `IncludeTree`. Obtaining an `IncludeTree` is easy - take a look at this example:
-
-``` c#
-public class Employee
-{
-    public ICollection<Employee> GetChainOfCommand(AppDbContext db, out IncludeTree includeTree)
-    {
-        var ret = new List<Employee>();
-        var current = this;
-        while (current.Supervisor != null)
-        {
-            ret.Push(current);
-            current = db.Employees
-                .Include(e => e.Supervisor)
-                .FirstOrDefault(e => e.EmployeeId == current.SupervisorId);
-        }
-
-        includeTree = db.Employees
-            .IncludedSeparately(e => e.Supervisor) 
-            .GetIncludeTree();
-
-        return ret;
-    }
-}
-```
+If you have [custom methods](/modeling/model-components/methods.md) that return object data, you may also want to control the structure of the returned data when it is serialized. Fortunately, you can also use `IncludeTree` in these situations. Without an `IncludeTree`, the entire object graph is traversed and serialized without limit.
 
 ::: tip
 An `IncludeTree` can be obtained from any `IQueryable` by calling the `GetIncludeTree` extension method (`using IntelliTect.Coalesce.Helpers.IncludeTree`).
@@ -193,40 +167,58 @@ An `IncludeTree` can be obtained from any `IQueryable` by calling the `GetInclud
 In situations where your root object isn't on your `DbContext` (see [External Types](/modeling/model-types/external-types.md)), you can use `Enumerable.Empty<MyNonDbClass>().AsQueryable()` to get an `IQueryable` to start from. When you do this, you **must** use `IncludedSeparately` - the regular EF `Include` method won't work without a `DbSet`.
 :::
 
-Without the outputted `IncludeTree` in this scenario, the object graph received by the client would have ended up looking like this:
-    
-``` :no-line-numbers
-- Steve's manager
-    - District Supervisor
-        - VP
-            - CEO
-- District Supervisor
-    - VP
-        - CEO
-- VP
-    - CEO
-- CEO
+See the following two techniques for returning an `IncludeTree` from a custom method:
+
+#### ItemResult.IncludeTree
+
+The easiest and most versatile way to return an `IncludeTree` from a custom method is to make that method return an `ItemResult<T>`, and then set the `IncludeTree` property of the `ItemResult` object. For example:
+
+``` c#
+public class Employee
+{
+    public async Task<ItemResult<ICollection<Employee>>> GetChainOfCommand(AppDbContext db)
+    {
+        IQueryable<Employee> query = db.Employees
+            .Include(e => e.Supervisor);
+
+        var ret = new List<Employee>();
+        var current = this;
+        while (current.Supervisor != null)
+        {
+            ret.Push(current);
+            current = await query.FirstOrDefaultAsync(e => e.EmployeeId == current.SupervisorId);
+        }
+
+        return new(ret, includeTree: query.GetIncludeTree());
+    }
+}
 ```
 
-Instead, with the `IncludeTree`, we get the following, which is only the data we actually wanted:
+#### Out Parameter
 
-``` :no-line-numbers
-- Steve's manager
-    - District Supervisor
-- District Supervisor
-    - VP
-- VP
-    - CEO
-- CEO
-```
+To tell Coalesce about the structure of the data returned from a model method, you can also add `out IncludeTree includeTree` to the signature of the method. Inside your method, set `includeTree` to an instance of an `IncludeTree`. However, this approach cannot be used on `async` methods, since `out` parameters are not allowed on async methods in C#. For example:
 
-If you wanted to get even simpler, you could simply set the `out includeTree` to a `new IncludeTree()`, which would give you only the top-most level of data:
+``` c#
+public class Employee
+{
+    public ICollection<Employee> GetChainOfCommand(AppDbContext db, out IncludeTree includeTree)
+    {
+        IQueryable<Employee> query = db.Employees
+            .Include(e => e.Supervisor);
 
-``` :no-line-numbers
-- Steve's manager
-- District Supervisor
-- VP
-- CEO
+        var ret = new List<Employee>();
+        var current = this;
+        while (current.Supervisor != null)
+        {
+            ret.Push(current);
+            current = query.FirstOrDefault(e => e.EmployeeId == current.SupervisorId);
+        }
+
+        includeTree = query.GetIncludeTree();
+
+        return ret;
+    }
+}
 ```
 
 ### External Type Caveats

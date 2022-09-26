@@ -14,6 +14,15 @@ namespace IntelliTect.Coalesce.Models
 
         public string? Message { get; set; }
 
+        /// <summary>
+        /// Controls the shape of the DTO mapping of the result object.
+        /// </summary>
+#if NETCOREAPP3_1_OR_GREATER
+        [System.Text.Json.Serialization.JsonIgnore]
+#endif
+        [System.Runtime.Serialization.IgnoreDataMember] // for newtonsoft
+        public IncludeTree? IncludeTree { get; set; }
+
         public ApiResult() { }
 
         public ApiResult(bool wasSuccessful, string? message = null) 

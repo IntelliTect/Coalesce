@@ -8,6 +8,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
 {
@@ -170,6 +171,16 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         public static IEnumerable<string> NamesStartingWith(string characters, TestDbContext db)
         {
             return db.People.Where(f => f.FirstName.StartsWith(characters)).Select(f => f.Name).ToList();
+        }
+
+        public async Task<ItemResult<Person>> MethodWithIncludeTreeOnItemResult(TestDbContext db)
+        {
+            var query = db.People.Include(p => p.Company);
+
+            return new(
+                await query.FindItemAsync(PersonId),
+                includeTree: query.GetIncludeTree()
+            );
         }
 
         [Coalesce, DefaultDataSource]

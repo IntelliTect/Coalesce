@@ -20,12 +20,19 @@ namespace IntelliTect.Coalesce.Models
         public ItemResult(ItemResult result) : base(result)
         {
             ValidationIssues = result.ValidationIssues;
+            IncludeTree = result.IncludeTree;
         }
 
-        public ItemResult(bool wasSuccessful, string? message = null, IEnumerable<ValidationIssue>? validationIssues = null) 
+        public ItemResult(
+            bool wasSuccessful, 
+            string? message = null, 
+            IEnumerable<ValidationIssue>? validationIssues = null,
+            IncludeTree? includeTree = null
+        ) 
             : base(wasSuccessful, message)
         {
             ValidationIssues = validationIssues as ICollection<ValidationIssue> ?? validationIssues?.ToList();
+            IncludeTree = includeTree;
         }
 
         public static implicit operator ItemResult(bool success) => new ItemResult(success);
@@ -65,14 +72,15 @@ namespace IntelliTect.Coalesce.Models
             [System.Diagnostics.CodeAnalysis.AllowNull]
 #endif 
             T obj = default, 
-            IEnumerable<ValidationIssue>? validationIssues = null
+            IEnumerable<ValidationIssue>? validationIssues = null,
+            IncludeTree? includeTree = null
         ) 
-            : base(wasSuccessful, message, validationIssues)
+            : base(wasSuccessful, message, validationIssues, includeTree)
         {
             Object = obj;
         }
 
-        public ItemResult(T obj) : this(true)
+        public ItemResult(T obj, IncludeTree? includeTree = null) : this(true, includeTree: includeTree)
         {
             Object = obj;
         }

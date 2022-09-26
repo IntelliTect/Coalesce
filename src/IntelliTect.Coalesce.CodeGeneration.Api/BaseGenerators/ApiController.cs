@@ -278,11 +278,11 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
             {
                 if (param.Type.IsCollection)
                 {
-                    ret = $"{param.CsParameterName}.Select(_m => _m.{nameof(Mapper.MapToModel)}(new {param.Type.PureType.FullyQualifiedName}(), _mappingContext))";
+                    ret = $"{param.CsParameterName}.Select(_m => _m.{nameof(Mapper.MapToModel)}(new {param.Type.PureType.FullyQualifiedName}(), {MappingContextVar}))";
                 }
                 else
                 {
-                    ret = $"{param.CsParameterName}.{nameof(Mapper.MapToModel)}(new {param.Type.FullyQualifiedName}(), _mappingContext)";
+                    ret = $"{param.CsParameterName}.{nameof(Mapper.MapToModel)}(new {param.Type.FullyQualifiedName}(), {MappingContextVar})";
                 }
             }
 
@@ -359,8 +359,12 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
                 }
             }
 
+
+            var includeTreeForMapping = "includeTree";
             if (method.TaskUnwrappedReturnType.IsA<ApiResult>())
             {
+                includeTreeForMapping += $" ?? {MethodResultVar}.IncludeTree";
+
                 // For any ApiResult return type, pass it to our ApiResult ctor to grab the WasSuccessful and Message props.
                 // For list results, this also copies paging information.
                 b.Line($"var _result = new {method.ApiActionReturnTypeDeclaration}({MethodResultVar});");
@@ -392,9 +396,10 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
                     b.Append($"Mapper.MapToDto<{resultType.PureType.ClassViewModel.FullyQualifiedName}, {resultType.PureType.ClassViewModel.DtoName}>");
 
                     // Only attempt to pull the include tree out of the result if the user actually typed their return type as an IQueryable.
-                    var includeTreeForMapping = resultType.IsA<IQueryable>()
-                        ? $"includeTree ?? ({resultVar} as IQueryable)?.GetIncludeTree()"
-                        : "includeTree";
+                    if (resultType.IsA<IQueryable>())
+                    {
+                        includeTreeForMapping += $" ?? ({resultVar} as IQueryable)?.GetIncludeTree()";
+                    }
 
                     b.Append($"(o, {MappingContextVar}, {includeTreeForMapping}))");
                 }
@@ -414,7 +419,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
                 if (resultType.HasClassViewModel && !resultType.ClassViewModel.IsDto)
                 {
                     // Return type is a model that needs to be mapped to a DTO.
-                    b.Line($"_result.{resultProp} = Mapper.MapToDto<{resultType.ClassViewModel.FullyQualifiedName}, {resultType.ClassViewModel.DtoName}>({resultVar}, {MappingContextVar}, includeTree);");
+                    b.Line($"_result.{resultProp} = Mapper.MapToDto<{resultType.ClassViewModel.FullyQualifiedName}, {resultType.ClassViewModel.DtoName}>({resultVar}, {MappingContextVar}, {includeTreeForMapping});");
                 }
                 else
                 {

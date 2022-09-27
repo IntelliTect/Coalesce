@@ -27,7 +27,6 @@ import {
   ListParameters,
   Model,
   ModelType,
-  ModelValue,
   convertToModel,
   ModelApiClient,
   mapParamsToDto,
@@ -37,8 +36,8 @@ import {
   BehaviorFlags,
   ApiStateType,
   ApiState,
-  CollectionValue,
-  CollectionProperty,
+  Indexable,
+  ModelCollectionNavigationProperty,
 } from "coalesce-vue";
 
 import { defineComponent, PropType } from "vue";
@@ -87,7 +86,7 @@ export default defineComponent({
             [manyToManyMeta.nearForeignKey.name]: this.modelPkValue,
             [manyToManyMeta.nearNavigationProp.name]: model,
           },
-          (this.collectionMeta.itemType as ModelValue).typeDef
+          this.collectionMeta.itemType.typeDef
         )
       );
     },
@@ -139,19 +138,23 @@ export default defineComponent({
 
     canDelete(): boolean {
       return (
-        ((this.collectionMeta.itemType as ModelValue).typeDef.behaviorFlags &
+        (this.collectionMeta.itemType.typeDef.behaviorFlags &
           BehaviorFlags.Delete) !=
         0
       );
     },
 
-    collectionMeta(): CollectionValue | CollectionProperty {
+    collectionMeta(): ModelCollectionNavigationProperty {
       const valueMeta = this.valueMeta;
-      if (valueMeta && valueMeta.type == "collection") {
+      if (
+        valueMeta &&
+        valueMeta.type == "collection" &&
+        "manyToMany" in valueMeta
+      ) {
         return valueMeta;
       } else {
         throw Error(
-          "c-select-many-to-many requires value metadata for a collection. Specify it with the 'for' prop'"
+          "c-select-many-to-many requires value metadata for a many-to-many collection. Specify it with the 'for' prop'"
         );
       }
     },
@@ -201,8 +204,20 @@ export default defineComponent({
       if (typeof this.$attrs["item-title"] === "function") {
         return this.$attrs["item-title"](item);
       }
-      const display = modelDisplay(this.foreignItemOf(item) || item);
-      return display;
+
+      const foreignItem = this.foreignItemOf(item);
+      if (!foreignItem) {
+        const itemFarFk = this.manyToManyMeta.farForeignKey;
+        const itemFarNav = this.manyToManyMeta.farNavigationProp;
+        console.warn(
+          `${this.$options.name}: Unable to display the name of %o because '${itemFarNav.name}' is not loaded.`,
+          item
+        );
+
+        return item[itemFarFk.name] || modelDisplay(item);
+      }
+
+      return modelDisplay(foreignItem);
     },
 
     itemValue(item: any) {
@@ -211,8 +226,11 @@ export default defineComponent({
         return null;
       }
 
-      item = this.foreignItemOf(item);
-      return item[this.foreignItemKeyPropName];
+      const foreignItem = this.foreignItemOf(item);
+      if (foreignItem) {
+        return foreignItem[this.foreignItemKeyPropName];
+      }
+      return item[this.manyToManyMeta.farForeignKey.name];
     },
 
     onInput(value: any[]) {
@@ -287,7 +305,7 @@ export default defineComponent({
       this.$emit("update:modelValue", items);
     },
 
-    foreignItemOf(value: any) {
+    foreignItemOf(value: any): Indexable<Model> | null | undefined {
       return value[this.manyToManyMeta!.farNavigationProp.name];
     },
   },

@@ -132,7 +132,7 @@ export default defineComponent({
   inject: {
     // Read `readonly` and `disabled` from Vuetify form.
     // TODO: Port to Vue3
-    form: {},
+    form: { default: null },
   },
 
   data() {

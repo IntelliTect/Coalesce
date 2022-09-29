@@ -45,7 +45,7 @@ public class CaseBehaviors : StandardBehaviors<Case, AppDbContext>
 
         // This is a new item, OR its an existing item and the owner isn't being modified.
         if (item.CreatedById != User.GetUserId())
-            return "You are not the owner of this item."
+            return "You are not the owner of this item.";
 
         return true;
     }

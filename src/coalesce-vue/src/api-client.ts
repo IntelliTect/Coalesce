@@ -1143,7 +1143,7 @@ export abstract class ApiState<
   /**
    * Enable response caching for the API caller,
    * saving previous responses to persistent storage (default: `sessionStorage`) so they can later
-   * be used to populate `result` when an identical request is made but before a network response is received.
+   * be used to populate `result` when an identical request is made but before any initial network response is received.
    *
    * Response caching does not prevent any HTTP requests from being made, but instead
    * will temporarily load an old response while the fresh response is being fetched.
@@ -1348,7 +1348,7 @@ export abstract class ApiState<
           const key = `coalesce:${userKey}`;
 
           const cachedValue = storage.getItem(key);
-          if (cachedValue) {
+          if (cachedValue && this.wasSuccessful === null && !this.hasResult) {
             const {
               time,
               maxAge: storedMaxAge,

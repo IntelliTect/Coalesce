@@ -879,6 +879,44 @@ describe("$makeCaller", () => {
       // will not have hydrated `result` with a cached value.
       expect(caller3.result).toBe(null);
     });
+
+    test("does not use cached response when another response is already loaded", async () => {
+      AxiosClient.defaults.adapter = () => makeEndpointMock("response1")();
+
+      const runTest = () => {
+        const caller = new StudentApiClient().$makeCaller("item", async (c) => {
+          const res = c.fullNameAndAge(42);
+          await delay(10);
+          return await res;
+        });
+        caller.useResponseCaching({ maxAgeSeconds: 20 });
+        return caller;
+      };
+
+      // Make the first caller and invoke it, which will populate the cache.
+      await runTest()();
+
+      // Make another caller.
+      const caller2 = runTest();
+
+      // Upon first invocation, the cache will be used.
+      await caller2();
+      expect(caller2.result).toBe("response1");
+
+      // Change the result of the caller.
+      // Real world scenario here is perhaps a ListViewModel where we've
+      // since added items locally to its $items collection, and we don't want those items overwritten.
+      caller2.result = "response2";
+
+      // Start another invocation. It should not overwrite the value in `caller2.result`,
+      // because the caller has already loaded at least once.
+      caller2();
+      expect(caller2.result).toBe("response2");
+
+      // Check again in case of any promise weirdness.
+      await delay(1);
+      expect(caller2.result).toBe("response2");
+    });
   });
 });
 

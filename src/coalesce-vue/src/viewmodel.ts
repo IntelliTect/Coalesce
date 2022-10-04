@@ -777,7 +777,7 @@ export abstract class ViewModel<
     initialDirtyData?: DeepPartial<TModel> | null
   ) {
     Object.defineProperty(this, "$stableId", {
-      enumerable: false,
+      enumerable: true, // Enumerable so visible in vue devtools
       configurable: false,
       value: nextStableId++,
       writable: false,

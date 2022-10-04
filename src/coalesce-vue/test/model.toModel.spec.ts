@@ -244,6 +244,12 @@ describe.each(["convertToModel", "mapToModel"] as const)("%s", (methodName) => {
 });
 
 describe("mapToModel", () => {
+  test("can be typed with concrete model class", () => {
+    const mapped: Course = model.mapToModel<Course>({}, $metadata.Course);
+    //@ts-expect-error
+    const mapped2: Course = model.mapToModel<Course>({}, $metadata.Student);
+  });
+
   test("ignores mismatched existing metadata", () => {
     const mapped = model.mapToModel(
       {
@@ -269,6 +275,12 @@ describe("mapToModel", () => {
 });
 
 describe("convertToModel", () => {
+  test("can be typed with concrete model class", () => {
+    const mapped: Course = model.convertToModel<Course>({}, $metadata.Course);
+    //@ts-expect-error
+    const mapped2: Course = model.convertToModel<Course>({}, $metadata.Student);
+  });
+
   test("rejects mismatched existing metadata", () => {
     // If metadata on the incoming object doesn't match what
     // the resulting metadata is supposed to be, then something's wrong.

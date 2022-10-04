@@ -106,7 +106,9 @@ export interface FilterParameters extends DataSourceParameters {
   search?: string | null;
 
   /** A collection of key-value pairs to filter by. Behavior is dependent on the type of each field, see Coalesce's full documentation for details. */
-  filter?: { [fieldName: string]: string | number | boolean | null } | null;
+  filter?: {
+    [fieldName: string]: string | number | boolean | null | undefined;
+  } | null;
 }
 export class FilterParameters extends DataSourceParameters {
   constructor() {

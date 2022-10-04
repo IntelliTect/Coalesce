@@ -415,8 +415,8 @@ class ModelConversionVisitor extends Visitor<any, any[] | null, any | null> {
  * @param metadata The metadata describing the TModel that is desired
  */
 export function convertToModel<
-  TMeta extends ClassType,
-  TModel extends Model<TMeta>
+  TModel extends Model<TMeta>,
+  TMeta extends ClassType = TModel["$metadata"]
 >(object: { [k: string]: any }, metadata: TMeta): TModel;
 /**
  * Transforms a raw value into a valid implementation of a model value.
@@ -441,8 +441,8 @@ export { convertToModel as convertValueToModel };
  * @param metadata The metadata describing the TModel that is desired
  */
 export function mapToModel<
-  TMeta extends ClassType,
-  TModel extends Model<TMeta>
+  TModel extends Model<TMeta>,
+  TMeta extends ClassType = TModel["$metadata"]
 >(object: { [k: string]: any }, metadata: TMeta): TModel;
 /**
  * Maps a raw value into a valid implementation of a model value.

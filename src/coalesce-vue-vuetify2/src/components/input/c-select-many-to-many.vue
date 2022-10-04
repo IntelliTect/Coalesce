@@ -44,6 +44,11 @@ import {
 export default defineComponent({
   name: "c-select-many-to-many",
 
+  // We manually pass attrs via inputBindAttrs, so disable the default Vue behavior.
+  // If we don't do this, some HTML attrs (e.g. tabindex) will incorrectly be placed
+  // on the root element rather than on the search field in the autocomplete.
+  inheritAttrs: false,
+
   setup(props) {
     return { ...useMetadataProps(props) };
   },

@@ -1,34 +1,40 @@
 <template>
   <v-container grid-list-lg>
-    
+
+    <c-select-string-value :model="caseVm" for="title" method="getCaseTitles" eager />
+
+    {{selectedTitle}}
+    <div @click="selectedTitle = null">Reset</div>
+    <c-select-string-value for="Case" v-model="selectedTitle" method="getCaseTitles" eager @input="trace" clearable />
+
     <video v-if="caseVm.caseKey" :src="caseVm.downloadImage.url" controls style="max-width: 100%">
     </video>
- 
+
     <!--<video v-if="caseVm.caseKey" :src="caseVm.downloadImage.getResultObjectUrl(this)" controls style="max-width: 100%">
-    </video>--> 
+  </video>-->
 
     <c-input :model="person" for="height" />
 
-    <v-layout v-if="person != null" >
+    <v-layout v-if="person != null">
       <v-flex xs12>
-        <v-card >
+        <v-card>
           <c-display :model="person" for="birthDate" format="yyyy MM dd zzzz" />
           <v-card-actions>
-            <v-container >
-              <v-layout  wrap >
+            <v-container>
+              <v-layout wrap>
                 <v-flex sm6 md4 xl3 v-for="prop in showProps" :key="prop.name" class="py-0">
-                  <c-input :model="person" :for="prop"/>
+                  <c-input :model="person" :for="prop" />
                 </v-flex>
               </v-layout>
             </v-container>
           </v-card-actions>
           <v-card-actions right>
             <v-spacer />
-            <v-btn flat>
+            <v-btn text>
               <v-icon left>cancel</v-icon>
               Cancel
             </v-btn>
-            <v-btn flat color="primary"
+            <v-btn text color="primary"
                    @click.native="person.$save()"
                    :loading="person.$save.isLoading"
                    :disabled="person.$save.isLoading">
@@ -38,40 +44,40 @@
           </v-card-actions>
         </v-card>
       </v-flex>
-      
+
     </v-layout>
-    
-    <v-layout >
+
+    <v-layout>
 
       <!--<v-flex xs12>
-        <v-data-table
-                      v-if="company.employees"
-          :headers="headers"
-          :items="company.employees"
-          :search="search"
-          :pagination.sync="pagination"
-          :server-items-length="count"
-          :loading="isLoading"
-          class="elevation-1"
-          >
-          <template slot="items" slot-scope="props">
-              <td>
-                  <v-btn flat color="primary"
-                         @click.native="props.item.$save()"
-                         :loading="props.item.$save.isLoading"
-                         :disabled="props.item.$save.isLoading">
-                      <v-icon left>save</v-icon>
-                      Save
-                  </v-btn>
-              </td>
-            <td v-for="prop in showProps" :key="prop.name" :class="'prop-' + prop.name" >
-              <c-input :model="props.item" :for="prop.name"/>
+      <v-data-table
+                    v-if="company.employees"
+        :headers="headers"
+        :items="company.employees"
+        :search="search"
+        :pagination.sync="pagination"
+        :server-items-length="count"
+        :loading="isLoading"
+        class="elevation-1"
+        >
+        <template slot="items" slot-scope="props">
+            <td>
+                <v-btn text color="primary"
+                       @click.native="props.item.$save()"
+                       :loading="props.item.$save.isLoading"
+                       :disabled="props.item.$save.isLoading">
+                    <v-icon left>save</v-icon>
+                    Save
+                </v-btn>
             </td>
-          </template>
-        </v-data-table>
-      </v-flex>-->
+          <td v-for="prop in showProps" :key="prop.name" :class="'prop-' + prop.name" >
+            <c-input :model="props.item" :for="prop.name"/>
+          </td>
+        </template>
+      </v-data-table>
+    </v-flex>-->
     </v-layout>
-    
+
   </v-container>
 
 
@@ -99,6 +105,7 @@
     person: PersonViewModel = new PersonViewModel();
     personList = new PersonListViewModel();
     isLoading: boolean = false;
+    selectedTitle = "";
 
     caseVm = new CaseViewModel();
 
@@ -118,6 +125,10 @@
         .values(metadata.Person.props)
         .filter(p => p.role != "primaryKey" && p.role != "foreignKey");
     };
+
+    trace(...args: any[]) {
+      console.log("trace", args)
+    }
 
     get headers() { return this.showProps.map(o => ({ text: o.displayName, value: o.name })) };
 
@@ -150,7 +161,8 @@
 
     async created() {
 
-       this.caseVm.$load(16);
+      this.caseVm.$load(16);
+      this.caseVm.$startAutoSave(this);
       //await this.caseVm.downloadImage()
        this.company.$load(1);
 

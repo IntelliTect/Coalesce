@@ -5,10 +5,15 @@
     @update:modelValue="onInput"
     :loading="loading"
     :items="items"
-    v-model:search="search"
+    :hide-no-data="false"
+    v-model:searchInput="search"
     v-bind="inputBindAttrs"
   >
   </v-combobox>
+  <!-- TODO: This component has a lot of issues in vuetify3:
+    - Dropdown menu hides until the second keystroke.
+    - Current value disappears when the component receives focus if the value has not yet been edited since the component mounted.
+  -->
 </template>
 
 <script lang="ts">
@@ -17,7 +22,7 @@ import { ModelApiClient, ItemResultPromise } from "coalesce-vue";
 import { makeMetadataProps, useMetadataProps } from "../c-metadata-component";
 
 const MODEL_REQUIRED_MESSAGE =
-  "c-select-string-value requires a model to be provided via the `model` prop.";
+  "c-select-string-value requires a model to be provided via the `model` prop, or a type to be provided via the `for` prop.";
 
 export default defineComponent({
   name: "c-select-string-value",
@@ -29,7 +34,10 @@ export default defineComponent({
 
   setup(props) {
     const metaProps = useMetadataProps(props);
-    const modelMeta = metaProps.modelMeta.value;
+    const valueMeta = metaProps.valueMeta.value;
+    const modelMeta =
+      metaProps.modelMeta.value ??
+      (valueMeta?.type == "model" ? valueMeta.typeDef : null);
 
     if (!modelMeta || modelMeta.type != "model") {
       throw Error(MODEL_REQUIRED_MESSAGE);
@@ -37,8 +45,13 @@ export default defineComponent({
 
     const methodMeta = modelMeta.methods[props.method];
 
+    if (!methodMeta) {
+      throw Error(
+        `No method named ${props.method} could be found on type ${modelMeta.name}. Note: method name is expected to be camelCase.`
+      );
+    }
+
     if (
-      !methodMeta ||
       !methodMeta.isStatic ||
       methodMeta.transportType != "item" ||
       methodMeta.return.type != "collection" ||
@@ -57,7 +70,6 @@ export default defineComponent({
           search,
           ...props.params,
         }) as ItemResultPromise<string[]>;
-        // (c as any)[methodMeta.name](page, search) as ListResultPromise<string>
       })
       .setConcurrency("debounce");
 
@@ -67,6 +79,7 @@ export default defineComponent({
   props: {
     ...makeMetadataProps(),
     method: { required: true, type: String },
+    modelValue: { required: false, type: String },
     params: { required: false, type: Object },
     listWhenEmpty: { required: false, default: false, type: Boolean },
   },
@@ -106,7 +119,7 @@ export default defineComponent({
         return (this.model as any)[this.valueMeta.name];
       }
 
-      throw Error(MODEL_REQUIRED_MESSAGE);
+      return this.modelValue ?? null;
     },
   },
 
@@ -114,10 +127,10 @@ export default defineComponent({
     // `unknown` because vuetify's types are a little weird right now (wont infer `string`)
     onInput(value: unknown) {
       if (this.model && this.valueMeta) {
-        return ((this.model as any)[this.valueMeta.name] = value);
+        (this.model as any)[this.valueMeta.name] = value;
       }
 
-      this.$emit("input", value);
+      this.$emit("update:modelValue", value);
     },
   },
 

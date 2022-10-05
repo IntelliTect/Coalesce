@@ -283,6 +283,33 @@ export const Case = domain.types.Case = {
     },
   },
   methods: {
+    getCaseTitles: {
+      name: "getCaseTitles",
+      displayName: "Get Case Titles",
+      transportType: "item",
+      httpMethod: "POST",
+      isStatic: true,
+      params: {
+        search: {
+          name: "search",
+          displayName: "Search",
+          type: "string",
+          role: "value",
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "collection",
+        itemType: {
+          name: "$collectionItem",
+          displayName: "",
+          role: "value",
+          type: "string",
+        },
+        role: "value",
+      },
+    },
     getSomeCases: {
       name: "getSomeCases",
       displayName: "Get Some Cases",

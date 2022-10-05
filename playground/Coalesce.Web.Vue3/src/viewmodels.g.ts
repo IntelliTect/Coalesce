@@ -99,6 +99,17 @@ defineProps(CaseViewModel, $metadata.Case)
 
 export class CaseListViewModel extends ListViewModel<$models.Case, $apiClients.CaseApiClient, CaseViewModel> {
   
+  public get getCaseTitles() {
+    const getCaseTitles = this.$apiClient.$makeCaller(
+      this.$metadata.methods.getCaseTitles,
+      (c, search: string | null) => c.getCaseTitles(search),
+      () => ({search: null as string | null, }),
+      (c, args) => c.getCaseTitles(args.search))
+    
+    Object.defineProperty(this, 'getCaseTitles', {value: getCaseTitles});
+    return getCaseTitles
+  }
+  
   public get getSomeCases() {
     const getSomeCases = this.$apiClient.$makeCaller(
       this.$metadata.methods.getSomeCases,

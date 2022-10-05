@@ -342,7 +342,7 @@ namespace Coalesce.Web.Vue3.Api
             var _mappingContext = new MappingContext(User);
             var _methodResult = Coalesce.Domain.Person.SearchPeople(Db, criteria.MapToModel(new Coalesce.Domain.PersonCriteria(), _mappingContext), page);
             var _result = new ListResult<PersonDtoGen>(_methodResult);
-            _result.List = _methodResult.List?.ToList().Select(o => Mapper.MapToDto<Coalesce.Domain.Person, PersonDtoGen>(o, _mappingContext, includeTree)).ToList();
+            _result.List = _methodResult.List?.ToList().Select(o => Mapper.MapToDto<Coalesce.Domain.Person, PersonDtoGen>(o, _mappingContext, includeTree ?? _methodResult.IncludeTree)).ToList();
             return _result;
         }
     }

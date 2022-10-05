@@ -5,6 +5,14 @@ import { AxiosPromise, AxiosResponse, AxiosRequestConfig } from 'axios'
 
 export class CaseApiClient extends ModelApiClient<$models.Case> {
   constructor() { super($metadata.Case) }
+  public getCaseTitles(search: string | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<string[]>> {
+    const $method = this.$metadata.methods.getCaseTitles
+    const $params =  {
+      search,
+    }
+    return this.$invoke($method, $params, $config)
+  }
+  
   public getSomeCases($config?: AxiosRequestConfig): AxiosPromise<ItemResult<$models.Case[]>> {
     const $method = this.$metadata.methods.getSomeCases
     const $params =  {

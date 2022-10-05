@@ -1,15 +1,22 @@
 <template>
   <v-container grid-list-lg>
+
+    <c-select-string-value :model="caseVm" for="title" method="getCaseTitles" eager />
+
+    {{selectedTitle}}
+    <div @click="selectedTitle = null">Reset</div>
+    <c-select-string-value for="Case" v-model="selectedTitle" method="getCaseTitles" eager clearable />
+
     <router-link to="/admin/Case?filter.assignedToId=12"> asdasd </router-link>
 
     <c-select for="Person" :create="createMethods"> </c-select>
 
     <c-admin-table :list="personList"></c-admin-table>
 
-    <!--     
-    <video v-if="caseVm.caseKey" :src="caseVm.downloadImage.url" controls style="max-width: 100%">
-    </video>
-    <img v-if="caseVm.caseKey" :src="caseVm.downloadImage.url" controls style="max-width: 100%" /> -->
+    <!--
+  <video v-if="caseVm.caseKey" :src="caseVm.downloadImage.url" controls style="max-width: 100%">
+  </video>
+  <img v-if="caseVm.caseKey" :src="caseVm.downloadImage.url" controls style="max-width: 100%" /> -->
 
     <c-input :model="caseVm" for="title"></c-input>
     <c-input :model="caseVm" for="description" textarea></c-input>
@@ -24,8 +31,7 @@
 
     <v-text-field v-model="caseVm.title" label="vuetify direct"></v-text-field>
     <!--<video v-if="caseVm.caseKey" :src="caseVm.downloadImage.getResultObjectUrl(this)" controls style="max-width: 100%">
-    </video>-->
-
+  </video>-->
     <!-- <c-input :model="person" for="height" /> -->
   </v-container>
 </template>
@@ -53,6 +59,7 @@ export default class Test extends Base {
   person: PersonViewModel = new PersonViewModel();
   personList = new PersonListViewModel();
   isLoading: boolean = false;
+  selectedTitle = null;
 
   caseVm = new CaseViewModel();
 

@@ -110,6 +110,15 @@ namespace Coalesce.Domain
 
 #nullable restore
 
+        [Coalesce]
+        public static ICollection<string> GetCaseTitles(AppDbContext db, string search) => db.Cases
+            .Select(p => p.Title)
+            .Distinct()
+            .Where(t => t.StartsWith(search))
+            .OrderBy(t => t)
+            .Take(100)
+            .ToList();
+
         // Arbitrary endpoint to "test" method collection return types.
         [Coalesce]
         public static ICollection<Case> GetSomeCases(AppDbContext db) => db.Cases.Take(10).ToList();

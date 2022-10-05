@@ -1,5 +1,5 @@
 // This will tree shake correctly as of v2.0.0-alpha.21
-import { formatDistanceToNow, lightFormat, parseISO } from "date-fns";
+import { formatDistanceToNow, lightFormat } from "date-fns";
 
 // These weird imports from date-fns-tz are needed because date-fns-tz
 // doesn't define its esm exports from its root correctly.
@@ -29,6 +29,7 @@ import {
   type Indexable,
   isNullOrWhitespace,
   type VueInstance,
+  parseJSONDate,
 } from "./util.js";
 
 /**
@@ -209,21 +210,7 @@ export function parseValue(
       if (value instanceof Date) {
         date = value;
       } else if (type === "string") {
-        // dateFns `toDate` is way too lenient -
-        // it will parse any number as milliseconds since the epoch,
-        // and parses `true` as the epoch.
-        // So, we restrict parsing to strings only.
-
-        // DO NOT USE `new Date()` here.
-        // Safari incorrectly interprets times without a timezone offset
-        // (i.e. DateTime objects in c#) as UTC instead of local time.
-        // Safari is the only browser that does that. IE,Chrome,Firefox,Edge
-        // all do this correctly.
-        // The reason we originally used `new Date()` here was for sheer performance.
-        // This idea came from the Knockout stack where `moment(...)` is 20x slower than
-        // `new Date()` and it seemed at the time that the date ctor did behave the same
-        // across all browsers. However, this has proven not to be the case in practice.
-        date = parseISO(value);
+        date = parseJSONDate(value);
       }
 
       // isNaN is what date-fn's `isValid` calls internally,

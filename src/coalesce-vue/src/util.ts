@@ -42,6 +42,52 @@ export function isNullOrWhitespace(value: string | null | undefined) {
   return true;
 }
 
+const iso8601DateRegex =
+  /^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2}):(\d{2})(?:\.(\d{0,7}))?(?:Z|(.)(\d{2}):?(\d{2})?)?/;
+export function parseJSONDate(argument: string) {
+  // DO NOT USE `new Date()` here.
+  // Safari incorrectly interprets times without a timezone offset
+  // (i.e. DateTime objects in c#) as UTC instead of local time.
+  // Safari is the only browser that does that. IE,Chrome,Firefox,Edge
+  // all do this correctly.
+  // The reason we originally used `new Date()` here was for sheer performance.
+  // This idea came from the Knockout stack where `moment(...)` is 20x slower than
+  // `new Date()` and it seemed at the time that the date ctor did behave the same
+  // across all browsers. However, this has proven not to be the case in practice.
+
+  // `date-fns` `parseJSON` function is susceptible to the same issue,
+  // which is why this function is a adaptation of that function.
+  // This method is only slightly slower than parseJSON,
+  // but is still 3-4x faster than parseISO while also having much, much less code.
+
+  var parts = argument.match(iso8601DateRegex) || [];
+
+  const part9 = parts[9];
+  if (part9 !== undefined) {
+    return new Date(
+      Date.UTC(
+        +parts[1],
+        +parts[2] - 1,
+        +parts[3],
+        +parts[4] - (+part9 || 0) * (parts[8] == "-" ? -1 : 1),
+        +parts[5] - (+parts[10] || 0) * (parts[8] == "-" ? -1 : 1),
+        +parts[6],
+        +((parts[7] || "0") + "00").substring(0, 3)
+      )
+    );
+  } else {
+    return new Date(
+      +parts[1],
+      +parts[2] - 1,
+      +parts[3],
+      +parts[4],
+      +parts[5],
+      +parts[6],
+      +((parts[7] || "0") + "00").substring(0, 3)
+    );
+  }
+}
+
 export function parseDateUserInput(input: string, defaultDate: Date) {
   const mmdd = /^\s*(\d+)\s*[\-\/\\\.]\s*(\d+)\s*$/.exec(input);
   if (mmdd) {

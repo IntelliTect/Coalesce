@@ -12,12 +12,12 @@
 
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp3.1' ">
-    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="3.1.*" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.*" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="3.1.29" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.29" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'net6.0' ">
-    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="6.0.*" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="6.0.*" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="6.0.9" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="6.0.9" />
   </ItemGroup>
 
   <ItemGroup>

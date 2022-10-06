@@ -10,6 +10,7 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
     public class TestDbContext : DbContext
     {
         public DbSet<Person> People { get; set; }
+        public DbSet<Sibling> Siblings { get; set; }
         public DbSet<Case> Cases { get; set; }
         public DbSet<Company> Companies { get; set; }
         public DbSet<Product> Products { get; set; }

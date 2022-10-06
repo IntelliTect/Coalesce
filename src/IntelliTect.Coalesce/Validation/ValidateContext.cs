@@ -119,18 +119,16 @@ namespace IntelliTect.Coalesce.Validation
                             assert.IsTrue(prop.PureTypeOnContext, $"ManyToManyAttribute cannot be used on {prop.PureType} because the type is not DB-mapped.")
                         )
                         {
-                            var farNavigation = prop.ManyToManyCollectionProperty;
-                            assert.IsNotNull(farNavigation?.Object?.ViewModelClassName, $"Many to Many contained type is: {prop.ManyToManyCollectionProperty?.Object?.ViewModelClassName}");
-                            if (farNavigation != null)
-                            {
-                                assert.IsNotNull(farNavigation.ForeignKeyProperty, $"Many-to-many property's far-side navigation property ({farNavigation.Parent}.{farNavigation}) has no corresponding foreign key property.");
-                            }
-
-                            var nearNavigation = prop.Object?.ClientProperties.FirstOrDefault(f => f.Type == model.Type);
-                            assert.IsNotNull(nearNavigation, $"Many-to-many property's near-side navigation property doesn't exist (expected a prop of type {model.Type} to be found on {prop.Object}).");
-                            if (nearNavigation != null)
+                            var nearNavigation = prop.ManyToManyNearNavigationProperty;
+                            if (assert.IsNotNull(nearNavigation, $"Many to Many near navigation prop could not be determined. Consider adding an [InverseProperty] as well."))
                             {
                                 assert.IsNotNull(nearNavigation.ForeignKeyProperty, $"Many-to-many property's near-side navigation property ({nearNavigation}) has no corresponding foreign key property.");
+                            }
+
+                            var farNavigation = prop.ManyToManyFarNavigationProperty;
+                            if (assert.IsNotNull(farNavigation, $"Many to Many far navigation prop could not be determined. "))
+                            {
+                                assert.IsNotNull(farNavigation.ForeignKeyProperty, $"Many-to-many property's far-side navigation property ({farNavigation}) has no corresponding foreign key property.");
                             }
                         }
 

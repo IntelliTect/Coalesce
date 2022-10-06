@@ -576,10 +576,10 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
                 </select>",
                 prefix,
                 propertyModel.ManyToManyCollectionName.ToCamelCase(),
-                propertyModel.ManyToManyCollectionProperty.Object.ViewModelClassName,
-                propertyModel.ManyToManyCollectionProperty.Object.PrimaryKey.Name,
-                propertyModel.ManyToManyCollectionProperty.Object.ListTextProperty.Name,
-                propertyModel.ManyToManyCollectionProperty.Object.ApiRouteControllerPart,
+                propertyModel.ManyToManyFarNavigationProperty.Object.ViewModelClassName,
+                propertyModel.ManyToManyFarNavigationProperty.Object.PrimaryKey.Name,
+                propertyModel.ManyToManyFarNavigationProperty.Object.ListTextProperty.Name,
+                propertyModel.ManyToManyFarNavigationProperty.Object.ApiRouteControllerPart,
                 (string.IsNullOrWhiteSpace(areaName) ? "" : $"{areaName}."),
                 pageSize
                 );
@@ -759,7 +759,7 @@ namespace IntelliTect.Coalesce.Knockout.Helpers
         {
             string result = $@"
                 <div data-bind = ""foreach: {propertyModel.ManyToManyCollectionName.ToCamelCase()} "">
-                    <div class=""form-control-static"" data-bind=""text: {propertyModel.ManyToManyCollectionProperty.Object.ListTextProperty.JsVariableForBinding()}""></div>
+                    <div class=""form-control-static"" data-bind=""text: {propertyModel.ManyToManyFarNavigationProperty.Object.ListTextProperty.JsVariableForBinding()}""></div>
                 </div>";
 
             return new HtmlString(result);

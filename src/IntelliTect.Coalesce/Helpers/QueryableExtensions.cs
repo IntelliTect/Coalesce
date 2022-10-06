@@ -26,7 +26,7 @@ namespace IntelliTect.Coalesce
             {
                 if (prop.IsManytoManyCollection)
                 {
-                    query = query.Include(prop.Name + "." + prop.ManyToManyCollectionProperty!.Name);
+                    query = query.Include(prop.Name + "." + prop.ManyToManyFarNavigationProperty!.Name);
                 }
                 else
                 {

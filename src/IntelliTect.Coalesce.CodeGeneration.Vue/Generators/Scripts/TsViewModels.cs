@@ -105,10 +105,10 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                         if (prop.IsManytoManyCollection)
                         {
                             b.Line();
-                            var manyToManyType = new VueType(prop.ManyToManyCollectionProperty.Type).TsType(viewModel: true);
+                            var manyToManyType = new VueType(prop.ManyToManyFarNavigationProperty.Type).TsType(viewModel: true);
                             using (b.Block($"get {prop.ManyToManyCollectionName.ToCamelCase()}(): ReadonlyArray<{manyToManyType}>"))
                             {
-                                b.Line($"return (this.{prop.JsVariable} || []).map($ => $.{prop.ManyToManyCollectionProperty.JsVariable}!).filter($ => $)");
+                                b.Line($"return (this.{prop.JsVariable} || []).map($ => $.{prop.ManyToManyFarNavigationProperty.JsVariable}!).filter($ => $)");
                             }
                         }
                     }

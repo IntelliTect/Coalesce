@@ -251,8 +251,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                         {
                             using (b.Block("manyToMany:", ","))
                             {
-                                var nearNavigation = prop.Object.ClientProperties.First(f => f.Type == model.Type);
-                                var farNavigation = prop.ManyToManyCollectionProperty;
+                                var nearNavigation = prop.ManyToManyNearNavigationProperty;
+                                var farNavigation = prop.ManyToManyFarNavigationProperty;
 
                                 b.StringProp("name", prop.ManyToManyCollectionName.ToCamelCase());
                                 b.StringProp("displayName", prop.ManyToManyCollectionName.ToProperCase());

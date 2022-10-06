@@ -109,6 +109,10 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         /// </summary>
         public Company Company { get; set; }
 
+        [ManyToMany("Siblings")]
+        [InverseProperty(nameof(Sibling.Person))]
+        public ICollection<Sibling> SiblingRelationships { get; set; }
+
         /// <summary>
         /// Sets the FirstName to the given text.
         /// </summary>
@@ -211,7 +215,6 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
             }
         }
     }
-
 
     [Coalesce]
     public class NamesStartingWithAWithCases : StandardDataSource<Person, TestDbContext>

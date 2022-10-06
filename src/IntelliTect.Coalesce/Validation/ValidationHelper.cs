@@ -33,12 +33,24 @@ namespace IntelliTect.Coalesce.Validation
             return IsTrue(obj1 != obj2, message, isWarning);
         }
 
-        public bool IsNotNull(object? obj, string message, bool isWarning = false)
+        public bool IsNotNull(
+#if NETCOREAPP
+            [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] 
+#endif
+            object? obj, 
+            string message, 
+            bool isWarning = false)
         {
             return IsTrue(obj != null, message, isWarning);
         }
 
-        public bool IsNull(object? obj, string message, bool isWarning = false)
+        public bool IsNull(
+#if NETCOREAPP
+            [System.Diagnostics.CodeAnalysis.NotNullWhen(false)] 
+#endif
+            object? obj, 
+            string message, 
+            bool isWarning = false)
         {
             return IsTrue(obj == null, message, isWarning);
         }

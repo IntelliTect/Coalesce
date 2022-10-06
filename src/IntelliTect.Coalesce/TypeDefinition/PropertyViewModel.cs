@@ -136,8 +136,22 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// Property on the other side of the many-to-many relationship.
         /// </summary>
-        public PropertyViewModel? ManyToManyCollectionProperty =>
-            Object?.ClientProperties.FirstOrDefault(prop => prop.IsPOCO && prop.Object?.Equals(Parent) != true);
+        [Obsolete("Use better-named property `ManyToManyFarNavigationProperty`.")]
+        public PropertyViewModel? ManyToManyCollectionProperty => ManyToManyFarNavigationProperty;
+
+        /// <summary>
+        /// Property on the far side of the many-to-many relationship.
+        /// </summary>
+        public PropertyViewModel? ManyToManyFarNavigationProperty =>
+            Object?.ClientProperties
+            .Where(p => p.IsPOCO)
+            .SingleOrDefault(p => !p.Equals(ManyToManyNearNavigationProperty));
+
+
+        /// <summary>
+        /// Property on the near side of the many-to-many relationship.
+        /// </summary>
+        public PropertyViewModel? ManyToManyNearNavigationProperty => InverseProperty;
 
         /// <summary>
         /// True if the property is read only.

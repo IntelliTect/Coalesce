@@ -74,5 +74,29 @@ namespace IntelliTect.Coalesce.Tests.TypeDefinition
             Assert.NotEqual(data.ClassViewModel, inheritedProp.Parent);
             Assert.Equal(data.ClassViewModel, inheritedProp.EffectiveParent);
         }
+
+        [Theory]
+        [ClassViewModelData(typeof(Case))]
+        public void NonHomogenousManyToMany_IsCorrect(ClassViewModelData data)
+        {
+            var prop = data.ClassViewModel.PropertyByName(nameof(Case.CaseProducts));
+
+            Assert.Equal("Case", prop.ManyToManyNearNavigationProperty.Name);
+            Assert.Equal("CaseId", prop.ManyToManyNearNavigationProperty.ForeignKeyProperty.Name);
+            Assert.Equal("Product", prop.ManyToManyFarNavigationProperty.Name);
+            Assert.Equal("ProductId", prop.ManyToManyFarNavigationProperty.ForeignKeyProperty.Name);
+        }
+
+        [Theory]
+        [ClassViewModelData(typeof(Person))]
+        public void HomogeneousManyToMany_IsCorrect(ClassViewModelData data)
+        {
+            var prop = data.ClassViewModel.PropertyByName(nameof(Person.SiblingRelationships));
+
+            Assert.Equal("Person", prop.ManyToManyNearNavigationProperty.Name);
+            Assert.Equal("PersonId", prop.ManyToManyNearNavigationProperty.ForeignKeyProperty.Name);
+            Assert.Equal("PersonTwo", prop.ManyToManyFarNavigationProperty.Name);
+            Assert.Equal("PersonTwoId", prop.ManyToManyFarNavigationProperty.ForeignKeyProperty.Name);
+        }
     }
 }

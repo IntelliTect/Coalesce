@@ -75,7 +75,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
                         {
                             b.DocComment($"Collection of related objects for many-to-many relationship {prop.ManyToManyCollectionName} via {prop.Name}");
                         }
-                        b.Line($"public {prop.ManyToManyCollectionName.ToCamelCase()}: KnockoutObservableArray<ViewModels.{prop.ManyToManyCollectionProperty.Object.ViewModelClassName}> = ko.observableArray([]);");
+                        b.Line($"public {prop.ManyToManyCollectionName.ToCamelCase()}: KnockoutObservableArray<ViewModels.{prop.ManyToManyFarNavigationProperty.Object.ViewModelClassName}> = ko.observableArray([]);");
                     }
                 }
 
@@ -298,7 +298,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
                     foreach (PropertyViewModel prop in Model.ClientProperties.Where(p => p.IsClientWritable && p.IsManytoManyCollection))
                     {
                         b.Line();
-                        b.Line($"self.{prop.ManyToManyCollectionName.ToCamelCase()}.subscribe<KnockoutArrayChange<{prop.ManyToManyCollectionProperty.Object.ViewModelClassName}>[]>(changes => {{");
+                        b.Line($"self.{prop.ManyToManyCollectionName.ToCamelCase()}.subscribe<KnockoutArrayChange<{prop.ManyToManyFarNavigationProperty.Object.ViewModelClassName}>[]>(changes => {{");
                         using (b.Indented())
                         {
                             using (b.Block("for (var i in changes)"))
@@ -308,9 +308,9 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
                                 b.Indented( "change.status, ");
                                 b.Indented($"this.{prop.JsVariable}, ");
                                 b.Indented($"{prop.Object.ViewModelClassName}, ");
-                                b.Indented($"'{prop.Object.ClientProperties.First(f => f.Type == Model.Type).ForeignKeyProperty.JsVariable}',");
-                                b.Indented($"'{prop.ManyToManyCollectionProperty.ForeignKeyProperty.JsVariable}',");
-                                b.Indented($"change.value.{prop.ManyToManyCollectionProperty.Object.PrimaryKey.JsVariable}()");
+                                b.Indented($"'{prop.ManyToManyNearNavigationProperty.ForeignKeyProperty.JsVariable}',");
+                                b.Indented($"'{prop.ManyToManyFarNavigationProperty.ForeignKeyProperty.JsVariable}',");
+                                b.Indented($"change.value.{prop.ManyToManyFarNavigationProperty.Object.PrimaryKey.JsVariable}()");
                                 b.Line( ");");
                             }
                         }
@@ -381,15 +381,15 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
                                 b.Line("let objs: any[] = [];");
                                 using (b.Block($"$.each(data.{prop.JsonName}, (index, item) =>", ");"))
                                 {
-                                    b.Line($"if (item.{prop.ManyToManyCollectionProperty.JsonName}) {{");
-                                    b.Indented($"objs.push(item.{prop.ManyToManyCollectionProperty.JsonName});");
+                                    b.Line($"if (item.{prop.ManyToManyFarNavigationProperty.JsonName}) {{");
+                                    b.Indented($"objs.push(item.{prop.ManyToManyFarNavigationProperty.JsonName});");
                                     b.Line($"}}");
                                 }
                                 b.Line($"Coalesce.KnockoutUtilities.RebuildArray(" +
                                     $"this.{prop.ManyToManyCollectionName.ToCamelCase()}, " +
                                     $"objs, " +
-                                    $"'{prop.ManyToManyCollectionProperty.Object.PrimaryKey.JsVariable}', " +
-                                    $"{prop.ManyToManyCollectionProperty.Object.ViewModelClassName}, " +
+                                    $"'{prop.ManyToManyFarNavigationProperty.Object.PrimaryKey.JsVariable}', " +
+                                    $"{prop.ManyToManyFarNavigationProperty.Object.ViewModelClassName}, " +
                                     $"this, " +
                                     $"allowCollectionDeletes);");
                             }

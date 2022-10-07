@@ -360,14 +360,23 @@ export default defineComponent({
       const selected = this.internalModelValue;
       const selectedKey = this.internalKeyValue;
 
-      // Appending this to the bottom is intentional - chances are, if a person opens a dropdown that already has a value selected, they don't want to re-select the value that's already selected.
-      if (
-        selected &&
-        !items.some(
-          (i) => selectedKey == (i as any)[this.modelObjectMeta.keyProp.name]
-        )
-      ) {
-        items.push(selected);
+      const selectedIndex = items.findIndex(
+        (i) => selectedKey == (i as any)[this.modelObjectMeta.keyProp.name]
+      );
+
+      if (selected) {
+        if (selectedIndex == -1) {
+          // Append the current selected item to the list if it isn't already there.
+          // Appending this to the bottom is intentional - chances are, if a person
+          //opens a dropdown that already has a value selected, they don't want to re-select the value that's already selected.
+          items.push(selected);
+        } else {
+          // Replace the item in the list that represents the current selected value with the actual object.
+          // This makes it so that external modifications to the selected item will be reflected in the
+          // dropdown's display of the current selection. At worst, this will already be the exact same instance
+          // and so will have no effect.
+          items[selectedIndex] = selected;
+        }
       }
 
       return items;

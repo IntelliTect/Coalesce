@@ -20,6 +20,15 @@ import App from './App.vue';
 import '@/viewmodels.g';
 import $metadata from '@/metadata.g';
 
+import testWorker from './worker.ts?worker';
+new testWorker();
+
+new Worker 
+( 
+  new URL 
+  ( 
+    './worker.ts', import.meta.url))
+
 
 AxiosClient.defaults.baseURL = '/api'
 AxiosClient.defaults.withCredentials = true

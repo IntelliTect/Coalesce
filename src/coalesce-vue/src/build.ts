@@ -157,7 +157,7 @@ export function createAspNetCoreHmrPlugin({
     }
 
     plugins.unshift({
-      name: "coalesce-vite-hmr-bypass-html",
+      name: "coalesce-vite-hmr-bypass-aspnetcore",
       enforce: "pre",
       configResolved(config) {
         // This might be wrong if no port was provided or if this port wasn't available.
@@ -189,6 +189,32 @@ export function createAspNetCoreHmrPlugin({
             server.config.server.https ? "s" : ""
           }://localhost:${port}`;
         });
+      },
+    });
+
+    // Web worker instantiation MUST reference a URL against the aspnetcore server.
+    // It cannot be loaded directly from the vite server (i.e. cannot bypass aspnetcore)
+    // due to same origin rules. This covers cases like `import foo from ./file?worker`.
+    // Vite generates the worker instantiations with an absolute host and port,
+    // which we need to then undo and make relative to the current origin.
+    plugins.push({
+      name: "coalesce-vite-hmr-unbypass-workers",
+      enforce: "post",
+
+      transform(code, id) {
+        return code.replace(
+          // Look for:
+          // * new Worker(new URL("https://
+          // * new Worker("https://
+          // where the URL is the vite server
+          new RegExp(
+            `(new\\s+(?:Shared)?Worker\\s*\\(\\s*(?:new\\s+URL\\s*\\(\\s*)?)(["'])https?://[^:]+:${port}${escapeRegex(
+              base
+            )}`,
+            "g"
+          ),
+          '$1window.location.origin + $2' + base
+        );
       },
     });
 
@@ -251,6 +277,7 @@ async function writeHtml(server: ViteDevServer) {
  * https://github.com/rollup/rollup/issues/4637, eliminating
  * errors in production caused by class names getting mangled by Rollup
  * (when those class names become component names via vue-class-component).
+ * Not needed as of rollup 3.2.1.
  */
 export function createClassNameFixerPlugin() {
   let command: string;

@@ -74,12 +74,18 @@ namespace IntelliTect.Coalesce.Vue.DevMiddleware
                     scriptRunner.AttachToLogger(logger);
                     scriptRunner.Exited += (sender, e) =>
                     {
-                        // No dispose needed here - scriptRunner disposes itself before calling Exited.
-                        if (!applicationStoppingToken.IsCancellationRequested)
+                        // Wait a short time before checking the stopping token
+                        // because sometimes when then terminal host that is running the app is closed,
+                        // it will close the child processes inside of it before it closes the parent process.
+                        Task.Delay(TimeSpan.FromSeconds(1)).ContinueWith(_ =>
                         {
-                            logger.LogError($"vite server appears to have crashed. Restarting...");
-                            Launch();
-                        }
+                            // No dispose needed here - scriptRunner disposes itself before calling Exited.
+                            if (!applicationStoppingToken.IsCancellationRequested)
+                            {
+                                logger.LogError($"vite server appears to have crashed. Restarting...");
+                                Launch();
+                            }
+                        });
                     };
                     currentRunner = scriptRunner;
 

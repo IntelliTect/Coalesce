@@ -7,6 +7,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Runtime.Versioning;
 using System.Text;
 using System.Threading.Tasks;
 using Xunit;
@@ -37,8 +39,10 @@ namespace IntelliTect.Coalesce.CodeGeneration.Tests
 
             var suiteName = suite.GetType().Name;
 
+            var tfmAttr = Assembly.GetEntryAssembly().GetCustomAttribute<TargetFrameworkAttribute>();
+
             suite = suite
-                .WithOutputPath(Path.Combine(project.FullName, "out", suiteName));
+                .WithOutputPath(Path.Combine(project.FullName, "out", tfmAttr.FrameworkName, suiteName));
 
             var validationResult = ValidateContext.Validate(suite.Model);
             Assert.Empty(validationResult.Where(r => r.IsError));

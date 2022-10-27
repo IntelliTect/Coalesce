@@ -11,7 +11,7 @@ using IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext;
 namespace IntelliTect.Coalesce.Tests.TargetClasses
 {
     [Coalesce]
-    public class CaseDtoStandalone : IClassDto<Case, TestDbContext.TestDbContext>
+    public class CaseDtoStandalone : IClassDto<Case, TestDbContext.AppDbContext>
     {
         [Key]
         public int CaseId { get; set; }

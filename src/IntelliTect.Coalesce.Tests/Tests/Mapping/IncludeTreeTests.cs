@@ -15,7 +15,7 @@ namespace IntelliTect.Coalesce.Tests.Mapping
             db = dbFixture.Db;
         }
 
-        private readonly TestDbContext db;
+        private readonly AppDbContext db;
 
 
         private void AssertBasicChecks(IncludeTree tree)

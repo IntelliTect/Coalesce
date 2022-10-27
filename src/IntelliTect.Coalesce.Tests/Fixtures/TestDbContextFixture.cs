@@ -7,14 +7,14 @@ namespace IntelliTect.Coalesce.Tests.Fixtures
     {
         public TestDbContextFixture()
         {
-            Db = new TestDbContext();
-            CrudContext = new CrudContext<TestDbContext>(Db, () => new System.Security.Claims.ClaimsPrincipal())
+            Db = new AppDbContext();
+            CrudContext = new CrudContext<AppDbContext>(Db, () => new System.Security.Claims.ClaimsPrincipal())
             {
                 ReflectionRepository = ReflectionRepositoryFactory.Reflection
             };
         }
 
-        public TestDbContext Db { get; }
-        public CrudContext<TestDbContext> CrudContext { get; }
+        public AppDbContext Db { get; }
+        public CrudContext<AppDbContext> CrudContext { get; }
     }
 }

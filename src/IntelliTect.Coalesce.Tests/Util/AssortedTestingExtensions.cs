@@ -20,16 +20,16 @@ namespace IntelliTect.Coalesce.Tests.Util
 {
     internal static class AssortedTestingExtensions
     {
-        public static StandardDataSource<TModel, TestDbContext> AddModel<TModel, TProp>(
-            this StandardDataSource<TModel, TestDbContext> source, Expression<Func<TModel, TProp>> propSelector, TProp propValue
+        public static StandardDataSource<TModel, AppDbContext> AddModel<TModel, TProp>(
+            this StandardDataSource<TModel, AppDbContext> source, Expression<Func<TModel, TProp>> propSelector, TProp propValue
         )
             where TModel : class, new()
         {
             return source.AddModel(propSelector, propValue, out _);
         }
 
-        public static StandardDataSource<TModel, TestDbContext> AddModel<TModel, TProp>(
-            this StandardDataSource<TModel, TestDbContext> source, Expression<Func<TModel, TProp>> propSelector, TProp propValue, out PropertyViewModel propInfo
+        public static StandardDataSource<TModel, AppDbContext> AddModel<TModel, TProp>(
+            this StandardDataSource<TModel, AppDbContext> source, Expression<Func<TModel, TProp>> propSelector, TProp propValue, out PropertyViewModel propInfo
         )
             where TModel : class, new()
         {
@@ -39,8 +39,8 @@ namespace IntelliTect.Coalesce.Tests.Util
             return source.AddModel(model);
         }
 
-        public static StandardDataSource<TModel, TestDbContext> AddModel<TModel>(
-            this StandardDataSource<TModel, TestDbContext> source, TModel model
+        public static StandardDataSource<TModel, AppDbContext> AddModel<TModel>(
+            this StandardDataSource<TModel, AppDbContext> source, TModel model
         )
             where TModel : class, new()
         {
@@ -50,14 +50,14 @@ namespace IntelliTect.Coalesce.Tests.Util
         }
 
         public static IQueryable<TModel> Query<TModel>(
-            this StandardDataSource<TModel, TestDbContext> source, Func<StandardDataSource<TModel, TestDbContext>, IQueryable<TModel>> method
+            this StandardDataSource<TModel, AppDbContext> source, Func<StandardDataSource<TModel, AppDbContext>, IQueryable<TModel>> method
         )
             where TModel : class, new()
         {
             return method(source);
         }
 
-        public static IQueryable<TModel> Query<TModel>(this StandardDataSource<TModel, TestDbContext> source)
+        public static IQueryable<TModel> Query<TModel>(this StandardDataSource<TModel, AppDbContext> source)
             where TModel : class, new()
         {
             return source.Db.Set<TModel>();

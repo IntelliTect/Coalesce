@@ -67,9 +67,9 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         [ManyToMany("Products")]
         public ICollection<CaseProduct> CaseProducts { get; set; }
         
-        public class AllOpenCases : StandardDataSource<Case, TestDbContext>
+        public class AllOpenCases : StandardDataSource<Case, AppDbContext>
         {
-            public AllOpenCases(CrudContext<TestDbContext> context) : base(context) { }
+            public AllOpenCases(CrudContext<AppDbContext> context) : base(context) { }
 
             [Coalesce]
             public DateTimeOffset? MinDate { get; set; }

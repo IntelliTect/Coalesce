@@ -62,14 +62,14 @@ namespace IntelliTect.Coalesce.Tests.TypeDefinition
         }
 
         [Theory]
-        [ClassViewModelData(typeof(TestDbContext))]
+        [ClassViewModelData(typeof(AppDbContext))]
         public void PropertyParent_IsCorrect(ClassViewModelData data)
         {
-            var directlyDeclaredProp = data.ClassViewModel.PropertyByName(nameof(TestDbContext.People));
+            var directlyDeclaredProp = data.ClassViewModel.PropertyByName(nameof(AppDbContext.People));
             Assert.Equal(data.ClassViewModel, directlyDeclaredProp.Parent);
             Assert.Equal(data.ClassViewModel, directlyDeclaredProp.EffectiveParent);
 
-            var inheritedProp = data.ClassViewModel.PropertyByName(nameof(TestDbContext.Database));
+            var inheritedProp = data.ClassViewModel.PropertyByName(nameof(AppDbContext.Database));
             Assert.Equal(nameof(DbContext), inheritedProp.Parent.Name);
             Assert.NotEqual(data.ClassViewModel, inheritedProp.Parent);
             Assert.Equal(data.ClassViewModel, inheritedProp.EffectiveParent);

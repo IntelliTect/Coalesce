@@ -61,7 +61,7 @@ namespace IntelliTect.Coalesce.Swashbuckle.Tests
                     webHost.UseTestServer();
                     webHost.ConfigureServices(services =>
                     {
-                        services.AddCoalesce<TestDbContext>();
+                        services.AddCoalesce<AppDbContext>();
                         services.AddMvc()
                             // Add our dynamic assembly that contains our generated controllers and DTOs
                             .AddApplicationPart(assembly);

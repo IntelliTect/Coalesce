@@ -66,7 +66,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// True if this is an injected method parameter that should be represented by a controller action argument.
         /// </summary>
-        public bool ShouldInjectFromServices => HasInjectAttribute || (IsAutoInjectedContext && Parent.Parent.IsService);
+        public bool ShouldInjectFromServices => HasInjectAttribute || (!IsAutoInjectedContext && IsDbContext);
 
         /// <summary>
         /// True if the parameter is marked with <see cref="InjectAttribute"/>
@@ -81,7 +81,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// True if the method is a <see cref="DbContext"/> that should be automatically injected, not needing an <see cref="InjectAttribute"/>.
         /// </summary>
-        public bool IsAutoInjectedContext => Type.IsA<DbContext>() && !HasInjectAttribute;
+        public bool IsAutoInjectedContext => IsDbContext && !HasInjectAttribute && Parent.Parent.DbContext != null;
+
+        public bool IsDbContext => Type.IsA<DbContext>();
 
         public bool IsAUser => Type.IsA<ClaimsPrincipal>();
 

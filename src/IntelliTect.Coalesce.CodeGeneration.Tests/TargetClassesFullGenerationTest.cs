@@ -48,9 +48,9 @@ namespace IntelliTect.Coalesce.CodeGeneration.Tests
             var services = new ServiceCollection()
                 .AddCoalesce(c =>
                 {
-                    c.AddContext<TestDbContext>();
+                    c.AddContext<AppDbContext>();
                 })
-                .AddScoped<TestDbContext>() // good enough (doesn't need to be configured, just needs to exist)
+                .AddScoped<AppDbContext>() // good enough (doesn't need to be configured, just needs to exist)
                 .BuildServiceProvider();
 
             var reflectionData = CoalesceApplicationBuilderExtensions.GetSecurityOverviewData(

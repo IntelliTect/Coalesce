@@ -172,12 +172,12 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         /// <param name="db"></param>
         /// <returns></returns>
         [Coalesce,Execute]
-        public static IEnumerable<string> NamesStartingWith(string characters, TestDbContext db)
+        public static IEnumerable<string> NamesStartingWith(string characters, AppDbContext db)
         {
             return db.People.Where(f => f.FirstName.StartsWith(characters)).Select(f => f.Name).ToList();
         }
 
-        public async Task<ItemResult<Person>> MethodWithIncludeTreeOnItemResult(TestDbContext db)
+        public async Task<ItemResult<Person>> MethodWithIncludeTreeOnItemResult(AppDbContext db)
         {
             var query = db.People.Include(p => p.Company);
 
@@ -188,17 +188,17 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         }
 
         [Coalesce, DefaultDataSource]
-        public class WithoutCases : StandardDataSource<Person, TestDbContext>
+        public class WithoutCases : StandardDataSource<Person, AppDbContext>
         {
-            public WithoutCases(CrudContext<TestDbContext> context) : base(context) { }
+            public WithoutCases(CrudContext<AppDbContext> context) : base(context) { }
 
             public override IQueryable<Person> GetQuery(IDataSourceParameters parameters)
                 => Db.People.Include(p => p.Company);
         }
 
-        public class Behaviors : StandardBehaviors<Person, TestDbContext>
+        public class Behaviors : StandardBehaviors<Person, AppDbContext>
         {
-            public Behaviors(CrudContext<TestDbContext> context) : base(context) { }
+            public Behaviors(CrudContext<AppDbContext> context) : base(context) { }
 
             public override ItemResult BeforeSave(SaveKind kind, Person originalItem, Person item)
             {
@@ -217,9 +217,9 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
     }
 
     [Coalesce]
-    public class NamesStartingWithAWithCases : StandardDataSource<Person, TestDbContext>
+    public class NamesStartingWithAWithCases : StandardDataSource<Person, AppDbContext>
     {
-        public NamesStartingWithAWithCases(CrudContext<TestDbContext> context) : base(context) { }
+        public NamesStartingWithAWithCases(CrudContext<AppDbContext> context) : base(context) { }
 
         public override IQueryable<Person> GetQuery(IDataSourceParameters parameters)
         {
@@ -239,9 +239,9 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
     /// People whose last name starts with B or c
     /// </summary>
     [Coalesce]
-    public class BorCPeople : StandardDataSource<Person, TestDbContext>
+    public class BorCPeople : StandardDataSource<Person, AppDbContext>
     {
-        public BorCPeople(CrudContext<TestDbContext> context) : base(context) { }
+        public BorCPeople(CrudContext<AppDbContext> context) : base(context) { }
 
         public override IQueryable<Person> GetQuery(IDataSourceParameters parameters) => 
             Db.People.Where(f => f.LastName.StartsWith("B") || f.LastName.StartsWith("c"));

@@ -10,24 +10,24 @@ namespace IntelliTect.Coalesce.Tests.Api.DataSources
 {
     public class StandardBehaviorsTests : TestDbContextFixture
     {
-        public StandardDataSource<Case, TestDbContext> CaseSource { get; }
+        public StandardDataSource<Case, AppDbContext> CaseSource { get; }
 
         public StandardBehaviorsTests() : base()
         {
             CaseSource = Source<Case>();
         }
 
-        private StandardDataSource<T, TestDbContext> Source<T>()
+        private StandardDataSource<T, AppDbContext> Source<T>()
             where T : class, new()
-            => new StandardDataSource<T, TestDbContext>(CrudContext);
+            => new StandardDataSource<T, AppDbContext>(CrudContext);
 
-        private StandardBehaviors<T, TestDbContext> Behaviors<T>()
+        private StandardBehaviors<T, AppDbContext> Behaviors<T>()
             where T : class, new()
-            => new StandardBehaviors<T, TestDbContext>(CrudContext);
+            => new StandardBehaviors<T, AppDbContext>(CrudContext);
 
-        private class TransformDs : StandardDataSource<Case, TestDbContext>
+        private class TransformDs : StandardDataSource<Case, AppDbContext>
         {
-            public TransformDs(CrudContext<TestDbContext> context) : base(context) { }
+            public TransformDs(CrudContext<AppDbContext> context) : base(context) { }
 
             public override Task TransformResultsAsync(IReadOnlyList<Case> results, IDataSourceParameters parameters)
             {

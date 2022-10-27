@@ -167,7 +167,10 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                         }
 
                         WriteMethodInvocation(b, method, "item");
-                        b.Line("await Db.SaveChangesAsync();");
+                        if (Model.DbContext != null)
+                        {
+                            b.Line("await Db.SaveChangesAsync();");
+                        }
                     }
 
                     WriteMethodResultProcessBlock(b, method);

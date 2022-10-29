@@ -22,7 +22,7 @@ Both the generated code and [coalesce-vue](https://www.npmjs.com/package/coalesc
 
 ### [Metadata Layer](/stacks/vue/layers/metadata.md)
 
-The metadata layer, generated as `metadata.g.ts`, contains a minimal set of metadata to represent your data model on the front-end. Because Vue applications are typically compiled into a set of static assets, it is necessary for the frontend code to have a representation of your data model as an analog to the `ReflectionRepository` available at runtime to Knockout apps that utilize `.cshtml` files.
+@[import-md "after":"MARKER:summary", "before":"MARKER:summary-end"](./layers/metadata.md) 
 
 [Read more about the Metadata layer](/stacks/vue/layers/metadata.md)
 
@@ -31,7 +31,7 @@ The metadata layer, generated as `metadata.g.ts`, contains a minimal set of meta
 
 ### [Model Layer](/stacks/vue/layers/models.md)
 
-The model layer, generated as `models.g.ts`, contains a set of TypeScript interfaces that represent each client-exposed type in your data model. Each interface declares all the [Properties](/modeling/model-components/properties.md) of that type, as well as a `$metadata` property that references the metadata object for that type. Enums and [Data Sources](/modeling/model-components/data-sources.md) are also represented in the model layer.
+@[import-md "after":"MARKER:summary", "before":"MARKER:summary-end"](./layers/models.md) 
 
 [Read more about the Model layer](/stacks/vue/layers/models.md)
 
@@ -39,7 +39,7 @@ The model layer, generated as `models.g.ts`, contains a set of TypeScript interf
 
 ### [API Client Layer](/stacks/vue/layers/api-clients.md)
 
-The API client layer, generated as `api-clients.g.ts`, exports a class for each API controller that was generated for your data model. These classes are stateless and provide one method for each API endpoint. This includes both the standard set of endpoints created for [Entity Models](/modeling/model-types/entities.md) and [Custom DTOs](/modeling/model-types/dtos.md), as well as any custom [Methods](/modeling/model-components/methods.md).
+@[import-md "after":"MARKER:summary", "before":"MARKER:summary-end"](./layers/api-clients.md) 
 
 [Read more about the API Client layer](/stacks/vue/layers/api-clients.md)
 
@@ -47,9 +47,7 @@ The API client layer, generated as `api-clients.g.ts`, exports a class for each 
 
 ### [ViewModel Layer](/stacks/vue/layers/viewmodels.md)
 
-The ViewModel layer, generated as `viewmodels.g.ts`, exports a ViewModel class for each API-backed type in your data model ([Entity Models](/modeling/model-types/entities.md), [Custom DTOs](/modeling/model-types/dtos.md), and [Services](/modeling/model-types/services.md)). It also exports an additional ListViewModel type for [Entity Models](/modeling/model-types/entities.md), [Custom DTOs](/modeling/model-types/dtos.md).
-
-These ViewModels contain the majority of functionality that you will use on a day-to-day basis as you build applications with the Coalesce Vue stack. They are all valid implementations of their corresponding model interface, and as such can be used in any place where a model could be used.
+@[import-md "after":"MARKER:summary", "before":"MARKER:summary-end"](./layers/viewmodels.md) 
 
 [Read more about the ViewModel layer](/stacks/vue/layers/viewmodels.md)
 

@@ -90,6 +90,7 @@
 }
 
 .code-tabs-item {
+  color: #adbac7;
   background-color: var(--code-bg-color);
   div[class*=language-]::before {
     top: 5px;

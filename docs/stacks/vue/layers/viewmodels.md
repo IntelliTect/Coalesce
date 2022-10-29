@@ -1,14 +1,18 @@
 # ViewModel Layer
 
-The ViewModel layer, generated as `viewmodels.g.ts`, exports for each [Entity Models](/modeling/model-types/entities.md) and [Custom DTOs](/modeling/model-types/dtos.md) in your data model both a ViewModel class representing a single instance of the type, and a ListViewModel class that is used to interact with the list functionality in Coalesce. Additionally, each [Service](/modeling/model-types/services.md) also has a ViewModel class generated.
+<!-- MARKER:summary -->
+
+The ViewModel layer, generated as `viewmodels.g.ts`, exports a ViewModel class for each API-backed type in your data model ([Entity Models](/modeling/model-types/entities.md), [Custom DTOs](/modeling/model-types/dtos.md), and [Services](/modeling/model-types/services.md)). It also exports a ListViewModel type for [Entity Models](/modeling/model-types/entities.md) and [Custom DTOs](/modeling/model-types/dtos.md).
 
 These classes provide a wide array of functionality that is useful when interacting with your data model through a user interface. The generated ViewModels are the primary way that Coalesce is used when developing a Vue application.
+
+<!-- MARKER:summary-end -->
 
 [[toc]]
 
 ## ViewModels 
 
-The following members can be found on the generated ViewModels, exported from `viewmodels.g.ts` as `<TypeName>ViewModel`.
+The following members can be found on the generated [Entity](/modeling/model-types/entities.md) and [Custom DTO](/modeling/model-types/dtos.md) ViewModels, exported from `viewmodels.g.ts` as `<TypeName>ViewModel`.
 
 ### Model Data Properties
 

@@ -2,6 +2,10 @@
 
 ## Creating a Project
 
+::: warning
+The Coalesce Knockout.js stack is deprecated and will be receiving only critical bug fixes going forward. You are strongly encouraged to start all new Coalesce projects with [Vue](../vue/getting-started.md).
+:::
+
 The quickest and easiest way to create a new Coalesce Knockout application is to use the ``dotnet new`` template. In your favorite shell:
 
 ``` sh

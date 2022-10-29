@@ -1,6 +1,10 @@
 # API Client Layer
 
+<!-- MARKER:summary -->
+
 The API client layer, generated as `api-clients.g.ts`, exports a class for each API controller that was generated for your data model. These classes are stateless and provide one method for each API endpoint. This includes both the standard set of endpoints created for [Entity Models](/modeling/model-types/entities.md) and [Custom DTOs](/modeling/model-types/dtos.md), as well as any custom [Methods](/modeling/model-components/methods.md) on the aforementioned types, as well as any methods on your [Services](/modeling/model-types/services.md).
+
+<!-- MARKER:summary-end -->
 
 The API clients provided by Coalesce are based on [axios](https://github.com/axios/axios). All API clients used a shared axios instance, exported from `coalesce-vue` as `AxiosClient`. This instance can be used to configure all HTTP requests made by Coalesce, including things like attaching [interceptors](https://axios-http.com/docs/interceptors) to modify the requests being made, or configuring [defaults](https://axios-http.com/docs/config_defaults).
 

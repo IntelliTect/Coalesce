@@ -19,17 +19,17 @@ npm ci
 ## Project Structure
 
 ::: tip Important
-The Vue template is based on [Vue CLI](https://cli.vuejs.org/). You are strongly encouraged to read through at least the first few pages of the [Vue CLI Documentation](https://cli.vuejs.org/guide/) before getting started on any development.
+The Vue template is based on [Vite](https://vitejs.dev/). You are strongly encouraged to read through at least the first few pages of the [Vite Documentation](https://vitejs.dev/guide/) before getting started on any development.
 :::
 
-The structure of the Web project follows the conventions of both ASP.NET Core and Vue CLI. The Vue-specific folders are as follows:
+The structure of the Web project follows the conventions of both ASP.NET Core and Vite. The Vue-specific folders are as follows:
 
 - ``/src`` - Files that should be compiled into your application. CSS/SCSS, TypeScript, Vue SFCs, and so on.
 - ``/public`` - Static assets that should be served as files. Includes index.html, the root document of the application.
 - ``/tests`` - Jest unit tests.
 - ``/wwwroot`` - Target for compiled output.
 
-During development, no special tooling is required to build your frontend code. ``WebpackDevMiddleware`` in ASP.NET Core will take care of that automatically when the application starts.
+During development, no special tooling is required to build your frontend code. Coalesce's ``UseViteDevelopmentServer`` in ASP.NET Core will take care of that automatically when the application starts. Just make sure NPM packages have been installed (`npm ci`).
 
 ::: tip
 If developing with Visual Studio, you are strongly encouraged to disable Visual Studio's built-in automatic NPM package restore functionality (``Options > Projects and Solutions > Web Package Management > Package Restore``). 

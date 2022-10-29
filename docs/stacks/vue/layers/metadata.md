@@ -1,6 +1,10 @@
 # Metadata Layer
 
-The metadata layer, generated as `metadata.g.ts`, contains a minimal set of metadata to represent your data model on the front-end. Because Vue applications are typically statically compiled, it is necessary for the frontend code to have a representation of your data model as an analog to the `ReflectionRepository` available at runtime to Knockout apps that utilize `.cshtml` files.
+<!-- MARKER:summary -->
+
+The metadata layer, generated as `metadata.g.ts`, contains information about the types, properties, methods, and other components of your data model. Because Vue applications are typically compiled into a set of static assets, it is necessary for the frontend code to have a representation of your data model as an analog to the `ReflectionRepository` available at runtime to Knockout apps that utilize `.cshtml` files.
+
+<!-- MARKER:summary-end -->
 
 [[toc]]
 

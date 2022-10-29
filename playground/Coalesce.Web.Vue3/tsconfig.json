@@ -29,6 +29,7 @@
     }
   },
   "include": [
+    "vite.config.ts",
     "src/**/*.ts",
     "src/**/*.tsx",
     "src/**/*.vue",

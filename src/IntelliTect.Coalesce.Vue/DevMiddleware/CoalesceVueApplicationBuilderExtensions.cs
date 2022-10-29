@@ -28,7 +28,11 @@ namespace IntelliTect.Coalesce
         public static IApplicationBuilder UseViteDevelopmentServer(this IApplicationBuilder app, ViteServerOptions options) 
         {
             return app
-                .UseWhen(c => c.Request.Path.StartsWithSegments(options.PathBase), filteredApp =>
+                .UseWhen(c => 
+                    c.Request.Path.StartsWithSegments(options.PathBase) || 
+                    // Vite does not prefix the import of '@vite/env' that is emitted into web worker scripts...
+                    c.Request.Path.StartsWithSegments("/@vite"), 
+                filteredApp =>
                 {
                     filteredApp.UseSpa(spa =>
                     {

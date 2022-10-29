@@ -250,11 +250,12 @@ export function useMetadataProps(
     return props.model ? props.model.$metadata : null;
   });
 
+  const instance = getCurrentInstance();
   const valueMeta = computed((() => {
     const valueMeta = getValueMeta(
       props.for,
       modelMeta.value,
-      getCurrentInstance()!.proxy.$coalesce.metadata
+      instance!.proxy.$coalesce.metadata
     );
     if (valueMeta && "role" in valueMeta) {
       return valueMeta;

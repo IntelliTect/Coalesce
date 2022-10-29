@@ -77,9 +77,7 @@ export abstract class ViewModel<
   // Underlying object which will hold the backing values
   // of the custom getters/setters. Not for external use.
   // Must exist in order to for Vue to pick it up and add reactivity.
-  private $data: TModel & { [propName: string]: any } = reactive(
-    convertToModel({}, this.$metadata)
-  );
+  private $data: TModel & { [propName: string]: any };
 
   /**
    * A number unique among all ViewModel instances that will be unchanged for the instance's lifetime.
@@ -776,6 +774,8 @@ export abstract class ViewModel<
 
     initialDirtyData?: DeepPartial<TModel> | null
   ) {
+    this.$data = reactive(convertToModel({}, this.$metadata));
+
     Object.defineProperty(this, "$stableId", {
       enumerable: true, // Enumerable so visible in vue devtools
       configurable: false,
@@ -836,9 +836,9 @@ export abstract class ListViewModel<
   /**
    * The current set of items that have been loaded into this ListViewModel.
    */
-  private _items = ref(new ViewModelCollection(this.$metadata, this));
+  private _items = ref();
   public get $items(): TItem[] {
-    return this._items.value as unknown as TItem[];
+    return (this._items.value as unknown as TItem[]) ?? [];
   }
   public set $items(val: TItem[]) {
     if ((this._items.value as any) === val) return;
@@ -890,25 +890,41 @@ export abstract class ListViewModel<
   /**
    * A function for invoking the `/load` endpoint, and a set of properties about the state of the last call.
    */
-  public $load = this.$apiClient
-    .$makeCaller("list", (c) => c.list(this.$params))
-    .onFulfilled((state) => {
-      if (state.result) {
-        this.$items = rebuildModelCollectionForViewModelCollection(
-          this.$metadata,
-          this.$items,
-          state.result,
-          true
-        );
-      }
-    });
+  get $load() {
+    const $load = this.$apiClient
+      .$makeCaller("list", (c) => c.list(this.$params))
+      .onFulfilled((state) => {
+        if (state.result) {
+          this.$items = rebuildModelCollectionForViewModelCollection(
+            this.$metadata,
+            this.$items,
+            state.result,
+            true
+          );
+        }
+      });
+
+    // Lazy getter technique - don't create the caller until/unless it is needed,
+    // since creation of api callers is a little expensive.
+    Object.defineProperty(this, "$load", { value: $load });
+
+    return $load;
+  }
 
   /**
    * A function for invoking the `/count` endpoint, and a set of properties about the state of the last call.
    */
-  public $count = this.$apiClient.$makeCaller("item", (c) =>
-    c.count(this.$params)
-  );
+  get $count() {
+    const $count = this.$apiClient.$makeCaller("item", (c) =>
+      c.count(this.$params)
+    );
+
+    // Lazy getter technique - don't create the caller until/unless it is needed,
+    // since creation of api callers is a little expensive.
+    Object.defineProperty(this, "$count", { value: $count });
+
+    return $count;
+  }
 
   // Internal autoload state
   private _autoLoadState = new AutoCallState();

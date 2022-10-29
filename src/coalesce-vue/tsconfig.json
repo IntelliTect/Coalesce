@@ -11,17 +11,12 @@
     "module": "esnext",
     "moduleResolution": "node",
     "esModuleInterop": true,
-    "target": "ES2020",
+    "target": "ES2022",
     "declaration": true,
     "lib": ["es2015", "es2017", "dom"],
     "types": ["vitest/globals"]
   },
-    
-  "exclude": [
-    "node_modules"
-  ],
-  "include": [
-    "src/**/*",
-    "test/**/*",
-  ]
+
+  "exclude": ["node_modules"],
+  "include": ["src/**/*", "test/**/*"]
 }

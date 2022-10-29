@@ -1632,7 +1632,7 @@ export class ItemApiStateWithArgs<
   TArgsObj,
   TResult
 > extends ItemApiState<TArgs, TResult> {
-  private readonly __args = ref<TArgsObj>(this.argsFactory()) as Ref<TArgsObj>;
+  private readonly __args = ref<TArgsObj>() as Ref<TArgsObj>;
   /** Values that will be used as arguments if the method is invoked with `this.invokeWithArgs()`. */
   get args() {
     return this.__args.value;
@@ -1697,6 +1697,7 @@ export class ItemApiStateWithArgs<
     >
   ) {
     super(apiClient, invoker);
+    this.resetArgs();
   }
 }
 
@@ -1792,7 +1793,7 @@ export class ListApiStateWithArgs<
   TArgsObj,
   TResult
 > extends ListApiState<TArgs, TResult> {
-  private readonly __args = ref<TArgsObj>(this.argsFactory()) as Ref<TArgsObj>;
+  private readonly __args = ref<TArgsObj>() as Ref<TArgsObj>;
   /** Values that will be used as arguments if the method is invoked with `this.invokeWithArgs()`. */
   get args() {
     return this.__args.value;
@@ -1834,6 +1835,7 @@ export class ListApiStateWithArgs<
     >
   ) {
     super(apiClient, invoker);
+    this.resetArgs();
   }
 }
 

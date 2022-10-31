@@ -1037,7 +1037,7 @@ export type ResponseCachingConfiguration = {
 // Base class for ApiState that contains nothing but the logic for
 // subclassing Function. Specifically, we do this to avoid a need to call
 // `super()`, which triggers CSP unsafe-eval.
-abstract class ApiStateBase<TArgs extends any[], TResult> extends Function {
+abstract class ApiStateBase<TArgs extends any[], TResult> {
   /** Invokes a call to this API endpoint. */
   public readonly invoke!: this;
 
@@ -1052,7 +1052,6 @@ abstract class ApiStateBase<TArgs extends any[], TResult> extends Function {
     callInvoker: () => any
   ): ApiResultPromise<TResult>;
 
-  // @ts-expect-error Don't call super() - it triggers CSP unsafe-eval (even though nothing is being eval'd)
   constructor(
     apiClient: ApiClient<any>,
     invoker: ApiCallerInvoker<
@@ -1061,9 +1060,6 @@ abstract class ApiStateBase<TArgs extends any[], TResult> extends Function {
       ApiClient<any>
     >
   ) {
-    // Don't call super - this will trigger CSP unsafe-eval.
-    // super();
-
     // Create our invoker function that will ultimately be our instance object.
     const invokeFunc = function invokeFunc(this: any, ...args: TArgs) {
       return invoke._invokeInternal(this, () => {
@@ -1085,6 +1081,14 @@ abstract class ApiStateBase<TArgs extends any[], TResult> extends Function {
     return invoke;
   }
 }
+
+// @ts-ignore Workaround for https://github.com/evanw/esbuild/issues/1918,
+// an error that happens when esbuild transforms the class fields
+// into incorrectly using `this` even though our actual constructor does not use `this`.
+// Using `this` before a call to `super` (which we don't have or need either of these)
+// when the class has a base class is invalid in JS. But we can prevent this by
+// assigning the base class prototype directly, hiding the existence of a base class from JS.
+ApiStateBase.prototype.__proto__ = Function;
 
 export abstract class ApiState<
   TArgs extends any[],

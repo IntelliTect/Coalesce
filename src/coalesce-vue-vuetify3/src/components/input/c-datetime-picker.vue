@@ -159,9 +159,17 @@ export default defineComponent({
     displayedValue() {
       if (!this.hasMounted) return null;
 
-      return this.modelValue
-        ? format(this.modelValue, this.internalFormat)
+      return this.internalValue
+        ? format(this.internalValue, this.internalFormat)
         : null;
+    },
+
+    internalValue() {
+      if (this.model && this.dateMeta) {
+        return (this.model as any)[this.dateMeta.name];
+      }
+
+      return this.modelValue;
     },
 
     internalDateKind() {
@@ -211,12 +219,15 @@ export default defineComponent({
 
     datePart() {
       return (
-        (this.modelValue && lightFormat(this.modelValue, "yyyy-MM-dd")) || null
+        (this.internalValue && lightFormat(this.internalValue, "yyyy-MM-dd")) ||
+        null
       );
     },
 
     timePart() {
-      return (this.modelValue && lightFormat(this.modelValue, "HH:mm")) || null;
+      return (
+        (this.internalValue && lightFormat(this.internalValue, "HH:mm")) || null
+      );
     },
   },
 
@@ -301,7 +312,7 @@ export default defineComponent({
     timeChanged(val: string) {
       this.error = [];
 
-      var value = this.modelValue || this.createDefaultDate();
+      var value = this.internalValue || this.createDefaultDate();
 
       var parts = /(\d\d):(\d\d)/.exec(val);
       if (!parts)
@@ -316,7 +327,7 @@ export default defineComponent({
     dateChanged(val: string) {
       this.error = [];
 
-      var value = this.modelValue || this.createDefaultDate();
+      var value = this.internalValue || this.createDefaultDate();
 
       var parts = /(\d\d\d\d)-(\d\d)-(\d\d)/.exec(val);
       if (!parts)
@@ -344,7 +355,7 @@ export default defineComponent({
 
     emitInput(value: any) {
       if (this.model && this.dateMeta) {
-        return ((this.model as any)[this.dateMeta.name] = value);
+        (this.model as any)[this.dateMeta.name] = value;
       }
 
       this.$emit("update:modelValue", value);

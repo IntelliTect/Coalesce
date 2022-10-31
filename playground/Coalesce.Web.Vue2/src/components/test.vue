@@ -1,6 +1,12 @@
 <template>
   <v-container grid-list-lg>
 
+
+    <c-input :model="caseVm" for="openedAt" @input="trace" />
+    <c-datetime-picker v-model="caseVm.openedAt" @input="trace" />
+    <c-datetime-picker :model="caseVm" for="openedAt" @input="trace" />
+
+
     <c-select-string-value :model="caseVm" for="title" method="getCaseTitles" eager />
 
     {{selectedTitle}}

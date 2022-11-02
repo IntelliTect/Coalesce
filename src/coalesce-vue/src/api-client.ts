@@ -1088,6 +1088,8 @@ abstract class ApiStateBase<TArgs extends any[], TResult> {
 // Using `this` before a call to `super` (which we don't have or need either of these)
 // when the class has a base class is invalid in JS. But we can prevent this by
 // assigning the base class prototype directly, hiding the existence of a base class from JS.
+// The reason we can't inherit from Function and just call `super()` is because doing so
+// will create an empty function which won't be used, and doing so triggers CSP unsafe-eval.
 ApiStateBase.prototype.__proto__ = Function;
 
 export abstract class ApiState<

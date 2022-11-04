@@ -16,6 +16,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -206,9 +207,13 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
                         bool shouldRetry = false;
                         restorePackages = false;
 
+                        // Matches e.g: "...Person.cs(251,13): warning CS0612..."
+                        // We don't output warnings because they're inconsequential to the failure of this part of Coalesce code gen
+                        // and don't help the user solve the immediate problem.
+                        var warningLineRegex = new Regex(@"\.cs\(\d+,\d+\): warning ");
                         void LogAllOutputAsError()
                         {
-                            foreach (var line in ex.OutputLines)
+                            foreach (var line in ex.OutputLines.Where(l => !warningLineRegex.IsMatch(l)))
                             {
                                 logger.LogError(line);
                             }

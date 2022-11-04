@@ -73,6 +73,20 @@ namespace Coalesce.Web.Ko.Api
         // Methods from data class exposed through API Controller.
 
         /// <summary>
+        /// Method: GetCaseTitles
+        /// </summary>
+        [HttpPost("GetCaseTitles")]
+        [Authorize]
+        public virtual ItemResult<System.Collections.Generic.ICollection<string>> GetCaseTitles(
+            [FromForm(Name = "search")] string search)
+        {
+            var _methodResult = Coalesce.Domain.Case.GetCaseTitles(Db, search);
+            var _result = new ItemResult<System.Collections.Generic.ICollection<string>>();
+            _result.Object = _methodResult?.ToList();
+            return _result;
+        }
+
+        /// <summary>
         /// Method: GetSomeCases
         /// </summary>
         [HttpPost("GetSomeCases")]

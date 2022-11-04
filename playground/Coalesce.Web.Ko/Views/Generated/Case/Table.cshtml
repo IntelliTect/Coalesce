@@ -220,6 +220,25 @@
                 </tr>
             </thead>
             <tbody>
+                <tr data-bind="with: getCaseTitles">
+                    <td>
+                        <button class="btn btn-default btn-xs" data-bind="click: function(){ $('#method-GetCaseTitles').modal() }">
+                            Get Case Titles
+                        </button>
+                    </td>
+                    <td>
+                        <ul data-bind="foreach: result">
+                            <li data-bind="text: $data"></li>
+                        </ul>
+                    </td>
+                    <td>
+                        <span data-bind="text: wasSuccessful"></span>
+                        <span data-bind="text: message"></span>
+                    </td>
+                    <td>
+                        <span class="label label-info" data-bind="fadeVisible: isLoading">Loading</span>
+                    </td>
+                </tr>
                 <tr data-bind="with: getSomeCases">
                     <td>
                         <button class="btn btn-default btn-xs" data-bind="click: function(){ invoke() }">
@@ -305,6 +324,33 @@
                 </tr>
             </tbody>
         </table>
+    </div>
+</div>
+
+<!-- Modal for method: GetCaseTitles -->
+<div class="modal fade" id="method-GetCaseTitles" tabindex="-1" role="dialog" data-bind="with: getCaseTitles">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type='button' class='close' data-dismiss='modal' aria-label='Close'><span aria-hidden='true'>&times;</span></button>
+                <h4 class='modal-title'>Get Case Titles</h4>
+            </div>
+            <div class="modal-body form-horizontal" data-bind="with: args">
+                <div class="form-group">
+                    <label class='col-md-4 control-label'>Search</label>
+                    <div class="col-md-8">
+                        <input type="text" class="form-control" data-bind="value: search" />
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type='button' class='btn btn-default' data-dismiss='modal'>Cancel</button>
+                <button type='button' class='btn btn-primary btn-ok'
+                    data-bind="click: invokeWithArgs.bind(this, args, function(){jQuery($element).closest('.modal').modal('hide')})">
+                    OK
+                </button>
+            </div>
+        </div>
     </div>
 </div>
 

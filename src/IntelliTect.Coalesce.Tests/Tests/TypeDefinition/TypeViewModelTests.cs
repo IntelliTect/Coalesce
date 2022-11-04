@@ -211,5 +211,44 @@ namespace IntelliTect.Coalesce.Tests.TypeDefinition
         [ClassViewModelData(typeof(WeatherService), true)]
         public void HasClassViewModel_IsCorrect(ClassViewModelData data, bool expected)
             => Assert.Equal(expected, ((TypeViewModel)data).HasClassViewModel);
+
+        [Theory]
+        [ClassViewModelData(typeof(Case.Statuses))]
+        public void EnumValues_IsCorrect(ClassViewModelData data)
+        {
+            Assert.Collection(data.TypeViewModel.EnumValues,
+                v =>
+                {
+                    Assert.Equal(0, v.Value);
+                    Assert.Equal("Open", v.Name);
+                    Assert.Equal("Open", v.DisplayName);
+                    Assert.Null(v.Description);
+                }, v =>
+                {
+                    Assert.Equal(1, v.Value);
+                    Assert.Equal("InProgress", v.Name);
+                    Assert.Equal("In Progress", v.DisplayName);
+                    Assert.Null(v.Description);
+                }, v =>
+                {
+                    Assert.Equal(2, v.Value);
+                    Assert.Equal("Resolved", v.Name);
+                    Assert.Equal("Resolved", v.DisplayName);
+                    Assert.Null(v.Description);
+                }, v =>
+                {
+                    Assert.Equal(3, v.Value);
+                    Assert.Equal("ClosedNoSolution", v.Name);
+                    Assert.Equal("Closed, No Solution", v.DisplayName);
+                    Assert.Equal("Closed without any resolution.", v.Description);
+                }, v =>
+                {
+                    Assert.Equal(99, v.Value);
+                    Assert.Equal("Cancelled", v.Name);
+                    Assert.Equal("Cancelled", v.DisplayName);
+                    Assert.Null(v.Description);
+                }
+            );
+        }
     }
 }

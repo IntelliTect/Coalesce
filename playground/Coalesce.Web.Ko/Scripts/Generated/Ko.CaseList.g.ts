@@ -53,6 +53,49 @@ module ListViewModels {
             = new Coalesce.ListViewModelConfiguration<CaseList, ViewModels.Case>(CaseList.coalesceConfig);
         
         
+        /** Methods and properties for invoking server method GetCaseTitles. */
+        public readonly getCaseTitles = new CaseList.GetCaseTitles(this);
+        public static GetCaseTitles = class GetCaseTitles extends Coalesce.ClientMethod<CaseList, string[]> {
+            public readonly name = 'GetCaseTitles';
+            public readonly verb = 'POST';
+            public result: KnockoutObservableArray<string> = ko.observableArray([]);
+            
+            /** Calls server method (GetCaseTitles) with the given arguments */
+            public invoke = (search: string | null, callback?: (result: string[]) => void, reload: boolean = true): JQueryPromise<any> => {
+                return this.invokeWithData({ search: search }, callback, reload);
+            };
+            
+            /** Object that can be easily bound to fields to allow data entry for the method's parameters */
+            public args = new GetCaseTitles.Args(); 
+            public static Args = class Args {
+                public search: KnockoutObservable<string | null> = ko.observable(null);
+            };
+            
+            /** Calls server method (GetCaseTitles) with an instance of GetCaseTitles.Args, or the value of this.args if not specified. */
+            public invokeWithArgs = (args = this.args, callback?: (result: string[]) => void, reload: boolean = true): JQueryPromise<any> => {
+                return this.invoke(args.search(), callback, reload);
+            }
+            
+            /** Invokes the method after displaying a browser-native prompt for each argument. */
+            public invokeWithPrompts = (callback?: (result: string[]) => void, reload: boolean = true): JQueryPromise<any> | undefined => {
+                var $promptVal: string | null = null;
+                $promptVal = prompt('Search');
+                if ($promptVal === null) return;
+                var search: string = $promptVal;
+                return this.invoke(search, callback, reload);
+            };
+            
+            protected loadResponse = (data: Coalesce.ItemResult, jqXHR: JQuery.jqXHR, callback?: (result: string[]) => void, reload: boolean = true) => {
+                this.result(data.object);
+                if (reload) {
+                    var result = this.result();
+                    this.parent.load(typeof(callback) == 'function' ? () => callback(result) : undefined);
+                } else if (typeof(callback) == 'function') {
+                    callback(this.result());
+                }
+            };
+        };
+        
         /** Methods and properties for invoking server method GetSomeCases. */
         public readonly getSomeCases = new CaseList.GetSomeCases(this);
         public static GetSomeCases = class GetSomeCases extends Coalesce.ClientMethod<CaseList, ViewModels.Case[]> {

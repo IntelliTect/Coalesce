@@ -6,6 +6,7 @@ using IntelliTect.Coalesce.Utilities;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
@@ -26,10 +27,10 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
 
             Resolved,
 
-            [Display(Name = "Closed, No Solution")]
+            [Display(Name = "Closed, No Solution", Description = "Closed without any resolution.")]
             ClosedNoSolution,
 
-            Cancelled
+            Cancelled = 99
         }
         
         [Key]

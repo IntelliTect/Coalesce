@@ -110,14 +110,19 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public override bool IsVoid => Info == typeof(void);
 
+        private IReadOnlyList<EnumMember> _enumValues;
         public override IReadOnlyList<EnumMember> EnumValues
         {
             get
             {
+                if (_enumValues != null) return _enumValues;
+
                 if (IsNullableType) return NullableUnderlyingType.EnumValues;
 
                 var result = new List<EnumMember>();
                 if (!IsEnum) return result;
+
+                var integralType = Enum.GetUnderlyingType(Info);
 
                 foreach (var value in Enum.GetValues(Info))
                 {
@@ -125,14 +130,13 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     var member = Info.GetMember(name)[0];
                     result.Add(new EnumMember(
                         name, 
-                        value,
-                        member.GetAttributeValue<DisplayNameAttribute>(a => a.DisplayName) ??
-                            member.GetAttributeValue<DisplayAttribute>(a => a.Name) ??
+                        Convert.ChangeType(value, integralType),
+                        member.GetAttributeValue<DisplayAttribute>(a => a.Name) ??
                             member.Name.ToProperCase(),
                         member.GetAttributeValue<DisplayAttribute>(a => a.Description)
                     ));
                 }
-                return result;
+                return _enumValues = result;
             }
         }
 

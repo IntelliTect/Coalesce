@@ -685,10 +685,16 @@ export interface DisplayOptions {
 let defaultTimeZone: string | null = null;
 /** Set the timezone that will be used to display dates
  * via the `modelDisplay`/`propDisplay`/`valueDisplay` functions
- * if no other timezone is provided as a parameter.
+ * if no other timezone is provided as a parameter,
+ * and for c-datetime-picker in coalesce-vue-vuetify.
+ * @param tzName An IANA tzdb timezone name, or null to clear this setting.
  */
 export function setDefaultTimeZone(tzName: string | null) {
   defaultTimeZone = tzName;
+}
+/** Returns the current default timezone as provided to `setDefaultTimeZone`. */
+export function getDefaultTimeZone() {
+  return defaultTimeZone;
 }
 
 /** Visitor that maps its input to a string representation of its value, suitable for display. */
@@ -797,7 +803,7 @@ class DisplayVisitor extends Visitor<
       }
     }
 
-    if (defaultTimeZone && !formatOptions?.timeZone) {
+    if (defaultTimeZone && !formatOptions?.timeZone && !meta.noOffset) {
       formatOptions = { ...formatOptions, timeZone: defaultTimeZone };
     }
 

@@ -95,18 +95,23 @@
 
 import {
   isValid,
-  format,
   parse,
   setYear,
   setMonth,
   setDate,
   setHours,
   setMinutes,
-  lightFormat,
   startOfDay,
 } from "date-fns";
 
-import { parseDateUserInput } from "coalesce-vue";
+// These weird imports from date-fns-tz are needed because date-fns-tz
+// doesn't define its esm exports from its root correctly.
+// https://github.com/marnusw/date-fns-tz/blob/0577249fb6c47ad7b6a84826e90d976dac9ab52e/README.md#esm-and-commonjs
+import format from "date-fns-tz/esm/format";
+import utcToZonedTime from "date-fns-tz/esm/utcToZonedTime";
+import zonedTimeToUtc from "date-fns-tz/esm/zonedTimeToUtc";
+
+import { getDefaultTimeZone, parseDateUserInput } from "coalesce-vue";
 import { defineComponent } from "vue";
 import { makeMetadataProps, useMetadataProps } from "../c-metadata-component";
 
@@ -132,6 +137,7 @@ export default defineComponent({
     closeOnDatePicked: { type: Boolean, default: null },
     /** Use native HTML5 date picker rather than Vuetify. */
     native: { type: Boolean, default: true }, // Default true now since Vuetify date/timepickers don't exist in 3.0
+    timeZone: { type: String, default: () => getDefaultTimeZone() },
   },
 
   data() {
@@ -159,9 +165,31 @@ export default defineComponent({
     displayedValue() {
       if (!this.hasMounted) return null;
 
-      return this.internalValue
-        ? format(this.internalValue, this.internalFormat)
+      return this.internalValueZoned
+        ? format(this.internalValueZoned, this.internalFormat, {
+            timeZone: this.internalTimeZone || undefined,
+          })
         : null;
+    },
+
+    internalTimeZone() {
+      if (this.timeZone) {
+        return this.timeZone;
+      }
+      if (this.dateMeta) {
+        if (!this.dateMeta.noOffset) {
+
+          // date is a DateTimeOffset, so TZ conversions are meaningful.
+        return getDefaultTimeZone();
+        } else {
+          // date is a DateTime, where TZ conversions would actually be harmful. Don't use the default.
+          return null;
+        }
+      }
+
+      // This is a bare v-model usage of the component.
+      // Don't use the default since we don't know the user's intent.
+      return null;
     },
 
     internalValue() {
@@ -170,6 +198,12 @@ export default defineComponent({
       }
 
       return this.modelValue;
+    },
+
+    internalValueZoned() {
+      const value = this.internalValue;
+      if (!value || !this.internalTimeZone) return value;
+      return utcToZonedTime(value, this.internalTimeZone);
     },
 
     internalDateKind() {
@@ -219,14 +253,21 @@ export default defineComponent({
 
     datePart() {
       return (
-        (this.internalValue && lightFormat(this.internalValue, "yyyy-MM-dd")) ||
+        (this.internalValueZoned &&
+          format(this.internalValueZoned, "yyyy-MM-dd", {
+            timeZone: this.internalTimeZone || undefined,
+          })) ||
         null
       );
     },
 
     timePart() {
       return (
-        (this.internalValue && lightFormat(this.internalValue, "HH:mm")) || null
+        (this.internalValueZoned &&
+          format(this.internalValueZoned, "HH:mm", {
+            timeZone: this.internalTimeZone || undefined,
+          })) ||
+        null
       );
     },
   },
@@ -247,7 +288,10 @@ export default defineComponent({
     createDefaultDate() {
       const date = new Date();
       if (this.dateKind == "date") {
-        return startOfDay(date);
+        const zone = this.internalTimeZone;
+        if (!zone) return startOfDay(date);
+
+        return zonedTimeToUtc(startOfDay(utcToZonedTime(date, zone)), zone);
       }
       return date;
     },
@@ -258,11 +302,7 @@ export default defineComponent({
       if (!val || !val.trim()) {
         value = null;
       } else {
-        value = parse(
-          val,
-          this.internalFormat,
-          startOfDay(this.createDefaultDate())
-        );
+        value = parse(val, this.internalFormat, this.createDefaultDate());
 
         // If failed, try normalizing common separators to the same symbol in
         // both the format string and user input.
@@ -271,7 +311,7 @@ export default defineComponent({
           value = parse(
             val.replace(separatorRegex, "-"),
             this.internalFormat.replace(separatorRegex, "-"),
-            startOfDay(this.createDefaultDate())
+            this.createDefaultDate()
           );
         }
 
@@ -302,6 +342,12 @@ export default defineComponent({
           ];
           value = null;
         }
+
+        if (value && this.internalTimeZone) {
+          // The date was parsed against the current browser timeZone.
+          // This (poorly named) function will shift it into the desired timezone.
+          value = zonedTimeToUtc(value, this.internalTimeZone);
+        }
       }
 
       // Only emit an event if the input isn't invalid.
@@ -312,7 +358,7 @@ export default defineComponent({
     timeChanged(val: string) {
       this.error = [];
 
-      var value = this.internalValue || this.createDefaultDate();
+      var value = this.internalValueZoned || this.createDefaultDate();
 
       var parts = /(\d\d):(\d\d)/.exec(val);
       if (!parts)
@@ -321,13 +367,17 @@ export default defineComponent({
       value = setHours(value, parseInt(parts[1]));
       value = setMinutes(value, parseInt(parts[2]));
 
+      if (this.internalTimeZone) {
+        value = zonedTimeToUtc(value, this.internalTimeZone);
+      }
+
       this.emitInput(value);
     },
 
     dateChanged(val: string) {
       this.error = [];
 
-      var value = this.internalValue || this.createDefaultDate();
+      var value = this.internalValueZoned || this.createDefaultDate();
 
       var parts = /(\d\d\d\d)-(\d\d)-(\d\d)/.exec(val);
       if (!parts)
@@ -339,6 +389,10 @@ export default defineComponent({
       value = setYear(value, parseInt(parts[1]));
       value = setMonth(value, parseInt(parts[2]) - 1);
       value = setDate(value, parseInt(parts[3]));
+
+      if (this.internalTimeZone) {
+        value = zonedTimeToUtc(value, this.internalTimeZone);
+      }
 
       this.emitInput(value);
 

@@ -14,8 +14,8 @@ import 'vuetify/dist/vuetify.min.css'
 Vue.use(Vuetify);
 
 import App from './components/app.vue';
-import { AxiosClient } from 'coalesce-vue'
-
+import { AxiosClient, setDefaultTimeZone } from 'coalesce-vue'
+setDefaultTimeZone("America/Los_Angeles")
 import VueRouter from 'vue-router';
 Vue.use(VueRouter);
 

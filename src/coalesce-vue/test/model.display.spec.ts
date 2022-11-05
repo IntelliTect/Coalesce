@@ -224,3 +224,37 @@ describe.each(<DisplayData[]>[
     });
   });
 });
+
+describe("valueDisplay", () => {
+  describe("date + defaultTimeZone", () => {
+    test("date noOffset does not use defaultTimeZone", () => {
+      model.setDefaultTimeZone("America/Adak");
+      const result = model.valueDisplay(
+        toDate("2014-10-25T13:46:20"),
+        studentProps.dateNoOffset,
+        {
+          format: "yyyy-MM-dd HH:mm:ss",
+        }
+      );
+
+      // Output is what we put in.
+      // Should not be shifted by TZ since dates without offsets
+      // are meant to be timezone agnostic.
+      expect(result).toBe("2014-10-25 13:46:20");
+    });
+
+    test("date with offset uses defaultTimeZone", () => {
+      model.setDefaultTimeZone("America/Adak");
+      const result = model.valueDisplay(
+        toDate("2014-10-25T13:46:20+02:00"),
+        studentProps.birthDate,
+        {
+          format: "yyyy-MM-dd HH:mm:ss zzzz",
+        }
+      );
+
+      // Output is shifted from UTC+2 to UTC-9, a total of 11 hours (1300 hours to 0200 hours).
+      expect(result).toBe("2014-10-25 02:46:20 Hawaii-Aleutian Daylight Time");
+    });
+  });
+});

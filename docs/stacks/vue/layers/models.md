@@ -158,5 +158,24 @@ The following options are available to functions in coalesce-vue that render a v
 @[import-md "start":"export interface DisplayOptions", "end":"\n}\n", "prepend":"``` ts", "append":"```"](../../../../src/coalesce-vue/src/model.ts)
 
 ::: tip Note
-Dates rendered with `formatDistanceToNow` function into a Vue component will not automatically be updated in realtime. If this is needed, you should use a strategy like using a [key](https://v2.vuejs.org/v2/api/#key) that you periodically update to force a re-render.
+Dates rendered with the `formatDistanceToNow` function into a Vue component will not automatically be updated in realtime. If this is needed, you should use a strategy like using a [key](https://v2.vuejs.org/v2/api/#key) that you periodically update to force a re-render.
 :::
+
+
+## Time Zones
+
+In Coalesce Vue, all `DateTimeOffset`-based properties, for both inputs and display-only contexts, are by default formatted into the user's computer's system time zone. This is largely just a consequence of how the JavaScript Date type works. However, this behavior can be overridden by configuring a global default timezone, or by providing a time zone name to individual usages.
+
+Fields with a type of `DateTime` are agnostic to time zone and UTC offset and so are not subject to any of the following rules.
+
+<Prop def="setDefaultTimeZone(timeZoneName: string | null): void" lang="ts" />
+
+Gets or sets the default time zone used by Coalesce. The time zone should be an [IANA Time Zone Database](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) name, e.g. `"America/Los_Angeles"`.
+
+The time zone provided here is used in the following ways:
+- It will be used as `DisplayOptions.format.timeZone` if no other value was provided for this option. This is used by functions [modelDisplay](#member-modeldisplay), [propDisplay](#member-propdisplay), and [valueDisplay](#member-valuedisplay), as well as the [c-display](/stacks/vue/coalesce-vue-vuetify/components/c-display.md) component.
+- It will be used by [c-datetime-picker](/stacks/vue/coalesce-vue-vuetify/components/c-datetime-picker.md), used to both interpret the user input and display the selected date. This can also be set on individual component usages via the `timeZone` prop.
+
+<Prop def="getDefaultTimeZone(): string | null" lang="ts" />
+
+Returns the current configured default time zone. Default is `null`, falling back on the user's computer's system time zone.

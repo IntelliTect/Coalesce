@@ -1,10 +1,12 @@
-import type { Plugin, ViteDevServer } from "vite";
-import path from "path";
-import { existsSync } from "fs";
-import { readFile, writeFile, mkdir } from "fs/promises";
-import { spawn } from "child_process";
-import { TLSSocket } from "tls";
+import type { Plugin, ResolvedConfig, ViteDevServer } from "vite";
 import MagicString from "magic-string";
+
+import path from "node:path";
+import os from "node:os";
+import { existsSync } from "node:fs";
+import { readFile, writeFile, mkdir } from "node:fs/promises";
+import { spawn } from "node:child_process";
+import { TLSSocket } from "node:tls";
 
 import type * as https from "https";
 
@@ -28,6 +30,12 @@ export interface AspNetCoreHmrPluginOptions {
    * contain the wrong port on app startup.
    */
   writeIndexHtmlToDisk?: boolean;
+
+  /** If set, will override the hostname that is injected into index.html
+   * and other assets when `assetBypass` is true. Can be configured to access the
+   * local development app instance from a network computer, e.g. a phone or
+   * tablet for mobile testing. */
+  host?: string;
 }
 
 /**
@@ -42,6 +50,7 @@ export function createAspNetCoreHmrPlugin({
   https = true,
   assetBypass = true,
   writeIndexHtmlToDisk = true,
+  host: configuredHost,
 }: AspNetCoreHmrPluginOptions = {}) {
   // We are passed in the PID of the parent .NET process so that when it aborts,
   // we can shut ourselves down. Otherwise the vite server will end up orphaned.
@@ -128,7 +137,20 @@ export function createAspNetCoreHmrPlugin({
   if (assetBypass) {
     let port: number | undefined;
     let base: string;
-    let https = true;
+    let resolvedConfig: ResolvedConfig;
+
+    function getOrigin() {
+      const serverConfig = resolvedConfig.server;
+
+      const host =
+        configuredHost ||
+        (typeof serverConfig.host == "string" && serverConfig.host == "0.0.0.0"
+          ? undefined
+          : serverConfig.host) ||
+        "localhost";
+
+      return `http${serverConfig.https ? "s" : ""}://${host}:${port}`;
+    }
 
     function transformCode(code: string) {
       // Search for strings like:
@@ -143,10 +165,7 @@ export function createAspNetCoreHmrPlugin({
         // Insert the hostname of the vite server at the start of the relative path
         // so that the request will go directly to the vite server
         // rather than having to traverse the aspnetcore server proxy first.
-        s.appendLeft(
-          match.index + match[1].length,
-          `http${https ? "s" : ""}://localhost:${port}`
-        );
+        s.appendLeft(match.index + match[1].length, getOrigin());
       }
 
       return s;
@@ -160,11 +179,11 @@ export function createAspNetCoreHmrPlugin({
       name: "coalesce-vite-hmr-bypass-aspnetcore",
       enforce: "pre",
       configResolved(config) {
+        resolvedConfig = config;
         // This might be wrong if no port was provided or if this port wasn't available.
         // Will get overridden with the real port below.
         port = config.server.port;
         base = config.base;
-        https = !!config.server.https;
       },
 
       configureServer(server) {
@@ -182,12 +201,11 @@ export function createAspNetCoreHmrPlugin({
         // Transform assets (fonts, mainly) to go to the HMR server instead of the aspnetcore server.
         server.httpServer!.on("listening", () => {
           port = (server.httpServer!.address() as any)?.port;
-          // Static assets are loaded relative to the browser's origin
+
+          // Static assets are normally loaded relative to the browser's origin
           // since they're often originating from things like font rules in <style> tags.
           // This will repoint them at the HMR server.
-          server.config.server.origin = `http${
-            server.config.server.https ? "s" : ""
-          }://localhost:${port}`;
+          server.config.server.origin = getOrigin();
         });
       },
     });
@@ -213,7 +231,7 @@ export function createAspNetCoreHmrPlugin({
             )}`,
             "g"
           ),
-          '$1window.location.origin + $2' + base
+          "$1window.location.origin + $2" + base
         );
       },
     });

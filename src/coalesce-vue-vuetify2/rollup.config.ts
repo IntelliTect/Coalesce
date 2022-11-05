@@ -51,8 +51,8 @@ const sharedPlugins = (exclude) => [
 const external = [
   ...Object.keys(pkg.dependencies),
   ...Object.keys(pkg.peerDependencies),
-  "vuetify/lib"
-];
+  ...Object.keys(pkg.optionalDependencies),
+].map((pkg) => new RegExp("^" + pkg));
 
 export default [
   {

@@ -15,168 +15,175 @@ on:
 jobs:
   meta:
     runs-on: ubuntu-latest
-
+    
     outputs:
       COALESCE_VERSION: ${{ steps.version.outputs.COALESCE_VERSION }}
 
     steps:
-      - uses: actions/checkout@v3
+    - uses: actions/checkout@v3
+    
+    - name: "Verify and set COALESCE_VERSION variable"
+      id: version
+      shell: pwsh
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        $apiBaseUrl = "${{ github.api_url }}/repos/${{ github.repository }}/actions"
+        $runInfo = curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "$apiBaseUrl/runs/${{ github.run_id }}";
 
-      - name: "Verify and set COALESCE_VERSION variable"
-        id: version
-        shell: pwsh
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          $apiBaseUrl = "${{ github.api_url }}/repos/${{ github.repository }}/actions"
-          $runInfo = curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "$apiBaseUrl/runs/${{ github.run_id }}";
+        $workflowId = $runInfo | jq -r .workflow_id;
+        $createdAt = $runInfo | jq -r .created_at;
+        $createdAtPST = [System.TimeZoneInfo]::ConvertTimeBySystemTimeZoneId( [System.DateTimeOffset](Get-Date -Date $createdAt), "America/Los_Angeles" );
 
-          $workflowId = $runInfo | jq -r .workflow_id;
-          $createdAt = $runInfo | jq -r .created_at;
-          $createdAtPST = [System.TimeZoneInfo]::ConvertTimeBySystemTimeZoneId( [System.DateTimeOffset](Get-Date -Date $createdAt), "America/Los_Angeles" );
+        echo "workflowId: $workflowId";
+        echo "createdAt: $createdAt ($createdAtPST)";
+          
+        # Get how many runs of this workflow have happened today
+        $dateFormat = "yyyy-MM-ddT00:00:00K"
+        $revRequestUrl = "$apiBaseUrl/workflows/$workflowId/runs?created=$($createdAtPST.ToString($dateFormat))..$($createdAtPST.AddDays(1).ToString($dateFormat))";
+        $rev = curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" $revRequestUrl | jq .total_count;
 
-          echo "workflowId: $workflowId";
-          echo "createdAt: $createdAt ($createdAtPST)";
-            
-          # Get how many runs of this workflow have happened today
-          $dateFormat = "yyyy-MM-ddT00:00:00K"
-          $revRequestUrl = "$apiBaseUrl/workflows/$workflowId/runs?created=$($createdAtPST.ToString($dateFormat))..$($createdAtPST.AddDays(1).ToString($dateFormat))";
-          $rev = curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" $revRequestUrl | jq .total_count;
+        $path = "version.txt";
+        $version = "$((cat $path).Trim())"
+        $date = $createdAtPST.ToString("yyyyMMdd")
+        $prereleaseSlug = "${{ inputs.prereleaseSlug }}"
+        echo "Version from $($path): $version";
+        echo "Prerelease: $prereleaseSlug";
+        echo "Date: $date";
+        echo "Rev: $rev";
+        echo "checkTagIsUnique: ${{ inputs.checkTagIsUnique }}";
 
-          $path = "version.txt";
-          $version = "$((cat $path).Trim())"
-          $date = $createdAtPST.ToString("yyyyMMdd")
-          $prereleaseSlug = "${{ inputs.prereleaseSlug }}"
-          echo "Version from $($path): $version";
-          echo "Prerelease: $prereleaseSlug";
-          echo "Date: $date";
-          echo "Rev: $rev";
-          echo "checkTagIsUnique: ${{ inputs.checkTagIsUnique }}";
+        if ($prereleaseSlug) {
+          $version = "$version-$prereleaseSlug.$date.$rev"
+        }
 
-          if ($prereleaseSlug) {
-            $version = "$version-$prereleaseSlug.$date.$rev"
+        echo "Computed version: $version";
+
+        try
+        {
+            [System.Management.Automation.SemanticVersion]::Parse($version);
+        }
+        catch
+        {
+            Write-Error "'$version' is an invalid SemVer version"
+            exit 1
+        }
+
+        if ("${{ inputs.checkTagIsUnique }}" -eq "true") {
+          if (git tag -l "$version") {
+            Write-Error "Tag $version already exists.";
+            exit 1;
           }
+        }
 
-          echo "Computed version: $version";
+        echo "::set-output name=COALESCE_VERSION::$version";
+        echo "# Version $version" >> $GITHUB_STEP_SUMMARY
 
-          try
-          {
-              [System.Management.Automation.SemanticVersion]::Parse($version);
-          }
-          catch
-          {
-              Write-Error "'$version' is an invalid SemVer version"
-              exit 1
-          }
 
-          if ("${{ inputs.checkTagIsUnique }}" -eq "true") {
-            if (git tag -l "$version") {
-              Write-Error "Tag $version already exists.";
-              exit 1;
-            }
-          }
-
-          echo "::set-output name=COALESCE_VERSION::$version";
-          echo "# Version $version" >> $GITHUB_STEP_SUMMARY
-
-  build-dotnet:
+  build-dotnet: 
     needs: meta
     runs-on: ubuntu-latest
 
     env:
       COALESCE_VERSION: ${{needs.meta.outputs.COALESCE_VERSION}}
-
+      
     steps:
-      - uses: actions/checkout@v3
+    - uses: actions/checkout@v3
 
-      # 2.2 is installed because it is the last version that officially supports DotnetCliToolReference
-      - name: Setup dotnet
-        uses: actions/setup-dotnet@v2
-        with:
-          dotnet-version: |
-            2.2.x
-            3.1.x
-            5.0.x
-            6.0.x
+    # 2.2 is installed because it is the last version that officially supports DotnetCliToolReference
+    - name: Setup dotnet
+      uses: actions/setup-dotnet@v2
+      with:
+        dotnet-version: | 
+          2.2.x
+          3.1.x
+          5.0.x
+          6.0.x
 
-      - run: dotnet restore
-      - run: dotnet build --no-restore --configuration Release
-      - run: dotnet test --no-build --configuration Release
-      - run: dotnet pack --no-build --configuration Release -o out/packages
+    - run: dotnet restore
+    - run: dotnet build --no-restore --configuration Release
+    - run: dotnet test --no-build --configuration Release
+    - run: dotnet pack --no-build --configuration Release -o out/packages
 
-      - name: "Upload Artifact: NuGet Packages"
-        uses: actions/upload-artifact@v3
-        with:
-          name: packages
-          path: out/packages
+    - name: 'Upload Artifact: NuGet Packages'
+      uses: actions/upload-artifact@v3
+      with:
+        name: packages
+        path: out/packages
 
-  validate-ko-playground:
+
+
+  validate-ko-playground: 
     needs: meta
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: playground/Coalesce.Web.Ko
-
+      
     steps:
-      - uses: actions/checkout@v3
+    - uses: actions/checkout@v3
 
-      - name: Setup dotnet
-        uses: actions/setup-dotnet@v2
-        with:
-          dotnet-version: |
-            3.1.x
-            6.0.x
+    - name: Setup dotnet
+      uses: actions/setup-dotnet@v2
+      with:
+        dotnet-version: | 
+          3.1.x
+          6.0.x
 
-      - run: npm ci
-      - run: npx gulp coalesce
-      - run: npx gulp copyAll
-      - run: dotnet build --configuration Release
+    - run: npm ci
+    - run: npx gulp coalesce
+    - run: npx gulp copyAll
+    - run: dotnet build --configuration Release
 
-  validate-vue2-playground:
+
+  validate-vue2-playground: 
     needs: meta
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: playground/Coalesce.Web.Vue2
-
+      
     steps:
-      - uses: actions/checkout@v3
+    - uses: actions/checkout@v3
 
-      - uses: actions/setup-dotnet@v2
-        with:
-          dotnet-version: 6.0.x
+    - uses: actions/setup-dotnet@v2
+      with:
+        dotnet-version: 6.0.x
 
-      - run: npm ci
-        working-directory: src/coalesce-vue
-      - run: npm ci
-        working-directory: src/coalesce-vue-vuetify2
-      - run: npm ci
-      - run: npm run coalesce
-      - run: npm run build
-      - run: dotnet build --configuration Release
+    - run: npm ci
+      working-directory: src/coalesce-vue
+    - run: npm ci
+      working-directory: src/coalesce-vue-vuetify2
+    - run: npm ci
+    - run: npm run coalesce
+    - run: npm run build
+    - run: dotnet build --configuration Release
 
-  validate-vue3-playground:
+
+  validate-vue3-playground: 
     needs: meta
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: playground/Coalesce.Web.Vue3
-
+      
     steps:
-      - uses: actions/checkout@v3
+    - uses: actions/checkout@v3
 
-      - uses: actions/setup-dotnet@v2
-        with:
-          dotnet-version: 6.0.x
+    - uses: actions/setup-dotnet@v2
+      with:
+        dotnet-version: 6.0.x
 
-      - run: npm ci
-        working-directory: src/coalesce-vue
-      - run: npm ci
-        working-directory: src/coalesce-vue-vuetify3
-      - run: npm ci
-      - run: npm run coalesce
-      - run: npm run build
-      - run: dotnet build --configuration Release
+    - run: npm ci
+      working-directory: src/coalesce-vue
+    - run: npm ci
+      working-directory: src/coalesce-vue-vuetify3
+    - run: npm ci
+    - run: npm run coalesce
+    - run: npm run build
+    - run: dotnet build --configuration Release
+
+
 
   build-coalesce-vue:
     needs: meta
@@ -189,46 +196,48 @@ jobs:
       COALESCE_VERSION: ${{needs.meta.outputs.COALESCE_VERSION}}
 
     steps:
-      - uses: actions/checkout@v3
+    - uses: actions/checkout@v3
+    
+    - run: npm ci
+    
+    - name: npm version
+      run: npm version $COALESCE_VERSION --no-git-tag-version
+    
+    - name: npm run test (Vue2)
+      run: npm run test -- --coverage --reporter=default --reporter=junit --outputFile coalesce-vue2.results.xml
+    
+    - name: npm run test (Vue3)
+      run: |
+        set -e;
 
-      - run: npm ci
+        cd vue3-tests
+        npm ci;
 
-      - name: npm version
-        run: npm version $COALESCE_VERSION --no-git-tag-version
+        # Run a build to check the TS types, since vitest doesn't do full typechecking.
+        npm run build;
 
-      - name: npm run test (Vue2)
-        run: npm run test -- --coverage --reporter=default --reporter=junit --outputFile coalesce-vue2.results.xml
+        # no coverage on this one, since it'll be identical to vue2 and also doesn't work
+        # since it ignores the files from outside the vue3-tests directory.
+        npm run test -- --reporter=default --reporter=junit --outputFile coalesce-vue3.results.xml
+    
 
-      - name: npm run test (Vue3)
-        run: |
-          set -e;
+    # Currently broken with vitest: https://github.com/dorny/test-reporter/issues/187
+    # - name: Publish Test Results
+    #   uses: dorny/test-reporter@v1
+    #   if: always() && github.event_name != 'pull_request'
+    #   with:
+    #     name: coalesce-vue tests
+    #     path: '**/*.results.xml'
+    #     reporter: jest-junit
 
-          cd vue3-tests
-          npm ci;
+    - run: npm pack
 
-          # Run a build to check the TS types, since vitest doesn't do full typechecking.
-          npm run build;
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: coalesce-vue
+        path: src/coalesce-vue/coalesce-vue*.tgz
 
-          # no coverage on this one, since it'll be identical to vue2 and also doesn't work
-          # since it ignores the files from outside the vue3-tests directory.
-          npm run test -- --reporter=default --reporter=junit --outputFile coalesce-vue3.results.xml
-
-      # Currently broken with vitest: https://github.com/dorny/test-reporter/issues/187
-      # - name: Publish Test Results
-      #   uses: dorny/test-reporter@v1
-      #   if: always() && github.event_name != 'pull_request'
-      #   with:
-      #     name: coalesce-vue tests
-      #     path: '**/*.results.xml'
-      #     reporter: jest-junit
-
-      - run: npm pack
-
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: coalesce-vue
-          path: src/coalesce-vue/coalesce-vue*.tgz
 
   build-coalesce-vue-vuetify2:
     needs: meta
@@ -241,27 +250,30 @@ jobs:
       COALESCE_VERSION: ${{needs.meta.outputs.COALESCE_VERSION}}
 
     steps:
-      - uses: actions/checkout@v3
+    - uses: actions/checkout@v3
 
-      - run: npm ci
-      - run: npm run build
+    # build coalesce-vue
+    - run: npm run build-local-deps
+    - run: npm ci
+    - run: npm run build
 
-      # now we'll setup the real versions of things.
-      # Change the package.json with the correct version of coalesce-vue,
-      # but do not use any npm commands to do so as they'll freak out that the version isn't published.
-      - name: update *dependencies["coalesce-vue"] version
-        run: cat <<< "$(cat package.json | jq ".peerDependencies[\"coalesce-vue\"] = \"$COALESCE_VERSION\" | .devDependencies[\"coalesce-vue\"] = \"$COALESCE_VERSION\" ")" > package.json
+    # now we'll setup the real versions of things.
+    # Change the package.json with the correct version of coalesce-vue, 
+    # but do not use any npm commands to do so as they'll freak out that the version isn't published.
+    - name: update *dependencies["coalesce-vue"] version
+      run: cat <<< "$(cat package.json | jq ".peerDependencies[\"coalesce-vue\"] = \"$COALESCE_VERSION\" | .devDependencies[\"coalesce-vue\"] = \"$COALESCE_VERSION\" ")" > package.json
 
-      - name: npm version
-        run: npm version $COALESCE_VERSION --no-git-tag-version
+    - name: npm version
+      run: npm version $COALESCE_VERSION --no-git-tag-version
 
-      - run: npm pack
+    - run: npm pack
 
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: coalesce-vue-vuetify
-          path: src/coalesce-vue-vuetify2/*.tgz
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: coalesce-vue-vuetify
+        path: src/coalesce-vue-vuetify2/*.tgz
+
 
   build-coalesce-vue-vuetify3:
     needs: meta
@@ -274,24 +286,26 @@ jobs:
       COALESCE_VERSION: ${{needs.meta.outputs.COALESCE_VERSION}}
 
     steps:
-      - uses: actions/checkout@v3
+    - uses: actions/checkout@v3
 
-      - run: npm ci
-      - run: npm run build
+    # build coalesce-vue
+    - run: npm run build-local-deps
+    - run: npm ci
+    - run: npm run build
 
-      # now we'll setup the real versions of things.
-      # Change the package.json with the correct version of coalesce-vue,
-      # but do not use any npm commands to do so as they'll freak out that the version isn't published.
-      - name: update *dependencies["coalesce-vue"] version
-        run: cat <<< "$(cat package.json | jq ".peerDependencies[\"coalesce-vue\"] = \"$COALESCE_VERSION\" | .devDependencies[\"coalesce-vue\"] = \"$COALESCE_VERSION\" ")" > package.json
+    # now we'll setup the real versions of things.
+    # Change the package.json with the correct version of coalesce-vue, 
+    # but do not use any npm commands to do so as they'll freak out that the version isn't published.
+    - name: update *dependencies["coalesce-vue"] version
+      run: cat <<< "$(cat package.json | jq ".peerDependencies[\"coalesce-vue\"] = \"$COALESCE_VERSION\" | .devDependencies[\"coalesce-vue\"] = \"$COALESCE_VERSION\" ")" > package.json
 
-      - name: npm version
-        run: npm version $COALESCE_VERSION --no-git-tag-version
+    - name: npm version
+      run: npm version $COALESCE_VERSION --no-git-tag-version
 
-      - run: npm pack
+    - run: npm pack
 
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: coalesce-vue-vuetify
-          path: src/coalesce-vue-vuetify3/*.tgz
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: coalesce-vue-vuetify
+        path: src/coalesce-vue-vuetify3/*.tgz

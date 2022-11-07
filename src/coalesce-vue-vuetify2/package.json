@@ -33,6 +33,7 @@
   ],
   "scripts": {
     "build": "rollup -c --configPlugin rollup-plugin-typescript2",
+    "build-local-deps": "cd ../coalesce-vue && npm ci && npm run build",
     "test:unit": "vue-cli-service test:unit"
   },
   "dependencies": {

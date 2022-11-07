@@ -533,6 +533,16 @@ class MapToDtoVisitor extends Visitor<
     if (meta.noOffset) {
       return format(parsed, "yyyy-MM-dd'T'HH:mm:ss.SSS");
     } else {
+      if (defaultTimeZone) {
+        return format(
+          utcToZonedTime(parsed, defaultTimeZone),
+          "yyyy-MM-dd'T'HH:mm:ss.SSSXXX",
+          {
+            timeZone: defaultTimeZone,
+          }
+        );
+      }
+
       return format(parsed, "yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
     }
   }

@@ -180,4 +180,16 @@ describe("mapToDto", () => {
       studentId: 1,
     });
   });
+
+  test("for date with offset and defaultTimeZone set, serializes as defaultTimeZone", () => {
+    model.setDefaultTimeZone("America/Adak");
+
+    const mapped = model.mapToDto({
+      $metadata: $metadata.Student,
+      birthDate: new Date("2014-10-25T13:46:20+02:00"),
+    }) as any;
+
+    // Output is shifted from UTC+2 to UTC-9, a total of 11 hours (1300 hours to 0200 hours).
+    expect(mapped.birthDate).toBe("2014-10-25T02:46:20.000-09:00");
+  });
 });

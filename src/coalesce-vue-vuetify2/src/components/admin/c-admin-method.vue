@@ -108,14 +108,14 @@
             >
               <img
                 v-if="caller.result.type.indexOf('image') >= 0"
-                :src="caller.getResultObjectUrl(this)"
+                :src="caller.getResultObjectUrl(thisComponent)"
                 :alt="caller.result.name"
                 class="elevation-1"
                 style="max-width: 100%"
               />
               <video
                 v-else-if="caller.result.type.indexOf('video') >= 0"
-                :src="caller.getResultObjectUrl(this)"
+                :src="caller.getResultObjectUrl(thisComponent)"
                 :alt="caller.result.name"
                 class="elevation-1"
                 controls
@@ -165,12 +165,12 @@ import {
   ItemApiState,
 } from "coalesce-vue";
 
-const resultDisplayOptions = <DisplayOptions>{
+const resultDisplayOptions = {
   collection: {
     enumeratedItemsMax: Infinity,
     enumeratedItemsSeparator: "\n",
   },
-};
+} as DisplayOptions;
 
 export default defineComponent({
   name: "c-method",
@@ -192,6 +192,11 @@ export default defineComponent({
   },
 
   computed: {
+    // Hack for volar's lack of typing for `this` in templates.
+    thisComponent() {
+      return this;
+    },
+
     methodMeta() {
       const meta = getValueMeta(this.for, this.modelMeta);
       if (meta && "params" in meta) {

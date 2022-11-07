@@ -76,7 +76,7 @@
                 (!filter.value || filter.value.toString().indexOf(',') == -1)
               "
               :key-value="filter.value"
-              @update:key-value="(value) => setFilter(filter, value)"
+              @update:key-value="filter.onInput"
               :for="
                 filter.propMeta.role == 'primaryKey'
                   ? list.$metadata.name
@@ -91,7 +91,7 @@
             <v-select
               v-else-if="filter.propMeta && filter.propMeta.type == 'enum'"
               :value="parseValueArray(filter.value)"
-              @input="(value) => setFilter(filter, value)"
+              @input="filter.onInput"
               :items="filter.propMeta.typeDef.values"
               item-text="displayName"
               item-value="value"
@@ -105,7 +105,7 @@
             <v-combobox
               v-else-if="filter.propMeta && filter.propMeta.type == 'number'"
               :value="parseValueArray(filter.value)"
-              @input="(value) => setFilter(filter, value)"
+              @input="filter.onInput"
               :label="filter.displayName"
               clearable
               hide-details
@@ -125,7 +125,7 @@
                   ? false
                   : null
               "
-              @change="(value) => setFilter(filter, value)"
+              @change="filter.onInput"
               :label="filter.displayName"
               clearable
               hide-details
@@ -135,7 +135,7 @@
             <v-text-field
               v-else
               :value="filter.value === 'null' ? null : filter.value"
-              @input="(value) => setFilter(filter, value)"
+              @input="filter.onInput"
               :label="filter.displayName"
               outlined
               dense
@@ -176,6 +176,7 @@ interface FilterInfo {
   isNull: boolean;
   value?: any;
   propMeta?: Property;
+  onInput: (value: any) => void;
 }
 
 const filterTypes = ["string", "number", "boolean", "enum", "date"];
@@ -241,10 +242,11 @@ export default defineComponent({
           const value = filter[key];
           const propMeta = meta.props[key] ?? null;
 
-          return <FilterInfo>{
+          const filterInfo = {
             key,
             value,
             propMeta,
+            onInput: (value: any) => this.setFilter(filterInfo, value),
             isNull: value === null || value === "null",
             isDefined: key in filter,
             // Both undefined and emptystring are considered by Coalesce to be "not filtered".
@@ -254,7 +256,8 @@ export default defineComponent({
               propMeta?.role == "foreignKey"
                 ? propMeta.navigationProp?.displayName
                 : propMeta?.displayName ?? key,
-          };
+          } as FilterInfo;
+          return filterInfo;
         })
         .sort((a, b) =>
           // a.isActive != b.isActive ? (b.isActive ? 1 : -1) :

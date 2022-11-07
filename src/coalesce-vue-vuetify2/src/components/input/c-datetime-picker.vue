@@ -200,9 +200,8 @@ export default defineComponent({
       }
       if (this.dateMeta) {
         if (!this.dateMeta.noOffset) {
-
           // date is a DateTimeOffset, so TZ conversions are meaningful.
-        return getDefaultTimeZone();
+          return getDefaultTimeZone();
         } else {
           // date is a DateTime, where TZ conversions would actually be harmful. Don't use the default.
           return null;

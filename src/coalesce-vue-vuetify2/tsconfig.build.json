@@ -3,8 +3,8 @@
   "compilerOptions": {
     "declaration": true,
     "paths": {
-      "coalesce-vue": ["../coalesce-vue/dist"],
-      "coalesce-vue/*": ["../coalesce-vue/dist/*"]
+      "coalesce-vue": ["../coalesce-vue/src"],
+      "coalesce-vue/*": ["../coalesce-vue/src/*"]
     }
   },
   "include": ["src/**/*"]

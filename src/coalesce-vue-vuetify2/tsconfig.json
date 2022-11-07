@@ -12,28 +12,22 @@
     "sourceMap": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": [ "src/*" ],
-      "coalesce-vue": [ "../coalesce-vue/src" ],
-      "coalesce-vue/*": [ "../coalesce-vue/src/*" ],
-      "vue": [ "node_modules/vue" ],
-      "vue/*": [ "node_modules/vue/*" ],
+      "@/*": ["src/*"],
+      "coalesce-vue": ["../coalesce-vue/src"],
+      "coalesce-vue/*": ["../coalesce-vue/src/*"],
+      "vue": ["node_modules/vue"],
+      "vue/*": ["node_modules/vue/*"]
     },
-    "lib": [
-      "esnext",
-      "dom",
-      "dom.iterable",
-      "scripthost"
-    ],
+    "lib": ["esnext", "dom", "dom.iterable", "scripthost"],
     "types": ["node", "vuetify"]
   },
   "include": [
+    "rollup.config.ts",
     "src/**/*.ts",
     "src/**/*.tsx",
     "src/**/*.vue",
     "tests/**/*.ts",
     "tests/**/*.tsx"
   ],
-  "exclude": [
-    "node_modules"
-  ]
+  "exclude": ["node_modules"]
 }

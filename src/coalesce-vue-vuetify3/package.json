@@ -21,8 +21,7 @@
   ],
   "scripts": {
     "build": "vue-tsc --noEmit && vite build && npm run buildts",
-    "buildts": "tsc ./src/build.ts --declaration --outDir ./dist",
-    "build-local-deps": "cd ../coalesce-vue && npm ci && npm run build"
+    "buildts": "tsc ./src/build.ts --declaration --outDir ./dist"
   },
   "dependencies": {
     "date-fns": "^2.28.0",

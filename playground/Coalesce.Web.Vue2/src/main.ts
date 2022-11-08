@@ -78,9 +78,9 @@ new Vue({
         },
         themes: {
           light: {
-            // primary: "#9ccc6f",
-            // secondary: "#4d97bc",
-            // accent: "#e98f07",
+            primary: '#9ccc6f',
+            secondary: '#4d97bc',
+            accent: '#074a7d',
             error: '#df323b', // This is the default error color with darken-1
           }
         }

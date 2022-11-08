@@ -175,6 +175,7 @@ Gets or sets the default time zone used by Coalesce. The time zone should be an 
 The time zone provided here is used in the following ways:
 - It will be used as `DisplayOptions.format.timeZone` if no other value was provided for this option. This is used by functions [modelDisplay](#member-modeldisplay), [propDisplay](#member-propdisplay), and [valueDisplay](#member-valuedisplay), as well as the [c-display](/stacks/vue/coalesce-vue-vuetify/components/c-display.md) component.
 - It will be used by [c-datetime-picker](/stacks/vue/coalesce-vue-vuetify/components/c-datetime-picker.md), used to both interpret the user input and display the selected date. This can also be set on individual component usages via the `timeZone` prop.
+- It will be used when serializing DateTimeOffset fields into JSON DTOs, representing the ISO 8601 date string in the specified time zone rather than in the user's computer's system time zone.
 
 <Prop def="getDefaultTimeZone(): string | null" lang="ts" />
 

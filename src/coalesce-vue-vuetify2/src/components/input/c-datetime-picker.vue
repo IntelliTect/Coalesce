@@ -1,6 +1,7 @@
 <template>
   <v-text-field
     v-if="native"
+    class="c-datetime-picker"
     :type="
       internalDateKind == 'time'
         ? 'time'
@@ -27,9 +28,11 @@
     offset-x
     :disabled="isDisabled"
     min-width="290px"
+    content-class="c-datetime-picker--menu"
   >
     <template #activator="{ on }">
       <v-text-field
+        class="c-datetime-picker"
         v-on="inputBindListeners(on)"
         v-bind="inputBindAttrs"
         :value="displayedValue"
@@ -45,7 +48,7 @@
       ></v-text-field>
     </template>
 
-    <div v-if="menu && interactive">
+    <div v-if="!sideBySide && menu && interactive">
       <v-tabs
         v-model="selectedTab"
         grow
@@ -62,31 +65,96 @@
       </v-tabs>
 
       <v-tabs-items v-model="selectedTab">
-        <v-tab-item key="date" v-if="showDate">
+        <v-tab-item key="date" v-if="showDate" eager>
           <v-date-picker
             color="secondary"
             :value="datePart"
             scrollable
-            actions
-            style="padding-bottom: 18px"
+            :allowed-dates="$attrs.allowedDates || $attrs['allowed-dates']"
             @input="dateChanged"
           ></v-date-picker>
         </v-tab-item>
-        <v-tab-item key="time" v-if="showTime">
+        <v-tab-item key="time" v-if="showTime" eager>
           <v-time-picker
             color="secondary"
             ampm-in-title
             :value="timePart"
             scrollable
             format="ampm"
-            actions
+            :allowed-minutes="
+              $attrs.allowedMinutes || $attrs['allowed-minutes']
+            "
+            :allowed-hours="$attrs.allowedHours || $attrs['allowed-hours']"
             @input="timeChanged"
           ></v-time-picker>
         </v-tab-item>
       </v-tabs-items>
     </div>
+
+    <div v-else-if="sideBySide && menu && interactive" class="d-flex">
+      <v-date-picker
+        color="secondary"
+        :value="datePart"
+        scrollable
+        :allowed-dates="$attrs.allowedDates || $attrs['allowed-dates']"
+        @input="dateChanged"
+      ></v-date-picker>
+      <v-time-picker
+        color="secondary"
+        ampm-in-title
+        :value="timePart"
+        scrollable
+        format="ampm"
+        :allowed-minutes="$attrs.allowedMinutes || $attrs['allowed-minutes']"
+        :allowed-hours="$attrs.allowedHours || $attrs['allowed-hours']"
+        @input="timeChanged"
+      ></v-time-picker>
+    </div>
   </v-menu>
 </template>
+
+<style lang="scss">
+.c-datetime-picker--menu {
+  .v-picker {
+    // Remove the border radius. It looks bad since the header is not at the top of a card.
+    border-radius: 0;
+  }
+  .v-picker--date {
+    padding-bottom: 10px;
+  }
+  .v-picker--time .v-picker__title {
+    // Make the height of the clock header match the calendar (normally its a bit taller)
+    padding-top: 9px;
+    padding-bottom: 9px;
+  }
+
+  .v-time-picker-title__ampm {
+    // Make these look more like the material3 spec,
+    // which is WAY more intuitive than the default vuetify2 appearance.
+    position: relative;
+    margin-bottom: 2px;
+    margin-left: 12px;
+
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 4px;
+
+    .v-picker__title__btn {
+      border-radius: 4px;
+      &:first-child {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+        border-radius: 4px 4px 0 0;
+      }
+      &:last-child {
+        border-radius: 0 0 4px 4px;
+      }
+      &.v-picker__title__btn--active {
+        background: rgba(0, 0, 0, 0.25);
+      }
+      padding: 8px;
+    }
+  }
+}
+</style>
 
 <script lang="ts">
 /*
@@ -138,6 +206,9 @@ export default defineComponent({
     /** Use native HTML5 date picker rather than Vuetify. */
     native: { type: Boolean, default: false },
     timeZone: { type: String, required: false },
+    /** Show the calendar and clock side by side in the picker menu. */
+    sideBySide: { type: Boolean, default: false },
+    // TODO: Formally support allowed-minutes/hours/dates (need to handle them on the text input)
   },
 
   inject: {

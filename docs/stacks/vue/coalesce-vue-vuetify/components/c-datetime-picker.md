@@ -67,6 +67,10 @@ If this fails, the date will be parsed with the [Date constructor](https://devel
 
 True if a native HTML5 input should be used instead of a popup menu with Vuetify date/time pickers inside of it.
 
+<Prop def="sideBySide?: boolean" lang="ts" />
+
+True if the calendar and clock should be shown side by side in the picker menu, rather than in separate tabs.
+
 <Prop def="readonly?: boolean" lang="ts" />
 
 True if the component should be read-only.
@@ -75,5 +79,4 @@ True if the component should be read-only.
 
 True if the component should be disabled.
 
-## Slots
 

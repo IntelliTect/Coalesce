@@ -54,7 +54,7 @@ public class Employee
 
 ### [Create]
 
-Controls permissions for deletion of an object of the targeted type through the API.
+Controls permissions for creation of an object of the targeted type through the API.
 
 #### Example Usage
 ``` c#

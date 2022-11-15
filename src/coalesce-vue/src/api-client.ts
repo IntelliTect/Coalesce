@@ -125,6 +125,9 @@ export interface ListParameters extends FilterParameters {
   /** The number of items per page to request. */
   pageSize?: number | null;
 
+  /** If true, a total count of items will not be determined. `pageCount` and `totalCount` will be returned as -1. */
+  noCount?: boolean | null;
+
   /**
    * The name of a field to order the results by.
    *  If this and `orderByDescending` are blank, default ordering determined by the server will be used.
@@ -147,6 +150,7 @@ export class ListParameters extends FilterParameters {
     super();
     this.page = 1;
     this.pageSize = 10;
+    this.noCount = null;
     this.orderBy = null;
     this.orderByDescending = null;
     this.fields = null;
@@ -176,6 +180,7 @@ export function mapParamsToDto(parameters?: StandardParameters) {
     "search",
     "page",
     "pageSize",
+    "noCount",
     "orderBy",
     "orderByDescending",
   ] as const;
@@ -230,6 +235,11 @@ export function mapParamsToDto(parameters?: StandardParameters) {
   return paramsObject;
 }
 
+const dummyValue = {
+  role: "value",
+  displayName: "",
+} as const;
+
 /**
  * Maps the given flat object of key-value pairs into an API parameters object.
  * @param dto The flat object to map.
@@ -246,8 +256,24 @@ export function mapQueryToParams<T extends StandardParameters>(
   const parameters = new parametersType();
 
   if (parameters instanceof ListParameters) {
-    if ("page" in dto) parameters.page = +dto.page;
-    if ("pageSize" in dto) parameters.pageSize = +dto.pageSize;
+    if ("page" in dto)
+      parameters.page = parseValue(dto.page, {
+        type: "number",
+        name: "page",
+        ...dummyValue,
+      });
+    if ("pageSize" in dto)
+      parameters.pageSize = parseValue(dto.pageSize, {
+        type: "number",
+        name: "pageSize",
+        ...dummyValue,
+      });
+    if ("noCount" in dto)
+      parameters.noCount = parseValue(dto.noCount, {
+        type: "boolean",
+        name: "noCount",
+        ...dummyValue,
+      });
     if ("orderBy" in dto) parameters.orderBy = dto.orderBy;
     if ("orderByDescending" in dto)
       parameters.orderByDescending = dto.orderByDescending;

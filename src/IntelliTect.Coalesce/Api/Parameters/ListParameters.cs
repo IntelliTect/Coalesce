@@ -15,6 +15,9 @@ namespace IntelliTect.Coalesce.Api
         public int? PageSize { get; set; }
 
         /// <inheritdoc />
+        public bool? NoCount { get; set; }
+
+        /// <inheritdoc />
         public string? OrderBy { get; set; }
 
         /// <inheritdoc />

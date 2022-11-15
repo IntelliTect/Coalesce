@@ -23,6 +23,9 @@ import type {
   ModelType,
   BinaryValue,
   UnknownValue,
+  BooleanValue,
+  NumberValue,
+  StringValue,
 } from "./metadata.js";
 import { resolvePropMeta } from "./metadata.js";
 import {
@@ -120,22 +123,9 @@ function parseError(
  * Values that cannot be converted will throw an error.
  */
 export function parseValue(value: null | undefined, meta: Value): null;
-export function parseValue(
-  value: any,
-  meta: PrimitiveValue
-): null | string | number | boolean;
-export function parseValue(
-  value: any,
-  meta: PrimitiveValue & { type: "string" }
-): null | string;
-export function parseValue(
-  value: any,
-  meta: PrimitiveValue & { type: "number" }
-): null | number;
-export function parseValue(
-  value: any,
-  meta: PrimitiveValue & { type: "boolean" }
-): null | boolean;
+export function parseValue(value: any, meta: StringValue): null | string;
+export function parseValue(value: any, meta: NumberValue): null | number;
+export function parseValue(value: any, meta: BooleanValue): null | boolean;
 export function parseValue(value: any, meta: EnumValue): null | number;
 export function parseValue(value: any, meta: DateValue): null | Date;
 export function parseValue(value: any, meta: FileValue): null | Blob | File;
@@ -145,6 +135,10 @@ export function parseValue(
 ): null | Uint8Array | string;
 export function parseValue(value: any, meta: ModelValue): null | object;
 export function parseValue(value: any, meta: ObjectValue): null | object;
+export function parseValue(
+  value: any,
+  meta: PrimitiveValue
+): null | string | number | boolean;
 export function parseValue(value: any, meta: UnknownValue): null | unknown;
 export function parseValue(value: any[], meta: CollectionValue): Array<any>;
 export function parseValue(

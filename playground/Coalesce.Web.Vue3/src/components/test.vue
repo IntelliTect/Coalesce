@@ -138,6 +138,8 @@ export default class Test extends Base {
   }
 
   async created() {
+    this.personList.$params.noCount = true;
+
     await this.caseVm.$load(16);
     //await this.caseVm.downloadImage(),
     this.caseVm.$startAutoSave(this);

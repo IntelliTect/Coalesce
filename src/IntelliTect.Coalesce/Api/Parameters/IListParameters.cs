@@ -18,6 +18,11 @@ namespace IntelliTect.Coalesce
         int? PageSize { get; }
 
         /// <summary>
+        /// If true, a total count of items will not be determined. `pageCount` and `totalCount` will be returned as -1.
+        /// </summary>
+        bool? NoCount { get; }
+
+        /// <summary>
         /// A comma-delimited list of field names to sort by.
         /// Each field name may be followed by "ASC" or "DESC" (case insensitive), specifying direction.
         /// </summary>

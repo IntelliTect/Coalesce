@@ -82,6 +82,11 @@ namespace IntelliTect.Coalesce
 
         public override Task<int> GetListTotalCountAsync(IQueryable<T> query, IFilterParameters parameters)
         {
+            if (parameters is IListParameters lp && lp.NoCount == true)
+            {
+                return Task.FromResult(-1);
+            }
+
             var canUseAsync = CanEvalQueryAsynchronously(query);
             return canUseAsync ? query.CountAsync(GetEffectiveCancellationToken(parameters)) : Task.FromResult(query.Count());
         }

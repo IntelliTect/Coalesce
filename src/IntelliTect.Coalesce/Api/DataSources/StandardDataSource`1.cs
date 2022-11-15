@@ -125,6 +125,11 @@ namespace IntelliTect.Coalesce
         /// <returns>The total count of items represented by the query.</returns>
         public virtual Task<int> GetListTotalCountAsync(IQueryable<T> query, IFilterParameters parameters)
         {
+            if (parameters is IListParameters lp && lp.NoCount == true)
+            {
+                return Task.FromResult(-1);
+            }
+
             return Task.FromResult(query.Count());
         }
 

@@ -97,8 +97,8 @@ jobs:
         dotnet-version: | 
           2.2.x
           3.1.x
-          5.0.x
           6.0.x
+          7.0.x
 
     - run: dotnet restore
     - run: dotnet build --no-restore --configuration Release
@@ -129,6 +129,7 @@ jobs:
         dotnet-version: | 
           3.1.x
           6.0.x
+          7.0.x
 
     - run: npm ci
     - run: npx gulp coalesce
@@ -148,7 +149,9 @@ jobs:
 
     - uses: actions/setup-dotnet@v2
       with:
-        dotnet-version: 6.0.x
+        dotnet-version: | 
+          6.0.x
+          7.0.x
 
     - run: npm ci
       working-directory: src/coalesce-vue
@@ -172,7 +175,7 @@ jobs:
 
     - uses: actions/setup-dotnet@v2
       with:
-        dotnet-version: 6.0.x
+        dotnet-version: 7.0.x
 
     - run: npm ci
       working-directory: src/coalesce-vue

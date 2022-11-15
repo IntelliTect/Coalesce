@@ -9,7 +9,7 @@
       dotnet ef database update - -framework netcoreapp2.1 
       (no space between the dashes; space is there because double dash is illegal in XML comments).
     -->
-    <TargetFrameworks>netcoreapp3.1;net6.0</TargetFrameworks>
+    <TargetFrameworks>netcoreapp3.1;net6.0;net7.0</TargetFrameworks>
     <IsPackable>false</IsPackable>
     <Nullable>enable</Nullable>
   </PropertyGroup>
@@ -30,6 +30,12 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.*" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.*" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="6.0.*" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net7.0' ">
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.*" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.*" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="7.0.*" />
   </ItemGroup>
 
   <ItemGroup>

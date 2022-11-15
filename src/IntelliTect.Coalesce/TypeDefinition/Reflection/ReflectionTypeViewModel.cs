@@ -110,7 +110,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public override bool IsVoid => Info == typeof(void);
 
-        private IReadOnlyList<EnumMember> _enumValues;
+        private IReadOnlyList<EnumMember>? _enumValues;
         public override IReadOnlyList<EnumMember> EnumValues
         {
             get

@@ -52,7 +52,7 @@ namespace IntelliTect.Coalesce
                                 }
 
                                 // Browser document request always include text/html as the very first Accept header value.
-                                if (context.Request.Headers.Accept.Any(s => s.StartsWith("text/html")))
+                                if (context.Request.Headers.Accept.Any(s => s?.StartsWith("text/html") == true))
                                 {
                                     // Don't try and serve the SPA fallback route if the server hasn't started,
                                     // since it won't have written index.html to disk yet.

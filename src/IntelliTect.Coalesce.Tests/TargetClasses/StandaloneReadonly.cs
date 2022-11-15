@@ -24,23 +24,23 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses
         public string Description { get; set; } = "";
 
         [Coalesce]
-        public async Task<ItemResult<int>> InstanceMethod(
+        public Task<ItemResult<int>> InstanceMethod(
             [Inject] WeatherService weather,
             [Inject] AppDbContext explicitDbInjection,
             AppDbContext implicitDbInjection
         )
         {
-            return 42;
+            return Task.FromResult(new ItemResult<int>(42));
         }
 
         [Coalesce]
-        public static async Task<ItemResult<int>> StaticMethod(
+        public static Task<ItemResult<int>> StaticMethod(
             [Inject] WeatherService weather,
             [Inject] AppDbContext explicitDbInjection,
             AppDbContext implicitDbInjection
         )
         {
-            return 42;
+            return Task.FromResult(new ItemResult<int>(42));
         }
 
         public class DefaultSource : StandardDataSource<StandaloneReadonly>

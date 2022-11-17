@@ -451,6 +451,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
                 if (IsPrimaryKey)
                 {
+                    if (Type.IsEnum) return DatabaseGeneratedOption.None;
+
                     return DatabaseGeneratedOption.Identity;
                 }
 

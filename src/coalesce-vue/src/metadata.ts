@@ -347,7 +347,7 @@ export interface UnknownValue extends ValueMeta<"unknown"> {
 
 /** Represents the usage of an enum */
 export interface EnumValue extends ValueMetaWithTypeDef<"enum", EnumType> {
-  readonly role: "value";
+  readonly role: "value" | "foreignKey" | "primaryKey";
   readonly rules?: Rules;
 }
 
@@ -418,13 +418,13 @@ export type PrimitiveProperty = PropertyBase &
 
 /** Represents a property that serves as a primary key */
 export type PrimaryKeyProperty = PropertyBase &
-  (StringValue | NumberValue) & {
+  (StringValue | NumberValue | EnumValue) & {
     readonly role: "primaryKey";
   };
 
 /** Represents a property that serves as a foreign key */
 export type ForeignKeyProperty = PropertyBase &
-  (StringValue | NumberValue) & {
+  (StringValue | NumberValue | EnumValue) & {
     readonly role: "foreignKey";
     readonly principalKey: PrimaryKeyProperty;
     readonly principalType: ModelType;
@@ -435,7 +435,10 @@ export type ForeignKeyProperty = PropertyBase &
 export interface DateProperty extends PropertyBase, DateValue {}
 
 /** Represents an enum property */
-export interface EnumProperty extends PropertyBase, EnumValue {}
+export type EnumProperty = PropertyBase &
+  EnumValue & {
+    readonly role: "value";
+  };
 
 /** Represents an object property */
 export interface ObjectProperty extends PropertyBase, ObjectValue {}

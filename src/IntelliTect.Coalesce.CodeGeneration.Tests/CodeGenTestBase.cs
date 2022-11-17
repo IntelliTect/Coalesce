@@ -39,7 +39,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Tests
 
             var suiteName = suite.GetType().Name;
 
-            var tfmAttr = Assembly.GetEntryAssembly().GetCustomAttribute<TargetFrameworkAttribute>();
+            var tfmAttr = Assembly.GetExecutingAssembly().GetCustomAttribute<TargetFrameworkAttribute>();
 
             suite = suite
                 .WithOutputPath(Path.Combine(project.FullName, "out", tfmAttr.FrameworkName, suiteName));

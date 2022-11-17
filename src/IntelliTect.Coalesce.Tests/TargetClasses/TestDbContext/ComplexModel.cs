@@ -22,6 +22,9 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         public int SingleTestId { get; set; }
         public Test SingleTest { get; set; }
 
+        public EnumPkId EnumPkId { get; set; }
+        public EnumPk EnumPk { get; set; }
+
         [Search]
         public DateTimeOffset DateTimeOffset { get; set; }
 

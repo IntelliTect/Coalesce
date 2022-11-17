@@ -21,6 +21,8 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
 
         public DbSet<AbstractModel> AbstractModels { get; set; }
 
+        public DbSet<EnumPk> EnumPks { get; set; }
+
         public AppDbContext() : this(Guid.NewGuid().ToString()) { }
 
         public AppDbContext(string memoryDatabaseName)

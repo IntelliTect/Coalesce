@@ -144,7 +144,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// True if the type is supported by Coalesce as a key type.
         /// </summary>
-        public bool IsValidKeyType => IsString || IsIntegral || IsGuid;
+        public bool IsValidKeyType => IsString || IsIntegral || IsEnum || IsGuid;
 
         /// <summary>
         /// Best approximation of a TypeScript type definition for the type.

@@ -423,6 +423,12 @@ namespace IntelliTect.Coalesce
                         {
                             return null;
                         }
+
+                        if (!prop.IsDbMapped && prop.Parent.IsDbMappedType)
+                        {
+                            // Unmapped property on a db mapped type. Won't translate to SQL.
+                            return null;
+                        }
                     }
 
                     if (prop == null)

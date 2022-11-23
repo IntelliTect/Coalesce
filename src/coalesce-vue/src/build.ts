@@ -7,6 +7,7 @@ import { existsSync } from "node:fs";
 import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { spawn } from "node:child_process";
 import { TLSSocket } from "node:tls";
+import type { AddressInfo, Server } from "node:net";
 
 import type * as https from "https";
 
@@ -36,6 +37,11 @@ export interface AspNetCoreHmrPluginOptions {
    * local development app instance from a network computer, e.g. a phone or
    * tablet for mobile testing. */
   host?: string;
+
+  /** If true (default), some code will be injected during development
+   * that attempts to detect and suggest fixes for common browser configuration issues.
+   */
+  offerConfigurationSuggestions?: boolean;
 }
 
 /**
@@ -51,6 +57,7 @@ export function createAspNetCoreHmrPlugin({
   assetBypass = true,
   writeIndexHtmlToDisk = true,
   host: configuredHost,
+  offerConfigurationSuggestions = true,
 }: AspNetCoreHmrPluginOptions = {}) {
   // We are passed in the PID of the parent .NET process so that when it aborts,
   // we can shut ourselves down. Otherwise the vite server will end up orphaned.
@@ -58,6 +65,7 @@ export function createAspNetCoreHmrPlugin({
   const parentPid = process.env.ASPNETCORE_VITE_PID;
   if (!parentPid) return;
 
+  let certsExportPromise: Promise<boolean> | undefined;
   const plugins = <Plugin[]>[
     {
       name: "coalesce-vite-hmr",
@@ -77,7 +85,12 @@ export function createAspNetCoreHmrPlugin({
         if (https && server.https != false) {
           const httpsOptions = (server.https ??= {}) as https.ServerOptions;
 
-          const { keyFilePath, certFilePath } = await getCertPaths();
+          const {
+            keyFilePath,
+            certFilePath,
+            certsExportPromise: certsExport,
+          } = await getCertPaths();
+          certsExportPromise = certsExport;
 
           httpsOptions.key ??= await readFile(keyFilePath);
           httpsOptions.cert ??= await readFile(certFilePath);
@@ -120,6 +133,24 @@ export function createAspNetCoreHmrPlugin({
         if (writeIndexHtmlToDisk) {
           writeHtml(server);
         }
+
+        // Wait for dotnet dev-certs to finish exporting the ssl cert.
+        // If it did export a new cert, restart the server so it can be used.
+        // We wait for the server to start listening because if we do this too soon,
+        // things blow up a little bit.
+        server.httpServer!.on("listening", () => {
+          certsExportPromise?.then((certsWereRegenerated) => {
+            if (certsWereRegenerated) {
+              console.log(
+                "dotnet dev-certs produced a different cert than the previous cached cert. Restarting the vite server..."
+              );
+              setTimeout(() => {
+                // Wait a bit of time because things explode if we do this too soon after listening starts.
+                server.restart();
+              }, 1000);
+            }
+          });
+        });
       },
 
       async handleHotUpdate(ctx) {
@@ -139,7 +170,23 @@ export function createAspNetCoreHmrPlugin({
     let base: string;
     let resolvedConfig: ResolvedConfig;
 
-    function getOrigin() {
+    function getNetworkAddresses() {
+      return Object.values(os.networkInterfaces())
+        .flatMap((nInterface) => nInterface ?? [])
+        .filter(
+          (detail) =>
+            detail &&
+            detail.address &&
+            // Node < v18
+            ((typeof detail.family === "string" && detail.family === "IPv4") ||
+              // Node >= v18
+              (typeof detail.family === "number" && detail.family === 4))
+        )
+        .map((detail) => detail.address)
+        .filter((host) => !host.includes("127.0.0.1"));
+    }
+
+    function getViteOrigin() {
       const serverConfig = resolvedConfig.server;
 
       const host =
@@ -147,6 +194,8 @@ export function createAspNetCoreHmrPlugin({
         (typeof serverConfig.host == "string" && serverConfig.host == "0.0.0.0"
           ? undefined
           : serverConfig.host) ||
+        // Cannot use the network address because it isn't a valid name for dotnet dev-certs' certs.
+        //getNetworkAddresses()[0] ||
         "localhost";
 
       return `http${serverConfig.https ? "s" : ""}://${host}:${port}`;
@@ -165,7 +214,7 @@ export function createAspNetCoreHmrPlugin({
         // Insert the hostname of the vite server at the start of the relative path
         // so that the request will go directly to the vite server
         // rather than having to traverse the aspnetcore server proxy first.
-        s.appendLeft(match.index + match[1].length, getOrigin());
+        s.appendLeft(match.index + match[1].length, getViteOrigin());
       }
 
       return s;
@@ -186,6 +235,96 @@ export function createAspNetCoreHmrPlugin({
         base = config.base;
       },
 
+      transformIndexHtml(html) {
+        // Inject code that will detect some network config issues
+        if (!offerConfigurationSuggestions) return [];
+
+        const escapeHTML = (str: string) =>
+          str.replace(
+            /[&<>'"\\/]/g,
+            (tag) =>
+              ({
+                "&": "&amp;",
+                "<": "&lt;",
+                ">": "&gt;",
+                "'": "&#39;",
+                '"': "&quot;",
+                "\\": "&#92;",
+                "/": "&#47;",
+              }[tag]!)
+          );
+
+        return [
+          {
+            tag: "script",
+            children: `
+    // This code injected by coalesce-vue's createAspNetCoreHmrPlugin.
+    // It can be disabled with setting 'offerConfigurationSuggestions: false'.
+    // Detect if requests to the vite server are failing, and offer suggestions.
+    
+    if ("${getViteOrigin()}" == window.location.origin) {
+      alert("Coalesce/Vite: You seem to be hitting the vite server directly, rather than the ASP.NET Core server. API calls probably won't work. If you're were only hitting this URL to add a TLS exception, disregard and just close this tab.")
+    }
+
+    fetch("${getViteOrigin()}${base}", {
+      method: 'HEAD',
+      cache: 'no-cache',
+    }).catch((e) => {
+      // The only reason that fetch throws is because of network errors,
+      // so no need to look carefully at the message.
+
+      var messages = [];
+      if (window.location.protocol == "https:") {
+        if (navigator.userAgent?.includes("Firefox") && !navigator.userAgent?.includes("Mobile")) {
+          messages.push(\`This might be a <b>Firefox-specific</b> TLS error. Firefox does not use the system cert store by default. To resolve this, navigate to <code>about:config</code> and enable setting 
+          '<code>security.enterprise_roots.enabled</code>' 
+          (<a href="https://learn.microsoft.com/en-us/aspnet/core/security/enforcing-ssl?view=aspnetcore-7.0&tabs=visual-studio#configure-trust-of-https-certificate-using-firefox-browser">MS Docs</a>).\`)
+        }
+      
+        messages.push(\`The TLS certificate of <code>${
+          new URL(getViteOrigin()).host
+        }</code> might not be trusted. Open <a href="${getViteOrigin()}${base}" target=_blank>this link</a> in a new tab and add an additional certificate exception if prompted. This is especially useful if this browser is on a different device than the dev server.\`)
+      }
+
+      const isSameHostname = "${
+        new URL(getViteOrigin()).hostname
+      }" == window.location.hostname;
+      messages[!isSameHostname ? 'unshift' : 'push'](\`If the dev server is not routable from this browser using URL <code>${getViteOrigin()}</code>, pass either: <ul><li>  <code>{host: 'network-hostname-or-ip-of-dev-server'}</code> (better)</li> <li> <code>{assetBypass: false}</code> (slower)</li></ul> to <code>createAspNetCoreHmrPlugin()</code> in vite.config.ts. Don't commit this change because it will break other developers.\`)
+
+      messages.push("You launched locally without <code>UseViteDevelopmentServer()</code>, or didn't build for production before deploying, and are therefore operating off a stale <code>${escapeHTML(
+        path.join(getHtmlTargetDir(resolvedConfig), "index.html")
+      )}</code> file. Or, the vite server crashed.")
+
+      document.body.insertAdjacentHTML("beforeend", \`
+      <div style="height: 100vh;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        background: #333;"
+      >
+      <div style="
+        margin: 30px auto;
+        max-width: 700px;
+        font-family: sans-serif;
+        padding: 16px;
+        font-size: 16px;
+        background: #680b0b;
+        z-index: 10000;
+        color: #cfcfcf;"
+      >
+        <b>Coalesce/Vite</b>: Requests to the Vite server (${getViteOrigin()}) are failing due to network errors. 
+        <br>
+        <br>
+        Consider the following potential solutions:
+        <ol>\${messages.map(m => '<li style="padding-bottom: 16px">' + m + '</li>').join('')}</ol>
+        </div></div>\`)
+    })
+          `,
+          },
+        ];
+      },
+
       configureServer(server) {
         // Transform imports in index.html to go to the HMR server instead of the aspnetcore server.
         // Ideally we'd do this in the transformIndexHtml hook, but cant because of
@@ -194,8 +333,10 @@ export function createAspNetCoreHmrPlugin({
         // transformIndexHtml before coalesce-vite-hmr attempts to read from it.
         const original = server.transformIndexHtml;
         server.transformIndexHtml = async function (...args) {
-          const res = await original.apply(this, args);
-          return transformCode(res)?.toString() ?? res;
+          let res = await original.apply(this, args);
+          res = transformCode(res)?.toString() ?? res;
+
+          return res;
         };
 
         // Transform assets (fonts, mainly) to go to the HMR server instead of the aspnetcore server.
@@ -205,7 +346,7 @@ export function createAspNetCoreHmrPlugin({
           // Static assets are normally loaded relative to the browser's origin
           // since they're often originating from things like font rules in <style> tags.
           // This will repoint them at the HMR server.
-          server.config.server.origin = getOrigin();
+          server.config.server.origin = getViteOrigin();
         });
       },
     });
@@ -268,20 +409,27 @@ export function createAspNetCoreHmrPlugin({
 /** Write the index.html file to the server's web root so that it can be
  * picked up normally as the fallback file during development in the same
  * way that happens in production. */
+function getHtmlTargetDir(config: ResolvedConfig) {
+  return path.join(config.root, config.build.outDir);
+}
 async function writeHtml(server: ViteDevServer) {
-  const filename = server.config.root + "/index.html";
-  if (existsSync(filename)) {
-    let html = await readFile(filename, "utf-8");
-    html = await server.transformIndexHtml("/index.html", html, "/");
+  const htmlSourceFileName = server.config.root + "/index.html";
+  if (existsSync(htmlSourceFileName)) {
+    let outputHtml = await readFile(htmlSourceFileName, "utf-8");
+    outputHtml = await server.transformIndexHtml(
+      "/index.html",
+      outputHtml,
+      "/"
+    );
 
-    const targetDir = path.join(server.config.root, server.config.build.outDir);
+    const targetDir = getHtmlTargetDir(server.config);
 
     try {
       if (!existsSync(targetDir)) {
         await mkdir(targetDir);
       }
 
-      await writeFile(path.join(targetDir, "index.html"), html, "utf-8");
+      await writeFile(path.join(targetDir, "index.html"), outputHtml, "utf-8");
       server.config.logger.info(`  Coalesce: Wrote index.html to ${targetDir}`);
     } catch (e) {
       server.config.logger.error(
@@ -374,14 +522,18 @@ export async function getCertPaths(certName?: string) {
   const keyFilePath = path.join(baseFolder, `${certificateName}.key`);
 
   let valid = existsSync(certFilePath) && existsSync(keyFilePath);
+  let certContent;
 
   if (valid) {
+    certContent = await readFile(certFilePath);
+
     // The certs exist. Check that they're not expired.
+    // This is very fast, on the order of ~10ms.
 
     // Passing null to TLSSocket here doesn't seem to cause any errors.
     // Since we're not actually communicating over the socket, no reason to provide a real stream.
     const socket = new TLSSocket(null as any, {
-      cert: await readFile(certFilePath),
+      cert: certContent,
     });
     const cert = socket.getCertificate();
     socket.destroy();
@@ -399,8 +551,11 @@ export async function getCertPaths(certName?: string) {
     }
   }
 
-  if (!valid) {
-    console.log("Launching dotnet dev-certs to generate local certs");
+  const certsExportPromise = (async () => {
+    // console.log("Launching dotnet dev-certs to get fresh copy of local cert");
+    const start = new Date();
+    const oldContent = certContent;
+
     await new Promise((resolve) => {
       const proc = spawn(
         "dotnet",
@@ -425,6 +580,33 @@ export async function getCertPaths(certName?: string) {
         }
       });
     });
+    // console.log("dotnet dev-certs completed in %dms", new Date().valueOf() - start.valueOf())
+
+    const newContent = await readFile(certFilePath);
+    if (!oldContent?.equals(newContent)) {
+      // Signal that we produced a new cert
+      return true;
+    } else {
+      // Signal that the existing cert was OK.
+      return false;
+    }
+  })();
+
+  if (valid) {
+    // The existing stored certs are /suspected/ to be valid, but aren't guaranteed,
+    // since their trust chain may be broken if the dotnet dev cert has since been regenerated.
+    // Unfortunately, since the cert is stored in the windows store, we can't easily validate it here,
+    // so instead, we'll always run dotnet dev-certs to re-export the cert, but do so in the background
+    // so that in the 99% case, we don't have to wait for it.
+
+    // console.log("tentatively using existing saved ssl cert")
+    return {
+      certFilePath,
+      keyFilePath,
+      certsExportPromise,
+    };
+  } else {
+    await certsExportPromise;
   }
 
   return {

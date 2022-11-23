@@ -30,7 +30,7 @@ You are responsible for the interesting parts of your application:
 Coalesce builds the part of your application that are mundane and
 monotonous to build:
 
-- Client side [TypeScript ViewModels](/stacks/disambiguation/view-model.md) for either [Vue](https://vuejs.org/) or [Knockout](https://knockoutjs.com/) that mirror your data model for both [lists](/stacks/disambiguation/list-view-model.md) and [individual objects](/stacks/disambiguation/view-model.md). Utilize these to rapidly build out your applications various pages.
+- Client side [TypeScript ViewModels](/stacks/disambiguation/view-model.md) for either [Vue](https://vuejs.org/) or [Knockout](https://knockoutjs.com/) that mirror your data model for both [lists](/stacks/disambiguation/list-view-model.md) and [individual objects](/stacks/disambiguation/view-model.md). Utilize these to rapidly build out your application's various pages.
 - APIs to interact with your models via endpoints like List, Get, Save, and more.
 - Out-of-the-box [Vue Components](/stacks/vue/coalesce-vue-vuetify/overview.md) or [Knockout bindings](/stacks/ko/client/bindings.md) for common controls like dates, selecting objects via drop downs, enums, etc. Dropdowns support searching and paging automatically.
 -  A complete set of admin pages are provided, allowing you to read, create, edit, and delete data straight away without writing any additional code.

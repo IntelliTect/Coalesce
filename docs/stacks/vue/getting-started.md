@@ -109,16 +109,11 @@ These libraries provide an alternative to the default component declaration synt
 We then need to add route to this new view. In ``MyApplication.Web/src/router.ts``, add a new item to the `routes` array:
 
 ``` ts
-// At the top of the file, import the component:
-import PersonDetails from '@/views/person-details.vue';
-```
-
-``` ts
 // In the `routes` array, add the following item:
 {
   path: '/person/:id',
   name: 'person-details',
-  component: PersonDetails,
+  component: () => import('@/views/person-details.vue'),
   props: route => ({ id: +route.params.id }),
 },
 ```

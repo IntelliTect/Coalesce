@@ -74,7 +74,9 @@ namespace Coalesce.Web.Vue
             {
                 app.UseDeveloperExceptionPage();
 
-                app.UseViteDevelopmentServer();
+                app.UseViteDevelopmentServer(o => {
+                    o.DevServerPort = 64392;
+                });
             }
             else
             {

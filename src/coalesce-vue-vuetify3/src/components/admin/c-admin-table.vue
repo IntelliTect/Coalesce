@@ -3,7 +3,8 @@
     <c-admin-table-toolbar
       :list="viewModel"
       @update:editable="editable = $event"
-      :editable="canEdit ? editable : null"
+      :editable="canEdit ? editable : undefined"
+      :color="color"
     />
 
     <v-card-text class="pt-3">
@@ -90,8 +91,9 @@ export default defineComponent({
   name: "c-admin-table",
 
   props: {
-    list: { required: false, type: Object as PropType<ListViewModel> },
+    list: { required: true, type: Object as PropType<ListViewModel> },
     pageSizes: { required: false, type: Array as PropType<number[]> },
+    color: { required: false, type: String, default: null },
     queryBind: { type: Boolean, default: false },
   },
 

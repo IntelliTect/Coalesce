@@ -35,6 +35,7 @@ export default defineConfig({
       // logDiagnostics: true,
       // skipDiagnostics: false,
       // noEmitOnError: true,
+      skipDiagnostics: true,
       staticImport: true,
       compilerOptions: {
         skipLibCheck: true,

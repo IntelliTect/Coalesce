@@ -248,7 +248,9 @@ export type VueInstance = Pick<
   ): () => void;
 };
 
-export function getInternalInstance(vue: VueInstance) {
+export function getInternalInstance(vue: VueInstance): any {
+  // This returns `any` because its just kind of impossible to type correctly.
+
   // @ts-ignore vue2/vue3 compat shim.
   if ("$" in vue) return vue.$;
   // Vue2.7 doesn't have a notion of InternalInstance,

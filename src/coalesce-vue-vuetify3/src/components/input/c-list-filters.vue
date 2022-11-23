@@ -16,8 +16,9 @@
     </template>
 
     <v-card class="c-list-filters--card">
-      <v-card-title> Filters </v-card-title>
+      <v-card-title> Active Filters </v-card-title>
       <v-card-text>
+        <div v-if="!definedFilters.length" class="text-grey">No Filters</div>
         <v-row
           v-for="filter in definedFilters"
           :key="filter.key"
@@ -66,8 +67,8 @@
               </v-btn>
             </v-btn-toggle>
           </v-col>
-          <v-col>
-            <pre class="pl-5" v-if="filter.isNull">== null</pre>
+          <v-col align-self="end">
+            <pre class="pl-5 py-2" v-if="filter.isNull">== null</pre>
 
             <!-- If the filter is a foreign key, and there's zero or one value specified,
               provide a dropdown input. -->

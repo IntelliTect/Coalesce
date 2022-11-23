@@ -1,11 +1,17 @@
 <template>
   <v-container fluid class="c-admin-table-page">
-    <c-admin-table class="c-admin-table-page--table" :list="listVM" query-bind>
+    <c-admin-table
+      class="c-admin-table-page--table"
+      :list="listVM"
+      :color="color"
+      query-bind
+    >
     </c-admin-table>
 
     <c-admin-methods
       class="c-admin-table-page--methods"
       :model="listVM"
+      :color="color"
       auto-reload-model
     ></c-admin-methods>
   </v-container>
@@ -22,34 +28,29 @@ export default defineComponent({
   props: {
     ...makeMetadataProps(),
     type: { required: false, type: String, default: null },
+    color: { required: false, type: String, default: null },
     list: { required: false, type: Object as PropType<ListViewModel> },
   },
 
   setup(props) {
-    return { ...useMetadataProps(props) };
-  },
-
-  data() {
     let listVM;
-    if (this.list) {
-      listVM = this.list;
+    if (props.list) {
+      listVM = props.list;
     } else {
-      if (!this.type) {
+      if (!props.type) {
         throw Error(
           "c-admin-table-page: If prop `list` is not provided, `type` is required."
         );
-      } else if (!ListViewModel.typeLookup![this.type]) {
+      } else if (!ListViewModel.typeLookup![props.type]) {
         // TODO: Bake a `getOrThrow` into `typeLookup`.
         throw Error(
-          `No model named ${this.type} is registered to ListViewModel.typeLookup`
+          `No model named ${props.type} is registered to ListViewModel.typeLookup`
         );
       }
-      listVM = new ListViewModel.typeLookup![this.type]();
+      listVM = new ListViewModel.typeLookup![props.type]();
     }
 
-    return {
-      listVM,
-    };
+    return { listVM, ...useMetadataProps(props) };
   },
 
   computed: {

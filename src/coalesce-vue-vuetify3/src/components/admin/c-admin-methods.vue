@@ -1,6 +1,10 @@
 <template>
-  <div class="c-admin-methods" v-if="methods.length">
-    <v-toolbar class="c-admin-methods--toolbar">
+  <v-card class="c-admin-methods" v-if="methods.length">
+    <v-toolbar
+      class="c-admin-methods--toolbar"
+      density="compact"
+      :color="color"
+    >
       <v-toolbar-title style="flex: 0 1 auto"> Actions </v-toolbar-title>
 
       <v-divider class="mx-4 my-0" vertical></v-divider>
@@ -24,7 +28,7 @@
         </v-expansion-panel-text>
       </v-expansion-panel>
     </v-expansion-panels>
-  </div>
+  </v-card>
 </template>
 
 <script lang="ts">
@@ -40,6 +44,7 @@ export default defineComponent({
       required: true,
       type: Object as PropType<ViewModel<Model<ModelType>> | ListViewModel>,
     },
+    color: { required: false, type: String, default: null },
     autoReloadModel: { required: false, type: Boolean, default: false },
   },
 

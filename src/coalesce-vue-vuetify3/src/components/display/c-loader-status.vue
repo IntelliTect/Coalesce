@@ -40,6 +40,7 @@
         v-if="showLoading"
         indeterminate
         :height="height"
+        :color="color"
       >
       </v-progress-linear>
       <div key="placeholder" v-else :style="{ height: height + 'px' }"></div>
@@ -94,6 +95,7 @@ export default defineComponent({
      */
     progressPlaceholder: { required: false, type: Boolean, default: true },
     height: { required: false, type: [Number, String], default: 10 },
+    color: { required: false, type: String, default: "primary" },
   },
 
   computed: {
@@ -238,7 +240,11 @@ export default defineComponent({
     // Remove bulleting when there's only one error.
     &:only-child {
       list-style: none;
-      margin-left: -20px;
+    }
+    &:not(:only-child) {
+      // We have to manually add the margin back in for the list bullet point
+      // because some weird interaction with css grid (the vuetify3 v-alert is grid based.)
+      margin-left: 20px;
     }
   }
 }

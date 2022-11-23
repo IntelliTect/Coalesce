@@ -41,6 +41,8 @@
                 :readonly="isPropReadOnly(prop, item)"
                 label=""
                 hide-details="auto"
+                density="compact"
+                variant="outlined"
               >
                 <c-admin-display v-if="admin" :model="item" :for="prop" />
                 <c-display v-else :model="item" :for="prop" />
@@ -177,11 +179,23 @@ export default defineComponent({
     max-width: 150px;
   }
   &.c-table--editable {
+    td {
+      padding: 0px 0px !important;
+    }
     th,
     td {
-      padding: 2px 2px !important;
+      // &:not(:last-child) {
+      //   border-right: thin solid
+      //     rgba(var(--v-border-color), var(--v-border-opacity));
+      // }
+      .v-input {
+        min-width: 120px;
+      }
       .v-input__slot {
         margin-bottom: 0px;
+      }
+      .v-field__input {
+        padding: 4px 6px;
       }
       // Remove extra padding on the top of v-switch components
       // so they align nicely with other components.

@@ -38,8 +38,8 @@ const router = createRouter({
   routes: [
     { path: '/', component: () => import("@/components/HelloWorld.vue"), },
     { path: '/test', component: () => import("./components/test.vue"), },
-    { path: '/admin/:type', name: 'coalesce-admin-list', component: CAdminTablePage, props: true},
-    { path: '/admin/:type/item/:id?', name: 'coalesce-admin-item', component: CAdminEditorPage, props: true}
+    { path: '/admin/:type', name: 'coalesce-admin-list', component: CAdminTablePage, props: route => ({ ...route.params, color: 'primary' }) },
+    { path: '/admin/:type/item/:id?', name: 'coalesce-admin-item', component: CAdminEditorPage, props: route => ({ ...route.params, color: 'primary' }) }
   ]
 });
 
@@ -50,7 +50,15 @@ const vuetify = createVuetify({
     sets: { fa }
   },
   theme: {
-    
+    defaultTheme: 'light',
+    themes: {
+      light: {
+        dark: false,
+        colors: {
+          primary: '#127815',
+        }
+      }
+    }
   }
 })
 const coalesceVuetify = createCoalesceVuetify({

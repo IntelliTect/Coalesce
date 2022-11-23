@@ -1,11 +1,16 @@
 <template>
   <v-container class="c-admin-editor-page">
-    <c-admin-editor class="c-admin-editor-page--editor" :model="viewModel" />
+    <c-admin-editor
+      class="c-admin-editor-page--editor"
+      :model="viewModel"
+      :color="color"
+    />
 
     <c-admin-methods
       class="c-admin-editor-page--methods"
       :model="viewModel"
       auto-reload-model
+      :color="color"
     />
   </v-container>
 </template>
@@ -30,18 +35,19 @@ export default defineComponent({
   props: {
     type: { required: true, type: String },
     id: { required: false, type: [String, Number] },
+    color: { required: false, type: String, default: null },
   },
 
-  data() {
-    if (!ViewModel.typeLookup![this.type]) {
+  setup(props) {
+    if (!ViewModel.typeLookup![props.type]) {
       // TODO: Bake a `getOrThrow` into `typeLookup`.
       throw Error(
-        `No model named ${this.type} is registered to ViewModel.typeLookup`
+        `No model named ${props.type} is registered to ViewModel.typeLookup`
       );
     }
 
     return {
-      viewModel: new ViewModel.typeLookup![this.type](),
+      viewModel: new ViewModel.typeLookup![props.type](),
     };
   },
 

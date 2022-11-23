@@ -1,10 +1,15 @@
 <template>
-  <v-toolbar extended class="c-admin-table-toolbar">
+  <v-toolbar
+    extended
+    class="c-admin-table-toolbar"
+    density="comfortable"
+    :color="color"
+  >
     <v-toolbar-title class="c-admin-table-toolbar--model-name hidden-xs-only">
       {{ metadata.displayName }}
     </v-toolbar-title>
 
-    <v-divider class="hidden-xs-only mx-4 my-0" vertical></v-divider>
+    <v-divider class="hidden-xs-only mx-4" vertical></v-divider>
 
     <v-btn
       v-if="canCreate"
@@ -55,12 +60,11 @@
     <template v-slot:extension>
       <v-text-field
         class="c-admin-table-toolbar--search"
-        flat
-        solo-inverted
         hide-details
         prepend-inner-icon="fa fa-search"
         label="Search"
         v-model="list.$params.search"
+        density="comfortable"
         single-line
         clearable
       ></v-text-field>
@@ -100,7 +104,7 @@ export default defineComponent({
   props: {
     ...makeMetadataProps(),
     list: { required: true, type: Object as PropType<ListViewModel> },
-    color: { default: "primary", type: String },
+    color: { required: false, type: String, default: null },
     editable: { default: null, required: false, type: Boolean },
   },
 
@@ -164,6 +168,9 @@ export default defineComponent({
   // Workaround a vuetify bug where the caret will be white.
   input[type="text"] {
     caret-color: currentColor !important;
+  }
+  .v-toolbar__extension {
+    height: 47px !important;
   }
 }
 </style>

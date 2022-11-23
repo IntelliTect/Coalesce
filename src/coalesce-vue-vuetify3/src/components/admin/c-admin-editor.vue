@@ -1,6 +1,6 @@
 <template>
   <v-card class="c-admin-editor">
-    <v-toolbar class="c-admin-editor--toolbar">
+    <v-toolbar class="c-admin-editor--toolbar" density="compact" :color="color">
       <v-toolbar-title style="flex: 0 1 auto">
         <template v-if="showContent">
           <span v-if="!canEdit">View</span>
@@ -48,7 +48,7 @@
               >
                 {{ prop.displayName }}
               </v-col>
-              <v-col class="py-0" align-self="start">
+              <v-col class="py-0" align-self="start" style="flex-basis: 1px">
                 <v-row
                   no-gutters
                   style="min-height: 44px"
@@ -165,6 +165,7 @@ export default defineComponent({
       required: true,
       type: Object as PropType<Indexable<ViewModel<Model<ModelType>>>>,
     },
+    color: { required: false, type: String, default: null },
   },
 
   methods: {

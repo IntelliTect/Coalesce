@@ -5,7 +5,8 @@
       'c-select--is-menu-active': menuOpen,
     }"
     @keydown="onInputKey"
-    @keydown.native.delete.stop="!search ? onInput(null) : void 0"
+    @keydown.native.delete.stop="!menuOpen ? onInput(null) : void 0"
+    @keydown.native.backspace.stop="!menuOpen ? onInput(null) : void 0"
     v-bind="inputBindAttrs"
     :error-messages="error"
   >
@@ -13,6 +14,7 @@
       :active="!!internalModelValue || focused"
       :dirty="!!internalModelValue"
       :clearable="effectiveClearable"
+      persistent-clear
       @click:clear.stop.prevent="onInput(null)"
       append-inner-icon="$dropdown"
       v-bind="inputBindAttrs"
@@ -22,13 +24,14 @@
           var(--v-field-padding-top, 10px) + var(--v-input-padding-top, 0)
         );
         min-height: var(--v-input-control-height, 56px);
-        display: flex;
         align-items: center;
       "
     >
       <div class="v-field__input">
         <slot name="item" :item="internalModelValue">
-          <c-display :model="internalModelValue" />
+          <span style="overflow: hidden">
+            <c-display :model="internalModelValue" />
+          </span>
         </slot>
 
         <input
@@ -146,10 +149,15 @@
 .c-select {
   .v-field__field {
     align-items: center;
-    input {
-      flex-basis: 10px;
-      &:focus {
-        outline: none;
+    .v-field__input {
+      flex-wrap: nowrap;
+      input {
+        min-width: 0;
+        flex: 1 1;
+        flex-basis: 1px;
+        &:focus {
+          outline: none;
+        }
       }
     }
   }
@@ -165,11 +173,11 @@
     transform: rotate(180deg);
   }
 }
-.c-select__menu-content {
-  input {
-    padding-top: 8px;
-  }
-}
+// .c-select__menu-content {
+//   input {
+//     // padding-top: 8px;
+//   }
+// }
 </style>
 
 <script lang="ts">
@@ -503,10 +511,14 @@ export default defineComponent({
 
   methods: {
     onInput(value: Model<ModelType> | null | undefined, dontFocus = false) {
+      value = value ?? null;
+      if (value == null && !this.effectiveClearable) {
+        return;
+      }
+
       // Clear any manual errors
       this.error = [];
 
-      value = value ? value : null;
       const key = value
         ? (value as any)[this.modelObjectMeta.keyProp.name]
         : null;

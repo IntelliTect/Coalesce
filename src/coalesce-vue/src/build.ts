@@ -177,9 +177,9 @@ export function createAspNetCoreHmrPlugin({
           (detail) =>
             detail &&
             detail.address &&
-            // Node < v18
+            // @ts-ignore Node < v18
             ((typeof detail.family === "string" && detail.family === "IPv4") ||
-              // Node >= v18
+              // @ts-ignore Node >= v18
               (typeof detail.family === "number" && detail.family === 4))
         )
         .map((detail) => detail.address)
@@ -606,6 +606,7 @@ export async function getCertPaths(certName?: string) {
       certsExportPromise,
     };
   } else {
+    // We know the stored cert isn't valid. Wait for it to regenerate before we return.
     await certsExportPromise;
   }
 

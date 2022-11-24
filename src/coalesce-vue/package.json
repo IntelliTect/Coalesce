@@ -55,6 +55,7 @@
     "@vitest/coverage-c8": "0.25.3",
     "@vue/test-utils": "1.3.0",
     "cross-blob": "^1.2.1",
+    "jsdom": "^20.0.3",
     "lodash": "^4.17.15",
     "typescript": "4.9.3",
     "vite": "^3.2.4",

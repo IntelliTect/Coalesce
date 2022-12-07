@@ -1,8 +1,14 @@
 ﻿using IntelliTect.Coalesce.Helpers;
+using Microsoft.EntityFrameworkCore.Design;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using Xunit;
 
 namespace IntelliTect.Coalesce.Tests
@@ -39,5 +45,46 @@ namespace IntelliTect.Coalesce.Tests
 
             public string Field;
         }
+
+#if NET5_0_OR_GREATER
+        class NullReporter : Microsoft.EntityFrameworkCore.Design.Internal.IOperationReporter
+        {
+            public void WriteError(string message)
+            {
+            }
+
+            public void WriteInformation(string message)
+            {
+            }
+
+            public void WriteVerbose(string message)
+            {
+            }
+
+            public void WriteWarning(string message)
+            {
+            }
+        }
+
+        [Fact]
+        public void AdHoc()
+        {
+            var contextType = "AppDbContext";
+            var assembly = Assembly.GetExecutingAssembly();
+            var _contextOperations = new Microsoft.EntityFrameworkCore.Design.Internal.DbContextOperations(
+                reporter: new NullReporter(),
+                assembly: assembly,
+                startupAssembly: assembly,
+                projectDir: Environment.CurrentDirectory,
+                rootNamespace: null,
+                language: null,
+                nullable: false,
+                args: null);
+
+            using var context = _contextOperations.CreateContext(contextType);
+            var model = context.Model;
+            var relationalModel = context.Model.GetRelationalModel();
+        }
+#endif
     }
 }

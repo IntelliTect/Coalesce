@@ -7,7 +7,9 @@ using IntelliTect.Coalesce.CodeGeneration.Templating.Resolution;
 using IntelliTect.Coalesce.CodeGeneration.Utilities;
 using IntelliTect.Coalesce.TypeDefinition;
 using IntelliTect.Coalesce.Validation;
+using Microsoft.CodeAnalysis.Differencing;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
@@ -107,6 +109,75 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
                 types.Select(t => new SymbolTypeViewModel(rr, t))
             );
 
+#if NET5_0_OR_GREATER
+            ResolveEventHandler assemblyResolver = (sender, args) =>
+            {
+                var assemblyName = new AssemblyName(args.Name);
+                var allLoaded = AppDomain.CurrentDomain.GetAssemblies();
+                var alreadyLoaded = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => a.GetName().Name == assemblyName.Name);
+                if (alreadyLoaded != null)
+                {
+                    Logger.LogWarning($"Resolved {assemblyName.Name} to {alreadyLoaded.GetName().Version} ({assemblyName.Version} was requested by {genContext.DataProject.ProjectFileName})");
+                    return alreadyLoaded;
+                }
+                foreach (var extension in new[] { ".dll", ".exe" })
+                {
+                    var match = (genContext.DataProject as RoslynProjectContext).MsBuildProjectContext.CompilationAssemblies
+                        .FirstOrDefault(a => a.Name == assemblyName.Name + extension);
+                    if (match != null)
+                    {
+                        return Assembly.LoadFrom(match.ResolvedPath);
+                    }
+                }
+
+                return null;
+            };
+
+            AppDomain.CurrentDomain.AssemblyResolve += assemblyResolver;
+            try
+            {
+                foreach (var dbContext in rr.DbContexts)
+                {
+                    // WARNING: This stuff is extremely fragile and implodes on the slightest version mismatch.
+                    // It currently works if you launch a .net6 tool against a .net6 target project (e.g. coakesce-vue2.json).
+                    // We may need to: Launch a second executable of the generator, which since it will be a fresh process, won't have any EF assemblies loaded,
+                    // so we can load the Data project and all its dependencies into that fresh process,
+                    // then extract and serialize the EF model (the bits we carea bout) and send it back into the generator process.
+                    // Thought: Coalesce has roslyn in it, so create this second executable on the fly with the Data project as a dependency.
+                    // Thought: What if the data project already has an entry point? Can we just use that? How did the old EF tooling work when it used to require an entry point?
+
+
+                    // Load Microsoft.EntityFrameworkCore.Abstractions.
+                    // If we don't load our own, local copy,
+                    // then DB context construction will fail because we will have loaded our own version of .Relational
+                    // and therefore the version of .Relational and .Abstractions won't match.
+                    typeof(IndexAttribute).GetTypeInfo();
+
+                    // See efcore\src\ef\ReflectionOperationExecutor.cs
+                    var dataAsmPath = (genContext.DataProject as RoslynProjectContext).MsBuildProjectContext.AssemblyFullPath;
+                    var assembly = Assembly.LoadFrom(dataAsmPath);
+
+                    var contextOperations = new Microsoft.EntityFrameworkCore.Design.Internal.DbContextOperations(
+                        reporter: new LoggerReporter(Logger),
+                        assembly: assembly,
+                        startupAssembly: assembly,
+                        projectDir: Environment.CurrentDirectory,
+                        rootNamespace: null,
+                        language: null,
+                        nullable: false,
+                        args: null);
+
+                    using var context = contextOperations.CreateContext(dbContext.ClassViewModel.FullyQualifiedName);
+                    dbContext.Model = context.Model;
+                    // TODO: Use the Model during code gen.
+                }
+            }
+            finally
+            {
+                AppDomain.CurrentDomain.AssemblyResolve -= assemblyResolver;
+            }
+#endif
+
 
 
             var validationResult = ValidateContext.Validate(rr);
@@ -172,7 +243,9 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
                 {
                     try
                     {
-                        var projectContext = ServiceProvider.GetRequiredService<IProjectContextFactory>().CreateContext(config, restorePackages);
+                        var projectContext = ServiceProvider
+                            .GetRequiredService<IProjectContextFactory>()
+                            .CreateContext(config, restorePackages);
 
                         // Warn if the Coalesce versions referenced in the project don't
                         // match the version of the code generation being ran.

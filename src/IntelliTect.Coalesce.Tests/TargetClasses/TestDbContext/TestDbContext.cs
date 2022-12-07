@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using System;
 using System.Collections.Generic;
@@ -45,6 +46,16 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
             modelBuilder.Entity<AbstractModel>()
                 .HasDiscriminator(b => b.Discriminatior)
                 .HasValue<AbstractImpl>("impl");
+        }
+    }
+
+    public class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<AppDbContext>
+    {
+        public AppDbContext CreateDbContext(string[] args)
+        {
+            var builder = new DbContextOptionsBuilder<AppDbContext>();
+            builder.UseSqlServer("Server=(localdb)\\MSSQLLocalDB;Database=CoalesceTestDb;Trusted_Connection=True;");
+            return new AppDbContext(builder.Options);
         }
     }
 }

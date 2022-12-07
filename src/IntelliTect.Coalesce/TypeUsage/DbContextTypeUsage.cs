@@ -1,5 +1,6 @@
 ﻿using IntelliTect.Coalesce.TypeDefinition;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,6 +32,8 @@ namespace IntelliTect.Coalesce.TypeUsage
         public ClassViewModel ClassViewModel { get; }
 
         public IReadOnlyList<EntityTypeUsage> Entities { get; }
+
+        public IModel? Model { get; set; }
 
         public override bool Equals(object? obj) => obj is DbContextTypeUsage that && that.ClassViewModel.Equals(ClassViewModel);
 

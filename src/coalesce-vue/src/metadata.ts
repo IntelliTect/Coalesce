@@ -550,6 +550,9 @@ export interface MethodBase extends Metadata {
   /** True if the method is static; otherwise undefined/false */
   readonly isStatic?: boolean;
 
+  /** True if the args object should be cleared on admin pages after a successful invocation. */
+  readonly autoClear?: boolean;
+
   /** The parameters of the method */
   readonly params: { [paramName in string]: MethodParameter };
 }

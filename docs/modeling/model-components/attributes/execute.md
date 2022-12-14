@@ -36,3 +36,8 @@ Enum values are:
 - `SecurityPermissionLevels.AllowAll` Allow all users to perform the action for the attribute, including users who are not authenticated at all.
 - `SecurityPermissionLevels.AllowAuthorized` Allow only users who are members of the roles specified on the attribute to perform the action. If no roles are specified on the attribute, then all authenticated users are allowed (no anonymous access). 
 - `SecurityPermissionLevels.DenyAll` Deny the action to all users, regardless of authentication status or authorization level. If `DenyAll` is used, no API endpoint for the action will be generated.
+
+
+<Prop def="public bool AutoClear { get; set; }" />
+
+If true, the method's arguments will be cleared after a successful invocation on admin pages.

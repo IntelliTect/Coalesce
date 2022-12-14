@@ -482,6 +482,11 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                     b.Prop("isStatic", "true");
                 }
 
+                if (method.GetAttributeValue<ExecuteAttribute, bool>(e => e.AutoClear) == true)
+                {
+                    b.Prop("autoClear", "true");
+                }
+
                 using (b.Block("params:", ','))
                 {
                     foreach (var param in method.ApiParameters)

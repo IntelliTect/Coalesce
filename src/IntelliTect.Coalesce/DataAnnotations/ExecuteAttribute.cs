@@ -24,5 +24,10 @@ namespace IntelliTect.Coalesce.DataAnnotations
         {
             Roles = string.Join(",", roles);
         }
+
+        /// <summary>
+        /// If true, admin pages will clear the parameter inputs when a successful invocation is performed.
+        /// </summary>
+        public bool AutoClear { get; set; }
     }
 }

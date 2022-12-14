@@ -236,6 +236,9 @@ export default defineComponent({
       if (this.autoReloadModel) {
         await this.viewModel.$load();
       }
+      if (this.methodMeta.autoClear) {
+        this.caller.resetArgs()
+      }
     },
 
     async invokeAndDownload() {
@@ -245,6 +248,9 @@ export default defineComponent({
       if (this.autoReloadModel) {
         // Don't await. Just do this in the background while we setup the file download.
         this.viewModel.$load();
+      }
+      if (this.methodMeta.autoClear) {
+        this.caller.resetArgs()
       }
 
       this.downloadFileResult();

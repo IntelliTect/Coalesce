@@ -53,16 +53,20 @@
       <v-list-item v-bind="attrs" v-on="on">
         <v-list-item-content>
           <v-list-item-title>
-            <slot name="item" :item="item">
-              <c-display :model="item" />
+            <slot name="list-item" :item="item" :search="search">
+              <slot name="item" :item="item" :search="search">
+                <c-display :model="item" />
+              </slot>
             </slot>
           </v-list-item-title>
         </v-list-item-content>
       </v-list-item>
     </template>
     <template #selection="{ item }">
-      <slot name="item" :item="item">
-        <c-display :model="item" />
+      <slot name="selected-item" :item="item" :search="search">
+        <slot name="item" :item="item" :search="search">
+          <c-display :model="item" />
+        </slot>
       </slot>
     </template>
   </v-autocomplete>

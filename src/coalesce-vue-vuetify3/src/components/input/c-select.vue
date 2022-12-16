@@ -28,10 +28,17 @@
       "
     >
       <div class="v-field__input">
-        <slot name="item" :item="internalModelValue">
-          <span style="overflow: hidden">
-            <c-display :model="internalModelValue" />
-          </span>
+        <slot
+          v-if="internalModelValue"
+          name="selected-item"
+          :item="internalModelValue"
+          :search="search"
+        >
+          <slot name="item" :item="internalModelValue" :search="search">
+            <span style="overflow: hidden">
+              <c-display :model="internalModelValue" />
+            </span>
+          </slot>
         </slot>
 
         <input
@@ -124,8 +131,10 @@
             :active="pendingSelection == i"
           >
             <v-list-item-title>
-              <slot name="item" :item="item">
-                <c-display :model="item" />
+              <slot name="list-item" :item="item" :search="search">
+                <slot name="item" :item="item" :search="search">
+                  <c-display :model="item" />
+                </slot>
               </slot>
             </v-list-item-title>
           </v-list-item>

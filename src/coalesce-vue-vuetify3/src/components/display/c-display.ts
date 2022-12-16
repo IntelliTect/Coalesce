@@ -1,4 +1,4 @@
-import { defineComponent, Prop, h as _c, PropType } from "vue";
+import { defineComponent, Prop, h as _c, PropType, mergeProps } from "vue";
 import { ForSpec, getValueMeta } from "../c-metadata-component";
 import {
   propDisplay,
@@ -29,16 +29,24 @@ const passwordWrapper = defineComponent({
     };
   },
   render() {
-    return _c(this.element, this.$attrs, [
-      _c("i", {
-        class: [!this.shown ? "fa fa-eye" : "fa fa-eye-slash", "pr-1"],
-        role: "button",
-        pressed: this.shown,
-        title: !this.shown ? "Reveal" : "Hide",
-        onClick: () => (this.shown = !this.shown),
+    return _c(
+      this.element,
+      mergeProps(this.$attrs, {
+        class: this.shown
+          ? "c-password-display c-password-display--shown"
+          : "c-password-display c-password-display--hidden",
       }),
-      !this.shown ? "•".repeat(10) : this.value,
-    ]);
+      [
+        _c("i", {
+          class: [!this.shown ? "fa fa-eye" : "fa fa-eye-slash", "pr-1"],
+          role: "button",
+          pressed: this.shown,
+          title: !this.shown ? "Reveal" : "Hide",
+          onClick: () => (this.shown = !this.shown),
+        }),
+        !this.shown ? "•".repeat(8) : this.value,
+      ]
+    );
   },
 });
 

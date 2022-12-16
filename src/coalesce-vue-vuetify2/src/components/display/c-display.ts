@@ -34,6 +34,9 @@ const passwordWrapper = defineComponent({
       {
         attrs: { ...this.$attrs },
         on: { ...this.$listeners },
+        staticClass: this.shown
+          ? "c-password-display c-password-display--shown"
+          : "c-password-display c-password-display--hidden",
       },
       [
         _c("i", {
@@ -48,7 +51,7 @@ const passwordWrapper = defineComponent({
             click: () => (this.shown = !this.shown),
           },
         }),
-        !this.shown ? "•".repeat(10) : this.value,
+        !this.shown ? "•".repeat(8) : this.value,
       ]
     );
   },

@@ -19,7 +19,7 @@
       "vue/*": ["node_modules/vue/*"]
     },
     "lib": ["esnext", "dom", "dom.iterable", "scripthost"],
-    "types": ["node", "vuetify"]
+    "types": ["node", "vuetify", "vue-router"]
   },
   "include": [
     "rollup.config.ts",

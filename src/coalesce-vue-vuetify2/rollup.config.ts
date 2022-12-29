@@ -25,7 +25,7 @@ const sharedPlugins = (exclude: string[]) =>
       },
     }),
     {
-      // Since we point typescript at coalesce-vue/src,
+      // Since we point typescript at ../coalesce-vue/src,
       // TSC emits declaration files for coalesce-vue as well,
       // causing also our own TS declarations to be emitted into a nested folder.
       // Un-nest the ones for coalesce-vue-vuetify2, and delete the ones for coalesce-vue

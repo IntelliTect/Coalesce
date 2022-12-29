@@ -22,3 +22,33 @@ export { default as CSelectManyToMany } from "./input/c-select-many-to-many.vue"
 export { default as CSelectStringValue } from "./input/c-select-string-value.vue";
 export { default as CSelectValues } from "./input/c-select-values.vue";
 export { default as CTable } from "./display/c-table.vue";
+
+// Type definitions for Volar intellisense support:
+import "vue";
+declare module "vue" {
+  interface GlobalComponents {
+    CAdminDisplay: typeof import(".")["CAdminDisplay"];
+    CAdminEditor: typeof import(".")["CAdminEditor"];
+    CAdminEditorPage: typeof import(".")["CAdminEditorPage"];
+    CAdminMethod: typeof import(".")["CAdminMethod"];
+    CAdminMethods: typeof import(".")["CAdminMethods"];
+    CAdminTable: typeof import(".")["CAdminTable"];
+    CAdminTablePage: typeof import(".")["CAdminTablePage"];
+    CAdminTableToolbar: typeof import(".")["CAdminTableToolbar"];
+    CDatetimePicker: typeof import(".")["CDatetimePicker"];
+    CDisplay: typeof import(".")["CDisplay"];
+    CInput: typeof import(".")["CInput"];
+    CInputPropsProvider: typeof import(".")["CInputPropsProvider"];
+    CListFilters: typeof import(".")["CListFilters"];
+    CListPage: typeof import(".")["CListPage"];
+    CListPageSize: typeof import(".")["CListPageSize"];
+    CListPagination: typeof import(".")["CListPagination"];
+    CListRangeDisplay: typeof import(".")["CListRangeDisplay"];
+    CLoaderStatus: typeof import(".")["CLoaderStatus"];
+    CSelect: typeof import(".")["CSelect"];
+    CSelectManyToMany: typeof import(".")["CSelectManyToMany"];
+    CSelectStringValue: typeof import(".")["CSelectStringValue"];
+    CSelectValues: typeof import(".")["CSelectValues"];
+    CTable: typeof import(".")["CTable"];
+  }
+}

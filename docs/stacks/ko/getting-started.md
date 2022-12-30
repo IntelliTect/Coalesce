@@ -9,7 +9,7 @@ The Coalesce Knockout.js stack is deprecated and will be receiving only critical
 The quickest and easiest way to create a new Coalesce Knockout application is to use the ``dotnet new`` template. In your favorite shell:
 
 ``` sh
-dotnet new --install IntelliTect.Coalesce.KnockoutJS.Template
+dotnet new install IntelliTect.Coalesce.KnockoutJS.Template
 dotnet new coalesceko
 ```
 

@@ -21,8 +21,8 @@ Coalesce is a framework for rapid-development of ASP.NET Core web applications. 
 
 The best way to get started with Coalesce is using the `dotnet new` templates that have been created:
 
-* [Vue 2](https://github.com/IntelliTect/Coalesce.Vue.Template): `dotnet new --install IntelliTect.Coalesce.Vue.Template; dotnet new coalescevue`
-* [Knockout](https://github.com/IntelliTect/Coalesce.KnockoutJS.Template): `dotnet new --install IntelliTect.Coalesce.KnockoutJS.Template; dotnet new coalesceko`
+* [Vue 2](https://github.com/IntelliTect/Coalesce.Vue.Template): `dotnet new install IntelliTect.Coalesce.Vue.Template; dotnet new coalescevue`
+* [Knockout](https://github.com/IntelliTect/Coalesce.KnockoutJS.Template): `dotnet new install IntelliTect.Coalesce.KnockoutJS.Template; dotnet new coalesceko`
 
 This command will use the current folder name for the project names, namespaces, etc. It will create a solution in the current folder with .Data and .Web projects.
 

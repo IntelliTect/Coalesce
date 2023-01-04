@@ -32,10 +32,22 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public override bool IsStatic => Info.IsAbstract && Info.IsSealed;
 
+        private bool? _isRecord;
+        // https://stackoverflow.com/questions/64809750/how-to-check-if-type-is-a-record
+        public override bool IsRecord => _isRecord ??= Info.GetMethods().Any(m => m.Name == "<Clone>$");
+
         protected override IReadOnlyCollection<PropertyViewModel> RawProperties(ClassViewModel effectiveParent) => Info
             .GetProperties()
             .Select((p, i) => new ReflectionPropertyViewModel(effectiveParent, GetOrCreate(ReflectionRepository, p.DeclaringType!), p){ ClassFieldOrder = i })
             .Cast<PropertyViewModel>()
+            .ToList()
+            .AsReadOnly();
+
+        public override IReadOnlyCollection<MethodViewModel> Constructors => Info
+            .GetConstructors()
+            .Where(m => m.IsPublic && !m.IsSpecialName)
+            .Select(m => new ReflectionMethodViewModel(this, m))
+            .Cast<MethodViewModel>()
             .ToList()
             .AsReadOnly();
 

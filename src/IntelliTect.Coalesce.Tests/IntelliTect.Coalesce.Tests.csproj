@@ -37,6 +37,18 @@
     <EmbeddedResource Include="TargetClasses/**/*.cs" />
   </ItemGroup>
 
+  <!-- Add current preprocessor directives into an attributes 
+    so we can feed them back into roslyn when we analyze our TargetClasses. -->
+  <Target Name="AddDefinesAsAttribute" BeforeTargets="CoreGenerateAssemblyInfo" DependsOnTargets="AddImplicitDefineConstants">
+    <ItemGroup>
+      <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute" >
+        <_Parameter1>DefineConstants</_Parameter1>
+        <_Parameter2>$(DefineConstants)</_Parameter2>
+      </AssemblyAttribute>
+    </ItemGroup>
+  </Target>
+
+
   <ItemGroup>
     <None Update="xunit.runner.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

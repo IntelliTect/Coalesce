@@ -60,5 +60,15 @@ namespace Coalesce.Web.Ko.Models
             if (ShouldMapTo(nameof(BirthdayMonth))) entity.BirthdayMonth = BirthdayMonth;
             if (ShouldMapTo(nameof(EmailDomain))) entity.EmailDomain = EmailDomain;
         }
+
+        /// <summary>
+        /// Map from the current DTO instance to a new instance of the domain object.
+        /// </summary>
+        public override Coalesce.Domain.PersonCriteria MapToNew(IMappingContext context)
+        {
+            var entity = new Coalesce.Domain.PersonCriteria();
+            MapTo(entity, context);
+            return entity;
+        }
     }
 }

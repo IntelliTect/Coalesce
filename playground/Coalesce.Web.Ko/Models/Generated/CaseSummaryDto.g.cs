@@ -84,5 +84,15 @@ namespace Coalesce.Web.Ko.Models
             if (ShouldMapTo(nameof(Description))) entity.Description = Description;
             if (ShouldMapTo(nameof(TestDict))) entity.TestDict = TestDict?.ToDictionary(k => k.Key, v => v.Value);
         }
+
+        /// <summary>
+        /// Map from the current DTO instance to a new instance of the domain object.
+        /// </summary>
+        public override Coalesce.Domain.CaseSummary MapToNew(IMappingContext context)
+        {
+            var entity = new Coalesce.Domain.CaseSummary();
+            MapTo(entity, context);
+            return entity;
+        }
     }
 }

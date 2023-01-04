@@ -274,15 +274,15 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
                 ret += $" ?? await ((await Request.ReadFormAsync()).Files[nameof({param.CsParameterName})]?.OpenReadStream().ReadAllBytesAsync(true) ?? Task.FromResult<{param.Type.FullyQualifiedName}>(null))";
             }
 
-            if (param.Type.PureType.HasClassViewModel)
+            if (param.Type.PureType.ClassViewModel != null && !param.Type.PureType.ClassViewModel.IsDto)
             {
                 if (param.Type.IsCollection)
                 {
-                    ret = $"{param.CsParameterName}.Select(_m => _m.{nameof(Mapper.MapToModel)}(new {param.Type.PureType.FullyQualifiedName}(), {MappingContextVar}))";
+                    ret = $"{param.CsParameterName}.Select(_m => _m.MapToNew({MappingContextVar}))";
                 }
                 else
                 {
-                    ret = $"{param.CsParameterName}.{nameof(Mapper.MapToModel)}(new {param.Type.FullyQualifiedName}(), {MappingContextVar})";
+                    ret = $"{param.CsParameterName}.MapToNew({MappingContextVar})";
                 }
             }
 

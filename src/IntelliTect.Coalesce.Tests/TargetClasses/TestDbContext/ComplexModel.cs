@@ -166,12 +166,23 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         public Task MethodWithOptionalEnumParam(Case.Statuses status = Case.Statuses.Open) => Task.CompletedTask;
 
         [Coalesce]
-        public ExternalTypeWithDtoProp ReturnsExternalTypeWithDtoProp() => new ExternalTypeWithDtoProp();
+        public ExternalTypeWithDtoProp ExternalTypeWithDtoProp(ExternalTypeWithDtoProp input) => input;
+
+        [Coalesce]
+        public CaseDtoStandalone CustomDto(CaseDtoStandalone input) => input;
 
         [Coalesce]
         [ControllerAction(Method = HttpMethod.Post)]
         public static ItemResult HasTopLevelParamWithSameNameAsObjectProp(
             int complexModelId,
             ComplexModel model) => true;
+
+#if NET5_0_OR_GREATER
+        [Coalesce]
+        public PositionalRecord MethodWithPositionRecord(PositionalRecord rec) => new PositionalRecord("a", 42);
+
+        [Coalesce]
+        public InitRecordWithDefaultCtor MethodWithInitRecord(InitRecordWithDefaultCtor rec) => new InitRecordWithDefaultCtor { String = "a", Num = 42 };
+#endif
     }
 }

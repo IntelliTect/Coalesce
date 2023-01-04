@@ -91,7 +91,7 @@ namespace Coalesce.Web.Ko.Api
             }
             var item = itemResult.Object;
             var _mappingContext = new MappingContext(User);
-            item.ConflictingParameterNames(companyParam.MapToModel(new Coalesce.Domain.Company(), _mappingContext), name);
+            item.ConflictingParameterNames(companyParam.MapToNew(_mappingContext), name);
             await Db.SaveChangesAsync();
             var _result = new ItemResult();
             return _result;

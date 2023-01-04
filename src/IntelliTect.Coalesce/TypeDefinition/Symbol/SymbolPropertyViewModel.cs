@@ -35,6 +35,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public override bool IsStatic => Symbol.IsStatic;
 
+        public override bool IsInitOnly => Symbol.SetMethod?.IsInitOnly == true;
+
         public override bool IsVirtual => Symbol.IsVirtual;
 
         public override bool IsInternalUse => base.IsInternalUse || Symbol.DeclaredAccessibility != Accessibility.Public;

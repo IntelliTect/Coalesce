@@ -52,5 +52,15 @@ namespace Coalesce.Web.Vue2.Models
             if (ShouldMapTo(nameof(Zip))) entity.Zip = Zip;
             if (ShouldMapTo(nameof(State))) entity.State = State;
         }
+
+        /// <summary>
+        /// Map from the current DTO instance to a new instance of the domain object.
+        /// </summary>
+        public override Coalesce.Domain.ZipCode MapToNew(IMappingContext context)
+        {
+            var entity = new Coalesce.Domain.ZipCode();
+            MapTo(entity, context);
+            return entity;
+        }
     }
 }

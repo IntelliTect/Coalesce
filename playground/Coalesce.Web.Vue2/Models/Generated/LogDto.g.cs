@@ -60,5 +60,15 @@ namespace Coalesce.Web.Vue2.Models
             if (ShouldMapTo(nameof(Level))) entity.Level = Level;
             if (ShouldMapTo(nameof(Message))) entity.Message = Message;
         }
+
+        /// <summary>
+        /// Map from the current DTO instance to a new instance of the domain object.
+        /// </summary>
+        public override Coalesce.Domain.Log MapToNew(IMappingContext context)
+        {
+            var entity = new Coalesce.Domain.Log();
+            MapTo(entity, context);
+            return entity;
+        }
     }
 }

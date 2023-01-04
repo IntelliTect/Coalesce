@@ -53,8 +53,18 @@ namespace Coalesce.Web.Vue3.Models
 
             if (OnUpdate(entity, context)) return;
 
-            if (ShouldMapTo(nameof(ManufacturingAddress))) entity.ManufacturingAddress = ManufacturingAddress?.MapToModel<Coalesce.Domain.StreetAddress, Coalesce.Web.Vue3.Models.StreetAddressDtoGen>(entity.ManufacturingAddress ?? new Coalesce.Domain.StreetAddress(), context);
-            if (ShouldMapTo(nameof(CompanyHqAddress))) entity.CompanyHqAddress = CompanyHqAddress?.MapToModel<Coalesce.Domain.StreetAddress, Coalesce.Web.Vue3.Models.StreetAddressDtoGen>(entity.CompanyHqAddress ?? new Coalesce.Domain.StreetAddress(), context);
+            if (ShouldMapTo(nameof(ManufacturingAddress))) entity.ManufacturingAddress = ManufacturingAddress?.MapToModelOrNew(entity.ManufacturingAddress, context);
+            if (ShouldMapTo(nameof(CompanyHqAddress))) entity.CompanyHqAddress = CompanyHqAddress?.MapToModelOrNew(entity.CompanyHqAddress, context);
+        }
+
+        /// <summary>
+        /// Map from the current DTO instance to a new instance of the domain object.
+        /// </summary>
+        public override Coalesce.Domain.ProductDetails MapToNew(IMappingContext context)
+        {
+            var entity = new Coalesce.Domain.ProductDetails();
+            MapTo(entity, context);
+            return entity;
         }
     }
 }

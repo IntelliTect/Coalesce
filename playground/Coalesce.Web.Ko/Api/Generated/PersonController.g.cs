@@ -323,7 +323,7 @@ namespace Coalesce.Web.Ko.Api
         {
             IncludeTree includeTree = null;
             var _mappingContext = new MappingContext(User);
-            var _methodResult = Coalesce.Domain.Person.MethodWithEntityParameter(Db, person.MapToModel(new Coalesce.Domain.Person(), _mappingContext));
+            var _methodResult = Coalesce.Domain.Person.MethodWithEntityParameter(Db, person.MapToNew(_mappingContext));
             var _result = new ItemResult<PersonDtoGen>();
             _result.Object = Mapper.MapToDto<Coalesce.Domain.Person, PersonDtoGen>(_methodResult, _mappingContext, includeTree);
             return _result;
@@ -340,7 +340,7 @@ namespace Coalesce.Web.Ko.Api
         {
             IncludeTree includeTree = null;
             var _mappingContext = new MappingContext(User);
-            var _methodResult = Coalesce.Domain.Person.SearchPeople(Db, criteria.MapToModel(new Coalesce.Domain.PersonCriteria(), _mappingContext), page);
+            var _methodResult = Coalesce.Domain.Person.SearchPeople(Db, criteria.MapToNew(_mappingContext), page);
             var _result = new ListResult<PersonDtoGen>(_methodResult);
             _result.List = _methodResult.List?.ToList().Select(o => Mapper.MapToDto<Coalesce.Domain.Person, PersonDtoGen>(o, _mappingContext, includeTree ?? _methodResult.IncludeTree)).ToList();
             return _result;

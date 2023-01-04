@@ -60,5 +60,15 @@ namespace Coalesce.Web.Vue3.Models
             if (ShouldMapTo(nameof(Name))) entity.Name = Name;
             if (ShouldMapTo(nameof(Date))) entity.Date = (Date ?? entity.Date);
         }
+
+        /// <summary>
+        /// Map from the current DTO instance to a new instance of the domain object.
+        /// </summary>
+        public override Coalesce.Domain.StandaloneReadWrite MapToNew(IMappingContext context)
+        {
+            var entity = new Coalesce.Domain.StandaloneReadWrite();
+            MapTo(entity, context);
+            return entity;
+        }
     }
 }

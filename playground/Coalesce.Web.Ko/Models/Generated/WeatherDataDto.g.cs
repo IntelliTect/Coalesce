@@ -60,7 +60,17 @@ namespace Coalesce.Web.Ko.Models
 
             if (ShouldMapTo(nameof(TempFahrenheit))) entity.TempFahrenheit = (TempFahrenheit ?? entity.TempFahrenheit);
             if (ShouldMapTo(nameof(Humidity))) entity.Humidity = (Humidity ?? entity.Humidity);
-            if (ShouldMapTo(nameof(Location))) entity.Location = Location?.MapToModel<Coalesce.Domain.Services.Location, Coalesce.Web.Ko.Models.LocationDtoGen>(entity.Location ?? new Coalesce.Domain.Services.Location(), context);
+            if (ShouldMapTo(nameof(Location))) entity.Location = Location?.MapToModelOrNew(entity.Location, context);
+        }
+
+        /// <summary>
+        /// Map from the current DTO instance to a new instance of the domain object.
+        /// </summary>
+        public override Coalesce.Domain.Services.WeatherData MapToNew(IMappingContext context)
+        {
+            var entity = new Coalesce.Domain.Services.WeatherData();
+            MapTo(entity, context);
+            return entity;
         }
     }
 }

@@ -149,5 +149,15 @@ namespace Coalesce.Web.Vue2.Models
             if (ShouldMapTo(nameof(LogoUrl))) entity.LogoUrl = LogoUrl;
             if (ShouldMapTo(nameof(IsDeleted))) entity.IsDeleted = (IsDeleted ?? entity.IsDeleted);
         }
+
+        /// <summary>
+        /// Map from the current DTO instance to a new instance of the domain object.
+        /// </summary>
+        public override Coalesce.Domain.Company MapToNew(IMappingContext context)
+        {
+            var entity = new Coalesce.Domain.Company();
+            MapTo(entity, context);
+            return entity;
+        }
     }
 }

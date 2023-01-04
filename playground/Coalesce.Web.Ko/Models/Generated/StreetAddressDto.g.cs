@@ -68,5 +68,15 @@ namespace Coalesce.Web.Ko.Models
             if (ShouldMapTo(nameof(State))) entity.State = State;
             if (ShouldMapTo(nameof(PostalCode))) entity.PostalCode = PostalCode;
         }
+
+        /// <summary>
+        /// Map from the current DTO instance to a new instance of the domain object.
+        /// </summary>
+        public override Coalesce.Domain.StreetAddress MapToNew(IMappingContext context)
+        {
+            var entity = new Coalesce.Domain.StreetAddress();
+            MapTo(entity, context);
+            return entity;
+        }
     }
 }

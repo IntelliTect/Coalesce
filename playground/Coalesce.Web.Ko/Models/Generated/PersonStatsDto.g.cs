@@ -76,5 +76,15 @@ namespace Coalesce.Web.Ko.Models
             if (ShouldMapTo(nameof(NullableValueTypeCollection))) entity.NullableValueTypeCollection = NullableValueTypeCollection;
             if (ShouldMapTo(nameof(ValueTypeCollection))) entity.ValueTypeCollection = ValueTypeCollection;
         }
+
+        /// <summary>
+        /// Map from the current DTO instance to a new instance of the domain object.
+        /// </summary>
+        public override Coalesce.Domain.PersonStats MapToNew(IMappingContext context)
+        {
+            var entity = new Coalesce.Domain.PersonStats();
+            MapTo(entity, context);
+            return entity;
+        }
     }
 }

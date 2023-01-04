@@ -54,13 +54,27 @@ namespace IntelliTect.Coalesce.Tests.Util
         {
             var asm = Assembly.GetExecutingAssembly();
 
+            var parseOptions = CSharpParseOptions.Default
+                // We inject the current preprocessor constants via
+                // IntelliTect.Coalesce.Tests.csproj target "AddDefinesAsAttribute". 
+                // Grab them and add them to the compilation.
+                .WithPreprocessorSymbols(Assembly
+                    .GetExecutingAssembly()
+                    .GetCustomAttributes<AssemblyMetadataAttribute>()
+                    .Where(m => m.Key == "DefineConstants")
+                    .First()
+                    .Value
+                    .Split(";", StringSplitOptions.RemoveEmptyEntries));
+
             return asm.GetManifestResourceNames()
                 .AsParallel()
                 .Where(name => name.EndsWith(".cs"))
                 .Select(name =>
                 {
                     using var stream = asm.GetManifestResourceStream(name);
-                    return CSharpSyntaxTree.ParseText(SourceText.From(stream));
+                    return CSharpSyntaxTree.ParseText(
+                        SourceText.From(stream), parseOptions
+                    );
                 })
                 .ToList()
                 .AsReadOnly();

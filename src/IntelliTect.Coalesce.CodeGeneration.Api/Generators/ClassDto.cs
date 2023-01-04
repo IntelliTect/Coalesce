@@ -124,8 +124,102 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
 
                     WriteSetters(Model
                         .ClientProperties
+                        .Where(p => p.IsClientSerializable && !p.IsInitOnly)
+                        .Select(p =>
+                        {
+                            var (conditional, setter) = DtoToModelPropertySetter(p);
+                            return (conditional, $"if (ShouldMapTo(nameof({p.Name}))) entity.{p.Name} = {setter};");
+                        }));
+                }
+
+                b.DocComment("Map from the current DTO instance to a new instance of the domain object.");
+                using (b.Block($"public override {Model.FullyQualifiedName} MapToNew(IMappingContext context)"))
+                {
+                    var properties = Model
+                        .ClientProperties
                         .Where(p => p.IsClientSerializable)
-                        .Select(DtoToModelPropertySetter));
+                        .ToDictionary(p => p.Name, StringComparer.OrdinalIgnoreCase);
+
+                    // Find the best ctor.
+                    // The smallest ctor where all parameters are named after a mappable property.
+                    // Usually this will be the default ctor.
+                    // Primary use case is positional record types.
+                    var bestCtor = Model.Constructors
+                        .OrderBy(c => c.Parameters.Count())
+                        .Select(c => new {
+                            Ctor = c, 
+                            Properties = c.Parameters.Select(p => properties.TryGetValue(p.Name, out var prop) ? prop : null).ToList()}
+                        )
+                        .Where(c => !c.Properties.Any(p => p == null))
+                        .FirstOrDefault() ?? throw new Exception($"Unable to find an appropriate constructor for type {Model.FullyQualifiedName}");
+
+                    var ctorParams = bestCtor.Properties;
+                    foreach (var prop in ctorParams) properties.Remove(prop.Name);
+
+                    var initParams = properties.Values.Where(p => p.IsInitOnly).ToList();
+                    foreach (var prop in initParams) properties.Remove(prop.Name);
+
+                    if (!ctorParams.Any() && !initParams.Any())
+                    {
+                        b.Line($"var entity = new {Model.FullyQualifiedName}();");
+                        b.Line($"MapTo(entity, context);");
+                        b.Line($"return entity;");
+                        return;
+                    }
+
+                    b.Line("var includes = context.Includes;");
+                    b.Line();
+
+                    b.Append($"var entity = new {Model.FullyQualifiedName}(");
+                    if (ctorParams.Any()) b.Line();
+                    for (int i = 0; i < ctorParams.Count; i++)
+                    {
+                        b.Indented(InlinePropertyRhs(ctorParams[i]) + (i < ctorParams.Count - 1 ? "," : ""));
+                    }
+                    b.Append(")");
+
+                    if (initParams.Any())
+                    {
+                        using (b.Block(closeWith: ";"))
+                        {
+                            foreach (var prop in initParams)
+                            {
+                                b.Line($"{prop.Name} = {InlinePropertyRhs(prop)},");
+                            }
+                        }
+                    }
+                    else
+                    {
+                        b.Append(";");
+                    }
+
+                    b.Line();
+                    b.Line("if (OnUpdate(entity, context)) return entity;");
+
+                    WriteSetters(properties.Values
+                        .Select(p =>
+                        {
+                            var (conditional, setter) = DtoToModelPropertySetter(p);
+                            return (conditional, $"if (ShouldMapTo(nameof({p.Name}))) entity.{p.Name} = {setter};");
+                        }));
+
+                    b.Line();
+                    b.Line("return entity;");
+
+                    string InlinePropertyRhs(PropertyViewModel p)
+                    {
+                        // Init-only props must be set here where we instantiate the type.
+                        // They cannot be handled by the record
+                        var (conditional, setter) = DtoToModelPropertySetter(p, fallbackPrefix: null);
+                        if (!string.IsNullOrWhiteSpace(conditional))
+                        {
+                            return $"({conditional}) ? {setter} : default";
+                        }
+                        else
+                        {
+                            return setter;
+                        }
+                    }
                 }
             }
         }
@@ -165,11 +259,12 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
         /// <summary>
         /// Get the conditional and a C# expression that will map the property from a DTO to a local model object.
         /// </summary>
-        /// <param name="property">The property to map</param>
-        private (string conditional, string setter) DtoToModelPropertySetter(PropertyViewModel property)
+        private (string conditional, string setter) DtoToModelPropertySetter(
+            PropertyViewModel property, 
+            string fallbackPrefix = "entity."
+        )
         {
             string name = property.Name;
-            string targetProp = $"entity.{name}";
 
             string setter;
             if (property.Type.IsDictionary)
@@ -179,38 +274,38 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                 // This is only a stop-gap to bridge apparent functionality that existed in 2.x versions
                 // of Coalesce where Dictionaries apparently "accidentally" worked to a limited extent.
                 // There is no frontend support at all.
-                setter = $"{targetProp} = {name}?.ToDictionary(k => k.Key, v => v.Value);";
+                setter = $"{name}?.ToDictionary(k => k.Key, v => v.Value)";
             }
             else if (property.Object != null)
             {
                 if (property.Type.IsCollection)
                 {
-                    string mapCall = $"MapToModel<{property.PureType.FullyQualifiedName}, {property.PureType.NullableTypeForDto(DtoNamespace, true)}> (new {property.Object.FullyQualifiedName}(), context)";
-                    setter = $"{targetProp} = {name}?.Select(f => f.{mapCall}).{(property.Type.IsArray ? "ToArray" : "ToList")}();";
+                    setter = $"{name}?.Select(f => f.MapToNew(context)).{(property.Type.IsArray ? "ToArray" : "ToList")}()";
+                }
+                else if (fallbackPrefix != null)
+                {
+                    setter = $"{name}?.MapToModelOrNew({fallbackPrefix}{name}, context)";
                 }
                 else
                 {
-                    string mapCall = $"MapToModel<{property.PureType.FullyQualifiedName}, {property.PureType.NullableTypeForDto(DtoNamespace, true)}>({targetProp} ?? new {property.Type.FullyQualifiedName}(), context)";
-                    setter = $"{targetProp} = {name}?.{mapCall};";
+                    setter = $"{name}?.MapToNew(context)";
                 }
             }
             else if (!property.Type.IsArray && property.Type.IsA(typeof(IList<>)))
             {
                 // Lists of scalar values, whose DTO properties will be ICollection<>, preventing direct assignment.
-                setter = $"{targetProp} = {name}?.ToList();";
+                setter = $"{name}?.ToList()";
             }
             else
             {
                 var newValue = name;
                 if (!property.Type.IsNullable && property.Type.CsDefaultValue != "null")
                 {
-                    newValue = $"({newValue} ?? {targetProp})";
+                    var fallback = fallbackPrefix == null ? "default" : $"{fallbackPrefix}{name}";
+                    newValue = $"({newValue} ?? {fallback})";
                 }
-                setter = $"{targetProp} = {newValue};";
+                setter = $"{newValue}";
             }
-
-
-            setter = $"if (ShouldMapTo(nameof({name}))) " + setter;
 
             var statement = GetPropertySetterConditional(property, true);
             if (!string.IsNullOrWhiteSpace(statement))

@@ -33,6 +33,13 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public override bool IsStatic => Info.GetGetMethod()?.IsStatic ?? Info.GetSetMethod()?.IsStatic ?? false;
 
+        public override bool IsInitOnly
+#if NET5_0_OR_GREATER
+            => Info.SetMethod?.ReturnParameter.GetRequiredCustomModifiers().Contains(typeof(System.Runtime.CompilerServices.IsExternalInit)) == true;
+#else
+            => false;
+#endif
+
         public override bool IsInternalUse => base.IsInternalUse || Info.GetGetMethod(true)?.IsPublic != true;
 
         public override object? GetAttributeValue<TAttribute>(string valueName)

@@ -52,5 +52,15 @@ namespace Coalesce.Web.Ko.Models
             if (ShouldMapTo(nameof(DevTeamId))) entity.DevTeamId = (DevTeamId ?? entity.DevTeamId);
             if (ShouldMapTo(nameof(Name))) entity.Name = Name;
         }
+
+        /// <summary>
+        /// Map from the current DTO instance to a new instance of the domain object.
+        /// </summary>
+        public override Coalesce.Domain.External.DevTeam MapToNew(IMappingContext context)
+        {
+            var entity = new Coalesce.Domain.External.DevTeam();
+            MapTo(entity, context);
+            return entity;
+        }
     }
 }

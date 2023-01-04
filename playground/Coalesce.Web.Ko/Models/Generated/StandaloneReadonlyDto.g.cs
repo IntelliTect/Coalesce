@@ -60,5 +60,15 @@ namespace Coalesce.Web.Ko.Models
             if (ShouldMapTo(nameof(Name))) entity.Name = Name;
             if (ShouldMapTo(nameof(Description))) entity.Description = Description;
         }
+
+        /// <summary>
+        /// Map from the current DTO instance to a new instance of the domain object.
+        /// </summary>
+        public override Coalesce.Domain.StandaloneReadonly MapToNew(IMappingContext context)
+        {
+            var entity = new Coalesce.Domain.StandaloneReadonly();
+            MapTo(entity, context);
+            return entity;
+        }
     }
 }

@@ -80,5 +80,15 @@ namespace Coalesce.Web.Vue2.Models
                 if (ShouldMapTo(nameof(UniqueId))) entity.UniqueId = (UniqueId ?? entity.UniqueId);
             }
         }
+
+        /// <summary>
+        /// Map from the current DTO instance to a new instance of the domain object.
+        /// </summary>
+        public override Coalesce.Domain.Product MapToNew(IMappingContext context)
+        {
+            var entity = new Coalesce.Domain.Product();
+            MapTo(entity, context);
+            return entity;
+        }
     }
 }

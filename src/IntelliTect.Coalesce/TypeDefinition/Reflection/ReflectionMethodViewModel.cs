@@ -10,9 +10,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
 {
     public class ReflectionMethodViewModel : MethodViewModel
     {
-        private MethodInfo Info { get; }
+        private MethodBase Info { get; }
 
-        public ReflectionMethodViewModel(ClassViewModel parent, MethodInfo methodInfo) : base(parent)
+        public ReflectionMethodViewModel(ClassViewModel parent, MethodBase methodInfo) : base(parent)
         {
             Info = methodInfo;
         }
@@ -28,11 +28,11 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public override bool IsStatic => Info.IsStatic;
 
-        public override TypeViewModel ReturnType => ReflectionTypeViewModel.GetOrCreate(Parent.ReflectionRepository, Info.ReturnType);
+        public override TypeViewModel ReturnType => ReflectionTypeViewModel.GetOrCreate(Parent.ReflectionRepository, MethodInfo.ReturnType);
 
         public override bool IsInternalUse => base.IsInternalUse || !Info.IsPublic;
 
-        public override MethodInfo MethodInfo => Info;
+        public override MethodInfo MethodInfo => (MethodInfo)Info;
 
         public override IEnumerable<ParameterViewModel> Parameters
             => Info.GetParameters().Select(p => new ReflectionParameterViewModel(this, p));

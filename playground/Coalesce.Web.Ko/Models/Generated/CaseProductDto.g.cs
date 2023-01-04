@@ -78,5 +78,15 @@ namespace Coalesce.Web.Ko.Models
             if (ShouldMapTo(nameof(CaseId))) entity.CaseId = (CaseId ?? entity.CaseId);
             if (ShouldMapTo(nameof(ProductId))) entity.ProductId = (ProductId ?? entity.ProductId);
         }
+
+        /// <summary>
+        /// Map from the current DTO instance to a new instance of the domain object.
+        /// </summary>
+        public override Coalesce.Domain.CaseProduct MapToNew(IMappingContext context)
+        {
+            var entity = new Coalesce.Domain.CaseProduct();
+            MapTo(entity, context);
+            return entity;
+        }
     }
 }

@@ -46,6 +46,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public abstract bool IsStatic { get; }
 
+        public abstract bool IsInitOnly { get; }
+
         /// <summary>
         /// Convenient accessor for the PropertyInfo when in reflection-based contexts.
         /// </summary>

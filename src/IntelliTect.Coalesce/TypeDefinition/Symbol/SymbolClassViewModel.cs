@@ -29,6 +29,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public override bool IsStatic => Symbol.IsStatic;
 
+        public override bool IsRecord => Symbol.IsRecord;
+
         protected override IReadOnlyCollection<PropertyViewModel> RawProperties(ClassViewModel effectiveParent)
         {
             var result = Symbol.GetMembers()
@@ -94,6 +96,13 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 return result.Distinct().ToList().AsReadOnly();
             }
         }
+
+        public override IReadOnlyCollection<MethodViewModel> Constructors => Symbol.GetMembers()
+            .Where(f => f.Kind == SymbolKind.Method && f.DeclaredAccessibility == Accessibility.Public)
+            .Cast<IMethodSymbol>()
+            .Where(f => f.MethodKind == MethodKind.Constructor)
+            .Select(s => new SymbolMethodViewModel(s, this))
+            .ToList();
 
         protected override IReadOnlyCollection<TypeViewModel> RawNestedTypes => Symbol
             .GetTypeMembers()

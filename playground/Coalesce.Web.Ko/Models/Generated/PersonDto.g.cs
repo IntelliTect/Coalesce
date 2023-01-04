@@ -193,5 +193,15 @@ namespace Coalesce.Web.Ko.Models
             if (ShouldMapTo(nameof(CompanyId))) entity.CompanyId = (CompanyId ?? entity.CompanyId);
             if (ShouldMapTo(nameof(ArbitraryCollectionOfStrings))) entity.ArbitraryCollectionOfStrings = ArbitraryCollectionOfStrings;
         }
+
+        /// <summary>
+        /// Map from the current DTO instance to a new instance of the domain object.
+        /// </summary>
+        public override Coalesce.Domain.Person MapToNew(IMappingContext context)
+        {
+            var entity = new Coalesce.Domain.Person();
+            MapTo(entity, context);
+            return entity;
+        }
     }
 }

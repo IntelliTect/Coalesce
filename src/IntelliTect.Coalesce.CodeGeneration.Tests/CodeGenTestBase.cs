@@ -78,16 +78,14 @@ namespace IntelliTect.Coalesce.CodeGeneration.Tests
                 .GetDiagnostics()
                 .Where(d => d.Severity >= Microsoft.CodeAnalysis.DiagnosticSeverity.Error);
 
-            Assert.All(errors, error =>
-            {
-                var loc = error.Location;
+            if (!errors.Any()) return;
 
-                Assert.False(true, "\"" + error.ToString() +
-                    $"\" near:```\n" +
-                    loc.SourceTree.ToString().Substring(loc.SourceSpan.Start, loc.SourceSpan.Length) +
-                    "\n```"
-                );
-            });
+            Assert.False(true, string.Join("\n", errors.Select(error =>
+                error.ToString() +
+                $" near `" +
+                error.Location.SourceTree.ToString().Substring(error.Location.SourceSpan.Start, error.Location.SourceSpan.Length) +
+                "`"
+            )));
         }
     }
 }

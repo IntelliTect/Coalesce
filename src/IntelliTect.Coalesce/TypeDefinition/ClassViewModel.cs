@@ -36,6 +36,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public abstract string Comment { get; }
         public TypeViewModel Type { get; protected set; }
         public abstract bool IsStatic { get; }
+        public abstract bool IsRecord { get; }
 
         public string FullyQualifiedName => Type.FullyQualifiedName;
 
@@ -132,6 +133,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         #region Member Info - Properties & Methods
 
         protected abstract IReadOnlyCollection<PropertyViewModel> RawProperties(ClassViewModel effectiveParent);
+        public abstract IReadOnlyCollection<MethodViewModel> Constructors { get; }
         protected abstract IReadOnlyCollection<MethodViewModel> RawMethods { get; }
         protected abstract IReadOnlyCollection<TypeViewModel> RawNestedTypes { get; }
 

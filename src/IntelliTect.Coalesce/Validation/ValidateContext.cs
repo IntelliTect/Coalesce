@@ -82,6 +82,8 @@ namespace IntelliTect.Coalesce.Validation
                                 "[DtoExcludesAttribute] has no effect on an IClassDto. This logic must be implemented manually in MapFrom.");
                         }
 
+                        assert.IsFalse(prop.IsInitOnly, "Init-only properties are not supported on entity or custom DTO types.");
+
                         assert.IsFalse(prop.Type.IsFile, "IFile is not supported as a property.");
 
                         if (prop.IsPOCO)

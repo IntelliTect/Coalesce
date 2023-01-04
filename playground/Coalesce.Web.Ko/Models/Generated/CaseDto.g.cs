@@ -193,5 +193,15 @@ namespace Coalesce.Web.Ko.Models
             if (ShouldMapTo(nameof(DevTeamAssignedId))) entity.DevTeamAssignedId = DevTeamAssignedId;
             if (ShouldMapTo(nameof(Duration))) entity.Duration = (Duration ?? entity.Duration);
         }
+
+        /// <summary>
+        /// Map from the current DTO instance to a new instance of the domain object.
+        /// </summary>
+        public override Coalesce.Domain.Case MapToNew(IMappingContext context)
+        {
+            var entity = new Coalesce.Domain.Case();
+            MapTo(entity, context);
+            return entity;
+        }
     }
 }

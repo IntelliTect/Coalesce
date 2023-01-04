@@ -45,7 +45,7 @@ namespace Coalesce.Web.Ko.Api
         {
             IncludeTree includeTree = null;
             var _mappingContext = new MappingContext(User);
-            var _methodResult = await Service.GetWeatherAsync(parameterDbContext, location.MapToModel(new Coalesce.Domain.Services.Location(), _mappingContext), dateTime, conditions);
+            var _methodResult = await Service.GetWeatherAsync(parameterDbContext, location.MapToNew(_mappingContext), dateTime, conditions);
             var _result = new ItemResult<WeatherDataDtoGen>();
             _result.Object = Mapper.MapToDto<Coalesce.Domain.Services.WeatherData, WeatherDataDtoGen>(_methodResult, _mappingContext, includeTree);
             return _result;

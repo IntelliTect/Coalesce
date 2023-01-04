@@ -105,8 +105,6 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                     b.Line("if (obj == null) return;");
                     b.Line("var includes = context.Includes;");
                     b.Line();
-                    b.Line("// Fill the properties of the object.");
-                    b.Line();
 
                     WriteSetters(Model
                         .ClientProperties

@@ -52,8 +52,6 @@ namespace Coalesce.Web.Ko.Models
             if (obj == null) return;
             var includes = context.Includes;
 
-            // Fill the properties of the object.
-
             this.ProductId = obj.ProductId;
             this.Name = obj.Name;
             this.UniqueId = obj.UniqueId;

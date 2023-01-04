@@ -34,8 +34,6 @@ namespace Coalesce.Web.Ko.Models
             if (obj == null) return;
             var includes = context.Includes;
 
-            // Fill the properties of the object.
-
 
             this.ManufacturingAddress = obj.ManufacturingAddress.MapToDto<Coalesce.Domain.StreetAddress, StreetAddressDtoGen>(context, tree?[nameof(this.ManufacturingAddress)]);
 

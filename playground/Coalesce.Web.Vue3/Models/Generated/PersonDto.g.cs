@@ -124,8 +124,6 @@ namespace Coalesce.Web.Vue3.Models
             if (obj == null) return;
             var includes = context.Includes;
 
-            // Fill the properties of the object.
-
             this.PersonId = obj.PersonId;
             this.Title = obj.Title;
             this.FirstName = obj.FirstName;

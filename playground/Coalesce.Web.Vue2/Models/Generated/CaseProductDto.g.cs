@@ -52,8 +52,6 @@ namespace Coalesce.Web.Vue2.Models
             if (obj == null) return;
             var includes = context.Includes;
 
-            // Fill the properties of the object.
-
             this.CaseProductId = obj.CaseProductId;
             this.CaseId = obj.CaseId;
             this.ProductId = obj.ProductId;

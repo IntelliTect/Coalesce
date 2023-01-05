@@ -13,6 +13,7 @@ using IntelliTect.Coalesce.Api.DataSources;
 using IntelliTect.Coalesce.Api.Behaviors;
 using IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext;
 using System.Text.Json;
+using System.Collections.Generic;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Tests
 {
@@ -25,8 +26,50 @@ namespace IntelliTect.Coalesce.CodeGeneration.Tests
 
             var suite = executor.CreateRootGenerator<VueSuite>()
                 .WithModel(ReflectionRepositoryFactory.Symbol);
+            suite = await ConfigureAndValidateSuite(suite);
 
-            await AssertSuiteOutputCompiles(suite);
+            await Task.WhenAll(
+                Task.Run(() => AssertVueSuiteTypescriptOutputCompiles(suite)),
+                Task.Run(() => AssertSuiteCSharpOutputCompiles(suite))
+            );
+        }
+
+        protected async Task AssertVueSuiteTypescriptOutputCompiles(IRootGenerator suite)
+        {
+            var coalesceVue = GetRepoRoot().GetDirectory("src/coalesce-vue");
+
+            Assert.True(
+                coalesceVue.GetDirectory("node_modules").Exists,
+                "Test relies on NPM packages for coalesce-vue being restored."
+            );
+
+            // We use coalesce-vue as our working directory here
+            // because it contains both tsc and all the dependencies of the generated code.
+            var workingDirectory = coalesceVue.FullName.Replace("\\", "/");
+            var tsConfig =
+            $$"""
+            {
+              "compilerOptions": {
+                "target": "ES2020",
+                "strict": true,
+                "moduleResolution": "node",
+                "baseUrl": ".",
+                "paths": {
+                  "coalesce-vue/lib/*": [ "{{workingDirectory}}/src/*" ],
+                  "*": [ "{{workingDirectory}}/node_modules/*" ],
+                }
+              },
+              "include": [
+                "src/**/*.ts",
+              ],
+            }
+            """;
+            var tsConfigPath = suite.EffectiveOutputPath + "/tsconfig.json";
+            File.WriteAllText(tsConfigPath, tsConfig);
+
+            await AssertTypescriptProjectCompiles(
+                tsConfigPath: tsConfigPath, 
+                workingDirectory: workingDirectory);
         }
 
         [Fact]
@@ -36,8 +79,9 @@ namespace IntelliTect.Coalesce.CodeGeneration.Tests
 
             var suite = executor.CreateRootGenerator<KnockoutSuite>()
                 .WithModel(ReflectionRepositoryFactory.Symbol);
+            suite = await ConfigureAndValidateSuite(suite);
 
-            await AssertSuiteOutputCompiles(suite);
+            await AssertSuiteCSharpOutputCompiles(suite);
         }
 
         [Fact]

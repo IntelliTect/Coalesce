@@ -1,5 +1,6 @@
 ﻿using IntelliTect.Coalesce.CodeGeneration.Api.Generators;
 using IntelliTect.Coalesce.CodeGeneration.Generation;
+using IntelliTect.Coalesce.CodeGeneration.Tests;
 using IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext;
 using IntelliTect.Coalesce.Tests.Util;
 using IntelliTect.Coalesce.TypeDefinition;
@@ -8,7 +9,6 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Emit;
-using Microsoft.CodeAnalysis.Text;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
@@ -28,30 +28,18 @@ namespace IntelliTect.Coalesce.Swashbuckle.Tests
 
         public OpenApiFixture()
         {
-            var generationTasks = new GenerationExecutor(
+            var suite = new GenerationExecutor(
                     new() { WebProject = new() { RootNamespace = "MyProject" } },
                     Microsoft.Extensions.Logging.LogLevel.Information
                 )
                 .CreateRootGenerator<ApiOnlySuite>()
                 .WithModel(ReflectionRepositoryFactory.Symbol)
-                .WithOutputPath(".")
-                .GetGeneratorsFlattened()
-                .OfType<IFileGenerator>()
-                .Select(gen => (Generator: gen, Output: gen.GetOutputAsync()));
+                .WithOutputPath(".");
 
-            Task.WaitAll(generationTasks.Select(t => t.Output).ToArray());
-
-            var generatedFiles = generationTasks
-                .Select((task) => CSharpSyntaxTree.ParseText(
-                    SourceText.From(new StreamReader(task.Output.Result).ReadToEnd()),
-                    path: task.Generator.EffectiveOutputPath
-                ))
-                .ToArray();
+            var compilation = CodeGenTestBase.GetCSharpCompilation(suite).Result;
 
             using var ms = new MemoryStream();
-            EmitResult emitResult = ReflectionRepositoryFactory
-                .GetCompilation(generatedFiles)
-                .Emit(ms);
+            EmitResult emitResult = compilation.Emit(ms);
             Assert.True(emitResult.Success);
             Assembly assembly = Assembly.Load(ms.ToArray());
 

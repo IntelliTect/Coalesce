@@ -12,6 +12,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
 		.gitignore = .gitignore
+		.lutignore = .lutignore
+		Coalesce.lutconfig = Coalesce.lutconfig
 		build\version.txt = build\version.txt
 	EndProjectSection
 EndProject
@@ -62,7 +64,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Coalesce.Web.Vue3", "playgr
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Coalesce.Web.Vue2", "playground\Coalesce.Web.Vue2\Coalesce.Web.Vue2.csproj", "{A12234E0-DF1F-4042-8CAF-D57F9CED37C0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IntelliTect.Coalesce.Swashbuckle.Tests", "src\IntelliTect.Coalesce.Swashbuckle.Tests\IntelliTect.Coalesce.Swashbuckle.Tests.csproj", "{D5B01884-1B53-4C5D-AE66-04F3B0795FA8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IntelliTect.Coalesce.Swashbuckle.Tests", "src\IntelliTect.Coalesce.Swashbuckle.Tests\IntelliTect.Coalesce.Swashbuckle.Tests.csproj", "{D5B01884-1B53-4C5D-AE66-04F3B0795FA8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

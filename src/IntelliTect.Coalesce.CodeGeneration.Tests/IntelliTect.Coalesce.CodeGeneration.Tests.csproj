@@ -8,10 +8,10 @@
 
   <ItemGroup>
     <Compile Remove="out/**/*.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="out/**/*.cs" />
+    <None Include="out/**/*.*" />
+    <None Update="xunit.runner.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
   <ItemGroup>
@@ -28,12 +28,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
     <PackageReference Include="xunit" Version="2.4.1" />
-  </ItemGroup>
-  
-  <ItemGroup>
-    <None Update="xunit.runner.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    <PackageReference Include="Xunit.SkippableFact" Version="1.4.13" />
   </ItemGroup>
 
 </Project>

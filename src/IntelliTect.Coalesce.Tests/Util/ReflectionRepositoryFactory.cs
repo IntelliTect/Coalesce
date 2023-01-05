@@ -1,13 +1,16 @@
 ﻿using IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext;
 using IntelliTect.Coalesce.TypeDefinition;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Text;
+using Microsoft.EntityFrameworkCore.InMemory.Infrastructure.Internal;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using Xunit;
 
 namespace IntelliTect.Coalesce.Tests.Util
 {
@@ -80,13 +83,27 @@ namespace IntelliTect.Coalesce.Tests.Util
                 .AsReadOnly();
         }
 
-        public static CSharpCompilation GetCompilation(IEnumerable<SyntaxTree> trees)
+        public static CSharpCompilation GetCompilation(IEnumerable<SyntaxTree> trees, bool assertSuccess = true)
         {
-            // Essential asemblies that aren't otherwise being loaded already:
-            Assembly.Load("Microsoft.EntityFrameworkCore.InMemory");
-            Assembly.Load("System.Linq.Queryable");
+            var loaded = new HashSet<Assembly>();
+            void Load(Assembly asm)
+            {
+                foreach (var reference in asm.GetReferencedAssemblies())
+                {
+                    var dep = Assembly.Load(reference);
+                    if (loaded.Add(dep)) Load(dep);
+                }
+            }
 
-            var current = Assembly.GetExecutingAssembly();
+            // Eagerly and recursively load all dependencies of the current assembly,
+            // which takes care of almost everything that can be a dependency of the code gen output.
+            Load(Assembly.GetExecutingAssembly());
+
+            // Other assemblies that are ONLY introduced by generated code:
+            Load(typeof(Microsoft.AspNetCore.StaticFiles.FileExtensionContentTypeProvider).Assembly);
+
+            // Now that we've eagerly loaded all possible dependencies,
+            // gather their locations so we can feed those locations to Roslyn.
             var assemblies = AppDomain.CurrentDomain
                 .GetAssemblies()
                 // Exclude dynamic assemblies (they can't possibly be relevant here)
@@ -94,16 +111,41 @@ namespace IntelliTect.Coalesce.Tests.Util
                 .Select(a => MetadataReference.CreateFromFile(a.Location))
                 .ToArray();
 
-            return CSharpCompilation.Create(
+            var compilation = CSharpCompilation.Create(
                 SymbolDiscoveryAssemblyName,
                 trees.Concat(ModelSyntaxTrees),
                 assemblies,
                 new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
             );
+
+            if (assertSuccess)
+            {
+                AssertCompilationSuccess(compilation);
+            }
+
+            return compilation;
+        }
+
+        public static void AssertCompilationSuccess(CSharpCompilation comp)
+        {
+            var errors = comp
+                .GetDiagnostics()
+                .Where(d => d.Severity >= Microsoft.CodeAnalysis.DiagnosticSeverity.Error);
+
+            if (!errors.Any()) return;
+
+            Assert.False(true, string.Join("\n", errors.Select(error =>
+                error.ToString() +
+                $" near `" +
+                error.Location.SourceTree.ToString().Substring(error.Location.SourceSpan.Start, error.Location.SourceSpan.Length) +
+                "`"
+            )));
         }
 
         private static List<ITypeSymbol> GetAllSymbols()
         {
+            AssertCompilationSuccess(Compilation);
+
             // Assembly.GlobalNamespace restricts us to only types declared in the C# files 
             // that are being included.
             // compilation.GlobalNamespace gives us ALL CLR types

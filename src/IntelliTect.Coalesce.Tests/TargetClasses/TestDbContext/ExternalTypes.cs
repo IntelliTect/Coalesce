@@ -58,4 +58,17 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         public string Value { get; set; }
         public ExternalParentAsOutputOnly Recursive { get; set; }
     }
+
+    public class OutputOnlyExternalTypeWithoutDefaultCtor
+    {
+        public OutputOnlyExternalTypeWithoutDefaultCtor(string foo)
+        {
+            Bar = foo;
+            Baz = foo;
+        }
+
+        public string Bar { get; }
+
+        public string Baz { get; internal set; }
+    }
 }

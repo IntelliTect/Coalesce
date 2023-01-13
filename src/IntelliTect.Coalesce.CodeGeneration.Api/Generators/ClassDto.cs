@@ -145,11 +145,26 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                     var bestCtor = Model.Constructors
                         .OrderBy(c => c.Parameters.Count())
                         .Select(c => new {
-                            Ctor = c, 
-                            Properties = c.Parameters.Select(p => properties.TryGetValue(p.Name, out var prop) ? prop : null).ToList()}
+                            Ctor = c,
+                            Properties = c.Parameters.Select(p => properties.TryGetValue(p.Name, out var prop) ? prop : null).ToList() }
                         )
                         .Where(c => !c.Properties.Any(p => p == null))
-                        .FirstOrDefault() ?? throw new Exception($"Unable to find an appropriate constructor for type {Model.FullyQualifiedName}");
+                        .FirstOrDefault();
+                    
+                    if (bestCtor == null)
+                    {
+                        if (properties.Count == 0)
+                        {
+                            // There's no constructor we can use,
+                            // but also no properties that can even be mapped, so just return null i guess?
+                            b.Line("return null;");
+                            return;
+                        }
+                        else
+                        {
+                            throw new Exception($"Unable to find an appropriate constructor for type {Model.FullyQualifiedName}");
+                        }
+                    }
 
                     var ctorParams = bestCtor.Properties;
                     foreach (var prop in ctorParams) properties.Remove(prop.Name);

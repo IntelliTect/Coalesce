@@ -148,7 +148,7 @@ exports.default = gulp.series(
     exports.copyAll, exports.watch
 );
 
-const coalesceKoGen = shell.task(`dotnet run --project ../../src/IntelliTect.Coalesce.DotnetTool --framework net6.0 -- ../../coalesce-ko.json`, { verbose: true });
+const coalesceKoGen = shell.task(`dotnet run --project ../../src/IntelliTect.Coalesce.DotnetCliTool --framework netcoreapp3.1 -- ../../coalesce-ko.json`, { verbose: true });
 coalesceKoGen.displayName = "coalesceKoGen";
 
 exports.coalesce = gulp.series(

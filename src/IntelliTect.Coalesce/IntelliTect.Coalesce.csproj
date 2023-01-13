@@ -24,9 +24,17 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.0.0" />
-		<PackageReference Include="System.Linq.Dynamic.Core" Version="1.0.19.0" />
+		<PackageReference Include="System.Linq.Dynamic.Core" Version="1.2.24" />
 	</ItemGroup>
+
+  <ItemGroup Condition="!$([MSBuild]::IsTargetFrameworkCompatible($(TargetFramework), 'netcoreapp3.1'))">
+    <!-- Stuck at this version because System.Runtime.CompilerServices.Unsafe doesn't work in netcoreapp2.1 (IntelliTect.Coalesce.DotnetCliTool) -->
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.1.0" />
+  </ItemGroup>
+
+  <ItemGroup Condition="$([MSBuild]::IsTargetFrameworkCompatible($(TargetFramework), 'netcoreapp3.1'))">
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.4.0" />
+  </ItemGroup>
 
 	<ItemGroup Condition="!$([MSBuild]::IsTargetFrameworkCompatible($(TargetFramework), 'net5.0'))">
 		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="[2.2,)" />

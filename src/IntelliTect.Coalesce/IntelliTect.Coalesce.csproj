@@ -24,7 +24,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="System.Linq.Dynamic.Core" Version="1.2.24" />
+    <!-- 1.0.22 is the last known working version. https://github.com/zzzprojects/System.Linq.Dynamic.Core/issues/662 -->
+    <PackageReference Include="System.Linq.Dynamic.Core" Version="1.0.19.0" />
 	</ItemGroup>
 
   <ItemGroup Condition="!$([MSBuild]::IsTargetFrameworkCompatible($(TargetFramework), 'netcoreapp3.1'))">

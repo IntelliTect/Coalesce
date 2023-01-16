@@ -69,7 +69,11 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         /// <summary>
         /// Email address of the person
         /// </summary>
+        [DataType(DataType.EmailAddress)]
         public string Email { get; set; }
+
+        [DataType(DataType.Password)]
+        public string SecretPhrase { get; set; }
 
         /// <summary>
         /// Genetic Gender of the person. 

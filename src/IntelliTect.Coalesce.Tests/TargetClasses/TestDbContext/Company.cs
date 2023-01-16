@@ -2,6 +2,7 @@
 using IntelliTect.Coalesce.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using IntelliTect.Coalesce.Helpers;
+using System.ComponentModel.DataAnnotations;
 
 namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
 {
@@ -17,6 +18,15 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         public string City { get; set; }
         public string State { get; set; }
         public string ZipCode { get; set; }
+
+        [DataType(DataType.PhoneNumber)]
+        public string Phone { get; set; }
+
+        [DataType(DataType.Url)]
+        public string WebsiteUrl { get; set; }
+
+        [DataType(DataType.ImageUrl)]
+        public string LogoUrl { get; set; }
 
         [InverseProperty("Company")]
         public ICollection<Person> Employees { get; set; }

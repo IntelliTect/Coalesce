@@ -42,6 +42,7 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         public string Title { get; set; }
 
         [Search]
+        [DataType(DataType.MultilineText)]
         public string Description { get; set; }
         
         public DateTimeOffset OpenedAt { get; set; }

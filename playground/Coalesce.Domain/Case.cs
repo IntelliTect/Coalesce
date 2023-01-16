@@ -89,6 +89,7 @@ namespace Coalesce.Domain
             public byte[] Content { get; set; }
         }
 
+        [DataType("Color")]
         public string Severity { get; set; }
 
         public Statuses Status { get; set; }

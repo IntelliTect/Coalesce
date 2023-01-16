@@ -2,6 +2,7 @@
 using IntelliTect.Coalesce.Models;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -66,6 +67,9 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         public byte[] ByteArrayProp { get; set; }
 
         public string String { get; set; }
+
+        [DataType("Color")]
+        public string Color { get; set; }
 
         [Search(SearchMethod = SearchAttribute.SearchMethods.Equals)]
         public string StringSearchedEqualsInsensitive { get; set; }

@@ -178,10 +178,23 @@ export default defineComponent({
             case "tel":
               attrs.type = valueMeta.subtype;
               break;
+
+            case "color":
+              // Make clicks on the entire vuetify text field element trigger the color picker.
+              // Without this, only clicks on the html input element itself, inside the text field, will open the picker.
+              addHandler(data.on, "mouseup", function (e: MouseEvent) {
+                const t = e.currentTarget as HTMLElement | null;
+                t?.matches(".v-input__slot") &&
+                  t.querySelector("input")?.click();
+              });
+              attrs.type = valueMeta.subtype;
+              break;
+
             case "url":
             case "url-image":
               attrs.type = "url";
               break;
+
             case "password":
               data.attrs = { ...data.attrs, ...data.props };
               return _c(passwordWrapper, data);

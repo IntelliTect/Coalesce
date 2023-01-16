@@ -143,6 +143,24 @@ export default defineComponent({
             src: valueString,
             title: valueString,
           });
+        case "color":
+          return _c(
+            props.element,
+            {
+              ...this.$attrs,
+              style: "white-space: nowrap",
+            },
+            [
+              _c("span", {
+                style: `background-color: ${valueString.replace(
+                  /[^A-Fa-f0-9#]/g,
+                  ""
+                )};`,
+                class: "c-display--color-swatch",
+              }),
+              valueString || this.$slots,
+            ] as any
+          );
         case "url":
         case "email":
         case "tel":

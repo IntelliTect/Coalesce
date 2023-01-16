@@ -688,7 +688,11 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                         // Others:
                         DataType.MultilineText => "multiline",
                         DataType.ImageUrl => "url-image",
-                        _ => null
+                        _ => definingMember.GetAttributeValue<DataTypeAttribute>(a => a.CustomDataType).ToLowerInvariant() switch
+                        {
+                            "color" => "color",
+                            _ => null
+                        }
                     }, omitIfNull: true);
                     break;
             }

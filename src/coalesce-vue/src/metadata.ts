@@ -297,6 +297,7 @@ export interface StringValue extends ValueMeta<"string"> {
     | "email"
     | "tel"
     | "multiline"
+    | "color"
     | "url-image";
 
   readonly rules?: Rules;

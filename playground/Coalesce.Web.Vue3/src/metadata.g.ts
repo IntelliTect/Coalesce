@@ -226,6 +226,7 @@ export const Case = domain.types.Case = {
       name: "severity",
       displayName: "Severity",
       type: "string",
+      subtype: 'color',
       role: "value",
     },
     status: {

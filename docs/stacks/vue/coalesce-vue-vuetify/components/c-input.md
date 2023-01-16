@@ -10,7 +10,9 @@ All attributes are passed through to the delegated-to component, allowing for fu
 
 A summary of the components delegated to, by type:
 
-- string: [v-text-field](https://vuetifyjs.com/en/components/text-fields/), or [v-textarea](https://vuetifyjs.com/en/components/textarea/) if flag attribute ``textarea`` is provided to ``c-input`` or if `[DataType(DataType.MultilineText)]` is present in C#.
+- string: 
+    - [v-textarea](https://vuetifyjs.com/en/components/textarea/) if flag attribute ``textarea`` is provided to ``c-input`` or if `[DataType(DataType.MultilineText)]` is present in C#.
+    - Otherwise, [v-text-field](https://vuetifyjs.com/en/components/text-fields/). Additionally, `[DataTypeAttribute]` values of `DataType.EmailAddress`, `DataType.PhoneNumber`, `DataType.Password`, or `"Color"` on the field will apply appropriate adjustments to the field.
 - number: [v-text-field](https://vuetifyjs.com/en/components/text-fields/).
 - boolean: [v-switch](https://vuetifyjs.com/en/components/selection-controls/), or [v-checkbox](https://vuetifyjs.com/en/components/selection-controls/) if flag attribute ``checkbox`` is provided to ``c-input``.
 - enum: [v-select](https://vuetifyjs.com/en/components/selects/)

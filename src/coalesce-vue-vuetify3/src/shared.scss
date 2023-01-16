@@ -49,3 +49,26 @@
 .c-password-display {
   white-space: nowrap;
 }
+
+.c-display--color-swatch {
+  border-radius: 0.5em;
+  height: 1em;
+  width: 1em;
+  display: inline-block;
+  vertical-align: text-top;
+  margin-right: 0.3ex;
+}
+
+.v-text-field input[type="color"] {
+  // These two swatch styles are crafted to make Chrome and FF look the same.
+
+  &::-webkit-color-swatch {
+    margin: -2px -2px;
+    border-radius: 4px;
+  }
+
+  &::-moz-color-swatch {
+    border-radius: 4px;
+    max-height: calc(100% - 9px);
+  }
+}

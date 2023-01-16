@@ -89,7 +89,6 @@ namespace Coalesce.Domain
             public byte[] Content { get; set; }
         }
 
-
         public string Severity { get; set; }
 
         public Statuses Status { get; set; }

@@ -145,6 +145,29 @@ export default defineComponent({
             ...ctx.data,
             attrs: { ...ctx.data.attrs, src: valueString, title: valueString },
           });
+        case "color":
+          return _c(
+            props.element,
+            {
+              ...ctx.data,
+              attrs: {
+                ...ctx.data.attrs,
+                style: "white-space: nowrap",
+              },
+            },
+            [
+              _c("span", {
+                attrs: {
+                  style: `background-color: ${valueString.replace(
+                    /[^A-Fa-f0-9#]/g,
+                    ""
+                  )};`,
+                  class: "c-display--color-swatch",
+                },
+              }),
+              valueString || ctx.children,
+            ]
+          );
         case "url":
         case "email":
         case "tel":

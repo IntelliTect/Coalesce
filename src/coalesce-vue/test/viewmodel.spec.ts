@@ -1,4 +1,10 @@
-import Vue, { defineComponent, nextTick, watch } from "vue";
+import Vue, {
+  defineComponent,
+  getCurrentInstance,
+  inject,
+  nextTick,
+  watch,
+} from "vue";
 import {
   AxiosClient,
   AxiosItemResult,
@@ -16,10 +22,11 @@ import {
 } from "./targets.viewmodels";
 import { Student, Advisor, Course, Grade } from "./targets.models";
 import * as metadata from "./targets.metadata";
-import { delay, mountData } from "./test-utils";
+import { delay, destroy, mountData } from "./test-utils";
 import { AxiosResponse } from "axios";
 
 import { mount } from "@vue/test-utils";
+import { IsVue2 } from "../src/util";
 
 function mockItemResult<T>(success: boolean, object: T) {
   return vitest.fn().mockResolvedValue(<AxiosItemResult<T>>{
@@ -789,6 +796,64 @@ describe("ViewModel", () => {
       // stopped user input.
       await delay(550);
       expect(saveMock).toBeCalledTimes(2);
+    });
+
+    test("works with setup()", async () => {
+      var student = new StudentViewModel({
+        studentId: 1,
+        name: "bob",
+      });
+      student.$isDirty = false;
+      const saveMock = (student.$apiClient.save = mockItemResult(true, {}));
+
+      const wrapper = mount(
+        defineComponent({
+          template: "<div></div>",
+          setup() {
+            student.name += "2";
+            expect(student.$isDirty).toBe(true);
+
+            // Autosave should trigger immediately since the model is dirty.
+            student.$startAutoSave(getCurrentInstance()!.proxy!, { wait: 0 });
+          },
+        })
+      );
+
+      await delay(10);
+      expect(saveMock).toBeCalledTimes(1);
+
+      // Watchers should be destroyed on component unmount.
+      destroy(wrapper);
+      expect((student as any)._autoSaveState.active).toBe(false);
+    });
+
+    test("useAutoSave works with setup()", async () => {
+      var student = new StudentViewModel({
+        studentId: 1,
+        name: "bob",
+      });
+      student.$isDirty = false;
+      const saveMock = (student.$apiClient.save = mockItemResult(true, {}));
+
+      const wrapper = mount(
+        defineComponent({
+          template: "<div></div>",
+          setup() {
+            student.name += "2";
+            expect(student.$isDirty).toBe(true);
+
+            // Autosave should trigger immediately since the model is dirty.
+            student.$useAutoSave({ wait: 0 });
+          },
+        })
+      );
+
+      await delay(10);
+      expect(saveMock).toBeCalledTimes(1);
+
+      // Watchers should be destroyed on component unmount.
+      destroy(wrapper);
+      expect((student as any)._autoSaveState.active).toBe(false);
     });
 
     describe("deep", () => {
@@ -1929,6 +1994,52 @@ describe("ListViewModel", () => {
       expect(item0).toBe(list.$items[0]);
       expect(item1).toBe(list.$items[1]);
       expect(item0.name).toBe("Steve");
+    });
+  });
+
+  describe("autoload", () => {
+    test("works with setup()", async () => {
+      var list = new StudentListViewModel();
+      const loadMock = (list.$apiClient.list = mockItemResult(true, {}));
+
+      const wrapper = mount(
+        defineComponent({
+          template: "<div></div>",
+          setup() {
+            list.$startAutoLoad(getCurrentInstance()!.proxy!, { wait: 0 });
+            list.$params.search = "a";
+          },
+        })
+      );
+
+      await delay(10);
+      expect(loadMock).toBeCalledTimes(1);
+
+      // Watchers should be destroyed on component unmount.
+      destroy(wrapper);
+      expect((list as any)._autoLoadState.active).toBe(false);
+    });
+
+    test("useAutoLoad works with setup()", async () => {
+      var list = new StudentListViewModel();
+      const loadMock = (list.$apiClient.list = mockItemResult(true, {}));
+
+      const wrapper = mount(
+        defineComponent({
+          template: "<div></div>",
+          setup() {
+            list.$useAutoLoad({ wait: 0 });
+            list.$params.search = "a";
+          },
+        })
+      );
+
+      await delay(10);
+      expect(loadMock).toBeCalledTimes(1);
+
+      // Watchers should be destroyed on component unmount.
+      destroy(wrapper);
+      expect((list as any)._autoLoadState.active).toBe(false);
     });
   });
 });

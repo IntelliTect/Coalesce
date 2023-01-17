@@ -122,7 +122,7 @@ You can setup [TypeScript List ViewModels](/stacks/disambiguation/list-view-mode
 <CodeTabs>
 <template #vue>
 
-To automatically reload a [ListViewModel](/stacks/vue/layers/viewmodels.md) when data source parameters change, simply use the list's `$startAutoLoad` function:
+To automatically reload a [ListViewModel](/stacks/vue/layers/viewmodels.md) when data source parameters change, simply use the list's `$useAutoLoad` or `$startAutoLoad` function:
 
 ``` ts
 import { Person } from '@/models.g';
@@ -130,7 +130,7 @@ import { PersonListViewModel } from '@/viewmodels.g';
 
 const list = new PersonListViewModel;
 const dataSource = list.$dataSource = new Person.DataSources.NamesStartingWith
-list.$startAutoLoad(this);
+list.$useAutoLoad(); // When using options API, use $startAutoLoad(this)
 
 // Trigger a reload:
 dataSource.startsWith = "Jo";

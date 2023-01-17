@@ -154,11 +154,11 @@ Getter/setter wrapper around `$params.includes`. See [Includes String](/concepts
 ### Auto-save & Dirty Flags
 
 
-<Prop def="$startAutosave(vue: Vue, options: AutoSaveOptions<this> = {})" lang="ts" />
+<Prop def="$useAutoSave(options: AutoSaveOptions<this> = {})" lang="ts" />
 
 Starts auto-saving of the instance when its savable data properties become dirty. Saves are performed with the `$save` [API Caller](/stacks/vue/layers/api-clients.md#api-callers) (documented above) and will not be performed if the ViewModel has any validation errors - see [Rules/Validation](/stacks/vue/layers/viewmodels.md#rules-validation) below.
 
-Requires a reference to a Vue instance in order to manage lifetime (auto-save hooks will be destroyed when the Vue component provided is destroyed). Options are as follows:
+This function is only usable with Vue composition API from within `setup()` or `<script setup>`. For options API or class components, use `$startAutoSave` instead.
 
 ``` ts
 { 
@@ -169,6 +169,9 @@ Requires a reference to a Vue instance in order to manage lifetime (auto-save ho
         reachable from the navigation properties & collections of the current view model. */
     deep?: boolean;
 
+    /** Additional options to pass to the third parameter of lodash's `debounce` function. */
+    debounce?: DebounceSettings;
+
     /** A function that will be called before autosaving that can return false to prevent a save. 
         Only allowed if not using deep auto-saves.
     */
@@ -176,7 +179,11 @@ Requires a reference to a Vue instance in order to manage lifetime (auto-save ho
 }
 ```
 
-<Prop def="$stopAutosave(): void" lang="ts" />
+<Prop def="$startAutoSave(vue: Vue, options: AutoSaveOptions<this> = {})" lang="ts" />
+
+Same as `$useAutoSave`, but requires a Vue instance in order to manage lifetime (auto-save hooks will be destroyed when the Vue component provided is destroyed). Usable from options API or class components (or advanced composition API scenarios - pass `getCurrentInstance().proxy` as the Vue instance.)
+
+<Prop def="$stopAutoSave(): void" lang="ts" />
     
 Turns off auto-saving of the instance. Does not recursively disable auto-saves on related instances if `deep` was used when auto-save was enabled.
 
@@ -186,11 +193,11 @@ Turns off auto-saving of the instance. Does not recursively disable auto-saves o
 Returns true if the given property is flagged as dirty.
 
 
-<Prop def="$setPropDirty(propName: string, dirty: boolean = true, triggerAutosave = true)" lang="ts" />
+<Prop def="$setPropDirty(propName: string, dirty: boolean = true, triggerAutoSave = true)" lang="ts" />
 
 Manually set the dirty flag of the given property to the desired state. This seldom needs to be done explicitly, as mutating a property will automatically flag it as dirty.
 
-If `dirty` is true and `triggerAutosave` is false, auto-save (if enabled) will not be immediately triggered for this specific flag change. Note that a future change to any other property's dirty flag will still trigger a save of all dirty properties.
+If `dirty` is true and `triggerAutoSave` is false, auto-save (if enabled) will not be immediately triggered for this specific flag change. Note that a future change to any other property's dirty flag will still trigger a save of all dirty properties.
 
 
 <Prop def="$isDirty: boolean" lang="ts" />
@@ -345,11 +352,11 @@ Shorthand for `$load.pageCount` - returns the page count reported by the last su
 ### Auto-Load
 
 
-<Prop def="$startAutoLoad(vue: Vue, options: AutoLoadOptions<this> = {})" lang="ts" />
+<Prop def="$useAutoLoad(options: AutoLoadOptions<this> = {})" lang="ts" />
 
 Starts auto-loading of the list as changes to its parameters occur. Loads are performed with the `$load` [API Caller](/stacks/vue/layers/api-clients.md#api-callers).
 
-Requires a reference to a Vue instance in order to manage lifetime (auto-load hooks will be destroyed when the Vue component provided is destroyed). Options are as follows:
+This function is only usable with Vue composition API from within `setup()` or `<script setup>`. For options API or class components, use `$startAutoLoad` instead.
 
 ``` ts
 { 
@@ -363,6 +370,10 @@ Requires a reference to a Vue instance in order to manage lifetime (auto-load ho
     predicate?: (viewModel: TThis) => boolean;
 }
 ```
+
+<Prop def="$startAutoLoad(vue: Vue, options: AutoLoadOptions<this> = {})" lang="ts" />
+
+Same as `$useAutoLoad`, but requires a Vue instance in order to manage lifetime (auto-load hooks will be destroyed when the Vue component provided is destroyed). Usable from options API or class components (or advanced composition API scenarios - pass `getCurrentInstance().proxy` as the Vue instance.)
 
 <Prop def="$stopAutoLoad()" lang="ts" />
 

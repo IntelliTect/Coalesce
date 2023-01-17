@@ -1,4 +1,10 @@
-import { onBeforeUnmount, reactive, ref, markRaw } from "vue";
+import {
+  onBeforeUnmount,
+  reactive,
+  ref,
+  markRaw,
+  getCurrentInstance,
+} from "vue";
 
 import { resolvePropMeta } from "./metadata.js";
 import type {
@@ -606,6 +612,20 @@ export abstract class ViewModel<
 
   /**
    * Starts auto-saving of the instance when changes to its savable data properties occur.
+   * Only usable from Vue setup() or <script setup>. Otherwise, use $startAutoSave().
+   * @param options Options to control how the auto-saving is performed.
+   */
+  public $useAutoSave(options: AutoSaveOptions<this> = {}) {
+    const vue = getCurrentInstance()?.proxy;
+    if (!vue)
+      throw new Error(
+        "$useAutoSave can only be used inside setup(). Consider using $startAutoSave if you're not using Vue composition API."
+      );
+    return this.$startAutoSave(vue, options);
+  }
+
+  /**
+   * Starts auto-saving of the instance when changes to its savable data properties occur.
    * @param vue A Vue instance through which the lifecycle of the watcher will be managed.
    * @param options Options to control how the auto-saving is performed.
    */
@@ -928,6 +948,20 @@ export abstract class ListViewModel<
 
   // Internal autoload state
   private _autoLoadState = new AutoCallState();
+
+  /**
+   * Starts auto-loading of the list as changes to its parameters occur.
+   * Only usable from Vue setup() or <script setup>. Otherwise, use $startAutoLoad().
+   * @param options Options that control the auto-load behavior.
+   */
+  public $useAutoLoad(options: AutoLoadOptions<this> = {}) {
+    const vue = getCurrentInstance()?.proxy;
+    if (!vue)
+      throw new Error(
+        "$useAutoLoad can only be used inside setup(). Consider using $startAutoSave if you're not using Vue composition API."
+      );
+    return this.$startAutoLoad(vue, options);
+  }
 
   /**
    * Starts auto-loading of the list as changes to its parameters occur.

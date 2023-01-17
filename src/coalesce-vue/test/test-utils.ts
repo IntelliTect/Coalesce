@@ -1,5 +1,6 @@
 import { mount } from "@vue/test-utils";
 import { defineComponent } from "vue";
+import { IsVue2 } from "../src/util";
 
 export const MetadataSymbol = Symbol("metadata");
 
@@ -55,4 +56,9 @@ export function mountData<T>(data: T) {
       },
     })
   ).vm;
+}
+
+
+export function destroy(wrapper: {destroy(): void} | {unmount(): void}) {
+  'destroy' in wrapper ? wrapper.destroy() : wrapper.unmount();
 }

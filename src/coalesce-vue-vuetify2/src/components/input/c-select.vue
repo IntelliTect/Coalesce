@@ -9,7 +9,9 @@
     :search-input.sync="search"
     :item-value="modelObjectMeta.keyProp.name"
     :return-object="true"
-    :clearable="effectiveClearable"
+    :clearable="isClearable"
+    :readonly="isReadonly"
+    :disabled="isDisabled"
     :rules="effectiveRules"
     :error-messages="error"
     no-filter
@@ -109,6 +111,8 @@ export default defineComponent({
   props: {
     ...makeMetadataProps(),
     clearable: { required: false, default: undefined, type: Boolean },
+    readonly: { required: false, default: undefined, type: Boolean },
+    disabled: { required: false, default: undefined, type: Boolean },
     value: { required: false },
     keyValue: { required: false },
     objectValue: { required: false },
@@ -124,6 +128,12 @@ export default defineComponent({
         getItem: (search: string, label: string) => Promise<Model<ModelType>>;
       }>,
     },
+  },
+
+  inject: {
+    // Read `readonly` and `disabled` from Vuetify form.
+    // TODO: Port to Vue3
+    form: { default: null },
   },
 
   data() {
@@ -166,6 +176,34 @@ export default defineComponent({
   },
 
   computed: {
+    isReadonly() {
+      return (
+        this.readonly ||
+        //@ts-expect-error `inject` is not typed in options API
+        this.form?.readonly
+      );
+    },
+
+    isDisabled() {
+      return (
+        this.disabled ||
+        //@ts-expect-error `inject` is not typed in options API
+        this.form?.disabled
+      );
+    },
+
+    /** The effective clearability state of the dropdown. */
+    isClearable(): boolean {
+      if (this.isReadonly || this.isDisabled) return false;
+
+      if (typeof this.clearable == "boolean")
+        // If explicitly given a value, use that value.
+        return this.clearable;
+
+      // Check to see if the foreign key is nullable (i.e. doesn't have a 'required' rule).
+      return !!(this.modelKeyProp && !this.modelKeyProp.rules?.required);
+    },
+
     loading() {
       return this.listCaller.isLoading || this.getCaller.isLoading;
     },
@@ -346,15 +384,6 @@ export default defineComponent({
       return [];
     },
 
-    /** The effective clearability state of the dropdown. */
-    effectiveClearable(): boolean {
-      // If explicitly given a value, use that value.
-      if (typeof this.clearable == "boolean") return this.clearable;
-
-      // Check to see if the foreign key is nullable (i.e. doesn't have a 'required' rule).
-      return !!(this.modelKeyProp && !this.modelKeyProp.rules?.required);
-    },
-
     items() {
       return this.listCaller.result || [];
     },
@@ -479,7 +508,7 @@ export default defineComponent({
       .$withSimultaneousRequestCaching()
       .$makeCaller(
         "item",
-        function (c) {
+        function () {
           throw "expected calls to be made with invokeWithArgs";
         },
         () => ({ id: null as any }),

@@ -26,7 +26,7 @@
     transition="slide-x-transition"
     offset-y
     offset-x
-    :disabled="isDisabled"
+    :disabled="!interactive"
     min-width="290px"
     content-class="c-datetime-picker--menu"
   >

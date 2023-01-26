@@ -3,7 +3,7 @@
 
 
     <c-input :model="caseVm" for="openedAt" @input="trace" />
-    <c-datetime-picker v-model="caseVm.openedAt" @input="trace" />
+    <c-datetime-picker v-model="caseVm.openedAt" @input="trace" readonly />
     <c-datetime-picker :model="caseVm" for="openedAt" @input="trace" side-by-side :allowed-minutes="[0,15,30,45]" />
 
     <c-select for="Person">

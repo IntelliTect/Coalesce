@@ -25,7 +25,7 @@
     transition="slide-x-transition"
     offset-y
     offset-x
-    :disabled="disabled"
+    :disabled="!interactive"
     min-width="290px"
   >
     <template #activator="{ on }">
@@ -178,9 +178,8 @@ export default defineComponent({
       }
       if (this.dateMeta) {
         if (!this.dateMeta.noOffset) {
-
           // date is a DateTimeOffset, so TZ conversions are meaningful.
-        return getDefaultTimeZone();
+          return getDefaultTimeZone();
         } else {
           // date is a DateTime, where TZ conversions would actually be harmful. Don't use the default.
           return null;

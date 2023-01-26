@@ -221,8 +221,8 @@ export function buildVuetifyAttrs(
         "rules" in valueMeta && valueMeta.rules
         ? Object.values(valueMeta.rules)
         : undefined,
-        
-      ...attrs,
+
+    ...attrs,
   };
 }
 
@@ -233,7 +233,7 @@ export function makeMetadataProps() {
       type: [String, Object] as PropType<ForSpec>,
       default: null,
     },
-    model: { type: Object as PropType<Model<ClassType>>, default: null },
+    model: { type: Object as PropType<Model<ClassType> | null>, default: null },
   };
 }
 

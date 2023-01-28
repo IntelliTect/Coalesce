@@ -2,6 +2,7 @@
 using IntelliTect.Coalesce.CodeGeneration.Vue.Utils;
 using IntelliTect.Coalesce.TypeDefinition;
 using IntelliTect.Coalesce.Utilities;
+using Newtonsoft.Json.Linq;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -27,6 +28,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                 {
                     foreach (var value in model.EnumValues)
                     {
+                        b.DocComment(value.Comment ?? value.Description);
                         b.Line($"{value.Name} = {value.Value},");
                     }
                 }
@@ -45,7 +47,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                 {
                     foreach (var prop in model.ClientProperties)
                     {
-                        b.DocComment(prop.Comment);
+                        b.DocComment(prop.Comment ?? prop.Description);
                         var typeString = new VueType(prop.Type.NullableUnderlyingType).TsType();
                         b.Line($"{prop.JsVariable}: {typeString} | null");
                     }
@@ -89,7 +91,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                                     b.Line($"readonly $metadata = {sourceMeta}");
                                     foreach (var param in source.DataSourceParameters)
                                     {
-                                        b.DocComment(param.Comment);
+                                        b.DocComment(param.Comment ?? param.Description);
                                         var typeString = new VueType(param.Type).TsType();
                                         b.Line($"{param.JsVariable}: {typeString} | null = null");
                                     }

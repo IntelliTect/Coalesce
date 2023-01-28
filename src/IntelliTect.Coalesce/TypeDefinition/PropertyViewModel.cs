@@ -34,7 +34,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public TypeViewModel Type { get; protected set; }
 
-        public abstract string Comment { get; }
+        public abstract string? Comment { get; }
 
         public abstract bool HasGetter { get; }
 

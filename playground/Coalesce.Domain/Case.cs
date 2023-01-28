@@ -33,6 +33,9 @@ namespace Coalesce.Domain
             [Display(Name = "Closed, No Solution", Description = "The case was closed without being solved.")]
             ClosedNoSolution,
 
+            /// <summary>
+            /// Case closed.
+            /// </summary>
             Cancelled
         }
 

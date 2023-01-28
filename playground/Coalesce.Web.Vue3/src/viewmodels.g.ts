@@ -8,11 +8,17 @@ export interface CaseViewModel extends $models.Case {
   /** The Primary key for the Case object */
   caseKey: number | null;
   title: string | null;
+  
+  /** User-provided description of the issue */
   description: string | null;
+  
+  /** Date and time when the case was opened */
   openedAt: Date | null;
   assignedToId: number | null;
   assignedTo: PersonViewModel | null;
   reportedById: number | null;
+  
+  /** Person who originally reported the case */
   reportedBy: PersonViewModel | null;
   attachmentSize: number | null;
   attachmentName: string | null;

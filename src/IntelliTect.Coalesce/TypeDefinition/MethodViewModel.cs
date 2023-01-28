@@ -37,7 +37,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// </summary>
         public bool IsAwaitable => ReturnType.IsA<Task>();
 
-        public abstract string Comment { get; }
+        public abstract string? Comment { get; }
 
         public abstract string Name { get; }
 

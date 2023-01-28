@@ -65,12 +65,12 @@ namespace IntelliTect.Coalesce.TypeDefinition
             return arg.Value;
         }
 
-        public static string ExtractXmlComments(this ISymbol symbol)
+        public static string? ExtractXmlComments(this ISymbol symbol)
         {
             string? xmlDocs = symbol.GetDocumentationCommentXml();
             if (string.IsNullOrEmpty(xmlDocs))
             {
-                return "";
+                return null;
             }
 
             try
@@ -90,7 +90,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 //Console.Error.WriteLine(ex);
             }
 
-            return "";
+            return null;
         }
     }
 }

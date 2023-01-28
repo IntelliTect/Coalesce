@@ -104,7 +104,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
                         member.GetAttributeValue<DisplayNameAttribute>(a => a.DisplayName) ??
                             member.GetAttributeValue<DisplayAttribute>(a => a.Name) ??
                             member.Name.ToProperCase(),
-                        member.GetAttributeValue<DisplayAttribute>(a => a.Description)
+                        member.GetAttributeValue<DisplayAttribute>(a => a.Description),
+                        member.ExtractXmlComments()
                     ));
                 }
 

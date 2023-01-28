@@ -25,7 +25,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public override string Name => Symbol.Name;
 
-        public override string Comment => Symbol.ExtractXmlComments();
+        public override string? Comment => Symbol.ExtractXmlComments();
 
         public override bool IsStatic => Symbol.IsStatic;
 

@@ -19,7 +19,11 @@ export enum Statuses {
   Open = 0,
   InProgress = 1,
   Resolved = 2,
+  
+  /** The case was closed without being solved. */
   ClosedNoSolution = 3,
+  
+  /** Case closed. */
   Cancelled = 4,
 }
 
@@ -37,11 +41,17 @@ export interface Case extends Model<typeof metadata.Case> {
   /** The Primary key for the Case object */
   caseKey: number | null
   title: string | null
+  
+  /** User-provided description of the issue */
   description: string | null
+  
+  /** Date and time when the case was opened */
   openedAt: Date | null
   assignedToId: number | null
   assignedTo: Person | null
   reportedById: number | null
+  
+  /** Person who originally reported the case */
   reportedBy: Person | null
   attachmentSize: number | null
   attachmentName: string | null

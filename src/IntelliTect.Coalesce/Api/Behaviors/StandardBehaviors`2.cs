@@ -37,23 +37,6 @@ namespace IntelliTect.Coalesce
 
         #region Save
 
-        protected override void MapIncomingDto<TDto>(SaveKind kind, T item, TDto dto, IDataSourceParameters parameters)
-        {
-            if (kind == SaveKind.Update)
-            {
-                // Ensure that the entity is tracked.
-                // We want to allow for item retrieval from data sources that build their query with .AsNoTracking().
-                // This is done before mapping so that EF can get the original state of the item.
-                var entry = Db.Entry(item);
-                if (entry.State == EntityState.Detached)
-                {
-                    entry.State = EntityState.Unchanged;
-                }
-            }
-
-            base.MapIncomingDto(kind, item, dto, parameters);
-        }
-
         /// <summary>
         /// Executes the save action against the database and saves the change.
         /// This may be overridden to change what action is actually performed against the database 
@@ -68,6 +51,19 @@ namespace IntelliTect.Coalesce
             if (kind == SaveKind.Create)
             {
                 GetDbSet().Add(item);
+            }
+            else if (kind == SaveKind.Update)
+            {
+                // Ensure that the entity is tracked.
+                // We want to allow for item retrieval from data sources that build their query with .AsNoTracking().
+                var entry = Db.Entry(item);
+                if (entry.State == EntityState.Detached)
+                {
+                    entry.State = EntityState.Unchanged;
+                    // When we start tracking `item`, at this point it already has the new incoming values on it,
+                    // so we have to teach EF what the old values were so that EF will update the correct properties.
+                    entry.OriginalValues.SetValues(oldItem);
+                }
             }
 
             return Db.SaveChangesAsync();

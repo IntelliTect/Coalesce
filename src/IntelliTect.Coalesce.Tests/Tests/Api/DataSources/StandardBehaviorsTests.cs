@@ -2,7 +2,9 @@
 using IntelliTect.Coalesce.Tests.Fixtures;
 using IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext;
 using IntelliTect.Coalesce.Tests.Util;
+using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -44,14 +46,41 @@ namespace IntelliTect.Coalesce.Tests.Api.DataSources
         [Fact]
         public async Task Save_HydratesResultWithDataSourceTransformAsync()
         {
-            var dto = new TestDto<Case>(1, c => { c.Description = "new desc"; });
             var ds = new TransformDs(CrudContext)
                 .AddModel(m => m.Title, "original title");
+
+            var dto = new TestDto<Case>(1, c => { c.Description = "new desc"; });
             var result = await Behaviors<Case>().SaveAsync(dto, ds, new DataSourceParameters());
 
             result.AssertSuccess();
             Assert.Equal("new desc", result.Object.SourceEntity.Description);
             Assert.Equal("TRANSFORMED", result.Object.SourceEntity.Title);
         }
+
+
+        private class UntrackedDs : StandardDataSource<Case, AppDbContext>
+        {
+            public UntrackedDs(CrudContext<AppDbContext> context) : base(context) { }
+            public override IQueryable<Case> GetQuery(IDataSourceParameters parameters) => base.GetQuery(parameters).AsNoTracking();
+        }
+
+#if NET6_0_OR_GREATER
+        [Fact]
+        public async Task Save_WhenDataSourceIsUntracked_RetracksEntityAndSaves()
+        {
+            // Arrange
+            var ds = new UntrackedDs(CrudContext)
+                .AddModel(new Case { CaseKey = 1, Description = "bob" });
+            ds.Db.ChangeTracker.Clear();
+
+            // Act
+            var dto = new TestDto<Case>(1, c => { c.Description = "new desc"; });
+            var result = await Behaviors<Case>().SaveAsync(dto, ds, new DataSourceParameters());
+
+            // Assert2: Entity saved as expected
+            ds.Db.ChangeTracker.Clear();
+            Assert.Equal("new desc", ds.Db.Cases.Single().Description);
+        }
+#endif
     }
 }

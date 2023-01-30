@@ -30,6 +30,9 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
             [Display(Name = "Closed, No Solution", Description = "Closed without any resolution.")]
             ClosedNoSolution,
 
+            /// <summary>
+            /// doc comment on enum member
+            /// </summary>
             Cancelled = 99
         }
         

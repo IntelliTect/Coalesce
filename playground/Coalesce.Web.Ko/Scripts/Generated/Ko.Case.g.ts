@@ -51,6 +51,8 @@ module ViewModels {
             return null;
         });
         public caseProducts: KnockoutObservableArray<ViewModels.CaseProduct> = ko.observableArray([]);
+        
+        /** Collection of related objects for many-to-many relationship Products via CaseProducts */
         public products: KnockoutObservableArray<ViewModels.Product> = ko.observableArray([]);
         public devTeamAssignedId: KnockoutObservable<number | null> = ko.observable(null);
         public devTeamAssigned: KnockoutObservable<ViewModels.DevTeam | null> = ko.observable(null);

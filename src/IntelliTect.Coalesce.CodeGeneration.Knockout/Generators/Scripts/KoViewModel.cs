@@ -71,10 +71,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
                     }
                     if (prop.IsManytoManyCollection)
                     {
-                        if (prop.Comment.Length > 0)
-                        {
-                            b.DocComment($"Collection of related objects for many-to-many relationship {prop.ManyToManyCollectionName} via {prop.Name}");
-                        }
+                        b.DocComment($"Collection of related objects for many-to-many relationship {prop.ManyToManyCollectionName} via {prop.Name}");
                         b.Line($"public {prop.ManyToManyCollectionName.ToCamelCase()}: KnockoutObservableArray<ViewModels.{prop.ManyToManyFarNavigationProperty.Object.ViewModelClassName}> = ko.observableArray([]);");
                     }
                 }

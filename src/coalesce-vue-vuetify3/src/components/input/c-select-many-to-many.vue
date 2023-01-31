@@ -244,13 +244,16 @@ export default defineComponent({
 
       const items: any[] = [];
 
+      // Check for deleted existing items
       this.internalValue.forEach((vm) => {
         if (!newItems.has(vm)) {
           if (vm instanceof ViewModel && this.canDelete) {
             this.pushLoader(vm.$delete);
+            this.$emit("deleting", vm);
             vm.$delete()
               .then(() => {
                 // Delete successful. No need to keep the state around.
+                this.$emit("deleted", vm);
                 this.currentLoaders = this.currentLoaders.filter(
                   (l) => l != vm.$delete
                 );
@@ -268,10 +271,7 @@ export default defineComponent({
         }
       });
 
-      // Handle many-to-many collections.
-      // The items available for selection will be unsaved model
-      // instances of the join table's type that contain the key values
-      // for either side of the relationship.
+      // Check for added new items
       newItems.forEach((i) => {
         if (!existingItems.has(i)) {
           const vm = ViewModelFactory.get(
@@ -285,9 +285,11 @@ export default defineComponent({
           items.push(vm);
 
           this.pushLoader(vm.$save);
+          this.$emit("adding", vm);
           vm.$save()
             .then(() => {
               // Save successful. No need to keep the state around.
+              this.$emit("added", vm);
               this.currentLoaders = this.currentLoaders.filter(
                 (l) => l != vm.$save
               );

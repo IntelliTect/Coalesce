@@ -59,6 +59,12 @@
                   v-bind="propInputBinds(prop)"
                   label=""
                   hide-details="auto"
+                  @deleted="
+                    // Reload when a c-select-many-to-many item is deleted,
+                    // since delete responses have no payloads and the delete
+                    // might have affected a computed property on the model
+                    model.$load()
+                  "
                 >
                   <div class="pt-md-3">
                     <c-admin-display :model="model" :for="prop" />

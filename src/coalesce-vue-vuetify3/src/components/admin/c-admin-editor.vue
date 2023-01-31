@@ -65,6 +65,12 @@
                       hide-details="auto"
                       density="compact"
                       variant="outlined"
+                      @deleted="
+                        // Reload when a c-select-many-to-many item is deleted,
+                        // since delete responses have no payloads and the delete
+                        // might have affected a computed property on the model
+                        model.$load()
+                      "
                     >
                       <c-admin-display :model="model" :for="prop" />
                     </c-input>

@@ -61,5 +61,11 @@ If binding the component with ``v-model``, accepts the ``value`` part of ``v-mod
 An optional set of [Data Source Standard Parameters](/modeling/model-components/data-sources.md#standard-parameters) to pass to API calls made to the server.
     
 
+## Events
+
+- `adding` - Fired when a new item has been selected, but before the call to `/save` has completed.
+- `added` - Fired when the call to `/save` has completed after adding a new item.
+- `deleting` - Fired when an item has been removed, but before the call to `/delete` has completed.
+- `deleted` - Fired when the call to `/delete` has completed after removing an item.
 
 

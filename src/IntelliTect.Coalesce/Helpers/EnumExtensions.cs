@@ -11,12 +11,12 @@ namespace IntelliTect.Coalesce.Helpers
     {
         public static string? GetDisplayName(this Enum value)
         {
-            var customAttribute = value.GetType()
-                                        .GetMember(value.ToString())
-                                        .First()
-                                        .GetCustomAttribute<DisplayAttribute>();
-            if (customAttribute == null) return value.ToString();
-            else return customAttribute.GetName();
+            return value.GetType()
+                .GetMember(value.ToString())
+                .First()
+                .GetCustomAttribute<DisplayAttribute>()
+                ?.GetName()
+                ?? value.ToString();
         }
     }
 }

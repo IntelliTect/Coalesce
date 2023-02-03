@@ -238,7 +238,13 @@ describe("ViewModel", () => {
       ]);
     });
 
-    test("when save mode is 'surgical' and model lacks PK, saves all props", async () => {
+    /** Note: This test used to assert the opposite - that we always save all props
+     * for a save of a model without a PK. However, doing so breaks https://github.com/IntelliTect/Coalesce/issues/276
+     * (Default values in C# were not respected for reference types, but they were respected for value types).
+     * I can't find any documented reason why I made it save all props during a Create when I made the change in Jan 2020,
+     * and since we have a documented reason for it to work otherwise now (Jan 2023), the behavior is changing.
+     */
+    test("when save mode is 'surgical' and model lacks PK, saves only dirty props", async () => {
       const student = new StudentViewModel({
         name: "Bob",
       });
@@ -251,12 +257,10 @@ describe("ViewModel", () => {
       }));
 
       student.$saveMode = "surgical";
-      student.$setPropDirty("name");
       await student.$save();
 
       expect(saveMock.mock.calls[0][0]).toBe(student);
-      // Fields should be null, causing all props to be saved.
-      expect(saveMock.mock.calls[0][1].fields).toBeNull();
+      expect(saveMock.mock.calls[0][1].fields).toEqual(["name"]);
     });
 
     test("when save mode is 'whole', saves all props", async () => {

@@ -443,10 +443,10 @@ export abstract class ViewModel<
 
           this.$savingProps = new Set(propsToSave);
 
-          // If doing surgical saves and the object already has a known PK,
+          // If doing surgical saves,
           // only save the props that are dirty and/or explicitly requested.
           const fields =
-            this.$saveMode == "surgical" && this.$primaryKey != null
+            this.$saveMode == "surgical"
               ? ([...this.$savingProps] as any)
               : null;
 

@@ -407,6 +407,9 @@ export interface PropertyBase {
   /** True if the property should be skipped when mapping to a DTO. */
   readonly dontSerialize?: boolean | undefined;
 
+  /** True if the property can only be changed on a create, but not on an update. */
+  readonly createOnly?: boolean | undefined;
+
   /** Enum indicating what admin views the property is hidden on, if any. */
   readonly hidden?: HiddenAreas;
 }

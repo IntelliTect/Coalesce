@@ -735,6 +735,7 @@ export const Company = domain.types.Company = {
       displayName: "Address1",
       type: "string",
       role: "value",
+      createOnly: true,
       rules: {
         required: val => (val != null && val !== '') || "Address1 is required.",
       }
@@ -1649,6 +1650,7 @@ export const ZipCode = domain.types.ZipCode = {
       displayName: "Zip",
       type: "string",
       role: "primaryKey",
+      createOnly: true,
       rules: {
         required: val => (val != null && val !== '') || "Zip is required.",
       }

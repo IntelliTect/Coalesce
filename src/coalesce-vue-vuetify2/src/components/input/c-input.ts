@@ -150,10 +150,11 @@ export default defineComponent({
     switch (valueMeta.type) {
       case "string":
       case "number":
-        if (valueMeta.role == "primaryKey") {
-          // If this is an editable primary key, emit the value on change (leaving the field)
+        if ("createOnly" in valueMeta && valueMeta.createOnly) {
+          // If this is a create-only property (e.g. an editable primary key),
+          // emit the value on change(leaving the field)
           // instead of on every keystroke. If we were to emit on every keystroke,
-          // the very first character the user types would end up as the PK.
+          // the very first character the user types would end up as the field value.
           addHandler(data.on, "change", onInput);
         } else {
           addHandler(data.on, "input", onInput);

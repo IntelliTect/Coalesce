@@ -40,7 +40,7 @@
         :append-icon="
           internalDateKind == 'time' ? 'fa fa-clock' : 'fa fa-calendar-alt'
         "
-        @change="textInputChanged"
+        @change="textInputChanged NOTE DOESNT WORK IN VUETIFY3 https://github.com/vuetifyjs/vuetify/issues/16637"
         @click:append="menu = !menu"
       ></v-text-field>
     </template>

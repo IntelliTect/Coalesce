@@ -156,11 +156,23 @@ export default defineComponent({
     switch (valueMeta.type) {
       case "string":
       case "number":
-        if (valueMeta.role == "primaryKey") {
+        if ("createOnly" in valueMeta && valueMeta.createOnly) {
           // If this is an editable primary key, emit the value on change (leaving the field)
           // instead of on every keystroke. If we were to emit on every keystroke,
           // the very first character the user types would end up as the PK.
-          addHandler(data, "change", onInput);
+          addHandler(data, "change", (valueOrEvent: Event | string) => {
+            if (valueOrEvent instanceof Event) {
+              // Vuetify3: workaround https://github.com/vuetifyjs/vuetify/issues/16637
+              if (
+                valueOrEvent.target instanceof HTMLInputElement ||
+                valueOrEvent.target instanceof HTMLTextAreaElement
+              ) {
+                onInput(valueOrEvent.target.value);
+              }
+            } else {
+              onInput(value);
+            }
+          });
         } else {
           addHandler(data, "update:modelValue", onInput);
         }

@@ -33,6 +33,9 @@ Any property that only has a getter will also have a corresponding property gene
 
 If such a property is defined as an auto-property, the `[NotMapped]` attribute should be used to prevent EF Core from attempting to map such a property to your database.
 
+### Init-only Properties
+Properties on [Entity Models](/modeling/model-types/entities.md) that use an `init` accessor rather than a `set` accessor will be implicitly treated as required, and can also only have a value provided when the entity is created for the first time. Any values provided during save actions for init-only properties when updating an existing entity will be ignored.
+
 
 
 ## Other Considerations

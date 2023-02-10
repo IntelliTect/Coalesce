@@ -732,6 +732,9 @@ export const Company = domain.types.Company = {
       displayName: "Address1",
       type: "string",
       role: "value",
+      rules: {
+        required: val => (val != null && val !== '') || "Address1 is required.",
+      }
     },
     address2: {
       name: "address2",

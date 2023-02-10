@@ -49,6 +49,11 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public abstract bool IsInitOnly { get; }
 
         /// <summary>
+        /// True if the property has the `required` C# language keyword, introduced in C# 7.
+        /// </summary>
+        public abstract bool HasRequiredKeyword { get; }
+
+        /// <summary>
         /// Convenient accessor for the PropertyInfo when in reflection-based contexts.
         /// </summary>
         public virtual PropertyInfo PropertyInfo => throw new InvalidOperationException("PropertyInfo not available in the current context");
@@ -262,6 +267,18 @@ namespace IntelliTect.Coalesce.TypeDefinition
             get
             {
                 if (this.HasAttribute<RequiredAttribute>()) return true;
+
+                if (HasRequiredKeyword) return true;
+
+                if (IsInitOnly && EffectiveParent.IsDbMappedType)
+                {
+                    // Init-only properties on entity types are inherently required
+                    // because they can't be set after the initial save.
+                    // TODO: Current frontend support for this needs to be better, though,
+                    // as the first modification to such a field will trigger an immediate autosave.
+                    // Behavior needs to be more like user-specified PKs where the field doesn't save until tabbed out of.
+                    return true;
+                }
 
                 // Explicit == false is intentional - if the parameter is missing, GetAttributeValue returns null.
                 if (this.GetAttributeValue<ClientValidationAttribute, bool>(a => a.IsRequired) == false)

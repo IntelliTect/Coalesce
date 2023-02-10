@@ -16,7 +16,7 @@ using Microsoft.AspNetCore.Hosting;
 namespace IntelliTect.Coalesce.Api.Controllers
 {
     public abstract class BaseApiController<T, TDto> : Controller
-        where T : class, new()
+        where T : class
         where TDto : class, IClassDto<T>, new()
     {
         protected BaseApiController()
@@ -81,7 +81,7 @@ namespace IntelliTect.Coalesce.Api.Controllers
     }
 
     public abstract class BaseApiController<T, TDto, TContext> : BaseApiController<T, TDto>
-        where T : class, new()
+        where T : class
         where TDto : class, IClassDto<T>, new()
         where TContext : DbContext
     {

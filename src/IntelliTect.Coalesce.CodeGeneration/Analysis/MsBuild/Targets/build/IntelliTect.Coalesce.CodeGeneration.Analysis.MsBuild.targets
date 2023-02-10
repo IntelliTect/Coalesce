@@ -20,6 +20,7 @@ Outputs the Project Information needed for CodeGeneration to a file.
       $(EvaluateProjectInfoForCodeGenerationDependsOn);
       ResolveReferences;
       ResolvePackageDependenciesDesignTime;
+	  AddImplicitDefineConstants;
     </EvaluateProjectInfoForCodeGenerationDependsOn>
   </PropertyGroup>
 
@@ -70,6 +71,7 @@ Outputs the Project Information needed for CodeGeneration to a file.
     <WriteLinesToFile Encoding="Unicode" File="$(OutputFile)" Lines="TargetDirectory: %22$(TargetDir.Replace('\', '/'))%22," />
     <WriteLinesToFile Encoding="Unicode" File="$(OutputFile)" Lines="DepsFile: %22$(ProjectDepsFileName)%22," />
     <WriteLinesToFile Encoding="Unicode" File="$(OutputFile)" Lines="RuntimeConfig: %22$(ProjectRuntimeConfigFileName)%22," />
+    <WriteLinesToFile Encoding="Unicode" File="$(OutputFile)" Lines="DefineConstants: %22$(DefineConstants)%22," />
 
 
     <WriteLinesToFile Encoding="Unicode" File="$(OutputFile)" Lines="}"/>

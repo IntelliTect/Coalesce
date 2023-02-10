@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 namespace IntelliTect.Coalesce
 {
     public abstract class StandardBehaviors<T> : IBehaviors<T>, IStandardCrudStrategy
-        where T : class, new()
+        where T : class
     {
         /// <summary>
         /// Contains contextual information about the request.
@@ -156,10 +156,19 @@ namespace IntelliTect.Coalesce
         /// <param name="item">The item that will be saved to the database.</param>
         /// <param name="dto">The incoming item from the client.</param>
         /// <param name="parameters">The additional parameters sent by the client.</param>
-        protected virtual void MapIncomingDto<TDto>(SaveKind kind, T item, TDto dto, IDataSourceParameters parameters)
+        protected virtual T MapIncomingDto<TDto>(SaveKind kind, T? item, TDto dto, IDataSourceParameters parameters)
             where TDto : class, IClassDto<T>, new()
         {
-            dto.MapToModel(item, new MappingContext(User, parameters));
+            var context = new MappingContext(User, parameters);
+            if (kind == SaveKind.Create)
+            {
+                return dto.MapToNew(context);
+            }
+            else
+            {
+                dto.MapToModel(item!, context);
+                return item!;
+            }
         }
 
         /// <summary>
@@ -219,16 +228,10 @@ namespace IntelliTect.Coalesce
             (SaveKind kind, object? idValue) = await DetermineSaveKindAsync(incomingDto, dataSource, parameters);
 
             T? originalItem = null;
-            T item;
+            T? item = null;
             IncludeTree? includeTree;
 
-            var includes = parameters.Includes;
-
-            if (kind == SaveKind.Create)
-            {
-                item = new T();
-            }
-            else
+            if (kind == SaveKind.Update)
             {
                 // Primary Key was defined. This object should exist in the database.
                 var (existingItem, _) = await (OverrideFetchForUpdateDataSource ?? dataSource).GetItemAsync(idValue!, parameters);
@@ -256,7 +259,7 @@ namespace IntelliTect.Coalesce
             }
 
             // Set all properties on the DB-mapped object to the incoming values.
-            MapIncomingDto(kind, item, incomingDto, parameters);
+            item = MapIncomingDto(kind, item, incomingDto, parameters) ?? item!;
 
             // Allow interception of the save.
             var beforeSave = await BeforeSaveAsync(kind, originalItem, item);
@@ -304,7 +307,7 @@ namespace IntelliTect.Coalesce
             }
 
             return new ItemResult<TDto?>(
-                item.MapToDto<T, TDto>(new MappingContext(User, includes), includeTree)
+                item.MapToDto<T, TDto>(new MappingContext(User, parameters.Includes), includeTree)
             );
         }
 

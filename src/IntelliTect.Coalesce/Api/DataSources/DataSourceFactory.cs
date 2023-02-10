@@ -46,8 +46,8 @@ namespace IntelliTect.Coalesce.Api.DataSources
         }
 
         public IDataSource<TServed> GetDataSource<TServed, TDeclaredFor>(string? dataSourceName)
-            where TServed : class, new()
-            where TDeclaredFor : class, new()
+            where TServed : class
+            where TDeclaredFor : class
         {
             return (IDataSource<TServed>)GetDataSource(
                 reflectionRepository.GetClassViewModel<TServed>()!,
@@ -89,8 +89,8 @@ namespace IntelliTect.Coalesce.Api.DataSources
         }
 
         public IDataSource<TServed> GetDefaultDataSource<TServed, TDeclaredFor>()
-            where TServed : class, new()
-            where TDeclaredFor : class, new()
+            where TServed : class
+            where TDeclaredFor : class
         {
             return (IDataSource<TServed>)GetDefaultDataSource(
                 reflectionRepository.GetClassViewModel<TServed>()!, 

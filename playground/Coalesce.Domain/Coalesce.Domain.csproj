@@ -40,7 +40,8 @@
 
   <ItemGroup>
     <PackageReference Include="GenFu" Version="1.4.22" />
-    
+    <PackageReference Include="Bogus" Version="34.0.2" />
+
     <!-- Necessary because GenFu has a hard dep against NETStandard.Library 1.6, which screws up a lot of things. -->
     <PackageReference Include="NETStandard.Library" Version="2.0.3" />
   </ItemGroup>

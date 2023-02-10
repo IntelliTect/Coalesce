@@ -6,7 +6,7 @@ namespace IntelliTect.Coalesce
 {
 
     public class StandardBehaviors<T, TContext> : StandardBehaviors<T>, IEntityFrameworkBehaviors<T, TContext>
-        where T : class, new()
+        where T : class
         where TContext : DbContext
     {
         /// <summary>
@@ -62,7 +62,7 @@ namespace IntelliTect.Coalesce
                     entry.State = EntityState.Unchanged;
                     // When we start tracking `item`, at this point it already has the new incoming values on it,
                     // so we have to teach EF what the old values were so that EF will update the correct properties.
-                    entry.OriginalValues.SetValues(oldItem);
+                    entry.OriginalValues.SetValues(oldItem!);
                 }
             }
 

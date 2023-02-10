@@ -712,7 +712,7 @@ export const Company = domain.types.Company = {
   type: "model",
   controllerRoute: "Company",
   get keyProp() { return this.props.id }, 
-  behaviorFlags: 6,
+  behaviorFlags: 7,
   props: {
     id: {
       name: "id",
@@ -726,12 +726,18 @@ export const Company = domain.types.Company = {
       displayName: "Name",
       type: "string",
       role: "value",
+      rules: {
+        required: val => (val != null && val !== '') || "Name is required.",
+      }
     },
     address1: {
       name: "address1",
       displayName: "Address1",
       type: "string",
       role: "value",
+      rules: {
+        required: val => (val != null && val !== '') || "Address1 is required.",
+      }
     },
     address2: {
       name: "address2",

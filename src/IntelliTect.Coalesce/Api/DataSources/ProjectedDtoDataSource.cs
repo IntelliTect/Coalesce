@@ -27,7 +27,7 @@ namespace IntelliTect.Coalesce
     /// <typeparam name="TDto">The <see cref="IClassDto{T}"/> type to project to.</typeparam>
     /// <typeparam name="TContext">The <see cref="DbContext"/> to query from.</typeparam>
     public abstract class ProjectedDtoDataSource<T, TDto, TContext> : StandardDataSource<T, TContext>
-        where T : class, new()
+        where T : class
         where TDto : class, IClassDto<T>, new()
         where TContext : DbContext
     {

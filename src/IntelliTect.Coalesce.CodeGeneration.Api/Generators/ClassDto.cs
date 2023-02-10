@@ -169,7 +169,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                     var ctorParams = bestCtor.Properties;
                     foreach (var prop in ctorParams) properties.Remove(prop.Name);
 
-                    var initParams = properties.Values.Where(p => p.IsInitOnly).ToList();
+                    var initParams = properties.Values.Where(p => p.IsInitOnly || p.HasRequiredKeyword).ToList();
                     foreach (var prop in initParams) properties.Remove(prop.Name);
 
                     if (!ctorParams.Any() && !initParams.Any())

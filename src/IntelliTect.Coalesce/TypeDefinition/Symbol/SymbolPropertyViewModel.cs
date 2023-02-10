@@ -37,6 +37,13 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public override bool IsInitOnly => Symbol.SetMethod?.IsInitOnly == true;
 
+        public override bool HasRequiredKeyword =>
+#if NETCOREAPP3_1_OR_GREATER
+            Symbol.IsRequired;
+#else
+            false;
+#endif
+
         public override bool IsVirtual => Symbol.IsVirtual;
 
         public override bool IsInternalUse => base.IsInternalUse || Symbol.DeclaredAccessibility != Accessibility.Public;

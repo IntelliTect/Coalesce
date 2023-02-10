@@ -344,7 +344,7 @@ Simply create a class that implements `IEntityFrameworkDataSource<,>` (the `Stan
 
 ``` c#
 public class MyDataSource<T, TContext> : StandardDataSource<T, TContext>
-    where T : class, new()
+    where T : class
     where TContext : DbContext
 {
     public MyDataSource(CrudContext<TContext> context) : base(context)

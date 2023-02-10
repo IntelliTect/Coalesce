@@ -153,9 +153,9 @@ Returns a `DbSet<T>` that items can be added to (creates) or remove from (delete
 Provides a chance to validate the properties of the DTO object itself, as opposed to the properties of the model after the DTO has been mapped to it in `BeforeSave`. A number of extension methods on `IClassDto<T>` can be used to access the value of the properties of [Generated C# DTOs](/stacks/agnostic/dtos.md). For behaviors on [Custom DTOs](/modeling/model-types/dtos.md) where the DTO type is known, simply cast to the correct type. 
 
 
-<Prop def="void MapIncomingDto<TDto>(SaveKind kind, T item, TDto dto, IDataSourceParameters parameters)" />
+<Prop def="T MapIncomingDto<TDto>(SaveKind kind, T? item, TDto dto, IDataSourceParameters parameters)" />
 
-Map the properties of the incoming DTO to the model that will be saved to the database. By default, this will call the `MapTo` method on the DTO, but if more precise control is needed, the `IClassDto<T>` extension methods or a cast to a known type can be used to get specific values. If all else fails, the DTO can be reflected upon.
+Map the properties of the incoming DTO to the model that will be saved to the database. For a `SaveKind.Create`, this will call the `MapToNew` method on the DTO and a new instance must be returned (`item` will be null). For a `SaveKind.Update`, this will call the `MapTo` method on the DTO, and the incoming `item` must be returned. If more precise control is needed, extension methods on `IClassDto<T>` or casting to a known type can be used to get specific values. If all else fails, the DTO can be reflected upon.
 
 
 <Prop def="Task<ItemResult> BeforeSaveAsync(SaveKind kind, T? oldItem, T item);
@@ -206,7 +206,7 @@ Simply create a class that implements `IEntityFrameworkBehaviors<,>` (the `Stand
 
 ``` c#
 public class MyBehaviors<T, TContext> : StandardBehaviors<T, TContext>
-    where T : class, new()
+    where T : class
     where TContext : DbContext
 {
     public MyBehaviors(CrudContext<TContext> context) : base(context)

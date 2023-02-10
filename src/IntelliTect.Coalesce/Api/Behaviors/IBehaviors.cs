@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace IntelliTect.Coalesce
 {
     public interface IBehaviors<T>
-        where T : class, new()
+        where T : class
     {
         /// <summary>
         /// Given the incoming DTO, discern from its properties whether the save action

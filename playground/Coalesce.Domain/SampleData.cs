@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Bogus;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,8 +29,11 @@ namespace Coalesce.Domain
 
                 if (!context.Companies.Any())
                 {
-                    GenFu.GenFu.Configure<Company>().Fill(c => c.Id, () => 0);
-                    var companies = GenFu.GenFu.ListOf<Company>(10);
+                    // TODO: Convert everything to Bogus(Faker), remove GenFu (abandoned, doesn't support C# required).
+                    var companies = new Faker<Company>()
+                        .RuleFor(c => c.Id, () => 0)
+                        .RuleFor(c => c.Name, f => f.Company.CompanyName())
+                        .Generate(10);
                     context.Companies.AddRange(companies);
                     context.SaveChanges();
                 }

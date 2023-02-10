@@ -712,7 +712,7 @@ export const Company = domain.types.Company = {
   type: "model",
   controllerRoute: "Company",
   get keyProp() { return this.props.id }, 
-  behaviorFlags: 6,
+  behaviorFlags: 7,
   props: {
     id: {
       name: "id",

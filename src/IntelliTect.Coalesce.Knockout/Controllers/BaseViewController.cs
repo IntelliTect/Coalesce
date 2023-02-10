@@ -14,7 +14,7 @@ using System.Net;
 namespace IntelliTect.Coalesce.Knockout.Controllers
 {
     public abstract class BaseViewController<T> : Controller
-        where T : class, new()
+        where T : class
     {
         protected ClassViewModel ClassViewModel { get; }
 

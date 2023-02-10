@@ -40,6 +40,13 @@ namespace IntelliTect.Coalesce.TypeDefinition
             => false;
 #endif
 
+        public override bool HasRequiredKeyword =>
+#if NET7_0_OR_GREATER
+            this.HasAttribute<System.Runtime.CompilerServices.RequiredMemberAttribute>();
+#else
+            false;
+#endif
+
         public override bool IsInternalUse => base.IsInternalUse || Info.GetGetMethod(true)?.IsPublic != true;
 
         public override object? GetAttributeValue<TAttribute>(string valueName)

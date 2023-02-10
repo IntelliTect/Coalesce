@@ -9,14 +9,23 @@ using System.ComponentModel.DataAnnotations;
 namespace Coalesce.Domain
 {
     [Table("Company")]
-    [Create(PermissionLevel = SecurityPermissionLevels.DenyAll)]
     public class Company
     {
 #nullable disable
         [Column("CompanyId")]
         public int Id { get; set; }
+
+
+#if NET7_0_OR_GREATER
+        required
+#endif
         public string Name { get; set; }
+
+#if NET6_0_OR_GREATER
+        public string Address1 { get; init; }
+#else
         public string Address1 { get; set; }
+#endif
         public string Address2 { get; set; }
         [Hidden(HiddenAttribute.Areas.List)]
         public string City { get; set; }

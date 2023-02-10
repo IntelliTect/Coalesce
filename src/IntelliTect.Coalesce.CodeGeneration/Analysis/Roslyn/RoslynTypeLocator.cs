@@ -40,12 +40,16 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.Roslyn
                 throw new FileNotFoundException($"Couldn't find project in workspace with project file name {projectFileName}");
             }
 
+            var parseOptions = ((CSharpParseOptions)project.ParseOptions)
+                .WithPreprocessorSymbols(_projectContext.MsBuildProjectContext.DefineConstants.Split(new[] { ';', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries));
+
             if (_projectContext.LangVersion != null)
             {
-                project = project.WithParseOptions(((CSharpParseOptions)project.ParseOptions).WithLanguageVersion(_projectContext.LangVersion.Value));
+                parseOptions = parseOptions.WithLanguageVersion(_projectContext.LangVersion.Value);
             }
 
             _compilation = project
+                .WithParseOptions(parseOptions)
                 .WithMetadataReferences(_projectContext.GetMetadataReferences())
                 .GetCompilationAsync().Result;
 

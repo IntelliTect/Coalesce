@@ -11,7 +11,7 @@ namespace IntelliTect.Coalesce
     /// <typeparam name="T">The entity type handled.</typeparam>
     /// <typeparam name="TContext">The context that serves the entity.</typeparam>
     public interface IEntityFrameworkBehaviors<T, TContext> : IBehaviors<T>
-        where T : class, new()
+        where T : class
         where TContext : DbContext
     {
     }

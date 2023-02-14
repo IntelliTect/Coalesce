@@ -56,6 +56,11 @@
           page-break-inside: avoid;
         }
       }
+
+      [title]:not(.badge) {
+        text-decoration: underline dotted;
+        text-decoration-thickness: 1px;
+      }
     </style>
   </head>
   <body>
@@ -262,7 +267,7 @@
                         Generated DTO Properties
                       </h4>
 
-                      <properties-table :type="type"></properties-table>
+                      <properties-table :type="type" :is-crud="true"></properties-table>
 
                       <div
                         v-if="type.dtoBaseType"
@@ -323,7 +328,7 @@
                   <div class="card mb-4">
                     <div class="card-body">
                       <h4 class="card-title">Generated DTO Properties</h4>
-                      <properties-table :type="type"></properties-table>
+                      <properties-table :type="type" :is-crud="false"></properties-table>
                     </div>
                   </div>
                 </div>
@@ -416,8 +421,12 @@
         <thead>
           <tr>
             <th>Name</th>
-            <th width="100px">Read</th>
-            <th width="100px">Write</th>
+            <th width="100px" title="Security rules for any place that this entity is served in a response to the client.">Read</th>
+            <template v-if="isCrud">
+              <th width="100px" title="Security rules for Create saves, and usage as a custom method parameter.">Create</th>
+              <th width="100px" title="Security rules for Edit saves.">Edit</th>
+            </template>
+            <th v-else width="100px">Write</th>
           </tr>
         </thead>
         <tbody>
@@ -432,10 +441,32 @@
             <template v-if="type.dtoBaseType">
               <td><span class="badge bg-custom-code">Custom</span></td>
               <td><span class="badge bg-custom-code">Custom</span></td>
+              <td><span class="badge bg-custom-code">Custom</span></td>
             </template>
             <template v-else>
-              <td v-for="action in [prop.read, prop.edit]">
-                <security-badge :action="action"></security-badge>
+              <td>
+                <security-badge :action="prop.read"></security-badge>
+              </td>
+              <td>
+                <security-badge :action="prop.init"></security-badge>
+                <div v-if="prop.isPrimaryKey && !prop.isCreateOnly"
+                     class="text-muted"
+                     title="The property is the primary key. &#013;&#013;During a save, its absence is what triggers a Create save. &#013;As a custom method parameter, it is mapped like any other property.">
+                  <small>🔑 PK</small>
+                </div>
+                <div v-if="prop.isPrimaryKey && prop.isCreateOnly"
+                     class="text-muted"
+                     title="The property is the primary key. &#013;&#013;During a save, an existing entity with this key will be looked up in the database, and the absence of a match is what triggers a Create save. &#013;As a custom method parameter, it is mapped like any other property.">
+                  <small>🔑 PK</small>
+                </div>
+              </td>
+              <td v-if="isCrud">
+                <security-badge :action="prop.edit"></security-badge>
+                <div v-if="prop.isPrimaryKey"
+                      class="text-muted"
+                      title="The property is the primary key. &#013;&#013;During an Edit, it is used to look up the existing entity to edit.">
+                  <small>🔑 PK</small>
+                </div>
               </td>
             </template>
           </tr>
@@ -457,6 +488,7 @@
         <span
           v-if="action.noAccess"
           class="badge border border-danger text-dark"
+          :title="action.reason"
         >
           Deny
         </span>
@@ -466,12 +498,19 @@
         <span
           v-else
           class="badge"
-          :class="action.isUnused ? 'border border-success text-dark' : !action.hasRoles ? 'bg-success' : 'bg-success'"
-          :title="action.isUnused ? 'Analyzed as unused by any API endpoint.' : !action.hasRoles ? 'No specific role requirements' : 'One of these roles is required: \n' + action.roleList.join('\n')"
+          :class="action.isUnused ? 'border text-dark' : !action.hasRoles ? 'bg-success' : 'bg-success'"
+          :title="
+              ('Allow' + ('allowAnonymous' in action ? ' Authenticated' : '')) + ' - ' +
+              (!action.hasRoles ? 'No specific role requirements' : 'One of these roles is required: \n' + action.roleList.join('\n')) +
+              (action.isUnused ? '\n\nAnalyzed as unused by any API endpoint.' : '')
+            "
         >
-          Allow {{'allowAnonymous' in action ? 'Authenticated' : ''}}
-          <div v-if="action.roleList.length" class="fw-normal text-start">
-            {{action.roles}}
+          <div v-if="action.isUnused">Unused</div>
+          <div v-else>
+            Allow {{'allowAnonymous' in action ? 'Authenticated' : ''}}
+            <div v-if="action.roleList.length" class="fw-normal text-start">
+              {{action.roles}}
+            </div>
           </div>
         </span>
       </span>
@@ -511,7 +550,7 @@
       });
       app.component("properties-table", {
         template: "#properties-table",
-        props: ["type"],
+        props: ["type", "isCrud"],
       });
       app.component("usages-table", {
         template: "#usages-table",

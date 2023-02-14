@@ -590,6 +590,27 @@ export class ProductListViewModel extends ListViewModel<$models.Product, $apiCli
 }
 
 
+export interface StandaloneReadCreateViewModel extends $models.StandaloneReadCreate {
+  id: number | null;
+  name: string | null;
+  date: Date | null;
+}
+export class StandaloneReadCreateViewModel extends ViewModel<$models.StandaloneReadCreate, $apiClients.StandaloneReadCreateApiClient, number> implements $models.StandaloneReadCreate  {
+  
+  constructor(initialData?: DeepPartial<$models.StandaloneReadCreate> | null) {
+    super($metadata.StandaloneReadCreate, new $apiClients.StandaloneReadCreateApiClient(), initialData)
+  }
+}
+defineProps(StandaloneReadCreateViewModel, $metadata.StandaloneReadCreate)
+
+export class StandaloneReadCreateListViewModel extends ListViewModel<$models.StandaloneReadCreate, $apiClients.StandaloneReadCreateApiClient, StandaloneReadCreateViewModel> {
+  
+  constructor() {
+    super($metadata.StandaloneReadCreate, new $apiClients.StandaloneReadCreateApiClient())
+  }
+}
+
+
 export interface StandaloneReadonlyViewModel extends $models.StandaloneReadonly {
   id: number | null;
   name: string | null;
@@ -680,6 +701,7 @@ const viewModelTypeLookup = ViewModel.typeLookup = {
   Log: LogViewModel,
   Person: PersonViewModel,
   Product: ProductViewModel,
+  StandaloneReadCreate: StandaloneReadCreateViewModel,
   StandaloneReadonly: StandaloneReadonlyViewModel,
   StandaloneReadWrite: StandaloneReadWriteViewModel,
   ZipCode: ZipCodeViewModel,
@@ -693,6 +715,7 @@ const listViewModelTypeLookup = ListViewModel.typeLookup = {
   Log: LogListViewModel,
   Person: PersonListViewModel,
   Product: ProductListViewModel,
+  StandaloneReadCreate: StandaloneReadCreateListViewModel,
   StandaloneReadonly: StandaloneReadonlyListViewModel,
   StandaloneReadWrite: StandaloneReadWriteListViewModel,
   ZipCode: ZipCodeListViewModel,

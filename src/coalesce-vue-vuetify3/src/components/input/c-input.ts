@@ -157,9 +157,10 @@ export default defineComponent({
       case "string":
       case "number":
         if ("createOnly" in valueMeta && valueMeta.createOnly) {
-          // If this is an editable primary key, emit the value on change (leaving the field)
+          // If this is a create-only property (e.g. an editable primary key),
+          // emit the value on change(leaving the field)
           // instead of on every keystroke. If we were to emit on every keystroke,
-          // the very first character the user types would end up as the PK.
+          // the very first character the user types would end up as the field value.
           addHandler(data, "change", (valueOrEvent: Event | string) => {
             if (valueOrEvent instanceof Event) {
               // Vuetify3: workaround https://github.com/vuetifyjs/vuetify/issues/16637

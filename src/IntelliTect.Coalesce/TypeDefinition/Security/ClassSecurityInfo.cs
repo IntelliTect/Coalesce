@@ -38,14 +38,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
             if (ClassViewModel.Type.IsAbstract)
             {
                 notMutable = true;
-
-                // Abstract classes currently can't be readable because BaseApiController
-                // has a `new()` constraint on its `T` (because of its usage of Behaviors<T>).
-                // If this ever became important, we could do some refactoring to make this possible.
-
-                // TODO: This constraint is no longer in place, but removing this rule will require
-                // additional considerations that I'm unable to consider at this very moment.
-                notReadable = true; 
             }
 
             if (!ClassViewModel.WillCreateApiController)
@@ -70,7 +62,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
             Edit = new SecurityPermission(
                 level: 
-                    notMutable ? SecurityPermissionLevels.DenyAll : 
+                    notMutable ? SecurityPermissionLevels.DenyAll :
                     editAttribute.PermissionLevel,
                 roles: editAttribute.Roles,
                 name: editAttribute.Name

@@ -98,10 +98,11 @@ namespace IntelliTect.Coalesce.TypeDefinition
         }
 
         public override IReadOnlyCollection<MethodViewModel> Constructors => Symbol.GetMembers()
-            .Where(f => f.Kind == SymbolKind.Method && f.DeclaredAccessibility == Accessibility.Public)
+            .Where(m => m.Kind == SymbolKind.Method && m.DeclaredAccessibility == Accessibility.Public)
             .Cast<IMethodSymbol>()
-            .Where(f => f.MethodKind == MethodKind.Constructor)
-            .Select(s => new SymbolMethodViewModel(s, this))
+            .Where(m => m.MethodKind == MethodKind.Constructor)
+            .Select(m => new SymbolMethodViewModel(m, this))
+            .Where(m => !m.IsInternalUse)
             .ToList();
 
         protected override IReadOnlyCollection<TypeViewModel> RawNestedTypes => Symbol

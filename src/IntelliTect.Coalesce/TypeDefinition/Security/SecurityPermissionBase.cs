@@ -11,6 +11,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
     {
         public string Roles { get; protected set; } = "";
         public string Name { get; protected set; } = "";
+        public string Reason { get; protected set; } = "";
         public bool HasRoles => RoleList.Count > 0;
 
         public bool NoAccess { get; protected set; }

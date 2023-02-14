@@ -274,6 +274,11 @@ export class ProductApiClient extends ModelApiClient<$models.Product> {
 }
 
 
+export class StandaloneReadCreateApiClient extends ModelApiClient<$models.StandaloneReadCreate> {
+  constructor() { super($metadata.StandaloneReadCreate) }
+}
+
+
 export class StandaloneReadonlyApiClient extends ModelApiClient<$models.StandaloneReadonly> {
   constructor() { super($metadata.StandaloneReadonly) }
 }

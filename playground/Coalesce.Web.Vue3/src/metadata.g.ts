@@ -1553,6 +1553,48 @@ export const Product = domain.types.Product = {
   dataSources: {
   },
 }
+export const StandaloneReadCreate = domain.types.StandaloneReadCreate = {
+  name: "StandaloneReadCreate",
+  displayName: "Standalone Read Create",
+  get displayProp() { return this.props.name }, 
+  type: "model",
+  controllerRoute: "StandaloneReadCreate",
+  get keyProp() { return this.props.id }, 
+  behaviorFlags: 5,
+  props: {
+    id: {
+      name: "id",
+      displayName: "Id",
+      type: "number",
+      role: "primaryKey",
+      hidden: 3,
+    },
+    name: {
+      name: "name",
+      displayName: "Name",
+      type: "string",
+      role: "value",
+    },
+    date: {
+      name: "date",
+      displayName: "Date",
+      type: "date",
+      dateKind: "datetime",
+      role: "value",
+    },
+  },
+  methods: {
+  },
+  dataSources: {
+    defaultSource: {
+      type: "dataSource",
+      name: "DefaultSource",
+      displayName: "Default Source",
+      props: {
+      },
+    },
+  },
+}
 export const StandaloneReadonly = domain.types.StandaloneReadonly = {
   name: "StandaloneReadonly",
   displayName: "Standalone Readonly",
@@ -1988,6 +2030,7 @@ interface AppDomain extends Domain {
     PersonStats: typeof PersonStats
     Product: typeof Product
     ProductDetails: typeof ProductDetails
+    StandaloneReadCreate: typeof StandaloneReadCreate
     StandaloneReadonly: typeof StandaloneReadonly
     StandaloneReadWrite: typeof StandaloneReadWrite
     StreetAddress: typeof StreetAddress

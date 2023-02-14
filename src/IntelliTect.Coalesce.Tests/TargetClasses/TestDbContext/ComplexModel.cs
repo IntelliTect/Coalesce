@@ -192,6 +192,16 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
 #endif
     }
 
+    [Create(SecurityPermissionLevels.DenyAll)]
+    [Edit(SecurityPermissionLevels.DenyAll)]
+    public class ReadOnlyEntityUsedAsMethodInput
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        [Coalesce]
+        public static void StaticCreate(ReadOnlyEntityUsedAsMethodInput foo) { }
+    }
+
     public class RequiredAndInitModel
     {
         public int Id { get; set; }

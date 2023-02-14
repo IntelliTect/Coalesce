@@ -284,16 +284,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                     b.Line("dontSerialize: true,");
                 }
 
-                if (
-                    // User-determined PKs,
-                    (prop.Role == PropertyRole.PrimaryKey && prop.DatabaseGenerated == System.ComponentModel.DataAnnotations.Schema.DatabaseGeneratedOption.None) ||
-                    // And init-only properties
-                    (prop.IsInitOnly && prop.EffectiveParent.IsDbMappedType)
-                )
+                if (prop.IsCreateOnly)
                 {
-                    // ...must be fully provided by the user before we perform the initial save.
-                    // This lets the UI wait for the user to leave the field before accepting their input for the field
-                    // in order to avoid autosave just taking the first character that they type.
                     b.Line("createOnly: true,");
                 }
 

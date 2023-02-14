@@ -9,21 +9,20 @@ namespace IntelliTect.Coalesce.TypeDefinition
 {
     public class PropertySecurityPermission : SecurityPermissionBase
     {
-        private readonly Func<PropertyViewModel, HashSet<PropertyViewModel>, bool?> computeIsUnused;
-        private PropertyViewModel prop { get; }
+        private Func<PropertyViewModel, HashSet<PropertyViewModel>, bool?> ComputeIsUnused { get; }
+        private PropertyViewModel Prop { get; }
 
         internal PropertySecurityPermission(
-            PropertyViewModel prop, 
-            bool allow, 
+            PropertyViewModel prop,
+            string name,
             string? roles, 
-            string name, 
-            Func<PropertyViewModel, HashSet<PropertyViewModel>, bool?>? computeIsUnused = null
+            Func<PropertyViewModel, HashSet<PropertyViewModel>, bool?> computeIsUnused
         )
         {
-            NoAccess = !allow;
+            NoAccess = false;
             Roles = NoAccess ? string.Empty : roles ?? "";
             Name = name;
-            this.prop = prop;
+            Prop = prop;
             
             // Unused-ness is lazily computed because if we did it eagerly,
             // we could enter infinte recusion when examining the SecurityInfo of other properties.
@@ -31,13 +30,27 @@ namespace IntelliTect.Coalesce.TypeDefinition
             // Another note about analysys of IsUnused - it cannot be used to affect code generation output
             // because it will yield incorrect results when multiple code gens with different RootTypesWhitelist
             // are ran against the same codebase. 
-            this.computeIsUnused = computeIsUnused ?? (allow ? (_, _) => false : (_, _) => true);
+            ComputeIsUnused = computeIsUnused;
+        }
+
+        internal PropertySecurityPermission(
+            PropertyViewModel prop,
+            string name,
+            string denyReason
+        )
+        {
+            NoAccess = true;
+            Roles = string.Empty;
+            Name = name;
+            Reason = denyReason;
+            Prop = prop;
+            ComputeIsUnused = (_, _) => true; // a NoAccess permission is always unused
         }
 
         /// <summary>
         /// Whether static analysis has determined that the action on the property is not used by any API endpoint.
         /// </summary>
-        public bool IsUnused => computeIsUnused(prop, new())!.Value;
+        public bool IsUnused => ComputeIsUnused(Prop, new())!.Value;
 
         public override bool IsAllowed(ClaimsPrincipal? user)
         {

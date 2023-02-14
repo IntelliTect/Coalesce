@@ -61,14 +61,14 @@ namespace IntelliTect.Coalesce.Validation
                         assert.IsNull(prop.GetAttributeValue<EditAttribute, SecurityPermissionLevels>(a => a.PermissionLevel),
                             "Property-level EditAttribute security doesn't support the PermissionLevel property");
                         assert.IsFalse(prop.HasAttribute<CreateAttribute>(),
-                            "Property-level security doesn't support CreateAttribute");
+                            "Property-level security doesn't support CreateAttribute. To make create-only properties, use an init accessor on the property instead of a set accessor.");
                         assert.IsFalse(prop.HasAttribute<DeleteAttribute>(),
                             "Property-level security doesn't support DeleteAttribute");
 
                         if (model.IsDto)
                         {
                             const string dtoPropSecWarningPreamble =
-                                "Property-level security for an IClassDto must be implemented in MapTo/MapFrom, or in a DataSource or Behaviors. ";
+                                "Property-level security for an IClassDto must be implemented in MapTo/MapToNew/MapFrom, or in a DataSource or Behaviors. ";
 
                             assert.IsFalse(prop.HasAttribute<ReadAttribute>(),
                                 dtoPropSecWarningPreamble + "ReadAttribute has no effect here.");

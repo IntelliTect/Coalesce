@@ -108,6 +108,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
 
                     WriteSetters(Model
                         .ClientProperties
+                        .Where(p => p.SecurityInfo.Read.IsAllowed())
                         .OrderBy(p => p.PureType.HasClassViewModel)
                         .Select(ModelToDtoPropertySetter));
                 }
@@ -122,10 +123,10 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
 
                     WriteSetters(Model
                         .ClientProperties
-                        .Where(p => p.IsClientSerializable && !p.IsInitOnly)
+                        .Where(p => p.SecurityInfo.Edit.IsAllowed())
                         .Select(p =>
                         {
-                            var (conditional, setter) = DtoToModelPropertySetter(p);
+                            var (conditional, setter) = DtoToModelPropertySetter(p, p.SecurityInfo.Edit);
                             return (conditional, $"if (ShouldMapTo(nameof({p.Name}))) entity.{p.Name} = {setter};");
                         }));
                 }
@@ -135,7 +136,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                 {
                     var properties = Model
                         .ClientProperties
-                        .Where(p => p.IsClientSerializable)
+                        .Where(p => p.SecurityInfo.Init.IsAllowed())
                         .ToDictionary(p => p.Name, StringComparer.OrdinalIgnoreCase);
 
                     // Find the best ctor.
@@ -212,7 +213,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                     WriteSetters(properties.Values
                         .Select(p =>
                         {
-                            var (conditional, setter) = DtoToModelPropertySetter(p);
+                            var (conditional, setter) = DtoToModelPropertySetter(p, p.SecurityInfo.Init);
                             return (conditional, $"if (ShouldMapTo(nameof({p.Name}))) entity.{p.Name} = {setter};");
                         }));
 
@@ -223,7 +224,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                     {
                         // Init-only props must be set here where we instantiate the type.
                         // They cannot be handled by the record
-                        var (conditional, setter) = DtoToModelPropertySetter(p, fallbackPrefix: null);
+                        var (conditional, setter) = DtoToModelPropertySetter(p, p.SecurityInfo.Init, fallbackPrefix: null);
+
                         if (!string.IsNullOrWhiteSpace(conditional))
                         {
                             return $"({conditional}) ? {setter} : default";
@@ -242,27 +244,20 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
         /// taking into account the current user and whether the property mapping is incoming or outgoing.
         /// </summary>
         /// <param name="property">The property whose permissions will be evaluated.</param>
-        /// <param name="isForEdit">True to get a conditional for mapping incoming data, false for mapping outgoing data.</param>
+        /// <param name="permission">The permission info to pull the required roles from.</param>
         /// <returns></returns>
-        private string GetPropertySetterConditional(PropertyViewModel property, bool isForEdit)
+        private string GetPropertySetterConditional(PropertyViewModel property, PropertySecurityPermission permission)
         {
             string RoleCheck(string role) => $"context.IsInRoleCached(\"{role.EscapeStringLiteralForCSharp()}\")";
             string IncludesCheck(string include) => $"includes == \"{include.EscapeStringLiteralForCSharp()}\"";
 
-            string readRoles = string.Join(" || ", property.SecurityInfo.Read.RoleList.Select(RoleCheck));
-
-            string editRoles = default;
-            if (isForEdit)
-            {
-                editRoles = string.Join(" || ", property.SecurityInfo.Edit.RoleList.Select(RoleCheck));
-            }
+            string roles = string.Join(" || ", permission.RoleList.Select(RoleCheck));
 
             var includes = string.Join(" || ", property.DtoIncludes.Select(IncludesCheck));
             var excludes = string.Join(" || ", property.DtoExcludes.Select(IncludesCheck));
 
             var statement = new List<string>();
-            if (!string.IsNullOrEmpty(readRoles)) statement.Add($"({readRoles})");
-            if (!string.IsNullOrEmpty(editRoles)) statement.Add($"({editRoles})");
+            if (!string.IsNullOrEmpty(roles)) statement.Add($"({roles})");
             if (!string.IsNullOrEmpty(includes)) statement.Add($"({includes})");
             if (!string.IsNullOrEmpty(excludes)) statement.Add($"!({excludes})");
 
@@ -273,7 +268,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
         /// Get the conditional and a C# expression that will map the property from a DTO to a local model object.
         /// </summary>
         private (string conditional, string setter) DtoToModelPropertySetter(
-            PropertyViewModel property, 
+            PropertyViewModel property,
+            PropertySecurityPermission permission,
             string fallbackPrefix = "entity."
         )
         {
@@ -320,7 +316,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                 setter = $"{newValue}";
             }
 
-            var statement = GetPropertySetterConditional(property, true);
+            var statement = GetPropertySetterConditional(property, permission);
             if (!string.IsNullOrWhiteSpace(statement))
             {
                 return (statement, setter);
@@ -442,7 +438,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                 setter = $"{objectName}.{name} = obj.{name};";
             }
 
-            var statement = GetPropertySetterConditional(property, false);
+            var statement = GetPropertySetterConditional(property, property.SecurityInfo.Read);
             if (!string.IsNullOrWhiteSpace(statement))
             {
                 return (statement, setter);

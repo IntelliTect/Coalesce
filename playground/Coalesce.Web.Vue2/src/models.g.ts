@@ -512,6 +512,38 @@ export class ProductDetails {
 }
 
 
+export interface StandaloneReadCreate extends Model<typeof metadata.StandaloneReadCreate> {
+  id: number | null
+  name: string | null
+  date: Date | null
+}
+export class StandaloneReadCreate {
+  
+  /** Mutates the input object and its descendents into a valid StandaloneReadCreate implementation. */
+  static convert(data?: Partial<StandaloneReadCreate>): StandaloneReadCreate {
+    return convertToModel(data || {}, metadata.StandaloneReadCreate) 
+  }
+  
+  /** Maps the input object and its descendents to a new, valid StandaloneReadCreate implementation. */
+  static map(data?: Partial<StandaloneReadCreate>): StandaloneReadCreate {
+    return mapToModel(data || {}, metadata.StandaloneReadCreate) 
+  }
+  
+  /** Instantiate a new StandaloneReadCreate, optionally basing it on the given data. */
+  constructor(data?: Partial<StandaloneReadCreate> | {[k: string]: any}) {
+      Object.assign(this, StandaloneReadCreate.map(data || {}));
+  }
+}
+export namespace StandaloneReadCreate {
+  export namespace DataSources {
+    
+    export class DefaultSource implements DataSource<typeof metadata.StandaloneReadCreate.dataSources.defaultSource> {
+      readonly $metadata = metadata.StandaloneReadCreate.dataSources.defaultSource
+    }
+  }
+}
+
+
 export interface StandaloneReadonly extends Model<typeof metadata.StandaloneReadonly> {
   id: number | null
   name: string | null

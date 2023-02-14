@@ -47,6 +47,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             .GetConstructors()
             .Where(m => m.IsPublic && !m.IsSpecialName)
             .Select(m => new ReflectionMethodViewModel(this, m))
+            .Where(m => !m.IsInternalUse)
             .Cast<MethodViewModel>()
             .ToList()
             .AsReadOnly();

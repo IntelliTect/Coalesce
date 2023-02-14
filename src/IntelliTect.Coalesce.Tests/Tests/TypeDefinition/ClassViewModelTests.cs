@@ -48,16 +48,19 @@ namespace IntelliTect.Coalesce.Tests.TypeDefinition
         }
 
         [Theory]
-        [ClassViewModelData(typeof(ExternalParentAsInputOnly), false, true)]
-        [ClassViewModelData(typeof(ExternalChildAsInputOnly), false, true)]
-        [ClassViewModelData(typeof(ExternalParentAsOutputOnly), true, false)]
-        [ClassViewModelData(typeof(ExternalChildAsOutputOnly), true, false)]
-        public void ExternalType_PropertySecurityReflectsActualUsage(ClassViewModelData data, bool read, bool write)
+        [ClassViewModelData(typeof(ExternalParentAsInputOnly), false, true, false)]
+        [ClassViewModelData(typeof(ExternalChildAsInputOnly), false, true, false)]
+        [ClassViewModelData(typeof(ExternalParentAsOutputOnly), true, false, false)]
+        [ClassViewModelData(typeof(ExternalChildAsOutputOnly), true, false, false)]
+        [ClassViewModelData(typeof(ReadOnlyEntityUsedAsMethodInput), true, true, false)]
+        public void PropertySecurityIsUnused_ReflectsActualUsage(
+            ClassViewModelData data, bool read, bool init, bool edit)
         {
             Assert.All(data.ClassViewModel.ClientProperties, p =>
             {
                 Assert.Equal(read, !p.SecurityInfo.Read.IsUnused);
-                Assert.Equal(write, !p.SecurityInfo.Edit.IsUnused);
+                Assert.Equal(init, !p.SecurityInfo.Init.IsUnused);
+                Assert.Equal(edit, !p.SecurityInfo.Edit.IsUnused);
             });
         }
 

@@ -20,23 +20,27 @@ namespace IntelliTect.Coalesce.TypeDefinition
             var read = prop.GetSecurityPermission<ReadAttribute>();
             var edit = prop.GetSecurityPermission<EditAttribute>();
 
-            if (
-                read.NoAccess ||
-                !prop.IsClientProperty
-            )
+            string? readDenyReason =
+                read.NoAccess ? "Property annotated with [Read(SecurityPermissionLevels.DenyAll)]" :
+                !prop.HasGetter ? "Property has no get accessor" :
+                prop.IsInternalUse ? "Property annotated with [InternalUse]" :
+                !prop.IsClientProperty ? "Other" :
+                null;
+
+            if (readDenyReason != null)
             {
-                Read = new PropertySecurityPermission(prop, false, null, read.Name);
+                Read = new PropertySecurityPermission(prop, read.Name, readDenyReason);
             }
             else
             {
-
-                Read = new PropertySecurityPermission(prop, true, read.Roles, read.Name, IsReadUnused);
+                Read = new PropertySecurityPermission(prop, read.Name, read.Roles, IsReadUnused);
             }
 
-            if (
-                edit.NoAccess ||
-                !prop.IsClientProperty ||
-                !prop.HasPublicSetter ||
+
+            string? editDenyReason =
+                edit.NoAccess ? "Property annotated with [Edit(SecurityPermissionLevels.DenyAll)]" :
+                !prop.HasPublicSetter ? "Property has no public set accessor" :
+                prop.IsInternalUse ? "Property annotated with [InternalUse]" :
 
                 // Properties with a [Read] attribute but no [Edit] attribute
                 // are read-only. This is for multiple reasons:
@@ -44,28 +48,58 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 //    just /feels/ like it should be read-only.
                 // 2) It avoids accidents by omission - applying specific permissions for reading
                 //    but not applying permissions for editing is probably an accident that would otherwise introduce a security hole.
-                (read.HasAttribute && !edit.HasAttribute) ||
+                (read.HasAttribute && !edit.HasAttribute) ? "Property has [Read] attribute, but doesn't have an [Edit] attribute" :
 
-                prop.HasAttribute<ReadOnlyAttribute>() ||
+                prop.HasAttribute<ReadOnlyAttribute>() ? "Property annotated with [ReadOnly]" :
 
 #pragma warning disable CS0618 // Type or member is obsolete
-                prop.HasAttribute<ReadOnlyApiAttribute>() ||
+                prop.HasAttribute<ReadOnlyApiAttribute>() ? "Property annotated with [ReadOnlyApi]" :
 #pragma warning restore CS0618 // Type or member is obsolete
 
                 // Non-value properties arent writable unless they're owned by an external type,
                 // or the type of the property is an external type.
-                (prop.PureType.IsPOCO && (prop.Parent.IsDbMappedType || prop.Object!.IsDbMappedType))
-            )
+                (prop.PureType.IsPOCO && (prop.Parent.IsDbMappedType || prop.Object!.IsDbMappedType)) ? "Property is non-scalar and type is DB mapped." :
+
+                !prop.IsClientProperty ? "Other" :
+                null;
+
+            if (editDenyReason != null)
             {
-                Edit = new PropertySecurityPermission(prop, false, null, edit.Name);
+                // Property is readonly.
+                Init = new PropertySecurityPermission(prop, nameof(Init), editDenyReason);
+                Edit = new PropertySecurityPermission(prop, edit.Name, editDenyReason);
             }
             else
             {
-                Edit = new PropertySecurityPermission(prop, true, edit.Roles, edit.Name, IsEditUnused);
+                // Property accepts input from clients.
+
+                var roles = string.Join(",", edit.RoleList.Concat(read.RoleList).Distinct());
+                Init = new PropertySecurityPermission(prop, "Init", roles, IsInitUnused);
+
+                if (prop.IsInitOnly)
+                {
+                    Edit = new PropertySecurityPermission(prop, edit.Name, "Property uses an init accessor.");
+                }
+                else
+                {
+                    Edit = new PropertySecurityPermission(prop, edit.Name, roles, IsEditUnused);
+                }
             }
         }
 
+        /// <summary>
+        /// Security applied when sending a value to the client.
+        /// </summary>
         public PropertySecurityPermission Read { get; }
+
+        /// <summary>
+        /// Security applied when accepting a value from the client onto a new instance of the object.
+        /// </summary>
+        public PropertySecurityPermission Init { get; }
+
+        /// <summary>
+        /// Security applied when accepting a value from the client onto an existing instance of the object.
+        /// </summary>
         public PropertySecurityPermission Edit { get; }
 
         /// <summary>
@@ -74,7 +108,12 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public bool IsReadAllowed(ClaimsPrincipal? user) => Read.IsAllowed(user);
 
         /// <summary>
-        /// If true, the user can edit the field.
+        /// If true, the user can initialize the field on a new instance of the object.
+        /// </summary>
+        public bool IsInitAllowed(ClaimsPrincipal? user) => Init.IsAllowed(user);
+
+        /// <summary>
+        /// If true, the user can edit the field on an existing instance of the object.
         /// </summary>
         public bool IsEditAllowed(ClaimsPrincipal? user) => Edit.IsAllowed(user);
 
@@ -88,25 +127,26 @@ namespace IntelliTect.Coalesce.TypeDefinition
             if (value is PropertyViewModel p)
             {
                 if (!visited.Add(p)) return null;
-                if (visited.Count > 1 && !p.SecurityInfo.Read.IsAllowed()) return true;
+                if (!p.SecurityInfo.Read.IsAllowed()) return true;
 
-                if (p.EffectiveParent is { IsDbMappedType: true } or { IsStandaloneEntity: true })
-                {
-                    // Reads will be done by generated APIs
-                    return p.EffectiveParent.SecurityInfo.Read.NoAccess;
-                }
-
+                // Check for recursive usages where the action might be conclusively used.
                 foreach (var usage in p.EffectiveParent.Usages)
                 {
                     if (IsReadUnused(usage, visited) == false) return false;
+                }
+
+                // If nothing was found recusively, use the API permissions of the type if it has a CRUD api.
+                if (p.EffectiveParent is { IsDbMappedType: true } or { IsStandaloneEntity: true })
+                {
+                    return p.EffectiveParent.SecurityInfo.Read.NoAccess;
                 }
             }
             return true;
         }
 
-        private static bool? IsEditUnused(IValueViewModel value, HashSet<PropertyViewModel> visited)
+        private static bool? IsInitUnused(IValueViewModel value, HashSet<PropertyViewModel> visited)
         {
-            // The client needs to Edit/Write to parameters, so edit is NOT unused.
+            // The client needs to instantiate parameters, so edit is NOT unused.
             if (value is ParameterViewModel) return false;
             // The client only needs to Read from method returns, so edit IS unused.
             if (value is MethodReturnViewModel) return true;
@@ -114,17 +154,45 @@ namespace IntelliTect.Coalesce.TypeDefinition
             if (value is PropertyViewModel p)
             {
                 if (!visited.Add(p)) return null;
-                if (visited.Count > 1 && !p.SecurityInfo.Edit.IsAllowed()) return true;
+                if (!p.SecurityInfo.Init.IsAllowed()) return true;
 
-                if (p.EffectiveParent is { IsDbMappedType: true } or { IsStandaloneEntity: true })
+                // Check for recursive usages where the action might be conclusively used.
+                foreach (var usage in p.EffectiveParent.Usages)
                 {
-                    // Edits will be done by generated APIs
-                    return p.EffectiveParent.SecurityInfo.Save.NoAccess;
+                    if (IsInitUnused(usage, visited) == false) return false;
                 }
 
+                // If nothing was found recusively, use the API permissions of the type if it has a CRUD api.
+                if (p.EffectiveParent is { IsDbMappedType: true } or { IsStandaloneEntity: true })
+                {
+                    return p.EffectiveParent.SecurityInfo.Create.NoAccess;
+                }
+            }
+            return true;
+        }
+
+        private static bool? IsEditUnused(IValueViewModel value, HashSet<PropertyViewModel> visited)
+        {
+            // Parameters always instantiate new objects, so edit IS unused.
+            if (value is ParameterViewModel) return true;
+            // The client only needs to Read from method returns, so edit IS unused.
+            if (value is MethodReturnViewModel) return true;
+
+            if (value is PropertyViewModel p)
+            {
+                if (!visited.Add(p)) return null;
+                if (!p.SecurityInfo.Edit.IsAllowed()) return true;
+
+                // Check for recursive usages where the action might be conclusively used.
                 foreach (var usage in p.EffectiveParent.Usages)
                 {
                     if (IsEditUnused(usage, visited) == false) return false;
+                }
+
+                // If nothing was found recusively, use the API permissions of the type if it has a CRUD api.
+                if (p.EffectiveParent is { IsDbMappedType: true } or { IsStandaloneEntity: true })
+                {
+                    return p.EffectiveParent.SecurityInfo.Edit.NoAccess;
                 }
             }
             return true;
@@ -132,7 +200,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public override string ToString()
         {
-            return $"Read:{Read}  Edit:{Edit}";
+            return $"Read:{Read}  Init:{Init}  Edit:{Edit}";
         }
 
     }

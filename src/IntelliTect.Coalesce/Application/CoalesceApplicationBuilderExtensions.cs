@@ -181,7 +181,10 @@ public static class CoalesceApplicationBuilderExtensions
             p.Name,
             Type = GetTypeInfo(p.Type),
             p.SecurityInfo.Read,
-            p.SecurityInfo.Edit
+            p.SecurityInfo.Init,
+            p.SecurityInfo.Edit,
+            p.IsCreateOnly,
+            p.IsPrimaryKey
         };
 
         object GetMethodInfo(MethodViewModel m) => new

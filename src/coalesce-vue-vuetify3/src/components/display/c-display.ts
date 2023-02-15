@@ -1,12 +1,10 @@
-import { defineComponent, Prop, h as _c, PropType, mergeProps } from "vue";
-import { ForSpec, getValueMeta } from "../c-metadata-component";
+import { defineComponent, Prop, h, PropType, mergeProps } from "vue";
+import { getValueMeta, makeMetadataProps } from "../c-metadata-component";
 import {
   propDisplay,
   valueDisplay,
   Property,
   DisplayOptions,
-  Model,
-  ClassType,
   DateValue,
 } from "coalesce-vue";
 
@@ -29,7 +27,7 @@ const passwordWrapper = defineComponent({
     };
   },
   render() {
-    return _c(
+    return h(
       this.element,
       mergeProps(this.$attrs, {
         class: this.shown
@@ -37,7 +35,7 @@ const passwordWrapper = defineComponent({
           : "c-password-display c-password-display--hidden",
       }),
       [
-        _c("i", {
+        h("i", {
           class: [!this.shown ? "fa fa-eye" : "fa fa-eye-slash", "pr-1"],
           role: "button",
           pressed: this.shown,
@@ -52,15 +50,18 @@ const passwordWrapper = defineComponent({
 
 export const cDisplayProps = {
   element: { type: String, default: "span" },
-  for: { required: false, type: [String, Object] as PropType<ForSpec> },
-  model: { type: Object as PropType<Model<ClassType>> },
 
+  ...makeMetadataProps(),
+
+  /** Options for formatting the output.
+   * See [DisplayOptions](https://intellitect.github.io/Coalesce/stacks/vue/layers/models.html#displayoptions). */
   options: {
     required: false,
     type: Object as PropType<DisplayOptions>,
     default: null,
   },
-  // Shorthand for { options: format }
+
+  /** Shorthand for `:options="{ format: ... }"` */
   format: {
     required: false,
     type: [String, Object] as PropType<DisplayOptions["format"]>,
@@ -77,8 +78,6 @@ export default defineComponent({
   props: cDisplayProps,
 
   render() {
-    // NOTE: CreateElement fn must be named `_c` for unplugin-vue-components to work correctly.
-
     const props = this.$props;
     const model = props.model;
     const valueProp = props.modelValue ?? props.value;
@@ -87,7 +86,7 @@ export default defineComponent({
       // If no model and no value were provided, just display nothing.
       // This isn't an error case - it just means the thing we're trying to display
       // is `null`-ish, and should be treated the same way that vue would treat {{null}}
-      return _c(props.element);
+      return h(props.element);
     }
 
     const modelMeta = model ? model.$metadata : null;
@@ -124,12 +123,13 @@ export default defineComponent({
     if (meta.type === "string" && valueString) {
       switch (meta.subtype) {
         case "password":
-          return _c(passwordWrapper, {
+          return h(passwordWrapper, {
             ...this.$attrs,
             value: valueString,
           });
+
         case "multiline":
-          return _c(
+          return h(
             props.element,
             {
               ...this.$attrs,
@@ -137,21 +137,23 @@ export default defineComponent({
             },
             valueString || this.$slots
           );
+
         case "url-image":
-          return _c("img", {
+          return h("img", {
             ...this.$attrs,
             src: valueString,
             title: valueString,
           });
+
         case "color":
-          return _c(
+          return h(
             props.element,
             {
               ...this.$attrs,
               style: "white-space: nowrap",
             },
             [
-              _c("span", {
+              h("span", {
                 style: `background-color: ${valueString.replace(
                   /[^A-Fa-f0-9#]/g,
                   ""
@@ -161,6 +163,7 @@ export default defineComponent({
               valueString || this.$slots,
             ] as any
           );
+
         case "url":
         case "email":
         case "tel":
@@ -175,7 +178,7 @@ export default defineComponent({
           if (href) {
             try {
               new URL(valueString, window.location.origin);
-              return _c(
+              return h(
                 "a",
                 {
                   ...this.$attrs,
@@ -194,6 +197,6 @@ export default defineComponent({
       }
     }
 
-    return _c(props.element, this.$attrs, valueString || this.$slots);
+    return h(props.element, this.$attrs, valueString || this.$slots);
   },
 });

@@ -128,7 +128,9 @@
           </div>
 
           <c-display
-            v-else-if="caller.result != null"
+            v-else-if="
+              caller.result != null && methodMeta.return.type !== 'void'
+            "
             element="pre"
             class="c-method--result-value"
             v-model="caller.result"
@@ -237,7 +239,7 @@ export default defineComponent({
         await this.viewModel.$load();
       }
       if (this.methodMeta.autoClear) {
-        this.caller.resetArgs()
+        this.caller.resetArgs();
       }
     },
 
@@ -250,7 +252,7 @@ export default defineComponent({
         this.viewModel.$load();
       }
       if (this.methodMeta.autoClear) {
-        this.caller.resetArgs()
+        this.caller.resetArgs();
       }
 
       this.downloadFileResult();

@@ -1,8 +1,8 @@
-import { defineComponent, Prop, h as _c, toHandlerKey, PropType } from "vue";
+import { defineComponent, Prop, h, toHandlerKey } from "vue";
 import {
   buildVuetifyAttrs,
-  ForSpec,
   getValueMeta,
+  makeMetadataProps,
 } from "../c-metadata-component";
 import {
   Model,
@@ -13,7 +13,6 @@ import {
   AnyArgCaller,
   ApiState,
   parseValue,
-  EnumMember,
 } from "coalesce-vue";
 
 import CSelect from "./c-select.vue";
@@ -46,7 +45,7 @@ const passwordWrapper = defineComponent({
     data["append-inner-icon"] ??= !this.shown ? "fa fa-eye" : "fa fa-eye-slash";
     data.type = this.shown ? "text" : "password";
     addHandler(data, "click:appendInner", () => (this.shown = !this.shown));
-    return _c(VTextField, data);
+    return h(VTextField, data);
   },
 });
 
@@ -58,13 +57,10 @@ export default defineComponent({
   },
 
   props: {
-    for: { required: false, type: [String, Object] as PropType<ForSpec> },
-    model: {
-      required: false,
-      type: Object as PropType<
-        Model<ClassType> | DataSource<DataSourceType> | AnyArgCaller
-      >,
-    },
+    ...makeMetadataProps<
+      Model<ClassType> | DataSource<DataSourceType> | AnyArgCaller
+    >(),
+
     modelValue: <Prop<any>>{ required: false },
   },
 
@@ -111,25 +107,25 @@ export default defineComponent({
       case "date":
         data.model = props.model;
         data.for = props.for;
-        return _c(CDatetimePicker, data);
+        return h(CDatetimePicker, data);
 
       case "model":
         data.model = props.model;
         data.for = props.for;
-        return _c(CSelect, data);
+        return h(CSelect, data);
 
       case "collection":
         data.model = props.model;
         data.for = props.for;
 
         if ("manyToMany" in valueMeta) {
-          return _c(CSelectManyToMany, data);
+          return h(CSelectManyToMany, data);
         } else if (
           valueMeta.itemType.type != "model" &&
           valueMeta.itemType.type != "object" &&
           valueMeta.itemType.type != "file"
         ) {
-          return _c(CSelectValues, data);
+          return h(CSelectValues, data);
         } else {
           // console.warn(`Unsupported collection type ${valueMeta.itemType.type} for v-input`)
         }
@@ -181,14 +177,14 @@ export default defineComponent({
         if (valueMeta.type == "number") {
           // For numeric values, use a numeric text field.
           data.type = "number";
-          return _c(VTextField, data);
+          return h(VTextField, data);
         }
 
         if (
           ("textarea" in data || valueMeta.subtype == "multiline") &&
           data.textarea !== false
         ) {
-          return _c(VTextarea, data);
+          return h(VTextarea, data);
         }
 
         if (!data.type && valueMeta.subtype) {
@@ -215,16 +211,16 @@ export default defineComponent({
               break;
 
             case "password":
-              return _c(passwordWrapper, data);
+              return h(passwordWrapper, data);
           }
         }
-        return _c(VTextField, data);
+        return h(VTextField, data);
 
       case "boolean":
         if ("checkbox" in data && data.checkbox !== false) {
-          return _c(VCheckbox, data);
+          return h(VCheckbox, data);
         }
-        return _c(VSwitch, data);
+        return h(VSwitch, data);
 
       case "enum":
         addHandler(data, "update:modelValue", onInput);
@@ -233,12 +229,12 @@ export default defineComponent({
         data["item-value"] = "value";
         // maps to the prop "subtitle" on v-list-item
         data["item-props"] = (item: any) => ({ subtitle: item.description });
-        return _c(VSelect, data);
+        return h(VSelect, data);
 
       case "file":
         // v-file-input uses 'change' as its event, not 'input'.
 
-        // Currently in Vuetify3 beta, VFileInput ONLY takes an array, even for single file selection.
+        // In Vuetify3, VFileInput ONLY takes an array, even for single file selection.
         // It also explodes on null/undefined.
         const value = data.modelValue;
         if (!Array.isArray(value)) {
@@ -250,7 +246,7 @@ export default defineComponent({
           onInput(value[0])
         );
 
-        return _c(VFileInput, data);
+        return h(VFileInput, data);
 
       case "collection":
         if (valueMeta.itemType.type == "file") {
@@ -262,7 +258,7 @@ export default defineComponent({
           data.modelValue ??= [];
 
           addHandler(data, "update:modelValue", onInput);
-          return _c(VFileInput, data);
+          return h(VFileInput, data);
         }
     }
 
@@ -272,17 +268,17 @@ export default defineComponent({
     // but this hasn't been updated for 2.0.
     if (this.$slots) {
       // TODO: this.$slots might be always defined
-      return _c("div", {}, this.$slots);
+      return h("div", {}, this.$slots);
     }
-    return _c(
+    return h(
       "div",
       {
         staticClass: "input-group input-group--dirty input-group--text-field",
       },
       [
-        _c("label", data.label),
-        _c("p", [
-          _c(CDisplay, {
+        h("label", data.label),
+        h("p", [
+          h(CDisplay, {
             staticClass: "subtitle-1",
             props: {
               value: data.value,

@@ -42,7 +42,7 @@ export default defineConfig({
       },
     }),
     Components({
-      dts: true,
+      dts: false,
       resolvers: [Vuetify3Resolver()],
       extensions: ["vue", "ts"],
       include: [/\.vue$/, /\.ts$/, /\.vue\?vue/],

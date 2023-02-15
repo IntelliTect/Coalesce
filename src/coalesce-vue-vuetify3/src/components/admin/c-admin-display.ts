@@ -1,11 +1,6 @@
-import { defineComponent, PropType, h as _c, resolveComponent } from "vue";
-import { ForSpec, getValueMeta } from "../c-metadata-component";
-import {
-  propDisplay,
-  Model,
-  ClassType,
-  ViewModelCollection,
-} from "coalesce-vue";
+import { defineComponent, h, resolveComponent } from "vue";
+import { getValueMeta } from "../c-metadata-component";
+import { propDisplay, ViewModelCollection } from "coalesce-vue";
 
 import CDisplay, { cDisplayProps } from "../display/c-display";
 import { useRouter } from "vue-router";
@@ -27,7 +22,7 @@ export default defineComponent({
       // If no model was provided, just display nothing.
       // This isn't an error case - it just means the thing we're trying to display
       // is `null`-ish, and should be treated the same way that vue would treat {{null}}
-      return _c("span");
+      return h("span");
     }
 
     const modelMeta = model ? model.$metadata : null;
@@ -56,7 +51,7 @@ export default defineComponent({
         "foreignKey" in meta
       ) {
         const narrowedMeta = meta;
-        return _c(
+        return h(
           resolveComponent("router-link"),
           {
             // Resolve to an href to allow overriding of admin routes in userspace.
@@ -90,7 +85,7 @@ export default defineComponent({
         const narrowedMeta = meta;
         const fkValue = (model as any)[meta.foreignKey.name];
         if (fkValue) {
-          return _c(
+          return h(
             resolveComponent("router-link"),
             {
               // Resolve to an href to allow overriding of admin routes in userspace.

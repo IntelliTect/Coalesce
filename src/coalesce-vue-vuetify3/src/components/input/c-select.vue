@@ -4,28 +4,30 @@
     :class="{
       'c-select--is-menu-active': menuOpen,
     }"
-    @keydown="onInputKey"
-    @keydown.native.delete.stop="!menuOpen ? onInput(null) : void 0"
-    @keydown.native.backspace.stop="!menuOpen ? onInput(null) : void 0"
-    v-bind="inputBindAttrs"
     :error-messages="error"
+    :messages="
+      focused ||
+      inputBindAttrs['persistent-hint'] ||
+      inputBindAttrs['persistentHint']
+        ? inputBindAttrs.hint
+        : ''
+    "
+    v-bind="inputBindAttrs"
+    :rules="effectiveRules"
+    :modelValue="internalModelValue"
+    #default="{ isDisabled, isReadonly, isValid }"
   >
     <v-field
-      :active="!!internalModelValue || focused"
+      :active="!!internalModelValue || focused || !!placeholder"
       :dirty="!!internalModelValue"
-      :clearable="effectiveClearable"
+      :clearable="!isDisabled.value && !isReadonly.value && isClearable"
       persistent-clear
-      @click:clear.stop.prevent="onInput(null)"
       append-inner-icon="$dropdown"
+      :error="isValid.value === false"
       v-bind="inputBindAttrs"
+      @click:clear.stop.prevent="onInput(null, true)"
+      @keydown="!isDisabled.value && !isReadonly.value && onInputKey($event)"
       :focused="focused"
-      style="
-        padding-top: calc(
-          var(--v-field-padding-top, 10px) + var(--v-input-padding-top, 0)
-        );
-        min-height: var(--v-input-control-height, 56px);
-        align-items: center;
-      "
     >
       <div class="v-field__input">
         <slot
@@ -46,13 +48,20 @@
           v-model="mainValue"
           @focus="focused = true"
           @blur="focused = false"
+          :disabled="isDisabled.value"
+          :readonly="isReadonly.value"
+          :placeholder="internalModelValue ? undefined : placeholder"
         />
       </div>
     </v-field>
 
     <v-menu
       :modelValue="menuOpen"
-      @update:modelValue="toggleMenu()"
+      @update:modelValue="
+        menuOpen
+          ? toggleMenu()
+          : !isDisabled.value && !isReadonly.value && toggleMenu()
+      "
       activator="parent"
       :close-on-content-click="false"
       contentClass="c-select__menu-content"
@@ -156,6 +165,10 @@
 
 <style lang="scss">
 .c-select {
+  .v-field {
+    align-items: center;
+    min-height: var(--v-input-control-height, 56px);
+  }
   .v-field__field {
     align-items: center;
     .v-field__input {
@@ -170,6 +183,10 @@
       }
     }
   }
+  .v-input__details {
+    padding-inline-start: 16px;
+    padding-inline-end: 16px;
+  }
   .v-field__clearable,
   .v-field__append-inner {
     padding-top: 0;
@@ -182,11 +199,6 @@
     transform: rotate(180deg);
   }
 }
-// .c-select__menu-content {
-//   input {
-//     // padding-top: 8px;
-//   }
-// }
 </style>
 
 <script lang="ts">
@@ -229,9 +241,10 @@ export default defineComponent({
   props: {
     ...makeMetadataProps(),
     clearable: { required: false, default: undefined, type: Boolean },
-    value: { required: false },
+    modelValue: { required: false },
     keyValue: { required: false },
     objectValue: { required: false },
+    placeholder: { type: String, required: false },
     preselectFirst: { required: false, type: Boolean, default: false },
     preselectSingle: { required: false, type: Boolean, default: false },
     openOnClear: { required: false, type: Boolean, default: true },
@@ -282,8 +295,14 @@ export default defineComponent({
   },
 
   computed: {
-    loading() {
-      return this.listCaller?.isLoading || this.getCaller?.isLoading;
+    /** The effective clearability state of the dropdown. */
+    isClearable(): boolean {
+      if (typeof this.clearable == "boolean")
+        // If explicitly given a value, use that value.
+        return this.clearable;
+
+      // Check to see if the foreign key is nullable (i.e. doesn't have a 'required' rule).
+      return !!(this.modelKeyProp && !this.modelKeyProp.rules?.required);
     },
 
     /** The property on `this.model` which holds the foreign key being selected for, or `null` if there is no such property. */
@@ -353,15 +372,15 @@ export default defineComponent({
       ) {
         return (this.model as any)[this.modelNavProp.name];
       }
-      if (this.value && this.primaryBindKind == "model") {
-        return this.value;
+      if (this.modelValue && this.primaryBindKind == "model") {
+        return this.modelValue;
       }
 
       if (this.internalKeyValue) {
         // See if we already have a model that we're using to represent a key-only binding.
         // Storing this object prevents it from flipping between different instances
         // obtained from either this.getCaller or this.listCaller,
-        // which causes vuetify to reset its search when the object passed to v-select's `value` prop changes.
+        // which causes vuetify to reset its search when the object passed to v-select's `modelValue` prop changes.
         if (
           this.keyFetchedModel &&
           this.internalKeyValue ===
@@ -415,8 +434,8 @@ export default defineComponent({
         value = this.keyValue;
       } else if (this.model && this.modelKeyProp) {
         value = (this.model as any)[this.modelKeyProp.name];
-      } else if (this.value && this.primaryBindKind == "key") {
-        value = this.value;
+      } else if (this.modelValue && this.primaryBindKind == "key") {
+        value = this.modelValue;
       } else {
         value = null;
       }
@@ -460,15 +479,6 @@ export default defineComponent({
       }
 
       return [];
-    },
-
-    /** The effective clearability state of the dropdown. */
-    effectiveClearable(): boolean {
-      // If explicitly given a value, use that value.
-      if (typeof this.clearable == "boolean") return this.clearable;
-
-      // Check to see if the foreign key is nullable (i.e. doesn't have a 'required' rule).
-      return !!(this.modelKeyProp && !this.modelKeyProp.rules?.required);
     },
 
     items() {
@@ -521,7 +531,7 @@ export default defineComponent({
   methods: {
     onInput(value: Model<ModelType> | null | undefined, dontFocus = false) {
       value = value ?? null;
-      if (value == null && !this.effectiveClearable) {
+      if (value == null && !this.isClearable) {
         return;
       }
 
@@ -542,9 +552,12 @@ export default defineComponent({
         }
       }
 
-      this.$emit("input", this.primaryBindKind == "key" ? key : value);
-      this.$emit("update:object-value", value);
-      this.$emit("update:key-value", key);
+      this.$emit(
+        "update:modelValue",
+        this.primaryBindKind == "key" ? key : value
+      );
+      this.$emit("update:objectValue", value);
+      this.$emit("update:keyValue", key);
       this.pendingSelection = value ? this.listItems.indexOf(value) : 0;
 
       // When the input value is cleared, re-focus the dropdown
@@ -563,8 +576,18 @@ export default defineComponent({
     /** When a key is pressed on the top level input */
     onInputKey(event: KeyboardEvent) {
       switch (event.key) {
+        case "Delete":
+        case "Backspace":
+          if (!this.menuOpen) {
+            this.onInput(null, true);
+            event.stopPropagation();
+            event.preventDefault();
+            return;
+          }
         case "Esc":
         case "Escape":
+          event.stopPropagation();
+          event.preventDefault();
           this.closeMenu();
           return;
         case " ":
@@ -573,6 +596,9 @@ export default defineComponent({
         case "ArrowUp":
         case "Down":
         case "ArrowDown":
+        case "Spacebar":
+          event.stopPropagation();
+          event.preventDefault();
           this.openMenu();
           return;
       }
@@ -613,10 +639,12 @@ export default defineComponent({
         "input"
       ) as HTMLInputElement;
 
-      // Wait for the menu fade-in animation to unhide the content root.
+      // Wait for the menu fade-in animation to unhide the content root
+      // before we try to focus the search input, because otherwise it wont work.
       // https://stackoverflow.com/questions/19669786/check-if-element-is-visible-in-dom
       const start = performance.now();
       while (
+        // cap waiting at 100ms
         start + 100 > performance.now() &&
         (!input.offsetParent || input != document.activeElement)
       ) {

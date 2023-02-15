@@ -15,17 +15,7 @@
     "paths": {
       "@/*": [ "src/*" ],
       // Add modules here that are getting duplicated due to the fact that we symlink in coalesce-vue and coalesce-vue-vuetifiy.
-      "vue": [ "node_modules/vue" ],
-      "vue/*": [ "node_modules/vue/*" ],
-      "vue-router": [ "node_modules/vue-router" ],
-      "vue-router/*": [ "node_modules/vue-router/*" ],
-      "axios": [ "node_modules/axios" ],
-
-      "coalesce-vue": [ "../../src/coalesce-vue/src" ],
-      "coalesce-vue/*": [ "../../src/coalesce-vue/src/*" ],
-      "coalesce-vue/lib/*": [ "../../src/coalesce-vue/src/*" ],
-      "coalesce-vue-vuetify": [ "../../src/coalesce-vue-vuetify3/src" ],
-      "coalesce-vue-vuetify/*": [ "../../src/coalesce-vue-vuetify3/src/*" ]
+      
     }
   },
   "include": [

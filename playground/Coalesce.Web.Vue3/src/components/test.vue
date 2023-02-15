@@ -17,18 +17,20 @@
   <video v-if="caseVm.caseKey" :src="caseVm.downloadImage.url" controls style="max-width: 100%">
   </video>
   <img v-if="caseVm.caseKey" :src="caseVm.downloadImage.url" controls style="max-width: 100%" /> -->
-
+<v-form >
     <c-input :model="caseVm" for="title"></c-input>
-    <c-input :model="caseVm" for="description" textarea></c-input>
+    <c-input :model="caseVm" for="description" textarea placeholder="asdf"></c-input>
     <c-input :model="caseVm" for="openedAt"></c-input>
-    <c-input :model="caseVm" for="assignedTo"></c-input>
-    <c-input :model="caseVm" for="reportedBy"></c-input>
+    <c-input :model="caseVm" for="assignedTo" disabled></c-input>
+    <c-select :model="caseVm" for="assignedTo" readonly></c-select>
+    <c-select for="Person" v-model="caseVm.assignedTo" placeholder="asdf"></c-select>
+    <c-input :model="caseVm" for="reportedBy" placeholder="asdf"></c-input>
     <c-input :model="caseVm" for="attachmentSize"></c-input>
     <c-input :model="caseVm" for="severity"></c-input>
     <c-input :model="caseVm" for="status"></c-input>
     <c-input :model="caseVm" for="caseProducts"></c-input>
     <c-display :model="caseVm" for="title" />
-
+  </v-form>
     <v-text-field v-model="caseVm.title" label="vuetify direct"></v-text-field>
     <!--<video v-if="caseVm.caseKey" :src="caseVm.downloadImage.getResultObjectUrl(this)" controls style="max-width: 100%">
   </video>-->

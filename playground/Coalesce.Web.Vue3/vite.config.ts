@@ -3,14 +3,13 @@ import path from 'path';
 import { defineConfig } from 'vite';
 
 import createVuePlugin from '@vitejs/plugin-vue';
+import vuetify, { transformAssetUrls } from 'vite-plugin-vuetify'
 import createCheckerPlugin from 'vite-plugin-checker';
 import createVueComponentImporterPlugin from 'unplugin-vue-components/vite';
 import { Vuetify3Resolver } from 'unplugin-vue-components/resolvers';
 
-// jiti is a workaround for https://github.com/vitejs/vite/issues/9202
-import jiti from 'jiti';
-const { createAspNetCoreHmrPlugin } = jiti(__filename)('../../src/coalesce-vue/src/build.ts')
-const { CoalesceVuetifyResolver } = jiti(__filename)('../../src/coalesce-vue-vuetify3/src/build.ts')
+import { createAspNetCoreHmrPlugin } from '../../src/coalesce-vue/src/build';
+import { CoalesceVuetifyResolver } from '../../src/coalesce-vue-vuetify3/src/build';
 
 import { sassPlugin } from 'esbuild-sass-plugin';
 
@@ -37,14 +36,18 @@ export default defineConfig(async ({ command, mode }) => {
     },
 
     plugins: [
-      createVuePlugin(),
+      createVuePlugin({ 
+        template: { transformAssetUrls }
+      }),
 
-      // vuetify(),
+      vuetify({
+        autoImport: true,
+      }),
 
       // Transforms usages of Vuetify and Coalesce components into treeshakable imports
       createVueComponentImporterPlugin({
         dts: false,
-        resolvers: [Vuetify3Resolver(), CoalesceVuetifyResolver()],
+        resolvers: [CoalesceVuetifyResolver()],
       }),
 
       // Integrations with UseViteDevelopmentServer from IntelliTect.Coalesce.Vue
@@ -80,7 +83,7 @@ export default defineConfig(async ({ command, mode }) => {
           replacement: libRoot + 'coalesce-vue/src',
         },
         {
-          find: 'coalesce-vue-vuetify',
+          find: 'coalesce-vue-vuetify3',
           replacement: libRoot + 'coalesce-vue-vuetify3/src/index.ts',
         },
         {
@@ -90,6 +93,10 @@ export default defineConfig(async ({ command, mode }) => {
         {
           find: 'vue-router',
           replacement: path.resolve(__dirname, 'node_modules/vue-router'),
+        },
+        {
+          find: 'vuetify',
+          replacement: path.resolve(__dirname, 'node_modules/vuetify'),
         },
       ],
     },
@@ -105,24 +112,9 @@ export default defineConfig(async ({ command, mode }) => {
       keepNames: true,
     },
 
-    css: { preprocessorOptions: { sass: sassOptions } },
-
     optimizeDeps: {
-      // The configuration for SASS here is so that Vuetify's styles
-      // will be included in Vite's Dependency Pre-Bundling feature.
-      // Without this, in serve mode there will be nearly 100 extra HTTP requests,
-      // one for each individual Vuetify component's stylesheet.
-      // See https://github.com/vitejs/vite/issues/7719
-      extensions: ['.scss', '.sass'],
-      esbuildOptions: {
-        plugins: [
-          sassPlugin({
-            type: 'style',
-            ...sassOptions,
-          }),
-        ],
-      },
-    },
+      include: ['vuetify'],
+    }
 
     // test: <VitestInlineConfig>{
     //   globals: true,
@@ -137,25 +129,3 @@ export default defineConfig(async ({ command, mode }) => {
     // },
   };
 });
-
-const sassOptions: StringOptions<'sync'> = {
-  quietDeps: true,
-  // Logger warn override is a workaround for deprecation warning spam. See
-  // https://github.com/sass/sass/issues/3065#issuecomment-868302160.
-  // `quietDeps` is supposed to have the same effect, but doesn't work.
-  logger: {
-    warn(message, options) {
-      if (
-        (options.deprecation && options.stack?.includes('node_modules')) ||
-        message.includes('repetitive deprecation')
-      ) {
-        return;
-      }
-      console.warn(
-        `\x1b[33mSASS WARNING\x1b[0m: ${message}\n${
-          options.stack === 'null' ? '' : options.stack
-        }\n`
-      );
-    },
-  },
-};

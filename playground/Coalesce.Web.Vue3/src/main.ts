@@ -12,7 +12,7 @@ import { aliases, fa } from 'vuetify/iconsets/fa'
 
 import { createRouter, createWebHistory } from 'vue-router';
 import { AxiosClient } from 'coalesce-vue'
-import { createCoalesceVuetify, CAdminEditorPage, CAdminTablePage } from 'coalesce-vue-vuetify'
+import { createCoalesceVuetify, CAdminEditorPage, CAdminTablePage } from 'coalesce-vue-vuetify3'
 
 import App from './App.vue';
 

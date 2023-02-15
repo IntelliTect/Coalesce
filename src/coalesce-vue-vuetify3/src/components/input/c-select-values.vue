@@ -32,7 +32,7 @@ export default defineComponent({
 
   props: {
     ...makeMetadataProps(),
-    value: { required: false, type: Array },
+    modelValue: { required: false, type: Array },
   },
 
   computed: {
@@ -40,7 +40,7 @@ export default defineComponent({
       if (this.model && this.collectionMeta) {
         return (this.model as any)[this.collectionMeta.name] || [];
       }
-      return this.value || [];
+      return this.modelValue || [];
     },
 
     collectionMeta() {

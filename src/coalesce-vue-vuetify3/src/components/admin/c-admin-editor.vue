@@ -83,6 +83,8 @@
                     <v-btn
                       class="c-admin-editor--ref-nav-link"
                       variant="outlined"
+                      tabindex="-1"
+                      title="View selected item"
                       :disabled="!model[prop.foreignKey.name]"
                       :to="{
                         name: 'coalesce-admin-item',
@@ -108,6 +110,7 @@
                     <v-btn
                       class="c-admin-editor--href-link"
                       variant="outlined"
+                      tabindex="-1"
                       :disabled="!model[prop.name]"
                       :href="
                         (prop.subtype == 'email'

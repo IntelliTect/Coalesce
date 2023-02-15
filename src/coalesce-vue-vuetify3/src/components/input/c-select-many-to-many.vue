@@ -6,7 +6,7 @@
     multiple
     chips
     small-chips
-    :deletable-chips="canDelete"
+    :closable-chips="canDelete"
     :loading="isLoading"
     :error-messages="error"
     :items="listItems"
@@ -97,14 +97,33 @@ export default defineComponent({
     },
 
     listItems() {
-      // TODO: do this better to prevent duplicates?
       const added = new Set();
       const ret = [];
 
+      // Make a lookup of all the candidate items
+      // so we can use this to determine if a selected item
+      // matches the search criteria that the server is using.
+      const candidateItems = new Map<any, any>();
+      for (const item of this.items) {
+        const key = this.itemValue(item);
+        candidateItems.set(key, item);
+      }
+
       for (const item of this.internalValue) {
         // Put the selected values first
-        added.add(this.itemValue(item));
-        ret.push(item);
+        const key = this.itemValue(item);
+        added.add(key);
+
+        // If we're not searching, put all the selected items at the start of the list.
+        // If we are searching, add the selected item if the server returned it as a candidate for the current search query,
+        // or if it matches locally by name (to avoid weird/unexpected behavior if server search criteria is weird).
+        if (
+          !this.search ||
+          candidateItems.has(key) ||
+          this.itemText(item)?.toLowerCase().includes(this.search.toLowerCase())
+        ) {
+          ret.push(item);
+        }
       }
 
       for (const item of this.items) {
@@ -205,7 +224,7 @@ export default defineComponent({
       this.currentLoaders = newArray;
     },
 
-    itemText(item: any) {
+    itemText(item: any): string | null {
       if (typeof this.$attrs["item-title"] === "function") {
         return this.$attrs["item-title"](item);
       }

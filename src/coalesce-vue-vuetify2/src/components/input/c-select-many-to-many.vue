@@ -96,7 +96,6 @@ export default defineComponent({
     },
 
     listItems() {
-      // TODO: do this better to prevent duplicates?
       const added = new Set();
       const ret = [];
 

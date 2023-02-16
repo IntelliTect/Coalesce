@@ -186,6 +186,7 @@ jobs:
     - run: npm ci
     - run: npm run coalesce
     - run: npm run build
+    - run: npm run test
     - run: dotnet build --configuration Release
 
 

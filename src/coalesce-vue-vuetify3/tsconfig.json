@@ -13,22 +13,22 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"],
+      "@test/*": ["test/*"],
       "coalesce-vue": ["../coalesce-vue/src"],
       "coalesce-vue/*": ["../coalesce-vue/src/*"],
       "vue": ["node_modules/vue"],
       "vue/*": ["node_modules/vue/*"]
     },
     "lib": ["esnext", "dom", "dom.iterable", "scripthost"],
-    "types": ["node", "vue-router", "vuetify"]
+    "types": ["node", "vue-router", "vuetify", "vitest/globals"]
   },
   "include": [
-    "components.d.ts",
     "vite.config.ts",
     "src/**/*.ts",
     "src/**/*.tsx",
     "src/**/*.vue",
-    "tests/**/*.ts",
-    "tests/**/*.tsx"
+    "test/**/*.ts",
+    "test/**/*.tsx"
   ],
   "exclude": ["node_modules"]
 }

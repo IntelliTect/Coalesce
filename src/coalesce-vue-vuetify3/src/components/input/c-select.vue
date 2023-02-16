@@ -25,6 +25,7 @@
       append-inner-icon="$dropdown"
       :error="isValid.value === false"
       v-bind="inputBindAttrs"
+      :label="$attrs.label ?? modelNavProp?.displayName ?? inputBindAttrs.label"
       @click:clear.stop.prevent="onInput(null, true)"
       @keydown="!isDisabled.value && !isReadonly.value && onInputKey($event)"
       :focused="focused"
@@ -342,6 +343,15 @@ export default defineComponent({
         return "key";
       }
       if (this.valueMeta.type == "model") {
+        if (
+          typeof this.modelValue != "object" &&
+          this.modelValue !== undefined
+        ) {
+          throw (
+            "Expected a model object to be bound to modelValue, but received a " +
+            typeof this.modelValue
+          );
+        }
         return "model";
       }
 
@@ -372,6 +382,7 @@ export default defineComponent({
       ) {
         return (this.model as any)[this.modelNavProp.name];
       }
+
       if (this.modelValue && this.primaryBindKind == "model") {
         return this.modelValue;
       }

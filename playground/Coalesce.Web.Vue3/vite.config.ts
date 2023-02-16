@@ -94,10 +94,18 @@ export default defineConfig(async ({ command, mode }) => {
           find: 'vue-router',
           replacement: path.resolve(__dirname, 'node_modules/vue-router'),
         },
-        {
-          find: 'vuetify',
-          replacement: path.resolve(__dirname, 'node_modules/vuetify'),
-        },
+
+        // Deduplicate vuetify so we don't end up with double imports from 
+        // both ourselves and coalesce-vue-vuetify3.
+        // Deduplicating vuetify breaks builds on linux for some reason.
+        // Could not load /src/Coalesce/playground/Coalesce.Web.Vue3/node_modules/vuetify/styles (imported by src/main.ts): ENOENT: no such file or directory
+        ...(process.platform == "linux" ? [] : [
+          {
+            find: 'vuetify',
+            replacement: path.resolve(__dirname, 'node_modules/vuetify'),
+          },
+        ])
+        
       ],
     },
     server: {

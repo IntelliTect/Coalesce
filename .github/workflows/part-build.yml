@@ -105,7 +105,7 @@ jobs:
     - run: dotnet restore
     - run: dotnet build --no-restore --configuration Release
     - run: dotnet test --no-build --configuration Release
-    - run: dotnet pack --no-build --configuration Release -p:PublishDir=out/packages
+    - run: dotnet pack --no-build --configuration Release -p:PackageOutputPath="$(pwd)/out/packages"
 
     - name: 'Upload Artifact: NuGet Packages'
       uses: actions/upload-artifact@v3
@@ -184,9 +184,9 @@ jobs:
     - run: npm ci
       working-directory: src/coalesce-vue-vuetify3
     - run: npm ci
-    # - run: npm run coalesce
-    # - run: npm run build
-    # - run: dotnet build --configuration Release
+    - run: npm run coalesce
+    - run: npm run build
+    - run: dotnet build --configuration Release
 
 
 

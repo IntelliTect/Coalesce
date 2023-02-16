@@ -118,6 +118,9 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         public OutputOnlyExternalTypeWithoutDefaultCtor MethodWithOutputOnlyExternalType() => null;
 
         [Coalesce, Execute]
+        public OutputOnlyExternalTypeWithoutDefaultCtorWithInputMappableProperties MethodWithOutputOnlyExternalType2() => null;
+
+        [Coalesce, Execute]
         public void MethodWithSingleFileParameter(IFile file) { }
 
         [Coalesce, Execute]

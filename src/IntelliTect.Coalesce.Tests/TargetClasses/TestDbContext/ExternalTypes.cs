@@ -59,16 +59,32 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         public ExternalParentAsOutputOnly Recursive { get; set; }
     }
 
+    /// <summary>
+    /// This type can codegen its dto successfully because despite having no valid constructors that Coalesce can use, it also has zero input-mappable properties in the first place.
+    /// </summary>
     public class OutputOnlyExternalTypeWithoutDefaultCtor
     {
-        public OutputOnlyExternalTypeWithoutDefaultCtor(string foo)
+        public OutputOnlyExternalTypeWithoutDefaultCtor(Exception ex)
         {
-            Bar = foo;
-            Baz = foo;
+            Bar = ex.Message;
+            Baz = ex.Message;
         }
 
         public string Bar { get; }
 
         public string Baz { get; internal set; }
+    }
+
+    /// <summary>
+    /// This type can codegen its dto successfully because despite having no valid constructors that Coalesce can used, it is also never used in an input position so Coalesce doesn't require the ctor to be generated.
+    /// </summary>
+    public class OutputOnlyExternalTypeWithoutDefaultCtorWithInputMappableProperties
+    {
+        public OutputOnlyExternalTypeWithoutDefaultCtorWithInputMappableProperties(Exception ex)
+        {
+            Message = ex.Message;
+        }
+
+        public string Message { get; set; }
     }
 }

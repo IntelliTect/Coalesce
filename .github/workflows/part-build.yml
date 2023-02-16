@@ -186,7 +186,6 @@ jobs:
     - run: npm ci
     - run: npm run coalesce
     - run: npm run build
-    - run: npm run test
     - run: dotnet build --configuration Release
 
 
@@ -298,6 +297,7 @@ jobs:
     - run: npm run build-local-deps
     - run: npm ci
     - run: npm run build
+    - run: npm run test
 
     # now we'll setup the real versions of things.
     # Change the package.json with the correct version of coalesce-vue, 

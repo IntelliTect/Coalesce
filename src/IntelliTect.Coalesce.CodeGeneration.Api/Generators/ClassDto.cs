@@ -156,14 +156,26 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                     {
                         if (properties.Count == 0)
                         {
-                            // There's no constructor we can use,
-                            // but also no properties that can even be mapped, so just return null i guess?
-                            b.Line("return null;");
+                            // There's no constructor we can use, but also no properties that can even be mapped.
+                            b.Line("throw new NotSupportedException(" +
+                                $"\"Type {Model.Name} has no initializable properties and so cannot be used as an input to any Coalesce-generated APIs.\");");
+                            return;
+                        }
+                        else if (properties.All(p => p.Value.SecurityInfo.Init.IsUnused))
+                        {
+                            // If the type has no default constructor but also isn't used as an input by Coalesce,
+                            // don't stop code gen - just gen an exception (that will never be hit at runtime)
+                            b.Line("throw new NotSupportedException(" +
+                                $"\"Type {Model.Name} does not have a constructor suitable for use by Coalesce for new object instantiation. " +
+                                "Fortunately, this type appears to never be used in an input position in a Coalesce-generated API.\");");
                             return;
                         }
                         else
                         {
-                            throw new Exception($"Unable to find an appropriate constructor for type {Model.FullyQualifiedName}");
+                            throw new Exception($"Unable to find an appropriate constructor for type {Model.FullyQualifiedName}. \n\n" +
+                                $"Coalesce needs a default constructor, or a constructor where each parameter case-insensitively matches " +
+                                $"the name of one of the input-mappable properties of the type. " +
+                                $"({string.Join(", ", properties.Select(p => p.Key))})");
                         }
                     }
 

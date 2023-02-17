@@ -14,60 +14,52 @@ describe("CDisplay", () => {
   });
 
   test(":model", () => {
-    const wrapper = mount(CDisplay, {
-      props: { model },
-    });
+    const wrapper = mount(() => <CDisplay model={model} />);
 
     expect(wrapper.text()).toContain("bob");
   });
 
   test(":model for=propString", () => {
-    const wrapper = mount(CDisplay, {
-      props: { model, for: "grade" },
-    });
+    const wrapper = mount(() => <CDisplay model={model} for="grade" />);
 
     expect(wrapper.text()).toContain("Freshman");
   });
 
   test(":model for=metaObject", () => {
-    const wrapper = mount(CDisplay, {
-      props: { model, for: model.$metadata.props.grade },
-    });
+    const wrapper = mount(() => (
+      <CDisplay model={model} for={model.$metadata.props.grade} />
+    ));
 
     expect(wrapper.text()).toContain("Freshman");
   });
 
   test(":model for=qualifiedString", () => {
-    const wrapper = mount(CDisplay, {
-      props: { model, for: "Student.grade" },
-    });
+    const wrapper = mount(() => <CDisplay model={model} for="Student.grade" />);
 
     expect(wrapper.text()).toContain("Freshman");
   });
 
   test(":value date", () => {
-    const wrapper = mount(CDisplay, {
-      props: { value: new Date(1990, 0, 2, 3, 4, 5) },
-    });
+    const wrapper = mount(() => (
+      <CDisplay value={new Date(1990, 0, 2, 3, 4, 5)} />
+    ));
 
     expect(wrapper.text()).toContain("1/2/1990 3:04:05 AM");
   });
 
   test(":modelValue date", () => {
-    const wrapper = mount(CDisplay, {
-      props: {
-        modelValue: new Date(1990, 0, 2, 3, 4, 5),
-        format: "yyyy-MM-dd hh:mm:ss a",
-      },
-    });
+    const wrapper = mount(() => (
+      <CDisplay
+        modelValue={new Date(1990, 0, 2, 3, 4, 5)}
+        format="yyyy-MM-dd hh:mm:ss a"
+      />
+    ));
 
     expect(wrapper.text()).toContain("1990-01-02 03:04:05 AM");
   });
 
   test("password", async () => {
-    const wrapper = mount(CDisplay, {
-      props: { model, for: "password" },
-    });
+    const wrapper = mount(() => <CDisplay model={model} for="password" />);
 
     expect(wrapper.text()).toContain("••••••••");
     expect(wrapper.text()).not.toContain("secretValue");
@@ -79,9 +71,7 @@ describe("CDisplay", () => {
   });
 
   test("email", async () => {
-    const wrapper = mount(CDisplay, {
-      props: { model, for: "email" },
-    });
+    const wrapper = mount(() => <CDisplay model={model} for="email" />);
 
     expect(wrapper.text()).toContain(model.email);
     expect(wrapper.find("a[href]").attributes()["href"]).toEqual(
@@ -90,9 +80,7 @@ describe("CDisplay", () => {
   });
 
   test("phone", async () => {
-    const wrapper = mount(CDisplay, {
-      props: { model, for: "phone" },
-    });
+    const wrapper = mount(() => <CDisplay model={model} for="phone" />);
 
     expect(wrapper.text()).toContain(model.phone);
     expect(wrapper.find("a[href]").attributes()["href"]).toEqual(
@@ -105,17 +93,13 @@ describe("CDisplay", () => {
     [false, "✗"],
   ])("boolean %s", async (value, display) => {
     model.isEnrolled = value;
-    const wrapper = mount(CDisplay, {
-      props: { model, for: "isEnrolled" },
-    });
+    const wrapper = mount(() => <CDisplay model={model} for="isEnrolled" />);
 
     expect(wrapper.text()).toContain(display);
   });
 
   test("color", async () => {
-    const wrapper = mount(CDisplay, {
-      props: { model, for: "color" },
-    });
+    const wrapper = mount(() => <CDisplay model={model} for="color" />);
 
     expect(wrapper.text()).toContain(model.color);
     expect(
@@ -128,9 +112,7 @@ describe("CDisplay", () => {
   });
 
   test("multiline", async () => {
-    const wrapper = mount(CDisplay, {
-      props: { model, for: "notes" },
-    });
+    const wrapper = mount(() => <CDisplay model={model} for="notes" />);
 
     expect(wrapper.text()).toContain(model.notes);
     expect(wrapper.attributes()["style"]).toEqual("white-space: pre-wrap;");

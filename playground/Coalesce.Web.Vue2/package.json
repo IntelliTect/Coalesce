@@ -18,11 +18,11 @@
     "coalesce-vue-vuetify": "../../src/coalesce-vue-vuetify2",
     "typeface-roboto": "0.0.75",
     "typeface-roboto-mono": "0.0.75",
-    "vue": "2.7.9",
+    "vue": "^2.7.9",
     "vue-class-component": "7.0.2",
     "vue-property-decorator": "8.1.0",
     "vue-router": "3.5.4",
-    "vuetify": "2.6.9"
+    "vuetify": "^2.6.14"
   },
   "devDependencies": {
     "@types/node": "^18.7.13",

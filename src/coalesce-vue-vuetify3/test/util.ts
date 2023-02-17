@@ -1,5 +1,5 @@
 import { createCoalesceVuetify } from "@/install";
-import { mount, DOMWrapper } from "@vue/test-utils";
+import { mount, DOMWrapper, createWrapperError } from "@vue/test-utils";
 import { ArgumentsType } from "vitest";
 import { defineComponent, h, nextTick } from "vue";
 
@@ -65,7 +65,9 @@ const mountApp = function (
 } as typeof mount;
 
 export function getWrapper(selector = ".v-overlay-container") {
-  return new DOMWrapper(document.querySelector(selector)!);
+  const el = document.querySelector(selector);
+  if (el) return new DOMWrapper(el);
+  else return createWrapperError<DOMWrapper<Element>>("DOMWrapper");
 }
 
 export async function delay(ms: number) {

@@ -18,16 +18,16 @@
     #default="{ isDisabled, isReadonly, isValid }"
   >
     <v-field
+      persistent-clear
+      :error="isValid.value === false"
+      append-inner-icon="$dropdown"
+      v-bind="inputBindAttrs"
+      :clearable="!isDisabled.value && !isReadonly.value && isClearable"
       :active="!!internalModelValue || focused || !!placeholder"
       :dirty="!!internalModelValue"
-      :clearable="!isDisabled.value && !isReadonly.value && isClearable"
-      persistent-clear
-      append-inner-icon="$dropdown"
-      :error="isValid.value === false"
-      v-bind="inputBindAttrs"
+      :focused="focused"
       @click:clear.stop.prevent="onInput(null, true)"
       @keydown="!isDisabled.value && !isReadonly.value && onInputKey($event)"
-      :focused="focused"
     >
       <div class="v-field__input">
         <slot

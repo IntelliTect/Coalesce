@@ -84,6 +84,8 @@ describe("CSelect", () => {
     // Assert: resting state of the component
     expect(wrapper.find("label").text()).toEqual(label);
     expect(wrapper.find(".v-messages").text()).toEqual(hint);
+    // Only automatically clearable when bound by a non-required navigation/fk, which is none of these test cases
+    expect(wrapper.find(".v-field__clearable").exists()).toBeFalsy();
     await nextTick();
 
     // Act/Assert: Open menu and ensure options from server are listed
@@ -100,11 +102,13 @@ describe("CSelect", () => {
           label="custom label"
           hint="custom hint"
           persistent-hint
+          clearable
         ></CSelect>
       ));
 
       expect(wrapper.find("label").text()).toEqual("custom label");
       expect(wrapper.find(".v-messages").text()).toEqual("custom hint");
+      expect(wrapper.find(".v-field__clearable").exists()).toBeTruthy();
     });
   });
 
@@ -345,6 +349,50 @@ describe("CSelect", () => {
       await mainInput.trigger("keydown.delete");
       expect(model.currentCourseId).toBeNull();
     });
+
+    describe.each(["disabled", "readonly"])("%s", (prop) => {
+      async function assertNonInteractive(
+        wrapper: VueWrapper<InstanceType<typeof CSelect>>
+      ) {
+        // Clearable is ignored when disabled/readonly
+        expect(wrapper.find(".v-field__clearable").exists()).toBeFalsy();
+        // Main input that grabs search query when focused is disabled/readonly
+        expect(wrapper.find("input").attributes()[prop]).not.toBeUndefined();
+
+        // Clicking the component doesn't open the menu
+        const menuContents = await openMenu(wrapper);
+        expect(menuContents.exists()).toBeFalsy();
+        expect(wrapper.vm.menuOpen).toBeFalsy();
+
+        // Can't open with keyboard inputs
+        await wrapper.find("input").trigger("keydown.enter");
+        expect(wrapper.vm.menuOpen).toBeFalsy();
+      }
+
+      test("noninteractive via VForm", async () => {
+        model.currentCourse = new Course({ courseId: 101 });
+        const wrapper = mountApp(() => (
+          <VForm {...{ [prop]: true }}>
+            <CSelect model={model} for="currentCourse" clearable></CSelect>
+          </VForm>
+        )).findComponent(CSelect);
+
+        assertNonInteractive(wrapper);
+      });
+      test("noninteractive via direct", () => {
+        model.currentCourse = new Course({ courseId: 101 });
+        const wrapper = mountApp(() => (
+          <CSelect
+            model={model}
+            for="currentCourse"
+            clearable
+            {...{ [prop]: true }}
+          ></CSelect>
+        )).findComponent(CSelect);
+
+        assertNonInteractive(wrapper);
+      });
+    });
   });
 
   test("preselect first", async () => {
@@ -382,6 +430,7 @@ describe("CSelect", () => {
         create={{
           getLabel(search: string) {
             if (search == "f") return "new thing";
+            else return false;
           },
           async getItem(search: string, label: string) {
             return new Course({ name: label });

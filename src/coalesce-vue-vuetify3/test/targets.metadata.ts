@@ -371,6 +371,7 @@ export const Student = (domain.types.Student = {
       type: "model",
       role: "referenceNavigation",
       dontSerialize: true,
+      description: "The course that the student is currently attending.",
       get foreignKey() {
         return domain.types.Student.props.currentCourseId as ForeignKeyProperty;
       },
@@ -393,6 +394,9 @@ export const Student = (domain.types.Student = {
       },
       get principalKey() {
         return Course.keyProp as PrimaryKeyProperty;
+      },
+      rules: {
+        required: (val) => !!val || "Current Course is required.",
       },
     },
     grade: {

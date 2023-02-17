@@ -247,7 +247,8 @@ export function makeMetadataProps<TModel = Model<ClassType>>() {
 export function useMetadataProps(
   props: ExtractPropTypes<
     ReturnType<typeof makeMetadataProps<Model<ClassType>>>
-  >
+  >,
+  transformValueMeta?: (meta: Value | Property) => Value | Property
 ) {
   const metadata = useMetadata();
 
@@ -258,7 +259,7 @@ export function useMetadataProps(
   const valueMeta = computed((() => {
     const valueMeta = getValueMeta(props.for, modelMeta.value, metadata);
     if (valueMeta && "role" in valueMeta) {
-      return valueMeta;
+      return transformValueMeta?.(valueMeta) ?? valueMeta;
     }
     return null;
   }) as () => Property | Value | null);

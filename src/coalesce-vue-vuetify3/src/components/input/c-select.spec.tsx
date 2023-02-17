@@ -1,51 +1,49 @@
 import { Course, Grade, Student } from "@test/targets.models";
+import { StudentViewModel } from "@test/targets.viewmodels";
 import { delay, getWrapper, mountApp, nextTick, nextTicks } from "@test/util";
-import { mount, VueWrapper } from "@vue/test-utils";
+import { DOMWrapper, mount, VueWrapper } from "@vue/test-utils";
 import { AxiosRequestConfig } from "axios";
 import { AxiosClient, AxiosItemResult, AxiosListResult } from "coalesce-vue";
 import { Mock } from "vitest";
+import { FunctionalComponent } from "vue";
+import { VForm } from "vuetify/components";
 import { CSelect } from "..";
 
 describe("CSelect", () => {
-  var model = new Student({
+  let model = new Student({
     name: "bob",
   });
-
-  const menuContents = () => getWrapper(".c-select__menu-content");
-
-  const openMenu = async (wrapper: VueWrapper) => {
-    await delay(1);
-    await wrapper.find(".v-input__control").trigger("click");
-    await delay(1);
-    return menuContents();
-  };
-
-  const selectFirstResult = async (wrapper: VueWrapper) => {
-    const overlay = await openMenu(wrapper);
-    await overlay.find(".v-list-item").trigger("click");
-  };
-
   let axiosMock: Mock;
   beforeEach(() => {
+    model = new Student({
+      name: "bob",
+    });
+
     axiosMock = AxiosClient.defaults.adapter = vitest
       .fn()
       .mockImplementation(async (config: AxiosRequestConfig) => {
-        if (config.url == "/Courses/list")
+        if (config.url == "/Courses/list") {
+          const items = [
+            new Course({ courseId: 101, name: "foo 101" }),
+            new Course({ courseId: 202, name: "bar 202" }),
+          ].filter(
+            (c, i) =>
+              (!config.params.search ||
+                c.name?.startsWith(config.params.search)) &&
+              (!config.params.pageSize || i < config.params.pageSize)
+          );
           return {
             data: {
               wasSuccessful: true,
-              list: [
-                new Course({ courseId: 101, name: "foo 101" }),
-                new Course({ courseId: 202, name: "bar 201" }),
-              ],
+              list: items,
               page: 1,
               pageCount: 1,
               pageSize: 10,
-              totalCount: 2,
+              totalCount: items.length,
             },
             status: 200,
           } as AxiosListResult<Course>;
-
+        }
         if (config.url == "/Courses/get/303")
           return {
             data: {
@@ -58,51 +56,146 @@ describe("CSelect", () => {
   });
 
   test.each([
-    { props: { model, for: "currentCourse" }, label: "Current Course" },
-    { props: { model, for: "currentCourseId" }, label: "Current Course" },
+    {
+      props: { model, for: "currentCourse" },
+      label: "Current Course",
+      hint: "The course that the student is currently attending.",
+    },
+    {
+      props: { model, for: "currentCourseId" },
+      label: "Current Course",
+      hint: "The course that the student is currently attending.",
+    },
     {
       props: { model, for: model.$metadata.props.currentCourse },
       label: "Current Course",
+      hint: "The course that the student is currently attending.",
     },
     {
       props: { model, for: model.$metadata.props.currentCourseId },
       label: "Current Course",
+      hint: "The course that the student is currently attending.",
     },
-    { props: { for: "Course" }, label: "Course" },
-  ])("metadata resolves - $props.for", async ({ props, label }) => {
+    { props: { for: "Course" }, label: "Course", hint: "" },
+  ])("metadata resolves - $props.for", async ({ props, label, hint }) => {
+    // Arrange/Act
     const wrapper = mountApp(CSelect, { props }).findComponent(CSelect);
 
+    // Assert: resting state of the component
     expect(wrapper.find("label").text()).toEqual(label);
+    expect(wrapper.find(".v-messages").text()).toEqual(hint);
     await nextTick();
 
+    // Act/Assert: Open menu and ensure options from server are listed
     const overlay = await openMenu(wrapper);
     expect(overlay.text()).toContain("foo 101");
-    expect(overlay.text()).toContain("bar 201");
+    expect(overlay.text()).toContain("bar 202");
+  });
+
+  describe("user-provided props override defaults", () => {
+    test("label", async () => {
+      const wrapper = mountApp(() => (
+        <CSelect
+          for="Course"
+          label="custom label"
+          hint="custom hint"
+          persistent-hint
+        ></CSelect>
+      ));
+
+      expect(wrapper.find("label").text()).toEqual("custom label");
+      expect(wrapper.find(".v-messages").text()).toEqual("custom hint");
+    });
+  });
+
+  describe("validation", () => {
+    async function assertValidation(
+      TargetComponent: FunctionalComponent,
+      message: string
+    ) {
+      const wrapper = mountApp(() => (
+        <VForm>
+          <TargetComponent></TargetComponent>
+        </VForm>
+      ));
+
+      await wrapper.findComponent(VForm).vm.validate();
+
+      expect(wrapper.find(".v-input--error").exists()).toBeTruthy();
+      expect(wrapper.find(".v-messages").text()).toEqual(message);
+    }
+
+    describe.each([
+      { p: "currentCourse", d: "navigation" },
+      { p: "currentCourseId", d: "fk" },
+    ])("when bound by $d", ({ p: propName }) => {
+      test("pulls validation from fk metadata", async () => {
+        await assertValidation(
+          () => <CSelect model={model} for={propName}></CSelect>,
+          "Current Course is required."
+        );
+      });
+
+      test("pulls validation from ViewModel instance", async () => {
+        const model = new StudentViewModel();
+        model.$addRule(
+          "currentCourseId",
+          "required",
+          (v: any) => !!v || "Custom rule from VM."
+        );
+        await assertValidation(
+          () => <CSelect model={model} for={propName}></CSelect>,
+          "Custom rule from VM."
+        );
+      });
+
+      test("overrides via rules prop", async () => {
+        await assertValidation(
+          () => (
+            <CSelect
+              model={model}
+              for={propName}
+              rules={[(v: any) => !!v || "Custom rule"]}
+            ></CSelect>
+          ),
+          "Custom rule"
+        );
+      });
+    });
   });
 
   describe("value binding", () => {
     test("keyValue fetches object from server", async () => {
+      // Arrange/Act
       const wrapper = mountApp(() => (
         <CSelect for="Course" keyValue={303}></CSelect>
       ));
       await delay(1);
+
+      // Assert - the name of the selected option should be fetched from the server
+      // and show as the selected item.
       expect(wrapper.text()).toContain("baz 303");
       // Two calls - one list, and one /get for the specific key value.
       expect(axiosMock).toHaveBeenCalledTimes(2);
     });
 
     test("model + FK-only fetches object from server", async () => {
+      // Arrange/Act
       const student = new Student({ currentCourseId: 303 });
       const wrapper = mountApp(() => (
         <CSelect model={student} for="currentCourse"></CSelect>
       ));
       await delay(1);
+
+      // Assert - the name of the selected option should be fetched from the server
+      // and show as the selected item.
       expect(wrapper.text()).toContain("baz 303");
       // Two calls - one list, and one /get for the specific key value.
       expect(axiosMock).toHaveBeenCalledTimes(2);
     });
 
     test("objectValue does not fetch object from server", async () => {
+      // Arrange/Act
       const wrapper = mountApp(() => (
         <CSelect
           for="Course"
@@ -110,12 +203,15 @@ describe("CSelect", () => {
         ></CSelect>
       ));
       await delay(1);
+
+      // Assert
       expect(wrapper.text()).toContain("baz 303");
       // One call - just /list
       expect(axiosMock).toHaveBeenCalledTimes(1);
     });
 
     test("modelValue does not fetch object from server", async () => {
+      // Arrange/Act
       const wrapper = mountApp(() => (
         <CSelect
           for="Course"
@@ -123,12 +219,15 @@ describe("CSelect", () => {
         ></CSelect>
       ));
       await delay(1);
+
+      // Assert
       expect(wrapper.text()).toContain("baz 303");
       // One call - just /list
       expect(axiosMock).toHaveBeenCalledTimes(1);
     });
 
     test("emits updates on selection", async () => {
+      // Arrange
       const onUpdateKey = vitest.fn();
       const onUpdateObject = vitest.fn();
       const onUpdateModel = vitest.fn();
@@ -143,9 +242,10 @@ describe("CSelect", () => {
         ></CSelect>
       )).findComponent(CSelect);
 
+      // Act
       await selectFirstResult(wrapper);
 
-      // Emits events
+      // Assert: Emits events
       expect(onUpdateKey).toHaveBeenCalledWith(101);
       expect(onUpdateObject).toHaveBeenCalledWith(
         new Course({ courseId: 101, name: "foo 101" })
@@ -154,25 +254,158 @@ describe("CSelect", () => {
         new Course({ courseId: 101, name: "foo 101" })
       );
 
-      // `model` prop not mutated because we're bound by type, not prop
+      // Assert: `model` prop not mutated because we're bound by type, not prop
       expect(model.courseId).toBe(303);
 
-      // Menu closes after selection
+      // Assert: Menu closes after selection
       expect(wrapper.vm.menuOpen).toBe(false);
     });
 
     test("mutates model on selection when bound by model", async () => {
+      // Arrange
       const model = new Student({ currentCourseId: 303 });
       const wrapper = mountApp(() => (
         <CSelect model={model} for="currentCourse"></CSelect>
       )).findComponent(CSelect);
 
+      // Act
       await selectFirstResult(wrapper);
 
-      // `model` prop mutated
+      // Assert: `model` prop mutated
       expect(model.currentCourseId).toBe(101);
       expect(model.currentCourse?.courseId).toBe(101);
     });
+  });
+
+  describe("interaction", () => {
+    test("typing while focused opens search", async () => {
+      const wrapper = mountApp(() => (
+        <CSelect model={model} for="currentCourse"></CSelect>
+      )).findComponent(CSelect);
+
+      await delay(1);
+
+      // Find the main input, focus it (as if it was tabbed to by the user)
+      const mainInput = wrapper.find("input");
+      mainInput.element.focus();
+
+      // Type a character
+      await mainInput.setValue("f");
+      expect(wrapper.vm.search).toBe("f");
+      expect(wrapper.vm.menuOpen).toBe(true);
+
+      // Input should have been transferred to the dropdown's search field
+      expect(mainInput.element.value).toBeFalsy();
+      const menuWrapper = menuContents();
+      const menuInput = menuWrapper.find("input");
+      expect(menuInput.element.value).toBe("f");
+
+      // Focus should be transferred to the dropdown's search field
+      expect(menuInput.element).toBe(document.activeElement);
+
+      // Only one item matches our search criteria (foo 101, not bar 202)
+      await delay(1);
+      expect(menuWrapper.findAll(".v-list-item").length).toBe(1);
+    });
+
+    test("list is keyboard navigable", async () => {
+      const wrapper = mountApp(() => (
+        <CSelect model={model} for="currentCourse" clearable></CSelect>
+      )).findComponent(CSelect);
+
+      const mainInput = wrapper.find("input");
+
+      // Open the menu
+      mainInput.trigger("keydown.enter");
+      expect(wrapper.vm.menuOpen).toBeTruthy();
+
+      await delay(1);
+      const menuWrapper = menuContents();
+      const menuInput = menuWrapper.find("input");
+
+      // Close it with escape
+      mainInput.trigger("keydown.esc");
+      await delay(10);
+      expect(wrapper.vm.menuOpen).toBeFalsy();
+
+      // Open it again
+      mainInput.trigger("keydown.space");
+      expect(wrapper.vm.menuOpen).toBeTruthy();
+
+      // Navigate to the second item
+      await menuInput.trigger("keydown.down");
+      // Pick it
+      await menuInput.trigger("keydown.enter");
+
+      expect(menuWrapper.find(".v-list-item--active").text()).toBe("bar 202");
+      expect(model.currentCourseId).toBe(202); // second result in the list
+      expect(wrapper.vm.menuOpen).toBeFalsy();
+
+      // Clear the selection with delete
+      await mainInput.trigger("keydown.delete");
+      expect(model.currentCourseId).toBeNull();
+    });
+  });
+
+  test("preselect first", async () => {
+    const wrapper = mountApp(() => (
+      <CSelect model={model} for="currentCourse" preselect-first></CSelect>
+    )).findComponent(CSelect);
+    await delay(1);
+    expect(model.currentCourseId).toBe(101);
+  });
+
+  test.each([
+    { results: 1, expected: 101 },
+    { results: 2, expected: null },
+  ])(
+    "preselect single with $results results",
+    async ({ results, expected }) => {
+      const wrapper = mountApp(() => (
+        <CSelect
+          model={model}
+          for="currentCourse"
+          preselect-single
+          params={{ pageSize: results }}
+        ></CSelect>
+      )).findComponent(CSelect);
+      await delay(1);
+      expect(model.currentCourseId).toBe(expected);
+    }
+  );
+
+  test("create", async () => {
+    const wrapper = mountApp(() => (
+      <CSelect
+        model={model}
+        for="currentCourse"
+        create={{
+          getLabel(search: string) {
+            if (search == "f") return "new thing";
+          },
+          async getItem(search: string, label: string) {
+            return new Course({ name: label });
+          },
+        }}
+      ></CSelect>
+    )).findComponent(CSelect);
+    await delay(1);
+
+    // our label function is predicated on a search of "f",
+    // so no create item option expected yet.
+    const menuWrapper = await openMenu(wrapper);
+    expect(menuWrapper.text()).not.toContain("new thing");
+
+    // Set our search value to fulfil getLabel's predicate
+    await menuWrapper.find("input").setValue("f");
+
+    // Select the new item entry.
+    const createItem = menuWrapper.find(".c-select__create-item");
+    expect(createItem.text()).toContain("new thing");
+    await createItem.trigger("click");
+
+    // Assert
+    expect(model.currentCourse?.name).toBe("new thing");
   });
 
   // test("BOILERPLATE", () => {
@@ -180,3 +413,17 @@ describe("CSelect", () => {
   //   const wrapper = appWrapper.findComponent(CSelect);
   // });
 });
+
+const menuContents = () => getWrapper(".c-select__menu-content");
+
+const openMenu = async (wrapper: VueWrapper) => {
+  await delay(1);
+  await wrapper.find(".v-input__control").trigger("click");
+  await delay(1);
+  return menuContents();
+};
+
+const selectFirstResult = async (wrapper: VueWrapper) => {
+  const overlay = await openMenu(wrapper);
+  await overlay.find(".v-list-item").trigger("click");
+};

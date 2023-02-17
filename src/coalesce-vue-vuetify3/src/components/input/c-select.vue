@@ -25,7 +25,6 @@
       append-inner-icon="$dropdown"
       :error="isValid.value === false"
       v-bind="inputBindAttrs"
-      :label="$attrs.label ?? modelNavProp?.displayName ?? inputBindAttrs.label"
       @click:clear.stop.prevent="onInput(null, true)"
       @keydown="!isDisabled.value && !isReadonly.value && onInputKey($event)"
       :focused="focused"
@@ -111,6 +110,7 @@
         <v-list class="py-0" max-height="302" ref="listRef" density="compact">
           <v-list-item
             v-if="createItemLabel"
+            class="c-select__create-item"
             @click="createItem"
             :loading="createItemLoading"
           >
@@ -235,7 +235,11 @@ export default defineComponent({
     return {
       listRef: ref<ComponentPublicInstance>(),
       searchRef: ref<ComponentPublicInstance>(),
-      ...useMetadataProps(props),
+      ...useMetadataProps(props, (v) =>
+        // Use the navigation metadata (if exists) to drive the logic in here,
+        // as it will be a better source to pull label, hint, etc. from.
+        v.role == "foreignKey" && "navigationProp" in v ? v.navigationProp! : v
+      ),
     };
   },
 
@@ -470,9 +474,7 @@ export default defineComponent({
         // Grab the rules from the instance, because it may contain custom rules
         // and/or other rule changes that have been customized in userland beyond what the metadata provides.
 
-        // Since the v-autocomplete is always bound to a model instance,
-        // vuetify will invoke the rules using the model object as the arg to the rule function.
-        // However, we use the validation rules of the foreign key since the FK
+        // Validate using the key, not the navigation. The FK
         // is the actual scalar value that gets sent to the server,
         // and is the prop that we generate things like `required` onto.
         // We need to translate the rule functions to pass the selected FK instead
@@ -514,8 +516,6 @@ export default defineComponent({
   watch: {
     search(newVal: any, oldVal: any) {
       if (newVal != oldVal) {
-        // Single equals intended. Works around https://github.com/vuetifyjs/vuetify/issues/7344,
-        // since null == undefined, the transition from undefined to null will fail.
         this.listCaller();
       }
     },
@@ -586,28 +586,29 @@ export default defineComponent({
 
     /** When a key is pressed on the top level input */
     onInputKey(event: KeyboardEvent) {
-      switch (event.key) {
-        case "Delete":
-        case "Backspace":
+      switch (event.key.toLowerCase()) {
+        case "delete":
+        case "backspace":
           if (!this.menuOpen) {
             this.onInput(null, true);
             event.stopPropagation();
             event.preventDefault();
             return;
           }
-        case "Esc":
-        case "Escape":
+        case "esc":
+        case "escape":
           event.stopPropagation();
           event.preventDefault();
           this.closeMenu();
           return;
         case " ":
-        case "Enter":
-        case "Up":
-        case "ArrowUp":
-        case "Down":
-        case "ArrowDown":
-        case "Spacebar":
+        case "enter":
+        case "up":
+        case "arrowup":
+        case "down":
+        case "arrowdown":
+        case "spacebar":
+        case "space":
           event.stopPropagation();
           event.preventDefault();
           this.openMenu();
@@ -710,8 +711,6 @@ export default defineComponent({
         });
       })
       .onFulfilled(() => {
-        // Vuetify (2, anyway) is super buggy and won't highlight the first item
-        // if we just directly set this to 0. We have to null it, and then after a cycle set it to 0.
         this.pendingSelection = 0;
       })
       .onRejected((state) => {
@@ -731,7 +730,7 @@ export default defineComponent({
         await this.$nextTick();
         var listDiv = this.listRef?.$el as HTMLElement;
         var selectedItem = listDiv?.querySelector(".v-list-item--active");
-        selectedItem?.scrollIntoView({
+        selectedItem?.scrollIntoView?.({
           behavior: "auto",
           block: "nearest",
           inline: "nearest",

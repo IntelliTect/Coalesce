@@ -32,7 +32,8 @@
     "gulp-typescript": "^6.0.0-alpha.1",
     "natives": "1.1.6",
     "sass": "^1.24.5",
-    "typescript": "4.4.4"
+    "typescript": "4.4.4",
+    "source-map": "0.7.4"
   },
   "overrides": {
     "glob-parent": "^5.1.1"

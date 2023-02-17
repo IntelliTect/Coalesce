@@ -90,6 +90,8 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
+    - run: npm i -g npm@9.5.0 # Pin NPM to avoid breaking changes like https://github.com/nodejs/node/issues/46542
+    
     # 2.2 is installed because it is the last version that officially supports DotnetCliToolReference
     - name: Setup dotnet
       uses: actions/setup-dotnet@v2
@@ -124,7 +126,8 @@ jobs:
       
     steps:
     - uses: actions/checkout@v3
-
+    
+    - run: npm i -g npm@9.5.0 # Pin NPM to avoid breaking changes like https://github.com/nodejs/node/issues/46542
     - name: Setup dotnet
       uses: actions/setup-dotnet@v2
       with:
@@ -149,6 +152,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
+    - run: npm i -g npm@9.5.0 # Pin NPM to avoid breaking changes like https://github.com/nodejs/node/issues/46542
     - uses: actions/setup-dotnet@v2
       with:
         dotnet-version: | 
@@ -175,6 +179,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
+    - run: npm i -g npm@9.5.0 # Pin NPM to avoid breaking changes like https://github.com/nodejs/node/issues/46542
     - uses: actions/setup-dotnet@v2
       with:
         dotnet-version: 7.0.x
@@ -203,6 +208,8 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     
+    - run: npm i -g npm@9.5.0 # Pin NPM to avoid breaking changes like https://github.com/nodejs/node/issues/46542
+
     - run: npm ci
     
     - name: npm version
@@ -257,6 +264,8 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
+    - run: npm i -g npm@9.5.0 # Pin NPM to avoid breaking changes like https://github.com/nodejs/node/issues/46542
+
     # build coalesce-vue
     - run: npm run build-local-deps
     - run: npm ci
@@ -292,6 +301,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+
+    - run: npm i -g npm@9.5.0 # Pin NPM to avoid breaking changes like https://github.com/nodejs/node/issues/46542
 
     # build coalesce-vue
     - run: npm run build-local-deps

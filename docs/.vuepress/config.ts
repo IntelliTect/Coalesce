@@ -59,7 +59,6 @@ export default defineUserConfig({
         link: "/",
         children: [
           '/stacks/vue/getting-started',
-          '/stacks/ko/getting-started',
         ]
       },
       {
@@ -120,6 +119,7 @@ export default defineUserConfig({
         collapsible: true,
         children: [
           '/stacks/ko/overview',
+          '/stacks/ko/getting-started',
           '/stacks/ko/client/view-model',
           '/stacks/ko/client/list-view-model',
           '/stacks/ko/client/external-view-model',

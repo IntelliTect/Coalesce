@@ -10,18 +10,25 @@
     "*.css"
   ],
   "exports": {
-    ".": "./dist/coalesce-vue-vuetify.js",
-    "./lib/build": "./dist/build.js",
-    "./build": "./dist/build.js",
+    ".": "./dist/coalesce-vue-vuetify3.js",
+    "./*": "./dist/*",
     "./styles": "./dist/coalesce-vue-vuetify.css",
-    "./*": "./*"
+    "./styles.css": "./dist/coalesce-vue-vuetify.css"
+  },
+  "typesVersions": {
+    "*": {
+      "*": [
+        "*",
+        "dist/*"
+      ]
+    }
   },
   "files": [
     "dist"
   ],
   "scripts": {
     "build": "vue-tsc --noEmit && vite build && npm run buildts",
-    "buildts": "tsc ./src/build.ts --declaration --outDir ./dist",
+    "buildts": "tsc ./src/build.ts --declaration --outDir ./dist --target esnext --module es2020",
     "build-local-deps": "cd ../coalesce-vue && npm ci && npm run build",
     "test": "vitest",
     "coverage": "vitest --coverage"

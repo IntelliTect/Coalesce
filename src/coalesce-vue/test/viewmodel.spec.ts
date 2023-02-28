@@ -683,6 +683,22 @@ describe("ViewModel", () => {
       expect(saveMock).toBeCalledTimes(1);
     });
 
+    test("triggers save immediately if model is empty but valid", async () => {
+      var student = new StudentViewModel();
+
+      const saveMock = (student.$apiClient.save = mockItemResult(true, {
+        studentId: 1,
+      }));
+      const vue = mountData({ student });
+
+      // Start auto save. Model shouldn't be dirty, but does lack a PK, so autosave should trigger.
+      expect(student.$isDirty).toBe(false);
+      expect(student.$primaryKey).toBeFalsy();
+      student.$startAutoSave(vue, { wait: 0 });
+      await delay(10);
+      expect(saveMock).toBeCalledTimes(1);
+    });
+
     const loadMock = vitest.fn().mockResolvedValue(<AxiosItemResult<Student>>{
       data: {
         wasSuccessful: true,
@@ -718,6 +734,30 @@ describe("ViewModel", () => {
           data: { wasSuccessful: true },
         }));
       student.$apiClient.get = loadMock;
+
+      const vue = mountData({ student });
+
+      student.$startAutoSave(vue, { wait: 0 });
+      student.$load(1);
+      await delay(10);
+      expect(saveMock).toBeCalledTimes(0);
+    });
+
+    test("does not trigger if enabled just before loading model and model load fails", async () => {
+      var student = new StudentViewModel();
+      const saveMock = (student.$apiClient.save = vitest
+        .fn()
+        .mockResolvedValue(<AxiosItemResult<Student>>{
+          data: { wasSuccessful: true },
+        }));
+      student.$apiClient.get = vitest.fn().mockResolvedValue(<
+        AxiosItemResult<Student>
+      >{
+        data: {
+          wasSuccessful: false,
+          message: "Not found",
+        },
+      });
 
       const vue = mountData({ student });
 

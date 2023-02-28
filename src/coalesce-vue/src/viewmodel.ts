@@ -661,9 +661,16 @@ export abstract class ViewModel<
           2) The model lacks a primary key, and we haven't yet tried to save it
             since autosave was enabled. We should only ever try to do this once
             in case the Behaviors on the server are for some reason not configured
-            to return responses from saves.
+            to return responses from saves. We also don't do this if $load has ever 
+            been attempted, because if it is has then this means there's an expectation
+            that the object does already exist on the server and might mean that
+            $load(somePkValue) was called (and so if we did a save, it would create an 
+            object with a new PK)
       */
-        if (this.$isDirty || (!ranOnce && !this.$primaryKey)) {
+        if (
+          this.$isDirty ||
+          (!ranOnce && !this.$primaryKey && this.$load.wasSuccessful === null)
+        ) {
           if (this.$hasError || (predicate && !predicate(this))) {
             // There are validation errors, or a user-defined predicate failed.
             // Do nothing, and don't enqueue another attempt.

@@ -227,7 +227,7 @@ export default defineComponent({
       const meta = this.list.$metadata;
 
       // Start with the set of valid filter properties
-      const filterNames = Object.values(meta.props)
+      const filterNames = (Object.values(meta.props) as Property[])
         .filter((p) => filterTypes.includes(p.type) && !p.dontSerialize)
         .map((p) => p.name);
 

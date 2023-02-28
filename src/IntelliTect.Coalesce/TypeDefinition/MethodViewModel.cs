@@ -243,6 +243,69 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
         }
 
+        /// <summary>
+        /// If this method is a constructor, returns information about its suitability for usage in IClassDto.MapToNew.
+        /// </summary>
+        public ConstructorUsage DtoMapToNewConstructorUsage
+        {
+            get
+            {
+                var incomingProperties = Parent
+                    .ClientProperties
+                    .Where(p => p.SecurityInfo.Init.IsAllowed())
+                    .ToDictionary(p => p.Name, StringComparer.OrdinalIgnoreCase);
+
+                var ctorMappableProps = new List<PropertyViewModel>();
+                foreach (var parameter in Parameters)
+                {
+                    if (!incomingProperties.TryGetValue(parameter.Name, out var prop))
+                    {
+                        // There's no incoming property that corresponds to this parameter name,
+                        // so Coalesce cannot provide any value here and therefore has no way 
+                        // of knowing how to call this ctor.
+                        return new ConstructorUsage
+                        {
+                            IsAcceptable = false,
+                            Reason = $"There is no incoming property named `{parameter.Name}`, so Coalesce cannot provide a value for that constructor parameter."
+                        };
+                    }
+                    else
+                    {
+                        ctorMappableProps.Add(prop);
+                    }
+                }
+
+#if NET7_0_OR_GREATER
+                if (!HasAttribute<System.Diagnostics.CodeAnalysis.SetsRequiredMembersAttribute>())
+                {
+                    foreach (var requiredProp in Parent.ClientProperties.Where(p => p.HasRequiredKeyword))
+                    {
+                        if (!incomingProperties.ContainsKey(requiredProp.Name))
+                        {
+                            return new ConstructorUsage
+                            {
+                                IsAcceptable = false,
+                                Reason = $"Required property `{requiredProp.Name}` is not accepted as an input, " +
+                                    $"so Coalesce cannnot satisfy its `required` constraint. Adding [SetsRequiredMembers] will suppress this."
+                            };
+                        }
+                    }
+                }
+#endif
+
+                var initParams = incomingProperties.Values.Where(p => p.IsInitOnly || p.HasRequiredKeyword).ToList();
+                foreach (var prop in initParams) incomingProperties.Remove(prop.Name);
+
+                return new ConstructorUsage
+                {
+                    IsAcceptable = true,
+                    CtorParams = ctorMappableProps,
+                    InitParams = initParams,
+                    SetParams = incomingProperties.Values.ToList()
+                };
+            }
+        }
+
         public abstract object? GetAttributeValue<TAttribute>(string valueName) where TAttribute : Attribute;
         public abstract bool HasAttribute<TAttribute>() where TAttribute : Attribute;
 
@@ -251,5 +314,16 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public string ToStringWithoutReturn()
             => $"{Name}({string.Join(", ", Parameters)})";
+
+
+        public class ConstructorUsage
+        {
+            public bool IsAcceptable { get; set; }
+            public string Reason { get; internal set; }
+            public List<PropertyViewModel> CtorParams { get; internal set; }
+            public List<PropertyViewModel> InitParams { get; internal set; }
+            public List<PropertyViewModel> SetParams { get; internal set; }
+        }
     }
+
 }

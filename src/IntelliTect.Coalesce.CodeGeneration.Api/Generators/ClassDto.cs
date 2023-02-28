@@ -140,20 +140,26 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                         .ToDictionary(p => p.Name, StringComparer.OrdinalIgnoreCase);
 
                     // Find the best ctor.
-                    // The smallest ctor where all parameters are named after a mappable property.
-                    // Usually this will be the default ctor.
-                    // Primary use case is positional record types.
+                    // We want to use the smallest ctor so we can favor default ctors if one exists,
+                    // since prior to `init` and `required`, this was how Coalesce always worked.
                     var bestCtor = Model.Constructors
                         .OrderBy(c => c.Parameters.Count())
-                        .Select(c => new {
-                            Ctor = c,
-                            Properties = c.Parameters.Select(p => properties.TryGetValue(p.Name, out var prop) ? prop : null).ToList() }
-                        )
-                        .Where(c => !c.Properties.Any(p => p == null))
+                        .Where(c => c.DtoMapToNewConstructorUsage.IsAcceptable)
                         .FirstOrDefault();
                     
                     if (bestCtor == null)
                     {
+                        var reasons = Model.Constructors
+                            .Select(c => $"{c.ToStringWithoutReturn()}: {c.DtoMapToNewConstructorUsage.Reason}")
+                            .ToList();
+                        if (!reasons.Any())
+                        {
+                            reasons.Add("Type has no public constructors.");
+                        }
+
+                        b.Line("// Unacceptable constructors:");
+                        foreach (var reason in reasons) b.Append("// ").Line(reason);
+
                         if (properties.Count == 0)
                         {
                             // There's no constructor we can use, but also no properties that can even be mapped.
@@ -172,18 +178,13 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                         }
                         else
                         {
-                            throw new Exception($"Unable to find an appropriate constructor for type {Model.FullyQualifiedName}. \n\n" +
-                                $"Coalesce needs a default constructor, or a constructor where each parameter case-insensitively matches " +
-                                $"the name of one of the input-mappable properties of the type. " +
-                                $"({string.Join(", ", properties.Select(p => p.Key))})");
+                            throw new Exception($"Unable to find an appropriate constructor for type {Model.FullyQualifiedName}. The following public constructors were found to be insufficient: \n\n {string.Join("\n", reasons)}");
                         }
                     }
 
-                    var ctorParams = bestCtor.Properties;
-                    foreach (var prop in ctorParams) properties.Remove(prop.Name);
-
-                    var initParams = properties.Values.Where(p => p.IsInitOnly || p.HasRequiredKeyword).ToList();
-                    foreach (var prop in initParams) properties.Remove(prop.Name);
+                    var ctorUsage = bestCtor.DtoMapToNewConstructorUsage;
+                    var ctorParams = ctorUsage.CtorParams;
+                    var initParams = ctorUsage.InitParams;
 
                     if (!ctorParams.Any() && !initParams.Any())
                     {
@@ -222,7 +223,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                     b.Line();
                     b.Line("if (OnUpdate(entity, context)) return entity;");
 
-                    WriteSetters(properties.Values
+                    WriteSetters(ctorUsage.SetParams
                         .Select(p =>
                         {
                             var (conditional, setter) = DtoToModelPropertySetter(p, p.SecurityInfo.Init);

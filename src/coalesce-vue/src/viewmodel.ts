@@ -817,7 +817,7 @@ export abstract class ViewModel<
 }
 
 export abstract class ListViewModel<
-  TModel extends Model<ModelType> = Model<ModelType>,
+  TModel extends Model<ModelType> = any,
   TApi extends ModelApiClient<TModel> = ModelApiClient<TModel>,
   TItem extends ViewModel<TModel, TApi> = ViewModel<TModel, TApi>
 > {

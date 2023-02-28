@@ -12,7 +12,11 @@ import {
   ItemApiState,
 } from "../src/api-client";
 import { mapToModel } from "../src/model";
-import { ViewModelCollection } from "../src/viewmodel";
+import {
+  ListViewModel,
+  ViewModel,
+  ViewModelCollection,
+} from "../src/viewmodel";
 
 import {
   StudentViewModel,
@@ -38,6 +42,10 @@ function mockItemResult<T>(success: boolean, object: T) {
 }
 
 describe("ViewModel", () => {
+  test("is assignable to generic untyped ViewModel", () => {
+    const vm: ViewModel = new StudentViewModel();
+  });
+
   describe.each(["$load", "$save", "$delete"] as const)("%s", (callerName) => {
     test("caller is lazily created", async () => {
       // This test ensures that vue doesn't create them for us
@@ -1870,6 +1878,10 @@ describe("ViewModel", () => {
 });
 
 describe("ListViewModel", () => {
+  test("is assignable to generic untyped ListViewModel", () => {
+    const vm: ListViewModel = new StudentListViewModel();
+  });
+
   describe("$load & $items", () => {
     let list: StudentListViewModel;
     let includeAdditionalItemAtStart: boolean;

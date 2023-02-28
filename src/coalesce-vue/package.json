@@ -23,7 +23,7 @@
   "license": "Apache-2.0",
   "private": false,
   "scripts": {
-    "build": "tsc -p ./tsconfig.build.esm.json && tsc -p ./tsconfig.build.cjs.json",
+    "build": "tsc --noEmit && tsc -p ./tsconfig.build.esm.json && tsc -p ./tsconfig.build.cjs.json",
     "prepack": "npm run build",
     "test": "vitest",
     "coverage": "vitest --coverage"

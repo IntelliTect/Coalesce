@@ -192,8 +192,8 @@ export default defineComponent({
   },
   computed: {
     filters(): FilterInfo[] {
-      this.list.$params.filter ??= {};
-      const filter = this.list.$params.filter;
+      const list = this.list;
+      const filter = this.list.$params.filter ?? {};
       const meta = this.list.$metadata;
 
       // Start with the set of valid filter properties
@@ -216,8 +216,8 @@ export default defineComponent({
             key,
             get value() {
               if (propMeta.type == "boolean") {
-                if (filter.value === "true") return true;
-                if (filter.value === "false") return false;
+                if (value === "true") return true;
+                if (value === "false") return false;
               }
               if (
                 (propMeta?.type == "enum" || propMeta?.type == "number") &&
@@ -235,7 +235,7 @@ export default defineComponent({
               if (Array.isArray(value)) {
                 value = value.join(",");
               }
-              filter[key] = value;
+              (list.$params.filter ??= {})[key] = value;
             },
             propMeta,
             isNull: value === null || value === "null",

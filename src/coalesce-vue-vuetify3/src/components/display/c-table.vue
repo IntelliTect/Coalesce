@@ -169,11 +169,7 @@ export default defineComponent({
 <style lang="scss">
 .c-table {
   word-break: initial;
-  th,
-  td {
-    padding: 4px 8px;
-    font-size: 12px;
-  }
+
   img {
     // Images can come from c-display for a property with subtype `image-url`.
     max-height: 50px;
@@ -185,10 +181,6 @@ export default defineComponent({
     }
     th,
     td {
-      // &:not(:last-child) {
-      //   border-right: thin solid
-      //     rgba(var(--v-border-color), var(--v-border-opacity));
-      // }
       .v-input {
         min-width: 120px;
       }

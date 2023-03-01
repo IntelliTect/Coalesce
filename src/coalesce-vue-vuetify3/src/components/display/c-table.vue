@@ -41,6 +41,7 @@
                 :readonly="isPropReadOnly(prop, item)"
                 label=""
                 hide-details="auto"
+                hint=""
                 density="compact"
                 variant="outlined"
               >
@@ -195,7 +196,8 @@ export default defineComponent({
         margin-bottom: 0px;
       }
       .v-field__input {
-        padding: 4px 6px;
+        padding-left: 6px;
+        padding-right: 6px;
       }
       // Remove extra padding on the top of v-switch components
       // so they align nicely with other components.

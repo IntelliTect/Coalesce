@@ -1,6 +1,11 @@
 <template>
   <v-card class="c-admin-editor">
-    <v-toolbar class="c-admin-editor--toolbar" density="compact" :color="color">
+    <v-toolbar
+      class="c-admin-editor--toolbar"
+      density="compact"
+      :color="color"
+      elevation="4"
+    >
       <v-toolbar-title style="flex: 0 1 auto">
         <template v-if="showContent">
           <span v-if="!canEdit">View</span>

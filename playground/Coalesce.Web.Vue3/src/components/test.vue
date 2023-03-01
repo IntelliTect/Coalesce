@@ -4,19 +4,15 @@
     <c-loader-status :loaders="{'no-initial-content': [caseVm.$load]}">
       <c-select-string-value :model="caseVm" for="title" method="getCaseTitles" eager />
 
-      {{selectedTitle}}
-      <div @click="selectedTitle = null">Reset</div>
-      <c-select-string-value for="Case" v-model="selectedTitle" method="getCaseTitles" eager clearable />
-
-      <router-link to="/admin/Case?filter.assignedToId=12"> asdasd </router-link>
-
-      <c-select for="Person" :create="createMethods"> </c-select>
+      <c-select :model="caseVm" for="assignedTo" > </c-select>
+      <c-select :model="caseVm" for="assignedTo" density="compact"> </c-select>
+      <c-select :model="caseVm" for="assignedTo" density="compact" variant="outlined"> </c-select>
 
       <c-admin-table :list="personList"></c-admin-table>
       <!--
-    <video v-if="caseVm.caseKey" :src="caseVm.downloadImage.url" controls style="max-width: 100%">
-    </video>
-    <img v-if="caseVm.caseKey" :src="caseVm.downloadImage.url" controls style="max-width: 100%" /> -->
+  <video v-if="caseVm.caseKey" :src="caseVm.downloadImage.url" controls style="max-width: 100%">
+  </video>
+  <img v-if="caseVm.caseKey" :src="caseVm.downloadImage.url" controls style="max-width: 100%" /> -->
       <v-form>
         <c-input :model="caseVm" for="title"></c-input>
         <c-input :model="caseVm" for="description" textarea placeholder="asdf"></c-input>

@@ -5,6 +5,7 @@
       @update:editable="editable = $event"
       :editable="canEdit ? editable : undefined"
       :color="color"
+      elevation="4"
     />
 
     <v-card-text class="pt-3">

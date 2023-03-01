@@ -170,7 +170,12 @@ export default defineComponent({
     caret-color: currentColor !important;
   }
   .v-toolbar__extension {
-    height: 47px !important;
+    height: 49px !important;
+  }
+
+  .c-list-page,
+  .c-list-page-size {
+    margin-right: 8px;
   }
 }
 </style>

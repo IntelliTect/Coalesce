@@ -1,37 +1,38 @@
 <template>
   <v-container grid-list-lg>
 
-    <c-select-string-value :model="caseVm" for="title" method="getCaseTitles" eager />
+    <c-loader-status :loaders="{'no-initial-content': [caseVm.$load]}">
+      <c-select-string-value :model="caseVm" for="title" method="getCaseTitles" eager />
 
-    {{selectedTitle}}
-    <div @click="selectedTitle = null">Reset</div>
-    <c-select-string-value for="Case" v-model="selectedTitle" method="getCaseTitles" eager clearable />
+      {{selectedTitle}}
+      <div @click="selectedTitle = null">Reset</div>
+      <c-select-string-value for="Case" v-model="selectedTitle" method="getCaseTitles" eager clearable />
 
-    <router-link to="/admin/Case?filter.assignedToId=12"> asdasd </router-link>
+      <router-link to="/admin/Case?filter.assignedToId=12"> asdasd </router-link>
 
-    <c-select for="Person" :create="createMethods"> </c-select>
+      <c-select for="Person" :create="createMethods"> </c-select>
 
-    <c-admin-table :list="personList"></c-admin-table>
-
-    <!--
-  <video v-if="caseVm.caseKey" :src="caseVm.downloadImage.url" controls style="max-width: 100%">
-  </video>
-  <img v-if="caseVm.caseKey" :src="caseVm.downloadImage.url" controls style="max-width: 100%" /> -->
-<v-form >
-    <c-input :model="caseVm" for="title"></c-input>
-    <c-input :model="caseVm" for="description" textarea placeholder="asdf"></c-input>
-    <c-input :model="caseVm" for="openedAt"></c-input>
-    <c-input :model="caseVm" for="assignedTo" disabled></c-input>
-    <c-select :model="caseVm" for="assignedTo" readonly></c-select>
-    <c-select for="Person" v-model="caseVm.assignedTo" placeholder="asdf"></c-select>
-    <c-input :model="caseVm" for="reportedBy" placeholder="asdf"></c-input>
-    <c-input :model="caseVm" for="attachmentSize"></c-input>
-    <c-input :model="caseVm" for="severity"></c-input>
-    <c-input :model="caseVm" for="status"></c-input>
-    <c-input :model="caseVm" for="caseProducts"></c-input>
-    <c-display :model="caseVm" for="title" />
-  </v-form>
-    <v-text-field v-model="caseVm.title" label="vuetify direct"></v-text-field>
+      <c-admin-table :list="personList"></c-admin-table>
+      <!--
+    <video v-if="caseVm.caseKey" :src="caseVm.downloadImage.url" controls style="max-width: 100%">
+    </video>
+    <img v-if="caseVm.caseKey" :src="caseVm.downloadImage.url" controls style="max-width: 100%" /> -->
+      <v-form>
+        <c-input :model="caseVm" for="title"></c-input>
+        <c-input :model="caseVm" for="description" textarea placeholder="asdf"></c-input>
+        <c-input :model="caseVm" for="openedAt"></c-input>
+        <c-input :model="caseVm" for="assignedTo" disabled></c-input>
+        <c-select :model="caseVm" for="assignedTo" readonly></c-select>
+        <c-select for="Person" v-model="caseVm.assignedTo" placeholder="asdf"></c-select>
+        <c-input :model="caseVm" for="reportedBy" placeholder="asdf"></c-input>
+        <c-input :model="caseVm" for="attachmentSize"></c-input>
+        <c-input :model="caseVm" for="severity"></c-input>
+        <c-input :model="caseVm" for="status"></c-input>
+        <c-input :model="caseVm" for="caseProducts"></c-input>
+        <c-display :model="caseVm" for="title" />
+      </v-form>
+      <v-text-field v-model="caseVm.title" label="vuetify direct"></v-text-field>
+    </c-loader-status>
     <!--<video v-if="caseVm.caseKey" :src="caseVm.downloadImage.getResultObjectUrl(this)" controls style="max-width: 100%">
   </video>-->
     <!-- <c-input :model="person" for="height" /> -->
@@ -142,12 +143,12 @@ export default class Test extends Base {
   async created() {
     this.personList.$params.noCount = true;
 
-    await this.caseVm.$load(16);
+    await this.caseVm.$load(15);
     //await this.caseVm.downloadImage(),
     this.caseVm.$startAutoSave(this);
     await this.company.$load(1);
 
-    await this.person.$load(1);
+    //await this.person.$load(1);
   }
 
   async mounted() {

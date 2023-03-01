@@ -8,42 +8,58 @@
       'has-progress-placeholder': usePlaceholder,
     }"
   >
-    <v-alert
-      v-if="errorMessages.length"
-      key="error"
-      :modelValue="true"
-      type="error"
-      class="c-loader-status--errors"
-    >
-      <ul>
-        <li
-          v-for="message in errorMessages"
-          class="c-loader-status--error-message"
-          v-text="message"
-        ></li>
-      </ul>
-    </v-alert>
+    <!-- Outer div is needed because a transition can't be a child of another transition  -->
+    <div key="error">
+      <v-expand-transition>
+        <!-- This div is to reduce jank caused by padding/margins on v-alert -->
+        <div v-if="errorMessages.length">
+          <v-alert
+            :modelValue="true"
+            type="error"
+            class="c-loader-status--errors"
+          >
+            <ul>
+              <li
+                v-for="message in errorMessages"
+                class="c-loader-status--error-message"
+                v-text="message"
+              ></li>
+            </ul>
+          </v-alert>
+        </div>
+      </v-expand-transition>
+    </div>
 
     <!-- This nested transition allows us to transition between 
         the progress loader and the placeholder independent of the 
         main outer transition between content/error/loaders -->
     <transition-group
-      class="c-loader-status--transition-group"
-      key="loading"
       v-if="showLoading || usePlaceholder"
+      key="loading"
+      class="c-loader-status--transition-group c-loader-status--progress-group"
       name="c-loader-status-fade"
       mode="out-in"
       tag="div"
+      style="position: relative"
+      :style="{
+        '--c-loader-status-progress-height': height + 'px',
+      }"
     >
       <v-progress-linear
-        key="progress"
         v-if="showLoading"
+        key="progress"
+        class="c-loader-status--progress"
         indeterminate
         :height="height"
         :color="color"
       >
       </v-progress-linear>
-      <div key="placeholder" v-else :style="{ height: height + 'px' }"></div>
+      <div
+        key="placeholder"
+        v-else
+        class="c-loader-status--progress-placeholder"
+        :style="{ height: height + 'px' }"
+      ></div>
     </transition-group>
 
     <div v-if="showContent" key="normal" class="c-loader-status--content">
@@ -199,19 +215,53 @@ export default defineComponent({
 <style lang="scss">
 .c-loader-status--transition-group {
   > * {
-    flex-shrink: 0;
-    transition: all 0.2s, opacity 0.2s ease-in 0.2s;
+    transition-property: max-height, opacity;
+    transition-duration: 0.1s, 0.2s;
+    transition-timing-function: ease-in;
+  }
+  &:not(.has-progress-placeholder) {
+    // If there's no progress placeholder, hide the progress bar immediately
+    // so that it doesn't cause the content to jump as it finishes fading away.
+    // Also animate the height to smooth out its entrance.
+    // For example, test c-admin-method under various latency settings.
+    .c-loader-status--progress-group {
+      &.c-loader-status-fade-leave-from,
+      &.c-loader-status-fade-leave-active {
+        transition-duration: 0s;
+        max-height: 0px;
+      }
+
+      max-height: var(--c-loader-status-progress-height);
+      &.c-loader-status-fade-enter-from {
+        max-height: 0px;
+      }
+      &.c-loader-status-fade-enter-active {
+        overflow: hidden;
+      }
+    }
   }
 }
 
-.c-loader-status-fade-enter,
+.c-loader-status-fade-enter-from,
 .c-loader-status-fade-leave-to {
   opacity: 0;
 }
 .c-loader-status-fade-leave-active {
-  // Important because vuetify specifies position:relative on .v-progress-linear
-  position: absolute !important;
-  transition-delay: 0s !important;
+  &.c-loader-status--progress-placeholder,
+  &.c-loader-status--progress {
+    position: absolute !important;
+  }
+}
+.c-loader-status-fade-enter-from,
+.c-loader-status-fade-enter-active {
+  // Delay the fade-in of the progress bars.
+  // 1) This prevents progress bars from flashing in during very fast connections.
+  // 2) This prevents progress bars from appearing before content disappears (if no-loading-content)
+  &.c-loader-status--progress-group,
+  &.c-loader-status--progress-placeholder,
+  &.c-loader-status--progress {
+    transition-delay: 0.2s !important;
+  }
 }
 
 .c-loader-status {
@@ -234,17 +284,16 @@ export default defineComponent({
     // overflow: hidden;
   }
 
+  ul {
+    padding-left: 24px;
+  }
   .c-loader-status--error-message {
     white-space: pre-wrap;
 
     // Remove bulleting when there's only one error.
     &:only-child {
       list-style: none;
-    }
-    &:not(:only-child) {
-      // We have to manually add the margin back in for the list bullet point
-      // because some weird interaction with css grid (the vuetify3 v-alert is grid based.)
-      margin-left: 20px;
+      margin-left: -20px;
     }
   }
 }

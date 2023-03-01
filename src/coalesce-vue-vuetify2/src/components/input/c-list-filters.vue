@@ -180,7 +180,6 @@ interface FilterInfo {
 }
 
 const filterTypes = ["string", "number", "boolean", "enum", "date"];
-
 export default defineComponent({
   name: "c-list-filters",
   props: {
@@ -190,6 +189,7 @@ export default defineComponent({
     removeFilter(filterInfo: FilterInfo) {
       const copy: any = { ...this.list.$params.filter };
       delete copy[filterInfo.key];
+      // eslint-disable-next-line vue/no-mutating-props
       this.list.$params.filter = copy;
     },
     setFilter(filterInfo: FilterInfo, value: any) {
@@ -198,6 +198,7 @@ export default defineComponent({
       }
       const filter = this.list.$params.filter ?? {};
       this.$set(filter, filterInfo.key, value);
+      // eslint-disable-next-line vue/no-mutating-props
       this.list.$params.filter = filter;
     },
     addFilter(filterInfo: FilterInfo) {

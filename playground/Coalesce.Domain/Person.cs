@@ -175,7 +175,10 @@ namespace Coalesce.Domain
         {
             try
             {
-                return numberOne + numberTwo;
+                checked
+                {
+                    return numberOne + numberTwo;
+                }
             }
             catch
             {

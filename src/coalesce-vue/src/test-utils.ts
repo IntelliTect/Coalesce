@@ -2,13 +2,13 @@ import { AxiosAdapter, AxiosRequestConfig, AxiosResponse } from "axios";
 //@ts-expect-error untyped
 import settle from "axios/lib/core/settle.js";
 
-import { AxiosClient, ItemResult, ListResult } from "./api-client";
-import {
+import { AxiosClient, ItemResult, ListResult } from "./api-client.js";
+import type {
   ItemMethod,
   ListMethod,
   Method,
   TypeDiscriminatorToType,
-} from "./metadata";
+} from "./metadata.js";
 
 let originalAdapter: AxiosAdapter | undefined;
 

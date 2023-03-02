@@ -319,10 +319,10 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public class ConstructorUsage
         {
             public bool IsAcceptable { get; set; }
-            public string Reason { get; internal set; }
-            public List<PropertyViewModel> CtorParams { get; internal set; }
-            public List<PropertyViewModel> InitParams { get; internal set; }
-            public List<PropertyViewModel> SetParams { get; internal set; }
+            public string? Reason { get; internal set; }
+            public List<PropertyViewModel>? CtorParams { get; internal set; }
+            public List<PropertyViewModel>? InitParams { get; internal set; }
+            public List<PropertyViewModel>? SetParams { get; internal set; }
         }
     }
 

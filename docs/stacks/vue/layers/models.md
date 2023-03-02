@@ -44,7 +44,7 @@ The following functions exported from ``coalesce-vue`` can be used with your mod
 bindToQueryString(vue: Vue, obj: {}, key: string, queryKey: string = key, parse?: (v: any) => any, mode: 'push' | 'replace' = 'replace')
 &nbsp;
 // Vue Composition API
-useBindToQueryString(obj: {}, key: string, queryKey: string = key, parse?: (v: any) => any, mode: 'push' | 'replace' = 'replace')" lang="ts" />
+useBindToQueryString(obj: {}, key: string, queryKey: string = key, parse?: (v: any) => any, mode: 'push' | 'replace' = 'replace')" lang="ts" idPrefix="member-bindToQuery" />
 
 Binds property `key` of `obj` to query string parameter `queryKey`. When the object's value changes, the query string will be updated using [vue-router](https://router.vuejs.org/). When the query string changes, the object's value will be updated.
 
@@ -97,7 +97,7 @@ setup() {
 bindKeyToRouteOnCreate(vue: Vue, model: Model<ModelType>, routeParamName: string = 'id', keepQuery: boolean = false)
 &nbsp;
 // Vue Composition API
-useBindKeyToRouteOnCreate(model: Model<ModelType>, routeParamName: string = 'id', keepQuery: boolean = false)" lang="ts" />
+useBindKeyToRouteOnCreate(model: Model<ModelType>, routeParamName: string = 'id', keepQuery: boolean = false)" lang="ts" idPrefix="member-bindKey" />
 
 When `model` is created (i.e. its primary key becomes non-null), replace the current URL with one that includes uses primary key for the route parameter named by `routeParamName`.
 

@@ -76,7 +76,8 @@ jobs:
           }
         }
 
-        echo "::set-output name=COALESCE_VERSION::$version";
+        echo "COALESCE_VERSION=$version" >> $GITHUB_OUTPUT
+        
         echo "# Version $version" >> $GITHUB_STEP_SUMMARY
 
 

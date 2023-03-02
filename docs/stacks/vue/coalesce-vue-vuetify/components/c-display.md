@@ -8,18 +8,6 @@ A general-purpose component for displaying any [Value](/stacks/vue/layers/metada
 
 [[toc]]
 
-## [DataTypeAttribute]
-
-For properties and other values annotated with [DataTypeAttribute], the following special handling occurs based on the data type:
-
-* `DataType.MultilineText`: Renders with `white-space: pre-wrap`.
-* `DataType.Password`: Renders with a show/hide toggle (hidden by default), showing a fixed number of dot characters when hidden.
-* `DataType.Url`: Renders as a clickable link.
-* `DataType.EmailAddress`: Renders as a clickable `mailto` link.
-* `DataType.PhoneNumber`: Renders as a clickable `tel` link.
-* `DataType.ImageUrl`: Renders as an `img` element.
-* `"Color"`: Renders a colored dot next to the value, interpreting the field value as a 7-character HTML hex color code..
-
 ## Examples
 
 Typical usage, providing an object and a property on that object:
@@ -28,7 +16,7 @@ Typical usage, providing an object and a property on that object:
 <c-display :model="person" for="gender" />
 ```
 
-Customizing date formatting:
+Customizing date formatting ([view format patterns](https://date-fns.org/v2.29.3/docs/format)):
 
 ``` vue-html
 <c-display :model="person" for="birthDate" format="M/d/yyyy" />
@@ -70,7 +58,8 @@ See [DisplayOptions](/stacks/vue/layers/models.md#displayoptions) for details on
 
 Specify options for formatting some kinds of values, including dates. See [DisplayOptions](/stacks/vue/layers/models.md#displayoptions) for details.
 
-<Prop def="value: any" lang="ts" />
+<Prop def="value: any // Vue 2
+modelValue: any // Vue 3" lang="ts" />
 
 Can be provided the value to be displayed in conjunction with the `for` prop, as an alternative to the `model` prop.
 
@@ -80,4 +69,16 @@ This is an uncommon scenario - it is generally easier to use the `for`/`model` p
 
 ``default`` - Used to display fallback content if the value being displayed is either `null` or `""` (empty string).
 
+
+## [DataTypeAttribute]
+
+For properties and other values annotated with [DataTypeAttribute], the following special handling occurs based on the data type:
+
+* `DataType.MultilineText`: Renders with `white-space: pre-wrap`.
+* `DataType.Password`: Renders with a show/hide toggle (hidden by default), showing a fixed number of dot characters when hidden.
+* `DataType.Url`: Renders as a clickable link.
+* `DataType.EmailAddress`: Renders as a clickable `mailto` link.
+* `DataType.PhoneNumber`: Renders as a clickable `tel` link.
+* `DataType.ImageUrl`: Renders as an `img` element.
+* `"Color"`: Renders a colored dot next to the value, interpreting the field value as a 7-character HTML hex color code..
 

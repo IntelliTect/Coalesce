@@ -52,7 +52,8 @@ c-select-many-to-many expects metadata for the "real" collection navigation prop
 
 An object owning the value that was specified by the `for` prop. If provided, the input will be bound to the corresponding property on the `model` object.
 
-<Prop def="value: any" lang="ts" />
+<Prop def="value?: any // Vue 2
+modelValue?: any // Vue 3" lang="ts" />
 
 If binding the component with ``v-model``, accepts the ``value`` part of ``v-model``.
     

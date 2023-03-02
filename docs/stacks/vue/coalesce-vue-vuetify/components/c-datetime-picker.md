@@ -37,7 +37,8 @@ A metadata specifier for the value being bound. One of:
 
 An object owning the value that was specified by the `for` prop. If provided, the input will be bound to the corresponding property on the `model` object.
 
-<Prop def="value?: Date" lang="ts" />
+<Prop def="value?: Date // Vue 2
+modelValue?: Date // Vue 3" lang="ts" />
 
 If binding the component with ``v-model``, accepts the ``value`` part of ``v-model``.
 

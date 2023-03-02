@@ -2,104 +2,20 @@
 
 <!-- MARKER:summary -->
 
-[![](https://img.shields.io/npm/v/coalesce-vue-vuetify2/dev?color=42b883&label=coalesce-vue-vuetify2%40dev)](https://www.npmjs.com/package/coalesce-vue-vuetify2)
+[![](https://img.shields.io/npm/v/coalesce-vue-vuetify2/latest?color=42b883&label=coalesce-vue-vuetify2%40latest)](https://www.npmjs.com/package/coalesce-vue-vuetify2)
+[![](https://img.shields.io/npm/v/coalesce-vue-vuetify3/latest?color=42b883&label=coalesce-vue-vuetify3%40latest)](https://www.npmjs.com/package/coalesce-vue-vuetify3)
 
-The [Vue](https://vuejs.org/) stack for Coalesce provides [a set of components](/stacks/vue/coalesce-vue-vuetify/overview.md) based on [Vuetify](https://vuetifyjs.com/), packaged up in an NPM package [coalesce-vue-vuetify2](https://www.npmjs.com/package/coalesce-vue-vuetify2). These components are driven primarily by the [Metadata Layer](/stacks/vue/layers/metadata.md), and include both low level input and display components like [c-input](/stacks/vue/coalesce-vue-vuetify/components/c-input.md) and [c-display](/stacks/vue/coalesce-vue-vuetify/components/c-display.md) that are highly reusable in the custom pages you'll build in your application, as well as high-level components like [c-admin-table-page](/stacks/vue/coalesce-vue-vuetify/components/c-admin-table-page.md) and [c-admin-editor-page](/stacks/vue/coalesce-vue-vuetify/components/c-admin-editor-page.md) that constitute entire pages. 
+The [Vue](https://vuejs.org/) stack for Coalesce provides [a set of components](/stacks/vue/coalesce-vue-vuetify/overview.md) based on [Vuetify](https://vuetifyjs.com/), packaged up in an NPM package [coalesce-vue-vuetify2](https://www.npmjs.com/package/coalesce-vue-vuetify2) or [coalesce-vue-vuetify3](https://www.npmjs.com/package/coalesce-vue-vuetify3). These components are driven primarily by the [Metadata Layer](/stacks/vue/layers/metadata.md), and include both low level input and display components like [c-input](/stacks/vue/coalesce-vue-vuetify/components/c-input.md) and [c-display](/stacks/vue/coalesce-vue-vuetify/components/c-display.md) that are highly reusable in the custom pages you'll build in your application, as well as high-level components like [c-admin-table-page](/stacks/vue/coalesce-vue-vuetify/components/c-admin-table-page.md) and [c-admin-editor-page](/stacks/vue/coalesce-vue-vuetify/components/c-admin-editor-page.md) that constitute entire pages. 
 
 <!-- MARKER:summary-end -->
 
 [[toc]]
 
-## Setup
+## Setup 
 
-::: tip
-The template described in [Getting Started with Vue](/stacks/vue/getting-started.md) already includes all the necessary setup. You can skip this section if you started from the template.
-:::
+All Coalesce projects should be started from the template described in [Getting Started with Vue](/stacks/vue/getting-started.md), and will therefore have all the setup completed for you.
 
-First, ensure that NPM package [coalesce-vue-vuetify2](https://www.npmjs.com/package/coalesce-vue-vuetify2) is installed in your project. The examples below assume it has been aliased to `coalesce-vue-vuetify` - in your package.json: `"coalesce-vue-vuetify": "npm:coalesce-vue-vuetify2@some.version"`. If you do not alias it, adjust the import/require statements accordingly.
-
-### Setup with Vuetify A-la-carte
-If you're using [Vuetify](https://vuetifyjs.com/)'s [A-la-carte builds](https://vuetifyjs.com/en/customization/a-la-carte/), then similar to importing Vuetify from `'vuetify/lib'` rather than `'vuetify'`, you should import `'coalesce-vue-vuetify'` from `'coalesce-vue-vuetify/lib'`. 
-
-This is an alternate build that itself imports Vuetify components from `'vuetify/lib'`, therefore preventing duplication of components. Similar to Vuetify, this build also does not register the Coalesce components globally, allowing them to also be treeshaken.
-
-<CodeTabs name="vue-bundler">
-<template #vue-cli>
-
-Install `unplugin-vue-components`, and add the following configuration to `vue.config.js`:
-
-``` ts
-// vue.config.js
-configureWebpack: {
-  plugins: [
-    require('unplugin-vue-components/webpack')({
-      dts: false,
-      resolvers: [
-        // If VuetifyResolver is used, `vuetify-loader` + `vue-cli-plugin-vuetify` can be uninstalled.
-        require('unplugin-vue-components/resolvers').VuetifyResolver(),
-        require('coalesce-vue-vuetify/lib/build').CoalesceVuetifyResolver(),
-      ],
-    }),
-  ],
-}
-```
-
-</template>
-<template #vite>
-
-Install `unplugin-vue-components`, and add it to your `vite.config.ts`:
-
-``` ts
-// vite.config.js
-import Components from "unplugin-vue-components/vite";
-import { VuetifyResolver } from "unplugin-vue-components/resolvers";
-import { CoalesceVuetifyResolver } from "coalesce-vue-vuetify/lib/build";
-
-// defineConfig
-plugins: [
-  // createVuePlugin(), etc...
-  Components({
-    dts: false,
-    resolvers: [VuetifyResolver(), CoalesceVuetifyResolver()],
-  }),
-]
-```
-
-</template>
-</CodeTabs>
-
-Then, in your [Vue](https://vuejs.org/) application's ``main.ts`` file, you need to add the ``coalesce-vue-vuetify`` [plugin](https://vuejs.org/v2/guide/plugins.html) to your application, like so:
-
-``` ts
-import $metadata from '@/metadata.g';
-// viewmodels.g has side-effects - it populates the global lookup on ViewModel and ListViewModel. 
-// It must be imported for c-admin-editor-page and c-admin-table-page to work correctly.
-import '@/viewmodels.g';
-
-import CoalesceVuetify from 'coalesce-vue-vuetify/lib';
-Vue.use(CoalesceVuetify, { metadata: $metadata, });
-```
-
-If you have routes to [c-admin-editor-page](./components/c-admin-editor-page.md) or [c-admin-table-page](./components/c-admin-table-page.md), make sure that those components are also imported from `coalesce-vue-vuetify/lib`.
-
-
-### Setup without Vuetify A-la-carte
-
-In your [Vue](https://vuejs.org/) application's ``main.ts`` file, you need to add the ``coalesce-vue-vuetify`` [plugin](https://vuejs.org/v2/guide/plugins.html) to your application, like so:
-
-``` ts
-import $metadata from '@/metadata.g';
-// viewmodels.g has side-effects - it populates the global lookup on ViewModel and ListViewModel. 
-// It must be imported for c-admin-editor-page and c-admin-table-page to work correctly.
-import '@/viewmodels.g';
-
-import CoalesceVuetify from 'coalesce-vue-vuetify';
-Vue.use(CoalesceVuetify, { metadata: $metadata, });
-```
-
-Also ensure that you have setup [Vuetify](https://vuetifyjs.com/) correctly in your application as [described in Vuetify's documentation](https://vuetifyjs.com/en/getting-started/quick-start/).
-
-
+If for whatever reason you find yourself adding Coalesce to an existing project, use the template as a reference for what configuration needs to be added to your project.
 
 
 ## Display Components

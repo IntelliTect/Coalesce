@@ -120,6 +120,7 @@ import { reactive, effect } from 'vue'
 const options = {
   groups: {
     default: { vue: "Vue", knockout: "Knockout" },
+    vue: { options: "Options API", setup: "Composition API" },
     'vue-bundler': { 'vue-cli': 'Vue CLI', vite: 'Vite'}
   },
 };

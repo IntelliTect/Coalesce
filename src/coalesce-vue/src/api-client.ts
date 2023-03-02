@@ -1,4 +1,4 @@
-import { onBeforeUnmount, Ref, ref, markRaw } from "vue";
+import { onBeforeUnmount, Ref, ref, markRaw, getCurrentInstance } from "vue";
 
 import {
   ModelType,
@@ -406,13 +406,20 @@ AxiosClient.interceptors.request.use((config) => {
       return config;
     }
   }
-  return {
-    ...config,
-    headers: {
-      ...config.headers,
-      ["X-Requested-With"]: "XMLHttpRequest",
-    },
-  };
+  if (typeof config?.headers?.set == "function") {
+    // Axios 1.x
+    config.headers.set("X-Requested-With", "XMLHttpRequest");
+    return config;
+  } else {
+    // Axios 0.x
+    return {
+      ...config,
+      headers: {
+        ...config.headers,
+        ["X-Requested-With"]: "XMLHttpRequest",
+      },
+    } as any;
+  }
 });
 
 export type ApiCallerConcurrency = "cancel" | "disallow" | "allow" | "debounce";
@@ -770,7 +777,7 @@ export class ApiClient<T extends ApiRoutedType> {
         // causing the server to return a SPA fallback route (as HTML) with a 200 status.
         throw new Error(
           `Unexpected ${
-            r.headers?.["content-type"]
+            r.headers?.["content-type"] || r.headers?.["Content-Type"]
           } ${typeof r.data} response from server.`
         );
       }
@@ -1595,7 +1602,7 @@ export class ItemApiState<TArgs extends any[], TResult> extends ApiState<
    * @param vue A Vue instance through which the lifecycle of the object URL will be managed.
    */
   public getResultObjectUrl(
-    vue: VueInstance
+    vue: VueInstance | undefined = getCurrentInstance()?.proxy
   ): undefined | (TResult extends Blob ? string : never) {
     const result = this.result;
     if (result == this._objectUrl?.target) {
@@ -1613,35 +1620,32 @@ export class ItemApiState<TArgs extends any[], TResult> extends ApiState<
       URL.revokeObjectURL(this._objectUrl?.url);
     }
 
-    if (result instanceof Blob) {
-      // Result is useful as an object url. Make one!
+    if (!(result instanceof Blob)) return undefined;
+    // Result is useful as an object url. Make one!
 
-      this._objectUrl ??= {
-        hooked: new WeakSet(),
-        active: 0,
-      };
-      const objUrl = this._objectUrl!;
-      objUrl.url = URL.createObjectURL(result);
-      objUrl.target = result;
+    this._objectUrl ??= {
+      hooked: new WeakSet(),
+      active: 0,
+    };
+    const objUrl = this._objectUrl!;
+    objUrl.url = URL.createObjectURL(result);
+    objUrl.target = result;
 
-      if (!objUrl.hooked.has(vue)) {
-        objUrl.active++;
-        objUrl.hooked.add(vue);
-        onBeforeUnmount(() => {
-          objUrl.active--;
-          if (objUrl.url && objUrl.active == 0) {
-            URL.revokeObjectURL(objUrl.url);
-            objUrl.url = undefined;
-            objUrl.target = undefined;
-          }
-        }, getInternalInstance(vue));
-      }
-
-      // @ts-expect-error TS can't figure out that we correctly narrowed on TResult here.
-      return this._objectUrl.url;
+    if (vue && !objUrl.hooked.has(vue)) {
+      objUrl.active++;
+      objUrl.hooked.add(vue);
+      onBeforeUnmount(() => {
+        objUrl.active--;
+        if (objUrl.url && objUrl.active == 0) {
+          URL.revokeObjectURL(objUrl.url);
+          objUrl.url = undefined;
+          objUrl.target = undefined;
+        }
+      }, getInternalInstance(vue));
     }
 
-    return undefined;
+    // @ts-expect-error TS can't figure out that we correctly narrowed on TResult here.
+    return this._objectUrl.url;
   }
 
   protected setResponseProps(data: ItemResult<TResult>) {

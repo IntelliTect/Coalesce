@@ -1,5 +1,11 @@
 # [SelectFilter]
 
+::: warning
+This attribute only affects the generated Knockout HTML views - it does not enforce any relational rules in your data.
+
+This attribute also currently has no effect against the Vue stack.
+:::
+
 Specify a property to restrict dropdown menus by. Values presented will
 be only those where the value of the foreign property matches the value
 of the local property.
@@ -10,12 +16,6 @@ property.
 Additionally, in place of a `LocalPropertyName` to check against, you
 may instead specify a static value using `StaticPropertyValue` to
 filter by a constant.
-
-::: warning
-This attribute only affects the generated Knockout HTML views - it does not enforce any relational rules in your data.
-
-This attribute also currently has no effect against the Vue stack.
-:::
 
 ## Example Usage
 

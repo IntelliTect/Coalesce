@@ -29,6 +29,6 @@ The areas in which the property should be hidden.
 Enum values are:
 - `HiddenAttribute.Areas.None` Hide from no generated views. Primary and Foreign keys are hidden by default - setting this value explicitly can override this default behavior.
 - `HiddenAttribute.Areas.All` Hide from all generated views
-- `HiddenAttribute.Areas.List` Hide from generated list views only (Knockout Table/Cards, Vue `c-table`)
+- `HiddenAttribute.Areas.List` Hide from generated list views only (Knockout Table/Cards, Vue `c-admin-table`)
 - `HiddenAttribute.Areas.Edit` Hide from generated editor only (Knockout CreateEdit, Vue `c-admin-editor`)
 

@@ -29,7 +29,8 @@
     "dist",
     "lib",
     "src",
-    "test"
+    "test",
+    "README.md"
   ],
   "scripts": {
     "build": "rollup -c --configPlugin rollup-plugin-typescript2",

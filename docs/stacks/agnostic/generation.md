@@ -1,6 +1,6 @@
 # Code Generation Overview
 
-One of the primary functions of Coalesce is as a code generation framework. Below, you find an overview of the different components of Coalesce's code generation features.
+Coalesce's principal purpose is a code generation framework for automating the creation of the boring-but-necessary parts of a web application. Below, you find an overview of the different components of Coalesce's code generation features.
 
 [[toc]]
 
@@ -36,9 +36,7 @@ There are a couple of extra options which are only available as CLI parameters t
 
 ## Generated Code
 
-Coalesce has the option of two front-end stacks - either [Knockout](https://knockoutjs.com/), or [Vue](https://vuejs.org/). The Vue-based stack is the current focus of all development efforts against Coalesce going forward - the Knockout stack is effectively in maintenance-only mode.
-
-For either stack, Coalesce will generate a variety of different kinds of code for you:
+Coalesce will generate a full vertical stack of code for you:
 
 ### Server-side C#
 
@@ -54,9 +52,9 @@ See [Generated C# DTOs](/stacks/agnostic/dtos.md) for more information.
 
 ### Vue
 
-An overview of the Vue stack can be found at [Vue Overview](/stacks/vue/overview.md).
+An overview of the Vue generated code can be found at [Vue Overview](/stacks/vue/overview.md).
 
 ### Knockout
 
-An overview of the Knockout stack can be found at [Knockout Overview](/stacks/ko/overview.md).
+An overview of the legacy Knockout stack can be found at [Knockout Overview](/stacks/ko/overview.md).
 

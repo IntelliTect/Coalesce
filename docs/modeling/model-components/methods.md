@@ -81,7 +81,7 @@ Security for instance methods is also controlled by the data source that loads t
 
 ## Generated TypeScript
 
-See [API Callers](/stacks/vue/layers/api-clients.md#api-callers) and [ViewModel Layer](/stacks/vue/layers/viewmodels.md) (Vue) or [TypeScript Method Objects](/stacks/ko/client/methods.md) (Knockout) for details on the code that is generated for your custom methods.
+See [API Callers](/stacks/vue/layers/api-clients.md#api-callers) and [ViewModel Layer](/stacks/vue/layers/viewmodels.md) for details on the code that is generated for your custom methods.
 
 ::: tip Note
 Any Task-returning methods with "Async" as a suffix to the C# method's name will have the "Async" suffix stripped from the generated Typescript.
@@ -153,7 +153,7 @@ viewModel.$load(1);
 <img :src="downloadPicture.url">
 ```
 ----
-Alternatively, the [API Callers](/stacks/vue/layers/api-clients.md#api-callers) for file-returning methods have a method `getResultObjectUrl(vue)`. If the method was invoked programmatically (i.e. via `caller()`, `caller.invoke()`, or `caller.invokeWithArgs()`), this property contains an [Object URL](https://developer.mozilla.org/en-US/docs/Web/API/URL/createObjectURL) that can be set as the `src` of an `image` or `video` HTML tag.
+Alternatively, the [API Callers](/stacks/vue/layers/api-clients.md#api-callers) for file-returning methods have a method `getResultObjectUrl(vue)`. If the method was invoked programmatically (i.e. via `caller()`, `caller.invoke()`, or `caller.invokeWithArgs()`), this method returns an [Object URL](https://developer.mozilla.org/en-US/docs/Web/API/URL/createObjectURL) that can be set as the `src` of an `image` or `video` HTML tag.
 
 ``` ts
 import { PersonViewModel } from '@/viewmodels.g'

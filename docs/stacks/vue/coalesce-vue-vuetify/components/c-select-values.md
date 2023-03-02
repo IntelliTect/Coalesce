@@ -35,7 +35,8 @@ A metadata specifier for the value being bound. One of:
 
 An object owning the value that was specified by the `for` prop.
 
-<Prop def="value: any" lang="ts" />
+<Prop def="value?: any // Vue 2
+modelValue?: any // Vue 3" lang="ts" />
 
 If binding the component with ``v-model``, accepts the ``value`` part of ``v-model``.
 

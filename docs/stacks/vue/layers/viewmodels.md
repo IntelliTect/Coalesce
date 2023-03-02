@@ -1,4 +1,4 @@
-# ViewModel Layer
+# Vue ViewModel Layer
 
 <!-- MARKER:summary -->
 

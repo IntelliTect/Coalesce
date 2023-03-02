@@ -48,8 +48,8 @@ describe("error handling", () => {
       data: "<!doctype html><html><body></body></html>",
       status: 200,
       statusText: "OK",
-      config: {},
-      headers: { "content-type": "text/html" },
+      config: {} as any,
+      headers: { "Content-Type": "text/html" },
     });
 
     await expect(new StudentApiClient().get(1)).rejects.toThrow(
@@ -628,19 +628,19 @@ describe("$makeCaller", () => {
   test("handles successful file response", async () => {
     let blob = new Blob(["foo"]);
 
-    AxiosClient.defaults.adapter = vitest.fn().mockImplementation(
-      async () =>
-        <AxiosResponse<any>>{
-          data: blob,
-          status: 200,
-          statusText: "OK",
-          config: {},
-          headers: {
-            "content-disposition":
-              "attachment; filename=\"sample-mp4-file small.mp4\"; filename*=UTF-8''sample-mp4-file%20small.mp4",
-          },
-        }
-    );
+    AxiosClient.defaults.adapter = vitest.fn().mockImplementation(async (c) => {
+      const resp: AxiosResponse<any> = {
+        data: blob,
+        status: 200,
+        statusText: "OK",
+        config: c,
+        headers: {
+          "content-disposition":
+            "attachment; filename=\"sample-mp4-file small.mp4\"; filename*=UTF-8''sample-mp4-file%20small.mp4",
+        },
+      };
+      return resp;
+    });
 
     const caller = new StudentApiClient().$makeCaller("item", (c) =>
       c.getFile(42, "bob")

@@ -59,6 +59,14 @@ export default defineUserConfig({
         link: "/",
         children: [
           '/stacks/vue/getting-started',
+          {
+            text: 'Generated Code',
+            link: '/stacks/agnostic/generation',
+            collapsible: true,
+            children: [
+              '/stacks/agnostic/dtos'
+             ],
+          },
         ]
       },
       {
@@ -81,52 +89,35 @@ export default defineUserConfig({
             children: fs
               .readdirSync(path.resolve(__dirname, '../modeling/model-components/attributes'))
               .map(f => '/modeling/model-components/attributes/' + f)
-          } as SidebarGroup /* https://github.com/vuepress/vuepress-next/issues/883 */,
+          },
           '/modeling/model-components/methods',
           '/modeling/model-components/data-sources',
           '/modeling/model-components/behaviors'
          ],
       },
       {
-        text: 'Generated Code',
+        text: 'Vue',
         // collapsible: false,
         children: [
-          '/stacks/agnostic/generation',
-          '/stacks/agnostic/dtos'
+          {text: 'Overview', link: '/stacks/vue/overview' },
+          {text: 'Metadata', link: '/stacks/vue/layers/metadata' },
+          {text: 'Models', link: '/stacks/vue/layers/models' },
+          {text: 'API Clients', link: '/stacks/vue/layers/api-clients' },
+          {text: 'View Models', link: '/stacks/vue/layers/viewmodels' },
          ],
       },
       {
-        text: 'Client - Vue',
-        // collapsible: false,
-        children: [
-          '/stacks/vue/overview',
-          '/stacks/vue/layers/metadata',
-          '/stacks/vue/layers/models',
-          '/stacks/vue/layers/api-clients',
-          '/stacks/vue/layers/viewmodels',
-          {
-            text: "Vuetify Components",
-            link: '/stacks/vue/coalesce-vue-vuetify/overview.html',
-            collapsible: true,
-            children: fs
-              .readdirSync(path.resolve(__dirname, '../stacks/vue/coalesce-vue-vuetify/components'))
-              .map(f => '/stacks/vue/coalesce-vue-vuetify/components/' + f)
-          } as SidebarGroup /* https://github.com/vuepress/vuepress-next/issues/883 */,
-         ],
-      },
-      {
-        text: 'Client - Knockout',
+        text: "Vuetify Components",
         collapsible: true,
         children: [
-          '/stacks/ko/overview',
-          '/stacks/ko/getting-started',
-          '/stacks/ko/client/view-model',
-          '/stacks/ko/client/list-view-model',
-          '/stacks/ko/client/external-view-model',
-          '/stacks/ko/client/methods',
-          '/stacks/ko/client/model-config',
-          '/stacks/ko/client/bindings',
-         ],
+          {
+            text: "Overview",
+            link: '/stacks/vue/coalesce-vue-vuetify/overview',
+          },
+          ...fs
+          .readdirSync(path.resolve(__dirname, '../stacks/vue/coalesce-vue-vuetify/components'))
+          .map(f => '/stacks/vue/coalesce-vue-vuetify/components/' + f)
+        ]
       },
       {
         text: 'Concepts',
@@ -143,7 +134,21 @@ export default defineUserConfig({
           '/topics/startup',
           '/topics/coalesce-json',
          ],
-      }
+      },
+      {
+        text: 'Knockout (legacy)',
+        collapsible: true,
+        children: [
+          '/stacks/ko/overview',
+          '/stacks/ko/getting-started',
+          '/stacks/ko/client/view-model',
+          '/stacks/ko/client/list-view-model',
+          '/stacks/ko/client/external-view-model',
+          '/stacks/ko/client/methods',
+          '/stacks/ko/client/model-config',
+          '/stacks/ko/client/bindings',
+         ],
+      },
     ]
   }),
 })

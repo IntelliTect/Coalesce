@@ -4,15 +4,19 @@
     <c-loader-status :loaders="{'no-initial-content': [caseVm.$load]}">
       <c-select-string-value :model="caseVm" for="title" method="getCaseTitles" eager />
 
-      <c-select :model="caseVm" for="assignedTo" > </c-select>
+      <c-select :model="caseVm" for="assignedTo"> </c-select>
       <c-select :model="caseVm" for="assignedTo" density="compact"> </c-select>
       <c-select :model="caseVm" for="assignedTo" density="compact" variant="outlined"> </c-select>
 
+      <img v-if="caseVm.caseKey" :src="caseVm.downloadImage.getResultObjectUrl()" style="max-width: 100%" />
+
       <c-admin-table :list="personList"></c-admin-table>
+
+      <!--<video v-if="caseVm.caseKey" :src="caseVm.downloadImage.getResultObjectUrl(this)" controls style="max-width: 100%">
+  </video>-->
       <!--
   <video v-if="caseVm.caseKey" :src="caseVm.downloadImage.url" controls style="max-width: 100%">
-  </video>
-  <img v-if="caseVm.caseKey" :src="caseVm.downloadImage.url" controls style="max-width: 100%" /> -->
+  </video> -->
       <v-form>
         <c-input :model="caseVm" for="title"></c-input>
         <c-input :model="caseVm" for="description" textarea placeholder="asdf"></c-input>
@@ -29,8 +33,6 @@
       </v-form>
       <v-text-field v-model="caseVm.title" label="vuetify direct"></v-text-field>
     </c-loader-status>
-    <!--<video v-if="caseVm.caseKey" :src="caseVm.downloadImage.getResultObjectUrl(this)" controls style="max-width: 100%">
-  </video>-->
     <!-- <c-input :model="person" for="height" /> -->
   </v-container>
 </template>
@@ -140,7 +142,7 @@ export default class Test extends Base {
     this.personList.$params.noCount = true;
 
     await this.caseVm.$load(15);
-    //await this.caseVm.downloadImage(),
+    await this.caseVm.downloadImage(),
     this.caseVm.$startAutoSave(this);
     await this.company.$load(1);
 

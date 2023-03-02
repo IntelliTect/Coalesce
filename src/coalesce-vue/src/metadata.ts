@@ -608,22 +608,22 @@ export function resolvePropMeta<TProp extends Property>(
 export function resolvePropMeta<TProp extends Property>(
   metadata: ClassType,
   propOrString: TProp | string,
-  slient: true
+  silent: true
 ): Exclude<TProp, string> | undefined;
 export function resolvePropMeta<TProp extends Property>(
   metadata: ClassType,
   propOrString: TProp | string,
-  slient: boolean = false
+  silent: boolean = false
 ) {
   const propMeta =
     typeof propOrString == "string"
       ? metadata.props[propOrString]
       : propOrString;
   if (!propMeta) {
-    if (slient) return undefined;
+    if (silent) return undefined;
     throw `Unknown property ${propOrString}`;
   } else if (metadata.props[propMeta.name] !== propMeta) {
-    if (slient) return undefined;
+    if (silent) return undefined;
     throw `Property ${propMeta.name} does not belong to object of type ${metadata.name}`;
   }
   return propMeta;

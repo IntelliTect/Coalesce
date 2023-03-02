@@ -15,7 +15,7 @@
     "target": "ES2022",
     "declaration": true,
     "lib": ["es2015", "es2017", "dom"],
-    "types": ["vitest/globals"]
+    "types": ["vitest/globals", "vue-router"]
   },
 
   "exclude": ["node_modules"],

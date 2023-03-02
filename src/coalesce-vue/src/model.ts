@@ -1,11 +1,6 @@
-// This will tree shake correctly as of v2.0.0-alpha.21
 import { formatDistanceToNow, lightFormat } from "date-fns";
-
-// These weird imports from date-fns-tz are needed because date-fns-tz
-// doesn't define its esm exports from its root correctly.
-// https://github.com/marnusw/date-fns-tz/blob/0577249fb6c47ad7b6a84826e90d976dac9ab52e/README.md#esm-and-commonjs
-import format from "date-fns-tz/esm/format";
-import utcToZonedTime from "date-fns-tz/esm/utcToZonedTime";
+import { format, utcToZonedTime } from "date-fns-tz";
+import { getCurrentInstance } from "vue";
 
 import type {
   ClassType,
@@ -453,7 +448,7 @@ class MapToDtoVisitor extends Visitor<
   private depth: number = 0;
 
   public visitObject(value: any, meta: ClassType): {} | null | undefined {
-    // If we've exceded max depth, return undefined to prevent the
+    // If we've exceeded max depth, return undefined to prevent the
     // creation of an entry in the parent object for this object.
     if (this.depth >= this.maxObjectDepth) return undefined;
     this.depth++;
@@ -502,7 +497,7 @@ class MapToDtoVisitor extends Visitor<
 
   protected visitCollection(value: any[] | null, meta: CollectionValue) {
     if (this.depth >= this.maxObjectDepth) {
-      // If we've exceded max depth, return undefined to prevent the
+      // If we've exceeded max depth, return undefined to prevent the
       // creation of an entry in the parent object for this collection.
       return undefined;
     }
@@ -943,9 +938,6 @@ export function valueDisplay(
   );
 }
 
-// Type import to get vue-router's type augmentations
-import type VueRouter from "vue-router";
-
 export function bindToQueryString(
   vue: VueInstance,
   obj: any, // TODO: Maybe only support objects with $metadata? Would eliminate need for `parse`, and could allow for very strong typings.
@@ -1008,6 +1000,21 @@ export function bindToQueryString(
   );
 }
 
+export function useBindToQueryString(
+  obj: any,
+  key: string,
+  queryKey: string = key,
+  parse?: (v: string) => any,
+  mode: "push" | "replace" = "replace"
+) {
+  const vue = getCurrentInstance()?.proxy;
+  if (!vue)
+    throw new Error(
+      "useBindToQueryString can only be used inside setup(). Consider using bindToQueryString if you're not using Vue composition API."
+    );
+  return bindToQueryString(vue, obj, key, queryKey, parse, mode);
+}
+
 export function bindKeyToRouteOnCreate(
   vue: VueInstance,
   model: Model<ModelType>,
@@ -1044,5 +1051,25 @@ export function bindKeyToRouteOnCreate(
         window.history.replaceState(history.state, "", href);
       }
     }
+  );
+}
+
+export function useBindKeyToRouteOnCreate(
+  model: Model<ModelType>,
+  routeParamName: string = "id",
+  keepQuery: boolean = false,
+  routeName?: VueInstance["$route"]["name"]
+) {
+  const vue = getCurrentInstance()?.proxy;
+  if (!vue)
+    throw new Error(
+      "useBindToQueryString can only be used inside setup(). Consider using bindToQueryString if you're not using Vue composition API."
+    );
+  return bindKeyToRouteOnCreate(
+    vue,
+    model,
+    routeParamName,
+    keepQuery,
+    routeName
   );
 }

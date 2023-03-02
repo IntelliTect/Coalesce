@@ -69,7 +69,8 @@ An object owning the value that was specified by the `for` prop. If provided, th
 
 If `for` specifies a foreign key or reference navigation property, both the foreign key and the navigation property of the `model` will be updated when the selected value is changed.
 
-<Prop def="value?: any" lang="ts" />
+<Prop def="value?: any // Vue 2
+modelValue?: any // Vue 3" lang="ts" />
 
 When binding the component with ``v-model``, accepts the ``value`` part of ``v-model``. If `for` was specified as a foreign key, this will expect a key; likewise, if `for` was specified as a type or as a navigation property, this will expect an object.
 

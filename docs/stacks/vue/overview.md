@@ -11,7 +11,7 @@ Check out [Getting Started with Vue](/stacks/vue/getting-started.md) if you have
 
 ## TypeScript Layers
 
-[![](https://img.shields.io/npm/v/coalesce-vue/dev?color=42b883&label=coalesce-vue%40dev)](https://www.npmjs.com/package/coalesce-vue)
+[![](https://img.shields.io/npm/v/coalesce-vue/latest?color=42b883&label=coalesce-vue%40latest)](https://www.npmjs.com/package/coalesce-vue)
 
 
 The generated code for the Vue stack all builds on the [coalesce-vue](https://www.npmjs.com/package/coalesce-vue) NPM package which contains most of the core functionality of the Vue stack.  Its version should generally be kept in sync with the [IntelliTect.Coalesce NuGet packages](https://www.nuget.org/packages/IntelliTect.Coalesce/) in your project.
@@ -60,10 +60,7 @@ Both the generated code and [coalesce-vue](https://www.npmjs.com/package/coalesc
 
 ## Admin Views
 
-The [Vue](https://vuejs.org/) stack for Coalesce does not generate any admin views for you like the [Knockout stack](/stacks/ko/overview.md) does. Instead, it provides some high level components that provide functionality of whole pages like [c-admin-table-page](/stacks/vue/coalesce-vue-vuetify/components/c-admin-table-page.md) and [c-admin-editor-page](/stacks/vue/coalesce-vue-vuetify/components/c-admin-editor-page.md) - these are the analogues of the generated admin Table and CreateEdit views in the [Knockout stack](/stacks/ko/overview.md). 
-
-These components are driven off of the generated layers described above rather than being statically generated like the [Knockout](https://knockoutjs.com/) admin pages - this allows us to keep bundle size to a minimum.
+The Vue.js stack for Coalesce provides some high level components that provide functionality of whole pages like [c-admin-table-page](/stacks/vue/coalesce-vue-vuetify/components/c-admin-table-page.md) and [c-admin-editor-page](/stacks/vue/coalesce-vue-vuetify/components/c-admin-editor-page.md). 
 
 The template described in [Getting Started with Vue](/stacks/vue/getting-started.md) comes with routes already in place for these page-level components. For example, ``/admin/Person`` for a table, ``/admin/Person/edit`` to create a new ``Person``, and ``/admin/Person/edit/:id`` to edit a ``Person``.
 
-[Read more about the Vuetify Components here](/stacks/vue/coalesce-vue-vuetify/overview.md).

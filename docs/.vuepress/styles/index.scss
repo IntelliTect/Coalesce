@@ -19,3 +19,17 @@ html.dark {
 code {
   padding: 0.1em 0.2em;
 }
+
+body {
+  .sidebar-item:not(.sidebar-heading) {
+    padding: 0.15rem 1rem 0.15rem 2rem;
+  }
+  .sidebar-item.sidebar-heading {
+    
+    padding: 0.50rem 1.5rem 0.10rem 1.25rem;
+  }
+  .sidebar .sidebar-items {
+    padding-top: .5rem;
+    padding-bottom: 5rem;
+  }
+}

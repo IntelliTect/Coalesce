@@ -22,7 +22,7 @@ A summary of the components delegated to, by type:
 - [[ManyToMany]](/modeling/model-components/attributes/many-to-many.md) collection: [c-select-many-to-many](/stacks/vue/coalesce-vue-vuetify/components/c-select-many-to-many.md)
 - Non-object collection: [c-select-values](/stacks/vue/coalesce-vue-vuetify/components/c-select-values.md)
 
-Any other unsupported type will simply be displayed with [c-display](/stacks/vue/coalesce-vue-vuetify/components/c-display.md), unless a [default slot](https://vuejs.org/v2/guide/components-slots.html) is provided - in that case, the default slot will be rendered instead.
+Any other unsupported type will simply be displayed with [c-display](/stacks/vue/coalesce-vue-vuetify/components/c-display.md), unless a [default slot](https://vuejs.org/guide/components/slots.html) is provided - in that case, the default slot will be rendered instead.
 
 When bound to a [ViewModel](/stacks/vue/layers/viewmodels.md), the [validation rules](/stacks/vue/layers/viewmodels.md#rules-validation) for the bound property will be obtained from the [ViewModel](/stacks/vue/layers/viewmodels.md#rules-validation) and passed to [Vuetify](https://vuetifyjs.com/)'s `rules` prop.
 

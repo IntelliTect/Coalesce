@@ -26,18 +26,9 @@ The structure of the Web project follows the conventions of both ASP.NET Core an
 
 - ``/src`` - Files that should be compiled into your application. CSS/SCSS, TypeScript, Vue SFCs, and so on.
 - ``/public`` - Static assets that should be served as files. Includes index.html, the root document of the application.
-- ``/tests`` - Jest unit tests.
 - ``/wwwroot`` - Target for compiled output.
 
 During development, no special tooling is required to build your frontend code. Coalesce's ``UseViteDevelopmentServer`` in ASP.NET Core will take care of that automatically when the application starts. Just make sure NPM packages have been installed (`npm ci`).
-
-::: tip
-If developing with Visual Studio, you are strongly encouraged to disable Visual Studio's built-in automatic NPM package restore functionality (``Options > Projects and Solutions > Web Package Management > Package Restore``). 
-
-This feature of Visual Studio fails to respect your ``package.lock.json`` file, and the version of NPM that Visual Studio comes with tends to be quite old and will behave differently from the ``npm`` on your system's $PATH.
-
-You should manually restore your packages with ``npm ci`` (when you haven't tried to change any versions) or ``npm i`` (when installing new packages or upgrading versions).
-:::
 
 @[import-md "after":"MARKER:data-modeling", "before":"MARKER:data-modeling-end"](../agnostic/getting-started-modeling.md)
 
@@ -58,7 +49,7 @@ namespace MyApplication.Data.Models
 }
 ```
 
-We can create a details page for a Person by creating a [Single File Component](https://vuejs.org/v2/guide/single-file-components.html) in ``MyApplication.Web/src/views/person-details.vue``:
+We can create a details page for a Person by creating a [Single File Component](https://vuejs.org/guide/scaling-up/sfc.html) in ``MyApplication.Web/src/views/person-details.vue``:
 
 ``` vue
 <template>
@@ -75,21 +66,13 @@ We can create a details page for a Person by creating a [Single File Component](
   </dl>
 </template>
 
-<script lang="ts"> 
-import { Vue, Component, Watch, Prop } from "vue-property-decorator";
+<script setup lang="ts"> 
 import { PersonViewModel } from "@/viewmodels.g";
 
-@Component({})
-export default class extends Vue {
-  @Prop({ required: true, type: Number })
-  id!: number;
+const props = defineProps<{ id: number }>();
+const person = new PersonViewModel();
 
-  person = new PersonViewModel();
-
-  created() {
-    this.person.$load(this.id);
-  }
-}
+person.$load(props.id);
 </script>
 ```
 
@@ -99,12 +82,6 @@ In the code above, [c-display](/stacks/vue/coalesce-vue-vuetify/components/c-dis
 For simple property types like `string` and `number` you can always use simple template interpolation syntax, but for more complex properties like dates, [c-display](/stacks/vue/coalesce-vue-vuetify/components/c-display.md) is handy to use because it includes features like built-in date formatting.
 :::
 
-
-::: tip
-The code above uses [vue-class-component](https://class-component.vuejs.org/) and [vue-property-decorator](https://github.com/kaorun343/vue-property-decorator) to define the component.
-
-These libraries provide an alternative to the default component declaration syntax in [Vue](https://vuejs.org/). However, you must be aware of the [Caveats](https://class-component.vuejs.org/guide/caveats.html) if you want to use these tools to build your own class-style components.
-:::
 
 We then need to add route to this new view. In ``MyApplication.Web/src/router.ts``, add a new item to the `routes` array:
 

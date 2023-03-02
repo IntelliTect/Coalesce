@@ -164,9 +164,9 @@
           if (!list) return;
 
           this.items = list;
-          this.pagination.page = listResult.page;
-          this.pagination.rowsPerPage = listResult.pageSize;
-          this.count = listResult.totalCount;
+          this.pagination.page = listResult.page ?? 0;
+          this.pagination.rowsPerPage = listResult.pageSize ?? 0;
+          this.count = listResult.totalCount ?? 0;
 
           // this.person = new PersonViewModel(list[0]);
         })

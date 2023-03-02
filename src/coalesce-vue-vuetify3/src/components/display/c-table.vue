@@ -1,6 +1,6 @@
 <template>
   <div class="c-table" :class="{ 'c-table--editable': editable }">
-    <c-loader-status :loaders="{ 'no-initial-content': [list.$load] }" #default>
+    <c-loader-status :loaders="{ 'no-initial-content': [list.$load] }">
       <v-table>
         <thead>
           <tr>

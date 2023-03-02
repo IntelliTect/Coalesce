@@ -38,115 +38,109 @@
             '': [model.$save],
           }"
         >
-          <template #default>
-            <v-row
-              v-for="prop in showProps"
-              :key="prop.name"
-              class="c-admin-editor--row"
-              no-gutters
+          <v-row
+            v-for="prop in showProps"
+            :key="prop.name"
+            class="c-admin-editor--row"
+            no-gutters
+          >
+            <v-col
+              cols="12"
+              md="2"
+              class="py-0 pr-3 py-md-3 font-weight-bold text-md-right"
+              align-self="start"
             >
-              <v-col
-                cols="12"
-                md="2"
-                class="py-0 pr-3 py-md-3 font-weight-bold text-md-right"
-                align-self="start"
-              >
-                {{ prop.displayName }}
-              </v-col>
-              <v-col class="py-0" align-self="start" style="flex-basis: 1px">
-                <v-row
-                  no-gutters
-                  style="min-height: 44px"
-                  align-content="center"
+              {{ prop.displayName }}
+            </v-col>
+            <v-col class="py-0" align-self="start" style="flex-basis: 1px">
+              <v-row no-gutters style="min-height: 44px" align-content="center">
+                <v-col>
+                  <c-input
+                    :model="model"
+                    :for="prop"
+                    v-bind="propInputBinds(prop)"
+                    label=""
+                    :aria-label="prop.displayName"
+                    :aria-description="prop.description"
+                    hide-details="auto"
+                    density="compact"
+                    variant="outlined"
+                    @deleted="
+                      // Reload when a c-select-many-to-many item is deleted,
+                      // since delete responses have no payloads and the delete
+                      // might have affected a computed property on the model
+                      model.$load()
+                    "
+                  >
+                    <c-admin-display :model="model" :for="prop" />
+                  </c-input>
+                </v-col>
+                <v-col
+                  v-if="prop.role == 'referenceNavigation'"
+                  class="flex-grow-0 pl-3"
+                  align-self="start"
                 >
-                  <v-col>
-                    <c-input
+                  <v-btn
+                    class="c-admin-editor--ref-nav-link"
+                    variant="outlined"
+                    tabindex="-1"
+                    title="View selected item"
+                    :disabled="!model[prop.foreignKey.name]"
+                    :to="{
+                      name: 'coalesce-admin-item',
+                      params: {
+                        type: prop.typeDef.name,
+                        id: model[prop.foreignKey.name],
+                      },
+                    }"
+                  >
+                    <v-icon>fa fa-ellipsis-h</v-icon>
+                  </v-btn>
+                </v-col>
+                <v-col
+                  v-if="
+                    prop.type == 'string' &&
+                    (prop.subtype == 'url' ||
+                      prop.subtype == 'email' ||
+                      prop.subtype == 'tel')
+                  "
+                  class="flex-grow-0 pl-3"
+                  align-self="start"
+                >
+                  <v-btn
+                    class="c-admin-editor--href-link"
+                    variant="outlined"
+                    tabindex="-1"
+                    :disabled="!model[prop.name]"
+                    :href="
+                      (prop.subtype == 'email'
+                        ? 'mailto:'
+                        : prop.subtype == 'tel'
+                        ? 'tel:'
+                        : '') + model[prop.name]
+                    "
+                  >
+                    <v-icon class="black--text"
+                      >fa fa-external-link-alt
+                    </v-icon>
+                  </v-btn>
+                </v-col>
+                <v-col
+                  v-if="prop.type == 'string' && prop.subtype == 'url-image'"
+                  class="flex-grow-0 pl-3"
+                  align-self="start"
+                >
+                  <v-card outlined rounded>
+                    <c-display
                       :model="model"
                       :for="prop"
-                      v-bind="propInputBinds(prop)"
-                      label=""
-                      :aria-label="prop.displayName"
-                      :aria-description="prop.description"
-                      hide-details="auto"
-                      density="compact"
-                      variant="outlined"
-                      @deleted="
-                        // Reload when a c-select-many-to-many item is deleted,
-                        // since delete responses have no payloads and the delete
-                        // might have affected a computed property on the model
-                        model.$load()
-                      "
-                    >
-                      <c-admin-display :model="model" :for="prop" />
-                    </c-input>
-                  </v-col>
-                  <v-col
-                    v-if="prop.role == 'referenceNavigation'"
-                    class="flex-grow-0 pl-3"
-                    align-self="start"
-                  >
-                    <v-btn
-                      class="c-admin-editor--ref-nav-link"
-                      variant="outlined"
-                      tabindex="-1"
-                      title="View selected item"
-                      :disabled="!model[prop.foreignKey.name]"
-                      :to="{
-                        name: 'coalesce-admin-item',
-                        params: {
-                          type: prop.typeDef.name,
-                          id: model[prop.foreignKey.name],
-                        },
-                      }"
-                    >
-                      <v-icon>fa fa-ellipsis-h</v-icon>
-                    </v-btn>
-                  </v-col>
-                  <v-col
-                    v-if="
-                      prop.type == 'string' &&
-                      (prop.subtype == 'url' ||
-                        prop.subtype == 'email' ||
-                        prop.subtype == 'tel')
-                    "
-                    class="flex-grow-0 pl-3"
-                    align-self="start"
-                  >
-                    <v-btn
-                      class="c-admin-editor--href-link"
-                      variant="outlined"
-                      tabindex="-1"
-                      :disabled="!model[prop.name]"
-                      :href="
-                        (prop.subtype == 'email'
-                          ? 'mailto:'
-                          : prop.subtype == 'tel'
-                          ? 'tel:'
-                          : '') + model[prop.name]
-                      "
-                    >
-                      <v-icon class="black--text"
-                        >fa fa-external-link-alt
-                      </v-icon>
-                    </v-btn>
-                  </v-col>
-                  <v-col
-                    v-if="prop.type == 'string' && prop.subtype == 'url-image'"
-                    class="flex-grow-0 pl-3"
-                    align-self="start"
-                  >
-                    <v-card outlined rounded>
-                      <c-display
-                        :model="model"
-                        :for="prop"
-                        style="max-width: 100px; display: block"
-                      ></c-display>
-                    </v-card>
-                  </v-col>
-                </v-row>
-              </v-col>
-            </v-row>
-          </template>
+                      style="max-width: 100px; display: block"
+                    ></c-display>
+                  </v-card>
+                </v-col>
+              </v-row>
+            </v-col>
+          </v-row>
         </c-loader-status>
       </v-form>
     </v-card-text>

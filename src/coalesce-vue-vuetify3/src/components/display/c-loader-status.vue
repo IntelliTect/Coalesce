@@ -76,23 +76,35 @@ type AnyLoader = ItemApiState<any, any> | ListApiState<any, any>;
 type AnyLoaderMaybe = AnyLoader | null | undefined;
 
 class Flags {
-  progress: boolean | null = null;
-  initialProgress = true;
-  secondaryProgress = true;
-  loadingContent = true;
-  errorContent = true;
-  initialContent = true;
+  progress = true;
+  "initial-progress" = true;
+  "secondary-progress" = true;
+  "loading-content" = true;
+  "error-content" = true;
+  "initial-content" = true;
 }
 
 /*
   TODO: This component could use a bit of a rewrite (again).
-  Leave the existing component as it is for backwards compat - 
+  Leave the existing component as it is for backwards compat -
   instead, make a new one with the following changes:
-    - New name: c-caller-status 
+    - New name: c-caller-status
     - Rename prop loaders => callers
     - Allow defining flags as props on the components, preferably directly as flags like <c-caller-status :callers="[list.$load]" no-initial-progress />.
       - This is a new syntax in addition to the current flags dictionary syntax, which needs to be preserved to support advanced use cases.
 */
+
+// type Flag = `no-${keyof Flags}`;
+// type KeysOf<T, Key extends keyof T = keyof T> = Key extends string
+//   ? `${KebabCase<`no-${Key}`>} ${KeysOf<Omit<T, Key>>}` | KebabCase<`no-${Key}`>
+//   : never;
+// type FlagsString = KeysOf<Flags> | "";
+
+// The above types are way over the top, since the yield every possible permutation of flags.
+// Instead, type this as only individual flags, and then allow whatever else after each individual flag.
+// This presents nice intellisense.
+type Flag = `no-${keyof Flags}`;
+type FlagsString = Flag | "" | `${Flag} ${string}`;
 
 export default defineComponent({
   name: "c-loader-status",
@@ -101,7 +113,7 @@ export default defineComponent({
     loaders: {
       required: true,
       type: Object as PropType<{
-        [flags: string]: AnyLoaderMaybe | AnyLoaderMaybe[];
+        [flags in FlagsString]?: AnyLoaderMaybe | AnyLoaderMaybe[];
       }>,
     },
 
@@ -133,7 +145,9 @@ export default defineComponent({
           }
         }
 
-        let loaders = this.loaders[flagsStr];
+        let loaders = (
+          this.loaders as Record<string, AnyLoaderMaybe | AnyLoaderMaybe[]>
+        )[flagsStr];
         if (!Array.isArray(loaders)) {
           loaders = [loaders];
         }
@@ -160,14 +174,16 @@ export default defineComponent({
     showLoading() {
       return this.loaderFlags.some((f) => {
         const [loader, flags] = f;
-        if (flags.progress === false) return false;
+        if (!flags.progress) return false;
 
         const isLoading = loader.isLoading;
         return (
-          (flags.initialProgress &&
+          (flags["initial-progress"] &&
             isLoading &&
             loader.wasSuccessful == null) ||
-          (flags.secondaryProgress && isLoading && loader.wasSuccessful != null)
+          (flags["secondary-progress"] &&
+            isLoading &&
+            loader.wasSuccessful != null)
         );
       });
     },
@@ -177,26 +193,26 @@ export default defineComponent({
         this.progressPlaceholder &&
         this.loaderFlags.some(
           (f) =>
-            f[1].progress !== false &&
-            f[1].secondaryProgress &&
-            f[1].loadingContent
+            f[1].progress &&
+            f[1]["secondary-progress"] &&
+            f[1]["loading-content"]
         )
       );
     },
 
     showContent() {
       return this.loaderFlags.every(([loader, flags]) => {
-        if (!flags.loadingContent && loader.isLoading) {
+        if (!flags["loading-content"] && loader.isLoading) {
           // loader is loading, and loading content is off.
           return false;
         }
-        if (!flags.errorContent && loader.wasSuccessful === false) {
+        if (!flags["error-content"] && loader.wasSuccessful === false) {
           // loader has an error, and error content is off
           return false;
         }
         if (
           // initial content is off, and either:
-          !flags.initialContent &&
+          !flags["initial-content"] &&
           // loader has not yet loaded
           (loader.wasSuccessful == null ||
             // or loader has loaded, but it errored and there's no current result

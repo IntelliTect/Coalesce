@@ -131,11 +131,14 @@ export function parseDateUserInput(input: string, defaultDate: Date) {
 
 /**
  * Converts deep Javascript objects to URL encoded query strings.
+ * @license MIT
+ */
+/*
  * Code extracted from jQuery.param() and boiled down to bare metal js.
  * Should handle deep/nested objects and arrays in the same manner as jQuery's ajax functionality.
  * Origin: https://gist.github.com/dgs700/4677933
  * Replaces NPM module "qs" after it became bloated with dependencies in a commit dated 3/18/2021.
- * @license MIT
+ * license: MIT
  */
 export function objectToQueryString(
   a: Array<any> | { [s: string]: any } | null

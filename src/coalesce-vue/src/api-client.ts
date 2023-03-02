@@ -58,10 +58,10 @@ export interface ItemResult<T = any> extends ApiResult {
 
 export interface ListResult<T = any> extends ApiResult {
   list?: T[];
-  page: number;
-  pageSize: number;
-  pageCount: number;
-  totalCount: number;
+  page?: number;
+  pageSize?: number;
+  pageCount?: number;
+  totalCount?: number;
 }
 
 /* Api Parameter Objects */
@@ -733,6 +733,9 @@ export class ApiClient<T extends ApiRoutedType> {
         ...query,
         ...(config && config.params ? config.params : null),
         ...mapParamsToDto(standardParameters),
+      },
+      __coalesce_method_meta() {
+        return method;
       },
     };
 
@@ -1806,10 +1809,10 @@ export class ListApiState<TArgs extends any[], TResult> extends ApiState<
     this.wasSuccessful = data.wasSuccessful;
     this.message = data.message || null;
 
-    this.page = data.page;
-    this.pageSize = data.pageSize;
-    this.pageCount = data.pageCount;
-    this.totalCount = data.totalCount;
+    this.page = data.page ?? null;
+    this.pageSize = data.pageSize ?? null;
+    this.pageCount = data.pageCount ?? null;
+    this.totalCount = data.totalCount ?? null;
 
     if ("list" in data) {
       this.result = data.list || [];

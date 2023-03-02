@@ -1,5 +1,5 @@
 import { StudentListViewModel } from "@test/targets.viewmodels";
-import { delay, mountApp } from "@test/util";
+import { flushPromises, mountApp } from "@test/util";
 import { watch } from "vue";
 import { CListFilters } from "..";
 
@@ -14,13 +14,13 @@ describe("CListFilters", () => {
 
     // Mount the component without any user action. list.$params should be unchanged.
     const wrapper = mountApp(() => <CListFilters list={list}></CListFilters>);
-    await delay(1);
+    await flushPromises();
     expect(watchTracker).toBeCalledTimes(0);
 
     // Now change a filter and observe that the params watcher triggers.
     const filters = wrapper.findComponent(CListFilters);
     filters.vm.filters.find((f) => f.key == "name")!.value = "asd";
-    await delay(1);
+    await flushPromises();
     expect(watchTracker).toBeCalledTimes(1);
   });
 });

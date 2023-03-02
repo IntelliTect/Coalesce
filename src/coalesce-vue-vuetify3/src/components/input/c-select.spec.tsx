@@ -1,7 +1,7 @@
 import { Course, Grade, Student } from "@test/targets.models";
 import { StudentViewModel } from "@test/targets.viewmodels";
-import { delay, getWrapper, mountApp, nextTick, nextTicks } from "@test/util";
-import { DOMWrapper, mount, VueWrapper } from "@vue/test-utils";
+import { getWrapper, mountApp, nextTick, flushPromises } from "@test/util";
+import { VueWrapper } from "@vue/test-utils";
 import { AxiosRequestConfig } from "axios";
 import { AxiosClient, AxiosItemResult, AxiosListResult } from "coalesce-vue";
 import { Mock } from "vitest";
@@ -174,7 +174,7 @@ describe("CSelect", () => {
       const wrapper = mountApp(() => (
         <CSelect for="Course" keyValue={303}></CSelect>
       ));
-      await delay(1);
+      await flushPromises();
 
       // Assert - the name of the selected option should be fetched from the server
       // and show as the selected item.
@@ -189,7 +189,7 @@ describe("CSelect", () => {
       const wrapper = mountApp(() => (
         <CSelect model={student} for="currentCourse"></CSelect>
       ));
-      await delay(1);
+      await flushPromises();
 
       // Assert - the name of the selected option should be fetched from the server
       // and show as the selected item.
@@ -206,7 +206,7 @@ describe("CSelect", () => {
           objectValue={new Course({ courseId: 303, name: "baz 303" })}
         ></CSelect>
       ));
-      await delay(1);
+      await flushPromises();
 
       // Assert
       expect(wrapper.text()).toContain("baz 303");
@@ -222,7 +222,7 @@ describe("CSelect", () => {
           modelValue={new Course({ courseId: 303, name: "baz 303" })}
         ></CSelect>
       ));
-      await delay(1);
+      await flushPromises();
 
       // Assert
       expect(wrapper.text()).toContain("baz 303");
@@ -287,7 +287,7 @@ describe("CSelect", () => {
         <CSelect model={model} for="currentCourse"></CSelect>
       )).findComponent(CSelect);
 
-      await delay(1);
+      await flushPromises();
 
       // Find the main input, focus it (as if it was tabbed to by the user)
       const mainInput = wrapper.find("input");
@@ -308,7 +308,7 @@ describe("CSelect", () => {
       expect(menuInput.element).toBe(document.activeElement);
 
       // Only one item matches our search criteria (foo 101, not bar 202)
-      await delay(1);
+      await flushPromises();
       expect(menuWrapper.findAll(".v-list-item").length).toBe(1);
     });
 
@@ -323,17 +323,16 @@ describe("CSelect", () => {
       mainInput.trigger("keydown.enter");
       expect(wrapper.vm.menuOpen).toBeTruthy();
 
-      await delay(1);
+      await flushPromises();
       const menuWrapper = menuContents();
       const menuInput = menuWrapper.find("input");
 
       // Close it with escape
-      mainInput.trigger("keydown.esc");
-      await delay(10);
+      await mainInput.trigger("keydown.esc");
       expect(wrapper.vm.menuOpen).toBeFalsy();
 
       // Open it again
-      mainInput.trigger("keydown.space");
+      await mainInput.trigger("keydown.space");
       expect(wrapper.vm.menuOpen).toBeTruthy();
 
       // Navigate to the second item
@@ -399,7 +398,7 @@ describe("CSelect", () => {
     const wrapper = mountApp(() => (
       <CSelect model={model} for="currentCourse" preselect-first></CSelect>
     )).findComponent(CSelect);
-    await delay(1);
+    await flushPromises();
     expect(model.currentCourseId).toBe(101);
   });
 
@@ -417,7 +416,7 @@ describe("CSelect", () => {
           params={{ pageSize: results }}
         ></CSelect>
       )).findComponent(CSelect);
-      await delay(1);
+      await flushPromises();
       expect(model.currentCourseId).toBe(expected);
     }
   );
@@ -438,7 +437,7 @@ describe("CSelect", () => {
         }}
       ></CSelect>
     )).findComponent(CSelect);
-    await delay(1);
+    await flushPromises();
 
     // our label function is predicated on a search of "f",
     // so no create item option expected yet.
@@ -466,9 +465,9 @@ describe("CSelect", () => {
 const menuContents = () => getWrapper(".c-select__menu-content");
 
 const openMenu = async (wrapper: VueWrapper) => {
-  await delay(1);
+  await flushPromises();
   await wrapper.find(".v-input__control").trigger("click");
-  await delay(1);
+  await flushPromises();
   return menuContents();
 };
 

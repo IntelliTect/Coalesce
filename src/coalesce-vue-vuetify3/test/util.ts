@@ -1,7 +1,12 @@
 import { createCoalesceVuetify } from "@/install";
-import { mount, DOMWrapper, createWrapperError } from "@vue/test-utils";
+import {
+  mount,
+  DOMWrapper,
+  createWrapperError,
+  enableAutoUnmount,
+} from "@vue/test-utils";
 import { ArgumentsType } from "vitest";
-import { defineComponent, h, nextTick } from "vue";
+import { defineComponent, h } from "vue";
 
 import { createVuetify } from "vuetify";
 import * as components from "vuetify/components";
@@ -15,9 +20,7 @@ global.ResizeObserver ??= class ResizeObserver {
 };
 global.cancelIdleCallback = function () {};
 
-beforeEach(() => {
-  document.body.childNodes.forEach((n) => n.remove());
-});
+enableAutoUnmount(afterEach);
 
 const vuetify = createVuetify({ components, directives });
 const coalesceVuetify = createCoalesceVuetify({
@@ -73,11 +76,8 @@ export function getWrapper(selector = ".v-overlay-container") {
 export async function delay(ms: number) {
   await new Promise((resolve) => setTimeout(resolve, ms));
 }
-export async function nextTicks(ticks: number) {
-  for (let i = 0; i < ticks; i++) {
-    await nextTick();
-  }
-}
+
 export { nextTick } from "vue";
+export { flushPromises } from "@vue/test-utils";
 
 export { mountVuetify as mount, mountApp };

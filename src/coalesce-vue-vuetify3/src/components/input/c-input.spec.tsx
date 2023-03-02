@@ -1,8 +1,7 @@
 import { Grade, Student } from "@test/targets.models";
 import { StudentViewModel } from "@test/targets.viewmodels";
-import { delay, mount } from "@test/util";
-import { reactive } from "vue";
-import { VListItem, VList } from "vuetify/components";
+import { mount } from "@test/util";
+import { VListItem } from "vuetify/components";
 import { CInput } from "..";
 
 describe("CInput", () => {

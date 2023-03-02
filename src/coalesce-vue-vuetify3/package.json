@@ -54,7 +54,7 @@
     "@vue/eslint-config-typescript": "11.0.2",
     "@vue/test-utils": "^2.2.10",
     "autoprefixer": "^10.4.8",
-    "axios": "^0.26.1",
+    "axios": "^1.3.4",
     "coalesce-vue": "../coalesce-vue",
     "eslint": "8.28.0",
     "eslint-plugin-vue": "9.7.0",

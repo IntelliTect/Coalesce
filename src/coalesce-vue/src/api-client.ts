@@ -1602,7 +1602,7 @@ export class ItemApiState<TArgs extends any[], TResult> extends ApiState<
    * @param vue A Vue instance through which the lifecycle of the object URL will be managed.
    */
   public getResultObjectUrl(
-    vue: VueInstance | undefined = getCurrentInstance()?.proxy
+    vue: VueInstance | null | undefined = getCurrentInstance()?.proxy
   ): undefined | (TResult extends Blob ? string : never) {
     const result = this.result;
     if (result == this._objectUrl?.target) {

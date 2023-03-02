@@ -57,7 +57,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Tests
                 "paths": {
                   "coalesce-vue/lib/*": [ "{{workingDirectory}}/src/*" ],
                   "*": [ "{{workingDirectory}}/node_modules/*" ],
-                }
+                },
+                "types": ["{{workingDirectory}}/node_modules/vue-router"]
               },
               "include": [
                 "src/**/*.ts",

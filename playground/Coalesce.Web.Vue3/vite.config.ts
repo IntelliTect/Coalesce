@@ -4,16 +4,11 @@ import { defineConfig } from 'vite';
 
 import createVuePlugin from '@vitejs/plugin-vue';
 import vuetify, { transformAssetUrls } from 'vite-plugin-vuetify'
-import createCheckerPlugin from 'vite-plugin-checker';
 import createVueComponentImporterPlugin from 'unplugin-vue-components/vite';
 import { Vuetify3Resolver } from 'unplugin-vue-components/resolvers';
 
 import { createAspNetCoreHmrPlugin } from '../../src/coalesce-vue/src/build';
 import { CoalesceVuetifyResolver } from '../../src/coalesce-vue-vuetify3/src/build';
-
-import { sassPlugin } from 'esbuild-sass-plugin';
-
-import type { StringOptions } from 'sass';
 
 const libRoot = path.resolve(__dirname, '../../src/') + "/";
 
@@ -72,6 +67,11 @@ export default defineConfig(async ({ command, mode }) => {
     ],
 
     resolve: {
+      dedupe: [
+        "vue",
+        "vue-router",
+        "vuetify",
+      ],
       alias: [
         { find: '@', replacement: path.resolve(__dirname, 'src') },
         {
@@ -86,26 +86,6 @@ export default defineConfig(async ({ command, mode }) => {
           find: 'coalesce-vue-vuetify3',
           replacement: libRoot + 'coalesce-vue-vuetify3/src/index.ts',
         },
-        {
-          find: 'vue',
-          replacement: path.resolve(__dirname, 'node_modules/vue'),
-        },
-        {
-          find: 'vue-router',
-          replacement: path.resolve(__dirname, 'node_modules/vue-router'),
-        },
-
-        // Deduplicate vuetify so we don't end up with double imports from 
-        // both ourselves and coalesce-vue-vuetify3.
-        // Deduplicating vuetify breaks builds on linux for some reason.
-        // Could not load /src/Coalesce/playground/Coalesce.Web.Vue3/node_modules/vuetify/styles (imported by src/main.ts): ENOENT: no such file or directory
-        ...(process.platform == "linux" ? [] : [
-          {
-            find: 'vuetify',
-            replacement: path.resolve(__dirname, 'node_modules/vuetify'),
-          },
-        ])
-        
       ],
     },
     server: {

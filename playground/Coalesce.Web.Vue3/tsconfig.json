@@ -16,6 +16,11 @@
       "@/*": [ "src/*" ],
       // Add modules here that are getting duplicated due to the fact that we symlink in coalesce-vue and coalesce-vue-vuetifiy.
       
+      "coalesce-vue": [ "../../src/coalesce-vue/src" ],
+      "coalesce-vue/*": [ "../../src/coalesce-vue/src/*" ],
+      "coalesce-vue/lib/*": [ "../../src/coalesce-vue/src/*" ],
+      "coalesce-vue-vuetify": [ "../../src/coalesce-vue-vuetify3/src" ],
+      "coalesce-vue-vuetify/*": [ "../../src/coalesce-vue-vuetify3/src/*" ]
     }
   },
   "include": [

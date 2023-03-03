@@ -48,7 +48,7 @@ namespace Coalesce.Domain
                             i++;
                             return companyId;
                         });
-                    context.People.AddRange(GenFu.GenFu.ListOf<Person>(100));
+                    context.People.AddRange(GenFu.GenFu.ListOf<Person>(2000));
                     context.SaveChanges();
                 }
 

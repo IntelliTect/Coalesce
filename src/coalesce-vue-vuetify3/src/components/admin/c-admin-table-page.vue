@@ -4,6 +4,7 @@
       class="c-admin-table-page--table"
       :list="listVM"
       :color="color"
+      :page-sizes="[10, 25, 100, 500]"
       query-bind
     >
     </c-admin-table>

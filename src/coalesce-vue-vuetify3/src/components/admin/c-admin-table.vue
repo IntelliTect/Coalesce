@@ -2,16 +2,21 @@
   <v-card class="c-admin-table">
     <c-admin-table-toolbar
       :list="viewModel"
+      :page-sizes="pageSizes"
       @update:editable="editable = $event"
       :editable="canEdit ? editable : undefined"
       :color="color"
       elevation="4"
     />
 
-    <v-card-text class="pt-3">
-      <!-- TODO: c-table also has a loader, making it so we have 2 different loaders, 
-      each with its own 10px placeholder. Figure out how to combine them into one. -->
-      <c-loader-status
+    <v-card-text>
+      <c-table
+        admin
+        :editable="editable"
+        :list="viewModel"
+        :extra-headers="
+          canEdit || canDelete || hasInstanceMethods ? ['Actions'] : []
+        "
         :loaders="{
           '': [
             ...viewModel.$items.map((i) => i.$delete),
@@ -19,54 +24,42 @@
           ],
         }"
       >
-        <c-table
-          admin
-          :editable="editable"
-          :list="viewModel"
-          :extra-headers="
-            canEdit || canDelete || hasInstanceMethods ? ['Actions'] : []
-          "
-        >
-          <template #item.append="{ item }">
-            <td width="1%">
-              <v-row class="flex-nowrap" no-gutters>
-                <v-btn
-                  v-if="canEdit || hasInstanceMethods"
-                  class="mx-1"
-                  title="Edit"
-                  variant="text"
-                  icon
-                  :to="editRoute(item)"
-                >
-                  <!-- Using an <i> directly is much more performant than v-icon. -->
-                  <i
-                    aria-hidden="true"
-                    class="v-icon notranslate fa fa-edit"
-                  ></i>
-                </v-btn>
+        <template #item.append="{ item }">
+          <td width="1%">
+            <v-row class="flex-nowrap" no-gutters>
+              <v-btn
+                v-if="canEdit || hasInstanceMethods"
+                class="mx-1"
+                title="Edit"
+                variant="text"
+                icon
+                :to="editRoute(item)"
+              >
+                <!-- Using an <i> directly is much more performant than v-icon. -->
+                <i aria-hidden="true" class="v-icon notranslate fa fa-edit"></i>
+              </v-btn>
 
-                <v-btn
-                  v-if="canDelete"
-                  class="mx-1"
-                  title="Delete"
-                  variant="text"
-                  icon
-                  @click="deleteItemWithConfirmation(item)"
-                >
-                  <i
-                    aria-hidden="true"
-                    class="v-icon notranslate fa fa-trash-alt"
-                  ></i>
-                </v-btn>
-              </v-row>
-            </td>
-          </template>
-        </c-table>
-      </c-loader-status>
+              <v-btn
+                v-if="canDelete"
+                class="mx-1"
+                title="Delete"
+                variant="text"
+                icon
+                @click="deleteItemWithConfirmation(item)"
+              >
+                <i
+                  aria-hidden="true"
+                  class="v-icon notranslate fa fa-trash-alt"
+                ></i>
+              </v-btn>
+            </v-row>
+          </td>
+        </template>
+      </c-table>
 
       <c-list-pagination
         :list="list"
-        :pageSizes="pageSizes"
+        :page-sizes="pageSizes"
         class="mt-4"
       ></c-list-pagination>
     </v-card-text>

@@ -75,7 +75,7 @@
 
       <v-spacer></v-spacer>
 
-      <c-list-page-size :list="list" />
+      <c-list-page-size :list="list" :items="pageSizes" />
     </template>
   </v-toolbar>
 </template>
@@ -104,6 +104,7 @@ export default defineComponent({
   props: {
     ...makeMetadataProps(),
     list: { required: true, type: Object as PropType<ListViewModel> },
+    pageSizes: { required: false, type: Array as PropType<number[]> },
     color: { required: false, type: String, default: null },
     editable: { default: null, required: false, type: Boolean },
   },
@@ -118,7 +119,6 @@ export default defineComponent({
       // If we just gave a named raw location, it would always use the coalesce admin route
       // instead of the user-overridden one (that the user overrides by declaring another
       // route with the same path).
-      this.router;
       return this.router.resolve({
         name: "coalesce-admin-item",
         params: {

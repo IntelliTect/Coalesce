@@ -21,6 +21,7 @@ import {
   ListParameters,
   DataSourceParameters,
   ServiceApiClient,
+  mapParamsToDto,
 } from "./api-client.js";
 import {
   type Model,
@@ -1011,7 +1012,13 @@ export abstract class ListViewModel<
       enqueueLoad();
     };
 
-    const watcher = vue.$watch(() => this.$params, onChange, { deep: true });
+    const watcher = vue.$watch(
+      // Watch the stringified version of the params, since if we watch the object itself,
+      // insignificant changes will incorrectly trigger reloads,
+      // e.g. when c-admin-table remaps params from the querystring.
+      () => JSON.stringify(mapParamsToDto(this.$params)),
+      onChange
+    );
     startAutoCall(this._autoLoadState, vue, watcher, enqueueLoad);
   }
 
@@ -1086,7 +1093,6 @@ export class ViewModelFactory {
     const vm = new vmCtor() as unknown as ViewModel;
     map.set(initialData, vm);
 
-    // @ts-ignore
     vm.$loadFromModel(initialData, this.isCleanData);
 
     return vm;
@@ -1199,7 +1205,6 @@ function viewModelCollectionMapItems<T extends ViewModel>(
 }
 
 function resolveProto(obj: ViewModelCollection<any>): Array<any> {
-  if (IsVue3) return Array.prototype as any;
   // Babel does some stupid nonsense where it will wrap our proto
   // in another proto. This breaks things if coalesce-vue is imported from source,
   // or if we were to at some point in the future emit a esnext version of coalesce-vue.
@@ -1222,6 +1227,10 @@ export class ViewModelCollection<T extends ViewModel> extends Array<T> {
     // method from the proto. See test "newly loaded additional items are reactive".
     const viewModelItems = viewModelCollectionMapItems(items, this, true);
 
+    if (IsVue3) {
+      return super.push(...viewModelItems);
+    }
+
     return resolveProto(this).push.apply(this, viewModelItems);
   }
 
@@ -1230,6 +1239,9 @@ export class ViewModelCollection<T extends ViewModel> extends Array<T> {
       ? viewModelCollectionMapItems(items, this, true)
       : items;
 
+    if (IsVue3) {
+      return super.splice(start, deleteCount as any, ...viewModelItems);
+    }
     return resolveProto(this).splice.call(
       this,
       start,

@@ -1,7 +1,9 @@
 <template>
   <div class="c-table" :class="{ 'c-table--editable': editable }">
-    <c-loader-status :loaders="{ 'no-initial-content': [list.$load] }">
-      <v-table>
+    <c-loader-status
+      :loaders="{ 'no-initial-content': [list.$load], ...loaders }"
+    >
+      <v-table style="--v-table-header-height: 40px">
         <thead>
           <tr>
             <th
@@ -15,12 +17,12 @@
             >
               {{ header.text }}
               <v-icon v-if="list.$params.orderBy == header.value">
-                fa fa-sort-up
+                fa fa-caret-up
               </v-icon>
               <v-icon
                 v-else-if="list.$params.orderByDescending == header.value"
               >
-                fa fa-sort-down
+                fa fa-caret-down
               </v-icon>
             </th>
           </tr>
@@ -58,30 +60,6 @@
       </v-table>
     </c-loader-status>
   </div>
-
-  <!-- <v-data-table
-    class="c-table"
-    v-bind="$attrs"
-    :headers="$attrs.headers || headers"
-    :items="list.$items"
-    :sort-by.sync="sortBy"
-    :sort-desc.sync="sortDesc"
-    :server-items-length="list.$load.totalCount"
-    hide-default-footer
-    >
-    <template #item="{ item, index }">
-      <slot 
-        name="item"
-        :item="item"
-        >
-        <c-table-row :item="item" :effectiveProps="effectiveProps" :key="index">
-          <template #item.append="{item}">
-            <slot name="item.append" :item="item" />
-          </template>
-        </c-table-row>
-      </slot>
-    </template>
-  </v-data-table> -->
 </template>
 
 <script lang="ts">
@@ -105,6 +83,7 @@ export default defineComponent({
     admin: { required: false, type: Boolean },
     editable: { required: false, type: Boolean },
     extraHeaders: { required: false, type: Array as PropType<Array<string>> },
+    loaders: { required: false, type: Object },
   },
 
   computed: {

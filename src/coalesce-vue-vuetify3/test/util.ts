@@ -1,3 +1,4 @@
+import { CAdminEditorPage, CAdminTablePage } from "@/index";
 import { createCoalesceVuetify } from "@/install";
 import {
   mount,
@@ -7,6 +8,7 @@ import {
 } from "@vue/test-utils";
 import { ArgumentsType } from "vitest";
 import { defineComponent, h } from "vue";
+import { createRouter, createWebHistory } from "vue-router";
 
 import { createVuetify } from "vuetify";
 import * as components from "vuetify/components";
@@ -34,7 +36,31 @@ const mountVuetify = function (
   const wrapper = mount(component, {
     ...options,
     global: {
-      plugins: [vuetify, coalesceVuetify],
+      plugins: [
+        vuetify,
+        coalesceVuetify,
+        createRouter({
+          history: createWebHistory(),
+          routes: [
+            {
+              path: "/",
+              component: () => h("div"),
+            },
+            {
+              path: "/admin/:type",
+              name: "coalesce-admin-list",
+              component: CAdminTablePage,
+              props: (route) => ({ ...route.params, color: "primary" }),
+            },
+            {
+              path: "/admin/:type/item/:id?",
+              name: "coalesce-admin-item",
+              component: CAdminEditorPage,
+              props: (route) => ({ ...route.params, color: "primary" }),
+            },
+          ],
+        }),
+      ],
     },
   });
 
@@ -79,5 +105,6 @@ export async function delay(ms: number) {
 
 export { nextTick } from "vue";
 export { flushPromises } from "@vue/test-utils";
+export { mockEndpoint } from "coalesce-vue/lib/test-utils";
 
 export { mountVuetify as mount, mountApp };

@@ -76,9 +76,8 @@ jobs:
           }
         }
 
-        echo "COALESCE_VERSION=$version" >> $GITHUB_OUTPUT
-        
-        echo "# Version $version" >> $GITHUB_STEP_SUMMARY
+        echo "COALESCE_VERSION=$version" >> $env:GITHUB_OUTPUT
+        echo "# Version $version" >> $env:GITHUB_STEP_SUMMARY
 
 
   build-dotnet: 

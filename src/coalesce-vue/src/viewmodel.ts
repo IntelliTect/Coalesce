@@ -4,6 +4,7 @@ import {
   ref,
   markRaw,
   getCurrentInstance,
+  toRaw,
 } from "vue";
 
 import { resolvePropMeta } from "./metadata.js";
@@ -1465,7 +1466,12 @@ export function defineProps<T extends new () => ViewModel<any, any>>(
 
             function (this: InstanceType<T>, incomingValue: any) {
               const $data = (this as any).$data;
-              const old = $data[propName];
+
+              // Optimization: read old data from raw,
+              // because we're just using it to avoid a set if we don't need to,
+              // so we don't want to be wasting time on dependency tracking.
+              const $dataRaw = toRaw($data);
+              const old = $dataRaw[propName];
 
               // First, check strict equality. This will handle the 90% most common case.
               if (old === incomingValue) {
@@ -1483,7 +1489,7 @@ export function defineProps<T extends new () => ViewModel<any, any>>(
               // If strict equality fails, try to use valueOf() to compare.
               // valueOf() helps with Date instances that represent the same time value.
               // If either side is null, it is ok to set $isDirty, since we
-              // know that if we got this var, BOTH sides aren't both null.
+              // know that if we got this far, BOTH sides aren't both null.
               if (old?.valueOf() !== incomingValue?.valueOf()) {
                 $data[propName] = incomingValue;
 
@@ -1498,7 +1504,7 @@ export function defineProps<T extends new () => ViewModel<any, any>>(
                   we need to null it out if the current value of the 
                   navigation prop is non-null and the incoming value of the FK does not agree with the  PK on the value of the navigation prop.
                 */
-                  const currentObject = $data[prop.navigationProp.name];
+                  const currentObject = $dataRaw[prop.navigationProp.name];
                   if (
                     currentObject != null &&
                     incomingValue != currentObject[prop.principalKey.name]
@@ -1668,11 +1674,15 @@ export function updateViewModelFromModel<
       );
     }
 
+    // Optimization: read old data from raw,
+    // because we're just using it to avoid a set if we don't need to,
+    // so we don't want to be wasting time on dependency tracking.
+    // We also want to skip the getter from defineProps for the same reason.
+    const $data = (target as any).$data;
+    const $dataRaw = toRaw($data);
+
     for (const prop of Object.values(metadata.props)) {
       const propName = prop.name as keyof typeof target & string;
-      // Hit $data directly since this is internal code.
-      // Avoids a redundant function call against the ViewModel's prop getter.
-      const currentValue = (target as any).$data[propName];
       let incomingValue = source[propName];
 
       // Sanitize incomingValue to not be undefined (to not break Vue's reactivity),
@@ -1683,6 +1693,7 @@ export function updateViewModelFromModel<
       switch (prop.role) {
         case "referenceNavigation":
           if (incomingValue) {
+            const currentValue = $dataRaw[propName];
             if (
               currentValue == null ||
               currentValue[prop.typeDef.keyProp.name] !==
@@ -1728,6 +1739,7 @@ export function updateViewModelFromModel<
           }
           break;
         case "collectionNavigation":
+          const currentValue = $data[propName];
           if (incomingValue == null) {
             if (currentValue) {
               // No incoming collection was provided. Allow the existing collection to stick around.
@@ -1759,12 +1771,20 @@ export function updateViewModelFromModel<
 
         case "primaryKey":
           // Always update the PK, even if skipDirty is true.
-          if (currentValue !== incomingValue) {
+          if ($dataRaw[propName] !== incomingValue) {
             target[propName] = incomingValue;
           }
           break;
 
         default:
+          // We check against the current value here for a minor perf increase -
+          // Even though this is redundant with the ViewModel's setters,
+          // it avoids calling into the setter if we don't have to,
+          // and handles the vast majority of cases. Using $dataRaw also avoids unnecessary reactivity.
+          if ($dataRaw[propName] === incomingValue) {
+            break;
+          }
+
           if (prop.role == "foreignKey") {
             if (
               incomingValue == null &&
@@ -1779,14 +1799,7 @@ export function updateViewModelFromModel<
             }
           }
 
-          // We check against currentValue here for a minor perf increase -
-          // Even though this is redundant with the ViewModel's setters,
-          // it avoids calling into the setter if we don't have to,
-          // and handles the vast majority of cases.
-          if (
-            (!skipDirty || !target.$getPropDirty(propName)) &&
-            currentValue !== incomingValue
-          ) {
+          if (!skipDirty || !target.$getPropDirty(propName)) {
             target[propName] = incomingValue;
           }
           break;

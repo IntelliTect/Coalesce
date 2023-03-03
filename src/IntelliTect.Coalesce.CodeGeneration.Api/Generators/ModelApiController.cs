@@ -148,11 +148,11 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
 
                         if (Model.IsDto)
                         {
-                            b.Line($"var itemResult = await dataSource.GetMappedItemAsync<{Model.FullyQualifiedName}>(id, new ListParameters());");
+                            b.Line($"var itemResult = await dataSource.GetMappedItemAsync<{Model.FullyQualifiedName}>(id, new DataSourceParameters());");
                         }
                         else
                         {
-                            b.Line("var (itemResult, _) = await dataSource.GetItemAsync(id, new ListParameters());");
+                            b.Line("var (itemResult, _) = await dataSource.GetItemAsync(id, new DataSourceParameters());");
                         }
                         using (b.Block("if (!itemResult.WasSuccessful)"))
                         {

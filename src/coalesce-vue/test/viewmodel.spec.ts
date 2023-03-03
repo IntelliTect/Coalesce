@@ -1795,6 +1795,22 @@ describe("ViewModel", () => {
       // so the root should be the same instance seen in the advisor's students array.
       expect(student).toBe(student.advisor!.students[0]);
     });
+
+    test("child object is reactive", async () => {
+      var course = new CourseViewModel({
+        student: { studentId: 1, name: "Steve" },
+      });
+
+      let triggered = false;
+      watch(
+        () => course.student?.name,
+        () => (triggered = true)
+      );
+      course.$loadCleanData({ student: { studentId: 1, name: "Steve2" } });
+
+      await delay(1);
+      expect(triggered).toBe(true);
+    });
   });
 
   describe("$delete", () => {

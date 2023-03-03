@@ -83,7 +83,7 @@ namespace Coalesce.Web.Vue2.Api
             [FromForm(Name = "input")] string input)
         {
             var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Case, Coalesce.Domain.CaseDto>("Default");
-            var itemResult = await dataSource.GetMappedItemAsync<Coalesce.Domain.CaseDto>(id, new ListParameters());
+            var itemResult = await dataSource.GetMappedItemAsync<Coalesce.Domain.CaseDto>(id, new DataSourceParameters());
             if (!itemResult.WasSuccessful)
             {
                 return new ItemResult<string>(itemResult);

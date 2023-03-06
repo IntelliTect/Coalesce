@@ -290,7 +290,12 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                 }
 
 
-                if (prop.IsClientWritable && prop.IsClientSerializable)
+                if (prop.IsClientWritable && prop.IsClientSerializable && (
+                    prop.Type.IsString ||  
+                    prop.Type.IsBool ||
+                    prop.Type.IsNumber ||
+                    prop.Type.IsDate
+                ))
                 {
                     List<string> rules = GetValidationRules(prop);
 

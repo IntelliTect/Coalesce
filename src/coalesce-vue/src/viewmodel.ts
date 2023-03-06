@@ -392,10 +392,10 @@ export abstract class ViewModel<
    *
    * Does not include non-dirty properties even if `$saveMode == 'whole'`.
    */
-  public get $savingProps() {
+  public get $savingProps(): ReadonlySet<string> {
     return this._savingProps.value;
   }
-  public set $savingProps(value) {
+  public set $savingProps(value: ReadonlySet<string>) {
     this._savingProps.value = value;
   }
 

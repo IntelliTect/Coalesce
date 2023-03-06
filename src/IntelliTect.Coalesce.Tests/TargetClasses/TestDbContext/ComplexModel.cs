@@ -124,6 +124,9 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         public OutputOnlyExternalTypeWithRequiredEntityProp MethodWithOutputOnlyExternalType3() => null;
 
         [Coalesce, Execute]
+        public InputOutputOnlyExternalTypeWithRequiredNonscalarProp MethodWithInputOutputOnlyExternalTypeWithRequiredNonscalarProp(InputOutputOnlyExternalTypeWithRequiredNonscalarProp i) => i;
+
+        [Coalesce, Execute]
         public void MethodWithSingleFileParameter(IFile file) { }
 
         [Coalesce, Execute]

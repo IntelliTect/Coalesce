@@ -100,4 +100,17 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         public required ComplexModel Entity { get; set; }
 #endif
     }
+
+
+    public class InputOutputOnlyExternalTypeWithRequiredNonscalarProp
+    {
+        public int Id { get; set; }
+
+#if NET7_0_OR_GREATER
+        // Entity props aren't accepted as inputs as children of external types,
+        // so this creates quite the conundrum indeed.
+        // Expected output here is that we generate a `throw` in MapToNew, since the scenario is just impossible.
+        public required ExternalChild ExternalChild { get; set; }
+#endif
+    }
 }

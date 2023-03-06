@@ -32,4 +32,9 @@ body {
     padding-top: .5rem;
     padding-bottom: 5rem;
   }
+
+  .wide-page .page .theme-default-content {
+    // Check the vue2-to-vue3 page when changing this value.
+    max-width: 1700px !important;
+  }
 }

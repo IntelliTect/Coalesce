@@ -294,6 +294,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                     prop.Type.IsString ||  
                     prop.Type.IsBool ||
                     prop.Type.IsNumber ||
+                    prop.Type.IsEnum ||
                     prop.Type.IsDate
                 ))
                 {

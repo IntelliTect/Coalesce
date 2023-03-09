@@ -33,7 +33,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
             else
             {
-                Read = new PropertySecurityPermission(prop, read.Name, read.Roles, IsReadUnused);
+                Read = new PropertySecurityPermission(prop, read.Name, read.RoleLists, IsReadUnused);
             }
 
 
@@ -56,9 +56,10 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 prop.HasAttribute<ReadOnlyApiAttribute>() ? "Property annotated with [ReadOnlyApi]" :
 #pragma warning restore CS0618 // Type or member is obsolete
 
-                // Non-value properties arent writable unless they're owned by an external type,
+                // Non-scalar properties arent writable unless they're owned by an external type,
                 // or the type of the property is an external type.
-                (prop.PureType.IsPOCO && (prop.Parent.IsDbMappedType || prop.Object!.IsDbMappedType)) ? "Property is non-scalar and type is DB mapped." :
+                (prop.PureType.IsPOCO && prop.Parent.IsDbMappedType) ? $"Property is non-scalar and parent type {prop.Parent.Name} is a DB mapped type." :
+                (prop.PureType.IsPOCO && prop.Object!.IsDbMappedType) ? $"Property is non-scalar and property type {prop.Object.Name} is a DB mapped type." :
 
                 !prop.IsClientProperty ? "Other" :
                 null;
@@ -73,7 +74,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             {
                 // Property accepts input from clients.
 
-                var roles = string.Join(",", edit.RoleList.Concat(read.RoleList).Distinct());
+                var roles = read.RoleLists.Concat(edit.RoleLists).ToList();
                 Init = new PropertySecurityPermission(prop, "Init", roles, IsInitUnused);
 
                 if (prop.IsInitOnly)

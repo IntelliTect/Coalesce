@@ -17,10 +17,15 @@ namespace IntelliTect.Coalesce.TypeDefinition
         }
 
         internal SecurityPermission(SecurityPermissionLevels level, string? roles, string name)
+            : this(level, SplitRoles(roles), name) { }
+
+        internal SecurityPermission(SecurityPermissionLevels level, IEnumerable<string>? roles, string name)
         {
             HasAttribute = true;
             PermissionLevel = level;
-            Roles = PermissionLevel != SecurityPermissionLevels.DenyAll ? roles ?? "" : string.Empty;
+            RoleLists = PermissionLevel == SecurityPermissionLevels.DenyAll || roles is null || !roles.Any()
+                ? NoRoles
+                : new List<IReadOnlyList<string>> { roles.ToList().AsReadOnly() }.AsReadOnly();
             NoAccess = PermissionLevel == SecurityPermissionLevels.DenyAll;
             Name = name;
         }
@@ -40,7 +45,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
             if (HasRoles)
             {
-                return userIsAuthenticated && RoleList.Any(s => user!.IsInRole(s));
+                return userIsAuthenticated && RoleLists.All(rl => rl.Any(s => user!.IsInRole(s)));
             }
 
             return userIsAuthenticated;
@@ -50,7 +55,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             if (NoAccess) return $"Deny All";
             if (AllowAnonymous) return $"Allow All (Including Anonymous)";
-            if (HasRoles) return $"Allow Roles: {string.Join(", ", RoleList)}";
+            if (HasRoles) return $"Allow Roles: {string.Join(" && ", RoleLists.Select(rl => "(" + string.Join(", ", rl) + ")"))}";
             return $"Allow Authenticated";
         }
     }

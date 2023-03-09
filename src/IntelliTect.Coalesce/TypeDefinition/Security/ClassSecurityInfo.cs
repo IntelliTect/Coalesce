@@ -55,7 +55,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     allowAnonymousAny ? SecurityPermissionLevels.AllowAll :
                     SecurityPermissionLevels.AllowAuthorized,
                 roles: readAttribute.HasRoles 
-                    ? string.Join(",", readAttribute.RoleList.Union(editAttribute.RoleList).Union(createAttribute.RoleList).Union(deleteAttribute.RoleList)) 
+                    ? readAttribute.RoleLists.Union(editAttribute.RoleLists).Union(createAttribute.RoleLists).Union(deleteAttribute.RoleLists)
+                        .SelectMany(r => r)
                     : null,
                 name: readAttribute.Name
             );
@@ -83,7 +84,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     createAttribute.AllowAnonymous || editAttribute.AllowAnonymous ? SecurityPermissionLevels.AllowAll :
                     SecurityPermissionLevels.AllowAuthorized,
                 roles: createAttribute.HasRoles && editAttribute.HasRoles 
-                    ? string.Join(",", editAttribute.RoleList.Union(createAttribute.RoleList).ToList())
+                    ? $"{createAttribute.Roles},{editAttribute.Roles}"
                     : null,
                 name: "Save"
             );

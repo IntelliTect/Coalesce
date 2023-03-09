@@ -21,6 +21,7 @@ namespace Coalesce.Domain
         public ProductDetails Details { get; set; }
 
         [Column("ProductUniqueId")]
+        [Read(Roles = "User")]
         [Edit(Roles = "Admin")]
         [DataType(DataType.Password)]
         public Guid UniqueId { get; set; }

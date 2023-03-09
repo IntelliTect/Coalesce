@@ -501,15 +501,22 @@
           :class="action.isUnused ? 'border text-dark' : !action.hasRoles ? 'bg-success' : 'bg-success'"
           :title="
               ('Allow' + ('allowAnonymous' in action ? ' Authenticated' : '')) + ' - ' +
-              (!action.hasRoles ? 'No specific role requirements' : 'One of these roles is required: \n' + action.roleList.join('\n')) +
+              (!action.hasRoles 
+                ? 'No specific role requirements' 
+                : action.roleLists.length == 1 
+                  ? 'One of these roles is required: \n' + action.roleLists[0].join('\n')
+                  : 'One role from each role group is required: \n' + action.roleLists.map(rl => 'Role Group: ' + rl.join(', ')).join('\n')
+              ) +
               (action.isUnused ? '\n\nAnalyzed as unused by any API endpoint.' : '')
             "
         >
           <div v-if="action.isUnused">Unused</div>
           <div v-else>
             Allow {{'allowAnonymous' in action ? 'Authenticated' : ''}}
-            <div v-if="action.roleList.length" class="fw-normal text-start">
-              {{action.roles}}
+            <div v-if="action.roleLists.length" class="fw-normal text-start">
+              <div v-for="rl in action.roleLists">
+                {{rl.join(',')}}
+              </div>
             </div>
           </div>
         </span>

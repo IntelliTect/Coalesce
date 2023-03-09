@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Text;
 using Xunit;
 using IntelliTect.Coalesce.Tests.TargetClasses;
+using System.Security.Claims;
 
 namespace IntelliTect.Coalesce.Tests.Tests.Security
 {
@@ -23,6 +24,30 @@ namespace IntelliTect.Coalesce.Tests.Tests.Security
             Assert.True(prop.IsReadOnly);
             Assert.False(prop.IsClientSerializable);
             Assert.False(prop.IsClientWritable);
+        }
+
+        [Theory]
+        [ClassViewModelData(typeof(PropSec))]
+        public void ReadWriteDifferentExplicitRoles_RequiresBothRolesForEdit(ClassViewModelData data)
+        {
+            ClassViewModel vm = data;
+            var prop = vm.PropertyByName(nameof(PropSec.ReadWriteDifferentRoles));
+
+            Assert.Collection(prop.SecurityInfo.Edit.RoleLists,
+                l => Assert.Equal(new[] { "ReadRole" }, l),
+                l => Assert.Equal(new[] { "EditRole" }, l)
+            );
+
+            Assert.True(prop.SecurityInfo.IsEditAllowed(new (new ClaimsIdentity(new[]
+            {
+                new Claim(ClaimTypes.Role, "ReadRole"),
+                new Claim(ClaimTypes.Role, "EditRole"),
+            }))));
+
+            Assert.False(prop.SecurityInfo.IsEditAllowed(new (new ClaimsIdentity(new[]
+            {
+                new Claim(ClaimTypes.Role, "EditRole"),
+            }))));
         }
     }
 }

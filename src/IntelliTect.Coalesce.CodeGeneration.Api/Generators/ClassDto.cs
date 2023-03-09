@@ -264,7 +264,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
             string RoleCheck(string role) => $"context.IsInRoleCached(\"{role.EscapeStringLiteralForCSharp()}\")";
             string IncludesCheck(string include) => $"includes == \"{include.EscapeStringLiteralForCSharp()}\"";
 
-            string roles = string.Join(" || ", permission.RoleList.Select(RoleCheck));
+            string roles = string.Join(" && ", permission.RoleLists.Select(rl => string.Join(" || ", rl.Select(RoleCheck))));
 
             var includes = string.Join(" || ", property.DtoIncludes.Select(IncludesCheck));
             var excludes = string.Join(" || ", property.DtoExcludes.Select(IncludesCheck));

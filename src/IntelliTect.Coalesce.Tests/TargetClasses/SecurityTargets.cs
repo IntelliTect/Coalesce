@@ -6,6 +6,9 @@ using System.Text;
 
 namespace IntelliTect.Coalesce.Tests.TargetClasses
 {
+    [Edit(Roles = " RoleA , RoleB,RoleC")]
+    public class EditWithSpaces { }
+
     public class PropSec
     {
         [Read]
@@ -20,5 +23,8 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses
         public string ReadOnlyViaReadOnlyApi { get; set; }
 
         public string ReadOnlyViaNonPublicSetter { get; internal set; }
+
+        [Read("ReadRole"), Edit("EditRole")]
+        public string ReadWriteDifferentRoles { get; set; }
     }
 }

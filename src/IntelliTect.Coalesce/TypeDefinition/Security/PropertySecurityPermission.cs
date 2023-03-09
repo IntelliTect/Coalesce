@@ -15,21 +15,24 @@ namespace IntelliTect.Coalesce.TypeDefinition
         internal PropertySecurityPermission(
             PropertyViewModel prop,
             string name,
-            string? roles, 
+            IEnumerable<IReadOnlyList<string>>? roleLists, 
             Func<PropertyViewModel, HashSet<PropertyViewModel>, bool?> computeIsUnused
         )
         {
             NoAccess = false;
-            Roles = NoAccess ? string.Empty : roles ?? "";
+            RoleLists = NoAccess || roleLists is null 
+                ? NoRoles 
+                : (roleLists.Where(l => l.Any()).ToList().AsReadOnly() ?? NoRoles);
             Name = name;
             Prop = prop;
             
             // Unused-ness is lazily computed because if we did it eagerly,
             // we could enter infinte recusion when examining the SecurityInfo of other properties.
 
-            // Another note about analysys of IsUnused - it cannot be used to affect code generation output
+            // Another note about analysys of IsUnused - it shouldn't be used to affect code generation output
             // because it will yield incorrect results when multiple code gens with different RootTypesWhitelist
-            // are ran against the same codebase. 
+            // are ran against the same codebase (but we do it anyway because otherwise the ergonomics of using c#
+            // `required`/`init` properties or record types are really bad).
             ComputeIsUnused = computeIsUnused;
         }
 
@@ -55,14 +58,14 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public override bool IsAllowed(ClaimsPrincipal? user)
         {
             if (NoAccess) return false;
-            if (RoleList.Count == 0) return true;
-            return user != null && RoleList.Any(f => user.IsInRole(f));
+            if (RoleLists.Count == 0) return true;
+            return user != null && RoleLists.All(rl => rl.Any(f => user.IsInRole(f)));
         }
 
         public override string ToString()
         {
             if (NoAccess) return $"Deny";
-            if (HasRoles) return $"Allow Roles: {string.Join(", ", RoleList)}";
+            if (HasRoles) return $"Allow Roles: {string.Join(" && ", RoleLists.Select(rl => "(" + string.Join(", ", rl) + ")"))}";
             return $"Allow";
         }
     }

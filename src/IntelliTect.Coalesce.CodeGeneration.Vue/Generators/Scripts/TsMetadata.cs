@@ -291,11 +291,12 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
 
 
                 if (prop.IsClientWritable && prop.IsClientSerializable && (
-                    prop.Type.IsString ||  
-                    prop.Type.IsBool ||
-                    prop.Type.IsNumber ||
-                    prop.Type.IsEnum ||
-                    prop.Type.IsDate
+                    prop.Type.TsTypeKind is 
+                        TypeDiscriminator.Number or 
+                        TypeDiscriminator.String or 
+                        TypeDiscriminator.Boolean or 
+                        TypeDiscriminator.Enum or 
+                        TypeDiscriminator.Date
                 ))
                 {
                     List<string> rules = GetValidationRules(prop);

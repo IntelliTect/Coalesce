@@ -355,7 +355,7 @@ Shorthand for `$load.pageCount` - returns the page count reported by the last su
 $startAutoLoad(vue: Vue, options: AutoLoadOptions<this> = {})
 &nbsp;
 // Vue Composition API
-$useAutoLoad(options: AutoLoadOptions<this> = {})" lang="ts" idPrefix="member-autoload" />
+$useAutoLoad(options: AutoLoadOptions<this> = {})" lang="ts" idPrefix="member-autoLoad" />
 
 Starts auto-loading of the list as changes to its parameters occur. Loads are performed with the `$load` [API Caller](/stacks/vue/layers/api-clients.md#api-callers).
 

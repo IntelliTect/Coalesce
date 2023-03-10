@@ -2,37 +2,41 @@
     "version": "0.2",
     "language": "en",
     "words": [
-        "autosave",
-        "autosaving",
+        "Vuetify",
         "Axios",
-        "bootstrap-datetimepicker",
         "Coalesce",
+        "IntelliTect",
+        "EF",
+        "vite",
+        "unplugin",
+        "IIFE",
+
+        "POCOs",
+        "dtos",
+        "viewmodels",
+        "treeshaken",
         "coalesceko",
         "coalescevue",
-        "dontSerialize",
-        "dtos",
-        "EF",
-        "enumerables",
-        "fiddy",
-        "IIFE",
-        "instanceof",
-        "IntelliTect",
-        "mkdir",
+        "querystring",
+        "bootstrap-datetimepicker",
+
         "nameof",
-        "netcoreapp",
-        "netstandard",
-        "POCOs",
         "queryable",
         "queryables",
-        "querystring",
+        "enumerables",
         "readonly",
-        "treeshaken",
         "typeof",
-        "unplugin",
-        "viewmodels",
-        "vite",
-        "Vuetify",
-        "wwwroot"
+        "instanceof",
+
+        "autosave",
+        "autosaving",
+        "dontSerialize",
+
+        "netcoreapp",
+        "netstandard",
+        "mkdir",
+        "wwwroot",
+        "webp",
     ],
     "ignorePaths": [
         "node_modules"
@@ -43,8 +47,8 @@
             "ignoreRegExpList": [
                 // Hashes in URLs, which for PascalCase headers get transformed into lowercase 
                 // (which then to cspell looks like a single word.)
-                "/(\\.md|\\()#[-\\w]+/mig"
-            ]
+                "/(\\.md|\\()#[-\\w]+/mig",
+             ]
         }
     ]
 }

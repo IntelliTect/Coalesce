@@ -8,6 +8,7 @@ using IntelliTect.Coalesce.DataAnnotations;
 namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
 {
     [Table("Product")]
+    [Read(RoleNames.Admin, RoleNames.User)]
     [Create(Roles = RoleNames.Admin)]
     [Edit(Roles = RoleNames.Admin)]
     public class Product

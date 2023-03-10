@@ -76,7 +76,7 @@ namespace Coalesce.Web.Vue3.Models
             if (ShouldMapTo(nameof(ProductId))) entity.ProductId = (ProductId ?? entity.ProductId);
             if (ShouldMapTo(nameof(Name))) entity.Name = Name;
             if (ShouldMapTo(nameof(Unknown))) entity.Unknown = Unknown;
-            if ((context.IsInRoleCached("Admin") && context.IsInRoleCached("User")))
+            if ((context.IsInRoleCached("User") && context.IsInRoleCached("Admin")))
             {
                 if (ShouldMapTo(nameof(UniqueId))) entity.UniqueId = (UniqueId ?? entity.UniqueId);
             }

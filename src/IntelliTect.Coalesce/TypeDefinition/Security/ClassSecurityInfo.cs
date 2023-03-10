@@ -46,7 +46,11 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 notReadable = true;
             }
 
-            var allowAnonymousAny = readAttribute.AllowAnonymous || editAttribute.AllowAnonymous || deleteAttribute.AllowAnonymous || createAttribute.AllowAnonymous;
+            var allowAnonymousAny = 
+                readAttribute.AllowAnonymous || 
+                editAttribute.AllowAnonymous || 
+                deleteAttribute.AllowAnonymous || 
+                createAttribute.AllowAnonymous;
 
             Read = new SecurityPermission(
                 level:
@@ -57,6 +61,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 roles: readAttribute.HasRoles 
                     ? readAttribute.RoleLists.Union(editAttribute.RoleLists).Union(createAttribute.RoleLists).Union(deleteAttribute.RoleLists)
                         .SelectMany(r => r)
+                        .Distinct()
                     : null,
                 name: readAttribute.Name
             );

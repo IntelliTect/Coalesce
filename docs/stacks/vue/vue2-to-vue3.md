@@ -66,7 +66,7 @@ const list = new PersonListViewModel();
 person.$useAutoSave();
 list.$useAutoLoad();
 
-// If you need to await an async operation during  component creation, 
+// If you need to await an async operation during component creation, 
 // use an IIFE so that the component mount is not delayed.
 (async function created() {
   await person.$load();
@@ -109,8 +109,6 @@ export default class MyComponent extends Vue {
 
 ```vue
 <script lang="ts" setup>
-import { PropType } from "vue";
-
 const props = defineProps({
   label: { type: String, default: "Student" },
   student: { type: Object as PropType<ApplicationUserViewModel>, required: true },
@@ -160,7 +158,7 @@ export default class MyComponent extends Vue {
 
   public items = [
     { name: "Foo", checked: false, }
-    { name: "Foo", checked: true, }
+    { name: "Bar", checked: true, }
   ]
 }
 </script>
@@ -221,6 +219,7 @@ export default class MyComponent extends Vue {
 import { PersonViewModel } from "@/viewmodels.g";
 
 const person = new PersonViewModel();
+
 const fullName = computed(() => `${person.firstName} ${person.lastName}`)
 </script>
 ```

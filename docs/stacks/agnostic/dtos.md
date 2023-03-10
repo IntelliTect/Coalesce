@@ -14,3 +14,7 @@ Every class that is exposed through Coalesce's generated API will have a corresp
 
 [[DtoIncludes] & [DtoExcludes]](/modeling/model-components/attributes/dto-includes-excludes.md) and the [Includes String](/concepts/includes.md) infrastructure can be used to indicate which properties should be transferred to the client in which cases, and [Include Tree](/concepts/include-tree.md) is used to dictate how these DTOs are constructed from POCOs retrieved from the database.
 
+The [[Read] and [Edit] attributes](/modeling/model-components/attributes/security-attribute.md) can be used to apply property-level security, which manifests as conditional logic in the mapping methods on the generated DTOs.
+
+See the [Security](/topics/security.md#attributes) page to read more about property-level security, as well as all other security mechanisms in Coalesce.
+

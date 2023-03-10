@@ -11,16 +11,22 @@ Coalesce's code generation is ran via a dotnet CLI tool, ``dotnet coalesce``. In
 
 ``` xml
 <Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
 
-    ...
+    <!-- Necessary to use DotNetCliToolReference with modern framework versions -->
+    <DotnetCliToolTargetFramework>net7.0</DotnetCliToolTargetFramework>
+  </PropertyGroup>
 
-    <ItemGroup>
-        <PackageReference Include="IntelliTect.Coalesce" Version="..." />
-    </ItemGroup>
+  ...
 
-    <ItemGroup>
-        <DotNetCliToolReference Include="IntelliTect.Coalesce.Tools" Version="..." />
-    </ItemGroup>  
+  <ItemGroup>
+    <PackageReference Include="IntelliTect.Coalesce" Version="..." />
+  </ItemGroup>
+
+  <ItemGroup>
+    <DotNetCliToolReference Include="IntelliTect.Coalesce.Tools" Version="..." />
+  </ItemGroup>  
 </Project>
 ```
 
@@ -38,7 +44,7 @@ There are a couple of extra options which are only available as CLI parameters t
 
 Coalesce will generate a full vertical stack of code for you:
 
-### Server-side C#
+### Backend C#
 
 #### API Controllers
 For each of your [Entity Models](/modeling/model-types/entities.md), [Custom DTOs](/modeling/model-types/dtos.md), and [Services](/modeling/model-types/services.md), an API controller is created in the ``/Api/Generated`` directory of your web project. These controllers provide a number of endpoints for interacting with your data.
@@ -50,11 +56,11 @@ For each of your [Entity Models](/modeling/model-types/entities.md), a C# DTO cl
 
 See [Generated C# DTOs](/stacks/agnostic/dtos.md) for more information.
 
-### Vue
+### Frontend - Vue
 
 An overview of the Vue generated code can be found at [Vue Overview](/stacks/vue/overview.md).
 
-### Knockout
+### Frontend - Knockout
 
-An overview of the legacy Knockout stack can be found at [Knockout Overview](/stacks/ko/overview.md).
+An overview of the legacy Knockout generated code can be found at [Knockout Overview](/stacks/ko/overview.md).
 

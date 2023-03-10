@@ -8,7 +8,7 @@ Coalesce is a framework for rapid-development of ASP.NET Core + Vue.js web appli
 
 * **Code Generation**: Write your data model. We'll build the DTOs, API controllers, and TypeScript files that are needed to start building a front-end UI right away. A full suite of CRUD endpoints are generated with inner-workings that are overridable.
 * **Extensibility**: We don't want to box you in - one of the primary goals of Coalesce is to be as flexible as possible. If something that Coalesce is doing doesn't quite fit your needs, you can configure it or override it easily. You should never feel like you need to eject from the framework.
-* **Security**: Coalesce is designed with security in mind. All classes, properties, and methods can be restricted per-role, or be completely excluded from the generated APIs. Row-level security can be implemented using custom data sources. The guiding principal here is that it should always be easy to know exactly what parts of your data Coalesce is exposing for you. Reference the [Security Overview](https://intellitect.github.io/Coalesce/topics/startup.html#security-overview-page) page in your application to see exactly how a specific class, property, or method is exposed by Coalesce. 
+* **Security**: Coalesce is designed with security in mind. All classes, properties, and methods can be restricted per-role, or be completely excluded from the generated APIs. Row-level security can be implemented using custom data sources. The guiding principal here is that it should always be easy to know exactly what parts of your data Coalesce is exposing for you. [Read more about security in the Coalesce Documentation](https://intellitect.github.io/Coalesce/topics/security).
 
 ## Features
 

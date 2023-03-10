@@ -81,6 +81,9 @@ export default defineUserConfig({
       {
         text: 'Model Components',
         children: [
+          // This is deliberately here in a prominent place because its important,
+          // even though the path is inconsistent with these other pages.
+          '/topics/security',
           '/modeling/model-components/properties',
           {
             text: "Attributes",

@@ -65,33 +65,3 @@ Specify a service implementation to use to resolve the current timezone. This sh
 Configure additional options for Coalesce runtime behavior. Current options include those around exception handling. See individual members for details.
 
 
-
-## Security Overview Page
-
-Coalesce provides batteries-included page that you can view to review the security rules in place for all the Coalesce-generated code in your project. Add this page to your application by mapping it as a route, either directly on `WebHost` in .NET 6+, or in `UseEndpoints` for 3.1+.
-
-``` c#
-// .NET 6 Program.cs:
-
-// If exposing in production, it is strongly encourage to apply an authorization policy like this one.
-// Alternative, make the entire endpoint conditional upon the environment.
-app.MapCoalesceSecurityOverview("coalesce-security").RequireAuthorization(
-    new AuthorizeAttribute { Roles = env.IsDevelopment() ? null : "Admin" }
-);
-```
-
-``` c#
-// .NET 3.1+ Startup.cs:
-
-app.UseEndpoints(endpoints =>
-{
-    // If exposing in production, it is strongly encourage to apply an authorization policy like this one.
-    // Alternative, make the entire endpoint conditional upon the environment.
-    endpoints.MapCoalesceSecurityOverview("coalesce-security").RequireAuthorization(
-        new AuthorizeAttribute { Roles = env.IsDevelopment() ? null : "Admin" }
-    );
-
-    // ... Other endpoints
-});
-```
-

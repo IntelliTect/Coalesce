@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using IntelliTect.Coalesce.DataAnnotations;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using System;
 using System.Collections.Generic;
@@ -24,6 +25,9 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         public DbSet<AbstractModel> AbstractModels { get; set; }
 
         public DbSet<EnumPk> EnumPks { get; set; }
+
+        [InternalUse]
+        public DbSet<DbSetIsInternalUse> Internals { get; set; }
 
         public AppDbContext() : this(Guid.NewGuid().ToString()) { }
 

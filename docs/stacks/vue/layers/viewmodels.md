@@ -154,13 +154,16 @@ Getter/setter wrapper around `$params.includes`. See [Includes String](/concepts
 ### Auto-save & Dirty Flags
 
 
-<Prop def="$useAutoSave(options: AutoSaveOptions<this> = {})" lang="ts" />
+<Prop def="// Vue Options API
+$startAutoSave(vue: Vue, options: AutoSaveOptions<this> = {})
+&nbsp;
+// Vue Composition API
+$useAutoSave(options: AutoSaveOptions<this> = {})" lang="ts" idPrefix="member-autosave" />
 
 Starts auto-saving of the instance when its savable data properties become dirty. Saves are performed with the `$save` [API Caller](/stacks/vue/layers/api-clients.md#api-callers) (documented above) and will not be performed if the ViewModel has any validation errors - see [Rules/Validation](/stacks/vue/layers/viewmodels.md#rules-validation) below.
 
-This function is only usable with Vue composition API from within `setup()` or `<script setup>`. For options API or class components, use `$startAutoSave` instead.
-
 ``` ts
+type AutoSaveOptions<TThis> = 
 { 
     /** Time, in milliseconds, to debounce saves for.  */
     wait?: number;
@@ -178,10 +181,6 @@ This function is only usable with Vue composition API from within `setup()` or `
     predicate?: (viewModel: TThis) => boolean;
 }
 ```
-
-<Prop def="$startAutoSave(vue: Vue, options: AutoSaveOptions<this> = {})" lang="ts" />
-
-Same as `$useAutoSave`, but requires a Vue instance in order to manage lifetime (auto-save hooks will be destroyed when the Vue component provided is destroyed). Usable from options API or class components (or advanced composition API scenarios - pass `getCurrentInstance().proxy` as the Vue instance.)
 
 <Prop def="$stopAutoSave(): void" lang="ts" />
     
@@ -265,7 +264,7 @@ Indicates if any properties have validation errors.
 
 ### Generated Members
 
-#### Method Callers
+#### API Callers
 For each of the instance [Methods](/modeling/model-components/methods.md) of the type, an [API Caller](/stacks/vue/layers/api-clients.md#api-callers) will be generated.
 
 #### `addTo*()` Functions
@@ -352,13 +351,17 @@ Shorthand for `$load.pageCount` - returns the page count reported by the last su
 ### Auto-Load
 
 
-<Prop def="$useAutoLoad(options: AutoLoadOptions<this> = {})" lang="ts" />
+<Prop def="// Vue Options API
+$startAutoLoad(vue: Vue, options: AutoLoadOptions<this> = {})
+&nbsp;
+// Vue Composition API
+$useAutoLoad(options: AutoLoadOptions<this> = {})" lang="ts" idPrefix="member-autoload" />
 
 Starts auto-loading of the list as changes to its parameters occur. Loads are performed with the `$load` [API Caller](/stacks/vue/layers/api-clients.md#api-callers).
 
-This function is only usable with Vue composition API from within `setup()` or `<script setup>`. For options API or class components, use `$startAutoLoad` instead.
 
 ``` ts
+type AutoLoadOptions<TThis> =
 { 
     /** Time, in milliseconds, to debounce loads for.  */
     wait?: number;
@@ -371,10 +374,6 @@ This function is only usable with Vue composition API from within `setup()` or `
 }
 ```
 
-<Prop def="$startAutoLoad(vue: Vue, options: AutoLoadOptions<this> = {})" lang="ts" />
-
-Same as `$useAutoLoad`, but requires a Vue instance in order to manage lifetime (auto-load hooks will be destroyed when the Vue component provided is destroyed). Usable from options API or class components (or advanced composition API scenarios - pass `getCurrentInstance().proxy` as the Vue instance.)
-
 <Prop def="$stopAutoLoad()" lang="ts" />
 
 Manually turns off auto-loading of the instance.
@@ -383,7 +382,7 @@ Manually turns off auto-loading of the instance.
 
 ### Generated Members
 
-#### Method Callers
+#### API Callers
     
 For each of the static [Methods](/modeling/model-components/methods.md) on the type, an [API Caller](/stacks/vue/layers/api-clients.md#api-callers) will be created.
 
@@ -395,6 +394,6 @@ The following members can be found on the generated Service ViewModels, exported
 
 ### Generated Members
 
-#### Method Callers
+#### API Callers
     
 For each method of the [Service](/modeling/model-types/services.md), an [API Caller](/stacks/vue/layers/api-clients.md#api-callers) will be created.

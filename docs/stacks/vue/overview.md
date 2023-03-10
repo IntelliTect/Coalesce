@@ -7,7 +7,7 @@ The `Vue` stack for Coalesce has been designed from the ground up to be used to 
 
 ## Getting Started
 
-Check out [Getting Started with Vue](/stacks/vue/getting-started.md) if you haven't already to learn how to get a new Coalesce Vue project up and running.
+Check out [Getting Started with Vue](/stacks/vue/getting-started.md) to learn how to get a new Coalesce Vue project up and running.
 
 ## TypeScript Layers
 

@@ -2,7 +2,9 @@
 
 Coalesce provides a collection of four attributes which can provide class-level (and property-level, where appropriate) security controls over the generated API.
 
-To see an overview of the effective security rules applied to your whole data model in one place, use [the security overview page](/topics/startup.md#security-overview-page).
+::: tip
+This page provides API-level documentation for a specific set of four attributes. For a complete overview of all the security-focused techniques that can be used in a Coalesce application, see the [Security](/topics/security.md) page.
+:::
 
 [[toc]]
 

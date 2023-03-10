@@ -49,5 +49,26 @@ namespace IntelliTect.Coalesce.Tests.Tests.Security
                 new Claim(ClaimTypes.Role, "EditRole"),
             }))));
         }
+
+        [Theory]
+        [ClassViewModelData(typeof(PropSec))]
+        public void UsageOfEntityWithInternalDbSet_IsTreatedLikeExternalType(ClassViewModelData data)
+        {
+            ClassViewModel vm = data;
+            var prop = vm.PropertyByName(nameof(PropSec.ExternalTypeUsageOfEntityWithInternalDbSet));
+
+            Assert.False(prop.IsDbMapped);
+            Assert.False(prop.Object.IsDbMappedType);
+            Assert.False(prop.Object.HasDbSet);
+            Assert.Null(prop.Object.DbContext);
+            Assert.Null(prop.Object.DbContextUsage);
+
+            Assert.True(prop.SecurityInfo.Read.IsAllowed());
+
+            // Both PropSec and DbSetIsInternalUse are considered external types,
+            // so the property should be accepted as input
+            Assert.True(prop.SecurityInfo.Edit.IsAllowed());
+
+        }
     }
 }

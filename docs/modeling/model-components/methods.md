@@ -79,6 +79,8 @@ You can implement role-based security on a method by placing the [[Execute]](/mo
 
 Security for instance methods is also controlled by the data source that loads the instance - if the data source can't provide an instance of the requested model, the method won't be executed.
 
+See the [Security](/topics/security.md#custom-methods-and-services) page to read more about custom method security, as well as all other security mechanisms in Coalesce.
+
 ## Generated TypeScript
 
 See [API Callers](/stacks/vue/layers/api-clients.md#api-callers) and [ViewModel Layer](/stacks/vue/layers/viewmodels.md) for details on the code that is generated for your custom methods.

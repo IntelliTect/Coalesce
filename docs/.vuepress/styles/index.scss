@@ -37,4 +37,21 @@ body {
     // Check the vue2-to-vue3 page when changing this value.
     max-width: 1700px !important;
   }
+
+  // For table cells that contain only code, remove cell padding:
+  td:has(> div[class*=language-]:only-child:not(.line-numbers-mode)) {
+    > div {
+      background-color: transparent !important;
+
+      &:before {
+        top: 0;
+        right: 0.5em
+      }
+    }
+    padding: 0;
+    .shiki {
+      margin-top: 0;
+      margin-bottom: 0;
+    }
+  }
 }

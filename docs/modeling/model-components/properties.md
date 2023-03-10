@@ -46,7 +46,7 @@ For any of the kinds of properties outlined above, the following rules are appli
 Coalesce provides a number of [Attributes](/modeling/model-components/attributes.md), and supports a number of other .NET attributes, that allow for further customization of your model.
 
 ### Security
-Properties will not be sent to the client and/or will be ignored if received by the client if authorization checks against any property-level [Security Attributes](/modeling/model-components/attributes/security-attribute.md) present fail. This security is handled by the [Generated C# DTOs](/stacks/agnostic/dtos.md).
+Properties will be ignored if received by the client if authorization checks against any [property-level Security](/topics/security.md#propertycolumn-security) present fail. This security is handled by the [Generated C# DTOs](/stacks/agnostic/dtos.md).
 
 ### Loading & Serialization
 The [Default Loading Behavior](/modeling/model-components/data-sources.md#default-loading-behavior), any custom functionality defined in [Data Sources](/modeling/model-components/data-sources.md), and [[DtoIncludes] & [DtoExcludes]](/modeling/model-components/attributes/dto-includes-excludes.md) may also restrict which properties are sent to the client when requested.

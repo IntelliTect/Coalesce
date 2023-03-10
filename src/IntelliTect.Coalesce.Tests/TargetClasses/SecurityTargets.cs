@@ -6,6 +6,17 @@ using System.Text;
 
 namespace IntelliTect.Coalesce.Tests.TargetClasses
 {
+    public class DbSetIsInternalUse
+    {
+        public int Id { get; set; }
+    }
+
+    [InternalUse]
+    public class TypeWithInternalUse
+    {
+        public int Id { get; set; }
+    }
+
     [Edit(Roles = " RoleA , RoleB,RoleC")]
     public class EditWithSpaces { }
 
@@ -26,5 +37,7 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses
 
         [Read("ReadRole"), Edit("EditRole")]
         public string ReadWriteDifferentRoles { get; set; }
+
+        public DbSetIsInternalUse ExternalTypeUsageOfEntityWithInternalDbSet { get; set; }
     }
 }

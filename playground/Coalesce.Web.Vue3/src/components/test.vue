@@ -4,6 +4,8 @@
     <c-loader-status :loaders="{'no-initial-content': [caseVm.$load]}">
       <c-select-string-value :model="caseVm" for="title" method="getCaseTitles" eager />
 
+      <c-datetime-picker date-kind="time" v-model="date" />
+      {{date}}
       <c-select :model="caseVm" for="assignedTo"> </c-select>
       <c-select :model="caseVm" for="assignedTo" density="compact"> </c-select>
       <c-select :model="caseVm" for="assignedTo" density="compact" variant="outlined"> </c-select>
@@ -62,6 +64,7 @@ export default class Test extends Base {
   isLoading: boolean = false;
   selectedTitle = null;
 
+  date = null;
   caseVm = new CaseViewModel();
 
   pagination = {

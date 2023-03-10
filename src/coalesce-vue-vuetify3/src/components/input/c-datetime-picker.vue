@@ -298,10 +298,12 @@ export default defineComponent({
     textInputChanged(val: string) {
       this.error = [];
       var value: Date | null | undefined;
+      const referenceDate = this.internalValueZoned || this.createDefaultDate();
+
       if (!val || !val.trim()) {
         value = null;
       } else {
-        value = parse(val, this.internalFormat, this.createDefaultDate());
+        value = parse(val, this.internalFormat, referenceDate);
 
         // If failed, try normalizing common separators to the same symbol in
         // both the format string and user input.
@@ -310,7 +312,7 @@ export default defineComponent({
           value = parse(
             val.replace(separatorRegex, "-"),
             this.internalFormat.replace(separatorRegex, "-"),
-            this.createDefaultDate()
+            referenceDate
           );
         }
 
@@ -328,7 +330,7 @@ export default defineComponent({
             value.getFullYear() <= 1000) &&
           this.internalFormat != "time"
         ) {
-          value = parseDateUserInput(val, this.createDefaultDate());
+          value = parseDateUserInput(val, referenceDate);
         }
 
         // If that didn't work, don't change the underlying value. Instead, display an error.

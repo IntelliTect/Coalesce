@@ -6,6 +6,9 @@
     <c-datetime-picker v-model="caseVm.openedAt" @input="trace" readonly />
     <c-datetime-picker :model="caseVm" for="openedAt" @input="trace" side-by-side :allowed-minutes="[0,15,30,45]" />
 
+    time only: {{date}}
+    <c-datetime-picker date-kind="time" v-model="date" timeZone="America/New_York" />
+
     <c-select for="Person">
       <template #item="{item, search}">
         {{item.name}}
@@ -99,14 +102,14 @@
 <script lang="ts">
 
   import { Vue, Component, Watch } from 'vue-property-decorator';
-  import { ApiClient, convertToModel, ModelType, ModelApiClient } from 'coalesce-vue'
+  import { ApiClient, convertToModel, ModelType, ModelApiClient, setDefaultTimeZone } from 'coalesce-vue'
   import { Person } from '../metadata.g';
   import * as metadata from '../metadata.g';
   import * as models from '../models.g';
 
   import { PersonViewModel, CaseViewModel, CompanyViewModel, PersonListViewModel } from '../viewmodels.g'
   import { CaseApiClient, PersonApiClient } from '../api-clients.g';
-
+  setDefaultTimeZone("America/New_York")
 
   @Component({
     name: 'admin-table-page',
@@ -120,6 +123,7 @@
     isLoading: boolean = false;
     selectedTitle = "";
 
+    date = new Date("2023-03-02");
     caseVm = new CaseViewModel();
 
     pagination = {

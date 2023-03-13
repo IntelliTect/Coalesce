@@ -15,7 +15,7 @@ namespace IntelliTect.Coalesce.Models
 
         public ItemResult(): base() { }
 
-        public ItemResult(string? message) : base(message) { }
+        public ItemResult(string? errorMessage) : base(errorMessage) { }
 
         public ItemResult(ItemResult result) : base(result)
         {
@@ -37,7 +37,7 @@ namespace IntelliTect.Coalesce.Models
 
         public static implicit operator ItemResult(bool success) => new ItemResult(success);
 
-        public static implicit operator ItemResult(string message) => new ItemResult(message);
+        public static implicit operator ItemResult(string errorMessage) => new ItemResult(errorMessage);
     }
 
     public class ItemResult<T> : ItemResult
@@ -48,11 +48,9 @@ namespace IntelliTect.Coalesce.Models
 #endif 
         public T Object { get; set; }
 
-#pragma warning disable CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.
         public ItemResult(): base() { }
 
-        public ItemResult(string? message) : base(message) { }
-#pragma warning restore CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.
+        public ItemResult(string? errorMessage) : base(errorMessage) { }
 
         public ItemResult(
             ItemResult result,
@@ -87,7 +85,7 @@ namespace IntelliTect.Coalesce.Models
 
         public static implicit operator ItemResult<T>(bool success) => new ItemResult<T>(success);
 
-        public static implicit operator ItemResult<T>(string? message) => new ItemResult<T>(message);
+        public static implicit operator ItemResult<T>(string? errorMessage) => new ItemResult<T>(errorMessage);
 
         public static implicit operator ItemResult<T>(T obj) => new ItemResult<T>(obj);
     }

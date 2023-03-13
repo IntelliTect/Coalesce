@@ -270,8 +270,10 @@ If called a parameter, that parameter will be used as the args object. Otherwise
 Only exists if the caller was created with the option of being invoked with an args object as described in the sections above.
 
 
-<Prop def="getResultObjectUrl(vue: Vue): string | undefined" lang="ts" />
+<Prop def="getResultObjectUrl(vue?: Vue): string | undefined" lang="ts" />
 
-If the method returns a file, this method will return an [Object URL](https://developer.mozilla.org/en-US/docs/Web/API/URL/createObjectURL) representing the value of the `result` prop. Requires a `Vue` instance to be provided in order to manage the lifecycle of the URL, since object URLs must be manually released to avoid memory leaks. When the provided Vue component is destroyed, the object URL will be destroyed.
+If the method returns a file, this method will return an [Object URL](https://developer.mozilla.org/en-US/docs/Web/API/URL/createObjectURL) representing the value of the `result` prop. 
+
+Accepts a `Vue` instance in order to manage the lifecycle of the URL, since object URLs must be manually released to avoid memory leaks. When the provided Vue component is destroyed, the object URL will be destroyed. If called inside the component template, the Vue instance can be acquired automatically.
 
 Only exists if the caller was created with the option of being invoked with an args object as described in the sections above.

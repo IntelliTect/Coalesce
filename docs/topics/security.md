@@ -220,13 +220,15 @@ use a custom method on the model to accept and set the new value.
 
 ## Row-level Security
 
+### Data Sources
+
 In Coalesce, [Data Sources](/modeling/model-components/data-sources.md) are the mechanism that you can extend to implement row-level security on your [Entities](/modeling/model-types/entities.md) and [Custom DTOs](/modeling/model-types/dtos.md).
 
 Data Sources are used when fetching results for `/get`, `/list`, and `/count` endpoints, and when fetching the target of a `/save` or `/delete`, and when fetching the invocation target of an [Instance Method](/modeling/model-components/methods.md#instance-methods). 
 
 By default, your entities will be fetched using the [Standard Data Source](/modeling/model-components/data-sources.md#standard-data-source), but you can declare a custom default data source for each of your entities to override this default functionality.
 
-For most use cases, all your security rules will be applied in the [GetQuery or GetQueryAsync](/modeling/model-components/data-sources.md#member-getquery) method. This is the most foundational method of the data source that all other functions in the data source build upon. Any predicates applied to the returned query will affect the all of a type's generated API endpoints (except for static custom methods).
+For most use cases, all your security rules will be implemented in the [GetQuery or GetQueryAsync](/modeling/model-components/data-sources.md#member-getquery) method. This is the most foundational method of the data source that all other functions in the data source build upon. Any predicates applied to the returned query will affect the all of a type's generated API endpoints (except for static custom methods).
 
 A complex example with a many-to-many relationship, role restrictions, and [filtered includes](https://learn.microsoft.com/en-us/ef/core/querying/related-data/eager#filtered-include):
 
@@ -299,6 +301,8 @@ public class Department
 [Read("HR"), Create("HR"), Edit("HR"), Delete("HR")]
 public class DepartmentMember 
 {
+  public int Id { get; set; }
+
   public int DepartmentId { get; set; }
   public Department Department { get; set; }
   public int EmployeeId { get; set; }
@@ -310,9 +314,27 @@ public class DepartmentMember
 
 For a more complete explanation of everything you can do with data sources, see the full [Data Sources](/modeling/model-components/data-sources.md) documentation page.
 
+### EF Global Query Filters
+
+Since Coalesce's data access layer is built on top of Entity Framework, you can also use [Entity Framework's Global Query Filters](https://learn.microsoft.com/en-us/ef/core/querying/filters) feature to apply row-level security.
+
+This approach is less flexible than custom Coalesce data sources and has other [drawbacks](https://learn.microsoft.com/en-us/ef/core/querying/filters#accessing-entity-with-query-filter-using-required-navigation) as well, but it also has more absolute authority and is less susceptible to issues like inadvertently returning data through unfiltered navigation properties.
+
+### Foreign Key Injection Vulnerabilities
+
+When a user is saving a model with Coalesce, they can provide values for the model's foreign key properties. When this interaction takes place through a user interface, the user is not likely to produce a foreign key referencing an object that the user is not allowed to view.
+
+A malicious user, however, is a different story. Imagine a user who is brute-forcing the `/save` endpoint on one of your entities, enumerating values of a foreign key. The may be trying to leak data through navigation property values returned by the response from the save, or they may be trying to inject their data into an object graph that they do not otherwise have access to.
+
+If this scenario sounds like a plausible threat vector your application, be sure to perform sufficient [validation](#data-validation) of incoming foreign keys to ensure that the user is allowed to use a particular foreign key value before saving it to your database.
+
+Also consider making any required foreign keys that should not change for the lifetime of an entity into init-only properties (i.e. use the `init` accessor in C# instead of the `set` accessor). While this does not entirely solve the foreign key injection issue, it eliminates the need to validate that a user is not re-parenting an object if such an operation is not desirable.
+
+
+
 ## Data Validation
 
-Coalesce does not perform any server-side validation of incoming data. Instead, you must implement this yourself in the appropriate locations:
+Coalesce does not perform any server-side validation of incoming data. Your database will of course enforce any constraints (referential integrity, `not null`, etc.), but for anything else, you must implement this yourself in the appropriate locations:
 
 ### Saves and Deletes
 

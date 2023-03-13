@@ -31,7 +31,7 @@ namespace IntelliTect.Coalesce.Models
             Message = message;
         }
 
-        public ApiResult(string? message) : this(false, message) { }
+        public ApiResult(string? errorMessage) : this(false, errorMessage) { }
 
         public ApiResult(ApiResult result) : this(result.WasSuccessful, result.Message) { }
     }

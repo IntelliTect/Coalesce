@@ -30,7 +30,7 @@ namespace IntelliTect.Coalesce.Models
 
         public ListResult(bool wasSuccessful, string? message = null) : base(wasSuccessful, message) { }
 
-        public ListResult(string message) : base(message) { }
+        public ListResult(string errorMessage) : base(errorMessage) { }
 
         public ListResult(IListResult result, IList<T>? items = null)
             : this(items, page: result.Page, totalCount: result.TotalCount, pageSize: result.PageSize, wasSuccessful: result.WasSuccessful, message: result.Message) { }

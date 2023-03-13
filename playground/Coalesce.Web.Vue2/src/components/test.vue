@@ -23,6 +23,8 @@
     <div @click="selectedTitle = null">Reset</div>
     <c-select-string-value for="Case" v-model="selectedTitle" method="getCaseTitles" eager @input="trace" clearable />
 
+    <img v-if="caseVm.caseKey" :src="caseVm.downloadImage.getResultObjectUrl()" style="max-width: 100%" />
+
     <video v-if="caseVm.caseKey" :src="caseVm.downloadImage.url" controls style="max-width: 100%">
     </video>
 
@@ -178,7 +180,7 @@
 
     async created() {
 
-      this.caseVm.$load(16);
+      this.caseVm.$load(15);
       this.caseVm.$startAutoSave(this);
       //await this.caseVm.downloadImage()
        this.company.$load(1);

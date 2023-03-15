@@ -374,6 +374,22 @@ public class Employee
 }
 ```
 
+Alternatively, and indeed preferably, you can often formulate a query that does not use iteration and requires only a single database round-trip:
+
+``` c#:no-line-numbers
+public override async Task TransformResultsAsync(
+  IReadOnlyList<Employee> results,
+  IDataSourceParameters parameters
+)
+{
+  var managerIds = results.Select(e => e.ManagerId).ToList();
+  await Db.Employees
+    .Where(e => managerIds.Contains(e.ManagerId) && e.EmployeeId == User.GetEmployeeId())
+    .LoadAsync();
+}
+```
+
+
 For a more complete explanation of everything you can do with data sources, see the full [Data Sources](/modeling/model-components/data-sources.md) documentation page.
 
 ### EF Global Query Filters

@@ -228,9 +228,24 @@ Data Sources are used when fetching results for `/get`, `/list`, and `/count` en
 
 By default, your entities will be fetched using the [Standard Data Source](/modeling/model-components/data-sources.md#standard-data-source), but you can declare a custom default data source for each of your entities to override this default functionality.
 
-For most use cases, all your security rules will be implemented in the [GetQuery or GetQueryAsync](/modeling/model-components/data-sources.md#member-getquery) method. This is the most foundational method of the data source that all other functions in the data source build upon. Any predicates applied to the returned query will affect the all of a type's generated API endpoints (except for static custom methods).
+For most use cases, all your security rules will be implemented in the [GetQuery/GetQueryAsync](/modeling/model-components/data-sources.md#member-getquery) method. This is the most foundational method of the data source that all other functions in the data source build upon. Any predicates applied to the query of a type's default data source will affect all of the type's generated API endpoints (except for static custom methods).
 
-A complex example with a many-to-many relationship, role restrictions, and [filtered includes](https://learn.microsoft.com/en-us/ef/core/querying/related-data/eager#filtered-include):
+There are a few different techniques that you can use to apply filtering in a data source, each one working for a specific use case. The example below includes an example of each technique.
+
+#### Query Predicates
+The **Query Predicates** technique involves applying a `.Where()` predicate to your query to filter the root entities that are returned by the query using some database-executed logic. This is a form of row-level security and can be used to only include a record based on the values of that record in the database.
+
+
+#### Conditional Includes
+The **Conditional Includes** technique involves only appending `.Include()` calls to your query if some server-executed criteria is met. Usually this involves checking the roles of a user and only including a navigation property if the user is in the requisite role. This technique cannot be used with database-executed logic and is therefore a form of table-level security, not row-level security.
+
+#### Filtered Includes
+The **Filtered Includes** technique involves using [EF Core filtered includes](https://learn.microsoft.com/en-us/ef/core/querying/related-data/eager#filtered-include) to apply database-executed logic to filter the rows of child collection navigation properties. 
+
+EF filtered Includes **cannot** be used to apply database-executed filters to *reference* navigation properties due to [lack of EF support](https://github.com/dotnet/efcore/issues/24422) - see the sections below on [transform results](#transform-results) and [global query filters](#ef-global-query-filters) for two possible solutions.
+
+
+A complex example using all three of the above techniques:
 
 ``` c#:no-line-numbers
 public class Employee 
@@ -248,22 +263,26 @@ public class Employee
     public override IQueryable<Employee> GetQuery(IDataSourceParameters parameters) {
       IQueryable<Employee> query = Db.Employees;
 
-      // HR can see everything:
-      if (User.IsInRole("HR")) return query
-        .Include(e => e.DepartmentMembers).ThenInclude(dm => dm.Department);
+      // TECHNIQUE: Conditional Includes - subset child objects using server-executed logic:
+      if (User.IsInRole("HR")) {
+        // HR can see everything. Return early so they are not subjected to the other filters:
+        return query.Include(e => e.DepartmentMembers).ThenInclude(dm => dm.Department);
+      }
 
+      // TECHNIQUE: Query Predicates - subset root objects using database-executed logic:
       int employeeId = User.GetEmployeeId();
       query = query.Where(e => 
           // Anyone can see interns
           e.IsIntern ||
           // Otherwise, a user can only see employees in their own departments:
           e.DepartmentMembers.Any(dm => dm.Department.DepartmentMembers.Any(u => u.EmployeeId == employeeId))
-        )
-        // Include the departments of each employee, 
-        // but only ones that the current user is a member of.
-        .Include(e => e.DepartmentMembers
-          .Where(dm => dm.Department.DepartmentMembers.Any(u => u.EmployeeId == employeeId)))
-          .ThenInclude(dm => dm.Department);
+        );
+
+      // TECHNIQUE: EF Core Filtered Includes - subset collections using database-executed logic.
+      // Include the departments of employees, but only those that the current user is a member of.
+      query = query.Include(e => e.DepartmentMembers
+        .Where(dm => dm.Department.DepartmentMembers.Any(u => u.EmployeeId == employeeId)))
+        .ThenInclude(dm => dm.Department);
       
       return query;
     }
@@ -311,6 +330,49 @@ public class DepartmentMember
 
 ```
 
+#### Transform Results
+
+There exists a fourth technique in Data Sources for applying filtered includes: the [TransformResultsAsync](/modeling/model-components/data-sources.md#member-transformresults) method. Unlike the other techniques above that are performed in the `GetQuery` method and applied at the beginning of the data source query pipeline, `TransformResults` is applied at the very end of the process against the materialized results. It also only affects the responses from the generated `/get`, `/list`, `/save`, and `/delete` endpoints - it has no bearing on the invocation target of [instance methods](/modeling/model-components/methods.md#instance-methods).
+
+The primary purpose of `TransformResults` is to conditionally load navigation properties. This was very useful before EF Core introduced native [filtered includes](#filtered-includes) for collection navigation properties, and is still useful for applying filtered includes to *reference* navigation properties since EF [does not support this](https://github.com/dotnet/efcore/issues/24422). It can also be used for any kind of filtered includes if native EF filtered includes get translated into poorly-performant SQL, or it can be used to populate [external type](/modeling/model-types/external-types.md) or other non-database-mapped properties on your entities.
+
+The general technique for using `TransformResults` involves using [EF Core Explicit Loading](https://learn.microsoft.com/en-us/ef/core/querying/related-data/explicit#explicit-loading) to attach additional navigation properties to the result set, and then using Coalesce's `.IncludedSeparately()` method in the data source's `GetQuery` so that Coalesce can still build the correct [Include Tree](/concepts/include-tree.md) to shape the serialization of your results.
+
+
+``` c#:no-line-numbers
+public class Employee 
+{
+  public int EmployeeId { get; set; }
+  public int ManagerId { get; set; }
+  public Employee Manager { get; set; }
+
+  [DefaultDataSource]
+  public class DefaultSource : StandardDataSource<Employee, AppDbContext>
+  {
+    public DefaultSource(CrudContext<AppDbContext> context) : base(context) { }
+
+    public override IQueryable<Employee> GetQuery(IDataSourceParameters parameters) 
+      // Use IncludedSeparately to instruct Coalesce that we're going to 
+      // manually populate the Manager, and that it should be mapped to the result DTOs
+      // despite not being eagerly loaded with EF's .Include() method.
+      => Db.Employees.IncludedSeparately(e => e.Manager);
+
+    public override async Task TransformResultsAsync(
+      IReadOnlyList<Employee> results,
+      IDataSourceParameters parameters
+    )
+    {
+      foreach (var employee in results)
+      {
+        // Only load the employee's manager if the current logged in user is that manager.
+        if (employee.ManagerId == User.GetEmployeeId() && employee.Manager is null) {
+          await Db.Employees.Where(e => e.EmployeeId == employee.ManagerId).LoadAsync();
+        }
+      }
+    }
+  }
+}
+```
 
 For a more complete explanation of everything you can do with data sources, see the full [Data Sources](/modeling/model-components/data-sources.md) documentation page.
 
@@ -318,7 +380,11 @@ For a more complete explanation of everything you can do with data sources, see 
 
 Since Coalesce's data access layer is built on top of Entity Framework, you can also use [Entity Framework's Global Query Filters](https://learn.microsoft.com/en-us/ef/core/querying/filters) feature to apply row-level security.
 
-This approach is less flexible than custom Coalesce data sources and has other [drawbacks](https://learn.microsoft.com/en-us/ef/core/querying/filters#accessing-entity-with-query-filter-using-required-navigation) as well, but it also has more absolute authority and is less susceptible to issues like inadvertently returning data through unfiltered navigation properties.
+This approach is less flexible than custom Coalesce data sources and has other [drawbacks](https://learn.microsoft.com/en-us/ef/core/querying/filters#accessing-entity-with-query-filter-using-required-navigation) as well, but on the other hand it has more absolute authority, is less susceptible to issues like inadvertently returning data through unfiltered navigation properties, and can sometimes require less work to implement than individual data sources.
+
+Global Query Filters are also the only way to implement database-executed [filtered includes](#filtered-includes) of [reference navigation properties](https://learn.microsoft.com/en-us/ef/core/modeling/relationships#definition-of-terms), as there is no version of `.Include()` for reference navigation properties that allows a database-executed predicate to be applied. See [this open issue](https://github.com/dotnet/efcore/issues/24422) on EF Core.
+
+
 
 ### Foreign Key Injection Vulnerabilities
 
@@ -328,7 +394,7 @@ A malicious user, however, is a different story. Imagine a user who is brute-for
 
 If this scenario sounds like a plausible threat vector your application, be sure to perform sufficient [validation](#data-validation) of incoming foreign keys to ensure that the user is allowed to use a particular foreign key value before saving it to your database.
 
-Also consider making any required foreign keys that should not change for the lifetime of an entity into init-only properties (i.e. use the `init` accessor in C# instead of the `set` accessor). While this does not entirely solve the foreign key injection issue, it eliminates the need to validate that a user is not re-parenting an object if such an operation is not desirable.
+Also consider making any required foreign keys that should not change for the lifetime of an entity into init-only properties (i.e. use the `init` accessor in C# instead of the `set` accessor). While this does not entirely solve the foreign key injection issue, it eliminates the need to validate that a user is not changing the parent of an object if such an operation is not desirable.
 
 
 

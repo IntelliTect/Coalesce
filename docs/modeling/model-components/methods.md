@@ -42,12 +42,12 @@ public class User
 
 ```
 
-When an instance method is invoked, the target model instance will be loaded using the data source specified by an attribute `[LoadFromDataSource(typeof(MyDataSource))]` if present. Otherwise, the model instance will be loaded using the default data source for the POCO's type. If you have a [Custom Data Source](/modeling/model-components/data-sources.md#defining-data-sources) annotated with `[DefaultDataSource]`, that data source will be used. Otherwise, the [Standard Data Source](/modeling/model-components/data-sources.md#standard-data-source) will be used. The consequence of this is that a user cannot call a method on an instance of entity that they're not allowed to see or load.
+When an instance method is invoked, the target model instance will be loaded using the data source specified by an attribute `[LoadFromDataSource(typeof(MyDataSource))]` if present. Otherwise, the model instance will be loaded using the default data source for the model's type. If you have a [Custom Data Source](/modeling/model-components/data-sources.md#defining-data-sources) annotated with `[DefaultDataSource]`, that data source will be used. Otherwise, the [Standard Data Source](/modeling/model-components/data-sources.md#standard-data-source) will be used. The consequence of this is that a user cannot call a method on an instance of entity that they're not allowed to see or load.
 
 Instance methods are generated onto the TypeScript ViewModels.
 
 #### When should I use Instance Methods?
-Instance methods, as opposed to [static](#static-methods) or [service](#service-methods) methods, are a good fit when implementing an action that directly acts on or depends upon one of your entity types. One of their biggest benefits is the automatic row-level security from data sources as described above.
+Instance methods, as opposed to [static](#static-methods) or [service](#service-methods) methods, are a good fit when implementing an action that directly acts on or depends upon a specific instance of one of your entity types. One of their biggest benefits is the automatic row-level security from data sources as described above.
 
 
 ### Static Methods

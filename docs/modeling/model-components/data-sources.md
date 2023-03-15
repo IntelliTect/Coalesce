@@ -323,11 +323,13 @@ Simple wrapper around invoking `.Count()` on a query.
 Task TransformResultsAsync(IReadOnlyList<T> results, IDataSourceParameters parameters);" />
 
 Allows for transformation of a result set after the query has been evaluated. 
-This will be called for both lists of items and for single items. This can be used for things like populating non-mapped properties on a model. This method is only called immediately before mapping to a DTO - if the data source is serving data without mapping (e.g. when invoked by [Behaviors](/modeling/model-components/behaviors.md)) to a DTO, this will not be called..
+This will be called for both lists of items and for single items. This can be used for populating non-mapped properties on a model, or conditionally loading navigation properties using logic that depends upon the contents of each loaded record.
 
-::: warning
-It is STRONGLY RECOMMENDED that this method does not modify any database-mapped properties, as any such changes could be inadvertently persisted to the database.
-:::
+This method is only called immediately before mapping to a DTO; it does not affect operations that don't involve mapping to a DTO - e.g. when loading the target of a `/save` operation or when loading the invocation target of an [instance method](/modeling/model-components/methods.md#instance-methods).
+
+See the [Security](/topics/security.md#transform-results) page for an example on how to use TransformResults to [apply filtered includes](/topics/security.md#transform-results).
+
+Do not use `TransformResults` to modify any database-mapped scalar properties, since such changes could be inadvertently persisted to the database.
 
 
 <Prop def="IList<TDto> TrimListFields<TDto>(IList<TDto> mappedResult, IListParameters parameters)" />

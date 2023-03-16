@@ -412,6 +412,7 @@ export default defineComponent({
             (i as any)[this.modelObjectMeta.keyProp.name]
         )[0];
         if (item) {
+          // eslint-disable-next-line vue/no-side-effects-in-computed-properties
           this.keyFetchedModel = item;
           return item;
         }
@@ -423,6 +424,7 @@ export default defineComponent({
           this.internalKeyValue ===
             (singleItem as any)[this.modelObjectMeta.keyProp.name]
         ) {
+          // eslint-disable-next-line vue/no-side-effects-in-computed-properties
           this.keyFetchedModel = singleItem;
           return singleItem;
         }
@@ -435,6 +437,7 @@ export default defineComponent({
           // and if the last requested key is not the key we're looking for.
           // (this prevents an infinite loop of invokes if the call to the server fails.)
           // The single item may end up coming back from a pending list call.
+          // eslint-disable-next-line vue/no-side-effects-in-computed-properties
           this.getCaller.args.id = this.internalKeyValue;
           this.getCaller.invokeWithArgs();
         }
@@ -593,8 +596,8 @@ export default defineComponent({
             this.onInput(null, true);
             event.stopPropagation();
             event.preventDefault();
-            return;
           }
+          return;
         case "esc":
         case "escape":
           event.stopPropagation();
@@ -693,7 +696,7 @@ export default defineComponent({
       .$withSimultaneousRequestCaching()
       .$makeCaller(
         "item",
-        function (c) {
+        function () {
           throw "expected calls to be made with invokeWithArgs";
         },
         () => ({ id: null as any }),

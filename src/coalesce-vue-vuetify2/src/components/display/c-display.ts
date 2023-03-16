@@ -1,12 +1,10 @@
-import Vue, { defineComponent, PropOptions } from "vue";
-import { getValueMeta } from "../c-metadata-component";
+import { defineComponent, PropOptions } from "vue";
+import { getValueMeta, makeMetadataProps } from "../c-metadata-component";
 import {
   propDisplay,
   valueDisplay,
   Property,
   DisplayOptions,
-  Model,
-  ClassType,
   DateValue,
 } from "coalesce-vue";
 
@@ -62,8 +60,8 @@ export default defineComponent({
   functional: true,
   props: {
     element: { type: String, default: "span" },
-    for: <PropOptions<any>>{ required: false },
-    model: <PropOptions<Model<ClassType>>>{ type: Object },
+
+    ...makeMetadataProps(),
 
     options: <PropOptions<DisplayOptions>>{
       required: false,
@@ -79,7 +77,7 @@ export default defineComponent({
   render(_c, ctx) {
     // NOTE: CreateElement fn must be named `_c` for unplugin-vue-components to work correctly.
 
-    const props = ctx.props;
+    const props: typeof ctx.props = ctx.props;
     const { model, value: valueProp } = props;
 
     if (model == null && valueProp == null) {
@@ -190,7 +188,9 @@ export default defineComponent({
                 },
                 valueString
               );
-            } catch {}
+            } catch {
+              /* value is not a valid url */
+            }
           }
       }
     } else if (meta.type === "boolean") {

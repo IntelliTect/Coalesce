@@ -68,7 +68,11 @@ export default defineComponent({
     let model = this.model;
     const modelMeta = model ? model.$metadata : null;
 
-    let _valueMeta = getValueMeta(this.for, modelMeta, this.$coalesce.metadata);
+    const _valueMeta = getValueMeta(
+      this.for,
+      modelMeta,
+      this.$coalesce.metadata
+    );
     if (!_valueMeta || !("role" in _valueMeta)) {
       throw Error(
         "c-input requires value metadata. Specify it with the 'for' prop'"
@@ -141,7 +145,7 @@ export default defineComponent({
     };
 
     const onInput = (value: any) => {
-      var parsed = parseValue(value, valueMeta);
+      const parsed = parseValue(value, valueMeta);
       if (model && valueMeta) {
         (model as any)[valueMeta.name] = parsed;
       }

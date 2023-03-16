@@ -10,12 +10,16 @@ export function CoalesceVuetifyResolver() {
       try {
         require.resolve("coalesce-vue-vuetify");
         return "coalesce-vue-vuetify";
-      } catch {}
+      } catch {
+        /* not cjs */
+      }
     } else {
       try {
         if (await import.meta.resolve?.("coalesce-vue-vuetify"))
           return "coalesce-vue-vuetify";
-      } catch {}
+      } catch {
+        /* not esm */
+      }
     }
     return "coalesce-vue-vuetify2";
   })();

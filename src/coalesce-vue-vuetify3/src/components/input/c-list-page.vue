@@ -43,7 +43,7 @@
 
 <script lang="ts">
 import { ListViewModel } from "coalesce-vue";
-import { defineComponent, Prop, PropType } from "vue";
+import { defineComponent, PropType } from "vue";
 
 export default defineComponent({
   name: "c-list-page",

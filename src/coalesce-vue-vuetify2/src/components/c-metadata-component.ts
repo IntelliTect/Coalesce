@@ -188,9 +188,9 @@ export function getValueMeta(
             typeDef: type,
           };
       }
-    default:
-      return tail as Property | Value;
   }
+  
+  return tail as Property | Value;
 }
 
 export function buildVuetifyAttrs(
@@ -232,19 +232,19 @@ export function buildVuetifyAttrs(
   };
 }
 
-export function makeMetadataProps() {
+export function makeMetadataProps<TModel = Model<ClassType>>() {
   return {
     for: {
       required: false,
       type: [String, Object] as PropType<ForSpec>,
       default: null,
     },
-    model: { type: Object as PropType<Model<ClassType> | null>, default: null },
+    model: { type: Object as PropType<TModel | null>, default: null },
   };
 }
 
 export function useMetadataProps(
-  props: ExtractPropTypes<ReturnType<typeof makeMetadataProps>>
+  props: ExtractPropTypes<ReturnType<typeof makeMetadataProps<Model<ClassType>>>>
 ) {
   const modelMeta = computed(() => {
     return props.model ? props.model.$metadata : null;

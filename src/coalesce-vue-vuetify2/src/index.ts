@@ -5,8 +5,8 @@
  *
  */
 
-import { PluginObject } from "vue";
-import { Domain } from "coalesce-vue";
+import type { PluginObject } from "vue";
+import type { Domain } from "coalesce-vue";
 
 export interface CoalesceVuetifyOptions {
   /** A reference to the whole set of Coalesce-generated metadata for the application,

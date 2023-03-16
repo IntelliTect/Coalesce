@@ -1,5 +1,9 @@
 import { defineComponent, type PropOptions, type VNodeData } from "vue";
-import { buildVuetifyAttrs, getValueMeta } from "../c-metadata-component";
+import {
+  buildVuetifyAttrs,
+  getValueMeta,
+  makeMetadataProps,
+} from "../c-metadata-component";
 import {
   Model,
   ClassType,
@@ -39,10 +43,10 @@ export default defineComponent({
   functional: true,
 
   props: {
-    for: <PropOptions<any>>{ required: false },
-    model: <
-      PropOptions<Model<ClassType> | DataSource<DataSourceType> | AnyArgCaller>
-    >{ required: false },
+    ...makeMetadataProps<
+      Model<ClassType> | DataSource<DataSourceType> | AnyArgCaller
+    >(),
+
     value: <PropOptions<any>>{ required: false },
   },
 
@@ -52,7 +56,7 @@ export default defineComponent({
     let model = ctx.props.model;
     const modelMeta = model ? model.$metadata : null;
 
-    let _valueMeta = getValueMeta(
+    const _valueMeta = getValueMeta(
       ctx.props.for,
       modelMeta,
       ctx.parent.$coalesce.metadata
@@ -76,7 +80,7 @@ export default defineComponent({
     }
 
     const { on: ctxOn, props: ctxProps, ...ctxData } = ctx.data;
-    let data = {
+    const data = {
       ...ctxData,
       attrs: undefined as typeof ctxData.attrs,
 

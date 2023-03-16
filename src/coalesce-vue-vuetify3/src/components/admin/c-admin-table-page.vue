@@ -19,7 +19,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from "vue";
+import { defineComponent, PropType, Ref, ref, toRefs } from "vue";
 import { makeMetadataProps, useMetadataProps } from "../c-metadata-component";
 import { ListViewModel, ModelType } from "coalesce-vue";
 
@@ -34,9 +34,9 @@ export default defineComponent({
   },
 
   setup(props) {
-    let listVM;
+    let listVM: Ref<ListViewModel>;
     if (props.list) {
-      listVM = props.list;
+      listVM = toRefs(props).list as any;
     } else {
       if (!props.type) {
         throw Error(
@@ -48,7 +48,7 @@ export default defineComponent({
           `No model named ${props.type} is registered to ListViewModel.typeLookup`
         );
       }
-      listVM = new ListViewModel.typeLookup![props.type]();
+      listVM = ref(new ListViewModel.typeLookup![props.type]() as any);
     }
 
     return { listVM, ...useMetadataProps(props) };

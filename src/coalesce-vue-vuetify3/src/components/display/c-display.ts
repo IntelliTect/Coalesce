@@ -186,7 +186,9 @@ export default defineComponent({
                 },
                 valueString
               );
-            } catch {}
+            } catch {
+              /* value is not a valid url */
+            }
           }
       }
     } else if (meta.type === "boolean") {

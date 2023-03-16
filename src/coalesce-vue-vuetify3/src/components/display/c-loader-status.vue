@@ -20,7 +20,8 @@
           >
             <ul>
               <li
-                v-for="message in errorMessages"
+                v-for="(message, i) in errorMessages"
+                :key="'message-' + i"
                 class="c-loader-status--error-message"
                 v-text="message"
               ></li>

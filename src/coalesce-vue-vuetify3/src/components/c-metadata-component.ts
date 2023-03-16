@@ -184,9 +184,8 @@ export function getValueMeta(
             typeDef: type,
           };
       }
-    default:
-      return tail as Property | Value;
   }
+  return tail as Property | Value;
 }
 
 export function buildVuetifyAttrs(

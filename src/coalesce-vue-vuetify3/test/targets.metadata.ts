@@ -1,11 +1,7 @@
 import {
   ObjectType,
-  BasicCollectionProperty,
   getEnumMeta,
-  ObjectProperty,
   ModelType,
-  ModelCollectionNavigationProperty,
-  ClassType,
   Domain,
   ForeignKeyProperty,
   PrimaryKeyProperty,

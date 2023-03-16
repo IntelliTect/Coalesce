@@ -54,7 +54,7 @@
               <c-admin-display v-else-if="admin" :model="item" :for="prop" />
               <c-display v-else :model="item" :for="prop" />
             </td>
-            <slot name="item.append" :item="item" />
+            <slot name="item-append" :item="item" />
           </tr>
         </tbody>
       </v-table>

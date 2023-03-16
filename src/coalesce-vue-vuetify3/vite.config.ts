@@ -2,7 +2,6 @@ import path from "path";
 import { defineConfig } from "vite";
 import dts from "vite-plugin-dts";
 import vue from "@vitejs/plugin-vue";
-import vuetify from "vite-plugin-vuetify";
 import vueJsx from "@vitejs/plugin-vue-jsx";
 
 import Components from "unplugin-vue-components/vite";

@@ -3,7 +3,7 @@ import { mount } from "@test/util";
 import { CDisplay } from "..";
 
 describe("CDisplay", () => {
-  var model = new Student({
+  const model = new Student({
     name: "bob",
     grade: Grade.Freshman,
     password: "secretValue",

@@ -1,4 +1,4 @@
-import { Course, Grade, Student } from "@test/targets.models";
+import { Course, Student } from "@test/targets.models";
 import { StudentViewModel } from "@test/targets.viewmodels";
 import { getWrapper, mountApp, nextTick, flushPromises } from "@test/util";
 import { VueWrapper } from "@vue/test-utils";
@@ -395,7 +395,7 @@ describe("CSelect", () => {
   });
 
   test("preselect first", async () => {
-    const wrapper = mountApp(() => (
+    mountApp(() => (
       <CSelect model={model} for="currentCourse" preselect-first></CSelect>
     )).findComponent(CSelect);
     await flushPromises();
@@ -408,7 +408,7 @@ describe("CSelect", () => {
   ])(
     "preselect single with $results results",
     async ({ results, expected }) => {
-      const wrapper = mountApp(() => (
+      mountApp(() => (
         <CSelect
           model={model}
           for="currentCourse"

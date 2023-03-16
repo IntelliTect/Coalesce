@@ -5,7 +5,7 @@ import { VListItem } from "vuetify/components";
 import { CInput } from "..";
 
 describe("CInput", () => {
-  var model: Student;
+  let model: Student;
   beforeEach(() => {
     model = new StudentViewModel({
       name: "bob",

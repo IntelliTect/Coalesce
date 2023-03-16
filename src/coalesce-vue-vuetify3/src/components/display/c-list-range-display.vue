@@ -20,7 +20,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, Prop, PropType } from "vue";
+import { defineComponent, PropType } from "vue";
 import type { ListViewModel } from "coalesce-vue";
 
 export default defineComponent({

@@ -24,7 +24,7 @@
           ],
         }"
       >
-        <template #item.append="{ item }">
+        <template #item-append="{ item }">
           <td width="1%">
             <v-row class="flex-nowrap" no-gutters>
               <v-btn

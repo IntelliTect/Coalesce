@@ -180,7 +180,7 @@ import utcToZonedTime from "date-fns-tz/esm/utcToZonedTime";
 import zonedTimeToUtc from "date-fns-tz/esm/zonedTimeToUtc";
 
 import { getDefaultTimeZone, parseDateUserInput } from "coalesce-vue";
-import { defineComponent } from "vue";
+import { defineComponent, PropType } from "vue";
 import { makeMetadataProps, useMetadataProps } from "../c-metadata-component";
 
 export default defineComponent({
@@ -197,7 +197,7 @@ export default defineComponent({
 
   props: {
     ...makeMetadataProps(),
-    value: { required: false, type: Date },
+    value: { required: false, type: Date as PropType<Date | null | undefined> },
     dateKind: { type: String },
     dateFormat: { type: String },
     readonly: { type: Boolean },

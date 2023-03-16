@@ -17,7 +17,8 @@
     >
       <ul>
         <li
-          v-for="message in errorMessages"
+          v-for="(message, i) in errorMessages"
+          :key="'message-' + i"
           class="c-loader-status--error-message"
           v-text="message"
         ></li>
@@ -52,7 +53,7 @@
 </template>
 
 <script lang="ts">
-import Vue, { defineComponent, PropType } from "vue";
+import { defineComponent, PropType } from "vue";
 import { ItemApiState, ListApiState } from "coalesce-vue";
 
 type AnyLoader = ItemApiState<any, any> | ListApiState<any, any>;

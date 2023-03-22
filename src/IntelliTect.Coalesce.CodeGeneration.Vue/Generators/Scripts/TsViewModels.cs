@@ -191,12 +191,12 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
             if (method.HasHttpRequestBody) paramTypeFlags |= VueType.Flags.RawBinary;
 
             string signature = string.Concat(inputParams
-                .Select(p => $", {p.Name}: {new VueType(p.Type, paramTypeFlags).TsType("$models")} | null")
+                .Select(p => $", {p.JsVariable}: {new VueType(p.Type, paramTypeFlags).TsType("$models")} | null")
             );
 
             string argsConstructor =
                 "({" +
-                string.Concat(inputParams.Select(f => $"{f.Name}: null as {new VueType(f.Type, paramTypeFlags).TsType("$models")} | null, ")) +
+                string.Concat(inputParams.Select(f => $"{f.JsVariable}: null as {new VueType(f.Type, paramTypeFlags).TsType("$models")} | null, ")) +
                 "})";
 
             var transportTypeSlug = method.TransportType.ToString().Replace("Result", "").ToLower();

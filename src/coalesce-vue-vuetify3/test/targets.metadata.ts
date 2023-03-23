@@ -289,7 +289,7 @@ export const Student = (domain.types.Student = {
     },
     isEnrolled: {
       name: "isEnrolled",
-      displayName: "IsEnrolled",
+      displayName: "Is Enrolled",
       role: "value",
       type: "boolean",
     },

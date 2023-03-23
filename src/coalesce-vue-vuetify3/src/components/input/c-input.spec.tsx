@@ -1,6 +1,6 @@
 import { Grade, Student } from "@test/targets.models";
 import { StudentViewModel } from "@test/targets.viewmodels";
-import { mount } from "@test/util";
+import { mount, nextTick } from "@test/util";
 import { VListItem } from "vuetify/components";
 import { CInput } from "..";
 
@@ -49,5 +49,23 @@ describe("CInput", () => {
     // The selected value should now be Junior, the third value of the enum
     expect(model.grade).toBe(Grade.Junior);
     expect(wrapper.text()).contains("Junior");
+  });
+
+  test.each([true, false])("bool (checkbox: %s)", async (checkbox) => {
+    const wrapper = mount(() => (
+      <CInput model={model} for="isEnrolled" checkbox={checkbox} />
+    ));
+
+    // Assert resting state
+    expect(wrapper.find("label").text()).toEqual("Is Enrolled");
+
+    // Click the input
+    await nextTick();
+    await wrapper.find("input").setValue(true);
+    await wrapper.find("input").trigger("input"); // workaround https://github.com/vuejs/test-utils/issues/2014
+    await nextTick();
+
+    // Value should now be true
+    expect(model.isEnrolled).toBe(true);
   });
 });

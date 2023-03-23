@@ -221,6 +221,7 @@ export default defineComponent({
         return h(VTextField, data);
 
       case "boolean":
+        addHandler(data, "update:modelValue", onInput);
         if ("checkbox" in data && data.checkbox !== false) {
           return h(VCheckbox, data);
         }

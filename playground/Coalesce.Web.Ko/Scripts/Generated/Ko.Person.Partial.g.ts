@@ -532,7 +532,7 @@ module ViewModels {
                 this.firstName.extend({ minLength: 2, maxLength: 75 }),
                 this.lastName.extend({ minLength: 3, maxLength: 100 }),
                 this.email.extend({ email: true }),
-                this.height.extend({ required: {params: true, message: "Height has to be a number."}, pattern: {params: '^[+]?([0-9]+(?:[\.][0-9]*)?|\.[0-9]+)$', message: "Height has to be a number."} }),
+                this.height.extend({ min: 5, max: 10 }),
                 this.birthDate.extend({ moment: { unix: true } }),
                 this.lastBath.extend({ moment: { unix: true } }),
                 this.nextUpgrade.extend({ moment: { unix: true } }),

@@ -52,6 +52,8 @@ namespace Coalesce.Web
                     .UseDefaultBehaviors(typeof(MyBehaviors<,>))
                     .Configure(o =>
                     {
+                        o.ValidateAttributesForMethods = true;
+                        o.ValidateAttributesForSaves = true;
                         o.DetailedExceptionMessages = true;
                         o.ExceptionResponseFactory = ctx =>
                         {

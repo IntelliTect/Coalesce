@@ -26,9 +26,9 @@ namespace Coalesce.Web.Vue3.Api
     public partial class PersonController
         : BaseApiController<Coalesce.Domain.Person, PersonDtoGen, Coalesce.Domain.AppDbContext>
     {
-        public PersonController(Coalesce.Domain.AppDbContext db) : base(db)
+        public PersonController(CrudContext<Coalesce.Domain.AppDbContext> context) : base(context)
         {
-            GeneratedForClassViewModel = ReflectionRepository.Global.GetClassViewModel<Coalesce.Domain.Person>();
+            GeneratedForClassViewModel = context.ReflectionRepository.GetClassViewModel<Coalesce.Domain.Person>();
         }
 
         [HttpGet("get/{id}")]
@@ -89,9 +89,24 @@ namespace Coalesce.Web.Vue3.Api
                 return new ItemResult<PersonDtoGen>(itemResult);
             }
             var item = itemResult.Object;
+            var _params = new
+            {
+                name = name
+            };
+
+            if (Context.CoalesceOptions.ValidateAttributesForMethods)
+            {
+                var _validationResult = ItemResult.FromParameterValidation(
+                    GeneratedForClassViewModel!.MethodByName("Rename"), _params, HttpContext.RequestServices);
+                if (!_validationResult.WasSuccessful) return new ItemResult<PersonDtoGen>(_validationResult);
+            }
+
             IncludeTree includeTree = null;
             var _mappingContext = new MappingContext(User);
-            var _methodResult = item.Rename(name, out includeTree);
+            var _methodResult = item.Rename(
+                _params.name,
+                out includeTree
+            );
             await Db.SaveChangesAsync();
             var _result = new ItemResult<PersonDtoGen>();
             _result.Object = Mapper.MapToDto<Coalesce.Domain.Person, PersonDtoGen>(_methodResult, _mappingContext, includeTree);
@@ -129,7 +144,23 @@ namespace Coalesce.Web.Vue3.Api
             [FromForm(Name = "numberOne")] int numberOne,
             [FromForm(Name = "numberTwo")] int numberTwo)
         {
-            var _methodResult = Coalesce.Domain.Person.Add(numberOne, numberTwo);
+            var _params = new
+            {
+                numberOne = numberOne,
+                numberTwo = numberTwo
+            };
+
+            if (Context.CoalesceOptions.ValidateAttributesForMethods)
+            {
+                var _validationResult = ItemResult.FromParameterValidation(
+                    GeneratedForClassViewModel!.MethodByName("Add"), _params, HttpContext.RequestServices);
+                if (!_validationResult.WasSuccessful) return new ItemResult<int>(_validationResult);
+            }
+
+            var _methodResult = Coalesce.Domain.Person.Add(
+                _params.numberOne,
+                _params.numberTwo
+            );
             var _result = new ItemResult<int>(_methodResult);
             _result.Object = _methodResult.Object;
             return _result;
@@ -142,7 +173,9 @@ namespace Coalesce.Web.Vue3.Api
         [Authorize(Roles = "Admin")]
         public virtual ItemResult<string> GetUser()
         {
-            var _methodResult = Coalesce.Domain.Person.GetUser(User);
+            var _methodResult = Coalesce.Domain.Person.GetUser(
+                User
+            );
             var _result = new ItemResult<string>();
             _result.Object = _methodResult;
             return _result;
@@ -179,7 +212,22 @@ namespace Coalesce.Web.Vue3.Api
         public virtual ItemResult<long> PersonCount(
             string lastNameStartsWith = "")
         {
-            var _methodResult = Coalesce.Domain.Person.PersonCount(Db, lastNameStartsWith);
+            var _params = new
+            {
+                lastNameStartsWith = lastNameStartsWith
+            };
+
+            if (Context.CoalesceOptions.ValidateAttributesForMethods)
+            {
+                var _validationResult = ItemResult.FromParameterValidation(
+                    GeneratedForClassViewModel!.MethodByName("PersonCount"), _params, HttpContext.RequestServices);
+                if (!_validationResult.WasSuccessful) return new ItemResult<long>(_validationResult);
+            }
+
+            var _methodResult = Coalesce.Domain.Person.PersonCount(
+                Db,
+                _params.lastNameStartsWith
+            );
             var _result = new ItemResult<long>();
             _result.Object = _methodResult;
             return _result;
@@ -201,7 +249,9 @@ namespace Coalesce.Web.Vue3.Api
                 return new ItemResult<string>(itemResult);
             }
             var item = itemResult.Object;
-            var _methodResult = item.FullNameAndAge(Db);
+            var _methodResult = item.FullNameAndAge(
+                Db
+            );
             await Db.SaveChangesAsync();
             var _result = new ItemResult<string>();
             _result.Object = _methodResult;
@@ -216,7 +266,22 @@ namespace Coalesce.Web.Vue3.Api
         public virtual ItemResult<bool> RemovePersonById(
             int id)
         {
-            var _methodResult = Coalesce.Domain.Person.RemovePersonById(Db, id);
+            var _params = new
+            {
+                id = id
+            };
+
+            if (Context.CoalesceOptions.ValidateAttributesForMethods)
+            {
+                var _validationResult = ItemResult.FromParameterValidation(
+                    GeneratedForClassViewModel!.MethodByName("RemovePersonById"), _params, HttpContext.RequestServices);
+                if (!_validationResult.WasSuccessful) return new ItemResult<bool>(_validationResult);
+            }
+
+            var _methodResult = Coalesce.Domain.Person.RemovePersonById(
+                Db,
+                _params.id
+            );
             var _result = new ItemResult<bool>();
             _result.Object = _methodResult;
             return _result;
@@ -238,7 +303,9 @@ namespace Coalesce.Web.Vue3.Api
                 return new ItemResult<string>(itemResult);
             }
             var item = itemResult.Object;
-            var _methodResult = item.ObfuscateEmail(Db);
+            var _methodResult = item.ObfuscateEmail(
+                Db
+            );
             await Db.SaveChangesAsync();
             var _result = new ItemResult<string>();
             _result.Object = _methodResult;
@@ -263,9 +330,25 @@ namespace Coalesce.Web.Vue3.Api
                 return new ItemResult<PersonDtoGen>(itemResult);
             }
             var item = itemResult.Object;
+            var _params = new
+            {
+                firstName = firstName,
+                title = title
+            };
+
+            if (Context.CoalesceOptions.ValidateAttributesForMethods)
+            {
+                var _validationResult = ItemResult.FromParameterValidation(
+                    GeneratedForClassViewModel!.MethodByName("ChangeFirstName"), _params, HttpContext.RequestServices);
+                if (!_validationResult.WasSuccessful) return new ItemResult<PersonDtoGen>(_validationResult);
+            }
+
             IncludeTree includeTree = null;
             var _mappingContext = new MappingContext(User);
-            var _methodResult = item.ChangeFirstName(firstName, title);
+            var _methodResult = item.ChangeFirstName(
+                _params.firstName,
+                _params.title
+            );
             await Db.SaveChangesAsync();
             var _result = new ItemResult<PersonDtoGen>();
             _result.Object = Mapper.MapToDto<Coalesce.Domain.Person, PersonDtoGen>(_methodResult, _mappingContext, includeTree);
@@ -279,7 +362,9 @@ namespace Coalesce.Web.Vue3.Api
         [Authorize]
         public virtual ItemResult<string> GetUserPublic()
         {
-            var _methodResult = Coalesce.Domain.Person.GetUserPublic(User);
+            var _methodResult = Coalesce.Domain.Person.GetUserPublic(
+                User
+            );
             var _result = new ItemResult<string>();
             _result.Object = _methodResult;
             return _result;
@@ -293,7 +378,22 @@ namespace Coalesce.Web.Vue3.Api
         public virtual ItemResult<System.Collections.Generic.ICollection<string>> NamesStartingWith(
             [FromForm(Name = "characters")] string characters)
         {
-            var _methodResult = Coalesce.Domain.Person.NamesStartingWith(Db, characters);
+            var _params = new
+            {
+                characters = characters
+            };
+
+            if (Context.CoalesceOptions.ValidateAttributesForMethods)
+            {
+                var _validationResult = ItemResult.FromParameterValidation(
+                    GeneratedForClassViewModel!.MethodByName("NamesStartingWith"), _params, HttpContext.RequestServices);
+                if (!_validationResult.WasSuccessful) return new ItemResult<System.Collections.Generic.ICollection<string>>(_validationResult);
+            }
+
+            var _methodResult = Coalesce.Domain.Person.NamesStartingWith(
+                Db,
+                _params.characters
+            );
             var _result = new ItemResult<System.Collections.Generic.ICollection<string>>();
             _result.Object = _methodResult?.ToList();
             return _result;
@@ -307,7 +407,22 @@ namespace Coalesce.Web.Vue3.Api
         public virtual ItemResult<string[]> MethodWithStringArrayParameter(
             [FromForm(Name = "strings")] string[] strings)
         {
-            var _methodResult = Coalesce.Domain.Person.MethodWithStringArrayParameter(Db, strings.ToArray());
+            var _params = new
+            {
+                strings = strings.ToList()
+            };
+
+            if (Context.CoalesceOptions.ValidateAttributesForMethods)
+            {
+                var _validationResult = ItemResult.FromParameterValidation(
+                    GeneratedForClassViewModel!.MethodByName("MethodWithStringArrayParameter"), _params, HttpContext.RequestServices);
+                if (!_validationResult.WasSuccessful) return new ItemResult<string[]>(_validationResult);
+            }
+
+            var _methodResult = Coalesce.Domain.Person.MethodWithStringArrayParameter(
+                Db,
+                _params.strings.ToArray()
+            );
             var _result = new ItemResult<string[]>();
             _result.Object = _methodResult?.ToArray();
             return _result;
@@ -321,9 +436,24 @@ namespace Coalesce.Web.Vue3.Api
         public virtual ItemResult<PersonDtoGen> MethodWithEntityParameter(
             [FromForm(Name = "person")] PersonDtoGen person)
         {
+            var _params = new
+            {
+                person = person
+            };
+
+            if (Context.CoalesceOptions.ValidateAttributesForMethods)
+            {
+                var _validationResult = ItemResult.FromParameterValidation(
+                    GeneratedForClassViewModel!.MethodByName("MethodWithEntityParameter"), _params, HttpContext.RequestServices);
+                if (!_validationResult.WasSuccessful) return new ItemResult<PersonDtoGen>(_validationResult);
+            }
+
             IncludeTree includeTree = null;
             var _mappingContext = new MappingContext(User);
-            var _methodResult = Coalesce.Domain.Person.MethodWithEntityParameter(Db, person.MapToNew(_mappingContext));
+            var _methodResult = Coalesce.Domain.Person.MethodWithEntityParameter(
+                Db,
+                _params.person.MapToNew(_mappingContext)
+            );
             var _result = new ItemResult<PersonDtoGen>();
             _result.Object = Mapper.MapToDto<Coalesce.Domain.Person, PersonDtoGen>(_methodResult, _mappingContext, includeTree);
             return _result;
@@ -338,9 +468,26 @@ namespace Coalesce.Web.Vue3.Api
             [FromForm(Name = "criteria")] PersonCriteriaDtoGen criteria,
             [FromForm(Name = "page")] int page)
         {
+            var _params = new
+            {
+                criteria = criteria,
+                page = page
+            };
+
+            if (Context.CoalesceOptions.ValidateAttributesForMethods)
+            {
+                var _validationResult = ItemResult.FromParameterValidation(
+                    GeneratedForClassViewModel!.MethodByName("SearchPeople"), _params, HttpContext.RequestServices);
+                if (!_validationResult.WasSuccessful) return new ListResult<PersonDtoGen>(_validationResult);
+            }
+
             IncludeTree includeTree = null;
             var _mappingContext = new MappingContext(User);
-            var _methodResult = Coalesce.Domain.Person.SearchPeople(Db, criteria.MapToNew(_mappingContext), page);
+            var _methodResult = Coalesce.Domain.Person.SearchPeople(
+                Db,
+                _params.criteria.MapToNew(_mappingContext),
+                _params.page
+            );
             var _result = new ListResult<PersonDtoGen>(_methodResult);
             _result.List = _methodResult.List?.ToList().Select(o => Mapper.MapToDto<Coalesce.Domain.Person, PersonDtoGen>(o, _mappingContext, includeTree ?? _methodResult.IncludeTree)).ToList();
             return _result;

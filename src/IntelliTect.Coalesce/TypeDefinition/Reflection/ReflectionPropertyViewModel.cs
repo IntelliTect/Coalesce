@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -9,6 +10,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 {
     internal class ReflectionPropertyViewModel : PropertyViewModel
     {
+
         protected PropertyInfo Info { get; }
 
         public ReflectionPropertyViewModel(ClassViewModel effectiveParent, ClassViewModel declaringParent, PropertyInfo propertyInfo)
@@ -54,6 +56,16 @@ namespace IntelliTect.Coalesce.TypeDefinition
         
         public override bool HasAttribute<TAttribute>() =>
             Info.HasAttribute<TAttribute>();
-        
+
+        private IReadOnlyList<ValidationAttribute>? _validationAttributes;
+        internal IReadOnlyList<ValidationAttribute> GetValidationAttributes()
+        {
+            return _validationAttributes ??= Info
+                .GetCustomAttributes(typeof(ValidationAttribute), true)
+                .OfType<ValidationAttribute>()
+                // RequiredAttribute first (descending: true first)
+                .OrderByDescending(a => a is RequiredAttribute)
+                .ToList();
+        }
     }
 }

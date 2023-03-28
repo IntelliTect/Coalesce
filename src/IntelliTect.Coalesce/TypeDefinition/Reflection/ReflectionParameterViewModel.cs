@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using System.Reflection;
 using IntelliTect.Coalesce.Utilities;
+using System.ComponentModel.DataAnnotations;
 
 namespace IntelliTect.Coalesce.TypeDefinition
 {
@@ -38,6 +39,17 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public override bool HasAttribute<TAttribute>()
         {
             return Info.HasAttribute<TAttribute>();
+        }
+
+        private IReadOnlyList<ValidationAttribute>? _validationAttributes;
+        internal IReadOnlyList<ValidationAttribute> GetValidationAttributes()
+        {
+            return _validationAttributes ??= Info
+                .GetCustomAttributes(typeof(ValidationAttribute), true)
+                .OfType<ValidationAttribute>()
+                // RequiredAttribute first (descending: true first)
+                .OrderByDescending(a => a is RequiredAttribute)
+                .ToList();
         }
     }
 }

@@ -17,6 +17,7 @@ namespace Coalesce.Web.Vue3.Models
         private string _Name;
         private System.Collections.Generic.ICollection<System.DateTimeOffset?> _NullableValueTypeCollection;
         private System.Collections.Generic.ICollection<System.DateTimeOffset> _ValueTypeCollection;
+        private Coalesce.Web.Vue3.Models.PersonLocationDtoGen _PersonLocation;
 
         public double? Height
         {
@@ -43,6 +44,11 @@ namespace Coalesce.Web.Vue3.Models
             get => _ValueTypeCollection;
             set { _ValueTypeCollection = value; Changed(nameof(ValueTypeCollection)); }
         }
+        public Coalesce.Web.Vue3.Models.PersonLocationDtoGen PersonLocation
+        {
+            get => _PersonLocation;
+            set { _PersonLocation = value; Changed(nameof(PersonLocation)); }
+        }
 
         /// <summary>
         /// Map from the domain object to the properties of the current DTO instance.
@@ -57,6 +63,9 @@ namespace Coalesce.Web.Vue3.Models
             this.Name = obj.Name;
             this.NullableValueTypeCollection = obj.NullableValueTypeCollection;
             this.ValueTypeCollection = obj.ValueTypeCollection;
+
+            this.PersonLocation = obj.PersonLocation.MapToDto<Coalesce.Domain.PersonLocation, PersonLocationDtoGen>(context, tree?[nameof(this.PersonLocation)]);
+
         }
 
         /// <summary>
@@ -73,6 +82,7 @@ namespace Coalesce.Web.Vue3.Models
             if (ShouldMapTo(nameof(Name))) entity.Name = Name;
             if (ShouldMapTo(nameof(NullableValueTypeCollection))) entity.NullableValueTypeCollection = NullableValueTypeCollection;
             if (ShouldMapTo(nameof(ValueTypeCollection))) entity.ValueTypeCollection = ValueTypeCollection;
+            if (ShouldMapTo(nameof(PersonLocation))) entity.PersonLocation = PersonLocation?.MapToModelOrNew(entity.PersonLocation, context);
         }
 
         /// <summary>

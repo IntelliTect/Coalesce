@@ -33,11 +33,15 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
 
         private void WriteClassContents(CSharpCodeBuilder b)
         {
+            b.Line($"protected ClassViewModel GeneratedForClassViewModel {{ get; }}");
             b.Line($"protected {Model.FullyQualifiedName} Service {{ get; }}");
+            b.Line($"protected CrudContext Context {{ get; }}");
             b.Line();
-            using (b.Block($"public {Model.ApiControllerClassName}({Model.FullyQualifiedName} service)"))
+            using (b.Block($"public {Model.ApiControllerClassName}(CrudContext context, {Model.FullyQualifiedName} service)"))
             {
+                b.Line($"GeneratedForClassViewModel = context.ReflectionRepository.GetClassViewModel<{Model.FullyQualifiedName}>();");
                 b.Line("Service = service;");
+                b.Line("Context = context;");
             }
 
             foreach (var method in Model.ClientMethods)

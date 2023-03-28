@@ -26,9 +26,9 @@ namespace Coalesce.Web.Vue2.Api
     public partial class ZipCodeController
         : BaseApiController<Coalesce.Domain.ZipCode, ZipCodeDtoGen, Coalesce.Domain.AppDbContext>
     {
-        public ZipCodeController(Coalesce.Domain.AppDbContext db) : base(db)
+        public ZipCodeController(CrudContext<Coalesce.Domain.AppDbContext> context) : base(context)
         {
-            GeneratedForClassViewModel = ReflectionRepository.Global.GetClassViewModel<Coalesce.Domain.ZipCode>();
+            GeneratedForClassViewModel = context.ReflectionRepository.GetClassViewModel<Coalesce.Domain.ZipCode>();
         }
 
         [HttpGet("get/{id}")]

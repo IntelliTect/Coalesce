@@ -26,9 +26,9 @@ namespace Coalesce.Web.Ko.Api
     public partial class CaseController
         : BaseApiController<Coalesce.Domain.Case, CaseDtoGen, Coalesce.Domain.AppDbContext>
     {
-        public CaseController(Coalesce.Domain.AppDbContext db) : base(db)
+        public CaseController(CrudContext<Coalesce.Domain.AppDbContext> context) : base(context)
         {
-            GeneratedForClassViewModel = ReflectionRepository.Global.GetClassViewModel<Coalesce.Domain.Case>();
+            GeneratedForClassViewModel = context.ReflectionRepository.GetClassViewModel<Coalesce.Domain.Case>();
         }
 
         [HttpGet("get/{id}")]
@@ -80,7 +80,22 @@ namespace Coalesce.Web.Ko.Api
         public virtual ItemResult<System.Collections.Generic.ICollection<string>> GetCaseTitles(
             [FromForm(Name = "search")] string search)
         {
-            var _methodResult = Coalesce.Domain.Case.GetCaseTitles(Db, search);
+            var _params = new
+            {
+                search = search
+            };
+
+            if (Context.CoalesceOptions.ValidateAttributesForMethods)
+            {
+                var _validationResult = ItemResult.FromParameterValidation(
+                    GeneratedForClassViewModel!.MethodByName("GetCaseTitles"), _params, HttpContext.RequestServices);
+                if (!_validationResult.WasSuccessful) return new ItemResult<System.Collections.Generic.ICollection<string>>(_validationResult);
+            }
+
+            var _methodResult = Coalesce.Domain.Case.GetCaseTitles(
+                Db,
+                _params.search
+            );
             var _result = new ItemResult<System.Collections.Generic.ICollection<string>>();
             _result.Object = _methodResult?.ToList();
             return _result;
@@ -95,7 +110,9 @@ namespace Coalesce.Web.Ko.Api
         {
             IncludeTree includeTree = null;
             var _mappingContext = new MappingContext(User);
-            var _methodResult = Coalesce.Domain.Case.GetSomeCases(Db);
+            var _methodResult = Coalesce.Domain.Case.GetSomeCases(
+                Db
+            );
             var _result = new ItemResult<System.Collections.Generic.ICollection<CaseDtoGen>>();
             _result.Object = _methodResult?.ToList().Select(o => Mapper.MapToDto<Coalesce.Domain.Case, CaseDtoGen>(o, _mappingContext, includeTree)).ToList();
             return _result;
@@ -108,7 +125,9 @@ namespace Coalesce.Web.Ko.Api
         [Authorize]
         public virtual ItemResult<int> GetAllOpenCasesCount()
         {
-            var _methodResult = Coalesce.Domain.Case.GetAllOpenCasesCount(Db);
+            var _methodResult = Coalesce.Domain.Case.GetAllOpenCasesCount(
+                Db
+            );
             var _result = new ItemResult<int>();
             _result.Object = _methodResult;
             return _result;
@@ -121,7 +140,9 @@ namespace Coalesce.Web.Ko.Api
         [Authorize]
         public virtual ItemResult RandomizeDatesAndStatus()
         {
-            Coalesce.Domain.Case.RandomizeDatesAndStatus(Db);
+            Coalesce.Domain.Case.RandomizeDatesAndStatus(
+                Db
+            );
             var _result = new ItemResult();
             return _result;
         }
@@ -143,7 +164,22 @@ namespace Coalesce.Web.Ko.Api
                 return new ItemResult(itemResult);
             }
             var item = itemResult.Object;
-            await item.UploadImage(Db, file == null ? null : new IntelliTect.Coalesce.Models.File { Name = file.FileName, ContentType = file.ContentType, Length = file.Length, Content = file.OpenReadStream() });
+            var _params = new
+            {
+                file = file == null ? null : new IntelliTect.Coalesce.Models.File { Name = file.FileName, ContentType = file.ContentType, Length = file.Length, Content = file.OpenReadStream() }
+            };
+
+            if (Context.CoalesceOptions.ValidateAttributesForMethods)
+            {
+                var _validationResult = ItemResult.FromParameterValidation(
+                    GeneratedForClassViewModel!.MethodByName("UploadImage"), _params, HttpContext.RequestServices);
+                if (!_validationResult.WasSuccessful) return _validationResult;
+            }
+
+            await item.UploadImage(
+                Db,
+                _params.file
+            );
             await Db.SaveChangesAsync();
             var _result = new ItemResult();
             return _result;
@@ -184,7 +220,9 @@ namespace Coalesce.Web.Ko.Api
                 }
             }
 
-            var _methodResult = item.DownloadImage(Db);
+            var _methodResult = item.DownloadImage(
+                Db
+            );
             await Db.SaveChangesAsync();
             if (_methodResult != null)
             {
@@ -221,7 +259,22 @@ namespace Coalesce.Web.Ko.Api
                 return new ItemResult<IntelliTect.Coalesce.Models.IFile>(itemResult);
             }
             var item = itemResult.Object;
-            var _methodResult = await item.UploadAndDownload(Db, file == null ? null : new IntelliTect.Coalesce.Models.File { Name = file.FileName, ContentType = file.ContentType, Length = file.Length, Content = file.OpenReadStream() });
+            var _params = new
+            {
+                file = file == null ? null : new IntelliTect.Coalesce.Models.File { Name = file.FileName, ContentType = file.ContentType, Length = file.Length, Content = file.OpenReadStream() }
+            };
+
+            if (Context.CoalesceOptions.ValidateAttributesForMethods)
+            {
+                var _validationResult = ItemResult.FromParameterValidation(
+                    GeneratedForClassViewModel!.MethodByName("UploadAndDownload"), _params, HttpContext.RequestServices);
+                if (!_validationResult.WasSuccessful) return new ItemResult<IntelliTect.Coalesce.Models.IFile>(_validationResult);
+            }
+
+            var _methodResult = await item.UploadAndDownload(
+                Db,
+                _params.file
+            );
             await Db.SaveChangesAsync();
             if (_methodResult.Object != null)
             {
@@ -257,7 +310,22 @@ namespace Coalesce.Web.Ko.Api
                 return new ItemResult(itemResult);
             }
             var item = itemResult.Object;
-            await item.UploadImages(Db, files == null ? null : files.Select(f => (IntelliTect.Coalesce.Models.IFile)new IntelliTect.Coalesce.Models.File { Name = f.FileName, ContentType = f.ContentType, Length = f.Length, Content = f.OpenReadStream() }).ToList());
+            var _params = new
+            {
+                files = files == null ? null : files.Select(f => (IntelliTect.Coalesce.Models.IFile)new IntelliTect.Coalesce.Models.File { Name = f.FileName, ContentType = f.ContentType, Length = f.Length, Content = f.OpenReadStream() }).ToList()
+            };
+
+            if (Context.CoalesceOptions.ValidateAttributesForMethods)
+            {
+                var _validationResult = ItemResult.FromParameterValidation(
+                    GeneratedForClassViewModel!.MethodByName("UploadImages"), _params, HttpContext.RequestServices);
+                if (!_validationResult.WasSuccessful) return _validationResult;
+            }
+
+            await item.UploadImages(
+                Db,
+                _params.files.ToList()
+            );
             await Db.SaveChangesAsync();
             var _result = new ItemResult();
             return _result;
@@ -280,7 +348,21 @@ namespace Coalesce.Web.Ko.Api
                 return new ItemResult(itemResult);
             }
             var item = itemResult.Object;
-            item.UploadByteArray(file ?? await ((await Request.ReadFormAsync()).Files[nameof(file)]?.OpenReadStream().ReadAllBytesAsync(true) ?? Task.FromResult<byte[]>(null)));
+            var _params = new
+            {
+                file = file ?? await ((await Request.ReadFormAsync()).Files[nameof(file)]?.OpenReadStream().ReadAllBytesAsync(true) ?? Task.FromResult<byte[]>(null))
+            };
+
+            if (Context.CoalesceOptions.ValidateAttributesForMethods)
+            {
+                var _validationResult = ItemResult.FromParameterValidation(
+                    GeneratedForClassViewModel!.MethodByName("UploadByteArray"), _params, HttpContext.RequestServices);
+                if (!_validationResult.WasSuccessful) return _validationResult;
+            }
+
+            item.UploadByteArray(
+                _params.file
+            );
             await Db.SaveChangesAsync();
             var _result = new ItemResult();
             return _result;
@@ -295,7 +377,9 @@ namespace Coalesce.Web.Ko.Api
         {
             IncludeTree includeTree = null;
             var _mappingContext = new MappingContext(User);
-            var _methodResult = Coalesce.Domain.Case.GetCaseSummary(Db);
+            var _methodResult = Coalesce.Domain.Case.GetCaseSummary(
+                Db
+            );
             var _result = new ItemResult<CaseSummaryDtoGen>();
             _result.Object = Mapper.MapToDto<Coalesce.Domain.CaseSummary, CaseSummaryDtoGen>(_methodResult, _mappingContext, includeTree);
             return _result;

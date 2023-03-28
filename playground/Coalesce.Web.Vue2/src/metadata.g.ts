@@ -975,6 +975,7 @@ export const Person = domain.types.Person = {
       role: "value",
       rules: {
         email: val => !val || /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<> ()\[\]\\.,;:\s@"]+)*)|(".+ "))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(val.trim()) || "Email must be a valid email address.",
+        phone: val => !val || /^(\+\s?)?((?<!\+.*)\(\+?\d+([\s\-\.]?\d+)?\)|\d+)([\s\-\.]?(\(\d+([\s\-\.]?\d+)?\)|\d+))*(\s?(x|ext\.?)\s?\d+)?$/.test(val.replace(/\s+/g, '')) || "Email must be a valid phone number.",
       }
     },
     gender: {
@@ -990,8 +991,8 @@ export const Person = domain.types.Person = {
       type: "number",
       role: "value",
       rules: {
-        required: val => val != null || "Height has to be a number.",
-        pattern: val => !val || /^[+]?([0-9]+(?:[\.][0-9]*)?|\.[0-9]+)$/.test(val) || "Height has to be a number.",
+        min: val => val == null || val >= 5 || "Height must be at least 5.",
+        max: val => val == null || val <= 10 || "Height may not be more than 10.",
       }
     },
     casesAssigned: {
@@ -1828,6 +1829,25 @@ export const PersonCriteria = domain.types.PersonCriteria = {
     },
   },
 }
+export const PersonLocation = domain.types.PersonLocation = {
+  name: "PersonLocation",
+  displayName: "Person Location",
+  type: "object",
+  props: {
+    latitude: {
+      name: "latitude",
+      displayName: "Latitude",
+      type: "number",
+      role: "value",
+    },
+    longitude: {
+      name: "longitude",
+      displayName: "Longitude",
+      type: "number",
+      role: "value",
+    },
+  },
+}
 export const PersonStats = domain.types.PersonStats = {
   name: "PersonStats",
   displayName: "Person Stats",
@@ -1876,6 +1896,13 @@ export const PersonStats = domain.types.PersonStats = {
         type: "date",
         dateKind: "datetime",
       },
+      role: "value",
+    },
+    personLocation: {
+      name: "personLocation",
+      displayName: "Person Location",
+      type: "object",
+      get typeDef() { return (domain.types.PersonLocation as ObjectType) },
       role: "value",
     },
   },
@@ -2024,6 +2051,7 @@ interface AppDomain extends Domain {
     Log: typeof Log
     Person: typeof Person
     PersonCriteria: typeof PersonCriteria
+    PersonLocation: typeof PersonLocation
     PersonStats: typeof PersonStats
     Product: typeof Product
     ProductDetails: typeof ProductDetails

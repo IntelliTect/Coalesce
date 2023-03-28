@@ -26,9 +26,9 @@ namespace Coalesce.Web.Ko.Api
     public partial class LogController
         : BaseApiController<Coalesce.Domain.Log, LogDtoGen, Coalesce.Domain.AppDbContext>
     {
-        public LogController(Coalesce.Domain.AppDbContext db) : base(db)
+        public LogController(CrudContext<Coalesce.Domain.AppDbContext> context) : base(context)
         {
-            GeneratedForClassViewModel = ReflectionRepository.Global.GetClassViewModel<Coalesce.Domain.Log>();
+            GeneratedForClassViewModel = context.ReflectionRepository.GetClassViewModel<Coalesce.Domain.Log>();
         }
 
         [HttpGet("get/{id}")]

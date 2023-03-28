@@ -26,9 +26,9 @@ namespace Coalesce.Web.Vue3.Api
     public partial class CompanyController
         : BaseApiController<Coalesce.Domain.Company, CompanyDtoGen, Coalesce.Domain.AppDbContext>
     {
-        public CompanyController(Coalesce.Domain.AppDbContext db) : base(db)
+        public CompanyController(CrudContext<Coalesce.Domain.AppDbContext> context) : base(context)
         {
-            GeneratedForClassViewModel = ReflectionRepository.Global.GetClassViewModel<Coalesce.Domain.Company>();
+            GeneratedForClassViewModel = context.ReflectionRepository.GetClassViewModel<Coalesce.Domain.Company>();
         }
 
         [HttpGet("get/{id}")]
@@ -90,8 +90,24 @@ namespace Coalesce.Web.Vue3.Api
                 return new ItemResult(itemResult);
             }
             var item = itemResult.Object;
+            var _params = new
+            {
+                companyParam = companyParam,
+                name = name
+            };
+
+            if (Context.CoalesceOptions.ValidateAttributesForMethods)
+            {
+                var _validationResult = ItemResult.FromParameterValidation(
+                    GeneratedForClassViewModel!.MethodByName("ConflictingParameterNames"), _params, HttpContext.RequestServices);
+                if (!_validationResult.WasSuccessful) return _validationResult;
+            }
+
             var _mappingContext = new MappingContext(User);
-            item.ConflictingParameterNames(companyParam.MapToNew(_mappingContext), name);
+            item.ConflictingParameterNames(
+                _params.companyParam.MapToNew(_mappingContext),
+                _params.name
+            );
             await Db.SaveChangesAsync();
             var _result = new ItemResult();
             return _result;
@@ -105,9 +121,24 @@ namespace Coalesce.Web.Vue3.Api
         public virtual ItemResult<System.Collections.Generic.ICollection<CompanyDtoGen>> GetCertainItems(
             [FromForm(Name = "isDeleted")] bool isDeleted = false)
         {
+            var _params = new
+            {
+                isDeleted = isDeleted
+            };
+
+            if (Context.CoalesceOptions.ValidateAttributesForMethods)
+            {
+                var _validationResult = ItemResult.FromParameterValidation(
+                    GeneratedForClassViewModel!.MethodByName("GetCertainItems"), _params, HttpContext.RequestServices);
+                if (!_validationResult.WasSuccessful) return new ItemResult<System.Collections.Generic.ICollection<CompanyDtoGen>>(_validationResult);
+            }
+
             IncludeTree includeTree = null;
             var _mappingContext = new MappingContext(User);
-            var _methodResult = Coalesce.Domain.Company.GetCertainItems(Db, isDeleted);
+            var _methodResult = Coalesce.Domain.Company.GetCertainItems(
+                Db,
+                _params.isDeleted
+            );
             var _result = new ItemResult<System.Collections.Generic.ICollection<CompanyDtoGen>>();
             _result.Object = _methodResult?.ToList().Select(o => Mapper.MapToDto<Coalesce.Domain.Company, CompanyDtoGen>(o, _mappingContext, includeTree)).ToList();
             return _result;

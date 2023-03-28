@@ -463,12 +463,36 @@ export class PersonCriteria {
 }
 
 
+export interface PersonLocation extends Model<typeof metadata.PersonLocation> {
+  latitude: number | null
+  longitude: number | null
+}
+export class PersonLocation {
+  
+  /** Mutates the input object and its descendents into a valid PersonLocation implementation. */
+  static convert(data?: Partial<PersonLocation>): PersonLocation {
+    return convertToModel(data || {}, metadata.PersonLocation) 
+  }
+  
+  /** Maps the input object and its descendents to a new, valid PersonLocation implementation. */
+  static map(data?: Partial<PersonLocation>): PersonLocation {
+    return mapToModel(data || {}, metadata.PersonLocation) 
+  }
+  
+  /** Instantiate a new PersonLocation, optionally basing it on the given data. */
+  constructor(data?: Partial<PersonLocation> | {[k: string]: any}) {
+      Object.assign(this, PersonLocation.map(data || {}));
+  }
+}
+
+
 export interface PersonStats extends Model<typeof metadata.PersonStats> {
   height: number | null
   weight: number | null
   name: string | null
   nullableValueTypeCollection: Date[] | null
   valueTypeCollection: Date[] | null
+  personLocation: PersonLocation | null
 }
 export class PersonStats {
   

@@ -32,6 +32,8 @@ namespace IntelliTect.Coalesce.Models
 
         public ListResult(string errorMessage) : base(errorMessage) { }
 
+        public ListResult(ApiResult result) : base(result) { }
+
         public ListResult(IListResult result, IList<T>? items = null)
             : this(items, page: result.Page, totalCount: result.TotalCount, pageSize: result.PageSize, wasSuccessful: result.WasSuccessful, message: result.Message) { }
 

@@ -28,6 +28,13 @@ namespace IntelliTect.Coalesce.TypeDefinition
             return new T?((T)result);
         }
 
+        public static T? GetAttributeValue<TAttribute, T>(this IAttributeProvider obj, Expression<Func<TAttribute, T?>> propertyExpression)
+            where TAttribute : Attribute
+            where T : struct
+        {
+            return obj.GetAttributeValue<TAttribute, T>(propertyExpression.GetExpressedProperty().Name);
+        }
+
         public static T? GetAttributeValue<TAttribute, T>(this IAttributeProvider obj, Expression<Func<TAttribute, T>> propertyExpression)
             where TAttribute : Attribute
             where T : struct

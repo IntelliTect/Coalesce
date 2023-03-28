@@ -20,7 +20,7 @@ namespace Coalesce.Domain
 
         public ICollection<DateTimeOffset> ValueTypeCollection { get; set; }
 
-        // public PersonLocation PersonLocation { get; set; }
+         public PersonLocation PersonLocation { get; set; }
     }
 
 

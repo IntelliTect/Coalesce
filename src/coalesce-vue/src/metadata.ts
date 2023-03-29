@@ -545,6 +545,7 @@ export type MethodParameter = Value & {
    * that the value of this parameter should be automatically sourced from when invoked on viewmodels.
    */
   source?: Property;
+  readonly rules?: Rules;
 };
 
 export interface MethodBase extends Metadata {

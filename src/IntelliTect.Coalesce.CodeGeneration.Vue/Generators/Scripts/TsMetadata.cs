@@ -299,7 +299,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                         TypeDiscriminator.Date
                 ))
                 {
-                    List<string> rules = GetValidationRules(prop);
+                    List<string> rules = GetValidationRules(prop, (prop.ReferenceNavigationProperty ?? prop).DisplayName);
 
                     if (rules.Count > 0)
                     {
@@ -316,10 +316,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
             }
         }
 
-        private static List<string> GetValidationRules(PropertyViewModel prop)
+        private static List<string> GetValidationRules(IValueViewModel prop, string propName)
         {
-            var propName = (prop.ReferenceNavigationProperty ?? prop).DisplayName;
-
             // TODO: Handle 'ClientValidationAllowSave' by placing a field on the 
             // validator function that contains the value of this flag.
 
@@ -359,8 +357,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                 }
                 if (string.IsNullOrWhiteSpace(message))
                 {
-                    var name = (prop.ReferenceNavigationProperty ?? prop).DisplayName;
-                    message = $"{name} is required.";
+                    message = $"{propName} is required.";
                 }
 
                 rules.Add($"required: val => {requiredPredicate} || \"{message.EscapeStringLiteralForTypeScript()}\"");
@@ -372,11 +369,12 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                 void Min(object value, string error) => rules.Add($"minLength: val => !val || val.length >= {value} {Error(error, $"{propName} must be at least {value} characters.")}");
                 void Max(object value, string error) => rules.Add($"maxLength: val => !val || val.length <= {value} {Error(error, $"{propName} may not be more than {value} characters.")}");
 
-                if (prop.Range != null)
+                var range = prop.GetValidationRange();
+                if (range != null)
                 {
                     var message = prop.GetAttributeValue<RangeAttribute>(a => a.ErrorMessage);
-                    Min(prop.Range.Item1, message);
-                    Max(prop.Range.Item2, message);
+                    Min(range.Item1, message);
+                    Max(range.Item2, message);
                     goto RangeDone;
                 }
 
@@ -400,18 +398,18 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                 var minLength = prop.GetAttributeValue<ClientValidationAttribute, int>(a => a.MinLength);
                 var maxLength = prop.GetAttributeValue<ClientValidationAttribute, int>(a => a.MaxLength);
 
-                if (prop.MinLength.HasValue)
+                if (prop.GetValidationMinLength().HasValue)
                 {
-                    Min(prop.MinLength.Value, prop.GetAttributeValue<MinLengthAttribute>(a => a.ErrorMessage));
+                    Min(prop.GetValidationMinLength().Value, prop.GetAttributeValue<MinLengthAttribute>(a => a.ErrorMessage));
                 }
                 else if (minLength.HasValue && minLength.Value != int.MaxValue)
                 {
                     Min(minLength.Value, clientValidationError);
                 }
 
-                if (prop.MaxLength.HasValue)
+                if (prop.GetValidationMaxLength().HasValue)
                 {
-                    Max(prop.MaxLength.Value, prop.GetAttributeValue<MaxLengthAttribute>(a => a.ErrorMessage));
+                    Max(prop.GetValidationMaxLength().Value, prop.GetAttributeValue<MaxLengthAttribute>(a => a.ErrorMessage));
                 }
                 else if (maxLength.HasValue && maxLength.Value != int.MinValue)
                 {
@@ -423,11 +421,12 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                 void Min(object value, string error) => rules.Add($"min: val => val == null || val >= {value} {Error(error, $"{propName} must be at least {value}.")}");
                 void Max(object value, string error) => rules.Add($"max: val => val == null || val <= {value} {Error(error, $"{propName} may not be more than {value}.")}");
 
-                if (prop.Range != null)
+                var range = prop.GetValidationRange();
+                if (range != null)
                 {
                     var message = prop.GetAttributeValue<RangeAttribute>(a => a.ErrorMessage);
-                    Min(prop.Range.Item1, message);
-                    Max(prop.Range.Item2, message);
+                    Min(range.Item1, message);
+                    Max(range.Item2, message);
                     goto RangeDone;
                 }
 
@@ -547,6 +546,20 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                 if (parameter.ParentSourceProp != null)
                 {
                     b.Line($"get source() {{ return {GetClassMetadataRef(method.Parent)}.props.{parameter.ParentSourceProp.JsVariable} }},");
+                }
+
+                List<string> rules = GetValidationRules(parameter, parameter.DisplayName);
+
+                if (rules.Count > 0)
+                {
+                    using (b.Block("rules:"))
+                    {
+                        foreach (var rule in rules)
+                        {
+                            b.Append(rule);
+                            b.Line(",");
+                        }
+                    }
                 }
             }
         }

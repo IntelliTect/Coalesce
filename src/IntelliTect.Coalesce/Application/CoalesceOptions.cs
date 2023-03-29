@@ -26,15 +26,15 @@ namespace IntelliTect.Coalesce
         /// <summary>
         /// If true, Coalesce will perform validation of incoming data using <see cref="ValidationAttribute"/>s
         /// present on your models during save operations (in <see cref="StandardBehaviors{T}.ValidateDto(SaveKind, IClassDto{T})"/>).
-        /// This can be overridden on individual Behaviors instances with a prop of the same name.
+        /// This can be overridden on individual Behaviors instances by setting <see cref="StandardBehaviors{T}.ValidateAttributesForSaves"/>.
         /// </summary>
-        public bool ValidateAttributesForSaves { get; set; }
+        public bool ValidateAttributesForSaves { get; set; } = true;
 
         /// <summary>
         /// If true, Coalesce will perform validation of incoming parameters using <see cref="ValidationAttribute"/>s
         /// present on your parameters and for custom methods.
-        /// This can be overridden on individual methods using <see cref="ExecuteAttribute.ValidateAttributes"/>.
+        /// This can be overridden on individual custom methods using <see cref="ExecuteAttribute.ValidateAttributes"/>.
         /// </summary>
-        public bool ValidateAttributesForMethods { get; set; }
+        public bool ValidateAttributesForMethods { get; set; } = true;
     }
 }

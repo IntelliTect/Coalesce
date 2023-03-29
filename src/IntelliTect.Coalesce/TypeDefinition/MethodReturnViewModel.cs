@@ -29,6 +29,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public MethodViewModel Method { get; }
 
+        public bool IsRequired => false;
+
         public object? GetAttributeValue<TAttribute>(string valueName) where TAttribute : Attribute
             => Method.GetAttributeValue<TAttribute>(valueName);
 

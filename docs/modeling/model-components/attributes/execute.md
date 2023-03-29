@@ -41,3 +41,9 @@ Enum values are:
 <Prop def="public bool AutoClear { get; set; }" />
 
 If true, the method's arguments will be cleared after a successful invocation on admin pages.
+
+<Prop def="public bool? ValidateAttributes { get; set; }" />
+
+If non-null, overrides the value of [`CoalesceOptions.ValidateAttributesForMethods`](/topics/security.md#validateattributesformethods) when determining whether to perform automatic server-side validation of the method's parameters.
+
+If validation is performed, the method's parameters will be validated by the server and the method invocation prevented if errors are found.

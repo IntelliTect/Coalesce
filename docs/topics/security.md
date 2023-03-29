@@ -414,13 +414,51 @@ Also consider making any required foreign keys that should not change for the li
 
 
 
-## Data Validation
+## Server-side Data Validation
 
-Coalesce does not perform any server-side validation of incoming data. Your database will of course enforce any constraints (referential integrity, `not null`, etc.), but for anything else, you must implement this yourself in the appropriate locations:
+Coalesce, as of version 4, will by default perform server-side validation of incoming data using validation attributes. 
+
+Your database will also enforce any constraints (referential integrity, `not null`, check constraints, etc.), but errors produced by your database will manifest as exceptions, which are not user-friendly. 
+
+For any custom validation that cannot be implemented by attributes, you must implement that yourself for [saves and deletes](#saves-and-deletes) or [custom methods](#custom-methods-and-services).
+
+### Attribute Validation
+
+Historically, Coalesce did not provide any automatic, attribute-based validation of incoming data. As of Coalesce 4.0, automatic server side validation using [ValidationAttribute](https://learn.microsoft.com/en-us/dotnet/api/system.componentmodel.dataannotations.validationattribute)-derived attributes on your models is enabled by default.
+
+In addition to any validation attributes present on your model properties and method parameters, there are some other rules that work similarly to the default validation in ASP.NET Core:
+- The C# 11 `required` keyword also acts like a `RequiredAttribute`
+- If C# nullable reference types are enabled, non-nullable reference types are required required.
+- Value types are implicitly optional, with the exception of non-nullable foreign keys, which are required.
+
+To disable this functionality for your entire application, disable the corresponding configuration options on `CoalesceOptions`. For example, in Startup.cs or Program.cs:
+
+``` c#
+services.AddCoalesce<AppDbContext>(b => b.Configure(o =>
+{
+    // Set either to false to disable:
+    o.ValidateAttributesForSaves = true;
+    o.ValidateAttributesForMethods = true;
+}));
+```
+
+Each option also has a more granular override:
+
+#### ValidateAttributesForSaves
+
+Enabling `ValidateAttributesForSaves` causes the [Standard Behaviors](/modeling/model-components/behaviors.md#standard-behaviors) to perform validation of validation attributes during `/save` calls, preventing a save when validation fails.
+
+This can be overridden per type or even per request by setting the `ValidateAttributesForSaves` property on a [custom Behaviors](/modeling/model-components/behaviors.md#defining-behaviors) instance.
+
+#### ValidateAttributesForMethods
+
+Enabling [`ValidateAttributesForMethods`](/modeling/model-components/attributes/execute.md#member-ValidateAttributes) causes the generated controllers for [custom methods](/modeling/model-components/methods.md) to perform validation of incoming parameters. Validation attributes may be placed on method parameters, and validation will also be performed against the members of any complex type parameters.
+
+This can be overridden per method by setting the `ValidateAttributes` property on [ExecuteAttribute](/modeling/model-components/attributes/execute.md) for the method.
 
 ### Saves and Deletes
 
-Validation of `/save` and `/delete` actions against [Entities](/modeling/model-types/entities.md) and [Custom DTOs](/modeling/model-types/dtos.md) are performed by the [Behaviors](/modeling/model-components/behaviors.md) for the type. Behaviors can be overridden to perform validation and other customization of the save and delete process, as in the following example:
+Validation of `/save` and `/delete` actions against [Entities](/modeling/model-types/entities.md) and [Custom DTOs](/modeling/model-types/dtos.md) are performed by the [Behaviors](/modeling/model-components/behaviors.md) for the type. Automatic [attribute based validation](#attribute-validation) can be used (saves only), or Behaviors can be overridden to perform validation and other customization of the save and delete process, as in the following example:
 
 
 ``` c#
@@ -438,7 +476,7 @@ public class Employee
     {
       // `oldItem` is a shallow copy of entity from the database,
       // and `item` is the tracked entity with incoming user data applied to it.
-      if (item.Salary > 1000000m && !oldItem.IsCeo) return "Salary is too high.";
+      if (item.Salary > 1_000_000m && !oldItem.IsCeo) return "Salary is too high.";
       return true;
     }
 
@@ -453,7 +491,7 @@ public class Employee
 
 ### Custom Methods and Services
 
-For [Custom Methods](/modeling/model-components/methods.md) and [Services](/modeling/model-types/services.md), perform your own validation and return errors when validation fails. Custom methods that need to return errors to the client are recommended to wrap their return type in an `ItemResult<T>`, allowing errors to be received and handled elegantly by your Coalesce Typescript code.
+For [Custom Methods](/modeling/model-components/methods.md) and [Services](/modeling/model-types/services.md), you can perform your own custom validation and return errors when validation fails. You can also use [attribute based validation](#attribute-validation). Custom methods that need to return errors to the client are recommended to wrap their return type in an `ItemResult<T>`, allowing errors to be received and handled elegantly by your Coalesce Typescript code.
 
 ``` c#
 public class Employee 

@@ -150,7 +150,9 @@ Returns a `DbSet<T>` that items can be added to (creates) or remove from (delete
 
 <Prop def="ItemResult ValidateDto(SaveKind kind, IClassDto<T> dto)" />
 
-Provides a chance to validate the properties of the DTO object itself, as opposed to the properties of the model after the DTO has been mapped to it in `BeforeSave`. A number of extension methods on `IClassDto<T>` can be used to access the value of the properties of [Generated C# DTOs](/stacks/agnostic/dtos.md). For behaviors on [Custom DTOs](/modeling/model-types/dtos.md) where the DTO type is known, simply cast to the correct type. 
+Provides a chance to validate the properties of the DTO object itself, as opposed to doing validation in `BeforeSave` of the properties of the model after the DTO has been mapped to the model. This also where [attribute-based validation](/topics/security.md#validateattributesforsaves) is performed. 
+
+To perform custom validation in this method (uncommon), there are a number of extension methods on `IClassDto<T>` that can be used to access the value of the properties of [Generated C# DTOs](/stacks/agnostic/dtos.md). For behaviors on [Custom DTOs](/modeling/model-types/dtos.md) where the DTO type is known, simply cast to the correct type. 
 
 
 <Prop def="T MapIncomingDto<TDto>(SaveKind kind, T? item, TDto dto, IDataSourceParameters parameters)" />

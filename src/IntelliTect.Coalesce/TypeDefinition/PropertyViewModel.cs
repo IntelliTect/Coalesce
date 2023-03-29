@@ -324,26 +324,17 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// Returns the MinLength of the property or null if it doesn't exist.
         /// </summary>
-        public int? MinLength => this.GetAttributeValue<MinLengthAttribute, int>(a => a.Length);
+        public int? MinLength => this.GetValidationMinLength();
         
         /// <summary>
         /// Returns the MaxLength of the property or null if it doesn't exist.
         /// </summary>
-        public int? MaxLength => this.GetAttributeValue<MaxLengthAttribute, int>(a => a.Length);
-        
+        public int? MaxLength => this.GetValidationMaxLength();
+
         /// <summary>
         /// Returns the range of valid values or null if they don't exist. (min, max)
         /// </summary>
-        public Tuple<object, object>? Range
-        {
-            get
-            {
-                var min = this.GetAttributeValue<RangeAttribute>(nameof(RangeAttribute.Minimum));
-                var max = this.GetAttributeValue<RangeAttribute>(nameof(RangeAttribute.Maximum));
-                if (min != null && max != null) return new Tuple<object, object>(min, max);
-                return null;
-            }
-        }
+        public Tuple<object, object>? Range => this.GetValidationRange();
 
         /// <summary>
         /// Returns true if this property is marked with the Search attribute.

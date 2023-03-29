@@ -168,7 +168,10 @@ namespace Coalesce.Domain
         /// <param name="numberTwo"></param>
         /// <returns></returns>
         [Coalesce]
-        public static ItemResult<int> Add(int numberOne, int numberTwo)
+        public static ItemResult<int> Add(
+            int numberOne, 
+            [Range(0, 10000)] int numberTwo
+        )
         {
             try
             {

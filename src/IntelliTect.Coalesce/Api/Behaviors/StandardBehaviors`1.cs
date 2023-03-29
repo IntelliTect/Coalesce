@@ -4,6 +4,7 @@ using IntelliTect.Coalesce.Mapping;
 using IntelliTect.Coalesce.Models;
 using IntelliTect.Coalesce.TypeDefinition;
 using System;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -55,6 +56,13 @@ namespace IntelliTect.Coalesce
         /// </summary>
         public IDataSource<T>? OverridePostDeleteResultDataSource { get; protected set; }
 
+        /// <summary>
+        /// If true, Coalesce will perform validation of incoming data using <see cref="ValidationAttribute"/>s
+        /// present on your models during save operations (in <see cref="ValidateDto(SaveKind, IClassDto{T})"/>).
+        /// This setting defaults to the value of <see cref="CoalesceOptions.ValidateAttributesForSaves"/>.
+        /// </summary>
+        public bool ValidateAttributesForSaves { get; set; }
+
         public StandardBehaviors(CrudContext context)
         {
             Context = context
@@ -62,6 +70,8 @@ namespace IntelliTect.Coalesce
 
             ClassViewModel = Context.ReflectionRepository.GetClassViewModel<T>()
                 ?? throw new ArgumentException("Generic type T has no ClassViewModel.", nameof(T));
+
+            ValidateAttributesForSaves = context.Options?.ValidateAttributesForSaves ?? ValidateAttributesForSaves;
         }
 
 
@@ -117,7 +127,7 @@ namespace IntelliTect.Coalesce
 
             // IsNullable handles nullable value types, and reference types (mainly strings).
             // !IsNullable handles non-Nullable<T> value types.
-            if (dtoPkInfo.Type.IsNullable
+            if (dtoPkInfo.Type.IsReferenceOrNullableValue
                 ? idValue == null
                 : idValue!.Equals(Activator.CreateInstance(dtoClassViewModel.PrimaryKey.Type.TypeInfo)))
             {
@@ -181,7 +191,11 @@ namespace IntelliTect.Coalesce
         /// <param name="kind">Descriminator between a create and a update operation.</param>
         /// <param name="dto">The incoming item from the client.</param>
         /// <returns></returns>
-        public virtual ItemResult ValidateDto(SaveKind kind, IClassDto<T> dto) => true;
+        public virtual ItemResult ValidateDto(SaveKind kind, IClassDto<T> dto)
+        {
+            if (!ValidateAttributesForSaves) return true;
+            return ItemResult.FromValidation(dto, deep: false, forceRequired: kind == SaveKind.Create, Context.ServiceProvider);
+        }
 
         /// <summary>
         /// Code to run before committing a save to the database.

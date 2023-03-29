@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -29,5 +30,11 @@ namespace IntelliTect.Coalesce.DataAnnotations
         /// If true, admin pages will clear the parameter inputs when a successful invocation is performed.
         /// </summary>
         public bool AutoClear { get; set; }
+
+        /// <summary>
+        /// If true, validation of <see cref="ValidationAttribute"/> on parameters will be performed by the server.
+        /// This setting defaults to the value of <see cref="CoalesceOptions.ValidateAttributesForMethods"/>.
+        /// </summary>
+        public bool? ValidateAttributes { get; set; }
     }
 }

@@ -24,6 +24,7 @@
 /// <reference path="Generated/Ko.Person.Partial.g.ts" />
 /// <reference path="Generated/Ko.PersonCriteria.g.ts" />
 /// <reference path="Generated/Ko.PersonList.g.ts" />
+/// <reference path="Generated/Ko.PersonLocation.g.ts" />
 /// <reference path="Generated/Ko.PersonStats.g.ts" />
 /// <reference path="Generated/Ko.Product.g.ts" />
 /// <reference path="Generated/Ko.ProductDetails.g.ts" />

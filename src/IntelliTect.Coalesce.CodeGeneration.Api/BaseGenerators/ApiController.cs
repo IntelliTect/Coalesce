@@ -195,6 +195,37 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
         /// </param>
         public void WriteMethodInvocation(CSharpCodeBuilder b, MethodViewModel method, string owningMember)
         {
+
+            var clientParameters = method.ClientParameters.ToList();
+            if (clientParameters.Count > 0)
+            {
+                using (b.Block("var _params = new", ";"))
+                {
+                    for (int i = 0; i < clientParameters.Count; i++)
+                    {
+                        var param = clientParameters[i];
+                        if (i != 0) b.Line(", ");
+                        b.Append(param.CsParameterName);
+                        b.Append(" = ");
+                        b.Append(GetMethodPreMapParameterExpression(clientParameters[i]));
+                    }
+                }
+                b.Line();
+
+                if (method.GetAttributeValue<ExecuteAttribute, bool>(e => e.ValidateAttributes) == true)
+                {
+                    WriteMethodValidation(b, method);
+                }
+                else if (method.GetAttributeValue<ExecuteAttribute, bool>(e => e.ValidateAttributes) == null)
+                {
+                    using (b.Block("if (Context.Options.ValidateAttributesForMethods)"))
+                    {
+                        WriteMethodValidation(b, method);
+                    }
+                }
+                b.Line();
+            }
+
             if (method.ResultType.PureType.ClassViewModel?.IsDto == false)
             {
                 b.Line("IncludeTree includeTree = null;");
@@ -222,36 +253,48 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
                 for (int i = 0; i < parameters.Count; i++)
                 {
                     if (i != 0) b.Append(", ");
-                    //b.Line(); // Uncomment for parameter-per-line
+                    b.Line(); // Uncomment for parameter-per-line
                     b.Append(GetMethodInvocationParameterExpression(parameters[i]));
                 }
             }
-            //if (parameters.Any()) b.Line(); // Uncomment for parameter-per-line
+            if (parameters.Any()) b.Line(); // Uncomment for parameter-per-line
             b.Line(");");
+        }
+
+        private void WriteMethodValidation(CSharpCodeBuilder b, MethodViewModel method)
+        {
+            // You may be wondering... why don't we just check ModelState?
+            // Well, the main reason is that the generated DTOs (which are the parameters at least for complex types):
+            // 1) have all nullable properties and so any inherent required-ness of non-nullable properties is lost
+            // 2) model attributes are not copied from models to generated DTOs, so any attributes aren't validated by ModelState.
+            // 3) validation for the /save endpoint is done in Behaviors and is therefore outside/beyond when ModelState is available. Validating methods like this is therefore consistent with SaveImplementation.
+
+            // One thing that this code does NOT cover, that could be covered by ModelState validation,
+            // would be actual deserialization issues that cause property values to get skipped.
+            // However, when interacting with Coalesce through the generated TS, this should never be a problem
+            // and so is not a high priority to add checking of ModelState for this reason.
+
+            b.Line("var _validationResult = ItemResult.FromParameterValidation(");
+            b.Indented($"GeneratedForClassViewModel!.MethodByName({method.Name.QuotedStringLiteralForCSharp()}), _params, HttpContext.RequestServices);");
+
+            if (method.ApiActionReturnTypeDeclaration == "ItemResult")
+            {
+                b.Line("if (!_validationResult.WasSuccessful) return _validationResult;");
+            }
+            else
+            {
+                b.Line($"if (!_validationResult.WasSuccessful) return new {method.ApiActionReturnTypeDeclaration}(_validationResult);");
+            }
         }
 
 
         /// <summary>
         /// For a method invocation controller action, builds an expression for the given parameter
         /// that maps the controller input to the argument of method being called.
+        /// Does not perform DTO mapping, as this method produces the target of validation.
         /// </summary>
-        public string GetMethodInvocationParameterExpression(ParameterViewModel param)
+        protected string GetMethodPreMapParameterExpression(ParameterViewModel param)
         {
-            if (param.IsNonArgumentDI)
-            {
-                // We expect these to either be present on the controller which we're generating for,
-                // or in the contents of the generated action method.
-                if (param.IsAutoInjectedContext) return "Db";
-                else if (param.IsAUser) return "User";
-                else if (param.IsAnIncludeTree) return "out includeTree";
-                else throw new ArgumentException("Unknown type of NonArgumentDI");
-            }
-
-            if (param.IsDI)
-            { 
-                return param.CsParameterName;
-            }
-
             var ret = param.CsParameterName;
 
             if (param.PureType.IsFile)
@@ -274,15 +317,47 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
                 ret += $" ?? await ((await Request.ReadFormAsync()).Files[nameof({param.CsParameterName})]?.OpenReadStream().ReadAllBytesAsync(true) ?? Task.FromResult<{param.Type.FullyQualifiedName}>(null))";
             }
 
+            if (param.Type.IsCollection)
+            {
+                ret += ".ToList()";
+            }
+
+            return ret;
+        }
+
+
+        /// <summary>
+        /// For a method invocation controller action, builds an expression for the given parameter
+        /// that maps the controller input to the argument of method being called.
+        /// </summary>
+        protected string GetMethodInvocationParameterExpression(ParameterViewModel param)
+        {
+            if (param.IsNonArgumentDI)
+            {
+                // We expect these to either be present on the controller which we're generating for,
+                // or in the contents of the generated action method.
+                if (param.IsAutoInjectedContext) return "Db";
+                else if (param.IsAUser) return "User";
+                else if (param.IsAnIncludeTree) return "out includeTree";
+                else throw new ArgumentException("Unknown type of NonArgumentDI");
+            }
+
+            if (param.IsDI)
+            {
+                return param.CsParameterName;
+            }
+
+            string ret = $"_params.{param.CsParameterName}";
+
             if (param.Type.PureType.ClassViewModel != null && !param.Type.PureType.ClassViewModel.IsDto)
             {
                 if (param.Type.IsCollection)
                 {
-                    ret = $"{param.CsParameterName}.Select(_m => _m.MapToNew({MappingContextVar}))";
+                    ret += $".Select(_m => _m.MapToNew({MappingContextVar}))";
                 }
                 else
                 {
-                    ret = $"{param.CsParameterName}.MapToNew({MappingContextVar})";
+                    ret += $".MapToNew({MappingContextVar})";
                 }
             }
 

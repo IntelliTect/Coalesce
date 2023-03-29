@@ -8,7 +8,7 @@
     <AspNetCoreHostingModel>InProcess</AspNetCoreHostingModel>
     
     <Nullable>enable</Nullable>
-    <LangVersion>10.0</LangVersion>
+    <LangVersion>11.0</LangVersion>
     <ImplicitUsings>true</ImplicitUsings>
   </PropertyGroup>
 
@@ -20,6 +20,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Coalesce.Domain\Coalesce.Domain.csproj" />
     <ProjectReference Include="..\..\src\IntelliTect.Coalesce.Vue\IntelliTect.Coalesce.Vue.csproj" />
+    <ProjectReference Include="..\..\src\IntelliTect.Coalesce.Swashbuckle\IntelliTect.Coalesce.Swashbuckle.csproj" />
   </ItemGroup>
 
 </Project>

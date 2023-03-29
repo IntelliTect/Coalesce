@@ -75,7 +75,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                 foreach (var prop in model.ClientProperties)
                 {
                     b.DocComment(prop.Comment ?? prop.Description);
-                    var typeString = new VueType(prop.Type.NullableUnderlyingType).TsType(modelPrefix: "$models", viewModel: true);
+                    var typeString = new VueType(prop.Type.NullableValueUnderlyingType).TsType(modelPrefix: "$models", viewModel: true);
                     b.Line($"{prop.JsVariable}: {typeString} | null;");
                 }
             }

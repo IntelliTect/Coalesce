@@ -16,6 +16,7 @@ module ViewModels {
         public name: KnockoutObservable<string | null> = ko.observable(null);
         public nullableValueTypeCollection: KnockoutObservableArray<moment.Moment> = ko.observableArray([]);
         public valueTypeCollection: KnockoutObservableArray<moment.Moment> = ko.observableArray([]);
+        public personLocation: KnockoutObservable<ViewModels.PersonLocation | null> = ko.observable(null);
         
         /** 
             Load the object from the DTO.
@@ -30,6 +31,11 @@ module ViewModels {
             this.name(data.name);
             this.nullableValueTypeCollection(data.nullableValueTypeCollection);
             this.valueTypeCollection(data.valueTypeCollection);
+            if (!this.personLocation()){
+                this.personLocation(new PersonLocation(data.personLocation, this));
+            } else {
+                this.personLocation()!.loadFromDto(data.personLocation);
+            }
             
         };
         
@@ -42,6 +48,7 @@ module ViewModels {
             dto.name = this.name();
             dto.nullableValueTypeCollection = this.nullableValueTypeCollection();
             dto.valueTypeCollection = this.valueTypeCollection();
+            dto.personLocation = this.personLocation()?.saveToDto();
             
             return dto;
         }

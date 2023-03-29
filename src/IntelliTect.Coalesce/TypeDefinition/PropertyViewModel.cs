@@ -63,9 +63,21 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 
 
         /// <summary>
-        /// True if the property has the `required` C# language keyword, introduced in C# 7.
+        /// True if the property has the `required` C# language keyword, introduced in C# 11.
         /// </summary>
         public abstract bool HasRequiredKeyword { get; }
+
+#if NET6_0_OR_GREATER
+        /// <summary>
+        /// The reference type nullability state for reads of this property.
+        /// </summary>
+        public NullabilityState ReadNullability { get; set; }
+
+        /// <summary>
+        /// The reference type nullability state for writes to this property.
+        /// </summary>
+        public NullabilityState WriteNullability { get; set; }
+#endif
 
         /// <summary>
         /// Convenient accessor for the PropertyInfo when in reflection-based contexts.
@@ -274,7 +286,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         }
 
         /// <summary>
-        /// True if the property should generate a "required" client-side validation rule.
+        /// True if the property should generate a "required" validation rule.
         /// </summary>
         public bool IsRequired
         {
@@ -291,17 +303,19 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     return true;
                 }
 
-                // Explicit == false is intentional - if the parameter is missing, GetAttributeValue returns null.
-                if (this.GetAttributeValue<ClientValidationAttribute, bool>(a => a.IsRequired) == false)
-                {
-                    return false;
-                }
-
                 // Non-nullable foreign keys and their corresponding objects are implicitly required.
-                if (IsForeignKey && !Type.IsNullable)
+                if (IsForeignKey && !Type.IsReferenceOrNullableValue)
                 {
                     return true;
                 }
+
+#if NET6_0_OR_GREATER
+                // If C# reference nullable types is on and this type is not nullable, then it is implicitly required.
+                if (Type.IsReferenceType && WriteNullability == NullabilityState.NotNull)
+                {
+                    return true;
+                }
+#endif
 
                 return false;
             }
@@ -310,26 +324,17 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// Returns the MinLength of the property or null if it doesn't exist.
         /// </summary>
-        public int? MinLength => this.GetAttributeValue<MinLengthAttribute, int>(a => a.Length);
+        public int? MinLength => this.GetValidationMinLength();
         
         /// <summary>
         /// Returns the MaxLength of the property or null if it doesn't exist.
         /// </summary>
-        public int? MaxLength => this.GetAttributeValue<MaxLengthAttribute, int>(a => a.Length);
-        
+        public int? MaxLength => this.GetValidationMaxLength();
+
         /// <summary>
         /// Returns the range of valid values or null if they don't exist. (min, max)
         /// </summary>
-        public Tuple<object, object>? Range
-        {
-            get
-            {
-                var min = this.GetAttributeValue<RangeAttribute>(nameof(RangeAttribute.Minimum));
-                var max = this.GetAttributeValue<RangeAttribute>(nameof(RangeAttribute.Maximum));
-                if (min != null && max != null) return new Tuple<object, object>(min, max);
-                return null;
-            }
-        }
+        public Tuple<object, object>? Range => this.GetValidationRange();
 
         /// <summary>
         /// Returns true if this property is marked with the Search attribute.

@@ -63,9 +63,11 @@ namespace IntelliTect.Coalesce
             services.TryAddScoped<ITimeZoneResolver>(_ => new StaticTimeZoneResolver(TimeZoneInfo.Local));
 
             services.TryAddScoped(sp => new CrudContext(
-                 () => sp.GetRequiredService<Microsoft.AspNetCore.Http.IHttpContextAccessor>().HttpContext?.User,
+                 () => sp.GetRequiredService<IHttpContextAccessor>().HttpContext?.User,
                  sp.GetService<ITimeZoneResolver>()?.GetTimeZoneInfo() ?? TimeZoneInfo.Local,
-                 sp.GetRequiredService<Microsoft.AspNetCore.Http.IHttpContextAccessor>().HttpContext?.RequestAborted ?? default
+                 sp.GetRequiredService<IHttpContextAccessor>().HttpContext?.RequestAborted ?? default,
+                 sp.GetRequiredService<IOptions<CoalesceOptions>>().Value,
+                 sp
              ));
 
             // Workaround for https://github.com/dotnet/aspnetcore/issues/43815
@@ -75,12 +77,15 @@ namespace IntelliTect.Coalesce
             return services;
         }
 
-        public static IServiceCollection AddCoalesce<TContext>(this IServiceCollection services)
+        public static IServiceCollection AddCoalesce<TContext>(this IServiceCollection services, Action<CoalesceServiceBuilder>? builder = null)
             where TContext : DbContext
         {
             if (services == null) throw new ArgumentNullException(nameof(services));
 
-            services.AddCoalesce(builder => builder.AddContext<TContext>());
+            services.AddCoalesce(b => {
+                b.AddContext<TContext>();
+                builder?.Invoke(b);
+            });
 
             return services;
         }

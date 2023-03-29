@@ -61,11 +61,11 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
             }
 
             using (b.Block(Model.DbContext != null 
-                ? $"public {Model.ApiControllerClassName}({Model.DbContext.Type.FullyQualifiedName} db) : base(db)"
-                : $"public {Model.ApiControllerClassName}() : base()"
+                ? $"public {Model.ApiControllerClassName}(CrudContext<{Model.DbContext.Type.FullyQualifiedName}> context) : base(context)"
+                : $"public {Model.ApiControllerClassName}(CrudContext context) : base(context)"
             ))
             {
-                b.Line($"GeneratedForClassViewModel = ReflectionRepository.Global.GetClassViewModel<{Model.FullyQualifiedName}>();");
+                b.Line($"GeneratedForClassViewModel = context.ReflectionRepository.GetClassViewModel<{Model.FullyQualifiedName}>();");
             }
 
             if (securityInfo.IsReadAllowed())

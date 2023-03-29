@@ -100,7 +100,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public override bool IsArray => Info.IsArray;
 
-        public override bool IsNullable => Info.IsClass || IsNullableType;
+        public override bool IsReferenceOrNullableValue => Info.IsClass || IsNullableValueType;
+
+        public override bool IsReferenceType => !Info.IsValueType;
 
         public override bool IsClass => Info.IsClass;
 
@@ -117,7 +119,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             {
                 if (_enumValues != null) return _enumValues;
 
-                if (IsNullableType) return NullableUnderlyingType.EnumValues;
+                if (IsNullableValueType) return NullableValueUnderlyingType.EnumValues;
 
                 var result = new List<EnumMember>();
                 if (!IsEnum) return result;
@@ -141,7 +143,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         }
 
         public override bool IsEnum =>
-            IsNullableType ? NullableUnderlyingType.IsEnum : Info.IsEnum;
+            IsNullableValueType ? NullableValueUnderlyingType.IsEnum : Info.IsEnum;
 
         public override string FullNamespace => Info.Namespace ?? "";
 

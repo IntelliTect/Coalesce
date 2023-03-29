@@ -26,9 +26,9 @@ namespace Coalesce.Web.Vue2.Api
     public partial class CaseDtoStandaloneController
         : BaseApiController<Coalesce.Domain.Case, Coalesce.Domain.CaseDtoStandalone, Coalesce.Domain.AppDbContext>
     {
-        public CaseDtoStandaloneController(Coalesce.Domain.AppDbContext db) : base(db)
+        public CaseDtoStandaloneController(CrudContext<Coalesce.Domain.AppDbContext> context) : base(context)
         {
-            GeneratedForClassViewModel = ReflectionRepository.Global.GetClassViewModel<Coalesce.Domain.CaseDtoStandalone>();
+            GeneratedForClassViewModel = context.ReflectionRepository.GetClassViewModel<Coalesce.Domain.CaseDtoStandalone>();
         }
 
         [HttpGet("get/{id}")]

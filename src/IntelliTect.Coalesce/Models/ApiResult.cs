@@ -33,6 +33,9 @@ namespace IntelliTect.Coalesce.Models
 
         public ApiResult(string? errorMessage) : this(false, errorMessage) { }
 
-        public ApiResult(ApiResult result) : this(result.WasSuccessful, result.Message) { }
+        public ApiResult(ApiResult result) : this(result.WasSuccessful, result.Message)
+        {
+            IncludeTree = result.IncludeTree;
+        }
     }
 }

@@ -18,7 +18,7 @@
             <c-input
               v-model="caller.args[param.name]"
               :for="param"
-              hide-details
+              hide-details="auto"
             />
           </v-col>
         </v-row>
@@ -235,7 +235,7 @@ export default defineComponent({
         await this.viewModel.$load();
       }
       if (this.methodMeta.autoClear) {
-        this.caller.resetArgs()
+        this.caller.resetArgs();
       }
     },
 
@@ -248,7 +248,7 @@ export default defineComponent({
         this.viewModel.$load();
       }
       if (this.methodMeta.autoClear) {
-        this.caller.resetArgs()
+        this.caller.resetArgs();
       }
 
       this.downloadFileResult();

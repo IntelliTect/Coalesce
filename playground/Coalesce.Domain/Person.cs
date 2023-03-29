@@ -71,6 +71,7 @@ namespace Coalesce.Domain
         /// </summary>
         [ClientValidation(IsEmail = true)]
         [DataType(DataType.EmailAddress)]
+        [EmailAddress]
         public string Email { get; set; }
 
         /// <summary>
@@ -78,12 +79,8 @@ namespace Coalesce.Domain
         /// </summary>
         public Genders Gender { get; set; }
 
-        [ClientValidation(
-            Pattern = @"^[+]?([0-9]+(?:[\.][0-9]*)?|\.[0-9]+)$",
-            ErrorMessage = "Height has to be a number.",
-            IsRequired = true
-        )]
         [NotMapped]
+        [Range(5, 10)]
         public double Height { get; set; }
 
         /// <summary>
@@ -171,7 +168,10 @@ namespace Coalesce.Domain
         /// <param name="numberTwo"></param>
         /// <returns></returns>
         [Coalesce]
-        public static ItemResult<int> Add(int numberOne, int numberTwo)
+        public static ItemResult<int> Add(
+            int numberOne, 
+            [Range(0, 10000)] int numberTwo
+        )
         {
             try
             {

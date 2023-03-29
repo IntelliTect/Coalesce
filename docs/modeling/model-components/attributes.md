@@ -24,19 +24,19 @@ The displayed name of a property can also be set via the `[DisplayName]` attribu
 
 ### [Required]
 
-Properties with `[Required]` will generate client validation rules. See [[ClientValidation]](/modeling/model-components/attributes/client-validation.md).
+Properties with `[Required]` will generate [client validation](/modeling/model-components/attributes/client-validation.md) and [server validation](/topics/security.md#server-side-data-validation) rules.
 
 ### [Range]
 
-Properties with `[Range]` will generate client validation rules. See [[ClientValidation]](/modeling/model-components/attributes/client-validation.md).
+Properties with `[Range]` will generate [client validation](/modeling/model-components/attributes/client-validation.md) and [server validation](/topics/security.md#server-side-data-validation) rules.
 
 ### [MinLength]
 
-Properties with `[MinLength]` will generate client validation rules. See [[ClientValidation]](/modeling/model-components/attributes/client-validation.md).
+Properties with `[MinLength]` will generate [client validation](/modeling/model-components/attributes/client-validation.md) and [server validation](/topics/security.md#server-side-data-validation) rules.
 
 ### [MaxLength]
 
-Properties with `[MaxLength]` will generate client validation rules. See [[ClientValidation]](/modeling/model-components/attributes/client-validation.md).
+Properties with `[MaxLength]` will generate [client validation](/modeling/model-components/attributes/client-validation.md) and [server validation](/topics/security.md#server-side-data-validation) rules.
 
 ### [DataType]
 

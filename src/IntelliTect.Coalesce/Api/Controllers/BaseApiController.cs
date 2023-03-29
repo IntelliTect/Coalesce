@@ -19,10 +19,16 @@ namespace IntelliTect.Coalesce.Api.Controllers
         where T : class
         where TDto : class, IClassDto<T>, new()
     {
-        protected BaseApiController()
+        protected BaseApiController(CrudContext context)
         {
-            EntityClassViewModel = ReflectionRepository.Global.GetClassViewModel<T>()!;
+            Context = context;
+            EntityClassViewModel = context.ReflectionRepository.GetClassViewModel<T>()!;
         }
+
+        /// <summary>
+        /// Contains contextual information about the request.
+        /// </summary>
+        protected CrudContext Context { get; }
 
         /// <summary>
         /// A ClassViewModel representing the entity type T that is served by this controller,
@@ -85,11 +91,15 @@ namespace IntelliTect.Coalesce.Api.Controllers
         where TDto : class, IClassDto<T>, new()
         where TContext : DbContext
     {
-        protected BaseApiController(TContext db) : base()
+        protected BaseApiController(CrudContext<TContext> context) : base(context)
         {
-            Db = db;
         }
 
-        public TContext Db { get; }
+        /// <summary>
+        /// Contains contextual information about the request.
+        /// </summary>
+        public new CrudContext<TContext> Context => (CrudContext<TContext>)base.Context;
+
+        public TContext Db => Context.DbContext;
     }
 }

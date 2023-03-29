@@ -26,9 +26,9 @@ namespace Coalesce.Web.Vue2.Api
     public partial class CaseDtoController
         : BaseApiController<Coalesce.Domain.Case, Coalesce.Domain.CaseDto, Coalesce.Domain.AppDbContext>
     {
-        public CaseDtoController(Coalesce.Domain.AppDbContext db) : base(db)
+        public CaseDtoController(CrudContext<Coalesce.Domain.AppDbContext> context) : base(context)
         {
-            GeneratedForClassViewModel = ReflectionRepository.Global.GetClassViewModel<Coalesce.Domain.CaseDto>();
+            GeneratedForClassViewModel = context.ReflectionRepository.GetClassViewModel<Coalesce.Domain.CaseDto>();
         }
 
         [HttpGet("get/{id}")]
@@ -89,7 +89,21 @@ namespace Coalesce.Web.Vue2.Api
                 return new ItemResult<string>(itemResult);
             }
             var item = itemResult.Object;
-            var _methodResult = await item.AsyncMethodOnIClassDto(input);
+            var _params = new
+            {
+                input = input
+            };
+
+            if (Context.Options.ValidateAttributesForMethods)
+            {
+                var _validationResult = ItemResult.FromParameterValidation(
+                    GeneratedForClassViewModel!.MethodByName("AsyncMethodOnIClassDto"), _params, HttpContext.RequestServices);
+                if (!_validationResult.WasSuccessful) return new ItemResult<string>(_validationResult);
+            }
+
+            var _methodResult = await item.AsyncMethodOnIClassDto(
+                _params.input
+            );
             await Db.SaveChangesAsync();
             var _result = new ItemResult<string>();
             _result.Object = _methodResult;

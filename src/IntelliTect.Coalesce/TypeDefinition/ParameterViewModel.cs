@@ -111,6 +111,26 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
         }
 
+#if NET6_0_OR_GREATER
+        /// <summary>
+        /// The reference type nullability state for this parameter.
+        /// </summary>
+        public NullabilityState Nullability { get; set; }
+#endif
+
+        public bool IsRequired
+        {
+            get
+            {
+                if (this.HasAttribute<RequiredAttribute>()) return true;
+
+#if NET6_0_OR_GREATER
+                if (Type.IsReferenceType && Nullability == NullabilityState.NotNull) return true;
+#endif
+                return false;
+            }
+        }
+
         public override string ToString() => $"{Type} {Name}";
 
         public abstract object? GetAttributeValue<TAttribute>(string valueName) where TAttribute : Attribute;

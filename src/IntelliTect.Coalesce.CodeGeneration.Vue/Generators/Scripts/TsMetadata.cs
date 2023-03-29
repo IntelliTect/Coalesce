@@ -299,7 +299,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                         TypeDiscriminator.Date
                 ))
                 {
-                    List<string> rules = GetValidationRules(prop);
+                    List<string> rules = GetValidationRules(prop, (prop.ReferenceNavigationProperty ?? prop).DisplayName);
 
                     if (rules.Count > 0)
                     {
@@ -316,14 +316,12 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
             }
         }
 
-        private static List<string> GetValidationRules(PropertyViewModel prop)
+        private static List<string> GetValidationRules(IValueViewModel prop, string propName)
         {
-            var propName = (prop.ReferenceNavigationProperty ?? prop).DisplayName;
-
             // TODO: Handle 'ClientValidationAllowSave' by placing a field on the 
             // validator function that contains the value of this flag.
 
-            var errorMessage = prop.GetAttributeValue<ClientValidationAttribute>(a => a.ErrorMessage);
+            var clientValidationError = prop.GetAttributeValue<ClientValidationAttribute>(a => a.ErrorMessage);
 
             var rules = new List<string>();
             string Error(string message, string fallback)
@@ -344,7 +342,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
             var isRequired = prop.GetAttributeValue<ClientValidationAttribute, bool>(a => a.IsRequired);
             if (isRequired == true)
             {
-                rules.Add($"required: val => {requiredPredicate} {Error(errorMessage, $"{propName} is required.")}");
+                rules.Add($"required: val => {requiredPredicate} {Error(clientValidationError, $"{propName} is required.")}");
             }
             else if (prop.IsRequired)
             {
@@ -352,11 +350,14 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                 if (prop.HasAttribute<RequiredAttribute>())
                 {
                     message = prop.GetAttributeValue<RequiredAttribute>(a => a.ErrorMessage);
+                    if (prop.GetAttributeValue<RequiredAttribute, bool>(a => a.AllowEmptyStrings) == true)
+                    {
+                        requiredPredicate = "val != null";
+                    }
                 }
                 if (string.IsNullOrWhiteSpace(message))
                 {
-                    var name = (prop.ReferenceNavigationProperty ?? prop).DisplayName;
-                    message = $"{name} is required.";
+                    message = $"{propName} is required.";
                 }
 
                 rules.Add($"required: val => {requiredPredicate} || \"{message.EscapeStringLiteralForTypeScript()}\"");
@@ -368,11 +369,12 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                 void Min(object value, string error) => rules.Add($"minLength: val => !val || val.length >= {value} {Error(error, $"{propName} must be at least {value} characters.")}");
                 void Max(object value, string error) => rules.Add($"maxLength: val => !val || val.length <= {value} {Error(error, $"{propName} may not be more than {value} characters.")}");
 
-                if (prop.Range != null)
+                var range = prop.GetValidationRange();
+                if (range != null)
                 {
                     var message = prop.GetAttributeValue<RangeAttribute>(a => a.ErrorMessage);
-                    Min(prop.Range.Item1, message);
-                    Max(prop.Range.Item2, message);
+                    Min(range.Item1, message);
+                    Max(range.Item2, message);
                     goto RangeDone;
                 }
 
@@ -396,22 +398,22 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                 var minLength = prop.GetAttributeValue<ClientValidationAttribute, int>(a => a.MinLength);
                 var maxLength = prop.GetAttributeValue<ClientValidationAttribute, int>(a => a.MaxLength);
 
-                if (prop.MinLength.HasValue)
+                if (prop.GetValidationMinLength().HasValue)
                 {
-                    Min(prop.MinLength.Value, prop.GetAttributeValue<MinLengthAttribute>(a => a.ErrorMessage));
+                    Min(prop.GetValidationMinLength().Value, prop.GetAttributeValue<MinLengthAttribute>(a => a.ErrorMessage));
                 }
                 else if (minLength.HasValue && minLength.Value != int.MaxValue)
                 {
-                    Min(minLength.Value, errorMessage);
+                    Min(minLength.Value, clientValidationError);
                 }
 
-                if (prop.MaxLength.HasValue)
+                if (prop.GetValidationMaxLength().HasValue)
                 {
-                    Max(prop.MaxLength.Value, prop.GetAttributeValue<MaxLengthAttribute>(a => a.ErrorMessage));
+                    Max(prop.GetValidationMaxLength().Value, prop.GetAttributeValue<MaxLengthAttribute>(a => a.ErrorMessage));
                 }
                 else if (maxLength.HasValue && maxLength.Value != int.MinValue)
                 {
-                    Max(maxLength.Value, errorMessage);
+                    Max(maxLength.Value, clientValidationError);
                 }
             }
             else if (prop.Type.IsNumber)
@@ -419,11 +421,12 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                 void Min(object value, string error) => rules.Add($"min: val => val == null || val >= {value} {Error(error, $"{propName} must be at least {value}.")}");
                 void Max(object value, string error) => rules.Add($"max: val => val == null || val <= {value} {Error(error, $"{propName} may not be more than {value}.")}");
 
-                if (prop.Range != null)
+                var range = prop.GetValidationRange();
+                if (range != null)
                 {
                     var message = prop.GetAttributeValue<RangeAttribute>(a => a.ErrorMessage);
-                    Min(prop.Range.Item1, message);
-                    Max(prop.Range.Item2, message);
+                    Min(range.Item1, message);
+                    Max(range.Item2, message);
                     goto RangeDone;
                 }
 
@@ -431,9 +434,9 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                 var maxValue = prop.GetAttributeValue<ClientValidationAttribute, double>(a => a.MaxValue);
 
                 if (minValue.HasValue && minValue.Value != double.MaxValue)
-                    Min(minValue.Value, errorMessage);
+                    Min(minValue.Value, clientValidationError);
                 if (maxValue.HasValue && maxValue.Value != double.MinValue)
-                    Max(maxValue.Value, errorMessage);
+                    Max(maxValue.Value, clientValidationError);
             }
 
             RangeDone:
@@ -445,19 +448,35 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
             }
             if (!string.IsNullOrEmpty(pattern))
             {
-                rules.Add($"pattern: val => !val || /{pattern}/.test(val) {Error(errorMessage, $"{propName} does not match expected format.")}");
+                rules.Add($"pattern: val => !val || /{pattern}/.test(val) {Error(clientValidationError, $"{propName} does not match expected format.")}");
             }
 
             // https://emailregex.com/
             const string emailRegex = @"^(([^<>()\[\]\\.,;:\s@""]+(\.[^<> ()\[\]\\.,;:\s@""]+)*)|("".+ ""))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$";
-            var isEmail = prop.GetAttributeValue<ClientValidationAttribute, bool>(a => a.IsEmail);
-            if (isEmail.HasValue && isEmail.Value)
-                rules.Add($"email: val => !val || /{emailRegex}/.test(val.trim()) {Error(errorMessage, $"{propName} must be a valid email address.")}");
+            if (prop.GetAttributeValue<ClientValidationAttribute, bool>(a => a.IsEmail) == true)
+            {
+                rules.Add($"email: val => !val || /{emailRegex}/.test(val.trim()) {Error(clientValidationError, $"{propName} must be a valid email address.")}");
+            }
+            else if (prop.HasAttribute<EmailAddressAttribute>())
+            {
+                // This is actually much more strict on the client than what EmailAddressAttribute actually validates.
+                rules.Add($"email: val => !val || /{emailRegex}/.test(val.trim()) {Error(prop.GetAttributeValue<EmailAddressAttribute>(p => p.ErrorMessage), $"{propName} must be a valid email address.")}");
+            }
 
-            const string phoneRegex = @"^(1-?)?(\([2-9]\d{2}\)|[2-9]\d{2})-?[2-9]\d{2}-?\d{4}$";
-            var isPhoneUs = prop.GetAttributeValue<ClientValidationAttribute, bool>(a => a.IsPhoneUs);
-            if (isPhoneUs.HasValue && isPhoneUs.Value)
-                rules.Add($"phone: val => !val || /{phoneRegex}/.test(val.replace(/\\s+/g, '')) {Error(errorMessage, $"{propName} must be a valid US phone number.")}");
+            if (
+                prop.GetAttributeValue<ClientValidationAttribute, bool>(a => a.IsPhoneUs) == true
+            )
+            {
+                const string phoneRegex = @"^(1-?)?(\([2-9]\d{2}\)|[2-9]\d{2})-?[2-9]\d{2}-?\d{4}$";
+                rules.Add($"phone: val => !val || /{phoneRegex}/.test(val.replace(/\\s+/g, '')) {Error(clientValidationError, $"{propName} must be a valid US phone number.")}");
+            }
+            else if (prop.HasAttribute<PhoneAttribute>())
+            {
+                // This regex from https://github.com/dotnet/runtime/blob/ab0a4ff9fa8002fa17703a9f9571869b820846c3/src/libraries/System.ComponentModel.Annotations/src/System/ComponentModel/DataAnnotations/PhoneAttribute.cs#LL15C9-L15C9
+                // and matches the behavior of the server validation
+                const string phoneRegex = @"^(\+\s?)?((?<!\+.*)\(\+?\d+([\s\-\.]?\d+)?\)|\d+)([\s\-\.]?(\(\d+([\s\-\.]?\d+)?\)|\d+))*(\s?(x|ext\.?)\s?\d+)?$";
+                rules.Add($"phone: val => !val || /{phoneRegex}/.test(val.replace(/\\s+/g, '')) {Error(prop.GetAttributeValue<PhoneAttribute>(p => p.ErrorMessage), $"{propName} must be a valid phone number.")}");
+            }
 
             return rules;
         }
@@ -527,6 +546,20 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                 if (parameter.ParentSourceProp != null)
                 {
                     b.Line($"get source() {{ return {GetClassMetadataRef(method.Parent)}.props.{parameter.ParentSourceProp.JsVariable} }},");
+                }
+
+                List<string> rules = GetValidationRules(parameter, parameter.DisplayName);
+
+                if (rules.Count > 0)
+                {
+                    using (b.Block("rules:"))
+                    {
+                        foreach (var rule in rules)
+                        {
+                            b.Append(rule);
+                            b.Line(",");
+                        }
+                    }
                 }
             }
         }

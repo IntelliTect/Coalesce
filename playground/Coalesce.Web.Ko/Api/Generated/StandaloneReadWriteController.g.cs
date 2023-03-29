@@ -26,9 +26,9 @@ namespace Coalesce.Web.Ko.Api
     public partial class StandaloneReadWriteController
         : BaseApiController<Coalesce.Domain.StandaloneReadWrite, StandaloneReadWriteDtoGen>
     {
-        public StandaloneReadWriteController() : base()
+        public StandaloneReadWriteController(CrudContext context) : base(context)
         {
-            GeneratedForClassViewModel = ReflectionRepository.Global.GetClassViewModel<Coalesce.Domain.StandaloneReadWrite>();
+            GeneratedForClassViewModel = context.ReflectionRepository.GetClassViewModel<Coalesce.Domain.StandaloneReadWrite>();
         }
 
         [HttpGet("get/{id}")]

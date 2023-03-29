@@ -23,6 +23,8 @@ public void ConfigureServices(IServiceCollection services)
         .UseTimeZone(TimeZoneInfo.FindSystemTimeZoneById("Pacific Standard Time"))
         .Configure(o =>
         {
+            o.ValidateAttributesForMethods = true; // note: true is the default
+            o.ValidateAttributesForSaves = true; // note: true is the default
             o.DetailedExceptionMessages = true;
             o.ExceptionResponseFactory = ctx =>
             {
@@ -62,6 +64,6 @@ Specify a service implementation to use to resolve the current timezone. This sh
 
 `.Configure(...)` 
 
-Configure additional options for Coalesce runtime behavior. Current options include those around exception handling. See individual members for details.
+Configure additional options for Coalesce runtime behavior. Current options include options for server-side validation, and options for exception handling. See individual members for details.
 
 

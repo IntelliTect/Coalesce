@@ -112,10 +112,7 @@ namespace IntelliTect.Coalesce.Utilities
         [return: System.Diagnostics.CodeAnalysis.NotNullIfNotNull("str")]
 #endif
         public static string? QuotedStringLiteralForCSharp(this string? str) => 
-            str is null ? null : ('"' + str?
-            .Replace(@"\", @"\\")
-            .Replace("\"", "\\\"")
-            + '"');
+            str is null ? null : ('"' + str.EscapeStringLiteralForCSharp() + '"');
 
 #if NETCOREAPP
         [return: System.Diagnostics.CodeAnalysis.NotNullIfNotNull("str")]

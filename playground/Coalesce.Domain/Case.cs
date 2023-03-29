@@ -49,6 +49,7 @@ namespace Coalesce.Domain
         public int CaseKey { get; set; }
 
         [ListText]
+        [Required]
         [ClientValidation(IsRequired = true, ErrorMessage = "You must enter a title for the case.")]
         [Search(IsSplitOnSpaces = true, SearchMethod = SearchAttribute.SearchMethods.Contains)]
         public string Title { get; set; }

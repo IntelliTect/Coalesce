@@ -14,6 +14,8 @@ using IntelliTect.Coalesce.Api.Behaviors;
 using IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext;
 using System.Text.Json;
 using System.Collections.Generic;
+using Microsoft.AspNetCore.Hosting;
+using Moq;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Tests
 {
@@ -95,6 +97,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Tests
                 {
                     c.AddContext<AppDbContext>();
                 })
+                .AddSingleton<IWebHostEnvironment>(Mock.Of<IWebHostEnvironment>())
                 .AddScoped<AppDbContext>() // good enough (doesn't need to be configured, just needs to exist)
                 .BuildServiceProvider();
 

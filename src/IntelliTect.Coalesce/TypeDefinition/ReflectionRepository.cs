@@ -240,7 +240,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
             else if (type.IsEnum)
             {
-                _enums.Add(type.NullableUnderlyingType);
+                _enums.Add(type.NullableValueUnderlyingType);
             }
         }
 
@@ -309,7 +309,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 {
                     if (parameter.PureType.IsEnum)
                     {
-                        _enums.Add(parameter.PureType.NullableUnderlyingType);
+                        _enums.Add(parameter.PureType.NullableValueUnderlyingType);
                     }
                 }
             }

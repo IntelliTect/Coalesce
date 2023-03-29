@@ -1,11 +1,12 @@
-﻿using IntelliTect.Coalesce.Models;
+﻿using IntelliTect.Coalesce.DataAnnotations;
+using IntelliTect.Coalesce.Models;
 using Microsoft.AspNetCore.Mvc.Filters;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace IntelliTect.Coalesce
 {
-
     public class CoalesceOptions
     {
         /// <summary>
@@ -21,5 +22,19 @@ namespace IntelliTect.Coalesce
         /// Return null to use the default response handling.
         /// </summary>
         public Func<ActionExecutedContext, ApiResult?>? ExceptionResponseFactory { get; set; }
+
+        /// <summary>
+        /// If true, Coalesce will perform validation of incoming data using <see cref="ValidationAttribute"/>s
+        /// present on your models during save operations (in <see cref="StandardBehaviors{T}.ValidateDto(SaveKind, IClassDto{T})"/>).
+        /// This can be overridden on individual Behaviors instances by setting <see cref="StandardBehaviors{T}.ValidateAttributesForSaves"/>.
+        /// </summary>
+        public bool ValidateAttributesForSaves { get; set; } = true;
+
+        /// <summary>
+        /// If true, Coalesce will perform validation of incoming parameters using <see cref="ValidationAttribute"/>s
+        /// present on your parameters and for custom methods.
+        /// This can be overridden on individual custom methods using <see cref="ExecuteAttribute.ValidateAttributes"/>.
+        /// </summary>
+        public bool ValidateAttributesForMethods { get; set; } = true;
     }
 }

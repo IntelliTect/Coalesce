@@ -26,9 +26,9 @@ namespace Coalesce.Web.Vue3.Api
     public partial class ProductController
         : BaseApiController<Coalesce.Domain.Product, ProductDtoGen, Coalesce.Domain.AppDbContext>
     {
-        public ProductController(Coalesce.Domain.AppDbContext db) : base(db)
+        public ProductController(CrudContext<Coalesce.Domain.AppDbContext> context) : base(context)
         {
-            GeneratedForClassViewModel = ReflectionRepository.Global.GetClassViewModel<Coalesce.Domain.Product>();
+            GeneratedForClassViewModel = context.ReflectionRepository.GetClassViewModel<Coalesce.Domain.Product>();
         }
 
         [HttpGet("get/{id}")]

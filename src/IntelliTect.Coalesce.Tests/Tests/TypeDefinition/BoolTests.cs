@@ -23,7 +23,7 @@ namespace IntelliTect.Coalesce.Tests.TypeDefinition
                 vm.PropertyByName(nameof(Bools.NonNullableKeywordName)),
             })
             {
-                Assert.False(prop.Type.IsNullable);
+                Assert.False(prop.Type.IsReferenceOrNullableValue);
             }
 
             foreach (var prop in new[]
@@ -34,8 +34,8 @@ namespace IntelliTect.Coalesce.Tests.TypeDefinition
                 vm.PropertyByName(nameof(Bools.NullableQuestionMarkKeywordName)),
             })
             {
-                Assert.True(prop.Type.IsNullable);
-                Assert.False(prop.Type.NullableUnderlyingType.IsNullable);
+                Assert.True(prop.Type.IsReferenceOrNullableValue);
+                Assert.False(prop.Type.NullableValueUnderlyingType.IsReferenceOrNullableValue);
             }
 
             // Collections
@@ -73,8 +73,8 @@ namespace IntelliTect.Coalesce.Tests.TypeDefinition
             })
             {
                 Assert.True(prop.Type.IsCollection);
-                Assert.True(prop.Type.PureType.IsNullable);
-                Assert.False(prop.Type.PureType.PureType.IsNullable);
+                Assert.True(prop.Type.PureType.IsReferenceOrNullableValue);
+                Assert.False(prop.Type.PureType.PureType.IsReferenceOrNullableValue);
             }
 
             // Non-Nullable Collections/Arrays
@@ -85,7 +85,7 @@ namespace IntelliTect.Coalesce.Tests.TypeDefinition
             })
             {
                 Assert.True(prop.Type.IsCollection);
-                Assert.False(prop.Type.PureType.IsNullable);
+                Assert.False(prop.Type.PureType.IsReferenceOrNullableValue);
             }
         }
 
@@ -104,7 +104,7 @@ namespace IntelliTect.Coalesce.Tests.TypeDefinition
             {
                 Assert.True(prop.Type.IsBool);
                 Assert.True(prop.PureType.IsBool);
-                Assert.True(prop.Type.IsNullable);
+                Assert.True(prop.Type.IsReferenceOrNullableValue);
             }
 
             // Collections

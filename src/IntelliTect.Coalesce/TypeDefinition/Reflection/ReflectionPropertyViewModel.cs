@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -9,12 +10,19 @@ namespace IntelliTect.Coalesce.TypeDefinition
 {
     internal class ReflectionPropertyViewModel : PropertyViewModel
     {
+
         protected PropertyInfo Info { get; }
 
         public ReflectionPropertyViewModel(ClassViewModel effectiveParent, ClassViewModel declaringParent, PropertyInfo propertyInfo)
             : base (effectiveParent, declaringParent, ReflectionTypeViewModel.GetOrCreate(declaringParent.ReflectionRepository, propertyInfo.PropertyType))
         {
             Info = propertyInfo;
+
+#if NET6_0_OR_GREATER
+            var nullable = new NullabilityInfoContext().Create(Info);
+            ReadNullability = nullable.ReadState;
+            WriteNullability = nullable.WriteState;
+#endif
         }
 
         public override string Name => Info.Name;
@@ -54,6 +62,28 @@ namespace IntelliTect.Coalesce.TypeDefinition
         
         public override bool HasAttribute<TAttribute>() =>
             Info.HasAttribute<TAttribute>();
-        
+
+        private IReadOnlyList<ValidationAttribute>? _validationAttributes;
+        internal IReadOnlyList<ValidationAttribute> GetValidationAttributes()
+        {
+            if (_validationAttributes is not null) return _validationAttributes;
+
+            var attrs = Info
+                .GetCustomAttributes(typeof(ValidationAttribute), true)
+                .OfType<ValidationAttribute>();
+            if (IsRequired && !attrs.Any(a => a is RequiredAttribute))
+            {
+                // Implicitly add required validation to any property that is required by other means,
+                // but doesn't explicitly have a RequiredAttribute.
+                // This mirrors the behavior of aspnetcore:
+                // https://github.com/dotnet/aspnetcore/blob/3a6acd95c769bbbd2e5288d5844c81dee45fc958/src/Mvc/Mvc.Abstractions/src/ModelBinding/ModelMetadata.cs#L344-L347
+                attrs = attrs.Append(new RequiredAttribute());
+            }
+
+            return _validationAttributes = attrs
+                // RequiredAttribute first (descending: true first)
+                .OrderByDescending(a => a is RequiredAttribute)
+                .ToList();
+        }
     }
 }

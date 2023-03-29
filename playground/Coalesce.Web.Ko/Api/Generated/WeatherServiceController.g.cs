@@ -24,11 +24,15 @@ namespace Coalesce.Web.Ko.Api
     [ServiceFilter(typeof(IApiActionFilter))]
     public partial class WeatherServiceController : Controller
     {
+        protected ClassViewModel GeneratedForClassViewModel { get; }
         protected Coalesce.Domain.Services.IWeatherService Service { get; }
+        protected CrudContext Context { get; }
 
-        public WeatherServiceController(Coalesce.Domain.Services.IWeatherService service)
+        public WeatherServiceController(CrudContext context, Coalesce.Domain.Services.IWeatherService service)
         {
+            GeneratedForClassViewModel = context.ReflectionRepository.GetClassViewModel<Coalesce.Domain.Services.IWeatherService>();
             Service = service;
+            Context = context;
         }
 
         /// <summary>
@@ -43,9 +47,28 @@ namespace Coalesce.Web.Ko.Api
             [FromForm(Name = "dateTime")] System.DateTimeOffset? dateTime,
             [FromForm(Name = "conditions")] Coalesce.Domain.Services.SkyConditions? conditions)
         {
+            var _params = new
+            {
+                location = location,
+                dateTime = dateTime,
+                conditions = conditions
+            };
+
+            if (Context.Options.ValidateAttributesForMethods)
+            {
+                var _validationResult = ItemResult.FromParameterValidation(
+                    GeneratedForClassViewModel!.MethodByName("GetWeatherAsync"), _params, HttpContext.RequestServices);
+                if (!_validationResult.WasSuccessful) return new ItemResult<WeatherDataDtoGen>(_validationResult);
+            }
+
             IncludeTree includeTree = null;
             var _mappingContext = new MappingContext(User);
-            var _methodResult = await Service.GetWeatherAsync(parameterDbContext, location.MapToNew(_mappingContext), dateTime, conditions);
+            var _methodResult = await Service.GetWeatherAsync(
+                parameterDbContext,
+                _params.location.MapToNew(_mappingContext),
+                _params.dateTime,
+                _params.conditions
+            );
             var _result = new ItemResult<WeatherDataDtoGen>();
             _result.Object = Mapper.MapToDto<Coalesce.Domain.Services.WeatherData, WeatherDataDtoGen>(_methodResult, _mappingContext, includeTree);
             return _result;

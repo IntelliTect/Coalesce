@@ -1,6 +1,9 @@
 ﻿using IntelliTect.Coalesce.TypeDefinition;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using System;
+using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 using System.Threading;
 
@@ -18,17 +21,22 @@ namespace IntelliTect.Coalesce
             }
 
             lazyUser = new Lazy<ClaimsPrincipal?>(userAccessor, true);
+            Options = new();
         }
 
         public CrudContext(
             Func<ClaimsPrincipal?> userAccessor, 
             TimeZoneInfo timeZone,
-            CancellationToken cancellationToken = default
+            CancellationToken cancellationToken = default,
+            CoalesceOptions? coalesceOptions = null,
+            IServiceProvider? serviceProvider = null
         )
             : this(userAccessor)
         {
             TimeZone = timeZone ?? throw new ArgumentNullException(nameof(timeZone));
             CancellationToken = cancellationToken;
+            Options = coalesceOptions ?? Options;
+            ServiceProvider = serviceProvider;
         }
 
         internal CrudContext(CrudContext baseContext)
@@ -41,6 +49,8 @@ namespace IntelliTect.Coalesce
             lazyUser = baseContext.lazyUser;
             TimeZone = baseContext.TimeZone;
             CancellationToken = baseContext.CancellationToken;
+            Options = baseContext.Options;
+            ServiceProvider = baseContext.ServiceProvider;
         }
 
         /// <summary>
@@ -62,6 +72,18 @@ namespace IntelliTect.Coalesce
         /// A <see cref="CancellationToken"/> that can be observed to see if the underlying request has been canceled.
         /// </summary>
         public CancellationToken CancellationToken { get; set; } = CancellationToken.None;
+
+        /// <summary>
+        /// The application's configured <see cref="Options"/>.
+        /// </summary>
+        public CoalesceOptions Options { get; set; }
+
+        /// <summary>
+        /// This service provider is used to provide services to <see cref="ValidationContext"/> during validation.
+        /// It is internal because we don't want people seeing it and using service locator in their
+        /// custom datasources/behaviors instead of normal dependency injection.
+        /// </summary>
+        internal IServiceProvider? ServiceProvider { get; set; }
     }
 
     public class CrudContext<TContext> : CrudContext

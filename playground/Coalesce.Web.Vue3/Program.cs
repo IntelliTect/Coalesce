@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Console;
 using Microsoft.Net.Http.Headers;
+using Microsoft.OpenApi.Models;
 using System.Security.Claims;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -37,7 +38,11 @@ services.AddDbContext<AppDbContext>(options =>
         .UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery)
     ));
 
-services.AddCoalesce<AppDbContext>();
+services.AddCoalesce<AppDbContext>(c => c.Configure(o =>
+{
+    o.ValidateAttributesForMethods = true;
+    o.ValidateAttributesForSaves = true;
+}));
 
 services
     .AddMvc()
@@ -52,6 +57,12 @@ services
 services.Configure<Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerOptions>(options =>
 {
     options.Limits.MaxRequestBodySize = int.MaxValue; // testing big file uploads/downloads
+});
+
+services.AddSwaggerGen(c =>
+{
+    c.AddCoalesce();
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
 });
 
 
@@ -105,6 +116,11 @@ app.Use(async (context, next) =>
 });
 
 app.MapControllers();
+app.MapSwagger();
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+});
 
 // API fallback to prevent serving SPA fallback to 404 hits on API endpoints.
 app.Map("/api/{**any}", () => Results.NotFound());

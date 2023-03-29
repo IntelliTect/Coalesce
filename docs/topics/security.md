@@ -408,7 +408,7 @@ When a user is saving a model with Coalesce, they can provide values for the mod
 
 A malicious user, however, is a different story. Imagine a user who is brute-forcing the `/save` endpoint on one of your entities, enumerating values of a foreign key. The may be trying to leak data through navigation property values returned by the response from the save, or they may be trying to inject their data into an object graph that they do not otherwise have access to.
 
-If this scenario sounds like a plausible threat vector your application, be sure to perform sufficient [validation](#data-validation) of incoming foreign keys to ensure that the user is allowed to use a particular foreign key value before saving it to your database.
+If this scenario sounds like a plausible threat vector your application, be sure to perform sufficient [validation](#server-side-data-validation) of incoming foreign keys to ensure that the user is allowed to use a particular foreign key value before saving it to your database.
 
 Also consider making any required foreign keys that should not change for the lifetime of an entity into init-only properties (i.e. use the `init` accessor in C# instead of the `set` accessor). While this does not entirely solve the foreign key injection issue, it eliminates the need to validate that a user is not changing the parent of an object if such an operation is not desirable.
 
@@ -429,7 +429,7 @@ Historically, Coalesce did not provide any automatic, attribute-based validation
 In addition to any validation attributes present on your model properties and method parameters, there are some other rules that work similarly to the default validation in ASP.NET Core:
 - The C# 11 `required` keyword also acts like a `RequiredAttribute`
 - If C# nullable reference types are enabled, non-nullable reference types are required required.
-- Value types are implicitly optional, with the exception of non-nullable foreign keys, which are required.
+- Non-nullable value types are implicitly optional, with the exception of non-nullable foreign keys, which are required.
 
 To disable this functionality for your entire application, disable the corresponding configuration options on `CoalesceOptions`. For example, in Startup.cs or Program.cs:
 
@@ -452,7 +452,7 @@ This can be overridden per type or even per request by setting the `ValidateAttr
 
 #### ValidateAttributesForMethods
 
-Enabling [`ValidateAttributesForMethods`](/modeling/model-components/attributes/execute.md#member-ValidateAttributes) causes the generated controllers for [custom methods](/modeling/model-components/methods.md) to perform validation of incoming parameters. Validation attributes may be placed on method parameters, and validation will also be performed against the members of any complex type parameters.
+Enabling [`ValidateAttributesForMethods`](/modeling/model-components/attributes/execute.md#member-validateattributes) causes the generated controllers for [custom methods](/modeling/model-components/methods.md) to perform validation of incoming parameters. Validation attributes may be placed on method parameters, and validation will also be performed against the members of any complex type parameters.
 
 This can be overridden per method by setting the `ValidateAttributes` property on [ExecuteAttribute](/modeling/model-components/attributes/execute.md) for the method.
 

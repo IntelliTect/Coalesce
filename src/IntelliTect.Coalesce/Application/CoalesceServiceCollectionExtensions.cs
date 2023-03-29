@@ -77,12 +77,15 @@ namespace IntelliTect.Coalesce
             return services;
         }
 
-        public static IServiceCollection AddCoalesce<TContext>(this IServiceCollection services)
+        public static IServiceCollection AddCoalesce<TContext>(this IServiceCollection services, Action<CoalesceServiceBuilder>? builder = null)
             where TContext : DbContext
         {
             if (services == null) throw new ArgumentNullException(nameof(services));
 
-            services.AddCoalesce(builder => builder.AddContext<TContext>());
+            services.AddCoalesce(b => {
+                b.AddContext<TContext>();
+                builder?.Invoke(b);
+            });
 
             return services;
         }

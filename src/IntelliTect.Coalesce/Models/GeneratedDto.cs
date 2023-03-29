@@ -18,7 +18,8 @@ namespace IntelliTect.Coalesce.Models
 
         private readonly HashSet<string> _changedProperties = new HashSet<string>();
         [InternalUse]
-        public ISet<string> ChangedProperties => _changedProperties;
+        ISet<string> ISparseDto.ChangedProperties => _changedProperties;
+
         protected void Changed(string propName) => _changedProperties.Add(propName);
         protected bool ShouldMapTo(string propName) => _changedProperties.Contains(propName);
 

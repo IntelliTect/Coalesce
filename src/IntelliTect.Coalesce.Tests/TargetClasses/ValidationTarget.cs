@@ -31,7 +31,10 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses
         // This class (ValidationTarget) is not mapped,
         // but the code under test here (parameter validation) doesn't really care.
         [Coalesce]
-        public ItemResult MethodWithMixedParameters([Required,EmailAddress] string email, [Required] ValidationTarget target)
+        public ItemResult MethodWithMixedParameters(
+            [Required,EmailAddress] string email, 
+            [Required] ValidationTarget target
+        )
         {
             return true;
         }

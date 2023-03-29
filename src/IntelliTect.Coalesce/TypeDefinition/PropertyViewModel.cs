@@ -309,6 +309,14 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     return true;
                 }
 
+#if NET6_0_OR_GREATER
+                // If C# reference nullable types is on and this type is not nullable, then it is implicitly required.
+                if (Type.IsReferenceType && WriteNullability == NullabilityState.NotNull)
+                {
+                    return true;
+                }
+#endif
+
                 return false;
             }
         }

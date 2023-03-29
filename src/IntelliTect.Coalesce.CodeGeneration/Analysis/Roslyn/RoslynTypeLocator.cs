@@ -48,8 +48,15 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.Roslyn
                 parseOptions = parseOptions.WithLanguageVersion(_projectContext.LangVersion.Value);
             }
 
+            var compilationOptions = (CSharpCompilationOptions)project.CompilationOptions;
+            if (Enum.TryParse(_projectContext.MsBuildProjectContext.Nullable, true, out NullableContextOptions nullable))
+            {
+                compilationOptions = compilationOptions.WithNullableContextOptions(nullable);
+            }
+
             _compilation = project
                 .WithParseOptions(parseOptions)
+                .WithCompilationOptions(compilationOptions)
                 .WithMetadataReferences(_projectContext.GetMetadataReferences())
                 .GetCompilationAsync().Result;
 

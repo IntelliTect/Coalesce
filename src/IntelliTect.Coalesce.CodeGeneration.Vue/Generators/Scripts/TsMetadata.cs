@@ -352,6 +352,10 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                 if (prop.HasAttribute<RequiredAttribute>())
                 {
                     message = prop.GetAttributeValue<RequiredAttribute>(a => a.ErrorMessage);
+                    if (prop.GetAttributeValue<RequiredAttribute, bool>(a => a.AllowEmptyStrings) == true)
+                    {
+                        requiredPredicate = "val != null";
+                    }
                 }
                 if (string.IsNullOrWhiteSpace(message))
                 {

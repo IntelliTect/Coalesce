@@ -66,9 +66,22 @@ namespace IntelliTect.Coalesce.TypeDefinition
         private IReadOnlyList<ValidationAttribute>? _validationAttributes;
         internal IReadOnlyList<ValidationAttribute> GetValidationAttributes()
         {
-            return _validationAttributes ??= Info
+            var attrs = Info
                 .GetCustomAttributes(typeof(ValidationAttribute), true)
-                .OfType<ValidationAttribute>()
+                .OfType<ValidationAttribute>();
+            if (
+                IsRequired && 
+                Type.IsReferenceType && 
+                !attrs.Any(a => a is RequiredAttribute)
+            )
+            {
+                // Implicitly add required validation to non-nullable C# reference types.
+                // This mirrors the behavior of aspnetcore:
+                // https://github.com/dotnet/aspnetcore/blob/3a6acd95c769bbbd2e5288d5844c81dee45fc958/src/Mvc/Mvc.Abstractions/src/ModelBinding/ModelMetadata.cs#L344-L347
+                attrs = attrs.Append(new RequiredAttribute());
+            }
+
+            return _validationAttributes ??= attrs
                 // RequiredAttribute first (descending: true first)
                 .OrderByDescending(a => a is RequiredAttribute)
                 .ToList();

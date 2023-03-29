@@ -978,7 +978,6 @@ export const Person = domain.types.Person = {
       role: "value",
       rules: {
         email: val => !val || /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<> ()\[\]\\.,;:\s@"]+)*)|(".+ "))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(val.trim()) || "Email must be a valid email address.",
-        phone: val => !val || /^(\+\s?)?((?<!\+.*)\(\+?\d+([\s\-\.]?\d+)?\)|\d+)([\s\-\.]?(\(\d+([\s\-\.]?\d+)?\)|\d+))*(\s?(x|ext\.?)\s?\d+)?$/.test(val.replace(/\s+/g, '')) || "Email must be a valid phone number.",
       }
     },
     gender: {
@@ -1575,6 +1574,9 @@ export const StandaloneReadCreate = domain.types.StandaloneReadCreate = {
       displayName: "Name",
       type: "string",
       role: "value",
+      rules: {
+        required: val => (val != null && val !== '') || "Name is required.",
+      }
     },
     date: {
       name: "date",
@@ -1617,12 +1619,18 @@ export const StandaloneReadonly = domain.types.StandaloneReadonly = {
       displayName: "Name",
       type: "string",
       role: "value",
+      rules: {
+        required: val => (val != null && val !== '') || "Name is required.",
+      }
     },
     description: {
       name: "description",
       displayName: "Description",
       type: "string",
       role: "value",
+      rules: {
+        required: val => (val != null && val !== '') || "Description is required.",
+      }
     },
   },
   methods: {
@@ -1658,6 +1666,9 @@ export const StandaloneReadWrite = domain.types.StandaloneReadWrite = {
       displayName: "Name",
       type: "string",
       role: "value",
+      rules: {
+        required: val => (val != null && val !== '') || "Name is required.",
+      }
     },
     date: {
       name: "date",
@@ -1703,6 +1714,9 @@ export const ZipCode = domain.types.ZipCode = {
       displayName: "State",
       type: "string",
       role: "value",
+      rules: {
+        required: val => (val != null && val !== '') || "State is required.",
+      }
     },
   },
   methods: {

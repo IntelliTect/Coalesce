@@ -274,10 +274,6 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
             // However, when interacting with Coalesce through the generated TS, this should never be a problem
             // and so is not a high priority to add checking of ModelState for this reason.
 
-            // One thing that ModelState validation does that Coalesce does not (neither in this runtime validation
-            // nor in the generated frontend validation rules) is make non-nullable properties required when nullability is on.
-            // The C# `required` keyword largely solves this, but it may be worth adding this interaction with C# Nullability also.
-
             b.Line("var _validationResult = ItemResult.FromParameterValidation(");
             b.Indented($"GeneratedForClassViewModel!.MethodByName({method.Name.QuotedStringLiteralForCSharp()}), _params, HttpContext.RequestServices);");
 

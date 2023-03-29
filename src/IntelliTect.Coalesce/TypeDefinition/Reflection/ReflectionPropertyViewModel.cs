@@ -17,6 +17,12 @@ namespace IntelliTect.Coalesce.TypeDefinition
             : base (effectiveParent, declaringParent, ReflectionTypeViewModel.GetOrCreate(declaringParent.ReflectionRepository, propertyInfo.PropertyType))
         {
             Info = propertyInfo;
+
+#if NET6_0_OR_GREATER
+            var nullable = new NullabilityInfoContext().Create(Info);
+            ReadNullability = nullable.ReadState;
+            WriteNullability = nullable.WriteState;
+#endif
         }
 
         public override string Name => Info.Name;

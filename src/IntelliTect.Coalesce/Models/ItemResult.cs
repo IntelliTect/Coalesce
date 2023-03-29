@@ -25,7 +25,6 @@ namespace IntelliTect.Coalesce.Models
         public ItemResult(ItemResult result) : base(result)
         {
             ValidationIssues = result.ValidationIssues;
-            IncludeTree = result.IncludeTree;
         }
 
         public ItemResult(
@@ -99,8 +98,8 @@ namespace IntelliTect.Coalesce.Models
         public static ItemResult FromParameterValidation(
             MethodViewModel method,
             object model,
-            bool deep = true,
-            bool forceRequired = true,
+            bool deep,
+            bool forceRequired,
             IServiceProvider? serviceProvider = null
         )
         {
@@ -171,14 +170,12 @@ namespace IntelliTect.Coalesce.Models
                 string fullPropName = (prefix + "." + propName).Trim('.');
 
                 // The property on the underlying model if we're validating a generated dto:
-                var sourceProp = attributeSource.PropertyByName(propName) as ReflectionPropertyViewModel;
-                if (sourceProp == null) continue;
+                if (attributeSource.PropertyByName(propName) is not ReflectionPropertyViewModel sourceProp) continue;
 
                 if (obj is ISparseDto genDto)
                 {
-                    // 99% case: For generated DTOs, only validate the properties that the user is changing,
-                    // and also any required props if `forceRequired` is set.
-                    if (!(genDto.ChangedProperties.Contains(propName) || (forceRequired && sourceProp.IsRequired)))
+                    // 99% case: For generated DTOs, normally only validate the properties that the user is changing.
+                    if (!forceRequired && !genDto.ChangedProperties.Contains(propName))
                     {
                         continue;
                     }

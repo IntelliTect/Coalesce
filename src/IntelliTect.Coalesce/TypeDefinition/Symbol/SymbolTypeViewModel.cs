@@ -70,10 +70,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public override bool IsArray => Symbol.TypeKind == TypeKind.Array;
 
-        /// <summary>
-        /// Returns true if the property is nullable.
-        /// </summary>
-        public override bool IsNullable => Symbol.IsReferenceType || IsNullableType;
+        public override bool IsReferenceOrNullableValue => Symbol.IsReferenceType || IsNullableValueType;
+
+        public override bool IsReferenceType => Symbol.IsReferenceType;
 
         public override bool IsClass => IsArray || Symbol.TypeKind == TypeKind.Class;
 
@@ -88,7 +87,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             get
             {
-                if (IsNullableType) return NullableUnderlyingType.EnumValues;
+                if (IsNullableValueType) return NullableValueUnderlyingType.EnumValues;
 
                 var result = new List<EnumMember>();
                 if (!IsEnum) return result;
@@ -114,7 +113,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         }
 
         public override bool IsEnum =>
-            IsNullableType ? NullableUnderlyingType.IsEnum : Symbol.TypeKind == TypeKind.Enum;
+            IsNullableValueType ? NullableValueUnderlyingType.IsEnum : Symbol.TypeKind == TypeKind.Enum;
 
         public static readonly SymbolDisplayFormat DefaultDisplayFormat = SymbolDisplayFormat
             .FullyQualifiedFormat

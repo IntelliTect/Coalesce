@@ -96,7 +96,7 @@ namespace Coalesce.Web.Ko.Api
                 name = name
             };
 
-            if (Context.CoalesceOptions.ValidateAttributesForMethods)
+            if (Context.Options.ValidateAttributesForMethods)
             {
                 var _validationResult = ItemResult.FromParameterValidation(
                     GeneratedForClassViewModel!.MethodByName("ConflictingParameterNames"), _params, HttpContext.RequestServices);
@@ -126,7 +126,7 @@ namespace Coalesce.Web.Ko.Api
                 isDeleted = isDeleted
             };
 
-            if (Context.CoalesceOptions.ValidateAttributesForMethods)
+            if (Context.Options.ValidateAttributesForMethods)
             {
                 var _validationResult = ItemResult.FromParameterValidation(
                     GeneratedForClassViewModel!.MethodByName("GetCertainItems"), _params, HttpContext.RequestServices);

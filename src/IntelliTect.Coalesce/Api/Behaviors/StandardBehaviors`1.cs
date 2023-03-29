@@ -71,7 +71,7 @@ namespace IntelliTect.Coalesce
             ClassViewModel = Context.ReflectionRepository.GetClassViewModel<T>()
                 ?? throw new ArgumentException("Generic type T has no ClassViewModel.", nameof(T));
 
-            ValidateAttributesForSaves = context.CoalesceOptions?.ValidateAttributesForSaves ?? ValidateAttributesForSaves;
+            ValidateAttributesForSaves = context.Options?.ValidateAttributesForSaves ?? ValidateAttributesForSaves;
         }
 
 
@@ -127,7 +127,7 @@ namespace IntelliTect.Coalesce
 
             // IsNullable handles nullable value types, and reference types (mainly strings).
             // !IsNullable handles non-Nullable<T> value types.
-            if (dtoPkInfo.Type.IsNullable
+            if (dtoPkInfo.Type.IsReferenceOrNullableValue
                 ? idValue == null
                 : idValue!.Equals(Activator.CreateInstance(dtoClassViewModel.PrimaryKey.Type.TypeInfo)))
             {

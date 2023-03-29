@@ -63,9 +63,21 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 
 
         /// <summary>
-        /// True if the property has the `required` C# language keyword, introduced in C# 7.
+        /// True if the property has the `required` C# language keyword, introduced in C# 11.
         /// </summary>
         public abstract bool HasRequiredKeyword { get; }
+
+#if NET6_0_OR_GREATER
+        /// <summary>
+        /// The reference type nullability state for reads of this property.
+        /// </summary>
+        public NullabilityState ReadNullability { get; set; }
+
+        /// <summary>
+        /// The reference type nullability state for writes to this property.
+        /// </summary>
+        public NullabilityState WriteNullability { get; set; }
+#endif
 
         /// <summary>
         /// Convenient accessor for the PropertyInfo when in reflection-based contexts.
@@ -274,7 +286,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         }
 
         /// <summary>
-        /// True if the property should generate a "required" client-side validation rule.
+        /// True if the property should generate a "required" validation rule.
         /// </summary>
         public bool IsRequired
         {
@@ -291,14 +303,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     return true;
                 }
 
-                // Explicit == false is intentional - if the parameter is missing, GetAttributeValue returns null.
-                if (this.GetAttributeValue<ClientValidationAttribute, bool>(a => a.IsRequired) == false)
-                {
-                    return false;
-                }
-
                 // Non-nullable foreign keys and their corresponding objects are implicitly required.
-                if (IsForeignKey && !Type.IsNullable)
+                if (IsForeignKey && !Type.IsReferenceOrNullableValue)
                 {
                     return true;
                 }

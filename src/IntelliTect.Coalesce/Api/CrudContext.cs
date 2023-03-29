@@ -21,7 +21,7 @@ namespace IntelliTect.Coalesce
             }
 
             lazyUser = new Lazy<ClaimsPrincipal?>(userAccessor, true);
-            CoalesceOptions = new();
+            Options = new();
         }
 
         public CrudContext(
@@ -35,7 +35,7 @@ namespace IntelliTect.Coalesce
         {
             TimeZone = timeZone ?? throw new ArgumentNullException(nameof(timeZone));
             CancellationToken = cancellationToken;
-            CoalesceOptions = coalesceOptions ?? CoalesceOptions;
+            Options = coalesceOptions ?? Options;
             ServiceProvider = serviceProvider;
         }
 
@@ -49,7 +49,7 @@ namespace IntelliTect.Coalesce
             lazyUser = baseContext.lazyUser;
             TimeZone = baseContext.TimeZone;
             CancellationToken = baseContext.CancellationToken;
-            CoalesceOptions = baseContext.CoalesceOptions;
+            Options = baseContext.Options;
             ServiceProvider = baseContext.ServiceProvider;
         }
 
@@ -74,9 +74,9 @@ namespace IntelliTect.Coalesce
         public CancellationToken CancellationToken { get; set; } = CancellationToken.None;
 
         /// <summary>
-        /// The application's configured <see cref="CoalesceOptions"/>.
+        /// The application's configured <see cref="Options"/>.
         /// </summary>
-        public CoalesceOptions CoalesceOptions { get; set; }
+        public CoalesceOptions Options { get; set; }
 
         /// <summary>
         /// This service provider is used to provide services to <see cref="ValidationContext"/> during validation.

@@ -94,7 +94,7 @@ namespace Coalesce.Web.Vue2.Api
                 input = input
             };
 
-            if (Context.CoalesceOptions.ValidateAttributesForMethods)
+            if (Context.Options.ValidateAttributesForMethods)
             {
                 var _validationResult = ItemResult.FromParameterValidation(
                     GeneratedForClassViewModel!.MethodByName("AsyncMethodOnIClassDto"), _params, HttpContext.RequestServices);

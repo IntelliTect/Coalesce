@@ -16,6 +16,19 @@ namespace IntelliTect.Coalesce.TypeDefinition
             : base(effectiveParent, declaringParent, SymbolTypeViewModel.GetOrCreate(declaringParent.ReflectionRepository, symbol.Type))
         {
             Symbol = symbol;
+#if NET6_0_OR_GREATER
+            if (symbol.Type.IsReferenceType)
+            {
+                // This is naive and doesn't capture the full nullable behavior and nuances of attributes.
+                // But its probably good enough for most use cases.
+                ReadNullability = WriteNullability = symbol.NullableAnnotation switch
+                {
+                    NullableAnnotation.Annotated => NullabilityState.Nullable,
+                    NullableAnnotation.NotAnnotated => NullabilityState.NotNull,
+                    _ => NullabilityState.Unknown
+                };
+            }
+#endif
         }
 
         public override string Name => Symbol.Name;

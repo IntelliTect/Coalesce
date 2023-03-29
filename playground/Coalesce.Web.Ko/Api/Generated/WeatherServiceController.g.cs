@@ -54,7 +54,7 @@ namespace Coalesce.Web.Ko.Api
                 conditions = conditions
             };
 
-            if (Context.CoalesceOptions.ValidateAttributesForMethods)
+            if (Context.Options.ValidateAttributesForMethods)
             {
                 var _validationResult = ItemResult.FromParameterValidation(
                     GeneratedForClassViewModel!.MethodByName("GetWeatherAsync"), _params, HttpContext.RequestServices);

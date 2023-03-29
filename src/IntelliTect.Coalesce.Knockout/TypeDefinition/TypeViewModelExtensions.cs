@@ -18,7 +18,7 @@ namespace IntelliTect.Coalesce.Knockout.TypeDefinition
             }
             else if (typeModel.IsDate)
             {
-                if (typeModel.IsNullable)
+                if (typeModel.IsReferenceOrNullableValue)
                     return "ko.observable(null)";
                 else
                     return "ko.observable(moment())";

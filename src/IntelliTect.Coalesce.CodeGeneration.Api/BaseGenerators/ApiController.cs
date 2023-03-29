@@ -218,7 +218,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
                 }
                 else if (method.GetAttributeValue<ExecuteAttribute, bool>(e => e.ValidateAttributes) == null)
                 {
-                    using (b.Block("if (Context.CoalesceOptions.ValidateAttributesForMethods)"))
+                    using (b.Block("if (Context.Options.ValidateAttributesForMethods)"))
                     {
                         WriteMethodValidation(b, method);
                     }

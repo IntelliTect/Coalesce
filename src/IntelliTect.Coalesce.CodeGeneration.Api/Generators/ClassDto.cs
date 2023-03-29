@@ -321,7 +321,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
             else
             {
                 var newValue = name;
-                if (!property.Type.IsNullable && property.Type.CsDefaultValue != "null")
+                if (!property.Type.IsReferenceOrNullableValue && property.Type.CsDefaultValue != "null")
                 {
                     var fallback = fallbackPrefix == null ? "default" : $"{fallbackPrefix}{name}";
                     newValue = $"({newValue} ?? {fallback})";

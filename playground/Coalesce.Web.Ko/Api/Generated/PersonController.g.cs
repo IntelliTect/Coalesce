@@ -94,7 +94,7 @@ namespace Coalesce.Web.Ko.Api
                 name = name
             };
 
-            if (Context.CoalesceOptions.ValidateAttributesForMethods)
+            if (Context.Options.ValidateAttributesForMethods)
             {
                 var _validationResult = ItemResult.FromParameterValidation(
                     GeneratedForClassViewModel!.MethodByName("Rename"), _params, HttpContext.RequestServices);
@@ -150,7 +150,7 @@ namespace Coalesce.Web.Ko.Api
                 numberTwo = numberTwo
             };
 
-            if (Context.CoalesceOptions.ValidateAttributesForMethods)
+            if (Context.Options.ValidateAttributesForMethods)
             {
                 var _validationResult = ItemResult.FromParameterValidation(
                     GeneratedForClassViewModel!.MethodByName("Add"), _params, HttpContext.RequestServices);
@@ -217,7 +217,7 @@ namespace Coalesce.Web.Ko.Api
                 lastNameStartsWith = lastNameStartsWith
             };
 
-            if (Context.CoalesceOptions.ValidateAttributesForMethods)
+            if (Context.Options.ValidateAttributesForMethods)
             {
                 var _validationResult = ItemResult.FromParameterValidation(
                     GeneratedForClassViewModel!.MethodByName("PersonCount"), _params, HttpContext.RequestServices);
@@ -271,7 +271,7 @@ namespace Coalesce.Web.Ko.Api
                 id = id
             };
 
-            if (Context.CoalesceOptions.ValidateAttributesForMethods)
+            if (Context.Options.ValidateAttributesForMethods)
             {
                 var _validationResult = ItemResult.FromParameterValidation(
                     GeneratedForClassViewModel!.MethodByName("RemovePersonById"), _params, HttpContext.RequestServices);
@@ -336,7 +336,7 @@ namespace Coalesce.Web.Ko.Api
                 title = title
             };
 
-            if (Context.CoalesceOptions.ValidateAttributesForMethods)
+            if (Context.Options.ValidateAttributesForMethods)
             {
                 var _validationResult = ItemResult.FromParameterValidation(
                     GeneratedForClassViewModel!.MethodByName("ChangeFirstName"), _params, HttpContext.RequestServices);
@@ -383,7 +383,7 @@ namespace Coalesce.Web.Ko.Api
                 characters = characters
             };
 
-            if (Context.CoalesceOptions.ValidateAttributesForMethods)
+            if (Context.Options.ValidateAttributesForMethods)
             {
                 var _validationResult = ItemResult.FromParameterValidation(
                     GeneratedForClassViewModel!.MethodByName("NamesStartingWith"), _params, HttpContext.RequestServices);
@@ -412,7 +412,7 @@ namespace Coalesce.Web.Ko.Api
                 strings = strings.ToList()
             };
 
-            if (Context.CoalesceOptions.ValidateAttributesForMethods)
+            if (Context.Options.ValidateAttributesForMethods)
             {
                 var _validationResult = ItemResult.FromParameterValidation(
                     GeneratedForClassViewModel!.MethodByName("MethodWithStringArrayParameter"), _params, HttpContext.RequestServices);
@@ -441,7 +441,7 @@ namespace Coalesce.Web.Ko.Api
                 person = person
             };
 
-            if (Context.CoalesceOptions.ValidateAttributesForMethods)
+            if (Context.Options.ValidateAttributesForMethods)
             {
                 var _validationResult = ItemResult.FromParameterValidation(
                     GeneratedForClassViewModel!.MethodByName("MethodWithEntityParameter"), _params, HttpContext.RequestServices);
@@ -474,7 +474,7 @@ namespace Coalesce.Web.Ko.Api
                 page = page
             };
 
-            if (Context.CoalesceOptions.ValidateAttributesForMethods)
+            if (Context.Options.ValidateAttributesForMethods)
             {
                 var _validationResult = ItemResult.FromParameterValidation(
                     GeneratedForClassViewModel!.MethodByName("SearchPeople"), _params, HttpContext.RequestServices);

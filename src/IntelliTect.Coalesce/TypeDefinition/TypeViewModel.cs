@@ -28,8 +28,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// Returns the name of the type to be used by the client.
         /// </summary>
-        public string ClientTypeName => IsNullableType
-            ? NullableUnderlyingType.ClientTypeName
+        public string ClientTypeName => IsNullableValueType
+            ? NullableValueUnderlyingType.ClientTypeName
             : this.GetAttributeValue<CoalesceAttribute>(a => a.ClientTypeName) ?? Name;
 
         public abstract string FullyQualifiedName { get; }
@@ -55,9 +55,17 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public abstract bool IsArray { get; }
 
-        public abstract bool IsNullable { get; }
+        /// <summary>
+        /// Returns true if the type can be assigned `null`. Does NOT factor in C# 8 non-nullable reference types.
+        /// </summary>
+        public abstract bool IsReferenceOrNullableValue { get; }
 
-        public bool IsNullableType => IsA(typeof(Nullable<>));
+        /// <summary>
+        /// Returns true if the type is a reference type (i.e. not a value type).
+        /// </summary>
+        public abstract bool IsReferenceType { get; }
+
+        public bool IsNullableValueType => !IsReferenceType && IsA(typeof(Nullable<>));
 
         public abstract bool IsClass { get; }
 
@@ -212,7 +220,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// True if this is a boolean.
         /// </summary>
-        public bool IsBool => NullableUnderlyingType.IsA<bool>();
+        public bool IsBool => NullableValueUnderlyingType.IsA<bool>();
 
         public bool IsPrimitive => IsString || IsNumber || IsBool || IsEnum;
 
@@ -226,17 +234,17 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// </summary>
         public bool IsString => IsA<string>();
 
-        public bool IsGuid => NullableUnderlyingType.IsA<Guid>();
+        public bool IsGuid => NullableValueUnderlyingType.IsA<Guid>();
 
         /// <summary>
         /// True if the property is a DateTime or Nullable DateTime
         /// </summary>
-        public bool IsDateTime => NullableUnderlyingType.IsA<DateTime>();
+        public bool IsDateTime => NullableValueUnderlyingType.IsA<DateTime>();
 
         /// <summary>
         /// True if the property is a DateTimeOffset or Nullable DateTimeOffset
         /// </summary>
-        public bool IsDateTimeOffset => NullableUnderlyingType.IsA<DateTimeOffset>();
+        public bool IsDateTimeOffset => NullableValueUnderlyingType.IsA<DateTimeOffset>();
 
         /// <summary>
         /// Returns true if class is a Byte[]
@@ -255,7 +263,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             get
             {
-                var underlying = NullableUnderlyingType;
+                var underlying = NullableValueUnderlyingType;
                 return underlying.IsA<SByte>()
                     || underlying.IsA<Byte>()
                     || underlying.IsA<Int16>()
@@ -276,7 +284,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             {
                 if (IsIntegral) return true;
 
-                var underlying = NullableUnderlyingType;
+                var underlying = NullableValueUnderlyingType;
                 return underlying.IsA<Single>()
                     || underlying.IsA<Double>()
                     || underlying.IsA<Decimal>();
@@ -287,7 +295,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// If this represents a nullable type, returns the underlying type that is nullable.
         /// Otherwise, returns the current instance.
         /// </summary>
-        public TypeViewModel NullableUnderlyingType => IsNullableType ? FirstTypeArgument! : this;
+        public TypeViewModel NullableValueUnderlyingType => IsNullableValueType ? FirstTypeArgument! : this;
 
         /// <summary>
         /// Gets the type name without any collection or nullable around it.
@@ -311,7 +319,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                         )?[0]
                         ?? FirstTypeArgument!;
                     }
-                    if (IsNullable)
+                    if (IsReferenceOrNullableValue)
                     {
                         return FirstTypeArgument!;
                     }
@@ -322,10 +330,10 @@ namespace IntelliTect.Coalesce.TypeDefinition
         }
 
         /// <summary>
-        /// Returns true if the type is class outside the System namespace.
+        /// Returns true if the type is a reference type outside the System namespace.
         /// </summary>
         public bool IsPOCO => 
-            (IsClass || IsInterface) && 
+            IsReferenceType && 
             !IsArray && 
             !IsCollection && 
             !FullNamespace.StartsWith("System") && 
@@ -378,7 +386,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
                 string typeName;
 
-                if (IsNullable || IsArray || IsCollection)
+                if (IsReferenceOrNullableValue || IsArray || IsCollection)
                     typeName = FullyQualifiedName;
                 else
                     typeName = Name + "?";
@@ -391,7 +399,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
             else
             {
-                if (dontEmitNullable || IsNullable || IsArray)
+                if (dontEmitNullable || IsReferenceOrNullableValue || IsArray)
                     return FullyQualifiedName;
                 else
                     return FullyQualifiedName + "?";

@@ -43,7 +43,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Utils
                 case TypeDiscriminator.String: return "string";
                 case TypeDiscriminator.Boolean: return "boolean";
                 case TypeDiscriminator.Date: return "Date";
-                case TypeDiscriminator.Enum: return modelPrefix + type.NullableUnderlyingType.ClientTypeName;
+                case TypeDiscriminator.Enum: return modelPrefix + type.NullableValueUnderlyingType.ClientTypeName;
                 case TypeDiscriminator.Number: return "number";
                 case TypeDiscriminator.Void: return "void";
                 case TypeDiscriminator.Unknown: return "unknown";

@@ -85,7 +85,7 @@ namespace Coalesce.Web.Vue2.Api
                 search = search
             };
 
-            if (Context.CoalesceOptions.ValidateAttributesForMethods)
+            if (Context.Options.ValidateAttributesForMethods)
             {
                 var _validationResult = ItemResult.FromParameterValidation(
                     GeneratedForClassViewModel!.MethodByName("GetCaseTitles"), _params, HttpContext.RequestServices);
@@ -169,7 +169,7 @@ namespace Coalesce.Web.Vue2.Api
                 file = file == null ? null : new IntelliTect.Coalesce.Models.File { Name = file.FileName, ContentType = file.ContentType, Length = file.Length, Content = file.OpenReadStream() }
             };
 
-            if (Context.CoalesceOptions.ValidateAttributesForMethods)
+            if (Context.Options.ValidateAttributesForMethods)
             {
                 var _validationResult = ItemResult.FromParameterValidation(
                     GeneratedForClassViewModel!.MethodByName("UploadImage"), _params, HttpContext.RequestServices);
@@ -264,7 +264,7 @@ namespace Coalesce.Web.Vue2.Api
                 file = file == null ? null : new IntelliTect.Coalesce.Models.File { Name = file.FileName, ContentType = file.ContentType, Length = file.Length, Content = file.OpenReadStream() }
             };
 
-            if (Context.CoalesceOptions.ValidateAttributesForMethods)
+            if (Context.Options.ValidateAttributesForMethods)
             {
                 var _validationResult = ItemResult.FromParameterValidation(
                     GeneratedForClassViewModel!.MethodByName("UploadAndDownload"), _params, HttpContext.RequestServices);
@@ -315,7 +315,7 @@ namespace Coalesce.Web.Vue2.Api
                 files = files == null ? null : files.Select(f => (IntelliTect.Coalesce.Models.IFile)new IntelliTect.Coalesce.Models.File { Name = f.FileName, ContentType = f.ContentType, Length = f.Length, Content = f.OpenReadStream() }).ToList()
             };
 
-            if (Context.CoalesceOptions.ValidateAttributesForMethods)
+            if (Context.Options.ValidateAttributesForMethods)
             {
                 var _validationResult = ItemResult.FromParameterValidation(
                     GeneratedForClassViewModel!.MethodByName("UploadImages"), _params, HttpContext.RequestServices);
@@ -353,7 +353,7 @@ namespace Coalesce.Web.Vue2.Api
                 file = file ?? await ((await Request.ReadFormAsync()).Files[nameof(file)]?.OpenReadStream().ReadAllBytesAsync(true) ?? Task.FromResult<byte[]>(null))
             };
 
-            if (Context.CoalesceOptions.ValidateAttributesForMethods)
+            if (Context.Options.ValidateAttributesForMethods)
             {
                 var _validationResult = ItemResult.FromParameterValidation(
                     GeneratedForClassViewModel!.MethodByName("UploadByteArray"), _params, HttpContext.RequestServices);

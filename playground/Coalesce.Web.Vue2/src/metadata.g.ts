@@ -296,6 +296,9 @@ export const Case = domain.types.Case = {
           displayName: "Search",
           type: "string",
           role: "value",
+          rules: {
+            required: val => (val != null && val !== '') || "Search is required.",
+          }
         },
       },
       return: {
@@ -381,6 +384,9 @@ export const Case = domain.types.Case = {
           displayName: "File",
           type: "file",
           role: "value",
+          rules: {
+            required: val => val != null || "File is required.",
+          }
         },
       },
       return: {
@@ -436,6 +442,9 @@ export const Case = domain.types.Case = {
           displayName: "File",
           type: "file",
           role: "value",
+          rules: {
+            required: val => val != null || "File is required.",
+          }
         },
       },
       return: {
@@ -469,6 +478,9 @@ export const Case = domain.types.Case = {
             type: "file",
           },
           role: "value",
+          rules: {
+            required: val => val != null || "Files is required.",
+          }
         },
       },
       return: {
@@ -496,6 +508,9 @@ export const Case = domain.types.Case = {
           displayName: "File",
           type: "binary",
           role: "value",
+          rules: {
+            required: val => val != null || "File is required.",
+          }
         },
       },
       return: {
@@ -588,6 +603,9 @@ export const CaseDto = domain.types.CaseDto = {
           displayName: "Input",
           type: "string",
           role: "value",
+          rules: {
+            required: val => (val != null && val !== '') || "Input is required.",
+          }
         },
       },
       return: {
@@ -835,12 +853,18 @@ export const Company = domain.types.Company = {
           type: "model",
           get typeDef() { return (domain.types.Company as ModelType) },
           role: "value",
+          rules: {
+            required: val => val != null || "Company Param is required.",
+          }
         },
         name: {
           name: "name",
           displayName: "Name",
           type: "string",
           role: "value",
+          rules: {
+            required: val => (val != null && val !== '') || "Name is required.",
+          }
         },
       },
       return: {
@@ -975,7 +999,6 @@ export const Person = domain.types.Person = {
       role: "value",
       rules: {
         email: val => !val || /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<> ()\[\]\\.,;:\s@"]+)*)|(".+ "))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(val.trim()) || "Email must be a valid email address.",
-        phone: val => !val || /^(\+\s?)?((?<!\+.*)\(\+?\d+([\s\-\.]?\d+)?\)|\d+)([\s\-\.]?(\(\d+([\s\-\.]?\d+)?\)|\d+))*(\s?(x|ext\.?)\s?\d+)?$/.test(val.replace(/\s+/g, '')) || "Email must be a valid phone number.",
       }
     },
     gender: {
@@ -1124,6 +1147,9 @@ export const Person = domain.types.Person = {
           displayName: "Name",
           type: "string",
           role: "value",
+          rules: {
+            required: val => (val != null && val !== '') || "Name is required.",
+          }
         },
       },
       return: {
@@ -1173,6 +1199,10 @@ export const Person = domain.types.Person = {
           displayName: "Number Two",
           type: "number",
           role: "value",
+          rules: {
+            min: val => val == null || val >= 0 || "Number Two must be at least 0.",
+            max: val => val == null || val <= 10000 || "Number Two may not be more than 10000.",
+          }
         },
       },
       return: {
@@ -1232,6 +1262,9 @@ export const Person = domain.types.Person = {
           displayName: "Last Name Starts With",
           type: "string",
           role: "value",
+          rules: {
+            required: val => (val != null && val !== '') || "Last Name Starts With is required.",
+          }
         },
       },
       return: {
@@ -1322,6 +1355,9 @@ export const Person = domain.types.Person = {
           displayName: "First Name",
           type: "string",
           role: "value",
+          rules: {
+            required: val => (val != null && val !== '') || "First Name is required.",
+          }
         },
         title: {
           name: "title",
@@ -1366,6 +1402,9 @@ export const Person = domain.types.Person = {
           displayName: "Characters",
           type: "string",
           role: "value",
+          rules: {
+            required: val => (val != null && val !== '') || "Characters is required.",
+          }
         },
       },
       return: {
@@ -1399,6 +1438,9 @@ export const Person = domain.types.Person = {
             type: "string",
           },
           role: "value",
+          rules: {
+            required: val => val != null || "Strings is required.",
+          }
         },
       },
       return: {
@@ -1427,6 +1469,9 @@ export const Person = domain.types.Person = {
           type: "model",
           get typeDef() { return (domain.types.Person as ModelType) },
           role: "value",
+          rules: {
+            required: val => val != null || "Person is required.",
+          }
         },
       },
       return: {
@@ -1450,6 +1495,9 @@ export const Person = domain.types.Person = {
           type: "object",
           get typeDef() { return (domain.types.PersonCriteria as ObjectType) },
           role: "value",
+          rules: {
+            required: val => val != null || "Criteria is required.",
+          }
         },
         page: {
           name: "page",
@@ -1572,6 +1620,9 @@ export const StandaloneReadCreate = domain.types.StandaloneReadCreate = {
       displayName: "Name",
       type: "string",
       role: "value",
+      rules: {
+        required: val => (val != null && val !== '') || "Name is required.",
+      }
     },
     date: {
       name: "date",
@@ -1614,12 +1665,18 @@ export const StandaloneReadonly = domain.types.StandaloneReadonly = {
       displayName: "Name",
       type: "string",
       role: "value",
+      rules: {
+        required: val => (val != null && val !== '') || "Name is required.",
+      }
     },
     description: {
       name: "description",
       displayName: "Description",
       type: "string",
       role: "value",
+      rules: {
+        required: val => (val != null && val !== '') || "Description is required.",
+      }
     },
   },
   methods: {
@@ -1655,6 +1712,9 @@ export const StandaloneReadWrite = domain.types.StandaloneReadWrite = {
       displayName: "Name",
       type: "string",
       role: "value",
+      rules: {
+        required: val => (val != null && val !== '') || "Name is required.",
+      }
     },
     date: {
       name: "date",
@@ -1700,6 +1760,9 @@ export const ZipCode = domain.types.ZipCode = {
       displayName: "State",
       type: "string",
       role: "value",
+      rules: {
+        required: val => (val != null && val !== '') || "State is required.",
+      }
     },
   },
   methods: {
@@ -2005,6 +2068,9 @@ export const WeatherService = domain.services.WeatherService = {
           type: "object",
           get typeDef() { return (domain.types.Location as ObjectType) },
           role: "value",
+          rules: {
+            required: val => val != null || "Location is required.",
+          }
         },
         dateTime: {
           name: "dateTime",

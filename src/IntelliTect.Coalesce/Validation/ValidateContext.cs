@@ -126,7 +126,7 @@ namespace IntelliTect.Coalesce.Validation
                             }
 
                             var farNavigation = prop.ManyToManyFarNavigationProperty;
-                            if (assert.IsNotNull(farNavigation, $"Many to Many far navigation prop could not be determined. "))
+                            if (assert.IsNotNull(farNavigation, $"Many to Many far navigation prop could not be determined."))
                             {
                                 assert.IsNotNull(farNavigation.ForeignKeyProperty, $"Many-to-many property's far-side navigation property ({farNavigation}) has no corresponding foreign key property.");
                             }
@@ -139,7 +139,7 @@ namespace IntelliTect.Coalesce.Validation
                     }
                     catch (Exception ex)
                     {
-                        assert.IsTrue(false, $"Exception property validation. {ex.Message}");
+                        assert.IsTrue(false, $"Exception: {ex.Message}");
                     }
                 }
 

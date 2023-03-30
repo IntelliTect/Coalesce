@@ -13,6 +13,7 @@ using System.Text;
 using IntelliTect.Coalesce.Helpers.Search;
 using System.Linq.Expressions;
 using IntelliTect.Coalesce.TypeDefinition.Enums;
+using System.Diagnostics.CodeAnalysis;
 
 namespace IntelliTect.Coalesce.TypeDefinition
 {
@@ -149,10 +150,13 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// Gets the ClassViewModel associated with the Object
         /// </summary>
         public ClassViewModel? Object => PureType.ClassViewModel;
-        
+
         /// <summary>
         /// Returns true if this property is a collection and has the ManyToMany Attribute 
         /// </summary>
+#if NET6_0_OR_GREATER
+        [MemberNotNullWhen(true, nameof(ManyToManyFarNavigationProperty))]
+#endif
         public bool IsManytoManyCollection => Type.IsCollection && HasAttribute<ManyToManyAttribute>();
 
         /// <summary>
@@ -175,10 +179,42 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// Property on the far side of the many-to-many relationship.
         /// </summary>
-        public PropertyViewModel? ManyToManyFarNavigationProperty =>
-            Object?.ClientProperties
-            .Where(p => p.IsPOCO)
-            .SingleOrDefault(p => !p.Equals(ManyToManyNearNavigationProperty));
+        public PropertyViewModel? ManyToManyFarNavigationProperty
+        {
+            get
+            {
+                if (!IsManytoManyCollection || Object is null) return null;
+
+                string? propName = this.GetAttributeValue<ManyToManyAttribute>(a => a.FarNavigationProperty);
+                if (propName != null && propName == ManyToManyNearNavigationProperty?.Name)
+                {
+                    throw new Exception(
+                        "ManyToManyAtttribute.FarNavigationProperty is referencing the near side of " +
+                        "the many-to-many relationship, which is not allowed. " +
+                        "To configure the near side of the many-to-many relationship, use [InverseProperty].");
+                }
+
+                PropertyViewModel? firstCandidate = null;
+                var candidates = Object.ClientProperties.Where(p =>
+                    p.Role == PropertyRole.ReferenceNavigation &&
+                    propName is null 
+                        ? !p.Equals(ManyToManyNearNavigationProperty) 
+                        : propName == p.Name);
+
+                foreach (var prop in candidates)
+                {
+                    if (firstCandidate != null)
+                    {
+                        throw new Exception(
+                            "Found more than one candidate far navigation property for [ManyToMany] collection. To fix this, set ManyToManyAtttribute.FarNavigationProperty to the name of one of these candidate properties: " +
+                            string.Concat(candidates.Select(p => $"\n    {Object}.{p.Name}")));
+                    }
+                    firstCandidate = prop;
+                }
+                return firstCandidate;
+            }
+        }
+            
 
 
         /// <summary>

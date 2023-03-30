@@ -27,3 +27,8 @@ public class Person
 <Prop def="public string CollectionName { get; }" ctor="1" />
 
 The name of the collection that will contain the set of objects on the other side of the many-to-many relationship.
+
+
+<Prop def="public string FarNavigationProperty { get; set; }" />
+
+The name of the navigation property on the middle entity that points at the far side of the many-to-many relationship. Use this to resolve ambiguities when the middle table of the many-to-many relationship has more than two reference navigation properties on it.

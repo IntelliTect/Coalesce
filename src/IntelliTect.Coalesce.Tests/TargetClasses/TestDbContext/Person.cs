@@ -113,7 +113,7 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         /// </summary>
         public Company Company { get; set; }
 
-        [ManyToMany("Siblings")]
+        [ManyToMany("Siblings", FarNavigationProperty = nameof(Sibling.PersonTwo))]
         [InverseProperty(nameof(Sibling.Person))]
         public ICollection<Sibling> SiblingRelationships { get; set; }
 

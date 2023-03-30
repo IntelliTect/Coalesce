@@ -14,6 +14,11 @@ namespace IntelliTect.Coalesce.DataAnnotations
     {
         public string CollectionName { get; }
 
+        /// <summary>
+        /// The name of the navigation property on the middle entity that points at the far side of the many-to-many relationship.
+        /// </summary>
+        public string? FarNavigationProperty { get; set; }
+
         public ManyToManyAttribute(string collectionName)
         {
             CollectionName = collectionName;

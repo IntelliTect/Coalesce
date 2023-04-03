@@ -121,6 +121,16 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses
         public override void MapTo(ValidationTarget entity, IMappingContext context)
             => throw new NotImplementedException(
                 "This 'generated dto' is actually hand-written for these tests. Mapping methods are unused.");
+
+        /// <summary>
+        /// Map from the current DTO instance to a new instance of the domain object.
+        /// </summary>
+        public override ValidationTarget MapToNew(IMappingContext context)
+        {
+            var entity = new ValidationTarget();
+            MapTo(entity, context);
+            return entity;
+        }
     }
 
     public partial class ValidationTargetChildDtoGen : GeneratedDto<ValidationTargetChild>

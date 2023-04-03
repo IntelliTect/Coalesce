@@ -10,6 +10,124 @@ Vuetify also offers a [migration guide](https://vuetifyjs.com/en/getting-started
 
 If you're new to Vue entirely, check out the rest of Vue docs and [pick your learning path](https://vuejs.org/guide/introduction.html#pick-your-learning-path).
 
+
+## Coalesce Upgrade Steps
+
+The changes specific to Coalesce when migrating from Vue2 to Vue3 are pretty minimal. Most of your work will be in following the [Vue 3 Migration Guide](https://v3-migration.vuejs.org/) and the [Vuetify 3 Migration Guide](https://vuetifyjs.com/en/getting-started/upgrade-guide/).
+
+The table below contains the Coalesce-specific changes when migrating to Vue 3. However, the easiest migration path may be to disregard the table below and instead, [instantiate the Coalesce Vue template](/stacks/vue/getting-started.md#creating-a-project) or [look at it on GitHub](https://github.com/IntelliTect/Coalesce.Vue.Template/tree/master/content/Coalesce.Starter.Vue.Web) and compare individual files between your project and the template side by side and ingest the changes that you observe.
+
+
+<table>
+<thead><tr><th width="150px">Location</th><th>Old (Vue 2)</th><th>New (Vue 3)</th></tr></thead>
+<tr><td>
+
+package.json
+
+</td>
+<td style="vertical-align: top">
+
+```json:no-line-numbers
+{
+  "dependencies": {
+    "coalesce-vue-vuetify2": "x"
+  }
+}
+```
+
+</td>
+<td style="vertical-align: top">
+
+```json:no-line-numbers
+{
+  "dependencies": {
+    "coalesce-vue-vuetify3": "x"
+  }
+}
+```
+
+</td></tr>
+<tr><td>
+
+vite.config.ts
+
+</td>
+<td style="vertical-align: top">
+
+```ts:no-line-numbers
+import { CoalesceVuetifyResolver } from "coalesce-vue-vuetify2/lib/build"
+```
+
+</td>
+<td style="vertical-align: top">
+
+```ts:no-line-numbers
+import { CoalesceVuetifyResolver } from "coalesce-vue-vuetify3/build"
+```
+
+</td></tr>
+<tr><td>
+
+main.ts
+
+</td>
+<td style="vertical-align: top">
+
+```ts:no-line-numbers
+import "coalesce-vue-vuetify2/dist/coalesce-vue-vuetify.css"
+
+// Either of these:
+import CoalesceVuetify from 'coalesce-vue-vuetify2/lib'
+import CoalesceVuetify from 'coalesce-vue-vuetify2'
+
+Vue.use(CoalesceVuetify, {
+  metadata: $metadata,
+});
+
+```
+
+</td>
+<td style="vertical-align: top">
+
+```ts:no-line-numbers
+import "coalesce-vue-vuetify3/styles.css"
+
+
+import { createCoalesceVuetify } from "coalesce-vue-vuetify3";
+
+
+const coalesceVuetify = createCoalesceVuetify({
+  metadata: $metadata,
+});
+app.use(coalesceVuetify);
+```
+
+</td></tr>
+<tr><td>
+
+router.ts
+
+</td>
+<td style="vertical-align: top">
+
+```ts:no-line-numbers
+// Either of these:
+import { CAdminTablePage, CAdminEditorPage } from 'coalesce-vue-vuetify2/lib';
+import { CAdminTablePage, CAdminEditorPage } from 'coalesce-vue-vuetify2';
+```
+
+</td>
+<td style="vertical-align: top">
+
+```ts:no-line-numbers
+
+import { CAdminEditorPage, CAdminTablePage } from "coalesce-vue-vuetify3";
+```
+
+</td></tr>
+</table>
+
+
 ## From Class Components to `<script setup>`
 
 The components in the Coalesce template for Vue 3 have switched from `vue-class-component` to Vue Composition API with `<script setup>`, the [official recommendation](https://vuejs.org/guide/introduction.html#which-to-choose) for building full Vue 3 applications.

@@ -175,8 +175,19 @@ namespace IntelliTect.Coalesce.Models
                 if (obj is ISparseDto genDto)
                 {
                     // 99% case: For generated DTOs, normally only validate the properties that the user is changing.
-                    if (!forceRequired && !genDto.ChangedProperties.Contains(propName))
+                    if (forceRequired)
                     {
+                        if (!sourceProp.IsClientSerializable)
+                        {
+                            // Even when forcing validation of required props,
+                            // don't validate those that can't be accepted as input.
+                            continue;
+                        }
+                    }
+                    else if (!genDto.ChangedProperties.Contains(propName))
+                    {
+                        // When not forcing validation of required props,
+                        // skip properties that weren't sent by the client.
                         continue;
                     }
                 }

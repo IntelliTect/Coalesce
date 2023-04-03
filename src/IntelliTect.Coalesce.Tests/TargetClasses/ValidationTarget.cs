@@ -1,9 +1,12 @@
-﻿using IntelliTect.Coalesce.Mapping;
+﻿using IntelliTect.Coalesce.DataAnnotations;
+using IntelliTect.Coalesce.Mapping;
 using IntelliTect.Coalesce.Models;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
+
+#nullable enable
 
 namespace IntelliTect.Coalesce.Tests.TargetClasses
 {
@@ -12,21 +15,23 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses
         public int Id { get; set; }
 
         [RegularExpression(@"^product:\d+:\d+$")]
-        public string ProductId { get; set; }
+        public string? ProductId { get; set; }
 
         [EmailAddress(ErrorMessage = "Custom email error message")]
         [StringLength(150, MinimumLength = 3)]
-        public string Email { get; set; }
+        public string? Email { get; set; }
 
         [Display(Name = "Fancy Number")]
         [Required]
         [Range(5, 10)]
         public int? Number { get; set; }
 
-        public ValidationTargetChild OptionalChild { get; set; }
+        public ValidationTargetChild? OptionalChild { get; set; }
 
-        [Required]
         public ValidationTargetChild RequiredChild { get; set; } = null!;
+
+        [Read]
+        public ValidationTargetChild NonInputtableNonNullableChild { get; set; } = null!;
 
         // This class (ValidationTarget) is not mapped,
         // but the code under test here (parameter validation) doesn't really care.
@@ -47,11 +52,13 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses
     public class ValidationTargetChild
     {
         [Url]
-        public string String { get; set; }
+        public string? String { get; set; }
 
         [Required]
-        public string RequiredVal { get; set; }
+        public string RequiredVal { get; set; } = null!;
     }
+
+#nullable disable
 
     public partial class ValidationTargetDtoGen : GeneratedDto<ValidationTarget>
     {
@@ -63,6 +70,7 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses
         private int? _Number;
         private ValidationTargetChildDtoGen _OptionalChild;
         private ValidationTargetChildDtoGen _RequiredChild;
+        private ValidationTargetChildDtoGen _NonInputtableNonNullableChild;
 
         public int? Id
         {
@@ -94,53 +102,25 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses
             get => _RequiredChild;
             set { _RequiredChild = value; Changed(nameof(RequiredChild)); }
         }
+        public ValidationTargetChildDtoGen NonInputtableNonNullableChild
+        {
+            get => _NonInputtableNonNullableChild;
+            set { _NonInputtableNonNullableChild = value; Changed(nameof(NonInputtableNonNullableChild)); }
+        }
 
         /// <summary>
         /// Map from the domain object to the properties of the current DTO instance.
         /// </summary>
         public override void MapFrom(ValidationTarget obj, IMappingContext context, IncludeTree tree = null)
-        {
-            if (obj == null) return;
-            var includes = context.Includes;
-
-            this.Id = obj.Id;
-            this.ProductId = obj.ProductId;
-            this.Email = obj.Email;
-            this.Number = obj.Number;
-
-            this.OptionalChild = obj.OptionalChild.MapToDto<ValidationTargetChild, ValidationTargetChildDtoGen>(context, tree?[nameof(this.OptionalChild)]);
-
-
-            this.RequiredChild = obj.RequiredChild.MapToDto<ValidationTargetChild, ValidationTargetChildDtoGen>(context, tree?[nameof(this.RequiredChild)]);
-
-        }
+            => throw new NotImplementedException(
+                "This 'generated dto' is actually hand-written for these tests. Mapping methods are unused.");
 
         /// <summary>
         /// Map from the current DTO instance to the domain object.
         /// </summary>
         public override void MapTo(ValidationTarget entity, IMappingContext context)
-        {
-            var includes = context.Includes;
-
-            if (OnUpdate(entity, context)) return;
-
-            if (ShouldMapTo(nameof(Id))) entity.Id = (Id ?? entity.Id);
-            if (ShouldMapTo(nameof(ProductId))) entity.ProductId = ProductId;
-            if (ShouldMapTo(nameof(Email))) entity.Email = Email;
-            if (ShouldMapTo(nameof(Number))) entity.Number = Number;
-            if (ShouldMapTo(nameof(OptionalChild))) entity.OptionalChild = OptionalChild?.MapToModelOrNew(entity.OptionalChild, context);
-            if (ShouldMapTo(nameof(RequiredChild))) entity.RequiredChild = RequiredChild?.MapToModelOrNew(entity.RequiredChild, context);
-        }
-
-        /// <summary>
-        /// Map from the current DTO instance to a new instance of the domain object.
-        /// </summary>
-        public override ValidationTarget MapToNew(IMappingContext context)
-        {
-            var entity = new ValidationTarget();
-            MapTo(entity, context);
-            return entity;
-        }
+            => throw new NotImplementedException(
+                "This 'generated dto' is actually hand-written for these tests. Mapping methods are unused.");
     }
 
     public partial class ValidationTargetChildDtoGen : GeneratedDto<ValidationTargetChild>

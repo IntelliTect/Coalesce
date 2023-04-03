@@ -263,7 +263,7 @@ export function createAspNetCoreHmrPlugin({
     // Detect if requests to the vite server are failing, and offer suggestions.
     
     if ("${getViteOrigin()}" == window.location.origin) {
-      alert("Coalesce/Vite: You seem to be hitting the vite server directly, rather than the ASP.NET Core server. API calls probably won't work. If you're were only hitting this URL to add a TLS exception, disregard and just close this tab.")
+      alert("Coalesce/Vite: You seem to be hitting the vite server directly, rather than the ASP.NET Core server. API calls probably won't work. \n\nIf you were only hitting this URL to add a TLS exception, disregard and just close this tab.")
     }
 
     fetch("${getViteOrigin()}${base}", {

@@ -63,6 +63,10 @@ import { CoalesceVuetifyResolver } from "coalesce-vue-vuetify2/lib/build"
 
 ```ts:no-line-numbers
 import { CoalesceVuetifyResolver } from "coalesce-vue-vuetify3/build"
+
+// Custom SASS options and `optimizeDeps` configuration can be removed
+// since Vuetify3 no longer uses deprecated sass features,
+// and pre-bundling styles no longer has appreciable benefit.
 ```
 
 </td></tr>
@@ -123,6 +127,21 @@ import { CAdminTablePage, CAdminEditorPage } from 'coalesce-vue-vuetify2';
 
 import { CAdminEditorPage, CAdminTablePage } from "coalesce-vue-vuetify3";
 ```
+
+</td></tr>
+<tr><td>
+
+Vitest/Jest tests
+
+</td>
+<td style="vertical-align: top">
+
+If you had a global test setup file performing Vue configuration, you can likely remove it entirely, or at least remove the parts that configure Vue. Vue3 does not operate on global configuration like Vue2 did.
+
+</td>
+<td style="vertical-align: top">
+
+See [test-utils.ts](https://github.com/IntelliTect/Coalesce.Vue.Template/blob/master/content/Coalesce.Starter.Vue.Web/src/test-utils.ts) and [HelloWorld.spec.ts](https://github.com/IntelliTect/Coalesce.Vue.Template/blob/master/content/Coalesce.Starter.Vue.Web/src/components/HelloWorld.spec.ts) in the template for examples of Vue3 component testing.
 
 </td></tr>
 </table>

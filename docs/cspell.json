@@ -3,6 +3,8 @@
     "language": "en",
     "words": [
         "Vuetify",
+        "Vitest",
+        "vitest",
         "Axios",
         "Coalesce",
         "IntelliTect",

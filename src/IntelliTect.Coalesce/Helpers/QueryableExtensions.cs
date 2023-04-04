@@ -11,20 +11,24 @@ using System.Reflection;
 using IntelliTect.Coalesce.TypeDefinition;
 using System.Threading;
 using System.Collections;
+using IntelliTect.Coalesce.DataAnnotations;
 
 namespace IntelliTect.Coalesce
 {
     public static class QueryableExtensions
     {
         /// <summary>
-        /// Includes immediate children, as well as the other side of many-to-many relationships.
+        /// <para>Includes immediate children, as well as the other side of many-to-many relationships.</para>
+        /// <para>Does not include navigations or classes that have <see cref="ReadAttribute.NoAutoInclude"/> set.</para>
         /// </summary>
         public static IQueryable<T> IncludeChildren<T>(this IQueryable<T> query, ReflectionRepository? reflectionRepository = null) where T : class
         {
-            var model = (reflectionRepository ?? ReflectionRepository.Global).GetClassViewModel<T>() ?? throw new ArgumentException("Queried type is not a class");
-            foreach (var prop in model.ClientProperties.Where(f => !f.IsStatic && f.Object?.HasDbSet == true && !f.HasNotMapped))
+            var model = (reflectionRepository ?? ReflectionRepository.Global).GetClassViewModel<T>() 
+                ?? throw new ArgumentException("Queried type is not a class");
+
+            foreach (var prop in model.ClientProperties.Where(f => f.CanAutoInclude))
             {
-                if (prop.IsManytoManyCollection)
+                if (prop.IsManytoManyCollection && prop.ManyToManyFarNavigationProperty.CanAutoInclude)
                 {
                     query = query.Include(prop.Name + "." + prop.ManyToManyFarNavigationProperty!.Name);
                 }

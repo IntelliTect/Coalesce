@@ -21,6 +21,8 @@ Controls permissions for reading of objects and properties through the API.
 
 For **property-level** security only, if a `[Read]` attribute is present without an `[Edit]` attribute, the property is read-only. 
 
+Additionally, you can set  `NoAutoInclude = true` the `[Read]` attribute to suppress the [Default Loading Behavior](/modeling/model-components/data-sources.md#default-loading-behavior).
+
 #### Example Usage
 ``` c#
 [Read(Roles = "Management", PermissionLevel = SecurityPermissionLevels.AllowAuthorized)]

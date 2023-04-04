@@ -719,6 +719,29 @@ namespace IntelliTect.Coalesce.TypeDefinition
         private PropertySecurityInfo? _securityInfo;
         public PropertySecurityInfo SecurityInfo => _securityInfo ??= new PropertySecurityInfo(this);
 
+        public bool CanAutoInclude
+        {
+            get
+            {
+                if (Role is not PropertyRole.ReferenceNavigation and not PropertyRole.CollectionNavigation)
+                {
+                    return false;
+                }
+
+                if (PureType.GetAttributeValue<ReadAttribute, bool>(a => a.NoAutoInclude) == true)
+                {
+                    return false;
+                }
+
+                if (this.GetAttributeValue<ReadAttribute, bool>(a => a.NoAutoInclude) == true)
+                {
+                    return false;
+                }
+
+                return true;
+            }
+        }
+
         /// <summary>
         /// Has the NotMapped attribute.
         /// </summary>

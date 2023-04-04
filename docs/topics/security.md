@@ -226,7 +226,7 @@ In Coalesce, [Data Sources](/modeling/model-components/data-sources.md) are the 
 
 Data Sources are used when fetching results for `/get`, `/list`, and `/count` endpoints, and when fetching the target of a `/save` or `/delete`, and when fetching the invocation target of an [Instance Method](/modeling/model-components/methods.md#instance-methods). 
 
-By default, your entities will be fetched using the [Standard Data Source](/modeling/model-components/data-sources.md#standard-data-source), but you can declare a custom default data source for each of your entities to override this default functionality.
+By default, your entities will be fetched using the [Standard Data Source](/modeling/model-components/data-sources.md#standard-data-source), but you can declare a custom default data source for each of your entities to override this default functionality. The default functionality here includes the [default loading behavior](/modeling/model-components/data-sources.md#default-loading-behavior), a feature where the Standard Data Source automatically loads all the immediate relationships of requested objects. This can be suppressed by overriding the `GetQuery` method on your custom data source and not calling the base method, or by placing `[Read(NoAutoInclude = true)]` on classes or navigation properties that you do not want automatically included.
 
 For most use cases, all your security rules will be implemented in the [GetQuery/GetQueryAsync](/modeling/model-components/data-sources.md#member-getquery) method. This is the most foundational method of the data source that all other functions in the data source build upon. Any predicates applied to the query of a type's default data source will affect all of the type's generated API endpoints (except for static custom methods).
 
@@ -235,9 +235,8 @@ There are a few different techniques that you can use to apply filtering in a da
 #### Query Predicates
 The **Query Predicates** technique involves applying a `.Where()` predicate to your query to filter the root entities that are returned by the query using some database-executed logic. This is a form of row-level security and can be used to only include a record based on the values of that record in the database.
 
-
 #### Conditional Includes
-The **Conditional Includes** technique involves only appending `.Include()` calls to your query if some server-executed criteria is met. Usually this involves checking the roles of a user and only including a navigation property if the user is in the requisite role. This technique cannot be used with database-executed logic and is therefore a form of table-level security, not row-level security.
+The **Conditional Includes** technique involves conditionally appending `.Include()` calls to your query only when some server-executed criteria is met. Usually this involves checking the roles of a user and only including a navigation property if the user is in the requisite role. This technique cannot be used with database-executed logic and is therefore behaves more like table-level security than row-level security.
 
 #### Filtered Includes
 The **Filtered Includes** technique involves using [EF Core filtered includes](https://learn.microsoft.com/en-us/ef/core/querying/related-data/eager#filtered-include) to apply database-executed logic to filter the rows of child collection navigation properties. 

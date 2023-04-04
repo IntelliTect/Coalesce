@@ -60,6 +60,17 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         public ComplexModel ReferenceNavigation { get; set; }
 
 
+        public int? NoAutoIncludeReferenceNavigationId { get; set; }
+        [Read(NoAutoInclude = true)]
+        [ForeignKey(nameof(NoAutoIncludeReferenceNavigationId))]
+        public ComplexModel NoAutoIncludeReferenceNavigation { get; set; }
+
+
+        public int? NoAutoIncludeByClassReferenceNavigationId { get; set; }
+        [ForeignKey(nameof(NoAutoIncludeByClassReferenceNavigationId))]
+        public Company NoAutoIncludeByClassReferenceNavigation { get; set; }
+
+
         // Default searchable property
         [DefaultOrderBy(FieldOrder = 1)]
         public string Name { get; set; }

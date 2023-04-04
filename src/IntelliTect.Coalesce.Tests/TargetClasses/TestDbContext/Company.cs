@@ -8,6 +8,7 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
 {
     [Table("Company")]
     [Create(PermissionLevel = SecurityPermissionLevels.DenyAll)]
+    [Read(NoAutoInclude = true)]
     public class Company
     {
         public int CompanyId { get; set; }

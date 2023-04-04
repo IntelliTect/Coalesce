@@ -1,9 +1,13 @@
 ﻿using IntelliTect.Coalesce.Mapping.IncludeTrees;
+using Microsoft.EntityFrameworkCore.Query;
+using Microsoft.EntityFrameworkCore.Query.Internal;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce
@@ -69,6 +73,52 @@ namespace IntelliTect.Coalesce
             }
         }
 
+#if NET6_0_OR_GREATER
+#pragma warning disable EF1001 // Internal EF Core API usage.
+
+        /// <summary>
+        /// Fake EF query compiler, used so we can build include trees with real EntityQueryProvider
+        /// so that .Include() and .ThenInclude() work (they require an EntityQueryProvider).
+        /// </summary>
+        private class FakeQueryCompiler : IQueryCompiler
+        {
+            public Func<QueryContext, TResult> CreateCompiledAsyncQuery<TResult>(Expression query) => Throw<Func<QueryContext, TResult>>();
+            public Func<QueryContext, TResult> CreateCompiledQuery<TResult>(Expression query) => Throw<Func<QueryContext, TResult>>();
+            public TResult Execute<TResult>(Expression query) => Throw<TResult>();
+            public TResult ExecuteAsync<TResult>(Expression query, CancellationToken cancellationToken) => Throw<TResult>();
+
+            [DoesNotReturn]
+            private T Throw<T>()
+            {
+                throw new InvalidOperationException(
+                    "The query being operated on was created from IncludeTree for the purpose of capturing the structure of .Include() calls." +
+                    "It cannot be evaluated or executed.");
+            }
+        }
+
+        /// <summary>
+        /// Shorthand for <code>Enumerable.Empty&lt;T&gt;().AsQueryable()</code>,
+        /// which can be used to build up a query upon which <code>GetIncludeTree</code> can be called.
+        /// </summary>
+        public static IQueryable<T> QueryFor<T>()
+        {
+            return new EntityQueryProvider(new FakeQueryCompiler())
+                .CreateQuery<T>(Expression.Constant(Enumerable.Empty<T>().AsQueryable()));
+        }
+
+        /// <summary>
+        /// Build an include tree for the specified type by providing a function
+        /// that will build up the query by calling <code>IncludedSeprately</code> 
+        /// and <code>ThenIncludedSeprately</code> on the query.
+        /// </summary>
+        public static IncludeTree For<T>(Func<IQueryable<T>, IQueryable<T>> builder)
+        {
+            return builder(QueryFor<T>()).GetIncludeTree();
+        }
+
+#pragma warning restore EF1001 // Internal EF Core API usage.
+#else
+
         /// <summary>
         /// Shorthand for <code>Enumerable.Empty&lt;T&gt;().AsQueryable()</code>,
         /// which can be used to build up a query upon which <code>GetIncludeTree</code> can be called.
@@ -87,6 +137,8 @@ namespace IntelliTect.Coalesce
         {
             return builder(QueryFor<T>()).GetIncludeTree();
         }
+
+#endif
 
         internal static IncludeTree ParseMemberExpression(MemberExpression expr, out IncludeTree tail)
         {
@@ -143,7 +195,7 @@ namespace IntelliTect.Coalesce
             return first;
         }
 
-        #region IReadOnlyDictionary
+#region IReadOnlyDictionary
 
         public bool ContainsKey(string key)
         {
@@ -159,7 +211,7 @@ namespace IntelliTect.Coalesce
             string key,
 #if NETCOREAPP
             [System.Diagnostics.CodeAnalysis.MaybeNullWhen(false)]
-#endif 
+#endif
             out IncludeTree value)
         {
             return _children.TryGetValue(key, out value);
@@ -185,6 +237,6 @@ namespace IntelliTect.Coalesce
         public IEnumerable<string> Keys => _children.Keys;
         public IEnumerable<IncludeTree> Values => _children.Values;
 
-        #endregion
+#endregion
     }
 }

@@ -6,6 +6,11 @@ using System.Text;
 using Xunit;
 using IntelliTect.Coalesce.Tests.TargetClasses;
 using System.Security.Claims;
+using IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext;
+using Microsoft.EntityFrameworkCore.Query.Internal;
+using Moq;
+using System.Linq.Expressions;
+using IntelliTect.Coalesce.TypeDefinition.Enums;
 
 namespace IntelliTect.Coalesce.Tests.Tests.Security
 {
@@ -69,6 +74,42 @@ namespace IntelliTect.Coalesce.Tests.Tests.Security
             // so the property should be accepted as input
             Assert.True(prop.SecurityInfo.Edit.IsAllowed());
 
+        }
+
+        [Theory]
+        [ClassViewModelData(typeof(ComplexModel))]
+        public void IncludeChildren_IncludesNonSuppressedMembers(ClassViewModelData data)
+        {
+            ClassViewModel vm = data;
+            const string propName = nameof(ComplexModel.ReferenceNavigation);
+
+            var tree = IncludeTree.For<ComplexModel>(q => q.IncludeChildren(vm.ReflectionRepository));
+            var prop = vm.PropertyByName(propName);
+
+            // Precondition:
+            Assert.Equal(PropertyRole.ReferenceNavigation, prop.Role);
+
+            // Assert
+            Assert.True(prop.CanAutoInclude);
+            Assert.NotNull(tree[propName]);
+        }
+
+        [Theory]
+        [ClassViewModelData(typeof(ComplexModel), nameof(ComplexModel.NoAutoIncludeReferenceNavigation))]
+        [ClassViewModelData(typeof(ComplexModel), nameof(ComplexModel.NoAutoIncludeByClassReferenceNavigation))]
+        public void IncludeChildren_DoesNotIncludedOptedOutMember(ClassViewModelData data, string propName)
+        {
+            ClassViewModel vm = data;
+
+            var tree = IncludeTree.For<ComplexModel>(q => q.IncludeChildren(vm.ReflectionRepository));
+            var prop = vm.PropertyByName(propName);
+
+            // Precondition:
+            Assert.Equal(PropertyRole.ReferenceNavigation, prop.Role);
+
+            // Assert
+            Assert.False(prop.CanAutoInclude);
+            Assert.Null(tree[propName]);
         }
     }
 }

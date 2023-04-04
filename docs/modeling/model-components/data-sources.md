@@ -164,9 +164,12 @@ The standard data sources, `IntelliTect.Coalesce.StandardDataSource<T>` and its 
 
 ### Default Loading Behavior
 
-When an object or list of objects is requested, the default behavior of the the `StandardDataSource` is to load all of the immediate relationships of the object (parent objects and child collections), as well as the far side of [many-to-many](attributes/many-to-many.md) relationships. This can be suppressed by settings `includes = "none"` on your TypeScript [ViewModel](/stacks/disambiguation/view-model.md) or [ListViewModel](/stacks/disambiguation/list-view-model.md) when making a request.
+When an object or list of objects is requested, the default behavior of the the `StandardDataSource` is to load all of the immediate relationships of the object (parent objects and child collections), as well as the far side of [many-to-many](attributes/many-to-many.md) relationships. This is performed in `StandardDataSource.GetQuery()`, so in order to suppress this behavior in a custom data source, don't build you query off of `base.GetQuery()`, but instead start directly from the `DbSet` for your entity when building your custom query.
 
-In most cases, however, you'll probably want more or less data than what the default behavior provides. You can achieve this by overriding the `GetQuery` method, outlined below.
+Clients can suppress this per-request by setting `includes = "none"` on your TypeScript [ViewModel](/stacks/disambiguation/view-model.md) or [ListViewModel](/stacks/disambiguation/list-view-model.md), but note this is not a security mechanism and should only be used to reduce payload size or improve response time.
+
+On the server, you can suppress this behavior by placing `[Read(NoAutoInclude = true)]` on either an entire class (affecting all navigation properties of that type), or on specific navigation properties. When placed on a entity class that holds sensitive data, this can help ensure you don't accidentally leak records due to forgetting to customize the data sources of the types whose navigation properties reference your sensitive entity.
+
 
 
 ### Properties

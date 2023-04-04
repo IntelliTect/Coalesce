@@ -20,7 +20,7 @@ namespace Coalesce.Web
 
                 try
                 {
-                    SampleData.Initialize(services.GetService<AppDbContext>());
+                    SampleData.Initialize(services.GetRequiredService<AppDbContext>());
                 }
                 catch (Exception ex)
                 {

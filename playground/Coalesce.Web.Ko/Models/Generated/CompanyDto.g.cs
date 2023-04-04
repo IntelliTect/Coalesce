@@ -137,7 +137,6 @@ namespace Coalesce.Web.Ko.Models
 
             if (ShouldMapTo(nameof(Id))) entity.Id = (Id ?? entity.Id);
             if (ShouldMapTo(nameof(Name))) entity.Name = Name;
-            if (ShouldMapTo(nameof(Address1))) entity.Address1 = Address1;
             if (ShouldMapTo(nameof(Address2))) entity.Address2 = Address2;
             if (ShouldMapTo(nameof(City))) entity.City = City;
             if (ShouldMapTo(nameof(State))) entity.State = State;
@@ -153,8 +152,25 @@ namespace Coalesce.Web.Ko.Models
         /// </summary>
         public override Coalesce.Domain.Company MapToNew(IMappingContext context)
         {
-            var entity = new Coalesce.Domain.Company();
-            MapTo(entity, context);
+            var includes = context.Includes;
+
+            var entity = new Coalesce.Domain.Company()
+            {
+                Address1 = Address1,
+            };
+
+            if (OnUpdate(entity, context)) return entity;
+            if (ShouldMapTo(nameof(Id))) entity.Id = (Id ?? entity.Id);
+            if (ShouldMapTo(nameof(Name))) entity.Name = Name;
+            if (ShouldMapTo(nameof(Address2))) entity.Address2 = Address2;
+            if (ShouldMapTo(nameof(City))) entity.City = City;
+            if (ShouldMapTo(nameof(State))) entity.State = State;
+            if (ShouldMapTo(nameof(ZipCode))) entity.ZipCode = ZipCode;
+            if (ShouldMapTo(nameof(Phone))) entity.Phone = Phone;
+            if (ShouldMapTo(nameof(WebsiteUrl))) entity.WebsiteUrl = WebsiteUrl;
+            if (ShouldMapTo(nameof(LogoUrl))) entity.LogoUrl = LogoUrl;
+            if (ShouldMapTo(nameof(IsDeleted))) entity.IsDeleted = (IsDeleted ?? entity.IsDeleted);
+
             return entity;
         }
     }

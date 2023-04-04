@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<Description>Core framework library for IntelliTect.Coalesce</Description>
-		<TargetFrameworks>netstandard2.0;netcoreapp3.1;net6.0;net7.0</TargetFrameworks>
+		<TargetFrameworks>netstandard2.0;net6.0;net7.0</TargetFrameworks>
 		<PlatformTarget>AnyCPU</PlatformTarget>
 
 		<Nullable>enable</Nullable>
@@ -37,13 +37,8 @@
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.4.0" />
   </ItemGroup>
 
-	<ItemGroup Condition="!$([MSBuild]::IsTargetFrameworkCompatible($(TargetFramework), 'net5.0'))">
+	<ItemGroup Condition="!$([MSBuild]::IsTargetFrameworkCompatible($(TargetFramework), 'net6.0'))">
 		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="[2.2,)" />
-	</ItemGroup>
-
-	<ItemGroup Condition=" '$(TargetFramework)' == 'net5.0' ">
-		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="[5.0,)" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="[5.0,)" />
 	</ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net6.0' ">

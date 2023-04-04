@@ -82,6 +82,7 @@ module ViewModels {
             if (this.errors !== null) return;
             this.errors = ko.validation.group([
                 this.zip.extend({ required: {params: true, message: "Zip is required."} }),
+                this.state.extend({ required: {params: true, message: "State is required."} }),
             ]);
             this.warnings = ko.validation.group([
             ]);

@@ -84,6 +84,8 @@ module ViewModels {
         public setupValidation(): void {
             if (this.errors !== null) return;
             this.errors = ko.validation.group([
+                this.name.extend({ required: {params: true, message: "Name is required."} }),
+                this.description.extend({ required: {params: true, message: "Description is required."} }),
             ]);
             this.warnings = ko.validation.group([
             ]);

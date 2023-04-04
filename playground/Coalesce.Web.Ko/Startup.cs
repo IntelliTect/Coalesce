@@ -85,19 +85,13 @@ namespace Coalesce.Web
                 options.Limits.MaxRequestBodySize = int.MaxValue; // testing big file uploads/downloads
             });
 
-#if NETCOREAPP3_1
             services.AddMvc()
-                .SetCompatibilityVersion(CompatibilityVersion.Version_3_0)
                 .AddNewtonsoftJson(options =>
                  {
                      options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
                      options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
                      options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
                  });
-#else
-            services.AddMvc()
-                .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
-#endif
 
             services.AddScoped<IWeatherService, WeatherService>();
 

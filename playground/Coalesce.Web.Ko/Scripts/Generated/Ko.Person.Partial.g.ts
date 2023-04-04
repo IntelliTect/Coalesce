@@ -537,6 +537,7 @@ module ViewModels {
                 this.lastBath.extend({ moment: { unix: true } }),
                 this.nextUpgrade.extend({ moment: { unix: true } }),
                 this.companyId.extend({ required: {params: true, message: "Company is required."} }),
+                this.arbitraryCollectionOfStrings.extend({ required: {params: true, message: "Arbitrary Collection Of Strings is required."} }),
             ]);
             this.warnings = ko.validation.group([
             ]);

@@ -28,6 +28,8 @@ import {
   isNullOrWhitespace,
   type VueInstance,
   parseJSONDate,
+  IsVue3,
+  getInternalInstance,
 } from "./util.js";
 
 /**
@@ -979,7 +981,25 @@ export function bindToQueryString(
   // When the query changes, grab the new value.
   vue.$watch(
     () => vue.$route?.query[queryKey],
-    (v: any) => {
+    async (v: any) => {
+      if (IsVue3) {
+        // In Vue3/VueRouter4, the component doesn't start tearing down immediately
+        // upon route navigation - it takes an extra tick for that to happen.
+
+        // If we don't guard here, then this watcher will pick up the query values of the new route
+        // (which are probably all undefined for the keys we're watching for),
+        // and start setting those (or `defaultValue`) onto the component instance, which will then trigger
+        // the other watcher above which will put those new values back into the querystring of the new route.
+
+        // Vue2 has a similar issue where this watcher still runs when leaving the route,
+        // but by the time the other watcher above has a chance to run, the component is torn down
+        // and so the bad values never make it back to the query string.
+        await vue.$nextTick();
+        if (getInternalInstance(vue).isUnmounted) {
+          return;
+        }
+      }
+
       obj[key] =
         // Use the default value if null or undefined
         v == null

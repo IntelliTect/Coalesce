@@ -4,3 +4,4 @@ github.com/intellitect/coalesce/edit
 https://www.npmjs.com/package
 https://knockoutjs.com
 https://github.com/IntelliTect/Coalesce
+https://intellitect.com

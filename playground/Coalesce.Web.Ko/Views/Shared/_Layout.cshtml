@@ -98,7 +98,7 @@
                             <ul id="menu-footer-menu-links" class="menu">
                                 <li>
                                     &copy; @DateTime.Now.Year - <a href="https://www.intellitect.com">IntelliTect</a>
-                                    @if (!string.IsNullOrWhiteSpace(User.Identity.Name))
+                                    @if (!string.IsNullOrWhiteSpace(User.Identity?.Name))
                                     {
                                         <span>- @User.Identity.Name</span>
                                     }

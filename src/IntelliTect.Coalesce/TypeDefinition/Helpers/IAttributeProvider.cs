@@ -2,6 +2,7 @@
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq.Expressions;
 using System.Text;
 
@@ -46,6 +47,32 @@ namespace IntelliTect.Coalesce.TypeDefinition
             where TAttribute : Attribute
         {
             return obj.GetAttributeValue<TAttribute>(propertyExpression.GetExpressedProperty().Name) as string;
+        }
+
+        public static (bool Exists, string? Message) GetValidationAttribute<TAttribute>(this IAttributeProvider obj)
+            where TAttribute : ValidationAttribute
+        {
+            if (!obj.HasAttribute<TAttribute>())
+            {
+                return (false, null);
+            }
+
+            return (true, obj.GetAttributeValue<TAttribute>(a => a.ErrorMessage) ?? "");
+        }
+
+        public static (bool Exists, T? Value, string? Message) GetValidationAttribute<TAttribute, T>(
+            this IAttributeProvider obj, 
+            Expression<Func<TAttribute, T>> propertyExpression
+        )
+            where TAttribute : ValidationAttribute
+            where T : struct
+        {
+            if (obj.GetValidationAttribute<TAttribute>() is not (true, string message))
+            {
+                return (false, null, null);
+            }
+
+            return (true, obj.GetAttributeValue(propertyExpression), message);
         }
 
         public static TypeViewModel? GetAttributeValue<TAttribute>(this IAttributeProvider obj, Expression<Func<TAttribute, Type>> propertyExpression)

@@ -257,6 +257,7 @@ export interface Rules {
   pattern?: Rule<string>;
   email?: Rule<string>;
   phone?: Rule<string>;
+  url?: Rule<string>;
 }
 
 /**

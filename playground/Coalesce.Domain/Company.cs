@@ -37,7 +37,7 @@ namespace Coalesce.Domain
         [DataType(DataType.PhoneNumber)]
         public string Phone { get; set; }
 
-        [DataType(DataType.Url)]
+        [Url]
         public string WebsiteUrl { get; set; }
 
         [DataType(DataType.ImageUrl)]

@@ -798,6 +798,9 @@ export const Company = domain.types.Company = {
       type: "string",
       subtype: "url",
       role: "value",
+      rules: {
+        url: val => !val || /^((http(s)|ftp):\/\/.)/.test(val) || "Website Url must be a valid URL.",
+      }
     },
     logoUrl: {
       name: "logoUrl",

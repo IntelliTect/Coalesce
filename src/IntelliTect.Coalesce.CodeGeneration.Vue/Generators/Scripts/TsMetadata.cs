@@ -381,6 +381,12 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                     Max(max2, max2Message);
                 else if (prop.GetAttributeValue<ClientValidationAttribute, int>(a => a.MaxLength) is int maxLength)
                     Max(maxLength, clientValidationError);
+
+                if (prop.GetValidationAttribute<UrlAttribute>() is (true, string urlMessage))
+                {
+                    const string urlPattern = @"^((http(s)|ftp):\/\/.)";
+                    rules.Add($"url: val => !val || /{urlPattern}/.test(val) {Error(clientValidationError, $"{propName} must be a valid URL.")}");
+                }
             }
             else if (prop.Type.IsNumber)
             {
@@ -698,7 +704,9 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                         _ => definingMember.GetAttributeValue<DataTypeAttribute>(a => a.CustomDataType)?.ToLowerInvariant() switch
                         {
                             "color" => "color",
-                            _ => null
+                            _ =>
+                                definingMember.HasAttribute<UrlAttribute>() ? "url" : 
+                                null
                         }
                     }, omitIfNull: true);
                     break;

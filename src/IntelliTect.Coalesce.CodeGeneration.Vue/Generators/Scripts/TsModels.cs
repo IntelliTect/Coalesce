@@ -70,7 +70,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                     b.DocComment($"Instantiate a new {name}, optionally basing it on the given data.");
                     using (b.Block($"constructor(data?: Partial<{name}> | {{[k: string]: any}})"))
                     {
-                        b.Indented($"Object.assign(this, {name}.map(data || {{}}));");
+                        b.Line($"Object.assign(this, {name}.map(data || {{}}));");
                     }
                 }
 
@@ -89,11 +89,21 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                                 using (b.Block($"export class {source.ClientTypeName} implements DataSource<typeof {sourceMeta}>"))
                                 {
                                     b.Line($"readonly $metadata = {sourceMeta}");
-                                    foreach (var param in source.DataSourceParameters)
+
+                                    if (source.DataSourceParameters.Any())
                                     {
-                                        b.DocComment(param.Comment ?? param.Description);
-                                        var typeString = new VueType(param.Type).TsType();
-                                        b.Line($"{param.JsVariable}: {typeString} | null = null");
+                                        foreach (var param in source.DataSourceParameters)
+                                        {
+                                            b.DocComment(param.Comment ?? param.Description);
+                                            var typeString = new VueType(param.Type).TsType();
+                                            b.Line($"{param.JsVariable}: {typeString} | null = null");
+                                        }
+
+                                        b.Line();
+                                        using (b.Block($"constructor(params?: Omit<Partial<{source.ClientTypeName}>, '$metadata'>)"))
+                                        {
+                                            b.Line($"if (params) Object.assign(this, params);");
+                                        }
                                     }
                                 }
                             }

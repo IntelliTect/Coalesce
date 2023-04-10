@@ -78,7 +78,7 @@ export class Case {
   
   /** Instantiate a new Case, optionally basing it on the given data. */
   constructor(data?: Partial<Case> | {[k: string]: any}) {
-      Object.assign(this, Case.map(data || {}));
+    Object.assign(this, Case.map(data || {}));
   }
 }
 export namespace Case {
@@ -86,6 +86,9 @@ export namespace Case {
     
     export class AllOpenCases implements DataSource<typeof metadata.Case.dataSources.allOpenCases> {
       readonly $metadata = metadata.Case.dataSources.allOpenCases
+      constructor(params?: Omit<Partial<AllOpenCases>, '$metadata'>) {
+        if (params) Object.assign(this, params);
+      }
       minDate: Date | null = null
     }
   }
@@ -111,7 +114,7 @@ export class CaseDto {
   
   /** Instantiate a new CaseDto, optionally basing it on the given data. */
   constructor(data?: Partial<CaseDto> | {[k: string]: any}) {
-      Object.assign(this, CaseDto.map(data || {}));
+    Object.assign(this, CaseDto.map(data || {}));
   }
 }
 export namespace CaseDto {
@@ -142,7 +145,7 @@ export class CaseDtoStandalone {
   
   /** Instantiate a new CaseDtoStandalone, optionally basing it on the given data. */
   constructor(data?: Partial<CaseDtoStandalone> | {[k: string]: any}) {
-      Object.assign(this, CaseDtoStandalone.map(data || {}));
+    Object.assign(this, CaseDtoStandalone.map(data || {}));
   }
 }
 
@@ -168,7 +171,7 @@ export class CaseProduct {
   
   /** Instantiate a new CaseProduct, optionally basing it on the given data. */
   constructor(data?: Partial<CaseProduct> | {[k: string]: any}) {
-      Object.assign(this, CaseProduct.map(data || {}));
+    Object.assign(this, CaseProduct.map(data || {}));
   }
 }
 
@@ -202,7 +205,7 @@ export class Company {
   
   /** Instantiate a new Company, optionally basing it on the given data. */
   constructor(data?: Partial<Company> | {[k: string]: any}) {
-      Object.assign(this, Company.map(data || {}));
+    Object.assign(this, Company.map(data || {}));
   }
 }
 export namespace Company {
@@ -234,7 +237,7 @@ export class Log {
   
   /** Instantiate a new Log, optionally basing it on the given data. */
   constructor(data?: Partial<Log> | {[k: string]: any}) {
-      Object.assign(this, Log.map(data || {}));
+    Object.assign(this, Log.map(data || {}));
   }
 }
 
@@ -294,7 +297,7 @@ export class Person {
   
   /** Instantiate a new Person, optionally basing it on the given data. */
   constructor(data?: Partial<Person> | {[k: string]: any}) {
-      Object.assign(this, Person.map(data || {}));
+    Object.assign(this, Person.map(data || {}));
   }
 }
 export namespace Person {
@@ -337,7 +340,7 @@ export class Product {
   
   /** Instantiate a new Product, optionally basing it on the given data. */
   constructor(data?: Partial<Product> | {[k: string]: any}) {
-      Object.assign(this, Product.map(data || {}));
+    Object.assign(this, Product.map(data || {}));
   }
 }
 
@@ -360,7 +363,7 @@ export class ZipCode {
   
   /** Instantiate a new ZipCode, optionally basing it on the given data. */
   constructor(data?: Partial<ZipCode> | {[k: string]: any}) {
-      Object.assign(this, ZipCode.map(data || {}));
+    Object.assign(this, ZipCode.map(data || {}));
   }
 }
 
@@ -387,7 +390,7 @@ export class CaseSummary {
   
   /** Instantiate a new CaseSummary, optionally basing it on the given data. */
   constructor(data?: Partial<CaseSummary> | {[k: string]: any}) {
-      Object.assign(this, CaseSummary.map(data || {}));
+    Object.assign(this, CaseSummary.map(data || {}));
   }
 }
 
@@ -410,7 +413,7 @@ export class DevTeam {
   
   /** Instantiate a new DevTeam, optionally basing it on the given data. */
   constructor(data?: Partial<DevTeam> | {[k: string]: any}) {
-      Object.assign(this, DevTeam.map(data || {}));
+    Object.assign(this, DevTeam.map(data || {}));
   }
 }
 
@@ -434,7 +437,7 @@ export class Location {
   
   /** Instantiate a new Location, optionally basing it on the given data. */
   constructor(data?: Partial<Location> | {[k: string]: any}) {
-      Object.assign(this, Location.map(data || {}));
+    Object.assign(this, Location.map(data || {}));
   }
 }
 
@@ -458,7 +461,7 @@ export class PersonCriteria {
   
   /** Instantiate a new PersonCriteria, optionally basing it on the given data. */
   constructor(data?: Partial<PersonCriteria> | {[k: string]: any}) {
-      Object.assign(this, PersonCriteria.map(data || {}));
+    Object.assign(this, PersonCriteria.map(data || {}));
   }
 }
 
@@ -481,7 +484,7 @@ export class PersonLocation {
   
   /** Instantiate a new PersonLocation, optionally basing it on the given data. */
   constructor(data?: Partial<PersonLocation> | {[k: string]: any}) {
-      Object.assign(this, PersonLocation.map(data || {}));
+    Object.assign(this, PersonLocation.map(data || {}));
   }
 }
 
@@ -508,7 +511,7 @@ export class PersonStats {
   
   /** Instantiate a new PersonStats, optionally basing it on the given data. */
   constructor(data?: Partial<PersonStats> | {[k: string]: any}) {
-      Object.assign(this, PersonStats.map(data || {}));
+    Object.assign(this, PersonStats.map(data || {}));
   }
 }
 
@@ -531,7 +534,7 @@ export class ProductDetails {
   
   /** Instantiate a new ProductDetails, optionally basing it on the given data. */
   constructor(data?: Partial<ProductDetails> | {[k: string]: any}) {
-      Object.assign(this, ProductDetails.map(data || {}));
+    Object.assign(this, ProductDetails.map(data || {}));
   }
 }
 
@@ -555,7 +558,7 @@ export class StandaloneReadCreate {
   
   /** Instantiate a new StandaloneReadCreate, optionally basing it on the given data. */
   constructor(data?: Partial<StandaloneReadCreate> | {[k: string]: any}) {
-      Object.assign(this, StandaloneReadCreate.map(data || {}));
+    Object.assign(this, StandaloneReadCreate.map(data || {}));
   }
 }
 export namespace StandaloneReadCreate {
@@ -587,7 +590,7 @@ export class StandaloneReadonly {
   
   /** Instantiate a new StandaloneReadonly, optionally basing it on the given data. */
   constructor(data?: Partial<StandaloneReadonly> | {[k: string]: any}) {
-      Object.assign(this, StandaloneReadonly.map(data || {}));
+    Object.assign(this, StandaloneReadonly.map(data || {}));
   }
 }
 export namespace StandaloneReadonly {
@@ -619,7 +622,7 @@ export class StandaloneReadWrite {
   
   /** Instantiate a new StandaloneReadWrite, optionally basing it on the given data. */
   constructor(data?: Partial<StandaloneReadWrite> | {[k: string]: any}) {
-      Object.assign(this, StandaloneReadWrite.map(data || {}));
+    Object.assign(this, StandaloneReadWrite.map(data || {}));
   }
 }
 export namespace StandaloneReadWrite {
@@ -652,7 +655,7 @@ export class StreetAddress {
   
   /** Instantiate a new StreetAddress, optionally basing it on the given data. */
   constructor(data?: Partial<StreetAddress> | {[k: string]: any}) {
-      Object.assign(this, StreetAddress.map(data || {}));
+    Object.assign(this, StreetAddress.map(data || {}));
   }
 }
 
@@ -676,7 +679,7 @@ export class WeatherData {
   
   /** Instantiate a new WeatherData, optionally basing it on the given data. */
   constructor(data?: Partial<WeatherData> | {[k: string]: any}) {
-      Object.assign(this, WeatherData.map(data || {}));
+    Object.assign(this, WeatherData.map(data || {}));
   }
 }
 

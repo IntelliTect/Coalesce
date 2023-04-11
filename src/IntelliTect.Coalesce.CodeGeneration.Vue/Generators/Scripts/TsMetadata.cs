@@ -5,6 +5,7 @@ using IntelliTect.Coalesce.TypeDefinition.Enums;
 using IntelliTect.Coalesce.Utilities;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
@@ -706,6 +707,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                             "color" => "color",
                             _ =>
                                 definingMember.HasAttribute<UrlAttribute>() ? "url" : 
+                                definingMember.HasAttribute<EmailAddressAttribute>() ? "email" :
+                                definingMember.HasAttribute<PhoneAttribute>() ? "tel" :
                                 null
                         }
                     }, omitIfNull: true);

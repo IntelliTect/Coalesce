@@ -31,12 +31,13 @@ namespace IntelliTect.Coalesce.CodeGeneration.Tests
             suite = await ConfigureAndValidateSuite(suite);
 
             await Task.WhenAll(
-                Task.Run(() => AssertVueSuiteTypescriptOutputCompiles(suite)),
+                Task.Run(() => AssertVueSuiteTypescriptOutputCompiles(suite, "4.9")),
+                Task.Run(() => AssertVueSuiteTypescriptOutputCompiles(suite, "5")),
                 Task.Run(() => AssertSuiteCSharpOutputCompiles(suite))
             );
         }
 
-        protected async Task AssertVueSuiteTypescriptOutputCompiles(IRootGenerator suite)
+        protected async Task AssertVueSuiteTypescriptOutputCompiles(IRootGenerator suite, string tsVersion)
         {
             var coalesceVue = GetRepoRoot().GetDirectory("src/coalesce-vue");
 
@@ -67,12 +68,14 @@ namespace IntelliTect.Coalesce.CodeGeneration.Tests
               ],
             }
             """;
-            var tsConfigPath = suite.EffectiveOutputPath + "/tsconfig.json";
+            var tsConfigPath = $"{suite.EffectiveOutputPath}/tsconfig.{tsVersion}.json";
             File.WriteAllText(tsConfigPath, tsConfig);
 
             await AssertTypescriptProjectCompiles(
-                tsConfigPath: tsConfigPath, 
-                workingDirectory: workingDirectory);
+                tsConfigPath: tsConfigPath,
+                workingDirectory: workingDirectory,
+                tsVersion: tsVersion
+            );
         }
 
         [Fact]

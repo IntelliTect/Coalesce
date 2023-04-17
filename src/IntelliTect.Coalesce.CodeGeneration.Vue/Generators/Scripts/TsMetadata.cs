@@ -27,7 +27,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
             {
                 b.Line("Domain, getEnumMeta, solidify, ModelType, ObjectType,");
                 b.Line("PrimitiveProperty, ForeignKeyProperty, PrimaryKeyProperty,");
-                b.Line("ModelCollectionNavigationProperty, ModelReferenceNavigationProperty");
+                b.Line("ModelCollectionNavigationProperty, ModelReferenceNavigationProperty,");
+                b.Line("HiddenAreas, BehaviorFlags");
             }
             b.Line();
             b.Line();
@@ -133,7 +134,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                     (securityInfo.IsCreateAllowed() ? 1 << 0 : 0) |
                     (securityInfo.IsEditAllowed() ? 1 << 1 : 0) | 
                     (securityInfo.IsDeleteAllowed() ? 1 << 2 : 0);
-                b.Prop("behaviorFlags", flags.ToString());
+                b.Prop("behaviorFlags", flags.ToString() + " as BehaviorFlags");
 
                 WriteClassPropertiesMetadata(b, model);
 
@@ -275,7 +276,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                 int hiddenAreaFlags = (int)prop.HiddenAreas;
                 if (hiddenAreaFlags != 0)
                 {
-                    b.Prop("hidden", hiddenAreaFlags.ToString());
+                    b.Prop("hidden", hiddenAreaFlags.ToString() + " as HiddenAreas");
                 }
 
                 // We store the negative case instead of the positive

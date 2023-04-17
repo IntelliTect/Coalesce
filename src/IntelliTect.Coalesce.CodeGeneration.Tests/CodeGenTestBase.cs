@@ -54,9 +54,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Tests
                 string.Join("\n", validationResult.Where(r => r.IsError))
             );
 
-            // While not needed for any test assertions,
-            // we actually generate the output to disk so that we can look at it
-            // in case we need to diagnose a failure or something.
+            // Writing the output to disk is needed for the TS compilation tests.
+            // It is also useful so we can look at the output on diskto diagnose a failures.
             await suite.GenerateAsync();
             return suite;
         }
@@ -85,37 +84,48 @@ namespace IntelliTect.Coalesce.CodeGeneration.Tests
             return ReflectionRepositoryFactory.GetCompilation(generatedFiles, assertSuccess);
         }
 
-        protected static async Task AssertTypescriptProjectCompiles(string tsConfigPath, string workingDirectory)
+        private static ProcessStartInfo GetShellExecStartInfo(string program, IEnumerable<string> args, string workingDirectory = null)
         {
-            const string pkgManagerCommand = "npx";
-            var arguments = new List<string>
-            {
-                "tsc",
-                "--project",
-                tsConfigPath,
-                "--noEmit"
-            };
-
-            var exeToRun = pkgManagerCommand;
+            var arguments = args.ToList();
+            var exeToRun = program;
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 // On Windows, the node executable is a .cmd file, so it can't be executed
                 // directly (except with UseShellExecute=true, but that's no good, because
                 // it prevents capturing stdio). So we need to invoke it via "cmd /c".
                 exeToRun = "cmd";
-                arguments.Insert(0, pkgManagerCommand);
+                arguments.Insert(0, program);
                 arguments.Insert(0, "/c");
             }
 
             var start = new ProcessStartInfo(exeToRun)
             {
-                RedirectStandardInput = true,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
                 WorkingDirectory = workingDirectory,
-                WindowStyle = ProcessWindowStyle.Hidden
+                //WindowStyle = ProcessWindowStyle.Hidden
             };
             foreach (var arg in arguments) start.ArgumentList.Add(arg);
+
+            return start;
+        }
+
+        protected static async Task AssertTypescriptProjectCompiles(string tsConfigPath, string workingDirectory, string tsVersion)
+        {
+            var tsPath = Path.GetFullPath("./ts" + tsVersion);
+            var tsInstall = Process.Start(GetShellExecStartInfo("npm", new[] { "i", "typescript@" + tsVersion, "--prefix", tsPath }));
+            await tsInstall.WaitForExitAsync();
+
+            var start = GetShellExecStartInfo(
+                $"{tsPath}/node_modules/.bin/tsc",
+                new List<string>
+                {
+                    "--project",
+                    tsConfigPath,
+                    "--noEmit"
+                },
+                workingDirectory
+            );
+            start.RedirectStandardOutput = true;
+            start.RedirectStandardError = true;
 
             var typescriptProcess = Process.Start(start);
 
@@ -136,9 +146,9 @@ namespace IntelliTect.Coalesce.CodeGeneration.Tests
                 return sb.ToString();
             }).ToArray();
 
-            typescriptProcess.WaitForExit();
+            await typescriptProcess.WaitForExitAsync();
             var streams = await Task.WhenAll(streamTasks);
-            Assert.True(0 == typescriptProcess.ExitCode, string.Join("\n\n", streams));
+            Assert.True(0 == typescriptProcess.ExitCode, $"Typescript {tsVersion}\n:" + string.Join("\n\n", streams));
         }
 
         protected DirectoryInfo GetRepoRoot()

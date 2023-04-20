@@ -101,18 +101,23 @@ namespace IntelliTect.Coalesce.CodeGeneration.Tests
             var start = new ProcessStartInfo(exeToRun)
             {
                 WorkingDirectory = workingDirectory,
-                //WindowStyle = ProcessWindowStyle.Hidden
+                WindowStyle = ProcessWindowStyle.Hidden
             };
             foreach (var arg in arguments) start.ArgumentList.Add(arg);
 
             return start;
         }
 
-        protected static async Task AssertTypescriptProjectCompiles(string tsConfigPath, string workingDirectory, string tsVersion)
+        protected static async Task AssertTypescriptProjectCompiles(
+            string tsConfigPath, 
+            string workingDirectory, 
+            string tsVersion
+        )
         {
             var tsPath = Path.GetFullPath("./ts" + tsVersion);
-            var tsInstall = Process.Start(GetShellExecStartInfo("npm", new[] { "i", "typescript@" + tsVersion, "--prefix", tsPath }));
-            await tsInstall.WaitForExitAsync();
+            await Process
+                .Start(GetShellExecStartInfo("npm", new[] { "i", "typescript@" + tsVersion, "--prefix", tsPath }))
+                .WaitForExitAsync();
 
             var start = GetShellExecStartInfo(
                 $"{tsPath}/node_modules/.bin/tsc",

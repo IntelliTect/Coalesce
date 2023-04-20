@@ -452,7 +452,7 @@ class MapToDtoVisitor extends Visitor<
   public visitObject(value: any, meta: ClassType): {} | null | undefined {
     // If we've exceeded max depth, return undefined to prevent the
     // creation of an entry in the parent object for this object.
-    if (this.depth >= this.maxObjectDepth) return undefined;
+    if (this.depth > this.maxObjectDepth) return undefined;
     this.depth++;
 
     if (value == null) return null;
@@ -498,7 +498,7 @@ class MapToDtoVisitor extends Visitor<
   }
 
   protected visitCollection(value: any[] | null, meta: CollectionValue) {
-    if (this.depth >= this.maxObjectDepth) {
+    if (this.depth > this.maxObjectDepth) {
       // If we've exceeded max depth, return undefined to prevent the
       // creation of an entry in the parent object for this collection.
       return undefined;
@@ -571,10 +571,13 @@ class MapToDtoVisitor extends Visitor<
    * @param maxObjectDepth The maximum depth to serialize objects and collections at.
    * Any property with `propMeta.dontSerialize == true` will always be ignored, regardless of depth.
    */
-  constructor(private maxObjectDepth: number = 3) {
-    // Depth of 3 here is a 'sensible default' for cases where object/collection properties
-    // have been marked as serializable. Most of the time, no depth will be reached because
-    // the default in the generated metadata is that no objects/collections are serializable.
+  constructor(private maxObjectDepth: number = 1e9) {
+    // Default depth used to be 3, but this was arbitrarily limiting and would break app functionality
+    // in a very mysterious way for deep hierarchies of external types.
+    // An arbitrary depth limit at all is just masking application bugs caused by
+    // developers creating circular dependencies in their external types.
+    // Its better to let this stack overflow to make the issue apparent than it is to silently truncate
+    // object graphs at arbitrary depths.
     super();
   }
 }

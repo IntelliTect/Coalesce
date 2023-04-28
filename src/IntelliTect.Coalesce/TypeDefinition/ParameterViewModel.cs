@@ -122,7 +122,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             get
             {
-                if (this.HasAttribute<RequiredAttribute>()) return true;
+                if (this.IsRequired()) return true;
 
 #if NET6_0_OR_GREATER
                 if (Type.IsReferenceType && Nullability == NullabilityState.NotNull) return true;

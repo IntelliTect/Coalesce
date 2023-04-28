@@ -328,7 +328,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             get
             {
-                if (this.HasAttribute<RequiredAttribute>()) return true;
+                if (this.IsRequired()) return true;
 
                 if (HasRequiredKeyword) return true;
 

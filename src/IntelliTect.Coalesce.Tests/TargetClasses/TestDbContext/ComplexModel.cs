@@ -95,6 +95,9 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         public Guid Guid { get; set; }
         public Guid? GuidNullable { get; set; }
 
+        [Range(1, 100)]
+        public int NonNullNonZeroInt { get; set; }
+
 
         public Case.Statuses? EnumNullable { get; set; }
 

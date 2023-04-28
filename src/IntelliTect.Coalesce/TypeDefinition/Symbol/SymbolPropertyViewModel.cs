@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace IntelliTect.Coalesce.TypeDefinition
 {
@@ -60,5 +61,13 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public override bool IsVirtual => Symbol.IsVirtual;
 
         public override bool IsInternalUse => base.IsInternalUse || Symbol.DeclaredAccessibility != Accessibility.Public;
+
+        // experimental, currently unused. reflection version will have to instantiate the instance to check this.
+        // getting the actual value from the syntax will require additional work if that is needed.
+        internal bool HasDefaultValue => Symbol.Locations.Any(l =>
+        {
+            var node = l.SourceTree?.GetRoot().FindNode(l.SourceSpan);
+            return node is PropertyDeclarationSyntax { Initializer: { } };
+        });
     }
 }

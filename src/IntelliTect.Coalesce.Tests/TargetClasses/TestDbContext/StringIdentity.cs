@@ -17,15 +17,15 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
 
         public string? ParentId { get; set; }
         // Arbitrary reference navigation (optional)
-        public StringIdentity Parent { get; set; }
+        public StringIdentity Parent { get; set; } = null!;
 
-        public string ParentReqId { get; set; }
+        public string ParentReqId { get; set; } = null!;
         // Arbitrary reference navigation (req)
         public StringIdentity? ParentReq { get; set; }
 
         // Artbirary collection navigation
         [InverseProperty(nameof(Parent))]
-        public ICollection<StringIdentity> Children { get; set; }
+        public ICollection<StringIdentity> Children { get; set; } = null!;
     }
 
 

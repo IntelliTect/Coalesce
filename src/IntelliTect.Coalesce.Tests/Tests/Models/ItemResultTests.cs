@@ -1,5 +1,7 @@
 ﻿using IntelliTect.Coalesce.Models;
 using IntelliTect.Coalesce.Tests.TargetClasses;
+using IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext;
+using IntelliTect.Coalesce.Tests.Util;
 using IntelliTect.Coalesce.TypeDefinition;
 using System;
 using System.Collections.Generic;
@@ -10,6 +12,11 @@ namespace IntelliTect.Coalesce.Tests.Tests.Models
 {
     public class ItemResultTests
     {
+        public ItemResultTests()
+        {
+            ReflectionRepositoryFactory.Initialize();
+        }
+
         [Fact]
         public void FromValidation_ForGenDto_ProducesErrors()
         {
@@ -77,6 +84,16 @@ namespace IntelliTect.Coalesce.Tests.Tests.Models
                 The Fancy Number field is required.
                 The Required Val field is required.
                 """.ReplaceLineEndings(), result.Message.ReplaceLineEndings());
+        }
+
+        [Fact]
+        public void FromValidation_ForGenDto_WhenPkIsIdentity_DoesNotProduceError()
+        {
+            var dto = new StringIdentityDtoGen();
+
+            var result = ItemResult.FromValidation(dto, deep: true, forceRequired: true);
+
+            Assert.True(result.WasSuccessful);
         }
 
 

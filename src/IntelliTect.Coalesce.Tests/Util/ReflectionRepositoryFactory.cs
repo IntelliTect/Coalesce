@@ -16,6 +16,11 @@ namespace IntelliTect.Coalesce.Tests.Util
 {
     public static class ReflectionRepositoryFactory
     {
+        static ReflectionRepositoryFactory()
+        {
+            MakeFromReflection(ReflectionRepository.Global);
+        }
+
         public static readonly IReadOnlyCollection<SyntaxTree> ModelSyntaxTrees = GetModelSyntaxTrees();
 
         internal static readonly CSharpCompilation Compilation = GetCompilation(new SyntaxTree[0]);
@@ -47,10 +52,21 @@ namespace IntelliTect.Coalesce.Tests.Util
         public static ReflectionRepository MakeFromReflection()
         {
             var rr = new ReflectionRepository();
-
-            // Just picking an arbitrary class that should always be in the test assembly.
-            rr.AddAssembly<ComplexModel>();
+            MakeFromReflection(rr);
             return rr;
+        }
+
+        public static void Initialize()
+        {
+            // Do nothing - this is a dummy method to ensure the static constructor was hit,
+            // which will in turn initialize ReflectionRepository.Global.
+        }
+
+        private static void MakeFromReflection(ReflectionRepository rr)
+        {
+            // Just picking an arbitrary class that should always be in the test assembly.
+            rr.AddAssembly<TargetClasses.TestDbContext.AppDbContext>();
+            rr.AddAssembly<ComplexModel>();
         }
 
         private static IReadOnlyCollection<SyntaxTree> GetModelSyntaxTrees()

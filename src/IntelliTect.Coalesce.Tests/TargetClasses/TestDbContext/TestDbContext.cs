@@ -26,6 +26,8 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
 
         public DbSet<EnumPk> EnumPks { get; set; }
 
+        public DbSet<StringIdentity> StringIdentities { get; set; }
+
         [InternalUse]
         public DbSet<DbSetIsInternalUse> Internals { get; set; }
 

@@ -177,7 +177,7 @@ namespace IntelliTect.Coalesce.Models
                     // 99% case: For generated DTOs, normally only validate the properties that the user is changing.
                     if (forceRequired)
                     {
-                        if (!sourceProp.IsClientSerializable)
+                        if (!sourceProp.IsClientWritable)
                         {
                             // Even when forcing validation of required props,
                             // don't validate those that can't be accepted as input.
@@ -191,7 +191,7 @@ namespace IntelliTect.Coalesce.Models
                         continue;
                     }
                 }
-                else if (!sourceProp.IsClientSerializable)
+                else if (!sourceProp.IsClientWritable)
                 {
                     continue;
                 }

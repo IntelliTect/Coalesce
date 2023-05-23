@@ -172,27 +172,19 @@ namespace IntelliTect.Coalesce.Models
                 // The property on the underlying model if we're validating a generated dto:
                 if (attributeSource.PropertyByName(propName) is not ReflectionPropertyViewModel sourceProp) continue;
 
-                if (obj is ISparseDto genDto)
+                if (
+                    // Skip properties that the client is not permitted to send:
+                    !sourceProp.IsClientSerializable
+                )
+                {
+                    continue;
+                }
+
+                if (obj is ISparseDto genDto && !forceRequired && !genDto.ChangedProperties.Contains(propName))
                 {
                     // 99% case: For generated DTOs, normally only validate the properties that the user is changing.
-                    if (forceRequired)
-                    {
-                        if (!sourceProp.IsClientWritable)
-                        {
-                            // Even when forcing validation of required props,
-                            // don't validate those that can't be accepted as input.
-                            continue;
-                        }
-                    }
-                    else if (!genDto.ChangedProperties.Contains(propName))
-                    {
-                        // When not forcing validation of required props,
-                        // skip properties that weren't sent by the client.
-                        continue;
-                    }
-                }
-                else if (!sourceProp.IsClientWritable)
-                {
+                    // The exception to this case is when we want to ensure we're validating all required props,
+                    // which happens for custom method calls and create-saves, in which case `forceRequired==true`.
                     continue;
                 }
 

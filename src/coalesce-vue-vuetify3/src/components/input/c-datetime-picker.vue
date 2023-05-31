@@ -103,14 +103,7 @@ import {
   setMinutes,
   startOfDay,
 } from "date-fns";
-
-// These weird imports from date-fns-tz are needed because date-fns-tz
-// doesn't define its esm exports from its root correctly.
-// https://github.com/marnusw/date-fns-tz/blob/0577249fb6c47ad7b6a84826e90d976dac9ab52e/README.md#esm-and-commonjs
-import format from "date-fns-tz/esm/format";
-import utcToZonedTime from "date-fns-tz/esm/utcToZonedTime";
-import zonedTimeToUtc from "date-fns-tz/esm/zonedTimeToUtc";
-
+import { format, utcToZonedTime, zonedTimeToUtc } from "date-fns-tz";
 import { getDefaultTimeZone, parseDateUserInput } from "coalesce-vue";
 import { defineComponent, PropType } from "vue";
 import { makeMetadataProps, useMetadataProps } from "../c-metadata-component";

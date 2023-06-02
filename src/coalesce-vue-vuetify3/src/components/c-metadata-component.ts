@@ -191,10 +191,17 @@ export function getValueMeta(
 export function buildVuetifyAttrs(
   valueMeta: Property | Value | null,
   model: Model<ClassType> | AnyArgCaller | null | undefined,
-  attrs?: {}
+  attrs?: { [k: string]: any }
 ): { [s: string]: any } {
+  if (attrs) {
+    attrs = { ...attrs };
+    // Do not pass update:modelValue down to child components.
+    // Components will always handle emitting this event themselves.
+    delete attrs["onUpdate:modelValue"];
+  }
+
   if (!valueMeta) {
-    return {};
+    return { ...attrs };
   }
 
   const modelMeta = model ? model.$metadata : null;

@@ -1,16 +1,60 @@
 <template>
   <v-container grid-list-lg>
+    <c-loader-status :loaders="{ 'no-initial-content': [caseVm.$load] }">
+      <c-select-string-value
+        :model="caseVm"
+        for="title"
+        method="getCaseTitles"
+        eager
+      />
 
-    <c-loader-status :loaders="{'no-initial-content': [caseVm.$load]}">
-      <c-select-string-value :model="caseVm" for="title" method="getCaseTitles" eager />
+      <c-datetime-picker
+        label="Time"
+        density="compact"
+        variant="outlined"
+        date-kind="time"
+        v-model="date"
+      />
+      <c-datetime-picker
+        label="DateTime"
+        density="compact"
+        variant="outlined"
+        date-kind="datetime"
+        v-model="date"
+      />
+      <c-datetime-picker
+        label="Date"
+        density="compact"
+        variant="outlined"
+        date-kind="date"
+        v-model="date"
+      />
+      <c-datetime-picker
+        label="DateTime Native"
+        native
+        density="compact"
+        variant="outlined"
+        date-kind="datetime"
+        v-model="date"
+      />
 
-      <c-datetime-picker date-kind="time" v-model="date" />
-      {{date}}
+      {{ date }}
+      <c-select for="Person" v-model="caseVm.assignedTo"> </c-select>
       <c-select :model="caseVm" for="assignedTo"> </c-select>
       <c-select :model="caseVm" for="assignedTo" density="compact"> </c-select>
-      <c-select :model="caseVm" for="assignedTo" density="compact" variant="outlined"> </c-select>
+      <c-select
+        :model="caseVm"
+        for="assignedTo"
+        density="compact"
+        variant="outlined"
+      >
+      </c-select>
 
-      <img v-if="caseVm.caseKey" :src="caseVm.downloadImage.getResultObjectUrl()" style="max-width: 100%" />
+      <img
+        v-if="caseVm.caseKey"
+        :src="caseVm.downloadImage.getResultObjectUrl()"
+        style="max-width: 100%"
+      />
 
       <c-admin-table :list="personList"></c-admin-table>
 
@@ -21,11 +65,20 @@
   </video> -->
       <v-form>
         <c-input :model="caseVm" for="title"></c-input>
-        <c-input :model="caseVm" for="description" textarea placeholder="asdf"></c-input>
+        <c-input
+          :model="caseVm"
+          for="description"
+          textarea
+          placeholder="asdf"
+        ></c-input>
         <c-input :model="caseVm" for="openedAt"></c-input>
         <c-input :model="caseVm" for="assignedTo" disabled></c-input>
         <c-select :model="caseVm" for="assignedTo" readonly></c-select>
-        <c-select for="Person" v-model="caseVm.assignedTo" placeholder="asdf"></c-select>
+        <c-select
+          for="Person"
+          v-model="caseVm.assignedTo"
+          placeholder="asdf"
+        ></c-select>
         <c-input :model="caseVm" for="reportedBy" placeholder="asdf"></c-input>
         <c-input :model="caseVm" for="attachmentSize"></c-input>
         <c-input :model="caseVm" for="severity"></c-input>
@@ -33,7 +86,10 @@
         <c-input :model="caseVm" for="caseProducts"></c-input>
         <c-display :model="caseVm" for="title" />
       </v-form>
-      <v-text-field v-model="caseVm.title" label="vuetify direct"></v-text-field>
+      <v-text-field
+        v-model="caseVm.title"
+        label="vuetify direct"
+      ></v-text-field>
     </c-loader-status>
     <!-- <c-input :model="person" for="height" /> -->
   </v-container>
@@ -145,8 +201,7 @@ export default class Test extends Base {
     this.personList.$params.noCount = true;
 
     await this.caseVm.$load(15);
-    await this.caseVm.downloadImage(),
-    this.caseVm.$startAutoSave(this);
+    await this.caseVm.downloadImage(), this.caseVm.$startAutoSave(this);
     await this.company.$load(1);
 
     //await this.person.$load(1);

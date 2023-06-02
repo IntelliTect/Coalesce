@@ -80,7 +80,6 @@ namespace Coalesce.Domain
         public Genders Gender { get; set; }
 
         [NotMapped]
-        [Range(5, 10)]
         public double Height { get; set; }
 
         /// <summary>

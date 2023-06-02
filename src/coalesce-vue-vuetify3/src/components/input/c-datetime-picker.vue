@@ -1,6 +1,7 @@
 <template>
   <v-text-field
-    v-if="native || /*temp until vuetify picker is available*/ true"
+    v-if="native"
+    class="c-datetime-picker"
     :type="
       internalDateKind == 'time'
         ? 'time'
@@ -8,84 +9,63 @@
         ? 'date'
         : 'datetime-local'
     "
-    :modelValue="displayedValue"
+    :modelValue="nativeValue"
     v-bind="inputBindAttrs"
     :error-messages="error"
     :readonly="readonly"
     :disabled="disabled"
     autocomplete="off"
-    @update:modelValue="textInputChanged"
-    @click:append="menu = !menu"
+    @change="textInputChanged($event, true)"
   ></v-text-field>
 
-  <!-- <v-menu
+  <v-text-field
     v-else
-    :close-on-content-click="false"
-    v-model="menu"
-    transition="slide-x-transition"
-    offset-y
-    offset-x
-    :disabled="!interactive"
-    min-width="290px"
+    class="c-datetime-picker"
+    v-bind="inputBindAttrs"
+    :modelValue="displayedValue"
+    :error-messages="error"
+    :readonly="readonly"
+    :disabled="disabled"
+    autocomplete="off"
+    :placeholder="internalFormat"
+    @change="textInputChanged($event, false)"
+    @click.capture="showPickerMobile($event)"
   >
-    <template #activator="{ on }">
-      <v-text-field
-        v-on="inputBindListeners(on)"
-        v-bind="inputBindAttrs"
-        :value="displayedValue"
-        :error-messages="error"
+    <template #append-inner>
+      <v-icon
+        :icon="
+          internalDateKind == 'time' ? 'fa fa-clock' : 'fa fa-calendar-alt'
+        "
+        @click="showPicker"
+      ></v-icon>
+
+      <!-- 
+        Since vuetify3 doesn't have datepickers, 
+        use a native HTML5 date input to provide the calendar and clock input. 
+        We don't want to use a native HTML5 input as the root input element, because
+        the way they handle events is way too strange and finnicky.
+        See https://stackoverflow.com/questions/40762549/html5-input-type-date-onchange-event 
+      -->
+      <input
+        ref="nativeInput"
+        style="width: 0px; height: 0; position: absolute"
+        tabindex="-1"
+        aria-hidden="true"
+        :type="
+          internalDateKind == 'time'
+            ? 'time'
+            : internalDateKind == 'date'
+            ? 'date'
+            : 'datetime-local'
+        "
+        :value="nativeValue"
         :readonly="readonly"
         :disabled="disabled"
         autocomplete="off"
-        :append-icon="
-          internalDateKind == 'time' ? 'fa fa-clock' : 'fa fa-calendar-alt'
-        "
-        @change="textInputChanged NOTE DOESNT WORK IN VUETIFY3 https://github.com/vuetifyjs/vuetify/issues/16637"
-        @click:append="menu = !menu"
-      ></v-text-field>
+        @change="textInputChanged($event, true)"
+      />
     </template>
-
-    <div v-if="menu && interactive">
-      <v-tabs
-        v-model="selectedTab"
-        grow
-        centered
-        color="primary"
-        v-show="showDate && showTime"
-      >
-        <v-tab key="date" v-if="showDate">
-          <v-icon start>fa fa-calendar-alt</v-icon> Date
-        </v-tab>
-        <v-tab key="time" v-if="showTime">
-          <v-icon start>fa fa-clock</v-icon> Time
-        </v-tab>
-      </v-tabs>
-
-      <v-tabs-items v-model="selectedTab">
-        <v-tab-item key="date" v-if="showDate">
-          <v-date-picker
-            color="secondary"
-            :value="datePart"
-            scrollable
-            actions
-            style="padding-bottom: 18px"
-            @input="dateChanged"
-          ></v-date-picker>
-        </v-tab-item>
-        <v-tab-item key="time" v-if="showTime">
-          <v-time-picker
-            color="secondary"
-            ampm-in-title
-            :value="timePart"
-            scrollable
-            format="ampm"
-            actions
-            @input="timeChanged"
-          ></v-time-picker>
-        </v-tab-item>
-      </v-tabs-items>
-    </div>
-  </v-menu> -->
+  </v-text-field>
 </template>
 
 <script lang="ts">
@@ -105,7 +85,7 @@ import {
 } from "date-fns";
 import { format, utcToZonedTime, zonedTimeToUtc } from "date-fns-tz";
 import { getDefaultTimeZone, parseDateUserInput } from "coalesce-vue";
-import { defineComponent, PropType } from "vue";
+import { defineComponent, PropType, ref } from "vue";
 import { makeMetadataProps, useMetadataProps } from "../c-metadata-component";
 
 export default defineComponent({
@@ -117,25 +97,27 @@ export default defineComponent({
   inheritAttrs: false,
 
   setup(props) {
-    return { ...useMetadataProps(props) };
+    return { ...useMetadataProps(props), nativeInput: ref() };
   },
 
   props: {
     ...makeMetadataProps(),
-    modelValue: { required: false, type: Date as PropType<Date | null | undefined> },
+    modelValue: {
+      required: false,
+      type: Date as PropType<Date | null | undefined>,
+    },
     dateKind: { type: String },
     dateFormat: { type: String },
     readonly: { type: Boolean },
     disabled: { type: Boolean },
     closeOnDatePicked: { type: Boolean, default: null },
     /** Use native HTML5 date picker rather than Vuetify. */
-    native: { type: Boolean, default: true }, // Default true now since Vuetify date/timepickers don't exist in 3.0
+    native: { type: Boolean, default: false },
     timeZone: { type: String, default: () => getDefaultTimeZone() },
   },
 
   data() {
     return {
-      hasMounted: false,
       error: [] as string[],
       menu: false,
       selectedTab: 0,
@@ -155,9 +137,15 @@ export default defineComponent({
       return null;
     },
 
-    displayedValue() {
-      if (!this.hasMounted) return null;
+    nativeValue() {
+      return this.internalValueZoned
+        ? format(this.internalValueZoned, this.nativeInternalFormat, {
+            timeZone: this.internalTimeZone || undefined,
+          })
+        : null;
+    },
 
+    displayedValue() {
       return this.internalValueZoned
         ? format(this.internalValueZoned, this.internalFormat, {
             timeZone: this.internalTimeZone || undefined,
@@ -204,19 +192,23 @@ export default defineComponent({
       return "datetime";
     },
 
+    nativeInternalFormat() {
+      // These are the formats expected by HTMLInputElement.value
+      // when its type is one of the native date/time types.
+      switch (this.internalDateKind) {
+        case "date":
+          return "yyyy-MM-dd";
+        case "time":
+          return "HH:mm";
+        case "datetime":
+        default:
+          return "yyyy-MM-dd'T'HH:mm";
+      }
+    },
+
     internalFormat() {
       if (this.native) {
-        // These are the formats expected by HTMLInputElement.value
-        // when its type is one of the native date/time types.
-        switch (this.internalDateKind) {
-          case "date":
-            return "yyyy-MM-dd";
-          case "time":
-            return "HH:mm";
-          case "datetime":
-          default:
-            return "yyyy-MM-dd'T'HH:mm";
-        }
+        return this.nativeInternalFormat;
       }
 
       if (this.dateFormat) return this.dateFormat;
@@ -227,7 +219,7 @@ export default defineComponent({
           return "h:mm a";
         case "datetime":
         default:
-          return "M/d/yyyy hh:mm a";
+          return "M/d/yyyy h:mm a";
       }
     },
 
@@ -265,17 +257,38 @@ export default defineComponent({
   },
 
   methods: {
-    // inputBindListeners(on: any) {
-    //   const ret = {
-    //     ...this.$listeners,
-    //     ...on,
-    //   };
+    showPickerMobile(event: MouseEvent) {
+      if (/android|iphone/i.test(navigator.userAgent)) {
+        this.showPicker(event);
+      }
+    },
 
-    //   // prevent v-model from getting bound to the text field (via $listeners)
-    //   delete ret.input;
+    showPicker(event: MouseEvent) {
+      // Firefox Desktop only has pickers for date-only inputs.
+      // It has no time picker, which makes this essentially useless on firefox for those cases.
+      if (
+        this.internalDateKind !== "date" &&
+        /firefox/i.test(navigator.userAgent) &&
+        !/android|iphone/i.test(navigator.userAgent)
+      ) {
+        return;
+      }
 
-    //   return ret;
-    // },
+      if (this.nativeInput?.showPicker) {
+        this.nativeInput.showPicker();
+        event.stopPropagation();
+        event.preventDefault();
+
+        // Immediately unfocus the input element,
+        // because vuetify will have focused it in its own handler.
+        // On mobile, we don't want the mobile keyboard to flash open for a few milliseconds,
+        // and on desktop when the native picker is open it intercepts ALL keyboard input,
+        // so having the text field is deceptive for the user.
+        (document.activeElement as HTMLElement)?.blur?.();
+
+        return true;
+      }
+    },
 
     createDefaultDate() {
       const date = new Date();
@@ -288,7 +301,14 @@ export default defineComponent({
       return date;
     },
 
-    textInputChanged(val: string) {
+    textInputChanged(val: string | Event, isNative: boolean) {
+      const inputFormat = isNative
+        ? this.nativeInternalFormat
+        : this.internalFormat;
+      if (val instanceof Event) {
+        val = (val.target as HTMLInputElement)?.value;
+      }
+
       this.error = [];
       var value: Date | null | undefined;
       const referenceDate = this.internalValueZoned || this.createDefaultDate();
@@ -296,7 +316,7 @@ export default defineComponent({
       if (!val || !val.trim()) {
         value = null;
       } else {
-        value = parse(val, this.internalFormat, referenceDate);
+        value = parse(val, inputFormat, referenceDate);
 
         // If failed, try normalizing common separators to the same symbol in
         // both the format string and user input.
@@ -304,25 +324,42 @@ export default defineComponent({
           const separatorRegex = /[\-\\\/\.]/g;
           value = parse(
             val.replace(separatorRegex, "-"),
-            this.internalFormat.replace(separatorRegex, "-"),
+            inputFormat.replace(separatorRegex, "-"),
             referenceDate
           );
         }
 
-        // If the input didn't match our format exactly,
-        // try parsing user input with general formatting interpretation (trying to be a good citizen).
-        // DO NOT do this if the input doesn't have a date part.
-        // Behavior of new Date() is generally always Invalid Date if you just give it a time,
-        // except if you're on Chrome and give it an invalid time like "8:98 AM" - it'll give you "Thu Jan 01 1998 08:00:00".
-        // Since the user wouldn't ever see the date part when only entering a time, there's no chance to detect this error.
         if (
           (!isValid(value) ||
             // A year less than 100(0?) is also invalid.
             // This means that the format for the year was "yyyy",
             // but the user only entered "yy" (or entered 3 digits by accident, hence checking 1000 instead of 100).
             value.getFullYear() <= 1000) &&
-          this.internalFormat != "time"
+          this.internalDateKind != "time"
         ) {
+          if (this.native) {
+            // HTML 5 native date input keyboard events are a disaster.
+            // They'll emit events for any date that is /technically/ valid,
+            // including dates like 0002-06-13.
+            // To prevent this, we have to assume that users always mean to type in a year > 1000,
+            // which is a pretty reasonable assumption to make for most applications unless
+            // someone makes a Coalesce app to detail the events of the Viking Age.
+
+            // We can't parse and emit intermediate dates as the user is typing,
+            // since doing so will reset the internal state of the HTML5 date input
+            // that keeps track of which character of the date segment that the user was typing in.
+            // So, we have to just ignore the user's input in this case.
+
+            // Ignore all events if the year isn't fully typed.
+            return;
+          }
+
+          // If the input didn't match our format exactly,
+          // try parsing user input with general formatting interpretation (trying to be a good citizen).
+          // DO NOT do this if the input doesn't have a date part.
+          // Behavior of new Date() is generally always Invalid Date if you just give it a time,
+          // except if you're on Chrome and give it an invalid time like "8:98 AM" - it'll give you "Thu Jan 01 1998 08:00:00".
+          // Since the user wouldn't ever see the date part when only entering a time, there's no chance to detect this error.
           value = parseDateUserInput(val, referenceDate);
         }
 
@@ -331,7 +368,7 @@ export default defineComponent({
           // TODO: i18n
           this.error = [
             'Invalid Date. Try formatting like "' +
-              format(new Date(), this.internalFormat) +
+              format(new Date(), inputFormat) +
               '"',
           ];
           value = null;
@@ -412,16 +449,6 @@ export default defineComponent({
     close() {
       this.menu = false;
     },
-  },
-
-  mounted() {
-    // Workaround for bug in vuetify where the label displays wrong
-    // when the textbox is styled with 'outlined' due to the textbox being the activator for a v-menu.
-    // This will delay the render of the date value by a tick,
-    // allowing the label to render properly.
-    this.$nextTick(() => {
-      this.hasMounted = true;
-    });
   },
 });
 </script>

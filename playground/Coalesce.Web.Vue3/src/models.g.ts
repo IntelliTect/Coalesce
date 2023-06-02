@@ -86,10 +86,11 @@ export namespace Case {
     
     export class AllOpenCases implements DataSource<typeof metadata.Case.dataSources.allOpenCases> {
       readonly $metadata = metadata.Case.dataSources.allOpenCases
+      minDate: Date | null = null
+      
       constructor(params?: Omit<Partial<AllOpenCases>, '$metadata'>) {
         if (params) Object.assign(this, params);
       }
-      minDate: Date | null = null
     }
   }
 }

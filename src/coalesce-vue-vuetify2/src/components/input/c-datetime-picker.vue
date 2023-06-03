@@ -172,7 +172,7 @@ import {
   startOfDay,
 } from "date-fns";
 import { format, utcToZonedTime, zonedTimeToUtc } from "date-fns-tz";
-import { getDefaultTimeZone, parseDateUserInput } from "coalesce-vue";
+import { DateKind, getDefaultTimeZone, parseDateUserInput } from "coalesce-vue";
 import { defineComponent, PropType } from "vue";
 import { makeMetadataProps, useMetadataProps } from "../c-metadata-component";
 
@@ -191,7 +191,7 @@ export default defineComponent({
   props: {
     ...makeMetadataProps(),
     value: { required: false, type: Date as PropType<Date | null | undefined> },
-    dateKind: { type: String },
+    dateKind: { type: String as PropType<DateKind | null | undefined> },
     dateFormat: { type: String },
     readonly: { type: Boolean },
     disabled: { type: Boolean },
@@ -291,7 +291,7 @@ export default defineComponent({
       return utcToZonedTime(value, this.internalTimeZone);
     },
 
-    internalDateKind() {
+    internalDateKind(): DateKind {
       if (this.dateKind) return this.dateKind;
       if (this.dateMeta) return this.dateMeta.dateKind;
       return "datetime";
@@ -409,7 +409,7 @@ export default defineComponent({
           // but the user only entered "yy" (or entered 3 digits by accident, hence checking 1000 instead of 100).
           value.getFullYear() <= 1000
         ) {
-          value = parseDateUserInput(val, referenceDate);
+          value = parseDateUserInput(val, referenceDate, this.internalDateKind);
         }
 
         // If that didn't work, don't change the underlying value. Instead, display an error.

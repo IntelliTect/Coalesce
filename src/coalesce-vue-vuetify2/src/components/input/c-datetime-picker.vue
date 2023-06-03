@@ -402,19 +402,12 @@ export default defineComponent({
           );
         }
 
-        // If the input didn't match our format exactly,
-        // try parsing user input with general formatting interpretation (trying to be a good citizen).
-        // DO NOT do this if the input doesn't have a date part.
-        // Behavior of new Date() is generally always Invalid Date if you just give it a time,
-        // except if you're on Chrome and give it an invalid time like "8:98 AM" - it'll give you "Thu Jan 01 1998 08:00:00".
-        // Since the user wouldn't ever see the date part when only entering a time, there's no chance to detect this error.
         if (
-          (!isValid(value) ||
-            // A year less than 100(0?) is also invalid.
-            // This means that the format for the year was "yyyy",
-            // but the user only entered "yy" (or entered 3 digits by accident, hence checking 1000 instead of 100).
-            value.getFullYear() <= 1000) &&
-          this.internalFormat != "time"
+          !isValid(value) ||
+          // A year less than 100(0?) is also invalid.
+          // This means that the format for the year was "yyyy",
+          // but the user only entered "yy" (or entered 3 digits by accident, hence checking 1000 instead of 100).
+          value.getFullYear() <= 1000
         ) {
           value = parseDateUserInput(val, referenceDate);
         }

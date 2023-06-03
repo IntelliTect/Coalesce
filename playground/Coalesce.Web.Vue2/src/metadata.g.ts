@@ -1,7 +1,8 @@
 import {
   Domain, getEnumMeta, solidify, ModelType, ObjectType,
   PrimitiveProperty, ForeignKeyProperty, PrimaryKeyProperty,
-  ModelCollectionNavigationProperty, ModelReferenceNavigationProperty
+  ModelCollectionNavigationProperty, ModelReferenceNavigationProperty,
+  HiddenAreas, BehaviorFlags
 } from 'coalesce-vue/lib/metadata'
 
 
@@ -117,14 +118,14 @@ export const Case = domain.types.Case = {
   type: "model",
   controllerRoute: "Case",
   get keyProp() { return this.props.caseKey }, 
-  behaviorFlags: 7,
+  behaviorFlags: 7 as BehaviorFlags,
   props: {
     caseKey: {
       name: "caseKey",
       displayName: "Case Key",
       type: "number",
       role: "primaryKey",
-      hidden: 3,
+      hidden: 3 as HiddenAreas,
     },
     title: {
       name: "title",
@@ -159,7 +160,7 @@ export const Case = domain.types.Case = {
       get principalKey() { return (domain.types.Person as ModelType).props.personId as PrimaryKeyProperty },
       get principalType() { return (domain.types.Person as ModelType) },
       get navigationProp() { return (domain.types.Case as ModelType).props.assignedTo as ModelReferenceNavigationProperty },
-      hidden: 3,
+      hidden: 3 as HiddenAreas,
     },
     assignedTo: {
       name: "assignedTo",
@@ -180,7 +181,7 @@ export const Case = domain.types.Case = {
       get principalKey() { return (domain.types.Person as ModelType).props.personId as PrimaryKeyProperty },
       get principalType() { return (domain.types.Person as ModelType) },
       get navigationProp() { return (domain.types.Case as ModelType).props.reportedBy as ModelReferenceNavigationProperty },
-      hidden: 3,
+      hidden: 3 as HiddenAreas,
     },
     reportedBy: {
       name: "reportedBy",
@@ -561,14 +562,14 @@ export const CaseDto = domain.types.CaseDto = {
   type: "model",
   controllerRoute: "CaseDto",
   get keyProp() { return this.props.caseId }, 
-  behaviorFlags: 7,
+  behaviorFlags: 7 as BehaviorFlags,
   props: {
     caseId: {
       name: "caseId",
       displayName: "Case Id",
       type: "number",
       role: "primaryKey",
-      hidden: 3,
+      hidden: 3 as HiddenAreas,
     },
     title: {
       name: "title",
@@ -633,14 +634,14 @@ export const CaseDtoStandalone = domain.types.CaseDtoStandalone = {
   type: "model",
   controllerRoute: "CaseDtoStandalone",
   get keyProp() { return this.props.caseId }, 
-  behaviorFlags: 7,
+  behaviorFlags: 7 as BehaviorFlags,
   props: {
     caseId: {
       name: "caseId",
       displayName: "Case Id",
       type: "number",
       role: "primaryKey",
-      hidden: 3,
+      hidden: 3 as HiddenAreas,
     },
     title: {
       name: "title",
@@ -661,14 +662,14 @@ export const CaseProduct = domain.types.CaseProduct = {
   type: "model",
   controllerRoute: "CaseProduct",
   get keyProp() { return this.props.caseProductId }, 
-  behaviorFlags: 7,
+  behaviorFlags: 7 as BehaviorFlags,
   props: {
     caseProductId: {
       name: "caseProductId",
       displayName: "Case Product Id",
       type: "number",
       role: "primaryKey",
-      hidden: 3,
+      hidden: 3 as HiddenAreas,
     },
     caseId: {
       name: "caseId",
@@ -678,7 +679,7 @@ export const CaseProduct = domain.types.CaseProduct = {
       get principalKey() { return (domain.types.Case as ModelType).props.caseKey as PrimaryKeyProperty },
       get principalType() { return (domain.types.Case as ModelType) },
       get navigationProp() { return (domain.types.CaseProduct as ModelType).props.case as ModelReferenceNavigationProperty },
-      hidden: 3,
+      hidden: 3 as HiddenAreas,
       rules: {
         required: val => val != null || "Case is required.",
       }
@@ -702,7 +703,7 @@ export const CaseProduct = domain.types.CaseProduct = {
       get principalKey() { return (domain.types.Product as ModelType).props.productId as PrimaryKeyProperty },
       get principalType() { return (domain.types.Product as ModelType) },
       get navigationProp() { return (domain.types.CaseProduct as ModelType).props.product as ModelReferenceNavigationProperty },
-      hidden: 3,
+      hidden: 3 as HiddenAreas,
       rules: {
         required: val => val != null || "Product is required.",
       }
@@ -730,14 +731,14 @@ export const Company = domain.types.Company = {
   type: "model",
   controllerRoute: "Company",
   get keyProp() { return this.props.id }, 
-  behaviorFlags: 7,
+  behaviorFlags: 7 as BehaviorFlags,
   props: {
     id: {
       name: "id",
       displayName: "Id",
       type: "number",
       role: "primaryKey",
-      hidden: 3,
+      hidden: 3 as HiddenAreas,
     },
     name: {
       name: "name",
@@ -766,21 +767,21 @@ export const Company = domain.types.Company = {
       displayName: "City",
       type: "string",
       role: "value",
-      hidden: 1,
+      hidden: 1 as HiddenAreas,
     },
     state: {
       name: "state",
       displayName: "State",
       type: "string",
       role: "value",
-      hidden: 2,
+      hidden: 2 as HiddenAreas,
     },
     zipCode: {
       name: "zipCode",
       displayName: "Zip Code",
       type: "string",
       role: "value",
-      hidden: 3,
+      hidden: 3 as HiddenAreas,
     },
     phone: {
       name: "phone",
@@ -924,14 +925,14 @@ export const Log = domain.types.Log = {
   type: "model",
   controllerRoute: "Log",
   get keyProp() { return this.props.logId }, 
-  behaviorFlags: 0,
+  behaviorFlags: 0 as BehaviorFlags,
   props: {
     logId: {
       name: "logId",
       displayName: "Log Id",
       type: "number",
       role: "primaryKey",
-      hidden: 3,
+      hidden: 3 as HiddenAreas,
     },
     level: {
       name: "level",
@@ -958,7 +959,7 @@ export const Person = domain.types.Person = {
   type: "model",
   controllerRoute: "Person",
   get keyProp() { return this.props.personId }, 
-  behaviorFlags: 7,
+  behaviorFlags: 7 as BehaviorFlags,
   props: {
     title: {
       name: "title",
@@ -992,7 +993,7 @@ export const Person = domain.types.Person = {
       displayName: "Person Id",
       type: "number",
       role: "primaryKey",
-      hidden: 3,
+      hidden: 3 as HiddenAreas,
     },
     email: {
       name: "email",
@@ -1016,10 +1017,6 @@ export const Person = domain.types.Person = {
       displayName: "Height",
       type: "number",
       role: "value",
-      rules: {
-        min: val => val == null || val >= 5 || "Height must be at least 5.",
-        max: val => val == null || val <= 10 || "Height may not be more than 10.",
-      }
     },
     casesAssigned: {
       name: "casesAssigned",
@@ -1068,7 +1065,7 @@ export const Person = domain.types.Person = {
       dateKind: "datetime",
       noOffset: true,
       role: "value",
-      hidden: 3,
+      hidden: 3 as HiddenAreas,
     },
     nextUpgrade: {
       name: "nextUpgrade",
@@ -1076,7 +1073,7 @@ export const Person = domain.types.Person = {
       type: "date",
       dateKind: "datetime",
       role: "value",
-      hidden: 3,
+      hidden: 3 as HiddenAreas,
     },
     personStats: {
       name: "personStats",
@@ -1084,7 +1081,7 @@ export const Person = domain.types.Person = {
       type: "object",
       get typeDef() { return (domain.types.PersonStats as ObjectType) },
       role: "value",
-      hidden: 3,
+      hidden: 3 as HiddenAreas,
       dontSerialize: true,
     },
     name: {
@@ -1102,7 +1099,7 @@ export const Person = domain.types.Person = {
       get principalKey() { return (domain.types.Company as ModelType).props.id as PrimaryKeyProperty },
       get principalType() { return (domain.types.Company as ModelType) },
       get navigationProp() { return (domain.types.Person as ModelType).props.company as ModelReferenceNavigationProperty },
-      hidden: 3,
+      hidden: 3 as HiddenAreas,
       rules: {
         required: val => val != null || "Company is required.",
       }
@@ -1556,14 +1553,14 @@ export const Product = domain.types.Product = {
   type: "model",
   controllerRoute: "Product",
   get keyProp() { return this.props.productId }, 
-  behaviorFlags: 7,
+  behaviorFlags: 7 as BehaviorFlags,
   props: {
     productId: {
       name: "productId",
       displayName: "Product Id",
       type: "number",
       role: "primaryKey",
-      hidden: 3,
+      hidden: 3 as HiddenAreas,
     },
     name: {
       name: "name",
@@ -1609,14 +1606,14 @@ export const StandaloneReadCreate = domain.types.StandaloneReadCreate = {
   type: "model",
   controllerRoute: "StandaloneReadCreate",
   get keyProp() { return this.props.id }, 
-  behaviorFlags: 5,
+  behaviorFlags: 5 as BehaviorFlags,
   props: {
     id: {
       name: "id",
       displayName: "Id",
       type: "number",
       role: "primaryKey",
-      hidden: 3,
+      hidden: 3 as HiddenAreas,
     },
     name: {
       name: "name",
@@ -1654,14 +1651,14 @@ export const StandaloneReadonly = domain.types.StandaloneReadonly = {
   type: "model",
   controllerRoute: "StandaloneReadonly",
   get keyProp() { return this.props.id }, 
-  behaviorFlags: 0,
+  behaviorFlags: 0 as BehaviorFlags,
   props: {
     id: {
       name: "id",
       displayName: "Id",
       type: "number",
       role: "primaryKey",
-      hidden: 3,
+      hidden: 3 as HiddenAreas,
     },
     name: {
       name: "name",
@@ -1701,14 +1698,14 @@ export const StandaloneReadWrite = domain.types.StandaloneReadWrite = {
   type: "model",
   controllerRoute: "StandaloneReadWrite",
   get keyProp() { return this.props.id }, 
-  behaviorFlags: 7,
+  behaviorFlags: 7 as BehaviorFlags,
   props: {
     id: {
       name: "id",
       displayName: "Id",
       type: "number",
       role: "primaryKey",
-      hidden: 3,
+      hidden: 3 as HiddenAreas,
     },
     name: {
       name: "name",
@@ -1746,7 +1743,7 @@ export const ZipCode = domain.types.ZipCode = {
   type: "model",
   controllerRoute: "ZipCode",
   get keyProp() { return this.props.zip }, 
-  behaviorFlags: 7,
+  behaviorFlags: 7 as BehaviorFlags,
   props: {
     zip: {
       name: "zip",

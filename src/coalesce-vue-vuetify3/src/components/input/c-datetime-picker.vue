@@ -15,6 +15,7 @@
     :readonly="readonly"
     :disabled="disabled"
     autocomplete="off"
+    v-model:focused="focused"
     @change="textInputChanged($event, true)"
   ></v-text-field>
 
@@ -22,13 +23,16 @@
     v-else
     class="c-datetime-picker"
     v-bind="inputBindAttrs"
-    :modelValue="displayedValue"
+    :modelValue="internalTextValue == null ? displayedValue : internalTextValue"
     :error-messages="error"
     :readonly="readonly"
     :disabled="disabled"
     autocomplete="off"
     :placeholder="internalFormat"
-    @change="textInputChanged($event, false)"
+    v-model:focused="focused"
+    @keydown.enter="focused = false"
+    @keydown.escape="focused = false"
+    @update:model-value="textInputChanged($event, false)"
     @click.capture="showPickerMobile($event)"
   >
     <template #append-inner>
@@ -62,7 +66,7 @@
         :readonly="readonly"
         :disabled="disabled"
         autocomplete="off"
-        @change="textInputChanged($event, true)"
+        @input="textInputChanged($event, true)"
       />
     </template>
   </v-text-field>
@@ -84,7 +88,7 @@ import {
   startOfDay,
 } from "date-fns";
 import { format, utcToZonedTime, zonedTimeToUtc } from "date-fns-tz";
-import { getDefaultTimeZone, parseDateUserInput } from "coalesce-vue";
+import { getDefaultTimeZone, parseDateUserInput, DateKind } from "coalesce-vue";
 import { defineComponent, PropType, ref } from "vue";
 import { makeMetadataProps, useMetadataProps } from "../c-metadata-component";
 
@@ -106,7 +110,7 @@ export default defineComponent({
       required: false,
       type: Date as PropType<Date | null | undefined>,
     },
-    dateKind: { type: String },
+    dateKind: { type: String as PropType<DateKind | null | undefined> },
     dateFormat: { type: String },
     readonly: { type: Boolean },
     disabled: { type: Boolean },
@@ -118,10 +122,35 @@ export default defineComponent({
 
   data() {
     return {
+      focused: false,
       error: [] as string[],
       menu: false,
       selectedTab: 0,
+      internalTextValue: null as string | null,
     };
+  },
+
+  watch: {
+    focused(focused) {
+      // When the user is no longer typing into the text field,
+      // clear the temporary value that stores exactly what they typed
+      // so that the text field can fall back to the nicely formatted date.
+      if (!focused) {
+        if (
+          this.internalTextValue &&
+          !isValid(this.parseUserInput(this.internalTextValue))
+        ) {
+          // TODO: i18n
+          this.error = [
+            'Invalid value. Try formatting like "' +
+              format(new Date(), this.internalFormat) +
+              '"',
+          ];
+        } else {
+          this.internalTextValue = null;
+        }
+      }
+    },
   },
 
   computed: {
@@ -137,6 +166,7 @@ export default defineComponent({
       return null;
     },
 
+    /** The value to bind to the `value` of a native HTML5 date input */
     nativeValue() {
       return this.internalValueZoned
         ? format(this.internalValueZoned, this.nativeInternalFormat, {
@@ -186,7 +216,7 @@ export default defineComponent({
       return utcToZonedTime(value, this.internalTimeZone);
     },
 
-    internalDateKind() {
+    internalDateKind(): DateKind {
       if (this.dateKind) return this.dateKind;
       if (this.dateMeta) return this.dateMeta.dateKind;
       return "datetime";
@@ -301,22 +331,14 @@ export default defineComponent({
       return date;
     },
 
-    textInputChanged(val: string | Event, isNative: boolean) {
-      const inputFormat = isNative
-        ? this.nativeInternalFormat
-        : this.internalFormat;
-      if (val instanceof Event) {
-        val = (val.target as HTMLInputElement)?.value;
-      }
-
-      this.error = [];
+    parseUserInput(val: string) {
       var value: Date | null | undefined;
       const referenceDate = this.internalValueZoned || this.createDefaultDate();
 
       if (!val || !val.trim()) {
-        value = null;
+        return null;
       } else {
-        value = parse(val, inputFormat, referenceDate);
+        value = parse(val, this.internalFormat, referenceDate);
 
         // If failed, try normalizing common separators to the same symbol in
         // both the format string and user input.
@@ -324,18 +346,17 @@ export default defineComponent({
           const separatorRegex = /[\-\\\/\.]/g;
           value = parse(
             val.replace(separatorRegex, "-"),
-            inputFormat.replace(separatorRegex, "-"),
+            this.internalFormat.replace(separatorRegex, "-"),
             referenceDate
           );
         }
 
         if (
-          (!isValid(value) ||
-            // A year less than 100(0?) is also invalid.
-            // This means that the format for the year was "yyyy",
-            // but the user only entered "yy" (or entered 3 digits by accident, hence checking 1000 instead of 100).
-            value.getFullYear() <= 1000) &&
-          this.internalDateKind != "time"
+          !isValid(value) ||
+          // A year less than 100(0?) is also invalid.
+          // This means that the format for the year was "yyyy",
+          // but the user only entered "yy" (or entered 3 digits by accident, hence checking 1000 instead of 100).
+          value.getFullYear() <= 1000
         ) {
           if (this.native) {
             // HTML 5 native date input keyboard events are a disaster.
@@ -360,18 +381,7 @@ export default defineComponent({
           // Behavior of new Date() is generally always Invalid Date if you just give it a time,
           // except if you're on Chrome and give it an invalid time like "8:98 AM" - it'll give you "Thu Jan 01 1998 08:00:00".
           // Since the user wouldn't ever see the date part when only entering a time, there's no chance to detect this error.
-          value = parseDateUserInput(val, referenceDate);
-        }
-
-        // If that didn't work, don't change the underlying value. Instead, display an error.
-        if (!value || !isValid(value)) {
-          // TODO: i18n
-          this.error = [
-            'Invalid Date. Try formatting like "' +
-              format(new Date(), inputFormat) +
-              '"',
-          ];
-          value = null;
+          value = parseDateUserInput(val, referenceDate, this.internalDateKind);
         }
 
         if (value && this.internalTimeZone) {
@@ -381,9 +391,29 @@ export default defineComponent({
         }
       }
 
+      return value;
+    },
+
+    textInputChanged(val: string | Event, isNative: boolean) {
+      if (val instanceof Event) {
+        val = (val.target as HTMLInputElement)?.value;
+      }
+
+      this.error = [];
+      var value: Date | null | undefined;
+      const referenceDate = this.internalValueZoned || this.createDefaultDate();
+
+      if (isNative) {
+        value = parse(val, this.nativeInternalFormat, referenceDate);
+      } else {
+        // Capture the user's intermediate text input
+        this.internalTextValue = val;
+        value = this.parseUserInput(val);
+      }
+
       // Only emit an event if the input isn't invalid.
       // If we don't emit an input event, it gives the user a chance to correct their text.
-      if (!this.error.length) this.emitInput(value);
+      if (isValid(value)) this.emitInput(value);
     },
 
     timeChanged(val: string) {
@@ -443,7 +473,9 @@ export default defineComponent({
         (this.model as any)[this.dateMeta.name] = value;
       }
 
-      this.$emit("update:modelValue", value);
+      if (this.modelValue != value) {
+        this.$emit("update:modelValue", value);
+      }
     },
 
     close() {

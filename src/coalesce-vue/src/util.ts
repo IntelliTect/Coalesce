@@ -1,4 +1,4 @@
-import { addYears } from "date-fns";
+import { addYears, parse } from "date-fns";
 import type {
   ComponentPublicInstance,
   ReactiveFlags,
@@ -6,6 +6,7 @@ import type {
   WatchOptions,
 } from "vue";
 import { version } from "vue";
+import { DateKind } from "./metadata";
 
 export type OwnProps<T, TExclude> = Pick<T, Exclude<keyof T, keyof TExclude>>;
 
@@ -88,42 +89,119 @@ export function parseJSONDate(argument: string) {
   }
 }
 
-export function parseDateUserInput(input: string, defaultDate: Date) {
-  const mmdd = /^\s*(\d+)\s*[\-\/\\\.]\s*(\d+)\s*$/.exec(input);
-  if (mmdd) {
-    // Parse formats like "month/day" (without a year)
-    const month = parseInt(mmdd[1]) - 1;
-    const day = parseInt(mmdd[2]);
-    const parsed = new Date(
-      defaultDate.getFullYear(),
-      month,
-      day,
-      defaultDate.getHours(),
-      defaultDate.getMinutes(),
-      defaultDate.getSeconds(),
-      defaultDate.getMilliseconds()
-    );
+export function parseDateUserInput(
+  input: string,
+  defaultDate: Date,
+  dateKind: DateKind
+) {
+  // DO NOT do this if the input doesn't have a date part.
+  // Behavior of new Date() is generally always Invalid Date if you just give it a time,
+  // except if you're on Chrome and give it an invalid time like "8:98 AM" - it'll give you "Thu Jan 01 1998 08:00:00".
+  // Since the user wouldn't ever see the date part when only entering a time, there's no chance to detect this error.
+  input = input.trim();
+  if (dateKind !== "time") {
+    // Space is treated as a valid separator here because new Date() treats it like a separator.
+    const mmddyy = /^(\d+)([\-\/\\\. ])(\d+)(?:\2(\d+))?/.exec(input);
+    if (mmddyy) {
+      // Parse formats like "month/day" (without a year)
+      const month = parseInt(mmddyy[1]) - 1;
+      const sep = mmddyy[2];
+      const day = parseInt(mmddyy[3]);
+      const year = parseInt(mmddyy[4]);
 
-    // Find the closest occurrence of the given mm/dd to the defaultDate.
-    // For e.g., if the current date is Jan 1 2020 and a user enters 12/20,
-    // they most likely meant Dec 20 2019, not Dec 20 2020.
-    // Likewise, If the current date is Dec 20 2019 and the user enters 1/1,
-    // they most likely meant Jan 1 2020, not Jan 1 2019.
-    const bestGuessMaxDiffMs = 120 * 24 * 60 * 60 * 1000;
-    let bestMatch: Date = parsed;
-    let bestMatchDiff = Math.pow(2, 52);
-    for (const candidate of [
-      addYears(parsed, 1),
-      parsed,
-      addYears(parsed, -1),
-    ]) {
-      const diff = Math.abs(defaultDate.valueOf() - candidate.valueOf());
-      if (diff < bestMatchDiff && diff <= bestGuessMaxDiffMs) {
-        bestMatch = candidate;
-        bestMatchDiff = diff;
+      if (!year) {
+        // If the year is missing, add the best match to the current year
+        const parsed = new Date(
+          defaultDate.getFullYear(),
+          month,
+          day,
+          defaultDate.getHours(),
+          defaultDate.getMinutes(),
+          defaultDate.getSeconds(),
+          defaultDate.getMilliseconds()
+        );
+
+        // Find the closest occurrence of the given mm/dd to the defaultDate.
+        // For e.g., if the current date is Jan 1 2020 and a user enters 12/20,
+        // they most likely meant Dec 20 2019, not Dec 20 2020.
+        // Likewise, If the current date is Dec 20 2019 and the user enters 1/1,
+        // they most likely meant Jan 1 2020, not Jan 1 2019.
+        const bestGuessMaxDiffMs = 120 * 24 * 60 * 60 * 1000;
+        let bestMatch: Date = parsed;
+        let bestMatchDiff = Math.pow(2, 52);
+        for (const candidate of [
+          addYears(parsed, 1),
+          parsed,
+          addYears(parsed, -1),
+        ]) {
+          const diff = Math.abs(defaultDate.valueOf() - candidate.valueOf());
+          if (diff < bestMatchDiff && diff <= bestGuessMaxDiffMs) {
+            bestMatch = candidate;
+            bestMatchDiff = diff;
+          }
+        }
+
+        input = input
+          .replace(
+            mmddyy[0],
+            mmddyy[0].trim().replace(sep, "/") +
+              "/" +
+              bestMatch.getFullYear() +
+              " "
+          )
+          .trim();
+      } else {
+        // just normalize the separators:
+        input = input
+          .replace(
+            mmddyy[0],
+            mmddyy[0]
+              .trim()
+              .replace(
+                new RegExp(sep.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&"), "g"),
+                "/"
+              )
+          )
+          .trim();
       }
     }
-    return bestMatch;
+  }
+
+  if (dateKind != "date") {
+    // If the AM/PM doesn't have a space before it, new Date() can't parse it. Try to correct:
+    input = input.replace(/(\d)(a|p)/i, "$1 $2");
+
+    // If the AM/PM lacks the "M", add it (new Date() won't parse without it)
+    input = input.replace(/\b(a|p)\b/i, "$1m");
+
+    // If the time is all mashed together without a separator, fix it
+    input = input.replace(
+      /((?:^|\s+)\d{1,2})(\d{2})((?:\s+am|\s+pm)|$)/i,
+      "$1:$2$3"
+    );
+
+    // If it looks like there's hours but no minutes, fix it:
+    input = input.replace(/((?:^|\s)\d{1,2})(\s+(?:am|pm))\b/i, "$1:00$2");
+  }
+
+  const segments = [...input.matchAll(/\w+\b/g)].length;
+
+  if (dateKind == "time") {
+    // The date ctor can't parse time-only values.
+    if (segments == 1) {
+      // Single contiguous number - parse as 24h
+      return parse(input, "HHmm", defaultDate);
+    } else if (segments == 2) {
+      // Time with two parts number - parse as 24h
+      return parse(input, "HH:mm", defaultDate);
+    } else {
+      return parse(input, "hh:mm aa", defaultDate);
+    }
+  }
+
+  if (segments <= 1) {
+    // Prevent an input like "7" or "1 7" from parsing as "1/1/2007"
+    return undefined;
   }
 
   return new Date(input);

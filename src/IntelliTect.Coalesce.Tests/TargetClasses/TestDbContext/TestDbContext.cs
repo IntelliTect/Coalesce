@@ -23,6 +23,7 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         public DbSet<Test> Tests { get; set; }
 
         public DbSet<AbstractModel> AbstractModels { get; set; }
+        public DbSet<AbstractImpl> AbstractImpls { get; set; }
 
         public DbSet<EnumPk> EnumPks { get; set; }
 

@@ -7,5 +7,8 @@
         public string Discriminatior { get; set; }
     }
 
-    public class AbstractImpl : AbstractModel { }
+    public class AbstractImpl : AbstractModel
+    {
+        public string ImplOnlyField { get; set; }
+    }
 }

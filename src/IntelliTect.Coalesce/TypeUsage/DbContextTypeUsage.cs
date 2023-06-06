@@ -21,7 +21,7 @@ namespace IntelliTect.Coalesce.TypeUsage
                 // that don't have keys & other properties that Coalesce can work with.
                 .Where(p => p.Parent.Equals(classViewModel) || !p.PureType.FullNamespace.StartsWith(nameof(Microsoft)))
 
-                .Where(p => p.Type.IsA(typeof(DbSet<>)) && !p.PureType.IsAbstract)
+                .Where(p => p.Type.IsA(typeof(DbSet<>)))
                 .Select(p => new EntityTypeUsage(this, p.PureType, p.Name))
                 .ToList()
                 .AsReadOnly();

@@ -58,3 +58,7 @@ Primary Keys with `[DatabaseGenerated(DatabaseGeneratedOption.None)]` will be se
 ### [NotMapped]
 
 Model properties that aren't mapped to the database should be marked with `[NotMapped]` so that Coalesce doesn't try to load them from the database when [searching](/modeling/model-components/attributes/search.md) or carrying out the [Default Loading Behavior](/modeling/model-components/data-sources.md#default-loading-behavior).
+
+### [DefaultValue]
+
+Properties with `[DefaultValue]` will recieve an initial value when a new model is created. Note: this is different from an initializer, the member will not be initialized with this value, see [remarks](https://learn.microsoft.com/en-us/dotnet/api/system.componentmodel.defaultvalueattribute?view=net-7.0#remarks).

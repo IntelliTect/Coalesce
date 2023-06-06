@@ -14,6 +14,7 @@ using IntelliTect.Coalesce.Helpers.Search;
 using System.Linq.Expressions;
 using IntelliTect.Coalesce.TypeDefinition.Enums;
 using System.Diagnostics.CodeAnalysis;
+using Microsoft.EntityFrameworkCore;
 
 namespace IntelliTect.Coalesce.TypeDefinition
 {
@@ -281,6 +282,11 @@ namespace IntelliTect.Coalesce.TypeDefinition
             this.GetAttributeValue<DisplayNameAttribute>(a => a.DisplayName) ??
             this.GetAttributeValue<DisplayAttribute>(a => a.Name) ??
             Name.ToProperCase();
+
+        /// <summary>
+        /// Returns a default value if provided.
+        /// </summary>
+        public object? DefaultValue => this.GetAttributeValue<DefaultValueAttribute>(nameof(DefaultValueAttribute.Value));
 
         /// <summary>
         /// Returns the description from the DisplayAttribute, if present.

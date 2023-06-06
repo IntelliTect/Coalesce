@@ -274,6 +274,7 @@ export interface ValueMeta<TType extends TypeDiscriminator> extends Metadata {
   readonly role: ValueRole;
   readonly type: TType;
   readonly description?: string;
+  readonly defaultValue?: string | number | boolean;
 }
 
 /**

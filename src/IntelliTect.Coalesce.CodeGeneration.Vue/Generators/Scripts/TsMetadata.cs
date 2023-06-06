@@ -301,6 +301,23 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                         TypeDiscriminator.Date
                 ))
                 {
+                    if (prop.DefaultValue is not null)
+                    {
+                        if (prop.Type.TsTypeKind is TypeDiscriminator.Date)
+                        {
+                            throw new NotSupportedException("Default date values currently not supported.");
+                        }
+                        if (prop.DefaultValue is string stringValue)
+                        {
+                            b.StringProp("defaultValue", stringValue);
+                        }
+                        else
+                        {
+                            // ToLower in case it happens to be boolean here.
+                            b.Prop("defaultValue", prop.DefaultValue.ToString().ToLower());
+                        }
+                    }
+
                     List<string> rules = GetValidationRules(prop, (prop.ReferenceNavigationProperty ?? prop).DisplayName);
 
                     if (rules.Count > 0)

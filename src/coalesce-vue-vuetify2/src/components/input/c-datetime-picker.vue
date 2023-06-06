@@ -171,15 +171,8 @@ import {
   setMinutes,
   startOfDay,
 } from "date-fns";
-
-// These weird imports from date-fns-tz are needed because date-fns-tz
-// doesn't define its esm exports from its root correctly.
-// https://github.com/marnusw/date-fns-tz/blob/0577249fb6c47ad7b6a84826e90d976dac9ab52e/README.md#esm-and-commonjs
-import format from "date-fns-tz/esm/format";
-import utcToZonedTime from "date-fns-tz/esm/utcToZonedTime";
-import zonedTimeToUtc from "date-fns-tz/esm/zonedTimeToUtc";
-
-import { getDefaultTimeZone, parseDateUserInput } from "coalesce-vue";
+import { format, utcToZonedTime, zonedTimeToUtc } from "date-fns-tz";
+import { DateKind, getDefaultTimeZone, parseDateUserInput } from "coalesce-vue";
 import { defineComponent, PropType } from "vue";
 import { makeMetadataProps, useMetadataProps } from "../c-metadata-component";
 
@@ -198,7 +191,7 @@ export default defineComponent({
   props: {
     ...makeMetadataProps(),
     value: { required: false, type: Date as PropType<Date | null | undefined> },
-    dateKind: { type: String },
+    dateKind: { type: String as PropType<DateKind | null | undefined> },
     dateFormat: { type: String },
     readonly: { type: Boolean },
     disabled: { type: Boolean },
@@ -298,7 +291,7 @@ export default defineComponent({
       return utcToZonedTime(value, this.internalTimeZone);
     },
 
-    internalDateKind() {
+    internalDateKind(): DateKind {
       if (this.dateKind) return this.dateKind;
       if (this.dateMeta) return this.dateMeta.dateKind;
       return "datetime";
@@ -409,21 +402,14 @@ export default defineComponent({
           );
         }
 
-        // If the input didn't match our format exactly,
-        // try parsing user input with general formatting interpretation (trying to be a good citizen).
-        // DO NOT do this if the input doesn't have a date part.
-        // Behavior of new Date() is generally always Invalid Date if you just give it a time,
-        // except if you're on Chrome and give it an invalid time like "8:98 AM" - it'll give you "Thu Jan 01 1998 08:00:00".
-        // Since the user wouldn't ever see the date part when only entering a time, there's no chance to detect this error.
         if (
-          (!isValid(value) ||
-            // A year less than 100(0?) is also invalid.
-            // This means that the format for the year was "yyyy",
-            // but the user only entered "yy" (or entered 3 digits by accident, hence checking 1000 instead of 100).
-            value.getFullYear() <= 1000) &&
-          this.internalFormat != "time"
+          !isValid(value) ||
+          // A year less than 100(0?) is also invalid.
+          // This means that the format for the year was "yyyy",
+          // but the user only entered "yy" (or entered 3 digits by accident, hence checking 1000 instead of 100).
+          value.getFullYear() <= 1000
         ) {
-          value = parseDateUserInput(val, referenceDate);
+          value = parseDateUserInput(val, referenceDate, this.internalDateKind);
         }
 
         // If that didn't work, don't change the underlying value. Instead, display an error.

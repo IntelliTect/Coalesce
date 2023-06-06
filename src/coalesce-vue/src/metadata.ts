@@ -319,10 +319,12 @@ export interface BooleanValue extends ValueMeta<"boolean"> {
 /** Represents the usage of a primitive value (string, number, or bool) */
 export type PrimitiveValue = StringValue | NumberValue | BooleanValue;
 
+export type DateKind = "date" | "time" | "datetime";
+
 /** Represents the usage of a date */
 export interface DateValue extends ValueMeta<"date"> {
   readonly role: "value";
-  readonly dateKind: "date" | "time" | "datetime";
+  readonly dateKind: DateKind;
 
   /** True if the date value is insensitive to timezone offsets
    * (i.e. the C# type is `DateTime`, not `DateTimeOffset`) */

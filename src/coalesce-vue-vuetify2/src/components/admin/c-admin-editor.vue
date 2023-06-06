@@ -29,16 +29,16 @@
     </v-toolbar>
 
     <v-card-text>
-      <v-form ref="form">
-        <c-loader-status
-          :loaders="{
-            [!showContent ? 'no-initial-content' : 'no-error-content']: [
-              model.$load,
-            ],
-            '': [model.$save],
-          }"
-        >
-          <template #default>
+      <c-loader-status
+        :loaders="{
+          [!showContent ? 'no-initial-content' : 'no-error-content']: [
+            model.$load,
+          ],
+          '': [model.$save],
+        }"
+      >
+        <template #default>
+          <v-form ref="form">
             <v-row
               v-for="prop in showProps"
               :key="prop.name"
@@ -129,15 +129,15 @@
                 </v-card>
               </v-col>
             </v-row>
-          </template>
-        </c-loader-status>
-      </v-form>
+          </v-form>
+        </template>
+      </c-loader-status>
     </v-card-text>
   </v-card>
 </template>
 
 <script lang="ts">
-import { PropType, defineComponent } from "vue";
+import { PropType, defineComponent, ref, watch } from "vue";
 import {
   Model,
   ViewModel,
@@ -153,8 +153,14 @@ import { isPropReadOnly } from "../../util";
 export default defineComponent({
   name: "c-admin-editor",
 
-  mounted() {
-    (this.$refs.form as any).validate();
+  setup() {
+    const form = ref<any>();
+    // Validate the form when it is rendered to trigger all validation messages.
+    // This will either be immediate for a create scenario, or delayed until load for an edit.
+    watch(form, (form) => {
+      form?.validate?.();
+    });
+    return { form };
   },
 
   props: {

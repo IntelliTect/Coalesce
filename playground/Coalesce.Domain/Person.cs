@@ -130,13 +130,13 @@ namespace Coalesce.Domain
         /// </summary>
         public Company Company { get; set; }
 
-#nullable restore
-
         // Ad-hoc test case for https://github.com/IntelliTect/Coalesce/issues/109
         // Migrate to a real test case once real tests exist for the code gen.
         [NotMapped]
         public ICollection<string> ArbitraryCollectionOfStrings { get; set; }
 
+
+#nullable restore
 
         /// <summary>
         /// Sets the FirstName to the given text.

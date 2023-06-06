@@ -374,14 +374,14 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                     Min(min, minMessage);
                 else if (prop.GetValidationAttribute<MinLengthAttribute, int>(x => x.Length) is (true, int min2, string min2Message))
                     Min(min2, min2Message);
-                else if (prop.GetAttributeValue<ClientValidationAttribute, int>(a => a.MinLength) is int minLength)
+                else if (prop.GetAttributeValue<ClientValidationAttribute, int>(a => a.MinLength) is int minLength and not int.MaxValue)
                     Min(minLength, clientValidationError);
 
                 if (prop.GetValidationAttribute<StringLengthAttribute, int>(x => x.MaximumLength) is (true, int max, string maxMessage))
                     Max(max, maxMessage);
                 else if (prop.GetValidationAttribute<MaxLengthAttribute, int>(x => x.Length) is (true, int max2, string max2Message))
                     Max(max2, max2Message);
-                else if (prop.GetAttributeValue<ClientValidationAttribute, int>(a => a.MaxLength) is int maxLength)
+                else if (prop.GetAttributeValue<ClientValidationAttribute, int>(a => a.MaxLength) is int maxLength and not int.MinValue)
                     Max(maxLength, clientValidationError);
 
                 if (prop.GetValidationAttribute<UrlAttribute>() is (true, string urlMessage))
@@ -404,10 +404,10 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                 }
                 else
                 {
-                    if (prop.GetAttributeValue<ClientValidationAttribute, double>(a => a.MinValue) is double minValue)
+                    if (prop.GetAttributeValue<ClientValidationAttribute, double>(a => a.MinValue) is double minValue and not double.MaxValue)
                         Min(minValue, clientValidationError);
 
-                    if (prop.GetAttributeValue<ClientValidationAttribute, double>(a => a.MaxValue) is double maxValue)
+                    if (prop.GetAttributeValue<ClientValidationAttribute, double>(a => a.MaxValue) is double maxValue and not double.MinValue)
                         Max(maxValue, clientValidationError);
                 }
             }

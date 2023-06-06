@@ -212,11 +212,14 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
                 }
                 b.Line();
 
-                if (method.GetAttributeValue<ExecuteAttribute, bool>(e => e.ValidateAttributes) == true)
+                var validateAttributes = method.GetAttributeValue<ExecuteAttribute, bool>(
+                    e => e.ValidateAttributes, 
+                    e => e.ValidateAttributesHasValue);
+                if (validateAttributes == true)
                 {
                     WriteMethodValidation(b, method);
                 }
-                else if (method.GetAttributeValue<ExecuteAttribute, bool>(e => e.ValidateAttributes) == null)
+                else if (validateAttributes == null)
                 {
                     using (b.Block("if (Context.Options.ValidateAttributesForMethods)"))
                     {

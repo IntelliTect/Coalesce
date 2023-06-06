@@ -98,6 +98,12 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         [Range(1, 100)]
         public int NonNullNonZeroInt { get; set; }
 
+        [ClientValidation(MinValue = 0, MaxValue = 10)]
+        public int ClientValidationInt { get; set; }
+
+        [ClientValidation(MinLength = 0, MaxLength = 10)]
+        public string ClientValidationString { get; set; }
+
 
         public Case.Statuses? EnumNullable { get; set; }
 
@@ -213,6 +219,12 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         [Coalesce]
         public InitRecordWithDefaultCtor MethodWithInitRecord(InitRecordWithDefaultCtor rec) => new InitRecordWithDefaultCtor { String = "a", Num = 42 };
 #endif
+
+        [Coalesce, Execute(ValidateAttributes = false)]
+        public ItemResult MethodWithValidationExplicitOff([Required] ValidationTarget target) => true;
+
+        [Coalesce, Execute(ValidateAttributes = true)]
+        public ItemResult MethodWithValidationExplicitOn([Required] ValidationTarget target) => true;
     }
 
     [Create(SecurityPermissionLevels.DenyAll)]

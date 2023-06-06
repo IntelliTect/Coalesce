@@ -35,6 +35,12 @@ namespace IntelliTect.Coalesce.DataAnnotations
         /// If true, validation of <see cref="ValidationAttribute"/> on parameters will be performed by the server.
         /// This setting defaults to the value of <see cref="CoalesceOptions.ValidateAttributesForMethods"/>.
         /// </summary>
-        public bool? ValidateAttributes { get; set; }
+        public bool ValidateAttributes
+        {
+            get => _ValidateAttributes.GetValueOrDefault();
+            set => _ValidateAttributes = value;
+        }
+        public bool ValidateAttributesHasValue => _ValidateAttributes.HasValue;
+        private bool? _ValidateAttributes;
     }
 }

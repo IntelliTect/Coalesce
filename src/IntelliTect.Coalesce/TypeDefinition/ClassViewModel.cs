@@ -440,7 +440,10 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// Returns a human-readable string that represents the name of this type to the client.
         /// </summary>
-        public string DisplayName => ClientTypeName.ToProperCase();
+        public string DisplayName =>
+            this.GetAttributeValue<DisplayNameAttribute>(a => a.DisplayName) ??
+            this.GetAttributeValue<DisplayAttribute>(a => a.Name) ??
+            ClientTypeName.ToProperCase();
 
         public bool IsDbMappedType => DbContext != null;
 

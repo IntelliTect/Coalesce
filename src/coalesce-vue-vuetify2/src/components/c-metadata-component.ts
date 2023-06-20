@@ -234,12 +234,19 @@ export function buildVuetifyAttrs(
 
 export function makeMetadataProps<TModel = Model<ClassType>>() {
   return {
+    /** An object owning the value that is specified by the `for` prop. */
+    model: { type: [Object, Function] as PropType<TModel | null>, default: null },
+
+    /** A metadata specifier for the value being bound. One of:
+     * * A string with the name of the value belonging to `model`. E.g. `"firstName"`.
+     * * A direct reference to the metadata object. E.g. `model.$metadata.props.firstName`.
+     * * A string in dot-notation that starts with a type name. E.g. `"Person.firstName"`.
+     */
     for: {
       required: false,
       type: [String, Object] as PropType<ForSpec>,
       default: null,
     },
-    model: { type: Object as PropType<TModel | null>, default: null },
   };
 }
 

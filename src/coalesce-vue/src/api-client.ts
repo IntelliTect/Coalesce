@@ -168,8 +168,10 @@ export type StandardParameters =
  * that is suitable for use as a URL querystring.
  * @param parameters The parameters to map.
  */
-export function mapParamsToDto(parameters?: StandardParameters) {
-  if (!parameters) return null;
+export function mapParamsToDto(parameters?: StandardParameters): {
+  [s: string]: string;
+} {
+  if (!parameters) return {};
 
   // Assume the widest type, which is ListParameters.
   var wideParams = parameters as Partial<ListParameters>;
@@ -293,18 +295,26 @@ export function mapQueryToParams<T extends StandardParameters>(
   if (parameters instanceof DataSourceParameters) {
     if ("includes" in dto) parameters.includes = dto.includes;
 
-    if ("dataSource" in dto && dto.dataSource in modelMeta.dataSources) {
-      const dataSource = mapToModel({}, modelMeta.dataSources[dto.dataSource]);
-      parameters.dataSource = dataSource;
+    if ("dataSource" in dto) {
+      var dataSourceMeta = Object.values(modelMeta.dataSources).find(
+        // Match case insensitively on the DS name, because it feels like
+        // you should be able to use the PascalCase DS name here.
+        (d) => d.name.toLowerCase() == dto.dataSource.toLowerCase()
+      );
 
-      for (const key in dto) {
-        if (key.startsWith("dataSource.")) {
-          var paramName = key.replace("dataSource.", "");
-          if (paramName in dataSource.$metadata.props) {
-            (dataSource as any)[paramName] = mapToModel(
-              dto[key],
-              dataSource.$metadata.props[paramName]
-            );
+      if (dataSourceMeta) {
+        const dataSource = mapToModel({}, dataSourceMeta);
+        parameters.dataSource = dataSource;
+
+        for (const key in dto) {
+          if (key.startsWith("dataSource.")) {
+            var paramName = key.replace("dataSource.", "");
+            if (paramName in dataSource.$metadata.props) {
+              (dataSource as any)[paramName] = mapToModel(
+                dto[key],
+                dataSource.$metadata.props[paramName]
+              );
+            }
           }
         }
       }

@@ -45,6 +45,7 @@ export default defineComponent({
         );
       }
       listVM = new ListViewModel.typeLookup![this.type]();
+      listVM.$includes = "admin-list";
     }
 
     return {

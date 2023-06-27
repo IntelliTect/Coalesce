@@ -42,6 +42,8 @@ There are a few values of `includes` that are either set by default in the auto-
 | Value | Description |
 |------|---|
 | `'none'` | Setting `includes` to ``none`` suppresses the [Default Loading Behavior](/modeling/model-components/data-sources.md#default-loading-behavior) provided by the [Standard Data Source](/modeling/model-components/data-sources.md#standard-data-source) - The resulting data will be the requested object (or list of objects) and nothing more. |
+| `'admin-list'` | Used when loading a list of objects in the [Vue admin list page](/stacks/vue/coalesce-vue-vuetify/components/c-admin-table-page.md). |
+| `'admin-editor'` | Used when loading an object in the [Vue admin editor component](/stacks/vue/coalesce-vue-vuetify/components/c-admin-editor.md). |
 | `'Editor'` | Used when loading an object in the generated Knockout CreateEdit views.  |
 | `'<ModelName>ListGen'` | Used when loading a list of objects in the generated Knockout Table and Cards views. For example, `PersonListGen` |
 

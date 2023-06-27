@@ -49,6 +49,7 @@ export default defineComponent({
         );
       }
       listVM = ref(new ListViewModel.typeLookup![props.type]() as any);
+      listVM.value.$includes = "admin-list";
     }
 
     return { listVM, ...useMetadataProps(props) };

@@ -297,8 +297,9 @@ export function mapQueryToParams<T extends StandardParameters>(
 
     if ("dataSource" in dto) {
       var dataSourceMeta = Object.values(modelMeta.dataSources).find(
-        // Match case insensitively on the DS name, because it feels like
-        // you should be able to use the PascalCase DS name here.
+        // Match case insensitively on the DS name,
+        // because sometimes it'll be camelCase (keys of `modelMeta.dataSources`)
+        // and sometimes it'll be PascalCase (values of `modelMeta.dataSources[x].name`).
         (d) => d.name.toLowerCase() == dto.dataSource.toLowerCase()
       );
 

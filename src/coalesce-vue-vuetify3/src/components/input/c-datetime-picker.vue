@@ -332,7 +332,7 @@ export default defineComponent({
     },
 
     parseUserInput(val: string) {
-      var value: Date | null | undefined;
+      var value: Date | null;
       const referenceDate = this.internalValueZoned || this.createDefaultDate();
 
       if (!val || !val.trim()) {
@@ -372,7 +372,7 @@ export default defineComponent({
             // So, we have to just ignore the user's input in this case.
 
             // Ignore all events if the year isn't fully typed.
-            return;
+            return null;
           }
 
           // If the input didn't match our format exactly,
@@ -381,7 +381,9 @@ export default defineComponent({
           // Behavior of new Date() is generally always Invalid Date if you just give it a time,
           // except if you're on Chrome and give it an invalid time like "8:98 AM" - it'll give you "Thu Jan 01 1998 08:00:00".
           // Since the user wouldn't ever see the date part when only entering a time, there's no chance to detect this error.
-          value = parseDateUserInput(val, referenceDate, this.internalDateKind);
+          value =
+            parseDateUserInput(val, referenceDate, this.internalDateKind) ??
+            null;
         }
 
         if (value && this.internalTimeZone) {
@@ -400,10 +402,15 @@ export default defineComponent({
       }
 
       this.error = [];
-      var value: Date | null | undefined;
+      var value: Date | null;
       const referenceDate = this.internalValueZoned || this.createDefaultDate();
 
       if (isNative) {
+        if (val == "") {
+          // Emptystring is emitted when the user clicks "clear" in the date picker popup
+          this.emitInput(null);
+          return;
+        }
         value = parse(val, this.nativeInternalFormat, referenceDate);
       } else {
         // Capture the user's intermediate text input
@@ -468,7 +475,7 @@ export default defineComponent({
       }
     },
 
-    emitInput(value: any) {
+    emitInput(value: Date | null) {
       if (this.model && this.dateMeta) {
         (this.model as any)[this.dateMeta.name] = value;
       }

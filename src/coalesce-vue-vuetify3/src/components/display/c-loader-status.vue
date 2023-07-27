@@ -301,8 +301,10 @@ export default defineComponent({
     // overflow: hidden;
   }
 
-  ul {
-    padding-left: 24px;
+  .c-loader-status--errors {
+    ul {
+      padding-left: 24px;
+    }
   }
   .c-loader-status--error-message {
     white-space: pre-wrap;

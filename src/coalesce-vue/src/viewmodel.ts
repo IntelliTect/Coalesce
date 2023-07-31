@@ -73,7 +73,7 @@ export abstract class ViewModel<
   /** See comments on ReactiveFlags_SKIP for explanation.
    * @internal
    */
-  private readonly [ReactiveFlags_SKIP] = true;
+  readonly [ReactiveFlags_SKIP] = true;
 
   /** Static lookup of all generated ViewModel types. */
   public static typeLookup: ViewModelTypeLookup | null = null;
@@ -856,7 +856,7 @@ export abstract class ListViewModel<
    * even if the value didn't change.
    * @internal
    */
-  private readonly [ReactiveFlags_SKIP] = true;
+  readonly [ReactiveFlags_SKIP] = true;
 
   /** Static lookup of all generated ListViewModel types. */
   public static typeLookup: ListViewModelTypeLookup | null = null;
@@ -1083,7 +1083,7 @@ export class ServiceViewModel<
    * even if the value didn't change.
    * @internal
    */
-  private readonly [ReactiveFlags_SKIP] = true;
+  readonly [ReactiveFlags_SKIP] = true;
 
   /** Static lookup of all generated ServiceViewModel types. */
   public static typeLookup: ServiceViewModelTypeLookup | null = null;
@@ -1884,4 +1884,14 @@ function startAutoCall(
     state.vue = null; // cleanup for GC
   };
   state.active = true;
+}
+
+//@ts-expect-error: only exists in vue3, but not vue2.
+declare module "@vue/reactivity" {
+  export interface RefUnwrapBailTypes {
+    // Prevent Vue's type helpers from brutalizing coalesce view models,
+    // which are manually marked to skip reactivity (ReactiveFlags_SKIP)
+    // and therefore are never unwrapped anyway.
+    coalesceViewModels: ViewModel | ListViewModel | ServiceViewModel;
+  }
 }

@@ -497,7 +497,7 @@ export class ApiClient<T extends ApiRoutedType> {
   /** See comments on ReactiveFlags_SKIP for explanation.
    * @internal
    */
-  private readonly [ReactiveFlags_SKIP] = true;
+  readonly [ReactiveFlags_SKIP] = true;
 
   constructor(public $metadata: T) {}
 
@@ -1146,7 +1146,7 @@ export abstract class ApiState<
   /** See comments on ReactiveFlags_SKIP for explanation.
    * @internal
    */
-  private readonly [ReactiveFlags_SKIP] = true;
+  readonly [ReactiveFlags_SKIP] = true;
 
   /** The metadata of the method being called, if it was provided. */
   abstract $metadata?: Method;
@@ -1896,3 +1896,13 @@ export type AnyArgCaller<
 > =
   | ListApiStateWithArgs<TArgs, TArgsObj, TResult>
   | ItemApiStateWithArgs<TArgs, TArgsObj, TResult>;
+
+//@ts-expect-error: only exists in vue3, but not vue2.
+declare module "@vue/reactivity" {
+  export interface RefUnwrapBailTypes {
+    // Prevent Vue's type helpers from brutalizing these types,
+    // which are manually marked to skip reactivity (ReactiveFlags_SKIP)
+    // and therefore are never unwrapped anyway.
+    coalesceApiModels: ApiState<any, any> | ApiClient<any>;
+  }
+}

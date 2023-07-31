@@ -79,12 +79,19 @@ export abstract class ViewModel<
   public static typeLookup: ViewModelTypeLookup | null = null;
 
   // TODO: Do $parent and $parentCollection need to be Set<>s in order to handle objects being in multiple collections or parented to multiple parents? Could be useful.
+
+  /** @internal  */
   private $parent: any = null;
+
+  /** @internal  */
   private $parentCollection: this[] | null = null;
 
-  // Underlying object which will hold the backing values
-  // of the custom getters/setters. Not for external use.
-  // Must exist in order to for Vue to pick it up and add reactivity.
+  /** 
+    Underlying object which will hold the backing values
+    of the custom getters/setters. Not for external use.
+    Must exist in order to for Vue to pick it up and add reactivity.
+    @internal 
+  */
   private $data: TModel & { [propName: string]: any };
 
   /**
@@ -108,11 +115,17 @@ export abstract class ViewModel<
     (this as any)[this.$metadata.keyProp.name] = val;
   }
 
-  // This bool could be computed from the size of the set,
-  // but this wouldn't trigger reactivity because Vue 2 doesn't have reactivity
-  // for types like Set and Map.
+  /**
+    This bool could be computed from the size of the set,
+    but this wouldn't trigger reactivity because Vue 2 doesn't have reactivity
+    for types like Set and Map.
+    @internal 
+   */
   private _isDirty = ref(false);
+
+  /** @internal */
   private _dirtyProps = new Set<string>();
+
   /**
    * Returns true if the values of the savable data properties of this ViewModel
    * have changed since the last load, save, or the last time $isDirty was set to false.
@@ -163,7 +176,9 @@ export abstract class ViewModel<
     return this._dirtyProps.has(propName);
   }
 
+  /** @internal */
   private _params = ref(new DataSourceParameters());
+
   /** The parameters that will be passed to `/get`, `/save`, and `/delete` calls. */
   public get $params() {
     return this._params.value;
@@ -192,12 +207,14 @@ export abstract class ViewModel<
    * and whose keys are one of the following formats:
    *  - `"propName.ruleName"` - ignores the given rule on the given property.
    *  - `"propName.*"` - ignores rules of the given propName on all properties
+   * @internal
    */
   private $ignoredRules: { [identifier: string]: boolean } | null = null;
 
   /**
    * A two-layer map, the first layer being property names and the second layer being rule identifiers,
    * of custom validation rules that should be applied to this viewmodel instance.
+   * @internal
    */
   private $customRules: {
     [propName: string]: {
@@ -208,10 +225,13 @@ export abstract class ViewModel<
   /**
    * Cached set of the effective rules for each property on the model.
    * Will be invalidated when custom rules and/or ignores are changed.
+   * @internal
    */
   private _effectiveRules: {
     [propName: string]: undefined | Array<(val: any) => true | string>;
   } | null = null;
+
+  /** @internal */
   private get $effectiveRules() {
     let effectiveRules = this._effectiveRules;
     if (effectiveRules) return effectiveRules;
@@ -387,7 +407,9 @@ export abstract class ViewModel<
    */
   public $saveMode: "surgical" | "whole" = "surgical";
 
+  /** @internal */
   private _savingProps = ref<ReadonlySet<string>>(emptySet);
+
   /** When `$save.isLoading == true`, contains the properties of the model currently being saved by `$save` (including autosaves).
    *
    * Does not include non-dirty properties even if `$saveMode == 'whole'`.
@@ -503,6 +525,7 @@ export abstract class ViewModel<
     return $save;
   }
 
+  /** @internal */
   private updatedRelatedForeignKeysWithCurrentPrimaryKey() {
     const pkValue = this.$primaryKey;
 
@@ -609,7 +632,7 @@ export abstract class ViewModel<
     return $delete;
   }
 
-  // Internal autosave state. We must use <any> instead of <this> here because reasons.
+  /** @internal Internal autosave state. */
   private _autoSaveState?: AutoCallState<AutoSaveOptions<any>>;
 
   /**
@@ -831,13 +854,16 @@ export abstract class ListViewModel<
    * and since the setter is defined on the prototype and Vue checks hasOwnProperty
    * when determining if a field is new on an object, all setters trigger reactivity
    * even if the value didn't change.
+   * @internal
    */
   private readonly [ReactiveFlags_SKIP] = true;
 
   /** Static lookup of all generated ListViewModel types. */
   public static typeLookup: ListViewModelTypeLookup | null = null;
 
+  /** @internal  */
   private _params = ref(new ListParameters());
+
   /** The parameters that will be passed to `/list` and `/count` calls. */
   public get $params() {
     return this._params.value;
@@ -864,8 +890,10 @@ export abstract class ListViewModel<
 
   /**
    * The current set of items that have been loaded into this ListViewModel.
+   * @internal
    */
   private _items = ref();
+
   public get $items(): TItem[] {
     return (this._items.value as unknown as TItem[]) ?? [];
   }
@@ -955,7 +983,7 @@ export abstract class ListViewModel<
     return $count;
   }
 
-  // Internal autoload state
+  /** @internal Internal autoload state */
   private _autoLoadState = new AutoCallState();
 
   /**
@@ -1053,6 +1081,7 @@ export class ServiceViewModel<
    * and since the setter is defined on the prototype and Vue checks hasOwnProperty
    * when determining if a field is new on an object, all setters trigger reactivity
    * even if the value didn't change.
+   * @internal
    */
   private readonly [ReactiveFlags_SKIP] = true;
 

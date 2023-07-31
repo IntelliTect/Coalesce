@@ -944,12 +944,6 @@ export function valueDisplay(
 }
 
 const coalescePendingQuery = Symbol();
-/** @internal */
-declare module "vue-router/types/router" {
-  interface VueRouter {
-    [coalescePendingQuery]?: any;
-  }
-}
 
 export function bindToQueryString(
   vue: VueInstance,
@@ -972,7 +966,8 @@ export function bindToQueryString(
       }
 
       const newQuery = {
-        ...(vue.$router[coalescePendingQuery] || vue.$route.query),
+        ...//@ts-expect-error
+        (vue.$router[coalescePendingQuery] || vue.$route.query),
         [queryKey]:
           v == null || v === ""
             ? undefined
@@ -993,7 +988,9 @@ export function bindToQueryString(
       // So, we store the pending new query value so that subsequent updates
       // during the same tick can read the previous update's desired end state,
       // rather than every update reading the beginning state.
+      //@ts-expect-error
       vue.$router[coalescePendingQuery] = newQuery;
+      //@ts-expect-error
       nextTick(() => delete vue.$router[coalescePendingQuery]);
 
       vue.$router[mode]({

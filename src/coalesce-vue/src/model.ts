@@ -1,6 +1,6 @@
 import { formatDistanceToNow, lightFormat } from "date-fns";
 import { format, utcToZonedTime } from "date-fns-tz";
-import { getCurrentInstance } from "vue";
+import { getCurrentInstance, nextTick } from "vue";
 
 import type {
   ClassType,
@@ -943,6 +943,14 @@ export function valueDisplay(
   );
 }
 
+const coalescePendingQuery = Symbol();
+/** @internal */
+declare module "vue-router/types/router" {
+  interface VueRouter {
+    [coalescePendingQuery]?: any;
+  }
+}
+
 export function bindToQueryString(
   vue: VueInstance,
   obj: any, // TODO: Maybe only support objects with $metadata? Would eliminate need for `parse`, and could allow for very strong typings.
@@ -962,21 +970,34 @@ export function bindToQueryString(
           "Could not find $router or $route on the component instance. Is vue-router installed?"
         );
       }
+
+      const newQuery = {
+        ...(vue.$router[coalescePendingQuery] || vue.$route.query),
+        [queryKey]:
+          v == null || v === ""
+            ? undefined
+            : // Use metadata to format the value if the obj has any.
+            obj?.$metadata?.params?.[key]
+            ? mapToDto(v, obj.$metadata.params[key])?.toString()
+            : obj?.$metadata?.props?.[key]
+            ? mapToDto(v, obj.$metadata.props[key])?.toString()
+            : // TODO: Add $metadata to DataSourceParameters/FilterParameters/ListParameters, and then support that as well.
+              // Fallback to .tostring()
+              String(v) ?? undefined,
+      };
+
+      // Fix https://github.com/IntelliTect/Coalesce/issues/310:
+      // Vue router processes route changes delayed by a tick,
+      // so if multiple querystring-bound values change in the same tick,
+      // changes subsequent to the first will be reading a stale copy of `vue.$route.query`.
+      // So, we store the pending new query value so that subsequent updates
+      // during the same tick can read the previous update's desired end state,
+      // rather than every update reading the beginning state.
+      vue.$router[coalescePendingQuery] = newQuery;
+      nextTick(() => delete vue.$router[coalescePendingQuery]);
+
       vue.$router[mode]({
-        query: {
-          ...vue.$route.query,
-          [queryKey]:
-            v == null || v === ""
-              ? undefined
-              : // Use metadata to format the value if the obj has any.
-              obj?.$metadata?.params?.[key]
-              ? mapToDto(v, obj.$metadata.params[key])?.toString()
-              : obj?.$metadata?.props?.[key]
-              ? mapToDto(v, obj.$metadata.props[key])?.toString()
-              : // TODO: Add $metadata to DataSourceParameters/FilterParameters/ListParameters, and then support that as well.
-                // Fallback to .tostring()
-                String(v) ?? undefined,
-        },
+        query: newQuery,
       }).catch((err: any) => {});
     }
   );

@@ -8,6 +8,7 @@
     "noImplicitOverride": true,
     "strict": true,
     "skipLibCheck": true,
+    "stripInternal": true,
 
     "module": "esnext",
     "moduleResolution": "node",

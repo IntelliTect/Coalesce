@@ -38,6 +38,7 @@ const router = createRouter({
   routes: [
     { path: '/', component: () => import("@/components/HelloWorld.vue"), },
     { path: '/test', component: () => import("./components/test.vue"), },
+    { path: '/test-setup', component: () => import("./components/test-setup.vue"), },
     { path: '/admin/:type', name: 'coalesce-admin-list', component: CAdminTablePage, props: route => ({ ...route.params, color: 'primary' }) },
     { path: '/admin/:type/item/:id?', name: 'coalesce-admin-item', component: CAdminEditorPage, props: route => ({ ...route.params, color: 'primary' }) }
   ]

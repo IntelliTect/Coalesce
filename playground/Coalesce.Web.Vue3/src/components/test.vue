@@ -20,7 +20,7 @@
         density="compact"
         variant="outlined"
         date-kind="datetime"
-        v-model="date"
+        v-model="date" clearable
       />
       <c-datetime-picker
         label="Date"

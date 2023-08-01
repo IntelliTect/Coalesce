@@ -402,15 +402,19 @@ export default defineComponent({
       }
 
       this.error = [];
+
+      if (val == "" || val == null) {
+        // Emptystring is emitted when the user clicks "clear" in the date picker popup,
+        // or if they delete all characters from the input.
+        this.internalTextValue = "";
+        this.emitInput(null);
+        return;
+      }
+
       var value: Date | null;
       const referenceDate = this.internalValueZoned || this.createDefaultDate();
 
       if (isNative) {
-        if (val == "") {
-          // Emptystring is emitted when the user clicks "clear" in the date picker popup
-          this.emitInput(null);
-          return;
-        }
         value = parse(val, this.nativeInternalFormat, referenceDate);
       } else {
         // Capture the user's intermediate text input

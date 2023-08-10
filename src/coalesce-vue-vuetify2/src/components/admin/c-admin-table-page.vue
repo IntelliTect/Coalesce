@@ -1,5 +1,9 @@
 <template>
-  <v-container fluid class="c-admin-table-page">
+  <v-container
+    fluid
+    class="c-admin-table-page"
+    :class="'type-' + metadata.name"
+  >
     <c-admin-table class="c-admin-table-page--table" :list="listVM" query-bind>
     </c-admin-table>
 

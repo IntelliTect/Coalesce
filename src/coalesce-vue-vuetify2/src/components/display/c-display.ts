@@ -141,7 +141,7 @@ export default defineComponent({
         case "url-image":
           return _c("img", {
             ...ctx.data,
-            attrs: { ...ctx.data.attrs, src: valueString, title: valueString },
+            attrs: { ...ctx.data.attrs, src: valueString },
           });
         case "color":
           return _c(

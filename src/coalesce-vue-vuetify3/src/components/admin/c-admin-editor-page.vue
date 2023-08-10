@@ -1,5 +1,5 @@
 <template>
-  <v-container class="c-admin-editor-page">
+  <v-container class="c-admin-editor-page" :class="'type-' + metadata.name">
     <c-admin-editor
       class="c-admin-editor-page--editor"
       :model="viewModel"

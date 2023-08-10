@@ -10,6 +10,8 @@
               class="text-left"
               :class="{
                 sortable: header.sortable,
+                ['prop-' + header.prop]: !!header.prop,
+                ['th-' + header.value]: !header.prop,
               }"
               @click="header.sortable ? orderByToggle(header.value) : void 0"
             >
@@ -128,11 +130,13 @@ export default defineComponent({
           value: o.name,
           sortable: o.type != "collection",
           align: "left",
+          prop: o.name,
         })),
         ...(this.extraHeaders || []).map((h) => ({
           text: h,
           value: h,
           sortable: false,
+          prop: undefined,
         })),
       ];
     },

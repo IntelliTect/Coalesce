@@ -142,7 +142,6 @@ export default defineComponent({
           return h("img", {
             ...this.$attrs,
             src: valueString,
-            title: valueString,
           });
 
         case "color":

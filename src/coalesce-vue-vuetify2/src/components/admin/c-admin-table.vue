@@ -1,5 +1,5 @@
 <template>
-  <v-card class="c-admin-table">
+  <v-card class="c-admin-table" :class="'type-' + metadata.name">
     <c-admin-table-toolbar
       :list="viewModel"
       @update:editable="editable = $event"
@@ -26,7 +26,7 @@
           "
         >
           <template #item.append="{ item }">
-            <td width="1%">
+            <td width="1%" class="c-admin-table--actions">
               <v-row class="flex-nowrap" no-gutters>
                 <v-btn
                   v-if="canEdit || hasInstanceMethods"

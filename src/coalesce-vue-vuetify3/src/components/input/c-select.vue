@@ -327,7 +327,6 @@ export default defineComponent({
     /** The property on `this.valueOwner` which holds the model object being selected for, or `null` if there is no such property. */
     modelObjectProp(): ModelReferenceNavigationProperty | ModelValue | null {
       const meta = this.valueMeta!;
-      debugger;
       if (meta.role == "foreignKey" && "navigationProp" in meta) {
         return meta.navigationProp || null;
       }

@@ -274,6 +274,57 @@ export const Student = (domain.types.Student = {
         type: "file",
       },
     },
+    manyParams: {
+      name: "manyParams",
+      displayName: "ManyParams",
+      transportType: "item",
+      httpMethod: "GET",
+      params: {
+        id: {
+          name: "id",
+          displayName: "id",
+          type: "number",
+          role: "value",
+          get source() {
+            return (domain.types.Student as ModelType).props.studentId;
+          },
+        },
+        string: {
+          name: "string",
+          displayName: "String",
+          type: "string",
+          role: "value",
+        },
+        date: {
+          name: "date",
+          displayName: "Date",
+          type: "date",
+          dateKind: "datetime",
+          role: "value",
+        },
+        num: {
+          name: "num",
+          displayName: "Num",
+          type: "number",
+          role: "value",
+        },
+        model: {
+          name: "model",
+          displayName: "Model",
+          type: "model",
+          get typeDef() {
+            return domain.types.Course as ModelType;
+          },
+          role: "value",
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        role: "value",
+        type: "string",
+      },
+    },
   },
   props: {
     studentId: {

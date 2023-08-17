@@ -28,6 +28,36 @@ export class StudentViewModel extends ViewModel<
   constructor(initialData?: DeepPartial<models.Student> | null) {
     super(metadata.Student, new apiClients.StudentApiClient(), initialData);
   }
+
+  public get manyParams() {
+    const manyParams = this.$apiClient.$makeCaller(
+      this.$metadata.methods.manyParams,
+      (
+        c,
+        string: string | null,
+        date: Date | null,
+        num: number | null,
+        model: models.Course | null
+      ) => c.manyParams(this.$primaryKey, string, date, num, model),
+      () => ({
+        string: null as string | null,
+        date: null as Date | null,
+        num: null as number | null,
+        model: null as models.Course | null,
+      }),
+      (c, args) =>
+        c.manyParams(
+          this.$primaryKey,
+          args.string,
+          args.date,
+          args.num,
+          args.model
+        )
+    );
+
+    Object.defineProperty(this, "manyParams", { value: manyParams });
+    return manyParams;
+  }
 }
 defineProps(StudentViewModel, metadata.Student);
 

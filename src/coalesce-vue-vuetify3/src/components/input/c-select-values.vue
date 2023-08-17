@@ -37,8 +37,8 @@ export default defineComponent({
 
   computed: {
     internalValue(): any[] {
-      if (this.model && this.collectionMeta) {
-        return (this.model as any)[this.collectionMeta.name] || [];
+      if (this.valueOwner && this.collectionMeta) {
+        return this.valueOwner[this.collectionMeta.name] || [];
       }
       return this.modelValue || [];
     },
@@ -79,8 +79,8 @@ export default defineComponent({
         }
       }
 
-      if (this.model) {
-        return ((this.model as any)[this.collectionMeta.name] = items);
+      if (this.valueOwner) {
+        return (this.valueOwner[this.collectionMeta.name] = items);
       }
 
       this.$emit("input", items);

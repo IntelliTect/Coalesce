@@ -115,8 +115,8 @@ export default defineComponent({
     },
 
     internalValue(): string | null {
-      if (this.model && this.valueMeta) {
-        return (this.model as any)[this.valueMeta.name];
+      if (this.valueOwner && this.valueMeta) {
+        return (this.valueOwner as any)[this.valueMeta.name];
       }
 
       return this.modelValue ?? null;
@@ -126,8 +126,8 @@ export default defineComponent({
   methods: {
     // `unknown` because vuetify's types are a little weird right now (wont infer `string`)
     onInput(value: unknown) {
-      if (this.model && this.valueMeta) {
-        (this.model as any)[this.valueMeta.name] = value;
+      if (this.valueOwner && this.valueMeta) {
+        (this.valueOwner as any)[this.valueMeta.name] = value;
       }
 
       this.$emit("update:modelValue", value);

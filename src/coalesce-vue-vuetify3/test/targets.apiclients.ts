@@ -44,6 +44,25 @@ export class StudentApiClient extends ModelApiClient<$models.Student> {
     };
     return this.$invoke($method, $params, $config);
   }
+
+  public manyParams(
+    id: number,
+    string: string | null,
+    date: Date | null,
+    num: number | null,
+    model: $models.Course | null,
+    $config?: AxiosRequestConfig
+  ): AxiosPromise<ItemResult<string>> {
+    const $method = this.$metadata.methods.manyParams;
+    const $params = {
+      id,
+      string,
+      date,
+      num,
+      model,
+    };
+    return this.$invoke($method, $params, $config);
+  }
 }
 
 export class CourseApiClient extends ModelApiClient<$models.Course> {

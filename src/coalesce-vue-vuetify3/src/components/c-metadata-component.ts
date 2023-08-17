@@ -11,11 +11,40 @@ import {
   ViewModel,
   Domain,
   AnyArgCaller,
+  ApiState,
+  DataSource,
 } from "coalesce-vue";
 import { computed, PropType, useAttrs, ExtractPropTypes } from "vue";
 import { useMetadata } from "..";
 
 export type ForSpec = undefined | null | string | Property | Value | Method;
+
+export function getModelAndValueMeta(
+  forVal: ForSpec,
+  model:
+    | Model<ClassType>
+    | DataSource<DataSourceType>
+    | AnyArgCaller
+    | null
+    | undefined,
+  $metadata?: Domain
+) {
+  const valueMeta = getValueMeta(forVal, model?.$metadata, $metadata);
+
+  // Support binding to method args via `:model="myModel.myMethod" for="myArg"`.
+  // getValueMeta will resolve to the metadata of the specific parameter;
+  // we then have to resolve the args object from the ApiState.
+  if (
+    model instanceof ApiState &&
+    "args" in model &&
+    valueMeta &&
+    valueMeta.name in model.args
+  ) {
+    model = model.args;
+  }
+
+  return { valueMeta, model };
+}
 
 export function getValueMeta(
   forVal: ForSpec,
@@ -273,9 +302,14 @@ export function useMetadataProps(
     return null;
   }) as () => Property | Value | null);
 
+  /** The object that owns the value described by `valueMeta`. */
+  const valueOwner = computed((() => {
+    return getModelAndValueMeta(props.for, props.model, metadata).model;
+  }) as () => any);
+
   const inputBindAttrs = computed(() =>
     buildVuetifyAttrs(valueMeta.value, props.model, useAttrs())
   );
 
-  return { modelMeta, valueMeta, inputBindAttrs };
+  return { modelMeta, valueMeta, valueOwner, inputBindAttrs };
 }

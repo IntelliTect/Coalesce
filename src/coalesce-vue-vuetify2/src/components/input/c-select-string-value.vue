@@ -153,8 +153,8 @@ export default defineComponent({
     },
 
     internalValue(): string | null {
-      if (this.model && this.valueMeta) {
-        return (this.model as any)[this.valueMeta.name];
+      if (this.valueOwner && this.valueMeta) {
+        return this.valueOwner[this.valueMeta.name];
       }
 
       return this.value ?? null;
@@ -164,8 +164,8 @@ export default defineComponent({
   methods: {
     onInput(value: string) {
       this.realValue = this.fakeValue = value;
-      if (this.model && this.valueMeta) {
-        (this.model as any)[this.valueMeta.name] = value;
+      if (this.valueOwner && this.valueMeta) {
+        this.valueOwner[this.valueMeta.name] = value;
       }
       this.$emit("input", value);
     },

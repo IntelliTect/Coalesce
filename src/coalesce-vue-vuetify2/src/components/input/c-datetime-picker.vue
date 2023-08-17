@@ -278,8 +278,8 @@ export default defineComponent({
     },
 
     internalValue() {
-      if (this.model && this.dateMeta) {
-        return (this.model as any)[this.dateMeta.name];
+      if (this.valueOwner && this.dateMeta) {
+        return this.valueOwner[this.dateMeta.name];
       }
 
       return this.value;
@@ -488,8 +488,8 @@ export default defineComponent({
     },
 
     emitInput(value: any) {
-      if (this.model && this.dateMeta) {
-        (this.model as any)[this.dateMeta.name] = value;
+      if (this.valueOwner && this.dateMeta) {
+        this.valueOwner[this.dateMeta.name] = value;
       }
 
       this.$emit("input", value);

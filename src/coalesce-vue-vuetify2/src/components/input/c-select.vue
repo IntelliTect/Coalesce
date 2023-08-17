@@ -86,11 +86,12 @@ import {
   ForeignKeyProperty,
   ModelReferenceNavigationProperty,
   ListParameters,
+  ItemApiStateWithArgs,
+  ViewModel,
+  ModelValue,
   mapParamsToDto,
   getMessageForError,
   mapValueToModel,
-  ItemApiStateWithArgs,
-  ViewModel,
   modelDisplay,
 } from "coalesce-vue";
 
@@ -207,7 +208,7 @@ export default defineComponent({
       return this.listCaller.isLoading || this.getCaller.isLoading;
     },
 
-    /** The property on `this.model` which holds the foreign key being selected for, or `null` if there is no such property. */
+    /** The property on `this.valueOwner` which holds the foreign key being selected for, or `null` if there is no such property. */
     modelKeyProp(): ForeignKeyProperty | null {
       const meta = this.valueMeta!;
       if (meta.role == "foreignKey" && "principalType" in meta) {
@@ -219,13 +220,16 @@ export default defineComponent({
       return null;
     },
 
-    /** The property on `this.model` which holds the reference navigation being selected for, or `null` if there is no such property. */
-    modelNavProp(): ModelReferenceNavigationProperty | null {
+    /** The property on `this.valueOwner` which holds the model object being selected for, or `null` if there is no such property. */
+    modelObjectProp(): ModelReferenceNavigationProperty | ModelValue | null {
       const meta = this.valueMeta!;
       if (meta.role == "foreignKey" && "navigationProp" in meta) {
         return meta.navigationProp || null;
       }
       if (meta.role == "referenceNavigation" && "foreignKey" in meta) {
+        return meta;
+      }
+      if (meta.role == "value" && meta.type == "model") {
         return meta;
       }
       return null;
@@ -268,11 +272,11 @@ export default defineComponent({
         return this.objectValue;
       }
       if (
-        this.model &&
-        this.modelNavProp &&
-        (this.model as any)[this.modelNavProp.name]
+        this.valueOwner &&
+        this.modelObjectProp &&
+        this.valueOwner[this.modelObjectProp.name]
       ) {
-        return (this.model as any)[this.modelNavProp.name];
+        return this.valueOwner[this.modelObjectProp.name];
       }
       if (this.value && this.primaryBindKind == "model") {
         return this.value;
@@ -334,8 +338,8 @@ export default defineComponent({
       let value: any;
       if (this.keyValue) {
         value = this.keyValue;
-      } else if (this.model && this.modelKeyProp) {
-        value = (this.model as any)[this.modelKeyProp.name];
+      } else if (this.valueOwner && this.modelKeyProp) {
+        value = this.valueOwner[this.modelKeyProp.name];
       } else if (this.value && this.primaryBindKind == "key") {
         value = this.value;
       } else {
@@ -356,7 +360,7 @@ export default defineComponent({
       // If we were explicitly given rules, use those.
       if (this.inputBindAttrs.rules) return this.inputBindAttrs.rules;
 
-      if (this.model instanceof ViewModel && this.modelKeyProp) {
+      if (this.valueOwner instanceof ViewModel && this.modelKeyProp) {
         // We're binding to a ViewModel instance.
         // Grab the rules from the instance, because it may contain custom rules
         // and/or other rule changes that have been customized in userland beyond what the metadata provides.
@@ -368,7 +372,7 @@ export default defineComponent({
         // and is the prop that we generate things like `required` onto.
         // We need to translate the rule functions to pass the selected FK instead
         // of the selected model object.
-        return this.model
+        return this.valueOwner
           .$getRules(this.modelKeyProp)
           ?.map((rule) => () => rule(this.internalKeyValue));
       }
@@ -440,12 +444,12 @@ export default defineComponent({
         : null;
       this.keyFetchedModel = value;
 
-      if (this.model) {
+      if (this.valueOwner) {
         if (this.modelKeyProp) {
-          (this.model as any)[this.modelKeyProp.name] = key;
+          this.valueOwner[this.modelKeyProp.name] = key;
         }
-        if (this.modelNavProp) {
-          (this.model as any)[this.modelNavProp.name] = value;
+        if (this.modelObjectProp) {
+          this.valueOwner[this.modelObjectProp.name] = value;
         }
       }
 

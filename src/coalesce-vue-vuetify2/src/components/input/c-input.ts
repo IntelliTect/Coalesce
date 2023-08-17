@@ -1,7 +1,7 @@
 import { defineComponent, type PropOptions, type VNodeData } from "vue";
 import {
   buildVuetifyAttrs,
-  getValueMeta,
+  getModelAndValueMeta,
   makeMetadataProps,
 } from "../c-metadata-component";
 import {
@@ -11,7 +11,6 @@ import {
   DataSourceType,
   mapValueToModel,
   AnyArgCaller,
-  ApiState,
   parseValue,
 } from "coalesce-vue";
 
@@ -53,31 +52,18 @@ export default defineComponent({
   render(_c, ctx) {
     // NOTE: CreateElement fn must be named `_c` for unplugin-vue-components to work correctly.
 
-    let model = ctx.props.model;
-    const modelMeta = model ? model.$metadata : null;
-
-    const _valueMeta = getValueMeta(
+    const { valueMeta: _valueMeta, model } = getModelAndValueMeta(
       ctx.props.for,
-      modelMeta,
+      ctx.props.model,
       ctx.parent.$coalesce.metadata
     );
+
     if (!_valueMeta || !("role" in _valueMeta)) {
       throw Error(
         "c-input requires value metadata. Specify it with the 'for' prop'"
       );
     }
     const valueMeta = _valueMeta; // Alias so type inside closures will be correct;
-
-    // Support binding to method args via `:model="myModel.myMethod" for="myArg"`.
-    // getValueMeta will resolve to the metadata of the specific parameter;
-    // we then have to resolve the args object from the ApiState.
-    if (
-      model instanceof ApiState &&
-      "args" in model &&
-      valueMeta.name in model.args
-    ) {
-      model = model.args;
-    }
 
     const { on: ctxOn, props: ctxProps, ...ctxData } = ctx.data;
     const data = {

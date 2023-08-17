@@ -14,19 +14,14 @@ import {
   ApiState,
   DataSource,
 } from "coalesce-vue";
-import { computed, PropType, useAttrs, ExtractPropTypes } from "vue";
+import { computed, PropType, useAttrs } from "vue";
 import { useMetadata } from "..";
 
 export type ForSpec = undefined | null | string | Property | Value | Method;
 
-export function getModelAndValueMeta(
+export function getValueMetaAndOwner(
   forVal: ForSpec,
-  model:
-    | Model<ClassType>
-    | DataSource<DataSourceType>
-    | AnyArgCaller
-    | null
-    | undefined,
+  model: Model | DataSource | AnyArgCaller | null | undefined,
   $metadata?: Domain
 ) {
   const valueMeta = getValueMeta(forVal, model?.$metadata, $metadata);
@@ -43,7 +38,7 @@ export function getModelAndValueMeta(
     model = model.args;
   }
 
-  return { valueMeta, model };
+  return { valueMeta, valueOwner: model as any };
 }
 
 export function getValueMeta(
@@ -261,7 +256,9 @@ export function buildVuetifyAttrs(
   };
 }
 
-export function makeMetadataProps<TModel = Model<ClassType>>() {
+type ModelAllowedType = Model | AnyArgCaller;
+
+export function makeMetadataProps<TModel extends ModelAllowedType = Model>() {
   return {
     /** An object owning the value that is specified by the `for` prop. */
     model: {
@@ -282,16 +279,19 @@ export function makeMetadataProps<TModel = Model<ClassType>>() {
   };
 }
 
-export function useMetadataProps(
-  props: ExtractPropTypes<
-    ReturnType<typeof makeMetadataProps<Model<ClassType>>>
-  >,
+export function useMetadataProps<TModel extends ModelAllowedType = Model>(
+  props: {
+    model: TModel | null | undefined;
+    for: ForSpec | null | undefined;
+  },
   transformValueMeta?: (meta: Value | Property) => Value | Property
 ) {
   const metadata = useMetadata();
 
   const modelMeta = computed(() => {
-    return props.model ? props.model.$metadata : null;
+    return props.model
+      ? (props.model.$metadata as any as TModel["$metadata"])
+      : null;
   });
 
   const valueMeta = computed((() => {
@@ -303,9 +303,9 @@ export function useMetadataProps(
   }) as () => Property | Value | null);
 
   /** The object that owns the value described by `valueMeta`. */
-  const valueOwner = computed((() => {
-    return getModelAndValueMeta(props.for, props.model, metadata).model;
-  }) as () => any);
+  const valueOwner = computed(() => {
+    return getValueMetaAndOwner(props.for, props.model, metadata).valueOwner;
+  });
 
   const inputBindAttrs = computed(() =>
     buildVuetifyAttrs(valueMeta.value, props.model, useAttrs())

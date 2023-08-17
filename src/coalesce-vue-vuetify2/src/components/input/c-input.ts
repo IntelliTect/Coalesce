@@ -1,14 +1,12 @@
 import { defineComponent, type PropOptions, type VNodeData } from "vue";
 import {
   buildVuetifyAttrs,
-  getModelAndValueMeta,
+  getValueMetaAndOwner,
   makeMetadataProps,
 } from "../c-metadata-component";
 import {
   Model,
-  ClassType,
   DataSource,
-  DataSourceType,
   mapValueToModel,
   AnyArgCaller,
   parseValue,
@@ -42,9 +40,7 @@ export default defineComponent({
   functional: true,
 
   props: {
-    ...makeMetadataProps<
-      Model<ClassType> | DataSource<DataSourceType> | AnyArgCaller
-    >(),
+    ...makeMetadataProps<Model | DataSource | AnyArgCaller>(),
 
     value: <PropOptions<any>>{ required: false },
   },
@@ -52,7 +48,7 @@ export default defineComponent({
   render(_c, ctx) {
     // NOTE: CreateElement fn must be named `_c` for unplugin-vue-components to work correctly.
 
-    const { valueMeta: _valueMeta, model } = getModelAndValueMeta(
+    const { valueMeta: _valueMeta, valueOwner } = getValueMetaAndOwner(
       ctx.props.for,
       ctx.props.model,
       ctx.parent.$coalesce.metadata
@@ -72,8 +68,8 @@ export default defineComponent({
 
       props: {
         // If a model is provided, pull the value off the model.
-        value: model
-          ? (model as any)[valueMeta.name]
+        value: valueOwner
+          ? valueOwner[valueMeta.name]
           : primitiveTypes.includes(valueMeta.type)
           ? mapValueToModel(ctx.props.value, valueMeta)
           : ctx.props.value,
@@ -126,13 +122,13 @@ export default defineComponent({
     // that delegate directly to vuetify components.
     const attrs = (data.attrs = buildVuetifyAttrs(
       valueMeta,
-      model,
+      ctx.props.model,
       ctxData.attrs
     ));
 
     const onInput = function (value: any) {
-      if (model && valueMeta) {
-        (model as any)[valueMeta.name] = parseValue(value, valueMeta);
+      if (valueOwner && valueMeta) {
+        valueOwner[valueMeta.name] = parseValue(value, valueMeta);
       }
     };
 

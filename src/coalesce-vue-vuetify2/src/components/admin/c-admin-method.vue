@@ -15,12 +15,12 @@
             md="4"
             lg="3"
           >
-            <!-- <c-input
+            <c-input
               v-model="caller.args[param.name]"
               :for="param"
               hide-details="auto"
-            /> -->
-            <c-input :model="caller" :for="param.name" hide-details="auto" />
+            />
+            <!-- <c-input :model="caller" :for="param.name" hide-details="auto" /> -->
           </v-col>
         </v-row>
       </v-col>

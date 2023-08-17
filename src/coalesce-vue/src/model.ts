@@ -42,7 +42,7 @@ export interface Model<TMeta extends ClassType = ClassType> {
 /**
  * Represents a data source with metadata information and parameter values.
  */
-export interface DataSource<TMeta extends DataSourceType> {
+export interface DataSource<TMeta extends DataSourceType = DataSourceType> {
   readonly $metadata: TMeta;
 }
 

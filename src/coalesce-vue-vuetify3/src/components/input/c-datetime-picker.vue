@@ -88,7 +88,13 @@ import {
   startOfDay,
 } from "date-fns";
 import { format, utcToZonedTime, zonedTimeToUtc } from "date-fns-tz";
-import { getDefaultTimeZone, parseDateUserInput, DateKind } from "coalesce-vue";
+import {
+  getDefaultTimeZone,
+  parseDateUserInput,
+  DateKind,
+  AnyArgCaller,
+  Model,
+} from "coalesce-vue";
 import { defineComponent, PropType, ref } from "vue";
 import { makeMetadataProps, useMetadataProps } from "../c-metadata-component";
 
@@ -105,7 +111,7 @@ export default defineComponent({
   },
 
   props: {
-    ...makeMetadataProps(),
+    ...makeMetadataProps<Model | AnyArgCaller>(),
     modelValue: {
       required: false,
       type: Date as PropType<Date | null | undefined>,

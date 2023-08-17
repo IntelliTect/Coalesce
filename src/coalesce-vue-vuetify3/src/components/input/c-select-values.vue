@@ -14,7 +14,7 @@
 </template>
 
 <script lang="ts">
-import { convertValueToModel } from "coalesce-vue";
+import { AnyArgCaller, convertValueToModel, Model } from "coalesce-vue";
 import { defineComponent } from "vue";
 import { makeMetadataProps, useMetadataProps } from "../c-metadata-component";
 
@@ -31,7 +31,7 @@ export default defineComponent({
   },
 
   props: {
-    ...makeMetadataProps(),
+    ...makeMetadataProps<Model | AnyArgCaller>(),
     modelValue: { required: false, type: Array },
   },
 

@@ -1,14 +1,12 @@
 import { defineComponent, Prop, h, toHandlerKey } from "vue";
 import {
   buildVuetifyAttrs,
-  getModelAndValueMeta,
+  getValueMetaAndOwner,
   makeMetadataProps,
 } from "../c-metadata-component";
 import {
   Model,
-  ClassType,
   DataSource,
-  DataSourceType,
   mapValueToModel,
   AnyArgCaller,
   parseValue,
@@ -56,15 +54,12 @@ export default defineComponent({
   },
 
   props: {
-    ...makeMetadataProps<
-      Model<ClassType> | DataSource<DataSourceType> | AnyArgCaller
-    >(),
-
+    ...makeMetadataProps<Model | DataSource | AnyArgCaller>(),
     modelValue: <Prop<any>>{ required: false },
   },
 
   render() {
-    const { valueMeta: _valueMeta, model } = getModelAndValueMeta(
+    const { valueMeta: _valueMeta, valueOwner } = getValueMetaAndOwner(
       this.for,
       this.model,
       this.$coalesce.metadata
@@ -81,8 +76,8 @@ export default defineComponent({
 
     let data = {
       ...this.$attrs, // Includes any non-props, as well as event handlers.
-      modelValue: model
-        ? (model as any)[valueMeta.name]
+      modelValue: valueOwner
+        ? valueOwner[valueMeta.name]
         : primitiveTypes.includes(valueMeta.type)
         ? mapValueToModel(props.modelValue, valueMeta)
         : props.modelValue,
@@ -126,14 +121,14 @@ export default defineComponent({
     // We now need to compute them in order to render components
     // that delegate directly to vuetify components.
     data = {
-      ...buildVuetifyAttrs(valueMeta, model, data),
+      ...buildVuetifyAttrs(valueMeta, this.model, data),
       ...data,
     };
 
     const onInput = (value: any) => {
       const parsed = parseValue(value, valueMeta);
-      if (model && valueMeta) {
-        (model as any)[valueMeta.name] = parsed;
+      if (valueOwner && valueMeta) {
+        valueOwner[valueMeta.name] = parsed;
       }
       this.$emit("update:modelValue", parsed);
     };

@@ -222,6 +222,7 @@ import {
   modelDisplay,
   Indexable,
   ModelValue,
+  AnyArgCaller,
 } from "coalesce-vue";
 
 export default defineComponent({
@@ -245,7 +246,7 @@ export default defineComponent({
   },
 
   props: {
-    ...makeMetadataProps(),
+    ...makeMetadataProps<Model | AnyArgCaller>(),
     clearable: { required: false, default: undefined, type: Boolean },
     modelValue: { required: false },
     keyValue: { required: false },

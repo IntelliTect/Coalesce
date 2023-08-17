@@ -89,6 +89,7 @@ import {
   ItemApiStateWithArgs,
   ViewModel,
   ModelValue,
+  AnyArgCaller,
   mapParamsToDto,
   getMessageForError,
   mapValueToModel,
@@ -110,7 +111,7 @@ export default defineComponent({
   },
 
   props: {
-    ...makeMetadataProps(),
+    ...makeMetadataProps<Model | AnyArgCaller>(),
     clearable: { required: false, default: undefined, type: Boolean },
     readonly: { required: false, default: undefined, type: Boolean },
     disabled: { required: false, default: undefined, type: Boolean },

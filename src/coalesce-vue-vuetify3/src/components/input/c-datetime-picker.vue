@@ -11,6 +11,7 @@
     "
     :modelValue="nativeValue"
     v-bind="inputBindAttrs"
+    :rules="effectiveRules"
     :error-messages="error"
     :readonly="readonly"
     :disabled="disabled"
@@ -23,6 +24,7 @@
     v-else
     class="c-datetime-picker"
     v-bind="inputBindAttrs"
+    :rules="effectiveRules"
     :modelValue="internalTextValue == null ? displayedValue : internalTextValue"
     :error-messages="error"
     :readonly="readonly"
@@ -208,7 +210,7 @@ export default defineComponent({
       return null;
     },
 
-    internalValue() {
+    internalValue(): Date | null | undefined {
       if (this.valueOwner && this.dateMeta) {
         return (this.valueOwner as any)[this.dateMeta.name];
       }
@@ -257,6 +259,15 @@ export default defineComponent({
         default:
           return "M/d/yyyy h:mm a";
       }
+    },
+
+    /** The effective set of validation rules to pass to the text field. Ensures that the real Date value is passed to the rule, rather than the text field's string value. */
+    effectiveRules() {
+      return this.inputBindAttrs.rules?.map(
+        (ruleFunc: (value: Date | null | undefined) => string | boolean) =>
+          () =>
+            ruleFunc(this.internalValue)
+      );
     },
 
     showDate() {

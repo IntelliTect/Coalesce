@@ -42,7 +42,7 @@ const passwordWrapper = defineComponent({
     data["append-inner-icon"] ??= !this.shown ? "fa fa-eye" : "fa fa-eye-slash";
     data.type = this.shown ? "text" : "password";
     addHandler(data, "click:appendInner", () => (this.shown = !this.shown));
-    return h(VTextField, data);
+    return h(VTextField, data, this.$slots);
   },
 });
 
@@ -92,25 +92,25 @@ export default defineComponent({
       case "date":
         data.model = props.model;
         data.for = props.for;
-        return h(CDatetimePicker, data);
+        return h(CDatetimePicker, data, this.$slots);
 
       case "model":
         data.model = props.model;
         data.for = props.for;
-        return h(CSelect, data);
+        return h(CSelect, data, this.$slots);
 
       case "collection":
         data.model = props.model;
         data.for = props.for;
 
         if ("manyToMany" in valueMeta) {
-          return h(CSelectManyToMany, data);
+          return h(CSelectManyToMany, data, this.$slots);
         } else if (
           valueMeta.itemType.type != "model" &&
           valueMeta.itemType.type != "object" &&
           valueMeta.itemType.type != "file"
         ) {
-          return h(CSelectValues, data);
+          return h(CSelectValues, data, this.$slots);
         } else {
           // console.warn(`Unsupported collection type ${valueMeta.itemType.type} for v-input`)
         }
@@ -162,14 +162,14 @@ export default defineComponent({
         if (valueMeta.type == "number") {
           // For numeric values, use a numeric text field.
           data.type = "number";
-          return h(VTextField, data);
+          return h(VTextField, data, this.$slots);
         }
 
         if (
           ("textarea" in data || valueMeta.subtype == "multiline") &&
           data.textarea !== false
         ) {
-          return h(VTextarea, data);
+          return h(VTextarea, data, this.$slots);
         }
 
         if (!data.type && valueMeta.subtype) {
@@ -196,17 +196,17 @@ export default defineComponent({
               break;
 
             case "password":
-              return h(passwordWrapper, data);
+              return h(passwordWrapper, data, this.$slots);
           }
         }
-        return h(VTextField, data);
+        return h(VTextField, data, this.$slots);
 
       case "boolean":
         addHandler(data, "update:modelValue", onInput);
         if ("checkbox" in data && data.checkbox !== false) {
-          return h(VCheckbox, data);
+          return h(VCheckbox, data, this.$slots);
         }
-        return h(VSwitch, data);
+        return h(VSwitch, data, this.$slots);
 
       case "enum":
         addHandler(data, "update:modelValue", onInput);
@@ -215,7 +215,7 @@ export default defineComponent({
         data["item-value"] = "value";
         // maps to the prop "subtitle" on v-list-item
         data["item-props"] = (item: any) => ({ subtitle: item.description });
-        return h(VSelect, data);
+        return h(VSelect, data, this.$slots);
 
       case "file":
         // v-file-input uses 'change' as its event, not 'input'.
@@ -232,7 +232,7 @@ export default defineComponent({
           onInput(value[0])
         );
 
-        return h(VFileInput, data);
+        return h(VFileInput, data, this.$slots);
 
       case "collection":
         if (valueMeta.itemType.type == "file") {
@@ -244,14 +244,11 @@ export default defineComponent({
           data.modelValue ??= [];
 
           addHandler(data, "update:modelValue", onInput);
-          return h(VFileInput, data);
+          return h(VFileInput, data, this.$slots);
         }
     }
 
     // Fall back to just displaying the value.
-    // Note that this probably looks bad on Vuetify 2+ because we're
-    // abusing its internal classes to try to emulate the look of a text field,
-    // but this hasn't been updated for 2.0.
     if (this.$slots) {
       // TODO: this.$slots might be always defined
       return h("div", {}, this.$slots);

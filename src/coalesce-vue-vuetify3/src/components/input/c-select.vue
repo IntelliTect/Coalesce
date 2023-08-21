@@ -94,6 +94,7 @@
           "
           clearable
           placeholder="Search"
+          variant="filled"
         >
         </v-text-field>
 
@@ -102,7 +103,8 @@
           v-if="!createItemLabel && !listItems.length"
           class="grey--text px-4 my-3 font-italic"
         >
-          No results found.
+          <template v-if="listCaller.isLoading">Loading...</template>
+          <template>No results found.</template>
         </div>
 
         <!-- This height shows 7 full items, with a final item partially out 

@@ -133,6 +133,10 @@ export default defineComponent({
       this.$emit("update:modelValue", parsed);
     };
 
+    // Do not pass the default slot through to vuetify.
+    // It will put it in a weird spot in most inputs.
+    const { default: defaultSlot, ...vuetifySlots } = this.$slots;
+
     // Handle components that delegate immediately to Vuetify
     switch (valueMeta.type) {
       case "string":
@@ -162,14 +166,14 @@ export default defineComponent({
         if (valueMeta.type == "number") {
           // For numeric values, use a numeric text field.
           data.type = "number";
-          return h(VTextField, data, this.$slots);
+          return h(VTextField, data, vuetifySlots);
         }
 
         if (
           ("textarea" in data || valueMeta.subtype == "multiline") &&
           data.textarea !== false
         ) {
-          return h(VTextarea, data, this.$slots);
+          return h(VTextarea, data, vuetifySlots);
         }
 
         if (!data.type && valueMeta.subtype) {
@@ -196,17 +200,17 @@ export default defineComponent({
               break;
 
             case "password":
-              return h(passwordWrapper, data, this.$slots);
+              return h(passwordWrapper, data, vuetifySlots);
           }
         }
-        return h(VTextField, data, this.$slots);
+        return h(VTextField, data, vuetifySlots);
 
       case "boolean":
         addHandler(data, "update:modelValue", onInput);
         if ("checkbox" in data && data.checkbox !== false) {
-          return h(VCheckbox, data, this.$slots);
+          return h(VCheckbox, data, vuetifySlots);
         }
-        return h(VSwitch, data, this.$slots);
+        return h(VSwitch, data, vuetifySlots);
 
       case "enum":
         addHandler(data, "update:modelValue", onInput);
@@ -215,7 +219,7 @@ export default defineComponent({
         data["item-value"] = "value";
         // maps to the prop "subtitle" on v-list-item
         data["item-props"] = (item: any) => ({ subtitle: item.description });
-        return h(VSelect, data, this.$slots);
+        return h(VSelect, data, vuetifySlots);
 
       case "file":
         // v-file-input uses 'change' as its event, not 'input'.
@@ -232,7 +236,7 @@ export default defineComponent({
           onInput(value[0])
         );
 
-        return h(VFileInput, data, this.$slots);
+        return h(VFileInput, data, vuetifySlots);
 
       case "collection":
         if (valueMeta.itemType.type == "file") {
@@ -244,15 +248,15 @@ export default defineComponent({
           data.modelValue ??= [];
 
           addHandler(data, "update:modelValue", onInput);
-          return h(VFileInput, data, this.$slots);
+          return h(VFileInput, data, vuetifySlots);
         }
     }
 
     // Fall back to just displaying the value.
-    if (this.$slots) {
-      // TODO: this.$slots might be always defined
-      return h("div", {}, this.$slots);
+    if (defaultSlot) {
+      return h("div", {}, { default: defaultSlot });
     }
+
     return h(
       "div",
       {

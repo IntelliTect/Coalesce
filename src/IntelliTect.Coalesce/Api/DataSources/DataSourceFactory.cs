@@ -98,6 +98,15 @@ namespace IntelliTect.Coalesce.Api.DataSources
             );
         }
 
+        public IDataSource<TServed> GetDefaultDataSource<TServed>(ClassViewModel declaredFor)
+            where TServed : class
+        {
+            return (IDataSource<TServed>)GetDefaultDataSource(
+                reflectionRepository.GetClassViewModel<TServed>()!,
+                declaredFor
+            );
+        }
+
         public object GetDefaultDataSource(ClassViewModel servedType, ClassViewModel declaredFor)
         {
             var dataSourceType = GetDefaultDataSourceType(servedType, declaredFor);

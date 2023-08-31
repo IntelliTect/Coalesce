@@ -13,6 +13,9 @@ namespace IntelliTect.Coalesce.Api.DataSources
 
         object GetDefaultDataSource(ClassViewModel servedType, ClassViewModel declaredFor);
 
+        IDataSource<TServed> GetDefaultDataSource<TServed>(ClassViewModel declaredFor)
+            where TServed : class;
+
         IDataSource<TServed> GetDefaultDataSource<TServed, TDeclaredFor>()
             where TServed : class
             where TDeclaredFor : class;

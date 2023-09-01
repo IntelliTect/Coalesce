@@ -45,6 +45,16 @@ namespace IntelliTect.Coalesce.Api.DataSources
             return dataSourceClassViewModel.Type.TypeInfo;
         }
 
+        public IDataSource<TServed> GetDataSource<TServed>(ClassViewModel declaredFor, string? dataSourceName)
+            where TServed : class
+        {
+            return (IDataSource<TServed>)GetDataSource(
+                reflectionRepository.GetClassViewModel<TServed>()!,
+                declaredFor,
+                dataSourceName
+            );
+        }
+
         public IDataSource<TServed> GetDataSource<TServed, TDeclaredFor>(string? dataSourceName)
             where TServed : class
             where TDeclaredFor : class

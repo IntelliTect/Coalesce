@@ -491,6 +491,22 @@ export type ApiStateTypeWithArgs<
   ? ListApiStateWithArgs<TArgs, TArgsObj, TResult>
   : never;
 
+export interface BulkSaveRequest {
+  // This is an object even though it only has one property
+  // in case we need to expand in the future. An array as a JSON root
+  // prevents any future extensibility.
+
+  items: BulkSaveRequestItem[];
+}
+
+export interface BulkSaveRequestItem {
+  type: string;
+  action: "save" | "delete" | "none";
+  root?: boolean;
+  data: Record<string, any>;
+  refs?: Record<string, number>;
+}
+
 const simultaneousGetCache: Map<string, AxiosPromise<any>> = new Map();
 
 export class ApiClient<T extends ApiRoutedType> {
@@ -728,6 +744,10 @@ export class ApiClient<T extends ApiRoutedType> {
         // (Blobs become Files when put into FormData, and we serialize UInt8Array into a Blob)
         // This will form a multipart/form-data response.
         body = formData;
+      } else if (method.json) {
+        // The server expects json for this method. Pass the object directly,
+        // which axios will serialize as json.
+        body = mappedParams;
       } else {
         // No top-level special values - just handle the params normally.
         // This will form a application/x-www-form-urlencoded response.
@@ -1011,6 +1031,34 @@ export class ModelApiClient<TModel extends Model<ModelType>> extends ApiClient<
       mapToDtoFiltered(item, fields)!,
       config,
       params
+    );
+  }
+
+  public bulkSave(
+    data: BulkSaveRequest,
+    parameters?: DataSourceParameters,
+    config?: AxiosRequestConfig
+  ): ItemResultPromise<TModel> {
+    return this.$invoke(
+      {
+        name: "bulkSave",
+        displayName: "bulkSave",
+        transportType: "item",
+        httpMethod: "POST",
+        params: {
+          items: {
+            name: "items",
+            displayName: "items",
+            role: "value",
+            type: "unknown",
+          },
+        },
+        json: true,
+        return: this.$itemValueMeta,
+      },
+      data,
+      config,
+      parameters
     );
   }
 

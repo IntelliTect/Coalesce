@@ -7,6 +7,9 @@ namespace IntelliTect.Coalesce.Api.DataSources
     {
         object GetDataSource(ClassViewModel servedType, ClassViewModel declaredFor, string? dataSourceName);
 
+        IDataSource<TServed> GetDataSource<TServed>(ClassViewModel declaredFor, string? dataSourceName)
+            where TServed : class;
+
         IDataSource<TServed> GetDataSource<TServed, TDeclaredFor>(string? dataSourceName)
              where TServed : class
              where TDeclaredFor : class;

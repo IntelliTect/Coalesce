@@ -189,7 +189,7 @@ namespace IntelliTect.Coalesce.Validation
                         assert.IsFalse(method.ResultType.IsInternalUse, "Method return types cannot be internal use.");
 
                         // TODO: Assert that the method name isn't a reserved endpoint name:
-                        // get, save, delete, list, count
+                        // get, save, bulkSave, delete, list, count
                         foreach (var param in method.Parameters)
                         {
                             assert.Area = $"{model}: {method}: {param}";

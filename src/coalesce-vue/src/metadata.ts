@@ -561,8 +561,11 @@ export interface MethodBase extends Metadata {
   /** True if the args object should be cleared on admin pages after a successful invocation. */
   readonly autoClear?: boolean;
 
-  /** The parameters of the method */
+  /** The query string (GET/DELETE only) or body parameters of the method */
   readonly params: { [paramName in string]: MethodParameter };
+
+  /** If true, the request body is json */
+  readonly json?: boolean;
 }
 
 export interface ItemMethod extends MethodBase {

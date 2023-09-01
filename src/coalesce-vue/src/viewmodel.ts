@@ -7,7 +7,10 @@ import {
   toRaw,
 } from "vue";
 
-import { resolvePropMeta } from "./metadata.js";
+import {
+  ModelReferenceNavigationProperty,
+  resolvePropMeta,
+} from "./metadata.js";
 import type {
   ModelType,
   PropertyOrName,
@@ -23,6 +26,7 @@ import {
   DataSourceParameters,
   ServiceApiClient,
   mapParamsToDto,
+  BulkSaveRequestItem,
 } from "./api-client.js";
 import {
   type Model,
@@ -30,6 +34,7 @@ import {
   propDisplay,
   convertToModel,
   mapToModel,
+  mapToDtoFiltered,
 } from "./model.js";
 import {
   type Indexable,
@@ -521,6 +526,142 @@ export abstract class ViewModel<
     // Lazy getter technique - don't create the caller until/unless it is needed,
     // since creation of api callers is a little expensive.
     Object.defineProperty(this, "$save", { value: $save });
+
+    return $save;
+  }
+
+  /**
+   * A function for invoking the `/save` endpoint, and a set of properties about the state of the last call.
+   */
+  get $bulkSave() {
+    const $save = this.$apiClient
+      .$makeCaller(
+        "item",
+        async function (this: ViewModel, c /*TODO: options*/) {
+          if (this.$hasError) {
+            throw Error(
+              "Cannot save - validation failed: " +
+                [...this.$getErrors()].join(", ")
+            );
+          }
+
+          let nextModels = [this];
+          const processed = new Set();
+          const modelsToSend: BulkSaveRequestItem[] = [];
+          while (nextModels.length) {
+            const currentModels = nextModels;
+            nextModels = [];
+            for (const model of currentModels) {
+              if (!model || !processed.add(model)) continue;
+
+              const meta: ModelType = model.$metadata;
+
+              const root = model == this;
+
+              for (const propName in meta.props) {
+                const prop = meta.props[propName];
+                if (prop.role == "referenceNavigation") {
+                  const principal = model.$data[prop.name];
+                  if (
+                    principal &&
+                    !principal.$primaryKey &&
+                    !model.$getPropDirty(prop.foreignKey.name)
+                  ) {
+                    // If the principal end of the navigation is unsaved,
+                    // and the dependent end's foreign key is not dirty,
+                    // mark it as dirty since when the principal is saved,
+                    // the dependent will then have a foreign key to use.
+                    /*
+                    TODO TEST CASE:
+
+                      const vm = new CaseViewModel();
+                      await vm.$load(1); // case has no assignedToId on the server.
+                      vm.assignedTo = new PersonViewModel({firstName: 'bob', companyId: 1})
+                      vm.$bulkSave();
+                      
+                    */
+                    model.$setPropDirty(prop.foreignKey.name);
+                  }
+                  nextModels.push(model.$data[prop.name]);
+                }
+                if (prop.role == "collectionNavigation") {
+                  nextModels.push(...model.$data[prop.name]);
+                }
+              }
+
+              const action = model.$deletePending
+                ? "delete"
+                : model.$isDirty
+                ? "save"
+                : "none";
+
+              if (root || action != "none") {
+                const bulkSaveItem: BulkSaveRequestItem = {
+                  action,
+                  type: meta.name,
+                  data: mapToDtoFiltered(model, [
+                    ...model._dirtyProps,
+                    meta.keyProp.name,
+                  ])!,
+                  refs: {
+                    // The model's $stableId will be referenced by other objects. It is recorded as the object's primary key ref value.
+                    [meta.keyProp.name]: model.$stableId,
+                    ...Object.fromEntries(
+                      Object.values(meta.props)
+                        .filter(
+                          (prop): prop is ModelReferenceNavigationProperty =>
+                            prop.role == "referenceNavigation" &&
+                            // Model has an object value for this reference navigation...
+                            model.$data[prop.name] &&
+                            // but the model has no FK, then we need to include a reference to the reference nav object.
+                            // We're assuming that it is already present in `modelsToSend`, or will be added in a future iteration.
+                            !model.$data[prop.foreignKey.name]
+                        )
+                        .map((prop) => [
+                          // The foreign key references...
+                          prop.foreignKey.name,
+                          // the $stableId of the principal end of the reference navigation.
+                          // The $stableId will also occur on the principal object's refs (as its primary key ref value),
+                          // which the server will use to link these two objects together.
+                          model.$data[prop.name].$stableId,
+                        ])
+                    ),
+                  },
+                };
+
+                // Omit if false.
+                if (root) bulkSaveItem.root = root;
+
+                modelsToSend.push(bulkSaveItem);
+              }
+            }
+          }
+
+          // TODO: all kinds of dirty handling that we do in $save.
+          return await c.bulkSave({ items: modelsToSend }, { ...this.$params });
+        }
+      )
+      .onFulfilled(function (this: ViewModel) {
+        if (!this.$save.result) {
+          // Can't do anything useful if the save returned no data.
+          return;
+        }
+
+        if (!this.$loadResponseFromSaves) {
+          // The PK *MUST* be loaded so that the PK returned by a creation save call
+          // will be used by subsequent update calls.
+          this.$primaryKey = (this.$save.result as Indexable<TModel>)[
+            this.$metadata.keyProp.name
+          ];
+        } else {
+          this.$loadCleanData(this.$save.result);
+          this.updatedRelatedForeignKeysWithCurrentPrimaryKey();
+        }
+      });
+
+    // Lazy getter technique - don't create the caller until/unless it is needed,
+    // since creation of api callers is a little expensive.
+    Object.defineProperty(this, "$bulkSave", { value: $save });
 
     return $save;
   }

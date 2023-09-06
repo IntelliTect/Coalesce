@@ -7,7 +7,8 @@
     <c-loader-status :loaders="{'': [vm.$bulkSave]}"></c-loader-status>
     <h2>Case (pk: {{ vm.$primaryKey }})</h2>
     <div v-for="x in vm.caseProducts">
-      <v-btn variant="text" size="x-small" @click="x.product?.$remove(); x.$remove()" icon="fa fa-trash"></v-btn>
+      <v-btn variant="text" size="x-small" @click="x.product?.$remove(); x.product=null; x.$remove()" icon="fa fa-trash"></v-btn>
+      <v-btn variant="text" size="x-small" @click="x.product?.$remove(); x.product=newProduct();" icon="fa fa-sync"></v-btn>
       {{ x.product?.name }}: (pk: {{ x.$primaryKey }}, ref {{ x.$stableId }})
 
     </div>
@@ -16,7 +17,7 @@
 
 <script setup lang="ts">
 import { CaseApiClient } from "@/api-clients.g";
-import { CaseViewModel, PersonViewModel } from "@/viewmodels.g";
+import { CaseViewModel, PersonViewModel, ProductViewModel } from "@/viewmodels.g";
 import { useBindToQueryString } from "coalesce-vue";
 import { ref } from "vue";
 
@@ -28,11 +29,15 @@ vm.$load(1);
 vm.$bulkSave.setConcurrency("debounce");
 async function add() {
   vm.addToCaseProducts({
-    product: { name: products[Math.ceil(Math.random() * products.length)] },
+    product: newProduct(),
   });
 }
 async function del() {
   vm.caseProducts![0].$remove();
+}
+
+function newProduct() {
+  return new ProductViewModel({ name: products[Math.ceil(Math.random() * products.length)-1] });
 }
 
 const products = [

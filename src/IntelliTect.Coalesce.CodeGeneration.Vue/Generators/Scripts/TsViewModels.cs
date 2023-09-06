@@ -97,9 +97,9 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                         string propVmName = vt.TsType(viewModel: true);
 
                         b.Line();
-                        using (b.Block($"public addTo{prop.Name}()"))
+                        using (b.Block($"public addTo{prop.Name}(initialData?: DeepPartial<$models.{vt.TsType()}> | null)"))
                         {
-                            b.Line($"return this.$addChild('{prop.JsVariable}') as {propVmName}");
+                            b.Line($"return this.$addChild('{prop.JsVariable}', initialData) as {propVmName}");
                         }
 
                         if (prop.IsManytoManyCollection)

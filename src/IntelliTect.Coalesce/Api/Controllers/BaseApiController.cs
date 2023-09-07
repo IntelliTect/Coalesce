@@ -246,10 +246,16 @@ namespace IntelliTect.Coalesce.Api.Controllers
                         }
                     }
 
+                    var refMap = dto.Save
+                        .Where(i => i.PrimaryRef.HasValue)    
+                        .ToDictionary(i => i.PrimaryRef!.Value, i => i.PrimaryKey);
                     if (root?.PrimaryKey is null)
                     {
                         await tran.CommitAsync();
-                        return true;
+                        return new(true)
+                        {
+                            RefMap = refMap
+                        };
                     }
                     else
                     {
@@ -259,6 +265,7 @@ namespace IntelliTect.Coalesce.Api.Controllers
 
                         await tran.CommitAsync();
 
+                        rootResult.RefMap = refMap;
                         return rootResult;
                     }
                 }

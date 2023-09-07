@@ -18,6 +18,11 @@ namespace IntelliTect.Coalesce.Models
         /// </summary>
         public ICollection<ValidationIssue>? ValidationIssues { get; set; }
 
+        /// <summary>
+        /// Mapping between incoming refs of unkeyed bulk save items and each item's new primary key.
+        /// </summary>
+        public IDictionary<int, object?>? RefMap { get; set; }
+
         public ItemResult(): base() { }
 
         public ItemResult(string? errorMessage) : base(errorMessage) { }

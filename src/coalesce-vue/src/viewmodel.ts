@@ -133,7 +133,7 @@ export abstract class ViewModel<
   private _isDirty = ref(false);
 
   /** @internal */
-  private _dirtyProps = new Set<string>();
+  _dirtyProps = new Set<string>();
 
   /**
    * Returns true if the values of the savable data properties of this ViewModel
@@ -277,7 +277,7 @@ export abstract class ViewModel<
 
           // HACK: In order to make bulk saves work,
           // we have to allow for missing foreign keys
-          // as long as the nav prop does have a value without a PK.
+          // as long as the nav prop is an unsaved, new entity.
           // This is a scenario that wouldn't really ever happen in any UI
           // that isn't using bulk saves (you'd always be fetching a
           // navigation prop value from /somewhere/, or when creating new ones
@@ -291,21 +291,23 @@ export abstract class ViewModel<
             const fkRule = rules[ruleName];
             propRules.push((v: any) => {
               const result = fkRule(v);
-              if (result != true) {
-                const principal = this.$data[
-                  prop.navigationProp!.name
-                ] as ViewModel;
-                if (principal && !principal._existsOnServer) {
-                  // The nav prop has a value that we anticipate will be created
-                  // by a bulk save. Allow this.
-                  return true;
-                }
+              if (result === true) return result;
+
+              const principal = this.$data[
+                prop.navigationProp!.name
+              ] as ViewModel;
+              if (principal && !principal._existsOnServer) {
+                // The nav prop has a value that we anticipate will be created
+                // by a bulk save. Allow this.
+                return true;
               }
+
               return result;
             });
-          } else {
-            propRules.push(rules[ruleName]);
+            continue;
           }
+
+          propRules.push(rules[ruleName]);
         }
       }
 
@@ -569,15 +571,18 @@ export abstract class ViewModel<
   }
 
   /**
-   * A function for invoking the `/save` endpoint, and a set of properties about the state of the last call.
+   * A function for invoking the `/bulkSave` endpoint, and a set of properties about the state of the last call.
+   *
+   * A bulk save will save/delete this entity and all reachable relationships in a single round trip and database transaction.
    */
   get $bulkSave() {
-    const $save = this.$apiClient.$makeCaller(
+    const $bulkSave = this.$apiClient.$makeCaller(
       "item",
       async function (this: ViewModel, c /*TODO: options*/) {
         let nextModels = [this];
         const processed = new Set();
         const itemsToSend: BulkSaveRequestItem[] = [];
+        const modelsByRef = new Map<number, ViewModel>();
 
         // Traverse all models reachable from `this`,
         // collecting those that need to be saved or deleted.
@@ -627,10 +632,7 @@ export abstract class ViewModel<
                 const dependents = model.$data[prop.name];
                 nextModels.push(...dependents);
 
-                if (
-                  dependents instanceof ViewModelCollection &&
-                  dependents.$removedItems
-                ) {
+                if ("$removedItems" in dependents && dependents.$removedItems) {
                   nextModels.push(...dependents.$removedItems);
                 }
               }
@@ -668,7 +670,9 @@ export abstract class ViewModel<
                 action,
                 type: meta.name,
                 data:
-                  model.$saveMode == "surgical" || action != "save"
+                  action == "none" || action == "delete"
+                    ? mapToDtoFiltered(model, [meta.keyProp.name])!
+                    : model.$saveMode == "surgical"
                     ? mapToDtoFiltered(model, [
                         ...model._dirtyProps,
                         meta.keyProp.name,
@@ -704,6 +708,7 @@ export abstract class ViewModel<
               if (root) bulkSaveItem.root = root;
 
               itemsToSend.push(bulkSaveItem);
+              modelsByRef.set(model.$stableId, model);
             }
           }
         }
@@ -714,12 +719,20 @@ export abstract class ViewModel<
         );
 
         if (ret.data?.wasSuccessful) {
-          const result = ret.data.object;
+          // Load models with their new primary key so that
+          // instances can be uniquely identified correctly when loading them with the data
+          // returned by the client.
+          const refMap = ret.data.refMap;
+          for (const ref in refMap) {
+            const model = modelsByRef.get(+ref);
+            if (model) model.$primaryKey = refMap[ref];
+          }
 
+          const result = ret.data.object;
           if (result) {
             // `purgeUnsaved` here (arg2) since the bulk save should have covered the entire object graph.
-            // The only unsaved items here will be newly created collection items that we were unable
-            // to match up with the instance of that item from the response due to the local version having no PK.
+            // Wiping out unsaved items will help developers discover bugs where their root model's data source
+            // does not correctly include the whole object graph that they're saving (which is expected for bulk saves)
             this.$loadCleanData(result, true);
           }
         }
@@ -730,9 +743,9 @@ export abstract class ViewModel<
 
     // Lazy getter technique - don't create the caller until/unless it is needed,
     // since creation of api callers is a little expensive.
-    Object.defineProperty(this, "$bulkSave", { value: $save });
+    Object.defineProperty(this, "$bulkSave", { value: $bulkSave });
 
-    return $save;
+    return $bulkSave;
   }
 
   /** @internal */
@@ -1080,15 +1093,15 @@ export abstract class ViewModel<
         collection.push(mapToModel({}, propMeta.itemType.typeDef)) - 1
       ] as ViewModel;
 
+      if (initialDirtyData) {
+        newViewModel.$loadDirtyData(initialDirtyData);
+      }
+
       //@ts-expect-error untyped indexer
       newViewModel[propMeta.foreignKey.name] = this.$primaryKey;
       if (propMeta.foreignKey.navigationProp) {
         //@ts-expect-error untyped indexer
         newViewModel[propMeta.foreignKey.navigationProp.name] = this;
-      }
-
-      if (initialDirtyData) {
-        Object.assign(newViewModel, initialDirtyData);
       }
 
       return newViewModel;
@@ -1238,6 +1251,7 @@ export abstract class ListViewModel<
             this.$metadata,
             this.$items,
             state.result,
+            true,
             true
           );
         }
@@ -1900,9 +1914,6 @@ function rebuildModelCollectionForViewModelCollection<
     const incomingItemPk = incomingItem[pkName];
     const existingItem = existingItemsMap.get(incomingItemPk);
 
-    // TODO: if existingItem is null, try and grab the best match from existingItemsWithoutPk
-    // and load into that. This will support bulk saves and avoid creating extra VM instances.
-
     if (existingItem) {
       existingItem.$loadFromModel(incomingItem, isCleanData);
 
@@ -2096,7 +2107,7 @@ export function updateViewModelFromModel<
           if (currentValue !== newCollection) {
             target[propName] = newCollection;
           } else {
-            if (isCleanData && currentValue instanceof ViewModelCollection) {
+            if (isCleanData && "$removedItems" in currentValue) {
               // When loading clean data, remove any pending bulk deletes
               // because we should expect that any pending delete items are either:
               // 1) Already deleted and therefore no longer need to be contained in $removedItems, OR

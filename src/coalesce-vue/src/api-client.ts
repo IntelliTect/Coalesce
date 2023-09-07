@@ -53,6 +53,7 @@ export interface ValidationIssue {
 
 export interface ItemResult<T = any> extends ApiResult {
   object?: T;
+  refMap?: { [key: string]: any };
   validationIssues?: ValidationIssue[];
 }
 
@@ -1610,7 +1611,8 @@ export abstract class ApiState<
 }
 
 export interface ItemApiState<TArgs extends any[], TResult> {
-  /** Invokes a call to this API endpoint. */
+  // Do not put a doc comment on the call signature:
+  // it'll hide the doc comment of the caller's definition.
   (...args: TArgs): ItemResultPromise<TResult>;
 }
 export class ItemApiState<TArgs extends any[], TResult> extends ApiState<

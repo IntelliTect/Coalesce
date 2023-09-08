@@ -116,7 +116,7 @@ Create a new instance of the ViewModel, loading the given initial data with `$lo
 <Prop def="$save: ItemApiState;
 $save(overrideProps?: Partial<TModel>) => ItemResultPromise<TModel>;" lang="ts" idPrefix="member-item" />
 
-An [API Caller](/stacks/vue/layers/api-clients.md#api-callers) for the ``/save`` endpoint. Uses the instance's `$params` object for the [Standard Parameters](/modeling/model-components/data-sources.md#standard-parameters). A save operation saves only properties on the model it is called on - for deep/bulk saves, see [$bulkSave](#member-_bulkSave).
+An [API Caller](/stacks/vue/layers/api-clients.md#api-callers) for the ``/save`` endpoint. Uses the instance's `$params` object for the [Standard Parameters](/modeling/model-components/data-sources.md#standard-parameters). A save operation saves only properties on the model it is called on - for deep/bulk saves, see [$bulkSave](#member-_bulksave).
 
 This caller is used for both manually-triggered saves in custom code and for auto-saves. If the [Rules/Validation](/stacks/vue/layers/viewmodels.md#rules-validation) report any errors when the caller is invoked, an error will be thrown.
 
@@ -238,7 +238,7 @@ Returns true if auto-save is currently active on the instance.
 ### Bulk saves
 
 <Prop def="$bulkSave: ItemApiState;
-$bulkSave() => ItemResultPromise<TModel>;" lang="ts" idPrefix="member-item" />
+$bulkSave() => ItemResultPromise<TModel>;" lang="ts" />
 
 Bulk saves save all changes to an object graph in one API call and one database transaction. This includes creation, updates, and deletions of entities.
 
@@ -246,7 +246,7 @@ To use bulk saves, you can work with your ViewModel instances on the client much
 
 If the client-side [Rules/Validation](/stacks/vue/layers/viewmodels.md#rules-validation) report any errors for any of the models being saved in the operation, an error will be thrown.
 
-On the server, each affected entity is handled through the same standard mechanisms as are used by individual saves or deletes ([Behaviors](/modeling/model-components/behaviors.md), [Data Sources](/modeling/model-components/data-sources.md), and [Security Attribute](/modeling/model-components/attributes/security-attribute.md)), but with a bit of sugar on top:
+On the server, each affected entity is handled through the same standard mechanisms as are used by individual saves or deletes ([Behaviors](/modeling/model-components/behaviors.md), [Data Sources](/modeling/model-components/data-sources.md), and [Security Attributes](/modeling/model-components/attributes/security-attribute.md)), but with a bit of sugar on top:
 * All operations are wrapped in a single database transaction that is rolled back if any individual operation fails.
 * Foreign keys will be fixed up as new items are created, allowing a parent and child record to be created at the same time even when the client has no foreign key to link the two together.
 

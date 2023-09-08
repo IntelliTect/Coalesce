@@ -98,7 +98,7 @@ Data is loaded recursively into all related ViewModel instances, preserving exis
 
 If auto-save is enabled, only non-dirty properties are updated. This prevents user input that is pending a save from being overwritten by the response from an auto-save ``/save`` request.
 
-If `purgeUnsaved` is true, unkeyed items found in collections will be dropped. This is used by the `$load` caller in order to fully reset the object graph with the state from the server.
+If `purgeUnsaved` is true, items without a primary key will be dropped from collection navigation properties. This is used by the `$load` caller in order to fully reset the object graph with the state from the server.
     
 
 <Prop def="$loadDirtyData(source: {} | TModel)" lang="ts" />

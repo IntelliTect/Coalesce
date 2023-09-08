@@ -163,14 +163,6 @@ namespace IntelliTect.Coalesce.Api.Controllers
                     root ??= dto.None.FirstOrDefault(i => i.Root);
 
 
-
-                    // Naive implemenation - does not consider order of operations.
-                    foreach (var item in dto.Delete)
-                    {
-                        var result = await item.DeleteAsync(parameters);
-                        if (!result.WasSuccessful) return new(result);
-                    }
-
                     var itemsToSave = new List<BulkSaveRequestItem>(dto.Save);
                     // Keep looping over the items to save until we've saved them all,
                     // or until we get stuck. We do this because reference between items
@@ -244,6 +236,19 @@ namespace IntelliTect.Coalesce.Api.Controllers
 
                             // TODO: Handle circular relationships with nullable FKs.
                         }
+                    }
+
+
+                    // Naive implemenation - does not consider order of operations.
+                    // We do deletes second under the assumption that if a principal 
+                    // entity is being deleted, the saves above may be removing the references
+                    // to that principal entity so that there are no conflicts when deleting it.
+                    // This is naive and a proper implementation will analyze relationships
+                    // and interweave saves and deletes as needed. However, this is really hard.
+                    foreach (var item in dto.Delete)
+                    {
+                        var result = await item.DeleteAsync(parameters);
+                        if (!result.WasSuccessful) return new(result);
                     }
 
                     var refMap = dto.Save

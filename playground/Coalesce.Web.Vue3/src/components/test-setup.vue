@@ -6,6 +6,8 @@
 
     <c-loader-status :loaders="{'': [vm.$bulkSave]}"></c-loader-status>
     <h2>Case (pk: {{ vm.$primaryKey }})</h2>
+
+    <c-input :model="vm" for="caseProducts"></c-input>
     <div v-for="x in vm.caseProducts">
       <v-btn variant="text" size="x-small" @click="x.product?.$remove(); x.product=null; x.$remove()" icon="fa fa-trash"></v-btn>
       <v-btn variant="text" size="x-small" @click="x.product?.$remove(); x.product=newProduct();" icon="fa fa-sync"></v-btn>

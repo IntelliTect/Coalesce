@@ -210,7 +210,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public virtual bool IsInternalUse => HasAttribute<InternalUseAttribute>() || (PureType != this && PureType.IsInternalUse);
 
-        protected bool ShouldCreateClassViewModel => !IsPrimitive && IsPOCO;
+        protected virtual bool ShouldCreateClassViewModel => !IsPrimitive && IsPOCO;
 
         public bool HasClassViewModel => ClassViewModel != null;
 

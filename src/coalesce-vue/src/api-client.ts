@@ -496,7 +496,6 @@ export interface BulkSaveRequest {
   // This is an object even though it only has one property
   // in case we need to expand in the future. An array as a JSON root
   // prevents any future extensibility.
-
   items: BulkSaveRequestItem[];
 }
 

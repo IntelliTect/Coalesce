@@ -143,9 +143,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
         private void ProcessAddedType(TypeViewModel type)
         {
             var generatedDtoEntity = type.GenericArgumentsFor(typeof(GeneratedDto<>))?[0];
-            if (generatedDtoEntity != null)
+            if (generatedDtoEntity?.ClassViewModel is ClassViewModel cvm)
             {
-                _generatedDtos[generatedDtoEntity.ClassViewModel!] = type.ClassViewModel!;
+                _generatedDtos[cvm] = type.ClassViewModel!;
             }
 
             if (!type.HasAttribute<CoalesceAttribute>())

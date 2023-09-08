@@ -267,23 +267,36 @@ export default defineComponent({
       this.internalValue.forEach((vm) => {
         if (!newItems.has(vm)) {
           if (vm instanceof ViewModel && this.canDelete) {
-            this.pushLoader(vm.$delete);
-            this.$emit("deleting", vm);
-            vm.$delete()
-              .then(() => {
-                // Delete successful. No need to keep the state around.
-                this.$emit("deleted", vm);
-                this.currentLoaders = this.currentLoaders.filter(
-                  (l) => l != vm.$delete
-                );
-              })
-              .catch(() => {
-                // Item failed to delete. Re-add it to the selected set of values.
-                // Note that the item will be re-added to the end because we don't
-                // know where for sure which index to re-insert it at.
-                // Because this is an error case, this is probably acceptable.
-                this.emitInput([...this.internalValue, vm]);
-              });
+            if (vm.$isAutoSaveEnabled) {
+              this.pushLoader(vm.$delete);
+              this.$emit("deleting", vm);
+              vm.$delete()
+                .then(() => {
+                  // Delete successful. No need to keep the state around.
+                  this.$emit("deleted", vm);
+                  this.currentLoaders = this.currentLoaders.filter(
+                    (l) => l != vm.$delete
+                  );
+                })
+                .catch(() => {
+                  // Item failed to delete. Re-add it to the selected set of values.
+                  // Note that the item will be re-added to the end because we don't
+                  // know where for sure which index to re-insert it at.
+                  // Because this is an error case, this is probably acceptable.
+                  this.emitInput([...this.internalValue, vm]);
+                });
+            } else {
+              // Autosave disabled. Remove (which supports bulk saves).
+              // This is a bit hacky - we don't want to call $remove
+              // because that will modify the collection we're currently iterating.
+              // We need to mark the item as removed, but allow `emitInput` to handle
+              // actually updating the collection bound to the input.
+
+              // @ts-expect-error internal state
+              vm._isRemoved = true;
+              // @ts-expect-error internal state
+              vm.$parent && (vm.$parent.$removedItems ??= []).push(vm);
+            }
           }
         } else {
           items.push(vm);
@@ -303,20 +316,29 @@ export default defineComponent({
           vm.$isDirty = true;
           items.push(vm);
 
-          this.pushLoader(vm.$save);
-          this.$emit("adding", vm);
-          vm.$save()
-            .then(() => {
-              // Save successful. No need to keep the state around.
-              this.$emit("added", vm);
-              this.currentLoaders = this.currentLoaders.filter(
-                (l) => l != vm.$save
-              );
-            })
-            .catch(() => {
-              // Item failed to save. Remove it from the selected set of values.
-              this.emitInput(this.internalValue.filter((i) => i != vm));
-            });
+          if (
+            this.model instanceof ViewModel &&
+            this.model.$isAutoSaveEnabled
+          ) {
+            // Only perform a save if the model we're bound to is autosaving.
+            // Otherwise, its possible that bulk saves are being used and
+            // that an automatic save here would be undesirable.
+
+            this.pushLoader(vm.$save);
+            this.$emit("adding", vm);
+            vm.$save()
+              .then(() => {
+                // Save successful. No need to keep the state around.
+                this.$emit("added", vm);
+                this.currentLoaders = this.currentLoaders.filter(
+                  (l) => l != vm.$save
+                );
+              })
+              .catch(() => {
+                // Item failed to save. Remove it from the selected set of values.
+                this.emitInput(this.internalValue.filter((i) => i != vm));
+              });
+          }
         }
       });
 

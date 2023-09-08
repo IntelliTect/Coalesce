@@ -400,7 +400,7 @@ describe("ViewModel", () => {
   });
 
   describe("$bulkSave", () => {
-    test("basic", async () => {
+    test("deep creation with circular references", async () => {
       const response = {
         refMap: {} as any,
         object: {
@@ -471,7 +471,7 @@ describe("ViewModel", () => {
       endpoint.destroy();
     });
 
-    test("removal", async () => {
+    test("deletion", async () => {
       const loadEndpoint = mockEndpoint("/students/get", (req) => ({
         wasSuccessful: true,
         object: {
@@ -498,18 +498,24 @@ describe("ViewModel", () => {
       const student = new StudentViewModel();
       await student.$load(1);
 
+      // Delete a dependent item in a collection navigation
       const course = student.courses![0];
       course.$remove();
+
+      // Delete a principal item in a reference navigation
       const advisor = student.advisor!;
       student.advisor!.$remove();
+
+      expect(student.$removedItems?.length).toBe(2);
 
       await student.$bulkSave();
       expect(student.courses).toHaveLength(0);
       expect(student.advisor).toBeNull();
       expect(student.studentAdvisorId).toBeNull();
+      expect(student.$removedItems?.length).toBeFalsy();
 
       expect(JSON.parse(bulkSaveEndpoint.mock.calls[0][0].data)).toMatchObject({
-        items: [
+        items: expect.arrayContaining([
           {
             action: "none",
             type: "Student",
@@ -529,10 +535,60 @@ describe("ViewModel", () => {
             data: { advisorId: 3 },
             refs: { advisorId: advisor.$stableId },
           },
-        ],
+        ]),
       });
 
       loadEndpoint.destroy();
+      bulkSaveEndpoint.destroy();
+    });
+
+    test("creation of principal entity", async () => {
+      const bulkSaveEndpoint = mockEndpoint(
+        "/students/bulkSave",
+        vitest.fn((req) => ({
+          wasSuccessful: true,
+          object: {
+            studentId: 1,
+            studentAdvisorId: 2,
+            advisor: { advisorId: 2, name: "bob" },
+            // We're assuming that `advisor` has a SetNull cascading delete on the server.
+          },
+        }))
+      );
+
+      const student = new StudentViewModel({ studentId: 1 });
+      student.$isDirty = false;
+
+      const advisor = (student.advisor = new AdvisorViewModel({ name: "bob" }));
+      await student.$bulkSave();
+
+      expect(JSON.parse(bulkSaveEndpoint.mock.calls[0][0].data)).toMatchObject({
+        items: expect.arrayContaining([
+          {
+            action: "save",
+            type: "Student",
+            data: {
+              studentId: 1,
+              studentAdvisorId: null,
+            },
+            refs: {
+              studentId: student.$stableId,
+              studentAdvisorId: advisor.$stableId,
+            },
+            root: true,
+          },
+          {
+            action: "save",
+            type: "Advisor",
+            data: {
+              advisorId: null,
+              name: "bob",
+            },
+            refs: { advisorId: advisor.$stableId },
+          },
+        ]),
+      });
+
       bulkSaveEndpoint.destroy();
     });
 
@@ -552,15 +608,14 @@ describe("ViewModel", () => {
       const course = student.courses![0];
       course.$remove();
 
-      //@ts-expect-error internal state:
-      expect(student.courses.$removedItems).toContain(course);
+      expect(student.$removedItems?.length).toBe(1);
+      expect(student.$removedItems).toContain(course);
       expect(course.$isRemoved).toBeTruthy();
       expect(student.courses).toHaveLength(0);
 
       await student.$load(1);
 
-      //@ts-expect-error internal state:
-      expect(student.courses.$removedItems?.length).toBeFalsy();
+      expect(student.$removedItems?.length).toBeFalsy();
       expect(student.courses).toHaveLength(1);
       expect(student.courses![0].$isRemoved).toBeFalsy();
 

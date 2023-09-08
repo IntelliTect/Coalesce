@@ -276,7 +276,8 @@ namespace IntelliTect.Coalesce.Models
         public T Object { get; set; }
 
         /// <summary>
-        /// Mapping between incoming refs of unkeyed bulk save items and each item's new primary key.
+        /// For bulk save responses, holds a mapping between the incoming refs of 
+        /// unkeyed bulk save items and each item's new primary key.
         /// </summary>
         public IDictionary<int, object?>? RefMap { get; set; }
 

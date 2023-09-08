@@ -242,7 +242,10 @@ export default defineComponent({
       this.internalValue.forEach((vm) => {
         if (!newItems.has(vm)) {
           if (vm instanceof ViewModel && this.canDelete) {
-            if (vm.$isAutoSaveEnabled) {
+            if (
+              this.model instanceof ViewModel &&
+              this.model.$isAutoSaveEnabled
+            ) {
               this.$emit("deleting", vm);
               this.pushLoader(vm.$delete);
               vm.$delete()

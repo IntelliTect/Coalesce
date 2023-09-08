@@ -631,8 +631,8 @@ export abstract class ViewModel<
               ? model._existsOnServer
                 ? "delete" // Delete items that have a PK are sent as a delete
                 : "none" // Do not send removed items that never had a PK.
-              : model.$isDirty
-              ? "save" // Save items that are dirty
+              : model.$isDirty || !model._existsOnServer
+              ? "save" // Save items that are dirty or never saved
               : "none"; // Non-dirty, non-deleted items are sent as "none". This exists so that the root item (that will be sent as the response from the server) can be identified even if it isn't being modified.
 
             if (action == "save") {

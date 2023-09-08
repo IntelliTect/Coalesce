@@ -559,6 +559,7 @@ describe("ViewModel", () => {
       const student = new StudentViewModel({ studentId: 1 });
       student.$isDirty = false;
 
+      // Advisor is a new principal entity we're creating for an existing dependent (student).
       const advisor = (student.advisor = new AdvisorViewModel({ name: "bob" }));
       await student.$bulkSave();
 
@@ -620,6 +621,35 @@ describe("ViewModel", () => {
       expect(student.courses![0].$isRemoved).toBeFalsy();
 
       loadEndpoint.destroy();
+    });
+
+    test("creation of root entity with no dirty props", async () => {
+      const bulkSaveEndpoint = mockEndpoint(
+        "/students/bulkSave",
+        vitest.fn((req) => ({
+          wasSuccessful: true,
+          object: {
+            studentId: 1,
+          },
+        }))
+      );
+
+      const student = new StudentViewModel();
+      await student.$bulkSave();
+
+      expect(JSON.parse(bulkSaveEndpoint.mock.calls[0][0].data)).toMatchObject({
+        items: expect.arrayContaining([
+          {
+            action: "save",
+            type: "Student",
+            data: { studentId: null },
+            refs: { studentId: student.$stableId },
+            root: true,
+          },
+        ]),
+      });
+
+      bulkSaveEndpoint.destroy();
     });
   });
 

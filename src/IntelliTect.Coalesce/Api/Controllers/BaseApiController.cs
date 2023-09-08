@@ -4,7 +4,9 @@ using IntelliTect.Coalesce.Models;
 using IntelliTect.Coalesce.TypeDefinition;
 using IntelliTect.Coalesce.TypeDefinition.Enums;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -102,15 +104,23 @@ namespace IntelliTect.Coalesce.Api.Controllers
         public TContext Db => Context.DbContext;
 
         protected async Task<ItemResult<TDto>> BulkSaveImplementation(
-            [FromBody] BulkSaveRequest dto,
-            [FromQuery] DataSourceParameters parameters,
-            [FromServices] IDataSourceFactory dataSourceFactory,
-            [FromServices] IBehaviorsFactory behaviorsFactory
+            BulkSaveRequest dto,
+            DataSourceParameters parameters,
+            IDataSourceFactory dataSourceFactory,
+            IBehaviorsFactory behaviorsFactory
         )
         {
-#if NET6_0_OR_GREATER
+            if (dto is null && HttpContext.RequestServices.GetService(typeof(IJsonHelper))?.GetType().Name.Contains("Newtonsoft") == true)
+            {
+                throw new NotSupportedException("Coalesce bulk saves require that the server be configured to use System.Text.Json, not Newtonsoft.Json.");
+            }
 
-            // TODO: Detect if deserialization failed due to use of newtonsoft, and throw if so.
+            if (dto is null)
+            {
+                throw new ArgumentException("Request body could not be read. There may have been a deserialization error.");
+            }
+
+#if NET6_0_OR_GREATER
 
             var strategy = Db.Database.CreateExecutionStrategy();
             return await strategy.ExecuteAsync<ItemResult<TDto>>(async () =>

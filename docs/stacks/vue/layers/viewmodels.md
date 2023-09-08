@@ -77,7 +77,7 @@ An [API Caller](/stacks/vue/layers/api-clients.md#api-callers) for the ``/get`` 
 
 <Prop def="$params: DataSourceParameters" lang="ts" idPrefix="member-item" />
 
-An object containing the [Standard Parameters](/modeling/model-components/data-sources.md#standard-parameters) to be used for the `$load`, `$save`, and `$delete` API callers.
+An object containing the [Standard Parameters](/modeling/model-components/data-sources.md#standard-parameters) to be used for the `$load`, `$save`, `$bulkSave`, and `$delete` API callers.
 
 
 <Prop def="$dataSource: DataSource" lang="ts" idPrefix="member-item" />
@@ -253,7 +253,7 @@ On the server, each affected entity is handled through the same standard mechani
 For the response to a bulk save, the server will load and return the root ViewModel that `$bulkSave` was called upon, using the instance's `$params` object for the [Standard Parameters](/modeling/model-components/data-sources.md#standard-parameters).
 
 
-<Prop def="readonly $remove: void" lang="ts" />
+<Prop def="$remove(): void" lang="ts" />
 
 Removes the item from its parent collection (if it is in a collection), and marks the item for deletion in the next bulk save.
 

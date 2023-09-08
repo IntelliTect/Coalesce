@@ -34,8 +34,8 @@ export interface CaseViewModel extends $models.Case {
 export class CaseViewModel extends ViewModel<$models.Case, $apiClients.CaseApiClient, number> implements $models.Case  {
   
   
-  public addToCaseProducts() {
-    return this.$addChild('caseProducts') as CaseProductViewModel
+  public addToCaseProducts(initialData?: DeepPartial<$models.CaseProduct> | null) {
+    return this.$addChild('caseProducts', initialData) as CaseProductViewModel
   }
   
   get products(): ReadonlyArray<ProductViewModel> {
@@ -262,8 +262,8 @@ export interface CompanyViewModel extends $models.Company {
 export class CompanyViewModel extends ViewModel<$models.Company, $apiClients.CompanyApiClient, number> implements $models.Company  {
   
   
-  public addToEmployees() {
-    return this.$addChild('employees') as PersonViewModel
+  public addToEmployees(initialData?: DeepPartial<$models.Person> | null) {
+    return this.$addChild('employees', initialData) as PersonViewModel
   }
   
   public get conflictingParameterNames() {
@@ -367,13 +367,13 @@ export interface PersonViewModel extends $models.Person {
 export class PersonViewModel extends ViewModel<$models.Person, $apiClients.PersonApiClient, number> implements $models.Person  {
   
   
-  public addToCasesAssigned() {
-    return this.$addChild('casesAssigned') as CaseViewModel
+  public addToCasesAssigned(initialData?: DeepPartial<$models.Case> | null) {
+    return this.$addChild('casesAssigned', initialData) as CaseViewModel
   }
   
   
-  public addToCasesReported() {
-    return this.$addChild('casesReported') as CaseViewModel
+  public addToCasesReported(initialData?: DeepPartial<$models.Case> | null) {
+    return this.$addChild('casesReported', initialData) as CaseViewModel
   }
   
   /** Sets the FirstName to the given text. */

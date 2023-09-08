@@ -14,12 +14,26 @@ namespace IntelliTect.Coalesce.Api
     [JsonConverter(typeof(BulkSaveRequestItemConverter))]
     public abstract class BulkSaveRequestItem
     {
+        /// <summary>
+        /// The type of the item being saved.
+        /// </summary>
         public string Type { get; set; } = null!;
 
+        /// <summary>
+        /// The action taken agains the item - either 'save', 'delete', or 'none'
+        /// </summary>
         public string Action { get; set; } = null!;
 
+        /// <summary>
+        /// If true, this is the root item that should be loaded and served as the response after the operation completes.
+        /// </summary>
         public bool Root { get; set; }
 
+        /// <summary>
+        /// A map from the names of unresolvable foreign keys to the <see cref="PrimaryRef"/> 
+        /// of the item that the foreign key should reference once that principal item is created.
+        /// Also contains an entry keyed by the model's primary key name that defines the <see cref="PrimaryRef"/> for this item.
+        /// </summary>
         public Dictionary<string, int>? Refs { get; set; }
 
         /// <summary>

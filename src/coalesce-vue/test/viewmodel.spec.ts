@@ -413,17 +413,18 @@ describe("ViewModel", () => {
             students: [
               { studentId: 1, name: "scott" },
               { studentId: 4, name: "steve" },
-              { studentId: 5, name: "sarah" },
-              { studentId: 6, name: "steph" },
             ],
           },
         },
       };
 
-      const endpoint = mockEndpoint("/students/bulkSave", (req) => ({
-        wasSuccessful: true,
-        ...JSON.parse(JSON.stringify(response)), // deep clone
-      }));
+      const endpoint = mockEndpoint(
+        "/students/bulkSave",
+        vitest.fn((req) => ({
+          wasSuccessful: true,
+          ...JSON.parse(JSON.stringify(response)), // deep clone
+        }))
+      );
 
       const student = new StudentViewModel();
       student.name = "scott";
@@ -431,42 +432,81 @@ describe("ViewModel", () => {
       // new child
       student.$addChild("courses", { name: "CS101" });
 
-      // new parent
+      // new parent, with children not added by $addChild.
       student.advisor = new AdvisorViewModel({
         name: "bob",
         students: [
           student, // circular reference
-          { name: "steve" },
-          { name: "sarah" },
-          { name: "steph" },
+          { name: "steve" }, // item in child collection with null reference nav prop to its parent.
         ],
       });
       const originalAdvisor = student.advisor;
       const originalSteve = student.advisor.students[1];
+      const originalCourse = student.courses![0];
 
-      // Setup the ref map so that existing instances may be preserved
+      // Setup the ref map on the response so that existing instances may be preserved
       response.refMap[student.$stableId] = 1;
-      response.refMap[student.advisor.$stableId] = 3;
+      response.refMap[originalCourse.$stableId] = 2;
+      response.refMap[originalAdvisor.$stableId] = 3;
       response.refMap[originalSteve.$stableId] = 4;
 
       await student.$bulkSave();
+
+      expect(JSON.parse(endpoint.mock.calls[0][0].data)).toMatchObject({
+        items: expect.arrayContaining([
+          {
+            action: "save",
+            type: "Student",
+            data: { studentId: null, studentAdvisorId: null, name: "scott" },
+            refs: {
+              studentId: student.$stableId,
+              studentAdvisorId: originalAdvisor.$stableId,
+            },
+            root: true,
+          },
+          {
+            action: "save",
+            type: "Course",
+            data: { courseId: null, name: "CS101", studentId: null },
+            refs: {
+              courseId: originalCourse.$stableId,
+              studentId: student.$stableId,
+            },
+          },
+          {
+            action: "save",
+            type: "Advisor",
+            data: { advisorId: null, name: "bob" },
+            refs: { advisorId: originalAdvisor.$stableId },
+          },
+          {
+            action: "save",
+            type: "Student",
+            data: { studentId: null, name: "steve" },
+            refs: {
+              studentId: originalSteve.$stableId,
+              studentAdvisorId: originalAdvisor.$stableId,
+            },
+          },
+        ]),
+      });
+
+      // Preserves non-circular instances:
+      // Reference nav:
+      expect(student.advisor === originalAdvisor).toBeTruthy();
+      // Collection navs:
+      expect(student.advisor.students[1] === originalSteve).toBeTruthy();
+      expect(student.courses![0] === originalCourse).toBeTruthy();
+
+      // Preserves *circular* instances:
+      expect(student.advisor.students[0] === student).toBeTruthy();
 
       expect(student.$bulkSave.wasSuccessful).toBeTruthy();
       expect(student.studentId).toBe(1);
       expect(student.courses).toHaveLength(1);
       expect(student.courses![0].name).toBe("CS101");
       expect(student.courses![0].courseId).toBe(2);
-      expect(student.advisor.students).toHaveLength(4);
-      expect(student.advisor.students[0].studentId).toBe(1);
-
-      // Preserves non-circular instances:
-      // Reference nav:
-      expect(student.advisor === originalAdvisor).toBeTruthy();
-      // Collection nav:
-      expect(student.advisor.students[1] === originalSteve).toBeTruthy();
-
-      // Preserves *circular* instances:
-      expect(student.advisor.students[0] === student).toBeTruthy();
+      expect(student.advisor.students).toHaveLength(2);
 
       endpoint.destroy();
     });

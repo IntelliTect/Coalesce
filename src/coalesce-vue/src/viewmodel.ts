@@ -603,24 +603,6 @@ export abstract class ViewModel<
 
             const meta: ModelType = model.$metadata;
 
-            for (const propName in meta.props) {
-              const prop = meta.props[propName];
-
-              // FUTURE: do we need to traverse through $parent too?
-
-              if (prop.role == "referenceNavigation") {
-                const principal = model.$data[prop.name] as ViewModel | null;
-                nextModels.push(principal);
-              } else if (prop.role == "collectionNavigation") {
-                const dependents = model.$data[
-                  prop.name
-                ] as ViewModelCollection<any> | null;
-                if (dependents) {
-                  nextModels.push(...dependents);
-                }
-              }
-            }
-
             if (model.$removedItems) {
               // `model.$removedItems` will contain items that were `.$remove()`d  while having `model` as a `$parent`.
               nextModels.push(...model.$removedItems);
@@ -651,10 +633,77 @@ export abstract class ViewModel<
             // Don't items that have an action of `none` if they aren't there to identify the root item.
             if (!root && action == "none") continue;
 
-            const bulkSaveItem: BulkSaveRequestItem = {
-              action,
-              type: meta.name,
+            const refs: BulkSaveRequestItem["refs"] = {
+              // The model's $stableId will be referenced by other objects.
+              // It is recorded as the object's primary key ref value.
+              [meta.keyProp.name]: model.$stableId,
 
+              // Other foreign key names here will be added that reference
+              // the $stableId of the principal end of the relationship
+              // The server will use these values to link these two objects together.
+            };
+
+            for (const propName in meta.props) {
+              const prop = meta.props[propName];
+
+              if (prop.role == "collectionNavigation") {
+                const dependents = model.$data[
+                  prop.name
+                ] as ViewModelCollection<any> | null;
+                if (dependents) {
+                  nextModels.push(...dependents);
+                }
+              } else if (prop.role == "referenceNavigation") {
+                const principal = model.$data[prop.name] as ViewModel | null;
+                nextModels.push(principal);
+
+                // Build up `refs` as needed.
+                // If the prop is a reference navigation that has no foreign key,
+                // then the ref will link the foreign key prop to the principal entity,
+                // allowing the server to fixup the foreign key once the principal is created.
+                if (
+                  // If the model isn't being saved, don't need to resolve foreign keys to refs.
+                  action != "save" ||
+                  // If the foreign key has a value then we don't need a ref.
+                  model.$data[prop.foreignKey.name] != null
+                ) {
+                  continue;
+                }
+
+                if (model.$data[prop.name]) {
+                  // The model has an object value for this reference navigation.
+                  // This makes things easy - the foreign key should ref the value of that reference navigation.
+                  refs[prop.foreignKey.name] = model.$data[prop.name].$stableId;
+                  continue;
+                }
+
+                const collection = model.$parentCollection;
+                if (
+                  collection?.$parent instanceof ViewModel &&
+                  collection.$metadata == prop.inverseNavigation
+                ) {
+                  // The reference navigation property has no value,
+                  // and the foreign key has no value,
+                  // but the model is contained in a collection navigation property,
+                  // and that collection is the inverse navigation of this reference navigation,
+                  // so it must reference the parent of that collection.
+
+                  // This scenario enables adding a new item to a collection navigation
+                  // without setting either the foreign key or the nav prop on that new child.
+
+                  refs[prop.foreignKey.name] = collection.$parent.$stableId;
+
+                  // Ensure we traverse to the owner of the ref we just used, which since
+                  // the reference navigation had no value, its actually possible we missed it.
+                  nextModels.push(collection.$parent);
+                }
+              }
+            }
+
+            const bulkSaveItem: BulkSaveRequestItem = {
+              type: meta.name,
+              action,
+              refs,
               data:
                 action == "none" || action == "delete"
                   ? // "none" and "delete" items only need their PK:
@@ -665,31 +714,6 @@ export abstract class ViewModel<
                       meta.keyProp.name,
                     ])!
                   : mapToDto(model)!,
-
-              refs: {
-                // The model's $stableId will be referenced by other objects. It is recorded as the object's primary key ref value.
-                [meta.keyProp.name]: model.$stableId,
-                ...Object.fromEntries(
-                  Object.values(meta.props)
-                    .filter(
-                      (prop): prop is ModelReferenceNavigationProperty =>
-                        prop.role == "referenceNavigation" &&
-                        // Model has an object value for this reference navigation...
-                        model.$data[prop.name] &&
-                        // ...but the model has no FK, then we need to include a reference to the reference nav object.
-                        // We're assuming that it is already present in `modelsToSend`, or will be added in a future iteration.
-                        !model.$data[prop.foreignKey.name]
-                    )
-                    .map((prop) => [
-                      // The foreign key references...
-                      prop.foreignKey.name,
-                      // ...the $stableId of the principal end of the reference navigation.
-                      // The $stableId will also occur on the principal object's refs (as its primary key ref value),
-                      // which the server will use to link these two objects together.
-                      model.$data[prop.name].$stableId,
-                    ])
-                ),
-              },
             };
 
             // Omit the optional `root` prop entirely unless its true.
@@ -1499,7 +1523,7 @@ function viewModelCollectionMapItems<T extends ViewModel>(
       ) as unknown as T;
     }
 
-    // $parent and $parentCollection are intentionally protected -
+    // $parent and $parentCollection are intentionally private -
     // they're just for internal tracking of stuff
     // and probably shouldn't be used in custom code.
     // So, we'll cast to `any` so we can set them here.
@@ -1532,7 +1556,10 @@ function resolveProto(obj: ViewModelCollection<any>): Array<any> {
 }
 
 export class ViewModelCollection<T extends ViewModel> extends Array<T> {
-  readonly $metadata!: ModelCollectionValue | ModelType;
+  readonly $metadata!:
+    | ModelCollectionValue
+    | ModelCollectionNavigationProperty
+    | ModelType;
   readonly $parent!: ViewModel | ListViewModel;
 
   $hasLoaded!: boolean;

@@ -46,7 +46,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
             AssignableToLookup = types.ToLookup(t => t.MetadataName);
 
-            ClassViewModel = ShouldCreateClassViewModel && Symbol is INamedTypeSymbol nts
+            ClassViewModel = ShouldCreateClassViewModel
                 ? new SymbolClassViewModel(this)
                 : null;
 
@@ -59,6 +59,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             return reflectionRepository?.GetOrAddType(symbol) ?? new SymbolTypeViewModel(reflectionRepository, symbol);
         }
+
+        protected override bool ShouldCreateClassViewModel
+            => base.ShouldCreateClassViewModel && Symbol is INamedTypeSymbol;
 
         public INamedTypeSymbol NamedSymbol => Symbol as INamedTypeSymbol ?? throw new InvalidCastException("Cannot cast to INamedTypeSymbol");
 

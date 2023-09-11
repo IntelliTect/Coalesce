@@ -64,6 +64,8 @@ An optional set of [Data Source Standard Parameters](/modeling/model-components/
 
 ## Events
 
+The following events and automatic API calls are only used when bound to a `model` that has [auto-saves](/stacks/vue/layers/viewmodels.md#auto-save) enabled.
+
 - `adding` - Fired when a new item has been selected, but before the call to `/save` has completed.
 - `added` - Fired when the call to `/save` has completed after adding a new item.
 - `deleting` - Fired when an item has been removed, but before the call to `/delete` has completed.

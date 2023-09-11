@@ -133,6 +133,10 @@ export const Advisor = (domain.types.Advisor = {
         return (domain.types.Student as ModelType).props
           .studentAdvisorId as ForeignKeyProperty;
       },
+      get inverseNavigation() {
+        return (domain.types.Student as ModelType).props
+          .advisor as ModelReferenceNavigationProperty;
+      },
       itemType: {
         name: "$collectionValue",
         role: "value",
@@ -390,6 +394,10 @@ export const Student = (domain.types.Student = {
       },
       get principalKey() {
         return Advisor.keyProp as PrimaryKeyProperty;
+      },
+      get inverseNavigation() {
+        return (domain.types.Advisor as ModelType).props
+          .students as ModelCollectionNavigationProperty;
       },
       typeDef: Advisor,
     },

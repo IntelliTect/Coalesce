@@ -12,7 +12,14 @@ type PromiseOrSync<T> = T | Promise<T>;
 
 type EndpointSpec =
   | Method
-  | `/${string}/${"list" | "get" | "count" | "save" | "delete" | string}`;
+  | `/${string}/${
+      | "list"
+      | "get"
+      | "count"
+      | "save"
+      | "bulkSave"
+      | "delete"
+      | string}`;
 
 type EndpointMock<TEndpoint extends EndpointSpec> = (
   request: AxiosRequestConfig

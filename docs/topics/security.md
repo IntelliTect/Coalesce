@@ -14,7 +14,7 @@ Classes can be hidden from Coalesce entirely by annotating them with `[InternalU
 `DbSet<>` properties on your `DbContext` class can also be annotated with `[InternalUse]`, causing that type to be treated by Coalesce like an [External Type](/modeling/model-types/external-types.md) rather than an [Entity](/modeling/model-types/entities.md), once again preventing generation of API endpoints but _without_ preventing properties of that type from being exposed.
 
 ### Standard CRUD Endpoints 
-For each of your [Entities](/modeling/model-types/entities.md) and [Custom DTOs](/modeling/model-types/dtos.md), Coalesce generates a set of CRUD API endpoints (`/get`, `/list`, `/count`, `/save`, and `/delete`). 
+For each of your [Entities](/modeling/model-types/entities.md) and [Custom DTOs](/modeling/model-types/dtos.md), Coalesce generates a set of CRUD API endpoints (`/get`, `/list`, `/count`, `/save`, `/bulkSave`, and `/delete`). 
 
 The default behavior is that all endpoints require an authenticated user (anonymous users are rejected).
 
@@ -33,13 +33,15 @@ This security is applied to the generated [controllers](https://learn.microsoft.
 <tr>
 <td>
 
-`/get`, `/list`, `/count`
+`/get`, `/list`, `/count`, `/bulkSave` 
 </td>
 <td>
 
 ``` c#:no-line-numbers
 [ReadAttribute]
 ```
+
+Note: the root model for a bulk save operation requires read permission. All other entities affected by the bulk save operation require their respective attribute for Create/Edit/Delete.
 </td>
 </tr>
 <tr>
@@ -224,7 +226,7 @@ use a custom method on the model to accept and set the new value.
 
 In Coalesce, [Data Sources](/modeling/model-components/data-sources.md) are the mechanism that you can extend to implement row-level security on your [Entities](/modeling/model-types/entities.md) and [Custom DTOs](/modeling/model-types/dtos.md).
 
-Data Sources are used when fetching results for `/get`, `/list`, and `/count` endpoints, and when fetching the target of a `/save` or `/delete`, and when fetching the invocation target of an [Instance Method](/modeling/model-components/methods.md#instance-methods). 
+Data Sources are used when fetching results for `/get`, `/list`, and `/count` endpoints, and when fetching the target or result of a `/save`, `/bulkSave`, or `/delete`, and when fetching the invocation target of an [Instance Method](/modeling/model-components/methods.md#instance-methods). 
 
 By default, your entities will be fetched using the [Standard Data Source](/modeling/model-components/data-sources.md#standard-data-source), but you can declare a custom default data source for each of your entities to override this default functionality. The default functionality here includes the [default loading behavior](/modeling/model-components/data-sources.md#default-loading-behavior), a feature where the Standard Data Source automatically includes the immediate relationships of requested entities. This can be suppressed by overriding the `GetQuery` method on your custom data source and not calling the base method, or by placing `[Read(NoAutoInclude = true)]` on classes or navigation properties that you do not want automatically included.
 
@@ -331,7 +333,7 @@ public class DepartmentMember
 
 #### Transform Results
 
-There exists a fourth technique in Data Sources for applying filtered includes: the [TransformResultsAsync](/modeling/model-components/data-sources.md#member-transformresults) method. Unlike the other techniques above that are performed in the `GetQuery` method and applied at the beginning of the data source query pipeline, `TransformResults` is applied at the very end of the process against the materialized results. It also only affects the responses from the generated `/get`, `/list`, `/save`, and `/delete` endpoints - it has no bearing on the invocation target of [instance methods](/modeling/model-components/methods.md#instance-methods).
+There exists a fourth technique in Data Sources for applying filtered includes: the [TransformResultsAsync](/modeling/model-components/data-sources.md#member-transformresults) method. Unlike the other techniques above that are performed in the `GetQuery` method and applied at the beginning of the data source query pipeline, `TransformResults` is applied at the very end of the process against the materialized results. It also only affects the responses from the generated `/get`, `/list`, `/save`, `/bulkSave`, and `/delete` endpoints - it has no bearing on the invocation target of [instance methods](/modeling/model-components/methods.md#instance-methods).
 
 The primary purpose of `TransformResults` is to conditionally load navigation properties. This was very useful before EF Core introduced native [filtered includes](#filtered-includes) for collection navigation properties, and is still useful for applying filtered includes to *reference* navigation properties since EF [does not support this](https://github.com/dotnet/efcore/issues/24422). It can also be used for any kind of filtered includes if native EF filtered includes get translated into poorly-performant SQL, or it can be used to populate [external type](/modeling/model-types/external-types.md) or other non-database-mapped properties on your entities.
 
@@ -445,7 +447,7 @@ Each option also has a more granular override:
 
 #### ValidateAttributesForSaves
 
-Enabling `ValidateAttributesForSaves` causes the [Standard Behaviors](/modeling/model-components/behaviors.md#standard-behaviors) to perform validation of validation attributes during `/save` calls, preventing a save when validation fails.
+Enabling `ValidateAttributesForSaves` causes the [Standard Behaviors](/modeling/model-components/behaviors.md#standard-behaviors) to perform validation of validation attributes during `/save` or `/bulkSave` calls, preventing a save when validation fails.
 
 This can be overridden per type or even per request by setting the `ValidateAttributesForSaves` property on a [custom Behaviors](/modeling/model-components/behaviors.md#defining-behaviors) instance.
 
@@ -457,7 +459,7 @@ This can be overridden per method by setting the `ValidateAttributes` property o
 
 ### Saves and Deletes
 
-Validation of `/save` and `/delete` actions against [Entities](/modeling/model-types/entities.md) and [Custom DTOs](/modeling/model-types/dtos.md) are performed by the [Behaviors](/modeling/model-components/behaviors.md) for the type. Automatic [attribute based validation](#attribute-validation) can be used (saves only), or Behaviors can be overridden to perform validation and other customization of the save and delete process, as in the following example:
+Validation of `/save`, `/bulkSave`, and `/delete` actions against [Entities](/modeling/model-types/entities.md) and [Custom DTOs](/modeling/model-types/dtos.md) are performed by the [Behaviors](/modeling/model-components/behaviors.md) for the type. Automatic [attribute based validation](#attribute-validation) can be used (saves only), or Behaviors can be overridden to perform validation and other customization of the save and delete process, as in the following example:
 
 
 ``` c#

@@ -33,6 +33,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
                 "IntelliTect.Coalesce.Api",
                 "IntelliTect.Coalesce.Api.Controllers",
                 "IntelliTect.Coalesce.Api.DataSources",
+                "IntelliTect.Coalesce.Api.Behaviors",
                 "IntelliTect.Coalesce.Mapping",
                 "IntelliTect.Coalesce.Mapping.IncludeTrees",
                 "IntelliTect.Coalesce.Models",

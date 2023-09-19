@@ -670,7 +670,10 @@ export abstract class ViewModel<
                   continue;
                 }
 
-                if (model.$data[prop.name]) {
+                if (
+                  model.$data[prop.name] &&
+                  !model.$data[prop.name]._existsOnServer
+                ) {
                   // The model has an object value for this reference navigation.
                   // This makes things easy - the foreign key should ref the value of that reference navigation.
                   refs[prop.foreignKey.name] = model.$data[prop.name].$stableId;
@@ -871,11 +874,11 @@ export abstract class ViewModel<
   /** @internal */
   private _removeFromParentCollection() {
     if (this.$parentCollection) {
-      const item = this.$parentCollection.splice(
-        this.$parentCollection.indexOf(this),
-        1
-      )[0];
-      return item;
+      const idx = this.$parentCollection.indexOf(this);
+      if (idx > -1) {
+        const item = this.$parentCollection.splice(idx, 1)[0];
+        return item;
+      }
     }
   }
 

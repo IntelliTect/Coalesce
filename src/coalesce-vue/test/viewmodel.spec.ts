@@ -691,6 +691,51 @@ describe("ViewModel", () => {
 
       bulkSaveEndpoint.destroy();
     });
+
+    test("creation with parent that was explicitly late loaded by key - does not include ref to existing parent", async () => {
+      const bulkSaveEndpoint = mockEndpoint(
+        "/students/bulkSave",
+        vitest.fn((req) => ({
+          wasSuccessful: true,
+          object: {
+            studentId: 1,
+            studentAdvisorId: 3,
+          },
+        }))
+      );
+
+      const advisor = new AdvisorViewModel();
+      const student = new StudentViewModel({
+        advisor: advisor,
+      });
+
+      // Weird scenario: After loading the principal entity from the server (emulated here),
+      // `student.advisor` is still non-null, but `student.studentAdvisorId` is null.
+      advisor.$loadCleanData({ advisorId: 7 });
+
+      await student.$bulkSave();
+
+      expect(JSON.parse(bulkSaveEndpoint.mock.calls[0][0].data)).toMatchObject({
+        items: expect.arrayContaining([
+          {
+            action: "save",
+            type: "Student",
+            data: {
+              studentId: null,
+              // `mapToDto` will discover the foreign key through the nav prop
+              studentAdvisorId: 7,
+            },
+            refs: {
+              studentId: student.$stableId,
+              // Since the FK has a known server value, it should not be `ref`'d.
+            },
+            root: true,
+          },
+        ]),
+      });
+
+      bulkSaveEndpoint.destroy();
+    });
   });
 
   describe("autoSave", () => {

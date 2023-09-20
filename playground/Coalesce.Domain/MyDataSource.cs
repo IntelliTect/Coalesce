@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
-using System.Linq.Dynamic.Core;
 using IntelliTect.Coalesce.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;

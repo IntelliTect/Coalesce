@@ -11,7 +11,7 @@
     "dev": "vite",
     "lint:fix": "eslint src --fix",
     "test": "vitest",
-    "coalesce": "dotnet run --project ../../src/IntelliTect.Coalesce.DotnetTool --framework net7.0 -- ../../coalesce-vue3.json"
+    "coalesce": "dotnet run --project ../../src/IntelliTect.Coalesce.DotnetTool --framework net8.0 -- ../../coalesce-vue3.json"
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "5.15.4",

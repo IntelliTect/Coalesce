@@ -1,14 +1,14 @@
-﻿using IntelliTect.Coalesce.Models;
+﻿using IntelliTect.Coalesce.Api;
+using IntelliTect.Coalesce.Mapping;
+using IntelliTect.Coalesce.Models;
+using IntelliTect.Coalesce.TypeDefinition;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Linq.Dynamic.Core;
-using System.Threading.Tasks;
-using IntelliTect.Coalesce.TypeDefinition;
-using IntelliTect.Coalesce.Mapping;
-using System.Collections.ObjectModel;
 using System.Threading;
-using IntelliTect.Coalesce.Api;
+using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce
 {

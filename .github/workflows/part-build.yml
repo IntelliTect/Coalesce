@@ -100,6 +100,7 @@ jobs:
           2.2.x
           6.0.x
           7.0.x
+          8.0.x
 
     - run: npm ci
       working-directory: src/coalesce-vue

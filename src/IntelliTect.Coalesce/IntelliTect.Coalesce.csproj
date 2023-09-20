@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<Description>Core framework library for IntelliTect.Coalesce</Description>
-		<TargetFrameworks>netstandard2.0;net6.0;net7.0</TargetFrameworks>
+		<TargetFrameworks>netstandard2.0;net6.0;net7.0;net8.0</TargetFrameworks>
 		<PlatformTarget>AnyCPU</PlatformTarget>
 
 		<Nullable>enable</Nullable>
@@ -34,20 +34,21 @@
   </ItemGroup>
 
   <ItemGroup Condition="$([MSBuild]::IsTargetFrameworkCompatible($(TargetFramework), 'netcoreapp3.1'))">
+    <!-- C# 11? -->
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.4.0" />
+  </ItemGroup>
+
+  <ItemGroup Condition="$([MSBuild]::IsTargetFrameworkCompatible($(TargetFramework), 'net8.0'))">
+    <!-- C# 12-->
+    <PackageReference Update="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.8.*-*" />
   </ItemGroup>
 
 	<ItemGroup Condition="!$([MSBuild]::IsTargetFrameworkCompatible($(TargetFramework), 'net6.0'))">
 		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="[2.2,)" />
 	</ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net6.0' ">
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="[6.0,)" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="[6.0,)" />
-  </ItemGroup>
-
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net7.0' ">
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="[7.0,)" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="[7.0,)" />
-  </ItemGroup>
+	<ItemGroup Condition="$([MSBuild]::IsTargetFrameworkCompatible($(TargetFramework), 'net6.0'))">
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="$(DotNetPackageVersionSpec)" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="$(DotNetPackageVersionSpec)" />
+	</ItemGroup>
 </Project>

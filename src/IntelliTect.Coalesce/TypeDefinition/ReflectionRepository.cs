@@ -79,9 +79,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public ReadOnlyHashSet<TypeViewModel> ClientEnums => new ReadOnlyHashSet<TypeViewModel>(_enums);
 
-        public IEnumerable<ClassViewModel> DiscoveredClassViewModels =>
+        internal IEnumerable<ClassViewModel> DiscoveredClassViewModels =>
             DbContexts.Select(t => t.ClassViewModel)
-            .Union(ClientClasses);
+            .Union(ClientClasses).Union(Services);
 
         public ReflectionRepository()
         {

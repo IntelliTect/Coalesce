@@ -100,6 +100,8 @@ jobs:
           2.2.x
           6.0.x
           7.0.x
+          8.0.x
+        include-prerelease: true
 
     - run: npm ci
       working-directory: src/coalesce-vue
@@ -133,6 +135,8 @@ jobs:
         dotnet-version: | 
           6.0.x
           7.0.x
+          8.0.x
+        include-prerelease: true
 
     - run: npm ci
     - run: npx gulp coalesce
@@ -156,6 +160,8 @@ jobs:
         dotnet-version: | 
           6.0.x
           7.0.x
+          8.0.x
+        include-prerelease: true
 
     - run: npm ci
       working-directory: src/coalesce-vue
@@ -180,7 +186,9 @@ jobs:
     - run: npm i -g npm@9.5.0 # Pin NPM to avoid breaking changes like https://github.com/nodejs/node/issues/46542
     - uses: actions/setup-dotnet@v2
       with:
-        dotnet-version: 7.0.x
+        dotnet-version: | 
+          8.0.x
+        include-prerelease: true
 
     - run: npm ci
       working-directory: src/coalesce-vue

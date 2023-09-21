@@ -3,19 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Dynamic.Core;
-using System.Security.Claims;
-using System.Text;
-using System.Threading.Tasks;
-using IntelliTect.Coalesce.TypeDefinition;
-using Microsoft.EntityFrameworkCore.Query.Internal;
-using IntelliTect.Coalesce.Mapping.IncludeTrees;
-using IntelliTect.Coalesce.Mapping;
-using IntelliTect.Coalesce.Api;
-using IntelliTect.Coalesce.Utilities;
-using System.Collections.ObjectModel;
-using IntelliTect.Coalesce.Api.DataSources;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce
 {

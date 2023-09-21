@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Text;
-using Microsoft.EntityFrameworkCore.InMemory.Infrastructure.Internal;
 using System;
 using System.Collections.Generic;
 using System.Linq;

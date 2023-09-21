@@ -231,6 +231,8 @@ namespace Coalesce.Domain
         [Coalesce]
         public static CaseSummary GetCaseSummary(AppDbContext db)
         {
+            int[] a = [1, 2, 3, 4, 5, 6, 7, 8];
+
             return CaseSummary.GetCaseSummary(db);
         }
     }

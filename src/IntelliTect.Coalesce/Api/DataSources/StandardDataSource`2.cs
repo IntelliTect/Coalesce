@@ -1,17 +1,10 @@
-﻿using IntelliTect.Coalesce.Models;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Dynamic.Core;
-using System.Threading.Tasks;
-using IntelliTect.Coalesce.TypeDefinition;
-using IntelliTect.Coalesce.Mapping;
-using IntelliTect.Coalesce.Api;
-using System.Collections.ObjectModel;
 using System.Threading;
-using Microsoft.EntityFrameworkCore.Query.Internal;
-using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce
 {

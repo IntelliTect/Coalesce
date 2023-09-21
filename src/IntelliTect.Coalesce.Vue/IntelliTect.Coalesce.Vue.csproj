@@ -2,8 +2,7 @@
 	
 	<PropertyGroup>
 		<Description>Vue.js shared code for server projects for IntelliTect.Coalesce</Description>
-		<TargetFrameworks>net6.0;net7.0</TargetFrameworks>
-		<LangVersion>10.0</LangVersion>
+		<TargetFrameworks>net6.0;net7.0;net8.0</TargetFrameworks>
 		<Nullable>enable</Nullable>
 	</PropertyGroup>
 
@@ -11,12 +10,8 @@
 		<ProjectReference Include="..\IntelliTect.Coalesce\IntelliTect.Coalesce.csproj" />
 	</ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net6.0' ">
-    <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="6.0.*" />
-  </ItemGroup>
-
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net7.0' ">
-    <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="7.0.*" />
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="$(DotNetPackageVersionSpec)" />
   </ItemGroup>
 
 </Project>

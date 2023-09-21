@@ -33,6 +33,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Tests
             await Task.WhenAll(
                 Task.Run(() => AssertVueSuiteTypescriptOutputCompiles(suite, "4.9")),
                 Task.Run(() => AssertVueSuiteTypescriptOutputCompiles(suite, "5")),
+                Task.Run(() => AssertVueSuiteTypescriptOutputCompiles(suite, "5.2")),
                 Task.Run(() => AssertSuiteCSharpOutputCompiles(suite))
             );
         }

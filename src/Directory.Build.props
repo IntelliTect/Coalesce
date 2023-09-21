@@ -1,5 +1,7 @@
 <Project>
   <PropertyGroup>
+	  <TargetFrameworks>net6.0;net7.0;net8.0</TargetFrameworks>
+	  
     <Company>IntelliTect</Company>
     <Authors>IntelliTect</Authors>
     <Product>Coalesce Web Framework</Product>
@@ -50,12 +52,6 @@
 
   <PropertyGroup Condition="'$(TF_BUILD)' == 'true'">
     <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
-  </PropertyGroup>
-
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' Or '$(TargetFramework)' == 'net471' ">
-    <!-- Ignore nullability warnings for the netstandard2.0 target since many of them 
-    are false positives due to attributes not existing in the BCL. -->
-    <NoWarn>$(NoWarn);CS8600;CS8601;CS8602;CS8603;CS8604;CS8618;CS8625;CS8619</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup Condition="$(Configuration) == 'Release'">

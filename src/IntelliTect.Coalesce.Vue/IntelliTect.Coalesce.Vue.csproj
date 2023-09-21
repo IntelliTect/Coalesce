@@ -2,7 +2,6 @@
 	
 	<PropertyGroup>
 		<Description>Vue.js shared code for server projects for IntelliTect.Coalesce</Description>
-		<TargetFrameworks>net6.0;net7.0;net8.0</TargetFrameworks>
 		<Nullable>enable</Nullable>
 	</PropertyGroup>
 

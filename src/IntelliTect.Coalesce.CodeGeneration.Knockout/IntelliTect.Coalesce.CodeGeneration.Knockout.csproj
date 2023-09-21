@@ -2,7 +2,6 @@
 
   <PropertyGroup>
     <Description>Knockout.js code generation for IntelliTect.Coalesce</Description>
-    <TargetFramework>netstandard2.0</TargetFramework>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <OutputType>Library</OutputType>
 

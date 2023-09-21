@@ -97,7 +97,6 @@ jobs:
       uses: actions/setup-dotnet@v2
       with:
         dotnet-version: | 
-          2.2.x
           6.0.x
           7.0.x
           8.0.x

@@ -10,16 +10,6 @@
   -->
   
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp2.1;net6.0;net7.0;net8.0</TargetFrameworks>
-
-    <!--    
-	    Suppress warnings about 2.1 being abandoned. 
-	    This was the last version to officially support DotNetCliToolReference,
-		  so we keep building for this target framework because it doesn't require
-		  hacky workarounds (<DotnetCliToolTargetFramework>) in the consuming project.
-	  -->
-	  <CheckEolTargetFramework Condition=" '$(TargetFramework)' == 'netcoreapp2.1' ">false</CheckEolTargetFramework>
-    
     <PlatformTarget>AnyCPU</PlatformTarget>
 
     <AssemblyName>dotnet-coalesce</AssemblyName>

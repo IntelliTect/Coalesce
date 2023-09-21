@@ -40,9 +40,7 @@ namespace IntelliTect.Coalesce.Mapping
 
         public bool TryGetMapping<TDto>(
             object sourceObject,
-    #if NETCOREAPP
             [System.Diagnostics.CodeAnalysis.NotNullWhen(true)]
-    #endif
             out TDto? mappedObject
         )
             where TDto : class

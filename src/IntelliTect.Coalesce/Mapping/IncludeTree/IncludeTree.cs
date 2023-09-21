@@ -73,7 +73,6 @@ namespace IntelliTect.Coalesce
             }
         }
 
-#if NET6_0_OR_GREATER
 #pragma warning disable EF1001 // Internal EF Core API usage.
 
         /// <summary>
@@ -117,28 +116,6 @@ namespace IntelliTect.Coalesce
         }
 
 #pragma warning restore EF1001 // Internal EF Core API usage.
-#else
-
-        /// <summary>
-        /// Shorthand for <code>Enumerable.Empty&lt;T&gt;().AsQueryable()</code>,
-        /// which can be used to build up a query upon which <code>GetIncludeTree</code> can be called.
-        /// </summary>
-        public static IQueryable<T> QueryFor<T>()
-        {
-            return Enumerable.Empty<T>().AsQueryable();
-        }
-
-        /// <summary>
-        /// Build an include tree for the specified type by providing a function
-        /// that will build up the query by calling <code>IncludedSeprately</code> 
-        /// and <code>ThenIncludedSeprately</code> on the query.
-        /// </summary>
-        public static IncludeTree For<T>(Func<IQueryable<T>, IIncludedSeparatelyQueryable<T, object>> builder)
-        {
-            return builder(QueryFor<T>()).GetIncludeTree();
-        }
-
-#endif
 
         internal static IncludeTree ParseMemberExpression(MemberExpression expr, out IncludeTree tail)
         {
@@ -209,9 +186,7 @@ namespace IntelliTect.Coalesce
 
         public bool TryGetValue(
             string key,
-#if NETCOREAPP
             [System.Diagnostics.CodeAnalysis.MaybeNullWhen(false)]
-#endif
             out IncludeTree value)
         {
             return _children.TryGetValue(key, out value);

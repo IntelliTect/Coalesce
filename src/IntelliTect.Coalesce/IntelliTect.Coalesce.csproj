@@ -26,14 +26,8 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="$(DotNetPackageVersionSpec)" />
 	</ItemGroup>
 
-  <ItemGroup Condition="$([MSBuild]::IsTargetFrameworkCompatible($(TargetFramework), 'net6.0'))">
-    <!-- C# 11? -->
-    <!-- C# 11? -->
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.4.0" />
-  </ItemGroup>
-
-  <ItemGroup Condition="$([MSBuild]::IsTargetFrameworkCompatible($(TargetFramework), 'net8.0'))">
+  <ItemGroup>
     <!-- C# 12-->
-    <PackageReference Update="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.8.*-*" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.8.*-*" />
   </ItemGroup>
 </Project>

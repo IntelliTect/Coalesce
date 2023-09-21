@@ -269,10 +269,8 @@ namespace IntelliTect.Coalesce.Models
 
     public class ItemResult<T> : ItemResult
     {
-#if NETCOREAPP
         [System.Diagnostics.CodeAnalysis.AllowNull]
         [System.Diagnostics.CodeAnalysis.MaybeNull]
-#endif 
         public T Object { get; set; }
 
         /// <summary>
@@ -287,9 +285,7 @@ namespace IntelliTect.Coalesce.Models
 
         public ItemResult(
             ItemResult result,
-#if NETCOREAPP
             [System.Diagnostics.CodeAnalysis.AllowNull]
-#endif  
             T obj = default
         ) : base(result)
         {
@@ -299,9 +295,7 @@ namespace IntelliTect.Coalesce.Models
         public ItemResult(
             bool wasSuccessful, 
             string? message = null,
-#if NETCOREAPP
             [System.Diagnostics.CodeAnalysis.AllowNull]
-#endif 
             T obj = default, 
             IEnumerable<ValidationIssue>? validationIssues = null,
             IncludeTree? includeTree = null

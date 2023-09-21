@@ -121,11 +121,9 @@ namespace IntelliTect.Coalesce.Tests.Mapping
                 .IncludedSeparately(e => e.CasesReported).ThenIncluded(c => c.ReportedBy.CasesAssigned.Where(c => c.Description != null))
                 .Where(e => e.LastName != null);
 
-#if NET5_0_OR_GREATER
             // Just calling this to make sure the query can execute.
-            // There might not be any items that match our precidate, but so long as we don't get exceptions, we don't care what the result is.
+            // There might not be any items that match our predicate, but so long as we don't get exceptions, we don't care what the result is.
             Person obj = queryable.FirstOrDefault();
-#endif
 
             IncludeTree tree = queryable.GetIncludeTree();
             AssertBasicChecks(tree);

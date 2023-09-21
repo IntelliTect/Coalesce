@@ -1,6 +1,4 @@
-﻿#if NET6_0_OR_GREATER
-
-using IntelliTect.Coalesce.Api.Behaviors;
+﻿using IntelliTect.Coalesce.Api.Behaviors;
 using IntelliTect.Coalesce.Api.DataSources;
 using IntelliTect.Coalesce.Models;
 using IntelliTect.Coalesce.TypeDefinition;
@@ -126,4 +124,3 @@ namespace IntelliTect.Coalesce.Api
     }
 }
 
-#endif

@@ -1,7 +1,4 @@
-﻿
-#if NET6_0_OR_GREATER
-
-using IntelliTect.Coalesce.TypeDefinition;
+﻿using IntelliTect.Coalesce.TypeDefinition;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -109,6 +106,3 @@ namespace IntelliTect.Coalesce.Api
             => throw new NotSupportedException();
     }
 }
-
-
-#endif

@@ -36,6 +36,12 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
 
         public DateTime? DateTimeNullable { get; set; }
 
+        public DateOnly SystemDateOnly { get; set; }
+        public TimeOnly SystemTimeOnly { get; set; }
+
+        [DateType(DateTypeAttribute.DateTypes.DateOnly)]
+        public DateTime DateOnlyViaAttribute { get; set; }
+
 
         internal string InternalProperty { get; set; }
 
@@ -212,13 +218,11 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
             int complexModelId,
             ComplexModel model) => true;
 
-#if NET5_0_OR_GREATER
         [Coalesce]
         public PositionalRecord MethodWithPositionRecord(PositionalRecord rec) => new PositionalRecord("a", 42);
 
         [Coalesce]
         public InitRecordWithDefaultCtor MethodWithInitRecord(InitRecordWithDefaultCtor rec) => new InitRecordWithDefaultCtor { String = "a", Num = 42 };
-#endif
 
         [Coalesce, Execute(ValidateAttributes = false)]
         public ItemResult MethodWithValidationExplicitOff([Required] ValidationTarget target) => true;

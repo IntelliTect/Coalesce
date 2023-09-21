@@ -8,8 +8,6 @@ using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.Models
 {
-#if NET5_0_OR_GREATER
-
     internal class QueryableByteStream : Stream
     {
         private DbCommand? _cmd;
@@ -145,7 +143,4 @@ namespace IntelliTect.Coalesce.Models
 
         public override void Write(byte[] buffer, int offset, int count) => throw new InvalidOperationException();
     }
-
-#endif
-
 }

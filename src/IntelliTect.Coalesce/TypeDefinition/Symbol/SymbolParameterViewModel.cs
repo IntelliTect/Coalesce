@@ -16,7 +16,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
             : base(parent, SymbolTypeViewModel.GetOrCreate(parent.Parent.ReflectionRepository, symbol.Type))
         {
             Symbol = symbol;
-#if NET6_0_OR_GREATER
             if (symbol.Type.IsReferenceType)
             {
                 // This is naive and doesn't capture the full nullable behavior and nuances of attributes.
@@ -28,7 +27,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     _ => NullabilityState.Unknown
                 };
             }
-#endif
         }
 
         public override string Name => Symbol.Name;

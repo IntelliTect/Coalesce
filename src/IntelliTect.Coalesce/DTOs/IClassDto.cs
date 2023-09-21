@@ -15,7 +15,6 @@ namespace IntelliTect.Coalesce
         void MapFrom(T obj, IMappingContext context, IncludeTree? tree = null);
 
         T MapToNew(IMappingContext context)
-#if NETCOREAPP3_1_OR_GREATER
         {
             Type tType = typeof(T);
 
@@ -28,9 +27,6 @@ namespace IntelliTect.Coalesce
             MapTo(obj, context);
             return obj;
         }
-#else
-;
-#endif
     }
 
     /// <summary>

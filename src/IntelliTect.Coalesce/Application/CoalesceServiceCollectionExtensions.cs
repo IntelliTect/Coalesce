@@ -26,18 +26,11 @@ namespace IntelliTect.Coalesce
             if (services == null) throw new ArgumentNullException(nameof(services));
             if (builder == null) throw new ArgumentNullException(nameof(builder));
 
-#if NETCOREAPP
             services.AddOptions<CoalesceOptions>().Configure<IWebHostEnvironment>((opts, hosting) =>
             {
                 opts.DetailedExceptionMessages = 
                     Microsoft.Extensions.Hosting.HostEnvironmentEnvExtensions.IsDevelopment(hosting);
             });
-#else
-            services.AddOptions<CoalesceOptions>().Configure<IHostingEnvironment>((opts, hosting) =>
-            {
-                opts.DetailedExceptionMessages = hosting.IsDevelopment();
-            });
-#endif
 
             builder(new CoalesceServiceBuilder(services));
 

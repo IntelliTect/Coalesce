@@ -3,11 +3,8 @@ using System.Linq;
 
 namespace IntelliTect.Coalesce.Api
 {
-
     public class BulkSaveRequest
     {
-#if NET6_0_OR_GREATER
-
         public List<BulkSaveRequestItem> Items { get; set; } = new();
 
         internal IEnumerable<BulkSaveRequestItem> Save => Items.Where(i => i.Action == "save");
@@ -32,7 +29,5 @@ namespace IntelliTect.Coalesce.Api
                 return _RefsLookup;
             }
         }
-#endif
-
     }
 }

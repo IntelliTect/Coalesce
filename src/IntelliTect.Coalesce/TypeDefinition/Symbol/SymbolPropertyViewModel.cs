@@ -17,7 +17,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
             : base(effectiveParent, declaringParent, SymbolTypeViewModel.GetOrCreate(declaringParent.ReflectionRepository, symbol.Type))
         {
             Symbol = symbol;
-#if NET6_0_OR_GREATER
             if (symbol.Type.IsReferenceType)
             {
                 // This is naive and doesn't capture the full nullable behavior and nuances of attributes.
@@ -29,7 +28,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     _ => NullabilityState.Unknown
                 };
             }
-#endif
         }
 
         public override string Name => Symbol.Name;
@@ -51,12 +49,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public override bool IsInitOnly => Symbol.SetMethod?.IsInitOnly == true;
 
-        public override bool HasRequiredKeyword =>
-#if NETCOREAPP3_1_OR_GREATER
-            Symbol.IsRequired;
-#else
-            false;
-#endif
+        public override bool HasRequiredKeyword => Symbol.IsRequired;
 
         public override bool IsVirtual => Symbol.IsVirtual;
 

@@ -90,7 +90,7 @@ namespace IntelliTect.Coalesce.Knockout.Controllers
 
         
         //[OutputCache(Duration = 10000, VaryByParam = "none")]
-        protected ActionResult DocsImplementation([FromServices] IHostingEnvironment hostingEnvironment)
+        protected ActionResult DocsImplementation([FromServices] IWebHostEnvironment hostingEnvironment)
         {
             // Load TypeScript docs
             var contentRoot = hostingEnvironment.ContentRootPath;

@@ -118,8 +118,6 @@ namespace IntelliTect.Coalesce.Api.Controllers
                 throw new ArgumentException("Request body could not be read. There may have been a deserialization error.");
             }
 
-#if NET6_0_OR_GREATER
-
             var strategy = Db.Database.CreateExecutionStrategy();
             return await strategy.ExecuteAsync<ItemResult<TDto>>(async () =>
             {
@@ -289,10 +287,6 @@ namespace IntelliTect.Coalesce.Api.Controllers
                     throw;
                 }
             });
-#else
-            await Task.CompletedTask; // Silence warning
-            throw new NotSupportedException("Bulk saves require the application target .NET 6 or greater");
-#endif
         }
     }
 }

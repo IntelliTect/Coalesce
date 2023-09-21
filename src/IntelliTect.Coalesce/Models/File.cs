@@ -28,7 +28,6 @@ namespace IntelliTect.Coalesce.Models
 
         public File(byte[] content) : this(new MemoryStream(content ?? Array.Empty<byte>())) { }
 
-#if NET5_0_OR_GREATER
         /// <summary>
         /// Construct a file that will stream its content from a database.
         /// When returned from a Coalesce method using HTTP GET, this will support HTTP Range requests.
@@ -40,7 +39,6 @@ namespace IntelliTect.Coalesce.Models
             // Don't bother setting Length here, since we don't actually use it when creating responses.
             // aspnetcore itself has to be the one that reads .Length from the underlying stream.
         }
-#endif
 
         public string? Name { get; set; }
 

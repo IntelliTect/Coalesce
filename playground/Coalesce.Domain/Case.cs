@@ -171,9 +171,6 @@ namespace Coalesce.Domain
             return new IntelliTect.Coalesce.Models.File(db.Cases
                 .WherePrimaryKeyIs(CaseKey)
                 .Select(c => c.AttachmentContent.Content)
-#if !NET5_0_OR_GREATER
-                .First()
-#endif
             )
             {
                 Name = AttachmentName,

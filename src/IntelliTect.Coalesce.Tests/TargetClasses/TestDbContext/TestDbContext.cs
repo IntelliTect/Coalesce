@@ -37,9 +37,7 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         public AppDbContext(string memoryDatabaseName)
             : base(new DbContextOptionsBuilder<AppDbContext>().UseInMemoryDatabase(memoryDatabaseName).ConfigureWarnings(w =>
             {
-#if NET5_0_OR_GREATER
-            w.Ignore(CoreEventId.NavigationBaseIncludeIgnored);
-#endif
+                w.Ignore(CoreEventId.NavigationBaseIncludeIgnored);
             }).Options)
         { }
 

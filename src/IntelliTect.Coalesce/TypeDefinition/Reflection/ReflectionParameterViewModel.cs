@@ -23,10 +23,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             Info = info;
 
-#if NET6_0_OR_GREATER
             var nullable = new NullabilityInfoContext().Create(Info);
             Nullability = nullable.WriteState;
-#endif
         }
 
         public override string Name => Info.Name ?? throw new Exception("Parameter has no name???");

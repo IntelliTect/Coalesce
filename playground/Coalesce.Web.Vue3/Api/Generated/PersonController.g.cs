@@ -215,6 +215,46 @@ namespace Coalesce.Web.Vue3.Api
         }
 
         /// <summary>
+        /// Method: SetBirthDate
+        /// </summary>
+        [HttpPost("SetBirthDate")]
+        [Authorize]
+        public virtual async Task<ItemResult> SetBirthDate(
+            [FromServices] IDataSourceFactory dataSourceFactory,
+            [FromForm(Name = "id")] int id,
+            [FromForm(Name = "date")] System.DateOnly date,
+            [FromForm(Name = "time")] System.TimeOnly time)
+        {
+            var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Person, Coalesce.Domain.Person>("Default");
+            var (itemResult, _) = await dataSource.GetItemAsync(id, new DataSourceParameters());
+            if (!itemResult.WasSuccessful)
+            {
+                return new ItemResult(itemResult);
+            }
+            var item = itemResult.Object;
+            var _params = new
+            {
+                date = date,
+                time = time
+            };
+
+            if (Context.Options.ValidateAttributesForMethods)
+            {
+                var _validationResult = ItemResult.FromParameterValidation(
+                    GeneratedForClassViewModel!.MethodByName("SetBirthDate"), _params, HttpContext.RequestServices);
+                if (!_validationResult.WasSuccessful) return _validationResult;
+            }
+
+            item.SetBirthDate(
+                _params.date,
+                _params.time
+            );
+            await Db.SaveChangesAsync();
+            var _result = new ItemResult();
+            return _result;
+        }
+
+        /// <summary>
         /// Method: PersonCount
         /// </summary>
         [HttpGet("PersonCount")]

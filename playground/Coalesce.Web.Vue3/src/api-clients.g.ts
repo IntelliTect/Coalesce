@@ -184,6 +184,16 @@ export class PersonApiClient extends ModelApiClient<$models.Person> {
     return this.$invoke($method, $params, $config)
   }
   
+  public setBirthDate(id: number, date: Date | null, time: Date | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<void>> {
+    const $method = this.$metadata.methods.setBirthDate
+    const $params =  {
+      id,
+      date,
+      time,
+    }
+    return this.$invoke($method, $params, $config)
+  }
+  
   public personCount(lastNameStartsWith: string | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<number>> {
     const $method = this.$metadata.methods.personCount
     const $params =  {

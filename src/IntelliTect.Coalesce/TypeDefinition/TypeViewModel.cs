@@ -109,7 +109,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             IsByteArray ? TypeDiscriminator.Binary :
             IsNumber ? TypeDiscriminator.Number :
             IsBool ? TypeDiscriminator.Boolean :
-            IsDate ? TypeDiscriminator.Date :
+            IsDateOrTime ? TypeDiscriminator.Date :
             IsEnum ? TypeDiscriminator.Enum :
             IsVoid ? TypeDiscriminator.Void :
             IsFile ? TypeDiscriminator.File :
@@ -133,6 +133,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
         }
 
+        [Obsolete("Deprecated")]
         public string CsConvertFromString
         {
             get
@@ -227,7 +228,12 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// True if this is a DateTime or DateTimeOffset.
         /// </summary>
-        public bool IsDate => IsDateTime || IsDateTimeOffset;
+        public bool IsDate => IsDateTime || IsDateTimeOffset || NullableValueUnderlyingType.IsA<DateOnly>();
+
+        /// <summary>
+        /// True if this type holds temporal data.
+        /// </summary>
+        public bool IsDateOrTime => IsDate || NullableValueUnderlyingType.IsA<TimeOnly>();
 
         /// <summary>
         /// True if the property is a string.
@@ -245,6 +251,12 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// True if the property is a DateTimeOffset or Nullable DateTimeOffset
         /// </summary>
         public bool IsDateTimeOffset => NullableValueUnderlyingType.IsA<DateTimeOffset>();
+
+        public DateTypeAttribute.DateTypes? DateType =>
+            NullableValueUnderlyingType.IsA<DateOnly>() ? DateTypeAttribute.DateTypes.DateOnly :
+            NullableValueUnderlyingType.IsA<TimeOnly>() ? DateTypeAttribute.DateTypes.TimeOnly :
+            IsDate ? DateTypeAttribute.DateTypes.DateTime :
+            null;
 
         /// <summary>
         /// Returns true if class is a Byte[]

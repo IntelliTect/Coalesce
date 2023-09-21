@@ -1253,6 +1253,43 @@ export const Person = domain.types.Person = {
         role: "value",
       },
     },
+    setBirthDate: {
+      name: "setBirthDate",
+      displayName: "Set Birth Date",
+      transportType: "item",
+      httpMethod: "POST",
+      params: {
+        id: {
+          name: "id",
+          displayName: "Primary Key",
+          type: "number",
+          role: "value",
+          get source() { return (domain.types.Person as ModelType).props.personId },
+        },
+        date: {
+          name: "date",
+          displayName: "Date",
+          type: "date",
+          dateKind: "date",
+          noOffset: true,
+          role: "value",
+        },
+        time: {
+          name: "time",
+          displayName: "Time",
+          type: "date",
+          dateKind: "time",
+          noOffset: true,
+          role: "value",
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "void",
+        role: "value",
+      },
+    },
     personCount: {
       name: "personCount",
       displayName: "Person Count",

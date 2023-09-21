@@ -1,12 +1,14 @@
 ﻿using IntelliTect.Coalesce.Tests.TargetClasses;
+using IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext;
 using IntelliTect.Coalesce.Tests.Util;
 using IntelliTect.Coalesce.TypeDefinition;
 using System.Text;
 using Xunit;
+using static IntelliTect.Coalesce.DataAnnotations.DateTypeAttribute;
 
 namespace IntelliTect.Coalesce.Tests.TypeDefinition
 {
-    public class BoolTests
+    public class PropertyViewModelTests
     {
         [Theory, ClassViewModelData(typeof(Bools))]
         // Unfortunately, we must specify our parameter type as ClassViewModelData instead of ClassViewModel.
@@ -129,6 +131,22 @@ namespace IntelliTect.Coalesce.Tests.TypeDefinition
                 Assert.False(prop.Type.IsBool);
                 Assert.True(prop.PureType.IsBool);
             }
+        }
+
+        [Theory, ClassViewModelData(typeof(ComplexModel))]
+        public void DateType_IsCorrect(ClassViewModelData data)
+        {
+            ClassViewModel vm = data;
+
+            Assert.Equal(DateTypes.DateOnly, vm.PropertyByName(nameof(ComplexModel.SystemDateOnly)).DateType);
+            Assert.Equal(DateTypes.DateOnly, vm.PropertyByName(nameof(ComplexModel.DateOnlyViaAttribute)).DateType);
+
+            Assert.Equal(DateTypes.TimeOnly, vm.PropertyByName(nameof(ComplexModel.SystemTimeOnly)).DateType);
+
+            Assert.Equal(DateTypes.DateTime, vm.PropertyByName(nameof(ComplexModel.DateTime)).DateType);
+            Assert.Equal(DateTypes.DateTime, vm.PropertyByName(nameof(ComplexModel.DateTimeNullable)).DateType);
+            Assert.Equal(DateTypes.DateTime, vm.PropertyByName(nameof(ComplexModel.DateTimeOffset)).DateType);
+            Assert.Equal(DateTypes.DateTime, vm.PropertyByName(nameof(ComplexModel.DateTimeOffsetNullable)).DateType);
         }
     }
 }

@@ -19,7 +19,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         protected IReadOnlyCollection<PropertyViewModel>? _Properties;
         protected IReadOnlyCollection<MethodViewModel>? _Methods;
 
-        internal HashSet<IValueViewModel> Usages = new HashSet<IValueViewModel>();
+        internal HashSet<ValueViewModel> Usages = new HashSet<ValueViewModel>();
 
         public ReflectionRepository? ReflectionRepository => Type.ReflectionRepository;
 
@@ -183,7 +183,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             .Where(p =>
                 !p.IsInternalUse && p.HasPublicSetter && p.HasAttribute<CoalesceAttribute>()
                 // These are the only supported types, for now
-                && (p.Type.IsPrimitive || p.Type.IsDate)
+                && (p.Type.IsPrimitive || p.Type.IsDateOrTime)
             );
 
         /// <summary>

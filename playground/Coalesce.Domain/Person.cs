@@ -200,6 +200,15 @@ namespace Coalesce.Domain
             return BirthDate ?? DateTime.Now;
         }
 
+        /// <summary>
+        /// Returns the user name
+        /// </summary>
+        [Coalesce]
+        public void SetBirthDate(DateOnly date, TimeOnly time)
+        {
+            BirthDate = date.ToDateTime(time);
+        }
+
         [Coalesce]
         [ControllerAction(Method = HttpMethod.Get)]
         public static long PersonCount(AppDbContext db, string lastNameStartsWith = "")

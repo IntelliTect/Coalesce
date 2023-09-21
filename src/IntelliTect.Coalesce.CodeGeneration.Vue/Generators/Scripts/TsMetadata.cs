@@ -318,7 +318,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
             }
         }
 
-        private static List<string> GetValidationRules(IValueViewModel prop, string propName)
+        private static List<string> GetValidationRules(ValueViewModel prop, string propName)
         {
             // TODO: Handle 'ClientValidationAllowSave' by placing a field on the 
             // validator function that contains the value of this flag.
@@ -395,7 +395,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                 void Min(object value, string error) => rules.Add($"min: val => val == null || val >= {value} {Error(error, $"{propName} must be at least {value}.")}");
                 void Max(object value, string error) => rules.Add($"max: val => val == null || val <= {value} {Error(error, $"{propName} may not be more than {value}.")}");
 
-                var range = prop.GetValidationRange();
+                var range = prop.Range;
                 if (range != null)
                 {
                     var message = prop.GetAttributeValue<RangeAttribute>(a => a.ErrorMessage);
@@ -601,7 +601,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
         /// <summary>
         /// Write metadata common to all value representations, like properties and method parameters.
         /// </summary>
-        private void WriteValueCommonMetadata(TypeScriptCodeBuilder b, IValueViewModel value)
+        private void WriteValueCommonMetadata(TypeScriptCodeBuilder b, ValueViewModel value)
         {
             b.StringProp("name", value.JsVariable);
             b.StringProp("displayName", value.DisplayName);
@@ -618,7 +618,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
         /// Write metadata common to all type representations, 
         /// like properties, method parameters, method returns, etc.
         /// </summary>
-        private void WriteTypeCommonMetadata(TypeScriptCodeBuilder b, TypeViewModel type, IValueViewModel definingMember)
+        private void WriteTypeCommonMetadata(TypeScriptCodeBuilder b, TypeViewModel type, ValueViewModel definingMember)
         {
             var kind = type.TsTypeKind;
             var subtype = definingMember.GetAttributeValue<DataTypeAttribute, DataType>(a => a.DataType);
@@ -668,17 +668,16 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                     break;
 
                 case TypeDiscriminator.Date:
-                    var dateType = definingMember.GetAttributeValue<DateTypeAttribute, DateTypes>(a => a.DateType);
+                    var dateType = definingMember.DateType;
 
-                    b.StringProp("dateKind", ((dateType, subtype)) switch
+                    b.StringProp("dateKind", dateType switch
                     {
-                        (DateTypes.DateOnly, _) => "date",
-                        (null, DataType.Date) => "date",
-                        (null, DataType.Time) => "time",
+                        DateTypes.DateOnly => "date",
+                        DateTypes.TimeOnly => "time",
                         _ => "datetime"
                     });
 
-                    if (type.IsDateTime)
+                    if (!type.IsDateTimeOffset)
                     {
                         b.Prop("noOffset", "true");
                     }

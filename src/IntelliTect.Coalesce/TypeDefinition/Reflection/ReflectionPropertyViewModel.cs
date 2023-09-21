@@ -18,11 +18,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             Info = propertyInfo;
 
-#if NET6_0_OR_GREATER
             var nullable = new NullabilityInfoContext().Create(Info);
             ReadNullability = nullable.ReadState;
             WriteNullability = nullable.WriteState;
-#endif
         }
 
         public override string Name => Info.Name;
@@ -42,11 +40,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public override bool IsStatic => Info.GetGetMethod()?.IsStatic ?? Info.GetSetMethod()?.IsStatic ?? false;
 
         public override bool IsInitOnly
-#if NET5_0_OR_GREATER
             => Info.SetMethod?.ReturnParameter.GetRequiredCustomModifiers().Contains(typeof(System.Runtime.CompilerServices.IsExternalInit)) == true;
-#else
-            => false;
-#endif
 
         public override bool HasRequiredKeyword =>
 #if NET7_0_OR_GREATER

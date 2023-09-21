@@ -136,6 +136,11 @@ namespace IntelliTect.Coalesce.Validation
                         {
                             assert.IsTrue(prop.IsDbMapped, "Property with [DefaultOrderBy] must be DB mapped.");
                         }
+
+                        if (prop.DateType == DateTypeAttribute.DateTypes.TimeOnly)
+                        {
+                            assert.IsTrue(prop.PureType.IsA<TimeOnly>(), "Time-only properties should be of type System.TimeOnly.", isWarning: true);
+                        }
                     }
                     catch (Exception ex)
                     {

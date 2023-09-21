@@ -411,6 +411,18 @@ export class PersonViewModel extends ViewModel<$models.Person, $apiClients.Perso
     return getBirthdate
   }
   
+  /** Returns the user name */
+  public get setBirthDate() {
+    const setBirthDate = this.$apiClient.$makeCaller(
+      this.$metadata.methods.setBirthDate,
+      (c, date: Date | null, time: Date | null) => c.setBirthDate(this.$primaryKey, date, time),
+      () => ({date: null as Date | null, time: null as Date | null, }),
+      (c, args) => c.setBirthDate(this.$primaryKey, args.date, args.time))
+    
+    Object.defineProperty(this, 'setBirthDate', {value: setBirthDate});
+    return setBirthDate
+  }
+  
   public get fullNameAndAge() {
     const fullNameAndAge = this.$apiClient.$makeCaller(
       this.$metadata.methods.fullNameAndAge,

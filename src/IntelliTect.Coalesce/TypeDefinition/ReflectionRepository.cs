@@ -241,7 +241,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// Attempt to add the given ClassViewModel as an ExternalType if it isn't already known.
         /// If its a newly discovered type, recurse into that type's properties as well.
         /// </summary>
-        private void ConditionallyAddAndDiscoverTypesOn(IValueViewModel typeUsage)
+        private void ConditionallyAddAndDiscoverTypesOn(ValueViewModel typeUsage)
         {
             var type = typeUsage.PureType;
             var classViewModel = type.ClassViewModel;

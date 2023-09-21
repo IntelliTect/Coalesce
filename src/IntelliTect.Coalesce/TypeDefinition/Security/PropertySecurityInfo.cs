@@ -118,7 +118,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// </summary>
         public bool IsEditAllowed(ClaimsPrincipal? user) => Edit.IsAllowed(user);
 
-        private static bool? IsReadUnused(IValueViewModel value, HashSet<PropertyViewModel> visited)
+        private static bool? IsReadUnused(ValueViewModel value, HashSet<PropertyViewModel> visited)
         {
             // The client only needs to Edit/Write to parameters, so read IS unused.
             if (value is ParameterViewModel) return true;
@@ -145,7 +145,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             return true;
         }
 
-        private static bool? IsInitUnused(IValueViewModel value, HashSet<PropertyViewModel> visited)
+        private static bool? IsInitUnused(ValueViewModel value, HashSet<PropertyViewModel> visited)
         {
             // The client needs to instantiate parameters, so edit is NOT unused.
             if (value is ParameterViewModel) return false;
@@ -172,7 +172,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             return true;
         }
 
-        private static bool? IsEditUnused(IValueViewModel value, HashSet<PropertyViewModel> visited)
+        private static bool? IsEditUnused(ValueViewModel value, HashSet<PropertyViewModel> visited)
         {
             // Parameters always instantiate new objects, so edit IS unused.
             if (value is ParameterViewModel) return true;

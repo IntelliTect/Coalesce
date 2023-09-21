@@ -3,6 +3,9 @@
     <LangVersion>12.0</LangVersion>
     <TypeScriptCompileBlocked>true</TypeScriptCompileBlocked>
     <TypeScriptToolsVersion>Latest</TypeScriptToolsVersion>
+    
+    <!-- Generated assembly info attribute will often change after launch, breaking hot reload -->
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
 	
   <ItemGroup>

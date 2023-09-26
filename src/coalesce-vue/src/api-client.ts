@@ -1562,6 +1562,18 @@ export abstract class ApiState<
         // We don't set isLoading to false here - we set it in the cancel() method to ensure that we don't set isLoading=false for a subsequent call,
         // since the promise won't reject immediately after requesting cancellation. There could already be another request pending when this code is being executed.
         return;
+      } else if (
+        windowUnloading &&
+        thrown &&
+        typeof thrown == "object" &&
+        "code" in thrown &&
+        thrown.code == "ECONNABORTED"
+      ) {
+        // Ignore aborted requests when the window is unloading.
+        // This seems to only happen on Firefox - Chrome doesn't abort requests
+        // on unload in a way that ever propagates up to user code.
+        // https://github.com/IntelliTect/Coalesce/issues/296
+        return;
       } else {
         var error = thrown as AxiosError | ApiResult | Error | string;
       }
@@ -1617,6 +1629,14 @@ export abstract class ApiState<
     super(apiClient, invoker);
   }
 }
+
+// Detect unloads to suppress "request aborted" failures (https://github.com/IntelliTect/Coalesce/issues/296).
+let windowUnloading = false;
+window.addEventListener("beforeunload", (e) => {
+  windowUnloading = true;
+  // unflag the unload after a moment in case it gets user-canceled
+  setTimeout(() => (windowUnloading = false), 1000);
+});
 
 function purgeStaleCacheEntries(storage: Storage) {
   for (var i = 0; i < storage.length; i++) {

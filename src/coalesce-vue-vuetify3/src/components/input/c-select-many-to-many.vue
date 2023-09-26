@@ -38,6 +38,7 @@ import {
   ApiState,
   Indexable,
   ModelCollectionNavigationProperty,
+  ResponseCachingConfiguration,
 } from "coalesce-vue";
 
 import { defineComponent, PropType } from "vue";
@@ -58,6 +59,16 @@ export default defineComponent({
     ...makeMetadataProps(),
     modelValue: { required: false, type: Array },
     params: { required: false, type: Object as PropType<ListParameters> },
+
+    /** Response caching configuration for the `/get` and `/list` API calls made by the component.
+     * See https://intellitect.github.io/Coalesce/stacks/vue/layers/api-clients.html#response-caching. */
+    cache: {
+      required: false,
+      type: [Object, Boolean] as PropType<
+        ResponseCachingConfiguration | boolean
+      >,
+      default: false as any,
+    },
   },
 
   data() {
@@ -368,7 +379,17 @@ export default defineComponent({
       .$makeCaller("list", (c) => {
         return c.list(this.listParams);
       })
-      .setConcurrency("debounce");
+      .setConcurrency("debou nce");
+
+    this.$watch(
+      () => this.cache,
+      () => {
+        this.listCaller.useResponseCaching(
+          this.cache === true ? {} : this.cache
+        );
+      },
+      { immediate: true }
+    );
 
     this.$watch(
       () => JSON.stringify(mapParamsToDto(this.listParams)),

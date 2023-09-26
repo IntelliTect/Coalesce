@@ -94,6 +94,7 @@ import {
   getMessageForError,
   mapValueToModel,
   modelDisplay,
+  ResponseCachingConfiguration,
 } from "coalesce-vue";
 
 export default defineComponent({
@@ -123,6 +124,17 @@ export default defineComponent({
     openOnClear: { required: false, type: Boolean, default: true },
     reloadOnOpen: { required: false, type: Boolean, default: false },
     params: { required: false, type: Object as PropType<ListParameters> },
+
+    /** Response caching configuration for the `/get` and `/list` API calls made by the component.
+     * See https://intellitect.github.io/Coalesce/stacks/vue/layers/api-clients.html#response-caching. */
+    cache: {
+      required: false,
+      type: [Object, Boolean] as PropType<
+        ResponseCachingConfiguration | boolean
+      >,
+      default: false as any,
+    },
+
     create: {
       required: false,
       type: Object as PropType<{
@@ -533,6 +545,19 @@ export default defineComponent({
         this.error = [state.message || "Unknown Error"];
       })
       .setConcurrency("debounce");
+
+    this.$watch(
+      () => this.cache,
+      () => {
+        this.getCaller.useResponseCaching(
+          this.cache === true ? {} : this.cache
+        );
+        this.listCaller.useResponseCaching(
+          this.cache === true ? {} : this.cache
+        );
+      },
+      { immediate: true }
+    );
 
     this.$watch(
       () => JSON.stringify(mapParamsToDto(this.params)),

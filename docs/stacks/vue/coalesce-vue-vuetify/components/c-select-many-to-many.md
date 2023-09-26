@@ -60,6 +60,10 @@ If binding the component with ``v-model``, accepts the ``value`` part of ``v-mod
 <Prop def="params?: ListParameters" lang="ts" />
 
 An optional set of [Data Source Standard Parameters](/modeling/model-components/data-sources.md#standard-parameters) to pass to API calls made to the server.
+
+<Prop def="cache?: ResponseCachingConfiguration | boolean" lang="ts" />
+
+If provided and non-false, enables [response caching](/stacks/vue/layers/api-clients.html#response-caching) on the component's internal API caller.
     
 
 ## Events

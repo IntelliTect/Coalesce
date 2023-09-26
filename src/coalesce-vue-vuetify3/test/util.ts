@@ -44,7 +44,7 @@ const mountVuetify = function (
           routes: [
             {
               path: "/",
-              component: () => h("div"),
+              component: async () => h("div"),
             },
             {
               path: "/admin/:type",

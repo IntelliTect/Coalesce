@@ -594,7 +594,7 @@ export default defineComponent({
         if (!value) {
           this.openMenu();
         } else {
-          this.closeMenu();
+          this.closeMenu(true);
         }
       }
     },
@@ -614,7 +614,7 @@ export default defineComponent({
         case "escape":
           event.stopPropagation();
           event.preventDefault();
-          this.closeMenu();
+          this.closeMenu(true);
           return;
         case " ":
         case "enter":
@@ -699,8 +699,11 @@ export default defineComponent({
       }
     },
 
-    closeMenu() {
-      if (!this.menuOpen || this.menuOpenForced) return;
+    closeMenu(force = false) {
+      if (!this.menuOpen) return;
+      if (this.menuOpenForced && !force) return;
+
+      this.menuOpenForced = false;
       this.menuOpen = false;
       //@ts-ignore
       this.$el.querySelector("input").focus();

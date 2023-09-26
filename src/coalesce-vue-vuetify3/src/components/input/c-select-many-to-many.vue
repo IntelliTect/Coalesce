@@ -379,7 +379,7 @@ export default defineComponent({
       .$makeCaller("list", (c) => {
         return c.list(this.listParams);
       })
-      .setConcurrency("debou nce");
+      .setConcurrency("debounce");
 
     this.$watch(
       () => this.cache,

@@ -39,6 +39,7 @@ import {
   ApiState,
   Indexable,
   ModelCollectionNavigationProperty,
+  ResponseCachingConfiguration,
 } from "coalesce-vue";
 
 export default defineComponent({

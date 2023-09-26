@@ -63,7 +63,7 @@ An optional set of [Data Source Standard Parameters](/modeling/model-components/
 
 <Prop def="cache?: ResponseCachingConfiguration | boolean" lang="ts" />
 
-If provided and non-false, enables [response caching](/stacks/vue/layers/api-clients.html#response-caching) on the component's internal API caller.
+If provided and non-false, enables [response caching](/stacks/vue/layers/api-clients.md#response-caching) on the component's internal API caller.
     
 
 ## Events

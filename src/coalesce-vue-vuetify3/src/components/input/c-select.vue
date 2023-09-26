@@ -58,9 +58,9 @@
     <v-menu
       :modelValue="menuOpen"
       @update:modelValue="
-        menuOpen
-          ? toggleMenu()
-          : !isDisabled.value && !isReadonly.value && toggleMenu()
+        !$event
+          ? closeMenu()
+          : !isDisabled.value && !isReadonly.value && openMenu()
       "
       activator="parent"
       :close-on-content-click="false"
@@ -276,6 +276,8 @@ export default defineComponent({
       error: [] as string[],
       focused: false,
       menuOpen: false,
+      menuOpenForced: false,
+      searchChanged: new Date(),
       mainValue: "",
       createItemLoading: false,
       createItemError: "" as string | null,
@@ -525,6 +527,7 @@ export default defineComponent({
 
   watch: {
     search(newVal: any, oldVal: any) {
+      this.searchChanged = new Date();
       if (newVal != oldVal) {
         this.listCaller();
       }
@@ -536,10 +539,12 @@ export default defineComponent({
       // - We don't have to disable/readonly the main input
       if (val) {
         this.$nextTick(() => (this.mainValue = ""));
+        this.searchChanged = new Date();
         if (!this.menuOpen) {
           this.search = val;
           this.openMenu(false);
         } else {
+          this.search ||= ""; // Ensure we aren't concatenating `val` onto `null`. Issue #315.
           this.search += val;
         }
       }
@@ -650,7 +655,14 @@ export default defineComponent({
       }
     },
 
-    async openMenu(select = true) {
+    async openMenu(select?: boolean) {
+      if (select == undefined) {
+        // Select the whole search input if it hasn't changed recently.
+        // If it /has/ changed recently, it means the user is actively typing and probably
+        // doesn't want to use what they're typing.
+        select = new Date().valueOf() - this.searchChanged.valueOf() > 1000;
+      }
+
       if (this.menuOpen) return;
       this.menuOpen = true;
 
@@ -665,6 +677,12 @@ export default defineComponent({
       // before we try to focus the search input, because otherwise it wont work.
       // https://stackoverflow.com/questions/19669786/check-if-element-is-visible-in-dom
       const start = performance.now();
+
+      // Force the menu open while we wait, because otherwise if a user clicks and then rapidly types a character,
+      // the typed character will process before the click, resulting in the click toggling the menu closed
+      // after the typed character opened the menu.
+      this.menuOpenForced = true;
+
       while (
         // cap waiting at 100ms
         start + 100 > performance.now() &&
@@ -674,13 +692,15 @@ export default defineComponent({
         await new Promise((resolve) => setTimeout(resolve, 1));
       }
 
+      this.menuOpenForced = false;
+
       if (select) {
         input.select();
       }
     },
 
     closeMenu() {
-      if (!this.menuOpen) return;
+      if (!this.menuOpen || this.menuOpenForced) return;
       this.menuOpen = false;
       //@ts-ignore
       this.$el.querySelector("input").focus();

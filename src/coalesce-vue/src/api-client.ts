@@ -1494,17 +1494,26 @@ export abstract class ApiState<
 
           // We didn't throw, so store the successful response in the cache
           const data = resp.data;
-          storage.setItem(
-            key,
-            JSON.stringify(
-              {
-                time: Date.now() / 1000,
-                maxAge: configuredMaxAge,
-                result: data,
-              },
-              (key, value) => (key == "$metadata" ? undefined : value)
-            )
-          );
+          try {
+            purgeStaleCacheEntries(storage);
+            storage.setItem(
+              key,
+              JSON.stringify(
+                {
+                  time: Date.now() / 1000,
+                  maxAge: configuredMaxAge,
+                  result: data,
+                },
+                (key, value) =>
+                  key == "$metadata" || value === null ? undefined : value
+              )
+            );
+          } catch (e) {
+            console.warn(
+              "coalesce: useResponseCaching: Unable to store response",
+              e
+            );
+          }
 
           return resp;
         };
@@ -1608,6 +1617,29 @@ export abstract class ApiState<
     super(apiClient, invoker);
   }
 }
+
+function purgeStaleCacheEntries(storage: Storage) {
+  for (var i = 0; i < storage.length; i++) {
+    const key = storage.key(i)!;
+    if (!key.startsWith("coalesce:")) continue;
+
+    const item = storage.getItem(key)!;
+    try {
+      const { time, maxAge } = JSON.parse(item);
+      if (typeof time != "number" || typeof maxAge != "number") continue;
+
+      if (time < Date.now() / 1000 - maxAge) {
+        storage.removeItem(key);
+        i--;
+      }
+    } catch {
+      // Do nothing - entry probably wasn't valid json and isn't a valid coalesce api response cache entry.
+    }
+  }
+}
+
+purgeStaleCacheEntries(localStorage);
+purgeStaleCacheEntries(sessionStorage);
 
 export interface ItemApiState<TArgs extends any[], TResult> {
   // Do not put a doc comment on the call signature:

@@ -39,10 +39,9 @@
               class="text-xs-left"
             >
               <c-input
-                v-if="editable"
+                v-if="editable && !isPropReadOnly(prop, item)"
                 :model="item"
                 :for="prop"
-                :readonly="isPropReadOnly(prop, item)"
                 label=""
                 hide-details="auto"
                 hint=""

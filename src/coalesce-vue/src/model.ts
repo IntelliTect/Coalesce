@@ -201,7 +201,7 @@ export function parseValue(
       if (value instanceof Date) {
         date = value;
       } else if (type === "string") {
-        date = parseJSONDate(value);
+        date = parseJSONDate(value, meta.dateKind);
       }
 
       // isNaN is what date-fn's `isValid` calls internally,

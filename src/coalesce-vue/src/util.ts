@@ -47,6 +47,7 @@ const iso8601DateRegex =
   /^(\d{4})-(\d{2})-(\d{2})(?:[T ](\d{2}):(\d{2}):(\d{2})(?:\.(\d{0,7}))?(?:Z|(.)(\d{2}):?(\d{2})?)?)?/;
 const iso8601TimeRegex =
   /^(\d{2}):(\d{2}):(\d{2})(?:\.(\d{0,7}))?(?:Z|(.)(\d{2}):?(\d{2})?)?$/;
+
 export function parseJSONDate(argument: string, kind: DateKind = "datetime") {
   // DO NOT USE `new Date()` here.
   // Safari incorrectly interprets times without a timezone offset
@@ -69,12 +70,12 @@ export function parseJSONDate(argument: string, kind: DateKind = "datetime") {
 
     var timeParts = argument.match(iso8601TimeRegex) || [];
     if (timeParts.length >= 3) {
-      // If ES Temporal was standardize we could maybe switch Coalesce to use it,
+      // If ES Temporal was actually implemented in browsers we could maybe switch Coalesce to use it,
       // but for now we just settle for using a Date and ignoring the time part.
 
       // NOTE: We set the date to Jan 1 in to avoid Daylight Savings switch days,
       // which if such a date were to be the date component of the `Date`, would fail
-      // to represent the time correctly.
+      // to represent the time correctly for the hour that never occurs on leap-forward days.
       return new Date(
         new Date().getFullYear(),
         0,

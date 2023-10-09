@@ -28,6 +28,10 @@ using System.Collections.Concurrent;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Logging;
+using System.Configuration.Provider;
+using System.Data.Common;
+using System.Text.Json;
 
 namespace IntelliTect.Coalesce.AuditLogging;
 
@@ -37,7 +41,7 @@ public interface IObjectChange<TUserKey>
 
     string EntityTypeName { get; set; }
 
-    string EntityKeyValue { get; set; }
+    string? EntityKeyValue { get; set; }
 
     TUserKey UserId { get; set; }
 
@@ -46,31 +50,14 @@ public interface IObjectChange<TUserKey>
     string State { get; set; }
 
     /// <summary>
-    /// Populate the values of extra custom fields on this change entry.
+    /// Populate the values of extra custom fields on this change entry. TODO: remove this?
     /// </summary>
     Task PopulateAsync(DbContext db) => Task.CompletedTask;
 }
 
 public interface IObjectChange<TUserKey, TObjectChangeProperty> : IObjectChange<TUserKey>
 {
-    long ObjectChangeId { get; set; }
-
-    string EntityTypeName { get; set; }
-
-    string EntityKeyValue { get; set; }
-
-    TUserKey UserId { get; set; }
-
-    DateTimeOffset Date { get; set; }
-
     ICollection<TObjectChangeProperty>? Properties { get; set; }
-
-    string State { get; set; }
-
-    /// <summary>
-    /// Populate the values of extra custom fields on this change entry.
-    /// </summary>
-    Task PopulateAsync(DbContext db) => Task.CompletedTask;
 }
 
 [Edit(DenyAll)]
@@ -294,7 +281,8 @@ public sealed class AuditingInterceptor<TUserKey, TObjectChange, TObjectChangePr
 {
     private Audit? _audit;
 
-    private IAuditLogContext<TUserKey, TObjectChange, TObjectChangeProperty> GetContext(DbContextEventData data) => (IAuditLogContext<TUserKey, TObjectChange, TObjectChangeProperty>)data.Context;
+    private IAuditLogContext<TUserKey, TObjectChange, TObjectChangeProperty> GetContext(DbContextEventData data) 
+        => (IAuditLogContext<TUserKey, TObjectChange, TObjectChangeProperty>)(data.Context ?? throw new InvalidOperationException("DbContext unavailable."));
 
     #region SavingChanges
     public override async ValueTask<InterceptionResult<int>> SavingChangesAsync(
@@ -348,9 +336,9 @@ public sealed class AuditingInterceptor<TUserKey, TObjectChange, TObjectChangePr
     }
     #endregion
 
-    private static readonly MemoryCache _sqlCache = new MemoryCache(new MemoryCacheOptions() { SizeLimit = 10_000_000 });
+    private static readonly MemoryCache _sqlCache = new MemoryCache(new MemoryCacheOptions() { SizeLimit = 4_000_000 });
 
-    private string BuildSql(IModel model)
+    private string BuildSqlServerSql(IModel model)
     {
         var entityType = model.FindEntityType(typeof(TObjectChange));
         var propEntityType = model.FindEntityType(typeof(TObjectChangeProperty));
@@ -361,7 +349,16 @@ public sealed class AuditingInterceptor<TUserKey, TObjectChange, TObjectChangePr
         var basePropNames = typeof(IObjectChange<TUserKey>).GetProperties().Select(p => p.Name).ToArray();
         var props = entityType.GetDeclaredProperties();
         var customProps = props.ExceptBy(basePropNames, p => p.PropertyInfo?.Name);
-        
+        var propsByName = props.ToLookup(p => p.Name);
+
+        var objectChangeStoreId = StoreObjectIdentifier.Create(entityType, StoreObjectType.Table)!.Value;
+        string GetColName(string propName) => propsByName[propName].Single().GetColumnName(objectChangeStoreId)!;
+
+        string entityTypeNameCol = GetColName(nameof(IObjectChange<TUserKey>.EntityTypeName));
+        string entityKeyValueCol = GetColName(nameof(IObjectChange<TUserKey>.EntityKeyValue));
+        string dateCol = GetColName(nameof(IObjectChange<TUserKey>.Date));
+        string createdByCol = GetColName(nameof(IObjectChange<TUserKey>.UserId));
+        string stateCol = GetColName(nameof(IObjectChange<TUserKey>.State));
 
         return $"""
             SET NOCOUNT ON;
@@ -420,13 +417,13 @@ public sealed class AuditingInterceptor<TUserKey, TObjectChange, TObjectChangePr
                         @EntityTypeName IS NOT NULL
                         AND @EntityKeyValue IS NOT NULL
                         -- These fields must match exactly:
-                        AND [CreatedById] = @CreatedById
-                        AND [State] = @State
+                        AND {createdByCol} = @CreatedById
+                        AND {stateCol} = @State
                         {string.Join("\n           ", customProps.Select(p => $"AND {p.GetColumnName()} = @{p.Name}"))}
                         -- Date of the most recent record must be within X amount of time, 
-                        AND DATEDIFF(second, [Date], @Date) < @MergeWindowSeconds
+                        AND DATEDIFF(second, {dateCol}, @Date) < @MergeWindowSeconds
                         -- and the incoming record must have a date equal or after the existing record
-                        AND @Date >= [Date]
+                        AND @Date >= {dateCol}
                         -- The existing ObjectChange record has the same set of properties as the incoming record
                         AND (
                         		SELECT TOP 1 STRING_AGG([PropertyName], ',') WITHIN GROUP (ORDER BY [PropertyName] ASC)
@@ -443,7 +440,7 @@ public sealed class AuditingInterceptor<TUserKey, TObjectChange, TObjectChangePr
                         ELSE 0 
                     END)
                 FROM {tableName}
-                WHERE [EntityTypeName] = @EntityTypeName AND [EntityKeyValue] = @EntityKeyValue
+                WHERE {entityTypeNameCol} = @EntityTypeName AND {entityKeyValueCol} = @EntityKeyValue
                 ORDER BY [ObjectChangeId] DESC;
 
                 IF @mostRecentObjectChangeId > 0 AND @shouldUpdate = 1
@@ -452,7 +449,7 @@ public sealed class AuditingInterceptor<TUserKey, TObjectChange, TObjectChangePr
                         --PRINT('AUDIT UPDATE ' + @EntityTypeName + ':' + @EntityKeyValue);
 
                         UPDATE {tableName}
-                        SET Date = @Date
+                        SET {dateCol} = @Date
                         WHERE [ObjectChangeId] = @mostRecentObjectChangeId;
 
 
@@ -477,7 +474,7 @@ public sealed class AuditingInterceptor<TUserKey, TObjectChange, TObjectChangePr
                         -- PRINT('AUDIT INSERT ' + @EntityTypeName + ':' + @EntityKeyValue);
 
                         INSERT INTO {tableName}
-                        (EntityTypeName, EntityKeyValue, CreatedById, Date, State, {string.Join(", ", customProps.Select(p => p.GetColumnName()))})
+                        ({entityTypeNameCol}, {entityKeyValueCol}, {createdByCol}, {dateCol}, {stateCol}, {string.Join(", ", customProps.Select(p => p.GetColumnName()))})
                         VALUES (@EntityTypeName, @EntityKeyValue, @CreatedById, @Date, @State, {string.Join(", ", customProps.Select(p => $"@{p.Name}"))});
 
                         SET @mostRecentObjectChangeId = SCOPE_IDENTITY();
@@ -499,70 +496,107 @@ public sealed class AuditingInterceptor<TUserKey, TObjectChange, TObjectChangePr
             """;
     }
 
+    private string GetSql(IModel model) => _sqlCache.GetOrCreate(model, entry =>
+    {
+        string sql = BuildSqlServerSql(model);
+        entry.Size = sql.Length;
+        return sql;
+    });
+
     private Task SaveAudit(DbContext db, Audit audit, bool async)
     {
         audit.PostSaveChanges();
 
         var operation = db.GetService<IAuditOperationContext<TUserKey, TObjectChange>>();
+        var date = DateTimeOffset.Now; // This must be the exact same date for all items for the merge logic in the SQL to work properly.
 
-
-        var createdById = _operationContext?.GetAppUserId();
-        var referrer = _operationContext?.GetReferrer();
-        var requestUrl = _operationContext?.GetRequestUrl();
-        var clientIpAddress = _operationContext?.GetClientIpAddress()?.ToString();
-        var date = DateTimeOffset.Now; // This must be the exact same date for all items in our loop for the stored proc to work as intended.
-
-        foreach (var e in audit.Entries)
-        {
+        var objectChanges = audit.Entries
             // The change is only useful if there's more than one property, since one of the properties is always the primary key.
             // This happens when the only changed properties on the object are marked as excluded properties.
-
-            var entityType = e.Entity.GetType();
-            var classViewModel = ReflectionRepository.Global.GetClassViewModel(entityType);
-            var keyProp = classViewModel.PrimaryKey;
-            var keyValue = keyProp?.PropertyInfo.GetValue(e.Entity);
-
-            foreach (var p in e.Properties.Where(p => p.PropertyName != keyProp?.Name))
+            .Where(e => e.Properties.Count > 1 && e is not TObjectChange && e is not TObjectChangeProperty)
+            .Select(e =>
             {
-                // Order must match column order above
-                table.Rows.Add(
-                    e.EntityTypeName,
-                    keyValue?.ToString(),
-                    createdById,
-                    date,
-                    e.StateName,
-                    requestUrl,
-                    referrer,
-                    clientIpAddress,
-                    p.PropertyName,
-                    p.OldValueFormatted,
-                    p.NewValueFormatted
-                );
-            }
-        }
+                var keyProperty = db.Model
+                    .FindEntityType(e.Entity.GetType())?
+                    .FindPrimaryKey()?
+                    .Properties.SingleOrDefault()?
+                    .PropertyInfo;
 
-        if (table.Rows.Count == 0)
+                var objectChange = Activator.CreateInstance<TObjectChange>();
+
+                objectChange.Date = date;
+                objectChange.State = e.StateName;
+                objectChange.EntityTypeName = e.EntityTypeName;
+                objectChange.EntityKeyValue = keyProperty?.GetValue(e.Entity)?.ToString();
+                objectChange.Properties = e.Properties
+                    .Where(property => property.OldValueFormatted != property.NewValueFormatted)
+                    .Select(property =>
+                    {
+                        var prop = Activator.CreateInstance<TObjectChangeProperty>();
+                        prop.PropertyName = property.PropertyName;
+                        prop.OldValue = property.OldValueFormatted;
+                        prop.NewValue = property.NewValueFormatted;
+                        return prop;
+                    }).ToList();
+
+                operation.Populate(objectChange, e.Entity);
+
+                return objectChange;
+            })
+            .ToList();
+
+        if (objectChanges.Count == 0)
         {
             return Task.CompletedTask;
         }
 
-        // "50" is the max age, in seconds, that a record can be for it to be updated (rather than inserting a new one).
-        // This is chosen to be just under a minute so that changes happening on a one-minute interval to the same record
-        // (there's nothing like this that I'm aware of currently in the application, but anyway...)
-        // will not continuously roll forward on the same ObjectChange record for all time.
-        string command = "EXECUTE InsertObjectChanges @Changes, 50;";
-        if (async)
+        if (db.Database.ProviderName == "Microsoft.EntityFrameworkCore.SqlServer")
         {
-            return Database.ExecuteSqlRawAsync(command, parameter);
+            var conn = db.Database.GetDbConnection();
+            var cmd = conn.CreateCommand();
+            cmd.CommandText = GetSql(db.Model);
+
+            var jsonParam = cmd.CreateParameter();
+            jsonParam.ParameterName = "json";
+            jsonParam.Value = JsonSerializer.Serialize(objectChanges); // todo: super wrong, need to exclude user nav properties that may be tacked on.
+
+
+            // MergeWindowSeconds, in seconds, that a record can be for it to be updated (rather than inserting a new one).
+            // This is chosen to be just under a minute so that changes happening on a one-minute interval to the same record
+            // (there's nothing like this that I'm aware of currently in the application, but anyway...)
+            // will not continuously roll forward on the same ObjectChange record for all time.
+
+            var mergeWindowParam = cmd.CreateParameter();
+            mergeWindowParam.ParameterName = "MergeWindowSeconds";
+            mergeWindowParam.Value = 50; // todo: configurable?
+
+            if (async)
+            {
+                return cmd.ExecuteNonQueryAsync();
+            }
+            else
+            {
+                cmd.ExecuteNonQuery();
+                return Task.CompletedTask;
+            }
         }
         else
         {
-            Database.ExecuteSqlRaw(command, parameter);
-            return Task.CompletedTask;
+            // Naïve insertion for providers where we don't know how to generate 
+            // SQL that will merge existing entries.
+            // TODO: Test if this works at all
+
+            db.AddRange(objectChanges);
+            
+            if (async)
+            {
+                return db.SaveChangesAsync();
+            }
+            else
+            {
+                db.SaveChanges();
+                return Task.CompletedTask;
+            }
         }
     }
 }
-//public interface IModelConfiguration
-//{
-//    static abstract void Configure(ModelBuilder builder);
-//}

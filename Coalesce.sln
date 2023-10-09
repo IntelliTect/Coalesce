@@ -68,7 +68,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IntelliTect.Coalesce.Swashb
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IntelliTect.Coalesce.AuditLogging", "src\IntelliTect.Coalesce.AuditLogging\IntelliTect.Coalesce.AuditLogging.csproj", "{0CCC382C-C626-4C42-905A-7AC1963A4E6B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InteliTect.Coalesce.AuditLogging.Tests", "src\InteliTect.Coalesce.AuditLogging.Tests\InteliTect.Coalesce.AuditLogging.Tests.csproj", "{0808FD33-DA45-4270-82F3-3AE6C66F1D0A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IntelliTect.Coalesce.AuditLogging.Tests", "src\InteliTect.Coalesce.AuditLogging.Tests\IntelliTect.Coalesce.AuditLogging.Tests.csproj", "{0808FD33-DA45-4270-82F3-3AE6C66F1D0A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

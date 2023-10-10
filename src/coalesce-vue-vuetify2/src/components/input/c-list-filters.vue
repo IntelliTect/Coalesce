@@ -80,7 +80,7 @@
               :for="
                 filter.propMeta.role == 'primaryKey'
                   ? list.$metadata.name
-                  : filter.propMeta.navigationProp ??
+                  : filter.propMeta.navigationProp ||
                     filter.propMeta.principalType
               "
               clearable

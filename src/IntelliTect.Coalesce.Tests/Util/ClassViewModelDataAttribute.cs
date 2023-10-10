@@ -34,31 +34,10 @@ namespace IntelliTect.Coalesce.Tests.Util
         }
     }
 
-    internal class PropertyViewModelDataAttribute : Xunit.Sdk.DataAttribute
+    internal class ClassViewModelDataAttribute<T> : ClassViewModelDataAttribute
     {
-        private readonly Type targetClass;
-        private readonly string propName;
-        private readonly object[] inlineData;
-
-        protected bool reflection = true;
-        protected bool symbol = true;
-
-        public PropertyViewModelDataAttribute(Type targetClass, string propName, params object[] additionalInlineData)
+        public ClassViewModelDataAttribute(params object[] additionalInlineData) : base(typeof(T), additionalInlineData)
         {
-            this.targetClass = targetClass;
-            this.propName = propName;
-            this.inlineData = additionalInlineData;
-        }
-
-        public override IEnumerable<object[]> GetData(MethodInfo testMethod)
-        {
-            if (reflection) yield return new[] {
-                new PropertyViewModelData(targetClass, propName, typeof(ReflectionClassViewModel))
-            }.Concat(inlineData).ToArray();
-
-            if (symbol) yield return new[] {
-                new PropertyViewModelData(targetClass, propName, typeof(SymbolClassViewModel))
-            }.Concat(inlineData).ToArray();
         }
     }
 

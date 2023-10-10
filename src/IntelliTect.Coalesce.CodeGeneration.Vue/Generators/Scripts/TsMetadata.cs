@@ -246,7 +246,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                     case PropertyRole.CollectionNavigation:
                         // TS Type: "ModelCollectionNavigationProperty"
                         b.StringProp("role", "collectionNavigation");
-                        b.Line($"get foreignKey() {{ return {GetClassMetadataRef(prop.Object)}.props.{prop.InverseProperty.ForeignKeyProperty.JsVariable} as ForeignKeyProperty }},");
+                        b.Line($"get foreignKey() {{ return {GetClassMetadataRef(prop.Object)}.props.{prop.ForeignKeyProperty.JsVariable} as ForeignKeyProperty }},");
                         
                         if (prop.InverseProperty != null)
                         {

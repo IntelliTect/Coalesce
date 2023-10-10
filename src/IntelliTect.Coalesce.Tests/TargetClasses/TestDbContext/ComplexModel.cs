@@ -25,7 +25,7 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         /// This configuration *will* be picked up by EF conventions.
         /// </summary>
         [ForeignKey(nameof(ComplexModelDependent.ParentId))]
-        public ICollection<ComplexModelDependent> Children { get; set; }
+        public ICollection<ComplexModelDependent> ChildrenWithoutRefNavProp { get; set; }
 
         public int SingleTestId { get; set; }
         public Test SingleTest { get; set; }

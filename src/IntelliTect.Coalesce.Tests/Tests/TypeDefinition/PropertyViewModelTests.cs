@@ -134,7 +134,7 @@ namespace IntelliTect.Coalesce.Tests.TypeDefinition
             }
         }
 
-        [Theory, ClassViewModelData(typeof(ComplexModel))]
+        [Theory, ClassViewModelData<ComplexModel>]
         public void DateType_IsCorrect(ClassViewModelData data)
         {
             ClassViewModel vm = data;
@@ -151,8 +151,8 @@ namespace IntelliTect.Coalesce.Tests.TypeDefinition
         }
 
         [Theory]
-        [PropertyViewModelData(typeof(ComplexModel), nameof(ComplexModel.SingleTestId))]
-        [PropertyViewModelData(typeof(ComplexModelDependent), nameof(ComplexModelDependent.ParentId))]
+        [PropertyViewModelData<ComplexModel>(nameof(ComplexModel.SingleTestId))]
+        [PropertyViewModelData<ComplexModelDependent>(nameof(ComplexModelDependent.ParentId))]
         public void IsForeignKey_IsCorrect(PropertyViewModelData data)
         {
             PropertyViewModel vm = data;
@@ -160,6 +160,17 @@ namespace IntelliTect.Coalesce.Tests.TypeDefinition
             Assert.True(vm.IsForeignKey);
             Assert.NotNull(vm.ForeignKeyPrincipalType);
             Assert.Equal(PropertyRole.ForeignKey, vm.Role);
+        }
+
+        [Theory]
+        [PropertyViewModelData<ComplexModel>(nameof(ComplexModel.Tests), nameof(Test.ComplexModelId))]
+        [PropertyViewModelData<ComplexModel>(nameof(ComplexModel.ChildrenWithoutRefNavProp), nameof(ComplexModelDependent.ParentId))]
+        public void Role_IsCollectionNavigation_IsCorrect(PropertyViewModelData data, string fkName)
+        {
+            PropertyViewModel vm = data;
+
+            Assert.Equal(PropertyRole.CollectionNavigation, vm.Role);
+            Assert.Equal(fkName, vm.ForeignKeyProperty.Name);
         }
     }
 }

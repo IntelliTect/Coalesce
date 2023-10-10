@@ -111,8 +111,12 @@ namespace IntelliTect.Coalesce.Validation
                             }
                             if (prop.Role == PropertyRole.CollectionNavigation)
                             {
-                                assert.IsTrue(prop.InverseProperty!.IsPOCO, "The inverse property of a collection navigation should reference the corresponding reference navigation on the other side of the relationship.");
-                                assert.IsNotNull(prop.InverseProperty.ForeignKeyProperty, "Could not find the foreign key of the referenced inverse property");
+                                if (prop.InverseProperty != null)
+                                {
+                                    assert.IsTrue(prop.InverseProperty.IsPOCO, "The inverse property of a collection navigation should reference the corresponding reference navigation on the other side of the relationship.");
+                                }
+
+                                assert.IsNotNull(prop.ForeignKeyProperty, "Could not find the foreign key of the navigation property");
                             }
                         }
                         if (prop.IsManytoManyCollection &&

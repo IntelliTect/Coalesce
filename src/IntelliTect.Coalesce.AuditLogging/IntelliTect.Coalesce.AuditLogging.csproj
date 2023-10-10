@@ -2,6 +2,9 @@
 
   <PropertyGroup>
     <Nullable>enable</Nullable>
+    
+    <!-- CS1591: Missing XML comment for publicly visible type or member -->
+    <!--<NoWarn>$([System.String]::Copy("$(NoWarn)").Replace(";CS1591",""))</NoWarn>-->
   </PropertyGroup>
 
   <ItemGroup>

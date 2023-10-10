@@ -1,8 +1,8 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using System.ComponentModel.DataAnnotations;
-using IntelliTect.Coalesce.DataAnnotations;
-using static IntelliTect.Coalesce.DataAnnotations.SecurityPermissionLevels;
+﻿using IntelliTect.Coalesce.DataAnnotations;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using static IntelliTect.Coalesce.DataAnnotations.SecurityPermissionLevels;
 
 namespace IntelliTect.Coalesce.AuditLogging;
 
@@ -11,17 +11,26 @@ namespace IntelliTect.Coalesce.AuditLogging;
 [Create(DenyAll)]
 public class ObjectChangeProperty
 {
-    public long ObjectChangePropertyId { get; set; }
+    public long Id { get; set; }
 
-    public long ObjectChangeId { get; set; }
+    public long ParentId { get; set; }
 
-    [ListText, Search, MaxLength(100), Column(TypeName = "varchar(100)")]
+    /// <summary>
+    /// The name of the a property on the parent entity that was changed.
+    /// </summary>
+    [Required, ListText, Search, MaxLength(100), Column(TypeName = "varchar(100)")]
 #if NET7_0_OR_GREATER 
 required 
 #endif
     public string PropertyName { get; set; } = null!;
 
+    /// <summary>
+    /// For modify or delete operations, holds the old value of the property.
+    /// </summary>
     public string? OldValue { get; set; }
 
+    /// <summary>
+    /// For add or modify operations, holds the new value of the property.
+    /// </summary>
     public string? NewValue { get; set; }
 }

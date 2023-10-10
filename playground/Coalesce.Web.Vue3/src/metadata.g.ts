@@ -7,6 +7,28 @@ import {
 
 
 const domain: Domain = { enums: {}, types: {}, services: {} }
+export const AuditEntryState = domain.enums.AuditEntryState = {
+  name: "AuditEntryState",
+  displayName: "Audit Entry State",
+  type: "enum",
+  ...getEnumMeta<"EntityAdded"|"EntityDeleted"|"EntityModified">([
+  {
+    value: 0,
+    strValue: "EntityAdded",
+    displayName: "Entity Added",
+  },
+  {
+    value: 1,
+    strValue: "EntityDeleted",
+    displayName: "Entity Deleted",
+  },
+  {
+    value: 2,
+    strValue: "EntityModified",
+    displayName: "Entity Modified",
+  },
+  ]),
+}
 export const Genders = domain.enums.Genders = {
   name: "Genders",
   displayName: "Genders",
@@ -946,6 +968,122 @@ export const Log = domain.types.Log = {
     message: {
       name: "message",
       displayName: "Message",
+      type: "string",
+      role: "value",
+    },
+  },
+  methods: {
+  },
+  dataSources: {
+  },
+}
+export const ObjectChange = domain.types.ObjectChange = {
+  name: "ObjectChange",
+  displayName: "Object Change",
+  get displayProp() { return this.props.type }, 
+  type: "model",
+  controllerRoute: "ObjectChange",
+  get keyProp() { return this.props.id }, 
+  behaviorFlags: 7 as BehaviorFlags,
+  props: {
+    id: {
+      name: "id",
+      displayName: "Id",
+      type: "number",
+      role: "primaryKey",
+      hidden: 3 as HiddenAreas,
+    },
+    type: {
+      name: "type",
+      displayName: "Type",
+      type: "string",
+      role: "value",
+      rules: {
+        required: val => (val != null && val !== '') || "Type is required.",
+        maxLength: val => !val || val.length <= 100 || "Type may not be more than 100 characters.",
+      }
+    },
+    keyValue: {
+      name: "keyValue",
+      displayName: "Key Value",
+      type: "string",
+      role: "value",
+    },
+    state: {
+      name: "state",
+      displayName: "State",
+      type: "enum",
+      get typeDef() { return domain.enums.AuditEntryState },
+      role: "value",
+    },
+    date: {
+      name: "date",
+      displayName: "Date",
+      type: "date",
+      dateKind: "datetime",
+      role: "value",
+    },
+    properties: {
+      name: "properties",
+      displayName: "Properties",
+      type: "collection",
+      itemType: {
+        name: "$collectionItem",
+        displayName: "",
+        role: "value",
+        type: "model",
+        get typeDef() { return (domain.types.ObjectChangeProperty as ModelType) },
+      },
+      role: "value",
+      dontSerialize: true,
+    },
+  },
+  methods: {
+  },
+  dataSources: {
+  },
+}
+export const ObjectChangeProperty = domain.types.ObjectChangeProperty = {
+  name: "ObjectChangeProperty",
+  displayName: "Object Change Property",
+  get displayProp() { return this.props.propertyName }, 
+  type: "model",
+  controllerRoute: "ObjectChangeProperty",
+  get keyProp() { return this.props.id }, 
+  behaviorFlags: 0 as BehaviorFlags,
+  props: {
+    id: {
+      name: "id",
+      displayName: "Id",
+      type: "number",
+      role: "primaryKey",
+      hidden: 3 as HiddenAreas,
+    },
+    parentId: {
+      name: "parentId",
+      displayName: "Parent Id",
+      type: "number",
+      role: "value",
+    },
+    propertyName: {
+      name: "propertyName",
+      displayName: "Property Name",
+      type: "string",
+      role: "value",
+      rules: {
+        required: val => (val != null && val !== '') || "Property Name is required.",
+        maxLength: val => !val || val.length <= 100 || "Property Name may not be more than 100 characters.",
+      }
+    },
+    oldValue: {
+      name: "oldValue",
+      displayName: "Old Value",
+      type: "string",
+      role: "value",
+    },
+    newValue: {
+      name: "newValue",
+      displayName: "New Value",
       type: "string",
       role: "value",
     },
@@ -2140,6 +2278,7 @@ export const WeatherService = domain.services.WeatherService = {
 
 interface AppDomain extends Domain {
   enums: {
+    AuditEntryState: typeof AuditEntryState
     Genders: typeof Genders
     SkyConditions: typeof SkyConditions
     Statuses: typeof Statuses
@@ -2155,6 +2294,8 @@ interface AppDomain extends Domain {
     DevTeam: typeof DevTeam
     Location: typeof Location
     Log: typeof Log
+    ObjectChange: typeof ObjectChange
+    ObjectChangeProperty: typeof ObjectChangeProperty
     Person: typeof Person
     PersonCriteria: typeof PersonCriteria
     PersonLocation: typeof PersonLocation

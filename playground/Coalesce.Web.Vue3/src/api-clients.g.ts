@@ -141,6 +141,16 @@ export class LogApiClient extends ModelApiClient<$models.Log> {
 }
 
 
+export class ObjectChangeApiClient extends ModelApiClient<$models.ObjectChange> {
+  constructor() { super($metadata.ObjectChange) }
+}
+
+
+export class ObjectChangePropertyApiClient extends ModelApiClient<$models.ObjectChangeProperty> {
+  constructor() { super($metadata.ObjectChangeProperty) }
+}
+
+
 export class PersonApiClient extends ModelApiClient<$models.Person> {
   constructor() { super($metadata.Person) }
   public rename(id: number, name: string | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<$models.Person>> {

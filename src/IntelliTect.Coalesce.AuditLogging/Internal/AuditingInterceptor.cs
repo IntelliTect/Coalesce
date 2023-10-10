@@ -1,16 +1,16 @@
-﻿using System.Data;
-using System.Linq;
-using System.Threading.Tasks;
-using System;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
-using System.Threading;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.Extensions.DependencyInjection;
-using Z.EntityFramework.Plus;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.DependencyInjection;
+using System;
+using System.Data;
+using System.Linq;
 using System.Text.Json;
+using System.Threading;
+using System.Threading.Tasks;
+using Z.EntityFramework.Plus;
 
 namespace IntelliTect.Coalesce.AuditLogging.Internal;
 
@@ -86,8 +86,10 @@ internal sealed class AuditingInterceptor<TObjectChange> : SaveChangesIntercepto
 
         var basePropNames = typeof(IObjectChange).GetProperties().Select(p => p.Name).ToArray();
         var props = entityType.GetDeclaredProperties();
-        var customProps = props.ExceptBy(basePropNames, p => p.PropertyInfo?.Name);
         var propsByName = props.ToLookup(p => p.Name);
+
+        var customProps = props.ExceptBy(basePropNames, p => p.PropertyInfo?.Name);
+        var cursorProps = customProps.Concat(props.Where(p => p.Name is nameof(IObjectChange.State) or nameof(IObjectChange.Date) or nameof(IObjectChange.Type) or nameof(IObjectChange.KeyValue)));
 
         string GetColName(string propName, IEntityType table) => table
             .GetDeclaredProperties()
@@ -97,14 +99,14 @@ internal sealed class AuditingInterceptor<TObjectChange> : SaveChangesIntercepto
         string GetPropColName(IProperty prop, IEntityType table) => prop
             .GetColumnName(StoreObjectIdentifier.Create(table, StoreObjectType.Table)!.Value)!;
 
-        string pkCol = GetColName(nameof(IObjectChange.ObjectChangeId), entityType);
-        string entityTypeNameCol = GetColName(nameof(IObjectChange.EntityTypeName), entityType);
-        string entityKeyValueCol = GetColName(nameof(IObjectChange.EntityKeyValue), entityType);
+        string pkCol = GetColName(nameof(IObjectChange.Id), entityType);
+        string entityTypeNameCol = GetColName(nameof(IObjectChange.Type), entityType);
+        string entityKeyValueCol = GetColName(nameof(IObjectChange.KeyValue), entityType);
         string dateCol = GetColName(nameof(IObjectChange.Date), entityType);
         string stateCol = GetColName(nameof(IObjectChange.State), entityType);
 
-        string propFkCol = GetColName(nameof(ObjectChangeProperty.ObjectChangeId), propEntityType);
-        string propPkCol = GetColName(nameof(ObjectChangeProperty.ObjectChangePropertyId), propEntityType);
+        string propFkCol = GetColName(nameof(ObjectChangeProperty.ParentId), propEntityType);
+        string propPkCol = GetColName(nameof(ObjectChangeProperty.Id), propEntityType);
 
         return $"""
             SET NOCOUNT ON;
@@ -112,21 +114,13 @@ internal sealed class AuditingInterceptor<TObjectChange> : SaveChangesIntercepto
 
             -- Setup iteration over each distinct [ObjectChange] represented by our incoming flat data.
             DECLARE object_cursor CURSOR FOR 
-            SELECT EntityTypeName, EntityKeyValue, [Date], [State], {string.Join(", ", customProps.Select(p => p.Name))}, Properties
+            SELECT {string.Join(", ", cursorProps.Select(p => p.Name))}, Properties
             FROM OPENJSON(@json) with (   
-            	EntityTypeName [varchar](100) '$.EntityTypeName',
-            	EntityKeyValue [nvarchar](450) '$.EntityKeyValue',
-            	Date [datetimeoffset](7) '$.Date',
-            	State [varchar](30) '$.State',
-                {string.Join(",\n    ", customProps.Select(p => $"{p.Name} {p.GetRelationalTypeMapping().StoreType} '$.{p.Name}'"))},
+                {string.Join(",\n    ", cursorProps.Select(p => $"{p.Name} {p.GetRelationalTypeMapping().StoreType} '$.{p.Name}'"))},
             	Properties [nvarchar](max) '$.Properties' as JSON
             );
 
-            DECLARE @EntityTypeName [varchar](100);
-            DECLARE @EntityKeyValue [nvarchar](450);
-            DECLARE @Date [datetimeoffset](7);
-            DECLARE @State [varchar](30);
-            {string.Join(";\n", customProps.Select(p => $"DECLARE @{p.Name} {p.GetRelationalTypeMapping().StoreType};"))};
+            {string.Join(";\n    ", cursorProps.Select(p => $"DECLARE @{p.Name} {p.GetRelationalTypeMapping().StoreType}"))};
             DECLARE @Properties [nvarchar](max);
 
             OPEN object_cursor
@@ -135,11 +129,7 @@ internal sealed class AuditingInterceptor<TObjectChange> : SaveChangesIntercepto
             BEGIN  
                 -- Looping over each entity in the set of changes passed in.
             	FETCH NEXT FROM object_cursor INTO 
-            		@EntityTypeName, 
-            		@EntityKeyValue,
-            		@Date,
-            		@State,
-                    {string.Join(",\n        ", customProps.Select(p => $"@{p.Name}"))},
+                    {string.Join(",\n        ", cursorProps.Select(p => $"@{p.Name}"))},
             		@Properties;
 
             	IF @@FETCH_STATUS <> 0  
@@ -157,11 +147,11 @@ internal sealed class AuditingInterceptor<TObjectChange> : SaveChangesIntercepto
                     @mostRecentObjectChangeId = {pkCol},
                     @shouldUpdate = (CASE WHEN 
                         -- Don't update if the type and/or key matched on NULL=NULL
-                        @EntityTypeName IS NOT NULL
-                        AND @EntityKeyValue IS NOT NULL
+                        @Type IS NOT NULL
+                        AND @KeyValue IS NOT NULL
                         -- These fields must match exactly:
                         AND {stateCol} = @State
-                        {string.Join("\n           ", customProps.Select(p => $"AND {GetPropColName(p, entityType)} = @{p.Name}"))}
+                        {string.Join("\n           ", customProps.Select(p => $"AND ({GetPropColName(p, entityType)} = @{p.Name} OR ISNULL({GetPropColName(p, entityType)}, @{p.Name}) IS NULL)"))}
                         -- Date of the most recent record must be within X amount of time, 
                         AND DATEDIFF(second, {dateCol}, @Date) < @MergeWindowSeconds
                         -- and the incoming record must have a date equal or after the existing record
@@ -182,13 +172,12 @@ internal sealed class AuditingInterceptor<TObjectChange> : SaveChangesIntercepto
                         ELSE 0 
                     END)
                 FROM {tableName}
-                WHERE {entityTypeNameCol} = @EntityTypeName AND {entityKeyValueCol} = @EntityKeyValue
+                WHERE {entityTypeNameCol} = @Type AND {entityKeyValueCol} = @KeyValue
                 ORDER BY {pkCol} DESC;
 
                 IF @mostRecentObjectChangeId > 0 AND @shouldUpdate = 1
                     BEGIN
-                        -- We found an existing record for the given EntityType and KeyValue and it is a candidate for being updated.
-                        --PRINT('AUDIT UPDATE ' + @EntityTypeName + ':' + @EntityKeyValue);
+                        -- We found an existing record for the given Type and KeyValue and it is a candidate for being updated.
 
                         UPDATE {tableName}
                         SET {dateCol} = @Date
@@ -213,11 +202,10 @@ internal sealed class AuditingInterceptor<TObjectChange> : SaveChangesIntercepto
                 ELSE
                     BEGIN
                         -- The existing record didn't exist, or was not a candidate for being updated. Insert a new record.
-                        -- PRINT('AUDIT INSERT ' + @EntityTypeName + ':' + @EntityKeyValue);
 
                         INSERT INTO {tableName}
-                        ({entityTypeNameCol}, {entityKeyValueCol}, {dateCol}, {stateCol}, {string.Join(", ", customProps.Select(p => GetPropColName(p, entityType)))})
-                        VALUES (@EntityTypeName, @EntityKeyValue, @Date, @State, {string.Join(", ", customProps.Select(p => $"@{p.Name}"))});
+                        ({string.Join(", ", cursorProps.Select(p => GetPropColName(p, entityType)))})
+                        VALUES ({string.Join(", ", cursorProps.Select(p => $"@{p.Name}"))});
 
                         SET @mostRecentObjectChangeId = SCOPE_IDENTITY();
 
@@ -260,18 +248,17 @@ internal sealed class AuditingInterceptor<TObjectChange> : SaveChangesIntercepto
             .Where(e => e.Properties.Count > 1 && e.Entity is not TObjectChange && e.Entity is not ObjectChangeProperty)
             .Select(e =>
             {
-                var keyProperty = db.Model
+                var keyProperties = db.Model
                     .FindEntityType(e.Entity.GetType())?
                     .FindPrimaryKey()?
-                    .Properties.SingleOrDefault()?
-                    .PropertyInfo;
+                    .Properties;
 
                 var objectChange = Activator.CreateInstance<TObjectChange>();
 
                 objectChange.Date = date;
-                objectChange.State = e.StateName;
-                objectChange.EntityTypeName = e.EntityTypeName;
-                objectChange.EntityKeyValue = keyProperty?.GetValue(e.Entity)?.ToString();
+                objectChange.State = (IntelliTect.Coalesce.AuditLogging.AuditEntryState)e.State;
+                objectChange.Type = e.EntityTypeName;
+                objectChange.KeyValue = keyProperties is null ? null : string.Join(";", keyProperties.Select(p => e.Entry.CurrentValues[p]));
                 objectChange.Properties = e.Properties
                     .Where(property => property.OldValueFormatted != property.NewValueFormatted)
                     .Select(property =>
@@ -305,7 +292,7 @@ internal sealed class AuditingInterceptor<TObjectChange> : SaveChangesIntercepto
 
             var jsonParam = cmd.CreateParameter();
             jsonParam.ParameterName = "json";
-            jsonParam.Value = JsonSerializer.Serialize(objectChanges); // todo: super wrong, need to exclude user nav properties that may be tacked on.
+            jsonParam.Value = JsonSerializer.Serialize(objectChanges); // todo: super wrong, need to exclude user nav properties that may be tacked on, should exclude null
 
 
             // MergeWindowSeconds, in seconds, that a record can be for it to be updated (rather than inserting a new one).

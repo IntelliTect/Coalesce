@@ -1,8 +1,8 @@
-﻿using System.Linq;
-using System;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
+using System;
+using System.Linq;
 
 namespace IntelliTect.Coalesce.AuditLogging.Internal;
 

@@ -8,6 +8,12 @@ namespace IntelliTect.Coalesce.AuditLogging;
 
 public static class DbContextOptionsBuilderExtensions
 {
+    /// <summary>
+    /// Adds Coalesce's audit logging infrastructure to the <see cref="DbContext"/>. The <see cref="DbContext"/> must inherit from <see cref="IAuditLogContext{TObjectChange}"/>, where <typeparamref name="TObjectChange"/> derives from <see cref="IObjectChange"/> or <see cref="ObjectChangeBase"/>
+    /// </summary>
+    /// <typeparam name="TObjectChange"></typeparam>
+    /// <param name="builder"></param>
+    /// <returns></returns>
     public static DbContextOptionsBuilder UseCoalesceAuditLogging<TObjectChange>(
         this DbContextOptionsBuilder builder
     )
@@ -31,18 +37,4 @@ public static class DbContextOptionsBuilderExtensions
         services.TryAddTransient<IAuditOperationContext<TObjectChange>, TOperationContext>();
         return services;
     }
-
-    ///// <summary>
-    ///// Add Coalesce audit logging, including a <typeparamref name="TOperationContext"/> whose dependencies can be entirely resolved from the <see cref="DbContext"/>'s own internal service provider, plus <see cref="IHttpContextAccessor"/>.
-    ///// </summary>
-    //public static DbContextOptionsBuilder UseCoalesceAuditLogging<TObjectChange, TOperationContext>(
-    //    this DbContextOptionsBuilder builder
-    //)
-    //    where TObjectChange : class, IObjectChange
-    //    where TOperationContext : class, IAuditOperationContext<TObjectChange>
-    //{
-    //    ((IDbContextOptionsBuilderInfrastructure)builder).AddOrUpdateExtension(new AuditExtension<TObjectChange>(typeof(TOperationContext)));
-
-    //    return builder.AddInterceptors(new AuditingInterceptor<TObjectChange>());
-    //}
 }

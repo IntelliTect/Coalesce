@@ -323,6 +323,53 @@ export class LogListViewModel extends ListViewModel<$models.Log, $apiClients.Log
 }
 
 
+export interface ObjectChangeViewModel extends $models.ObjectChange {
+  id: number | null;
+  type: string | null;
+  keyValue: string | null;
+  state: $models.AuditEntryState | null;
+  date: Date | null;
+  properties: ObjectChangePropertyViewModel[] | null;
+}
+export class ObjectChangeViewModel extends ViewModel<$models.ObjectChange, $apiClients.ObjectChangeApiClient, number> implements $models.ObjectChange  {
+  
+  constructor(initialData?: DeepPartial<$models.ObjectChange> | null) {
+    super($metadata.ObjectChange, new $apiClients.ObjectChangeApiClient(), initialData)
+  }
+}
+defineProps(ObjectChangeViewModel, $metadata.ObjectChange)
+
+export class ObjectChangeListViewModel extends ListViewModel<$models.ObjectChange, $apiClients.ObjectChangeApiClient, ObjectChangeViewModel> {
+  
+  constructor() {
+    super($metadata.ObjectChange, new $apiClients.ObjectChangeApiClient())
+  }
+}
+
+
+export interface ObjectChangePropertyViewModel extends $models.ObjectChangeProperty {
+  id: number | null;
+  parentId: number | null;
+  propertyName: string | null;
+  oldValue: string | null;
+  newValue: string | null;
+}
+export class ObjectChangePropertyViewModel extends ViewModel<$models.ObjectChangeProperty, $apiClients.ObjectChangePropertyApiClient, number> implements $models.ObjectChangeProperty  {
+  
+  constructor(initialData?: DeepPartial<$models.ObjectChangeProperty> | null) {
+    super($metadata.ObjectChangeProperty, new $apiClients.ObjectChangePropertyApiClient(), initialData)
+  }
+}
+defineProps(ObjectChangePropertyViewModel, $metadata.ObjectChangeProperty)
+
+export class ObjectChangePropertyListViewModel extends ListViewModel<$models.ObjectChangeProperty, $apiClients.ObjectChangePropertyApiClient, ObjectChangePropertyViewModel> {
+  
+  constructor() {
+    super($metadata.ObjectChangeProperty, new $apiClients.ObjectChangePropertyApiClient())
+  }
+}
+
+
 export interface PersonViewModel extends $models.Person {
   
   /** ID for the person object. */
@@ -711,6 +758,8 @@ const viewModelTypeLookup = ViewModel.typeLookup = {
   CaseProduct: CaseProductViewModel,
   Company: CompanyViewModel,
   Log: LogViewModel,
+  ObjectChange: ObjectChangeViewModel,
+  ObjectChangeProperty: ObjectChangePropertyViewModel,
   Person: PersonViewModel,
   Product: ProductViewModel,
   StandaloneReadCreate: StandaloneReadCreateViewModel,
@@ -725,6 +774,8 @@ const listViewModelTypeLookup = ListViewModel.typeLookup = {
   CaseProduct: CaseProductListViewModel,
   Company: CompanyListViewModel,
   Log: LogListViewModel,
+  ObjectChange: ObjectChangeListViewModel,
+  ObjectChangeProperty: ObjectChangePropertyListViewModel,
   Person: PersonListViewModel,
   Product: ProductListViewModel,
   StandaloneReadCreate: StandaloneReadCreateListViewModel,

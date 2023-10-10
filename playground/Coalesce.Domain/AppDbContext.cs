@@ -1,11 +1,17 @@
 ﻿using IntelliTect.Coalesce;
+using IntelliTect.Coalesce.AuditLogging;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
 
 namespace Coalesce.Domain
 {
+    public class ObjectChange : ObjectChangeBase
+    {
+
+    }
+
     [Coalesce]
-    public class AppDbContext : DbContext
+    public class AppDbContext : DbContext, IAuditLogContext<ObjectChange>
     {
 #nullable disable
         public DbSet<Person> People { get; set; }
@@ -15,6 +21,10 @@ namespace Coalesce.Domain
         public DbSet<CaseProduct> CaseProducts { get; set; }
         public DbSet<ZipCode> ZipCodes { get; set; }
         public DbSet<Log> Logs { get; set; }
+
+        public DbSet<ObjectChange> ObjectChanges { get; set; }
+        public DbSet<ObjectChangeProperty> ObjectChangeProperties { get; set; }
+
 #nullable restore
 
         public AppDbContext()

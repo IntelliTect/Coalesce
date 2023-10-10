@@ -2,6 +2,9 @@
 
 namespace IntelliTect.Coalesce.AuditLogging;
 
+/// <summary>
+/// A service that may be registered with <see cref="DbContextOptionsBuilderExtensions.AddCoalesceAuditLoggingOperationContext{TObjectChange, TOperationContext}(Microsoft.Extensions.DependencyInjection.IServiceCollection)"/> that can populate additional fields on the given <typeparamref name="TObjectChange"/> before it is persisted to the database.
+/// </summary>
 public interface IAuditOperationContext<TObjectChange>
     where TObjectChange : class, IObjectChange
 {

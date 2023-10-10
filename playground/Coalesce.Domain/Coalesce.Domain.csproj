@@ -18,6 +18,9 @@
     <ProjectReference Include="..\..\src\IntelliTect.Coalesce\IntelliTect.Coalesce.csproj">
       <SetTargetFramework>TargetFramework=$(TargetFramework)</SetTargetFramework>
     </ProjectReference>
+    <ProjectReference Include="..\..\src\IntelliTect.Coalesce.AuditLogging\IntelliTect.Coalesce.AuditLogging.csproj">
+      <SetTargetFramework>TargetFramework=$(TargetFramework)</SetTargetFramework>
+    </ProjectReference>
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net6.0' ">

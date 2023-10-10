@@ -1,13 +1,13 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Metadata.Conventions.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions;
+using Microsoft.EntityFrameworkCore.Metadata.Conventions.Infrastructure;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace IntelliTect.Coalesce.AuditLogging.Internal;
 
@@ -35,6 +35,10 @@ internal class AuditExtension<TObjectChange> : IDbContextOptionsExtension
             .TryAdd<IConventionSetPlugin, ConventionSetPlugin>();
     }
 
+    public void Validate(IDbContextOptions options)
+    {
+    }
+
     private class ConventionSetPlugin : IConventionSetPlugin
     {
         public ConventionSet ModifyConventions(ConventionSet conventionSet)
@@ -57,24 +61,20 @@ internal class AuditExtension<TObjectChange> : IDbContextOptionsExtension
             var e = new EntityTypeBuilder<TObjectChange>((IMutableEntityType)entityTypeBuilder.Metadata);
 #pragma warning restore EF1001 // Internal EF Core API usage.
 
-            e.HasIndex(c => new { c.EntityTypeName, c.EntityKeyValue });
+            e.HasIndex(c => new { c.Type, c.KeyValue });
             e.HasIndex(c => c.State);
 
             // An index on EntityTypeName is needed by itself because 
             // the index that includes EntityKeyValue is no good when not looking for a specific key
             // (looking at that index requires an index scan rather than a seek).
-            e.HasIndex(c => c.EntityTypeName);
+            e.HasIndex(c => c.Type);
 
-            e.HasMany(c => c.Properties)
-                .WithOne()
-                .HasPrincipalKey(c => c.ObjectChangeId)
-                .HasForeignKey(c => c.ObjectChangeId)
-                .OnDelete(DeleteBehavior.Cascade);
+            //e.HasMany(c => c.Properties)
+            //    .WithOne()
+            //    .HasPrincipalKey(c => c.Id)
+            //    .HasForeignKey(c => c.ParentId)
+            //    .OnDelete(DeleteBehavior.Cascade);
         }
-    }
-
-    public void Validate(IDbContextOptions options)
-    {
     }
 
     private sealed class ExtensionInfo : DbContextOptionsExtensionInfo

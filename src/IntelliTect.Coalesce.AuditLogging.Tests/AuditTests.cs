@@ -2,6 +2,7 @@ using IntelliTect.Coalesce.AuditLogging;
 using IntelliTect.Coalesce.Utilities;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,7 +16,7 @@ public class AuditTests
     [Theory]
     [InlineData(false)]
     [InlineData(true)]
-    public async Task WithSqlServer_WithoutFullApp_PopulatesContextAndSavesEntries(bool async)
+    public async Task WithSqlServer_PopulatesContextAndSavesEntries(bool async)
     {
         // Arrange
         using var db = new TestDbContext(new DbContextOptionsBuilder<TestDbContext>()
@@ -23,7 +24,93 @@ public class AuditTests
             .UseCoalesceAuditLogging<TestObjectChange>()
             .Options);
 
-        await RunTest(db, async, 
+        await RunTest(db, async,
+            expectedCustom1: null,
+            expectedCustom2: "from IObjectChange.Populate");
+    }
+
+    [Fact]
+    public async Task WithSqlServer_UpdatesExistingRecordForLikeChanges()
+    {
+        // Arrange
+        using var db = new TestDbContext(new DbContextOptionsBuilder<TestDbContext>()
+            .UseSqlServer(SqlServerConnString)
+            .UseCoalesceAuditLogging<TestObjectChange>()
+            .Options);
+
+        db.Database.EnsureDeleted();
+        db.Database.EnsureCreated();
+
+        var user = new AppUser { Name = "bob" };
+        db.Add(user);
+        await db.SaveChangesAsync();
+
+        // Act/Assert
+        user.Name = "bob2";
+        await db.SaveChangesAsync();
+
+        Assert.Equal(2, db.ObjectChanges.Count()); // Two records: EntityAdded, and EntityUpdated
+
+        // Act/Assert
+        user.Name = "bob3";
+        await db.SaveChangesAsync();
+
+        Assert.Equal(2, db.ObjectChanges.Count()); // Two records: EntityAdded, and EntityUpdated
+
+        // Assert
+        var entry = Assert.Single(db.ObjectChanges.Include(c => c.Properties).Where(c => c.State == AuditEntryState.EntityModified));
+
+        var propChange = Assert.Single(entry.Properties);
+        Assert.Equal(nameof(AppUser.Name), propChange.PropertyName);
+        Assert.Equal("bob", propChange.OldValue);
+        Assert.Equal("bob3", propChange.NewValue);
+    }
+
+    [Fact]
+    public async Task WithSqlServer_CreatesNewRecordForUnlikeChanges()
+    {
+        // Arrange
+        using var db = new TestDbContext(new DbContextOptionsBuilder<TestDbContext>()
+            .UseSqlServer(SqlServerConnString)
+            .UseCoalesceAuditLogging<TestObjectChange>()
+            .Options);
+
+        db.Database.EnsureDeleted();
+        db.Database.EnsureCreated();
+
+        var user = new AppUser { Name = "bob" };
+        db.Add(user);
+        await db.SaveChangesAsync();
+
+        // Act/Assert
+        user.Name = "bob2";
+        await db.SaveChangesAsync();
+
+        Assert.Equal(2, db.ObjectChanges.Count()); // Two records: EntityAdded, and EntityUpdated
+
+        // Act/Assert
+        user.Name = "bob3";
+        user.Title = "Associate";
+        await db.SaveChangesAsync();
+
+        Assert.Equal(3, db.ObjectChanges.Count()); // Now two records for EntityUpdated
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task WithSqlite_PopulatesContextAndSavesEntries(bool async)
+    {
+        // Arrange
+        using var conn = new SqliteConnection("Data Source=:memory:");
+        conn.Open();
+
+        using var db = new TestDbContext(new DbContextOptionsBuilder<TestDbContext>()
+            .UseSqlite(conn)
+            .UseCoalesceAuditLogging<TestObjectChange>()
+            .Options);
+
+        await RunTest(db, async,
             expectedCustom1: null,
             expectedCustom2: "from IObjectChange.Populate");
     }
@@ -76,9 +163,9 @@ public class AuditTests
         var entry = Assert.Single(db.ObjectChanges.Include(c => c.Properties));
         Assert.Equal(expectedCustom1, entry.CustomField1);
         Assert.Equal(expectedCustom2, entry.CustomField2);
-        Assert.Equal(nameof(AppUser), entry.EntityTypeName);
-        Assert.Equal(user.Id, entry.EntityKeyValue);
-        Assert.Equal("EntityAdded", entry.State);
+        Assert.Equal(nameof(AppUser), entry.Type);
+        Assert.Equal(user.Id, entry.KeyValue);
+        Assert.Equal(AuditEntryState.EntityAdded, entry.State);
         Assert.Equal(DateTimeOffset.Now.UtcDateTime, entry.Date.UtcDateTime, TimeSpan.FromSeconds(10));
 
         var idProp = entry.Properties!.ElementAt(0);
@@ -95,9 +182,10 @@ class AppUser
 {
     public string Id { get; set; } = Guid.NewGuid().ToString();
     public string? Name { get; set; }
+    public string? Title { get; set; }
 }
 
-internal class TestObjectChange : ObjectChange
+internal class TestObjectChange : ObjectChangeBase
 {
     public string? UserId { get; set; }
     public AppUser? User { get; set; }

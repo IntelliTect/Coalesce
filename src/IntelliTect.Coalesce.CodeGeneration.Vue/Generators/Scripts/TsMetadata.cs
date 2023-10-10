@@ -219,11 +219,15 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
 
                     case PropertyRole.ForeignKey:
                         // TS Type: "ForeignKeyProperty"
-                        var navProp = prop.ReferenceNavigationProperty;
+                        var principal = prop.ForeignKeyPrincipalType;
                         b.StringProp("role", "foreignKey");
-                        b.Line($"get principalKey() {{ return {GetClassMetadataRef(navProp.Object)}.props.{navProp.Object.PrimaryKey.JsVariable} as PrimaryKeyProperty }},");
-                        b.Line($"get principalType() {{ return {GetClassMetadataRef(navProp.Object)} }},");
-                        b.Line($"get navigationProp() {{ return {GetClassMetadataRef(model)}.props.{navProp.JsVariable} as ModelReferenceNavigationProperty }},");
+                        b.Line($"get principalKey() {{ return {GetClassMetadataRef(principal)}.props.{principal.PrimaryKey.JsVariable} as PrimaryKeyProperty }},");
+                        b.Line($"get principalType() {{ return {GetClassMetadataRef(principal)} }},");
+
+                        if (prop.ReferenceNavigationProperty is { } navProp)
+                        {
+                            b.Line($"get navigationProp() {{ return {GetClassMetadataRef(model)}.props.{navProp.JsVariable} as ModelReferenceNavigationProperty }},");
+                        }
                         break;
 
                     case PropertyRole.ReferenceNavigation:

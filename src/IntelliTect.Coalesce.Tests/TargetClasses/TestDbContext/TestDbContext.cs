@@ -18,6 +18,7 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         public DbSet<CaseProduct> CaseProducts { get; set; }
 
         public DbSet<ComplexModel> ComplexModels { get; set; }
+        public DbSet<ComplexModelDependent> ComplexModelDependents { get; set; }
         public DbSet<ReadOnlyEntityUsedAsMethodInput> ReadOnlyEntityUsedAsMethodInputs { get; set; }
         public DbSet<RequiredAndInitModel> RequiredAndInitModels { get; set; }
         public DbSet<Test> Tests { get; set; }

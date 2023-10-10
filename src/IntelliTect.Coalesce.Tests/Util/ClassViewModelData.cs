@@ -32,7 +32,7 @@ namespace IntelliTect.Coalesce.Tests.Util
             SetupProps();
         }
 
-        private void SetupProps()
+        protected void SetupProps()
         {
             if (ViewModelType == typeof(ReflectionClassViewModel))
             {
@@ -56,7 +56,7 @@ namespace IntelliTect.Coalesce.Tests.Util
             }
         }
 
-        public void Deserialize(IXunitSerializationInfo info)
+        public virtual void Deserialize(IXunitSerializationInfo info)
         {
             var targetType = info.GetValue<string>(nameof(TargetType));
             var viewModelType = info.GetValue<string>(nameof(ViewModelType));
@@ -82,7 +82,7 @@ namespace IntelliTect.Coalesce.Tests.Util
             SetupProps();
         }
 
-        public void Serialize(IXunitSerializationInfo info)
+        public virtual void Serialize(IXunitSerializationInfo info)
         {
             info.AddValue(nameof(TargetType), TargetType.FullName);
             info.AddValue(nameof(ViewModelType), ViewModelType.Name);

@@ -2,6 +2,7 @@
 using IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext;
 using IntelliTect.Coalesce.Tests.Util;
 using IntelliTect.Coalesce.TypeDefinition;
+using IntelliTect.Coalesce.TypeDefinition.Enums;
 using System.Text;
 using Xunit;
 using static IntelliTect.Coalesce.DataAnnotations.DateTypeAttribute;
@@ -147,6 +148,18 @@ namespace IntelliTect.Coalesce.Tests.TypeDefinition
             Assert.Equal(DateTypes.DateTime, vm.PropertyByName(nameof(ComplexModel.DateTimeNullable)).DateType);
             Assert.Equal(DateTypes.DateTime, vm.PropertyByName(nameof(ComplexModel.DateTimeOffset)).DateType);
             Assert.Equal(DateTypes.DateTime, vm.PropertyByName(nameof(ComplexModel.DateTimeOffsetNullable)).DateType);
+        }
+
+        [Theory]
+        [PropertyViewModelData(typeof(ComplexModel), nameof(ComplexModel.SingleTestId))]
+        [PropertyViewModelData(typeof(ComplexModelDependent), nameof(ComplexModelDependent.ParentId))]
+        public void IsForeignKey_IsCorrect(PropertyViewModelData data)
+        {
+            PropertyViewModel vm = data;
+
+            Assert.True(vm.IsForeignKey);
+            Assert.NotNull(vm.ForeignKeyPrincipalType);
+            Assert.Equal(PropertyRole.ForeignKey, vm.Role);
         }
     }
 }

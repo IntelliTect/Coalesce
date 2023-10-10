@@ -94,12 +94,13 @@ namespace IntelliTect.Coalesce.Validation
                                 assert.IsNotNull(prop.Object.PrimaryKey, "No Primary key for related object. Ensure the target object has a [Key] attributed property.");
                             }
                         }
-                        if (prop.IsForeignKey)
+
+                        if (prop.ReferenceNavigationProperty is not null)
                         {
-                            assert.IsNotNull(prop.ReferenceNavigationProperty, "Object property not found.");
-                            assert.IsNotNull(prop.ReferenceNavigationProperty?.Object, "Object property related object not found.");
-                            assert.IsNotNull(prop.ReferenceNavigationProperty?.Object?.PrimaryKey, "No primary key on type of this ID's Navigation Property.");
+                            assert.IsNotNull(prop.ReferenceNavigationProperty.Object, "Object property related object not found.");
+                            assert.IsNotNull(prop.ReferenceNavigationProperty.Object?.PrimaryKey, "No primary key on type of this ID's Navigation Property.");
                         }
+
                         if (prop.Type.IsCollection)
                         {
                             assert.AreNotEqual(prop.Type.FullyQualifiedName, prop.PureType.FullyQualifiedName, "Collection is not defined correctly.");

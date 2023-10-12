@@ -12,6 +12,7 @@ namespace Coalesce.Web.Vue3.Models
     {
         public ObjectChangeDtoGen() { }
 
+        private string _Message;
         private long? _Id;
         private string _Type;
         private string _KeyValue;
@@ -19,6 +20,11 @@ namespace Coalesce.Web.Vue3.Models
         private System.DateTimeOffset? _Date;
         private System.Collections.Generic.ICollection<Coalesce.Web.Vue3.Models.ObjectChangePropertyDtoGen> _Properties;
 
+        public string Message
+        {
+            get => _Message;
+            set { _Message = value; Changed(nameof(Message)); }
+        }
         public long? Id
         {
             get => _Id;
@@ -58,6 +64,7 @@ namespace Coalesce.Web.Vue3.Models
             if (obj == null) return;
             var includes = context.Includes;
 
+            this.Message = obj.Message;
             this.Id = obj.Id;
             this.Type = obj.Type;
             this.KeyValue = obj.KeyValue;
@@ -86,6 +93,7 @@ namespace Coalesce.Web.Vue3.Models
 
             if (OnUpdate(entity, context)) return;
 
+            if (ShouldMapTo(nameof(Message))) entity.Message = Message;
             if (ShouldMapTo(nameof(Id))) entity.Id = (Id ?? entity.Id);
             if (ShouldMapTo(nameof(Type))) entity.Type = Type;
             if (ShouldMapTo(nameof(KeyValue))) entity.KeyValue = KeyValue;

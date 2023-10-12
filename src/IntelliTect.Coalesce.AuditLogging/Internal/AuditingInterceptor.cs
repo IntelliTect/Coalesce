@@ -8,6 +8,7 @@ using System;
 using System.Data;
 using System.Linq;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using Z.EntityFramework.Plus;
@@ -17,6 +18,8 @@ namespace IntelliTect.Coalesce.AuditLogging.Internal;
 internal sealed class AuditingInterceptor<TObjectChange> : SaveChangesInterceptor
     where TObjectChange : class, IObjectChange
 {
+    private readonly AuditOptions _options;
+
     private Audit? _audit;
 
     private IAuditLogContext<TObjectChange> GetContext(DbContextEventData data)
@@ -74,48 +77,66 @@ internal sealed class AuditingInterceptor<TObjectChange> : SaveChangesIntercepto
     }
     #endregion
 
+    /// <summary>
+    /// Cache for generated SQL. Size is limited in case there is an application whose Model
+    ///  is not a singleton, e.g. dynamic model configuration for schema-based tenancy.
+    /// </summary>
     private static readonly MemoryCache _sqlCache = new MemoryCache(new MemoryCacheOptions() { SizeLimit = 4_000_000 });
 
-    private string BuildSqlServerSql(IModel model)
+    public AuditingInterceptor(AuditOptions options)
     {
-        var entityType = model.FindEntityType(typeof(TObjectChange))!;
-        var propEntityType = model.FindEntityType(typeof(ObjectChangeProperty))!;
+        _options = options;
+    }
 
-        var tableName = entityType.GetSchemaQualifiedTableName();
-        var propTableName = propEntityType.GetSchemaQualifiedTableName();
+    private string GetSqlServerSql(IModel model)
+    {
+        return _sqlCache.GetOrCreate(model, entry =>
+        {
+            string sql = BuildSqlServerSql(model);
+            entry.Size = sql.Length;
+            return sql;
+        })!;
 
-        var basePropNames = typeof(IObjectChange).GetProperties().Select(p => p.Name).ToArray();
-        var props = entityType.GetDeclaredProperties();
-        var propsByName = props.ToLookup(p => p.Name);
+        static string BuildSqlServerSql(IModel model)
+        {
+            var entityType = model.FindEntityType(typeof(TObjectChange))!;
+            var propEntityType = model.FindEntityType(typeof(ObjectChangeProperty))!;
 
-        var customProps = props.ExceptBy(basePropNames, p => p.PropertyInfo?.Name);
-        var cursorProps = customProps.Concat(props.Where(p => p.Name is nameof(IObjectChange.State) or nameof(IObjectChange.Date) or nameof(IObjectChange.Type) or nameof(IObjectChange.KeyValue)));
+            var tableName = entityType.GetSchemaQualifiedTableName();
+            var propTableName = propEntityType.GetSchemaQualifiedTableName();
 
-        string GetColName(string propName, IEntityType table) => table
-            .GetDeclaredProperties()
-            .Single(p => p.Name == propName)
-            .GetColumnName(StoreObjectIdentifier.Create(table, StoreObjectType.Table)!.Value)!;
+            var basePropNames = typeof(IObjectChange).GetProperties().Select(p => p.Name).ToArray();
+            var props = entityType.GetDeclaredProperties();
+            var propsByName = props.ToLookup(p => p.Name);
 
-        string GetPropColName(IProperty prop, IEntityType table) => prop
-            .GetColumnName(StoreObjectIdentifier.Create(table, StoreObjectType.Table)!.Value)!;
+            var customProps = props.ExceptBy(basePropNames, p => p.PropertyInfo?.Name);
+            var cursorProps = customProps.Concat(props.Where(p => p.Name is nameof(IObjectChange.State) or nameof(IObjectChange.Date) or nameof(IObjectChange.Type) or nameof(IObjectChange.KeyValue)));
 
-        string pkCol = GetColName(nameof(IObjectChange.Id), entityType);
-        string entityTypeNameCol = GetColName(nameof(IObjectChange.Type), entityType);
-        string entityKeyValueCol = GetColName(nameof(IObjectChange.KeyValue), entityType);
-        string dateCol = GetColName(nameof(IObjectChange.Date), entityType);
-        string stateCol = GetColName(nameof(IObjectChange.State), entityType);
+            string GetColName(string propName, IEntityType table) => table
+                .GetDeclaredProperties()
+                .Single(p => p.Name == propName)
+                .GetColumnName(StoreObjectIdentifier.Create(table, StoreObjectType.Table)!.Value)!;
 
-        string propFkCol = GetColName(nameof(ObjectChangeProperty.ParentId), propEntityType);
-        string propPkCol = GetColName(nameof(ObjectChangeProperty.Id), propEntityType);
+            string GetPropColName(IProperty prop, IEntityType table) => prop
+                .GetColumnName(StoreObjectIdentifier.Create(table, StoreObjectType.Table)!.Value)!;
 
-        return $"""
+            string pkCol = GetColName(nameof(IObjectChange.Id), entityType);
+            string entityTypeNameCol = GetColName(nameof(IObjectChange.Type), entityType);
+            string entityKeyValueCol = GetColName(nameof(IObjectChange.KeyValue), entityType);
+            string dateCol = GetColName(nameof(IObjectChange.Date), entityType);
+            string stateCol = GetColName(nameof(IObjectChange.State), entityType);
+
+            string propFkCol = GetColName(nameof(ObjectChangeProperty.ParentId), propEntityType);
+            string propPkCol = GetColName(nameof(ObjectChangeProperty.Id), propEntityType);
+
+            return $"""
             SET NOCOUNT ON;
             SET XACT_ABORT ON;
 
             -- Setup iteration over each distinct [ObjectChange] represented by our incoming flat data.
             DECLARE object_cursor CURSOR FOR 
             SELECT {string.Join(", ", cursorProps.Select(p => p.Name))}, Properties
-            FROM OPENJSON(@json) with (   
+            FROM OPENJSON(@MergePayload) with (   
                 {string.Join(",\n    ", cursorProps.Select(p => $"{p.Name} {p.GetRelationalTypeMapping().StoreType} '$.{p.Name}'"))},
             	Properties [nvarchar](max) '$.Properties' as JSON
             );
@@ -224,28 +245,24 @@ internal sealed class AuditingInterceptor<TObjectChange> : SaveChangesIntercepto
             CLOSE object_cursor;
             DEALLOCATE object_cursor;
             """;
+        }
     }
-
-    private string GetSql(IModel model) => _sqlCache.GetOrCreate(model, entry =>
-    {
-        string sql = BuildSqlServerSql(model);
-        entry.Size = sql.Length;
-        return sql;
-    })!;
 
     private Task SaveAudit(DbContext db, Audit audit, bool async)
     {
         audit.PostSaveChanges();
 
         var serviceProvider = new EntityFrameworkServiceProvider(db);
-        var operationContext = serviceProvider.GetService<IAuditOperationContext<TObjectChange>>();
+        var operationContext = _options.OperationContextType is null 
+            ? null 
+            : (IAuditOperationContext<TObjectChange>)ActivatorUtilities.GetServiceOrCreateInstance(serviceProvider, _options.OperationContextType);
 
         var date = DateTimeOffset.Now; // This must be the exact same date for all items for the merge logic in the SQL to work properly.
 
         var objectChanges = audit.Entries
             // The change is only useful if there's more than one property, since one of the properties is always the primary key.
             // This happens when the only changed properties on the object are marked as excluded properties.
-            .Where(e => e.Properties.Count > 1 && e.Entity is not TObjectChange && e.Entity is not ObjectChangeProperty)
+            .Where(e => e.Properties.Count > 1 && e.Entity is not IObjectChange && e.Entity is not ObjectChangeProperty)
             .Select(e =>
             {
                 var keyProperties = db.Model
@@ -273,7 +290,6 @@ internal sealed class AuditingInterceptor<TObjectChange> : SaveChangesIntercepto
                     }).ToList();
 
                 operationContext?.Populate(objectChange, e.Entry);
-                objectChange.Populate(db, serviceProvider, e.Entry);
 
                 return objectChange;
             })
@@ -284,15 +300,15 @@ internal sealed class AuditingInterceptor<TObjectChange> : SaveChangesIntercepto
             return Task.CompletedTask;
         }
 
-        if (db.Database.ProviderName == "Microsoft.EntityFrameworkCore.SqlServer")
+        if (_options.MergeWindow > TimeSpan.Zero && db.Database.ProviderName == "Microsoft.EntityFrameworkCore.SqlServer")
         {
             var conn = db.Database.GetDbConnection();
             var cmd = conn.CreateCommand();
-            cmd.CommandText = GetSql(db.Model);
+            cmd.CommandText = GetSqlServerSql(db.Model);
 
             var jsonParam = cmd.CreateParameter();
-            jsonParam.ParameterName = "json";
-            jsonParam.Value = JsonSerializer.Serialize(objectChanges); // todo: super wrong, need to exclude user nav properties that may be tacked on, should exclude null
+            jsonParam.ParameterName = "MergePayload";
+            jsonParam.Value = JsonSerializer.Serialize(objectChanges, _mergeJsonOptions);
 
 
             // MergeWindowSeconds, in seconds, that a record can be for it to be updated (rather than inserting a new one).
@@ -302,25 +318,22 @@ internal sealed class AuditingInterceptor<TObjectChange> : SaveChangesIntercepto
 
             var mergeWindowParam = cmd.CreateParameter();
             mergeWindowParam.ParameterName = "MergeWindowSeconds";
-            mergeWindowParam.Value = 50; // todo: configurable?
+            mergeWindowParam.Value = _options.MergeWindow.TotalSeconds;
 
             if (async)
             {
-                //return cmd.ExecuteNonQueryAsync();
                 return db.Database.ExecuteSqlRawAsync(cmd.CommandText, jsonParam, mergeWindowParam);
             }
             else
             {
                 db.Database.ExecuteSqlRaw(cmd.CommandText, jsonParam, mergeWindowParam);
-                //cmd.ExecuteNonQuery();
                 return Task.CompletedTask;
             }
         }
         else
         {
             // Naïve insertion for providers where we don't know how to generate 
-            // SQL that will merge existing entries.
-            // TODO: Test if this works at all
+            // SQL that will merge existing entries, or when the merge feature is disabled.
 
             db.AddRange(objectChanges);
 
@@ -335,4 +348,16 @@ internal sealed class AuditingInterceptor<TObjectChange> : SaveChangesIntercepto
             }
         }
     }
+
+    private static readonly JsonSerializerOptions _mergeJsonOptions = new()
+    {
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+        // 1: outer array
+        // 2: ObjectChange instance
+        // 3: Properties array
+        // 4: ObjectChangeProperties object
+        // 5: Individual fields on ObjectChangeProperties (not sure why this counts as a depth layer)
+        MaxDepth = 5,
+        
+    };
 }

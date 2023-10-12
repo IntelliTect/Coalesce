@@ -36,11 +36,4 @@ public abstract class ObjectChangeBase : IObjectChange
     /// <inheritdoc/>
     [ForeignKey(nameof(ObjectChangeProperty.ParentId))]
     public ICollection<ObjectChangeProperty>? Properties { get; set; }
-    
-    /// <inheritdoc cref="IObjectChange.Populate(DbContext, IServiceProvider, EntityEntry)"/>
-    protected virtual void Populate(DbContext db, IServiceProvider serviceProvider, EntityEntry entry) { }
-
-    /// <inheritdoc/>
-    void IObjectChange.Populate(DbContext db, IServiceProvider serviceProvider, EntityEntry entry)
-        => Populate(db, serviceProvider, entry);
 }

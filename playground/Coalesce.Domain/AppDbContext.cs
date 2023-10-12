@@ -1,14 +1,14 @@
 ﻿using IntelliTect.Coalesce;
 using IntelliTect.Coalesce.AuditLogging;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.Extensions.DependencyInjection;
+using System;
 using System.Linq;
 
 namespace Coalesce.Domain
 {
-    public class ObjectChange : ObjectChangeBase
-    {
-
-    }
 
     [Coalesce]
     public class AppDbContext : DbContext, IAuditLogContext<ObjectChange>
@@ -35,10 +35,17 @@ namespace Coalesce.Domain
         {
         }
 
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            optionsBuilder
+                .UseCoalesceAuditLogging<ObjectChange>(x => x
+                    .WithAugmentation<OperationContext>()
+                    .WithMergeWindow(TimeSpan.FromSeconds(15))
+                );
+        }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            base.OnModelCreating(modelBuilder);
-
             modelBuilder.Entity<Product>().OwnsOne(p => p.Details, cb =>
             {
                 cb.OwnsOne(c => c.ManufacturingAddress);

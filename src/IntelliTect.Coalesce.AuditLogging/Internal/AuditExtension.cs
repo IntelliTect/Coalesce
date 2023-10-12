@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions.Infrastructure;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using System;
 using System.Collections.Generic;
@@ -11,25 +12,21 @@ using System.Linq;
 
 namespace IntelliTect.Coalesce.AuditLogging.Internal;
 
-internal class AuditExtension<TObjectChange> : IDbContextOptionsExtension
-    where TObjectChange : class, IObjectChange
+internal class AuditExtension : IDbContextOptionsExtension
 {
+    private readonly AuditOptions _options;
     private DbContextOptionsExtensionInfo? _info;
-    private Type? _operationContextType;
 
-    public AuditExtension(Type? operationContextType = null)
+    public AuditExtension(AuditOptions options)
     {
-        _operationContextType = operationContextType;
+        _options = options;
     }
 
     public DbContextOptionsExtensionInfo Info => _info ??= new ExtensionInfo(this);
 
     public void ApplyServices(Microsoft.Extensions.DependencyInjection.IServiceCollection services)
     {
-        if (_operationContextType is not null)
-        {
-            services.TryAddScoped(typeof(IAuditOperationContext<TObjectChange>), _operationContextType);
-        }
+        services.AddSingleton(_options);
 
         new EntityFrameworkServicesBuilder(services)
             .TryAdd<IConventionSetPlugin, ConventionSetPlugin>();
@@ -58,7 +55,7 @@ internal class AuditExtension<TObjectChange> : IDbContextOptionsExtension
             }
 
 #pragma warning disable EF1001 // Internal EF Core API usage.
-            var e = new EntityTypeBuilder<TObjectChange>((IMutableEntityType)entityTypeBuilder.Metadata);
+            var e = new EntityTypeBuilder<IObjectChange>((IMutableEntityType)entityTypeBuilder.Metadata);
 #pragma warning restore EF1001 // Internal EF Core API usage.
 
             e.HasIndex(c => new { c.Type, c.KeyValue });
@@ -68,12 +65,6 @@ internal class AuditExtension<TObjectChange> : IDbContextOptionsExtension
             // the index that includes EntityKeyValue is no good when not looking for a specific key
             // (looking at that index requires an index scan rather than a seek).
             e.HasIndex(c => c.Type);
-
-            //e.HasMany(c => c.Properties)
-            //    .WithOne()
-            //    .HasPrincipalKey(c => c.Id)
-            //    .HasForeignKey(c => c.ParentId)
-            //    .OnDelete(DeleteBehavior.Cascade);
         }
     }
 

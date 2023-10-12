@@ -36,10 +36,4 @@ public interface IObjectChange
     /// The individual column/property changes made to the entity.
     /// </summary>
     ICollection<ObjectChangeProperty>? Properties { get; set; }
-
-    /// <summary>
-    /// A hook that may be overridden to populate additional contextual information.
-    /// Can be used in conjunction with, or as an alternative to, a registered <see cref="IAuditOperationContext{TObjectChange}"/> service.
-    /// </summary>
-    void Populate(DbContext db, IServiceProvider serviceProvider, EntityEntry entry) { }
 }

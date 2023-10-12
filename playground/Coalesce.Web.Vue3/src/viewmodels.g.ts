@@ -324,6 +324,7 @@ export class LogListViewModel extends ListViewModel<$models.Log, $apiClients.Log
 
 
 export interface ObjectChangeViewModel extends $models.ObjectChange {
+  message: string | null;
   id: number | null;
   type: string | null;
   keyValue: string | null;
@@ -332,6 +333,11 @@ export interface ObjectChangeViewModel extends $models.ObjectChange {
   properties: ObjectChangePropertyViewModel[] | null;
 }
 export class ObjectChangeViewModel extends ViewModel<$models.ObjectChange, $apiClients.ObjectChangeApiClient, number> implements $models.ObjectChange  {
+  
+  
+  public addToProperties(initialData?: DeepPartial<$models.ObjectChangeProperty> | null) {
+    return this.$addChild('properties', initialData) as ObjectChangePropertyViewModel
+  }
   
   constructor(initialData?: DeepPartial<$models.ObjectChange> | null) {
     super($metadata.ObjectChange, new $apiClients.ObjectChangeApiClient(), initialData)

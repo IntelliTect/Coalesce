@@ -33,4 +33,6 @@ required
     /// For add or modify operations, holds the new value of the property.
     /// </summary>
     public string? NewValue { get; set; }
+
+    // FUTURE?: Add additional fields that get filled with the [ListText] of FK values? Could be used for other descriptive purposes too.
 }

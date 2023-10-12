@@ -986,6 +986,12 @@ export const ObjectChange = domain.types.ObjectChange = {
   get keyProp() { return this.props.id }, 
   behaviorFlags: 7 as BehaviorFlags,
   props: {
+    message: {
+      name: "message",
+      displayName: "Message",
+      type: "string",
+      role: "value",
+    },
     id: {
       name: "id",
       displayName: "Id",
@@ -1034,7 +1040,8 @@ export const ObjectChange = domain.types.ObjectChange = {
         type: "model",
         get typeDef() { return (domain.types.ObjectChangeProperty as ModelType) },
       },
-      role: "value",
+      role: "collectionNavigation",
+      get foreignKey() { return (domain.types.ObjectChangeProperty as ModelType).props.parentId as ForeignKeyProperty },
       dontSerialize: true,
     },
   },
@@ -1063,7 +1070,12 @@ export const ObjectChangeProperty = domain.types.ObjectChangeProperty = {
       name: "parentId",
       displayName: "Parent Id",
       type: "number",
-      role: "value",
+      role: "foreignKey",
+      get principalKey() { return (domain.types.ObjectChange as ModelType).props.id as PrimaryKeyProperty },
+      get principalType() { return (domain.types.ObjectChange as ModelType) },
+      rules: {
+        required: val => val != null || "Parent Id is required.",
+      }
     },
     propertyName: {
       name: "propertyName",

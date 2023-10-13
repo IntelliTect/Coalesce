@@ -36,6 +36,7 @@ namespace Coalesce.Domain.Migrations
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Message = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    UserId = table.Column<int>(type: "int", nullable: true),
                     Type = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false),
                     KeyValue = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     State = table.Column<byte>(type: "tinyint", nullable: false),
@@ -44,6 +45,11 @@ namespace Coalesce.Domain.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_ObjectChanges", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ObjectChanges_Person_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Person",
+                        principalColumn: "PersonId");
                 });
 
             migrationBuilder.CreateTable(
@@ -87,6 +93,11 @@ namespace Coalesce.Domain.Migrations
                 name: "IX_ObjectChanges_Type_KeyValue",
                 table: "ObjectChanges",
                 columns: new[] { "Type", "KeyValue" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ObjectChanges_UserId",
+                table: "ObjectChanges",
+                column: "UserId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

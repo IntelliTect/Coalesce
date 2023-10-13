@@ -8,11 +8,11 @@ namespace IntelliTect.Coalesce.AuditLogging;
 public interface IAuditOperationContext<TObjectChange> : IAuditOperationContext
 {
     /// <inheritdoc cref="IAuditOperationContext.Populate(IObjectChange, EntityEntry)"/>
-    void Populate(TObjectChange auditEntry, EntityEntry entity);
+    void Populate(TObjectChange auditEntry, EntityEntry changedEntity);
 
-    void IAuditOperationContext.Populate(IObjectChange auditEntry, EntityEntry entity)
+    void IAuditOperationContext.Populate(IObjectChange auditEntry, EntityEntry changedEntity)
     {
-        Populate((TObjectChange) auditEntry, entity);
+        Populate((TObjectChange) auditEntry, changedEntity);
     }
 }
 
@@ -21,5 +21,5 @@ public interface IAuditOperationContext
     /// <summary>
     /// A hook that may be overridden to populate additional contextual information on an audit entry.
     /// </summary>
-    void Populate(IObjectChange auditEntry, EntityEntry entity);
+    void Populate(IObjectChange auditEntry, EntityEntry changedEntity);
 }

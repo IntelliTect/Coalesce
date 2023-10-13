@@ -41,6 +41,7 @@ namespace Coalesce.Domain
                 .UseCoalesceAuditLogging<ObjectChange>(x => x
                     .WithAugmentation<OperationContext>()
                     .WithMergeWindow(TimeSpan.FromSeconds(15))
+                    // TODO: add nice spot here to setup Z EFPLUS config
                 );
         }
 

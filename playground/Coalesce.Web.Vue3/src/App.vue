@@ -10,6 +10,13 @@
       </v-toolbar-title>
 
       <!-- <div class="nav-items"> -->
+        <v-switch
+                    label="Dark Mode"
+                    v-model="darkMode"
+                    hide-details
+                    class="ml-2"
+                    density="compact"
+                  />
 
         <v-btn variant="text" to="/">Home</v-btn>
         <v-btn variant="text" to="/test">Test</v-btn>
@@ -31,7 +38,7 @@
 
     <v-main>
       <router-view v-slot="{ Component }">
-        <transition name="router-transition" mode="out-in" @enter="routerViewOnEnter" appear>
+        <transition name="router-transition" mode="out-in"  appear>
           <!-- https://stackoverflow.com/questions/52847979/what-is-router-view-key-route-fullpath -->
           <component ref="routerView" :is="Component" :key="$route.path" />
         </transition>
@@ -40,41 +47,22 @@
   </v-app>
 </template>
 
-<script lang="ts">
-import { Base, Component } from 'vue-facing-decorator';
+<script setup lang=ts>
+import { computed } from "vue";
+import { useTheme } from "vuetify";
 
-@Component({
-  components: { }
-})
-export default class App extends Base {
-  routeComponent: any = null;
-
-  get routeMeta() {
-    if (!this.$route || this.$route.name === null) return null;
-
-    return this.$route.meta;
-  }
-  routerViewOnEnter() {
-    this.routeComponent = this.$refs.routerView
-  }
-
-  created() {
-    const baseTitle = document.title
-    this.$watch(
-      () => (this.routeComponent as any)?.pageTitle,
-      (n: string | null | undefined) => {
-        if (n) {
-          document.title = n + " - " + baseTitle
-        } else {
-          document.title = baseTitle
-        }
-      },
-      { immediate: true }
-    )
-  }
-}
-
+const theme = useTheme();
+const darkMode = computed({
+  get() {
+    return theme.global.name.value == "dark";
+  },
+  set(v) {
+    theme.global.name.value = v ? "dark" : "light";
+    localStorage.setItem("dark", v.toString());
+  },
+});
 </script>
+
 
 <style lang="scss">
   .router-transition-enter-active,

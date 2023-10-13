@@ -17,23 +17,24 @@ public abstract class ObjectChangeBase : IObjectChange
 {
     /// <inheritdoc/>
     [Key, DefaultOrderBy(OrderByDirection = DefaultOrderByAttribute.OrderByDirections.Descending)]
-    public long Id { get; set; }
+    public virtual long Id { get; set; }
 
     /// <inheritdoc/>
     [Required, MaxLength(100), Column(TypeName = "varchar(100)")]
     [ListText, Search]
-    public string Type { get; set; } = null!;
+    public virtual string Type { get; set; } = null!;
 
     /// <inheritdoc/>
-    public string? KeyValue { get; set; }
+    public virtual string? KeyValue { get; set; }
 
     /// <inheritdoc/>
-    public AuditEntryState State { get; set; }
+    [Display(Name = "Change Type")]
+    public virtual AuditEntryState State { get; set; }
 
     /// <inheritdoc/>
-    public DateTimeOffset Date { get; set; }
+    public virtual DateTimeOffset Date { get; set; }
 
     /// <inheritdoc/>
     [ForeignKey(nameof(ObjectChangeProperty.ParentId))]
-    public ICollection<ObjectChangeProperty>? Properties { get; set; }
+    public virtual ICollection<ObjectChangeProperty>? Properties { get; set; }
 }

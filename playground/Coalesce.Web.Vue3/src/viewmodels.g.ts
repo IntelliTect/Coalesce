@@ -325,6 +325,8 @@ export class LogListViewModel extends ListViewModel<$models.Log, $apiClients.Log
 
 export interface ObjectChangeViewModel extends $models.ObjectChange {
   message: string | null;
+  userId: number | null;
+  user: PersonViewModel | null;
   id: number | null;
   type: string | null;
   keyValue: string | null;

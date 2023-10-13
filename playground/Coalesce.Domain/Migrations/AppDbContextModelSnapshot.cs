@@ -205,11 +205,16 @@ namespace Coalesce.Domain.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("varchar(100)");
 
+                    b.Property<int?>("UserId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("State");
 
                     b.HasIndex("Type");
+
+                    b.HasIndex("UserId");
 
                     b.HasIndex("Type", "KeyValue");
 
@@ -367,6 +372,15 @@ namespace Coalesce.Domain.Migrations
                     b.Navigation("Case");
 
                     b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("Coalesce.Domain.ObjectChange", b =>
+                {
+                    b.HasOne("Coalesce.Domain.Person", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Coalesce.Domain.Person", b =>

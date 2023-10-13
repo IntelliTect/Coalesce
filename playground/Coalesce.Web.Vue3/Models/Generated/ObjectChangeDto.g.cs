@@ -13,6 +13,8 @@ namespace Coalesce.Web.Vue3.Models
         public ObjectChangeDtoGen() { }
 
         private string _Message;
+        private int? _UserId;
+        private Coalesce.Web.Vue3.Models.PersonDtoGen _User;
         private long? _Id;
         private string _Type;
         private string _KeyValue;
@@ -24,6 +26,16 @@ namespace Coalesce.Web.Vue3.Models
         {
             get => _Message;
             set { _Message = value; Changed(nameof(Message)); }
+        }
+        public int? UserId
+        {
+            get => _UserId;
+            set { _UserId = value; Changed(nameof(UserId)); }
+        }
+        public Coalesce.Web.Vue3.Models.PersonDtoGen User
+        {
+            get => _User;
+            set { _User = value; Changed(nameof(User)); }
         }
         public long? Id
         {
@@ -65,11 +77,15 @@ namespace Coalesce.Web.Vue3.Models
             var includes = context.Includes;
 
             this.Message = obj.Message;
+            this.UserId = obj.UserId;
             this.Id = obj.Id;
             this.Type = obj.Type;
             this.KeyValue = obj.KeyValue;
             this.State = obj.State;
             this.Date = obj.Date;
+            if (tree == null || tree[nameof(this.User)] != null)
+                this.User = obj.User.MapToDto<Coalesce.Domain.Person, PersonDtoGen>(context, tree?[nameof(this.User)]);
+
             var propValProperties = obj.Properties;
             if (propValProperties != null && (tree == null || tree[nameof(this.Properties)] != null))
             {
@@ -94,6 +110,7 @@ namespace Coalesce.Web.Vue3.Models
             if (OnUpdate(entity, context)) return;
 
             if (ShouldMapTo(nameof(Message))) entity.Message = Message;
+            if (ShouldMapTo(nameof(UserId))) entity.UserId = UserId;
             if (ShouldMapTo(nameof(Id))) entity.Id = (Id ?? entity.Id);
             if (ShouldMapTo(nameof(Type))) entity.Type = Type;
             if (ShouldMapTo(nameof(KeyValue))) entity.KeyValue = KeyValue;

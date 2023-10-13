@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Coalesce.Domain.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20231012202324_AddAuditLogging")]
+    [Migration("20231013200054_AddAuditLogging")]
     partial class AddAuditLogging
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -207,11 +207,16 @@ namespace Coalesce.Domain.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("varchar(100)");
 
+                    b.Property<int?>("UserId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("State");
 
                     b.HasIndex("Type");
+
+                    b.HasIndex("UserId");
 
                     b.HasIndex("Type", "KeyValue");
 
@@ -369,6 +374,15 @@ namespace Coalesce.Domain.Migrations
                     b.Navigation("Case");
 
                     b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("Coalesce.Domain.ObjectChange", b =>
+                {
+                    b.HasOne("Coalesce.Domain.Person", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Coalesce.Domain.Person", b =>

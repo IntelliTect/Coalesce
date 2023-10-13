@@ -252,6 +252,8 @@ export class Log {
 
 export interface ObjectChange extends Model<typeof metadata.ObjectChange> {
   message: string | null
+  userId: number | null
+  user: Person | null
   id: number | null
   type: string | null
   keyValue: string | null

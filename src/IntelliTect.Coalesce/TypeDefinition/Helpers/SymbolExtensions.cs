@@ -12,9 +12,73 @@ namespace IntelliTect.Coalesce.TypeDefinition
 {
     public static class SymbolExtensions
     {
+        private static bool IsInherited(AttributeData attribute)
+        {
+            // From https://stackoverflow.com/a/67601737
+
+            if (attribute.AttributeClass == null)
+            {
+                return false;
+            }
+
+            foreach (var attributeAttribute in attribute.AttributeClass.GetAttributes())
+            {
+                var attrClass = attributeAttribute.AttributeClass;
+                if ((attrClass?.Name) != nameof(AttributeUsageAttribute) ||
+                    (attrClass.ContainingNamespace?.Name) != "System")
+                {
+                    continue;
+                }
+
+                foreach (var kvp in attributeAttribute.NamedArguments)
+                {
+                    if (kvp.Key == nameof(AttributeUsageAttribute.Inherited))
+                    {
+                        return (bool)kvp.Value.Value!;
+                    }
+                }
+
+                // Default value of Inherited is true
+                return true;
+            }
+
+            // Inheritance is also automatic if the attribute has no [AttributeUsage].
+            return true;
+        }
+
+        public static IEnumerable<AttributeData> GetAttributesWithInherited(this INamedTypeSymbol typeSymbol)
+        {
+            // From https://stackoverflow.com/a/67601737
+
+            foreach (var attribute in typeSymbol.GetAttributes())
+            {
+                yield return attribute;
+            }
+
+            var baseType = typeSymbol.BaseType;
+            while (baseType != null)
+            {
+                foreach (var attribute in baseType.GetAttributes())
+                {
+                    if (IsInherited(attribute))
+                    {
+                        yield return attribute;
+                    }
+                }
+
+                baseType = baseType.BaseType;
+            }
+        }
+
         public static AttributeData? GetAttribute<TAttribute>(this ISymbol symbol)
         {
-            return symbol.GetAttributes().SingleOrDefault(a => a.AttributeClass?.Name == typeof(TAttribute).Name);
+
+            return (symbol is INamedTypeSymbol named 
+                ? named.GetAttributesWithInherited() 
+                : symbol.GetAttributes())
+                // GetAttributesWithInherited iterates backwards in the inheritance hierarchy,
+                // so a .First() here will return the attribute from the most specific type.
+                .FirstOrDefault(a => a.AttributeClass?.Name == typeof(TAttribute).Name);
         }
 
         public static bool HasAttribute<TAttribute>(this ISymbol symbol)

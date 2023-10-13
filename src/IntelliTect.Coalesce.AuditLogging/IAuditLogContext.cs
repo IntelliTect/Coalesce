@@ -5,7 +5,7 @@ namespace IntelliTect.Coalesce.AuditLogging;
 /// <summary>
 /// An interface representing the <see cref="DbSet{TEntity}"/>s that hold the data produced by Coalesce's audit logging features.
 /// </summary>
-/// <typeparam name="TObjectChange">The type of entity representing a change to an entity. You are expected to make your own implementation of this entity in your application code, inheriting from <see cref="ObjectChangeBase"/> or <see cref="IObjectChange"/>. 
+/// <typeparam name="TObjectChange">The type of entity representing a change to an entity. You are expected to make your own implementation of this entity in your application code, inheriting from <see cref="DefaultObjectChange"/> or <see cref="IObjectChange"/>. 
 /// </typeparam>
 public interface IAuditLogContext<TObjectChange>
     where TObjectChange : class, IObjectChange

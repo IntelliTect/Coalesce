@@ -21,7 +21,7 @@ class AppUser
     public string? Title { get; set; }
 }
 
-internal class TestObjectChange : ObjectChangeBase
+internal class TestObjectChange : DefaultObjectChange
 {
     public string? UserId { get; set; }
     public AppUser? User { get; set; }

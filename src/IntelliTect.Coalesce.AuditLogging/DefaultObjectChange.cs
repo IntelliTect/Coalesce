@@ -13,7 +13,7 @@ namespace IntelliTect.Coalesce.AuditLogging;
 [Edit(DenyAll)]
 [Delete(DenyAll)]
 [Create(DenyAll)]
-public abstract class ObjectChangeBase : IObjectChange
+public abstract class DefaultObjectChange : IObjectChange
 {
     /// <inheritdoc/>
     [Key, DefaultOrderBy(OrderByDirection = DefaultOrderByAttribute.OrderByDirections.Descending)]
@@ -37,4 +37,20 @@ public abstract class ObjectChangeBase : IObjectChange
     /// <inheritdoc/>
     [ForeignKey(nameof(ObjectChangeProperty.ParentId))]
     public virtual ICollection<ObjectChangeProperty>? Properties { get; set; }
+
+    /// <summary>
+    /// The IP address of the client, if the change resulted from an incoming request.
+    /// </summary>
+    [Display(Name = "Client IP")]
+    public string? ClientIp { get; set; }
+
+    /// <summary>
+    /// The value of the Referrer header, if the change resulted from an incoming request.
+    /// </summary>
+    public string? Referrer { get; set; }
+
+    /// <summary>
+    /// The URL of the endpoint that caused the change, if the change resulted from an incoming request.
+    /// </summary>
+    public string? Endpoint { get; set; }
 }

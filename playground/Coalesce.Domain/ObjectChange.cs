@@ -9,7 +9,7 @@ using System.Linq;
 
 namespace Coalesce.Domain
 {
-    public class ObjectChange : ObjectChangeBase
+    public class ObjectChange : DefaultObjectChange
     {
         public string? Message { get; set; }
 

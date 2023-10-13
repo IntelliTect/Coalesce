@@ -10,7 +10,7 @@ namespace IntelliTect.Coalesce.AuditLogging;
 public static class DbContextOptionsBuilderExtensions
 {
     /// <summary>
-    /// Adds Coalesce's audit logging infrastructure to the <see cref="DbContext"/>. The <see cref="DbContext"/> must inherit from <see cref="IAuditLogContext{TObjectChange}"/>, where <typeparamref name="TObjectChange"/> derives from <see cref="IObjectChange"/> or <see cref="ObjectChangeBase"/>
+    /// Adds Coalesce's audit logging infrastructure to the <see cref="DbContext"/>. The <see cref="DbContext"/> must inherit from <see cref="IAuditLogContext{TObjectChange}"/>, where <typeparamref name="TObjectChange"/> derives from <see cref="IObjectChange"/> or <see cref="DefaultObjectChange"/>
     /// </summary>
     public static DbContextOptionsBuilder UseCoalesceAuditLogging<TObjectChange>(
         this DbContextOptionsBuilder builder,

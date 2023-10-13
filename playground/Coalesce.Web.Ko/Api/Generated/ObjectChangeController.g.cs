@@ -21,37 +21,46 @@ using System.Threading.Tasks;
 
 namespace Coalesce.Web.Ko.Api
 {
-    [Route("api/StandaloneReadonly")]
+    [Route("api/ObjectChange")]
     [Authorize]
     [ServiceFilter(typeof(IApiActionFilter))]
-    public partial class StandaloneReadonlyController
-        : BaseApiController<Coalesce.Domain.StandaloneReadonly, StandaloneReadonlyDtoGen>
+    public partial class ObjectChangeController
+        : BaseApiController<Coalesce.Domain.ObjectChange, ObjectChangeDtoGen, Coalesce.Domain.AppDbContext>
     {
-        public StandaloneReadonlyController(CrudContext context) : base(context)
+        public ObjectChangeController(CrudContext<Coalesce.Domain.AppDbContext> context) : base(context)
         {
-            GeneratedForClassViewModel = context.ReflectionRepository.GetClassViewModel<Coalesce.Domain.StandaloneReadonly>();
+            GeneratedForClassViewModel = context.ReflectionRepository.GetClassViewModel<Coalesce.Domain.ObjectChange>();
         }
 
         [HttpGet("get/{id}")]
         [Authorize]
-        public virtual Task<ItemResult<StandaloneReadonlyDtoGen>> Get(
-            int id,
+        public virtual Task<ItemResult<ObjectChangeDtoGen>> Get(
+            long id,
             DataSourceParameters parameters,
-            IDataSource<Coalesce.Domain.StandaloneReadonly> dataSource)
+            IDataSource<Coalesce.Domain.ObjectChange> dataSource)
             => GetImplementation(id, parameters, dataSource);
 
         [HttpGet("list")]
         [Authorize]
-        public virtual Task<ListResult<StandaloneReadonlyDtoGen>> List(
+        public virtual Task<ListResult<ObjectChangeDtoGen>> List(
             ListParameters parameters,
-            IDataSource<Coalesce.Domain.StandaloneReadonly> dataSource)
+            IDataSource<Coalesce.Domain.ObjectChange> dataSource)
             => ListImplementation(parameters, dataSource);
 
         [HttpGet("count")]
         [Authorize]
         public virtual Task<ItemResult<int>> Count(
             FilterParameters parameters,
-            IDataSource<Coalesce.Domain.StandaloneReadonly> dataSource)
+            IDataSource<Coalesce.Domain.ObjectChange> dataSource)
             => CountImplementation(parameters, dataSource);
+
+        [HttpPost("bulkSave")]
+        [Authorize]
+        public virtual Task<ItemResult<ObjectChangeDtoGen>> BulkSave(
+            [FromBody] BulkSaveRequest dto,
+            [FromQuery] DataSourceParameters parameters,
+            [FromServices] IDataSourceFactory dataSourceFactory,
+            [FromServices] IBehaviorsFactory behaviorsFactory)
+            => BulkSaveImplementation(dto, parameters, dataSourceFactory, behaviorsFactory);
     }
 }

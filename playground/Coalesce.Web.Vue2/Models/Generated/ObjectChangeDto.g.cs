@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 
-namespace Coalesce.Web.Vue3.Models
+namespace Coalesce.Web.Vue2.Models
 {
     public partial class ObjectChangeDtoGen : GeneratedDto<Coalesce.Domain.ObjectChange>
     {
@@ -14,13 +14,13 @@ namespace Coalesce.Web.Vue3.Models
 
         private string _Message;
         private int? _UserId;
-        private Coalesce.Web.Vue3.Models.PersonDtoGen _User;
+        private Coalesce.Web.Vue2.Models.PersonDtoGen _User;
         private long? _Id;
         private string _Type;
         private string _KeyValue;
         private IntelliTect.Coalesce.AuditLogging.AuditEntryState? _State;
         private System.DateTimeOffset? _Date;
-        private System.Collections.Generic.ICollection<Coalesce.Web.Vue3.Models.ObjectChangePropertyDtoGen> _Properties;
+        private System.Collections.Generic.ICollection<Coalesce.Web.Vue2.Models.ObjectChangePropertyDtoGen> _Properties;
         private string _ClientIp;
         private string _Referrer;
         private string _Endpoint;
@@ -35,7 +35,7 @@ namespace Coalesce.Web.Vue3.Models
             get => _UserId;
             set { _UserId = value; Changed(nameof(UserId)); }
         }
-        public Coalesce.Web.Vue3.Models.PersonDtoGen User
+        public Coalesce.Web.Vue2.Models.PersonDtoGen User
         {
             get => _User;
             set { _User = value; Changed(nameof(User)); }
@@ -65,7 +65,7 @@ namespace Coalesce.Web.Vue3.Models
             get => _Date;
             set { _Date = value; Changed(nameof(Date)); }
         }
-        public System.Collections.Generic.ICollection<Coalesce.Web.Vue3.Models.ObjectChangePropertyDtoGen> Properties
+        public System.Collections.Generic.ICollection<Coalesce.Web.Vue2.Models.ObjectChangePropertyDtoGen> Properties
         {
             get => _Properties;
             set { _Properties = value; Changed(nameof(Properties)); }

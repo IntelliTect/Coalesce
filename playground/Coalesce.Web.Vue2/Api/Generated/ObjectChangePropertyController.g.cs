@@ -1,5 +1,5 @@
 
-using Coalesce.Web.Vue3.Models;
+using Coalesce.Web.Vue2.Models;
 using IntelliTect.Coalesce;
 using IntelliTect.Coalesce.Api;
 using IntelliTect.Coalesce.Api.Behaviors;
@@ -19,44 +19,44 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 
-namespace Coalesce.Web.Vue3.Api
+namespace Coalesce.Web.Vue2.Api
 {
-    [Route("api/ObjectChange")]
+    [Route("api/ObjectChangeProperty")]
     [Authorize]
     [ServiceFilter(typeof(IApiActionFilter))]
-    public partial class ObjectChangeController
-        : BaseApiController<Coalesce.Domain.ObjectChange, ObjectChangeDtoGen, Coalesce.Domain.AppDbContext>
+    public partial class ObjectChangePropertyController
+        : BaseApiController<IntelliTect.Coalesce.AuditLogging.ObjectChangeProperty, ObjectChangePropertyDtoGen, Coalesce.Domain.AppDbContext>
     {
-        public ObjectChangeController(CrudContext<Coalesce.Domain.AppDbContext> context) : base(context)
+        public ObjectChangePropertyController(CrudContext<Coalesce.Domain.AppDbContext> context) : base(context)
         {
-            GeneratedForClassViewModel = context.ReflectionRepository.GetClassViewModel<Coalesce.Domain.ObjectChange>();
+            GeneratedForClassViewModel = context.ReflectionRepository.GetClassViewModel<IntelliTect.Coalesce.AuditLogging.ObjectChangeProperty>();
         }
 
         [HttpGet("get/{id}")]
         [Authorize]
-        public virtual Task<ItemResult<ObjectChangeDtoGen>> Get(
+        public virtual Task<ItemResult<ObjectChangePropertyDtoGen>> Get(
             long id,
             DataSourceParameters parameters,
-            IDataSource<Coalesce.Domain.ObjectChange> dataSource)
+            IDataSource<IntelliTect.Coalesce.AuditLogging.ObjectChangeProperty> dataSource)
             => GetImplementation(id, parameters, dataSource);
 
         [HttpGet("list")]
         [Authorize]
-        public virtual Task<ListResult<ObjectChangeDtoGen>> List(
+        public virtual Task<ListResult<ObjectChangePropertyDtoGen>> List(
             ListParameters parameters,
-            IDataSource<Coalesce.Domain.ObjectChange> dataSource)
+            IDataSource<IntelliTect.Coalesce.AuditLogging.ObjectChangeProperty> dataSource)
             => ListImplementation(parameters, dataSource);
 
         [HttpGet("count")]
         [Authorize]
         public virtual Task<ItemResult<int>> Count(
             FilterParameters parameters,
-            IDataSource<Coalesce.Domain.ObjectChange> dataSource)
+            IDataSource<IntelliTect.Coalesce.AuditLogging.ObjectChangeProperty> dataSource)
             => CountImplementation(parameters, dataSource);
 
         [HttpPost("bulkSave")]
         [Authorize]
-        public virtual Task<ItemResult<ObjectChangeDtoGen>> BulkSave(
+        public virtual Task<ItemResult<ObjectChangePropertyDtoGen>> BulkSave(
             [FromBody] BulkSaveRequest dto,
             [FromQuery] DataSourceParameters parameters,
             [FromServices] IDataSourceFactory dataSourceFactory,

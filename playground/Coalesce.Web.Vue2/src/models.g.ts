@@ -1,6 +1,13 @@
 import * as metadata from './metadata.g'
 import { Model, DataSource, convertToModel, mapToModel } from 'coalesce-vue/lib/model'
 
+export enum AuditEntryState {
+  EntityAdded = 0,
+  EntityDeleted = 1,
+  EntityModified = 2,
+}
+
+
 export enum Genders {
   NonSpecified = 0,
   Male = 1,
@@ -239,6 +246,65 @@ export class Log {
   /** Instantiate a new Log, optionally basing it on the given data. */
   constructor(data?: Partial<Log> | {[k: string]: any}) {
     Object.assign(this, Log.map(data || {}));
+  }
+}
+
+
+export interface ObjectChange extends Model<typeof metadata.ObjectChange> {
+  message: string | null
+  userId: number | null
+  user: Person | null
+  id: number | null
+  type: string | null
+  keyValue: string | null
+  state: AuditEntryState | null
+  date: Date | null
+  properties: ObjectChangeProperty[] | null
+  clientIp: string | null
+  referrer: string | null
+  endpoint: string | null
+}
+export class ObjectChange {
+  
+  /** Mutates the input object and its descendents into a valid ObjectChange implementation. */
+  static convert(data?: Partial<ObjectChange>): ObjectChange {
+    return convertToModel(data || {}, metadata.ObjectChange) 
+  }
+  
+  /** Maps the input object and its descendents to a new, valid ObjectChange implementation. */
+  static map(data?: Partial<ObjectChange>): ObjectChange {
+    return mapToModel(data || {}, metadata.ObjectChange) 
+  }
+  
+  /** Instantiate a new ObjectChange, optionally basing it on the given data. */
+  constructor(data?: Partial<ObjectChange> | {[k: string]: any}) {
+    Object.assign(this, ObjectChange.map(data || {}));
+  }
+}
+
+
+export interface ObjectChangeProperty extends Model<typeof metadata.ObjectChangeProperty> {
+  id: number | null
+  parentId: number | null
+  propertyName: string | null
+  oldValue: string | null
+  newValue: string | null
+}
+export class ObjectChangeProperty {
+  
+  /** Mutates the input object and its descendents into a valid ObjectChangeProperty implementation. */
+  static convert(data?: Partial<ObjectChangeProperty>): ObjectChangeProperty {
+    return convertToModel(data || {}, metadata.ObjectChangeProperty) 
+  }
+  
+  /** Maps the input object and its descendents to a new, valid ObjectChangeProperty implementation. */
+  static map(data?: Partial<ObjectChangeProperty>): ObjectChangeProperty {
+    return mapToModel(data || {}, metadata.ObjectChangeProperty) 
+  }
+  
+  /** Instantiate a new ObjectChangeProperty, optionally basing it on the given data. */
+  constructor(data?: Partial<ObjectChangeProperty> | {[k: string]: any}) {
+    Object.assign(this, ObjectChangeProperty.map(data || {}));
   }
 }
 

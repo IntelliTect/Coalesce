@@ -1,5 +1,5 @@
 
-using Coalesce.Web.Vue3.Models;
+using Coalesce.Web.Vue2.Models;
 using IntelliTect.Coalesce;
 using IntelliTect.Coalesce.Api;
 using IntelliTect.Coalesce.Api.Behaviors;
@@ -19,7 +19,7 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 
-namespace Coalesce.Web.Vue3.Api
+namespace Coalesce.Web.Vue2.Api
 {
     [Route("api/ObjectChange")]
     [Authorize]

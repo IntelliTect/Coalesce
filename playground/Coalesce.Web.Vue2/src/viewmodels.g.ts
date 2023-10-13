@@ -323,6 +323,64 @@ export class LogListViewModel extends ListViewModel<$models.Log, $apiClients.Log
 }
 
 
+export interface ObjectChangeViewModel extends $models.ObjectChange {
+  message: string | null;
+  userId: number | null;
+  user: PersonViewModel | null;
+  id: number | null;
+  type: string | null;
+  keyValue: string | null;
+  state: $models.AuditEntryState | null;
+  date: Date | null;
+  properties: ObjectChangePropertyViewModel[] | null;
+  clientIp: string | null;
+  referrer: string | null;
+  endpoint: string | null;
+}
+export class ObjectChangeViewModel extends ViewModel<$models.ObjectChange, $apiClients.ObjectChangeApiClient, number> implements $models.ObjectChange  {
+  
+  
+  public addToProperties(initialData?: DeepPartial<$models.ObjectChangeProperty> | null) {
+    return this.$addChild('properties', initialData) as ObjectChangePropertyViewModel
+  }
+  
+  constructor(initialData?: DeepPartial<$models.ObjectChange> | null) {
+    super($metadata.ObjectChange, new $apiClients.ObjectChangeApiClient(), initialData)
+  }
+}
+defineProps(ObjectChangeViewModel, $metadata.ObjectChange)
+
+export class ObjectChangeListViewModel extends ListViewModel<$models.ObjectChange, $apiClients.ObjectChangeApiClient, ObjectChangeViewModel> {
+  
+  constructor() {
+    super($metadata.ObjectChange, new $apiClients.ObjectChangeApiClient())
+  }
+}
+
+
+export interface ObjectChangePropertyViewModel extends $models.ObjectChangeProperty {
+  id: number | null;
+  parentId: number | null;
+  propertyName: string | null;
+  oldValue: string | null;
+  newValue: string | null;
+}
+export class ObjectChangePropertyViewModel extends ViewModel<$models.ObjectChangeProperty, $apiClients.ObjectChangePropertyApiClient, number> implements $models.ObjectChangeProperty  {
+  
+  constructor(initialData?: DeepPartial<$models.ObjectChangeProperty> | null) {
+    super($metadata.ObjectChangeProperty, new $apiClients.ObjectChangePropertyApiClient(), initialData)
+  }
+}
+defineProps(ObjectChangePropertyViewModel, $metadata.ObjectChangeProperty)
+
+export class ObjectChangePropertyListViewModel extends ListViewModel<$models.ObjectChangeProperty, $apiClients.ObjectChangePropertyApiClient, ObjectChangePropertyViewModel> {
+  
+  constructor() {
+    super($metadata.ObjectChangeProperty, new $apiClients.ObjectChangePropertyApiClient())
+  }
+}
+
+
 export interface PersonViewModel extends $models.Person {
   
   /** ID for the person object. */
@@ -409,6 +467,18 @@ export class PersonViewModel extends ViewModel<$models.Person, $apiClients.Perso
     
     Object.defineProperty(this, 'getBirthdate', {value: getBirthdate});
     return getBirthdate
+  }
+  
+  /** Returns the user name */
+  public get setBirthDate() {
+    const setBirthDate = this.$apiClient.$makeCaller(
+      this.$metadata.methods.setBirthDate,
+      (c, date: Date | null, time: Date | null) => c.setBirthDate(this.$primaryKey, date, time),
+      () => ({date: null as Date | null, time: null as Date | null, }),
+      (c, args) => c.setBirthDate(this.$primaryKey, args.date, args.time))
+    
+    Object.defineProperty(this, 'setBirthDate', {value: setBirthDate});
+    return setBirthDate
   }
   
   public get fullNameAndAge() {
@@ -699,6 +769,8 @@ const viewModelTypeLookup = ViewModel.typeLookup = {
   CaseProduct: CaseProductViewModel,
   Company: CompanyViewModel,
   Log: LogViewModel,
+  ObjectChange: ObjectChangeViewModel,
+  ObjectChangeProperty: ObjectChangePropertyViewModel,
   Person: PersonViewModel,
   Product: ProductViewModel,
   StandaloneReadCreate: StandaloneReadCreateViewModel,
@@ -713,6 +785,8 @@ const listViewModelTypeLookup = ListViewModel.typeLookup = {
   CaseProduct: CaseProductListViewModel,
   Company: CompanyListViewModel,
   Log: LogListViewModel,
+  ObjectChange: ObjectChangeListViewModel,
+  ObjectChangeProperty: ObjectChangePropertyListViewModel,
   Person: PersonListViewModel,
   Product: ProductListViewModel,
   StandaloneReadCreate: StandaloneReadCreateListViewModel,

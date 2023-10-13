@@ -260,6 +260,9 @@ export interface ObjectChange extends Model<typeof metadata.ObjectChange> {
   state: AuditEntryState | null
   date: Date | null
   properties: ObjectChangeProperty[] | null
+  clientIp: string | null
+  referrer: string | null
+  endpoint: string | null
 }
 export class ObjectChange {
   

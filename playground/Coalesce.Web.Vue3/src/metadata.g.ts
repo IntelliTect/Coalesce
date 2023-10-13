@@ -984,7 +984,7 @@ export const ObjectChange = domain.types.ObjectChange = {
   type: "model",
   controllerRoute: "ObjectChange",
   get keyProp() { return this.props.id }, 
-  behaviorFlags: 7 as BehaviorFlags,
+  behaviorFlags: 0 as BehaviorFlags,
   props: {
     message: {
       name: "message",
@@ -1037,7 +1037,7 @@ export const ObjectChange = domain.types.ObjectChange = {
     },
     state: {
       name: "state",
-      displayName: "State",
+      displayName: "Change Type",
       type: "enum",
       get typeDef() { return domain.enums.AuditEntryState },
       role: "value",
@@ -1063,6 +1063,24 @@ export const ObjectChange = domain.types.ObjectChange = {
       role: "collectionNavigation",
       get foreignKey() { return (domain.types.ObjectChangeProperty as ModelType).props.parentId as ForeignKeyProperty },
       dontSerialize: true,
+    },
+    clientIp: {
+      name: "clientIp",
+      displayName: "Client IP",
+      type: "string",
+      role: "value",
+    },
+    referrer: {
+      name: "referrer",
+      displayName: "Referrer",
+      type: "string",
+      role: "value",
+    },
+    endpoint: {
+      name: "endpoint",
+      displayName: "Endpoint",
+      type: "string",
+      role: "value",
     },
   },
   methods: {

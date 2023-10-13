@@ -333,6 +333,9 @@ export interface ObjectChangeViewModel extends $models.ObjectChange {
   state: $models.AuditEntryState | null;
   date: Date | null;
   properties: ObjectChangePropertyViewModel[] | null;
+  clientIp: string | null;
+  referrer: string | null;
+  endpoint: string | null;
 }
 export class ObjectChangeViewModel extends ViewModel<$models.ObjectChange, $apiClients.ObjectChangeApiClient, number> implements $models.ObjectChange  {
   

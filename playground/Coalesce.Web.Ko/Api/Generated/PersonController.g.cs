@@ -2,6 +2,7 @@
 using Coalesce.Web.Ko.Models;
 using IntelliTect.Coalesce;
 using IntelliTect.Coalesce.Api;
+using IntelliTect.Coalesce.Api.Behaviors;
 using IntelliTect.Coalesce.Api.Controllers;
 using IntelliTect.Coalesce.Api.DataSources;
 using IntelliTect.Coalesce.Mapping;
@@ -61,6 +62,15 @@ namespace Coalesce.Web.Ko.Api
             IDataSource<Coalesce.Domain.Person> dataSource,
             IBehaviors<Coalesce.Domain.Person> behaviors)
             => SaveImplementation(dto, parameters, dataSource, behaviors);
+
+        [HttpPost("bulkSave")]
+        [AllowAnonymous]
+        public virtual Task<ItemResult<PersonDtoGen>> BulkSave(
+            [FromBody] BulkSaveRequest dto,
+            [FromQuery] DataSourceParameters parameters,
+            [FromServices] IDataSourceFactory dataSourceFactory,
+            [FromServices] IBehaviorsFactory behaviorsFactory)
+            => BulkSaveImplementation(dto, parameters, dataSourceFactory, behaviorsFactory);
 
         [HttpPost("delete/{id}")]
         [Authorize]
@@ -201,6 +211,46 @@ namespace Coalesce.Web.Ko.Api
             await Db.SaveChangesAsync();
             var _result = new ItemResult<System.DateTime>();
             _result.Object = _methodResult;
+            return _result;
+        }
+
+        /// <summary>
+        /// Method: SetBirthDate
+        /// </summary>
+        [HttpPost("SetBirthDate")]
+        [Authorize]
+        public virtual async Task<ItemResult> SetBirthDate(
+            [FromServices] IDataSourceFactory dataSourceFactory,
+            [FromForm(Name = "id")] int id,
+            [FromForm(Name = "date")] System.DateOnly date,
+            [FromForm(Name = "time")] System.TimeOnly time)
+        {
+            var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Person, Coalesce.Domain.Person>("Default");
+            var (itemResult, _) = await dataSource.GetItemAsync(id, new DataSourceParameters());
+            if (!itemResult.WasSuccessful)
+            {
+                return new ItemResult(itemResult);
+            }
+            var item = itemResult.Object;
+            var _params = new
+            {
+                date = date,
+                time = time
+            };
+
+            if (Context.Options.ValidateAttributesForMethods)
+            {
+                var _validationResult = ItemResult.FromParameterValidation(
+                    GeneratedForClassViewModel!.MethodByName("SetBirthDate"), _params, HttpContext.RequestServices);
+                if (!_validationResult.WasSuccessful) return _validationResult;
+            }
+
+            item.SetBirthDate(
+                _params.date,
+                _params.time
+            );
+            await Db.SaveChangesAsync();
+            var _result = new ItemResult();
             return _result;
         }
 

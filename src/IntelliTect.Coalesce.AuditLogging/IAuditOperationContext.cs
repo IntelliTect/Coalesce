@@ -1,4 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore.ChangeTracking;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using System.Net;
+using System.Security.Claims;
 
 namespace IntelliTect.Coalesce.AuditLogging;
 

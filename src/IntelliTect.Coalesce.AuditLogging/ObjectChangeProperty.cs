@@ -6,6 +6,9 @@ using static IntelliTect.Coalesce.DataAnnotations.SecurityPermissionLevels;
 
 namespace IntelliTect.Coalesce.AuditLogging;
 
+// All API endpoints are disabled.
+// These records are meant to only be read through IObjectChange.Properties.
+[Read(DenyAll)]
 [Edit(DenyAll)]
 [Delete(DenyAll)]
 [Create(DenyAll)]

@@ -28,6 +28,10 @@ internal class AuditExtension : IDbContextOptionsExtension
     {
         services.AddSingleton(_options);
 
+        // This doesn't really hurt, and will ensure that DefaultAuditOperationContext can always be constructed
+        // in contexts that are isolated from AspNetCore, like usages of the DbContext in unit tests.
+        services.AddHttpContextAccessor(); 
+
         new EntityFrameworkServicesBuilder(services)
             .TryAdd<IConventionSetPlugin, ConventionSetPlugin>();
     }

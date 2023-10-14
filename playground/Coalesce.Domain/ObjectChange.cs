@@ -19,17 +19,14 @@ namespace Coalesce.Domain
         public Person? User { get; set; }
     }
 
-    internal class OperationContext : IAuditOperationContext<ObjectChange>
+    internal class OperationContext : DefaultAuditOperationContext<ObjectChange>
     {
-        public OperationContext(IHttpContextAccessor accessor)
-        {
-            Accessor = accessor;
-        }
+        public OperationContext(IHttpContextAccessor accessor) : base(accessor) { }
 
-        public IHttpContextAccessor Accessor { get; }
-
-        public void Populate(ObjectChange auditEntry, EntityEntry changedEntity)
+        public override void Populate(ObjectChange auditEntry, EntityEntry changedEntity)
         {
+            base.Populate(auditEntry, changedEntity);
+
             var db = ((AppDbContext)changedEntity.Context);
 
             auditEntry.UserId = db.People
@@ -37,7 +34,7 @@ namespace Coalesce.Domain
                 .FirstOrDefault()?
                 .PersonId;
 
-            var context = Accessor.HttpContext;
+            var context = HttpContext;
             if (context is not null)
             {
                 auditEntry.Message = $"Changed by {context.Connection.RemoteIpAddress} on {context.Request.Headers.Referer}";

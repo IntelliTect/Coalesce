@@ -8,10 +8,11 @@ internal class TestDbContext : DbContext, IAuditLogContext<TestObjectChange>
     {
     }
 
+    public DbSet<AppUser> Users => Set<AppUser>();
     public DbSet<TestObjectChange> ObjectChanges => Set<TestObjectChange>();
     public DbSet<ObjectChangeProperty> ObjectChangeProperties => Set<ObjectChangeProperty>();
 
-    public bool SuppressAudit => false;
+    public bool SuppressAudit { get; set; }
 }
 
 class AppUser

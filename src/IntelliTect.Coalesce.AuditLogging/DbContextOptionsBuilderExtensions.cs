@@ -29,28 +29,3 @@ public static class DbContextOptionsBuilderExtensions
         return builder;
     }
 }
-
-public class CoalesceAuditLoggingBuilder<TObjectChange>
-    where TObjectChange : class, IObjectChange
-{
-    private readonly AuditOptions options;
-
-    public CoalesceAuditLoggingBuilder(AuditOptions options)
-    {
-        this.options = options;
-    }
-
-    public CoalesceAuditLoggingBuilder<TObjectChange> WithAugmentation<T>()
-        where T : IAuditOperationContext<TObjectChange>
-    {
-        options.OperationContextType = typeof(T);
-        return this;
-    }
-
-    /// <inheritdoc cref="AuditOptions.MergeWindow"/> 
-    public CoalesceAuditLoggingBuilder<TObjectChange> WithMergeWindow(TimeSpan timeSpan)
-    {
-        options.MergeWindow = timeSpan;
-        return this;
-    }
-}

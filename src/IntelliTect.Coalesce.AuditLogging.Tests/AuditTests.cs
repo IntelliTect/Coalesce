@@ -8,6 +8,8 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+using Z.EntityFramework.Plus;
 
 namespace IntelliTect.Coalesce.AuditLogging.Tests;
 public class AuditTests
@@ -139,7 +141,6 @@ public class AuditTests
             expectedCustom2: null);
     }
 
-
     [Theory]
     [InlineData(false)]
     [InlineData(true)]
@@ -156,6 +157,100 @@ public class AuditTests
         await RunBasicTest(db, async,
             expectedCustom1: "from TestOperationContext",
             expectedCustom2: null);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task SuppressAudit_SuppressesAudit(bool async)
+    {
+        // Arrange
+        using var db = new TestDbContext(new DbContextOptionsBuilder<TestDbContext>()
+            .UseSqlite(SqliteConn)
+            .UseCoalesceAuditLogging<TestObjectChange>(x => x
+                .WithAugmentation<TestOperationContext>()
+            )
+            .Options);
+
+        // Act
+        db.SuppressAudit = true;
+        db.Add(new AppUser { Name = "bob" });
+        int rows = async ? await db.SaveChangesAsync() : db.SaveChanges();
+
+        // Assert
+        Assert.Equal(0, db.ObjectChanges.Count());
+        Assert.Equal(1, rows);
+    }
+
+    [Fact]
+    public void ConfigureAudit_IsCached()
+    {
+        // Arrange
+        int calls1 = 0;
+        StrongBox<int> calls2 = new(0);
+        TestDbContext MakeDb(bool excludeUser = true)
+        {
+            var db = new TestDbContext(new DbContextOptionsBuilder<TestDbContext>()
+                .UseSqlite(SqliteConn)
+                .UseCoalesceAuditLogging<TestObjectChange>(x =>
+                {
+                    x.WithAugmentation<TestOperationContext>();
+                    if (excludeUser)
+                    {
+                        // Dynamic config can be done via conditional calls to ConfigureAudit
+                        x.ConfigureAudit(c =>
+                        {
+                            c.Exclude<AppUser>();
+                            calls1++;
+                        });
+                    }
+
+                    // Dynamic config can also be done by passing things to arg2.
+                    // Note that StrongBox doesn't have equality semantics,
+                    // so the incrementing of it won't actually produce a new cached config instance.
+                    x.ConfigureAudit(static (x, arg) =>
+                    {
+                        arg.Value++;
+                        x.Exclude<TestObjectChange>();
+                    }, calls2);
+                })
+                .Options);
+            db.Database.EnsureCreated();
+            return db;
+        }
+
+        // Act/Assert 1
+        var db = MakeDb();
+        db.Add(new AppUser { Name = "bob" });
+        db.SaveChanges();
+
+        Assert.Equal(0, db.ObjectChanges.Count());
+        // Our config functions should have each been called:
+        Assert.Equal(1, calls1);
+        Assert.Equal(1, calls2.Value);
+
+        // Act/Assert 2
+        db = MakeDb();
+        db.Users.Single().Name = "bob2";
+        db.SaveChanges();
+
+        Assert.Equal(0, db.ObjectChanges.Count());
+        // Our config functions should have still only been called once.
+        Assert.Equal(1, calls1);
+        Assert.Equal(1, calls2.Value);
+
+        // Act/Assert 3
+        db = MakeDb(excludeUser: false);
+        db.Users.Single().Name = "bob3";
+        db.SaveChanges();
+
+        // The first config function will still be called only once
+        // because it is turned off for `excludeUser: false`,
+        // and the second config function will now be called twice
+        // since it is being chained off a different base state than before.
+        Assert.Equal(1, db.ObjectChanges.Count());
+        Assert.Equal(1, calls1);
+        Assert.Equal(2, calls2.Value);
     }
 
     [Fact]
@@ -186,6 +281,31 @@ public class AuditTests
     }
 
     [Fact]
+    public async Task WithFullApp_WhenDependencyIsOptionalAndMissing_DoesNotFailToConstructOperationContext()
+    {
+        // Arrange
+        var builder = CreateAppBuilder();
+
+        builder.Services.AddDbContext<TestDbContext>(options => options
+            .UseSqlite(SqliteConn)
+            .UseCoalesceAuditLogging<TestObjectChange>(x => x
+                .WithAugmentation<TestOperationContextWithAppService>()
+            )
+        );
+
+        var app = builder.Build();
+
+        using var scope = app.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<TestDbContext>();
+
+        // Act/Assert
+        await RunBasicTest(db, async: true,
+            expectedCustom1: "from TestOperationContextWithAppService",
+            expectedCustom2: null
+        );
+    }
+
+    [Fact]
     public async Task WithFullApp_CanInjectInterfaceRegisteredOperationContext()
     {
         // Arrange
@@ -208,6 +328,7 @@ public class AuditTests
             expectedCustom2: null
         );
     }
+
     private WebApplicationBuilder CreateAppBuilder()
     {
         var builder = WebApplication.CreateBuilder();

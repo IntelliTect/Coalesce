@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Data;
 using System.Linq;
+using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading;
@@ -26,6 +27,26 @@ internal sealed class AuditingInterceptor<TObjectChange> : SaveChangesIntercepto
         => (IAuditLogContext<TObjectChange>)(data.Context ?? throw new InvalidOperationException("DbContext unavailable."));
 
     #region SavingChanges
+
+    private static readonly FieldInfo m_auditConfiguration = typeof(Audit)
+        .GetField("_configuration", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
+        ?? throw new NotSupportedException("Unknown version of Z.EntityFramework.Plus - field Audit._configuration not found.");
+
+    private void AttachConfig(Audit audit)
+    {
+        var configLazy = new Lazy<AuditConfiguration>(
+            () => _options.AuditConfiguration ?? AuditManager.DefaultConfiguration.Clone());
+
+        if (_options.AuditConfiguration is not null)
+        {
+            // Force the lazy to evaluate so that Audit.CurrentOrDefaultConfiguration 
+            // will return our instance instead of AuditManager.DefaultConfiguration.
+            var _ = configLazy.Value;
+        }
+
+        m_auditConfiguration.SetValue(audit, configLazy);
+    }
+
     public override ValueTask<InterceptionResult<int>> SavingChangesAsync(
         DbContextEventData eventData,
         InterceptionResult<int> result,
@@ -35,6 +56,7 @@ internal sealed class AuditingInterceptor<TObjectChange> : SaveChangesIntercepto
         if (GetContext(eventData).SuppressAudit) return ValueTask.FromResult(result);
 
         _audit = new Audit();
+        AttachConfig(_audit);
         _audit.PreSaveChanges(eventData.Context);
 
         return ValueTask.FromResult(result);
@@ -48,10 +70,12 @@ internal sealed class AuditingInterceptor<TObjectChange> : SaveChangesIntercepto
         if (GetContext(eventData).SuppressAudit) return result;
 
         _audit = new Audit();
+        AttachConfig(_audit);
         _audit.PreSaveChanges(eventData.Context);
 
         return result;
     }
+
     #endregion
 
     #region SavedChanges

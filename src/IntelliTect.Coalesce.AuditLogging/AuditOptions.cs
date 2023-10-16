@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore.ChangeTracking;
 using System;
+using Z.EntityFramework.Plus;
 
 namespace IntelliTect.Coalesce.AuditLogging;
 
@@ -22,4 +23,10 @@ public class AuditOptions
     public TimeSpan MergeWindow { get; set; } = TimeSpan.FromSeconds(30);
 
     public Type? OperationContextType { get; internal set; }
+
+    /// <summary>
+    /// Internal so that it cannot be modified in a way that breaks the caching assumptions
+    /// that we make in CoalesceAuditLoggingBuilder.
+    /// </summary>
+    internal AuditConfiguration? AuditConfiguration { get; set; } = null;
 }

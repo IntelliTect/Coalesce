@@ -133,11 +133,12 @@ export default defineUserConfig({
          ],
       },
       {
-        text: 'Configuration',
+        text: 'Topics',
         // collapsible: false,
         children: [
           '/topics/startup',
           '/topics/coalesce-json',
+          '/topics/audit-logging',
          ],
       },
       {

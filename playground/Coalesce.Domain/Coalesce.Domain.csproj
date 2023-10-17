@@ -2,24 +2,14 @@
   <PropertyGroup>
     <!-- All these frameworks are included for testing code generation.
     Override the used framework by specifying (framework: "tfm") in coalesce.json. -->
-    <!--
-      IMPORTANT NOTE REGARDING ENTITYFRAMEWORK MIGRATIONS (Ctrl+f: EFCore, EF Core):
-      All EF commands need to be ran with - -framework net6.0. E.g.:
-      dotnet ef database update - -framework net6.0
-      (no space between the dashes; space is there because double dash is illegal in XML comments).
-    -->
     <TargetFrameworks>net6.0;net7.0;net8.0</TargetFrameworks>
     <IsPackable>false</IsPackable>
     <Nullable>enable</Nullable>
   </PropertyGroup>
   
   <ItemGroup>
-    <ProjectReference Include="..\..\src\IntelliTect.Coalesce\IntelliTect.Coalesce.csproj">
-      <SetTargetFramework>TargetFramework=$(TargetFramework)</SetTargetFramework>
-    </ProjectReference>
-    <ProjectReference Include="..\..\src\IntelliTect.Coalesce.AuditLogging\IntelliTect.Coalesce.AuditLogging.csproj">
-      <SetTargetFramework>TargetFramework=$(TargetFramework)</SetTargetFramework>
-    </ProjectReference>
+    <ProjectReference Include="..\..\src\IntelliTect.Coalesce\IntelliTect.Coalesce.csproj" />
+    <ProjectReference Include="..\..\src\IntelliTect.Coalesce.AuditLogging\IntelliTect.Coalesce.AuditLogging.csproj" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net6.0' ">

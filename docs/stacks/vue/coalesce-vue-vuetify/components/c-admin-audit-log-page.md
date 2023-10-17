@@ -4,13 +4,12 @@
     
 A full-featured page for interacting with Coalesce's [Audit Logging](/topics/audit-logging.md). Presents a view similar to [c-admin-table-page](/stacks/vue/coalesce-vue-vuetify/components/c-admin-table-page.md) with content optimized for viewing audit log records. Designed to be routed to directly with [vue-router](https://router.vuejs.org/).
 
-Currently only supports Vue3.
-
 <!-- MARKER:summary-end -->
 
 ## Examples
 
 ``` ts
+import { CAdminAuditLogPage } from 'coalesce-vue-vuetify3';
 const router = new Router({
   // ...
   routes: [

@@ -40,7 +40,10 @@ namespace Coalesce.Domain.Migrations
                     Type = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false),
                     KeyValue = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     State = table.Column<byte>(type: "tinyint", nullable: false),
-                    Date = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
+                    Date = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    ClientIp = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Referrer = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Endpoint = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {

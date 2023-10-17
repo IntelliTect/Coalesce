@@ -4,8 +4,9 @@
       <v-toolbar
         extended
         class="c-admin-table-toolbar"
-        density="comfortable"
+        dense
         :color="color"
+        dark
       >
         <v-toolbar-title
           class="c-admin-table-toolbar--model-name hidden-xs-only"
@@ -17,10 +18,10 @@
 
         <v-btn
           class="c-admin-table-toolbar--button-reload"
-          variant="text"
+          text
           @click="list.$load()"
         >
-          <v-icon start>$loading</v-icon>
+          <v-icon left>fa fa-sync-alt</v-icon>
           <span class="hidden-sm-and-down">Reload</span>
         </v-btn>
 
@@ -35,57 +36,62 @@
         <c-list-page class="c-admin-table-toolbar--page" :list="list" />
 
         <template v-slot:extension>
-          <v-defaults-provider
-            :defaults="{
-              global: {
-                hideDetails: true,
-                density: 'comfortable',
-                clearable: true,
-                persistentClear: true,
-              },
-            }"
-          >
-            <div class="c-audit-logs--filters">
-              <v-text-field
-                v-model="list.$params.filter!.type"
-                label="Type Name"
-                style="width: 150px"
-                @click:clear="$nextTick(() => (list.$params.filter!.type = ''))"
-              />
+          <div class="c-audit-logs--filters">
+            <v-text-field
+              v-model="list.$params.filter.type"
+              label="Type Name"
+              style="width: 150px"
+              @clear="$nextTick(() => (list.$params.filter.type = ''))"
+              flat
+              solo-inverted
+              hide-details
+              single-line
+              clearable
+            />
 
-              <v-text-field
-                v-model="list.$params.filter!.keyValue"
-                label="Key Value"
-                style="width: 150px"
-                @click:clear="
-                  $nextTick(() => (list.$params.filter!.keyValue = ''))
-                "
-              />
+            <v-text-field
+              v-model="list.$params.filter.keyValue"
+              label="Key Value"
+              style="width: 150px"
+              @clear="$nextTick(() => (list.$params.filter.keyValue = ''))"
+              flat
+              solo-inverted
+              hide-details
+              single-line
+              clearable
+            />
 
-              <c-input
-                v-model="(list.$params.filter!.state)"
-                :for="list.$metadata.props.state"
-                @click:clear="
-                  $nextTick(() => (list.$params.filter!.state = ''))
-                "
-                style="min-width: 210px; max-width: 210px"
-              />
+            <c-input
+              v-model="list.$params.filter.state"
+              :for="list.$metadata.props.state"
+              @clear="$nextTick(() => (list.$params.filter.state = ''))"
+              style="min-width: 210px; max-width: 210px"
+              flat
+              solo-inverted
+              hide-details
+              single-line
+              clearable
+            />
 
-              <c-select
-                v-if="userPropMeta"
-                :for="userPropMeta"
-                v-model:key-value="list.$params.filter![userPropMeta.foreignKey.name]"
-                clearable
-                style="width: 240px"
-                @click:clear="
-                  $nextTick(
-                    () =>
-                      (list.$params.filter![userPropMeta.foreignKey.name] = '')
-                  )
-                "
-              />
-            </div>
-          </v-defaults-provider>
+            <c-select
+              v-if="userPropMeta"
+              :for="userPropMeta"
+              v-model:key-value="
+                list.$params.filter[userPropMeta.foreignKey.name]
+              "
+              style="width: 240px"
+              @clear="
+                $nextTick(
+                  () => (list.$params.filter[userPropMeta.foreignKey.name] = '')
+                )
+              "
+              flat
+              solo-inverted
+              hide-details
+              single-line
+              clearable
+            />
+          </div>
 
           <v-spacer></v-spacer>
           <c-list-page-size :list="list" />
@@ -93,14 +99,12 @@
       </v-toolbar>
 
       <v-card-text>
-        <!-- <v-divider></v-divider> -->
-
         <c-loader-status
           :loaders="{
             'no-initial-content no-error-content': [list.$load],
           }"
         >
-          <v-table class="c-audit-logs--table">
+          <v-simple-table class="c-audit-logs--table">
             <thead>
               <tr>
                 <th class="c-audit-logs--column-user-date">By/Date</th>
@@ -149,9 +153,7 @@
                     "/></pre>
                 </td>
 
-                <td
-                  class="c-audit-logs--column-details c-audit-logs--row-detail"
-                >
+                <td class="c-audit-logs--column-details">
                   <slot name="row-detail" :item="objectChange">
                     <table>
                       <tr class="prop-state">
@@ -160,7 +162,7 @@
                       </tr>
                       <tr
                         v-for="propMeta in otherProps"
-                        :key="objectChange.$stableId + '-prop-' + propMeta.name!"
+                        :key="objectChange.$stableId + '-prop-' + propMeta.name"
                         :class="'prop-' + propMeta.name"
                       >
                         <td>{{ propMeta.displayName }}:</td>
@@ -168,7 +170,7 @@
                           <c-display
                             :model="objectChange"
                             :for="propMeta"
-                            class="text-grey"
+                            class="grey--text"
                           />
                         </td>
                       </tr>
@@ -177,9 +179,7 @@
                   </slot>
                 </td>
 
-                <td
-                  class="c-audit-logs--column-properties c-audit-logs--row-properties"
-                >
+                <td class="c-audit-logs--column-properties">
                   <table>
                     <thead>
                       <tr>
@@ -191,7 +191,7 @@
                     <tbody>
                       <tr
                         v-for="prop in objectChange.properties"
-                        :key="prop.id!"
+                        :key="prop.id"
                       >
                         <td class="c-audit-logs--property-name">
                           <c-display :model="prop" for="propertyName" />
@@ -208,7 +208,7 @@
                 </td>
               </tr>
             </tbody>
-          </v-table>
+          </v-simple-table>
 
           <v-divider />
           <c-list-pagination :list="list" class="mt-4" />
@@ -332,20 +332,14 @@ function timeDiffClass(
 ) {
   if (!older) return "";
   const diff = current.date!.valueOf() - (older?.date ?? 0).valueOf();
-  return diff == 0 ? "grey--text" : diff > 0 ? "text-success" : "text-error";
+  return diff == 0 ? "grey--text" : diff > 0 ? "success--text" : "error--text";
 }
 
-const filter = (list.$params.filter = {
+let filter = {
   type: "",
   keyValue: "",
   state: "",
-});
-
-useBindToQueryString(filter, "type");
-useBindToQueryString(filter, "keyValue");
-useBindToQueryString(filter, "state");
-useBindToQueryString(list.$params, "page", "page", (p) => +p);
-useBindToQueryString(list.$params, "pageSize", "pageSize", (p) => +p);
+};
 
 if (userPropMeta.value) {
   const fkName = userPropMeta.value.foreignKey.name;
@@ -353,6 +347,14 @@ if (userPropMeta.value) {
   filter[fkName] = "";
   useBindToQueryString(filter, fkName, "user");
 }
+
+list.$params.filter = filter;
+
+useBindToQueryString(filter, "type");
+useBindToQueryString(filter, "keyValue");
+useBindToQueryString(filter, "state");
+useBindToQueryString(list.$params, "page", "page", (p) => +p);
+useBindToQueryString(list.$params, "pageSize", "pageSize", (p) => +p);
 
 list.$load();
 list.$useAutoLoad({ wait: 0 });
@@ -376,14 +378,14 @@ defineExpose({
   flex-wrap: nowrap;
   flex-grow: 1;
   > * {
-    margin-right: 16px;
+    margin-right: 16px !important;
   }
 }
 
 .c-audit-logs--table {
   --v-table-header-height: auto !important;
 
-  &.v-table > .v-table__wrapper > table > tbody > tr > td {
+  > .v-data-table__wrapper > table > tbody > tr > td {
     padding-top: 4px;
     padding-bottom: 4px;
   }
@@ -395,10 +397,10 @@ defineExpose({
   }
 }
 
-.c-audit-logs--row-detail {
-  @include small;
-  font-family: monospace;
+.c-audit-logs--column-details {
   table {
+    @include small;
+    font-family: monospace;
     td {
       white-space: pre-wrap;
       vertical-align: top;
@@ -412,7 +414,7 @@ defineExpose({
   }
 }
 
-.c-audit-logs--row-properties table {
+.c-audit-logs--column-properties table {
   @include small;
   table-layout: fixed;
   border-spacing: 0;
@@ -437,10 +439,10 @@ defineExpose({
     line-height: 1.25rem;
   }
   th {
-    border-bottom: 1px solid rgba(var(--v-theme-on-surface), 0.15);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.12);
   }
   tr:not(:last-child) td {
-    border-bottom: 1px solid rgba(var(--v-theme-on-surface), 0.05);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
   }
 }
 </style>

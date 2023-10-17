@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Coalesce.Domain.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20231013200054_AddAuditLogging")]
+    [Migration("20231017172408_AddAuditLogging")]
     partial class AddAuditLogging
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -190,13 +190,22 @@ namespace Coalesce.Domain.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"), 1L, 1);
 
+                    b.Property<string>("ClientIp")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTimeOffset>("Date")
                         .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Endpoint")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("KeyValue")
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Message")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Referrer")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<byte>("State")

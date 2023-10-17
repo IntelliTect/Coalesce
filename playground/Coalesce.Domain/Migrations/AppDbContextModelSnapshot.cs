@@ -188,13 +188,22 @@ namespace Coalesce.Domain.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"), 1L, 1);
 
+                    b.Property<string>("ClientIp")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTimeOffset>("Date")
                         .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Endpoint")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("KeyValue")
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Message")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Referrer")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<byte>("State")

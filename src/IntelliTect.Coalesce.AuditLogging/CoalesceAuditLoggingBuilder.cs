@@ -17,6 +17,13 @@ public class CoalesceAuditLoggingBuilder<TObjectChange>
         this.options = options;
     }
 
+    /// <summary>
+    /// Configures the operation context service that will be used to populate additional contextual
+    /// fields on audit log entries. The service will be injected from the application service 
+    /// provider if available; otherwise, a new instance will be constructed using dependencies 
+    /// from the application service provider. To make an injected dependency optional, make the
+    /// constructor parameter nullable with a default value of `null`, or create alternate constructors.
+    /// </summary>
     public CoalesceAuditLoggingBuilder<TObjectChange> WithAugmentation<T>()
         where T : IAuditOperationContext<TObjectChange>
     {

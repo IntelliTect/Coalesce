@@ -84,6 +84,20 @@ When you're inheriting from `DefaultObjectChange` for your `IObjectChange` imple
 
 The operation context class passed to `WithAugmentation` will be injected from the application service provider if available; otherwise, a new instance will be constructed using dependencies from the application service provider. To make an injected dependency optional, make the constructor parameter nullable with a default value of `null`, or create [alternate constructors](https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection#multiple-constructor-discovery-rules).
 
+### 4. Add the UI
+
+For Vue applications, the [c-admin-audit-log-page](/stacks/vue/coalesce-vue-vuetify/components/c-admin-audit-log-page.md) component provides an out-of-the-box user interface for browsing through audit logs. Simply define the following route in your application's router:
+
+``` ts
+import { CAdminAuditLogPage } from 'coalesce-vue-vuetify3';
+
+{
+  path: '/admin/audit-logs',
+  component: CAdminAuditLogPage,
+  props: { type: 'ObjectChange' }
+}
+```
+
 ## Configuration
 
 ### Suppression

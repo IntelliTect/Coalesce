@@ -2,7 +2,7 @@
 
 Keeping a history of all (or most) of the changes that are made to records in your database can be invaluable, both for [non-repudiation](https://csrc.nist.gov/glossary/term/non_repudiation) (i.e. proving what happened and who did it), and for troubleshooting or debugging.
 
-Coalesce provides a package `IntelliTect.Coalesce.AuditLogging` that adds an easy way to inject this kind of audit logging into your EF Core `DbContext`. It also includes an out-of-the-box view [`c-admin-audit-log-page`](TODO LINK) that enables  browsing of this data on the frontend.
+Coalesce provides a package `IntelliTect.Coalesce.AuditLogging` that adds an easy way to inject this kind of audit logging into your EF Core `DbContext`. It also includes an out-of-the-box view [`c-admin-audit-log-page`](/stacks/vue/coalesce-vue-vuetify/components/c-admin-audit-log-page.md) that enables  browsing of this data on the frontend.
 
 ## Setup
 

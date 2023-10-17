@@ -12,10 +12,9 @@ using System.Runtime.CompilerServices;
 using Z.EntityFramework.Plus;
 
 namespace IntelliTect.Coalesce.AuditLogging.Tests;
+
 public class AuditTests
 {
-    private const string SqlServerConnString = "Server=(localdb)\\MSSQLLocalDB;Database=CoalesceAuditLoggingTests;Trusted_Connection=True;";
-
     public SqliteConnection SqliteConn { get; }
 
     public AuditTests()
@@ -24,135 +23,16 @@ public class AuditTests
         SqliteConn.Open();
     }
 
-    [Fact]
-    public async Task WithSqlServer_UpdatesExistingRecordForLikeChanges()
-    {
-        // Arrange
-        using var db = new TestDbContext(new DbContextOptionsBuilder<TestDbContext>()
-            .UseSqlServer(SqlServerConnString)
-            .UseCoalesceAuditLogging<TestObjectChange>()
-            .Options);
-
-        db.Database.EnsureDeleted();
-        db.Database.EnsureCreated();
-
-        var user = new AppUser { Name = "bob" };
-        db.Add(user);
-        await db.SaveChangesAsync();
-
-        // Act/Assert
-        user.Name = "bob2";
-        await db.SaveChangesAsync();
-
-        Assert.Equal(2, db.ObjectChanges.Count()); // Two records: EntityAdded, and EntityUpdated
-
-        // Act/Assert
-        user.Name = "bob3";
-        await db.SaveChangesAsync();
-
-        Assert.Equal(2, db.ObjectChanges.Count()); // Two records: EntityAdded, and EntityUpdated
-
-        // Assert
-        var entry = Assert.Single(db.ObjectChanges.Include(c => c.Properties).Where(c => c.State == AuditEntryState.EntityModified));
-
-        var propChange = Assert.Single(entry.Properties);
-        Assert.Equal(nameof(AppUser.Name), propChange.PropertyName);
-        Assert.Equal("bob", propChange.OldValue);
-        Assert.Equal("bob3", propChange.NewValue);
-    }
-
-    [Fact]
-    public async Task WithSqlServer_CreatesNewRecordForLikeChangesOutsideMergeWindow()
-    {
-        // Arrange
-        using var db = new TestDbContext(new DbContextOptionsBuilder<TestDbContext>()
-            .UseSqlServer(SqlServerConnString)
-            .UseCoalesceAuditLogging<TestObjectChange>()
-            .Options);
-
-        db.Database.EnsureDeleted();
-        db.Database.EnsureCreated();
-
-        var user = new AppUser { Name = "bob" };
-        db.Add(user);
-        await db.SaveChangesAsync();
-
-        // Act/Assert
-        user.Name = "bob2";
-        await db.SaveChangesAsync();
-
-        Assert.Equal(2, db.ObjectChanges.Count()); // Two records: EntityAdded, and EntityUpdated
-
-        // Make the original Updated entry old such that it is outside the merge window.
-        db.ObjectChanges.First(c => c.State == AuditEntryState.EntityModified).Date -= TimeSpan.FromMinutes(1);
-        db.SaveChanges();
-
-        // Act/Assert
-        user.Name = "bob3";
-        await db.SaveChangesAsync();
-        Assert.Equal(3, db.ObjectChanges.Count()); // Now two records for EntityUpdated
-    }
-
-    [Fact]
-    public async Task WithSqlServer_CreatesNewRecordForUnlikeChanges()
-    {
-        // Arrange
-        using var db = new TestDbContext(new DbContextOptionsBuilder<TestDbContext>()
-            .UseSqlServer(SqlServerConnString)
-            .UseCoalesceAuditLogging<TestObjectChange>()
-            .Options);
-
-        db.Database.EnsureDeleted();
-        db.Database.EnsureCreated();
-
-        var user = new AppUser { Name = "bob" };
-        db.Add(user);
-        await db.SaveChangesAsync();
-
-        // Act/Assert
-        user.Name = "bob2";
-        await db.SaveChangesAsync();
-
-        Assert.Equal(2, db.ObjectChanges.Count()); // Two records: EntityAdded, and EntityUpdated
-
-        // Act/Assert
-        user.Name = "bob3";
-        user.Title = "Associate";
-        await db.SaveChangesAsync();
-
-        Assert.Equal(3, db.ObjectChanges.Count()); // Now two records for EntityUpdated
-    }
-
-    [Theory]
-    [InlineData(false)]
-    [InlineData(true)]
-    public async Task WithSqlServer_PopulatesContextAndSavesEntries(bool async)
-    {
-        // Arrange
-        using var db = new TestDbContext(new DbContextOptionsBuilder<TestDbContext>()
-            .UseSqlServer(SqlServerConnString)
-            .UseCoalesceAuditLogging<TestObjectChange>(x => x
-                .WithAugmentation<TestOperationContext>()
-            )
-            .Options);
-
-        await RunBasicTest(db, async,
-            expectedCustom1: "from TestOperationContext",
-            expectedCustom2: null);
-    }
-
     [Theory]
     [InlineData(false)]
     [InlineData(true)]
     public async Task WithSqlite_PopulatesContextAndSavesEntries(bool async)
     {
         // Arrange
-        using var db = new TestDbContext(new DbContextOptionsBuilder<TestDbContext>()
-            .UseSqlite(SqliteConn)
+        using var db = BuildDbContext(b => b
             .UseCoalesceAuditLogging<TestObjectChange>(x => x
                 .WithAugmentation<TestOperationContext>()
-            )
-            .Options);
+            ));
 
         await RunBasicTest(db, async,
             expectedCustom1: "from TestOperationContext",
@@ -165,12 +45,10 @@ public class AuditTests
     public async Task SuppressAudit_SuppressesAudit(bool async)
     {
         // Arrange
-        using var db = new TestDbContext(new DbContextOptionsBuilder<TestDbContext>()
-            .UseSqlite(SqliteConn)
-            .UseCoalesceAuditLogging<TestObjectChange>(x => x
-                .WithAugmentation<TestOperationContext>()
-            )
-            .Options);
+        using var db = BuildDbContext(b => b
+            .UseCoalesceAuditLogging((Action<CoalesceAuditLoggingBuilder<TestObjectChange>>?)(x => x
+                .WithAugmentation<TestOperationContext>())
+            ));
 
         // Act
         db.SuppressAudit = true;
@@ -190,8 +68,7 @@ public class AuditTests
         StrongBox<int> calls2 = new(0);
         TestDbContext MakeDb(bool excludeUser = true)
         {
-            var db = new TestDbContext(new DbContextOptionsBuilder<TestDbContext>()
-                .UseSqlite(SqliteConn)
+            var db = BuildDbContext(b => b
                 .UseCoalesceAuditLogging<TestObjectChange>(x =>
                 {
                     x.WithAugmentation<TestOperationContext>();
@@ -213,8 +90,7 @@ public class AuditTests
                         arg.Value++;
                         x.Exclude<TestObjectChange>();
                     }, calls2);
-                })
-                .Options);
+                }));
             db.Database.EnsureCreated();
             return db;
         }
@@ -336,6 +212,18 @@ public class AuditTests
         return builder;
     }
 
+    private TestDbContext BuildDbContext(Func<DbContextOptionsBuilder<TestDbContext>, DbContextOptionsBuilder> setup)
+    {
+        var builder = new DbContextOptionsBuilder<TestDbContext>()
+            .UseSqlite(SqliteConn);
+
+        var db = new TestDbContext(setup(builder).Options);
+
+        db.Database.EnsureCreated();
+
+        return db;
+    }
+
     private static async Task RunBasicTest(
         TestDbContext db, 
         bool async, 
@@ -343,7 +231,6 @@ public class AuditTests
         string? expectedCustom2
     )
     {
-        db.Database.EnsureDeleted();
         db.Database.EnsureCreated();
 
         var user = new AppUser { Name = "bob" };

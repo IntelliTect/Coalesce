@@ -36,11 +36,14 @@
           :item="internalModelValue"
           :search="search"
         >
-          <slot name="item" :item="internalModelValue" :search="search">
-            <span style="overflow: hidden">
-              <c-display :model="internalModelValue" />
-            </span>
-          </slot>
+          <span class="v-select__selection">
+            <slot name="item" :item="internalModelValue" :search="search">
+              <c-display
+                class="v-select__selection-text"
+                :model="internalModelValue"
+              />
+            </slot>
+          </span>
         </slot>
 
         <input

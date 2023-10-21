@@ -76,6 +76,11 @@ const dtoToModelMappings = <MappingData[]>[
     model: new Date(1591822800000),
   },
   {
+    meta: studentProps.birthDate,
+    dto: "2020-06-10T21:00:00-00:30",
+    model: new Date(1591824600000),
+  },
+  {
     // Dates without timezone should be assumed to be local time.
     meta: studentProps.birthDate,
     dto: "2020-06-10T14:00:00",
@@ -85,6 +90,11 @@ const dtoToModelMappings = <MappingData[]>[
     meta: { ...studentProps.birthDate, dateKind: "date" },
     dto: "2020-06-10",
     model: new Date(2020, 5, 10, 0, 0, 0, 0),
+  },
+  {
+    meta: { ...studentProps.birthDate, dateKind: "date" },
+    dto: "2020-06-10T14:00:00Z",
+    model: new Date(1591797600000),
   },
   {
     meta: { ...studentProps.birthDate, dateKind: "time" },

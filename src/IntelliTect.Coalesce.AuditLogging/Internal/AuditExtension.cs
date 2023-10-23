@@ -53,13 +53,13 @@ internal class AuditExtension : IDbContextOptionsExtension
     {
         public void ProcessEntityTypeAdded(IConventionEntityTypeBuilder entityTypeBuilder, IConventionContext<IConventionEntityTypeBuilder> context)
         {
-            if (!entityTypeBuilder.Metadata.ClrType.GetInterfaces().Contains(typeof(IObjectChange)))
+            if (!entityTypeBuilder.Metadata.ClrType.GetInterfaces().Contains(typeof(IAuditLog)))
             {
                 return;
             }
 
 #pragma warning disable EF1001 // Internal EF Core API usage.
-            var e = new EntityTypeBuilder<IObjectChange>((IMutableEntityType)entityTypeBuilder.Metadata);
+            var e = new EntityTypeBuilder<IAuditLog>((IMutableEntityType)entityTypeBuilder.Metadata);
 #pragma warning restore EF1001 // Internal EF Core API usage.
 
             e.HasIndex(c => new { c.Type, c.KeyValue });

@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Coalesce.Domain.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20231017172408_AddAuditLogging")]
+    [Migration("20231023220647_AddAuditLogging")]
     partial class AddAuditLogging
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -23,6 +23,56 @@ namespace Coalesce.Domain.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
+
+            modelBuilder.Entity("Coalesce.Domain.AuditLog", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"), 1L, 1);
+
+                    b.Property<string>("ClientIp")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTimeOffset>("Date")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Endpoint")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("KeyValue")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Message")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Referrer")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<byte>("State")
+                        .HasColumnType("tinyint");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
+
+                    b.Property<int?>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("State");
+
+                    b.HasIndex("Type");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("Type", "KeyValue");
+
+                    b.ToTable("AuditLogs");
+                });
 
             modelBuilder.Entity("Coalesce.Domain.Case", b =>
                 {
@@ -182,56 +232,6 @@ namespace Coalesce.Domain.Migrations
                     b.ToTable("Logs");
                 });
 
-            modelBuilder.Entity("Coalesce.Domain.ObjectChange", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"), 1L, 1);
-
-                    b.Property<string>("ClientIp")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTimeOffset>("Date")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("Endpoint")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("KeyValue")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("Message")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Referrer")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<byte>("State")
-                        .HasColumnType("tinyint");
-
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
-
-                    b.Property<int?>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("State");
-
-                    b.HasIndex("Type");
-
-                    b.HasIndex("UserId");
-
-                    b.HasIndex("Type", "KeyValue");
-
-                    b.ToTable("ObjectChanges");
-                });
-
             modelBuilder.Entity("Coalesce.Domain.Person", b =>
                 {
                     b.Property<int>("PersonId")
@@ -313,7 +313,7 @@ namespace Coalesce.Domain.Migrations
                     b.ToTable("ZipCodes");
                 });
 
-            modelBuilder.Entity("IntelliTect.Coalesce.AuditLogging.ObjectChangeProperty", b =>
+            modelBuilder.Entity("IntelliTect.Coalesce.AuditLogging.AuditLogProperty", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -339,7 +339,16 @@ namespace Coalesce.Domain.Migrations
 
                     b.HasIndex("ParentId");
 
-                    b.ToTable("ObjectChangeProperties");
+                    b.ToTable("AuditLogProperties");
+                });
+
+            modelBuilder.Entity("Coalesce.Domain.AuditLog", b =>
+                {
+                    b.HasOne("Coalesce.Domain.Person", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Coalesce.Domain.Case", b =>
@@ -383,15 +392,6 @@ namespace Coalesce.Domain.Migrations
                     b.Navigation("Case");
 
                     b.Navigation("Product");
-                });
-
-            modelBuilder.Entity("Coalesce.Domain.ObjectChange", b =>
-                {
-                    b.HasOne("Coalesce.Domain.Person", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Coalesce.Domain.Person", b =>
@@ -478,13 +478,18 @@ namespace Coalesce.Domain.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("IntelliTect.Coalesce.AuditLogging.ObjectChangeProperty", b =>
+            modelBuilder.Entity("IntelliTect.Coalesce.AuditLogging.AuditLogProperty", b =>
                 {
-                    b.HasOne("Coalesce.Domain.ObjectChange", null)
+                    b.HasOne("Coalesce.Domain.AuditLog", null)
                         .WithMany("Properties")
                         .HasForeignKey("ParentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Coalesce.Domain.AuditLog", b =>
+                {
+                    b.Navigation("Properties");
                 });
 
             modelBuilder.Entity("Coalesce.Domain.Case", b =>
@@ -497,11 +502,6 @@ namespace Coalesce.Domain.Migrations
             modelBuilder.Entity("Coalesce.Domain.Company", b =>
                 {
                     b.Navigation("Employees");
-                });
-
-            modelBuilder.Entity("Coalesce.Domain.ObjectChange", b =>
-                {
-                    b.Navigation("Properties");
                 });
 
             modelBuilder.Entity("Coalesce.Domain.Person", b =>

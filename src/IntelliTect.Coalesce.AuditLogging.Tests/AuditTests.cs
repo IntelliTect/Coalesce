@@ -30,7 +30,7 @@ public class AuditTests
     {
         // Arrange
         using var db = BuildDbContext(b => b
-            .UseCoalesceAuditLogging<TestObjectChange>(x => x
+            .UseCoalesceAuditLogging<TestAuditLog>(x => x
                 .WithAugmentation<TestOperationContext>()
             ));
 
@@ -46,7 +46,7 @@ public class AuditTests
     {
         // Arrange
         using var db = BuildDbContext(b => b
-            .UseCoalesceAuditLogging((Action<CoalesceAuditLoggingBuilder<TestObjectChange>>?)(x => x
+            .UseCoalesceAuditLogging((Action<CoalesceAuditLoggingBuilder<TestAuditLog>>?)(x => x
                 .WithAugmentation<TestOperationContext>())
             ));
 
@@ -56,7 +56,7 @@ public class AuditTests
         int rows = async ? await db.SaveChangesAsync() : db.SaveChanges();
 
         // Assert
-        Assert.Equal(0, db.ObjectChanges.Count());
+        Assert.Equal(0, db.AuditLogs.Count());
         Assert.Equal(1, rows);
     }
 
@@ -69,7 +69,7 @@ public class AuditTests
         TestDbContext MakeDb(bool excludeUser = true)
         {
             var db = BuildDbContext(b => b
-                .UseCoalesceAuditLogging<TestObjectChange>(x =>
+                .UseCoalesceAuditLogging<TestAuditLog>(x =>
                 {
                     x.WithAugmentation<TestOperationContext>();
                     if (excludeUser)
@@ -88,7 +88,7 @@ public class AuditTests
                     x.ConfigureAudit(static (x, arg) =>
                     {
                         arg.Value++;
-                        x.Exclude<TestObjectChange>();
+                        x.Exclude<TestAuditLog>();
                     }, calls2);
                 }));
             db.Database.EnsureCreated();
@@ -100,7 +100,7 @@ public class AuditTests
         db.Add(new AppUser { Name = "bob" });
         db.SaveChanges();
 
-        Assert.Equal(0, db.ObjectChanges.Count());
+        Assert.Equal(0, db.AuditLogs.Count());
         // Our config functions should have each been called:
         Assert.Equal(1, calls1);
         Assert.Equal(1, calls2.Value);
@@ -110,7 +110,7 @@ public class AuditTests
         db.Users.Single().Name = "bob2";
         db.SaveChanges();
 
-        Assert.Equal(0, db.ObjectChanges.Count());
+        Assert.Equal(0, db.AuditLogs.Count());
         // Our config functions should have still only been called once.
         Assert.Equal(1, calls1);
         Assert.Equal(1, calls2.Value);
@@ -124,7 +124,7 @@ public class AuditTests
         // because it is turned off for `excludeUser: false`,
         // and the second config function will now be called twice
         // since it is being chained off a different base state than before.
-        Assert.Equal(1, db.ObjectChanges.Count());
+        Assert.Equal(1, db.AuditLogs.Count());
         Assert.Equal(1, calls1);
         Assert.Equal(2, calls2.Value);
     }
@@ -139,7 +139,7 @@ public class AuditTests
 
         builder.Services.AddDbContext<TestDbContext>(options => options
             .UseSqlite(SqliteConn)
-            .UseCoalesceAuditLogging<TestObjectChange>(x => x
+            .UseCoalesceAuditLogging<TestAuditLog>(x => x
                 .WithAugmentation<TestOperationContextWithAppService>()
             )
         );
@@ -164,7 +164,7 @@ public class AuditTests
 
         builder.Services.AddDbContext<TestDbContext>(options => options
             .UseSqlite(SqliteConn)
-            .UseCoalesceAuditLogging<TestObjectChange>(x => x
+            .UseCoalesceAuditLogging<TestAuditLog>(x => x
                 .WithAugmentation<TestOperationContextWithAppService>()
             )
         );
@@ -187,11 +187,11 @@ public class AuditTests
         // Arrange
         var builder = CreateAppBuilder();
 
-        builder.Services.AddSingleton<IAuditOperationContext<TestObjectChange>, TestOperationContext>();
+        builder.Services.AddSingleton<IAuditOperationContext<TestAuditLog>, TestOperationContext>();
         builder.Services.AddDbContextFactory<TestDbContext>(options => options
             .UseSqlite(SqliteConn)
-            .UseCoalesceAuditLogging<TestObjectChange>(x => x
-                .WithAugmentation<IAuditOperationContext<TestObjectChange>>()
+            .UseCoalesceAuditLogging<TestAuditLog>(x => x
+                .WithAugmentation<IAuditOperationContext<TestAuditLog>>()
             )
         );
 
@@ -241,7 +241,7 @@ public class AuditTests
         else db.SaveChanges();
 
         // Assert
-        var entry = Assert.Single(db.ObjectChanges.Include(c => c.Properties));
+        var entry = Assert.Single(db.AuditLogs.Include(c => c.Properties));
         Assert.Equal(expectedCustom1, entry.CustomField1);
         Assert.Equal(expectedCustom2, entry.CustomField2);
         Assert.Equal(nameof(AppUser), entry.Type);
@@ -259,18 +259,18 @@ public class AuditTests
     }
 }
 
-class TestOperationContext(IHttpContextAccessor? httpContext = null) : IAuditOperationContext<TestObjectChange>
+class TestOperationContext(IHttpContextAccessor? httpContext = null) : IAuditOperationContext<TestAuditLog>
 {
-    public void Populate(TestObjectChange auditEntry, EntityEntry entry)
+    public void Populate(TestAuditLog auditEntry, EntityEntry entry)
     {
         auditEntry.UserId = httpContext?.HttpContext?.User?.GetUserId();
         auditEntry.CustomField1 = "from TestOperationContext";
     }
 }
 
-class TestOperationContextWithAppService(ApplicationRegisteredService? service = null) : IAuditOperationContext<TestObjectChange>
+class TestOperationContextWithAppService(ApplicationRegisteredService? service = null) : IAuditOperationContext<TestAuditLog>
 {
-    public void Populate(TestObjectChange auditEntry, EntityEntry entry)
+    public void Populate(TestAuditLog auditEntry, EntityEntry entry)
     {
         auditEntry.CustomField1 = "from TestOperationContextWithAppService";
         auditEntry.CustomField2 = service?.ValueFromAppService;

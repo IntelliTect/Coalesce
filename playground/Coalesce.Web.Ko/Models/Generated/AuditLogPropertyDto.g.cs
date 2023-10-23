@@ -6,11 +6,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 
-namespace Coalesce.Web.Vue3.Models
+namespace Coalesce.Web.Ko.Models
 {
-    public partial class ObjectChangePropertyDtoGen : GeneratedDto<IntelliTect.Coalesce.AuditLogging.ObjectChangeProperty>
+    public partial class AuditLogPropertyDtoGen : GeneratedDto<IntelliTect.Coalesce.AuditLogging.AuditLogProperty>
     {
-        public ObjectChangePropertyDtoGen() { }
+        public AuditLogPropertyDtoGen() { }
 
         private long? _Id;
         private long? _ParentId;
@@ -47,7 +47,7 @@ namespace Coalesce.Web.Vue3.Models
         /// <summary>
         /// Map from the domain object to the properties of the current DTO instance.
         /// </summary>
-        public override void MapFrom(IntelliTect.Coalesce.AuditLogging.ObjectChangeProperty obj, IMappingContext context, IncludeTree tree = null)
+        public override void MapFrom(IntelliTect.Coalesce.AuditLogging.AuditLogProperty obj, IMappingContext context, IncludeTree tree = null)
         {
             if (obj == null) return;
             var includes = context.Includes;
@@ -62,7 +62,7 @@ namespace Coalesce.Web.Vue3.Models
         /// <summary>
         /// Map from the current DTO instance to the domain object.
         /// </summary>
-        public override void MapTo(IntelliTect.Coalesce.AuditLogging.ObjectChangeProperty entity, IMappingContext context)
+        public override void MapTo(IntelliTect.Coalesce.AuditLogging.AuditLogProperty entity, IMappingContext context)
         {
             var includes = context.Includes;
 
@@ -78,21 +78,10 @@ namespace Coalesce.Web.Vue3.Models
         /// <summary>
         /// Map from the current DTO instance to a new instance of the domain object.
         /// </summary>
-        public override IntelliTect.Coalesce.AuditLogging.ObjectChangeProperty MapToNew(IMappingContext context)
+        public override IntelliTect.Coalesce.AuditLogging.AuditLogProperty MapToNew(IMappingContext context)
         {
-            var includes = context.Includes;
-
-            var entity = new IntelliTect.Coalesce.AuditLogging.ObjectChangeProperty()
-            {
-                PropertyName = PropertyName,
-            };
-
-            if (OnUpdate(entity, context)) return entity;
-            if (ShouldMapTo(nameof(Id))) entity.Id = (Id ?? entity.Id);
-            if (ShouldMapTo(nameof(ParentId))) entity.ParentId = (ParentId ?? entity.ParentId);
-            if (ShouldMapTo(nameof(OldValue))) entity.OldValue = OldValue;
-            if (ShouldMapTo(nameof(NewValue))) entity.NewValue = NewValue;
-
+            var entity = new IntelliTect.Coalesce.AuditLogging.AuditLogProperty();
+            MapTo(entity, context);
             return entity;
         }
     }

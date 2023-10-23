@@ -22,16 +22,16 @@ public class SqlServerAuditTests
         user.Name = "bob2";
         await db.SaveChangesAsync();
 
-        Assert.Equal(2, db.ObjectChanges.Count()); // Two records: EntityAdded, and EntityUpdated
+        Assert.Equal(2, db.AuditLogs.Count()); // Two records: EntityAdded, and EntityUpdated
 
         // Act/Assert
         user.Name = "bob3";
         await db.SaveChangesAsync();
 
-        Assert.Equal(2, db.ObjectChanges.Count()); // Two records: EntityAdded, and EntityUpdated
+        Assert.Equal(2, db.AuditLogs.Count()); // Two records: EntityAdded, and EntityUpdated
 
         // Assert
-        var entry = Assert.Single(db.ObjectChanges.Include(c => c.Properties).Where(c => c.State == AuditEntryState.EntityModified));
+        var entry = Assert.Single(db.AuditLogs.Include(c => c.Properties).Where(c => c.State == AuditEntryState.EntityModified));
 
         var propChange = Assert.Single(entry.Properties);
         Assert.Equal(nameof(AppUser.Name), propChange.PropertyName);
@@ -53,16 +53,16 @@ public class SqlServerAuditTests
         user.Name = "bob2";
         await db.SaveChangesAsync();
 
-        Assert.Equal(2, db.ObjectChanges.Count()); // Two records: EntityAdded, and EntityUpdated
+        Assert.Equal(2, db.AuditLogs.Count()); // Two records: EntityAdded, and EntityUpdated
 
         // Make the original Updated entry old such that it is outside the merge window.
-        db.ObjectChanges.First(c => c.State == AuditEntryState.EntityModified).Date -= TimeSpan.FromMinutes(1);
+        db.AuditLogs.First(c => c.State == AuditEntryState.EntityModified).Date -= TimeSpan.FromMinutes(1);
         db.SaveChanges();
 
         // Act/Assert
         user.Name = "bob3";
         await db.SaveChangesAsync();
-        Assert.Equal(3, db.ObjectChanges.Count()); // Now two records for EntityUpdated
+        Assert.Equal(3, db.AuditLogs.Count()); // Now two records for EntityUpdated
     }
 
     [SkippableFact]
@@ -79,21 +79,21 @@ public class SqlServerAuditTests
         user.Name = "bob2";
         await db.SaveChangesAsync();
 
-        Assert.Equal(2, db.ObjectChanges.Count()); // Two records: EntityAdded, and EntityUpdated
+        Assert.Equal(2, db.AuditLogs.Count()); // Two records: EntityAdded, and EntityUpdated
 
         // Act/Assert
         user.Name = "bob3";
         user.Title = "Associate";
         await db.SaveChangesAsync();
 
-        Assert.Equal(3, db.ObjectChanges.Count()); // Now two records for EntityUpdated
+        Assert.Equal(3, db.AuditLogs.Count()); // Now two records for EntityUpdated
     }
 
     private static TestDbContext BuildDbContext()
     {
         var db = new TestDbContext(new DbContextOptionsBuilder<TestDbContext>()
                     .UseSqlServer(SqlServerConnString)
-                    .UseCoalesceAuditLogging<TestObjectChange>()
+                    .UseCoalesceAuditLogging<TestAuditLog>()
                     .Options);
 
         try

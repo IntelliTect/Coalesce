@@ -43,6 +43,65 @@ export enum Titles {
 }
 
 
+export interface AuditLog extends Model<typeof metadata.AuditLog> {
+  message: string | null
+  userId: number | null
+  user: Person | null
+  id: number | null
+  type: string | null
+  keyValue: string | null
+  state: AuditEntryState | null
+  date: Date | null
+  properties: AuditLogProperty[] | null
+  clientIp: string | null
+  referrer: string | null
+  endpoint: string | null
+}
+export class AuditLog {
+  
+  /** Mutates the input object and its descendents into a valid AuditLog implementation. */
+  static convert(data?: Partial<AuditLog>): AuditLog {
+    return convertToModel(data || {}, metadata.AuditLog) 
+  }
+  
+  /** Maps the input object and its descendents to a new, valid AuditLog implementation. */
+  static map(data?: Partial<AuditLog>): AuditLog {
+    return mapToModel(data || {}, metadata.AuditLog) 
+  }
+  
+  /** Instantiate a new AuditLog, optionally basing it on the given data. */
+  constructor(data?: Partial<AuditLog> | {[k: string]: any}) {
+    Object.assign(this, AuditLog.map(data || {}));
+  }
+}
+
+
+export interface AuditLogProperty extends Model<typeof metadata.AuditLogProperty> {
+  id: number | null
+  parentId: number | null
+  propertyName: string | null
+  oldValue: string | null
+  newValue: string | null
+}
+export class AuditLogProperty {
+  
+  /** Mutates the input object and its descendents into a valid AuditLogProperty implementation. */
+  static convert(data?: Partial<AuditLogProperty>): AuditLogProperty {
+    return convertToModel(data || {}, metadata.AuditLogProperty) 
+  }
+  
+  /** Maps the input object and its descendents to a new, valid AuditLogProperty implementation. */
+  static map(data?: Partial<AuditLogProperty>): AuditLogProperty {
+    return mapToModel(data || {}, metadata.AuditLogProperty) 
+  }
+  
+  /** Instantiate a new AuditLogProperty, optionally basing it on the given data. */
+  constructor(data?: Partial<AuditLogProperty> | {[k: string]: any}) {
+    Object.assign(this, AuditLogProperty.map(data || {}));
+  }
+}
+
+
 export interface Case extends Model<typeof metadata.Case> {
   
   /** The Primary key for the Case object */
@@ -246,65 +305,6 @@ export class Log {
   /** Instantiate a new Log, optionally basing it on the given data. */
   constructor(data?: Partial<Log> | {[k: string]: any}) {
     Object.assign(this, Log.map(data || {}));
-  }
-}
-
-
-export interface ObjectChange extends Model<typeof metadata.ObjectChange> {
-  message: string | null
-  userId: number | null
-  user: Person | null
-  id: number | null
-  type: string | null
-  keyValue: string | null
-  state: AuditEntryState | null
-  date: Date | null
-  properties: ObjectChangeProperty[] | null
-  clientIp: string | null
-  referrer: string | null
-  endpoint: string | null
-}
-export class ObjectChange {
-  
-  /** Mutates the input object and its descendents into a valid ObjectChange implementation. */
-  static convert(data?: Partial<ObjectChange>): ObjectChange {
-    return convertToModel(data || {}, metadata.ObjectChange) 
-  }
-  
-  /** Maps the input object and its descendents to a new, valid ObjectChange implementation. */
-  static map(data?: Partial<ObjectChange>): ObjectChange {
-    return mapToModel(data || {}, metadata.ObjectChange) 
-  }
-  
-  /** Instantiate a new ObjectChange, optionally basing it on the given data. */
-  constructor(data?: Partial<ObjectChange> | {[k: string]: any}) {
-    Object.assign(this, ObjectChange.map(data || {}));
-  }
-}
-
-
-export interface ObjectChangeProperty extends Model<typeof metadata.ObjectChangeProperty> {
-  id: number | null
-  parentId: number | null
-  propertyName: string | null
-  oldValue: string | null
-  newValue: string | null
-}
-export class ObjectChangeProperty {
-  
-  /** Mutates the input object and its descendents into a valid ObjectChangeProperty implementation. */
-  static convert(data?: Partial<ObjectChangeProperty>): ObjectChangeProperty {
-    return convertToModel(data || {}, metadata.ObjectChangeProperty) 
-  }
-  
-  /** Maps the input object and its descendents to a new, valid ObjectChangeProperty implementation. */
-  static map(data?: Partial<ObjectChangeProperty>): ObjectChangeProperty {
-    return mapToModel(data || {}, metadata.ObjectChangeProperty) 
-  }
-  
-  /** Instantiate a new ObjectChangeProperty, optionally basing it on the given data. */
-  constructor(data?: Partial<ObjectChangeProperty> | {[k: string]: any}) {
-    Object.assign(this, ObjectChangeProperty.map(data || {}));
   }
 }
 

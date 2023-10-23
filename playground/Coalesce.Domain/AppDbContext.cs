@@ -11,7 +11,7 @@ namespace Coalesce.Domain
 {
 
     [Coalesce]
-    public class AppDbContext : DbContext, IAuditLogContext<ObjectChange>
+    public class AppDbContext : DbContext, IAuditLogContext<AuditLog>
     {
 #nullable disable
         public DbSet<Person> People { get; set; }
@@ -22,8 +22,8 @@ namespace Coalesce.Domain
         public DbSet<ZipCode> ZipCodes { get; set; }
         public DbSet<Log> Logs { get; set; }
 
-        public DbSet<ObjectChange> ObjectChanges { get; set; }
-        public DbSet<ObjectChangeProperty> ObjectChangeProperties { get; set; }
+        public DbSet<AuditLog> AuditLogs { get; set; }
+        public DbSet<AuditLogProperty> AuditLogProperties { get; set; }
 
 #nullable restore
 
@@ -38,7 +38,7 @@ namespace Coalesce.Domain
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder
-                .UseCoalesceAuditLogging<ObjectChange>(x => x
+                .UseCoalesceAuditLogging<AuditLog>(x => x
                     .WithAugmentation<OperationContext>()
                     .WithMergeWindow(TimeSpan.FromSeconds(15))
                     .ConfigureAudit(x => x

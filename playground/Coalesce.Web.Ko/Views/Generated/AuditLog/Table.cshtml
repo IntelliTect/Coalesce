@@ -26,11 +26,11 @@
         color: lightgray;
     }
 </style>
-<div class="table-view obj-objectChange">
+<div class="table-view obj-auditLog">
     <div class="table-view-header">
         <div class="clearfix">
             <h1 style="display: inline-block">
-                Object Change List
+                Audit Log List
             </h1>
         </div>
         <div class="clearfix">
@@ -56,7 +56,7 @@
                 <button data-bind="click:load" class="btn btn-sm btn-default "><i class="fa fa-refresh"></i> Refresh</button>
                 @if (ViewBag.Editable)
                 {
-                    <a href="~/ObjectChange/Table?@(ViewBag.Query)" role="button" class="btn btn-sm btn-default "><i class="fa fa-lock"></i> Make Read-only</a>
+                    <a href="~/AuditLog/Table?@(ViewBag.Query)" role="button" class="btn btn-sm btn-default "><i class="fa fa-lock"></i> Make Read-only</a>
                 }
             </div>
         </div>
@@ -113,29 +113,29 @@
                         <tr data-bind="css: {'btn-warning': errorMessage()}, attr: {id: id}">
                             @if (@ViewBag.Editable)
                             {
-                                <td class="prop-message">@(Knockout.InputFor<Coalesce.Domain.ObjectChange>(p => p.Message))</td>
-                                <td class="prop-user">@(Knockout.SelectForObject<Coalesce.Domain.ObjectChange>(p => p.User))</td>
-                                <td class="prop-type">@(Knockout.InputFor<IntelliTect.Coalesce.AuditLogging.DefaultObjectChange>(p => p.Type))</td>
-                                <td class="prop-keyValue">@(Knockout.InputFor<IntelliTect.Coalesce.AuditLogging.DefaultObjectChange>(p => p.KeyValue))</td>
-                                <td class="prop-state">@(Knockout.SelectFor<IntelliTect.Coalesce.AuditLogging.DefaultObjectChange>(p => p.State))</td>
-                                <td class="prop-date">@(Knockout.InputFor<IntelliTect.Coalesce.AuditLogging.DefaultObjectChange>(p => p.Date))</td>
+                                <td class="prop-message">@(Knockout.InputFor<Coalesce.Domain.AuditLog>(p => p.Message))</td>
+                                <td class="prop-user">@(Knockout.SelectForObject<Coalesce.Domain.AuditLog>(p => p.User))</td>
+                                <td class="prop-type">@(Knockout.InputFor<IntelliTect.Coalesce.AuditLogging.DefaultAuditLog>(p => p.Type))</td>
+                                <td class="prop-keyValue">@(Knockout.InputFor<IntelliTect.Coalesce.AuditLogging.DefaultAuditLog>(p => p.KeyValue))</td>
+                                <td class="prop-state">@(Knockout.SelectFor<IntelliTect.Coalesce.AuditLogging.DefaultAuditLog>(p => p.State))</td>
+                                <td class="prop-date">@(Knockout.InputFor<IntelliTect.Coalesce.AuditLogging.DefaultAuditLog>(p => p.Date))</td>
                                 <td class="prop-properties"><a data-bind='attr: {href: propertiesListUrl}, text: properties().length + " - Edit"' class='btn btn-default btn-sm'></a></td>
-                                <td class="prop-clientIp">@(Knockout.InputFor<IntelliTect.Coalesce.AuditLogging.DefaultObjectChange>(p => p.ClientIp))</td>
-                                <td class="prop-referrer">@(Knockout.InputFor<IntelliTect.Coalesce.AuditLogging.DefaultObjectChange>(p => p.Referrer))</td>
-                                <td class="prop-endpoint">@(Knockout.InputFor<IntelliTect.Coalesce.AuditLogging.DefaultObjectChange>(p => p.Endpoint))</td>
+                                <td class="prop-clientIp">@(Knockout.InputFor<IntelliTect.Coalesce.AuditLogging.DefaultAuditLog>(p => p.ClientIp))</td>
+                                <td class="prop-referrer">@(Knockout.InputFor<IntelliTect.Coalesce.AuditLogging.DefaultAuditLog>(p => p.Referrer))</td>
+                                <td class="prop-endpoint">@(Knockout.InputFor<IntelliTect.Coalesce.AuditLogging.DefaultAuditLog>(p => p.Endpoint))</td>
                             }
                             else
                             {
-                                <td class="prop-message">@(Knockout.DisplayFor<Coalesce.Domain.ObjectChange>(p => p.Message, true))</td>
-                                <td class="prop-user">@(Knockout.DisplayFor<Coalesce.Domain.ObjectChange>(p => p.User, true))</td>
-                                <td class="prop-type">@(Knockout.DisplayFor<IntelliTect.Coalesce.AuditLogging.DefaultObjectChange>(p => p.Type, true))</td>
-                                <td class="prop-keyValue">@(Knockout.DisplayFor<IntelliTect.Coalesce.AuditLogging.DefaultObjectChange>(p => p.KeyValue, true))</td>
-                                <td class="prop-state">@(Knockout.DisplayFor<IntelliTect.Coalesce.AuditLogging.DefaultObjectChange>(p => p.State, true))</td>
-                                <td class="prop-date">@(Knockout.DisplayFor<IntelliTect.Coalesce.AuditLogging.DefaultObjectChange>(p => p.Date, true))</td>
+                                <td class="prop-message">@(Knockout.DisplayFor<Coalesce.Domain.AuditLog>(p => p.Message, true))</td>
+                                <td class="prop-user">@(Knockout.DisplayFor<Coalesce.Domain.AuditLog>(p => p.User, true))</td>
+                                <td class="prop-type">@(Knockout.DisplayFor<IntelliTect.Coalesce.AuditLogging.DefaultAuditLog>(p => p.Type, true))</td>
+                                <td class="prop-keyValue">@(Knockout.DisplayFor<IntelliTect.Coalesce.AuditLogging.DefaultAuditLog>(p => p.KeyValue, true))</td>
+                                <td class="prop-state">@(Knockout.DisplayFor<IntelliTect.Coalesce.AuditLogging.DefaultAuditLog>(p => p.State, true))</td>
+                                <td class="prop-date">@(Knockout.DisplayFor<IntelliTect.Coalesce.AuditLogging.DefaultAuditLog>(p => p.Date, true))</td>
                                 <td class="prop-properties"><a data-bind='attr: {href: propertiesListUrl}, text: properties().length + " - Edit"' class='btn btn-default btn-sm'></a></td>
-                                <td class="prop-clientIp">@(Knockout.DisplayFor<IntelliTect.Coalesce.AuditLogging.DefaultObjectChange>(p => p.ClientIp, true))</td>
-                                <td class="prop-referrer">@(Knockout.DisplayFor<IntelliTect.Coalesce.AuditLogging.DefaultObjectChange>(p => p.Referrer, true))</td>
-                                <td class="prop-endpoint">@(Knockout.DisplayFor<IntelliTect.Coalesce.AuditLogging.DefaultObjectChange>(p => p.Endpoint, true))</td>
+                                <td class="prop-clientIp">@(Knockout.DisplayFor<IntelliTect.Coalesce.AuditLogging.DefaultAuditLog>(p => p.ClientIp, true))</td>
+                                <td class="prop-referrer">@(Knockout.DisplayFor<IntelliTect.Coalesce.AuditLogging.DefaultAuditLog>(p => p.Referrer, true))</td>
+                                <td class="prop-endpoint">@(Knockout.DisplayFor<IntelliTect.Coalesce.AuditLogging.DefaultAuditLog>(p => p.Endpoint, true))</td>
                             }
                             <td>
                                 <!-- Editor buttons -->
@@ -159,35 +159,35 @@
         {
             @:Coalesce.GlobalConfiguration.viewModel.setupValidationAutomatically(false);
         }
-        var objectChangeList = new ListViewModels.ObjectChangeList();
+        var auditLogList = new ListViewModels.AuditLogList();
         
         // Set up parent info based on the URL.
         @if (ViewBag.Query != null)
         {
-            @:objectChangeList.queryString = "@(ViewBag.Query)";
+            @:auditLogList.queryString = "@(ViewBag.Query)";
         }
         
         // Save and restore values from the URL:
         var urlVariables = ['page', 'pageSize', 'search', 'orderBy', 'orderByDescending'];
         $.each(urlVariables, function(){
             var param = Coalesce.Utilities.GetUrlParameter(this);
-            if (param) {objectChangeList[this](param);}
+            if (param) {auditLogList[this](param);}
         })
-        objectChangeList.isLoading.subscribe(function(){
+        auditLogList.isLoading.subscribe(function(){
             var newUrl = window.location.href;
         
             $.each(urlVariables, function(){
-                var param = objectChangeList[this]();
+                var param = auditLogList[this]();
                 newUrl = Coalesce.Utilities.SetUrlParameter(newUrl, this, param);
             })
             history.replaceState(null, document.title, newUrl);
         });
         
-        objectChangeList.isSavingAutomatically = false;
-        ko.applyBindings(objectChangeList, document.body);
-        objectChangeList.isSavingAutomatically = true;
+        auditLogList.isSavingAutomatically = false;
+        ko.applyBindings(auditLogList, document.body);
+        auditLogList.isSavingAutomatically = true;
         
-        objectChangeList.includes = "ObjectChangeListGen";
-        objectChangeList.load();
+        auditLogList.includes = "AuditLogListGen";
+        auditLogList.load();
     </script>
 }

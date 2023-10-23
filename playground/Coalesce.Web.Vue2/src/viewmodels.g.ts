@@ -3,6 +3,64 @@ import * as $models from './models.g'
 import * as $apiClients from './api-clients.g'
 import { ViewModel, ListViewModel, ServiceViewModel, DeepPartial, defineProps } from 'coalesce-vue/lib/viewmodel'
 
+export interface AuditLogViewModel extends $models.AuditLog {
+  message: string | null;
+  userId: number | null;
+  user: PersonViewModel | null;
+  id: number | null;
+  type: string | null;
+  keyValue: string | null;
+  state: $models.AuditEntryState | null;
+  date: Date | null;
+  properties: AuditLogPropertyViewModel[] | null;
+  clientIp: string | null;
+  referrer: string | null;
+  endpoint: string | null;
+}
+export class AuditLogViewModel extends ViewModel<$models.AuditLog, $apiClients.AuditLogApiClient, number> implements $models.AuditLog  {
+  
+  
+  public addToProperties(initialData?: DeepPartial<$models.AuditLogProperty> | null) {
+    return this.$addChild('properties', initialData) as AuditLogPropertyViewModel
+  }
+  
+  constructor(initialData?: DeepPartial<$models.AuditLog> | null) {
+    super($metadata.AuditLog, new $apiClients.AuditLogApiClient(), initialData)
+  }
+}
+defineProps(AuditLogViewModel, $metadata.AuditLog)
+
+export class AuditLogListViewModel extends ListViewModel<$models.AuditLog, $apiClients.AuditLogApiClient, AuditLogViewModel> {
+  
+  constructor() {
+    super($metadata.AuditLog, new $apiClients.AuditLogApiClient())
+  }
+}
+
+
+export interface AuditLogPropertyViewModel extends $models.AuditLogProperty {
+  id: number | null;
+  parentId: number | null;
+  propertyName: string | null;
+  oldValue: string | null;
+  newValue: string | null;
+}
+export class AuditLogPropertyViewModel extends ViewModel<$models.AuditLogProperty, $apiClients.AuditLogPropertyApiClient, number> implements $models.AuditLogProperty  {
+  
+  constructor(initialData?: DeepPartial<$models.AuditLogProperty> | null) {
+    super($metadata.AuditLogProperty, new $apiClients.AuditLogPropertyApiClient(), initialData)
+  }
+}
+defineProps(AuditLogPropertyViewModel, $metadata.AuditLogProperty)
+
+export class AuditLogPropertyListViewModel extends ListViewModel<$models.AuditLogProperty, $apiClients.AuditLogPropertyApiClient, AuditLogPropertyViewModel> {
+  
+  constructor() {
+    super($metadata.AuditLogProperty, new $apiClients.AuditLogPropertyApiClient())
+  }
+}
+
+
 export interface CaseViewModel extends $models.Case {
   
   /** The Primary key for the Case object */
@@ -319,64 +377,6 @@ export class LogListViewModel extends ListViewModel<$models.Log, $apiClients.Log
   
   constructor() {
     super($metadata.Log, new $apiClients.LogApiClient())
-  }
-}
-
-
-export interface ObjectChangeViewModel extends $models.ObjectChange {
-  message: string | null;
-  userId: number | null;
-  user: PersonViewModel | null;
-  id: number | null;
-  type: string | null;
-  keyValue: string | null;
-  state: $models.AuditEntryState | null;
-  date: Date | null;
-  properties: ObjectChangePropertyViewModel[] | null;
-  clientIp: string | null;
-  referrer: string | null;
-  endpoint: string | null;
-}
-export class ObjectChangeViewModel extends ViewModel<$models.ObjectChange, $apiClients.ObjectChangeApiClient, number> implements $models.ObjectChange  {
-  
-  
-  public addToProperties(initialData?: DeepPartial<$models.ObjectChangeProperty> | null) {
-    return this.$addChild('properties', initialData) as ObjectChangePropertyViewModel
-  }
-  
-  constructor(initialData?: DeepPartial<$models.ObjectChange> | null) {
-    super($metadata.ObjectChange, new $apiClients.ObjectChangeApiClient(), initialData)
-  }
-}
-defineProps(ObjectChangeViewModel, $metadata.ObjectChange)
-
-export class ObjectChangeListViewModel extends ListViewModel<$models.ObjectChange, $apiClients.ObjectChangeApiClient, ObjectChangeViewModel> {
-  
-  constructor() {
-    super($metadata.ObjectChange, new $apiClients.ObjectChangeApiClient())
-  }
-}
-
-
-export interface ObjectChangePropertyViewModel extends $models.ObjectChangeProperty {
-  id: number | null;
-  parentId: number | null;
-  propertyName: string | null;
-  oldValue: string | null;
-  newValue: string | null;
-}
-export class ObjectChangePropertyViewModel extends ViewModel<$models.ObjectChangeProperty, $apiClients.ObjectChangePropertyApiClient, number> implements $models.ObjectChangeProperty  {
-  
-  constructor(initialData?: DeepPartial<$models.ObjectChangeProperty> | null) {
-    super($metadata.ObjectChangeProperty, new $apiClients.ObjectChangePropertyApiClient(), initialData)
-  }
-}
-defineProps(ObjectChangePropertyViewModel, $metadata.ObjectChangeProperty)
-
-export class ObjectChangePropertyListViewModel extends ListViewModel<$models.ObjectChangeProperty, $apiClients.ObjectChangePropertyApiClient, ObjectChangePropertyViewModel> {
-  
-  constructor() {
-    super($metadata.ObjectChangeProperty, new $apiClients.ObjectChangePropertyApiClient())
   }
 }
 
@@ -763,14 +763,14 @@ export class WeatherServiceViewModel extends ServiceViewModel<typeof $metadata.W
 
 
 const viewModelTypeLookup = ViewModel.typeLookup = {
+  AuditLog: AuditLogViewModel,
+  AuditLogProperty: AuditLogPropertyViewModel,
   Case: CaseViewModel,
   CaseDto: CaseDtoViewModel,
   CaseDtoStandalone: CaseDtoStandaloneViewModel,
   CaseProduct: CaseProductViewModel,
   Company: CompanyViewModel,
   Log: LogViewModel,
-  ObjectChange: ObjectChangeViewModel,
-  ObjectChangeProperty: ObjectChangePropertyViewModel,
   Person: PersonViewModel,
   Product: ProductViewModel,
   StandaloneReadCreate: StandaloneReadCreateViewModel,
@@ -779,14 +779,14 @@ const viewModelTypeLookup = ViewModel.typeLookup = {
   ZipCode: ZipCodeViewModel,
 }
 const listViewModelTypeLookup = ListViewModel.typeLookup = {
+  AuditLog: AuditLogListViewModel,
+  AuditLogProperty: AuditLogPropertyListViewModel,
   Case: CaseListViewModel,
   CaseDto: CaseDtoListViewModel,
   CaseDtoStandalone: CaseDtoStandaloneListViewModel,
   CaseProduct: CaseProductListViewModel,
   Company: CompanyListViewModel,
   Log: LogListViewModel,
-  ObjectChange: ObjectChangeListViewModel,
-  ObjectChangeProperty: ObjectChangePropertyListViewModel,
   Person: PersonListViewModel,
   Product: ProductListViewModel,
   StandaloneReadCreate: StandaloneReadCreateListViewModel,

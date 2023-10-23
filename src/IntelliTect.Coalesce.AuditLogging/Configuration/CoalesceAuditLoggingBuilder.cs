@@ -7,8 +7,8 @@ using Z.EntityFramework.Plus;
 
 namespace IntelliTect.Coalesce.AuditLogging;
 
-public class CoalesceAuditLoggingBuilder<TObjectChange>
-    where TObjectChange : class, IObjectChange
+public class CoalesceAuditLoggingBuilder<TAuditLog>
+    where TAuditLog : class, IAuditLog
 {
     private readonly AuditOptions options;
 
@@ -24,15 +24,15 @@ public class CoalesceAuditLoggingBuilder<TObjectChange>
     /// from the application service provider. To make an injected dependency optional, make the
     /// constructor parameter nullable with a default value of `null`, or create alternate constructors.
     /// </summary>
-    public CoalesceAuditLoggingBuilder<TObjectChange> WithAugmentation<T>()
-        where T : IAuditOperationContext<TObjectChange>
+    public CoalesceAuditLoggingBuilder<TAuditLog> WithAugmentation<T>()
+        where T : IAuditOperationContext<TAuditLog>
     {
         options.OperationContextType = typeof(T);
         return this;
     }
 
     /// <inheritdoc cref="AuditOptions.MergeWindow"/> 
-    public CoalesceAuditLoggingBuilder<TObjectChange> WithMergeWindow(TimeSpan timeSpan)
+    public CoalesceAuditLoggingBuilder<TAuditLog> WithMergeWindow(TimeSpan timeSpan)
     {
         options.MergeWindow = timeSpan;
         return this;
@@ -50,14 +50,14 @@ public class CoalesceAuditLoggingBuilder<TObjectChange>
     /// pass the dynamic inputs to the second argument so that configuration caching can account for this.
     /// </para>
     /// </summary>
-    public CoalesceAuditLoggingBuilder<TObjectChange> ConfigureAudit(Action<AuditConfiguration> configure)
+    public CoalesceAuditLoggingBuilder<TAuditLog> ConfigureAudit(Action<AuditConfiguration> configure)
         => ConfigureAudit<object?>((c, _) => configure(c), null, configure.Method);
 
     /// <inheritdoc cref="ConfigureAudit(Action{AuditConfiguration})"/>
-    public CoalesceAuditLoggingBuilder<TObjectChange> ConfigureAudit<TArg>(Action<AuditConfiguration, TArg> configure, TArg arg)
+    public CoalesceAuditLoggingBuilder<TAuditLog> ConfigureAudit<TArg>(Action<AuditConfiguration, TArg> configure, TArg arg)
         => ConfigureAudit(configure, arg, configure.Method);
 
-    private CoalesceAuditLoggingBuilder<TObjectChange> ConfigureAudit<TArg>(Action<AuditConfiguration, TArg> configure, TArg arg, MethodInfo methodCacheKey)
+    private CoalesceAuditLoggingBuilder<TAuditLog> ConfigureAudit<TArg>(Action<AuditConfiguration, TArg> configure, TArg arg, MethodInfo methodCacheKey)
     {
         options.AuditConfiguration = _auditConfigTransforms.GetOrCreate((methodCacheKey, options.AuditConfiguration, arg), entry =>
         {

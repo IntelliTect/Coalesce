@@ -9,7 +9,7 @@ using System.Linq;
 
 namespace Coalesce.Domain
 {
-    public class ObjectChange : DefaultObjectChange
+    public class AuditLog : DefaultAuditLog
     {
         public string? Message { get; set; }
 
@@ -19,11 +19,11 @@ namespace Coalesce.Domain
         public Person? User { get; set; }
     }
 
-    internal class OperationContext : DefaultAuditOperationContext<ObjectChange>
+    internal class OperationContext : DefaultAuditOperationContext<AuditLog>
     {
         public OperationContext(IHttpContextAccessor accessor) : base(accessor) { }
 
-        public override void Populate(ObjectChange auditEntry, EntityEntry changedEntity)
+        public override void Populate(AuditLog auditEntry, EntityEntry changedEntity)
         {
             base.Populate(auditEntry, changedEntity);
 

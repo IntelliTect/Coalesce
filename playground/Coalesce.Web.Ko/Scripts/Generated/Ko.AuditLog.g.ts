@@ -5,23 +5,23 @@
 
 module ViewModels {
     
-    export class ObjectChange extends Coalesce.BaseViewModel {
-        public readonly modelName = "ObjectChange";
+    export class AuditLog extends Coalesce.BaseViewModel {
+        public readonly modelName = "AuditLog";
         public readonly primaryKeyName = "id";
-        public readonly modelDisplayName = "Object Change";
-        public readonly apiController = "/ObjectChange";
-        public readonly viewController = "/ObjectChange";
+        public readonly modelDisplayName = "Audit Log";
+        public readonly apiController = "/AuditLog";
+        public readonly viewController = "/AuditLog";
         
-        /** Configuration for all instances of ObjectChange. Can be overidden on each instance via instance.coalesceConfig. */
-        public static coalesceConfig: Coalesce.ViewModelConfiguration<ObjectChange>
-            = new Coalesce.ViewModelConfiguration<ObjectChange>(Coalesce.GlobalConfiguration.viewModel);
+        /** Configuration for all instances of AuditLog. Can be overidden on each instance via instance.coalesceConfig. */
+        public static coalesceConfig: Coalesce.ViewModelConfiguration<AuditLog>
+            = new Coalesce.ViewModelConfiguration<AuditLog>(Coalesce.GlobalConfiguration.viewModel);
         
-        /** Configuration for the current ObjectChange instance. */
+        /** Configuration for the current AuditLog instance. */
         public coalesceConfig: Coalesce.ViewModelConfiguration<this>
-            = new Coalesce.ViewModelConfiguration<ObjectChange>(ObjectChange.coalesceConfig);
+            = new Coalesce.ViewModelConfiguration<AuditLog>(AuditLog.coalesceConfig);
         
         /** The namespace containing all possible values of this.dataSource. */
-        public dataSources: typeof ListViewModels.ObjectChangeDataSources = ListViewModels.ObjectChangeDataSources;
+        public dataSources: typeof ListViewModels.AuditLogDataSources = ListViewModels.AuditLogDataSources;
         
         
         public message: KnockoutObservable<string | null> = ko.observable(null);
@@ -42,7 +42,7 @@ module ViewModels {
             return null;
         });
         public date: KnockoutObservable<moment.Moment | null> = ko.observable(moment());
-        public properties: KnockoutObservableArray<ViewModels.ObjectChangeProperty> = ko.observableArray([]);
+        public properties: KnockoutObservableArray<ViewModels.AuditLogProperty> = ko.observableArray([]);
         public clientIp: KnockoutObservable<string | null> = ko.observable(null);
         public referrer: KnockoutObservable<string | null> = ko.observable(null);
         public endpoint: KnockoutObservable<string | null> = ko.observable(null);
@@ -53,8 +53,8 @@ module ViewModels {
         
         
         /** Add object to properties */
-        public addToProperties = (autoSave?: boolean | null): ObjectChangeProperty => {
-            var newItem = new ObjectChangeProperty();
+        public addToProperties = (autoSave?: boolean | null): AuditLogProperty => {
+            var newItem = new AuditLogProperty();
             if (typeof(autoSave) == 'boolean'){
                 newItem.coalesceConfig.autoSaveEnabled(autoSave);
             }
@@ -67,12 +67,12 @@ module ViewModels {
         };
         
         /** ListViewModel for Properties. Allows for loading subsets of data. */
-        public propertiesList: (loadImmediate?: boolean) => ListViewModels.ObjectChangePropertyList;
+        public propertiesList: (loadImmediate?: boolean) => ListViewModels.AuditLogPropertyList;
         
         
         /** Url for a table view of all members of collection Properties for the current object. */
         public propertiesListUrl: KnockoutComputed<string> = ko.computed(
-            () => "Inverse property not set on ObjectChange for property Properties",
+            () => "Inverse property not set on AuditLog for property Properties",
             null, { deferEvaluation: true }
         );
         
@@ -106,7 +106,7 @@ module ViewModels {
             // Load the lists of other objects
             if (data.properties != null) {
                 // Merge the incoming array
-                Coalesce.KnockoutUtilities.RebuildArray(this.properties, data.properties, 'id', ObjectChangeProperty, this, allowCollectionDeletes);
+                Coalesce.KnockoutUtilities.RebuildArray(this.properties, data.properties, 'id', AuditLogProperty, this, allowCollectionDeletes);
             }
             if (!data.user) { 
                 if (data.userId != this.userId()) {
@@ -196,7 +196,7 @@ module ViewModels {
             ]);
         }
         
-        constructor(newItem?: object, parent?: Coalesce.BaseViewModel | ListViewModels.ObjectChangeList) {
+        constructor(newItem?: object, parent?: Coalesce.BaseViewModel | ListViewModels.AuditLogList) {
             super(parent);
             this.baseInitialize();
             const self = this;
@@ -211,10 +211,10 @@ module ViewModels {
             
             
             // List Object model for Properties. Allows for loading subsets of data.
-            var _propertiesList: ListViewModels.ObjectChangePropertyList;
+            var _propertiesList: ListViewModels.AuditLogPropertyList;
             this.propertiesList = function(loadImmediate = true) {
                 if (!_propertiesList) {
-                    _propertiesList = new ListViewModels.ObjectChangePropertyList();
+                    _propertiesList = new ListViewModels.AuditLogPropertyList();
                     if (loadImmediate) loadPropertiesList();
                     self.id.subscribe(loadPropertiesList)
                 }
@@ -252,7 +252,7 @@ module ViewModels {
         }
     }
     
-    export namespace ObjectChange {
+    export namespace AuditLog {
         export enum StateEnum {
             EntityAdded = 0,
             EntityDeleted = 1,

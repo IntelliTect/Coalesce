@@ -30,7 +30,7 @@ namespace Coalesce.Domain.Migrations
                 oldNullable: true);
 
             migrationBuilder.CreateTable(
-                name: "ObjectChanges",
+                name: "AuditLogs",
                 columns: table => new
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false)
@@ -47,16 +47,16 @@ namespace Coalesce.Domain.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ObjectChanges", x => x.Id);
+                    table.PrimaryKey("PK_AuditLogs", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_ObjectChanges_Person_UserId",
+                        name: "FK_AuditLogs_Person_UserId",
                         column: x => x.UserId,
                         principalTable: "Person",
                         principalColumn: "PersonId");
                 });
 
             migrationBuilder.CreateTable(
-                name: "ObjectChangeProperties",
+                name: "AuditLogProperties",
                 columns: table => new
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false)
@@ -68,48 +68,48 @@ namespace Coalesce.Domain.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ObjectChangeProperties", x => x.Id);
+                    table.PrimaryKey("PK_AuditLogProperties", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_ObjectChangeProperties_ObjectChanges_ParentId",
+                        name: "FK_AuditLogProperties_AuditLogs_ParentId",
                         column: x => x.ParentId,
-                        principalTable: "ObjectChanges",
+                        principalTable: "AuditLogs",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_ObjectChangeProperties_ParentId",
-                table: "ObjectChangeProperties",
+                name: "IX_AuditLogProperties_ParentId",
+                table: "AuditLogProperties",
                 column: "ParentId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ObjectChanges_State",
-                table: "ObjectChanges",
+                name: "IX_AuditLogs_State",
+                table: "AuditLogs",
                 column: "State");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ObjectChanges_Type",
-                table: "ObjectChanges",
+                name: "IX_AuditLogs_Type",
+                table: "AuditLogs",
                 column: "Type");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ObjectChanges_Type_KeyValue",
-                table: "ObjectChanges",
+                name: "IX_AuditLogs_Type_KeyValue",
+                table: "AuditLogs",
                 columns: new[] { "Type", "KeyValue" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_ObjectChanges_UserId",
-                table: "ObjectChanges",
+                name: "IX_AuditLogs_UserId",
+                table: "AuditLogs",
                 column: "UserId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "ObjectChangeProperties");
+                name: "AuditLogProperties");
 
             migrationBuilder.DropTable(
-                name: "ObjectChanges");
+                name: "AuditLogs");
 
             migrationBuilder.AlterColumn<string>(
                 name: "State",

@@ -4,8 +4,8 @@ using System.Security.Claims;
 
 namespace IntelliTect.Coalesce.AuditLogging;
 
-public class DefaultAuditOperationContext<TObjectChange> : IAuditOperationContext<TObjectChange>
-    where TObjectChange : DefaultObjectChange
+public class DefaultAuditOperationContext<TAuditLog> : IAuditOperationContext<TAuditLog>
+    where TAuditLog : DefaultAuditLog
 {
     public DefaultAuditOperationContext(IHttpContextAccessor httpContextAccessor)
     {
@@ -14,11 +14,11 @@ public class DefaultAuditOperationContext<TObjectChange> : IAuditOperationContex
 
     private IHttpContextAccessor HttpContextAccessor { get; }
 
-    protected HttpContext? HttpContext => HttpContextAccessor.HttpContext;
+    public HttpContext? HttpContext => HttpContextAccessor.HttpContext;
 
     public ClaimsPrincipal? User => HttpContext?.User;
 
-    public virtual void Populate(TObjectChange auditEntry, EntityEntry changedEntity)
+    public virtual void Populate(TAuditLog auditEntry, EntityEntry changedEntity)
     {
         // read only once from the underlying AsyncLocal for perf:
         var context = HttpContext;

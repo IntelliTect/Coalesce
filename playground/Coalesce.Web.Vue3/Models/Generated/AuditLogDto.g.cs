@@ -6,21 +6,21 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 
-namespace Coalesce.Web.Ko.Models
+namespace Coalesce.Web.Vue3.Models
 {
-    public partial class ObjectChangeDtoGen : GeneratedDto<Coalesce.Domain.ObjectChange>
+    public partial class AuditLogDtoGen : GeneratedDto<Coalesce.Domain.AuditLog>
     {
-        public ObjectChangeDtoGen() { }
+        public AuditLogDtoGen() { }
 
         private string _Message;
         private int? _UserId;
-        private Coalesce.Web.Ko.Models.PersonDtoGen _User;
+        private Coalesce.Web.Vue3.Models.PersonDtoGen _User;
         private long? _Id;
         private string _Type;
         private string _KeyValue;
         private IntelliTect.Coalesce.AuditLogging.AuditEntryState? _State;
         private System.DateTimeOffset? _Date;
-        private System.Collections.Generic.ICollection<Coalesce.Web.Ko.Models.ObjectChangePropertyDtoGen> _Properties;
+        private System.Collections.Generic.ICollection<Coalesce.Web.Vue3.Models.AuditLogPropertyDtoGen> _Properties;
         private string _ClientIp;
         private string _Referrer;
         private string _Endpoint;
@@ -35,7 +35,7 @@ namespace Coalesce.Web.Ko.Models
             get => _UserId;
             set { _UserId = value; Changed(nameof(UserId)); }
         }
-        public Coalesce.Web.Ko.Models.PersonDtoGen User
+        public Coalesce.Web.Vue3.Models.PersonDtoGen User
         {
             get => _User;
             set { _User = value; Changed(nameof(User)); }
@@ -65,7 +65,7 @@ namespace Coalesce.Web.Ko.Models
             get => _Date;
             set { _Date = value; Changed(nameof(Date)); }
         }
-        public System.Collections.Generic.ICollection<Coalesce.Web.Ko.Models.ObjectChangePropertyDtoGen> Properties
+        public System.Collections.Generic.ICollection<Coalesce.Web.Vue3.Models.AuditLogPropertyDtoGen> Properties
         {
             get => _Properties;
             set { _Properties = value; Changed(nameof(Properties)); }
@@ -89,7 +89,7 @@ namespace Coalesce.Web.Ko.Models
         /// <summary>
         /// Map from the domain object to the properties of the current DTO instance.
         /// </summary>
-        public override void MapFrom(Coalesce.Domain.ObjectChange obj, IMappingContext context, IncludeTree tree = null)
+        public override void MapFrom(Coalesce.Domain.AuditLog obj, IMappingContext context, IncludeTree tree = null)
         {
             if (obj == null) return;
             var includes = context.Includes;
@@ -112,11 +112,11 @@ namespace Coalesce.Web.Ko.Models
             {
                 this.Properties = propValProperties
                     .OrderBy(f => f.Id)
-                    .Select(f => f.MapToDto<IntelliTect.Coalesce.AuditLogging.ObjectChangeProperty, ObjectChangePropertyDtoGen>(context, tree?[nameof(this.Properties)])).ToList();
+                    .Select(f => f.MapToDto<IntelliTect.Coalesce.AuditLogging.AuditLogProperty, AuditLogPropertyDtoGen>(context, tree?[nameof(this.Properties)])).ToList();
             }
             else if (propValProperties == null && tree?[nameof(this.Properties)] != null)
             {
-                this.Properties = new ObjectChangePropertyDtoGen[0];
+                this.Properties = new AuditLogPropertyDtoGen[0];
             }
 
         }
@@ -124,7 +124,7 @@ namespace Coalesce.Web.Ko.Models
         /// <summary>
         /// Map from the current DTO instance to the domain object.
         /// </summary>
-        public override void MapTo(Coalesce.Domain.ObjectChange entity, IMappingContext context)
+        public override void MapTo(Coalesce.Domain.AuditLog entity, IMappingContext context)
         {
             var includes = context.Includes;
 
@@ -145,9 +145,9 @@ namespace Coalesce.Web.Ko.Models
         /// <summary>
         /// Map from the current DTO instance to a new instance of the domain object.
         /// </summary>
-        public override Coalesce.Domain.ObjectChange MapToNew(IMappingContext context)
+        public override Coalesce.Domain.AuditLog MapToNew(IMappingContext context)
         {
-            var entity = new Coalesce.Domain.ObjectChange();
+            var entity = new Coalesce.Domain.AuditLog();
             MapTo(entity, context);
             return entity;
         }

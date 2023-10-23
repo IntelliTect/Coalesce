@@ -6,6 +6,10 @@
 
 
 /// <reference path="coalesce.dependencies.d.ts" />
+/// <reference path="Generated/Ko.AuditLog.g.ts" />
+/// <reference path="Generated/Ko.AuditLogList.g.ts" />
+/// <reference path="Generated/Ko.AuditLogProperty.g.ts" />
+/// <reference path="Generated/Ko.AuditLogPropertyList.g.ts" />
 /// <reference path="Generated/Ko.Case.g.ts" />
 /// <reference path="Generated/Ko.CaseDto.g.ts" />
 /// <reference path="Generated/Ko.CaseDtoList.g.ts" />
@@ -21,10 +25,6 @@
 /// <reference path="Generated/Ko.Location.g.ts" />
 /// <reference path="Generated/Ko.Log.g.ts" />
 /// <reference path="Generated/Ko.LogList.g.ts" />
-/// <reference path="Generated/Ko.ObjectChange.g.ts" />
-/// <reference path="Generated/Ko.ObjectChangeList.g.ts" />
-/// <reference path="Generated/Ko.ObjectChangeProperty.g.ts" />
-/// <reference path="Generated/Ko.ObjectChangePropertyList.g.ts" />
 /// <reference path="Generated/Ko.Person.Partial.g.ts" />
 /// <reference path="Generated/Ko.PersonCriteria.g.ts" />
 /// <reference path="Generated/Ko.PersonList.g.ts" />

@@ -16,15 +16,15 @@ using Z.EntityFramework.Plus;
 
 namespace IntelliTect.Coalesce.AuditLogging.Internal;
 
-internal sealed class AuditingInterceptor<TObjectChange> : SaveChangesInterceptor
-    where TObjectChange : class, IObjectChange
+internal sealed class AuditingInterceptor<TAuditLog> : SaveChangesInterceptor
+    where TAuditLog : class, IAuditLog
 {
     private readonly AuditOptions _options;
 
     private Audit? _audit;
 
-    private IAuditLogContext<TObjectChange> GetContext(DbContextEventData data)
-        => (IAuditLogContext<TObjectChange>)(data.Context ?? throw new InvalidOperationException("DbContext unavailable."));
+    private IAuditLogContext<TAuditLog> GetContext(DbContextEventData data)
+        => (IAuditLogContext<TAuditLog>)(data.Context ?? throw new InvalidOperationException("DbContext unavailable."));
 
     #region SavingChanges
 
@@ -123,18 +123,18 @@ internal sealed class AuditingInterceptor<TObjectChange> : SaveChangesIntercepto
 
         static string BuildSqlServerSql(IModel model)
         {
-            var entityType = model.FindEntityType(typeof(TObjectChange))!;
-            var propEntityType = model.FindEntityType(typeof(ObjectChangeProperty))!;
+            var entityType = model.FindEntityType(typeof(TAuditLog))!;
+            var propEntityType = model.FindEntityType(typeof(AuditLogProperty))!;
 
             var tableName = entityType.GetSchemaQualifiedTableName();
             var propTableName = propEntityType.GetSchemaQualifiedTableName();
 
-            var basePropNames = typeof(IObjectChange).GetProperties().Select(p => p.Name).ToArray();
+            var basePropNames = typeof(IAuditLog).GetProperties().Select(p => p.Name).ToArray();
             var props = entityType.GetDeclaredProperties();
             var propsByName = props.ToLookup(p => p.Name);
 
             var customProps = props.ExceptBy(basePropNames, p => p.PropertyInfo?.Name);
-            var cursorProps = customProps.Concat(props.Where(p => p.Name is nameof(IObjectChange.State) or nameof(IObjectChange.Date) or nameof(IObjectChange.Type) or nameof(IObjectChange.KeyValue)));
+            var cursorProps = customProps.Concat(props.Where(p => p.Name is nameof(IAuditLog.State) or nameof(IAuditLog.Date) or nameof(IAuditLog.Type) or nameof(IAuditLog.KeyValue)));
 
             string GetColName(string propName, IEntityType table) => table
                 .GetDeclaredProperties()
@@ -144,20 +144,20 @@ internal sealed class AuditingInterceptor<TObjectChange> : SaveChangesIntercepto
             string GetPropColName(IProperty prop, IEntityType table) => prop
                 .GetColumnName(StoreObjectIdentifier.Create(table, StoreObjectType.Table)!.Value)!;
 
-            string pkCol = GetColName(nameof(IObjectChange.Id), entityType);
-            string entityTypeNameCol = GetColName(nameof(IObjectChange.Type), entityType);
-            string entityKeyValueCol = GetColName(nameof(IObjectChange.KeyValue), entityType);
-            string dateCol = GetColName(nameof(IObjectChange.Date), entityType);
-            string stateCol = GetColName(nameof(IObjectChange.State), entityType);
+            string pkCol = GetColName(nameof(IAuditLog.Id), entityType);
+            string entityTypeNameCol = GetColName(nameof(IAuditLog.Type), entityType);
+            string entityKeyValueCol = GetColName(nameof(IAuditLog.KeyValue), entityType);
+            string dateCol = GetColName(nameof(IAuditLog.Date), entityType);
+            string stateCol = GetColName(nameof(IAuditLog.State), entityType);
 
-            string propFkCol = GetColName(nameof(ObjectChangeProperty.ParentId), propEntityType);
-            string propPkCol = GetColName(nameof(ObjectChangeProperty.Id), propEntityType);
+            string propFkCol = GetColName(nameof(AuditLogProperty.ParentId), propEntityType);
+            string propPkCol = GetColName(nameof(AuditLogProperty.Id), propEntityType);
 
             return $"""
             SET NOCOUNT ON;
             SET XACT_ABORT ON;
 
-            -- Setup iteration over each distinct [ObjectChange] represented by our incoming flat data.
+            -- Setup iteration over each distinct [AuditLog] represented by our incoming flat data.
             DECLARE object_cursor CURSOR FOR 
             SELECT {string.Join(", ", cursorProps.Select(p => p.Name))}, Properties
             FROM OPENJSON(@MergePayload) with (   
@@ -183,13 +183,13 @@ internal sealed class AuditingInterceptor<TObjectChange> : SaveChangesIntercepto
             	END
 
                 -- Find the most recent change record for the given entity.
-                DECLARE @mostRecentObjectChangeId [bigint];
+                DECLARE @mostRecentAuditLogId [bigint];
                 DECLARE @shouldUpdate [bit];
-                SET @mostRecentObjectChangeId = 0;
+                SET @mostRecentAuditLogId = 0;
                 SET @shouldUpdate = 0;
 
                 SELECT TOP 1 
-                    @mostRecentObjectChangeId = {pkCol},
+                    @mostRecentAuditLogId = {pkCol},
                     @shouldUpdate = (CASE WHEN 
                         -- Don't update if the type and/or key matched on NULL=NULL
                         @Type IS NOT NULL
@@ -201,7 +201,7 @@ internal sealed class AuditingInterceptor<TObjectChange> : SaveChangesIntercepto
                         AND DATEDIFF(second, {dateCol}, @Date) < @MergeWindowSeconds
                         -- and the incoming record must have a date equal or after the existing record
                         AND @Date >= {dateCol}
-                        -- The existing ObjectChange record has the same set of properties as the incoming record
+                        -- The existing AuditLog record has the same set of properties as the incoming record
                         AND (
                         		SELECT TOP 1 STRING_AGG([PropertyName], ',') WITHIN GROUP (ORDER BY [PropertyName] ASC)
                         		FROM {propTableName} 
@@ -220,13 +220,13 @@ internal sealed class AuditingInterceptor<TObjectChange> : SaveChangesIntercepto
                 WHERE {entityTypeNameCol} = @Type AND {entityKeyValueCol} = @KeyValue
                 ORDER BY {pkCol} DESC;
 
-                IF @mostRecentObjectChangeId > 0 AND @shouldUpdate = 1
+                IF @mostRecentAuditLogId > 0 AND @shouldUpdate = 1
                     BEGIN
                         -- We found an existing record for the given Type and KeyValue and it is a candidate for being updated.
 
                         UPDATE {tableName}
                         SET {dateCol} = @Date
-                        WHERE {pkCol} = @mostRecentObjectChangeId;
+                        WHERE {pkCol} = @mostRecentAuditLogId;
 
 
                         MERGE {propTableName}
@@ -238,7 +238,7 @@ internal sealed class AuditingInterceptor<TObjectChange> : SaveChangesIntercepto
             					NewValue [nvarchar](max) '$.NewValue'
             				)
                         ) AS Source
-                        ON {propFkCol} = @mostRecentObjectChangeId AND {propTableName}.[PropertyName] = Source.PropertyName
+                        ON {propFkCol} = @mostRecentAuditLogId AND {propTableName}.[PropertyName] = Source.PropertyName
                         WHEN MATCHED THEN
                         	-- DO NOT UPDATE OldValue! It stays the same so we represent the transition from the original OldValue to the new NewValue.
                         	UPDATE SET NewValue = Source.NewValue
@@ -252,11 +252,11 @@ internal sealed class AuditingInterceptor<TObjectChange> : SaveChangesIntercepto
                         ({string.Join(", ", cursorProps.Select(p => GetPropColName(p, entityType)))})
                         VALUES ({string.Join(", ", cursorProps.Select(p => $"@{p.Name}"))});
 
-                        SET @mostRecentObjectChangeId = SCOPE_IDENTITY();
+                        SET @mostRecentAuditLogId = SCOPE_IDENTITY();
 
                         INSERT INTO {propTableName}
                         ({propFkCol}, PropertyName, OldValue, NewValue)
-                        SELECT @mostRecentObjectChangeId, PropertyName, OldValue, NewValue
+                        SELECT @mostRecentAuditLogId, PropertyName, OldValue, NewValue
                         FROM OPENJSON (@Properties) WITH (
             				PropertyName [nvarchar](max) '$.PropertyName',
             				OldValue [nvarchar](max) '$.OldValue',
@@ -279,14 +279,14 @@ internal sealed class AuditingInterceptor<TObjectChange> : SaveChangesIntercepto
         var serviceProvider = new EntityFrameworkServiceProvider(db);
         var operationContext = _options.OperationContextType is null 
             ? null 
-            : (IAuditOperationContext<TObjectChange>)ActivatorUtilities.GetServiceOrCreateInstance(serviceProvider, _options.OperationContextType);
+            : (IAuditOperationContext<TAuditLog>)ActivatorUtilities.GetServiceOrCreateInstance(serviceProvider, _options.OperationContextType);
 
         var date = DateTimeOffset.Now; // This must be the exact same date for all items for the merge logic in the SQL to work properly.
 
-        var objectChanges = audit.Entries
+        var auditLogs = audit.Entries
             // The change is only useful if there's more than one property, since one of the properties is always the primary key.
             // This happens when the only changed properties on the object are marked as excluded properties.
-            .Where(e => e.Properties.Count > 1 && e.Entity is not IObjectChange && e.Entity is not ObjectChangeProperty)
+            .Where(e => e.Properties.Count > 1 && e.Entity is not IAuditLog && e.Entity is not AuditLogProperty)
             .Select(e =>
             {
                 var keyProperties = db.Model
@@ -294,17 +294,17 @@ internal sealed class AuditingInterceptor<TObjectChange> : SaveChangesIntercepto
                     .FindPrimaryKey()?
                     .Properties;
 
-                var objectChange = Activator.CreateInstance<TObjectChange>();
+                var auditLog = Activator.CreateInstance<TAuditLog>();
 
-                objectChange.Date = date;
-                objectChange.State = (IntelliTect.Coalesce.AuditLogging.AuditEntryState)e.State;
-                objectChange.Type = e.EntityTypeName;
-                objectChange.KeyValue = keyProperties is null ? null : string.Join(";", keyProperties.Select(p => e.Entry.CurrentValues[p]));
-                objectChange.Properties = e.Properties
+                auditLog.Date = date;
+                auditLog.State = (IntelliTect.Coalesce.AuditLogging.AuditEntryState)e.State;
+                auditLog.Type = e.EntityTypeName;
+                auditLog.KeyValue = keyProperties is null ? null : string.Join(";", keyProperties.Select(p => e.Entry.CurrentValues[p]));
+                auditLog.Properties = e.Properties
                     .Where(property => property.OldValueFormatted != property.NewValueFormatted)
                     .Select(property =>
                     {
-                        var prop = new ObjectChangeProperty
+                        var prop = new AuditLogProperty
                         {
                             PropertyName = property.PropertyName,
                             OldValue = property.OldValueFormatted,
@@ -313,13 +313,13 @@ internal sealed class AuditingInterceptor<TObjectChange> : SaveChangesIntercepto
                         return prop;
                     }).ToList();
 
-                operationContext?.Populate(objectChange, e.Entry);
+                operationContext?.Populate(auditLog, e.Entry);
 
-                return objectChange;
+                return auditLog;
             })
             .ToList();
 
-        if (objectChanges.Count == 0)
+        if (auditLogs.Count == 0)
         {
             return Task.CompletedTask;
         }
@@ -332,13 +332,13 @@ internal sealed class AuditingInterceptor<TObjectChange> : SaveChangesIntercepto
 
             var jsonParam = cmd.CreateParameter();
             jsonParam.ParameterName = "MergePayload";
-            jsonParam.Value = JsonSerializer.Serialize(objectChanges, _mergeJsonOptions);
+            jsonParam.Value = JsonSerializer.Serialize(auditLogs, _mergeJsonOptions);
 
 
             // MergeWindowSeconds, in seconds, that a record can be for it to be updated (rather than inserting a new one).
             // This is chosen to be just under a minute so that changes happening on a one-minute interval to the same record
             // (there's nothing like this that I'm aware of currently in the application, but anyway...)
-            // will not continuously roll forward on the same ObjectChange record for all time.
+            // will not continuously roll forward on the same AuditLog record for all time.
 
             var mergeWindowParam = cmd.CreateParameter();
             mergeWindowParam.ParameterName = "MergeWindowSeconds";
@@ -359,7 +359,7 @@ internal sealed class AuditingInterceptor<TObjectChange> : SaveChangesIntercepto
             // Naïve insertion for providers where we don't know how to generate 
             // SQL that will merge existing entries, or when the merge feature is disabled.
 
-            db.AddRange(objectChanges);
+            db.AddRange(auditLogs);
 
             if (async)
             {
@@ -377,10 +377,10 @@ internal sealed class AuditingInterceptor<TObjectChange> : SaveChangesIntercepto
     {
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
         // 1: outer array
-        // 2: ObjectChange instance
+        // 2: AuditLog instance
         // 3: Properties array
-        // 4: ObjectChangeProperties object
-        // 5: Individual fields on ObjectChangeProperties (not sure why this counts as a depth layer)
+        // 4: AuditLogProperties object
+        // 5: Individual fields on AuditLogProperties (not sure why this counts as a depth layer)
         MaxDepth = 5,
         
     };

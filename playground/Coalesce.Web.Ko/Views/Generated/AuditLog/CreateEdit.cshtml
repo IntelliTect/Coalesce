@@ -15,7 +15,7 @@
             <button onclick="window.history.back()" class="btn btn-xs btn-default"><i class="fa fa-arrow-left"></i> Back</button>
             <button data-bind="click:function() { load(); }" class="btn btn-xs btn-default"><i class="fa fa-refresh"></i> Refresh</button>
         </div>
-        <h1 class="card-title clearfix" style="display:inline-block;">Object Change</h1>
+        <h1 class="card-title clearfix" style="display:inline-block;">Audit Log</h1>
         <span class="label label-info" data-bind="fadeVisible: isLoading()">Loading...</span>
     </div>
     <div class="card-body">
@@ -28,30 +28,30 @@
             </div>
             <div class="form-group">
                 <label class="col-md-4 control-label">Message</label>
-                <div class="col-md-8 prop-message">@(Knockout.InputFor<Coalesce.Domain.ObjectChange>(p => p.Message))</div>
+                <div class="col-md-8 prop-message">@(Knockout.InputFor<Coalesce.Domain.AuditLog>(p => p.Message))</div>
             </div>
             <div class="form-group">
                 <label class="col-md-4 control-label">User</label>
-                <div class="col-md-7 prop-user">@(Knockout.SelectForObject<Coalesce.Domain.ObjectChange>(p => p.User))</div>
+                <div class="col-md-7 prop-user">@(Knockout.SelectForObject<Coalesce.Domain.AuditLog>(p => p.User))</div>
                 <div class="col-md-1" data-bind="with: user">
                     <a data-bind="attr: {href: editUrl}" class="btn btn-default pull-right"><i class="fa fa-ellipsis-h "></i></a>
                 </div>
             </div>
             <div class="form-group">
                 <label class="col-md-4 control-label">Type</label>
-                <div class="col-md-8 prop-type">@(Knockout.InputFor<IntelliTect.Coalesce.AuditLogging.DefaultObjectChange>(p => p.Type))</div>
+                <div class="col-md-8 prop-type">@(Knockout.InputFor<IntelliTect.Coalesce.AuditLogging.DefaultAuditLog>(p => p.Type))</div>
             </div>
             <div class="form-group">
                 <label class="col-md-4 control-label">Key Value</label>
-                <div class="col-md-8 prop-keyValue">@(Knockout.InputFor<IntelliTect.Coalesce.AuditLogging.DefaultObjectChange>(p => p.KeyValue))</div>
+                <div class="col-md-8 prop-keyValue">@(Knockout.InputFor<IntelliTect.Coalesce.AuditLogging.DefaultAuditLog>(p => p.KeyValue))</div>
             </div>
             <div class="form-group">
                 <label class="col-md-4 control-label">Change Type</label>
-                <div class="col-md-8 prop-state">@(Knockout.SelectFor<IntelliTect.Coalesce.AuditLogging.DefaultObjectChange>(p => p.State))</div>
+                <div class="col-md-8 prop-state">@(Knockout.SelectFor<IntelliTect.Coalesce.AuditLogging.DefaultAuditLog>(p => p.State))</div>
             </div>
             <div class="form-group">
                 <label class="col-md-4 control-label">Date</label>
-                <div class="col-md-8 prop-date">@(Knockout.InputFor<IntelliTect.Coalesce.AuditLogging.DefaultObjectChange>(p => p.Date))</div>
+                <div class="col-md-8 prop-date">@(Knockout.InputFor<IntelliTect.Coalesce.AuditLogging.DefaultAuditLog>(p => p.Date))</div>
             </div>
             <div class="form-group">
                 <label class="col-md-4 control-label">Properties</label>
@@ -59,15 +59,15 @@
             </div>
             <div class="form-group">
                 <label class="col-md-4 control-label">Client IP</label>
-                <div class="col-md-8 prop-clientIp">@(Knockout.InputFor<IntelliTect.Coalesce.AuditLogging.DefaultObjectChange>(p => p.ClientIp))</div>
+                <div class="col-md-8 prop-clientIp">@(Knockout.InputFor<IntelliTect.Coalesce.AuditLogging.DefaultAuditLog>(p => p.ClientIp))</div>
             </div>
             <div class="form-group">
                 <label class="col-md-4 control-label">Referrer</label>
-                <div class="col-md-8 prop-referrer">@(Knockout.InputFor<IntelliTect.Coalesce.AuditLogging.DefaultObjectChange>(p => p.Referrer))</div>
+                <div class="col-md-8 prop-referrer">@(Knockout.InputFor<IntelliTect.Coalesce.AuditLogging.DefaultAuditLog>(p => p.Referrer))</div>
             </div>
             <div class="form-group">
                 <label class="col-md-4 control-label">Endpoint</label>
-                <div class="col-md-8 prop-endpoint">@(Knockout.InputFor<IntelliTect.Coalesce.AuditLogging.DefaultObjectChange>(p => p.Endpoint))</div>
+                <div class="col-md-8 prop-endpoint">@(Knockout.InputFor<IntelliTect.Coalesce.AuditLogging.DefaultAuditLog>(p => p.Endpoint))</div>
             </div>
         </div>
     </div>
@@ -78,7 +78,7 @@
 @section Scripts
 {
 <script>
-    var model = new ViewModels.ObjectChange();
+    var model = new ViewModels.AuditLog();
     model.includes = "Editor";
     model.saveCallbacks.push(function(obj){
         // If there is a new id, set the one for this page

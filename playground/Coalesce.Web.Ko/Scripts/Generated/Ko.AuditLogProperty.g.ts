@@ -5,23 +5,23 @@
 
 module ViewModels {
     
-    export class ObjectChangeProperty extends Coalesce.BaseViewModel {
-        public readonly modelName = "ObjectChangeProperty";
+    export class AuditLogProperty extends Coalesce.BaseViewModel {
+        public readonly modelName = "AuditLogProperty";
         public readonly primaryKeyName = "id";
-        public readonly modelDisplayName = "Object Change Property";
-        public readonly apiController = "/ObjectChangeProperty";
-        public readonly viewController = "/ObjectChangeProperty";
+        public readonly modelDisplayName = "Audit Log Property";
+        public readonly apiController = "/AuditLogProperty";
+        public readonly viewController = "/AuditLogProperty";
         
-        /** Configuration for all instances of ObjectChangeProperty. Can be overidden on each instance via instance.coalesceConfig. */
-        public static coalesceConfig: Coalesce.ViewModelConfiguration<ObjectChangeProperty>
-            = new Coalesce.ViewModelConfiguration<ObjectChangeProperty>(Coalesce.GlobalConfiguration.viewModel);
+        /** Configuration for all instances of AuditLogProperty. Can be overidden on each instance via instance.coalesceConfig. */
+        public static coalesceConfig: Coalesce.ViewModelConfiguration<AuditLogProperty>
+            = new Coalesce.ViewModelConfiguration<AuditLogProperty>(Coalesce.GlobalConfiguration.viewModel);
         
-        /** Configuration for the current ObjectChangeProperty instance. */
+        /** Configuration for the current AuditLogProperty instance. */
         public coalesceConfig: Coalesce.ViewModelConfiguration<this>
-            = new Coalesce.ViewModelConfiguration<ObjectChangeProperty>(ObjectChangeProperty.coalesceConfig);
+            = new Coalesce.ViewModelConfiguration<AuditLogProperty>(AuditLogProperty.coalesceConfig);
         
         /** The namespace containing all possible values of this.dataSource. */
-        public dataSources: typeof ListViewModels.ObjectChangePropertyDataSources = ListViewModels.ObjectChangePropertyDataSources;
+        public dataSources: typeof ListViewModels.AuditLogPropertyDataSources = ListViewModels.AuditLogPropertyDataSources;
         
         
         public id: KnockoutObservable<number | null> = ko.observable(null);
@@ -97,7 +97,7 @@ module ViewModels {
             ]);
         }
         
-        constructor(newItem?: object, parent?: Coalesce.BaseViewModel | ListViewModels.ObjectChangePropertyList) {
+        constructor(newItem?: object, parent?: Coalesce.BaseViewModel | ListViewModels.AuditLogPropertyList) {
             super(parent);
             this.baseInitialize();
             const self = this;
@@ -118,6 +118,6 @@ module ViewModels {
         }
     }
     
-    export namespace ObjectChangeProperty {
+    export namespace AuditLogProperty {
     }
 }

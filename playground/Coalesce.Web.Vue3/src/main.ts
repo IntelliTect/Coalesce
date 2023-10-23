@@ -39,7 +39,7 @@ const router = createRouter({
     { path: '/', component: () => import("@/components/HelloWorld.vue"), },
     { path: '/test', component: () => import("./components/test.vue"), },
     { path: '/test-setup', component: () => import("./components/test-setup.vue"), },
-    { path: '/audit-logs', component: CAdminAuditLogPage, props: {type: 'ObjectChange'} },
+    { path: '/audit-logs', component: CAdminAuditLogPage, props: {type: 'AuditLog'} },
     { path: '/admin/:type', name: 'coalesce-admin-list', component: CAdminTablePage, props: route => ({ ...route.params, color: 'primary' }) },
     { path: '/admin/:type/item/:id?', name: 'coalesce-admin-item', component: CAdminEditorPage, props: route => ({ ...route.params, color: 'primary' }) }
   ]

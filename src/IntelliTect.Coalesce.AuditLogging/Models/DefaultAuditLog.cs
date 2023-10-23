@@ -13,7 +13,7 @@ namespace IntelliTect.Coalesce.AuditLogging;
 [Edit(DenyAll)]
 [Delete(DenyAll)]
 [Create(DenyAll)]
-public abstract class DefaultObjectChange : IObjectChange
+public abstract class DefaultAuditLog : IAuditLog
 {
     /// <inheritdoc/>
     [Key, DefaultOrderBy(OrderByDirection = DefaultOrderByAttribute.OrderByDirections.Descending)]
@@ -35,8 +35,8 @@ public abstract class DefaultObjectChange : IObjectChange
     public virtual DateTimeOffset Date { get; set; }
 
     /// <inheritdoc/>
-    [ForeignKey(nameof(ObjectChangeProperty.ParentId))]
-    public virtual ICollection<ObjectChangeProperty>? Properties { get; set; }
+    [ForeignKey(nameof(AuditLogProperty.ParentId))]
+    public virtual ICollection<AuditLogProperty>? Properties { get; set; }
 
     /// <summary>
     /// The IP address of the client, if the change resulted from an incoming request.

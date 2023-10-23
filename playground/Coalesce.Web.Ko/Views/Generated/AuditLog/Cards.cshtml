@@ -15,11 +15,11 @@
     }
 </style>
 
-<div class="card-view obj-objectChangeProperty">
+<div class="card-view obj-auditLog">
     <div class="card-view-header">
         <div class="clearfix">
             <h1 style="display: inline-block">
-                Object Change Property List
+                Audit Log List
             </h1>
         </div>
         <div class="clearfix">
@@ -53,26 +53,50 @@
         <div class="flex-card">
             <div class="card-heading">
                 <h3 class="card-title">
-                    <span data-bind="text: propertyName"></span>
+                    <span data-bind="text: type"></span>
                 </h3>
             </div>
             <div class="card-body flex">
                 <dl>
-                    <dt>Parent Id</dt>
+                    <dt>Message</dt>
                     <dd>
-                        @(Knockout.DisplayFor<IntelliTect.Coalesce.AuditLogging.ObjectChangeProperty>(p => p.ParentId, false))
+                        @(Knockout.DisplayFor<Coalesce.Domain.AuditLog>(p => p.Message, false))
                     </dd>
-                    <dt>Property Name</dt>
+                    <dt>User</dt>
                     <dd>
-                        @(Knockout.DisplayFor<IntelliTect.Coalesce.AuditLogging.ObjectChangeProperty>(p => p.PropertyName, false))
+                        @(Knockout.DisplayFor<Coalesce.Domain.AuditLog>(p => p.User, false))
                     </dd>
-                    <dt>Old Value</dt>
+                    <dt>Type</dt>
                     <dd>
-                        @(Knockout.DisplayFor<IntelliTect.Coalesce.AuditLogging.ObjectChangeProperty>(p => p.OldValue, false))
+                        @(Knockout.DisplayFor<IntelliTect.Coalesce.AuditLogging.DefaultAuditLog>(p => p.Type, false))
                     </dd>
-                    <dt>New Value</dt>
+                    <dt>Key Value</dt>
                     <dd>
-                        @(Knockout.DisplayFor<IntelliTect.Coalesce.AuditLogging.ObjectChangeProperty>(p => p.NewValue, false))
+                        @(Knockout.DisplayFor<IntelliTect.Coalesce.AuditLogging.DefaultAuditLog>(p => p.KeyValue, false))
+                    </dd>
+                    <dt>Change Type</dt>
+                    <dd>
+                        @(Knockout.DisplayFor<IntelliTect.Coalesce.AuditLogging.DefaultAuditLog>(p => p.State, false))
+                    </dd>
+                    <dt>Date</dt>
+                    <dd>
+                        @(Knockout.DisplayFor<IntelliTect.Coalesce.AuditLogging.DefaultAuditLog>(p => p.Date, false))
+                    </dd>
+                    <dt>Properties</dt>
+                    <dd>
+                        <a data-bind='attr: {href: propertiesListUrl}, text: properties().length + " - Edit"' class='btn btn-default btn-sm'></a>
+                    </dd>
+                    <dt>Client IP</dt>
+                    <dd>
+                        @(Knockout.DisplayFor<IntelliTect.Coalesce.AuditLogging.DefaultAuditLog>(p => p.ClientIp, false))
+                    </dd>
+                    <dt>Referrer</dt>
+                    <dd>
+                        @(Knockout.DisplayFor<IntelliTect.Coalesce.AuditLogging.DefaultAuditLog>(p => p.Referrer, false))
+                    </dd>
+                    <dt>Endpoint</dt>
+                    <dd>
+                        @(Knockout.DisplayFor<IntelliTect.Coalesce.AuditLogging.DefaultAuditLog>(p => p.Endpoint, false))
                     </dd>
                 </dl>
                 
@@ -95,35 +119,35 @@
         {
             @:Coalesce.GlobalConfiguration.viewModel.setupValidationAutomatically(false);
         }
-        var objectChangePropertyList = new ListViewModels.ObjectChangePropertyList();
+        var auditLogList = new ListViewModels.AuditLogList();
         
         // Set up parent info based on the URL.
         @if (ViewBag.Query != null)
         {
-            @:objectChangePropertyList.queryString = "@(ViewBag.Query)";
+            @:auditLogList.queryString = "@(ViewBag.Query)";
         }
         
         // Save and restore values from the URL:
         var urlVariables = ['page', 'pageSize', 'search', 'orderBy', 'orderByDescending'];
         $.each(urlVariables, function(){
             var param = Coalesce.Utilities.GetUrlParameter(this);
-            if (param) {objectChangePropertyList[this](param);}
+            if (param) {auditLogList[this](param);}
         })
-        objectChangePropertyList.isLoading.subscribe(function(){
+        auditLogList.isLoading.subscribe(function(){
             var newUrl = window.location.href;
         
             $.each(urlVariables, function(){
-                var param = objectChangePropertyList[this]();
+                var param = auditLogList[this]();
                 newUrl = Coalesce.Utilities.SetUrlParameter(newUrl, this, param);
             })
             history.replaceState(null, document.title, newUrl);
         });
         
-        objectChangePropertyList.isSavingAutomatically = false;
-        ko.applyBindings(objectChangePropertyList, document.body);
-        objectChangePropertyList.isSavingAutomatically = true;
+        auditLogList.isSavingAutomatically = false;
+        ko.applyBindings(auditLogList, document.body);
+        auditLogList.isSavingAutomatically = true;
         
-        objectChangePropertyList.includes = "ObjectChangePropertyListGen";
-        objectChangePropertyList.load();
+        auditLogList.includes = "AuditLogListGen";
+        auditLogList.load();
     </script>
 }

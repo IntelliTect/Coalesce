@@ -47,7 +47,7 @@ const router = new VueRouter({ mode: 'history', routes: [
     path: '/test',
     component: () => import("./components/test.vue"),  },
 
-  { path: '/audit-logs', component: CAdminAuditLogPage, props: {type: 'ObjectChange'} },
+  { path: '/audit-logs', component: CAdminAuditLogPage, props: {type: 'AuditLog'} },
   { path: '/admin/:type', 
     name: 'coalesce-admin-list', 
     component: CAdminTablePage, 

@@ -8,7 +8,7 @@ namespace IntelliTect.Coalesce.AuditLogging;
 /// <summary>
 /// A representation of a change performed on an entity in the database.
 /// </summary>
-public interface IObjectChange
+public interface IAuditLog
 {
     long Id { get; set; }
 
@@ -35,5 +35,5 @@ public interface IObjectChange
     /// <summary>
     /// The individual column/property changes made to the entity.
     /// </summary>
-    ICollection<ObjectChangeProperty>? Properties { get; set; }
+    ICollection<AuditLogProperty>? Properties { get; set; }
 }

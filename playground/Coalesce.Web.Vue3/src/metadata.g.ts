@@ -133,6 +133,172 @@ export const Titles = domain.enums.Titles = {
   },
   ]),
 }
+export const AuditLog = domain.types.AuditLog = {
+  name: "AuditLog",
+  displayName: "Audit Log",
+  get displayProp() { return this.props.type }, 
+  type: "model",
+  controllerRoute: "AuditLog",
+  get keyProp() { return this.props.id }, 
+  behaviorFlags: 0 as BehaviorFlags,
+  props: {
+    message: {
+      name: "message",
+      displayName: "Message",
+      type: "string",
+      role: "value",
+    },
+    userId: {
+      name: "userId",
+      displayName: "User Id",
+      type: "number",
+      role: "foreignKey",
+      get principalKey() { return (domain.types.Person as ModelType).props.personId as PrimaryKeyProperty },
+      get principalType() { return (domain.types.Person as ModelType) },
+      get navigationProp() { return (domain.types.AuditLog as ModelType).props.user as ModelReferenceNavigationProperty },
+      hidden: 3 as HiddenAreas,
+    },
+    user: {
+      name: "user",
+      displayName: "User",
+      type: "model",
+      get typeDef() { return (domain.types.Person as ModelType) },
+      role: "referenceNavigation",
+      get foreignKey() { return (domain.types.AuditLog as ModelType).props.userId as ForeignKeyProperty },
+      get principalKey() { return (domain.types.Person as ModelType).props.personId as PrimaryKeyProperty },
+      dontSerialize: true,
+    },
+    id: {
+      name: "id",
+      displayName: "Id",
+      type: "number",
+      role: "primaryKey",
+      hidden: 3 as HiddenAreas,
+    },
+    type: {
+      name: "type",
+      displayName: "Type",
+      type: "string",
+      role: "value",
+      rules: {
+        required: val => (val != null && val !== '') || "Type is required.",
+        maxLength: val => !val || val.length <= 100 || "Type may not be more than 100 characters.",
+      }
+    },
+    keyValue: {
+      name: "keyValue",
+      displayName: "Key Value",
+      type: "string",
+      role: "value",
+    },
+    state: {
+      name: "state",
+      displayName: "Change Type",
+      type: "enum",
+      get typeDef() { return domain.enums.AuditEntryState },
+      role: "value",
+    },
+    date: {
+      name: "date",
+      displayName: "Date",
+      type: "date",
+      dateKind: "datetime",
+      role: "value",
+    },
+    properties: {
+      name: "properties",
+      displayName: "Properties",
+      type: "collection",
+      itemType: {
+        name: "$collectionItem",
+        displayName: "",
+        role: "value",
+        type: "model",
+        get typeDef() { return (domain.types.AuditLogProperty as ModelType) },
+      },
+      role: "collectionNavigation",
+      get foreignKey() { return (domain.types.AuditLogProperty as ModelType).props.parentId as ForeignKeyProperty },
+      dontSerialize: true,
+    },
+    clientIp: {
+      name: "clientIp",
+      displayName: "Client IP",
+      type: "string",
+      role: "value",
+    },
+    referrer: {
+      name: "referrer",
+      displayName: "Referrer",
+      type: "string",
+      role: "value",
+    },
+    endpoint: {
+      name: "endpoint",
+      displayName: "Endpoint",
+      type: "string",
+      role: "value",
+    },
+  },
+  methods: {
+  },
+  dataSources: {
+  },
+}
+export const AuditLogProperty = domain.types.AuditLogProperty = {
+  name: "AuditLogProperty",
+  displayName: "Audit Log Property",
+  get displayProp() { return this.props.propertyName }, 
+  type: "model",
+  controllerRoute: "AuditLogProperty",
+  get keyProp() { return this.props.id }, 
+  behaviorFlags: 0 as BehaviorFlags,
+  props: {
+    id: {
+      name: "id",
+      displayName: "Id",
+      type: "number",
+      role: "primaryKey",
+      hidden: 3 as HiddenAreas,
+    },
+    parentId: {
+      name: "parentId",
+      displayName: "Parent Id",
+      type: "number",
+      role: "foreignKey",
+      get principalKey() { return (domain.types.AuditLog as ModelType).props.id as PrimaryKeyProperty },
+      get principalType() { return (domain.types.AuditLog as ModelType) },
+      rules: {
+        required: val => val != null || "Parent Id is required.",
+      }
+    },
+    propertyName: {
+      name: "propertyName",
+      displayName: "Property Name",
+      type: "string",
+      role: "value",
+      rules: {
+        required: val => (val != null && val !== '') || "Property Name is required.",
+        maxLength: val => !val || val.length <= 100 || "Property Name may not be more than 100 characters.",
+      }
+    },
+    oldValue: {
+      name: "oldValue",
+      displayName: "Old Value",
+      type: "string",
+      role: "value",
+    },
+    newValue: {
+      name: "newValue",
+      displayName: "New Value",
+      type: "string",
+      role: "value",
+    },
+  },
+  methods: {
+  },
+  dataSources: {
+  },
+}
 export const Case = domain.types.Case = {
   name: "Case",
   displayName: "Case",
@@ -968,172 +1134,6 @@ export const Log = domain.types.Log = {
     message: {
       name: "message",
       displayName: "Message",
-      type: "string",
-      role: "value",
-    },
-  },
-  methods: {
-  },
-  dataSources: {
-  },
-}
-export const ObjectChange = domain.types.ObjectChange = {
-  name: "ObjectChange",
-  displayName: "Object Change",
-  get displayProp() { return this.props.type }, 
-  type: "model",
-  controllerRoute: "ObjectChange",
-  get keyProp() { return this.props.id }, 
-  behaviorFlags: 0 as BehaviorFlags,
-  props: {
-    message: {
-      name: "message",
-      displayName: "Message",
-      type: "string",
-      role: "value",
-    },
-    userId: {
-      name: "userId",
-      displayName: "User Id",
-      type: "number",
-      role: "foreignKey",
-      get principalKey() { return (domain.types.Person as ModelType).props.personId as PrimaryKeyProperty },
-      get principalType() { return (domain.types.Person as ModelType) },
-      get navigationProp() { return (domain.types.ObjectChange as ModelType).props.user as ModelReferenceNavigationProperty },
-      hidden: 3 as HiddenAreas,
-    },
-    user: {
-      name: "user",
-      displayName: "User",
-      type: "model",
-      get typeDef() { return (domain.types.Person as ModelType) },
-      role: "referenceNavigation",
-      get foreignKey() { return (domain.types.ObjectChange as ModelType).props.userId as ForeignKeyProperty },
-      get principalKey() { return (domain.types.Person as ModelType).props.personId as PrimaryKeyProperty },
-      dontSerialize: true,
-    },
-    id: {
-      name: "id",
-      displayName: "Id",
-      type: "number",
-      role: "primaryKey",
-      hidden: 3 as HiddenAreas,
-    },
-    type: {
-      name: "type",
-      displayName: "Type",
-      type: "string",
-      role: "value",
-      rules: {
-        required: val => (val != null && val !== '') || "Type is required.",
-        maxLength: val => !val || val.length <= 100 || "Type may not be more than 100 characters.",
-      }
-    },
-    keyValue: {
-      name: "keyValue",
-      displayName: "Key Value",
-      type: "string",
-      role: "value",
-    },
-    state: {
-      name: "state",
-      displayName: "Change Type",
-      type: "enum",
-      get typeDef() { return domain.enums.AuditEntryState },
-      role: "value",
-    },
-    date: {
-      name: "date",
-      displayName: "Date",
-      type: "date",
-      dateKind: "datetime",
-      role: "value",
-    },
-    properties: {
-      name: "properties",
-      displayName: "Properties",
-      type: "collection",
-      itemType: {
-        name: "$collectionItem",
-        displayName: "",
-        role: "value",
-        type: "model",
-        get typeDef() { return (domain.types.ObjectChangeProperty as ModelType) },
-      },
-      role: "collectionNavigation",
-      get foreignKey() { return (domain.types.ObjectChangeProperty as ModelType).props.parentId as ForeignKeyProperty },
-      dontSerialize: true,
-    },
-    clientIp: {
-      name: "clientIp",
-      displayName: "Client IP",
-      type: "string",
-      role: "value",
-    },
-    referrer: {
-      name: "referrer",
-      displayName: "Referrer",
-      type: "string",
-      role: "value",
-    },
-    endpoint: {
-      name: "endpoint",
-      displayName: "Endpoint",
-      type: "string",
-      role: "value",
-    },
-  },
-  methods: {
-  },
-  dataSources: {
-  },
-}
-export const ObjectChangeProperty = domain.types.ObjectChangeProperty = {
-  name: "ObjectChangeProperty",
-  displayName: "Object Change Property",
-  get displayProp() { return this.props.propertyName }, 
-  type: "model",
-  controllerRoute: "ObjectChangeProperty",
-  get keyProp() { return this.props.id }, 
-  behaviorFlags: 0 as BehaviorFlags,
-  props: {
-    id: {
-      name: "id",
-      displayName: "Id",
-      type: "number",
-      role: "primaryKey",
-      hidden: 3 as HiddenAreas,
-    },
-    parentId: {
-      name: "parentId",
-      displayName: "Parent Id",
-      type: "number",
-      role: "foreignKey",
-      get principalKey() { return (domain.types.ObjectChange as ModelType).props.id as PrimaryKeyProperty },
-      get principalType() { return (domain.types.ObjectChange as ModelType) },
-      rules: {
-        required: val => val != null || "Parent Id is required.",
-      }
-    },
-    propertyName: {
-      name: "propertyName",
-      displayName: "Property Name",
-      type: "string",
-      role: "value",
-      rules: {
-        required: val => (val != null && val !== '') || "Property Name is required.",
-        maxLength: val => !val || val.length <= 100 || "Property Name may not be more than 100 characters.",
-      }
-    },
-    oldValue: {
-      name: "oldValue",
-      displayName: "Old Value",
-      type: "string",
-      role: "value",
-    },
-    newValue: {
-      name: "newValue",
-      displayName: "New Value",
       type: "string",
       role: "value",
     },
@@ -2335,6 +2335,8 @@ interface AppDomain extends Domain {
     Titles: typeof Titles
   }
   types: {
+    AuditLog: typeof AuditLog
+    AuditLogProperty: typeof AuditLogProperty
     Case: typeof Case
     CaseDto: typeof CaseDto
     CaseDtoStandalone: typeof CaseDtoStandalone
@@ -2344,8 +2346,6 @@ interface AppDomain extends Domain {
     DevTeam: typeof DevTeam
     Location: typeof Location
     Log: typeof Log
-    ObjectChange: typeof ObjectChange
-    ObjectChangeProperty: typeof ObjectChangeProperty
     Person: typeof Person
     PersonCriteria: typeof PersonCriteria
     PersonLocation: typeof PersonLocation

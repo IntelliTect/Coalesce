@@ -26,11 +26,11 @@
         color: lightgray;
     }
 </style>
-<div class="table-view obj-objectChangeProperty">
+<div class="table-view obj-auditLogProperty">
     <div class="table-view-header">
         <div class="clearfix">
             <h1 style="display: inline-block">
-                Object Change Property List
+                Audit Log Property List
             </h1>
         </div>
         <div class="clearfix">
@@ -56,7 +56,7 @@
                 <button data-bind="click:load" class="btn btn-sm btn-default "><i class="fa fa-refresh"></i> Refresh</button>
                 @if (ViewBag.Editable)
                 {
-                    <a href="~/ObjectChangeProperty/Table?@(ViewBag.Query)" role="button" class="btn btn-sm btn-default "><i class="fa fa-lock"></i> Make Read-only</a>
+                    <a href="~/AuditLogProperty/Table?@(ViewBag.Query)" role="button" class="btn btn-sm btn-default "><i class="fa fa-lock"></i> Make Read-only</a>
                 }
             </div>
         </div>
@@ -92,17 +92,17 @@
                         <tr data-bind="css: {'btn-warning': errorMessage()}, attr: {id: id}">
                             @if (@ViewBag.Editable)
                             {
-                                <td class="prop-parentId">@(Knockout.InputFor<IntelliTect.Coalesce.AuditLogging.ObjectChangeProperty>(p => p.ParentId))</td>
-                                <td class="prop-propertyName">@(Knockout.InputFor<IntelliTect.Coalesce.AuditLogging.ObjectChangeProperty>(p => p.PropertyName))</td>
-                                <td class="prop-oldValue">@(Knockout.InputFor<IntelliTect.Coalesce.AuditLogging.ObjectChangeProperty>(p => p.OldValue))</td>
-                                <td class="prop-newValue">@(Knockout.InputFor<IntelliTect.Coalesce.AuditLogging.ObjectChangeProperty>(p => p.NewValue))</td>
+                                <td class="prop-parentId">@(Knockout.InputFor<IntelliTect.Coalesce.AuditLogging.AuditLogProperty>(p => p.ParentId))</td>
+                                <td class="prop-propertyName">@(Knockout.InputFor<IntelliTect.Coalesce.AuditLogging.AuditLogProperty>(p => p.PropertyName))</td>
+                                <td class="prop-oldValue">@(Knockout.InputFor<IntelliTect.Coalesce.AuditLogging.AuditLogProperty>(p => p.OldValue))</td>
+                                <td class="prop-newValue">@(Knockout.InputFor<IntelliTect.Coalesce.AuditLogging.AuditLogProperty>(p => p.NewValue))</td>
                             }
                             else
                             {
-                                <td class="prop-parentId">@(Knockout.DisplayFor<IntelliTect.Coalesce.AuditLogging.ObjectChangeProperty>(p => p.ParentId, true))</td>
-                                <td class="prop-propertyName">@(Knockout.DisplayFor<IntelliTect.Coalesce.AuditLogging.ObjectChangeProperty>(p => p.PropertyName, true))</td>
-                                <td class="prop-oldValue">@(Knockout.DisplayFor<IntelliTect.Coalesce.AuditLogging.ObjectChangeProperty>(p => p.OldValue, true))</td>
-                                <td class="prop-newValue">@(Knockout.DisplayFor<IntelliTect.Coalesce.AuditLogging.ObjectChangeProperty>(p => p.NewValue, true))</td>
+                                <td class="prop-parentId">@(Knockout.DisplayFor<IntelliTect.Coalesce.AuditLogging.AuditLogProperty>(p => p.ParentId, true))</td>
+                                <td class="prop-propertyName">@(Knockout.DisplayFor<IntelliTect.Coalesce.AuditLogging.AuditLogProperty>(p => p.PropertyName, true))</td>
+                                <td class="prop-oldValue">@(Knockout.DisplayFor<IntelliTect.Coalesce.AuditLogging.AuditLogProperty>(p => p.OldValue, true))</td>
+                                <td class="prop-newValue">@(Knockout.DisplayFor<IntelliTect.Coalesce.AuditLogging.AuditLogProperty>(p => p.NewValue, true))</td>
                             }
                             <td>
                                 <!-- Editor buttons -->
@@ -126,35 +126,35 @@
         {
             @:Coalesce.GlobalConfiguration.viewModel.setupValidationAutomatically(false);
         }
-        var objectChangePropertyList = new ListViewModels.ObjectChangePropertyList();
+        var auditLogPropertyList = new ListViewModels.AuditLogPropertyList();
         
         // Set up parent info based on the URL.
         @if (ViewBag.Query != null)
         {
-            @:objectChangePropertyList.queryString = "@(ViewBag.Query)";
+            @:auditLogPropertyList.queryString = "@(ViewBag.Query)";
         }
         
         // Save and restore values from the URL:
         var urlVariables = ['page', 'pageSize', 'search', 'orderBy', 'orderByDescending'];
         $.each(urlVariables, function(){
             var param = Coalesce.Utilities.GetUrlParameter(this);
-            if (param) {objectChangePropertyList[this](param);}
+            if (param) {auditLogPropertyList[this](param);}
         })
-        objectChangePropertyList.isLoading.subscribe(function(){
+        auditLogPropertyList.isLoading.subscribe(function(){
             var newUrl = window.location.href;
         
             $.each(urlVariables, function(){
-                var param = objectChangePropertyList[this]();
+                var param = auditLogPropertyList[this]();
                 newUrl = Coalesce.Utilities.SetUrlParameter(newUrl, this, param);
             })
             history.replaceState(null, document.title, newUrl);
         });
         
-        objectChangePropertyList.isSavingAutomatically = false;
-        ko.applyBindings(objectChangePropertyList, document.body);
-        objectChangePropertyList.isSavingAutomatically = true;
+        auditLogPropertyList.isSavingAutomatically = false;
+        ko.applyBindings(auditLogPropertyList, document.body);
+        auditLogPropertyList.isSavingAutomatically = true;
         
-        objectChangePropertyList.includes = "ObjectChangePropertyListGen";
-        objectChangePropertyList.load();
+        auditLogPropertyList.includes = "AuditLogPropertyListGen";
+        auditLogPropertyList.load();
     </script>
 }

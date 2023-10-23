@@ -10,7 +10,7 @@ public class AuditOptions
     /// <para>
     /// For supported DB providers (currently only SQL Server), specifies a length of time
     /// during which repeated changes to the same record that are entirely identical other than
-    /// their timestamp and specific <see cref="ObjectChangeProperty.NewValue"/>s will be merged 
+    /// their timestamp and specific <see cref="AuditLogProperty.NewValue"/>s will be merged 
     /// together into a single change. 
     /// </para>
     /// <para>

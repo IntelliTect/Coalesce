@@ -33,9 +33,17 @@ required
     public string? OldValue { get; set; }
 
     /// <summary>
+    /// Additional descriptive information about <see cref="OldValue"/>. For example, a string describing the value of a foreign key.
+    /// </summary>
+    public string? OldValueDescription { get; set; }
+
+    /// <summary>
     /// For add or modify operations, holds the new value of the property.
     /// </summary>
     public string? NewValue { get; set; }
 
-    // FUTURE?: Add additional fields that get filled with the [ListText] of FK values? Could be used for other descriptive purposes too.
+    /// <summary>
+    /// Additional descriptive information about <see cref="NewValue"/>. For example, a string describing the value of a foreign key.
+    /// </summary>
+    public string? NewValueDescription { get; set; }
 }

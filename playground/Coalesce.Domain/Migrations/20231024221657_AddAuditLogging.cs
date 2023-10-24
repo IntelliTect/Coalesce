@@ -64,7 +64,9 @@ namespace Coalesce.Domain.Migrations
                     ParentId = table.Column<long>(type: "bigint", nullable: false),
                     PropertyName = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false),
                     OldValue = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    NewValue = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    OldValueDescription = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    NewValue = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    NewValueDescription = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {

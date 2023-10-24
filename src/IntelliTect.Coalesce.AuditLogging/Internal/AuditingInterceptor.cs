@@ -1,10 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
-using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Reflection;
@@ -21,7 +21,7 @@ internal sealed class AuditingInterceptor<TAuditLog> : SaveChangesInterceptor
 {
     private readonly AuditOptions _options;
 
-    private Audit? _audit;
+    private CoalesceAudit? _audit;
 
     private IAuditLogContext<TAuditLog> GetContext(DbContextEventData data)
         => (IAuditLogContext<TAuditLog>)(data.Context ?? throw new InvalidOperationException("DbContext unavailable."));
@@ -47,19 +47,24 @@ internal sealed class AuditingInterceptor<TAuditLog> : SaveChangesInterceptor
         m_auditConfiguration.SetValue(audit, configLazy);
     }
 
-    public override ValueTask<InterceptionResult<int>> SavingChangesAsync(
+    public override async ValueTask<InterceptionResult<int>> SavingChangesAsync(
         DbContextEventData eventData,
         InterceptionResult<int> result,
         CancellationToken cancellationToken = default)
     {
         _audit = null;
-        if (GetContext(eventData).SuppressAudit) return ValueTask.FromResult(result);
-
-        _audit = new Audit();
+        if (GetContext(eventData).SuppressAudit) return result;
+        
+        _audit = new CoalesceAudit();
         AttachConfig(_audit);
         _audit.PreSaveChanges(eventData.Context);
 
-        return ValueTask.FromResult(result);
+        if (_options.PropertyDescriptions.HasFlag(PropertyDescriptionMode.FkListText))
+        {
+            await _audit.PopulateOldDescriptions(eventData.Context!, true);
+        }
+
+        return result;
     }
 
     public override InterceptionResult<int> SavingChanges(
@@ -69,9 +74,16 @@ internal sealed class AuditingInterceptor<TAuditLog> : SaveChangesInterceptor
         _audit = null;
         if (GetContext(eventData).SuppressAudit) return result;
 
-        _audit = new Audit();
+        _audit = new CoalesceAudit();
         AttachConfig(_audit);
         _audit.PreSaveChanges(eventData.Context);
+
+        if (_options.PropertyDescriptions.HasFlag(PropertyDescriptionMode.FkListText))
+        {
+#pragma warning disable CS4014 // Executes synchonously when async: false
+            _audit.PopulateOldDescriptions(eventData.Context!, async: false);
+#pragma warning restore CS4014
+        }
 
         return result;
     }
@@ -83,7 +95,9 @@ internal sealed class AuditingInterceptor<TAuditLog> : SaveChangesInterceptor
     {
         if (_audit is null) return result;
 
+#pragma warning disable CS4014 // Executes synchonously when async: false
         SaveAudit(eventData.Context!, _audit, async: false);
+#pragma warning restore CS4014
 
         return result;
     }
@@ -136,10 +150,9 @@ internal sealed class AuditingInterceptor<TAuditLog> : SaveChangesInterceptor
             var customProps = props.ExceptBy(basePropNames, p => p.PropertyInfo?.Name);
             var cursorProps = customProps.Concat(props.Where(p => p.Name is nameof(IAuditLog.State) or nameof(IAuditLog.Date) or nameof(IAuditLog.Type) or nameof(IAuditLog.KeyValue)));
 
-            string GetColName(string propName, IEntityType table) => table
+            string GetColName(string propName, IEntityType table) => GetPropColName(table
                 .GetDeclaredProperties()
-                .Single(p => p.Name == propName)
-                .GetColumnName(StoreObjectIdentifier.Create(table, StoreObjectType.Table)!.Value)!;
+                .Single(p => p.Name == propName), table);
 
             string GetPropColName(IProperty prop, IEntityType table) => prop
                 .GetColumnName(StoreObjectIdentifier.Create(table, StoreObjectType.Table)!.Value)!;
@@ -152,6 +165,11 @@ internal sealed class AuditingInterceptor<TAuditLog> : SaveChangesInterceptor
 
             string propFkCol = GetColName(nameof(AuditLogProperty.ParentId), propEntityType);
             string propPkCol = GetColName(nameof(AuditLogProperty.Id), propEntityType);
+            string propNameCol = GetColName(nameof(AuditLogProperty.PropertyName), propEntityType);
+            string propOldCol = GetColName(nameof(AuditLogProperty.OldValue), propEntityType);
+            string propOldDescCol = GetColName(nameof(AuditLogProperty.OldValueDescription), propEntityType);
+            string propNewCol = GetColName(nameof(AuditLogProperty.NewValue), propEntityType);
+            string propNewDescCol = GetColName(nameof(AuditLogProperty.NewValueDescription), propEntityType);
 
             return $"""
             SET NOCOUNT ON;
@@ -231,17 +249,19 @@ internal sealed class AuditingInterceptor<TAuditLog> : SaveChangesInterceptor
 
                         MERGE {propTableName}
                         USING (
-                        	SELECT PropertyName, NewValue 
+                        	SELECT PropertyName, NewValue, NewValueDescription
                         	FROM OPENJSON(@Properties) with (
             					PropertyName [nvarchar](max) '$.PropertyName',
             					OldValue [nvarchar](max) '$.OldValue',
-            					NewValue [nvarchar](max) '$.NewValue'
+            				    OldValueDescription [nvarchar](max) '$.OldValueDescription',
+            					NewValue [nvarchar](max) '$.NewValue',
+            				    NewValueDescription [nvarchar](max) '$.NewValueDescription'
             				)
                         ) AS Source
-                        ON {propFkCol} = @mostRecentAuditLogId AND {propTableName}.[PropertyName] = Source.PropertyName
+                        ON {propFkCol} = @mostRecentAuditLogId AND {propTableName}.{propNameCol} = Source.PropertyName
                         WHEN MATCHED THEN
                         	-- DO NOT UPDATE OldValue! It stays the same so we represent the transition from the original OldValue to the new NewValue.
-                        	UPDATE SET NewValue = Source.NewValue
+                        	UPDATE SET {propNewCol} = Source.NewValue, {propNewDescCol} = Source.NewValueDescription
                         ;
                     END;
                 ELSE
@@ -255,12 +275,14 @@ internal sealed class AuditingInterceptor<TAuditLog> : SaveChangesInterceptor
                         SET @mostRecentAuditLogId = SCOPE_IDENTITY();
 
                         INSERT INTO {propTableName}
-                        ({propFkCol}, PropertyName, OldValue, NewValue)
-                        SELECT @mostRecentAuditLogId, PropertyName, OldValue, NewValue
+                        ({propFkCol}, {propNameCol}, {propOldCol}, {propOldDescCol}, {propNewCol}, {propNewDescCol})
+                        SELECT @mostRecentAuditLogId, PropertyName, OldValue, OldValueDescription, NewValue, NewValueDescription
                         FROM OPENJSON (@Properties) WITH (
             				PropertyName [nvarchar](max) '$.PropertyName',
             				OldValue [nvarchar](max) '$.OldValue',
-            				NewValue [nvarchar](max) '$.NewValue'
+            				OldValueDescription [nvarchar](max) '$.OldValueDescription',
+            				NewValue [nvarchar](max) '$.NewValue',
+            				NewValueDescription [nvarchar](max) '$.NewValueDescription'
             			);
 
                     END;
@@ -272,9 +294,14 @@ internal sealed class AuditingInterceptor<TAuditLog> : SaveChangesInterceptor
         }
     }
 
-    private Task SaveAudit(DbContext db, Audit audit, bool async)
+    private async ValueTask SaveAudit(DbContext db, CoalesceAudit audit, bool async)
     {
         audit.PostSaveChanges();
+
+        if (_options.PropertyDescriptions.HasFlag(PropertyDescriptionMode.FkListText))
+        {
+            await audit.PopulateNewDescriptions(db, async);
+        }
 
         var serviceProvider = new EntityFrameworkServiceProvider(db);
         var operationContext = _options.OperationContextType is null 
@@ -301,17 +328,19 @@ internal sealed class AuditingInterceptor<TAuditLog> : SaveChangesInterceptor
                 auditLog.Type = e.EntityTypeName;
                 auditLog.KeyValue = keyProperties is null ? null : string.Join(";", keyProperties.Select(p => e.Entry.CurrentValues[p]));
                 auditLog.Properties = e.Properties
-                    .Where(property => property.OldValueFormatted != property.NewValueFormatted)
                     .Select(property =>
                     {
-                        var prop = new AuditLogProperty
+                        return new AuditLogProperty
                         {
                             PropertyName = property.PropertyName,
                             OldValue = property.OldValueFormatted,
-                            NewValue = property.NewValueFormatted
+                            OldValueDescription = audit.OldValueDescriptions?.GetValueOrDefault((e, property.PropertyName)),
+                            NewValue = property.NewValueFormatted,
+                            NewValueDescription = audit.NewValueDescriptions?.GetValueOrDefault((e, property.PropertyName))
                         };
-                        return prop;
-                    }).ToList();
+                    })
+                    .Where(property => property.OldValue != property.NewValue || property.OldValueDescription != property.NewValueDescription)
+                    .ToList();
 
                 operationContext?.Populate(auditLog, e.Entry);
 
@@ -321,7 +350,7 @@ internal sealed class AuditingInterceptor<TAuditLog> : SaveChangesInterceptor
 
         if (auditLogs.Count == 0)
         {
-            return Task.CompletedTask;
+            return;
         }
 
         if (_options.MergeWindow > TimeSpan.Zero && db.Database.ProviderName == "Microsoft.EntityFrameworkCore.SqlServer")
@@ -346,12 +375,11 @@ internal sealed class AuditingInterceptor<TAuditLog> : SaveChangesInterceptor
 
             if (async)
             {
-                return db.Database.ExecuteSqlRawAsync(cmd.CommandText, jsonParam, mergeWindowParam);
+                await db.Database.ExecuteSqlRawAsync(cmd.CommandText, jsonParam, mergeWindowParam);
             }
             else
             {
                 db.Database.ExecuteSqlRaw(cmd.CommandText, jsonParam, mergeWindowParam);
-                return Task.CompletedTask;
             }
         }
         else
@@ -363,12 +391,11 @@ internal sealed class AuditingInterceptor<TAuditLog> : SaveChangesInterceptor
 
             if (async)
             {
-                return db.SaveChangesAsync();
+                await db.SaveChangesAsync();
             }
             else
             {
                 db.SaveChanges();
-                return Task.CompletedTask;
             }
         }
     }

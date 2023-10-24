@@ -322,7 +322,13 @@ namespace Coalesce.Domain.Migrations
                     b.Property<string>("NewValue")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("NewValueDescription")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("OldValue")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OldValueDescription")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<long>("ParentId")

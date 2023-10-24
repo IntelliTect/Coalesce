@@ -115,7 +115,7 @@ namespace Coalesce.Domain
         /// </summary>
         [ListText]
         [NotMapped]
-        public string Name => $"{Title} {FirstName} {LastName}";
+        public string Name => $"{Title} {FirstName} {LastName}".Trim();
 
         /// <summary>
         /// Company ID this person is employed by

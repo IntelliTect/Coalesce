@@ -16,7 +16,9 @@ namespace Coalesce.Web.Vue3.Models
         private long? _ParentId;
         private string _PropertyName;
         private string _OldValue;
+        private string _OldValueDescription;
         private string _NewValue;
+        private string _NewValueDescription;
 
         public long? Id
         {
@@ -38,10 +40,20 @@ namespace Coalesce.Web.Vue3.Models
             get => _OldValue;
             set { _OldValue = value; Changed(nameof(OldValue)); }
         }
+        public string OldValueDescription
+        {
+            get => _OldValueDescription;
+            set { _OldValueDescription = value; Changed(nameof(OldValueDescription)); }
+        }
         public string NewValue
         {
             get => _NewValue;
             set { _NewValue = value; Changed(nameof(NewValue)); }
+        }
+        public string NewValueDescription
+        {
+            get => _NewValueDescription;
+            set { _NewValueDescription = value; Changed(nameof(NewValueDescription)); }
         }
 
         /// <summary>
@@ -56,7 +68,9 @@ namespace Coalesce.Web.Vue3.Models
             this.ParentId = obj.ParentId;
             this.PropertyName = obj.PropertyName;
             this.OldValue = obj.OldValue;
+            this.OldValueDescription = obj.OldValueDescription;
             this.NewValue = obj.NewValue;
+            this.NewValueDescription = obj.NewValueDescription;
         }
 
         /// <summary>
@@ -72,7 +86,9 @@ namespace Coalesce.Web.Vue3.Models
             if (ShouldMapTo(nameof(ParentId))) entity.ParentId = (ParentId ?? entity.ParentId);
             if (ShouldMapTo(nameof(PropertyName))) entity.PropertyName = PropertyName;
             if (ShouldMapTo(nameof(OldValue))) entity.OldValue = OldValue;
+            if (ShouldMapTo(nameof(OldValueDescription))) entity.OldValueDescription = OldValueDescription;
             if (ShouldMapTo(nameof(NewValue))) entity.NewValue = NewValue;
+            if (ShouldMapTo(nameof(NewValueDescription))) entity.NewValueDescription = NewValueDescription;
         }
 
         /// <summary>
@@ -91,7 +107,9 @@ namespace Coalesce.Web.Vue3.Models
             if (ShouldMapTo(nameof(Id))) entity.Id = (Id ?? entity.Id);
             if (ShouldMapTo(nameof(ParentId))) entity.ParentId = (ParentId ?? entity.ParentId);
             if (ShouldMapTo(nameof(OldValue))) entity.OldValue = OldValue;
+            if (ShouldMapTo(nameof(OldValueDescription))) entity.OldValueDescription = OldValueDescription;
             if (ShouldMapTo(nameof(NewValue))) entity.NewValue = NewValue;
+            if (ShouldMapTo(nameof(NewValueDescription))) entity.NewValueDescription = NewValueDescription;
 
             return entity;
         }

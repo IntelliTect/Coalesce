@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Coalesce.Domain.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20231023220647_AddAuditLogging")]
+    [Migration("20231024221657_AddAuditLogging")]
     partial class AddAuditLogging
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -324,7 +324,13 @@ namespace Coalesce.Domain.Migrations
                     b.Property<string>("NewValue")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("NewValueDescription")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("OldValue")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OldValueDescription")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<long>("ParentId")

@@ -18,7 +18,13 @@ public static class DbContextOptionsBuilderExtensions
     {
         var options = new AuditOptions();
 
-        configure?.Invoke(new(options));
+        CoalesceAuditLoggingBuilder<TAuditLog> auditBuilder = new(options);
+        auditBuilder = auditBuilder.ConfigureAudit(c =>
+        {
+            c.Exclude<TAuditLog>();
+            c.Exclude<AuditLogProperty>();
+        });
+        configure?.Invoke(auditBuilder);
 
         ((IDbContextOptionsBuilderInfrastructure)builder).AddOrUpdateExtension(new AuditExtension(options));
 

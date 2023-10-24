@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.ChangeTracking;
+﻿using IntelliTect.Coalesce.DataAnnotations;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using System;
 using Z.EntityFramework.Plus;
 
@@ -20,13 +21,40 @@ public class AuditOptions
     /// <para>
     /// The default is 30 seconds.</para>
     /// </summary>
-    public TimeSpan MergeWindow { get; set; } = TimeSpan.FromSeconds(30);
+    public TimeSpan MergeWindow { get; internal set; } = TimeSpan.FromSeconds(30);
 
     public Type? OperationContextType { get; internal set; }
+
+    public PropertyDescriptionMode PropertyDescriptions { get; internal set; } = PropertyDescriptionMode.FkListText;
 
     /// <summary>
     /// Internal so that it cannot be modified in a way that breaks the caching assumptions
     /// that we make in CoalesceAuditLoggingBuilder.
     /// </summary>
     internal AuditConfiguration? AuditConfiguration { get; set; } = null;
+}
+
+/// <summary>
+/// Controls how <see cref="AuditLogProperty.OldValueDescription"/> and <see cref="AuditLogProperty.NewValueDescription"/>
+/// are populated by the framework.
+/// </summary>
+[Flags]
+public enum PropertyDescriptionMode
+{
+    /// <summary>
+    /// Properties will not be populated by the framework.
+    /// </summary>
+    None = 0,
+
+    // Core modes:
+    /// <summary>
+    /// Descriptions for foreign key properties will be populating from the List Text property of the principal entity.
+    /// The list text of an entity can be customized by placing <see cref="ListTextAttribute"/> on a property,
+    /// and defaults to a property named "Name" if one exists.
+    /// </summary>
+    FkListText = 1 << 0,
+
+    // Extra options: bits 20+
+    // Future: untrack entities that we had to load because they weren't already in the context?
+    //AutoUntrack = 1 << 20,
 }

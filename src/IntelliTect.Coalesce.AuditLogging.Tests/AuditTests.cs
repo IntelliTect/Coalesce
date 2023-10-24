@@ -1,4 +1,3 @@
-using IntelliTect.Coalesce.AuditLogging;
 using IntelliTect.Coalesce.Utilities;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -7,7 +6,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Z.EntityFramework.Plus;
 
@@ -203,6 +201,209 @@ public class AuditTests
             expectedCustom1: "from TestOperationContext",
             expectedCustom2: null
         );
+    }
+
+
+    [Theory]
+    [InlineData(PropertyDescriptionMode.None, null)]
+    [InlineData(PropertyDescriptionMode.FkListText, "ListTextA")]
+    public async Task PropertyDesc_RespectsConfig(PropertyDescriptionMode mode, string? expected)
+    {
+        // Arrange
+        using var db = BuildDbContext(b => b
+            .UseCoalesceAuditLogging<TestAuditLog>(x => x
+                .WithAugmentation<TestOperationContext>()
+                .WithPropertyDescriptions(mode)
+            ));
+
+        var user = new AppUser { Name = "bob", Parent1 = new() { CustomListTextField = "ListTextA" } };
+        db.Add(user);
+        await db.SaveChangesAsync();
+
+        var log = db.AuditLogs.Include(l => l.Properties).Single(e => e.Type == nameof(AppUser));
+        var typeChangeProp = Assert.Single(log.Properties!.Where(p => p.PropertyName == nameof(AppUser.Parent1Id)));
+
+        Assert.Equal(expected, typeChangeProp.NewValueDescription);
+    }
+
+    [Fact]
+    public async Task PropertyDesc_PopulatesValuesForMappedListText()
+    {
+        // Arrange
+        using var db = BuildDbContext(b => b
+            .UseCoalesceAuditLogging<TestAuditLog>(x => x
+                .WithAugmentation<TestOperationContext>()
+            ));
+
+        db.SuppressAudit = true;
+        db.Add(new ParentWithMappedListText { Id = "A", CustomListTextField = "ListTextA" });
+        db.Add(new ParentWithMappedListText { Id = "B", CustomListTextField = "ListTextB" });
+        db.SaveChanges();
+        db.SuppressAudit = false;
+
+        // Act/Assert: Insert
+        Cleanup();
+        var user = new AppUser { Name = "bob", Parent1Id = "A" };
+        db.Add(user);
+        await db.SaveChangesAsync();
+
+        var typeChangeProp = GetAuditLogProp();
+        Assert.Null(typeChangeProp.OldValueDescription);
+        Assert.Equal("ListTextA", typeChangeProp.NewValueDescription);
+
+
+        // Act/Assert: Update
+        Cleanup();
+        user = db.Users.Single();
+        user.Parent1Id = "B";
+        await db.SaveChangesAsync();
+
+        typeChangeProp = GetAuditLogProp();
+        Assert.Equal("ListTextA", typeChangeProp.OldValueDescription);
+        Assert.Equal("ListTextB", typeChangeProp.NewValueDescription);
+
+
+        // Act/Assert: Delete
+        Cleanup();
+        db.Remove(user);
+        await db.SaveChangesAsync();
+
+        typeChangeProp = GetAuditLogProp();
+        Assert.Equal("ListTextB", typeChangeProp.OldValueDescription);
+        Assert.Null(typeChangeProp.NewValueDescription);
+
+        void Cleanup()
+        {
+            db.AuditLogs.Delete();
+            db.ChangeTracker.Clear();
+        }
+        AuditLogProperty GetAuditLogProp()
+        {
+            var log = db.AuditLogs.Include(l => l.Properties).Single(e => e.Type == nameof(AppUser));
+            return Assert.Single(log.Properties!.Where(p => p.PropertyName == nameof(AppUser.Parent1Id)));
+        }
+    }
+
+    [Fact]
+    public void PropertyDesc_PopulatesValuesCorrectlyWhenPrincipalAlsoChanges()
+    {
+        // Arrange
+        using var db = BuildDbContext(b => b
+            .UseCoalesceAuditLogging<TestAuditLog>(x => x
+                .WithAugmentation<TestOperationContext>()
+            ));
+
+        db.SuppressAudit = true;
+        var parentA = new ParentWithMappedListText { Id = "A", CustomListTextField = "ListTextA" };
+        db.Add(parentA);
+        var parentB = new ParentWithMappedListText { Id = "B", CustomListTextField = "ListTextB" };
+        db.Add(parentB);
+        var user = new AppUser { Name = "bob", Parent1Id = "A" };
+        db.Add(user);
+        db.SaveChanges();
+        db.SuppressAudit = false;
+
+        // Act/Assert: Insert
+        user.Parent1Id = "B";
+        parentA.CustomListTextField = "NewListTextA";
+        parentB.CustomListTextField = "NewListTextB";
+        db.SaveChanges();
+
+        var typeChangeProp = GetAuditLogProp();
+        Assert.Equal("ListTextA", typeChangeProp.OldValueDescription);
+        Assert.Equal("NewListTextB", typeChangeProp.NewValueDescription);
+
+        AuditLogProperty GetAuditLogProp()
+        {
+            var log = db.AuditLogs.Include(l => l.Properties).Single(e => e.Type == nameof(AppUser));
+            return Assert.Single(log.Properties!.Where(p => p.PropertyName == nameof(AppUser.Parent1Id)));
+        }
+    }
+
+    [Fact]
+    public void PropertyDesc_PopulatesValuesForUnMappedListText()
+    {
+        // Arrange
+        using var db = BuildDbContext(b => b
+            .UseCoalesceAuditLogging<TestAuditLog>(x => x
+                .WithAugmentation<TestOperationContext>()
+            ));
+
+        db.SuppressAudit = true;
+        db.Add(new ParentWithUnMappedListText { Id = "A", Name = "ThingA" });
+        db.Add(new ParentWithUnMappedListText { Id = "B", Name = "ThingB" });
+        db.SaveChanges();
+        db.SuppressAudit = false;
+
+        // Act/Assert: Insert
+        Cleanup();
+        var user = new AppUser { Name = "bob", Parent2Id = "A" };
+        db.Add(user);
+        db.SaveChanges();
+
+        var typeChangeProp = GetAuditLogProp();
+        Assert.Null(typeChangeProp.OldValueDescription);
+        Assert.Equal("Name:ThingA", typeChangeProp.NewValueDescription);
+
+
+        // Act/Assert: Update
+        Cleanup();
+        user = db.Users.Single();
+        user.Parent2Id = "B";
+        db.SaveChanges();
+
+        typeChangeProp = GetAuditLogProp();
+        Assert.Equal("Name:ThingA", typeChangeProp.OldValueDescription);
+        Assert.Equal("Name:ThingB", typeChangeProp.NewValueDescription);
+
+
+        // Act/Assert: Delete
+        Cleanup();
+        db.Remove(user);
+        db.SaveChanges();
+
+        typeChangeProp = GetAuditLogProp();
+        Assert.Equal("Name:ThingB", typeChangeProp.OldValueDescription);
+        Assert.Null(typeChangeProp.NewValueDescription);
+
+        void Cleanup()
+        {
+            db.AuditLogs.Delete();
+            db.ChangeTracker.Clear();
+        }
+        AuditLogProperty GetAuditLogProp()
+        {
+            var log = db.AuditLogs.Include(l => l.Properties).Single(e => e.Type == nameof(AppUser));
+            return Assert.Single(log.Properties!.Where(p => p.PropertyName == nameof(AppUser.Parent2Id)));
+        }
+    }
+
+    [Fact]
+    public async Task PropertyDesc_OnlyLoadsPrincipalWhenChanged()
+    {
+        // Arrange
+        using var db = BuildDbContext(b => b
+            .UseCoalesceAuditLogging<TestAuditLog>(x => x
+                .WithAugmentation<TestOperationContext>()
+            ));
+
+        db.SuppressAudit = true;
+        var user = new AppUser { Name = "bob", Parent1 = new() { CustomListTextField = "ListTextA" } };
+        db.Add(user);
+        await db.SaveChangesAsync();
+        db.SuppressAudit = false;
+
+        // Act
+        db.ChangeTracker.Clear();
+        user = db.Users.Single();
+        user.Name = "bob2";
+        await db.SaveChangesAsync();
+
+        // Assert
+        // Navigation prop should not be loaded because it wasn't changed.
+        // This ensures we don't waste database calls loading principal entities for no reason.
+        Assert.Empty(db.ParentWithMappedListTexts.Local);
+        Assert.Null(user.Parent1);
     }
 
     private WebApplicationBuilder CreateAppBuilder()

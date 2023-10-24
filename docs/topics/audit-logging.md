@@ -6,6 +6,8 @@ Coalesce provides a package `IntelliTect.Coalesce.AuditLogging` that adds an eas
 
 ## Setup
 
+In this setup process, we're going to add an additional Coalesce Nuget package, define a custom entity to hold our audit logs and any extra properties, install the audit logging extension into our `DbContext`, and add a pre-made interface on the frontend to view our logs.
+
 ### 1. Add the NuGet package
 
 Add a reference to the Nuget package `IntelliTect.Coalesce.AuditLogging` to your data project:
@@ -25,7 +27,7 @@ Define the entity type that will hold the audit records in your database:
 using IntelliTect.Coalesce.AuditLogging;
 
 [Read(Roles = "Administrator")]
-public class ObjectChange : DefaultObjectChange
+public class AuditLog : DefaultAuditLog
 {
     public string? UserId { get; set; }
     public AppUser? User { get; set; }
@@ -34,26 +36,26 @@ public class ObjectChange : DefaultObjectChange
 }
 ```
 
-This entity only needs to implement `IObjectChange`, but a default implementation of this interface  `DefaultObjectChange` is provided for your convenience. `DefaultObjectChange` contains additional properties `ClientIp`, `Referrer`, and `Endpoint` for recording information about the HTTP request (if available), and also has attributes to disable Create, Edit, and Delete APIs.
+This entity only needs to implement `IAuditLog`, but a default implementation of this interface  `DefaultAuditLog` is provided for your convenience. `DefaultAuditLog` contains additional properties `ClientIp`, `Referrer`, and `Endpoint` for recording information about the HTTP request (if available), and also has attributes to disable Create, Edit, and Delete APIs.
 
-You should further augment this type with any additional fields that you would like to track on each change record. A property to track the user who performed the change should be added, since it is not provided by the default implementation so that you can declare it yourself with the correct type for the foreign key and navigation property.
+You should further augment this type with any additional properties that you would like to track on each change record. A property to track the user who performed the change should be added, since it is not provided by the default implementation so that you can declare it yourself with the correct type for the foreign key and navigation property.
 
 You should also apply security to restrict reading of these records to only the most privileged users with a [Read Attribute](/modeling/model-components/attributes/security-attribute.md#read) (as in the example above) and/or a [custom Default Data Source](/modeling/model-components/data-sources.md#defining-data-sources).
 
 ### 3. Configure your `DbContext`
 
-On your `DbContext`, implement the `IAuditLogContext<ObjectChange>` interface using the class you just created as the type parameter. Then register the Coalesce audit logging extension in your `DbContext`'s `OnConfiguring` method so that saves will be intercepted and audit log entries created.
+On your `DbContext`, implement the `IAuditLogContext<AuditLog>` interface using the class you just created as the type parameter. Then register the Coalesce audit logging extension in your `DbContext`'s `OnConfiguring` method so that saves will be intercepted and audit log entries created.
 
 ``` c#
 [Coalesce]
-public class AppDbContext : DbContext, IAuditLogContext<ObjectChange>
+public class AppDbContext : DbContext, IAuditLogContext<AuditLog>
 {
-    public DbSet<ObjectChange> ObjectChanges { get; set; }
-    public DbSet<ObjectChangeProperty> ObjectChangeProperties { get; set; }
+    public DbSet<AuditLog> AuditLogs { get; set; }
+    public DbSet<AuditLogProperty> AuditLogProperties { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        optionsBuilder.UseCoalesceAuditLogging<ObjectChange>(x => x
+        optionsBuilder.UseCoalesceAuditLogging<AuditLog>(x => x
             .WithAugmentation<OperationContext>()
         );
     }
@@ -62,15 +64,15 @@ public class AppDbContext : DbContext, IAuditLogContext<ObjectChange>
 
 You could also perform this setup in your web project when calling `.AddDbContext()`.
 
-The above code also contains a reference to a class `OperationContext`. This is the service that will allow you to populate additional custom fields on your audit entries. You'll want to define it as follows:
+The above code also contains a reference to a class `OperationContext`. This is the service that will allow you to populate additional custom properties on your audit entries. You'll want to define it as follows:
 
 ``` c#
-public class OperationContext : DefaultAuditOperationContext<ObjectChange>
+public class OperationContext : DefaultAuditOperationContext<AuditLog>
 {
     // Inject any additional desired services in the constructor:
     public OperationContext(IHttpContextAccessor accessor) : base(accessor) { }
 
-    public override void Populate(ObjectChange auditEntry, EntityEntry changedEntity)
+    public override void Populate(AuditLog auditEntry, EntityEntry changedEntity)
     {
         base.Populate(auditEntry, changedEntity);
 
@@ -80,7 +82,7 @@ public class OperationContext : DefaultAuditOperationContext<ObjectChange>
 }
 ```
 
-When you're inheriting from `DefaultObjectChange` for your `IObjectChange` implementation, you'll want to similarly inherit from `DefaultAuditOperationContext<>` for your operation context. It will take care of populating the HTTP request tracking fields on the `ObjectChange` record.
+When you're inheriting from `DefaultAuditLog` for your `IAuditLog` implementation, you'll want to similarly inherit from `DefaultAuditOperationContext<>` for your operation context. It will take care of populating the HTTP request tracking fields on the `AuditLog` record. If you want a totally custom implementation, you only need to implement the `IAuditOperationContext<TAuditLog>` interface.
 
 The operation context class passed to `WithAugmentation` will be injected from the application service provider if available; otherwise, a new instance will be constructed using dependencies from the application service provider. To make an injected dependency optional, make the constructor parameter nullable with a default value of `null`, or create [alternate constructors](https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection#multiple-constructor-discovery-rules).
 
@@ -94,7 +96,7 @@ import { CAdminAuditLogPage } from 'coalesce-vue-vuetify3';
 {
   path: '/admin/audit-logs',
   component: CAdminAuditLogPage,
-  props: { type: 'ObjectChange' }
+  props: { type: 'AuditLog' }
 }
 ```
 
@@ -106,7 +108,7 @@ You can turn audit logging on or off for individual operations by implementing t
 
 ``` c#
 [Coalesce]
-public class AppDbContext : DbContext, IAuditLogContext<ObjectChange>
+public class AppDbContext : DbContext, IAuditLogContext<AuditLog>
 {
     ...
     public bool SuppressAudit { get; set; }
@@ -117,14 +119,14 @@ public class AppDbContext : DbContext, IAuditLogContext<ObjectChange>
 
 Coalesce's audit logging is built on top of [Entity Framework Plus](https://entityframework-plus.net/ef-core-audit) and can be configured using all of its [configuration](https://entityframework-plus.net/ef-core-audit#scenarios), including [includes/excludes](https://entityframework-plus.net/ef-core-audit-exclude-include-entity) and [custom property formatting](https://entityframework-plus.net/ef-core-audit-format-value).
 
-While Coalesce will respect EF Plus's global configuration, it is recommended that you instead use Coalesce's configuration extensions which allow for more targeted configuration that does not rely on a global static singleton. For example:
+Coalesce will not use EF Plus's `AuditManager.DefaultConfiguration` global singleton instance. You must use Coalesce's configuration extensions which allow for more targeted configuration per context that does not rely on a global static singleton. For example:
 
 ``` c#
-public class AppDbContext : DbContext, IAuditLogContext<ObjectChange>
+public class AppDbContext : DbContext, IAuditLogContext<AuditLog>
 {
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        optionsBuilder.UseCoalesceAuditLogging<ObjectChange>(x => x
+        optionsBuilder.UseCoalesceAuditLogging<AuditLog>(x => x
             .WithAugmentation<OperationContext>()
             .ConfigureAudit(c => c
                 .Exclude<DataProtectionKey>()
@@ -137,14 +139,21 @@ public class AppDbContext : DbContext, IAuditLogContext<ObjectChange>
 }
 ```
 
-If you use `ConfigureAudit`, `AuditManager.DefaultConfiguration` will not be used.
+### Property Descriptions
+
+The `AuditLogProperty` children of your `IAuditLog` implementation have two properties `OldValueDescription` and `NewValueDescription` that can be used to hold a description of the old and new values. By default, Coalesce will populate the descriptions of foreign key properties with the [List Text](/modeling/model-components/attributes/list-text.md) of the referenced principal entity. This greatly improves the usability of the audit logs, which would otherwise only show meaningless numbers or GUIDs for foreign keys that changed.
+
+This feature will load principal entities into the `DbContext` if they are not already loaded, which could inflict subtle differences in application functionality in rare edge cases if your application is making assumptions about navigation properties not being loaded. Typically though, this will not be an issue and will not lead unintentional information disclosure to clients as along as [IncludeTree](/concepts/include-tree.md)s are used correctly.
+
+This feature may be disabled by calling `.WithPropertyDescriptions(PropertyDescriptionMode.None)` inside your call to `.UseCoalesceAuditLogging(...)` in your DbContext configuration. You may also populate these descriptions in your `IAuditOperationContext` implementation that was provided to `.WithAugmentation<T>()`.
+
 
 ## Merging
 When using a supported database provider (currently only SQL Server), audit records for changes to the same entity will be merged together when the change is identical in all aspects to the previous audit record for that entity, with the sole exception of the old/new property values.
 
 In other words, if the same user is making repeated changes to the same property on the same entity from the same page, then those changes will merge together into one audit record.
 
-This merging only happens together if the existing audit record is recent; the default cutoff for this is 30 seconds, but can be configured with `.WithMergeWindow(TimeSpan.FromSeconds(15))` when calling `UseCoalesceAuditLogging`. It can also be turned off by setting this value to `TimeSpan.Zero`. The merging logic respects all custom properties you add to your `IObjectChange` implementation, requiring their values to match between the existing and new audit records for a merge to occur.
+This merging only happens together if the existing audit record is recent; the default cutoff for this is 30 seconds, but can be configured with `.WithMergeWindow(TimeSpan.FromSeconds(15))` when calling `UseCoalesceAuditLogging`. It can also be turned off by setting this value to `TimeSpan.Zero`. The merging logic respects all custom properties you add to your `IAuditLog` implementation, requiring their values to match between the existing and new audit records for a merge to occur.
 
 ## Caveats
 Only changes that are tracked by the `DbContext`'s `ChangeTracker` can be audited. Changes that are made with raw SQL, or changes that are made with bulk update functions like [`ExecuteUpdate` or `ExecuteDelete`](https://learn.microsoft.com/en-us/ef/core/performance/efficient-updating?tabs=ef7) will not be audited using this package.

@@ -111,68 +111,84 @@
             </thead>
             <tbody>
               <tr
-                v-for="(objectChange, index) in list.$items"
-                :key="objectChange.$stableId"
+                v-for="(auditLog, index) in list.$items"
+                :key="auditLog.$stableId"
               >
                 <td class="c-audit-logs--column-user-date">
                   <c-display
                     v-if="userPropMeta"
-                    :model="objectChange"
+                    :model="auditLog"
                     element="div"
                     :for="userPropMeta.name"
                     class="text-no-wrap"
                   />
                   <c-display
-                    :model="objectChange"
+                    :model="auditLog"
                     element="div"
                     for="date"
                     class="text-no-wrap text-caption d-block"
-                    format="M/dd/yy h:mm:ss.SSS a"
+                    format="M/dd/yy h:mm:ss a z"
+                    :title="
+                      [
+                        propDisplay(auditLog, 'date', {
+                          format: {
+                            format: 'M/dd/yy HH:mm:ss.SSS z',
+                          },
+                        }),
+                        propDisplay(auditLog, 'date', {
+                          format: {
+                            format: 'M/dd/yy HH:mm:ss.SSS z',
+                            timeZone: 'UTC',
+                          },
+                        }),
+                        (auditLog.date!.valueOf() / 1000).toFixed(3) + ' (Unix Seconds)',
+                      ].join('\n')
+                    "
                   />
                   <pre
-                    :class="timeDiffClass(objectChange, list.$items[index + 1])"
-                    v-text="timeDiff(objectChange, list.$items[index + 1])"
+                    :class="timeDiffClass(auditLog, list.$items[index + 1])"
+                    v-text="timeDiff(auditLog, list.$items[index + 1])"
                     title="Time delta from the preceding row"
                   ></pre>
                 </td>
 
                 <td class="c-audit-logs--column-entity">
-                  <pre>Type: <c-display :model="objectChange" for="type" /></pre>
-                  <pre> Key: <c-display 
-                    :model="objectChange"       
+                  <pre><c-display :model="auditLog" for="type" title="Entity Type" /></pre>
+                  <pre><c-display 
+                    :model="auditLog"       
                     for="keyValue" 
                     style="    
                       white-space: break-spaces;
                       display: inline-block;
                       padding-right: 40px;
                       vertical-align: top;
-                    "/></pre>
+                    " title="Entity Key" /></pre>
                 </td>
 
                 <td
                   class="c-audit-logs--column-details c-audit-logs--row-detail"
                 >
-                  <slot name="row-detail" :item="objectChange">
+                  <slot name="row-detail" :item="auditLog">
                     <table>
                       <tr class="prop-state">
                         <td>Change:</td>
-                        <td><c-display :model="objectChange" for="state" /></td>
+                        <td><c-display :model="auditLog" for="state" /></td>
                       </tr>
                       <tr
                         v-for="propMeta in otherProps"
-                        :key="objectChange.$stableId + '-prop-' + propMeta.name!"
+                        :key="auditLog.$stableId + '-prop-' + propMeta.name!"
                         :class="'prop-' + propMeta.name"
                       >
                         <td>{{ propMeta.displayName }}:</td>
                         <td>
                           <c-display
-                            :model="objectChange"
+                            :model="auditLog"
                             :for="propMeta"
                             class="text-grey"
                           />
                         </td>
                       </tr>
-                      <slot name="row-detail-append" :item="objectChange" />
+                      <slot name="row-detail-append" :item="auditLog" />
                     </table>
                   </slot>
                 </td>
@@ -189,18 +205,33 @@
                       </tr>
                     </thead>
                     <tbody>
-                      <tr
-                        v-for="prop in objectChange.properties"
-                        :key="prop.id!"
-                      >
+                      <tr v-for="prop in auditLog.properties" :key="prop.id!">
                         <td class="c-audit-logs--property-name">
                           <c-display :model="prop" for="propertyName" />
                         </td>
-                        <td class="c-audit-logs--property-value">
-                          <c-display :model="prop" for="oldValue" />
+                        <td
+                          class="c-audit-logs--property-value c-audit-logs--property-old"
+                        >
+                          {{ prop.oldValue }}
+
+                          <span
+                            class="c-audit-logs--property-value-desc text-grey"
+                            v-if="prop.oldValueDescription"
+                          >
+                            ({{ prop.oldValueDescription }})
+                          </span>
                         </td>
-                        <td class="c-audit-logs--property-value">
-                          <c-display :model="prop" for="newValue" />
+                        <td
+                          class="c-audit-logs--property-value c-audit-logs--property-old"
+                        >
+                          {{ prop.newValue }}
+
+                          <span
+                            class="c-audit-logs--property-value-desc text-grey"
+                            v-if="prop.newValueDescription"
+                          >
+                            ({{ prop.newValueDescription }})
+                          </span>
                         </td>
                       </tr>
                     </tbody>
@@ -227,11 +258,12 @@ import {
   ModelApiClient,
   ModelReferenceNavigationProperty,
   ModelType,
+  propDisplay,
   useBindToQueryString,
   ViewModel,
 } from "coalesce-vue";
 
-interface ObjectChangeBase {
+interface AuditLogBase {
   $metadata: ModelType;
   id: number | null;
   type: string | null;
@@ -243,15 +275,17 @@ interface ObjectChangeBase {
     id: number | null;
     parentId: number | null;
     oldValue: string | null;
+    oldValueDescription: string | null;
     newValue: string | null;
+    newValueDescription: string | null;
   }[];
 }
 
-type ObjectChangeViewModel = ViewModel<ObjectChangeBase> & ObjectChangeBase;
-type ObjectChangeListViewModel = ListViewModel<
-  ObjectChangeBase,
-  ModelApiClient<ObjectChangeBase>,
-  ObjectChangeViewModel
+type AuditLogViewModel = ViewModel<AuditLogBase> & AuditLogBase;
+type AuditLogListViewModel = ListViewModel<
+  AuditLogBase,
+  ModelApiClient<AuditLogBase>,
+  AuditLogViewModel
 >;
 
 const props = withDefaults(
@@ -263,7 +297,7 @@ const props = withDefaults(
   { color: "primary" }
 );
 
-let list: ObjectChangeListViewModel;
+let list: AuditLogListViewModel;
 if (props.list) {
   list = props.list as any;
 } else {
@@ -303,10 +337,7 @@ const otherProps = computed(() => {
   );
 });
 
-function timeDiff(
-  current: ObjectChangeViewModel,
-  older?: ObjectChangeViewModel
-) {
+function timeDiff(current: AuditLogViewModel, older?: AuditLogViewModel) {
   if (!older) return "";
   let ms = differenceInMilliseconds(current.date!, older.date!);
   const positive = ms >= 0;
@@ -326,10 +357,7 @@ function timeDiff(
   );
 }
 
-function timeDiffClass(
-  current: ObjectChangeViewModel,
-  older?: ObjectChangeViewModel
-) {
+function timeDiffClass(current: AuditLogViewModel, older?: AuditLogViewModel) {
   if (!older) return "";
   const diff = current.date!.valueOf() - (older?.date ?? 0).valueOf();
   return diff == 0 ? "grey--text" : diff > 0 ? "text-success" : "text-error";

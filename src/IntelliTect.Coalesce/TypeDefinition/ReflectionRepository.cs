@@ -15,6 +15,7 @@ using IntelliTect.Coalesce.Api;
 using System.Threading;
 using IntelliTect.Coalesce.Models;
 using System.Collections.ObjectModel;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace IntelliTect.Coalesce.TypeDefinition
 {
@@ -118,8 +119,19 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public SymbolTypeViewModel GetOrAddType(ITypeSymbol symbol) =>
             GetOrAddType(symbol, () => new SymbolTypeViewModel(this, symbol));
 
-        public ReflectionTypeViewModel GetOrAddType(Type type) =>
-            GetOrAddType(type, () => new ReflectionTypeViewModel(this, type));
+        public ReflectionTypeViewModel GetOrAddType(Type type)
+        {
+            // Hot path during runtime - perform the cache check before entering GetOrAddType
+            // which requires allocating a closure.
+            if (_allTypeViewModels.TryGetValue(type, out var existing)) return (ReflectionTypeViewModel)existing;
+
+            // Avoid closure on fast path by storing state into scoped locals.
+            // Technique from https://github.com/dotnet/runtime/blob/4aa4d28f951babd9b26c2e4cff99a3203c56aee8/src/libraries/Microsoft.Extensions.Options/src/OptionsManager.cs#L48
+            var localThis = this;
+            var localType = type;
+
+            return GetOrAddType(type, () => new ReflectionTypeViewModel(this, type));
+        }
 
         public TypeViewModel GetOrAddType(TypeViewModel type) => 
             GetOrAddType(GetCacheKey(type), () => type);

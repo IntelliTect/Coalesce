@@ -18,7 +18,7 @@ const router = new Router({
       path: '/admin/audit-logs',
       component: CAdminAuditLogPage,
       props: {
-        type: 'ObjectChange'
+        type: 'AuditLog'
       }
     },
   ]
@@ -29,7 +29,7 @@ const router = new Router({
 
 <Prop def="type: string" lang="ts" />
 
-The PascalCase name of your `IObjectChange` implementation.
+The PascalCase name of your `IAuditLog` implementation.
 
 <Prop def="list?: ListViewModel" lang="ts" />
 
@@ -42,10 +42,10 @@ A Vuetify color name to be applied to the toolbar at the top of the page.
 
 ## Slots
 
-<Prop def="row-detail: { item: ObjectChangeViewModel }" lang="ts" />
+<Prop def="row-detail: { item: AuditLogViewModel }" lang="ts" />
 
 A slot that can be used to replace the entire content of the Detail column on the page.
 
-<Prop def="row-detail-append: { item: ObjectChangeViewModel }" lang="ts" />
+<Prop def="row-detail-append: { item: AuditLogViewModel }" lang="ts" />
 
 A slot that can be used to append additional content to the Detail column on the page.

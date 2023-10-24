@@ -44,7 +44,7 @@ public class AuditTests
     {
         // Arrange
         using var db = BuildDbContext(b => b
-            .UseCoalesceAuditLogging((Action<CoalesceAuditLoggingBuilder<TestAuditLog>>?)(x => x
+            .UseCoalesceAuditLogging((Action<AuditLoggingBuilder<TestAuditLog>>?)(x => x
                 .WithAugmentation<TestOperationContext>())
             ));
 

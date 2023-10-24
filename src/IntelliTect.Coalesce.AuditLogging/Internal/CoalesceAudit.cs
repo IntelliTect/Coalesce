@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata;
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -22,7 +23,6 @@ internal class CoalesceAudit : Audit
 
     internal async ValueTask PopulateOldDescriptions(DbContext db, bool async)
     {
-        OldValueDescriptions = [];
         foreach (var entry in Entries)
         {
             if (entry.State == Z.EntityFramework.Plus.AuditEntryState.EntityAdded) continue;
@@ -35,6 +35,7 @@ internal class CoalesceAudit : Audit
                     (HasChanged ??= new()).Add((entry, refNav.Metadata));
                 }
 
+                OldValueDescriptions ??= [];
                 await PopulateDescriptions(db, entry, refNav, OldValueDescriptions, isNew: false, async);
             }
         }
@@ -42,7 +43,6 @@ internal class CoalesceAudit : Audit
 
     internal async ValueTask PopulateNewDescriptions(DbContext db, bool async)
     {
-        NewValueDescriptions = [];
         foreach (var entry in Entries)
         {
             if (entry.State == Z.EntityFramework.Plus.AuditEntryState.EntityDeleted) continue;
@@ -51,9 +51,11 @@ internal class CoalesceAudit : Audit
                 if (entry.State == Z.EntityFramework.Plus.AuditEntryState.EntityModified)
                 {
                     // We're capturing the new descriptions, but the navigation wasn't modified. Do nothing.
+                    // We can't use refNav.IsModified here because we're in the post-save, so it'll always be false.
                     if (HasChanged?.Contains((entry, refNav.Metadata)) != true) continue;
                 }
 
+                NewValueDescriptions ??= [];
                 await PopulateDescriptions(db, entry, refNav, NewValueDescriptions, isNew: true, async);
             }
         }
@@ -108,6 +110,7 @@ internal class CoalesceAudit : Audit
             object? propVal = isNew 
                 ? entry.Entry.CurrentValues[prop] 
                 : entry.Entry.OriginalValues[prop];
+
             if (propVal is null)
             {
                 // Foreign key value is null, so the principal doesn't exist and we can't get ListText from it.

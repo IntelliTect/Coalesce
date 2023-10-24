@@ -44,11 +44,11 @@ You should also apply security to restrict reading of these records to only the 
 
 ### 3. Configure your `DbContext`
 
-On your `DbContext`, implement the `IAuditLogContext<AuditLog>` interface using the class you just created as the type parameter. Then register the Coalesce audit logging extension in your `DbContext`'s `OnConfiguring` method so that saves will be intercepted and audit log entries created.
+On your `DbContext`, implement the `IAuditLogDbContext<AuditLog>` interface using the class you just created as the type parameter. Then register the Coalesce audit logging extension in your `DbContext`'s `OnConfiguring` method so that saves will be intercepted and audit log entries created.
 
 ``` c#
 [Coalesce]
-public class AppDbContext : DbContext, IAuditLogContext<AuditLog>
+public class AppDbContext : DbContext, IAuditLogDbContext<AuditLog>
 {
     public DbSet<AuditLog> AuditLogs { get; set; }
     public DbSet<AuditLogProperty> AuditLogProperties { get; set; }
@@ -108,7 +108,7 @@ You can turn audit logging on or off for individual operations by implementing t
 
 ``` c#
 [Coalesce]
-public class AppDbContext : DbContext, IAuditLogContext<AuditLog>
+public class AppDbContext : DbContext, IAuditLogDbContext<AuditLog>
 {
     ...
     public bool SuppressAudit { get; set; }
@@ -122,7 +122,7 @@ Coalesce's audit logging is built on top of [Entity Framework Plus](https://enti
 Coalesce will not use EF Plus's `AuditManager.DefaultConfiguration` global singleton instance. You must use Coalesce's configuration extensions which allow for more targeted configuration per context that does not rely on a global static singleton. For example:
 
 ``` c#
-public class AppDbContext : DbContext, IAuditLogContext<AuditLog>
+public class AppDbContext : DbContext, IAuditLogDbContext<AuditLog>
 {
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {

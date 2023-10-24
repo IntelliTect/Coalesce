@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace IntelliTect.Coalesce.AuditLogging.Tests;
 
-internal class TestDbContext : DbContext, IAuditLogContext<TestAuditLog>
+internal class TestDbContext : DbContext, IAuditLogDbContext<TestAuditLog>
 {
     public TestDbContext(DbContextOptions options) : base(options)
     {

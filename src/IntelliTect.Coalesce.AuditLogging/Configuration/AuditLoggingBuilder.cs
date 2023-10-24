@@ -1,19 +1,17 @@
 ﻿using IntelliTect.Coalesce.DataAnnotations;
 using Microsoft.Extensions.Caching.Memory;
 using System;
-using System.Collections.Concurrent;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using Z.EntityFramework.Plus;
 
 namespace IntelliTect.Coalesce.AuditLogging;
 
-public class CoalesceAuditLoggingBuilder<TAuditLog>
+public class AuditLoggingBuilder<TAuditLog>
     where TAuditLog : class, IAuditLog
 {
     private readonly AuditOptions options;
 
-    public CoalesceAuditLoggingBuilder(AuditOptions options)
+    public AuditLoggingBuilder(AuditOptions options)
     {
         this.options = options;
     }
@@ -25,7 +23,7 @@ public class CoalesceAuditLoggingBuilder<TAuditLog>
     /// from the application service provider. To make an injected dependency optional, make the
     /// constructor parameter nullable with a default value of `null`, or create alternate constructors.
     /// </summary>
-    public CoalesceAuditLoggingBuilder<TAuditLog> WithAugmentation<T>()
+    public AuditLoggingBuilder<TAuditLog> WithAugmentation<T>()
         where T : IAuditOperationContext<TAuditLog>
     {
         options.OperationContextType = typeof(T);
@@ -33,7 +31,7 @@ public class CoalesceAuditLoggingBuilder<TAuditLog>
     }
 
     /// <inheritdoc cref="AuditOptions.MergeWindow"/> 
-    public CoalesceAuditLoggingBuilder<TAuditLog> WithMergeWindow(TimeSpan timeSpan)
+    public AuditLoggingBuilder<TAuditLog> WithMergeWindow(TimeSpan timeSpan)
     {
         options.MergeWindow = timeSpan;
         return this;
@@ -49,7 +47,7 @@ public class CoalesceAuditLoggingBuilder<TAuditLog>
     /// being described by the list text (as defined by <see cref="ListTextAttribute"/>) of their referenced principal entity.
     /// </para>
     /// </summary>
-    public CoalesceAuditLoggingBuilder<TAuditLog> WithPropertyDescriptions(PropertyDescriptionMode mode)
+    public AuditLoggingBuilder<TAuditLog> WithPropertyDescriptions(PropertyDescriptionMode mode)
     {
         options.PropertyDescriptions = mode;
         return this;
@@ -66,14 +64,14 @@ public class CoalesceAuditLoggingBuilder<TAuditLog>
     /// pass the dynamic inputs to the second argument so that configuration caching can account for this.
     /// </para>
     /// </summary>
-    public CoalesceAuditLoggingBuilder<TAuditLog> ConfigureAudit(Action<AuditConfiguration> configure)
+    public AuditLoggingBuilder<TAuditLog> ConfigureAudit(Action<AuditConfiguration> configure)
         => ConfigureAudit<object?>((c, _) => configure(c), null, configure.Method);
 
     /// <inheritdoc cref="ConfigureAudit(Action{AuditConfiguration})"/>
-    public CoalesceAuditLoggingBuilder<TAuditLog> ConfigureAudit<TArg>(Action<AuditConfiguration, TArg> configure, TArg arg)
+    public AuditLoggingBuilder<TAuditLog> ConfigureAudit<TArg>(Action<AuditConfiguration, TArg> configure, TArg arg)
         => ConfigureAudit(configure, arg, configure.Method);
 
-    private CoalesceAuditLoggingBuilder<TAuditLog> ConfigureAudit<TArg>(Action<AuditConfiguration, TArg> configure, TArg arg, MethodInfo methodCacheKey)
+    private AuditLoggingBuilder<TAuditLog> ConfigureAudit<TArg>(Action<AuditConfiguration, TArg> configure, TArg arg, MethodInfo methodCacheKey)
     {
         options.AuditConfiguration = _auditConfigTransforms.GetOrCreate((methodCacheKey, options.AuditConfiguration, arg), entry =>
         {

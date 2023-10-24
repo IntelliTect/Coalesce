@@ -8,17 +8,17 @@ namespace IntelliTect.Coalesce.AuditLogging;
 public static class DbContextOptionsBuilderExtensions
 {
     /// <summary>
-    /// Adds Coalesce's audit logging infrastructure to the <see cref="DbContext"/>. The <see cref="DbContext"/> must inherit from <see cref="IAuditLogContext{TAuditLog}"/>, where <typeparamref name="TAuditLog"/> derives from <see cref="IAuditLog"/> or <see cref="DefaultAuditLog"/>
+    /// Adds Coalesce's audit logging infrastructure to the <see cref="DbContext"/>. The <see cref="DbContext"/> must inherit from <see cref="IAuditLogDbContext{TAuditLog}"/>, where <typeparamref name="TAuditLog"/> derives from <see cref="IAuditLog"/> or <see cref="DefaultAuditLog"/>
     /// </summary>
     public static DbContextOptionsBuilder UseCoalesceAuditLogging<TAuditLog>(
         this DbContextOptionsBuilder builder,
-        Action<CoalesceAuditLoggingBuilder<TAuditLog>>? configure = null
+        Action<AuditLoggingBuilder<TAuditLog>>? configure = null
     )
         where TAuditLog : class, IAuditLog
     {
         var options = new AuditOptions();
 
-        CoalesceAuditLoggingBuilder<TAuditLog> auditBuilder = new(options);
+        AuditLoggingBuilder<TAuditLog> auditBuilder = new(options);
         auditBuilder = auditBuilder.ConfigureAudit(c =>
         {
             c.Exclude<TAuditLog>();
@@ -28,7 +28,7 @@ public static class DbContextOptionsBuilderExtensions
 
         ((IDbContextOptionsBuilderInfrastructure)builder).AddOrUpdateExtension(new AuditExtension(options));
 
-        builder.AddInterceptors(new AuditingInterceptor<TAuditLog>(options));
+        builder.AddInterceptors(new AuditInterceptor<TAuditLog>(options));
 
         return builder;
     }

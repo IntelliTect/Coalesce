@@ -1,12 +1,9 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
-using System.Net;
-using System.Security.Claims;
+﻿using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace IntelliTect.Coalesce.AuditLogging;
 
 /// <summary>
-/// Defines a service that can populate additional fields on the given <typeparamref name="TAuditLog"/> before it is persisted to the database. Declare the implementation of this service by calling <see cref="CoalesceAuditLoggingBuilder{TAuditLog}.WithAugmentation{T}"/>.
+/// Defines a service that can populate additional fields on the given <typeparamref name="TAuditLog"/> before it is persisted to the database. Declare the implementation of this service by calling <see cref="AuditLoggingBuilder{TAuditLog}.WithAugmentation{T}"/>.
 /// </summary>
 public interface IAuditOperationContext<TAuditLog> : IAuditOperationContext
 {

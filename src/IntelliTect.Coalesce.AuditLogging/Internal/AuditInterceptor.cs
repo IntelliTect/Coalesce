@@ -16,15 +16,15 @@ using Z.EntityFramework.Plus;
 
 namespace IntelliTect.Coalesce.AuditLogging.Internal;
 
-internal sealed class AuditingInterceptor<TAuditLog> : SaveChangesInterceptor
+internal sealed class AuditInterceptor<TAuditLog> : SaveChangesInterceptor
     where TAuditLog : class, IAuditLog
 {
     private readonly AuditOptions _options;
 
     private CoalesceAudit? _audit;
 
-    private IAuditLogContext<TAuditLog> GetContext(DbContextEventData data)
-        => (IAuditLogContext<TAuditLog>)(data.Context ?? throw new InvalidOperationException("DbContext unavailable."));
+    private IAuditLogDbContext<TAuditLog> GetContext(DbContextEventData data)
+        => (IAuditLogDbContext<TAuditLog>)(data.Context ?? throw new InvalidOperationException("DbContext unavailable."));
 
     #region SavingChanges
 
@@ -121,7 +121,7 @@ internal sealed class AuditingInterceptor<TAuditLog> : SaveChangesInterceptor
     /// </summary>
     private static readonly MemoryCache _sqlCache = new MemoryCache(new MemoryCacheOptions() { SizeLimit = 4_000_000 });
 
-    public AuditingInterceptor(AuditOptions options)
+    public AuditInterceptor(AuditOptions options)
     {
         _options = options;
     }

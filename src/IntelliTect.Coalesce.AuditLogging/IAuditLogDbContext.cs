@@ -7,7 +7,7 @@ namespace IntelliTect.Coalesce.AuditLogging;
 /// </summary>
 /// <typeparam name="TAuditLog">The type of entity representing a change to an entity. You are expected to make your own implementation of this entity in your application code, inheriting from <see cref="DefaultAuditLog"/> or <see cref="IAuditLog"/>. 
 /// </typeparam>
-public interface IAuditLogContext<TAuditLog>
+public interface IAuditLogDbContext<TAuditLog>
     where TAuditLog : class, IAuditLog
 {
     DbSet<TAuditLog> AuditLogs { get; }

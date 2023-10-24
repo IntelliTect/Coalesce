@@ -11,7 +11,7 @@ namespace Coalesce.Domain
 {
 
     [Coalesce]
-    public class AppDbContext : DbContext, IAuditLogContext<AuditLog>
+    public class AppDbContext : DbContext, IAuditLogDbContext<AuditLog>
     {
 #nullable disable
         public DbSet<Person> People { get; set; }

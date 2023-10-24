@@ -1,5 +1,4 @@
 ﻿using IntelliTect.Coalesce.DataAnnotations;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using static IntelliTect.Coalesce.DataAnnotations.SecurityPermissionLevels;

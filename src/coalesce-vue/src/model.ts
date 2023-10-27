@@ -999,6 +999,24 @@ export function bindToQueryString(
     }
   );
 
+  const updateObject = (v: any) => {
+    obj[key] =
+      // Use the default value if null or undefined
+      v == null
+        ? defaultValue
+        : // Use provided parse function, if provided.
+        parse
+        ? parse(v)
+        : // Use metadata to parse the value if the obj is a DataSource.
+        obj?.$metadata?.params?.[key]
+        ? mapToModel(v, obj.$metadata.params[key])
+        : obj?.$metadata?.props?.[key]
+        ? mapToModel(v, obj.$metadata.props[key])
+        : // TODO: Add $metadata to DataSourceParameters/FilterParameters/ListParameters, and then support that as well.
+          // Fallback to the raw value
+          v;
+  };
+
   // When the query changes, grab the new value.
   vue.$watch(
     () => vue.$route?.query[queryKey],
@@ -1021,24 +1039,12 @@ export function bindToQueryString(
         }
       }
 
-      obj[key] =
-        // Use the default value if null or undefined
-        v == null
-          ? defaultValue
-          : // Use provided parse function, if provided.
-          parse
-          ? parse(v)
-          : // Use metadata to parse the value if the obj is a DataSource.
-          obj?.$metadata?.params?.[key]
-          ? mapToModel(v, obj.$metadata.params[key])
-          : obj?.$metadata?.props?.[key]
-          ? mapToModel(v, obj.$metadata.props[key])
-          : // TODO: Add $metadata to DataSourceParameters/FilterParameters/ListParameters, and then support that as well.
-            // Fallback to the raw value
-            v;
-    },
-    { immediate: true }
+      updateObject(v);
+    }
   );
+
+  // Fix #332: circumvent the `await nextTick` above on the initial call"
+  updateObject(vue.$route?.query[queryKey]);
 }
 
 export function useBindToQueryString(

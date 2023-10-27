@@ -6,6 +6,7 @@ import {
   RouterView,
   createWebHistory,
   RouterLink,
+  createMemoryHistory,
 } from "vue-router";
 import { bindToQueryString } from "../src";
 import { mount } from "@vue/test-utils";
@@ -13,9 +14,6 @@ import { delay } from "../test/test-utils";
 
 describe("bindToQueryString", () => {
   test("does not put values on new route when changing routes", async () => {
-    // TO VALIDATE IF THE UNDERLYING PROBLEM IS STILL A PROBLEM:
-    // Comment the code in bindToQueryString that checks for `isUnmounted` and does a $nextTick.
-
     let changeBoundValue: Function;
     var router = createRouter({
       history: createWebHistory(), // Note: memory history doesn't reproduce the bug.
@@ -79,6 +77,59 @@ describe("bindToQueryString", () => {
       // Value from the previous page should not be in the querystring.
       await delay(1);
       expect(router.currentRoute.value.query.boundValue).toBe(undefined);
+    } finally {
+      // Cleanup: reset route for other tests
+      await router.push("/");
+    }
+  });
+
+  test("sets query value before returning", async () => {
+    let boundValueNewValue;
+    var router = createRouter({
+      history: createMemoryHistory(),
+      routes: [
+        {
+          path: "/",
+          component: defineComponent({ render: () => h("div") }),
+        },
+        {
+          path: "/two",
+          component: defineComponent({
+            data() {
+              return { boundValue: "" };
+            },
+            created() {
+              bindToQueryString(this, this, "boundValue");
+              boundValueNewValue = this.boundValue;
+            },
+            render: () => h("div"),
+          }),
+        },
+      ],
+    });
+
+    const app = mount(
+      defineComponent({
+        render() {
+          return h(RouterView);
+        },
+      }),
+      {
+        global: { plugins: [router] },
+        attachTo: document.body,
+      }
+    );
+
+    try {
+      // wait for mount
+      await delay(1);
+
+      // Navigate to another page that uses binding
+      await router.push("/two?boundValue=foo");
+
+      // Value from the route should now be in boundValueNewValue.
+      await delay(1);
+      expect(boundValueNewValue).toBe("foo");
     } finally {
       // Cleanup: reset route for other tests
       await router.push("/");

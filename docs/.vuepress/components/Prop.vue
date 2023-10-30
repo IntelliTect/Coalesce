@@ -144,7 +144,7 @@ export default defineComponent({
         // Typescript is pretty nice in that the member name is always first in its declaration.
         // No types on the left hand side.
         // "namespace" is included as part of the attr if present.
-        const result = /(?:(?:readonly|public|static|protected|private|abstract|export) )*((?:namespace )?[\w$]+)/.exec(this.def);
+        const result = /(?:(?:readonly|public|static|protected|private|abstract|export) )*((?:namespace )?[\w$-]+)/.exec(this.def);
         this.idAttr = result ? this.idPrefix + '-' + result[1] : null
       } else if (this.lang == "c#") {
         // For C#, there's always a type on the left hand side.

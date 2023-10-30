@@ -3,6 +3,66 @@ import * as $models from './models.g'
 import * as $apiClients from './api-clients.g'
 import { ViewModel, ListViewModel, ServiceViewModel, DeepPartial, defineProps } from 'coalesce-vue/lib/viewmodel'
 
+export interface AuditLogViewModel extends $models.AuditLog {
+  message: string | null;
+  userId: number | null;
+  user: PersonViewModel | null;
+  id: number | null;
+  type: string | null;
+  keyValue: string | null;
+  state: $models.AuditEntryState | null;
+  date: Date | null;
+  properties: AuditLogPropertyViewModel[] | null;
+  clientIp: string | null;
+  referrer: string | null;
+  endpoint: string | null;
+}
+export class AuditLogViewModel extends ViewModel<$models.AuditLog, $apiClients.AuditLogApiClient, number> implements $models.AuditLog  {
+  
+  
+  public addToProperties(initialData?: DeepPartial<$models.AuditLogProperty> | null) {
+    return this.$addChild('properties', initialData) as AuditLogPropertyViewModel
+  }
+  
+  constructor(initialData?: DeepPartial<$models.AuditLog> | null) {
+    super($metadata.AuditLog, new $apiClients.AuditLogApiClient(), initialData)
+  }
+}
+defineProps(AuditLogViewModel, $metadata.AuditLog)
+
+export class AuditLogListViewModel extends ListViewModel<$models.AuditLog, $apiClients.AuditLogApiClient, AuditLogViewModel> {
+  
+  constructor() {
+    super($metadata.AuditLog, new $apiClients.AuditLogApiClient())
+  }
+}
+
+
+export interface AuditLogPropertyViewModel extends $models.AuditLogProperty {
+  id: number | null;
+  parentId: number | null;
+  propertyName: string | null;
+  oldValue: string | null;
+  oldValueDescription: string | null;
+  newValue: string | null;
+  newValueDescription: string | null;
+}
+export class AuditLogPropertyViewModel extends ViewModel<$models.AuditLogProperty, $apiClients.AuditLogPropertyApiClient, number> implements $models.AuditLogProperty  {
+  
+  constructor(initialData?: DeepPartial<$models.AuditLogProperty> | null) {
+    super($metadata.AuditLogProperty, new $apiClients.AuditLogPropertyApiClient(), initialData)
+  }
+}
+defineProps(AuditLogPropertyViewModel, $metadata.AuditLogProperty)
+
+export class AuditLogPropertyListViewModel extends ListViewModel<$models.AuditLogProperty, $apiClients.AuditLogPropertyApiClient, AuditLogPropertyViewModel> {
+  
+  constructor() {
+    super($metadata.AuditLogProperty, new $apiClients.AuditLogPropertyApiClient())
+  }
+}
+
+
 export interface CaseViewModel extends $models.Case {
   
   /** The Primary key for the Case object */
@@ -705,6 +765,8 @@ export class WeatherServiceViewModel extends ServiceViewModel<typeof $metadata.W
 
 
 const viewModelTypeLookup = ViewModel.typeLookup = {
+  AuditLog: AuditLogViewModel,
+  AuditLogProperty: AuditLogPropertyViewModel,
   Case: CaseViewModel,
   CaseDto: CaseDtoViewModel,
   CaseDtoStandalone: CaseDtoStandaloneViewModel,
@@ -719,6 +781,8 @@ const viewModelTypeLookup = ViewModel.typeLookup = {
   ZipCode: ZipCodeViewModel,
 }
 const listViewModelTypeLookup = ListViewModel.typeLookup = {
+  AuditLog: AuditLogListViewModel,
+  AuditLogProperty: AuditLogPropertyListViewModel,
   Case: CaseListViewModel,
   CaseDto: CaseDtoListViewModel,
   CaseDtoStandalone: CaseDtoStandaloneListViewModel,

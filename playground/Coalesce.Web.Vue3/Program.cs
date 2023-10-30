@@ -53,7 +53,6 @@ services
         options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
     });
 
-
 services.Configure<Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerOptions>(options =>
 {
     options.Limits.MaxRequestBodySize = int.MaxValue; // testing big file uploads/downloads

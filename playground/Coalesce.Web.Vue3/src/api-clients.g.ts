@@ -3,6 +3,16 @@ import * as $models from './models.g'
 import { AxiosClient, ModelApiClient, ServiceApiClient, ItemResult, ListResult } from 'coalesce-vue/lib/api-client'
 import { AxiosPromise, AxiosResponse, AxiosRequestConfig } from 'axios'
 
+export class AuditLogApiClient extends ModelApiClient<$models.AuditLog> {
+  constructor() { super($metadata.AuditLog) }
+}
+
+
+export class AuditLogPropertyApiClient extends ModelApiClient<$models.AuditLogProperty> {
+  constructor() { super($metadata.AuditLogProperty) }
+}
+
+
 export class CaseApiClient extends ModelApiClient<$models.Case> {
   constructor() { super($metadata.Case) }
   public getCaseTitles(search: string | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<string[]>> {

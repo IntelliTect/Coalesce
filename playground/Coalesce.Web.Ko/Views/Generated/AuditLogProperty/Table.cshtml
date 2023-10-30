@@ -1,0 +1,160 @@
+@using IntelliTect.Coalesce.Knockout.Helpers
+
+@{ ViewBag.Fluid = true; }
+
+<style>
+    td div a {
+        display: block;
+    }
+    th.sortable-header {
+        cursor: pointer;
+    }
+    th.sortable-header:hover {
+        background-color: #e6e6e6
+    }
+    .table-view-header {
+        padding: 10px 15px;
+    }
+    img.form-control-static {
+        max-width: 100px;
+        max-height: 100px;
+    }
+    .coalesce-upload-icon {
+        cursor: pointer;
+    }
+    .fa-sort {
+        color: lightgray;
+    }
+</style>
+<div class="table-view obj-auditLogProperty">
+    <div class="table-view-header">
+        <div class="clearfix">
+            <h1 style="display: inline-block">
+                Audit Log Property List
+            </h1>
+        </div>
+        <div class="clearfix">
+            <div style="display: inline-block; font-size: 1.1em; margin-right: 10px;">
+                <i class="fa fa-arrow-circle-left" data-bind="enabled: previousPageEnabled() && !isLoading(), click: previousPage"></i>
+                Page
+                <input data-bind="value: page" style="width: 35px">
+                of
+                <span data-bind="text: pageCount"></span>
+                <i class="fa fa-arrow-circle-right" data-bind="enabled: nextPageEnabled() && !isLoading(), click: nextPage"></i>
+            </div>
+            <select class="form-control" style="width: 100px; display: inline-block;" data-bind="value: pageSize">
+                <option value="1">1</option>
+                <option value="5">5</option>
+                <option value="10">10</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+                <option value="500">500</option>
+                <option value="1000">1000</option>
+            </select>
+            <input class="form-control pull-right" style="width: 250px; margin-left: 20px" data-bind="textInput: search" placeholder="Search" />
+            <div class="btn-group pull-right">
+                <button data-bind="click:load" class="btn btn-sm btn-default "><i class="fa fa-refresh"></i> Refresh</button>
+                @if (ViewBag.Editable)
+                {
+                    <a href="~/AuditLogProperty/Table?@(ViewBag.Query)" role="button" class="btn btn-sm btn-default "><i class="fa fa-lock"></i> Make Read-only</a>
+                }
+            </div>
+        </div>
+    </div>
+    <hr />
+    <div class="card table-view-body">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table @(ViewBag.Editable ? "editable" : "" )">
+                    <thead>
+                        <tr>
+                            <th class="sortable-header" data-bind="click: function(){orderByToggle('ParentId')}">
+                                Parent Id
+                                <i class="fa" data-bind="css: orderBy() == 'ParentId' ? 'fa-caret-up' : orderByDescending() == 'ParentId' ? 'fa-caret-down' : 'fa-sort'" style="float: right; padding: .3em 0 0 0 "></i>
+                            </th>
+                            <th class="sortable-header" data-bind="click: function(){orderByToggle('PropertyName')}">
+                                Property Name
+                                <i class="fa" data-bind="css: orderBy() == 'PropertyName' ? 'fa-caret-up' : orderByDescending() == 'PropertyName' ? 'fa-caret-down' : 'fa-sort'" style="float: right; padding: .3em 0 0 0 "></i>
+                            </th>
+                            <th class="sortable-header" data-bind="click: function(){orderByToggle('OldValue')}">
+                                Old Value
+                                <i class="fa" data-bind="css: orderBy() == 'OldValue' ? 'fa-caret-up' : orderByDescending() == 'OldValue' ? 'fa-caret-down' : 'fa-sort'" style="float: right; padding: .3em 0 0 0 "></i>
+                            </th>
+                            <th class="sortable-header" data-bind="click: function(){orderByToggle('NewValue')}">
+                                New Value
+                                <i class="fa" data-bind="css: orderBy() == 'NewValue' ? 'fa-caret-up' : orderByDescending() == 'NewValue' ? 'fa-caret-down' : 'fa-sort'" style="float: right; padding: .3em 0 0 0 "></i>
+                            </th>
+                            <th style="width: 1%">
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody data-bind="foreach: items">
+                        <tr data-bind="css: {'btn-warning': errorMessage()}, attr: {id: id}">
+                            @if (@ViewBag.Editable)
+                            {
+                                <td class="prop-parentId">@(Knockout.InputFor<IntelliTect.Coalesce.AuditLogging.AuditLogProperty>(p => p.ParentId))</td>
+                                <td class="prop-propertyName">@(Knockout.InputFor<IntelliTect.Coalesce.AuditLogging.AuditLogProperty>(p => p.PropertyName))</td>
+                                <td class="prop-oldValue">@(Knockout.InputFor<IntelliTect.Coalesce.AuditLogging.AuditLogProperty>(p => p.OldValue))</td>
+                                <td class="prop-newValue">@(Knockout.InputFor<IntelliTect.Coalesce.AuditLogging.AuditLogProperty>(p => p.NewValue))</td>
+                            }
+                            else
+                            {
+                                <td class="prop-parentId">@(Knockout.DisplayFor<IntelliTect.Coalesce.AuditLogging.AuditLogProperty>(p => p.ParentId, true))</td>
+                                <td class="prop-propertyName">@(Knockout.DisplayFor<IntelliTect.Coalesce.AuditLogging.AuditLogProperty>(p => p.PropertyName, true))</td>
+                                <td class="prop-oldValue">@(Knockout.DisplayFor<IntelliTect.Coalesce.AuditLogging.AuditLogProperty>(p => p.OldValue, true))</td>
+                                <td class="prop-newValue">@(Knockout.DisplayFor<IntelliTect.Coalesce.AuditLogging.AuditLogProperty>(p => p.NewValue, true))</td>
+                            }
+                            <td>
+                                <!-- Editor buttons -->
+                                <div class="btn-group pull-right" role="group" style="display: inline-flex">
+                                </div>
+                                <div class="form-control-static" data-bind="text: errorMessage"></div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts
+{
+    <script>
+        @if (!ViewBag.Editable)
+        {
+            @:Coalesce.GlobalConfiguration.viewModel.setupValidationAutomatically(false);
+        }
+        var auditLogPropertyList = new ListViewModels.AuditLogPropertyList();
+        
+        // Set up parent info based on the URL.
+        @if (ViewBag.Query != null)
+        {
+            @:auditLogPropertyList.queryString = "@(ViewBag.Query)";
+        }
+        
+        // Save and restore values from the URL:
+        var urlVariables = ['page', 'pageSize', 'search', 'orderBy', 'orderByDescending'];
+        $.each(urlVariables, function(){
+            var param = Coalesce.Utilities.GetUrlParameter(this);
+            if (param) {auditLogPropertyList[this](param);}
+        })
+        auditLogPropertyList.isLoading.subscribe(function(){
+            var newUrl = window.location.href;
+        
+            $.each(urlVariables, function(){
+                var param = auditLogPropertyList[this]();
+                newUrl = Coalesce.Utilities.SetUrlParameter(newUrl, this, param);
+            })
+            history.replaceState(null, document.title, newUrl);
+        });
+        
+        auditLogPropertyList.isSavingAutomatically = false;
+        ko.applyBindings(auditLogPropertyList, document.body);
+        auditLogPropertyList.isSavingAutomatically = true;
+        
+        auditLogPropertyList.includes = "AuditLogPropertyListGen";
+        auditLogPropertyList.load();
+    </script>
+}

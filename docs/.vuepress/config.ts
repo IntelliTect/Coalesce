@@ -107,8 +107,6 @@ export default defineUserConfig({
           {text: 'Models', link: '/stacks/vue/layers/models' },
           {text: 'API Clients', link: '/stacks/vue/layers/api-clients' },
           {text: 'View Models', link: '/stacks/vue/layers/viewmodels' },
-          
-          {text: 'Vue 2 to Vue 3', link: '/stacks/vue/vue2-to-vue3' },
          ],
       },
       {
@@ -125,19 +123,16 @@ export default defineUserConfig({
         ]
       },
       {
-        text: 'Concepts',
-        // collapsible: false,
-        children: [
-          '/concepts/include-tree',
-          '/concepts/includes',
-         ],
-      },
-      {
-        text: 'Configuration',
+        text: 'Topics',
         // collapsible: false,
         children: [
           '/topics/startup',
+          '/topics/audit-logging',
           '/topics/coalesce-json',
+          '/concepts/include-tree',
+          '/concepts/includes',
+          
+          {text: 'Vue 2 to Vue 3', link: '/stacks/vue/vue2-to-vue3' },
          ],
       },
       {

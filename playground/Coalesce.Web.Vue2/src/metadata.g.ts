@@ -7,6 +7,28 @@ import {
 
 
 const domain: Domain = { enums: {}, types: {}, services: {} }
+export const AuditEntryState = domain.enums.AuditEntryState = {
+  name: "AuditEntryState",
+  displayName: "Audit Entry State",
+  type: "enum",
+  ...getEnumMeta<"EntityAdded"|"EntityDeleted"|"EntityModified">([
+  {
+    value: 0,
+    strValue: "EntityAdded",
+    displayName: "Entity Added",
+  },
+  {
+    value: 1,
+    strValue: "EntityDeleted",
+    displayName: "Entity Deleted",
+  },
+  {
+    value: 2,
+    strValue: "EntityModified",
+    displayName: "Entity Modified",
+  },
+  ]),
+}
 export const Genders = domain.enums.Genders = {
   name: "Genders",
   displayName: "Genders",
@@ -110,6 +132,172 @@ export const Titles = domain.enums.Titles = {
     displayName: "Miss",
   },
   ]),
+}
+export const AuditLog = domain.types.AuditLog = {
+  name: "AuditLog",
+  displayName: "Audit Log",
+  get displayProp() { return this.props.type }, 
+  type: "model",
+  controllerRoute: "AuditLog",
+  get keyProp() { return this.props.id }, 
+  behaviorFlags: 0 as BehaviorFlags,
+  props: {
+    message: {
+      name: "message",
+      displayName: "Message",
+      type: "string",
+      role: "value",
+    },
+    userId: {
+      name: "userId",
+      displayName: "User Id",
+      type: "number",
+      role: "foreignKey",
+      get principalKey() { return (domain.types.Person as ModelType).props.personId as PrimaryKeyProperty },
+      get principalType() { return (domain.types.Person as ModelType) },
+      get navigationProp() { return (domain.types.AuditLog as ModelType).props.user as ModelReferenceNavigationProperty },
+      hidden: 3 as HiddenAreas,
+    },
+    user: {
+      name: "user",
+      displayName: "User",
+      type: "model",
+      get typeDef() { return (domain.types.Person as ModelType) },
+      role: "referenceNavigation",
+      get foreignKey() { return (domain.types.AuditLog as ModelType).props.userId as ForeignKeyProperty },
+      get principalKey() { return (domain.types.Person as ModelType).props.personId as PrimaryKeyProperty },
+      dontSerialize: true,
+    },
+    id: {
+      name: "id",
+      displayName: "Id",
+      type: "number",
+      role: "primaryKey",
+      hidden: 3 as HiddenAreas,
+    },
+    type: {
+      name: "type",
+      displayName: "Type",
+      type: "string",
+      role: "value",
+      rules: {
+        required: val => (val != null && val !== '') || "Type is required.",
+        maxLength: val => !val || val.length <= 100 || "Type may not be more than 100 characters.",
+      }
+    },
+    keyValue: {
+      name: "keyValue",
+      displayName: "Key Value",
+      type: "string",
+      role: "value",
+    },
+    state: {
+      name: "state",
+      displayName: "Change Type",
+      type: "enum",
+      get typeDef() { return domain.enums.AuditEntryState },
+      role: "value",
+    },
+    date: {
+      name: "date",
+      displayName: "Date",
+      type: "date",
+      dateKind: "datetime",
+      role: "value",
+    },
+    properties: {
+      name: "properties",
+      displayName: "Properties",
+      type: "collection",
+      itemType: {
+        name: "$collectionItem",
+        displayName: "",
+        role: "value",
+        type: "model",
+        get typeDef() { return (domain.types.AuditLogProperty as ModelType) },
+      },
+      role: "collectionNavigation",
+      get foreignKey() { return (domain.types.AuditLogProperty as ModelType).props.parentId as ForeignKeyProperty },
+      dontSerialize: true,
+    },
+    clientIp: {
+      name: "clientIp",
+      displayName: "Client IP",
+      type: "string",
+      role: "value",
+    },
+    referrer: {
+      name: "referrer",
+      displayName: "Referrer",
+      type: "string",
+      role: "value",
+    },
+    endpoint: {
+      name: "endpoint",
+      displayName: "Endpoint",
+      type: "string",
+      role: "value",
+    },
+  },
+  methods: {
+  },
+  dataSources: {
+  },
+}
+export const AuditLogProperty = domain.types.AuditLogProperty = {
+  name: "AuditLogProperty",
+  displayName: "Audit Log Property",
+  get displayProp() { return this.props.propertyName }, 
+  type: "model",
+  controllerRoute: "AuditLogProperty",
+  get keyProp() { return this.props.id }, 
+  behaviorFlags: 0 as BehaviorFlags,
+  props: {
+    id: {
+      name: "id",
+      displayName: "Id",
+      type: "number",
+      role: "primaryKey",
+      hidden: 3 as HiddenAreas,
+    },
+    parentId: {
+      name: "parentId",
+      displayName: "Parent Id",
+      type: "number",
+      role: "foreignKey",
+      get principalKey() { return (domain.types.AuditLog as ModelType).props.id as PrimaryKeyProperty },
+      get principalType() { return (domain.types.AuditLog as ModelType) },
+      rules: {
+        required: val => val != null || "Parent Id is required.",
+      }
+    },
+    propertyName: {
+      name: "propertyName",
+      displayName: "Property Name",
+      type: "string",
+      role: "value",
+      rules: {
+        required: val => (val != null && val !== '') || "Property Name is required.",
+        maxLength: val => !val || val.length <= 100 || "Property Name may not be more than 100 characters.",
+      }
+    },
+    oldValue: {
+      name: "oldValue",
+      displayName: "Old Value",
+      type: "string",
+      role: "value",
+    },
+    newValue: {
+      name: "newValue",
+      displayName: "New Value",
+      type: "string",
+      role: "value",
+    },
+  },
+  methods: {
+  },
+  dataSources: {
+  },
 }
 export const Case = domain.types.Case = {
   name: "Case",
@@ -1250,6 +1438,43 @@ export const Person = domain.types.Person = {
         role: "value",
       },
     },
+    setBirthDate: {
+      name: "setBirthDate",
+      displayName: "Set Birth Date",
+      transportType: "item",
+      httpMethod: "POST",
+      params: {
+        id: {
+          name: "id",
+          displayName: "Primary Key",
+          type: "number",
+          role: "value",
+          get source() { return (domain.types.Person as ModelType).props.personId },
+        },
+        date: {
+          name: "date",
+          displayName: "Date",
+          type: "date",
+          dateKind: "date",
+          noOffset: true,
+          role: "value",
+        },
+        time: {
+          name: "time",
+          displayName: "Time",
+          type: "date",
+          dateKind: "time",
+          noOffset: true,
+          role: "value",
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "void",
+        role: "value",
+      },
+    },
     personCount: {
       name: "personCount",
       displayName: "Person Count",
@@ -2100,12 +2325,15 @@ export const WeatherService = domain.services.WeatherService = {
 
 interface AppDomain extends Domain {
   enums: {
+    AuditEntryState: typeof AuditEntryState
     Genders: typeof Genders
     SkyConditions: typeof SkyConditions
     Statuses: typeof Statuses
     Titles: typeof Titles
   }
   types: {
+    AuditLog: typeof AuditLog
+    AuditLogProperty: typeof AuditLogProperty
     Case: typeof Case
     CaseDto: typeof CaseDto
     CaseDtoStandalone: typeof CaseDtoStandalone

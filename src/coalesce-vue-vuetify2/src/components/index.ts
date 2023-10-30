@@ -1,4 +1,5 @@
 // In alphabetical order:
+export { default as CAdminAuditLogPage } from "./admin/c-admin-audit-log-page.vue";
 export { default as CAdminDisplay } from "./admin/c-admin-display";
 export { default as CAdminEditor } from "./admin/c-admin-editor.vue";
 export { default as CAdminEditorPage } from "./admin/c-admin-editor-page.vue";
@@ -27,6 +28,7 @@ export { default as CTable } from "./display/c-table.vue";
 import "vue";
 declare module "vue" {
   interface GlobalComponents {
+    CAdminAuditLogPage: typeof import(".")["CAdminAuditLogPage"];
     CAdminDisplay: typeof import(".")["CAdminDisplay"];
     CAdminEditor: typeof import(".")["CAdminEditor"];
     CAdminEditorPage: typeof import(".")["CAdminEditorPage"];

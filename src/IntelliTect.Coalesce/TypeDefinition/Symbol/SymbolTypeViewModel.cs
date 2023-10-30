@@ -53,7 +53,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             // These are precomputed because they are used for .Equals() and the == operator.
             FullyQualifiedName = Symbol.ToDisplayString(DefaultDisplayFormat);
             VerboseFullyQualifiedName = Symbol.ToDisplayString(VerboseDisplayFormat);
-    }
+        }
 
         internal static SymbolTypeViewModel GetOrCreate(ReflectionRepository? reflectionRepository, ITypeSymbol symbol)
         {

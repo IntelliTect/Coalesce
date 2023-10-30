@@ -2,6 +2,7 @@
 using Coalesce.Web.Ko.Models;
 using IntelliTect.Coalesce;
 using IntelliTect.Coalesce.Api;
+using IntelliTect.Coalesce.Api.Behaviors;
 using IntelliTect.Coalesce.Api.Controllers;
 using IntelliTect.Coalesce.Api.DataSources;
 using IntelliTect.Coalesce.Mapping;
@@ -52,5 +53,14 @@ namespace Coalesce.Web.Ko.Api
             FilterParameters parameters,
             IDataSource<Coalesce.Domain.Log> dataSource)
             => CountImplementation(parameters, dataSource);
+
+        [HttpPost("bulkSave")]
+        [Authorize]
+        public virtual Task<ItemResult<LogDtoGen>> BulkSave(
+            [FromBody] BulkSaveRequest dto,
+            [FromQuery] DataSourceParameters parameters,
+            [FromServices] IDataSourceFactory dataSourceFactory,
+            [FromServices] IBehaviorsFactory behaviorsFactory)
+            => BulkSaveImplementation(dto, parameters, dataSourceFactory, behaviorsFactory);
     }
 }

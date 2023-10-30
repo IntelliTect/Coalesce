@@ -35,7 +35,7 @@ The PascalCase name of your `IAuditLog` implementation.
 
 An optional [ListViewModel](/stacks/vue/layers/viewmodels.md) that will be used if provided instead of the one the component will create automatically from the provided `type` prop.
 
-<Prop def="color: string" lang="ts" />
+<Prop def="color: string = 'primary'" lang="ts" />
 
 A Vuetify color name to be applied to the toolbar at the top of the page.
 

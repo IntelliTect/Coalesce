@@ -6,7 +6,7 @@ Coalesce provides a package `IntelliTect.Coalesce.AuditLogging` that adds an eas
 
 ## Setup
 
-In this setup process, we're going to add an additional Coalesce Nuget package, define a custom entity to hold our audit logs and any extra properties, install the audit logging extension into our `DbContext`, and add a pre-made interface on the frontend to view our logs.
+In this setup process, we're going to add an additional Coalesce Nuget package, define a custom entity to hold our audit logs, install the audit logging extension into our `DbContext`, and add a pre-made interface on the frontend to view our logs.
 
 ### 1. Add the NuGet package
 

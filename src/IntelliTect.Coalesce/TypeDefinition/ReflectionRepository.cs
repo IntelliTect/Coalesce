@@ -130,7 +130,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             var localThis = this;
             var localType = type;
 
-            return GetOrAddType(type, () => new ReflectionTypeViewModel(this, type));
+            return GetOrAddType(localType, () => new ReflectionTypeViewModel(localThis, localType));
         }
 
         public TypeViewModel GetOrAddType(TypeViewModel type) => 

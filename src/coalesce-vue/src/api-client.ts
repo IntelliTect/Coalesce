@@ -2007,3 +2007,10 @@ declare module "@vue/reactivity" {
     coalesceApiModels: ApiState<any, any> | ApiClient<any>;
   }
 }
+
+// The vue2 version of this interface:
+declare module "vue" {
+  export interface RefUnwrapBailTypes {
+    coalesceApiModels: ApiState<any, any> | ApiClient<any>;
+  }
+}

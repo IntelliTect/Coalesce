@@ -2219,3 +2219,10 @@ declare module "@vue/reactivity" {
     coalesceViewModels: ViewModel | ListViewModel | ServiceViewModel;
   }
 }
+
+// The vue2 version of this interface:
+declare module "vue" {
+  export interface RefUnwrapBailTypes {
+    coalesceViewModels: ViewModel | ListViewModel | ServiceViewModel;
+  }
+}

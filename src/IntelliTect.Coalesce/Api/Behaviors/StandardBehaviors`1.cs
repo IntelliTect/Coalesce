@@ -162,7 +162,7 @@ namespace IntelliTect.Coalesce
         /// <summary>
         /// Maps the incoming DTO's properties to the item that will be saved to the database.
         /// </summary>
-        /// <param name="kind">Descriminator between a create and a update operation.</param>
+        /// <param name="kind">Discriminator between a create and a update operation.</param>
         /// <param name="item">The item that will be saved to the database.</param>
         /// <param name="dto">The incoming item from the client.</param>
         /// <param name="parameters">The additional parameters sent by the client.</param>

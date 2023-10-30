@@ -44,7 +44,7 @@ export function isNullOrWhitespace(value: string | null | undefined) {
 }
 
 const iso8601DateRegex =
-  /^(\d{4})-(\d{2})-(\d{2})(?:[T ](\d{2}):(\d{2}):(\d{2})(?:\.(\d{0,7}))?(?:Z|(.)(\d{2}):?(\d{2})?)?)?/;
+  /^(\d{4})-(\d{2})-(\d{2})(?:[T ](\d{2}):(\d{2}):(\d{2})(?:\.(\d{0,7}))?(?:(Z)|(.)(\d{2}):?(\d{2})?)?)?/;
 const iso8601TimeRegex =
   /^(\d{2}):(\d{2}):(\d{2})(?:\.(\d{0,7}))?(?:Z|(.)(\d{2}):?(\d{2})?)?$/;
 
@@ -90,17 +90,17 @@ export function parseJSONDate(argument: string, kind: DateKind = "datetime") {
 
   var parts = argument.match(iso8601DateRegex) || [];
 
-  const part9 = parts[9]; // TZ offset
+  const partTzOffset = parts[8] == "Z" ? 0 : parts[10]; // TZ offset
 
-  if (part9 !== undefined) {
+  if (partTzOffset !== undefined) {
     // Date+Time, with offset specifier
     return new Date(
       Date.UTC(
         +parts[1],
         +parts[2] - 1,
         +parts[3],
-        +parts[4] - (+part9 || 0) * (parts[8] == "-" ? -1 : 1),
-        +parts[5] - (+parts[10] || 0) * (parts[8] == "-" ? -1 : 1),
+        +parts[4] - (+partTzOffset || 0) * (parts[9] == "-" ? -1 : 1),
+        +parts[5] - (+parts[11] || 0) * (parts[9] == "-" ? -1 : 1),
         +parts[6],
         +((parts[7] || "0") + "00").substring(0, 3)
       )

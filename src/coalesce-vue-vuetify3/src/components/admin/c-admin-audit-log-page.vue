@@ -321,7 +321,9 @@ const userPropMeta = computed(() => {
           p.role == "referenceNavigation"
       )
       // FUTURE: Could there be other props that we detect as representing a user?
-      .filter((p) => ["user"].includes(p.name.toLowerCase()))[0]
+      .filter((p) =>
+        ["user"].some((needle) => p.name.toLowerCase().includes(needle))
+      )[0]
   );
 });
 

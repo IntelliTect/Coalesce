@@ -751,7 +751,11 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// </summary>
         public bool HasNotMapped => HasAttribute<NotMappedAttribute>();
 
-        public bool IsDbMapped => !HasNotMapped && HasSetter && (Object?.IsDbMappedType ?? true);
+        public bool IsDbMapped => 
+            !HasNotMapped && 
+            // Collection navigation properties are allowed to be getter-only
+            (HasSetter || (Type.IsCollection && PureType.IsPOCO)) && 
+            (Object?.IsDbMappedType ?? true);
 
         /// <summary>
         /// If true, this property should be filterable on the URL line via "filter.{UrlParameterName}. 

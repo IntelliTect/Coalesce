@@ -93,8 +93,6 @@
       </v-toolbar>
 
       <v-card-text>
-        <!-- <v-divider></v-divider> -->
-
         <c-loader-status
           :loaders="{
             'no-initial-content no-error-content': [list.$load],
@@ -132,12 +130,12 @@
                       [
                         propDisplay(auditLog, 'date', {
                           format: {
-                            format: 'M/dd/yy HH:mm:ss.SSS z',
+                            format: 'yyyy-MM-dd HH:mm:ss.SSS z',
                           },
                         }),
                         propDisplay(auditLog, 'date', {
                           format: {
-                            format: 'M/dd/yy HH:mm:ss.SSS z',
+                            format: 'yyyy-MM-dd HH:mm:ss.SSS z',
                             timeZone: 'UTC',
                           },
                         }),

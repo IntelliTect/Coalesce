@@ -341,6 +341,34 @@ public class AuditTests
         db.Add(user);
         db.SaveChanges();
 
+        var now = new DateOnly(2023, 1, 1);
+        var end = new DateOnly(2023, 1, 15);
+        var log = db.AuditLogs.Single();
+        log.Date = new DateTimeOffset(2023, 1, 1, 8, 0, 0, TimeSpan.Zero);
+        db.SaveChanges();
+
+        var x = db.AuditLogs.Select(a => new {
+            DateOnly = DateOnly.FromDateTime(a.Date.Date),
+            Date = a.Date.Date,
+            DateTime = a.Date.DateTime,
+            TimeOfDay = a.Date.TimeOfDay,
+            Ticks = a.Date.Ticks,
+            Now = DateTimeOffset.Now,
+            UtcNow = DateTimeOffset.UtcNow,
+            Hours = a.Date.Hour
+        })
+            .Where(x => DateOnly.FromDateTime(x.Date.Date) >= now)
+            .Where(x => DateOnly.FromDateTime(x.Date.Date) <= end);
+        var xq = x.ToQueryString();
+        var xr = x.AsNoTracking().Single();
+
+        Assert.Equal(DateOnly.FromDateTime(log.Date.Date), xr.DateOnly);
+        Assert.Equal(log.Date.Date, xr.Date);
+        Assert.Equal(log.Date.DateTime, xr.DateTime, TimeSpan.FromMilliseconds(1) /*sqlite has millisecond precision only */);
+        Assert.Equal(log.Date.TimeOfDay.TotalMilliseconds, xr.TimeOfDay.TotalMilliseconds, 0 /*sqlite has millisecond precision only */);
+        Assert.True(Math.Abs(log.Date.Ticks-xr.Ticks) < TimeSpan.TicksPerMillisecond);
+        Assert.Equal(log.Date.Hour, xr.Hours);
+
         var typeChangeProp = GetAuditLogProp();
         Assert.Null(typeChangeProp.OldValueDescription);
         Assert.Equal("Name:ThingA", typeChangeProp.NewValueDescription);
@@ -416,6 +444,7 @@ public class AuditTests
     private TestDbContext BuildDbContext(Func<DbContextOptionsBuilder<TestDbContext>, DbContextOptionsBuilder> setup)
     {
         var builder = new DbContextOptionsBuilder<TestDbContext>()
+            .LogTo(Console.WriteLine)
             .UseSqlite(SqliteConn);
 
         var db = new TestDbContext(setup(builder).Options);

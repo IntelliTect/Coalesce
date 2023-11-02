@@ -7,22 +7,30 @@ using System.Xml;
 
 namespace IntelliTect.Coalesce.TypeDefinition
 {
-    public class SymbolAttributeViewModel<TAttribute>(AttributeData attributeData) : AttributeViewModel<TAttribute>
+    public class SymbolAttributeViewModel<TAttribute> : AttributeViewModel<TAttribute>
         where TAttribute : Attribute
     {
+        public AttributeData AttributeData { get; }
+
+        public SymbolAttributeViewModel(AttributeData attributeData, ReflectionRepository? rr) : base(rr)
+        {
+            AttributeData = attributeData;
+        }
+
+        public override TypeViewModel Type => ReflectionRepository.GetOrAddType(AttributeData.AttributeClass!);
+
         public override object? GetValue(string propertyName)
         {
-            if (attributeData == null) return null;
-            var namedArgument = attributeData.NamedArguments.SingleOrDefault(na => na.Key == propertyName);
+            var namedArgument = AttributeData.NamedArguments.SingleOrDefault(na => na.Key == propertyName);
 
             if (namedArgument.Key != null)
             {
-                return namedArgument.Value.Value;
+                return MapReturn(namedArgument.Value.Value);
             }
 
-            TypedConstant? constructorArgument = attributeData
+            TypedConstant? constructorArgument = AttributeData
                 .AttributeConstructor?.Parameters
-                .Zip(attributeData.ConstructorArguments, Tuple.Create)
+                .Zip(AttributeData.ConstructorArguments, Tuple.Create)
             // Look for ctor params with a matching name (case insensitive)
                 .FirstOrDefault(t => string.Equals(t.Item1.Name, propertyName, StringComparison.OrdinalIgnoreCase))
                 ?.Item2
@@ -34,9 +42,15 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
             if (arg.Kind == TypedConstantKind.Array)
             {
-                return arg.Values.Select(v => v.Value).ToArray();
+                return arg.Values.Select(v => MapReturn(v.Value)).ToArray();
             }
-            return arg.Value;
+            return MapReturn(arg.Value);
+
+            object? MapReturn(object? ret) => ret switch
+            {
+                ITypeSymbol symbolValue => ReflectionRepository.Global.GetOrAddType(symbolValue),
+                _ => ret
+            };
         }
     }
 
@@ -110,7 +124,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public static IAttributeProvider GetAttributeProvider(this ISymbol symbol)
             => new SymbolAttributeProvider(symbol);
 
-        public static IEnumerable<SymbolAttributeViewModel<TAttribute>> GetAttributes<TAttribute>(this ISymbol symbol)
+        public static IEnumerable<SymbolAttributeViewModel<TAttribute>> GetAttributes<TAttribute>(
+            this ISymbol symbol, 
+            ReflectionRepository rr = null)
             where TAttribute : Attribute
         {
             return (symbol is INamedTypeSymbol named
@@ -118,8 +134,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 : symbol.GetAttributes())
                 // GetAttributesWithInherited iterates backwards in the inheritance hierarchy,
                 // so this will return the attributes from the most specific type first.
-                .Where(a => a.AttributeClass?.Name == typeof(TAttribute).Name)
-                .Select(a => new SymbolAttributeViewModel<TAttribute>(a));
+                .Where(a => (rr ?? ReflectionRepository.Global).GetOrAddType(a.AttributeClass!).IsA<TAttribute>())
+                .Select(a => new SymbolAttributeViewModel<TAttribute>(a, rr));
         }
 
         public static string? ExtractXmlComments(this ISymbol symbol)

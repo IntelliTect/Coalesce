@@ -12,6 +12,15 @@ namespace IntelliTect.Coalesce.TypeDefinition
     public abstract class AttributeViewModel<TAttribute>
         where TAttribute : Attribute
     {
+        public ReflectionRepository ReflectionRepository { get; }
+
+        public abstract TypeViewModel Type { get; }
+
+        protected AttributeViewModel(ReflectionRepository? reflectionRepository)
+        {
+            ReflectionRepository = reflectionRepository ?? ReflectionRepository.Global;
+        }
+
         public T? GetValue<T>(string valueName)
             where T : struct
         {
@@ -124,9 +133,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             where TAttribute : Attribute
         {
             var value = obj.GetAttributeValue<TAttribute>(propertyExpression.GetExpressedProperty().Name);
-            if (value is Type reflectionValue) return ReflectionRepository.Global.GetOrAddType(reflectionValue);
-            if (value is ITypeSymbol symbolValue) return ReflectionRepository.Global.GetOrAddType(symbolValue);
-            return null;
+            return value as TypeViewModel;
         }
     }
 }

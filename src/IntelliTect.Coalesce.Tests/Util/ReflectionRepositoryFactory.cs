@@ -221,7 +221,7 @@ namespace IntelliTect.Coalesce.Tests.Util
                 foreach (var attr in symbol.GetAttributeProvider().GetAttributes<ClassViewModelDataAttribute>())
                 {
                     var value = attr.GetValue("targetClass");
-                    if (value is ITypeSymbol type) type.Accept(this);
+                    if (value is SymbolTypeViewModel type) type.Symbol.Accept(this);
                 }
             }
         }

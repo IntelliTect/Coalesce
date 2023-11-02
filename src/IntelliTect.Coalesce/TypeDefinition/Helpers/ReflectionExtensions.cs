@@ -1,22 +1,22 @@
-﻿using IntelliTect.Coalesce.Utilities;
+﻿using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Reflection;
-using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.TypeDefinition
 {
     public class ReflectionAttributeViewModel<TAttribute> : AttributeViewModel<TAttribute>
         where TAttribute : Attribute
     {
-        public TAttribute Instance { get; private set; }
+        public TAttribute Instance { get; }
 
-        public ReflectionAttributeViewModel(TAttribute instance)
+        public ReflectionAttributeViewModel(TAttribute instance, ReflectionRepository? rr) : base(rr)
         {
             Instance = instance;
         }
+
+        public override TypeViewModel Type => ReflectionRepository.GetOrAddType(Instance.GetType());
 
         public override object? GetValue(string valueName)
         {
@@ -27,7 +27,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
             // E.g. DisplayAttribute.Order
             try
             {
-                return property.GetValue(Instance, null);
+                var value = property.GetValue(Instance, null);
+                if (value is Type reflectionValue) return ReflectionRepository.Global.GetOrAddType(reflectionValue);
+                return value;
             }
             catch (Exception)
             {
@@ -39,12 +41,13 @@ namespace IntelliTect.Coalesce.TypeDefinition
     public static class ReflectionExtensions
     {
         public static IEnumerable<ReflectionAttributeViewModel<TAttribute>> GetAttributes<TAttribute>(
-            this ICustomAttributeProvider member
+            this ICustomAttributeProvider member,
+            ReflectionRepository? rr = null
         )
             where TAttribute : Attribute
             => member.GetCustomAttributes(typeof(TAttribute), true)
                 .OfType<TAttribute>()
-                .Select(a => new ReflectionAttributeViewModel<TAttribute>(a));
+                .Select(a => new ReflectionAttributeViewModel<TAttribute>(a, rr));
 
         public static TAttribute? GetAttribute<TAttribute>(
             this ICustomAttributeProvider member

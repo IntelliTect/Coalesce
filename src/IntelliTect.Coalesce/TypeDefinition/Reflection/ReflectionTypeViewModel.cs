@@ -67,11 +67,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
         // - If we're removing arity, we should remove any arity.
         public override string Name => Info.Name.Replace("`1", "");
 
-        public override object? GetAttributeValue<TAttribute>(string valueName) =>
-            Info.GetAttributeValue<TAttribute>(valueName);
-
-        public override bool HasAttribute<TAttribute>() =>
-            Info.HasAttribute<TAttribute>();
+        public override IEnumerable<AttributeViewModel<TAttribute>> GetAttributes<TAttribute>()
+            => Info.GetAttributes<TAttribute>();
 
         private ICollection<Type> BaseClassesAndInterfaces { get; }
 
@@ -133,9 +130,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     result.Add(new EnumMember(
                         name, 
                         Convert.ChangeType(value, integralType),
-                        member.GetAttributeValue<DisplayAttribute>(a => a.Name) ??
+                        member.GetAttribute<DisplayAttribute>()?.Name ??
                             member.Name.ToProperCase(),
-                        member.GetAttributeValue<DisplayAttribute>(a => a.Description)
+                        member.GetAttribute<DisplayAttribute>()?.Description
                     ));
                 }
                 return _enumValues = result;

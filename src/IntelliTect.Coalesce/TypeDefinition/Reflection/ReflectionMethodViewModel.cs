@@ -21,10 +21,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public override string Comment => "";
 
-        public override object? GetAttributeValue<TAttribute>(string valueName) =>
-            Info.GetAttributeValue<TAttribute>(valueName);
-        
-        public override bool HasAttribute<TAttribute>() => Info.HasAttribute<TAttribute>();
+        public override IEnumerable<AttributeViewModel<TAttribute>> GetAttributes<TAttribute>()
+            => Info.GetAttributes<TAttribute>();
 
         public override bool IsStatic => Info.IsStatic;
 

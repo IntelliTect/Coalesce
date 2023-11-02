@@ -50,7 +50,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// True if the parameter is marked with <see cref="InjectAttribute"/>
         /// </summary>
-        public bool HasInjectAttribute => HasAttribute<InjectAttribute>();
+        public bool HasInjectAttribute => this.HasAttribute<InjectAttribute>();
 
         /// <summary>
         /// True if the parameter is NOT provided by the calling client.

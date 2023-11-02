@@ -209,7 +209,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
         }
 
-        public virtual bool IsInternalUse => HasAttribute<InternalUseAttribute>() || (PureType != this && PureType.IsInternalUse);
+        public virtual bool IsInternalUse => this.HasAttribute<InternalUseAttribute>() || (PureType != this && PureType.IsInternalUse);
 
         protected virtual bool ShouldCreateClassViewModel => !IsPrimitive && IsPOCO;
 
@@ -354,10 +354,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public string TsDeclaration => $"{Name}: {TsType}";
 
         public string TsDeclarationPlain(string parameterName) => $"{parameterName}: {TsTypePlain}";
-        
-        public abstract object? GetAttributeValue<TAttribute>(string valueName) where TAttribute : Attribute;
-
-        public abstract bool HasAttribute<TAttribute>() where TAttribute : Attribute;
 
         public string DtoFullyQualifiedName => NullableTypeForDto(null, true);
 
@@ -428,6 +424,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public override int GetHashCode() => VerboseFullyQualifiedName.GetHashCode();
 
         public override string ToString() => FullyQualifiedName;
+
+        public abstract IEnumerable<AttributeViewModel<TAttribute>> GetAttributes<TAttribute>() where TAttribute : Attribute;
 
         public static bool operator ==(TypeViewModel? lhs, TypeViewModel? rhs)
         {

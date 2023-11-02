@@ -34,11 +34,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public override string? Comment => Symbol.ExtractXmlComments();
 
-        public override object? GetAttributeValue<TAttribute>(string valueName) =>
-            Symbol.GetAttributeValue<TAttribute>(valueName);
-        
-        public override bool HasAttribute<TAttribute>() => Symbol.HasAttribute<TAttribute>();
-        
+        public override IEnumerable<AttributeViewModel<TAttribute>> GetAttributes<TAttribute>()
+            => Symbol.GetAttributes<TAttribute>();
+
         public override bool HasGetter => !Symbol.IsWriteOnly;
 
         public override bool HasSetter => !Symbol.IsReadOnly;

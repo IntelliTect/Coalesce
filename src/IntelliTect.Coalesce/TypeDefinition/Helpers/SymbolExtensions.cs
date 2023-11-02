@@ -1,15 +1,52 @@
-﻿using IntelliTect.Coalesce.Utilities;
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Xml;
 
 namespace IntelliTect.Coalesce.TypeDefinition
 {
+    public class SymbolAttributeViewModel<TAttribute>(AttributeData attributeData) : AttributeViewModel<TAttribute>
+        where TAttribute : Attribute
+    {
+        public override object? GetValue(string propertyName)
+        {
+            if (attributeData == null) return null;
+            var namedArgument = attributeData.NamedArguments.SingleOrDefault(na => na.Key == propertyName);
+
+            if (namedArgument.Key != null)
+            {
+                return namedArgument.Value.Value;
+            }
+
+            TypedConstant? constructorArgument = attributeData
+                .AttributeConstructor?.Parameters
+                .Zip(attributeData.ConstructorArguments, Tuple.Create)
+            // Look for ctor params with a matching name (case insensitive)
+                .FirstOrDefault(t => string.Equals(t.Item1.Name, propertyName, StringComparison.OrdinalIgnoreCase))
+                ?.Item2
+                // If we didn't find one, see if there is just a single ctor param. If so, this is almost certainly what we were looking for.
+                ;//?? (attributeData.ConstructorArguments.Length == 1 ? attributeData.ConstructorArguments.SingleOrDefault() : default);
+
+            if (constructorArgument == null || constructorArgument.Value.IsNull) return null;
+            var arg = constructorArgument.Value;
+
+            if (arg.Kind == TypedConstantKind.Array)
+            {
+                return arg.Values.Select(v => v.Value).ToArray();
+            }
+            return arg.Value;
+        }
+    }
+
+    public class SymbolAttributeProvider(ISymbol symbol) : IAttributeProvider
+    {
+        public IEnumerable<AttributeViewModel<TAttribute>> GetAttributes<TAttribute>()
+            where TAttribute : Attribute
+            => symbol.GetAttributes<TAttribute>();
+    }
+
     public static class SymbolExtensions
     {
         private static bool IsInherited(AttributeData attribute)
@@ -46,7 +83,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             return true;
         }
 
-        public static IEnumerable<AttributeData> GetAttributesWithInherited(this INamedTypeSymbol typeSymbol)
+        private static IEnumerable<AttributeData> GetAttributesWithInherited(this INamedTypeSymbol typeSymbol)
         {
             // From https://stackoverflow.com/a/67601737
 
@@ -70,63 +107,19 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
         }
 
-        public static AttributeData? GetAttribute<TAttribute>(this ISymbol symbol)
-        {
+        public static IAttributeProvider GetAttributeProvider(this ISymbol symbol)
+            => new SymbolAttributeProvider(symbol);
 
-            return (symbol is INamedTypeSymbol named 
-                ? named.GetAttributesWithInherited() 
+        public static IEnumerable<SymbolAttributeViewModel<TAttribute>> GetAttributes<TAttribute>(this ISymbol symbol)
+            where TAttribute : Attribute
+        {
+            return (symbol is INamedTypeSymbol named
+                ? named.GetAttributesWithInherited()
                 : symbol.GetAttributes())
                 // GetAttributesWithInherited iterates backwards in the inheritance hierarchy,
-                // so a .First() here will return the attribute from the most specific type.
-                .FirstOrDefault(a => a.AttributeClass?.Name == typeof(TAttribute).Name);
-        }
-
-        public static bool HasAttribute<TAttribute>(this ISymbol symbol)
-        {
-            return symbol.GetAttribute<TAttribute>() != null;
-        }
-
-        public static object? GetAttributeValue<TAttribute>(this ISymbol symbol, string valueName) 
-            where TAttribute : Attribute
-        {
-            var attributeData = symbol.GetAttribute<TAttribute>();
-            return attributeData?.GetPropertyValue(valueName, null);
-        }
-
-        public static string? GetAttributeValue<TAttribute>(this ISymbol symbol, Expression<Func<TAttribute, string?>> propertyExpression) 
-            where TAttribute : Attribute
-        {
-            var attributeData = symbol.GetAttribute<TAttribute>();
-            return attributeData?.GetPropertyValue(propertyExpression.GetExpressedProperty().Name, null) as string;
-        }
-
-        public static object? GetPropertyValue(this AttributeData attributeData, string propertyName, object? defaultValue)
-        {
-            if (attributeData == null) return defaultValue;
-            var namedArgument = attributeData.NamedArguments.SingleOrDefault(na => na.Key == propertyName);
-
-            if (namedArgument.Key != null)
-            {
-                return namedArgument.Value.Value;
-            }
-
-            TypedConstant? constructorArgument = attributeData
-                .AttributeConstructor?.Parameters
-                .Zip(attributeData.ConstructorArguments, Tuple.Create)
-                // Look for ctor params with a matching name (case insensitive)
-                .FirstOrDefault(t => string.Equals(t.Item1.Name, propertyName, StringComparison.OrdinalIgnoreCase))
-                ?.Item2
-                // If we didn't find one, see if there is just a single ctor param. If so, this is almost certainly what we were looking for.
-                ;//?? (attributeData.ConstructorArguments.Length == 1 ? attributeData.ConstructorArguments.SingleOrDefault() : default);
-
-            if (constructorArgument == null || constructorArgument.Value.IsNull) return defaultValue;
-            var arg = constructorArgument.Value;
-
-            if (arg.Kind == TypedConstantKind.Array)
-            {
-                return arg.Values.Select(v => v.Value).ToArray();
-            }
-            return arg.Value;
+                // so this will return the attributes from the most specific type first.
+                .Where(a => a.AttributeClass?.Name == typeof(TAttribute).Name)
+                .Select(a => new SymbolAttributeViewModel<TAttribute>(a));
         }
 
         public static string? ExtractXmlComments(this ISymbol symbol)

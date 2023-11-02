@@ -51,7 +51,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             get
             {
 
-                if (HasAttribute<RequiredAttribute>()) return true;
+                if (this.HasAttribute<RequiredAttribute>()) return true;
 
                 if (
                     Type.IsNumber &&
@@ -85,8 +85,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             get
             {
-                var min = GetAttributeValue<RangeAttribute>(nameof(RangeAttribute.Minimum));
-                var max = GetAttributeValue<RangeAttribute>(nameof(RangeAttribute.Maximum));
+                var min = this.GetAttributeValue<RangeAttribute>(nameof(RangeAttribute.Minimum));
+                var max = this.GetAttributeValue<RangeAttribute>(nameof(RangeAttribute.Maximum));
                 if (min != null && max != null) return new Tuple<object, object>(min, max);
                 return null;
             }
@@ -111,7 +111,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// </summary>
         public int? MaxLength => this.GetAttributeValue<MaxLengthAttribute, int>(a => a.Length);
 
-        public abstract object? GetAttributeValue<TAttribute>(string valueName) where TAttribute : Attribute;
-        public abstract bool HasAttribute<TAttribute>() where TAttribute : Attribute;
+        public abstract IEnumerable<AttributeViewModel<TAttribute>> GetAttributes<TAttribute>() where TAttribute : Attribute;
     }
 }

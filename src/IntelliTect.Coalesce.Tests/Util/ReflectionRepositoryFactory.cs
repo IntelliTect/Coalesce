@@ -218,13 +218,10 @@ namespace IntelliTect.Coalesce.Tests.Util
             {
                 // Hack to pick up any arbitrary constructed generic types
                 // that were specified as parameters to [ClassViewModelDataAttribute] in tests.
-                foreach (var attr in symbol.GetAttributes())
+                foreach (var attr in symbol.GetAttributeProvider().GetAttributes<ClassViewModelDataAttribute>())
                 {
-                    if (attr.AttributeClass.Name == nameof(ClassViewModelDataAttribute))
-                    {
-                        var value = attr.GetPropertyValue("targetClass", null);
-                        if (value is ITypeSymbol type) type.Accept(this);
-                    }
+                    var value = attr.GetValue("targetClass");
+                    if (value is ITypeSymbol type) type.Accept(this);
                 }
             }
         }

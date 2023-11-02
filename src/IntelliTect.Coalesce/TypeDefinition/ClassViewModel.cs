@@ -116,8 +116,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// </summary>
         public string ListViewModelClassName => ClientTypeName + "List";
 
-        public bool IsService => HasAttribute<CoalesceAttribute>() && HasAttribute<ServiceAttribute>();
-        public bool IsStandaloneEntity => HasAttribute<CoalesceAttribute>() && HasAttribute<StandaloneEntityAttribute>();
+        public bool IsService => this.HasAttribute<CoalesceAttribute>() && this.HasAttribute<ServiceAttribute>();
+        public bool IsStandaloneEntity => this.HasAttribute<CoalesceAttribute>() && this.HasAttribute<StandaloneEntityAttribute>();
 
         public string ServiceClientClassName => ClientTypeName + "Client";
 
@@ -425,7 +425,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// Returns true if this class has a partial typescript file.
         /// </summary>
-        public bool HasTypeScriptPartial => HasAttribute<TypeScriptPartialAttribute>();
+        public bool HasTypeScriptPartial => this.HasAttribute<TypeScriptPartialAttribute>();
 
         public bool WillCreateViewController =>
             this.GetAttributeValue<CreateControllerAttribute, bool>(a => a.WillCreateView) ?? true;
@@ -467,13 +467,11 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public ClassSecurityInfo SecurityInfo => _securityInfo ??= new ClassSecurityInfo(this);
 
-        public bool IsDefaultDataSource => HasAttribute<DefaultDataSourceAttribute>();
+        public bool IsDefaultDataSource => this.HasAttribute<DefaultDataSourceAttribute>();
 
-        public object? GetAttributeValue<TAttribute>(string valueName) where TAttribute : Attribute =>
-            Type.GetAttributeValue<TAttribute>(valueName);
-
-        public bool HasAttribute<TAttribute>() where TAttribute : Attribute =>
-            Type.HasAttribute<TAttribute>();
+        public IEnumerable<AttributeViewModel<TAttribute>> GetAttributes<TAttribute>() 
+            where TAttribute : Attribute 
+            => Type.GetAttributes<TAttribute>();
 
         public override string ToString() => FullyQualifiedName;
 

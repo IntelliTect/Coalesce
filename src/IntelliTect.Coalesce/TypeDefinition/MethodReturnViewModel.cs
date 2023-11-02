@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Microsoft.CodeAnalysis;
+using System;
+using System.Collections.Generic;
 
 #nullable enable
 
@@ -24,10 +26,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public override bool IsRequired => false;
 
-        public override object? GetAttributeValue<TAttribute>(string valueName)
-            => Method.GetAttributeValue<TAttribute>(valueName);
-
-        public override bool HasAttribute<TAttribute>()
-            => Method.HasAttribute<TAttribute>();
+        public override IEnumerable<AttributeViewModel<TAttribute>> GetAttributes<TAttribute>()
+            => Method.GetAttributes<TAttribute>();
     }
 }

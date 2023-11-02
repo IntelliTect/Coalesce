@@ -51,11 +51,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public override bool IsInternalUse => base.IsInternalUse || Info.GetGetMethod(true)?.IsPublic != true;
 
-        public override object? GetAttributeValue<TAttribute>(string valueName)
-            => Info.GetAttributeValue<TAttribute>(valueName);
-        
-        public override bool HasAttribute<TAttribute>() =>
-            Info.HasAttribute<TAttribute>();
+        public override IEnumerable<AttributeViewModel<TAttribute>> GetAttributes<TAttribute>()
+            => Info.GetAttributes<TAttribute>();
 
         private IReadOnlyList<ValidationAttribute>? _validationAttributes;
         internal IReadOnlyList<ValidationAttribute> GetValidationAttributes()

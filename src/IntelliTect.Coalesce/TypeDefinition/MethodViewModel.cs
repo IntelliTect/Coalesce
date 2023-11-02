@@ -126,7 +126,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// Returns true if this method is marked as InternalUse. Not exposed through the API
         /// </summary>
-        public virtual bool IsInternalUse => HasAttribute<InternalUseAttribute>();
+        public virtual bool IsInternalUse => this.HasAttribute<InternalUseAttribute>();
         
         
         public HttpMethod ApiActionHttpMethod =>
@@ -231,7 +231,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             // Services only have instance methods - no static methods.
             (!Parent.IsService || !IsStatic) && 
             // Interface services always expose all their declared methods.
-            ((Parent.IsService && Parent.Type.IsInterface) || HasAttribute<CoalesceAttribute>());
+            ((Parent.IsService && Parent.Type.IsInterface) || this.HasAttribute<CoalesceAttribute>());
 
         public string LoadFromDataSourceName
         {
@@ -276,7 +276,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 }
 
 #if NET7_0_OR_GREATER
-                if (!HasAttribute<System.Diagnostics.CodeAnalysis.SetsRequiredMembersAttribute>())
+                if (!this.HasAttribute<System.Diagnostics.CodeAnalysis.SetsRequiredMembersAttribute>())
                 {
                     foreach (var requiredProp in Parent.ClientProperties.Where(p => p.HasRequiredKeyword))
                     {
@@ -306,8 +306,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
         }
 
-        public abstract object? GetAttributeValue<TAttribute>(string valueName) where TAttribute : Attribute;
-        public abstract bool HasAttribute<TAttribute>() where TAttribute : Attribute;
+        public abstract IEnumerable<AttributeViewModel<TAttribute>> GetAttributes<TAttribute>() where TAttribute : Attribute;
 
         public override string ToString()
             => $"{ReturnType} {ToStringWithoutReturn()}";

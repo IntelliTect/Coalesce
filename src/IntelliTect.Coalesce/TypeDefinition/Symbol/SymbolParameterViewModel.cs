@@ -35,14 +35,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         protected override object? RawDefaultValue => Symbol.ExplicitDefaultValue;
 
-        public override object? GetAttributeValue<TAttribute>(string valueName)
-        {
-            return Symbol.GetAttributeValue<TAttribute>(valueName);
-        }
-
-        public override bool HasAttribute<TAttribute>()
-        {
-            return Symbol.HasAttribute<TAttribute>();
-        }
+        public override IEnumerable<AttributeViewModel<TAttribute>> GetAttributes<TAttribute>()
+            => Symbol.GetAttributes<TAttribute>();
     }
 }

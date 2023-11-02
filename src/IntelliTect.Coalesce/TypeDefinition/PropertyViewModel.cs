@@ -101,7 +101,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// Returns true if this property has the InternalUse Attribute 
         /// </summary>
-        public virtual bool IsInternalUse => HasAttribute<InternalUseAttribute>();
+        public virtual bool IsInternalUse => this.HasAttribute<InternalUseAttribute>();
 
         /// <summary>
         /// Returns whether or not the property may be exposed to the client.
@@ -140,7 +140,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// Returns true if this property is a collection and has the ManyToMany Attribute 
         /// </summary>
         [MemberNotNullWhen(true, nameof(ManyToManyFarNavigationProperty))]
-        public bool IsManytoManyCollection => Type.IsCollection && HasAttribute<ManyToManyAttribute>();
+        public bool IsManytoManyCollection => Type.IsCollection && this.HasAttribute<ManyToManyAttribute>();
 
         /// <summary>
         /// True if the client should save data when there is a ClientValidation error. False is default.
@@ -332,7 +332,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// </summary>
         public bool IsSearchable(ClassViewModel? rootModel)
         {
-            if (!HasAttribute<SearchAttribute>()) return false;
+            if (!this.HasAttribute<SearchAttribute>()) return false;
 
             var rootModelName = rootModel?.Name;
             if (rootModelName == null) return true;
@@ -749,7 +749,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// Has the NotMapped attribute.
         /// </summary>
-        public bool HasNotMapped => HasAttribute<NotMappedAttribute>();
+        public bool HasNotMapped => this.HasAttribute<NotMappedAttribute>();
 
         public bool IsDbMapped => 
             !HasNotMapped && 
@@ -805,7 +805,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 {
                     if (Type.IsCollection && 
                         obj.PrimaryKey != null && 
-                        (InverseProperty != null || HasAttribute<ForeignKeyAttribute>())
+                        (InverseProperty != null || this.HasAttribute<ForeignKeyAttribute>())
                     )
                     {
                         return PropertyRole.CollectionNavigation;

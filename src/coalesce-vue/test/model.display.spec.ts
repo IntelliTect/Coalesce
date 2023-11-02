@@ -103,6 +103,16 @@ describe.each(<DisplayData[]>[
     display: "1/2/1990 3:04:05 AM",
   },
   {
+    meta: { ...studentProps.birthDate, dateKind: "time" },
+    model: new Date(1990, 0, 2, 3, 4, 5),
+    display: "3:04:05 AM",
+  },
+  {
+    meta: { ...studentProps.birthDate, dateKind: "date" },
+    model: new Date(1990, 0, 2, 3, 4, 5),
+    display: "1/2/1990",
+  },
+  {
     meta: studentProps.birthDate,
     model: new Date(1990, 0, 2, 3, 4, 5),
     display: "1990",

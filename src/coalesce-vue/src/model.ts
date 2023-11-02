@@ -801,6 +801,9 @@ class DisplayVisitor extends Visitor<
         case "date":
           formatString = "M/d/yyyy";
           break;
+        case "time":
+          formatString = "h:mm:ss aa";
+          break;
         default:
           formatString = "M/d/yyyy h:mm:ss aa";
           break;

@@ -221,15 +221,18 @@ internal sealed class AuditInterceptor<TAuditLog> : SaveChangesInterceptor
                         AND @Date >= {dateCol}
                         -- The existing AuditLog record has the same set of properties as the incoming record
                         AND (
-                        		SELECT TOP 1 STRING_AGG([PropertyName], ',') WITHIN GROUP (ORDER BY [PropertyName] ASC)
+                        		SELECT TOP 1 ( SELECT {propNameCol} + ','
                         		FROM {propTableName} 
                         		WHERE {propTableName}.{propFkCol} = {tableName}.{pkCol}
-                        		GROUP BY {propTableName}.{propFkCol}
+                                ORDER BY {propNameCol} ASC
+                                FOR XML PATH('') ) as PropNames
                         	) = (
-                        		SELECT TOP 1 STRING_AGG([PropertyName], ',') WITHIN GROUP (ORDER BY [PropertyName] ASC)
+                        		SELECT TOP 1 ( SELECT [PropertyName] + ','
                         		FROM OPENJSON(@Properties) WITH (
             						PropertyName [nvarchar](max) '$.PropertyName'
             					)
+                                ORDER BY PropertyName ASC
+                                FOR XML PATH('') ) as PropNames
                         	)
                         THEN 1 
                         ELSE 0 

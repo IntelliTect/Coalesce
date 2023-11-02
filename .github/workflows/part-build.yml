@@ -92,7 +92,6 @@ jobs:
 
     - run: npm i -g npm@9.5.0 # Pin NPM to avoid breaking changes like https://github.com/nodejs/node/issues/46542
     
-    # 2.2 is installed because it is the last version that officially supports DotnetCliToolReference
     - name: Setup dotnet
       uses: actions/setup-dotnet@v2
       with:

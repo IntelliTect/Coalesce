@@ -418,7 +418,10 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             if (!(obj is TypeViewModel that)) return false;
 
-            return this.VerboseFullyQualifiedName == that.VerboseFullyQualifiedName;
+            return 
+                this.VerboseFullyQualifiedName == that.VerboseFullyQualifiedName &&
+                // Ensure we don't conflate reflection and symbol types together:
+                this.GetType() == that.GetType();
         }
 
         public override int GetHashCode() => VerboseFullyQualifiedName.GetHashCode();

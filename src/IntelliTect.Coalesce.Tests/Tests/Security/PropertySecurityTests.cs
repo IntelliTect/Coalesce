@@ -77,7 +77,7 @@ namespace IntelliTect.Coalesce.Tests.Tests.Security
         }
 
         [Theory]
-        [ClassViewModelData(typeof(ComplexModel))]
+        [ReflectionClassViewModelData(typeof(ComplexModel))]
         public void IncludeChildren_IncludesNonSuppressedMembers(ClassViewModelData data)
         {
             ClassViewModel vm = data;
@@ -95,8 +95,8 @@ namespace IntelliTect.Coalesce.Tests.Tests.Security
         }
 
         [Theory]
-        [ClassViewModelData(typeof(ComplexModel), nameof(ComplexModel.NoAutoIncludeReferenceNavigation))]
-        [ClassViewModelData(typeof(ComplexModel), nameof(ComplexModel.NoAutoIncludeByClassReferenceNavigation))]
+        [ReflectionClassViewModelData(typeof(ComplexModel), nameof(ComplexModel.NoAutoIncludeReferenceNavigation))]
+        [ReflectionClassViewModelData(typeof(ComplexModel), nameof(ComplexModel.NoAutoIncludeByClassReferenceNavigation))]
         public void IncludeChildren_DoesNotIncludedOptedOutMember(ClassViewModelData data, string propName)
         {
             ClassViewModel vm = data;

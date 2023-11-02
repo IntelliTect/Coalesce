@@ -22,7 +22,7 @@ namespace IntelliTect.Coalesce
         /// <summary>
         /// The user making the request.
         /// </summary>
-        public ClaimsPrincipal? User => Context.User;
+        public ClaimsPrincipal User => Context.User;
 
         /// <summary>
         /// A ClassViewModel representing the type T that is handled by the behaviors.
@@ -169,7 +169,7 @@ namespace IntelliTect.Coalesce
         protected virtual T MapIncomingDto<TDto>(SaveKind kind, T? item, TDto dto, IDataSourceParameters parameters)
             where TDto : class, IClassDto<T>, new()
         {
-            var context = new MappingContext(User, parameters);
+            var context = new MappingContext(Context, parameters.Includes);
             if (kind == SaveKind.Create)
             {
                 return dto.MapToNew(context);
@@ -321,7 +321,7 @@ namespace IntelliTect.Coalesce
             }
 
             return new ItemResult<TDto?>(
-                item.MapToDto<T, TDto>(new MappingContext(User, parameters.Includes), includeTree)
+                item.MapToDto<T, TDto>(new MappingContext(Context, parameters.Includes), includeTree)
             );
         }
 
@@ -440,7 +440,7 @@ namespace IntelliTect.Coalesce
                 }
 
                 return new ItemResult<TDto?>(
-                    deletedItem.MapToDto<T, TDto>(new MappingContext(User, parameters.Includes), includeTree)
+                    deletedItem.MapToDto<T, TDto>(new MappingContext(Context, parameters.Includes), includeTree)
                 );
             }
         }

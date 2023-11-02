@@ -34,7 +34,7 @@ namespace IntelliTect.Coalesce
         /// <summary>
         /// The user making the request.
         /// </summary>
-        public ClaimsPrincipal? User => Context.User;
+        public ClaimsPrincipal User => Context.User;
 
         /// <summary>
         /// A ClassViewModel representing the type T that is handled by these strategies.

@@ -7,7 +7,7 @@ namespace IntelliTect.Coalesce
     {
         string? Includes { get; }
         Dictionary<object, object> MappedObjects { get; }
-        ClaimsPrincipal? User { get; }
+        ClaimsPrincipal User { get; }
 
         bool IsInRoleCached(string role);
 

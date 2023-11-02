@@ -11,21 +11,21 @@ namespace IntelliTect.Coalesce
 {
     public class CrudContext
     {
-        private readonly Lazy<ClaimsPrincipal?> lazyUser;
+        private readonly Lazy<ClaimsPrincipal> lazyUser;
 
-        public CrudContext(Func<ClaimsPrincipal?> userAccessor)
+        public CrudContext(Func<ClaimsPrincipal> userAccessor)
         {
             if (userAccessor == null)
             {
                 throw new ArgumentNullException(nameof(userAccessor));
             }
 
-            lazyUser = new Lazy<ClaimsPrincipal?>(userAccessor, true);
+            lazyUser = new Lazy<ClaimsPrincipal>(userAccessor, true);
             Options = new();
         }
 
         public CrudContext(
-            Func<ClaimsPrincipal?> userAccessor, 
+            Func<ClaimsPrincipal> userAccessor, 
             TimeZoneInfo timeZone,
             CancellationToken cancellationToken = default,
             CoalesceOptions? coalesceOptions = null,
@@ -56,7 +56,7 @@ namespace IntelliTect.Coalesce
         /// <summary>
         /// The user making the request for a CRUD action.
         /// </summary>
-        public ClaimsPrincipal? User => lazyUser.Value;
+        public ClaimsPrincipal User => lazyUser.Value ?? new ClaimsPrincipal();
 
         /// <summary>
         /// The timezone to be used when performing any actions on date inputs that lack time zone information.

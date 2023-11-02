@@ -239,7 +239,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
                 || method.ResultType.PureType.HasClassViewModel
             )
             {
-                b.Line($"var {MappingContextVar} = new {nameof(MappingContext)}(User);");
+                b.Line($"var {MappingContextVar} = new {nameof(MappingContext)}(Context);");
             }
 
             // Don't try to store the result in the variable if the method returns void.

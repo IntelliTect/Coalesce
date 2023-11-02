@@ -8,23 +8,30 @@ namespace IntelliTect.Coalesce.Mapping
 {
     public class MappingContext : IMappingContext
     {
-        public ClaimsPrincipal? User { get; }
+        public ClaimsPrincipal User { get; }
 
         public string? Includes { get; }
+
+        public IServiceProvider? Services { get; }
 
         public Dictionary<object, object> MappedObjects { get; }
             = new Dictionary<object, object>();
 
         private readonly Dictionary<string, bool> _roleCache = new Dictionary<string, bool>();
 
-        public MappingContext(ClaimsPrincipal? user = null, string? includes = null)
+        public MappingContext(
+            ClaimsPrincipal? user = null, 
+            string? includes = null,
+            IServiceProvider? services = null
+        )
         {
-            User = user;
+            User = user ?? new ClaimsPrincipal();
             Includes = includes;
+            Services = services;
         }
 
-        public MappingContext(ClaimsPrincipal? user, IDataSourceParameters parameters)
-            : this(user, parameters.Includes) { }
+        public MappingContext(CrudContext context, string? includes = null)
+            : this(context.User, includes, context.ServiceProvider) { }
 
         public bool IsInRoleCached(string role)
         {

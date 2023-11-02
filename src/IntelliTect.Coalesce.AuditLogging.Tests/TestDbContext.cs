@@ -204,7 +204,8 @@ public class SqliteDateTimeOffsetMemberTranslator : IMemberTranslator
         return null;
     }
 
-    private SqlFunctionExpression ApplyStoredUtcOffset(SqlExpression? instance)
+
+    private SqlExpression GetInstance(SqlExpression? instance)
     {
         // SQLite will use the UTC offset stored in date strings and convert
         // the output of the sqlite date functions to UTC.
@@ -217,15 +218,77 @@ public class SqliteDateTimeOffsetMemberTranslator : IMemberTranslator
         if (instance.TypeMapping.Converter is DateTimeOffsetToBinaryConverter)
         {
             throw new NotImplementedException("need to bitshift the offset out of the number, and also translate `instance`");
+
+            return
+                _sqlExpressionFactory.Divide(
+                _sqlExpressionFactory.Subtract(
+                    _sqlExpressionFactory.MakeBinary(
+                        System.Linq.Expressions.ExpressionType.RightShift,
+                        instance,
+                        _sqlExpressionFactory.Constant(11),
+                        null
+                    ),
+                    _sqlExpressionFactory.Constant(621355968000000)
+                ), 
+                _sqlExpressionFactory.Constant(10000.0)
+                );
+
+            // todo: the modifiers
+            // We do need to handle all converters.
+            // See https://github.com/dotnet/efcore/issues/24714#issuecomment-827965516.
+
+            //-- offset part minutes
+            //(1307329968093230684 << 53) >> 53, 
+            //--DATEPART
+            //datetime(((1307329968093230684 >> 11) - 621355968000000) / 10000.0, 'unixepoch', 'subsec', -420 || ' minutes')
+        }
+
+        return instance;
+    }
+
+    private SqlExpression ApplyStoredUtcOffset(SqlExpression? instance)
+    {
+        // SQLite will use the UTC offset stored in date strings and convert
+        // the output of the sqlite date functions to UTC.
+        // This operation will extract the UTC offset from the stored string
+        // in order to apply it as a modifier ("±HH:MM") to sqlite's date functions,
+        // thereby converting the UTC back into its original stored timezone.
+        // See https://www.sqlite.org/lang_datefunc.html.
+
+        //var typeMapping = _sqlExpressionFactory.
+        if (instance.TypeMapping.Converter is DateTimeOffsetToBinaryConverter)
+        {
+            throw new NotImplementedException("need to bitshift the offset out of the number, and also translate `instance`");
+
+            return
+                _sqlExpressionFactory.Add(
+                _sqlExpressionFactory.MakeBinary(
+                    System.Linq.Expressions.ExpressionType.RightShift,
+                    _sqlExpressionFactory.MakeBinary(
+                        System.Linq.Expressions.ExpressionType.LeftShift,
+                        instance,
+                        _sqlExpressionFactory.Constant(53),
+                        null
+                    ),
+                    _sqlExpressionFactory.Constant(53),
+                    null
+                ),
+                _sqlExpressionFactory.Constant(" minutes")
+            );
+
+//-- offset part minutes
+//(1307329968093230684 << 53) >> 53, 
+//--DATEPART
+//datetime(((1307329968093230684 >> 11) - 621355968000000) / 10000.0, 'unixepoch', 'subsec', -420 || ' minutes')
         }
 
         return _sqlExpressionFactory.Function(
             "substr",
             new[] {
-            instance, 
-            // Substring the last 6 chars out of the date, which will include the "zzz" part 
-            // of the date ("±HH:MM") as formatted with DateTimeOffset.ToString("...zzz")
-            _sqlExpressionFactory.Constant(-6)
+                instance, 
+                // Substring the last 6 chars out of the date, which will include the "zzz" part 
+                // of the date ("±HH:MM") as formatted with DateTimeOffset.ToString("...zzz")
+                _sqlExpressionFactory.Constant(-6)
             },
             nullable: true,
             argumentsPropagateNullability: new[] { true, false },
@@ -255,7 +318,7 @@ internal class TestDbContext : DbContext, IAuditLogDbContext<TestAuditLog>
     {
         base.ConfigureConventions(configurationBuilder);
         configurationBuilder.Properties<DateTimeOffset>()
-            .HaveConversion<DateTimeOffsetToStringConverter>();
+            .HaveConversion<DateTimeOffsetToBinaryConverter>();
     }
 
     public DbSet<AppUser> Users => Set<AppUser>();

@@ -145,7 +145,8 @@
                             timeZone: 'UTC',
                           },
                         }),
-                        (auditLog.date!.valueOf() / 1000).toFixed(3) + ' (Unix Seconds)',
+                        (auditLog.date.valueOf() / 1000).toFixed(3) +
+                          ' (Unix Seconds)',
                       ].join('\n')
                     "
                   />

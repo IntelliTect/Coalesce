@@ -11,7 +11,7 @@ The following table is a quick reference of scenarios you might encounter and ho
 | Restrict an entity CRUD operation with roles  | [Class Security Attributes](#class-security-attributes) |
 | Restrict a method or service with roles       | [Method Security Attributes](#method-security-attributes) |
 | Remove a property from Coalesce               | • annotate with [[InternalUse]](#internal-properties) <br> • `internal` access modifier |
-| Restrict a property by roles                  | [Property Security Attributes](#property-role-restrictions) |
+| Restrict a property by roles                  | [Property Security Attributes](#role-restrictions) |
 | Restrict a property with custom logic         | • save operations: [custom Behaviors](#behaviors) <br> • nav prop loading: [custom Default Data Source](#data-sources) <br> • any property: [custom Property Restrictions](#custom-restrictions)  |
 | Make a property read-only                     | • make the setter `internal` <br> • add a `[Read]` attribute without `[Edit]` <br> • [other techniques](#read-only-properties) |
 | Make a property write-once (init-only)        | use an [`init`-only setter](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/init) |
@@ -438,7 +438,7 @@ In Coalesce, [Behaviors](/modeling/model-components/behaviors.md) are the extens
 
 By default, each entity will use the [Standard Behaviors](/modeling/model-components/behaviors.md#behaviors), but you can declare a [custom behaviors class](/modeling/model-components/behaviors.md#defining-behaviors) for each of your entities to override this default functionality.
 
-For most use cases, all your security rules will be implemented in the [BeforeSave/BeforeSaveAsync](/modeling/model-components/behaviors.md#member-BeforeSaveAsync) and [BeforeDelete/BeforeDeleteAsync](/modeling/model-components/behaviors.md#member-BeforeDeleteAsync) methods.
+For most use cases, all your security rules will be implemented in the [BeforeSave/BeforeSaveAsync](/modeling/model-components/behaviors.md#member-beforesaveasync) and [BeforeDelete/BeforeDeleteAsync](/modeling/model-components/behaviors.md#member-beforedeleteasync) methods.
 
 For a more complete explanation of everything you can do with behaviors, see the full [Behaviors](/modeling/model-components/behaviors.md) documentation page.
 

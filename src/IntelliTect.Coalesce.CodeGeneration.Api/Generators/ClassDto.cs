@@ -118,7 +118,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
 
                 var orderedProps = Model
                     .ClientProperties
-                    // PK always first so it is available to guide decisions in IMappingRestirctions
+                    // PK always first so it is available to guide decisions in IPropertyRestrictions
                     .OrderBy(p => !p.IsPrimaryKey)
                         // Scalars before objects
                         .ThenBy(p => p.PureType.HasClassViewModel)

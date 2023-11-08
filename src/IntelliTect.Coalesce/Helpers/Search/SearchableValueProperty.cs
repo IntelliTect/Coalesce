@@ -68,9 +68,9 @@ namespace IntelliTect.Coalesce.Helpers.Search
         };
 
         public override IEnumerable<(PropertyViewModel property, string statement)> GetLinqDynamicSearchStatements(
-            ClaimsPrincipal? user, TimeZoneInfo timeZone, string? propertyParent, string rawSearchTerm)
+            CrudContext context, string? propertyParent, string rawSearchTerm)
         {
-            if (!Property.SecurityInfo.IsReadAllowed(user))
+            if (!Property.SecurityInfo.IsFilterAllowed(context))
             {
                 yield break;
             }
@@ -107,7 +107,7 @@ namespace IntelliTect.Coalesce.Helpers.Search
                     ))
                     {
                         if (propType.IsDateTimeOffset)
-                            dt = TimeZoneInfo.ConvertTimeToUtc(dt, timeZone);
+                            dt = TimeZoneInfo.ConvertTimeToUtc(dt, context.TimeZone);
 
                         if (formatInfo.Value == (ParseFlags.HaveYear | ParseFlags.HaveMonth))
                         {
@@ -154,7 +154,7 @@ namespace IntelliTect.Coalesce.Helpers.Search
                     }
 
                     if (propType.IsDateTimeOffset)
-                        dt = TimeZoneInfo.ConvertTimeToUtc(dt, timeZone);
+                        dt = TimeZoneInfo.ConvertTimeToUtc(dt, context.TimeZone);
 
                     yield return (
                         Property,

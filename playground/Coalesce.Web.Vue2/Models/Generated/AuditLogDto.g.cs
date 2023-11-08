@@ -94,9 +94,9 @@ namespace Coalesce.Web.Vue2.Models
             if (obj == null) return;
             var includes = context.Includes;
 
+            this.Id = obj.Id;
             this.Message = obj.Message;
             this.UserId = obj.UserId;
-            this.Id = obj.Id;
             this.Type = obj.Type;
             this.KeyValue = obj.KeyValue;
             this.State = obj.State;
@@ -130,9 +130,9 @@ namespace Coalesce.Web.Vue2.Models
 
             if (OnUpdate(entity, context)) return;
 
+            if (ShouldMapTo(nameof(Id))) entity.Id = (Id ?? entity.Id);
             if (ShouldMapTo(nameof(Message))) entity.Message = Message;
             if (ShouldMapTo(nameof(UserId))) entity.UserId = UserId;
-            if (ShouldMapTo(nameof(Id))) entity.Id = (Id ?? entity.Id);
             if (ShouldMapTo(nameof(Type))) entity.Type = Type;
             if (ShouldMapTo(nameof(KeyValue))) entity.KeyValue = KeyValue;
             if (ShouldMapTo(nameof(State))) entity.State = (State ?? entity.State);

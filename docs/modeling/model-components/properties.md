@@ -52,4 +52,4 @@ Properties will be ignored if received by the client if authorization checks aga
 The [Default Loading Behavior](/modeling/model-components/data-sources.md#default-loading-behavior), any custom functionality defined in [Data Sources](/modeling/model-components/data-sources.md), and [[DtoIncludes] & [DtoExcludes]](/modeling/model-components/attributes/dto-includes-excludes.md) may also restrict which properties are sent to the client when requested.
 
 ### NotMapped
-While Coalesce does not do anything special for the `[NotMapped]` attribute, it is still and important attribute to keep in mind while building your model, as it prevents EF Core from doing anything with the property.
+While Coalesce does not do anything special for the `[NotMapped]` attribute, it is still an important attribute to keep in mind while building your model, as it prevents EF Core from doing anything with the property.

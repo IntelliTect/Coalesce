@@ -119,7 +119,7 @@ namespace Coalesce.Web.Ko.Api
         public virtual ItemResult<System.Collections.Generic.ICollection<CaseDtoGen>> GetSomeCases()
         {
             IncludeTree includeTree = null;
-            var _mappingContext = new MappingContext(User);
+            var _mappingContext = new MappingContext(Context);
             var _methodResult = Coalesce.Domain.Case.GetSomeCases(
                 Db
             );
@@ -386,7 +386,7 @@ namespace Coalesce.Web.Ko.Api
         public virtual ItemResult<CaseSummaryDtoGen> GetCaseSummary()
         {
             IncludeTree includeTree = null;
-            var _mappingContext = new MappingContext(User);
+            var _mappingContext = new MappingContext(Context);
             var _methodResult = Coalesce.Domain.Case.GetCaseSummary(
                 Db
             );

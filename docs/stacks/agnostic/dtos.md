@@ -16,5 +16,5 @@ Every class that is exposed through Coalesce's generated API will have a corresp
 
 The [[Read] and [Edit] attributes](/modeling/model-components/attributes/security-attribute.md) can be used to apply property-level security, which manifests as conditional logic in the mapping methods on the generated DTOs.
 
-See the [Security](/topics/security.md#attributes) page to read more about property-level security, as well as all other security mechanisms in Coalesce.
+See the [Security](/topics/security.md#property-column-security) page to read more about property-level security, as well as all other security mechanisms in Coalesce.
 

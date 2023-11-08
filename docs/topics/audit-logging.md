@@ -36,7 +36,7 @@ public class AuditLog : DefaultAuditLog
 }
 ```
 
-This entity only needs to implement `IAuditLog`, but a default implementation of this interface  `DefaultAuditLog` is provided for your convenience. `DefaultAuditLog` contains additional properties `ClientIp`, `Referrer`, and `Endpoint` for recording information about the HTTP request (if available), and also has attributes to disable Create, Edit, and Delete APIs.
+This entity only needs to implement `IAuditLog`, but a default implementation of this interface  `DefaultAuditLog` is provided for your convenience. `DefaultAuditLog` contains additional properties `ClientIp`, `Referrer`, and `Endpoint` for recording information about the HTTP request (if available), and also comes pre-configured for security with Create, Edit, and Delete APIs disabled.
 
 You should further augment this type with any additional properties that you would like to track on each change record. A property to track the user who performed the change should be added, since it is not provided by the default implementation so that you can declare it yourself with the correct type for the foreign key and navigation property.
 

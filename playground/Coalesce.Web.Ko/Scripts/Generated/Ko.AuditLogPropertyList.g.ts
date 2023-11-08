@@ -20,7 +20,9 @@ module ListViewModels {
             parentId?: string;
             propertyName?: string;
             oldValue?: string;
+            oldValueDescription?: string;
             newValue?: string;
+            newValueDescription?: string;
         } | null = null;
         
         /** The namespace containing all possible values of this.dataSource. */

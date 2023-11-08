@@ -61,6 +61,12 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         [Read(RoleNames.Admin)]
         public string AdminReadableString { get; set; }
 
+        [Restrict<AuthenticatedRestriction>]
+        public string RestrictedString { get; set; }
+
+        [Restrict<AuthenticatedRestriction>]
+        public string RestrictInit { get; init; }
+
         [Read(RoleNames.Admin)]
         public int? AdminReadableReferenceNavigationId { get; set; }
 

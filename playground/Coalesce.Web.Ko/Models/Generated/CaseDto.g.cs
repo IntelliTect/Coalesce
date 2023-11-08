@@ -137,8 +137,6 @@ namespace Coalesce.Web.Ko.Models
             this.AssignedToId = obj.AssignedToId;
             this.ReportedById = obj.ReportedById;
             this.AttachmentSize = obj.AttachmentSize;
-            this.AttachmentName = obj.AttachmentName;
-            this.AttachmentType = obj.AttachmentType;
             this.AttachmentHash = obj.AttachmentHash;
             this.Severity = obj.Severity;
             this.Status = obj.Status;
@@ -159,6 +157,8 @@ namespace Coalesce.Web.Ko.Models
 
             this.DevTeamAssigned = obj.DevTeamAssigned.MapToDto<Coalesce.Domain.External.DevTeam, DevTeamDtoGen>(context, tree?[nameof(this.DevTeamAssigned)]);
 
+            if (context.GetPropertyRestriction<Coalesce.Domain.Case.TestRestriction>().UserCanRead(context, nameof(AttachmentName), obj)) this.AttachmentName = obj.AttachmentName;
+            if (context.GetPropertyRestriction<Coalesce.Domain.Case.TestRestriction>().UserCanRead(context, nameof(AttachmentType), obj)) this.AttachmentType = obj.AttachmentType;
             if (!(includes == "PersonListGen"))
             {
                 if (tree == null || tree[nameof(this.AssignedTo)] != null)
@@ -168,6 +168,7 @@ namespace Coalesce.Web.Ko.Models
                     this.ReportedBy = obj.ReportedBy.MapToDto<Coalesce.Domain.Person, PersonDtoGen>(context, tree?[nameof(this.ReportedBy)]);
 
             }
+
         }
 
         /// <summary>
@@ -185,7 +186,7 @@ namespace Coalesce.Web.Ko.Models
             if (ShouldMapTo(nameof(OpenedAt))) entity.OpenedAt = (OpenedAt ?? entity.OpenedAt);
             if (ShouldMapTo(nameof(AssignedToId))) entity.AssignedToId = AssignedToId;
             if (ShouldMapTo(nameof(ReportedById))) entity.ReportedById = ReportedById;
-            if (ShouldMapTo(nameof(AttachmentType))) entity.AttachmentType = AttachmentType;
+            if (ShouldMapTo(nameof(AttachmentType)) && context.GetPropertyRestriction<Coalesce.Domain.Case.TestRestriction>().UserCanWrite(context, nameof(AttachmentType), entity, AttachmentType)) entity.AttachmentType = AttachmentType;
             if (ShouldMapTo(nameof(Severity))) entity.Severity = Severity;
             if (ShouldMapTo(nameof(Status))) entity.Status = (Status ?? entity.Status);
             if (ShouldMapTo(nameof(DevTeamAssignedId))) entity.DevTeamAssignedId = DevTeamAssignedId;

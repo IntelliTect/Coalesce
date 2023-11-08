@@ -63,7 +63,7 @@ namespace Coalesce.Web.Ko.Api
             }
 
             IncludeTree includeTree = null;
-            var _mappingContext = new MappingContext(User);
+            var _mappingContext = new MappingContext(Context);
             var _methodResult = await Service.GetWeatherAsync(
                 parameterDbContext,
                 _params.location.MapToNew(_mappingContext),

@@ -40,4 +40,12 @@ namespace IntelliTect.Coalesce.Tests.Util
         {
         }
     }
+
+    internal class ReflectionPropertyViewModelDataAttribute<T> : PropertyViewModelDataAttribute<T>
+    {
+        public ReflectionPropertyViewModelDataAttribute(string propName, params object[] additionalInlineData) : base(propName, additionalInlineData)
+        {
+            symbol = false;
+        }
+    }
 }

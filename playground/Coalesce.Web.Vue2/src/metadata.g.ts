@@ -287,9 +287,21 @@ export const AuditLogProperty = domain.types.AuditLogProperty = {
       type: "string",
       role: "value",
     },
+    oldValueDescription: {
+      name: "oldValueDescription",
+      displayName: "Old Value Description",
+      type: "string",
+      role: "value",
+    },
     newValue: {
       name: "newValue",
       displayName: "New Value",
+      type: "string",
+      role: "value",
+    },
+    newValueDescription: {
+      name: "newValueDescription",
+      displayName: "New Value Description",
       type: "string",
       role: "value",
     },

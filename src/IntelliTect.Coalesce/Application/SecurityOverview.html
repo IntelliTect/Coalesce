@@ -7,11 +7,29 @@
     <title>Coalesce Security Overview</title>
 
     <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
       rel="stylesheet"
-      integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+      integrity="sha256-MBffSnbbXwHCuZtgPYiwMQbfE7z+GOZ7fBPCNB06Z98="
       crossorigin="anonymous"
     />
+    <script>
+      const getStoredTheme = () => localStorage.getItem("coalesce-sec-theme");
+      const setStoredTheme = (theme) =>
+        localStorage.setItem("coalesce-sec-theme", theme);
+
+      const getTheme = () =>
+        getStoredTheme() ||
+        window.matchMedia("(prefers-color-scheme: dark)").matches
+          ? "dark"
+          : "light";
+
+      const setTheme = (theme) => {
+        document.documentElement.setAttribute("data-bs-theme", theme);
+        setStoredTheme(theme);
+      };
+
+      setTheme(getTheme());
+    </script>
     <style>
       [v-cloak] {
         display: none;
@@ -78,25 +96,30 @@
               max-height: calc(100vh - 16px);
             "
           >
+            <span class="float-end">
+              Theme:
+              <a
+                class="text-capitalize"
+                role="button"
+                @click="setTheme(theme = (theme == 'dark' ? 'light' : 'dark'))"
+              >
+                {{ theme }}
+              </a>
+            </span>
             <a href="#top">Top</a>
 
-            <h6 class="mt-4">Entities &amp; Custom DTOs</h6>
-            <div v-if="!crudTypes.length" class="text-muted">None</div>
-            <div v-for="type in crudTypes">
-              <a :href="'#type-' + type.name">{{type.name}}</a>
-            </div>
-
-            <h6 class="mt-4">Services</h6>
-            <div v-if="!serviceTypes.length" class="text-muted">None</div>
-            <div v-for="type in serviceTypes">
-              <a :href="'#type-' + type.name">{{type.name}}</a>
-            </div>
-
-            <h6 class="mt-4">External Types</h6>
-            <div v-if="!externalTypes.length" class="text-muted">None</div>
-            <div v-for="type in externalTypes">
-              <a :href="'#type-' + type.name">{{type.name}}</a>
-            </div>
+            <template v-for="set in [
+              {heading: 'Entities', types: crudTypes.filter(t => !t.dtoBaseType)},
+              {heading: 'Custom DTOs', types: crudTypes.filter(t => t.dtoBaseType), hideEmpty: true},
+              {heading: 'Services', types: serviceTypes},
+              {heading: 'External Types', types: externalTypes}
+            ].filter(s => s.types.length || !s.hideEmpty)">
+              <h6 class="mt-4">{{set.heading}}</h6>
+              <div v-if="!set.types.length" class="text-muted">None</div>
+              <div v-for="t in set.types">
+                <a :href="'#type-' + t.name">{{t.name}}</a>
+              </div>
+            </template>
           </nav>
         </div>
         <div class="col">
@@ -155,9 +178,9 @@
                       <tr
                         v-for="({action, subtitle}, idx) in [
                           {action: type.read, subtitle: '/get, /list, /count'},
-                          {action: type.create, subtitle: '/save'},
-                          {action: type.edit, subtitle: '/save'},
-                          {action: type.delete, subtitle: '/delete'}
+                          {action: type.create, subtitle: '/save, /bulkSave'},
+                          {action: type.edit, subtitle: '/save, /bulkSave'},
+                          {action: type.delete, subtitle: '/delete, /bulkSave'}
                         ]"
                       >
                         <td>
@@ -257,7 +280,7 @@
                   </div>
                 </div>
 
-                <div class="col" style="flex-basis: 450px; max-width: 500px">
+                <div class="col" style="flex-basis: 450px">
                   <div class="card mb-4">
                     <div class="card-body">
                       <h4 class="card-title" v-if="type.dtoBaseType">
@@ -267,7 +290,10 @@
                         Generated DTO Properties
                       </h4>
 
-                      <properties-table :type="type" :is-crud="true"></properties-table>
+                      <properties-table
+                        :type="type"
+                        :is-crud="true"
+                      ></properties-table>
 
                       <div
                         v-if="type.dtoBaseType"
@@ -328,7 +354,10 @@
                   <div class="card mb-4">
                     <div class="card-body">
                       <h4 class="card-title">Generated DTO Properties</h4>
-                      <properties-table :type="type" :is-crud="false"></properties-table>
+                      <properties-table
+                        :type="type"
+                        :is-crud="false"
+                      ></properties-table>
                     </div>
                   </div>
                 </div>
@@ -421,12 +450,36 @@
         <thead>
           <tr>
             <th>Name</th>
-            <th width="100px" title="Security rules for any place that this entity is served in a response to the client.">Read</th>
+            <th
+              class="text-center"
+              width="100px"
+              title="Security rules for any place that this entity is served in a response to the client."
+            >
+              Read
+            </th>
             <template v-if="isCrud">
-              <th width="100px" title="Security rules for Create saves, and usage as a custom method parameter.">Create</th>
-              <th width="100px" title="Security rules for Edit saves.">Edit</th>
+              <th
+                class="text-center"
+                width="100px"
+                title="Security rules for Create saves, and usage as a custom method parameter."
+              >
+                Create
+              </th>
+              <th
+                class="text-center"
+                width="100px"
+                title="Security rules for Edit saves."
+              >
+                Edit
+              </th>
             </template>
-            <th v-else width="100px">Write</th>
+            <th
+              v-else
+              width="100px"
+              title="Security rules for any place that this type is provided as an input to the server."
+            >
+              Write
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -439,32 +492,47 @@
               </small>
             </td>
             <template v-if="type.dtoBaseType">
-              <td><span class="badge bg-custom-code">Custom</span></td>
-              <td><span class="badge bg-custom-code">Custom</span></td>
-              <td><span class="badge bg-custom-code">Custom</span></td>
+              <td v-for="i in 3" class="text-center">
+                <span class="badge bg-custom-code">Custom</span>
+              </td>
             </template>
             <template v-else>
-              <td>
-                <security-badge :action="prop.read"></security-badge>
+              <td class="text-center">
+                <security-badge
+                  :action="prop.read"
+                  :restrict="prop.restrictions"
+                ></security-badge>
               </td>
-              <td>
-                <security-badge :action="prop.init"></security-badge>
-                <div v-if="prop.isPrimaryKey && !prop.isCreateOnly"
-                     class="text-muted"
-                     title="The property is the primary key. &#013;&#013;During a save, its absence is what triggers a Create save. &#013;As a custom method parameter, it is mapped like any other property.">
+              <td class="text-center">
+                <security-badge
+                  :action="prop.init"
+                  :restrict="prop.restrictions"
+                ></security-badge>
+                <div
+                  v-if="prop.isPrimaryKey && !prop.isCreateOnly"
+                  class="text-muted"
+                  title="The property is the primary key. &#013;&#013;During a save, its absence is what triggers a Create save. &#013;As a custom method parameter, it is mapped like any other property."
+                >
                   <small>🔑 PK</small>
                 </div>
-                <div v-if="prop.isPrimaryKey && prop.isCreateOnly"
-                     class="text-muted"
-                     title="The property is the primary key. &#013;&#013;During a save, an existing entity with this key will be looked up in the database, and the absence of a match is what triggers a Create save. &#013;As a custom method parameter, it is mapped like any other property.">
+                <div
+                  v-if="prop.isPrimaryKey && prop.isCreateOnly"
+                  class="text-muted"
+                  title="The property is the primary key. &#013;&#013;During a save, an existing entity with this key will be looked up in the database, and the absence of a match is what triggers a Create save. &#013;As a custom method parameter, it is mapped like any other property."
+                >
                   <small>🔑 PK</small>
                 </div>
               </td>
-              <td v-if="isCrud">
-                <security-badge :action="prop.edit"></security-badge>
-                <div v-if="prop.isPrimaryKey"
-                      class="text-muted"
-                      title="The property is the primary key. &#013;&#013;During an Edit, it is used to look up the existing entity to edit.">
+              <td class="text-center" v-if="isCrud">
+                <security-badge
+                  :action="prop.edit"
+                  :restrict="prop.restrictions"
+                ></security-badge>
+                <div
+                  v-if="prop.isPrimaryKey"
+                  class="text-muted"
+                  title="The property is the primary key. &#013;&#013;During an Edit, it is used to look up the existing entity to edit."
+                >
                   <small>🔑 PK</small>
                 </div>
               </td>
@@ -487,54 +555,59 @@
       <span>
         <span
           v-if="action.noAccess"
-          class="badge border border-danger text-dark"
+          class="badge border border-danger text-body"
           :title="action.reason"
         >
           Deny
         </span>
-        <span v-else-if="action.allowAnonymous" class="badge bg-danger">
-          Allow Anonymous
-        </span>
         <span
           v-else
           class="badge"
-          :class="action.isUnused ? 'border text-dark' : !action.hasRoles ? 'bg-success' : 'bg-success'"
+          :class="
+            action.isUnused ? 'border text-body' : 
+            action.allowAnonymous ? 'bg-danger' : 
+            !action.hasRoles ? 'bg-success' : 
+            'bg-success'"
           :title="
-              ('Allow' + ('allowAnonymous' in action ? ' Authenticated' : '')) + ' - ' +
+              ('Allow' + (action.allowAnonymous === false ? ' Authenticated' : action.allowAnonymous === true ? ' Anonymous' : '')) + ' - ' +
               (!action.hasRoles 
                 ? 'No specific role requirements' 
                 : action.roleLists.length == 1 
                   ? 'One of these roles is required: \n' + action.roleLists[0].join('\n')
                   : 'One role from each role group is required: \n' + action.roleLists.map(rl => 'Role Group: ' + rl.join(', ')).join('\n')
               ) +
+              (!restrict?.length ? '' : '\n\nThe following custom restrictions are applied: \n' + restrict.join('\n')) +
               (action.isUnused ? '\n\nAnalyzed as unused by any API endpoint.' : '')
             "
         >
-          <div v-if="action.isUnused">Unused</div>
-          <div v-else>
-            Allow {{'allowAnonymous' in action ? 'Authenticated' : ''}}
+            <template v-if="action.isUnused">
+              Unused
+            </template>
+            <template v-else>
+              Allow {{(action.allowAnonymous === false ? ' Authenticated' :
+              action.allowAnonymous === true ? ' Anonymous' : '')}}
+            </template>
             <div v-if="action.roleLists.length" class="fw-normal text-start">
-              <div v-for="rl in action.roleLists">
-                {{rl.join(',')}}
-              </div>
+              <div v-for="rl in action.roleLists">{{rl.join(', ')}}</div>
             </div>
+            <div v-if="restrict?.length" class="fw-normal text-start">
+              <div v-for="restriction in restrict">
+                <span class="badge bg-custom-code mt-1" style="font-size: 0.8em"
+                  >{{restriction}}</span
+                >
+              </div>
           </div>
         </span>
       </span>
     </script>
 
-    <script src="https://unpkg.com/vue@3"></script>
-    <script
-      src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
-      integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
-      crossorigin="anonymous"
-    ></script>
+    <script src="https://unpkg.com/vue@3.3.8/dist/vue.global.js"></script>
 
     <script>
       const app = Vue.createApp({
         data() {
           // DATA is injected by the route handler that serves this content.
-          return DATA;
+          return { ...DATA, theme: getTheme(), setTheme };
         },
         mounted() {
           // Scroll to hash after page load - this won't otherwise happen since there's a delay in mounting the vue app.
@@ -549,7 +622,7 @@
       });
       app.component("security-badge", {
         template: "#security-badge",
-        props: ["action"],
+        props: ["action", "restrict"],
       });
       app.component("methods-table", {
         template: "#methods-table",

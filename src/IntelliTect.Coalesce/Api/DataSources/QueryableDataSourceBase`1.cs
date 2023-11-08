@@ -73,7 +73,7 @@ namespace IntelliTect.Coalesce
                 var prop = ClassViewModel.PropertyByName(clause.Key);
                 if (prop != null
                     && prop.IsUrlFilterParameter
-                    && prop.SecurityInfo.IsReadAllowed(User))
+                    && prop.SecurityInfo.IsFilterAllowed(Context))
                 {
                     query = ApplyListPropertyFilter(query, prop, clause.Value);
                 }
@@ -269,7 +269,7 @@ namespace IntelliTect.Coalesce
                 {
                     var expressions = prop
                         .SearchProperties(ClassViewModel, maxDepth: 1, force: true)
-                        .SelectMany(p => p.GetLinqDynamicSearchStatements(Context.User, Context.TimeZone, "it", value))
+                        .SelectMany(p => p.GetLinqDynamicSearchStatements(Context, "it", value))
                         .Select(t => t.statement)
                         .ToList();
 
@@ -303,7 +303,7 @@ namespace IntelliTect.Coalesce
             {
                 var splitOnStringClauses = ClassViewModel
                     .SearchProperties(ClassViewModel)
-                    .SelectMany(p => p.GetLinqDynamicSearchStatements(Context.User, Context.TimeZone, "it", termWord))
+                    .SelectMany(p => p.GetLinqDynamicSearchStatements(Context, "it", termWord))
                     .Where(f => f.property.SearchIsSplitOnSpaces)
                     .Select(t => t.statement)
                     .ToList();
@@ -328,7 +328,7 @@ namespace IntelliTect.Coalesce
             // we only require that the entire search term match at least one of these properties.
             var searchClauses = ClassViewModel
                 .SearchProperties(ClassViewModel)
-                .SelectMany(p => p.GetLinqDynamicSearchStatements(Context.User, Context.TimeZone, "it", searchTerm))
+                .SelectMany(p => p.GetLinqDynamicSearchStatements(Context, "it", searchTerm))
                 .Where(f => !f.property.SearchIsSplitOnSpaces)
                 .Select(t => t.statement)
                 .ToList();
@@ -405,7 +405,7 @@ namespace IntelliTect.Coalesce
                         prop = (prop?.Object ?? ClassViewModel).PropertyByName(part);
 
                         // Check if the new prop exists and is readable by user.
-                        if (prop == null || !prop.IsClientProperty || !prop.SecurityInfo.IsReadAllowed(User))
+                        if (prop == null || !prop.IsClientProperty || !prop.SecurityInfo.IsFilterAllowed(Context))
                         {
                             return null;
                         }

@@ -76,6 +76,9 @@ namespace IntelliTect.Coalesce.Validation
                             assert.IsFalse(prop.HasAttribute<EditAttribute>(),
                                 dtoPropSecWarningPreamble + "EditAttribute has no effect here.");
 
+                            assert.IsFalse(prop.SecurityInfo.Restrictions.Count > 0,
+                                dtoPropSecWarningPreamble + "RestrictAttribute has no effect here.");
+
                             assert.IsFalse(prop.HasAttribute<DtoIncludesAttribute>(),
                                 "[DtoIncludesAttribute] has no effect on an IClassDto. This logic must be implemented manually in MapFrom.");
                             assert.IsFalse(prop.HasAttribute<DtoExcludesAttribute>(),

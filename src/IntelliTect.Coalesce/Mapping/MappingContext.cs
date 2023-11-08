@@ -1,4 +1,6 @@
-﻿using System;
+﻿using IntelliTect.Coalesce.DataAnnotations;
+using Microsoft.Extensions.DependencyInjection;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
@@ -14,10 +16,10 @@ namespace IntelliTect.Coalesce.Mapping
 
         public IServiceProvider? Services { get; }
 
-        public Dictionary<object, object> MappedObjects { get; }
-            = new Dictionary<object, object>();
+        public Dictionary<object, object> MappedObjects { get; } = new();
 
-        private readonly Dictionary<string, bool> _roleCache = new Dictionary<string, bool>();
+        private Dictionary<string, bool>? _roleCache;
+        private Dictionary<Type, IPropertyRestriction>? _restrictionCache;
 
         public MappingContext(
             ClaimsPrincipal? user = null, 
@@ -35,6 +37,7 @@ namespace IntelliTect.Coalesce.Mapping
 
         public bool IsInRoleCached(string role)
         {
+            _roleCache ??= new();
             if (_roleCache.TryGetValue(role, out bool inRole)) return inRole;
 
             return _roleCache[role] = User?.IsInRole(role) ?? false;
@@ -52,13 +55,27 @@ namespace IntelliTect.Coalesce.Mapping
         )
             where TDto : class
         {
-            if (!MappedObjects.TryGetValue(sourceObject, out object? existingMapped) || !(existingMapped is TDto))
+            if (!MappedObjects.TryGetValue(sourceObject, out object? existingMapped) || existingMapped is not TDto)
             {
                 mappedObject = default;
                 return false; 
             }
             mappedObject = (TDto)existingMapped;
             return true;
+        }
+
+        public IPropertyRestriction GetPropertyRestriction(Type type)
+        {
+            _restrictionCache ??= new();
+            if (_restrictionCache.TryGetValue(type, out var restriction)) return restriction;
+
+            restriction = Services is {} 
+                ? (IPropertyRestriction)ActivatorUtilities.GetServiceOrCreateInstance(Services, type) 
+                : (IPropertyRestriction)Activator.CreateInstance(type)!;
+
+            _restrictionCache.Add(type, restriction);
+
+            return restriction;
         }
     }
 }

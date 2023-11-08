@@ -43,7 +43,9 @@ export interface AuditLogPropertyViewModel extends $models.AuditLogProperty {
   parentId: number | null;
   propertyName: string | null;
   oldValue: string | null;
+  oldValueDescription: string | null;
   newValue: string | null;
+  newValueDescription: string | null;
 }
 export class AuditLogPropertyViewModel extends ViewModel<$models.AuditLogProperty, $apiClients.AuditLogPropertyApiClient, number> implements $models.AuditLogProperty  {
   

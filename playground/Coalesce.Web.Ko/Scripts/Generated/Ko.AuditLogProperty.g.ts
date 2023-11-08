@@ -28,7 +28,9 @@ module ViewModels {
         public parentId: KnockoutObservable<number | null> = ko.observable(null);
         public propertyName: KnockoutObservable<string | null> = ko.observable(null);
         public oldValue: KnockoutObservable<string | null> = ko.observable(null);
+        public oldValueDescription: KnockoutObservable<string | null> = ko.observable(null);
         public newValue: KnockoutObservable<string | null> = ko.observable(null);
+        public newValueDescription: KnockoutObservable<string | null> = ko.observable(null);
         
         
         
@@ -56,7 +58,9 @@ module ViewModels {
             this.parentId(data.parentId);
             this.propertyName(data.propertyName);
             this.oldValue(data.oldValue);
+            this.oldValueDescription(data.oldValueDescription);
             this.newValue(data.newValue);
+            this.newValueDescription(data.newValueDescription);
             if (this.coalesceConfig.onLoadFromDto()){
                 this.coalesceConfig.onLoadFromDto()(this as any);
             }
@@ -73,7 +77,9 @@ module ViewModels {
             dto.parentId = this.parentId();
             dto.propertyName = this.propertyName();
             dto.oldValue = this.oldValue();
+            dto.oldValueDescription = this.oldValueDescription();
             dto.newValue = this.newValue();
+            dto.newValueDescription = this.newValueDescription();
             
             return dto;
         }
@@ -110,7 +116,9 @@ module ViewModels {
             self.parentId.subscribe(self.autoSave);
             self.propertyName.subscribe(self.autoSave);
             self.oldValue.subscribe(self.autoSave);
+            self.oldValueDescription.subscribe(self.autoSave);
             self.newValue.subscribe(self.autoSave);
+            self.newValueDescription.subscribe(self.autoSave);
             
             if (newItem) {
                 self.loadFromDto(newItem, true);

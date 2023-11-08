@@ -70,9 +70,17 @@
                     <dd>
                         @(Knockout.DisplayFor<IntelliTect.Coalesce.AuditLogging.AuditLogProperty>(p => p.OldValue, false))
                     </dd>
+                    <dt>Old Value Description</dt>
+                    <dd>
+                        @(Knockout.DisplayFor<IntelliTect.Coalesce.AuditLogging.AuditLogProperty>(p => p.OldValueDescription, false))
+                    </dd>
                     <dt>New Value</dt>
                     <dd>
                         @(Knockout.DisplayFor<IntelliTect.Coalesce.AuditLogging.AuditLogProperty>(p => p.NewValue, false))
+                    </dd>
+                    <dt>New Value Description</dt>
+                    <dd>
+                        @(Knockout.DisplayFor<IntelliTect.Coalesce.AuditLogging.AuditLogProperty>(p => p.NewValueDescription, false))
                     </dd>
                 </dl>
                 

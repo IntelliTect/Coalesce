@@ -80,9 +80,17 @@
                                 Old Value
                                 <i class="fa" data-bind="css: orderBy() == 'OldValue' ? 'fa-caret-up' : orderByDescending() == 'OldValue' ? 'fa-caret-down' : 'fa-sort'" style="float: right; padding: .3em 0 0 0 "></i>
                             </th>
+                            <th class="sortable-header" data-bind="click: function(){orderByToggle('OldValueDescription')}">
+                                Old Value Description
+                                <i class="fa" data-bind="css: orderBy() == 'OldValueDescription' ? 'fa-caret-up' : orderByDescending() == 'OldValueDescription' ? 'fa-caret-down' : 'fa-sort'" style="float: right; padding: .3em 0 0 0 "></i>
+                            </th>
                             <th class="sortable-header" data-bind="click: function(){orderByToggle('NewValue')}">
                                 New Value
                                 <i class="fa" data-bind="css: orderBy() == 'NewValue' ? 'fa-caret-up' : orderByDescending() == 'NewValue' ? 'fa-caret-down' : 'fa-sort'" style="float: right; padding: .3em 0 0 0 "></i>
+                            </th>
+                            <th class="sortable-header" data-bind="click: function(){orderByToggle('NewValueDescription')}">
+                                New Value Description
+                                <i class="fa" data-bind="css: orderBy() == 'NewValueDescription' ? 'fa-caret-up' : orderByDescending() == 'NewValueDescription' ? 'fa-caret-down' : 'fa-sort'" style="float: right; padding: .3em 0 0 0 "></i>
                             </th>
                             <th style="width: 1%">
                             </th>
@@ -95,14 +103,18 @@
                                 <td class="prop-parentId">@(Knockout.InputFor<IntelliTect.Coalesce.AuditLogging.AuditLogProperty>(p => p.ParentId))</td>
                                 <td class="prop-propertyName">@(Knockout.InputFor<IntelliTect.Coalesce.AuditLogging.AuditLogProperty>(p => p.PropertyName))</td>
                                 <td class="prop-oldValue">@(Knockout.InputFor<IntelliTect.Coalesce.AuditLogging.AuditLogProperty>(p => p.OldValue))</td>
+                                <td class="prop-oldValueDescription">@(Knockout.InputFor<IntelliTect.Coalesce.AuditLogging.AuditLogProperty>(p => p.OldValueDescription))</td>
                                 <td class="prop-newValue">@(Knockout.InputFor<IntelliTect.Coalesce.AuditLogging.AuditLogProperty>(p => p.NewValue))</td>
+                                <td class="prop-newValueDescription">@(Knockout.InputFor<IntelliTect.Coalesce.AuditLogging.AuditLogProperty>(p => p.NewValueDescription))</td>
                             }
                             else
                             {
                                 <td class="prop-parentId">@(Knockout.DisplayFor<IntelliTect.Coalesce.AuditLogging.AuditLogProperty>(p => p.ParentId, true))</td>
                                 <td class="prop-propertyName">@(Knockout.DisplayFor<IntelliTect.Coalesce.AuditLogging.AuditLogProperty>(p => p.PropertyName, true))</td>
                                 <td class="prop-oldValue">@(Knockout.DisplayFor<IntelliTect.Coalesce.AuditLogging.AuditLogProperty>(p => p.OldValue, true))</td>
+                                <td class="prop-oldValueDescription">@(Knockout.DisplayFor<IntelliTect.Coalesce.AuditLogging.AuditLogProperty>(p => p.OldValueDescription, true))</td>
                                 <td class="prop-newValue">@(Knockout.DisplayFor<IntelliTect.Coalesce.AuditLogging.AuditLogProperty>(p => p.NewValue, true))</td>
+                                <td class="prop-newValueDescription">@(Knockout.DisplayFor<IntelliTect.Coalesce.AuditLogging.AuditLogProperty>(p => p.NewValueDescription, true))</td>
                             }
                             <td>
                                 <!-- Editor buttons -->

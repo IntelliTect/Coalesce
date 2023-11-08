@@ -113,7 +113,7 @@ namespace Coalesce.Web.Vue2.Api
                 if (!_validationResult.WasSuccessful) return _validationResult;
             }
 
-            var _mappingContext = new MappingContext(User);
+            var _mappingContext = new MappingContext(Context);
             item.ConflictingParameterNames(
                 _params.companyParam.MapToNew(_mappingContext),
                 _params.name
@@ -144,7 +144,7 @@ namespace Coalesce.Web.Vue2.Api
             }
 
             IncludeTree includeTree = null;
-            var _mappingContext = new MappingContext(User);
+            var _mappingContext = new MappingContext(Context);
             var _methodResult = Coalesce.Domain.Company.GetCertainItems(
                 Db,
                 _params.isDeleted

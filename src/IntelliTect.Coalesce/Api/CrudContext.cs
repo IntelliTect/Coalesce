@@ -1,4 +1,5 @@
-﻿using IntelliTect.Coalesce.TypeDefinition;
+﻿using IntelliTect.Coalesce.Mapping;
+using IntelliTect.Coalesce.TypeDefinition;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -53,6 +54,16 @@ namespace IntelliTect.Coalesce
             ServiceProvider = baseContext.ServiceProvider;
         }
 
+
+        /// <summary>
+        /// A shared mapping context instance for this operation.
+        /// Use intended for handling inputs before any mutations (if any)
+        /// have occurred that might invalidate local state on cached instances
+        /// of IPropertyRestriction.
+        /// </summary>
+        internal MappingContext MappingContext => _mappingContext ??= new MappingContext(this);
+        private MappingContext? _mappingContext;
+
         /// <summary>
         /// The user making the request for a CRUD action.
         /// </summary>
@@ -89,7 +100,7 @@ namespace IntelliTect.Coalesce
     public class CrudContext<TContext> : CrudContext
         where TContext : DbContext
     {
-        public CrudContext(TContext dbContext, Func<ClaimsPrincipal?> userAccessor)
+        public CrudContext(TContext dbContext, Func<ClaimsPrincipal> userAccessor)
             : base(userAccessor)
         {
             DbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
@@ -97,7 +108,7 @@ namespace IntelliTect.Coalesce
 
         public CrudContext(
             TContext dbContext, 
-            Func<ClaimsPrincipal?> userAccessor, 
+            Func<ClaimsPrincipal> userAccessor, 
             TimeZoneInfo timeZone,
             CancellationToken cancellationToken = default
         )

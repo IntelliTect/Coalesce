@@ -1,4 +1,5 @@
-﻿using System;
+﻿using IntelliTect.Coalesce.DataAnnotations;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
@@ -55,6 +56,10 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// </summary>
         public bool IsUnused => ComputeIsUnused(Prop, new())!.Value;
 
+        /// <summary>
+        /// Return whether the action is allowed for the specified user.
+        /// Does not account for <see cref="IPropertyRestriction"/>s.
+        /// </summary>
         public override bool IsAllowed(ClaimsPrincipal? user)
         {
             if (NoAccess) return false;

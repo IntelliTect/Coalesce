@@ -65,7 +65,8 @@ public static class CoalesceApplicationBuilderExtensions
         {
             CrudTypes = repo
                 .CrudApiBackedClasses
-                .OrderBy(c => c.Name)
+                .OrderBy(c => c.IsDto)
+                .ThenBy(c => c.Name)
                 .Select(c =>
                 {
                     var isImmutable = c.SecurityInfo is
@@ -181,6 +182,7 @@ public static class CoalesceApplicationBuilderExtensions
             p.SecurityInfo.Read,
             p.SecurityInfo.Init,
             p.SecurityInfo.Edit,
+            Restrictions = p.SecurityInfo.Restrictions.Select(t => t.Name).ToList(),
             p.IsCreateOnly,
             p.IsPrimaryKey
         };

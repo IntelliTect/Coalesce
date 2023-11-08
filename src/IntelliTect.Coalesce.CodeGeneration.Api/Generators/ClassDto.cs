@@ -55,6 +55,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
 
         private void WriteDtoClass(CSharpCodeBuilder b)
         {
+
             using (b.Block($"public partial class {Model.DtoName} : GeneratedDto<{Model.FullyQualifiedName}>"))
             {
                 b.Line($"public {Model.DtoName}() {{ }}");
@@ -75,29 +76,55 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                     }
                 }
 
-                void WriteSetters(IEnumerable<(string conditional, string setter)> settersAndConditionals)
+                void WriteSetters(IEnumerable<(IEnumerable<string> conditionals, string setter)> settersAndConditionals)
                 {
                     foreach (var conditionGroup in settersAndConditionals
-                        .GroupBy(s => s.conditional, s => s.setter))
+                        .GroupBy(s => s.conditionals.FirstOrDefault(), s => s))
                     {
-                        if (!string.IsNullOrWhiteSpace(conditionGroup.Key))
+                        if (conditionGroup.Key is null)
                         {
-                            b.Line($"if ({conditionGroup.Key}) {{");
                             foreach (var setter in conditionGroup)
                             {
-                                b.Indented(setter);
+                                b.Line(setter.setter);
                             }
-                            b.Line("}");
+                        }
+                        else if (
+                            // There are multiple setters that use `conditionGroup.Key` as at least part of
+                            // their conditional. Group them together in a single `if` that consumes
+                            // that shared part of the mapping conditional.
+                            conditionGroup.Count() > 1 ||
+                            // Also use a full block if the setter contains multiple statements
+                            // that would make a braceless block impossible.
+                            (conditionGroup.Single() is var singleSetter && singleSetter.setter.Count(x => x == ';') > 1)
+                        )
+                        {
+                            using (b.Block($"if ({conditionGroup.Key})"))
+                            {
+                                WriteSetters(conditionGroup.Select(g => (g.conditionals.Skip(1), g.setter)));
+                            }
+                            b.Line();
                         }
                         else
                         {
-                            foreach (var setter in conditionGroup)
-                            {
-                                b.Line(setter);
-                            }
+                            // There's only one setter in `conditionGroup`,
+                            // such that we can merge all its conditions together.
+                            b.Append("if (");
+                            b.Append(string.Join(" && ", singleSetter.conditionals));
+                            b.Append(") ");
+                            b.Line(singleSetter.setter);
                         }
                     }
                 }
+
+                var orderedProps = Model
+                    .ClientProperties
+                    // PK always first so it is available to guide decisions in IMappingRestirctions
+                    .OrderBy(p => !p.IsPrimaryKey)
+                        // Scalars before objects
+                        .ThenBy(p => p.PureType.HasClassViewModel)
+                        // Finally, preserve original field order.
+                        .ThenBy(p => p.ClassFieldOrder)
+                    .ToList();
 
                 b.DocComment("Map from the domain object to the properties of the current DTO instance.");
                 using (b.Block($"public override void MapFrom({Model.FullyQualifiedName} obj, IMappingContext context, IncludeTree tree = null)"))
@@ -106,10 +133,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                     b.Line("var includes = context.Includes;");
                     b.Line();
 
-                    WriteSetters(Model
-                        .ClientProperties
+                    WriteSetters(orderedProps
                         .Where(p => p.SecurityInfo.Read.IsAllowed())
-                        .OrderBy(p => p.PureType.HasClassViewModel)
                         .Select(ModelToDtoPropertySetter));
                 }
 
@@ -121,21 +146,20 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                     b.Line("if (OnUpdate(entity, context)) return;");
                     b.Line();
 
-                    WriteSetters(Model
-                        .ClientProperties
+                    WriteSetters(orderedProps
                         .Where(p => p.SecurityInfo.Edit.IsAllowed())
                         .Select(p =>
                         {
                             var (conditional, setter) = DtoToModelPropertySetter(p, p.SecurityInfo.Edit);
-                            return (conditional, $"if (ShouldMapTo(nameof({p.Name}))) entity.{p.Name} = {setter};");
+                            conditional = conditional.Prepend($"ShouldMapTo(nameof({p.Name}))");
+                            return (conditional, $"entity.{p.Name} = {setter};");
                         }));
                 }
 
                 b.DocComment("Map from the current DTO instance to a new instance of the domain object.");
                 using (b.Block($"public override {Model.FullyQualifiedName} MapToNew(IMappingContext context)"))
                 {
-                    var properties = Model
-                        .ClientProperties
+                    var properties = orderedProps
                         .Where(p => p.SecurityInfo.Init.IsAllowed())
                         .ToDictionary(p => p.Name, StringComparer.OrdinalIgnoreCase);
 
@@ -227,7 +251,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                         .Select(p =>
                         {
                             var (conditional, setter) = DtoToModelPropertySetter(p, p.SecurityInfo.Init);
-                            return (conditional, $"if (ShouldMapTo(nameof({p.Name}))) entity.{p.Name} = {setter};");
+                            conditional = conditional.Prepend($"ShouldMapTo(nameof({p.Name}))");
+                            return (conditional, $"entity.{p.Name} = {setter};");
                         }));
 
                     b.Line();
@@ -237,11 +262,11 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                     {
                         // Init-only props must be set here where we instantiate the type.
                         // They cannot be handled by the record
-                        var (conditional, setter) = DtoToModelPropertySetter(p, p.SecurityInfo.Init, fallbackPrefix: null);
+                        var (conditional, setter) = DtoToModelPropertySetter(p, p.SecurityInfo.Init, modelVar: null);
 
-                        if (!string.IsNullOrWhiteSpace(conditional))
+                        if (conditional.Any())
                         {
-                            return $"({conditional}) ? {setter} : default";
+                            return $"({string.Join(" && ", conditional)}) ? {setter} : default";
                         }
                         else
                         {
@@ -258,13 +283,17 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
         /// </summary>
         /// <param name="property">The property whose permissions will be evaluated.</param>
         /// <param name="permission">The permission info to pull the required roles from.</param>
+        /// <param name="modelVar">The variable that holds the entity/model instance.</param>
         /// <returns></returns>
-        private string GetPropertySetterConditional(PropertyViewModel property, PropertySecurityPermission permission)
+        private IEnumerable<string> GetPropertySetterConditional(
+            PropertyViewModel property, 
+            PropertySecurityPermission permission, 
+            string modelVar)
         {
             string RoleCheck(string role) => $"context.IsInRoleCached(\"{role.EscapeStringLiteralForCSharp()}\")";
             string IncludesCheck(string include) => $"includes == \"{include.EscapeStringLiteralForCSharp()}\"";
 
-            string roles = string.Join(" && ", permission.RoleLists.Select(rl => string.Join(" || ", rl.Select(RoleCheck))));
+            string roles = string.Join(" && ", permission.RoleLists.Select(rl => string.Join(" || ", rl.Select(RoleCheck))).Distinct());
 
             var includes = string.Join(" || ", property.DtoIncludes.Select(IncludesCheck));
             var excludes = string.Join(" || ", property.DtoExcludes.Select(IncludesCheck));
@@ -274,16 +303,29 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
             if (!string.IsNullOrEmpty(includes)) statement.Add($"({includes})");
             if (!string.IsNullOrEmpty(excludes)) statement.Add($"!({excludes})");
 
-            return string.Join(" && ", statement);
+            foreach (var restriction in property.SecurityInfo.Restrictions)
+            {
+                var restrictionExpr = $"context.GetPropertyRestriction<{restriction.FullyQualifiedName}>()";
+                if (permission.Name == "Read")
+                {
+                    statement.Add($"{restrictionExpr}.UserCanRead(context, nameof({property.Name}), {modelVar ?? "null"})");
+                }
+                else
+                {
+                    statement.Add($"{restrictionExpr}.UserCanWrite(context, nameof({property.Name}), {modelVar ?? "null"}, {property.Name})");
+                }
+            }
+
+            return statement;
         }
 
         /// <summary>
         /// Get the conditional and a C# expression that will map the property from a DTO to a local model object.
         /// </summary>
-        private (string conditional, string setter) DtoToModelPropertySetter(
+        private (IEnumerable<string> conditionals, string setter) DtoToModelPropertySetter(
             PropertyViewModel property,
             PropertySecurityPermission permission,
-            string fallbackPrefix = "entity."
+            string modelVar = "entity"
         )
         {
             string name = property.Name;
@@ -304,9 +346,9 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                 {
                     setter = $"{name}?.Select(f => f.MapToNew(context)).{(property.Type.IsArray ? "ToArray" : "ToList")}()";
                 }
-                else if (fallbackPrefix != null)
+                else if (modelVar != null)
                 {
-                    setter = $"{name}?.MapToModelOrNew({fallbackPrefix}{name}, context)";
+                    setter = $"{name}?.MapToModelOrNew({modelVar}.{name}, context)";
                 }
                 else
                 {
@@ -323,36 +365,29 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                 var newValue = name;
                 if (!property.Type.IsReferenceOrNullableValue && property.Type.CsDefaultValue != "null")
                 {
-                    var fallback = fallbackPrefix == null ? "default" : $"{fallbackPrefix}{name}";
+                    var fallback = modelVar == null ? "default" : $"{modelVar}.{name}";
                     newValue = $"({newValue} ?? {fallback})";
                 }
                 setter = $"{newValue}";
             }
 
-            var statement = GetPropertySetterConditional(property, permission);
-            if (!string.IsNullOrWhiteSpace(statement))
-            {
-                return (statement, setter);
-            }
-            else
-            {
-                return (null, setter);
-            }
+            var statement = GetPropertySetterConditional(property, permission, modelVar);
+            return (statement, setter);
         }
 
         /// <summary>
         /// Get the conditional and a C# expression that will map the property from a local object to a DTO.
         /// </summary>
         /// <param name="property">The property to map</param>
-        private (string conditional, string setter) ModelToDtoPropertySetter(PropertyViewModel property)
+        private (IEnumerable<string> conditionals, string setter) ModelToDtoPropertySetter(PropertyViewModel property)
         {
             string name = property.Name;
-            string objectName = "this";
+            string dtoVar = "this";
 
             string setter;
             string mapCall() => property.Object.IsDto
                 ? "" // If we hang an IClassDto off an external type, or another IClassDto, no mapping needed - it is already the desired type.
-                : $".MapToDto<{property.Object.FullyQualifiedName}, {property.Object.DtoName}>(context, tree?[nameof({objectName}.{name})])";
+                : $".MapToDto<{property.Object.FullyQualifiedName}, {property.Object.DtoName}>(context, tree?[nameof({dtoVar}.{name})])";
 
             if (property.Type.IsCollection)
             {
@@ -367,12 +402,12 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                     sb.Append($"if (propVal{name} != null");
                     if (property.Object.HasDbSet)
                     {
-                        sb.Append($" && (tree == null || tree[nameof({objectName}.{name})] != null)");
+                        sb.Append($" && (tree == null || tree[nameof({dtoVar}.{name})] != null)");
                     }
                     sb.Line(") {");
                     using (sb.Indented())
                     {
-                        sb.Line($"{objectName}.{name} = propVal{name}");
+                        sb.Line($"{dtoVar}.{name} = propVal{name}");
 
                         var defaultOrderBy = property.Object.DefaultOrderBy;
                         if (defaultOrderBy.Count > 0)
@@ -402,8 +437,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                     {
                         // If we know for sure that we're loading these things (becuse the IncludeTree said so),
                         // but EF didn't load any, then add a blank collection so the client will delete any that already exist.
-                        sb.Line($"}} else if (propVal{name} == null && tree?[nameof({objectName}.{name})] != null) {{");
-                        sb.Indented($"{objectName}.{name} = new {property.Object.DtoName}[0];");
+                        sb.Line($"}} else if (propVal{name} == null && tree?[nameof({dtoVar}.{name})] != null) {{");
+                        sb.Indented($"{dtoVar}.{name} = new {property.Object.DtoName}[0];");
                         sb.Line("}");
                     }
                     else
@@ -422,14 +457,14 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                     {
                         // Collection types which emit properly compatible property types on the DTO.
                         // No coersion to a real collection type required.
-                        setter = $"{objectName}.{name} = obj.{name};";
+                        setter = $"{dtoVar}.{name} = obj.{name};";
                     }
                     else
                     {
                         // Collection is not really a collection. Probably an IEnumerable.
                         // We will have emitted the property type as ICollection,
                         // so we need to do a ToList() so that it can be assigned.
-                        setter = $"{objectName}.{name} = obj.{name}?.ToList();";
+                        setter = $"{dtoVar}.{name} = obj.{name}?.ToList();";
                     }
                 }
 
@@ -439,27 +474,20 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                 // Only check the includes tree for things that are in the database.
                 // Otherwise, this would break IncludesExternal.
                 string treeCheck = property.Type.ClassViewModel.HasDbSet 
-                    ? $"if (tree == null || tree[nameof({objectName}.{name})] != null)" 
+                    ? $"if (tree == null || tree[nameof({dtoVar}.{name})] != null)" 
                     : "";
 
                 setter = $@"{treeCheck}
-                {objectName}.{name} = obj.{name}{mapCall()};
+                {dtoVar}.{name} = obj.{name}{mapCall()};
 ";
             }
             else
             {
-                setter = $"{objectName}.{name} = obj.{name};";
+                setter = $"{dtoVar}.{name} = obj.{name};";
             }
 
-            var statement = GetPropertySetterConditional(property, property.SecurityInfo.Read);
-            if (!string.IsNullOrWhiteSpace(statement))
-            {
-                return (statement, setter);
-            }
-            else
-            {
-                return (null, setter);
-            }
+            var statement = GetPropertySetterConditional(property, property.SecurityInfo.Read, "obj");
+            return (statement, setter);
         }
     }
 }

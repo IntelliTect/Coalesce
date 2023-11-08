@@ -11,20 +11,20 @@ using Microsoft.EntityFrameworkCore.Query.Internal;
 using Moq;
 using System.Linq.Expressions;
 using IntelliTect.Coalesce.TypeDefinition.Enums;
+using IntelliTect.Coalesce.Mapping;
 
 namespace IntelliTect.Coalesce.Tests.Tests.Security
 {
     public class PropertySecurityTests
     {
         [Theory]
-        [ClassViewModelData(typeof(PropSec), nameof(PropSec.ReadOnlyViaRead))]
-        [ClassViewModelData(typeof(PropSec), nameof(PropSec.ReadOnlyViaReadOnly))]
-        [ClassViewModelData(typeof(PropSec), nameof(PropSec.ReadOnlyViaReadOnlyApi))]
-        [ClassViewModelData(typeof(PropSec), nameof(PropSec.ReadOnlyViaNonPublicSetter))]
-        public void ReadOnly_CorrectForReadOnlyProps(ClassViewModelData data, string propName)
+        [PropertyViewModelData<PropSec>(nameof(PropSec.ReadOnlyViaRead))]
+        [PropertyViewModelData<PropSec>(nameof(PropSec.ReadOnlyViaReadOnly))]
+        [PropertyViewModelData<PropSec>(nameof(PropSec.ReadOnlyViaReadOnlyApi))]
+        [PropertyViewModelData<PropSec>(nameof(PropSec.ReadOnlyViaNonPublicSetter))]
+        public void ReadOnly_CorrectForReadOnlyProps(PropertyViewModelData data)
         {
-            ClassViewModel vm = data;
-            var prop = vm.PropertyByName(propName);
+            PropertyViewModel prop = data;
 
             Assert.True(prop.IsReadOnly);
             Assert.False(prop.IsClientSerializable);
@@ -32,35 +32,33 @@ namespace IntelliTect.Coalesce.Tests.Tests.Security
         }
 
         [Theory]
-        [ClassViewModelData(typeof(PropSec))]
-        public void ReadWriteDifferentExplicitRoles_RequiresBothRolesForEdit(ClassViewModelData data)
+        [PropertyViewModelData<PropSec>(nameof(PropSec.ReadWriteDifferentRoles))]
+        public void ReadWriteDifferentExplicitRoles_RequiresBothRolesForEdit(PropertyViewModelData data)
         {
-            ClassViewModel vm = data;
-            var prop = vm.PropertyByName(nameof(PropSec.ReadWriteDifferentRoles));
+            PropertyViewModel prop = data;
 
             Assert.Collection(prop.SecurityInfo.Edit.RoleLists,
                 l => Assert.Equal(new[] { "ReadRole" }, l),
                 l => Assert.Equal(new[] { "EditRole" }, l)
             );
 
-            Assert.True(prop.SecurityInfo.IsEditAllowed(new (new ClaimsIdentity(new[]
+            Assert.True(prop.SecurityInfo.Edit.IsAllowed(new (new ClaimsIdentity(new[]
             {
                 new Claim(ClaimTypes.Role, "ReadRole"),
                 new Claim(ClaimTypes.Role, "EditRole"),
             }))));
 
-            Assert.False(prop.SecurityInfo.IsEditAllowed(new (new ClaimsIdentity(new[]
+            Assert.False(prop.SecurityInfo.Edit.IsAllowed(new (new ClaimsIdentity(new[]
             {
                 new Claim(ClaimTypes.Role, "EditRole"),
             }))));
         }
 
         [Theory]
-        [ClassViewModelData(typeof(PropSec))]
-        public void UsageOfEntityWithInternalDbSet_IsTreatedLikeExternalType(ClassViewModelData data)
+        [PropertyViewModelData<PropSec>(nameof(PropSec.ExternalTypeUsageOfEntityWithInternalDbSet))]
+        public void UsageOfEntityWithInternalDbSet_IsTreatedLikeExternalType(PropertyViewModelData data)
         {
-            ClassViewModel vm = data;
-            var prop = vm.PropertyByName(nameof(PropSec.ExternalTypeUsageOfEntityWithInternalDbSet));
+            PropertyViewModel prop = data;
 
             Assert.False(prop.IsDbMapped);
             Assert.False(prop.Object.IsDbMappedType);
@@ -73,7 +71,33 @@ namespace IntelliTect.Coalesce.Tests.Tests.Security
             // Both PropSec and DbSetIsInternalUse are considered external types,
             // so the property should be accepted as input
             Assert.True(prop.SecurityInfo.Edit.IsAllowed());
+        }
 
+        [Theory]
+        [PropertyViewModelData<PropSec>(nameof(PropSec.RestrictMultiple))]
+        public void MappingRestrictions_AreDiscovered(PropertyViewModelData data)
+        {
+            PropertyViewModel prop = data;
+
+            Assert.Collection(prop.SecurityInfo.Restrictions,
+                r =>
+                {
+                    Assert.Equal(typeof(AuthenticatedRestriction).Name, r.Name);
+                },
+                r =>
+                {
+                    Assert.Equal(typeof(Restrict2).Name, r.Name);
+                });
+        }
+
+        [Theory]
+        [ReflectionPropertyViewModelData<PropSec>(nameof(PropSec.RestrictFilter))]
+        public void MappingRestrictions_UserCanFilter_RespectsRestrictions(PropertyViewModelData data)
+        {
+            PropertyViewModel prop = data;
+
+            Assert.False(prop.SecurityInfo.IsFilterAllowed(new MappingContext(new ClaimsPrincipal(), null)));
+            Assert.True(prop.SecurityInfo.IsFilterAllowed(new MappingContext(new ClaimsPrincipal(new ClaimsIdentity("foo")), null)));
         }
 
         [Theory]

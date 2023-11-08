@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using IntelliTect.Coalesce.DataAnnotations;
+using System;
+using System.Collections.Generic;
 using System.Security.Claims;
 
 namespace IntelliTect.Coalesce
@@ -19,5 +21,10 @@ namespace IntelliTect.Coalesce
             out TDto? mappedObject
         )
             where TDto : class;
+
+        IPropertyRestriction GetPropertyRestriction(Type type);
+        TRestriction GetPropertyRestriction<TRestriction>()
+            where TRestriction : IPropertyRestriction
+            => (TRestriction)GetPropertyRestriction(typeof(TRestriction));
     }
 }

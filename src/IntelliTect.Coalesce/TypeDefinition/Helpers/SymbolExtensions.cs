@@ -126,7 +126,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public static IEnumerable<SymbolAttributeViewModel<TAttribute>> GetAttributes<TAttribute>(
             this ISymbol symbol, 
-            ReflectionRepository rr = null)
+            ReflectionRepository? rr = null)
             where TAttribute : Attribute
         {
             return (symbol is INamedTypeSymbol named

@@ -1,9 +1,26 @@
 
 # Security
 
-This page is a comprehensive overview of all the techniques that can be used in a Coalesce application to restrict the usage of  API endpoints that Coalesce generates.
+This page is a comprehensive overview of all the techniques that can be used in a Coalesce application to restrict the capabilities of API endpoints that Coalesce generates.
 
-[[toc]]
+The following table is a quick reference of scenarios you might encounter and how you might handle them. If you're unfamiliar with these techniques, though, then you are encouraged to read through this page to get a deeper understanding of what's available before selecting a solution.
+
+| <div style="width:290px">When I want to...</div> | ... I should use ... |
+| - | - |
+| Remove an entity CRUD operation               | [Class Security Attributes](#class-security-attributes) with `DenyAll` |
+| Restrict an entity CRUD operation with roles  | [Class Security Attributes](#class-security-attributes) |
+| Restrict a method or service with roles       | [Method Security Attributes](#method-security-attributes) |
+| Remove a property from Coalesce               | • annotate with [[InternalUse]](#internal-properties) <br> • `internal` access modifier |
+| Restrict a property by roles                  | [Property Security Attributes](#property-role-restrictions) |
+| Restrict a property with custom logic         | • save operations: [custom Behaviors](#behaviors) <br> • nav prop loading: [custom Default Data Source](#data-sources) <br> • any property: [custom Property Restrictions](#custom-restrictions)  |
+| Make a property read-only                     | • make the setter `internal` <br> • add a `[Read]` attribute without `[Edit]` <br> • [other techniques](#read-only-properties) |
+| Make a property write-once (init-only)        | use an [`init`-only setter](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/init) |
+| Prevent [auto-include](/modeling/model-components/data-sources.md#default-loading-behavior) | annotate the navigation property or the included type's class with `[Read(NoAutoInclude = true)]` |
+| Restrict results of `/get`, `/list`           | [custom Default Data Source](#data-sources)
+| Restrict `/save`, `/bulkSave`, `/delete`      | • any custom logic: [custom Behaviors](#behaviors) <br> • restrict targets: [custom Default Data Source](#data-sources) <br> • static role restrictions: [Class Security Attributes](#class-security-attributes) |
+| Restrict targets of instance methods          | • [custom Default Data Source](#data-sources) <br> • specify data source: [LoadFromDataSource](/modeling/model-components/methods.md#loadfromdatasource-type-datasourcetype) <br> • [custom logic](#custom-methods-and-services) in the method |
+| Apply server-side data validation             | • implement [validation attributes](#attribute-validation) <br> • [custom Behaviors](#saves-and-deletes) (for entity CRUD) <br> • [custom logic](#custom-methods-and-services) (for methods/services) |
+
 
 ## Endpoint Security
 
@@ -13,7 +30,7 @@ Classes can be hidden from Coalesce entirely by annotating them with `[InternalU
 
 `DbSet<>` properties on your `DbContext` class can also be annotated with `[InternalUse]`, causing that type to be treated by Coalesce like an [External Type](/modeling/model-types/external-types.md) rather than an [Entity](/modeling/model-types/entities.md), once again preventing generation of API endpoints but _without_ preventing properties of that type from being exposed.
 
-### Standard CRUD Endpoints 
+### Class Security Attributes
 For each of your [Entities](/modeling/model-types/entities.md) and [Custom DTOs](/modeling/model-types/dtos.md), Coalesce generates a set of CRUD API endpoints (`/get`, `/list`, `/count`, `/save`, `/bulkSave`, and `/delete`). 
 
 The default behavior is that all endpoints require an authenticated user (anonymous users are rejected).
@@ -33,15 +50,13 @@ This security is applied to the generated [controllers](https://learn.microsoft.
 <tr>
 <td>
 
-`/get`, `/list`, `/count`, `/bulkSave` 
+`/get`, `/list`, `/count`
 </td>
 <td>
 
 ``` c#:no-line-numbers
 [ReadAttribute]
 ```
-
-Note: the root model for a bulk save operation requires read permission. All other entities affected by the bulk save operation require their respective attribute for Create/Edit/Delete.
 </td>
 </tr>
 <tr>
@@ -69,6 +84,24 @@ Note: the root model for a bulk save operation requires read permission. All oth
 ```
 </td>
 </tr>
+<tr>
+<td>
+
+`/bulkSave` 
+</td>
+<td>
+
+``` c#:no-line-numbers
+// Read permission required for the root entity:
+[ReadAttribute]
+
+// Control of each entity affected by the bulk save:
+[CreateAttribute]
+[EditAttribute]
+[DeleteAttribute]
+```
+</td>
+</tr>
 </table>
 
 Here are some examples of applying security attributes to an entity class. If a particular action doesn't need to be restricted, you can omit that attribute, but this example shows usages of all four:
@@ -88,7 +121,7 @@ public class Employee
 }
 ```
 
-### Custom Methods and Services
+### Method Security Attributes
 
 To secure the endpoints generated for your [Custom Methods](/modeling/model-components/methods.md) and [Services](/modeling/model-types/services.md), the [[Execute] attribute](/modeling/model-components/attributes/execute.md) can be used to specify a set of required roles for that endpoint, or to open that endpoint to anonymous users.
 
@@ -115,6 +148,13 @@ public class Employee
 
 ## Property/Column Security
 
+Security applied via attributes to properties in Coalesce affects all usages of that property across all Coalesce-generated APIs. This includes usages of that property on types that occur as children of other types, which is a spot where class-level or endpoint-level security generally does not apply. [These attributes](/modeling/model-components/attributes/security-attribute.md) can be placed on the properties on your [Entities](/modeling/model-types/entities.md) and [External Types](/modeling/model-types/external-types.md) to apply role-based restrictions to that property.
+
+* `ReadAttribute` limits the roles that can read values from that property in responses from the server.
+* `EditAttribute` limits the roles that can write values to that property in requests made to the server.
+* `RestrictAttribute` registers an implementation of [IPropertyRestriction](#custom-restrictions) that allows for writing custom code to implement these restrictions.
+
+This security is executed and enforced by the mapping that occurs in the [generated DTOs](/stacks/agnostic/dtos.md), meaning it affects both entity CRUD APIs as well as [Custom Methods](/modeling/model-components/methods.md). It is also checked by the [Standard Data Source](/modeling/model-components/data-sources.md#standard-data-source) to prevent sorting, searching, and filtering by properties that a user is not permitted to read.
 
 ### Internal Properties
 
@@ -146,12 +186,6 @@ public class Department
 }
 ```
 
-### Attributes
-The [[Read] and [Edit] attributes](/modeling/model-components/attributes/security-attribute.md) can be placed on the properties on your [Entities](/modeling/model-types/entities.md) and [External Types](/modeling/model-types/external-types.md) to apply role-based restrictions to the usage of that property.
-
-This security is primarily executed and enforced by the mapping that occurs in the [generated DTOs](/stacks/agnostic/dtos.md). It is also checked by the [Standard Data Source](/modeling/model-components/data-sources.md#standard-data-source) to prevent sorting, searching, and filtering by properties that a user is not permitted to read.
-
-
 ### Read-Only Properties
 
 A property in Coalesce can be made read-only in any of the following ways:
@@ -176,13 +210,16 @@ public class Employee
   // Non-public setter:
   public DateTime StartDate { get; internal set; }
 
+  // No setter:
+  public string EmploymentDuration => (DateTime.Now - StartDate).ToString();
+
   // Edits denied:
   [Edit(SecurityPermissionLevels.DenyAll)]
   public string EmployeeNumber { get; set; }
 }
 ```
 
-### Read/Write Properties
+### Role Restrictions
 
 Reading and writing a property in Coalesce can be restricted by roles:
 
@@ -218,6 +255,11 @@ those roles are also required when editing that property. This is because it usu
 for a user to change a value when they have no way of knowing what the original value was.
 If you have a situation where a property should be editable without knowing the original value,
 use a custom method on the model to accept and set the new value.
+
+
+### Custom Restrictions
+
+@[import-md "after":"# [Restrict]"](../modeling/model-components/attributes/restrict.md)  
 
 
 ## Row-level Security
@@ -390,8 +432,16 @@ public override async Task TransformResultsAsync(
 }
 ```
 
+### Behaviors
 
-For a more complete explanation of everything you can do with data sources, see the full [Data Sources](/modeling/model-components/data-sources.md) documentation page.
+In Coalesce, [Behaviors](/modeling/model-components/behaviors.md) are the extension point to implement row-level security or other customizations of create/edit/delete operations on your [Entities](/modeling/model-types/entities.md) and [Custom DTOs](/modeling/model-types/dtos.md). Behaviors are implemented on top of data sources, meaning the client request will be rejected if the requested entity for modification cannot be loaded from the entity's default data source.
+
+By default, each entity will use the [Standard Behaviors](/modeling/model-components/behaviors.md#behaviors), but you can declare a [custom behaviors class](/modeling/model-components/behaviors.md#defining-behaviors) for each of your entities to override this default functionality.
+
+For most use cases, all your security rules will be implemented in the [BeforeSave/BeforeSaveAsync](/modeling/model-components/behaviors.md#member-BeforeSaveAsync) and [BeforeDelete/BeforeDeleteAsync](/modeling/model-components/behaviors.md#member-BeforeDeleteAsync) methods.
+
+For a more complete explanation of everything you can do with behaviors, see the full [Behaviors](/modeling/model-components/behaviors.md) documentation page.
+
 
 ### EF Global Query Filters
 

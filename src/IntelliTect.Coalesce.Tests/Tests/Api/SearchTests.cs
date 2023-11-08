@@ -179,12 +179,12 @@ namespace IntelliTect.Coalesce.Tests.Api
         {
             var classViewModel = new ReflectionClassViewModel(typeof(T));
             var prop = classViewModel.PropertyBySelector(propSelector);
+            var context = new CrudContext(() => new ClaimsPrincipal(), timeZoneInfo ?? TimeZoneInfo.Local);
 
             var searchClauses = prop
                 .SearchProperties(classViewModel, maxDepth: 1, force: true)
                 .SelectMany(p => p.GetLinqDynamicSearchStatements(
-                    new ClaimsPrincipal(),
-                    timeZoneInfo ?? TimeZoneInfo.Local,
+                    context,
                     "it",
                     searchTerm
                 ))

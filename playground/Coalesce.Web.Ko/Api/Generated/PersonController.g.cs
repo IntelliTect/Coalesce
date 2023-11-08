@@ -112,7 +112,7 @@ namespace Coalesce.Web.Ko.Api
             }
 
             IncludeTree includeTree = null;
-            var _mappingContext = new MappingContext(User);
+            var _mappingContext = new MappingContext(Context);
             var _methodResult = item.Rename(
                 _params.name,
                 out includeTree
@@ -394,7 +394,7 @@ namespace Coalesce.Web.Ko.Api
             }
 
             IncludeTree includeTree = null;
-            var _mappingContext = new MappingContext(User);
+            var _mappingContext = new MappingContext(Context);
             var _methodResult = item.ChangeFirstName(
                 _params.firstName,
                 _params.title
@@ -499,7 +499,7 @@ namespace Coalesce.Web.Ko.Api
             }
 
             IncludeTree includeTree = null;
-            var _mappingContext = new MappingContext(User);
+            var _mappingContext = new MappingContext(Context);
             var _methodResult = Coalesce.Domain.Person.MethodWithEntityParameter(
                 Db,
                 _params.person.MapToNew(_mappingContext)
@@ -532,7 +532,7 @@ namespace Coalesce.Web.Ko.Api
             }
 
             IncludeTree includeTree = null;
-            var _mappingContext = new MappingContext(User);
+            var _mappingContext = new MappingContext(Context);
             var _methodResult = Coalesce.Domain.Person.SearchPeople(
                 Db,
                 _params.criteria.MapToNew(_mappingContext),

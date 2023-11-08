@@ -511,6 +511,67 @@ describe("ViewModel", () => {
       endpoint.destroy();
     });
 
+    test("unsaved principal excluded by predicate", async () => {
+      const response = {
+        refMap: {} as any,
+        object: {
+          studentId: 1,
+          name: "scott",
+        },
+      };
+
+      const endpoint = mockEndpoint(
+        "/students/bulkSave",
+        vitest.fn((req) => ({
+          wasSuccessful: true,
+          ...JSON.parse(JSON.stringify(response)), // deep clone
+        }))
+      );
+
+      const student = new StudentViewModel({ name: "scott" });
+
+      // new parent, with children not added by $addChild.
+      student.advisor = new AdvisorViewModel({ name: "bob" });
+      // Add a failing validation rule to ensure that failed validation
+      // on predicate-excluded models does not block saves.
+      student.advisor.$addRule("name", "test", (v) => v == "foo" || "invalid");
+      const originalAdvisor = student.advisor;
+
+      // Setup the ref map on the response so that existing instances may be preserved
+      response.refMap[student.$stableId] = 1;
+
+      await student.$bulkSave({
+        predicate(entity, action) {
+          if (entity instanceof AdvisorViewModel) return false;
+          return true;
+        },
+      });
+
+      expect(JSON.parse(endpoint.mock.calls[0][0].data)).toMatchObject({
+        items: expect.arrayContaining([
+          {
+            action: "save",
+            type: "Student",
+            data: { studentId: null, studentAdvisorId: null, name: "scott" },
+            refs: {
+              studentId: student.$stableId,
+              // There should NOT be a ref for `studentAdvisorId` since the
+              // unsaved advisor was excluded by predicate.
+            },
+            root: true,
+          },
+        ]),
+      });
+
+      // Preserves non-circular instances:
+      // Reference nav:
+      expect(student.advisor === originalAdvisor).toBeTruthy();
+      expect(student.$bulkSave.wasSuccessful).toBeTruthy();
+      expect(student.studentId).toBe(1);
+
+      endpoint.destroy();
+    });
+
     test("deletion", async () => {
       const loadEndpoint = mockEndpoint("/students/get", (req) => ({
         wasSuccessful: true,

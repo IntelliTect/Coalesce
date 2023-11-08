@@ -238,7 +238,7 @@ Returns true if auto-save is currently active on the instance.
 ### Bulk saves
 
 <Prop def="$bulkSave: ItemApiState;
-$bulkSave() => ItemResultPromise<TModel>;" lang="ts" />
+$bulkSave(options: BulkSaveOptions) => ItemResultPromise<TModel>;" lang="ts" />
 
 Bulk saves save all changes to an object graph in one API call and one database transaction. This includes creation, updates, and deletions of entities.
 
@@ -252,6 +252,7 @@ On the server, each affected entity is handled through the same standard mechani
 
 For the response to a bulk save, the server will load and return the root ViewModel that `$bulkSave` was called upon, using the instance's `$params` object for the [Standard Parameters](/modeling/model-components/data-sources.md#standard-parameters).
 
+@[import-md "start":"export interface BulkSaveOptions", "end":"\n}\n", "prepend":"``` ts", "append":"```"](../../../../src/coalesce-vue/src/viewmodel.ts)
 
 <Prop def="$remove(): void" lang="ts" />
 

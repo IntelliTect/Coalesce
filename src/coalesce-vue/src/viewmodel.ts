@@ -578,7 +578,7 @@ export abstract class ViewModel<
   get $bulkSave() {
     const $bulkSave = this.$apiClient.$makeCaller(
       "item",
-      async function (this: ViewModel, c /*TODO: options*/) {
+      async function (this: ViewModel, c, options?: BulkSaveOptions) {
         /** The models to traverse for relations in the next iteration of the outer loop. */
         let nextModels: (ViewModel | null)[] = [this];
 
@@ -617,6 +617,12 @@ export abstract class ViewModel<
               ? "save" // Save items that are dirty or never saved
               : "none"; // Non-dirty, non-deleted items are sent as "none". This exists so that the root item (that will be sent as the response from the server) can be identified even if it isn't being modified.
 
+            if (action !== "none") {
+              if (options?.predicate?.(model, action) === false) {
+                continue;
+              }
+            }
+
             if (action == "save") {
               const errors = [...model.$getErrors()];
               if (errors.length) {
@@ -630,7 +636,7 @@ export abstract class ViewModel<
               }
             }
 
-            // Don't items that have an action of `none` if they aren't there to identify the root item.
+            // Don't include items that have an action of `none` if they aren't there to identify the root item.
             if (!root && action == "none") continue;
 
             const refs: BulkSaveRequestItem["refs"] = {
@@ -654,8 +660,7 @@ export abstract class ViewModel<
                   nextModels.push(...dependents);
                 }
               } else if (prop.role == "referenceNavigation") {
-                const principal = model.$data[prop.name] as ViewModel | null;
-                nextModels.push(principal);
+                let principal = model.$data[prop.name] as ViewModel | null;
 
                 // Build up `refs` as needed.
                 // If the prop is a reference navigation that has no foreign key,
@@ -667,21 +672,13 @@ export abstract class ViewModel<
                   // If the foreign key has a value then we don't need a ref.
                   model.$data[prop.foreignKey.name] != null
                 ) {
-                  continue;
-                }
-
-                if (
-                  model.$data[prop.name] &&
-                  !model.$data[prop.name]._existsOnServer
-                ) {
-                  // The model has an object value for this reference navigation.
-                  // This makes things easy - the foreign key should ref the value of that reference navigation.
-                  refs[prop.foreignKey.name] = model.$data[prop.name].$stableId;
+                  nextModels.push(principal);
                   continue;
                 }
 
                 const collection = model.$parentCollection;
                 if (
+                  !principal &&
                   collection?.$parent instanceof ViewModel &&
                   collection.$metadata == prop.inverseNavigation
                 ) {
@@ -694,11 +691,21 @@ export abstract class ViewModel<
                   // This scenario enables adding a new item to a collection navigation
                   // without setting either the foreign key or the nav prop on that new child.
 
-                  refs[prop.foreignKey.name] = collection.$parent.$stableId;
+                  principal = collection.$parent;
+                }
 
-                  // Ensure we traverse to the owner of the ref we just used, which since
-                  // the reference navigation had no value, its actually possible we missed it.
-                  nextModels.push(collection.$parent);
+                nextModels.push(principal);
+
+                if (
+                  principal &&
+                  !principal._existsOnServer &&
+                  !principal._isRemoved &&
+                  options?.predicate?.(principal, "save") !== false
+                ) {
+                  // The model has an object value for this reference navigation.
+                  // This makes things easy - the foreign key should ref the value of that reference navigation.
+                  refs[prop.foreignKey.name] = principal.$stableId;
+                  continue;
                 }
               }
             }
@@ -1678,8 +1685,19 @@ type AutoSaveOptions<TThis> = DebounceOptions &
       }
   );
 
+export interface BulkSaveOptions {
+  /** A predicate that will be applied to each modified model
+   * to determine if it should be included in the bulk save operation.
+   *
+   * The predicate is applied before validation (`$hasError`), allowing
+   * it to be used to skip over entities that have client validation errors
+   * that would otherwise cause the entire bulk save operation to fail.
+   * */
+  predicate?: (viewModel: ViewModel, action: "save" | "delete") => boolean;
+}
+
 /**
- * Dynamically adds gettter/setter properties to a class. These properties wrap the properties in its instances' $data objects.
+ * Dynamically adds getter/setter properties to a class. These properties wrap the properties in its instances' $data objects.
  * @param ctor The class to add wrapper properties to
  * @param metadata The metadata describing the properties to add.
  */

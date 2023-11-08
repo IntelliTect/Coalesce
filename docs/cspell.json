@@ -50,6 +50,7 @@
                 // Hashes in URLs, which for PascalCase headers get transformed into lowercase 
                 // (which then to cspell looks like a single word.)
                 "/(\\.md|\\()#[-\\w]+/mig",
+                "/viewmodel\\.ts/mig",
              ]
         }
     ]

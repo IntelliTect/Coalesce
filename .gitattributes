@@ -1,8 +1,10 @@
 
 *.g.cs linguist-generated=true
-# *.g.ts linguist-generated=true
+*.g.ts linguist-generated=true
 *.generated.d.ts linguist-generated=true
 playground/**/Scripts/Coalesce/* linguist-generated=true
+playground/**/Scripts/Coalesce/**/* linguist-generated=true
 playground/**/Views/Generated/* linguist-generated=true
+playground/**/Views/Generated/**/* linguist-generated=true
 
 * text eol=lf

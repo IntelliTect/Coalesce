@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
@@ -17,22 +18,18 @@ namespace IntelliTect.Coalesce.Helpers.Search
 
         internal ICollection<SearchableProperty> Children { get; } = new List<SearchableProperty>();
 
-        public override IEnumerable<(PropertyViewModel property, string statement)> GetLinqDynamicSearchStatements(
-            CrudContext context, string? propertyParent, string rawSearchTerm)
+        public override IEnumerable<(PropertyViewModel property, Expression statement)> GetLinqSearchStatements(
+            CrudContext context, Expression propertyParent, string rawSearchTerm)
         {
             if (!Property.SecurityInfo.IsFilterAllowed(context))
             {
-                return Enumerable.Empty<(PropertyViewModel, string)>();
+                return Enumerable.Empty<(PropertyViewModel, Expression)>();
             }
 
-            var parent = propertyParent == null
-                ? Property.Name
-                : $"{propertyParent}.{Property.Name}";
+            var parent = Expression.Property(propertyParent, Property.Name);
 
             return Children
-                .SelectMany(c => c.GetLinqDynamicSearchStatements(context, parent, rawSearchTerm));
-
-
+                .SelectMany(c => c.GetLinqSearchStatements(context, parent, rawSearchTerm));
         }
     }
 }

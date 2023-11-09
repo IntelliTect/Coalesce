@@ -360,21 +360,10 @@ namespace IntelliTect.Coalesce.TypeDefinition
             ?? SearchAttribute.SearchMethods.BeginsWith;
 
         /// <summary>
-        /// Returns the Linq.Dynamic-interpretable string representation of the method invocation that will perform search on the property.
-        /// </summary>
-        public string SearchMethodCall => SearchMethod switch {
-            SearchAttribute.SearchMethods.Contains => @"ToLower().IndexOf((""{0}"").ToLower()) >= 0",
-            SearchAttribute.SearchMethods.BeginsWith => @"ToLower().StartsWith((""{0}"").ToLower())",
-            SearchAttribute.SearchMethods.Equals => @"ToLower().Equals((""{0}"").ToLower())",
-            SearchAttribute.SearchMethods.EqualsNatural => @"Equals(""{0}"")",
-            _ => throw new InvalidOperationException()
-        };
-
-        /// <summary>
         /// True if the search term should be split on spaces and evaluated individually with or.
         /// </summary>
         public bool SearchIsSplitOnSpaces =>
-            this.GetAttributeValue<SearchAttribute, bool>(a => a.IsSplitOnSpaces) ?? false;
+            this.GetAttributeValue<SearchAttribute, bool>(a => a.IsSplitOnSpaces) ?? true;
 
         /// <summary>
         /// Returns the fields to search for this object. This could be just the field itself 

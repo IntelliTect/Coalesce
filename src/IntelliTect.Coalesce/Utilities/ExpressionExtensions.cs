@@ -56,6 +56,31 @@ namespace IntelliTect.Coalesce.Utilities
         public static MethodInfo GetExpressedMethod(this LambdaExpression lambda)
             => GetExpressedMember(lambda) as MethodInfo ?? throw new ArgumentException($"Expression '{lambda}' doesn't refer to a method.");
 
+        public static Expression Call(this Expression instanceTarget, MethodInfo method, params Expression[]? methodParams)
+        {
+            if (method.IsStatic)
+            {
+                // Call the static method as if it is an extension method,
+                // passing the instanceTarget as the first param.
+                return Expression.Call(
+                    method,
+                    [instanceTarget, ..methodParams]
+                );
+            }
+
+            return Expression.Call(
+                instanceTarget,
+                method,
+                methodParams
+            );
+        }
+
+        public static Expression OrAny(this IEnumerable<Expression> expressions)
+            => expressions.Aggregate((prev, cur) => prev == null ? cur : Expression.OrElse(prev, cur));
+
+        public static Expression AndAll(this IEnumerable<Expression> expressions)
+            => expressions.Aggregate((prev, cur) => prev == null ? cur : Expression.AndAlso(prev, cur));
+
         public static string? GetDebugView(this Expression exp)
         {
             if (exp == null)

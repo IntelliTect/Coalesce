@@ -1,8 +1,10 @@
 ﻿using IntelliTect.Coalesce.TypeDefinition;
+using IntelliTect.Coalesce.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Dynamic.Core;
+using System.Linq.Expressions;
 using System.Security.Claims;
 
 namespace IntelliTect.Coalesce
@@ -253,6 +255,8 @@ namespace IntelliTect.Coalesce
                 return query;
             }
 
+            var param = Expression.Parameter(typeof(T));
+
             // See if the user has specified a field with a colon and search on that first
             if (searchTerm.Contains(":"))
             {
@@ -269,22 +273,20 @@ namespace IntelliTect.Coalesce
                 {
                     var expressions = prop
                         .SearchProperties(ClassViewModel, maxDepth: 1, force: true)
-                        .SelectMany(p => p.GetLinqDynamicSearchStatements(Context, "it", value))
+                        .SelectMany(p => p.GetLinqSearchStatements(Context, param, value))
                         .Select(t => t.statement)
                         .ToList();
 
                     // Join these together with an 'or'
                     if (expressions.Count > 0)
                     {
-                        string finalSearchClause = string.Join(" || ", expressions);
-                        return query.Where(finalSearchClause);
+                        var predicate = Expression.Lambda<Func<T, bool>>(expressions.OrAny(), param);
+                        return query.Where(predicate);
                     }
                 }
             }
 
-
-
-            var completeSearchClauses = new List<string>();
+            var completeSearchClauses = new List<Expression>();
 
             // For all searchable properties where SearchIsSplitOnSpaces is true,
             // we require that each word in the search terms yields at least one match.
@@ -292,7 +294,7 @@ namespace IntelliTect.Coalesce
             // For example, when searching on properties (FirstName, LastName) with input "steve steverson",
             // we require that "steve" match either a first name or last name, and "steverson" match a first name or last name
             // of the same records. This will yield people named "steve steverson" or "steverson steve".
-            var splitOnStringTermClauses = new List<string>();
+            var splitOnStringTermClauses = new List<Expression>();
             var terms = searchTerm
                     .Split(new string[] { " ", "," }, StringSplitOptions.RemoveEmptyEntries)
                     .Select(term => term.Trim())
@@ -303,7 +305,7 @@ namespace IntelliTect.Coalesce
             {
                 var splitOnStringClauses = ClassViewModel
                     .SearchProperties(ClassViewModel)
-                    .SelectMany(p => p.GetLinqDynamicSearchStatements(Context, "it", termWord))
+                    .SelectMany(p => p.GetLinqSearchStatements(Context, param, termWord))
                     .Where(f => f.property.SearchIsSplitOnSpaces)
                     .Select(t => t.statement)
                     .ToList();
@@ -312,13 +314,13 @@ namespace IntelliTect.Coalesce
                 // to match the term word.
                 if (splitOnStringClauses.Count > 0)
                 {
-                    splitOnStringTermClauses.Add("(" + string.Join(" || ", splitOnStringClauses) + ")");
+                    splitOnStringTermClauses.Add(splitOnStringClauses.OrAny());
                 }
             }
             // Require each "word clause"
             if (splitOnStringTermClauses.Count > 0)
             {
-                completeSearchClauses.Add("( " + string.Join(" && ", splitOnStringTermClauses) + " )");
+                completeSearchClauses.Add(splitOnStringTermClauses.AndAll());
             }
 
 
@@ -328,7 +330,7 @@ namespace IntelliTect.Coalesce
             // we only require that the entire search term match at least one of these properties.
             var searchClauses = ClassViewModel
                 .SearchProperties(ClassViewModel)
-                .SelectMany(p => p.GetLinqDynamicSearchStatements(Context, "it", searchTerm))
+                .SelectMany(p => p.GetLinqSearchStatements(Context, param, searchTerm))
                 .Where(f => !f.property.SearchIsSplitOnSpaces)
                 .Select(t => t.statement)
                 .ToList();
@@ -337,8 +339,8 @@ namespace IntelliTect.Coalesce
 
             if (completeSearchClauses.Count > 0)
             {
-                string finalSearchClause = string.Join(" || ", completeSearchClauses);
-                return query.Where(finalSearchClause);
+                var predicate = Expression.Lambda<Func<T, bool>>(completeSearchClauses.OrAny(), param);
+                return query.Where(predicate);
             }
 
             // A search term was specified (we didn't return early from this method), 

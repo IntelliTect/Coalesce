@@ -18,6 +18,7 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         public int ComplexModelId { get; set; }
 
         [InverseProperty(nameof(Test.ComplexModel))]
+        [Search]
         public ICollection<Test> Tests { get; set; }
 
         /// <summary>

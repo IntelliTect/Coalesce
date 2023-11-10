@@ -753,6 +753,80 @@ describe("ViewModel", () => {
       bulkSaveEndpoint.destroy();
     });
 
+    test("save of dirty child under nondirty nonroot parent", async () => {
+      const response = {
+        refMap: {} as any,
+        object: {
+          studentId: 1,
+          name: "scott",
+          advisor: {
+            name: "bob",
+            advisorId: 3,
+            students: [{ studentId: 4, name: "steve" }],
+          },
+        },
+      };
+
+      const endpoint = mockEndpoint(
+        "/students/bulkSave",
+        vitest.fn((req) => ({
+          wasSuccessful: true,
+          ...JSON.parse(JSON.stringify(response)), // deep clone
+        }))
+      );
+
+      const student = new StudentViewModel();
+      student.studentId = 1;
+      student.name = "scott";
+
+      const originalAdvisor = (student.advisor = new AdvisorViewModel({
+        name: "bob",
+        advisorId: 3,
+      }));
+      student.advisor.$isDirty = false;
+      student.$isDirty = false;
+
+      const originalSteve = originalAdvisor.$addChild("students", {
+        name: "steve",
+      });
+
+      // Setup the ref map on the response so that existing instances may be preserved
+      response.refMap[student.$stableId] = 1;
+      response.refMap[originalAdvisor.$stableId] = 3;
+      response.refMap[originalSteve.$stableId] = 4;
+
+      await student.$bulkSave();
+
+      expect(JSON.parse(endpoint.mock.calls[0][0].data)).toMatchObject({
+        items: expect.arrayContaining([
+          {
+            action: "none",
+            type: "Student",
+            data: { studentId: student.studentId },
+            refs: {
+              studentId: student.$stableId,
+            },
+            root: true,
+          },
+          {
+            action: "save",
+            type: "Student",
+            data: { studentId: null, name: "steve", studentAdvisorId: 3 },
+            refs: {
+              studentId: originalSteve.$stableId,
+            },
+          },
+        ]),
+      });
+
+      expect(student.$bulkSave.wasSuccessful).toBeTruthy();
+      expect(student.studentId).toBe(1);
+      expect(student.advisor.students).toHaveLength(1);
+      expect(student.advisor.students[0] === originalSteve).toBeTruthy();
+
+      endpoint.destroy();
+    });
+
     test("creation with parent that was explicitly late loaded by key - does not include ref to existing parent", async () => {
       const bulkSaveEndpoint = mockEndpoint(
         "/students/bulkSave",

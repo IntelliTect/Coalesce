@@ -636,9 +636,6 @@ export abstract class ViewModel<
               }
             }
 
-            // Don't include items that have an action of `none` if they aren't there to identify the root item.
-            if (!root && action == "none") continue;
-
             const refs: BulkSaveRequestItem["refs"] = {
               // The model's $stableId will be referenced by other objects.
               // It is recorded as the object's primary key ref value.
@@ -710,27 +707,32 @@ export abstract class ViewModel<
               }
             }
 
-            const bulkSaveItem: BulkSaveRequestItem = {
-              type: meta.name,
-              action,
-              refs,
-              data:
-                action == "none" || action == "delete"
-                  ? // "none" and "delete" items only need their PK:
-                    mapToDtoFiltered(model, [meta.keyProp.name])!
-                  : model.$saveMode == "surgical"
-                  ? mapToDtoFiltered(model, [
-                      ...model._dirtyProps,
-                      meta.keyProp.name,
-                    ])!
-                  : mapToDto(model)!,
-            };
+            // Finally, add the item to the payload if it needs to be there.
+            // We always want to do the property traversal above to find
+            // related objects, even if we aren't saving this model.
+            if (root || action !== "none") {
+              const bulkSaveItem: BulkSaveRequestItem = {
+                type: meta.name,
+                action,
+                refs,
+                data:
+                  action == "none" || action == "delete"
+                    ? // "none" and "delete" items only need their PK:
+                      mapToDtoFiltered(model, [meta.keyProp.name])!
+                    : model.$saveMode == "surgical"
+                    ? mapToDtoFiltered(model, [
+                        ...model._dirtyProps,
+                        meta.keyProp.name,
+                      ])!
+                    : mapToDto(model)!,
+              };
 
-            // Omit the optional `root` prop entirely unless its true.
-            if (root) bulkSaveItem.root = root;
+              // Omit the optional `root` prop entirely unless its true.
+              if (root) bulkSaveItem.root = root;
 
-            itemsToSend.push(bulkSaveItem);
-            modelsByRef.set(model.$stableId, model);
+              itemsToSend.push(bulkSaveItem);
+              modelsByRef.set(model.$stableId, model);
+            }
           }
         }
 

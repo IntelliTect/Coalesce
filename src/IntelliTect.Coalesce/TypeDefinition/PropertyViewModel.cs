@@ -620,7 +620,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                         {
                             return new OrderByInformation()
                             {
-                                Properties = { this, childField },
+                                Properties = [this, childField],
                                 FieldOrder = order.Value,
                                 OrderByDirection = direction.Value
                             };
@@ -629,7 +629,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
                     return new OrderByInformation()
                     {
-                        Properties = { this },
+                        Properties = [this],
                         FieldOrder = order.Value,
                         OrderByDirection = direction.Value
                     };

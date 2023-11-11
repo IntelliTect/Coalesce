@@ -1,4 +1,5 @@
-﻿using IntelliTect.Coalesce.TypeDefinition;
+﻿using IntelliTect.Coalesce.DataAnnotations;
+using IntelliTect.Coalesce.TypeDefinition;
 using IntelliTect.Coalesce.Utilities;
 using System;
 using System.Collections.Generic;
@@ -385,80 +386,96 @@ namespace IntelliTect.Coalesce
                 return query;
             }
 
-            var clauses = orderByParams
-                .Select(orderByParam =>
+            return query.OrderBy(orderByParams
+                .SelectMany(GetOrderInfos)
+                // Take all the clauses up until an invalid one is found.
+                .TakeWhile(clause => clause != null)!
+            );
+
+            IEnumerable<OrderByInformation?> GetOrderInfos(KeyValuePair<string, SortDirection> orderByParam)
+            {
+                string fieldName = orderByParam.Key;
+                SortDirection direction = orderByParam.Value;
+
+                var props = GetPropChain(fieldName);
+                if (props == null)
                 {
-                    string fieldName = orderByParam.Key;
-                    string direction = orderByParam.Value.ToString();
+                    // User-provided field name is no good.
+                    // We specifically yield null in order to halt and
+                    // not consume any user input after an invalid ordering is found,
+                    // as doing so could produce really weird orderings.
+                    yield return null;
+                    yield break;
+                }
 
-                    // Validate that the field accessor is a valid property
-                    // that the current user is allowed to read.
-                    var parts = fieldName.Split('.');
-                    PropertyViewModel? prop = null;
-                    foreach (var part in parts)
+                if (props.Last() is { IsPOCO: true } lastProp)
+                {
+                    // The property is a POCO, not a value.
+                    // Emit all the default orderings of that object.
+                    foreach (var info in lastProp.Object!.DefaultOrderBy)
                     {
-                        if (prop != null && !prop.IsPOCO)
+                        yield return info with 
                         {
-                            // We're accessing a nested prop, but the parent isn't an object,
-                            // so this can't be valid.
-                            return null;
-                        }
+                            Properties = [..props, ..info.Properties],
+                            // Override the direction specified by the user's input.
+                            SortDirection = direction 
+                        };
+                    }
+                }
+                else
+                {
+                    // The end of a prop chain is a value.
+                    // Return it as a directly sortable property.
+                    yield return new OrderByInformation()
+                    {
+                        Properties = props,
+                        SortDirection = direction
+                    };
+                }
+            }
 
-                        prop = (prop?.Object ?? ClassViewModel).PropertyByName(part);
+            List<PropertyViewModel>? GetPropChain(string fieldName)
+            {
+                // Split a dotted property accessor chain into its sequence properties.
+                // Return null if anything in the chain is not searchable.
 
-                        // Check if the new prop exists and is readable by user.
-                        if (prop == null || !prop.IsClientProperty || !prop.SecurityInfo.IsFilterAllowed(Context))
-                        {
-                            return null;
-                        }
+                var parts = fieldName.Split('.');
+                List<PropertyViewModel> props = new(parts.Length);
+                PropertyViewModel? current = null;
 
-                        // If the prop is an object that isn't readable, then this is no good.
-                        if (prop.IsPOCO && prop.Object?.SecurityInfo.IsReadAllowed(User) != true)
-                        {
-                            return null;
-                        }
-
-                        if (!prop.IsDbMapped && prop.Parent.IsDbMappedType)
-                        {
-                            // Unmapped property on a db mapped type. Won't translate to SQL.
-                            return null;
-                        }
+                foreach (var part in parts)
+                {
+                    if (current != null && !current.IsPOCO)
+                    {
+                        // We're accessing a nested prop, but the parent isn't an object,
+                        // so this can't be valid.
+                        return null;
                     }
 
-                    if (prop == null)
+                    current = (current?.Object ?? ClassViewModel).PropertyByName(part);
+
+                    // Check if the prop exists and is readable by user.
+                    if (current == null || !current.IsClientProperty || !current.SecurityInfo.IsFilterAllowed(Context))
                     {
                         return null;
                     }
 
-                    if (prop.IsPOCO)
+                    // If the prop is an object that isn't readable, then this is no good.
+                    if (current.IsPOCO && current.Object?.SecurityInfo.IsReadAllowed(User) != true)
                     {
-                        // The property is a POCO, not a value.
-                        // Get the default order by for the object's type to figure out what field to sort by.
-                        string? clause = prop.Type.ClassViewModel?.DefaultOrderByClause($"{fieldName}");
-
-                        // The default order by clause has an order associated, but we want to override it
-                        // with the order that the client specified. A string replacement will do.
-                        return clause?
-                            .Replace("ASC", direction.ToUpper())
-                            .Replace("DESC", direction.ToUpper());
+                        return null;
                     }
-                    else
+
+                    if (!current.IsDbMapped && current.Parent.IsDbMappedType)
                     {
-                        // We've validated that `fieldName` is a valid acccessor for a comparable property,
-                        // and that the user is allowed to read it.
-                        return $"{fieldName} {direction}";
+                        // Unmapped property on a db mapped type. Won't translate to SQL.
+                        return null;
                     }
-                })
-                // Take all the clauses up until an invalid one is found.
-                .TakeWhile(clause => clause != null)
-                .ToList();
 
-            if (clauses.Count > 0)
-            {
-                query = query.OrderBy(string.Join(", ", clauses));
+                    props.Add(current);
+                }
+                return props;
             }
-
-            return query;
         }
 
         /// <summary>
@@ -472,13 +489,7 @@ namespace IntelliTect.Coalesce
         /// <returns>The new query with additional sorting applied.</returns>
         public virtual IQueryable<T> ApplyListDefaultSorting(IQueryable<T> query)
         {
-            // Use the DefaultOrderBy attributes if available
-            var defaultOrderBy = ClassViewModel.DefaultOrderByClause();
-            if (defaultOrderBy != null)
-            {
-                query = query.OrderBy(defaultOrderBy);
-            }
-            return query;
+            return query.OrderBy(ClassViewModel.DefaultOrderBy);
         }
 
         /// <summary>

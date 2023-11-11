@@ -266,32 +266,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         #region Searching/Sorting
 
-        /// <summary>
-        /// Returns an expression suitable for usage with LINQ Dynamic
-        /// that represents the default sort ordering of instances of the class.
-        /// </summary>
-        public string? DefaultOrderByClause(string prependText = "")
-        {
-            var defaultOrderBy = DefaultOrderBy.ToList();
-
-            if (defaultOrderBy.Count == 0) return null;
-
-            var orderByClauseList = new List<string>();
-            foreach (var orderInfo in defaultOrderBy)
-            {
-                if (orderInfo.OrderByDirection == DefaultOrderByAttribute.OrderByDirections.Ascending)
-                {
-                    orderByClauseList.Add($"{orderInfo.OrderExpression(prependText)} ASC");
-                }
-                else
-                {
-                    orderByClauseList.Add($"{orderInfo.OrderExpression(prependText)} DESC");
-                }
-            }
-
-            return string.Join(",", orderByClauseList);
-        }
-
+        private ICollection<OrderByInformation>? _defaultOrderBy;
         /// <summary>
         /// Gets a sorted list of the default order by attributes for the class.
         /// </summary>
@@ -299,6 +274,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             get
             {
+                if (_defaultOrderBy is not null) return _defaultOrderBy;
+
                 var result = new List<OrderByInformation>();
                 foreach (var p in Properties
                     .Select(p => new { Prop = p, p.DefaultOrderBy })
@@ -336,7 +313,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
                 if (result.Count > 0)
                 {
-                    return result.ToList();
+                    return _defaultOrderBy = result;
                 }
 
                 // Nothing found, order by ListText and then ID.
@@ -345,7 +322,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 {
                     result.Add(new OrderByInformation()
                     {
-                        Properties = { nameProp },
+                        Properties = [nameProp],
                         OrderByDirection = DefaultOrderByAttribute.OrderByDirections.Ascending,
                         FieldOrder = 1
                     });
@@ -354,12 +331,12 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 {
                     result.Add(new OrderByInformation()
                     {
-                        Properties = { PrimaryKey },
+                        Properties = [PrimaryKey],
                         OrderByDirection = DefaultOrderByAttribute.OrderByDirections.Ascending,
                         FieldOrder = 1
                     });
                 }
-                return result;
+                return _defaultOrderBy = result;
             }
         }
 

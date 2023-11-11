@@ -70,5 +70,22 @@ namespace IntelliTect.Coalesce
         {
             return query.WherePrimaryKeyIs(id, reflectionRepository).FirstOrDefault();
         }
+
+        public static IQueryable<T> OrderBy<T>(
+            this IQueryable<T> query,
+            IEnumerable<OrderByInformation> orderings)
+            where T : class
+        {
+            bool isFirst = true;
+
+            foreach (var ordering in orderings)
+            {
+                var expression = ordering!.LambdaExpression<T>();
+                query = (IQueryable<T>)ordering.OrderByMethod<T>(isFirst).Invoke(null, [query, expression])!;
+                isFirst = false;
+            }
+
+            return query;
+        }
     }
 }

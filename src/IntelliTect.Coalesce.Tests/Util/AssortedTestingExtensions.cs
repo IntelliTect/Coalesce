@@ -74,11 +74,11 @@ namespace IntelliTect.Coalesce.Tests.Util
             var modelsList = models.ToList();
             Assert.Equal(expectedOrder.Length, modelsList.Count);
 
-            Assert.All(
+            foreach (var (model, expected) in modelsList.Zip(expectedOrder))
+            {
                 // Model not null because we asserted the length matches
-                modelsList.Zip(expectedOrder, (model, expected) => propSelector(model!)!.Equals(expected)),
-                Assert.True
-            );
+                Assert.Equal(expected, propSelector(model!));
+            }
         }
 
         public static void AssertOrder<TModel>(this IEnumerable<TModel> models, params TModel[] expectedOrder)

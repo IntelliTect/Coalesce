@@ -186,6 +186,7 @@ namespace IntelliTect.Coalesce.Tests.Api.DataSources
             
             // The exact value "null" should match null values exactly.
             new object[] { true, "null", null },
+            new object[] { false, "null", new DateTime(2017, 08, 2, 12, 34, 57) },
             
             // Null or empty inputs always do nothing - these will always match.
             new object[] { true, "", new DateTime(2017, 08, 2, 12, 34, 57) },
@@ -223,6 +224,7 @@ namespace IntelliTect.Coalesce.Tests.Api.DataSources
             
             // The exact value "null" should match null values exactly.
             new object[] { true, "null", -8, null },
+            new object[] { false, "null", -8, new DateTimeOffset(638353181662275815, TimeSpan.Zero) },
             
             // Null or empty inputs always do nothing - these will always match.
             new object[] { true, "", -8, new DateTimeOffset(2017, 08, 2, 12, 34, 57, TimeSpan.FromHours(-8)) },

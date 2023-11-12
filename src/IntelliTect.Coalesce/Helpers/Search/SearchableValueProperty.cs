@@ -76,7 +76,7 @@ namespace IntelliTect.Coalesce.Helpers.Search
             }
 
             var propType = Property.Type;
-            var propertyAccessor = Expression.Property(propertyParent, Property.PropertyInfo);
+            var propertyAccessor = propertyParent.Prop(Property);
 
             if (propType.IsDate)
             {
@@ -139,13 +139,13 @@ namespace IntelliTect.Coalesce.Helpers.Search
                     if (propType.IsDateTimeOffset)
                     {
                         var offset = new DateTimeOffset(dt, context.TimeZone.GetUtcOffset(dt));
-                        min = Parameterize(offset);
-                        max = Parameterize(offset.Add(range.Value));
+                        min = offset.AsQueryParam(propType);
+                        max = offset.Add(range.Value).AsQueryParam(propType);
                     }
                     else
                     {
-                        min = Parameterize(dt);
-                        max = Parameterize(dt.Add(range.Value));
+                        min = dt.AsQueryParam(propType);
+                        max = dt.Add(range.Value).AsQueryParam(propType);
                     }
 
                     yield return (
@@ -173,7 +173,7 @@ namespace IntelliTect.Coalesce.Helpers.Search
                 {
                     yield return (Property, Expression.Equal(
                         propertyAccessor,
-                        Parameterize(enumValuePair.Value)
+                        enumValuePair.Value.AsQueryParam(propType)
                     ));
                 }
             }
@@ -188,29 +188,12 @@ namespace IntelliTect.Coalesce.Helpers.Search
                     var comparand = typeConverter.ConvertFromString(rawSearchTerm)!;
                     yield return (Property, Expression.Equal(
                         propertyAccessor,
-                        Parameterize(comparand)
+                        comparand.AsQueryParam(propType)
                     ));
                 }
             }
             else if (propType.IsString)
             {
-                // Theoretical support for EF.Functions.Like.
-                // Could be added with expressions now that we don't use Linq.Dynamic.
-                /*
-                 switch (Property.SearchMethod)
-                {
-                    case DataAnnotations.SearchAttribute.SearchMethods.BeginsWith:
-                        yield return (Property, $"({propertyAccessor} != null && EF.Functions.Like({propertyAccessor}, \"{term}%\")");
-                        break;
-                    case DataAnnotations.SearchAttribute.SearchMethods.Contains:
-                        yield return (Property, $"({propertyAccessor} != null && EF.Functions.Like({propertyAccessor}, \"%{term}%\")");
-                        break;
-                    default:
-                        throw new NotImplementedException();
-                }
-                 * */
-                //var term = rawSearchTerm.EscapeStringLiteralForLinqDynamic();
-
                 var expr = Expression.AndAlso(
                     // Can only search non-null strings:
                     Expression.NotEqual(
@@ -220,7 +203,7 @@ namespace IntelliTect.Coalesce.Helpers.Search
                     Property.SearchMethod switch
                     {
                         SearchMethods.EqualsNatural =>
-                            propertyAccessor.Call(StringEquals, Parameterize(rawSearchTerm)),
+                            propertyAccessor.Call(MethodInfos.StringEquals, rawSearchTerm.AsQueryParam()),
 
                         // All our "unnatural" search operations perform a ToLower().
                         // The value of this is questionable considering default collation
@@ -229,51 +212,19 @@ namespace IntelliTect.Coalesce.Helpers.Search
                         // Altering this behavior is considered in https://github.com/IntelliTect/Coalesce/issues/328
                         _ =>
                             propertyAccessor
-                                .Call(StringToLower)
+                                .Call(MethodInfos.StringToLower)
                                 .Call(Property.SearchMethod switch
                                 {
-                                    SearchMethods.Contains => StringContains,
-                                    SearchMethods.BeginsWith => StringStartsWith,
-                                    SearchMethods.Equals => StringEquals,
+                                    SearchMethods.Contains => MethodInfos.StringContains,
+                                    SearchMethods.BeginsWith => MethodInfos.StringStartsWith,
+                                    SearchMethods.Equals => MethodInfos.StringEquals,
                                     _ => throw new NotSupportedException()
-                                }, Parameterize(rawSearchTerm.ToLower())),
+                                }, rawSearchTerm.ToLower().AsQueryParam()),
                     }
                 );
 
                 yield return (Property, expr);
             }
-            else
-            {
-
-            }
         }
-
-        /// <summary>
-        /// Create an expression representing a constant value in a way that will
-        /// cause EF's to parameterize the value and cache the query.
-        /// <see href="https://github.com/dotnet/efcore/issues/8909#issuecomment-313768471" />
-        /// </summary>
-        private Expression Parameterize(object var)
-        {
-            var type = var.GetType();
-            var box = Activator.CreateInstance(typeof(StrongBox<>).MakeGenericType(type));
-            ((IStrongBox)box!).Value = var;
-
-            // This emulates what a variable capture from a closure looks like,
-            // which EF will translate into a SQL query parameter.
-            return Expression.Field(Expression.Constant(box), nameof(StrongBox<object>.Value));
-        }
-
-        private static readonly MethodInfo StringToLower
-            = typeof(string).GetRuntimeMethod(nameof(string.ToLower), [])!;
-
-        private static readonly MethodInfo StringEquals
-            = typeof(string).GetRuntimeMethod(nameof(string.Equals), [typeof(string)])!;
-
-        private static readonly MethodInfo StringContains
-            = typeof(string).GetRuntimeMethod(nameof(string.Contains), [typeof(string)])!;
-
-        private static readonly MethodInfo StringStartsWith
-            = typeof(string).GetRuntimeMethod(nameof(string.StartsWith), [typeof(string)])!;
     }
 }

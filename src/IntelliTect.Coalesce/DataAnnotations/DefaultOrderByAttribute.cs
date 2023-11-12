@@ -91,6 +91,7 @@ namespace IntelliTect.Coalesce.DataAnnotations
         /// <summary>
         /// Produces the property expression for the property access chain
         /// represented by <see cref="Properties"/> that will yield the value being sorted.
+        /// </summary>
         public Expression OrderExpression(Expression parent)
         {
             return Recurse(parent, Properties);

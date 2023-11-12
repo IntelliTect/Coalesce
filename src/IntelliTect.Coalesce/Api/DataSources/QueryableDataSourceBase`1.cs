@@ -4,7 +4,6 @@ using IntelliTect.Coalesce.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Dynamic.Core;
 using System.Linq.Expressions;
 using System.Security.Claims;
 
@@ -43,13 +42,6 @@ namespace IntelliTect.Coalesce
         /// A ClassViewModel representing the type T that is handled by these strategies.
         /// </summary>
         public ClassViewModel ClassViewModel { get; protected set; }
-
-        static QueryableDataSourceBase()
-        {
-            // Fixes EF Core query caching issues: https://dzone.com/articles/investigating-a-memory-leak-in-entity-framework-co
-            ParsingConfig.Default.UseParameterizedNamesInDynamicQuery = true;
-            ParsingConfig.DefaultEFCore21.UseParameterizedNamesInDynamicQuery = true;
-        }
 
         public QueryableDataSourceBase(CrudContext context)
         {
@@ -104,51 +96,54 @@ namespace IntelliTect.Coalesce
                 return query;
             }
 
-            if (prop.Type.IsDate)
+            TypeViewModel propType = prop.Type;
+            if (propType.IsDate)
             {
                 // Literal string "null" should match null values if the prop is nullable.
                 if (value.Trim().Equals("null", StringComparison.InvariantCultureIgnoreCase))
                 {
-                    if (prop.Type.IsReferenceOrNullableValue) return query.Where($"it.{prop.Name} = null");
-                    else return query.Where(_ => false);
+                    if (propType.IsReferenceOrNullableValue)
+                    {
+                        return query.WhereExpression(it =>
+                            Expression.Equal(it.Prop(prop), Expression.Constant(null))
+                        );
+                    }
+                    
+                    return query.Where(_ => false);
                 }
 
                 // See if they just passed in a date or a date and a time
                 if (DateTime.TryParse(value, out DateTime parsedValue))
                 {
                     // Correct offset.
-                    if (prop.Type.IsDateTimeOffset)
+                    Expression min, max;
+                    if (propType.IsDateTimeOffset)
                     {
                         DateTimeOffset dateTimeOffset = new DateTimeOffset(parsedValue, Context.TimeZone.GetUtcOffset(parsedValue));
-                        if (dateTimeOffset.TimeOfDay == TimeSpan.FromHours(0) &&
-                            !value.Contains(':'))
-                        {
-                            // Only a date
-                            var nextDate = dateTimeOffset.AddDays(1);
-                            return query.Where($"it.{prop.Name} >= @0 && it.{prop.Name} < @1",
-                                dateTimeOffset, nextDate);
-                        }
-                        else
-                        {
-                            // Date and Time
-                            return query.Where($"it.{prop.Name} = @0", dateTimeOffset);
-                        }
+
+                        min = dateTimeOffset.AsQueryParam(propType);
+                        max = dateTimeOffset.AddDays(1).AsQueryParam(propType);
                     }
                     else
                     {
-                        if (parsedValue.TimeOfDay == TimeSpan.FromHours(0) &&
-                            !value.Contains(':'))
-                        {
-                            // Only a date
-                            var nextDate = parsedValue.AddDays(1);
-                            return query.Where($"it.{prop.Name} >= @0 && it.{prop.Name} < @1",
-                                parsedValue, nextDate);
-                        }
-                        else
-                        {
-                            // Date and Time
-                            return query.Where($"it.{prop.Name} = @0", parsedValue);
-                        }
+                        min = parsedValue.AsQueryParam(propType);
+                        max = parsedValue.AddDays(1).AsQueryParam(propType);
+                    }
+
+                    if (parsedValue.TimeOfDay == TimeSpan.FromHours(0) &&
+                        !value.Contains(':'))
+                    {
+                        // Only a date. Find all values on that date.
+                        return query.WhereExpression(it =>
+                            Expression.AndAlso(
+                                Expression.GreaterThanOrEqual(it.Prop(prop), min),
+                                Expression.LessThan(it.Prop(prop), max)
+                            ));
+                    }
+                    else
+                    {
+                        // Date and Time
+                        return query.WhereExpression(it => Expression.Equal(it.Prop(prop), min));
                     }
                 }
                 else
@@ -157,15 +152,20 @@ namespace IntelliTect.Coalesce
                     return query.Where(_ => false);
                 }
             }
-            else if (prop.Type.IsString)
+            else if (propType.IsString)
             {
                 if (value.Contains("*"))
                 {
-                    return query.Where($"it.{prop.Name}.StartsWith(@0)", value.Replace("*", ""));
+                    return query.WhereExpression(it => it
+                        .Prop(prop)
+                        .Call(MethodInfos.StringStartsWith, value.Replace("*", "").AsQueryParam())
+                    );
                 }
                 else
                 {
-                    return query.Where($"it.{prop.Name} == @0", value);
+                    return query.WhereExpression(it => 
+                        Expression.Equal(it.Prop(prop), value.AsQueryParam())
+                    );
                 }
             }
             else
@@ -174,33 +174,33 @@ namespace IntelliTect.Coalesce
                     .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
                     .Select(item =>
                     {
-                        var type = prop.Type.NullableValueUnderlyingType.TypeInfo;
+                        var type = propType.NullableValueUnderlyingType.TypeInfo;
 
                         // The exact value "null" should match null values exactly.
                         if (item.Trim().Equals("null", StringComparison.InvariantCultureIgnoreCase))
                         {
-                            if (prop.Type.IsReferenceOrNullableValue) return (Success: true, Result: (object?)null);
+                            if (propType.IsReferenceOrNullableValue) return (Success: true, Result: (object?)null);
                             else return (Success: false, Result: null);
                         }
 
-                        if (prop.Type.IsEnum)
+                        if (propType.IsEnum)
                         {
                             var isLong = long.TryParse(item, out long longVal);
-                            var enumString = prop.Type.EnumValues.SingleOrDefault(ev =>
+                            var integralValue = propType.EnumValues.SingleOrDefault(ev =>
                                 isLong
+                                    // Match user input as the enum's numeric value
                                     ? longVal.Equals(Convert.ToInt64(ev.Value))
+                                    // Match user input as the enum's string value.
                                     : ev.Name.Equals(item.Trim(), StringComparison.InvariantCultureIgnoreCase)
-                                )?.Name;
+                                )?.Value;
 
-                            // If SingleOrDefault doesn't match anything,
-                            // `.Value` will be default(string), which is null.
-                            // This is the parse failure case.
-                            if (enumString == null)
+                            if (integralValue == null)
                             {
+                                // Parsing the user input to an enum value failed
                                 return (Success: false, Result: null);
                             }
 
-                            return (Success: true, Result: enumString);
+                            return (Success: true, Result: Enum.ToObject(type, integralValue));
                         }
 
                         try
@@ -214,10 +214,7 @@ namespace IntelliTect.Coalesce
                         catch { return (Success: false, Result: null); }
                     })
                     .Where(conversion => conversion.Success)
-                    .Select((conversion, i) => (
-                        Param: conversion.Result,
-                        Clause: $"it.{prop.Name} == @{i}"
-                    ))
+                    .Select(conversion => conversion.Result)
                     .ToList();
 
                 // Something was specified (since we didnt return early), but we couldn't parse it.
@@ -228,9 +225,8 @@ namespace IntelliTect.Coalesce
                     return query.Where(_ => false);
                 }
 
-                return query.Where(
-                    string.Join(" || ", values.Select(v => v.Clause)),
-                    values.Select(v => v.Param).ToArray()
+                return query.WhereExpression(it =>
+                    values.Select(v => Expression.Equal(it.Prop(prop), v.AsQueryParam(prop.Type))).OrAny()
                 );
             }
         }
@@ -256,6 +252,7 @@ namespace IntelliTect.Coalesce
                 return query;
             }
 
+            // The `x` in `.Where(x => x. ...)`
             var param = Expression.Parameter(typeof(T));
 
             // See if the user has specified a field with a colon and search on that first

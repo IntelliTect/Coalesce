@@ -6,7 +6,7 @@
 
 @{ ClassViewModel model = Model;}
 <div class="form-horizontal">
-    @foreach (var prop in model.ClientProperties.Where(f => !f.IsHidden(HiddenAttribute.Areas.Edit) && f.SecurityInfo.IsReadAllowed(User)).OrderBy(f => f.EditorOrder))
+    @foreach (var prop in model.ClientProperties.Where(f => !f.IsHidden(HiddenAttribute.Areas.Edit) && f.SecurityInfo.Read.IsAllowed(User)).OrderBy(f => f.EditorOrder))
     {
         if (ViewBag.SimpleEditorOnly == null || ViewBag.SimpleEditorOnly == false ||
                         (prop.IsManytoManyCollection == prop.Type.IsCollection))
@@ -14,7 +14,7 @@
             <div class="form-group">
                 <label class="col-md-4 control-label">@prop.DisplayName</label>
                 <div class="col-md-8">
-                    @Display.Property(prop, prop.SecurityInfo.IsEditAllowed(User))
+                    @Display.Property(prop, prop.SecurityInfo.Init.IsAllowed(User) || prop.SecurityInfo.Edit.IsAllowed(User))
                     @*@Editors.DisplayOrEdit(prop, true, false)*@
                 </div>
             </div>

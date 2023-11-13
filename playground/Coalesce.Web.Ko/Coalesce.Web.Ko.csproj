@@ -5,8 +5,6 @@
     <OutputType>Exe</OutputType>
     <PackageId>Coalesce.Web</PackageId>
     <UserSecretsId>aspnet-AspNetCoreTest-c1a899d5-70d6-46f0-ba4b-f4986ebe6948</UserSecretsId>
-    <TypeScriptToolsVersion>Latest</TypeScriptToolsVersion>
-    <IsPackable>false</IsPackable>
     <!-- Remove <MvcRazorCompileOnPublish>true</MvcRazorCompileOnPublish to publish to Azure -->
     <MvcRazorCompileOnPublish>true</MvcRazorCompileOnPublish>
     <AspNetCoreHostingModel>InProcess</AspNetCoreHostingModel>

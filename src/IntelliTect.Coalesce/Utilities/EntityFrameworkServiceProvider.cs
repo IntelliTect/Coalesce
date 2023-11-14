@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Linq;
 
-namespace IntelliTect.Coalesce.AuditLogging.Internal;
+namespace IntelliTect.Coalesce.Utilities;
 
 internal class EntityFrameworkServiceProvider(DbContext db) : IServiceProvider
 {

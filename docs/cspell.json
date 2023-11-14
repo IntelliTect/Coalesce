@@ -12,6 +12,7 @@
         "vite",
         "unplugin",
         "IIFE",
+        "Stampable",
 
         "POCOs",
         "dtos",

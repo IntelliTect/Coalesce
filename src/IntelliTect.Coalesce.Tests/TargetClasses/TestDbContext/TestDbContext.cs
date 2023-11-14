@@ -42,7 +42,7 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
             }).Options)
         { }
 
-        public AppDbContext(DbContextOptions<AppDbContext> options)
+        public AppDbContext(DbContextOptions options)
             : base(options)
         { }
 

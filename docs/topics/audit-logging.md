@@ -158,3 +158,60 @@ This merging only happens together if the existing audit record is recent; the d
 ## Caveats
 Only changes that are tracked by the `DbContext`'s `ChangeTracker` can be audited. Changes that are made with raw SQL, or changes that are made with bulk update functions like [`ExecuteUpdate` or `ExecuteDelete`](https://learn.microsoft.com/en-us/ef/core/performance/efficient-updating?tabs=ef7) will not be audited using this package.
 
+
+## Audit Stamping
+
+A lightweight alternative or addition to full audit logging is audit stamping - the process of setting fields like `CreatedBy` or `ModifiedOn` on each changed entity. This cannot record a history of exact changes, but can at least record the age of an entity and how recently it changed.
+
+Coalesce offers a simple mechanism to register an Entity Framework save interceptor to perform this kind of action (this **does NOT** require the `IntelliTect.Coalesce.AuditLogging` package). This mechanism operations on all saves that go through Entity Framework, eliminating the need to perform this manually in individual Behaviors, Services, and Custom Methods:
+
+``` c#
+services.AddDbContext<AppDbContext>(options => options
+    .UseSqlServer(connectionString) // (or other provider)
+    .UseStamping<TrackingBase>((entity, user) => entity.SetTracking(user))
+);
+```
+
+In the above example, `TrackingBase` is an interface or class that you would write as part of your application that defines the properties and mechanisms for performing the tracking operation. For example:
+
+``` c#
+public abstract class TrackingBase
+{
+    [Read, Display(Order = 1000)]
+    public ApplicationUser CreatedBy { get; set; }
+    
+    [Read, Display(Order = 1001)]
+    public string? CreatedById { get; set; }
+    
+    [Read, Display(Order = 1002)]
+    public DateTimeOffset CreatedOn { get; set; }
+
+
+    [Read, Display(Order = 1003)]
+    public ApplicationUser ModifiedBy { get; set; }
+    
+    [Read, Display(Order = 1004)]
+    public string? ModifiedById { get; set; }
+    
+    [Read, Display(Order = 1005)]
+    public DateTimeOffset ModifiedOn { get; set; }
+
+
+    public void SetTracking(ClaimsPrincipal? user) 
+        => SetTracking(user?.GetApplicationUserId());
+    
+    public void SetTracking(int? userId)
+    {
+        if (this.CreatedById == null)
+        {
+            this.CreatedById = userId;
+            this.CreatedOn = DateTimeOffset.Now;
+        }
+
+        this.ModifiedById = userId;
+        this.ModifiedOn = DateTimeOffset.Now;
+    }
+}
+```
+
+The overload `UseStamping<TStampable>` will provide the `ClaimsPrincipal` from the current HTTP request if present, defaulting to `null` if an operation occurs outside an HTTP request (e.g. a background job). The overloads `UseStamping<TStampable, TService>` and `UseStamping<TStampable, TService1, TService2>` can be used to inject services into the operation. If more than two services are needed, you should wrap those dependencies up into an additional services that takes them as dependencies.

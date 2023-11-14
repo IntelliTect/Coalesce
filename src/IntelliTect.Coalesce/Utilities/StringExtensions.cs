@@ -77,6 +77,10 @@ namespace IntelliTect.Coalesce.Utilities
             if (theString == null) return null;
             if (theString.Length < 2) return theString.ToUpper();
 
+            // Two-letter uppercase should be preserved as uppercase.
+            // https://learn.microsoft.com/en-us/visualstudio/code-quality/ca1709?view=vs-2022
+            if (theString.Length == 2 && char.IsUpper(theString[0]) && char.IsUpper(theString[1])) return theString;
+
             // Start with the first character.
             string result = theString.Substring(0, 1).ToUpper();
 

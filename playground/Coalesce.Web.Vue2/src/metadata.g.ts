@@ -191,6 +191,12 @@ export const AuditLog = domain.types.AuditLog = {
       type: "string",
       role: "value",
     },
+    description: {
+      name: "description",
+      displayName: "Description",
+      type: "string",
+      role: "value",
+    },
     state: {
       name: "state",
       displayName: "Change Type",

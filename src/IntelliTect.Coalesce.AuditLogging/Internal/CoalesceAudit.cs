@@ -61,7 +61,7 @@ internal class CoalesceAudit : Audit
         }
     }
 
-    private async ValueTask PopulateDescriptions(
+    private static async ValueTask PopulateDescriptions(
         DbContext db,
         AuditEntry entry,
         ReferenceEntry refNav,

@@ -10,6 +10,7 @@ export interface AuditLogViewModel extends $models.AuditLog {
   id: number | null;
   type: string | null;
   keyValue: string | null;
+  description: string | null;
   state: $models.AuditEntryState | null;
   date: Date | null;
   properties: AuditLogPropertyViewModel[] | null;

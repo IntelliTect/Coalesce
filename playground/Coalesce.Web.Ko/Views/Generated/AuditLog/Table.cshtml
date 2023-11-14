@@ -84,6 +84,10 @@
                                 Key Value
                                 <i class="fa" data-bind="css: orderBy() == 'KeyValue' ? 'fa-caret-up' : orderByDescending() == 'KeyValue' ? 'fa-caret-down' : 'fa-sort'" style="float: right; padding: .3em 0 0 0 "></i>
                             </th>
+                            <th class="sortable-header" data-bind="click: function(){orderByToggle('Description')}">
+                                Description
+                                <i class="fa" data-bind="css: orderBy() == 'Description' ? 'fa-caret-up' : orderByDescending() == 'Description' ? 'fa-caret-down' : 'fa-sort'" style="float: right; padding: .3em 0 0 0 "></i>
+                            </th>
                             <th class="sortable-header" data-bind="click: function(){orderByToggle('State')}">
                                 Change Type
                                 <i class="fa" data-bind="css: orderBy() == 'State' ? 'fa-caret-up' : orderByDescending() == 'State' ? 'fa-caret-down' : 'fa-sort'" style="float: right; padding: .3em 0 0 0 "></i>
@@ -117,6 +121,7 @@
                                 <td class="prop-user">@(Knockout.SelectForObject<Coalesce.Domain.AuditLog>(p => p.User))</td>
                                 <td class="prop-type">@(Knockout.InputFor<IntelliTect.Coalesce.AuditLogging.DefaultAuditLog>(p => p.Type))</td>
                                 <td class="prop-keyValue">@(Knockout.InputFor<IntelliTect.Coalesce.AuditLogging.DefaultAuditLog>(p => p.KeyValue))</td>
+                                <td class="prop-description">@(Knockout.InputFor<IntelliTect.Coalesce.AuditLogging.DefaultAuditLog>(p => p.Description))</td>
                                 <td class="prop-state">@(Knockout.SelectFor<IntelliTect.Coalesce.AuditLogging.DefaultAuditLog>(p => p.State))</td>
                                 <td class="prop-date">@(Knockout.InputFor<IntelliTect.Coalesce.AuditLogging.DefaultAuditLog>(p => p.Date))</td>
                                 <td class="prop-properties"><a data-bind='attr: {href: propertiesListUrl}, text: properties().length + " - Edit"' class='btn btn-default btn-sm'></a></td>
@@ -130,6 +135,7 @@
                                 <td class="prop-user">@(Knockout.DisplayFor<Coalesce.Domain.AuditLog>(p => p.User, true))</td>
                                 <td class="prop-type">@(Knockout.DisplayFor<IntelliTect.Coalesce.AuditLogging.DefaultAuditLog>(p => p.Type, true))</td>
                                 <td class="prop-keyValue">@(Knockout.DisplayFor<IntelliTect.Coalesce.AuditLogging.DefaultAuditLog>(p => p.KeyValue, true))</td>
+                                <td class="prop-description">@(Knockout.DisplayFor<IntelliTect.Coalesce.AuditLogging.DefaultAuditLog>(p => p.Description, true))</td>
                                 <td class="prop-state">@(Knockout.DisplayFor<IntelliTect.Coalesce.AuditLogging.DefaultAuditLog>(p => p.State, true))</td>
                                 <td class="prop-date">@(Knockout.DisplayFor<IntelliTect.Coalesce.AuditLogging.DefaultAuditLog>(p => p.Date, true))</td>
                                 <td class="prop-properties"><a data-bind='attr: {href: propertiesListUrl}, text: properties().length + " - Edit"' class='btn btn-default btn-sm'></a></td>

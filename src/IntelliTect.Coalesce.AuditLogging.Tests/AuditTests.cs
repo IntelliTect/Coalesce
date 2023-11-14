@@ -447,6 +447,7 @@ public class AuditTests
         Assert.Equal(expectedCustom2, entry.CustomField2);
         Assert.Equal(nameof(AppUser), entry.Type);
         Assert.Equal(user.Id, entry.KeyValue);
+        Assert.Equal(user.Name, entry.Description);
         Assert.Equal(AuditEntryState.EntityAdded, entry.State);
         Assert.Equal(DateTimeOffset.Now.UtcDateTime, entry.Date.UtcDateTime, TimeSpan.FromSeconds(10));
 

@@ -37,22 +37,19 @@ public class AuditLoggingBuilder<TAuditLog>
         return this;
     }
 
-    /// <summary>
-    /// <para>
-    /// Control how <see cref="AuditLogProperty.OldValueDescription"/> and <see cref="AuditLogProperty.NewValueDescription"/>
-    /// are populated by the framework.
-    /// </para>
-    /// <para>
-    /// The default behavior, <see cref="PropertyDescriptionMode.FkListText"/>, will result foreign key properties
-    /// being described by the list text (as defined by <see cref="ListTextAttribute"/>) of their referenced principal entity.
-    /// </para>
-    /// </summary>
+    /// <inheritdoc cref="AuditOptions.Descriptions"/> 
+    public AuditLoggingBuilder<TAuditLog> WithDescriptions(DescriptionMode mode)
+    {
+        options.Descriptions = mode;
+        return this;
+    }
+
+    /// <inheritdoc cref="AuditOptions.PropertyDescriptions"/> 
     public AuditLoggingBuilder<TAuditLog> WithPropertyDescriptions(PropertyDescriptionMode mode)
     {
         options.PropertyDescriptions = mode;
         return this;
     }
-    
     private static readonly MemoryCache _auditConfigTransforms = new(new MemoryCacheOptions { SizeLimit = 512 });
 
     /// <summary>

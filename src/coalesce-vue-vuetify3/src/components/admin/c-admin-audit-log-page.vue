@@ -151,16 +151,21 @@
                 </td>
 
                 <td class="c-audit-logs--column-entity">
-                  <pre><c-display :model="auditLog" for="type" title="Entity Type" /></pre>
-                  <pre><c-display 
-                    :model="auditLog"       
-                    for="keyValue" 
-                    style="    
+                  <pre title="Entity Type">{{ auditLog.type }}</pre>
+                  <pre
+                    style="
                       white-space: break-spaces;
                       display: inline-block;
-                      padding-right: 40px;
                       vertical-align: top;
-                    " title="Entity Key" /></pre>
+                    "
+                    title="Entity Key"
+                    >{{ auditLog.keyValue }}</pre
+                  >
+                  <div
+                    v-if="auditLog.description"
+                    v-text="auditLog.description"
+                    class="c-audit-logs--entry-desc text-grey"
+                  ></div>
                 </td>
 
                 <td
@@ -266,6 +271,7 @@ interface AuditLogBase {
   id: number | null;
   type: string | null;
   keyValue: string | null;
+  description: string | null;
   date: Date | null;
   state: number | null;
   properties: {
@@ -330,9 +336,15 @@ const otherProps = computed(() => {
     (p) =>
       ((p.hidden || 0) & HiddenAreas.List) != HiddenAreas.List &&
       p != userPropMeta.value &&
-      !["id", "type", "keyValue", "date", "state", "properties"].includes(
-        p.name
-      ) &&
+      ![
+        "id",
+        "type",
+        "keyValue",
+        "date",
+        "state",
+        "properties",
+        "description",
+      ].includes(p.name) &&
       (p.role !== "foreignKey" || !p.navigationProp)
   );
 });
@@ -423,6 +435,10 @@ defineExpose({
   }
 }
 
+.c-audit-logs--column-entity {
+  min-width: 180px;
+}
+
 .c-audit-logs--row-detail {
   @include small;
   font-family: monospace;
@@ -438,6 +454,10 @@ defineExpose({
       }
     }
   }
+}
+
+.c-audit-logs--entry-desc {
+  @include small;
 }
 
 .c-audit-logs--row-properties table {

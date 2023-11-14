@@ -46,6 +46,10 @@
                 <div class="col-md-8 prop-keyValue">@(Knockout.InputFor<IntelliTect.Coalesce.AuditLogging.DefaultAuditLog>(p => p.KeyValue))</div>
             </div>
             <div class="form-group">
+                <label class="col-md-4 control-label">Description</label>
+                <div class="col-md-8 prop-description">@(Knockout.InputFor<IntelliTect.Coalesce.AuditLogging.DefaultAuditLog>(p => p.Description))</div>
+            </div>
+            <div class="form-group">
                 <label class="col-md-4 control-label">Change Type</label>
                 <div class="col-md-8 prop-state">@(Knockout.SelectFor<IntelliTect.Coalesce.AuditLogging.DefaultAuditLog>(p => p.State))</div>
             </div>

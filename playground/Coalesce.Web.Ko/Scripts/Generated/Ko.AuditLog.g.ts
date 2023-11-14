@@ -30,6 +30,7 @@ module ViewModels {
         public id: KnockoutObservable<number | null> = ko.observable(null);
         public type: KnockoutObservable<string | null> = ko.observable(null);
         public keyValue: KnockoutObservable<string | null> = ko.observable(null);
+        public description: KnockoutObservable<string | null> = ko.observable(null);
         public state: KnockoutObservable<number | null> = ko.observable(null);
         
         /** Text value for enumeration State */
@@ -129,6 +130,7 @@ module ViewModels {
             this.userId(data.userId);
             this.type(data.type);
             this.keyValue(data.keyValue);
+            this.description(data.description);
             this.state(data.state);
             if (data.date == null) this.date(null);
             else if (this.date() == null || this.date()!.valueOf() != new Date(data.date).getTime()){
@@ -157,6 +159,7 @@ module ViewModels {
             }
             dto.type = this.type();
             dto.keyValue = this.keyValue();
+            dto.description = this.description();
             dto.state = this.state();
             if (!this.date()) dto.date = null;
             else dto.date = this.date()!.format('YYYY-MM-DDTHH:mm:ss.SSSZZ');
@@ -240,6 +243,7 @@ module ViewModels {
             self.user.subscribe(self.autoSave);
             self.type.subscribe(self.autoSave);
             self.keyValue.subscribe(self.autoSave);
+            self.description.subscribe(self.autoSave);
             self.state.subscribe(self.autoSave);
             self.date.subscribe(self.autoSave);
             self.clientIp.subscribe(self.autoSave);

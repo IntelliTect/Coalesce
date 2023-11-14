@@ -14,18 +14,18 @@ public class SqlServerAuditTests
         // Arrange
         using TestDbContext db = BuildDbContext();
 
-        var user = new AppUser { Name = "bob" };
+        var user = new AppUser { Name = "Bob", Title = "Intern" };
         db.Add(user);
         await db.SaveChangesAsync();
 
         // Act/Assert
-        user.Name = "bob2";
+        user.Title = "Manager";
         await db.SaveChangesAsync();
 
         Assert.Equal(2, db.AuditLogs.Count()); // Two records: EntityAdded, and EntityUpdated
 
         // Act/Assert
-        user.Name = "bob3";
+        user.Title = "CEO";
         await db.SaveChangesAsync();
 
         Assert.Equal(2, db.AuditLogs.Count()); // Two records: EntityAdded, and EntityUpdated
@@ -34,9 +34,9 @@ public class SqlServerAuditTests
         var entry = Assert.Single(db.AuditLogs.Include(c => c.Properties).Where(c => c.State == AuditEntryState.EntityModified));
 
         var propChange = Assert.Single(entry.Properties);
-        Assert.Equal(nameof(AppUser.Name), propChange.PropertyName);
-        Assert.Equal("bob", propChange.OldValue);
-        Assert.Equal("bob3", propChange.NewValue);
+        Assert.Equal(nameof(AppUser.Title), propChange.PropertyName);
+        Assert.Equal("Intern", propChange.OldValue);
+        Assert.Equal("CEO", propChange.NewValue);
     }
 
     [SkippableFact]
@@ -45,12 +45,12 @@ public class SqlServerAuditTests
         // Arrange
         using TestDbContext db = BuildDbContext();
 
-        var user = new AppUser { Name = "bob" };
+        var user = new AppUser { Name = "Bob", Title = "Intern" };
         db.Add(user);
         await db.SaveChangesAsync();
 
         // Act/Assert
-        user.Name = "bob2";
+        user.Title = "Manager";
         await db.SaveChangesAsync();
 
         Assert.Equal(2, db.AuditLogs.Count()); // Two records: EntityAdded, and EntityUpdated
@@ -60,7 +60,7 @@ public class SqlServerAuditTests
         db.SaveChanges();
 
         // Act/Assert
-        user.Name = "bob3";
+        user.Title = "CEO";
         await db.SaveChangesAsync();
         Assert.Equal(3, db.AuditLogs.Count()); // Now two records for EntityUpdated
     }

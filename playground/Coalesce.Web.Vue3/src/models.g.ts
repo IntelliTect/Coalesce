@@ -50,6 +50,7 @@ export interface AuditLog extends Model<typeof metadata.AuditLog> {
   id: number | null
   type: string | null
   keyValue: string | null
+  description: string | null
   state: AuditEntryState | null
   date: Date | null
   properties: AuditLogProperty[] | null

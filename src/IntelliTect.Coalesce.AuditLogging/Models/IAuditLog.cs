@@ -21,6 +21,12 @@ public interface IAuditLog
     string? KeyValue { get; set; }
 
     /// <summary>
+    /// A description of the changed entity that may be populated by the framework
+    /// according to the configuration of <see cref="AuditOptions.Descriptions"/>.
+    /// </summary>
+    string? Description { get; set; }
+
+    /// <summary>
     /// The date when the change occurred.
     /// </summary>
     DateTimeOffset Date { get; set; }

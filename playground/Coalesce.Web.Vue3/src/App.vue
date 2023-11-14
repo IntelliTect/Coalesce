@@ -18,17 +18,24 @@
 
       <v-btn variant="text" to="/">Home</v-btn>
       <v-btn variant="text" to="/test">Test</v-btn>
+      <v-btn variant="text" to="/audit-logs">Audit</v-btn>
       <v-btn variant="text" href="/coalesce-security">Security Overview</v-btn>
 
       <v-menu offset-y>
         <template #activator="{ props }">
           <v-btn variant="text" v-bind="props">
-            Dropdown Menu
+            Admin tables
             <i class="fa fa-caret-down pl-1"></i>
           </v-btn>
         </template>
         <v-list>
-          <v-list-item to="/" title="Home" />
+          <v-list-item
+            v-for="t in Object.values($metadata.types).filter(
+              (t) => t.type == 'model'
+            )"
+            :to="'/admin/' + t.name"
+            :title="t.displayName"
+          />
         </v-list>
       </v-menu>
       <!-- </div> -->
@@ -48,6 +55,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { useTheme } from "vuetify";
+import $metadata from "@/metadata.g";
 
 const theme = useTheme();
 const darkMode = computed({

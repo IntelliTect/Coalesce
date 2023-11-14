@@ -25,6 +25,9 @@ public abstract class DefaultAuditLog : IAuditLog
     public virtual string? KeyValue { get; set; }
 
     /// <inheritdoc/>
+    public virtual string? Description { get; set; }
+
+    /// <inheritdoc/>
     [Display(Name = "Change Type")]
     public virtual AuditEntryState State { get; set; }
 

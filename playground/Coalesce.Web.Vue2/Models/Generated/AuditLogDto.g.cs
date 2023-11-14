@@ -18,6 +18,7 @@ namespace Coalesce.Web.Vue2.Models
         private long? _Id;
         private string _Type;
         private string _KeyValue;
+        private string _Description;
         private IntelliTect.Coalesce.AuditLogging.AuditEntryState? _State;
         private System.DateTimeOffset? _Date;
         private System.Collections.Generic.ICollection<Coalesce.Web.Vue2.Models.AuditLogPropertyDtoGen> _Properties;
@@ -54,6 +55,11 @@ namespace Coalesce.Web.Vue2.Models
         {
             get => _KeyValue;
             set { _KeyValue = value; Changed(nameof(KeyValue)); }
+        }
+        public string Description
+        {
+            get => _Description;
+            set { _Description = value; Changed(nameof(Description)); }
         }
         public IntelliTect.Coalesce.AuditLogging.AuditEntryState? State
         {
@@ -99,6 +105,7 @@ namespace Coalesce.Web.Vue2.Models
             this.UserId = obj.UserId;
             this.Type = obj.Type;
             this.KeyValue = obj.KeyValue;
+            this.Description = obj.Description;
             this.State = obj.State;
             this.Date = obj.Date;
             this.ClientIp = obj.ClientIp;
@@ -135,6 +142,7 @@ namespace Coalesce.Web.Vue2.Models
             if (ShouldMapTo(nameof(UserId))) entity.UserId = UserId;
             if (ShouldMapTo(nameof(Type))) entity.Type = Type;
             if (ShouldMapTo(nameof(KeyValue))) entity.KeyValue = KeyValue;
+            if (ShouldMapTo(nameof(Description))) entity.Description = Description;
             if (ShouldMapTo(nameof(State))) entity.State = (State ?? entity.State);
             if (ShouldMapTo(nameof(Date))) entity.Date = (Date ?? entity.Date);
             if (ShouldMapTo(nameof(ClientIp))) entity.ClientIp = ClientIp;

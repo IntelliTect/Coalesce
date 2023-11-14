@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using IntelliTect.Coalesce.TypeDefinition;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.Extensions.Caching.Memory;
@@ -148,7 +149,8 @@ internal sealed class AuditInterceptor<TAuditLog> : SaveChangesInterceptor
             var propsByName = props.ToLookup(p => p.Name);
 
             var customProps = props.ExceptBy(basePropNames, p => p.PropertyInfo?.Name);
-            var cursorProps = customProps.Concat(props.Where(p => p.Name is nameof(IAuditLog.State) or nameof(IAuditLog.Date) or nameof(IAuditLog.Type) or nameof(IAuditLog.KeyValue)));
+            var mergeMatchProps = customProps.Concat(props.Where(p => p.Name is nameof(IAuditLog.State) or nameof(IAuditLog.Description)));
+            var cursorProps = mergeMatchProps.Concat(props.Where(p => p.Name is nameof(IAuditLog.Date) or nameof(IAuditLog.Type) or nameof(IAuditLog.KeyValue)));
 
             string GetColName(string propName, IEntityType table) => GetPropColName(table
                 .GetDeclaredProperties()
@@ -213,8 +215,7 @@ internal sealed class AuditInterceptor<TAuditLog> : SaveChangesInterceptor
                         @Type IS NOT NULL
                         AND @KeyValue IS NOT NULL
                         -- These fields must match exactly:
-                        AND {stateCol} = @State
-                        {string.Join("\n           ", customProps.Select(p => $"AND ({GetPropColName(p, entityType)} = @{p.Name} OR ISNULL({GetPropColName(p, entityType)}, @{p.Name}) IS NULL)"))}
+                        {string.Join("\n           ", mergeMatchProps.Select(p => $"AND ({GetPropColName(p, entityType)} = @{p.Name} OR ISNULL({GetPropColName(p, entityType)}, @{p.Name}) IS NULL)"))}
                         -- Date of the most recent record must be within X amount of time, 
                         AND DATEDIFF(second, {dateCol}, @Date) < @MergeWindowSeconds
                         -- and the incoming record must have a date equal or after the existing record
@@ -319,8 +320,9 @@ internal sealed class AuditInterceptor<TAuditLog> : SaveChangesInterceptor
             .Where(e => e.Properties.Count > 1 && e.Entity is not IAuditLog && e.Entity is not AuditLogProperty)
             .Select(e =>
             {
+                var entityClrType = e.Entity.GetType();
                 var keyProperties = db.Model
-                    .FindEntityType(e.Entity.GetType())?
+                    .FindEntityType(entityClrType)?
                     .FindPrimaryKey()?
                     .Properties;
 
@@ -329,7 +331,25 @@ internal sealed class AuditInterceptor<TAuditLog> : SaveChangesInterceptor
                 auditLog.Date = date;
                 auditLog.State = (IntelliTect.Coalesce.AuditLogging.AuditEntryState)e.State;
                 auditLog.Type = e.EntityTypeName;
-                auditLog.KeyValue = keyProperties is null ? null : string.Join(";", keyProperties.Select(p => e.Entry.CurrentValues[p]));
+                auditLog.KeyValue = keyProperties is null 
+                    ? null 
+                    : string.Join(";", keyProperties.Select(p => e.Entry.CurrentValues[p]));
+
+                if (
+                    _options.Descriptions.HasFlag(DescriptionMode.ListText) &&
+                    ReflectionRepository.Global.GetOrAddType(entityClrType).ClassViewModel is { } cvm &&
+                    // If the list text for the target is the PK,
+                    // the description won't be useful as it'll just duplicate the value prop.
+                    cvm.ListTextProperty is { IsPrimaryKey: false, PropertyInfo: var listTextProp }
+                )
+                {
+                    try
+                    {
+                        auditLog.Description = listTextProp.GetValue(e.Entity)?.ToString();
+                    }
+                    catch { }
+                }
+
                 auditLog.Properties = e.Properties
                     .Select(property =>
                     {
@@ -342,7 +362,9 @@ internal sealed class AuditInterceptor<TAuditLog> : SaveChangesInterceptor
                             NewValueDescription = audit.NewValueDescriptions?.GetValueOrDefault((e, property.PropertyName))
                         };
                     })
-                    .Where(property => property.OldValue != property.NewValue || property.OldValueDescription != property.NewValueDescription)
+                    .Where(property => 
+                        property.OldValue != property.NewValue || 
+                        property.OldValueDescription != property.NewValueDescription)
                     .ToList();
 
                 operationContext?.Populate(auditLog, e.Entry);

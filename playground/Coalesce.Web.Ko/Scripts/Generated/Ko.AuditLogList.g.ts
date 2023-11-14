@@ -21,6 +21,7 @@ module ListViewModels {
             id?: string;
             type?: string;
             keyValue?: string;
+            description?: string;
             state?: string;
             date?: string;
             clientIp?: string;

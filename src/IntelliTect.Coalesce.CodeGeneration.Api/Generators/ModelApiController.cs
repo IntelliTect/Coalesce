@@ -113,6 +113,26 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                 b.Indented($"=> SaveImplementation(dto, parameters, dataSource, behaviors);");
             }
 
+            if (Model.DbContext != null && securityInfo.IsReadAllowed())
+            {
+                // Counterintuitively, bulk saves are governed by read permissions. This is for a few reasons:
+                // - BulkSaveImplementation checks the save/delete permissions for each entity being acted upon at runtime.
+                // - At the end of a bulk save, a GetImplementation is performed for this controller's type.
+                // - A particular usage of a bulk save might never be saving the root entity;
+                //   it may be the case that the root entity is immutable and only its children are being mutated.
+
+                // ENDPOINT: /bulkSave
+                b.Line();
+                b.Line("[HttpPost(\"bulkSave\")]");
+                b.Line($"{securityInfo.Read.MvcAnnotation()}");
+                b.Line($"{Model.ApiActionAccessModifier} virtual Task<ItemResult<{Model.DtoName}>> BulkSave(");
+                b.Indented($"[FromBody] BulkSaveRequest dto,");
+                b.Indented($"[FromQuery] DataSourceParameters parameters,");
+                b.Indented($"[FromServices] IDataSourceFactory dataSourceFactory,");
+                b.Indented($"[FromServices] IBehaviorsFactory behaviorsFactory)");
+                b.Indented($"=> BulkSaveImplementation(dto, parameters, dataSourceFactory, behaviorsFactory);");
+            }
+
             if (securityInfo.IsDeleteAllowed())
             {
                 // ENDPOINT: /delete/{id}

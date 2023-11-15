@@ -2,9 +2,6 @@
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
-    <TypeScriptCompileBlocked>true</TypeScriptCompileBlocked>
-    <TypeScriptToolsVersion>Latest</TypeScriptToolsVersion>
-    <IsPackable>false</IsPackable>
     <AspNetCoreHostingModel>InProcess</AspNetCoreHostingModel>
     <Nullable>enable</Nullable>
   </PropertyGroup>

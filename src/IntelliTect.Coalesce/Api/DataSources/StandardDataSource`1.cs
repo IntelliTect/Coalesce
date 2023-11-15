@@ -1,14 +1,13 @@
-﻿using IntelliTect.Coalesce.Models;
+﻿using IntelliTect.Coalesce.Api;
+using IntelliTect.Coalesce.Mapping;
+using IntelliTect.Coalesce.Models;
+using IntelliTect.Coalesce.TypeDefinition;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Dynamic.Core;
-using System.Threading.Tasks;
-using IntelliTect.Coalesce.TypeDefinition;
-using IntelliTect.Coalesce.Mapping;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading;
-using IntelliTect.Coalesce.Api;
+using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce
 {
@@ -185,7 +184,7 @@ namespace IntelliTect.Coalesce
 
             await TransformResultsAsync(new ReadOnlyCollection<T>(result.List), parameters);
 
-            var mappingContext = new MappingContext(Context.User, parameters.Includes);
+            var mappingContext = new MappingContext(Context, parameters.Includes);
             IList<TDto> mappedResult = result.List.Select(obj => obj.MapToDto<T, TDto>(mappingContext, tree)!).ToList();
             mappedResult = TrimListFields(mappedResult, parameters);
 
@@ -254,7 +253,7 @@ namespace IntelliTect.Coalesce
 
             await TransformResultsAsync(Array.AsReadOnly(new[] { result.Object }), parameters);
 
-            var mappingContext = new MappingContext(Context.User, parameters.Includes);
+            var mappingContext = new MappingContext(Context, parameters.Includes);
             var mappedResult = result.Object.MapToDto<T, TDto>(mappingContext, tree);
 
             return new ItemResult<TDto>(result, mappedResult);

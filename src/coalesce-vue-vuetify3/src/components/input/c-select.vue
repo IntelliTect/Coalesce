@@ -36,11 +36,14 @@
           :item="internalModelValue"
           :search="search"
         >
-          <slot name="item" :item="internalModelValue" :search="search">
-            <span style="overflow: hidden">
-              <c-display :model="internalModelValue" />
-            </span>
-          </slot>
+          <span class="v-select__selection">
+            <slot name="item" :item="internalModelValue" :search="search">
+              <c-display
+                class="v-select__selection-text"
+                :model="internalModelValue"
+              />
+            </slot>
+          </span>
         </slot>
 
         <input
@@ -58,9 +61,9 @@
     <v-menu
       :modelValue="menuOpen"
       @update:modelValue="
-        menuOpen
-          ? toggleMenu()
-          : !isDisabled.value && !isReadonly.value && toggleMenu()
+        !$event
+          ? closeMenu()
+          : !isDisabled.value && !isReadonly.value && openMenu()
       "
       activator="parent"
       :close-on-content-click="false"
@@ -94,6 +97,7 @@
           "
           clearable
           placeholder="Search"
+          variant="filled"
         >
         </v-text-field>
 
@@ -102,7 +106,8 @@
           v-if="!createItemLabel && !listItems.length"
           class="grey--text px-4 my-3 font-italic"
         >
-          No results found.
+          <template v-if="listCaller.isLoading">Loading...</template>
+          <template>No results found.</template>
         </div>
 
         <!-- This height shows 7 full items, with a final item partially out 
@@ -221,6 +226,9 @@ import {
   ViewModel,
   modelDisplay,
   Indexable,
+  ModelValue,
+  AnyArgCaller,
+  ResponseCachingConfiguration,
 } from "coalesce-vue";
 
 export default defineComponent({
@@ -244,7 +252,7 @@ export default defineComponent({
   },
 
   props: {
-    ...makeMetadataProps(),
+    ...makeMetadataProps<Model | AnyArgCaller>(),
     clearable: { required: false, default: undefined, type: Boolean },
     modelValue: { required: false },
     keyValue: { required: false },
@@ -255,6 +263,17 @@ export default defineComponent({
     openOnClear: { required: false, type: Boolean, default: true },
     reloadOnOpen: { required: false, type: Boolean, default: false },
     params: { required: false, type: Object as PropType<ListParameters> },
+
+    /** Response caching configuration for the `/get` and `/list` API calls made by the component.
+     * See https://intellitect.github.io/Coalesce/stacks/vue/layers/api-clients.html#response-caching. */
+    cache: {
+      required: false,
+      type: [Object, Boolean] as PropType<
+        ResponseCachingConfiguration | boolean
+      >,
+      default: false as any,
+    },
+
     create: {
       required: false,
       type: Object as PropType<{
@@ -272,6 +291,8 @@ export default defineComponent({
       error: [] as string[],
       focused: false,
       menuOpen: false,
+      menuOpenForced: false,
+      searchChanged: new Date(),
       mainValue: "",
       createItemLoading: false,
       createItemError: "" as string | null,
@@ -310,7 +331,7 @@ export default defineComponent({
       return !!(this.modelKeyProp && !this.modelKeyProp.rules?.required);
     },
 
-    /** The property on `this.model` which holds the foreign key being selected for, or `null` if there is no such property. */
+    /** The property on `this.valueOwner` which holds the foreign key being selected for, or `null` if there is no such property. */
     modelKeyProp(): ForeignKeyProperty | null {
       const meta = this.valueMeta!;
       if (meta.role == "foreignKey" && "principalType" in meta) {
@@ -322,13 +343,16 @@ export default defineComponent({
       return null;
     },
 
-    /** The property on `this.model` which holds the reference navigation being selected for, or `null` if there is no such property. */
-    modelNavProp(): ModelReferenceNavigationProperty | null {
+    /** The property on `this.valueOwner` which holds the model object being selected for, or `null` if there is no such property. */
+    modelObjectProp(): ModelReferenceNavigationProperty | ModelValue | null {
       const meta = this.valueMeta!;
       if (meta.role == "foreignKey" && "navigationProp" in meta) {
         return meta.navigationProp || null;
       }
       if (meta.role == "referenceNavigation" && "foreignKey" in meta) {
+        return meta;
+      }
+      if (meta.role == "value" && meta.type == "model") {
         return meta;
       }
       return null;
@@ -380,11 +404,11 @@ export default defineComponent({
         return this.objectValue;
       }
       if (
-        this.model &&
-        this.modelNavProp &&
-        (this.model as any)[this.modelNavProp.name]
+        this.valueOwner &&
+        this.modelObjectProp &&
+        this.valueOwner[this.modelObjectProp.name]
       ) {
-        return (this.model as any)[this.modelNavProp.name];
+        return this.valueOwner[this.modelObjectProp.name];
       }
 
       if (this.modelValue && this.primaryBindKind == "model") {
@@ -450,8 +474,8 @@ export default defineComponent({
       let value: any;
       if (this.keyValue) {
         value = this.keyValue;
-      } else if (this.model && this.modelKeyProp) {
-        value = (this.model as any)[this.modelKeyProp.name];
+      } else if (this.valueOwner && this.modelKeyProp) {
+        value = this.valueOwner[this.modelKeyProp.name];
       } else if (this.modelValue && this.primaryBindKind == "key") {
         value = this.modelValue;
       } else {
@@ -472,7 +496,7 @@ export default defineComponent({
       // If we were explicitly given rules, use those.
       if (this.inputBindAttrs.rules) return this.inputBindAttrs.rules;
 
-      if (this.model instanceof ViewModel && this.modelKeyProp) {
+      if (this.valueOwner instanceof ViewModel && this.modelKeyProp) {
         // We're binding to a ViewModel instance.
         // Grab the rules from the instance, because it may contain custom rules
         // and/or other rule changes that have been customized in userland beyond what the metadata provides.
@@ -482,7 +506,7 @@ export default defineComponent({
         // and is the prop that we generate things like `required` onto.
         // We need to translate the rule functions to pass the selected FK instead
         // of the selected model object.
-        return this.model
+        return this.valueOwner
           .$getRules(this.modelKeyProp)
           ?.map((rule) => () => rule(this.internalKeyValue));
       }
@@ -518,6 +542,7 @@ export default defineComponent({
 
   watch: {
     search(newVal: any, oldVal: any) {
+      this.searchChanged = new Date();
       if (newVal != oldVal) {
         this.listCaller();
       }
@@ -529,10 +554,12 @@ export default defineComponent({
       // - We don't have to disable/readonly the main input
       if (val) {
         this.$nextTick(() => (this.mainValue = ""));
+        this.searchChanged = new Date();
         if (!this.menuOpen) {
           this.search = val;
           this.openMenu(false);
         } else {
+          this.search ||= ""; // Ensure we aren't concatenating `val` onto `null`. Issue #315.
           this.search += val;
         }
       }
@@ -557,12 +584,12 @@ export default defineComponent({
         : null;
       this.keyFetchedModel = value;
 
-      if (this.model) {
+      if (this.valueOwner) {
         if (this.modelKeyProp) {
-          (this.model as any)[this.modelKeyProp.name] = key;
+          this.valueOwner[this.modelKeyProp.name] = key;
         }
-        if (this.modelNavProp) {
-          (this.model as any)[this.modelNavProp.name] = value;
+        if (this.modelObjectProp) {
+          this.valueOwner[this.modelObjectProp.name] = value;
         }
       }
 
@@ -582,7 +609,7 @@ export default defineComponent({
         if (!value) {
           this.openMenu();
         } else {
-          this.closeMenu();
+          this.closeMenu(true);
         }
       }
     },
@@ -602,7 +629,7 @@ export default defineComponent({
         case "escape":
           event.stopPropagation();
           event.preventDefault();
-          this.closeMenu();
+          this.closeMenu(true);
           return;
         case " ":
         case "enter":
@@ -643,7 +670,14 @@ export default defineComponent({
       }
     },
 
-    async openMenu(select = true) {
+    async openMenu(select?: boolean) {
+      if (select == undefined) {
+        // Select the whole search input if it hasn't changed recently.
+        // If it /has/ changed recently, it means the user is actively typing and probably
+        // doesn't want to use what they're typing.
+        select = new Date().valueOf() - this.searchChanged.valueOf() > 1000;
+      }
+
       if (this.menuOpen) return;
       this.menuOpen = true;
 
@@ -658,6 +692,12 @@ export default defineComponent({
       // before we try to focus the search input, because otherwise it wont work.
       // https://stackoverflow.com/questions/19669786/check-if-element-is-visible-in-dom
       const start = performance.now();
+
+      // Force the menu open while we wait, because otherwise if a user clicks and then rapidly types a character,
+      // the typed character will process before the click, resulting in the click toggling the menu closed
+      // after the typed character opened the menu.
+      this.menuOpenForced = true;
+
       while (
         // cap waiting at 100ms
         start + 100 > performance.now() &&
@@ -667,13 +707,18 @@ export default defineComponent({
         await new Promise((resolve) => setTimeout(resolve, 1));
       }
 
+      this.menuOpenForced = false;
+
       if (select) {
         input.select();
       }
     },
 
-    closeMenu() {
+    closeMenu(force = false) {
       if (!this.menuOpen) return;
+      if (this.menuOpenForced && !force) return;
+
+      this.menuOpenForced = false;
       this.menuOpen = false;
       //@ts-ignore
       this.$el.querySelector("input").focus();
@@ -724,6 +769,19 @@ export default defineComponent({
     this.$watch(
       () => JSON.stringify(mapParamsToDto(this.params)),
       () => this.listCaller()
+    );
+
+    this.$watch(
+      () => this.cache,
+      () => {
+        this.getCaller.useResponseCaching(
+          this.cache === true ? {} : this.cache
+        );
+        this.listCaller.useResponseCaching(
+          this.cache === true ? {} : this.cache
+        );
+      },
+      { immediate: true }
     );
 
     this.$watch(

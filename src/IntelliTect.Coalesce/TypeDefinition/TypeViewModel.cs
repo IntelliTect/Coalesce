@@ -109,7 +109,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             IsByteArray ? TypeDiscriminator.Binary :
             IsNumber ? TypeDiscriminator.Number :
             IsBool ? TypeDiscriminator.Boolean :
-            IsDate ? TypeDiscriminator.Date :
+            IsDateOrTime ? TypeDiscriminator.Date :
             IsEnum ? TypeDiscriminator.Enum :
             IsVoid ? TypeDiscriminator.Void :
             IsFile ? TypeDiscriminator.File :
@@ -133,6 +133,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
         }
 
+        [Obsolete("Deprecated")]
         public string CsConvertFromString
         {
             get
@@ -208,9 +209,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
         }
 
-        public virtual bool IsInternalUse => HasAttribute<InternalUseAttribute>() || (PureType != this && PureType.IsInternalUse);
+        public virtual bool IsInternalUse => this.HasAttribute<InternalUseAttribute>() || (PureType != this && PureType.IsInternalUse);
 
-        protected bool ShouldCreateClassViewModel => !IsPrimitive && IsPOCO;
+        protected virtual bool ShouldCreateClassViewModel => !IsPrimitive && IsPOCO;
 
         public bool HasClassViewModel => ClassViewModel != null;
 
@@ -227,7 +228,12 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// True if this is a DateTime or DateTimeOffset.
         /// </summary>
-        public bool IsDate => IsDateTime || IsDateTimeOffset;
+        public bool IsDate => IsDateTime || IsDateTimeOffset || NullableValueUnderlyingType.IsA<DateOnly>();
+
+        /// <summary>
+        /// True if this type holds temporal data.
+        /// </summary>
+        public bool IsDateOrTime => IsDate || NullableValueUnderlyingType.IsA<TimeOnly>();
 
         /// <summary>
         /// True if the property is a string.
@@ -245,6 +251,12 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// True if the property is a DateTimeOffset or Nullable DateTimeOffset
         /// </summary>
         public bool IsDateTimeOffset => NullableValueUnderlyingType.IsA<DateTimeOffset>();
+
+        public DateTypeAttribute.DateTypes? DateType =>
+            NullableValueUnderlyingType.IsA<DateOnly>() ? DateTypeAttribute.DateTypes.DateOnly :
+            NullableValueUnderlyingType.IsA<TimeOnly>() ? DateTypeAttribute.DateTypes.TimeOnly :
+            IsDate ? DateTypeAttribute.DateTypes.DateTime :
+            null;
 
         /// <summary>
         /// Returns true if class is a Byte[]
@@ -342,10 +354,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public string TsDeclaration => $"{Name}: {TsType}";
 
         public string TsDeclarationPlain(string parameterName) => $"{parameterName}: {TsTypePlain}";
-        
-        public abstract object? GetAttributeValue<TAttribute>(string valueName) where TAttribute : Attribute;
-
-        public abstract bool HasAttribute<TAttribute>() where TAttribute : Attribute;
 
         public string DtoFullyQualifiedName => NullableTypeForDto(null, true);
 
@@ -410,12 +418,17 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             if (!(obj is TypeViewModel that)) return false;
 
-            return this.VerboseFullyQualifiedName == that.VerboseFullyQualifiedName;
+            return 
+                this.VerboseFullyQualifiedName == that.VerboseFullyQualifiedName &&
+                // Ensure we don't conflate reflection and symbol types together:
+                this.GetType() == that.GetType();
         }
 
         public override int GetHashCode() => VerboseFullyQualifiedName.GetHashCode();
 
         public override string ToString() => FullyQualifiedName;
+
+        public abstract IEnumerable<AttributeViewModel<TAttribute>> GetAttributes<TAttribute>() where TAttribute : Attribute;
 
         public static bool operator ==(TypeViewModel? lhs, TypeViewModel? rhs)
         {

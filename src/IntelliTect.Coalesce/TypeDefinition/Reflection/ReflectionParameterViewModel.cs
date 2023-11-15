@@ -23,10 +23,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             Info = info;
 
-#if NET6_0_OR_GREATER
             var nullable = new NullabilityInfoContext().Create(Info);
             Nullability = nullable.WriteState;
-#endif
         }
 
         public override string Name => Info.Name ?? throw new Exception("Parameter has no name???");
@@ -35,15 +33,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         protected override object? RawDefaultValue => Info.RawDefaultValue;
 
-        public override object? GetAttributeValue<TAttribute>(string valueName)
-        {
-            return Info.GetAttributeValue<TAttribute>(valueName);
-        }
-
-        public override bool HasAttribute<TAttribute>()
-        {
-            return Info.HasAttribute<TAttribute>();
-        }
+        public override IEnumerable<AttributeViewModel<TAttribute>> GetAttributes<TAttribute>()
+            => Info.GetAttributes<TAttribute>();
 
         private IReadOnlyList<ValidationAttribute>? _validationAttributes;
         internal IReadOnlyList<ValidationAttribute> GetValidationAttributes()

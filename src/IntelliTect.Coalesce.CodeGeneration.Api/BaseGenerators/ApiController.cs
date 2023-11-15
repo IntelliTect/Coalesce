@@ -33,6 +33,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
                 "IntelliTect.Coalesce.Api",
                 "IntelliTect.Coalesce.Api.Controllers",
                 "IntelliTect.Coalesce.Api.DataSources",
+                "IntelliTect.Coalesce.Api.Behaviors",
                 "IntelliTect.Coalesce.Mapping",
                 "IntelliTect.Coalesce.Mapping.IncludeTrees",
                 "IntelliTect.Coalesce.Models",
@@ -212,11 +213,14 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
                 }
                 b.Line();
 
-                if (method.GetAttributeValue<ExecuteAttribute, bool>(e => e.ValidateAttributes) == true)
+                var validateAttributes = method.GetAttributeValue<ExecuteAttribute, bool>(
+                    e => e.ValidateAttributes, 
+                    e => e.ValidateAttributesHasValue);
+                if (validateAttributes == true)
                 {
                     WriteMethodValidation(b, method);
                 }
-                else if (method.GetAttributeValue<ExecuteAttribute, bool>(e => e.ValidateAttributes) == null)
+                else if (validateAttributes == null)
                 {
                     using (b.Block("if (Context.Options.ValidateAttributesForMethods)"))
                     {
@@ -235,7 +239,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
                 || method.ResultType.PureType.HasClassViewModel
             )
             {
-                b.Line($"var {MappingContextVar} = new {nameof(MappingContext)}(User);");
+                b.Line($"var {MappingContextVar} = new {nameof(MappingContext)}(Context);");
             }
 
             // Don't try to store the result in the variable if the method returns void.

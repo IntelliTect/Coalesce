@@ -1,16 +1,10 @@
-﻿using IntelliTect.Coalesce.Models;
-using Microsoft.EntityFrameworkCore;
+﻿using IntelliTect.Coalesce.DataAnnotations;
+using IntelliTect.Coalesce.TypeDefinition;
+using IntelliTect.Coalesce.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Dynamic.Core;
-using System.Threading.Tasks;
-using IntelliTect.Coalesce.TypeDefinition;
-using IntelliTect.Coalesce.Mapping;
-using IntelliTect.Coalesce.Api;
-using System.Collections.ObjectModel;
-using System.Threading;
-using Microsoft.EntityFrameworkCore.Query.Internal;
+using System.Linq.Expressions;
 using System.Security.Claims;
 
 namespace IntelliTect.Coalesce
@@ -42,19 +36,12 @@ namespace IntelliTect.Coalesce
         /// <summary>
         /// The user making the request.
         /// </summary>
-        public ClaimsPrincipal? User => Context.User;
+        public ClaimsPrincipal User => Context.User;
 
         /// <summary>
         /// A ClassViewModel representing the type T that is handled by these strategies.
         /// </summary>
         public ClassViewModel ClassViewModel { get; protected set; }
-
-        static QueryableDataSourceBase()
-        {
-            // Fixes EF Core query caching issues: https://dzone.com/articles/investigating-a-memory-leak-in-entity-framework-co
-            ParsingConfig.Default.UseParameterizedNamesInDynamicQuery = true;
-            ParsingConfig.DefaultEFCore21.UseParameterizedNamesInDynamicQuery = true;
-        }
 
         public QueryableDataSourceBase(CrudContext context)
         {
@@ -81,7 +68,7 @@ namespace IntelliTect.Coalesce
                 var prop = ClassViewModel.PropertyByName(clause.Key);
                 if (prop != null
                     && prop.IsUrlFilterParameter
-                    && prop.SecurityInfo.IsReadAllowed(User))
+                    && prop.SecurityInfo.IsFilterAllowed(Context))
                 {
                     query = ApplyListPropertyFilter(query, prop, clause.Value);
                 }
@@ -109,51 +96,54 @@ namespace IntelliTect.Coalesce
                 return query;
             }
 
-            if (prop.Type.IsDate)
+            TypeViewModel propType = prop.Type;
+            if (propType.IsDate)
             {
                 // Literal string "null" should match null values if the prop is nullable.
                 if (value.Trim().Equals("null", StringComparison.InvariantCultureIgnoreCase))
                 {
-                    if (prop.Type.IsReferenceOrNullableValue) return query.Where($"it.{prop.Name} = null");
-                    else return query.Where(_ => false);
+                    if (propType.IsReferenceOrNullableValue)
+                    {
+                        return query.WhereExpression(it =>
+                            Expression.Equal(it.Prop(prop), Expression.Constant(null))
+                        );
+                    }
+                    
+                    return query.Where(_ => false);
                 }
 
                 // See if they just passed in a date or a date and a time
                 if (DateTime.TryParse(value, out DateTime parsedValue))
                 {
                     // Correct offset.
-                    if (prop.Type.IsDateTimeOffset)
+                    Expression min, max;
+                    if (propType.IsDateTimeOffset)
                     {
                         DateTimeOffset dateTimeOffset = new DateTimeOffset(parsedValue, Context.TimeZone.GetUtcOffset(parsedValue));
-                        if (dateTimeOffset.TimeOfDay == TimeSpan.FromHours(0) &&
-                            !value.Contains(':'))
-                        {
-                            // Only a date
-                            var nextDate = dateTimeOffset.AddDays(1);
-                            return query.Where($"it.{prop.Name} >= @0 && it.{prop.Name} < @1",
-                                dateTimeOffset, nextDate);
-                        }
-                        else
-                        {
-                            // Date and Time
-                            return query.Where($"it.{prop.Name} = @0", dateTimeOffset);
-                        }
+
+                        min = dateTimeOffset.AsQueryParam(propType);
+                        max = dateTimeOffset.AddDays(1).AsQueryParam(propType);
                     }
                     else
                     {
-                        if (parsedValue.TimeOfDay == TimeSpan.FromHours(0) &&
-                            !value.Contains(':'))
-                        {
-                            // Only a date
-                            var nextDate = parsedValue.AddDays(1);
-                            return query.Where($"it.{prop.Name} >= @0 && it.{prop.Name} < @1",
-                                parsedValue, nextDate);
-                        }
-                        else
-                        {
-                            // Date and Time
-                            return query.Where($"it.{prop.Name} = @0", parsedValue);
-                        }
+                        min = parsedValue.AsQueryParam(propType);
+                        max = parsedValue.AddDays(1).AsQueryParam(propType);
+                    }
+
+                    if (parsedValue.TimeOfDay == TimeSpan.FromHours(0) &&
+                        !value.Contains(':'))
+                    {
+                        // Only a date. Find all values on that date.
+                        return query.WhereExpression(it =>
+                            Expression.AndAlso(
+                                Expression.GreaterThanOrEqual(it.Prop(prop), min),
+                                Expression.LessThan(it.Prop(prop), max)
+                            ));
+                    }
+                    else
+                    {
+                        // Date and Time
+                        return query.WhereExpression(it => Expression.Equal(it.Prop(prop), min));
                     }
                 }
                 else
@@ -162,15 +152,20 @@ namespace IntelliTect.Coalesce
                     return query.Where(_ => false);
                 }
             }
-            else if (prop.Type.IsString)
+            else if (propType.IsString)
             {
                 if (value.Contains("*"))
                 {
-                    return query.Where($"it.{prop.Name}.StartsWith(@0)", value.Replace("*", ""));
+                    return query.WhereExpression(it => it
+                        .Prop(prop)
+                        .Call(MethodInfos.StringStartsWith, value.Replace("*", "").AsQueryParam())
+                    );
                 }
                 else
                 {
-                    return query.Where($"it.{prop.Name} == @0", value);
+                    return query.WhereExpression(it => 
+                        Expression.Equal(it.Prop(prop), value.AsQueryParam())
+                    );
                 }
             }
             else
@@ -179,33 +174,33 @@ namespace IntelliTect.Coalesce
                     .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
                     .Select(item =>
                     {
-                        var type = prop.Type.NullableValueUnderlyingType.TypeInfo;
+                        var type = propType.NullableValueUnderlyingType.TypeInfo;
 
                         // The exact value "null" should match null values exactly.
                         if (item.Trim().Equals("null", StringComparison.InvariantCultureIgnoreCase))
                         {
-                            if (prop.Type.IsReferenceOrNullableValue) return (Success: true, Result: (object?)null);
+                            if (propType.IsReferenceOrNullableValue) return (Success: true, Result: (object?)null);
                             else return (Success: false, Result: null);
                         }
 
-                        if (prop.Type.IsEnum)
+                        if (propType.IsEnum)
                         {
                             var isLong = long.TryParse(item, out long longVal);
-                            var enumString = prop.Type.EnumValues.SingleOrDefault(ev =>
+                            var integralValue = propType.EnumValues.SingleOrDefault(ev =>
                                 isLong
+                                    // Match user input as the enum's numeric value
                                     ? longVal.Equals(Convert.ToInt64(ev.Value))
+                                    // Match user input as the enum's string value.
                                     : ev.Name.Equals(item.Trim(), StringComparison.InvariantCultureIgnoreCase)
-                                )?.Name;
+                                )?.Value;
 
-                            // If SingleOrDefault doesn't match anything,
-                            // `.Value` will be default(string), which is null.
-                            // This is the parse failure case.
-                            if (enumString == null)
+                            if (integralValue == null)
                             {
+                                // Parsing the user input to an enum value failed
                                 return (Success: false, Result: null);
                             }
 
-                            return (Success: true, Result: enumString);
+                            return (Success: true, Result: Enum.ToObject(type, integralValue));
                         }
 
                         try
@@ -219,10 +214,7 @@ namespace IntelliTect.Coalesce
                         catch { return (Success: false, Result: null); }
                     })
                     .Where(conversion => conversion.Success)
-                    .Select((conversion, i) => (
-                        Param: conversion.Result,
-                        Clause: $"it.{prop.Name} == @{i}"
-                    ))
+                    .Select(conversion => conversion.Result)
                     .ToList();
 
                 // Something was specified (since we didnt return early), but we couldn't parse it.
@@ -233,9 +225,8 @@ namespace IntelliTect.Coalesce
                     return query.Where(_ => false);
                 }
 
-                return query.Where(
-                    string.Join(" || ", values.Select(v => v.Clause)),
-                    values.Select(v => v.Param).ToArray()
+                return query.WhereExpression(it =>
+                    values.Select(v => Expression.Equal(it.Prop(prop), v.AsQueryParam(prop.Type))).OrAny()
                 );
             }
         }
@@ -261,6 +252,9 @@ namespace IntelliTect.Coalesce
                 return query;
             }
 
+            // The `x` in `.Where(x => x. ...)`
+            var param = Expression.Parameter(typeof(T));
+
             // See if the user has specified a field with a colon and search on that first
             if (searchTerm.Contains(":"))
             {
@@ -277,22 +271,20 @@ namespace IntelliTect.Coalesce
                 {
                     var expressions = prop
                         .SearchProperties(ClassViewModel, maxDepth: 1, force: true)
-                        .SelectMany(p => p.GetLinqDynamicSearchStatements(Context.User, Context.TimeZone, "it", value))
+                        .SelectMany(p => p.GetLinqSearchStatements(Context, param, value))
                         .Select(t => t.statement)
                         .ToList();
 
                     // Join these together with an 'or'
                     if (expressions.Count > 0)
                     {
-                        string finalSearchClause = string.Join(" || ", expressions);
-                        return query.Where(finalSearchClause);
+                        var predicate = Expression.Lambda<Func<T, bool>>(expressions.OrAny(), param);
+                        return query.Where(predicate);
                     }
                 }
             }
 
-
-
-            var completeSearchClauses = new List<string>();
+            var completeSearchClauses = new List<Expression>();
 
             // For all searchable properties where SearchIsSplitOnSpaces is true,
             // we require that each word in the search terms yields at least one match.
@@ -300,7 +292,7 @@ namespace IntelliTect.Coalesce
             // For example, when searching on properties (FirstName, LastName) with input "steve steverson",
             // we require that "steve" match either a first name or last name, and "steverson" match a first name or last name
             // of the same records. This will yield people named "steve steverson" or "steverson steve".
-            var splitOnStringTermClauses = new List<string>();
+            var splitOnStringTermClauses = new List<Expression>();
             var terms = searchTerm
                     .Split(new string[] { " ", "," }, StringSplitOptions.RemoveEmptyEntries)
                     .Select(term => term.Trim())
@@ -311,7 +303,7 @@ namespace IntelliTect.Coalesce
             {
                 var splitOnStringClauses = ClassViewModel
                     .SearchProperties(ClassViewModel)
-                    .SelectMany(p => p.GetLinqDynamicSearchStatements(Context.User, Context.TimeZone, "it", termWord))
+                    .SelectMany(p => p.GetLinqSearchStatements(Context, param, termWord))
                     .Where(f => f.property.SearchIsSplitOnSpaces)
                     .Select(t => t.statement)
                     .ToList();
@@ -320,13 +312,13 @@ namespace IntelliTect.Coalesce
                 // to match the term word.
                 if (splitOnStringClauses.Count > 0)
                 {
-                    splitOnStringTermClauses.Add("(" + string.Join(" || ", splitOnStringClauses) + ")");
+                    splitOnStringTermClauses.Add(splitOnStringClauses.OrAny());
                 }
             }
             // Require each "word clause"
             if (splitOnStringTermClauses.Count > 0)
             {
-                completeSearchClauses.Add("( " + string.Join(" && ", splitOnStringTermClauses) + " )");
+                completeSearchClauses.Add(splitOnStringTermClauses.AndAll());
             }
 
 
@@ -336,7 +328,7 @@ namespace IntelliTect.Coalesce
             // we only require that the entire search term match at least one of these properties.
             var searchClauses = ClassViewModel
                 .SearchProperties(ClassViewModel)
-                .SelectMany(p => p.GetLinqDynamicSearchStatements(Context.User, Context.TimeZone, "it", searchTerm))
+                .SelectMany(p => p.GetLinqSearchStatements(Context, param, searchTerm))
                 .Where(f => !f.property.SearchIsSplitOnSpaces)
                 .Select(t => t.statement)
                 .ToList();
@@ -345,8 +337,8 @@ namespace IntelliTect.Coalesce
 
             if (completeSearchClauses.Count > 0)
             {
-                string finalSearchClause = string.Join(" || ", completeSearchClauses);
-                return query.Where(finalSearchClause);
+                var predicate = Expression.Lambda<Func<T, bool>>(completeSearchClauses.OrAny(), param);
+                return query.Where(predicate);
             }
 
             // A search term was specified (we didn't return early from this method), 
@@ -391,80 +383,96 @@ namespace IntelliTect.Coalesce
                 return query;
             }
 
-            var clauses = orderByParams
-                .Select(orderByParam =>
+            return query.OrderBy(orderByParams
+                .SelectMany(GetOrderInfos)
+                // Take all the clauses up until an invalid one is found.
+                .TakeWhile(clause => clause != null)!
+            );
+
+            IEnumerable<OrderByInformation?> GetOrderInfos(KeyValuePair<string, SortDirection> orderByParam)
+            {
+                string fieldName = orderByParam.Key;
+                SortDirection direction = orderByParam.Value;
+
+                var props = GetPropChain(fieldName);
+                if (props == null)
                 {
-                    string fieldName = orderByParam.Key;
-                    string direction = orderByParam.Value.ToString();
+                    // User-provided field name is no good.
+                    // We specifically yield null in order to halt and
+                    // not consume any user input after an invalid ordering is found,
+                    // as doing so could produce really weird orderings.
+                    yield return null;
+                    yield break;
+                }
 
-                    // Validate that the field accessor is a valid property
-                    // that the current user is allowed to read.
-                    var parts = fieldName.Split('.');
-                    PropertyViewModel? prop = null;
-                    foreach (var part in parts)
+                if (props.Last() is { IsPOCO: true } lastProp)
+                {
+                    // The property is a POCO, not a value.
+                    // Emit all the default orderings of that object.
+                    foreach (var info in lastProp.Object!.DefaultOrderBy)
                     {
-                        if (prop != null && !prop.IsPOCO)
+                        yield return info with 
                         {
-                            // We're accessing a nested prop, but the parent isn't an object,
-                            // so this can't be valid.
-                            return null;
-                        }
+                            Properties = [..props, ..info.Properties],
+                            // Override the direction specified by the user's input.
+                            SortDirection = direction 
+                        };
+                    }
+                }
+                else
+                {
+                    // The end of a prop chain is a value.
+                    // Return it as a directly sortable property.
+                    yield return new OrderByInformation()
+                    {
+                        Properties = props,
+                        SortDirection = direction
+                    };
+                }
+            }
 
-                        prop = (prop?.Object ?? ClassViewModel).PropertyByName(part);
+            List<PropertyViewModel>? GetPropChain(string fieldName)
+            {
+                // Split a dotted property accessor chain into its sequence properties.
+                // Return null if anything in the chain is not searchable.
 
-                        // Check if the new prop exists and is readable by user.
-                        if (prop == null || !prop.IsClientProperty || !prop.SecurityInfo.IsReadAllowed(User))
-                        {
-                            return null;
-                        }
+                var parts = fieldName.Split('.');
+                List<PropertyViewModel> props = new(parts.Length);
+                PropertyViewModel? current = null;
 
-                        // If the prop is an object that isn't readable, then this is no good.
-                        if (prop.IsPOCO && prop.Object?.SecurityInfo.IsReadAllowed(User) != true)
-                        {
-                            return null;
-                        }
-
-                        if (!prop.IsDbMapped && prop.Parent.IsDbMappedType)
-                        {
-                            // Unmapped property on a db mapped type. Won't translate to SQL.
-                            return null;
-                        }
+                foreach (var part in parts)
+                {
+                    if (current != null && !current.IsPOCO)
+                    {
+                        // We're accessing a nested prop, but the parent isn't an object,
+                        // so this can't be valid.
+                        return null;
                     }
 
-                    if (prop == null)
+                    current = (current?.Object ?? ClassViewModel).PropertyByName(part);
+
+                    // Check if the prop exists and is readable by user.
+                    if (current == null || !current.IsClientProperty || !current.SecurityInfo.IsFilterAllowed(Context))
                     {
                         return null;
                     }
 
-                    if (prop.IsPOCO)
+                    // If the prop is an object that isn't readable, then this is no good.
+                    if (current.IsPOCO && current.Object?.SecurityInfo.IsReadAllowed(User) != true)
                     {
-                        // The property is a POCO, not a value.
-                        // Get the default order by for the object's type to figure out what field to sort by.
-                        string? clause = prop.Type.ClassViewModel?.DefaultOrderByClause($"{fieldName}");
-
-                        // The default order by clause has an order associated, but we want to override it
-                        // with the order that the client specified. A string replacement will do.
-                        return clause?
-                            .Replace("ASC", direction.ToUpper())
-                            .Replace("DESC", direction.ToUpper());
+                        return null;
                     }
-                    else
+
+                    if (!current.IsDbMapped && current.Parent.IsDbMappedType)
                     {
-                        // We've validated that `fieldName` is a valid acccessor for a comparable property,
-                        // and that the user is allowed to read it.
-                        return $"{fieldName} {direction}";
+                        // Unmapped property on a db mapped type. Won't translate to SQL.
+                        return null;
                     }
-                })
-                // Take all the clauses up until an invalid one is found.
-                .TakeWhile(clause => clause != null)
-                .ToList();
 
-            if (clauses.Count > 0)
-            {
-                query = query.OrderBy(string.Join(", ", clauses));
+                    props.Add(current);
+                }
+                return props;
             }
-
-            return query;
         }
 
         /// <summary>
@@ -478,13 +486,7 @@ namespace IntelliTect.Coalesce
         /// <returns>The new query with additional sorting applied.</returns>
         public virtual IQueryable<T> ApplyListDefaultSorting(IQueryable<T> query)
         {
-            // Use the DefaultOrderBy attributes if available
-            var defaultOrderBy = ClassViewModel.DefaultOrderByClause();
-            if (defaultOrderBy != null)
-            {
-                query = query.OrderBy(defaultOrderBy);
-            }
-            return query;
+            return query.OrderBy(ClassViewModel.DefaultOrderBy);
         }
 
         /// <summary>

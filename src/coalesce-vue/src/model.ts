@@ -1,6 +1,6 @@
 import { formatDistanceToNow, lightFormat } from "date-fns";
 import { format, utcToZonedTime } from "date-fns-tz";
-import { getCurrentInstance } from "vue";
+import { getCurrentInstance, nextTick } from "vue";
 
 import type {
   ClassType,
@@ -42,7 +42,7 @@ export interface Model<TMeta extends ClassType = ClassType> {
 /**
  * Represents a data source with metadata information and parameter values.
  */
-export interface DataSource<TMeta extends DataSourceType> {
+export interface DataSource<TMeta extends DataSourceType = DataSourceType> {
   readonly $metadata: TMeta;
 }
 
@@ -201,7 +201,7 @@ export function parseValue(
       if (value instanceof Date) {
         date = value;
       } else if (type === "string") {
-        date = parseJSONDate(value);
+        date = parseJSONDate(value, meta.dateKind);
       }
 
       // isNaN is what date-fn's `isValid` calls internally,
@@ -808,6 +808,9 @@ class DisplayVisitor extends Visitor<
         case "date":
           formatString = "M/d/yyyy";
           break;
+        case "time":
+          formatString = "h:mm:ss aa";
+          break;
         default:
           formatString = "M/d/yyyy h:mm:ss aa";
           break;
@@ -950,6 +953,8 @@ export function valueDisplay(
   );
 }
 
+const coalescePendingQuery = Symbol();
+
 export function bindToQueryString(
   vue: VueInstance,
   obj: any, // TODO: Maybe only support objects with $metadata? Would eliminate need for `parse`, and could allow for very strong typings.
@@ -969,24 +974,58 @@ export function bindToQueryString(
           "Could not find $router or $route on the component instance. Is vue-router installed?"
         );
       }
+
+      const newQuery = {
+        ...//@ts-expect-error
+        (vue.$router[coalescePendingQuery] || vue.$route.query),
+        [queryKey]:
+          v == null || v === ""
+            ? undefined
+            : // Use metadata to format the value if the obj has any.
+            obj?.$metadata?.params?.[key]
+            ? mapToDto(v, obj.$metadata.params[key])?.toString()
+            : obj?.$metadata?.props?.[key]
+            ? mapToDto(v, obj.$metadata.props[key])?.toString()
+            : // TODO: Add $metadata to DataSourceParameters/FilterParameters/ListParameters, and then support that as well.
+              // Fallback to .tostring()
+              String(v) ?? undefined,
+      };
+
+      // Fix https://github.com/IntelliTect/Coalesce/issues/310:
+      // Vue router processes route changes delayed by a tick,
+      // so if multiple querystring-bound values change in the same tick,
+      // changes subsequent to the first will be reading a stale copy of `vue.$route.query`.
+      // So, we store the pending new query value so that subsequent updates
+      // during the same tick can read the previous update's desired end state,
+      // rather than every update reading the beginning state.
+      //@ts-expect-error
+      vue.$router[coalescePendingQuery] = newQuery;
+      //@ts-expect-error
+      nextTick(() => delete vue.$router[coalescePendingQuery]);
+
       vue.$router[mode]({
-        query: {
-          ...vue.$route.query,
-          [queryKey]:
-            v == null || v === ""
-              ? undefined
-              : // Use metadata to format the value if the obj has any.
-              obj?.$metadata?.params?.[key]
-              ? mapToDto(v, obj.$metadata.params[key])?.toString()
-              : obj?.$metadata?.props?.[key]
-              ? mapToDto(v, obj.$metadata.props[key])?.toString()
-              : // TODO: Add $metadata to DataSourceParameters/FilterParameters/ListParameters, and then support that as well.
-                // Fallback to .tostring()
-                String(v) ?? undefined,
-        },
+        query: newQuery,
       }).catch((err: any) => {});
     }
   );
+
+  const updateObject = (v: any) => {
+    obj[key] =
+      // Use the default value if null or undefined
+      v == null
+        ? defaultValue
+        : // Use provided parse function, if provided.
+        parse
+        ? parse(v)
+        : // Use metadata to parse the value if the obj is a DataSource.
+        obj?.$metadata?.params?.[key]
+        ? mapToModel(v, obj.$metadata.params[key])
+        : obj?.$metadata?.props?.[key]
+        ? mapToModel(v, obj.$metadata.props[key])
+        : // TODO: Add $metadata to DataSourceParameters/FilterParameters/ListParameters, and then support that as well.
+          // Fallback to the raw value
+          v;
+  };
 
   // When the query changes, grab the new value.
   vue.$watch(
@@ -1010,24 +1049,12 @@ export function bindToQueryString(
         }
       }
 
-      obj[key] =
-        // Use the default value if null or undefined
-        v == null
-          ? defaultValue
-          : // Use provided parse function, if provided.
-          parse
-          ? parse(v)
-          : // Use metadata to parse the value if the obj is a DataSource.
-          obj?.$metadata?.params?.[key]
-          ? mapToModel(v, obj.$metadata.params[key])
-          : obj?.$metadata?.props?.[key]
-          ? mapToModel(v, obj.$metadata.props[key])
-          : // TODO: Add $metadata to DataSourceParameters/FilterParameters/ListParameters, and then support that as well.
-            // Fallback to the raw value
-            v;
-    },
-    { immediate: true }
+      updateObject(v);
+    }
   );
+
+  // Fix #332: circumvent the `await nextTick` above on the initial call"
+  updateObject(vue.$route?.query[queryKey]);
 }
 
 export function useBindToQueryString(

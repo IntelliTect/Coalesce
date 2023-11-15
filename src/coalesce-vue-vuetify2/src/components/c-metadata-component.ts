@@ -11,6 +11,8 @@ import {
   ViewModel,
   Domain,
   AnyArgCaller,
+  ApiState,
+  DataSource,
 } from "coalesce-vue";
 import {
   computed,
@@ -22,6 +24,28 @@ import {
 } from "vue";
 
 export type ForSpec = undefined | null | string | Property | Value | Method;
+
+export function getValueMetaAndOwner(
+  forVal: ForSpec,
+  model: Model | DataSource | AnyArgCaller | null | undefined,
+  $metadata?: Domain
+) {
+  const valueMeta = getValueMeta(forVal, model?.$metadata, $metadata);
+
+  // Support binding to method args via `:model="myModel.myMethod" for="myArg"`.
+  // getValueMeta will resolve to the metadata of the specific parameter;
+  // we then have to resolve the args object from the ApiState.
+  if (
+    model instanceof ApiState &&
+    "args" in model &&
+    valueMeta &&
+    valueMeta.name in model.args
+  ) {
+    model = model.args;
+  }
+
+  return { valueMeta, valueOwner: model as any };
+}
 
 export function getValueMeta(
   forVal: ForSpec,
@@ -189,7 +213,7 @@ export function getValueMeta(
           };
       }
   }
-  
+
   return tail as Property | Value;
 }
 
@@ -203,8 +227,6 @@ export function buildVuetifyAttrs(
       ...attrs,
     };
   }
-
-  const modelMeta = model ? model.$metadata : null;
 
   return {
     // If a label is not provided to the component, default to the displayName of the value.
@@ -221,7 +243,7 @@ export function buildVuetifyAttrs(
       // We're bound to a ViewModel instance, and the value is a prop on that viewmodel. Ask the ViewModel for the rules.
       model &&
       model instanceof ViewModel &&
-      valueMeta.name in (modelMeta as ModelType)!.props
+      valueMeta.name in model.$metadata!.props
         ? model.$getRules(valueMeta.name)
         : // Grab the rules from the metadata for the bound value
         "rules" in valueMeta && valueMeta.rules
@@ -232,22 +254,39 @@ export function buildVuetifyAttrs(
   };
 }
 
-export function makeMetadataProps<TModel = Model<ClassType>>() {
+type ModelAllowedType = Model | AnyArgCaller;
+
+export function makeMetadataProps<TModel extends ModelAllowedType = Model>() {
   return {
+    /** An object owning the value that is specified by the `for` prop. */
+    model: {
+      type: [Object, Function] as PropType<TModel | null>,
+      default: null,
+    },
+
+    /** A metadata specifier for the value being bound. One of:
+     * * A string with the name of the value belonging to `model`. E.g. `"firstName"`.
+     * * A direct reference to the metadata object. E.g. `model.$metadata.props.firstName`.
+     * * A string in dot-notation that starts with a type name. E.g. `"Person.firstName"`.
+     */
     for: {
       required: false,
       type: [String, Object] as PropType<ForSpec>,
       default: null,
     },
-    model: { type: Object as PropType<TModel | null>, default: null },
   };
 }
 
-export function useMetadataProps(
-  props: ExtractPropTypes<ReturnType<typeof makeMetadataProps<Model<ClassType>>>>
-) {
+export function useMetadataProps<
+  TModel extends ModelAllowedType = Model
+>(props: {
+  model: TModel | null | undefined;
+  for: ForSpec | null | undefined;
+}) {
   const modelMeta = computed(() => {
-    return props.model ? props.model.$metadata : null;
+    return props.model
+      ? (props.model.$metadata as any as TModel["$metadata"])
+      : null;
   });
 
   const instance = getCurrentInstance();
@@ -263,6 +302,15 @@ export function useMetadataProps(
     return null;
   }) as () => Property | Value | null);
 
+  /** The object that owns the value described by `valueMeta`. */
+  const valueOwner = computed(() => {
+    return getValueMetaAndOwner(
+      props.for,
+      props.model,
+      instance!.proxy.$coalesce.metadata
+    ).valueOwner;
+  });
+
   const inputBindAttrs = computed(() =>
     buildVuetifyAttrs(valueMeta.value, props.model, {
       ...useAttrs(),
@@ -270,5 +318,5 @@ export function useMetadataProps(
     })
   );
 
-  return { modelMeta, valueMeta, inputBindAttrs };
+  return { modelMeta, valueMeta, valueOwner, inputBindAttrs };
 }

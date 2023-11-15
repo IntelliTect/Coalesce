@@ -257,6 +257,54 @@ module ViewModels {
             };
         };
         
+        /** 
+            Methods and properties for invoking server method SetBirthDate.
+            
+            Returns the user name
+        */
+        public readonly setBirthDate = new PersonPartial.SetBirthDate(this);
+        public static SetBirthDate = class SetBirthDate extends Coalesce.ClientMethod<PersonPartial, void> {
+            public readonly name = 'SetBirthDate';
+            public readonly verb = 'POST';
+            
+            /** Calls server method (SetBirthDate) with the given arguments */
+            public invoke = (date: moment.Moment | null, time: moment.Moment | null, callback?: (result: void) => void, reload: boolean = true): JQueryPromise<any> => {
+                return this.invokeWithData({ id: this.parent.personId(), date: date?.format('YYYY-MM-DDTHH:mm:ss.SSS'), time: time }, callback, reload);
+            };
+            
+            /** Object that can be easily bound to fields to allow data entry for the method's parameters */
+            public args = new SetBirthDate.Args(); 
+            public static Args = class Args {
+                public date: KnockoutObservable<moment.Moment | null> = ko.observable(moment());
+                public time: KnockoutObservable<moment.Moment | null> = ko.observable(null);
+            };
+            
+            /** Calls server method (SetBirthDate) with an instance of SetBirthDate.Args, or the value of this.args if not specified. */
+            public invokeWithArgs = (args = this.args, callback?: (result: void) => void, reload: boolean = true): JQueryPromise<any> => {
+                return this.invoke(args.date(), args.time(), callback, reload);
+            }
+            
+            /** Invokes the method after displaying a browser-native prompt for each argument. */
+            public invokeWithPrompts = (callback?: (result: void) => void, reload: boolean = true): JQueryPromise<any> | undefined => {
+                var $promptVal: string | null = null;
+                $promptVal = prompt('Date');
+                if ($promptVal === null) return;
+                var date: moment.Moment = moment($promptVal);
+                var time: null = null;
+                return this.invoke(date, time, callback, reload);
+            };
+            
+            protected loadResponse = (data: Coalesce.ItemResult, jqXHR: JQuery.jqXHR, callback?: (result: void) => void, reload: boolean = true) => {
+                this.result(data.object);
+                if (reload) {
+                    var result = this.result();
+                    this.parent.load(null, typeof(callback) == 'function' ? () => callback(result) : undefined);
+                } else if (typeof(callback) == 'function') {
+                    callback(this.result());
+                }
+            };
+        };
+        
         /** Methods and properties for invoking server method FullNameAndAge. */
         public readonly fullNameAndAge = new PersonPartial.FullNameAndAge(this);
         public static FullNameAndAge = class FullNameAndAge extends Coalesce.ClientMethod<PersonPartial, string> {
@@ -532,12 +580,10 @@ module ViewModels {
                 this.firstName.extend({ minLength: 2, maxLength: 75 }),
                 this.lastName.extend({ minLength: 3, maxLength: 100 }),
                 this.email.extend({ email: true }),
-                this.height.extend({ min: 5, max: 10 }),
                 this.birthDate.extend({ moment: { unix: true } }),
                 this.lastBath.extend({ moment: { unix: true } }),
                 this.nextUpgrade.extend({ moment: { unix: true } }),
                 this.companyId.extend({ required: {params: true, message: "Company is required."} }),
-                this.arbitraryCollectionOfStrings.extend({ required: {params: true, message: "Arbitrary Collection Of Strings is required."} }),
             ]);
             this.warnings = ko.validation.group([
             ]);

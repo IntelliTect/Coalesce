@@ -6,6 +6,7 @@ using IntelliTect.Coalesce.Tests.Util;
 using IntelliTect.Coalesce.TypeDefinition;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -123,7 +124,20 @@ namespace IntelliTect.Coalesce.Tests.Api.DataSources
             // Preconditions
             Assert.False(CrudContext.User.IsInRole(role));
             Assert.Collection(prop.SecurityInfo.Read.RoleList, r => Assert.Equal(role, r));
-            
+
+            Assert.Single(query);
+        }
+
+        [Fact]
+        public void ApplyListPropertyFilters_WhenPropRestricted_IgnoresProp()
+        {
+            var (prop, query) = PropertyFiltersTestHelper<ComplexModel, string>(
+                m => m.RestrictedString, "propValue", "inputValue");
+
+            // Preconditions
+            Assert.NotEqual(true, CrudContext.User.Identity?.IsAuthenticated);
+            Assert.NotEmpty(prop.SecurityInfo.Restrictions);
+
             Assert.Single(query);
         }
 
@@ -141,8 +155,22 @@ namespace IntelliTect.Coalesce.Tests.Api.DataSources
             
             Assert.Empty(query);
         }
-        
-        
+
+        [Fact]
+        public void ApplyListPropertyFilters_WhenPropRestrictionPasses_FiltersProp()
+        {
+            CrudContext.User.AddIdentity(new ClaimsIdentity("foo"));
+            var (prop, query) = PropertyFiltersTestHelper<ComplexModel, string>(
+                m => m.RestrictedString, "propValue", "inputValue");
+
+            // Preconditions
+            Assert.True(CrudContext.User.Identity?.IsAuthenticated);
+            Assert.NotEmpty(prop.SecurityInfo.Restrictions);
+
+            Assert.Empty(query);
+        }
+
+
         public static IEnumerable<object[]> Filter_MatchesDateTimesData = new[]
         {
             new object[] { true, "2017-08-02", new DateTime(2017, 08, 02, 0, 0, 0) },
@@ -158,6 +186,7 @@ namespace IntelliTect.Coalesce.Tests.Api.DataSources
             
             // The exact value "null" should match null values exactly.
             new object[] { true, "null", null },
+            new object[] { false, "null", new DateTime(2017, 08, 2, 12, 34, 57) },
             
             // Null or empty inputs always do nothing - these will always match.
             new object[] { true, "", new DateTime(2017, 08, 2, 12, 34, 57) },
@@ -195,6 +224,7 @@ namespace IntelliTect.Coalesce.Tests.Api.DataSources
             
             // The exact value "null" should match null values exactly.
             new object[] { true, "null", -8, null },
+            new object[] { false, "null", -8, new DateTimeOffset(638353181662275815, TimeSpan.Zero) },
             
             // Null or empty inputs always do nothing - these will always match.
             new object[] { true, "", -8, new DateTimeOffset(2017, 08, 2, 12, 34, 57, TimeSpan.FromHours(-8)) },
@@ -360,6 +390,12 @@ namespace IntelliTect.Coalesce.Tests.Api.DataSources
             source.Query().AssertOrder(models);
 
             // Order should do nothing because the prop is unauthorized.
+            source
+                .Query(s => s.ApplyListSorting(s.Query(), new ListParameters
+                {
+                    OrderBy = $"{nameof(ComplexModel.RestrictedString)}"
+                }))
+                .AssertOrder(models);
             source
                 .Query(s => s.ApplyListSorting(s.Query(), new ListParameters
                 {
@@ -552,6 +588,20 @@ namespace IntelliTect.Coalesce.Tests.Api.DataSources
 
             // Since searching by prop isn't valid for this specific property,
             // the search will instead treat the entire input as the search term.
+            // Since this search term doesn't match the property's value, the results should be empty.
+            query.AssertMatched(false);
+        }
+
+        [Fact]
+        public void ApplyListSearchTerm_WhenTargetedPropRestricted_IgnoresProp()
+        {
+            var query = Source<ComplexModel>()
+                .AddModel(m => m.RestrictedString, "propValue", out PropertyViewModel prop)
+                .Query(s => s.ApplyListSearchTerm(s.Query(), new FilterParameters
+                {
+                    Search = "RestrictedString:propV"
+                }));
+
             // Since this search term doesn't match the property's value, the results should be empty.
             query.AssertMatched(false);
         }

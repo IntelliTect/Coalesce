@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using System.Linq.Dynamic.Core;
 using IntelliTect.Coalesce.Models;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;

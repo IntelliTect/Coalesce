@@ -53,6 +53,7 @@ export interface ValidationIssue {
 
 export interface ItemResult<T = any> extends ApiResult {
   object?: T;
+  refMap?: { [key: string]: any };
   validationIssues?: ValidationIssue[];
 }
 
@@ -168,8 +169,10 @@ export type StandardParameters =
  * that is suitable for use as a URL querystring.
  * @param parameters The parameters to map.
  */
-export function mapParamsToDto(parameters?: StandardParameters) {
-  if (!parameters) return null;
+export function mapParamsToDto(parameters?: StandardParameters): {
+  [s: string]: string;
+} {
+  if (!parameters) return {};
 
   // Assume the widest type, which is ListParameters.
   var wideParams = parameters as Partial<ListParameters>;
@@ -293,18 +296,27 @@ export function mapQueryToParams<T extends StandardParameters>(
   if (parameters instanceof DataSourceParameters) {
     if ("includes" in dto) parameters.includes = dto.includes;
 
-    if ("dataSource" in dto && dto.dataSource in modelMeta.dataSources) {
-      const dataSource = mapToModel({}, modelMeta.dataSources[dto.dataSource]);
-      parameters.dataSource = dataSource;
+    if ("dataSource" in dto) {
+      var dataSourceMeta = Object.values(modelMeta.dataSources).find(
+        // Match case insensitively on the DS name,
+        // because sometimes it'll be camelCase (keys of `modelMeta.dataSources`)
+        // and sometimes it'll be PascalCase (values of `modelMeta.dataSources[x].name`).
+        (d) => d.name.toLowerCase() == dto.dataSource.toLowerCase()
+      );
 
-      for (const key in dto) {
-        if (key.startsWith("dataSource.")) {
-          var paramName = key.replace("dataSource.", "");
-          if (paramName in dataSource.$metadata.props) {
-            (dataSource as any)[paramName] = mapToModel(
-              dto[key],
-              dataSource.$metadata.props[paramName]
-            );
+      if (dataSourceMeta) {
+        const dataSource = mapToModel({}, dataSourceMeta);
+        parameters.dataSource = dataSource;
+
+        for (const key in dto) {
+          if (key.startsWith("dataSource.")) {
+            var paramName = key.replace("dataSource.", "");
+            if (paramName in dataSource.$metadata.props) {
+              (dataSource as any)[paramName] = mapToModel(
+                dto[key],
+                dataSource.$metadata.props[paramName]
+              );
+            }
           }
         }
       }
@@ -480,13 +492,28 @@ export type ApiStateTypeWithArgs<
   ? ListApiStateWithArgs<TArgs, TArgsObj, TResult>
   : never;
 
+export interface BulkSaveRequest {
+  // This is an object even though it only has one property
+  // in case we need to expand in the future. An array as a JSON root
+  // prevents any future extensibility.
+  items: BulkSaveRequestItem[];
+}
+
+export interface BulkSaveRequestItem {
+  type: string;
+  action: "save" | "delete" | "none";
+  root?: boolean;
+  data: Record<string, any>;
+  refs?: Record<string, number>;
+}
+
 const simultaneousGetCache: Map<string, AxiosPromise<any>> = new Map();
 
 export class ApiClient<T extends ApiRoutedType> {
   /** See comments on ReactiveFlags_SKIP for explanation.
    * @internal
    */
-  private readonly [ReactiveFlags_SKIP] = true;
+  readonly [ReactiveFlags_SKIP] = true;
 
   constructor(public $metadata: T) {}
 
@@ -717,6 +744,10 @@ export class ApiClient<T extends ApiRoutedType> {
         // (Blobs become Files when put into FormData, and we serialize UInt8Array into a Blob)
         // This will form a multipart/form-data response.
         body = formData;
+      } else if (method.json) {
+        // The server expects json for this method. Pass the object directly,
+        // which axios will serialize as json.
+        body = mappedParams;
       } else {
         // No top-level special values - just handle the params normally.
         // This will form a application/x-www-form-urlencoded response.
@@ -1003,6 +1034,34 @@ export class ModelApiClient<TModel extends Model<ModelType>> extends ApiClient<
     );
   }
 
+  public bulkSave(
+    data: BulkSaveRequest,
+    parameters?: DataSourceParameters,
+    config?: AxiosRequestConfig
+  ): ItemResultPromise<TModel> {
+    return this.$invoke(
+      {
+        name: "bulkSave",
+        displayName: "bulkSave",
+        transportType: "item",
+        httpMethod: "POST",
+        params: {
+          items: {
+            name: "items",
+            displayName: "items",
+            role: "value",
+            type: "unknown",
+          },
+        },
+        json: true,
+        return: this.$itemValueMeta,
+      },
+      data,
+      config,
+      parameters
+    );
+  }
+
   public delete(
     id: string | number,
     parameters?: DataSourceParameters,
@@ -1135,7 +1194,7 @@ export abstract class ApiState<
   /** See comments on ReactiveFlags_SKIP for explanation.
    * @internal
    */
-  private readonly [ReactiveFlags_SKIP] = true;
+  readonly [ReactiveFlags_SKIP] = true;
 
   /** The metadata of the method being called, if it was provided. */
   abstract $metadata?: Method;
@@ -1435,17 +1494,26 @@ export abstract class ApiState<
 
           // We didn't throw, so store the successful response in the cache
           const data = resp.data;
-          storage.setItem(
-            key,
-            JSON.stringify(
-              {
-                time: Date.now() / 1000,
-                maxAge: configuredMaxAge,
-                result: data,
-              },
-              (key, value) => (key == "$metadata" ? undefined : value)
-            )
-          );
+          try {
+            purgeStaleCacheEntries(storage);
+            storage.setItem(
+              key,
+              JSON.stringify(
+                {
+                  time: Date.now() / 1000,
+                  maxAge: configuredMaxAge,
+                  result: data,
+                },
+                (key, value) =>
+                  key == "$metadata" || value === null ? undefined : value
+              )
+            );
+          } catch (e) {
+            console.warn(
+              "coalesce: useResponseCaching: Unable to store response",
+              e
+            );
+          }
 
           return resp;
         };
@@ -1493,6 +1561,18 @@ export abstract class ApiState<
         // it should probably be implemented as a separate set of callbacks.
         // We don't set isLoading to false here - we set it in the cancel() method to ensure that we don't set isLoading=false for a subsequent call,
         // since the promise won't reject immediately after requesting cancellation. There could already be another request pending when this code is being executed.
+        return;
+      } else if (
+        windowUnloading &&
+        thrown &&
+        typeof thrown == "object" &&
+        "code" in thrown &&
+        thrown.code == "ECONNABORTED"
+      ) {
+        // Ignore aborted requests when the window is unloading.
+        // This seems to only happen on Firefox - Chrome doesn't abort requests
+        // on unload in a way that ever propagates up to user code.
+        // https://github.com/IntelliTect/Coalesce/issues/296
         return;
       } else {
         var error = thrown as AxiosError | ApiResult | Error | string;
@@ -1550,8 +1630,40 @@ export abstract class ApiState<
   }
 }
 
+// Detect unloads to suppress "request aborted" failures (https://github.com/IntelliTect/Coalesce/issues/296).
+let windowUnloading = false;
+window.addEventListener("beforeunload", (e) => {
+  windowUnloading = true;
+  // unflag the unload after a moment in case it gets user-canceled
+  setTimeout(() => (windowUnloading = false), 1000);
+});
+
+function purgeStaleCacheEntries(storage: Storage) {
+  for (var i = 0; i < storage.length; i++) {
+    const key = storage.key(i)!;
+    if (!key.startsWith("coalesce:")) continue;
+
+    const item = storage.getItem(key)!;
+    try {
+      const { time, maxAge } = JSON.parse(item);
+      if (typeof time != "number" || typeof maxAge != "number") continue;
+
+      if (time < Date.now() / 1000 - maxAge) {
+        storage.removeItem(key);
+        i--;
+      }
+    } catch {
+      // Do nothing - entry probably wasn't valid json and isn't a valid coalesce api response cache entry.
+    }
+  }
+}
+
+purgeStaleCacheEntries(localStorage);
+purgeStaleCacheEntries(sessionStorage);
+
 export interface ItemApiState<TArgs extends any[], TResult> {
-  /** Invokes a call to this API endpoint. */
+  // Do not put a doc comment on the call signature:
+  // it'll hide the doc comment of the caller's definition.
   (...args: TArgs): ItemResultPromise<TResult>;
 }
 export class ItemApiState<TArgs extends any[], TResult> extends ApiState<
@@ -1885,3 +1997,20 @@ export type AnyArgCaller<
 > =
   | ListApiStateWithArgs<TArgs, TArgsObj, TResult>
   | ItemApiStateWithArgs<TArgs, TArgsObj, TResult>;
+
+//@ts-expect-error: only exists in vue3, but not vue2.
+declare module "@vue/reactivity" {
+  export interface RefUnwrapBailTypes {
+    // Prevent Vue's type helpers from brutalizing these types,
+    // which are manually marked to skip reactivity (ReactiveFlags_SKIP)
+    // and therefore are never unwrapped anyway.
+    coalesceApiModels: ApiState<any, any> | ApiClient<any>;
+  }
+}
+
+// The vue2 version of this interface:
+declare module "vue" {
+  export interface RefUnwrapBailTypes {
+    coalesceApiModels: ApiState<any, any> | ApiClient<any>;
+  }
+}

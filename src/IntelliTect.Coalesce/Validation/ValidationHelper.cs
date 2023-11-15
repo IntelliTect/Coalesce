@@ -34,9 +34,7 @@ namespace IntelliTect.Coalesce.Validation
         }
 
         public bool IsNotNull(
-#if NETCOREAPP
             [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] 
-#endif
             object? obj, 
             string message, 
             bool isWarning = false)
@@ -45,9 +43,7 @@ namespace IntelliTect.Coalesce.Validation
         }
 
         public bool IsNull(
-#if NETCOREAPP
             [System.Diagnostics.CodeAnalysis.NotNullWhen(false)] 
-#endif
             object? obj, 
             string message, 
             bool isWarning = false)

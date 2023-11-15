@@ -34,6 +34,13 @@ namespace IntelliTect.Coalesce.Tests.Util
         }
     }
 
+    internal class ClassViewModelDataAttribute<T> : ClassViewModelDataAttribute
+    {
+        public ClassViewModelDataAttribute(params object[] additionalInlineData) : base(typeof(T), additionalInlineData)
+        {
+        }
+    }
+
     internal class ReflectionClassViewModelDataAttribute : ClassViewModelDataAttribute
     {
         public ReflectionClassViewModelDataAttribute(Type targetClass, params object[] additionalInlineData)

@@ -58,10 +58,7 @@ namespace Coalesce.Web.Ko.Models
 
             this.Details = obj.Details.MapToDto<Coalesce.Domain.ProductDetails, ProductDetailsDtoGen>(context, tree?[nameof(this.Details)]);
 
-            if ((context.IsInRoleCached("User")))
-            {
-                this.UniqueId = obj.UniqueId;
-            }
+            if ((context.IsInRoleCached("User"))) this.UniqueId = obj.UniqueId;
         }
 
         /// <summary>
@@ -75,11 +72,8 @@ namespace Coalesce.Web.Ko.Models
 
             if (ShouldMapTo(nameof(ProductId))) entity.ProductId = (ProductId ?? entity.ProductId);
             if (ShouldMapTo(nameof(Name))) entity.Name = Name;
+            if (ShouldMapTo(nameof(UniqueId)) && (context.IsInRoleCached("User") && context.IsInRoleCached("Admin"))) entity.UniqueId = (UniqueId ?? entity.UniqueId);
             if (ShouldMapTo(nameof(Unknown))) entity.Unknown = Unknown;
-            if ((context.IsInRoleCached("User") && context.IsInRoleCached("Admin")))
-            {
-                if (ShouldMapTo(nameof(UniqueId))) entity.UniqueId = (UniqueId ?? entity.UniqueId);
-            }
         }
 
         /// <summary>

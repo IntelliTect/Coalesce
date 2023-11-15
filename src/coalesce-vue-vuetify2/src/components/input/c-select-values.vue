@@ -15,7 +15,7 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { convertValueToModel } from "coalesce-vue";
+import { AnyArgCaller, Model, convertValueToModel } from "coalesce-vue";
 import { makeMetadataProps, useMetadataProps } from "../c-metadata-component";
 
 export default defineComponent({
@@ -31,14 +31,14 @@ export default defineComponent({
   },
 
   props: {
-    ...makeMetadataProps(),
+    ...makeMetadataProps<Model | AnyArgCaller>(),
     value: { required: false, type: Array },
   },
 
   computed: {
     internalValue(): any[] {
-      if (this.model && this.collectionMeta) {
-        return (this.model as any)[this.collectionMeta.name] || [];
+      if (this.valueOwner && this.collectionMeta) {
+        return this.valueOwner[this.collectionMeta.name] || [];
       }
       return this.value || [];
     },
@@ -74,8 +74,8 @@ export default defineComponent({
         }
       }
 
-      if (this.model) {
-        return ((this.model as any)[this.collectionMeta.name] = items);
+      if (this.valueOwner) {
+        return (this.valueOwner[this.collectionMeta.name] = items);
       }
 
       this.$emit("input", items);

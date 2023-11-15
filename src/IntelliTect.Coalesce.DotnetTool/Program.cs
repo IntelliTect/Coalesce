@@ -50,12 +50,12 @@ namespace IntelliTect.Coalesce.Cli
 
             // Get the target framework (e.g. ".NETCoreApp,Version=v2.0") that Coalesce was compiled against.
             // I added this originally for debugging, but its kinda nice to show regardless.
-            var attr = Assembly.GetEntryAssembly().GetCustomAttribute<TargetFrameworkAttribute>();
+            var frameworkVersion = System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription;
 
             // This reflects the version of the nuget package.
             string version = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).ProductVersion;
 
-            Console.WriteLine($"Starting Coalesce {version}, running under {attr.FrameworkName}");
+            Console.WriteLine($"Starting Coalesce {version}, running under {frameworkVersion}");
             Console.WriteLine("https://github.com/IntelliTect/Coalesce");
             Console.WriteLine();
 

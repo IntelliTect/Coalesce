@@ -172,7 +172,13 @@ import {
   startOfDay,
 } from "date-fns";
 import { format, utcToZonedTime, zonedTimeToUtc } from "date-fns-tz";
-import { DateKind, getDefaultTimeZone, parseDateUserInput } from "coalesce-vue";
+import {
+  AnyArgCaller,
+  DateKind,
+  Model,
+  getDefaultTimeZone,
+  parseDateUserInput,
+} from "coalesce-vue";
 import { defineComponent, PropType } from "vue";
 import { makeMetadataProps, useMetadataProps } from "../c-metadata-component";
 
@@ -189,7 +195,7 @@ export default defineComponent({
   },
 
   props: {
-    ...makeMetadataProps(),
+    ...makeMetadataProps<Model | AnyArgCaller>(),
     value: { required: false, type: Date as PropType<Date | null | undefined> },
     dateKind: { type: String as PropType<DateKind | null | undefined> },
     dateFormat: { type: String },
@@ -278,8 +284,8 @@ export default defineComponent({
     },
 
     internalValue() {
-      if (this.model && this.dateMeta) {
-        return (this.model as any)[this.dateMeta.name];
+      if (this.valueOwner && this.dateMeta) {
+        return this.valueOwner[this.dateMeta.name];
       }
 
       return this.value;
@@ -488,8 +494,8 @@ export default defineComponent({
     },
 
     emitInput(value: any) {
-      if (this.model && this.dateMeta) {
-        (this.model as any)[this.dateMeta.name] = value;
+      if (this.valueOwner && this.dateMeta) {
+        this.valueOwner[this.dateMeta.name] = value;
       }
 
       this.$emit("input", value);

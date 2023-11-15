@@ -80,7 +80,8 @@
               :for="
                 filter.propMeta.role == 'primaryKey'
                   ? list.$metadata.name
-                  : filter.propMeta.navigationProp
+                  : filter.propMeta.navigationProp ||
+                    filter.propMeta.principalType
               "
               clearable
               hide-details
@@ -254,9 +255,11 @@ export default defineComponent({
             // `null` as a value is a filter that checks that the value is `null`.
             isActive: value !== "" && value !== undefined,
             displayName:
-              propMeta?.role == "foreignKey"
+              (propMeta?.role == "foreignKey"
                 ? propMeta.navigationProp?.displayName
-                : propMeta?.displayName ?? key,
+                : undefined) ??
+              propMeta?.displayName ??
+              key,
           } as FilterInfo;
           return filterInfo;
         })

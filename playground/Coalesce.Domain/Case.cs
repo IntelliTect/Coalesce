@@ -79,13 +79,15 @@ namespace Coalesce.Domain
 
         [Read]
         public long AttachmentSize { get; set; }
-        [Read]
+        [Read, Restrict<TestRestriction>]
         public string AttachmentName { get; set; }
+        [Restrict<TestRestriction>]
         public string AttachmentType { get; set; }
         [Read, MaxLength(32)]
         public byte[] AttachmentHash { get; set; }
         [InternalUse]
         public CaseAttachmentContent AttachmentContent { get; set; } 
+
         public class CaseAttachmentContent
         {
             public int CaseKey { get; set; }
@@ -171,9 +173,6 @@ namespace Coalesce.Domain
             return new IntelliTect.Coalesce.Models.File(db.Cases
                 .WherePrimaryKeyIs(CaseKey)
                 .Select(c => c.AttachmentContent.Content)
-#if !NET5_0_OR_GREATER
-                .First()
-#endif
             )
             {
                 Name = AttachmentName,
@@ -231,7 +230,23 @@ namespace Coalesce.Domain
         [Coalesce]
         public static CaseSummary GetCaseSummary(AppDbContext db)
         {
+            int[] a = [1, 2, 3, 4, 5, 6, 7, 8];
+
             return CaseSummary.GetCaseSummary(db);
+        }
+
+        public class TestRestriction(AppDbContext db) : IPropertyRestriction<Case>
+        {
+            public bool UserCanRead(IMappingContext context, string propertyName, Case model)
+            {
+                // Nonsense arbitrary logic
+                return db.Cases.Any() && propertyName != null;
+            }
+
+            public bool UserCanWrite(IMappingContext context, string propertyName, Case? model, object? incomingValue)
+            {
+                return false;
+            }
         }
     }
 }

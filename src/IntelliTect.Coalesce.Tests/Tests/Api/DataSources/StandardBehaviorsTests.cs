@@ -64,7 +64,6 @@ namespace IntelliTect.Coalesce.Tests.Api.DataSources
             public override IQueryable<Case> GetQuery(IDataSourceParameters parameters) => base.GetQuery(parameters).AsNoTracking();
         }
 
-#if NET6_0_OR_GREATER
         [Fact]
         public async Task Save_WhenDataSourceIsUntracked_RetracksEntityAndSaves()
         {
@@ -81,6 +80,5 @@ namespace IntelliTect.Coalesce.Tests.Api.DataSources
             ds.Db.ChangeTracker.Clear();
             Assert.Equal("new desc", ds.Db.Cases.Single().Description);
         }
-#endif
     }
 }

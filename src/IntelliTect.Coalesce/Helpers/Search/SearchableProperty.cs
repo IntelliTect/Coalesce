@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
@@ -19,7 +20,7 @@ namespace IntelliTect.Coalesce.Helpers.Search
 
         protected virtual string PropertyNamePath => Property.Name;
 
-        public abstract IEnumerable<(PropertyViewModel property, string statement)> GetLinqDynamicSearchStatements(
-            ClaimsPrincipal? user, TimeZoneInfo timeZone, string? propertyParent, string rawSearchTerm);
+        public abstract IEnumerable<(PropertyViewModel property, Expression statement)> GetLinqSearchStatements(
+            CrudContext context, Expression propertyParent, string rawSearchTerm);
     }
 }

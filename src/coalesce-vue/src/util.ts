@@ -44,8 +44,11 @@ export function isNullOrWhitespace(value: string | null | undefined) {
 }
 
 const iso8601DateRegex =
-  /^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2}):(\d{2})(?:\.(\d{0,7}))?(?:Z|(.)(\d{2}):?(\d{2})?)?/;
-export function parseJSONDate(argument: string) {
+  /^(\d{4})-(\d{2})-(\d{2})(?:[T ](\d{2}):(\d{2}):(\d{2})(?:\.(\d{0,7}))?(?:(Z)|(.)(\d{2}):?(\d{2})?)?)?/;
+const iso8601TimeRegex =
+  /^(\d{2}):(\d{2}):(\d{2})(?:\.(\d{0,7}))?(?:Z|(.)(\d{2}):?(\d{2})?)?$/;
+
+export function parseJSONDate(argument: string, kind: DateKind = "datetime") {
   // DO NOT USE `new Date()` here.
   // Safari incorrectly interprets times without a timezone offset
   // (i.e. DateTime objects in c#) as UTC instead of local time.
@@ -61,22 +64,49 @@ export function parseJSONDate(argument: string) {
   // This method is only slightly slower than parseJSON,
   // but is still 3-4x faster than parseISO while also having much, much less code.
 
+  if (kind == "time") {
+    // Time-only formats might come from the server as truly only a time (C# TimeOnly type).
+    // "ISO 8601: Time without UTC offset information" https://github.com/dotnet/runtime/issues/53539
+
+    var timeParts = argument.match(iso8601TimeRegex) || [];
+    if (timeParts.length >= 3) {
+      // If ES Temporal was actually implemented in browsers we could maybe switch Coalesce to use it,
+      // but for now we just settle for using a Date and ignoring the time part.
+
+      // NOTE: We set the date to Jan 1 in to avoid Daylight Savings switch days,
+      // which if such a date were to be the date component of the `Date`, would fail
+      // to represent the time correctly for the hour that never occurs on leap-forward days.
+      return new Date(
+        new Date().getFullYear(),
+        0,
+        1,
+        +timeParts[1], // h
+        +timeParts[2], // m
+        +timeParts[3], // s
+        +((timeParts[4] || "0") + "00").substring(0, 3) // ms (maybe never used?)
+      );
+    }
+  }
+
   var parts = argument.match(iso8601DateRegex) || [];
 
-  const part9 = parts[9];
-  if (part9 !== undefined) {
+  const partTzOffset = parts[8] == "Z" ? 0 : parts[10]; // TZ offset
+
+  if (partTzOffset !== undefined) {
+    // Date+Time, with offset specifier
     return new Date(
       Date.UTC(
         +parts[1],
         +parts[2] - 1,
         +parts[3],
-        +parts[4] - (+part9 || 0) * (parts[8] == "-" ? -1 : 1),
-        +parts[5] - (+parts[10] || 0) * (parts[8] == "-" ? -1 : 1),
+        +parts[4] - (+partTzOffset || 0) * (parts[9] == "-" ? -1 : 1),
+        +parts[5] - (+parts[11] || 0) * (parts[9] == "-" ? -1 : 1),
         +parts[6],
         +((parts[7] || "0") + "00").substring(0, 3)
       )
     );
-  } else {
+  } else if (parts[4] !== undefined) {
+    // Date+Time, without offset specifier
     return new Date(
       +parts[1],
       +parts[2] - 1,
@@ -86,6 +116,9 @@ export function parseJSONDate(argument: string) {
       +parts[6],
       +((parts[7] || "0") + "00").substring(0, 3)
     );
+  } else {
+    // Date only, without a time portion:
+    return new Date(+parts[1], +parts[2] - 1, +parts[3]);
   }
 }
 

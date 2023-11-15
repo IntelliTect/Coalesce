@@ -60,9 +60,15 @@ If binding the component with ``v-model``, accepts the ``value`` part of ``v-mod
 <Prop def="params?: ListParameters" lang="ts" />
 
 An optional set of [Data Source Standard Parameters](/modeling/model-components/data-sources.md#standard-parameters) to pass to API calls made to the server.
+
+<Prop def="cache?: ResponseCachingConfiguration | boolean" lang="ts" />
+
+If provided and non-false, enables [response caching](/stacks/vue/layers/api-clients.md#response-caching) on the component's internal API caller.
     
 
 ## Events
+
+The following events and automatic API calls are only used when bound to a `model` that has [auto-saves](/stacks/vue/layers/viewmodels.md#auto-save) enabled.
 
 - `adding` - Fired when a new item has been selected, but before the call to `/save` has completed.
 - `added` - Fired when the call to `/save` has completed after adding a new item.

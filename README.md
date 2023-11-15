@@ -34,6 +34,10 @@ After you create your project, you should start reading through [the Documentati
 |master|[![GitHub Workflow Status (branch)](https://img.shields.io/github/actions/workflow/status/IntelliTect/Coalesce/release.yml?label=Build%20Status&logo=github)](https://github.com/IntelliTect/Coalesce/actions/workflows/release.yml)|[![NuGet](https://img.shields.io/nuget/v/IntelliTect.Coalesce.svg?label=nuget&logo=nuget)](https://www.nuget.org/packages/IntelliTect.Coalesce)
 
 
+## Support
+Full support for Coalesce is available. Please contact us for more information at info@intellitect.com.
+
+
 ## Contributing
 
 See the contribution guide [here](CONTRIBUTING.md).

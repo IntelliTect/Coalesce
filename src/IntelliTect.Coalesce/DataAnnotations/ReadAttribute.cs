@@ -3,10 +3,17 @@ using System;
 
 namespace IntelliTect.Coalesce.DataAnnotations
 {
+
     /// <summary>
     /// <para>
-    /// The Class or Property is read only for the users and groups and not accessible to others.
-    /// If no roles are specified, the target is readable by anyone.
+    /// When placed on an entity or custom <see cref="IClassDto{T}"/> class exposed by Coalesce,
+    /// controls the permissions for fetching existing instances of the model from 
+    /// the /get, /list, and /count endpoints.
+    /// </para>
+    /// <para>
+    /// When placed on a property exposed by Coalesce, controls the roles that are allowed
+    /// to read data from that property for any usage of the parent model,
+    /// including when the model is a custom method result or a nested child of another model.
     /// </para>
     /// <para>If specified on a property with no <see cref="EditAttribute"/>, the property is read-only.</para>
     /// </summary>

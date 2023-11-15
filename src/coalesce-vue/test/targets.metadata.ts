@@ -11,6 +11,7 @@ import {
   PrimaryKeyProperty,
   ModelReferenceNavigationProperty,
   solidify,
+  BehaviorFlags,
 } from "../src/metadata";
 
 const metaBase = (name: string = "model") => {
@@ -33,7 +34,7 @@ const domain: Domain = { enums: {}, types: {}, services: {} };
 export const Course = (domain.types.Course = {
   ...metaBase("Course"),
   type: "model",
-  behaviorFlags: 7,
+  behaviorFlags: 7 as BehaviorFlags,
   get keyProp() {
     return this.props.courseId;
   },
@@ -96,7 +97,7 @@ export const Course = (domain.types.Course = {
 export const Advisor = (domain.types.Advisor = {
   ...metaBase("Advisor"),
   type: "model",
-  behaviorFlags: 7,
+  behaviorFlags: 7 as BehaviorFlags,
   get keyProp() {
     return this.props.advisorId;
   },
@@ -131,6 +132,10 @@ export const Advisor = (domain.types.Advisor = {
       get foreignKey() {
         return (domain.types.Student as ModelType).props
           .studentAdvisorId as ForeignKeyProperty;
+      },
+      get inverseNavigation() {
+        return (domain.types.Student as ModelType).props
+          .advisor as ModelReferenceNavigationProperty;
       },
       itemType: {
         name: "$collectionValue",
@@ -174,7 +179,7 @@ export const Advisor = (domain.types.Advisor = {
 export const Student = (domain.types.Student = {
   ...metaBase("Student"),
   type: "model",
-  behaviorFlags: 7,
+  behaviorFlags: 7 as BehaviorFlags,
   get displayProp() {
     return this.props.name;
   },
@@ -389,6 +394,10 @@ export const Student = (domain.types.Student = {
       },
       get principalKey() {
         return Advisor.keyProp as PrimaryKeyProperty;
+      },
+      get inverseNavigation() {
+        return (domain.types.Advisor as ModelType).props
+          .students as ModelCollectionNavigationProperty;
       },
       typeDef: Advisor,
     },

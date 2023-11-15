@@ -18,9 +18,9 @@ namespace IntelliTect.Coalesce
         public static IApplicationBuilder UseViteDevelopmentServer(this IApplicationBuilder app)
             => app.UseViteDevelopmentServer(_ => { });
 
-        public static IApplicationBuilder UseViteDevelopmentServer(this IApplicationBuilder app, Action<ViteServerOptions> configure)
+        public static IApplicationBuilder UseViteDevelopmentServer(this IApplicationBuilder app, Action<ViteServerOptions> configure, string? optionsName = null)
         {
-            var options = app.ApplicationServices.GetService<IOptions<ViteServerOptions>>()?.Value ?? new();
+            var options = app.ApplicationServices.GetService<IOptionsMonitor<ViteServerOptions>>()?.Get(optionsName ?? Options.DefaultName) ?? new();
             configure(options);
             return app.UseViteDevelopmentServer(options);
         }

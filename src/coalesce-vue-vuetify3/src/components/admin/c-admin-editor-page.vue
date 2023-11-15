@@ -1,5 +1,5 @@
 <template>
-  <v-container class="c-admin-editor-page">
+  <v-container class="c-admin-editor-page" :class="'type-' + metadata.name">
     <c-admin-editor
       class="c-admin-editor-page--editor"
       :model="viewModel"
@@ -46,8 +46,11 @@ export default defineComponent({
       );
     }
 
+    const viewModel = new ViewModel.typeLookup![props.type]();
+    viewModel.$includes = "admin-editor";
+
     return {
-      viewModel: new ViewModel.typeLookup![props.type](),
+      viewModel,
     };
   },
 
@@ -91,14 +94,16 @@ export default defineComponent({
   },
 
   async created() {
+    const params = mapQueryToParams(
+      useRoute().query,
+      ListParameters,
+      this.metadata
+    );
+    this.viewModel.$dataSource = params.dataSource;
+
     if (this.id) {
       await this.viewModel.$load(this.id);
     } else {
-      const params = mapQueryToParams(
-        useRoute().query,
-        ListParameters,
-        this.metadata
-      );
       if (params.filter) {
         for (const propName in this.metadata.props) {
           const prop = this.metadata.props[propName];
@@ -117,7 +122,12 @@ export default defineComponent({
         }
       }
 
-      bindKeyToRouteOnCreate(this, this.viewModel);
+      bindKeyToRouteOnCreate(
+        this,
+        this.viewModel,
+        "id",
+        /* keep the querystring in case it has data source parameters */ true
+      );
     }
 
     this.viewModel.$startAutoSave(this, { wait: 500 });

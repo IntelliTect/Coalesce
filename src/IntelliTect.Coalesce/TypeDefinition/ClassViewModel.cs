@@ -1,20 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Dynamic;
-using System.Reflection;
-using System.Linq.Expressions;
-using System.ComponentModel;
-using System.Text.RegularExpressions;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using IntelliTect.Coalesce.DataAnnotations;
+﻿using IntelliTect.Coalesce.DataAnnotations;
+using IntelliTect.Coalesce.Helpers.Search;
+using IntelliTect.Coalesce.TypeUsage;
 using IntelliTect.Coalesce.Utilities;
 using Microsoft.CodeAnalysis;
-using IntelliTect.Coalesce.Helpers;
-using IntelliTect.Coalesce.Helpers.Search;
 using Microsoft.EntityFrameworkCore;
-using IntelliTect.Coalesce.TypeUsage;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
 
 namespace IntelliTect.Coalesce.TypeDefinition
 {
@@ -23,7 +19,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         protected IReadOnlyCollection<PropertyViewModel>? _Properties;
         protected IReadOnlyCollection<MethodViewModel>? _Methods;
 
-        internal HashSet<IValueViewModel> Usages = new HashSet<IValueViewModel>();
+        internal HashSet<ValueViewModel> Usages = new HashSet<ValueViewModel>();
 
         public ReflectionRepository? ReflectionRepository => Type.ReflectionRepository;
 
@@ -120,8 +116,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// </summary>
         public string ListViewModelClassName => ClientTypeName + "List";
 
-        public bool IsService => HasAttribute<CoalesceAttribute>() && HasAttribute<ServiceAttribute>();
-        public bool IsStandaloneEntity => HasAttribute<CoalesceAttribute>() && HasAttribute<StandaloneEntityAttribute>();
+        public bool IsService => this.HasAttribute<CoalesceAttribute>() && this.HasAttribute<ServiceAttribute>();
+        public bool IsStandaloneEntity => this.HasAttribute<CoalesceAttribute>() && this.HasAttribute<StandaloneEntityAttribute>();
 
         public string ServiceClientClassName => ClientTypeName + "Client";
 
@@ -187,7 +183,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             .Where(p =>
                 !p.IsInternalUse && p.HasPublicSetter && p.HasAttribute<CoalesceAttribute>()
                 // These are the only supported types, for now
-                && (p.Type.IsPrimitive || p.Type.IsDate)
+                && (p.Type.IsPrimitive || p.Type.IsDateOrTime)
             );
 
         /// <summary>
@@ -270,32 +266,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         #region Searching/Sorting
 
-        /// <summary>
-        /// Returns an expression suitable for usage with LINQ Dynamic
-        /// that represents the default sort ordering of instances of the class.
-        /// </summary>
-        public string? DefaultOrderByClause(string prependText = "")
-        {
-            var defaultOrderBy = DefaultOrderBy.ToList();
-
-            if (defaultOrderBy.Count == 0) return null;
-
-            var orderByClauseList = new List<string>();
-            foreach (var orderInfo in defaultOrderBy)
-            {
-                if (orderInfo.OrderByDirection == DefaultOrderByAttribute.OrderByDirections.Ascending)
-                {
-                    orderByClauseList.Add($"{orderInfo.OrderExpression(prependText)} ASC");
-                }
-                else
-                {
-                    orderByClauseList.Add($"{orderInfo.OrderExpression(prependText)} DESC");
-                }
-            }
-
-            return string.Join(",", orderByClauseList);
-        }
-
+        private ICollection<OrderByInformation>? _defaultOrderBy;
         /// <summary>
         /// Gets a sorted list of the default order by attributes for the class.
         /// </summary>
@@ -303,6 +274,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             get
             {
+                if (_defaultOrderBy is not null) return _defaultOrderBy;
+
                 var result = new List<OrderByInformation>();
                 foreach (var p in Properties
                     .Select(p => new { Prop = p, p.DefaultOrderBy })
@@ -340,7 +313,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
                 if (result.Count > 0)
                 {
-                    return result.ToList();
+                    return _defaultOrderBy = result;
                 }
 
                 // Nothing found, order by ListText and then ID.
@@ -349,7 +322,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 {
                     result.Add(new OrderByInformation()
                     {
-                        Properties = { nameProp },
+                        Properties = [nameProp],
                         OrderByDirection = DefaultOrderByAttribute.OrderByDirections.Ascending,
                         FieldOrder = 1
                     });
@@ -358,12 +331,12 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 {
                     result.Add(new OrderByInformation()
                     {
-                        Properties = { PrimaryKey },
+                        Properties = [PrimaryKey],
                         OrderByDirection = DefaultOrderByAttribute.OrderByDirections.Ascending,
                         FieldOrder = 1
                     });
                 }
-                return result;
+                return _defaultOrderBy = result;
             }
         }
 
@@ -429,7 +402,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// Returns true if this class has a partial typescript file.
         /// </summary>
-        public bool HasTypeScriptPartial => HasAttribute<TypeScriptPartialAttribute>();
+        public bool HasTypeScriptPartial => this.HasAttribute<TypeScriptPartialAttribute>();
 
         public bool WillCreateViewController =>
             this.GetAttributeValue<CreateControllerAttribute, bool>(a => a.WillCreateView) ?? true;
@@ -440,7 +413,10 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// Returns a human-readable string that represents the name of this type to the client.
         /// </summary>
-        public string DisplayName => ClientTypeName.ToProperCase();
+        public string DisplayName =>
+            this.GetAttributeValue<DisplayNameAttribute>(a => a.DisplayName) ??
+            this.GetAttributeValue<DisplayAttribute>(a => a.Name) ??
+            ClientTypeName.ToProperCase();
 
         public bool IsDbMappedType => DbContext != null;
 
@@ -468,13 +444,11 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public ClassSecurityInfo SecurityInfo => _securityInfo ??= new ClassSecurityInfo(this);
 
-        public bool IsDefaultDataSource => HasAttribute<DefaultDataSourceAttribute>();
+        public bool IsDefaultDataSource => this.HasAttribute<DefaultDataSourceAttribute>();
 
-        public object? GetAttributeValue<TAttribute>(string valueName) where TAttribute : Attribute =>
-            Type.GetAttributeValue<TAttribute>(valueName);
-
-        public bool HasAttribute<TAttribute>() where TAttribute : Attribute =>
-            Type.HasAttribute<TAttribute>();
+        public IEnumerable<AttributeViewModel<TAttribute>> GetAttributes<TAttribute>() 
+            where TAttribute : Attribute 
+            => Type.GetAttributes<TAttribute>();
 
         public override string ToString() => FullyQualifiedName;
 

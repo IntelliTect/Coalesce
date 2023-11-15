@@ -1,3 +1,4 @@
+import { BehaviorFlags } from "coalesce-vue";
 import {
   ObjectType,
   getEnumMeta,
@@ -29,7 +30,7 @@ const domain: Domain = { enums: {}, types: {}, services: {} };
 export const Course = (domain.types.Course = {
   ...metaBase("Course"),
   type: "model",
-  behaviorFlags: 7,
+  behaviorFlags: 7 as BehaviorFlags,
   get keyProp() {
     return this.props.courseId;
   },
@@ -92,7 +93,7 @@ export const Course = (domain.types.Course = {
 export const Advisor = (domain.types.Advisor = {
   ...metaBase("Advisor"),
   type: "model",
-  behaviorFlags: 7,
+  behaviorFlags: 7 as BehaviorFlags,
   get keyProp() {
     return this.props.advisorId;
   },
@@ -170,7 +171,7 @@ export const Advisor = (domain.types.Advisor = {
 export const Student = (domain.types.Student = {
   ...metaBase("Student"),
   type: "model",
-  behaviorFlags: 7,
+  behaviorFlags: 7 as BehaviorFlags,
   get displayProp() {
     return this.props.name;
   },
@@ -271,6 +272,57 @@ export const Student = (domain.types.Student = {
         displayName: "Result",
         role: "value",
         type: "file",
+      },
+    },
+    manyParams: {
+      name: "manyParams",
+      displayName: "ManyParams",
+      transportType: "item",
+      httpMethod: "GET",
+      params: {
+        id: {
+          name: "id",
+          displayName: "id",
+          type: "number",
+          role: "value",
+          get source() {
+            return (domain.types.Student as ModelType).props.studentId;
+          },
+        },
+        string: {
+          name: "string",
+          displayName: "String",
+          type: "string",
+          role: "value",
+        },
+        date: {
+          name: "date",
+          displayName: "Date",
+          type: "date",
+          dateKind: "datetime",
+          role: "value",
+        },
+        num: {
+          name: "num",
+          displayName: "Num",
+          type: "number",
+          role: "value",
+        },
+        model: {
+          name: "model",
+          displayName: "Model",
+          type: "model",
+          get typeDef() {
+            return domain.types.Course as ModelType;
+          },
+          role: "value",
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        role: "value",
+        type: "string",
       },
     },
   },

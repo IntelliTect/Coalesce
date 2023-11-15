@@ -1,5 +1,9 @@
 <template>
-  <v-container fluid class="c-admin-table-page">
+  <v-container
+    fluid
+    class="c-admin-table-page"
+    :class="'type-' + metadata.name"
+  >
     <c-admin-table
       class="c-admin-table-page--table"
       :list="listVM"
@@ -49,6 +53,7 @@ export default defineComponent({
         );
       }
       listVM = ref(new ListViewModel.typeLookup![props.type]() as any);
+      listVM.value.$includes = "admin-list";
     }
 
     return { listVM, ...useMetadataProps(props) };

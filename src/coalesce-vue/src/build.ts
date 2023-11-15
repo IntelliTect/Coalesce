@@ -3,7 +3,7 @@ import MagicString from "magic-string";
 
 import path from "node:path";
 import os from "node:os";
-import { existsSync } from "node:fs";
+import fs from "node:fs";
 import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { spawn } from "node:child_process";
 import { TLSSocket } from "node:tls";
@@ -414,7 +414,16 @@ function getHtmlTargetDir(config: ResolvedConfig) {
 }
 async function writeHtml(server: ViteDevServer) {
   const htmlSourceFileName = server.config.root + "/index.html";
-  if (existsSync(htmlSourceFileName)) {
+  const targetDir = getHtmlTargetDir(server.config);
+
+  fs.mkdirSync(targetDir, { recursive: true });
+
+  // Copy static public assets too
+  if (server.config.publicDir) {
+    copyDir(server.config.publicDir, targetDir);
+  }
+
+  if (fs.existsSync(htmlSourceFileName)) {
     let outputHtml = await readFile(htmlSourceFileName, "utf-8");
     outputHtml = await server.transformIndexHtml(
       "/index.html",
@@ -422,19 +431,26 @@ async function writeHtml(server: ViteDevServer) {
       "/"
     );
 
-    const targetDir = getHtmlTargetDir(server.config);
-
     try {
-      if (!existsSync(targetDir)) {
-        await mkdir(targetDir);
-      }
-
       await writeFile(path.join(targetDir, "index.html"), outputHtml, "utf-8");
       server.config.logger.info(`  Coalesce: Wrote index.html to ${targetDir}`);
     } catch (e) {
       server.config.logger.error(
         `  Coalesce: Error writing index.html to ${targetDir}: ${e}`
       );
+    }
+  }
+}
+
+function copyDir(srcDir: string, destDir: string) {
+  for (const file of fs.readdirSync(srcDir)) {
+    const srcFile = path.resolve(srcDir, file);
+    const destFile = path.resolve(destDir, file);
+    const stat = fs.statSync(srcFile);
+    if (stat.isDirectory()) {
+      copyDir(srcFile, destFile);
+    } else {
+      fs.copyFileSync(srcFile, destFile);
     }
   }
 }
@@ -454,7 +470,9 @@ export function createClassNameFixerPlugin() {
       // Auto set esbuild to keep names as well,
       // which is also an important part of making vue-class-component work.
       config.esbuild ??= {};
-      config.esbuild.keepNames ??= true;
+      if (config.esbuild) {
+        config.esbuild.keepNames ??= true;
+      }
     },
     configResolved(config) {
       command = config.command;
@@ -521,7 +539,7 @@ export async function getCertPaths(certName?: string) {
   const certFilePath = path.join(baseFolder, `${certificateName}.pem`);
   const keyFilePath = path.join(baseFolder, `${certificateName}.key`);
 
-  let valid = existsSync(certFilePath) && existsSync(keyFilePath);
+  let valid = fs.existsSync(certFilePath) && fs.existsSync(keyFilePath);
   let certContent;
 
   if (valid) {

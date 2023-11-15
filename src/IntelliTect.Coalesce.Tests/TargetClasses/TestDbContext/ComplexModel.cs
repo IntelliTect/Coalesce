@@ -18,7 +18,15 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         public int ComplexModelId { get; set; }
 
         [InverseProperty(nameof(Test.ComplexModel))]
+        [Search]
         public ICollection<Test> Tests { get; set; }
+
+        /// <summary>
+        /// Test case for foreign keys without a reference navigation prop.
+        /// This configuration *will* be picked up by EF conventions.
+        /// </summary>
+        [ForeignKey(nameof(ComplexModelDependent.ParentId))]
+        public ICollection<ComplexModelDependent> ChildrenWithoutRefNavProp { get; set; }
 
         public int SingleTestId { get; set; }
         public Test SingleTest { get; set; }
@@ -36,6 +44,12 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
 
         public DateTime? DateTimeNullable { get; set; }
 
+        public DateOnly SystemDateOnly { get; set; }
+        public TimeOnly SystemTimeOnly { get; set; }
+
+        [DateType(DateTypeAttribute.DateTypes.DateOnly)]
+        public DateTime DateOnlyViaAttribute { get; set; }
+
 
         internal string InternalProperty { get; set; }
 
@@ -47,6 +61,12 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
 
         [Read(RoleNames.Admin)]
         public string AdminReadableString { get; set; }
+
+        [Restrict<AuthenticatedRestriction>]
+        public string RestrictedString { get; set; }
+
+        [Restrict<AuthenticatedRestriction>]
+        public string RestrictInit { get; init; }
 
         [Read(RoleNames.Admin)]
         public int? AdminReadableReferenceNavigationId { get; set; }
@@ -97,6 +117,12 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
 
         [Range(1, 100)]
         public int NonNullNonZeroInt { get; set; }
+
+        [ClientValidation(MinValue = 0, MaxValue = 10)]
+        public int ClientValidationInt { get; set; }
+
+        [ClientValidation(MinLength = 0, MaxLength = 10)]
+        public string ClientValidationString { get; set; }
 
 
         public Case.Statuses? EnumNullable { get; set; }
@@ -206,13 +232,17 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
             int complexModelId,
             ComplexModel model) => true;
 
-#if NET5_0_OR_GREATER
         [Coalesce]
         public PositionalRecord MethodWithPositionRecord(PositionalRecord rec) => new PositionalRecord("a", 42);
 
         [Coalesce]
         public InitRecordWithDefaultCtor MethodWithInitRecord(InitRecordWithDefaultCtor rec) => new InitRecordWithDefaultCtor { String = "a", Num = 42 };
-#endif
+
+        [Coalesce, Execute(ValidateAttributes = false)]
+        public ItemResult MethodWithValidationExplicitOff([Required] ValidationTarget target) => true;
+
+        [Coalesce, Execute(ValidateAttributes = true)]
+        public ItemResult MethodWithValidationExplicitOn([Required] ValidationTarget target) => true;
     }
 
     [Create(SecurityPermissionLevels.DenyAll)]

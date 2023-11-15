@@ -5,6 +5,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Security.Claims;
+using System.Linq.Expressions;
+using Microsoft.EntityFrameworkCore.Query;
+using System.Reflection;
+using IntelliTect.Coalesce.Utilities;
 
 namespace IntelliTect.Coalesce.Helpers.Search
 {
@@ -17,25 +21,44 @@ namespace IntelliTect.Coalesce.Helpers.Search
 
         internal ICollection<SearchableProperty> Children { get; }
 
-        public override IEnumerable<(PropertyViewModel property, string statement)> GetLinqDynamicSearchStatements(
-            ClaimsPrincipal? user, TimeZoneInfo timeZone, string? propertyParent, string rawSearchTerm)
+        public override IEnumerable<(PropertyViewModel property, Expression statement)> GetLinqSearchStatements(
+            CrudContext context, Expression propertyParent, string rawSearchTerm)
         {
-            if (!Property.SecurityInfo.IsReadAllowed(user))
+            if (!Property.SecurityInfo.IsFilterAllowed(context))
             {
-                return Enumerable.Empty<(PropertyViewModel, string)>();
+                return Enumerable.Empty<(PropertyViewModel, Expression)>();
             }
 
-            var accessor = propertyParent == null
-                ? Property.Name
-                : $"{propertyParent}.{Property.Name}";
+            var accessor = Expression.Property(propertyParent, Property.Name);
 
             return Children
                 .SelectMany(c => {
-                    return c.GetLinqDynamicSearchStatements(user, timeZone, null, rawSearchTerm).Select(t =>
+                    var anyParam = Expression.Parameter(Property.PureType.TypeInfo);
+
+                    return c.GetLinqSearchStatements(context, anyParam, rawSearchTerm).Select(t =>
                     {
-                        return (t.property, $"{accessor}.Any({t.statement})");
+                        var expr = accessor.Call(
+                            EnumerableAnyWithPredicate.MakeGenericMethod(Property.PureType.TypeInfo),
+                            Expression.Lambda(
+                                t.statement,
+                                anyParam
+                            )
+                        );
+
+                        // This will get optimized away when translating to SQL,
+                        // but guarding against null is necessary to perform our
+                        // search tests in memory.
+                        expr = Expression.AndAlso(
+                            Expression.NotEqual(accessor, Expression.Constant(null)),
+                            expr
+                        );
+
+                        return (t.property, expr);
                     });
                 });
         }
+
+        private static readonly MethodInfo EnumerableAnyWithPredicate
+            = typeof(Enumerable).GetMethods().Single(m => m.Name == nameof(Enumerable.Any) && m.GetParameters().Length == 2);
     }
 }

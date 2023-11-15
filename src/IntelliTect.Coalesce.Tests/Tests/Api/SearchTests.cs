@@ -2,10 +2,10 @@
 using IntelliTect.Coalesce.Tests.TargetClasses;
 using IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext;
 using IntelliTect.Coalesce.TypeDefinition;
+using IntelliTect.Coalesce.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Dynamic.Core;
 using System.Linq.Expressions;
 using System.Security.Claims;
 using System.Text;
@@ -166,6 +166,18 @@ namespace IntelliTect.Coalesce.Tests.Api
                 shouldMatch);
         }
 
+        [Theory]
+        [InlineData(true, "a1", "a1")]
+        [InlineData(false, "B1", "a1")]
+        public void Search_Collection_SearchesCorrectly(
+            bool shouldMatch, string propValue, string inputValue)
+        {
+            SearchHelper(
+                (ComplexModel t) => t.Tests,
+                inputValue,
+                new[] {new Test { TestName = propValue } },
+                shouldMatch);
+        }
 
 
         private void SearchHelper<T, TProp>(
@@ -179,13 +191,14 @@ namespace IntelliTect.Coalesce.Tests.Api
         {
             var classViewModel = new ReflectionClassViewModel(typeof(T));
             var prop = classViewModel.PropertyBySelector(propSelector);
+            var context = new CrudContext(() => new ClaimsPrincipal(), timeZoneInfo ?? TimeZoneInfo.Local);
 
+            var param = Expression.Parameter(typeof(T));
             var searchClauses = prop
-                .SearchProperties(classViewModel, maxDepth: 1, force: true)
-                .SelectMany(p => p.GetLinqDynamicSearchStatements(
-                    new ClaimsPrincipal(),
-                    timeZoneInfo ?? TimeZoneInfo.Local,
-                    "it",
+                .SearchProperties(classViewModel, maxDepth: 2, force: true)
+                .SelectMany(p => p.GetLinqSearchStatements(
+                    context,
+                    param,
                     searchTerm
                 ))
                 .Select(t => t.statement)
@@ -197,7 +210,7 @@ namespace IntelliTect.Coalesce.Tests.Api
             var matchedItems = searchClauses.Any()
                 ? new[] { model }
                     .AsQueryable()
-                    .Where(string.Join(" || ", searchClauses))
+                    .Where(Expression.Lambda<Func<T, bool>>(searchClauses.OrAny(), param))
                     .ToArray()
                 : new T[0];
 

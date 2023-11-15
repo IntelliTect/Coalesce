@@ -1,5 +1,5 @@
 <template>
-  <v-card class="c-admin-table">
+  <v-card class="c-admin-table" :class="'type-' + metadata.name">
     <c-admin-table-toolbar
       :list="viewModel"
       :page-sizes="pageSizes"
@@ -25,7 +25,7 @@
         }"
       >
         <template #item-append="{ item }">
-          <td width="1%">
+          <td width="1%" class="c-admin-table--actions">
             <v-row class="flex-nowrap" no-gutters>
               <v-btn
                 v-if="canEdit || hasInstanceMethods"
@@ -153,6 +153,11 @@ export default defineComponent({
           type: this.metadata.name,
           id: item.$primaryKey,
         },
+        query: this.queryBind
+          ? // If there's a data source for the list, pass it to the edit page
+            // in case that data source is the only thing allowing the item to be loaded.
+            mapParamsToDto({ dataSource: this.viewModel.$params.dataSource })
+          : {},
       }).fullPath;
     },
   },
@@ -168,16 +173,22 @@ export default defineComponent({
         "replace"
       );
 
-      // Pull initial parameters from the querystring before we setup watchers.
-      this.viewModel.$params = mapQueryToParams(
-        this.router.currentRoute.value.query,
-        ListParameters,
-        this.viewModel.$metadata
-      );
+      // Establish the baseline parameters that do not need to be represented in the query string.
+      // I.E. don't put the default values of parameters in the query string.
+      const baselineParams = mapParamsToDto(this.viewModel.$params);
 
+      // When the parameters change, put them into the query string.
       this.$watch(
         () => mapParamsToDto(this.viewModel.$params),
         (mappedParams: any, old: any) => {
+          // For any parameters that match the baseline parameters,
+          // do not put those parameters in the query string.
+          for (const key in baselineParams) {
+            if (mappedParams[key] == baselineParams[key]) {
+              delete mappedParams[key];
+            }
+          }
+
           this.router
             .replace({
               query: {
@@ -204,16 +215,21 @@ export default defineComponent({
         { deep: true }
       );
 
-      // When the query changes, grab the new value.
+      // When the query changes, grab the new parameter values.
       this.$watch(
         () => this.router.currentRoute.value.query,
         (v: any) => {
           this.viewModel.$params = mapQueryToParams(
-            v,
+            {
+              ...baselineParams,
+              // Overlay the query values on top of the baseline parameters.
+              ...v,
+            },
             ListParameters,
             this.viewModel.$metadata
           );
-        }
+        },
+        { immediate: true }
       );
     }
 

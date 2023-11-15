@@ -126,7 +126,9 @@ export default defineComponent({
         },
         query: Object.fromEntries(
           Object.entries(mapParamsToDto(this.list.$params) || {}).filter(
-            (entry) => entry[0].startsWith("filter.")
+            (entry) =>
+              entry[0].startsWith("filter.") ||
+              entry[0].startsWith("dataSource")
           )
         ),
       }).fullPath;

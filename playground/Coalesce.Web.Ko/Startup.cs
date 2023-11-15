@@ -21,11 +21,7 @@ namespace Coalesce.Web
     {
         public IConfigurationRoot Configuration { get; set; }
 
-#if NETCOREAPP
         public Startup(IWebHostEnvironment env)
-#else
-        public Startup(IHostingEnvironment env)
-#endif
         {
             var builder = new ConfigurationBuilder()
                 .SetBasePath(env.ContentRootPath)

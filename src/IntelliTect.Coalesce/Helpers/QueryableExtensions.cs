@@ -1,17 +1,13 @@
-﻿using IntelliTect.Coalesce.Utilities;
+﻿using IntelliTect.Coalesce.DataAnnotations;
+using IntelliTect.Coalesce.TypeDefinition;
+using IntelliTect.Coalesce.Utilities;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
-using System.Linq.Dynamic.Core;
 using System.Linq.Expressions;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Query;
-using System.Reflection;
-using IntelliTect.Coalesce.TypeDefinition;
 using System.Threading;
-using System.Collections;
-using IntelliTect.Coalesce.DataAnnotations;
+using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce
 {
@@ -46,9 +42,13 @@ namespace IntelliTect.Coalesce
         /// <returns>The filtered query.</returns>
         public static IQueryable<T> WherePrimaryKeyIs<T>(this IQueryable<T> query, object id, ReflectionRepository? reflectionRepository = null)
         {
-            var classViewModel = (reflectionRepository ?? ReflectionRepository.Global).GetClassViewModel<T>() ?? throw new ArgumentException("Queried type is not a class");
-            var pkProp = classViewModel.PrimaryKey?.PropertyInfo ?? throw new ArgumentException("Unable to determine primary key of the queried type");
-            return query.Where($"{pkProp.Name} == @0", id);
+            var classViewModel = (reflectionRepository ?? ReflectionRepository.Global).GetClassViewModel<T>() 
+                ?? throw new ArgumentException("Queried type is not a class");
+
+            var pkProp = classViewModel.PrimaryKey 
+                ?? throw new ArgumentException("Unable to determine primary key of the queried type");
+
+            return query.WhereExpression(it => Expression.Equal(it.Prop(pkProp), id.AsQueryParam(pkProp.Type)));
         }
 
         /// <summary>
@@ -69,6 +69,32 @@ namespace IntelliTect.Coalesce
             where T : class
         {
             return query.WherePrimaryKeyIs(id, reflectionRepository).FirstOrDefault();
+        }
+
+        public static IQueryable<T> OrderBy<T>(
+            this IQueryable<T> query,
+            IEnumerable<OrderByInformation> orderings)
+            where T : class
+        {
+            bool isFirst = true;
+
+            foreach (var ordering in orderings)
+            {
+                var expression = ordering!.LambdaExpression<T>();
+                query = (IQueryable<T>)ordering.OrderByMethod<T>(isFirst).Invoke(null, [query, expression])!;
+                isFirst = false;
+            }
+
+            return query;
+        }
+
+        internal static IQueryable<T> WhereExpression<T>(
+            this IQueryable<T> query,
+            Func<ParameterExpression, Expression> predicateBuilder
+        )
+        {
+            var param = Expression.Parameter(typeof(T));
+            return query.Where(Expression.Lambda<Func<T, bool>>(predicateBuilder(param), param));
         }
     }
 }

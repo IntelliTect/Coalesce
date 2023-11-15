@@ -2,6 +2,7 @@
 using Coalesce.Web.Ko.Models;
 using IntelliTect.Coalesce;
 using IntelliTect.Coalesce.Api;
+using IntelliTect.Coalesce.Api.Behaviors;
 using IntelliTect.Coalesce.Api.Controllers;
 using IntelliTect.Coalesce.Api.DataSources;
 using IntelliTect.Coalesce.Mapping;
@@ -61,6 +62,15 @@ namespace Coalesce.Web.Ko.Api
             [DeclaredFor(typeof(Coalesce.Domain.CaseDto))] IDataSource<Coalesce.Domain.Case> dataSource,
             [DeclaredFor(typeof(Coalesce.Domain.CaseDto))] IBehaviors<Coalesce.Domain.Case> behaviors)
             => SaveImplementation(dto, parameters, dataSource, behaviors);
+
+        [HttpPost("bulkSave")]
+        [Authorize]
+        public virtual Task<ItemResult<Coalesce.Domain.CaseDto>> BulkSave(
+            [FromBody] BulkSaveRequest dto,
+            [FromQuery] DataSourceParameters parameters,
+            [FromServices] IDataSourceFactory dataSourceFactory,
+            [FromServices] IBehaviorsFactory behaviorsFactory)
+            => BulkSaveImplementation(dto, parameters, dataSourceFactory, behaviorsFactory);
 
         [HttpPost("delete/{id}")]
         [Authorize]

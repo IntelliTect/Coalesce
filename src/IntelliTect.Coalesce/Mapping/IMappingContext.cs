@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using IntelliTect.Coalesce.DataAnnotations;
+using System;
+using System.Collections.Generic;
 using System.Security.Claims;
 
 namespace IntelliTect.Coalesce
@@ -7,7 +9,7 @@ namespace IntelliTect.Coalesce
     {
         string? Includes { get; }
         Dictionary<object, object> MappedObjects { get; }
-        ClaimsPrincipal? User { get; }
+        ClaimsPrincipal User { get; }
 
         bool IsInRoleCached(string role);
 
@@ -15,11 +17,14 @@ namespace IntelliTect.Coalesce
 
         bool TryGetMapping<TDto>(
             object sourceObject,
-#if NETCOREAPP
             [System.Diagnostics.CodeAnalysis.NotNullWhen(true)]
-#endif
             out TDto? mappedObject
         )
             where TDto : class;
+
+        IPropertyRestriction GetPropertyRestriction(Type type);
+        TRestriction GetPropertyRestriction<TRestriction>()
+            where TRestriction : IPropertyRestriction
+            => (TRestriction)GetPropertyRestriction(typeof(TRestriction));
     }
 }

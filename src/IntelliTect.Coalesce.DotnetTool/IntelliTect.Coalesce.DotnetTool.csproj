@@ -6,8 +6,6 @@
     https://docs.microsoft.com/en-us/dotnet/core/tools/global-tools-how-to-create
     -->
   <PropertyGroup>
-    <TargetFrameworks>net6.0;net7.0</TargetFrameworks>
-    
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>coalesce</ToolCommandName>
     

@@ -1,11 +1,11 @@
 {
   "webProject": {
     "projectFile": "./playground/Coalesce.Web.Vue3/Coalesce.Web.Vue3.csproj",
-    "framework": "net7.0"
+    "framework": "net8.0"
   },
   "dataProject": {
     "projectFile": "./playground/Coalesce.Domain/Coalesce.Domain.csproj",
-    "framework": "net7.0"
+    "framework": "net8.0"
   },
   //"rootTypesWhitelist": [
   //  "CaseDto"

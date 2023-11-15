@@ -1,63 +1,58 @@
-﻿using IntelliTect.Coalesce.Utilities;
+﻿using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Reflection;
-using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.TypeDefinition
 {
+    public class ReflectionAttributeViewModel<TAttribute> : AttributeViewModel<TAttribute>
+        where TAttribute : Attribute
+    {
+        public TAttribute Instance { get; }
+
+        public ReflectionAttributeViewModel(TAttribute instance, ReflectionRepository? rr) : base(rr)
+        {
+            Instance = instance;
+        }
+
+        public override TypeViewModel Type => ReflectionRepository.GetOrAddType(Instance.GetType());
+
+        public override object? GetValue(string valueName)
+        {
+            var property = Instance.GetType().GetProperty(valueName);
+            if (property == null) return null;
+
+            // Some attributes have getters that throw if the value was never set, hence the try/catch.
+            // E.g. DisplayAttribute.Order
+            try
+            {
+                var value = property.GetValue(Instance, null);
+                if (value is Type reflectionValue) return ReflectionRepository.Global.GetOrAddType(reflectionValue);
+                return value;
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+    }
+
     public static class ReflectionExtensions
     {
-        /// <summary>
-        /// Returns the attributed requested if it exists or null if it does not.
-        /// </summary>
-        /// <typeparam name="TAttribute"></typeparam>
-        /// <returns></returns>
-        public static TAttribute? GetAttribute<TAttribute>(this ICustomAttributeProvider member) where TAttribute : Attribute
-        {
-            var attributes = member.GetCustomAttributes(typeof(TAttribute), true);
-            return attributes.FirstOrDefault() as TAttribute;
-        }
-
-        /// <summary>
-        /// Returns true if the attribute exists.
-        /// </summary>
-        /// <typeparam name="TAttribute"></typeparam>
-        /// <returns></returns>
-        public static bool HasAttribute<TAttribute>(this ICustomAttributeProvider member) where TAttribute : Attribute
-        {
-            return member.IsDefined(typeof(TAttribute), true);
-        }
-
-        public static object? GetAttributeValue<TAttribute>(this ICustomAttributeProvider member, string valueName) where TAttribute : Attribute
-        {
-            var attr = member.GetAttribute<TAttribute>();
-            if (attr != null)
-            {
-                var property = attr.GetType().GetProperty(valueName);
-                if (property == null) return null;
-
-                // Some attributes have getters that throw if the value was never set, hence the try/catch.
-                // E.g. DisplayAttribute.Order
-                try
-                {
-                    return property.GetValue(attr, null);
-                }
-                catch (Exception)
-                {
-                    return null;
-                }
-            }
-            return null;
-        }
-
-        public static string? GetAttributeValue<TAttribute>(this ICustomAttributeProvider member, Expression<Func<TAttribute, string?>> propertyExpression)
+        public static IEnumerable<ReflectionAttributeViewModel<TAttribute>> GetAttributes<TAttribute>(
+            this ICustomAttributeProvider member,
+            ReflectionRepository? rr = null
+        )
             where TAttribute : Attribute
-        {
-            return GetAttributeValue<TAttribute>(member, propertyExpression.GetExpressedProperty().Name) as string;
-        }
+            => member.GetCustomAttributes(typeof(TAttribute), true)
+                .OfType<TAttribute>()
+                .Select(a => new ReflectionAttributeViewModel<TAttribute>(a, rr));
 
+        public static TAttribute? GetAttribute<TAttribute>(
+            this ICustomAttributeProvider member
+        )
+            where TAttribute : Attribute
+            => member.GetAttributes<TAttribute>().Select(a => a.Instance).FirstOrDefault();
     }
 }

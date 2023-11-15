@@ -1,5 +1,5 @@
 <template>
-  <v-card class="c-admin-editor">
+  <v-card class="c-admin-editor" :class="'type-' + metadata.name">
     <v-toolbar
       class="c-admin-editor-page--toolbar"
       dense
@@ -43,21 +43,24 @@
               v-for="prop in showProps"
               :key="prop.name"
               class="c-admin-editor--row"
+              :class="'prop-' + prop.name"
             >
               <v-col
                 cols="12"
                 md="2"
-                class="py-0 py-md-3 font-weight-bold text-md-right"
+                class="py-0 py-md-3 font-weight-bold text-md-right c-admin-editor--label-col"
                 align-self="start"
               >
                 {{ prop.displayName }}
               </v-col>
-              <v-col class="py-0">
+              <v-col class="py-0 c-admin-editor--input-col">
                 <c-input
                   :model="model"
                   :for="prop"
                   v-bind="propInputBinds(prop)"
                   label=""
+                  :aria-label="prop.displayName"
+                  :aria-description="prop.description"
                   hide-details="auto"
                   @deleted="
                     // Reload when a c-select-many-to-many item is deleted,
@@ -73,7 +76,7 @@
               </v-col>
               <v-col
                 v-if="prop.role == 'referenceNavigation'"
-                class="py-0 flex-grow-0"
+                class="c-admin-editor--aux-col"
               >
                 <v-btn
                   class="c-admin-editor--ref-nav-link"
@@ -98,7 +101,7 @@
                     prop.subtype == 'email' ||
                     prop.subtype == 'tel')
                 "
-                class="py-0 flex-grow-0"
+                class="c-admin-editor--aux-col"
               >
                 <v-btn
                   class="c-admin-editor--href-link"
@@ -118,14 +121,10 @@
               </v-col>
               <v-col
                 v-if="prop.type == 'string' && prop.subtype == 'url-image'"
-                class="py-0 flex-grow-0"
+                class="c-admin-editor--aux-col"
               >
-                <v-card outlined rounded>
-                  <c-display
-                    :model="model"
-                    :for="prop"
-                    style="max-width: 100px; display: block"
-                  ></c-display>
+                <v-card outlined rounded class="c-admin-editor--img-preview">
+                  <c-display :model="model" :for="prop"></c-display>
                 </v-card>
               </v-col>
             </v-row>
@@ -244,5 +243,14 @@ export default defineComponent({
       padding-top: 0;
     }
   }
+}
+.c-admin-editor--aux-col {
+  flex-grow: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+.c-admin-editor--img-preview img {
+  max-width: 100px;
+  display: block;
 }
 </style>

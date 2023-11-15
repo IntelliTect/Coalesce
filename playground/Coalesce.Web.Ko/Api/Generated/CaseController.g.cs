@@ -2,6 +2,7 @@
 using Coalesce.Web.Ko.Models;
 using IntelliTect.Coalesce;
 using IntelliTect.Coalesce.Api;
+using IntelliTect.Coalesce.Api.Behaviors;
 using IntelliTect.Coalesce.Api.Controllers;
 using IntelliTect.Coalesce.Api.DataSources;
 using IntelliTect.Coalesce.Mapping;
@@ -62,6 +63,15 @@ namespace Coalesce.Web.Ko.Api
             IBehaviors<Coalesce.Domain.Case> behaviors)
             => SaveImplementation(dto, parameters, dataSource, behaviors);
 
+        [HttpPost("bulkSave")]
+        [AllowAnonymous]
+        public virtual Task<ItemResult<CaseDtoGen>> BulkSave(
+            [FromBody] BulkSaveRequest dto,
+            [FromQuery] DataSourceParameters parameters,
+            [FromServices] IDataSourceFactory dataSourceFactory,
+            [FromServices] IBehaviorsFactory behaviorsFactory)
+            => BulkSaveImplementation(dto, parameters, dataSourceFactory, behaviorsFactory);
+
         [HttpPost("delete/{id}")]
         [Authorize]
         public virtual Task<ItemResult<CaseDtoGen>> Delete(
@@ -109,7 +119,7 @@ namespace Coalesce.Web.Ko.Api
         public virtual ItemResult<System.Collections.Generic.ICollection<CaseDtoGen>> GetSomeCases()
         {
             IncludeTree includeTree = null;
-            var _mappingContext = new MappingContext(User);
+            var _mappingContext = new MappingContext(Context);
             var _methodResult = Coalesce.Domain.Case.GetSomeCases(
                 Db
             );
@@ -376,7 +386,7 @@ namespace Coalesce.Web.Ko.Api
         public virtual ItemResult<CaseSummaryDtoGen> GetCaseSummary()
         {
             IncludeTree includeTree = null;
-            var _mappingContext = new MappingContext(User);
+            var _mappingContext = new MappingContext(Context);
             var _methodResult = Coalesce.Domain.Case.GetCaseSummary(
                 Db
             );

@@ -1,11 +1,13 @@
 <Project>
   <PropertyGroup>
+	  <TargetFrameworks>net6.0;net7.0;net8.0</TargetFrameworks>
+	  
     <Company>IntelliTect</Company>
     <Authors>IntelliTect</Authors>
     <Product>Coalesce Web Framework</Product>
     <Copyright>Copyright IntelliTect © 2020, All Rights Reserved.</Copyright>
     <DefaultLanguage>en-US</DefaultLanguage>
-    
+
     <!-- CS1591: Missing XML comment for publicly visible type or member -->
     <NoWarn>$(NoWarn);CS1591</NoWarn>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -21,9 +23,8 @@
     <RepositoryUrl>https://github.com/IntelliTect/Coalesce</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
 
-    <LangVersion>11.0</LangVersion>
+    <LangVersion>12.0</LangVersion>
     <TypeScriptCompileBlocked>true</TypeScriptCompileBlocked>
-    <TypeScriptToolsVersion>Latest</TypeScriptToolsVersion>
 
     <!-- Sourcelink stuff: -->
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
@@ -34,18 +35,22 @@
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
 
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'net6.0' ">
+    <DotNetPackageVersionSpec>6.0.*</DotNetPackageVersionSpec>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'net7.0' ">
+    <DotNetPackageVersionSpec>7.0.*</DotNetPackageVersionSpec>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'net8.0' ">
+    <DotNetPackageVersionSpec>8.0.*-*</DotNetPackageVersionSpec>
+  </PropertyGroup>
+
   <ItemGroup>
     <SourceRoot Include="$(MSBuildThisFileDirectory)/../"/>
   </ItemGroup>
-  
+
   <PropertyGroup Condition="'$(TF_BUILD)' == 'true'">
     <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
-  </PropertyGroup>
-
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' Or '$(TargetFramework)' == 'net471' ">
-    <!-- Ignore nullability warnings for the netstandard2.0 target since many of them 
-    are false positives due to attributes not existing in the BCL. -->
-    <NoWarn>$(NoWarn);CS8600;CS8601;CS8602;CS8603;CS8604;CS8618;CS8625;CS8619</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup Condition="$(Configuration) == 'Release'">
@@ -64,4 +69,5 @@
       <IncludeAssets>analyzers</IncludeAssets>
     </PackageReference>
   </ItemGroup>
+
 </Project>

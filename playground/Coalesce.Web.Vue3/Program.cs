@@ -53,7 +53,6 @@ services
         options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
     });
 
-
 services.Configure<Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerOptions>(options =>
 {
     options.Limits.MaxRequestBodySize = int.MaxValue; // testing big file uploads/downloads
@@ -115,6 +114,7 @@ app.Use(async (context, next) =>
     await next();
 });
 
+app.UseCors(c => c.AllowAnyOrigin().AllowAnyHeader());
 app.MapControllers();
 app.MapSwagger();
 app.UseSwaggerUI(c =>

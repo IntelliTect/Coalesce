@@ -10,22 +10,17 @@
   -->
   
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp2.1;net6.0;net7.0</TargetFrameworks>
-
-    <!--    
-	    Suppress warnings about 2.1 being abandoned. 
-	    This was the last version to officially support DotNetCliToolReference,
-		so we keep building for this target framework because it doesn't require
-		hacky workarounds (<DotnetCliToolTargetFramework>) in the consuming project.
-	-->
-	<CheckEolTargetFramework Condition=" '$(TargetFramework)' == 'netcoreapp2.1' ">false</CheckEolTargetFramework>
-	  
     <PlatformTarget>AnyCPU</PlatformTarget>
 
     <AssemblyName>dotnet-coalesce</AssemblyName>
     <PackageId>IntelliTect.Coalesce.Tools</PackageId>
     <PackageType>DotnetCliTool</PackageType>
   </PropertyGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.1' ">
+    <!-- Supress vulnerability warnings about .NET Core 2.1 -->
+    <PackageReference Update="Microsoft.NETCore.App" NoWarn="NU1902;NU1903"  />
+  </ItemGroup>
 
   <ItemGroup>
     <Compile Include="../IntelliTect.Coalesce.DotnetTool/*.cs" />

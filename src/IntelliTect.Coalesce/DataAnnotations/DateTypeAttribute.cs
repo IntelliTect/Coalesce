@@ -15,6 +15,7 @@ namespace IntelliTect.Coalesce.DataAnnotations
         {
             DateTime = 0,
             DateOnly = 1,
+            TimeOnly = 2,
         }
 
         public DateTypes DateType { get; set; }

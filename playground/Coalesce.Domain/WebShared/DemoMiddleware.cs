@@ -50,8 +50,7 @@ namespace Coalesce.Domain.WebShared
             }
 
             var isLoggedIn = context.User.Identity?.IsAuthenticated == true;
-            if (!wasLoggedIn && isLoggedIn) context.Response.Redirect("/");
-            else await _next(context);
+            await _next(context);
         }
 
         private async Task SignInUser(HttpContext context, string name, string role)
@@ -80,7 +79,9 @@ namespace Coalesce.Domain.WebShared
                 // which we don't want to do unless we really need to change user.
                 return;
             }
-            await context.SignInAsync(AuthenticationScheme, new ClaimsPrincipal(identity));
+            var user = new ClaimsPrincipal(identity);
+            await context.SignInAsync(AuthenticationScheme, user);
+            context.User = user;
         }
     }
 }

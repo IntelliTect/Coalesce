@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Mvc;
 using IntelliTect.Coalesce.Api.Behaviors;
 using IntelliTect.Coalesce.Api.Controllers;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
+using System.Reflection;
 
 namespace IntelliTect.Coalesce
 {
@@ -25,24 +26,24 @@ namespace IntelliTect.Coalesce
             if (services == null) throw new ArgumentNullException(nameof(services));
             if (builder == null) throw new ArgumentNullException(nameof(builder));
 
-#if NETCOREAPP
             services.AddOptions<CoalesceOptions>().Configure<IWebHostEnvironment>((opts, hosting) =>
             {
                 opts.DetailedExceptionMessages = 
                     Microsoft.Extensions.Hosting.HostEnvironmentEnvExtensions.IsDevelopment(hosting);
             });
-#else
-            services.AddOptions<CoalesceOptions>().Configure<IHostingEnvironment>((opts, hosting) =>
-            {
-                opts.DetailedExceptionMessages = hosting.IsDevelopment();
-            });
-#endif
 
             builder(new CoalesceServiceBuilder(services));
 
             // Needed for CrudContext to access the current user.
             services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.TryAddSingleton(_ => ReflectionRepository.Global);
+
+            var entryAsm = Assembly.GetEntryAssembly();
+            if (entryAsm is not null)
+            {
+                // Needed to disover the generated DTOs for bulk saves:
+                ReflectionRepository.Global.AddAssembly(entryAsm);
+            }
 
             services.AddTransient<IConfigureOptions<MvcOptions>, ConfigureMvc>();
 
@@ -63,7 +64,7 @@ namespace IntelliTect.Coalesce
             services.TryAddScoped<ITimeZoneResolver>(_ => new StaticTimeZoneResolver(TimeZoneInfo.Local));
 
             services.TryAddScoped(sp => new CrudContext(
-                 () => sp.GetRequiredService<IHttpContextAccessor>().HttpContext?.User,
+                 () => sp.GetRequiredService<IHttpContextAccessor>().HttpContext?.User ?? new System.Security.Claims.ClaimsPrincipal(),
                  sp.GetService<ITimeZoneResolver>()?.GetTimeZoneInfo() ?? TimeZoneInfo.Local,
                  sp.GetRequiredService<IHttpContextAccessor>().HttpContext?.RequestAborted ?? default,
                  sp.GetRequiredService<IOptions<CoalesceOptions>>().Value,

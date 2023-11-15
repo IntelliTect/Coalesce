@@ -4,10 +4,18 @@ using System;
 namespace IntelliTect.Coalesce.DataAnnotations
 {
     /// <summary>
-    /// The Class or Property is read/write for the users and groups and not accessible to others.
+    /// <para>
+    /// When placed on an entity or custom <see cref="IClassDto{T}"/> class exposed by Coalesce,
+    /// controls the permissions for modifying existing instances of the model via the /save or /bulkSave endpoints.
+    /// </para>
+    /// <para>
+    /// When placed on a property exposed by Coalesce, controls the roles that are allowed
+    /// to send data from the client to the server for that property for any purpose,
+    /// including the /save and /bulkSave APIs, and method parameters. 
+    /// </para>
     /// </summary>    
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Class)]
-    public class EditAttribute: SecurityAttribute
+    public class EditAttribute : SecurityAttribute
     {
         public EditAttribute()
         {

@@ -7,7 +7,10 @@ import {
   toRaw,
 } from "vue";
 
-import { resolvePropMeta } from "./metadata.js";
+import {
+  ModelReferenceNavigationProperty,
+  resolvePropMeta,
+} from "./metadata.js";
 import type {
   ModelType,
   PropertyOrName,
@@ -23,6 +26,7 @@ import {
   DataSourceParameters,
   ServiceApiClient,
   mapParamsToDto,
+  BulkSaveRequestItem,
 } from "./api-client.js";
 import {
   type Model,
@@ -30,6 +34,8 @@ import {
   propDisplay,
   convertToModel,
   mapToModel,
+  mapToDtoFiltered,
+  mapToDto,
 } from "./model.js";
 import {
   type Indexable,
@@ -73,18 +79,28 @@ export abstract class ViewModel<
   /** See comments on ReactiveFlags_SKIP for explanation.
    * @internal
    */
-  private readonly [ReactiveFlags_SKIP] = true;
+  readonly [ReactiveFlags_SKIP] = true;
 
   /** Static lookup of all generated ViewModel types. */
   public static typeLookup: ViewModelTypeLookup | null = null;
 
   // TODO: Do $parent and $parentCollection need to be Set<>s in order to handle objects being in multiple collections or parented to multiple parents? Could be useful.
-  private $parent: any = null;
-  private $parentCollection: this[] | null = null;
 
-  // Underlying object which will hold the backing values
-  // of the custom getters/setters. Not for external use.
-  // Must exist in order to for Vue to pick it up and add reactivity.
+  /** @internal  */
+  private $parent: ViewModel | ListViewModel | null = null;
+
+  /** @internal  */
+  private $parentCollection: ViewModelCollection<this> | null = null;
+
+  /** @internal Removed items, pending deletion in a bulk save */
+  $removedItems?: ViewModel[];
+
+  /** 
+    Underlying object which will hold the backing values
+    of the custom getters/setters. Not for external use.
+    Must exist in order to for Vue to pick it up and add reactivity.
+    @internal 
+  */
   private $data: TModel & { [propName: string]: any };
 
   /**
@@ -108,11 +124,17 @@ export abstract class ViewModel<
     (this as any)[this.$metadata.keyProp.name] = val;
   }
 
-  // This bool could be computed from the size of the set,
-  // but this wouldn't trigger reactivity because Vue 2 doesn't have reactivity
-  // for types like Set and Map.
+  /**
+    This bool could be computed from the size of the set,
+    but this wouldn't trigger reactivity because Vue 2 doesn't have reactivity
+    for types like Set and Map.
+    @internal 
+   */
   private _isDirty = ref(false);
-  private _dirtyProps = new Set<string>();
+
+  /** @internal */
+  _dirtyProps = new Set<string>();
+
   /**
    * Returns true if the values of the savable data properties of this ViewModel
    * have changed since the last load, save, or the last time $isDirty was set to false.
@@ -163,7 +185,9 @@ export abstract class ViewModel<
     return this._dirtyProps.has(propName);
   }
 
+  /** @internal */
   private _params = ref(new DataSourceParameters());
+
   /** The parameters that will be passed to `/get`, `/save`, and `/delete` calls. */
   public get $params() {
     return this._params.value;
@@ -192,12 +216,14 @@ export abstract class ViewModel<
    * and whose keys are one of the following formats:
    *  - `"propName.ruleName"` - ignores the given rule on the given property.
    *  - `"propName.*"` - ignores rules of the given propName on all properties
+   * @internal
    */
   private $ignoredRules: { [identifier: string]: boolean } | null = null;
 
   /**
    * A two-layer map, the first layer being property names and the second layer being rule identifiers,
    * of custom validation rules that should be applied to this viewmodel instance.
+   * @internal
    */
   private $customRules: {
     [propName: string]: {
@@ -208,10 +234,13 @@ export abstract class ViewModel<
   /**
    * Cached set of the effective rules for each property on the model.
    * Will be invalidated when custom rules and/or ignores are changed.
+   * @internal
    */
   private _effectiveRules: {
     [propName: string]: undefined | Array<(val: any) => true | string>;
   } | null = null;
+
+  /** @internal */
   private get $effectiveRules() {
     let effectiveRules = this._effectiveRules;
     if (effectiveRules) return effectiveRules;
@@ -243,6 +272,38 @@ export abstract class ViewModel<
           // with the same identifier as a metadata-provided rule,
           // do not process the metadata-provided rule.
           if (custom && custom[ruleName]) {
+            continue;
+          }
+
+          // HACK: In order to make bulk saves work,
+          // we have to allow for missing foreign keys
+          // as long as the nav prop is an unsaved, new entity.
+          // This is a scenario that wouldn't really ever happen in any UI
+          // that isn't using bulk saves (you'd always be fetching a
+          // navigation prop value from /somewhere/, or when creating new ones
+          // you'd be saving the principal entity immediately), so it doesn't seem too bad
+          // that this technically produces incorrect validation when not using bulk saves.
+          if (
+            ruleName == "required" &&
+            prop.role == "foreignKey" &&
+            prop.navigationProp
+          ) {
+            const fkRule = rules[ruleName];
+            propRules.push((v: any) => {
+              const result = fkRule(v);
+              if (result === true) return result;
+
+              const principal = this.$data[
+                prop.navigationProp!.name
+              ] as ViewModel;
+              if (principal && !principal._existsOnServer) {
+                // The nav prop has a value that we anticipate will be created
+                // by a bulk save. Allow this.
+                return true;
+              }
+
+              return result;
+            });
             continue;
           }
 
@@ -367,7 +428,9 @@ export abstract class ViewModel<
       )
       .onFulfilled(() => {
         if (this.$load.result) {
-          this.$loadCleanData(this.$load.result);
+          // We do `purgeUnsaved` (arg2) here, since $load() is always an explicit user action
+          // that may be serving as a "reset" of local state.
+          this.$loadCleanData(this.$load.result, true);
         }
       });
 
@@ -387,7 +450,9 @@ export abstract class ViewModel<
    */
   public $saveMode: "surgical" | "whole" = "surgical";
 
+  /** @internal */
   private _savingProps = ref<ReadonlySet<string>>(emptySet);
+
   /** When `$save.isLoading == true`, contains the properties of the model currently being saved by `$save` (including autosaves).
    *
    * Does not include non-dirty properties even if `$saveMode == 'whole'`.
@@ -491,8 +556,10 @@ export abstract class ViewModel<
             this.$metadata.keyProp.name
           ];
         } else {
+          // Do NOT purgeUnsaved here (arg2), as this save may be one of many saves
+          // occurring in a large object graph where there are unsaved objects that will be imminently saved.
           this.$loadCleanData(this.$save.result);
-          this.updatedRelatedForeignKeysWithCurrentPrimaryKey();
+          this.updateRelatedForeignKeysWithCurrentPrimaryKey();
         }
       });
 
@@ -503,7 +570,210 @@ export abstract class ViewModel<
     return $save;
   }
 
-  private updatedRelatedForeignKeysWithCurrentPrimaryKey() {
+  /**
+   * A function for invoking the `/bulkSave` endpoint, and a set of properties about the state of the last call.
+   *
+   * A bulk save will save/delete this entity and all reachable relationships in a single round trip and database transaction.
+   */
+  get $bulkSave() {
+    const $bulkSave = this.$apiClient.$makeCaller(
+      "item",
+      async function (this: ViewModel, c, options?: BulkSaveOptions) {
+        /** The models to traverse for relations in the next iteration of the outer loop. */
+        let nextModels: (ViewModel | null)[] = [this];
+
+        /** The models we've already examined, to avoid infinite loops */
+        const processed = new Set();
+
+        /** The items in the bulk save payload that will be sent to the server */
+        const itemsToSend: BulkSaveRequestItem[] = [];
+
+        /** The ViewModels represented in the bulk save payload, keyed by their `$stableId` (aka 'ref') */
+        const modelsByRef = new Map<number, ViewModel>();
+
+        // Traverse all models reachable from `this`,
+        // collecting those that need to be saved or deleted.
+        while (nextModels.length) {
+          const currentModels = nextModels;
+          nextModels = [];
+
+          for (const model of currentModels) {
+            if (!model || processed.has(model)) continue;
+            processed.add(model);
+
+            const meta: ModelType = model.$metadata;
+
+            if (model.$removedItems) {
+              // `model.$removedItems` will contain items that were `.$remove()`d  while having `model` as a `$parent`.
+              nextModels.push(...model.$removedItems);
+            }
+
+            const root = model == this;
+            const action = model._isRemoved
+              ? model._existsOnServer
+                ? "delete" // Delete items that have a PK are sent as a delete
+                : "none" // Do not send removed items that never had a PK.
+              : model.$isDirty || !model._existsOnServer
+              ? "save" // Save items that are dirty or never saved
+              : "none"; // Non-dirty, non-deleted items are sent as "none". This exists so that the root item (that will be sent as the response from the server) can be identified even if it isn't being modified.
+
+            if (action !== "none") {
+              if (options?.predicate?.(model, action) === false) {
+                continue;
+              }
+            }
+
+            if (action == "save") {
+              const errors = [...model.$getErrors()];
+              if (errors.length) {
+                // Somewhat user-friendly error: this could be shown in a c-loader-status
+                // if a developer isn't eagerly checking validation before enabling a save button:
+                throw Error(
+                  `Cannot save ${meta.displayName} ${
+                    model.$primaryKey || "<new>"
+                  }: ` + errors.join(", ")
+                );
+              }
+            }
+
+            const refs: BulkSaveRequestItem["refs"] = {
+              // The model's $stableId will be referenced by other objects.
+              // It is recorded as the object's primary key ref value.
+              [meta.keyProp.name]: model.$stableId,
+
+              // Other foreign key names here will be added that reference
+              // the $stableId of the principal end of the relationship
+              // The server will use these values to link these two objects together.
+            };
+
+            for (const propName in meta.props) {
+              const prop = meta.props[propName];
+
+              if (prop.role == "collectionNavigation") {
+                const dependents = model.$data[
+                  prop.name
+                ] as ViewModelCollection<any> | null;
+                if (dependents) {
+                  nextModels.push(...dependents);
+                }
+              } else if (prop.role == "referenceNavigation") {
+                let principal = model.$data[prop.name] as ViewModel | null;
+
+                // Build up `refs` as needed.
+                // If the prop is a reference navigation that has no foreign key,
+                // then the ref will link the foreign key prop to the principal entity,
+                // allowing the server to fixup the foreign key once the principal is created.
+                if (
+                  // If the model isn't being saved, don't need to resolve foreign keys to refs.
+                  action != "save" ||
+                  // If the foreign key has a value then we don't need a ref.
+                  model.$data[prop.foreignKey.name] != null
+                ) {
+                  nextModels.push(principal);
+                  continue;
+                }
+
+                const collection = model.$parentCollection;
+                if (
+                  !principal &&
+                  collection?.$parent instanceof ViewModel &&
+                  collection.$metadata == prop.inverseNavigation
+                ) {
+                  // The reference navigation property has no value,
+                  // and the foreign key has no value,
+                  // but the model is contained in a collection navigation property,
+                  // and that collection is the inverse navigation of this reference navigation,
+                  // so it must reference the parent of that collection.
+
+                  // This scenario enables adding a new item to a collection navigation
+                  // without setting either the foreign key or the nav prop on that new child.
+
+                  principal = collection.$parent;
+                }
+
+                nextModels.push(principal);
+
+                if (
+                  principal &&
+                  !principal._existsOnServer &&
+                  !principal._isRemoved &&
+                  options?.predicate?.(principal, "save") !== false
+                ) {
+                  // The model has an object value for this reference navigation.
+                  // This makes things easy - the foreign key should ref the value of that reference navigation.
+                  refs[prop.foreignKey.name] = principal.$stableId;
+                  continue;
+                }
+              }
+            }
+
+            // Finally, add the item to the payload if it needs to be there.
+            // We always want to do the property traversal above to find
+            // related objects, even if we aren't saving this model.
+            if (root || action !== "none") {
+              const bulkSaveItem: BulkSaveRequestItem = {
+                type: meta.name,
+                action,
+                refs,
+                data:
+                  action == "none" || action == "delete"
+                    ? // "none" and "delete" items only need their PK:
+                      mapToDtoFiltered(model, [meta.keyProp.name])!
+                    : model.$saveMode == "surgical"
+                    ? mapToDtoFiltered(model, [
+                        ...model._dirtyProps,
+                        meta.keyProp.name,
+                      ])!
+                    : mapToDto(model)!,
+              };
+
+              // Omit the optional `root` prop entirely unless its true.
+              if (root) bulkSaveItem.root = root;
+
+              itemsToSend.push(bulkSaveItem);
+              modelsByRef.set(model.$stableId, model);
+            }
+          }
+        }
+
+        const ret = await c.bulkSave(
+          { items: itemsToSend },
+          { ...this.$params }
+        );
+
+        if (ret.data?.wasSuccessful) {
+          // Load models with their new primary key so that instances can be uniquely
+          // identified when loading them with the data returned by the client,
+          // allowing the original ViewModel instances to be preserved instead of being replaced.
+          // `refMap` maps `ref` values to the resulting primary key produced by the server.
+          const refMap = ret.data.refMap;
+          for (const ref in refMap) {
+            const model = modelsByRef.get(+ref);
+            if (model) model.$primaryKey = refMap[ref];
+          }
+
+          const result = ret.data.object;
+          if (result) {
+            // `purgeUnsaved = true` here (arg2) since the bulk save should have covered the entire object graph.
+            // Wiping out unsaved items will help developers discover bugs where their root model's data source
+            // does not correctly include the whole object graph that they're saving (which is expected for bulk saves)
+            this.$loadCleanData(result, true);
+          }
+        }
+
+        return ret;
+      }
+    );
+
+    // Lazy getter technique - don't create the caller until/unless it is needed,
+    // since creation of api callers is a little expensive.
+    Object.defineProperty(this, "$bulkSave", { value: $bulkSave });
+
+    return $bulkSave;
+  }
+
+  /** @internal */
+  private updateRelatedForeignKeysWithCurrentPrimaryKey() {
     const pkValue = this.$primaryKey;
 
     // Look through collection navigations.
@@ -528,8 +798,10 @@ export abstract class ViewModel<
         // The prop on the parent is a reference navigation.
         // If the value of the navigation is ourself,
         // update the foreign key on the $parent with our new PK.
+        //@ts-expect-error undefined indexer
         const value = parent[prop.name];
         if (value === this) {
+          //@ts-expect-error undefined indexer
           parent[prop.foreignKey.name] = pkValue;
         }
       }
@@ -545,12 +817,19 @@ export abstract class ViewModel<
    */
   public $loadFromModel(
     source: DeepPartial<TModel>,
-    isCleanData: boolean = true
+    isCleanData: boolean = true,
+    purgeUnsaved: boolean = false
   ) {
     if (this.$isDirty && this._autoSaveState?.active) {
-      updateViewModelFromModel(this as any, source, true, isCleanData);
+      updateViewModelFromModel(this as any, source, true, isCleanData, false);
     } else {
-      updateViewModelFromModel(this as any, source, false, isCleanData);
+      updateViewModelFromModel(
+        this as any,
+        source,
+        false,
+        isCleanData,
+        purgeUnsaved
+      );
       if (isCleanData) {
         this.$isDirty = false;
       }
@@ -563,8 +842,8 @@ export abstract class ViewModel<
    * Data is loaded in a surgical fashion that will preserve existing instances
    * of objects and arrays found on navigation properties.
    */
-  public $loadCleanData(source: DeepPartial<TModel>) {
-    return this.$loadFromModel(source, true);
+  public $loadCleanData(source: DeepPartial<TModel>, purgeUnsaved = false) {
+    return this.$loadFromModel(source, true, purgeUnsaved);
   }
 
   /**
@@ -575,7 +854,7 @@ export abstract class ViewModel<
    * of objects and arrays found on navigation properties.
    */
   public $loadDirtyData(source: DeepPartial<TModel>) {
-    return this.$loadFromModel(source, false);
+    return this.$loadFromModel(source, false, false);
   }
 
   /**
@@ -584,22 +863,14 @@ export abstract class ViewModel<
   get $delete() {
     const $delete = this.$apiClient
       .$makeCaller("item", function (this: ViewModel, c) {
-        if (this.$primaryKey) {
+        if (this._existsOnServer) {
           return c.delete(this.$primaryKey, this.$params);
-        } else if (this.$parentCollection) {
-          this.$parentCollection.splice(
-            this.$parentCollection.indexOf(this),
-            1
-          );
+        } else {
+          this._removeFromParentCollection();
         }
       })
       .onFulfilled(function (this: ViewModel) {
-        if (this.$parentCollection) {
-          this.$parentCollection.splice(
-            this.$parentCollection.indexOf(this),
-            1
-          );
-        }
+        this._removeFromParentCollection();
       });
 
     // Lazy getter technique - don't create the caller until/unless it is needed,
@@ -609,7 +880,63 @@ export abstract class ViewModel<
     return $delete;
   }
 
-  // Internal autosave state. We must use <any> instead of <this> here because reasons.
+  /** @internal */
+  private _removeFromParentCollection() {
+    if (this.$parentCollection) {
+      const idx = this.$parentCollection.indexOf(this);
+      if (idx > -1) {
+        const item = this.$parentCollection.splice(idx, 1)[0];
+        return item;
+      }
+    }
+  }
+
+  private get _existsOnServer() {
+    if (!this.$primaryKey) {
+      return false;
+    }
+
+    if (
+      this.$metadata.keyProp.createOnly &&
+      this.$getPropDirty(this.$metadata.keyProp.name as any)
+    ) {
+      // PK is client-provided (not server generated), and is dirty.
+      // Therefore, this is just the local state of the PK that has not yet been saved.
+      return false;
+    }
+
+    return true;
+  }
+
+  /** Whether the item has been removed via `$remove()` and is pending for deletion in the next bulk save.
+   * @internal
+   * */
+  private _isRemoved = false;
+
+  public get $isRemoved() {
+    return this._isRemoved; // does this need to be reactive?
+  }
+
+  /** Mark this model for deletion in the next `$bulkSave` operation performed on an ancestor.
+   *
+   * If this item has a parent collection, it will be immediately removed from that collection.
+   * */
+  public $remove() {
+    if (!this.$parent) {
+      throw new Error(
+        `Unable to remove ${this.$metadata.name}: item has no parent to be removed from.`
+      );
+    }
+
+    this._isRemoved = true;
+
+    this._removeFromParentCollection();
+    if (this.$parent instanceof ViewModel) {
+      (this.$parent.$removedItems ??= []).push(this);
+    }
+  }
+
+  /** @internal Internal autosave state. */
   private _autoSaveState?: AutoCallState<AutoSaveOptions<any>>;
 
   /**
@@ -741,6 +1068,11 @@ export abstract class ViewModel<
     this._autoSaveState?.cleanup!();
   }
 
+  /** Returns true if auto-saving is currently enabled. */
+  public get $isAutoSaveEnabled() {
+    return this._autoSaveState?.active;
+  }
+
   /**
    * Returns a string representation of the object, or one of its properties, suitable for display.
    * @param prop If provided, specifies a property whose value will be displayed.
@@ -759,7 +1091,8 @@ export abstract class ViewModel<
   public $addChild(
     prop:
       | ModelCollectionNavigationProperty
-      | PropNames<TModel["$metadata"], ModelCollectionNavigationProperty>
+      | PropNames<TModel["$metadata"], ModelCollectionNavigationProperty>,
+    initialDirtyData?: any
   ) {
     const propMeta = resolvePropMeta<ModelCollectionNavigationProperty>(
       this.$metadata,
@@ -775,17 +1108,25 @@ export abstract class ViewModel<
     }
 
     if (propMeta.role == "collectionNavigation") {
-      const newModel: any = mapToModel({}, propMeta.itemType.typeDef);
-      const foreignKey = propMeta.foreignKey;
-      newModel[foreignKey.name] = this.$primaryKey;
-
-      // The ViewModelCollection will handle create a new ViewModel,
+      // The ViewModelCollection will handle creating a new ViewModel,
       // and setting $parent, $parentCollection.
-      // TODO: Should it also handle setting of the foreign key?
       const newViewModel = collection[
-        collection.push(newModel) - 1
+        collection.push(mapToModel({}, propMeta.itemType.typeDef)) - 1
       ] as ViewModel;
-      newViewModel.$setPropDirty(foreignKey.name);
+
+      if (initialDirtyData) {
+        newViewModel.$loadDirtyData(initialDirtyData);
+      }
+
+      //@ts-expect-error untyped indexer
+      newViewModel[propMeta.foreignKey.name] = this.$primaryKey;
+      // Populate the navigation property on the new child as well
+      // so that navigation property fixup can work with bulk saves.
+      if (propMeta.foreignKey.navigationProp) {
+        //@ts-expect-error untyped indexer
+        newViewModel[propMeta.foreignKey.navigationProp.name] = this;
+      }
+
       return newViewModel;
     } else {
       throw "$addChild only adds to collections of model properties.";
@@ -831,13 +1172,16 @@ export abstract class ListViewModel<
    * and since the setter is defined on the prototype and Vue checks hasOwnProperty
    * when determining if a field is new on an object, all setters trigger reactivity
    * even if the value didn't change.
+   * @internal
    */
-  private readonly [ReactiveFlags_SKIP] = true;
+  readonly [ReactiveFlags_SKIP] = true;
 
   /** Static lookup of all generated ListViewModel types. */
   public static typeLookup: ListViewModelTypeLookup | null = null;
 
+  /** @internal  */
   private _params = ref(new ListParameters());
+
   /** The parameters that will be passed to `/list` and `/count` calls. */
   public get $params() {
     return this._params.value;
@@ -864,8 +1208,10 @@ export abstract class ListViewModel<
 
   /**
    * The current set of items that have been loaded into this ListViewModel.
+   * @internal
    */
   private _items = ref();
+
   public get $items(): TItem[] {
     return (this._items.value as unknown as TItem[]) ?? [];
   }
@@ -928,6 +1274,7 @@ export abstract class ListViewModel<
             this.$metadata,
             this.$items,
             state.result,
+            true,
             true
           );
         }
@@ -955,7 +1302,7 @@ export abstract class ListViewModel<
     return $count;
   }
 
-  // Internal autoload state
+  /** @internal Internal autoload state */
   private _autoLoadState = new AutoCallState();
 
   /**
@@ -1053,8 +1400,9 @@ export class ServiceViewModel<
    * and since the setter is defined on the prototype and Vue checks hasOwnProperty
    * when determining if a field is new on an object, all setters trigger reactivity
    * even if the value didn't change.
+   * @internal
    */
-  private readonly [ReactiveFlags_SKIP] = true;
+  readonly [ReactiveFlags_SKIP] = true;
 
   /** Static lookup of all generated ServiceViewModel types. */
   public static typeLookup: ServiceViewModelTypeLookup | null = null;
@@ -1187,7 +1535,7 @@ function viewModelCollectionMapItems<T extends ViewModel>(
       ) as unknown as T;
     }
 
-    // $parent and $parentCollection are intentionally protected -
+    // $parent and $parentCollection are intentionally private -
     // they're just for internal tracking of stuff
     // and probably shouldn't be used in custom code.
     // So, we'll cast to `any` so we can set them here.
@@ -1195,8 +1543,9 @@ function viewModelCollectionMapItems<T extends ViewModel>(
     (val as any).$parentCollection = vmc;
 
     // If deep autosave is active, propagate it to the ViewModel instance being attached to the object graph.
-    const autoSaveState: AutoCallState<AutoSaveOptions<any>> =
-      vmc.$parent._autoSaveState;
+    const autoSaveState: AutoCallState<AutoSaveOptions<any>> = (
+      vmc.$parent as any
+    )._autoSaveState;
     if (autoSaveState?.active && autoSaveState.options?.deep) {
       val.$startAutoSave(autoSaveState.vue!, autoSaveState.options);
     }
@@ -1219,8 +1568,12 @@ function resolveProto(obj: ViewModelCollection<any>): Array<any> {
 }
 
 export class ViewModelCollection<T extends ViewModel> extends Array<T> {
-  readonly $metadata!: ModelCollectionValue | ModelType;
-  readonly $parent!: any;
+  readonly $metadata!:
+    | ModelCollectionValue
+    | ModelCollectionNavigationProperty
+    | ModelType;
+  readonly $parent!: ViewModel | ListViewModel;
+
   $hasLoaded!: boolean;
 
   override push(...items: T[]): number {
@@ -1251,7 +1604,10 @@ export class ViewModelCollection<T extends ViewModel> extends Array<T> {
     );
   }
 
-  constructor($metadata: ModelCollectionValue | ModelType, $parent: any) {
+  constructor(
+    $metadata: ModelCollectionValue | ModelType,
+    $parent: ViewModel | ListViewModel
+  ) {
     super();
     Object.defineProperties(this, {
       // These properties need to be non-enumerable to avoid them from being looped over
@@ -1331,8 +1687,19 @@ type AutoSaveOptions<TThis> = DebounceOptions &
       }
   );
 
+export interface BulkSaveOptions {
+  /** A predicate that will be applied to each modified model
+   * to determine if it should be included in the bulk save operation.
+   *
+   * The predicate is applied before validation (`$hasError`), allowing
+   * it to be used to skip over entities that have client validation errors
+   * that would otherwise cause the entire bulk save operation to fail.
+   * */
+  predicate?: (viewModel: ViewModel, action: "save" | "delete") => boolean;
+}
+
 /**
- * Dynamically adds gettter/setter properties to a class. These properties wrap the properties in its instances' $data objects.
+ * Dynamically adds getter/setter properties to a class. These properties wrap the properties in its instances' $data objects.
  * @param ctor The class to add wrapper properties to
  * @param metadata The metadata describing the properties to add.
  */
@@ -1378,7 +1745,7 @@ export function defineProps<T extends new () => ViewModel<any, any>>(
                   incomingValue = ViewModelFactory.get(
                     prop.typeDef.name,
                     incomingValue,
-                    true // Assume the data is clean.
+                    !!incomingValue[prop.typeDef.keyProp.name] // Assume the data is clean if it has a PK
                   );
                 }
 
@@ -1411,7 +1778,11 @@ export function defineProps<T extends new () => ViewModel<any, any>>(
 
                 // Set on `this`, not `$data`, in order to trigger $isDirty in the
                 // setter function for the FK prop.
-                (this as any)[prop.foreignKey.name] = incomingPk;
+                (this as any).$data[prop.foreignKey.name] = incomingPk;
+                // Even if the FK might be changing from null to null,
+                // always set the FK as dirty so that it'll be included
+                // as a `ref` in bulk save payloads and be resolved by the server.
+                this.$setPropDirty(prop.foreignKey.name);
               }
             }
           : prop.type == "collection" && prop.itemType.type == "model"
@@ -1449,22 +1820,7 @@ export function defineProps<T extends new () => ViewModel<any, any>>(
               vmc.push(...incomingValue);
               $data[propName] = vmc;
             }
-          : // : prop.role =="primaryKey"
-            // ? function(this: InstanceType<T>, incomingValue: any) {
-            //     const $data = (this as any).$data;
-
-            //     // Do nothing if the value is unchanged.
-            //     if ($data[propName] === incomingValue) {
-            //       return;
-            //     }
-
-            //     $data[propName] = incomingValue;
-
-            //     // TODO: Implement $emit?
-            //     // this.$emit('valueChanged', prop, value, val);
-            //   }
-
-            function (this: InstanceType<T>, incomingValue: any) {
+          : function (this: InstanceType<T>, incomingValue: any) {
               const $data = (this as any).$data;
 
               // Optimization: read old data from raw,
@@ -1492,9 +1848,6 @@ export function defineProps<T extends new () => ViewModel<any, any>>(
               // know that if we got this far, BOTH sides aren't both null.
               if (old?.valueOf() !== incomingValue?.valueOf()) {
                 $data[propName] = incomingValue;
-
-                // TODO: Implement $emit?
-                // this.$emit('valueChanged', prop, value, val);
 
                 this.$setPropDirty(propName);
 
@@ -1549,7 +1902,8 @@ function rebuildModelCollectionForViewModelCollection<
   type: ModelType,
   currentValue: Array<TItem>,
   incomingValue: Array<any>,
-  isCleanData: boolean
+  isCleanData: boolean,
+  purgeUnsaved: boolean
 ) {
   if (!Array.isArray(currentValue)) {
     currentValue = [];
@@ -1566,6 +1920,7 @@ function rebuildModelCollectionForViewModelCollection<
   for (let i = 0; i < currentLength; i++) {
     const item = currentValue[i];
     const itemPk = item.$primaryKey;
+
     if (itemPk) {
       existingItemsMap.set(itemPk, item);
     } else {
@@ -1580,6 +1935,7 @@ function rebuildModelCollectionForViewModelCollection<
     const incomingItem = incomingValue[i];
     const incomingItemPk = incomingItem[pkName];
     const existingItem = existingItemsMap.get(incomingItemPk);
+
     if (existingItem) {
       existingItem.$loadFromModel(incomingItem, isCleanData);
 
@@ -1603,7 +1959,7 @@ function rebuildModelCollectionForViewModelCollection<
     }
   }
 
-  if (existingItemsWithoutPk.length) {
+  if (existingItemsWithoutPk.length && !purgeUnsaved) {
     // Add to the end of the collection any existing items that do not have primary keys.
     // This behavior exists to prevent losing items on the client
     // that may not yet be saved in the event that the parent of the collection
@@ -1613,20 +1969,18 @@ function rebuildModelCollectionForViewModelCollection<
 
     const existingItemsLength = existingItemsWithoutPk.length;
     for (let i = 0; i < existingItemsLength; i++) {
-      let realIndex = incomingLength + i;
-
       const existingItem = existingItemsWithoutPk[i];
-      const currentItem = currentValue[realIndex];
+      const currentItem = currentValue[incomingLength];
 
       if (existingItem === currentItem) {
         // The existing item is not moving position. Do nothing.
       } else {
         // Replace the item currently at this position with the existing item.
-        currentValue.splice(realIndex, 1, existingItem);
+        currentValue.splice(incomingLength, 1, existingItem);
       }
-    }
 
-    incomingLength += existingItemsLength;
+      incomingLength += 1;
+    }
   }
 
   // If the new collection is shorter than the existing length,
@@ -1646,6 +2000,7 @@ function rebuildModelCollectionForViewModelCollection<
  * @param source The model whose values will be used to perform the update.
  * @param skipDirty If true, only non-dirty props, and related objects, will be updated.
  * Basic properties on target that are dirty will be skipped.
+ * @param purgeUnsaved If true, unsaved items lingering in collections that are not in `source` will be removed.
  */
 export function updateViewModelFromModel<
   TViewModel extends ViewModel<Model<ModelType>>
@@ -1653,7 +2008,8 @@ export function updateViewModelFromModel<
   target: TViewModel,
   source: Indexable<{}>,
   skipDirty = false,
-  isCleanData = true
+  isCleanData = true,
+  purgeUnsaved = false
 ) {
   ViewModelFactory.scope(function (factory) {
     // Add the root ViewModel to the factory
@@ -1680,6 +2036,17 @@ export function updateViewModelFromModel<
     // We also want to skip the getter from defineProps for the same reason.
     const $data = (target as any).$data;
     const $dataRaw = toRaw($data);
+
+    if (isCleanData) {
+      // When loading clean data, remove any pending bulk deletes
+      // because we should expect that any pending delete items are either:
+      // 1) Already deleted and therefore no longer need to be contained in $removedItems, OR
+      // 2) Not deleted and therefore present in the incoming data, which means we have two copies
+      //    of the entity, each in a different state. If an interface is using bulk saves
+      //    and performs a load of clean data (e.g. by calling `/load`),
+      //    we assuming they're doing so to reset local state.
+      delete target.$removedItems;
+    }
 
     for (const prop of Object.values(metadata.props)) {
       const propName = prop.name as keyof typeof target & string;
@@ -1708,7 +2075,11 @@ export function updateViewModelFromModel<
             } else {
               // `currentValue` is guaranteed to be a ViewModel by virtue of the
               // implementations of the setters for referenceNavigation properties on ViewModel instances.
-              currentValue.$loadFromModel(incomingValue, isCleanData);
+              currentValue.$loadFromModel(
+                incomingValue,
+                isCleanData,
+                purgeUnsaved
+              );
             }
 
             // Check if target.$parent is the expected value of this navigation prop,
@@ -1718,13 +2089,13 @@ export function updateViewModelFromModel<
             const newValue =
               currentValue ?? (target[propName] as any as ViewModel);
             if (
-              parent &&
+              parent instanceof ViewModel &&
               newValue &&
               parent.$metadata === newValue.$metadata &&
               newValue.$primaryKey === parent.$primaryKey &&
               parent !== newValue
             ) {
-              parent.$loadFromModel(incomingValue, isCleanData);
+              parent.$loadFromModel(incomingValue, isCleanData, purgeUnsaved);
             }
           } else {
             // We allow the existing value of the navigation prop to stick around
@@ -1740,6 +2111,7 @@ export function updateViewModelFromModel<
           break;
         case "collectionNavigation":
           const currentValue = $data[propName];
+
           if (incomingValue == null) {
             if (currentValue) {
               // No incoming collection was provided. Allow the existing collection to stick around.
@@ -1761,7 +2133,8 @@ export function updateViewModelFromModel<
             prop.itemType.typeDef,
             currentValue,
             incomingValue,
-            isCleanData
+            isCleanData,
+            purgeUnsaved
           ) as any;
 
           if (currentValue !== newCollection) {
@@ -1855,4 +2228,21 @@ function startAutoCall(
     state.vue = null; // cleanup for GC
   };
   state.active = true;
+}
+
+//@ts-expect-error: only exists in vue3, but not vue2.
+declare module "@vue/reactivity" {
+  export interface RefUnwrapBailTypes {
+    // Prevent Vue's type helpers from brutalizing coalesce view models,
+    // which are manually marked to skip reactivity (ReactiveFlags_SKIP)
+    // and therefore are never unwrapped anyway.
+    coalesceViewModels: ViewModel | ListViewModel | ServiceViewModel;
+  }
+}
+
+// The vue2 version of this interface:
+declare module "vue" {
+  export interface RefUnwrapBailTypes {
+    coalesceViewModels: ViewModel | ListViewModel | ServiceViewModel;
+  }
 }

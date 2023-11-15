@@ -18,11 +18,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             Info = propertyInfo;
 
-#if NET6_0_OR_GREATER
             var nullable = new NullabilityInfoContext().Create(Info);
             ReadNullability = nullable.ReadState;
             WriteNullability = nullable.WriteState;
-#endif
         }
 
         public override string Name => Info.Name;
@@ -42,11 +40,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public override bool IsStatic => Info.GetGetMethod()?.IsStatic ?? Info.GetSetMethod()?.IsStatic ?? false;
 
         public override bool IsInitOnly
-#if NET5_0_OR_GREATER
             => Info.SetMethod?.ReturnParameter.GetRequiredCustomModifiers().Contains(typeof(System.Runtime.CompilerServices.IsExternalInit)) == true;
-#else
-            => false;
-#endif
 
         public override bool HasRequiredKeyword =>
 #if NET7_0_OR_GREATER
@@ -57,11 +51,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public override bool IsInternalUse => base.IsInternalUse || Info.GetGetMethod(true)?.IsPublic != true;
 
-        public override object? GetAttributeValue<TAttribute>(string valueName)
-            => Info.GetAttributeValue<TAttribute>(valueName);
-        
-        public override bool HasAttribute<TAttribute>() =>
-            Info.HasAttribute<TAttribute>();
+        public override IEnumerable<AttributeViewModel<TAttribute>> GetAttributes<TAttribute>()
+            => Info.GetAttributes<TAttribute>();
 
         private IReadOnlyList<ValidationAttribute>? _validationAttributes;
         internal IReadOnlyList<ValidationAttribute> GetValidationAttributes()

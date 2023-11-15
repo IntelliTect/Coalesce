@@ -13,6 +13,9 @@ using System.Collections.Concurrent;
 using IntelliTect.Coalesce.TypeUsage;
 using IntelliTect.Coalesce.Api;
 using System.Threading;
+using IntelliTect.Coalesce.Models;
+using System.Collections.ObjectModel;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace IntelliTect.Coalesce.TypeDefinition
 {
@@ -32,6 +35,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
         private readonly HashSet<ClassViewModel> _services = new HashSet<ClassViewModel>();
         private readonly HashSet<TypeViewModel> _enums = new HashSet<TypeViewModel>();
 
+        private readonly Dictionary<ClassViewModel, ClassViewModel> _generatedDtos = new();
+
         private readonly ConcurrentDictionary<object, TypeViewModel> _allTypeViewModels
             = new ConcurrentDictionary<object, TypeViewModel>();
 
@@ -42,12 +47,21 @@ namespace IntelliTect.Coalesce.TypeDefinition
             .SelectMany(contextUsage => contextUsage.Entities)
             .ToLookup(entityUsage => entityUsage.ClassViewModel);
 
+        private ReadOnlyDictionary<string, ClassViewModel>? _clientTypes;
+        public ReadOnlyDictionary<string, ClassViewModel> ClientTypesLookup 
+            => _clientTypes ??= new(ClientClasses.Union(Services).ToDictionary(c => c.ClientTypeName, StringComparer.OrdinalIgnoreCase));
+
         public ReadOnlyHashSet<ClassViewModel> Entities => new ReadOnlyHashSet<ClassViewModel>(_entities);
         public ReadOnlyHashSet<CrudStrategyTypeUsage> Behaviors => new ReadOnlyHashSet<CrudStrategyTypeUsage>(_behaviors);
         public ReadOnlyHashSet<CrudStrategyTypeUsage> DataSources => new ReadOnlyHashSet<CrudStrategyTypeUsage>(_dataSources);
         public ReadOnlyHashSet<ClassViewModel> ExternalTypes => new ReadOnlyHashSet<ClassViewModel>(_externalTypes);
         public ReadOnlyHashSet<ClassViewModel> CustomDtos => new ReadOnlyHashSet<ClassViewModel>(_customDtos);
         public ReadOnlyHashSet<ClassViewModel> Services => new ReadOnlyHashSet<ClassViewModel>(_services);
+
+        /// <summary>
+        /// A map from an entity or external type to the DTO that was generated for it.
+        /// </summary>
+        public ReadOnlyDictionary<ClassViewModel, ClassViewModel> GeneratedDtos => new(_generatedDtos);
 
         [Obsolete("Replaced by better-named property \"CrudApiBackedClasses\".")]
         public IEnumerable<ClassViewModel> ApiBackedClasses => CrudApiBackedClasses;
@@ -66,9 +80,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public ReadOnlyHashSet<TypeViewModel> ClientEnums => new ReadOnlyHashSet<TypeViewModel>(_enums);
 
-        public IEnumerable<ClassViewModel> DiscoveredClassViewModels =>
+        internal IEnumerable<ClassViewModel> DiscoveredClassViewModels =>
             DbContexts.Select(t => t.ClassViewModel)
-            .Union(ClientClasses);
+            .Union(ClientClasses).Union(Services);
 
         public ReflectionRepository()
         {
@@ -92,7 +106,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     // For some reason, attribute checking can be really slow. We're talking ~350ms to determine that the DbContext type has a [Coalesce] attribute.
                     // Really not sure why, but lets parallelize to minimize that impact.
                     .AsParallel()
-                    .Where(type => type.HasAttribute<CoalesceAttribute>())
+                    .Where(type => type.HasAttribute<CoalesceAttribute>() || type.IsA(typeof(GeneratedDto<>)))
                 );
             }
         }
@@ -105,8 +119,19 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public SymbolTypeViewModel GetOrAddType(ITypeSymbol symbol) =>
             GetOrAddType(symbol, () => new SymbolTypeViewModel(this, symbol));
 
-        public ReflectionTypeViewModel GetOrAddType(Type type) =>
-            GetOrAddType(type, () => new ReflectionTypeViewModel(this, type));
+        public ReflectionTypeViewModel GetOrAddType(Type type)
+        {
+            // Hot path during runtime - perform the cache check before entering GetOrAddType
+            // which requires allocating a closure.
+            if (_allTypeViewModels.TryGetValue(type, out var existing)) return (ReflectionTypeViewModel)existing;
+
+            // Avoid closure on fast path by storing state into scoped locals.
+            // Technique from https://github.com/dotnet/runtime/blob/4aa4d28f951babd9b26c2e4cff99a3203c56aee8/src/libraries/Microsoft.Extensions.Options/src/OptionsManager.cs#L48
+            var localThis = this;
+            var localType = type;
+
+            return GetOrAddType(localType, () => new ReflectionTypeViewModel(localThis, localType));
+        }
 
         public TypeViewModel GetOrAddType(TypeViewModel type) => 
             GetOrAddType(GetCacheKey(type), () => type);
@@ -129,6 +154,12 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         private void ProcessAddedType(TypeViewModel type)
         {
+            var generatedDtoEntity = type.GenericArgumentsFor(typeof(GeneratedDto<>))?[0];
+            if (generatedDtoEntity?.ClassViewModel is ClassViewModel cvm)
+            {
+                _generatedDtos[cvm] = type.ClassViewModel!;
+            }
+
             if (!type.HasAttribute<CoalesceAttribute>())
             {
                 return;
@@ -138,6 +169,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
             {
                 return;
             }
+
+            // Null this out so it gets recomputed on next access.
+            _clientTypes = null;
 
             if (type.IsA<DbContext>())
             {
@@ -201,8 +235,13 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// Adds types from the assembly where type T resides.
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        public void AddAssembly<T>() =>
-            DiscoverCoalescedTypes(typeof(T).Assembly.ExportedTypes.Select(t => new ReflectionTypeViewModel(this, t)));
+        public void AddAssembly<T>() => AddAssembly(typeof(T).Assembly);
+
+        /// <summary>
+        /// Adds types from the given assembly.
+        /// </summary>
+        public void AddAssembly(Assembly assembly) =>
+            DiscoverCoalescedTypes(assembly.ExportedTypes.Select(t => new ReflectionTypeViewModel(this, t)));
 
 
         private object GetCacheKey(TypeViewModel typeViewModel) =>
@@ -214,7 +253,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// Attempt to add the given ClassViewModel as an ExternalType if it isn't already known.
         /// If its a newly discovered type, recurse into that type's properties as well.
         /// </summary>
-        private void ConditionallyAddAndDiscoverTypesOn(IValueViewModel typeUsage)
+        private void ConditionallyAddAndDiscoverTypesOn(ValueViewModel typeUsage)
         {
             var type = typeUsage.PureType;
             var classViewModel = type.ClassViewModel;

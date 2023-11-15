@@ -1,11 +1,17 @@
 ﻿using IntelliTect.Coalesce;
+using IntelliTect.Coalesce.AuditLogging;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.Extensions.DependencyInjection;
+using System;
 using System.Linq;
 
 namespace Coalesce.Domain
 {
+
     [Coalesce]
-    public class AppDbContext : DbContext
+    public class AppDbContext : DbContext, IAuditLogDbContext<AuditLog>
     {
 #nullable disable
         public DbSet<Person> People { get; set; }
@@ -15,6 +21,10 @@ namespace Coalesce.Domain
         public DbSet<CaseProduct> CaseProducts { get; set; }
         public DbSet<ZipCode> ZipCodes { get; set; }
         public DbSet<Log> Logs { get; set; }
+
+        public DbSet<AuditLog> AuditLogs { get; set; }
+        public DbSet<AuditLogProperty> AuditLogProperties { get; set; }
+
 #nullable restore
 
         public AppDbContext()
@@ -25,10 +35,21 @@ namespace Coalesce.Domain
         {
         }
 
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            optionsBuilder
+                .UseCoalesceAuditLogging<AuditLog>(x => x
+                    .WithAugmentation<OperationContext>()
+                    .WithMergeWindow(TimeSpan.FromSeconds(15))
+                    .ConfigureAudit(x => x
+                        // Just a random example of EFPlus config:
+                        .ExcludeProperty<Person>(p => p.ProfilePic)
+                    )
+                );
+        }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            base.OnModelCreating(modelBuilder);
-
             modelBuilder.Entity<Product>().OwnsOne(p => p.Details, cb =>
             {
                 cb.OwnsOne(c => c.ManufacturingAddress);

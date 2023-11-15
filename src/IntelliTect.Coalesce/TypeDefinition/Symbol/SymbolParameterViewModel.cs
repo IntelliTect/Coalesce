@@ -16,7 +16,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
             : base(parent, SymbolTypeViewModel.GetOrCreate(parent.Parent.ReflectionRepository, symbol.Type))
         {
             Symbol = symbol;
-#if NET6_0_OR_GREATER
             if (symbol.Type.IsReferenceType)
             {
                 // This is naive and doesn't capture the full nullable behavior and nuances of attributes.
@@ -28,7 +27,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     _ => NullabilityState.Unknown
                 };
             }
-#endif
         }
 
         public override string Name => Symbol.Name;
@@ -37,14 +35,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         protected override object? RawDefaultValue => Symbol.ExplicitDefaultValue;
 
-        public override object? GetAttributeValue<TAttribute>(string valueName)
-        {
-            return Symbol.GetAttributeValue<TAttribute>(valueName);
-        }
-
-        public override bool HasAttribute<TAttribute>()
-        {
-            return Symbol.HasAttribute<TAttribute>();
-        }
+        public override IEnumerable<AttributeViewModel<TAttribute>> GetAttributes<TAttribute>()
+            => Symbol.GetAttributes<TAttribute>();
     }
 }

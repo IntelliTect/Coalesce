@@ -104,6 +104,10 @@ If true, the list results will be reloaded when the dropdown menu is opened. By 
 
 An optional set of [Data Source Standard Parameters](/modeling/model-components/data-sources.md#standard-parameters) to pass to API calls made to the server.
 
+<Prop def="cache?: ResponseCachingConfiguration | boolean" lang="ts" />
+
+If provided and non-false, enables [response caching](/stacks/vue/layers/api-clients.md#response-caching) on the component's internal API callers.
+
 <Prop def="create?: {
   getLabel: (search: string, items: TModel[]) => string | false,
   getItem: (search: string, label: string) => Promise<TModel>

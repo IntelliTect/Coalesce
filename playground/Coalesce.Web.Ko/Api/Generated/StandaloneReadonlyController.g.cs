@@ -2,6 +2,7 @@
 using Coalesce.Web.Ko.Models;
 using IntelliTect.Coalesce;
 using IntelliTect.Coalesce.Api;
+using IntelliTect.Coalesce.Api.Behaviors;
 using IntelliTect.Coalesce.Api.Controllers;
 using IntelliTect.Coalesce.Api.DataSources;
 using IntelliTect.Coalesce.Mapping;

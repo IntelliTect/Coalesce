@@ -76,6 +76,9 @@ namespace IntelliTect.Coalesce.Validation
                             assert.IsFalse(prop.HasAttribute<EditAttribute>(),
                                 dtoPropSecWarningPreamble + "EditAttribute has no effect here.");
 
+                            assert.IsFalse(prop.SecurityInfo.Restrictions.Count > 0,
+                                dtoPropSecWarningPreamble + "RestrictAttribute has no effect here.");
+
                             assert.IsFalse(prop.HasAttribute<DtoIncludesAttribute>(),
                                 "[DtoIncludesAttribute] has no effect on an IClassDto. This logic must be implemented manually in MapFrom.");
                             assert.IsFalse(prop.HasAttribute<DtoExcludesAttribute>(),
@@ -94,12 +97,13 @@ namespace IntelliTect.Coalesce.Validation
                                 assert.IsNotNull(prop.Object.PrimaryKey, "No Primary key for related object. Ensure the target object has a [Key] attributed property.");
                             }
                         }
-                        if (prop.IsForeignKey)
+
+                        if (prop.ReferenceNavigationProperty is not null)
                         {
-                            assert.IsNotNull(prop.ReferenceNavigationProperty, "Object property not found.");
-                            assert.IsNotNull(prop.ReferenceNavigationProperty?.Object, "Object property related object not found.");
-                            assert.IsNotNull(prop.ReferenceNavigationProperty?.Object?.PrimaryKey, "No primary key on type of this ID's Navigation Property.");
+                            assert.IsNotNull(prop.ReferenceNavigationProperty.Object, "Object property related object not found.");
+                            assert.IsNotNull(prop.ReferenceNavigationProperty.Object?.PrimaryKey, "No primary key on type of this ID's Navigation Property.");
                         }
+
                         if (prop.Type.IsCollection)
                         {
                             assert.AreNotEqual(prop.Type.FullyQualifiedName, prop.PureType.FullyQualifiedName, "Collection is not defined correctly.");
@@ -110,8 +114,12 @@ namespace IntelliTect.Coalesce.Validation
                             }
                             if (prop.Role == PropertyRole.CollectionNavigation)
                             {
-                                assert.IsTrue(prop.InverseProperty!.IsPOCO, "The inverse property of a collection navigation should reference the corresponding reference navigation on the other side of the relationship.");
-                                assert.IsNotNull(prop.InverseProperty.ForeignKeyProperty, "Could not find the foreign key of the referenced inverse property");
+                                if (prop.InverseProperty != null)
+                                {
+                                    assert.IsTrue(prop.InverseProperty.IsPOCO, "The inverse property of a collection navigation should reference the corresponding reference navigation on the other side of the relationship.");
+                                }
+
+                                assert.IsNotNull(prop.ForeignKeyProperty, "Could not find the foreign key of the navigation property");
                             }
                         }
                         if (prop.IsManytoManyCollection &&
@@ -135,6 +143,11 @@ namespace IntelliTect.Coalesce.Validation
                         if (prop.DefaultOrderBy != null && model.IsDbMappedType)
                         {
                             assert.IsTrue(prop.IsDbMapped, "Property with [DefaultOrderBy] must be DB mapped.");
+                        }
+
+                        if (prop.DateType == DateTypeAttribute.DateTypes.TimeOnly)
+                        {
+                            assert.IsTrue(prop.PureType.IsA<TimeOnly>(), "Time-only properties should be of type System.TimeOnly.", isWarning: true);
                         }
                     }
                     catch (Exception ex)
@@ -189,7 +202,7 @@ namespace IntelliTect.Coalesce.Validation
                         assert.IsFalse(method.ResultType.IsInternalUse, "Method return types cannot be internal use.");
 
                         // TODO: Assert that the method name isn't a reserved endpoint name:
-                        // get, save, delete, list, count
+                        // get, save, bulkSave, delete, list, count
                         foreach (var param in method.Parameters)
                         {
                             assert.Area = $"{model}: {method}: {param}";

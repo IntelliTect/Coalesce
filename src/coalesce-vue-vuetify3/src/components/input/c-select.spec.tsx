@@ -279,6 +279,19 @@ describe("CSelect", () => {
       expect(model.currentCourseId).toBe(101);
       expect(model.currentCourse?.courseId).toBe(101);
     });
+
+    test("mutates model on selection when bound by apicaller arg", async () => {
+      const model = new StudentViewModel({});
+      const wrapper = mountApp(() => (
+        <CSelect model={model.manyParams} for="model" />
+      )).findComponent(CSelect);
+
+      // Act
+      await selectFirstResult(wrapper);
+
+      // Assert: arg prop mutated
+      expect(model.manyParams.args.model?.courseId).toBe(101);
+    });
   });
 
   describe("interaction", () => {

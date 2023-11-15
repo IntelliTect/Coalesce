@@ -117,7 +117,7 @@ namespace Coalesce.Domain
         /// </summary>
         [ListText]
         [NotMapped]
-        public string Name => $"{Title} {FirstName} {LastName}";
+        public string Name => $"{Title} {FirstName} {LastName}".Trim();
 
         /// <summary>
         /// Company ID this person is employed by
@@ -200,6 +200,15 @@ namespace Coalesce.Domain
         public DateTime GetBirthdate()
         {
             return BirthDate ?? DateTime.Now;
+        }
+
+        /// <summary>
+        /// Returns the user name
+        /// </summary>
+        [Coalesce]
+        public void SetBirthDate(DateOnly date, TimeOnly time)
+        {
+            BirthDate = date.ToDateTime(time);
         }
 
         [Coalesce]

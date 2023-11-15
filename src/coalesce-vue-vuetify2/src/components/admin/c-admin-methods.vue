@@ -15,7 +15,11 @@
           <c-display :model="model"></c-display>
         </v-toolbar-title>
       </v-toolbar>
-      <v-expansion-panel v-for="method in methods" :key="method.name">
+      <v-expansion-panel
+        v-for="method in methods"
+        :key="method.name"
+        :class="'method-' + method.name"
+      >
         <v-expansion-panel-header>
           <div>{{ method.displayName }}</div>
         </v-expansion-panel-header>

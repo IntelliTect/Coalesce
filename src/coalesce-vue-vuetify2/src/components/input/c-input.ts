@@ -1,17 +1,14 @@
 import { defineComponent, type PropOptions, type VNodeData } from "vue";
 import {
   buildVuetifyAttrs,
-  getValueMeta,
+  getValueMetaAndOwner,
   makeMetadataProps,
 } from "../c-metadata-component";
 import {
   Model,
-  ClassType,
   DataSource,
-  DataSourceType,
   mapValueToModel,
   AnyArgCaller,
-  ApiState,
   parseValue,
 } from "coalesce-vue";
 
@@ -43,9 +40,7 @@ export default defineComponent({
   functional: true,
 
   props: {
-    ...makeMetadataProps<
-      Model<ClassType> | DataSource<DataSourceType> | AnyArgCaller
-    >(),
+    ...makeMetadataProps<Model | DataSource | AnyArgCaller>(),
 
     value: <PropOptions<any>>{ required: false },
   },
@@ -53,31 +48,18 @@ export default defineComponent({
   render(_c, ctx) {
     // NOTE: CreateElement fn must be named `_c` for unplugin-vue-components to work correctly.
 
-    let model = ctx.props.model;
-    const modelMeta = model ? model.$metadata : null;
-
-    const _valueMeta = getValueMeta(
+    const { valueMeta: _valueMeta, valueOwner } = getValueMetaAndOwner(
       ctx.props.for,
-      modelMeta,
+      ctx.props.model,
       ctx.parent.$coalesce.metadata
     );
+
     if (!_valueMeta || !("role" in _valueMeta)) {
       throw Error(
         "c-input requires value metadata. Specify it with the 'for' prop'"
       );
     }
     const valueMeta = _valueMeta; // Alias so type inside closures will be correct;
-
-    // Support binding to method args via `:model="myModel.myMethod" for="myArg"`.
-    // getValueMeta will resolve to the metadata of the specific parameter;
-    // we then have to resolve the args object from the ApiState.
-    if (
-      model instanceof ApiState &&
-      "args" in model &&
-      valueMeta.name in model.args
-    ) {
-      model = model.args;
-    }
 
     const { on: ctxOn, props: ctxProps, ...ctxData } = ctx.data;
     const data = {
@@ -86,8 +68,8 @@ export default defineComponent({
 
       props: {
         // If a model is provided, pull the value off the model.
-        value: model
-          ? (model as any)[valueMeta.name]
+        value: valueOwner
+          ? valueOwner[valueMeta.name]
           : primitiveTypes.includes(valueMeta.type)
           ? mapValueToModel(ctx.props.value, valueMeta)
           : ctx.props.value,
@@ -140,13 +122,13 @@ export default defineComponent({
     // that delegate directly to vuetify components.
     const attrs = (data.attrs = buildVuetifyAttrs(
       valueMeta,
-      model,
+      ctx.props.model,
       ctxData.attrs
     ));
 
     const onInput = function (value: any) {
-      if (model && valueMeta) {
-        (model as any)[valueMeta.name] = parseValue(value, valueMeta);
+      if (valueOwner && valueMeta) {
+        valueOwner[valueMeta.name] = parseValue(value, valueMeta);
       }
     };
 

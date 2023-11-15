@@ -1,13 +1,13 @@
 ﻿using IntelliTect.Coalesce.TypeDefinition;
+using IntelliTect.Coalesce.Utilities;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Security.Claims;
-using IntelliTect.Coalesce.Utilities;
-using System.Reflection;
 using System.Globalization;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
+using System.Runtime.CompilerServices;
+using static IntelliTect.Coalesce.DataAnnotations.SearchAttribute;
 
 namespace IntelliTect.Coalesce.Helpers.Search
 {
@@ -67,71 +67,50 @@ namespace IntelliTect.Coalesce.Helpers.Search
             //{ DateTimeFormatInfo.CurrentInfo.UniversalSortableDateTimePattern, ParseFlags.HaveDateTime },
         };
 
-        public override IEnumerable<(PropertyViewModel property, string statement)> GetLinqDynamicSearchStatements(
-            ClaimsPrincipal? user, TimeZoneInfo timeZone, string? propertyParent, string rawSearchTerm)
+        public override IEnumerable<(PropertyViewModel property, Expression statement)> GetLinqSearchStatements(
+            CrudContext context, Expression propertyParent, string rawSearchTerm)
         {
-            if (!Property.SecurityInfo.IsReadAllowed(user))
+            if (!Property.SecurityInfo.IsFilterAllowed(context))
             {
                 yield break;
             }
 
             var propType = Property.Type;
-            var propertyAccessor = propertyParent == null
-                ? Property.Name
-                : $"{propertyParent}.{Property.Name}";
+            var propertyAccessor = propertyParent.Prop(Property);
 
             if (propType.IsDate)
             {
-                string DateLiteral(DateTime date)
-                {
-                    if (propType.IsDateTimeOffset && date.Kind != DateTimeKind.Utc)
-                        throw new ArgumentException("datetimeoffset comparand must be a UTC date.");
+                DateTime dt = default;
+                TimeSpan? range = null;
 
-                    return $"{Property.PureType.Name}" +
-                        $"({date.Year}, {date.Month}, {date.Day}, {date.Hour}, {date.Minute}, {date.Second}" +
-                        $"{(propType.IsDateTimeOffset ? " , TimeSpan(0)" : "")})";
-                }
-
-
-#pragma warning disable IDE0018 // Inline variable declaration. Invalid suggestion - this variable is used more than once.
-                DateTime dt;
-#pragma warning restore IDE0018 // Inline variable declaration
+                // Parse special formats that search entire years or month:
                 foreach (var formatInfo in DateFormats)
                 {
                     if (DateTime.TryParseExact(
-                        rawSearchTerm, 
-                        formatInfo.Key, 
-                        CultureInfo.CurrentCulture, 
-                        DateTimeStyles.AllowWhiteSpaces, 
+                        rawSearchTerm,
+                        formatInfo.Key,
+                        CultureInfo.CurrentCulture,
+                        DateTimeStyles.AllowWhiteSpaces,
                         out dt
                     ))
                     {
-                        if (propType.IsDateTimeOffset)
-                            dt = TimeZoneInfo.ConvertTimeToUtc(dt, timeZone);
-
                         if (formatInfo.Value == (ParseFlags.HaveYear | ParseFlags.HaveMonth))
                         {
-                            yield return (
-                                Property,
-                                $"({propertyAccessor} >= {DateLiteral(dt)} && {propertyAccessor} < {DateLiteral(dt.AddMonths(1))})"
-                            );
+                            range = dt.AddMonths(1) - dt;
+                            break;
                         }
                         else if (formatInfo.Value == (ParseFlags.HaveYear))
                         {
-                            yield return (
-                                Property,
-                                $"({propertyAccessor} >= {DateLiteral(dt)} && {propertyAccessor} < {DateLiteral(dt.AddYears(1))})"
-                            );
+                            range = dt.AddYears(1) - dt;
+                            break;
                         }
-                        yield break;
                     }
                 }
 
                 // We didn't find any specific format above.
                 // Try general date parsing for either searching by day or by minute.
-                if (DateTime.TryParse(rawSearchTerm, CultureInfo.CurrentCulture, DateTimeStyles.AllowWhiteSpaces, out dt))
+                if (range == null && DateTime.TryParse(rawSearchTerm, CultureInfo.CurrentCulture, DateTimeStyles.AllowWhiteSpaces, out dt))
                 {
-                    TimeSpan range;
                     if (dt.TimeOfDay == TimeSpan.Zero)
                     {
                         // No time component (or time was midnight - this is a limitation we're willing to take for simplicity).
@@ -152,26 +131,50 @@ namespace IntelliTect.Coalesce.Helpers.Search
                         dt = new DateTime(dt.Year, dt.Month, dt.Day, dt.Hour, dt.Minute, 0, DateTimeKind.Unspecified);
                         range = TimeSpan.FromMinutes(1);
                     }
+                }
 
+                if (range != null)
+                {
+                    Expression min, max;
                     if (propType.IsDateTimeOffset)
-                        dt = TimeZoneInfo.ConvertTimeToUtc(dt, timeZone);
+                    {
+                        var offset = new DateTimeOffset(dt, context.TimeZone.GetUtcOffset(dt));
+                        min = offset.AsQueryParam(propType);
+                        max = offset.Add(range.Value).AsQueryParam(propType);
+                    }
+                    else
+                    {
+                        min = dt.AsQueryParam(propType);
+                        max = dt.Add(range.Value).AsQueryParam(propType);
+                    }
 
                     yield return (
                         Property,
-                        $"({propertyAccessor} >= {DateLiteral(dt)} && {propertyAccessor} < {DateLiteral(dt.Add(range))})"
+                        Expression.AndAlso(
+                            Expression.GreaterThanOrEqual(
+                                propertyAccessor,
+                                min
+                            ),
+                            Expression.LessThan(
+                                propertyAccessor,
+                                max
+                            )
+                        )
                     );
-                    yield break;
                 }
             }
             else if (propType.IsEnum)
             {
                 var enumValuePair = propType.EnumValues
                     .FirstOrDefault(kvp => string.Equals(kvp.Name, rawSearchTerm, StringComparison.OrdinalIgnoreCase));
-                
+
                 // If the input string mapped to a valid enum value, search by the int value of that enum value.
                 if (enumValuePair != null)
                 {
-                    yield return (Property, $"({propertyAccessor} == \"{enumValuePair.Value}\")");
+                    yield return (Property, Expression.Equal(
+                        propertyAccessor,
+                        enumValuePair.Value.AsQueryParam(propType)
+                    ));
                 }
             }
             else if (propType.IsNumber || propType.IsGuid)
@@ -182,37 +185,45 @@ namespace IntelliTect.Coalesce.Helpers.Search
                 // (in our code, anyway - the default implementation of this is just a try catch anyway)
                 if (typeConverter.IsValid(rawSearchTerm))
                 {
-                    var comparand = typeConverter.ConvertFromString(rawSearchTerm);
-                    if (propType.IsGuid)
-                    {
-                        comparand = $"\"{comparand}\"";
-                    }
-                    yield return (Property, $"({propertyAccessor} == {comparand})");
+                    var comparand = typeConverter.ConvertFromString(rawSearchTerm)!;
+                    yield return (Property, Expression.Equal(
+                        propertyAccessor,
+                        comparand.AsQueryParam(propType)
+                    ));
                 }
             }
             else if (propType.IsString)
             {
-                // Theoretical support for EF.Functions.Like. Not yet supported in DynamicLinq.
-                // https://github.com/StefH/System.Linq.Dynamic.Core/issues/105
-                /*
-                 switch (Property.SearchMethod)
-                {
-                    case DataAnnotations.SearchAttribute.SearchMethods.BeginsWith:
-                        yield return (Property, $"({propertyAccessor} != null && EF.Functions.Like({propertyAccessor}, \"{term}%\")");
-                        break;
-                    case DataAnnotations.SearchAttribute.SearchMethods.Contains:
-                        yield return (Property, $"({propertyAccessor} != null && EF.Functions.Like({propertyAccessor}, \"%{term}%\")");
-                        break;
-                    default:
-                        throw new NotImplementedException();
-                }
-                 * */
-                var term = rawSearchTerm.EscapeStringLiteralForLinqDynamic();
-                yield return (Property, $"({propertyAccessor} != null && {propertyAccessor}.{string.Format(Property.SearchMethodCall, term)})");
-            }
-            else
-            {
+                var expr = Expression.AndAlso(
+                    // Can only search non-null strings:
+                    Expression.NotEqual(
+                        propertyAccessor,
+                        Expression.Constant(null)
+                    ),
+                    Property.SearchMethod switch
+                    {
+                        SearchMethods.EqualsNatural =>
+                            propertyAccessor.Call(MethodInfos.StringEquals, rawSearchTerm.AsQueryParam()),
 
+                        // All our "unnatural" search operations perform a ToLower().
+                        // The value of this is questionable considering default collation
+                        // in SQL server is case-insensitive, but at least for now this behavior
+                        // remains to ensure maximum compatibility.
+                        // Altering this behavior is considered in https://github.com/IntelliTect/Coalesce/issues/328
+                        _ =>
+                            propertyAccessor
+                                .Call(MethodInfos.StringToLower)
+                                .Call(Property.SearchMethod switch
+                                {
+                                    SearchMethods.Contains => MethodInfos.StringContains,
+                                    SearchMethods.BeginsWith => MethodInfos.StringStartsWith,
+                                    SearchMethods.Equals => MethodInfos.StringEquals,
+                                    _ => throw new NotSupportedException()
+                                }, rawSearchTerm.ToLower().AsQueryParam()),
+                    }
+                );
+
+                yield return (Property, expr);
             }
         }
     }

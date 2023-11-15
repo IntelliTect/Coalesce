@@ -59,6 +59,10 @@ namespace IntelliTect.Coalesce.Api.Behaviors
             }
         }
 
+        public IBehaviors<TServed> GetBehaviors<TServed>(ClassViewModel declaredFor)
+            where TServed : class
+            => (IBehaviors<TServed>)GetBehaviors(reflectionRepository.GetClassViewModel<TServed>()!, declaredFor);
+
         public object GetBehaviors(ClassViewModel servedType, ClassViewModel declaredFor)
         {
             var behaviorsType = GetBehaviorsType(servedType, declaredFor);

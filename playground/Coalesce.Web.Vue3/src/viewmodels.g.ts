@@ -3,6 +3,67 @@ import * as $models from './models.g'
 import * as $apiClients from './api-clients.g'
 import { ViewModel, ListViewModel, ServiceViewModel, DeepPartial, defineProps } from 'coalesce-vue/lib/viewmodel'
 
+export interface AuditLogViewModel extends $models.AuditLog {
+  message: string | null;
+  userId: number | null;
+  user: PersonViewModel | null;
+  id: number | null;
+  type: string | null;
+  keyValue: string | null;
+  description: string | null;
+  state: $models.AuditEntryState | null;
+  date: Date | null;
+  properties: AuditLogPropertyViewModel[] | null;
+  clientIp: string | null;
+  referrer: string | null;
+  endpoint: string | null;
+}
+export class AuditLogViewModel extends ViewModel<$models.AuditLog, $apiClients.AuditLogApiClient, number> implements $models.AuditLog  {
+  
+  
+  public addToProperties(initialData?: DeepPartial<$models.AuditLogProperty> | null) {
+    return this.$addChild('properties', initialData) as AuditLogPropertyViewModel
+  }
+  
+  constructor(initialData?: DeepPartial<$models.AuditLog> | null) {
+    super($metadata.AuditLog, new $apiClients.AuditLogApiClient(), initialData)
+  }
+}
+defineProps(AuditLogViewModel, $metadata.AuditLog)
+
+export class AuditLogListViewModel extends ListViewModel<$models.AuditLog, $apiClients.AuditLogApiClient, AuditLogViewModel> {
+  
+  constructor() {
+    super($metadata.AuditLog, new $apiClients.AuditLogApiClient())
+  }
+}
+
+
+export interface AuditLogPropertyViewModel extends $models.AuditLogProperty {
+  id: number | null;
+  parentId: number | null;
+  propertyName: string | null;
+  oldValue: string | null;
+  oldValueDescription: string | null;
+  newValue: string | null;
+  newValueDescription: string | null;
+}
+export class AuditLogPropertyViewModel extends ViewModel<$models.AuditLogProperty, $apiClients.AuditLogPropertyApiClient, number> implements $models.AuditLogProperty  {
+  
+  constructor(initialData?: DeepPartial<$models.AuditLogProperty> | null) {
+    super($metadata.AuditLogProperty, new $apiClients.AuditLogPropertyApiClient(), initialData)
+  }
+}
+defineProps(AuditLogPropertyViewModel, $metadata.AuditLogProperty)
+
+export class AuditLogPropertyListViewModel extends ListViewModel<$models.AuditLogProperty, $apiClients.AuditLogPropertyApiClient, AuditLogPropertyViewModel> {
+  
+  constructor() {
+    super($metadata.AuditLogProperty, new $apiClients.AuditLogPropertyApiClient())
+  }
+}
+
+
 export interface CaseViewModel extends $models.Case {
   
   /** The Primary key for the Case object */
@@ -34,8 +95,8 @@ export interface CaseViewModel extends $models.Case {
 export class CaseViewModel extends ViewModel<$models.Case, $apiClients.CaseApiClient, number> implements $models.Case  {
   
   
-  public addToCaseProducts() {
-    return this.$addChild('caseProducts') as CaseProductViewModel
+  public addToCaseProducts(initialData?: DeepPartial<$models.CaseProduct> | null) {
+    return this.$addChild('caseProducts', initialData) as CaseProductViewModel
   }
   
   get products(): ReadonlyArray<ProductViewModel> {
@@ -262,8 +323,8 @@ export interface CompanyViewModel extends $models.Company {
 export class CompanyViewModel extends ViewModel<$models.Company, $apiClients.CompanyApiClient, number> implements $models.Company  {
   
   
-  public addToEmployees() {
-    return this.$addChild('employees') as PersonViewModel
+  public addToEmployees(initialData?: DeepPartial<$models.Person> | null) {
+    return this.$addChild('employees', initialData) as PersonViewModel
   }
   
   public get conflictingParameterNames() {
@@ -367,13 +428,13 @@ export interface PersonViewModel extends $models.Person {
 export class PersonViewModel extends ViewModel<$models.Person, $apiClients.PersonApiClient, number> implements $models.Person  {
   
   
-  public addToCasesAssigned() {
-    return this.$addChild('casesAssigned') as CaseViewModel
+  public addToCasesAssigned(initialData?: DeepPartial<$models.Case> | null) {
+    return this.$addChild('casesAssigned', initialData) as CaseViewModel
   }
   
   
-  public addToCasesReported() {
-    return this.$addChild('casesReported') as CaseViewModel
+  public addToCasesReported(initialData?: DeepPartial<$models.Case> | null) {
+    return this.$addChild('casesReported', initialData) as CaseViewModel
   }
   
   /** Sets the FirstName to the given text. */
@@ -409,6 +470,18 @@ export class PersonViewModel extends ViewModel<$models.Person, $apiClients.Perso
     
     Object.defineProperty(this, 'getBirthdate', {value: getBirthdate});
     return getBirthdate
+  }
+  
+  /** Returns the user name */
+  public get setBirthDate() {
+    const setBirthDate = this.$apiClient.$makeCaller(
+      this.$metadata.methods.setBirthDate,
+      (c, date: Date | null, time: Date | null) => c.setBirthDate(this.$primaryKey, date, time),
+      () => ({date: null as Date | null, time: null as Date | null, }),
+      (c, args) => c.setBirthDate(this.$primaryKey, args.date, args.time))
+    
+    Object.defineProperty(this, 'setBirthDate', {value: setBirthDate});
+    return setBirthDate
   }
   
   public get fullNameAndAge() {
@@ -693,6 +766,8 @@ export class WeatherServiceViewModel extends ServiceViewModel<typeof $metadata.W
 
 
 const viewModelTypeLookup = ViewModel.typeLookup = {
+  AuditLog: AuditLogViewModel,
+  AuditLogProperty: AuditLogPropertyViewModel,
   Case: CaseViewModel,
   CaseDto: CaseDtoViewModel,
   CaseDtoStandalone: CaseDtoStandaloneViewModel,
@@ -707,6 +782,8 @@ const viewModelTypeLookup = ViewModel.typeLookup = {
   ZipCode: ZipCodeViewModel,
 }
 const listViewModelTypeLookup = ListViewModel.typeLookup = {
+  AuditLog: AuditLogListViewModel,
+  AuditLogProperty: AuditLogPropertyListViewModel,
   Case: CaseListViewModel,
   CaseDto: CaseDtoListViewModel,
   CaseDtoStandalone: CaseDtoStandaloneListViewModel,

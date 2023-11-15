@@ -76,10 +76,37 @@ const dtoToModelMappings = <MappingData[]>[
     model: new Date(1591822800000),
   },
   {
+    meta: studentProps.birthDate,
+    dto: "2020-06-10T21:00:00-00:30",
+    model: new Date(1591824600000),
+  },
+  {
     // Dates without timezone should be assumed to be local time.
     meta: studentProps.birthDate,
     dto: "2020-06-10T14:00:00",
     model: new Date(2020, 5, 10, 14, 0, 0, 0),
+  },
+  {
+    meta: { ...studentProps.birthDate, dateKind: "date" },
+    dto: "2020-06-10",
+    model: new Date(2020, 5, 10, 0, 0, 0, 0),
+  },
+  {
+    meta: { ...studentProps.birthDate, dateKind: "date" },
+    dto: "2020-06-10T14:00:00Z",
+    model: new Date(1591797600000),
+  },
+  {
+    meta: { ...studentProps.birthDate, dateKind: "time" },
+    dto: "12:34:56",
+    // Time-only parses as Jan 1 of current year to avoid un-representable times on DST changeover days.
+    model: new Date(new Date().getFullYear(), 0, 1, 12, 34, 56, 0),
+  },
+  {
+    // Time-only, represented in a datetime format.
+    meta: { ...studentProps.birthDate, dateKind: "time" },
+    dto: "2020-06-10T12:34:56",
+    model: new Date(2020, 5, 10, 12, 34, 56, 0),
   },
   ...unparsable(
     studentProps.birthDate,

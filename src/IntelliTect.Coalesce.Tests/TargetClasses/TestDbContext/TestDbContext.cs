@@ -18,11 +18,13 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         public DbSet<CaseProduct> CaseProducts { get; set; }
 
         public DbSet<ComplexModel> ComplexModels { get; set; }
+        public DbSet<ComplexModelDependent> ComplexModelDependents { get; set; }
         public DbSet<ReadOnlyEntityUsedAsMethodInput> ReadOnlyEntityUsedAsMethodInputs { get; set; }
         public DbSet<RequiredAndInitModel> RequiredAndInitModels { get; set; }
         public DbSet<Test> Tests { get; set; }
 
         public DbSet<AbstractModel> AbstractModels { get; set; }
+        public DbSet<AbstractImpl> AbstractImpls { get; set; }
 
         public DbSet<EnumPk> EnumPks { get; set; }
 
@@ -36,13 +38,11 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         public AppDbContext(string memoryDatabaseName)
             : base(new DbContextOptionsBuilder<AppDbContext>().UseInMemoryDatabase(memoryDatabaseName).ConfigureWarnings(w =>
             {
-#if NET5_0_OR_GREATER
-            w.Ignore(CoreEventId.NavigationBaseIncludeIgnored);
-#endif
+                w.Ignore(CoreEventId.NavigationBaseIncludeIgnored);
             }).Options)
         { }
 
-        public AppDbContext(DbContextOptions<AppDbContext> options)
+        public AppDbContext(DbContextOptions options)
             : base(options)
         { }
 

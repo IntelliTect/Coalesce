@@ -269,11 +269,15 @@ namespace IntelliTect.Coalesce.Models
 
     public class ItemResult<T> : ItemResult
     {
-#if NETCOREAPP
         [System.Diagnostics.CodeAnalysis.AllowNull]
         [System.Diagnostics.CodeAnalysis.MaybeNull]
-#endif 
         public T Object { get; set; }
+
+        /// <summary>
+        /// For bulk save responses, holds a mapping between the incoming refs of 
+        /// unkeyed bulk save items and each item's new primary key.
+        /// </summary>
+        public IDictionary<int, object?>? RefMap { get; set; }
 
         public ItemResult(): base() { }
 
@@ -281,9 +285,7 @@ namespace IntelliTect.Coalesce.Models
 
         public ItemResult(
             ItemResult result,
-#if NETCOREAPP
             [System.Diagnostics.CodeAnalysis.AllowNull]
-#endif  
             T obj = default
         ) : base(result)
         {
@@ -293,9 +295,7 @@ namespace IntelliTect.Coalesce.Models
         public ItemResult(
             bool wasSuccessful, 
             string? message = null,
-#if NETCOREAPP
             [System.Diagnostics.CodeAnalysis.AllowNull]
-#endif 
             T obj = default, 
             IEnumerable<ValidationIssue>? validationIssues = null,
             IncludeTree? includeTree = null

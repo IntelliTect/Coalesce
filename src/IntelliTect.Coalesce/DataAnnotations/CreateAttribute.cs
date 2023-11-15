@@ -4,8 +4,11 @@ using IntelliTect.Coalesce.Helpers;
 namespace IntelliTect.Coalesce.DataAnnotations
 {
     /// <summary>
-    /// Should users be allowed to create an entity via the API/button.
-    /// </summary>    
+    /// <para>
+    /// When placed on an entity or custom <see cref="IClassDto{T}"/> class exposed by Coalesce,
+    /// controls the permissions for saving new instances of the model via the /save or /bulkSave endpoints.
+    /// </para>
+    /// </summary>  
     [AttributeUsage(AttributeTargets.Class)]
     public sealed class CreateAttribute : SecurityAttribute
     {

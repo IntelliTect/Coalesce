@@ -46,19 +46,22 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
             AssignableToLookup = types.ToLookup(t => t.MetadataName);
 
-            ClassViewModel = ShouldCreateClassViewModel && Symbol is INamedTypeSymbol nts
+            ClassViewModel = ShouldCreateClassViewModel
                 ? new SymbolClassViewModel(this)
                 : null;
 
             // These are precomputed because they are used for .Equals() and the == operator.
             FullyQualifiedName = Symbol.ToDisplayString(DefaultDisplayFormat);
             VerboseFullyQualifiedName = Symbol.ToDisplayString(VerboseDisplayFormat);
-    }
+        }
 
         internal static SymbolTypeViewModel GetOrCreate(ReflectionRepository? reflectionRepository, ITypeSymbol symbol)
         {
             return reflectionRepository?.GetOrAddType(symbol) ?? new SymbolTypeViewModel(reflectionRepository, symbol);
         }
+
+        protected override bool ShouldCreateClassViewModel
+            => base.ShouldCreateClassViewModel && Symbol is INamedTypeSymbol;
 
         public INamedTypeSymbol NamedSymbol => Symbol as INamedTypeSymbol ?? throw new InvalidCastException("Cannot cast to INamedTypeSymbol");
 
@@ -97,13 +100,14 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
                 foreach (var member in Symbol.GetMembers().OfType<IFieldSymbol>())
                 {
+                    var attrs = member.GetAttributeProvider();
                     result.Add(new EnumMember(
                         member.Name, 
                         member.ConstantValue!,
-                        member.GetAttributeValue<DisplayNameAttribute>(a => a.DisplayName) ??
-                            member.GetAttributeValue<DisplayAttribute>(a => a.Name) ??
+                        attrs.GetAttributeValue<DisplayNameAttribute>(a => a.DisplayName) ??
+                            attrs.GetAttributeValue<DisplayAttribute>(a => a.Name) ??
                             member.Name.ToProperCase(),
-                        member.GetAttributeValue<DisplayAttribute>(a => a.Description),
+                        attrs.GetAttributeValue<DisplayAttribute>(a => a.Description),
                         member.ExtractXmlComments()
                     ));
                 }
@@ -138,11 +142,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public override ClassViewModel? ClassViewModel { get; }
 
-        public override object? GetAttributeValue<TAttribute>(string valueName) =>
-            Symbol.GetAttributeValue<TAttribute>(valueName);
-
-        public override bool HasAttribute<TAttribute>() =>
-            Symbol.HasAttribute<TAttribute>();
+        public override IEnumerable<AttributeViewModel<TAttribute>> GetAttributes<TAttribute>()
+            => Symbol.GetAttributes<TAttribute>();
 
         /// <summary>
         /// The set of types that an object of the current represented type is assignable to, 

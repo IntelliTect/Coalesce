@@ -6,6 +6,9 @@
   <PropertyGroup>
     <Description>.NET Core command-line tooling for IntelliTect.Coalesce code generation</Description>
     <OutputType>Exe</OutputType>
+    
+    <!-- Always allow the tools to roll forward to take advantage of newer installed SDKs on developer machines. -->
+    <RollForward>LatestMinor</RollForward>
   </PropertyGroup>
 
   <ItemGroup>

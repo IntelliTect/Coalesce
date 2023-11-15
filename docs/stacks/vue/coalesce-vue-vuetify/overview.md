@@ -212,5 +212,12 @@ If for whatever reason you find yourself adding Coalesce to an existing project,
 <td> 
 
 @[import-md "after":"MARKER:summary", "before":"MARKER:summary-end"](./components/c-admin-table-page.md) 
+</td></tr><tr><td>
+
+[c-admin-audit-log-page](./components/c-admin-audit-log-page.md)
+</td>
+<td> 
+
+@[import-md "after":"MARKER:summary", "before":"MARKER:summary-end"](./components/c-admin-audit-log-page.md) 
 </td></tr>
 </table>

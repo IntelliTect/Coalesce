@@ -20,10 +20,13 @@ namespace IntelliTect.Coalesce.DataAnnotations
         /// </summary>
         public bool AllowSave { get; set; } = false;
         public bool IsRequired { get; set; }
-        public double? MinValue { get; set; }
-        public double? MaxValue { get; set; }
-        public int? MinLength { get; set; }
-        public int? MaxLength { get; set; }
+
+        // Note: nullable propeties can't be used here because nullable values can't be used as attribute initializers.
+        public double MinValue { get; set; } = double.MaxValue;
+        public double MaxValue { get; set; } = double.MinValue;
+        public int MinLength { get; set; } = int.MaxValue;
+        public int MaxLength { get; set; } = int.MinValue;
+
         public string? Pattern { get; set; }
         public double Step { get; set; }
         public bool IsEmail { get; set; }

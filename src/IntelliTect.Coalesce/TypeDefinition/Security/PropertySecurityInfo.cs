@@ -1,6 +1,8 @@
 ﻿using IntelliTect.Coalesce.DataAnnotations;
 using IntelliTect.Coalesce.Helpers;
+using IntelliTect.Coalesce.Mapping;
 using IntelliTect.Coalesce.Utilities;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -15,8 +17,12 @@ namespace IntelliTect.Coalesce.TypeDefinition
     /// </summary>
     public class PropertySecurityInfo
     {
+        private PropertyViewModel Prop { get; }
+
         public PropertySecurityInfo(PropertyViewModel prop)
         {
+            Prop = prop;
+
             var read = prop.GetSecurityPermission<ReadAttribute>();
             var edit = prop.GetSecurityPermission<EditAttribute>();
 
@@ -86,6 +92,11 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     Edit = new PropertySecurityPermission(prop, edit.Name, roles, IsEditUnused);
                 }
             }
+
+            Restrictions = prop.GetAttributes<Attribute>()
+                .Select(a => a.Type.GenericArgumentsFor(typeof(RestrictAttribute<>))?[0])
+                .Where(a => a != null)
+                .ToArray()!;
         }
 
         /// <summary>
@@ -104,21 +115,53 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public PropertySecurityPermission Edit { get; }
 
         /// <summary>
+        /// Dynamic restrictions to be applied for both Reads and Writes.
+        /// </summary>
+        public IReadOnlyList<TypeViewModel> Restrictions { get; }
+
+        /// <summary>
         /// If true, the user can read the field.
         /// </summary>
+        [Obsolete("This method cannot account for any custom IPropertyRestrictions.")]
         public bool IsReadAllowed(ClaimsPrincipal? user) => Read.IsAllowed(user);
 
         /// <summary>
         /// If true, the user can initialize the field on a new instance of the object.
         /// </summary>
+        [Obsolete("This method cannot account for any custom IPropertyRestrictions.")]
         public bool IsInitAllowed(ClaimsPrincipal? user) => Init.IsAllowed(user);
 
         /// <summary>
         /// If true, the user can edit the field on an existing instance of the object.
         /// </summary>
+        [Obsolete("This method cannot account for any custom IPropertyRestrictions.")]
         public bool IsEditAllowed(ClaimsPrincipal? user) => Edit.IsAllowed(user);
 
-        private static bool? IsReadUnused(IValueViewModel value, HashSet<PropertyViewModel> visited)
+        /// <inheritdoc cref="IsFilterAllowed(IMappingContext)"/>
+        public bool IsFilterAllowed(CrudContext context) => IsFilterAllowed(context.MappingContext);
+
+        /// <summary>
+        /// If true, the user can sort/search/filter the field.
+        /// </summary>
+        public bool IsFilterAllowed(IMappingContext context)
+        {
+            if (!Read.IsAllowed(context.User)) return false;
+
+            if (Restrictions.Count > 0)
+            {
+                foreach (var restrictionType in Restrictions)
+                {
+                    if (!context.GetPropertyRestriction(restrictionType.TypeInfo).UserCanFilter(context, Prop.Name))
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        private static bool? IsReadUnused(ValueViewModel value, HashSet<PropertyViewModel> visited)
         {
             // The client only needs to Edit/Write to parameters, so read IS unused.
             if (value is ParameterViewModel) return true;
@@ -145,7 +188,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             return true;
         }
 
-        private static bool? IsInitUnused(IValueViewModel value, HashSet<PropertyViewModel> visited)
+        private static bool? IsInitUnused(ValueViewModel value, HashSet<PropertyViewModel> visited)
         {
             // The client needs to instantiate parameters, so edit is NOT unused.
             if (value is ParameterViewModel) return false;
@@ -172,7 +215,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             return true;
         }
 
-        private static bool? IsEditUnused(IValueViewModel value, HashSet<PropertyViewModel> visited)
+        private static bool? IsEditUnused(ValueViewModel value, HashSet<PropertyViewModel> visited)
         {
             // Parameters always instantiate new objects, so edit IS unused.
             if (value is ParameterViewModel) return true;

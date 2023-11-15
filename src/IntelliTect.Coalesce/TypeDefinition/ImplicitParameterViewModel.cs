@@ -1,4 +1,8 @@
-﻿namespace IntelliTect.Coalesce.TypeDefinition
+﻿using Microsoft.CodeAnalysis;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace IntelliTect.Coalesce.TypeDefinition
 {
     class ImplicitParameterViewModel : ParameterViewModel
     {
@@ -24,7 +28,7 @@
         public override bool HasDefaultValue => false;
         protected override object? RawDefaultValue => null;
 
-        public override object? GetAttributeValue<TAttribute>(string valueName) => null;
-        public override bool HasAttribute<TAttribute>() => false;
+        public override IEnumerable<AttributeViewModel<TAttribute>> GetAttributes<TAttribute>()
+            => Enumerable.Empty<AttributeViewModel<TAttribute>>();
     }
 }

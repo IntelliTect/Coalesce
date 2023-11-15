@@ -31,6 +31,7 @@ import { AxiosResponse } from "axios";
 
 import { mount } from "@vue/test-utils";
 import { IsVue2 } from "../src/util";
+import { mockEndpoint } from "../src/test-utils";
 
 function mockItemResult<T>(success: boolean, object: T) {
   return vitest.fn().mockResolvedValue(<AxiosItemResult<T>>{
@@ -46,101 +47,104 @@ describe("ViewModel", () => {
     const vm: ViewModel = new StudentViewModel();
   });
 
-  describe.each(["$load", "$save", "$delete"] as const)("%s", (callerName) => {
-    test("caller is lazily created", async () => {
-      // This test ensures that vue doesn't create them for us
-      // as a consequence of it trying to enumerate properties
-      // on our objects in order to add reactivity.
+  describe.each(["$load", "$save", "$delete", "$bulkSave"] as const)(
+    "%s",
+    (callerName) => {
+      test("caller is lazily created", async () => {
+        // This test ensures that vue doesn't create them for us
+        // as a consequence of it trying to enumerate properties
+        // on our objects in order to add reactivity.
 
-      const vue = mountData({
-        student: new StudentViewModel(),
+        const vue = mountData({
+          student: new StudentViewModel(),
+        });
+
+        // ViewModel shouldn't have its own property descriptor for callerName.
+        // The descriptor will be on the prototype.
+        expect(
+          Object.getOwnPropertyDescriptor(vue.student, callerName)
+        ).toBeUndefined();
+
+        // Access the caller to cause it to be created.
+        vue.student[callerName];
+
+        // Instance should now have its own caller.
+        expect(
+          Object.getOwnPropertyDescriptor(vue.student, callerName)
+        ).not.toBeUndefined();
+        expect(vue.student[callerName]).toBeInstanceOf(ItemApiState);
+
+        // Multiple access should yield the same instance.
+        expect(vue.student[callerName]).toBe(vue.student[callerName]);
+
+        // Instances should be reactive:
+        const callbackFn = vitest.fn();
+        vue.$watch(`student.${callerName}.isLoading`, callbackFn);
+        vue.student[callerName].isLoading = true;
+        await vue.$nextTick();
+        // Watcher should have been triggered for isLoading.
+        expect(callbackFn).toBeCalledTimes(1);
       });
+    }
+  );
 
-      // ViewModel shouldn't have its own property descriptor for callerName.
-      // The descriptor will be on the prototype.
-      expect(
-        Object.getOwnPropertyDescriptor(vue.student, callerName)
-      ).toBeUndefined();
-
-      // Access the caller to cause it to be created.
-      vue.student[callerName];
-
-      // Instance should now have its own caller.
-      expect(
-        Object.getOwnPropertyDescriptor(vue.student, callerName)
-      ).not.toBeUndefined();
-      expect(vue.student[callerName]).toBeInstanceOf(ItemApiState);
-
-      // Multiple access should yield the same instance.
-      expect(vue.student[callerName]).toBe(vue.student[callerName]);
-
-      // Instances should be reactive:
-      const callbackFn = vitest.fn();
-      vue.$watch(`student.${callerName}.isLoading`, callbackFn);
-      vue.student[callerName].isLoading = true;
-      await vue.$nextTick();
-      // Watcher should have been triggered for isLoading.
-      expect(callbackFn).toBeCalledTimes(1);
-    });
-  });
-
-  describe.each(["$load", "$save"] as const)("%s", (callerName) => {
-    describe("model props are set when watchers observe end of loading", () => {
-      AxiosClient.defaults.adapter = vitest
-        .fn()
-        .mockImplementation(async () => {
-          return <AxiosResponse<any>>{
-            data: {
+  describe.each(["$load", "$save", "$bulkSave"] as const)(
+    "%s",
+    (callerName) => {
+      describe("model props are set when watchers observe end of loading", () => {
+        beforeEach(() => {
+          return mockEndpoint("/students/", (req) => {
+            return {
               wasSuccessful: true,
               object: <Student>{ studentId: 1, name: "Bob" },
-            },
-            status: 200,
-          };
+            };
+          }).destroy;
         });
 
-      test("isLoading==false", async () => {
-        const student = new StudentViewModel({ studentId: 1 });
-        const vue = mountData({ student });
+        test("isLoading==false", async () => {
+          const student = new StudentViewModel({ studentId: 1 });
+          const vue = mountData({ student });
 
-        let capturedName;
-        const callbackFn = vitest.fn((n) => {
-          if (n === false) {
+          let capturedName;
+          const callbackFn = vitest.fn((n) => {
+            if (n === false) {
+              // DO NOT ASSERT INSIDE THE WATCHER CALLBACK. Vue will swallow the error.
+              capturedName = student.name;
+            }
+          });
+          vue.$watch(`student.${callerName}.isLoading`, callbackFn);
+          student[callerName].apply(student); // .apply() works around https://github.com/microsoft/TypeScript/issues/49866
+
+          // Run a bunch of cycles to let everything flush through.
+          for (let i = 0; i < 10; i++) await vue.$nextTick();
+
+          // Watcher should have been triggered for isLoading=true, then isLoading=false.
+          expect(callbackFn.mock.calls[0][0]).toBe(true);
+          expect(callbackFn.mock.calls[1][0]).toBe(false);
+          expect(capturedName).toBe("Bob");
+        });
+
+        test("wasSuccessful==true", async () => {
+          const student = new StudentViewModel({ studentId: 1 });
+          const vue = mountData({ student });
+
+          let capturedName;
+          const callbackFn = vitest.fn((n) => {
             // DO NOT ASSERT INSIDE THE WATCHER CALLBACK. Vue will swallow the error.
             capturedName = student.name;
-          }
+          });
+          vue.$watch(`student.${callerName}.wasSuccessful`, callbackFn);
+          student[callerName].apply(student); // .apply() works around https://github.com/microsoft/TypeScript/issues/49866
+
+          // Run a bunch of cycles to let everything flush through.
+          for (let i = 0; i < 10; i++) await vue.$nextTick();
+
+          expect(callbackFn.mock.calls[0][0]).toBe(true);
+          expect(capturedName).toBe("Bob");
         });
-        vue.$watch(`student.${callerName}.isLoading`, callbackFn);
-        student[callerName].apply(student); // .apply() works around https://github.com/microsoft/TypeScript/issues/49866
-
-        // Run a bunch of cycles to let everything flush through.
-        for (let i = 0; i < 10; i++) await vue.$nextTick();
-
-        // Watcher should have been triggered for isLoading=true, then isLoading=false.
-        expect(callbackFn.mock.calls[0][0]).toBe(true);
-        expect(callbackFn.mock.calls[1][0]).toBe(false);
-        expect(capturedName).toBe("Bob");
       });
-
-      test("wasSuccessful==true", async () => {
-        const student = new StudentViewModel({ studentId: 1 });
-        const vue = mountData({ student });
-
-        let capturedName;
-        const callbackFn = vitest.fn((n) => {
-          // DO NOT ASSERT INSIDE THE WATCHER CALLBACK. Vue will swallow the error.
-          capturedName = student.name;
-        });
-        vue.$watch(`student.${callerName}.wasSuccessful`, callbackFn);
-        student[callerName].apply(student); // .apply() works around https://github.com/microsoft/TypeScript/issues/49866
-
-        // Run a bunch of cycles to let everything flush through.
-        for (let i = 0; i < 10; i++) await vue.$nextTick();
-
-        expect(callbackFn.mock.calls[0][0]).toBe(true);
-        expect(capturedName).toBe("Bob");
-      });
-    });
-  });
+    }
+  );
 
   describe("$save", () => {
     const saveMock = mockItemResult(true, <Student>{
@@ -392,6 +396,480 @@ describe("ViewModel", () => {
       const promise = student.$save();
       await promise;
       expect(triggered).toBeTruthy();
+    });
+  });
+
+  describe("$bulkSave", () => {
+    test("deep creation with circular references", async () => {
+      const response = {
+        refMap: {} as any,
+        object: {
+          studentId: 1,
+          name: "scott",
+          courses: [{ courseId: 2, name: "CS101" }],
+          advisor: {
+            name: "bob",
+            advisorId: 3,
+            students: [
+              { studentId: 1, name: "scott" },
+              { studentId: 4, name: "steve" },
+            ],
+          },
+        },
+      };
+
+      const endpoint = mockEndpoint(
+        "/students/bulkSave",
+        vitest.fn((req) => ({
+          wasSuccessful: true,
+          ...JSON.parse(JSON.stringify(response)), // deep clone
+        }))
+      );
+
+      const student = new StudentViewModel();
+      student.name = "scott";
+
+      // new child
+      student.$addChild("courses", { name: "CS101" });
+
+      // new parent, with children not added by $addChild.
+      student.advisor = new AdvisorViewModel({
+        name: "bob",
+        students: [
+          student, // circular reference
+          { name: "steve" }, // item in child collection with null reference nav prop to its parent.
+        ],
+      });
+      const originalAdvisor = student.advisor;
+      const originalSteve = student.advisor.students[1];
+      const originalCourse = student.courses![0];
+
+      // Setup the ref map on the response so that existing instances may be preserved
+      response.refMap[student.$stableId] = 1;
+      response.refMap[originalCourse.$stableId] = 2;
+      response.refMap[originalAdvisor.$stableId] = 3;
+      response.refMap[originalSteve.$stableId] = 4;
+
+      await student.$bulkSave();
+
+      expect(JSON.parse(endpoint.mock.calls[0][0].data)).toMatchObject({
+        items: expect.arrayContaining([
+          {
+            action: "save",
+            type: "Student",
+            data: { studentId: null, studentAdvisorId: null, name: "scott" },
+            refs: {
+              studentId: student.$stableId,
+              studentAdvisorId: originalAdvisor.$stableId,
+            },
+            root: true,
+          },
+          {
+            action: "save",
+            type: "Course",
+            data: { courseId: null, name: "CS101", studentId: null },
+            refs: {
+              courseId: originalCourse.$stableId,
+              studentId: student.$stableId,
+            },
+          },
+          {
+            action: "save",
+            type: "Advisor",
+            data: { advisorId: null, name: "bob" },
+            refs: { advisorId: originalAdvisor.$stableId },
+          },
+          {
+            action: "save",
+            type: "Student",
+            data: { studentId: null, name: "steve" },
+            refs: {
+              studentId: originalSteve.$stableId,
+              studentAdvisorId: originalAdvisor.$stableId,
+            },
+          },
+        ]),
+      });
+
+      // Preserves non-circular instances:
+      // Reference nav:
+      expect(student.advisor === originalAdvisor).toBeTruthy();
+      // Collection navs:
+      expect(student.advisor.students[1] === originalSteve).toBeTruthy();
+      expect(student.courses![0] === originalCourse).toBeTruthy();
+
+      // Preserves *circular* instances:
+      expect(student.advisor.students[0] === student).toBeTruthy();
+
+      expect(student.$bulkSave.wasSuccessful).toBeTruthy();
+      expect(student.studentId).toBe(1);
+      expect(student.courses).toHaveLength(1);
+      expect(student.courses![0].name).toBe("CS101");
+      expect(student.courses![0].courseId).toBe(2);
+      expect(student.advisor.students).toHaveLength(2);
+
+      endpoint.destroy();
+    });
+
+    test("unsaved principal excluded by predicate", async () => {
+      const response = {
+        refMap: {} as any,
+        object: {
+          studentId: 1,
+          name: "scott",
+        },
+      };
+
+      const endpoint = mockEndpoint(
+        "/students/bulkSave",
+        vitest.fn((req) => ({
+          wasSuccessful: true,
+          ...JSON.parse(JSON.stringify(response)), // deep clone
+        }))
+      );
+
+      const student = new StudentViewModel({ name: "scott" });
+
+      // new parent, with children not added by $addChild.
+      student.advisor = new AdvisorViewModel({ name: "bob" });
+      // Add a failing validation rule to ensure that failed validation
+      // on predicate-excluded models does not block saves.
+      student.advisor.$addRule("name", "test", (v) => v == "foo" || "invalid");
+      const originalAdvisor = student.advisor;
+
+      // Setup the ref map on the response so that existing instances may be preserved
+      response.refMap[student.$stableId] = 1;
+
+      await student.$bulkSave({
+        predicate(entity, action) {
+          if (entity instanceof AdvisorViewModel) return false;
+          return true;
+        },
+      });
+
+      expect(JSON.parse(endpoint.mock.calls[0][0].data)).toMatchObject({
+        items: expect.arrayContaining([
+          {
+            action: "save",
+            type: "Student",
+            data: { studentId: null, studentAdvisorId: null, name: "scott" },
+            refs: {
+              studentId: student.$stableId,
+              // There should NOT be a ref for `studentAdvisorId` since the
+              // unsaved advisor was excluded by predicate.
+            },
+            root: true,
+          },
+        ]),
+      });
+
+      // Preserves non-circular instances:
+      // Reference nav:
+      expect(student.advisor === originalAdvisor).toBeTruthy();
+      expect(student.$bulkSave.wasSuccessful).toBeTruthy();
+      expect(student.studentId).toBe(1);
+
+      endpoint.destroy();
+    });
+
+    test("deletion", async () => {
+      const loadEndpoint = mockEndpoint("/students/get", (req) => ({
+        wasSuccessful: true,
+        object: {
+          studentId: 1,
+          name: "bob",
+          courses: [{ courseId: 2, name: "CS101" }],
+          studentAdvisorId: 3,
+          advisor: { advisorId: 3 },
+        },
+      }));
+
+      const bulkSaveEndpoint = mockEndpoint(
+        "/students/bulkSave",
+        vitest.fn((req) => ({
+          wasSuccessful: true,
+          object: {
+            studentId: 1,
+            name: "bob",
+            // We're assuming that `advisor` has a SetNull cascading delete on the server.
+          },
+        }))
+      );
+
+      const student = new StudentViewModel();
+      await student.$load(1);
+
+      // Delete a dependent item in a collection navigation
+      const course = student.courses![0];
+      course.$remove();
+
+      // Delete a principal item in a reference navigation
+      const advisor = student.advisor!;
+      student.advisor!.$remove();
+
+      expect(student.$removedItems?.length).toBe(2);
+
+      await student.$bulkSave();
+      expect(student.courses).toHaveLength(0);
+      expect(student.advisor).toBeNull();
+      expect(student.studentAdvisorId).toBeNull();
+      expect(student.$removedItems?.length).toBeFalsy();
+
+      expect(JSON.parse(bulkSaveEndpoint.mock.calls[0][0].data)).toMatchObject({
+        items: expect.arrayContaining([
+          {
+            action: "none",
+            type: "Student",
+            data: { studentId: 1 },
+            refs: { studentId: student.$stableId },
+            root: true,
+          },
+          {
+            action: "delete",
+            type: "Course",
+            data: { courseId: 2 },
+            refs: { courseId: course.$stableId },
+          },
+          {
+            action: "delete",
+            type: "Advisor",
+            data: { advisorId: 3 },
+            refs: { advisorId: advisor.$stableId },
+          },
+        ]),
+      });
+
+      loadEndpoint.destroy();
+      bulkSaveEndpoint.destroy();
+    });
+
+    test("creation of principal entity", async () => {
+      const bulkSaveEndpoint = mockEndpoint(
+        "/students/bulkSave",
+        vitest.fn((req) => ({
+          wasSuccessful: true,
+          object: {
+            studentId: 1,
+            studentAdvisorId: 2,
+            advisor: { advisorId: 2, name: "bob" },
+            // We're assuming that `advisor` has a SetNull cascading delete on the server.
+          },
+        }))
+      );
+
+      const student = new StudentViewModel({ studentId: 1 });
+      student.$isDirty = false;
+
+      // Advisor is a new principal entity we're creating for an existing dependent (student).
+      const advisor = (student.advisor = new AdvisorViewModel({ name: "bob" }));
+      await student.$bulkSave();
+
+      expect(JSON.parse(bulkSaveEndpoint.mock.calls[0][0].data)).toMatchObject({
+        items: expect.arrayContaining([
+          {
+            action: "save",
+            type: "Student",
+            data: {
+              studentId: 1,
+              studentAdvisorId: null,
+            },
+            refs: {
+              studentId: student.$stableId,
+              studentAdvisorId: advisor.$stableId,
+            },
+            root: true,
+          },
+          {
+            action: "save",
+            type: "Advisor",
+            data: {
+              advisorId: null,
+              name: "bob",
+            },
+            refs: { advisorId: advisor.$stableId },
+          },
+        ]),
+      });
+
+      bulkSaveEndpoint.destroy();
+    });
+
+    test("removing an item and then reloading purges local $removedItems", async () => {
+      const loadEndpoint = mockEndpoint("/students/get", (req) => ({
+        wasSuccessful: true,
+        object: {
+          studentId: 1,
+          name: "bob",
+          courses: [{ courseId: 2, name: "CS101" }],
+        },
+      }));
+
+      const student = new StudentViewModel();
+      await student.$load(1);
+
+      const course = student.courses![0];
+      course.$remove();
+
+      expect(student.$removedItems?.length).toBe(1);
+      expect(student.$removedItems).toContain(course);
+      expect(course.$isRemoved).toBeTruthy();
+      expect(student.courses).toHaveLength(0);
+
+      await student.$load(1);
+
+      expect(student.$removedItems?.length).toBeFalsy();
+      expect(student.courses).toHaveLength(1);
+      expect(student.courses![0].$isRemoved).toBeFalsy();
+
+      loadEndpoint.destroy();
+    });
+
+    test("creation of root entity with no dirty props", async () => {
+      const bulkSaveEndpoint = mockEndpoint(
+        "/students/bulkSave",
+        vitest.fn((req) => ({
+          wasSuccessful: true,
+          object: {
+            studentId: 1,
+          },
+        }))
+      );
+
+      const student = new StudentViewModel();
+      await student.$bulkSave();
+
+      expect(JSON.parse(bulkSaveEndpoint.mock.calls[0][0].data)).toMatchObject({
+        items: expect.arrayContaining([
+          {
+            action: "save",
+            type: "Student",
+            data: { studentId: null },
+            refs: { studentId: student.$stableId },
+            root: true,
+          },
+        ]),
+      });
+
+      bulkSaveEndpoint.destroy();
+    });
+
+    test("save of dirty child under nondirty nonroot parent", async () => {
+      const response = {
+        refMap: {} as any,
+        object: {
+          studentId: 1,
+          name: "scott",
+          advisor: {
+            name: "bob",
+            advisorId: 3,
+            students: [{ studentId: 4, name: "steve" }],
+          },
+        },
+      };
+
+      const endpoint = mockEndpoint(
+        "/students/bulkSave",
+        vitest.fn((req) => ({
+          wasSuccessful: true,
+          ...JSON.parse(JSON.stringify(response)), // deep clone
+        }))
+      );
+
+      const student = new StudentViewModel();
+      student.studentId = 1;
+      student.name = "scott";
+
+      const originalAdvisor = (student.advisor = new AdvisorViewModel({
+        name: "bob",
+        advisorId: 3,
+      }));
+      student.advisor.$isDirty = false;
+      student.$isDirty = false;
+
+      const originalSteve = originalAdvisor.$addChild("students", {
+        name: "steve",
+      });
+
+      // Setup the ref map on the response so that existing instances may be preserved
+      response.refMap[student.$stableId] = 1;
+      response.refMap[originalAdvisor.$stableId] = 3;
+      response.refMap[originalSteve.$stableId] = 4;
+
+      await student.$bulkSave();
+
+      expect(JSON.parse(endpoint.mock.calls[0][0].data)).toMatchObject({
+        items: expect.arrayContaining([
+          {
+            action: "none",
+            type: "Student",
+            data: { studentId: student.studentId },
+            refs: {
+              studentId: student.$stableId,
+            },
+            root: true,
+          },
+          {
+            action: "save",
+            type: "Student",
+            data: { studentId: null, name: "steve", studentAdvisorId: 3 },
+            refs: {
+              studentId: originalSteve.$stableId,
+            },
+          },
+        ]),
+      });
+
+      expect(student.$bulkSave.wasSuccessful).toBeTruthy();
+      expect(student.studentId).toBe(1);
+      expect(student.advisor.students).toHaveLength(1);
+      expect(student.advisor.students[0] === originalSteve).toBeTruthy();
+
+      endpoint.destroy();
+    });
+
+    test("creation with parent that was explicitly late loaded by key - does not include ref to existing parent", async () => {
+      const bulkSaveEndpoint = mockEndpoint(
+        "/students/bulkSave",
+        vitest.fn((req) => ({
+          wasSuccessful: true,
+          object: {
+            studentId: 1,
+            studentAdvisorId: 3,
+          },
+        }))
+      );
+
+      const advisor = new AdvisorViewModel();
+      const student = new StudentViewModel({
+        advisor: advisor,
+      });
+
+      // Weird scenario: After loading the principal entity from the server (emulated here),
+      // `student.advisor` is still non-null, but `student.studentAdvisorId` is null.
+      advisor.$loadCleanData({ advisorId: 7 });
+
+      await student.$bulkSave();
+
+      expect(JSON.parse(bulkSaveEndpoint.mock.calls[0][0].data)).toMatchObject({
+        items: expect.arrayContaining([
+          {
+            action: "save",
+            type: "Student",
+            data: {
+              studentId: null,
+              // `mapToDto` will discover the foreign key through the nav prop
+              studentAdvisorId: 7,
+            },
+            refs: {
+              studentId: student.$stableId,
+              // Since the FK has a known server value, it should not be `ref`'d.
+            },
+            root: true,
+          },
+        ]),
+      });
+
+      bulkSaveEndpoint.destroy();
     });
   });
 
@@ -687,6 +1165,7 @@ describe("ViewModel", () => {
       expect(student.$isDirty).toBe(false);
       expect(student.$primaryKey).toBeFalsy();
       student.$startAutoSave(vue, { wait: 0 });
+      expect(student.$isAutoSaveEnabled).toBeTruthy();
       await delay(10);
       expect(saveMock).toBeCalledTimes(1);
     });
@@ -1069,6 +1548,7 @@ describe("ViewModel", () => {
 
       expect(course).toBeInstanceOf(CourseViewModel);
       expect(course.studentId).toBe(student.studentId);
+      expect(course.student).toBe(student);
       expect(course.$isDirty).toBe(true);
       expect(course.$getPropDirty("studentId")).toBe(true);
     });
@@ -1079,6 +1559,30 @@ describe("ViewModel", () => {
 
       expect(student.courses).not.toBeNull();
       expect(student.courses).toHaveLength(0);
+    });
+
+    test("new model has initial data flagged dirty", () => {
+      var advisor = new AdvisorViewModel({ advisorId: 3 });
+      advisor.$isDirty = false;
+
+      const student = advisor.$addChild("students", {
+        name: "bob",
+        advisor,
+        courses: [{ name: "CS101" }],
+      }) as StudentViewModel;
+
+      // The name and courses come from a partial raw model,
+      // which should be loaded as dirty into new ViewModel instances:
+      expect(student.$getPropDirty("name")).toBeTruthy();
+      expect(student.courses![0].$getPropDirty("name")).toBeTruthy();
+
+      // Foreign key for the advisor should be populated as dirty:
+      expect(student.$getPropDirty("studentAdvisorId")).toBeTruthy();
+      expect(student.studentAdvisorId).toBe(advisor.advisorId);
+
+      // The advisor itself was already a non-dirty ViewModel instance,
+      // so it should not have been flagged as dirty.
+      expect(student.advisor?.$isDirty).toBeFalsy();
     });
   });
 
@@ -1811,6 +2315,29 @@ describe("ViewModel", () => {
       await delay(1);
       expect(triggered).toBe(true);
     });
+
+    test.each([false, true])(
+      "wipes unsaved items from collections when requested (purgeUnsaved: %s)",
+      async (purgeUnsaved) => {
+        const student = new StudentViewModel({
+          courses: [
+            // Saved (has PK), won't be purged:
+            { courseId: 1, name: "CS101" },
+            // Will be purged as unsaved if purgeUnsaved is true:
+            { name: "CS102" },
+          ],
+        });
+
+        student.$loadCleanData(
+          {
+            courses: [{ courseId: 1, name: "CS101" }],
+          },
+          purgeUnsaved
+        );
+
+        expect(student.courses?.length).toBe(purgeUnsaved ? 1 : 2);
+      }
+    );
   });
 
   describe("$delete", () => {

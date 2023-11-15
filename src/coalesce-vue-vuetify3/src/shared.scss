@@ -1,8 +1,7 @@
 .hide-non-error-details {
   .v-input {
-    .v-text-field__details,
+    .v-input__details,
     .v-messages,
-    .v-messages__wrapper,
     &.v-input--switch .v-input__slot,
     &.v-input--checkbox .v-input__slot {
       transition: min-height 0.3s cubic-bezier(0.25, 0.8, 0.5, 1),
@@ -13,18 +12,18 @@
   .v-input {
     // Make the messages area have a margin and min height when not empty.
     // Otherwise, collapse it when empty. Min-height is important for smooth animation here.
-    .v-messages__wrapper {
+    .v-messages {
       margin-bottom: 0;
       min-height: 0;
     }
-    .v-messages__wrapper:not(:empty) {
+    .v-messages:not(:empty) {
       margin-bottom: 12px;
       min-height: 12px;
     }
 
     // Vuetify normally applies the message area height styling to the
     // parts different than the messages__wrapper. Remove this.
-    .v-text-field__details {
+    .v-input__details {
       min-height: 0 !important;
       margin-bottom: 0 !important;
 

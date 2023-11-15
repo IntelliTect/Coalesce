@@ -1,17 +1,14 @@
 import { defineComponent, Prop, h, toHandlerKey } from "vue";
 import {
   buildVuetifyAttrs,
-  getValueMeta,
+  getValueMetaAndOwner,
   makeMetadataProps,
 } from "../c-metadata-component";
 import {
   Model,
-  ClassType,
   DataSource,
-  DataSourceType,
   mapValueToModel,
   AnyArgCaller,
-  ApiState,
   parseValue,
 } from "coalesce-vue";
 
@@ -45,7 +42,7 @@ const passwordWrapper = defineComponent({
     data["append-inner-icon"] ??= !this.shown ? "fa fa-eye" : "fa fa-eye-slash";
     data.type = this.shown ? "text" : "password";
     addHandler(data, "click:appendInner", () => (this.shown = !this.shown));
-    return h(VTextField, data);
+    return h(VTextField, data, this.$slots);
   },
 });
 
@@ -57,22 +54,17 @@ export default defineComponent({
   },
 
   props: {
-    ...makeMetadataProps<
-      Model<ClassType> | DataSource<DataSourceType> | AnyArgCaller
-    >(),
-
+    ...makeMetadataProps<Model | DataSource | AnyArgCaller>(),
     modelValue: <Prop<any>>{ required: false },
   },
 
   render() {
-    let model = this.model;
-    const modelMeta = model ? model.$metadata : null;
-
-    const _valueMeta = getValueMeta(
+    const { valueMeta: _valueMeta, valueOwner } = getValueMetaAndOwner(
       this.for,
-      modelMeta,
+      this.model,
       this.$coalesce.metadata
     );
+
     if (!_valueMeta || !("role" in _valueMeta)) {
       throw Error(
         "c-input requires value metadata. Specify it with the 'for' prop'"
@@ -80,23 +72,12 @@ export default defineComponent({
     }
     const valueMeta = _valueMeta; // Alias so type inside closures will be correct;
 
-    // Support binding to method args via `:model="myModel.myMethod" for="myArg"`.
-    // getValueMeta will resolve to the metadata of the specific parameter;
-    // we then have to resolve the args object from the ApiState.
-    if (
-      model instanceof ApiState &&
-      "args" in model &&
-      valueMeta.name in model.args
-    ) {
-      model = model.args;
-    }
-
     const props = this.$props;
 
     let data = {
       ...this.$attrs, // Includes any non-props, as well as event handlers.
-      modelValue: model
-        ? (model as any)[valueMeta.name]
+      modelValue: valueOwner
+        ? valueOwner[valueMeta.name]
         : primitiveTypes.includes(valueMeta.type)
         ? mapValueToModel(props.modelValue, valueMeta)
         : props.modelValue,
@@ -111,25 +92,25 @@ export default defineComponent({
       case "date":
         data.model = props.model;
         data.for = props.for;
-        return h(CDatetimePicker, data);
+        return h(CDatetimePicker, data, this.$slots);
 
       case "model":
         data.model = props.model;
         data.for = props.for;
-        return h(CSelect, data);
+        return h(CSelect, data, this.$slots);
 
       case "collection":
         data.model = props.model;
         data.for = props.for;
 
         if ("manyToMany" in valueMeta) {
-          return h(CSelectManyToMany, data);
+          return h(CSelectManyToMany, data, this.$slots);
         } else if (
           valueMeta.itemType.type != "model" &&
           valueMeta.itemType.type != "object" &&
           valueMeta.itemType.type != "file"
         ) {
-          return h(CSelectValues, data);
+          return h(CSelectValues, data, this.$slots);
         } else {
           // console.warn(`Unsupported collection type ${valueMeta.itemType.type} for v-input`)
         }
@@ -140,17 +121,21 @@ export default defineComponent({
     // We now need to compute them in order to render components
     // that delegate directly to vuetify components.
     data = {
-      ...buildVuetifyAttrs(valueMeta, model, data),
+      ...buildVuetifyAttrs(valueMeta, this.model, data),
       ...data,
     };
 
     const onInput = (value: any) => {
       const parsed = parseValue(value, valueMeta);
-      if (model && valueMeta) {
-        (model as any)[valueMeta.name] = parsed;
+      if (valueOwner && valueMeta) {
+        valueOwner[valueMeta.name] = parsed;
       }
       this.$emit("update:modelValue", parsed);
     };
+
+    // Do not pass the default slot through to vuetify.
+    // It will put it in a weird spot in most inputs.
+    const { default: defaultSlot, ...vuetifySlots } = this.$slots;
 
     // Handle components that delegate immediately to Vuetify
     switch (valueMeta.type) {
@@ -181,14 +166,14 @@ export default defineComponent({
         if (valueMeta.type == "number") {
           // For numeric values, use a numeric text field.
           data.type = "number";
-          return h(VTextField, data);
+          return h(VTextField, data, vuetifySlots);
         }
 
         if (
           ("textarea" in data || valueMeta.subtype == "multiline") &&
           data.textarea !== false
         ) {
-          return h(VTextarea, data);
+          return h(VTextarea, data, vuetifySlots);
         }
 
         if (!data.type && valueMeta.subtype) {
@@ -215,17 +200,17 @@ export default defineComponent({
               break;
 
             case "password":
-              return h(passwordWrapper, data);
+              return h(passwordWrapper, data, vuetifySlots);
           }
         }
-        return h(VTextField, data);
+        return h(VTextField, data, vuetifySlots);
 
       case "boolean":
         addHandler(data, "update:modelValue", onInput);
         if ("checkbox" in data && data.checkbox !== false) {
-          return h(VCheckbox, data);
+          return h(VCheckbox, data, vuetifySlots);
         }
-        return h(VSwitch, data);
+        return h(VSwitch, data, vuetifySlots);
 
       case "enum":
         addHandler(data, "update:modelValue", onInput);
@@ -234,7 +219,7 @@ export default defineComponent({
         data["item-value"] = "value";
         // maps to the prop "subtitle" on v-list-item
         data["item-props"] = (item: any) => ({ subtitle: item.description });
-        return h(VSelect, data);
+        return h(VSelect, data, vuetifySlots);
 
       case "file":
         // v-file-input uses 'change' as its event, not 'input'.
@@ -251,7 +236,7 @@ export default defineComponent({
           onInput(value[0])
         );
 
-        return h(VFileInput, data);
+        return h(VFileInput, data, vuetifySlots);
 
       case "collection":
         if (valueMeta.itemType.type == "file") {
@@ -263,18 +248,15 @@ export default defineComponent({
           data.modelValue ??= [];
 
           addHandler(data, "update:modelValue", onInput);
-          return h(VFileInput, data);
+          return h(VFileInput, data, vuetifySlots);
         }
     }
 
     // Fall back to just displaying the value.
-    // Note that this probably looks bad on Vuetify 2+ because we're
-    // abusing its internal classes to try to emulate the look of a text field,
-    // but this hasn't been updated for 2.0.
-    if (this.$slots) {
-      // TODO: this.$slots might be always defined
-      return h("div", {}, this.$slots);
+    if (defaultSlot) {
+      return h("div", {}, { default: defaultSlot });
     }
+
     return h(
       "div",
       {

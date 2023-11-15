@@ -20,41 +20,20 @@ using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.TypeDefinition
 {
-    public abstract class ParameterViewModel : IAttributeProvider, IValueViewModel
+    public abstract class ParameterViewModel : ValueViewModel
     {
-        private protected ParameterViewModel(MethodViewModel parent, TypeViewModel type)
+        private protected ParameterViewModel(MethodViewModel parent, TypeViewModel type) : base(type)
         {
             Parent = parent;
-            Type = type;
         }
 
         public MethodViewModel Parent { get; }
-
-        public abstract string Name { get; }
-
-        public TypeViewModel Type { get; protected set; }
 
         /// <summary>
         /// If set, this parameter's value is automatically populated from the referenced 
         /// property on the parent model's ViewModel instance.
         /// </summary>
         public PropertyViewModel? ParentSourceProp { get; protected set; }
-
-        public TypeViewModel PureType => Type.PureType;
-
-        /// <summary>
-        /// Returns the DisplayName Attribute or 
-        /// puts a space before every upper class letter aside from the first one.
-        /// </summary>
-        public virtual string DisplayName =>
-            this.GetAttributeValue<DisplayNameAttribute>(a => a.DisplayName) ??
-            this.GetAttributeValue<DisplayAttribute>(a => a.Name) ??
-            Name.ToProperCase();
-
-        /// <summary>
-        /// Returns the description from the DisplayAttribute, if present.
-        /// </summary>
-        public string? Description => this.GetAttributeValue<DisplayAttribute>(a => a.Description);
 
         /// <summary>
         /// True if this is a parameter to the method on the model that is not represented in the controller action signature.
@@ -71,7 +50,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// True if the parameter is marked with <see cref="InjectAttribute"/>
         /// </summary>
-        public bool HasInjectAttribute => HasAttribute<InjectAttribute>();
+        public bool HasInjectAttribute => this.HasAttribute<InjectAttribute>();
 
         /// <summary>
         /// True if the parameter is NOT provided by the calling client.
@@ -93,7 +72,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public bool ConvertsFromJsString => Type.IsNumber || Type.IsString || Type.IsGuid || Type.IsDate || Type.IsBool || Type.IsEnum;
 
-        public string JsVariable => Name.ToCamelCase();
         public string CsParameterName => Name.ToCamelCase();
 
         public abstract bool HasDefaultValue { get; }
@@ -111,29 +89,23 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
         }
 
-#if NET6_0_OR_GREATER
         /// <summary>
         /// The reference type nullability state for this parameter.
         /// </summary>
         public NullabilityState Nullability { get; set; }
-#endif
 
-        public bool IsRequired
+        public override bool IsRequired
         {
             get
             {
-                if (this.IsRequired()) return true;
+                if (base.IsRequired) return true;
 
-#if NET6_0_OR_GREATER
                 if (Type.IsReferenceType && Nullability == NullabilityState.NotNull) return true;
-#endif
+
                 return false;
             }
         }
 
         public override string ToString() => $"{Type} {Name}";
-
-        public abstract object? GetAttributeValue<TAttribute>(string valueName) where TAttribute : Attribute;
-        public abstract bool HasAttribute<TAttribute>() where TAttribute : Attribute;
     }
 }

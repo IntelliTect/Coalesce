@@ -1,6 +1,4 @@
-﻿#if NETCOREAPP3_1_OR_GREATER
-
-using IntelliTect.Coalesce.Api.Behaviors;
+﻿using IntelliTect.Coalesce.Api.Behaviors;
 using IntelliTect.Coalesce.Api.DataSources;
 using IntelliTect.Coalesce.TypeDefinition;
 using Microsoft.AspNetCore.Builder;
@@ -67,7 +65,8 @@ public static class CoalesceApplicationBuilderExtensions
         {
             CrudTypes = repo
                 .CrudApiBackedClasses
-                .OrderBy(c => c.Name)
+                .OrderBy(c => c.IsDto)
+                .ThenBy(c => c.Name)
                 .Select(c =>
                 {
                     var isImmutable = c.SecurityInfo is
@@ -168,7 +167,7 @@ public static class CoalesceApplicationBuilderExtensions
             ? new Regex(@"[^<>,+\s]*\.").Replace(s, "", 5, start)
             : s;
 
-        object GetUsageInfo(IValueViewModel v) => v switch
+        object GetUsageInfo(ValueViewModel v) => v switch
         {
             PropertyViewModel p => new { Type = GetTypeInfo(p.EffectiveParent.Type), Property = GetPropertyInfo(p) },
             ParameterViewModel p => new { Type = GetTypeInfo(p.Parent.Parent.Type), Method = GetMethodInfo(p.Parent), Parameter = p.Name },
@@ -183,6 +182,7 @@ public static class CoalesceApplicationBuilderExtensions
             p.SecurityInfo.Read,
             p.SecurityInfo.Init,
             p.SecurityInfo.Edit,
+            Restrictions = p.SecurityInfo.Restrictions.Select(t => t.Name).ToList(),
             p.IsCreateOnly,
             p.IsPrimaryKey
         };
@@ -215,5 +215,3 @@ public static class CoalesceApplicationBuilderExtensions
         };
     }
 }
-
-#endif

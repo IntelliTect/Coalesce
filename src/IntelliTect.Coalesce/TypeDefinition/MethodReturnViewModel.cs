@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Microsoft.CodeAnalysis;
+using System;
+using System.Collections.Generic;
 
 #nullable enable
 
@@ -7,34 +9,24 @@ namespace IntelliTect.Coalesce.TypeDefinition
     /// <summary>
     /// Shim of a method's return value so it can be treated as an IValueViewModel.
     /// </summary>
-    public class MethodReturnViewModel : IValueViewModel
+    public class MethodReturnViewModel : ValueViewModel
     {
-        internal MethodReturnViewModel(MethodViewModel method)
+        internal MethodReturnViewModel(MethodViewModel method) : base(method.ResultType)
         {
             Method = method;
-            Type = method.ResultType;
         }
 
-        public string Name => "$return";
+        public override string Name => "$return";
 
-        public string JsVariable => Name;
+        public override string DisplayName => "Result"; // TODO: i18n
 
-        public string DisplayName => "Result"; // TODO: i18n
-
-        public string? Description => null;
-
-        public TypeViewModel Type { get; }
-
-        public TypeViewModel PureType => Type.PureType;
+        public override string? Description => null;
 
         public MethodViewModel Method { get; }
 
-        public bool IsRequired => false;
+        public override bool IsRequired => false;
 
-        public object? GetAttributeValue<TAttribute>(string valueName) where TAttribute : Attribute
-            => Method.GetAttributeValue<TAttribute>(valueName);
-
-        public bool HasAttribute<TAttribute>() where TAttribute : Attribute
-            => Method.HasAttribute<TAttribute>();
+        public override IEnumerable<AttributeViewModel<TAttribute>> GetAttributes<TAttribute>()
+            => Method.GetAttributes<TAttribute>();
     }
 }

@@ -60,12 +60,13 @@ A getter/setter property that wraps the primary key of the model. Used to intera
 Returns a string representation of the object, or one of its properties if specified, suitable for display.
 
 
-<Prop def="$addChild(prop: string | ModelCollectionNavigationProperty)" lang="ts" />
+<Prop def="$addChild(prop: string | ModelCollectionNavigationProperty, initialDirtyData?: {})" lang="ts" />
 
 Creates a new instance of an item for the specified child model collection, adds it to that collection, and returns the item.
+If `initialDirtyData` is provided, it will be loaded into the new instance with `$loadDirtyData()`.
 
 
-### API Callers & Parameters
+### Loading & Parameters
 
 
 <Prop def="$load: ItemApiState;
@@ -74,70 +75,9 @@ $load(id?: TKey) => ItemResultPromise<TModel>;" lang="ts" idPrefix="member-item"
 An [API Caller](/stacks/vue/layers/api-clients.md#api-callers) for the ``/get`` endpoint. Accepts an optional `id` argument - if not provided, the ViewModel's `$primaryKey` is used instead. Uses the instance's `$params` object for the [Standard Parameters](/modeling/model-components/data-sources.md#standard-parameters).
 
 
-<Prop def="$save: ItemApiState;
-$save(overrideProps?: Partial<TModel>) => ItemResultPromise<TModel>;" lang="ts" idPrefix="member-item" />
-
-An [API Caller](/stacks/vue/layers/api-clients.md#api-callers) for the ``/save`` endpoint. Uses the instance's `$params` object for the [Standard Parameters](/modeling/model-components/data-sources.md#standard-parameters).
-
-This caller is used for both manually-triggered saves in custom code and for auto-saves. If the [Rules/Validation](/stacks/vue/layers/viewmodels.md#rules-validation) report any errors when the caller is invoked, an error will be thrown.
-
-`overrideProps` can provide properties to save that override the [data properties](#model-data-properties) on the ViewModel instance. This allows for manually saving a change to a property without setting the property on the ViewModel instance into a dirty state. This makes it easier to handle some scenarios where changing the value of the property may put the UI into a logically inconsistent state until the save response has been returned from the server - for example, if a change to one property affects the computed value of other properties.
-
-When a save creates a new record and a new primary key is returned from the server, any entities attached to the current ViewModel via a collection navigation property will have their foreign keys set to the new primary key. This behavior, combined with the usage of deep auto-saves, allows for complex object graphs to be constructed even before any model in the graph has been created.
-
-When a save is in progress, the names of properties being saved are in contained in `$savingProps`.
-
-Saving behavior can be further customized with `$loadResponseFromSaves` and `$saveMode`, listed below.
-
-
-<Prop def="$loadResponseFromSaves: boolean" lang="ts" />
-
-Default `true` - controls if a ViewModel will be loaded with the data from the model returned by the ``/save`` endpoint when saved with the `$save` API caller. There is seldom any reason to disable this.
-
-
-<Prop def="$saveMode: 'surgical' | 'whole'" lang="ts" />
-
-Configures which properties of the model are sent to the server during a save.
-
-<div style="margin-left: 20px">
-
-`"surgical"` (default)
-
-By default, only dirty properties (and always the primary key) are sent to the server when performing a save. 
-
-This improves the handling of concurrent changes being made by multiple users against different fields of the same entity at the same time - specifically, it prevents a user with a stale value of some field X from overwriting a more recent value of X in the database when the user is only making changes to some other property Y and has no intention of changing X. 
-
-Save mode `"surgical"` doesn't help when multiple users are editing field X at the same time - if such a scenario is applicable to your application, you must implement [more advanced handling of concurrency conflicts](https://docs.microsoft.com/en-us/ef/core/saving/concurrency).
-
-::: warning
-@[import-md "after":"MARKER:surgical-saves-warning", "before":"MARKER:end-surgical-saves-warning"](../../../modeling/model-types/dtos.md)
-::: 
-
-`"whole"`
-
-All serializable properties of the object are sent back to the server with every save. 
-        
-</div>
-
-
-<Prop def="$savingProps: ReadonlySet<string>" lang="ts" />
-
-When `$save.isLoading == true`, contains the properties of the model currently being saved by `$save` (including auto-saves). Does not include non-dirty properties even if `$saveMode == 'whole'`.
-
-This can be used to make per-property UI state changes during saves - for example, displaying progress indicators on/near individual inputs, or disabling input controls.
-
-
-<Prop def="$delete: ItemApiState;
-$delete() => ItemResultPromise<TModel>;" lang="ts" idPrefix="member-item" />
-
-An [API Caller](/stacks/vue/layers/api-clients.md#api-callers) for the ``/delete`` endpoint. Uses the instance's `$params` object for the [Standard Parameters](/modeling/model-components/data-sources.md#standard-parameters).
-
-If the object was loaded as a child of a collection, it will be removed from that collection upon being deleted. Note that ViewModels currently only support tracking of a single parent collection, so if an object is programmatically added to additional collections, it will only be removed from one of them upon delete.
-
-
 <Prop def="$params: DataSourceParameters" lang="ts" idPrefix="member-item" />
 
-An object containing the [Standard Parameters](/modeling/model-components/data-sources.md#standard-parameters) to be used for the `$load`, `$save`, and `$delete` API callers.
+An object containing the [Standard Parameters](/modeling/model-components/data-sources.md#standard-parameters) to be used for the `$load`, `$save`, `$bulkSave`, and `$delete` API callers.
 
 
 <Prop def="$dataSource: DataSource" lang="ts" idPrefix="member-item" />
@@ -150,8 +90,111 @@ Getter/setter wrapper around `$params.dataSource`. Takes an instance of a [Data 
 Getter/setter wrapper around `$params.includes`. See [Includes String](/concepts/includes.md) for more information.
 
 
+<Prop def="$loadCleanData(source: {} | TModel, purgeUnsaved = false)" lang="ts" />
 
-### Auto-save & Dirty Flags
+Loads data from the provided model into the current ViewModel, and then clears all dirty flags.
+
+Data is loaded recursively into all related ViewModel instances, preserving existing instances whose primary keys match the incoming data.
+
+If auto-save is enabled, only non-dirty properties are updated. This prevents user input that is pending a save from being overwritten by the response from an auto-save ``/save`` request.
+
+If `purgeUnsaved` is true, items without a primary key will be dropped from collection navigation properties. This is used by the `$load` caller in order to fully reset the object graph with the state from the server.
+    
+
+<Prop def="$loadDirtyData(source: {} | TModel)" lang="ts" />
+
+Same as `$loadCleanData`, but does not clear any existing dirty flags, nor does it clear any dirty flags that will be set while mutating the data properties of any ViewModel instance that gets loaded.
+
+<Prop def="constructor(initialDirtyData?: {} | TModel | null)" lang="ts" />
+
+Create a new instance of the ViewModel, loading the given initial data with `$loadDirtyData()` if provided.
+
+
+### Saving and Deleting
+
+
+<Prop def="$save: ItemApiState;
+$save(overrideProps?: Partial<TModel>) => ItemResultPromise<TModel>;" lang="ts" idPrefix="member-item" />
+
+An [API Caller](/stacks/vue/layers/api-clients.md#api-callers) for the ``/save`` endpoint. Uses the instance's `$params` object for the [Standard Parameters](/modeling/model-components/data-sources.md#standard-parameters). A save operation saves only properties on the model it is called on - for deep/bulk saves, see [$bulkSave](#member-_bulksave).
+
+This caller is used for both manually-triggered saves in custom code and for auto-saves. If the [Rules/Validation](/stacks/vue/layers/viewmodels.md#rules-validation) report any errors when the caller is invoked, an error will be thrown.
+
+`overrideProps` can provide properties to save that override the [data properties](#model-data-properties) on the ViewModel instance. This allows for manually saving a change to a property without setting the property on the ViewModel instance into a dirty state. This makes it easier to handle some scenarios where changing the value of the property may put the UI into a logically inconsistent state until the save response has been returned from the server - for example, if a change to one property affects the computed value of other properties.
+
+When a save creates a new record and a new primary key is returned from the server, any entities attached to the current ViewModel via a collection navigation property will have their foreign keys set to the new primary key. This behavior, combined with the usage of deep auto-saves, allows for complex object graphs to be constructed even before any model in the graph has been created.
+
+When a save is in progress, the names of properties being saved are in contained in `$savingProps`.
+
+Saving behavior can be further customized with `$loadResponseFromSaves` and `$saveMode`, listed below.
+
+
+<Prop def="$delete: ItemApiState;
+$delete() => ItemResultPromise<TModel>;" lang="ts" idPrefix="member-item" />
+
+An [API Caller](/stacks/vue/layers/api-clients.md#api-callers) for the ``/delete`` endpoint. Uses the instance's `$params` object for the [Standard Parameters](/modeling/model-components/data-sources.md#standard-parameters).
+
+If the object was loaded as a child of a collection, it will be removed from that collection upon being deleted. Note that ViewModels currently only support tracking of a single parent collection, so if an object is programmatically added to additional collections, it will only be removed from one of them upon delete.
+
+
+<Prop def="$loadResponseFromSaves: boolean" lang="ts" />
+
+Default `true` - controls if a ViewModel will be loaded with the data from the model returned by the ``/save`` endpoint when saved with the `$save` API caller. There is seldom any reason to disable this.
+
+
+<Prop def="$savingProps: ReadonlySet<string>" lang="ts" />
+
+When `$save.isLoading == true`, contains the properties of the model currently being saved by `$save` (including auto-saves). Does not include non-dirty properties even if `$saveMode == 'whole'`.
+
+This can be used to make per-property UI state changes during saves - for example, displaying progress indicators on/near individual inputs, or disabling input controls.
+
+
+<Prop def="$saveMode: 'surgical' | 'whole'" lang="ts" />
+
+Configures which properties of the model are sent to the server during a save or bulk save.
+
+<div style="margin-left: 20px">
+
+`"surgical"` (default)
+
+By default, only dirty properties (and always the primary key) are sent to the server when performing a save. 
+
+This improves the handling of concurrent changes being made by multiple users against different fields of the same entity at the same time - specifically, it prevents a user with a stale value of some field X from overwriting a more recent value of X in the database when the user is only making changes to some other property Y and has no intention of changing X. 
+
+Save mode `"surgical"` doesn't help when multiple users are editing field X at the same time - if such a scenario is applicable to your application, you must implement [more advanced handling of concurrency conflicts](https://learn.microsoft.com/en-us/ef/core/saving/concurrency).
+
+::: warning
+@[import-md "after":"MARKER:surgical-saves-warning", "before":"MARKER:end-surgical-saves-warning"](../../../modeling/model-types/dtos.md)
+::: 
+
+`"whole"`
+
+All serializable properties of the object are sent back to the server with every save. 
+        
+</div>
+
+
+<Prop def="$getPropDirty(propName: string): boolean" lang="ts" />
+
+Returns true if the given property is flagged as dirty.
+
+
+<Prop def="$setPropDirty(propName: string, dirty: boolean = true, triggerAutoSave = true)" lang="ts" />
+
+Manually set the dirty flag of the given property to the desired state. This seldom needs to be done explicitly, as mutating a property will automatically flag it as dirty.
+
+If `dirty` is true and `triggerAutoSave` is false, auto-save (if enabled) will not be immediately triggered for this specific flag change. Note that a future change to any other property's dirty flag will still trigger a save of all dirty properties.
+
+
+<Prop def="$isDirty: boolean" lang="ts" />
+
+Getter/setter that summarizes the model's property-level dirty flags. Returns true if any properties are dirty.
+
+When set to false, all property dirty flags are cleared. When set to true, all properties are marked as dirty.
+
+
+
+### Auto-save
 
 
 <Prop def="// Vue Options API
@@ -186,43 +229,38 @@ type AutoSaveOptions<TThis> =
     
 Turns off auto-saving of the instance. Does not recursively disable auto-saves on related instances if `deep` was used when auto-save was enabled.
 
+<Prop def="readonly $isAutoSaveEnabled: boolean" lang="ts" />
 
-<Prop def="$getPropDirty(propName: string): boolean" lang="ts" />
-
-Returns true if the given property is flagged as dirty.
-
-
-<Prop def="$setPropDirty(propName: string, dirty: boolean = true, triggerAutoSave = true)" lang="ts" />
-
-Manually set the dirty flag of the given property to the desired state. This seldom needs to be done explicitly, as mutating a property will automatically flag it as dirty.
-
-If `dirty` is true and `triggerAutoSave` is false, auto-save (if enabled) will not be immediately triggered for this specific flag change. Note that a future change to any other property's dirty flag will still trigger a save of all dirty properties.
+Returns true if auto-save is currently active on the instance.
 
 
-<Prop def="$isDirty: boolean" lang="ts" />
 
-Getter/setter that summarizes the model's property-level dirty flags. Returns true if any properties are dirty.
+### Bulk saves
 
-When set to false, all property dirty flags are cleared. When set to true, all properties are marked as dirty.
+<Prop def="$bulkSave: ItemApiState;
+$bulkSave(options: BulkSaveOptions) => ItemResultPromise<TModel>;" lang="ts" />
 
+Bulk saves save all changes to an object graph in one API call and one database transaction. This includes creation, updates, and deletions of entities.
 
-<Prop def="$loadCleanData(source: {} | TModel)" lang="ts" />
+To use bulk saves, you can work with your ViewModel instances on the client much in the same way you would on the server with Entity Framework. Assign objects to reference navigation properties and modify scalar values to perform creates and updates. To perform deletions, you must call `model.$remove()` on the ViewModel you want to remove, similar how you would call `DbSet<>.Remove(model)` on the server.
 
-Loads data from the provided model into the current ViewModel, and then clears all dirty flags.
+If the client-side [Rules/Validation](/stacks/vue/layers/viewmodels.md#rules-validation) report any errors for any of the models being saved in the operation, an error will be thrown.
 
-Data is loaded recursively into all related ViewModel instances, preserving existing instances whose primary keys match the incoming data.
+On the server, each affected entity is handled through the same standard mechanisms as are used by individual saves or deletes ([Behaviors](/modeling/model-components/behaviors.md), [Data Sources](/modeling/model-components/data-sources.md), and [Security Attributes](/modeling/model-components/attributes/security-attribute.md)), but with a bit of sugar on top:
+* All operations are wrapped in a single database transaction that is rolled back if any individual operation fails.
+* Foreign keys will be fixed up as new items are created, allowing a parent and child record to be created at the same time even when the client has no foreign key to link the two together.
 
-If auto-save is enabled, only non-dirty properties are updated. This prevents user input that is pending a save from being overwritten by the response from an auto-save ``/save`` request.
-    
+For the response to a bulk save, the server will load and return the root ViewModel that `$bulkSave` was called upon, using the instance's `$params` object for the [Standard Parameters](/modeling/model-components/data-sources.md#standard-parameters).
 
-<Prop def="$loadDirtyData(source: {} | TModel)" lang="ts" />
+@[import-md "start":"export interface BulkSaveOptions", "end":"\n}\n", "prepend":"``` ts", "append":"```"](../../../../src/coalesce-vue/src/viewmodel.ts)
 
-Same as `$loadCleanData`, but does not clear any existing dirty flags, nor does it clear any dirty flags that will be set while mutating the data properties of any ViewModel instance that gets loaded.
+<Prop def="$remove(): void" lang="ts" />
 
-<Prop def="constructor(initialDirtyData?: {} | TModel | null)" lang="ts" />
+Removes the item from its parent collection (if it is in a collection), and marks the item for deletion in the next bulk save.
 
-Create a new instance of the ViewModel, loading the given initial data with `$loadDirtyData()` if provided.
+<Prop def="readonly $isRemoved: boolean" lang="ts" />
 
+Returns true if the instance was previously removed by calling `$remove()`.
 
 ### Rules/Validation
 

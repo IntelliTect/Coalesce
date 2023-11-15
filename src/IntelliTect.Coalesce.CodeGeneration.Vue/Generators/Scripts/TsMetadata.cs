@@ -219,11 +219,15 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
 
                     case PropertyRole.ForeignKey:
                         // TS Type: "ForeignKeyProperty"
-                        var navProp = prop.ReferenceNavigationProperty;
+                        var principal = prop.ForeignKeyPrincipalType;
                         b.StringProp("role", "foreignKey");
-                        b.Line($"get principalKey() {{ return {GetClassMetadataRef(navProp.Object)}.props.{navProp.Object.PrimaryKey.JsVariable} as PrimaryKeyProperty }},");
-                        b.Line($"get principalType() {{ return {GetClassMetadataRef(navProp.Object)} }},");
-                        b.Line($"get navigationProp() {{ return {GetClassMetadataRef(model)}.props.{navProp.JsVariable} as ModelReferenceNavigationProperty }},");
+                        b.Line($"get principalKey() {{ return {GetClassMetadataRef(principal)}.props.{principal.PrimaryKey.JsVariable} as PrimaryKeyProperty }},");
+                        b.Line($"get principalType() {{ return {GetClassMetadataRef(principal)} }},");
+
+                        if (prop.ReferenceNavigationProperty is { } navProp)
+                        {
+                            b.Line($"get navigationProp() {{ return {GetClassMetadataRef(model)}.props.{navProp.JsVariable} as ModelReferenceNavigationProperty }},");
+                        }
                         break;
 
                     case PropertyRole.ReferenceNavigation:
@@ -242,7 +246,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                     case PropertyRole.CollectionNavigation:
                         // TS Type: "ModelCollectionNavigationProperty"
                         b.StringProp("role", "collectionNavigation");
-                        b.Line($"get foreignKey() {{ return {GetClassMetadataRef(prop.Object)}.props.{prop.InverseProperty.ForeignKeyProperty.JsVariable} as ForeignKeyProperty }},");
+                        b.Line($"get foreignKey() {{ return {GetClassMetadataRef(prop.Object)}.props.{prop.ForeignKeyProperty.JsVariable} as ForeignKeyProperty }},");
                         
                         if (prop.InverseProperty != null)
                         {
@@ -335,7 +339,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
             }
         }
 
-        private static List<string> GetValidationRules(IValueViewModel prop, string propName)
+        private static List<string> GetValidationRules(ValueViewModel prop, string propName)
         {
             // TODO: Handle 'ClientValidationAllowSave' by placing a field on the 
             // validator function that contains the value of this flag.
@@ -391,14 +395,14 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                     Min(min, minMessage);
                 else if (prop.GetValidationAttribute<MinLengthAttribute, int>(x => x.Length) is (true, int min2, string min2Message))
                     Min(min2, min2Message);
-                else if (prop.GetAttributeValue<ClientValidationAttribute, int>(a => a.MinLength) is int minLength)
+                else if (prop.GetAttributeValue<ClientValidationAttribute, int>(a => a.MinLength) is int minLength and not int.MaxValue)
                     Min(minLength, clientValidationError);
 
                 if (prop.GetValidationAttribute<StringLengthAttribute, int>(x => x.MaximumLength) is (true, int max, string maxMessage))
                     Max(max, maxMessage);
                 else if (prop.GetValidationAttribute<MaxLengthAttribute, int>(x => x.Length) is (true, int max2, string max2Message))
                     Max(max2, max2Message);
-                else if (prop.GetAttributeValue<ClientValidationAttribute, int>(a => a.MaxLength) is int maxLength)
+                else if (prop.GetAttributeValue<ClientValidationAttribute, int>(a => a.MaxLength) is int maxLength and not int.MinValue)
                     Max(maxLength, clientValidationError);
 
                 if (prop.GetValidationAttribute<UrlAttribute>() is (true, string urlMessage))
@@ -412,7 +416,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                 void Min(object value, string error) => rules.Add($"min: val => val == null || val >= {value} {Error(error, $"{propName} must be at least {value}.")}");
                 void Max(object value, string error) => rules.Add($"max: val => val == null || val <= {value} {Error(error, $"{propName} may not be more than {value}.")}");
 
-                var range = prop.GetValidationRange();
+                var range = prop.Range;
                 if (range != null)
                 {
                     var message = prop.GetAttributeValue<RangeAttribute>(a => a.ErrorMessage);
@@ -421,10 +425,10 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                 }
                 else
                 {
-                    if (prop.GetAttributeValue<ClientValidationAttribute, double>(a => a.MinValue) is double minValue)
+                    if (prop.GetAttributeValue<ClientValidationAttribute, double>(a => a.MinValue) is double minValue and not double.MaxValue)
                         Min(minValue, clientValidationError);
 
-                    if (prop.GetAttributeValue<ClientValidationAttribute, double>(a => a.MaxValue) is double maxValue)
+                    if (prop.GetAttributeValue<ClientValidationAttribute, double>(a => a.MaxValue) is double maxValue and not double.MinValue)
                         Max(maxValue, clientValidationError);
                 }
             }
@@ -618,7 +622,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
         /// <summary>
         /// Write metadata common to all value representations, like properties and method parameters.
         /// </summary>
-        private void WriteValueCommonMetadata(TypeScriptCodeBuilder b, IValueViewModel value)
+        private void WriteValueCommonMetadata(TypeScriptCodeBuilder b, ValueViewModel value)
         {
             b.StringProp("name", value.JsVariable);
             b.StringProp("displayName", value.DisplayName);
@@ -635,7 +639,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
         /// Write metadata common to all type representations, 
         /// like properties, method parameters, method returns, etc.
         /// </summary>
-        private void WriteTypeCommonMetadata(TypeScriptCodeBuilder b, TypeViewModel type, IValueViewModel definingMember)
+        private void WriteTypeCommonMetadata(TypeScriptCodeBuilder b, TypeViewModel type, ValueViewModel definingMember)
         {
             var kind = type.TsTypeKind;
             var subtype = definingMember.GetAttributeValue<DataTypeAttribute, DataType>(a => a.DataType);
@@ -685,17 +689,16 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                     break;
 
                 case TypeDiscriminator.Date:
-                    var dateType = definingMember.GetAttributeValue<DateTypeAttribute, DateTypes>(a => a.DateType);
+                    var dateType = definingMember.DateType;
 
-                    b.StringProp("dateKind", ((dateType, subtype)) switch
+                    b.StringProp("dateKind", dateType switch
                     {
-                        (DateTypes.DateOnly, _) => "date",
-                        (null, DataType.Date) => "date",
-                        (null, DataType.Time) => "time",
+                        DateTypes.DateOnly => "date",
+                        DateTypes.TimeOnly => "time",
                         _ => "datetime"
                     });
 
-                    if (type.IsDateTime)
+                    if (!type.IsDateTimeOffset)
                     {
                         b.Prop("noOffset", "true");
                     }

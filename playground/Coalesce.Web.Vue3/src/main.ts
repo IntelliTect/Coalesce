@@ -12,7 +12,7 @@ import { aliases, fa } from 'vuetify/iconsets/fa'
 
 import { createRouter, createWebHistory } from 'vue-router';
 import { AxiosClient } from 'coalesce-vue'
-import { createCoalesceVuetify, CAdminEditorPage, CAdminTablePage } from 'coalesce-vue-vuetify3'
+import { createCoalesceVuetify, CAdminEditorPage, CAdminTablePage, CAdminAuditLogPage } from 'coalesce-vue-vuetify3'
 
 import App from './App.vue';
 
@@ -38,6 +38,8 @@ const router = createRouter({
   routes: [
     { path: '/', component: () => import("@/components/HelloWorld.vue"), },
     { path: '/test', component: () => import("./components/test.vue"), },
+    { path: '/test-setup', component: () => import("./components/test-setup.vue"), },
+    { path: '/audit-logs', component: CAdminAuditLogPage, props: {type: 'AuditLog'} },
     { path: '/admin/:type', name: 'coalesce-admin-list', component: CAdminTablePage, props: route => ({ ...route.params, color: 'primary' }) },
     { path: '/admin/:type/item/:id?', name: 'coalesce-admin-item', component: CAdminEditorPage, props: route => ({ ...route.params, color: 'primary' }) }
   ]
@@ -50,12 +52,17 @@ const vuetify = createVuetify({
     sets: { fa }
   },
   theme: {
-    defaultTheme: 'light',
+    defaultTheme: localStorage.getItem('dark') == 'true' ? 'dark' : 'light',
     themes: {
       light: {
         dark: false,
         colors: {
           primary: '#127815',
+        }
+      },
+      dark: {
+        colors: {
+          primary: '#0047a3',
         }
       }
     }

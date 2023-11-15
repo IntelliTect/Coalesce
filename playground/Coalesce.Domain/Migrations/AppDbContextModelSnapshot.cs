@@ -6,6 +6,8 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
+#nullable disable
+
 namespace Coalesce.Domain.Migrations
 {
     [DbContext(typeof(AppDbContext))]
@@ -15,42 +17,112 @@ namespace Coalesce.Domain.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "2.2.6-servicing-10079")
-                .HasAnnotation("Relational:MaxIdentifierLength", 128)
-                .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                .HasAnnotation("ProductVersion", "6.0.24")
+                .HasAnnotation("Relational:MaxIdentifierLength", 128);
+
+            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
+
+            modelBuilder.Entity("Coalesce.Domain.AuditLog", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"), 1L, 1);
+
+                    b.Property<string>("ClientIp")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTimeOffset>("Date")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Endpoint")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("KeyValue")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Message")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Referrer")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<byte>("State")
+                        .HasColumnType("tinyint");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
+
+                    b.Property<int?>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("State");
+
+                    b.HasIndex("Type");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("Type", "KeyValue");
+
+                    b.ToTable("AuditLogs");
+                });
 
             modelBuilder.Entity("Coalesce.Domain.Case", b =>
                 {
                     b.Property<int>("CaseKey")
                         .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .HasColumnType("int");
 
-                    b.Property<int?>("AssignedToId");
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CaseKey"), 1L, 1);
+
+                    b.Property<int?>("AssignedToId")
+                        .HasColumnType("int");
 
                     b.Property<byte[]>("AttachmentHash")
-                        .HasMaxLength(32);
+                        .HasMaxLength(32)
+                        .HasColumnType("varbinary(32)");
 
-                    b.Property<string>("AttachmentName");
+                    b.Property<string>("AttachmentName")
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<long>("AttachmentSize");
+                    b.Property<long>("AttachmentSize")
+                        .HasColumnType("bigint");
 
-                    b.Property<string>("AttachmentType");
+                    b.Property<string>("AttachmentType")
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Description");
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("DevTeamAssignedId");
+                    b.Property<int?>("DevTeamAssignedId")
+                        .HasColumnType("int");
 
-                    b.Property<TimeSpan>("Duration");
+                    b.Property<TimeSpan>("Duration")
+                        .HasColumnType("time");
 
-                    b.Property<DateTimeOffset>("OpenedAt");
+                    b.Property<DateTimeOffset>("OpenedAt")
+                        .HasColumnType("datetimeoffset");
 
-                    b.Property<int?>("ReportedById");
+                    b.Property<int?>("ReportedById")
+                        .HasColumnType("int");
 
-                    b.Property<string>("Severity");
+                    b.Property<string>("Severity")
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("Status");
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
 
-                    b.Property<string>("Title");
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("CaseKey");
 
@@ -58,32 +130,36 @@ namespace Coalesce.Domain.Migrations
 
                     b.HasIndex("ReportedById");
 
-                    b.ToTable("Case");
+                    b.ToTable("Case", (string)null);
                 });
 
             modelBuilder.Entity("Coalesce.Domain.Case+CaseAttachmentContent", b =>
                 {
                     b.Property<int>("CaseKey")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .HasColumnType("int");
 
                     b.Property<byte[]>("Content")
-                        .IsRequired();
+                        .IsRequired()
+                        .HasColumnType("varbinary(max)");
 
                     b.HasKey("CaseKey");
 
-                    b.ToTable("Case");
+                    b.ToTable("Case", (string)null);
                 });
 
             modelBuilder.Entity("Coalesce.Domain.CaseProduct", b =>
                 {
                     b.Property<int>("CaseProductId")
                         .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .HasColumnType("int");
 
-                    b.Property<int>("CaseId");
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CaseProductId"), 1L, 1);
 
-                    b.Property<int>("ProductId");
+                    b.Property<int>("CaseId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
 
                     b.HasKey("CaseProductId");
 
@@ -96,31 +172,44 @@ namespace Coalesce.Domain.Migrations
 
             modelBuilder.Entity("Coalesce.Domain.Company", b =>
                 {
-                    b.Property<int>("CompanyId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .HasColumnType("int")
+                        .HasColumnName("CompanyId");
 
-                    b.Property<string>("Address1");
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
-                    b.Property<string>("Address2");
+                    b.Property<string>("Address1")
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("City");
+                    b.Property<string>("Address2")
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool>("IsDeleted");
+                    b.Property<string>("City")
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("LogoUrl");
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
 
-                    b.Property<string>("Name");
+                    b.Property<string>("LogoUrl")
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Phone");
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("State");
+                    b.Property<string>("Phone")
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("WebsiteUrl");
+                    b.Property<string>("State")
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("ZipCode");
+                    b.Property<string>("WebsiteUrl")
+                        .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("CompanyId");
+                    b.Property<string>("ZipCode")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
 
                     b.ToTable("Company");
                 });
@@ -129,11 +218,15 @@ namespace Coalesce.Domain.Migrations
                 {
                     b.Property<int>("LogId")
                         .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .HasColumnType("int");
 
-                    b.Property<string>("Level");
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("LogId"), 1L, 1);
 
-                    b.Property<string>("Message");
+                    b.Property<string>("Level")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Message")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("LogId");
 
@@ -144,29 +237,41 @@ namespace Coalesce.Domain.Migrations
                 {
                     b.Property<int>("PersonId")
                         .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .HasColumnType("int");
 
-                    b.Property<DateTime?>("BirthDate");
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PersonId"), 1L, 1);
 
-                    b.Property<int>("CompanyId");
+                    b.Property<DateTime?>("BirthDate")
+                        .HasColumnType("datetime2");
 
-                    b.Property<string>("Email");
+                    b.Property<int>("CompanyId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Email")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("FirstName")
-                        .HasMaxLength(75);
+                        .HasMaxLength(75)
+                        .HasColumnType("nvarchar(75)");
 
-                    b.Property<int>("Gender");
+                    b.Property<int>("Gender")
+                        .HasColumnType("int");
 
-                    b.Property<DateTime?>("LastBath");
+                    b.Property<DateTime?>("LastBath")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("LastName")
-                        .HasMaxLength(100);
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
-                    b.Property<DateTimeOffset?>("NextUpgrade");
+                    b.Property<DateTimeOffset?>("NextUpgrade")
+                        .HasColumnType("datetimeoffset");
 
-                    b.Property<byte[]>("ProfilePic");
+                    b.Property<byte[]>("ProfilePic")
+                        .HasColumnType("varbinary(max)");
 
-                    b.Property<int?>("Title");
+                    b.Property<int?>("Title")
+                        .HasColumnType("int");
 
                     b.HasKey("PersonId");
 
@@ -179,11 +284,15 @@ namespace Coalesce.Domain.Migrations
                 {
                     b.Property<int>("ProductId")
                         .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .HasColumnType("int");
 
-                    b.Property<string>("Name");
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ProductId"), 1L, 1);
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("UniqueId")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("ProductUniqueId");
 
                     b.HasKey("ProductId");
@@ -193,13 +302,60 @@ namespace Coalesce.Domain.Migrations
 
             modelBuilder.Entity("Coalesce.Domain.ZipCode", b =>
                 {
-                    b.Property<string>("Zip");
+                    b.Property<string>("Zip")
+                        .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("State");
+                    b.Property<string>("State")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Zip");
 
                     b.ToTable("ZipCodes");
+                });
+
+            modelBuilder.Entity("IntelliTect.Coalesce.AuditLogging.AuditLogProperty", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"), 1L, 1);
+
+                    b.Property<string>("NewValue")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("NewValueDescription")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OldValue")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OldValueDescription")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<long>("ParentId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("PropertyName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ParentId");
+
+                    b.ToTable("AuditLogProperties");
+                });
+
+            modelBuilder.Entity("Coalesce.Domain.AuditLog", b =>
+                {
+                    b.HasOne("Coalesce.Domain.Person", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Coalesce.Domain.Case", b =>
@@ -211,14 +367,19 @@ namespace Coalesce.Domain.Migrations
                     b.HasOne("Coalesce.Domain.Person", "ReportedBy")
                         .WithMany("CasesReported")
                         .HasForeignKey("ReportedById");
+
+                    b.Navigation("AssignedTo");
+
+                    b.Navigation("ReportedBy");
                 });
 
             modelBuilder.Entity("Coalesce.Domain.Case+CaseAttachmentContent", b =>
                 {
-                    b.HasOne("Coalesce.Domain.Case")
+                    b.HasOne("Coalesce.Domain.Case", null)
                         .WithOne("AttachmentContent")
                         .HasForeignKey("Coalesce.Domain.Case+CaseAttachmentContent", "CaseKey")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Coalesce.Domain.CaseProduct", b =>
@@ -226,12 +387,18 @@ namespace Coalesce.Domain.Migrations
                     b.HasOne("Coalesce.Domain.Case", "Case")
                         .WithMany("CaseProducts")
                         .HasForeignKey("CaseId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("Coalesce.Domain.Product", "Product")
                         .WithMany()
                         .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Case");
+
+                    b.Navigation("Product");
                 });
 
             modelBuilder.Entity("Coalesce.Domain.Person", b =>
@@ -239,7 +406,10 @@ namespace Coalesce.Domain.Migrations
                     b.HasOne("Coalesce.Domain.Company", "Company")
                         .WithMany("Employees")
                         .HasForeignKey("CompanyId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Company");
                 });
 
             modelBuilder.Entity("Coalesce.Domain.Product", b =>
@@ -247,66 +417,105 @@ namespace Coalesce.Domain.Migrations
                     b.OwnsOne("Coalesce.Domain.ProductDetails", "Details", b1 =>
                         {
                             b1.Property<int>("ProductId")
-                                .ValueGeneratedOnAdd()
-                                .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                                .HasColumnType("int");
 
                             b1.HasKey("ProductId");
 
                             b1.ToTable("Product");
 
-                            b1.HasOne("Coalesce.Domain.Product")
-                                .WithOne("Details")
-                                .HasForeignKey("Coalesce.Domain.ProductDetails", "ProductId")
-                                .OnDelete(DeleteBehavior.Cascade);
+                            b1.WithOwner()
+                                .HasForeignKey("ProductId");
 
                             b1.OwnsOne("Coalesce.Domain.StreetAddress", "CompanyHqAddress", b2 =>
                                 {
                                     b2.Property<int>("ProductDetailsProductId")
-                                        .ValueGeneratedOnAdd()
-                                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                                        .HasColumnType("int");
 
-                                    b2.Property<string>("Address");
+                                    b2.Property<string>("Address")
+                                        .HasColumnType("nvarchar(max)");
 
-                                    b2.Property<string>("City");
+                                    b2.Property<string>("City")
+                                        .HasColumnType("nvarchar(max)");
 
-                                    b2.Property<string>("PostalCode");
+                                    b2.Property<string>("PostalCode")
+                                        .HasColumnType("nvarchar(max)");
 
-                                    b2.Property<string>("State");
+                                    b2.Property<string>("State")
+                                        .HasColumnType("nvarchar(max)");
 
                                     b2.HasKey("ProductDetailsProductId");
 
                                     b2.ToTable("Product");
 
-                                    b2.HasOne("Coalesce.Domain.ProductDetails")
-                                        .WithOne("CompanyHqAddress")
-                                        .HasForeignKey("Coalesce.Domain.StreetAddress", "ProductDetailsProductId")
-                                        .OnDelete(DeleteBehavior.Cascade);
+                                    b2.WithOwner()
+                                        .HasForeignKey("ProductDetailsProductId");
                                 });
 
                             b1.OwnsOne("Coalesce.Domain.StreetAddress", "ManufacturingAddress", b2 =>
                                 {
                                     b2.Property<int>("ProductDetailsProductId")
-                                        .ValueGeneratedOnAdd()
-                                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                                        .HasColumnType("int");
 
-                                    b2.Property<string>("Address");
+                                    b2.Property<string>("Address")
+                                        .HasColumnType("nvarchar(max)");
 
-                                    b2.Property<string>("City");
+                                    b2.Property<string>("City")
+                                        .HasColumnType("nvarchar(max)");
 
-                                    b2.Property<string>("PostalCode");
+                                    b2.Property<string>("PostalCode")
+                                        .HasColumnType("nvarchar(max)");
 
-                                    b2.Property<string>("State");
+                                    b2.Property<string>("State")
+                                        .HasColumnType("nvarchar(max)");
 
                                     b2.HasKey("ProductDetailsProductId");
 
                                     b2.ToTable("Product");
 
-                                    b2.HasOne("Coalesce.Domain.ProductDetails")
-                                        .WithOne("ManufacturingAddress")
-                                        .HasForeignKey("Coalesce.Domain.StreetAddress", "ProductDetailsProductId")
-                                        .OnDelete(DeleteBehavior.Cascade);
+                                    b2.WithOwner()
+                                        .HasForeignKey("ProductDetailsProductId");
                                 });
+
+                            b1.Navigation("CompanyHqAddress");
+
+                            b1.Navigation("ManufacturingAddress");
                         });
+
+                    b.Navigation("Details")
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("IntelliTect.Coalesce.AuditLogging.AuditLogProperty", b =>
+                {
+                    b.HasOne("Coalesce.Domain.AuditLog", null)
+                        .WithMany("Properties")
+                        .HasForeignKey("ParentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Coalesce.Domain.AuditLog", b =>
+                {
+                    b.Navigation("Properties");
+                });
+
+            modelBuilder.Entity("Coalesce.Domain.Case", b =>
+                {
+                    b.Navigation("AttachmentContent");
+
+                    b.Navigation("CaseProducts");
+                });
+
+            modelBuilder.Entity("Coalesce.Domain.Company", b =>
+                {
+                    b.Navigation("Employees");
+                });
+
+            modelBuilder.Entity("Coalesce.Domain.Person", b =>
+                {
+                    b.Navigation("CasesAssigned");
+
+                    b.Navigation("CasesReported");
                 });
 #pragma warning restore 612, 618
         }

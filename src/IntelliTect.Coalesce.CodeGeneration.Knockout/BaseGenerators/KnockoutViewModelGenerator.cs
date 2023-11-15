@@ -342,13 +342,15 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators
                 }
                 else if (prop.IsForeignKey)
                 {
-                    var navigationProp = prop.ReferenceNavigationProperty;
-
                     b.Line($"dto.{prop.JsonName} = this.{prop.JsVariable}();");
+
                     // If the Id isn't set, use the object and see if that is set. Allows a child to get an Id after the fact.
-                    using (b.Block($"if (!dto.{prop.JsonName} && this.{navigationProp.JsVariable}())"))
+                    if (prop.ReferenceNavigationProperty is {} navProp)
                     {
-                        b.Line($"dto.{prop.JsonName} = this.{navigationProp.JsVariable}()!.{navigationProp.Object.PrimaryKey.JsVariable}();");
+                        using (b.Block($"if (!dto.{prop.JsonName} && this.{navProp.JsVariable}())"))
+                        {
+                            b.Line($"dto.{prop.JsonName} = this.{navProp.JsVariable}()!.{navProp.Object.PrimaryKey.JsVariable}();");
+                        }
                     }
                 }
                 else if (prop.Type.IsCollection)

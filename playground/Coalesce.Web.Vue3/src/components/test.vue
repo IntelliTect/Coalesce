@@ -21,6 +21,7 @@
         variant="outlined"
         date-kind="datetime"
         v-model="date"
+        clearable
       />
       <c-datetime-picker
         label="Date"
@@ -49,6 +50,17 @@
         variant="outlined"
       >
       </c-select>
+
+      <v-defaults-provider
+        :defaults="{ VTextField: { variant: 'outlined', density: 'compact' } }"
+      >
+        <c-select
+          :model="caseVm"
+          for="assignedTo"
+          label="Outlined via v-defaults-provider"
+        >
+        </c-select>
+      </v-defaults-provider>
 
       <img
         v-if="caseVm.caseKey"

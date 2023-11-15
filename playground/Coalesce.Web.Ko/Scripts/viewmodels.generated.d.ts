@@ -6,6 +6,10 @@
 
 
 /// <reference path="coalesce.dependencies.d.ts" />
+/// <reference path="Generated/Ko.AuditLog.g.ts" />
+/// <reference path="Generated/Ko.AuditLogList.g.ts" />
+/// <reference path="Generated/Ko.AuditLogProperty.g.ts" />
+/// <reference path="Generated/Ko.AuditLogPropertyList.g.ts" />
 /// <reference path="Generated/Ko.Case.g.ts" />
 /// <reference path="Generated/Ko.CaseDto.g.ts" />
 /// <reference path="Generated/Ko.CaseDtoList.g.ts" />

@@ -3,8 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-#if NET5_0_OR_GREATER
-
 namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext;
 
 public record PositionalRecord(string String, int Num)
@@ -23,4 +21,3 @@ public record InitRecordWithDefaultCtor
     public PositionalRecord NestedRecord { get; init; }
 }
 
-#endif

@@ -4,8 +4,11 @@ using System;
 namespace IntelliTect.Coalesce.DataAnnotations
 {
     /// <summary>
-    /// Should users be allowed to delete an entity via the API/button.
-    /// </summary>    
+    /// <para>
+    /// When placed on an entity or custom <see cref="IClassDto{T}"/> class exposed by Coalesce,
+    /// controls the permissions for the deleting existing instances of the model via the /delete or /bulkSave endpoints.
+    /// </para>
+    /// </summary>      
     [AttributeUsage(AttributeTargets.Class)]
     public class DeleteAttribute : SecurityAttribute
     {

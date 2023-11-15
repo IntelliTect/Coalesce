@@ -249,22 +249,22 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
                             {
                                 b.Line($"{childListVar} = new {ListViewModelModuleName}.{prop.Object.ListViewModelClassName}();");
                                 b.Line($"if (loadImmediate) load{prop.Name}List();");
-                                b.Line($"self.{prop.Parent.PrimaryKey.JsVariable}.subscribe(load{prop.Name}List)");
+                                b.Line($"self.{Model.PrimaryKey.JsVariable}.subscribe(load{prop.Name}List)");
                             }
                             b.Line($"return {childListVar};");
                         }
 
                         using (b.Block($"function load{prop.Name}List()"))
                         {
-                            using (b.Block($"if (self.{prop.Parent.PrimaryKey.JsVariable}())"))
+                            using (b.Block($"if (self.{Model.PrimaryKey.JsVariable}())"))
                             {
                                 if (prop.InverseIdProperty != null)
                                 {
-                                    b.Line($"{childListVar}.queryString = \"filter.{prop.InverseIdProperty.Name}=\" + self.{prop.Parent.PrimaryKey.JsVariable}();");
+                                    b.Line($"{childListVar}.queryString = \"filter.{prop.InverseIdProperty.Name}=\" + self.{Model.PrimaryKey.JsVariable}();");
                                 }
                                 else
                                 {
-                                    b.Line($"{childListVar}.queryString = \"filter.{Model.PrimaryKey.Name}=\" + self.{prop.Parent.PrimaryKey.JsVariable}();");
+                                    b.Line($"{childListVar}.queryString = \"filter.{Model.PrimaryKey.Name}=\" + self.{Model.PrimaryKey.JsVariable}();");
                                 }
                                 b.Line($"{childListVar}.load();");
                             }

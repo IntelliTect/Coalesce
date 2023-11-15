@@ -38,6 +38,32 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses
         [Read("ReadRole"), Edit("EditRole")]
         public string ReadWriteDifferentRoles { get; set; }
 
+        [Restrict<AuthenticatedRestriction>]
+        public string RestrictFilter { get; set; }
+
+        [Restrict<AuthenticatedRestriction>]
+        [Restrict<Restrict2>]
+        public string RestrictMultiple { get; set; }
+
         public DbSetIsInternalUse ExternalTypeUsageOfEntityWithInternalDbSet { get; set; }
+    }
+
+    public class AuthenticatedRestriction : IPropertyRestriction
+    {
+        public bool UserCanFilter(IMappingContext context, string propertyName)
+            => context.User.Identity?.IsAuthenticated == true;
+
+        public bool UserCanRead(IMappingContext context, string propertyName, object model)
+            => context.User.Identity?.IsAuthenticated == true;
+
+        public bool UserCanWrite(IMappingContext context, string propertyName, object model, object incomingValue)
+            => context.User.Identity?.IsAuthenticated == true;
+    }
+
+    public class Restrict2 : IPropertyRestriction
+    {
+        public bool UserCanRead(IMappingContext context, string propertyName, object model) => true;
+
+        public bool UserCanWrite(IMappingContext context, string propertyName, object model, object incomingValue) => true;
     }
 }

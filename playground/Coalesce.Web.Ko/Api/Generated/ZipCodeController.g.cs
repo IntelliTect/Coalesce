@@ -2,6 +2,7 @@
 using Coalesce.Web.Ko.Models;
 using IntelliTect.Coalesce;
 using IntelliTect.Coalesce.Api;
+using IntelliTect.Coalesce.Api.Behaviors;
 using IntelliTect.Coalesce.Api.Controllers;
 using IntelliTect.Coalesce.Api.DataSources;
 using IntelliTect.Coalesce.Mapping;
@@ -61,6 +62,15 @@ namespace Coalesce.Web.Ko.Api
             IDataSource<Coalesce.Domain.ZipCode> dataSource,
             IBehaviors<Coalesce.Domain.ZipCode> behaviors)
             => SaveImplementation(dto, parameters, dataSource, behaviors);
+
+        [HttpPost("bulkSave")]
+        [Authorize]
+        public virtual Task<ItemResult<ZipCodeDtoGen>> BulkSave(
+            [FromBody] BulkSaveRequest dto,
+            [FromQuery] DataSourceParameters parameters,
+            [FromServices] IDataSourceFactory dataSourceFactory,
+            [FromServices] IBehaviorsFactory behaviorsFactory)
+            => BulkSaveImplementation(dto, parameters, dataSourceFactory, behaviorsFactory);
 
         [HttpPost("delete/{id}")]
         [Authorize]

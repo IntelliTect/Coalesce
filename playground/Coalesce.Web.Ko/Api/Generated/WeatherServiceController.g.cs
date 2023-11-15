@@ -2,6 +2,7 @@
 using Coalesce.Web.Ko.Models;
 using IntelliTect.Coalesce;
 using IntelliTect.Coalesce.Api;
+using IntelliTect.Coalesce.Api.Behaviors;
 using IntelliTect.Coalesce.Api.Controllers;
 using IntelliTect.Coalesce.Api.DataSources;
 using IntelliTect.Coalesce.Mapping;
@@ -62,7 +63,7 @@ namespace Coalesce.Web.Ko.Api
             }
 
             IncludeTree includeTree = null;
-            var _mappingContext = new MappingContext(User);
+            var _mappingContext = new MappingContext(Context);
             var _methodResult = await Service.GetWeatherAsync(
                 parameterDbContext,
                 _params.location.MapToNew(_mappingContext),

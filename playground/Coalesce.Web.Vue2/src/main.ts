@@ -24,7 +24,7 @@ import $metadata from '@/metadata.g';
 // viewmodels.g has sideeffects - it populates the global lookup on ViewModel and ListViewModel.
 import '@/viewmodels.g';
 
-import CoalesceVuetify, { CAdminTablePage, CAdminEditorPage } from 'coalesce-vue-vuetify';
+import CoalesceVuetify, { CAdminTablePage, CAdminEditorPage, CAdminAuditLogPage } from 'coalesce-vue-vuetify';
 Vue.use(CoalesceVuetify, {
   metadata: $metadata
 });
@@ -47,6 +47,7 @@ const router = new VueRouter({ mode: 'history', routes: [
     path: '/test',
     component: () => import("./components/test.vue"),  },
 
+  { path: '/audit-logs', component: CAdminAuditLogPage, props: {type: 'AuditLog'} },
   { path: '/admin/:type', 
     name: 'coalesce-admin-list', 
     component: CAdminTablePage, 

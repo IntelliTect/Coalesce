@@ -1159,13 +1159,21 @@ export abstract class ViewModel<
       this.$loadDirtyData(initialDirtyData);
     }
 
-    for (const prop of Object.values($metadata.props)) {
-      if (
-        "defaultValue" in prop &&
-        (!initialDirtyData || !(prop.name in initialDirtyData))
-      ) {
-        (this as any)[prop.name] = prop.defaultValue;
+    const ctor = this.constructor as any;
+    if (ctor.hasPropDefaults !== false) {
+      for (const prop of Object.values($metadata.props)) {
+        if ("defaultValue" in prop) {
+          ctor.hasPropDefaults ??= true;
+
+          if (!initialDirtyData || !(prop.name in initialDirtyData)) {
+            (this as any)[prop.name] = prop.defaultValue;
+          }
+        }
       }
+
+      // Cache that this type doesn't have prop defaults so we don't
+      // ever have to loop over the props looking for them on future instances.
+      ctor.hasPropDefaults ??= false;
     }
   }
 }

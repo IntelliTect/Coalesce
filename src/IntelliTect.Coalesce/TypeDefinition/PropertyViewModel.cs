@@ -107,7 +107,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// Returns whether or not the property may be exposed to the client.
         /// </summary>
         public bool IsClientProperty => !IsInternalUse && HasGetter && !Type.IsInternalUse;
-
+        
         public bool PureTypeOnContext => Object?.IsDbMappedType ?? false;
 
         public static readonly Regex JsKeywordRegex = new Regex(
@@ -249,7 +249,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// </summary>
         public object? DefaultValue => this.GetAttributeValue<DefaultValueAttribute>(nameof(DefaultValueAttribute.Value));
 
-        /// <summary>        
+        /// <summary>
         /// If true, there is an API controller that is serving this type of data.
         /// </summary>
         public bool HasValidValues => IsManytoManyCollection || ((Object?.IsDbMappedType ?? false) && IsPOCO);
@@ -498,21 +498,21 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 {
                     // `this` may be a reference navigation prop
 
-                var name =
-                    // Use the foreign key attribute
-                    this.GetAttributeValue<ForeignKeyAttribute>(a => a.Name)
+                    var name =
+                        // Use the foreign key attribute
+                        this.GetAttributeValue<ForeignKeyAttribute>(a => a.Name)
 
-                    // Use the ForeignKey Attribute on the key property if it is there.
-                    ?? EffectiveParent.Properties.SingleOrDefault(p => Name == p.GetAttributeValue<ForeignKeyAttribute>(a => a.Name))?.Name
+                        // Use the ForeignKey Attribute on the key property if it is there.
+                        ?? EffectiveParent.Properties.SingleOrDefault(p => Name == p.GetAttributeValue<ForeignKeyAttribute>(a => a.Name))?.Name
 
-                    // See if this is a one-to-one using the parent's key
-                    // Look up the other object and check the key
-                    ?? (Object?.IsOneToOne ?? false ? EffectiveParent.PrimaryKey?.Name : null)
+                        // See if this is a one-to-one using the parent's key
+                        // Look up the other object and check the key
+                        ?? (Object?.IsOneToOne ?? false ? EffectiveParent.PrimaryKey?.Name : null)
 
-                    // Look for a property that follows convention.
-                    ?? Name + ConventionalIdSuffix;
+                        // Look for a property that follows convention.
+                        ?? Name + ConventionalIdSuffix;
 
-                    prop = EffectiveParent.PropertyByName(name);
+                        prop = EffectiveParent.PropertyByName(name);
                 }
 
                 if (prop == null || !prop.Type.IsValidKeyType || !prop.IsDbMapped)

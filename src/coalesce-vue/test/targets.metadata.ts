@@ -501,6 +501,6 @@ interface AppDomain extends Domain {
   services: {};
 }
 
-// solidify(domain);
+solidify(domain);
 
 export default domain as AppDomain;

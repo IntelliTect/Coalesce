@@ -512,7 +512,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                         // Look for a property that follows convention.
                         ?? Name + ConventionalIdSuffix;
 
-                        prop = EffectiveParent.PropertyByName(name);
+                    prop = EffectiveParent.PropertyByName(name);
                 }
 
                 if (prop == null || !prop.Type.IsValidKeyType || !prop.IsDbMapped)

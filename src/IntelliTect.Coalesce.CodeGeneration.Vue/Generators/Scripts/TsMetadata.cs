@@ -294,7 +294,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                 {
                     b.Line("createOnly: true,");
                 }
-                
+
 
                 if (prop.IsClientWritable && prop.IsClientSerializable && (
                     prop.Type.TsTypeKind is 

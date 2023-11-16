@@ -16,8 +16,7 @@ import {
 
 export const metaBase = (name: string = "model") => {
   const pascalName = name.substr(0, 1).toUpperCase() + name.substr(1);
-  let obj;
-  return (obj = {
+  return {
     type: "model",
     name: name,
     displayName: pascalName,
@@ -25,7 +24,7 @@ export const metaBase = (name: string = "model") => {
     methods: {},
     controllerRoute: pascalName,
     behaviorFlags: 7 as BehaviorFlags,
-  });
+  };
 };
 
 const value = (name: string = "prop") => {

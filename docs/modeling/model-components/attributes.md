@@ -60,4 +60,4 @@ Model properties that aren't mapped to the database should be marked with `[NotM
 
 ### [DefaultValue]
 
-Properties with `[DefaultValue]` will receive the specified value when a new ViewModel is instantiated on the client. This enables scenarios like prefilling a required property with a suggested value.
+Properties with `[DefaultValue]` will receive the specified value when a new ViewModel is instantiated on the client. This enables scenarios like pre-filling a required property with a suggested value.

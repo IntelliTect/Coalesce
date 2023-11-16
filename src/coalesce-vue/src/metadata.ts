@@ -302,17 +302,20 @@ export interface StringValue extends ValueMeta<"string"> {
     | "url-image";
 
   readonly rules?: Rules;
+  readonly defaultValue?: string;
 }
 
 /** Represents the usage of a number */
 export interface NumberValue extends ValueMeta<"number"> {
   readonly role: "value" | "foreignKey" | "primaryKey";
   readonly rules?: Rules;
+  readonly defaultValue?: number;
 }
 
 /** Represents the usage of a boolean */
 export interface BooleanValue extends ValueMeta<"boolean"> {
   readonly rules?: Rules;
+  readonly defaultValue?: boolean;
 }
 
 /** Represents the usage of a primitive value (string, number, or bool) */
@@ -353,6 +356,7 @@ export interface UnknownValue extends ValueMeta<"unknown"> {
 export interface EnumValue extends ValueMetaWithTypeDef<"enum", EnumType> {
   readonly role: "value" | "foreignKey" | "primaryKey";
   readonly rules?: Rules;
+  readonly defaultValue?: number;
 }
 
 /** Represents the usage of an 'external type', i.e. an object that is not part of a relational model */

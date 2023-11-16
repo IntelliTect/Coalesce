@@ -4,6 +4,7 @@ using IntelliTect.Coalesce.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
@@ -77,6 +78,7 @@ namespace Coalesce.Domain
         /// <summary>
         /// Genetic Gender of the person. 
         /// </summary>
+        [DefaultValue(Genders.NonSpecified)]
         public Genders Gender { get; set; }
 
         [NotMapped]

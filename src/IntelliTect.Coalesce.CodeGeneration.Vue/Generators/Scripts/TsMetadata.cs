@@ -305,6 +305,38 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                         TypeDiscriminator.Date
                 ))
                 {
+                    var defaultValue = prop.DefaultValue;
+                    if (defaultValue is not null)
+                    {
+                        if (
+                            prop.Type.TsTypeKind is TypeDiscriminator.String &&
+                            defaultValue is string stringValue
+                        )
+                        {
+                            b.StringProp("defaultValue", stringValue);
+                        }
+                        else if (
+                            prop.Type.TsTypeKind is TypeDiscriminator.Boolean &&
+                            defaultValue is true or false
+                        )
+                        {
+                            b.Prop("defaultValue", defaultValue.ToString().ToLowerInvariant());
+                        }
+                        else if (
+                            prop.Type.TsTypeKind is TypeDiscriminator.Number or TypeDiscriminator.Enum &&
+                            double.TryParse(defaultValue.ToString(), out _)
+                        )
+                        {
+                            b.Prop("defaultValue", defaultValue.ToString());
+                        }
+                        else
+                        {
+                            throw new InvalidOperationException(
+                                $"Default value {defaultValue} does not match property type {prop.Type}, " +
+                                $"or type does not support default values.");
+                        }
+                    }
+
                     List<string> rules = GetValidationRules(prop, (prop.ReferenceNavigationProperty ?? prop).DisplayName);
 
                     if (rules.Count > 0)

@@ -1220,6 +1220,7 @@ export const Person = domain.types.Person = {
       type: "enum",
       get typeDef() { return domain.enums.Genders },
       role: "value",
+      defaultValue: 0,
     },
     height: {
       name: "height",

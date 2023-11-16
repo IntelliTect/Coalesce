@@ -2,6 +2,7 @@
 using IntelliTect.Coalesce.Models;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
@@ -98,6 +99,18 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         public byte[] ByteArrayProp { get; set; }
 
         public string String { get; set; }
+
+        [DefaultValue("Inigo")]
+        public string StringWithDefault { get; set; }
+
+        [DefaultValue(42)]
+        public int IntWithDefault { get; set; }
+
+        [DefaultValue(Math.PI)]
+        public double DoubleWithDefault { get; set; }
+
+        [DefaultValue(EnumPkId.Value10)]
+        public EnumPkId EnumWithDefault{ get; set; }
 
         [DataType("Color")]
         public string Color { get; set; }

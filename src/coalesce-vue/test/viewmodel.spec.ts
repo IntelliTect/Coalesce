@@ -16,6 +16,7 @@ import {
   ListViewModel,
   ViewModel,
   ViewModelCollection,
+  defineProps,
 } from "../src/viewmodel";
 
 import {
@@ -32,6 +33,8 @@ import { AxiosResponse } from "axios";
 import { mount } from "@vue/test-utils";
 import { IsVue2 } from "../src/util";
 import { mockEndpoint } from "../src/test-utils";
+import { ModelType } from "../src/metadata";
+import { metaBase } from "./targets.metadata";
 
 function mockItemResult<T>(success: boolean, object: T) {
   return vitest.fn().mockResolvedValue(<AxiosItemResult<T>>{
@@ -2416,6 +2419,76 @@ describe("ViewModel", () => {
 
       // Should be the exact same reference.
       expect(studentVM.advisor).toBe(advisorVM);
+    });
+
+    describe("default values", () => {
+      const meta = {
+        ...metaBase(),
+        get keyProp() {
+          return this.props.id;
+        },
+        get displayProp() {
+          return this.props.name;
+        },
+        props: {
+          id: {
+            name: "id",
+            displayName: "id",
+            role: "primaryKey",
+            type: "number",
+          },
+          name: {
+            name: "name",
+            displayName: "Name",
+            role: "value",
+            type: "string",
+            defaultValue: "Allen",
+          },
+        },
+      } as ModelType;
+
+      class TestVm extends ViewModel<{
+        $metadata: typeof meta;
+        id: number | null;
+        name: string | null;
+      }> {
+        declare id: number | null;
+        declare name: string | null;
+      }
+      defineProps(TestVm as any, meta);
+
+      test("populates default values as dirty", () => {
+        // If default values don't get marked dirty, they won't get saved
+        // which could result in a mismatch between what the user sees in the UI
+        // and what actually happens on the server.
+        const instance = new TestVm(meta, null!);
+
+        expect(instance.name).toBe("Allen");
+        expect(instance.$getPropDirty("name")).toBe(true);
+      });
+
+      test("default values do not overwrite initial data", () => {
+        const instance = new TestVm(meta, null!, { name: "Bob" });
+
+        expect(instance.name).toBe("Bob");
+        expect(instance.$getPropDirty("name")).toBe(true);
+      });
+
+      test("default values fill holes in initial data", () => {
+        const instance = new TestVm(meta, null!, { id: 42 });
+
+        expect(instance.id).toBe(42);
+        expect(instance.name).toBe("Allen");
+      });
+
+      test("default values don't supersede nulls in initial data", () => {
+        // When instantiating a viewmodel from an existing object, deliberate
+        // nulls on the existing object shouldn't be replaced by default values.
+        const instance = new TestVm(meta, null!, { id: 42, name: null });
+
+        expect(instance.id).toBe(42);
+        expect(instance.name).toBe(null);
+      });
     });
   });
 });

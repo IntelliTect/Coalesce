@@ -14,10 +14,16 @@ import {
   BehaviorFlags,
 } from "../src/metadata";
 
-const metaBase = (name: string = "model") => {
+export const metaBase = (name: string = "model") => {
+  const pascalName = name.substr(0, 1).toUpperCase() + name.substr(1);
   return {
+    type: "model",
     name: name,
-    displayName: name.substr(0, 1).toUpperCase() + name.substr(1),
+    displayName: pascalName,
+    dataSources: {},
+    methods: {},
+    controllerRoute: pascalName,
+    behaviorFlags: 7 as BehaviorFlags,
   };
 };
 

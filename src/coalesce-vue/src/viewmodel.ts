@@ -5,6 +5,7 @@ import {
   markRaw,
   getCurrentInstance,
   toRaw,
+  type Ref,
 } from "vue";
 
 import {
@@ -186,7 +187,7 @@ export abstract class ViewModel<
   }
 
   /** @internal */
-  private _params = ref(new DataSourceParameters());
+  private _params: Ref<DataSourceParameters> = ref(new DataSourceParameters());
 
   /** The parameters that will be passed to `/get`, `/save`, and `/delete` calls. */
   public get $params() {
@@ -451,7 +452,8 @@ export abstract class ViewModel<
   public $saveMode: "surgical" | "whole" = "surgical";
 
   /** @internal */
-  private _savingProps = ref<ReadonlySet<string>>(emptySet);
+  private _savingProps: Ref<ReadonlySet<string>> =
+    ref<ReadonlySet<string>>(emptySet);
 
   /** When `$save.isLoading == true`, contains the properties of the model currently being saved by `$save` (including autosaves).
    *
@@ -1144,7 +1146,7 @@ export abstract class ViewModel<
 
     initialDirtyData?: DeepPartial<TModel> | null
   ) {
-    this.$data = reactive(convertToModel({}, this.$metadata));
+    this.$data = reactive(convertToModel({}, $metadata));
 
     Object.defineProperty(this, "$stableId", {
       enumerable: true, // Enumerable so visible in vue devtools
@@ -1155,6 +1157,15 @@ export abstract class ViewModel<
 
     if (initialDirtyData) {
       this.$loadDirtyData(initialDirtyData);
+    }
+
+    for (const prop of Object.values($metadata.props)) {
+      if (
+        "defaultValue" in prop &&
+        (!initialDirtyData || !(prop.name in initialDirtyData))
+      ) {
+        (this as any)[prop.name] = prop.defaultValue;
+      }
     }
   }
 }

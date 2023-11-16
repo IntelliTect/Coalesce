@@ -14,7 +14,6 @@ using IntelliTect.Coalesce.Helpers.Search;
 using System.Linq.Expressions;
 using IntelliTect.Coalesce.TypeDefinition.Enums;
 using System.Diagnostics.CodeAnalysis;
-using Microsoft.EntityFrameworkCore;
 
 namespace IntelliTect.Coalesce.TypeDefinition
 {
@@ -246,11 +245,12 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public bool IsDateOnly => DateType == DateTypeAttribute.DateTypes.DateOnly;
 
         /// <summary>
-        /// Returns a default value if provided.
+        /// Returns the default value specified by <see cref="DefaultValueAttribute"/>, if present.
         /// </summary>
         public object? DefaultValue => this.GetAttributeValue<DefaultValueAttribute>(nameof(DefaultValueAttribute.Value));
 
-        /// <summary>        /// If true, there is an API controller that is serving this type of data.
+        /// <summary>        
+        /// If true, there is an API controller that is serving this type of data.
         /// </summary>
         public bool HasValidValues => IsManytoManyCollection || ((Object?.IsDbMappedType ?? false) && IsPOCO);
 

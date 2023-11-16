@@ -303,14 +303,7 @@ class ModelConversionVisitor extends Visitor<any, any[] | null, any | null> {
         // All properties that are not defined need to be declared
         // so that Vue's reactivity system can discover them.
         // Null is a valid type for all model properties (or at least generated models). Undefined is not.
-        let val = null;
-
-        // Use default value if defined.
-        if (meta.props[propName].defaultValue !== undefined) {
-          val = meta.props[propName].defaultValue;
-        }
-
-        target[propName] = val;
+        target[propName] = null;
       } else {
         target[propName] = this.visitValue(propVal, props[propName]);
       }

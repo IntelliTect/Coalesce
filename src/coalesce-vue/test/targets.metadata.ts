@@ -14,11 +14,18 @@ import {
   BehaviorFlags,
 } from "../src/metadata";
 
-const metaBase = (name: string = "model") => {
-  return {
+export const metaBase = (name: string = "model") => {
+  const pascalName = name.substr(0, 1).toUpperCase() + name.substr(1);
+  let obj;
+  return (obj = {
+    type: "model",
     name: name,
-    displayName: name.substr(0, 1).toUpperCase() + name.substr(1),
-  };
+    displayName: pascalName,
+    dataSources: {},
+    methods: {},
+    controllerRoute: pascalName,
+    behaviorFlags: 7 as BehaviorFlags,
+  });
 };
 
 const value = (name: string = "prop") => {
@@ -494,6 +501,6 @@ interface AppDomain extends Domain {
   services: {};
 }
 
-solidify(domain);
+// solidify(domain);
 
 export default domain as AppDomain;

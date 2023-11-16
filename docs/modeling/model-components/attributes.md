@@ -42,7 +42,6 @@ Properties with `[MaxLength]` will generate [client validation](/modeling/model-
 
 Some values of `DataType` when provided to `DataTypeAttribute` on a `string` property will alter the behavior of the [Vue Components](/stacks/vue/coalesce-vue-vuetify/overview.md). See [c-display](/stacks/vue/coalesce-vue-vuetify/components/c-display.md) and See [c-display](/stacks/vue/coalesce-vue-vuetify/components/c-input.md) for details.
 
-
 ### [ForeignKey]
 
 Normally, Coalesce figures out which properties are foreign keys, but if you don't use standard EF naming conventions then you'll need to annotate with `[ForeignKey]` to help out both EF and Coalesce. See the [Entity Framework Relationships](https://docs.microsoft.com/en-us/ef/core/modeling/relationships) documentation for more.
@@ -61,4 +60,4 @@ Model properties that aren't mapped to the database should be marked with `[NotM
 
 ### [DefaultValue]
 
-Properties with `[DefaultValue]` will recieve an initial value when a new model is created. Note: this is different from an initializer, the member will not be initialized with this value, see [remarks](https://learn.microsoft.com/en-us/dotnet/api/system.componentmodel.defaultvalueattribute?view=net-7.0#remarks).
+Properties with `[DefaultValue]` will receive the specified value when a new ViewModel is instantiated on the client. This enables scenarios like prefilling a required property with a suggested value.

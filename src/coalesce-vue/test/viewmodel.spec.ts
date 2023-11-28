@@ -2525,6 +2525,17 @@ describe("ListViewModel", () => {
       });
     });
 
+    test("$items is a ViewModelCollection initially", () => {
+      // There was a mistake for a very long time where $items
+      // would return a new, empty plain array when not initialized
+      // and would return a new instance on every access.
+      const items = list.$items;
+      expect(items).toBe(list.$items);
+
+      items.push({ name: "bob" } as any);
+      expect(items[0]).toBeInstanceOf(StudentViewModel);
+    });
+
     test("props on objects in $items are reactive", async () => {
       await list.$load();
 

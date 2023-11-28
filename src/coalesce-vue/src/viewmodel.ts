@@ -1232,7 +1232,10 @@ export abstract class ListViewModel<
   private _items = ref();
 
   public get $items(): TItem[] {
-    return (this._items.value as unknown as TItem[]) ?? [];
+    return (this._items.value ??= new ViewModelCollection(
+      this.$metadata,
+      this
+    ));
   }
   public set $items(val: TItem[]) {
     if ((this._items.value as any) === val) return;

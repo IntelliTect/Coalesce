@@ -823,14 +823,22 @@ export abstract class ViewModel<
     purgeUnsaved: boolean = false
   ) {
     if (this.$isDirty && this._autoSaveState?.active) {
-      updateViewModelFromModel(this as any, source, true, isCleanData, false);
+      updateViewModelFromModel(
+        this as any,
+        source,
+        true,
+        isCleanData,
+        false,
+        true
+      );
     } else {
       updateViewModelFromModel(
         this as any,
         source,
         false,
         isCleanData,
-        purgeUnsaved
+        purgeUnsaved,
+        true
       );
       if (isCleanData) {
         this.$isDirty = false;
@@ -2023,6 +2031,8 @@ function rebuildModelCollectionForViewModelCollection<
  * @param skipDirty If true, only non-dirty props, and related objects, will be updated.
  * Basic properties on target that are dirty will be skipped.
  * @param purgeUnsaved If true, unsaved items lingering in collections that are not in `source` will be removed.
+ * @param skipSaving If true, only props not actively being saved, and related objects, will be updated.
+ * Basic properties on target that are currently being saved will be skipped.
  */
 export function updateViewModelFromModel<
   TViewModel extends ViewModel<Model<ModelType>>
@@ -2031,7 +2041,8 @@ export function updateViewModelFromModel<
   source: Indexable<{}>,
   skipDirty = false,
   isCleanData = true,
-  purgeUnsaved = false
+  purgeUnsaved = false,
+  skipSaving = false
 ) {
   ViewModelFactory.scope(function (factory) {
     // Add the root ViewModel to the factory
@@ -2194,7 +2205,15 @@ export function updateViewModelFromModel<
             }
           }
 
-          if (!skipDirty || !target.$getPropDirty(propName)) {
+          if (skipSaving && target.$savingProps.has(propName)) {
+            // This is a pretty rare condition and might be unintuitive as to what happened, so log this.
+            console.log(
+              `Skipped loading '${propName}' on ${metadata.name} ${target.$primaryKey}: property is actively saving.`
+            );
+          } else if (skipDirty && target.$getPropDirty(propName)) {
+            // Do nothing. We've historically never logged here, so we'll continue not logging for now.
+            // This scenario usually happens if the user is just rapidly inputting into one field, e.g. a text field.
+          } else {
             target[propName] = incomingValue;
           }
           break;

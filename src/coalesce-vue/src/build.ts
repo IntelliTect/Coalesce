@@ -443,6 +443,8 @@ async function writeHtml(server: ViteDevServer) {
 }
 
 function copyDir(srcDir: string, destDir: string) {
+  if (!fs.existsSync(srcDir)) return;
+
   for (const file of fs.readdirSync(srcDir)) {
     const srcFile = path.resolve(srcDir, file);
     const destFile = path.resolve(destDir, file);

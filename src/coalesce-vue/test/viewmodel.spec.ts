@@ -1451,6 +1451,7 @@ describe("ViewModel", () => {
         student.$isDirty = false;
         const vue = mountData({ student });
 
+        student.$apiClient.save = vitest.fn();
         student.$startAutoSave(vue, { wait: 0, deep: true });
 
         const newModel = (student.advisor = new AdvisorViewModel());

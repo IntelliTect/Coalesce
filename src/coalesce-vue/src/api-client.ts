@@ -2010,6 +2010,11 @@ declare module "@vue/reactivity" {
 
 // The vue2 version of this interface:
 declare module "vue" {
+  // If we don't also declare GlobalComponents here,
+  // then all component intellisense breaks for vue2.
+  // I have absolutely no idea why.
+  export interface GlobalComponents {}
+
   export interface RefUnwrapBailTypes {
     coalesceApiModels: ApiState<any, any> | ApiClient<any>;
   }

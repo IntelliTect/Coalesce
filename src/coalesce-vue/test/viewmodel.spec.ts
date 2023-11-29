@@ -1,8 +1,10 @@
 import Vue, {
+  computed,
   defineComponent,
   getCurrentInstance,
   inject,
   nextTick,
+  ref,
   watch,
 } from "vue";
 import {
@@ -2650,6 +2652,26 @@ describe("ListViewModel", () => {
 
       expect(watchCallback).toBeCalledTimes(1);
       expect(list.$items).toHaveLength(3);
+    });
+
+    test("$items is reactive when first usage is a read", async () => {
+      const seekVal = ref(1);
+
+      // There are two computeds here because only the very first
+      // read of $items on a new ListViewModel was nonreactive (and only in vue2).
+      const comp = computed(() => {
+        return list.$items.find((i) => i.studentId == seekVal.value);
+      });
+      const comp2 = computed(() => {
+        return list.$items.find((i) => i.studentId == seekVal.value + 1);
+      });
+      expect(comp.value).toBeUndefined();
+      expect(comp2.value).toBeUndefined();
+
+      await list.$load();
+
+      expect(comp.value === list.$items[0]).toBeTruthy();
+      expect(comp2.value === list.$items[1]).toBeTruthy();
     });
 
     test("identical loads do not trigger reactivity on $items", async () => {

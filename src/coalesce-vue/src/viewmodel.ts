@@ -1240,10 +1240,21 @@ export abstract class ListViewModel<
   private _items = ref();
 
   public get $items(): TItem[] {
-    return (this._items.value ??= new ViewModelCollection(
-      this.$metadata,
-      this
-    ));
+    let value = this._items.value;
+    if (!value) {
+      this._items.value = value = new ViewModelCollection(this.$metadata, this);
+
+      if (IsVue2) {
+        // bugfix: in vue2, since $items is wrapping over a `ref` and this is the getter
+        // and should therefore act as a read of the ref, we need to force a read
+        // of the ref to track a dependency on `_items` on behalf of whatever accessed `$items`.
+        // This is only necessary in Vue2 because the ViewModelCollection instance won't be made
+        // reactive until it is assigned into a reactive object (like a ref).
+        // See test "$items is reactive when first usage is a read"
+        this._items.value.length.toString();
+      }
+    }
+    return value;
   }
   public set $items(val: TItem[]) {
     if ((this._items.value as any) === val) return;

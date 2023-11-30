@@ -1,5 +1,5 @@
 ﻿<Project>
-  
+  <Import Project="../Common.props" />
   <!-- Technique for overriding SDK targets from https://stackoverflow.com/a/47619786/2465631 -->
   <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
   

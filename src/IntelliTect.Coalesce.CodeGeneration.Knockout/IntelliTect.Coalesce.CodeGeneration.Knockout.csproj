@@ -1,5 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
+  <Import Project="../Common.props" />
   <PropertyGroup>
     <Description>Knockout.js code generation for IntelliTect.Coalesce</Description>
     <PlatformTarget>AnyCPU</PlatformTarget>

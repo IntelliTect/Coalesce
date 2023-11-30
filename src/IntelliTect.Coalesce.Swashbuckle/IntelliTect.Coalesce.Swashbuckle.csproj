@@ -1,5 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
+  <Import Project="../Common.props" />
   <PropertyGroup>
     <Description>
       Provides Swashbuckle SwaggerGen filters to enhance definitions of Coalesce APIs in OpenAPI documents.

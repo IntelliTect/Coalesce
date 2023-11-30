@@ -1,5 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
+  <Import Project="../Common.props" />
   <PropertyGroup>
     <ImplicitUsings>enable</ImplicitUsings>
     <OpenApiGenerateDocuments>false</OpenApiGenerateDocuments>

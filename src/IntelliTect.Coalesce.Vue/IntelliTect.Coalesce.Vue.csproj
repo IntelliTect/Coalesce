@@ -1,5 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-	
+  <Import Project="../Common.props" />
 	<PropertyGroup>
 		<Description>Vue.js shared code for server projects for IntelliTect.Coalesce</Description>
 		<Nullable>enable</Nullable>

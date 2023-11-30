@@ -19,6 +19,7 @@
     <PackageTags>IntelliTect Coalesce MVC API Web Framework Generation Generator</PackageTags>
 
     <RepositoryUrl>https://github.com/IntelliTect/Coalesce</RepositoryUrl>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <RepositoryType>git</RepositoryType>
 
     <LangVersion>12.0</LangVersion>
@@ -47,7 +48,7 @@
     <SourceRoot Include="$(MSBuildThisFileDirectory)/../"/>
   </ItemGroup>
 
-  <PropertyGroup Condition="'$(TF_BUILD)' == 'true'">
+  <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
     <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
   </PropertyGroup>
 

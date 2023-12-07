@@ -28,7 +28,7 @@ export default defineComponent({
 });
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 .c-list-pagination {
   display: flex;
   justify-content: space-between;

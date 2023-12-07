@@ -223,26 +223,24 @@
                         <td
                           class="c-audit-logs--property-value c-audit-logs--property-old"
                         >
-                          {{ prop.oldValue }}
-
+                          <!-- Extra span is required for preserving whitespace -->
+                          <span>{{ prop.oldValue }}</span>
                           <span
                             class="c-audit-logs--property-value-desc grey--text"
                             v-if="prop.oldValueDescription"
-                          >
-                            ({{ prop.oldValueDescription }})
-                          </span>
+                            v-text="' (' + prop.oldValueDescription + ')'"
+                          ></span>
                         </td>
                         <td
                           class="c-audit-logs--property-value c-audit-logs--property-old"
                         >
-                          {{ prop.newValue }}
-
+                          <!-- Extra span is required for preserving whitespace -->
+                          <span>{{ prop.newValue }}</span>
                           <span
                             class="c-audit-logs--property-value-desc grey--text"
                             v-if="prop.newValueDescription"
-                          >
-                            ({{ prop.newValueDescription }})
-                          </span>
+                            v-text="' (' + prop.newValueDescription + ')'"
+                          ></span>
                         </td>
                       </tr>
                     </tbody>
@@ -498,7 +496,11 @@ export default defineComponent({
     white-space: nowrap;
   }
   .c-audit-logs--property-value {
-    white-space: pre-wrap;
+    > * {
+      // Pre-wrap must go on inner spans because Prettier won't preserve whitespace between tags
+      // that are children of a `td` when it formats.
+      white-space: pre-wrap;
+    }
     overflow: auto;
     min-width: 100px;
   }

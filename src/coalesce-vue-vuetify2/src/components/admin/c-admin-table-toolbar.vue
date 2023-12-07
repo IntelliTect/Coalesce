@@ -63,6 +63,7 @@
         v-model="list.$params.search"
         single-line
         clearable
+        :persistent-placeholder="false"
       ></v-text-field>
 
       <v-divider class="hidden-xs-only mx-4 my-0" vertical></v-divider>

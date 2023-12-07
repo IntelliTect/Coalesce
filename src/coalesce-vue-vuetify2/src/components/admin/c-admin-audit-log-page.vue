@@ -41,46 +41,51 @@
               v-model="listVm.$params.filter.type"
               label="Type Name"
               style="width: 150px"
-              @clear="$nextTick(() => (listVm.$params.filter.type = ''))"
+              @click:clear="$nextTick(() => (listVm.$params.filter.type = ''))"
               flat
               solo-inverted
               hide-details
               single-line
               clearable
+              :persistent-placeholder="false"
             />
 
             <v-text-field
               v-model="listVm.$params.filter.keyValue"
               label="Key Value"
               style="width: 150px"
-              @clear="$nextTick(() => (listVm.$params.filter.keyValue = ''))"
+              @click:clear="
+                $nextTick(() => (listVm.$params.filter.keyValue = ''))
+              "
               flat
               solo-inverted
               hide-details
               single-line
               clearable
+              :persistent-placeholder="false"
             />
 
             <c-input
               v-model="listVm.$params.filter.state"
               :for="listVm.$metadata.props.state"
-              @clear="$nextTick(() => (listVm.$params.filter.state = ''))"
+              @click:clear="$nextTick(() => (listVm.$params.filter.state = ''))"
               style="min-width: 210px; max-width: 210px"
               flat
               solo-inverted
               hide-details
               single-line
               clearable
+              :persistent-placeholder="false"
             />
 
             <c-select
               v-if="userPropMeta"
               :for="userPropMeta"
-              v-model:key-value="
+              :key-value.sync="
                 listVm.$params.filter[userPropMeta.foreignKey.name]
               "
               style="width: 240px"
-              @clear="
+              @click:clear="
                 $nextTick(
                   () =>
                     (listVm.$params.filter[userPropMeta.foreignKey.name] = '')
@@ -91,6 +96,7 @@
               hide-details
               single-line
               clearable
+              :persistent-placeholder="false"
             />
           </div>
 
@@ -319,6 +325,7 @@ export default defineComponent({
         );
       }
       listVm = new ListViewModel.typeLookup![props.type]() as any;
+      listVm.$load.setConcurrency("cancel");
     }
 
     const userPropMeta = computed(() => {
@@ -408,7 +415,7 @@ export default defineComponent({
     useBindToQueryString(listVm.$params, "pageSize", "pageSize", (p) => +p);
 
     listVm.$load();
-    listVm.$useAutoLoad({ wait: 0 });
+    listVm.$useAutoLoad({ wait: 100 });
 
     const pageTitle = "Audit Logs";
 

@@ -34,6 +34,7 @@ const components: any = Vue.options.components;
 components.VInput.options.props.dense.default = true
 components.VTextField.options.props.dense.default = true
 components.VTextField.options.props.outlined.default = true
+components.VTextField.options.props.persistentPlaceholder.default = true;
 
 Vue.config.productionTip = false;
 

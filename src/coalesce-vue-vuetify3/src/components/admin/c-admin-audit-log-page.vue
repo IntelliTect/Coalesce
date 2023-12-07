@@ -315,6 +315,7 @@ if (props.list) {
     );
   }
   list = new ListViewModel.typeLookup![props.type]() as any;
+  list.$load.setConcurrency("cancel");
 }
 
 const userPropMeta = computed(() => {
@@ -395,7 +396,7 @@ if (userPropMeta.value) {
 }
 
 list.$load();
-list.$useAutoLoad({ wait: 0 });
+list.$useAutoLoad({ wait: 100 });
 
 defineExpose({
   /** Support for common convention of exposing 'pageTitle' from router-view hosted components. */

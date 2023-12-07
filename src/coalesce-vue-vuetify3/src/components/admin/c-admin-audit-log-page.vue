@@ -296,14 +296,14 @@ const props = withDefaults(
   defineProps<{
     type?: string;
     color?: string;
-    list?: string;
+    list?: AuditLogListViewModel;
   }>(),
   { color: "primary" }
 );
 
 let list: AuditLogListViewModel;
 if (props.list) {
-  list = props.list as any;
+  list = props.list!;
 } else {
   if (!props.type) {
     throw Error(

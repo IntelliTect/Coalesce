@@ -11,7 +11,7 @@
         <v-toolbar-title
           class="c-admin-table-toolbar--model-name hidden-xs-only"
         >
-          {{ list.$metadata.displayName }}
+          {{ listVm.$metadata.displayName }}
         </v-toolbar-title>
 
         <v-divider class="hidden-xs-only mx-4" vertical></v-divider>
@@ -19,7 +19,7 @@
         <v-btn
           class="c-admin-table-toolbar--button-reload"
           text
-          @click="list.$load()"
+          @click="listVm.$load()"
         >
           <v-icon left>fa fa-sync-alt</v-icon>
           <span class="hidden-sm-and-down">Reload</span>
@@ -28,20 +28,20 @@
         <v-spacer></v-spacer>
 
         <span class="c-admin-table-toolbar--range hidden-sm-and-down">
-          Showing <c-list-range-display :list="list" />
+          Showing <c-list-range-display :list="listVm" />
         </span>
 
         <v-spacer></v-spacer>
 
-        <c-list-page class="c-admin-table-toolbar--page" :list="list" />
+        <c-list-page class="c-admin-table-toolbar--page" :list="listVm" />
 
         <template v-slot:extension>
           <div class="c-audit-logs--filters">
             <v-text-field
-              v-model="list.$params.filter.type"
+              v-model="listVm.$params.filter.type"
               label="Type Name"
               style="width: 150px"
-              @clear="$nextTick(() => (list.$params.filter.type = ''))"
+              @clear="$nextTick(() => (listVm.$params.filter.type = ''))"
               flat
               solo-inverted
               hide-details
@@ -50,10 +50,10 @@
             />
 
             <v-text-field
-              v-model="list.$params.filter.keyValue"
+              v-model="listVm.$params.filter.keyValue"
               label="Key Value"
               style="width: 150px"
-              @clear="$nextTick(() => (list.$params.filter.keyValue = ''))"
+              @clear="$nextTick(() => (listVm.$params.filter.keyValue = ''))"
               flat
               solo-inverted
               hide-details
@@ -62,9 +62,9 @@
             />
 
             <c-input
-              v-model="list.$params.filter.state"
-              :for="list.$metadata.props.state"
-              @clear="$nextTick(() => (list.$params.filter.state = ''))"
+              v-model="listVm.$params.filter.state"
+              :for="listVm.$metadata.props.state"
+              @clear="$nextTick(() => (listVm.$params.filter.state = ''))"
               style="min-width: 210px; max-width: 210px"
               flat
               solo-inverted
@@ -77,12 +77,13 @@
               v-if="userPropMeta"
               :for="userPropMeta"
               v-model:key-value="
-                list.$params.filter[userPropMeta.foreignKey.name]
+                listVm.$params.filter[userPropMeta.foreignKey.name]
               "
               style="width: 240px"
               @clear="
                 $nextTick(
-                  () => (list.$params.filter[userPropMeta.foreignKey.name] = '')
+                  () =>
+                    (listVm.$params.filter[userPropMeta.foreignKey.name] = '')
                 )
               "
               flat
@@ -94,14 +95,14 @@
           </div>
 
           <v-spacer></v-spacer>
-          <c-list-page-size :list="list" />
+          <c-list-page-size :list="listVm" />
         </template>
       </v-toolbar>
 
       <v-card-text>
         <c-loader-status
           :loaders="{
-            'no-initial-content no-error-content': [list.$load],
+            'no-initial-content no-error-content': [listVm.$load],
           }"
         >
           <v-simple-table class="c-audit-logs--table">
@@ -115,7 +116,7 @@
             </thead>
             <tbody>
               <tr
-                v-for="(auditLog, index) in list.$items"
+                v-for="(auditLog, index) in listVm.$items"
                 :key="auditLog.$stableId"
               >
                 <td class="c-audit-logs--column-user-date">
@@ -151,8 +152,8 @@
                     "
                   />
                   <pre
-                    :class="timeDiffClass(auditLog, list.$items[index + 1])"
-                    v-text="timeDiff(auditLog, list.$items[index + 1])"
+                    :class="timeDiffClass(auditLog, listVm.$items[index + 1])"
+                    v-text="timeDiff(auditLog, listVm.$items[index + 1])"
                     title="Time delta from the preceding row"
                   ></pre>
                 </td>
@@ -252,15 +253,15 @@
           </v-simple-table>
 
           <v-divider />
-          <c-list-pagination :list="list" class="mt-4" />
+          <c-list-pagination :list="listVm" class="mt-4" />
         </c-loader-status>
       </v-card-text>
     </v-card>
   </v-container>
 </template>
 
-<script setup lang="ts">
-import { computed } from "vue";
+<script lang="ts">
+import { computed, defineComponent } from "vue";
 import { differenceInMilliseconds } from "date-fns";
 import {
   HiddenAreas,
@@ -299,116 +300,130 @@ type AuditLogListViewModel = ListViewModel<
   AuditLogViewModel
 >;
 
-const props = withDefaults(
-  defineProps<{
-    type?: string;
-    color?: string;
-    list?: string;
-  }>(),
-  { color: "primary" }
-);
+export default defineComponent({
+  props: {
+    type: { type: String, required: false },
+    color: { type: String, required: false, default: "primary" },
+    list: { type: Object, required: false },
+  },
+  setup(props) {
+    let listVm: AuditLogListViewModel;
+    if (props.list) {
+      listVm = props.list as any;
+    } else {
+      if (!props.type) {
+        throw Error(
+          "c-admin-audit-log-page: If prop `list` is not provided, `type` is required."
+        );
+      } else if (!ListViewModel.typeLookup![props.type]) {
+        throw Error(
+          `No model named ${props.type} is registered to ListViewModel.typeLookup`
+        );
+      }
+      listVm = new ListViewModel.typeLookup![props.type]() as any;
+    }
 
-let list: AuditLogListViewModel;
-if (props.list) {
-  list = props.list as any;
-} else {
-  if (!props.type) {
-    throw Error(
-      "c-admin-audit-log-page: If prop `list` is not provided, `type` is required."
-    );
-  } else if (!ListViewModel.typeLookup![props.type]) {
-    throw Error(
-      `No model named ${props.type} is registered to ListViewModel.typeLookup`
-    );
-  }
-  list = new ListViewModel.typeLookup![props.type]() as any;
-}
+    const userPropMeta = computed(() => {
+      return (
+        Object.values(listVm.$metadata.props)
+          .filter(
+            (p): p is ModelReferenceNavigationProperty =>
+              p.role == "referenceNavigation"
+          )
+          // FUTURE: Could there be other props that we detect as representing a user?
+          .filter((p) =>
+            ["user"].some((needle) => p.name.toLowerCase().includes(needle))
+          )[0]
+      );
+    });
 
-const userPropMeta = computed(() => {
-  return (
-    Object.values(list.$metadata.props)
-      .filter(
-        (p): p is ModelReferenceNavigationProperty =>
-          p.role == "referenceNavigation"
-      )
-      // FUTURE: Could there be other props that we detect as representing a user?
-      .filter((p) =>
-        ["user"].some((needle) => p.name.toLowerCase().includes(needle))
-      )[0]
-  );
-});
+    const otherProps = computed(() => {
+      return Object.values(listVm.$metadata.props).filter(
+        (p) =>
+          ((p.hidden || 0) & HiddenAreas.List) != HiddenAreas.List &&
+          p != userPropMeta.value &&
+          ![
+            "id",
+            "type",
+            "keyValue",
+            "date",
+            "state",
+            "properties",
+            "description",
+          ].includes(p.name) &&
+          (p.role !== "foreignKey" || !p.navigationProp)
+      );
+    });
 
-const otherProps = computed(() => {
-  return Object.values(list.$metadata.props).filter(
-    (p) =>
-      ((p.hidden || 0) & HiddenAreas.List) != HiddenAreas.List &&
-      p != userPropMeta.value &&
-      ![
-        "id",
-        "type",
-        "keyValue",
-        "date",
-        "state",
-        "properties",
-        "description",
-      ].includes(p.name) &&
-      (p.role !== "foreignKey" || !p.navigationProp)
-  );
-});
+    function timeDiff(current: AuditLogViewModel, older?: AuditLogViewModel) {
+      if (!older) return "";
+      let ms = differenceInMilliseconds(current.date!, older.date!);
+      const positive = ms >= 0;
+      ms = Math.abs(ms);
 
-function timeDiff(current: AuditLogViewModel, older?: AuditLogViewModel) {
-  if (!older) return "";
-  let ms = differenceInMilliseconds(current.date!, older.date!);
-  const positive = ms >= 0;
-  ms = Math.abs(ms);
+      var totalSec = ms / 1000;
+      var hours = Math.floor(totalSec / 3600);
+      var minutes = Math.floor((totalSec - hours * 3600) / 60);
+      var seconds = totalSec - hours * 3600 - minutes * 60;
 
-  var totalSec = ms / 1000;
-  var hours = Math.floor(totalSec / 3600);
-  var minutes = Math.floor((totalSec - hours * 3600) / 60);
-  var seconds = totalSec - hours * 3600 - minutes * 60;
+      return (
+        (positive ? "+" : "-") +
+        (hours > 0 ? hours + "h " : "") +
+        (hours > 0 || minutes > 0 ? minutes + "m " : "") +
+        seconds.toFixed(2) +
+        "s"
+      );
+    }
 
-  return (
-    (positive ? "+" : "-") +
-    (hours > 0 ? hours + "h " : "") +
-    (hours > 0 || minutes > 0 ? minutes + "m " : "") +
-    seconds.toFixed(2) +
-    "s"
-  );
-}
+    function timeDiffClass(
+      current: AuditLogViewModel,
+      older?: AuditLogViewModel
+    ) {
+      if (!older) return "";
+      const diff = current.date!.valueOf() - (older?.date ?? 0).valueOf();
+      return diff == 0
+        ? "grey--text"
+        : diff > 0
+        ? "success--text"
+        : "error--text";
+    }
 
-function timeDiffClass(current: AuditLogViewModel, older?: AuditLogViewModel) {
-  if (!older) return "";
-  const diff = current.date!.valueOf() - (older?.date ?? 0).valueOf();
-  return diff == 0 ? "grey--text" : diff > 0 ? "success--text" : "error--text";
-}
+    let filter = {
+      type: "",
+      keyValue: "",
+      state: "",
+    };
 
-let filter = {
-  type: "",
-  keyValue: "",
-  state: "",
-};
+    if (userPropMeta.value) {
+      const fkName = userPropMeta.value.foreignKey.name;
+      //@ts-ignore
+      filter[fkName] = "";
+      useBindToQueryString(filter, fkName, "user");
+    }
 
-if (userPropMeta.value) {
-  const fkName = userPropMeta.value.foreignKey.name;
-  //@ts-ignore
-  filter[fkName] = "";
-  useBindToQueryString(filter, fkName, "user");
-}
+    listVm.$params.filter = filter;
 
-list.$params.filter = filter;
+    useBindToQueryString(filter, "type");
+    useBindToQueryString(filter, "keyValue");
+    useBindToQueryString(filter, "state");
+    useBindToQueryString(listVm.$params, "page", "page", (p) => +p);
+    useBindToQueryString(listVm.$params, "pageSize", "pageSize", (p) => +p);
 
-useBindToQueryString(filter, "type");
-useBindToQueryString(filter, "keyValue");
-useBindToQueryString(filter, "state");
-useBindToQueryString(list.$params, "page", "page", (p) => +p);
-useBindToQueryString(list.$params, "pageSize", "pageSize", (p) => +p);
+    listVm.$load();
+    listVm.$useAutoLoad({ wait: 0 });
 
-list.$load();
-list.$useAutoLoad({ wait: 0 });
+    const pageTitle = "Audit Logs";
 
-defineExpose({
-  /** Support for common convention of exposing 'pageTitle' from router-view hosted components. */
-  pageTitle: "Audit Logs",
+    return {
+      listVm,
+      timeDiff,
+      timeDiffClass,
+      propDisplay,
+      userPropMeta,
+      otherProps,
+      pageTitle,
+    };
+  },
 });
 </script>
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Web;
 using Microsoft.CodeAnalysis.CSharp;
@@ -77,21 +78,30 @@ namespace IntelliTect.Coalesce.Utilities
             if (theString == null) return null;
             if (theString.Length < 2) return theString.ToUpper();
 
-            // Two-letter uppercase should be preserved as uppercase.
-            // https://learn.microsoft.com/en-us/visualstudio/code-quality/ca1709?view=vs-2022
-            if (theString.Length == 2 && char.IsUpper(theString[0]) && char.IsUpper(theString[1])) return theString;
-
-            // Start with the first character.
-            string result = theString.Substring(0, 1).ToUpper();
-
-            // Add the remaining characters.
+            StringBuilder returnedString = new(theString.Length);
+            returnedString.Append(char.ToUpper(theString[0]));
             for (int i = 1; i < theString.Length; i++)
             {
-                if (char.IsUpper(theString[i])) result += " ";
-                result += theString[i];
+                if (char.IsLower(theString[i]))
+                {
+                    returnedString.Append(theString[i]);
+                }
+                else
+                {
+                    // If the next character is uppercase, don't insert a space.
+                    if (i + 1 < theString.Length && (char.IsLower(theString[i + 1]) || char.IsLower(theString[i - 1])))
+                    {
+                        returnedString.Append(' ');
+                        returnedString.Append(theString[i]);
+                    }
+                    else
+                    {
+                        returnedString.Append(theString[i]);
+                    }
+                }
             }
 
-            return result;
+            return returnedString.ToString();
         }
 
         [return: System.Diagnostics.CodeAnalysis.NotNullIfNotNull("str")]
@@ -105,7 +115,7 @@ namespace IntelliTect.Coalesce.Utilities
             .Replace("\"", "\\\"");
 
         [return: System.Diagnostics.CodeAnalysis.NotNullIfNotNull("str")]
-        public static string? QuotedStringLiteralForCSharp(this string? str) => 
+        public static string? QuotedStringLiteralForCSharp(this string? str) =>
             str is null ? null : ('"' + str.EscapeStringLiteralForCSharp() + '"');
 
         [return: System.Diagnostics.CodeAnalysis.NotNullIfNotNull("str")]

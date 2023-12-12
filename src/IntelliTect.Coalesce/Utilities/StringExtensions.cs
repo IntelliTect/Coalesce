@@ -89,7 +89,7 @@ namespace IntelliTect.Coalesce.Utilities
                 else
                 {
                     // If the next character is uppercase, don't insert a space.
-                    if (i + 1 < theString.Length && char.IsLower(theString[i + 1]))
+                    if (i + 1 < theString.Length && (char.IsLower(theString[i + 1]) || char.IsLower(theString[i - 1])))
                     {
                         returnedString.Append(' ');
                         returnedString.Append(theString[i]);

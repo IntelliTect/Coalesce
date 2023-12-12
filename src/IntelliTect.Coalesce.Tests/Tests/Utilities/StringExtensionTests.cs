@@ -117,5 +117,19 @@ namespace IntelliTect.Coalesce.Tests.Utilities
             const string enumName = "HelloWorld";
             Assert.Equal("Hello World", enumName.ToProperCase());
         }
+
+        [Fact]
+        public void ToProperCase_HandlesCamelCase()
+        {
+            const string enumName = "helloWorld";
+            Assert.Equal("Hello World", enumName.ToProperCase());
+        }
+
+        [Fact]
+        public void ToProperCase_HandlesCamelCaseWithAcronym()
+        {
+            const string enumName = "helloWorldUI";
+            Assert.Equal("Hello World UI", enumName.ToProperCase());
+        }
     }
 }

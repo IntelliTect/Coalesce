@@ -1,4 +1,5 @@
 ﻿using IntelliTect.Coalesce.Utilities;
+using System.Collections.Generic;
 using Xunit;
 
 namespace IntelliTect.Coalesce.Tests.Utilities
@@ -83,6 +84,38 @@ namespace IntelliTect.Coalesce.Tests.Utilities
             string identifier = input.GetValidCSharpIdentifier();
 
             Assert.Equal("@if", identifier);
+        }
+
+        [Fact]
+        public void ToProperCase_HandlesTwoCapitalsInARow()
+        {
+            const string enumName = "HROnly";
+            Assert.Equal("HR Only", enumName.ToProperCase());
+        }
+        [Fact]
+        public void ToProperCase_HandlesMultipleCapitalsInARow()
+        {
+            const string enumName = "FBIOnly";
+            Assert.Equal("FBI Only", enumName.ToProperCase());
+        }
+        [Fact]
+        public void ToProperCase_HandlesOnlyTwoCapitals()
+        {
+            const string enumName = "UI";
+            Assert.Equal("UI", enumName.ToProperCase());
+        }
+        [Fact]
+        public void ToProperCase_HandlesANormalWord()
+        {
+            const string enumName = "User";
+            Assert.Equal("User", enumName.ToProperCase());
+        }
+
+        [Fact]
+        public void ToProperCase_HandlesANormalPhrase()
+        {
+            const string enumName = "HelloWorld";
+            Assert.Equal("Hello World", enumName.ToProperCase());
         }
     }
 }

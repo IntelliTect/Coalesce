@@ -210,7 +210,7 @@
                     <tbody>
                       <tr v-for="prop in auditLog.properties" :key="prop.id!">
                         <td class="c-audit-logs--property-name">
-                          <c-display :model="prop" for="propertyName" />
+                          {{ prop.propertyName }}
                         </td>
                         <td
                           class="c-audit-logs--property-value c-audit-logs--property-old"
@@ -278,6 +278,7 @@ interface AuditLogBase {
     $metadata: ModelType;
     id: number | null;
     parentId: number | null;
+    propertyName: string | null;
     oldValue: string | null;
     oldValueDescription: string | null;
     newValue: string | null;
@@ -474,7 +475,6 @@ defineExpose({
 
   .c-audit-logs--property-name {
     width: 170px;
-    white-space: nowrap;
   }
   .c-audit-logs--property-value {
     white-space: pre-wrap;
@@ -492,6 +492,9 @@ defineExpose({
   }
   tr:not(:last-child) td {
     border-bottom: 1px solid rgba(var(--v-theme-on-surface), 0.05);
+  }
+  tr:hover td {
+    background: rgba(0, 0, 0, 0.1);
   }
 }
 </style>

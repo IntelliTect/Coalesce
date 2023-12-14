@@ -20,10 +20,10 @@
     "coalesce-vue-vuetify3": "../../src/coalesce-vue-vuetify3",
     "typeface-roboto": "1.1.13",
     "typeface-roboto-mono": "0.0.75",
-    "vue": "3.2.47",
+    "vue": "3.3.11",
     "vue-facing-decorator": "^2.0.4",
     "vue-router": "4.1.6",
-    "vuetify": "3.1.4"
+    "vuetify": "3.4.7"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "5.4.0",

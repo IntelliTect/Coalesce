@@ -337,7 +337,9 @@ export default defineComponent({
           )
           // FUTURE: Could there be other props that we detect as representing a user?
           .filter((p) =>
-            ["user"].some((needle) => p.name.toLowerCase().includes(needle))
+            ["user", "createdby", "changedby"].some((needle) =>
+              p.name.toLowerCase().includes(needle)
+            )
           )[0]
       );
     });

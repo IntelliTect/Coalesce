@@ -1154,7 +1154,7 @@ export abstract class ViewModel<
 
     initialDirtyData?: DeepPartial<TModel> | null
   ) {
-    this.$data = reactive(convertToModel({}, $metadata));
+    this.$data = reactive(convertToModel({}, $metadata)) as any;
 
     Object.defineProperty(this, "$stableId", {
       enumerable: true, // Enumerable so visible in vue devtools

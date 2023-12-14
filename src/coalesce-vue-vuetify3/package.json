@@ -42,7 +42,7 @@
   "peerDependencies": {
     "coalesce-vue": "../coalesce-vue",
     "vue": "^3.3.0",
-    "vuetify": "^3.4.0"
+    "vuetify": "^3.1.0"
   },
   "optionalDependencies": {
     "vue-router": "^4.1.6"

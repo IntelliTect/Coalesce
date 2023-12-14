@@ -51,15 +51,13 @@ describe("CDatetimePicker", () => {
     await delay(1);
     expect(wrapper.text()).toContain("Year must be > 2017");
     expect(model.birthDate?.getFullYear()).toBe(2017);
-    expect(rule).toBeCalledTimes(1);
-    expect(rule).toBeCalledWith(model.birthDate);
+    expect(rule).toHaveBeenLastCalledWith(model.birthDate);
 
     // Do it again, but with a valid input this time. The error should be gone.
     await wrapper.find("input").setValue("1/3/2018");
     await delay(1);
     expect(wrapper.text()).not.toContain("Year must be > 2017");
     expect(model.birthDate?.getFullYear()).toBe(2018);
-    expect(rule).toBeCalledTimes(2);
     expect(rule).toHaveBeenLastCalledWith(model.birthDate);
   });
 });

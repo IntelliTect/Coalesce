@@ -19,6 +19,7 @@ docs_old/
 #vuepress
 .cache/
 .temp/
+**/.vitepress/cache/
 
 
 ## Ignore Visual Studio temporary files, build results, and

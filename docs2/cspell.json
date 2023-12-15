@@ -1,0 +1,58 @@
+{
+    "version": "0.2",
+    "language": "en",
+    "words": [
+        "Vuetify",
+        "Vitest",
+        "vitest",
+        "Axios",
+        "Coalesce",
+        "IntelliTect",
+        "EF",
+        "vite",
+        "unplugin",
+        "IIFE",
+        "Stampable",
+
+        "POCOs",
+        "dtos",
+        "viewmodels",
+        "treeshaken",
+        "coalesceko",
+        "coalescevue",
+        "querystring",
+        "bootstrap-datetimepicker",
+
+        "nameof",
+        "queryable",
+        "queryables",
+        "enumerables",
+        "readonly",
+        "typeof",
+        "instanceof",
+
+        "autosave",
+        "autosaving",
+        "dontSerialize",
+
+        "netcoreapp",
+        "netstandard",
+        "mkdir",
+        "wwwroot",
+        "webp",
+    ],
+    "ignorePaths": [
+        "node_modules"
+    ],
+    "languageSettings": [
+        {
+            "languageId": "markdown",
+            "ignoreRegExpList": [
+                // Hashes in URLs, which for PascalCase headers get transformed into lowercase 
+                // (which then to cspell looks like a single word.)
+                "/(\\.md|\\()#[-\\w]+/mig",
+                "/viewmodel\\.ts/mig",
+             ]
+        }
+    ]
+}

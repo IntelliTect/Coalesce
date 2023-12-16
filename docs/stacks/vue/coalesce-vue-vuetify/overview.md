@@ -2,14 +2,12 @@
 
 <!-- MARKER:summary -->
 
-[![](https://img.shields.io/npm/v/coalesce-vue-vuetify2/latest?color=42b883&label=coalesce-vue-vuetify2%40latest)](https://www.npmjs.com/package/coalesce-vue-vuetify2)
-[![](https://img.shields.io/npm/v/coalesce-vue-vuetify3/latest?color=42b883&label=coalesce-vue-vuetify3%40latest)](https://www.npmjs.com/package/coalesce-vue-vuetify3)
+[![](https://img.shields.io/npm/v/coalesce-vue-vuetify2/latest?color=0176b5&label=coalesce-vue-vuetify2%40latest&logo=npm)](https://www.npmjs.com/package/coalesce-vue-vuetify2)
+[![](https://img.shields.io/npm/v/coalesce-vue-vuetify3/latest?color=0176b5&label=coalesce-vue-vuetify3%40latest&logo=npm)](https://www.npmjs.com/package/coalesce-vue-vuetify3)
 
 The [Vue](https://vuejs.org/) stack for Coalesce provides [a set of components](/stacks/vue/coalesce-vue-vuetify/overview.md) based on [Vuetify](https://vuetifyjs.com/), packaged up in an NPM package [coalesce-vue-vuetify2](https://www.npmjs.com/package/coalesce-vue-vuetify2) or [coalesce-vue-vuetify3](https://www.npmjs.com/package/coalesce-vue-vuetify3). These components are driven primarily by the [Metadata Layer](/stacks/vue/layers/metadata.md), and include both low level input and display components like [c-input](/stacks/vue/coalesce-vue-vuetify/components/c-input.md) and [c-display](/stacks/vue/coalesce-vue-vuetify/components/c-display.md) that are highly reusable in the custom pages you'll build in your application, as well as high-level components like [c-admin-table-page](/stacks/vue/coalesce-vue-vuetify/components/c-admin-table-page.md) and [c-admin-editor-page](/stacks/vue/coalesce-vue-vuetify/components/c-admin-editor-page.md) that constitute entire pages. 
 
 <!-- MARKER:summary-end -->
-
-[[toc]]
 
 ## Setup 
 

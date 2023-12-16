@@ -3,8 +3,6 @@
 
 The [Knockout](https://knockoutjs.com/) stack for Coalesce offers the ability to build pages with the time-tested [Knockout](https://knockoutjs.com/) JavaScript library using all of the features of the Coalesce generated APIs and [ViewModels](/stacks/disambiguation/view-model.md). It can be used for anything between adding simple interactive augmentations of MVC pages to building a full MPA-SPA hybrid application.
 
-[[toc]]
-
 ## Getting Started
 
 Check out [Getting Started with Knockout](/stacks/ko/getting-started.md) if you haven't already to learn how to get a new Coalesce Knockout project up and running.

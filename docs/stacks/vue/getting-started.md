@@ -1,5 +1,5 @@
 
-# Getting Started with Vue
+# Getting Started
 
 ## Creating a Project
 
@@ -14,7 +14,11 @@ cd *.Web
 npm ci
 ```
 
-[![](https://img.shields.io/nuget/v/IntelliTect.Coalesce.Vue.Template)](https://www.nuget.org/packages/IntelliTect.Coalesce.Vue.Template/) • [View on GitHub](https://github.com/IntelliTect/Coalesce.Vue.Template) 
+<div style="display:flex">
+<a href="https://www.nuget.org/packages/IntelliTect.Coalesce.Vue.Template/" target="_blank" rel="noreferrer"><img src="https://img.shields.io/nuget/v/IntelliTect.Coalesce.Vue.Template?logo=nuget&color=0176b5" alt=""></a>
+&nbsp;
+<a href="https://github.com/IntelliTect/Coalesce.Vue.Template" target="_blank" rel="noreferrer"><img src="https://img.shields.io/badge/Github-Coalesce.Vue.Template-0176b5?logo=github" alt="Static Badge"></a> 
+</div>
 
 ## Project Structure
 

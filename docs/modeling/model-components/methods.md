@@ -4,8 +4,6 @@ Any public methods annotated with the [[Coalesce]](/modeling/model-components/at
 
 These custom methods allow you to implement any custom server-side functionality in your Coalesce application that falls outside of the standard CRUD functions that are generated for your entities.
 
-[[toc]]
-
 
 ## Declaring Methods
 
@@ -316,10 +314,10 @@ The [[Coalesce]](/modeling/model-components/attributes/coalesce.md) attribute ca
 The [[ControllerAction]](/modeling/model-components/attributes/controller-action.md) attribute controls how this method is exposed via HTTP. Can be used to customize the HTTP method/verb for the method, as well as caching behavior.
 
 ### `[Execute(string roles)]`
-The [[Execute]](/modeling/model-components/attributes/execute.md) attribute specifies which roles can execute this method from the generated API controller.
+The [[Execute]](/modeling/model-components/attributes/execute.md) attribute specifies which roles can execute this method from the generated API controller. Additional security restrictions that cannot be implemented with roles should be enforced with custom code in the method's implementation.
 
 ### `[LoadFromDataSource(Type dataSourceType)]`
-The [[LoadFromDataSource]](/modeling/model-components/attributes/load-from-data-source.md) attribute specifies that the targeted model instance method should load the instance it is called on from the specified data source when invoked from an API endpoint. By default, the default data source for the model's type will be used.
+The [[LoadFromDataSource]](/modeling/model-components/attributes/load-from-data-source.md) attribute specifies that the targeted model instance method should load the instance it is called on from the specified data source when invoked from an API endpoint. If not defined, the model's default data source is used.
     
 
 ## File Downloads

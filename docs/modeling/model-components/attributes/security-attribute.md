@@ -1,12 +1,10 @@
 # Security Attributes
 
-Coalesce provides a collection of four attributes which can provide class-level (and property-level, where appropriate) security controls over the generated API.
+Coalesce provides a collection of attributes which can provide class-level (and property-level, where appropriate) security controls over the generated API.
 
 ::: tip
-This page provides API-level documentation for a specific set of four attributes. For a complete overview of all the security-focused techniques that can be used in a Coalesce application, see the [Security](/topics/security.md) page.
+This page provides API-level documentation for a specific set of attributes. For a complete overview of all the security-focused techniques that can be used in a Coalesce application, see the [Security](/topics/security.md) page.
 :::
-
-[[toc]]
 
 
 ## Class vs. Property Security
@@ -83,6 +81,10 @@ public class Employee
 
 ### [Execute]
 A separate attribute for controlling method execution exists. Its documentation may be found on the [[Execute]](/modeling/model-components/attributes/execute.md) page.
+
+### [Restrict]
+
+For property security, `[Read]` and `[Edit]` can be used to apply role-based security. If you need logic more complicated than checking for the presence of a role, [[Restrict]](/modeling/model-components/attributes/restrict.md) offers the ability to write custom code to control the read and/or write permissions of a property.
 
 ## Attribute Properties
 

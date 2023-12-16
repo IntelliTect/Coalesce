@@ -1,44 +1,42 @@
 ---
-lang: en-US
-title: Coalesce Documentation
-description: Documentation home page for IntelliTect.Coalesce
+# https://vitepress.dev/reference/default-theme-home-page
+layout: home
+
+hero:
+  name: "Coalesce"
+  text: Accelerated Web App Development
+  tagline: ASP.NET Core • EF Core • Vue.js • TypeScript
+  image:
+    src: /coalesce-icon-color.svg
+    alt: Coalesce
+  actions:
+    - theme: brand
+      text: Introduction
+      link: /introduction
+    - theme: alt
+      text: Get Started
+      link: /stacks/vue/getting-started
+
+features:
+  - title: 🖨 Code Generated
+    details: Design your data model and build awesome pages. Coalesce generates the boring parts in the middle.
+  - title: 🧩 Extensible
+    details: All functionality in Coalesce is configurable or overridable. You'll never be boxed in or get stuck.
+  - title: 🔒 Secure
+    details: Customization of table-level, row-level, and property-level security are all built-in. <a href="./topics/security.html">Read More.</a>
 ---
 
-# Coalesce
+<SiteFooter />
 
-Designed to help you quickly build amazing web applications, Coalesce is a rapid-development code generation framework, created by [IntelliTect](https://intellitect.com) and built on top of:
+<style>
+.VPHero .text {
+  font-size: 42px;
+  line-height: 1.1;
+  padding: 16px 0;
+  color: var(--logo-text-color);
+}
 
-- ASP.NET Core
-- EF Core
-- TypeScript
-- [Vue](https://vuejs.org/)
-
-
-## What do I do?
-
-You are responsible for the interesting parts of your application:
-
--  Data Model
--  Business Logic
--  External Integrations
--  Page Content
--  Site Design
--  Custom Scripting
-
-## What is done for me?
-
-Coalesce builds the part of your application that are mundane and
-monotonous to build:
-
-- Client side [TypeScript ViewModels](/stacks/vue/layers/viewmodels.md) that mirror your data model for both lists and individual objects. Utilize these to rapidly build out your application's various pages.
-- APIs to interact with your models via endpoints like List, Get, Save, and more.
-- Out-of-the-box [Vue Components](/stacks/vue/coalesce-vue-vuetify/overview.md) for common controls like dates, selecting objects via drop downs, enums, etc. Dropdowns support searching and paging automatically.
--  A complete set of admin pages are provided, allowing you to read, create, edit, and delete data straight away without writing any additional code.
-
-
-# Getting Started
-
-To get started with Coalesce, check out [Getting Started with Vue](/stacks/vue/getting-started.md).
-
-While Knockout.js is still supported by Coalesce, it is a deprecated option and not recommended for new projects. If you do still want to choose Knockout, click [here](/stacks/ko/getting-started.md).
-
+.VPHero .VPImage {
+  width: 100%
+}
+</style>

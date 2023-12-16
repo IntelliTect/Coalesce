@@ -2,8 +2,6 @@
 
 Models are the core business objects of your application - they serve as the fundamental representation of data in your application. The design of your models is very important. In [Entity Framework Core](https://docs.microsoft.com/en-us/ef/core/) (EF), data models are just Plain Old CLR Objects (POCOs).
 
-[[toc]]
-
 ## Building a Data Model
 
 To start building your data model that Coalesce will generate code for, follow the best practices for [EF Core](https://docs.microsoft.com/en-us/ef/core/). Guidance on this topic is available in abundance in the [Entity Framework Core documentation](https://docs.microsoft.com/en-us/ef/core/).

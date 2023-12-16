@@ -6,8 +6,6 @@ A general-purpose component for displaying any [Value](/stacks/vue/layers/metada
 <!-- MARKER:summary-end -->
 
 
-[[toc]]
-
 ## Examples
 
 Typical usage, providing an object and a property on that object:

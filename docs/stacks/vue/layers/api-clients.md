@@ -10,8 +10,6 @@ The API clients provided by Coalesce are based on [axios](https://github.com/axi
 
 As with all the layers, the [source code of coalesce-vue](https://github.com/IntelliTect/Coalesce/blob/dev/src/coalesce-vue/src/api-client.ts) is also a great supplement to this documentation.
 
-[[toc]]
-
 ## Concepts 
 
 ### API Client
@@ -155,6 +153,7 @@ Returns the URL for the method's HTTP endpoint. Any parameters are sourced from 
 
 Only exists if the caller was created with the option of being invoked with an args object as described in the sections above.
     
+<br>
 
 #### ItemResult-based Callers
 
@@ -165,6 +164,8 @@ The principal data returned by the previous request. Will be set to null if the 
 <Prop def="validationIssues: ValidationIssue[] | null" lang="ts" />
 
 Any validation issues returned by the previous request. This is never populated automatically by Coalesce, and is therefore is only used if you have written custom code to populate it in your [Behaviors](/modeling/model-components/behaviors.md) or [Methods](/modeling/model-components/methods.md).
+
+<br>
 
 #### ListResult-based Callers
 

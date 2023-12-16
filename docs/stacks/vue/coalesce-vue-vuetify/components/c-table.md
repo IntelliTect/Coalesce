@@ -6,8 +6,6 @@ A table component for displaying the contents of a [ListViewModel](/stacks/vue/l
 
 <!-- MARKER:summary-end -->
 
-[[toc]]
-
 
 ## Example Usage
 

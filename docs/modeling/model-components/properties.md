@@ -10,7 +10,7 @@ Coalesce currently has a few more restrictions than what EF Core allows, but hop
 The following kinds of properties may be declared on your models.
 
 ### Primary Key
-To work with Coalesce, your model must have a single property for a primary key. By convention, this property should be named the same as your model class with `Id` appended to that name, but you can also annotate a property with `[Key]` to denote it as the primary key.
+To work with Coalesce, your model must have a single property for a primary key. By convention, this property should be named the same as your model class with `Id` appended to that name, but you can also annotate a property with `[Key]` or name it exactly "Id" to denote it as the primary key.
 
 ### Foreign Keys & Reference Navigation Properties
 While a foreign key may be declared on your model using only the EF OnModuleBuilding method to specify its purpose, Coalesce won't know what the property is a key for. Therefore, foreign key properties should always be accompanied by a reference navigation property, and vice versa.
@@ -38,15 +38,15 @@ Properties on [Entity Models](/modeling/model-types/entities.md) that use an `in
 
 
 
-## Other Considerations
+## Property Customization
 
-For any of the kinds of properties outlined above, the following rules are applied:
+For any of the kinds of properties outlined above, the following customizations can be applied:
 
 ### Attributes
 Coalesce provides a number of [Attributes](/modeling/model-components/attributes.md), and supports a number of other .NET attributes, that allow for further customization of your model.
 
 ### Security
-Properties will be ignored if received by the client if authorization checks against any [property-level Security](/topics/security.md#property-column-security) present fail. This security is handled by the [Generated C# DTOs](/stacks/agnostic/dtos.md).
+Property values received by the server from the client will be ignored if rejected by any [property-level Security](/topics/security.md#property-column-security). This security is implemented in the [Generated C# DTOs](/stacks/agnostic/dtos.md).
 
 ### Loading & Serialization
 The [Default Loading Behavior](/modeling/model-components/data-sources.md#default-loading-behavior), any custom functionality defined in [Data Sources](/modeling/model-components/data-sources.md), and [[DtoIncludes] & [DtoExcludes]](/modeling/model-components/attributes/dto-includes-excludes.md) may also restrict which properties are sent to the client when requested.

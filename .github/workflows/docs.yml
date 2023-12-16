@@ -37,7 +37,7 @@ jobs:
         run: npm ci
 
       # run build script
-      - name: Build VuePress site
+      - name: Build Site
         run: npm run build
 
       # please check out the docs of the workflow for more details
@@ -48,8 +48,7 @@ jobs:
         with:
           # deploy to gh-pages branch
           target_branch: gh-pages
-          # deploy the default output of VuePress
-          build_dir: docs/.vuepress/dist/Coalesce
+          build_dir: docs/.vitepress/dist/Coalesce
           jekyll: false
         env:
           # @see https://docs.github.com/en/actions/reference/authentication-in-a-workflow#about-the-github_token-secret

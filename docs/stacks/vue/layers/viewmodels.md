@@ -8,8 +8,6 @@ These classes provide a wide array of functionality that is useful when interact
 
 <!-- MARKER:summary-end -->
 
-[[toc]]
-
 ## ViewModels 
 
 The following members can be found on the generated [Entity](/modeling/model-types/entities.md) and [Custom DTO](/modeling/model-types/dtos.md) ViewModels, exported from `viewmodels.g.ts` as `<TypeName>ViewModel`.

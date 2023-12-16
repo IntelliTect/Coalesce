@@ -8,8 +8,6 @@ The model layer, generated as `models.g.ts`, contains a set of TypeScript interf
 
 The model layer also includes a TypeScript class for each type that can be used to easily instantiate a valid implementation of its corresponding interface. However, it is not necessary for the classes to be used, and all parts of Coalesce that interact with the model layer don't perform any `instanceof` checks against models - the `$metadata` property is used to determine type identity.
 
-[[toc]]
-
 
 ## Concepts 
 

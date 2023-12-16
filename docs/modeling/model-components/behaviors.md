@@ -9,8 +9,6 @@ Coalesce separates out the parts of your API that read your data from the parts 
 Also like data sources, these functions can be easily overridden on a per-model basis, allowing complete control over the ways in which your data is mutated by the APIs that Coalesce generates. However, unlike data sources which can have as many implementations per model as you like, you can only have one set of behaviors.
 
 
-[[toc]]
-
 ## Defining Behaviors
 
 By default, each of your models that Coalesce exposes will utilize the standard behaviors (`IntelliTect.Coalesce.StandardBehaviors<T, TContext>`) for the out-of-the-box API endpoints that Coalesce provides. These behaviors provide a set of create, update, and delete methods for an EF Core `DbContext`, as well as a plethora of virtual methods that make the `StandardBehaviors` a great base class for your custom implementations. Unlike data sources which require an annotation to override the Coalesce-provided standard class, the simple presence of an explicitly declared set of behaviors will suppress the standard behaviors.

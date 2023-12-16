@@ -1,9 +1,7 @@
 
 # Vue Overview
 
-The `Vue` stack for Coalesce has been designed from the ground up to be used to build modern web applications using current technologies like Vite or Webpack + Vue CLI, ES Modules, and more. It enables you to use all of the features of Vue.js, including building a SPA, and the ability to use modern component frameworks like [Vuetify](https://vuetifyjs.com/). 
-
-[[toc]]
+The `Vue` stack for Coalesce has been designed from the ground up to be used to build modern web applications using current technologies like Vite, ES Modules, and more. It enables you to use all of the features of Vue.js, including building a SPA, and the ability to use modern component frameworks like [Vuetify](https://vuetifyjs.com/). 
 
 ## Getting Started
 
@@ -11,7 +9,7 @@ Check out [Getting Started with Vue](/stacks/vue/getting-started.md) to learn ho
 
 ## TypeScript Layers
 
-[![](https://img.shields.io/npm/v/coalesce-vue/latest?color=42b883&label=coalesce-vue%40latest)](https://www.npmjs.com/package/coalesce-vue)
+[![](https://img.shields.io/npm/v/coalesce-vue/latest?color=0176b5&label=coalesce-vue%40latest&logo=npm)](https://www.npmjs.com/package/coalesce-vue)
 
 
 The generated code for the Vue stack all builds on the [coalesce-vue](https://www.npmjs.com/package/coalesce-vue) NPM package which contains most of the core functionality of the Vue stack.  Its version should generally be kept in sync with the [IntelliTect.Coalesce NuGet packages](https://www.nuget.org/packages/IntelliTect.Coalesce/) in your project.

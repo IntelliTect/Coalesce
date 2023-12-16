@@ -1,8 +1,8 @@
-import { Plugin } from 'vuepress'
-import { path } from '@vuepress/utils'
 import * as fs from 'fs';
+import MarkdownIt from 'markdown-it';
 import type { RuleBlock } from 'markdown-it/lib/parser_block'
-import type { MarkdownEnv } from '@vuepress/markdown/lib/types'
+import path from 'path';
+import { MarkdownEnv } from 'vitepress';
 
 interface ImportCodeTokenMeta {
   importPath: string;
@@ -118,7 +118,7 @@ const createImportCodeBlockRule = (): RuleBlock =>
 
 function resolveImportCode (
   { importPath, start, end, after, before, prepend, append }: ImportCodeTokenMeta,
-  { filePath }: MarkdownEnv
+  { path: filePath }: MarkdownEnv
 ) {
   let importFilePath = importPath
 
@@ -182,10 +182,8 @@ function resolveImportCode (
       (append ? append : ''),
   }
 }
-  
-export const importMdPlugin = () => ({
-  name: 'import-md-plugin',
-  extendsMarkdown: async (md) => {
+
+  export function registerImportMdPlugin(md: MarkdownIt) {
     // add import_md block rule
     md.block.ruler.before(
       'paragraph',
@@ -195,6 +193,5 @@ export const importMdPlugin = () => ({
         alt: ['paragraph', 'reference', 'blockquote', 'list'],
       }
     )
-  },
-} as Plugin);
+  }
 

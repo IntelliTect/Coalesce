@@ -246,10 +246,10 @@ export default class MyComponent extends Vue {
 
 ```vue
 <script lang="ts" setup>
-const props = defineProps({
-  label: { type: String, default: "Student" },
-  student: { type: Object as PropType<ApplicationUserViewModel>, required: true },
-});
+const props = withDefaults(defineProps<{
+  label?: string,
+  student?: ApplicationUserViewModel
+}>(), { label: 'Student' })
 
 watch(
   () => props.label,
@@ -257,19 +257,6 @@ watch(
     console.log(`label changed. new:${newVal}, old:${oldVal}`);
   }
 );
-</script>
-```
-
-Alternatively, props can be declared with type-only syntax,
-which is more concise but is a little more clunky when props have default values:
-```vue
-<script lang="ts" setup>
-const props = withDefaults(defineProps<{
-  label?: string,
-  student?: ApplicationUserViewModel
-}>(), { label: 'Student' })
-
-// ... rest of the component
 </script>
 ```
 

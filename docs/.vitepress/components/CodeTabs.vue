@@ -41,13 +41,11 @@
 .code-tabs__nav {
   margin-top: 0.85rem;
   // 2 * margin + border-radius of <pre> tag
-  margin-bottom: calc(-1.7rem - 6px);
-  padding-bottom: calc(1.7rem - 6px);
+  margin-bottom: -20px;
   padding-left: 10px;
-  padding-top: 10px;
   border-top-left-radius: 6px;
   border-top-right-radius: 6px;
-  background-color: var(--code-bg-color);
+  background-color: var(--vp-code-block-bg);
 }
 
 .code-tabs__ul {
@@ -55,7 +53,11 @@
   margin-bottom: 5px;
   padding-left: 0;
   display: inline-flex;
-  list-style: none;
+  list-style: none !important;
+}
+.code-tabs__li {
+  
+  margin-top: 0 !important;
 }
 
 .code-tabs__nav-tab {
@@ -78,7 +80,7 @@
 }
 
 .code-tabs__nav-tab-active {
-  border-bottom: var(--c-brand) 2px solid;
+  border-bottom: var(--vp-c-brand-1) 2px solid;
 }
 
 @media (max-width: 500px) {
@@ -91,14 +93,14 @@
 
 .code-tabs-item {
   color: #adbac7;
-  background-color: var(--code-bg-color);
+  background-color: var(--vp-code-block-bg);
   div[class*=language-]::before {
     top: 5px;
   }
   
   // Give some horizontal padding to items that arent code
-  > :not(.line-numbers-mode) {
-    padding: 0 20px
+  > :not([class*='language-']) {
+    padding: 0 24px
   }
 
   pre, pre + div {
@@ -113,7 +115,7 @@
 <script>
 // Code tabs plugin inspired by 
 // https://github.com/padarom/vuepress-plugin-code-switcher,
-// updated to work with Vuepress2/Vue3.
+// updated to work with Vitepress.
 
 import { reactive, effect } from 'vue'
 

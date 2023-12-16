@@ -2,8 +2,6 @@
 
 In addition to the generated [Generated C# DTOs](/stacks/agnostic/dtos.md) that Coalesce will create for you, you may also create your own implementations of an `IClassDto`. These types are first-class citizens in Coalesce - you will get a full suite of features surrounding them as if they were entities. This includes generated API Controllers, Admin Views, and full [TypeScript ViewModels](/stacks/disambiguation/view-model.md) and [TypeScript List ViewModels](/stacks/disambiguation/list-view-model.md).
 
-[[toc]]
-
 The difference between a Custom DTO and the underlying entity that they represent is as follows:
 
 - The only time your custom DTO will be served is when it is requested directly from one of the endpoints on its generated controller, or when its type is explicitly used by a [method](/modeling/model-components/methods.md) or [property](../model-components/properties.md) of another type.

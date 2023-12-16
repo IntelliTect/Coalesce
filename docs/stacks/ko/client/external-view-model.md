@@ -5,8 +5,6 @@ For all [External Types](/modeling/model-types/external-types.md) in your model,
 
 These ViewModels are dependent on [Knockout](https://knockoutjs.com/), and are designed to be used directly from Knockout bindings in your HTML. All data properties on the generated model are Knockout observables.
 
-[[toc]]
-
 ## Base Members
 
 The TypeScript ViewModels for external types do not have a common base class, and do not have any of the behaviors or convenience properties that the regular [TypeScript ViewModels](/stacks/ko/client/view-model.md) for database-mapped classes have.

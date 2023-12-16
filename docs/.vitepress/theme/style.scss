@@ -189,6 +189,11 @@ td:has(> div[class*=language-]:only-child:not(.line-numbers-mode)) {
       right: 0.5em
     }
     // margin: 12px 0 !important;
+
+    .copy {
+      top: 0px;
+    }
+    min-height: 40px;
   }
   padding: 0;
   .shiki {

@@ -23,7 +23,7 @@ features:
   - title: 🧩 Extensible
     details: All functionality in Coalesce is configurable or overridable. You'll never be boxed in or get stuck.
   - title: 🔒 Secure
-    details: Customization of table-level, row-level, and property-level security are all built-in. <a href="./topics/security.html">Read More.</a>
+    details: Customization of table-level, row-level, and property-level security are all built-in. <a href="/Coalesce/topics/security.html">Read More.</a>
 ---
 
 <SiteFooter />

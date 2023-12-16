@@ -6,8 +6,6 @@ A general, all-purpose date/time input component that can be used either with [m
 
 <!-- MARKER:summary-end -->
 
-[[toc]]
-
 
 ## Examples
 

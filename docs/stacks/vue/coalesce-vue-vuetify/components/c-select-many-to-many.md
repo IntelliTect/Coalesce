@@ -10,8 +10,6 @@ A multi-select dropdown component that allows for selecting values fetched from 
 It is unlikely that you'll ever need to use this component directly - it is highly recommended that you use [c-input](/stacks/vue/coalesce-vue-vuetify/components/c-input.md) instead and let it delegate to [c-select-many-to-many](/stacks/vue/coalesce-vue-vuetify/components/c-select-many-to-many.md) for you.
 :::
 
-[[toc]]
-
 ## Examples
 
 ``` vue-html

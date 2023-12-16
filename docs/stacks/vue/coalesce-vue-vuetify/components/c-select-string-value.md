@@ -8,8 +8,6 @@ Effectively, this is a server-driven autocomplete list.
 
 <!-- MARKER:summary-end -->
 
-[[toc]]
-
 ## Examples
 
 ``` vue-html

@@ -2,8 +2,6 @@
 
 Coalesce's principal purpose is a code generation framework for automating the creation of the boring-but-necessary parts of a web application. Below, you find an overview of the different components of Coalesce's code generation features.
 
-[[toc]]
-
 
 ## Running Code Generation
 

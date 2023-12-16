@@ -8,8 +8,6 @@ Used both for selecting values for foreign key and navigation properties, and fo
 
 <!-- MARKER:summary-end -->
 
-[[toc]]
-
 ## Examples
 
 Binding to a navigation property or foreign key of a model:

@@ -16,8 +16,6 @@ Progress is indicated with a [Vuetify](https://vuetifyjs.com/) [v-progress-linea
 This component uses the legacy term "loader" to refer to [API Callers](/stacks/vue/layers/api-clients.md#api-callers). A new ``c-caller-status`` component may be coming in the future with a few usability improvements - if that happens, `c-loader-status` will be preserved for backwards compatibility.
 :::
 
-[[toc]]
-
 ## Examples
 
 Wrap contents of a details/edit page:

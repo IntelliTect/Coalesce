@@ -6,8 +6,6 @@ Coalesce provides a number of knockout bindings that make common model binding a
 Editors Note: On this page, some bindings are split into their requisite HTML component with their ``data-bind`` component listed immediately after. Keep this in mind when reading.
 
 
-[[toc]]
-
 
 ## Input Bindings
 

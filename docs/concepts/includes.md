@@ -1,10 +1,9 @@
 # Includes String
 Coalesce provides a number of extension points for loading & serialization which make use of a concept called an "includes string" (also referred to as "include string" or just "includes").
 
-[[toc]]
     
 ## Includes String
-The includes string is simply a string which can be set to any arbitrary value. It is passed from the client to the server in order to control data loading and serialization. It can be set on both the TypeScript ViewModels and the ListViewModels.
+The includes string is simply a string which can be set to any arbitrary value. It is passed from the client to the server in order to customize data loading and serialization. It can be set on both the TypeScript ViewModels and the ListViewModels.
 
 <CodeTabs>
 <template #vue>
@@ -52,6 +51,6 @@ There are a few values of `includes` that are either set by default in the auto-
 
 Main document: [[DtoIncludes] & [DtoExcludes]](/modeling/model-components/attributes/dto-includes-excludes.md).
 
-There are two C# attributes, `DtoIncludes` and `DtoExcludes`, that can be used to annotate your data model in order to control what data gets put into the DTOs and ultimately serialized to JSON and sent out to the client.
+There are two C# attributes, `DtoIncludes` and `DtoExcludes`, that can be used to annotate your data model in order to customize what data gets put into the DTOs and ultimately serialized to JSON and sent out to the client.
 
 @[import-md "after":"see [Includes String]"](../modeling/model-components/attributes/dto-includes-excludes.md)

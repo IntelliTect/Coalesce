@@ -26,8 +26,6 @@ Any other unsupported type will simply be displayed with [c-display](/stacks/vue
 
 When bound to a [ViewModel](/stacks/vue/layers/viewmodels.md), the [validation rules](/stacks/vue/layers/viewmodels.md#rules-validation) for the bound property will be obtained from the [ViewModel](/stacks/vue/layers/viewmodels.md#rules-validation) and passed to [Vuetify](https://vuetifyjs.com/)'s `rules` prop.
 
-[[toc]]
-
 ## Examples
 
 Typical usage, providing an object and a property on that object:

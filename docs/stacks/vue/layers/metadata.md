@@ -6,8 +6,6 @@ The metadata layer, generated as `metadata.g.ts`, contains information about the
 
 <!-- MARKER:summary-end -->
 
-[[toc]]
-
 ## Concepts 
 
 The following is a non-exhaustive list of the general concepts used by the metadata layer. The [source code of coalesce-vue](https://github.com/IntelliTect/Coalesce/blob/dev/src/coalesce-vue/src/metadata.ts) provides the most exhaustive set of documentation about the metadata layer: 

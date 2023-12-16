@@ -9,8 +9,6 @@ These propagate to the client as validations in TypeScript via generated [Metada
 ::: warning
 This attribute controls client-side validation only. To perform server-side validation, create a custom [Behaviors class](/modeling/model-components/behaviors.md) for your types.
 :::
-
-[[toc]]
     
 
 ## Example Usage

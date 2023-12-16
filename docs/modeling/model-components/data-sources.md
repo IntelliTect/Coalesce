@@ -5,8 +5,6 @@ In Coalesce, all data that is retrieved from your database through the generated
 In addition to this standard data source, Coalesce allows you to create custom data sources that provide complete control over the way data is loaded and serialized for transfer to a requesting client. These data sources are defined on a per-model basis, and you can have as many of them as you like for each model.
 
 
-[[toc]]
-
 ## Defining Data Sources
 
 By default, each of your models that Coalesce exposes will expose the standard data source (`IntelliTect.Coalesce.StandardDataSource<T, TContext>`). This data source provides all the standard functionality one would expect - paging, sorting, searching, filtering, and so on. Each of these component pieces is implemented in one or more virtual methods, making the `StandardDataSource` a great place to start from when implementing your own data source. To suppress this behavior of always exposing the raw `StandardDataSource`, create your own custom data source and annotate it with `[DefaultDataSource]`.

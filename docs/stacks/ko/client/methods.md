@@ -13,8 +13,6 @@ public string Rename(string name)
 }
 ```
 
-[[toc]]
-
 ## Base Members
 
 The following members are available on the method object for all client methods:

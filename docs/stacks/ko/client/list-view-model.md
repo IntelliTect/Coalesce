@@ -6,8 +6,6 @@ In addition to [TypeScript ViewModels](/stacks/ko/client/view-model.md) for inte
 
 These ListViewModels, like the ViewModels, are dependent on Knockout and are designed to be used directly from Knockout bindings in your HTML.
 
-[[toc]]
-
 ## Base Members
 
 The following members are defined on `BaseListViewModel<>` and are available to the ListViewModels for all of your model types:

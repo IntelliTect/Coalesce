@@ -10,8 +10,6 @@ A multi-select input component for collections of non-object values (primarily s
 It is unlikely that you'll ever need to use this component directly - it is highly recommended that you use [c-input](/stacks/vue/coalesce-vue-vuetify/components/c-input.md) instead and let it delegate to [c-select-values](/stacks/vue/coalesce-vue-vuetify/components/c-select-values.md) for you.
 :::
 
-[[toc]]
-
 ## Examples
 
 ``` vue-html

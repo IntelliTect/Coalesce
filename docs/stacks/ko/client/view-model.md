@@ -6,8 +6,6 @@ For each database-mapped type in your model, Coalesce will generate a TypeScript
 
 These ViewModels are dependent on [Knockout](https://knockoutjs.com/), and are designed to be used directly from Knockout bindings in your HTML. All data properties on the generated model are Knockout observables.
 
-[[toc]]
-
 ## Base Members
 
 The following base members are available to all generated ViewModel classes:

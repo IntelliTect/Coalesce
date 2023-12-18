@@ -30,7 +30,7 @@
           Our clients
         </a>
         range from Fortune 100 companies to local small businesses and
-        non-profits. There is no job too big or small!
+        non-profits.
       </p>
     </div>
   </footer>

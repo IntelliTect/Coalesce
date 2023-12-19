@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Text;
 
 namespace IntelliTect.Coalesce.TypeDefinition
@@ -56,9 +57,16 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 if (
                     Type.IsNumber &&
                     !Type.IsNullableValueType &&
-                    Range is var range and not null && (
-                        Convert.ToDecimal(range.Item1) > 0 ||
-                        Convert.ToDecimal(range.Item2) < 0
+                    this.GetAttribute<RangeAttribute>() is var range and not null &&
+                    Convert.ToDecimal(range.GetValue(r => r.Minimum) ?? 0) is decimal min &&
+                    Convert.ToDecimal(range.GetValue(r => r.Maximum) ?? 0) is decimal max &&
+                    (
+                        min > 0 ||
+                        max < 0
+#if NET8_0_OR_GREATER
+                        || range.GetValue(a => a.MinimumIsExclusive) == true && min == 0
+                        || range.GetValue(a => a.MaximumIsExclusive) == true && max == 0
+#endif
                     )
                 )
                 {

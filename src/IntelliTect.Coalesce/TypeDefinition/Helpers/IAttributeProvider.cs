@@ -37,6 +37,12 @@ namespace IntelliTect.Coalesce.TypeDefinition
             return GetValue(propertyExpression.GetExpressedProperty().Name) as string;
         }
 
+        public T? GetValue<T>(Expression<Func<TAttribute, T?>> propertyExpression)
+            where T : class
+        {
+            return GetValue(propertyExpression.GetExpressedProperty().Name) as T;
+        }
+
         public T? GetValue<T>(
             Expression<Func<TAttribute, T>> propertyExpression,
             Expression<Func<TAttribute, bool>>? hasValueExpression = null
@@ -75,6 +81,10 @@ namespace IntelliTect.Coalesce.TypeDefinition
             where TAttribute : Attribute
             => obj.GetAttributes<TAttribute>();
 
+        public static AttributeViewModel<TAttribute>? GetAttribute<TAttribute>(this IAttributeProvider obj) 
+            where TAttribute : Attribute
+            => obj.GetAttributes<TAttribute>().FirstOrDefault();
+
         public static bool HasAttribute<TAttribute>(this IAttributeProvider obj)
             where TAttribute : Attribute
         {
@@ -83,12 +93,12 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public static object? GetAttributeValue<TAttribute>(this IAttributeProvider obj, string valueName)
             where TAttribute : Attribute
-            => obj.GetAttributes<TAttribute>().FirstOrDefault()?.GetValue(valueName);
+            => obj.GetAttribute<TAttribute>()?.GetValue(valueName);
 
         public static T? GetAttributeValue<TAttribute, T>(this IAttributeProvider obj, string valueName)
             where TAttribute : Attribute
             where T : struct
-            => obj.GetAttributes<TAttribute>().FirstOrDefault()?.GetValue<T>(valueName);
+            => obj.GetAttribute<TAttribute>()?.GetValue<T>(valueName);
 
         public static T? GetAttributeValue<TAttribute, T>(
             this IAttributeProvider obj,
@@ -97,11 +107,11 @@ namespace IntelliTect.Coalesce.TypeDefinition
         )
             where TAttribute : Attribute
             where T : struct
-            => obj.GetAttributes<TAttribute>().FirstOrDefault()?.GetValue<T>(propertyExpression, hasValueExpression);
+            => obj.GetAttribute<TAttribute>()?.GetValue<T>(propertyExpression, hasValueExpression);
 
         public static string? GetAttributeValue<TAttribute>(this IAttributeProvider obj, Expression<Func<TAttribute, string?>> propertyExpression)
             where TAttribute : Attribute
-            => obj.GetAttributes<TAttribute>().FirstOrDefault()?.GetValue(propertyExpression);
+            => obj.GetAttribute<TAttribute>()?.GetValue(propertyExpression);
 
         public static (bool Exists, string? Message) GetValidationAttribute<TAttribute>(this IAttributeProvider obj)
             where TAttribute : ValidationAttribute

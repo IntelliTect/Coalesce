@@ -410,6 +410,10 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                     Min(min, minMessage);
                 else if (prop.GetValidationAttribute<MinLengthAttribute, int>(x => x.Length) is (true, int min2, string min2Message))
                     Min(min2, min2Message);
+#if NET8_0_OR_GREATER
+                else if (prop.GetValidationAttribute<LengthAttribute, int>(x => x.MinimumLength) is (true, int min3, string min3Message))
+                    Min(min3, min3Message);
+#endif
                 else if (prop.GetAttributeValue<ClientValidationAttribute, int>(a => a.MinLength) is int minLength and not int.MaxValue)
                     Min(minLength, clientValidationError);
 
@@ -417,6 +421,10 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                     Max(max, maxMessage);
                 else if (prop.GetValidationAttribute<MaxLengthAttribute, int>(x => x.Length) is (true, int max2, string max2Message))
                     Max(max2, max2Message);
+#if NET8_0_OR_GREATER
+                else if (prop.GetValidationAttribute<LengthAttribute, int>(x => x.MaximumLength) is (true, int max3, string max3Message))
+                    Max(max3, max3Message);
+#endif
                 else if (prop.GetAttributeValue<ClientValidationAttribute, int>(a => a.MaxLength) is int maxLength and not int.MinValue)
                     Max(maxLength, clientValidationError);
 
@@ -425,63 +433,71 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                     const string urlPattern = @"^((https?|ftp):\/\/.)";
                     rules.Add($"url: val => !val || /{urlPattern}/.test(val) {Error(clientValidationError, $"{propName} must be a valid URL.")}");
                 }
+
+                var pattern = prop.GetAttributeValue<ClientValidationAttribute>(a => a.Pattern);
+                if (pattern == null && prop.Type.IsGuid)
+                {
+                    pattern = @"^\s*[{(]?[0-9A-Fa-f]{8}[-]?(?:[0-9A-Fa-f]{4}[-]?){3}[0-9A-Fa-f]{12}[)}]?\s*$";
+                }
+                if (!string.IsNullOrEmpty(pattern))
+                {
+                    rules.Add($"pattern: val => !val || /{pattern}/.test(val) {Error(clientValidationError, $"{propName} does not match expected format.")}");
+                }
+
+                // https://emailregex.com/
+                const string emailRegex = @"^(([^<>()\[\]\\.,;:\s@""]+(\.[^<> ()\[\]\\.,;:\s@""]+)*)|("".+ ""))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$";
+                if (prop.GetAttributeValue<ClientValidationAttribute, bool>(a => a.IsEmail) == true)
+                {
+                    rules.Add($"email: val => !val || /{emailRegex}/.test(val.trim()) {Error(clientValidationError, $"{propName} must be a valid email address.")}");
+                }
+                else if (prop.GetValidationAttribute<EmailAddressAttribute>() is (true, string message))
+                {
+                    // This is actually much more strict on the client than what EmailAddressAttribute actually validates on the server.
+                    rules.Add($"email: val => !val || /{emailRegex}/.test(val.trim()) {Error(message, $"{propName} must be a valid email address.")}");
+                }
+
+                if (prop.GetAttributeValue<ClientValidationAttribute, bool>(a => a.IsPhoneUs) == true)
+                {
+                    const string phoneRegex = @"^(1-?)?(\([2-9]\d{2}\)|[2-9]\d{2})-?[2-9]\d{2}-?\d{4}$";
+                    rules.Add($"phone: val => !val || /{phoneRegex}/.test(val.replace(/\\s+/g, '')) {Error(clientValidationError, $"{propName} must be a valid US phone number.")}");
+                }
+                else if (prop.GetValidationAttribute<PhoneAttribute>() is (true, string message))
+                {
+                    // This regex from https://github.com/dotnet/runtime/blob/ab0a4ff9fa8002fa17703a9f9571869b820846c3/src/libraries/System.ComponentModel.Annotations/src/System/ComponentModel/DataAnnotations/PhoneAttribute.cs#LL15C9-L15C9
+                    // and matches the behavior of the server validation
+                    const string phoneRegex = @"^(\+\s?)?((?<!\+.*)\(\+?\d+([\s\-\.]?\d+)?\)|\d+)([\s\-\.]?(\(\d+([\s\-\.]?\d+)?\)|\d+))*(\s?(x|ext\.?)\s?\d+)?$";
+                    rules.Add($"phone: val => !val || /{phoneRegex}/.test(val.replace(/\\s+/g, '')) {Error(message, $"{propName} must be a valid phone number.")}");
+                }
             }
             else if (prop.Type.IsNumber)
             {
-                void Min(object value, string error) => rules.Add($"min: val => val == null || val >= {value} {Error(error, $"{propName} must be at least {value}.")}");
-                void Max(object value, string error) => rules.Add($"max: val => val == null || val <= {value} {Error(error, $"{propName} may not be more than {value}.")}");
+                void Min(object value, bool exclusive, string error) => rules.Add(exclusive
+                    ? $"min: val => val == null || val > {value} {Error(error, $"{propName} must be more than {value}.")}"
+                    : $"min: val => val == null || val >= {value} {Error(error, $"{propName} must be at least {value}.")}");
+                void Max(object value, bool exclusive, string error) => rules.Add(exclusive
+                    ? $"max: val => val == null || val < {value} {Error(error, $"{propName} must be less than {value}.")}"
+                    : $"max: val => val == null || val <= {value} {Error(error, $"{propName} may not be more than {value}.")}");
 
-                var range = prop.Range;
+                var range = prop.GetAttribute<RangeAttribute>();
                 if (range != null)
                 {
-                    var message = prop.GetAttributeValue<RangeAttribute>(a => a.ErrorMessage);
-                    Min(range.Item1, message);
-                    Max(range.Item2, message);
+                    var message = range.GetValue(a => a.ErrorMessage);
+#if NET8_0_OR_GREATER
+                    Min(range.GetValue(r => r.Minimum), range.GetValue(r => r.MinimumIsExclusive) ?? false, message);
+                    Max(range.GetValue(r => r.Maximum), range.GetValue(r => r.MaximumIsExclusive) ?? false, message);
+#else
+                    Min(range.GetValue(r => r.Minimum), false, message);
+                    Max(range.GetValue(r => r.Maximum), false, message);
+#endif
                 }
                 else
                 {
                     if (prop.GetAttributeValue<ClientValidationAttribute, double>(a => a.MinValue) is double minValue and not double.MaxValue)
-                        Min(minValue, clientValidationError);
+                        Min(minValue, false, clientValidationError);
 
                     if (prop.GetAttributeValue<ClientValidationAttribute, double>(a => a.MaxValue) is double maxValue and not double.MinValue)
-                        Max(maxValue, clientValidationError);
+                        Max(maxValue, false, clientValidationError);
                 }
-            }
-
-
-            var pattern = prop.GetAttributeValue<ClientValidationAttribute>(a => a.Pattern);
-            if (pattern == null && prop.Type.IsGuid)
-            {
-                pattern = @"^\s*[{(]?[0-9A-Fa-f]{8}[-]?(?:[0-9A-Fa-f]{4}[-]?){3}[0-9A-Fa-f]{12}[)}]?\s*$";
-            }
-            if (!string.IsNullOrEmpty(pattern))
-            {
-                rules.Add($"pattern: val => !val || /{pattern}/.test(val) {Error(clientValidationError, $"{propName} does not match expected format.")}");
-            }
-
-            // https://emailregex.com/
-            const string emailRegex = @"^(([^<>()\[\]\\.,;:\s@""]+(\.[^<> ()\[\]\\.,;:\s@""]+)*)|("".+ ""))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$";
-            if (prop.GetAttributeValue<ClientValidationAttribute, bool>(a => a.IsEmail) == true)
-            {
-                rules.Add($"email: val => !val || /{emailRegex}/.test(val.trim()) {Error(clientValidationError, $"{propName} must be a valid email address.")}");
-            }
-            else if (prop.GetValidationAttribute<EmailAddressAttribute>() is (true, string message))
-            {
-                // This is actually much more strict on the client than what EmailAddressAttribute actually validates on the server.
-                rules.Add($"email: val => !val || /{emailRegex}/.test(val.trim()) {Error(message, $"{propName} must be a valid email address.")}");
-            }
-
-            if (prop.GetAttributeValue<ClientValidationAttribute, bool>(a => a.IsPhoneUs) == true)
-            {
-                const string phoneRegex = @"^(1-?)?(\([2-9]\d{2}\)|[2-9]\d{2})-?[2-9]\d{2}-?\d{4}$";
-                rules.Add($"phone: val => !val || /{phoneRegex}/.test(val.replace(/\\s+/g, '')) {Error(clientValidationError, $"{propName} must be a valid US phone number.")}");
-            }
-            else if (prop.GetValidationAttribute<PhoneAttribute>() is (true, string message))
-            {
-                // This regex from https://github.com/dotnet/runtime/blob/ab0a4ff9fa8002fa17703a9f9571869b820846c3/src/libraries/System.ComponentModel.Annotations/src/System/ComponentModel/DataAnnotations/PhoneAttribute.cs#LL15C9-L15C9
-                // and matches the behavior of the server validation
-                const string phoneRegex = @"^(\+\s?)?((?<!\+.*)\(\+?\d+([\s\-\.]?\d+)?\)|\d+)([\s\-\.]?(\(\d+([\s\-\.]?\d+)?\)|\d+))*(\s?(x|ext\.?)\s?\d+)?$";
-                rules.Add($"phone: val => !val || /{phoneRegex}/.test(val.replace(/\\s+/g, '')) {Error(message, $"{propName} must be a valid phone number.")}");
             }
 
             return rules;

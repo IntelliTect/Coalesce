@@ -78,5 +78,5 @@ For properties and other values annotated with [DataTypeAttribute], the followin
 * `DataType.EmailAddress`: Renders as a clickable `mailto` link.
 * `DataType.PhoneNumber`: Renders as a clickable `tel` link.
 * `DataType.ImageUrl`: Renders as an `img` element.
-* `"Color"`: Renders a colored dot next to the value, interpreting the field value as a 7-character HTML hex color code..
+* `"Color"`: Renders a colored dot next to the value, interpreting the field value as a 7-character HTML hex color code.
 

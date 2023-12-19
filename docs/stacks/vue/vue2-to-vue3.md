@@ -281,7 +281,7 @@ export default class MyComponent extends Vue {
   public checked = false;
 
   public items = [
-    { name: "Foo", checked: false, }
+    { name: "Foo", checked: false, },
     { name: "Bar", checked: true, }
   ]
 }
@@ -303,8 +303,8 @@ const person = new PersonViewModel();
 const checked = ref(false);
 
 const items = reactive([
-  { name: "Foo", checked: false, }
-  { name: "Foo", checked: true, }
+  { name: "Foo", checked: false, },
+  { name: "Bar", checked: true, }
 ])
 </script>
 ```

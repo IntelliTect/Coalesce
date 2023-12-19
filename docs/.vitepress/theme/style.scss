@@ -211,3 +211,16 @@ td:has(> div[class*=language-]:only-child:not(.line-numbers-mode)) {
 html:not(.dark) .dark-only {
   display: none !important;
 }
+
+// Improve information density in tables, e.g. on the security overview page.
+table td {
+  li, ul {
+    margin: 0px !important
+  }
+  p {
+    margin: 0px !important
+  }
+  > ul {
+    padding-left: 1rem !important;
+  }
+}

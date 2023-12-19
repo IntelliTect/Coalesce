@@ -5,21 +5,249 @@ This page is a comprehensive overview of all the techniques that can be used in 
 
 The following table is a quick reference of scenarios you might encounter and how you might handle them. If you're unfamiliar with these techniques, though, then you are encouraged to read through this page to get a deeper understanding of what's available before selecting a solution.
 
-| <div style="width:290px">When I want to...</div> | ... I should use ... |
-| - | - |
-| Remove an entity CRUD operation               | [Class Security Attributes](#class-security-attributes) with `DenyAll` |
-| Restrict an entity CRUD operation with roles  | [Class Security Attributes](#class-security-attributes) |
-| Restrict a method or service with roles       | [Method Security Attributes](#method-security-attributes) |
-| Remove a property from Coalesce               | • annotate with [[InternalUse]](#internal-properties) <br> • `internal` access modifier |
-| Restrict a property by roles                  | [Property Security Attributes](#role-restrictions) |
-| Restrict a property with custom logic         | • save operations: [custom Behaviors](#behaviors) <br> • nav prop loading: [custom Default Data Source](#data-sources) <br> • any property: [custom Property Restrictions](#custom-restrictions)  |
-| Make a property read-only                     | • make the setter `internal` <br> • add a `[Read]` attribute without `[Edit]` <br> • [other techniques](#read-only-properties) |
-| Make a property write-once (init-only)        | use an [`init`-only setter](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/init) |
-| Prevent [auto-include](/modeling/model-components/data-sources.md#default-loading-behavior) | annotate the navigation property or the included type's class with `[Read(NoAutoInclude = true)]` |
-| Restrict results of `/get`, `/list`           | [custom Default Data Source](#data-sources)
-| Restrict `/save`, `/bulkSave`, `/delete`      | • any custom logic: [custom Behaviors](#behaviors) <br> • restrict targets: [custom Default Data Source](#data-sources) <br> • static role restrictions: [Class Security Attributes](#class-security-attributes) |
-| Restrict targets of instance methods          | • [custom Default Data Source](#data-sources) <br> • specify data source: [LoadFromDataSource](/modeling/model-components/methods.md#loadfromdatasource-type-datasourcetype) <br> • [custom logic](#custom-methods-and-services) in the method |
-| Apply server-side data validation             | • implement [validation attributes](#attribute-validation) <br> • [custom Behaviors](#saves-and-deletes) (for entity CRUD) <br> • [custom logic](#custom-methods-and-services) (for methods/services) |
+<table>
+<thead>
+<tr>
+<th width=150px>Feature</th>
+<th width=190px>Restriction</th>
+<th>Technique</th>
+</tr>
+</thead>
+
+<tr>
+<td rowspan=4>
+
+[Entity](/modeling/model-types/entities.md) Reads:
+`/get`, <br> `/list`, <br> `/count`
+</td>
+<td>Disable</td>
+<td>
+
+[[Read(DenyAll)]](#class-security-attributes)
+</td>
+</tr>
+
+<tr>
+<td>Roles</td>
+<td>
+
+[[Read("RoleName")]](#class-security-attributes)
+</td>
+</tr>
+
+<tr>
+<td>
+
+Prevent
+[auto-include](/modeling/model-components/data-sources.md#default-loading-behavior)
+
+</td>
+<td>
+
+* Omit `base` call in Data Source `GetQuery` override.
+* `[Read(NoAutoInclude = true)]` on properties or types.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+Any custom code:
+* Query Predicates
+* Filtered Includes
+* Conditional Includes
+* Sort/search/filter overrides
+</td>
+<td>
+
+[Custom Default Data Source](#data-sources)
+</td>
+</tr>
+
+
+<!-- Blank TR to offset row striping -->
+<tr></tr>
+
+<tr>
+<td rowspan=5>
+
+[Entity](/modeling/model-types/entities.md) Mutations:
+`/save`, <br> `/bulkSave`, <br> `/delete`
+
+</td>
+<td>Disable</td>
+<td>
+
+[[Create(DenyAll)] [Edit(DenyAll)] [Delete(DenyAll)]](#class-security-attributes)
+</td>
+</tr>
+
+<tr>
+<td>Roles</td>
+<td>
+
+[[Create("Role")] [Edit("Role")] [Delete("Role")]](#class-security-attributes)
+</td>
+</tr>
+
+<tr>
+<td>Restrict target records (edit/delete)</td>
+<td>
+
+[Custom Default Data Source](#data-sources)
+</td>
+</tr>
+
+<tr>
+<td>Static Validation</td>
+<td>
+
+[Validation attributes](#attribute-validation)
+</td>
+</tr>
+
+<tr>
+<td>
+
+Any custom code:
+* Security
+* Validation
+
+</td>
+<td>
+
+[Custom Behaviors](#behaviors)
+<br>
+
+
+</td>
+</tr>
+
+<tr>
+<td rowspan=5>
+
+[Methods](/modeling/model-components/methods.md) and [Services](/modeling/model-types/services.md)
+
+</td>
+<td>Disable</td>
+<td>
+
+N/A - explicit opt-in required via `[Coalesce]`
+</td>
+</tr>
+
+<tr>
+<td>Roles</td>
+<td>
+
+[[Execute("RoleName")]](#method-security-attributes)
+</td>
+</tr>
+
+<tr>
+<td>Static Validation</td>
+<td>
+
+[Validation attributes](#attribute-validation)
+</td>
+</tr>
+
+<tr>
+<td>
+
+Restrict Targets (only [instance methods](/modeling/model-components/methods.md#instance-methods))
+</td>
+<td>
+
+* [custom Default Data Source](#data-sources)
+* specify data source:
+[[LoadFromDataSource]](/modeling/model-components/methods.md#loadfromdatasource-type-datasourcetype)
+
+</td>
+</tr>
+
+<tr>
+<td>Other</td>
+<td>
+
+Write custom logic in the method.
+</td>
+</tr>
+
+
+
+
+
+<tr>
+<td rowspan=8>
+
+[Properties](/modeling/model-components/properties.md)
+<br>
+<small style="display: block; line-height: 1.3">
+(All input and output for Entity CRUD, Methods, and Services)
+</small>
+
+</td>
+<td>Globally Exclude</td>
+<td>
+
+* [[InternalUse]](#internal-properties)
+* `internal` access modifier
+</td>
+</tr>
+
+
+<tr>
+<td>
+Roles
+</td>
+<td>
+
+[Property Security Attributes](#role-restrictions)
+</td>
+</tr>
+
+<tr>
+<td>
+
+Read-only
+
+</td>
+<td>
+
+* `internal` setter or no setter
+* `[Read]` attribute without `[Edit]`
+* [other techniques](#read-only-properties)
+
+</td>
+</tr>
+<tr>
+<td>
+
+Init-only (write-once)
+</td>
+<td>
+
+[`init` setter](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/init)
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+Custom security
+</td>
+<td>
+
+* Navigation Properties: [Data Sources](#data-sources)
+* Scalar/Other Properties: [Property Restrictions](#custom-restrictions)
+
+</td>
+</tr>
+
+</table>
 
 
 ## Endpoint Security
@@ -31,14 +259,14 @@ Classes can be hidden from Coalesce entirely by annotating them with `[InternalU
 `DbSet<>` properties on your `DbContext` class can also be annotated with `[InternalUse]`, causing that type to be treated by Coalesce like an [External Type](/modeling/model-types/external-types.md) rather than an [Entity](/modeling/model-types/entities.md), once again preventing generation of API endpoints but _without_ preventing properties of that type from being exposed.
 
 ### Class Security Attributes
-For each of your [Entities](/modeling/model-types/entities.md) and [Custom DTOs](/modeling/model-types/dtos.md), Coalesce generates a set of CRUD API endpoints (`/get`, `/list`, `/count`, `/save`, `/bulkSave`, and `/delete`). 
+
+For each of your [Entities](/modeling/model-types/entities.md) and [Custom DTOs](/modeling/model-types/dtos.md), Coalesce generates a set of CRUD API endpoints (`/get`, `/list`, `/count`, `/save`, `/bulkSave`, and `/delete`).
 
 The default behavior is that all endpoints require an authenticated user (anonymous users are rejected).
 
 These endpoints can be secured by placing any or all of the [[Read], [Create], [Edit], and [Delete] attributes](/modeling/model-components/attributes/security-attribute.md) on the the class. Each attribute can specify required roles for that action, or open that action to anonymous, unauthenticated users, or disable the endpoint entirely.
 
-
-This security is applied to the generated [controllers](https://learn.microsoft.com/en-us/aspnet/core/mvc/controllers/actions). The `[Read]` attribute on a class ***does not*** affect instances of that class when those instances are present as child properties of other types, since in those scenarios the data will be coming from a different endpoint on a different controller.
+This security is applied to the generated [controllers](https://learn.microsoft.com/en-us/aspnet/core/mvc/controllers/actions). The `[Read]` attribute on a class **_does not_** affect instances of that class when those instances are present as child properties of other types, since in those scenarios the data will be coming from a different endpoint on a different controller.
 
 <table> 
 <thead>
@@ -51,47 +279,54 @@ This security is applied to the generated [controllers](https://learn.microsoft.
 <td>
 
 `/get`, `/list`, `/count`
+
 </td>
 <td>
 
-``` c#:no-line-numbers
+```c#:no-line-numbers
 [ReadAttribute]
 ```
+
 </td>
 </tr>
 <tr>
 <td>
 
 `/save`
+
 </td>
 <td>
 
-``` c#:no-line-numbers
+```c#:no-line-numbers
 [CreateAttribute] // Affects saves of new entities
 [EditAttribute]   // Affects saves of existing entities
 ```
+
 </td>
 </tr>
 <tr>
 <td>
 
 `/delete`
+
 </td>
 <td>
 
-``` c#:no-line-numbers
+```c#:no-line-numbers
 [DeleteAttribute]
 ```
+
 </td>
 </tr>
 <tr>
 <td>
 
-`/bulkSave` 
+`/bulkSave`
+
 </td>
 <td>
 
-``` c#:no-line-numbers
+```c#:no-line-numbers
 // Read permission required for the root entity:
 [ReadAttribute]
 
@@ -100,13 +335,14 @@ This security is applied to the generated [controllers](https://learn.microsoft.
 [EditAttribute]
 [DeleteAttribute]
 ```
+
 </td>
 </tr>
 </table>
 
 Here are some examples of applying security attributes to an entity class. If a particular action doesn't need to be restricted, you can omit that attribute, but this example shows usages of all four:
 
-``` c#:no-line-numbers
+```c#:no-line-numbers
 // Allow read access by unauthenticated, anonymous users:
 [Read(SecurityPermissionLevels.AllowAll)]
 // Allow creation of new entities by the Admin and HR roles (params string[] style):
@@ -115,7 +351,7 @@ Here are some examples of applying security attributes to an entity class. If a 
 [Edit("Admin,HR")]
 // Prohibit deletion of Employee entities
 [Delete(SecurityPermissionLevels.DenyAll)]
-public class Employee 
+public class Employee
 {
     public int EmployeeId { get; set; }
 }
@@ -129,8 +365,8 @@ The default behavior is that all endpoints require an authenticated user (anonym
 
 For example:
 
-``` c#:no-line-numbers
-public class Employee 
+```c#:no-line-numbers
+public class Employee
 {
     public int EmployeeId { get; set; }
 
@@ -150,9 +386,9 @@ public class Employee
 
 Security applied via attributes to properties in Coalesce affects all usages of that property across all Coalesce-generated APIs. This includes usages of that property on types that occur as children of other types, which is a spot where class-level or endpoint-level security generally does not apply. [These attributes](/modeling/model-components/attributes/security-attribute.md) can be placed on the properties on your [Entities](/modeling/model-types/entities.md) and [External Types](/modeling/model-types/external-types.md) to apply role-based restrictions to that property.
 
-* `ReadAttribute` limits the roles that can read values from that property in responses from the server.
-* `EditAttribute` limits the roles that can write values to that property in requests made to the server.
-* `RestrictAttribute` registers an implementation of [IPropertyRestriction](#custom-restrictions) that allows for writing custom code to implement these restrictions.
+- `ReadAttribute` limits the roles that can read values from that property in responses from the server.
+- `EditAttribute` limits the roles that can write values to that property in requests made to the server.
+- `RestrictAttribute` registers an implementation of [IPropertyRestriction](#custom-restrictions) that allows for writing custom code to implement these restrictions.
 
 This security is executed and enforced by the mapping that occurs in the [generated DTOs](/stacks/agnostic/dtos.md), meaning it affects both entity CRUD APIs as well as [Custom Methods](/modeling/model-components/methods.md). It is also checked by the [Standard Data Source](/modeling/model-components/data-sources.md#standard-data-source) to prevent sorting, searching, and filtering by properties that a user is not permitted to read.
 
@@ -162,9 +398,9 @@ Properties can be hidden from Coalesce entirely, either with the [[InternalUse]]
 
 The properties in the following example are hidden entirely from all Coalesce functionality and generated APIs:
 
-``` c#:no-line-numbers
+```c#:no-line-numbers
 using IntelliTect.Coalesce.DataAnnotations;
-public class Employee 
+public class Employee
 {
   // InternalUseAttribute hides anything from Coalesce.
   [InternalUse]
@@ -190,10 +426,10 @@ public class Department
 
 A property in Coalesce can be made read-only in any of the following ways:
 
-``` c#:no-line-numbers
+```c#:no-line-numbers
 using IntelliTect.Coalesce.DataAnnotations;
 using System.ComponentModel;
-public class Employee 
+public class Employee
 {
   // A property with a [Read] attribute but no [Edit] attribute is read-only:
   [Read]
@@ -223,9 +459,9 @@ public class Employee
 
 Reading and writing a property in Coalesce can be restricted by roles:
 
-``` c#:no-line-numbers
+```c#:no-line-numbers
 using IntelliTect.Coalesce.DataAnnotations;
-public class Employee 
+public class Employee
 {
   // A property with no attributes is readable and writable without restriction
   public string Name { get; set; }
@@ -250,17 +486,15 @@ public class Employee
 }
 ```
 
-A few of the examples above point out that when a property is restricted for reading by roles, 
-those roles are also required when editing that property. This is because it usually doesn't make sense 
+A few of the examples above point out that when a property is restricted for reading by roles,
+those roles are also required when editing that property. This is because it usually doesn't make sense
 for a user to change a value when they have no way of knowing what the original value was.
 If you have a situation where a property should be editable without knowing the original value,
 use a custom method on the model to accept and set the new value.
 
-
 ### Custom Restrictions
 
-@[import-md "after":"# [Restrict]"](../modeling/model-components/attributes/restrict.md)  
-
+@[import-md "after":"# [Restrict]"](../modeling/model-components/attributes/restrict.md)
 
 ## Row-level Security
 
@@ -268,7 +502,7 @@ use a custom method on the model to accept and set the new value.
 
 In Coalesce, [Data Sources](/modeling/model-components/data-sources.md) are the mechanism that you can extend to implement row-level security on your [Entities](/modeling/model-types/entities.md) and [Custom DTOs](/modeling/model-types/dtos.md).
 
-Data Sources are used when fetching results for `/get`, `/list`, and `/count` endpoints, and when fetching the target or result of a `/save`, `/bulkSave`, or `/delete`, and when fetching the invocation target of an [Instance Method](/modeling/model-components/methods.md#instance-methods). 
+Data Sources are used when fetching results for `/get`, `/list`, and `/count` endpoints, and when fetching the target or result of a `/save`, `/bulkSave`, or `/delete`, and when fetching the invocation target of an [Instance Method](/modeling/model-components/methods.md#instance-methods).
 
 By default, your entities will be fetched using the [Standard Data Source](/modeling/model-components/data-sources.md#standard-data-source), but you can declare a custom default data source for each of your entities to override this default functionality. The default functionality here includes the [default loading behavior](/modeling/model-components/data-sources.md#default-loading-behavior), a feature where the Standard Data Source automatically includes the immediate relationships of requested entities. This can be suppressed by overriding the `GetQuery` method on your custom data source and not calling the base method, or by placing `[Read(NoAutoInclude = true)]` on classes or navigation properties that you do not want automatically included.
 
@@ -277,21 +511,23 @@ For most use cases, all your security rules will be implemented in the [GetQuery
 There are a few different techniques that you can use to apply filtering in a data source, each one working for a specific use case. The example below includes an example of each technique.
 
 #### Query Predicates
+
 The **Query Predicates** technique involves applying a `.Where()` predicate to your query to filter the root entities that are returned by the query using some database-executed logic. This is a form of row-level security and can be used to only include a record based on the values of that record in the database.
 
 #### Conditional Includes
+
 The **Conditional Includes** technique involves conditionally appending `.Include()` calls to your query only when some server-executed criteria is met. Usually this involves checking the roles of a user and only including a navigation property if the user is in the requisite role. This technique cannot be used with database-executed logic and is therefore behaves more like table-level security than row-level security.
 
 #### Filtered Includes
-The **Filtered Includes** technique involves using [EF Core filtered includes](https://learn.microsoft.com/en-us/ef/core/querying/related-data/eager#filtered-include) to apply database-executed logic to filter the rows of child collection navigation properties. 
 
-EF filtered Includes **cannot** be used to apply database-executed filters to *reference* navigation properties due to [lack of EF support](https://github.com/dotnet/efcore/issues/24422) - see the sections below on [transform results](#transform-results) and [global query filters](#ef-global-query-filters) for two possible solutions.
+The **Filtered Includes** technique involves using [EF Core filtered includes](https://learn.microsoft.com/en-us/ef/core/querying/related-data/eager#filtered-include) to apply database-executed logic to filter the rows of child collection navigation properties.
 
+EF filtered Includes **cannot** be used to apply database-executed filters to _reference_ navigation properties due to [lack of EF support](https://github.com/dotnet/efcore/issues/24422) - see the sections below on [transform results](#transform-results) and [global query filters](#ef-global-query-filters) for two possible solutions.
 
 A complex example using all three of the above techniques:
 
-``` c#:no-line-numbers
-public class Employee 
+```c#:no-line-numbers
+public class Employee
 {
   public int EmployeeId { get; set; }
   public bool IsIntern { get; set; }
@@ -314,7 +550,7 @@ public class Employee
 
       // TECHNIQUE: Query Predicates - subset root objects using database-executed logic:
       int employeeId = User.GetEmployeeId();
-      query = query.Where(e => 
+      query = query.Where(e =>
           // Anyone can see interns
           e.IsIntern ||
           // Otherwise, a user can only see employees in their own departments:
@@ -326,13 +562,13 @@ public class Employee
       query = query.Include(e => e.DepartmentMembers
         .Where(dm => dm.Department.DepartmentMembers.Any(u => u.EmployeeId == employeeId)))
         .ThenInclude(dm => dm.Department);
-      
+
       return query;
     }
   }
 }
 
-public class Department 
+public class Department
 {
   public int DepartmentId { get; set; }
   public string Name { get; set; }
@@ -348,7 +584,7 @@ public class Department
       IQueryable<Department> query = Db.Departments
         .Include(e => e.DepartmentMembers).ThenInclude(dm => dm.Employee);
 
-      if (!User.IsInRole("HR")) 
+      if (!User.IsInRole("HR"))
       {
         // Non-HR users can only see their own departments:
         query = query.Where(d => d.DepartmentMembers.Any(dm => dm.EmployeeId == User.GetEmployeeId()));
@@ -361,7 +597,7 @@ public class Department
 
 // Only HR can directly read or modify DepartmentMember records.
 [Read("HR"), Create("HR"), Edit("HR"), Delete("HR")]
-public class DepartmentMember 
+public class DepartmentMember
 {
   public int Id { get; set; }
 
@@ -377,13 +613,12 @@ public class DepartmentMember
 
 There exists a fourth technique in Data Sources for applying filtered includes: the [TransformResultsAsync](/modeling/model-components/data-sources.md#member-transformresults) method. Unlike the other techniques above that are performed in the `GetQuery` method and applied at the beginning of the data source query pipeline, `TransformResults` is applied at the very end of the process against the materialized results. It also only affects the responses from the generated `/get`, `/list`, `/save`, `/bulkSave`, and `/delete` endpoints - it has no bearing on the invocation target of [instance methods](/modeling/model-components/methods.md#instance-methods).
 
-The primary purpose of `TransformResults` is to conditionally load navigation properties. This was very useful before EF Core introduced native [filtered includes](#filtered-includes) for collection navigation properties, and is still useful for applying filtered includes to *reference* navigation properties since EF [does not support this](https://github.com/dotnet/efcore/issues/24422). It can also be used for any kind of filtered includes if native EF filtered includes get translated into poorly-performant SQL, or it can be used to populate [external type](/modeling/model-types/external-types.md) or other non-database-mapped properties on your entities.
+The primary purpose of `TransformResults` is to conditionally load navigation properties. This was very useful before EF Core introduced native [filtered includes](#filtered-includes) for collection navigation properties, and is still useful for applying filtered includes to _reference_ navigation properties since EF [does not support this](https://github.com/dotnet/efcore/issues/24422). It can also be used for any kind of filtered includes if native EF filtered includes get translated into poorly-performant SQL, or it can be used to populate [external type](/modeling/model-types/external-types.md) or other non-database-mapped properties on your entities.
 
 The general technique for using `TransformResults` involves using [EF Core Explicit Loading](https://learn.microsoft.com/en-us/ef/core/querying/related-data/explicit#explicit-loading) to attach additional navigation properties to the result set, and then using Coalesce's `.IncludedSeparately()` method in the data source's `GetQuery` so that Coalesce can still build the correct [Include Tree](/concepts/include-tree.md) to shape the serialization of your results.
 
-
-``` c#:no-line-numbers
-public class Employee 
+```c#:no-line-numbers
+public class Employee
 {
   public int EmployeeId { get; set; }
   public int ManagerId { get; set; }
@@ -394,8 +629,8 @@ public class Employee
   {
     public DefaultSource(CrudContext<AppDbContext> context) : base(context) { }
 
-    public override IQueryable<Employee> GetQuery(IDataSourceParameters parameters) 
-      // Use IncludedSeparately to instruct Coalesce that we're going to 
+    public override IQueryable<Employee> GetQuery(IDataSourceParameters parameters)
+      // Use IncludedSeparately to instruct Coalesce that we're going to
       // manually populate the Manager, and that it should be mapped to the result DTOs
       // despite not being eagerly loaded with EF's .Include() method.
       => Db.Employees.IncludedSeparately(e => e.Manager);
@@ -419,7 +654,7 @@ public class Employee
 
 Alternatively, and indeed preferably, you can often formulate a query that does not use iteration and requires only a single database round-trip:
 
-``` c#:no-line-numbers
+```c#:no-line-numbers
 public override async Task TransformResultsAsync(
   IReadOnlyList<Employee> results,
   IDataSourceParameters parameters
@@ -442,7 +677,6 @@ For most use cases, all your security rules will be implemented in the [BeforeSa
 
 For a more complete explanation of everything you can do with behaviors, see the full [Behaviors](/modeling/model-components/behaviors.md) documentation page.
 
-
 ### EF Global Query Filters
 
 Since Coalesce's data access layer is built on top of Entity Framework, you can also use [Entity Framework's Global Query Filters](https://learn.microsoft.com/en-us/ef/core/querying/filters) feature to apply row-level security.
@@ -450,8 +684,6 @@ Since Coalesce's data access layer is built on top of Entity Framework, you can 
 This approach is less flexible than custom Coalesce data sources and has other [drawbacks](https://learn.microsoft.com/en-us/ef/core/querying/filters#accessing-entity-with-query-filter-using-required-navigation) as well, but on the other hand it has more absolute authority, is less susceptible to issues like inadvertently returning data through unfiltered navigation properties, and can sometimes require less work to implement than individual data sources.
 
 Global Query Filters are also the only way to implement database-executed [filtered includes](#filtered-includes) of [reference navigation properties](https://learn.microsoft.com/en-us/ef/core/modeling/relationships/glossary), as there is no version of `.Include()` for reference navigation properties that allows a database-executed predicate to be applied. See [this open issue](https://github.com/dotnet/efcore/issues/24422) on EF Core.
-
-
 
 ### Foreign Key Injection Vulnerabilities
 
@@ -463,13 +695,11 @@ If this scenario sounds like a plausible threat vector your application, be sure
 
 Also consider making any required foreign keys that should not change for the lifetime of an entity into init-only properties (i.e. use the `init` accessor in C# instead of the `set` accessor). While this does not entirely solve the foreign key injection issue, it eliminates the need to validate that a user is not changing the parent of an object if such an operation is not desirable.
 
-
-
 ## Server-side Data Validation
 
-Coalesce, as of version 4, will by default perform server-side validation of incoming data using validation attributes. 
+Coalesce, as of version 4, will by default perform server-side validation of incoming data using validation attributes.
 
-Your database will also enforce any constraints (referential integrity, `not null`, check constraints, etc.), but errors produced by your database will manifest as exceptions, which are not user-friendly. 
+Your database will also enforce any constraints (referential integrity, `not null`, check constraints, etc.), but errors produced by your database will manifest as exceptions, which are not user-friendly.
 
 For any custom validation that cannot be implemented by attributes, you must implement that yourself for [saves and deletes](#saves-and-deletes) or [custom methods](#custom-methods-and-services).
 
@@ -478,13 +708,14 @@ For any custom validation that cannot be implemented by attributes, you must imp
 Historically, Coalesce did not provide any automatic, attribute-based validation of incoming data. As of Coalesce 4.0, automatic server side validation using [ValidationAttribute](https://learn.microsoft.com/en-us/dotnet/api/system.componentmodel.dataannotations.validationattribute)-derived attributes on your models is enabled by default.
 
 In addition to any validation attributes present on your model properties and method parameters, there are some other rules that work similarly to the default validation in ASP.NET Core:
+
 - The C# 11 `required` keyword also acts like a `RequiredAttribute`
 - If C# nullable reference types are enabled, non-nullable reference types are required required.
 - Non-nullable value types are implicitly optional, with the exception of non-nullable foreign keys, which are required.
 
 To disable this functionality for your entire application, disable the corresponding configuration options on `CoalesceOptions`. For example, in Startup.cs or Program.cs:
 
-``` c#
+```c#
 services.AddCoalesce<AppDbContext>(b => b.Configure(o =>
 {
     // Set either to false to disable:
@@ -495,25 +726,16 @@ services.AddCoalesce<AppDbContext>(b => b.Configure(o =>
 
 Each option also has a more granular override:
 
-#### ValidateAttributesForSaves
+Enabling `ValidateAttributesForSaves` causes the [Standard Behaviors](/modeling/model-components/behaviors.md#standard-behaviors) to perform validation of validation attributes during `/save` or `/bulkSave` calls, preventing a save when validation fails. This can be overridden per type or even per request by setting the `ValidateAttributesForSaves` property on a [custom Behaviors](/modeling/model-components/behaviors.md#defining-behaviors) instance.
 
-Enabling `ValidateAttributesForSaves` causes the [Standard Behaviors](/modeling/model-components/behaviors.md#standard-behaviors) to perform validation of validation attributes during `/save` or `/bulkSave` calls, preventing a save when validation fails.
-
-This can be overridden per type or even per request by setting the `ValidateAttributesForSaves` property on a [custom Behaviors](/modeling/model-components/behaviors.md#defining-behaviors) instance.
-
-#### ValidateAttributesForMethods
-
-Enabling [`ValidateAttributesForMethods`](/modeling/model-components/attributes/execute.md#member-validateattributes) causes the generated controllers for [custom methods](/modeling/model-components/methods.md) to perform validation of incoming parameters. Validation attributes may be placed on method parameters, and validation will also be performed against the members of any complex type parameters.
-
-This can be overridden per method by setting the `ValidateAttributes` property on [ExecuteAttribute](/modeling/model-components/attributes/execute.md) for the method.
+Enabling [`ValidateAttributesForMethods`](/modeling/model-components/attributes/execute.md#member-validateattributes) causes the generated controllers for [custom methods](/modeling/model-components/methods.md) to perform validation of incoming parameters. Validation attributes may be placed on method parameters, and validation will also be performed against the members of any complex type parameters. This can be overridden per method by setting the `ValidateAttributes` property on [ExecuteAttribute](/modeling/model-components/attributes/execute.md) for the method.
 
 ### Saves and Deletes
 
 Validation of `/save`, `/bulkSave`, and `/delete` actions against [Entities](/modeling/model-types/entities.md) and [Custom DTOs](/modeling/model-types/dtos.md) are performed by the [Behaviors](/modeling/model-components/behaviors.md) for the type. Automatic [attribute based validation](#attribute-validation) can be used (saves only), or Behaviors can be overridden to perform validation and other customization of the save and delete process, as in the following example:
 
-
-``` c#
-public class Employee 
+```c#
+public class Employee
 {
   public int IsCeo { get; set; }
   public decimal Salary { get; set; }
@@ -544,8 +766,8 @@ public class Employee
 
 For [Custom Methods](/modeling/model-components/methods.md) and [Services](/modeling/model-types/services.md), you can perform your own custom validation and return errors when validation fails. You can also use [attribute based validation](#attribute-validation). Custom methods that need to return errors to the client are recommended to wrap their return type in an `ItemResult<T>`, allowing errors to be received and handled elegantly by your Coalesce Typescript code.
 
-``` c#
-public class Employee 
+```c#
+public class Employee
 {
   public decimal Salary { get; set; }
 
@@ -564,10 +786,11 @@ public class Employee
 Coalesce provides batteries-included page that you can view to review the effective security rules in place for all the Coalesce-generated code in your project. Add this page to your application by mapping it as a route, either directly on `WebHost` in .NET 6+, or in `UseEndpoints` for 3.1+.
 
 ::: tip
-  If you include the security overview in your production app, you should secure it with an authorization policy like in the example below.
-  Alternatively, only map the endpoint in non-production environments.
+If you include the security overview in your production app, you should secure it with an authorization policy like in the example below.
+Alternatively, only map the endpoint in non-production environments.
 :::
-``` c#
+
+```c#
 // .NET 6+ Program.cs:
 app.MapCoalesceSecurityOverview("coalesce-security").RequireAuthorization(
     new AuthorizeAttribute { Roles = env.IsDevelopment() ? null : "Admin" }
@@ -587,7 +810,6 @@ Example of the contents of the security overview page:
 
 ## Testing Your Security
 
-If your application has complex security requirements and/or sensitive data that needs to be protected, you are encouraged to invest time into creating a set of automated tests to ensure that it is working how you expect. 
+If your application has complex security requirements and/or sensitive data that needs to be protected, you are encouraged to invest time into creating a set of automated tests to ensure that it is working how you expect.
 
 The most comprehensive way to do this is to build a suite of integration tests using [Microsoft's in-memory test server infrastructure](https://learn.microsoft.com/en-us/aspnet/core/test/integration-tests). Follow Microsoft's documentation to set up a test project, and then write tests against your API endpoints. You will want to [substitute your Entity Framework database provider](https://learn.microsoft.com/en-us/aspnet/core/test/integration-tests#customize-webapplicationfactory) with an in-memory Sqlite instance, and add a [mock authentication handler](https://learn.microsoft.com/en-us/aspnet/core/test/integration-tests?view=aspnetcore-7.0#mock-authentication) to simulate authentication (we're mainly focused on testing _authorization_, not _authentication_).
-

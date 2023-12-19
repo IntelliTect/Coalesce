@@ -69,11 +69,16 @@
   --vp-c-danger-3: var(--vp-c-red-3);
   --vp-c-danger-soft: var(--vp-c-red-soft);
   --logo-text-color: var(--vp-c-brand-3);
+
+  // Force dark code backgrounds even in light mode
+  // since our syntax highlight color depends on dark backgrounds.
+  --vp-code-block-bg: #2b2b2b;
 }
 
 .dark {
   --vp-c-text-1: rgb(185, 185, 185);
   --logo-text-color: #e7e7e7;
+  --vp-code-block-bg: var(--vp-c-bg-alt);
 }
 
 /**
@@ -143,6 +148,7 @@
   --vp-custom-block-tip-text: var(--vp-c-text-1);
   --vp-custom-block-tip-bg: var(--vp-c-brand-soft);
   --vp-custom-block-tip-code-bg: var(--vp-c-brand-soft);
+  
 }
 
 /**

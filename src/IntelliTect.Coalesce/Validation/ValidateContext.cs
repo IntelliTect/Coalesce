@@ -1,12 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using IntelliTect.Coalesce.Api.DataSources;
+using IntelliTect.Coalesce.DataAnnotations;
+using IntelliTect.Coalesce.TypeDefinition;
+using IntelliTect.Coalesce.TypeDefinition.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
-using IntelliTect.Coalesce.TypeDefinition;
-using IntelliTect.Coalesce.DataAnnotations;
-using IntelliTect.Coalesce.Api.DataSources;
-using IntelliTect.Coalesce.TypeDefinition.Enums;
 
 namespace IntelliTect.Coalesce.Validation
 {
@@ -18,11 +16,35 @@ namespace IntelliTect.Coalesce.Validation
 
             assert.IsTrue(repository.DiscoveredClassViewModels.Any(), "No types were discovered. Make sure all models have a DbSet on the context.");
 
+            assert.NoDuplicates(repository.ClientClasses, d => d.ClientTypeName, StringComparer.OrdinalIgnoreCase);
+
+            foreach (var model in repository.ClientClasses)
+            {
+                assert.Area = model.ToString();
+
+                assert.IsTrue(!string.IsNullOrWhiteSpace(model.Name), "Name not found.");
+
+                assert.NoDuplicates(model.ClientProperties, p => p.Name, StringComparer.OrdinalIgnoreCase);
+                assert.NoDuplicates(model.ClientProperties, p => p.JsonName, StringComparer.OrdinalIgnoreCase);
+
+                foreach (var prop in model.ClientProperties)
+                {
+                    assert.Area = $"{model}.{prop.Name}";
+
+                    assert.IsFalse(prop.Type.IsFile, "IFile is not supported as a property.");
+
+                    if (prop.DateType == DateTypeAttribute.DateTypes.TimeOnly)
+                    {
+                        assert.IsTrue(prop.PureType.IsA<TimeOnly>(), "Time-only properties should be of type System.TimeOnly.", isWarning: true);
+                    }
+                }
+            }
+
+
             foreach (var model in repository.CrudApiBackedClasses)
             {
                 assert.Area = model.ToString();
 
-                assert.IsTrue(!string.IsNullOrWhiteSpace(model.Name), $"Name not found.");
                 assert.IsNotNull(model.PrimaryKey, $"Primary key not found for {model}. Primary key should be named 'Id', '{model.Name}Id' or have the [Key] attribute.");
                 if (model.PrimaryKey != null)
                 {
@@ -30,6 +52,8 @@ namespace IntelliTect.Coalesce.Validation
                 }
 
                 var dataSources = model.ClientDataSources(repository).ToList();
+                assert.NoDuplicates(dataSources, d => d.ClientTypeName, StringComparer.OrdinalIgnoreCase);
+
                 if (model.IsStandaloneEntity)
                 {
                     assert.IsTrue(dataSources.Any(), "Standalone entities must declare at least one data source.");
@@ -47,7 +71,7 @@ namespace IntelliTect.Coalesce.Validation
                 }
 
                 assert.IsTrue(
-                    model.ClientDataSources(repository).Count(s => s.IsDefaultDataSource) <= 1,
+                    dataSources.Count(s => s.IsDefaultDataSource) <= 1,
                     $"Cannot have multiple default data sources for {model}");
 
                 // Check object references to see if they all have keys and remote keys
@@ -84,8 +108,6 @@ namespace IntelliTect.Coalesce.Validation
                             assert.IsFalse(prop.HasAttribute<DtoExcludesAttribute>(),
                                 "[DtoExcludesAttribute] has no effect on an IClassDto. This logic must be implemented manually in MapFrom.");
                         }
-
-                        assert.IsFalse(prop.Type.IsFile, "IFile is not supported as a property.");
 
                         if (prop.IsPOCO)
                         {
@@ -144,11 +166,6 @@ namespace IntelliTect.Coalesce.Validation
                         {
                             assert.IsTrue(prop.IsDbMapped, "Property with [DefaultOrderBy] must be DB mapped.");
                         }
-
-                        if (prop.DateType == DateTypeAttribute.DateTypes.TimeOnly)
-                        {
-                            assert.IsTrue(prop.PureType.IsA<TimeOnly>(), "Time-only properties should be of type System.TimeOnly.", isWarning: true);
-                        }
                     }
                     catch (Exception ex)
                     {
@@ -177,6 +194,8 @@ namespace IntelliTect.Coalesce.Validation
 
             foreach (var model in repository.ControllerBackedClasses)
             {
+                assert.NoDuplicates(model.ClientMethods, d => d.NameWithoutAsync, StringComparer.OrdinalIgnoreCase);
+
                 foreach (var method in model.Methods)
                 {
                     assert.Area = $"{model}.{method.ToStringWithoutReturn()}";

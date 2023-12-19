@@ -422,7 +422,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
 
                 if (prop.GetValidationAttribute<UrlAttribute>() is (true, string urlMessage))
                 {
-                    const string urlPattern = @"^((http(s)|ftp):\/\/.)";
+                    const string urlPattern = @"^((https?|ftp):\/\/.)";
                     rules.Add($"url: val => !val || /{urlPattern}/.test(val) {Error(clientValidationError, $"{propName} must be a valid URL.")}");
                 }
             }

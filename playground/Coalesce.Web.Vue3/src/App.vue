@@ -18,6 +18,7 @@
 
       <v-btn variant="text" to="/">Home</v-btn>
       <v-btn variant="text" to="/test">Test</v-btn>
+      <v-btn variant="text" to="/test-setup">Test2</v-btn>
       <v-btn variant="text" to="/audit-logs">Audit</v-btn>
       <v-btn variant="text" href="/coalesce-security">Security Overview</v-btn>
 

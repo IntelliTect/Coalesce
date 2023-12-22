@@ -14,7 +14,7 @@
     :item-text="$attrs['item-text'] || itemText"
     :item-value="itemValue"
     :return-object="true"
-    :disabled="!modelPkValue"
+    :disabled="isDisabled"
     no-filter
     v-bind="inputBindAttrs"
   >
@@ -82,6 +82,26 @@ export default defineComponent({
     modelPkValue() {
       const model = this.model as Model<ModelType>;
       return model ? (model as any)[model.$metadata.keyProp.name] : null;
+    },
+
+    isDisabled() {
+      if (this.model instanceof ViewModel && this.model.$isAutoSaveEnabled) {
+        // If autosave is enabled (and therefore we're going to be calling
+        // APIs on the viewmodel automatically, we can only do so if we're able
+        // to populate the near-side foreign key on the join entity
+        // using the PK of the model we're bound to.
+
+        // This is not as precise a check as it could be, since if deep autosaves are enabled,
+        // once `this.model` gets saved then FKs will be fixed up and then the active unsaved
+        // will become valid and get saved too.
+        return this.modelPkValue == null;
+      } else {
+        // If not autosaving then we shouldn't force disabled
+        // since if bulkSaves are being used, bulkSaves can handle
+        // missing FK values as long as navigation properties are populated
+        // (which we do - see the `items` computed below.)
+        return false;
+      }
     },
 
     items() {
@@ -284,7 +304,10 @@ export default defineComponent({
               // @ts-expect-error internal state
               vm._isRemoved = true;
               // @ts-expect-error internal state
-              vm.$parent && (vm.$parent.$removedItems ??= []).push(vm);
+              if (vm.$parent) {
+                // @ts-expect-error internal state
+                (vm.$parent.$removedItems ??= []).push(vm);
+              }
             }
           }
         } else {

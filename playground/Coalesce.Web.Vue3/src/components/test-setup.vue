@@ -1,32 +1,70 @@
 <template>
   <v-container>
     <v-btn @click="add" prepend-icon="fa fa-plus"> Add Product </v-btn>
-    <v-btn @click="vm.$bulkSave()" :loading="vm.$bulkSave.isLoading" prepend-icon="fa fa-save"> Save </v-btn>
-    <v-btn @click="vm.$load()" :loading="vm.$load.isLoading" prepend-icon="fa fa-sync"> Load </v-btn>
+    <v-btn
+      @click="vm.$bulkSave()"
+      :loading="vm.$bulkSave.isLoading"
+      prepend-icon="fa fa-save"
+    >
+      Save
+    </v-btn>
+    <v-btn
+      @click="vm.$load()"
+      :loading="vm.$load.isLoading"
+      prepend-icon="fa fa-sync"
+    >
+      Load
+    </v-btn>
+    <input
+      v-model="vm.caseKey"
+      :disabled="vm.caseKey && !vm.$getPropDirty('caseKey')"
+      placeholder="PK to load"
+    />
 
-    <c-loader-status :loaders="{'': [vm.$bulkSave]}"></c-loader-status>
+    <c-loader-status :loaders="{ '': [vm.$bulkSave] }"></c-loader-status>
     <h2>Case (pk: {{ vm.$primaryKey }})</h2>
 
+    <c-input :model="vm" for="title"></c-input>
     <c-input :model="vm" for="caseProducts"></c-input>
     <div v-for="x in vm.caseProducts">
-      <v-btn variant="text" size="x-small" @click="x.product?.$remove(); x.product=null; x.$remove()" icon="fa fa-trash"></v-btn>
-      <v-btn variant="text" size="x-small" @click="x.product?.$remove(); x.product=newProduct();" icon="fa fa-sync"></v-btn>
+      <v-btn
+        variant="text"
+        size="x-small"
+        @click="
+          x.product?.$remove();
+          x.product = null;
+          x.$remove();
+        "
+        icon="fa fa-trash"
+      ></v-btn>
+      <v-btn
+        variant="text"
+        size="x-small"
+        @click="
+          x.product?.$remove();
+          x.product = newProduct();
+        "
+        icon="fa fa-sync"
+      ></v-btn>
       {{ x.product?.name }}: (pk: {{ x.$primaryKey }}, ref {{ x.$stableId }})
-
     </div>
   </v-container>
 </template>
 
 <script setup lang="ts">
 import { CaseApiClient } from "@/api-clients.g";
-import { CaseViewModel, PersonViewModel, ProductViewModel } from "@/viewmodels.g";
+import {
+  CaseViewModel,
+  PersonViewModel,
+  ProductViewModel,
+} from "@/viewmodels.g";
 import { useBindToQueryString } from "coalesce-vue";
 import { ref } from "vue";
 
 // const vm = new CaseViewModel({title: 'asd'});
 const vm = new CaseViewModel();
-vm.$load(1);
-  vm.assignedTo = new PersonViewModel({ firstName: "bob", companyId: 1 });
+// vm.$load(1);
+vm.assignedTo = new PersonViewModel({ firstName: "bob", companyId: 1 });
 
 vm.$bulkSave.setConcurrency("debounce");
 async function add() {
@@ -39,7 +77,9 @@ async function del() {
 }
 
 function newProduct() {
-  return new ProductViewModel({ name: products[Math.ceil(Math.random() * products.length)-1] });
+  return new ProductViewModel({
+    name: products[Math.ceil(Math.random() * products.length) - 1],
+  });
 }
 
 const products = [

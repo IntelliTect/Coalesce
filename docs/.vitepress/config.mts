@@ -29,6 +29,25 @@ function autoTitle(link: string) {
   throw Error("Cannot find a title for " + link);
 }
 
+const vuetifyComponents = fs
+  .readdirSync(
+    path.resolve(__dirname, "../stacks/vue/coalesce-vue-vuetify/components")
+  )
+  .map((f) => autoTitle("/stacks/vue/coalesce-vue-vuetify/components/" + f));
+
+function getComponentCategory(item: (typeof vuetifyComponents)[0]) {
+  return item.text.startsWith("c-admin")
+    ? "admin"
+    : [
+        "c-display",
+        "c-loader-status",
+        "c-list-range-display",
+        "c-table",
+      ].includes(item.text)
+    ? "display"
+    : "input";
+}
+
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
   title: "Coalesce",
@@ -45,7 +64,7 @@ export default defineConfig({
   themeConfig: {
     logo: "/coalesce-icon-color.svg",
     outline: {
-      level: [2,3]
+      level: [2, 3],
     },
     // https://vitepress.dev/reference/default-theme-config
     nav: [
@@ -113,16 +132,30 @@ export default defineConfig({
         collapsed: true,
         link: "/stacks/vue/coalesce-vue-vuetify/overview",
         items: [
-          ...fs
-            .readdirSync(
-              path.resolve(
-                __dirname,
-                "../stacks/vue/coalesce-vue-vuetify/components"
-              )
-            )
-            .map((f) =>
-              autoTitle("/stacks/vue/coalesce-vue-vuetify/components/" + f)
-            ),
+          {
+            text: "Display",
+            collapsed: false,
+            items: [
+              ...vuetifyComponents.filter((i) => getComponentCategory(i) == "display"),
+            ],
+          },
+          {
+            text: "Input",
+            collapsed: false,
+            items: [
+              ...vuetifyComponents.filter((i) => getComponentCategory(i) == "input").sort((a,b) => {
+                if (a.text == 'c-input') return -1;
+                return a.text.localeCompare(b.text);
+              }),
+            ],
+          },
+          {
+            text: "Admin",
+            collapsed: true,
+            items: [
+              ...vuetifyComponents.filter((i) => getComponentCategory(i) == "admin"),
+            ],
+          },
         ],
       },
       {

@@ -1,6 +1,5 @@
 
 # [Inject]
-========
 
 Used to mark a [Method](/modeling/model-components/methods.md) parameter for dependency injection from the application's `IServiceProvider`.
 

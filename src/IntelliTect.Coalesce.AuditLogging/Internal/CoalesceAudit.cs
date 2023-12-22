@@ -70,10 +70,16 @@ internal class CoalesceAudit : Audit
         bool async)
     {
         var meta = (INavigation)refNav.Metadata;
+        var targetEntityType = meta.TargetEntityType;
 
-        if (!meta.ForeignKey.PrincipalKey.IsPrimaryKey())
-        {
+        if (
             // There's not a great way to look up entries by values other than their PK.
+            !meta.ForeignKey.PrincipalKey.IsPrimaryKey() ||
+            // The target is an owned type, meaning it belongs to the same table as `entry`,
+            // so there's no foreign entry to look up
+            targetEntityType.IsOwned()
+        )
+        {
             return;
         }
 
@@ -82,7 +88,8 @@ internal class CoalesceAudit : Audit
             // as it is the part that is most likely to be specific
             // to the principal entity and not reused.
             // The only scenario where we currently would expect a composite FK is 
-            // in a multitenant app where TenantId has been made to be the first part of each FK.
+            // in a multitenant app where TenantId has been made to be the first part of each FK
+            // in a way that is invisible to Coalesce, since Coalesce otherwise doesn't support composite keys.
             // FUTURE: We could instead prioritize the FK props that are not [InternalUse],
             // or the props that belong to the fewest number of FKs (TenantId in this example would always belong to at least 2 FKs).
             .Reverse()
@@ -94,9 +101,7 @@ internal class CoalesceAudit : Audit
             return;
         }
 
-        var targetEntityType = meta.TargetEntityType;
         var targetClrType = targetEntityType.ClrType;
-
         var targetClassVm = ReflectionRepository.Global.GetOrAddType(targetClrType).ClassViewModel;
 
         // If the list text for the target is the PK,

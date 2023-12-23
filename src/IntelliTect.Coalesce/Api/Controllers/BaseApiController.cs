@@ -67,12 +67,17 @@ namespace IntelliTect.Coalesce.Api.Controllers
 
             if (kind == SaveKind.Create && !GeneratedForClassViewModel.SecurityInfo.IsCreateAllowed(User))
             {
-                Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+                Response.StatusCode = User.Identity?.IsAuthenticated == true 
+                    ? (int)HttpStatusCode.Forbidden
+                    : (int)HttpStatusCode.Unauthorized;
                 return $"Creation of {GeneratedForClassViewModel.DisplayName} items not allowed.";
             }
+
             if (kind == SaveKind.Update && !GeneratedForClassViewModel.SecurityInfo.IsEditAllowed(User))
             {
-                Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+                Response.StatusCode = User.Identity?.IsAuthenticated == true
+                    ? (int)HttpStatusCode.Forbidden
+                    : (int)HttpStatusCode.Unauthorized;
                 return $"Editing of {GeneratedForClassViewModel.DisplayName} items not allowed.";
             }
 

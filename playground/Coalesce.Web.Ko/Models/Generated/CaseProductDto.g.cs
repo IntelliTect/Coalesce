@@ -58,8 +58,8 @@ namespace Coalesce.Web.Ko.Models
             if (tree == null || tree[nameof(this.Case)] != null)
                 this.Case = obj.Case.MapToDto<Coalesce.Domain.Case, CaseDtoGen>(context, tree?[nameof(this.Case)]);
 
-            if (tree == null || tree[nameof(this.Product)] != null)
-                this.Product = obj.Product.MapToDto<Coalesce.Domain.Product, ProductDtoGen>(context, tree?[nameof(this.Product)]);
+            if (context.GetPropertyRestriction<Coalesce.Domain.Restrictions.MultipleTypeRestriction>().UserCanRead(context, nameof(Product), obj)) if (tree == null || tree[nameof(this.Product)] != null)
+                    this.Product = obj.Product.MapToDto<Coalesce.Domain.Product, ProductDtoGen>(context, tree?[nameof(this.Product)]);
 
         }
 

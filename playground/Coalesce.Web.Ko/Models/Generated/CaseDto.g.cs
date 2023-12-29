@@ -141,7 +141,6 @@ namespace Coalesce.Web.Ko.Models
             this.Severity = obj.Severity;
             this.Status = obj.Status;
             this.DevTeamAssignedId = obj.DevTeamAssignedId;
-            this.Duration = obj.Duration;
             var propValCaseProducts = obj.CaseProducts;
             if (propValCaseProducts != null && (tree == null || tree[nameof(this.CaseProducts)] != null))
             {
@@ -159,6 +158,7 @@ namespace Coalesce.Web.Ko.Models
 
             if (context.GetPropertyRestriction<Coalesce.Domain.Case.TestRestriction>().UserCanRead(context, nameof(AttachmentName), obj)) this.AttachmentName = obj.AttachmentName;
             if (context.GetPropertyRestriction<Coalesce.Domain.Case.TestRestriction>().UserCanRead(context, nameof(AttachmentType), obj)) this.AttachmentType = obj.AttachmentType;
+            if (context.GetPropertyRestriction<Coalesce.Domain.Restrictions.MultipleTypeRestriction>().UserCanRead(context, nameof(Duration), obj)) this.Duration = obj.Duration;
             if (!(includes == "PersonListGen"))
             {
                 if (tree == null || tree[nameof(this.AssignedTo)] != null)
@@ -190,7 +190,7 @@ namespace Coalesce.Web.Ko.Models
             if (ShouldMapTo(nameof(Severity))) entity.Severity = Severity;
             if (ShouldMapTo(nameof(Status))) entity.Status = (Status ?? entity.Status);
             if (ShouldMapTo(nameof(DevTeamAssignedId))) entity.DevTeamAssignedId = DevTeamAssignedId;
-            if (ShouldMapTo(nameof(Duration))) entity.Duration = (Duration ?? entity.Duration);
+            if (ShouldMapTo(nameof(Duration)) && context.GetPropertyRestriction<Coalesce.Domain.Restrictions.MultipleTypeRestriction>().UserCanWrite(context, nameof(Duration), entity, Duration)) entity.Duration = (Duration ?? entity.Duration);
         }
 
         /// <summary>

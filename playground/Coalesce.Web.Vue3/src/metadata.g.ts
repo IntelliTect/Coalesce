@@ -1006,7 +1006,7 @@ export const Company = domain.types.Company = {
       subtype: "url",
       role: "value",
       rules: {
-        url: val => !val || /^((http(s)|ftp):\/\/.)/.test(val) || "Website Url must be a valid URL.",
+        url: val => !val || /^((https?|ftp):\/\/.)/.test(val) || "Website Url must be a valid URL.",
       }
     },
     logoUrl: {
@@ -1829,9 +1829,6 @@ export const Product = domain.types.Product = {
       type: "string",
       subtype: "password",
       role: "value",
-      rules: {
-        pattern: val => !val || /^\s*[{(]?[0-9A-Fa-f]{8}[-]?(?:[0-9A-Fa-f]{4}[-]?){3}[0-9A-Fa-f]{12}[)}]?\s*$/.test(val) || "Unique Id does not match expected format.",
-      }
     },
     unknown: {
       name: "unknown",

@@ -66,6 +66,7 @@ Any new code should also have reasonable unit test coverage.
  * Test your changes and please help us out by updating and implementing some automated tests.
    It is recommended that all contributors spend some time looking over the tests in the source code.
    You can't go wrong emulating one of the existing tests and then changing it specific to the behavior you are testing.
+    * You may have to run `npm ci` from the [src/coalesce-vue](src/coalesce-vue) directory for some of the automated tests to run.
  * See the [debugging/environment guide](ENVIRONMENT.md) for more details.
 
 ### Update documentation

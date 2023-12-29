@@ -1,4 +1,5 @@
-﻿using IntelliTect.Coalesce.DataAnnotations;
+﻿using Coalesce.Domain.Restrictions;
+using IntelliTect.Coalesce.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Coalesce.Domain
@@ -15,6 +16,7 @@ namespace Coalesce.Domain
         public int ProductId { get; set; }
 
         [Search]
+        [Restrict<MultipleTypeRestriction>]
         public Product Product { get; set; } = null!;
     }
 }

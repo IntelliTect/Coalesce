@@ -1,4 +1,5 @@
 ﻿using Coalesce.Domain.External;
+using Coalesce.Domain.Restrictions;
 using IntelliTect.Coalesce;
 using IntelliTect.Coalesce.Api;
 using IntelliTect.Coalesce.DataAnnotations;
@@ -111,6 +112,7 @@ namespace Coalesce.Domain
         public DevTeam DevTeamAssigned { get; set; }
 
         // EF does support TimeSpans. Some of our projects also do.
+        [Restrict<MultipleTypeRestriction>]
         public TimeSpan Duration { get; set; }
 
 

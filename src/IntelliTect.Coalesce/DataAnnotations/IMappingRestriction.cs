@@ -19,16 +19,20 @@ namespace IntelliTect.Coalesce.DataAnnotations
         /// <para>
         /// Improper permissions implemented here can result in information disclosure vulnerabilities.
         /// In general, filtering should only be allowed by users for whom 
-        /// <see cref="UserCanRead(IMappingContext, string, object)"/> will always return <see langword="true"/>,
+        /// <see cref="IPropertyRestriction{TModel}.UserCanRead(IMappingContext, string, TModel)"/> will always return <see langword="true"/>,
         /// regardless of the particular `model` instance.
         /// </para>
         /// </summary>
         bool UserCanFilter(IMappingContext context, string propertyName) => false;
+    }
 
+    public interface IPropertyRestriction<TModel> : IPropertyRestriction
+        where TModel : class
+    {
         /// <summary>
         /// Restricts whether values of a property will be mapped from a model instance to its DTO.
         /// </summary>
-        bool UserCanRead(IMappingContext context, string propertyName, object model);
+        bool UserCanRead(IMappingContext context, string propertyName, TModel model);
 
         /// <summary>
         /// <para>
@@ -46,22 +50,6 @@ namespace IntelliTect.Coalesce.DataAnnotations
         /// original, fresh values from the database.
         /// </para>
         /// </summary>
-        bool UserCanWrite(IMappingContext context, string propertyName, object? model, object? incomingValue);
-    }
-
-    public interface IPropertyRestriction<TModel> : IPropertyRestriction
-        where TModel : class
-    {
-        /// <inheritdoc cref="IPropertyRestriction.UserCanRead(IMappingContext, string, object)"/>
-        bool UserCanRead(IMappingContext context, string propertyName, TModel model);
-
-        /// <inheritdoc cref="IPropertyRestriction.UserCanWrite(IMappingContext, string, object, object)"/>
         bool UserCanWrite(IMappingContext context, string propertyName, TModel? model, object? incomingValue);
-
-        bool IPropertyRestriction.UserCanRead(IMappingContext context, string propertyName, object model)
-            => this.UserCanRead(context, propertyName, (TModel)model);
-
-        bool IPropertyRestriction.UserCanWrite(IMappingContext context, string propertyName, object? model, object? incomingValue)
-            => this.UserCanWrite(context, propertyName, (TModel?)model, incomingValue);
     }
 }

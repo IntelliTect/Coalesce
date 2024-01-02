@@ -137,7 +137,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         [Obsolete("This method cannot account for any custom IPropertyRestrictions.")]
         public bool IsEditAllowed(ClaimsPrincipal? user) => Edit.IsAllowed(user);
 
-        /// <inheritdoc cref="IsFilterAllowed(IMappingContext)"/>
+        /// <inheritdoc cref="IsFilterAllowed(IMappingContext)"/> 
         public bool IsFilterAllowed(CrudContext context) => IsFilterAllowed(context.MappingContext);
 
         /// <summary>
@@ -152,6 +152,27 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 foreach (var restrictionType in Restrictions)
                 {
                     if (!context.GetPropertyRestriction(restrictionType.TypeInfo).UserCanFilter(context, Prop.Name))
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// If true, the user can read the field.
+        /// </summary>
+        public bool IsReadAllowed(IMappingContext context, object model)
+        {
+            if (!Read.IsAllowed(context.User)) return false;
+
+            if (Restrictions.Count > 0)
+            {
+                foreach (var restrictionType in Restrictions)
+                {
+                    if (!context.GetPropertyRestriction(restrictionType.TypeInfo).UserCanRead(context, Prop.Name, model))
                     {
                         return false;
                     }

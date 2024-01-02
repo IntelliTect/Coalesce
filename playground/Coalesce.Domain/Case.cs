@@ -237,18 +237,9 @@ namespace Coalesce.Domain
             return CaseSummary.GetCaseSummary(db);
         }
 
-        public class TestRestriction(AppDbContext db) : IPropertyRestriction<Case>
+        public class TestRestriction(AppDbContext db) : IPropertyRestriction
         {
-            public bool UserCanRead(IMappingContext context, string propertyName, Case model)
-            {
-                // Nonsense arbitrary logic
-                return db.Cases.Any() && propertyName != null;
-            }
 
-            public bool UserCanWrite(IMappingContext context, string propertyName, Case? model, object? incomingValue)
-            {
-                return false;
-            }
         }
     }
 }

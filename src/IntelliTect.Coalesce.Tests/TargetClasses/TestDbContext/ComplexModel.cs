@@ -107,6 +107,9 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         public int IntWithDefault { get; set; }
 
         [DefaultValue(Math.PI)]
+        // Double's min/max are the biggest magnitude values that can occur in Range.
+        // This ensures we don't have overflows or incorrect parsing to smaller numeric types.
+        [Range(double.MinValue, double.MaxValue)] 
         public double DoubleWithDefault { get; set; }
 
         [DefaultValue(EnumPkId.Value10)]

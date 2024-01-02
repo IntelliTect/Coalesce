@@ -58,8 +58,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     Type.IsNumber &&
                     !Type.IsNullableValueType &&
                     this.GetAttribute<RangeAttribute>() is var range and not null &&
-                    Convert.ToDecimal(range.GetValue(r => r.Minimum) ?? 0) is decimal min &&
-                    Convert.ToDecimal(range.GetValue(r => r.Maximum) ?? 0) is decimal max &&
+                    Convert.ToDouble(range.GetValue(r => r.Minimum) ?? 0) is double min &&
+                    Convert.ToDouble(range.GetValue(r => r.Maximum) ?? 0) is double max &&
                     (
                         min > 0 ||
                         max < 0

@@ -23,7 +23,7 @@ namespace IntelliTect.Coalesce.DataAnnotations
         /// regardless of the particular `model` instance.
         /// </para>
         /// </summary>
-        bool UserCanFilter(IMappingContext context, string propertyName) => false;
+        bool UserCanFilter(IMappingContext context, string propertyName);
     }
 
     public interface IPropertyRestriction<TModel> : IPropertyRestriction
@@ -51,5 +51,9 @@ namespace IntelliTect.Coalesce.DataAnnotations
         /// </para>
         /// </summary>
         bool UserCanWrite(IMappingContext context, string propertyName, TModel? model, object? incomingValue);
+
+
+        override bool UserCanFilter(IMappingContext context, string propertyName) => false;
+
     }
 }

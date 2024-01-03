@@ -477,7 +477,7 @@ export abstract class ViewModel<
           if (this.$hasError) {
             throw Error(
               "Cannot save - validation failed: " +
-                [...this.$getErrors()].join(", ")
+                joinErrors(this.$getErrors())
             );
           }
 
@@ -633,7 +633,7 @@ export abstract class ViewModel<
                 throw Error(
                   `Cannot save ${meta.displayName} ${
                     model.$primaryKey || "<new>"
-                  }: ` + errors.join(", ")
+                  } - validation failed: ${joinErrors(errors)}`
                 );
               }
             }
@@ -2280,6 +2280,10 @@ function startAutoCall(
     state.vue = null; // cleanup for GC
   };
   state.active = true;
+}
+
+function joinErrors(errors: Iterable<string>) {
+  return [...errors].map((e) => e.replace(/\.$/, "")).join(", ") + ".";
 }
 
 //@ts-expect-error: only exists in vue3, but not vue2.

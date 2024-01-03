@@ -151,6 +151,20 @@ describe("ViewModel", () => {
     }
   );
 
+  describe.each(["$save", "$bulkSave"] as const)("%s", (callerName) => {
+    test("checks client validation", async () => {
+      const student = new StudentViewModel();
+      student.$addRule("name", "rule1", (v) => v == "a" || "Test Error 1.");
+      student.$addRule("name", "rule2", (v) => v == "b" || "Test Error 2.");
+
+      expect(() => {
+        return student[callerName].apply(student); // .apply() works around https://github.com/microsoft/TypeScript/issues/49866
+      }).rejects.toThrowError(
+        "- validation failed: Test Error 1, Test Error 2."
+      );
+    });
+  });
+
   describe("$save", () => {
     const saveMock = mockItemResult(true, <Student>{
       studentId: 3,

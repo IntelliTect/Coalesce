@@ -38,20 +38,7 @@ export default defineConfig({
   plugins: [
     vue(),
     vueJsx(),
-    // vuetify({
-    //   autoImport: true,
-    // }),
-    dts({
-      entryRoot: "src",
-      // logDiagnostics: true,
-      // skipDiagnostics: false,
-      // noEmitOnError: true,
-      skipDiagnostics: true,
-      staticImport: true,
-      compilerOptions: {
-        skipLibCheck: true,
-      },
-    }),
+
     Components({
       dts: false,
       resolvers: [Vuetify3Resolver()],
@@ -63,8 +50,10 @@ export default defineConfig({
     globals: true,
     environment: "jsdom",
     include: ["**/*.spec.{ts,tsx}"],
-    deps: {
-      inline: ["vuetify"],
+    server: {
+      deps: {
+        inline: [/vuetify/],
+      },
     },
   },
 });

@@ -1,0 +1,23 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "rootDir": "./src",
+    "paths": {
+      "coalesce-vue": ["coalesce-vue"],
+      "coalesce-vue/*": ["coalesce-vue/*"]
+    }
+  },
+  "include": ["src/index.ts"],
+  "exclude": [
+    "node_modules",
+    "../coalesce-vue",
+    "coalesce-vue",
+    "coalesce-vue/**/*",
+    "../coalesce-vue/src",
+    "../coalesce-vue/src/*",
+    "../coalesce-vue/**/*"
+  ]
+}

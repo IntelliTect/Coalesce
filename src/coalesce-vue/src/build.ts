@@ -82,7 +82,11 @@ export function createAspNetCoreHmrPlugin({
 
         // The development server launched by UseViteDevelopmentServer must be HTTPS
         // if the aspnetcore server is HTTPs to avoid issues with mixed content:
-        if (https && server.https != false) {
+        if (
+          https &&
+          //@ts-expect-error boolean check backwards combat with vite<5
+          server.https != false
+        ) {
           const httpsOptions = (server.https ??= {}) as https.ServerOptions;
 
           const {

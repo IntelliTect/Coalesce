@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "module": "NodeNext",
+    "target": "ESNext",
+    "outDir": "./dist",
+    "declaration": true,
+    "moduleResolution": "NodeNext"
+  },
+  "include": ["src/build.ts"],
+  "exclude": ["node_modules"]
+}

@@ -22,9 +22,15 @@ namespace IntelliTect.Coalesce
         )
             where TDto : class;
 
+        IPropertyRestriction GetPropertyRestriction<TModel>(Type type);
+        TRestriction GetPropertyRestriction<TRestriction, TModel>()
+            where TRestriction : IPropertyRestriction
+        {
+            return (TRestriction)GetPropertyRestriction<TModel>(typeof(TRestriction));
+        }
+
         IPropertyRestriction GetPropertyRestriction(Type type);
         TRestriction GetPropertyRestriction<TRestriction>()
-            where TRestriction : IPropertyRestriction
             => (TRestriction)GetPropertyRestriction(typeof(TRestriction));
     }
 }

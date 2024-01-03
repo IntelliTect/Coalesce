@@ -77,5 +77,19 @@ namespace IntelliTect.Coalesce.Mapping
 
             return restriction;
         }
+
+        public IPropertyRestriction<TModel> GetPropertyRestriction<TModel>(Type type)
+        {
+            _restrictionCache ??= new();
+            if (_restrictionCache.TryGetValue(type, out IPropertyRestriction<TModel>? restriction)) return restriction;
+
+            restriction = Services is { }
+                ? (IPropertyRestriction)ActivatorUtilities.GetServiceOrCreateInstance(Services, type)
+                : (IPropertyRestriction)Activator.CreateInstance(type)!;
+
+            _restrictionCache.Add(type, restriction);
+
+            return restriction;
+        }
     }
 }

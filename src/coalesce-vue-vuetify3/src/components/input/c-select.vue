@@ -48,6 +48,7 @@
 
         <input
           type="text"
+          ref="mainInputRef"
           v-model="mainValue"
           @focus="focused = true"
           @blur="focused = false"
@@ -208,12 +209,29 @@
 </style>
 
 <script lang="ts">
-import { ComponentPublicInstance, defineComponent, PropType, ref } from "vue";
+export default defineComponent({
+  name: "c-select",
+
+  // We manually pass attrs via inputBindAttrs, so disable the default Vue behavior.
+  // If we don't do this, some HTML attrs (e.g. tabindex) will incorrectly be placed
+  // on the root element rather than on the search field in Vuetify component.
+  inheritAttrs: false,
+});
+</script>
+
+<script lang="ts" setup>
+import {
+  ComponentPublicInstance,
+  defineComponent,
+  PropType,
+  ref,
+  computed,
+  nextTick,
+  watch,
+} from "vue";
 import { makeMetadataProps, useMetadataProps } from "../c-metadata-component";
 import {
   ModelApiClient,
-  ListApiState,
-  ListResultPromise,
   Model,
   ModelType,
   ForeignKeyProperty,
@@ -222,601 +240,545 @@ import {
   mapParamsToDto,
   getMessageForError,
   mapValueToModel,
-  ItemApiStateWithArgs,
   ViewModel,
-  modelDisplay,
   Indexable,
   ModelValue,
   AnyArgCaller,
   ResponseCachingConfiguration,
 } from "coalesce-vue";
 
-export default defineComponent({
-  name: "c-select",
+const props = defineProps({
+  ...makeMetadataProps<Model | AnyArgCaller>(),
+  clearable: { required: false, default: undefined, type: Boolean },
+  placeholder: { type: String, required: false },
+  preselectFirst: { required: false, type: Boolean, default: false },
+  preselectSingle: { required: false, type: Boolean, default: false },
+  openOnClear: { required: false, type: Boolean, default: true },
+  reloadOnOpen: { required: false, type: Boolean, default: false },
+  params: { required: false, type: Object as PropType<ListParameters> },
 
-  // We manually pass attrs via inputBindAttrs, so disable the default Vue behavior.
-  // If we don't do this, some HTML attrs (e.g. tabindex) will incorrectly be placed
-  // on the root element rather than on the search field in Vuetify component.
-  inheritAttrs: false,
-
-  setup(props) {
-    return {
-      listRef: ref<ComponentPublicInstance>(),
-      searchRef: ref<ComponentPublicInstance>(),
-      ...useMetadataProps(props, (v) =>
-        // Use the navigation metadata (if exists) to drive the logic in here,
-        // as it will be a better source to pull label, hint, etc. from.
-        v.role == "foreignKey" && "navigationProp" in v ? v.navigationProp! : v
-      ),
-    };
+  /** Response caching configuration for the `/get` and `/list` API calls made by the component.
+   * See https://intellitect.github.io/Coalesce/stacks/vue/layers/api-clients.html#response-caching. */
+  cache: {
+    required: false,
+    type: [Object, Boolean] as PropType<ResponseCachingConfiguration | boolean>,
+    default: false as any,
   },
 
-  props: {
-    ...makeMetadataProps<Model | AnyArgCaller>(),
-    clearable: { required: false, default: undefined, type: Boolean },
-    modelValue: { required: false },
-    keyValue: { required: false },
-    objectValue: { required: false },
-    placeholder: { type: String, required: false },
-    preselectFirst: { required: false, type: Boolean, default: false },
-    preselectSingle: { required: false, type: Boolean, default: false },
-    openOnClear: { required: false, type: Boolean, default: true },
-    reloadOnOpen: { required: false, type: Boolean, default: false },
-    params: { required: false, type: Object as PropType<ListParameters> },
-
-    /** Response caching configuration for the `/get` and `/list` API calls made by the component.
-     * See https://intellitect.github.io/Coalesce/stacks/vue/layers/api-clients.html#response-caching. */
-    cache: {
-      required: false,
-      type: [Object, Boolean] as PropType<
-        ResponseCachingConfiguration | boolean
-      >,
-      default: false as any,
-    },
-
-    create: {
-      required: false,
-      type: Object as PropType<{
-        getLabel: (search: string, items: Model<ModelType>[]) => string | false;
-        getItem: (search: string, label: string) => Promise<Model<ModelType>>;
-      }>,
-    },
+  create: {
+    required: false,
+    type: Object as PropType<{
+      getLabel: (search: string, items: Model<ModelType>[]) => string | false;
+      getItem: (search: string, label: string) => Promise<Model<ModelType>>;
+    }>,
   },
+});
 
-  data() {
-    return {
-      modelDisplay: modelDisplay,
+const modelValue = defineModel();
+const keyValue = defineModel("keyValue");
+const objectValue = defineModel("objectValue");
 
-      search: null as string | null,
-      error: [] as string[],
-      focused: false,
-      menuOpen: false,
-      menuOpenForced: false,
-      searchChanged: new Date(),
-      mainValue: "",
-      createItemLoading: false,
-      createItemError: "" as string | null,
-      pendingSelection: 0,
+const mainInputRef = ref<HTMLInputElement>();
+const listRef = ref<ComponentPublicInstance>();
+const searchRef = ref<ComponentPublicInstance>();
 
-      /** The model representing the current selected item
-       * in the case that only the PK was provided to the component.
-       * This is maintained in a variable to prevent its reference from
-       * changing unexpectedly, which causes Vuetify to annoying things.
-       */
-      keyFetchedModel: null as any,
+const { inputBindAttrs, modelMeta, valueMeta, valueOwner } = useMetadataProps(
+  props,
+  (v) =>
+    // Use the navigation metadata (if exists) to drive the logic in here,
+    // as it will be a better source to pull label, hint, etc. from.
+    v.role == "foreignKey" && "navigationProp" in v ? v.navigationProp! : v
+);
 
-      listCaller: null! as ListApiState<[], Model<ModelType>> &
-        (() => ListResultPromise<Model<ModelType>>),
+const search = ref(null as string | null);
+const error = ref([] as string[]);
+const focused = ref(false);
+const menuOpen = ref(false);
+const menuOpenForced = ref(false);
+const searchChanged = ref(new Date());
+const mainValue = ref("");
+const createItemLoading = ref(false);
+const createItemError = ref("" as string | null);
+const pendingSelection = ref(0);
 
-      /**
-       * A caller that will be used to resolve the full object when the only thing
-       * that has been provided to c-select is a primary key value.
-       */
-      getCaller: null! as ItemApiStateWithArgs<
-        [],
-        { id: any },
-        Model<ModelType>
-      >,
-    };
-  },
+/** The model representing the current selected item
+ * in the case that only the PK was provided to the component.
+ * This is maintained in a variable to prevent its reference from
+ * changing unexpectedly, which causes Vuetify to annoying things.
+ */
+const keyFetchedModel = ref(null as any);
 
-  computed: {
-    /** The effective clearability state of the dropdown. */
-    isClearable(): boolean {
-      if (typeof this.clearable == "boolean")
-        // If explicitly given a value, use that value.
-        return this.clearable;
+/** The effective clearability state of the dropdown. */
+const isClearable = computed((): boolean => {
+  if (typeof props.clearable == "boolean")
+    // If explicitly given a value, use that value.
+    return props.clearable;
 
-      // Check to see if the foreign key is nullable (i.e. doesn't have a 'required' rule).
-      return !!(this.modelKeyProp && !this.modelKeyProp.rules?.required);
-    },
+  // Check to see if the foreign key is nullable (i.e. doesn't have a 'required' rule).
+  return !!(modelKeyProp.value && !modelKeyProp.value.rules?.required);
+});
 
-    /** The property on `this.valueOwner` which holds the foreign key being selected for, or `null` if there is no such property. */
-    modelKeyProp(): ForeignKeyProperty | null {
-      const meta = this.valueMeta!;
-      if (meta.role == "foreignKey" && "principalType" in meta) {
-        return meta;
-      }
-      if (meta.role == "referenceNavigation" && "foreignKey" in meta) {
-        return meta.foreignKey;
-      }
-      return null;
-    },
+/** The property on `valueOwner` which holds the foreign key being selected for, or `null` if there is no such property. */
+const modelKeyProp = computed((): ForeignKeyProperty | null => {
+  const meta = valueMeta.value!;
+  if (meta.role == "foreignKey" && "principalType" in meta) {
+    return meta;
+  }
+  if (meta.role == "referenceNavigation" && "foreignKey" in meta) {
+    return meta.foreignKey;
+  }
+  return null;
+});
 
-    /** The property on `this.valueOwner` which holds the model object being selected for, or `null` if there is no such property. */
-    modelObjectProp(): ModelReferenceNavigationProperty | ModelValue | null {
-      const meta = this.valueMeta!;
-      if (meta.role == "foreignKey" && "navigationProp" in meta) {
-        return meta.navigationProp || null;
-      }
-      if (meta.role == "referenceNavigation" && "foreignKey" in meta) {
-        return meta;
-      }
-      if (meta.role == "value" && meta.type == "model") {
-        return meta;
-      }
-      return null;
-    },
+/** The property on `valueOwner` which holds the model object being selected for, or `null` if there is no such property. */
+const modelObjectProp = computed(
+  (): ModelReferenceNavigationProperty | ModelValue | null => {
+    const meta = valueMeta.value!;
+    if (meta.role == "foreignKey" && "navigationProp" in meta) {
+      return meta.navigationProp || null;
+    }
+    if (meta.role == "referenceNavigation" && "foreignKey" in meta) {
+      return meta;
+    }
+    if (meta.role == "value" && meta.type == "model") {
+      return meta;
+    }
+    return null;
+  }
+);
 
-    /**
-     * Whether the metadata provided to `for` and retrieved via `this.valueMeta` is for a key or an object.
-     * Dictates whether v-model will attempt to bind a key or an object.
-     */
-    primaryBindKind() {
-      if (!this.valueMeta) {
-        throw "c-select requires metadata";
-      }
+/**
+ * Whether the metadata provided to `for` and retrieved via `valueMeta` is for a key or an object.
+ * Dictates whether v-model will attempt to bind a key or an object.
+ */
+const primaryBindKind = computed(() => {
+  if (!valueMeta.value) {
+    throw "c-select requires metadata";
+  }
 
-      if (this.valueMeta.role == "foreignKey") {
-        return "key";
-      }
-      if (this.valueMeta.type == "model") {
-        if (
-          typeof this.modelValue != "object" &&
-          this.modelValue !== undefined
-        ) {
-          throw (
-            "Expected a model object to be bound to modelValue, but received a " +
-            typeof this.modelValue
-          );
-        }
-        return "model";
-      }
-
-      throw "The 'role' of the metadata provided for c-select must be 'foreignKey', or the type must be 'model' ";
-    },
-
-    /** The metadata of the type being selected by the dropdown. */
-    modelObjectMeta() {
-      var meta = this.valueMeta!;
-      if (meta.role == "foreignKey" && "principalType" in meta) {
-        return meta.principalType;
-      } else if (meta.type == "model") {
-        return meta.typeDef;
-      } else {
-        throw `Value ${meta.name} must be a foreignKey or model type to use c-select.`;
-      }
-    },
-
-    /** The effective object (whose type is described by `this.modelObjectMeta`) that has been provided to the component. */
-    internalModelValue() {
-      if (this.objectValue) {
-        return this.objectValue;
-      }
-      if (
-        this.valueOwner &&
-        this.modelObjectProp &&
-        this.valueOwner[this.modelObjectProp.name]
-      ) {
-        return this.valueOwner[this.modelObjectProp.name];
-      }
-
-      if (this.modelValue && this.primaryBindKind == "model") {
-        return this.modelValue;
-      }
-
-      if (this.internalKeyValue) {
-        // See if we already have a model that we're using to represent a key-only binding.
-        // Storing this object prevents it from flipping between different instances
-        // obtained from either this.getCaller or this.listCaller,
-        // which causes vuetify to reset its search when the object passed to v-select's `modelValue` prop changes.
-        if (
-          this.keyFetchedModel &&
-          this.internalKeyValue ===
-            this.keyFetchedModel[this.modelObjectMeta.keyProp.name]
-        ) {
-          return this.keyFetchedModel;
-        }
-
-        // All we have is the PK. First, check if it is already in our item array.
-        // If so, capture it. If not, request the object from the server.if (this.keyValue) {
-        const item = this.items.filter(
-          (i) =>
-            this.internalKeyValue ===
-            (i as any)[this.modelObjectMeta.keyProp.name]
-        )[0];
-        if (item) {
-          // eslint-disable-next-line vue/no-side-effects-in-computed-properties
-          this.keyFetchedModel = item;
-          return item;
-        }
-
-        // See if we obtained the item via getCaller.
-        const singleItem = this.getCaller.result;
-        if (
-          singleItem &&
-          this.internalKeyValue ===
-            (singleItem as any)[this.modelObjectMeta.keyProp.name]
-        ) {
-          // eslint-disable-next-line vue/no-side-effects-in-computed-properties
-          this.keyFetchedModel = singleItem;
-          return singleItem;
-        }
-
-        if (
-          !this.listCaller.isLoading &&
-          this.getCaller.args.id != this.internalKeyValue
-        ) {
-          // Only request the single item if the list isn't currently loading,
-          // and if the last requested key is not the key we're looking for.
-          // (this prevents an infinite loop of invokes if the call to the server fails.)
-          // The single item may end up coming back from a pending list call.
-          // eslint-disable-next-line vue/no-side-effects-in-computed-properties
-          this.getCaller.args.id = this.internalKeyValue;
-          this.getCaller.invokeWithArgs();
-        }
-      }
-      return null;
-    },
-
-    /** The effective key (whose type is described by `this.modelObjectMeta`) that has been provided to the component. */
-    internalKeyValue() {
-      let value: any;
-      if (this.keyValue) {
-        value = this.keyValue;
-      } else if (this.valueOwner && this.modelKeyProp) {
-        value = this.valueOwner[this.modelKeyProp.name];
-      } else if (this.modelValue && this.primaryBindKind == "key") {
-        value = this.modelValue;
-      } else {
-        value = null;
-      }
-
-      if (value != null) {
-        // Parse the value in case we were given a string instead of a number, or something like that, via the `keyValue` prop.
-        // This prevents `internalModelValue` from getting confused and infinitely calling the `getCaller`.
-        return mapValueToModel(value, this.modelObjectMeta.keyProp);
-      }
-
-      return null;
-    },
-
-    /** The effective set of validation rules to pass to the v-select. */
-    effectiveRules() {
-      // If we were explicitly given rules, use those.
-      if (this.inputBindAttrs.rules) return this.inputBindAttrs.rules;
-
-      if (this.valueOwner instanceof ViewModel && this.modelKeyProp) {
-        // We're binding to a ViewModel instance.
-        // Grab the rules from the instance, because it may contain custom rules
-        // and/or other rule changes that have been customized in userland beyond what the metadata provides.
-
-        // Validate using the key, not the navigation. The FK
-        // is the actual scalar value that gets sent to the server,
-        // and is the prop that we generate things like `required` onto.
-        // We need to translate the rule functions to pass the selected FK instead
-        // of the selected model object.
-        return this.valueOwner
-          .$getRules(this.modelKeyProp)
-          ?.map((rule) => () => rule(this.internalKeyValue));
-      }
-
-      // Look for validation rules from the metadata on the key prop.
-      // The foreign key is always the one that provides validation rules
-      // for navigation properties - never the navigation property itself.
-      if (this.modelKeyProp?.rules) {
-        return Object.values(this.modelKeyProp.rules);
-      }
-
-      return [];
-    },
-
-    items() {
-      return this.listCaller?.result || [];
-    },
-
-    listItems(): Indexable<Model<ModelType>>[] {
-      return this.items;
-    },
-
-    createItemLabel() {
-      if (!this.create || !this.search) return null;
-
-      const result = this.create.getLabel(this.search, this.items);
-      if (result) {
-        return result;
-      }
-      return null;
-    },
-  },
-
-  watch: {
-    search(newVal: any, oldVal: any) {
-      this.searchChanged = new Date();
-      if (newVal != oldVal) {
-        this.listCaller();
-      }
-    },
-    mainValue(val) {
-      // Transfer any input typed into the main input to the search input,
-      // and then open the menu. This has several jobs:
-      // - If the user starts typing while the main input is focused, we take it as a search query
-      // - We don't have to disable/readonly the main input
-      if (val) {
-        this.$nextTick(() => (this.mainValue = ""));
-        this.searchChanged = new Date();
-        if (!this.menuOpen) {
-          this.search = val;
-          this.openMenu(false);
-        } else {
-          this.search ||= ""; // Ensure we aren't concatenating `val` onto `null`. Issue #315.
-          this.search += val;
-        }
-      }
-    },
-    createItemLabel() {
-      this.createItemError = null;
-    },
-  },
-
-  methods: {
-    onInput(value: Model<ModelType> | null | undefined, dontFocus = false) {
-      value = value ?? null;
-      if (value == null && !this.isClearable) {
-        return;
-      }
-
-      // Clear any manual errors
-      this.error = [];
-
-      const key = value
-        ? (value as any)[this.modelObjectMeta.keyProp.name]
-        : null;
-      this.keyFetchedModel = value;
-
-      if (this.valueOwner) {
-        if (this.modelKeyProp) {
-          this.valueOwner[this.modelKeyProp.name] = key;
-        }
-        if (this.modelObjectProp) {
-          this.valueOwner[this.modelObjectProp.name] = value;
-        }
-      }
-
-      this.$emit(
-        "update:modelValue",
-        this.primaryBindKind == "key" ? key : value
+  if (valueMeta.value.role == "foreignKey") {
+    return "key";
+  }
+  if (valueMeta.value.type == "model") {
+    if (typeof modelValue.value != "object" && modelValue.value !== undefined) {
+      throw (
+        "Expected a model object to be bound to modelValue, but received a " +
+        typeof modelValue.value
       );
-      this.$emit("update:objectValue", value);
-      this.$emit("update:keyValue", key);
-      this.pendingSelection = value ? this.listItems.indexOf(value) : 0;
+    }
+    return "model";
+  }
 
-      // When the input value is cleared, re-focus the dropdown
-      // to allow the user to enter new search input.
-      // Without this, pressing backspace to delete the current value
-      // will cause the search field to lose focus and further keyboard input will do nothing.
-      if (!dontFocus) {
-        if (!value) {
-          this.openMenu();
-        } else {
-          this.closeMenu(true);
-        }
-      }
-    },
+  throw "The 'role' of the metadata provided for c-select must be 'foreignKey', or the type must be 'model' ";
+});
 
-    /** When a key is pressed on the top level input */
-    onInputKey(event: KeyboardEvent) {
-      switch (event.key.toLowerCase()) {
-        case "delete":
-        case "backspace":
-          if (!this.menuOpen) {
-            this.onInput(null, true);
-            event.stopPropagation();
-            event.preventDefault();
-          }
-          return;
-        case "esc":
-        case "escape":
-          event.stopPropagation();
-          event.preventDefault();
-          this.closeMenu(true);
-          return;
-        case " ":
-        case "enter":
-        case "up":
-        case "arrowup":
-        case "down":
-        case "arrowdown":
-        case "spacebar":
-        case "space":
-          event.stopPropagation();
-          event.preventDefault();
-          this.openMenu();
-          return;
-      }
-    },
+/** The metadata of the type being selected by the dropdown. */
+const modelObjectMeta = computed(() => {
+  var meta = valueMeta.value!;
+  if (meta.role == "foreignKey" && "principalType" in meta) {
+    return meta.principalType;
+  } else if (meta.type == "model") {
+    return meta.typeDef;
+  } else {
+    throw `Value ${meta.name} must be a foreignKey or model type to use c-select.`;
+  }
+});
 
-    confirmPendingSelection() {
-      var item = this.listItems[this.pendingSelection];
-      if (!item) return;
-      this.onInput(item);
-    },
+/** The effective object (whose type is described by `modelObjectMeta`) that has been provided to the component. */
+const internalModelValue = computed(() => {
+  if (objectValue.value) {
+    return objectValue.value;
+  }
+  if (
+    valueOwner.value &&
+    modelObjectProp.value &&
+    valueOwner.value[modelObjectProp.value.name]
+  ) {
+    return valueOwner.value[modelObjectProp.value.name];
+  }
 
-    async createItem() {
-      if (!this.createItemLabel) return;
-      try {
-        this.createItemLoading = true;
-        const item = await this.create!.getItem(
-          this.search!,
-          this.createItemLabel
-        );
-        if (!item) return;
-        this.onInput(item);
-        this.listCaller(); // Refresh the list, because the new item is probably now in the results.
-      } catch (e: unknown) {
-        this.createItemError = getMessageForError(e);
-      } finally {
-        this.createItemLoading = false;
-      }
-    },
+  if (modelValue.value && primaryBindKind.value == "model") {
+    return modelValue.value;
+  }
 
-    async openMenu(select?: boolean) {
-      if (select == undefined) {
-        // Select the whole search input if it hasn't changed recently.
-        // If it /has/ changed recently, it means the user is actively typing and probably
-        // doesn't want to use what they're typing.
-        select = new Date().valueOf() - this.searchChanged.valueOf() > 1000;
-      }
-
-      if (this.menuOpen) return;
-      this.menuOpen = true;
-
-      if (this.reloadOnOpen) this.listCaller();
-
-      await this.$nextTick();
-      const input = this.searchRef?.$el.querySelector(
-        "input"
-      ) as HTMLInputElement;
-
-      // Wait for the menu fade-in animation to unhide the content root
-      // before we try to focus the search input, because otherwise it wont work.
-      // https://stackoverflow.com/questions/19669786/check-if-element-is-visible-in-dom
-      const start = performance.now();
-
-      // Force the menu open while we wait, because otherwise if a user clicks and then rapidly types a character,
-      // the typed character will process before the click, resulting in the click toggling the menu closed
-      // after the typed character opened the menu.
-      this.menuOpenForced = true;
-
-      while (
-        // cap waiting at 100ms
-        start + 100 > performance.now() &&
-        (!input.offsetParent || input != document.activeElement)
-      ) {
-        input.focus();
-        await new Promise((resolve) => setTimeout(resolve, 1));
-      }
-
-      this.menuOpenForced = false;
-
-      if (select) {
-        input.select();
-      }
-    },
-
-    closeMenu(force = false) {
-      if (!this.menuOpen) return;
-      if (this.menuOpenForced && !force) return;
-
-      this.menuOpenForced = false;
-      this.menuOpen = false;
-      //@ts-ignore
-      this.$el.querySelector("input").focus();
-    },
-
-    toggleMenu() {
-      if (this.menuOpen) this.closeMenu();
-      else this.openMenu();
-    },
-  },
-
-  created() {
-    const propMeta = this.valueMeta;
-    if (!propMeta) {
-      throw "c-select requires value metadata. Specify it with the 'for' prop'";
+  if (internalKeyValue.value) {
+    // See if we already have a model that we're using to represent a key-only binding.
+    // Storing this object prevents it from flipping between different instances
+    // obtained from either getCaller or listCaller,
+    // which causes vuetify to reset its search when the object passed to v-select's `modelValue` prop changes.
+    if (
+      keyFetchedModel.value &&
+      internalKeyValue.value ===
+        keyFetchedModel.value[modelObjectMeta.value.keyProp.name]
+    ) {
+      return keyFetchedModel.value;
     }
 
-    // This needs to be late initialized so we have the correct "this" reference.
-    this.getCaller = new ModelApiClient(this.modelObjectMeta)
-      .$withSimultaneousRequestCaching()
-      .$makeCaller(
-        "item",
-        function () {
-          throw "expected calls to be made with invokeWithArgs";
-        },
-        () => ({ id: null as any }),
-        (c, args) => c.get(args.id)
-      )
-      .setConcurrency("debounce");
+    // All we have is the PK. First, check if it is already in our item array.
+    // If so, capture it. If not, request the object from the server.
+    const item = items.value.filter(
+      (i) =>
+        internalKeyValue.value ===
+        (i as any)[modelObjectMeta.value.keyProp.name]
+    )[0];
+    if (item) {
+      // eslint-disable-next-line vue/no-side-effects-in-computed-properties
+      keyFetchedModel.value = item;
+      return item;
+    }
 
-    this.listCaller = new ModelApiClient(this.modelObjectMeta)
-      .$withSimultaneousRequestCaching()
-      .$makeCaller("list", (c) => {
-        return c.list({
-          pageSize: 100,
-          ...this.params,
-          search: this.search || undefined,
-        });
-      })
-      .onFulfilled(() => {
-        this.pendingSelection = 0;
-      })
-      .onRejected((state) => {
-        this.error = [state.message || "Unknown Error"];
-      })
-      .setConcurrency("debounce");
+    // See if we obtained the item via getCaller.
+    const singleItem = getCaller.result;
+    if (
+      singleItem &&
+      internalKeyValue.value ===
+        (singleItem as any)[modelObjectMeta.value.keyProp.name]
+    ) {
+      // eslint-disable-next-line vue/no-side-effects-in-computed-properties
+      keyFetchedModel.value = singleItem;
+      return singleItem;
+    }
 
-    this.$watch(
-      () => JSON.stringify(mapParamsToDto(this.params)),
-      () => this.listCaller()
-    );
+    if (!listCaller.isLoading && getCaller.args.id != internalKeyValue.value) {
+      // Only request the single item if the list isn't currently loading,
+      // and if the last requested key is not the key we're looking for.
+      // (this prevents an infinite loop of invokes if the call to the server fails.)
+      // The single item may end up coming back from a pending list call.
+      // eslint-disable-next-line vue/no-side-effects-in-computed-properties
+      getCaller.args.id = internalKeyValue.value;
+      getCaller.invokeWithArgs();
+    }
+  }
+  return null;
+});
 
-    this.$watch(
-      () => this.cache,
-      () => {
-        this.getCaller.useResponseCaching(
-          this.cache === true ? {} : this.cache
-        );
-        this.listCaller.useResponseCaching(
-          this.cache === true ? {} : this.cache
-        );
-      },
-      { immediate: true }
-    );
+/** The effective key (whose type is described by `modelObjectMeta`) that has been provided to the component. */
+const internalKeyValue = computed(() => {
+  let value: any;
+  if (keyValue.value) {
+    value = keyValue.value;
+  } else if (valueOwner.value && modelKeyProp.value) {
+    value = valueOwner.value[modelKeyProp.value.name];
+  } else if (modelValue.value && primaryBindKind.value == "key") {
+    value = modelValue.value;
+  } else {
+    value = null;
+  }
 
-    this.$watch(
-      () => this.pendingSelection,
-      async () => {
-        await this.$nextTick();
-        await this.$nextTick();
-        var listDiv = this.listRef?.$el as HTMLElement;
-        var selectedItem = listDiv?.querySelector(".v-list-item--active");
-        selectedItem?.scrollIntoView?.({
-          behavior: "auto",
-          block: "nearest",
-          inline: "nearest",
-        });
+  if (value != null) {
+    // Parse the value in case we were given a string instead of a number, or something like that, via the `keyValue` prop.
+    // This prevents `internalModelValue` from getting confused and infinitely calling the `getCaller`.
+    return mapValueToModel(value, modelObjectMeta.value.keyProp);
+  }
+
+  return null;
+});
+
+/** The effective set of validation rules to pass to the v-select. */
+const effectiveRules = computed(() => {
+  // If we were explicitly given rules, use those.
+  if (inputBindAttrs.value.rules) return inputBindAttrs.value.rules;
+
+  if (valueOwner.value instanceof ViewModel && modelKeyProp.value) {
+    // We're binding to a ViewModel instance.
+    // Grab the rules from the instance, because it may contain custom rules
+    // and/or other rule changes that have been customized in userland beyond what the metadata provides.
+
+    // Validate using the key, not the navigation. The FK
+    // is the actual scalar value that gets sent to the server,
+    // and is the prop that we generate things like `required` onto.
+    // We need to translate the rule functions to pass the selected FK instead
+    // of the selected model object.
+    return valueOwner.value
+      .$getRules(modelKeyProp.value)
+      ?.map((rule) => () => rule(internalKeyValue.value));
+  }
+
+  // Look for validation rules from the metadata on the key prop.
+  // The foreign key is always the one that provides validation rules
+  // for navigation properties - never the navigation property itself.
+  if (modelKeyProp.value?.rules) {
+    return Object.values(modelKeyProp.value.rules);
+  }
+
+  return [];
+});
+
+const items = computed(() => {
+  return listCaller?.result || [];
+});
+
+const listItems = computed((): Indexable<Model<ModelType>>[] => {
+  return items.value;
+});
+
+const createItemLabel = computed(() => {
+  if (!props.create || !search.value) return null;
+
+  const result = props.create.getLabel(search.value, items.value);
+  if (result) {
+    return result;
+  }
+  return null;
+});
+
+function onInput(
+  value: Model<ModelType> | null | undefined,
+  dontFocus = false
+) {
+  value = value ?? null;
+  if (value == null && !isClearable.value) {
+    return;
+  }
+
+  // Clear any manual errors
+  error.value = [];
+
+  const key = value ? (value as any)[modelObjectMeta.value.keyProp.name] : null;
+  keyFetchedModel.value = value;
+
+  if (valueOwner.value) {
+    if (modelKeyProp.value) {
+      valueOwner.value[modelKeyProp.value.name] = key;
+    }
+    if (modelObjectProp.value) {
+      valueOwner.value[modelObjectProp.value.name] = value;
+    }
+  }
+
+  modelValue.value = primaryBindKind.value == "key" ? key : value;
+  objectValue.value = value;
+  keyValue.value = key;
+  pendingSelection.value = value ? listItems.value.indexOf(value) : 0;
+
+  // When the input value is cleared, re-focus the dropdown
+  // to allow the user to enter new search input.
+  // Without this, pressing backspace to delete the current value
+  // will cause the search field to lose focus and further keyboard input will do nothing.
+  if (!dontFocus) {
+    if (!value) {
+      openMenu();
+    } else {
+      closeMenu(true);
+    }
+  }
+}
+
+/** When a key is pressed on the top level input */
+function onInputKey(event: KeyboardEvent) {
+  switch (event.key.toLowerCase()) {
+    case "delete":
+    case "backspace":
+      if (!menuOpen.value) {
+        onInput(null, true);
+        event.stopPropagation();
+        event.preventDefault();
       }
+      return;
+    case "esc":
+    case "escape":
+      event.stopPropagation();
+      event.preventDefault();
+      closeMenu(true);
+      return;
+    case " ":
+    case "enter":
+    case "up":
+    case "arrowup":
+    case "down":
+    case "arrowdown":
+    case "spacebar":
+    case "space":
+      event.stopPropagation();
+      event.preventDefault();
+      openMenu();
+      return;
+  }
+}
+
+function confirmPendingSelection() {
+  var item = listItems.value[pendingSelection.value];
+  if (!item) return;
+  onInput(item);
+}
+
+async function createItem() {
+  if (!createItemLabel.value) return;
+  try {
+    createItemLoading.value = true;
+    const item = await props.create!.getItem(
+      search.value!,
+      createItemLabel.value
     );
+    if (!item) return;
+    onInput(item);
+    listCaller(); // Refresh the list, because the new item is probably now in the results.
+  } catch (e: unknown) {
+    createItemError.value = getMessageForError(e);
+  } finally {
+    createItemLoading.value = false;
+  }
+}
 
-    // Load the initial contents of the list.
-    this.listCaller().then(() => {
-      if (this.internalModelValue || this.internalKeyValue) {
-        // Don't preselect if there's already a value selected.
-        return;
-      }
+async function openMenu(select?: boolean) {
+  if (select == undefined) {
+    // Select the whole search input if it hasn't changed recently.
+    // If it /has/ changed recently, it means the user is actively typing and probably
+    // doesn't want to use what they're typing.
+    select = new Date().valueOf() - searchChanged.value.valueOf() > 1000;
+  }
 
-      const first = this.items[0];
-      if (
-        first &&
-        (this.preselectFirst ||
-          (this.preselectSingle && this.items.length === 1))
-      ) {
-        this.onInput(first, true);
-      }
+  if (menuOpen.value) return;
+  menuOpen.value = true;
+
+  if (props.reloadOnOpen) listCaller();
+
+  await nextTick();
+  const input = searchRef.value?.$el.querySelector("input") as HTMLInputElement;
+
+  // Wait for the menu fade-in animation to unhide the content root
+  // before we try to focus the search input, because otherwise it wont work.
+  // https://stackoverflow.com/questions/19669786/check-if-element-is-visible-in-dom
+  const start = performance.now();
+
+  // Force the menu open while we wait, because otherwise if a user clicks and then rapidly types a character,
+  // the typed character will process before the click, resulting in the click toggling the menu closed
+  // after the typed character opened the menu.
+  menuOpenForced.value = true;
+
+  while (
+    // cap waiting at 100ms
+    start + 100 > performance.now() &&
+    (!input.offsetParent || input != document.activeElement)
+  ) {
+    input.focus();
+    await new Promise((resolve) => setTimeout(resolve, 1));
+  }
+
+  menuOpenForced.value = false;
+
+  if (select) {
+    input.select();
+  }
+}
+
+function closeMenu(force = false) {
+  if (!menuOpen.value) return;
+  if (menuOpenForced.value && !force) return;
+
+  menuOpenForced.value = false;
+  menuOpen.value = false;
+  mainInputRef.value?.focus();
+}
+
+function toggleMenu() {
+  if (menuOpen.value) closeMenu();
+  else openMenu();
+}
+
+const propMeta = valueMeta.value;
+if (!propMeta) {
+  throw "c-select requires value metadata. Specify it with the 'for' prop'";
+}
+
+/**
+ * A caller that will be used to resolve the full object when the only thing
+ * that has been provided to c-select is a primary key value.
+ */
+const getCaller = new ModelApiClient(modelObjectMeta.value)
+  .$withSimultaneousRequestCaching()
+  .$makeCaller(
+    "item",
+    function () {
+      throw "expected calls to be made with invokeWithArgs";
+    },
+    () => ({ id: null as any }),
+    (c, args) => c.get(args.id)
+  )
+  .setConcurrency("debounce");
+
+const listCaller = new ModelApiClient(modelObjectMeta.value)
+  .$withSimultaneousRequestCaching()
+  .$makeCaller("list", (c) => {
+    return c.list({
+      pageSize: 100,
+      ...props.params,
+      search: search.value || undefined,
     });
-  },
+  })
+  .onFulfilled(() => {
+    pendingSelection.value = 0;
+  })
+  .onRejected((state) => {
+    error.value = [state.message || "Unknown Error"];
+  })
+  .setConcurrency("debounce");
 
-  mounted() {},
+watch(
+  () => JSON.stringify(mapParamsToDto(props.params)),
+  () => listCaller()
+);
+
+watch(
+  () => props.cache,
+  (c) => {
+    getCaller.useResponseCaching(c === true ? {} : c);
+    listCaller.useResponseCaching(c === true ? {} : c);
+  },
+  { immediate: true }
+);
+
+watch(pendingSelection, async () => {
+  await nextTick();
+  await nextTick();
+  var listDiv = listRef.value?.$el as HTMLElement;
+  var selectedItem = listDiv?.querySelector(".v-list-item--active");
+  selectedItem?.scrollIntoView?.({
+    behavior: "auto",
+    block: "nearest",
+    inline: "nearest",
+  });
+});
+
+watch(search, (newVal: any, oldVal: any) => {
+  searchChanged.value = new Date();
+  if (newVal != oldVal) {
+    listCaller();
+  }
+});
+
+watch(mainValue, (val) => {
+  if (val) {
+    nextTick(() => (mainValue.value = ""));
+    searchChanged.value = new Date();
+    if (!menuOpen.value) {
+      search.value = val;
+      openMenu(false);
+    } else {
+      search.value ||= "";
+      search.value += val;
+    }
+  }
+});
+
+watch(createItemLabel, () => {
+  createItemError.value = null;
+});
+
+// Load the initial contents of the list.
+listCaller().then(() => {
+  if (internalModelValue.value || internalKeyValue.value) {
+    // Don't preselect if there's already a value selected.
+    return;
+  }
+
+  const first = items.value[0];
+  if (
+    first &&
+    (props.preselectFirst ||
+      (props.preselectSingle && items.value.length === 1))
+  ) {
+    onInput(first, true);
+  }
 });
 </script>

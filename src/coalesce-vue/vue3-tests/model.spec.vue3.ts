@@ -138,7 +138,7 @@ describe("bindToQueryString", () => {
 
   test("handles multiple bound values changing simultaneously", async () => {
     let setBoundValues: (v: string | null) => void;
-    console.log(window.location.href);
+
     var router = createRouter({
       history: createWebHistory(),
       routes: [

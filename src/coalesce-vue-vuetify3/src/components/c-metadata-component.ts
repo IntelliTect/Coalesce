@@ -16,6 +16,11 @@ import {
   PropNames,
   KeysOfType,
   MethodParameter,
+  ModelValue,
+  TypeDiscriminatorToType,
+  StringValue,
+  ForeignKeyProperty,
+  ModelReferenceNavigationProperty,
 } from "coalesce-vue";
 import { computed, PropType, useAttrs } from "vue";
 import { useMetadata } from "..";
@@ -34,41 +39,55 @@ export type ForSpec<
   TModel extends ModelAllowedType | unknown = unknown,
   ValueKind extends Value = Property
 > = 
-  // Handle binding of `:model` to a Model or ViewModel:
-  TModel extends Model ? 
-    // Check if we only know that the type's prop names are any strings
-    "__neverPropName" extends PropNames<TModel["$metadata"]>
-      // If so, we have to allow any string because the exact prop names aren't known.
-      ? string | ValueKind
-      // We know the exact prop names of the type, so restrict to just those:
-      : {
-          [K in keyof PropsOf<TModel>]: PropsOf<TModel>[K] extends ValueKind
-          ? // Allow the property name
-            | K
-            // Or the full property metadata object
-            | PropsOf<TModel>[K]
-          : never;
-        }[keyof PropsOf<TModel>]
-      
-  // Handle binding of `:model` to an API caller's args object:    
-  : TModel extends ApiStateTypeWithArgs<
-    infer TMethod extends Method,
-    any,
-    infer TArgsObj,
-    any
-  > ?
-    // NOTE: Pulling types off of TArgsObj is a concession we make
-    // due to ApiStateTypeWithArgs's constituent types not actually capturing
-    // the type of their metadata. At some point this could be made better if
-    // we were able to pull metadata off of `TMethod.
-    // What we'd really like to do here is this:
-    // | Extract<TMethod["params"], ValueKind>
-    // | KeysOfType<TMethod["params"], ValueKind>
-    // TODO: THIS IS WRONG - HARDCODED AGAINST Model AND IGNORING ValueKind
-    KeysOfType<TArgsObj, Model | null> | MethodParameter
+// Handle binding of `:model` to a Model or ViewModel:
+TModel extends Model ? 
+  // Check if we only know that the type's prop names are any strings
+  "__neverPropName" extends PropNames<TModel["$metadata"]>
+    // If so, we have to allow any string because the exact prop names aren't known.
+    ? string | ValueKind
+    // We know the exact prop names of the type, so restrict to just those:
+    : {
+        [K in keyof PropsOf<TModel>]: PropsOf<TModel>[K] extends ValueKind
+        ? // Allow the property name
+          | K
+          // Or the full property metadata object
+          | PropsOf<TModel>[K]
+        : never;
+      }[keyof PropsOf<TModel>]
     
-  // Fallback to allowing anything:
-  : undefined | null | string | Property | Value | Method;
+// Handle binding of `:model` to an API caller (which binds values to the caller's args object):    
+: TModel extends ApiStateTypeWithArgs<
+  infer TMethod extends Method,
+  any,
+  infer TArgsObj,
+  any
+> ?
+  // HACK: Pulling types off of TArgsObj is a concession we make
+  // due to ApiStateTypeWithArgs's constituent types not actually capturing
+  // the type of their metadata. At some point this could be made better if
+  // we were able to pull metadata off of `TMethod.
+  // What we'd really like to do here is do the same thing we do for props on a model:
+  | {
+      [K in keyof TArgsObj]: TArgsObj[K] extends ((
+        ValueKind extends ModelValue ? Model :
+        // TODO: Map other kinds of value meta to concrete types
+        // ValueKind extends StringValue ? string :
+        never
+      ) | null)
+      ? K
+      : never;
+    }[keyof TArgsObj]
+  | ((
+      // Collapse the distribution of the union in ValueKind down
+      // to the actual type that make sense for method parameters.
+      // This produces cleaner intellisense tooltips.
+      ValueKind extends ForeignKeyProperty ? ModelValue :
+      ValueKind extends ModelReferenceNavigationProperty ? ModelValue :
+      ValueKind
+    ) & MethodParameter)
+  
+// Fallback to allowing anything:
+: undefined | string | ValueKind;
 
 export function getValueMetaAndOwner(
   forVal: ForSpec | null | undefined,

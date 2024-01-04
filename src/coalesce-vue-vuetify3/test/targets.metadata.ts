@@ -295,9 +295,9 @@ export const Student = (domain.types.Student = {
           type: "string",
           role: "value",
         },
-        date: {
-          name: "date",
-          displayName: "Date",
+        startDate: {
+          name: "startDate",
+          displayName: "Start Date",
           type: "date",
           dateKind: "datetime",
           role: "value",

@@ -52,20 +52,22 @@ describe("CInput", () => {
   });
 
   test("caller model - date value", async () => {
-    const wrapper = mount(() => <CInput model={model.manyParams} for="date" />);
+    const wrapper = mount(() => (
+      <CInput model={model.manyParams} for="startDate" />
+    ));
 
     // Assert resting state
-    expect(wrapper.find("label").text()).toEqual("Date");
+    expect(wrapper.find("label").text()).toEqual("Start Date");
 
     // Set a value, and look for the value
-    model.manyParams.args.date = new Date("2023-08-16T01:02:03Z");
+    model.manyParams.args.startDate = new Date("2023-08-16T01:02:03Z");
     await delay(10);
     expect(wrapper.find("input").element.value).contains("2023");
 
     // Perform an input on the component, and then look for the new value.
     await wrapper.find("input").setValue("1/3/2017");
     await delay(10);
-    expect(model.manyParams.args.date.getFullYear()).toBe(2017);
+    expect(model.manyParams.args.startDate.getFullYear()).toBe(2017);
   });
 
   test.each([true, false])("bool (checkbox: %s)", async (checkbox) => {

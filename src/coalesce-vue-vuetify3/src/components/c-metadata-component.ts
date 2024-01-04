@@ -14,13 +14,10 @@ import {
   ApiState,
   DataSource,
   PropNames,
-  KeysOfType,
-  MethodParameter,
   ModelValue,
-  TypeDiscriminatorToType,
-  StringValue,
   ForeignKeyProperty,
   ModelReferenceNavigationProperty,
+  DateValue,
 } from "coalesce-vue";
 import { computed, PropType, useAttrs } from "vue";
 import { useMetadata } from "..";
@@ -70,6 +67,7 @@ TModel extends Model ?
   | {
       [K in keyof TArgsObj]: TArgsObj[K] extends ((
         ValueKind extends ModelValue ? Model :
+        ValueKind extends DateValue ? Date :
         // TODO: Map other kinds of value meta to concrete types
         // ValueKind extends StringValue ? string :
         never
@@ -84,7 +82,13 @@ TModel extends Model ?
       ValueKind extends ForeignKeyProperty ? ModelValue :
       ValueKind extends ModelReferenceNavigationProperty ? ModelValue :
       ValueKind
-    ) & MethodParameter)
+    )
+      // While intersecting this with MethodParameter is *technically* correct,
+      // it creates noisy intellisense and we don't actually care if the meta
+      // has the few extra fields specific to method parameters,
+      // as our input components don't use those parameter-specific fields.
+      // & MethodParameter
+    )
   
 // Fallback to allowing anything:
 : undefined | string | ValueKind;

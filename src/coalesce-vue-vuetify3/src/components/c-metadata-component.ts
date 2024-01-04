@@ -13,14 +13,65 @@ import {
   AnyArgCaller,
   ApiState,
   DataSource,
+  PropNames,
+  KeysOfType,
+  MethodParameter,
 } from "coalesce-vue";
 import { computed, PropType, useAttrs } from "vue";
 import { useMetadata } from "..";
+import { ApiStateTypeWithArgs } from "coalesce-vue";
 
-export type ForSpec = undefined | null | string | Property | Value | Method;
+type PropsOf<TModel> = TModel extends {
+  $metadata: {
+    props: infer O extends Record<string, Property>;
+  };
+}
+  ? O
+  : never;
+
+// prettier-ignore
+export type ForSpec<
+  TModel extends ModelAllowedType | unknown = unknown,
+  ValueKind extends Value = Property
+> = 
+  // Handle binding of `:model` to a Model or ViewModel:
+  TModel extends Model ? 
+    // Check if we only know that the type's prop names are any strings
+    "__neverPropName" extends PropNames<TModel["$metadata"]>
+      // If so, we have to allow any string because the exact prop names aren't known.
+      ? string | ValueKind
+      // We know the exact prop names of the type, so restrict to just those:
+      : {
+          [K in keyof PropsOf<TModel>]: PropsOf<TModel>[K] extends ValueKind
+          ? // Allow the property name
+            | K
+            // Or the full property metadata object
+            | PropsOf<TModel>[K]
+          : never;
+        }[keyof PropsOf<TModel>]
+      
+  // Handle binding of `:model` to an API caller's args object:    
+  : TModel extends ApiStateTypeWithArgs<
+    infer TMethod extends Method,
+    any,
+    infer TArgsObj,
+    any
+  > ?
+    // NOTE: Pulling types off of TArgsObj is a concession we make
+    // due to ApiStateTypeWithArgs's constituent types not actually capturing
+    // the type of their metadata. At some point this could be made better if
+    // we were able to pull metadata off of `TMethod.
+    // What we'd really like to do here is this:
+    // | Extract<TMethod["params"], ValueKind>
+    // | KeysOfType<TMethod["params"], ValueKind>
+    // TODO: THIS IS WRONG - HARDCODED AGAINST Model AND IGNORING ValueKind
+    KeysOfType<TArgsObj, Model | null> | MethodParameter
+    
+  // Fallback to allowing anything:
+  : undefined | null | string | Property | Value | Method;
 
 export function getValueMetaAndOwner(
-  forVal: ForSpec,
+  forVal: ForSpec | null | undefined,
   model: Model | DataSource | AnyArgCaller | null | undefined,
   $metadata?: Domain
 ) {
@@ -42,7 +93,7 @@ export function getValueMetaAndOwner(
 }
 
 export function getValueMeta(
-  forVal: ForSpec,
+  forVal: ForSpec | null | undefined,
   modelMeta:
     | ObjectType
     | ModelType
@@ -273,7 +324,7 @@ export function makeMetadataProps<TModel extends ModelAllowedType = Model>() {
      */
     for: {
       required: false,
-      type: [String, Object] as PropType<ForSpec>,
+      type: [String, Object] as PropType<ForSpec<TModel>>,
       default: null,
     },
   };

@@ -208,28 +208,13 @@
 }
 </style>
 
-<script lang="ts">
-export default defineComponent({
-  name: "c-select",
-
-  // We manually pass attrs via inputBindAttrs, so disable the default Vue behavior.
-  // If we don't do this, some HTML attrs (e.g. tabindex) will incorrectly be placed
-  // on the root element rather than on the search field in Vuetify component.
-  inheritAttrs: false,
-});
-</script>
-
-<script lang="ts" setup>
-import {
-  ComponentPublicInstance,
-  defineComponent,
-  PropType,
-  ref,
-  computed,
-  nextTick,
-  watch,
-} from "vue";
-import { makeMetadataProps, useMetadataProps } from "../c-metadata-component";
+<script
+  lang="ts"
+  setup
+  generic="TModel extends Model | AnyArgCaller | undefined"
+>
+import { ComponentPublicInstance, ref, computed, nextTick, watch } from "vue";
+import { useMetadataProps, ForSpec } from "../c-metadata-component";
 import {
   ModelApiClient,
   Model,
@@ -247,36 +232,48 @@ import {
   ResponseCachingConfiguration,
 } from "coalesce-vue";
 
-const props = defineProps({
-  ...makeMetadataProps<Model | AnyArgCaller>(),
-  clearable: { required: false, default: undefined, type: Boolean },
-  placeholder: { type: String, required: false },
-  preselectFirst: { required: false, type: Boolean, default: false },
-  preselectSingle: { required: false, type: Boolean, default: false },
-  openOnClear: { required: false, type: Boolean, default: true },
-  reloadOnOpen: { required: false, type: Boolean, default: false },
-  params: { required: false, type: Object as PropType<ListParameters> },
+defineOptions({
+  name: "c-select",
+  // We manually pass attrs via inputBindAttrs, so disable the default Vue behavior.
+  // If we don't do this, some HTML attrs (e.g. tabindex) will incorrectly be placed
+  // on the root element rather than on the search field in Vuetify component.
+  inheritAttrs: false,
+});
 
-  /** Response caching configuration for the `/get` and `/list` API calls made by the component.
-   * See https://intellitect.github.io/Coalesce/stacks/vue/layers/api-clients.html#response-caching. */
-  cache: {
-    required: false,
-    type: [Object, Boolean] as PropType<ResponseCachingConfiguration | boolean>,
-    default: false as any,
-  },
+const props = withDefaults(
+  defineProps<{
+    model?: TModel;
 
-  create: {
-    required: false,
-    type: Object as PropType<{
+    /** A metadata specifier for the value being bound. One of:
+     * * A string with the name of the value belonging to `model`. E.g. `"firstName"`.
+     * * A direct reference to the metadata object. E.g. `model.$metadata.props.firstName`.
+     * * A string in dot-notation that starts with a type name. E.g. `"Person.firstName"`.
+     */
+    for: ForSpec<TModel, ForeignKeyProperty | ModelReferenceNavigationProperty>;
+
+    clearable?: boolean;
+    placeholder?: string;
+    preselectFirst?: boolean;
+    preselectSingle?: boolean;
+    openOnClear?: boolean;
+    reloadOnOpen?: boolean;
+    params?: ListParameters;
+
+    /** Response caching configuration for the `/get` and `/list` API calls made by the component.
+     * See https://intellitect.github.io/Coalesce/stacks/vue/layers/api-clients.html#response-caching. */
+    cache?: ResponseCachingConfiguration | boolean;
+
+    create?: {
       getLabel: (search: string, items: Model<ModelType>[]) => string | false;
       getItem: (search: string, label: string) => Promise<Model<ModelType>>;
-    }>,
-  },
-});
+    };
+  }>(),
+  { openOnClear: true }
+);
 
 const modelValue = defineModel();
 const keyValue = defineModel("keyValue");
-const objectValue = defineModel("objectValue");
+const objectValue = defineModel<Model>("objectValue");
 
 const mainInputRef = ref<HTMLInputElement>();
 const listRef = ref<ComponentPublicInstance>();

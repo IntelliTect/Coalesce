@@ -526,7 +526,7 @@ export const Student = (domain.types.Student = {
       props: {},
     },
   },
-});
+} as const);
 
 export const DisplaysStudent = (domain.types.DisplaysStudent = <ObjectType>{
   ...metaBase("DisplaysStudent"),

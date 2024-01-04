@@ -595,22 +595,20 @@ export type Method = ItemMethod | ListMethod;
    -----------------------------
 */
 
-export type PropsNames<
-  Props extends ClassType["props"],
-  Kind extends Property = Property
-> = {
-  [K in Extract<keyof Props, string>]: Props[K] extends Kind ? K : never;
-}[Extract<keyof Props, string>];
+export type KeysOfType<TObject, Type> = {
+  [K in keyof TObject]: TObject[K] extends Type ? K : never;
+}[keyof TObject];
 
 export type PropNames<
   TMeta extends ClassType,
   Kind extends Property = Property
-> = PropsNames<TMeta["props"], Kind>;
+> = KeysOfType<TMeta["props"], Kind>;
 
 // This doesn't support restriction of property kind - typescript makes unintelligible intellisense tooltips if we do.
+// NB: bad intellisense tooltips may be solvable by using the mapped type directly.
 export type PropertyOrName<TMeta extends ClassType> =
-  | Property
-  | PropNames<TMeta, Property>;
+  | PropNames<TMeta, Property>
+  | Property;
 
 export function resolvePropMeta<TProp extends Property>(
   metadata: ClassType,

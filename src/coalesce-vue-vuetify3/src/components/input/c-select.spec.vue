@@ -20,6 +20,11 @@
     <c-datetime-picker :model="model" for="birthDate" />
     <c-datetime-picker :model="(model as any)" for="birthDate" />
     <c-datetime-picker for="Student.birthDate" v-model="selectedDate" />
+    <c-datetime-picker
+      :for="model.$metadata.props.birthDate"
+      v-model="selectedDate"
+    />
+    <c-datetime-picker :model="model" :for="model.$metadata.props.birthDate" />
     <c-datetime-picker v-model="selectedDate" />
 
     <c-datetime-picker :model="vm.manyParams" for="startDate" />
@@ -38,6 +43,11 @@
     <c-datetime-picker :model="vm" for="model" />
     <c-datetime-picker :model="vm" for="asdf" />
     <c-datetime-picker :model="vm.manyParams" for="model" />
+
+    <c-select-many-to-many :model="vm" for="model" />
+    <c-select-many-to-many :model="vm" for="asdf" />
+    <c-select-many-to-many v-model="selectedAny" />
+    <c-select-many-to-many :model="vm" />
   </div>
 </template>
 

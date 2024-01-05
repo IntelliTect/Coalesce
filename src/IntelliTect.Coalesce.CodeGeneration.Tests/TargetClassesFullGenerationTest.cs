@@ -1,26 +1,60 @@
-using IntelliTect.Coalesce.CodeGeneration.Api.Generators;
-using IntelliTect.Coalesce.CodeGeneration.Generation;
-using IntelliTect.Coalesce.Tests.Util;
-using System;
-using System.Linq;
-using Xunit;
-using Microsoft.Extensions.DependencyInjection;
-using System.Threading.Tasks;
-using System.IO;
-using IntelliTect.Coalesce.CodeGeneration.Vue.Generators;
-using IntelliTect.Coalesce.CodeGeneration.Knockout.Generators;
-using IntelliTect.Coalesce.Api.DataSources;
 using IntelliTect.Coalesce.Api.Behaviors;
+using IntelliTect.Coalesce.Api.DataSources;
+using IntelliTect.Coalesce.CodeGeneration.Generation;
+using IntelliTect.Coalesce.CodeGeneration.Knockout.Generators;
+using IntelliTect.Coalesce.CodeGeneration.Vue.Generators;
 using IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext;
-using System.Text.Json;
-using System.Collections.Generic;
+using IntelliTect.Coalesce.Tests.Util;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.DependencyInjection;
 using Moq;
+using System.Collections.Generic;
+using System.IO;
+using System.Threading.Tasks;
+using System.Text.Json;
+using Xunit;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Tests
 {
     public class TargetClassesFullGenerationTest : CodeGenTestBase
     {
+#if NET8_0
+        /// <summary>
+        /// This test isn't asserting anything in .NET land.
+        /// Its purpose is to produce generated files that we can build our 
+        /// typescript/javascript tests upon, rather than building out
+        /// metadata, models, api clients, and viewmodels by hand.
+        /// </summary>
+        [Fact]
+        public async Task CreateVitestTargets()
+        {
+            var executor = BuildExecutor();
+            executor.Config.GeneratorConfig = JsonConvert.DeserializeObject<Dictionary<string, JObject>>("""
+            {
+                "Controllers": {
+                    "disabled": true
+                },
+                "Models": {
+                    "disabled": true
+                },
+                "Scripts": {
+                    "targetDirectory": "../"
+                }
+            }
+            """);
+
+            var project = GetRepoRoot().GetDirectory("src/coalesce-vue-vuetify3/test");
+
+            var suite = executor.CreateRootGenerator<VueSuite>()
+                .WithModel(ReflectionRepositoryFactory.Symbol)
+                .WithOutputPath(project.FullName);
+
+            await suite.GenerateAsync();
+        }
+#endif
+
         [Fact]
         public async Task VueOutputCompiles()
         {
@@ -29,6 +63,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Tests
             var suite = executor.CreateRootGenerator<VueSuite>()
                 .WithModel(ReflectionRepositoryFactory.Symbol);
             suite = await ConfigureAndValidateSuite(suite);
+            await suite.GenerateAsync();
 
             await Task.WhenAll(
                 Task.Run(() => AssertVueSuiteTypescriptOutputCompiles(suite, "4.9")),
@@ -87,6 +122,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Tests
             var suite = executor.CreateRootGenerator<KnockoutSuite>()
                 .WithModel(ReflectionRepositoryFactory.Symbol);
             suite = await ConfigureAndValidateSuite(suite);
+            await suite.GenerateAsync();
 
             await AssertSuiteCSharpOutputCompiles(suite);
         }
@@ -115,7 +151,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Tests
             // Otherwise, we wouldn't be testing very much here.
             // We're ultimately just testing that this doesn't throw right now.
             // Not looking for any specific output.
-            Assert.NotNull(JsonSerializer.Serialize(reflectionData));
+            Assert.NotNull(System.Text.Json.JsonSerializer.Serialize(reflectionData));
         }
     }
 }

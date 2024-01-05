@@ -597,7 +597,7 @@ export type Method = ItemMethod | ListMethod;
 
 export type KeysOfType<TObject, Type> = {
   [K in keyof TObject]: TObject[K] extends Type ? K : never;
-}[keyof TObject];
+}[Extract<keyof TObject, string>];
 
 export type PropNames<
   TMeta extends ClassType,

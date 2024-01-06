@@ -249,7 +249,10 @@ const props = withDefaults(
      * * A direct reference to the metadata object. E.g. `model.$metadata.props.firstName`.
      * * A string in dot-notation that starts with a type name. E.g. `"Person.firstName"`.
      */
-    for: ForSpec<TModel, ForeignKeyProperty | ModelReferenceNavigationProperty>;
+    for: ForSpec<
+      TModel,
+      ForeignKeyProperty | ModelReferenceNavigationProperty | ModelValue
+    >;
 
     clearable?: boolean;
     placeholder?: string;
@@ -273,7 +276,7 @@ const props = withDefaults(
 
 const modelValue = defineModel();
 const keyValue = defineModel("keyValue");
-const objectValue = defineModel<Model>("objectValue");
+const objectValue = defineModel<Model | null>("objectValue");
 
 const mainInputRef = ref<HTMLInputElement>();
 const listRef = ref<ComponentPublicInstance>();

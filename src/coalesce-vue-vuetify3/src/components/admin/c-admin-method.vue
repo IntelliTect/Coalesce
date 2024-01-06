@@ -110,14 +110,14 @@
             >
               <img
                 v-if="caller.result.type.indexOf('image') >= 0"
-                :src="caller.getResultObjectUrl(thisComponent)"
+                :src="caller.getResultObjectUrl(instance.proxy)"
                 :alt="caller.result.name"
                 class="elevation-1"
                 style="max-width: 100%"
               />
               <video
                 v-else-if="caller.result.type.indexOf('video') >= 0"
-                :src="caller.getResultObjectUrl(thisComponent)"
+                :src="caller.getResultObjectUrl(instance.proxy)"
                 :alt="caller.result.name"
                 class="elevation-1"
                 controls
@@ -154,20 +154,21 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from "vue";
-import {
-  getValueMeta,
-  makeMetadataProps,
-  useMetadataProps,
-} from "../c-metadata-component";
+<script lang="ts" setup generic="TModel extends ViewModel | ListViewModel">
+import { computed, ref } from "vue";
 import {
   ViewModel,
   ListViewModel,
   DisplayOptions,
   AnyArgCaller,
   ItemApiState,
+  Method,
 } from "coalesce-vue";
+import { getCurrentInstance } from "vue";
+
+defineOptions({
+  name: "c-admin-method",
+});
 
 const resultDisplayOptions = {
   collection: {
@@ -176,104 +177,109 @@ const resultDisplayOptions = {
   },
 } as DisplayOptions;
 
-export default defineComponent({
-  name: "c-method",
+type MethodsOf<TModel> = TModel extends {
+  $metadata: {
+    methods: infer O extends Record<string, Method>;
+  };
+}
+  ? O
+  : never;
 
-  props: {
-    ...makeMetadataProps(),
-    autoReloadModel: { required: false, type: Boolean, default: false },
-  },
+type MethodForSpec =
+  // Check if we only know that the type's method names are any strings
+  "__never" extends keyof MethodsOf<TModel["$metadata"]>
+    ? // If so, we have to allow any string because the exact method names aren't known.
+      string | Method
+    : // We know the exact method names of the type, so restrict to just those:
+      keyof MethodsOf<TModel> | MethodsOf<TModel>[keyof MethodsOf<TModel>];
 
-  setup(props) {
-    return { ...useMetadataProps(props) };
-  },
+const props = defineProps<{
+  model: TModel;
 
-  data() {
-    return {
-      resultDisplayOptions,
-      fileDownloadKind: "preview",
-    };
-  },
+  /** A metadata specifier for the method being bound. One of:
+   * * A string with the name of the method belonging to `model`. E.g. `"myMethod"`.
+   * * A direct reference to the metadata object. E.g. `model.$metadata.methods.myMethod`.
+   */
+  for: MethodForSpec;
 
-  computed: {
-    // Hack for volar's lack of typing for `this` in templates.
-    thisComponent() {
-      return this;
-    },
+  autoReloadModel?: boolean;
+}>();
 
-    methodMeta() {
-      const meta = getValueMeta(this.for, this.modelMeta);
-      if (meta && "params" in meta) {
-        return meta;
-      }
-      throw Error("`c-method` requires metadata for a method.");
-    },
+const fileDownloadKind = ref<"preview" | "download">("preview");
+const instance = getCurrentInstance()!;
 
-    filteredParams() {
-      return Object.values(this.methodMeta.params).filter((p) => !p.source);
-    },
+const methodMeta = computed((): Method => {
+  const modelMeta = props.model.$metadata;
+  const meta =
+    typeof props.for == "string" ? modelMeta.methods[props.for] : props.for;
 
-    caller(): AnyArgCaller {
-      const caller = (this.viewModel as any)[this.methodMeta.name];
-      if (!caller)
-        throw Error(
-          `Method '${this.methodMeta.name}' doesn't exist on provided model.`
-        );
-      return caller;
-    },
-
-    viewModel(): ViewModel | ListViewModel {
-      if (this.model instanceof ViewModel) return this.model;
-      if (this.model instanceof ListViewModel) return this.model;
-      throw Error(
-        "c-method: prop `model` is required, and must be a ViewModel or ListViewModel."
-      );
-    },
-  },
-
-  methods: {
-    async invoke() {
-      this.fileDownloadKind = "preview";
-      await this.caller.invokeWithArgs();
-      if (this.autoReloadModel) {
-        await this.viewModel.$load();
-      }
-      if (this.methodMeta.autoClear) {
-        this.caller.resetArgs();
-      }
-    },
-
-    async invokeAndDownload() {
-      this.fileDownloadKind = "download";
-      await this.caller.invokeWithArgs();
-
-      if (this.autoReloadModel) {
-        // Don't await. Just do this in the background while we setup the file download.
-        this.viewModel.$load();
-      }
-      if (this.methodMeta.autoClear) {
-        this.caller.resetArgs();
-      }
-
-      this.downloadFileResult();
-    },
-
-    downloadFileResult() {
-      const caller = this.caller as ItemApiState<any, File>;
-      const file = caller.result;
-      if (!(file instanceof File)) return;
-
-      const a = document.createElement("a");
-      document.body.appendChild(a);
-      a.href = caller.getResultObjectUrl(this)!;
-      a.download = file.name;
-      a.click();
-      setTimeout(() => {
-        document.body.removeChild(a);
-      }, 1);
-    },
-  },
+  if (meta && "params" in meta) {
+    return meta;
+  }
+  throw Error("`c-method` requires metadata for a method.");
 });
+
+const filteredParams = computed(() => {
+  return Object.values(methodMeta.value.params).filter((p) => !p.source);
+});
+
+const caller = computed((): AnyArgCaller => {
+  const caller = (viewModel.value as any)[methodMeta.value.name];
+  if (!caller)
+    throw Error(
+      `Method '${methodMeta.value.name}' doesn't exist on provided model.`
+    );
+  return caller;
+});
+
+const viewModel = computed((): ViewModel | ListViewModel => {
+  if (props.model instanceof ViewModel) return props.model;
+  if (props.model instanceof ListViewModel) return props.model;
+  throw Error(
+    "c-method: prop `model` is required, and must be a ViewModel or ListViewModel."
+  );
+});
+
+async function invoke() {
+  fileDownloadKind.value = "preview";
+  await caller.value.invokeWithArgs();
+  if (props.autoReloadModel) {
+    await viewModel.value.$load();
+  }
+  if (methodMeta.value.autoClear) {
+    caller.value.resetArgs();
+  }
+}
+
+async function invokeAndDownload() {
+  fileDownloadKind.value = "download";
+  await caller.value.invokeWithArgs();
+
+  if (props.autoReloadModel) {
+    // Don't await. Just do this in the background while we setup the file download.
+    viewModel.value.$load();
+  }
+  if (methodMeta.value.autoClear) {
+    caller.value.resetArgs();
+  }
+
+  downloadFileResult();
+}
+
+function downloadFileResult() {
+  const fileCaller = caller.value as ItemApiState<any, File>;
+  const file = fileCaller.result;
+  if (!(file instanceof File)) return;
+
+  const a = document.createElement("a");
+  document.body.appendChild(a);
+  a.href = fileCaller.getResultObjectUrl(instance!.proxy)!;
+  a.download = file.name;
+  a.click();
+  setTimeout(() => {
+    document.body.removeChild(a);
+  }, 1);
+}
 </script>
 
 <style lang="scss">

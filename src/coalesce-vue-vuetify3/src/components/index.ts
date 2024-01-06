@@ -1,6 +1,6 @@
 // In alphabetical order:
 export { default as CAdminAuditLogPage } from "./admin/c-admin-audit-log-page.vue";
-export { default as CAdminDisplay } from "./admin/c-admin-display";
+export { default as CAdminDisplay } from "./admin/c-admin-display.vue";
 export { default as CAdminEditor } from "./admin/c-admin-editor.vue";
 export { default as CAdminEditorPage } from "./admin/c-admin-editor-page.vue";
 export { default as CAdminMethod } from "./admin/c-admin-method.vue";
@@ -9,8 +9,8 @@ export { default as CAdminTable } from "./admin/c-admin-table.vue";
 export { default as CAdminTablePage } from "./admin/c-admin-table-page.vue";
 export { default as CAdminTableToolbar } from "./admin/c-admin-table-toolbar.vue";
 export { default as CDatetimePicker } from "./input/c-datetime-picker.vue";
-export { default as CDisplay } from "./display/c-display";
-export { default as CInput } from "./input/c-input";
+export { default as CDisplay } from "./display/c-display.vue";
+export { default as CInput } from "./input/c-input.vue";
 export { default as CListFilters } from "./input/c-list-filters.vue";
 export { default as CListPage } from "./input/c-list-page.vue";
 export { default as CListPageSize } from "./input/c-list-page-size.vue";

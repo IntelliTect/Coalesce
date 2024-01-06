@@ -21,7 +21,7 @@
   </v-autocomplete>
 </template>
 
-<script lang="ts" setup generic="TModel extends Model | undefined">
+<script lang="ts" setup generic="TModel extends Model">
 import { ForSpec, useMetadataProps } from "../c-metadata-component";
 import {
   ListParameters,
@@ -51,9 +51,9 @@ defineOptions({
   inheritAttrs: false,
 });
 
-const modelValue = defineModel<Model[]>();
+const modelValue = defineModel<Model[] | null>();
 const props = defineProps<{
-  model?: TModel;
+  model: TModel;
 
   /** A metadata specifier for the value being bound. One of:
    * * A string with the name of the value belonging to `model`. E.g. `"caseProducts"`.

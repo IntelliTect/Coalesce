@@ -48,8 +48,34 @@
       :for="caseVm.$metadata.props.caseProducts"
     />
 
+    <c-display :model="vm" for="color" />
+    <c-display :model="vm" for="byteArrayProp" />
+    <c-display :model="vm" for="singleTest" />
+    <c-display :model="vm" for="tests" />
+    <c-display :model="(vm as any)" for="tests" />
+    <c-display :model="genericModel" for="tests" />
+    <c-display
+      :model="genericModel"
+      :for="model.$metadata.props.dateTimeNullable"
+    />
+
+    <c-input :model="vm" for="color" />
+    <c-input :model="vm" for="byteArrayProp" />
+    <c-input :model="vm" for="singleTest" />
+    <c-input :model="vm" for="tests" />
+    <c-input :model="(vm as any)" for="tests" />
+    <c-input :model="genericModel" for="tests" />
+    <c-input
+      :model="genericModel"
+      :for="model.$metadata.props.dateTimeNullable"
+    />
+
+    <c-input :model="ds" for="minDate" />
+
     <!-- ERROR EXPECTED: -->
     <c-select :model="123" for="num" />
+    <c-select :model="model" :for="123" />
+    <c-select :model="(model as any)" :for="123" />
     <c-select :model="vm.methodWithManyParams" for="integer" />
     <c-select :model="model" for="name" />
     <c-select :model="vm" for="name" />
@@ -73,12 +99,18 @@
     <!-- Nice to have, but currently not supported: -->
     <!-- Reference manytomany by the value given to [manytomanyattribute] -->
     <c-select-many-to-many :model="caseVm" for="products" />
+
+    <c-display :model="vm" for="asdf" />
+    <c-input :model="vm" for="asdf" />
+    <c-input :model="ds" for="asdf" />
+    <c-input :model="vm" />
+    <c-input :model="ds" />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ComplexModel as ComplexMeta } from "@test/metadata.g";
-import { ComplexModel } from "@test/models.g";
+import { Case, ComplexModel } from "@test/models.g";
 import { CaseViewModel, ComplexModelViewModel } from "@test/viewmodels.g";
 import { AnyArgCaller, Model } from "coalesce-vue";
 import { ref } from "vue";
@@ -89,6 +121,8 @@ const vm = new ComplexModelViewModel();
 const caseVm = new CaseViewModel();
 const selectedAny = ref<any>();
 const selectedDate = ref<Date>();
+
+const ds = new Case.DataSources.AllOpenCases();
 
 const anyString: string = "foo";
 const genericModel: Model = model;

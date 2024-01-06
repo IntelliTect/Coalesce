@@ -15,8 +15,6 @@ import {
   DataSource,
   PropNames,
   ModelValue,
-  ForeignKeyProperty,
-  ModelReferenceNavigationProperty,
   DateValue,
 } from "coalesce-vue";
 import { computed, PropType, useAttrs } from "vue";
@@ -34,7 +32,7 @@ type PropsOf<TModel> = TModel extends {
 // prettier-ignore
 export type ForSpec<
   TModel extends ModelAllowedType | unknown = unknown,
-  ValueKind extends Value = Property
+  ValueKind extends Value = Value
 > = 
 // Handle binding of `:model` to a Model or ViewModel:
 TModel extends Model ? 
@@ -76,11 +74,10 @@ TModel extends Model ?
       : never;
     }[keyof TArgsObj]
   | ((
-      // Collapse the distribution of the union in ValueKind down
-      // to the actual type that make sense for method parameters.
-      // This produces cleaner intellisense tooltips.
-      ValueKind extends ForeignKeyProperty ? ModelValue :
-      ValueKind extends ModelReferenceNavigationProperty ? ModelValue :
+      // Remove from the ValueKind union any property types,
+      // since method parameters aren't properties. 
+      // This helps to create cleaner intellisense.
+      ValueKind extends Property ? never :
       ValueKind
     )
       // While intersecting this with MethodParameter is *technically* correct,

@@ -47,14 +47,14 @@ import {
 } from "vue";
 import {
   buildVuetifyAttrs,
-  ForSpec,
   useMetadataProps,
+  type ForSpec,
 } from "../c-metadata-component";
 import {
-  Model,
-  DataSource,
+  type Model,
+  type DataSource,
+  type AnyArgCaller,
   mapValueToModel,
-  AnyArgCaller,
   parseValue,
 } from "coalesce-vue";
 

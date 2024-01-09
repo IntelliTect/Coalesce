@@ -156,9 +156,8 @@
 
 <script lang="ts" setup generic="TModel extends ViewModel | ListViewModel">
 import { computed, ref } from "vue";
-import {
-  ViewModel,
-  ListViewModel,
+import { ViewModel, ListViewModel } from "coalesce-vue";
+import type {
   DisplayOptions,
   AnyArgCaller,
   ItemApiState,

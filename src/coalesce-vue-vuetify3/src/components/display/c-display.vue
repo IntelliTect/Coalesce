@@ -72,9 +72,9 @@ export type CDisplayProps<TModel extends Model | AnyArgCaller | undefined> = {
   generic="TModel extends Model | AnyArgCaller | undefined"
 >
 import { defineComponent, getCurrentInstance, h, mergeProps } from "vue";
-import { ForSpec, useMetadataProps } from "../c-metadata-component";
-import {
-  valueDisplay,
+import { type ForSpec, useMetadataProps } from "../c-metadata-component";
+import { valueDisplay } from "coalesce-vue";
+import type {
   DisplayOptions,
   DateValue,
   Model,

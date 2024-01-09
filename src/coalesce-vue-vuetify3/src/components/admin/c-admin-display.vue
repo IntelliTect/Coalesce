@@ -1,9 +1,13 @@
 <script lang="ts" setup generic="TModel extends Model | undefined">
 import { getCurrentInstance, h, resolveComponent } from "vue";
 import { useMetadataProps } from "../c-metadata-component";
-import { propDisplay, ViewModelCollection, Model } from "coalesce-vue";
+import {
+  propDisplay,
+  type ViewModelCollection,
+  type Model,
+} from "coalesce-vue";
 
-import CDisplay, { CDisplayProps } from "../display/c-display.vue";
+import CDisplay, { type CDisplayProps } from "../display/c-display.vue";
 import { useRouter } from "vue-router";
 
 const props = withDefaults(defineProps<CDisplayProps<TModel>>(), {

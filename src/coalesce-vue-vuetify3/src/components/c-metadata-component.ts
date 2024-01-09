@@ -1,4 +1,4 @@
-import {
+import type {
   Model,
   Property,
   Value,
@@ -22,10 +22,10 @@ import {
   BooleanValue,
   CollectionValue,
   ObjectValue,
+  ApiStateTypeWithArgs,
 } from "coalesce-vue";
-import { computed, PropType, useAttrs } from "vue";
+import { computed, useAttrs } from "vue";
 import { useMetadata } from "..";
-import { ApiStateTypeWithArgs } from "coalesce-vue";
 
 type PropsOf<TModel> = TModel extends {
   $metadata: {

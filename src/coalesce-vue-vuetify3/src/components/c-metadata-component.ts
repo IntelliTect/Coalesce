@@ -16,6 +16,12 @@ import {
   PropNames,
   ModelValue,
   DateValue,
+  StringValue,
+  NumberValue,
+  FileValue,
+  BooleanValue,
+  CollectionValue,
+  ObjectValue,
 } from "coalesce-vue";
 import { computed, PropType, useAttrs } from "vue";
 import { useMetadata } from "..";
@@ -60,14 +66,21 @@ TModel extends Model ?
   // HACK: Pulling types off of TArgsObj is a concession we make
   // due to ApiStateTypeWithArgs's constituent types not actually capturing
   // the type of their metadata. At some point this could be made better if
-  // we were able to pull metadata off of `TMethod.
-  // What we'd really like to do here is do the same thing we do for props on a model:
+  // we were able to pull metadata off of `TMethod. In other words, what we'd 
+  // really like to do here is do the same thing we do for props on a model.
   | {
       [K in keyof TArgsObj]: TArgsObj[K] extends ((
-        ValueKind extends ModelValue ? Model :
+        ValueKind extends ModelValue ? Model<ModelType> :
+        ValueKind extends ObjectValue ? Model<ClassType> :
         ValueKind extends DateValue ? Date :
-        // TODO: Map other kinds of value meta to concrete types
-        // ValueKind extends StringValue ? string :
+        // Narrowed to role:value so we don't produce these if only searching for a FK.
+        ValueKind extends (StringValue & {role: 'value'}) ? string :
+        ValueKind extends (NumberValue & {role: 'value'}) ? number :
+        ValueKind extends FileValue ? File :
+        ValueKind extends BooleanValue ? boolean :
+        ValueKind extends CollectionValue ? (string[] | number[]) :
+        ValueKind extends Property ? never :
+        ValueKind extends Value ? any :
         never
       ) | null)
       ? K
@@ -328,27 +341,6 @@ export function buildVuetifyAttrs(
 }
 
 type ModelAllowedType = Model | AnyArgCaller;
-
-export function makeMetadataProps<TModel extends ModelAllowedType = Model>() {
-  return {
-    /** An object owning the value that is specified by the `for` prop. */
-    model: {
-      type: [Object, Function] as PropType<TModel | null>,
-      default: null,
-    },
-
-    /** A metadata specifier for the value being bound. One of:
-     * * A string with the name of the value belonging to `model`. E.g. `"firstName"`.
-     * * A direct reference to the metadata object. E.g. `model.$metadata.props.firstName`.
-     * * A string in dot-notation that starts with a type name. E.g. `"Person.firstName"`.
-     */
-    for: {
-      required: false,
-      type: [String, Object] as PropType<ForSpec<TModel>>,
-      default: null,
-    },
-  };
-}
 
 export function useMetadataProps<TModel extends ModelAllowedType = Model>(
   props: {

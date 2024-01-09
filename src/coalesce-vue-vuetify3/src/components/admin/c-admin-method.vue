@@ -194,6 +194,7 @@ type MethodForSpec =
       keyof MethodsOf<TModel> | MethodsOf<TModel>[keyof MethodsOf<TModel>];
 
 const props = defineProps<{
+  /** An object owning the method that is specified by the `for` prop. */
   model: TModel;
 
   /** A metadata specifier for the method being bound. One of:

@@ -5,9 +5,24 @@ import {
   DOMWrapper,
   createWrapperError,
   enableAutoUnmount,
+  ComponentMountingOptions,
+  VueWrapper,
 } from "@vue/test-utils";
 import { ArgumentsType } from "vitest";
-import { defineComponent, h } from "vue";
+import {
+  defineComponent,
+  h,
+  ComponentPublicInstance,
+  DefineComponent,
+  VNode,
+  CreateComponentPublicInstance,
+  ComponentInstance,
+} from "vue";
+import type {
+  ComponentExposed,
+  ComponentProps,
+  ComponentSlots,
+} from "vue-component-type-helpers";
 import { createRouter, createWebHistory } from "vue-router";
 
 import { createVuetify } from "vuetify";
@@ -29,9 +44,89 @@ const coalesceVuetify = createCoalesceVuetify({
   metadata: $metadata,
 });
 
+// HACK, pending release of https://github.com/vuejs/test-utils/pull/2242.
+// Adapted from node_modules/@vue/test-utils/dist/mount.d.ts
+type ComponentData<T> = T extends {
+  data?(...args: any): infer D;
+}
+  ? D
+  : {};
+declare function betterMount<
+  T,
+  // BEGIN MODIFICATION
+  C = T extends (props: infer Props, ...args: any) => any
+    ? DefineComponent<
+        Props extends Readonly<(infer PropNames)[]> | (infer PropNames)[]
+          ? {
+              [key in PropNames extends string ? PropNames : string]?: any;
+            }
+          : Props
+      >
+    : // END MODIFICATION
+    T extends ((...args: any) => any) | (new (...args: any) => any)
+    ? T
+    : T extends {
+        props?: infer Props;
+      }
+    ? DefineComponent<
+        Props extends Readonly<(infer PropNames)[]> | (infer PropNames)[]
+          ? {
+              [key in PropNames extends string ? PropNames : string]?: any;
+            }
+          : Props
+      >
+    : DefineComponent,
+  P extends ComponentProps<C> = ComponentProps<C>
+>(
+  originalComponent: T,
+  options?: ComponentMountingOptions<T>
+): VueWrapper<
+  ComponentProps<C> & ComponentData<C> & ComponentExposed<C>,
+  ComponentPublicInstance<
+    ComponentProps<C>,
+    ComponentData<C> & ComponentExposed<C> & Omit<P, keyof ComponentProps<C>>
+  >
+>;
+// END HACK
+
+// HACK: https://github.com/vuejs/language-tools/issues/3206#issuecomment-1624541884
+export type BetterComponentInstance<T> = T extends new (
+  ...args: any[]
+) => infer R
+  ? R
+  : T extends (...args: any[]) => infer R
+  ? R extends { __ctx?: infer K }
+    ? Exclude<K, void> extends { expose: (...args: infer K2) => void }
+      ? K2[0] & ComponentInstance<T>
+      : any
+    : any
+  : any;
+
+// HACK: https://github.com/vuejs/test-utils/issues/2254
+declare module "@vue/test-utils" {
+  interface BaseWrapper<ElementType extends Node> {
+    findComponent<T extends (...args: any) => any>(
+      selector: T
+    ): VueWrapper<
+      T extends (props: infer Props, ...args: any) => infer C
+        ? BetterComponentInstance<T>
+        : ComponentPublicInstance
+    >;
+  }
+}
+
+declare module "vue/jsx-runtime" {
+  namespace JSX {
+    export interface IntrinsicAttributes {
+      // Make tsx shut up about extra attributes on elements, which is a perfectly valid thing.
+      [name: string]: any;
+    }
+  }
+}
+
 const mountVuetify = function (
-  component: ArgumentsType<typeof mount>[0],
-  options: ArgumentsType<typeof mount>[1]
+  component: ArgumentsType<typeof betterMount>[0],
+  options: ArgumentsType<typeof betterMount>[1]
 ) {
   const wrapper = mount(component, {
     ...options,
@@ -65,11 +160,11 @@ const mountVuetify = function (
   });
 
   return wrapper;
-} as typeof mount;
+} as typeof betterMount;
 
 const mountApp = function (
-  component: ArgumentsType<typeof mount>[0],
-  options: ArgumentsType<typeof mount>[1]
+  component: ArgumentsType<typeof betterMount>[0],
+  options: ArgumentsType<typeof betterMount>[1]
 ) {
   const appWrapper = mount(
     defineComponent({
@@ -91,7 +186,7 @@ const mountApp = function (
   );
 
   return appWrapper;
-} as typeof mount;
+} as typeof betterMount;
 
 export function getWrapper(selector = ".v-overlay-container") {
   const el = document.querySelector(selector);

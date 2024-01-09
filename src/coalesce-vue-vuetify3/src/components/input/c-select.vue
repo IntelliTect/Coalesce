@@ -231,6 +231,7 @@ import {
   AnyArgCaller,
   ResponseCachingConfiguration,
 } from "coalesce-vue";
+import { readonly } from "vue";
 
 defineOptions({
   name: "c-select",
@@ -242,6 +243,7 @@ defineOptions({
 
 const props = withDefaults(
   defineProps<{
+    /** An object owning the value to be edited that is specified by the `for` prop. */
     model?: TModel;
 
     /** A metadata specifier for the value being bound. One of:
@@ -780,5 +782,10 @@ listCaller().then(() => {
   ) {
     onInput(first, true);
   }
+});
+
+defineExpose({
+  menuOpen: menuOpen,
+  search: search,
 });
 </script>

@@ -1,6 +1,10 @@
 import { Grade, Student } from "@test/targets.models";
 import { mount } from "@test/util";
 import { CDisplay } from "..";
+import { Case, ComplexModel } from "@test/models.g";
+import { ComplexModelViewModel } from "@test/viewmodels.g";
+import { Model } from "coalesce-vue";
+import { h } from "vue";
 
 describe("CDisplay", () => {
   const model = new Student({
@@ -11,6 +15,44 @@ describe("CDisplay", () => {
     phone: "123-123-1234",
     color: "#ff0000",
     notes: "multiline\n\nstring",
+  });
+
+  test("types", () => {
+    const model = new ComplexModel();
+    const vm = new ComplexModelViewModel();
+    const ds = new Case.DataSources.AllOpenCases();
+
+    () => <CDisplay model={vm} />;
+    () => <CDisplay model={vm} for="color" />;
+    () => <CDisplay model={vm} for="byteArrayProp" />;
+    () => <CDisplay model={vm} for="singleTest" />;
+    () => <CDisplay model={vm} for="tests" />;
+    //@ts-expect-error non-existent prop
+    () => <CDisplay model={vm} for="_anyString" />;
+
+    () => <CDisplay model={vm as any} for="_anyString" />;
+    () => <CDisplay model={model as Model} for="_anyString" />;
+    () => <CDisplay model={model as Model} for={vm.$metadata.props.color} />;
+
+    () => <CDisplay model={ds} for="minDate" />;
+    //@ts-expect-error non-existent prop
+    () => <CDisplay model={ds} for="badString" />;
+
+    const caller = vm.methodWithManyParams;
+    // Method caller args have fairly exhaustive cases here
+    // for different types because ForSpec has unique handling
+    // for caller args.
+    () => <CDisplay model={caller} for="dateTime" />;
+    () => <CDisplay model={caller} for="model" />;
+    () => <CDisplay model={caller} for="strParam" />;
+    () => <CDisplay model={caller} for="integer" />;
+    () => <CDisplay model={caller} for="enumParam" />;
+    () => <CDisplay model={caller} for="boolParam" />;
+    () => <CDisplay model={caller} for="file" />;
+    () => <CDisplay model={caller} for="stringsParam" />;
+    () => <CDisplay model={caller} for="collectionExternal" />;
+    //@ts-expect-error non-existent prop
+    () => <CDisplay model={caller} for="badString" />;
   });
 
   test(":model", () => {
@@ -34,7 +76,11 @@ describe("CDisplay", () => {
   });
 
   test(":model for=qualifiedString", () => {
-    const wrapper = mount(() => <CDisplay model={model} for="Student.grade" />);
+    // This syntax is now deprecated and no longer supported by types
+    // (hence the cast to any), but is still supported at runtime for now.
+    const wrapper = mount(() => (
+      <CDisplay model={model} for={"Student.grade" as any} />
+    ));
 
     expect(wrapper.text()).toContain("Freshman");
   });

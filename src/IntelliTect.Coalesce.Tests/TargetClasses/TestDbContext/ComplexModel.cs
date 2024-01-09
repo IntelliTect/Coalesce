@@ -156,9 +156,13 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         public ExternalParent MethodWithManyParams(
             ExternalParent singleExternal,
             ICollection<ExternalParent> collectionExternal,
+            IFile file,
             string strParam,
+            string[] stringsParam,
             DateTime dateTime,
             int integer,
+            bool boolParam,
+            Case.Statuses enumParam,
             Company model,
             Company[] modelCollection
         )

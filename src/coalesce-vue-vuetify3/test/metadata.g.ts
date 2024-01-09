@@ -1008,10 +1008,28 @@ export const ComplexModel = domain.types.ComplexModel = {
           },
           role: "value",
         },
+        file: {
+          name: "file",
+          displayName: "File",
+          type: "file",
+          role: "value",
+        },
         strParam: {
           name: "strParam",
           displayName: "Str Param",
           type: "string",
+          role: "value",
+        },
+        stringsParam: {
+          name: "stringsParam",
+          displayName: "Strings Param",
+          type: "collection",
+          itemType: {
+            name: "$collectionItem",
+            displayName: "",
+            role: "value",
+            type: "string",
+          },
           role: "value",
         },
         dateTime: {
@@ -1026,6 +1044,19 @@ export const ComplexModel = domain.types.ComplexModel = {
           name: "integer",
           displayName: "Integer",
           type: "number",
+          role: "value",
+        },
+        boolParam: {
+          name: "boolParam",
+          displayName: "Bool Param",
+          type: "boolean",
+          role: "value",
+        },
+        enumParam: {
+          name: "enumParam",
+          displayName: "Enum Param",
+          type: "enum",
+          get typeDef() { return domain.enums.Statuses },
           role: "value",
         },
         model: {

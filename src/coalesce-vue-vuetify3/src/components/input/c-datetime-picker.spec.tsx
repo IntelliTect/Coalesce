@@ -1,7 +1,10 @@
-import { Grade, Student } from "@test/targets.models";
+import { Grade } from "@test/targets.models";
 import { StudentViewModel } from "@test/targets.viewmodels";
-import { delay, mount, nextTick } from "@test/util";
+import { delay, mount } from "@test/util";
 import { CDatetimePicker } from "..";
+import { Case, ComplexModel } from "@test/models.g";
+import { ComplexModelViewModel } from "@test/viewmodels.g";
+import { AnyArgCaller } from "coalesce-vue";
 
 describe("CDatetimePicker", () => {
   let model: StudentViewModel;
@@ -15,6 +18,57 @@ describe("CDatetimePicker", () => {
       color: "#ff0000",
       notes: "multiline\n\nstring",
     });
+  });
+
+  test("types", () => {
+    const model = new ComplexModel();
+    const vm = new ComplexModelViewModel();
+    const ds = new Case.DataSources.AllOpenCases();
+
+    const selectedDate = new Date();
+
+    () => <CDatetimePicker model={vm} for="systemDateOnly" />;
+    () => <CDatetimePicker model={model} for="systemDateOnly" />;
+    () => (
+      <CDatetimePicker
+        model={model}
+        for={vm.$metadata.props.dateTimeNullable}
+      />
+    );
+    () => <CDatetimePicker model={model as any} for="systemDateOnly" />;
+
+    //@ts-expect-error non-existent prop
+    () => <CDatetimePicker model={vm} for="asdf" />;
+    //@ts-expect-error non-date prop
+    () => <CDatetimePicker model={vm} for="long" />;
+
+    () => (
+      <CDatetimePicker for="ComplexModel.dateTime" modelValue={selectedDate} />
+    );
+    () => (
+      <CDatetimePicker
+        for={vm.$metadata.props.dateTimeNullable}
+        modelValue={selectedDate}
+      />
+    );
+
+    () => <CDatetimePicker modelValue={selectedDate} />;
+    //@ts-expect-error wrong value type
+    () => <CDatetimePicker modelValue={selectedDate as string} />;
+
+    const caller = vm.methodWithManyParams;
+    () => <CDatetimePicker model={caller} for="dateTime" />;
+    () => <CDatetimePicker model={caller as AnyArgCaller} for="dateTime" />;
+    () => <CDatetimePicker model={caller as AnyArgCaller} for="anyString" />;
+
+    //@ts-expect-error non-existent param
+    () => <CDatetimePicker model={caller} for="asdf" />;
+    //@ts-expect-error non-date param
+    () => <CDatetimePicker model={caller} for="integer" />;
+
+    () => <CDatetimePicker model={ds} for="minDate" />;
+    //@ts-expect-error invalid param
+    () => <CDatetimePicker model={ds} for="asdf" />;
   });
 
   test("caller model - date value", async () => {

@@ -1,0 +1,13 @@
+{
+  "extends": "./tsconfig.build-types.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "rootDir": "."
+  },
+  "include": [
+    "src/**/.spec.ts",
+    "src/**/.spec.tsx",
+    "test/**/.spec.ts",
+    "test/**/.spec.tsx"
+  ]
+}

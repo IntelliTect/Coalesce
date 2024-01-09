@@ -41,6 +41,7 @@ defineOptions({
 });
 
 const props = defineProps<{
+  /** An object owning the value to be edited that is specified by the `for` prop. */
   model?: TModel;
 
   /** A metadata specifier for the value being bound. One of:

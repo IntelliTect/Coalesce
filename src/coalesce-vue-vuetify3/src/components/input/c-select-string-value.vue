@@ -16,15 +16,22 @@
   -->
 </template>
 
-<script lang="ts" setup generic="TModel extends Model | undefined">
+<script lang="ts" setup generic="TModel extends Model">
 import { computed, ref } from "vue";
 import {
   ModelApiClient,
   ItemResultPromise,
   Model,
   StringValue,
+  Method,
+  CollectionValue,
+  ItemMethod,
 } from "coalesce-vue";
-import { ForSpec, useMetadataProps } from "../c-metadata-component";
+import {
+  ForSpec,
+  MethodForSpec,
+  useMetadataProps,
+} from "../c-metadata-component";
 import { watch } from "vue";
 import { onMounted } from "vue";
 
@@ -40,9 +47,14 @@ defineOptions({
   inheritAttrs: false,
 });
 
+type StringsStaticMethod = ItemMethod & {
+  isStatic: true;
+  return: CollectionValue & { itemType: StringValue };
+};
+
 const props = defineProps<{
   /** An object owning the value to be edited that is specified by the `for` prop. */
-  model?: TModel;
+  model: TModel;
 
   /** A metadata specifier for the value being bound. One of:
    * * A string with the name of the value belonging to `model`. E.g. `"autocompleteString"`.
@@ -51,7 +63,7 @@ const props = defineProps<{
    */
   for: ForSpec<TModel, StringValue>;
 
-  method: string;
+  method: MethodForSpec<TModel, StringsStaticMethod>;
   params?: any;
   listWhenEmpty?: boolean;
 }>();
@@ -69,7 +81,10 @@ if (!modelMeta || !("type" in modelMeta) || modelMeta.type != "model") {
   throw Error(MODEL_REQUIRED_MESSAGE);
 }
 
-const methodMeta = modelMeta.methods[props.method];
+const methodMeta =
+  typeof props.method == "string"
+    ? modelMeta.methods[props.method]
+    : (props.method as Method);
 
 if (!methodMeta) {
   throw Error(

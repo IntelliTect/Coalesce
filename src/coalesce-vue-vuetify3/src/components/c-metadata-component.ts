@@ -21,6 +21,7 @@ import type {
   CollectionValue,
   ObjectValue,
   ApiStateTypeWithArgs,
+  ListViewModel,
 } from "coalesce-vue";
 import { ApiState, ViewModel } from "coalesce-vue";
 import { computed, useAttrs } from "vue";
@@ -29,6 +30,14 @@ import { useMetadata } from "..";
 type PropsOf<TModel> = TModel extends {
   $metadata: {
     props: infer O extends Record<string, Property>;
+  };
+}
+  ? O
+  : never;
+
+type MethodsOf<TModel> = TModel extends {
+  $metadata: {
+    methods: infer O extends Record<string, Method>;
   };
 }
   ? O
@@ -101,6 +110,22 @@ TModel extends Model ?
   
 // Fallback to allowing anything:
 : undefined | string | ValueKind;
+
+export type MethodForSpec<
+  TModel extends Model | ListViewModel | ViewModel | unknown = unknown,
+  MethodKind extends Method = Method
+> = "__never" extends keyof MethodsOf<TModel> // Check if we only know that the type's method names are any strings
+  ? // If so, we have to allow any string because the exact method names aren't known.
+    string | Method
+  : // We know the exact method names of the type, so restrict to just those:
+    {
+      [K in keyof MethodsOf<TModel>]: MethodsOf<TModel>[K] extends MethodKind
+        ? // Allow the method name
+          | (K & string)
+            // Or the full method metadata object
+            | MethodsOf<TModel>[K]
+        : never;
+    }[keyof MethodsOf<TModel>];
 
 export function getValueMetaAndOwner(
   forVal: ForSpec | null | undefined,

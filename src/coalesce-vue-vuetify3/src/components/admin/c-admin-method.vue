@@ -164,6 +164,7 @@ import type {
   Method,
 } from "coalesce-vue";
 import { getCurrentInstance } from "vue";
+import { MethodForSpec } from "../c-metadata-component";
 
 defineOptions({
   name: "c-admin-method",
@@ -175,22 +176,6 @@ const resultDisplayOptions = {
     enumeratedItemsSeparator: "\n",
   },
 } as DisplayOptions;
-
-type MethodsOf<TModel> = TModel extends {
-  $metadata: {
-    methods: infer O extends Record<string, Method>;
-  };
-}
-  ? O
-  : never;
-
-type MethodForSpec =
-  // Check if we only know that the type's method names are any strings
-  "__never" extends keyof MethodsOf<TModel["$metadata"]>
-    ? // If so, we have to allow any string because the exact method names aren't known.
-      string | Method
-    : // We know the exact method names of the type, so restrict to just those:
-      keyof MethodsOf<TModel> | MethodsOf<TModel>[keyof MethodsOf<TModel>];
 
 const props = defineProps<{
   /** An object owning the method that is specified by the `for` prop. */

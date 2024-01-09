@@ -371,7 +371,7 @@ export function createAspNetCoreHmrPlugin({
           // * new Worker("https://
           // where the URL is the vite server
           new RegExp(
-            `(new\\s+(?:Shared)?Worker\\s*\\(\\s*(?:new\\s+URL\\s*\\(\\s*)?)(["'])https?://[^:]+:${port}${escapeRegex(
+            `(new\\s+(?:Shared)?Worker\\s*\\(\\s*(?:new\\s+URL\\s*\\(\\s*)?)(?:''\\s*\\+\\s*)?(["'])https?://[^:]+:${port}${escapeRegex(
               base
             )}`,
             "g"

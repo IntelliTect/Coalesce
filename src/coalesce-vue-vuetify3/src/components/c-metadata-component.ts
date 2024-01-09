@@ -8,10 +8,8 @@ import type {
   ModelType,
   ObjectType,
   DataSourceType,
-  ViewModel,
   Domain,
   AnyArgCaller,
-  ApiState,
   DataSource,
   PropNames,
   ModelValue,
@@ -24,6 +22,7 @@ import type {
   ObjectValue,
   ApiStateTypeWithArgs,
 } from "coalesce-vue";
+import { ApiState, ViewModel } from "coalesce-vue";
 import { computed, useAttrs } from "vue";
 import { useMetadata } from "..";
 

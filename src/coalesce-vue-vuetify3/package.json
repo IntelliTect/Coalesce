@@ -28,7 +28,7 @@
     "dist"
   ],
   "scripts": {
-    "build": "npm run build-local-deps && vite build && vue-tsc -p ./tsconfig.build-types.json && vue-tsc --noEmit **/*.spec.tsx && npm run buildts",
+    "build": "npm run build-local-deps && vite build && vue-tsc -p ./tsconfig.build-types.json && vue-tsc -p ./tsconfig.test-types.json && npm run buildts",
     "buildts": "tsc -p ./tsconfig.build-utils.json",
     "build-local-deps": "cd ../coalesce-vue && npm ci && npm run build",
     "test": "vitest",

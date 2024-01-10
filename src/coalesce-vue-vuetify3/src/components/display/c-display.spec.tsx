@@ -30,6 +30,12 @@ describe("CDisplay", () => {
     //@ts-expect-error non-existent prop
     () => <CDisplay model={vm} for="_anyString" />;
 
+    // Possibly null model:
+    () => <CDisplay model={vm.singleTest} />;
+    () => <CDisplay model={vm.singleTest} for="testName" />;
+    //@ts-expect-error non-existent prop
+    () => <CDisplay model={vm.singleTest} for="asdf" />;
+
     () => <CDisplay model={vm as any} for="_anyString" />;
     () => <CDisplay model={model as Model} for="_anyString" />;
     () => <CDisplay model={model as Model} for={vm.$metadata.props.color} />;

@@ -153,12 +153,21 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         // Add other kinds of properties, relationships, etc... as needed.
 
         [Coalesce, Execute]
-        public ExternalParent MethodWithExternalTypeParams(
-            ExternalParent single, 
-            ICollection<ExternalParent> collection
+        public ExternalParent MethodWithManyParams(
+            ExternalParent singleExternal,
+            ICollection<ExternalParent> collectionExternal,
+            IFile file,
+            string strParam,
+            string[] stringsParam,
+            DateTime dateTime,
+            int integer,
+            bool boolParam,
+            Case.Statuses enumParam,
+            Company model,
+            Company[] modelCollection
         )
         {
-            return collection.FirstOrDefault() ?? single;
+            return collectionExternal.FirstOrDefault() ?? singleExternal;
         }
 
         [Coalesce, Execute]

@@ -7,7 +7,8 @@
     "rootDir": "./src",
     "paths": {
       "coalesce-vue": ["coalesce-vue"],
-      "coalesce-vue/*": ["coalesce-vue/*"]
+      "coalesce-vue/*": ["coalesce-vue/*"],
+      "coalesce-vue/lib/*": ["coalesce-vue/lib/*"]
     }
   },
   "include": ["src/index.ts"],

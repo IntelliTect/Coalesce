@@ -54,9 +54,6 @@ namespace IntelliTect.Coalesce.CodeGeneration.Tests
                 string.Join("\n", validationResult.Where(r => r.IsError))
             );
 
-            // Writing the output to disk is needed for the TS compilation tests.
-            // It is also useful so we can look at the output on diskto diagnose a failures.
-            await suite.GenerateAsync();
             return suite;
         }
 

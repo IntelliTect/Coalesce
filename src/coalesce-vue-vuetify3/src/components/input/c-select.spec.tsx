@@ -1,13 +1,30 @@
 import { Course, Student } from "@test/targets.models";
 import { StudentViewModel } from "@test/targets.viewmodels";
-import { getWrapper, mountApp, nextTick, flushPromises } from "@test/util";
+import {
+  getWrapper,
+  mountApp,
+  nextTick,
+  flushPromises,
+  BetterComponentInstance,
+} from "@test/util";
 import { VueWrapper } from "@vue/test-utils";
 import { AxiosRequestConfig } from "axios";
-import { AxiosClient, AxiosItemResult, AxiosListResult } from "coalesce-vue";
+import {
+  AnyArgCaller,
+  AxiosClient,
+  AxiosItemResult,
+  AxiosListResult,
+  Model,
+  ViewModel,
+} from "coalesce-vue";
 import { Mock } from "vitest";
-import { FunctionalComponent } from "vue";
+import { FunctionalComponent, ref } from "vue";
 import { VForm } from "vuetify/components";
 import { CSelect } from "..";
+
+import { ComplexModel, Case } from "@test/models.g";
+import { ComplexModelViewModel, CaseViewModel } from "@test/viewmodels.g";
+import { h } from "vue";
 
 describe("CSelect", () => {
   let model = new Student({
@@ -53,6 +70,77 @@ describe("CSelect", () => {
             status: 200,
           } as AxiosItemResult<Course>;
       });
+  });
+
+  test("types", () => {
+    const model = new ComplexModel({
+      name: "bob",
+    });
+    const vm = new ComplexModelViewModel();
+    const selectedAny = ref<any>();
+
+    const anyString: string = "foo";
+    const genericModel: Model = model;
+
+    // Binding to FK or ref nav on a ViewModel:
+    () => <CSelect model={vm} for="singleTest" />;
+    () => <CSelect model={vm} for="singleTestId" />;
+    () => <CSelect model={vm} for={vm.$metadata.props.singleTest} />;
+
+    // Binding to plain Models:
+    () => <CSelect model={model} for="singleTest" />;
+    () => <CSelect model={model} for="singleTestId" />;
+    //@ts-expect-error wrong type of property
+    () => <CSelect model={model} for="name" />;
+    //@ts-expect-error wrong type of property
+    () => <CSelect model={vm} for={vm.$metadata.props.name} />;
+
+    // Untyped bindings:
+    () => <CSelect model={genericModel} for={anyString} />;
+    () => <CSelect model={model as any} for={anyString} />;
+
+    // Binding with for + v-model
+    () => (
+      <CSelect
+        for="Test"
+        modelValue={selectedAny}
+        update:modelValue={() => {}}
+      />
+    );
+    () => (
+      <CSelect
+        for={vm.$metadata.props.singleTest}
+        modelValue={selectedAny}
+        update:modelValue={() => {}}
+      />
+    );
+
+    // Binding to method parameters
+    () => <CSelect model={vm.methodWithManyParams} for="model" />;
+    () => (
+      <CSelect
+        model={vm.methodWithManyParams}
+        for={vm.$metadata.methods.methodWithManyParams.params.model}
+      />
+    );
+    //@ts-expect-error non-object method parameter
+    () => <CSelect model={vm.methodWithManyParams} for="integer" />;
+
+    () => (
+      <CSelect model={vm.methodWithManyParams as AnyArgCaller} for="model" />
+    );
+    // This has to be valid when we don't have a known type for the caller
+    () => (
+      <CSelect
+        model={vm.methodWithManyParams as AnyArgCaller}
+        for="specificString"
+      />
+    );
+
+    //@ts-expect-error invalid model type
+    () => <CSelect model={123} for="num" />;
+    //@ts-expect-error invalid for type
+    () => <CSelect model={vm} for={123} />;
   });
 
   test.each([
@@ -132,7 +220,7 @@ describe("CSelect", () => {
     describe.each([
       { p: "currentCourse", d: "navigation" },
       { p: "currentCourseId", d: "fk" },
-    ])("when bound by $d", ({ p: propName }) => {
+    ] as const)("when bound by $d", ({ p: propName }) => {
       test("pulls validation from fk metadata", async () => {
         await assertValidation(
           () => <CSelect model={model} for={propName}></CSelect>,
@@ -236,15 +324,15 @@ describe("CSelect", () => {
       const onUpdateObject = vitest.fn();
       const onUpdateModel = vitest.fn();
       const model = new Course({ courseId: 303 });
+
       const wrapper = mountApp(() => (
         <CSelect
           for="Course"
-          model={model}
           onUpdate:keyValue={onUpdateKey}
           onUpdate:objectValue={onUpdateObject}
           onUpdate:modelValue={onUpdateModel}
         ></CSelect>
-      )).findComponent(CSelect);
+      )).findComponent(CSelect<Course>);
 
       // Act
       await selectFirstResult(wrapper);
@@ -298,7 +386,7 @@ describe("CSelect", () => {
     test("typing while focused opens search", async () => {
       const wrapper = mountApp(() => (
         <CSelect model={model} for="currentCourse"></CSelect>
-      )).findComponent(CSelect);
+      )).findComponent(CSelect<any>);
 
       await flushPromises();
 
@@ -328,7 +416,7 @@ describe("CSelect", () => {
     test("list is keyboard navigable", async () => {
       const wrapper = mountApp(() => (
         <CSelect model={model} for="currentCourse" clearable></CSelect>
-      )).findComponent(CSelect);
+      )).findComponent(CSelect<Student>);
 
       const mainInput = wrapper.find("input");
 
@@ -364,7 +452,7 @@ describe("CSelect", () => {
 
     describe.each(["disabled", "readonly"])("%s", (prop) => {
       async function assertNonInteractive(
-        wrapper: VueWrapper<InstanceType<typeof CSelect>>
+        wrapper: VueWrapper<BetterComponentInstance<typeof CSelect<Student>>>
       ) {
         // Clearable is ignored when disabled/readonly
         expect(wrapper.find(".v-field__clearable").exists()).toBeFalsy();
@@ -387,7 +475,7 @@ describe("CSelect", () => {
           <VForm {...{ [prop]: true }}>
             <CSelect model={model} for="currentCourse" clearable></CSelect>
           </VForm>
-        )).findComponent(CSelect);
+        )).findComponent(CSelect<Student>);
 
         assertNonInteractive(wrapper);
       });
@@ -400,7 +488,7 @@ describe("CSelect", () => {
             clearable
             {...{ [prop]: true }}
           ></CSelect>
-        )).findComponent(CSelect);
+        )).findComponent(CSelect<Student>);
 
         assertNonInteractive(wrapper);
       });

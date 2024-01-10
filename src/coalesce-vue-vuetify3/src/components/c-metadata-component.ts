@@ -1,4 +1,4 @@
-import {
+import type {
   Model,
   Property,
   Value,
@@ -8,19 +8,127 @@ import {
   ModelType,
   ObjectType,
   DataSourceType,
-  ViewModel,
   Domain,
   AnyArgCaller,
-  ApiState,
   DataSource,
+  PropNames,
+  ModelValue,
+  DateValue,
+  StringValue,
+  NumberValue,
+  FileValue,
+  BooleanValue,
+  CollectionValue,
+  ObjectValue,
+  ApiStateTypeWithArgs,
+  ListViewModel,
 } from "coalesce-vue";
-import { computed, PropType, useAttrs } from "vue";
+import { ApiState, ViewModel } from "coalesce-vue";
+import { computed, useAttrs } from "vue";
 import { useMetadata } from "..";
 
-export type ForSpec = undefined | null | string | Property | Value | Method;
+type PropsOf<TModel> = TModel extends {
+  $metadata: {
+    props: infer O extends Record<string, Property>;
+  };
+}
+  ? O
+  : never;
+
+type MethodsOf<TModel> = TModel extends {
+  $metadata: {
+    methods: infer O extends Record<string, Method>;
+  };
+}
+  ? O
+  : never;
+
+// prettier-ignore
+export type ForSpec<
+  TModel extends ModelAllowedType | unknown = unknown,
+  ValueKind extends Value = Value
+> = 
+// Handle binding of `:model` to a Model or ViewModel:
+TModel extends Model ? 
+  // Check if we only know that the type's prop names are any strings
+  "__neverPropName" extends PropNames<TModel["$metadata"]>
+    // If so, we have to allow any string because the exact prop names aren't known.
+    ? string | ValueKind
+    // We know the exact prop names of the type, so restrict to just those:
+    : {
+        [K in keyof PropsOf<TModel>]: PropsOf<TModel>[K] extends ValueKind
+        ? // Allow the property name
+          | K
+          // Or the full property metadata object
+          | PropsOf<TModel>[K]
+        : never;
+      }[keyof PropsOf<TModel>]
+    
+// Handle binding of `:model` to an API caller (which binds values to the caller's args object):    
+: TModel extends ApiStateTypeWithArgs<
+  infer TMethod extends Method,
+  any,
+  infer TArgsObj,
+  any
+> ?
+  // HACK: Pulling types off of TArgsObj is a concession we make
+  // due to ApiStateTypeWithArgs's constituent types not actually capturing
+  // the type of their metadata. At some point this could be made better if
+  // we were able to pull metadata off of `TMethod. In other words, what we'd 
+  // really like to do here is do the same thing we do for props on a model.
+  | {
+      [K in keyof TArgsObj]: TArgsObj[K] extends ((
+        ValueKind extends ModelValue ? Model<ModelType> :
+        ValueKind extends ObjectValue ? Model<ClassType> :
+        ValueKind extends DateValue ? Date :
+        // Narrowed to role:value so we don't produce these if only searching for a FK.
+        ValueKind extends (StringValue & {role: 'value'}) ? string :
+        ValueKind extends (NumberValue & {role: 'value'}) ? number :
+        ValueKind extends FileValue ? File :
+        ValueKind extends BooleanValue ? boolean :
+        ValueKind extends CollectionValue ? (string[] | number[]) :
+        ValueKind extends Property ? never :
+        ValueKind extends Value ? any :
+        never
+      ) | null)
+      ? K
+      : never;
+    }[keyof TArgsObj]
+  | ((
+      // Remove from the ValueKind union any property types,
+      // since method parameters aren't properties. 
+      // This helps to create cleaner intellisense.
+      ValueKind extends Property ? never :
+      ValueKind
+    )
+      // While intersecting this with MethodParameter is *technically* correct,
+      // it creates noisy intellisense and we don't actually care if the meta
+      // has the few extra fields specific to method parameters,
+      // as our input components don't use those parameter-specific fields.
+      // & MethodParameter
+    )
+  
+// Fallback to allowing anything:
+: undefined | string | ValueKind;
+
+export type MethodForSpec<
+  TModel extends Model | ListViewModel | ViewModel | unknown = unknown,
+  MethodKind extends Method = Method
+> = "__never" extends keyof MethodsOf<TModel> // Check if we only know that the type's method names are any strings
+  ? // If so, we have to allow any string because the exact method names aren't known.
+    string | Method
+  : // We know the exact method names of the type, so restrict to just those:
+    {
+      [K in keyof MethodsOf<TModel>]: MethodsOf<TModel>[K] extends MethodKind
+        ? // Allow the method name
+          | (K & string)
+            // Or the full method metadata object
+            | MethodsOf<TModel>[K]
+        : never;
+    }[keyof MethodsOf<TModel>];
 
 export function getValueMetaAndOwner(
-  forVal: ForSpec,
+  forVal: ForSpec | null | undefined,
   model: Model | DataSource | AnyArgCaller | null | undefined,
   $metadata?: Domain
 ) {
@@ -42,7 +150,7 @@ export function getValueMetaAndOwner(
 }
 
 export function getValueMeta(
-  forVal: ForSpec,
+  forVal: ForSpec | null | undefined,
   modelMeta:
     | ObjectType
     | ModelType
@@ -257,27 +365,6 @@ export function buildVuetifyAttrs(
 }
 
 type ModelAllowedType = Model | AnyArgCaller;
-
-export function makeMetadataProps<TModel extends ModelAllowedType = Model>() {
-  return {
-    /** An object owning the value that is specified by the `for` prop. */
-    model: {
-      type: [Object, Function] as PropType<TModel | null>,
-      default: null,
-    },
-
-    /** A metadata specifier for the value being bound. One of:
-     * * A string with the name of the value belonging to `model`. E.g. `"firstName"`.
-     * * A direct reference to the metadata object. E.g. `model.$metadata.props.firstName`.
-     * * A string in dot-notation that starts with a type name. E.g. `"Person.firstName"`.
-     */
-    for: {
-      required: false,
-      type: [String, Object] as PropType<ForSpec>,
-      default: null,
-    },
-  };
-}
 
 export function useMetadataProps<TModel extends ModelAllowedType = Model>(
   props: {

@@ -3,6 +3,10 @@ import { StudentViewModel } from "@test/targets.viewmodels";
 import { delay, mount, nextTick } from "@test/util";
 import { VListItem } from "vuetify/components";
 import { CInput } from "..";
+import { Case, ComplexModel } from "@test/models.g";
+import { ComplexModelViewModel } from "@test/viewmodels.g";
+import { h } from "vue";
+import { Model } from "coalesce-vue";
 
 describe("CInput", () => {
   let model: StudentViewModel;
@@ -18,20 +22,71 @@ describe("CInput", () => {
     });
   });
 
-  test.each(["name", "Student.name", new Student().$metadata.props.name])(
-    "metadata resolves - %s",
-    async (forSpec) => {
-      const wrapper = mount(() => <CInput model={model} for={forSpec} />);
+  test("types", () => {
+    const model = new ComplexModel();
+    const vm = new ComplexModelViewModel();
+    const ds = new Case.DataSources.AllOpenCases();
 
-      // Assert resting state
-      expect(wrapper.find("label").text()).toEqual("Name");
-      expect(wrapper.find("input").element.value).toBe("bob");
+    () => <CInput model={model} for="color" />;
+    () => <CInput model={vm} for="color" />;
+    () => <CInput model={vm} for="byteArrayProp" />;
+    () => <CInput model={vm} for="singleTest" />;
+    () => <CInput model={vm} for="tests" />;
+    //@ts-expect-error non-existent prop
+    () => <CInput model={vm} for="_anyString" />;
+    //@ts-expect-error missing `for`
+    () => <CInput model={vm} />;
 
-      // Perform input
-      await wrapper.find("input").setValue("steve");
-      expect(model.name).toBe("steve");
-    }
-  );
+    () => <CInput model={vm as any} for="_anyString" />;
+    () => <CInput model={model as Model} for="_anyString" />;
+    () => <CInput model={model as Model} for={vm.$metadata.props.color} />;
+
+    () => <CInput model={ds} for="minDate" />;
+    //@ts-expect-error non-existent prop
+    () => <CInput model={ds} for="badString" />;
+    //@ts-expect-error missing `for`
+    () => <CInput model={ds} />;
+
+    const caller = vm.methodWithManyParams;
+    // Method caller args have fairly exhaustive cases here
+    // for different types because ForSpec has unique handling
+    // for caller args.
+    () => <CInput model={caller} for="dateTime" />;
+    () => <CInput model={caller} for="model" />;
+    () => <CInput model={caller} for="strParam" />;
+    () => <CInput model={caller} for="integer" />;
+    () => <CInput model={caller} for="enumParam" />;
+    () => <CInput model={caller} for="boolParam" />;
+    () => <CInput model={caller} for="file" />;
+    () => <CInput model={caller} for="stringsParam" />;
+
+    // While external types don't make an input for CInput,
+    // they aren't technically invalid either because they at least fall back to c-display.
+    () => <CInput model={caller} for="singleExternal" />;
+    () => <CInput model={caller} for="collectionExternal" />;
+
+    //@ts-expect-error non-existent prop
+    () => <CInput model={caller} for="badString" />;
+    //@ts-expect-error missing `for`
+    () => <CInput model={caller} />;
+  });
+
+  test.each([
+    "name",
+    // "Type.prop" w/ `model` is deprecated, no longer supported by types but still supported at runtime */
+    "Student.name" as "name",
+    new Student().$metadata.props.name,
+  ] as const)("metadata resolves - %s", async (forSpec) => {
+    const wrapper = mount(() => <CInput model={model} for={forSpec} />);
+
+    // Assert resting state
+    expect(wrapper.find("label").text()).toEqual("Name");
+    expect(wrapper.find("input").element.value).toBe("bob");
+
+    // Perform input
+    await wrapper.find("input").setValue("steve");
+    expect(model.name).toBe("steve");
+  });
 
   test("enum", async () => {
     const wrapper = mount(() => <CInput model={model} for="grade" />);
@@ -52,20 +107,22 @@ describe("CInput", () => {
   });
 
   test("caller model - date value", async () => {
-    const wrapper = mount(() => <CInput model={model.manyParams} for="date" />);
+    const wrapper = mount(() => (
+      <CInput model={model.manyParams} for="startDate" />
+    ));
 
     // Assert resting state
-    expect(wrapper.find("label").text()).toEqual("Date");
+    expect(wrapper.find("label").text()).toEqual("Start Date");
 
     // Set a value, and look for the value
-    model.manyParams.args.date = new Date("2023-08-16T01:02:03Z");
+    model.manyParams.args.startDate = new Date("2023-08-16T01:02:03Z");
     await delay(10);
     expect(wrapper.find("input").element.value).contains("2023");
 
     // Perform an input on the component, and then look for the new value.
     await wrapper.find("input").setValue("1/3/2017");
     await delay(10);
-    expect(model.manyParams.args.date.getFullYear()).toBe(2017);
+    expect(model.manyParams.args.startDate.getFullYear()).toBe(2017);
   });
 
   test.each([true, false])("bool (checkbox: %s)", async (checkbox) => {

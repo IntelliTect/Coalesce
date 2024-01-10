@@ -83,7 +83,6 @@
 <script lang="ts">
 import { PropType, defineComponent } from "vue";
 import { useRouter } from "vue-router";
-import { makeMetadataProps, useMetadataProps } from "../c-metadata-component";
 import {
   ListViewModel,
   ModelType,
@@ -96,13 +95,11 @@ export default defineComponent({
 
   setup(props) {
     return {
-      ...useMetadataProps(props),
       router: useRouter(),
     };
   },
 
   props: {
-    ...makeMetadataProps(),
     list: { required: true, type: Object as PropType<ListViewModel> },
     pageSizes: { required: false, type: Array as PropType<number[]> },
     color: { required: false, type: String, default: null },

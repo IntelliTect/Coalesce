@@ -295,9 +295,9 @@ export const Student = (domain.types.Student = {
           type: "string",
           role: "value",
         },
-        date: {
-          name: "date",
-          displayName: "Date",
+        startDate: {
+          name: "startDate",
+          displayName: "Start Date",
           type: "date",
           dateKind: "datetime",
           role: "value",
@@ -526,7 +526,7 @@ export const Student = (domain.types.Student = {
       props: {},
     },
   },
-});
+} as const);
 
 export const DisplaysStudent = (domain.types.DisplaysStudent = <ObjectType>{
   ...metaBase("DisplaysStudent"),

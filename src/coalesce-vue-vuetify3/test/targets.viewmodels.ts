@@ -35,13 +35,13 @@ export class StudentViewModel extends ViewModel<
       (
         c,
         string: string | null,
-        date: Date | null,
+        startDate: Date | null,
         num: number | null,
         model: models.Course | null
-      ) => c.manyParams(this.$primaryKey, string, date, num, model),
+      ) => c.manyParams(this.$primaryKey, string, startDate, num, model),
       () => ({
         string: null as string | null,
-        date: null as Date | null,
+        startDate: null as Date | null,
         num: null as number | null,
         model: null as models.Course | null,
       }),
@@ -49,7 +49,7 @@ export class StudentViewModel extends ViewModel<
         c.manyParams(
           this.$primaryKey,
           args.string,
-          args.date,
+          args.startDate,
           args.num,
           args.model
         )

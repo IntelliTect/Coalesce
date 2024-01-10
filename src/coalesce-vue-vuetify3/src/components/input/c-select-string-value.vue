@@ -16,126 +16,142 @@
   -->
 </template>
 
-<script lang="ts">
-import { defineComponent } from "vue";
-import { ModelApiClient, ItemResultPromise } from "coalesce-vue";
-import { makeMetadataProps, useMetadataProps } from "../c-metadata-component";
+<script lang="ts" setup generic="TModel extends Model">
+import { computed, ref } from "vue";
+import {
+  ModelApiClient,
+  ItemResultPromise,
+  Model,
+  StringValue,
+  Method,
+  CollectionValue,
+  ItemMethod,
+} from "coalesce-vue";
+import {
+  ForSpec,
+  MethodForSpec,
+  useMetadataProps,
+} from "../c-metadata-component";
+import { watch } from "vue";
+import { onMounted } from "vue";
 
 const MODEL_REQUIRED_MESSAGE =
   "c-select-string-value requires a model to be provided via the `model` prop, or a type to be provided via the `for` prop.";
 
-export default defineComponent({
+defineOptions({
   name: "c-select-string-value",
 
   // We manually pass attrs via inputBindAttrs, so disable the default Vue behavior.
   // If we don't do this, some HTML attrs (e.g. tabindex) will incorrectly be placed
   // on the root element rather than on the search field in Vuetify component.
   inheritAttrs: false,
-
-  setup(props) {
-    const metaProps = useMetadataProps(props);
-    const valueMeta = metaProps.valueMeta.value;
-    const modelMeta =
-      metaProps.modelMeta.value ??
-      (valueMeta?.type == "model" ? valueMeta.typeDef : null);
-
-    if (!modelMeta || modelMeta.type != "model") {
-      throw Error(MODEL_REQUIRED_MESSAGE);
-    }
-
-    const methodMeta = modelMeta.methods[props.method];
-
-    if (!methodMeta) {
-      throw Error(
-        `No method named ${props.method} could be found on type ${modelMeta.name}. Note: method name is expected to be camelCase.`
-      );
-    }
-
-    if (
-      !methodMeta.isStatic ||
-      methodMeta.transportType != "item" ||
-      methodMeta.return.type != "collection" ||
-      methodMeta.return.itemType.type != "string"
-    ) {
-      throw Error(
-        "c-select-string-value requires a static model method that returns an array of strings."
-      );
-    }
-
-    const caller = new ModelApiClient(modelMeta)
-      .$withSimultaneousRequestCaching()
-      .$makeCaller("item", (c, page?: number, search?: string) => {
-        return c.$invoke(methodMeta, {
-          page,
-          search,
-          ...props.params,
-        }) as ItemResultPromise<string[]>;
-      })
-      .setConcurrency("debounce");
-
-    return { ...metaProps, caller };
-  },
-
-  props: {
-    ...makeMetadataProps(),
-    method: { required: true, type: String },
-    modelValue: { required: false, type: String },
-    params: { required: false, type: Object },
-    listWhenEmpty: { required: false, default: false, type: Boolean },
-  },
-
-  data() {
-    return {
-      search: null as string | null,
-    };
-  },
-
-  watch: {
-    search(newVal: string, oldVal: string) {
-      if (!newVal && !this.listWhenEmpty) {
-        return;
-      }
-
-      if (newVal != oldVal) {
-        // Single equals intended. Works around https://github.com/vuetifyjs/vuetify/issues/7344,
-        // since null == undefined, the transition from undefined to null will fail.
-        this.caller(1, newVal);
-      }
-    },
-  },
-
-  computed: {
-    loading() {
-      return this.caller.isLoading;
-    },
-
-    items() {
-      if (!this.search && !this.listWhenEmpty) return [];
-      return this.caller.result || [];
-    },
-
-    internalValue(): string | null {
-      if (this.valueOwner && this.valueMeta) {
-        return (this.valueOwner as any)[this.valueMeta.name];
-      }
-
-      return this.modelValue ?? null;
-    },
-  },
-
-  methods: {
-    // `unknown` because vuetify's types are a little weird right now (wont infer `string`)
-    onInput(value: unknown) {
-      if (this.valueOwner && this.valueMeta) {
-        (this.valueOwner as any)[this.valueMeta.name] = value;
-      }
-
-      this.$emit("update:modelValue", value);
-    },
-  },
-
-  mounted() {
-    this.caller();
-  },
 });
+
+type StringsStaticMethod = ItemMethod & {
+  isStatic: true;
+  return: CollectionValue & { itemType: StringValue };
+};
+
+const props = defineProps<{
+  /** An object owning the value to be edited that is specified by the `for` prop. */
+  model: TModel;
+
+  /** A metadata specifier for the value being bound. One of:
+   * * A string with the name of the value belonging to `model`. E.g. `"autocompleteString"`.
+   * * A direct reference to the metadata object. E.g. `model.$metadata.props.autocompleteString`.
+   * * A string in dot-notation that starts with a type name. E.g. `"Person.autocompleteString"`.
+   */
+  for: ForSpec<TModel, StringValue>;
+
+  method: MethodForSpec<TModel, StringsStaticMethod>;
+  params?: any;
+  listWhenEmpty?: boolean;
+}>();
+
+const modelValue = defineModel<string | null>();
+
+const {
+  inputBindAttrs,
+  valueMeta,
+  modelMeta: { value: modelMeta },
+  valueOwner,
+} = useMetadataProps(props);
+
+if (!modelMeta || !("type" in modelMeta) || modelMeta.type != "model") {
+  throw Error(MODEL_REQUIRED_MESSAGE);
+}
+
+const methodMeta =
+  typeof props.method == "string"
+    ? modelMeta.methods[props.method]
+    : (props.method as Method);
+
+if (!methodMeta) {
+  throw Error(
+    `No method named ${props.method} could be found on type ${modelMeta.name}. Note: method name is expected to be camelCase.`
+  );
+}
+
+if (
+  !methodMeta.isStatic ||
+  methodMeta.transportType != "item" ||
+  methodMeta.return.type != "collection" ||
+  methodMeta.return.itemType.type != "string"
+) {
+  throw Error(
+    "c-select-string-value requires a static model method that returns an array of strings."
+  );
+}
+
+const caller = new ModelApiClient(modelMeta)
+  .$withSimultaneousRequestCaching()
+  .$makeCaller("item", (c, page?: number, search?: string) => {
+    return c.$invoke(methodMeta, {
+      page,
+      search,
+      ...props.params,
+    }) as ItemResultPromise<string[]>;
+  })
+  .setConcurrency("debounce");
+
+const search = ref<string>();
+watch(search, (newVal, oldVal) => {
+  if (!newVal && !props.listWhenEmpty) {
+    return;
+  }
+
+  if (newVal != oldVal) {
+    // Single equals intended. Works around https://github.com/vuetifyjs/vuetify/issues/7344,
+    // since null == undefined, the transition from undefined to null will fail.
+    caller(1, newVal);
+  }
+});
+
+const loading = computed(() => {
+  return caller.isLoading;
+});
+
+const items = computed(() => {
+  if (!search.value && !props.listWhenEmpty) return [];
+  return caller.result || [];
+});
+
+const internalValue = computed((): string | null => {
+  if (valueOwner.value && valueMeta.value) {
+    return (valueOwner.value as any)[valueMeta.value.name];
+  }
+
+  return modelValue.value ?? null;
+});
+
+// `unknown` because vuetify's types are a little weird right now (wont infer `string`)
+function onInput(value: string | null | undefined) {
+  if (valueOwner.value && valueMeta.value) {
+    (valueOwner.value as any)[valueMeta.value.name] = value;
+  }
+
+  modelValue.value = value || null;
+}
+
+onMounted(() => caller());
 </script>

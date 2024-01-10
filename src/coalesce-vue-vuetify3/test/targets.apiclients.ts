@@ -48,7 +48,7 @@ export class StudentApiClient extends ModelApiClient<$models.Student> {
   public manyParams(
     id: number,
     string: string | null,
-    date: Date | null,
+    startDate: Date | null,
     num: number | null,
     model: $models.Course | null,
     $config?: AxiosRequestConfig
@@ -57,7 +57,7 @@ export class StudentApiClient extends ModelApiClient<$models.Student> {
     const $params = {
       id,
       string,
-      date,
+      startDate,
       num,
       model,
     };

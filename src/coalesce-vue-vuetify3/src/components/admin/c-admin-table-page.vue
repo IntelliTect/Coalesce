@@ -24,14 +24,12 @@
 
 <script lang="ts">
 import { defineComponent, PropType, Ref, ref, toRefs } from "vue";
-import { makeMetadataProps, useMetadataProps } from "../c-metadata-component";
 import { ListViewModel, ModelType } from "coalesce-vue";
 
 export default defineComponent({
   name: "c-admin-table-page",
 
   props: {
-    ...makeMetadataProps(),
     type: { required: false, type: String, default: null },
     color: { required: false, type: String, default: null },
     list: { required: false, type: Object as PropType<ListViewModel> },
@@ -56,7 +54,7 @@ export default defineComponent({
       listVM.value.$includes = "admin-list";
     }
 
-    return { listVM, ...useMetadataProps(props) };
+    return { listVM };
   },
 
   computed: {

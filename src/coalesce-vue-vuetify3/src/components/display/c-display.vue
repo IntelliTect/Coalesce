@@ -71,7 +71,7 @@ export type CDisplayProps<TModel extends Model | AnyArgCaller | undefined> = {
   setup
   generic="TModel extends Model | AnyArgCaller | undefined"
 >
-import { defineComponent, getCurrentInstance, h, mergeProps } from "vue";
+import { defineComponent, h, mergeProps } from "vue";
 import { type ForSpec, useMetadataProps } from "../c-metadata-component";
 import { valueDisplay } from "coalesce-vue";
 import type {
@@ -98,9 +98,11 @@ defineOptions({
 });
 
 const attrs = useAttrs();
+
+defineSlots(); // Empty defineSlots() prevents TS errors for passthrough slots.
 const slots = useSlots();
 
-(getCurrentInstance() as any).render = function () {
+function render() {
   const model = props.model;
   let valueProp = props.modelValue ?? props.value;
 
@@ -219,5 +221,9 @@ const slots = useSlots();
   }
 
   return h(props.element, attrs, valueString || slots);
-};
+}
 </script>
+
+<template>
+  <render />
+</template>

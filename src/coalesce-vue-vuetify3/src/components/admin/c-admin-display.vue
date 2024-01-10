@@ -1,5 +1,5 @@
 <script lang="ts" setup generic="TModel extends Model | undefined">
-import { getCurrentInstance, h, resolveComponent } from "vue";
+import { h, resolveComponent } from "vue";
 import { useMetadataProps } from "../c-metadata-component";
 import {
   propDisplay,
@@ -22,7 +22,7 @@ const router = useRouter();
 
 const { modelMeta: modelMetaRef, valueMeta } = useMetadataProps(props);
 
-(getCurrentInstance() as any).render = function () {
+function render() {
   const { model } = props;
 
   if (model == null) {
@@ -110,5 +110,9 @@ const { modelMeta: modelMetaRef, valueMeta } = useMetadataProps(props);
   }
 
   return h(CDisplay, { ...props });
-};
+}
 </script>
+
+<template>
+  <render />
+</template>

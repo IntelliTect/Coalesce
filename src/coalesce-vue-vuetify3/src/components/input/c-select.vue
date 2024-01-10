@@ -231,7 +231,6 @@ import {
   AnyArgCaller,
   ResponseCachingConfiguration,
 } from "coalesce-vue";
-import { readonly } from "vue";
 
 defineOptions({
   name: "c-select",
@@ -240,6 +239,13 @@ defineOptions({
   // on the root element rather than on the search field in Vuetify component.
   inheritAttrs: false,
 });
+
+defineSlots<{
+  // FUTURE: strongly type `item` based on the forspec?
+  ["item"]?(props: { item: any; search: string | null }): any;
+  ["selected-item"]?(props: { item: any; search: string | null }): any;
+  ["list-item"]?(props: { item: any; search: string | null }): any;
+}>();
 
 const props = withDefaults(
   defineProps<{

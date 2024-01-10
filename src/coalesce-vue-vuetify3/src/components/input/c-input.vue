@@ -33,18 +33,13 @@ function addHandler(data: any, eventName: string, handler: Function) {
   }
 }
 </script>
+
 <script
   lang="ts"
   setup
   generic="TModel extends Model | DataSource | AnyArgCaller | undefined"
 >
-import {
-  defineComponent,
-  h,
-  toHandlerKey,
-  getCurrentInstance,
-  useSlots,
-} from "vue";
+import { defineComponent, h, toHandlerKey, useSlots } from "vue";
 import {
   buildVuetifyAttrs,
   useMetadataProps,
@@ -108,9 +103,11 @@ const emit = defineEmits<{
 }>();
 
 const attrs = useAttrs();
+
+defineSlots(); // Empty defineSlots() prevents TS errors for passthrough slots.
 const slots = useSlots();
 
-(getCurrentInstance() as any).render = function () {
+function render() {
   const valueMeta = valueMetaRef.value;
   const valueOwner = valueOwnerRef.value;
 
@@ -321,5 +318,9 @@ const slots = useSlots();
       ]),
     ]
   );
-};
+}
 </script>
+
+<template>
+  <render />
+</template>

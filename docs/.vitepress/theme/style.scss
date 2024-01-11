@@ -75,6 +75,13 @@
   --vp-code-block-bg: #2b2b2b;
 }
 
+// Since we force all code backgrounds to dark,
+// we need to set an explicit base text color
+// so that unhighlighted code blocks are readable. #356
+.vp-doc div[class*="language-"] code {
+  color: var(--vp-c-bg)
+}
+
 .dark {
   --vp-c-text-1: rgb(185, 185, 185);
   --logo-text-color: #e7e7e7;

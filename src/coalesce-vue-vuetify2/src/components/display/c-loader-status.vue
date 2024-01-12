@@ -29,7 +29,8 @@
         the progress loader and the placeholder independent of the 
         main outer transition between content/error/loaders -->
     <transition-group
-      class="c-loader-status--transition-group"
+      class="c-loader-status--transition-group c-loader-status--progress-group"
+      :class="{ absolute: progressAbsolute }"
       key="loading"
       v-if="showLoading || usePlaceholder"
       name="c-loader-status-fade"
@@ -118,6 +119,12 @@ export default defineComponent({
      * keep the default slot visible.
      */
     progressPlaceholder: { required: false, type: Boolean, default: true },
+
+    /** Positions the progress bar absolutely. This can be useful in compact interfaces
+     * where extra space for the progress bar is undesirable, allowing the
+     * progress bar to potentially overlap content while active. */
+    progressAbsolute: { required: false, type: Boolean, default: false },
+
     height: { required: false, type: [Number, String], default: 10 },
 
     noProgress: { required: false, type: Boolean, default: null },
@@ -279,6 +286,15 @@ export default defineComponent({
   display: flex;
   flex-direction: column;
   font-weight: 400;
+
+  .c-loader-status--progress-group {
+    &.absolute {
+      // Make the progress bar on c-loader-status overlap
+      // so it doesn't add extra whitespace to the top of the row.
+      position: absolute !important;
+      width: 100%;
+    }
+  }
 
   .c-loader-status--content {
     flex-grow: 1;

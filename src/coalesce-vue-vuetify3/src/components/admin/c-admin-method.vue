@@ -61,7 +61,6 @@
       </v-col>
       <v-col>
         <c-loader-status
-          :progress-placeholder="false"
           :loaders="{
             'no-initial-content no-error-content no-loading-content': [caller],
           }"

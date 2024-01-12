@@ -16,6 +16,7 @@
             ...viewModel.$items.map((i) => i.$save),
           ],
         }"
+        progress-absolute
       >
         <c-table
           admin

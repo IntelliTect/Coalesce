@@ -105,6 +105,10 @@ A more advanced usage allows passing different flags for different callers. Prov
 
 Specify if space should be reserved for the progress indicator. If set to false, the content in the default slot may jump up and down slightly as the progress indicator shows and hides.
 
+<Prop def="progressAbsolute: boolean = false" lang="ts" />
+
+Positions the progress bar absolutely. This can be useful in compact interfaces where extra space for the progress bar is undesirable, allowing the progress bar to potentially overlap content while active.
+
 <Prop def="height: number = 10" lang="ts" />
 
 Specifies the height in pixels of the [v-progress-linear](https://vuetifyjs.com/en/components/progress-linear) used to indicate progress.

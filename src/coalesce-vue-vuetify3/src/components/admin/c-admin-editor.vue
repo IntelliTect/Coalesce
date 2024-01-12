@@ -28,7 +28,7 @@
       </v-btn>
     </v-toolbar>
 
-    <v-card-text>
+    <v-card-text class="pt-2">
       <c-loader-status
         :loaders="{
           [!showContent ? 'no-initial-content' : 'no-error-content']: [

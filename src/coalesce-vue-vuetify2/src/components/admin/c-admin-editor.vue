@@ -38,7 +38,7 @@
         }"
       >
         <template #default>
-          <v-form ref="form">
+          <v-form ref="form" class="mt-3">
             <v-row
               v-for="prop in showProps"
               :key="prop.name"

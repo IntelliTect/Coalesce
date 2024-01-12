@@ -38,10 +38,10 @@
       v-if="showLoading || usePlaceholder"
       key="loading"
       class="c-loader-status--transition-group c-loader-status--progress-group"
+      :class="{ absolute: progressAbsolute }"
       name="c-loader-status-fade"
       mode="out-in"
       tag="div"
-      style="position: relative"
       :style="{
         '--c-loader-status-progress-height': height + 'px',
       }"
@@ -127,9 +127,15 @@ const props = withDefaults(
         | AnyLoaderMaybe[];
 
       /**
-       * Whether space is reserved for the progress bar even when the progress visible is not active. Default true.
+       * Whether space is reserved for the progress bar even when
+       * the progress visible is not active. Default true.
        */
       progressPlaceholder?: boolean;
+
+      /** Positions the progress bar absolutely. This can be useful in compact interfaces
+       * where extra space for the progress bar is undesirable, allowing the
+       * progress bar to potentially overlap content while active. */
+      progressAbsolute?: boolean;
 
       /** The height of the progress bar */
       height?: 10;
@@ -336,6 +342,16 @@ defineExpose({ loaderFlags });
   display: flex;
   flex-direction: column;
   font-weight: 400;
+
+  .c-loader-status--progress-group {
+    position: relative;
+    &.absolute {
+      // Make the progress bar on c-loader-status overlap
+      // so it doesn't add extra whitespace to the top of the row.
+      position: absolute !important;
+      width: 100%;
+    }
+  }
 
   .c-loader-status--content {
     flex-grow: 1;

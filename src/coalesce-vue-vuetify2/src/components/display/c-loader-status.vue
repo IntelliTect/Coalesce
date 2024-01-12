@@ -54,19 +54,38 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
-import { ItemApiState, ListApiState } from "coalesce-vue";
+import { ApiState, ItemApiState, ListApiState } from "coalesce-vue";
 
 type AnyLoader = ItemApiState<any, any> | ListApiState<any, any>;
 type AnyLoaderMaybe = AnyLoader | null | undefined;
 
+type YesFlags = keyof Flags;
+type NoFlags = `no-${YesFlags}`;
+
+type FlagsString =
+  | NoFlags
+  | YesFlags
+  | ""
+  | `${NoFlags} ${string}`
+  | `${YesFlags} ${string}`;
+
+type Camelize<S extends string> = S extends `${infer F}-${infer R}`
+  ? `${F}${Capitalize<Camelize<R>>}`
+  : S;
+
 class Flags {
-  progress: boolean | null = null;
-  initialProgress = true;
-  secondaryProgress = true;
-  loadingContent = true;
-  errorContent = true;
-  initialContent = true;
+  progress = true;
+  "initial-progress" = true;
+  "secondary-progress" = true;
+  "loading-content" = true;
+  "error-content" = true;
+  "initial-content" = true;
 }
+
+const camelizeRE = /-(\w)/g;
+const camelize = (str: string): string => {
+  return str.replace(camelizeRE, (_, c) => (c ? c.toUpperCase() : ""));
+};
 
 /*
   TODO: This component could use a bit of a rewrite (again).
@@ -78,15 +97,20 @@ class Flags {
       - This is a new syntax in addition to the current flags dictionary syntax, which needs to be preserved to support advanced use cases.
 */
 
+type LoadersProp =
+  | {
+      [flags in FlagsString]?: AnyLoaderMaybe | AnyLoaderMaybe[];
+    }
+  | AnyLoaderMaybe
+  | AnyLoaderMaybe[];
+
 export default defineComponent({
   name: "c-loader-status",
 
   props: {
     loaders: {
       required: true,
-      type: Object as PropType<{
-        [flags: string]: AnyLoaderMaybe | AnyLoaderMaybe[];
-      }>,
+      type: Object as PropType<LoadersProp>,
     },
 
     /**
@@ -95,32 +119,67 @@ export default defineComponent({
      */
     progressPlaceholder: { required: false, type: Boolean, default: true },
     height: { required: false, type: [Number, String], default: 10 },
+
+    noProgress: { required: false, type: Boolean, default: null },
+    noInitialProgress: { required: false, type: Boolean, default: null },
+    noSecondaryProgress: { required: false, type: Boolean, default: null },
+    noLoadingContent: { required: false, type: Boolean, default: null },
+    noErrorContent: { required: false, type: Boolean, default: null },
+    noInitialContent: { required: false, type: Boolean, default: null },
   },
 
   computed: {
+    baselineFlags() {
+      const flags = new Flags();
+      for (const key in flags) {
+        const noFlag = camelize(("no-" + key) as NoFlags) as Camelize<NoFlags>;
+
+        const flagValue = this[noFlag];
+        if (flagValue != null) flags[key as YesFlags] = !flagValue;
+      }
+
+      return Object.freeze(flags);
+    },
+
     loaderFlags() {
       var ret = [];
-      for (const flagsStr in this.loaders) {
-        const flagsArr = flagsStr.split(" ");
-        const flags: any = new Flags();
-        for (const flagName in flags) {
-          const kebabFlag = flagName.replace(
-            /([A-Z])/g,
-            (m) => "-" + m.toLowerCase()
-          );
 
-          if (flagsArr.includes(kebabFlag)) {
-            flags[flagName] = true;
-          } else if (flagsArr.includes("no-" + kebabFlag)) {
-            flags[flagName] = false;
+      let loaders: LoadersProp = this.loaders;
+      if (Array.isArray(loaders)) {
+        loaders = { "": loaders };
+      } else if (loaders == null) {
+        // An attempt to pass a single loader that was nullish.
+        loaders = { "": [] };
+      } else if (loaders instanceof ApiState) {
+        loaders = { "": [loaders] };
+      }
+
+      for (const flagsStr in loaders) {
+        let loadersForFlags = loaders[flagsStr as keyof typeof loaders];
+        if (!Array.isArray(loadersForFlags)) {
+          loadersForFlags = [loadersForFlags];
+        }
+
+        let flags: Flags = this.baselineFlags;
+
+        // Parse flags out of the object key for usages of the form:
+        // <CLS :loaders="{"no-loading-content secondary-progress": [vm.$load]}" />
+        if (flagsStr != "") {
+          const flagsArr = flagsStr.split(" ");
+          flags = { ...flags };
+
+          if (flagsArr.length) {
+            for (const flagName in flags) {
+              if (flagsArr.includes(flagName)) {
+                flags[flagName as YesFlags] = true;
+              } else if (flagsArr.includes("no-" + flagName)) {
+                flags[flagName as YesFlags] = false;
+              }
+            }
           }
         }
 
-        let loaders = this.loaders[flagsStr];
-        if (!Array.isArray(loaders)) {
-          loaders = [loaders];
-        }
-        for (const loader of loaders) {
+        for (const loader of loadersForFlags) {
           if (loader) {
             ret.push([loader, flags as Flags] as const);
           }
@@ -147,10 +206,12 @@ export default defineComponent({
 
         const isLoading = loader.isLoading;
         return (
-          (flags.initialProgress &&
+          (flags["initial-progress"] &&
             isLoading &&
             loader.wasSuccessful == null) ||
-          (flags.secondaryProgress && isLoading && loader.wasSuccessful != null)
+          (flags["secondary-progress"] &&
+            isLoading &&
+            loader.wasSuccessful != null)
         );
       });
     },
@@ -161,25 +222,25 @@ export default defineComponent({
         this.loaderFlags.some(
           (f) =>
             f[1].progress !== false &&
-            f[1].secondaryProgress &&
-            f[1].loadingContent
+            f[1]["secondary-progress"] &&
+            f[1]["loading-content"]
         )
       );
     },
 
     showContent() {
       return this.loaderFlags.every(([loader, flags]) => {
-        if (!flags.loadingContent && loader.isLoading) {
+        if (!flags["loading-content"] && loader.isLoading) {
           // loader is loading, and loading content is off.
           return false;
         }
-        if (!flags.errorContent && loader.wasSuccessful === false) {
+        if (!flags["error-content"] && loader.wasSuccessful === false) {
           // loader has an error, and error content is off
           return false;
         }
         if (
           // initial content is off, and either:
-          !flags.initialContent &&
+          !flags["initial-content"] &&
           // loader has not yet loaded
           (loader.wasSuccessful == null ||
             // or loader has loaded, but it errored and there's no current result

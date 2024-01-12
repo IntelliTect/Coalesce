@@ -76,9 +76,9 @@
 }
 
 // Since we force all code backgrounds to dark,
-// we need to set an explicit base text color
+// we need to set an explicit base text color in light mode
 // so that unhighlighted code blocks are readable. #356
-.vp-doc div[class*="language-"] code {
+html:not(.dark) .vp-doc div[class*="language-"] code {
   color: var(--vp-c-bg)
 }
 

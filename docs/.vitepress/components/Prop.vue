@@ -19,6 +19,7 @@ p + .code-prop {
 }
 .code-prop {
   margin-top: 10px;
+  font-weight: inherit !important;
   
   .shiki {
     margin: 0;

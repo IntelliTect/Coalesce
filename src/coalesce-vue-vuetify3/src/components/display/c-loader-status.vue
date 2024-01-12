@@ -70,12 +70,6 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from "vue";
-import { ItemApiState, ListApiState } from "coalesce-vue";
-
-type AnyLoader = ItemApiState<any, any> | ListApiState<any, any>;
-type AnyLoaderMaybe = AnyLoader | null | undefined;
-
 class Flags {
   progress = true;
   "initial-progress" = true;
@@ -84,149 +78,205 @@ class Flags {
   "error-content" = true;
   "initial-content" = true;
 }
+</script>
 
-/*
-  TODO: This component could use a bit of a rewrite (again).
-  Leave the existing component as it is for backwards compat -
-  instead, make a new one with the following changes:
-    - New name: c-caller-status
-    - Rename prop loaders => callers
-    - Allow defining flags as props on the components, preferably directly as flags like <c-caller-status :callers="[list.$load]" no-initial-progress />.
-      - This is a new syntax in addition to the current flags dictionary syntax, which needs to be preserved to support advanced use cases.
-*/
+<script lang="ts" setup>
+import { computed, camelize } from "vue";
+import { ApiState, ItemApiState, ListApiState } from "coalesce-vue";
 
-// type Flag = `no-${keyof Flags}`;
-// type KeysOf<T, Key extends keyof T = keyof T> = Key extends string
-//   ? `${KebabCase<`no-${Key}`>} ${KeysOf<Omit<T, Key>>}` | KebabCase<`no-${Key}`>
-//   : never;
-// type FlagsString = KeysOf<Flags> | "";
+type AnyLoader = ItemApiState<any, any> | ListApiState<any, any>;
+type AnyLoaderMaybe = AnyLoader | null | undefined;
 
-// The above types are way over the top, since the yield every possible permutation of flags.
-// Instead, type this as only individual flags, and then allow whatever else after each individual flag.
-// This presents nice intellisense.
-type Flag = `no-${keyof Flags}`;
-type FlagsString = Flag | "" | `${Flag} ${string}`;
+// Since the component props are the most general level of flags
+// and all flags default to true, include only the props that will
+// affect the default, which are the no versions.
+type CamelFlags =
+  | "noProgress"
+  | "noInitialProgress"
+  | "noSecondaryProgress"
+  | "noLoadingContent"
+  | "noErrorContent"
+  | "noInitialContent";
 
-export default defineComponent({
+type YesFlags = keyof Flags;
+type NoFlags = `no-${YesFlags}`;
+
+type FlagsString =
+  | NoFlags
+  | YesFlags
+  | ""
+  | `${NoFlags} ${string}`
+  | `${YesFlags} ${string}`;
+
+type Camelize<S extends string> = S extends `${infer F}-${infer R}`
+  ? `${F}${Capitalize<Camelize<R>>}`
+  : S;
+
+defineOptions({
   name: "c-loader-status",
+});
 
-  props: {
-    loaders: {
-      required: true,
-      type: Object as PropType<{
-        [flags in FlagsString]?: AnyLoaderMaybe | AnyLoaderMaybe[];
-      }>,
-    },
-
-    /**
-     * If the loader is loading when it already has a result,
-     * keep the default slot visible.
-     */
-    progressPlaceholder: { required: false, type: Boolean, default: true },
-    height: { required: false, type: [Number, String], default: 10 },
-    color: { required: false, type: String, default: "primary" },
-  },
-
-  computed: {
-    loaderFlags() {
-      var ret = [];
-      for (const flagsStr in this.loaders) {
-        const flagsArr = flagsStr.split(" ");
-        const flags: any = new Flags();
-        for (const flagName in flags) {
-          const kebabFlag = flagName.replace(
-            /([A-Z])/g,
-            (m) => "-" + m.toLowerCase()
-          );
-
-          if (flagsArr.includes(kebabFlag)) {
-            flags[flagName] = true;
-          } else if (flagsArr.includes("no-" + kebabFlag)) {
-            flags[flagName] = false;
+const props = withDefaults(
+  defineProps<
+    {
+      loaders:
+        | {
+            [flags in FlagsString]?: AnyLoaderMaybe | AnyLoaderMaybe[];
           }
-        }
+        | AnyLoaderMaybe
+        | AnyLoaderMaybe[];
 
-        let loaders = (
-          this.loaders as Record<string, AnyLoaderMaybe | AnyLoaderMaybe[]>
-        )[flagsStr];
-        if (!Array.isArray(loaders)) {
-          loaders = [loaders];
-        }
-        for (const loader of loaders) {
-          if (loader) {
-            ret.push([loader, flags as Flags] as const);
+      /**
+       * Whether space is reserved for the progress bar even when the progress visible is not active. Default true.
+       */
+      progressPlaceholder?: boolean;
+
+      /** The height of the progress bar */
+      height?: 10;
+      /** The color of the progress bar */
+      color?: string;
+    } & { [K in CamelFlags]?: boolean }
+  >(),
+  {
+    progressPlaceholder: true,
+    height: 10,
+    color: "primary",
+    // Prevent our flags from defaulting to `false`. We need them to default to `undefined`
+    // so we can detect if they were specified at all.
+    ...Object.fromEntries(
+      Object.entries(new Flags()).flatMap((f) => [
+        // [camelize(f[0]), undefined],
+        [camelize("no-" + f[0]), undefined],
+      ])
+    ),
+  }
+);
+
+const baselineFlags = computed(() => {
+  const flags = new Flags();
+  for (const key in flags) {
+    const noFlag = camelize(("no-" + key) as NoFlags) as Camelize<NoFlags>;
+
+    const flagValue = props[noFlag];
+    if (flagValue != null) flags[key as YesFlags] = !flagValue;
+  }
+
+  return Object.freeze(flags);
+});
+
+const loaderFlags = computed(() => {
+  var ret = [];
+
+  let loaders = props.loaders;
+  if (Array.isArray(loaders)) {
+    loaders = { "": loaders };
+  } else if (loaders == null) {
+    // An attempt to pass a single loader that was nullish.
+    loaders = { "": [] };
+  } else if (loaders instanceof ApiState) {
+    loaders = { "": [loaders] };
+  }
+
+  for (const flagsStr in loaders) {
+    let loadersForFlags = loaders[flagsStr as keyof typeof loaders];
+    if (!Array.isArray(loadersForFlags)) {
+      loadersForFlags = [loadersForFlags];
+    }
+
+    let flags: Flags = baselineFlags.value;
+
+    // Parse flags out of the object key for usages of the form:
+    // <CLS :loaders="{"no-loading-content secondary-progress": [vm.$load]}" />
+    if (flagsStr != "") {
+      const flagsArr = flagsStr.split(" ");
+      flags = { ...flags };
+
+      if (flagsArr.length) {
+        for (const flagName in flags) {
+          if (flagsArr.includes(flagName)) {
+            flags[flagName as YesFlags] = true;
+          } else if (flagsArr.includes("no-" + flagName)) {
+            flags[flagName as YesFlags] = false;
           }
         }
       }
+    }
 
-      return ret;
-    },
+    for (const loader of loadersForFlags) {
+      if (loader) {
+        ret.push([loader, flags as Flags] as const);
+      }
+    }
+  }
 
-    anyFailed() {
-      return this.loaderFlags.some((f) => f[0].wasSuccessful === false);
-    },
-
-    errorMessages() {
-      return this.loaderFlags
-        .filter((f) => f[0].wasSuccessful === false)
-        .map((f) => f[0].message);
-    },
-
-    showLoading() {
-      return this.loaderFlags.some((f) => {
-        const [loader, flags] = f;
-        if (!flags.progress) return false;
-
-        const isLoading = loader.isLoading;
-        return (
-          (flags["initial-progress"] &&
-            isLoading &&
-            loader.wasSuccessful == null) ||
-          (flags["secondary-progress"] &&
-            isLoading &&
-            loader.wasSuccessful != null)
-        );
-      });
-    },
-
-    usePlaceholder() {
-      return (
-        this.progressPlaceholder &&
-        this.loaderFlags.some(
-          (f) =>
-            f[1].progress &&
-            f[1]["secondary-progress"] &&
-            f[1]["loading-content"]
-        )
-      );
-    },
-
-    showContent() {
-      return this.loaderFlags.every(([loader, flags]) => {
-        if (!flags["loading-content"] && loader.isLoading) {
-          // loader is loading, and loading content is off.
-          return false;
-        }
-        if (!flags["error-content"] && loader.wasSuccessful === false) {
-          // loader has an error, and error content is off
-          return false;
-        }
-        if (
-          // initial content is off, and either:
-          !flags["initial-content"] &&
-          // loader has not yet loaded
-          (loader.wasSuccessful == null ||
-            // or loader has loaded, but it errored and there's no current result
-            // (implying it has never successfully loaded).
-            (loader.wasSuccessful === false && !loader.hasResult))
-        ) {
-          return false;
-        }
-        return true;
-      });
-    },
-  },
+  return ret;
 });
+
+const errorMessages = computed(() => {
+  return loaderFlags.value
+    .filter((f) => f[0].wasSuccessful === false)
+    .map((f) => f[0].message);
+});
+
+const showLoading = computed(() => {
+  return loaderFlags.value.some((f) => {
+    const [loader, flags] = f;
+    if (!flags.progress) return false;
+
+    const isLoading = loader.isLoading;
+    return (
+      (flags["initial-progress"] &&
+        isLoading &&
+        loader.wasSuccessful == null) ||
+      (flags["secondary-progress"] && isLoading && loader.wasSuccessful != null)
+    );
+  });
+});
+
+const usePlaceholder = computed(() => {
+  return (
+    props.progressPlaceholder &&
+    loaderFlags.value.some(
+      (f) =>
+        // Obviously don't need a progress placeholder if progress is off:
+        f[1].progress &&
+        // If secondary progress is off, the progress bar will never be shown
+        // once any content has been obtained, so there's no need to keep a placeholder.
+        f[1]["secondary-progress"] &&
+        // If loading content was off then the progressbar will just take the place of the content,
+        // so a placeholder is only needed if loading-content is on.
+        f[1]["loading-content"]
+    )
+  );
+});
+
+const showContent = computed(() => {
+  return loaderFlags.value.every(([loader, flags]) => {
+    if (!flags["loading-content"] && loader.isLoading) {
+      // loader is loading, and loading content is off.
+      return false;
+    }
+    if (!flags["error-content"] && loader.wasSuccessful === false) {
+      // loader has an error, and error content is off
+      return false;
+    }
+    if (
+      // initial content is off, and either:
+      !flags["initial-content"] &&
+      // loader has not yet loaded
+      (loader.wasSuccessful == null ||
+        // or loader has loaded, but it errored and there's no current result
+        // (implying it has never successfully loaded).
+        (loader.wasSuccessful === false && !loader.hasResult))
+    ) {
+      return false;
+    }
+    return true;
+  });
+});
+
+// For testing:
+defineExpose({ loaderFlags });
 </script>
 
 <style lang="scss">

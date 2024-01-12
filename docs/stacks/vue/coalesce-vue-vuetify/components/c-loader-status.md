@@ -12,9 +12,6 @@ It is highly recommended that all [API Callers](/stacks/vue/layers/api-clients.m
 
 Progress is indicated with a [Vuetify](https://vuetifyjs.com/) [v-progress-linear](https://vuetifyjs.com/en/components/progress-linear) component, and errors are displayed in a [v-alert](https://vuetifyjs.com/en/components/alerts/). [Transitions](https://vuetifyjs.com/en/styles/transitions/) are applied to smoothly fade between the different states the the caller can be in.
 
-::: tip Note
-This component uses the legacy term "loader" to refer to [API Callers](/stacks/vue/layers/api-clients.md#api-callers). A new ``c-caller-status`` component may be coming in the future with a few usability improvements - if that happens, `c-loader-status` will be preserved for backwards compatibility.
-:::
 
 ## Examples
 
@@ -37,16 +34,15 @@ Wrap contents of a details/edit page:
 
 Use ``c-loader-status`` to render a progress bar and any error messages, but don't use it to control content:
 ``` vue-html
-<c-loader-status :loaders="{'': [list.$load]}" />
+<c-loader-status :loaders="list.$load" />
 ```
 
 
 Wrap a save/submit button:
 ``` vue-html
-<c-loader-status
-    :loaders="{ 'no-loading-content': [person.$save] }"
->
+<c-loader-status :loaders="[person.$save, person.$delete]" no-loading-content>
     <button> Save </button>
+    <button> Delete </button>
 </c-loader-status>
 ```
 
@@ -54,10 +50,10 @@ Hides the table before the first load has completed, or if loading the list enco
 
 ``` vue-html
 <c-loader-status
-    :loaders="{
-        'no-secondary-progress no-initial-content no-error-content': [list.$load]
-    }"
-    #default
+    :loaders="list.$load"
+    no-initial-content 
+    no-error-content
+    no-secondary-progress 
 >
     <table>
         <tr v-for="item in list.$items"> ... </tr>
@@ -67,19 +63,43 @@ Hides the table before the first load has completed, or if loading the list enco
 
 ## Props
 
-<Prop def="loaders: { [flags: string]: ApiCaller | ApiCaller[] }" lang="ts" />
+<Prop def="loaders: 
+  // Flags per component:
+  | ApiCaller 
+  | ApiCaller[]
+  // Flags per caller:
+  | { [flags: string]: ApiCaller | ApiCaller[] } " lang="ts" />
 
-A dictionary object with entries mapping zero or more flags to one or more [API Callers](/stacks/vue/layers/api-clients.md#api-callers). Multiple entries of flags/caller pairs may be specified in the dictionary to give different behavior to different API callers.
-    
-The available flags are as follows. All flags default to `true`, and may be prefixed with ``no-`` to set the flag to ``false`` instead of ``true``. Multiple flags may be specified at once by delimiting them with spaces.
+<div>
 
-| <div style="width:160px">Flag</div> | Description |
-| - | - |
-| `loading-content` | Controls whether the default slot is rendered while any API caller is loading (i.e. when  `caller.isLoading === true`). |
-| `error-content` | Controls whether the default slot is rendered while any API Caller is in an error state (i.e. when  `caller.wasSuccessful === false`). |
-| `initial-content` | Controls whether the default slot is rendered while any API Caller has yet to receive a response for the first time (i.e. when `caller.wasSuccessful === null`). |
-| `initial-progress` | Controls whether the progress indicator is shown when an API Caller is loading for the very first time (i.e. when  `caller.wasSuccessful === null`). |
-| `secondary-progress` | Controls whether the progress indicator is shown when an API Caller is loading any time after its first invocation (i.e. when  `caller.wasSuccessful !== null`). |
+This prop has multiple options that support simple or complex usage scenarios:
+
+#### Flags Per Component
+A single instance, or array of [API Callers](/stacks/vue/layers/api-clients.md#api-callers), whose status will be represented by the component. The [flags](#flags) for these objects will be determined from the component-level [flag props](#flags-props).
+
+``` vue-html
+<c-loader-status
+  :loaders="[product.$load, person.$load]"
+  no-initial-content
+  no-error-content
+/>
+```
+
+#### Flags Per Caller
+A more advanced usage allows passing different flags for different callers. Provide a dictionary object with entries mapping zero or more [flags](#flags) to one or more [API Callers](/stacks/vue/layers/api-clients.md#api-callers). Multiple entries of flags/caller pairs may be specified in the dictionary to give different behavior to different API callers. These flags are layered on top of the base [flag props](#flags-props). 
+
+``` vue-html
+<c-loader-status
+  :loaders="{ 
+    'no-initial-content no-error-content': [person.$load],
+    'no-loading-content': [person.$save, person.$delete],
+  }"
+/>
+```
+
+</div>
+<br>
+
 
 <Prop def="progressPlaceholder: boolean = true" lang="ts" />
 
@@ -88,6 +108,29 @@ Specify if space should be reserved for the progress indicator. If set to false,
 <Prop def="height: number = 10" lang="ts" />
 
 Specifies the height in pixels of the [v-progress-linear](https://vuetifyjs.com/en/components/progress-linear) used to indicate progress.
+
+<Prop def="
+no-loading-content?: boolean;
+no-error-content?: boolean;
+no-initial-content?: boolean;
+no-progress?: boolean;
+no-initial-progress?: boolean;
+no-secondary-progress?: boolean;" lang="ts" id="flags-props" />
+
+Component level [flags](#flags) options that control behavior when the simple form of `loaders` (single instance or array) is used, as well as provide baseline defaults that can be overridden by the advanced form of `loaders` (object map) .
+
+## Flags
+
+The available flags are as follows, all of which default to `true`. In the object literal syntax for `loaders`, the `no-` prefix may be omitted to set the flag to `true`.
+
+| <div style="width:160px">Flag</div> | Description |
+| - | - |
+| `no-loading-content` | Controls whether the default slot is rendered while any API caller is loading (i.e. when  `caller.isLoading === true`). |
+| `no-error-content` | Controls whether the default slot is rendered while any API Caller is in an error state (i.e. when  `caller.wasSuccessful === false`). |
+| `no-initial-content` | Controls whether the default slot is rendered while any API Caller has yet to receive a response for the first time (i.e. when `caller.wasSuccessful === null`). |
+| `no-progress` | Master toggle for whether the progress indicator is shown in any scenario. |
+| `no-initial-progress` | Controls whether the progress indicator is shown when an API Caller is loading for the very first time (i.e. when  `caller.wasSuccessful === null`). |
+| `no-secondary-progress` | Controls whether the progress indicator is shown when an API Caller is loading any time after its first invocation (i.e. when  `caller.wasSuccessful !== null`). |
 
 ## Slots
 

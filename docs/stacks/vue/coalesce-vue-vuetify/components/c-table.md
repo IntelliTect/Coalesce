@@ -2,7 +2,7 @@
 
 <!-- MARKER:summary -->
     
-A table component for displaying the contents of a [ListViewModel](/stacks/vue/layers/viewmodels.md). Also supports modifying the list's [sort parameters](/modeling/model-components/data-sources.md#standard-parameters\) by clicking on column headers. Pairs well with a [c-list-pagination](/stacks/vue/coalesce-vue-vuetify/components/c-list-pagination.md).
+A table component for displaying the contents of a [ListViewModel](/stacks/vue/layers/viewmodels.md). Also supports modifying the list's [sort parameters](/modeling/model-components/data-sources.md#standard-parameters) by clicking on column headers. Pairs well with a [c-list-pagination](/stacks/vue/coalesce-vue-vuetify/components/c-list-pagination.md).
 
 <!-- MARKER:summary-end -->
 

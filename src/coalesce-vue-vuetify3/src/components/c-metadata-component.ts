@@ -25,7 +25,7 @@ import type {
 } from "coalesce-vue";
 import { ApiState, ViewModel } from "coalesce-vue";
 import { computed, useAttrs } from "vue";
-import { useMetadata } from "..";
+import { useMetadata } from "../composables/useMetadata";
 
 type PropsOf<TModel> = TModel extends {
   $metadata: {

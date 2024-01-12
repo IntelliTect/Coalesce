@@ -1,5 +1,6 @@
-import { App, inject } from "vue";
+import { App } from "vue";
 import { Domain } from "coalesce-vue";
+import { metadataKey } from "./composables/useMetadata";
 
 export interface CoalesceVuetifyOptions {
   /** A reference to the whole set of Coalesce-generated metadata for the application,
@@ -20,12 +21,6 @@ declare module "@vue/runtime-core" {
   export interface ComponentCustomProperties {
     readonly $coalesce: CoalesceVuetifyInstance;
   }
-}
-
-const metadataKey = Symbol("coalesce metadata");
-
-export function useMetadata() {
-  return inject(metadataKey) as Domain;
 }
 
 export const createCoalesceVuetify = (options: CoalesceVuetifyOptions) => {

@@ -1,38 +1,40 @@
-import path from 'path';
+import path from "path";
 
-import { defineConfig } from 'vite';
+import { defineConfig } from "vite";
 
-import createVuePlugin from '@vitejs/plugin-vue';
-import vuetify, { transformAssetUrls } from 'vite-plugin-vuetify'
-import createVueComponentImporterPlugin from 'unplugin-vue-components/vite';
-import { Vuetify3Resolver } from 'unplugin-vue-components/resolvers';
+import createVuePlugin from "@vitejs/plugin-vue";
+import vuetify, { transformAssetUrls } from "vite-plugin-vuetify";
+import createVueComponentImporterPlugin from "unplugin-vue-components/vite";
+import { Vuetify3Resolver } from "unplugin-vue-components/resolvers";
 
-import { createAspNetCoreHmrPlugin } from '../../src/coalesce-vue/src/build';
-import { CoalesceVuetifyResolver } from '../../src/coalesce-vue-vuetify3/src/build';
+import { createAspNetCoreHmrPlugin } from "../../src/coalesce-vue/src/build";
+import { CoalesceVuetifyResolver } from "../../src/coalesce-vue-vuetify3/src/build";
 
-const libRoot = path.resolve(__dirname, '../../src/') + "/";
+const libRoot = path.resolve(__dirname, "../../src/") + "/";
 
 export default defineConfig(async ({ command, mode }) => {
   return {
     build: {
-      outDir: 'wwwroot',
+      outDir: "wwwroot",
       rollupOptions: {
         output: {
           manualChunks(id) {
-            if (id.match(/home/i)) return 'index';
+            if (id.match(/home/i)) return "index";
             // All views are chunked together so that dynamic imports can be
             // used in `router.ts`(which makes for a much more readable file).
             // Without this, each dynamic import would get its own chunk.
-            if (id.includes('views')) return 'views';
-            return 'index';
+            if (id.includes("views")) return "views";
+            return "index";
           },
         },
       },
     },
 
     plugins: [
-      createVuePlugin({ 
-        template: { transformAssetUrls }
+      (await import("vite-plugin-inspect")).default(),
+      
+      createVuePlugin({
+        template: { transformAssetUrls },
       }),
 
       vuetify({
@@ -42,7 +44,15 @@ export default defineConfig(async ({ command, mode }) => {
       // Transforms usages of Vuetify and Coalesce components into treeshakable imports
       createVueComponentImporterPlugin({
         dts: false,
-        resolvers: [CoalesceVuetifyResolver()],
+        // DONT USE CoalesceVuetifyResolver because it will inject imports into component sources
+        // that will import from coalesce-vue-vuetify3's index.ts,
+        // which then creates circular imports that break HMR.
+        // Instead, give the plugin the actual source paths
+        // so they can be imported directly from their exact locations.
+        globs: [
+          "src/components/**/*.{vue}",
+          libRoot + "coalesce-vue-vuetify3/src/components/**/*.{vue,ts}",
+        ],
       }),
 
       // Integrations with UseViteDevelopmentServer from IntelliTect.Coalesce.Vue
@@ -67,31 +77,31 @@ export default defineConfig(async ({ command, mode }) => {
     ],
 
     resolve: {
-      dedupe: [
-        "vue",
-        "vue-router",
-        "vuetify",
-      ],
+      dedupe: ["vue", "vue-router", "vuetify"],
       alias: [
-        { find: '@', replacement: path.resolve(__dirname, 'src') },
+        { find: "@", replacement: path.resolve(__dirname, "src") },
         {
-          find: 'coalesce-vue/lib',
-          replacement: libRoot + 'coalesce-vue/src',
+          find: "coalesce-vue/lib",
+          replacement: libRoot + "coalesce-vue/src",
         },
         {
-          find: 'coalesce-vue',
-          replacement: libRoot + 'coalesce-vue/src',
+          find: "coalesce-vue",
+          replacement: libRoot + "coalesce-vue/src",
         },
         {
-          find: 'coalesce-vue-vuetify3',
-          replacement: libRoot + 'coalesce-vue-vuetify3/src/index.ts',
+          find: "coalesce-vue-vuetify3",
+          replacement: libRoot + "coalesce-vue-vuetify3/src/index.ts",
         },
       ],
     },
     server: {
-      host: '0.0.0.0',
+      host: "0.0.0.0",
       fs: {
-        allow: [libRoot + 'coalesce-vue', libRoot + 'coalesce-vue-vuetify3', '.'],
+        allow: [
+          libRoot + "coalesce-vue",
+          libRoot + "coalesce-vue-vuetify3",
+          ".",
+        ],
       },
     },
 
@@ -101,8 +111,8 @@ export default defineConfig(async ({ command, mode }) => {
     },
 
     optimizeDeps: {
-      include: ['vuetify'],
-    }
+      include: ["vuetify"],
+    },
 
     // test: <VitestInlineConfig>{
     //   globals: true,

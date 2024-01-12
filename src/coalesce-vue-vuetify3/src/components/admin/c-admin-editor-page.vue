@@ -4,6 +4,7 @@
       class="c-admin-editor-page--editor"
       :model="viewModel"
       :color="color"
+      @deleted="onDeleted"
     />
 
     <c-admin-methods
@@ -90,6 +91,12 @@ export default defineComponent({
         this.metadata &&
         Object.values(this.metadata.methods).some((m) => !m.isStatic)
       );
+    },
+  },
+
+  methods: {
+    onDeleted() {
+      this.$router.back();
     },
   },
 

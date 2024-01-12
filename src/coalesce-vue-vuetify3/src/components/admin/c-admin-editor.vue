@@ -22,7 +22,22 @@
       </v-toolbar-title>
 
       <v-spacer></v-spacer>
-      <v-btn @click="model.$load()" variant="text" :disabled="!hasPk">
+      <v-btn
+        v-if="canDelete"
+        @click="deleteItemWithConfirmation()"
+        variant="text"
+        :disabled="!hasPk"
+        title="Delete"
+      >
+        <v-icon start>fa fa-trash-alt</v-icon>
+        <span class="hidden-sm-and-down">Delete</span>
+      </v-btn>
+      <v-btn
+        @click="model.$load()"
+        variant="text"
+        :disabled="!hasPk"
+        title="Reload"
+      >
         <v-icon start>$loading</v-icon>
         <span class="hidden-sm-and-down">Reload</span>
       </v-btn>
@@ -34,7 +49,7 @@
           [!showContent ? 'no-initial-content' : 'no-error-content']: [
             model.$load,
           ],
-          '': [model.$save],
+          '': [model.$save, model.$delete],
         }"
       >
         <v-form ref="form">
@@ -171,9 +186,12 @@ export default defineComponent({
   props: {
     model: {
       required: true,
-      type: Object as PropType<Indexable<ViewModel<Model<ModelType>>>>,
+      type: Object as PropType<Indexable<ViewModel>>,
     },
     color: { required: false, type: String, default: null },
+
+    /** Whether or not a delete button is shown. Default true if the provided model allows deletes. */
+    deletable: { required: false, type: Boolean, default: true },
   },
 
   methods: {
@@ -183,6 +201,13 @@ export default defineComponent({
       return {
         readonly,
       };
+    },
+
+    async deleteItemWithConfirmation() {
+      if (confirm("Are you sure you wish to delete this item?")) {
+        await this.model.$delete();
+        this.$emit("deleted");
+      }
     },
   },
 
@@ -216,6 +241,13 @@ export default defineComponent({
         (metadata.behaviorFlags &
           (this.hasPk ? BehaviorFlags.Edit : BehaviorFlags.Create)) !=
         0
+      );
+    },
+
+    canDelete() {
+      return (
+        this.deletable &&
+        (this.metadata?.behaviorFlags & BehaviorFlags.Delete) != 0
       );
     },
 

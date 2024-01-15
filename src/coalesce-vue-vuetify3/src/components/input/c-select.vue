@@ -5,13 +5,7 @@
       'c-select--is-menu-active': menuOpen,
     }"
     :error-messages="error"
-    :messages="
-      focused ||
-      inputBindAttrs['persistent-hint'] ||
-      inputBindAttrs['persistentHint']
-        ? inputBindAttrs.hint
-        : ''
-    "
+    :focused="focused"
     v-bind="inputBindAttrs"
     :rules="effectiveRules"
     :modelValue="internalModelValue"

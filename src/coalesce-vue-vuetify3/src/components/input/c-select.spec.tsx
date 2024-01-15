@@ -6,6 +6,7 @@ import {
   nextTick,
   flushPromises,
   BetterComponentInstance,
+  delay,
 } from "@test/util";
 import { VueWrapper } from "@vue/test-utils";
 import { AxiosRequestConfig } from "axios";
@@ -195,8 +196,41 @@ describe("CSelect", () => {
       ));
 
       expect(wrapper.find("label").text()).toEqual("custom label");
-      expect(wrapper.find(".v-messages").text()).toEqual("custom hint");
       expect(wrapper.find(".v-field__clearable").exists()).toBeTruthy();
+    });
+  });
+
+  describe("hint", () => {
+    test("shows persistent hint", () => {
+      const wrapper = mountApp(() => (
+        <CSelect for="Course" hint="custom hint" persistent-hint></CSelect>
+      ));
+
+      expect(wrapper.find(".v-messages").text()).toEqual("custom hint");
+    });
+
+    test("shows non-persistent hint when focused", async () => {
+      const wrapper = mountApp(() => (
+        <CSelect for="Course" hint="custom hint"></CSelect>
+      ));
+
+      expect(wrapper.find(".v-messages").text()).toEqual("");
+      wrapper.find("input").element.focus();
+      await delay(10);
+
+      expect(wrapper.find(".v-messages").text()).toEqual("custom hint");
+    });
+
+    test("allow null hint", async () => {
+      const wrapper = mountApp(() => (
+        <CSelect for="Course" hint={null}></CSelect>
+      ));
+
+      expect(wrapper.find(".v-messages").text()).toEqual("");
+      wrapper.find("input").element.focus();
+      await delay(10);
+
+      expect(wrapper.find(".v-messages").text()).toEqual("");
     });
   });
 

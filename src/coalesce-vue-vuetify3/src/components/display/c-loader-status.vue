@@ -137,8 +137,8 @@ const props = withDefaults(
        * progress bar to potentially overlap content while active. */
       progressAbsolute?: boolean;
 
-      /** The height of the progress bar */
-      height?: 10;
+      /** The height of the progress bar in pixels */
+      height?: number;
       /** The color of the progress bar */
       color?: string;
     } & { [K in CamelFlags]?: boolean }

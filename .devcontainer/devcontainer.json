@@ -22,7 +22,7 @@
             "aspNetCoreRuntimeVersions": "8.0"
         }
     },
-	"postCreateCommand": "cd ./src && dotnet restore",
+	"postCreateCommand": "cd ./src && dotnet restore && coalesce-vue && npm ci && coalesce-vue-vuetify2 && npm ci && coalesce-vue-vuetify3 && npm ci",
 
 	"customizations": {
         "vscode": {
@@ -31,7 +31,13 @@
                 "GitHub.vscode-github-actions",
                 "ms-dotnettools.vscode-dotnet-runtime",
                 "ms-dotnettools.csdevkit",
-                "ms-dotnetools.csharp"
+                "ms-dotnetools.csharp",
+		"streetsidesoftware.code-spell-checker",
+	        "dbaeumer.vscode-eslint",
+	        "vue.volar",
+	        "vue.vscode-typescript-vue-plugin",
+	        "esbenp.prettier-vscode",
+	        "antfu.goto-alias"
             ]
         }
     }

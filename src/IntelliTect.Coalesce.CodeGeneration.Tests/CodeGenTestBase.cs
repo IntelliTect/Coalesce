@@ -35,7 +35,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Tests
             );
         }
 
-        protected async Task<T> ConfigureAndValidateSuite<T>(T suite)
+        protected Task<T> ConfigureAndValidateSuite<T>(T suite)
             where T : IRootGenerator
         {
             var cwd = new DirectoryInfo(Directory.GetCurrentDirectory());
@@ -54,7 +54,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Tests
                 string.Join("\n", validationResult.Where(r => r.IsError))
             );
 
-            return suite;
+            return Task.FromResult(suite);
         }
 
         protected Task AssertSuiteCSharpOutputCompiles(IRootGenerator suite)

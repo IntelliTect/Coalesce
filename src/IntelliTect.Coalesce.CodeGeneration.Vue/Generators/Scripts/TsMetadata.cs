@@ -401,6 +401,16 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                 rules.Add($"required: val => {requiredPredicate} || \"{message.EscapeStringLiteralForTypeScript()}\"");
             }
 
+            var pattern = prop.GetAttributeValue<ClientValidationAttribute>(a => a.Pattern);
+            if (pattern == null && prop.Type.IsGuid)
+            {
+                pattern = @"^\s*[{(]?[0-9A-Fa-f]{8}[-]?(?:[0-9A-Fa-f]{4}[-]?){3}[0-9A-Fa-f]{12}[)}]?\s*$";
+            }
+            if (!string.IsNullOrEmpty(pattern))
+            {
+                rules.Add($"pattern: val => !val || /{pattern}/.test(val) {Error(clientValidationError, $"{propName} does not match expected format.")}");
+            }
+
             if (prop.Type.IsString)
             {
                 void Min(object value, string error) => rules.Add($"minLength: val => !val || val.length >= {value} {Error(error, $"{propName} must be at least {value} characters.")}");
@@ -432,16 +442,6 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                 {
                     const string urlPattern = @"^((https?|ftp):\/\/.)";
                     rules.Add($"url: val => !val || /{urlPattern}/.test(val) {Error(clientValidationError, $"{propName} must be a valid URL.")}");
-                }
-
-                var pattern = prop.GetAttributeValue<ClientValidationAttribute>(a => a.Pattern);
-                if (pattern == null && prop.Type.IsGuid)
-                {
-                    pattern = @"^\s*[{(]?[0-9A-Fa-f]{8}[-]?(?:[0-9A-Fa-f]{4}[-]?){3}[0-9A-Fa-f]{12}[)}]?\s*$";
-                }
-                if (!string.IsNullOrEmpty(pattern))
-                {
-                    rules.Add($"pattern: val => !val || /{pattern}/.test(val) {Error(clientValidationError, $"{propName} does not match expected format.")}");
                 }
 
                 // https://emailregex.com/

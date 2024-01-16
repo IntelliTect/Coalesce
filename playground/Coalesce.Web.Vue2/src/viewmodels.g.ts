@@ -117,7 +117,7 @@ export class CaseViewModel extends ViewModel<$models.Case, $apiClients.CaseApiCl
   public get downloadImage() {
     const downloadImage = this.$apiClient.$makeCaller(
       this.$metadata.methods.downloadImage,
-      (c, ) => c.downloadImage(this.$primaryKey, this.attachmentHash),
+      (c) => c.downloadImage(this.$primaryKey, this.attachmentHash),
       () => ({}),
       (c, args) => c.downloadImage(this.$primaryKey, this.attachmentHash))
     
@@ -180,7 +180,7 @@ export class CaseListViewModel extends ListViewModel<$models.Case, $apiClients.C
   public get getSomeCases() {
     const getSomeCases = this.$apiClient.$makeCaller(
       this.$metadata.methods.getSomeCases,
-      (c, ) => c.getSomeCases(),
+      (c) => c.getSomeCases(),
       () => ({}),
       (c, args) => c.getSomeCases())
     
@@ -191,7 +191,7 @@ export class CaseListViewModel extends ListViewModel<$models.Case, $apiClients.C
   public get getAllOpenCasesCount() {
     const getAllOpenCasesCount = this.$apiClient.$makeCaller(
       this.$metadata.methods.getAllOpenCasesCount,
-      (c, ) => c.getAllOpenCasesCount(),
+      (c) => c.getAllOpenCasesCount(),
       () => ({}),
       (c, args) => c.getAllOpenCasesCount())
     
@@ -202,7 +202,7 @@ export class CaseListViewModel extends ListViewModel<$models.Case, $apiClients.C
   public get randomizeDatesAndStatus() {
     const randomizeDatesAndStatus = this.$apiClient.$makeCaller(
       this.$metadata.methods.randomizeDatesAndStatus,
-      (c, ) => c.randomizeDatesAndStatus(),
+      (c) => c.randomizeDatesAndStatus(),
       () => ({}),
       (c, args) => c.randomizeDatesAndStatus())
     
@@ -214,7 +214,7 @@ export class CaseListViewModel extends ListViewModel<$models.Case, $apiClients.C
   public get getCaseSummary() {
     const getCaseSummary = this.$apiClient.$makeCaller(
       this.$metadata.methods.getCaseSummary,
-      (c, ) => c.getCaseSummary(),
+      (c) => c.getCaseSummary(),
       () => ({}),
       (c, args) => c.getCaseSummary())
     
@@ -453,7 +453,7 @@ export class PersonViewModel extends ViewModel<$models.Person, $apiClients.Perso
   public get changeSpacesToDashesInName() {
     const changeSpacesToDashesInName = this.$apiClient.$makeCaller(
       this.$metadata.methods.changeSpacesToDashesInName,
-      (c, ) => c.changeSpacesToDashesInName(this.$primaryKey),
+      (c) => c.changeSpacesToDashesInName(this.$primaryKey),
       () => ({}),
       (c, args) => c.changeSpacesToDashesInName(this.$primaryKey))
     
@@ -464,7 +464,7 @@ export class PersonViewModel extends ViewModel<$models.Person, $apiClients.Perso
   public get getBirthdate() {
     const getBirthdate = this.$apiClient.$makeCaller(
       this.$metadata.methods.getBirthdate,
-      (c, ) => c.getBirthdate(this.$primaryKey),
+      (c) => c.getBirthdate(this.$primaryKey),
       () => ({}),
       (c, args) => c.getBirthdate(this.$primaryKey))
     
@@ -487,7 +487,7 @@ export class PersonViewModel extends ViewModel<$models.Person, $apiClients.Perso
   public get fullNameAndAge() {
     const fullNameAndAge = this.$apiClient.$makeCaller(
       this.$metadata.methods.fullNameAndAge,
-      (c, ) => c.fullNameAndAge(this.$primaryKey),
+      (c) => c.fullNameAndAge(this.$primaryKey),
       () => ({}),
       (c, args) => c.fullNameAndAge(this.$primaryKey))
     
@@ -498,7 +498,7 @@ export class PersonViewModel extends ViewModel<$models.Person, $apiClients.Perso
   public get obfuscateEmail() {
     const obfuscateEmail = this.$apiClient.$makeCaller(
       this.$metadata.methods.obfuscateEmail,
-      (c, ) => c.obfuscateEmail(this.$primaryKey),
+      (c) => c.obfuscateEmail(this.$primaryKey),
       () => ({}),
       (c, args) => c.obfuscateEmail(this.$primaryKey))
     
@@ -545,7 +545,7 @@ export class PersonListViewModel extends ListViewModel<$models.Person, $apiClien
   public get getUser() {
     const getUser = this.$apiClient.$makeCaller(
       this.$metadata.methods.getUser,
-      (c, ) => c.getUser(),
+      (c) => c.getUser(),
       () => ({}),
       (c, args) => c.getUser())
     
@@ -579,7 +579,7 @@ export class PersonListViewModel extends ListViewModel<$models.Person, $apiClien
   public get getUserPublic() {
     const getUserPublic = this.$apiClient.$makeCaller(
       this.$metadata.methods.getUserPublic,
-      (c, ) => c.getUserPublic(),
+      (c) => c.getUserPublic(),
       () => ({}),
       (c, args) => c.getUserPublic())
     

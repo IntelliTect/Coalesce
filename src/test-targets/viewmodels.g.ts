@@ -276,7 +276,7 @@ export class ComplexModelViewModel extends ViewModel<$models.ComplexModel, $apiC
   public get methodWithOutputOnlyExternalType() {
     const methodWithOutputOnlyExternalType = this.$apiClient.$makeCaller(
       this.$metadata.methods.methodWithOutputOnlyExternalType,
-      (c, ) => c.methodWithOutputOnlyExternalType(this.$primaryKey),
+      (c) => c.methodWithOutputOnlyExternalType(this.$primaryKey),
       () => ({}),
       (c, args) => c.methodWithOutputOnlyExternalType(this.$primaryKey))
     
@@ -287,7 +287,7 @@ export class ComplexModelViewModel extends ViewModel<$models.ComplexModel, $apiC
   public get methodWithOutputOnlyExternalType2() {
     const methodWithOutputOnlyExternalType2 = this.$apiClient.$makeCaller(
       this.$metadata.methods.methodWithOutputOnlyExternalType2,
-      (c, ) => c.methodWithOutputOnlyExternalType2(this.$primaryKey),
+      (c) => c.methodWithOutputOnlyExternalType2(this.$primaryKey),
       () => ({}),
       (c, args) => c.methodWithOutputOnlyExternalType2(this.$primaryKey))
     
@@ -298,7 +298,7 @@ export class ComplexModelViewModel extends ViewModel<$models.ComplexModel, $apiC
   public get methodWithOutputOnlyExternalType3() {
     const methodWithOutputOnlyExternalType3 = this.$apiClient.$makeCaller(
       this.$metadata.methods.methodWithOutputOnlyExternalType3,
-      (c, ) => c.methodWithOutputOnlyExternalType3(this.$primaryKey),
+      (c) => c.methodWithOutputOnlyExternalType3(this.$primaryKey),
       () => ({}),
       (c, args) => c.methodWithOutputOnlyExternalType3(this.$primaryKey))
     
@@ -342,7 +342,7 @@ export class ComplexModelViewModel extends ViewModel<$models.ComplexModel, $apiC
   public get downloadAttachment() {
     const downloadAttachment = this.$apiClient.$makeCaller(
       this.$metadata.methods.downloadAttachment,
-      (c, ) => c.downloadAttachment(this.$primaryKey),
+      (c) => c.downloadAttachment(this.$primaryKey),
       () => ({}),
       (c, args) => c.downloadAttachment(this.$primaryKey))
     
@@ -353,7 +353,7 @@ export class ComplexModelViewModel extends ViewModel<$models.ComplexModel, $apiC
   public get downloadAttachment_VaryByteArray() {
     const downloadAttachment_VaryByteArray = this.$apiClient.$makeCaller(
       this.$metadata.methods.downloadAttachment_VaryByteArray,
-      (c, ) => c.downloadAttachment_VaryByteArray(this.$primaryKey, this.byteArrayProp),
+      (c) => c.downloadAttachment_VaryByteArray(this.$primaryKey, this.byteArrayProp),
       () => ({}),
       (c, args) => c.downloadAttachment_VaryByteArray(this.$primaryKey, this.byteArrayProp))
     
@@ -364,7 +364,7 @@ export class ComplexModelViewModel extends ViewModel<$models.ComplexModel, $apiC
   public get downloadAttachment_VaryDate() {
     const downloadAttachment_VaryDate = this.$apiClient.$makeCaller(
       this.$metadata.methods.downloadAttachment_VaryDate,
-      (c, ) => c.downloadAttachment_VaryDate(this.$primaryKey, this.dateTimeOffset),
+      (c) => c.downloadAttachment_VaryDate(this.$primaryKey, this.dateTimeOffset),
       () => ({}),
       (c, args) => c.downloadAttachment_VaryDate(this.$primaryKey, this.dateTimeOffset))
     
@@ -375,7 +375,7 @@ export class ComplexModelViewModel extends ViewModel<$models.ComplexModel, $apiC
   public get downloadAttachment_VaryString() {
     const downloadAttachment_VaryString = this.$apiClient.$makeCaller(
       this.$metadata.methods.downloadAttachment_VaryString,
-      (c, ) => c.downloadAttachment_VaryString(this.$primaryKey, this.name),
+      (c) => c.downloadAttachment_VaryString(this.$primaryKey, this.name),
       () => ({}),
       (c, args) => c.downloadAttachment_VaryString(this.$primaryKey, this.name))
     
@@ -386,7 +386,7 @@ export class ComplexModelViewModel extends ViewModel<$models.ComplexModel, $apiC
   public get downloadAttachment_VaryInt() {
     const downloadAttachment_VaryInt = this.$apiClient.$makeCaller(
       this.$metadata.methods.downloadAttachment_VaryInt,
-      (c, ) => c.downloadAttachment_VaryInt(this.$primaryKey, this.int),
+      (c) => c.downloadAttachment_VaryInt(this.$primaryKey, this.int),
       () => ({}),
       (c, args) => c.downloadAttachment_VaryInt(this.$primaryKey, this.int))
     
@@ -397,7 +397,7 @@ export class ComplexModelViewModel extends ViewModel<$models.ComplexModel, $apiC
   public get downloadAttachment_VaryGuid() {
     const downloadAttachment_VaryGuid = this.$apiClient.$makeCaller(
       this.$metadata.methods.downloadAttachment_VaryGuid,
-      (c, ) => c.downloadAttachment_VaryGuid(this.$primaryKey, this.guid),
+      (c) => c.downloadAttachment_VaryGuid(this.$primaryKey, this.guid),
       () => ({}),
       (c, args) => c.downloadAttachment_VaryGuid(this.$primaryKey, this.guid))
     
@@ -408,7 +408,7 @@ export class ComplexModelViewModel extends ViewModel<$models.ComplexModel, $apiC
   public get downloadAttachmentItemResult() {
     const downloadAttachmentItemResult = this.$apiClient.$makeCaller(
       this.$metadata.methods.downloadAttachmentItemResult,
-      (c, ) => c.downloadAttachmentItemResult(this.$primaryKey),
+      (c) => c.downloadAttachmentItemResult(this.$primaryKey),
       () => ({}),
       (c, args) => c.downloadAttachmentItemResult(this.$primaryKey))
     
@@ -526,7 +526,7 @@ export class ComplexModelListViewModel extends ListViewModel<$models.ComplexMode
   public get downloadAttachmentStatic() {
     const downloadAttachmentStatic = this.$apiClient.$makeCaller(
       this.$metadata.methods.downloadAttachmentStatic,
-      (c, ) => c.downloadAttachmentStatic(),
+      (c) => c.downloadAttachmentStatic(),
       () => ({}),
       (c, args) => c.downloadAttachmentStatic())
     
@@ -667,7 +667,7 @@ export class PersonViewModel extends ViewModel<$models.Person, $apiClients.Perso
   public get changeSpacesToDashesInName() {
     const changeSpacesToDashesInName = this.$apiClient.$makeCaller(
       this.$metadata.methods.changeSpacesToDashesInName,
-      (c, ) => c.changeSpacesToDashesInName(this.$primaryKey),
+      (c) => c.changeSpacesToDashesInName(this.$primaryKey),
       () => ({}),
       (c, args) => c.changeSpacesToDashesInName(this.$primaryKey))
     
@@ -699,7 +699,7 @@ export class PersonListViewModel extends ListViewModel<$models.Person, $apiClien
   public get getUser() {
     const getUser = this.$apiClient.$makeCaller(
       this.$metadata.methods.getUser,
-      (c, ) => c.getUser(),
+      (c) => c.getUser(),
       () => ({}),
       (c, args) => c.getUser())
     
@@ -711,7 +711,7 @@ export class PersonListViewModel extends ListViewModel<$models.Person, $apiClien
   public get getUserPublic() {
     const getUserPublic = this.$apiClient.$makeCaller(
       this.$metadata.methods.getUserPublic,
-      (c, ) => c.getUserPublic(),
+      (c) => c.getUserPublic(),
       () => ({}),
       (c, args) => c.getUserPublic())
     
@@ -846,7 +846,7 @@ export class StandaloneReadonlyViewModel extends ViewModel<$models.StandaloneRea
   public get instanceMethod() {
     const instanceMethod = this.$apiClient.$makeCaller(
       this.$metadata.methods.instanceMethod,
-      (c, ) => c.instanceMethod(this.$primaryKey),
+      (c) => c.instanceMethod(this.$primaryKey),
       () => ({}),
       (c, args) => c.instanceMethod(this.$primaryKey))
     
@@ -865,7 +865,7 @@ export class StandaloneReadonlyListViewModel extends ListViewModel<$models.Stand
   public get staticMethod() {
     const staticMethod = this.$apiClient.$makeCaller(
       this.$metadata.methods.staticMethod,
-      (c, ) => c.staticMethod(),
+      (c) => c.staticMethod(),
       () => ({}),
       (c, args) => c.staticMethod())
     

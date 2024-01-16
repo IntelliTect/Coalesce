@@ -191,7 +191,6 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
             if (method.HasHttpRequestBody) paramTypeFlags |= VueType.Flags.RawBinary;
 
             var signatureData = inputParams.SignatureData(paramTypeFlags).ToList();
-            string signature = string.Join(", ", signatureData.Select(p => p.Signature));
 
             string argsConstructor =
                 "({" +
@@ -208,8 +207,9 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                 b.Indented($"this.$metadata.methods.{method.JsVariable},");
 
                 // The invoker function when the caller is used directly like `caller(...)`, or via `caller.invoke(...)`
-                var positionalParams = string.Join(", ", method.ApiParameters.Select(p => PropValue(p, "")));
-                b.Indented($"(c, {signature}) => c.{method.JsVariable}({positionalParams}),");
+                string signature = string.Join(", ", signatureData.Select(p => p.Signature).Prepend("c"));
+                string positionalParams = string.Join(", ", method.ApiParameters.Select(p => PropValue(p, "")));
+                b.Indented($"({signature}) => c.{method.JsVariable}({positionalParams}),");
 
                 // The factory function to return a new args object. Args object lives on `caller.args`
                 b.Indented($"() => {argsConstructor},");

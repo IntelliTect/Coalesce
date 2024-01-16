@@ -22,7 +22,7 @@
             "aspNetCoreRuntimeVersions": "8.0"
         }
     },
-	"postCreateCommand": "cd ./src && dotnet restore && coalesce-vue && npm ci && coalesce-vue-vuetify2 && npm ci && coalesce-vue-vuetify3 && npm ci",
+	"postCreateCommand": "cd ./src && dotnet restore && cd coalesce-vue && npm ci && cd coalesce-vue-vuetify2 && npm ci && cd coalesce-vue-vuetify3 && npm ci",
 
 	"customizations": {
         "vscode": {

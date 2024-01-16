@@ -394,8 +394,9 @@ export function useMetadataProps<TModel extends ModelAllowedType = Model>(
     return getValueMetaAndOwner(props.for, props.model, metadata).valueOwner;
   });
 
+  const attrs = useAttrs();
   const inputBindAttrs = computed(() =>
-    buildVuetifyAttrs(valueMeta.value, props.model, useAttrs())
+    buildVuetifyAttrs(valueMeta.value, props.model, attrs)
   );
 
   return { modelMeta, valueMeta, valueOwner, inputBindAttrs };

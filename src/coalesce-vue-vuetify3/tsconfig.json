@@ -15,6 +15,7 @@
     "paths": {
       "@/*": ["src/*"],
       "@test/*": ["test/*"],
+      "@test-targets/*": ["../test-targets/*"],
       "coalesce-vue": ["../coalesce-vue/src"],
       "coalesce-vue/*": ["../coalesce-vue/src/*"],
       "coalesce-vue/lib/*": ["../coalesce-vue/src/*"],

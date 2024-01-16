@@ -11,7 +11,7 @@
 </template>
 
 <script setup lang="ts">
-import { ComplexModelViewModel } from "@test/viewmodels.g";
+import { ComplexModelViewModel } from "@test-targets/viewmodels.g";
 
 const vm = new ComplexModelViewModel();
 </script>

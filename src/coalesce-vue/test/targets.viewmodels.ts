@@ -1,3 +1,8 @@
+// Ensure that ViewModel.typeLookup is created by the generated code as expected,
+// since the viewmodels in this class (which are deprecated and usages need to be changed
+// to use `test-targets`) get added to the generated ViewModel.typeLookup.
+import "../../test-targets/viewmodels.g";
+
 import * as metadata from "./targets.metadata";
 import * as models from "./targets.models";
 import * as apiClients from "./targets.apiclients";
@@ -75,8 +80,9 @@ export class AdvisorViewModel extends ViewModel<
 }
 defineProps(AdvisorViewModel, metadata.Advisor);
 
-ViewModel.typeLookup = {
+// Add these to the lookup created by "../../test-targets/viewmodels.g";
+Object.assign(ViewModel.typeLookup!, {
   Student: StudentViewModel,
   Course: CourseViewModel,
   Advisor: AdvisorViewModel,
-};
+});

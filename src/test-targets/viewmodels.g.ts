@@ -232,7 +232,7 @@ export class ComplexModelViewModel extends ViewModel<$models.ComplexModel, $apiC
   public get methodWithManyParams() {
     const methodWithManyParams = this.$apiClient.$makeCaller(
       this.$metadata.methods.methodWithManyParams,
-      (c, singleExternal: $models.ExternalParent | null, collectionExternal: $models.ExternalParent[] | null, file: File | null, strParam: string | null, stringsParam: string[] | null, dateTime: Date | null, integer: number | null, boolParam: boolean | null, enumParam: $models.Statuses | null, model: $models.Company | null, modelCollection: $models.Company[] | null) => c.methodWithManyParams(this.$primaryKey, singleExternal, collectionExternal, file, strParam, stringsParam, dateTime, integer, boolParam, enumParam, model, modelCollection),
+      (c, singleExternal?: $models.ExternalParent | null, collectionExternal?: $models.ExternalParent[] | null, file?: File | null, strParam?: string | null, stringsParam?: string[] | null, dateTime?: Date | null, integer?: number | null, boolParam?: boolean | null, enumParam?: $models.Statuses | null, model?: $models.Company | null, modelCollection?: $models.Company[] | null) => c.methodWithManyParams(this.$primaryKey, singleExternal, collectionExternal, file, strParam, stringsParam, dateTime, integer, boolParam, enumParam, model, modelCollection),
       () => ({singleExternal: null as $models.ExternalParent | null, collectionExternal: null as $models.ExternalParent[] | null, file: null as File | null, strParam: null as string | null, stringsParam: null as string[] | null, dateTime: null as Date | null, integer: null as number | null, boolParam: null as boolean | null, enumParam: null as $models.Statuses | null, model: null as $models.Company | null, modelCollection: null as $models.Company[] | null, }),
       (c, args) => c.methodWithManyParams(this.$primaryKey, args.singleExternal, args.collectionExternal, args.file, args.strParam, args.stringsParam, args.dateTime, args.integer, args.boolParam, args.enumParam, args.model, args.modelCollection))
     
@@ -240,10 +240,32 @@ export class ComplexModelViewModel extends ViewModel<$models.ComplexModel, $apiC
     return methodWithManyParams
   }
   
+  public get methodWithOptionalParams() {
+    const methodWithOptionalParams = this.$apiClient.$makeCaller(
+      this.$metadata.methods.methodWithOptionalParams,
+      (c, requiredInt: number, plainInt?: number | null, nullableInt?: number | null, intWithDefault?: number | null, enumWithDefault?: $models.Statuses | null, stringWithDefault?: string | null) => c.methodWithOptionalParams(this.$primaryKey, requiredInt, plainInt, nullableInt, intWithDefault, enumWithDefault, stringWithDefault),
+      () => ({requiredInt: null as number | null, plainInt: null as number | null, nullableInt: null as number | null, intWithDefault: null as number | null, enumWithDefault: null as $models.Statuses | null, stringWithDefault: null as string | null, }),
+      (c, args) => c.methodWithOptionalParams(this.$primaryKey, args.requiredInt!, args.plainInt, args.nullableInt, args.intWithDefault, args.enumWithDefault, args.stringWithDefault))
+    
+    Object.defineProperty(this, 'methodWithOptionalParams', {value: methodWithOptionalParams});
+    return methodWithOptionalParams
+  }
+  
+  public get methodWithRequiredAfterOptional() {
+    const methodWithRequiredAfterOptional = this.$apiClient.$makeCaller(
+      this.$metadata.methods.methodWithRequiredAfterOptional,
+      (c, optionalInt: number, singleExternal: $models.ExternalParent) => c.methodWithRequiredAfterOptional(this.$primaryKey, optionalInt, singleExternal),
+      () => ({optionalInt: null as number | null, singleExternal: null as $models.ExternalParent | null, }),
+      (c, args) => c.methodWithRequiredAfterOptional(this.$primaryKey, args.optionalInt!, args.singleExternal!))
+    
+    Object.defineProperty(this, 'methodWithRequiredAfterOptional', {value: methodWithRequiredAfterOptional});
+    return methodWithRequiredAfterOptional
+  }
+  
   public get methodWithExternalTypesWithSinglePurpose() {
     const methodWithExternalTypesWithSinglePurpose = this.$apiClient.$makeCaller(
       this.$metadata.methods.methodWithExternalTypesWithSinglePurpose,
-      (c, single: $models.ExternalParentAsInputOnly | null, collection: $models.ExternalParentAsInputOnly[] | null) => c.methodWithExternalTypesWithSinglePurpose(this.$primaryKey, single, collection),
+      (c, single?: $models.ExternalParentAsInputOnly | null, collection?: $models.ExternalParentAsInputOnly[] | null) => c.methodWithExternalTypesWithSinglePurpose(this.$primaryKey, single, collection),
       () => ({single: null as $models.ExternalParentAsInputOnly | null, collection: null as $models.ExternalParentAsInputOnly[] | null, }),
       (c, args) => c.methodWithExternalTypesWithSinglePurpose(this.$primaryKey, args.single, args.collection))
     
@@ -254,7 +276,7 @@ export class ComplexModelViewModel extends ViewModel<$models.ComplexModel, $apiC
   public get methodWithOutputOnlyExternalType() {
     const methodWithOutputOnlyExternalType = this.$apiClient.$makeCaller(
       this.$metadata.methods.methodWithOutputOnlyExternalType,
-      (c) => c.methodWithOutputOnlyExternalType(this.$primaryKey),
+      (c, ) => c.methodWithOutputOnlyExternalType(this.$primaryKey),
       () => ({}),
       (c, args) => c.methodWithOutputOnlyExternalType(this.$primaryKey))
     
@@ -265,7 +287,7 @@ export class ComplexModelViewModel extends ViewModel<$models.ComplexModel, $apiC
   public get methodWithOutputOnlyExternalType2() {
     const methodWithOutputOnlyExternalType2 = this.$apiClient.$makeCaller(
       this.$metadata.methods.methodWithOutputOnlyExternalType2,
-      (c) => c.methodWithOutputOnlyExternalType2(this.$primaryKey),
+      (c, ) => c.methodWithOutputOnlyExternalType2(this.$primaryKey),
       () => ({}),
       (c, args) => c.methodWithOutputOnlyExternalType2(this.$primaryKey))
     
@@ -276,7 +298,7 @@ export class ComplexModelViewModel extends ViewModel<$models.ComplexModel, $apiC
   public get methodWithOutputOnlyExternalType3() {
     const methodWithOutputOnlyExternalType3 = this.$apiClient.$makeCaller(
       this.$metadata.methods.methodWithOutputOnlyExternalType3,
-      (c) => c.methodWithOutputOnlyExternalType3(this.$primaryKey),
+      (c, ) => c.methodWithOutputOnlyExternalType3(this.$primaryKey),
       () => ({}),
       (c, args) => c.methodWithOutputOnlyExternalType3(this.$primaryKey))
     
@@ -287,7 +309,7 @@ export class ComplexModelViewModel extends ViewModel<$models.ComplexModel, $apiC
   public get methodWithInputOutputOnlyExternalTypeWithRequiredNonscalarProp() {
     const methodWithInputOutputOnlyExternalTypeWithRequiredNonscalarProp = this.$apiClient.$makeCaller(
       this.$metadata.methods.methodWithInputOutputOnlyExternalTypeWithRequiredNonscalarProp,
-      (c, i: $models.InputOutputOnlyExternalTypeWithRequiredNonscalarProp | null) => c.methodWithInputOutputOnlyExternalTypeWithRequiredNonscalarProp(this.$primaryKey, i),
+      (c, i?: $models.InputOutputOnlyExternalTypeWithRequiredNonscalarProp | null) => c.methodWithInputOutputOnlyExternalTypeWithRequiredNonscalarProp(this.$primaryKey, i),
       () => ({i: null as $models.InputOutputOnlyExternalTypeWithRequiredNonscalarProp | null, }),
       (c, args) => c.methodWithInputOutputOnlyExternalTypeWithRequiredNonscalarProp(this.$primaryKey, args.i))
     
@@ -298,7 +320,7 @@ export class ComplexModelViewModel extends ViewModel<$models.ComplexModel, $apiC
   public get methodWithSingleFileParameter() {
     const methodWithSingleFileParameter = this.$apiClient.$makeCaller(
       this.$metadata.methods.methodWithSingleFileParameter,
-      (c, file: File | null) => c.methodWithSingleFileParameter(this.$primaryKey, file),
+      (c, file?: File | null) => c.methodWithSingleFileParameter(this.$primaryKey, file),
       () => ({file: null as File | null, }),
       (c, args) => c.methodWithSingleFileParameter(this.$primaryKey, args.file))
     
@@ -309,7 +331,7 @@ export class ComplexModelViewModel extends ViewModel<$models.ComplexModel, $apiC
   public get methodWithMultiFileParameter() {
     const methodWithMultiFileParameter = this.$apiClient.$makeCaller(
       this.$metadata.methods.methodWithMultiFileParameter,
-      (c, files: File[] | null) => c.methodWithMultiFileParameter(this.$primaryKey, files),
+      (c, files?: File[] | null) => c.methodWithMultiFileParameter(this.$primaryKey, files),
       () => ({files: null as File[] | null, }),
       (c, args) => c.methodWithMultiFileParameter(this.$primaryKey, args.files))
     
@@ -320,7 +342,7 @@ export class ComplexModelViewModel extends ViewModel<$models.ComplexModel, $apiC
   public get downloadAttachment() {
     const downloadAttachment = this.$apiClient.$makeCaller(
       this.$metadata.methods.downloadAttachment,
-      (c) => c.downloadAttachment(this.$primaryKey),
+      (c, ) => c.downloadAttachment(this.$primaryKey),
       () => ({}),
       (c, args) => c.downloadAttachment(this.$primaryKey))
     
@@ -331,7 +353,7 @@ export class ComplexModelViewModel extends ViewModel<$models.ComplexModel, $apiC
   public get downloadAttachment_VaryByteArray() {
     const downloadAttachment_VaryByteArray = this.$apiClient.$makeCaller(
       this.$metadata.methods.downloadAttachment_VaryByteArray,
-      (c) => c.downloadAttachment_VaryByteArray(this.$primaryKey, this.byteArrayProp),
+      (c, ) => c.downloadAttachment_VaryByteArray(this.$primaryKey, this.byteArrayProp),
       () => ({}),
       (c, args) => c.downloadAttachment_VaryByteArray(this.$primaryKey, this.byteArrayProp))
     
@@ -342,7 +364,7 @@ export class ComplexModelViewModel extends ViewModel<$models.ComplexModel, $apiC
   public get downloadAttachment_VaryDate() {
     const downloadAttachment_VaryDate = this.$apiClient.$makeCaller(
       this.$metadata.methods.downloadAttachment_VaryDate,
-      (c) => c.downloadAttachment_VaryDate(this.$primaryKey, this.dateTimeOffset),
+      (c, ) => c.downloadAttachment_VaryDate(this.$primaryKey, this.dateTimeOffset),
       () => ({}),
       (c, args) => c.downloadAttachment_VaryDate(this.$primaryKey, this.dateTimeOffset))
     
@@ -353,7 +375,7 @@ export class ComplexModelViewModel extends ViewModel<$models.ComplexModel, $apiC
   public get downloadAttachment_VaryString() {
     const downloadAttachment_VaryString = this.$apiClient.$makeCaller(
       this.$metadata.methods.downloadAttachment_VaryString,
-      (c) => c.downloadAttachment_VaryString(this.$primaryKey, this.name),
+      (c, ) => c.downloadAttachment_VaryString(this.$primaryKey, this.name),
       () => ({}),
       (c, args) => c.downloadAttachment_VaryString(this.$primaryKey, this.name))
     
@@ -364,7 +386,7 @@ export class ComplexModelViewModel extends ViewModel<$models.ComplexModel, $apiC
   public get downloadAttachment_VaryInt() {
     const downloadAttachment_VaryInt = this.$apiClient.$makeCaller(
       this.$metadata.methods.downloadAttachment_VaryInt,
-      (c) => c.downloadAttachment_VaryInt(this.$primaryKey, this.int),
+      (c, ) => c.downloadAttachment_VaryInt(this.$primaryKey, this.int),
       () => ({}),
       (c, args) => c.downloadAttachment_VaryInt(this.$primaryKey, this.int))
     
@@ -375,7 +397,7 @@ export class ComplexModelViewModel extends ViewModel<$models.ComplexModel, $apiC
   public get downloadAttachment_VaryGuid() {
     const downloadAttachment_VaryGuid = this.$apiClient.$makeCaller(
       this.$metadata.methods.downloadAttachment_VaryGuid,
-      (c) => c.downloadAttachment_VaryGuid(this.$primaryKey, this.guid),
+      (c, ) => c.downloadAttachment_VaryGuid(this.$primaryKey, this.guid),
       () => ({}),
       (c, args) => c.downloadAttachment_VaryGuid(this.$primaryKey, this.guid))
     
@@ -386,7 +408,7 @@ export class ComplexModelViewModel extends ViewModel<$models.ComplexModel, $apiC
   public get downloadAttachmentItemResult() {
     const downloadAttachmentItemResult = this.$apiClient.$makeCaller(
       this.$metadata.methods.downloadAttachmentItemResult,
-      (c) => c.downloadAttachmentItemResult(this.$primaryKey),
+      (c, ) => c.downloadAttachmentItemResult(this.$primaryKey),
       () => ({}),
       (c, args) => c.downloadAttachmentItemResult(this.$primaryKey))
     
@@ -397,7 +419,7 @@ export class ComplexModelViewModel extends ViewModel<$models.ComplexModel, $apiC
   public get methodWithOptionalCancellationToken() {
     const methodWithOptionalCancellationToken = this.$apiClient.$makeCaller(
       this.$metadata.methods.methodWithOptionalCancellationToken,
-      (c, q: string | null) => c.methodWithOptionalCancellationToken(this.$primaryKey, q),
+      (c, q?: string | null) => c.methodWithOptionalCancellationToken(this.$primaryKey, q),
       () => ({q: null as string | null, }),
       (c, args) => c.methodWithOptionalCancellationToken(this.$primaryKey, args.q))
     
@@ -408,7 +430,7 @@ export class ComplexModelViewModel extends ViewModel<$models.ComplexModel, $apiC
   public get methodWithOptionalEnumParam() {
     const methodWithOptionalEnumParam = this.$apiClient.$makeCaller(
       this.$metadata.methods.methodWithOptionalEnumParam,
-      (c, status: $models.Statuses | null) => c.methodWithOptionalEnumParam(this.$primaryKey, status),
+      (c, status?: $models.Statuses | null) => c.methodWithOptionalEnumParam(this.$primaryKey, status),
       () => ({status: null as $models.Statuses | null, }),
       (c, args) => c.methodWithOptionalEnumParam(this.$primaryKey, args.status))
     
@@ -419,7 +441,7 @@ export class ComplexModelViewModel extends ViewModel<$models.ComplexModel, $apiC
   public get externalTypeWithDtoProp() {
     const externalTypeWithDtoProp = this.$apiClient.$makeCaller(
       this.$metadata.methods.externalTypeWithDtoProp,
-      (c, input: $models.ExternalTypeWithDtoProp | null) => c.externalTypeWithDtoProp(this.$primaryKey, input),
+      (c, input?: $models.ExternalTypeWithDtoProp | null) => c.externalTypeWithDtoProp(this.$primaryKey, input),
       () => ({input: null as $models.ExternalTypeWithDtoProp | null, }),
       (c, args) => c.externalTypeWithDtoProp(this.$primaryKey, args.input))
     
@@ -430,7 +452,7 @@ export class ComplexModelViewModel extends ViewModel<$models.ComplexModel, $apiC
   public get customDto() {
     const customDto = this.$apiClient.$makeCaller(
       this.$metadata.methods.customDto,
-      (c, input: $models.CaseDtoStandalone | null) => c.customDto(this.$primaryKey, input),
+      (c, input?: $models.CaseDtoStandalone | null) => c.customDto(this.$primaryKey, input),
       () => ({input: null as $models.CaseDtoStandalone | null, }),
       (c, args) => c.customDto(this.$primaryKey, args.input))
     
@@ -441,7 +463,7 @@ export class ComplexModelViewModel extends ViewModel<$models.ComplexModel, $apiC
   public get methodWithPositionRecord() {
     const methodWithPositionRecord = this.$apiClient.$makeCaller(
       this.$metadata.methods.methodWithPositionRecord,
-      (c, rec: $models.PositionalRecord | null) => c.methodWithPositionRecord(this.$primaryKey, rec),
+      (c, rec?: $models.PositionalRecord | null) => c.methodWithPositionRecord(this.$primaryKey, rec),
       () => ({rec: null as $models.PositionalRecord | null, }),
       (c, args) => c.methodWithPositionRecord(this.$primaryKey, args.rec))
     
@@ -452,7 +474,7 @@ export class ComplexModelViewModel extends ViewModel<$models.ComplexModel, $apiC
   public get methodWithInitRecord() {
     const methodWithInitRecord = this.$apiClient.$makeCaller(
       this.$metadata.methods.methodWithInitRecord,
-      (c, rec: $models.InitRecordWithDefaultCtor | null) => c.methodWithInitRecord(this.$primaryKey, rec),
+      (c, rec?: $models.InitRecordWithDefaultCtor | null) => c.methodWithInitRecord(this.$primaryKey, rec),
       () => ({rec: null as $models.InitRecordWithDefaultCtor | null, }),
       (c, args) => c.methodWithInitRecord(this.$primaryKey, args.rec))
     
@@ -463,9 +485,9 @@ export class ComplexModelViewModel extends ViewModel<$models.ComplexModel, $apiC
   public get methodWithValidationExplicitOff() {
     const methodWithValidationExplicitOff = this.$apiClient.$makeCaller(
       this.$metadata.methods.methodWithValidationExplicitOff,
-      (c, target: $models.ValidationTarget | null) => c.methodWithValidationExplicitOff(this.$primaryKey, target),
+      (c, target: $models.ValidationTarget) => c.methodWithValidationExplicitOff(this.$primaryKey, target),
       () => ({target: null as $models.ValidationTarget | null, }),
-      (c, args) => c.methodWithValidationExplicitOff(this.$primaryKey, args.target))
+      (c, args) => c.methodWithValidationExplicitOff(this.$primaryKey, args.target!))
     
     Object.defineProperty(this, 'methodWithValidationExplicitOff', {value: methodWithValidationExplicitOff});
     return methodWithValidationExplicitOff
@@ -474,9 +496,9 @@ export class ComplexModelViewModel extends ViewModel<$models.ComplexModel, $apiC
   public get methodWithValidationExplicitOn() {
     const methodWithValidationExplicitOn = this.$apiClient.$makeCaller(
       this.$metadata.methods.methodWithValidationExplicitOn,
-      (c, target: $models.ValidationTarget | null) => c.methodWithValidationExplicitOn(this.$primaryKey, target),
+      (c, target: $models.ValidationTarget) => c.methodWithValidationExplicitOn(this.$primaryKey, target),
       () => ({target: null as $models.ValidationTarget | null, }),
-      (c, args) => c.methodWithValidationExplicitOn(this.$primaryKey, args.target))
+      (c, args) => c.methodWithValidationExplicitOn(this.$primaryKey, args.target!))
     
     Object.defineProperty(this, 'methodWithValidationExplicitOn', {value: methodWithValidationExplicitOn});
     return methodWithValidationExplicitOn
@@ -493,7 +515,7 @@ export class ComplexModelListViewModel extends ListViewModel<$models.ComplexMode
   public get methodWithStringArrayParameterAndReturn() {
     const methodWithStringArrayParameterAndReturn = this.$apiClient.$makeCaller(
       this.$metadata.methods.methodWithStringArrayParameterAndReturn,
-      (c, strings: string[] | null) => c.methodWithStringArrayParameterAndReturn(strings),
+      (c, strings?: string[] | null) => c.methodWithStringArrayParameterAndReturn(strings),
       () => ({strings: null as string[] | null, }),
       (c, args) => c.methodWithStringArrayParameterAndReturn(args.strings))
     
@@ -504,7 +526,7 @@ export class ComplexModelListViewModel extends ListViewModel<$models.ComplexMode
   public get downloadAttachmentStatic() {
     const downloadAttachmentStatic = this.$apiClient.$makeCaller(
       this.$metadata.methods.downloadAttachmentStatic,
-      (c) => c.downloadAttachmentStatic(),
+      (c, ) => c.downloadAttachmentStatic(),
       () => ({}),
       (c, args) => c.downloadAttachmentStatic())
     
@@ -515,7 +537,7 @@ export class ComplexModelListViewModel extends ListViewModel<$models.ComplexMode
   public get hasTopLevelParamWithSameNameAsObjectProp() {
     const hasTopLevelParamWithSameNameAsObjectProp = this.$apiClient.$makeCaller(
       this.$metadata.methods.hasTopLevelParamWithSameNameAsObjectProp,
-      (c, complexModelId: number | null, model: $models.ComplexModel | null) => c.hasTopLevelParamWithSameNameAsObjectProp(complexModelId, model),
+      (c, complexModelId?: number | null, model?: $models.ComplexModel | null) => c.hasTopLevelParamWithSameNameAsObjectProp(complexModelId, model),
       () => ({complexModelId: null as number | null, model: null as $models.ComplexModel | null, }),
       (c, args) => c.hasTopLevelParamWithSameNameAsObjectProp(args.complexModelId, args.model))
     
@@ -633,7 +655,7 @@ export class PersonViewModel extends ViewModel<$models.Person, $apiClients.Perso
   public get rename() {
     const rename = this.$apiClient.$makeCaller(
       this.$metadata.methods.rename,
-      (c, name: string | null) => c.rename(this.$primaryKey, name),
+      (c, name?: string | null) => c.rename(this.$primaryKey, name),
       () => ({name: null as string | null, }),
       (c, args) => c.rename(this.$primaryKey, args.name))
     
@@ -645,7 +667,7 @@ export class PersonViewModel extends ViewModel<$models.Person, $apiClients.Perso
   public get changeSpacesToDashesInName() {
     const changeSpacesToDashesInName = this.$apiClient.$makeCaller(
       this.$metadata.methods.changeSpacesToDashesInName,
-      (c) => c.changeSpacesToDashesInName(this.$primaryKey),
+      (c, ) => c.changeSpacesToDashesInName(this.$primaryKey),
       () => ({}),
       (c, args) => c.changeSpacesToDashesInName(this.$primaryKey))
     
@@ -665,7 +687,7 @@ export class PersonListViewModel extends ListViewModel<$models.Person, $apiClien
   public get add() {
     const add = this.$apiClient.$makeCaller(
       this.$metadata.methods.add,
-      (c, numberOne: number | null, numberTwo: number | null) => c.add(numberOne, numberTwo),
+      (c, numberOne?: number | null, numberTwo?: number | null) => c.add(numberOne, numberTwo),
       () => ({numberOne: null as number | null, numberTwo: null as number | null, }),
       (c, args) => c.add(args.numberOne, args.numberTwo))
     
@@ -677,7 +699,7 @@ export class PersonListViewModel extends ListViewModel<$models.Person, $apiClien
   public get getUser() {
     const getUser = this.$apiClient.$makeCaller(
       this.$metadata.methods.getUser,
-      (c) => c.getUser(),
+      (c, ) => c.getUser(),
       () => ({}),
       (c, args) => c.getUser())
     
@@ -689,7 +711,7 @@ export class PersonListViewModel extends ListViewModel<$models.Person, $apiClien
   public get getUserPublic() {
     const getUserPublic = this.$apiClient.$makeCaller(
       this.$metadata.methods.getUserPublic,
-      (c) => c.getUserPublic(),
+      (c, ) => c.getUserPublic(),
       () => ({}),
       (c, args) => c.getUserPublic())
     
@@ -701,7 +723,7 @@ export class PersonListViewModel extends ListViewModel<$models.Person, $apiClien
   public get namesStartingWith() {
     const namesStartingWith = this.$apiClient.$makeCaller(
       this.$metadata.methods.namesStartingWith,
-      (c, characters: string | null) => c.namesStartingWith(characters),
+      (c, characters?: string | null) => c.namesStartingWith(characters),
       () => ({characters: null as string | null, }),
       (c, args) => c.namesStartingWith(args.characters))
     
@@ -752,7 +774,7 @@ export class ReadOnlyEntityUsedAsMethodInputListViewModel extends ListViewModel<
   public get staticCreate() {
     const staticCreate = this.$apiClient.$makeCaller(
       this.$metadata.methods.staticCreate,
-      (c, foo: $models.ReadOnlyEntityUsedAsMethodInput | null) => c.staticCreate(foo),
+      (c, foo?: $models.ReadOnlyEntityUsedAsMethodInput | null) => c.staticCreate(foo),
       () => ({foo: null as $models.ReadOnlyEntityUsedAsMethodInput | null, }),
       (c, args) => c.staticCreate(args.foo))
     
@@ -824,7 +846,7 @@ export class StandaloneReadonlyViewModel extends ViewModel<$models.StandaloneRea
   public get instanceMethod() {
     const instanceMethod = this.$apiClient.$makeCaller(
       this.$metadata.methods.instanceMethod,
-      (c) => c.instanceMethod(this.$primaryKey),
+      (c, ) => c.instanceMethod(this.$primaryKey),
       () => ({}),
       (c, args) => c.instanceMethod(this.$primaryKey))
     
@@ -843,7 +865,7 @@ export class StandaloneReadonlyListViewModel extends ListViewModel<$models.Stand
   public get staticMethod() {
     const staticMethod = this.$apiClient.$makeCaller(
       this.$metadata.methods.staticMethod,
-      (c) => c.staticMethod(),
+      (c, ) => c.staticMethod(),
       () => ({}),
       (c, args) => c.staticMethod())
     
@@ -934,9 +956,9 @@ export class WeatherServiceViewModel extends ServiceViewModel<typeof $metadata.W
   public get getWeather() {
     const getWeather = this.$apiClient.$makeCaller(
       this.$metadata.methods.getWeather,
-      (c, location: $models.Location | null, dateTime: Date | null, conditions: $models.SkyConditions | null) => c.getWeather(location, dateTime, conditions),
+      (c, location: $models.Location, dateTime?: Date | null, conditions?: $models.SkyConditions | null) => c.getWeather(location, dateTime, conditions),
       () => ({location: null as $models.Location | null, dateTime: null as Date | null, conditions: null as $models.SkyConditions | null, }),
-      (c, args) => c.getWeather(args.location, args.dateTime, args.conditions))
+      (c, args) => c.getWeather(args.location!, args.dateTime, args.conditions))
     
     Object.defineProperty(this, 'getWeather', {value: getWeather});
     return getWeather

@@ -224,7 +224,7 @@ namespace IntelliTect.Coalesce.Validation
                         // get, save, bulkSave, delete, list, count
                         foreach (var param in method.Parameters)
                         {
-                            assert.Area = $"{model}: {method}: {param}";
+                            assert.Area = $"{model}.{method.Name}: \n{param}";
 
                             if (!param.IsDI)
                             {

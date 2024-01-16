@@ -17,12 +17,13 @@ import {
   ListResultPromise,
 } from "../src/api-client";
 import { getInternalInstance, IsVue2 } from "../src/util";
+import { delay, mountData, mockEndpoint } from "./test-utils";
 
 import { StudentApiClient } from "./targets.apiclients";
 import { Student as StudentMeta } from "./targets.metadata";
 import { Student, Advisor } from "./targets.models";
 
-import { delay, mountData } from "./test-utils";
+import { ComplexModelApiClient } from "../../test-targets/api-clients.g";
 
 function makeAdapterMock(result?: any) {
   return makeEndpointMock<AxiosRequestConfig>(result);
@@ -162,6 +163,22 @@ describe("$invoke", () => {
     ).resolves.toBeTruthy();
 
     expect(mock.mock.calls[0][0]).toMatchObject({ params: {} });
+  });
+
+  test("does not send omitted optional parameters", async () => {
+    const mock = mockEndpoint(
+      "/ComplexModel/methodWithOptionalParams",
+      vitest.fn((req) => ({
+        wasSuccessful: true,
+      }))
+    );
+
+    await new ComplexModelApiClient().methodWithOptionalParams(1, 42);
+
+    // The request payload should have only included the parameters we actually provided.
+    // The others should have been omitted entirely.
+    const req: AxiosRequestConfig = mock.mock.lastCall?.[0];
+    expect(req.data).toEqual("id=1&requiredInt=42");
   });
 
   test("doesn't error when unexpected params are provided", async () => {

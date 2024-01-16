@@ -1,5 +1,6 @@
+import { ref } from "vue";
 import { CSelectValues } from "..";
-import { ComplexModelViewModel } from "@test/viewmodels.g";
+import { ComplexModelViewModel } from "@test-targets/viewmodels.g";
 
 describe("CSelectValues", () => {
   test("types", () => {

@@ -33,6 +33,15 @@ export default defineConfig({
     alias: [
       { find: "@", replacement: path.resolve(__dirname, "src") },
       { find: "@test", replacement: path.resolve(__dirname, "test") },
+      {
+        find: "@test-targets",
+        replacement: path.resolve(__dirname, "../test-targets"),
+      },
+      // Imports for generated test targets
+      {
+        find: "coalesce-vue/lib",
+        replacement: path.resolve(__dirname, "../coalesce-vue/src"),
+      },
     ],
   },
   plugins: [

@@ -98,7 +98,15 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             get
             {
+                // Any parameter with a non-null default value will always ultimately have
+                // a value by the time the underlying method is reached, so a required param
+                // with a default value doesn't make sense.
+                if (HasDefaultValue && RawDefaultValue is not null) return false;
+
                 if (base.IsRequired) return true;
+
+                // The PK param for instance methods is always required.
+                if (ParentSourceProp?.IsPrimaryKey == true) return true;
 
                 if (Type.IsReferenceType && Nullability == NullabilityState.NotNull) return true;
 

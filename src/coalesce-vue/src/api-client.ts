@@ -937,9 +937,10 @@ export class ApiClient<T extends ApiRoutedType> {
 }
 
 export type ParamsObject<TMethod extends Method> = {
-  [P in keyof TMethod["params"]]: TypeDiscriminatorToType<
-    TMethod["params"][P]["type"]
-  > | null;
+  [P in keyof TMethod["params"]]:
+    | TypeDiscriminatorToType<TMethod["params"][P]["type"]>
+    | null
+    | undefined;
 };
 
 export class ModelApiClient<TModel extends Model<ModelType>> extends ApiClient<

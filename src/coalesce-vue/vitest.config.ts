@@ -11,4 +11,10 @@ export default defineConfig({
     setupFiles: ["test/global-setup.ts"],
     include: ["**/*.{test,spec}.{ts,js}", "**/*.{test,spec}.vue2.{ts,js}"],
   },
+  resolve: {
+    alias: [
+      // Imports inside the generated test targets:
+      { find: "coalesce-vue/lib", replacement: path.resolve(__dirname, "src") },
+    ],
+  },
 }) as UserConfig;

@@ -1,8 +1,8 @@
 import { Grade, Student } from "@test/targets.models";
 import { mount } from "@test/util";
 import { CDisplay } from "..";
-import { Case, ComplexModel } from "@test/models.g";
-import { ComplexModelViewModel } from "@test/viewmodels.g";
+import { Case, ComplexModel } from "@test-targets/models.g";
+import { ComplexModelViewModel } from "@test-targets/viewmodels.g";
 import { Model } from "coalesce-vue";
 import { h } from "vue";
 

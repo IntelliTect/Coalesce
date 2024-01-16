@@ -15,7 +15,7 @@ export class AuditLogPropertyApiClient extends ModelApiClient<$models.AuditLogPr
 
 export class CaseApiClient extends ModelApiClient<$models.Case> {
   constructor() { super($metadata.Case) }
-  public getCaseTitles(search: string | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<string[]>> {
+  public getCaseTitles(search: string, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<string[]>> {
     const $method = this.$metadata.methods.getCaseTitles
     const $params =  {
       search,
@@ -44,7 +44,7 @@ export class CaseApiClient extends ModelApiClient<$models.Case> {
     return this.$invoke($method, $params, $config)
   }
   
-  public uploadImage(id: number, file: File | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<void>> {
+  public uploadImage(id: number, file: File, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<void>> {
     const $method = this.$metadata.methods.uploadImage
     const $params =  {
       id,
@@ -53,7 +53,7 @@ export class CaseApiClient extends ModelApiClient<$models.Case> {
     return this.$invoke($method, $params, $config)
   }
   
-  public downloadImage(id: number, etag: string | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<File>> {
+  public downloadImage(id: number, etag?: string | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<File>> {
     const $method = this.$metadata.methods.downloadImage
     const $params =  {
       id,
@@ -62,7 +62,7 @@ export class CaseApiClient extends ModelApiClient<$models.Case> {
     return this.$invoke($method, $params, $config)
   }
   
-  public uploadAndDownload(id: number, file: File | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<File>> {
+  public uploadAndDownload(id: number, file: File, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<File>> {
     const $method = this.$metadata.methods.uploadAndDownload
     const $params =  {
       id,
@@ -71,7 +71,7 @@ export class CaseApiClient extends ModelApiClient<$models.Case> {
     return this.$invoke($method, $params, $config)
   }
   
-  public uploadImages(id: number, files: File[] | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<void>> {
+  public uploadImages(id: number, files: File[], $config?: AxiosRequestConfig): AxiosPromise<ItemResult<void>> {
     const $method = this.$metadata.methods.uploadImages
     const $params =  {
       id,
@@ -80,7 +80,7 @@ export class CaseApiClient extends ModelApiClient<$models.Case> {
     return this.$invoke($method, $params, $config)
   }
   
-  public uploadByteArray(id: number, file: string | Uint8Array | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<void>> {
+  public uploadByteArray(id: number, file: string | Uint8Array, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<void>> {
     const $method = this.$metadata.methods.uploadByteArray
     const $params =  {
       id,
@@ -101,7 +101,7 @@ export class CaseApiClient extends ModelApiClient<$models.Case> {
 
 export class CaseDtoApiClient extends ModelApiClient<$models.CaseDto> {
   constructor() { super($metadata.CaseDto) }
-  public asyncMethodOnIClassDto(id: number, input: string | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<string>> {
+  public asyncMethodOnIClassDto(id: number, input: string, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<string>> {
     const $method = this.$metadata.methods.asyncMethodOnIClassDto
     const $params =  {
       id,
@@ -125,7 +125,7 @@ export class CaseProductApiClient extends ModelApiClient<$models.CaseProduct> {
 
 export class CompanyApiClient extends ModelApiClient<$models.Company> {
   constructor() { super($metadata.Company) }
-  public conflictingParameterNames(id: number, companyParam: $models.Company | null, name: string | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<void>> {
+  public conflictingParameterNames(id: number, companyParam: $models.Company, name: string, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<void>> {
     const $method = this.$metadata.methods.conflictingParameterNames
     const $params =  {
       id,
@@ -135,7 +135,7 @@ export class CompanyApiClient extends ModelApiClient<$models.Company> {
     return this.$invoke($method, $params, $config)
   }
   
-  public getCertainItems(isDeleted: boolean | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<$models.Company[]>> {
+  public getCertainItems(isDeleted?: boolean | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<$models.Company[]>> {
     const $method = this.$metadata.methods.getCertainItems
     const $params =  {
       isDeleted,
@@ -153,7 +153,7 @@ export class LogApiClient extends ModelApiClient<$models.Log> {
 
 export class PersonApiClient extends ModelApiClient<$models.Person> {
   constructor() { super($metadata.Person) }
-  public rename(id: number, name: string | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<$models.Person>> {
+  public rename(id: number, name: string, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<$models.Person>> {
     const $method = this.$metadata.methods.rename
     const $params =  {
       id,
@@ -170,7 +170,7 @@ export class PersonApiClient extends ModelApiClient<$models.Person> {
     return this.$invoke($method, $params, $config)
   }
   
-  public add(numberOne: number | null, numberTwo: number | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<number>> {
+  public add(numberOne?: number | null, numberTwo?: number | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<number>> {
     const $method = this.$metadata.methods.add
     const $params =  {
       numberOne,
@@ -194,7 +194,7 @@ export class PersonApiClient extends ModelApiClient<$models.Person> {
     return this.$invoke($method, $params, $config)
   }
   
-  public setBirthDate(id: number, date: Date | null, time: Date | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<void>> {
+  public setBirthDate(id: number, date?: Date | null, time?: Date | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<void>> {
     const $method = this.$metadata.methods.setBirthDate
     const $params =  {
       id,
@@ -204,7 +204,7 @@ export class PersonApiClient extends ModelApiClient<$models.Person> {
     return this.$invoke($method, $params, $config)
   }
   
-  public personCount(lastNameStartsWith: string | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<number>> {
+  public personCount(lastNameStartsWith?: string | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<number>> {
     const $method = this.$metadata.methods.personCount
     const $params =  {
       lastNameStartsWith,
@@ -220,7 +220,7 @@ export class PersonApiClient extends ModelApiClient<$models.Person> {
     return this.$invoke($method, $params, $config)
   }
   
-  public removePersonById(id: number | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<boolean>> {
+  public removePersonById(id?: number | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<boolean>> {
     const $method = this.$metadata.methods.removePersonById
     const $params =  {
       id,
@@ -236,7 +236,7 @@ export class PersonApiClient extends ModelApiClient<$models.Person> {
     return this.$invoke($method, $params, $config)
   }
   
-  public changeFirstName(id: number, firstName: string | null, title: $models.Titles | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<$models.Person>> {
+  public changeFirstName(id: number, firstName: string, title?: $models.Titles | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<$models.Person>> {
     const $method = this.$metadata.methods.changeFirstName
     const $params =  {
       id,
@@ -253,7 +253,7 @@ export class PersonApiClient extends ModelApiClient<$models.Person> {
     return this.$invoke($method, $params, $config)
   }
   
-  public namesStartingWith(characters: string | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<string[]>> {
+  public namesStartingWith(characters: string, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<string[]>> {
     const $method = this.$metadata.methods.namesStartingWith
     const $params =  {
       characters,
@@ -261,7 +261,7 @@ export class PersonApiClient extends ModelApiClient<$models.Person> {
     return this.$invoke($method, $params, $config)
   }
   
-  public methodWithStringArrayParameter(strings: string[] | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<string[]>> {
+  public methodWithStringArrayParameter(strings: string[], $config?: AxiosRequestConfig): AxiosPromise<ItemResult<string[]>> {
     const $method = this.$metadata.methods.methodWithStringArrayParameter
     const $params =  {
       strings,
@@ -269,7 +269,7 @@ export class PersonApiClient extends ModelApiClient<$models.Person> {
     return this.$invoke($method, $params, $config)
   }
   
-  public methodWithEntityParameter(person: $models.Person | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<$models.Person>> {
+  public methodWithEntityParameter(person: $models.Person, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<$models.Person>> {
     const $method = this.$metadata.methods.methodWithEntityParameter
     const $params =  {
       person,
@@ -277,7 +277,7 @@ export class PersonApiClient extends ModelApiClient<$models.Person> {
     return this.$invoke($method, $params, $config)
   }
   
-  public searchPeople(criteria: $models.PersonCriteria | null, page: number | null, $config?: AxiosRequestConfig): AxiosPromise<ListResult<$models.Person>> {
+  public searchPeople(criteria: $models.PersonCriteria, page?: number | null, $config?: AxiosRequestConfig): AxiosPromise<ListResult<$models.Person>> {
     const $method = this.$metadata.methods.searchPeople
     const $params =  {
       criteria,
@@ -316,7 +316,7 @@ export class ZipCodeApiClient extends ModelApiClient<$models.ZipCode> {
 
 export class WeatherServiceApiClient extends ServiceApiClient<typeof $metadata.WeatherService> {
   constructor() { super($metadata.WeatherService) }
-  public getWeather(location: $models.Location | null, dateTime: Date | null, conditions: $models.SkyConditions | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<$models.WeatherData>> {
+  public getWeather(location: $models.Location, dateTime?: Date | null, conditions?: $models.SkyConditions | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<$models.WeatherData>> {
     const $method = this.$metadata.methods.getWeather
     const $params =  {
       location,

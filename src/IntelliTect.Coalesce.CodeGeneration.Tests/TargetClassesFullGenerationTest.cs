@@ -45,7 +45,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Tests
             }
             """);
 
-            var project = GetRepoRoot().GetDirectory("src/coalesce-vue-vuetify3/test");
+            var project = GetRepoRoot().GetDirectory("src/test-targets");
 
             var suite = executor.CreateRootGenerator<VueSuite>()
                 .WithModel(ReflectionRepositoryFactory.Symbol)

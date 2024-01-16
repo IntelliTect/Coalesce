@@ -190,9 +190,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
             var paramTypeFlags = VueType.Flags.None;
             if (method.HasHttpRequestBody) paramTypeFlags |= VueType.Flags.RawBinary;
 
-            string signature = string.Concat(inputParams
-                .Select(p => $", {p.JsVariable}: {new VueType(p.Type, paramTypeFlags).TsType("$models")} | null")
-            );
+            var signatureData = inputParams.SignatureData(paramTypeFlags).ToList();
+            string signature = string.Join(", ", signatureData.Select(p => p.Signature));
 
             string argsConstructor =
                 "({" +
@@ -210,13 +209,19 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
 
                 // The invoker function when the caller is used directly like `caller(...)`, or via `caller.invoke(...)`
                 var positionalParams = string.Join(", ", method.ApiParameters.Select(p => PropValue(p, "")));
-                b.Indented($"(c{signature}) => c.{method.JsVariable}({positionalParams}),");
+                b.Indented($"(c, {signature}) => c.{method.JsVariable}({positionalParams}),");
 
                 // The factory function to return a new args object. Args object lives on `caller.args`
                 b.Indented($"() => {argsConstructor},");
 
                 // The invoker function when the caller is invoked with args with `caller.invokeWithArgs(args?)`
-                var argsParams = string.Join(", ", method.ApiParameters.Select(p => PropValue(p, "args.")));
+                var argsParams = string.Join(", ", method.ApiParameters.Select(p => 
+                    PropValue(p, "args.") +
+                    // HACK: We have to suppress nullability issues when passing the args to the API client func
+                    // since the args are always nullable. Perhaps in the future we could generate null checks
+                    // and throw errors for missing required args?
+                    (signatureData.FirstOrDefault(d => d.Param.Name == p.Name).IsRequired ? "!" : "")
+                ));
                 b.Indented($"(c, args) => c.{method.JsVariable}({argsParams}))");
 
                 // Lazy getter technique - don't create the caller until/unless it is needed,

@@ -2,8 +2,8 @@ import { Grade } from "@test/targets.models";
 import { StudentViewModel } from "@test/targets.viewmodels";
 import { delay, mount } from "@test/util";
 import { CDatetimePicker } from "..";
-import { Case, ComplexModel } from "@test/models.g";
-import { ComplexModelViewModel } from "@test/viewmodels.g";
+import { Case, ComplexModel } from "@test-targets/models.g";
+import { ComplexModelViewModel } from "@test-targets/viewmodels.g";
 import { AnyArgCaller } from "coalesce-vue";
 
 describe("CDatetimePicker", () => {

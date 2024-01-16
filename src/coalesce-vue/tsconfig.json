@@ -16,7 +16,12 @@
     "target": "ES2022",
     "declaration": true,
     "lib": ["es2015", "es2017", "dom"],
-    "types": ["vitest/globals", "vue-router"]
+    "types": ["vitest/globals", "vue-router"],
+
+    "paths": {
+      "@test-targets/*": ["../test-targets/*"],
+      "coalesce-vue/lib/*": ["./src/*"]
+    }
   },
 
   "exclude": ["node_modules"],

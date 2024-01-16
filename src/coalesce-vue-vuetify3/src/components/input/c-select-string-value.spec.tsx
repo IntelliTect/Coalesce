@@ -1,5 +1,5 @@
 import { CSelectStringValue } from "..";
-import { PersonViewModel } from "@test/viewmodels.g";
+import { PersonViewModel } from "@test-targets/viewmodels.g";
 
 describe("CSelectStringValue", () => {
   test("types", () => {

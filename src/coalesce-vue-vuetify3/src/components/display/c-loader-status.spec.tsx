@@ -1,6 +1,6 @@
 import { mountApp } from "@test/util";
 import CLS from "./c-loader-status.vue";
-import { ComplexModelViewModel } from "@test/viewmodels.g";
+import { ComplexModelViewModel } from "@test-targets/viewmodels.g";
 
 describe("CLoaderStatus", () => {
   const vm = new ComplexModelViewModel();

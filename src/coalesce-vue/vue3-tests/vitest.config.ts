@@ -11,10 +11,17 @@ export default defineConfig({
     TEST_EXPECTED_VUE_VERSION: 3,
   },
   resolve: {
-    alias: Object.keys(packageJson.devDependencies).map((pkgName) => ({
-      find: pkgName,
-      replacement: path.resolve(__dirname, "node_modules", pkgName),
-    })),
+    alias: [
+      ...Object.keys(packageJson.devDependencies).map((pkgName) => ({
+        find: pkgName,
+        replacement: path.resolve(__dirname, "node_modules", pkgName),
+      })),
+      {
+        // Imports inside the generated test targets:
+        find: "coalesce-vue/lib",
+        replacement: path.resolve(__dirname, "../src"),
+      },
+    ],
   },
   test: {
     ...config.test,

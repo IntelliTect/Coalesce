@@ -585,6 +585,9 @@ export const Case = domain.types.Case = {
           type: "number",
           role: "value",
           get source() { return (domain.types.Case as ModelType).props.caseKey },
+          rules: {
+            required: val => val != null || "Primary Key is required.",
+          }
         },
         file: {
           name: "file",
@@ -615,6 +618,9 @@ export const Case = domain.types.Case = {
           type: "number",
           role: "value",
           get source() { return (domain.types.Case as ModelType).props.caseKey },
+          rules: {
+            required: val => val != null || "Primary Key is required.",
+          }
         },
         etag: {
           name: "etag",
@@ -643,6 +649,9 @@ export const Case = domain.types.Case = {
           type: "number",
           role: "value",
           get source() { return (domain.types.Case as ModelType).props.caseKey },
+          rules: {
+            required: val => val != null || "Primary Key is required.",
+          }
         },
         file: {
           name: "file",
@@ -673,6 +682,9 @@ export const Case = domain.types.Case = {
           type: "number",
           role: "value",
           get source() { return (domain.types.Case as ModelType).props.caseKey },
+          rules: {
+            required: val => val != null || "Primary Key is required.",
+          }
         },
         files: {
           name: "files",
@@ -709,6 +721,9 @@ export const Case = domain.types.Case = {
           type: "number",
           role: "value",
           get source() { return (domain.types.Case as ModelType).props.caseKey },
+          rules: {
+            required: val => val != null || "Primary Key is required.",
+          }
         },
         file: {
           name: "file",
@@ -804,6 +819,9 @@ export const CaseDto = domain.types.CaseDto = {
           type: "number",
           role: "value",
           get source() { return (domain.types.CaseDto as ModelType).props.caseId },
+          rules: {
+            required: val => val != null || "Primary Key is required.",
+          }
         },
         input: {
           name: "input",
@@ -1006,7 +1024,7 @@ export const Company = domain.types.Company = {
       subtype: "url",
       role: "value",
       rules: {
-        url: val => !val || /^((http(s)|ftp):\/\/.)/.test(val) || "Website Url must be a valid URL.",
+        url: val => !val || /^((https?|ftp):\/\/.)/.test(val) || "Website Url must be a valid URL.",
       }
     },
     logoUrl: {
@@ -1059,6 +1077,9 @@ export const Company = domain.types.Company = {
           type: "number",
           role: "value",
           get source() { return (domain.types.Company as ModelType).props.id },
+          rules: {
+            required: val => val != null || "Primary Key is required.",
+          }
         },
         companyParam: {
           name: "companyParam",
@@ -1351,6 +1372,9 @@ export const Person = domain.types.Person = {
           type: "number",
           role: "value",
           get source() { return (domain.types.Person as ModelType).props.personId },
+          rules: {
+            required: val => val != null || "Primary Key is required.",
+          }
         },
         name: {
           name: "name",
@@ -1382,6 +1406,9 @@ export const Person = domain.types.Person = {
           type: "number",
           role: "value",
           get source() { return (domain.types.Person as ModelType).props.personId },
+          rules: {
+            required: val => val != null || "Primary Key is required.",
+          }
         },
       },
       return: {
@@ -1449,6 +1476,9 @@ export const Person = domain.types.Person = {
           type: "number",
           role: "value",
           get source() { return (domain.types.Person as ModelType).props.personId },
+          rules: {
+            required: val => val != null || "Primary Key is required.",
+          }
         },
       },
       return: {
@@ -1472,6 +1502,9 @@ export const Person = domain.types.Person = {
           type: "number",
           role: "value",
           get source() { return (domain.types.Person as ModelType).props.personId },
+          rules: {
+            required: val => val != null || "Primary Key is required.",
+          }
         },
         date: {
           name: "date",
@@ -1509,9 +1542,6 @@ export const Person = domain.types.Person = {
           displayName: "Last Name Starts With",
           type: "string",
           role: "value",
-          rules: {
-            required: val => (val != null && val !== '') || "Last Name Starts With is required.",
-          }
         },
       },
       return: {
@@ -1533,6 +1563,9 @@ export const Person = domain.types.Person = {
           type: "number",
           role: "value",
           get source() { return (domain.types.Person as ModelType).props.personId },
+          rules: {
+            required: val => val != null || "Primary Key is required.",
+          }
         },
       },
       return: {
@@ -1575,6 +1608,9 @@ export const Person = domain.types.Person = {
           type: "number",
           role: "value",
           get source() { return (domain.types.Person as ModelType).props.personId },
+          rules: {
+            required: val => val != null || "Primary Key is required.",
+          }
         },
       },
       return: {
@@ -1596,6 +1632,9 @@ export const Person = domain.types.Person = {
           type: "number",
           role: "value",
           get source() { return (domain.types.Person as ModelType).props.personId },
+          rules: {
+            required: val => val != null || "Primary Key is required.",
+          }
         },
         firstName: {
           name: "firstName",

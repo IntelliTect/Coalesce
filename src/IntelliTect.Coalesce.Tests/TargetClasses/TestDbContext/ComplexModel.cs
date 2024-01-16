@@ -170,6 +170,43 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
             return collectionExternal.FirstOrDefault() ?? singleExternal;
         }
 
+
+        [Coalesce, Execute]
+        public string MethodWithOptionalParams(
+            // Required:
+            [Required] int requiredInt,
+
+            // Optional:
+            int plainInt, // By longstanding Coalesce convention, value types are optional if not explicitly required.
+            int? nullableInt,
+            int intWithDefault = 42,
+            Case.Statuses enumWithDefault = Case.Statuses.ClosedNoSolution,
+            string stringWithDefault = "foo"
+        )
+        {
+            return stringWithDefault;
+        }
+
+
+#nullable enable
+        [Coalesce, Execute]
+        public int MethodWithRequiredAfterOptional(
+            // Optional, by longstanding Coalesce convention - 
+            int optionalInt,
+
+            // Required, by C# nullability rules:
+            ExternalParent singleExternal
+        )
+        {
+            // This method has what Coalesce considers to be an optional parameter
+            // (but is not actually optional in C#) occurring before a *definitely* required
+            // parameter (by both C# and Coalesce rules).
+            // If we're naive about the code gen for this method then it'll generate invalid typescript.
+            return optionalInt;
+        }
+#nullable restore
+
+
         [Coalesce, Execute]
         public ExternalParentAsOutputOnly MethodWithExternalTypesWithSinglePurpose(
             ExternalParentAsInputOnly single,

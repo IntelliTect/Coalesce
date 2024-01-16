@@ -7,6 +7,12 @@ import Vue, {
   ref,
   watch,
 } from "vue";
+import { AxiosRequestConfig, AxiosResponse } from "axios";
+
+import { mount } from "@vue/test-utils";
+import { delay, destroy, mountData, mockEndpoint } from "./test-utils";
+
+import { ModelType } from "../src/metadata";
 import {
   AxiosClient,
   AxiosItemResult,
@@ -21,6 +27,7 @@ import {
   defineProps,
 } from "../src/viewmodel";
 
+import { ComplexModelViewModel } from "../../test-targets/viewmodels.g";
 import {
   StudentViewModel,
   CourseViewModel,
@@ -29,13 +36,6 @@ import {
 } from "./targets.viewmodels";
 import { Student, Advisor, Course, Grade } from "./targets.models";
 import * as metadata from "./targets.metadata";
-import { delay, destroy, mountData } from "./test-utils";
-import { AxiosResponse } from "axios";
-
-import { mount } from "@vue/test-utils";
-import { IsVue2 } from "../src/util";
-import { mockEndpoint } from "../src/test-utils";
-import { ModelType } from "../src/metadata";
 import { metaBase } from "./targets.metadata";
 
 function mockItemResult<T>(success: boolean, object: T) {
@@ -2577,6 +2577,26 @@ describe("ViewModel", () => {
         expect(instance.id).toBe(42);
         expect(instance.name).toBe(null);
       });
+    });
+  });
+
+  describe("codegen", () => {
+    test("emits optional method parameters as optional", async () => {
+      const mock = mockEndpoint(
+        "/ComplexModel/methodWithOptionalParams",
+        vitest.fn((req) => ({
+          wasSuccessful: true,
+        }))
+      );
+
+      await new ComplexModelViewModel({
+        complexModelId: 3,
+      }).methodWithOptionalParams(42);
+
+      // The request payload should have only included the parameters we actually provided.
+      // The others should have been omitted entirely.
+      const req: AxiosRequestConfig = mock.mock.lastCall?.[0];
+      expect(req.data).toEqual("id=3&requiredInt=42");
     });
   });
 });

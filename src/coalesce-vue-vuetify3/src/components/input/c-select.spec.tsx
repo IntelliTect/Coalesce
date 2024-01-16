@@ -23,8 +23,11 @@ import { FunctionalComponent, ref } from "vue";
 import { VForm } from "vuetify/components";
 import { CSelect } from "..";
 
-import { ComplexModel, Case } from "@test/models.g";
-import { ComplexModelViewModel, CaseViewModel } from "@test/viewmodels.g";
+import { ComplexModel, Case } from "@test-targets/models.g";
+import {
+  ComplexModelViewModel,
+  CaseViewModel,
+} from "@test-targets/viewmodels.g";
 import { h } from "vue";
 
 describe("CSelect", () => {

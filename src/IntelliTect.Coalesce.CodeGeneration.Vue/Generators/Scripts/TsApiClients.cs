@@ -65,14 +65,11 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
             var paramTypeFlags = VueType.Flags.None;
             if (method.HasHttpRequestBody) paramTypeFlags |= VueType.Flags.RawBinary;
 
-            string signature =
-                string.Concat(method.ApiParameters.Select(f => 
-                    $"{f.JsVariable}: " +
-                    $"{new VueType(f.Type, paramTypeFlags).TsType("$models")}" +
-                    (f.ParentSourceProp?.IsPrimaryKey == true ? "" : " | null") +  
-                    ", "
-                ))
-                + "$config?: AxiosRequestConfig";
+            string signature = string.Join(", ", method.ApiParameters
+                .SignatureData(paramTypeFlags)
+                .Select(d => d.Signature)
+                .Append("$config?: AxiosRequestConfig")
+            );
 
             string resultType = method.TransportTypeGenericParameter.IsVoid
                 ? $"{method.TransportType}<void>"

@@ -1,5 +1,5 @@
 import { CSelectManyToMany } from "..";
-import { CaseViewModel } from "@test/viewmodels.g";
+import { CaseViewModel } from "@test-targets/viewmodels.g";
 
 describe("CSelectManyToMany", () => {
   test("types", () => {

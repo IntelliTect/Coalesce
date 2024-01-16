@@ -892,12 +892,18 @@ export const ComplexModel = domain.types.ComplexModel = {
       displayName: "Guid",
       type: "string",
       role: "value",
+      rules: {
+        pattern: val => !val || /^\s*[{(]?[0-9A-Fa-f]{8}[-]?(?:[0-9A-Fa-f]{4}[-]?){3}[0-9A-Fa-f]{12}[)}]?\s*$/.test(val) || "Guid does not match expected format.",
+      }
     },
     guidNullable: {
       name: "guidNullable",
       displayName: "Guid Nullable",
       type: "string",
       role: "value",
+      rules: {
+        pattern: val => !val || /^\s*[{(]?[0-9A-Fa-f]{8}[-]?(?:[0-9A-Fa-f]{4}[-]?){3}[0-9A-Fa-f]{12}[)}]?\s*$/.test(val) || "Guid Nullable does not match expected format.",
+      }
     },
     nonNullNonZeroInt: {
       name: "nonNullNonZeroInt",
@@ -987,6 +993,9 @@ export const ComplexModel = domain.types.ComplexModel = {
           type: "number",
           role: "value",
           get source() { return (domain.types.ComplexModel as ModelType).props.complexModelId },
+          rules: {
+            required: val => val != null || "Primary Key is required.",
+          }
         },
         singleExternal: {
           name: "singleExternal",
@@ -1088,6 +1097,110 @@ export const ComplexModel = domain.types.ComplexModel = {
         role: "value",
       },
     },
+    methodWithOptionalParams: {
+      name: "methodWithOptionalParams",
+      displayName: "Method With Optional Params",
+      transportType: "item",
+      httpMethod: "POST",
+      params: {
+        id: {
+          name: "id",
+          displayName: "Primary Key",
+          type: "number",
+          role: "value",
+          get source() { return (domain.types.ComplexModel as ModelType).props.complexModelId },
+          rules: {
+            required: val => val != null || "Primary Key is required.",
+          }
+        },
+        requiredInt: {
+          name: "requiredInt",
+          displayName: "Required Int",
+          type: "number",
+          role: "value",
+          rules: {
+            required: val => val != null || "Required Int is required.",
+          }
+        },
+        plainInt: {
+          name: "plainInt",
+          displayName: "Plain Int",
+          type: "number",
+          role: "value",
+        },
+        nullableInt: {
+          name: "nullableInt",
+          displayName: "Nullable Int",
+          type: "number",
+          role: "value",
+        },
+        intWithDefault: {
+          name: "intWithDefault",
+          displayName: "Int With Default",
+          type: "number",
+          role: "value",
+        },
+        enumWithDefault: {
+          name: "enumWithDefault",
+          displayName: "Enum With Default",
+          type: "enum",
+          get typeDef() { return domain.enums.Statuses },
+          role: "value",
+        },
+        stringWithDefault: {
+          name: "stringWithDefault",
+          displayName: "String With Default",
+          type: "string",
+          role: "value",
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "string",
+        role: "value",
+      },
+    },
+    methodWithRequiredAfterOptional: {
+      name: "methodWithRequiredAfterOptional",
+      displayName: "Method With Required After Optional",
+      transportType: "item",
+      httpMethod: "POST",
+      params: {
+        id: {
+          name: "id",
+          displayName: "Primary Key",
+          type: "number",
+          role: "value",
+          get source() { return (domain.types.ComplexModel as ModelType).props.complexModelId },
+          rules: {
+            required: val => val != null || "Primary Key is required.",
+          }
+        },
+        optionalInt: {
+          name: "optionalInt",
+          displayName: "Optional Int",
+          type: "number",
+          role: "value",
+        },
+        singleExternal: {
+          name: "singleExternal",
+          displayName: "Single External",
+          type: "object",
+          get typeDef() { return (domain.types.ExternalParent as ObjectType) },
+          role: "value",
+          rules: {
+            required: val => val != null || "Single External is required.",
+          }
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "number",
+        role: "value",
+      },
+    },
     methodWithExternalTypesWithSinglePurpose: {
       name: "methodWithExternalTypesWithSinglePurpose",
       displayName: "Method With External Types With Single Purpose",
@@ -1100,6 +1213,9 @@ export const ComplexModel = domain.types.ComplexModel = {
           type: "number",
           role: "value",
           get source() { return (domain.types.ComplexModel as ModelType).props.complexModelId },
+          rules: {
+            required: val => val != null || "Primary Key is required.",
+          }
         },
         single: {
           name: "single",
@@ -1142,6 +1258,9 @@ export const ComplexModel = domain.types.ComplexModel = {
           type: "number",
           role: "value",
           get source() { return (domain.types.ComplexModel as ModelType).props.complexModelId },
+          rules: {
+            required: val => val != null || "Primary Key is required.",
+          }
         },
       },
       return: {
@@ -1164,6 +1283,9 @@ export const ComplexModel = domain.types.ComplexModel = {
           type: "number",
           role: "value",
           get source() { return (domain.types.ComplexModel as ModelType).props.complexModelId },
+          rules: {
+            required: val => val != null || "Primary Key is required.",
+          }
         },
       },
       return: {
@@ -1186,6 +1308,9 @@ export const ComplexModel = domain.types.ComplexModel = {
           type: "number",
           role: "value",
           get source() { return (domain.types.ComplexModel as ModelType).props.complexModelId },
+          rules: {
+            required: val => val != null || "Primary Key is required.",
+          }
         },
       },
       return: {
@@ -1208,6 +1333,9 @@ export const ComplexModel = domain.types.ComplexModel = {
           type: "number",
           role: "value",
           get source() { return (domain.types.ComplexModel as ModelType).props.complexModelId },
+          rules: {
+            required: val => val != null || "Primary Key is required.",
+          }
         },
         i: {
           name: "i",
@@ -1237,6 +1365,9 @@ export const ComplexModel = domain.types.ComplexModel = {
           type: "number",
           role: "value",
           get source() { return (domain.types.ComplexModel as ModelType).props.complexModelId },
+          rules: {
+            required: val => val != null || "Primary Key is required.",
+          }
         },
         file: {
           name: "file",
@@ -1264,6 +1395,9 @@ export const ComplexModel = domain.types.ComplexModel = {
           type: "number",
           role: "value",
           get source() { return (domain.types.ComplexModel as ModelType).props.complexModelId },
+          rules: {
+            required: val => val != null || "Primary Key is required.",
+          }
         },
         files: {
           name: "files",
@@ -1330,6 +1464,9 @@ export const ComplexModel = domain.types.ComplexModel = {
           type: "number",
           role: "value",
           get source() { return (domain.types.ComplexModel as ModelType).props.complexModelId },
+          rules: {
+            required: val => val != null || "Primary Key is required.",
+          }
         },
       },
       return: {
@@ -1351,6 +1488,9 @@ export const ComplexModel = domain.types.ComplexModel = {
           type: "number",
           role: "value",
           get source() { return (domain.types.ComplexModel as ModelType).props.complexModelId },
+          rules: {
+            required: val => val != null || "Primary Key is required.",
+          }
         },
         etag: {
           name: "etag",
@@ -1379,6 +1519,9 @@ export const ComplexModel = domain.types.ComplexModel = {
           type: "number",
           role: "value",
           get source() { return (domain.types.ComplexModel as ModelType).props.complexModelId },
+          rules: {
+            required: val => val != null || "Primary Key is required.",
+          }
         },
         etag: {
           name: "etag",
@@ -1408,6 +1551,9 @@ export const ComplexModel = domain.types.ComplexModel = {
           type: "number",
           role: "value",
           get source() { return (domain.types.ComplexModel as ModelType).props.complexModelId },
+          rules: {
+            required: val => val != null || "Primary Key is required.",
+          }
         },
         etag: {
           name: "etag",
@@ -1436,6 +1582,9 @@ export const ComplexModel = domain.types.ComplexModel = {
           type: "number",
           role: "value",
           get source() { return (domain.types.ComplexModel as ModelType).props.complexModelId },
+          rules: {
+            required: val => val != null || "Primary Key is required.",
+          }
         },
         etag: {
           name: "etag",
@@ -1464,6 +1613,9 @@ export const ComplexModel = domain.types.ComplexModel = {
           type: "number",
           role: "value",
           get source() { return (domain.types.ComplexModel as ModelType).props.complexModelId },
+          rules: {
+            required: val => val != null || "Primary Key is required.",
+          }
         },
         etag: {
           name: "etag",
@@ -1471,6 +1623,9 @@ export const ComplexModel = domain.types.ComplexModel = {
           type: "string",
           role: "value",
           get source() { return (domain.types.ComplexModel as ModelType).props.guid },
+          rules: {
+            pattern: val => !val || /^\s*[{(]?[0-9A-Fa-f]{8}[-]?(?:[0-9A-Fa-f]{4}[-]?){3}[0-9A-Fa-f]{12}[)}]?\s*$/.test(val) || "Etag does not match expected format.",
+          }
         },
       },
       return: {
@@ -1492,6 +1647,9 @@ export const ComplexModel = domain.types.ComplexModel = {
           type: "number",
           role: "value",
           get source() { return (domain.types.ComplexModel as ModelType).props.complexModelId },
+          rules: {
+            required: val => val != null || "Primary Key is required.",
+          }
         },
       },
       return: {
@@ -1528,6 +1686,9 @@ export const ComplexModel = domain.types.ComplexModel = {
           type: "number",
           role: "value",
           get source() { return (domain.types.ComplexModel as ModelType).props.complexModelId },
+          rules: {
+            required: val => val != null || "Primary Key is required.",
+          }
         },
         q: {
           name: "q",
@@ -1555,6 +1716,9 @@ export const ComplexModel = domain.types.ComplexModel = {
           type: "number",
           role: "value",
           get source() { return (domain.types.ComplexModel as ModelType).props.complexModelId },
+          rules: {
+            required: val => val != null || "Primary Key is required.",
+          }
         },
         status: {
           name: "status",
@@ -1583,6 +1747,9 @@ export const ComplexModel = domain.types.ComplexModel = {
           type: "number",
           role: "value",
           get source() { return (domain.types.ComplexModel as ModelType).props.complexModelId },
+          rules: {
+            required: val => val != null || "Primary Key is required.",
+          }
         },
         input: {
           name: "input",
@@ -1612,6 +1779,9 @@ export const ComplexModel = domain.types.ComplexModel = {
           type: "number",
           role: "value",
           get source() { return (domain.types.ComplexModel as ModelType).props.complexModelId },
+          rules: {
+            required: val => val != null || "Primary Key is required.",
+          }
         },
         input: {
           name: "input",
@@ -1669,6 +1839,9 @@ export const ComplexModel = domain.types.ComplexModel = {
           type: "number",
           role: "value",
           get source() { return (domain.types.ComplexModel as ModelType).props.complexModelId },
+          rules: {
+            required: val => val != null || "Primary Key is required.",
+          }
         },
         rec: {
           name: "rec",
@@ -1698,6 +1871,9 @@ export const ComplexModel = domain.types.ComplexModel = {
           type: "number",
           role: "value",
           get source() { return (domain.types.ComplexModel as ModelType).props.complexModelId },
+          rules: {
+            required: val => val != null || "Primary Key is required.",
+          }
         },
         rec: {
           name: "rec",
@@ -1727,6 +1903,9 @@ export const ComplexModel = domain.types.ComplexModel = {
           type: "number",
           role: "value",
           get source() { return (domain.types.ComplexModel as ModelType).props.complexModelId },
+          rules: {
+            required: val => val != null || "Primary Key is required.",
+          }
         },
         target: {
           name: "target",
@@ -1758,6 +1937,9 @@ export const ComplexModel = domain.types.ComplexModel = {
           type: "number",
           role: "value",
           get source() { return (domain.types.ComplexModel as ModelType).props.complexModelId },
+          rules: {
+            required: val => val != null || "Primary Key is required.",
+          }
         },
         target: {
           name: "target",
@@ -2026,6 +2208,9 @@ export const Person = domain.types.Person = {
           type: "number",
           role: "value",
           get source() { return (domain.types.Person as ModelType).props.personId },
+          rules: {
+            required: val => val != null || "Primary Key is required.",
+          }
         },
         name: {
           name: "name",
@@ -2054,6 +2239,9 @@ export const Person = domain.types.Person = {
           type: "number",
           role: "value",
           get source() { return (domain.types.Person as ModelType).props.personId },
+          rules: {
+            required: val => val != null || "Primary Key is required.",
+          }
         },
       },
       return: {
@@ -2442,6 +2630,9 @@ export const StandaloneReadonly = domain.types.StandaloneReadonly = {
           type: "number",
           role: "value",
           get source() { return (domain.types.StandaloneReadonly as ObjectType).props.id },
+          rules: {
+            required: val => val != null || "Primary Key is required.",
+          }
         },
       },
       return: {

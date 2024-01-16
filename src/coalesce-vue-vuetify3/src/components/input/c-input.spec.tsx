@@ -3,8 +3,8 @@ import { StudentViewModel } from "@test/targets.viewmodels";
 import { delay, mount, nextTick } from "@test/util";
 import { VListItem } from "vuetify/components";
 import { CInput } from "..";
-import { Case, ComplexModel } from "@test/models.g";
-import { ComplexModelViewModel } from "@test/viewmodels.g";
+import { Case, ComplexModel } from "@test-targets/models.g";
+import { ComplexModelViewModel } from "@test-targets/viewmodels.g";
 import { h } from "vue";
 import { Model } from "coalesce-vue";
 

@@ -106,9 +106,9 @@ export class CaseViewModel extends ViewModel<$models.Case, $apiClients.CaseApiCl
   public get uploadImage() {
     const uploadImage = this.$apiClient.$makeCaller(
       this.$metadata.methods.uploadImage,
-      (c, file: File) => c.uploadImage(this.$primaryKey, file),
+      (c, file: File | null) => c.uploadImage(this.$primaryKey, file),
       () => ({file: null as File | null, }),
-      (c, args) => c.uploadImage(this.$primaryKey, args.file!))
+      (c, args) => c.uploadImage(this.$primaryKey, args.file))
     
     Object.defineProperty(this, 'uploadImage', {value: uploadImage});
     return uploadImage
@@ -128,9 +128,9 @@ export class CaseViewModel extends ViewModel<$models.Case, $apiClients.CaseApiCl
   public get uploadAndDownload() {
     const uploadAndDownload = this.$apiClient.$makeCaller(
       this.$metadata.methods.uploadAndDownload,
-      (c, file: File) => c.uploadAndDownload(this.$primaryKey, file),
+      (c, file: File | null) => c.uploadAndDownload(this.$primaryKey, file),
       () => ({file: null as File | null, }),
-      (c, args) => c.uploadAndDownload(this.$primaryKey, args.file!))
+      (c, args) => c.uploadAndDownload(this.$primaryKey, args.file))
     
     Object.defineProperty(this, 'uploadAndDownload', {value: uploadAndDownload});
     return uploadAndDownload
@@ -139,9 +139,9 @@ export class CaseViewModel extends ViewModel<$models.Case, $apiClients.CaseApiCl
   public get uploadImages() {
     const uploadImages = this.$apiClient.$makeCaller(
       this.$metadata.methods.uploadImages,
-      (c, files: File[]) => c.uploadImages(this.$primaryKey, files),
+      (c, files: File[] | null) => c.uploadImages(this.$primaryKey, files),
       () => ({files: null as File[] | null, }),
-      (c, args) => c.uploadImages(this.$primaryKey, args.files!))
+      (c, args) => c.uploadImages(this.$primaryKey, args.files))
     
     Object.defineProperty(this, 'uploadImages', {value: uploadImages});
     return uploadImages
@@ -150,9 +150,9 @@ export class CaseViewModel extends ViewModel<$models.Case, $apiClients.CaseApiCl
   public get uploadByteArray() {
     const uploadByteArray = this.$apiClient.$makeCaller(
       this.$metadata.methods.uploadByteArray,
-      (c, file: string | Uint8Array) => c.uploadByteArray(this.$primaryKey, file),
+      (c, file: string | Uint8Array | null) => c.uploadByteArray(this.$primaryKey, file),
       () => ({file: null as string | Uint8Array | null, }),
-      (c, args) => c.uploadByteArray(this.$primaryKey, args.file!))
+      (c, args) => c.uploadByteArray(this.$primaryKey, args.file))
     
     Object.defineProperty(this, 'uploadByteArray', {value: uploadByteArray});
     return uploadByteArray
@@ -169,9 +169,9 @@ export class CaseListViewModel extends ListViewModel<$models.Case, $apiClients.C
   public get getCaseTitles() {
     const getCaseTitles = this.$apiClient.$makeCaller(
       this.$metadata.methods.getCaseTitles,
-      (c, search: string) => c.getCaseTitles(search),
+      (c, search: string | null) => c.getCaseTitles(search),
       () => ({search: null as string | null, }),
-      (c, args) => c.getCaseTitles(args.search!))
+      (c, args) => c.getCaseTitles(args.search))
     
     Object.defineProperty(this, 'getCaseTitles', {value: getCaseTitles});
     return getCaseTitles
@@ -238,9 +238,9 @@ export class CaseDtoViewModel extends ViewModel<$models.CaseDto, $apiClients.Cas
   public get asyncMethodOnIClassDto() {
     const asyncMethodOnIClassDto = this.$apiClient.$makeCaller(
       this.$metadata.methods.asyncMethodOnIClassDto,
-      (c, input: string) => c.asyncMethodOnIClassDto(this.$primaryKey, input),
+      (c, input: string | null) => c.asyncMethodOnIClassDto(this.$primaryKey, input),
       () => ({input: null as string | null, }),
-      (c, args) => c.asyncMethodOnIClassDto(this.$primaryKey, args.input!))
+      (c, args) => c.asyncMethodOnIClassDto(this.$primaryKey, args.input))
     
     Object.defineProperty(this, 'asyncMethodOnIClassDto', {value: asyncMethodOnIClassDto});
     return asyncMethodOnIClassDto
@@ -330,9 +330,9 @@ export class CompanyViewModel extends ViewModel<$models.Company, $apiClients.Com
   public get conflictingParameterNames() {
     const conflictingParameterNames = this.$apiClient.$makeCaller(
       this.$metadata.methods.conflictingParameterNames,
-      (c, companyParam: $models.Company, name: string) => c.conflictingParameterNames(this.$primaryKey, companyParam, name),
+      (c, companyParam: $models.Company | null, name: string | null) => c.conflictingParameterNames(this.$primaryKey, companyParam, name),
       () => ({companyParam: null as $models.Company | null, name: null as string | null, }),
-      (c, args) => c.conflictingParameterNames(this.$primaryKey, args.companyParam!, args.name!))
+      (c, args) => c.conflictingParameterNames(this.$primaryKey, args.companyParam, args.name))
     
     Object.defineProperty(this, 'conflictingParameterNames', {value: conflictingParameterNames});
     return conflictingParameterNames
@@ -441,9 +441,9 @@ export class PersonViewModel extends ViewModel<$models.Person, $apiClients.Perso
   public get rename() {
     const rename = this.$apiClient.$makeCaller(
       this.$metadata.methods.rename,
-      (c, name: string) => c.rename(this.$primaryKey, name),
+      (c, name: string | null) => c.rename(this.$primaryKey, name),
       () => ({name: null as string | null, }),
-      (c, args) => c.rename(this.$primaryKey, args.name!))
+      (c, args) => c.rename(this.$primaryKey, args.name))
     
     Object.defineProperty(this, 'rename', {value: rename});
     return rename
@@ -509,9 +509,9 @@ export class PersonViewModel extends ViewModel<$models.Person, $apiClients.Perso
   public get changeFirstName() {
     const changeFirstName = this.$apiClient.$makeCaller(
       this.$metadata.methods.changeFirstName,
-      (c, firstName: string, title?: $models.Titles | null) => c.changeFirstName(this.$primaryKey, firstName, title),
+      (c, firstName: string | null, title?: $models.Titles | null) => c.changeFirstName(this.$primaryKey, firstName, title),
       () => ({firstName: null as string | null, title: null as $models.Titles | null, }),
-      (c, args) => c.changeFirstName(this.$primaryKey, args.firstName!, args.title))
+      (c, args) => c.changeFirstName(this.$primaryKey, args.firstName, args.title))
     
     Object.defineProperty(this, 'changeFirstName', {value: changeFirstName});
     return changeFirstName
@@ -591,9 +591,9 @@ export class PersonListViewModel extends ListViewModel<$models.Person, $apiClien
   public get namesStartingWith() {
     const namesStartingWith = this.$apiClient.$makeCaller(
       this.$metadata.methods.namesStartingWith,
-      (c, characters: string) => c.namesStartingWith(characters),
+      (c, characters: string | null) => c.namesStartingWith(characters),
       () => ({characters: null as string | null, }),
-      (c, args) => c.namesStartingWith(args.characters!))
+      (c, args) => c.namesStartingWith(args.characters))
     
     Object.defineProperty(this, 'namesStartingWith', {value: namesStartingWith});
     return namesStartingWith
@@ -602,9 +602,9 @@ export class PersonListViewModel extends ListViewModel<$models.Person, $apiClien
   public get methodWithStringArrayParameter() {
     const methodWithStringArrayParameter = this.$apiClient.$makeCaller(
       this.$metadata.methods.methodWithStringArrayParameter,
-      (c, strings: string[]) => c.methodWithStringArrayParameter(strings),
+      (c, strings: string[] | null) => c.methodWithStringArrayParameter(strings),
       () => ({strings: null as string[] | null, }),
-      (c, args) => c.methodWithStringArrayParameter(args.strings!))
+      (c, args) => c.methodWithStringArrayParameter(args.strings))
     
     Object.defineProperty(this, 'methodWithStringArrayParameter', {value: methodWithStringArrayParameter});
     return methodWithStringArrayParameter
@@ -614,9 +614,9 @@ export class PersonListViewModel extends ListViewModel<$models.Person, $apiClien
   public get methodWithEntityParameter() {
     const methodWithEntityParameter = this.$apiClient.$makeCaller(
       this.$metadata.methods.methodWithEntityParameter,
-      (c, person: $models.Person) => c.methodWithEntityParameter(person),
+      (c, person: $models.Person | null) => c.methodWithEntityParameter(person),
       () => ({person: null as $models.Person | null, }),
-      (c, args) => c.methodWithEntityParameter(args.person!))
+      (c, args) => c.methodWithEntityParameter(args.person))
     
     Object.defineProperty(this, 'methodWithEntityParameter', {value: methodWithEntityParameter});
     return methodWithEntityParameter
@@ -626,9 +626,9 @@ export class PersonListViewModel extends ListViewModel<$models.Person, $apiClien
   public get searchPeople() {
     const searchPeople = this.$apiClient.$makeCaller(
       this.$metadata.methods.searchPeople,
-      (c, criteria: $models.PersonCriteria, page?: number | null) => c.searchPeople(criteria, page),
+      (c, criteria: $models.PersonCriteria | null, page?: number | null) => c.searchPeople(criteria, page),
       () => ({criteria: null as $models.PersonCriteria | null, page: null as number | null, }),
-      (c, args) => c.searchPeople(args.criteria!, args.page))
+      (c, args) => c.searchPeople(args.criteria, args.page))
     
     Object.defineProperty(this, 'searchPeople', {value: searchPeople});
     return searchPeople
@@ -751,9 +751,9 @@ export class WeatherServiceViewModel extends ServiceViewModel<typeof $metadata.W
   public get getWeather() {
     const getWeather = this.$apiClient.$makeCaller(
       this.$metadata.methods.getWeather,
-      (c, location: $models.Location, dateTime?: Date | null, conditions?: $models.SkyConditions | null) => c.getWeather(location, dateTime, conditions),
+      (c, location: $models.Location | null, dateTime?: Date | null, conditions?: $models.SkyConditions | null) => c.getWeather(location, dateTime, conditions),
       () => ({location: null as $models.Location | null, dateTime: null as Date | null, conditions: null as $models.SkyConditions | null, }),
-      (c, args) => c.getWeather(args.location!, args.dateTime, args.conditions))
+      (c, args) => c.getWeather(args.location, args.dateTime, args.conditions))
     
     Object.defineProperty(this, 'getWeather', {value: getWeather});
     return getWeather

@@ -243,9 +243,9 @@ export class ComplexModelViewModel extends ViewModel<$models.ComplexModel, $apiC
   public get methodWithOptionalParams() {
     const methodWithOptionalParams = this.$apiClient.$makeCaller(
       this.$metadata.methods.methodWithOptionalParams,
-      (c, requiredInt: number, plainInt?: number | null, nullableInt?: number | null, intWithDefault?: number | null, enumWithDefault?: $models.Statuses | null, stringWithDefault?: string | null) => c.methodWithOptionalParams(this.$primaryKey, requiredInt, plainInt, nullableInt, intWithDefault, enumWithDefault, stringWithDefault),
+      (c, requiredInt: number | null, plainInt?: number | null, nullableInt?: number | null, intWithDefault?: number | null, enumWithDefault?: $models.Statuses | null, stringWithDefault?: string | null) => c.methodWithOptionalParams(this.$primaryKey, requiredInt, plainInt, nullableInt, intWithDefault, enumWithDefault, stringWithDefault),
       () => ({requiredInt: null as number | null, plainInt: null as number | null, nullableInt: null as number | null, intWithDefault: null as number | null, enumWithDefault: null as $models.Statuses | null, stringWithDefault: null as string | null, }),
-      (c, args) => c.methodWithOptionalParams(this.$primaryKey, args.requiredInt!, args.plainInt, args.nullableInt, args.intWithDefault, args.enumWithDefault, args.stringWithDefault))
+      (c, args) => c.methodWithOptionalParams(this.$primaryKey, args.requiredInt, args.plainInt, args.nullableInt, args.intWithDefault, args.enumWithDefault, args.stringWithDefault))
     
     Object.defineProperty(this, 'methodWithOptionalParams', {value: methodWithOptionalParams});
     return methodWithOptionalParams
@@ -254,9 +254,9 @@ export class ComplexModelViewModel extends ViewModel<$models.ComplexModel, $apiC
   public get methodWithRequiredAfterOptional() {
     const methodWithRequiredAfterOptional = this.$apiClient.$makeCaller(
       this.$metadata.methods.methodWithRequiredAfterOptional,
-      (c, optionalInt: number, singleExternal: $models.ExternalParent) => c.methodWithRequiredAfterOptional(this.$primaryKey, optionalInt, singleExternal),
+      (c, optionalInt: number | null, singleExternal: $models.ExternalParent | null) => c.methodWithRequiredAfterOptional(this.$primaryKey, optionalInt, singleExternal),
       () => ({optionalInt: null as number | null, singleExternal: null as $models.ExternalParent | null, }),
-      (c, args) => c.methodWithRequiredAfterOptional(this.$primaryKey, args.optionalInt!, args.singleExternal!))
+      (c, args) => c.methodWithRequiredAfterOptional(this.$primaryKey, args.optionalInt, args.singleExternal))
     
     Object.defineProperty(this, 'methodWithRequiredAfterOptional', {value: methodWithRequiredAfterOptional});
     return methodWithRequiredAfterOptional
@@ -485,9 +485,9 @@ export class ComplexModelViewModel extends ViewModel<$models.ComplexModel, $apiC
   public get methodWithValidationExplicitOff() {
     const methodWithValidationExplicitOff = this.$apiClient.$makeCaller(
       this.$metadata.methods.methodWithValidationExplicitOff,
-      (c, target: $models.ValidationTarget) => c.methodWithValidationExplicitOff(this.$primaryKey, target),
+      (c, target: $models.ValidationTarget | null) => c.methodWithValidationExplicitOff(this.$primaryKey, target),
       () => ({target: null as $models.ValidationTarget | null, }),
-      (c, args) => c.methodWithValidationExplicitOff(this.$primaryKey, args.target!))
+      (c, args) => c.methodWithValidationExplicitOff(this.$primaryKey, args.target))
     
     Object.defineProperty(this, 'methodWithValidationExplicitOff', {value: methodWithValidationExplicitOff});
     return methodWithValidationExplicitOff
@@ -496,9 +496,9 @@ export class ComplexModelViewModel extends ViewModel<$models.ComplexModel, $apiC
   public get methodWithValidationExplicitOn() {
     const methodWithValidationExplicitOn = this.$apiClient.$makeCaller(
       this.$metadata.methods.methodWithValidationExplicitOn,
-      (c, target: $models.ValidationTarget) => c.methodWithValidationExplicitOn(this.$primaryKey, target),
+      (c, target: $models.ValidationTarget | null) => c.methodWithValidationExplicitOn(this.$primaryKey, target),
       () => ({target: null as $models.ValidationTarget | null, }),
-      (c, args) => c.methodWithValidationExplicitOn(this.$primaryKey, args.target!))
+      (c, args) => c.methodWithValidationExplicitOn(this.$primaryKey, args.target))
     
     Object.defineProperty(this, 'methodWithValidationExplicitOn', {value: methodWithValidationExplicitOn});
     return methodWithValidationExplicitOn
@@ -956,9 +956,9 @@ export class WeatherServiceViewModel extends ServiceViewModel<typeof $metadata.W
   public get getWeather() {
     const getWeather = this.$apiClient.$makeCaller(
       this.$metadata.methods.getWeather,
-      (c, location: $models.Location, dateTime?: Date | null, conditions?: $models.SkyConditions | null) => c.getWeather(location, dateTime, conditions),
+      (c, location: $models.Location | null, dateTime?: Date | null, conditions?: $models.SkyConditions | null) => c.getWeather(location, dateTime, conditions),
       () => ({location: null as $models.Location | null, dateTime: null as Date | null, conditions: null as $models.SkyConditions | null, }),
-      (c, args) => c.getWeather(args.location!, args.dateTime, args.conditions))
+      (c, args) => c.getWeather(args.location, args.dateTime, args.conditions))
     
     Object.defineProperty(this, 'getWeather', {value: getWeather});
     return getWeather

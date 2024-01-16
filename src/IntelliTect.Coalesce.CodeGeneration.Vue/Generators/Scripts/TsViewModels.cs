@@ -216,11 +216,19 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
 
                 // The invoker function when the caller is invoked with args with `caller.invokeWithArgs(args?)`
                 var argsParams = string.Join(", ", method.ApiParameters.Select(p => 
-                    PropValue(p, "args.") +
-                    // HACK: We have to suppress nullability issues when passing the args to the API client func
-                    // since the args are always nullable. Perhaps in the future we could generate null checks
-                    // and throw errors for missing required args?
-                    (signatureData.FirstOrDefault(d => d.Param.Name == p.Name).IsRequired ? "!" : "")
+                    PropValue(p, "args.")
+
+                    // NB: The following code is from an iteration of optional param handling
+                    // where required params did not emit `null` as part of their signature.
+                    // This design was scrapped because it just leads to slapping null forgiveness operators
+                    // all over callsites of methods when method parameters are coming from ViewModel props
+                    // or from bound `ref`s on a component.
+                    //// We have to suppress nullability issues when passing the args to the API client func
+                    //// since the args are always nullable. Perhaps in the future we could generate null checks
+                    //// and throw errors for missing required args?
+                    //+ (signatureData.FirstOrDefault(d => d.Param.Name == p.Name).IsRequired ? "!" : "")
+
+
                 ));
                 b.Indented($"(c, args) => c.{method.JsVariable}({argsParams}))");
 

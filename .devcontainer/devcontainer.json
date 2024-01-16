@@ -25,7 +25,7 @@
             "version": "20"
         }
     },
-	"postCreateCommand": "cd ./src && dotnet restore && cd coalesce-vue && npm ci && cd coalesce-vue-vuetify2 && npm ci && cd coalesce-vue-vuetify3 && npm ci",
+	"postCreateCommand": "dotnet restore && cd ./src && cd coalesce-vue && npm ci && cd coalesce-vue-vuetify2 && npm ci && cd coalesce-vue-vuetify3 && npm ci",
 
 	"customizations": {
         "vscode": {

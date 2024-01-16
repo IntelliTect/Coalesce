@@ -20,6 +20,9 @@
             "version": "8.0",
             "dotnetRuntimeVersions": "8.0",
             "aspNetCoreRuntimeVersions": "8.0"
+        },
+	"ghcr.io/devcontainers/features/node:2": {
+            "version": "20"
         }
     },
 	"postCreateCommand": "cd ./src && dotnet restore && cd coalesce-vue && npm ci && cd coalesce-vue-vuetify2 && npm ci && cd coalesce-vue-vuetify3 && npm ci",

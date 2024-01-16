@@ -39,6 +39,9 @@ import axios, {
   CancelTokenSource,
 } from "axios";
 
+// Re-exports for more convenient imports in generated code.
+export { AxiosPromise, AxiosRequestConfig } from "axios";
+
 /* Api Response Objects */
 
 export interface ApiResult {

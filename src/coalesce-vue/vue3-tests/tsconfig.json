@@ -4,17 +4,16 @@
     // We only want to do TS builds for validation of type compatibility with vue3, not for emitting.
     "noEmit": true,
     "paths": {
-      "@vue/test-utils": [ "./node_modules/@vue/test-utils" ],
-      "vue": [ "./node_modules/vue" ],
-      "vue-router": [ "./node_modules/vue-router" ]
+      "@vue/test-utils": ["./node_modules/@vue/test-utils"],
+      "vue": ["./node_modules/vue"],
+      "vue-router": ["./node_modules/vue-router"],
+
+      // For test-targets files:
+      "@test-targets/*": ["../../test-targets/*"],
+      "coalesce-vue/lib/*": ["../src/*"]
     }
   },
-  
-  "include": [
-    "../src/**/*",
-    "../test/**/*"
-  ],
-  "exclude": [
-    "../test/**/*.spec.vue2.ts"
-  ]
+
+  "include": ["../src/**/*", "../test/**/*"],
+  "exclude": ["../test/**/*.spec.vue2.ts"]
 }

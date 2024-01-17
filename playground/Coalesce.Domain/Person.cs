@@ -171,7 +171,7 @@ namespace Coalesce.Domain
         [Coalesce]
         public static ItemResult<int> Add(
             int numberOne, 
-            [Range(0, 10000)] int numberTwo
+            [Range(0, 10000)] int numberTwo = 42
         )
         {
             try

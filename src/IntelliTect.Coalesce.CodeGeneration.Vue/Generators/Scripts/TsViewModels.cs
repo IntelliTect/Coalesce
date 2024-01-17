@@ -244,11 +244,6 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                     {
                         if (src.IsPrimaryKey)
                         {
-                            // TODO This is a bit of a hack, because right now $primaryKey is unfortunately typed without "null",
-                            // and the api clients emit the PK parameters without allowing null.
-                            // After a bit of a refactor that introduced "ParentSourceProp", I'm keeping the generated output here
-                            // the same in order to keep taking advantage of this misfortune until we can add in proper parameter null checking
-                            // and also fix the type of $primaryKey to include null.
                             return "this.$primaryKey";
                         }
                         return $"this.{src.JsVariable}";

@@ -40,7 +40,7 @@ import axios, {
 } from "axios";
 
 // Re-exports for more convenient imports in generated code.
-export { AxiosPromise, AxiosRequestConfig } from "axios";
+export type { AxiosPromise, AxiosRequestConfig } from "axios";
 
 /* Api Response Objects */
 

@@ -152,7 +152,7 @@ namespace Coalesce.Web.Ko.Api
         [Authorize]
         public virtual ItemResult<int> Add(
             [FromForm(Name = "numberOne")] int numberOne,
-            [FromForm(Name = "numberTwo")] int numberTwo)
+            [FromForm(Name = "numberTwo")] int numberTwo = 42)
         {
             var _params = new
             {

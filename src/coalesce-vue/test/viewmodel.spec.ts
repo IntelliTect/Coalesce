@@ -2492,6 +2492,27 @@ describe("ViewModel", () => {
 
       expect(triggered).toBeTruthy();
     });
+
+    test("serializable collections are dirtied when mutated directly", async () => {
+      var vm = new ComplexModelViewModel();
+      vm.$isDirty = false;
+      await delay(1);
+
+      vm.intCollection = [42];
+      expect(vm.$isDirty).toBeTruthy();
+
+      vm.$isDirty = false;
+      vm.intCollection.push(99);
+      expect(vm.$isDirty).toBeTruthy();
+
+      // Loading of new clean value doesn't trigger dirty:
+      // This ensures that the watcher is ran synchronously,
+      // since an async watcher would miss the $isDirty=false set that happens
+      // after loading clean data.
+      vm.$isDirty = false;
+      vm.$loadCleanData({ intCollection: [42, 99] });
+      expect(vm.$isDirty).toBeFalsy();
+    });
   });
 
   describe("ctor", () => {

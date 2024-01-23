@@ -209,6 +209,7 @@ export interface ComplexModelViewModel extends $models.ComplexModel {
   long: number | null;
   guid: string | null;
   guidNullable: string | null;
+  intCollection: number[] | null;
   nonNullNonZeroInt: number | null;
   clientValidationInt: number | null;
   clientValidationString: string | null;

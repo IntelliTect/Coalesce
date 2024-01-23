@@ -189,7 +189,7 @@ namespace Coalesce.Web.Vue2.Models
             if (ShouldMapTo(nameof(LastBath))) entity.LastBath = LastBath;
             if (ShouldMapTo(nameof(NextUpgrade))) entity.NextUpgrade = NextUpgrade;
             if (ShouldMapTo(nameof(CompanyId))) entity.CompanyId = (CompanyId ?? entity.CompanyId);
-            if (ShouldMapTo(nameof(ArbitraryCollectionOfStrings))) entity.ArbitraryCollectionOfStrings = ArbitraryCollectionOfStrings;
+            if (ShouldMapTo(nameof(ArbitraryCollectionOfStrings))) entity.ArbitraryCollectionOfStrings = ArbitraryCollectionOfStrings?.ToList();
         }
 
         /// <summary>

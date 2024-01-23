@@ -15,7 +15,7 @@
     "esModuleInterop": true,
     "target": "ES2022",
     "declaration": true,
-    "lib": ["es2015", "es2017", "dom"],
+    "lib": ["es2015", "es2017", "dom", "ES2021.WeakRef"],
     "types": ["vitest/globals", "vue-router"],
 
     "paths": {

@@ -240,5 +240,22 @@ namespace IntelliTect.Coalesce.Tests.TypeDefinition
             Assert.Equal("PersonTwo", prop.ManyToManyFarNavigationProperty.Name);
             Assert.Equal("PersonTwoId", prop.ManyToManyFarNavigationProperty.ForeignKeyProperty.Name);
         }
+
+        [Theory]
+        [PropertyViewModelData<ComplexModel>(nameof(ComplexModel.String), true)]
+        [PropertyViewModelData<ComplexModel>(nameof(ComplexModel.SingleTestId), true)]
+        [PropertyViewModelData<ComplexModel>(nameof(ComplexModel.IntCollection), true)]
+        [PropertyViewModelData<ComplexModel>(nameof(ComplexModel.MutablePrimitiveCollection), true)]
+        [PropertyViewModelData<ComplexModel>(nameof(ComplexModel.Tests), false)] // collection nav
+        [PropertyViewModelData<ComplexModel>(nameof(ComplexModel.SingleTest), false)] // ref nav
+        [PropertyViewModelData<PropSec>(nameof(PropSec.ReadOnlyViaRead), false)]
+        [PropertyViewModelData<PropSec>(nameof(PropSec.ReadOnlyViaReadOnly), false)]
+        [PropertyViewModelData<PropSec>(nameof(PropSec.ReadOnlyViaReadOnlyApi), false)]
+        [PropertyViewModelData<PropSec>(nameof(PropSec.ReadOnlyViaNonPublicSetter), false)]
+        public void IsClientSerializable_IsCorrect(PropertyViewModelData data, bool expected)
+        {
+            PropertyViewModel vm = data;
+            Assert.Equal(expected, vm.IsClientSerializable);
+        }
     }
 }

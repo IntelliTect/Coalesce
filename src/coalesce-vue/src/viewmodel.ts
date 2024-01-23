@@ -6,6 +6,8 @@ import {
   getCurrentInstance,
   toRaw,
   type Ref,
+  watch,
+  WatchStopHandle,
 } from "vue";
 
 import {
@@ -1754,6 +1756,8 @@ export function defineProps<T extends new () => ViewModel<any, any>>(
     const prop = props[i];
     const propName = prop.name;
 
+    const hasWatcherFlag = Symbol("watching collection for dirty " + propName);
+
     descriptors[propName] = {
       enumerable: true,
       configurable: true,
@@ -1891,6 +1895,46 @@ export function defineProps<T extends new () => ViewModel<any, any>>(
                 $data[propName] = incomingValue;
 
                 this.$setPropDirty(propName);
+
+                // For collections of primitives,
+                // we need to setup a watcher on the prop so that direct collection
+                // mutations will also trigger the dirty flag.
+                // Its OK that we only set this up in the setter
+                // since there's no point in watching an empty collection.
+                if (
+                  prop.role == "value" &&
+                  prop.type == "collection" &&
+                  !prop.dontSerialize &&
+                  !(this as any)[hasWatcherFlag]
+                ) {
+                  (this as any)[hasWatcherFlag] = true;
+                  if (!watcherFinalizationRegistry) {
+                    //@ts-expect-error
+                    if (!window.__coalesce_warned_collection_watcher) {
+                      //@ts-expect-error
+                      window.__coalesce_warned_collection_watcher = true;
+                      console.warn(
+                        "Unable to setup dirty watcher for collection prop mutations because FinalizationRegistry is not available."
+                      );
+                    }
+                  } else {
+                    // NB: At the time of writing this code this does work to dispose the watcher
+                    // when the VM instance is GC'd. HOWEVER, vue seems to currently be bad
+                    // at removing refs to `script setup` data and is retaining references.
+
+                    // Must capture a weak ref to `this` so that the effect of the watcher
+                    // isn't preventing the viewmodel from being disposed.
+                    const weakThis = new WeakRef(this);
+                    watcherFinalizationRegistry.register(
+                      this,
+                      watch(
+                        () => $data[propName],
+                        () => weakThis.deref()?.$setPropDirty(propName),
+                        { deep: true, flush: "sync" }
+                      )
+                    );
+                  }
+                }
 
                 if (prop.role == "foreignKey" && prop.navigationProp) {
                   /*
@@ -2285,6 +2329,13 @@ function startAutoCall(
 function joinErrors(errors: Iterable<string>) {
   return [...errors].map((e) => e.replace(/\.$/, "")).join(", ") + ".";
 }
+
+const watcherFinalizationRegistry =
+  typeof FinalizationRegistry !== "undefined"
+    ? new FinalizationRegistry<WatchStopHandle>((heldValue) => {
+        heldValue();
+      })
+    : undefined;
 
 //@ts-expect-error: only exists in vue3, but not vue2.
 declare module "@vue/reactivity" {

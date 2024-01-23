@@ -905,6 +905,18 @@ export const ComplexModel = domain.types.ComplexModel = {
         pattern: val => !val || /^\s*[{(]?[0-9A-Fa-f]{8}[-]?(?:[0-9A-Fa-f]{4}[-]?){3}[0-9A-Fa-f]{12}[)}]?\s*$/.test(val) || "Guid Nullable does not match expected format.",
       }
     },
+    intCollection: {
+      name: "intCollection",
+      displayName: "Int Collection",
+      type: "collection",
+      itemType: {
+        name: "$collectionItem",
+        displayName: "",
+        role: "value",
+        type: "number",
+      },
+      role: "value",
+    },
     nonNullNonZeroInt: {
       name: "nonNullNonZeroInt",
       displayName: "Non Null Non Zero Int",

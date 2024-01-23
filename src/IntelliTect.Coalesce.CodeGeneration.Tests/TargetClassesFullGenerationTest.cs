@@ -89,7 +89,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Tests
             $$"""
             {
               "compilerOptions": {
-                "target": "ES2020",
+                "target": "ES2021",
                 "strict": true,
                 "moduleResolution": "node",
                 "baseUrl": ".",

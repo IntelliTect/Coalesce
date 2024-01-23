@@ -11,7 +11,13 @@
     <ProjectReference Include="..\IntelliTect.Coalesce\IntelliTect.Coalesce.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Z.EntityFramework.Plus.EFCore" Version="$(DotNetPackageVersionSpec)" />
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net6.0' ">
+    <PackageReference Include="Z.EntityFramework.Plus.EFCore" Version="[6.101.2, 7.0.0)" />
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net7.0' ">
+    <PackageReference Include="Z.EntityFramework.Plus.EFCore" Version="[7.101.2, 8.0.0)" />
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net8.0' ">
+    <PackageReference Include="Z.EntityFramework.Plus.EFCore" Version="[8.101.2, 9.0.0)" />
   </ItemGroup>
 </Project>

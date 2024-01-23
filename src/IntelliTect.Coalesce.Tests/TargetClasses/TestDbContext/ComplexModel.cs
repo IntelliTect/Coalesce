@@ -131,7 +131,11 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         public Guid Guid { get; set; }
         public Guid? GuidNullable { get; set; }
 
-        // Implicitly maps to JSON in EF (since EF 7)
+#if NET8_0_OR_GREATER
+        // https://learn.microsoft.com/en-us/ef/core/what-is-new/ef-core-8.0/whatsnew#primitive-collections
+#else
+        [NotMapped]
+#endif
         public List<int> IntCollection { get; set; }
 
         [Range(1, 100)]

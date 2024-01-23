@@ -130,7 +130,8 @@ namespace Coalesce.Domain
         /// </summary>
         public Company Company { get; set; }
 
-#if NET7_0_OR_GREATER
+#if NET8_0_OR_GREATER
+        // https://learn.microsoft.com/en-us/ef/core/what-is-new/ef-core-8.0/whatsnew#primitive-collections
 #else
         [NotMapped]
 #endif

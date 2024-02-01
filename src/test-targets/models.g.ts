@@ -460,6 +460,32 @@ export class ReadOnlyEntityUsedAsMethodInput {
 }
 
 
+export interface RecursiveHierarchy extends Model<typeof metadata.RecursiveHierarchy> {
+  id: number | null
+  name: string | null
+  parentId: number | null
+  parent: RecursiveHierarchy | null
+  children: RecursiveHierarchy[] | null
+}
+export class RecursiveHierarchy {
+  
+  /** Mutates the input object and its descendents into a valid RecursiveHierarchy implementation. */
+  static convert(data?: Partial<RecursiveHierarchy>): RecursiveHierarchy {
+    return convertToModel(data || {}, metadata.RecursiveHierarchy) 
+  }
+  
+  /** Maps the input object and its descendents to a new, valid RecursiveHierarchy implementation. */
+  static map(data?: Partial<RecursiveHierarchy>): RecursiveHierarchy {
+    return mapToModel(data || {}, metadata.RecursiveHierarchy) 
+  }
+  
+  /** Instantiate a new RecursiveHierarchy, optionally basing it on the given data. */
+  constructor(data?: Partial<RecursiveHierarchy> | {[k: string]: any}) {
+    Object.assign(this, RecursiveHierarchy.map(data || {}));
+  }
+}
+
+
 export interface RequiredAndInitModel extends Model<typeof metadata.RequiredAndInitModel> {
   id: number | null
   requiredRef: string | null

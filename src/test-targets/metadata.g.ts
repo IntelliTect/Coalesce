@@ -2451,6 +2451,68 @@ export const ReadOnlyEntityUsedAsMethodInput = domain.types.ReadOnlyEntityUsedAs
   dataSources: {
   },
 }
+export const RecursiveHierarchy = domain.types.RecursiveHierarchy = {
+  name: "RecursiveHierarchy",
+  displayName: "Recursive Hierarchy",
+  get displayProp() { return this.props.name }, 
+  type: "model",
+  controllerRoute: "RecursiveHierarchy",
+  get keyProp() { return this.props.id }, 
+  behaviorFlags: 7 as BehaviorFlags,
+  props: {
+    id: {
+      name: "id",
+      displayName: "Id",
+      type: "number",
+      role: "primaryKey",
+      hidden: 3 as HiddenAreas,
+    },
+    name: {
+      name: "name",
+      displayName: "Name",
+      type: "string",
+      role: "value",
+    },
+    parentId: {
+      name: "parentId",
+      displayName: "Parent Id",
+      type: "number",
+      role: "foreignKey",
+      get principalKey() { return (domain.types.RecursiveHierarchy as ModelType).props.id as PrimaryKeyProperty },
+      get principalType() { return (domain.types.RecursiveHierarchy as ModelType) },
+      get navigationProp() { return (domain.types.RecursiveHierarchy as ModelType).props.parent as ModelReferenceNavigationProperty },
+      hidden: 3 as HiddenAreas,
+    },
+    parent: {
+      name: "parent",
+      displayName: "Parent",
+      type: "model",
+      get typeDef() { return (domain.types.RecursiveHierarchy as ModelType) },
+      role: "referenceNavigation",
+      get foreignKey() { return (domain.types.RecursiveHierarchy as ModelType).props.parentId as ForeignKeyProperty },
+      get principalKey() { return (domain.types.RecursiveHierarchy as ModelType).props.id as PrimaryKeyProperty },
+      dontSerialize: true,
+    },
+    children: {
+      name: "children",
+      displayName: "Children",
+      type: "collection",
+      itemType: {
+        name: "$collectionItem",
+        displayName: "",
+        role: "value",
+        type: "model",
+        get typeDef() { return (domain.types.RecursiveHierarchy as ModelType) },
+      },
+      role: "value",
+      dontSerialize: true,
+    },
+  },
+  methods: {
+  },
+  dataSources: {
+  },
+}
 export const RequiredAndInitModel = domain.types.RequiredAndInitModel = {
   name: "RequiredAndInitModel",
   displayName: "Required And Init Model",
@@ -3590,6 +3652,7 @@ interface AppDomain extends Domain {
     PositionalRecord: typeof PositionalRecord
     Product: typeof Product
     ReadOnlyEntityUsedAsMethodInput: typeof ReadOnlyEntityUsedAsMethodInput
+    RecursiveHierarchy: typeof RecursiveHierarchy
     RequiredAndInitModel: typeof RequiredAndInitModel
     Sibling: typeof Sibling
     StandaloneReadonly: typeof StandaloneReadonly

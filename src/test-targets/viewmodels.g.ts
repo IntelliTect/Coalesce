@@ -789,6 +789,29 @@ export class ReadOnlyEntityUsedAsMethodInputListViewModel extends ListViewModel<
 }
 
 
+export interface RecursiveHierarchyViewModel extends $models.RecursiveHierarchy {
+  id: number | null;
+  name: string | null;
+  parentId: number | null;
+  parent: RecursiveHierarchyViewModel | null;
+  children: RecursiveHierarchyViewModel[] | null;
+}
+export class RecursiveHierarchyViewModel extends ViewModel<$models.RecursiveHierarchy, $apiClients.RecursiveHierarchyApiClient, number> implements $models.RecursiveHierarchy  {
+  
+  constructor(initialData?: DeepPartial<$models.RecursiveHierarchy> | null) {
+    super($metadata.RecursiveHierarchy, new $apiClients.RecursiveHierarchyApiClient(), initialData)
+  }
+}
+defineProps(RecursiveHierarchyViewModel, $metadata.RecursiveHierarchy)
+
+export class RecursiveHierarchyListViewModel extends ListViewModel<$models.RecursiveHierarchy, $apiClients.RecursiveHierarchyApiClient, RecursiveHierarchyViewModel> {
+  
+  constructor() {
+    super($metadata.RecursiveHierarchy, new $apiClients.RecursiveHierarchyApiClient())
+  }
+}
+
+
 export interface RequiredAndInitModelViewModel extends $models.RequiredAndInitModel {
   id: number | null;
   requiredRef: string | null;
@@ -984,6 +1007,7 @@ const viewModelTypeLookup = ViewModel.typeLookup = {
   Person: PersonViewModel,
   Product: ProductViewModel,
   ReadOnlyEntityUsedAsMethodInput: ReadOnlyEntityUsedAsMethodInputViewModel,
+  RecursiveHierarchy: RecursiveHierarchyViewModel,
   RequiredAndInitModel: RequiredAndInitModelViewModel,
   Sibling: SiblingViewModel,
   StandaloneReadonly: StandaloneReadonlyViewModel,
@@ -1004,6 +1028,7 @@ const listViewModelTypeLookup = ListViewModel.typeLookup = {
   Person: PersonListViewModel,
   Product: ProductListViewModel,
   ReadOnlyEntityUsedAsMethodInput: ReadOnlyEntityUsedAsMethodInputListViewModel,
+  RecursiveHierarchy: RecursiveHierarchyListViewModel,
   RequiredAndInitModel: RequiredAndInitModelListViewModel,
   Sibling: SiblingListViewModel,
   StandaloneReadonly: StandaloneReadonlyListViewModel,

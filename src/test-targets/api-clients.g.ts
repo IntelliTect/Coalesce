@@ -379,6 +379,11 @@ export class ReadOnlyEntityUsedAsMethodInputApiClient extends ModelApiClient<$mo
 }
 
 
+export class RecursiveHierarchyApiClient extends ModelApiClient<$models.RecursiveHierarchy> {
+  constructor() { super($metadata.RecursiveHierarchy) }
+}
+
+
 export class RequiredAndInitModelApiClient extends ModelApiClient<$models.RequiredAndInitModel> {
   constructor() { super($metadata.RequiredAndInitModel) }
 }

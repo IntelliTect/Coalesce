@@ -30,6 +30,8 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
 
         public DbSet<StringIdentity> StringIdentities { get; set; }
 
+        public DbSet<RecursiveHierarchy> RecursiveHierarchies { get; set; }
+
         [InternalUse]
         public DbSet<DbSetIsInternalUse> Internals { get; set; }
 

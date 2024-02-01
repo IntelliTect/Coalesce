@@ -199,7 +199,7 @@ When set to false, all property dirty flags are cleared. When set to true, all p
 $startAutoSave(vue: Vue, options: AutoSaveOptions<this> = {})
 &nbsp;
 // Vue Composition API
-$useAutoSave(options: AutoSaveOptions<this> = {})" lang="ts" idPrefix="member-autosave" />
+$useAutoSave(options: AutoSaveOptions<this> = {})" lang="ts" id="member-item-autosave" />
 
 Starts auto-saving of the instance when its savable data properties become dirty. Saves are performed with the `$save` [API Caller](/stacks/vue/layers/api-clients.md#api-callers) (documented above) and will not be performed if the ViewModel has any validation errors - see [Rules/Validation](/stacks/vue/layers/viewmodels.md#rules-validation) below.
 
@@ -391,7 +391,7 @@ Shorthand for `$load.pageCount` - returns the page count reported by the last su
 $startAutoLoad(vue: Vue, options: AutoLoadOptions<this> = {})
 &nbsp;
 // Vue Composition API
-$useAutoLoad(options: AutoLoadOptions<this> = {})" lang="ts" idPrefix="member-autoLoad" />
+$useAutoLoad(options: AutoLoadOptions<this> = {})" lang="ts" id="member-list-autoLoad" />
 
 Starts auto-loading of the list as changes to its parameters occur. Loads are performed with the `$load` [API Caller](/stacks/vue/layers/api-clients.md#api-callers).
 
@@ -422,14 +422,19 @@ Manually turns off auto-loading of the instance.
 $startAutoSave(vue: Vue, options: AutoSaveOptions<this> = {})
 &nbsp;
 // Vue Composition API
-$useAutoSave(options: AutoSaveOptions<this> = {})" lang="ts" idPrefix="list-autosave" />
+$useAutoSave(options: AutoSaveOptions<this> = {})" lang="ts" id="member-list-autosave" />
 
-Enables auto-save for the items in the list, propagating to new items as they're added or loaded. See [ViewModel auto-save documentation](#member-autosave) for more details.
+Enables auto-save for the items in the list, propagating to new items as they're added or loaded. See [ViewModel auto-save documentation](#member-item-autosave) for more details.
 
 
 <Prop def="$stopAutoSave(): void" lang="ts" />
 
 Turns off auto-saving of the items in the list, and turns of propagation of auto-save to any future items if auto-save was previously turned on for the list. Only affects items that are currently in the list's `$items`.
+
+<Prop def="readonly $isAutoSaveEnabled: boolean" lang="ts" />
+
+Returns true if auto-save is currently active on the instance.
+
 
 
 ### Generated Members

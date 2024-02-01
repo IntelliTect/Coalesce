@@ -1077,7 +1077,7 @@ export abstract class ViewModel<
 
   /** Stops auto-saving if it is currently enabled. */
   public $stopAutoSave() {
-    this._autoSaveState?.cleanup!();
+    this._autoSaveState?.cleanup?.();
   }
 
   /** Returns true if auto-saving is currently enabled. */
@@ -1416,6 +1416,68 @@ export abstract class ListViewModel<
   /** Stops auto-loading if it is currently enabled. */
   public $stopAutoLoad() {
     this._autoLoadState.cleanup?.();
+  }
+
+  /** @internal Internal autosave state */
+  private _autoSaveState = new AutoCallState();
+
+  /**
+   * Enables auto save for the items in the list.
+   * Only usable from Vue setup() or <script setup>. Otherwise, use $startAutoSave().
+   * @param options Options to control how the auto-saving is performed.
+   */
+  public $useAutoSave(options: AutoSaveOptions<this> = {}) {
+    const vue = getCurrentInstance()?.proxy;
+    if (!vue)
+      throw new Error(
+        "$useAutoSave can only be used inside setup(). Consider using $startAutoSave if you're not using Vue composition API."
+      );
+    return this.$startAutoSave(vue, options);
+  }
+
+  /**
+   * Enables auto save for the items in the list.
+   * @param vue A Vue instance through which the lifecycle of the watcher will be managed.
+   * @param options Options to control how the auto-saving is performed.
+   */
+  public $startAutoSave(vue: VueInstance, options: AutoSaveOptions<this> = {}) {
+    let state = this._autoSaveState;
+
+    if (state?.active && state.options === options) {
+      // If already active using the exact same options object, don't restart.
+      return;
+    }
+
+    this.$stopAutoSave();
+
+    state = this._autoSaveState ??= new AutoCallState<AutoSaveOptions<any>>();
+    state.options = options;
+    state.vue = vue;
+
+    const watcher = vue.$watch(
+      () => [...this.$items.map((i) => i.$stableId)],
+      () => {
+        for (const item of this.$items) {
+          item.$startAutoSave(state.vue!, state.options);
+        }
+      },
+      { immediate: true, deep: true }
+    );
+
+    startAutoCall(state, vue, watcher);
+  }
+
+  /** Stops auto-saving if it is currently enabled. */
+  public $stopAutoSave() {
+    this._autoSaveState?.cleanup?.();
+    for (const item of this.$items) {
+      item.$stopAutoSave();
+    }
+  }
+
+  /** Returns true if auto-saving is currently enabled. */
+  public get $isAutoSaveEnabled() {
+    return this._autoSaveState?.active;
   }
 
   constructor(
@@ -2305,7 +2367,7 @@ function startAutoCall(
       // Only cleanup if the component instance on the state is the owner of the hook.
       // Since we can't cleanup hooks in vue3, this hook may be firing for a component
       // that no longer owns this autocall state, in which case it should be ignored.
-      () => state.vue === vue && state.cleanup!(),
+      () => state.vue === vue && state.cleanup?.(),
       getInternalInstance(vue)
     );
   }
@@ -2318,10 +2380,13 @@ function startAutoCall(
     watcher?.();
 
     // Cancel the debouncing timer if there is one.
-    if (debouncer) debouncer.cancel();
+    debouncer?.cancel();
 
     state.active = false;
-    state.vue = null; // cleanup for GC
+
+    // cleanup for GC
+    state.vue = null;
+    state.cleanup = null;
   };
   state.active = true;
 }

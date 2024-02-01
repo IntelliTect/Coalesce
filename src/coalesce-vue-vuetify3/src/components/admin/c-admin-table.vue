@@ -234,15 +234,15 @@ export default defineComponent({
     }
 
     this.$watch(
-      () => [this.editable, ...this.viewModel.$items.map((i) => i.$stableId)],
-      () => {
-        if (this.editable) {
-          for (const item of this.viewModel.$items) {
-            item.$startAutoSave(this, { wait: 100 });
-          }
+      () => this.editable,
+      (editable) => {
+        if (editable && !this.viewModel.$isAutoSaveEnabled) {
+          this.viewModel.$startAutoSave(this, { wait: 100 });
+        } else if (!editable) {
+          this.viewModel.$stopAutoSave();
         }
       },
-      { immediate: true, deep: true }
+      { immediate: true }
     );
 
     this.viewModel.$load.setConcurrency("debounce");

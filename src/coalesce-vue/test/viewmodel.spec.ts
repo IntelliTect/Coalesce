@@ -27,7 +27,12 @@ import {
   defineProps,
 } from "../src/viewmodel";
 
-import { ComplexModelViewModel } from "../../test-targets/viewmodels.g";
+import {
+  CaseListViewModel,
+  CaseViewModel,
+  ComplexModelListViewModel,
+  ComplexModelViewModel,
+} from "../../test-targets/viewmodels.g";
 import {
   StudentViewModel,
   CourseViewModel,
@@ -2872,6 +2877,79 @@ describe("ListViewModel", () => {
       // Watchers should be destroyed on component unmount.
       destroy(wrapper);
       expect((list as any)._autoLoadState.active).toBe(false);
+    });
+  });
+
+  describe("autosave", () => {
+    test("propagates to new items", async () => {
+      const list = new CaseListViewModel();
+      const vue = mountData({ list });
+
+      const saveMock = mockEndpoint(
+        "/Case/save",
+        vitest.fn(() => ({ wasSuccessful: true }))
+      );
+
+      list.$startAutoSave(vue, { wait: 0 });
+      const item = new CaseViewModel({ title: "bob" });
+      list.$items.push(item);
+
+      expect(item.$isDirty).toBe(true);
+      expect([...item.$getErrors()]).toHaveLength(0);
+
+      await delay(10);
+
+      expect(item.$isDirty).toBe(false);
+      expect(saveMock).toBeCalledTimes(1);
+    });
+
+    test("propagates to existing items", async () => {
+      const list = new CaseListViewModel();
+      const vue = mountData({ list });
+
+      const saveMock = mockEndpoint(
+        "/Case/save",
+        vitest.fn(() => ({ wasSuccessful: true }))
+      );
+
+      const item = new CaseViewModel({ title: "bob" });
+      list.$items.push(item);
+
+      list.$startAutoSave(vue, { wait: 0 });
+
+      await delay(10);
+
+      expect(item.$isDirty).toBe(false);
+      expect(saveMock).toBeCalledTimes(1);
+    });
+
+    test("stops on existing items", async () => {
+      const list = new CaseListViewModel();
+      const vue = mountData({ list });
+
+      const saveMock = mockEndpoint(
+        "/Case/save",
+        vitest.fn(() => ({ wasSuccessful: true }))
+      );
+
+      const item = new CaseViewModel({ title: "foo" });
+      item.$isDirty = false;
+      list.$items.push(item);
+
+      list.$startAutoSave(vue, { wait: 0 });
+      list.$stopAutoSave();
+
+      item.title = "bar";
+
+      await delay(10);
+
+      expect(item.$isDirty).toBe(true);
+      expect(saveMock).toBeCalledTimes(0);
+
+      const item2 = new CaseViewModel();
+      list.$items.push(item2);
+      await delay(10);
+      expect(item2.$isAutoSaveEnabled).toBeFalsy();
     });
   });
 });

@@ -415,6 +415,22 @@ type AutoLoadOptions<TThis> =
 Manually turns off auto-loading of the instance.
 
 
+### Auto-save
+
+
+<Prop def="// Vue Options API
+$startAutoSave(vue: Vue, options: AutoSaveOptions<this> = {})
+&nbsp;
+// Vue Composition API
+$useAutoSave(options: AutoSaveOptions<this> = {})" lang="ts" idPrefix="list-autosave" />
+
+Enables auto-save for the items in the list, propagating to new items as they're added or loaded. See [ViewModel auto-save documentation](#member-autosave) for more details.
+
+
+<Prop def="$stopAutoSave(): void" lang="ts" />
+
+Turns off auto-saving of the items in the list, and turns of propagation of auto-save to any future items if auto-save was previously turned on for the list. Only affects items that are currently in the list's `$items`.
+
 
 ### Generated Members
 

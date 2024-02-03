@@ -238,7 +238,7 @@ export default defineComponent({
       (editable) => {
         if (editable && !this.viewModel.$isAutoSaveEnabled) {
           this.viewModel.$startAutoSave(this, { wait: 100 });
-        } else if (!editable) {
+        } else if (!editable && this.viewModel.$isAutoSaveEnabled) {
           this.viewModel.$stopAutoSave();
         }
       },

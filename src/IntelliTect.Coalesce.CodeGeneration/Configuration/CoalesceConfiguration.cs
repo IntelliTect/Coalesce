@@ -70,5 +70,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Configuration
 
         // Reflection project context builder (which is obsolete) only.
         public string Assembly { get; set; }
+
+        internal bool BuildProjectReferences { get; set; } = true;
     }
 }

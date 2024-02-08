@@ -146,9 +146,18 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.MsBuild
                 $"/p:CustomBeforeMicrosoftCSharpTargets={targetsLocation}\\Imports.targets",
                 $"/p:OutputFile={projectInfoFile}",
                 $"/p:CodeGenerationTargetLocation={targetsLocation}",
-                $"/p:Configuration={Configuration}"
+                $"/p:Configuration={Configuration}",
+                "/p:SkipGetTargetFrameworkProperties=true",
+                $"/p:BuildProjectReferences={_context.ProjectConfiguration.BuildProjectReferences.ToString().ToLowerInvariant()}"
             };
             if (Framework != null) args.Add($"/p:TargetFramework={Framework}");
+
+            if (Logger.IsEnabled(LogLevel.Debug))
+            {
+                var binlogPath = Path.Combine(Path.GetTempPath(), $"{_context.ProjectFileName}.binlog");
+                Logger.LogDebug($"MSBuild binlog will write to {binlogPath}");
+                args.Add($"-bl:\"{binlogPath}\"");
+            }
 
             var outputLines = new List<string>();
             var result = Command.CreateDotNet("msbuild", args)
@@ -175,7 +184,14 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.MsBuild
             finally
             {
                 Logger.LogDebug($"Project analysis for {projectPath} took {timer.ElapsedMilliseconds}ms");
-                File.Delete(projectInfoFile);
+                if (!Logger.IsEnabled(LogLevel.Debug))
+                {
+                    File.Delete(projectInfoFile);
+                }
+                else
+                {
+                    Logger.LogDebug($"Project analysis output written to {projectInfoFile}");
+                }
             }
         }
     }

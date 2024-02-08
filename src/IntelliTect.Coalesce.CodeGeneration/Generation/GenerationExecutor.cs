@@ -152,18 +152,13 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
             // one another when they're building and end up failing due
             // to file contention of some form or another.
             genContext.DataProject = await TryLoadProject(Config.DataProject);
-            genContext.WebProject = await TryLoadProject(Config.WebProject);
 
-            //await Task.WhenAll(
-            //    Task.Run(async () =>
-            //    {
-            //        genContext.WebProject = await TryLoadProject(Config.WebProject);
-            //    }),
-            //    Task.Run(async () =>
-            //    {
-            //        genContext.DataProject = await TryLoadProject(Config.DataProject);
-            //    })
-            //);
+            // Don't build references of the web project (which always includes the data project).
+            // We don't need of those build outputs (we ingest the data project source code directly),
+            // so doing so would be a waste of time (and is indeed a LARGE waste of time on large projects,
+            // especially those with many EF migrations).
+            Config.WebProject.BuildProjectReferences = false;
+            genContext.WebProject = await TryLoadProject(Config.WebProject);
 
             async Task<ProjectContext> TryLoadProject(ProjectConfiguration config)
             {

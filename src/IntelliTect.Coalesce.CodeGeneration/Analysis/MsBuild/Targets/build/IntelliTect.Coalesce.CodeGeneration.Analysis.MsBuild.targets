@@ -41,10 +41,15 @@ Outputs the Project Information needed for CodeGeneration to a file.
     <WriteLinesToFile Encoding="Unicode" File="$(OutputFile)" Lines="DependenciesDesignTime: ["/>
       <WriteLinesToFile Encoding="Unicode" File="$(OutputFile)" Lines="@(_DependenciesDesignTime->'{Path: %22%(Identity)%22, Name: %22%(Name)%22, Type: %22%(Type)%22, Target: %22%(Target)%22, Version: %22%(Version)%22, Resolved:%22%(Resolved)%22, Dependencies:%22%(Dependencies)%22 }, ')" />
     <WriteLinesToFile Encoding="Unicode" File="$(OutputFile)" Lines="],"/>
-    
+
+	  <ItemGroup>
+	    <CoalesceCompile 
+		    Include="@(Compile)"
+        Condition="'$(CoalesceExcludeMigrations)' == 'false' or !$([System.String]::Copy('%(RelativeDir)').StartsWith('Migrations'))"></CoalesceCompile>
+	  </ItemGroup>
     
     <WriteLinesToFile Encoding="Unicode" File="$(OutputFile)" Lines="CompilationItems: ["/>
-      <WriteLinesToFile Encoding="Unicode" File="$(OutputFile)" Lines="@(Compile->' %22%(Identity)%22, '->Replace('\', '/'))" />
+      <WriteLinesToFile Encoding="Unicode" File="$(OutputFile)" Lines="@(CoalesceCompile->' %22%(Identity)%22, '->Replace('\', '/'))" />
     <WriteLinesToFile Encoding="Unicode" File="$(OutputFile)" Lines="],"/>
     
     <WriteLinesToFile Encoding="Unicode" File="$(OutputFile)" Lines="ResolvedReferences: ["/>

@@ -8,6 +8,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
         IGenerator Owner { get; set; }
 
         string TargetPath { get; set; }
+        bool DryRun { get; set; }
 
         /// <summary>
         /// Perform a cleanup with the consideration that the provided list of absolute paths to files should not be removed.

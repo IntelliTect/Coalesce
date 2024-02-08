@@ -17,6 +17,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
 
         public IGenerator Owner { get; set; }
         public string TargetPath { get; set; }
+        public bool DryRun { get; set; }
         public SearchOption Depth { get; set; } = SearchOption.TopDirectoryOnly;
 
         public DirectoryCleaner WithDepth(SearchOption depth)
@@ -40,7 +41,11 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
                 {
                     if (!knownGoodFiles.Any(goodFile => Path.GetFullPath(goodFile) == Path.GetFullPath(file)))
                     {
-                        logger.LogWarning($"Deleting {file} because it was not in the generation outputs.");
+                        logger.LogWarning(
+                            (DryRun ? " What if: " : "") + 
+                            $"Deleting {file} because it was not in the generation outputs.");
+                        if (DryRun) continue;
+
                         File.Delete(file);
 
                         // See if the directory that held this file is completely empty

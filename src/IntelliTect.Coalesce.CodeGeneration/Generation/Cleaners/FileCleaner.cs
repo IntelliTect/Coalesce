@@ -17,7 +17,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
 
         public IGenerator Owner { get; set; }
         public string TargetPath { get; set; }
-        
+        public bool DryRun { get; set; }
+
         public Task CleanupAsync(ICollection<string> knownGoodFiles)
         {
             return Task.Run(() =>
@@ -25,8 +26,14 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
                 logger.LogTrace($"Cleaning {this}");
                 if (File.Exists(TargetPath))
                 {
-                    logger.LogWarning($"Deleting {TargetPath} because it was explicitly flagged for removal.");
-                    File.Delete(TargetPath);
+                    logger.LogWarning(
+                        (DryRun ? " What if: " : "") + 
+                        $"Deleting {TargetPath} because it was explicitly flagged for removal."
+                    );
+                    if (!DryRun)
+                    {
+                        File.Delete(TargetPath);
+                    }
                 }
             });
         }

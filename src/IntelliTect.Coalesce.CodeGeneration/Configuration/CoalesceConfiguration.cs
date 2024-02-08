@@ -25,6 +25,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Configuration
         public OutputConfiguration Output { get; set; } = new OutputConfiguration();
 
         public Dictionary<string, JObject> GeneratorConfig { get; set; } = new Dictionary<string, JObject>();
+
+        public bool DryRun { get; set; }
     }
 
     public class OutputConfiguration

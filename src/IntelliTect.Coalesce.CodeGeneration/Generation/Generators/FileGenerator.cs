@@ -63,15 +63,21 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
                 }
 
                 var isRegen = File.Exists(outputFile);
-                using (FileStream fileStream = new FileStream(outputFile, FileMode.Create, FileAccess.Write))
+
+                if (!DryRun)
                 {
+                    using FileStream fileStream = new(outputFile, FileMode.Create, FileAccess.Write);
                     contents.Seek(0, SeekOrigin.Begin);
                     await contents.CopyToAsync(fileStream).ConfigureAwait(false);
                     await fileStream.FlushAsync();
+                }
 
-                    Uri relPath = new Uri(Environment.CurrentDirectory + Path.DirectorySeparatorChar).MakeRelativeUri(new Uri(outputFile));
-                    Logger?.LogInformation($"{(isRegen ? "Reg" : "G")}enerated: {Uri.UnescapeDataString(relPath.OriginalString)}");
-                };
+                Uri relPath = new Uri(Environment.CurrentDirectory + Path.DirectorySeparatorChar).MakeRelativeUri(new Uri(outputFile));
+
+                Logger?.LogInformation(
+                    (DryRun ? " What if: " : "") + 
+                    $"{(isRegen ? "Reg" : "G")}enerated: {Uri.UnescapeDataString(relPath.OriginalString)}"
+                );
             }
         }
 

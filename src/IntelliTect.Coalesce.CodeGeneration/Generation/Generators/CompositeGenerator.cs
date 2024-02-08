@@ -44,6 +44,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
             var cleaner = ActivatorUtilities.CreateInstance<TCleaner>(_services.ServiceProvider);
             cleaner.Owner = this;
             cleaner.TargetPath = EffectiveOutputPath;
+            cleaner.DryRun = _services.CoalesceConfiguration.DryRun;
             return cleaner;
         }
 

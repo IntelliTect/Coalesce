@@ -27,6 +27,10 @@ namespace IntelliTect.Coalesce.Cli
             ShortName = "d")]
         public bool Debug { get; }
 
+        [Option(CommandOptionType.NoValue,
+            Description = "Do not write output files to disk.", LongName = "what-if", ShortName = "WhatIf")]
+        public bool DryRun { get; }
+
         [Argument(0, "config", Description =
             "Path to a coalesce.json configuration file that will drive generation.  If not specified, it will search in current folder.")]
         public string ConfigFile { get; }
@@ -70,6 +74,8 @@ namespace IntelliTect.Coalesce.Cli
                 var serializer = new JsonSerializer();
                 config = serializer.Deserialize<CoalesceConfiguration>(jsonReader);
             }
+
+            config.DryRun = DryRun;
 
             // Must go AFTER we load in the config file, since if the config file was a relative path, changing this ruins that.
             Directory.SetCurrentDirectory(configFile.DirectoryName);

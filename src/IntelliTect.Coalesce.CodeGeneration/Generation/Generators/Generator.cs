@@ -17,9 +17,12 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
         {
             Logger = services.LoggerFactory.CreateLogger(GetType().Name);
             Configure(services.CoalesceConfiguration);
+            DryRun = services.CoalesceConfiguration.DryRun;
         }
 
         protected ILogger Logger { get; }
+
+        public bool DryRun { get; private set; }
 
         public bool IsDisabled { get; private set; }
 

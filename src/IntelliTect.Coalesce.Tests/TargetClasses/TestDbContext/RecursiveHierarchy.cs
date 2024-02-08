@@ -5,13 +5,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+#nullable enable
+
 namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
 {
     public class RecursiveHierarchy
     {
         public int Id { get; set; }
 
-        public string Name { get; set; }
+        public string? Name { get; set; }
 
         public int? ParentId { get; set; }
         public RecursiveHierarchy? Parent { get; set; }

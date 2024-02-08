@@ -90,13 +90,26 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
             Logger.LogInformation("Loading Projects:");
             await LoadProjects(Logger, genContext);
 
-            // TODO: make GetAllTypes return TypeViewModels, and move this to the TypeLocator base class.
+            var locator = genContext.DataProject.TypeLocator as RoslynTypeLocator;
+
             Logger.LogInformation("Gathering Types");
-            var rr = ReflectionRepository.Global;
-            IEnumerable<Microsoft.CodeAnalysis.INamedTypeSymbol> types = 
-                (genContext.DataProject.TypeLocator as RoslynTypeLocator).GetAllTypes();
+            var types = locator.GetAllTypes();
+
+            Logger.LogInformation("Checking Diagnostics");
+            bool die = false;
+            foreach (var diag in locator.GetDiagnostics())
+            {
+                Logger.LogError(diag);
+                die = true;
+            }
+            if (die)
+            {
+                Environment.Exit(-1);
+                return;
+            }
 
             Logger.LogInformation($"Analyzing {types.Count()} Types");
+            var rr = ReflectionRepository.Global;
             if (Config.RootTypesWhitelist?.Any() == true)
             {
                 rr.SetRootTypeWhitelist(Config.RootTypesWhitelist);
@@ -109,6 +122,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
 
 
 
+            Logger.LogInformation("Validating Model");
             var validationResult = ValidateContext.Validate(rr);
             var issues = validationResult.Where(r => !r.WasSuccessful);
             foreach (var issue in issues)

@@ -60,19 +60,38 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.Roslyn
                 .WithMetadataReferences(_projectContext.GetMetadataReferences())
                 .GetCompilationAsync().Result;
 
-            /*
-            // Commented this out because it seems to be giving us lots of nonsense errors that aren't true,
-            // and that don't actually affect our output.
-
-            var diagnostics = _compilation.GetDiagnostics();
-            var errors = diagnostics.Where(d => d.Severity == DiagnosticSeverity.Error);
-            if (errors.Any())
-                throw new AggregateException(errors.Select(e => new Exception(e.ToString())));
-            //*/
-
             return _compilation;
         }
 
+        public IEnumerable<string> GetDiagnostics()
+        {
+            var compilation = GetProjectCompilation();
+
+            var diagnostics = _compilation
+                .GetParseDiagnostics()
+                .Concat(_compilation.GetDeclarationDiagnostics());
+
+            HashSet<string> ignored = [
+                "CS8795" // Partial method '' must have an implementation part because it has accessibility modifiers. (regex source generators).
+            ];
+
+            return diagnostics
+                .Where(d => d.Severity == DiagnosticSeverity.Error && !ignored.Contains(d.Descriptor.Id))
+                .Select(d => d.ToString());
+        }
+
+        private List<INamedTypeSymbol> _allTypes;
+
+        public List<INamedTypeSymbol> GetAllTypes()
+        {
+            if (_allTypes != null) return _allTypes;
+            
+            var compilation = GetProjectCompilation();
+
+            var visitor = new SymbolDiscoveryVisitor();
+            compilation.Assembly.GlobalNamespace.Accept(visitor);
+            return _allTypes = visitor.Discovered;
+        }
 
         private class SymbolDiscoveryVisitor : SymbolVisitor
         {
@@ -88,23 +107,6 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.Roslyn
                 Discovered.Add(symbol);
                 foreach (var childSymbol in symbol.GetTypeMembers()) childSymbol.Accept(this);
             }
-        }
-
-        private List<INamedTypeSymbol> _allTypes;
-
-        public List<INamedTypeSymbol> GetAllTypes()
-        {
-            if (_allTypes != null) return _allTypes;
-            
-            var compilation = GetProjectCompilation();
-            if (compilation == null)
-            {
-                throw new ArgumentNullException(nameof(compilation));
-            }
-
-            var visitor = new SymbolDiscoveryVisitor();
-            compilation.Assembly.GlobalNamespace.Accept(visitor);
-            return _allTypes = visitor.Discovered;
         }
 
         /*

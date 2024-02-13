@@ -421,6 +421,102 @@ describe("ViewModel", () => {
       await promise;
       expect(triggered).toBeTruthy();
     });
+
+    test("responses from $load while $save in progress do not overwrite props being saved", async () => {
+      // Scenario: user is typing out a string on a model that autosaves.
+      // This model is also being periodically auto-reloaded from the server.
+
+      // 99% of the time, this works fine, but every once in a while,
+      // a load will start just before a save, or even soon enough after a save
+      // that the server will still read the old pre-save data from the database.
+      // This causes the server to send stale data back to the client that will
+      // not reflect the newest data sent back with the save.
+
+      // If the user were to make another edit to the value before either API call comes back,
+      // there would be no problem since the value would be dirty and therefore be skipped
+      // when handling the response from the load.
+
+      // However, if the changed field is non-dirty (which is the case just after performing
+      // a save - this allows for detecting changes that happen /during/ the save) and *remains*
+      // non-dirty until the response comes back from the load API, the stale value from the server
+      // will overwrite the field, and this stale value won't match the one we just sent
+      // in the still-pending save call (which is the same as the local copy of that value).
+
+      // The result of this is that the value bound to the HTML input/textarea changes, which
+      // at least for v-textarea components resets the user's cursor to the end of the field.
+      // If the user was typing in the middle of the field, this presents a very bad UX.
+      // (If the user was typing at the end of the field, they probably won't notice this bug).
+
+      var student = new StudentViewModel({
+        studentId: 1,
+        name: "bob",
+        currentCourse: new CourseViewModel({ courseId: 1 }),
+      });
+      student.$isDirty = false;
+      student.currentCourse!.$isDirty = false;
+
+      var list = new StudentListViewModel();
+      list.$items.push(student);
+
+      const saveMock = (student.$apiClient.save = vitest.fn(async () => {
+        await delay(160);
+        return {
+          data: {
+            wasSuccessful: true,
+            object: {
+              studentId: 1,
+              name: "bob2",
+              currentCourseId: 2,
+              currentCourse: { courseId: 2 },
+            },
+          },
+        } as AxiosItemResult<any>;
+      }));
+
+      const loadMock = (list.$apiClient.list = vitest.fn(async () => {
+        await delay(80);
+        return {
+          data: {
+            wasSuccessful: true,
+            list: [
+              {
+                studentId: 1,
+                name: "bob",
+                currentCourseId: 1,
+                currentCourse: { courseId: 1 },
+              },
+            ],
+          },
+        } as AxiosListResult<any>;
+      }));
+
+      const vue = mountData({ student });
+
+      // Act: Trigger a load that will finish while a save is still pending.
+      list.$load();
+      student.name = "bob2";
+      student.currentCourse = new CourseViewModel({ courseId: 2 });
+      student.$save();
+
+      // Let the load finish
+      await delay(100);
+      expect(saveMock).toBeCalledTimes(1);
+      expect(loadMock).toBeCalledTimes(1);
+      expect(student.$save.isLoading).toBeTruthy();
+      expect(list.$load.isLoading).toBeFalsy();
+
+      // Assert: Props that are still actively saving should be preserved.
+      expect(student.name).toBe("bob2");
+      expect(student.currentCourseId).toBe(2);
+      expect(student.currentCourse!.courseId).toBe(2);
+
+      // Let the load finish
+      await delay(100);
+      expect(student.$save.isLoading).toBeFalsy();
+      expect(student.name).toBe("bob2");
+      expect(student.currentCourseId).toBe(2);
+      expect(student.currentCourse!.courseId).toBe(2);
+    });
   });
 
   describe("$bulkSave", () => {
@@ -1546,77 +1642,6 @@ describe("ViewModel", () => {
         expect(parent.currentCourse?.courseId).toBe(11);
         expect(parent.currentCourse?.name).toBe("Math");
       });
-    });
-
-    test("responses from $load while $save in progress do not overwrite props being saved", async () => {
-      // Scenario: user is typing out a string on a model that autosaves.
-      // This model is also being periodically auto-reloaded from the server.
-
-      // 99% of the time, this works fine, but every once in a while,
-      // a load will start just before a save, or even soon enough after a save
-      // that the server will still read the old pre-save data from the database.
-      // This causes the server to send stale data back to the client that will
-      // not reflect the newest data sent back with the save.
-
-      // If the user were to make another edit to the value before either API call comes back,
-      // there would be no problem since the value would be dirty and therefore be skipped
-      // when handling the response from the load.
-
-      // However, if the changed field is non-dirty (which is the case just after performing
-      // a save - this allows for detecting changes that happen /during/ the save) and *remains*
-      // non-dirty until the response comes back from the load API, the stale value from the server
-      // will overwrite the field, and this stale value won't match the one we just sent
-      // in the still-pending save call (which is the same as the local copy of that value).
-
-      // The result of this is that the value bound to the HTML input/textarea changes, which
-      // at least for v-textarea components resets the user's cursor to the end of the field.
-      // If the user was typing in the middle of the field, this presents a very bad UX.
-      // (If the user was typing at the end of the field, they probably won't notice this bug).
-
-      var student = new StudentViewModel({
-        studentId: 1,
-        name: "bob",
-      });
-      student.$isDirty = false;
-
-      var list = new StudentListViewModel();
-      list.$items.push(student);
-
-      const saveMock = (student.$apiClient.save = vitest.fn(async () => {
-        await delay(160);
-        return {
-          data: { wasSuccessful: true, object: { studentId: 1, name: "bob2" } },
-        } as AxiosItemResult<any>;
-      }));
-
-      const loadMock = (list.$apiClient.list = vitest.fn(async () => {
-        await delay(80);
-        return {
-          data: { wasSuccessful: true, list: [{ studentId: 1, name: "bob" }] },
-        } as AxiosListResult<any>;
-      }));
-
-      const vue = mountData({ student });
-
-      // Act: Trigger a load that will finish while a save is still pending.
-      list.$load();
-      student.name = "bob2";
-      student.$save();
-
-      // Let the load finish
-      await delay(100);
-      expect(saveMock).toBeCalledTimes(1);
-      expect(loadMock).toBeCalledTimes(1);
-      expect(student.$save.isLoading).toBeTruthy();
-      expect(list.$load.isLoading).toBeFalsy();
-
-      // Assert: Name should be preserved because it is still actively saving.
-      expect(student.name).toBe("bob2");
-
-      // Let the load finish
-      await delay(100);
-      expect(student.$save.isLoading).toBeFalsy();
-      expect(student.name).toBe("bob2");
     });
   });
 

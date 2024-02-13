@@ -2220,8 +2220,15 @@ export function updateViewModelFromModel<
               // or if the current value has a different PK than the incoming value,
               // we should create a brand new object.
 
-              // The setter on the viewmodel will handle the conversion to a ViewModel.
-              target[propName] = incomingValue;
+              if (skipSaving && target.$savingProps.has(prop.foreignKey.name)) {
+                // This is a pretty rare condition and might be unintuitive as to what happened, so log this.
+                console.log(
+                  `Skipped loading '${propName}' on ${metadata.name} ${target.$primaryKey}: property is actively saving.`
+                );
+              } else {
+                // The setter on the viewmodel will handle the conversion to a ViewModel.
+                target[propName] = incomingValue;
+              }
             } else {
               // `currentValue` is guaranteed to be a ViewModel by virtue of the
               // implementations of the setters for referenceNavigation properties on ViewModel instances.

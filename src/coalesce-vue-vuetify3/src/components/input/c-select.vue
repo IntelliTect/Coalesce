@@ -101,8 +101,10 @@
           v-if="!createItemLabel && !listItems.length"
           class="grey--text px-4 my-3 font-italic"
         >
-          <template v-if="listCaller.isLoading">Loading...</template>
-          <template>No results found.</template>
+          <v-fade-transition mode="out-in">
+            <span v-if="listCaller.isLoading">Loading...</span>
+            <span v-else>No results found.</span>
+          </v-fade-transition>
         </div>
 
         <!-- This height shows 7 full items, with a final item partially out 

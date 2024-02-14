@@ -73,6 +73,13 @@ DESIGN NOTES
 let nextStableId = 1;
 const emptySet: ReadonlySet<string> = new Set();
 
+/**
+ * * If true, the data is clean with no known age.
+ * * If false, the data is dirty.
+ * * If number, the timestamp indicating the date of the data.
+ */
+type DataFreshness = boolean | number;
+
 export abstract class ViewModel<
   TModel extends Model<ModelType> = any,
   TApi extends ModelApiClient<TModel> = any,
@@ -425,17 +432,21 @@ export abstract class ViewModel<
    * A function for invoking the `/get` endpoint, and a set of properties about the state of the last call.
    */
   get $load() {
-    const $load = this.$apiClient
-      .$makeCaller("item", (c, id?: TPrimaryKey) =>
-        c.get(id != null ? id : this.$primaryKey, this.$params)
-      )
-      .onFulfilled(() => {
-        if (this.$load.result) {
-          // We do `purgeUnsaved` (arg2) here, since $load() is always an explicit user action
-          // that may be serving as a "reset" of local state.
-          this.$loadCleanData(this.$load.result, true);
-        }
-      });
+    const $load = this.$apiClient.$makeCaller("item", (c, id?: TPrimaryKey) => {
+      const startTime = performance.now();
+
+      return c
+        .get(id != null ? id : this.$primaryKey, this.$params)
+        .then((r) => {
+          const result = r.data.object;
+          if (result) {
+            // We do `purgeUnsaved` (arg2) here, since $load() is always an explicit user action
+            // that may be serving as a "reset" of local state.
+            this.$loadFromModel(result, startTime, true);
+          }
+          return r;
+        });
+    });
 
     // Lazy getter technique - don't create the caller until/unless it is needed,
     // since creation of api callers is a little expensive.
@@ -562,7 +573,7 @@ export abstract class ViewModel<
         } else {
           // Do NOT purgeUnsaved here (arg2), as this save may be one of many saves
           // occurring in a large object graph where there are unsaved objects that will be imminently saved.
-          this.$loadCleanData(this.$save.result);
+          this.$loadFromModel(this.$save.result, performance.now());
           this.updateRelatedForeignKeysWithCurrentPrimaryKey();
         }
       });
@@ -758,10 +769,10 @@ export abstract class ViewModel<
 
           const result = ret.data.object;
           if (result) {
-            // `purgeUnsaved = true` here (arg2) since the bulk save should have covered the entire object graph.
+            // `purgeUnsaved = true` here (arg3) since the bulk save should have covered the entire object graph.
             // Wiping out unsaved items will help developers discover bugs where their root model's data source
             // does not correctly include the whole object graph that they're saving (which is expected for bulk saves)
-            this.$loadCleanData(result, true);
+            this.$loadFromModel(result, performance.now(), true);
           }
         }
 
@@ -812,6 +823,9 @@ export abstract class ViewModel<
     }
   }
 
+  /** @internal */
+  _dataAge = 0;
+
   /**
    * Loads data from the provided model into the current ViewModel,
    * and then clears the $isDirty flag if `isCleanData` is not given as `false`.
@@ -821,7 +835,7 @@ export abstract class ViewModel<
    */
   public $loadFromModel(
     source: DeepPartial<TModel>,
-    isCleanData: boolean = true,
+    isCleanData: DataFreshness = true,
     purgeUnsaved: boolean = false
   ) {
     if (this.$isDirty && this._autoSaveState?.active) {
@@ -1309,19 +1323,22 @@ export abstract class ListViewModel<
    * A function for invoking the `/load` endpoint, and a set of properties about the state of the last call.
    */
   get $load() {
-    const $load = this.$apiClient
-      .$makeCaller("list", (c) => c.list(this.$params))
-      .onFulfilled((state) => {
-        if (state.result) {
+    const $load = this.$apiClient.$makeCaller("list", (c) => {
+      const startTime = performance.now();
+      return c.list(this.$params).then((r) => {
+        const result = r.data.list;
+        if (result) {
           this.$items = rebuildModelCollectionForViewModelCollection(
             this.$metadata,
             this.$items,
-            state.result,
-            true,
+            result,
+            startTime,
             true
           );
         }
+        return r;
       });
+    });
 
     // Lazy getter technique - don't create the caller until/unless it is needed,
     // since creation of api callers is a little expensive.
@@ -1559,7 +1576,7 @@ export class ViewModelFactory {
 
   public static scope<TRet>(
     action: (factory: ViewModelFactory) => TRet,
-    isCleanData: boolean
+    isCleanData: DataFreshness
   ) {
     if (!ViewModelFactory.current) {
       // There is no current factory. Make a new one.
@@ -1576,13 +1593,17 @@ export class ViewModelFactory {
     }
   }
 
-  public static get(typeName: string, initialData: any, isCleanData: boolean) {
+  public static get(
+    typeName: string,
+    initialData: any,
+    isCleanData: DataFreshness
+  ) {
     return ViewModelFactory.scope(function (factory) {
       return factory.get(typeName, initialData);
     }, isCleanData);
   }
 
-  private constructor(private isCleanData = true) {}
+  private constructor(private isCleanData: DataFreshness = true) {}
 }
 
 /** Gets a human-friendly description for ViewModelCollection error messages. */
@@ -2049,7 +2070,7 @@ function rebuildModelCollectionForViewModelCollection<
   type: ModelType,
   currentValue: Array<TItem>,
   incomingValue: Array<any>,
-  isCleanData: boolean,
+  isCleanData: DataFreshness,
   purgeUnsaved: boolean
 ) {
   if (!Array.isArray(currentValue)) {
@@ -2148,7 +2169,7 @@ function rebuildModelCollectionForViewModelCollection<
  * @param skipDirty If true, only non-dirty props, and related objects, will be updated.
  * Basic properties on target that are dirty will be skipped.
  * @param purgeUnsaved If true, unsaved items lingering in collections that are not in `source` will be removed.
- * @param skipSaving If true, only props not actively being saved, and related objects, will be updated.
+ * @param skipStale If true, only props not actively being saved, and related objects, will be updated.
  * Basic properties on target that are currently being saved will be skipped.
  */
 export function updateViewModelFromModel<
@@ -2157,9 +2178,9 @@ export function updateViewModelFromModel<
   target: TViewModel,
   source: Indexable<{}>,
   skipDirty = false,
-  isCleanData = true,
+  isCleanData: DataFreshness = true,
   purgeUnsaved = false,
-  skipSaving = false
+  skipStale = false
 ) {
   ViewModelFactory.scope(function (factory) {
     // Add the root ViewModel to the factory
@@ -2198,6 +2219,23 @@ export function updateViewModelFromModel<
       delete target.$removedItems;
     }
 
+    let incomingIsStale = false;
+    if (typeof isCleanData == "number") {
+      if (skipStale && isCleanData < target._dataAge) {
+        console.log(
+          `Skipped loading ${metadata.name} ${
+            target.$primaryKey
+          }: incoming data is ${(target._dataAge - isCleanData).toFixed(
+            3
+          )}ms older than the last known clean data.`
+        );
+        incomingIsStale = true;
+      }
+      target._dataAge = isCleanData;
+    } else if (isCleanData) {
+      target._dataAge = performance.now();
+    }
+
     for (const prop of Object.values(metadata.props)) {
       const propName = prop.name as keyof typeof target & string;
       let incomingValue = source[propName];
@@ -2220,12 +2258,12 @@ export function updateViewModelFromModel<
               // or if the current value has a different PK than the incoming value,
               // we should create a brand new object.
 
-              if (skipSaving && target.$savingProps.has(prop.foreignKey.name)) {
+              if (skipStale && target.$savingProps.has(prop.foreignKey.name)) {
                 // This is a pretty rare condition and might be unintuitive as to what happened, so log this.
                 console.log(
                   `Skipped loading '${propName}' on ${metadata.name} ${target.$primaryKey}: property is actively saving.`
                 );
-              } else {
+              } else if (!incomingIsStale) {
                 // The setter on the viewmodel will handle the conversion to a ViewModel.
                 target[propName] = incomingValue;
               }
@@ -2329,7 +2367,7 @@ export function updateViewModelFromModel<
             }
           }
 
-          if (skipSaving && target.$savingProps.has(propName)) {
+          if (skipStale && target.$savingProps.has(propName)) {
             // This is a pretty rare condition and might be unintuitive as to what happened, so log this.
             console.log(
               `Skipped loading '${propName}' on ${metadata.name} ${target.$primaryKey}: property is actively saving.`
@@ -2337,7 +2375,7 @@ export function updateViewModelFromModel<
           } else if (skipDirty && target.$getPropDirty(propName)) {
             // Do nothing. We've historically never logged here, so we'll continue not logging for now.
             // This scenario usually happens if the user is just rapidly inputting into one field, e.g. a text field.
-          } else {
+          } else if (!incomingIsStale) {
             target[propName] = incomingValue;
           }
           break;

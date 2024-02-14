@@ -510,9 +510,82 @@ describe("ViewModel", () => {
       expect(student.currentCourseId).toBe(2);
       expect(student.currentCourse!.courseId).toBe(2);
 
-      // Let the load finish
+      // Let the save finish
       await delay(100);
       expect(student.$save.isLoading).toBeFalsy();
+      expect(student.name).toBe("bob2");
+      expect(student.currentCourseId).toBe(2);
+      expect(student.currentCourse!.courseId).toBe(2);
+    });
+
+    test("loads that are older than the most recent save are ignored", async () => {
+      var student = new StudentViewModel({
+        studentId: 1,
+        name: "bob",
+        currentCourse: new CourseViewModel({ courseId: 1 }),
+      });
+      student.$isDirty = false;
+      student.currentCourse!.$isDirty = false;
+
+      var list = new StudentListViewModel();
+      list.$items.push(student);
+
+      const saveMock = (student.$apiClient.save = vitest.fn(async () => {
+        await delay(80);
+        return {
+          data: {
+            wasSuccessful: true,
+            object: {
+              studentId: 1,
+              name: "bob2",
+              currentCourseId: 2,
+              currentCourse: { courseId: 2 },
+            },
+          },
+        } as AxiosItemResult<any>;
+      }));
+
+      const loadMock = (list.$apiClient.list = vitest.fn(async () => {
+        await delay(160);
+        return {
+          data: {
+            wasSuccessful: true,
+            list: [
+              {
+                studentId: 1,
+                name: "bob",
+                currentCourseId: 1,
+                currentCourse: { courseId: 1 },
+              },
+            ],
+          },
+        } as AxiosListResult<any>;
+      }));
+
+      const vue = mountData({ student });
+
+      // Act: Trigger a load that will finish while a save is still pending.
+      list.$load();
+      student.name = "bob2";
+      student.currentCourse = new CourseViewModel({ courseId: 2 });
+      student.$save();
+
+      // Let the save finish
+      await delay(100);
+      expect(saveMock).toBeCalledTimes(1);
+      expect(loadMock).toBeCalledTimes(1);
+      expect(student.$save.isLoading).toBeFalsy();
+      expect(list.$load.isLoading).toBeTruthy();
+
+      // Assert: Props that we saved are still there:
+      expect(student.name).toBe("bob2");
+      expect(student.currentCourseId).toBe(2);
+      expect(student.currentCourse!.courseId).toBe(2);
+
+      // Let the load finish
+      await delay(100);
+      expect(student.$load.isLoading).toBeFalsy();
+      // Response from the load should be ignored since it was older than the save.
       expect(student.name).toBe("bob2");
       expect(student.currentCourseId).toBe(2);
       expect(student.currentCourse!.courseId).toBe(2);

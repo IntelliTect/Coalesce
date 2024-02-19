@@ -8,7 +8,7 @@ The quickest and easiest way to create a new Coalesce Vue application is to use 
 ``` sh
 dotnet new install IntelliTect.Coalesce.Vue.Template
 dotnet new coalescevue -o MyCompany.MyProject
-cd *.Web
+cd MyCompany.MyProject/*.Web
 npm ci
 ```
 

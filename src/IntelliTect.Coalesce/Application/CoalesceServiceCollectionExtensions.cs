@@ -26,11 +26,16 @@ namespace IntelliTect.Coalesce
             if (services == null) throw new ArgumentNullException(nameof(services));
             if (builder == null) throw new ArgumentNullException(nameof(builder));
 
-            services.AddOptions<CoalesceOptions>().Configure<IWebHostEnvironment>((opts, hosting) =>
+            services.AddOptions<CoalesceOptions>();
+
+            if (services.Any(s => s.ServiceType.IsAssignableFrom(typeof(IWebHostEnvironment))))
             {
-                opts.DetailedExceptionMessages = 
-                    Microsoft.Extensions.Hosting.HostEnvironmentEnvExtensions.IsDevelopment(hosting);
-            });
+                services.AddOptions<CoalesceOptions>().Configure<IWebHostEnvironment>((opts, hosting) =>
+                {
+                    opts.DetailedExceptionMessages =
+                        Microsoft.Extensions.Hosting.HostEnvironmentEnvExtensions.IsDevelopment(hosting);
+                });
+            }
 
             builder(new CoalesceServiceBuilder(services));
 

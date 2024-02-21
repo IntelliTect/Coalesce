@@ -8,6 +8,8 @@ namespace IntelliTect.Coalesce.Api.Behaviors
     {
         object GetBehaviors(ClassViewModel servedType, ClassViewModel declaredFor);
 
+        Type GetBehaviorsType(ClassViewModel servedType, ClassViewModel declaredFor);
+
         IBehaviors<TServed> GetBehaviors<TServed>(ClassViewModel declaredFor)
             where TServed : class;
 

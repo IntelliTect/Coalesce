@@ -1258,7 +1258,12 @@ export abstract class ListViewModel<
   public get $items(): TItem[] {
     let value = this._items.value;
     if (!value) {
-      this._items.value = value = new ViewModelCollection(this.$metadata, this);
+      value = new ViewModelCollection(this.$metadata, this);
+
+      // In order to avoid vue seeing that we mutated a `ref` in a getter,
+      // replace the entire ref when doing this lazy initialization.
+      // See test "$items initializer doesn't trigger reactivity".
+      this._items = ref(value);
 
       if (IsVue2) {
         // bugfix: in vue2, since $items is wrapping over a `ref` and this is the getter
@@ -1775,9 +1780,21 @@ export class ViewModelCollection<T extends ViewModel> extends Array<T> {
         },
       });
       return this;
-    }
+    } else {
+      // Force methods like .filter, .slice to produce plain arrays,
+      // not new ViewModelCollection instances.
+      // See test "$items.filter produces a plain array".
+      Object.defineProperties(this, {
+        constructor: {
+          value: Array.constructor,
+          enumerable: false,
+          writable: false,
+          configurable: false,
+        },
+      });
 
-    return reactive(this) as this;
+      return reactive(this) as this;
+    }
   }
 }
 

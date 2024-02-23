@@ -2768,6 +2768,39 @@ describe("ListViewModel", () => {
       expect(items[0]).toBeInstanceOf(StudentViewModel);
     });
 
+    test("$items initializer doesn't trigger reactivity.", async () => {
+      // Vue 3.4.15+ got a lot more pedantic about mutations occurring in computed getters.
+      // It is now producing (harmless) warnings due to our lazy init of $items.
+      // Make sure we're not doing that anymore.
+      const warn = vi.spyOn(console, "warn");
+
+      const itemsLength = computed(() => list.$items.length);
+      itemsLength.value.toString();
+
+      expect(warn).not.toHaveBeenCalled();
+    });
+
+    test("$items.filter produces a plain array", () => {
+      // Much like how `reactive([1,2,3]).filter(...)` produces a plain array,
+      // so too should ViewModelCollection.filter produce a plain array,
+      // not a new ViewModelCollection instance (since VMC is itself reactive).
+
+      // If we fail do to this, then subsequent mutations of the result of `filter`
+      // will trigger reactivity, which is bad in a `computed` which will trigger infinite reactivity.
+
+      const filteredItems = list.$items.filter((x) => x != null);
+      expect(filteredItems).not.toBeInstanceOf(ViewModelCollection);
+
+      // filteredItems should be entirely nonreactive:
+      let changed = false;
+      watch(filteredItems, () => (changed = true), {
+        flush: "sync",
+        deep: true,
+      });
+      filteredItems.push(new StudentViewModel());
+      expect(changed).toBeFalsy();
+    });
+
     test("props on objects in $items are reactive", async () => {
       await list.$load();
 

@@ -133,16 +133,16 @@ export function createAspNetCoreHmrPlugin({
           }
         }, 1000);
 
-        // Write the index.html file once on startup so it can be picked up immediately by aspnetcore.
-        if (writeIndexHtmlToDisk) {
-          writeHtml(server);
-        }
-
-        // Wait for dotnet dev-certs to finish exporting the ssl cert.
-        // If it did export a new cert, restart the server so it can be used.
-        // We wait for the server to start listening because if we do this too soon,
-        // things blow up a little bit.
         server.httpServer!.on("listening", () => {
+          // Write the index.html file once on startup so it can be picked up immediately by aspnetcore.
+          if (writeIndexHtmlToDisk) {
+            writeHtml(server);
+          }
+
+          // Wait for dotnet dev-certs to finish exporting the ssl cert.
+          // If it did export a new cert, restart the server so it can be used.
+          // We wait for the server to start listening because if we do this too soon,
+          // things blow up a little bit.
           certsExportPromise?.then((certsWereRegenerated) => {
             if (certsWereRegenerated) {
               console.log(
@@ -233,13 +233,13 @@ export function createAspNetCoreHmrPlugin({
       enforce: "pre",
       configResolved(config) {
         resolvedConfig = config;
-        // This might be wrong if no port was provided or if this port wasn't available.
-        // Will get overridden with the real port below.
-        port = config.server.port;
         base = config.base;
       },
 
       transformIndexHtml(html) {
+        // Transform imports in index.html to go to the HMR server instead of the aspnetcore server.
+        html = transformCode(html)?.toString() || html;
+
         // Inject code that will detect some network config issues
         if (!offerConfigurationSuggestions) return [];
 
@@ -258,10 +258,12 @@ export function createAspNetCoreHmrPlugin({
               }[tag]!)
           );
 
-        return [
-          {
-            tag: "script",
-            children: `
+        return {
+          html,
+          tags: [
+            {
+              tag: "script",
+              children: `
     // This code injected by coalesce-vue's createAspNetCoreHmrPlugin.
     // It can be disabled with setting 'offerConfigurationSuggestions: false'.
     // Detect if requests to the vite server are failing, and offer suggestions.
@@ -325,24 +327,12 @@ export function createAspNetCoreHmrPlugin({
         </div></div>\`)
     })
           `,
-          },
-        ];
+            },
+          ],
+        };
       },
 
       configureServer(server) {
-        // Transform imports in index.html to go to the HMR server instead of the aspnetcore server.
-        // Ideally we'd do this in the transformIndexHtml hook, but cant because of
-        // https://github.com/vitejs/vite/issues/5851 (fix merged, but not yet released).
-        // For this workaround, this must go before coalesce-vite-hmr so we can hook
-        // transformIndexHtml before coalesce-vite-hmr attempts to read from it.
-        const original = server.transformIndexHtml;
-        server.transformIndexHtml = async function (...args) {
-          let res = await original.apply(this, args);
-          res = transformCode(res)?.toString() ?? res;
-
-          return res;
-        };
-
         // Transform assets (fonts, mainly) to go to the HMR server instead of the aspnetcore server.
         server.httpServer!.on("listening", () => {
           port = (server.httpServer!.address() as any)?.port;

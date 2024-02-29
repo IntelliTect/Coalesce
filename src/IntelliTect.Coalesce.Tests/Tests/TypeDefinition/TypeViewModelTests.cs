@@ -234,7 +234,7 @@ namespace IntelliTect.Coalesce.Tests.TypeDefinition
                     Assert.Equal(2, v.Value);
                     Assert.Equal("Resolved", v.Name);
                     Assert.Equal("Resolved", v.DisplayName);
-                    Assert.Null(v.Description);
+                    Assert.Equal("Closed with a solution.", v.Description);
                 }, v =>
                 {
                     Assert.Equal(3, v.Value);

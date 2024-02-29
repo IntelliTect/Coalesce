@@ -28,9 +28,11 @@ namespace IntelliTect.Coalesce.TypeDefinition
             Name.ToProperCase();
 
         /// <summary>
-        /// Returns the description from the DisplayAttribute, if present.
+        /// Returns the description from the DisplayAttribute or DescriptionAttribute, if present.
         /// </summary>
-        public virtual string? Description => this.GetAttributeValue<DisplayAttribute>(a => a.Description);
+        public virtual string? Description => 
+            this.GetAttributeValue<DisplayAttribute>(a => a.Description) ?? 
+            this.GetAttributeValue<DescriptionAttribute>(a => a.Description);
 
         public string JsVariable => Name.ToCamelCase();
 

@@ -127,12 +127,14 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 {
                     var name = value!.ToString()!;
                     var member = Info.GetMember(name)[0];
+
                     result.Add(new EnumMember(
                         name, 
                         Convert.ChangeType(value, integralType),
                         member.GetAttribute<DisplayAttribute>()?.Name ??
                             member.Name.ToProperCase(),
-                        member.GetAttribute<DisplayAttribute>()?.Description
+                        member.GetAttribute<DisplayAttribute>()?.Description ??
+                            member.GetAttribute<DescriptionAttribute>()?.Description
                     ));
                 }
                 return _enumValues = result;

@@ -25,6 +25,7 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
             [Display(Name = "In Progress")]
             InProgress,
 
+            [Description("Closed with a solution.")]
             Resolved,
 
             [Display(Name = "Closed, No Solution", Description = "Closed without any resolution.")]

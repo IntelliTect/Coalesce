@@ -10,6 +10,7 @@
     <c-admin-methods
       class="c-admin-table-page--methods"
       :model="listVM"
+      :area="HiddenAreas.List"
       auto-reload-model
     ></c-admin-methods>
   </v-container>
@@ -17,7 +18,7 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
-import { ListViewModel, ModelType } from "coalesce-vue";
+import { HiddenAreas, ListViewModel, ModelType } from "coalesce-vue";
 import { makeMetadataProps, useMetadataProps } from "../c-metadata-component";
 
 export default defineComponent({
@@ -30,7 +31,7 @@ export default defineComponent({
   },
 
   setup(props) {
-    return { ...useMetadataProps(props) };
+    return { ...useMetadataProps(props), HiddenAreas };
   },
 
   data() {

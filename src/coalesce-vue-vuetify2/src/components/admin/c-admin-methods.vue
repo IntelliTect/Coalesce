@@ -38,7 +38,13 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
-import { Model, ViewModel, ModelType, ListViewModel } from "coalesce-vue";
+import {
+  Model,
+  ViewModel,
+  ModelType,
+  ListViewModel,
+  HiddenAreas,
+} from "coalesce-vue";
 
 export default defineComponent({
   name: "c-admin-methods",
@@ -47,6 +53,10 @@ export default defineComponent({
     model: {
       required: true,
       type: Object as PropType<ViewModel<Model<ModelType>> | ListViewModel>,
+    },
+    area: {
+      required: false,
+      type: Number as PropType<HiddenAreas>,
     },
     autoReloadModel: { required: false, type: Boolean, default: false },
   },
@@ -74,7 +84,9 @@ export default defineComponent({
       }
 
       return Object.values(this.metadata.methods).filter(
-        (m) => !!m.isStatic == this.isStatic
+        (m) =>
+          !!m.isStatic == this.isStatic &&
+          (!this.area || ((m.hidden || 0) & this.area) == 0)
       );
     },
   },

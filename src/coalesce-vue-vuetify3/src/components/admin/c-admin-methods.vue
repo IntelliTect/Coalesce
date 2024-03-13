@@ -37,7 +37,13 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { Model, ViewModel, ModelType, ListViewModel } from "coalesce-vue";
+import {
+  Model,
+  ViewModel,
+  ModelType,
+  ListViewModel,
+  HiddenAreas,
+} from "coalesce-vue";
 import { PropType } from "vue";
 
 export default defineComponent({
@@ -47,6 +53,10 @@ export default defineComponent({
     model: {
       required: true,
       type: Object as PropType<ViewModel<Model<ModelType>> | ListViewModel>,
+    },
+    area: {
+      required: false,
+      type: Number as PropType<HiddenAreas>,
     },
     color: { required: false, type: String, default: null },
     autoReloadModel: { required: false, type: Boolean, default: false },
@@ -75,7 +85,9 @@ export default defineComponent({
       }
 
       return Object.values(this.metadata.methods).filter(
-        (m) => !!m.isStatic == this.isStatic
+        (m) =>
+          !!m.isStatic == this.isStatic &&
+          (!this.area || ((m.hidden || 0) & this.area) == 0)
       );
     },
   },

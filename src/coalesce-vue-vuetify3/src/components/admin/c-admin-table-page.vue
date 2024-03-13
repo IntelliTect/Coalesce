@@ -16,6 +16,7 @@
     <c-admin-methods
       class="c-admin-table-page--methods"
       :model="listVM"
+      :area="HiddenAreas.List"
       :color="color"
       auto-reload-model
     ></c-admin-methods>
@@ -24,7 +25,7 @@
 
 <script lang="ts">
 import { defineComponent, PropType, Ref, ref, toRefs } from "vue";
-import { ListViewModel, ModelType } from "coalesce-vue";
+import { HiddenAreas, ListViewModel, ModelType } from "coalesce-vue";
 
 export default defineComponent({
   name: "c-admin-table-page",
@@ -54,7 +55,7 @@ export default defineComponent({
       listVM.value.$includes = "admin-list";
     }
 
-    return { listVM };
+    return { listVM, HiddenAreas };
   },
 
   computed: {

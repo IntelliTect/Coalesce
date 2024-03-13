@@ -1754,6 +1754,7 @@ export const ComplexModel = domain.types.ComplexModel = {
       displayName: "External Type With Dto Prop",
       transportType: "item",
       httpMethod: "POST",
+      hidden: 3 as HiddenAreas,
       params: {
         id: {
           name: "id",

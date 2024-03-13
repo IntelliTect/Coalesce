@@ -5,6 +5,7 @@
     <c-admin-methods
       class="c-admin-editor-page--methods"
       :model="viewModel"
+      :area="HiddenAreas.Edit"
       auto-reload-model
     />
   </v-container>
@@ -20,6 +21,7 @@ import {
   mapValueToModel,
   bindKeyToRouteOnCreate,
   modelDisplay,
+  HiddenAreas,
 } from "coalesce-vue";
 
 export default defineComponent({
@@ -28,6 +30,10 @@ export default defineComponent({
   props: {
     type: { required: true, type: String },
     id: { required: false, type: [String, Number] },
+  },
+
+  setup() {
+    return { HiddenAreas };
   },
 
   data() {

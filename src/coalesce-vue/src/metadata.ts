@@ -572,6 +572,9 @@ export interface MethodBase extends Metadata {
 
   /** If true, the request body is json */
   readonly json?: boolean;
+
+  /** Enum indicating what admin views the method is hidden on, if any. */
+  readonly hidden?: HiddenAreas;
 }
 
 export interface ItemMethod extends MethodBase {

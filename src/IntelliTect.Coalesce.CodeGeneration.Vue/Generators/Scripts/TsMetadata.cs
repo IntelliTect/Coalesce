@@ -530,6 +530,13 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                 b.StringProp("transportType", method.TransportType.ToString().Replace("Result", "").ToLower());
                 b.StringProp("httpMethod", method.ApiActionHttpMethod.ToString().ToUpperInvariant());
 
+
+                int hiddenAreaFlags = (int)method.HiddenAreas;
+                if (hiddenAreaFlags != 0)
+                {
+                    b.Prop("hidden", hiddenAreaFlags.ToString() + " as HiddenAreas");
+                }
+
                 if (method.IsStatic)
                 {
                     b.Prop("isStatic", "true");

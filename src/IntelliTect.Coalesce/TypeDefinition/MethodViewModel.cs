@@ -208,15 +208,27 @@ namespace IntelliTect.Coalesce.TypeDefinition
             NameWithoutAsync.ToProperCase()!;
 
         /// <summary>
-        /// For the specified area, returns true if the property has a hidden attribute.
+        /// For the specified area, returns true if the method has a hidden attribute.
         /// </summary>
-        /// <param name="area"></param>
-        /// <returns></returns>
-        public bool IsHidden(HiddenAttribute.Areas area)
+        public bool IsHidden(HiddenAttribute.Areas area) => HiddenAreas.HasFlag(area);
+
+        public HiddenAttribute.Areas HiddenAreas
         {
-            var hiddenArea = this.GetAttributeValue<HiddenAttribute, HiddenAttribute.Areas>(a => a.Area);
-            if (!hiddenArea.HasValue) return false;
-            return hiddenArea.Value == HiddenAttribute.Areas.All || hiddenArea.Value == area;
+            get
+            {
+                if (IsInternalUse)
+                {
+                    throw new InvalidOperationException("Cannot evaluate the hidden state of an InternalUse method.");
+                }
+
+                if (this.GetAttributeValue<HiddenAttribute, HiddenAttribute.Areas>(a => a.Area) is HiddenAttribute.Areas value)
+                {
+                    // Take the attribute value first to allow for overrides of the default behavior below
+                    return value;
+                }
+
+                return HiddenAttribute.Areas.None;
+            }
         }
 
         public MethodSecurityInfo SecurityInfo => new MethodSecurityInfo(this.GetSecurityPermission<ExecuteAttribute>());

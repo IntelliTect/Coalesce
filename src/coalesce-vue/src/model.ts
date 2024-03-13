@@ -522,6 +522,18 @@ class MapToDtoVisitor extends Visitor<
     // This is needed to keep a timezone-agnostic DateTime from being translated
     // into a different timezone when we serialize it.
     if (meta.noOffset) {
+      const serializeAs = meta.serializeAs || meta.dateKind;
+
+      if (serializeAs == "date") {
+        // System.Text.Json cannot deserialize into a System.DateOnly if the string contains a time part.
+        return format(parsed, "yyyy-MM-dd");
+      }
+
+      if (serializeAs == "time") {
+        // System.Text.Json cannot deserialize into a System.TimeOnly if the string contains a date part.
+        return format(parsed, "HH:mm:ss.SSS");
+      }
+
       return format(parsed, "yyyy-MM-dd'T'HH:mm:ss.SSS");
     } else {
       if (defaultTimeZone) {

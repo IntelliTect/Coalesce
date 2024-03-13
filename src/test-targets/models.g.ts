@@ -25,6 +25,8 @@ export enum SkyConditions {
 export enum Statuses {
   Open = 0,
   InProgress = 1,
+  
+  /** Closed with a solution. */
   Resolved = 2,
   
   /** Closed without any resolution. */

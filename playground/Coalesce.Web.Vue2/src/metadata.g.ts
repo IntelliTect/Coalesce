@@ -1284,6 +1284,7 @@ export const Person = domain.types.Person = {
       type: "date",
       dateKind: "date",
       noOffset: true,
+      serializeAs: "datetime",
       role: "value",
     },
     lastBath: {

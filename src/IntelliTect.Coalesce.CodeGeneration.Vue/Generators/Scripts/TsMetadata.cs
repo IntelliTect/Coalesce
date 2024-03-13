@@ -733,6 +733,17 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                     {
                         b.Prop("noOffset", "true");
                     }
+
+                    if (type.IsDateTime && dateType.GetValueOrDefault(DateTypes.DateTime) != DateTypes.DateTime)
+                    {
+                        // For System.DateTime props with a date kind of "time" or "date",
+                        // these must be serialized with both date and time so they can correctly be deserialized by the server.
+                        // Otherwise, coalesce-vue will serialize these with only the date part or time part,
+                        // assuming that the target on the server is a DateOnly or a TimeOnly.
+
+                        // New applications should use DateOnly and TimeOnly types. This supports legacy behavior.
+                        b.StringProp("serializeAs", "datetime");
+                    }
                     break;
 
                 case TypeDiscriminator.Binary:

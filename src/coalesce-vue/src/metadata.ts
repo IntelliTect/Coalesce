@@ -332,6 +332,8 @@ export interface DateValue extends ValueMeta<"date"> {
    * (i.e. the C# type is `DateTime`, not `DateTimeOffset`) */
   readonly noOffset?: boolean;
 
+  readonly serializeAs?: DateKind;
+
   readonly rules?: Rules;
 }
 

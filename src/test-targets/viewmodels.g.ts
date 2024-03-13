@@ -798,6 +798,11 @@ export interface RecursiveHierarchyViewModel extends $models.RecursiveHierarchy 
 }
 export class RecursiveHierarchyViewModel extends ViewModel<$models.RecursiveHierarchy, $apiClients.RecursiveHierarchyApiClient, number> implements $models.RecursiveHierarchy  {
   
+  
+  public addToChildren(initialData?: DeepPartial<$models.RecursiveHierarchy> | null) {
+    return this.$addChild('children', initialData) as RecursiveHierarchyViewModel
+  }
+  
   constructor(initialData?: DeepPartial<$models.RecursiveHierarchy> | null) {
     super($metadata.RecursiveHierarchy, new $apiClients.RecursiveHierarchyApiClient(), initialData)
   }

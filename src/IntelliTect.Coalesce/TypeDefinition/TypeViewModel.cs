@@ -226,7 +226,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public bool IsPrimitive => IsString || IsNumber || IsBool || IsEnum;
 
         /// <summary>
-        /// True if this is a DateTime or DateTimeOffset.
+        /// True if this is a DateTime or DateTimeOffset or DateOnly.
         /// </summary>
         public bool IsDate => IsDateTime || IsDateTimeOffset || NullableValueUnderlyingType.IsA<DateOnly>();
 

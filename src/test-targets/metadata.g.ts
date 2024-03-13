@@ -92,6 +92,7 @@ export const Statuses = domain.enums.Statuses = {
     value: 2,
     strValue: "Resolved",
     displayName: "Resolved",
+    description: "Closed with a solution.",
   },
   {
     value: 3,
@@ -680,6 +681,7 @@ export const ComplexModel = domain.types.ComplexModel = {
       type: "date",
       dateKind: "date",
       noOffset: true,
+      serializeAs: "datetime",
       role: "value",
     },
     unmappedSettableString: {
@@ -2148,6 +2150,7 @@ export const Person = domain.types.Person = {
       type: "date",
       dateKind: "date",
       noOffset: true,
+      serializeAs: "datetime",
       role: "value",
     },
     name: {
@@ -2491,6 +2494,7 @@ export const RecursiveHierarchy = domain.types.RecursiveHierarchy = {
       role: "referenceNavigation",
       get foreignKey() { return (domain.types.RecursiveHierarchy as ModelType).props.parentId as ForeignKeyProperty },
       get principalKey() { return (domain.types.RecursiveHierarchy as ModelType).props.id as PrimaryKeyProperty },
+      get inverseNavigation() { return (domain.types.RecursiveHierarchy as ModelType).props.children as ModelCollectionNavigationProperty },
       dontSerialize: true,
     },
     children: {
@@ -2504,7 +2508,9 @@ export const RecursiveHierarchy = domain.types.RecursiveHierarchy = {
         type: "model",
         get typeDef() { return (domain.types.RecursiveHierarchy as ModelType) },
       },
-      role: "value",
+      role: "collectionNavigation",
+      get foreignKey() { return (domain.types.RecursiveHierarchy as ModelType).props.parentId as ForeignKeyProperty },
+      get inverseNavigation() { return (domain.types.RecursiveHierarchy as ModelType).props.parent as ModelReferenceNavigationProperty },
       dontSerialize: true,
     },
   },

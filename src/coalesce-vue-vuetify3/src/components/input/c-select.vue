@@ -266,6 +266,12 @@ const props = withDefaults(
     reloadOnOpen?: boolean;
     params?: ListParameters;
 
+    // DONT use defineModel for these. We don't want to capture local state if the parent isn't binding it
+    // since we have 4 different binding sources in this component, we'll get stuck on the values of the ones that aren't used.
+    keyValue?: any;
+    objectValue?: Model;
+    modelValue?: any;
+
     /** Response caching configuration for the `/get` and `/list` API calls made by the component.
      * See https://intellitect.github.io/Coalesce/stacks/vue/layers/api-clients.html#response-caching. */
     cache?: ResponseCachingConfiguration | boolean;
@@ -278,9 +284,11 @@ const props = withDefaults(
   { openOnClear: true }
 );
 
-const modelValue = defineModel();
-const keyValue = defineModel("keyValue");
-const objectValue = defineModel<Model | null>("objectValue");
+const emit = defineEmits<{
+  "update:keyValue": [value: any];
+  "update:objectValue": [value: any];
+  "update:modelValue": [value: any];
+}>();
 
 const mainInputRef = ref<HTMLInputElement>();
 const listRef = ref<ComponentPublicInstance>();
@@ -364,10 +372,10 @@ const primaryBindKind = computed(() => {
     return "key";
   }
   if (valueMeta.value.type == "model") {
-    if (typeof modelValue.value != "object" && modelValue.value !== undefined) {
+    if (typeof props.modelValue != "object" && props.modelValue !== undefined) {
       throw (
         "Expected a model object to be bound to modelValue, but received a " +
-        typeof modelValue.value
+        typeof props.modelValue
       );
     }
     return "model";
@@ -390,8 +398,8 @@ const modelObjectMeta = computed(() => {
 
 /** The effective object (whose type is described by `modelObjectMeta`) that has been provided to the component. */
 const internalModelValue = computed(() => {
-  if (objectValue.value) {
-    return objectValue.value;
+  if (props.objectValue) {
+    return props.objectValue;
   }
   if (
     valueOwner.value &&
@@ -401,8 +409,8 @@ const internalModelValue = computed(() => {
     return valueOwner.value[modelObjectProp.value.name];
   }
 
-  if (modelValue.value && primaryBindKind.value == "model") {
-    return modelValue.value;
+  if (props.modelValue && primaryBindKind.value == "model") {
+    return props.modelValue;
   }
 
   if (internalKeyValue.value) {
@@ -459,12 +467,12 @@ const internalModelValue = computed(() => {
 /** The effective key (whose type is described by `modelObjectMeta`) that has been provided to the component. */
 const internalKeyValue = computed(() => {
   let value: any;
-  if (keyValue.value) {
-    value = keyValue.value;
+  if (props.keyValue) {
+    value = props.keyValue;
   } else if (valueOwner.value && modelKeyProp.value) {
     value = valueOwner.value[modelKeyProp.value.name];
-  } else if (modelValue.value && primaryBindKind.value == "key") {
-    value = modelValue.value;
+  } else if (props.modelValue && primaryBindKind.value == "key") {
+    value = props.modelValue;
   } else {
     value = null;
   }
@@ -550,9 +558,9 @@ function onInput(
     }
   }
 
-  modelValue.value = primaryBindKind.value == "key" ? key : value;
-  objectValue.value = value;
-  keyValue.value = key;
+  emit("update:modelValue", primaryBindKind.value == "key" ? key : value);
+  emit("update:objectValue", value);
+  emit("update:keyValue", key);
   pendingSelection.value = value ? listItems.value.indexOf(value) : 0;
 
   // When the input value is cleared, re-focus the dropdown

@@ -85,8 +85,15 @@ export default defineConfig({
         items: [
           autoTitle("/modeling/model-types/entities"),
           autoTitle("/modeling/model-types/external-types"),
-          autoTitle("/modeling/model-types/dtos"),
           autoTitle("/modeling/model-types/services"),
+          {
+            text: "Advanced",
+            collapsed: true,
+            items: [
+              autoTitle("/modeling/model-types/dtos"),
+              autoTitle("/modeling/model-types/standalone-entities"),
+            ]
+          },
         ],
       },
       {

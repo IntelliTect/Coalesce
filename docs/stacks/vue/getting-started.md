@@ -1,6 +1,19 @@
 
 # Getting Started
 
+## Environment Setup
+Before you begin, ensure that you have all the requisite tools installed
+- Recent version of the [.NET SDK](https://dotnet.microsoft.com/en-us/download). If you have Visual Studio, you already have this.
+- A recent version of [Node.js](https://nodejs.org/) (an LTS version is recommended).
+- A compatible IDE. 
+  - Recommended:
+    - Visual Studio for backend (C#) development 
+    - VS Code for frontend (Vue, TypeScript) development (with [Vue - Official](https://marketplace.visualstudio.com/items?itemName=Vue.volar) and [TypeScript Vue Plugin](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin))
+  - Also consider:
+    - VS Code for full stack development.
+    - JetBrains Rider
+
+
 ## Creating a Project
 
 The quickest and easiest way to create a new Coalesce Vue application is to use the ``dotnet new`` template. In your favorite shell:
@@ -26,9 +39,9 @@ The Vue template is based on [Vite](https://vitejs.dev/). You are strongly encou
 
 The structure of the Web project follows the conventions of both ASP.NET Core and Vite. The Vue-specific folders are as follows:
 
-- ``/src`` - Files that should be compiled into your application. CSS/SCSS, TypeScript, Vue SFCs, and so on.
+- ``/src`` - Files that should be compiled into your frontend application. CSS/SCSS, TypeScript, Vue SFCs, and so on.
 - ``/public`` - Static assets that should be served as files. Includes index.html, the root document of the application.
-- ``/wwwroot`` - Target for compiled output.
+- ``/wwwroot`` - Target for compiled output. This directory is excluded from git.
 
 During development, no special tooling is required to build your frontend code. Coalesce's ``UseViteDevelopmentServer`` in ASP.NET Core will take care of that automatically when the application starts. Just make sure NPM packages have been installed (`npm ci`).
 

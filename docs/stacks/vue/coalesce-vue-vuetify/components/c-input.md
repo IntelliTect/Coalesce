@@ -2,7 +2,7 @@
 
 <!-- MARKER:summary -->
     
-A general-purpose input component for most [Values](/stacks/vue/layers/metadata.md). c-input does not have much functionality of its own - instead, it delegates to the right kind of component based on the type of value to which it is bound. This includes both other [Coalesce Vuetify Components](/stacks/vue/coalesce-vue-vuetify/overview.md) as well as direct usages of some [Vuetify](https://vuetifyjs.com/) components.
+A general-purpose input component for most [Values](/stacks/vue/layers/metadata.md). c-input delegates to other components based on the type of value it is bound to. This includes both other [Coalesce Vuetify Components](/stacks/vue/coalesce-vue-vuetify/overview.md) as well as direct usages of some [Vuetify](https://vuetifyjs.com/) components.
 
 <!-- MARKER:summary-end -->
 

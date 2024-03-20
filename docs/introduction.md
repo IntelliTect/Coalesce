@@ -41,15 +41,15 @@ Designed to help you quickly build amazing web applications, Coalesce is a rapid
 </tr>
 <tr>
   <td><a href="https://learn.microsoft.com/en-us/ef/core/"><img class=ext-logo src=/ef-logo.svg></a></td>
-  <td>Design your relational data model with Entity Framework. Coalesce will use that data model to generate an extensible, customizable CRUD API that will drive both your custom pages and the out-of-the-box admin pages.</td>
+  <td>Entity Framework provides the interface between your database and C# code. Coalesce will use your EF data model to generate an extensible, customizable CRUD API that will drive both your custom pages and the out-of-the-box admin pages.</td>
 </tr>
 <tr>
   <td><a href="https://www.typescriptlang.org/"><img class=ext-logo src=/ts-logo-512.svg></a></td>
-  <td>Frontend code for Coalesce apps is generated for and written in TypeScript, enabling discovery of Coalesce features through Intellisense and providing confidence that your code won't break as your application grows.</td>
+  <td>TypeScript enables discovery of Coalesce features through Intellisense and provides confidence that your frontend code won't break as your application grows.</td>
 </tr>
 <tr>
   <td><a href="https://vuejs.org/"><img class=ext-logo src=/vue-logo.svg></a></td>
-  <td>Build an awesome frontend application with Vue.js. Coalesce will generate <a href="./stacks/vue/layers/viewmodels.html">TypeScript ViewModels</a> to facilitate rapid development of custom pages. </td>
+  <td>Vue.js provides data binding and interactivity for your application as it runs in a browser. Coalesce will generate <a href="./stacks/vue/layers/viewmodels.html">TypeScript ViewModels</a> to facilitate rapid development of custom pages. </td>
 </tr>
 <tr>
   <td><a href="https://vitejs.dev/"><img class=ext-logo src=/vite-logo.svg></a></td>

@@ -806,7 +806,7 @@ app.UseEndpoints(endpoints =>
 ```
 
 Example of the contents of the security overview page:
-![](./security-overview.webp)
+![](./security-overview.jpg)
 
 ## Testing Your Security
 

@@ -21,28 +21,28 @@ namespace IntelliTect.Coalesce.TypeDefinition
 {
     public class ReflectionRepository
     {
-        public static readonly ReflectionRepository Global = new ReflectionRepository();
+        public static readonly ReflectionRepository Global = new();
 
 
-        private readonly HashSet<DbContextTypeUsage> _contexts = new HashSet<DbContextTypeUsage>();
-        private readonly HashSet<ClassViewModel> _entities = new HashSet<ClassViewModel>();
+        private readonly ConcurrentHashSet<DbContextTypeUsage> _contexts = new();
+        private readonly ConcurrentHashSet<ClassViewModel> _entities = new();
         private ILookup<ClassViewModel, EntityTypeUsage>? _entityUsages = null;
 
-        private readonly HashSet<CrudStrategyTypeUsage> _behaviors = new HashSet<CrudStrategyTypeUsage>();
-        private readonly HashSet<CrudStrategyTypeUsage> _dataSources = new HashSet<CrudStrategyTypeUsage>();
-        private readonly HashSet<ClassViewModel> _externalTypes = new HashSet<ClassViewModel>();
-        private readonly HashSet<ClassViewModel> _customDtos = new HashSet<ClassViewModel>();
-        private readonly HashSet<ClassViewModel> _services = new HashSet<ClassViewModel>();
-        private readonly HashSet<TypeViewModel> _enums = new HashSet<TypeViewModel>();
+        private readonly ConcurrentHashSet<CrudStrategyTypeUsage> _behaviors = new();
+        private readonly ConcurrentHashSet<CrudStrategyTypeUsage> _dataSources = new();
+        private readonly ConcurrentHashSet<ClassViewModel> _externalTypes = new();
+        private readonly ConcurrentHashSet<ClassViewModel> _customDtos = new();
+        private readonly ConcurrentHashSet<ClassViewModel> _services = new();
+        private readonly ConcurrentHashSet<TypeViewModel> _enums = new();
 
-        private readonly Dictionary<ClassViewModel, ClassViewModel> _generatedDtos = new();
+        private readonly ConcurrentDictionary<ClassViewModel, ClassViewModel> _generatedDtos = new();
 
         private readonly ConcurrentDictionary<object, TypeViewModel> _allTypeViewModels
-            = new ConcurrentDictionary<object, TypeViewModel>();
+            = new();
 
-        private readonly object _discoverLock = new object();
+        private readonly object _discoverLock = new();
 
-        public ReadOnlyHashSet<DbContextTypeUsage> DbContexts => new ReadOnlyHashSet<DbContextTypeUsage>(_contexts);
+        public ReadOnlyHashSet<DbContextTypeUsage> DbContexts => new(_contexts);
         public ILookup<ClassViewModel, EntityTypeUsage> EntityUsages => _entityUsages ??= DbContexts
             .SelectMany(contextUsage => contextUsage.Entities)
             .ToLookup(entityUsage => entityUsage.ClassViewModel);
@@ -51,12 +51,12 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public ReadOnlyDictionary<string, ClassViewModel> ClientTypesLookup 
             => _clientTypes ??= new(ClientClasses.Union(Services).ToDictionary(c => c.ClientTypeName, StringComparer.OrdinalIgnoreCase));
 
-        public ReadOnlyHashSet<ClassViewModel> Entities => new ReadOnlyHashSet<ClassViewModel>(_entities);
-        public ReadOnlyHashSet<CrudStrategyTypeUsage> Behaviors => new ReadOnlyHashSet<CrudStrategyTypeUsage>(_behaviors);
-        public ReadOnlyHashSet<CrudStrategyTypeUsage> DataSources => new ReadOnlyHashSet<CrudStrategyTypeUsage>(_dataSources);
-        public ReadOnlyHashSet<ClassViewModel> ExternalTypes => new ReadOnlyHashSet<ClassViewModel>(_externalTypes);
-        public ReadOnlyHashSet<ClassViewModel> CustomDtos => new ReadOnlyHashSet<ClassViewModel>(_customDtos);
-        public ReadOnlyHashSet<ClassViewModel> Services => new ReadOnlyHashSet<ClassViewModel>(_services);
+        public ReadOnlyHashSet<ClassViewModel> Entities => new(_entities);
+        public ReadOnlyHashSet<CrudStrategyTypeUsage> Behaviors => new(_behaviors);
+        public ReadOnlyHashSet<CrudStrategyTypeUsage> DataSources => new(_dataSources);
+        public ReadOnlyHashSet<ClassViewModel> ExternalTypes => new(_externalTypes);
+        public ReadOnlyHashSet<ClassViewModel> CustomDtos => new(_customDtos);
+        public ReadOnlyHashSet<ClassViewModel> Services => new(_services);
 
         /// <summary>
         /// A map from an entity or external type to the DTO that was generated for it.
@@ -78,7 +78,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// </summary>
         public IEnumerable<ClassViewModel> ClientClasses => CrudApiBackedClasses.Union(ExternalTypes);
 
-        public ReadOnlyHashSet<TypeViewModel> ClientEnums => new ReadOnlyHashSet<TypeViewModel>(_enums);
+        public ReadOnlyHashSet<TypeViewModel> ClientEnums => new(_enums);
 
         internal IEnumerable<ClassViewModel> DiscoveredClassViewModels =>
             DbContexts.Select(t => t.ClassViewModel)
@@ -178,14 +178,12 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 var context = new DbContextTypeUsage(type.ClassViewModel!);
 
                 var entityCvms = context.Entities.Select(e => GetOrAddType(e.TypeViewModel).ClassViewModel!);
-                lock (_contexts)
-                {
-                    _contexts.Add(context);
-                    _entities.UnionWith(entityCvms);
-                    // Some of our entities may have gotten discovered as external types already.
-                    // Remove them from that set now that we know they're entities
-                    _externalTypes.ExceptWith(entityCvms);
-                }
+
+                _contexts.Add(context);
+                _entities.AddRange(entityCvms);
+                // Some of our entities may have gotten discovered as external types already.
+                // Remove them from that set now that we know they're entities
+                _externalTypes.RemoveRange(entityCvms);
 
                 // Null this out so it gets recomputed on next access.
                 _entityUsages = null;
@@ -307,7 +305,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         private bool AddCrudStrategy(
             Type iface,
             TypeViewModel strategyType,
-            HashSet<CrudStrategyTypeUsage> set,
+            ConcurrentHashSet<CrudStrategyTypeUsage> set,
             ClassViewModel? declaredFor = null
         )
         {

@@ -1,23 +1,26 @@
-﻿using System.Collections.Generic;
-using System.Collections;
+﻿using System.Collections;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace IntelliTect.Coalesce.Utilities
 {
-    public struct ReadOnlyHashSet<T> : IReadOnlyCollection<T>
+    public readonly struct ReadOnlyHashSet<T> : IReadOnlyCollection<T>
+        where T : notnull
     {
-        private readonly HashSet<T> set;
+        private readonly ConcurrentHashSet<T> set;
 
-        internal ReadOnlyHashSet(HashSet<T> set)
+        internal ReadOnlyHashSet(ConcurrentHashSet<T> set)
         {
             this.set = set;
         }
 
         public int Count => set.Count;
 
-        public IEnumerator<T> GetEnumerator() => ((IReadOnlyCollection<T>)set).GetEnumerator();
+        public IEnumerator<T> GetEnumerator() => set.GetEnumerator();
 
-        IEnumerator IEnumerable.GetEnumerator() => ((IReadOnlyCollection<T>)set).GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator() => set.GetEnumerator();
 
-        public bool Contains(T item) => set.Contains(item);
+        public bool Contains(T? item) => set.Contains(item);
     }
 }

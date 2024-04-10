@@ -38,6 +38,13 @@ namespace IntelliTect.Coalesce.TypeDefinition
         }
     }
 
+    internal class ReflectionAttributeProvider(ICustomAttributeProvider symbol) : IAttributeProvider
+    {
+        public IEnumerable<AttributeViewModel<TAttribute>> GetAttributes<TAttribute>()
+            where TAttribute : Attribute
+            => symbol.GetAttributes<TAttribute>();
+    }
+
     public static class ReflectionExtensions
     {
         public static IEnumerable<ReflectionAttributeViewModel<TAttribute>> GetAttributes<TAttribute>(

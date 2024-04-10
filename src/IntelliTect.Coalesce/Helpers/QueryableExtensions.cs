@@ -15,7 +15,7 @@ namespace IntelliTect.Coalesce
     {
         /// <summary>
         /// <para>Includes immediate children, as well as the other side of many-to-many relationships.</para>
-        /// <para>Does not include navigations or classes that have <see cref="ReadAttribute.NoAutoInclude"/> set.</para>
+        /// <para>Does not include navigations or classes that have <see cref="ReadAttribute.NoAutoInclude"/> or <see cref="CoalesceConfigurationAttribute.NoAutoInclude"/> set.</para>
         /// </summary>
         public static IQueryable<T> IncludeChildren<T>(this IQueryable<T> query, ReflectionRepository? reflectionRepository = null) where T : class
         {

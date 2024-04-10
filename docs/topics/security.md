@@ -46,6 +46,7 @@ Prevent
 
 * Omit `base` call in Data Source `GetQuery` override.
 * `[Read(NoAutoInclude = true)]` on properties or types.
+* `[assembly: CoalesceConfiguration(NoAutoInclude = true)]`
 
 </td>
 </tr>

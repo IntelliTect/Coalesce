@@ -23,6 +23,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public ReflectionRepository? ReflectionRepository { get; internal set; }
 
+        public abstract IAttributeProvider Assembly { get; }
+
         public abstract string Name { get; }
 
         /// <summary>

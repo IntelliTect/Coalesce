@@ -166,8 +166,9 @@ When an object or list of objects is requested, the default behavior of the the 
 
 Clients can suppress this per-request by setting `includes = "none"` on your TypeScript [ViewModel](/stacks/disambiguation/view-model.md) or [ListViewModel](/stacks/disambiguation/list-view-model.md), but note this is not a security mechanism and should only be used to reduce payload size or improve response time.
 
-On the server, you can suppress this behavior by placing `[Read(NoAutoInclude = true)]` on either an entire class (affecting all navigation properties of that type), or on specific navigation properties. When placed on a entity class that holds sensitive data, this can help ensure you don't accidentally leak records due to forgetting to customize the data sources of the types whose navigation properties reference your sensitive entity.
+On the server, you can suppress this behavior by placing `[Read(NoAutoInclude = true)]` on either an entire class (affecting all navigation properties of that type), or on specific navigation properties. When placed on a entity class that holds sensitive data, this can help ensure you don't accidentally leak records due to forgetting to customize the data sources of the types whose navigation properties reference your sensitive entity. 
 
+You can also suppress this for your entire application by placing `[assembly: CoalesceConfiguration(NoAutoInclude = true)]` on the assembly that holds your models.
 
 
 ### Properties

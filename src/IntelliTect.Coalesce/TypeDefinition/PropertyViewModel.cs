@@ -736,6 +736,11 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     return false;
                 }
 
+                if (PureType.Assembly.GetAttributeValue<CoalesceConfigurationAttribute, bool>(a => a.NoAutoInclude) == true)
+                {
+                    return false;
+                } 
+
                 return true;
             }
         }

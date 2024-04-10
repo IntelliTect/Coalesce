@@ -62,6 +62,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
             return reflectionRepository?.GetOrAddType(type) ?? new ReflectionTypeViewModel(reflectionRepository, type);
         }
 
+        public override IAttributeProvider Assembly
+            => new ReflectionAttributeProvider(Info.Assembly);
 
         // TODO: why is an arity of 1 removed from the name? Seems to be an oversight
         // - If we're removing arity, we should remove any arity.

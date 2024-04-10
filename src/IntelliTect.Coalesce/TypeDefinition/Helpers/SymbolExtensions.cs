@@ -54,7 +54,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         }
     }
 
-    public class SymbolAttributeProvider(ISymbol symbol) : IAttributeProvider
+    internal class SymbolAttributeProvider(ISymbol symbol) : IAttributeProvider
     {
         public IEnumerable<AttributeViewModel<TAttribute>> GetAttributes<TAttribute>()
             where TAttribute : Attribute

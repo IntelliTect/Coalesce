@@ -7,6 +7,8 @@ using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Linq;
 
+// [assembly: CoalesceConfiguration(NoAutoInclude = true)]
+
 namespace Coalesce.Domain
 {
 

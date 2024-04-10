@@ -60,6 +60,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
             return reflectionRepository?.GetOrAddType(symbol) ?? new SymbolTypeViewModel(reflectionRepository, symbol);
         }
 
+        public override IAttributeProvider Assembly
+            => Symbol.ContainingAssembly.GetAttributeProvider();
+
         protected override bool ShouldCreateClassViewModel
             => base.ShouldCreateClassViewModel && Symbol is INamedTypeSymbol;
 

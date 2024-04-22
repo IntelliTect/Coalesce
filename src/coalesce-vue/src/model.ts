@@ -960,15 +960,16 @@ export function valueDisplay(
 
 const coalescePendingQuery = Symbol();
 
-export function bindToQueryString(
+export function bindToQueryString<T>(
   vue: VueInstance,
-  obj: any, // TODO: Maybe only support objects with $metadata? Would eliminate need for `parse`, and could allow for very strong typings.
-  key: string,
+  obj: T,
+  key: keyof T & string,
   queryKey: string = key,
   parse?: (v: string) => any,
   mode: "push" | "replace" = "replace"
 ) {
   const defaultValue = obj[key];
+  const metadata = (obj as any)?.$metadata;
 
   // When the value changes, persist it to the query.
   vue.$watch(
@@ -987,10 +988,10 @@ export function bindToQueryString(
           v == null || v === ""
             ? undefined
             : // Use metadata to format the value if the obj has any.
-            obj?.$metadata?.params?.[key]
-            ? mapToDto(v, obj.$metadata.params[key])?.toString()
-            : obj?.$metadata?.props?.[key]
-            ? mapToDto(v, obj.$metadata.props[key])?.toString()
+            metadata?.params?.[key]
+            ? mapToDto(v, metadata.params[key])?.toString()
+            : metadata?.props?.[key]
+            ? mapToDto(v, metadata.props[key])?.toString()
             : // TODO: Add $metadata to DataSourceParameters/FilterParameters/ListParameters, and then support that as well.
               // Fallback to .tostring()
               String(v) ?? undefined,
@@ -1023,10 +1024,10 @@ export function bindToQueryString(
         parse
         ? parse(v)
         : // Use metadata to parse the value if the obj is a DataSource.
-        obj?.$metadata?.params?.[key]
-        ? mapToModel(v, obj.$metadata.params[key])
-        : obj?.$metadata?.props?.[key]
-        ? mapToModel(v, obj.$metadata.props[key])
+        metadata?.params?.[key]
+        ? mapToModel(v, metadata.params[key])
+        : metadata?.props?.[key]
+        ? mapToModel(v, metadata.props[key])
         : // TODO: Add $metadata to DataSourceParameters/FilterParameters/ListParameters, and then support that as well.
           // Fallback to the raw value
           v;
@@ -1062,9 +1063,9 @@ export function bindToQueryString(
   updateObject(vue.$route?.query[queryKey]);
 }
 
-export function useBindToQueryString(
-  obj: any,
-  key: string,
+export function useBindToQueryString<T>(
+  obj: T,
+  key: keyof T & string,
   queryKey: string = key,
   parse?: (v: string) => any,
   mode: "push" | "replace" = "replace"

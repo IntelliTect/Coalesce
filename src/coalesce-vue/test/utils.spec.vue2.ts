@@ -5,8 +5,8 @@ describe("VueInstance", () => {
   test("is assignable from Vue class component", async () => {
     class MyComponent extends Vue {
       created() {
-        bindToQueryString(this, this, 'a')
+        bindToQueryString(this, { a: 1 }, "a");
       }
     }
-  })
-})
+  });
+});

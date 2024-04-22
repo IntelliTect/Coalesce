@@ -52,16 +52,26 @@ describe("VueInstance", () => {
   });
 
   test("is assignable from getCurrentInstance", async () => {
-    () => bindToQueryString(getCurrentInstance()!.proxy!, {}, "a");
+    () => bindToQueryString(getCurrentInstance()!.proxy!, { a: 1 }, "a");
   });
 
   test("is not assignable from invalid object", async () => {
-    //@ts-expect-error
-    () => bindToQueryString(window, this, "a");
+    () =>
+      bindToQueryString(
+        //@ts-expect-error
+        window,
+        { a: 1 },
+        "a"
+      );
   });
 
   test("is not assignable from invalid scalar", async () => {
-    //@ts-expect-error
-    () => bindToQueryString("foo", this, "a");
+    () =>
+      bindToQueryString(
+        //@ts-expect-error
+        "foo",
+        { a: 1 },
+        "a"
+      );
   });
 });

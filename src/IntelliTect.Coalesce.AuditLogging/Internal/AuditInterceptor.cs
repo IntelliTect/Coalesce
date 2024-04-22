@@ -316,9 +316,7 @@ internal sealed class AuditInterceptor<TAuditLog> : SaveChangesInterceptor
         var date = DateTimeOffset.Now; // This must be the exact same date for all items for the merge logic in the SQL to work properly.
 
         var auditLogs = audit.Entries
-            // The change is only useful if there's more than one property, since one of the properties is always the primary key.
-            // This happens when the only changed properties on the object are marked as excluded properties.
-            .Where(e => e.Properties.Count > 1 && e.Entity is not IAuditLog && e.Entity is not AuditLogProperty)
+            .Where(e => e.Entity is not IAuditLog && e.Entity is not AuditLogProperty)
             .Select(e =>
             {
                 var entityClrType = e.Entity.GetType();
@@ -372,6 +370,10 @@ internal sealed class AuditInterceptor<TAuditLog> : SaveChangesInterceptor
 
                 return auditLog;
             })
+            // The change is only useful if there are any properties.
+            // This is checked after `operationContext.Populate` so that that user
+            // has a chance to apply customizations before we filter out an entry.
+            .Where(e => e.Properties?.Any() == true)
             .ToList();
 
         if (auditLogs.Count == 0)

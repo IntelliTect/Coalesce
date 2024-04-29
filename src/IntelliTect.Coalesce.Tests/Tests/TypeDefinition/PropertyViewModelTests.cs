@@ -257,5 +257,21 @@ namespace IntelliTect.Coalesce.Tests.TypeDefinition
             PropertyViewModel vm = data;
             Assert.Equal(expected, vm.IsClientSerializable);
         }
+
+        [Theory]
+        [PropertyViewModelData<ComplexModel>(nameof(ComplexModel.ReferenceNavigation), false)]
+        [PropertyViewModelData<ComplexModel>(nameof(ComplexModel.Tests), false)]
+        [PropertyViewModelData<ComplexModel>(nameof(ComplexModel.ComplexModelId), false)]
+#if NET7_0_OR_GREATER
+        [PropertyViewModelData<RequiredAndInitModel>(nameof(RequiredAndInitModel.RequiredRef), true)]
+        [PropertyViewModelData<RequiredAndInitModel>(nameof(RequiredAndInitModel.RequiredValue), true)]
+        [PropertyViewModelData<RequiredAndInitModel>(nameof(RequiredAndInitModel.RequiredInitRef), true)]
+        [PropertyViewModelData<RequiredAndInitModel>(nameof(RequiredAndInitModel.RequiredInitValue), true)]
+#endif
+        public void IsRequired_IsCorrect(PropertyViewModelData data, bool expected)
+        {
+            PropertyViewModel vm = data;
+            Assert.Equal(expected, vm.IsRequired);
+        }
     }
 }

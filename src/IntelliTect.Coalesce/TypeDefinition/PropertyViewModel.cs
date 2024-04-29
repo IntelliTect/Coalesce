@@ -307,6 +307,13 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     return false;
                 }
 
+                if (!IsClientSerializable)
+                {
+                    // Properties that the client never sends to the server can't be required.
+                    // This avoids creating bogus `required` rules for things like non-nullable navigation properties.
+                    return false;
+                }
+
                 if (HasRequiredKeyword) return true;
 
                 if (IsCreateOnly)

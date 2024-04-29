@@ -18,9 +18,11 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         [DefaultOrderBy(FieldOrder = 2)]
         public int ComplexModelId { get; set; }
 
+#nullable enable
         [InverseProperty(nameof(Test.ComplexModel))]
         [Search]
-        public ICollection<Test> Tests { get; set; }
+        public ICollection<Test> Tests { get; set; } = new List<Test>();
+#nullable restore
 
         /// <summary>
         /// Test case for foreign keys without a reference navigation prop.

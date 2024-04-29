@@ -383,7 +383,7 @@ const filter = (list.$params.filter = {
   type: "",
   keyValue: "",
   state: "",
-});
+}) as { [s: string]: string };
 
 useBindToQueryString(filter, "type");
 useBindToQueryString(filter, "keyValue");
@@ -393,7 +393,6 @@ useBindToQueryString(list.$params, "pageSize", "pageSize", (p) => +p);
 
 if (userPropMeta.value) {
   const fkName = userPropMeta.value.foreignKey.name;
-  //@ts-ignore
   filter[fkName] = "";
   useBindToQueryString(filter, fkName, "user");
 }

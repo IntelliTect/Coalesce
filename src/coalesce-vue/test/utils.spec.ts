@@ -45,6 +45,9 @@ describe("parseDateUserInput", () => {
 describe("VueInstance", () => {
   test("is assignable from defineComponent `this`", async () => {
     defineComponent({
+      data() {
+        return { a: 1 };
+      },
       created() {
         bindToQueryString(this, this, "a");
       },

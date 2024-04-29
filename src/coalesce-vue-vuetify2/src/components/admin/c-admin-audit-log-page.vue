@@ -400,11 +400,10 @@ export default defineComponent({
       type: "",
       keyValue: "",
       state: "",
-    };
+    } as { [s: string]: string };
 
     if (userPropMeta.value) {
       const fkName = userPropMeta.value.foreignKey.name;
-      //@ts-ignore
       filter[fkName] = "";
       useBindToQueryString(filter, fkName, "user");
     }

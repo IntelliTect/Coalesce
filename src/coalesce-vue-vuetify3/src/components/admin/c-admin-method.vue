@@ -153,9 +153,13 @@
   </div>
 </template>
 
-<script lang="ts" setup generic="TModel extends ViewModel | ListViewModel">
+<script
+  lang="ts"
+  setup
+  generic="TModel extends ViewModel | ListViewModel | ServiceViewModel"
+>
 import { computed, ref } from "vue";
-import { ViewModel, ListViewModel } from "coalesce-vue";
+import { ViewModel, ListViewModel, ServiceViewModel } from "coalesce-vue";
 import type {
   DisplayOptions,
   AnyArgCaller,
@@ -184,7 +188,7 @@ const props = defineProps<{
    * * A string with the name of the method belonging to `model`. E.g. `"myMethod"`.
    * * A direct reference to the metadata object. E.g. `model.$metadata.methods.myMethod`.
    */
-  for: MethodForSpec;
+  for: MethodForSpec<TModel>;
 
   autoReloadModel?: boolean;
 }>();
@@ -216,18 +220,17 @@ const caller = computed((): AnyArgCaller => {
   return caller;
 });
 
-const viewModel = computed((): ViewModel | ListViewModel => {
+const viewModel = computed((): TModel => {
   if (props.model instanceof ViewModel) return props.model;
   if (props.model instanceof ListViewModel) return props.model;
-  throw Error(
-    "c-method: prop `model` is required, and must be a ViewModel or ListViewModel."
-  );
+  if (props.model instanceof ServiceViewModel) return props.model;
+  throw Error("c-method: prop `model` is required, and must be a ViewModel.");
 });
 
 async function invoke() {
   fileDownloadKind.value = "preview";
   await caller.value.invokeWithArgs();
-  if (props.autoReloadModel) {
+  if (props.autoReloadModel && "$load" in viewModel.value) {
     await viewModel.value.$load();
   }
   if (methodMeta.value.autoClear) {
@@ -239,7 +242,7 @@ async function invokeAndDownload() {
   fileDownloadKind.value = "download";
   await caller.value.invokeWithArgs();
 
-  if (props.autoReloadModel) {
+  if (props.autoReloadModel && "$load" in viewModel.value) {
     // Don't await. Just do this in the background while we setup the file download.
     viewModel.value.$load();
   }

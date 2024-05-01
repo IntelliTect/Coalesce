@@ -24,9 +24,9 @@ A metadata specifier for the method. One of:
 - A direct reference to a method's metadata object.
 - A string in dot-notation that starts with a type name and ending with a method name.
 
-<Prop def="model: ViewModel | ListViewModel" lang="ts" />
+<Prop def="model: ViewModel | ListViewModel | ServiceViewModel" lang="ts" />
 
-An [ViewModel](/stacks/vue/layers/viewmodels.md) or [ListViewModel](/stacks/vue/layers/viewmodels.md) owning the method and [API Caller](/stacks/vue/layers/api-clients.md#api-callers) that was specified by the `for` prop.
+An [ViewModel](/stacks/vue/layers/viewmodels.md) or [ListViewModel](/stacks/vue/layers/viewmodels.md) or [ServiceViewModel](/modeling/model-types/services.md#generated-code) owning the method and [API Caller](/stacks/vue/layers/api-clients.md#api-callers) that was specified by the `for` prop.
 
 <Prop def="autoReloadModel?: boolean = false" lang="ts" />
 

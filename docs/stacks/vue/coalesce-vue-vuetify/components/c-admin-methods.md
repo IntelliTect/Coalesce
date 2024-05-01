@@ -24,7 +24,7 @@ Renders in a [Vuetify](https://vuetifyjs.com/) [v-expansion-panels](https://vuet
 
 <Prop def="model: ViewModel | ListViewModel" lang="ts" />
 
-An [ViewModel](/stacks/vue/layers/viewmodels.md) or [ListViewModel](/stacks/vue/layers/viewmodels.md) whose methods should each render as a [c-admin-method](/stacks/vue/coalesce-vue-vuetify/components/c-admin-method.md).
+An [ViewModel](/stacks/vue/layers/viewmodels.md) or [ListViewModel](/stacks/vue/layers/viewmodels.md) or [ServiceViewModel](/modeling/model-types/services.md#generated-code) whose methods should each render as a [c-admin-method](/stacks/vue/coalesce-vue-vuetify/components/c-admin-method.md).
 
 <Prop def="autoReloadModel?: boolean = false" lang="ts" />
 

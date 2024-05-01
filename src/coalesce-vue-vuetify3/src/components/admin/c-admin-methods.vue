@@ -9,8 +9,8 @@
 
       <v-divider class="mx-4 my-0" vertical></v-divider>
 
-      <v-toolbar-title v-if="!isStatic">
-        <c-display :model="model"></c-display>
+      <v-toolbar-title v-if="'$primaryKey' in viewModel">
+        <c-display :model="viewModel"></c-display>
       </v-toolbar-title>
     </v-toolbar>
     <v-expansion-panels class="c-methods">
@@ -38,13 +38,15 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import {
-  Model,
   ViewModel,
   ModelType,
   ListViewModel,
   HiddenAreas,
+  ServiceViewModel,
 } from "coalesce-vue";
 import { PropType } from "vue";
+
+type AnyViewModel = ViewModel | ListViewModel | ServiceViewModel;
 
 export default defineComponent({
   name: "c-admin-methods",
@@ -52,7 +54,7 @@ export default defineComponent({
   props: {
     model: {
       required: true,
-      type: Object as PropType<ViewModel<Model<ModelType>> | ListViewModel>,
+      type: Object as PropType<AnyViewModel>,
     },
     area: {
       required: false,
@@ -63,11 +65,12 @@ export default defineComponent({
   },
 
   computed: {
-    viewModel(): ViewModel | ListViewModel {
+    viewModel(): AnyViewModel {
       if (this.model instanceof ViewModel) return this.model;
       if (this.model instanceof ListViewModel) return this.model;
+      if (this.model instanceof ServiceViewModel) return this.model;
       throw Error(
-        "c-method: prop `model` is required, and must be a ViewModel or ListViewModel."
+        "c-method: prop `model` is required, and must be a ViewModel."
       );
     },
 

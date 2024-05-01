@@ -22,6 +22,7 @@ import type {
   ObjectValue,
   ApiStateTypeWithArgs,
   ListViewModel,
+  ServiceViewModel,
 } from "coalesce-vue";
 import { ApiState, ViewModel } from "coalesce-vue";
 import { computed, useAttrs } from "vue";
@@ -112,7 +113,12 @@ TModel extends Model ?
 : undefined | string | ValueKind;
 
 export type MethodForSpec<
-  TModel extends Model | ListViewModel | ViewModel | unknown = unknown,
+  TModel extends
+    | Model
+    | ServiceViewModel
+    | ListViewModel
+    | ViewModel
+    | unknown = unknown,
   MethodKind extends Method = Method
 > = "__never" extends keyof MethodsOf<TModel> // Check if we only know that the type's method names are any strings
   ? // If so, we have to allow any string because the exact method names aren't known.

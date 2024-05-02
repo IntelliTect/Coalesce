@@ -22,6 +22,6 @@
     "sass": "^1.69.5",
     "serve": "^14.2.0",
     "start-server-and-test": "^2.0.3",
-    "vitepress": "^1.0.0-rc.31"
+    "vitepress": "1.1.4"
   }
 }

@@ -42,6 +42,10 @@ export default defineConfig({
         find: "coalesce-vue/lib",
         replacement: path.resolve(__dirname, "../coalesce-vue/src"),
       },
+      {
+        find: "coalesce-vue",
+        replacement: path.resolve(__dirname, "../coalesce-vue/src"),
+      },
     ],
   },
   plugins: [

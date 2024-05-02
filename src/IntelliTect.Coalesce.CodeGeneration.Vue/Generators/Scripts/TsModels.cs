@@ -67,6 +67,9 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                         b.Line($"return mapToModel(data || {{}}, metadata.{name}) ");
                     }
 
+                    b.Line();
+                    b.Line($"static [Symbol.hasInstance](x: any) {{ return x?.$metadata === metadata.{name}; }}");
+
                     b.DocComment($"Instantiate a new {name}, optionally basing it on the given data.");
                     using (b.Block($"constructor(data?: Partial<{name}> | {{[k: string]: any}})"))
                     {

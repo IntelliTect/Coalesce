@@ -62,6 +62,8 @@ export class AbstractImpl {
     return mapToModel(data || {}, metadata.AbstractImpl) 
   }
   
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.AbstractImpl; }
+  
   /** Instantiate a new AbstractImpl, optionally basing it on the given data. */
   constructor(data?: Partial<AbstractImpl> | {[k: string]: any}) {
     Object.assign(this, AbstractImpl.map(data || {}));
@@ -84,6 +86,8 @@ export class AbstractModel {
   static map(data?: Partial<AbstractModel>): AbstractModel {
     return mapToModel(data || {}, metadata.AbstractModel) 
   }
+  
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.AbstractModel; }
   
   /** Instantiate a new AbstractModel, optionally basing it on the given data. */
   constructor(data?: Partial<AbstractModel> | {[k: string]: any}) {
@@ -116,6 +120,8 @@ export class Case {
   static map(data?: Partial<Case>): Case {
     return mapToModel(data || {}, metadata.Case) 
   }
+  
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.Case; }
   
   /** Instantiate a new Case, optionally basing it on the given data. */
   constructor(data?: Partial<Case> | {[k: string]: any}) {
@@ -153,6 +159,8 @@ export class CaseDtoStandalone {
     return mapToModel(data || {}, metadata.CaseDtoStandalone) 
   }
   
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.CaseDtoStandalone; }
+  
   /** Instantiate a new CaseDtoStandalone, optionally basing it on the given data. */
   constructor(data?: Partial<CaseDtoStandalone> | {[k: string]: any}) {
     Object.assign(this, CaseDtoStandalone.map(data || {}));
@@ -178,6 +186,8 @@ export class CaseProduct {
   static map(data?: Partial<CaseProduct>): CaseProduct {
     return mapToModel(data || {}, metadata.CaseProduct) 
   }
+  
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.CaseProduct; }
   
   /** Instantiate a new CaseProduct, optionally basing it on the given data. */
   constructor(data?: Partial<CaseProduct> | {[k: string]: any}) {
@@ -211,6 +221,8 @@ export class Company {
   static map(data?: Partial<Company>): Company {
     return mapToModel(data || {}, metadata.Company) 
   }
+  
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.Company; }
   
   /** Instantiate a new Company, optionally basing it on the given data. */
   constructor(data?: Partial<Company> | {[k: string]: any}) {
@@ -288,6 +300,8 @@ export class ComplexModel {
     return mapToModel(data || {}, metadata.ComplexModel) 
   }
   
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.ComplexModel; }
+  
   /** Instantiate a new ComplexModel, optionally basing it on the given data. */
   constructor(data?: Partial<ComplexModel> | {[k: string]: any}) {
     Object.assign(this, ComplexModel.map(data || {}));
@@ -312,6 +326,8 @@ export class ComplexModelDependent {
     return mapToModel(data || {}, metadata.ComplexModelDependent) 
   }
   
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.ComplexModelDependent; }
+  
   /** Instantiate a new ComplexModelDependent, optionally basing it on the given data. */
   constructor(data?: Partial<ComplexModelDependent> | {[k: string]: any}) {
     Object.assign(this, ComplexModelDependent.map(data || {}));
@@ -334,6 +350,8 @@ export class EnumPk {
   static map(data?: Partial<EnumPk>): EnumPk {
     return mapToModel(data || {}, metadata.EnumPk) 
   }
+  
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.EnumPk; }
   
   /** Instantiate a new EnumPk, optionally basing it on the given data. */
   constructor(data?: Partial<EnumPk> | {[k: string]: any}) {
@@ -392,6 +410,8 @@ export class Person {
     return mapToModel(data || {}, metadata.Person) 
   }
   
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.Person; }
+  
   /** Instantiate a new Person, optionally basing it on the given data. */
   constructor(data?: Partial<Person> | {[k: string]: any}) {
     Object.assign(this, Person.map(data || {}));
@@ -432,6 +452,8 @@ export class Product {
     return mapToModel(data || {}, metadata.Product) 
   }
   
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.Product; }
+  
   /** Instantiate a new Product, optionally basing it on the given data. */
   constructor(data?: Partial<Product> | {[k: string]: any}) {
     Object.assign(this, Product.map(data || {}));
@@ -454,6 +476,8 @@ export class ReadOnlyEntityUsedAsMethodInput {
   static map(data?: Partial<ReadOnlyEntityUsedAsMethodInput>): ReadOnlyEntityUsedAsMethodInput {
     return mapToModel(data || {}, metadata.ReadOnlyEntityUsedAsMethodInput) 
   }
+  
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.ReadOnlyEntityUsedAsMethodInput; }
   
   /** Instantiate a new ReadOnlyEntityUsedAsMethodInput, optionally basing it on the given data. */
   constructor(data?: Partial<ReadOnlyEntityUsedAsMethodInput> | {[k: string]: any}) {
@@ -480,6 +504,8 @@ export class RecursiveHierarchy {
   static map(data?: Partial<RecursiveHierarchy>): RecursiveHierarchy {
     return mapToModel(data || {}, metadata.RecursiveHierarchy) 
   }
+  
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.RecursiveHierarchy; }
   
   /** Instantiate a new RecursiveHierarchy, optionally basing it on the given data. */
   constructor(data?: Partial<RecursiveHierarchy> | {[k: string]: any}) {
@@ -509,6 +535,8 @@ export class RequiredAndInitModel {
     return mapToModel(data || {}, metadata.RequiredAndInitModel) 
   }
   
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.RequiredAndInitModel; }
+  
   /** Instantiate a new RequiredAndInitModel, optionally basing it on the given data. */
   constructor(data?: Partial<RequiredAndInitModel> | {[k: string]: any}) {
     Object.assign(this, RequiredAndInitModel.map(data || {}));
@@ -534,6 +562,8 @@ export class Sibling {
   static map(data?: Partial<Sibling>): Sibling {
     return mapToModel(data || {}, metadata.Sibling) 
   }
+  
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.Sibling; }
   
   /** Instantiate a new Sibling, optionally basing it on the given data. */
   constructor(data?: Partial<Sibling> | {[k: string]: any}) {
@@ -562,6 +592,8 @@ export class StringIdentity {
     return mapToModel(data || {}, metadata.StringIdentity) 
   }
   
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.StringIdentity; }
+  
   /** Instantiate a new StringIdentity, optionally basing it on the given data. */
   constructor(data?: Partial<StringIdentity> | {[k: string]: any}) {
     Object.assign(this, StringIdentity.map(data || {}));
@@ -587,6 +619,8 @@ export class Test {
     return mapToModel(data || {}, metadata.Test) 
   }
   
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.Test; }
+  
   /** Instantiate a new Test, optionally basing it on the given data. */
   constructor(data?: Partial<Test> | {[k: string]: any}) {
     Object.assign(this, Test.map(data || {}));
@@ -608,6 +642,8 @@ export class ExternalChild {
   static map(data?: Partial<ExternalChild>): ExternalChild {
     return mapToModel(data || {}, metadata.ExternalChild) 
   }
+  
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.ExternalChild; }
   
   /** Instantiate a new ExternalChild, optionally basing it on the given data. */
   constructor(data?: Partial<ExternalChild> | {[k: string]: any}) {
@@ -632,6 +668,8 @@ export class ExternalChildAsInputOnly {
     return mapToModel(data || {}, metadata.ExternalChildAsInputOnly) 
   }
   
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.ExternalChildAsInputOnly; }
+  
   /** Instantiate a new ExternalChildAsInputOnly, optionally basing it on the given data. */
   constructor(data?: Partial<ExternalChildAsInputOnly> | {[k: string]: any}) {
     Object.assign(this, ExternalChildAsInputOnly.map(data || {}));
@@ -654,6 +692,8 @@ export class ExternalChildAsOutputOnly {
   static map(data?: Partial<ExternalChildAsOutputOnly>): ExternalChildAsOutputOnly {
     return mapToModel(data || {}, metadata.ExternalChildAsOutputOnly) 
   }
+  
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.ExternalChildAsOutputOnly; }
   
   /** Instantiate a new ExternalChildAsOutputOnly, optionally basing it on the given data. */
   constructor(data?: Partial<ExternalChildAsOutputOnly> | {[k: string]: any}) {
@@ -694,6 +734,8 @@ export class ExternalParent {
     return mapToModel(data || {}, metadata.ExternalParent) 
   }
   
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.ExternalParent; }
+  
   /** Instantiate a new ExternalParent, optionally basing it on the given data. */
   constructor(data?: Partial<ExternalParent> | {[k: string]: any}) {
     Object.assign(this, ExternalParent.map(data || {}));
@@ -716,6 +758,8 @@ export class ExternalParentAsInputOnly {
     return mapToModel(data || {}, metadata.ExternalParentAsInputOnly) 
   }
   
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.ExternalParentAsInputOnly; }
+  
   /** Instantiate a new ExternalParentAsInputOnly, optionally basing it on the given data. */
   constructor(data?: Partial<ExternalParentAsInputOnly> | {[k: string]: any}) {
     Object.assign(this, ExternalParentAsInputOnly.map(data || {}));
@@ -737,6 +781,8 @@ export class ExternalParentAsOutputOnly {
   static map(data?: Partial<ExternalParentAsOutputOnly>): ExternalParentAsOutputOnly {
     return mapToModel(data || {}, metadata.ExternalParentAsOutputOnly) 
   }
+  
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.ExternalParentAsOutputOnly; }
   
   /** Instantiate a new ExternalParentAsOutputOnly, optionally basing it on the given data. */
   constructor(data?: Partial<ExternalParentAsOutputOnly> | {[k: string]: any}) {
@@ -763,6 +809,8 @@ export class ExternalTypeWithDtoProp {
     return mapToModel(data || {}, metadata.ExternalTypeWithDtoProp) 
   }
   
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.ExternalTypeWithDtoProp; }
+  
   /** Instantiate a new ExternalTypeWithDtoProp, optionally basing it on the given data. */
   constructor(data?: Partial<ExternalTypeWithDtoProp> | {[k: string]: any}) {
     Object.assign(this, ExternalTypeWithDtoProp.map(data || {}));
@@ -787,6 +835,8 @@ export class InitRecordWithDefaultCtor {
     return mapToModel(data || {}, metadata.InitRecordWithDefaultCtor) 
   }
   
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.InitRecordWithDefaultCtor; }
+  
   /** Instantiate a new InitRecordWithDefaultCtor, optionally basing it on the given data. */
   constructor(data?: Partial<InitRecordWithDefaultCtor> | {[k: string]: any}) {
     Object.assign(this, InitRecordWithDefaultCtor.map(data || {}));
@@ -809,6 +859,8 @@ export class InputOutputOnlyExternalTypeWithRequiredNonscalarProp {
   static map(data?: Partial<InputOutputOnlyExternalTypeWithRequiredNonscalarProp>): InputOutputOnlyExternalTypeWithRequiredNonscalarProp {
     return mapToModel(data || {}, metadata.InputOutputOnlyExternalTypeWithRequiredNonscalarProp) 
   }
+  
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.InputOutputOnlyExternalTypeWithRequiredNonscalarProp; }
   
   /** Instantiate a new InputOutputOnlyExternalTypeWithRequiredNonscalarProp, optionally basing it on the given data. */
   constructor(data?: Partial<InputOutputOnlyExternalTypeWithRequiredNonscalarProp> | {[k: string]: any}) {
@@ -834,6 +886,8 @@ export class Location {
     return mapToModel(data || {}, metadata.Location) 
   }
   
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.Location; }
+  
   /** Instantiate a new Location, optionally basing it on the given data. */
   constructor(data?: Partial<Location> | {[k: string]: any}) {
     Object.assign(this, Location.map(data || {}));
@@ -857,6 +911,8 @@ export class OutputOnlyExternalTypeWithoutDefaultCtor {
     return mapToModel(data || {}, metadata.OutputOnlyExternalTypeWithoutDefaultCtor) 
   }
   
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.OutputOnlyExternalTypeWithoutDefaultCtor; }
+  
   /** Instantiate a new OutputOnlyExternalTypeWithoutDefaultCtor, optionally basing it on the given data. */
   constructor(data?: Partial<OutputOnlyExternalTypeWithoutDefaultCtor> | {[k: string]: any}) {
     Object.assign(this, OutputOnlyExternalTypeWithoutDefaultCtor.map(data || {}));
@@ -878,6 +934,8 @@ export class OutputOnlyExternalTypeWithoutDefaultCtorWithInputMappableProperties
   static map(data?: Partial<OutputOnlyExternalTypeWithoutDefaultCtorWithInputMappableProperties>): OutputOnlyExternalTypeWithoutDefaultCtorWithInputMappableProperties {
     return mapToModel(data || {}, metadata.OutputOnlyExternalTypeWithoutDefaultCtorWithInputMappableProperties) 
   }
+  
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.OutputOnlyExternalTypeWithoutDefaultCtorWithInputMappableProperties; }
   
   /** Instantiate a new OutputOnlyExternalTypeWithoutDefaultCtorWithInputMappableProperties, optionally basing it on the given data. */
   constructor(data?: Partial<OutputOnlyExternalTypeWithoutDefaultCtorWithInputMappableProperties> | {[k: string]: any}) {
@@ -901,6 +959,8 @@ export class OutputOnlyExternalTypeWithRequiredEntityProp {
   static map(data?: Partial<OutputOnlyExternalTypeWithRequiredEntityProp>): OutputOnlyExternalTypeWithRequiredEntityProp {
     return mapToModel(data || {}, metadata.OutputOnlyExternalTypeWithRequiredEntityProp) 
   }
+  
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.OutputOnlyExternalTypeWithRequiredEntityProp; }
   
   /** Instantiate a new OutputOnlyExternalTypeWithRequiredEntityProp, optionally basing it on the given data. */
   constructor(data?: Partial<OutputOnlyExternalTypeWithRequiredEntityProp> | {[k: string]: any}) {
@@ -926,6 +986,8 @@ export class PositionalRecord {
     return mapToModel(data || {}, metadata.PositionalRecord) 
   }
   
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.PositionalRecord; }
+  
   /** Instantiate a new PositionalRecord, optionally basing it on the given data. */
   constructor(data?: Partial<PositionalRecord> | {[k: string]: any}) {
     Object.assign(this, PositionalRecord.map(data || {}));
@@ -949,6 +1011,8 @@ export class StandaloneReadonly {
   static map(data?: Partial<StandaloneReadonly>): StandaloneReadonly {
     return mapToModel(data || {}, metadata.StandaloneReadonly) 
   }
+  
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.StandaloneReadonly; }
   
   /** Instantiate a new StandaloneReadonly, optionally basing it on the given data. */
   constructor(data?: Partial<StandaloneReadonly> | {[k: string]: any}) {
@@ -981,6 +1045,8 @@ export class StandaloneReadWrite {
   static map(data?: Partial<StandaloneReadWrite>): StandaloneReadWrite {
     return mapToModel(data || {}, metadata.StandaloneReadWrite) 
   }
+  
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.StandaloneReadWrite; }
   
   /** Instantiate a new StandaloneReadWrite, optionally basing it on the given data. */
   constructor(data?: Partial<StandaloneReadWrite> | {[k: string]: any}) {
@@ -1018,6 +1084,8 @@ export class ValidationTarget {
     return mapToModel(data || {}, metadata.ValidationTarget) 
   }
   
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.ValidationTarget; }
+  
   /** Instantiate a new ValidationTarget, optionally basing it on the given data. */
   constructor(data?: Partial<ValidationTarget> | {[k: string]: any}) {
     Object.assign(this, ValidationTarget.map(data || {}));
@@ -1040,6 +1108,8 @@ export class ValidationTargetChild {
   static map(data?: Partial<ValidationTargetChild>): ValidationTargetChild {
     return mapToModel(data || {}, metadata.ValidationTargetChild) 
   }
+  
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.ValidationTargetChild; }
   
   /** Instantiate a new ValidationTargetChild, optionally basing it on the given data. */
   constructor(data?: Partial<ValidationTargetChild> | {[k: string]: any}) {
@@ -1064,6 +1134,8 @@ export class WeatherData {
   static map(data?: Partial<WeatherData>): WeatherData {
     return mapToModel(data || {}, metadata.WeatherData) 
   }
+  
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.WeatherData; }
   
   /** Instantiate a new WeatherData, optionally basing it on the given data. */
   constructor(data?: Partial<WeatherData> | {[k: string]: any}) {

@@ -52,15 +52,13 @@ p + .code-prop {
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import type { Highlighter, renderToHtml } from 'shiki';
 
 var highlighters = new Map<string, ReturnType<typeof highlighterFactory>>();
 async function highlighterFactory(lang) {
   // Dynamic import to avoid dependency in production builds
-  const shiki = await import('shiki')
-  shiki.setCDN('https://unpkg.com/shiki/');
+  const shiki = await import('shiki');
   const highlighter = await shiki.getHighlighter({
-    theme: 'dark-plus',
+    themes: ['dark-plus'],
     langs: [lang]
   });
   return { highlighter, shiki };
@@ -104,7 +102,6 @@ export default defineComponent({
     },
   },
 
-
   data() {
     return {
       idAttr: '',
@@ -115,6 +112,7 @@ export default defineComponent({
   async serverPrefetch() {
     await this.renderHtml();
   },
+  
   beforeMount() {
     // Copy pre-rendered HTML from the static render if it is present.
     this.html = this.$el?.innerHTML
@@ -175,19 +173,23 @@ export default defineComponent({
         .replace(/[ &<>"']/g,'-')
         .replace(/\$/g,'_')
 
-      const { highlighter, shiki } = await getHighlighter(this.lang)!;
-      const tokens = highlighter.codeToThemedTokens(code, this.lang)
+      const { highlighter } = await getHighlighter(this.lang)!;
       
-      if (!this.noClass) {
-        // Strip out the fake class wrapper that was added to get the colors right:
-        tokens.shift();
-        tokens.pop();
-      }
-
-      const theme = highlighter.getTheme();
-      let html = shiki.renderToHtml(tokens, {
-        fg: theme.fg,
-        bg: theme.bg
+      const noClass = this.noClass;
+      let html = highlighter.codeToHtml(code, {
+        lang: this.lang,
+        theme: 'dark-plus',
+        transformers: [
+          { 
+            tokens(tokens) {
+              if (!noClass) {
+                // Strip out the fake class wrapper that was added to get the colors right:
+                tokens.shift();
+                tokens.pop();
+              }
+            }
+          }
+        ]
       })
       
       this.html = `<a class="header-anchor" href="#${this.idAttr}" aria-hidden="true"></a>${html}`;

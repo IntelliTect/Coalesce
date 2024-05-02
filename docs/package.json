@@ -12,7 +12,7 @@
     "build": "cspell \"**/*.md\" && vitepress build --outDir .vitepress/dist/Coalesce && start-server-and-test 'serve -Ll 8087 ./.vitepress/dist' 8087 linkcheck"
   },
   "dependencies": {
-    "shiki": "0.10.1"
+    "shiki": "1.4.0"
   },
   "devDependencies": {
     "cspell": "^5.20.0",

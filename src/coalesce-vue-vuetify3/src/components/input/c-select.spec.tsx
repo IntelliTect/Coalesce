@@ -7,73 +7,60 @@ import {
   flushPromises,
   BetterComponentInstance,
   delay,
+  mockEndpoint,
 } from "@test/util";
 import { VueWrapper } from "@vue/test-utils";
-import { AxiosRequestConfig } from "axios";
-import {
-  AnyArgCaller,
-  AxiosClient,
-  AxiosItemResult,
-  AxiosListResult,
-  Model,
-  ViewModel,
-} from "coalesce-vue";
+import { AnyArgCaller, Model } from "coalesce-vue";
 import { Mock } from "vitest";
 import { FunctionalComponent, ref } from "vue";
 import { VForm } from "vuetify/components";
 import { CSelect } from "..";
 
-import { ComplexModel, Case } from "@test-targets/models.g";
-import {
-  ComplexModelViewModel,
-  CaseViewModel,
-} from "@test-targets/viewmodels.g";
-import { h } from "vue";
+import { ComplexModel } from "@test-targets/models.g";
+import { ComplexModelViewModel } from "@test-targets/viewmodels.g";
 
 describe("CSelect", () => {
   let model = new Student({
     name: "bob",
   });
-  let axiosMock: Mock;
+
+  let listMock: Mock, get303Mock: Mock;
+
   beforeEach(() => {
     model = new Student({
       name: "bob",
     });
 
-    axiosMock = AxiosClient.defaults.adapter = vitest
-      .fn()
-      .mockImplementation(async (config: AxiosRequestConfig) => {
-        if (config.url == "/Courses/list") {
-          const items = [
-            new Course({ courseId: 101, name: "foo 101" }),
-            new Course({ courseId: 202, name: "bar 202" }),
-          ].filter(
-            (c, i) =>
-              (!config.params.search ||
-                c.name?.startsWith(config.params.search)) &&
-              (!config.params.pageSize || i < config.params.pageSize)
-          );
-          return {
-            data: {
-              wasSuccessful: true,
-              list: items,
-              page: 1,
-              pageCount: 1,
-              pageSize: 10,
-              totalCount: items.length,
-            },
-            status: 200,
-          } as AxiosListResult<Course>;
-        }
-        if (config.url == "/Courses/get/303")
-          return {
-            data: {
-              wasSuccessful: true,
-              object: new Course({ courseId: 303, name: "baz 303" }),
-            },
-            status: 200,
-          } as AxiosItemResult<Course>;
-      });
+    listMock = mockEndpoint(
+      "/Courses/list",
+      vitest.fn((config) => {
+        const items = [
+          new Course({ courseId: 101, name: "foo 101" }),
+          new Course({ courseId: 202, name: "bar 202" }),
+        ].filter(
+          (c, i) =>
+            (!config.params.search ||
+              c.name?.startsWith(config.params.search)) &&
+            (!config.params.pageSize || i < config.params.pageSize)
+        );
+        return {
+          wasSuccessful: true,
+          list: items,
+          page: 1,
+          pageCount: 1,
+          pageSize: 10,
+          totalCount: items.length,
+        };
+      })
+    );
+
+    get303Mock = mockEndpoint(
+      "/Courses/get/303",
+      vitest.fn((config) => ({
+        wasSuccessful: true,
+        object: new Course({ courseId: 303, name: "baz 303" }),
+      }))
+    );
   });
 
   test("types", () => {
@@ -305,7 +292,8 @@ describe("CSelect", () => {
       // and show as the selected item.
       expect(wrapper.text()).toContain("baz 303");
       // Two calls - one list, and one /get for the specific key value.
-      expect(axiosMock).toHaveBeenCalledTimes(2);
+      expect(listMock).toHaveBeenCalledTimes(1);
+      expect(get303Mock).toHaveBeenCalledTimes(1);
     });
 
     test("model + FK-only fetches object from server", async () => {
@@ -320,7 +308,8 @@ describe("CSelect", () => {
       // and show as the selected item.
       expect(wrapper.text()).toContain("baz 303");
       // Two calls - one list, and one /get for the specific key value.
-      expect(axiosMock).toHaveBeenCalledTimes(2);
+      expect(listMock).toHaveBeenCalledTimes(1);
+      expect(get303Mock).toHaveBeenCalledTimes(1);
     });
 
     test("objectValue does not fetch object from server", async () => {
@@ -336,7 +325,8 @@ describe("CSelect", () => {
       // Assert
       expect(wrapper.text()).toContain("baz 303");
       // One call - just /list
-      expect(axiosMock).toHaveBeenCalledTimes(1);
+      expect(listMock).toHaveBeenCalledTimes(1);
+      expect(get303Mock).toHaveBeenCalledTimes(0);
     });
 
     test("modelValue does not fetch object from server", async () => {
@@ -352,7 +342,8 @@ describe("CSelect", () => {
       // Assert
       expect(wrapper.text()).toContain("baz 303");
       // One call - just /list
-      expect(axiosMock).toHaveBeenCalledTimes(1);
+      expect(listMock).toHaveBeenCalledTimes(1);
+      expect(get303Mock).toHaveBeenCalledTimes(0);
     });
 
     test("emits updates on selection", async () => {
@@ -416,6 +407,27 @@ describe("CSelect", () => {
 
       // Assert: arg prop mutated
       expect(model.manyParams.args.model?.courseId).toBe(101);
+    });
+
+    test("mutates v-model on selection when bound by apicaller arg", async () => {
+      const model = new StudentViewModel({});
+      const onUpdate = vitest.fn();
+
+      const wrapper = mountApp(() => (
+        <CSelect
+          for={model.$metadata.methods.manyParams.params.model}
+          modelValue={model.manyParams.args.model}
+          onUpdate:modelValue={onUpdate}
+        />
+      )).findComponent(CSelect);
+
+      // Act
+      await selectFirstResult(wrapper);
+
+      // Assert
+      expect(onUpdate).toHaveBeenCalledWith(
+        new Course({ courseId: 101, name: "foo 101" })
+      );
     });
   });
 

@@ -621,7 +621,7 @@ const openMenu = async (wrapper: VueWrapper) => {
   return menuContents();
 };
 
-const selectFirstResult = async (wrapper: VueWrapper) => {
+export const selectFirstResult = async (wrapper: VueWrapper) => {
   const overlay = await openMenu(wrapper);
   await overlay.find(".v-list-item").trigger("click");
 };

@@ -1,12 +1,12 @@
 import { Grade, Student } from "@test/targets.models";
 import { StudentViewModel } from "@test/targets.viewmodels";
-import { delay, mount, nextTick } from "@test/util";
+import { delay, mockEndpoint, mount, mountApp, nextTick } from "@test/util";
 import { VListItem } from "vuetify/components";
 import { CInput } from "..";
-import { Case, ComplexModel } from "@test-targets/models.g";
+import { Case, Company, ComplexModel } from "@test-targets/models.g";
 import { ComplexModelViewModel } from "@test-targets/viewmodels.g";
-import { h } from "vue";
 import { Model } from "coalesce-vue";
+import { selectFirstResult } from "./c-select.spec";
 
 describe("CInput", () => {
   let model: StudentViewModel;
@@ -141,5 +141,62 @@ describe("CInput", () => {
 
     // Value should now be true
     expect(model.isEnrolled).toBe(true);
+  });
+
+  test("model via v-model", async () => {
+    // Arrange
+    const onUpdate = vitest.fn();
+
+    const model = new ComplexModelViewModel({});
+    model.methodWithManyParams.args.model = new Company({
+      companyId: 100,
+      altName: "acme corp",
+    });
+
+    const newCompany = new Company({ companyId: 101, altName: "intellitect" });
+    mockEndpoint("/Company/list", () => ({
+      wasSuccessful: true,
+      list: [newCompany],
+    }));
+
+    const wrapper = mountApp(() => (
+      <CInput
+        for={model.$metadata.methods.methodWithManyParams.params.model}
+        modelValue={model.methodWithManyParams.args.model}
+        onUpdate:modelValue={onUpdate}
+      ></CInput>
+    )).findComponent(CInput);
+
+    // Act
+    expect(wrapper.text()).toContain("acme corp");
+    await selectFirstResult(wrapper);
+
+    // Assert: Emits event
+    expect(onUpdate).toHaveBeenCalledWith(newCompany);
+  });
+
+  test("date via v-model", async () => {
+    // Arrange
+    const onUpdate = vitest.fn();
+
+    const model = new ComplexModelViewModel({});
+    model.methodWithManyParams.args.dateTime = new Date("2023-08-16T01:02:03Z");
+
+    const wrapper = mountApp(() => (
+      <CInput
+        for={model.$metadata.methods.methodWithManyParams.params.dateTime}
+        modelValue={model.methodWithManyParams.args.dateTime}
+        onUpdate:modelValue={onUpdate}
+      ></CInput>
+    )).findComponent(CInput);
+
+    // Initial `modelValue` should pass through to c-datetime-picker:
+    expect(wrapper.find("input").element.value).contains("2023");
+
+    // Changing the date should emit the new value through `onUpdate`
+    await wrapper.find("input").setValue("1/3/2017");
+    await delay(1);
+
+    expect(onUpdate).toHaveBeenCalledWith(new Date("1/3/2017"));
   });
 });

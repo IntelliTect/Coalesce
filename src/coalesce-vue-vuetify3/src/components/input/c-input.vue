@@ -135,11 +135,17 @@ function render() {
     case "date":
       data.model = props.model;
       data.for = props.for;
+      addHandler(data, "update:modelValue", (v: any) =>
+        emit("update:modelValue", v)
+      );
       return h(CDatetimePicker, data, slots);
 
     case "model":
       data.model = props.model;
       data.for = props.for;
+      addHandler(data, "update:modelValue", (v: any) =>
+        emit("update:modelValue", v)
+      );
       return h(CSelect<any>, data, slots);
 
     case "collection":
@@ -147,12 +153,18 @@ function render() {
       data.for = props.for;
 
       if ("manyToMany" in valueMeta) {
+        addHandler(data, "update:modelValue", (v: any) =>
+          emit("update:modelValue", v)
+        );
         return h(CSelectManyToMany<any>, data, slots);
       } else if (
         valueMeta.itemType.type != "model" &&
         valueMeta.itemType.type != "object" &&
         valueMeta.itemType.type != "file"
       ) {
+        addHandler(data, "update:modelValue", (v: any) =>
+          emit("update:modelValue", v)
+        );
         return h(CSelectValues<any>, data, slots);
       } else {
         // console.warn(`Unsupported collection type ${valueMeta.itemType.type} for v-input`)

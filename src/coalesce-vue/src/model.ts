@@ -21,6 +21,7 @@ import type {
   BooleanValue,
   NumberValue,
   StringValue,
+  ModelCollectionNavigationProperty,
 } from "./metadata.js";
 import { resolvePropMeta } from "./metadata.js";
 import {
@@ -743,7 +744,7 @@ class DisplayVisitor extends Visitor<
 
   protected visitCollection(
     value: any[] | null,
-    meta: CollectionValue
+    meta: CollectionValue | ModelCollectionNavigationProperty
   ): string | null {
     if (value == null) return null;
     value = parseValue(value, meta);
@@ -756,9 +757,17 @@ class DisplayVisitor extends Visitor<
       this.options?.collection ?? {};
 
     if (value.length <= enumeratedItemsMax) {
+      let itemMeta = meta.itemType;
+      if ("manyToMany" in meta) {
+        itemMeta = meta.manyToMany!.farNavigationProp;
+        value = value.map(
+          (i) => i[meta.manyToMany!.farNavigationProp.name as any]
+        );
+      }
+
       return value
         .map<string>(
-          (childItem) => this.visitValue(childItem, meta.itemType) || "???" // TODO: what should this be for un-displayable members of a collection?
+          (childItem) => this.visitValue(childItem, itemMeta) || "???" // TODO: what should this be for un-displayable members of a collection?
         )
         .join(enumeratedItemsSeparator);
     }

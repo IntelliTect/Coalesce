@@ -15,6 +15,10 @@ export default defineConfig({
     alias: [
       // Imports inside the generated test targets:
       { find: "coalesce-vue/lib", replacement: path.resolve(__dirname, "src") },
+      {
+        find: "@test-targets",
+        replacement: path.resolve(__dirname, "../test-targets"),
+      },
     ],
   },
 }) as UserConfig;

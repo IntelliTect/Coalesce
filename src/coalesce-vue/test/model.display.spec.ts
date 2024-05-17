@@ -5,6 +5,9 @@ import { shortStringify } from "./test-utils";
 import { format, subYears } from "date-fns";
 import { toDate } from "date-fns-tz";
 
+import { Case as CaseMeta } from "@test-targets/metadata.g";
+import { Case } from "@test-targets/models.g";
+
 const studentProps = $metadata.Student.props;
 
 const basicStudent = {
@@ -203,6 +206,22 @@ describe.each(<DisplayData[]>[
   },
   ...undisplayable(studentProps.courses, "abc", 123, {}, true, new Date()),
 
+  // Many-to-many collection
+  {
+    meta: CaseMeta.props.caseProducts,
+    model: new Case({
+      caseProducts: ["Foo", "Bar", "Baz"].map((name) => {
+        return {
+          product: {
+            name,
+          },
+        };
+      }),
+    }).caseProducts,
+    display: "Foo, Bar, Baz",
+  },
+
+  // Model/Object
   { meta: studentProps.advisor, model: null, display: null },
   {
     meta: studentProps.advisor,

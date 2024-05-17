@@ -12,15 +12,13 @@ export default defineConfig({
   },
   resolve: {
     alias: [
+      ...(config.resolve!.alias as []),
+
+      // Override vue3-specific dependencies
       ...Object.keys(packageJson.devDependencies).map((pkgName) => ({
         find: pkgName,
         replacement: path.resolve(__dirname, "node_modules", pkgName),
       })),
-      {
-        // Imports inside the generated test targets:
-        find: "coalesce-vue/lib",
-        replacement: path.resolve(__dirname, "../src"),
-      },
     ],
   },
   test: {

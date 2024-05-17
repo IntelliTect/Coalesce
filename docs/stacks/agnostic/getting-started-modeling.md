@@ -10,8 +10,8 @@ At this point, you can open up the newly-created solution in Visual Studio and r
 
 - Run Coalesce's code generation by either:
 
-    - Running ``dotnet coalesce`` in the web project's root directory
-    - Running the ``coalesce`` npm script (Vue) or gulp task (Knockout) in the Task Runner Explorer
+    - Running ``dotnet coalesce`` in the web project's root directory (`dotnet restore` first if you get an error about "command or file was not found").
+    - Running the ``coalesce`` npm script in the Task Runner Explorer, or in a terminal via `npm run coalesce`.
 
 You're now at a point where you can start creating your own pages!
 

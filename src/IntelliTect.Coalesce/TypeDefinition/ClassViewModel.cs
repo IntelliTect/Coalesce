@@ -393,6 +393,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// Use the ListText Attribute first, then Name and then ID.
         /// </summary>
         public PropertyViewModel? ListTextProperty =>
+            Type.IsA(typeof(IDataSource<>)) ? null :
             ClientProperties.FirstOrDefault(f => f.IsListText) ??
             ClientProperties.FirstOrDefault(f => f.Name == "Name") ??
             PrimaryKey;

@@ -4,7 +4,7 @@ namespace IntelliTect.Coalesce.DataAnnotations
 {
     /// <summary>
     /// Implements restrictions that are declared on properties using <see cref="RestrictAttribute{T}"/>.
-    /// These restrictions will be checked each time such a property is mapped to or from a generated <see cref="IClassDto{T}"/>,
+    /// These restrictions will be checked each time such a property is mapped to or from a generated DTO,
     /// allowing for per-row, per-column security restrictions to be implemented.
     /// </summary>
     public interface IPropertyRestriction

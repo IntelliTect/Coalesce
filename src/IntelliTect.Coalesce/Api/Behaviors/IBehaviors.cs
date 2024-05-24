@@ -22,21 +22,22 @@ namespace IntelliTect.Coalesce
             TDto incomingDto,
             IDataSource<T> dataSource,
             IDataSourceParameters parameters
-        ) where TDto : class, IClassDto<T>, new();
+        ) where TDto : class, IParameterDto<T>, new();
 
         /// <summary>
         /// Save an item to the database.
         /// </summary>
-        /// <typeparam name="TDto"></typeparam>
         /// <param name="incomingDto">The DTO containing the properties to update.</param>
         /// <param name="dataSource">The data source that will be used when loading the item to be updated.</param>
         /// <param name="parameters">The parameters to be passed to the data source when loading the item.</param>
         /// <returns>A result indicating success or failure, as well as an up-to-date copy of the object being saved.</returns>
-        Task<ItemResult<TDto?>> SaveAsync<TDto>(
-            TDto incomingDto,
+        Task<ItemResult<TDtoOut?>> SaveAsync<TDtoIn, TDtoOut>(
+            TDtoIn incomingDto,
             IDataSource<T> dataSource,
             IDataSourceParameters parameters
-        ) where TDto : class, IClassDto<T>, new();
+        ) 
+            where TDtoIn : class, IParameterDto<T>, new() 
+            where TDtoOut : class, IResponseDto<T>, new();
 
 
         /// <summary>
@@ -51,6 +52,6 @@ namespace IntelliTect.Coalesce
             object id,
             IDataSource<T> dataSource,
             IDataSourceParameters parameters
-        ) where TDto : class, IClassDto<T>, new();
+        ) where TDto : class, IResponseDto<T>, new();
     }
 }

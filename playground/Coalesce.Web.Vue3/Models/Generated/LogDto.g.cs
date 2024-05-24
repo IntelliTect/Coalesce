@@ -8,9 +8,9 @@ using System.Security.Claims;
 
 namespace Coalesce.Web.Vue3.Models
 {
-    public partial class LogDtoGen : GeneratedDto<Coalesce.Domain.Log>
+    public partial class LogParameter : GeneratedParameterDto<Coalesce.Domain.Log>
     {
-        public LogDtoGen() { }
+        public LogParameter() { }
 
         private int? _LogId;
         private string _Level;
@@ -30,19 +30,6 @@ namespace Coalesce.Web.Vue3.Models
         {
             get => _Message;
             set { _Message = value; Changed(nameof(Message)); }
-        }
-
-        /// <summary>
-        /// Map from the domain object to the properties of the current DTO instance.
-        /// </summary>
-        public override void MapFrom(Coalesce.Domain.Log obj, IMappingContext context, IncludeTree tree = null)
-        {
-            if (obj == null) return;
-            var includes = context.Includes;
-
-            this.LogId = obj.LogId;
-            this.Level = obj.Level;
-            this.Message = obj.Message;
         }
 
         /// <summary>
@@ -67,6 +54,28 @@ namespace Coalesce.Web.Vue3.Models
             var entity = new Coalesce.Domain.Log();
             MapTo(entity, context);
             return entity;
+        }
+    }
+
+    public partial class LogResponse : GeneratedResponseDto<Coalesce.Domain.Log>
+    {
+        public LogResponse() { }
+
+        public int? LogId { get; set; }
+        public string Level { get; set; }
+        public string Message { get; set; }
+
+        /// <summary>
+        /// Map from the domain object to the properties of the current DTO instance.
+        /// </summary>
+        public override void MapFrom(Coalesce.Domain.Log obj, IMappingContext context, IncludeTree tree = null)
+        {
+            if (obj == null) return;
+            var includes = context.Includes;
+
+            this.LogId = obj.LogId;
+            this.Level = obj.Level;
+            this.Message = obj.Message;
         }
     }
 }

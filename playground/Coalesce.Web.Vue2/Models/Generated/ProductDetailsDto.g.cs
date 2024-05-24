@@ -8,38 +8,22 @@ using System.Security.Claims;
 
 namespace Coalesce.Web.Vue2.Models
 {
-    public partial class ProductDetailsDtoGen : GeneratedDto<Coalesce.Domain.ProductDetails>
+    public partial class ProductDetailsParameter : GeneratedParameterDto<Coalesce.Domain.ProductDetails>
     {
-        public ProductDetailsDtoGen() { }
+        public ProductDetailsParameter() { }
 
-        private Coalesce.Web.Vue2.Models.StreetAddressDtoGen _ManufacturingAddress;
-        private Coalesce.Web.Vue2.Models.StreetAddressDtoGen _CompanyHqAddress;
+        private Coalesce.Web.Vue2.Models.StreetAddressParameter _ManufacturingAddress;
+        private Coalesce.Web.Vue2.Models.StreetAddressParameter _CompanyHqAddress;
 
-        public Coalesce.Web.Vue2.Models.StreetAddressDtoGen ManufacturingAddress
+        public Coalesce.Web.Vue2.Models.StreetAddressParameter ManufacturingAddress
         {
             get => _ManufacturingAddress;
             set { _ManufacturingAddress = value; Changed(nameof(ManufacturingAddress)); }
         }
-        public Coalesce.Web.Vue2.Models.StreetAddressDtoGen CompanyHqAddress
+        public Coalesce.Web.Vue2.Models.StreetAddressParameter CompanyHqAddress
         {
             get => _CompanyHqAddress;
             set { _CompanyHqAddress = value; Changed(nameof(CompanyHqAddress)); }
-        }
-
-        /// <summary>
-        /// Map from the domain object to the properties of the current DTO instance.
-        /// </summary>
-        public override void MapFrom(Coalesce.Domain.ProductDetails obj, IMappingContext context, IncludeTree tree = null)
-        {
-            if (obj == null) return;
-            var includes = context.Includes;
-
-
-            this.ManufacturingAddress = obj.ManufacturingAddress.MapToDto<Coalesce.Domain.StreetAddress, StreetAddressDtoGen>(context, tree?[nameof(this.ManufacturingAddress)]);
-
-
-            this.CompanyHqAddress = obj.CompanyHqAddress.MapToDto<Coalesce.Domain.StreetAddress, StreetAddressDtoGen>(context, tree?[nameof(this.CompanyHqAddress)]);
-
         }
 
         /// <summary>
@@ -63,6 +47,30 @@ namespace Coalesce.Web.Vue2.Models
             var entity = new Coalesce.Domain.ProductDetails();
             MapTo(entity, context);
             return entity;
+        }
+    }
+
+    public partial class ProductDetailsResponse : GeneratedResponseDto<Coalesce.Domain.ProductDetails>
+    {
+        public ProductDetailsResponse() { }
+
+        public Coalesce.Web.Vue2.Models.StreetAddressResponse ManufacturingAddress { get; set; }
+        public Coalesce.Web.Vue2.Models.StreetAddressResponse CompanyHqAddress { get; set; }
+
+        /// <summary>
+        /// Map from the domain object to the properties of the current DTO instance.
+        /// </summary>
+        public override void MapFrom(Coalesce.Domain.ProductDetails obj, IMappingContext context, IncludeTree tree = null)
+        {
+            if (obj == null) return;
+            var includes = context.Includes;
+
+
+            this.ManufacturingAddress = obj.ManufacturingAddress.MapToDto<Coalesce.Domain.StreetAddress, StreetAddressResponse>(context, tree?[nameof(this.ManufacturingAddress)]);
+
+
+            this.CompanyHqAddress = obj.CompanyHqAddress.MapToDto<Coalesce.Domain.StreetAddress, StreetAddressResponse>(context, tree?[nameof(this.CompanyHqAddress)]);
+
         }
     }
 }

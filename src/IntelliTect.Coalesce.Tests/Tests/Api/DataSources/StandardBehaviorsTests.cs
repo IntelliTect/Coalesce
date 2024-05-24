@@ -50,7 +50,7 @@ namespace IntelliTect.Coalesce.Tests.Api.DataSources
                 .AddModel(m => m.Title, "original title");
 
             var dto = new TestDto<Case>(1, c => { c.Description = "new desc"; });
-            var result = await Behaviors<Case>().SaveAsync(dto, ds, new DataSourceParameters());
+            var result = await Behaviors<Case>().SaveAsync<TestDto<Case>, TestDto<Case>>(dto, ds, new DataSourceParameters());
 
             result.AssertSuccess();
             Assert.Equal("new desc", result.Object.SourceEntity.Description);
@@ -74,7 +74,7 @@ namespace IntelliTect.Coalesce.Tests.Api.DataSources
 
             // Act
             var dto = new TestDto<Case>(1, c => { c.Description = "new desc"; });
-            var result = await Behaviors<Case>().SaveAsync(dto, ds, new DataSourceParameters());
+            var result = await Behaviors<Case>().SaveAsync<TestDto<Case>, TestDto<Case>>(dto, ds, new DataSourceParameters());
 
             // Assert2: Entity saved as expected
             ds.Db.ChangeTracker.Clear();

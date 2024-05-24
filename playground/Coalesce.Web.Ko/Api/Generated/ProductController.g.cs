@@ -25,7 +25,7 @@ namespace Coalesce.Web.Ko.Api
     [Authorize]
     [ServiceFilter(typeof(IApiActionFilter))]
     public partial class ProductController
-        : BaseApiController<Coalesce.Domain.Product, ProductDtoGen, Coalesce.Domain.AppDbContext>
+        : BaseApiController<Coalesce.Domain.Product, ProductParameter, ProductResponse, Coalesce.Domain.AppDbContext>
     {
         public ProductController(CrudContext<Coalesce.Domain.AppDbContext> context) : base(context)
         {
@@ -34,7 +34,7 @@ namespace Coalesce.Web.Ko.Api
 
         [HttpGet("get/{id}")]
         [Authorize]
-        public virtual Task<ItemResult<ProductDtoGen>> Get(
+        public virtual Task<ItemResult<ProductResponse>> Get(
             int id,
             DataSourceParameters parameters,
             IDataSource<Coalesce.Domain.Product> dataSource)
@@ -42,7 +42,7 @@ namespace Coalesce.Web.Ko.Api
 
         [HttpGet("list")]
         [Authorize]
-        public virtual Task<ListResult<ProductDtoGen>> List(
+        public virtual Task<ListResult<ProductResponse>> List(
             ListParameters parameters,
             IDataSource<Coalesce.Domain.Product> dataSource)
             => ListImplementation(parameters, dataSource);
@@ -56,8 +56,8 @@ namespace Coalesce.Web.Ko.Api
 
         [HttpPost("save")]
         [Authorize(Roles = "Admin")]
-        public virtual Task<ItemResult<ProductDtoGen>> Save(
-            [FromForm] ProductDtoGen dto,
+        public virtual Task<ItemResult<ProductResponse>> Save(
+            [FromForm] ProductParameter dto,
             [FromQuery] DataSourceParameters parameters,
             IDataSource<Coalesce.Domain.Product> dataSource,
             IBehaviors<Coalesce.Domain.Product> behaviors)
@@ -65,7 +65,7 @@ namespace Coalesce.Web.Ko.Api
 
         [HttpPost("bulkSave")]
         [Authorize]
-        public virtual Task<ItemResult<ProductDtoGen>> BulkSave(
+        public virtual Task<ItemResult<ProductResponse>> BulkSave(
             [FromBody] BulkSaveRequest dto,
             [FromQuery] DataSourceParameters parameters,
             [FromServices] IDataSourceFactory dataSourceFactory,
@@ -74,7 +74,7 @@ namespace Coalesce.Web.Ko.Api
 
         [HttpPost("delete/{id}")]
         [Authorize]
-        public virtual Task<ItemResult<ProductDtoGen>> Delete(
+        public virtual Task<ItemResult<ProductResponse>> Delete(
             int id,
             IBehaviors<Coalesce.Domain.Product> behaviors,
             IDataSource<Coalesce.Domain.Product> dataSource)

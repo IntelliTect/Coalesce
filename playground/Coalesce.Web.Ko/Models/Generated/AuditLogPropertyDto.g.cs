@@ -8,9 +8,9 @@ using System.Security.Claims;
 
 namespace Coalesce.Web.Ko.Models
 {
-    public partial class AuditLogPropertyDtoGen : GeneratedDto<IntelliTect.Coalesce.AuditLogging.AuditLogProperty>
+    public partial class AuditLogPropertyParameter : GeneratedParameterDto<IntelliTect.Coalesce.AuditLogging.AuditLogProperty>
     {
-        public AuditLogPropertyDtoGen() { }
+        public AuditLogPropertyParameter() { }
 
         private long? _Id;
         private long? _ParentId;
@@ -57,23 +57,6 @@ namespace Coalesce.Web.Ko.Models
         }
 
         /// <summary>
-        /// Map from the domain object to the properties of the current DTO instance.
-        /// </summary>
-        public override void MapFrom(IntelliTect.Coalesce.AuditLogging.AuditLogProperty obj, IMappingContext context, IncludeTree tree = null)
-        {
-            if (obj == null) return;
-            var includes = context.Includes;
-
-            this.Id = obj.Id;
-            this.ParentId = obj.ParentId;
-            this.PropertyName = obj.PropertyName;
-            this.OldValue = obj.OldValue;
-            this.OldValueDescription = obj.OldValueDescription;
-            this.NewValue = obj.NewValue;
-            this.NewValueDescription = obj.NewValueDescription;
-        }
-
-        /// <summary>
         /// Map from the current DTO instance to the domain object.
         /// </summary>
         public override void MapTo(IntelliTect.Coalesce.AuditLogging.AuditLogProperty entity, IMappingContext context)
@@ -99,6 +82,36 @@ namespace Coalesce.Web.Ko.Models
             var entity = new IntelliTect.Coalesce.AuditLogging.AuditLogProperty();
             MapTo(entity, context);
             return entity;
+        }
+    }
+
+    public partial class AuditLogPropertyResponse : GeneratedResponseDto<IntelliTect.Coalesce.AuditLogging.AuditLogProperty>
+    {
+        public AuditLogPropertyResponse() { }
+
+        public long? Id { get; set; }
+        public long? ParentId { get; set; }
+        public string PropertyName { get; set; }
+        public string OldValue { get; set; }
+        public string OldValueDescription { get; set; }
+        public string NewValue { get; set; }
+        public string NewValueDescription { get; set; }
+
+        /// <summary>
+        /// Map from the domain object to the properties of the current DTO instance.
+        /// </summary>
+        public override void MapFrom(IntelliTect.Coalesce.AuditLogging.AuditLogProperty obj, IMappingContext context, IncludeTree tree = null)
+        {
+            if (obj == null) return;
+            var includes = context.Includes;
+
+            this.Id = obj.Id;
+            this.ParentId = obj.ParentId;
+            this.PropertyName = obj.PropertyName;
+            this.OldValue = obj.OldValue;
+            this.OldValueDescription = obj.OldValueDescription;
+            this.NewValue = obj.NewValue;
+            this.NewValueDescription = obj.NewValueDescription;
         }
     }
 }

@@ -145,7 +145,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// </summary>
         public string ApiActionReturnTypeDeclaration => TransportTypeGenericParameter.IsVoid
             ? TransportType.ToString()
-            : $"{TransportType}<{TransportTypeGenericParameter.DtoFullyQualifiedName}>";
+            : $"{TransportType}<{TransportTypeGenericParameter.NullableTypeForDto(isInput: false, dtoNamespace: null, dontEmitNullable: true)}>";
 
 
         /// <summary>

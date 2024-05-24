@@ -8,9 +8,9 @@ using System.Security.Claims;
 
 namespace Coalesce.Web.Vue3.Models
 {
-    public partial class PersonLocationDtoGen : GeneratedDto<Coalesce.Domain.PersonLocation>
+    public partial class PersonLocationParameter : GeneratedParameterDto<Coalesce.Domain.PersonLocation>
     {
-        public PersonLocationDtoGen() { }
+        public PersonLocationParameter() { }
 
         private double? _Latitude;
         private double? _Longitude;
@@ -24,18 +24,6 @@ namespace Coalesce.Web.Vue3.Models
         {
             get => _Longitude;
             set { _Longitude = value; Changed(nameof(Longitude)); }
-        }
-
-        /// <summary>
-        /// Map from the domain object to the properties of the current DTO instance.
-        /// </summary>
-        public override void MapFrom(Coalesce.Domain.PersonLocation obj, IMappingContext context, IncludeTree tree = null)
-        {
-            if (obj == null) return;
-            var includes = context.Includes;
-
-            this.Latitude = obj.Latitude;
-            this.Longitude = obj.Longitude;
         }
 
         /// <summary>
@@ -59,6 +47,26 @@ namespace Coalesce.Web.Vue3.Models
             var entity = new Coalesce.Domain.PersonLocation();
             MapTo(entity, context);
             return entity;
+        }
+    }
+
+    public partial class PersonLocationResponse : GeneratedResponseDto<Coalesce.Domain.PersonLocation>
+    {
+        public PersonLocationResponse() { }
+
+        public double? Latitude { get; set; }
+        public double? Longitude { get; set; }
+
+        /// <summary>
+        /// Map from the domain object to the properties of the current DTO instance.
+        /// </summary>
+        public override void MapFrom(Coalesce.Domain.PersonLocation obj, IMappingContext context, IncludeTree tree = null)
+        {
+            if (obj == null) return;
+            var includes = context.Includes;
+
+            this.Latitude = obj.Latitude;
+            this.Longitude = obj.Longitude;
         }
     }
 }

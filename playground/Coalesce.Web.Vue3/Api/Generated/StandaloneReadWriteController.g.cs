@@ -25,7 +25,7 @@ namespace Coalesce.Web.Vue3.Api
     [Authorize]
     [ServiceFilter(typeof(IApiActionFilter))]
     public partial class StandaloneReadWriteController
-        : BaseApiController<Coalesce.Domain.StandaloneReadWrite, StandaloneReadWriteDtoGen>
+        : BaseApiController<Coalesce.Domain.StandaloneReadWrite, StandaloneReadWriteParameter, StandaloneReadWriteResponse>
     {
         public StandaloneReadWriteController(CrudContext context) : base(context)
         {
@@ -34,7 +34,7 @@ namespace Coalesce.Web.Vue3.Api
 
         [HttpGet("get/{id}")]
         [Authorize]
-        public virtual Task<ItemResult<StandaloneReadWriteDtoGen>> Get(
+        public virtual Task<ItemResult<StandaloneReadWriteResponse>> Get(
             int id,
             DataSourceParameters parameters,
             IDataSource<Coalesce.Domain.StandaloneReadWrite> dataSource)
@@ -42,7 +42,7 @@ namespace Coalesce.Web.Vue3.Api
 
         [HttpGet("list")]
         [Authorize]
-        public virtual Task<ListResult<StandaloneReadWriteDtoGen>> List(
+        public virtual Task<ListResult<StandaloneReadWriteResponse>> List(
             ListParameters parameters,
             IDataSource<Coalesce.Domain.StandaloneReadWrite> dataSource)
             => ListImplementation(parameters, dataSource);
@@ -56,8 +56,8 @@ namespace Coalesce.Web.Vue3.Api
 
         [HttpPost("save")]
         [Authorize]
-        public virtual Task<ItemResult<StandaloneReadWriteDtoGen>> Save(
-            [FromForm] StandaloneReadWriteDtoGen dto,
+        public virtual Task<ItemResult<StandaloneReadWriteResponse>> Save(
+            [FromForm] StandaloneReadWriteParameter dto,
             [FromQuery] DataSourceParameters parameters,
             IDataSource<Coalesce.Domain.StandaloneReadWrite> dataSource,
             IBehaviors<Coalesce.Domain.StandaloneReadWrite> behaviors)
@@ -65,7 +65,7 @@ namespace Coalesce.Web.Vue3.Api
 
         [HttpPost("delete/{id}")]
         [Authorize]
-        public virtual Task<ItemResult<StandaloneReadWriteDtoGen>> Delete(
+        public virtual Task<ItemResult<StandaloneReadWriteResponse>> Delete(
             int id,
             IBehaviors<Coalesce.Domain.StandaloneReadWrite> behaviors,
             IDataSource<Coalesce.Domain.StandaloneReadWrite> dataSource)

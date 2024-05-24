@@ -8,13 +8,12 @@ using System.Security.Claims;
 
 namespace Coalesce.Web.Ko.Models
 {
-    public partial class ProductDtoGen : GeneratedDto<Coalesce.Domain.Product>
+    public partial class ProductParameter : GeneratedParameterDto<Coalesce.Domain.Product>
     {
-        public ProductDtoGen() { }
+        public ProductParameter() { }
 
         private int? _ProductId;
         private string _Name;
-        private Coalesce.Web.Ko.Models.ProductDetailsDtoGen _Details;
         private System.Guid? _UniqueId;
         private object _Unknown;
 
@@ -28,11 +27,6 @@ namespace Coalesce.Web.Ko.Models
             get => _Name;
             set { _Name = value; Changed(nameof(Name)); }
         }
-        public Coalesce.Web.Ko.Models.ProductDetailsDtoGen Details
-        {
-            get => _Details;
-            set { _Details = value; Changed(nameof(Details)); }
-        }
         public System.Guid? UniqueId
         {
             get => _UniqueId;
@@ -42,23 +36,6 @@ namespace Coalesce.Web.Ko.Models
         {
             get => _Unknown;
             set { _Unknown = value; Changed(nameof(Unknown)); }
-        }
-
-        /// <summary>
-        /// Map from the domain object to the properties of the current DTO instance.
-        /// </summary>
-        public override void MapFrom(Coalesce.Domain.Product obj, IMappingContext context, IncludeTree tree = null)
-        {
-            if (obj == null) return;
-            var includes = context.Includes;
-
-            this.ProductId = obj.ProductId;
-            this.Name = obj.Name;
-            this.Unknown = obj.Unknown;
-
-            this.Details = obj.Details.MapToDto<Coalesce.Domain.ProductDetails, ProductDetailsDtoGen>(context, tree?[nameof(this.Details)]);
-
-            if ((context.IsInRoleCached("User"))) this.UniqueId = obj.UniqueId;
         }
 
         /// <summary>
@@ -84,6 +61,34 @@ namespace Coalesce.Web.Ko.Models
             var entity = new Coalesce.Domain.Product();
             MapTo(entity, context);
             return entity;
+        }
+    }
+
+    public partial class ProductResponse : GeneratedResponseDto<Coalesce.Domain.Product>
+    {
+        public ProductResponse() { }
+
+        public int? ProductId { get; set; }
+        public string Name { get; set; }
+        public System.Guid? UniqueId { get; set; }
+        public object Unknown { get; set; }
+        public Coalesce.Web.Ko.Models.ProductDetailsResponse Details { get; set; }
+
+        /// <summary>
+        /// Map from the domain object to the properties of the current DTO instance.
+        /// </summary>
+        public override void MapFrom(Coalesce.Domain.Product obj, IMappingContext context, IncludeTree tree = null)
+        {
+            if (obj == null) return;
+            var includes = context.Includes;
+
+            this.ProductId = obj.ProductId;
+            this.Name = obj.Name;
+            this.Unknown = obj.Unknown;
+
+            this.Details = obj.Details.MapToDto<Coalesce.Domain.ProductDetails, ProductDetailsResponse>(context, tree?[nameof(this.Details)]);
+
+            if ((context.IsInRoleCached("User"))) this.UniqueId = obj.UniqueId;
         }
     }
 }

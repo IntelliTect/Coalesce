@@ -74,20 +74,24 @@ namespace IntelliTect.Coalesce.TypeDefinition
             ? "protected"
             : "public";
 
-        public string DtoName => IsDto ? FullyQualifiedName : $"{Name}DtoGen";
+        public string ParameterDtoTypeName => IsCustomDto ? FullyQualifiedName : $"{Name}Parameter";
+        public string ResponseDtoTypeName => IsCustomDto ? FullyQualifiedName : $"{Name}Response";
 
-        public ClassViewModel BaseViewModel => IsDto ? DtoBaseViewModel! : this;
+        public ClassViewModel BaseViewModel => DtoBaseViewModel ?? this;
 
         /// <summary>
         /// If this class implements IClassDto, return true.
         /// </summary>
-        public bool IsDto => Type.IsA(typeof(IClassDto<>));
+        public bool IsCustomDto => Type.IsA(typeof(IClassDto<>));
 
         /// <summary>
-        /// If this class implements IClassDto, return the ClassViewModel for the type that this DTO is based upon.
+        /// If this class is a DTO, return the ClassViewModel for the type that this DTO is based upon.
         /// </summary>
         public ClassViewModel? DtoBaseViewModel =>
-            Type.GenericArgumentsFor(typeof(IClassDto<>))?[0].ClassViewModel;
+            (
+                Type.GenericArgumentsFor(typeof(IParameterDto<>)) ?? 
+                Type.GenericArgumentsFor(typeof(IResponseDto<>))
+            )?[0].ClassViewModel;
 
         /// <summary>
         /// Name of the ViewModelClass
@@ -207,7 +211,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         internal IReadOnlyCollection<MethodViewModel> Methods =>
             _Methods ?? (_Methods = RawMethods
                 .Where(m => !excludedMethodNames.Contains(m.Name)
-                    && (!IsDto || (m.Name != nameof(IClassDto<object>.MapFrom) && m.Name != nameof(IClassDto<object>.MapTo))))
+                    && (!IsCustomDto || (m.Name != nameof(IClassDto<object>.MapFrom) && m.Name != nameof(IClassDto<object>.MapTo))))
                 .ToList().AsReadOnly());
 
         public IEnumerable<MethodViewModel> ClientMethods =>

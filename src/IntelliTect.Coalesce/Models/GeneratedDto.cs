@@ -9,10 +9,9 @@ using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.Models
 {
-    public abstract class GeneratedDto<T> : IClassDto<T>, ISparseDto
+    public abstract class GeneratedParameterDto<T> : IParameterDto<T>, ISparseDto
         where T : class
     {
-        public abstract void MapFrom(T obj, IMappingContext context, IncludeTree? tree = null);
         public abstract void MapTo(T obj, IMappingContext context);
         public abstract T MapToNew(IMappingContext context);
 
@@ -34,6 +33,12 @@ namespace IntelliTect.Coalesce.Models
             MapTo(obj, context);
             return obj;
         }
+    }
+
+    public abstract class GeneratedResponseDto<T> : IResponseDto<T>
+        where T : class
+    {
+        public abstract void MapFrom(T obj, IMappingContext context, IncludeTree? tree = null);
     }
 
     public interface ISparseDto

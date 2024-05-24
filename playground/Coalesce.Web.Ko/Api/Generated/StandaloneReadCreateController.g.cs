@@ -25,7 +25,7 @@ namespace Coalesce.Web.Ko.Api
     [Authorize]
     [ServiceFilter(typeof(IApiActionFilter))]
     public partial class StandaloneReadCreateController
-        : BaseApiController<Coalesce.Domain.StandaloneReadCreate, StandaloneReadCreateDtoGen>
+        : BaseApiController<Coalesce.Domain.StandaloneReadCreate, StandaloneReadCreateParameter, StandaloneReadCreateResponse>
     {
         public StandaloneReadCreateController(CrudContext context) : base(context)
         {
@@ -34,7 +34,7 @@ namespace Coalesce.Web.Ko.Api
 
         [HttpGet("get/{id}")]
         [Authorize]
-        public virtual Task<ItemResult<StandaloneReadCreateDtoGen>> Get(
+        public virtual Task<ItemResult<StandaloneReadCreateResponse>> Get(
             int id,
             DataSourceParameters parameters,
             IDataSource<Coalesce.Domain.StandaloneReadCreate> dataSource)
@@ -42,7 +42,7 @@ namespace Coalesce.Web.Ko.Api
 
         [HttpGet("list")]
         [Authorize]
-        public virtual Task<ListResult<StandaloneReadCreateDtoGen>> List(
+        public virtual Task<ListResult<StandaloneReadCreateResponse>> List(
             ListParameters parameters,
             IDataSource<Coalesce.Domain.StandaloneReadCreate> dataSource)
             => ListImplementation(parameters, dataSource);
@@ -56,8 +56,8 @@ namespace Coalesce.Web.Ko.Api
 
         [HttpPost("save")]
         [Authorize]
-        public virtual Task<ItemResult<StandaloneReadCreateDtoGen>> Save(
-            [FromForm] StandaloneReadCreateDtoGen dto,
+        public virtual Task<ItemResult<StandaloneReadCreateResponse>> Save(
+            [FromForm] StandaloneReadCreateParameter dto,
             [FromQuery] DataSourceParameters parameters,
             IDataSource<Coalesce.Domain.StandaloneReadCreate> dataSource,
             IBehaviors<Coalesce.Domain.StandaloneReadCreate> behaviors)
@@ -65,7 +65,7 @@ namespace Coalesce.Web.Ko.Api
 
         [HttpPost("delete/{id}")]
         [Authorize]
-        public virtual Task<ItemResult<StandaloneReadCreateDtoGen>> Delete(
+        public virtual Task<ItemResult<StandaloneReadCreateResponse>> Delete(
             int id,
             IBehaviors<Coalesce.Domain.StandaloneReadCreate> behaviors,
             IDataSource<Coalesce.Domain.StandaloneReadCreate> dataSource)

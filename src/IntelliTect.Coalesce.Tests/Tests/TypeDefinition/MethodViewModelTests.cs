@@ -14,7 +14,7 @@ namespace IntelliTect.Coalesce.Tests.TypeDefinition
         [ClassViewModelData(
             typeof(TargetClasses.Github31.Person),
             nameof(TargetClasses.Github31.Person.GetMyPeeps),
-            "ItemResult<System.Collections.Generic.ICollection<PersonDtoGen>>")]
+            "ItemResult<System.Collections.Generic.ICollection<PersonResponse>>")]
         public void ReturnTypeNameForApi_UsesDtoForCollection(
             ClassViewModelData data, string methodName, string expectedReturn)
         {

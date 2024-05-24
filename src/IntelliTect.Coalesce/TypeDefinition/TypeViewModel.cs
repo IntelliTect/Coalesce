@@ -115,6 +115,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             IsEnum ? TypeDiscriminator.Enum :
             IsVoid ? TypeDiscriminator.Void :
             IsFile ? TypeDiscriminator.File :
+            IsDictionary ? TypeDiscriminator.Unknown : // No support for dictionaries on the frontend.
             IsCollection ? TypeDiscriminator.Collection :
             ClassViewModel != null 
                 ? (ClassViewModel.IsDbMappedType ? TypeDiscriminator.Model : TypeDiscriminator.Object) 
@@ -357,19 +358,17 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public string TsDeclarationPlain(string parameterName) => $"{parameterName}: {TsTypePlain}";
 
-        public string DtoFullyQualifiedName => NullableTypeForDto(null, true);
-
-        public string NullableTypeForDto(string? dtoNamespace, bool dontEmitNullable = false)
+        public string NullableTypeForDto(bool isInput, string? dtoNamespace, bool dontEmitNullable = false)
         {
             if (IsDictionary)
             {
                 var args = GenericArgumentsFor(typeof(IDictionary<,>))!;
-                return $"System.Collections.Generic.IDictionary<{args[0].NullableTypeForDto(dtoNamespace, true)}, {args[1].NullableTypeForDto(dtoNamespace, true)}>";
+                return $"System.Collections.Generic.IDictionary<{args[0].NullableTypeForDto(isInput, dtoNamespace, true)}, {args[1].NullableTypeForDto(isInput, dtoNamespace, true)}>";
             }
 
             if (IsCollection)
             {
-                var innerType = PureType.NullableTypeForDto(dtoNamespace, true);
+                var innerType = PureType.NullableTypeForDto(isInput, dtoNamespace, true);
                 if (IsArray)
                 {
                     return $"{innerType}[]";
@@ -392,7 +391,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             var model = this.PureType.ClassViewModel;
             if (model != null)
             {
-                if (model.IsDto) return FullyQualifiedName;
+                if (model.IsCustomDto) return FullyQualifiedName;
 
                 string typeName;
 
@@ -401,9 +400,10 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 else
                     typeName = Name + "?";
 
-                var regex = new Regex($@"({model.Name}(?!DtoGen))(>|$)");
-                typeName = regex.Replace(typeName, $@"{model.Name}DtoGen$2");
-                typeName = typeName.Replace(model.Type.FullNamespace + ".", string.IsNullOrWhiteSpace(dtoNamespace) ? "" : dtoNamespace + ".");
+                var dtoName = isInput ? model.ParameterDtoTypeName : model.ResponseDtoTypeName;
+                typeName = typeName.Replace(
+                    model.Type.FullNamespace + ".", 
+                    string.IsNullOrWhiteSpace(dtoNamespace) ? "" : dtoNamespace + ".");
 
                 return typeName;
             }

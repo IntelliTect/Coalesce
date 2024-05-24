@@ -8,9 +8,9 @@ using System.Security.Claims;
 
 namespace Coalesce.Web.Ko.Models
 {
-    public partial class StandaloneReadonlyDtoGen : GeneratedDto<Coalesce.Domain.StandaloneReadonly>
+    public partial class StandaloneReadonlyParameter : GeneratedParameterDto<Coalesce.Domain.StandaloneReadonly>
     {
-        public StandaloneReadonlyDtoGen() { }
+        public StandaloneReadonlyParameter() { }
 
         private int? _Id;
         private string _Name;
@@ -30,19 +30,6 @@ namespace Coalesce.Web.Ko.Models
         {
             get => _Description;
             set { _Description = value; Changed(nameof(Description)); }
-        }
-
-        /// <summary>
-        /// Map from the domain object to the properties of the current DTO instance.
-        /// </summary>
-        public override void MapFrom(Coalesce.Domain.StandaloneReadonly obj, IMappingContext context, IncludeTree tree = null)
-        {
-            if (obj == null) return;
-            var includes = context.Includes;
-
-            this.Id = obj.Id;
-            this.Name = obj.Name;
-            this.Description = obj.Description;
         }
 
         /// <summary>
@@ -67,6 +54,28 @@ namespace Coalesce.Web.Ko.Models
             var entity = new Coalesce.Domain.StandaloneReadonly();
             MapTo(entity, context);
             return entity;
+        }
+    }
+
+    public partial class StandaloneReadonlyResponse : GeneratedResponseDto<Coalesce.Domain.StandaloneReadonly>
+    {
+        public StandaloneReadonlyResponse() { }
+
+        public int? Id { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
+
+        /// <summary>
+        /// Map from the domain object to the properties of the current DTO instance.
+        /// </summary>
+        public override void MapFrom(Coalesce.Domain.StandaloneReadonly obj, IMappingContext context, IncludeTree tree = null)
+        {
+            if (obj == null) return;
+            var includes = context.Includes;
+
+            this.Id = obj.Id;
+            this.Name = obj.Name;
+            this.Description = obj.Description;
         }
     }
 }

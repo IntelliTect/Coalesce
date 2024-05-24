@@ -25,7 +25,7 @@ namespace Coalesce.Web.Vue3.Api
     [Authorize]
     [ServiceFilter(typeof(IApiActionFilter))]
     public partial class PersonController
-        : BaseApiController<Coalesce.Domain.Person, PersonDtoGen, Coalesce.Domain.AppDbContext>
+        : BaseApiController<Coalesce.Domain.Person, PersonParameter, PersonResponse, Coalesce.Domain.AppDbContext>
     {
         public PersonController(CrudContext<Coalesce.Domain.AppDbContext> context) : base(context)
         {
@@ -34,7 +34,7 @@ namespace Coalesce.Web.Vue3.Api
 
         [HttpGet("get/{id}")]
         [AllowAnonymous]
-        public virtual Task<ItemResult<PersonDtoGen>> Get(
+        public virtual Task<ItemResult<PersonResponse>> Get(
             int id,
             DataSourceParameters parameters,
             IDataSource<Coalesce.Domain.Person> dataSource)
@@ -42,7 +42,7 @@ namespace Coalesce.Web.Vue3.Api
 
         [HttpGet("list")]
         [AllowAnonymous]
-        public virtual Task<ListResult<PersonDtoGen>> List(
+        public virtual Task<ListResult<PersonResponse>> List(
             ListParameters parameters,
             IDataSource<Coalesce.Domain.Person> dataSource)
             => ListImplementation(parameters, dataSource);
@@ -56,8 +56,8 @@ namespace Coalesce.Web.Vue3.Api
 
         [HttpPost("save")]
         [AllowAnonymous]
-        public virtual Task<ItemResult<PersonDtoGen>> Save(
-            [FromForm] PersonDtoGen dto,
+        public virtual Task<ItemResult<PersonResponse>> Save(
+            [FromForm] PersonParameter dto,
             [FromQuery] DataSourceParameters parameters,
             IDataSource<Coalesce.Domain.Person> dataSource,
             IBehaviors<Coalesce.Domain.Person> behaviors)
@@ -65,7 +65,7 @@ namespace Coalesce.Web.Vue3.Api
 
         [HttpPost("bulkSave")]
         [AllowAnonymous]
-        public virtual Task<ItemResult<PersonDtoGen>> BulkSave(
+        public virtual Task<ItemResult<PersonResponse>> BulkSave(
             [FromBody] BulkSaveRequest dto,
             [FromQuery] DataSourceParameters parameters,
             [FromServices] IDataSourceFactory dataSourceFactory,
@@ -74,7 +74,7 @@ namespace Coalesce.Web.Vue3.Api
 
         [HttpPost("delete/{id}")]
         [Authorize]
-        public virtual Task<ItemResult<PersonDtoGen>> Delete(
+        public virtual Task<ItemResult<PersonResponse>> Delete(
             int id,
             IBehaviors<Coalesce.Domain.Person> behaviors,
             IDataSource<Coalesce.Domain.Person> dataSource)
@@ -87,7 +87,7 @@ namespace Coalesce.Web.Vue3.Api
         /// </summary>
         [HttpPost("Rename")]
         [Authorize]
-        public virtual async Task<ItemResult<PersonDtoGen>> Rename(
+        public virtual async Task<ItemResult<Person>> Rename(
             [FromServices] IDataSourceFactory dataSourceFactory,
             [FromForm(Name = "id")] int id,
             [FromForm(Name = "name")] string name)
@@ -96,7 +96,7 @@ namespace Coalesce.Web.Vue3.Api
             var (itemResult, _) = await dataSource.GetItemAsync(id, new DataSourceParameters());
             if (!itemResult.WasSuccessful)
             {
-                return new ItemResult<PersonDtoGen>(itemResult);
+                return new ItemResult<Person>(itemResult);
             }
             var item = itemResult.Object;
             var _params = new
@@ -108,7 +108,7 @@ namespace Coalesce.Web.Vue3.Api
             {
                 var _validationResult = ItemResult.FromParameterValidation(
                     GeneratedForClassViewModel!.MethodByName("Rename"), _params, HttpContext.RequestServices);
-                if (!_validationResult.WasSuccessful) return new ItemResult<PersonDtoGen>(_validationResult);
+                if (!_validationResult.WasSuccessful) return new ItemResult<Person>(_validationResult);
             }
 
             IncludeTree includeTree = null;
@@ -118,8 +118,8 @@ namespace Coalesce.Web.Vue3.Api
                 out includeTree
             );
             await Db.SaveChangesAsync();
-            var _result = new ItemResult<PersonDtoGen>();
-            _result.Object = Mapper.MapToDto<Coalesce.Domain.Person, PersonDtoGen>(_methodResult, _mappingContext, includeTree);
+            var _result = new ItemResult<Person>();
+            _result.Object = Mapper.MapToDto<Coalesce.Domain.Person, PersonResponse>(_methodResult, _mappingContext, includeTree);
             return _result;
         }
 
@@ -367,7 +367,7 @@ namespace Coalesce.Web.Vue3.Api
         /// </summary>
         [HttpPatch("ChangeFirstName")]
         [Authorize]
-        public virtual async Task<ItemResult<PersonDtoGen>> ChangeFirstName(
+        public virtual async Task<ItemResult<Person>> ChangeFirstName(
             [FromServices] IDataSourceFactory dataSourceFactory,
             [FromForm(Name = "id")] int id,
             [FromForm(Name = "firstName")] string firstName,
@@ -377,7 +377,7 @@ namespace Coalesce.Web.Vue3.Api
             var (itemResult, _) = await dataSource.GetItemAsync(id, new DataSourceParameters());
             if (!itemResult.WasSuccessful)
             {
-                return new ItemResult<PersonDtoGen>(itemResult);
+                return new ItemResult<Person>(itemResult);
             }
             var item = itemResult.Object;
             var _params = new
@@ -390,7 +390,7 @@ namespace Coalesce.Web.Vue3.Api
             {
                 var _validationResult = ItemResult.FromParameterValidation(
                     GeneratedForClassViewModel!.MethodByName("ChangeFirstName"), _params, HttpContext.RequestServices);
-                if (!_validationResult.WasSuccessful) return new ItemResult<PersonDtoGen>(_validationResult);
+                if (!_validationResult.WasSuccessful) return new ItemResult<Person>(_validationResult);
             }
 
             IncludeTree includeTree = null;
@@ -400,8 +400,8 @@ namespace Coalesce.Web.Vue3.Api
                 _params.title
             );
             await Db.SaveChangesAsync();
-            var _result = new ItemResult<PersonDtoGen>();
-            _result.Object = Mapper.MapToDto<Coalesce.Domain.Person, PersonDtoGen>(_methodResult, _mappingContext, includeTree);
+            var _result = new ItemResult<Person>();
+            _result.Object = Mapper.MapToDto<Coalesce.Domain.Person, PersonResponse>(_methodResult, _mappingContext, includeTree);
             return _result;
         }
 
@@ -483,8 +483,8 @@ namespace Coalesce.Web.Vue3.Api
         /// </summary>
         [HttpPost("MethodWithEntityParameter")]
         [Authorize]
-        public virtual ItemResult<PersonDtoGen> MethodWithEntityParameter(
-            [FromForm(Name = "person")] PersonDtoGen person)
+        public virtual ItemResult<Person> MethodWithEntityParameter(
+            [FromForm(Name = "person")] Person person)
         {
             var _params = new
             {
@@ -495,7 +495,7 @@ namespace Coalesce.Web.Vue3.Api
             {
                 var _validationResult = ItemResult.FromParameterValidation(
                     GeneratedForClassViewModel!.MethodByName("MethodWithEntityParameter"), _params, HttpContext.RequestServices);
-                if (!_validationResult.WasSuccessful) return new ItemResult<PersonDtoGen>(_validationResult);
+                if (!_validationResult.WasSuccessful) return new ItemResult<Person>(_validationResult);
             }
 
             IncludeTree includeTree = null;
@@ -504,8 +504,8 @@ namespace Coalesce.Web.Vue3.Api
                 Db,
                 _params.person.MapToNew(_mappingContext)
             );
-            var _result = new ItemResult<PersonDtoGen>();
-            _result.Object = Mapper.MapToDto<Coalesce.Domain.Person, PersonDtoGen>(_methodResult, _mappingContext, includeTree);
+            var _result = new ItemResult<Person>();
+            _result.Object = Mapper.MapToDto<Coalesce.Domain.Person, PersonResponse>(_methodResult, _mappingContext, includeTree);
             return _result;
         }
 
@@ -514,8 +514,8 @@ namespace Coalesce.Web.Vue3.Api
         /// </summary>
         [HttpPost("SearchPeople")]
         [Authorize]
-        public virtual ListResult<PersonDtoGen> SearchPeople(
-            [FromForm(Name = "criteria")] PersonCriteriaDtoGen criteria,
+        public virtual ListResult<Person> SearchPeople(
+            [FromForm(Name = "criteria")] PersonCriteria criteria,
             [FromForm(Name = "page")] int page)
         {
             var _params = new
@@ -528,7 +528,7 @@ namespace Coalesce.Web.Vue3.Api
             {
                 var _validationResult = ItemResult.FromParameterValidation(
                     GeneratedForClassViewModel!.MethodByName("SearchPeople"), _params, HttpContext.RequestServices);
-                if (!_validationResult.WasSuccessful) return new ListResult<PersonDtoGen>(_validationResult);
+                if (!_validationResult.WasSuccessful) return new ListResult<Person>(_validationResult);
             }
 
             IncludeTree includeTree = null;
@@ -538,8 +538,8 @@ namespace Coalesce.Web.Vue3.Api
                 _params.criteria.MapToNew(_mappingContext),
                 _params.page
             );
-            var _result = new ListResult<PersonDtoGen>(_methodResult);
-            _result.List = _methodResult.List?.ToList().Select(o => Mapper.MapToDto<Coalesce.Domain.Person, PersonDtoGen>(o, _mappingContext, includeTree ?? _methodResult.IncludeTree)).ToList();
+            var _result = new ListResult<Person>(_methodResult);
+            _result.List = _methodResult.List?.ToList().Select(o => Mapper.MapToDto<Coalesce.Domain.Person, PersonResponse>(o, _mappingContext, includeTree ?? _methodResult.IncludeTree)).ToList();
             return _result;
         }
     }

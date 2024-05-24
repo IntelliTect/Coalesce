@@ -421,7 +421,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// </summary>
         public bool IsId => IsPrimaryKey || IsForeignKey;
 
-
         /// <summary>
         /// Returns true if this is the primary key for this object.
         /// </summary>
@@ -430,7 +429,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             get
             {
                 // EffectiveParent used here because primary keys may be declared on a base class (as they are with AspNetCore.Identity).
-                if (!EffectiveParent.IsDbMappedType && !Parent.IsDto && !Parent.IsStandaloneEntity)
+                if (!EffectiveParent.IsDbMappedType && !Parent.IsCustomDto && !Parent.IsStandaloneEntity)
                     return false;
                 if (this.HasAttribute<KeyAttribute>())
                     return true;

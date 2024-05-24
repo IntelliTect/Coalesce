@@ -19,21 +19,21 @@ namespace IntelliTect.Coalesce.Tests.TypeDefinition
         [ClassViewModelData(
             typeof(ComplexModel),
             "MyTestProject.Web.Models", nameof(ComplexModel.Tests),
-            "System.Collections.Generic.ICollection<MyTestProject.Web.Models.TestDtoGen>")]
+            "System.Collections.Generic.ICollection<MyTestProject.Web.Models.TestResponse>")]
         [ClassViewModelData(
             typeof(ComplexModel),
             "MyTestProject.Web.Models", nameof(ComplexModel.SingleTest),
-            "MyTestProject.Web.Models.TestDtoGen")]
+            "MyTestProject.Web.Models.TestResponse")]
 
         // With class name as a distinct namespace.
         [ClassViewModelData(
             typeof(ComplexModel),
             "MyProject.Test.Models", nameof(ComplexModel.Tests),
-            "System.Collections.Generic.ICollection<MyProject.Test.Models.TestDtoGen>")]
+            "System.Collections.Generic.ICollection<MyProject.Test.Models.TestResponse>")]
         [ClassViewModelData(
             typeof(ComplexModel),
             "MyProject.Test.Models", nameof(ComplexModel.SingleTest),
-            "MyProject.Test.Models.TestDtoGen")]
+            "MyProject.Test.Models.TestResponse")]
         public void NullableTypeForDto_DoesNotMangleNamespace(
             ClassViewModelData data,
             string dtoOputputNamespace,
@@ -51,7 +51,7 @@ namespace IntelliTect.Coalesce.Tests.TypeDefinition
             // Precondition: Model's type name is contained in its own namespace:
             Assert.Contains(prop.PureType.Name, prop.PureType.FullNamespace);
 
-            var dtoPropType = prop.Type.NullableTypeForDto(dtoOputputNamespace);
+            var dtoPropType = prop.Type.NullableTypeForDto(isInput: false, dtoNamespace: dtoOputputNamespace);
 
             Assert.Equal(expectedPropertyType, dtoPropType);
         }
@@ -64,12 +64,12 @@ namespace IntelliTect.Coalesce.Tests.TypeDefinition
         [ClassViewModelData(typeof(ExternalParent), nameof(ExternalParent.ValueICollection), "System.Collections.Generic.ICollection<int>")]
         [ClassViewModelData(typeof(ExternalParent), nameof(ExternalParent.ValueNullableICollection), "System.Collections.Generic.ICollection<int?>")]
         [ClassViewModelData(typeof(ExternalParent), nameof(ExternalParent.ValueICollectionNullable), "System.Collections.Generic.ICollection<int>")]
-        [ClassViewModelData(typeof(ExternalParent), nameof(ExternalParent.RefArray), "MyProject.ExternalChildDtoGen[]")]
-        [ClassViewModelData(typeof(ExternalParent), nameof(ExternalParent.RefNullableArray), "MyProject.ExternalChildDtoGen[]")]
-        [ClassViewModelData(typeof(ExternalParent), nameof(ExternalParent.RefArrayNullable), "MyProject.ExternalChildDtoGen[]")]
-        [ClassViewModelData(typeof(ExternalParent), nameof(ExternalParent.RefICollection), "System.Collections.Generic.ICollection<MyProject.ExternalChildDtoGen>")]
-        [ClassViewModelData(typeof(ExternalParent), nameof(ExternalParent.RefNullableICollection), "System.Collections.Generic.ICollection<MyProject.ExternalChildDtoGen>")]
-        [ClassViewModelData(typeof(ExternalParent), nameof(ExternalParent.RefICollectionNullable), "System.Collections.Generic.ICollection<MyProject.ExternalChildDtoGen>")]
+        [ClassViewModelData(typeof(ExternalParent), nameof(ExternalParent.RefArray), "MyProject.ExternalChildResponse[]")]
+        [ClassViewModelData(typeof(ExternalParent), nameof(ExternalParent.RefNullableArray), "MyProject.ExternalChildResponse[]")]
+        [ClassViewModelData(typeof(ExternalParent), nameof(ExternalParent.RefArrayNullable), "MyProject.ExternalChildResponse[]")]
+        [ClassViewModelData(typeof(ExternalParent), nameof(ExternalParent.RefICollection), "System.Collections.Generic.ICollection<MyProject.ExternalChildResponse>")]
+        [ClassViewModelData(typeof(ExternalParent), nameof(ExternalParent.RefNullableICollection), "System.Collections.Generic.ICollection<MyProject.ExternalChildResponse>")]
+        [ClassViewModelData(typeof(ExternalParent), nameof(ExternalParent.RefICollectionNullable), "System.Collections.Generic.ICollection<MyProject.ExternalChildResponse>")]
         public void NullableTypeForDto_HandlesCollectionsProperly(
             ClassViewModelData data,
             string propertyName,
@@ -80,7 +80,7 @@ namespace IntelliTect.Coalesce.Tests.TypeDefinition
 
             var prop = vm.PropertyByName(propertyName);
 
-            var dtoPropType = prop.Type.NullableTypeForDto("MyProject");
+            var dtoPropType = prop.Type.NullableTypeForDto(isInput: false, dtoNamespace: "MyProject");
 
             Assert.Equal(expectedPropertyType, dtoPropType);
         }

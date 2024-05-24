@@ -35,7 +35,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         private readonly ConcurrentHashSet<ClassViewModel> _services = new();
         private readonly ConcurrentHashSet<TypeViewModel> _enums = new();
 
-        private readonly ConcurrentDictionary<ClassViewModel, ClassViewModel> _generatedDtos = new();
+        private readonly ConcurrentDictionary<ClassViewModel, ClassViewModel> _generatedParamDtos = new();
 
         private readonly ConcurrentDictionary<object, TypeViewModel> _allTypeViewModels
             = new();
@@ -61,7 +61,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// A map from an entity or external type to the DTO that was generated for it.
         /// </summary>
-        public ReadOnlyDictionary<ClassViewModel, ClassViewModel> GeneratedDtos => new(_generatedDtos);
+        internal ReadOnlyDictionary<ClassViewModel, ClassViewModel> GeneratedParameterDtos => new(_generatedParamDtos);
 
         [Obsolete("Replaced by better-named property \"CrudApiBackedClasses\".")]
         public IEnumerable<ClassViewModel> ApiBackedClasses => CrudApiBackedClasses;
@@ -106,7 +106,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     // For some reason, attribute checking can be really slow. We're talking ~350ms to determine that the DbContext type has a [Coalesce] attribute.
                     // Really not sure why, but lets parallelize to minimize that impact.
                     .AsParallel()
-                    .Where(type => type.HasAttribute<CoalesceAttribute>() || type.IsA(typeof(GeneratedDto<>)))
+                    .Where(type => type.HasAttribute<CoalesceAttribute>() || type.IsA(typeof(GeneratedParameterDto<>)))
                 );
             }
         }
@@ -154,10 +154,10 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         private void ProcessAddedType(TypeViewModel type)
         {
-            var generatedDtoEntity = type.GenericArgumentsFor(typeof(GeneratedDto<>))?[0];
+            var generatedDtoEntity = type.GenericArgumentsFor(typeof(GeneratedParameterDto<>))?[0];
             if (generatedDtoEntity?.ClassViewModel is ClassViewModel cvm)
             {
-                _generatedDtos[cvm] = type.ClassViewModel!;
+                _generatedParamDtos[cvm] = type.ClassViewModel!;
             }
 
             if (!type.HasAttribute<CoalesceAttribute>())
@@ -332,7 +332,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             // or just the type that is served if neither are present.
             declaredFor = explicitlyDeclaredFor ?? declaredFor ?? servedClass;
 
-            if (declaredFor.IsDto && !servedClass.Equals(declaredFor.DtoBaseViewModel))
+            if (declaredFor.IsCustomDto && !servedClass.Equals(declaredFor.DtoBaseViewModel))
             {
                 throw new InvalidOperationException($"{strategyType} is not a valid {iface} for {declaredFor} - " +
                     $"{strategyType} must satisfy {iface} with type parameter <{declaredFor.DtoBaseViewModel}>.");

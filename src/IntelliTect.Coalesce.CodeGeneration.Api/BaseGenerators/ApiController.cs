@@ -144,7 +144,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
                 }
                 else
                 {
-                    typeName = param.Type.DtoFullyQualifiedName;
+                    typeName = param.Type.NullableTypeForDto(isInput: true, dtoNamespace: null, dontEmitNullable: true);
                 }
 
                 if (param.ShouldInjectFromServices)
@@ -230,7 +230,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
                 b.Line();
             }
 
-            if (method.ResultType.PureType.ClassViewModel?.IsDto == false)
+            if (method.ResultType.PureType.ClassViewModel?.IsCustomDto == false)
             {
                 b.Line("IncludeTree includeTree = null;");
             }
@@ -353,7 +353,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
 
             string ret = $"_params.{param.CsParameterName}";
 
-            if (param.Type.PureType.ClassViewModel != null && !param.Type.PureType.ClassViewModel.IsDto)
+            if (param.Type.PureType.ClassViewModel != null && !param.Type.PureType.ClassViewModel.IsCustomDto)
             {
                 if (param.Type.IsCollection)
                 {
@@ -467,12 +467,12 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
             }
             else if (resultType.IsCollection)
             {
-                if (resultType.PureType.HasClassViewModel && !resultType.PureType.ClassViewModel.IsDto)
+                if (resultType.PureType.HasClassViewModel && !resultType.PureType.ClassViewModel.IsCustomDto)
                 {
                     // Return type is a collection of models that need to be mapped to a DTO.
                     // ToList the result (because it might be IQueryable - we need to execute the query before mapping)
                     b.Append($"_result.{resultProp} = {resultVar}?.ToList().Select(o => ");
-                    b.Append($"Mapper.MapToDto<{resultType.PureType.ClassViewModel.FullyQualifiedName}, {resultType.PureType.ClassViewModel.DtoName}>");
+                    b.Append($"Mapper.MapToDto<{resultType.PureType.ClassViewModel.FullyQualifiedName}, {resultType.PureType.ClassViewModel.ResponseDtoTypeName}>");
 
                     // Only attempt to pull the include tree out of the result if the user actually typed their return type as an IQueryable.
                     if (resultType.IsA<IQueryable>())
@@ -495,10 +495,10 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
             }
             else
             {
-                if (resultType.HasClassViewModel && !resultType.ClassViewModel.IsDto)
+                if (resultType.HasClassViewModel && !resultType.ClassViewModel.IsCustomDto)
                 {
                     // Return type is a model that needs to be mapped to a DTO.
-                    b.Line($"_result.{resultProp} = Mapper.MapToDto<{resultType.ClassViewModel.FullyQualifiedName}, {resultType.ClassViewModel.DtoName}>({resultVar}, {MappingContextVar}, {includeTreeForMapping});");
+                    b.Line($"_result.{resultProp} = Mapper.MapToDto<{resultType.ClassViewModel.FullyQualifiedName}, {resultType.ClassViewModel.ResponseDtoTypeName}>({resultVar}, {MappingContextVar}, {includeTreeForMapping});");
                 }
                 else
                 {

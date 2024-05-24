@@ -25,7 +25,7 @@ namespace Coalesce.Web.Vue2.Api
     [Authorize]
     [ServiceFilter(typeof(IApiActionFilter))]
     public partial class CompanyController
-        : BaseApiController<Coalesce.Domain.Company, CompanyDtoGen, Coalesce.Domain.AppDbContext>
+        : BaseApiController<Coalesce.Domain.Company, CompanyParameter, CompanyResponse, Coalesce.Domain.AppDbContext>
     {
         public CompanyController(CrudContext<Coalesce.Domain.AppDbContext> context) : base(context)
         {
@@ -34,7 +34,7 @@ namespace Coalesce.Web.Vue2.Api
 
         [HttpGet("get/{id}")]
         [Authorize]
-        public virtual Task<ItemResult<CompanyDtoGen>> Get(
+        public virtual Task<ItemResult<CompanyResponse>> Get(
             int id,
             DataSourceParameters parameters,
             IDataSource<Coalesce.Domain.Company> dataSource)
@@ -42,7 +42,7 @@ namespace Coalesce.Web.Vue2.Api
 
         [HttpGet("list")]
         [Authorize]
-        public virtual Task<ListResult<CompanyDtoGen>> List(
+        public virtual Task<ListResult<CompanyResponse>> List(
             ListParameters parameters,
             IDataSource<Coalesce.Domain.Company> dataSource)
             => ListImplementation(parameters, dataSource);
@@ -56,8 +56,8 @@ namespace Coalesce.Web.Vue2.Api
 
         [HttpPost("save")]
         [Authorize]
-        public virtual Task<ItemResult<CompanyDtoGen>> Save(
-            [FromForm] CompanyDtoGen dto,
+        public virtual Task<ItemResult<CompanyResponse>> Save(
+            [FromForm] CompanyParameter dto,
             [FromQuery] DataSourceParameters parameters,
             IDataSource<Coalesce.Domain.Company> dataSource,
             IBehaviors<Coalesce.Domain.Company> behaviors)
@@ -65,7 +65,7 @@ namespace Coalesce.Web.Vue2.Api
 
         [HttpPost("bulkSave")]
         [Authorize]
-        public virtual Task<ItemResult<CompanyDtoGen>> BulkSave(
+        public virtual Task<ItemResult<CompanyResponse>> BulkSave(
             [FromBody] BulkSaveRequest dto,
             [FromQuery] DataSourceParameters parameters,
             [FromServices] IDataSourceFactory dataSourceFactory,
@@ -74,7 +74,7 @@ namespace Coalesce.Web.Vue2.Api
 
         [HttpPost("delete/{id}")]
         [Authorize]
-        public virtual Task<ItemResult<CompanyDtoGen>> Delete(
+        public virtual Task<ItemResult<CompanyResponse>> Delete(
             int id,
             IBehaviors<Coalesce.Domain.Company> behaviors,
             IDataSource<Coalesce.Domain.Company> dataSource)
@@ -90,7 +90,7 @@ namespace Coalesce.Web.Vue2.Api
         public virtual async Task<ItemResult> ConflictingParameterNames(
             [FromServices] IDataSourceFactory dataSourceFactory,
             [FromForm(Name = "id")] int id,
-            [FromForm(Name = "companyParam")] CompanyDtoGen companyParam,
+            [FromForm(Name = "companyParam")] CompanyParameter companyParam,
             [FromForm(Name = "name")] string name)
         {
             var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Company, Coalesce.Domain.Company>("Default");
@@ -128,7 +128,7 @@ namespace Coalesce.Web.Vue2.Api
         /// </summary>
         [HttpPost("GetCertainItems")]
         [Authorize]
-        public virtual ItemResult<System.Collections.Generic.ICollection<CompanyDtoGen>> GetCertainItems(
+        public virtual ItemResult<System.Collections.Generic.ICollection<CompanyResponse>> GetCertainItems(
             [FromForm(Name = "isDeleted")] bool isDeleted = false)
         {
             var _params = new
@@ -140,7 +140,7 @@ namespace Coalesce.Web.Vue2.Api
             {
                 var _validationResult = ItemResult.FromParameterValidation(
                     GeneratedForClassViewModel!.MethodByName("GetCertainItems"), _params, HttpContext.RequestServices);
-                if (!_validationResult.WasSuccessful) return new ItemResult<System.Collections.Generic.ICollection<CompanyDtoGen>>(_validationResult);
+                if (!_validationResult.WasSuccessful) return new ItemResult<System.Collections.Generic.ICollection<CompanyResponse>>(_validationResult);
             }
 
             IncludeTree includeTree = null;
@@ -149,8 +149,8 @@ namespace Coalesce.Web.Vue2.Api
                 Db,
                 _params.isDeleted
             );
-            var _result = new ItemResult<System.Collections.Generic.ICollection<CompanyDtoGen>>();
-            _result.Object = _methodResult?.ToList().Select(o => Mapper.MapToDto<Coalesce.Domain.Company, CompanyDtoGen>(o, _mappingContext, includeTree)).ToList();
+            var _result = new ItemResult<System.Collections.Generic.ICollection<CompanyResponse>>();
+            _result.Object = _methodResult?.ToList().Select(o => Mapper.MapToDto<Coalesce.Domain.Company, CompanyResponse>(o, _mappingContext, includeTree)).ToList();
             return _result;
         }
     }

@@ -8,9 +8,9 @@ using System.Security.Claims;
 
 namespace Coalesce.Web.Vue2.Models
 {
-    public partial class PersonCriteriaDtoGen : GeneratedDto<Coalesce.Domain.PersonCriteria>
+    public partial class PersonCriteriaParameter : GeneratedParameterDto<Coalesce.Domain.PersonCriteria>
     {
-        public PersonCriteriaDtoGen() { }
+        public PersonCriteriaParameter() { }
 
         private string _Name;
         private int? _BirthdayMonth;
@@ -30,19 +30,6 @@ namespace Coalesce.Web.Vue2.Models
         {
             get => _EmailDomain;
             set { _EmailDomain = value; Changed(nameof(EmailDomain)); }
-        }
-
-        /// <summary>
-        /// Map from the domain object to the properties of the current DTO instance.
-        /// </summary>
-        public override void MapFrom(Coalesce.Domain.PersonCriteria obj, IMappingContext context, IncludeTree tree = null)
-        {
-            if (obj == null) return;
-            var includes = context.Includes;
-
-            this.Name = obj.Name;
-            this.BirthdayMonth = obj.BirthdayMonth;
-            this.EmailDomain = obj.EmailDomain;
         }
 
         /// <summary>
@@ -67,6 +54,28 @@ namespace Coalesce.Web.Vue2.Models
             var entity = new Coalesce.Domain.PersonCriteria();
             MapTo(entity, context);
             return entity;
+        }
+    }
+
+    public partial class PersonCriteriaResponse : GeneratedResponseDto<Coalesce.Domain.PersonCriteria>
+    {
+        public PersonCriteriaResponse() { }
+
+        public string Name { get; set; }
+        public int? BirthdayMonth { get; set; }
+        public string EmailDomain { get; set; }
+
+        /// <summary>
+        /// Map from the domain object to the properties of the current DTO instance.
+        /// </summary>
+        public override void MapFrom(Coalesce.Domain.PersonCriteria obj, IMappingContext context, IncludeTree tree = null)
+        {
+            if (obj == null) return;
+            var includes = context.Includes;
+
+            this.Name = obj.Name;
+            this.BirthdayMonth = obj.BirthdayMonth;
+            this.EmailDomain = obj.EmailDomain;
         }
     }
 }

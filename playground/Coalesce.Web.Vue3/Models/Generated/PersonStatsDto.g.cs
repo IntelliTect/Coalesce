@@ -8,16 +8,16 @@ using System.Security.Claims;
 
 namespace Coalesce.Web.Vue3.Models
 {
-    public partial class PersonStatsDtoGen : GeneratedDto<Coalesce.Domain.PersonStats>
+    public partial class PersonStatsParameter : GeneratedParameterDto<Coalesce.Domain.PersonStats>
     {
-        public PersonStatsDtoGen() { }
+        public PersonStatsParameter() { }
 
         private double? _Height;
         private double? _Weight;
         private string _Name;
         private System.Collections.Generic.ICollection<System.DateTimeOffset?> _NullableValueTypeCollection;
         private System.Collections.Generic.ICollection<System.DateTimeOffset> _ValueTypeCollection;
-        private Coalesce.Web.Vue3.Models.PersonLocationDtoGen _PersonLocation;
+        private Coalesce.Web.Vue3.Models.PersonLocation _PersonLocation;
 
         public double? Height
         {
@@ -44,28 +44,10 @@ namespace Coalesce.Web.Vue3.Models
             get => _ValueTypeCollection;
             set { _ValueTypeCollection = value; Changed(nameof(ValueTypeCollection)); }
         }
-        public Coalesce.Web.Vue3.Models.PersonLocationDtoGen PersonLocation
+        public Coalesce.Web.Vue3.Models.PersonLocation PersonLocation
         {
             get => _PersonLocation;
             set { _PersonLocation = value; Changed(nameof(PersonLocation)); }
-        }
-
-        /// <summary>
-        /// Map from the domain object to the properties of the current DTO instance.
-        /// </summary>
-        public override void MapFrom(Coalesce.Domain.PersonStats obj, IMappingContext context, IncludeTree tree = null)
-        {
-            if (obj == null) return;
-            var includes = context.Includes;
-
-            this.Height = obj.Height;
-            this.Weight = obj.Weight;
-            this.Name = obj.Name;
-            this.NullableValueTypeCollection = obj.NullableValueTypeCollection;
-            this.ValueTypeCollection = obj.ValueTypeCollection;
-
-            this.PersonLocation = obj.PersonLocation.MapToDto<Coalesce.Domain.PersonLocation, PersonLocationDtoGen>(context, tree?[nameof(this.PersonLocation)]);
-
         }
 
         /// <summary>
@@ -93,6 +75,36 @@ namespace Coalesce.Web.Vue3.Models
             var entity = new Coalesce.Domain.PersonStats();
             MapTo(entity, context);
             return entity;
+        }
+    }
+
+    public partial class PersonStatsResponse : GeneratedResponseDto<Coalesce.Domain.PersonStats>
+    {
+        public PersonStatsResponse() { }
+
+        public double? Height { get; set; }
+        public double? Weight { get; set; }
+        public string Name { get; set; }
+        public System.Collections.Generic.ICollection<System.DateTimeOffset?> NullableValueTypeCollection { get; set; }
+        public System.Collections.Generic.ICollection<System.DateTimeOffset> ValueTypeCollection { get; set; }
+        public Coalesce.Web.Vue3.Models.PersonLocation PersonLocation { get; set; }
+
+        /// <summary>
+        /// Map from the domain object to the properties of the current DTO instance.
+        /// </summary>
+        public override void MapFrom(Coalesce.Domain.PersonStats obj, IMappingContext context, IncludeTree tree = null)
+        {
+            if (obj == null) return;
+            var includes = context.Includes;
+
+            this.Height = obj.Height;
+            this.Weight = obj.Weight;
+            this.Name = obj.Name;
+            this.NullableValueTypeCollection = obj.NullableValueTypeCollection;
+            this.ValueTypeCollection = obj.ValueTypeCollection;
+
+            this.PersonLocation = obj.PersonLocation.MapToDto<Coalesce.Domain.PersonLocation, PersonLocationResponse>(context, tree?[nameof(this.PersonLocation)]);
+
         }
     }
 }

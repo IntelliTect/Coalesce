@@ -22,13 +22,13 @@ namespace IntelliTect.Coalesce.Tests.Util
         public Action<TestDto<T>, T>? MapFrom { get; set; }
         public Action<T>? MapTo { get; set; }
 
-        void IClassDto<T>.MapFrom(T obj, IMappingContext context, IncludeTree? tree)
+        void IResponseDto<T>.MapFrom(T obj, IMappingContext context, IncludeTree? tree)
         {
             SourceEntity = obj;
             MapFrom?.Invoke(this, obj);
         }
 
-        void IClassDto<T>.MapTo(T obj, IMappingContext context)
+        void IParameterDto<T>.MapTo(T obj, IMappingContext context)
         {
             MapTo?.Invoke(obj);
         } 

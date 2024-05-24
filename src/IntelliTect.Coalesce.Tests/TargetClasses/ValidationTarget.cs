@@ -60,7 +60,7 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses
 
 #nullable disable
 
-    public partial class ValidationTargetDtoGen : GeneratedDto<ValidationTarget>
+    public partial class ValidationTargetDtoGen : GeneratedParameterDto<ValidationTarget>
     {
         public ValidationTargetDtoGen() { }
 
@@ -109,13 +109,6 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses
         }
 
         /// <summary>
-        /// Map from the domain object to the properties of the current DTO instance.
-        /// </summary>
-        public override void MapFrom(ValidationTarget obj, IMappingContext context, IncludeTree tree = null)
-            => throw new NotImplementedException(
-                "This 'generated dto' is actually hand-written for these tests. Mapping methods are unused.");
-
-        /// <summary>
         /// Map from the current DTO instance to the domain object.
         /// </summary>
         public override void MapTo(ValidationTarget entity, IMappingContext context)
@@ -133,7 +126,7 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses
         }
     }
 
-    public partial class ValidationTargetChildDtoGen : GeneratedDto<ValidationTargetChild>
+    public partial class ValidationTargetChildDtoGen : GeneratedParameterDto<ValidationTargetChild>
     {
         public ValidationTargetChildDtoGen() { }
 
@@ -149,18 +142,6 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses
         {
             get => _RequiredVal;
             set { _RequiredVal = value; Changed(nameof(RequiredVal)); }
-        }
-
-        /// <summary>
-        /// Map from the domain object to the properties of the current DTO instance.
-        /// </summary>
-        public override void MapFrom(ValidationTargetChild obj, IMappingContext context, IncludeTree tree = null)
-        {
-            if (obj == null) return;
-            var includes = context.Includes;
-
-            this.RequiredVal = obj.RequiredVal;
-            this.String = obj.String;
         }
 
         /// <summary>

@@ -1,7 +1,6 @@
 ﻿using IntelliTect.Coalesce.TypeDefinition;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -49,12 +48,11 @@ namespace IntelliTect.Coalesce.Api
             }
 
             var entityTypeViewModel = type.BaseViewModel;
-            var dtoTypeName = type.DtoName;
 
-            var dtoClassViewModel = (type.IsDto
+            var dtoClassViewModel = (type.IsCustomDto
                 ? type
-                : ReflectionRepository.Global.GeneratedDtos[entityTypeViewModel])
-                ?? throw new JsonException($"Cannot construct '{dtoTypeName}'");
+                : ReflectionRepository.Global.GeneratedParameterDtos[entityTypeViewModel])
+                ?? throw new JsonException($"Cannot construct '{type.ParameterDtoTypeName}'");
 
             BulkSaveRequestItem ret = (BulkSaveRequestItem)Activator.CreateInstance(
                 typeof(BulkSaveRequestItem<,>).MakeGenericType(
@@ -64,7 +62,7 @@ namespace IntelliTect.Coalesce.Api
 
             ret.Type = typeName;
             ret.ClassViewModel = entityTypeViewModel;
-            ret.DtoClassViewModel = dtoClassViewModel;
+            ret.ParamDtoClassViewModel = dtoClassViewModel;
 
             while (reader.Read())
             {

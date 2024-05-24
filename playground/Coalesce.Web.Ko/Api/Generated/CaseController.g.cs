@@ -25,7 +25,7 @@ namespace Coalesce.Web.Ko.Api
     [Authorize]
     [ServiceFilter(typeof(IApiActionFilter))]
     public partial class CaseController
-        : BaseApiController<Coalesce.Domain.Case, CaseDtoGen, Coalesce.Domain.AppDbContext>
+        : BaseApiController<Coalesce.Domain.Case, CaseParameter, CaseResponse, Coalesce.Domain.AppDbContext>
     {
         public CaseController(CrudContext<Coalesce.Domain.AppDbContext> context) : base(context)
         {
@@ -34,7 +34,7 @@ namespace Coalesce.Web.Ko.Api
 
         [HttpGet("get/{id}")]
         [AllowAnonymous]
-        public virtual Task<ItemResult<CaseDtoGen>> Get(
+        public virtual Task<ItemResult<CaseResponse>> Get(
             int id,
             DataSourceParameters parameters,
             IDataSource<Coalesce.Domain.Case> dataSource)
@@ -42,7 +42,7 @@ namespace Coalesce.Web.Ko.Api
 
         [HttpGet("list")]
         [AllowAnonymous]
-        public virtual Task<ListResult<CaseDtoGen>> List(
+        public virtual Task<ListResult<CaseResponse>> List(
             ListParameters parameters,
             IDataSource<Coalesce.Domain.Case> dataSource)
             => ListImplementation(parameters, dataSource);
@@ -56,8 +56,8 @@ namespace Coalesce.Web.Ko.Api
 
         [HttpPost("save")]
         [AllowAnonymous]
-        public virtual Task<ItemResult<CaseDtoGen>> Save(
-            [FromForm] CaseDtoGen dto,
+        public virtual Task<ItemResult<CaseResponse>> Save(
+            [FromForm] CaseParameter dto,
             [FromQuery] DataSourceParameters parameters,
             IDataSource<Coalesce.Domain.Case> dataSource,
             IBehaviors<Coalesce.Domain.Case> behaviors)
@@ -65,7 +65,7 @@ namespace Coalesce.Web.Ko.Api
 
         [HttpPost("bulkSave")]
         [AllowAnonymous]
-        public virtual Task<ItemResult<CaseDtoGen>> BulkSave(
+        public virtual Task<ItemResult<CaseResponse>> BulkSave(
             [FromBody] BulkSaveRequest dto,
             [FromQuery] DataSourceParameters parameters,
             [FromServices] IDataSourceFactory dataSourceFactory,
@@ -74,7 +74,7 @@ namespace Coalesce.Web.Ko.Api
 
         [HttpPost("delete/{id}")]
         [Authorize]
-        public virtual Task<ItemResult<CaseDtoGen>> Delete(
+        public virtual Task<ItemResult<CaseResponse>> Delete(
             int id,
             IBehaviors<Coalesce.Domain.Case> behaviors,
             IDataSource<Coalesce.Domain.Case> dataSource)
@@ -116,15 +116,15 @@ namespace Coalesce.Web.Ko.Api
         /// </summary>
         [HttpPost("GetSomeCases")]
         [Authorize]
-        public virtual ItemResult<System.Collections.Generic.ICollection<CaseDtoGen>> GetSomeCases()
+        public virtual ItemResult<System.Collections.Generic.ICollection<CaseResponse>> GetSomeCases()
         {
             IncludeTree includeTree = null;
             var _mappingContext = new MappingContext(Context);
             var _methodResult = Coalesce.Domain.Case.GetSomeCases(
                 Db
             );
-            var _result = new ItemResult<System.Collections.Generic.ICollection<CaseDtoGen>>();
-            _result.Object = _methodResult?.ToList().Select(o => Mapper.MapToDto<Coalesce.Domain.Case, CaseDtoGen>(o, _mappingContext, includeTree)).ToList();
+            var _result = new ItemResult<System.Collections.Generic.ICollection<CaseResponse>>();
+            _result.Object = _methodResult?.ToList().Select(o => Mapper.MapToDto<Coalesce.Domain.Case, CaseResponse>(o, _mappingContext, includeTree)).ToList();
             return _result;
         }
 
@@ -383,15 +383,15 @@ namespace Coalesce.Web.Ko.Api
         /// </summary>
         [HttpPost("GetCaseSummary")]
         [Authorize]
-        public virtual ItemResult<CaseSummaryDtoGen> GetCaseSummary()
+        public virtual ItemResult<CaseSummaryResponse> GetCaseSummary()
         {
             IncludeTree includeTree = null;
             var _mappingContext = new MappingContext(Context);
             var _methodResult = Coalesce.Domain.Case.GetCaseSummary(
                 Db
             );
-            var _result = new ItemResult<CaseSummaryDtoGen>();
-            _result.Object = Mapper.MapToDto<Coalesce.Domain.CaseSummary, CaseSummaryDtoGen>(_methodResult, _mappingContext, includeTree);
+            var _result = new ItemResult<CaseSummaryResponse>();
+            _result.Object = Mapper.MapToDto<Coalesce.Domain.CaseSummary, CaseSummaryResponse>(_methodResult, _mappingContext, includeTree);
             return _result;
         }
     }

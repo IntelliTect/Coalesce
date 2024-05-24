@@ -8,9 +8,9 @@ using System.Security.Claims;
 
 namespace Coalesce.Web.Vue3.Models
 {
-    public partial class ZipCodeDtoGen : GeneratedDto<Coalesce.Domain.ZipCode>
+    public partial class ZipCodeParameter : GeneratedParameterDto<Coalesce.Domain.ZipCode>
     {
-        public ZipCodeDtoGen() { }
+        public ZipCodeParameter() { }
 
         private string _Zip;
         private string _State;
@@ -24,18 +24,6 @@ namespace Coalesce.Web.Vue3.Models
         {
             get => _State;
             set { _State = value; Changed(nameof(State)); }
-        }
-
-        /// <summary>
-        /// Map from the domain object to the properties of the current DTO instance.
-        /// </summary>
-        public override void MapFrom(Coalesce.Domain.ZipCode obj, IMappingContext context, IncludeTree tree = null)
-        {
-            if (obj == null) return;
-            var includes = context.Includes;
-
-            this.Zip = obj.Zip;
-            this.State = obj.State;
         }
 
         /// <summary>
@@ -59,6 +47,26 @@ namespace Coalesce.Web.Vue3.Models
             var entity = new Coalesce.Domain.ZipCode();
             MapTo(entity, context);
             return entity;
+        }
+    }
+
+    public partial class ZipCodeResponse : GeneratedResponseDto<Coalesce.Domain.ZipCode>
+    {
+        public ZipCodeResponse() { }
+
+        public string Zip { get; set; }
+        public string State { get; set; }
+
+        /// <summary>
+        /// Map from the domain object to the properties of the current DTO instance.
+        /// </summary>
+        public override void MapFrom(Coalesce.Domain.ZipCode obj, IMappingContext context, IncludeTree tree = null)
+        {
+            if (obj == null) return;
+            var includes = context.Includes;
+
+            this.Zip = obj.Zip;
+            this.State = obj.State;
         }
     }
 }

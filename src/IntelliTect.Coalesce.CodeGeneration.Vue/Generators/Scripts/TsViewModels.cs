@@ -123,7 +123,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                 using (b.Block($"constructor(initialData?: DeepPartial<$models.{name}> | null)"))
                 {
                     b.Line($"super({metadataName}, new $apiClients.{name}ApiClient(), initialData)");
-                    if (model.IsDto)
+                    if (model.IsCustomDto)
                     {
                         // Non-generated DTOs don't have the necessary guts for surgical saves to work.
                         b.Line("this.$saveMode = \"whole\"");

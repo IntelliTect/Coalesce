@@ -9,7 +9,7 @@ namespace IntelliTect.Coalesce.Mapping
         [return: System.Diagnostics.CodeAnalysis.NotNullIfNotNull("obj")]
         public static TDto? MapToDto<T, TDto>(this T? obj, IMappingContext context, IncludeTree? tree = null)
             where T : class
-            where TDto : class, IClassDto<T>, new()
+            where TDto : class, IResponseDto<T>, new()
         {
             if (obj == null) return default;
 
@@ -27,7 +27,7 @@ namespace IntelliTect.Coalesce.Mapping
 
         public static T MapToModel<T, TDto>(this TDto dto, T entity, IMappingContext context)
             where T : class
-            where TDto : class, IClassDto<T>, new()
+            where TDto : class, IParameterDto<T>, new()
         {
             dto.MapTo(entity, context);
             return entity;

@@ -58,7 +58,7 @@ namespace IntelliTect.Coalesce
 
         /// <summary>
         /// If true, Coalesce will perform validation of incoming data using <see cref="ValidationAttribute"/>s
-        /// present on your models during save operations (in <see cref="ValidateDto(SaveKind, IClassDto{T})"/>).
+        /// present on your models during save operations (in <see cref="ValidateDto(SaveKind, IParameterDto{T})"/>).
         /// This setting defaults to the value of <see cref="CoalesceOptions.ValidateAttributesForSaves"/>.
         /// </summary>
         public bool ValidateAttributesForSaves { get; set; }
@@ -92,7 +92,7 @@ namespace IntelliTect.Coalesce
             IDataSource<T> dataSource,
             IDataSourceParameters parameters
         )
-            where TDto : class, IClassDto<T>, new()
+            where TDto : class, IParameterDto<T>, new()
         {
             var dtoClassViewModel = Context.ReflectionRepository.GetClassViewModel<TDto>()!;
             var dtoPkInfo = dtoClassViewModel.PrimaryKey ?? throw new InvalidOperationException("Data sources cannot save items that lack a PK");
@@ -167,7 +167,7 @@ namespace IntelliTect.Coalesce
         /// <param name="dto">The incoming item from the client.</param>
         /// <param name="parameters">The additional parameters sent by the client.</param>
         protected virtual T MapIncomingDto<TDto>(SaveKind kind, T? item, TDto dto, IDataSourceParameters parameters)
-            where TDto : class, IClassDto<T>, new()
+            where TDto : class, IParameterDto<T>, new()
         {
             var context = new MappingContext(Context, parameters.Includes);
             if (kind == SaveKind.Create)
@@ -191,7 +191,7 @@ namespace IntelliTect.Coalesce
         /// <param name="kind">Descriminator between a create and a update operation.</param>
         /// <param name="dto">The incoming item from the client.</param>
         /// <returns></returns>
-        public virtual ItemResult ValidateDto(SaveKind kind, IClassDto<T> dto)
+        public virtual ItemResult ValidateDto(SaveKind kind, IParameterDto<T> dto)
         {
             if (!ValidateAttributesForSaves) return true;
             return ItemResult.FromValidation(dto, deep: false, forceRequired: kind == SaveKind.Create, Context.ServiceProvider);
@@ -224,20 +224,23 @@ namespace IntelliTect.Coalesce
         /// <summary>
         /// Save the specified item to the database.
         /// </summary>
-        /// <typeparam name="TDto">
-        ///     The type of the DTO that contains the data to be saved,
-        ///     and the type of DTO that the caller expects to recieve the results in.
+        /// <typeparam name="TDtoIn">
+        ///     The type of the DTO that contains the data to be saved.
+        /// </typeparam>
+        /// <typeparam name="TDtoOut">
+        ///     The type of DTO that the caller expects to recieve the results in.
         /// </typeparam>
         /// <param name="incomingDto">The DTO containing the properties to update.</param>
         /// <param name="dataSource">The data source that will be used when loading the item to be updated.</param>
         /// <param name="parameters">The parameters to be passed to the data source when loading the item.</param>
         /// <returns>A result indicating success or failure, as well as an up-to-date copy of the object being saved.</returns>
-        public virtual async Task<ItemResult<TDto?>> SaveAsync<TDto>(
-            TDto incomingDto,
+        public virtual async Task<ItemResult<TDtoOut?>> SaveAsync<TDtoIn, TDtoOut>(
+            TDtoIn incomingDto,
             IDataSource<T> dataSource,
             IDataSourceParameters parameters
         )
-            where TDto : class, IClassDto<T>, new()
+            where TDtoIn : class, IParameterDto<T>, new()
+            where TDtoOut : class, IResponseDto<T>, new()
         {
             (SaveKind kind, object? idValue) = await DetermineSaveKindAsync(incomingDto, dataSource, parameters);
 
@@ -251,7 +254,7 @@ namespace IntelliTect.Coalesce
                 var (existingItem, _) = await (OverrideFetchForUpdateDataSource ?? dataSource).GetItemAsync(idValue!, parameters);
                 if (!existingItem.WasSuccessful)
                 {
-                    return new ItemResult<TDto?>(existingItem);
+                    return new ItemResult<TDtoOut?>(existingItem);
                 }
                 item = existingItem.Object ?? throw new InvalidOperationException(
                     $"Expected {nameof(ItemResult)}{nameof(ItemResult<T>.Object)} to be non-null when {nameof(dataSource.GetItemAsync)} returns success.");
@@ -269,7 +272,7 @@ namespace IntelliTect.Coalesce
 
             if (!validateDto.WasSuccessful)
             {
-                return new ItemResult<TDto?>(validateDto);
+                return new ItemResult<TDtoOut?>(validateDto);
             }
 
             // Set all properties on the DB-mapped object to the incoming values.
@@ -283,7 +286,7 @@ namespace IntelliTect.Coalesce
             }
             else if (!beforeSave.WasSuccessful)
             {
-                return new ItemResult<TDto?>(beforeSave);
+                return new ItemResult<TDtoOut?>(beforeSave);
             }
 
             await ExecuteSaveAsync(kind, originalItem, item);
@@ -309,7 +312,7 @@ namespace IntelliTect.Coalesce
             }
             else if (!afterSave.WasSuccessful)
             {
-                return new ItemResult<TDto?>(afterSave);
+                return new ItemResult<TDtoOut?>(afterSave);
             }
 
             // If the user nulled out the item in their AfterSave,
@@ -320,8 +323,8 @@ namespace IntelliTect.Coalesce
                 return true;
             }
 
-            return new ItemResult<TDto?>(
-                item.MapToDto<T, TDto>(new MappingContext(Context, parameters.Includes), includeTree)
+            return new ItemResult<TDtoOut?>(
+                item.MapToDto<T, TDtoOut>(new MappingContext(Context, parameters.Includes), includeTree)
             );
         }
 
@@ -372,7 +375,7 @@ namespace IntelliTect.Coalesce
             object id,
             IDataSource<T> dataSource,
             IDataSourceParameters parameters)
-            where TDto : class, IClassDto<T>, new()
+            where TDto : class, IResponseDto<T>, new()
         {
             var (existingItem, _) = await (OverrideFetchForDeleteDataSource ?? dataSource).GetItemAsync(id, parameters);
             if (!existingItem.WasSuccessful)

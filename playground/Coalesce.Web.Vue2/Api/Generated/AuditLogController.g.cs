@@ -25,7 +25,7 @@ namespace Coalesce.Web.Vue2.Api
     [Authorize]
     [ServiceFilter(typeof(IApiActionFilter))]
     public partial class AuditLogController
-        : BaseApiController<Coalesce.Domain.AuditLog, AuditLogDtoGen, Coalesce.Domain.AppDbContext>
+        : BaseApiController<Coalesce.Domain.AuditLog, AuditLogParameter, AuditLogResponse, Coalesce.Domain.AppDbContext>
     {
         public AuditLogController(CrudContext<Coalesce.Domain.AppDbContext> context) : base(context)
         {
@@ -34,7 +34,7 @@ namespace Coalesce.Web.Vue2.Api
 
         [HttpGet("get/{id}")]
         [Authorize]
-        public virtual Task<ItemResult<AuditLogDtoGen>> Get(
+        public virtual Task<ItemResult<AuditLogResponse>> Get(
             long id,
             DataSourceParameters parameters,
             IDataSource<Coalesce.Domain.AuditLog> dataSource)
@@ -42,7 +42,7 @@ namespace Coalesce.Web.Vue2.Api
 
         [HttpGet("list")]
         [Authorize]
-        public virtual Task<ListResult<AuditLogDtoGen>> List(
+        public virtual Task<ListResult<AuditLogResponse>> List(
             ListParameters parameters,
             IDataSource<Coalesce.Domain.AuditLog> dataSource)
             => ListImplementation(parameters, dataSource);
@@ -56,7 +56,7 @@ namespace Coalesce.Web.Vue2.Api
 
         [HttpPost("bulkSave")]
         [Authorize]
-        public virtual Task<ItemResult<AuditLogDtoGen>> BulkSave(
+        public virtual Task<ItemResult<AuditLogResponse>> BulkSave(
             [FromBody] BulkSaveRequest dto,
             [FromQuery] DataSourceParameters parameters,
             [FromServices] IDataSourceFactory dataSourceFactory,

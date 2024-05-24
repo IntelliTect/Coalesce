@@ -8,9 +8,9 @@ using System.Security.Claims;
 
 namespace Coalesce.Web.Ko.Models
 {
-    public partial class CaseSummaryDtoGen : GeneratedDto<Coalesce.Domain.CaseSummary>
+    public partial class CaseSummaryParameter : GeneratedParameterDto<Coalesce.Domain.CaseSummary>
     {
-        public CaseSummaryDtoGen() { }
+        public CaseSummaryParameter() { }
 
         private int? _CaseSummaryId;
         private int? _OpenCases;
@@ -51,22 +51,6 @@ namespace Coalesce.Web.Ko.Models
         }
 
         /// <summary>
-        /// Map from the domain object to the properties of the current DTO instance.
-        /// </summary>
-        public override void MapFrom(Coalesce.Domain.CaseSummary obj, IMappingContext context, IncludeTree tree = null)
-        {
-            if (obj == null) return;
-            var includes = context.Includes;
-
-            this.CaseSummaryId = obj.CaseSummaryId;
-            this.OpenCases = obj.OpenCases;
-            this.CaseCount = obj.CaseCount;
-            this.CloseCases = obj.CloseCases;
-            this.Description = obj.Description;
-            this.TestDict = obj.TestDict;
-        }
-
-        /// <summary>
         /// Map from the current DTO instance to the domain object.
         /// </summary>
         public override void MapTo(Coalesce.Domain.CaseSummary entity, IMappingContext context)
@@ -91,6 +75,34 @@ namespace Coalesce.Web.Ko.Models
             var entity = new Coalesce.Domain.CaseSummary();
             MapTo(entity, context);
             return entity;
+        }
+    }
+
+    public partial class CaseSummaryResponse : GeneratedResponseDto<Coalesce.Domain.CaseSummary>
+    {
+        public CaseSummaryResponse() { }
+
+        public int? CaseSummaryId { get; set; }
+        public int? OpenCases { get; set; }
+        public int? CaseCount { get; set; }
+        public int? CloseCases { get; set; }
+        public string Description { get; set; }
+        public System.Collections.Generic.IDictionary<string, int> TestDict { get; set; }
+
+        /// <summary>
+        /// Map from the domain object to the properties of the current DTO instance.
+        /// </summary>
+        public override void MapFrom(Coalesce.Domain.CaseSummary obj, IMappingContext context, IncludeTree tree = null)
+        {
+            if (obj == null) return;
+            var includes = context.Includes;
+
+            this.CaseSummaryId = obj.CaseSummaryId;
+            this.OpenCases = obj.OpenCases;
+            this.CaseCount = obj.CaseCount;
+            this.CloseCases = obj.CloseCases;
+            this.Description = obj.Description;
+            this.TestDict = obj.TestDict;
         }
     }
 }

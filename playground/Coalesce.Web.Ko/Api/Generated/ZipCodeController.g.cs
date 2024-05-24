@@ -25,7 +25,7 @@ namespace Coalesce.Web.Ko.Api
     [Authorize]
     [ServiceFilter(typeof(IApiActionFilter))]
     public partial class ZipCodeController
-        : BaseApiController<Coalesce.Domain.ZipCode, ZipCodeDtoGen, Coalesce.Domain.AppDbContext>
+        : BaseApiController<Coalesce.Domain.ZipCode, ZipCodeParameter, ZipCodeResponse, Coalesce.Domain.AppDbContext>
     {
         public ZipCodeController(CrudContext<Coalesce.Domain.AppDbContext> context) : base(context)
         {
@@ -34,7 +34,7 @@ namespace Coalesce.Web.Ko.Api
 
         [HttpGet("get/{id}")]
         [Authorize]
-        public virtual Task<ItemResult<ZipCodeDtoGen>> Get(
+        public virtual Task<ItemResult<ZipCodeResponse>> Get(
             string id,
             DataSourceParameters parameters,
             IDataSource<Coalesce.Domain.ZipCode> dataSource)
@@ -42,7 +42,7 @@ namespace Coalesce.Web.Ko.Api
 
         [HttpGet("list")]
         [Authorize]
-        public virtual Task<ListResult<ZipCodeDtoGen>> List(
+        public virtual Task<ListResult<ZipCodeResponse>> List(
             ListParameters parameters,
             IDataSource<Coalesce.Domain.ZipCode> dataSource)
             => ListImplementation(parameters, dataSource);
@@ -56,8 +56,8 @@ namespace Coalesce.Web.Ko.Api
 
         [HttpPost("save")]
         [Authorize]
-        public virtual Task<ItemResult<ZipCodeDtoGen>> Save(
-            [FromForm] ZipCodeDtoGen dto,
+        public virtual Task<ItemResult<ZipCodeResponse>> Save(
+            [FromForm] ZipCodeParameter dto,
             [FromQuery] DataSourceParameters parameters,
             IDataSource<Coalesce.Domain.ZipCode> dataSource,
             IBehaviors<Coalesce.Domain.ZipCode> behaviors)
@@ -65,7 +65,7 @@ namespace Coalesce.Web.Ko.Api
 
         [HttpPost("bulkSave")]
         [Authorize]
-        public virtual Task<ItemResult<ZipCodeDtoGen>> BulkSave(
+        public virtual Task<ItemResult<ZipCodeResponse>> BulkSave(
             [FromBody] BulkSaveRequest dto,
             [FromQuery] DataSourceParameters parameters,
             [FromServices] IDataSourceFactory dataSourceFactory,
@@ -74,7 +74,7 @@ namespace Coalesce.Web.Ko.Api
 
         [HttpPost("delete/{id}")]
         [Authorize]
-        public virtual Task<ItemResult<ZipCodeDtoGen>> Delete(
+        public virtual Task<ItemResult<ZipCodeResponse>> Delete(
             string id,
             IBehaviors<Coalesce.Domain.ZipCode> behaviors,
             IDataSource<Coalesce.Domain.ZipCode> dataSource)

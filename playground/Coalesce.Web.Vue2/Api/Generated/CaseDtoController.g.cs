@@ -25,7 +25,7 @@ namespace Coalesce.Web.Vue2.Api
     [Authorize]
     [ServiceFilter(typeof(IApiActionFilter))]
     public partial class CaseDtoController
-        : BaseApiController<Coalesce.Domain.Case, Coalesce.Domain.CaseDto, Coalesce.Domain.AppDbContext>
+        : BaseApiController<Coalesce.Domain.Case, Coalesce.Domain.CaseDto, Coalesce.Domain.CaseDto, Coalesce.Domain.AppDbContext>
     {
         public CaseDtoController(CrudContext<Coalesce.Domain.AppDbContext> context) : base(context)
         {

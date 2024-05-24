@@ -8,9 +8,9 @@ using System.Security.Claims;
 
 namespace Coalesce.Web.Vue3.Models
 {
-    public partial class StreetAddressDtoGen : GeneratedDto<Coalesce.Domain.StreetAddress>
+    public partial class StreetAddressParameter : GeneratedParameterDto<Coalesce.Domain.StreetAddress>
     {
-        public StreetAddressDtoGen() { }
+        public StreetAddressParameter() { }
 
         private string _Address;
         private string _City;
@@ -39,20 +39,6 @@ namespace Coalesce.Web.Vue3.Models
         }
 
         /// <summary>
-        /// Map from the domain object to the properties of the current DTO instance.
-        /// </summary>
-        public override void MapFrom(Coalesce.Domain.StreetAddress obj, IMappingContext context, IncludeTree tree = null)
-        {
-            if (obj == null) return;
-            var includes = context.Includes;
-
-            this.Address = obj.Address;
-            this.City = obj.City;
-            this.State = obj.State;
-            this.PostalCode = obj.PostalCode;
-        }
-
-        /// <summary>
         /// Map from the current DTO instance to the domain object.
         /// </summary>
         public override void MapTo(Coalesce.Domain.StreetAddress entity, IMappingContext context)
@@ -75,6 +61,30 @@ namespace Coalesce.Web.Vue3.Models
             var entity = new Coalesce.Domain.StreetAddress();
             MapTo(entity, context);
             return entity;
+        }
+    }
+
+    public partial class StreetAddressResponse : GeneratedResponseDto<Coalesce.Domain.StreetAddress>
+    {
+        public StreetAddressResponse() { }
+
+        public string Address { get; set; }
+        public string City { get; set; }
+        public string State { get; set; }
+        public string PostalCode { get; set; }
+
+        /// <summary>
+        /// Map from the domain object to the properties of the current DTO instance.
+        /// </summary>
+        public override void MapFrom(Coalesce.Domain.StreetAddress obj, IMappingContext context, IncludeTree tree = null)
+        {
+            if (obj == null) return;
+            var includes = context.Includes;
+
+            this.Address = obj.Address;
+            this.City = obj.City;
+            this.State = obj.State;
+            this.PostalCode = obj.PostalCode;
         }
     }
 }

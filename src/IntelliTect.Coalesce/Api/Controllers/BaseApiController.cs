@@ -14,9 +14,10 @@ using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.Api.Controllers
 {
-    public abstract class BaseApiController<T, TDto> : Controller
+    public abstract class BaseApiController<T, TDtoIn, TDtoOut> : Controller
         where T : class
-        where TDto : class, IClassDto<T>, new()
+        where TDtoIn : class, IParameterDto<T>, new()
+        where TDtoOut : class, IResponseDto<T>, new()
     {
         protected BaseApiController(CrudContext context)
         {
@@ -41,14 +42,14 @@ namespace IntelliTect.Coalesce.Api.Controllers
         /// </summary>
         protected ClassViewModel? GeneratedForClassViewModel { get; set; }
 
-        protected Task<ItemResult<TDto>> GetImplementation(object id, DataSourceParameters parameters, IDataSource<T> dataSource)
+        protected Task<ItemResult<TDtoOut>> GetImplementation(object id, DataSourceParameters parameters, IDataSource<T> dataSource)
         {
-            return dataSource.GetMappedItemAsync<TDto>(id, parameters);
+            return dataSource.GetMappedItemAsync<TDtoOut>(id, parameters);
         }
 
-        protected Task<ListResult<TDto>> ListImplementation(ListParameters listParameters, IDataSource<T> dataSource)
+        protected Task<ListResult<TDtoOut>> ListImplementation(ListParameters listParameters, IDataSource<T> dataSource)
         {
-            return dataSource.GetMappedListAsync<TDto>(listParameters);
+            return dataSource.GetMappedListAsync<TDtoOut>(listParameters);
         }
 
         protected Task<ItemResult<int>> CountImplementation(FilterParameters parameters, IDataSource<T> dataSource)
@@ -56,7 +57,7 @@ namespace IntelliTect.Coalesce.Api.Controllers
             return dataSource.GetCountAsync(parameters);
         }
 
-        protected async Task<ItemResult<TDto?>> SaveImplementation(TDto dto, DataSourceParameters parameters, IDataSource<T> dataSource, IBehaviors<T> behaviors)
+        protected async Task<ItemResult<TDtoOut?>> SaveImplementation(TDtoIn dto, DataSourceParameters parameters, IDataSource<T> dataSource, IBehaviors<T> behaviors)
         {
             var kind = (await behaviors.DetermineSaveKindAsync(dto, dataSource, parameters)).Kind;
 
@@ -81,18 +82,19 @@ namespace IntelliTect.Coalesce.Api.Controllers
                 return $"Editing of {GeneratedForClassViewModel.DisplayName} items not allowed.";
             }
 
-            return await behaviors.SaveAsync(dto, dataSource, parameters);
+            return await behaviors.SaveAsync<TDtoIn, TDtoOut>(dto, dataSource, parameters);
         }
 
-        protected Task<ItemResult<TDto?>> DeleteImplementation(object id, DataSourceParameters parameters, IDataSource<T> dataSource, IBehaviors<T> behaviors)
+        protected Task<ItemResult<TDtoOut?>> DeleteImplementation(object id, DataSourceParameters parameters, IDataSource<T> dataSource, IBehaviors<T> behaviors)
         {
-            return behaviors.DeleteAsync<TDto>(id, dataSource, parameters);
+            return behaviors.DeleteAsync<TDtoOut>(id, dataSource, parameters);
         }
     }
 
-    public abstract class BaseApiController<T, TDto, TContext> : BaseApiController<T, TDto>
+    public abstract class BaseApiController<T, TDtoIn, TDtoOut, TContext> : BaseApiController<T, TDtoIn, TDtoOut>
         where T : class
-        where TDto : class, IClassDto<T>, new()
+        where TDtoIn : class, IParameterDto<T>, new()
+        where TDtoOut : class, IResponseDto<T>, new()
         where TContext : DbContext
     {
         protected BaseApiController(CrudContext<TContext> context) : base(context)
@@ -106,7 +108,7 @@ namespace IntelliTect.Coalesce.Api.Controllers
 
         public TContext Db => Context.DbContext;
 
-        protected async Task<ItemResult<TDto>> BulkSaveImplementation(
+        protected async Task<ItemResult<TDtoOut>> BulkSaveImplementation(
             BulkSaveRequest dto,
             DataSourceParameters parameters,
             IDataSourceFactory dataSourceFactory,
@@ -124,7 +126,7 @@ namespace IntelliTect.Coalesce.Api.Controllers
             }
 
             var strategy = Db.Database.CreateExecutionStrategy();
-            return await strategy.ExecuteAsync<ItemResult<TDto>>(async () =>
+            return await strategy.ExecuteAsync<ItemResult<TDtoOut>>(async () =>
             {
                 using var tran = await Db.Database.BeginTransactionAsync();
 
@@ -194,7 +196,7 @@ namespace IntelliTect.Coalesce.Api.Controllers
                                     continue;
                                 }
 
-                                var referencedProp = item.DtoClassViewModel.PropertyByName(reference.Key);
+                                var referencedProp = item.ParamDtoClassViewModel.PropertyByName(reference.Key);
                                 if (referencedProp is not { Role: PropertyRole.ForeignKey, IsClientWritable: true })
                                 {
                                     // Ignore invalid refs. We only need to resolve writable foreign keys.

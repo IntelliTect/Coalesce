@@ -8,13 +8,13 @@ using System.Security.Claims;
 
 namespace Coalesce.Web.Vue2.Models
 {
-    public partial class WeatherDataDtoGen : GeneratedDto<Coalesce.Domain.Services.WeatherData>
+    public partial class WeatherDataParameter : GeneratedParameterDto<Coalesce.Domain.Services.WeatherData>
     {
-        public WeatherDataDtoGen() { }
+        public WeatherDataParameter() { }
 
         private double? _TempFahrenheit;
         private double? _Humidity;
-        private Coalesce.Web.Vue2.Models.LocationDtoGen _Location;
+        private Coalesce.Web.Vue2.Models.LocationParameter _Location;
 
         public double? TempFahrenheit
         {
@@ -26,25 +26,10 @@ namespace Coalesce.Web.Vue2.Models
             get => _Humidity;
             set { _Humidity = value; Changed(nameof(Humidity)); }
         }
-        public Coalesce.Web.Vue2.Models.LocationDtoGen Location
+        public Coalesce.Web.Vue2.Models.LocationParameter Location
         {
             get => _Location;
             set { _Location = value; Changed(nameof(Location)); }
-        }
-
-        /// <summary>
-        /// Map from the domain object to the properties of the current DTO instance.
-        /// </summary>
-        public override void MapFrom(Coalesce.Domain.Services.WeatherData obj, IMappingContext context, IncludeTree tree = null)
-        {
-            if (obj == null) return;
-            var includes = context.Includes;
-
-            this.TempFahrenheit = obj.TempFahrenheit;
-            this.Humidity = obj.Humidity;
-
-            this.Location = obj.Location.MapToDto<Coalesce.Domain.Services.Location, LocationDtoGen>(context, tree?[nameof(this.Location)]);
-
         }
 
         /// <summary>
@@ -69,6 +54,30 @@ namespace Coalesce.Web.Vue2.Models
             var entity = new Coalesce.Domain.Services.WeatherData();
             MapTo(entity, context);
             return entity;
+        }
+    }
+
+    public partial class WeatherDataResponse : GeneratedResponseDto<Coalesce.Domain.Services.WeatherData>
+    {
+        public WeatherDataResponse() { }
+
+        public double? TempFahrenheit { get; set; }
+        public double? Humidity { get; set; }
+        public Coalesce.Web.Vue2.Models.LocationResponse Location { get; set; }
+
+        /// <summary>
+        /// Map from the domain object to the properties of the current DTO instance.
+        /// </summary>
+        public override void MapFrom(Coalesce.Domain.Services.WeatherData obj, IMappingContext context, IncludeTree tree = null)
+        {
+            if (obj == null) return;
+            var includes = context.Includes;
+
+            this.TempFahrenheit = obj.TempFahrenheit;
+            this.Humidity = obj.Humidity;
+
+            this.Location = obj.Location.MapToDto<Coalesce.Domain.Services.Location, LocationResponse>(context, tree?[nameof(this.Location)]);
+
         }
     }
 }

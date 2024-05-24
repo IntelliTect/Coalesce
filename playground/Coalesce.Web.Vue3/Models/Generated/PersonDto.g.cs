@@ -8,9 +8,9 @@ using System.Security.Claims;
 
 namespace Coalesce.Web.Vue3.Models
 {
-    public partial class PersonDtoGen : GeneratedDto<Coalesce.Domain.Person>
+    public partial class PersonParameter : GeneratedParameterDto<Coalesce.Domain.Person>
     {
-        public PersonDtoGen() { }
+        public PersonParameter() { }
 
         private int? _PersonId;
         private Coalesce.Domain.Person.Titles? _Title;
@@ -19,15 +19,10 @@ namespace Coalesce.Web.Vue3.Models
         private string _Email;
         private Coalesce.Domain.Person.Genders? _Gender;
         private double? _Height;
-        private System.Collections.Generic.ICollection<Coalesce.Web.Vue3.Models.CaseDtoGen> _CasesAssigned;
-        private System.Collections.Generic.ICollection<Coalesce.Web.Vue3.Models.CaseDtoGen> _CasesReported;
         private System.DateTime? _BirthDate;
         private System.DateTime? _LastBath;
         private System.DateTimeOffset? _NextUpgrade;
-        private Coalesce.Web.Vue3.Models.PersonStatsDtoGen _PersonStats;
-        private string _Name;
         private int? _CompanyId;
-        private Coalesce.Web.Vue3.Models.CompanyDtoGen _Company;
         private System.Collections.Generic.ICollection<string> _ArbitraryCollectionOfStrings;
 
         public int? PersonId
@@ -65,16 +60,6 @@ namespace Coalesce.Web.Vue3.Models
             get => _Height;
             set { _Height = value; Changed(nameof(Height)); }
         }
-        public System.Collections.Generic.ICollection<Coalesce.Web.Vue3.Models.CaseDtoGen> CasesAssigned
-        {
-            get => _CasesAssigned;
-            set { _CasesAssigned = value; Changed(nameof(CasesAssigned)); }
-        }
-        public System.Collections.Generic.ICollection<Coalesce.Web.Vue3.Models.CaseDtoGen> CasesReported
-        {
-            get => _CasesReported;
-            set { _CasesReported = value; Changed(nameof(CasesReported)); }
-        }
         public System.DateTime? BirthDate
         {
             get => _BirthDate;
@@ -90,83 +75,15 @@ namespace Coalesce.Web.Vue3.Models
             get => _NextUpgrade;
             set { _NextUpgrade = value; Changed(nameof(NextUpgrade)); }
         }
-        public Coalesce.Web.Vue3.Models.PersonStatsDtoGen PersonStats
-        {
-            get => _PersonStats;
-            set { _PersonStats = value; Changed(nameof(PersonStats)); }
-        }
-        public string Name
-        {
-            get => _Name;
-            set { _Name = value; Changed(nameof(Name)); }
-        }
         public int? CompanyId
         {
             get => _CompanyId;
             set { _CompanyId = value; Changed(nameof(CompanyId)); }
         }
-        public Coalesce.Web.Vue3.Models.CompanyDtoGen Company
-        {
-            get => _Company;
-            set { _Company = value; Changed(nameof(Company)); }
-        }
         public System.Collections.Generic.ICollection<string> ArbitraryCollectionOfStrings
         {
             get => _ArbitraryCollectionOfStrings;
             set { _ArbitraryCollectionOfStrings = value; Changed(nameof(ArbitraryCollectionOfStrings)); }
-        }
-
-        /// <summary>
-        /// Map from the domain object to the properties of the current DTO instance.
-        /// </summary>
-        public override void MapFrom(Coalesce.Domain.Person obj, IMappingContext context, IncludeTree tree = null)
-        {
-            if (obj == null) return;
-            var includes = context.Includes;
-
-            this.PersonId = obj.PersonId;
-            this.Title = obj.Title;
-            this.FirstName = obj.FirstName;
-            this.LastName = obj.LastName;
-            this.Email = obj.Email;
-            this.Gender = obj.Gender;
-            this.Height = obj.Height;
-            this.BirthDate = obj.BirthDate;
-            this.LastBath = obj.LastBath;
-            this.NextUpgrade = obj.NextUpgrade;
-            this.Name = obj.Name;
-            this.CompanyId = obj.CompanyId;
-            this.ArbitraryCollectionOfStrings = obj.ArbitraryCollectionOfStrings;
-            var propValCasesAssigned = obj.CasesAssigned;
-            if (propValCasesAssigned != null && (tree == null || tree[nameof(this.CasesAssigned)] != null))
-            {
-                this.CasesAssigned = propValCasesAssigned
-                    .OrderByDescending(f => f.OpenedAt).ThenBy(f => (f.AssignedTo == null ? "" : f.AssignedTo.FirstName)).ThenBy(f => f.CaseKey)
-                    .Select(f => f.MapToDto<Coalesce.Domain.Case, CaseDtoGen>(context, tree?[nameof(this.CasesAssigned)])).ToList();
-            }
-            else if (propValCasesAssigned == null && tree?[nameof(this.CasesAssigned)] != null)
-            {
-                this.CasesAssigned = new CaseDtoGen[0];
-            }
-
-            var propValCasesReported = obj.CasesReported;
-            if (propValCasesReported != null && (tree == null || tree[nameof(this.CasesReported)] != null))
-            {
-                this.CasesReported = propValCasesReported
-                    .OrderByDescending(f => f.OpenedAt).ThenBy(f => (f.AssignedTo == null ? "" : f.AssignedTo.FirstName)).ThenBy(f => f.CaseKey)
-                    .Select(f => f.MapToDto<Coalesce.Domain.Case, CaseDtoGen>(context, tree?[nameof(this.CasesReported)])).ToList();
-            }
-            else if (propValCasesReported == null && tree?[nameof(this.CasesReported)] != null)
-            {
-                this.CasesReported = new CaseDtoGen[0];
-            }
-
-
-            this.PersonStats = obj.PersonStats.MapToDto<Coalesce.Domain.PersonStats, PersonStatsDtoGen>(context, tree?[nameof(this.PersonStats)]);
-
-            if (tree == null || tree[nameof(this.Company)] != null)
-                this.Company = obj.Company.MapToDto<Coalesce.Domain.Company, CompanyDtoGen>(context, tree?[nameof(this.Company)]);
-
         }
 
         /// <summary>
@@ -200,6 +117,82 @@ namespace Coalesce.Web.Vue3.Models
             var entity = new Coalesce.Domain.Person();
             MapTo(entity, context);
             return entity;
+        }
+    }
+
+    public partial class PersonResponse : GeneratedResponseDto<Coalesce.Domain.Person>
+    {
+        public PersonResponse() { }
+
+        public int? PersonId { get; set; }
+        public Coalesce.Domain.Person.Titles? Title { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public string Email { get; set; }
+        public Coalesce.Domain.Person.Genders? Gender { get; set; }
+        public double? Height { get; set; }
+        public System.DateTime? BirthDate { get; set; }
+        public System.DateTime? LastBath { get; set; }
+        public System.DateTimeOffset? NextUpgrade { get; set; }
+        public string Name { get; set; }
+        public int? CompanyId { get; set; }
+        public System.Collections.Generic.ICollection<string> ArbitraryCollectionOfStrings { get; set; }
+        public System.Collections.Generic.ICollection<Coalesce.Web.Vue3.Models.Case> CasesAssigned { get; set; }
+        public System.Collections.Generic.ICollection<Coalesce.Web.Vue3.Models.Case> CasesReported { get; set; }
+        public Coalesce.Web.Vue3.Models.PersonStats PersonStats { get; set; }
+        public Coalesce.Web.Vue3.Models.Company Company { get; set; }
+
+        /// <summary>
+        /// Map from the domain object to the properties of the current DTO instance.
+        /// </summary>
+        public override void MapFrom(Coalesce.Domain.Person obj, IMappingContext context, IncludeTree tree = null)
+        {
+            if (obj == null) return;
+            var includes = context.Includes;
+
+            this.PersonId = obj.PersonId;
+            this.Title = obj.Title;
+            this.FirstName = obj.FirstName;
+            this.LastName = obj.LastName;
+            this.Email = obj.Email;
+            this.Gender = obj.Gender;
+            this.Height = obj.Height;
+            this.BirthDate = obj.BirthDate;
+            this.LastBath = obj.LastBath;
+            this.NextUpgrade = obj.NextUpgrade;
+            this.Name = obj.Name;
+            this.CompanyId = obj.CompanyId;
+            this.ArbitraryCollectionOfStrings = obj.ArbitraryCollectionOfStrings;
+            var propValCasesAssigned = obj.CasesAssigned;
+            if (propValCasesAssigned != null && (tree == null || tree[nameof(this.CasesAssigned)] != null))
+            {
+                this.CasesAssigned = propValCasesAssigned
+                    .OrderByDescending(f => f.OpenedAt).ThenBy(f => (f.AssignedTo == null ? "" : f.AssignedTo.FirstName)).ThenBy(f => f.CaseKey)
+                    .Select(f => f.MapToDto<Coalesce.Domain.Case, CaseResponse>(context, tree?[nameof(this.CasesAssigned)])).ToList();
+            }
+            else if (propValCasesAssigned == null && tree?[nameof(this.CasesAssigned)] != null)
+            {
+                this.CasesAssigned = new CaseResponse[0];
+            }
+
+            var propValCasesReported = obj.CasesReported;
+            if (propValCasesReported != null && (tree == null || tree[nameof(this.CasesReported)] != null))
+            {
+                this.CasesReported = propValCasesReported
+                    .OrderByDescending(f => f.OpenedAt).ThenBy(f => (f.AssignedTo == null ? "" : f.AssignedTo.FirstName)).ThenBy(f => f.CaseKey)
+                    .Select(f => f.MapToDto<Coalesce.Domain.Case, CaseResponse>(context, tree?[nameof(this.CasesReported)])).ToList();
+            }
+            else if (propValCasesReported == null && tree?[nameof(this.CasesReported)] != null)
+            {
+                this.CasesReported = new CaseResponse[0];
+            }
+
+
+            this.PersonStats = obj.PersonStats.MapToDto<Coalesce.Domain.PersonStats, PersonStatsResponse>(context, tree?[nameof(this.PersonStats)]);
+
+            if (tree == null || tree[nameof(this.Company)] != null)
+                this.Company = obj.Company.MapToDto<Coalesce.Domain.Company, CompanyResponse>(context, tree?[nameof(this.Company)]);
+
         }
     }
 }

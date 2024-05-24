@@ -25,7 +25,7 @@ namespace Coalesce.Web.Vue2.Api
     [Authorize]
     [ServiceFilter(typeof(IApiActionFilter))]
     public partial class LogController
-        : BaseApiController<Coalesce.Domain.Log, LogDtoGen, Coalesce.Domain.AppDbContext>
+        : BaseApiController<Coalesce.Domain.Log, LogParameter, LogResponse, Coalesce.Domain.AppDbContext>
     {
         public LogController(CrudContext<Coalesce.Domain.AppDbContext> context) : base(context)
         {
@@ -34,7 +34,7 @@ namespace Coalesce.Web.Vue2.Api
 
         [HttpGet("get/{id}")]
         [Authorize]
-        public virtual Task<ItemResult<LogDtoGen>> Get(
+        public virtual Task<ItemResult<LogResponse>> Get(
             int id,
             DataSourceParameters parameters,
             IDataSource<Coalesce.Domain.Log> dataSource)
@@ -42,7 +42,7 @@ namespace Coalesce.Web.Vue2.Api
 
         [HttpGet("list")]
         [Authorize]
-        public virtual Task<ListResult<LogDtoGen>> List(
+        public virtual Task<ListResult<LogResponse>> List(
             ListParameters parameters,
             IDataSource<Coalesce.Domain.Log> dataSource)
             => ListImplementation(parameters, dataSource);
@@ -56,7 +56,7 @@ namespace Coalesce.Web.Vue2.Api
 
         [HttpPost("bulkSave")]
         [Authorize]
-        public virtual Task<ItemResult<LogDtoGen>> BulkSave(
+        public virtual Task<ItemResult<LogResponse>> BulkSave(
             [FromBody] BulkSaveRequest dto,
             [FromQuery] DataSourceParameters parameters,
             [FromServices] IDataSourceFactory dataSourceFactory,

@@ -7,12 +7,10 @@ using System;
 
 namespace IntelliTect.Coalesce
 {
-    public interface IClassDto<T>
+    public interface IParameterDto<T>
         where T : class
     {
         void MapTo(T obj, IMappingContext context);
-
-        void MapFrom(T obj, IMappingContext context, IncludeTree? tree = null);
 
         T MapToNew(IMappingContext context)
         {
@@ -27,6 +25,27 @@ namespace IntelliTect.Coalesce
             MapTo(obj, context);
             return obj;
         }
+    }
+
+    public interface IResponseDto<T>
+    {
+        void MapFrom(T obj, IMappingContext context, IncludeTree? tree = null);
+    }
+
+    /// <summary>
+    /// A implementation of an <see cref="IClassDto{T}"/> exposed by Coalesce 
+    /// will produce an API that behaves like an entity CRUD API,
+    /// but where the properties exposed by the API and the mapping to and 
+    /// from those properties is written by hand instead of being generated 
+    /// automatically from an existing DB-mapped entity.
+    /// </summary>
+    /// <typeparam name="T">
+    /// The DB-mapped entity type that this DTO is based on,
+    /// serving as the source and target for incoming queries, saves, and deletes.
+    /// </typeparam>
+    public interface IClassDto<T> : IParameterDto<T>, IResponseDto<T>
+        where T : class
+    {
     }
 
     /// <summary>

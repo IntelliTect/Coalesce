@@ -2096,14 +2096,8 @@ export const CaseSummary = domain.types.CaseSummary = {
     testDict: {
       name: "testDict",
       displayName: "Test Dict",
-      type: "collection",
-      itemType: {
-        name: "$collectionItem",
-        displayName: "",
-        role: "value",
-        // Type not supported natively by Coalesce - falling back to unknown.
-        type: "unknown",
-      },
+      // Type not supported natively by Coalesce - falling back to unknown.
+      type: "unknown",
       role: "value",
     },
   },

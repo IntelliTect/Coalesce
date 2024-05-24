@@ -65,7 +65,7 @@ public static class CoalesceApplicationBuilderExtensions
         {
             CrudTypes = repo
                 .CrudApiBackedClasses
-                .OrderBy(c => c.IsDto)
+                .OrderBy(c => c.IsCustomDto)
                 .ThenBy(c => c.Name)
                 .Select(c =>
                 {

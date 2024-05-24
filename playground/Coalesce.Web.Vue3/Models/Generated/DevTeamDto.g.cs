@@ -8,9 +8,9 @@ using System.Security.Claims;
 
 namespace Coalesce.Web.Vue3.Models
 {
-    public partial class DevTeamDtoGen : GeneratedDto<Coalesce.Domain.External.DevTeam>
+    public partial class DevTeamParameter : GeneratedParameterDto<Coalesce.Domain.External.DevTeam>
     {
-        public DevTeamDtoGen() { }
+        public DevTeamParameter() { }
 
         private int? _DevTeamId;
         private string _Name;
@@ -24,18 +24,6 @@ namespace Coalesce.Web.Vue3.Models
         {
             get => _Name;
             set { _Name = value; Changed(nameof(Name)); }
-        }
-
-        /// <summary>
-        /// Map from the domain object to the properties of the current DTO instance.
-        /// </summary>
-        public override void MapFrom(Coalesce.Domain.External.DevTeam obj, IMappingContext context, IncludeTree tree = null)
-        {
-            if (obj == null) return;
-            var includes = context.Includes;
-
-            this.DevTeamId = obj.DevTeamId;
-            this.Name = obj.Name;
         }
 
         /// <summary>
@@ -59,6 +47,26 @@ namespace Coalesce.Web.Vue3.Models
             var entity = new Coalesce.Domain.External.DevTeam();
             MapTo(entity, context);
             return entity;
+        }
+    }
+
+    public partial class DevTeamResponse : GeneratedResponseDto<Coalesce.Domain.External.DevTeam>
+    {
+        public DevTeamResponse() { }
+
+        public int? DevTeamId { get; set; }
+        public string Name { get; set; }
+
+        /// <summary>
+        /// Map from the domain object to the properties of the current DTO instance.
+        /// </summary>
+        public override void MapFrom(Coalesce.Domain.External.DevTeam obj, IMappingContext context, IncludeTree tree = null)
+        {
+            if (obj == null) return;
+            var includes = context.Includes;
+
+            this.DevTeamId = obj.DevTeamId;
+            this.Name = obj.Name;
         }
     }
 }

@@ -8,9 +8,9 @@ using System.Security.Claims;
 
 namespace Coalesce.Web.Ko.Models
 {
-    public partial class StandaloneReadCreateDtoGen : GeneratedDto<Coalesce.Domain.StandaloneReadCreate>
+    public partial class StandaloneReadCreateParameter : GeneratedParameterDto<Coalesce.Domain.StandaloneReadCreate>
     {
-        public StandaloneReadCreateDtoGen() { }
+        public StandaloneReadCreateParameter() { }
 
         private int? _Id;
         private string _Name;
@@ -30,19 +30,6 @@ namespace Coalesce.Web.Ko.Models
         {
             get => _Date;
             set { _Date = value; Changed(nameof(Date)); }
-        }
-
-        /// <summary>
-        /// Map from the domain object to the properties of the current DTO instance.
-        /// </summary>
-        public override void MapFrom(Coalesce.Domain.StandaloneReadCreate obj, IMappingContext context, IncludeTree tree = null)
-        {
-            if (obj == null) return;
-            var includes = context.Includes;
-
-            this.Id = obj.Id;
-            this.Name = obj.Name;
-            this.Date = obj.Date;
         }
 
         /// <summary>
@@ -67,6 +54,28 @@ namespace Coalesce.Web.Ko.Models
             var entity = new Coalesce.Domain.StandaloneReadCreate();
             MapTo(entity, context);
             return entity;
+        }
+    }
+
+    public partial class StandaloneReadCreateResponse : GeneratedResponseDto<Coalesce.Domain.StandaloneReadCreate>
+    {
+        public StandaloneReadCreateResponse() { }
+
+        public int? Id { get; set; }
+        public string Name { get; set; }
+        public System.DateTimeOffset? Date { get; set; }
+
+        /// <summary>
+        /// Map from the domain object to the properties of the current DTO instance.
+        /// </summary>
+        public override void MapFrom(Coalesce.Domain.StandaloneReadCreate obj, IMappingContext context, IncludeTree tree = null)
+        {
+            if (obj == null) return;
+            var includes = context.Includes;
+
+            this.Id = obj.Id;
+            this.Name = obj.Name;
+            this.Date = obj.Date;
         }
     }
 }

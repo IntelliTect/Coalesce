@@ -25,7 +25,7 @@ namespace Coalesce.Web.Vue3.Api
     [Authorize]
     [ServiceFilter(typeof(IApiActionFilter))]
     public partial class CaseProductController
-        : BaseApiController<Coalesce.Domain.CaseProduct, CaseProductDtoGen, Coalesce.Domain.AppDbContext>
+        : BaseApiController<Coalesce.Domain.CaseProduct, CaseProductParameter, CaseProductResponse, Coalesce.Domain.AppDbContext>
     {
         public CaseProductController(CrudContext<Coalesce.Domain.AppDbContext> context) : base(context)
         {
@@ -34,7 +34,7 @@ namespace Coalesce.Web.Vue3.Api
 
         [HttpGet("get/{id}")]
         [Authorize]
-        public virtual Task<ItemResult<CaseProductDtoGen>> Get(
+        public virtual Task<ItemResult<CaseProductResponse>> Get(
             int id,
             DataSourceParameters parameters,
             IDataSource<Coalesce.Domain.CaseProduct> dataSource)
@@ -42,7 +42,7 @@ namespace Coalesce.Web.Vue3.Api
 
         [HttpGet("list")]
         [Authorize]
-        public virtual Task<ListResult<CaseProductDtoGen>> List(
+        public virtual Task<ListResult<CaseProductResponse>> List(
             ListParameters parameters,
             IDataSource<Coalesce.Domain.CaseProduct> dataSource)
             => ListImplementation(parameters, dataSource);
@@ -56,8 +56,8 @@ namespace Coalesce.Web.Vue3.Api
 
         [HttpPost("save")]
         [Authorize]
-        public virtual Task<ItemResult<CaseProductDtoGen>> Save(
-            [FromForm] CaseProductDtoGen dto,
+        public virtual Task<ItemResult<CaseProductResponse>> Save(
+            [FromForm] CaseProductParameter dto,
             [FromQuery] DataSourceParameters parameters,
             IDataSource<Coalesce.Domain.CaseProduct> dataSource,
             IBehaviors<Coalesce.Domain.CaseProduct> behaviors)
@@ -65,7 +65,7 @@ namespace Coalesce.Web.Vue3.Api
 
         [HttpPost("bulkSave")]
         [Authorize]
-        public virtual Task<ItemResult<CaseProductDtoGen>> BulkSave(
+        public virtual Task<ItemResult<CaseProductResponse>> BulkSave(
             [FromBody] BulkSaveRequest dto,
             [FromQuery] DataSourceParameters parameters,
             [FromServices] IDataSourceFactory dataSourceFactory,
@@ -74,7 +74,7 @@ namespace Coalesce.Web.Vue3.Api
 
         [HttpPost("delete/{id}")]
         [Authorize]
-        public virtual Task<ItemResult<CaseProductDtoGen>> Delete(
+        public virtual Task<ItemResult<CaseProductResponse>> Delete(
             int id,
             IBehaviors<Coalesce.Domain.CaseProduct> behaviors,
             IDataSource<Coalesce.Domain.CaseProduct> dataSource)

@@ -13,11 +13,11 @@ namespace IntelliTect.Coalesce
     /// permitting aggregations and transformations to be performed by the database with SQL where possible.
     /// </summary>
     /// <typeparam name="T">The entity type to be queried</typeparam>
-    /// <typeparam name="TDto">The <see cref="IClassDto{T}"/> type to project to.</typeparam>
+    /// <typeparam name="TDto">The <see cref="IResponseDto{T}"/> type to project to.</typeparam>
     /// <typeparam name="TContext">The <see cref="DbContext"/> to query from.</typeparam>
     public abstract class ProjectedDtoDataSource<T, TDto, TContext> : StandardDataSource<T, TContext>
         where T : class
-        where TDto : class, IClassDto<T>, new()
+        where TDto : class, IResponseDto<T>, new()
         where TContext : DbContext
     {
         public ProjectedDtoDataSource(CrudContext<TContext> context) : base(context) { }
@@ -26,7 +26,7 @@ namespace IntelliTect.Coalesce
         /// <para>
         /// Apply a projection (e.g. with <see cref="Queryable.Select{TSource, TResult}(IQueryable{TSource}, System.Linq.Expressions.Expression{Func{TSource, TResult}})"/>)
         /// to the EF entity query to transform it into instances of TDto.
-        /// Results will bypass <see cref="IClassDto{T}.MapFrom(T, IMappingContext, IncludeTree)"/>.
+        /// Results will bypass <see cref="IResponseDto{T}.MapFrom(T, IMappingContext, IncludeTree)"/>.
         /// </para>
         /// <para>Do not perform filtering to the query in this method, as it will not be accounted for in the total list count.</para>
         /// </summary>

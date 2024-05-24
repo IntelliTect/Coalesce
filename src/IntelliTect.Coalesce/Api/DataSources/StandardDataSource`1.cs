@@ -78,7 +78,7 @@ namespace IntelliTect.Coalesce
         /// <param name="parameters">The parameters by which to trim.</param>
         /// <returns>The trimmed collection of DTOs.</returns>
         public virtual IList<TDto> TrimListFields<TDto>(IList<TDto> mappedResult, IListParameters parameters)
-            where TDto : class, IClassDto<T>, new()
+            where TDto : class, IResponseDto<T>, new()
         {
             if (parameters.Fields.Count > 0)
             {
@@ -173,7 +173,7 @@ namespace IntelliTect.Coalesce
         /// <typeparam name="TDto">The IClassDto to map the data to.</typeparam>
         /// <returns>A ListResult containing the desired data mapped to the desired type.</returns>
         public virtual async Task<ListResult<TDto>> GetMappedListAsync<TDto>(IListParameters parameters)
-            where TDto : class, IClassDto<T>, new()
+            where TDto : class, IResponseDto<T>, new()
         {
             var (result, tree) = await GetListAsync(parameters);
 
@@ -242,7 +242,7 @@ namespace IntelliTect.Coalesce
         /// <typeparam name="TDto">The IClassDto to map the data to.</typeparam>
         /// <returns>The desired item, mapped to the desired type.</returns>
         public virtual async Task<ItemResult<TDto>> GetMappedItemAsync<TDto>(object id, IDataSourceParameters parameters)
-            where TDto : class, IClassDto<T>, new()
+            where TDto : class, IResponseDto<T>, new()
         {
             var (result, tree) = await GetItemAsync(id, parameters);
 

@@ -66,7 +66,7 @@ namespace IntelliTect.Coalesce.Validation
                 {
                     assert.IsNotNull(model.DbContext, 
                         "Cannot determine the DbContext that provides this type. " 
-                        + (model.IsDto ? "Try using IClassDto<T, TDbContext> for this type instead." : "")
+                        + (model.IsCustomDto ? "Try using IClassDto<T, TDbContext> for this type instead." : "")
                     );
                 }
 
@@ -89,7 +89,7 @@ namespace IntelliTect.Coalesce.Validation
                         assert.IsFalse(prop.HasAttribute<DeleteAttribute>(),
                             "Property-level security doesn't support DeleteAttribute");
 
-                        if (model.IsDto)
+                        if (model.IsCustomDto)
                         {
                             const string dtoPropSecWarningPreamble =
                                 "Property-level security for an IClassDto must be implemented in MapTo/MapToNew/MapFrom, or in a DataSource or Behaviors. ";

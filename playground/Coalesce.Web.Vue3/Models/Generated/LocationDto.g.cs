@@ -8,9 +8,9 @@ using System.Security.Claims;
 
 namespace Coalesce.Web.Vue3.Models
 {
-    public partial class LocationDtoGen : GeneratedDto<Coalesce.Domain.Services.Location>
+    public partial class LocationParameter : GeneratedParameterDto<Coalesce.Domain.Services.Location>
     {
-        public LocationDtoGen() { }
+        public LocationParameter() { }
 
         private string _City;
         private string _State;
@@ -30,19 +30,6 @@ namespace Coalesce.Web.Vue3.Models
         {
             get => _Zip;
             set { _Zip = value; Changed(nameof(Zip)); }
-        }
-
-        /// <summary>
-        /// Map from the domain object to the properties of the current DTO instance.
-        /// </summary>
-        public override void MapFrom(Coalesce.Domain.Services.Location obj, IMappingContext context, IncludeTree tree = null)
-        {
-            if (obj == null) return;
-            var includes = context.Includes;
-
-            this.City = obj.City;
-            this.State = obj.State;
-            this.Zip = obj.Zip;
         }
 
         /// <summary>
@@ -67,6 +54,28 @@ namespace Coalesce.Web.Vue3.Models
             var entity = new Coalesce.Domain.Services.Location();
             MapTo(entity, context);
             return entity;
+        }
+    }
+
+    public partial class LocationResponse : GeneratedResponseDto<Coalesce.Domain.Services.Location>
+    {
+        public LocationResponse() { }
+
+        public string City { get; set; }
+        public string State { get; set; }
+        public string Zip { get; set; }
+
+        /// <summary>
+        /// Map from the domain object to the properties of the current DTO instance.
+        /// </summary>
+        public override void MapFrom(Coalesce.Domain.Services.Location obj, IMappingContext context, IncludeTree tree = null)
+        {
+            if (obj == null) return;
+            var includes = context.Includes;
+
+            this.City = obj.City;
+            this.State = obj.State;
+            this.Zip = obj.Zip;
         }
     }
 }

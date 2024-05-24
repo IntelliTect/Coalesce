@@ -25,7 +25,7 @@ namespace Coalesce.Web.Vue3.Api
     [Authorize]
     [ServiceFilter(typeof(IApiActionFilter))]
     public partial class StandaloneReadonlyController
-        : BaseApiController<Coalesce.Domain.StandaloneReadonly, StandaloneReadonlyDtoGen>
+        : BaseApiController<Coalesce.Domain.StandaloneReadonly, StandaloneReadonlyParameter, StandaloneReadonlyResponse>
     {
         public StandaloneReadonlyController(CrudContext context) : base(context)
         {
@@ -34,7 +34,7 @@ namespace Coalesce.Web.Vue3.Api
 
         [HttpGet("get/{id}")]
         [Authorize]
-        public virtual Task<ItemResult<StandaloneReadonlyDtoGen>> Get(
+        public virtual Task<ItemResult<StandaloneReadonlyResponse>> Get(
             int id,
             DataSourceParameters parameters,
             IDataSource<Coalesce.Domain.StandaloneReadonly> dataSource)
@@ -42,7 +42,7 @@ namespace Coalesce.Web.Vue3.Api
 
         [HttpGet("list")]
         [Authorize]
-        public virtual Task<ListResult<StandaloneReadonlyDtoGen>> List(
+        public virtual Task<ListResult<StandaloneReadonlyResponse>> List(
             ListParameters parameters,
             IDataSource<Coalesce.Domain.StandaloneReadonly> dataSource)
             => ListImplementation(parameters, dataSource);

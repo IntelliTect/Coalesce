@@ -30,11 +30,11 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                 b.Line($"public partial class {Model.ApiControllerClassName} ");
                 if (Model.DbContext != null)
                 {
-                    b.Indented($": BaseApiController<{Model.BaseViewModel.FullyQualifiedName}, {Model.DtoName}, {Model.DbContext.Type.FullyQualifiedName}>");
+                    b.Indented($": BaseApiController<{Model.BaseViewModel.FullyQualifiedName}, {Model.ParameterDtoTypeName}, {Model.ResponseDtoTypeName}, {Model.DbContext.Type.FullyQualifiedName}>");
                 }
                 else
                 {
-                    b.Indented($": BaseApiController<{Model.BaseViewModel.FullyQualifiedName}, {Model.DtoName}>");
+                    b.Indented($": BaseApiController<{Model.BaseViewModel.FullyQualifiedName}, {Model.ParameterDtoTypeName}, {Model.ResponseDtoTypeName}>");
                 }
 
 
@@ -53,7 +53,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
             var primaryKeyParameter = $"{Model.PrimaryKey.Type.FullyQualifiedName} id";
             var dataSourceParameter = $"IDataSource<{Model.BaseViewModel.FullyQualifiedName}> dataSource";
             var behaviorsParameter = $"IBehaviors<{Model.BaseViewModel.FullyQualifiedName}> behaviors";
-            if (Model.IsDto)
+            if (Model.IsCustomDto)
             {
                 var declaredForAttr = $"[DeclaredFor(typeof({Model.FullyQualifiedName}))] ";
                 dataSourceParameter = declaredForAttr + dataSourceParameter;
@@ -74,7 +74,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                 b.Line();
                 b.Line("[HttpGet(\"get/{id}\")]");
                 b.Line($"{securityInfo.Read.MvcAnnotation()}");
-                b.Line($"{Model.ApiActionAccessModifier} virtual Task<ItemResult<{Model.DtoName}>> Get(");
+                b.Line($"{Model.ApiActionAccessModifier} virtual Task<ItemResult<{Model.ResponseDtoTypeName}>> Get(");
                 b.Indented($"{primaryKeyParameter},");
                 b.Indented($"DataSourceParameters parameters,");
                 b.Indented($"{dataSourceParameter})");
@@ -84,7 +84,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                 b.Line();
                 b.Line("[HttpGet(\"list\")]");
                 b.Line($"{securityInfo.Read.MvcAnnotation()}");
-                b.Line($"{Model.ApiActionAccessModifier} virtual Task<ListResult<{Model.DtoName}>> List(");
+                b.Line($"{Model.ApiActionAccessModifier} virtual Task<ListResult<{Model.ResponseDtoTypeName}>> List(");
                 b.Indented($"ListParameters parameters,");
                 b.Indented($"{dataSourceParameter})");
                 b.Indented($"=> ListImplementation(parameters, dataSource);");
@@ -105,8 +105,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                 b.Line();
                 b.Line("[HttpPost(\"save\")]");
                 b.Line($"{securityInfo.Save.MvcAnnotation()}");
-                b.Line($"{Model.ApiActionAccessModifier} virtual Task<ItemResult<{Model.DtoName}>> Save(");
-                b.Indented($"[FromForm] {Model.DtoName} dto,");
+                b.Line($"{Model.ApiActionAccessModifier} virtual Task<ItemResult<{Model.ResponseDtoTypeName}>> Save(");
+                b.Indented($"[FromForm] {Model.ParameterDtoTypeName} dto,");
                 b.Indented($"[FromQuery] DataSourceParameters parameters,");
                 b.Indented($"{dataSourceParameter},");
                 b.Indented($"{behaviorsParameter})");
@@ -125,7 +125,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                 b.Line();
                 b.Line("[HttpPost(\"bulkSave\")]");
                 b.Line($"{securityInfo.Read.MvcAnnotation()}");
-                b.Line($"{Model.ApiActionAccessModifier} virtual Task<ItemResult<{Model.DtoName}>> BulkSave(");
+                b.Line($"{Model.ApiActionAccessModifier} virtual Task<ItemResult<{Model.ResponseDtoTypeName}>> BulkSave(");
                 b.Indented($"[FromBody] BulkSaveRequest dto,");
                 b.Indented($"[FromQuery] DataSourceParameters parameters,");
                 b.Indented($"[FromServices] IDataSourceFactory dataSourceFactory,");
@@ -139,7 +139,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                 b.Line();
                 b.Line("[HttpPost(\"delete/{id}\")]");
                 b.Line($"{securityInfo.Delete.MvcAnnotation()}");
-                b.Line($"{Model.ApiActionAccessModifier} virtual Task<ItemResult<{Model.DtoName}>> Delete(");
+                b.Line($"{Model.ApiActionAccessModifier} virtual Task<ItemResult<{Model.ResponseDtoTypeName}>> Delete(");
                 b.Indented($"{primaryKeyParameter},");
                 b.Indented($"{behaviorsParameter},");
                 b.Indented($"{dataSourceParameter})");
@@ -166,7 +166,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                             $"{Model.BaseViewModel.FullyQualifiedName}, {Model.FullyQualifiedName}>" +
                             $"(\"{method.LoadFromDataSourceName}\");");
 
-                        if (Model.IsDto)
+                        if (Model.IsCustomDto)
                         {
                             b.Line($"var itemResult = await dataSource.GetMappedItemAsync<{Model.FullyQualifiedName}>(id, new DataSourceParameters());");
                         }

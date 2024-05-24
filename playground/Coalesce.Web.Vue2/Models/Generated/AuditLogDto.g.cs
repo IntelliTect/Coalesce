@@ -8,24 +8,27 @@ using System.Security.Claims;
 
 namespace Coalesce.Web.Vue2.Models
 {
-    public partial class AuditLogDtoGen : GeneratedDto<Coalesce.Domain.AuditLog>
+    public partial class AuditLogParameter : GeneratedParameterDto<Coalesce.Domain.AuditLog>
     {
-        public AuditLogDtoGen() { }
+        public AuditLogParameter() { }
 
+        private long? _Id;
         private string _Message;
         private int? _UserId;
-        private Coalesce.Web.Vue2.Models.PersonDtoGen _User;
-        private long? _Id;
         private string _Type;
         private string _KeyValue;
         private string _Description;
         private IntelliTect.Coalesce.AuditLogging.AuditEntryState? _State;
         private System.DateTimeOffset? _Date;
-        private System.Collections.Generic.ICollection<Coalesce.Web.Vue2.Models.AuditLogPropertyDtoGen> _Properties;
         private string _ClientIp;
         private string _Referrer;
         private string _Endpoint;
 
+        public long? Id
+        {
+            get => _Id;
+            set { _Id = value; Changed(nameof(Id)); }
+        }
         public string Message
         {
             get => _Message;
@@ -35,16 +38,6 @@ namespace Coalesce.Web.Vue2.Models
         {
             get => _UserId;
             set { _UserId = value; Changed(nameof(UserId)); }
-        }
-        public Coalesce.Web.Vue2.Models.PersonDtoGen User
-        {
-            get => _User;
-            set { _User = value; Changed(nameof(User)); }
-        }
-        public long? Id
-        {
-            get => _Id;
-            set { _Id = value; Changed(nameof(Id)); }
         }
         public string Type
         {
@@ -71,11 +64,6 @@ namespace Coalesce.Web.Vue2.Models
             get => _Date;
             set { _Date = value; Changed(nameof(Date)); }
         }
-        public System.Collections.Generic.ICollection<Coalesce.Web.Vue2.Models.AuditLogPropertyDtoGen> Properties
-        {
-            get => _Properties;
-            set { _Properties = value; Changed(nameof(Properties)); }
-        }
         public string ClientIp
         {
             get => _ClientIp;
@@ -90,42 +78,6 @@ namespace Coalesce.Web.Vue2.Models
         {
             get => _Endpoint;
             set { _Endpoint = value; Changed(nameof(Endpoint)); }
-        }
-
-        /// <summary>
-        /// Map from the domain object to the properties of the current DTO instance.
-        /// </summary>
-        public override void MapFrom(Coalesce.Domain.AuditLog obj, IMappingContext context, IncludeTree tree = null)
-        {
-            if (obj == null) return;
-            var includes = context.Includes;
-
-            this.Id = obj.Id;
-            this.Message = obj.Message;
-            this.UserId = obj.UserId;
-            this.Type = obj.Type;
-            this.KeyValue = obj.KeyValue;
-            this.Description = obj.Description;
-            this.State = obj.State;
-            this.Date = obj.Date;
-            this.ClientIp = obj.ClientIp;
-            this.Referrer = obj.Referrer;
-            this.Endpoint = obj.Endpoint;
-            if (tree == null || tree[nameof(this.User)] != null)
-                this.User = obj.User.MapToDto<Coalesce.Domain.Person, PersonDtoGen>(context, tree?[nameof(this.User)]);
-
-            var propValProperties = obj.Properties;
-            if (propValProperties != null && (tree == null || tree[nameof(this.Properties)] != null))
-            {
-                this.Properties = propValProperties
-                    .OrderBy(f => f.Id)
-                    .Select(f => f.MapToDto<IntelliTect.Coalesce.AuditLogging.AuditLogProperty, AuditLogPropertyDtoGen>(context, tree?[nameof(this.Properties)])).ToList();
-            }
-            else if (propValProperties == null && tree?[nameof(this.Properties)] != null)
-            {
-                this.Properties = new AuditLogPropertyDtoGen[0];
-            }
-
         }
 
         /// <summary>
@@ -158,6 +110,61 @@ namespace Coalesce.Web.Vue2.Models
             var entity = new Coalesce.Domain.AuditLog();
             MapTo(entity, context);
             return entity;
+        }
+    }
+
+    public partial class AuditLogResponse : GeneratedResponseDto<Coalesce.Domain.AuditLog>
+    {
+        public AuditLogResponse() { }
+
+        public long? Id { get; set; }
+        public string Message { get; set; }
+        public int? UserId { get; set; }
+        public string Type { get; set; }
+        public string KeyValue { get; set; }
+        public string Description { get; set; }
+        public IntelliTect.Coalesce.AuditLogging.AuditEntryState? State { get; set; }
+        public System.DateTimeOffset? Date { get; set; }
+        public string ClientIp { get; set; }
+        public string Referrer { get; set; }
+        public string Endpoint { get; set; }
+        public Coalesce.Web.Vue2.Models.PersonResponse User { get; set; }
+        public System.Collections.Generic.ICollection<Coalesce.Web.Vue2.Models.AuditLogPropertyResponse> Properties { get; set; }
+
+        /// <summary>
+        /// Map from the domain object to the properties of the current DTO instance.
+        /// </summary>
+        public override void MapFrom(Coalesce.Domain.AuditLog obj, IMappingContext context, IncludeTree tree = null)
+        {
+            if (obj == null) return;
+            var includes = context.Includes;
+
+            this.Id = obj.Id;
+            this.Message = obj.Message;
+            this.UserId = obj.UserId;
+            this.Type = obj.Type;
+            this.KeyValue = obj.KeyValue;
+            this.Description = obj.Description;
+            this.State = obj.State;
+            this.Date = obj.Date;
+            this.ClientIp = obj.ClientIp;
+            this.Referrer = obj.Referrer;
+            this.Endpoint = obj.Endpoint;
+            if (tree == null || tree[nameof(this.User)] != null)
+                this.User = obj.User.MapToDto<Coalesce.Domain.Person, PersonResponse>(context, tree?[nameof(this.User)]);
+
+            var propValProperties = obj.Properties;
+            if (propValProperties != null && (tree == null || tree[nameof(this.Properties)] != null))
+            {
+                this.Properties = propValProperties
+                    .OrderBy(f => f.Id)
+                    .Select(f => f.MapToDto<IntelliTect.Coalesce.AuditLogging.AuditLogProperty, AuditLogPropertyResponse>(context, tree?[nameof(this.Properties)])).ToList();
+            }
+            else if (propValProperties == null && tree?[nameof(this.Properties)] != null)
+            {
+                this.Properties = new AuditLogPropertyResponse[0];
+            }
+
         }
     }
 }

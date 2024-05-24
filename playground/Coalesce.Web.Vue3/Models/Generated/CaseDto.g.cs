@@ -8,27 +8,20 @@ using System.Security.Claims;
 
 namespace Coalesce.Web.Vue3.Models
 {
-    public partial class CaseDtoGen : GeneratedDto<Coalesce.Domain.Case>
+    public partial class CaseParameter : GeneratedParameterDto<Coalesce.Domain.Case>
     {
-        public CaseDtoGen() { }
+        public CaseParameter() { }
 
         private int? _CaseKey;
         private string _Title;
         private string _Description;
         private System.DateTimeOffset? _OpenedAt;
         private int? _AssignedToId;
-        private Coalesce.Web.Vue3.Models.PersonDtoGen _AssignedTo;
         private int? _ReportedById;
-        private Coalesce.Web.Vue3.Models.PersonDtoGen _ReportedBy;
-        private long? _AttachmentSize;
-        private string _AttachmentName;
         private string _AttachmentType;
-        private byte[] _AttachmentHash;
         private string _Severity;
         private Coalesce.Domain.Case.Statuses? _Status;
-        private System.Collections.Generic.ICollection<Coalesce.Web.Vue3.Models.CaseProductDtoGen> _CaseProducts;
         private int? _DevTeamAssignedId;
-        private Coalesce.Web.Vue3.Models.DevTeamDtoGen _DevTeamAssigned;
         private System.TimeSpan? _Duration;
 
         public int? CaseKey
@@ -56,40 +49,15 @@ namespace Coalesce.Web.Vue3.Models
             get => _AssignedToId;
             set { _AssignedToId = value; Changed(nameof(AssignedToId)); }
         }
-        public Coalesce.Web.Vue3.Models.PersonDtoGen AssignedTo
-        {
-            get => _AssignedTo;
-            set { _AssignedTo = value; Changed(nameof(AssignedTo)); }
-        }
         public int? ReportedById
         {
             get => _ReportedById;
             set { _ReportedById = value; Changed(nameof(ReportedById)); }
         }
-        public Coalesce.Web.Vue3.Models.PersonDtoGen ReportedBy
-        {
-            get => _ReportedBy;
-            set { _ReportedBy = value; Changed(nameof(ReportedBy)); }
-        }
-        public long? AttachmentSize
-        {
-            get => _AttachmentSize;
-            set { _AttachmentSize = value; Changed(nameof(AttachmentSize)); }
-        }
-        public string AttachmentName
-        {
-            get => _AttachmentName;
-            set { _AttachmentName = value; Changed(nameof(AttachmentName)); }
-        }
         public string AttachmentType
         {
             get => _AttachmentType;
             set { _AttachmentType = value; Changed(nameof(AttachmentType)); }
-        }
-        public byte[] AttachmentHash
-        {
-            get => _AttachmentHash;
-            set { _AttachmentHash = value; Changed(nameof(AttachmentHash)); }
         }
         public string Severity
         {
@@ -101,74 +69,15 @@ namespace Coalesce.Web.Vue3.Models
             get => _Status;
             set { _Status = value; Changed(nameof(Status)); }
         }
-        public System.Collections.Generic.ICollection<Coalesce.Web.Vue3.Models.CaseProductDtoGen> CaseProducts
-        {
-            get => _CaseProducts;
-            set { _CaseProducts = value; Changed(nameof(CaseProducts)); }
-        }
         public int? DevTeamAssignedId
         {
             get => _DevTeamAssignedId;
             set { _DevTeamAssignedId = value; Changed(nameof(DevTeamAssignedId)); }
         }
-        public Coalesce.Web.Vue3.Models.DevTeamDtoGen DevTeamAssigned
-        {
-            get => _DevTeamAssigned;
-            set { _DevTeamAssigned = value; Changed(nameof(DevTeamAssigned)); }
-        }
         public System.TimeSpan? Duration
         {
             get => _Duration;
             set { _Duration = value; Changed(nameof(Duration)); }
-        }
-
-        /// <summary>
-        /// Map from the domain object to the properties of the current DTO instance.
-        /// </summary>
-        public override void MapFrom(Coalesce.Domain.Case obj, IMappingContext context, IncludeTree tree = null)
-        {
-            if (obj == null) return;
-            var includes = context.Includes;
-
-            this.CaseKey = obj.CaseKey;
-            this.Title = obj.Title;
-            this.Description = obj.Description;
-            this.OpenedAt = obj.OpenedAt;
-            this.AssignedToId = obj.AssignedToId;
-            this.ReportedById = obj.ReportedById;
-            this.AttachmentSize = obj.AttachmentSize;
-            this.AttachmentHash = obj.AttachmentHash;
-            this.Severity = obj.Severity;
-            this.Status = obj.Status;
-            this.DevTeamAssignedId = obj.DevTeamAssignedId;
-            this.Duration = obj.Duration;
-            var propValCaseProducts = obj.CaseProducts;
-            if (propValCaseProducts != null && (tree == null || tree[nameof(this.CaseProducts)] != null))
-            {
-                this.CaseProducts = propValCaseProducts
-                    .OrderBy(f => f.CaseProductId)
-                    .Select(f => f.MapToDto<Coalesce.Domain.CaseProduct, CaseProductDtoGen>(context, tree?[nameof(this.CaseProducts)])).ToList();
-            }
-            else if (propValCaseProducts == null && tree?[nameof(this.CaseProducts)] != null)
-            {
-                this.CaseProducts = new CaseProductDtoGen[0];
-            }
-
-
-            this.DevTeamAssigned = obj.DevTeamAssigned.MapToDto<Coalesce.Domain.External.DevTeam, DevTeamDtoGen>(context, tree?[nameof(this.DevTeamAssigned)]);
-
-            if (context.GetPropertyRestriction<Coalesce.Domain.Case.TestRestriction>().UserCanRead(context, nameof(AttachmentName), obj)) this.AttachmentName = obj.AttachmentName;
-            if (context.GetPropertyRestriction<Coalesce.Domain.Case.TestRestriction>().UserCanRead(context, nameof(AttachmentType), obj)) this.AttachmentType = obj.AttachmentType;
-            if (!(includes == "PersonListGen"))
-            {
-                if (tree == null || tree[nameof(this.AssignedTo)] != null)
-                    this.AssignedTo = obj.AssignedTo.MapToDto<Coalesce.Domain.Person, PersonDtoGen>(context, tree?[nameof(this.AssignedTo)]);
-
-                if (tree == null || tree[nameof(this.ReportedBy)] != null)
-                    this.ReportedBy = obj.ReportedBy.MapToDto<Coalesce.Domain.Person, PersonDtoGen>(context, tree?[nameof(this.ReportedBy)]);
-
-            }
-
         }
 
         /// <summary>
@@ -201,6 +110,79 @@ namespace Coalesce.Web.Vue3.Models
             var entity = new Coalesce.Domain.Case();
             MapTo(entity, context);
             return entity;
+        }
+    }
+
+    public partial class CaseResponse : GeneratedResponseDto<Coalesce.Domain.Case>
+    {
+        public CaseResponse() { }
+
+        public int? CaseKey { get; set; }
+        public string Title { get; set; }
+        public string Description { get; set; }
+        public System.DateTimeOffset? OpenedAt { get; set; }
+        public int? AssignedToId { get; set; }
+        public int? ReportedById { get; set; }
+        public long? AttachmentSize { get; set; }
+        public string AttachmentName { get; set; }
+        public string AttachmentType { get; set; }
+        public byte[] AttachmentHash { get; set; }
+        public string Severity { get; set; }
+        public Coalesce.Domain.Case.Statuses? Status { get; set; }
+        public int? DevTeamAssignedId { get; set; }
+        public System.TimeSpan? Duration { get; set; }
+        public Coalesce.Web.Vue3.Models.Person AssignedTo { get; set; }
+        public Coalesce.Web.Vue3.Models.Person ReportedBy { get; set; }
+        public System.Collections.Generic.ICollection<Coalesce.Web.Vue3.Models.CaseProduct> CaseProducts { get; set; }
+        public Coalesce.Web.Vue3.Models.DevTeam DevTeamAssigned { get; set; }
+
+        /// <summary>
+        /// Map from the domain object to the properties of the current DTO instance.
+        /// </summary>
+        public override void MapFrom(Coalesce.Domain.Case obj, IMappingContext context, IncludeTree tree = null)
+        {
+            if (obj == null) return;
+            var includes = context.Includes;
+
+            this.CaseKey = obj.CaseKey;
+            this.Title = obj.Title;
+            this.Description = obj.Description;
+            this.OpenedAt = obj.OpenedAt;
+            this.AssignedToId = obj.AssignedToId;
+            this.ReportedById = obj.ReportedById;
+            this.AttachmentSize = obj.AttachmentSize;
+            this.AttachmentHash = obj.AttachmentHash;
+            this.Severity = obj.Severity;
+            this.Status = obj.Status;
+            this.DevTeamAssignedId = obj.DevTeamAssignedId;
+            this.Duration = obj.Duration;
+            var propValCaseProducts = obj.CaseProducts;
+            if (propValCaseProducts != null && (tree == null || tree[nameof(this.CaseProducts)] != null))
+            {
+                this.CaseProducts = propValCaseProducts
+                    .OrderBy(f => f.CaseProductId)
+                    .Select(f => f.MapToDto<Coalesce.Domain.CaseProduct, CaseProductResponse>(context, tree?[nameof(this.CaseProducts)])).ToList();
+            }
+            else if (propValCaseProducts == null && tree?[nameof(this.CaseProducts)] != null)
+            {
+                this.CaseProducts = new CaseProductResponse[0];
+            }
+
+
+            this.DevTeamAssigned = obj.DevTeamAssigned.MapToDto<Coalesce.Domain.External.DevTeam, DevTeamResponse>(context, tree?[nameof(this.DevTeamAssigned)]);
+
+            if (context.GetPropertyRestriction<Coalesce.Domain.Case.TestRestriction>().UserCanRead(context, nameof(AttachmentName), obj)) this.AttachmentName = obj.AttachmentName;
+            if (context.GetPropertyRestriction<Coalesce.Domain.Case.TestRestriction>().UserCanRead(context, nameof(AttachmentType), obj)) this.AttachmentType = obj.AttachmentType;
+            if (!(includes == "PersonListGen"))
+            {
+                if (tree == null || tree[nameof(this.AssignedTo)] != null)
+                    this.AssignedTo = obj.AssignedTo.MapToDto<Coalesce.Domain.Person, PersonResponse>(context, tree?[nameof(this.AssignedTo)]);
+
+                if (tree == null || tree[nameof(this.ReportedBy)] != null)
+                    this.ReportedBy = obj.ReportedBy.MapToDto<Coalesce.Domain.Person, PersonResponse>(context, tree?[nameof(this.ReportedBy)]);
+
+            }
+
         }
     }
 }

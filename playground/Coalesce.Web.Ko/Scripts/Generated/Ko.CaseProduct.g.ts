@@ -155,9 +155,7 @@ module ViewModels {
             if (this.errors !== null) return;
             this.errors = ko.validation.group([
                 this.caseId.extend({ required: {params: true, message: "Case is required."} }),
-                this.case.extend({ required: {params: true, message: "Case is required."} }),
                 this.productId.extend({ required: {params: true, message: "Product is required."} }),
-                this.product.extend({ required: {params: true, message: "Product is required."} }),
             ]);
             this.warnings = ko.validation.group([
             ]);

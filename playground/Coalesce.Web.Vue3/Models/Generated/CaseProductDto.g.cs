@@ -8,15 +8,13 @@ using System.Security.Claims;
 
 namespace Coalesce.Web.Vue3.Models
 {
-    public partial class CaseProductDtoGen : GeneratedDto<Coalesce.Domain.CaseProduct>
+    public partial class CaseProductParameter : GeneratedParameterDto<Coalesce.Domain.CaseProduct>
     {
-        public CaseProductDtoGen() { }
+        public CaseProductParameter() { }
 
         private int? _CaseProductId;
         private int? _CaseId;
-        private Coalesce.Web.Vue3.Models.CaseDtoGen _Case;
         private int? _ProductId;
-        private Coalesce.Web.Vue3.Models.ProductDtoGen _Product;
 
         public int? CaseProductId
         {
@@ -28,39 +26,10 @@ namespace Coalesce.Web.Vue3.Models
             get => _CaseId;
             set { _CaseId = value; Changed(nameof(CaseId)); }
         }
-        public Coalesce.Web.Vue3.Models.CaseDtoGen Case
-        {
-            get => _Case;
-            set { _Case = value; Changed(nameof(Case)); }
-        }
         public int? ProductId
         {
             get => _ProductId;
             set { _ProductId = value; Changed(nameof(ProductId)); }
-        }
-        public Coalesce.Web.Vue3.Models.ProductDtoGen Product
-        {
-            get => _Product;
-            set { _Product = value; Changed(nameof(Product)); }
-        }
-
-        /// <summary>
-        /// Map from the domain object to the properties of the current DTO instance.
-        /// </summary>
-        public override void MapFrom(Coalesce.Domain.CaseProduct obj, IMappingContext context, IncludeTree tree = null)
-        {
-            if (obj == null) return;
-            var includes = context.Includes;
-
-            this.CaseProductId = obj.CaseProductId;
-            this.CaseId = obj.CaseId;
-            this.ProductId = obj.ProductId;
-            if (tree == null || tree[nameof(this.Case)] != null)
-                this.Case = obj.Case.MapToDto<Coalesce.Domain.Case, CaseDtoGen>(context, tree?[nameof(this.Case)]);
-
-            if (tree == null || tree[nameof(this.Product)] != null)
-                this.Product = obj.Product.MapToDto<Coalesce.Domain.Product, ProductDtoGen>(context, tree?[nameof(this.Product)]);
-
         }
 
         /// <summary>
@@ -85,6 +54,36 @@ namespace Coalesce.Web.Vue3.Models
             var entity = new Coalesce.Domain.CaseProduct();
             MapTo(entity, context);
             return entity;
+        }
+    }
+
+    public partial class CaseProductResponse : GeneratedResponseDto<Coalesce.Domain.CaseProduct>
+    {
+        public CaseProductResponse() { }
+
+        public int? CaseProductId { get; set; }
+        public int? CaseId { get; set; }
+        public int? ProductId { get; set; }
+        public Coalesce.Web.Vue3.Models.Case Case { get; set; }
+        public Coalesce.Web.Vue3.Models.Product Product { get; set; }
+
+        /// <summary>
+        /// Map from the domain object to the properties of the current DTO instance.
+        /// </summary>
+        public override void MapFrom(Coalesce.Domain.CaseProduct obj, IMappingContext context, IncludeTree tree = null)
+        {
+            if (obj == null) return;
+            var includes = context.Includes;
+
+            this.CaseProductId = obj.CaseProductId;
+            this.CaseId = obj.CaseId;
+            this.ProductId = obj.ProductId;
+            if (tree == null || tree[nameof(this.Case)] != null)
+                this.Case = obj.Case.MapToDto<Coalesce.Domain.Case, CaseResponse>(context, tree?[nameof(this.Case)]);
+
+            if (tree == null || tree[nameof(this.Product)] != null)
+                this.Product = obj.Product.MapToDto<Coalesce.Domain.Product, ProductResponse>(context, tree?[nameof(this.Product)]);
+
         }
     }
 }

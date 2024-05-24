@@ -27,46 +27,8 @@ namespace IntelliTect.Coalesce.Swashbuckle
             var cvm = ReflectionRepository.GetClassViewModel(context.MethodInfo.DeclaringType);
             var method = new ReflectionMethodViewModel(cvm, context.MethodInfo);
 
-            ProcessDtoParameters(operation, context, method);
             ProcessDataSources(operation, context, method);
             ProcessStandardParameters(operation, method);
-        }
-
-        private static void ProcessDtoParameters(OpenApiOperation operation, OperationFilterContext context, ReflectionMethodViewModel method)
-        {
-            foreach (var parameter in method.Parameters)
-            {
-                if (parameter.Type.IsA(typeof(GeneratedDto<>)))
-                {
-                    // Get the list of DTO properties that are settable by the DTO's MapTo method:
-                    var propsToKeep = parameter.Type.ClassViewModel.DtoBaseViewModel.ClientProperties
-                        .Where(p => p.IsClientSerializable)
-                        .ToLookup(p => p.Name);
-
-                    if (operation.RequestBody?.Content.TryGetValue("multipart/form-data", out var formContent) != true) continue;
-
-                    var paramsFromApiExplorer = context.ApiDescription.ParameterDescriptions
-                        .Where(d => d.ParameterDescriptor.Name == parameter.Name)
-                        .ToLookup(d => d.Name);
-                    foreach (var prop in formContent.Schema.Properties.ToList())
-                    {
-                        var apiExlorerProp = paramsFromApiExplorer[prop.Key].SingleOrDefault();
-                        if (apiExlorerProp is null) continue;
-
-                        var nameRoot = prop.Key
-                            .Split('.')
-                            .SkipWhile((seg, i) => i == 0 && seg == apiExlorerProp.ParameterDescriptor.BindingInfo.BinderModelName)
-                            .FirstOrDefault();
-                        if (!propsToKeep.Contains(nameRoot))
-                        {
-                            // This property is not one that is mappable back to the entity from the DTO.
-                            // It might be an excluded top-level property, or it might be nested under such a property.
-                            formContent.Schema.Properties.Remove(prop.Key);
-                            formContent.Encoding.Remove(prop.Key);
-                        }
-                    }
-                }
-            }
         }
 
         private void ProcessStandardParameters(OpenApiOperation operation, MethodViewModel method)

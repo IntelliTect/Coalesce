@@ -48,18 +48,18 @@ namespace IntelliTect.Coalesce.Api
         /// <summary>
         /// The ClassViewModel for the DTO type.
         /// </summary>
-        internal ClassViewModel DtoClassViewModel { get; set; } = null!;
+        internal ClassViewModel ParamDtoClassViewModel { get; set; } = null!;
 
-        internal ClassViewModel DeclaredForClassViewModel => DtoClassViewModel.Type.IsA(typeof(GeneratedDto<>))
+        internal ClassViewModel DeclaredForClassViewModel => ParamDtoClassViewModel.Type.IsA(typeof(GeneratedParameterDto<>))
             ? ClassViewModel // Strategies and annotations for generated DTOs are always declared on the entity itself
-            : DtoClassViewModel // Strategies and annotations for non-generated DTOs (i.e. custom DTOs) will be declared for that custom DTO.
+            : ParamDtoClassViewModel // Strategies and annotations for non-generated DTOs (i.e. custom DTOs) will be declared for that custom DTO.
             ;
 
-        internal PropertyViewModel DtoPrimaryKey => DtoClassViewModel.PrimaryKey ?? throw new Exception("Bulk saves cannot operate on unkeyed models");
+        internal PropertyViewModel InputDtoPrimaryKey => ParamDtoClassViewModel.PrimaryKey ?? throw new Exception("Bulk saves cannot operate on unkeyed models");
 
-        internal virtual object? PrimaryKey => DtoPrimaryKey.PropertyInfo.GetValue(Data);
+        internal virtual object? PrimaryKey => InputDtoPrimaryKey.PropertyInfo.GetValue(Data);
 
-        internal string PrimaryRefName => DtoPrimaryKey.JsonName;
+        internal string PrimaryRefName => InputDtoPrimaryKey.JsonName;
         internal int? PrimaryRef => Refs?.TryGetValue(PrimaryRefName, out int v) == true ? v : null;
 
         internal abstract void Initialize(IDataSourceFactory dataSourceFactory, IBehaviorsFactory behaviorsFactory);
@@ -69,22 +69,24 @@ namespace IntelliTect.Coalesce.Api
         internal abstract Task<ItemResult> DeleteAsync(DataSourceParameters parameters);
     }
 
-    internal class BulkSaveRequestItem<T, TDto> : BulkSaveRequestItem
+    internal class BulkSaveRequestItem<T, TInputDto> : BulkSaveRequestItem
         where T : class
-        where TDto : class, IClassDto<T>, new()
+        where TInputDto : class, IParameterDto<T>, new()
     {
         /// <summary>
         /// An IClassDto containing the data for the item.
         /// </summary>
-        internal TDto Dto
+        internal TInputDto Dto
         {
-            get => (TDto)Data;
+            get => (TInputDto)Data;
             set => Data = value;
         }
 
-        internal TDto? ResultDto { get; set; }
+        private ModelCapturingDto? ResultDto { get; set; }
 
-        internal override object? PrimaryKey => DtoPrimaryKey.PropertyInfo.GetValue(ResultDto ?? Dto);
+        internal override object? PrimaryKey => ResultDto?.Model is { } 
+            ? DeclaredForClassViewModel.PrimaryKey!.PropertyInfo.GetValue(ResultDto.Model)
+            : InputDtoPrimaryKey.PropertyInfo.GetValue(Dto);
 
         internal IDataSource<T>? DataSource { get; set; }
         internal IBehaviors<T>? Behaviors { get; set; }
@@ -96,10 +98,10 @@ namespace IntelliTect.Coalesce.Api
 
         internal override async Task<ItemResult> SaveAsync(DataSourceParameters parameters)
         {
-            var result = await Behaviors!.SaveAsync(Dto, DataSource!, parameters);
+            var result = await Behaviors!.SaveAsync<TInputDto, ModelCapturingDto>(Dto, DataSource!, parameters);
             if (!result.WasSuccessful) return result;
 
-            ResultDto = result.Object ?? Dto;
+            ResultDto = result.Object;
 
             return result;
         }
@@ -107,7 +109,7 @@ namespace IntelliTect.Coalesce.Api
         internal override async Task<ItemResult> DeleteAsync(DataSourceParameters parameters)
         {
             if (PrimaryKey is null) throw new InvalidOperationException("Unable to delete item - primary key was not provided");
-            return await Behaviors!.DeleteAsync<TDto>(PrimaryKey, DataSource!, parameters);
+            return await Behaviors!.DeleteAsync<ModelCapturingDto>(PrimaryKey, DataSource!, parameters);
         }
 
         internal override void Initialize(IDataSourceFactory dataSourceFactory, IBehaviorsFactory behaviorsFactory)
@@ -120,6 +122,16 @@ namespace IntelliTect.Coalesce.Api
             ClassViewModel declaredFor = DeclaredForClassViewModel;
             DataSource = dataSourceFactory.GetDefaultDataSource<T>(declaredFor);
             Behaviors = behaviorsFactory.GetBehaviors<T>(declaredFor);
+        }
+
+        private class ModelCapturingDto : IResponseDto<T>
+        {
+            public T? Model { get; set; }
+
+            public void MapFrom(T obj, IMappingContext context, IncludeTree? tree = null)
+            {
+                Model = obj;
+            }
         }
     }
 }

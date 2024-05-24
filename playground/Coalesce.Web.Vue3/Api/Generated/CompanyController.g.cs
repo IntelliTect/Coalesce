@@ -90,7 +90,7 @@ namespace Coalesce.Web.Vue3.Api
         public virtual async Task<ItemResult> ConflictingParameterNames(
             [FromServices] IDataSourceFactory dataSourceFactory,
             [FromForm(Name = "id")] int id,
-            [FromForm(Name = "companyParam")] Company companyParam,
+            [FromForm(Name = "companyParam")] CompanyParameter companyParam,
             [FromForm(Name = "name")] string name)
         {
             var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Company, Coalesce.Domain.Company>("Default");
@@ -128,7 +128,7 @@ namespace Coalesce.Web.Vue3.Api
         /// </summary>
         [HttpPost("GetCertainItems")]
         [Authorize]
-        public virtual ItemResult<System.Collections.Generic.ICollection<Company>> GetCertainItems(
+        public virtual ItemResult<System.Collections.Generic.ICollection<CompanyResponse>> GetCertainItems(
             [FromForm(Name = "isDeleted")] bool isDeleted = false)
         {
             var _params = new
@@ -140,7 +140,7 @@ namespace Coalesce.Web.Vue3.Api
             {
                 var _validationResult = ItemResult.FromParameterValidation(
                     GeneratedForClassViewModel!.MethodByName("GetCertainItems"), _params, HttpContext.RequestServices);
-                if (!_validationResult.WasSuccessful) return new ItemResult<System.Collections.Generic.ICollection<Company>>(_validationResult);
+                if (!_validationResult.WasSuccessful) return new ItemResult<System.Collections.Generic.ICollection<CompanyResponse>>(_validationResult);
             }
 
             IncludeTree includeTree = null;
@@ -149,7 +149,7 @@ namespace Coalesce.Web.Vue3.Api
                 Db,
                 _params.isDeleted
             );
-            var _result = new ItemResult<System.Collections.Generic.ICollection<Company>>();
+            var _result = new ItemResult<System.Collections.Generic.ICollection<CompanyResponse>>();
             _result.Object = _methodResult?.ToList().Select(o => Mapper.MapToDto<Coalesce.Domain.Company, CompanyResponse>(o, _mappingContext, includeTree)).ToList();
             return _result;
         }

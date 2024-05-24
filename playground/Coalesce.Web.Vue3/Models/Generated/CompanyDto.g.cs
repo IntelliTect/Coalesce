@@ -145,7 +145,7 @@ namespace Coalesce.Web.Vue3.Models
         public string LogoUrl { get; set; }
         public bool? IsDeleted { get; set; }
         public string AltName { get; set; }
-        public System.Collections.Generic.ICollection<Coalesce.Web.Vue3.Models.Person> Employees { get; set; }
+        public System.Collections.Generic.ICollection<Coalesce.Web.Vue3.Models.PersonResponse> Employees { get; set; }
 
         /// <summary>
         /// Map from the domain object to the properties of the current DTO instance.

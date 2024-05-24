@@ -64,8 +64,8 @@ namespace Coalesce.Web.Vue3.Models
         public int? CaseProductId { get; set; }
         public int? CaseId { get; set; }
         public int? ProductId { get; set; }
-        public Coalesce.Web.Vue3.Models.Case Case { get; set; }
-        public Coalesce.Web.Vue3.Models.Product Product { get; set; }
+        public Coalesce.Web.Vue3.Models.CaseResponse Case { get; set; }
+        public Coalesce.Web.Vue3.Models.ProductResponse Product { get; set; }
 
         /// <summary>
         /// Map from the domain object to the properties of the current DTO instance.

@@ -12,15 +12,15 @@ namespace Coalesce.Web.Vue3.Models
     {
         public ProductDetailsParameter() { }
 
-        private Coalesce.Web.Vue3.Models.StreetAddress _ManufacturingAddress;
-        private Coalesce.Web.Vue3.Models.StreetAddress _CompanyHqAddress;
+        private Coalesce.Web.Vue3.Models.StreetAddressParameter _ManufacturingAddress;
+        private Coalesce.Web.Vue3.Models.StreetAddressParameter _CompanyHqAddress;
 
-        public Coalesce.Web.Vue3.Models.StreetAddress ManufacturingAddress
+        public Coalesce.Web.Vue3.Models.StreetAddressParameter ManufacturingAddress
         {
             get => _ManufacturingAddress;
             set { _ManufacturingAddress = value; Changed(nameof(ManufacturingAddress)); }
         }
-        public Coalesce.Web.Vue3.Models.StreetAddress CompanyHqAddress
+        public Coalesce.Web.Vue3.Models.StreetAddressParameter CompanyHqAddress
         {
             get => _CompanyHqAddress;
             set { _CompanyHqAddress = value; Changed(nameof(CompanyHqAddress)); }
@@ -54,8 +54,8 @@ namespace Coalesce.Web.Vue3.Models
     {
         public ProductDetailsResponse() { }
 
-        public Coalesce.Web.Vue3.Models.StreetAddress ManufacturingAddress { get; set; }
-        public Coalesce.Web.Vue3.Models.StreetAddress CompanyHqAddress { get; set; }
+        public Coalesce.Web.Vue3.Models.StreetAddressResponse ManufacturingAddress { get; set; }
+        public Coalesce.Web.Vue3.Models.StreetAddressResponse CompanyHqAddress { get; set; }
 
         /// <summary>
         /// Map from the domain object to the properties of the current DTO instance.

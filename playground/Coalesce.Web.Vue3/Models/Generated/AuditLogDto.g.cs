@@ -128,8 +128,8 @@ namespace Coalesce.Web.Vue3.Models
         public string ClientIp { get; set; }
         public string Referrer { get; set; }
         public string Endpoint { get; set; }
-        public Coalesce.Web.Vue3.Models.Person User { get; set; }
-        public System.Collections.Generic.ICollection<Coalesce.Web.Vue3.Models.AuditLogProperty> Properties { get; set; }
+        public Coalesce.Web.Vue3.Models.PersonResponse User { get; set; }
+        public System.Collections.Generic.ICollection<Coalesce.Web.Vue3.Models.AuditLogPropertyResponse> Properties { get; set; }
 
         /// <summary>
         /// Map from the domain object to the properties of the current DTO instance.

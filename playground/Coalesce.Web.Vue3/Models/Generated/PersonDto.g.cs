@@ -137,10 +137,10 @@ namespace Coalesce.Web.Vue3.Models
         public string Name { get; set; }
         public int? CompanyId { get; set; }
         public System.Collections.Generic.ICollection<string> ArbitraryCollectionOfStrings { get; set; }
-        public System.Collections.Generic.ICollection<Coalesce.Web.Vue3.Models.Case> CasesAssigned { get; set; }
-        public System.Collections.Generic.ICollection<Coalesce.Web.Vue3.Models.Case> CasesReported { get; set; }
-        public Coalesce.Web.Vue3.Models.PersonStats PersonStats { get; set; }
-        public Coalesce.Web.Vue3.Models.Company Company { get; set; }
+        public System.Collections.Generic.ICollection<Coalesce.Web.Vue3.Models.CaseResponse> CasesAssigned { get; set; }
+        public System.Collections.Generic.ICollection<Coalesce.Web.Vue3.Models.CaseResponse> CasesReported { get; set; }
+        public Coalesce.Web.Vue3.Models.PersonStatsResponse PersonStats { get; set; }
+        public Coalesce.Web.Vue3.Models.CompanyResponse Company { get; set; }
 
         /// <summary>
         /// Map from the domain object to the properties of the current DTO instance.

@@ -42,9 +42,9 @@ namespace Coalesce.Web.Vue3.Api
         [HttpPost("GetWeather")]
         [HttpPost("GetWeatherAsync")]
         [Authorize]
-        public virtual async Task<ItemResult<WeatherData>> GetWeather(
+        public virtual async Task<ItemResult<WeatherDataResponse>> GetWeather(
             [FromServices] Coalesce.Domain.AppDbContext parameterDbContext,
-            [FromForm(Name = "location")] Location location,
+            [FromForm(Name = "location")] LocationParameter location,
             [FromForm(Name = "dateTime")] System.DateTimeOffset? dateTime,
             [FromForm(Name = "conditions")] Coalesce.Domain.Services.SkyConditions? conditions)
         {
@@ -59,7 +59,7 @@ namespace Coalesce.Web.Vue3.Api
             {
                 var _validationResult = ItemResult.FromParameterValidation(
                     GeneratedForClassViewModel!.MethodByName("GetWeatherAsync"), _params, HttpContext.RequestServices);
-                if (!_validationResult.WasSuccessful) return new ItemResult<WeatherData>(_validationResult);
+                if (!_validationResult.WasSuccessful) return new ItemResult<WeatherDataResponse>(_validationResult);
             }
 
             IncludeTree includeTree = null;
@@ -70,7 +70,7 @@ namespace Coalesce.Web.Vue3.Api
                 _params.dateTime,
                 _params.conditions
             );
-            var _result = new ItemResult<WeatherData>();
+            var _result = new ItemResult<WeatherDataResponse>();
             _result.Object = Mapper.MapToDto<Coalesce.Domain.Services.WeatherData, WeatherDataResponse>(_methodResult, _mappingContext, includeTree);
             return _result;
         }

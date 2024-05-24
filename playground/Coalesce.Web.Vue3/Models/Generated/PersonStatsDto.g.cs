@@ -17,7 +17,7 @@ namespace Coalesce.Web.Vue3.Models
         private string _Name;
         private System.Collections.Generic.ICollection<System.DateTimeOffset?> _NullableValueTypeCollection;
         private System.Collections.Generic.ICollection<System.DateTimeOffset> _ValueTypeCollection;
-        private Coalesce.Web.Vue3.Models.PersonLocation _PersonLocation;
+        private Coalesce.Web.Vue3.Models.PersonLocationParameter _PersonLocation;
 
         public double? Height
         {
@@ -44,7 +44,7 @@ namespace Coalesce.Web.Vue3.Models
             get => _ValueTypeCollection;
             set { _ValueTypeCollection = value; Changed(nameof(ValueTypeCollection)); }
         }
-        public Coalesce.Web.Vue3.Models.PersonLocation PersonLocation
+        public Coalesce.Web.Vue3.Models.PersonLocationParameter PersonLocation
         {
             get => _PersonLocation;
             set { _PersonLocation = value; Changed(nameof(PersonLocation)); }
@@ -87,7 +87,7 @@ namespace Coalesce.Web.Vue3.Models
         public string Name { get; set; }
         public System.Collections.Generic.ICollection<System.DateTimeOffset?> NullableValueTypeCollection { get; set; }
         public System.Collections.Generic.ICollection<System.DateTimeOffset> ValueTypeCollection { get; set; }
-        public Coalesce.Web.Vue3.Models.PersonLocation PersonLocation { get; set; }
+        public Coalesce.Web.Vue3.Models.PersonLocationResponse PersonLocation { get; set; }
 
         /// <summary>
         /// Map from the domain object to the properties of the current DTO instance.

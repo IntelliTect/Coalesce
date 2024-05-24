@@ -401,6 +401,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     typeName = Name + "?";
 
                 var dtoName = isInput ? model.ParameterDtoTypeName : model.ResponseDtoTypeName;
+                var regex = new Regex($@"({model.Name})(>|$)");
+                typeName = regex.Replace(typeName, $"{dtoName}$2");
                 typeName = typeName.Replace(
                     model.Type.FullNamespace + ".", 
                     string.IsNullOrWhiteSpace(dtoNamespace) ? "" : dtoNamespace + ".");

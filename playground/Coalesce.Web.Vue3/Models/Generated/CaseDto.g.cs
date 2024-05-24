@@ -131,10 +131,10 @@ namespace Coalesce.Web.Vue3.Models
         public Coalesce.Domain.Case.Statuses? Status { get; set; }
         public int? DevTeamAssignedId { get; set; }
         public System.TimeSpan? Duration { get; set; }
-        public Coalesce.Web.Vue3.Models.Person AssignedTo { get; set; }
-        public Coalesce.Web.Vue3.Models.Person ReportedBy { get; set; }
-        public System.Collections.Generic.ICollection<Coalesce.Web.Vue3.Models.CaseProduct> CaseProducts { get; set; }
-        public Coalesce.Web.Vue3.Models.DevTeam DevTeamAssigned { get; set; }
+        public Coalesce.Web.Vue3.Models.PersonResponse AssignedTo { get; set; }
+        public Coalesce.Web.Vue3.Models.PersonResponse ReportedBy { get; set; }
+        public System.Collections.Generic.ICollection<Coalesce.Web.Vue3.Models.CaseProductResponse> CaseProducts { get; set; }
+        public Coalesce.Web.Vue3.Models.DevTeamResponse DevTeamAssigned { get; set; }
 
         /// <summary>
         /// Map from the domain object to the properties of the current DTO instance.

@@ -72,7 +72,7 @@ namespace Coalesce.Web.Vue3.Models
         public string Name { get; set; }
         public System.Guid? UniqueId { get; set; }
         public object Unknown { get; set; }
-        public Coalesce.Web.Vue3.Models.ProductDetails Details { get; set; }
+        public Coalesce.Web.Vue3.Models.ProductDetailsResponse Details { get; set; }
 
         /// <summary>
         /// Map from the domain object to the properties of the current DTO instance.

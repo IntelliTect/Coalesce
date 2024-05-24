@@ -14,7 +14,7 @@ namespace Coalesce.Web.Vue3.Models
 
         private double? _TempFahrenheit;
         private double? _Humidity;
-        private Coalesce.Web.Vue3.Models.Location _Location;
+        private Coalesce.Web.Vue3.Models.LocationParameter _Location;
 
         public double? TempFahrenheit
         {
@@ -26,7 +26,7 @@ namespace Coalesce.Web.Vue3.Models
             get => _Humidity;
             set { _Humidity = value; Changed(nameof(Humidity)); }
         }
-        public Coalesce.Web.Vue3.Models.Location Location
+        public Coalesce.Web.Vue3.Models.LocationParameter Location
         {
             get => _Location;
             set { _Location = value; Changed(nameof(Location)); }
@@ -63,7 +63,7 @@ namespace Coalesce.Web.Vue3.Models
 
         public double? TempFahrenheit { get; set; }
         public double? Humidity { get; set; }
-        public Coalesce.Web.Vue3.Models.Location Location { get; set; }
+        public Coalesce.Web.Vue3.Models.LocationResponse Location { get; set; }
 
         /// <summary>
         /// Map from the domain object to the properties of the current DTO instance.

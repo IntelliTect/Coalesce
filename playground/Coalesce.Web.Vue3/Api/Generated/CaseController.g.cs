@@ -116,14 +116,14 @@ namespace Coalesce.Web.Vue3.Api
         /// </summary>
         [HttpPost("GetSomeCases")]
         [Authorize]
-        public virtual ItemResult<System.Collections.Generic.ICollection<Case>> GetSomeCases()
+        public virtual ItemResult<System.Collections.Generic.ICollection<CaseResponse>> GetSomeCases()
         {
             IncludeTree includeTree = null;
             var _mappingContext = new MappingContext(Context);
             var _methodResult = Coalesce.Domain.Case.GetSomeCases(
                 Db
             );
-            var _result = new ItemResult<System.Collections.Generic.ICollection<Case>>();
+            var _result = new ItemResult<System.Collections.Generic.ICollection<CaseResponse>>();
             _result.Object = _methodResult?.ToList().Select(o => Mapper.MapToDto<Coalesce.Domain.Case, CaseResponse>(o, _mappingContext, includeTree)).ToList();
             return _result;
         }
@@ -383,14 +383,14 @@ namespace Coalesce.Web.Vue3.Api
         /// </summary>
         [HttpPost("GetCaseSummary")]
         [Authorize]
-        public virtual ItemResult<CaseSummary> GetCaseSummary()
+        public virtual ItemResult<CaseSummaryResponse> GetCaseSummary()
         {
             IncludeTree includeTree = null;
             var _mappingContext = new MappingContext(Context);
             var _methodResult = Coalesce.Domain.Case.GetCaseSummary(
                 Db
             );
-            var _result = new ItemResult<CaseSummary>();
+            var _result = new ItemResult<CaseSummaryResponse>();
             _result.Object = Mapper.MapToDto<Coalesce.Domain.CaseSummary, CaseSummaryResponse>(_methodResult, _mappingContext, includeTree);
             return _result;
         }

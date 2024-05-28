@@ -2,10 +2,10 @@ name: build-alpha
 
 on:
   push:
-    branches: [dev]
+    branches: [dev, next]
     paths-ignore: ['docs/**']
   pull_request:
-    branches: [dev]
+    branches: [dev, next]
     paths-ignore: ['docs/**']
   workflow_dispatch:
 

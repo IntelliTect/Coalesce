@@ -196,8 +196,9 @@ namespace IntelliTect.Coalesce.Api.Controllers
                                     continue;
                                 }
 
-                                var referencedProp = item.ParamDtoClassViewModel.PropertyByName(reference.Key);
-                                if (referencedProp is not { Role: PropertyRole.ForeignKey, IsClientWritable: true })
+                                var referencedModelProp = item.DeclaredForClassViewModel.PropertyByName(reference.Key);
+                                var referencedDtoProp = item.ParamDtoClassViewModel.PropertyByName(reference.Key);
+                                if (referencedDtoProp is null || referencedModelProp is not { Role: PropertyRole.ForeignKey, IsClientWritable: true })
                                 {
                                     // Ignore invalid refs. We only need to resolve writable foreign keys.
                                     continue;
@@ -214,7 +215,7 @@ namespace IntelliTect.Coalesce.Api.Controllers
                                 }
 
                                 // Update the DTO with the new FK.
-                                referencedProp.PropertyInfo.SetValue(item.Data, principalKey);
+                                referencedDtoProp.PropertyInfo.SetValue(item.Data, principalKey);
                             }
 
                             // If we made it here, there were no refs preventing a save.

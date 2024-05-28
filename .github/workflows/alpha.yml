@@ -14,7 +14,7 @@ jobs:
     uses: ./.github/workflows/part-build.yml
     secrets: inherit
     with:
-      prereleaseSlug: alpha
+      prereleaseSlug: ci
 
   publish:
     if: success() && github.event_name == 'push'

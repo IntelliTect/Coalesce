@@ -1,7 +1,7 @@
 
 # Services
 
-In a Coalesce application, you are likely to end up with a need for some API endpoints that aren't closely tied with your regular data model. While you could stick [Static Methods](/modeling/model-components/methods.md#static-methods) on one of your entities, do so is detrimental to the organization of your code.
+In a Coalesce application, you are likely to end up with a need for some API endpoints that aren't closely tied with your regular data model. While you could stick [Static Methods](/modeling/model-components/methods.md#static-methods) on one of your entities, to do so is detrimental to the organization of your code.
 
 Instead, Coalesce allows you to generate API Controllers and a TypeScript client from a service. A service, in this case, is nothing more than a C# class or an interface with methods on it, annotated with `[Coalesce, Service]`. An implementation of this class or interface must be injectable from your application's service container, so a registration in Startup.cs is needed.
 

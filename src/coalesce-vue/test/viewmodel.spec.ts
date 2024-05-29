@@ -30,8 +30,10 @@ import {
 import {
   CaseListViewModel,
   CaseViewModel,
+  CompanyViewModel,
   ComplexModelListViewModel,
   ComplexModelViewModel,
+  PersonViewModel,
 } from "../../test-targets/viewmodels.g";
 import {
   StudentViewModel,
@@ -590,6 +592,36 @@ describe("ViewModel", () => {
       expect(student.currentCourseId).toBe(2);
       expect(student.currentCourse!.courseId).toBe(2);
     });
+
+    test("creation with parent that was explicitly late loaded by key", async () => {
+      const saveEndpoint = mockEndpoint(
+        "/students/save",
+        vitest.fn((req) => ({
+          wasSuccessful: true,
+          object: {
+            studentId: 1,
+            studentAdvisorId: 3,
+          },
+        }))
+      );
+
+      const student = new StudentViewModel({
+        name: "bob",
+      });
+      const advisor = (student.advisor = new AdvisorViewModel());
+
+      // Weird scenario: After loading the principal entity from the server (emulated here),
+      // `student.advisor` is still non-null, but `student.studentAdvisorId` is null.
+      advisor.$loadCleanData({ advisorId: 7 });
+
+      await student.$save();
+
+      expect(saveEndpoint.mock.calls[0][0].data).toBe(
+        "name=bob&studentAdvisorId=7"
+      );
+
+      saveEndpoint.destroy();
+    });
   });
 
   describe("$bulkSave", () => {
@@ -1020,6 +1052,52 @@ describe("ViewModel", () => {
       endpoint.destroy();
     });
 
+    test("add of child to existing parent without nav/fk on child", async () => {
+      const endpoint = mockEndpoint(
+        "/Company/bulkSave",
+        vitest.fn((req) => ({
+          wasSuccessful: true,
+        }))
+      );
+
+      const parent = new CompanyViewModel();
+      parent.$loadCleanData({ companyId: 1, name: "existing parent" });
+      parent.employees;
+      // Act
+      const newChild = new PersonViewModel({ firstName: "bob" });
+      parent.employees?.push(newChild);
+      await parent.$bulkSave();
+
+      // Assert
+      expect(JSON.parse(endpoint.mock.calls[0][0].data)).toMatchObject({
+        items: expect.arrayContaining([
+          {
+            action: "none",
+            type: "Company",
+            data: { companyId: parent.companyId },
+            refs: {
+              companyId: parent.$stableId,
+            },
+            root: true,
+          },
+          {
+            action: "save",
+            type: "Person",
+            data: {
+              personId: null,
+              firstName: "bob",
+            },
+            refs: {
+              personId: newChild.$stableId,
+              companyId: parent.$stableId,
+            },
+          },
+        ]),
+      });
+
+      endpoint.destroy();
+    });
+
     test("creation with parent that was explicitly late loaded by key - does not include ref to existing parent", async () => {
       const bulkSaveEndpoint = mockEndpoint(
         "/students/bulkSave",
@@ -1166,7 +1244,7 @@ describe("ViewModel", () => {
         advisor: {
           advisorId: 1,
           name: "child",
-          students: [{ studentId: 2, name: "grandchild" }],
+          students: [{ studentId: 2, name: "grandchild", studentAdvisorId: 1 }],
         },
       };
       const student = new StudentViewModel();
@@ -1279,7 +1357,7 @@ describe("ViewModel", () => {
     test("$loadCleanData won't trigger autosave on collection nav", async () => {
       var studentModel = new Student({
         studentId: 1,
-        courses: [{ courseId: 7, name: "foo" }],
+        courses: [{ courseId: 7, name: "foo", studentId: 1 }],
       });
       var student = new StudentViewModel();
       student.$loadCleanData(studentModel);

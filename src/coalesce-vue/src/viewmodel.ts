@@ -247,7 +247,9 @@ export abstract class ViewModel<
    * @internal
    */
   private _effectiveRules: {
-    [propName: string]: undefined | Array<(val: any) => true | string>;
+    [propName: string]:
+      | undefined
+      | Array<((val: any) => true | string) & { ruleName: string }>;
   } | null = null;
 
   /** @internal */
@@ -285,46 +287,18 @@ export abstract class ViewModel<
             continue;
           }
 
-          // HACK: In order to make bulk saves work,
-          // we have to allow for missing foreign keys
-          // as long as the nav prop is an unsaved, new entity.
-          // This is a scenario that wouldn't really ever happen in any UI
-          // that isn't using bulk saves (you'd always be fetching a
-          // navigation prop value from /somewhere/, or when creating new ones
-          // you'd be saving the principal entity immediately), so it doesn't seem too bad
-          // that this technically produces incorrect validation when not using bulk saves.
-          if (
-            ruleName == "required" &&
-            prop.role == "foreignKey" &&
-            prop.navigationProp
-          ) {
-            const fkRule = rules[ruleName];
-            propRules.push((v: any) => {
-              const result = fkRule(v);
-              if (result === true) return result;
-
-              const principal = this.$data[
-                prop.navigationProp!.name
-              ] as ViewModel;
-              if (principal && !principal._existsOnServer) {
-                // The nav prop has a value that we anticipate will be created
-                // by a bulk save. Allow this.
-                return true;
-              }
-
-              return result;
-            });
-            continue;
-          }
-
-          propRules.push(rules[ruleName]);
+          const ruleFn = rules[ruleName];
+          ruleFn.ruleName = ruleName;
+          propRules.push(ruleFn);
         }
       }
 
       // Process custom rules.
       if (custom) {
         for (const ruleName in custom) {
-          propRules.push(custom[ruleName]);
+          const ruleFn = custom[ruleName];
+          (ruleFn as any).ruleName = ruleName;
+          propRules.push(ruleFn);
         }
       }
 
@@ -597,14 +571,44 @@ export abstract class ViewModel<
         /** The models to traverse for relations in the next iteration of the outer loop. */
         let nextModels: (ViewModel | null)[] = [this];
 
-        /** The models we've already examined, to avoid infinite loops */
-        const processed = new Set();
+        const dataByRef = new Map<
+          number,
+          {
+            model: ViewModel;
+            meta: ModelType;
+            action: BulkSaveRequestItem["action"];
+            refs: BulkSaveRequestItem["refs"] & {};
+            root: boolean;
+            visited: boolean;
+            isEssential: boolean;
+          }
+        >();
 
-        /** The items in the bulk save payload that will be sent to the server */
-        const itemsToSend: BulkSaveRequestItem[] = [];
+        const getData = (model: ViewModel) => {
+          let ret = dataByRef.get(model.$stableId);
+          if (!ret)
+            dataByRef.set(
+              model.$stableId,
+              (ret = {
+                model,
+                meta: model.$metadata,
+                action: "none",
+                root: false,
+                isEssential: true,
+                visited: false,
+                refs: {
+                  // The model's $stableId will be referenced by other objects.
+                  // It is recorded as the object's primary key ref value.
+                  [model.$metadata.keyProp.name]: model.$stableId,
 
-        /** The ViewModels represented in the bulk save payload, keyed by their `$stableId` (aka 'ref') */
-        const modelsByRef = new Map<number, ViewModel>();
+                  // Other foreign key names here will be added that reference
+                  // the $stableId of the principal end of the relationship
+                  // The server will use these values to link these two objects together.
+                },
+              })
+            );
+          return ret;
+        };
 
         // Traverse all models reachable from `this`,
         // collecting those that need to be saved or deleted.
@@ -613,8 +617,11 @@ export abstract class ViewModel<
           nextModels = [];
 
           for (const model of currentModels) {
-            if (!model || processed.has(model)) continue;
-            processed.add(model);
+            if (!model) continue;
+
+            const data = getData(model);
+            if (data.visited) continue;
+            data.visited = true;
 
             const meta: ModelType = model.$metadata;
 
@@ -623,43 +630,7 @@ export abstract class ViewModel<
               nextModels.push(...model.$removedItems);
             }
 
-            const root = model == this;
-            const action = model._isRemoved
-              ? model._existsOnServer
-                ? "delete" // Delete items that have a PK are sent as a delete
-                : "none" // Do not send removed items that never had a PK.
-              : model.$isDirty || !model._existsOnServer
-              ? "save" // Save items that are dirty or never saved
-              : "none"; // Non-dirty, non-deleted items are sent as "none". This exists so that the root item (that will be sent as the response from the server) can be identified even if it isn't being modified.
-
-            if (action !== "none") {
-              if (options?.predicate?.(model, action) === false) {
-                continue;
-              }
-            }
-
-            if (action == "save") {
-              const errors = [...model.$getErrors()];
-              if (errors.length) {
-                // Somewhat user-friendly error: this could be shown in a c-loader-status
-                // if a developer isn't eagerly checking validation before enabling a save button:
-                throw Error(
-                  `Cannot save ${meta.displayName} ${
-                    model.$primaryKey || "<new>"
-                  } - validation failed: ${joinErrors(errors)}`
-                );
-              }
-            }
-
-            const refs: BulkSaveRequestItem["refs"] = {
-              // The model's $stableId will be referenced by other objects.
-              // It is recorded as the object's primary key ref value.
-              [meta.keyProp.name]: model.$stableId,
-
-              // Other foreign key names here will be added that reference
-              // the $stableId of the principal end of the relationship
-              // The server will use these values to link these two objects together.
-            };
+            data.root = model == this;
 
             for (const propName in meta.props) {
               const prop = meta.props[propName];
@@ -674,14 +645,12 @@ export abstract class ViewModel<
               } else if (prop.role == "referenceNavigation") {
                 let principal = model.$data[prop.name] as ViewModel | null;
 
-                // Build up `refs` as needed.
                 // If the prop is a reference navigation that has no foreign key,
                 // then the ref will link the foreign key prop to the principal entity,
                 // allowing the server to fixup the foreign key once the principal is created.
                 if (
-                  // If the model isn't being saved, don't need to resolve foreign keys to refs.
-                  action != "save" ||
                   // If the foreign key has a value then we don't need a ref.
+                  // Bail early.
                   model.$data[prop.foreignKey.name] != null
                 ) {
                   nextModels.push(principal);
@@ -708,48 +677,128 @@ export abstract class ViewModel<
 
                 nextModels.push(principal);
 
-                if (
-                  principal &&
-                  !principal._existsOnServer &&
-                  !principal._isRemoved &&
-                  options?.predicate?.(principal, "save") !== false
-                ) {
-                  // The model has an object value for this reference navigation.
-                  // This makes things easy - the foreign key should ref the value of that reference navigation.
-                  refs[prop.foreignKey.name] = principal.$stableId;
-                  continue;
+                if (principal && !principal._isRemoved && !model._isRemoved) {
+                  if (
+                    // The principal is not yet saved, but will be saved.
+                    (!principal._existsOnServer &&
+                      options?.predicate?.(principal, "save") !== false) ||
+                    // The principal object already exists, but the FK isn't dirty.
+                    // This may mean the principal object was late loaded which bypasses FK fixup,
+                    // or it means that a blank, empty dependent object was added to the principal's collection nav.
+                    (principal._existsOnServer &&
+                      !model.$getPropDirty(prop.foreignKey.name))
+                  ) {
+                    data.refs[prop.foreignKey.name] = principal.$stableId;
+                    getData(principal).isEssential = true;
+                  }
+                }
+              }
+            }
+          }
+        }
+
+        const dataToSend = [...dataByRef.values()]
+          .map((data) => {
+            const model = data.model;
+
+            // Non-dirty, non-deleted items are sent as "none".
+            // This exists so that the root item(that will be sent as the response
+            // from the server) can be identified even if it isn't being modified.
+            let action: BulkSaveRequestItem["action"] = "none";
+
+            if (model._isRemoved) {
+              action = model._existsOnServer
+                ? "delete" // Delete items that have a PK are sent as a delete
+                : "none"; // Do not send removed items that never had a PK.
+            } else {
+              // Save items that are dirty, or never saved, or have unresolved refs in the payload
+              if (
+                model.$isDirty ||
+                !model._existsOnServer ||
+                Object.entries(data.refs).some(([key, ref]) => {
+                  return key != model.$metadata.keyProp.name;
+                })
+              ) {
+                action = "save";
+              }
+            }
+
+            return {
+              ...data,
+              action,
+            };
+          })
+          // Include the root item and any items being changed.
+          .filter((v) => v.action != "none" || v.root || v.isEssential)
+          // Apply the user-supplied predicate to each item.
+          .filter(
+            (v) =>
+              v.action == "none" ||
+              options?.predicate?.(v.model, v.action) !== false
+          );
+
+        for (const data of dataToSend) {
+          const { action, model, meta } = data;
+
+          if (action == "save") {
+            const errors = [];
+
+            for (const [propName, rules] of Object.entries(
+              model.$effectiveRules
+            )) {
+              const propMeta = meta.props[propName];
+              for (const rule of rules || []) {
+                const result = rule((model as any)[propName]);
+                if (result !== true) {
+                  if (
+                    rule.ruleName == "required" &&
+                    propMeta.role == "foreignKey" &&
+                    propName in data.refs
+                  ) {
+                    // We have to allow for missing foreign keys
+                    // when the foreign key is missing but has a `ref`
+                    // that will be fixed up on the server as part of the bulk save operation.
+
+                    continue;
+                  }
+
+                  errors.push(result);
                 }
               }
             }
 
-            // Finally, add the item to the payload if it needs to be there.
-            // We always want to do the property traversal above to find
-            // related objects, even if we aren't saving this model.
-            if (root || action !== "none") {
-              const bulkSaveItem: BulkSaveRequestItem = {
-                type: meta.name,
-                action,
-                refs,
-                data:
-                  action == "none" || action == "delete"
-                    ? // "none" and "delete" items only need their PK:
-                      mapToDtoFiltered(model, [meta.keyProp.name])!
-                    : model.$saveMode == "surgical"
-                    ? mapToDtoFiltered(model, [
-                        ...model._dirtyProps,
-                        meta.keyProp.name,
-                      ])!
-                    : mapToDto(model)!,
-              };
-
-              // Omit the optional `root` prop entirely unless its true.
-              if (root) bulkSaveItem.root = root;
-
-              itemsToSend.push(bulkSaveItem);
-              modelsByRef.set(model.$stableId, model);
+            if (errors.length) {
+              // Somewhat user-friendly error: this could be shown in a c-loader-status
+              // if a developer isn't eagerly checking validation before enabling a save button:
+              throw Error(
+                `Cannot save ${meta.displayName} ${
+                  model.$primaryKey || "<new>"
+                } - validation failed: ${joinErrors(errors)}`
+              );
             }
           }
         }
+
+        const itemsToSend: BulkSaveRequestItem[] = dataToSend.map((data) => {
+          const { meta, action, model } = data;
+
+          return {
+            type: meta.name,
+            action,
+            refs: data.refs,
+            root: data.root ? true : undefined,
+            data:
+              action == "none" || action == "delete"
+                ? // "none" and "delete" items only need their PK:
+                  mapToDtoFiltered(model, [meta.keyProp.name])!
+                : model.$saveMode == "surgical"
+                ? mapToDtoFiltered(model, [
+                    ...model._dirtyProps,
+                    meta.keyProp.name,
+                  ])!
+                : mapToDto(model)!,
+          };
+        });
 
         const ret = await c.bulkSave(
           { items: itemsToSend },
@@ -763,7 +812,7 @@ export abstract class ViewModel<
           // `refMap` maps `ref` values to the resulting primary key produced by the server.
           const refMap = ret.data.refMap;
           for (const ref in refMap) {
-            const model = modelsByRef.get(+ref);
+            const model = dataByRef.get(+ref)?.model;
             if (model) model.$primaryKey = refMap[ref];
           }
 
@@ -917,6 +966,7 @@ export abstract class ViewModel<
     }
   }
 
+  /** @internal */
   private get _existsOnServer() {
     if (!this.$primaryKey) {
       return false;
@@ -1923,11 +1973,14 @@ export function defineProps<T extends new () => ViewModel<any, any>>(
 
                 // Set on `this`, not `$data`, in order to trigger $isDirty in the
                 // setter function for the FK prop.
-                (this as any).$data[prop.foreignKey.name] = incomingPk;
-                // Even if the FK might be changing from null to null,
-                // always set the FK as dirty so that it'll be included
-                // as a `ref` in bulk save payloads and be resolved by the server.
-                this.$setPropDirty(prop.foreignKey.name);
+                (this as any)[prop.foreignKey.name] = incomingPk;
+
+                if (incomingValue && incomingPk == null) {
+                  // If the incoming principal model doesn't have a PK yet, mark the FK as dirty.
+                  // Then, when a save is performed, `mapToDto` will discover and fixup the FK
+                  // if the principal's PK has received a value in the interim.
+                  this.$setPropDirty(prop.foreignKey.name);
+                }
               }
             }
           : prop.type == "collection" && prop.itemType.type == "model"

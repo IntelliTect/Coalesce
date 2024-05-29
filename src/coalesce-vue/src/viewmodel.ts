@@ -594,7 +594,7 @@ export abstract class ViewModel<
                 meta: model.$metadata,
                 action: "none",
                 root: false,
-                isEssential: true,
+                isEssential: false,
                 visited: false,
                 refs: {
                   // The model's $stableId will be referenced by other objects.

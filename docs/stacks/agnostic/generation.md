@@ -10,10 +10,10 @@ Coalesce's code generation is ran via a dotnet CLI tool, ``dotnet coalesce``. In
 ``` xml
 <Project Sdk="Microsoft.NET.Sdk.Web">
   <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
 
     <!-- Necessary to use DotNetCliToolReference with modern framework versions -->
-    <DotnetCliToolTargetFramework>net7.0</DotnetCliToolTargetFramework>
+    <DotnetCliToolTargetFramework>net8.0</DotnetCliToolTargetFramework>
   </PropertyGroup>
 
   ...

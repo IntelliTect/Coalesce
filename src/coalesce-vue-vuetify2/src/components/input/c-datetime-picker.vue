@@ -400,7 +400,7 @@ export default defineComponent({
         // If failed, try normalizing common separators to the same symbol in
         // both the format string and user input.
         if (!isValid(value)) {
-          const separatorRegex = /[\-\\\/\.]/g;
+          const separatorRegex = /[-\\/.]/g;
           value = parse(
             val.replace(separatorRegex, "-"),
             this.internalFormat.replace(separatorRegex, "-"),

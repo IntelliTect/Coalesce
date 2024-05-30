@@ -7,6 +7,15 @@ describe("CSelectValues", () => {
     const vm = new ComplexModelViewModel();
 
     () => <CSelectValues model={vm} for="mutablePrimitiveCollection" />;
+
+    // Against models that might be null
+    () => (
+      <CSelectValues
+        model={vm.referenceNavigation}
+        for="mutablePrimitiveCollection"
+      />
+    );
+
     () => (
       <CSelectValues
         model={vm}

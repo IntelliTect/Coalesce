@@ -1062,7 +1062,7 @@ describe("ViewModel", () => {
 
       const parent = new CompanyViewModel();
       parent.$loadCleanData({ companyId: 1, name: "existing parent" });
-      parent.employees;
+
       // Act
       const newChild = new PersonViewModel({ firstName: "bob" });
       parent.employees?.push(newChild);
@@ -2552,7 +2552,7 @@ describe("ViewModel", () => {
       expect(watchCallback).toBeCalledTimes(0);
     });
 
-    test("doesnt stackoverflow on recursive object structures", () => {
+    test("doesnt stackoverflow when creating new recursive object structures", () => {
       var studentModel = new Student({
         studentId: 1,
         studentAdvisorId: 1,
@@ -2562,6 +2562,32 @@ describe("ViewModel", () => {
 
       const student = new StudentViewModel(studentModel);
 
+      // First expectation: We made it this far without stackoverflowing.
+
+      // Second, different ways of traversing to the same VM should result in the same reference.
+      expect(student.advisor).toBe(student.advisor!.students[0].advisor);
+
+      // The root VM (`student`) should also be subject to this logic,
+      // so the root should be the same instance seen in the advisor's students array.
+      expect(student).toBe(student.advisor!.students[0]);
+    });
+
+    test("doesnt stackoverflow when updating existing recursive object structures", () => {
+      var studentModel = new Student({
+        studentId: 1,
+        studentAdvisorId: 1,
+        advisor: { name: "Seagull", advisorId: 1 },
+      });
+      studentModel.advisor!.students = [studentModel];
+
+      const student = new StudentViewModel();
+      student.$loadCleanData(studentModel);
+
+      // Act
+      // Now that the ViewModel structure exists, try to update it.
+      student.$loadCleanData(studentModel);
+
+      // Assert
       // First expectation: We made it this far without stackoverflowing.
 
       // Second, different ways of traversing to the same VM should result in the same reference.

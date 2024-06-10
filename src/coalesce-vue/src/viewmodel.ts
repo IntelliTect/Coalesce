@@ -1629,6 +1629,20 @@ export class ViewModelFactory {
     this.map.set(initialData, vm);
   }
 
+  private processed = new Map<any, Set<any>>();
+  /** Determine if the given initialData was already mapped to `vm`. */
+  shouldProcess(initialData: any, vm: ViewModel) {
+    let targets = this.processed.get(initialData);
+    if (!targets) {
+      this.processed.set(initialData, (targets = new Set()));
+    }
+    if (targets.has(vm)) {
+      return false;
+    }
+    targets.add(vm);
+    return true;
+  }
+
   public static scope<TRet>(
     action: (factory: ViewModelFactory) => TRet,
     isCleanData: DataFreshness
@@ -2253,6 +2267,11 @@ export function updateViewModelFromModel<
   skipStale = false
 ) {
   ViewModelFactory.scope(function (factory) {
+    // Skip if we already applied this source to the target.
+    if (!factory.shouldProcess(source, target)) {
+      return;
+    }
+
     // Add the root ViewModel to the factory
     // so that when existing ViewModels are being updated,
     // duplicate VM instances won't be created needlessly.

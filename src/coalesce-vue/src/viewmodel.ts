@@ -571,6 +571,10 @@ export abstract class ViewModel<
         /** The models to traverse for relations in the next iteration of the outer loop. */
         let nextModels: (ViewModel | null)[] = [this];
 
+        if (options?.additionalRoots) {
+          nextModels.push(...options.additionalRoots);
+        }
+
         const dataByRef = new Map<
           number,
           {
@@ -1903,6 +1907,12 @@ export interface BulkSaveOptions {
    * that would otherwise cause the entire bulk save operation to fail.
    * */
   predicate?: (viewModel: ViewModel, action: "save" | "delete") => boolean;
+
+  /** Additional root items that will be traversed for items that need saving.
+   * Use to add items that aren't attached to the target of the bulk save,
+   * but are still desired to be saved during the same operation.
+   */
+  additionalRoots?: ViewModel<any, any>[];
 }
 
 /**

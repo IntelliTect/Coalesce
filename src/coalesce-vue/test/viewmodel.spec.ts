@@ -1098,6 +1098,48 @@ describe("ViewModel", () => {
       endpoint.destroy();
     });
 
+    test("options.additionalRoots", async () => {
+      const endpoint = mockEndpoint(
+        "/Company/bulkSave",
+        vitest.fn((req) => ({
+          wasSuccessful: true,
+        }))
+      );
+
+      const company1 = new CompanyViewModel({ name: "new company1" });
+      const company2 = new CompanyViewModel({ name: "new company2" });
+
+      // Act
+      await company1.$bulkSave({
+        additionalRoots: [company2],
+      });
+
+      // Assert
+      expect(JSON.parse(endpoint.mock.calls[0][0].data)).toMatchObject({
+        items: expect.arrayContaining([
+          {
+            action: "save",
+            type: "Company",
+            data: { companyId: null, name: "new company1" },
+            refs: {
+              companyId: company1.$stableId,
+            },
+            root: true,
+          },
+          {
+            action: "save",
+            type: "Company",
+            data: { companyId: null, name: "new company2" },
+            refs: {
+              companyId: company2.$stableId,
+            },
+          },
+        ]),
+      });
+
+      endpoint.destroy();
+    });
+
     test("creation with parent that was explicitly late loaded by key - does not include ref to existing parent", async () => {
       const bulkSaveEndpoint = mockEndpoint(
         "/students/bulkSave",

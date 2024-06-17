@@ -1021,7 +1021,7 @@ export abstract class ViewModel<
 
   /**
    * Starts auto-saving of the instance when changes to its savable data properties occur.
-   * Only usable from Vue setup() or <script setup>. Otherwise, use $startAutoSave().
+   * Only usable from Vue setup() or `script setup`. Otherwise, use $startAutoSave().
    * @param options Options to control how the auto-saving is performed.
    */
   public $useAutoSave(options: AutoSaveOptions<this> = {}) {
@@ -1426,7 +1426,7 @@ export abstract class ListViewModel<
 
   /**
    * Starts auto-loading of the list as changes to its parameters occur.
-   * Only usable from Vue setup() or <script setup>. Otherwise, use $startAutoLoad().
+   * Only usable from Vue setup() or `script setup`. Otherwise, use $startAutoLoad().
    * @param options Options that control the auto-load behavior.
    */
   public $useAutoLoad(options: AutoLoadOptions<this> = {}) {
@@ -1499,7 +1499,7 @@ export abstract class ListViewModel<
 
   /**
    * Enables auto save for the items in the list.
-   * Only usable from Vue setup() or <script setup>. Otherwise, use $startAutoSave().
+   * Only usable from Vue setup() or `script setup`. Otherwise, use $startAutoSave().
    * @param options Options to control how the auto-saving is performed.
    */
   public $useAutoSave(options: AutoSaveOptions<this> = {}) {

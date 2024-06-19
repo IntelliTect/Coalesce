@@ -678,7 +678,7 @@ describe("ViewModel", () => {
       await student.$bulkSave();
 
       expect(JSON.parse(endpoint.mock.calls[0][0].data)).toMatchObject({
-        items: expect.arrayContaining([
+        items: [
           {
             action: "save",
             type: "Student",
@@ -691,18 +691,18 @@ describe("ViewModel", () => {
           },
           {
             action: "save",
+            type: "Advisor",
+            data: { advisorId: null, name: "bob" },
+            refs: { advisorId: originalAdvisor.$stableId },
+          },
+          {
+            action: "save",
             type: "Course",
             data: { courseId: null, name: "CS101", studentId: null },
             refs: {
               courseId: originalCourse.$stableId,
               studentId: student.$stableId,
             },
-          },
-          {
-            action: "save",
-            type: "Advisor",
-            data: { advisorId: null, name: "bob" },
-            refs: { advisorId: originalAdvisor.$stableId },
           },
           {
             action: "save",
@@ -713,7 +713,7 @@ describe("ViewModel", () => {
               studentAdvisorId: originalAdvisor.$stableId,
             },
           },
-        ]),
+        ],
       });
 
       // Preserves non-circular instances:
@@ -773,7 +773,7 @@ describe("ViewModel", () => {
       });
 
       expect(JSON.parse(endpoint.mock.calls[0][0].data)).toMatchObject({
-        items: expect.arrayContaining([
+        items: [
           {
             action: "save",
             type: "Student",
@@ -785,7 +785,7 @@ describe("ViewModel", () => {
             },
             root: true,
           },
-        ]),
+        ],
       });
 
       // Preserves non-circular instances:
@@ -841,7 +841,7 @@ describe("ViewModel", () => {
       expect(student.$removedItems?.length).toBeFalsy();
 
       expect(JSON.parse(bulkSaveEndpoint.mock.calls[0][0].data)).toMatchObject({
-        items: expect.arrayContaining([
+        items: [
           {
             action: "none",
             type: "Student",
@@ -861,7 +861,7 @@ describe("ViewModel", () => {
             data: { advisorId: 3 },
             refs: { advisorId: advisor.$stableId },
           },
-        ]),
+        ],
       });
 
       loadEndpoint.destroy();
@@ -890,7 +890,7 @@ describe("ViewModel", () => {
       await student.$bulkSave();
 
       expect(JSON.parse(bulkSaveEndpoint.mock.calls[0][0].data)).toMatchObject({
-        items: expect.arrayContaining([
+        items: [
           {
             action: "save",
             type: "Student",
@@ -913,7 +913,7 @@ describe("ViewModel", () => {
             },
             refs: { advisorId: advisor.$stableId },
           },
-        ]),
+        ],
       });
 
       bulkSaveEndpoint.destroy();
@@ -964,7 +964,7 @@ describe("ViewModel", () => {
       await student.$bulkSave();
 
       expect(JSON.parse(bulkSaveEndpoint.mock.calls[0][0].data)).toMatchObject({
-        items: expect.arrayContaining([
+        items: [
           {
             action: "save",
             type: "Student",
@@ -972,7 +972,7 @@ describe("ViewModel", () => {
             refs: { studentId: student.$stableId },
             root: true,
           },
-        ]),
+        ],
       });
 
       bulkSaveEndpoint.destroy();
@@ -1023,7 +1023,7 @@ describe("ViewModel", () => {
       await student.$bulkSave();
 
       expect(JSON.parse(endpoint.mock.calls[0][0].data)).toMatchObject({
-        items: expect.arrayContaining([
+        items: [
           {
             action: "none",
             type: "Student",
@@ -1041,7 +1041,7 @@ describe("ViewModel", () => {
               studentId: originalSteve.$stableId,
             },
           },
-        ]),
+        ],
       });
 
       expect(student.$bulkSave.wasSuccessful).toBeTruthy();
@@ -1070,7 +1070,7 @@ describe("ViewModel", () => {
 
       // Assert
       expect(JSON.parse(endpoint.mock.calls[0][0].data)).toMatchObject({
-        items: expect.arrayContaining([
+        items: [
           {
             action: "none",
             type: "Company",
@@ -1092,7 +1092,55 @@ describe("ViewModel", () => {
               companyId: parent.$stableId,
             },
           },
-        ]),
+        ],
+      });
+
+      endpoint.destroy();
+    });
+
+    test("existing nondirty child of existing parent without nav/fk on child does not save", async () => {
+      // SCENARIO: A new child object gets saved by virtue of existing in a child collection.
+      // However, this child object isn't reloaded by the response of the save.
+
+      const endpoint = mockEndpoint(
+        "/Company/bulkSave",
+        vitest.fn((req) => ({
+          wasSuccessful: true,
+        }))
+      );
+
+      const parent = new CompanyViewModel();
+      parent.$loadCleanData({
+        companyId: 1,
+        name: "existing parent",
+        employees: [{ personId: 1, firstName: "bob" }],
+      });
+
+      // Sanity check: The employee lacks a reference nav or FK to its parent
+      // but is not dirty and does have a PK.
+      parent.employees![0].company = null;
+      parent.employees![0].companyId = null;
+      parent.employees![0].$isDirty = false;
+
+      // Act
+      await parent.$bulkSave();
+
+      // Assert
+      expect(JSON.parse(endpoint.mock.calls[0][0].data)).toMatchObject({
+        items: [
+          {
+            action: "none",
+            type: "Company",
+            data: { companyId: parent.companyId },
+            refs: {
+              companyId: parent.$stableId,
+            },
+            root: true,
+          },
+          // There should NOT be a "Person" model in the payload,
+          // since despite missing a foreign key to its parent,
+          // it isn't dirty and does exist on the server.
+        ],
       });
 
       endpoint.destroy();
@@ -1116,7 +1164,7 @@ describe("ViewModel", () => {
 
       // Assert
       expect(JSON.parse(endpoint.mock.calls[0][0].data)).toMatchObject({
-        items: expect.arrayContaining([
+        items: [
           {
             action: "save",
             type: "Company",
@@ -1134,7 +1182,7 @@ describe("ViewModel", () => {
               companyId: company2.$stableId,
             },
           },
-        ]),
+        ],
       });
 
       endpoint.destroy();
@@ -1164,7 +1212,7 @@ describe("ViewModel", () => {
       await student.$bulkSave();
 
       expect(JSON.parse(bulkSaveEndpoint.mock.calls[0][0].data)).toMatchObject({
-        items: expect.arrayContaining([
+        items: [
           {
             action: "save",
             type: "Student",
@@ -1179,7 +1227,7 @@ describe("ViewModel", () => {
             },
             root: true,
           },
-        ]),
+        ],
       });
 
       bulkSaveEndpoint.destroy();

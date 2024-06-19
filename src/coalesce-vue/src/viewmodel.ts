@@ -681,7 +681,12 @@ export abstract class ViewModel<
 
                 nextModels.push(principal);
 
-                if (principal && !principal._isRemoved && !model._isRemoved) {
+                if (
+                  principal &&
+                  !principal._isRemoved &&
+                  !model._isRemoved &&
+                  (model.$isDirty || !model._existsOnServer)
+                ) {
                   if (
                     // The principal is not yet saved, but will be saved.
                     (!principal._existsOnServer &&
@@ -822,10 +827,32 @@ export abstract class ViewModel<
 
           const result = ret.data.object;
           if (result) {
+            const age = performance.now();
+
             // `purgeUnsaved = true` here (arg3) since the bulk save should have covered the entire object graph.
             // Wiping out unsaved items will help developers discover bugs where their root model's data source
             // does not correctly include the whole object graph that they're saving (which is expected for bulk saves)
-            this.$loadFromModel(result, performance.now(), true);
+            this.$loadFromModel(result, age, true);
+
+            const unloadedTypes = new Set(
+              dataToSend
+                .filter(
+                  (d) =>
+                    d.action == "save" &&
+                    d.model._dataAge != age &&
+                    // We currently don't have a good way to reload additionalRoots items.
+                    !options?.additionalRoots?.includes(d.model)
+                )
+                .map((d) => d.model.$metadata.name)
+            );
+
+            if (unloadedTypes.size > 0) {
+              console.warn(
+                `One or more ${[...unloadedTypes.values()].join(
+                  " and "
+                )} items were saved by a bulk save, but were not returned by the response. The Data Source of the bulk save target may not be returning all entities.`
+              );
+            }
           }
         }
 

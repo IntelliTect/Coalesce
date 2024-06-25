@@ -319,8 +319,17 @@ The following members can be found on the generated ListViewModels, exported fro
 
 <Prop def="readonly $items: T[]" lang="ts" />
 
-Collection holding the results of the last successful invocation of the `$load` [API Caller](/stacks/vue/layers/api-clients.md#api-callers).
+Collection holding the ViewModel instances from the last successful invocation of the `$load` [API Caller](/stacks/vue/layers/api-clients.md#api-callers).
 
+
+<Prop def="readonly $modelItems: T[]" lang="ts" />
+
+Collection holding plain Model instances from the last successful invocation of the `$load` [API Caller](/stacks/vue/layers/api-clients.md#api-callers).
+
+
+<Prop def="$modelOnlyMode: boolean" lang="ts" />
+
+When model-only mode is enabled, `$items` will not be populated with ViewModel instances. Result can instead be read from `$modelItems`. This mode allows much better performance when loading large quantities of data, especially in read-only contexts where the features of ViewModel instances aren't needed.
 
 
 ### Parameters & API Callers

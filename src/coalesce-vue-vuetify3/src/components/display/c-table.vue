@@ -31,7 +31,12 @@
         </thead>
 
         <tbody>
-          <tr v-for="(item, index) in list.$items" :key="index">
+          <tr
+            v-for="(item, index) in list.$modelOnlyMode
+              ? list.$modelItems
+              : list.$items"
+            :key="index"
+          >
             <td
               v-for="prop in effectiveProps"
               :key="prop.name"

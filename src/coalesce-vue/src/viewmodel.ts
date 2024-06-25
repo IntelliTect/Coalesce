@@ -1331,6 +1331,37 @@ export abstract class ListViewModel<
   }
 
   /**
+   * @internal
+   */
+  private _lightweight = false;
+
+  /** The plain model items that have been loaded into this ListViewModel.
+   * These instances do not reflect any changes made to the contents of `$items`.
+   */
+  public get $modelItems() {
+    return this.$load.result || [];
+  }
+
+  /** Returns true if `$modelOnlyMode` has been enabled. */
+  public get $modelOnlyMode(): boolean {
+    return this._lightweight;
+  }
+
+  /**
+   * Put the ListViewModel into a lightweight mode where `$items` is not populated with ViewModel instances.
+   * Result can instead be read from `$modelItems`.
+   *
+   * This mode allows much better performance when loading large numbers of items, especially in read-only contexts.
+   */
+  public set $modelOnlyMode(val: true) {
+    if (!val) {
+      throw new Error("Model-only mode cannot be disabled once enabled.");
+    }
+    this._lightweight = true;
+    this._items.value = undefined;
+  }
+
+  /**
    * The current set of items that have been loaded into this ListViewModel.
    * @internal
    */
@@ -1339,6 +1370,11 @@ export abstract class ListViewModel<
   public get $items(): TItem[] {
     let value = this._items.value;
     if (!value) {
+      if (this._lightweight) {
+        throw new Error(
+          "The ListViewModel instance is in model-only mode. Items may only be retrieved from `.$modelItems`, not `.$items`."
+        );
+      }
       value = new ViewModelCollection(this.$metadata, this);
 
       // In order to avoid vue seeing that we mutated a `ref` in a getter,
@@ -1359,6 +1395,12 @@ export abstract class ListViewModel<
     return value;
   }
   public set $items(val: TItem[]) {
+    if (this._lightweight) {
+      throw new Error(
+        "The ListViewModel instance is in model-only mode. `.$items` must not be populated."
+      );
+    }
+
     if ((this._items.value as any) === val) return;
 
     const vmc = new ViewModelCollection(this.$metadata, this);
@@ -1412,15 +1454,17 @@ export abstract class ListViewModel<
     const $load = this.$apiClient.$makeCaller("list", (c) => {
       const startTime = performance.now();
       return c.list(this.$params).then((r) => {
-        const result = r.data.list;
-        if (result) {
-          this.$items = rebuildModelCollectionForViewModelCollection(
-            this.$metadata,
-            this.$items,
-            result,
-            startTime,
-            true
-          );
+        if (!this._lightweight) {
+          const result = r.data.list;
+          if (result) {
+            this.$items = rebuildModelCollectionForViewModelCollection(
+              this.$metadata,
+              this.$items,
+              result,
+              startTime,
+              true
+            );
+          }
         }
         return r;
       });
@@ -1544,6 +1588,10 @@ export abstract class ListViewModel<
    * @param options Options to control how the auto-saving is performed.
    */
   public $startAutoSave(vue: VueInstance, options: AutoSaveOptions<this> = {}) {
+    if (this._lightweight) {
+      throw new Error("Autosave cannot be used with $modelOnlyMode enabled.");
+    }
+
     let state = this._autoSaveState;
 
     if (state?.active && state.options === options) {

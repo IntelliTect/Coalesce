@@ -1353,7 +1353,7 @@ export abstract class ListViewModel<
    *
    * This mode allows much better performance when loading large numbers of items, especially in read-only contexts.
    */
-  public set $modelOnlyMode(val: true) {
+  public set $modelOnlyMode(val: boolean) {
     if (!val) {
       throw new Error("Model-only mode cannot be disabled once enabled.");
     }

@@ -1504,7 +1504,7 @@ export abstract class ListViewModel<
     const vue = getCurrentInstance()?.proxy;
     if (!vue)
       throw new Error(
-        "$useAutoLoad can only be used inside setup(). Consider using $startAutoSave if you're not using Vue composition API."
+        "$useAutoLoad can only be used inside setup(). Consider using $startAutoLoad if you're not using Vue composition API."
       );
     return this.$startAutoLoad(vue, options);
   }

@@ -2328,7 +2328,7 @@ export const Person = domain.types.Person = {
       name: "namesStartingWith",
       displayName: "Names Starting With",
       transportType: "item",
-      httpMethod: "POST",
+      httpMethod: "GET",
       isStatic: true,
       params: {
         characters: {

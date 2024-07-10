@@ -175,7 +175,7 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         /// <param name="characters"></param>
         /// <param name="db"></param>
         /// <returns></returns>
-        [Coalesce,Execute]
+        [Coalesce,Execute,ControllerAction(Method = HttpMethod.Get)]
         public static IEnumerable<string> NamesStartingWith(string characters, AppDbContext db)
         {
             return db.People.Where(f => f.FirstName.StartsWith(characters)).Select(f => f.Name).ToList();

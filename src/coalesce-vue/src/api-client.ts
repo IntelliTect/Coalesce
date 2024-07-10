@@ -520,9 +520,6 @@ export class ApiClient<T extends ApiRoutedType> {
 
   constructor(public $metadata: T) {}
 
-  /** Configuration to inject into the next request. */
-  private _nextRequestConfig?: Partial<AxiosRequestConfig>;
-
   /** Flag to enable global caching of identical GET requests
    * that have been made simultaneously.
    */
@@ -530,10 +527,30 @@ export class ApiClient<T extends ApiRoutedType> {
 
   /** Enable simultaneous request caching, causing identical GET requests made
    * at the same time across all ApiClient instances to be handled with the same AJAX request.
+   * @deprecated Renamed to `$useSimultaneousRequestCaching`.
    */
   public $withSimultaneousRequestCaching(): this {
+    return this.$useSimultaneousRequestCaching();
+  }
+
+  /** Enable simultaneous request caching, causing identical GET requests made
+   * at the same time across all ApiClient instances to be handled with the same AJAX request.
+   */
+  public $useSimultaneousRequestCaching(): this {
     this._simultaneousGetCaching = true;
     return this;
+  }
+
+  /** @internal */
+  _cancelToken?: AxiosRequestConfig["cancelToken"];
+
+  /** Clones the API client and its config.
+   * @internal
+   */
+  $clone() {
+    const clone = Object.create(Object.getPrototypeOf(this));
+    Object.assign(clone, this);
+    return clone;
   }
 
   /**
@@ -768,7 +785,7 @@ export class ApiClient<T extends ApiRoutedType> {
       url: url,
       data: body,
       responseType: method.return.type == "file" ? "blob" : "json",
-      ...this._nextRequestConfig,
+      cancelToken: this._cancelToken,
       ...config,
       params: {
         ...query,
@@ -885,8 +902,9 @@ export class ApiClient<T extends ApiRoutedType> {
 
   /** Invokes `func`, capturing the parameter of any API calls within $invoke() invocations.,
    * If `capture` is true, no HTTP request will be made, being replaced by a never-resolving promise.
+   * @internal
    */
-  private _observeRequests<TFuncResult>(
+  _observeRequests<TFuncResult>(
     func: () => TFuncResult,
     capture = false
   ): [TFuncResult, { request: AxiosRequestConfig; method: Method }[]] {
@@ -1148,7 +1166,8 @@ abstract class ApiStateBase<TArgs extends any[], TResult> {
   >;
   protected abstract _invokeInternal(
     thisArg: any,
-    callInvoker: () => any
+    invoker: Function,
+    args: any[]
   ): ApiResultPromise<TResult>;
 
   constructor(
@@ -1161,9 +1180,7 @@ abstract class ApiStateBase<TArgs extends any[], TResult> {
   ) {
     // Create our invoker function that will ultimately be our instance object.
     const invokeFunc = function invokeFunc(this: any, ...args: TArgs) {
-      return invoke._invokeInternal(this, () => {
-        return (invoker as any).apply(this, [apiClient, ...args]);
-      });
+      return invoke._invokeInternal(this, invoker, [...args]);
     };
 
     const invoke = invokeFunc as unknown as this;
@@ -1270,6 +1287,17 @@ export abstract class ApiState<
     return this;
   }
 
+  protected _simultaneousGetCaching = false;
+
+  /** Enable simultaneous request caching for the API caller,
+   * causing all identical GET requests made with this setting enabled
+   * to be handled with the same AJAX request.
+   */
+  public useSimultaneousRequestCaching(): this {
+    this._simultaneousGetCaching = true;
+    return this;
+  }
+
   private _concurrencyMode: ApiCallerConcurrency = "disallow";
 
   /**
@@ -1360,7 +1388,13 @@ export abstract class ApiState<
     reject: () => void;
   } | null = null;
 
-  protected async _invokeInternal(thisArg: any, callInvoker: () => any) {
+  protected async _invokeInternal(
+    thisArg: any,
+    invoker: Function,
+    args: any[]
+  ) {
+    let apiClient = this.apiClient;
+
     if (this.isLoading) {
       switch (this._concurrencyMode) {
         case "disallow":
@@ -1404,20 +1438,23 @@ export abstract class ApiState<
     // this.message = null
     this.isLoading = true;
 
-    // Inject a cancellation token into the request.
     try {
       const token = axios.CancelToken.source();
-      (this.apiClient as any)._nextRequestConfig = <AxiosRequestConfig>{
-        cancelToken: token.token,
-      };
+      apiClient = apiClient.$clone();
+      apiClient._cancelToken = token.token;
+
+      if (this._simultaneousGetCaching) {
+        debugger;
+        apiClient.$useSimultaneousRequestCaching();
+      }
 
       const responseCacheConfig = this.__responseCacheConfig;
       if (responseCacheConfig) {
-        const originalCallInvoker = callInvoker;
-        callInvoker = async () => {
-          //@ts-expect-error _observeRequests is private because TS has no `internal`.
-          const [promise, requests] = this.apiClient._observeRequests(
-            originalCallInvoker,
+        const originalInvoker = invoker;
+
+        invoker = async () => {
+          const [promise, requests] = apiClient._observeRequests(
+            () => originalInvoker.apply(thisArg, [apiClient, ...arguments]),
             true
           );
           const { request, method } = requests[0];
@@ -1524,7 +1561,7 @@ export abstract class ApiState<
       }
 
       this._cancelToken = token;
-      let promise = callInvoker();
+      let promise = invoker.apply(thisArg, [apiClient, ...args]);
 
       if (!promise) {
         this.isLoading = false;
@@ -1613,8 +1650,6 @@ export abstract class ApiState<
 
       throw error;
     } finally {
-      delete (this.apiClient as any)._nextRequestConfig;
-
       if (this._debounceSignal) {
         this._debounceSignal.resolve();
         this._debounceSignal = null;
@@ -1806,9 +1841,7 @@ export class ItemApiStateWithArgs<
     // called will be used, rather than the state at the time when the actual API call gets made.
     args = { ...args };
 
-    return this._invokeInternal(this, () =>
-      this.argsInvoker.apply(this, [this.apiClient, args])
-    );
+    return this._invokeInternal(this, this.argsInvoker, [args]);
   }
 
   /** Replace `this.args` with a new, blank object containing default values (typically nulls) */
@@ -1818,11 +1851,9 @@ export class ItemApiStateWithArgs<
 
   /** Returns the URL for the endpoint, including querystring parameters, if invoked using `this.args`. */
   get url() {
-    const request =
-      // @ts-expect-error: _observeRequests is private (since TS has no "internal")
-      this.apiClient._observeRequests(() => {
-        this.argsInvoker.apply(this, [this.apiClient, this.args]);
-      }, false)[1][0].request;
+    const request = this.apiClient._observeRequests(() => {
+      this.argsInvoker.apply(this, [this.apiClient, this.args]);
+    }, false)[1][0].request;
 
     if (!request) return null;
     let url = AxiosClient.getUri(request);
@@ -1965,9 +1996,7 @@ export class ListApiStateWithArgs<
     args = { ...args }; // Copy args so that if we're debouncing,
     // the args at the point in time at which invokeWithArgs() was
     // called will be used, rather than the state at the time when the actual API call gets made.
-    return this._invokeInternal(this, () =>
-      this.argsInvoker.apply(this, [this.apiClient, args])
-    );
+    return this._invokeInternal(this, this.argsInvoker, [args]);
   }
 
   /** Replace `this.args` with a new, blank object containing default values (typically nulls) */

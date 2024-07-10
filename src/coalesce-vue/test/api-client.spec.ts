@@ -23,7 +23,10 @@ import { StudentApiClient } from "./targets.apiclients";
 import { Student as StudentMeta } from "./targets.metadata";
 import { Student, Advisor } from "./targets.models";
 
-import { ComplexModelApiClient } from "../../test-targets/api-clients.g";
+import {
+  ComplexModelApiClient,
+  PersonApiClient,
+} from "../../test-targets/api-clients.g";
 
 function makeAdapterMock(result?: any) {
   return makeEndpointMock<AxiosRequestConfig>(result);
@@ -59,7 +62,7 @@ describe("error handling", () => {
   });
 });
 
-describe("$withSimultaneousRequestCaching", () => {
+describe("$useSimultaneousRequestCaching", () => {
   test("uses proper cache key for standard method", async () => {
     const mock = (AxiosClient.defaults.adapter = vitest
       .fn()
@@ -78,7 +81,7 @@ describe("$withSimultaneousRequestCaching", () => {
         };
       }));
 
-    var client = new StudentApiClient().$withSimultaneousRequestCaching();
+    var client = new StudentApiClient().$useSimultaneousRequestCaching();
 
     const invoker = (nameStart: string) => {
       const params = new ListParameters();
@@ -119,7 +122,7 @@ describe("$withSimultaneousRequestCaching", () => {
         };
       }));
 
-    var client = new StudentApiClient().$withSimultaneousRequestCaching();
+    var client = new StudentApiClient().$useSimultaneousRequestCaching();
 
     const invoker = (advisorId: number) =>
       client.$invoke(StudentMeta.methods.getWithObjParam, {
@@ -139,6 +142,29 @@ describe("$withSimultaneousRequestCaching", () => {
         studentWrapperObject: null,
       },
     });
+  });
+
+  test("functions when enabled via ApiState", async () => {
+    var invoker = new PersonApiClient()
+      .$makeCaller("item", (c, letter: string) => c.namesStartingWith(letter))
+      .useSimultaneousRequestCaching()
+      .setConcurrency("allow");
+
+    const mock = mockEndpoint(
+      "/Person/namesStartingWith",
+      vitest.fn(async (req) => {
+        await delay(30);
+        return { wasSuccessful: true, object: [] };
+      })
+    );
+
+    // Act
+    await Promise.all([invoker("a"), invoker("a"), invoker("b"), invoker("b")]);
+
+    // Assert
+    expect(mock).toBeCalledTimes(2); // 2 distinct sets of parameters => 2 calls
+    expect(mock.mock.calls[0][0].params).toMatchObject({ characters: "a" });
+    expect(mock.mock.calls[1][0].params).toMatchObject({ characters: "b" });
   });
 });
 

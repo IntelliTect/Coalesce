@@ -48,7 +48,11 @@ export default defineComponent({
         return 0;
       }
 
-      return this.rangeStart + list.$items.length - 1;
+      return (
+        this.rangeStart +
+        (list.$modelOnlyMode ? list.$modelItems : list.$items).length -
+        1
+      );
     },
   },
 });

@@ -18,10 +18,12 @@
           canEdit || canDelete || hasInstanceMethods ? ['Actions'] : []
         "
         :loaders="{
-          '': [
-            ...viewModel.$items.map((i) => i.$delete),
-            ...viewModel.$items.map((i) => i.$save),
-          ],
+          '': list.$modelOnlyMode
+            ? []
+            : [
+                ...viewModel.$items.map((i) => i.$delete),
+                ...viewModel.$items.map((i) => i.$save),
+              ],
         }"
       >
         <template #item-append="{ item }">
@@ -115,21 +117,25 @@ export default defineComponent({
 
     canEdit() {
       return (
-        this.metadata && (this.metadata.behaviorFlags & BehaviorFlags.Edit) != 0
+        this.metadata &&
+        (this.metadata.behaviorFlags & BehaviorFlags.Edit) != 0 &&
+        !this.viewModel.$modelOnlyMode
       );
     },
 
     canDelete() {
       return (
         this.metadata &&
-        (this.metadata.behaviorFlags & BehaviorFlags.Delete) != 0
+        (this.metadata.behaviorFlags & BehaviorFlags.Delete) != 0 &&
+        !this.viewModel.$modelOnlyMode
       );
     },
 
     hasInstanceMethods() {
       return (
         this.metadata &&
-        Object.values(this.metadata.methods).some((m) => !m.isStatic)
+        Object.values(this.metadata.methods).some((m) => !m.isStatic) &&
+        !this.viewModel.$modelOnlyMode
       );
     },
   },

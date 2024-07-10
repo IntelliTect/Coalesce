@@ -42,6 +42,11 @@ describe("CDatetimePicker", () => {
     //@ts-expect-error non-date prop
     () => <CDatetimePicker model={vm} for="long" />;
 
+    // Against models that might be null
+    () => (
+      <CDatetimePicker model={vm.referenceNavigation} for="systemDateOnly" />
+    );
+
     () => (
       <CDatetimePicker for="ComplexModel.dateTime" modelValue={selectedDate} />
     );

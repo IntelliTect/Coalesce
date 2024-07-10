@@ -37,11 +37,8 @@
   <PropertyGroup Condition=" '$(TargetFramework)' == 'net6.0' ">
     <DotNetPackageVersionSpec>6.0.*</DotNetPackageVersionSpec>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'net7.0' ">
-    <DotNetPackageVersionSpec>7.0.*</DotNetPackageVersionSpec>
-  </PropertyGroup>
   <PropertyGroup Condition=" '$(TargetFramework)' == 'net8.0' ">
-    <DotNetPackageVersionSpec>8.0.*-*</DotNetPackageVersionSpec>
+    <DotNetPackageVersionSpec>8.0.6</DotNetPackageVersionSpec>
   </PropertyGroup>
 
   <ItemGroup>

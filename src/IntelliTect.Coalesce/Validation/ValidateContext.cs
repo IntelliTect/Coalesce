@@ -202,6 +202,11 @@ namespace IntelliTect.Coalesce.Validation
 
                     if (method.IsClientMethod)
                     {
+                        if (method is SymbolMethodViewModel smvm)
+                        {
+                            assert.IsFalse(smvm.Symbol.IsAsync && method.ReturnType.IsVoid, "Async methods must not return void.");
+                        }
+
                         if (method.Name != method.NameWithoutAsync)
                         {
                             // If the name and name w/o async are different, this method has "Async" at the end.

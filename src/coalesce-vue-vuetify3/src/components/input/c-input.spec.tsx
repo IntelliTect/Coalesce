@@ -37,6 +37,11 @@ describe("CInput", () => {
     //@ts-expect-error missing `for`
     () => <CInput model={vm} />;
 
+    // Against models that might be null
+    () => <CInput model={vm.referenceNavigation} for="color" />;
+    //@ts-expect-error non-existent prop
+    () => <CInput model={vm.referenceNavigation} for="_anyString" />;
+
     () => <CInput model={vm as any} for="_anyString" />;
     () => <CInput model={model as Model} for="_anyString" />;
     () => <CInput model={model as Model} for={vm.$metadata.props.color} />;

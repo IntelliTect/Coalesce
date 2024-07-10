@@ -30,8 +30,10 @@ import {
 import {
   CaseListViewModel,
   CaseViewModel,
+  CompanyViewModel,
   ComplexModelListViewModel,
   ComplexModelViewModel,
+  PersonViewModel,
 } from "../../test-targets/viewmodels.g";
 import {
   StudentViewModel,
@@ -590,6 +592,36 @@ describe("ViewModel", () => {
       expect(student.currentCourseId).toBe(2);
       expect(student.currentCourse!.courseId).toBe(2);
     });
+
+    test("creation with parent that was explicitly late loaded by key", async () => {
+      const saveEndpoint = mockEndpoint(
+        "/students/save",
+        vitest.fn((req) => ({
+          wasSuccessful: true,
+          object: {
+            studentId: 1,
+            studentAdvisorId: 3,
+          },
+        }))
+      );
+
+      const student = new StudentViewModel({
+        name: "bob",
+      });
+      const advisor = (student.advisor = new AdvisorViewModel());
+
+      // Weird scenario: After loading the principal entity from the server (emulated here),
+      // `student.advisor` is still non-null, but `student.studentAdvisorId` is null.
+      advisor.$loadCleanData({ advisorId: 7 });
+
+      await student.$save();
+
+      expect(saveEndpoint.mock.calls[0][0].data).toBe(
+        "name=bob&studentAdvisorId=7"
+      );
+
+      saveEndpoint.destroy();
+    });
   });
 
   describe("$bulkSave", () => {
@@ -646,7 +678,7 @@ describe("ViewModel", () => {
       await student.$bulkSave();
 
       expect(JSON.parse(endpoint.mock.calls[0][0].data)).toMatchObject({
-        items: expect.arrayContaining([
+        items: [
           {
             action: "save",
             type: "Student",
@@ -659,18 +691,18 @@ describe("ViewModel", () => {
           },
           {
             action: "save",
+            type: "Advisor",
+            data: { advisorId: null, name: "bob" },
+            refs: { advisorId: originalAdvisor.$stableId },
+          },
+          {
+            action: "save",
             type: "Course",
             data: { courseId: null, name: "CS101", studentId: null },
             refs: {
               courseId: originalCourse.$stableId,
               studentId: student.$stableId,
             },
-          },
-          {
-            action: "save",
-            type: "Advisor",
-            data: { advisorId: null, name: "bob" },
-            refs: { advisorId: originalAdvisor.$stableId },
           },
           {
             action: "save",
@@ -681,7 +713,7 @@ describe("ViewModel", () => {
               studentAdvisorId: originalAdvisor.$stableId,
             },
           },
-        ]),
+        ],
       });
 
       // Preserves non-circular instances:
@@ -741,7 +773,7 @@ describe("ViewModel", () => {
       });
 
       expect(JSON.parse(endpoint.mock.calls[0][0].data)).toMatchObject({
-        items: expect.arrayContaining([
+        items: [
           {
             action: "save",
             type: "Student",
@@ -753,7 +785,7 @@ describe("ViewModel", () => {
             },
             root: true,
           },
-        ]),
+        ],
       });
 
       // Preserves non-circular instances:
@@ -809,7 +841,7 @@ describe("ViewModel", () => {
       expect(student.$removedItems?.length).toBeFalsy();
 
       expect(JSON.parse(bulkSaveEndpoint.mock.calls[0][0].data)).toMatchObject({
-        items: expect.arrayContaining([
+        items: [
           {
             action: "none",
             type: "Student",
@@ -829,7 +861,7 @@ describe("ViewModel", () => {
             data: { advisorId: 3 },
             refs: { advisorId: advisor.$stableId },
           },
-        ]),
+        ],
       });
 
       loadEndpoint.destroy();
@@ -858,7 +890,7 @@ describe("ViewModel", () => {
       await student.$bulkSave();
 
       expect(JSON.parse(bulkSaveEndpoint.mock.calls[0][0].data)).toMatchObject({
-        items: expect.arrayContaining([
+        items: [
           {
             action: "save",
             type: "Student",
@@ -881,7 +913,7 @@ describe("ViewModel", () => {
             },
             refs: { advisorId: advisor.$stableId },
           },
-        ]),
+        ],
       });
 
       bulkSaveEndpoint.destroy();
@@ -932,7 +964,7 @@ describe("ViewModel", () => {
       await student.$bulkSave();
 
       expect(JSON.parse(bulkSaveEndpoint.mock.calls[0][0].data)).toMatchObject({
-        items: expect.arrayContaining([
+        items: [
           {
             action: "save",
             type: "Student",
@@ -940,7 +972,7 @@ describe("ViewModel", () => {
             refs: { studentId: student.$stableId },
             root: true,
           },
-        ]),
+        ],
       });
 
       bulkSaveEndpoint.destroy();
@@ -991,7 +1023,7 @@ describe("ViewModel", () => {
       await student.$bulkSave();
 
       expect(JSON.parse(endpoint.mock.calls[0][0].data)).toMatchObject({
-        items: expect.arrayContaining([
+        items: [
           {
             action: "none",
             type: "Student",
@@ -1009,13 +1041,149 @@ describe("ViewModel", () => {
               studentId: originalSteve.$stableId,
             },
           },
-        ]),
+        ],
       });
 
       expect(student.$bulkSave.wasSuccessful).toBeTruthy();
       expect(student.studentId).toBe(1);
       expect(student.advisor.students).toHaveLength(1);
       expect(student.advisor.students[0] === originalSteve).toBeTruthy();
+
+      endpoint.destroy();
+    });
+
+    test("add of child to existing parent without nav/fk on child", async () => {
+      const endpoint = mockEndpoint(
+        "/Company/bulkSave",
+        vitest.fn((req) => ({
+          wasSuccessful: true,
+        }))
+      );
+
+      const parent = new CompanyViewModel();
+      parent.$loadCleanData({ companyId: 1, name: "existing parent" });
+
+      // Act
+      const newChild = new PersonViewModel({ firstName: "bob" });
+      parent.employees?.push(newChild);
+      await parent.$bulkSave();
+
+      // Assert
+      expect(JSON.parse(endpoint.mock.calls[0][0].data)).toMatchObject({
+        items: [
+          {
+            action: "none",
+            type: "Company",
+            data: { companyId: parent.companyId },
+            refs: {
+              companyId: parent.$stableId,
+            },
+            root: true,
+          },
+          {
+            action: "save",
+            type: "Person",
+            data: {
+              personId: null,
+              firstName: "bob",
+            },
+            refs: {
+              personId: newChild.$stableId,
+              companyId: parent.$stableId,
+            },
+          },
+        ],
+      });
+
+      endpoint.destroy();
+    });
+
+    test("existing nondirty child of existing parent without nav/fk on child does not save", async () => {
+      // SCENARIO: A new child object gets saved by virtue of existing in a child collection.
+      // However, this child object isn't reloaded by the response of the save.
+
+      const endpoint = mockEndpoint(
+        "/Company/bulkSave",
+        vitest.fn((req) => ({
+          wasSuccessful: true,
+        }))
+      );
+
+      const parent = new CompanyViewModel();
+      parent.$loadCleanData({
+        companyId: 1,
+        name: "existing parent",
+        employees: [{ personId: 1, firstName: "bob" }],
+      });
+
+      // Sanity check: The employee lacks a reference nav or FK to its parent
+      // but is not dirty and does have a PK.
+      parent.employees![0].company = null;
+      parent.employees![0].companyId = null;
+      parent.employees![0].$isDirty = false;
+
+      // Act
+      await parent.$bulkSave();
+
+      // Assert
+      expect(JSON.parse(endpoint.mock.calls[0][0].data)).toMatchObject({
+        items: [
+          {
+            action: "none",
+            type: "Company",
+            data: { companyId: parent.companyId },
+            refs: {
+              companyId: parent.$stableId,
+            },
+            root: true,
+          },
+          // There should NOT be a "Person" model in the payload,
+          // since despite missing a foreign key to its parent,
+          // it isn't dirty and does exist on the server.
+        ],
+      });
+
+      endpoint.destroy();
+    });
+
+    test("options.additionalRoots", async () => {
+      const endpoint = mockEndpoint(
+        "/Company/bulkSave",
+        vitest.fn((req) => ({
+          wasSuccessful: true,
+        }))
+      );
+
+      const company1 = new CompanyViewModel({ name: "new company1" });
+      const company2 = new CompanyViewModel({ name: "new company2" });
+
+      // Act
+      await company1.$bulkSave({
+        additionalRoots: [company2],
+      });
+
+      // Assert
+      expect(JSON.parse(endpoint.mock.calls[0][0].data)).toMatchObject({
+        items: [
+          {
+            action: "save",
+            type: "Company",
+            data: { companyId: null, name: "new company1" },
+            refs: {
+              companyId: company1.$stableId,
+            },
+            root: true,
+          },
+          {
+            action: "save",
+            type: "Company",
+            data: { companyId: null, name: "new company2" },
+            refs: {
+              companyId: company2.$stableId,
+            },
+          },
+        ],
+      });
 
       endpoint.destroy();
     });
@@ -1044,7 +1212,7 @@ describe("ViewModel", () => {
       await student.$bulkSave();
 
       expect(JSON.parse(bulkSaveEndpoint.mock.calls[0][0].data)).toMatchObject({
-        items: expect.arrayContaining([
+        items: [
           {
             action: "save",
             type: "Student",
@@ -1059,7 +1227,7 @@ describe("ViewModel", () => {
             },
             root: true,
           },
-        ]),
+        ],
       });
 
       bulkSaveEndpoint.destroy();
@@ -1166,7 +1334,7 @@ describe("ViewModel", () => {
         advisor: {
           advisorId: 1,
           name: "child",
-          students: [{ studentId: 2, name: "grandchild" }],
+          students: [{ studentId: 2, name: "grandchild", studentAdvisorId: 1 }],
         },
       };
       const student = new StudentViewModel();
@@ -1279,7 +1447,7 @@ describe("ViewModel", () => {
     test("$loadCleanData won't trigger autosave on collection nav", async () => {
       var studentModel = new Student({
         studentId: 1,
-        courses: [{ courseId: 7, name: "foo" }],
+        courses: [{ courseId: 7, name: "foo", studentId: 1 }],
       });
       var student = new StudentViewModel();
       student.$loadCleanData(studentModel);
@@ -2474,7 +2642,7 @@ describe("ViewModel", () => {
       expect(watchCallback).toBeCalledTimes(0);
     });
 
-    test("doesnt stackoverflow on recursive object structures", () => {
+    test("doesnt stackoverflow when creating new recursive object structures", () => {
       var studentModel = new Student({
         studentId: 1,
         studentAdvisorId: 1,
@@ -2484,6 +2652,32 @@ describe("ViewModel", () => {
 
       const student = new StudentViewModel(studentModel);
 
+      // First expectation: We made it this far without stackoverflowing.
+
+      // Second, different ways of traversing to the same VM should result in the same reference.
+      expect(student.advisor).toBe(student.advisor!.students[0].advisor);
+
+      // The root VM (`student`) should also be subject to this logic,
+      // so the root should be the same instance seen in the advisor's students array.
+      expect(student).toBe(student.advisor!.students[0]);
+    });
+
+    test("doesnt stackoverflow when updating existing recursive object structures", () => {
+      var studentModel = new Student({
+        studentId: 1,
+        studentAdvisorId: 1,
+        advisor: { name: "Seagull", advisorId: 1 },
+      });
+      studentModel.advisor!.students = [studentModel];
+
+      const student = new StudentViewModel();
+      student.$loadCleanData(studentModel);
+
+      // Act
+      // Now that the ViewModel structure exists, try to update it.
+      student.$loadCleanData(studentModel);
+
+      // Assert
       // First expectation: We made it this far without stackoverflowing.
 
       // Second, different ways of traversing to the same VM should result in the same reference.

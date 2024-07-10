@@ -247,7 +247,9 @@ export abstract class ViewModel<
    * @internal
    */
   private _effectiveRules: {
-    [propName: string]: undefined | Array<(val: any) => true | string>;
+    [propName: string]:
+      | undefined
+      | Array<((val: any) => true | string) & { ruleName: string }>;
   } | null = null;
 
   /** @internal */
@@ -285,46 +287,18 @@ export abstract class ViewModel<
             continue;
           }
 
-          // HACK: In order to make bulk saves work,
-          // we have to allow for missing foreign keys
-          // as long as the nav prop is an unsaved, new entity.
-          // This is a scenario that wouldn't really ever happen in any UI
-          // that isn't using bulk saves (you'd always be fetching a
-          // navigation prop value from /somewhere/, or when creating new ones
-          // you'd be saving the principal entity immediately), so it doesn't seem too bad
-          // that this technically produces incorrect validation when not using bulk saves.
-          if (
-            ruleName == "required" &&
-            prop.role == "foreignKey" &&
-            prop.navigationProp
-          ) {
-            const fkRule = rules[ruleName];
-            propRules.push((v: any) => {
-              const result = fkRule(v);
-              if (result === true) return result;
-
-              const principal = this.$data[
-                prop.navigationProp!.name
-              ] as ViewModel;
-              if (principal && !principal._existsOnServer) {
-                // The nav prop has a value that we anticipate will be created
-                // by a bulk save. Allow this.
-                return true;
-              }
-
-              return result;
-            });
-            continue;
-          }
-
-          propRules.push(rules[ruleName]);
+          const ruleFn = rules[ruleName];
+          ruleFn.ruleName = ruleName;
+          propRules.push(ruleFn);
         }
       }
 
       // Process custom rules.
       if (custom) {
         for (const ruleName in custom) {
-          propRules.push(custom[ruleName]);
+          const ruleFn = custom[ruleName];
+          (ruleFn as any).ruleName = ruleName;
+          propRules.push(ruleFn);
         }
       }
 
@@ -597,14 +571,48 @@ export abstract class ViewModel<
         /** The models to traverse for relations in the next iteration of the outer loop. */
         let nextModels: (ViewModel | null)[] = [this];
 
-        /** The models we've already examined, to avoid infinite loops */
-        const processed = new Set();
+        if (options?.additionalRoots) {
+          nextModels.push(...options.additionalRoots);
+        }
 
-        /** The items in the bulk save payload that will be sent to the server */
-        const itemsToSend: BulkSaveRequestItem[] = [];
+        const dataByRef = new Map<
+          number,
+          {
+            model: ViewModel;
+            meta: ModelType;
+            action: BulkSaveRequestItem["action"];
+            refs: BulkSaveRequestItem["refs"] & {};
+            root: boolean;
+            visited: boolean;
+            isEssential: boolean;
+          }
+        >();
 
-        /** The ViewModels represented in the bulk save payload, keyed by their `$stableId` (aka 'ref') */
-        const modelsByRef = new Map<number, ViewModel>();
+        const getData = (model: ViewModel) => {
+          let ret = dataByRef.get(model.$stableId);
+          if (!ret)
+            dataByRef.set(
+              model.$stableId,
+              (ret = {
+                model,
+                meta: model.$metadata,
+                action: "none",
+                root: false,
+                isEssential: false,
+                visited: false,
+                refs: {
+                  // The model's $stableId will be referenced by other objects.
+                  // It is recorded as the object's primary key ref value.
+                  [model.$metadata.keyProp.name]: model.$stableId,
+
+                  // Other foreign key names here will be added that reference
+                  // the $stableId of the principal end of the relationship
+                  // The server will use these values to link these two objects together.
+                },
+              })
+            );
+          return ret;
+        };
 
         // Traverse all models reachable from `this`,
         // collecting those that need to be saved or deleted.
@@ -613,8 +621,11 @@ export abstract class ViewModel<
           nextModels = [];
 
           for (const model of currentModels) {
-            if (!model || processed.has(model)) continue;
-            processed.add(model);
+            if (!model) continue;
+
+            const data = getData(model);
+            if (data.visited) continue;
+            data.visited = true;
 
             const meta: ModelType = model.$metadata;
 
@@ -623,43 +634,7 @@ export abstract class ViewModel<
               nextModels.push(...model.$removedItems);
             }
 
-            const root = model == this;
-            const action = model._isRemoved
-              ? model._existsOnServer
-                ? "delete" // Delete items that have a PK are sent as a delete
-                : "none" // Do not send removed items that never had a PK.
-              : model.$isDirty || !model._existsOnServer
-              ? "save" // Save items that are dirty or never saved
-              : "none"; // Non-dirty, non-deleted items are sent as "none". This exists so that the root item (that will be sent as the response from the server) can be identified even if it isn't being modified.
-
-            if (action !== "none") {
-              if (options?.predicate?.(model, action) === false) {
-                continue;
-              }
-            }
-
-            if (action == "save") {
-              const errors = [...model.$getErrors()];
-              if (errors.length) {
-                // Somewhat user-friendly error: this could be shown in a c-loader-status
-                // if a developer isn't eagerly checking validation before enabling a save button:
-                throw Error(
-                  `Cannot save ${meta.displayName} ${
-                    model.$primaryKey || "<new>"
-                  } - validation failed: ${joinErrors(errors)}`
-                );
-              }
-            }
-
-            const refs: BulkSaveRequestItem["refs"] = {
-              // The model's $stableId will be referenced by other objects.
-              // It is recorded as the object's primary key ref value.
-              [meta.keyProp.name]: model.$stableId,
-
-              // Other foreign key names here will be added that reference
-              // the $stableId of the principal end of the relationship
-              // The server will use these values to link these two objects together.
-            };
+            data.root = model == this;
 
             for (const propName in meta.props) {
               const prop = meta.props[propName];
@@ -674,14 +649,12 @@ export abstract class ViewModel<
               } else if (prop.role == "referenceNavigation") {
                 let principal = model.$data[prop.name] as ViewModel | null;
 
-                // Build up `refs` as needed.
                 // If the prop is a reference navigation that has no foreign key,
                 // then the ref will link the foreign key prop to the principal entity,
                 // allowing the server to fixup the foreign key once the principal is created.
                 if (
-                  // If the model isn't being saved, don't need to resolve foreign keys to refs.
-                  action != "save" ||
                   // If the foreign key has a value then we don't need a ref.
+                  // Bail early.
                   model.$data[prop.foreignKey.name] != null
                 ) {
                   nextModels.push(principal);
@@ -710,46 +683,131 @@ export abstract class ViewModel<
 
                 if (
                   principal &&
-                  !principal._existsOnServer &&
                   !principal._isRemoved &&
-                  options?.predicate?.(principal, "save") !== false
+                  !model._isRemoved &&
+                  (model.$isDirty || !model._existsOnServer)
                 ) {
-                  // The model has an object value for this reference navigation.
-                  // This makes things easy - the foreign key should ref the value of that reference navigation.
-                  refs[prop.foreignKey.name] = principal.$stableId;
-                  continue;
+                  if (
+                    // The principal is not yet saved, but will be saved.
+                    (!principal._existsOnServer &&
+                      options?.predicate?.(principal, "save") !== false) ||
+                    // The principal object already exists, but the FK isn't dirty.
+                    // This may mean the principal object was late loaded which bypasses FK fixup,
+                    // or it means that a blank, empty dependent object was added to the principal's collection nav.
+                    (principal._existsOnServer &&
+                      !model.$getPropDirty(prop.foreignKey.name))
+                  ) {
+                    data.refs[prop.foreignKey.name] = principal.$stableId;
+                    getData(principal).isEssential = true;
+                  }
+                }
+              }
+            }
+          }
+        }
+
+        const dataToSend = [...dataByRef.values()]
+          .map((data) => {
+            const model = data.model;
+
+            // Non-dirty, non-deleted items are sent as "none".
+            // This exists so that the root item(that will be sent as the response
+            // from the server) can be identified even if it isn't being modified.
+            let action: BulkSaveRequestItem["action"] = "none";
+
+            if (model._isRemoved) {
+              action = model._existsOnServer
+                ? "delete" // Delete items that have a PK are sent as a delete
+                : "none"; // Do not send removed items that never had a PK.
+            } else {
+              // Save items that are dirty, or never saved, or have unresolved refs in the payload
+              if (
+                model.$isDirty ||
+                !model._existsOnServer ||
+                Object.entries(data.refs).some(([key, ref]) => {
+                  return key != model.$metadata.keyProp.name;
+                })
+              ) {
+                action = "save";
+              }
+            }
+
+            return {
+              ...data,
+              action,
+            };
+          })
+          // Include the root item and any items being changed.
+          .filter((v) => v.action != "none" || v.root || v.isEssential)
+          // Apply the user-supplied predicate to each item.
+          .filter(
+            (v) =>
+              v.action == "none" ||
+              options?.predicate?.(v.model, v.action) !== false
+          );
+
+        for (const data of dataToSend) {
+          const { action, model, meta } = data;
+
+          if (action == "save") {
+            const errors = [];
+
+            for (const [propName, rules] of Object.entries(
+              model.$effectiveRules
+            )) {
+              const propMeta = meta.props[propName];
+              for (const rule of rules || []) {
+                const result = rule((model as any)[propName]);
+                if (result !== true) {
+                  if (
+                    rule.ruleName == "required" &&
+                    propMeta.role == "foreignKey" &&
+                    propName in data.refs
+                  ) {
+                    // We have to allow for missing foreign keys
+                    // when the foreign key is missing but has a `ref`
+                    // that will be fixed up on the server as part of the bulk save operation.
+
+                    continue;
+                  }
+
+                  errors.push(result);
                 }
               }
             }
 
-            // Finally, add the item to the payload if it needs to be there.
-            // We always want to do the property traversal above to find
-            // related objects, even if we aren't saving this model.
-            if (root || action !== "none") {
-              const bulkSaveItem: BulkSaveRequestItem = {
-                type: meta.name,
-                action,
-                refs,
-                data:
-                  action == "none" || action == "delete"
-                    ? // "none" and "delete" items only need their PK:
-                      mapToDtoFiltered(model, [meta.keyProp.name])!
-                    : model.$saveMode == "surgical"
-                    ? mapToDtoFiltered(model, [
-                        ...model._dirtyProps,
-                        meta.keyProp.name,
-                      ])!
-                    : mapToDto(model)!,
-              };
-
-              // Omit the optional `root` prop entirely unless its true.
-              if (root) bulkSaveItem.root = root;
-
-              itemsToSend.push(bulkSaveItem);
-              modelsByRef.set(model.$stableId, model);
+            if (errors.length) {
+              // Somewhat user-friendly error: this could be shown in a c-loader-status
+              // if a developer isn't eagerly checking validation before enabling a save button:
+              throw Error(
+                `Cannot save ${meta.displayName} ${
+                  model.$primaryKey || "<new>"
+                } - validation failed: ${joinErrors(errors)}`
+              );
             }
           }
         }
+
+        const itemsToSend: BulkSaveRequestItem[] = dataToSend.map((data) => {
+          const { meta, action, model } = data;
+
+          return {
+            type: meta.name,
+            action,
+            refs: data.refs,
+            root: data.root ? true : undefined,
+            data:
+              action == "none" || action == "delete"
+                ? // "none" and "delete" items only need their PK:
+                  mapToDtoFiltered(model, [meta.keyProp.name])!
+                : model.$saveMode == "surgical"
+                ? mapToDtoFiltered(model, [
+                    ...model._dirtyProps,
+                    meta.keyProp.name,
+                  ])!
+                : mapToDto(model)!,
+          };
+        });
 
         const ret = await c.bulkSave(
           { items: itemsToSend },
@@ -763,16 +821,38 @@ export abstract class ViewModel<
           // `refMap` maps `ref` values to the resulting primary key produced by the server.
           const refMap = ret.data.refMap;
           for (const ref in refMap) {
-            const model = modelsByRef.get(+ref);
+            const model = dataByRef.get(+ref)?.model;
             if (model) model.$primaryKey = refMap[ref];
           }
 
           const result = ret.data.object;
           if (result) {
+            const age = performance.now();
+
             // `purgeUnsaved = true` here (arg3) since the bulk save should have covered the entire object graph.
             // Wiping out unsaved items will help developers discover bugs where their root model's data source
             // does not correctly include the whole object graph that they're saving (which is expected for bulk saves)
-            this.$loadFromModel(result, performance.now(), true);
+            this.$loadFromModel(result, age, true);
+
+            const unloadedTypes = new Set(
+              dataToSend
+                .filter(
+                  (d) =>
+                    d.action == "save" &&
+                    d.model._dataAge != age &&
+                    // We currently don't have a good way to reload additionalRoots items.
+                    !options?.additionalRoots?.includes(d.model)
+                )
+                .map((d) => d.model.$metadata.name)
+            );
+
+            if (unloadedTypes.size > 0) {
+              console.warn(
+                `One or more ${[...unloadedTypes.values()].join(
+                  " and "
+                )} items were saved by a bulk save, but were not returned by the response. The Data Source of the bulk save target may not be returning all entities.`
+              );
+            }
           }
         }
 
@@ -917,6 +997,7 @@ export abstract class ViewModel<
     }
   }
 
+  /** @internal */
   private get _existsOnServer() {
     if (!this.$primaryKey) {
       return false;
@@ -967,7 +1048,7 @@ export abstract class ViewModel<
 
   /**
    * Starts auto-saving of the instance when changes to its savable data properties occur.
-   * Only usable from Vue setup() or <script setup>. Otherwise, use $startAutoSave().
+   * Only usable from Vue setup() or `script setup`. Otherwise, use $startAutoSave().
    * @param options Options to control how the auto-saving is performed.
    */
   public $useAutoSave(options: AutoSaveOptions<this> = {}) {
@@ -1250,6 +1331,37 @@ export abstract class ListViewModel<
   }
 
   /**
+   * @internal
+   */
+  private _lightweight = false;
+
+  /** The plain model items that have been loaded into this ListViewModel.
+   * These instances do not reflect any changes made to the contents of `$items`.
+   */
+  public get $modelItems() {
+    return this.$load.result || [];
+  }
+
+  /** Returns true if `$modelOnlyMode` has been enabled. */
+  public get $modelOnlyMode(): boolean {
+    return this._lightweight;
+  }
+
+  /**
+   * Put the ListViewModel into a lightweight mode where `$items` is not populated with ViewModel instances.
+   * Result can instead be read from `$modelItems`.
+   *
+   * This mode allows much better performance when loading large numbers of items, especially in read-only contexts.
+   */
+  public set $modelOnlyMode(val: boolean) {
+    if (!val) {
+      throw new Error("Model-only mode cannot be disabled once enabled.");
+    }
+    this._lightweight = true;
+    this._items.value = undefined;
+  }
+
+  /**
    * The current set of items that have been loaded into this ListViewModel.
    * @internal
    */
@@ -1258,6 +1370,11 @@ export abstract class ListViewModel<
   public get $items(): TItem[] {
     let value = this._items.value;
     if (!value) {
+      if (this._lightweight) {
+        throw new Error(
+          "The ListViewModel instance is in model-only mode. Items may only be retrieved from `.$modelItems`, not `.$items`."
+        );
+      }
       value = new ViewModelCollection(this.$metadata, this);
 
       // In order to avoid vue seeing that we mutated a `ref` in a getter,
@@ -1278,6 +1395,12 @@ export abstract class ListViewModel<
     return value;
   }
   public set $items(val: TItem[]) {
+    if (this._lightweight) {
+      throw new Error(
+        "The ListViewModel instance is in model-only mode. `.$items` must not be populated."
+      );
+    }
+
     if ((this._items.value as any) === val) return;
 
     const vmc = new ViewModelCollection(this.$metadata, this);
@@ -1331,15 +1454,17 @@ export abstract class ListViewModel<
     const $load = this.$apiClient.$makeCaller("list", (c) => {
       const startTime = performance.now();
       return c.list(this.$params).then((r) => {
-        const result = r.data.list;
-        if (result) {
-          this.$items = rebuildModelCollectionForViewModelCollection(
-            this.$metadata,
-            this.$items,
-            result,
-            startTime,
-            true
-          );
+        if (!this._lightweight) {
+          const result = r.data.list;
+          if (result) {
+            this.$items = rebuildModelCollectionForViewModelCollection(
+              this.$metadata,
+              this.$items,
+              result,
+              startTime,
+              true
+            );
+          }
         }
         return r;
       });
@@ -1372,14 +1497,14 @@ export abstract class ListViewModel<
 
   /**
    * Starts auto-loading of the list as changes to its parameters occur.
-   * Only usable from Vue setup() or <script setup>. Otherwise, use $startAutoLoad().
+   * Only usable from Vue setup() or `script setup`. Otherwise, use $startAutoLoad().
    * @param options Options that control the auto-load behavior.
    */
   public $useAutoLoad(options: AutoLoadOptions<this> = {}) {
     const vue = getCurrentInstance()?.proxy;
     if (!vue)
       throw new Error(
-        "$useAutoLoad can only be used inside setup(). Consider using $startAutoSave if you're not using Vue composition API."
+        "$useAutoLoad can only be used inside setup(). Consider using $startAutoLoad if you're not using Vue composition API."
       );
     return this.$startAutoLoad(vue, options);
   }
@@ -1445,7 +1570,7 @@ export abstract class ListViewModel<
 
   /**
    * Enables auto save for the items in the list.
-   * Only usable from Vue setup() or <script setup>. Otherwise, use $startAutoSave().
+   * Only usable from Vue setup() or `script setup`. Otherwise, use $startAutoSave().
    * @param options Options to control how the auto-saving is performed.
    */
   public $useAutoSave(options: AutoSaveOptions<this> = {}) {
@@ -1463,6 +1588,10 @@ export abstract class ListViewModel<
    * @param options Options to control how the auto-saving is performed.
    */
   public $startAutoSave(vue: VueInstance, options: AutoSaveOptions<this> = {}) {
+    if (this._lightweight) {
+      throw new Error("Autosave cannot be used with $modelOnlyMode enabled.");
+    }
+
     let state = this._autoSaveState;
 
     if (state?.active && state.options === options) {
@@ -1577,6 +1706,20 @@ export class ViewModelFactory {
   /** Provide a pre-existing instance to the factory. */
   set(initialData: any, vm: ViewModel) {
     this.map.set(initialData, vm);
+  }
+
+  private processed = new Map<any, Set<any>>();
+  /** Determine if the given initialData was already mapped to `vm`. */
+  shouldProcess(initialData: any, vm: ViewModel) {
+    let targets = this.processed.get(initialData);
+    if (!targets) {
+      this.processed.set(initialData, (targets = new Set()));
+    }
+    if (targets.has(vm)) {
+      return false;
+    }
+    targets.add(vm);
+    return true;
   }
 
   public static scope<TRet>(
@@ -1839,6 +1982,12 @@ export interface BulkSaveOptions {
    * that would otherwise cause the entire bulk save operation to fail.
    * */
   predicate?: (viewModel: ViewModel, action: "save" | "delete") => boolean;
+
+  /** Additional root items that will be traversed for items that need saving.
+   * Use to add items that aren't attached to the target of the bulk save,
+   * but are still desired to be saved during the same operation.
+   */
+  additionalRoots?: ViewModel<any, any>[];
 }
 
 /**
@@ -1923,11 +2072,14 @@ export function defineProps<T extends new () => ViewModel<any, any>>(
 
                 // Set on `this`, not `$data`, in order to trigger $isDirty in the
                 // setter function for the FK prop.
-                (this as any).$data[prop.foreignKey.name] = incomingPk;
-                // Even if the FK might be changing from null to null,
-                // always set the FK as dirty so that it'll be included
-                // as a `ref` in bulk save payloads and be resolved by the server.
-                this.$setPropDirty(prop.foreignKey.name);
+                (this as any)[prop.foreignKey.name] = incomingPk;
+
+                if (incomingValue && incomingPk == null) {
+                  // If the incoming principal model doesn't have a PK yet, mark the FK as dirty.
+                  // Then, when a save is performed, `mapToDto` will discover and fixup the FK
+                  // if the principal's PK has received a value in the interim.
+                  this.$setPropDirty(prop.foreignKey.name);
+                }
               }
             }
           : prop.type == "collection" && prop.itemType.type == "model"
@@ -2200,6 +2352,11 @@ export function updateViewModelFromModel<
   skipStale = false
 ) {
   ViewModelFactory.scope(function (factory) {
+    // Skip if we already applied this source to the target.
+    if (!factory.shouldProcess(source, target)) {
+      return;
+    }
+
     // Add the root ViewModel to the factory
     // so that when existing ViewModels are being updated,
     // duplicate VM instances won't be created needlessly.

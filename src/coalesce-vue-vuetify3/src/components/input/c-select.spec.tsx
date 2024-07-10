@@ -78,6 +78,9 @@ describe("CSelect", () => {
     () => <CSelect model={vm} for="singleTestId" />;
     () => <CSelect model={vm} for={vm.$metadata.props.singleTest} />;
 
+    // Against models that might be null
+    () => <CSelect model={vm.referenceNavigation} for="referenceNavigation" />;
+
     // Binding to plain Models:
     () => <CSelect model={model} for="singleTest" />;
     () => <CSelect model={model} for="singleTestId" />;

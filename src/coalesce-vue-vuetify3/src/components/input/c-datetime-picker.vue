@@ -118,7 +118,7 @@ defineOptions({
 const props = withDefaults(
   defineProps<{
     /** An object owning the value to be edited that is specified by the `for` prop. */
-    model?: TModel;
+    model?: TModel | null;
 
     /** A metadata specifier for the value being bound. One of:
      * * A string with the name of the value belonging to `model`. E.g. `"startDate"`.

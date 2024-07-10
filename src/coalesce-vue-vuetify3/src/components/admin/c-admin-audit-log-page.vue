@@ -108,10 +108,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr
-                v-for="(auditLog, index) in list.$items"
-                :key="auditLog.$stableId"
-              >
+              <tr v-for="(auditLog, index) in items" :key="auditLog.id!">
                 <td class="c-audit-logs--column-user-date">
                   <c-display
                     v-if="userPropMeta"
@@ -144,8 +141,8 @@
                     "
                   />
                   <pre
-                    :class="timeDiffClass(auditLog, list.$items[index + 1])"
-                    v-text="timeDiff(auditLog, list.$items[index + 1])"
+                    :class="timeDiffClass(auditLog, items[index + 1])"
+                    v-text="timeDiff(auditLog, items[index + 1])"
                     title="Time delta from the preceding row"
                   ></pre>
                 </td>
@@ -179,7 +176,7 @@
                       </tr>
                       <tr
                         v-for="propMeta in otherProps"
-                        :key="auditLog.$stableId + '-prop-' + propMeta.name!"
+                        :key="auditLog.id! + '-prop-' + propMeta.name!"
                         :class="'prop-' + propMeta.name"
                       >
                         <td>{{ propMeta.displayName }}:</td>
@@ -253,7 +250,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, toRaw } from "vue";
 import { differenceInMilliseconds } from "date-fns";
 import {
   HiddenAreas,
@@ -317,7 +314,12 @@ if (props.list) {
   }
   list = new ListViewModel.typeLookup![props.type]() as any;
   list.$load.setConcurrency("cancel");
+  list.$modelOnlyMode = true;
 }
+
+const items = computed(() =>
+  list.$modelOnlyMode ? toRaw(list.$modelItems) : list.$items
+);
 
 const userPropMeta = computed(() => {
   return (
@@ -353,7 +355,7 @@ const otherProps = computed(() => {
   );
 });
 
-function timeDiff(current: AuditLogViewModel, older?: AuditLogViewModel) {
+function timeDiff(current: AuditLogBase, older?: AuditLogBase) {
   if (!older) return "";
   let ms = differenceInMilliseconds(current.date!, older.date!);
   const positive = ms >= 0;
@@ -373,7 +375,7 @@ function timeDiff(current: AuditLogViewModel, older?: AuditLogViewModel) {
   );
 }
 
-function timeDiffClass(current: AuditLogViewModel, older?: AuditLogViewModel) {
+function timeDiffClass(current: AuditLogBase, older?: AuditLogBase) {
   if (!older) return "";
   const diff = current.date!.valueOf() - (older?.date ?? 0).valueOf();
   return diff == 0 ? "grey--text" : diff > 0 ? "text-success" : "text-error";

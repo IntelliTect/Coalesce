@@ -96,6 +96,10 @@ export const Course = (domain.types.Course = {
       get typeDef() {
         return domain.types.Student as ModelType;
       },
+      get inverseNavigation() {
+        return domain.types.Student.props
+          .courses as ModelCollectionNavigationProperty;
+      },
     },
   },
 });

@@ -172,7 +172,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                         }
                         else
                         {
-                            b.Line("var (itemResult, _) = await dataSource.GetItemAsync(id, new DataSourceParameters());");
+                            b.Line("var itemResult = await dataSource.GetItemAsync(id, new DataSourceParameters());");
                         }
                         using (b.Block("if (!itemResult.WasSuccessful)"))
                         {

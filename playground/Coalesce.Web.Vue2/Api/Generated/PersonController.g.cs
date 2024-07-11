@@ -93,7 +93,7 @@ namespace Coalesce.Web.Vue2.Api
             [FromForm(Name = "name")] string name)
         {
             var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Person, Coalesce.Domain.Person>("Default");
-            var (itemResult, _) = await dataSource.GetItemAsync(id, new DataSourceParameters());
+            var itemResult = await dataSource.GetItemAsync(id, new DataSourceParameters());
             if (!itemResult.WasSuccessful)
             {
                 return new ItemResult<PersonResponse>(itemResult);
@@ -133,7 +133,7 @@ namespace Coalesce.Web.Vue2.Api
             [FromForm(Name = "id")] int id)
         {
             var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Person, Coalesce.Domain.Person>("WithoutCases");
-            var (itemResult, _) = await dataSource.GetItemAsync(id, new DataSourceParameters());
+            var itemResult = await dataSource.GetItemAsync(id, new DataSourceParameters());
             if (!itemResult.WasSuccessful)
             {
                 return new ItemResult(itemResult);
@@ -201,7 +201,7 @@ namespace Coalesce.Web.Vue2.Api
             [FromForm(Name = "id")] int id)
         {
             var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Person, Coalesce.Domain.Person>("Default");
-            var (itemResult, _) = await dataSource.GetItemAsync(id, new DataSourceParameters());
+            var itemResult = await dataSource.GetItemAsync(id, new DataSourceParameters());
             if (!itemResult.WasSuccessful)
             {
                 return new ItemResult<System.DateTime>(itemResult);
@@ -226,7 +226,7 @@ namespace Coalesce.Web.Vue2.Api
             [FromForm(Name = "time")] System.TimeOnly time)
         {
             var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Person, Coalesce.Domain.Person>("Default");
-            var (itemResult, _) = await dataSource.GetItemAsync(id, new DataSourceParameters());
+            var itemResult = await dataSource.GetItemAsync(id, new DataSourceParameters());
             if (!itemResult.WasSuccessful)
             {
                 return new ItemResult(itemResult);
@@ -293,7 +293,7 @@ namespace Coalesce.Web.Vue2.Api
             int id)
         {
             var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Person, Coalesce.Domain.Person>("Default");
-            var (itemResult, _) = await dataSource.GetItemAsync(id, new DataSourceParameters());
+            var itemResult = await dataSource.GetItemAsync(id, new DataSourceParameters());
             if (!itemResult.WasSuccessful)
             {
                 return new ItemResult<string>(itemResult);
@@ -347,7 +347,7 @@ namespace Coalesce.Web.Vue2.Api
             [FromForm(Name = "id")] int id)
         {
             var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Person, Coalesce.Domain.Person>("Default");
-            var (itemResult, _) = await dataSource.GetItemAsync(id, new DataSourceParameters());
+            var itemResult = await dataSource.GetItemAsync(id, new DataSourceParameters());
             if (!itemResult.WasSuccessful)
             {
                 return new ItemResult<string>(itemResult);
@@ -374,7 +374,7 @@ namespace Coalesce.Web.Vue2.Api
             [FromForm(Name = "title")] Coalesce.Domain.Person.Titles? title)
         {
             var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Person, Coalesce.Domain.Person>("Default");
-            var (itemResult, _) = await dataSource.GetItemAsync(id, new DataSourceParameters());
+            var itemResult = await dataSource.GetItemAsync(id, new DataSourceParameters());
             if (!itemResult.WasSuccessful)
             {
                 return new ItemResult<PersonResponse>(itemResult);

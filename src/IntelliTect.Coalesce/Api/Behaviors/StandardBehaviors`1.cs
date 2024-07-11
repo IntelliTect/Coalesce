@@ -116,7 +116,7 @@ namespace IntelliTect.Coalesce
                     return (SaveKind.Create, null);
                 }
 
-                var (existingItem, _) = await (OverrideFetchForUpdateDataSource ?? dataSource).GetItemAsync(idValue, parameters);
+                var existingItem = await (OverrideFetchForUpdateDataSource ?? dataSource).GetItemAsync(idValue, parameters);
                 if (existingItem.WasSuccessful && existingItem.Object != null)
                 {
                     return (SaveKind.Update, idValue);
@@ -145,15 +145,15 @@ namespace IntelliTect.Coalesce
         /// <param name="dataSource">The data source that will be used when loading the item.</param>
         /// <param name="parameters">The parameters to be passed to the data source when loading the item.</param>
         /// <param name="item">The saved item to reload</param>
-        protected virtual async Task<(ItemResult<T> Item, IncludeTree? IncludeTree)> FetchObjectAfterSaveAsync(IDataSource<T> dataSource, IDataSourceParameters parameters, T item)
+        protected virtual async Task<ItemResult<T>> FetchObjectAfterSaveAsync(IDataSource<T> dataSource, IDataSourceParameters parameters, T item)
         {
             var newItemId = ClassViewModel.PrimaryKey!.PropertyInfo.GetValue(item)!;
             var ds = (OverridePostSaveResultDataSource ?? dataSource);
             var result = await ds.GetItemAsync(newItemId, parameters);
 
-            if (result.Item.Object != null && ds is IResultTransformer<T> transformer)
+            if (result.Object != null && ds is IResultTransformer<T> transformer)
             {
-                await transformer.TransformResultsAsync(Array.AsReadOnly(new[] { result.Item.Object }), parameters);
+                await transformer.TransformResultsAsync(Array.AsReadOnly(new[] { result.Object }), parameters);
             }
 
             return result;
@@ -209,16 +209,7 @@ namespace IntelliTect.Coalesce
         /// <returns>An ItemResult potentially indicating failure, upon which the save operation will halt without persisting changes.</returns>
         public virtual ItemResult BeforeSave(SaveKind kind, T? oldItem, T item) => true;
 
-        /// <summary>
-        /// Code to run before committing a save to the database.
-        /// Any changes made to the properties of <c>item</c> will be persisted to the database.
-        /// The return a failure result will halt the save operation and return any associated message to the client.
-        /// </summary>
-        /// <param name="kind">Descriminator between a create and a update operation.</param>
-        /// <param name="oldItem">A shallow copy of the original item as it was retrieved from the database.
-        /// If kind == SaveKind.Create, this will be null.</param>
-        /// <param name="item">An entity instance with its properties set to incoming, new values.</param>
-        /// <returns>An ItemResult potentially indicating failure, upon which the save operation will halt without persisting changes.</returns>
+        /// <inheritdoc cref=" BeforeSave(SaveKind, T?, T)"/>
         public virtual Task<ItemResult> BeforeSaveAsync(SaveKind kind, T? oldItem, T item) => Task.FromResult(BeforeSave(kind, oldItem, item));
 
         /// <summary>
@@ -251,7 +242,7 @@ namespace IntelliTect.Coalesce
             if (kind == SaveKind.Update)
             {
                 // Primary Key was defined. This object should exist in the database.
-                var (existingItem, _) = await (OverrideFetchForUpdateDataSource ?? dataSource).GetItemAsync(idValue!, parameters);
+                var existingItem = await (OverrideFetchForUpdateDataSource ?? dataSource).GetItemAsync(idValue!, parameters);
                 if (!existingItem.WasSuccessful)
                 {
                     return new ItemResult<TDtoOut?>(existingItem);
@@ -292,8 +283,9 @@ namespace IntelliTect.Coalesce
             await ExecuteSaveAsync(kind, originalItem, item);
 
             // Pull the object to get any changes.
-            ItemResult<T> newItem;
-            (newItem, includeTree) = await FetchObjectAfterSaveAsync(dataSource, parameters, item);
+            ItemResult<T> newItem = await FetchObjectAfterSaveAsync(dataSource, parameters, item);
+            includeTree = newItem.IncludeTree;
+
             if (!newItem.WasSuccessful)
             {
                 return $"The item was saved, but could not be loaded with the requested data source: {newItem.Message}";
@@ -377,7 +369,7 @@ namespace IntelliTect.Coalesce
             IDataSourceParameters parameters)
             where TDto : class, IResponseDto<T>, new()
         {
-            var (existingItem, _) = await (OverrideFetchForDeleteDataSource ?? dataSource).GetItemAsync(id, parameters);
+            var existingItem = await (OverrideFetchForDeleteDataSource ?? dataSource).GetItemAsync(id, parameters);
             if (!existingItem.WasSuccessful)
             {
                 return existingItem.Message;
@@ -407,8 +399,8 @@ namespace IntelliTect.Coalesce
             // Pull the object to see if it can still be seen by the user.
             // If so, the operation was a soft delete and the user is allowed to see soft-deleted items.
             var postDeleteDs = OverridePostDeleteResultDataSource ?? dataSource;
-            var (postDeleteGetResult, includeTree) = await postDeleteDs.GetItemAsync(id, parameters);
-
+            var postDeleteGetResult = await postDeleteDs.GetItemAsync(id, parameters);
+            var includeTree = postDeleteGetResult.IncludeTree;
             var deletedItem = postDeleteGetResult.Object;
 
 

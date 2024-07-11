@@ -137,7 +137,7 @@ namespace IntelliTect.Coalesce
         /// </summary>
         /// <returns>A ListResult with the requested data and paging information,
         /// and an IncludeTree to be used when mapping/serializing the data.</returns>
-        public virtual async Task<(ListResult<T> List, IncludeTree? IncludeTree)> GetListAsync(IListParameters parameters)
+        public virtual async Task<ListResult<T>> GetListAsync(IListParameters parameters)
         {
             var query = await GetQueryAsync(parameters);
 
@@ -153,7 +153,7 @@ namespace IntelliTect.Coalesce
             List<T> result = await EvaluateListQueryAsync(query, GetEffectiveCancellationToken(parameters));
 
             var tree = GetIncludeTree(query, parameters);
-            return (new ListResult<T>(result, page: page, totalCount: totalCount, pageSize: pageSize), tree);
+            return new ListResult<T>(result, page: page, totalCount: totalCount, pageSize: pageSize) { IncludeTree = tree };
         }
 
         /// <summary>
@@ -175,7 +175,7 @@ namespace IntelliTect.Coalesce
         public virtual async Task<ListResult<TDto>> GetMappedListAsync<TDto>(IListParameters parameters)
             where TDto : class, IResponseDto<T>, new()
         {
-            var (result, tree) = await GetListAsync(parameters);
+            var result = await GetListAsync(parameters);
 
             if (!result.WasSuccessful || result.List == null)
             {
@@ -185,7 +185,7 @@ namespace IntelliTect.Coalesce
             await TransformResultsAsync(new ReadOnlyCollection<T>(result.List), parameters);
 
             var mappingContext = new MappingContext(Context, parameters.Includes);
-            IList<TDto> mappedResult = result.List.Select(obj => obj.MapToDto<T, TDto>(mappingContext, tree)!).ToList();
+            IList<TDto> mappedResult = result.List.Select(obj => obj.MapToDto<T, TDto>(mappingContext, result.IncludeTree)!).ToList();
             mappedResult = TrimListFields(mappedResult, parameters);
 
             return new ListResult<TDto>(result, mappedResult);
@@ -220,18 +220,18 @@ namespace IntelliTect.Coalesce
         /// <param name="parameters">The parameters by which to query.</param>
         /// <returns>The requested item
         /// and an IncludeTree to be used when mapping/serializing the item.</returns>
-        public virtual async Task<(ItemResult<T> Item, IncludeTree? IncludeTree)> GetItemAsync(object id, IDataSourceParameters parameters)
+        public virtual async Task<ItemResult<T>> GetItemAsync(object id, IDataSourceParameters parameters)
         {
             var query = await GetQueryAsync(parameters);
             T? result = await EvaluateItemQueryAsync(id, query, GetEffectiveCancellationToken(parameters));
 
             if (result == null)
             {
-                return (new ItemResult<T>(wasSuccessful: false, message: GetNotFoundMessage(id)), null);
+                return new ItemResult<T>(wasSuccessful: false, message: GetNotFoundMessage(id));
             }
 
             var tree = GetIncludeTree(query, parameters);
-            return (new ItemResult<T>(wasSuccessful: true, obj: result), tree);
+            return new ItemResult<T>(wasSuccessful: true, obj: result, includeTree: tree);
         }
 
         /// <summary>
@@ -244,7 +244,7 @@ namespace IntelliTect.Coalesce
         public virtual async Task<ItemResult<TDto>> GetMappedItemAsync<TDto>(object id, IDataSourceParameters parameters)
             where TDto : class, IResponseDto<T>, new()
         {
-            var (result, tree) = await GetItemAsync(id, parameters);
+            var result = await GetItemAsync(id, parameters);
 
             if (!result.WasSuccessful || result.Object == null)
             {
@@ -254,7 +254,7 @@ namespace IntelliTect.Coalesce
             await TransformResultsAsync(Array.AsReadOnly(new[] { result.Object }), parameters);
 
             var mappingContext = new MappingContext(Context, parameters.Includes);
-            var mappedResult = result.Object.MapToDto<T, TDto>(mappingContext, tree);
+            var mappedResult = result.Object.MapToDto<T, TDto>(mappingContext, result.IncludeTree);
 
             return new ItemResult<TDto>(result, mappedResult);
         }

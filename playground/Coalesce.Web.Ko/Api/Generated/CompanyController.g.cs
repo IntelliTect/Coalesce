@@ -94,7 +94,7 @@ namespace Coalesce.Web.Ko.Api
             [FromForm(Name = "name")] string name)
         {
             var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Company, Coalesce.Domain.Company>("Default");
-            var (itemResult, _) = await dataSource.GetItemAsync(id, new DataSourceParameters());
+            var itemResult = await dataSource.GetItemAsync(id, new DataSourceParameters());
             if (!itemResult.WasSuccessful)
             {
                 return new ItemResult(itemResult);

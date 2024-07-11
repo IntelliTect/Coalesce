@@ -168,7 +168,7 @@ namespace Coalesce.Web.Vue2.Api
             Microsoft.AspNetCore.Http.IFormFile file)
         {
             var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Case, Coalesce.Domain.Case>("Default");
-            var (itemResult, _) = await dataSource.GetItemAsync(id, new DataSourceParameters());
+            var itemResult = await dataSource.GetItemAsync(id, new DataSourceParameters());
             if (!itemResult.WasSuccessful)
             {
                 return new ItemResult(itemResult);
@@ -206,7 +206,7 @@ namespace Coalesce.Web.Vue2.Api
             byte[] etag)
         {
             var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Case, Coalesce.Domain.Case>("Default");
-            var (itemResult, _) = await dataSource.GetItemAsync(id, new DataSourceParameters());
+            var itemResult = await dataSource.GetItemAsync(id, new DataSourceParameters());
             if (!itemResult.WasSuccessful)
             {
                 return new ItemResult<IntelliTect.Coalesce.Models.IFile>(itemResult);
@@ -263,7 +263,7 @@ namespace Coalesce.Web.Vue2.Api
             Microsoft.AspNetCore.Http.IFormFile file)
         {
             var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Case, Coalesce.Domain.Case>("Default");
-            var (itemResult, _) = await dataSource.GetItemAsync(id, new DataSourceParameters());
+            var itemResult = await dataSource.GetItemAsync(id, new DataSourceParameters());
             if (!itemResult.WasSuccessful)
             {
                 return new ItemResult<IntelliTect.Coalesce.Models.IFile>(itemResult);
@@ -314,7 +314,7 @@ namespace Coalesce.Web.Vue2.Api
             System.Collections.Generic.ICollection<Microsoft.AspNetCore.Http.IFormFile> files)
         {
             var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Case, Coalesce.Domain.Case>("Default");
-            var (itemResult, _) = await dataSource.GetItemAsync(id, new DataSourceParameters());
+            var itemResult = await dataSource.GetItemAsync(id, new DataSourceParameters());
             if (!itemResult.WasSuccessful)
             {
                 return new ItemResult(itemResult);
@@ -352,7 +352,7 @@ namespace Coalesce.Web.Vue2.Api
             [FromForm(Name = "file")] byte[] file)
         {
             var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Case, Coalesce.Domain.Case>("Default");
-            var (itemResult, _) = await dataSource.GetItemAsync(id, new DataSourceParameters());
+            var itemResult = await dataSource.GetItemAsync(id, new DataSourceParameters());
             if (!itemResult.WasSuccessful)
             {
                 return new ItemResult(itemResult);

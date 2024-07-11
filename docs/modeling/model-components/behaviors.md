@@ -114,7 +114,7 @@ SaveAsync
     BeforeSaveAsync
         BeforeSave
     ExecuteSaveAsync
-    AfterSave
+    AfterSaveAsync
 
 DeleteAsync
     BeforeDeleteAsync
@@ -161,17 +161,16 @@ Map the properties of the incoming DTO to the model that will be saved to the da
 <Prop def="Task<ItemResult> BeforeSaveAsync(SaveKind kind, T? oldItem, T item);
 ItemResult BeforeSave(SaveKind kind, T? oldItem, T item)" />
 
-Provides an easy way for derived classes to intercept a save attempt and either reject it by returning an unsuccessful result, or approve it by returning success. The incoming item can also be modified at will in this method to override changes that the client made as desired.    
+Extension point for derived classes to intercept a save attempt and either reject it by returning an unsuccessful result, or approve it by returning success. The incoming item can also be modified at will in this method to override changes that the client made as desired.    
 
 
-<Prop def="ItemResult AfterSave(SaveKind kind, T? oldItem, ref T item, ref IncludeTree? includeTree)" />
+<Prop def="ItemResult<T> AfterSaveAsync(SaveKind kind, T? oldItem, T item)" />
 
-Provides an easy way for derived classes to perform actions after a save operation has been completed. Failure results returned here will present an error to the client, but will not prevent modifications to the database since changes have already been saved at this point. This method can optionally modify or replace the item that is sent back to the client after a save by setting `ref T item` to another object or to null. Setting `ref IncludeTree includeTree` will override the [Include Tree](/concepts/include-tree.md) used to shape the response object.
+Extension point for derived classes to perform actions after a save operation has been completed. 
 
-::: warning
-Setting `ref T item` to null will prevent the new object from being returned - be aware that this can be harmful in create scenarios since it prevents the client from receiving the primary key of the newly created item. If autoSave is enabled on the client, this could cause a large number of duplicate objects to be created in the database, since each subsequent save by the client will be treated as a create when the incoming object lacks a primary key.
-:::
+If a non-successful `ItemResult` is returned, a failure response will be returned immediately without the updated item attached to the response. This will not prevent modifications to the database since changes have already been saved at this point. 
 
+If a successful `ItemResult` is returned, then a non-null `Object` on the result will override the item sent in the response, and a non-null `IncludeTree` on the result will override the include tree used to map that item to the DTO. If these properties are left null (e.g. you return `true`), the original `item` will be returned in the response to the client.
 
 <Prop def="Task<ItemResult<TDto?>> DeleteAsync<TDto>(object id, IDataSource<T> dataSource, IDataSourceParameters parameters)" />
 

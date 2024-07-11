@@ -297,22 +297,19 @@ namespace IntelliTect.Coalesce
             // Call the AfterSave method to allow the user to
             // modify the returned object, the include tree,
             // or signal an error.
-            var afterSave = AfterSave(kind, originalItem, ref item, ref includeTree);
+            var afterSave = await AfterSaveAsync(kind, originalItem, item);
             if (afterSave == null)
             {
-                throw new InvalidOperationException("Received null from result of AfterSave. Expected an ItemResult<TDto>.");
+                throw new InvalidOperationException("Received null from result of AfterSaveAsync. Expected an ItemResult.");
             }
             else if (!afterSave.WasSuccessful)
             {
                 return new ItemResult<TDtoOut?>(afterSave);
             }
-
-            // If the user nulled out the item in their AfterSave,
-            // they don't want to send the item back with the save.
-            // This is fine - we won't try to map it if its null.
-            if (item == null)
+            else
             {
-                return true;
+                item = afterSave.Object ?? item;
+                includeTree = afterSave.IncludeTree ?? includeTree;
             }
 
             return new ItemResult<TDtoOut?>(
@@ -330,8 +327,8 @@ namespace IntelliTect.Coalesce
         public abstract Task ExecuteSaveAsync(SaveKind kind, T? oldItem, T item);
 
         /// <summary>
-        /// Code to run after a save has been committed to the database.
-        /// Allows any cleanup code to run, as well as modification of the object that will be returned to the client.
+        /// Code to run after a save has been committed to the database. Allows any cleanup code to run, 
+        /// as well as potential replacement of the object that will be returned to the client.
         /// </summary>
         /// <param name="kind">Descriminator between a create and a update operation.</param>
         /// <param name="oldItem">A shallow copy of the original item as it was retrieved from the database.
@@ -340,16 +337,16 @@ namespace IntelliTect.Coalesce
         /// A fresh copy of the modified item retrieved from the database,
         /// complete with any relations that were included as a result of being loaded 
         /// from the dataSource that was specified by the client.
-        /// This ref parameter may have its value changed in order to send a modified object to the client.
-        /// Set to null to return no object to the client.
         /// </param>
-        /// <param name="includeTree">
-        /// The includeTree that will be used to map the updatedItem for serialization and transmission to the client.
-        /// The includeTree is obtained from the dataSource that was used to load updatedItem.
-        /// This ref parameter may have its value changed to send a different object structure to the client.
-        /// </param>
-        /// <returns>An ItemResult potentially indicating failure. A failure response will be returned immediately without the updatedItem attached to the response.</returns>
-        public virtual ItemResult AfterSave(SaveKind kind, T? oldItem, ref T item, ref IncludeTree? includeTree) => true;
+        /// <returns>
+        /// If a non-successful <see cref="ItemResult"/> is returned, a failure response will be 
+        /// returned immediately without the updated item attached to the response.
+        /// If a successful <see cref="ItemResult{T}"/> is returned, then a non-null <see cref="ItemResult{T}.Object"/> 
+        /// on the result will override the item sent in the response, and a non-null <see cref="ApiResult.IncludeTree"/> 
+        /// on the result will override the include tree used to map that item to the DTO. If these properties are left null 
+        /// (e.g. you return <see langword="true"/>), <paramref name="item"/> will be returned in the response to the client.
+        /// </returns>
+        public virtual Task<ItemResult<T>> AfterSaveAsync(SaveKind kind, T? oldItem, T item) => Task.FromResult<ItemResult<T>>(true);
 
         #endregion
 

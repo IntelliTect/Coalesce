@@ -47,6 +47,7 @@
   > .content {
     margin: auto;
     max-width: 800px;
+    text-wrap: balance;
   }
 
   &.page-footer {

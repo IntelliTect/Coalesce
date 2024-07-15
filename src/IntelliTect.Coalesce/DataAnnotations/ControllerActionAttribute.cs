@@ -9,6 +9,7 @@ namespace IntelliTect.Coalesce.DataAnnotations
     /// Controls attributes of the API controller action generated for the target method.
     /// </summary>
     [System.AttributeUsage(System.AttributeTargets.Method)]
+    [Obsolete("ControllerActionAttribute has been merged into ExecuteAttribute")]
     public class ControllerActionAttribute : System.Attribute
     {
         public ControllerActionAttribute() { }
@@ -32,14 +33,5 @@ namespace IntelliTect.Coalesce.DataAnnotations
         /// </para>
         /// </summary>
         public string? VaryByProperty { get; set; }
-    }
-
-    public enum HttpMethod
-    {
-        Post = 0,
-        Get = 1,
-        Put = 2,
-        Delete = 3,
-        Patch = 4
     }
 }

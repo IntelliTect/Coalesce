@@ -10,6 +10,7 @@ namespace IntelliTect.Coalesce.DataAnnotations
     /// By default, whatever the default data source for the model's type will be used.
     /// </summary>
     [AttributeUsage(AttributeTargets.Method)]
+    [Obsolete("LoadFromDataSourceAttribute has been merged into ExecuteAttribute")]
     public sealed class LoadFromDataSourceAttribute : Attribute
     {
         public LoadFromDataSourceAttribute(Type dataSourceType)

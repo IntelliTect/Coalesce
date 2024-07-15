@@ -104,4 +104,4 @@ Observable that will contain an [Object URL](https://developer.mozilla.org/en-US
 
 <Prop def="public url: KnockoutComputed<string>" lang="ts" />
 
-The URL for the method. Can be useful for using as the `src` attribute of an `image` or `video` HTML element for file-downloading methods. Any arguments will be populated from `this.args`. Only generated for HTTP GET methods, as configured by [[ControllerAction]](/modeling/model-components/attributes/controller-action.md).
+The URL for the method. Can be useful for using as the `src` attribute of an `image` or `video` HTML element for file-downloading methods. Any arguments will be populated from `this.args`. Only generated for HTTP GET methods, as configured by [[Execute]](/modeling/model-components/attributes/execute.md).

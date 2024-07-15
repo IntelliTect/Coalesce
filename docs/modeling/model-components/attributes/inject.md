@@ -22,7 +22,7 @@ public class Person
     public string GetFullName([Inject] ILogger<Person> logger)
     {
         logger.LogInformation("Person " + PersonId + "'s full name was requested");
-        return FirstName + " " + LastName";
+        return FirstName + " " + LastName;
     }
 }
 ```

@@ -6,10 +6,10 @@ using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+
+#pragma warning disable CS0618 // Type or member is obsolete
 
 namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
 {
@@ -261,7 +261,7 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         public IFile DownloadAttachment_VaryDate() => new File(ByteArrayProp) { Name = Name };
 
         [Coalesce]
-        [ControllerAction(HttpMethod.Get, VaryByProperty = nameof(Name))]
+        [Execute(HttpMethod = HttpMethod.Get, VaryByProperty = nameof(Name))]
         public IFile DownloadAttachment_VaryString() => new File(ByteArrayProp) { Name = Name };
 
         [Coalesce]

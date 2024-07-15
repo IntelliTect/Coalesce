@@ -5,7 +5,7 @@
 
 module ViewModels {
     
-    export class PersonPartial extends Coalesce.BaseViewModel {
+    export class Person extends Coalesce.BaseViewModel {
         public readonly modelName = "Person";
         public readonly primaryKeyName = "personId";
         public readonly modelDisplayName = "Person";
@@ -18,7 +18,7 @@ module ViewModels {
         
         /** Configuration for the current Person instance. */
         public coalesceConfig: Coalesce.ViewModelConfiguration<this>
-            = new Coalesce.ViewModelConfiguration<PersonPartial>(Person.coalesceConfig);
+            = new Coalesce.ViewModelConfiguration<Person>(Person.coalesceConfig);
         
         /** The namespace containing all possible values of this.dataSource. */
         public dataSources: typeof ListViewModels.PersonDataSources = ListViewModels.PersonDataSources;
@@ -166,8 +166,8 @@ module ViewModels {
             
             Sets the FirstName to the given text.
         */
-        public readonly rename = new PersonPartial.Rename(this);
-        public static Rename = class Rename extends Coalesce.ClientMethod<PersonPartial, ViewModels.Person> {
+        public readonly rename = new Person.Rename(this);
+        public static Rename = class Rename extends Coalesce.ClientMethod<Person, ViewModels.Person> {
             public readonly name = 'Rename';
             public readonly verb = 'POST';
             
@@ -214,8 +214,8 @@ module ViewModels {
             
             Removes spaces from the name and puts in dashes
         */
-        public readonly changeSpacesToDashesInName = new PersonPartial.ChangeSpacesToDashesInName(this);
-        public static ChangeSpacesToDashesInName = class ChangeSpacesToDashesInName extends Coalesce.ClientMethod<PersonPartial, void> {
+        public readonly changeSpacesToDashesInName = new Person.ChangeSpacesToDashesInName(this);
+        public static ChangeSpacesToDashesInName = class ChangeSpacesToDashesInName extends Coalesce.ClientMethod<Person, void> {
             public readonly name = 'ChangeSpacesToDashesInName';
             public readonly verb = 'POST';
             
@@ -236,8 +236,8 @@ module ViewModels {
         };
         
         /** Methods and properties for invoking server method GetBirthdate. */
-        public readonly getBirthdate = new PersonPartial.GetBirthdate(this);
-        public static GetBirthdate = class GetBirthdate extends Coalesce.ClientMethod<PersonPartial, moment.Moment> {
+        public readonly getBirthdate = new Person.GetBirthdate(this);
+        public static GetBirthdate = class GetBirthdate extends Coalesce.ClientMethod<Person, moment.Moment> {
             public readonly name = 'GetBirthdate';
             public readonly verb = 'POST';
             
@@ -262,8 +262,8 @@ module ViewModels {
             
             Returns the user name
         */
-        public readonly setBirthDate = new PersonPartial.SetBirthDate(this);
-        public static SetBirthDate = class SetBirthDate extends Coalesce.ClientMethod<PersonPartial, void> {
+        public readonly setBirthDate = new Person.SetBirthDate(this);
+        public static SetBirthDate = class SetBirthDate extends Coalesce.ClientMethod<Person, void> {
             public readonly name = 'SetBirthDate';
             public readonly verb = 'POST';
             
@@ -306,8 +306,8 @@ module ViewModels {
         };
         
         /** Methods and properties for invoking server method FullNameAndAge. */
-        public readonly fullNameAndAge = new PersonPartial.FullNameAndAge(this);
-        public static FullNameAndAge = class FullNameAndAge extends Coalesce.ClientMethod<PersonPartial, string> {
+        public readonly fullNameAndAge = new Person.FullNameAndAge(this);
+        public static FullNameAndAge = class FullNameAndAge extends Coalesce.ClientMethod<Person, string> {
             public readonly name = 'FullNameAndAge';
             public readonly verb = 'GET';
             
@@ -334,8 +334,8 @@ module ViewModels {
         };
         
         /** Methods and properties for invoking server method ObfuscateEmail. */
-        public readonly obfuscateEmail = new PersonPartial.ObfuscateEmail(this);
-        public static ObfuscateEmail = class ObfuscateEmail extends Coalesce.ClientMethod<PersonPartial, string> {
+        public readonly obfuscateEmail = new Person.ObfuscateEmail(this);
+        public static ObfuscateEmail = class ObfuscateEmail extends Coalesce.ClientMethod<Person, string> {
             public readonly name = 'ObfuscateEmail';
             public readonly verb = 'PUT';
             
@@ -356,8 +356,8 @@ module ViewModels {
         };
         
         /** Methods and properties for invoking server method ChangeFirstName. */
-        public readonly changeFirstName = new PersonPartial.ChangeFirstName(this);
-        public static ChangeFirstName = class ChangeFirstName extends Coalesce.ClientMethod<PersonPartial, ViewModels.Person> {
+        public readonly changeFirstName = new Person.ChangeFirstName(this);
+        public static ChangeFirstName = class ChangeFirstName extends Coalesce.ClientMethod<Person, ViewModels.Person> {
             public readonly name = 'ChangeFirstName';
             public readonly verb = 'PATCH';
             
@@ -408,8 +408,8 @@ module ViewModels {
             
             Gets all the first names starting with the characters.
         */
-        public readonly methodWithEntityParameter = new PersonPartial.MethodWithEntityParameter(this);
-        public static MethodWithEntityParameter = class MethodWithEntityParameter extends Coalesce.ClientMethod<PersonPartial, ViewModels.Person> {
+        public readonly methodWithEntityParameter = new Person.MethodWithEntityParameter(this);
+        public static MethodWithEntityParameter = class MethodWithEntityParameter extends Coalesce.ClientMethod<Person, ViewModels.Person> {
             public readonly name = 'MethodWithEntityParameter';
             public readonly verb = 'POST';
             
@@ -669,7 +669,7 @@ module ViewModels {
         }
     }
     
-    export namespace PersonPartial {
+    export namespace Person {
         export enum TitleEnum {
             Mr = 0,
             Ms = 1,

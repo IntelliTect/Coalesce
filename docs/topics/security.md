@@ -163,7 +163,7 @@ Restrict Targets (only [instance methods](/modeling/model-components/methods.md#
 
 * [custom Default Data Source](#data-sources)
 * specify data source:
-[[LoadFromDataSource]](/modeling/model-components/methods.md#loadfromdatasource-type-datasourcetype)
+[[Execute(DataSource = typeof(...))]](/modeling/model-components/attributes/execute.md#member-datasource)
 
 </td>
 </tr>
@@ -813,4 +813,4 @@ Example of the contents of the security overview page:
 
 If your application has complex security requirements and/or sensitive data that needs to be protected, you are encouraged to invest time into creating a set of automated tests to ensure that it is working how you expect.
 
-The most comprehensive way to do this is to build a suite of integration tests using [Microsoft's in-memory test server infrastructure](https://learn.microsoft.com/en-us/aspnet/core/test/integration-tests). Follow Microsoft's documentation to set up a test project, and then write tests against your API endpoints. You will want to [substitute your Entity Framework database provider](https://learn.microsoft.com/en-us/aspnet/core/test/integration-tests#customize-webapplicationfactory) with an in-memory Sqlite instance, and add a [mock authentication handler](https://learn.microsoft.com/en-us/aspnet/core/test/integration-tests?view=aspnetcore-7.0#mock-authentication) to simulate authentication (we're mainly focused on testing _authorization_, not _authentication_).
+The most comprehensive way to do this is to build a suite of integration tests using [Microsoft's in-memory test server infrastructure](https://learn.microsoft.com/en-us/aspnet/core/test/integration-tests). Follow Microsoft's documentation to set up a test project, and then write tests against your API endpoints. You will want to [substitute your Entity Framework database provider](https://learn.microsoft.com/en-us/aspnet/core/test/integration-tests#customize-webapplicationfactory) with an in-memory Sqlite instance, and add a [mock authentication handler](https://learn.microsoft.com/en-us/aspnet/core/test/integration-tests#mock-authentication) to simulate authentication (we're mainly focused on testing _authorization_, not _authentication_).

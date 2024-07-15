@@ -217,9 +217,14 @@ namespace IntelliTect.Coalesce.Validation
                         }
 
                         assert.IsFalse(
-                            method.GetAttributeValue<ControllerActionAttribute>(a => a.VaryByProperty) != null && 
+                            (
+#pragma warning disable CS0618 // Type or member is obsolete
+                                method.GetAttributeValue<ControllerActionAttribute>(a => a.VaryByProperty) != null ||
+#pragma warning restore CS0618 // Type or member is obsolete
+                                method.GetAttributeValue<ExecuteAttribute>(a => a.VaryByProperty) != null
+                            ) && 
                             method.VaryByProperty == null,
-                            $"{nameof(ControllerActionAttribute.VaryByProperty)} is only applicable to HTTP GET model instance methods, " +
+                            $"{nameof(ExecuteAttribute.VaryByProperty)} is only applicable to HTTP GET model instance methods, " +
                             $"and must reference a property on the parent instance."
                         );
 
@@ -257,10 +262,12 @@ namespace IntelliTect.Coalesce.Validation
                             "Non-exposed method has the [Execute] attribute - did you forget to add [Coalesce]?",
                             isWarning: true);
 
+#pragma warning disable CS0618 // Type or member is obsolete
                         assert.IsFalse(
                             method.HasAttribute<ControllerActionAttribute>(),
                             "Non-exposed method has the [ControllerAction] attribute - did you forget to add [Coalesce]?",
                             isWarning: true);
+#pragma warning restore CS0618 // Type or member is obsolete
                     }
                 }
             }

@@ -139,7 +139,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             return (true, obj.GetAttributeValue(propertyExpression), message);
         }
 
-        public static TypeViewModel? GetAttributeValue<TAttribute>(this IAttributeProvider obj, Expression<Func<TAttribute, Type>> propertyExpression)
+        public static TypeViewModel? GetAttributeValue<TAttribute>(this IAttributeProvider obj, Expression<Func<TAttribute, Type?>> propertyExpression)
             where TAttribute : Attribute
         {
             var value = obj.GetAttributeValue<TAttribute>(propertyExpression.GetExpressedProperty().Name);

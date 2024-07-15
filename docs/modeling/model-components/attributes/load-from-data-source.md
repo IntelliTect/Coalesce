@@ -1,3 +1,7 @@
+---
+deprecated: true
+---
+
 # [LoadFromDataSource]
 
 `IntelliTect.Coalesce.DataAnnotations.LoadFromDataSourceAttribute`

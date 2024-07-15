@@ -127,17 +127,23 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// Returns true if this method is marked as InternalUse. Not exposed through the API
         /// </summary>
         public virtual bool IsInternalUse => this.HasAttribute<InternalUseAttribute>();
-        
-        
+
         public HttpMethod ApiActionHttpMethod =>
-            this.GetAttributeValue<ControllerActionAttribute, HttpMethod>(a => a.Method) ?? HttpMethod.Post;
+#pragma warning disable CS0618 // Type or member is obsolete
+            this.GetAttributeValue<ControllerActionAttribute, HttpMethod>(a => a.Method) ??
+#pragma warning restore CS0618 // Type or member is obsolete
+            this.GetAttributeValue<ExecuteAttribute, HttpMethod>(a => a.HttpMethod) ??
+            HttpMethod.Post;
 
         public bool HasHttpRequestBody => ApiActionHttpMethod != HttpMethod.Get && ApiActionHttpMethod != HttpMethod.Delete;
 
         public PropertyViewModel? VaryByProperty =>
             !IsModelInstanceMethod ? null :
             ApiActionHttpMethod != HttpMethod.Get ? null :
-            Parent.PropertyByName(this.GetAttributeValue<ControllerActionAttribute>(a => a.VaryByProperty));
+#pragma warning disable CS0618 // Type or member is obsolete
+            Parent.PropertyByName(this.GetAttributeValue<ControllerActionAttribute>(a => a.VaryByProperty)) ??
+#pragma warning restore CS0618 // Type or member is obsolete
+            Parent.PropertyByName(this.GetAttributeValue<ExecuteAttribute>(a => a.VaryByProperty));
 
         /// <summary>
         /// Return type of the controller action for the method.
@@ -249,7 +255,12 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             get
             {
-                var type = this.GetAttributeValue<LoadFromDataSourceAttribute>(a => a.DataSourceType);
+#pragma warning disable CS0618 // Type or member is obsolete
+                var type = 
+                    this.GetAttributeValue<LoadFromDataSourceAttribute>(a => a.DataSourceType) ??
+#pragma warning restore CS0618 // Type or member is obsolete
+                    this.GetAttributeValue<ExecuteAttribute>(a => a.DataSource);
+
                 if (type == null) return Api.DataSources.DataSourceFactory.DefaultSourceName;
                 return type.ClientTypeName;
             }

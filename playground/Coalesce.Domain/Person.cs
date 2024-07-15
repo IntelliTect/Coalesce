@@ -153,7 +153,7 @@ namespace Coalesce.Domain
         /// <summary>
         /// Removes spaces from the name and puts in dashes
         /// </summary>
-        [Coalesce, LoadFromDataSource(typeof(WithoutCases))]
+        [Coalesce, Execute(DataSource = typeof(WithoutCases))]
         public ItemResult ChangeSpacesToDashesInName()
         {
             var old = FirstName;
@@ -213,21 +213,21 @@ namespace Coalesce.Domain
         }
 
         [Coalesce]
-        [ControllerAction(Method = HttpMethod.Get)]
+        [Execute(HttpMethod = HttpMethod.Get)]
         public static long PersonCount(AppDbContext db, string lastNameStartsWith = "")
         {
             return db.People.Count(f=>f.LastName.StartsWith(lastNameStartsWith));
         }
 
         [Coalesce]
-        [ControllerAction(Method = HttpMethod.Get)]
+        [Execute(HttpMethod = HttpMethod.Get)]
         public string FullNameAndAge(AppDbContext db)
         {
             return $"{FirstName} {LastName} {BirthDate?.ToShortDateString() ?? "None"}";
         }
 
         [Coalesce]
-        [ControllerAction(Method = HttpMethod.Delete)]
+        [Execute(HttpMethod = HttpMethod.Delete)]
         public static bool RemovePersonById(AppDbContext db, int id)
         {
             var person = db.People.FirstOrDefault(f => f.PersonId == id);
@@ -249,7 +249,7 @@ namespace Coalesce.Domain
         }
 
         [Coalesce]
-        [ControllerAction(Method = HttpMethod.Put)]
+        [Execute(HttpMethod = HttpMethod.Put)]
         public string ObfuscateEmail(AppDbContext db)
         {
             var random = (new Random()).Next();
@@ -258,7 +258,7 @@ namespace Coalesce.Domain
         }
 
         [Coalesce]
-        [ControllerAction(Method = HttpMethod.Patch)]
+        [Execute(HttpMethod = HttpMethod.Patch)]
         public Person ChangeFirstName (string firstName, Titles? title)
         {
             this.FirstName = firstName;

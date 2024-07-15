@@ -167,7 +167,7 @@ namespace Coalesce.Domain
         }
 
         [Coalesce]
-        [ControllerAction(HttpMethod.Get, VaryByProperty = nameof(AttachmentHash))]
+        [Execute(HttpMethod = HttpMethod.Get, VaryByProperty = nameof(AttachmentHash))]
         public IFile DownloadImage(AppDbContext db)
         {
             return new IntelliTect.Coalesce.Models.File(db.Cases

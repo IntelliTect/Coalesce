@@ -1,3 +1,7 @@
+---
+deprecated: true
+---
+
 # [ControllerAction]
 
 `IntelliTect.Coalesce.DataAnnotations.ControllerActionAttribute`

@@ -40,7 +40,7 @@ public class User
 
 ```
 
-When an instance method is invoked, the target model instance will be loaded using the data source specified by an attribute `[LoadFromDataSource(typeof(MyDataSource))]` if present. Otherwise, the model instance will be loaded using the default data source for the model's type. If you have a [Custom Data Source](/modeling/model-components/data-sources.md#defining-data-sources) annotated with `[DefaultDataSource]`, that data source will be used. Otherwise, the [Standard Data Source](/modeling/model-components/data-sources.md#standard-data-source) will be used. The consequence of this is that a user cannot call a method on an instance of entity that they're not allowed to see or load.
+When an instance method is invoked, the target model instance will be loaded using the data source specified by `[Execute(DataSource = typeof(MyDataSource))]` if present. Otherwise, the model instance will be loaded using the default data source for the model's type. If you have a [Custom Data Source](/modeling/model-components/data-sources.md#defining-data-sources) annotated with `[DefaultDataSource]`, that data source will be used. Otherwise, the [Standard Data Source](/modeling/model-components/data-sources.md#standard-data-source) will be used. The consequence of this is that a user cannot call a method on an instance of entity that they're not allowed to see or load.
 
 Instance methods are generated onto the TypeScript ViewModels.
 
@@ -187,7 +187,7 @@ Passes through from `HttpContext.User`.
 
 <tr><td>
 
-[CancellationToken](https://learn.microsoft.com/en-us/dotnet/api/system.threading.cancellationtoken?view=net-8.0)
+[CancellationToken](https://learn.microsoft.com/en-us/dotnet/api/system.threading.cancellationtoken)
 </td><td>
 
 Passes through from `HttpContext.RequestAborted`.
@@ -314,19 +314,24 @@ Any Task-returning methods with "Async" as a suffix to the C# method's name will
 
 ## Method Annotations
 
-Methods can be annotated with attributes to control API exposure and TypeScript generation. The following attributes are available for model methods. General annotations can be found on the [Attributes](/modeling/model-components/attributes.md) page.
+Methods can be annotated with attributes to control API exposure and TypeScript generation.
 
-### `[Coalesce]`
-The [[Coalesce]](/modeling/model-components/attributes/coalesce.md) attribute causes the method to be exposed via a generated API controller. This is not needed for methods defined on an interface marked with `[Service]` - Coalesce assumes that all methods on the interface are intended to be exposed. If this is not desired, create a new, more restricted interface with only the desired methods to be exposed.
+### [Coalesce]
+The [[Coalesce]](/modeling/model-components/attributes/coalesce.md) attribute causes the method to be exposed via a generated API controller. This is not needed for methods defined on an interface marked with [`[Service]`](/modeling/model-types/services.md) - Coalesce assumes that all methods on the interface are intended to be exposed. If this is not desired, create a new, more restricted interface with only the desired methods to be exposed.
 
-### `[ControllerAction(Method = HttpMethod, VaryByProperty = string)]`
-The [[ControllerAction]](/modeling/model-components/attributes/controller-action.md) attribute controls how this method is exposed via HTTP. Can be used to customize the HTTP method/verb for the method, as well as caching behavior.
+### [Display]
 
-### `[Execute(string roles)]`
-The [[Execute]](/modeling/model-components/attributes/execute.md) attribute specifies which roles can execute this method from the generated API controller. Additional security restrictions that cannot be implemented with roles should be enforced with custom code in the method's implementation.
+The displayed name and description of a method, can be set via the [`[Display]`](https://learn.microsoft.com/en-us/dotnet/api/system.componentmodel.dataannotations.displayattribute) attribute.
 
-### `[LoadFromDataSource(Type dataSourceType)]`
-The [[LoadFromDataSource]](/modeling/model-components/attributes/load-from-data-source.md) attribute specifies that the targeted model instance method should load the instance it is called on from the specified data source when invoked from an API endpoint. If not defined, the model's default data source is used.
+### [Execute]
+The [[Execute]](/modeling/model-components/attributes/execute.md) controls most other aspects of custom methods:
+
+- Role-based security
+- HTTP Method
+- HTTP Caching
+- Data Source (for model instance methods) 
+- Attribute validation enable/disable
+- Parameter auto-clear after execute in admin UI
     
 
 ## File Downloads
@@ -463,7 +468,7 @@ public class Case
     }
 
     [Coalesce]
-    [ControllerAction(HttpMethod.Get, VaryByProperty = nameof(AttachmentHash))]
+    [Execute(HttpMethod = HttpMethod.Get, VaryByProperty = nameof(AttachmentHash))]
     public IFile DownloadAttachment(AppDbContext db)
     {
         return new IntelliTect.Coalesce.Models.File(db.Cases

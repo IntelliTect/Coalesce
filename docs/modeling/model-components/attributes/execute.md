@@ -3,7 +3,7 @@
 
 `IntelliTect.Coalesce.DataAnnotations.ExecuteAttribute`
 
-Controls permissions for executing of a static or instance method through the API.
+Controls various aspects of [Custom Methods](/modeling/model-components/methods.md), including role-based permissions, HTTP behavior, and more.
 
 For other security controls, see [Security Attributes](/modeling/model-components/attributes/security-attribute.md).
 
@@ -49,3 +49,24 @@ If true, the method's arguments will be cleared after a successful invocation on
 If non-null, overrides the value of [`CoalesceOptions.ValidateAttributesForMethods`](/topics/security.md#attribute-validation) when determining whether to perform automatic server-side validation of the method's parameters.
 
 If validation is performed, the method's parameters will be validated by the server and the method invocation prevented if errors are found.
+
+<Prop def="public HttpMethod HttpMethod { get; set; } = HttpMethod.Post;" />
+
+The HTTP method to use on the generated API Controller.
+
+Enum values are:
+- `HttpMethod.Post` Use the POST method.
+- `HttpMethod.Get` Use the GET method.
+- `HttpMethod.Put` Use the PUT method.
+- `HttpMethod.Delete` Use the DELETE method.
+- `HttpMethod.Patch` Use the PATCH method.
+
+<Prop def="public string? VaryByProperty { get; set; }" />
+
+For HTTP GET model instance methods, if `VaryByProperty` is set to the name of a property on the parent model class, [ETag headers](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/ETag) based on the value of this property will be used to implement caching. If the client provides a matching `If-None-Match` Header with the request, the method will not be invoked and HTTP Status `304 Not Modified`` will be returned.
+
+Additionally, if the `VaryByProperty` is set to a client-exposed [property](/modeling/model-components/properties.md), the value of the property will be included in the query string when performing API calls to invoke the method. If the query string value matches the current value on the model, a long-term `Cache-Control` header will be set on the response, allowing the client to avoid making future invocations to the same method while the value of the `VaryByProperty` remains the same.
+
+<Prop def="public Type? DataSource { get; set; }" />
+
+Specifies that the targeted model instance method should load the instance it is called on from the specified data source when invoked from an API endpoint. If not defined, the model's default data source is used.

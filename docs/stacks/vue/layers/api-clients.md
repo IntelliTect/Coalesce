@@ -208,7 +208,7 @@ If additional invocations are performed while there is already an invocation enq
 
 When a secondary invocation is performed, cancel the current pending invocation. 
 
-This completely aborts the request, propagating all the way back to the server where cancellation can be observed with [HttpContext.RequestAborted](https://docs.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.http.httpcontext.requestaborted?view=aspnetcore-3.1). The promise of the cancelled invocation will be resolved with `undefined` (it is NOT rejected).
+This completely aborts the request, propagating all the way back to the server where cancellation can be observed with [HttpContext.RequestAborted](https://docs.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.http.httpcontext.requestaborted). The promise of the cancelled invocation will be resolved with `undefined` (it is NOT rejected).
 
 ##### `"allow"`
 

@@ -1,3 +1,7 @@
+---
+deprecated: true
+---
+
 # [Controller]
 
 Allows for control over the generated MVC Controllers.

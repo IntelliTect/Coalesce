@@ -29,7 +29,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
 
         private void WriteViewModelClass(TypeScriptCodeBuilder b)
         {
-            using (b.Block($"export class {Model.ViewModelGeneratedClassName} extends Coalesce.BaseViewModel"))
+            using (b.Block($"export class {Model.GetViewModelGeneratedClassName()} extends Coalesce.BaseViewModel"))
             {
                 b.Line($"public readonly modelName = \"{Model.ClientTypeName}\";");
                 b.Line($"public readonly primaryKeyName = \"{Model.PrimaryKey.JsVariable}\";");
@@ -43,7 +43,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
 
                 b.DocComment($"Configuration for the current {Model.ViewModelClassName} instance.");
                 b.Line("public coalesceConfig: Coalesce.ViewModelConfiguration<this>");
-                b.Indented($"= new Coalesce.ViewModelConfiguration<{Model.ViewModelGeneratedClassName}>({Model.ViewModelClassName}.coalesceConfig);");
+                b.Indented($"= new Coalesce.ViewModelConfiguration<{Model.GetViewModelGeneratedClassName()}>({Model.ViewModelClassName}.coalesceConfig);");
 
                 b.DocComment("The namespace containing all possible values of this.dataSource.");
                 b.Line($"public dataSources: typeof ListViewModels.{Model.ClientTypeName}DataSources = ListViewModels.{Model.ClientTypeName}DataSources;");
@@ -155,7 +155,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
                 b.Line();
                 foreach (var method in Model.ClientMethods.Where(m => !m.IsStatic || m.ResultType == Model.Type))
                 {
-                    WriteClientMethodDeclaration(b, method, Model.ViewModelGeneratedClassName, true, true);
+                    WriteClientMethodDeclaration(b, method, Model.GetViewModelGeneratedClassName(), true, true);
                 }
 
                 WriteMethod_LoadFromDto(b);
@@ -324,7 +324,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
 
         private void WriteEnumNamespace(TypeScriptCodeBuilder b)
         {
-            using (b.Block($"export namespace {Model.ViewModelGeneratedClassName}"))
+            using (b.Block($"export namespace {Model.GetViewModelGeneratedClassName()}"))
             {
                 foreach (PropertyViewModel prop in Model.ClientProperties.Where(f => f.Type.IsEnum))
                 {

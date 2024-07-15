@@ -9,6 +9,7 @@ namespace IntelliTect.Coalesce.DataAnnotations
     /// Allows specifying the types of controllers to create. Not including will create all.
     /// </summary>
     [System.AttributeUsage(System.AttributeTargets.Class)]
+    [Obsolete("Use security attributes (Read/Edit/Create/Delete) or InternalUse to hide parts of entities or whole entities from Coalesce APIs")]
     public class CreateControllerAttribute : System.Attribute
     {
         public bool WillCreateView { get; set; }

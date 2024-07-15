@@ -1,4 +1,5 @@
 ﻿using IntelliTect.Coalesce.CodeGeneration.Generation;
+using IntelliTect.Coalesce.Knockout.TypeDefinition;
 using IntelliTect.Coalesce.TypeDefinition;
 using System;
 using System.Collections.Generic;
@@ -37,7 +38,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
 
         private IEnumerable<IGenerator> GetDynamicGenerators()
         {
-            string Partial(ClassViewModel model) => model.HasTypeScriptPartial ? ".Partial" : "";
+            string Partial(ClassViewModel model) => model.HasTypeScriptPartial() ? ".Partial" : "";
 
             foreach (var model in Model.CrudApiBackedClasses)
             {
@@ -63,7 +64,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
                     .AppendOutputPath($"Generated/Ko.{model.ServiceClientClassName}.g.ts");
             }
 
-            foreach (var model in Model.ClientClasses.Where(c => c.HasTypeScriptPartial))
+            foreach (var model in Model.ClientClasses.Where(c => c.HasTypeScriptPartial()))
             {
                 yield return Generator<KoTsPartialStub>()
                     .WithModel(model)

@@ -171,7 +171,7 @@ namespace IntelliTect.Coalesce.Tests.Util
 
         public static void LogIn(this ClaimsPrincipal user, string role = RoleNames.Admin)
         {
-            var claims = role == null ? new Claim[0] : new[] { new Claim(ClaimTypes.Role, RoleNames.Admin) };
+            Claim[] claims = role == null ? [] : [new Claim(ClaimTypes.Role, RoleNames.Admin)];
             user.AddIdentity(new ClaimsIdentity(claims, "TestAuth"));
         }
     }

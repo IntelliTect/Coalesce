@@ -6,6 +6,7 @@ using System.Text;
 using System.IO;
 using IntelliTect.Coalesce.CodeGeneration.Knockout.BaseGenerators;
 using IntelliTect.Coalesce.Utilities;
+using IntelliTect.Coalesce.Knockout.TypeDefinition;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
 {
@@ -25,7 +26,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
         {
             using (b.Block($"module {ViewModelModuleName}"))
             {
-                using (b.Block($"export class {Model.ViewModelClassName} extends {Model.ViewModelGeneratedClassName}"))
+                using (b.Block($"export class {Model.ViewModelClassName} extends {Model.GetViewModelGeneratedClassName()}"))
                 {
                     b.Line();
                     using (b.Block($"constructor(newItem?: object, parent?: Coalesce.BaseViewModel | {ListViewModelModuleName}.{Model.ListViewModelClassName})"))

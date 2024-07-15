@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.DataAnnotations
 {
+    [Obsolete]
     [System.AttributeUsage(System.AttributeTargets.Class)]
     public class ControllerAttribute : Attribute
     {

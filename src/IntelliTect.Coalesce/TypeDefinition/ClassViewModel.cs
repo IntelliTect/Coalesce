@@ -53,29 +53,31 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public string ControllerName => ClientTypeName;
 
+        public string ApiRouteControllerPart => ControllerName;
+
         public string ApiControllerClassName
         {
             get
             {
+#pragma warning disable CS0612 // Type or member is obsolete
                 var overrideName = this.GetAttributeValue<ControllerAttribute>(a => a.ApiControllerName);
                 if (!string.IsNullOrWhiteSpace(overrideName)) return overrideName;
 
                 var suffix = this.GetAttributeValue<ControllerAttribute>(a => a.ApiControllerSuffix) ?? "";
+#pragma warning restore CS0612 // Type or member is obsolete
+
                 return $"{ControllerName}Controller{suffix}";
             }
         }
 
-        public string ApiRouteControllerPart => ControllerName;
-
-        public string ViewControllerClassName => $"{ControllerName}Controller";
-
+        [Obsolete("This is governed exclusively via ControllerAttribute, an obsolete attribute. ")]
         public string ApiActionAccessModifier =>
             this.GetAttributeValue<ControllerAttribute, bool>(a => a.ApiActionsProtected) ?? false
             ? "protected"
             : "public";
 
-        public string ParameterDtoTypeName => IsCustomDto ? FullyQualifiedName : $"{Name}Parameter";
-        public string ResponseDtoTypeName => IsCustomDto ? FullyQualifiedName : $"{Name}Response";
+        public string ParameterDtoTypeName => IsCustomDto ? FullyQualifiedName : $"{ClientTypeName}Parameter";
+        public string ResponseDtoTypeName => IsCustomDto ? FullyQualifiedName : $"{ClientTypeName}Response";
 
         public ClassViewModel BaseViewModel => DtoBaseViewModel ?? this;
 
@@ -98,21 +100,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// </summary>
         public string ViewModelClassName => ClientTypeName;
 
-        public string ViewModelGeneratedClassName
-        {
-            get
-            {
-                if (!HasTypeScriptPartial)
-                    return ViewModelClassName;
-
-                var name = this.GetAttributeValue<TypeScriptPartialAttribute>(a => a.BaseClassName);
-
-                if (string.IsNullOrEmpty(name)) return $"{ViewModelClassName}Partial";
-
-                return name;
-            }
-        }
-
+        [Obsolete("This is governed exclusively via ControllerAttribute, an obsolete attribute. ")]
         public bool ApiRouted => this.GetAttributeValue<ControllerAttribute, bool>(a => a.ApiRouted) ?? true;
 
         /// <summary>
@@ -124,11 +112,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public bool IsStandaloneEntity => this.HasAttribute<CoalesceAttribute>() && this.HasAttribute<StandaloneEntityAttribute>();
 
         public string ServiceClientClassName => ClientTypeName + "Client";
-
-        /// <summary>
-        /// Name of an instance of the List ViewModelClass
-        /// </summary>
-        public string ListViewModelObjectName => ListViewModelClassName.ToCamelCase();
 
         #region Member Info - Properties & Methods
 
@@ -404,16 +387,10 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public bool IsOneToOne => PrimaryKey?.IsForeignKey ?? false;
 
-        /// <summary>
-        /// Returns true if this class has a partial typescript file.
-        /// </summary>
-        public bool HasTypeScriptPartial => this.HasAttribute<TypeScriptPartialAttribute>();
-
-        public bool WillCreateViewController =>
-            this.GetAttributeValue<CreateControllerAttribute, bool>(a => a.WillCreateView) ?? true;
-
+#pragma warning disable CS0618 // Type or member is obsolete
         public bool WillCreateApiController =>
             this.GetAttributeValue<CreateControllerAttribute, bool>(a => a.WillCreateApi) ?? true;
+#pragma warning restore CS0618 // Type or member is obsolete
 
         /// <summary>
         /// Returns a human-readable string that represents the name of this type to the client.

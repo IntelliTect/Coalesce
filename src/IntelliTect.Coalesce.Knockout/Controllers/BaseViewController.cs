@@ -1,4 +1,5 @@
 ﻿using IntelliTect.Coalesce.Knockout.Models;
+using IntelliTect.Coalesce.Knockout.TypeDefinition;
 using IntelliTect.Coalesce.TypeDefinition;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Html;
@@ -96,9 +97,9 @@ namespace IntelliTect.Coalesce.Knockout.Controllers
             var contentRoot = hostingEnvironment.ContentRootPath;
 
             var baseClassPath = Path.Combine(contentRoot, "Scripts", "Coalesce", "coalesce.ko.base.ts");
-            var path = Path.Combine(contentRoot, "Scripts", "Generated", $"ko.{ClassViewModel.ViewModelClassName}.{(ClassViewModel.HasTypeScriptPartial ? "Partial." : "")}g.ts");
+            var path = Path.Combine(contentRoot, "Scripts", "Generated", $"ko.{ClassViewModel.ViewModelClassName}.{(ClassViewModel.HasTypeScriptPartial() ? "Partial." : "")}g.ts");
 
-            ViewBag.ObjDoc = GenerateTypeScriptDocs(path, ClassViewModel.ViewModelGeneratedClassName);
+            ViewBag.ObjDoc = GenerateTypeScriptDocs(path, ClassViewModel.GetViewModelGeneratedClassName());
             ViewBag.BaseObjDoc = GenerateTypeScriptDocs(baseClassPath, "BaseViewModel");
 
             path = Path.Combine(contentRoot, "Scripts", "Generated", $"ko.{ClassViewModel.ListViewModelClassName}.g.ts");

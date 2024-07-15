@@ -9,6 +9,8 @@ using IntelliTect.Coalesce.DataAnnotations;
 using System.Linq;
 using System.Text;
 
+#pragma warning disable CS0618 // Type or member is obsolete
+
 namespace IntelliTect.Coalesce.Knockout.Helpers
 {
     public static class Knockout

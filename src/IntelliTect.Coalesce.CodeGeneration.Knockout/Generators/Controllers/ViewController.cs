@@ -39,7 +39,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
                 }
                 b.Line("[Authorize]");
 
-                using (b.Block($"public partial class {Model.ViewControllerClassName} : BaseViewController<{Model.FullyQualifiedName}>"))
+                using (b.Block($"public partial class {Model.ControllerName}Controller : BaseViewController<{Model.FullyQualifiedName}>"))
                 {
                     if (Model.SecurityInfo.Read.IsAllowed())
                     {

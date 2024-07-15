@@ -1,3 +1,7 @@
+---
+deprecated: true
+---
+
 # [TypeScriptPartial]
 
 ::: tip Note

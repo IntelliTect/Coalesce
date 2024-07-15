@@ -24,7 +24,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
 
         private void WriteViewModelClass(TypeScriptCodeBuilder b)
         {
-            using (b.Block($"export class {Model.ViewModelGeneratedClassName}"))
+            using (b.Block($"export class {Model.GetViewModelGeneratedClassName()}"))
             {
                 if (Model.PrimaryKey != null)
                 {

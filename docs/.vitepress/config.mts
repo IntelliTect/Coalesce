@@ -17,13 +17,13 @@ function autoTitle(link: string) {
 
   // Check if title exists in frontmatter
   if (data && data.title && typeof data.title === "string") {
-    return { text: data.title, link };
+    return { text: data.title, link, deprecated: data.deprecated };
   }
 
   // If title is not in frontmatter, try to find the first H1 heading
   const h1Match = content.match(/^#\s+(.+)/m);
   if (h1Match && h1Match[1] && typeof h1Match[1] === "string") {
-    return { text: h1Match[1], link };
+    return { text: h1Match[1], link, deprecated: data.deprecated };
   }
 
   throw Error("Cannot find a title for " + link);
@@ -47,6 +47,17 @@ function getComponentCategory(item: (typeof vuetifyComponents)[0]) {
     ? "display"
     : "input";
 }
+
+const attributes = fs
+  .readdirSync(
+    path.resolve(
+      __dirname,
+      "../modeling/model-components/attributes"
+    )
+  )
+  .map((f) =>
+    autoTitle("/modeling/model-components/attributes/" + f)
+  );
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
@@ -107,16 +118,13 @@ export default defineConfig({
             text: "Attributes",
             link: "/modeling/model-components/attributes.html",
             collapsed: true,
-            items: fs
-              .readdirSync(
-                path.resolve(
-                  __dirname,
-                  "../modeling/model-components/attributes"
-                )
-              )
-              .map((f) =>
-                autoTitle("/modeling/model-components/attributes/" + f)
-              ),
+            items: [
+              ...attributes.filter(f => !f.deprecated),
+              {
+                text: "Deprecated",
+                collapsed: true,
+                items: attributes.filter(f => f.deprecated),
+              }]
           },
           autoTitle("/modeling/model-components/methods"),
           autoTitle("/modeling/model-components/data-sources"),

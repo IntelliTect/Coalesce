@@ -1,5 +1,6 @@
 ﻿using IntelliTect.Coalesce.CodeGeneration.Api.Generators;
 using IntelliTect.Coalesce.CodeGeneration.Generation;
+using IntelliTect.Coalesce.DataAnnotations;
 using IntelliTect.Coalesce.TypeDefinition;
 using System;
 using System.Collections.Generic;
@@ -27,11 +28,16 @@ namespace IntelliTect.Coalesce.CodeGeneration.Knockout.Generators
 
             foreach (var model in Model.CrudApiBackedClasses)
             {
-                if (model.WillCreateViewController && model.SecurityInfo.IsReadAllowed())
+                if (
+#pragma warning disable CS0618 // Type or member is obsolete
+                    (model.GetAttributeValue<CreateControllerAttribute, bool>(a => a.WillCreateView) ?? true)
+#pragma warning restore CS0618 // Type or member is obsolete
+                    && model.SecurityInfo.IsReadAllowed()
+                )
                 {
                     yield return Generator<ViewController>()
                         .WithModel(model)
-                        .AppendOutputPath($"Controllers/Generated/{model.ViewControllerClassName}.g.cs");
+                        .AppendOutputPath($"Controllers/Generated/{model.ControllerName}Controller.g.cs");
                 }
             }
         }

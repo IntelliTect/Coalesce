@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 namespace IntelliTect.Coalesce.DataAnnotations
 {
     [System.AttributeUsage(System.AttributeTargets.Property)]
+    [Obsolete("This attribute only affects generated Knockout.js code. The Knockout stack for Coalesce is obsolete.")]
     public class SelectFilterAttribute : Attribute
     {
         /// <summary>

@@ -53,6 +53,10 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
             var primaryKeyParameter = $"{Model.PrimaryKey.Type.FullyQualifiedName} id";
             var dataSourceParameter = $"IDataSource<{Model.BaseViewModel.FullyQualifiedName}> dataSource";
             var behaviorsParameter = $"IBehaviors<{Model.BaseViewModel.FullyQualifiedName}> behaviors";
+#pragma warning disable CS0618 // Type or member is obsolete
+            var accessModifier = Model.ApiActionAccessModifier;
+#pragma warning restore CS0618 // Type or member is obsolete
+
             if (Model.IsCustomDto)
             {
                 var declaredForAttr = $"[DeclaredFor(typeof({Model.FullyQualifiedName}))] ";
@@ -74,7 +78,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                 b.Line();
                 b.Line("[HttpGet(\"get/{id}\")]");
                 b.Line($"{securityInfo.Read.MvcAnnotation()}");
-                b.Line($"{Model.ApiActionAccessModifier} virtual Task<ItemResult<{Model.ResponseDtoTypeName}>> Get(");
+                b.Line($"{accessModifier} virtual Task<ItemResult<{Model.ResponseDtoTypeName}>> Get(");
                 b.Indented($"{primaryKeyParameter},");
                 b.Indented($"DataSourceParameters parameters,");
                 b.Indented($"{dataSourceParameter})");
@@ -84,7 +88,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                 b.Line();
                 b.Line("[HttpGet(\"list\")]");
                 b.Line($"{securityInfo.Read.MvcAnnotation()}");
-                b.Line($"{Model.ApiActionAccessModifier} virtual Task<ListResult<{Model.ResponseDtoTypeName}>> List(");
+                b.Line($"{accessModifier} virtual Task<ListResult<{Model.ResponseDtoTypeName}>> List(");
                 b.Indented($"ListParameters parameters,");
                 b.Indented($"{dataSourceParameter})");
                 b.Indented($"=> ListImplementation(parameters, dataSource);");
@@ -93,7 +97,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                 b.Line();
                 b.Line("[HttpGet(\"count\")]");
                 b.Line($"{securityInfo.Read.MvcAnnotation()}");
-                b.Line($"{Model.ApiActionAccessModifier} virtual Task<ItemResult<int>> Count(");
+                b.Line($"{accessModifier} virtual Task<ItemResult<int>> Count(");
                 b.Indented($"FilterParameters parameters,");
                 b.Indented($"{dataSourceParameter})");
                 b.Indented($"=> CountImplementation(parameters, dataSource);");
@@ -105,7 +109,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                 b.Line();
                 b.Line("[HttpPost(\"save\")]");
                 b.Line($"{securityInfo.Save.MvcAnnotation()}");
-                b.Line($"{Model.ApiActionAccessModifier} virtual Task<ItemResult<{Model.ResponseDtoTypeName}>> Save(");
+                b.Line($"{accessModifier} virtual Task<ItemResult<{Model.ResponseDtoTypeName}>> Save(");
                 b.Indented($"[FromForm] {Model.ParameterDtoTypeName} dto,");
                 b.Indented($"[FromQuery] DataSourceParameters parameters,");
                 b.Indented($"{dataSourceParameter},");
@@ -125,7 +129,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                 b.Line();
                 b.Line("[HttpPost(\"bulkSave\")]");
                 b.Line($"{securityInfo.Read.MvcAnnotation()}");
-                b.Line($"{Model.ApiActionAccessModifier} virtual Task<ItemResult<{Model.ResponseDtoTypeName}>> BulkSave(");
+                b.Line($"{accessModifier} virtual Task<ItemResult<{Model.ResponseDtoTypeName}>> BulkSave(");
                 b.Indented($"[FromBody] BulkSaveRequest dto,");
                 b.Indented($"[FromQuery] DataSourceParameters parameters,");
                 b.Indented($"[FromServices] IDataSourceFactory dataSourceFactory,");
@@ -139,7 +143,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                 b.Line();
                 b.Line("[HttpPost(\"delete/{id}\")]");
                 b.Line($"{securityInfo.Delete.MvcAnnotation()}");
-                b.Line($"{Model.ApiActionAccessModifier} virtual Task<ItemResult<{Model.ResponseDtoTypeName}>> Delete(");
+                b.Line($"{accessModifier} virtual Task<ItemResult<{Model.ResponseDtoTypeName}>> Delete(");
                 b.Indented($"{primaryKeyParameter},");
                 b.Indented($"{behaviorsParameter},");
                 b.Indented($"{dataSourceParameter})");

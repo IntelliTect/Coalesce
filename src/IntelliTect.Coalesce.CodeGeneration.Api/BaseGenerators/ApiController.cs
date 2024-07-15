@@ -67,16 +67,17 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
         /// </summary>
         protected void WriteControllerRouteAttribute(CSharpCodeBuilder b)
         {
-            if (Model.ApiRouted)
+#pragma warning disable CS0618 // Type or member is obsolete
+            if (!Model.ApiRouted) return;
+#pragma warning restore CS0618 // Type or member is obsolete
+
+            if (!string.IsNullOrWhiteSpace(AreaName))
             {
-                if (!string.IsNullOrWhiteSpace(AreaName))
-                {
-                    b.Line($"[Route(\"{AreaName}/api/{Model.ApiRouteControllerPart}\")]");
-                }
-                else
-                {
-                    b.Line($"[Route(\"api/{Model.ApiRouteControllerPart}\")]");
-                }
+                b.Line($"[Route(\"{AreaName}/api/{Model.ApiRouteControllerPart}\")]");
+            }
+            else
+            {
+                b.Line($"[Route(\"api/{Model.ApiRouteControllerPart}\")]");
             }
         }
 
@@ -113,7 +114,9 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
                 returnType = $"async Task<{returnType}>";
             }
 
+#pragma warning disable CS0618 // Type or member is obsolete
             b.Append(Model.ApiActionAccessModifier);
+#pragma warning restore CS0618 // Type or member is obsolete
             b.Append(" virtual ");
             b.Append(returnType);
             b.Append(" ");

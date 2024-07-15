@@ -1,6 +1,8 @@
 
 # [Coalesce]
 
+`IntelliTect.Coalesce.CoalesceAttribute`
+
 Used to mark a type or member for generation by Coalesce.
 
 Some types and members will be implicitly included in generation - for example, all types represented by a `DbSet<T>` on a `DbContext` that has a `[Coalesce]` attribute will automatically be included. Properties on these types will also be generated for unless explicitly excluded, since this is by far the most common usage scenario in Coalesce.

@@ -1,6 +1,8 @@
 
 # [InternalUse]
 
+`IntelliTect.Coalesce.DataAnnotations.InternalUseAttribute`
+
 Used to mark a type, property or method for internal use. Internal Use members are:
 
 - Not exposed via the API.

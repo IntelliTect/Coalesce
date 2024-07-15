@@ -4,6 +4,8 @@ deprecated: true
 
 # [Controller]
 
+`IntelliTect.Coalesce.DataAnnotations.ControllerAttribute`
+
 Allows for control over the generated MVC Controllers.
 
 Currently only controls over the API controllers are present, but additional properties may be added in the future.

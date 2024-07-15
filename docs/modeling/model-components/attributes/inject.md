@@ -1,6 +1,8 @@
 
 # [Inject]
 
+`IntelliTect.Coalesce.DataAnnotations.InjectAttribute`
+
 Used to mark a [Method](/modeling/model-components/methods.md) parameter for dependency injection from the application's `IServiceProvider`.
 
 See [Methods](/modeling/model-components/methods.md) for more.

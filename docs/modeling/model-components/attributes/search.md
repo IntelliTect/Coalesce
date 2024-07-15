@@ -1,6 +1,8 @@
 
 # [Search]
 
+`IntelliTect.Coalesce.DataAnnotations.SearchAttribute`
+
 Coalesce supports searching through the generated API in its various implementations, including the generated list views (Table & Cards), in Select2 dropdowns, and directly through the TypeScript ListViewModels' `search` property.
 
 The `search` parameter of the API can also be formatted as ``PropertyName:SearchTerm`` in order to search on an arbitrary property of a model. For example, a value of ``Nickname:Steve-o`` for a search term would search the `Nickname` property, even through it is not marked as searchable using this attribute.

@@ -1,5 +1,7 @@
 # [Restrict]
 
+`IntelliTect.Coalesce.DataAnnotations.RestrictAttribute<T>`
+
 In addition to [role-based](/modeling/model-components/attributes/security-attribute.md) property restrictions, you can also define property restrictions that can execute custom code for each model instance if your logic require more nuanced decisions than can be made with roles.
 
 ``` c#:no-line-numbers

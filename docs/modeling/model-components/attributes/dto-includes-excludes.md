@@ -1,5 +1,9 @@
 # [DtoIncludes] & [DtoExcludes]
 
+`IntelliTect.Coalesce.DataAnnotations.DtoIncludesAttribute`
+<br>
+`IntelliTect.Coalesce.DataAnnotations.DtoExcludesAttribute`
+
 Allows for easily controlling what data gets set to the client. When requesting data from the generated client-side list view models, you can specify an `includes` property on the ViewModel or ListViewModel. 
 
 For more information about the includes string, see [Includes String](/concepts/includes.md).

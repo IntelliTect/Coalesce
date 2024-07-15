@@ -1,6 +1,8 @@
 # [ClientValidation]
 
-The `[IntelliTect.Coalesce.DataAnnotations.ClientValidation]`
+`IntelliTect.Coalesce.DataAnnotations.ClientValidationAttribute`
+
+The `ClientValidation`
 attribute is used to control the behavior of client-side model validation
 and to add additional client-only validation parameters. Database validation is available via standard `System.ComponentModel.DataAnnotations` annotations. 
 

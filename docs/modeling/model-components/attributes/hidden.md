@@ -1,6 +1,8 @@
 
 # [Hidden]
 
+`IntelliTect.Coalesce.DataAnnotations.HiddenAttribute`
+
 Mark an property as hidden from the edit, List or All areas.
 
 ::: danger

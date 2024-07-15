@@ -1,5 +1,7 @@
 # [CreateController]
 
+`IntelliTect.Coalesce.DataAnnotations.CreateControllerAttribute`
+
 By default an API and View controller are both created. This allows for
 suppressing the creation of either or both of these.
 

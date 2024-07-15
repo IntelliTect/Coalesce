@@ -1,6 +1,8 @@
 
 # [ManyToMany]
 
+`IntelliTect.Coalesce.DataAnnotations.ManyToManyAttribute`
+
 Used to specify a Many to Many relationship. Because EF core does not
 support automatic intermediate mapping tables, this field is used to
 allow for direct reference of the many-to-many collections from the

@@ -172,7 +172,7 @@ Collections of any of the above valid parameter types above are also valid param
 [DbContext](https://learn.microsoft.com/en-us/dotnet/api/microsoft.entityframeworkcore.dbcontext)
 </td><td>
 
-If the method has a parameter assignable to `Microsoft.EntityFrameworkCore.DbContext`, then the parameter will be implicitly `[Inject]`ed.
+EF Core `DbContext` types are injected automatically.
 </td></tr>
 
 
@@ -181,7 +181,16 @@ If the method has a parameter assignable to `Microsoft.EntityFrameworkCore.DbCon
 [ClaimsPrincipal](https://learn.microsoft.com/en-us/dotnet/api/system.security.claims.claimsprincipal)
 </td><td>
 
-If the method has a parameter of type ClaimsPrincipal, the value of `HttpContext.User` will be passed to the parameter.
+Passes through from `HttpContext.User`.
+</td></tr>
+
+
+<tr><td>
+
+[CancellationToken](https://learn.microsoft.com/en-us/dotnet/api/system.threading.cancellationtoken?view=net-8.0)
+</td><td>
+
+Passes through from `HttpContext.RequestAborted`.
 </td></tr>
 
 
@@ -190,7 +199,7 @@ If the method has a parameter of type ClaimsPrincipal, the value of `HttpContext
 [[Inject]](/modeling/model-components/attributes/inject.md)
 </td><td>
 
-If a parameter is marked with the [[Inject]](/modeling/model-components/attributes/inject.md) attribute, it will be injected from the application's `IServiceProvider`.
+Parameters with the [[Inject]](/modeling/model-components/attributes/inject.md) attribute are injected from the application's `IServiceProvider`.
 </td></tr>
 
 

@@ -1,5 +1,7 @@
 # [LoadFromDataSource]
 
+`IntelliTect.Coalesce.DataAnnotations.LoadFromDataSourceAttribute`
+
 Specifies that the targeted model instance method should load the instance it is called on from the specified data source when invoked from an API endpoint. If not defined, the model's default data source is used.
 
 ## Example Usage

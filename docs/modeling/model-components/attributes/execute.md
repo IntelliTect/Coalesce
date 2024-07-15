@@ -1,6 +1,8 @@
 
 # [Execute]
 
+`IntelliTect.Coalesce.DataAnnotations.ExecuteAttribute`
+
 Controls permissions for executing of a static or instance method through the API.
 
 For other security controls, see [Security Attributes](/modeling/model-components/attributes/security-attribute.md).

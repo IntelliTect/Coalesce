@@ -1,5 +1,7 @@
 # [ControllerAction]
 
+`IntelliTect.Coalesce.DataAnnotations.ControllerActionAttribute`
+
 Specifies how a [custom method](/modeling/model-components/methods.md) is exposed via HTTP. Can be used to customize the HTTP method/verb for the method, as well as caching behavior.
 
 

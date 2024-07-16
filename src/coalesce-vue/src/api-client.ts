@@ -1,4 +1,11 @@
-import { onBeforeUnmount, Ref, ref, markRaw, getCurrentInstance } from "vue";
+import {
+  onBeforeUnmount,
+  Ref,
+  ref,
+  markRaw,
+  getCurrentInstance,
+  shallowRef,
+} from "vue";
 
 import {
   ModelType,
@@ -566,24 +573,6 @@ export class ApiClient<T extends ApiRoutedType> {
     resultType: TTransportType,
     invoker: ApiCallerInvoker<
       TArgs,
-      ResultPromiseType<TTransportType, TResult>,
-      this
-    >
-  ): ApiStateType<TTransportType, TArgs, TResult>;
-
-  /**
-   * Create a wrapper function for an API call. This function maintains properties which represent the state of its previous invocation.
-   * @param resultType An indicator of whether the API endpoint returns an ItemResult<T> or a ListResult<T>
-   * @param invokerFactory method that will call the API. The signature of the function, minus the apiClient parameter, will be the call signature of the wrapper.
-   */
-  $makeCaller<
-    TArgs extends any[],
-    TResult,
-    TTransportType extends TransportTypeSpecifier<T>
-  >(
-    resultType: TTransportType,
-    invoker: ApiCallerInvoker<
-      TArgs,
       ResultPromiseType<TTransportType, TResult> | undefined | void,
       this
     >
@@ -604,37 +593,11 @@ export class ApiClient<T extends ApiRoutedType> {
     resultType: TTransportType,
     invoker: ApiCallerInvoker<
       TArgs,
-      ResultPromiseType<TTransportType, TResult>,
-      this
-    >,
-    argsFactory?: () => TArgsObj,
-    argsInvoker?: ApiCallerArgsInvoker<
-      TArgsObj,
-      ResultPromiseType<TTransportType, TResult>,
-      this
-    >
-  ): ApiStateTypeWithArgs<TTransportType, TArgs, TArgsObj, TResult>;
-
-  /**
-   * Create a wrapper function for an API call. This function maintains properties which represent the state of its previous invocation.
-   * @param resultType An indicator of whether the API endpoint returns an ItemResult<T> or a ListResult<T>
-   * @param invokerFactory method that will call the API. The signature of the function, minus the apiClient parameter, will be the call signature of the wrapper.
-   * @param invokerFactory method that will call the API with an args object as the only parameter. This may be called by using `.withArgs()` on the function that is returned from `$makeCaller`. The value of the args object will default to `.args` if not specified.
-   */
-  $makeCaller<
-    TArgs extends any[],
-    TArgsObj extends {},
-    TResult,
-    TTransportType extends TransportTypeSpecifier<T>
-  >(
-    resultType: TTransportType,
-    invoker: ApiCallerInvoker<
-      TArgs,
       ResultPromiseType<TTransportType, TResult> | undefined | void,
       this
     >,
-    argsFactory?: () => TArgsObj,
-    argsInvoker?: ApiCallerArgsInvoker<
+    argsFactory: () => TArgsObj,
+    argsInvoker: ApiCallerArgsInvoker<
       TArgsObj,
       ResultPromiseType<TTransportType, TResult> | undefined | void,
       this
@@ -714,24 +677,6 @@ export class ApiClient<T extends ApiRoutedType> {
     return instance as any;
   }
 
-  public $invoke<TMethod extends ItemMethod>(
-    method: TMethod,
-    params: ParamsObject<TMethod>,
-    config?: AxiosRequestConfig,
-    standardParameters?: DataSourceParameters
-  ): AxiosPromise<
-    ItemResult<TypeDiscriminatorToType<TMethod["return"]["type"]>>
-  >;
-
-  public $invoke<TMethod extends ListMethod>(
-    method: TMethod,
-    params: ParamsObject<TMethod>,
-    config?: AxiosRequestConfig,
-    standardParameters?: DataSourceParameters
-  ): AxiosPromise<
-    ListResult<TypeDiscriminatorToType<TMethod["return"]["type"]>>
-  >;
-
   /**
    * Invoke the specified method using the provided set of parameters.
    * @param method The metadata of the API method to invoke
@@ -743,7 +688,10 @@ export class ApiClient<T extends ApiRoutedType> {
     params: ParamsObject<TMethod>,
     config?: AxiosRequestConfig,
     standardParameters?: DataSourceParameters
-  ) {
+  ): ResultPromiseType<
+    TMethod,
+    TypeDiscriminatorToType<TMethod["return"]["type"]>
+  > {
     const mappedParams = this.$mapParams(method, params);
     const url = `/${this.$metadata.controllerRoute}/${method.name}`;
 
@@ -802,7 +750,7 @@ export class ApiClient<T extends ApiRoutedType> {
       if (!this._observedRequests.doRequest) {
         return new Promise(() => {
           /* never resolve */
-        });
+        }) as any;
       }
     }
 
@@ -816,7 +764,7 @@ export class ApiClient<T extends ApiRoutedType> {
     ) {
       cacheKey = AxiosClient.getUri(axiosRequest);
       if (simultaneousGetCache.has(cacheKey)) {
-        return simultaneousGetCache.get(cacheKey)!;
+        return simultaneousGetCache.get(cacheKey) as any;
       } else {
         doCache = true;
       }
@@ -889,7 +837,7 @@ export class ApiClient<T extends ApiRoutedType> {
       );
     }
 
-    return promise;
+    return promise as any;
   }
 
   // NOTE: DO NOT init _observedRequests to null. This _should_ be nonreactive.
@@ -1168,7 +1116,7 @@ abstract class ApiStateBase<TArgs extends any[], TResult> {
     thisArg: any,
     invoker: Function,
     args: any[]
-  ): ApiResultPromise<TResult>;
+  ): Promise<ItemResult<TResult> | ListResult<TResult>>;
 
   constructor(
     apiClient: ApiClient<any>,
@@ -1259,6 +1207,16 @@ export abstract class ApiState<
   }
   set hasResult(v) {
     this.__hasResult.value = v;
+  }
+
+  private readonly __rawResponse =
+    shallowRef<AxiosResponse<ItemResult<TResult> | ListResult<TResult>>>();
+
+  /** The raw axios response returned by the previous request.
+   * Can be used to read headers and other HTTP data from the response.
+   */
+  get rawResponse() {
+    return this.__rawResponse.value;
   }
 
   private __responseCacheConfig?: ResponseCachingConfiguration;
@@ -1444,7 +1402,6 @@ export abstract class ApiState<
       apiClient._cancelToken = token.token;
 
       if (this._simultaneousGetCaching) {
-        debugger;
         apiClient.$useSimultaneousRequestCaching();
       }
 
@@ -1573,6 +1530,7 @@ export abstract class ApiState<
       const data = resp.data;
       delete this._cancelToken;
 
+      this.__rawResponse.value = resp;
       this.setResponseProps(data);
 
       const onFulfilled = this._callbacks.onFulfilled;
@@ -1586,14 +1544,7 @@ export abstract class ApiState<
 
       this.isLoading = false;
 
-      // We have to maintain the shape of the promise of the stateless invoke method.
-      // This means we can't re-shape ourselves into a Promise<ApiState<T>> with `return fn` here.
-      // The reason for this is that we can't change the return type of TCall while maintaining
-      // the param signature (unless we required a full, explicit type annotation as a type parameter,
-      // but this would make the usability of apiCallers very unpleasant.)
-      // We could do this easily with https://github.com/Microsoft/TypeScript/issues/5453,
-      // but changing the implementation would be a significant breaking change by then.
-      return resp;
+      return data?.object ?? data?.list;
     } catch (thrown) {
       if (axios.isCancel(thrown)) {
         // No handling of anything for cancellations.
@@ -1630,6 +1581,7 @@ export abstract class ApiState<
             : undefined;
 
         let resultJson;
+        this.__rawResponse.value = result;
         if (result && (resultJson = await parseApiResult(result.data))) {
           this.setResponseProps(resultJson);
         } else {
@@ -1703,7 +1655,7 @@ purgeStaleCacheEntries(sessionStorage);
 export interface ItemApiState<TArgs extends any[], TResult> {
   // Do not put a doc comment on the call signature:
   // it'll hide the doc comment of the caller's definition.
-  (...args: TArgs): ItemResultPromise<TResult>;
+  (...args: TArgs): Promise<TResult>;
 }
 export class ItemApiState<TArgs extends any[], TResult> extends ApiState<
   TArgs,
@@ -1729,6 +1681,10 @@ export class ItemApiState<TArgs extends any[], TResult> extends ApiState<
   set result(v) {
     this.__result.value = v;
     this.hasResult = v != null;
+  }
+
+  override get rawResponse() {
+    return super.rawResponse as AxiosResponse<ItemResult<TResult>>;
   }
 
   constructor(
@@ -1833,9 +1789,7 @@ export class ItemApiStateWithArgs<
 
   /** Invokes a call to this API endpoint.
    * If `args` is not provided, the values in `this.args` will be used for the method's parameters. */
-  public invokeWithArgs(
-    args: TArgsObj = this.args
-  ): ResultPromiseType<"item", TResult> {
+  public invokeWithArgs(args: TArgsObj = this.args): Promise<TResult> {
     // Copy args so that if we're debouncing,
     // the args at the point in time at which invokeWithArgs() was
     // called will be used, rather than the state at the time when the actual API call gets made.
@@ -1889,7 +1843,7 @@ export class ItemApiStateWithArgs<
 
 export interface ListApiState<TArgs extends any[], TResult> {
   /** Invokes a call to this API endpoint. */
-  (...args: TArgs): ListResultPromise<TResult>;
+  (...args: TArgs): Promise<TResult>;
 }
 export class ListApiState<TArgs extends any[], TResult> extends ApiState<
   TArgs,
@@ -1945,6 +1899,10 @@ export class ListApiState<TArgs extends any[], TResult> extends ApiState<
     this.__result.value = v;
   }
 
+  override get rawResponse() {
+    return super.rawResponse as AxiosResponse<ListResult<TResult>>;
+  }
+
   constructor(
     apiClient: ApiClient<any>,
     invoker: ApiCallerInvoker<
@@ -1990,9 +1948,7 @@ export class ListApiStateWithArgs<
 
   /** Invokes a call to this API endpoint.
    * If `args` is not provided, the values in `this.args` will be used for the method's parameters. */
-  public invokeWithArgs(
-    args: TArgsObj = this.args
-  ): ResultPromiseType<"list", TResult> {
+  public invokeWithArgs(args: TArgsObj = this.args): Promise<TResult> {
     args = { ...args }; // Copy args so that if we're debouncing,
     // the args at the point in time at which invokeWithArgs() was
     // called will be used, rather than the state at the time when the actual API call gets made.

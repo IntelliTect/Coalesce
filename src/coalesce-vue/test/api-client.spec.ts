@@ -215,18 +215,17 @@ describe("$invoke", () => {
     const mock = (AxiosClient.defaults.adapter = vitest.fn().mockResolvedValue(<
       AxiosResponse<any>
     >{
-      data: { wasSuccessful: true, object: "" },
+      data: { wasSuccessful: true, object: "Bob 42" },
       status: 200,
     }));
 
-    await expect(
-      new StudentApiClient().$invoke(
-        StudentMeta.methods.fullNameAndAge,
-        // Our types are actually so good that they will catch this as an error, so we cast to any.
-        { id: 1, extraParam: "" } as any
-      )
-    ).resolves.toBeTruthy();
+    const res = await new StudentApiClient().$invoke(
+      StudentMeta.methods.fullNameAndAge,
+      // Our types are actually so good that they will catch this as an error, so we cast to any.
+      { id: 1, extraParam: "" } as any
+    );
 
+    expect(res.data.object).toBe("Bob 42");
     expect(mock.mock.calls[0][0]).toMatchObject({ params: { id: 1 } });
   });
 
@@ -260,7 +259,7 @@ describe("$invoke", () => {
       type: "application/pdf",
     });
 
-    var response = await new StudentApiClient().$invoke(methodMeta, {
+    const response = await new StudentApiClient().$invoke(methodMeta, {
       id: 42,
       file,
       student: <Student>{ name: "bob&bob=bob", studentAdvisorId: null },
@@ -400,9 +399,12 @@ describe("$makeCaller", () => {
     );
 
     const arg = 42;
-    await caller(arg);
+    const result = await caller(arg);
     expect(endpointMock.mock.calls[0][0]).toBe(arg);
     expect(caller.result).toBe(arg);
+    expect(result).toBe(arg);
+    expect(caller.rawResponse.data.object).toBe(arg);
+    expect(caller.rawResponse.status).toBe(200);
 
     // Typescript typing tests - all of these are valid types of `result`.
     caller.result = null;
@@ -975,7 +977,9 @@ describe("$makeCaller with args object", () => {
 
     caller.args.num = 42;
     const result = await caller.invokeWithArgs();
-    expect(result.data.object).toBe(42);
+    expect(result).toBe(42);
+    expect(caller.rawResponse.data.object).toBe(42);
+    expect(caller.rawResponse.status).toBe(200);
   });
 
   test("allows return undefined from args invoker func", async () => {
@@ -1031,6 +1035,7 @@ describe("$makeCaller with args object", () => {
   test("list caller types are correct", async () => {
     const endpointMock = vitest.fn((arg?: number | null) => {
       return Promise.resolve({
+        status: 200,
         data: {
           wasSuccessful: true,
           list: [arg],
@@ -1055,7 +1060,11 @@ describe("$makeCaller with args object", () => {
     const pageSize: number | null = caller.pageSize;
     const totalCount: number | null = caller.totalCount;
 
-    await caller(42);
+    const promiseResult = await caller(42);
+    expect(promiseResult).toStrictEqual([42]);
+    expect(caller.rawResponse.data.list?.[0]).toBe(42);
+    expect(caller.rawResponse.status).toBe(200);
+
     await caller.invoke(42);
     await caller.invokeWithArgs({ num: 42 });
     //@ts-expect-error

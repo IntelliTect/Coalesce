@@ -390,7 +390,7 @@ function foreignItemOf(value: any): Indexable<Model> | null | undefined {
 
 // This needs to be late initialized so we have the correct "this" reference.
 const listCaller = new ModelApiClient(foreignItemModelType.value)
-  .$withSimultaneousRequestCaching()
+  .$useSimultaneousRequestCaching()
   .$makeCaller("list", (c) => {
     return c.list(listParams.value);
   })

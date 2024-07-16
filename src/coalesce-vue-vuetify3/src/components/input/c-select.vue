@@ -698,7 +698,7 @@ if (!propMeta) {
  * that has been provided to c-select is a primary key value.
  */
 const getCaller = new ModelApiClient(modelObjectMeta.value)
-  .$withSimultaneousRequestCaching()
+  .$useSimultaneousRequestCaching()
   .$makeCaller(
     "item",
     function () {
@@ -710,7 +710,7 @@ const getCaller = new ModelApiClient(modelObjectMeta.value)
   .setConcurrency("debounce");
 
 const listCaller = new ModelApiClient(modelObjectMeta.value)
-  .$withSimultaneousRequestCaching()
+  .$useSimultaneousRequestCaching()
   .$makeCaller("list", (c) => {
     return c.list({
       pageSize: 100,

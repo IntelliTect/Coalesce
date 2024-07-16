@@ -127,7 +127,9 @@
           </div>
 
           <c-display
-            v-else-if="caller.result != null"
+            v-else-if="
+              caller.result != null && methodMeta.return.type !== 'void'
+            "
             element="pre"
             class="c-method--result-value"
             v-model="caller.result"

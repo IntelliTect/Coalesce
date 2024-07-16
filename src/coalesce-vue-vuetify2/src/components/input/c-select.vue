@@ -80,7 +80,6 @@ import { makeMetadataProps, useMetadataProps } from "../c-metadata-component";
 import {
   ModelApiClient,
   ListApiState,
-  ListResultPromise,
   Model,
   ModelType,
   ForeignKeyProperty,
@@ -163,8 +162,7 @@ export default defineComponent({
        */
       keyFetchedModel: null as any,
 
-      listCaller: null! as ListApiState<[], Model<ModelType>> &
-        (() => ListResultPromise<Model<ModelType>>),
+      listCaller: null! as ListApiState<[], Model<ModelType>>,
 
       /**
        * A caller that will be used to resolve the full object when the only thing
@@ -316,6 +314,7 @@ export default defineComponent({
             (i as any)[this.modelObjectMeta.keyProp.name]
         )[0];
         if (item) {
+          // eslint-disable-next-line vue/no-side-effects-in-computed-properties
           this.keyFetchedModel = item;
           return item;
         }
@@ -327,6 +326,7 @@ export default defineComponent({
           this.internalKeyValue ===
             (singleItem as any)[this.modelObjectMeta.keyProp.name]
         ) {
+          // eslint-disable-next-line vue/no-side-effects-in-computed-properties
           this.keyFetchedModel = singleItem;
           return singleItem;
         }
@@ -339,6 +339,7 @@ export default defineComponent({
           // and if the last requested key is not the key we're looking for.
           // (this prevents an infinite loop of invokes if the call to the server fails.)
           // The single item may end up coming back from a pending list call.
+          // eslint-disable-next-line vue/no-side-effects-in-computed-properties
           this.getCaller.args.id = this.internalKeyValue;
           this.getCaller.invokeWithArgs();
         }
@@ -521,7 +522,7 @@ export default defineComponent({
 
     // This needs to be late initialized so we have the correct "this" reference.
     this.getCaller = new ModelApiClient(this.modelObjectMeta)
-      .$withSimultaneousRequestCaching()
+      .$useSimultaneousRequestCaching()
       .$makeCaller(
         "item",
         function () {
@@ -533,7 +534,7 @@ export default defineComponent({
       .setConcurrency("debounce");
 
     this.listCaller = new ModelApiClient(this.modelObjectMeta)
-      .$withSimultaneousRequestCaching()
+      .$useSimultaneousRequestCaching()
       .$makeCaller("list", (c) => {
         return c.list({
           pageSize: 100,

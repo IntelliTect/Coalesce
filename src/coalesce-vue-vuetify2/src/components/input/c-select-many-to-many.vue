@@ -35,11 +35,11 @@ import {
   ViewModel,
   ViewModelFactory,
   BehaviorFlags,
-  ApiStateType,
   ApiState,
   Indexable,
   ModelCollectionNavigationProperty,
   ResponseCachingConfiguration,
+  ListApiState,
 } from "coalesce-vue";
 
 export default defineComponent({
@@ -73,7 +73,7 @@ export default defineComponent({
   data() {
     return {
       search: null as string | null,
-      listCaller: null! as ApiStateType<"list", [], Model<ModelType>>,
+      listCaller: null! as ListApiState<[], Model<ModelType>>,
       currentLoaders: [] as ApiState<any, any>[],
     };
   },
@@ -373,7 +373,7 @@ export default defineComponent({
   created() {
     // This needs to be late initialized so we have the correct "this" reference.
     this.listCaller = new ModelApiClient(this.foreignItemModelType)
-      .$withSimultaneousRequestCaching()
+      .$useSimultaneousRequestCaching()
       .$makeCaller("list", (c) => {
         return c.list(this.listParams);
       })

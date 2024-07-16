@@ -104,7 +104,7 @@ if (
 }
 
 const caller = new ModelApiClient(modelMeta)
-  .$withSimultaneousRequestCaching()
+  .$useSimultaneousRequestCaching()
   .$makeCaller("item", (c, page?: number, search?: string) => {
     return c.$invoke(methodMeta, {
       page,

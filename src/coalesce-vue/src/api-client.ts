@@ -1843,7 +1843,7 @@ export class ItemApiStateWithArgs<
 
 export interface ListApiState<TArgs extends any[], TResult> {
   /** Invokes a call to this API endpoint. */
-  (...args: TArgs): Promise<TResult>;
+  (...args: TArgs): Promise<TResult[]>;
 }
 export class ListApiState<TArgs extends any[], TResult> extends ApiState<
   TArgs,

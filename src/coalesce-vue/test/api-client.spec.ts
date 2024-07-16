@@ -1060,8 +1060,9 @@ describe("$makeCaller with args object", () => {
     const pageSize: number | null = caller.pageSize;
     const totalCount: number | null = caller.totalCount;
 
-    const promiseResult = await caller(42);
+    const promiseResult: number[] = await caller(42);
     expect(promiseResult).toStrictEqual([42]);
+    expect(caller.result).toStrictEqual([42]);
     expect(caller.rawResponse.data.list?.[0]).toBe(42);
     expect(caller.rawResponse.status).toBe(200);
 

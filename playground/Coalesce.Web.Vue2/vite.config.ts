@@ -7,10 +7,7 @@ import createCheckerPlugin from "vite-plugin-checker";
 import createVueComponentImporterPlugin from "unplugin-vue-components/vite";
 import { VuetifyResolver } from "unplugin-vue-components/resolvers";
 
-// jiti is a workaround for https://github.com/vitejs/vite/issues/9202
-import jiti from 'jiti';
-const jitiRequire = jiti(__filename, {}, module);
-const { createAspNetCoreHmrPlugin } = jitiRequire('../../src/coalesce-vue/src/build.ts')
+import { createAspNetCoreHmrPlugin } from '../../src/coalesce-vue/src/build'
 //const { CoalesceVuetifyResolver } = jitiRequire('../../src/coalesce-vue-vuetify2/src/build.ts')
 
 import { sassPlugin } from "esbuild-sass-plugin";

@@ -298,13 +298,14 @@ defineExpose({ loaderFlags });
     // Also animate the height to smooth out its entrance.
     // For example, test c-admin-method under various latency settings.
     .c-loader-status--progress-group {
+      max-height: var(--c-loader-status-progress-height);
+      
       &.c-loader-status-fade-leave-from,
       &.c-loader-status-fade-leave-active {
         transition-duration: 0s;
         max-height: 0px;
       }
 
-      max-height: var(--c-loader-status-progress-height);
       &.c-loader-status-fade-enter-from {
         max-height: 0px;
       }

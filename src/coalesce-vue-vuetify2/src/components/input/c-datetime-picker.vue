@@ -171,7 +171,7 @@ import {
   setMinutes,
   startOfDay,
 } from "date-fns";
-import { format, utcToZonedTime, zonedTimeToUtc } from "date-fns-tz";
+import { format, toZonedTime, fromZonedTime } from "date-fns-tz";
 import {
   AnyArgCaller,
   DateKind,
@@ -294,7 +294,7 @@ export default defineComponent({
     internalValueZoned() {
       const value = this.internalValue;
       if (!value || !this.internalTimeZone) return value;
-      return utcToZonedTime(value, this.internalTimeZone);
+      return toZonedTime(value, this.internalTimeZone);
     },
 
     internalDateKind(): DateKind {
@@ -382,7 +382,7 @@ export default defineComponent({
         const zone = this.internalTimeZone;
         if (!zone) return startOfDay(date);
 
-        return zonedTimeToUtc(startOfDay(utcToZonedTime(date, zone)), zone);
+        return fromZonedTime(startOfDay(toZonedTime(date, zone)), zone);
       }
       return date;
     },
@@ -413,7 +413,7 @@ export default defineComponent({
           // A year less than 100(0?) is also invalid.
           // This means that the format for the year was "yyyy",
           // but the user only entered "yy" (or entered 3 digits by accident, hence checking 1000 instead of 100).
-          value.getFullYear() <= 1000
+          value!.getFullYear() <= 1000
         ) {
           value = parseDateUserInput(val, referenceDate, this.internalDateKind);
         }
@@ -432,7 +432,7 @@ export default defineComponent({
         if (value && this.internalTimeZone) {
           // The date was parsed against the current browser timeZone.
           // This (poorly named) function will shift it into the desired timezone.
-          value = zonedTimeToUtc(value, this.internalTimeZone);
+          value = fromZonedTime(value, this.internalTimeZone);
         }
       }
 
@@ -454,7 +454,7 @@ export default defineComponent({
       value = setMinutes(value, parseInt(parts[2]));
 
       if (this.internalTimeZone) {
-        value = zonedTimeToUtc(value, this.internalTimeZone);
+        value = fromZonedTime(value, this.internalTimeZone);
       }
 
       this.emitInput(value);
@@ -477,7 +477,7 @@ export default defineComponent({
       value = setDate(value, parseInt(parts[3]));
 
       if (this.internalTimeZone) {
-        value = zonedTimeToUtc(value, this.internalTimeZone);
+        value = fromZonedTime(value, this.internalTimeZone);
       }
 
       this.emitInput(value);

@@ -93,7 +93,7 @@ import {
   setMinutes,
   startOfDay,
 } from "date-fns";
-import { format, utcToZonedTime, zonedTimeToUtc } from "date-fns-tz";
+import { format, toZonedTime, fromZonedTime } from "date-fns-tz";
 import {
   getDefaultTimeZone,
   parseDateUserInput,
@@ -213,7 +213,7 @@ const internalValue = computed((): Date | null | undefined => {
 const internalValueZoned = computed(() => {
   const value = internalValue.value;
   if (!value || !internalTimeZone.value) return value;
-  return utcToZonedTime(value, internalTimeZone.value);
+  return toZonedTime(value, internalTimeZone.value);
 });
 
 const internalDateKind = computed((): DateKind => {
@@ -332,7 +332,7 @@ function createDefaultDate() {
     const zone = internalTimeZone.value;
     if (!zone) return startOfDay(date);
 
-    return zonedTimeToUtc(startOfDay(utcToZonedTime(date, zone)), zone);
+    return fromZonedTime(startOfDay(toZonedTime(date, zone)), zone);
   }
   return date;
 }
@@ -394,7 +394,7 @@ function parseUserInput(val: string) {
     if (value && internalTimeZone.value) {
       // The date was parsed against the current browser timeZone.
       // This (poorly named) function will shift it into the desired timezone.
-      value = zonedTimeToUtc(value, internalTimeZone.value);
+      value = fromZonedTime(value, internalTimeZone.value);
     }
   }
 
@@ -445,7 +445,7 @@ function timeChanged(val: string) {
   value = setMinutes(value, parseInt(parts[2]));
 
   if (internalTimeZone.value) {
-    value = zonedTimeToUtc(value, internalTimeZone.value);
+    value = fromZonedTime(value, internalTimeZone.value);
   }
 
   emitInput(value);
@@ -468,7 +468,7 @@ function dateChanged(val: string) {
   value = setDate(value, parseInt(parts[3]));
 
   if (internalTimeZone.value) {
-    value = zonedTimeToUtc(value, internalTimeZone.value);
+    value = fromZonedTime(value, internalTimeZone.value);
   }
 
   emitInput(value);

@@ -1,5 +1,5 @@
 import { formatDistanceToNow, lightFormat } from "date-fns";
-import { format, utcToZonedTime } from "date-fns-tz";
+import { format, formatInTimeZone } from "date-fns-tz";
 import { getCurrentInstance, nextTick } from "vue";
 
 import type {
@@ -527,23 +527,21 @@ class MapToDtoVisitor extends Visitor<
 
       if (serializeAs == "date") {
         // System.Text.Json cannot deserialize into a System.DateOnly if the string contains a time part.
-        return format(parsed, "yyyy-MM-dd");
+        return lightFormat(parsed, "yyyy-MM-dd");
       }
 
       if (serializeAs == "time") {
         // System.Text.Json cannot deserialize into a System.TimeOnly if the string contains a date part.
-        return format(parsed, "HH:mm:ss.SSS");
+        return lightFormat(parsed, "HH:mm:ss.SSS");
       }
 
-      return format(parsed, "yyyy-MM-dd'T'HH:mm:ss.SSS");
+      return lightFormat(parsed, "yyyy-MM-dd'T'HH:mm:ss.SSS");
     } else {
       if (defaultTimeZone) {
-        return format(
-          utcToZonedTime(parsed, defaultTimeZone),
-          "yyyy-MM-dd'T'HH:mm:ss.SSSXXX",
-          {
-            timeZone: defaultTimeZone,
-          }
+        return formatInTimeZone(
+          parsed,
+          defaultTimeZone,
+          "yyyy-MM-dd'T'HH:mm:ss.SSSXXX"
         );
       }
 
@@ -840,13 +838,9 @@ class DisplayVisitor extends Visitor<
     }
 
     if (formatOptions?.timeZone) {
-      // This is honestly so stupid that you have to manually convert the input
-      // instead of the format function converting it for you based on the timeZone option
-      // that is being passed to it...
-      // From the docs:
-      //    "To clarify, the format function will never change the underlying date, it must be changed to a zoned time before passing it to format."
-      return format(
-        utcToZonedTime(parsed, formatOptions.timeZone),
+      return formatInTimeZone(
+        parsed,
+        formatOptions.timeZone,
         formatString,
         formatOptions
       );

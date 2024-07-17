@@ -32,9 +32,9 @@
     "esbuild-sass-plugin": "2.5.0",
     "eslint": "8.34.0",
     "eslint-plugin-vue": "9.9.0",
-    "typescript": "5.3.3",
+    "typescript": "^5.5.3",
     "unplugin-vue-components": "0.26.0",
-    "vite": "5.0.11",
+    "vite": "^5.3.4",
     "vite-plugin-inspect": "^0.8.1",
     "vite-plugin-vuetify": "^2.0.1",
     "vue-tsc": "^1.8.27"

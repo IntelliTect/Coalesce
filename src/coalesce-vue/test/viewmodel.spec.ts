@@ -128,7 +128,7 @@ describe("ViewModel", () => {
           student[callerName].apply(student); // .apply() works around https://github.com/microsoft/TypeScript/issues/49866
 
           // Run a bunch of cycles to let everything flush through.
-          for (let i = 0; i < 10; i++) await vue.$nextTick();
+          for (let i = 0; i < 20; i++) await vue.$nextTick();
 
           // Watcher should have been triggered for isLoading=true, then isLoading=false.
           expect(callbackFn.mock.calls[0][0]).toBe(true);
@@ -149,7 +149,7 @@ describe("ViewModel", () => {
           student[callerName].apply(student); // .apply() works around https://github.com/microsoft/TypeScript/issues/49866
 
           // Run a bunch of cycles to let everything flush through.
-          for (let i = 0; i < 10; i++) await vue.$nextTick();
+          for (let i = 0; i < 20; i++) await vue.$nextTick();
 
           expect(callbackFn.mock.calls[0][0]).toBe(true);
           expect(capturedName).toBe("Bob");

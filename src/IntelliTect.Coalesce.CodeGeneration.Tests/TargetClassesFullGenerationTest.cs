@@ -66,9 +66,9 @@ namespace IntelliTect.Coalesce.CodeGeneration.Tests
             await suite.GenerateAsync();
 
             await Task.WhenAll(
-                Task.Run(() => AssertVueSuiteTypescriptOutputCompiles(suite, "4.9")),
                 Task.Run(() => AssertVueSuiteTypescriptOutputCompiles(suite, "5")),
                 Task.Run(() => AssertVueSuiteTypescriptOutputCompiles(suite, "5.2")),
+                Task.Run(() => AssertVueSuiteTypescriptOutputCompiles(suite, "5.5")),
                 Task.Run(() => AssertSuiteCSharpOutputCompiles(suite))
             );
         }

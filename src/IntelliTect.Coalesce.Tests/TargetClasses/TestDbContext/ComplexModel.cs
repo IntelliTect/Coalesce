@@ -31,6 +31,9 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         [ForeignKey(nameof(ComplexModelDependent.ParentId))]
         public ICollection<ComplexModelDependent> ChildrenWithoutRefNavProp { get; set; }
 
+        [NotMapped]
+        public IEnumerable<Test> UnmappedCollectionOfMappedModels => Tests.Reverse();
+
         public int SingleTestId { get; set; }
         public Test SingleTest { get; set; }
 

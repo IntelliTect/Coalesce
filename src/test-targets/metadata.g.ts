@@ -582,6 +582,20 @@ export const ComplexModel = domain.types.ComplexModel = {
       get foreignKey() { return (domain.types.ComplexModelDependent as ModelType).props.parentId as ForeignKeyProperty },
       dontSerialize: true,
     },
+    unmappedCollectionOfMappedModels: {
+      name: "unmappedCollectionOfMappedModels",
+      displayName: "Unmapped Collection Of Mapped Models",
+      type: "collection",
+      itemType: {
+        name: "$collectionItem",
+        displayName: "",
+        role: "value",
+        type: "model",
+        get typeDef() { return (domain.types.Test as ModelType) },
+      },
+      role: "value",
+      dontSerialize: true,
+    },
     singleTestId: {
       name: "singleTestId",
       displayName: "Single Test Id",

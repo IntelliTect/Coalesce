@@ -76,7 +76,7 @@ function render() {
           propDisplay(model, narrowedMeta, {
             collection: { enumeratedItemsMax: 0 },
           }) ||
-          (((model as any)[narrowedMeta.name] as ViewModelCollection<any>)
+          (((model as any)[narrowedMeta.name] as ViewModelCollection<any, any>)
             ?.$hasLoaded === false
             ? "View"
             : "None")

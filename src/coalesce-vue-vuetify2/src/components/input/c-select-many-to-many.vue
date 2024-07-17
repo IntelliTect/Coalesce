@@ -303,7 +303,7 @@ export default defineComponent({
 
               // @ts-expect-error internal state
               vm._isRemoved = true;
-              // @ts-expect-error internal state
+              // @ts-ignore internal state
               if (vm.$parent) {
                 // @ts-expect-error internal state
                 (vm.$parent.$removedItems ??= []).push(vm);

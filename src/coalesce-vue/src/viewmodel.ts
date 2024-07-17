@@ -97,10 +97,10 @@ export abstract class ViewModel<
   // TODO: Do $parent and $parentCollection need to be Set<>s in order to handle objects being in multiple collections or parented to multiple parents? Could be useful.
 
   /** @internal  */
-  private $parent: ViewModel | ListViewModel | null = null;
+  $parent: ViewModel | ListViewModel | null = null;
 
   /** @internal  */
-  private $parentCollection: ViewModelCollection<this> | null = null;
+  $parentCollection: ViewModelCollection<this, TModel> | null = null;
 
   /** @internal Removed items, pending deletion in a bulk save */
   $removedItems?: ViewModel[];
@@ -640,9 +640,7 @@ export abstract class ViewModel<
               const prop = meta.props[propName];
 
               if (prop.role == "collectionNavigation") {
-                const dependents = model.$data[
-                  prop.name
-                ] as ViewModelCollection<any> | null;
+                const dependents = model.$data[prop.name];
                 if (dependents) {
                   nextModels.push(...dependents);
                 }
@@ -1260,11 +1258,34 @@ export abstract class ViewModel<
       writable: false,
     });
 
+    const ctor = this.constructor as any;
+
     if (initialDirtyData) {
       this.$loadDirtyData(initialDirtyData);
+    } else {
+      if (ctor.collectionProps !== false) {
+        if (!ViewModelFactory.isInScope) {
+          // Only initialize collections if we're not in a ViewModelFactory scope.
+          // If we ARE in a scope, there's a guaranteed call to $loadFromModel.
+
+          if (ctor.collectionProps === undefined) {
+            ctor.collectionProps = Object.values($metadata.props).filter(
+              (prop) =>
+                prop.type == "collection" && prop.itemType.type == "model"
+            );
+          }
+          for (const prop of ctor.collectionProps) {
+            // Pass null directly through to the VM's setter.
+            // The VM's setter will then populate the VM's data with an empty array rather than null.
+            (this as any)[prop.name] = null;
+          }
+          if (!ctor.collectionProps) {
+            ctor.collectionProps = false;
+          }
+        }
+      }
     }
 
-    const ctor = this.constructor as any;
     if (ctor.hasPropDefaults !== false) {
       for (const prop of Object.values($metadata.props)) {
         if ("defaultValue" in prop) {
@@ -1367,7 +1388,7 @@ export abstract class ListViewModel<
    */
   private _items = ref();
 
-  public get $items(): TItem[] {
+  public get $items(): ViewModelCollection<TItem, TModel> {
     let value = this._items.value;
     if (!value) {
       if (this._lightweight) {
@@ -1457,13 +1478,10 @@ export abstract class ListViewModel<
         if (!this._lightweight) {
           const result = r.data.list;
           if (result) {
-            this.$items = rebuildModelCollectionForViewModelCollection(
-              this.$metadata,
-              this.$items,
-              result,
-              startTime,
-              true
-            );
+            this.$items = rebuildModelCollectionForViewModelCollection<
+              TModel,
+              TItem
+            >(this.$metadata, this.$items, result, startTime, true);
           }
         }
         return r;
@@ -1682,6 +1700,11 @@ export class ServiceViewModel<
 export class ViewModelFactory {
   private static current: ViewModelFactory | null = null;
 
+  /** @internal */
+  static get isInScope() {
+    return !!this.current;
+  }
+
   private map = new Map<any, ViewModel>();
 
   /** Ask the factory for a ViewModel for the given type and initial data.
@@ -1764,9 +1787,9 @@ function viewModelCollectionName($metadata: ModelCollectionValue | ModelType) {
   return $metadata.type == "model" ? str : `${$metadata.name} (${str})`;
 }
 
-function viewModelCollectionMapItems<T extends ViewModel>(
-  items: T[],
-  vmc: ViewModelCollection<T>,
+function viewModelCollectionMapItems<T extends ViewModel, TModel extends Model>(
+  items: (T | Partial<TModel>)[],
+  vmc: ViewModelCollection<ViewModel, TModel>,
   isCleanData: boolean
 ) {
   const collectedTypeMeta =
@@ -1793,8 +1816,10 @@ function viewModelCollectionMapItems<T extends ViewModel>(
       );
     }
 
+    let viewModel;
     if (val instanceof ViewModel) {
       // Already a viewmodel. Do nothing
+      viewModel = val;
     } else {
       // Incoming is a Model. Make a ViewModel from it.
       if (ViewModel.typeLookup === null) {
@@ -1802,33 +1827,33 @@ function viewModelCollectionMapItems<T extends ViewModel>(
           "Static `ViewModel.typeLookup` is not defined. It should get defined in viewmodels.g.ts."
         );
       }
-      val = ViewModelFactory.get(
+      viewModel = val = ViewModelFactory.get(
         collectedTypeMeta.name,
         val,
         isCleanData
-      ) as unknown as T;
+      ) as unknown as T & ViewModel;
     }
 
     // $parent and $parentCollection are intentionally private -
     // they're just for internal tracking of stuff
     // and probably shouldn't be used in custom code.
     // So, we'll cast to `any` so we can set them here.
-    (val as any).$parent = vmc.$parent;
-    (val as any).$parentCollection = vmc;
+    viewModel.$parent = vmc.$parent;
+    viewModel.$parentCollection = vmc as any;
 
     // If deep autosave is active, propagate it to the ViewModel instance being attached to the object graph.
     const autoSaveState: AutoCallState<AutoSaveOptions<any>> = (
       vmc.$parent as any
     )._autoSaveState;
     if (autoSaveState?.active && autoSaveState.options?.deep) {
-      val.$startAutoSave(autoSaveState.vue!, autoSaveState.options);
+      viewModel.$startAutoSave(autoSaveState.vue!, autoSaveState.options);
     }
 
-    return val;
+    return viewModel;
   });
 }
 
-function resolveProto(obj: ViewModelCollection<any>): Array<any> {
+function resolveProto(obj: ViewModelCollection<any, any>): Array<any> {
   // Babel does some stupid nonsense where it will wrap our proto
   // in another proto. This breaks things if coalesce-vue is imported from source,
   // or if we were to at some point in the future emit a esnext version of coalesce-vue.
@@ -1841,7 +1866,10 @@ function resolveProto(obj: ViewModelCollection<any>): Array<any> {
   return proto;
 }
 
-export class ViewModelCollection<T extends ViewModel> extends Array<T> {
+export class ViewModelCollection<
+  T extends ViewModel,
+  TModel extends Model
+> extends Array<T> {
   readonly $metadata!:
     | ModelCollectionValue
     | ModelCollectionNavigationProperty
@@ -1850,10 +1878,14 @@ export class ViewModelCollection<T extends ViewModel> extends Array<T> {
 
   $hasLoaded!: boolean;
 
-  override push(...items: T[]): number {
+  override push(...items: (T | Partial<TModel>)[]): number {
     // MUST evaluate the .map() before grabbing the .push() (Vue2 only limitation)
     // method from the proto. See test "newly loaded additional items are reactive".
-    const viewModelItems = viewModelCollectionMapItems(items, this, true);
+    const viewModelItems = viewModelCollectionMapItems<T, TModel>(
+      items,
+      this,
+      true
+    );
 
     if (IsVue3) {
       return super.push(...viewModelItems);
@@ -2033,9 +2065,7 @@ export function defineProps<T extends new () => ViewModel<any, any>>(
                   // Already a viewmodel. Do nothing
                 } else {
                   // Incoming is a Model. Make a ViewModel from it.
-                  // This won't technically be valid according to the types of the properties
-                  // on our generated ViewModels, but we should handle it
-                  // so that input components work really nicely if a component sets the navigation prop.
+                  // This is require so that input components work if a component sets the navigation prop to a model instance.
                   incomingValue = ViewModelFactory.get(
                     prop.typeDef.name,
                     incomingValue,
@@ -2453,7 +2483,6 @@ export function updateViewModelFromModel<
 
             // Check if target.$parent is the expected value of this navigation prop,
             // and if it is, update $parent. (The KO stack does this too).
-            // @ts-expect-error
             const parent = target.$parent;
             const newValue =
               currentValue ?? (target[propName] as any as ViewModel);

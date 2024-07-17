@@ -62,7 +62,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Utils
             if (type.IsPOCO)
             {
                 string viewModelAppend = "";
-                if (viewModel && type.ClassViewModel.IsDbMappedType)
+                if (viewModel && (type.ClassViewModel.IsDbMappedType || type.ClassViewModel.IsStandaloneEntity))
                 {
                     modelPrefix = "";
                     viewModelAppend = "ViewModel";

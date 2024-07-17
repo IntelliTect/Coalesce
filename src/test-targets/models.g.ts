@@ -240,6 +240,7 @@ export interface ComplexModel extends Model<typeof metadata.ComplexModel> {
     This configuration *will* be picked up by EF conventions.
   */
   childrenWithoutRefNavProp: ComplexModelDependent[] | null
+  unmappedCollectionOfMappedModels: Test[] | null
   singleTestId: number | null
   singleTest: Test | null
   enumPkId: EnumPkId | null

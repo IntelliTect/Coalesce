@@ -3,6 +3,8 @@ using IntelliTect.Coalesce.CodeGeneration.Vue.Utils;
 using IntelliTect.Coalesce.TypeDefinition;
 using IntelliTect.Coalesce.TypeDefinition.Enums;
 using IntelliTect.Coalesce.Utilities;
+using Newtonsoft.Json.Linq;
+using NuGet.Protocol;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -21,7 +23,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
             b.Line("import * as $metadata from './metadata.g'");
             b.Line("import * as $models from './models.g'");
             b.Line("import * as $apiClients from './api-clients.g'");
-            b.Line("import { ViewModel, ListViewModel, ServiceViewModel, DeepPartial, defineProps } from 'coalesce-vue/lib/viewmodel'");
+            b.Line("import { ViewModel, ListViewModel, ViewModelCollection, ServiceViewModel, DeepPartial, defineProps } from 'coalesce-vue/lib/viewmodel'");
             b.Line();
 
             foreach (var model in Model.CrudApiBackedClasses.OrderBy(e => e.ClientTypeName))
@@ -67,20 +69,41 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
         private static void WriteViewModel(TypeScriptCodeBuilder b, ClassViewModel model)
         {
             string name = model.ViewModelClassName;
-            string viewModelName = $"{name}ViewModel";
+            string modelName = new VueType(model.Type).TsType(modelPrefix: "$models");
+            string viewModelName = new VueType(model.Type).TsType(viewModel: true);
             string metadataName = $"$metadata.{name}";
 
-            using (b.Block($"export interface {viewModelName} extends $models.{name}"))
+            using (b.Block($"export interface {viewModelName} extends {modelName}"))
             {
                 foreach (var prop in model.ClientProperties)
                 {
                     b.DocComment(prop.Comment ?? prop.Description);
-                    var typeString = new VueType(prop.Type.NullableValueUnderlyingType).TsType(modelPrefix: "$models", viewModel: true);
-                    b.Line($"{prop.JsVariable}: {typeString} | null;");
+                    var vueType = new VueType(prop.Type.NullableValueUnderlyingType);
+                    var typeString = vueType.TsType(modelPrefix: "$models", viewModel: true);
+                    var modelTypeString = vueType.TsType(modelPrefix: "$models", viewModel: false);
+
+                    if (typeString == modelTypeString)
+                    {
+                        b.Line($"{prop.JsVariable}: {typeString} | null;");
+                    }
+                    else if (prop.Type.IsCollection)
+                    {
+                        var pureType = new VueType(prop.PureType);
+                        var pureTypeString = pureType.TsType(modelPrefix: "$models", viewModel: true);
+                        var pureModelTypeString = pureType.TsType(modelPrefix: "$models", viewModel: false);
+
+                        b.Line($"get {prop.JsVariable}(): ViewModelCollection<{pureTypeString}, {pureModelTypeString}>;");
+                        b.Line($"set {prop.JsVariable}(value: ({pureTypeString} | {pureModelTypeString})[] | null);");
+                    }
+                    else
+                    {
+                        b.Line($"get {prop.JsVariable}(): {typeString} | null;");
+                        b.Line($"set {prop.JsVariable}(value: {typeString} | {modelTypeString} | null);");
+                    }
                 }
             }
 
-            using (b.Block($"export class {viewModelName} extends ViewModel<$models.{name}, $apiClients.{name}ApiClient, {model.PrimaryKey.Type.TsType}> implements $models.{name} "))
+            using (b.Block($"export class {viewModelName} extends ViewModel<{modelName}, $apiClients.{name}ApiClient, {model.PrimaryKey.Type.TsType}> implements {modelName} "))
             {
                 foreach (var prop in model.ClientProperties)
                 {
@@ -120,7 +143,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                 }
 
                 b.Line();
-                using (b.Block($"constructor(initialData?: DeepPartial<$models.{name}> | null)"))
+                using (b.Block($"constructor(initialData?: DeepPartial<{modelName}> | null)"))
                 {
                     b.Line($"super({metadataName}, new $apiClients.{name}ApiClient(), initialData)");
                     if (model.IsCustomDto)
@@ -138,10 +161,12 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
         {
             string name = model.ViewModelClassName;
 
-            string viewModelName = $"{model.ListViewModelClassName}ViewModel";
+            string modelName = new VueType(model.Type).TsType(modelPrefix: "$models");
+            string viewModelName = new VueType(model.Type).TsType(viewModel: true);
+            string listViewModelName = $"{model.ListViewModelClassName}ViewModel";
             string metadataName = $"$metadata.{name}";
 
-            using (b.Block($"export class {viewModelName} extends ListViewModel<$models.{name}, $apiClients.{name}ApiClient, {name}ViewModel>"))
+            using (b.Block($"export class {listViewModelName} extends ListViewModel<{modelName}, $apiClients.{name}ApiClient, {viewModelName}>"))
             {
 
                 foreach (var method in model.ClientMethods.Where(m => m.IsStatic))

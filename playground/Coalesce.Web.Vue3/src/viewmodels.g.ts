@@ -1,19 +1,21 @@
 import * as $metadata from './metadata.g'
 import * as $models from './models.g'
 import * as $apiClients from './api-clients.g'
-import { ViewModel, ListViewModel, ServiceViewModel, DeepPartial, defineProps } from 'coalesce-vue/lib/viewmodel'
+import { ViewModel, ListViewModel, ViewModelCollection, ServiceViewModel, DeepPartial, defineProps } from 'coalesce-vue/lib/viewmodel'
 
 export interface AuditLogViewModel extends $models.AuditLog {
   message: string | null;
   userId: number | null;
-  user: PersonViewModel | null;
+  get user(): PersonViewModel | null;
+  set user(value: PersonViewModel | $models.Person | null);
   id: number | null;
   type: string | null;
   keyValue: string | null;
   description: string | null;
   state: $models.AuditEntryState | null;
   date: Date | null;
-  properties: AuditLogPropertyViewModel[] | null;
+  get properties(): ViewModelCollection<AuditLogPropertyViewModel, $models.AuditLogProperty>;
+  set properties(value: (AuditLogPropertyViewModel | $models.AuditLogProperty)[] | null);
   clientIp: string | null;
   referrer: string | null;
   endpoint: string | null;
@@ -76,18 +78,21 @@ export interface CaseViewModel extends $models.Case {
   /** Date and time when the case was opened */
   openedAt: Date | null;
   assignedToId: number | null;
-  assignedTo: PersonViewModel | null;
+  get assignedTo(): PersonViewModel | null;
+  set assignedTo(value: PersonViewModel | $models.Person | null);
   reportedById: number | null;
   
   /** Person who originally reported the case */
-  reportedBy: PersonViewModel | null;
+  get reportedBy(): PersonViewModel | null;
+  set reportedBy(value: PersonViewModel | $models.Person | null);
   attachmentSize: number | null;
   attachmentName: string | null;
   attachmentType: string | null;
   attachmentHash: string | null;
   severity: string | null;
   status: $models.Statuses | null;
-  caseProducts: CaseProductViewModel[] | null;
+  get caseProducts(): ViewModelCollection<CaseProductViewModel, $models.CaseProduct>;
+  set caseProducts(value: (CaseProductViewModel | $models.CaseProduct)[] | null);
   devTeamAssignedId: number | null;
   devTeamAssigned: $models.DevTeam | null;
   duration: unknown | null;
@@ -285,9 +290,11 @@ export class CaseDtoStandaloneListViewModel extends ListViewModel<$models.CaseDt
 export interface CaseProductViewModel extends $models.CaseProduct {
   caseProductId: number | null;
   caseId: number | null;
-  case: CaseViewModel | null;
+  get case(): CaseViewModel | null;
+  set case(value: CaseViewModel | $models.Case | null);
   productId: number | null;
-  product: ProductViewModel | null;
+  get product(): ProductViewModel | null;
+  set product(value: ProductViewModel | $models.Product | null);
 }
 export class CaseProductViewModel extends ViewModel<$models.CaseProduct, $apiClients.CaseProductApiClient, number> implements $models.CaseProduct  {
   
@@ -317,7 +324,8 @@ export interface CompanyViewModel extends $models.Company {
   websiteUrl: string | null;
   logoUrl: string | null;
   isDeleted: boolean | null;
-  employees: PersonViewModel[] | null;
+  get employees(): ViewModelCollection<PersonViewModel, $models.Person>;
+  set employees(value: (PersonViewModel | $models.Person)[] | null);
   altName: string | null;
 }
 export class CompanyViewModel extends ViewModel<$models.Company, $apiClients.CompanyApiClient, number> implements $models.Company  {
@@ -406,10 +414,12 @@ export interface PersonViewModel extends $models.Person {
   height: number | null;
   
   /** List of cases assigned to the person */
-  casesAssigned: CaseViewModel[] | null;
+  get casesAssigned(): ViewModelCollection<CaseViewModel, $models.Case>;
+  set casesAssigned(value: (CaseViewModel | $models.Case)[] | null);
   
   /** List of cases reported by the person. */
-  casesReported: CaseViewModel[] | null;
+  get casesReported(): ViewModelCollection<CaseViewModel, $models.Case>;
+  set casesReported(value: (CaseViewModel | $models.Case)[] | null);
   birthDate: Date | null;
   lastBath: Date | null;
   nextUpgrade: Date | null;
@@ -422,7 +432,8 @@ export interface PersonViewModel extends $models.Person {
   companyId: number | null;
   
   /** Company loaded from the Company ID */
-  company: CompanyViewModel | null;
+  get company(): CompanyViewModel | null;
+  set company(value: CompanyViewModel | $models.Company | null);
   arbitraryCollectionOfStrings: string[] | null;
 }
 export class PersonViewModel extends ViewModel<$models.Person, $apiClients.PersonApiClient, number> implements $models.Person  {

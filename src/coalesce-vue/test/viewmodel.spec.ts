@@ -34,6 +34,7 @@ import {
   ComplexModelListViewModel,
   ComplexModelViewModel,
   PersonViewModel,
+  TestViewModel,
 } from "../../test-targets/viewmodels.g";
 import {
   StudentViewModel,
@@ -44,6 +45,7 @@ import {
 import { Student, Advisor, Course, Grade } from "./targets.models";
 import * as metadata from "./targets.metadata";
 import { metaBase } from "./targets.metadata";
+import { ComplexModel, Test } from "@test-targets/models.g";
 
 function mockItemResult<T>(success: boolean, object: T) {
   return vitest.fn().mockResolvedValue(<AxiosItemResult<T>>{
@@ -211,7 +213,7 @@ describe("ViewModel", () => {
       });
 
       const advisor = student.advisor!;
-      expect((advisor as any).$parent).toBe(student);
+      expect(advisor.$parent).toBe(student);
 
       advisor.$apiClient.save = mockItemResult(true, <Advisor>{
         advisorId: 3,
@@ -2084,99 +2086,108 @@ describe("ViewModel", () => {
     });
 
     describe("collection navigation getter/setters", () => {
-      test("setter creates new ViewModelCollection", () => {
-        var student = new StudentViewModel();
-        student.courses = [];
+      test("types", () => {
+        const model = new ComplexModelViewModel({});
+        const plain: ComplexModel = model;
 
-        expect(student.courses.push).not.toBe(Array.prototype.push);
-        //@ts-expect-error
-        expect(student.courses.$metadata).toBe(metadata.Student.props.courses);
+        model.tests = model.tests;
+        model.tests = [];
+        model.tests = null;
+        model.tests.push({ testName: "bob" });
+      });
+
+      test("new instance collection initialized", () => {
+        const model = new ComplexModelViewModel();
+        expect(model.tests).not.toBeFalsy();
+      });
+
+      test("new instance with missing collection initialized", () => {
+        const model = new ComplexModelViewModel({ name: "bob" });
+        expect(model.tests).not.toBeFalsy();
+      });
+
+      test("setter creates new ViewModelCollection", () => {
+        const model = new ComplexModelViewModel();
+        model.tests = [];
+
+        expect(model.tests.push).not.toBe(Array.prototype.push);
+        expect(model.tests.$metadata).toBe(model.$metadata.props.tests);
       });
 
       test("collection creates ViewModel when Model is pushed", () => {
-        var student = new StudentViewModel();
-        student.courses = [];
+        const model = new ComplexModelViewModel();
+        model.tests = [];
 
-        // The typings don't explicitly allow this, so we must cast to any.
-        // The use case is an input component that provides models (instead of ViewModels).
-        student.courses.push(
-          new Course({
-            courseId: 1,
-            name: "Seagull",
-          }) as any
+        model.tests.push(
+          new Test({
+            testName: "Seagull",
+          })
         );
 
-        expect(student.courses[0]).toBeInstanceOf(CourseViewModel);
-        expect(student.courses[0].name).toBe("Seagull");
+        expect(model.tests[0]).toBeInstanceOf(TestViewModel);
+        expect(model.tests[0].testName).toBe("Seagull");
       });
 
       test("collection creates ViewModel when array containing a Model is set", () => {
-        var student = new StudentViewModel();
+        const model = new ComplexModelViewModel();
 
-        // The typings don't explicitly allow this, so we must cast to any.
-        // The use case is an input component that provides models (instead of ViewModels).
-        student.courses = [
-          new Course({
-            courseId: 1,
-            name: "Seagull",
-          }) as any,
+        model.tests = [
+          new Test({
+            testName: "Seagull",
+          }),
         ];
 
-        expect(student.courses[0]).toBeInstanceOf(CourseViewModel);
-        expect(student.courses[0].name).toBe("Seagull");
-        expect((student.courses[0] as any).$parent).toBe(student);
-        expect((student.courses[0] as any).$parentCollection).toBe(
-          student.courses
-        );
+        expect(model.tests[0]).toBeInstanceOf(TestViewModel);
+        expect(model.tests[0].testName).toBe("Seagull");
+        expect(model.tests[0].$parent).toBe(model);
+        expect(model.tests[0].$parentCollection).toBe(model.tests);
       });
 
       test("collection is reactive for push", async () => {
-        var student = new StudentViewModel();
-        student.courses = [];
+        const model = new ComplexModelViewModel();
+        model.tests = [];
 
         const watchCallback = vitest.fn();
-        watch(student.courses, watchCallback);
+        watch(model.tests, watchCallback);
 
-        student.courses.push(new CourseViewModel());
+        model.tests.push(new TestViewModel());
 
         await nextTick();
 
         expect(watchCallback).toBeCalledTimes(1);
-        expect(student.courses).toHaveLength(1);
+        expect(model.tests).toHaveLength(1);
       });
     });
 
     describe("model collection (non-navigation) getter/setters", () => {
       test("setter creates new ViewModelCollection", () => {
-        var advisor = new AdvisorViewModel();
-        advisor.studentsNonNavigation = [];
+        const model = new ComplexModelViewModel();
+        model.unmappedCollectionOfMappedModels = [];
 
-        expect(advisor.studentsNonNavigation.push).not.toBe(
+        expect(model.unmappedCollectionOfMappedModels.push).not.toBe(
           Array.prototype.push
         );
-        //@ts-expect-error
-        expect(advisor.studentsNonNavigation.$metadata).toBe(
-          metadata.Advisor.props.studentsNonNavigation
+        expect(model.unmappedCollectionOfMappedModels.$metadata).toBe(
+          model.$metadata.props.unmappedCollectionOfMappedModels
         );
       });
 
       test("collection creates ViewModel when Model is pushed", () => {
-        var advisor = new AdvisorViewModel();
-        advisor.studentsNonNavigation = [];
+        const model = new ComplexModelViewModel();
+        model.unmappedCollectionOfMappedModels = [];
 
-        // The typings don't explicitly allow this, so we must cast to any.
-        // The use case is an input component that provides models (instead of ViewModels).
-        advisor.studentsNonNavigation.push(
-          new Student({
-            studentId: 1,
-            name: "Seagull",
-          }) as any
+        model.unmappedCollectionOfMappedModels.push(
+          new Test({
+            testName: "Seagull",
+          })
         );
 
-        expect(advisor.studentsNonNavigation[0]).toBeInstanceOf(
-          StudentViewModel
+        expect(model.unmappedCollectionOfMappedModels[0]).toBeInstanceOf(
+          TestViewModel
         );
-        expect(advisor.studentsNonNavigation[0].name).toBe("Seagull");
+        expect(model.unmappedCollectionOfMappedModels[0].testName).toBe(
+          "Seagull"
+        );
       });
     });
 
@@ -2189,15 +2200,11 @@ describe("ViewModel", () => {
       });
 
       test("setter creates ViewModel when provided a Model", () => {
-        var student = new StudentViewModel();
-        var advisor: Advisor = mapToModel({ advisorId: 3 }, metadata.Advisor);
+        const model = new ComplexModelViewModel();
 
-        // The typings don't explicitly allow this, so we must cast to any.
-        // The use case is an input component that provides models (instead of ViewModels).
-        (student as any).advisor = advisor;
+        model.singleTest = new Test({ testId: 1 });
 
-        expect(advisor).not.toBeInstanceOf(AdvisorViewModel);
-        expect(student.advisor).toBeInstanceOf(AdvisorViewModel);
+        expect(model.singleTest).toBeInstanceOf(TestViewModel);
       });
 
       test("clears FK when reference is nulled", () => {
@@ -2597,7 +2604,7 @@ describe("ViewModel", () => {
       const watchCallback = vitest.fn();
       watch(student.courses!, watchCallback);
 
-      studentModel.courses = (data as any[]).map((x) => new Course(x));
+      studentModel.courses = data.map((x) => new Course(x));
       student.$loadCleanData(studentModel);
 
       await vue.$nextTick();
@@ -2608,8 +2615,8 @@ describe("ViewModel", () => {
       // Verify that instances look right.
       student.courses!.forEach((c) => {
         expect(c).toBeInstanceOf(CourseViewModel);
-        expect((c as any).$parent).toBe(student);
-        expect((c as any).$parentCollection).toBe(student.courses);
+        expect(c.$parent).toBe(student);
+        expect(c.$parentCollection).toBe(student.courses);
       });
 
       // Watcher should have been triggered because its contents changed
@@ -2921,34 +2928,35 @@ describe("ViewModel", () => {
 
 describe("ListViewModel", () => {
   test("is assignable to generic untyped ListViewModel", () => {
-    const vm: ListViewModel = new StudentListViewModel();
+    const vm: ListViewModel = new ComplexModelListViewModel();
   });
 
   describe("$load & $items", () => {
-    let list: StudentListViewModel;
+    let list: ComplexModelListViewModel;
     let includeAdditionalItemAtStart: boolean;
 
     beforeEach(() => {
       includeAdditionalItemAtStart = false;
-      list = new StudentListViewModel();
-      list.$apiClient.list = vitest.fn().mockImplementation((dto: any) => {
-        return Promise.resolve(<AxiosListResult<Student>>{
-          data: {
+      list = new ComplexModelListViewModel();
+      mockEndpoint(
+        "/ComplexModel/list",
+        vitest.fn(() => {
+          return {
             wasSuccessful: true,
             list: [
               ...(includeAdditionalItemAtStart
-                ? [new Student({ studentId: 3, name: "John" })]
+                ? [new ComplexModel({ complexModelId: 3, name: "John" })]
                 : []),
-              new Student({ studentId: 1, name: "Steve" }),
-              new Student({ studentId: 2, name: "Bob" }),
+              new ComplexModel({ complexModelId: 1, name: "Steve" }),
+              new ComplexModel({ complexModelId: 2, name: "Bob" }),
             ],
             page: 1,
             pageSize: 10,
             pageCount: 1,
             totalCount: 2,
-          },
-        });
-      });
+          };
+        })
+      );
     });
 
     test("$items is a ViewModelCollection initially", () => {
@@ -2958,8 +2966,8 @@ describe("ListViewModel", () => {
       const items = list.$items;
       expect(items).toBe(list.$items);
 
-      items.push({ name: "bob" } as any);
-      expect(items[0]).toBeInstanceOf(StudentViewModel);
+      items.push({ name: "bob" });
+      expect(items[0]).toBeInstanceOf(ComplexModelViewModel);
     });
 
     test("$items initializer doesn't trigger reactivity.", async () => {
@@ -2991,7 +2999,7 @@ describe("ListViewModel", () => {
         flush: "sync",
         deep: true,
       });
-      filteredItems.push(new StudentViewModel());
+      filteredItems.push(new ComplexModelViewModel());
       expect(changed).toBeFalsy();
     });
 
@@ -3031,7 +3039,9 @@ describe("ListViewModel", () => {
       const watchCallback = vitest.fn();
       watch(list.$items, watchCallback);
 
-      list.$items.push(new StudentViewModel({ studentId: 3, name: "Heidi" }));
+      list.$items.push(
+        new ComplexModelViewModel({ complexModelId: 3, name: "Heidi" })
+      );
 
       await vue.$nextTick();
 
@@ -3045,10 +3055,10 @@ describe("ListViewModel", () => {
       // There are two computeds here because only the very first
       // read of $items on a new ListViewModel was nonreactive (and only in vue2).
       const comp = computed(() => {
-        return list.$items.find((i) => i.studentId == seekVal.value);
+        return list.$items.find((i) => i.complexModelId == seekVal.value);
       });
       const comp2 = computed(() => {
-        return list.$items.find((i) => i.studentId == seekVal.value + 1);
+        return list.$items.find((i) => i.complexModelId == seekVal.value + 1);
       });
       expect(comp.value).toBeUndefined();
       expect(comp2.value).toBeUndefined();

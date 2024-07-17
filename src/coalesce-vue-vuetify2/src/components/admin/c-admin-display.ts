@@ -76,7 +76,7 @@ export default Vue.extend({
           },
           // Use `propDisplay` for our formatted count, forcing the count always by preventing enumeration.
           propDisplay(model, meta, { collection: { enumeratedItemsMax: 0 } }) ||
-            (((model as any)[meta.name] as ViewModelCollection<any>)
+            (((model as any)[meta.name] as ViewModelCollection<any, any>)
               ?.$hasLoaded === false
               ? "View"
               : "None")

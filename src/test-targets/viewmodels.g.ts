@@ -1,7 +1,7 @@
 import * as $metadata from './metadata.g'
 import * as $models from './models.g'
 import * as $apiClients from './api-clients.g'
-import { ViewModel, ListViewModel, ServiceViewModel, DeepPartial, defineProps } from 'coalesce-vue/lib/viewmodel'
+import { ViewModel, ListViewModel, ViewModelCollection, ServiceViewModel, DeepPartial, defineProps } from 'coalesce-vue/lib/viewmodel'
 
 export interface AbstractImplViewModel extends $models.AbstractImpl {
   implOnlyField: string | null;
@@ -50,12 +50,15 @@ export interface CaseViewModel extends $models.Case {
   description: string | null;
   openedAt: Date | null;
   assignedToId: number | null;
-  assignedTo: PersonViewModel | null;
+  get assignedTo(): PersonViewModel | null;
+  set assignedTo(value: PersonViewModel | $models.Person | null);
   reportedById: number | null;
-  reportedBy: PersonViewModel | null;
+  get reportedBy(): PersonViewModel | null;
+  set reportedBy(value: PersonViewModel | $models.Person | null);
   attachment: string | null;
   status: $models.Statuses | null;
-  caseProducts: CaseProductViewModel[] | null;
+  get caseProducts(): ViewModelCollection<CaseProductViewModel, $models.CaseProduct>;
+  set caseProducts(value: (CaseProductViewModel | $models.CaseProduct)[] | null);
 }
 export class CaseViewModel extends ViewModel<$models.Case, $apiClients.CaseApiClient, number> implements $models.Case  {
   
@@ -106,9 +109,11 @@ export class CaseDtoStandaloneListViewModel extends ListViewModel<$models.CaseDt
 export interface CaseProductViewModel extends $models.CaseProduct {
   caseProductId: number | null;
   caseId: number | null;
-  case: CaseViewModel | null;
+  get case(): CaseViewModel | null;
+  set case(value: CaseViewModel | $models.Case | null);
   productId: number | null;
-  product: ProductViewModel | null;
+  get product(): ProductViewModel | null;
+  set product(value: ProductViewModel | $models.Product | null);
 }
 export class CaseProductViewModel extends ViewModel<$models.CaseProduct, $apiClients.CaseProductApiClient, number> implements $models.CaseProduct  {
   
@@ -137,7 +142,8 @@ export interface CompanyViewModel extends $models.Company {
   phone: string | null;
   websiteUrl: string | null;
   logoUrl: string | null;
-  employees: PersonViewModel[] | null;
+  get employees(): ViewModelCollection<PersonViewModel, $models.Person>;
+  set employees(value: (PersonViewModel | $models.Person)[] | null);
   altName: string | null;
 }
 export class CompanyViewModel extends ViewModel<$models.Company, $apiClients.CompanyApiClient, number> implements $models.Company  {
@@ -163,17 +169,23 @@ export class CompanyListViewModel extends ListViewModel<$models.Company, $apiCli
 
 export interface ComplexModelViewModel extends $models.ComplexModel {
   complexModelId: number | null;
-  tests: TestViewModel[] | null;
+  get tests(): ViewModelCollection<TestViewModel, $models.Test>;
+  set tests(value: (TestViewModel | $models.Test)[] | null);
   
   /** 
     Test case for foreign keys without a reference navigation prop.
     This configuration *will* be picked up by EF conventions.
   */
-  childrenWithoutRefNavProp: ComplexModelDependentViewModel[] | null;
+  get childrenWithoutRefNavProp(): ViewModelCollection<ComplexModelDependentViewModel, $models.ComplexModelDependent>;
+  set childrenWithoutRefNavProp(value: (ComplexModelDependentViewModel | $models.ComplexModelDependent)[] | null);
+  get unmappedCollectionOfMappedModels(): ViewModelCollection<TestViewModel, $models.Test>;
+  set unmappedCollectionOfMappedModels(value: (TestViewModel | $models.Test)[] | null);
   singleTestId: number | null;
-  singleTest: TestViewModel | null;
+  get singleTest(): TestViewModel | null;
+  set singleTest(value: TestViewModel | $models.Test | null);
   enumPkId: $models.EnumPkId | null;
-  enumPk: EnumPkViewModel | null;
+  get enumPk(): EnumPkViewModel | null;
+  set enumPk(value: EnumPkViewModel | $models.EnumPk | null);
   dateTimeOffset: Date | null;
   dateTimeOffsetNullable: Date | null;
   dateTime: Date | null;
@@ -186,13 +198,17 @@ export interface ComplexModelViewModel extends $models.ComplexModel {
   restrictedString: string | null;
   restrictInit: string | null;
   adminReadableReferenceNavigationId: number | null;
-  adminReadableReferenceNavigation: ComplexModelViewModel | null;
+  get adminReadableReferenceNavigation(): ComplexModelViewModel | null;
+  set adminReadableReferenceNavigation(value: ComplexModelViewModel | $models.ComplexModel | null);
   referenceNavigationId: number | null;
-  referenceNavigation: ComplexModelViewModel | null;
+  get referenceNavigation(): ComplexModelViewModel | null;
+  set referenceNavigation(value: ComplexModelViewModel | $models.ComplexModel | null);
   noAutoIncludeReferenceNavigationId: number | null;
-  noAutoIncludeReferenceNavigation: ComplexModelViewModel | null;
+  get noAutoIncludeReferenceNavigation(): ComplexModelViewModel | null;
+  set noAutoIncludeReferenceNavigation(value: ComplexModelViewModel | $models.ComplexModel | null);
   noAutoIncludeByClassReferenceNavigationId: number | null;
-  noAutoIncludeByClassReferenceNavigation: CompanyViewModel | null;
+  get noAutoIncludeByClassReferenceNavigation(): CompanyViewModel | null;
+  set noAutoIncludeByClassReferenceNavigation(value: CompanyViewModel | $models.Company | null);
   name: string | null;
   byteArrayProp: string | null;
   string: string | null;
@@ -615,10 +631,12 @@ export interface PersonViewModel extends $models.Person {
   gender: $models.Genders | null;
   
   /** List of cases assigned to the person */
-  casesAssigned: CaseViewModel[] | null;
+  get casesAssigned(): ViewModelCollection<CaseViewModel, $models.Case>;
+  set casesAssigned(value: (CaseViewModel | $models.Case)[] | null);
   
   /** List of cases reported by the person. */
-  casesReported: CaseViewModel[] | null;
+  get casesReported(): ViewModelCollection<CaseViewModel, $models.Case>;
+  set casesReported(value: (CaseViewModel | $models.Case)[] | null);
   birthDate: Date | null;
   
   /** Calculated name of the person. eg., Mr. Michael Stokesbary. */
@@ -628,8 +646,10 @@ export interface PersonViewModel extends $models.Person {
   companyId: number | null;
   
   /** Company loaded from the Company ID */
-  company: CompanyViewModel | null;
-  siblingRelationships: SiblingViewModel[] | null;
+  get company(): CompanyViewModel | null;
+  set company(value: CompanyViewModel | $models.Company | null);
+  get siblingRelationships(): ViewModelCollection<SiblingViewModel, $models.Sibling>;
+  set siblingRelationships(value: (SiblingViewModel | $models.Sibling)[] | null);
 }
 export class PersonViewModel extends ViewModel<$models.Person, $apiClients.PersonApiClient, number> implements $models.Person  {
   
@@ -793,8 +813,10 @@ export interface RecursiveHierarchyViewModel extends $models.RecursiveHierarchy 
   id: number | null;
   name: string | null;
   parentId: number | null;
-  parent: RecursiveHierarchyViewModel | null;
-  children: RecursiveHierarchyViewModel[] | null;
+  get parent(): RecursiveHierarchyViewModel | null;
+  set parent(value: RecursiveHierarchyViewModel | $models.RecursiveHierarchy | null);
+  get children(): ViewModelCollection<RecursiveHierarchyViewModel, $models.RecursiveHierarchy>;
+  set children(value: (RecursiveHierarchyViewModel | $models.RecursiveHierarchy)[] | null);
 }
 export class RecursiveHierarchyViewModel extends ViewModel<$models.RecursiveHierarchy, $apiClients.RecursiveHierarchyApiClient, number> implements $models.RecursiveHierarchy  {
   
@@ -845,9 +867,11 @@ export class RequiredAndInitModelListViewModel extends ListViewModel<$models.Req
 export interface SiblingViewModel extends $models.Sibling {
   siblingId: number | null;
   personId: number | null;
-  person: PersonViewModel | null;
+  get person(): PersonViewModel | null;
+  set person(value: PersonViewModel | $models.Person | null);
   personTwoId: number | null;
-  personTwo: PersonViewModel | null;
+  get personTwo(): PersonViewModel | null;
+  set personTwo(value: PersonViewModel | $models.Person | null);
 }
 export class SiblingViewModel extends ViewModel<$models.Sibling, $apiClients.SiblingApiClient, number> implements $models.Sibling  {
   
@@ -932,10 +956,13 @@ export class StandaloneReadWriteListViewModel extends ListViewModel<$models.Stan
 export interface StringIdentityViewModel extends $models.StringIdentity {
   stringIdentityId: string | null;
   parentId: string | null;
-  parent: StringIdentityViewModel | null;
+  get parent(): StringIdentityViewModel | null;
+  set parent(value: StringIdentityViewModel | $models.StringIdentity | null);
   parentReqId: string | null;
-  parentReq: StringIdentityViewModel | null;
-  children: StringIdentityViewModel[] | null;
+  get parentReq(): StringIdentityViewModel | null;
+  set parentReq(value: StringIdentityViewModel | $models.StringIdentity | null);
+  get children(): ViewModelCollection<StringIdentityViewModel, $models.StringIdentity>;
+  set children(value: (StringIdentityViewModel | $models.StringIdentity)[] | null);
 }
 export class StringIdentityViewModel extends ViewModel<$models.StringIdentity, $apiClients.StringIdentityApiClient, string> implements $models.StringIdentity  {
   
@@ -961,7 +988,8 @@ export class StringIdentityListViewModel extends ListViewModel<$models.StringIde
 export interface TestViewModel extends $models.Test {
   testId: number | null;
   complexModelId: number | null;
-  complexModel: ComplexModelViewModel | null;
+  get complexModel(): ComplexModelViewModel | null;
+  set complexModel(value: ComplexModelViewModel | $models.ComplexModel | null);
   testName: string | null;
 }
 export class TestViewModel extends ViewModel<$models.Test, $apiClients.TestApiClient, number> implements $models.Test  {

@@ -666,7 +666,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             get
             {
-                if (Object == null)
+                if (Object == null || HasNotMapped)
                 {
                     return null;
                 }

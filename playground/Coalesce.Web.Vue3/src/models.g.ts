@@ -398,6 +398,11 @@ export namespace Person {
     
     export class NamesStartingWithAWithCases implements DataSource<typeof metadata.Person.dataSources.namesStartingWithAWithCases> {
       readonly $metadata = metadata.Person.dataSources.namesStartingWithAWithCases
+      allowedStatuses: Statuses[] | null = null
+      
+      constructor(params?: Omit<Partial<NamesStartingWithAWithCases>, '$metadata'>) {
+        if (params) Object.assign(this, params);
+      }
     }
     
     export class WithoutCases implements DataSource<typeof metadata.Person.dataSources.withoutCases> {

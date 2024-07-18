@@ -413,6 +413,7 @@ export type ApiResultPromise<T> = Promise<
 /** Axios instance to be used by all Coalesce API requests. Can be configured as needed. */
 export const AxiosClient = axios.create();
 AxiosClient.defaults.baseURL = "/api";
+AxiosClient.defaults.paramsSerializer = objectToQueryString;
 
 // Set X-Requested-With: XmlHttpRequest to prevent aspnetcore from serving HTML and redirects to API requests.
 // https://github.com/dotnet/aspnetcore/blob/c440ebcf49badd49f0e2cdde1b0a74992af04158/src/Security/Authentication/Cookies/src/CookieAuthenticationEvents.cs#L107-L111

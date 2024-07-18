@@ -227,11 +227,14 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
     {
         public NamesStartingWithAWithCases(CrudContext<AppDbContext> context) : base(context) { }
 
+        [Coalesce]
+        public List<Case.Statuses> AllowedStatuses { get; set; }
+
         public override IQueryable<Person> GetQuery(IDataSourceParameters parameters)
         {
             Db.Cases
                 .Include(c => c.CaseProducts).ThenInclude(cp => cp.Product)
-                .Where(c => c.Status == Case.Statuses.Open || c.Status == Case.Statuses.InProgress)
+                .Where(c => AllowedStatuses.Contains(c.Status))
                 .Load();
 
             return Db.People

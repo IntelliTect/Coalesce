@@ -153,7 +153,13 @@ export interface DataSourceType extends Metadata {
    * Stored as `props` so it can be treated like a ModelType/ObjectType in many cases.
    */
   readonly props: {
-    [paramName in string]: PrimitiveProperty | DateProperty | EnumProperty;
+    [paramName in string]:
+      | PrimitiveProperty
+      | DateProperty
+      | EnumProperty
+      | (BasicCollectionProperty & {
+          itemType: PrimitiveValue | DateValue | EnumValue;
+        });
   };
   // NOTE: this union is the currently supported set of data source parameters.
   // When we support more types in the future (e.g. objects), adjust accordingly.

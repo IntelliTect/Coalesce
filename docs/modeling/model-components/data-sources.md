@@ -96,7 +96,7 @@ All methods on `IDataSource<T>` take a parameter that contains all the client-sp
 
 ## Custom Parameters
 
-On any data source that you create, you may add additional properties annotated with `[Coalesce]` that will then be exposed as parameters to the client. These property parameters are currently restricted to primitives (numeric types, strings) and dates (DateTime, DateTimeOffset). Property parameter primitives may be expanded to allow for more types in the future.
+On any data source that you create, you may add additional properties annotated with `[Coalesce]` that will then be exposed as parameters to the client. These property parameters can be primitives (numeric types, strings, enums), dates (DateTime, DateTimeOffset, DateOnly, TimeOnly), and collections of the preceding types.
     
 ``` c#
 [Coalesce]

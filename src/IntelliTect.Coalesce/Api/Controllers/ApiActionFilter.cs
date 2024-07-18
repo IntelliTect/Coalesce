@@ -28,7 +28,6 @@ namespace IntelliTect.Coalesce.Api.Controllers
             if (!context.ModelState.IsValid)
             {
                 var errors = context.ModelState
-                    .Where(v => v.Value?.Errors.Any() == true && v.Key.StartsWith("dataSource", StringComparison.InvariantCultureIgnoreCase))
                     .SelectMany(v => v.Value!.Errors.Select(e => (key: v.Key, error: e.ErrorMessage)))
                     .ToList();
 
@@ -38,7 +37,7 @@ namespace IntelliTect.Coalesce.Api.Controllers
                     // Anything that takes a SaveResult or ListResult should be fine, but other things (Count) won't handle this.
                     // The Vue typescript should handle this just fine.
                     context.Result = new BadRequestObjectResult(
-                        new ApiResult(string.Join("; ", errors.Select(e => $"Invalid value for parameter {e.key}: {e.error}")))
+                        new ApiResult(string.Join("\n; ", errors.Select(e => string.IsNullOrWhiteSpace(e.key) ? e.error : $"{e.key}: {e.error}")))
                     );
                     return;
                 }

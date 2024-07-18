@@ -24,6 +24,8 @@ import { Student as StudentMeta } from "./targets.metadata";
 import { Student, Advisor } from "./targets.models";
 
 import { ComplexModelApiClient } from "../../test-targets/api-clients.g";
+import { PersonListViewModel } from "@test-targets/viewmodels.g";
+import { Person, Statuses } from "@test-targets/models.g";
 
 function makeAdapterMock(result?: any) {
   return makeEndpointMock<AxiosRequestConfig>(result);
@@ -360,6 +362,30 @@ describe("$invoke", () => {
     );
 
     expect(mock.mock.calls[0][0].data).toBe("name=bob&studentAdvisorId=");
+  });
+
+  test("data source collection parameter", async () => {
+    const mock = mockEndpoint(
+      "/Person/list",
+      vitest.fn((req: AxiosRequestConfig) => {
+        return {
+          wasSuccessful: true,
+          list: [],
+        };
+      })
+    );
+
+    const personList = new PersonListViewModel();
+    personList.$dataSource = new Person.DataSources.NamesStartingWithAWithCases(
+      {
+        allowedStatuses: [Statuses.Open, Statuses.InProgress],
+      }
+    );
+    await personList.$load();
+
+    expect(AxiosClient.getUri(mock.mock.lastCall![0])).toBe(
+      "/api/Person/list?page=1&pageSize=10&dataSource=NamesStartingWithAWithCases&dataSource.allowedStatuses=0&dataSource.allowedStatuses=1"
+    );
   });
 });
 

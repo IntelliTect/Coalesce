@@ -84,7 +84,7 @@ import {
   PersonListViewModel,
 } from "../viewmodels.g";
 import { CaseApiClient, PersonApiClient } from "../api-clients.g";
-import { Person } from "../models.g";
+import { Person, Statuses } from "../models.g";
 
 @Component({
   components: {},
@@ -101,7 +101,12 @@ export default class Test extends Base {
   caseVm = new CaseViewModel();
 
   async created() {
+    this.personList.$dataSource =
+      new Person.DataSources.NamesStartingWithAWithCases({
+        allowedStatuses: [Statuses.Open, Statuses.InProgress],
+      });
     this.personList.$params.noCount = true;
+    this.personList.$load();
 
     await this.caseVm.$load(15);
     await this.caseVm.downloadImage();

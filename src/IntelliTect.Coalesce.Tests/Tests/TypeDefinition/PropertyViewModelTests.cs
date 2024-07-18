@@ -273,5 +273,15 @@ namespace IntelliTect.Coalesce.Tests.TypeDefinition
             PropertyViewModel vm = data;
             Assert.Equal(expected, vm.IsRequired);
         }
+
+        [Theory]
+        [SymbolPropertyViewModelData<Person>(
+            nameof(Person.Name),
+            "Calculated name of the person. eg., Mr. Michael Stokesbary.\nA concatenation of Title, FirstName, and LastName.")]
+        public void Comment_IsCorrect(PropertyViewModelData data, string expected)
+        {
+            PropertyViewModel vm = data;
+            Assert.Equal(expected, vm.Comment, ignoreLineEndingDifferences: true);
+        }
     }
 }

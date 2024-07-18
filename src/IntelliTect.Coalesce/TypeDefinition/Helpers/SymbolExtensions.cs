@@ -150,6 +150,15 @@ namespace IntelliTect.Coalesce.TypeDefinition
             {
                 XmlDocument xmlDocumentation = new XmlDocument();
                 xmlDocumentation.LoadXml(xmlDocs);
+                foreach (var see in xmlDocumentation.SelectNodes("//see")!.OfType<XmlNode>())
+                {
+                    string value = see.Attributes?["cref"]?.Value ?? "";
+                    var idx = value.LastIndexOf('.');
+                    if (idx < 0) continue;
+
+                    value = value.Substring(idx + 1);
+                    see.ParentNode!.ReplaceChild(xmlDocumentation.CreateTextNode(value), see);
+                }
                 string summary = xmlDocumentation.SelectSingleNode("/member/summary")?.InnerText.Trim() ?? "";
                 return Regex.Replace(summary, "\n( +)", "\n");
             }

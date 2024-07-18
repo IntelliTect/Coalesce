@@ -97,6 +97,7 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         
         /// <summary>
         /// Calculated name of the person. eg., Mr. Michael Stokesbary.
+        /// A concatenation of <see cref="Title"/>, <see cref="FirstName"/>, and <see cref="LastName"/>.
         /// </summary>
         [ListText]
         [NotMapped]

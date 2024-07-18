@@ -100,12 +100,12 @@
                     variant="outlined"
                     tabindex="-1"
                     title="View selected item"
-                    :disabled="!model[prop.foreignKey.name]"
+                    :disabled="!(model as any)[prop.foreignKey.name]"
                     :to="{
                       name: 'coalesce-admin-item',
                       params: {
                         type: prop.typeDef.name,
-                        id: model[prop.foreignKey.name],
+                        id: (model as any)[prop.foreignKey.name],
                       },
                     }"
                   >
@@ -125,13 +125,13 @@
                     class="c-admin-editor--href-link"
                     variant="outlined"
                     tabindex="-1"
-                    :disabled="!model[prop.name]"
+                    :disabled="!(model as any)[prop.name]"
                     :href="
                       (prop.subtype == 'email'
                         ? 'mailto:'
                         : prop.subtype == 'tel'
                         ? 'tel:'
-                        : '') + model[prop.name]
+                        : '') + (model as any)[prop.name]
                     "
                   >
                     <v-icon class="black--text"
@@ -158,13 +158,11 @@
 
 <script lang="ts">
 import {
-  Model,
   ViewModel,
   Property,
   ModelType,
   BehaviorFlags,
   HiddenAreas,
-  Indexable,
 } from "coalesce-vue";
 
 import { isPropReadOnly } from "../../util";
@@ -186,7 +184,7 @@ export default defineComponent({
   props: {
     model: {
       required: true,
-      type: Object as PropType<Indexable<ViewModel>>,
+      type: Object as PropType<ViewModel>,
     },
     color: { required: false, type: String, default: null },
 

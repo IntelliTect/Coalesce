@@ -367,7 +367,7 @@ namespace Coalesce.Domain
         public NamesStartingWithAWithCases(CrudContext<AppDbContext> context) : base(context) { }
 
         [Coalesce]
-        public List<Case.Statuses> AllowedStatuses { get; set; }
+        public List<Case.Statuses>? AllowedStatuses { get; set; }
 
         public override IQueryable<Person> GetQuery(IDataSourceParameters parameters)
         {

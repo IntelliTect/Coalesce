@@ -48,4 +48,13 @@ namespace IntelliTect.Coalesce.Tests.Util
             symbol = false;
         }
     }
+
+    internal class SymbolPropertyViewModelDataAttribute<T> : PropertyViewModelDataAttribute<T>
+    {
+        public SymbolPropertyViewModelDataAttribute(string propName, params object[] additionalInlineData)
+            : base(propName, additionalInlineData)
+        {
+            reflection = false;
+        }
+    }
 }

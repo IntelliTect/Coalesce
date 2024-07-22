@@ -1,6 +1,31 @@
 <template>
   <v-container grid-list-lg>
     <c-loader-status :loaders="{ 'no-initial-content': [caseVm.$load] }">
+      <v-card class="mb-10">
+        <v-row>
+          <v-col>
+            <c-select
+              :model="caseVm"
+              for="assignedTo"
+              variant="outlined"
+              density="compact"
+              class="my-4"
+              error-messages="sdfsdf"
+            >
+            </c-select>
+          </v-col>
+          <v-col>
+            <c-input
+              class="my-4"
+              :model="caseVm"
+              for="caseProducts"
+              density="compact"
+              variant="outlined"
+              error-messages="sdfsdf"
+            ></c-input>
+          </v-col>
+        </v-row>
+      </v-card>
       <c-select-string-value
         :model="caseVm"
         for="title"
@@ -52,7 +77,10 @@
       </c-select>
 
       <v-defaults-provider
-        :defaults="{ VTextField: { variant: 'outlined', density: 'compact' } }"
+        :defaults="{
+          VInput: { density: 'compact' },
+          VField: { variant: 'outlined' },
+        }"
       >
         <c-select
           :model="caseVm"

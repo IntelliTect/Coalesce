@@ -193,6 +193,40 @@ describe("CSelect", () => {
     });
   });
 
+  describe("clearable defaults to required state of FK", () => {
+    test("required fk", async () => {
+      mockEndpoint("/Test/list", () => ({ wasSuccessful: true, list: [] }));
+
+      const model = new ComplexModelViewModel();
+      const wrapper = mountApp(() => (
+        <CSelect model={model} for="singleTest"></CSelect>
+      ));
+
+      expect(model.$metadata.props.singleTestId.rules.required).toBeTruthy();
+      expect(wrapper.find(".v-field__clearable").exists()).toBeFalsy();
+    });
+
+    test("optional fk", async () => {
+      mockEndpoint("/ComplexModel/list", () => ({
+        wasSuccessful: true,
+        list: [],
+      }));
+
+      const model = new ComplexModelViewModel();
+      const wrapper = mountApp(() => (
+        <CSelect model={model} for="referenceNavigation"></CSelect>
+      ));
+
+      expect(
+        //@ts-expect-error We're asserting this prop doesn't have a required rule,
+        // but our types are so good that this even gets caught by typescript.
+        model.$metadata.props.referenceNavigationId.rules?.required
+      ).toBeFalsy();
+
+      expect(wrapper.find(".v-field__clearable").exists()).toBeTruthy();
+    });
+  });
+
   describe("hint", () => {
     test("shows persistent hint", () => {
       const wrapper = mountApp(() => (

@@ -283,7 +283,7 @@ const props = withDefaults(
       getItem: (search: string, label: string) => Promise<Model<ModelType>>;
     };
   }>(),
-  { openOnClear: true }
+  { openOnClear: true, clearable: undefined }
 );
 
 const emit = defineEmits<{

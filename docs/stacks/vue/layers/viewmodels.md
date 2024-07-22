@@ -57,6 +57,8 @@ A getter/setter property that wraps the primary key of the model. Used to intera
 
 Returns a string representation of the object, or one of its properties if specified, suitable for display.
 
+This is especially useful for displaying enum properties, navigation properties, date properties, and other complex values.
+
 
 <Prop def="$addChild(prop: string | ModelCollectionNavigationProperty, initialDirtyData?: {})" lang="ts" />
 

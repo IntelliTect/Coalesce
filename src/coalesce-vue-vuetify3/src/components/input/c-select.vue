@@ -15,7 +15,7 @@
       persistent-clear
       :error="isValid.value === false"
       append-inner-icon="$dropdown"
-      v-bind="inputBindAttrs"
+      v-bind="fieldAttrs"
       :clearable="!isDisabled.value && !isReadonly.value && isClearable"
       :active="!!internalModelValue || focused || !!placeholder"
       :dirty="!!internalModelValue"
@@ -93,6 +93,7 @@
           clearable
           placeholder="Search"
           variant="filled"
+          density="compact"
         >
         </v-text-field>
 
@@ -227,6 +228,7 @@ import {
   AnyArgCaller,
   ResponseCachingConfiguration,
 } from "coalesce-vue";
+import { VField } from "vuetify/components";
 
 defineOptions({
   name: "c-select",
@@ -293,6 +295,8 @@ const emit = defineEmits<{
 const mainInputRef = ref<HTMLInputElement>();
 const listRef = ref<ComponentPublicInstance>();
 const searchRef = ref<ComponentPublicInstance>();
+
+const fieldAttrs = computed(() => VField.filterProps(inputBindAttrs.value));
 
 const { inputBindAttrs, modelMeta, valueMeta, valueOwner } = useMetadataProps(
   props,

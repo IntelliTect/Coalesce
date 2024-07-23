@@ -45,14 +45,14 @@ namespace IntelliTect.Coalesce
         /// <summary>
         /// If set, this data source will be used in place of the supplied data source
         /// when reloading an object after a save operation has completed.
-        /// This is not recommended, as it can cause a client to recieve unexpected results.
+        /// This is not recommended, as it can cause a client to receive unexpected results.
         /// </summary>
         public IDataSource<T>? OverridePostSaveResultDataSource { get; protected set; }
 
         /// <summary>
         /// If set, this data source will be used in place of the supplied data source
         /// when reloading an object after a delete operation has completed.
-        /// This is not recommended, as it can cause a client to recieve unexpected results.
+        /// This is not recommended, as it can cause a client to receive unexpected results.
         /// </summary>
         public IDataSource<T>? OverridePostDeleteResultDataSource { get; protected set; }
 
@@ -188,7 +188,7 @@ namespace IntelliTect.Coalesce
         /// properties from the object based on its model type, although reflection is always an option as well.
         /// For behaviors on custom DTOs, a simple cast will allow access to all properties.
         /// </summary>
-        /// <param name="kind">Descriminator between a create and a update operation.</param>
+        /// <param name="kind">Discriminator between a create and a update operation.</param>
         /// <param name="dto">The incoming item from the client.</param>
         /// <returns></returns>
         public virtual ItemResult ValidateDto(SaveKind kind, IClassDto<T> dto)
@@ -202,7 +202,7 @@ namespace IntelliTect.Coalesce
         /// Any changes made to the properties of <c>item</c> will be persisted to the database.
         /// The return a failure result will halt the save operation and return any associated message to the client.
         /// </summary>
-        /// <param name="kind">Descriminator between a create and a update operation.</param>
+        /// <param name="kind">Discriminator between a create and a update operation.</param>
         /// <param name="oldItem">A shallow copy of the original item as it was retrieved from the database.
         /// If kind == SaveKind.Create, this will be null.</param>
         /// <param name="item">An entity instance with its properties set to incoming, new values.</param>
@@ -214,7 +214,7 @@ namespace IntelliTect.Coalesce
         /// Any changes made to the properties of <c>item</c> will be persisted to the database.
         /// The return a failure result will halt the save operation and return any associated message to the client.
         /// </summary>
-        /// <param name="kind">Descriminator between a create and a update operation.</param>
+        /// <param name="kind">Discriminator between a create and a update operation.</param>
         /// <param name="oldItem">A shallow copy of the original item as it was retrieved from the database.
         /// If kind == SaveKind.Create, this will be null.</param>
         /// <param name="item">An entity instance with its properties set to incoming, new values.</param>
@@ -226,7 +226,7 @@ namespace IntelliTect.Coalesce
         /// </summary>
         /// <typeparam name="TDto">
         ///     The type of the DTO that contains the data to be saved,
-        ///     and the type of DTO that the caller expects to recieve the results in.
+        ///     and the type of DTO that the caller expects to receive the results in.
         /// </typeparam>
         /// <param name="incomingDto">The DTO containing the properties to update.</param>
         /// <param name="dataSource">The data source that will be used when loading the item to be updated.</param>
@@ -328,7 +328,7 @@ namespace IntelliTect.Coalesce
         /// <summary>
         /// Executes the save action against the database and persists the changes.
         /// </summary>
-        /// <param name="kind">Descriminator between a create and a update operation.</param>
+        /// <param name="kind">Discriminator between a create and a update operation.</param>
         /// <param name="oldItem">A shallow copy of the original item as it was retrieved from the database.
         /// If kind == SaveKind.Create, this will be null.</param>
         /// <param name="item">An entity instance with its properties set to incoming, new values.</param>
@@ -338,7 +338,7 @@ namespace IntelliTect.Coalesce
         /// Code to run after a save has been committed to the database.
         /// Allows any cleanup code to run, as well as modification of the object that will be returned to the client.
         /// </summary>
-        /// <param name="kind">Descriminator between a create and a update operation.</param>
+        /// <param name="kind">Discriminator between a create and a update operation.</param>
         /// <param name="oldItem">A shallow copy of the original item as it was retrieved from the database.
         /// If kind == SaveKind.Create, this will be null.</param>
         /// <param name="item">

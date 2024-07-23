@@ -12,7 +12,6 @@
     #default="{ isDisabled, isReadonly, isValid }"
   >
     <v-field
-      persistent-clear
       :error="isValid.value === false"
       append-inner-icon="$dropdown"
       v-bind="fieldAttrs"

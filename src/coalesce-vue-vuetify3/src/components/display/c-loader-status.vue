@@ -35,7 +35,6 @@
         the progress loader and the placeholder independent of the 
         main outer transition between content/error/loaders -->
     <transition-group
-      v-if="showLoading || usePlaceholder"
       key="loading"
       class="c-loader-status--transition-group c-loader-status--progress-group"
       :class="{ absolute: progressAbsolute }"
@@ -43,7 +42,8 @@
       mode="out-in"
       tag="div"
       :style="{
-        '--c-loader-status-progress-height': height + 'px',
+        '--c-loader-status-progress-height':
+          (usePlaceholder || showLoading ? height : 0) + 'px',
       }"
     >
       <v-progress-linear
@@ -55,12 +55,6 @@
         :color="color"
       >
       </v-progress-linear>
-      <div
-        key="placeholder"
-        v-else
-        class="c-loader-status--progress-placeholder"
-        :style="{ height: height + 'px' }"
-      ></div>
     </transition-group>
 
     <div v-if="showContent" key="normal" class="c-loader-status--content">
@@ -171,7 +165,7 @@ const baselineFlags = computed(() => {
 });
 
 const loaderFlags = computed(() => {
-  var ret = [];
+  const ret = [];
 
   let loaders = props.loaders;
   if (Array.isArray(loaders)) {
@@ -299,7 +293,7 @@ defineExpose({ loaderFlags });
     // For example, test c-admin-method under various latency settings.
     .c-loader-status--progress-group {
       max-height: var(--c-loader-status-progress-height);
-      
+
       &.c-loader-status-fade-leave-from,
       &.c-loader-status-fade-leave-active {
         transition-duration: 0s;
@@ -321,7 +315,6 @@ defineExpose({ loaderFlags });
   opacity: 0;
 }
 .c-loader-status-fade-leave-active {
-  &.c-loader-status--progress-placeholder,
   &.c-loader-status--progress {
     position: absolute !important;
   }
@@ -332,7 +325,6 @@ defineExpose({ loaderFlags });
   // 1) This prevents progress bars from flashing in during very fast connections.
   // 2) This prevents progress bars from appearing before content disappears (if no-loading-content)
   &.c-loader-status--progress-group,
-  &.c-loader-status--progress-placeholder,
   &.c-loader-status--progress {
     transition-delay: 0.2s !important;
   }
@@ -345,7 +337,13 @@ defineExpose({ loaderFlags });
   font-weight: 400;
 
   .c-loader-status--progress-group {
+    transition-property: max-height, min-height;
+    transition-duration: 0.1s;
+    transition-timing-function: ease-in;
+    min-height: var(--c-loader-status-progress-height);
+    max-height: var(--c-loader-status-progress-height);
     position: relative;
+
     &.absolute {
       // Make the progress bar on c-loader-status overlap
       // so it doesn't add extra whitespace to the top of the row.

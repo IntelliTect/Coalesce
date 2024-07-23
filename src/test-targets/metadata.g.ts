@@ -2378,6 +2378,12 @@ export const Person = domain.types.Person = {
           },
           role: "value",
         },
+        hasEmail: {
+          name: "hasEmail",
+          displayName: "Has Email",
+          type: "boolean",
+          role: "value",
+        },
       },
     },
     withoutCases: {

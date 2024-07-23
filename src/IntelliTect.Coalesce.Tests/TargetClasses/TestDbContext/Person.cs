@@ -229,6 +229,9 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         [Coalesce]
         public List<Case.Statuses> AllowedStatuses { get; set; }
 
+        [Coalesce]
+        public bool HasEmail { get; set; }
+
         public override IQueryable<Person> GetQuery(IDataSourceParameters parameters)
         {
             Db.Cases

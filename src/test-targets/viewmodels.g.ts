@@ -621,7 +621,10 @@ export interface PersonViewModel extends $models.Person {
   casesReported: CaseViewModel[] | null;
   birthDate: Date | null;
   
-  /** Calculated name of the person. eg., Mr. Michael Stokesbary. */
+  /** 
+    Calculated name of the person. eg., Mr. Michael Stokesbary.
+    A concatenation of Title, FirstName, and LastName.
+  */
   name: string | null;
   
   /** Company ID this person is employed by */

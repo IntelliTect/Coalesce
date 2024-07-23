@@ -252,10 +252,13 @@ export function parseDateUserInput(
  * license: MIT
  */
 export function objectToQueryString(
-  a: Array<any> | { [s: string]: any } | null
+  a: Array<any> | { [s: string]: any } | null,
+  includeNull = true
 ) {
   var items: Array<any> = [];
   const add = function (key: string, value: any) {
+    if (!includeNull && value == null) return;
+
     value = value == null ? "" : value;
     items[items.length] =
       encodeURIComponent(key) +

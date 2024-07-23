@@ -408,10 +408,44 @@ describe("$invoke", () => {
     );
     await personList.$load();
 
+    // NOTE: This ensure that the `dataSource.allowedStatuses[]=` syntax is not used,
+    // which aspnetcore doesn't support.
+
     expect(AxiosClient.getUri(mock.mock.lastCall![0])).toBe(
       "/api/Person/list?page=1&pageSize=10&dataSource=NamesStartingWithAWithCases&dataSource.allowedStatuses=0&dataSource.allowedStatuses=1"
     );
-});
+  });
+
+  test.each([
+    [true, "&dataSource.hasEmail=true"],
+    [false, "&dataSource.hasEmail=false"],
+    // The parameter must be fully omitted for aspnetcore to not throw an error in modelbinding
+    [null, ""],
+    [undefined, ""],
+  ] as const)("data source bool parameter &s", async (value, expected) => {
+    const mock = mockEndpoint(
+      "/Person/list",
+      vitest.fn((req: AxiosRequestConfig) => {
+        return {
+          wasSuccessful: true,
+          list: [],
+        };
+      })
+    );
+
+    const personList = new PersonListViewModel();
+    personList.$dataSource = new Person.DataSources.NamesStartingWithAWithCases(
+      {
+        hasEmail: value,
+      }
+    );
+    await personList.$load();
+
+    expect(AxiosClient.getUri(mock.mock.lastCall![0])).toBe(
+      "/api/Person/list?page=1&pageSize=10&dataSource=NamesStartingWithAWithCases" +
+        expected
+    );
+  });
 });
 
 describe("$makeCaller", () => {

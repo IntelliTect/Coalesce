@@ -389,7 +389,10 @@ export interface Person extends Model<typeof metadata.Person> {
   casesReported: Case[] | null
   birthDate: Date | null
   
-  /** Calculated name of the person. eg., Mr. Michael Stokesbary. */
+  /** 
+    Calculated name of the person. eg., Mr. Michael Stokesbary.
+    A concatenation of Title, FirstName, and LastName.
+  */
   name: string | null
   
   /** Company ID this person is employed by */
@@ -429,6 +432,7 @@ export namespace Person {
     export class NamesStartingWithAWithCases implements DataSource<typeof metadata.Person.dataSources.namesStartingWithAWithCases> {
       readonly $metadata = metadata.Person.dataSources.namesStartingWithAWithCases
       allowedStatuses: Statuses[] | null = null
+      hasEmail: boolean | null = null
       
       constructor(params?: Omit<Partial<NamesStartingWithAWithCases>, '$metadata'>) {
         if (params) Object.assign(this, params);

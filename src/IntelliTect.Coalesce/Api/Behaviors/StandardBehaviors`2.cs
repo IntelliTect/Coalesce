@@ -42,7 +42,7 @@ namespace IntelliTect.Coalesce
         /// This may be overridden to change what action is actually performed against the database 
         /// on save of an item (e.g. setting a deleted flag instead of deleting the row).
         /// </summary>
-        /// <param name="kind">Descriminator between a create and a update operation.</param>
+        /// <param name="kind">Discriminator between a create and a update operation.</param>
         /// <param name="oldItem">A shallow copy of the original item as it was retrieved from the database.
         /// If kind == SaveKind.Create, this will be null.</param>
         /// <param name="item">An entity instance with its properties set to incoming, new values.</param>

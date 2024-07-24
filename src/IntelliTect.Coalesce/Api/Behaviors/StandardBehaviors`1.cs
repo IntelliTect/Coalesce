@@ -6,6 +6,7 @@ using IntelliTect.Coalesce.TypeDefinition;
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Reflection;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
@@ -95,11 +96,23 @@ namespace IntelliTect.Coalesce
             where TDto : class, IParameterDto<T>, new()
         {
             var dtoClassViewModel = Context.ReflectionRepository.GetClassViewModel<TDto>()!;
-            var dtoPkInfo = dtoClassViewModel.PrimaryKey ?? throw new InvalidOperationException("Data sources cannot save items that lack a PK");
+            var pk = ClassViewModel.PrimaryKey ?? throw new InvalidOperationException("Data sources cannot save items that lack a PK");
+            PropertyViewModel dtoPkInfo;
+
+            if (incomingDto is GeneratedParameterDto<T> genDto)
+            {
+                // For generated DTOs, simplify by matching the PK name since it will always match.
+                dtoPkInfo = dtoClassViewModel.PropertyByName(pk.Name)!;
+            }
+            else
+            {
+                // This path is really only for custom DTOs
+                dtoPkInfo = dtoClassViewModel.PrimaryKey ?? throw new InvalidOperationException("Data sources cannot save items that lack a PK");
+            }
 
             object? idValue = dtoPkInfo.PropertyInfo.GetValue(incomingDto);
 
-            if (ClassViewModel.PrimaryKey?.DatabaseGenerated == DatabaseGeneratedOption.None)
+            if (pk.DatabaseGenerated == DatabaseGeneratedOption.None)
             {
                 // PK is not database generated.
                 // We have to look for the existing object to determine if
@@ -129,7 +142,7 @@ namespace IntelliTect.Coalesce
             // !IsNullable handles non-Nullable<T> value types.
             if (dtoPkInfo.Type.IsReferenceOrNullableValue
                 ? idValue == null
-                : idValue!.Equals(Activator.CreateInstance(dtoClassViewModel.PrimaryKey.Type.TypeInfo)))
+                : idValue!.Equals(Activator.CreateInstance(dtoPkInfo.Type.TypeInfo)))
             {
                 return (SaveKind.Create, null);
             }

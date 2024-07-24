@@ -1,5 +1,7 @@
 ﻿using IntelliTect.Coalesce.Api;
+using IntelliTect.Coalesce.Models;
 using IntelliTect.Coalesce.Tests.Fixtures;
+using IntelliTect.Coalesce.Tests.TargetClasses;
 using IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext;
 using IntelliTect.Coalesce.Tests.Util;
 using Microsoft.EntityFrameworkCore;
@@ -20,11 +22,11 @@ namespace IntelliTect.Coalesce.Tests.Api.DataSources
         }
 
         private StandardDataSource<T, AppDbContext> Source<T>()
-            where T : class, new()
+            where T : class
             => new StandardDataSource<T, AppDbContext>(CrudContext);
 
         private StandardBehaviors<T, AppDbContext> Behaviors<T>()
-            where T : class, new()
+            where T : class
             => new StandardBehaviors<T, AppDbContext>(CrudContext);
 
         private class TransformDs : StandardDataSource<Case, AppDbContext>
@@ -79,6 +81,50 @@ namespace IntelliTect.Coalesce.Tests.Api.DataSources
             // Assert2: Entity saved as expected
             ds.Db.ChangeTracker.Clear();
             Assert.Equal("new desc", ds.Db.Cases.Single().Description);
+        }
+
+        [Fact]
+        public async Task DetermineSaveKindAsync_CanDeterminePkFromEfEntity()
+        {
+            // Arrange
+            var behaviors = Behaviors<RequiredAndInitModel>();
+
+            // Act
+            var result = await behaviors.DetermineSaveKindAsync(new RequiredAndInitModelParameterDto { Id = 42 }, Source<RequiredAndInitModel>(), new DataSourceParameters());
+
+            // Assert
+            Assert.Equal((SaveKind.Update, 42), result);
+        }
+
+        class RequiredAndInitModelParameterDto : GeneratedParameterDto<RequiredAndInitModel>
+        {
+            public int Id { get; set; }
+
+            public override void MapTo(RequiredAndInitModel obj, IMappingContext context) => throw new System.NotImplementedException();
+
+            public override RequiredAndInitModel MapToNew(IMappingContext context) => throw new System.NotImplementedException();
+        }
+
+        [Fact]
+        public async Task DetermineSaveKindAsync_CanDeterminePkFromStandaloneEntity()
+        {
+            // Arrange
+            var behaviors = Behaviors<StandaloneReadWrite>();
+
+            // Act
+            var result = await behaviors.DetermineSaveKindAsync(new StandaloneReadWriteDto { Id = 42 }, Source<StandaloneReadWrite>(), new DataSourceParameters());
+
+            // Assert
+            Assert.Equal((SaveKind.Update, 42), result);
+        }
+
+        class StandaloneReadWriteDto : GeneratedParameterDto<StandaloneReadWrite>
+        {
+            public int Id { get; set; }
+
+            public override void MapTo(StandaloneReadWrite obj, IMappingContext context) => throw new System.NotImplementedException();
+
+            public override StandaloneReadWrite MapToNew(IMappingContext context) => throw new System.NotImplementedException();
         }
     }
 }

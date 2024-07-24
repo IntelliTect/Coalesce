@@ -67,7 +67,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// </summary>
         public abstract bool IsReferenceType { get; }
 
-        public bool IsNullableValueType => !IsReferenceType && IsA(typeof(Nullable<>));
+        public bool IsNullableValueType => !IsReferenceType && IsA(typeof(Nullable<>)) && FirstTypeArgument is not null;
 
         public abstract bool IsClass { get; }
 
@@ -334,7 +334,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                         )?[0]
                         ?? FirstTypeArgument!;
                     }
-                    if (IsReferenceOrNullableValue)
+                    if (IsReferenceOrNullableValue && FirstTypeArgument is not null)
                     {
                         return FirstTypeArgument!;
                     }

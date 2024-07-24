@@ -57,4 +57,15 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
                 .HasValue<AbstractImpl>("impl");
         }
     }
+
+
+    public class TestBehaviors<T, TContext> : StandardBehaviors<T, TContext>
+        where T : class
+        where TContext : DbContext
+    {
+        public TestBehaviors(CrudContext<TContext> context) : base(context)
+        {
+        }
+    }
+
 }

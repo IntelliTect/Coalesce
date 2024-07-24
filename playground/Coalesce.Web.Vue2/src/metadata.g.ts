@@ -1818,6 +1818,19 @@ export const Person = domain.types.Person = {
       name: "NamesStartingWithAWithCases",
       displayName: "Names Starting With A With Cases",
       props: {
+        allowedStatuses: {
+          name: "allowedStatuses",
+          displayName: "Allowed Statuses",
+          type: "collection",
+          itemType: {
+            name: "$collectionItem",
+            displayName: "",
+            role: "value",
+            type: "enum",
+            get typeDef() { return domain.enums.Statuses },
+          },
+          role: "value",
+        },
       },
     },
     withoutCases: {

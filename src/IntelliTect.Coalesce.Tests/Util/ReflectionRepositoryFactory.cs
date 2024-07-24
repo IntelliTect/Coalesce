@@ -23,7 +23,7 @@ namespace IntelliTect.Coalesce.Tests.Util
         public static readonly IReadOnlyCollection<SyntaxTree> ModelSyntaxTrees = GetModelSyntaxTrees();
 
         internal static readonly CSharpCompilation Compilation = GetCompilation(new SyntaxTree[0]);
-        internal static readonly IEnumerable<ITypeSymbol> Symbols = GetAllSymbols();
+        internal static readonly List<ITypeSymbol> Symbols = GetAllSymbols();
 
         public static readonly ReflectionRepository Symbol = MakeFromSymbols();
         public static readonly ReflectionRepository Reflection = MakeFromReflection();
@@ -34,14 +34,20 @@ namespace IntelliTect.Coalesce.Tests.Util
         {
             var rr = new ReflectionRepository();
             rr.DiscoverCoalescedTypes(Symbols
-                .Where(s => 
+                .Where(s =>
                     // For classes inside the TargetClasses namespace, only include those from
                     // the symbol discovery assembly, not the copies that were included from the 
                     // assembly metadata of this very test assembly (IntelliTect.Coalesce.Tests),
                     // as the versions derived from assembly metadata behave slightly differently
                     // and are also just otherwise redundant.
-                    !s.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat).Contains("IntelliTect.Coalesce.Tests.TargetClasses") || 
-                    (s is IArrayTypeSymbol ats ? ats.ElementType : s).ContainingAssembly.MetadataName == SymbolDiscoveryAssemblyName
+                    s.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) is string fqn &&
+                    (
+                        (
+                            !fqn.Contains("IntelliTect.Coalesce.Tests.TargetClasses") //&&
+                           // !fqn.StartsWith("System.")
+                        ) || 
+                        (s is IArrayTypeSymbol ats ? ats.ElementType : s).ContainingAssembly?.MetadataName == SymbolDiscoveryAssemblyName
+                    )
                 )
                 .Select(s => new SymbolTypeViewModel(rr, s))
             );

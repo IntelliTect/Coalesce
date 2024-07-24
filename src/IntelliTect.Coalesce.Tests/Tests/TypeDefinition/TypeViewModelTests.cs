@@ -3,6 +3,7 @@ using IntelliTect.Coalesce.Tests.TargetClasses;
 using IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext;
 using IntelliTect.Coalesce.Tests.Util;
 using IntelliTect.Coalesce.TypeDefinition;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -249,6 +250,16 @@ namespace IntelliTect.Coalesce.Tests.TypeDefinition
                     Assert.Null(v.Description);
                 }
             );
+        }
+
+        [Theory]
+        [ClassViewModelData(typeof(TestBehaviors<,>))]
+        public void UnconstructedGeneric(ClassViewModelData data)
+        {
+            var type = data.TypeViewModel;
+            Assert.True(type.IsGeneric);
+            Assert.Equal(type, type.PureType);
+            Assert.Null(type.FirstTypeArgument);
         }
     }
 }

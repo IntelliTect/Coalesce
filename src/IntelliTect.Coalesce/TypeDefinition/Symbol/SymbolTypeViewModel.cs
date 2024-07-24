@@ -25,9 +25,14 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             Symbol = symbol;
 
-            FirstTypeArgument = IsGeneric
-                ? SymbolTypeViewModel.GetOrCreate(reflectionRepository, NamedSymbol.TypeArguments.First())
-                : null;
+            if (IsGeneric)
+            {
+                var typeArg = NamedSymbol.TypeArguments.First();
+                if (typeArg.Kind is not SymbolKind.ErrorType and not SymbolKind.TypeParameter)
+                {
+                    FirstTypeArgument = GetOrCreate(reflectionRepository, typeArg);
+                }
+            }
 
             ArrayType = IsArray
                 ? SymbolTypeViewModel.GetOrCreate(reflectionRepository, ((IArrayTypeSymbol)Symbol).ElementType)

@@ -106,7 +106,10 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     // For some reason, attribute checking can be really slow. We're talking ~350ms to determine that the DbContext type has a [Coalesce] attribute.
                     // Really not sure why, but lets parallelize to minimize that impact.
                     .AsParallel()
-                    .Where(type => type.HasAttribute<CoalesceAttribute>() || type.IsA(typeof(GeneratedParameterDto<>)))
+                    .Where(type => 
+                        !type.IsInternalUse &&
+                        (type.HasAttribute<CoalesceAttribute>() || type.IsA(typeof(GeneratedParameterDto<>)))
+                    )
                 );
             }
         }

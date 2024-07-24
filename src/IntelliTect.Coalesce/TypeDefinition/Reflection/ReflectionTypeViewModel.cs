@@ -107,7 +107,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public override bool IsInterface => Info.IsInterface;
 
-        public override bool IsInternalUse => base.IsInternalUse || !Info.IsVisible;
+        public override bool IsInternalUse => !Info.IsVisible || base.IsInternalUse;
 
         public override bool IsVoid => Info == typeof(void);
 

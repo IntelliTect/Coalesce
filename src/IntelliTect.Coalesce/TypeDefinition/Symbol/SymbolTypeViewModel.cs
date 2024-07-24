@@ -25,12 +25,12 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             Symbol = symbol;
 
-            FirstTypeArgument = IsGeneric && NamedSymbol.Arity > 0
+            FirstTypeArgument = IsGeneric
                 ? SymbolTypeViewModel.GetOrCreate(reflectionRepository, NamedSymbol.TypeArguments.First())
                 : null;
 
             ArrayType = IsArray
-                ? SymbolTypeViewModel.GetOrCreate(reflectionRepository, ((IArrayTypeSymbol)Symbol).ElementType) 
+                ? SymbolTypeViewModel.GetOrCreate(reflectionRepository, ((IArrayTypeSymbol)Symbol).ElementType)
                 : null;
 
             var types = new List<INamedTypeSymbol>();
@@ -68,7 +68,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public INamedTypeSymbol NamedSymbol => Symbol as INamedTypeSymbol ?? throw new InvalidCastException("Cannot cast to INamedTypeSymbol");
 
-        public override bool IsGeneric => (Symbol as INamedTypeSymbol)?.IsGenericType ?? false;
+        public override bool IsGeneric =>
+            Symbol is INamedTypeSymbol { IsGenericType: true, Arity: > 0 };
 
         public override bool IsAbstract => Symbol.IsAbstract;
 
@@ -84,8 +85,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public override bool IsInterface => Symbol.TypeKind == TypeKind.Interface;
 
-        public override bool IsInternalUse => base.IsInternalUse || 
-            (Symbol.DeclaredAccessibility != Accessibility.Public && Symbol.DeclaredAccessibility != Accessibility.NotApplicable);
+        public override bool IsInternalUse =>  
+            (Symbol.DeclaredAccessibility != Accessibility.Public && Symbol.DeclaredAccessibility != Accessibility.NotApplicable) ||
+            base.IsInternalUse;
 
         public override bool IsVoid => Symbol.SpecialType == SpecialType.System_Void;
 

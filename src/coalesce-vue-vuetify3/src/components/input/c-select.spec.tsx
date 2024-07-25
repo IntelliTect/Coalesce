@@ -227,6 +227,14 @@ describe("CSelect", () => {
     });
   });
 
+  test("autofocus applies to correct element", () => {
+    const wrapper = mountApp(() => <CSelect for="Course" autofocus></CSelect>);
+
+    const elements = wrapper.findAll("[autofocus]");
+    expect(elements).toHaveLength(1);
+    expect(elements[0].element).toBeInstanceOf(HTMLInputElement);
+  });
+
   describe("hint", () => {
     test("shows persistent hint", () => {
       const wrapper = mountApp(() => (

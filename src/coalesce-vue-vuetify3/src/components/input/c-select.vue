@@ -45,6 +45,7 @@
           v-model="mainValue"
           @focus="focused = true"
           @blur="focused = false"
+          :autofocus="autofocus"
           :disabled="isDisabled.value"
           :readonly="isReadonly.value"
           :placeholder="internalModelValue ? undefined : placeholder"
@@ -259,6 +260,7 @@ const props = withDefaults(
       ForeignKeyProperty | ModelReferenceNavigationProperty | ModelValue
     >;
 
+    autofocus?: boolean;
     clearable?: boolean;
     placeholder?: string;
     preselectFirst?: boolean;

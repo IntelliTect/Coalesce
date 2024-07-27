@@ -320,7 +320,7 @@ Methods can be annotated with attributes to control API exposure and TypeScript 
 The [[Coalesce]](/modeling/model-components/attributes/coalesce.md) attribute causes the method to be exposed via a generated API controller. This is not needed for methods defined on an interface marked with `[Service]` - Coalesce assumes that all methods on the interface are intended to be exposed. If this is not desired, create a new, more restricted interface with only the desired methods to be exposed.
 
 ### `[ControllerAction(Method = HttpMethod, VaryByProperty = string)]`
-The [[ControllerAction]](/modeling/model-components/attributes/controller-action.md) attribute controls how this method is exposed via HTTP. Can be used to customize the HTTP method/verb for the method, as well as caching behavior.
+The [[ControllerAction]](/modeling/model-components/attributes/controller-action.md) attribute controls how this method is exposed via HTTP. Can be used to customize the HTTP method/verb for the method, as well as caching behavior. On an instance method, by specifying the `HttpMethod.Get` Method argument, the instance of the object will not be saved. The `Post`, `Put`, `Delete`, and `Patch` Method arguments will save the instance object after the method completes as part of the controller action.
 
 ### `[Execute(string roles)]`
 The [[Execute]](/modeling/model-components/attributes/execute.md) attribute specifies which roles can execute this method from the generated API controller. Additional security restrictions that cannot be implemented with roles should be enforced with custom code in the method's implementation.

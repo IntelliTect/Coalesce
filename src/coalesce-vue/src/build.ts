@@ -555,21 +555,25 @@ export async function getCertPaths(certName?: string) {
 
     // Passing null to TLSSocket here doesn't seem to cause any errors.
     // Since we're not actually communicating over the socket, no reason to provide a real stream.
-    const socket = new TLSSocket(null as any, {
-      cert: certContent,
-    });
-    const cert = socket.getCertificate();
-    socket.destroy();
-
-    if (
-      cert &&
-      "valid_to" in cert &&
-      // Expires within 4 hours
-      (new Date(cert.valid_to).valueOf() - new Date().valueOf()) / 36e5 < 4
-    ) {
-      console.log(
-        "Local certs are expired, or almost expired. Will regenerate."
-      );
+    try {
+      const socket = new TLSSocket(null as any, {
+        cert: certContent,
+      });
+      const cert = socket.getCertificate();
+      socket.destroy();
+      if (
+        cert &&
+        "valid_to" in cert &&
+        // Expires within 4 hours
+        (new Date(cert.valid_to).valueOf() - new Date().valueOf()) / 36e5 < 4
+      ) {
+        console.log(
+          "Local certs are expired, or almost expired. Will regenerate."
+        );
+        valid = false;
+      }
+    } catch {
+      console.log("Local certs may be corrupted. Will regenerate.");
       valid = false;
     }
   }

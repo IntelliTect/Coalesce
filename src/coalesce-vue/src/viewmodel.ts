@@ -462,10 +462,7 @@ export abstract class ViewModel<
         "item",
         async function (this: ViewModel, c, overrideProps?: Partial<TModel>) {
           if (this.$hasError) {
-            throw Error(
-              "Cannot save - validation failed: " +
-                joinErrors(this.$getErrors())
-            );
+            throw Error(joinErrors(this.$getErrors()));
           }
 
           // Capture the dirty props before we set $isDirty = false;

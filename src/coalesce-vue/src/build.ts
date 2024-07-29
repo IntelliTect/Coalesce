@@ -408,14 +408,20 @@ function getHtmlTargetDir(config: ResolvedConfig) {
   return path.join(config.root, config.build.outDir);
 }
 async function writeHtml(server: ViteDevServer) {
-  const htmlSourceFileName = server.config.root + "/index.html";
-  const targetDir = getHtmlTargetDir(server.config);
+  const config = server.config;
+
+  const htmlSourceFileName = config.root + "/index.html";
+  const targetDir = getHtmlTargetDir(config);
 
   fs.mkdirSync(targetDir, { recursive: true });
 
   // Copy static public assets too
-  if (server.config.publicDir) {
-    copyDir(server.config.publicDir, targetDir);
+  if (
+    config.build.copyPublicDir &&
+    config.publicDir &&
+    fs.existsSync(config.publicDir)
+  ) {
+    copyDir(config.publicDir, targetDir);
   }
 
   if (fs.existsSync(htmlSourceFileName)) {
@@ -428,20 +434,22 @@ async function writeHtml(server: ViteDevServer) {
 
     try {
       await writeFile(path.join(targetDir, "index.html"), outputHtml, "utf-8");
-      server.config.logger.info(`  Coalesce: Wrote index.html to ${targetDir}`);
+      config.logger.info(`  Coalesce: Wrote index.html to ${targetDir}`);
     } catch (e) {
-      server.config.logger.error(
+      config.logger.error(
         `  Coalesce: Error writing index.html to ${targetDir}: ${e}`
       );
     }
   }
 }
 
-function copyDir(srcDir: string, destDir: string) {
-  if (!fs.existsSync(srcDir)) return;
-
+function copyDir(srcDir: string, destDir: string): void {
+  fs.mkdirSync(destDir, { recursive: true });
   for (const file of fs.readdirSync(srcDir)) {
     const srcFile = path.resolve(srcDir, file);
+    if (srcFile === destDir) {
+      continue;
+    }
     const destFile = path.resolve(destDir, file);
     const stat = fs.statSync(srcFile);
     if (stat.isDirectory()) {

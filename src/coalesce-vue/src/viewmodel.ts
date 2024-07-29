@@ -774,11 +774,7 @@ export abstract class ViewModel<
             if (errors.length) {
               // Somewhat user-friendly error: this could be shown in a c-loader-status
               // if a developer isn't eagerly checking validation before enabling a save button:
-              throw Error(
-                `Cannot save ${meta.displayName} ${
-                  model.$primaryKey || "<new>"
-                } - validation failed: ${joinErrors(errors)}`
-              );
+              throw Error(joinErrors(errors));
             }
           }
         }

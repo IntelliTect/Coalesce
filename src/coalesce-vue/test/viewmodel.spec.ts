@@ -168,9 +168,7 @@ describe("ViewModel", () => {
 
       expect(() => {
         return student[callerName].apply(student); // .apply() works around https://github.com/microsoft/TypeScript/issues/49866
-      }).rejects.toThrowError(
-        "- validation failed: Test Error 1, Test Error 2."
-      );
+      }).rejects.toThrowError("Test Error 1, Test Error 2.");
     });
   });
 

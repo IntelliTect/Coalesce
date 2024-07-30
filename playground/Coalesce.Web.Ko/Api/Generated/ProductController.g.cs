@@ -68,9 +68,10 @@ namespace Coalesce.Web.Ko.Api
         public virtual Task<ItemResult<ProductResponse>> BulkSave(
             [FromBody] BulkSaveRequest dto,
             [FromQuery] DataSourceParameters parameters,
+            IDataSource<Coalesce.Domain.Product> dataSource,
             [FromServices] IDataSourceFactory dataSourceFactory,
             [FromServices] IBehaviorsFactory behaviorsFactory)
-            => BulkSaveImplementation(dto, parameters, dataSourceFactory, behaviorsFactory);
+            => BulkSaveImplementation(dto, parameters, dataSource, dataSourceFactory, behaviorsFactory);
 
         [HttpPost("delete/{id}")]
         [Authorize]

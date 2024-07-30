@@ -111,6 +111,7 @@ namespace IntelliTect.Coalesce.Api.Controllers
         protected async Task<ItemResult<TDtoOut>> BulkSaveImplementation(
             BulkSaveRequest dto,
             DataSourceParameters parameters,
+            IDataSource<T> rootDataSource,
             IDataSourceFactory dataSourceFactory,
             IBehaviorsFactory behaviorsFactory
         )
@@ -279,7 +280,6 @@ namespace IntelliTect.Coalesce.Api.Controllers
                     else
                     {
                         // Read security is implemented by the generated controller action.
-                        var rootDataSource = dataSourceFactory.GetDataSource<T>(GeneratedForClassViewModel!, parameters.DataSource);
                         var rootResult = await GetImplementation(root.PrimaryKey, parameters, rootDataSource);
 
                         await tran.CommitAsync();

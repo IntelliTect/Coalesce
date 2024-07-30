@@ -132,9 +132,10 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                 b.Line($"{accessModifier} virtual Task<ItemResult<{Model.ResponseDtoTypeName}>> BulkSave(");
                 b.Indented($"[FromBody] BulkSaveRequest dto,");
                 b.Indented($"[FromQuery] DataSourceParameters parameters,");
+                b.Indented($"{dataSourceParameter},");
                 b.Indented($"[FromServices] IDataSourceFactory dataSourceFactory,");
                 b.Indented($"[FromServices] IBehaviorsFactory behaviorsFactory)");
-                b.Indented($"=> BulkSaveImplementation(dto, parameters, dataSourceFactory, behaviorsFactory);");
+                b.Indented($"=> BulkSaveImplementation(dto, parameters, dataSource, dataSourceFactory, behaviorsFactory);");
             }
 
             if (securityInfo.IsDeleteAllowed())

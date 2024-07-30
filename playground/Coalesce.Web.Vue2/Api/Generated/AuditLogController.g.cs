@@ -59,8 +59,9 @@ namespace Coalesce.Web.Vue2.Api
         public virtual Task<ItemResult<AuditLogResponse>> BulkSave(
             [FromBody] BulkSaveRequest dto,
             [FromQuery] DataSourceParameters parameters,
+            IDataSource<Coalesce.Domain.AuditLog> dataSource,
             [FromServices] IDataSourceFactory dataSourceFactory,
             [FromServices] IBehaviorsFactory behaviorsFactory)
-            => BulkSaveImplementation(dto, parameters, dataSourceFactory, behaviorsFactory);
+            => BulkSaveImplementation(dto, parameters, dataSource, dataSourceFactory, behaviorsFactory);
     }
 }

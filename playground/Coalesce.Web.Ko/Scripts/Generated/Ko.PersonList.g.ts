@@ -11,6 +11,12 @@ module ListViewModels {
         export class BOrCPeople extends Coalesce.DataSource<ViewModels.Person> {
         }
         export class NamesStartingWithAWithCases extends Coalesce.DataSource<ViewModels.Person> {
+            public allowedStatuses: KnockoutObservableArray<number> = ko.observableArray([]);
+            public saveToDto = () => {
+                var dto: any = {};
+                dto.allowedStatuses = this.allowedStatuses();
+                return dto;
+            }
         }
         export class WithoutCases extends Coalesce.DataSource<ViewModels.Person> {
         }

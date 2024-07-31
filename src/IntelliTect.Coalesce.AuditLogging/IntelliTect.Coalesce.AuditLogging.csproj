@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <Import Project="../Common.props" />
   <PropertyGroup>
     <Nullable>enable</Nullable>
@@ -11,9 +11,6 @@
     <ProjectReference Include="..\IntelliTect.Coalesce\IntelliTect.Coalesce.csproj" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net6.0' ">
-    <PackageReference Include="Z.EntityFramework.Plus.EFCore" Version="[6.101.2, 7.0.0)" />
-  </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'net8.0' ">
     <PackageReference Include="Z.EntityFramework.Plus.EFCore" Version="[8.101.2, 9.0.0)" />
   </ItemGroup>

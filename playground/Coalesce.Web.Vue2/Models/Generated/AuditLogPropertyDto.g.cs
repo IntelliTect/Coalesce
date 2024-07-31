@@ -79,8 +79,21 @@ namespace Coalesce.Web.Vue2.Models
         /// </summary>
         public override IntelliTect.Coalesce.AuditLogging.AuditLogProperty MapToNew(IMappingContext context)
         {
-            var entity = new IntelliTect.Coalesce.AuditLogging.AuditLogProperty();
-            MapTo(entity, context);
+            var includes = context.Includes;
+
+            var entity = new IntelliTect.Coalesce.AuditLogging.AuditLogProperty()
+            {
+                PropertyName = PropertyName,
+            };
+
+            if (OnUpdate(entity, context)) return entity;
+            if (ShouldMapTo(nameof(Id))) entity.Id = (Id ?? entity.Id);
+            if (ShouldMapTo(nameof(ParentId))) entity.ParentId = (ParentId ?? entity.ParentId);
+            if (ShouldMapTo(nameof(OldValue))) entity.OldValue = OldValue;
+            if (ShouldMapTo(nameof(OldValueDescription))) entity.OldValueDescription = OldValueDescription;
+            if (ShouldMapTo(nameof(NewValue))) entity.NewValue = NewValue;
+            if (ShouldMapTo(nameof(NewValueDescription))) entity.NewValueDescription = NewValueDescription;
+
             return entity;
         }
     }

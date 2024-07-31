@@ -118,7 +118,6 @@ namespace Coalesce.Web.Vue2.Api
                 _params.name,
                 out includeTree
             );
-            await Db.SaveChangesAsync();
             var _result = new ItemResult<PersonResponse>();
             _result.Object = Mapper.MapToDto<Coalesce.Domain.Person, PersonResponse>(_methodResult, _mappingContext, includeTree);
             return _result;
@@ -141,7 +140,6 @@ namespace Coalesce.Web.Vue2.Api
             }
             var item = itemResult.Object;
             var _methodResult = item.ChangeSpacesToDashesInName();
-            await Db.SaveChangesAsync();
             var _result = new ItemResult(_methodResult);
             return _result;
         }
@@ -209,7 +207,6 @@ namespace Coalesce.Web.Vue2.Api
             }
             var item = itemResult.Object;
             var _methodResult = item.GetBirthdate();
-            await Db.SaveChangesAsync();
             var _result = new ItemResult<System.DateTime>();
             _result.Object = _methodResult;
             return _result;
@@ -250,7 +247,6 @@ namespace Coalesce.Web.Vue2.Api
                 _params.date,
                 _params.time
             );
-            await Db.SaveChangesAsync();
             var _result = new ItemResult();
             return _result;
         }
@@ -303,7 +299,6 @@ namespace Coalesce.Web.Vue2.Api
             var _methodResult = item.FullNameAndAge(
                 Db
             );
-            await Db.SaveChangesAsync();
             var _result = new ItemResult<string>();
             _result.Object = _methodResult;
             return _result;
@@ -357,7 +352,6 @@ namespace Coalesce.Web.Vue2.Api
             var _methodResult = item.ObfuscateEmail(
                 Db
             );
-            await Db.SaveChangesAsync();
             var _result = new ItemResult<string>();
             _result.Object = _methodResult;
             return _result;
@@ -400,7 +394,6 @@ namespace Coalesce.Web.Vue2.Api
                 _params.firstName,
                 _params.title
             );
-            await Db.SaveChangesAsync();
             var _result = new ItemResult<PersonResponse>();
             _result.Object = Mapper.MapToDto<Coalesce.Domain.Person, PersonResponse>(_methodResult, _mappingContext, includeTree);
             return _result;

@@ -110,12 +110,12 @@ namespace Coalesce.Web.Vue2.Models
 
             var entity = new Coalesce.Domain.Company()
             {
+                Name = Name,
                 Address1 = Address1,
             };
 
             if (OnUpdate(entity, context)) return entity;
             if (ShouldMapTo(nameof(Id))) entity.Id = (Id ?? entity.Id);
-            if (ShouldMapTo(nameof(Name))) entity.Name = Name;
             if (ShouldMapTo(nameof(Address2))) entity.Address2 = Address2;
             if (ShouldMapTo(nameof(City))) entity.City = City;
             if (ShouldMapTo(nameof(State))) entity.State = State;

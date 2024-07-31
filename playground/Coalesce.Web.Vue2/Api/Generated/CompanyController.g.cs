@@ -119,7 +119,6 @@ namespace Coalesce.Web.Vue2.Api
                 _params.companyParam.MapToNew(_mappingContext),
                 _params.name
             );
-            await Db.SaveChangesAsync();
             var _result = new ItemResult();
             return _result;
         }

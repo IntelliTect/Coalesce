@@ -115,7 +115,6 @@ namespace Coalesce.Web.Vue2.Api
             var _methodResult = await item.AsyncMethodOnIClassDto(
                 _params.input
             );
-            await Db.SaveChangesAsync();
             var _result = new ItemResult<string>();
             _result.Object = _methodResult;
             return _result;

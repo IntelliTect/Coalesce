@@ -300,6 +300,10 @@ function showPickerMobile(event: MouseEvent) {
 }
 
 function showPicker(event: MouseEvent) {
+  if (!interactive.value) {
+    return;
+  }
+  
   // Firefox Desktop only has pickers for date-only inputs.
   // It has no time picker, which makes this essentially useless on firefox for those cases.
   if (

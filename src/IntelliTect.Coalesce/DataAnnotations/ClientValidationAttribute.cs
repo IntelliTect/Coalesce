@@ -18,6 +18,7 @@ namespace IntelliTect.Coalesce.DataAnnotations
         /// If true, even when these validation fail, it will still save the value. Default is false;
         /// If true the client handles these as warnings.
         /// </summary>
+        [Obsolete("AllowSave only affects the Knockout stack for Coalesce. It does not affect Vue applications.")]
         public bool AllowSave { get; set; } = false;
         public bool IsRequired { get; set; }
 
@@ -28,6 +29,7 @@ namespace IntelliTect.Coalesce.DataAnnotations
         public int MaxLength { get; set; } = int.MinValue;
 
         public string? Pattern { get; set; }
+        [Obsolete("This property only affects the Knockout stack for Coalesce. It does not affect Vue applications.")]
         public double Step { get; set; }
         public bool IsEmail { get; set; }
         public bool IsPhoneUs { get; set; }
@@ -35,25 +37,33 @@ namespace IntelliTect.Coalesce.DataAnnotations
         /// <summary>
         /// This is an unquoted string when converted to JS. Use '' to specify strings.
         /// </summary>
+        [Obsolete("This property only affects the Knockout stack for Coalesce. It does not affect Vue applications.")]
         public string? Equal { get; set; }
 
         /// <summary>
         /// This is an unquoted string when converted to JS. Use '' to specify strings.
         /// </summary>
+        [Obsolete("This property only affects the Knockout stack for Coalesce. It does not affect Vue applications.")]
         public string? NotEqual { get; set; }
+        [Obsolete("This property only affects the Knockout stack for Coalesce. It does not affect Vue applications.")]
         public bool IsDate { get; set; }
+        [Obsolete("This property only affects the Knockout stack for Coalesce. It does not affect Vue applications.")]
         public bool IsDateIso { get; set; }
+        [Obsolete("This property only affects the Knockout stack for Coalesce. It does not affect Vue applications.")]
         public bool IsNumber { get; set; }
+        [Obsolete("This property only affects the Knockout stack for Coalesce. It does not affect Vue applications.")]
         public bool IsDigit { get; set; }
 
         /// <summary>
         /// Allows specifying a name used in a custom validation. .extend({ CustomName: CustomValue })
         /// </summary>
+        [Obsolete("This property only affects the Knockout stack for Coalesce. It does not affect Vue applications.")]
         public string? CustomName { get; set; }
 
         /// <summary>
         /// Allows specifying a value used in a custom validation. .extend({ CustomName: CustomValue })
         /// </summary>
+        [Obsolete("This property only affects the Knockout stack for Coalesce. It does not affect Vue applications.")]
         public string? CustomValue { get; set; }
 
         /// <summary>

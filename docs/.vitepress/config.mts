@@ -191,20 +191,6 @@ export default defineConfig({
           },
         ].sort((a, b) => a.text.localeCompare(b.text)),
       },
-      {
-        text: "Knockout (legacy)",
-        collapsed: true,
-        items: [
-          autoTitle("/stacks/ko/overview"),
-          autoTitle("/stacks/ko/getting-started"),
-          autoTitle("/stacks/ko/client/view-model"),
-          autoTitle("/stacks/ko/client/list-view-model"),
-          autoTitle("/stacks/ko/client/external-view-model"),
-          autoTitle("/stacks/ko/client/methods"),
-          autoTitle("/stacks/ko/client/model-config"),
-          autoTitle("/stacks/ko/client/bindings"),
-        ],
-      },
     ],
 
     socialLinks: [

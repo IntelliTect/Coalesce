@@ -372,32 +372,6 @@ await viewModel.downloadPicture();
 ```
 
 </template>
-<template #knockout>
-
-The [TypeScript Method Objects](/stacks/ko/client/methods.md) for HTTP GET methods have a property `url`. This can be provided directly to your HTML, with the browser invoking the endpoint as normal.
-        
-``` ts
-var viewModel = new ViewModels.Person();
-viewModel.load(1);
-```
-``` html
-<img data-bind="attr: {src: downloadPicture.url }">
-```
-
-----
-Alternatively, the [TypeScript Method Objects](/stacks/ko/client/methods.md) for file-returning methods have a property `resultObjectUrl`. If the method is invoked programmatically (i.e. via `.invoke()` or `.invokeWithArgs()`), this property contains an [Object URL](https://developer.mozilla.org/en-US/docs/Web/API/URL/createObjectURL) that can be set as the `src` of an `image` or `video` HTML tag.
-
-``` ts
-var viewModel = new ViewModels.Person();
-viewModel.load(1, () => {
-    viewModel.downloadPicture.invoke();
-});
-```
-``` html
-<img data-bind="attr: {src: downloadPicture.resultObjectUrl }">
-```
-
-</template>
 </CodeTabs>
 
 

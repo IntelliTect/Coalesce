@@ -22,7 +22,7 @@ In general, you should only expose types that you have created so that you will 
 For each external type found in your application's model, Coalesce will generate:
 
 * A [Generated DTO](/stacks/agnostic/dtos.md)
-* A [TypeScript Model](/stacks/disambiguation/external-view-model.md)
+* A [TypeScript Model](/stacks/vue/layers/models.md)
 
 
 ## Example Data Model

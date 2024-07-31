@@ -70,21 +70,6 @@ list.$load(1);
 ```
 
 </template>
-<template #knockout>
-
-The [TypeScript ViewModels](/stacks/ko/client/view-model.md) and [TypeScript ListViewModels](/stacks/ko/client/list-view-model.md) each have a property called `dataSource`. These properties accept an instance of a `Coalesce.DataSource<T>`. Generated classes that satisfy this relationship for all the data sources that were defined in C# may be found in the `dataSources` property on an instance of a ViewModel or ListViewModel, or in `ListViewModels.<ModelName>DataSources`
-
-``` ts
-var viewModel = new ViewModels.Person();
-viewModel.dataSource = new viewModel.dataSources.IncludeFamily();
-viewModel.load(1);
-
-var list = new ListViewModels.PersonList();
-list.dataSource = new list.dataSources.NamesStartingWith();
-list.load();
-```
-
-</template>
 </CodeTabs>
 
 
@@ -115,7 +100,7 @@ public class NamesStartingWith : StandardDataSource<Person, AppDbContext>
 
 ### List Auto-loading
 
-You can setup [TypeScript List ViewModels](/stacks/disambiguation/list-view-model.md) to automatically reload from the server when data source parameters change:
+You can setup [TypeScript List ViewModels](/stacks/vue/layers/viewmodels.md) to automatically reload from the server when data source parameters change:
 
 <CodeTabs>
 <template #vue>
@@ -128,24 +113,10 @@ import { PersonListViewModel } from '@/viewmodels.g';
 
 const list = new PersonListViewModel;
 const dataSource = list.$dataSource = new Person.DataSources.NamesStartingWith
-list.$useAutoLoad(); // When using options API, use $startAutoLoad(this)
+list.$useAutoLoad(); // When using options API, use $startAutoLoad(this) instead.
 
 // Trigger a reload:
 dataSource.startsWith = "Jo";
-```
-
-</template>
-<template #knockout>
-
-The properties created on the TypeScript objects are observables so they may be bound to directly. In order to automatically reload a list when a data source parameter changes, you must explicitly subscribe to it:
-
-``` ts
-var list = new ListViewModels.PersonList();
-var dataSource = new list.dataSources.NamesStartingWith();
-dataSource.startsWith("Jo");
-dataSource.subscribe(list); // Enables automatic reloading.
-list.dataSource = dataSource;
-list.load();
 ```
 
 </template>
@@ -164,7 +135,7 @@ The standard data sources, `IntelliTect.Coalesce.StandardDataSource<T>` and its 
 
 When an object or list of objects is requested, the default behavior of the the `StandardDataSource` is to load all of the immediate relationships of the object (parent objects and child collections), as well as the far side of [many-to-many](attributes/many-to-many.md) relationships. This is performed in `StandardDataSource.GetQuery()`, so in order to suppress this behavior in a custom data source, don't build you query off of `base.GetQuery()`, but instead start directly from the `DbSet` for your entity when building your custom query.
 
-Clients can suppress this per-request by setting `includes = "none"` on your TypeScript [ViewModel](/stacks/disambiguation/view-model.md) or [ListViewModel](/stacks/disambiguation/list-view-model.md), but note this is not a security mechanism and should only be used to reduce payload size or improve response time.
+Clients can suppress this per-request by setting `.$includes = "none"` on your TypeScript [ViewModel](/stacks/vue/layers/viewmodels.md#viewmodels) or [ListViewModel](/stacks/vue/layers/viewmodels.md#listviewmodels), but note this is not a security mechanism and should only be used to reduce payload size or improve response time.
 
 On the server, you can suppress this behavior by placing `[Read(NoAutoInclude = true)]` on either an entire class (affecting all navigation properties of that type), or on specific navigation properties. When placed on a entity class that holds sensitive data, this can help ensure you don't accidentally leak records due to forgetting to customize the data sources of the types whose navigation properties reference your sensitive entity. 
 

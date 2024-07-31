@@ -1,6 +1,6 @@
 # Custom DTOs
 
-In addition to the generated [Generated C# DTOs](/stacks/agnostic/dtos.md) that Coalesce will create for you, you may also create your own implementations of an `IClassDto`. These types are first-class citizens in Coalesce - you will get a full suite of features surrounding them as if they were entities. This includes generated API Controllers, Admin Views, and full [TypeScript ViewModels](/stacks/disambiguation/view-model.md) and [TypeScript List ViewModels](/stacks/disambiguation/list-view-model.md).
+In addition to the generated [Generated C# DTOs](/stacks/agnostic/dtos.md) that Coalesce will create for you, you may also create your own implementations of an `IClassDto`. These types are first-class citizens in Coalesce - you will get a full suite of features surrounding them as if they were entities. This includes generated API Controllers, Admin Views, and full [TypeScript ViewModels](/stacks/vue/layers/viewmodels.md#viewmodels) and [TypeScript ListViewModels](/stacks/vue/layers/viewmodels.md#listviewmodels).
 
 The difference between a Custom DTO and the underlying entity that they represent is as follows:
 
@@ -144,7 +144,7 @@ public class CaseDtoSource : ProjectedDtoDataSource<Case, CaseDto, AppDbContext>
 
 ## Surgical Saves
 
-The [Vue ViewModels](../../stacks/vue/layers/viewmodels.md) support surgical saves through their `$saveMode` property, and [Knockout ViewModels](../../stacks/ko/client/view-model.md) through the [`saveIncludedFields` configuration](../../stacks/ko/client/model-config.md#viewmodelconfiguration).
+The [Vue ViewModels](../../stacks/vue/layers/viewmodels.md) are configured for surgical saves by default. This can be disabled through the [`$saveMode`](/stacks/vue/layers/viewmodels.md#member-_savemode) property.
 
 <!-- MARKER:surgical-saves-warning -->
 Surgical saves require DTOs on the server that are capable of determining which of their properties have been set by the model binder, as surgical saves are sent from the client by entirely omitting properties from the ``x-www-form-urlencoded`` body that is sent to the server.

@@ -82,4 +82,4 @@ monotonous to build:
 
 To get started with Coalesce, check out [Getting Started with Vue](/stacks/vue/getting-started.md).
 
-While Knockout.js is still supported by Coalesce, it is a deprecated option and not recommended for new projects. If you do still want to choose Knockout, click [here](/stacks/ko/getting-started.md).
+The legacy Knockout.js stack for Coalesce is no longer supported, and will be removed in a future release.

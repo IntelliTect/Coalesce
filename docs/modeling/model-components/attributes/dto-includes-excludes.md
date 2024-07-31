@@ -69,23 +69,6 @@ await personList.$load();
 ```
 
 </template>
-<template #knockout>
-
-``` ts
-var personList = new ListViewModels.PersonList();
-personList.includes = "Editor";
-personList.load(() => {
-    // objects in personList.items will not contain CreatedBy nor Department objects.
-});
-
-var personList2 = new ListViewModels.PersonList();
-personList2.includes = "details";
-personList2.load(() => {
-    // objects in personList2.items will be allowed to contain both CreatedBy and Department objects. Department will be allowed to include its other Person objects.
-});
-```
-
-</template>
 </CodeTabs>
 
 

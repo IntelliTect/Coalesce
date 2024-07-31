@@ -261,7 +261,7 @@ If a promise is returned, this promise will be awaited and will delay the settin
 
 <Prop def="invoke(...args: TArgs)" lang="ts" />
 
-The invoke function is a reference from the caller to itself. In other words, `caller.invoke === caller`. This exists to mirror the syntax of the Knockout generated method classes.
+The invoke function is a reference from the caller to itself. In other words, `caller.invoke === caller`.
 
 
 <Prop def="invokeWithArgs(args?: {})" lang="ts" />

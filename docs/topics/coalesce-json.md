@@ -49,7 +49,7 @@ A full example of a ``coalesce.json`` file, along with an explanation of each pr
         "configuration": "Debug",
     },
 
-    // The name of the root generator to use. Defaults to "Knockout".
+    // The name of the root generator to use.
     // Available values are "Vue" and "Knockout".
     "rootGenerator": "Vue",
             
@@ -66,25 +66,16 @@ A full example of a ``coalesce.json`` file, along with an explanation of each pr
         // A set of objects keyed by generator name.
         // Generator names may optionally be qualified by their full namespace.
         // All generators are listed when running 'dotnet coalesce' with '--verbosity debug'.
-        // For example, "Views" or "IntelliTect.Coalesce.CodeGeneration.Knockout.Generators.Views".
+        // For example, "Controllers" or "IntelliTect.Coalesce.CodeGeneration.Vue.Generators.Controllers".
         "GeneratorName": {
             // Optional: true if the generator should be disabled.
             "disabled": true,
             // Optional: Configures a path relative to the default output path for the generator
             // where that generator's output should be placed instead.
             "targetDirectory": "../DifferentFolder"
-        },
-        // Indentation for generated C# is configurable by type (API controllers, DTO classes and regular View controllers)
-        // It defaults to 4 spaces
-        "ApiController": {
+            // Optional: Indentation size
             "indentationSize": 2 
         },
-        "ClassDto": {
-            "indentationSize": 2 
-        },
-        "ViewController" : {
-            "indentationSize": 2
-        }
     }
 }
 ```

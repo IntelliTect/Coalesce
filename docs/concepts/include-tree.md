@@ -55,15 +55,6 @@ employee.$load(1);
 ```
 
 </template>
-<template #knockout>
-
-``` ts
-var employee = new ViewModels.Employee();
-employee.dataSource = new employee.dataSources.WithProjectsAndMembers();
-employee.load(1);
-```
-
-</template>
 </CodeTabs>
 
 If you're already familiar with the fact that an `IncludeTree` is implicitly created in this scenario, then imagine for a moment that this is not the case (if you're not familiar with this fact, then keep reading!).

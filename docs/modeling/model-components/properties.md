@@ -21,7 +21,7 @@ In cases where the foreign key is not named after the navigation property with `
 Collection navigation properties can be used in a straightforward manner. In the event where the inverse property on the other side of the relationship cannot be determined, `[InversePropertyAttribute]` will need to be used. [EF Core provides documentation](https://learn.microsoft.com/en-us/ef/core/modeling/relationships/mapping-attributes#inversepropertyattribute) on how to use this attribute. Errors will be displayed at generation time if an inverse property cannot be determined without the attribute. We recommend recommended that you declare the type of collection navigation properties as `ICollection<T>`.
 
 ### Non-mapped POCOs
-Properties of a type that are not on your `DbContext` will also have corresponding properties generated on the [TypeScript ViewModels](/stacks/disambiguation/view-model.md) typed as [TypeScript External ViewModels](/stacks/disambiguation/external-view-model.md), and the values of such properties will be sent with the object to the client when requested. Properties of this type will also be sent back to the server by the client when they are encountered (currently supported by the [Vue Stack](/stacks/vue/overview.md) only).
+Properties of a type that are not on your `DbContext` will also have corresponding properties generated on the [TypeScript ViewModels](/stacks/vue/layers/viewmodels.md#model-data-properties) typed as [Plain Models](/stacks/vue/layers/models.md), and the values of such properties will be sent with the object to the client when requested. Properties of this type will also be sent back to the server by the client when they are encountered.
 
 See [External Types](/modeling/model-types/external-types.md) for more information.
 
@@ -29,7 +29,7 @@ See [External Types](/modeling/model-types/external-types.md) for more informati
 Most common built-in primitive and scalar data types (numerics, strings, booleans, enums, `DateTime`, `DateTimeOffset`), and their nullable variants, are all supported as model properties.
 
 ### Getter-only Properties
-Any property that only has a getter will also have a corresponding property generated in the [TypeScript ViewModels](/stacks/disambiguation/view-model.md), but won't be sent back to the server during any save actions.
+Any property that only has a getter will also have a corresponding property generated in the [TypeScript ViewModels](/stacks/vue/layers/viewmodels.md#model-data-properties) and will receive values of the property from the server, but values won't be sent back to the server.
 
 If such a property is defined as an auto-property, the `[NotMapped]` attribute should be used to prevent EF Core from attempting to map such a property to your database.
 

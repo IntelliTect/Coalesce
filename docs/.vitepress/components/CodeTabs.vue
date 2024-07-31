@@ -1,6 +1,6 @@
 <template>
   <div class="code-tabs">
-    <div class="code-tabs__nav">
+    <div class="code-tabs__nav" v-if="Object.keys(actualLanguages).length > 1">
       <ul class="code-tabs__ul">
         <li
           v-for="(name, shorthand) in actualLanguages"
@@ -18,6 +18,7 @@
         </li>
       </ul>
     </div>
+    <div v-else class="code-tabs__nav"> &nbsp;</div>
 
     <div
       :key="shorthand"
@@ -121,7 +122,7 @@ import { reactive, effect } from 'vue'
 
 const options = {
   groups: {
-    default: { vue: "Vue", knockout: "Knockout" },
+    default: { vue: "Vue" },
     vue: { options: "Options API", setup: "Composition API" },
     'vue-bundler': { 'vue-cli': 'Vue CLI', vite: 'Vite'}
   },

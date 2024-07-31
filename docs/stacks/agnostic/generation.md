@@ -57,8 +57,3 @@ See [Generated C# DTOs](/stacks/agnostic/dtos.md) for more information.
 ### Frontend - Vue
 
 An overview of the Vue generated code can be found at [Vue Overview](/stacks/vue/overview.md).
-
-### Frontend - Knockout
-
-An overview of the legacy Knockout generated code can be found at [Knockout Overview](/stacks/ko/overview.md).
-

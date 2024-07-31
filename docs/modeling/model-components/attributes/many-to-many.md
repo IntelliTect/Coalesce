@@ -8,7 +8,7 @@ support automatic intermediate mapping tables, this field is used to
 allow for direct reference of the many-to-many collections from the
 ViewModel.
 
-The named specified in the attribute will be used as the name of a collection of the objects on the other side of the relationship in the generated [TypeScript ViewModels](/stacks/disambiguation/view-model.md). 
+The named specified in the attribute will be used as the name of a collection of the objects on the other side of the relationship in the generated [TypeScript ViewModels](/stacks/vue/layers/viewmodels.md#model-data-properties). 
 
 ## Example Usage
 

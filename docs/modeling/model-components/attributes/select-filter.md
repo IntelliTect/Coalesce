@@ -7,7 +7,7 @@ deprecated: true
 ::: warning
 This attribute only affects the generated Knockout HTML views - it does not enforce any relational rules in your data.
 
-This attribute also currently has no effect against the Vue stack.
+This attribute also has no effect against the Vue stack.
 :::
 
 Specify a property to restrict dropdown menus by. Values presented will

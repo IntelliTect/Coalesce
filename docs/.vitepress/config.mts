@@ -83,6 +83,23 @@ export default defineConfig({
       { text: "Guide", link: "/introduction", activeMatch: "/.+" },
     ],
 
+    socialLinks: [
+      { icon: "github", link: "https://github.com/IntelliTect/Coalesce" },
+    ],
+
+    search: {
+      provider: "algolia",
+      options: {
+        appId: "SDGLJOI8GP",
+        apiKey: "7aac3b70e2be40bd6bb55bc603e7bf46",
+        indexName: "coalesce",
+      },
+    },
+
+    editLink: {
+      pattern: 'https://github.com/IntelliTect/Coalesce/blob/dev/docs/:path'
+    },
+
     sidebar: [
       {
         text: "Introduction",
@@ -192,18 +209,5 @@ export default defineConfig({
         ].sort((a, b) => a.text.localeCompare(b.text)),
       },
     ],
-
-    socialLinks: [
-      { icon: "github", link: "https://github.com/IntelliTect/Coalesce" },
-    ],
-
-    search: {
-      provider: "algolia",
-      options: {
-        appId: "SDGLJOI8GP",
-        apiKey: "7aac3b70e2be40bd6bb55bc603e7bf46",
-        indexName: "coalesce",
-      },
-    },
   },
 });

@@ -1499,7 +1499,7 @@ describe("ViewModel", () => {
     test("triggers save immediately if model lacks a PK", async () => {
       /*
         Rationale: In coalesce-vue, autosave is always an explicit choice that is made.
-        This is in contrast to Knockout, where autosave is always on by default for all ViewModel instances.
+        This is in contrast to Knockout, where autosave was always on by default for all ViewModel instances.
 
         In Knockout, you wouldn't want to have a new record created in your DB 
         just because instantiated some ViewModel, especially if that ViewModel isn't attached

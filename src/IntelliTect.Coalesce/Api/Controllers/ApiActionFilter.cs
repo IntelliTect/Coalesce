@@ -33,9 +33,6 @@ namespace IntelliTect.Coalesce.Api.Controllers
 
                 if (errors.Any())
                 {
-                    // Lots of client methods in the knockout typescript aren't expecting an object that looks like this.
-                    // Anything that takes a SaveResult or ListResult should be fine, but other things (Count) won't handle this.
-                    // The Vue typescript should handle this just fine.
                     context.Result = new BadRequestObjectResult(
                         new ApiResult(string.Join("\n; ", errors.Select(e => string.IsNullOrWhiteSpace(e.key) ? e.error : $"{e.key}: {e.error}")))
                     );

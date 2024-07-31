@@ -143,12 +143,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public bool IsManytoManyCollection => Type.IsCollection && this.HasAttribute<ManyToManyAttribute>();
 
         /// <summary>
-        /// True if the client should save data when there is a ClientValidation error. False is default.
-        /// </summary>
-        public bool ClientValidationAllowSave =>
-            this.GetAttributeValue<ClientValidationAttribute, bool>(a => a.AllowSave) ?? false;
-
-        /// <summary>
         /// Returns the name of the collection to map as a direct many-to-many collection
         /// </summary>
         public string? ManyToManyCollectionName => this.GetAttributeValue<ManyToManyAttribute>(a => a.CollectionName);

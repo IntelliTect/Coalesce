@@ -121,7 +121,7 @@ namespace Coalesce.Domain
         /// <summary>
         /// Company ID this person is employed by
         /// </summary>
-        [ClientValidation(IsRequired = true, AllowSave = false)]
+        [ClientValidation(IsRequired = true)]
         public int CompanyId { get; set; }
 
         /// <summary>

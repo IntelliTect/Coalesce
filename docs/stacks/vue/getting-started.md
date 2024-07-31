@@ -34,13 +34,13 @@ npm ci
 ## Project Structure
 
 ::: tip Important
-The Vue template is based on [Vite](https://vitejs.dev/). You are strongly encouraged to read through at least the first few pages of the [Vite Documentation](https://vitejs.dev/guide/) before getting started on any development.
+The frontend build system uses [Vite](https://vitejs.dev/). You are strongly encouraged to read through at least the first few pages of the [Vite Documentation](https://vitejs.dev/guide/) before getting started on any development.
 :::
 
-The structure of the Web project follows the conventions of both ASP.NET Core and Vite. The Vue-specific folders are as follows:
+The structure of the Web project follows the conventions of both ASP.NET Core and Vite. The frontend-specific folders are as follows:
 
 - ``/src`` - Files that should be compiled into your frontend application. CSS/SCSS, TypeScript, Vue SFCs, and so on.
-- ``/public`` - Static assets that should be served as files. Includes index.html, the root document of the application.
+- ``/public`` - Static assets that should be served as files.
 - ``/wwwroot`` - Target for compiled output. This directory is excluded from git.
 
 During development, no special tooling is required to build your frontend code. Coalesce's ``UseViteDevelopmentServer`` in ASP.NET Core will take care of that automatically when the application starts. Just make sure NPM packages have been installed (`npm ci`).

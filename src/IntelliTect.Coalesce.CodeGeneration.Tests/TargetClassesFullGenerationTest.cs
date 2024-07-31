@@ -1,7 +1,6 @@
 using IntelliTect.Coalesce.Api.Behaviors;
 using IntelliTect.Coalesce.Api.DataSources;
 using IntelliTect.Coalesce.CodeGeneration.Generation;
-using IntelliTect.Coalesce.CodeGeneration.Knockout.Generators;
 using IntelliTect.Coalesce.CodeGeneration.Vue.Generators;
 using IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext;
 using IntelliTect.Coalesce.Tests.Util;
@@ -112,19 +111,6 @@ namespace IntelliTect.Coalesce.CodeGeneration.Tests
                 workingDirectory: workingDirectory,
                 tsVersion: tsVersion
             );
-        }
-
-        [Fact]
-        public async Task KnockoutOutputCompiles()
-        {
-            var executor = BuildExecutor();
-
-            var suite = executor.CreateRootGenerator<KnockoutSuite>()
-                .WithModel(ReflectionRepositoryFactory.Symbol);
-            suite = await ConfigureAndValidateSuite(suite);
-            await suite.GenerateAsync();
-
-            await AssertSuiteCSharpOutputCompiles(suite);
         }
 
         [Fact]

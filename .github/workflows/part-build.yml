@@ -111,31 +111,6 @@ jobs:
         path: out/packages
 
 
-
-  validate-ko-playground: 
-    needs: meta
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: playground/Coalesce.Web.Ko
-      
-    steps:
-    - uses: actions/checkout@v3
-    
-    - name: Setup dotnet
-      uses: actions/setup-dotnet@v2
-      with:
-        dotnet-version: | 
-          6.0.x
-          8.0.x
-        include-prerelease: true
-
-    - run: npm ci
-    - run: npx gulp coalesce
-    - run: npx gulp copyAll
-    - run: dotnet build --configuration Release
-
-
   validate-vue2-playground: 
     needs: meta
     runs-on: ubuntu-latest

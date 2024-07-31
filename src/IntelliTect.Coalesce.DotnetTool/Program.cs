@@ -88,11 +88,10 @@ namespace IntelliTect.Coalesce.Cli
             // TODO: dynamic resolution of the specific generator.
             // For now, we hard-reference all of them and then try and match one of them.
             // This may ultimately be the best approach in the long run, since it lets us easily do partial matching as below:
-            var rootGeneratorName = config.RootGenerator ?? "Knockout";
+            var rootGeneratorName = config.RootGenerator ?? "Vue";
             var rootGenerators = new[]
             {
                 typeof(CodeGeneration.Vue.Generators.VueSuite),
-                typeof(CodeGeneration.Knockout.Generators.KnockoutSuite),
             };
 
             Type rootGenerator =

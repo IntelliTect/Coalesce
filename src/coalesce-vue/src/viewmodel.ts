@@ -2480,7 +2480,7 @@ export function updateViewModelFromModel<
             }
 
             // Check if target.$parent is the expected value of this navigation prop,
-            // and if it is, update $parent. (The KO stack does this too).
+            // and if it is, update $parent. (The KO stack did this too).
             const parent = target.$parent;
             const newValue =
               currentValue ?? (target[propName] as any as ViewModel);

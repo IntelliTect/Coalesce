@@ -19,11 +19,6 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Utils
 
         public string TsType(string modelPrefix = null, bool viewModel = false)
         {
-            // TODO: expand this pattern to the knockout generation,
-            // and make a base class that for the common bits (strings are always strings, for example).
-
-            // This class (VueType) is a start towards that, but it needs more work for sure.
-
             modelPrefix = modelPrefix != null ? modelPrefix + "." : "";
 
             return TsType(type, modelPrefix, viewModel);

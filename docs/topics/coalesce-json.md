@@ -50,7 +50,7 @@ A full example of a ``coalesce.json`` file, along with an explanation of each pr
     },
 
     // The name of the root generator to use.
-    // Available values are "Vue" and "Knockout".
+    // The only current available value is "Vue" (default).
     "rootGenerator": "Vue",
             
     // If set, specifies a list of whitelisted root type names that will restrict

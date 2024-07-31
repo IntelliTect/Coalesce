@@ -1,9 +1,0 @@
-{
-  "compilerOptions": {
-    "strict": true,
-    "noEmitOnError": true,
-    "module": "system",
-    "target": "es5"
-  },
-  "include": ["Templates/Scripts"]
-}

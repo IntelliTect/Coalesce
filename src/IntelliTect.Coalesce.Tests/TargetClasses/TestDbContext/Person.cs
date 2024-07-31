@@ -14,9 +14,6 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
 {
     [Edit(PermissionLevel = SecurityPermissionLevels.AllowAll)]
     [Table("Person")]
-#pragma warning disable CS0618 // Type or member is obsolete
-    [TypeScriptPartial]
-#pragma warning restore CS0618 // Type or member is obsolete
     public class Person
     {
         public enum Genders
@@ -108,7 +105,7 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         /// <summary>
         /// Company ID this person is employed by
         /// </summary>
-        [ClientValidation(IsRequired = true, AllowSave = false)]
+        [ClientValidation(IsRequired = true)]
         public int CompanyId { get; set; }
 
         /// <summary>

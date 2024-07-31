@@ -903,7 +903,7 @@ class DisplayVisitor extends Visitor<
 }
 
 /** Singleton instance of `GetDisplayVisitor` to be used when no options are provided. */
-const displayVisitor = new DisplayVisitor();
+const defaultDisplayVisitor = new DisplayVisitor();
 
 /**
  * Given a model instance, return a string representation of the instance suitable for display.
@@ -918,10 +918,9 @@ export function modelDisplay<T extends Model<TMeta>, TMeta extends ClassType>(
     throw `Object has no $metadata property`;
   }
 
-  return (options ? new DisplayVisitor(options) : displayVisitor).visitObject(
-    item,
-    modelMeta
-  );
+  return (
+    options ? new DisplayVisitor(options) : defaultDisplayVisitor
+  ).visitObject(item, modelMeta);
 }
 
 /**
@@ -938,10 +937,9 @@ export function propDisplay<T extends Model<TMeta>, TMeta extends ClassType>(
   const propMeta = resolvePropMeta(item.$metadata, prop);
 
   var value = (item as Indexable<T>)[propMeta.name];
-  return (options ? new DisplayVisitor(options) : displayVisitor).visitValue(
-    value,
-    propMeta
-  );
+  return (
+    options ? new DisplayVisitor(options) : defaultDisplayVisitor
+  ).visitValue(value, propMeta);
 }
 
 /**
@@ -955,10 +953,9 @@ export function valueDisplay(
   metadata: Value,
   options?: DisplayOptions | null
 ) {
-  return (options ? new DisplayVisitor(options) : displayVisitor).visitValue(
-    value,
-    metadata
-  );
+  return (
+    options ? new DisplayVisitor(options) : defaultDisplayVisitor
+  ).visitValue(value, metadata);
 }
 
 const coalescePendingQuery = Symbol();

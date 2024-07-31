@@ -39,6 +39,7 @@ import {
   mapToModel,
   mapToDtoFiltered,
   mapToDto,
+  DisplayOptions,
 } from "./model.js";
 import {
   type Indexable,
@@ -1174,11 +1175,15 @@ export abstract class ViewModel<
   /**
    * Returns a string representation of the object, or one of its properties, suitable for display.
    * @param prop If provided, specifies a property whose value will be displayed.
+   * @param options Options for formatting the displayed value.
    * If omitted, the whole object will be represented.
    */
-  public $display(prop?: PropertyOrName<TModel["$metadata"]>) {
-    if (!prop) return modelDisplay(this);
-    return propDisplay(this, prop);
+  public $display(
+    prop?: PropertyOrName<TModel["$metadata"]>,
+    options?: DisplayOptions
+  ) {
+    if (!prop) return modelDisplay(this, options);
+    return propDisplay(this, prop, options);
   }
 
   /**

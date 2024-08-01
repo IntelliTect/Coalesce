@@ -1,6 +1,5 @@
 ﻿using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
-using Z.EntityFramework.Plus;
 
 namespace IntelliTect.Coalesce.AuditLogging.Tests;
 

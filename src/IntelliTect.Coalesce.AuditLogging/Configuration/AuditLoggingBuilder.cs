@@ -1,8 +1,6 @@
-﻿using IntelliTect.Coalesce.DataAnnotations;
-using Microsoft.Extensions.Caching.Memory;
+﻿using Microsoft.Extensions.Caching.Memory;
 using System;
 using System.Reflection;
-using Z.EntityFramework.Plus;
 
 namespace IntelliTect.Coalesce.AuditLogging;
 
@@ -54,7 +52,7 @@ public class AuditLoggingBuilder<TAuditLog>
 
     /// <summary>
     /// <para>
-    /// Configure type and property exclusions and property formatting rules with Z.EntityFramework.Plus.
+    /// Configure type and property exclusions and property formatting rules.
     /// </para>
     /// <para>
     /// The provided configuration delegate should be static. If dynamic configuration is needed (highly unlikely),

@@ -3,32 +3,191 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata;
 using System;
-using System.Buffers;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-using Z.EntityFramework.Plus;
 
-using DescriptionStore = System.Collections.Generic.Dictionary<(Z.EntityFramework.Plus.AuditEntry, string), string?>;
+// TODO: integrate this into AuditEntry.
+// TODO: Configuration tests
+using DescriptionStore = System.Collections.Generic.Dictionary<(IntelliTect.Coalesce.AuditLogging.AuditEntry, string), string?>;
 
 namespace IntelliTect.Coalesce.AuditLogging.Internal;
 
-internal class CoalesceAudit : Audit
+public class CoalesceAudit
 {
+    internal CoalesceAudit(AuditConfiguration configuration)
+    {
+        Configuration = configuration;
+    }
+
+    public List<AuditEntry> Entries { get; } = [];
+
+    internal AuditConfiguration Configuration { get; }
+
     internal DescriptionStore? OldValueDescriptions;
     internal DescriptionStore? NewValueDescriptions;
     private HashSet<(AuditEntry, INavigationBase)>? HasChanged;
+
+    public void PreSaveChanges(DbContext context)
+    {
+        var audit = this;
+        var config = audit.Configuration;
+
+        context.ChangeTracker.DetectChanges();
+        foreach (EntityEntry item in context.ChangeTracker
+            .Entries()
+            .Where(x => x.State is EntityState.Added or EntityState.Modified or EntityState.Deleted)
+        )
+        {
+            if (!config.IsAuditedEntity(item)) continue;
+
+            AuditEntry auditEntry;
+            switch (item.State)
+            {
+                case EntityState.Added:
+                    audit.Entries.Add(new()
+                    {
+                        Parent = audit,
+                        Entry = item,
+                        State = AuditEntryState.EntityAdded
+                    });
+                    break;
+
+                case EntityState.Deleted:
+                    auditEntry = new()
+                    {
+                        Parent = audit,
+                        Entry = item,
+                        State = AuditEntryState.EntityDeleted
+                    };
+                    audit.Entries.Add(auditEntry);
+
+                    AuditEntityDeleted(auditEntry, item);
+                    break;
+
+                case EntityState.Modified:
+                    auditEntry = new()
+                    {
+                        Parent = audit,
+                        Entry = item,
+                        State = AuditEntryState.EntityModified
+                    };
+                    audit.Entries.Add(auditEntry);
+
+                    AuditEntityModified(audit, auditEntry, item);
+                    break;
+            }
+        }
+    }
+
+    public void PostSaveChanges()
+    {
+        foreach (var auditEntry in Entries)
+        {
+            switch (auditEntry.State)
+            {
+                case AuditEntryState.EntityAdded:
+                    foreach (var propertyEntry in auditEntry.Entry.Properties)
+                    {
+                        if (!propertyEntry.Metadata.IsKey() && (!auditEntry.Parent.Configuration.IsAuditedProperty(propertyEntry)))
+                        {
+                            continue;
+                        }
+
+                        object? newValue = propertyEntry.CurrentValue;
+                        if (auditEntry.Parent.Configuration.IgnoreAddedDefaultValues && 
+                            propertyEntry.Metadata.FieldInfo != null && 
+                            propertyEntry.Metadata.FieldInfo.FieldType != typeof(object) && 
+                            propertyEntry.CurrentValue != null
+                        )
+                        {
+                            object? obj = DefaultValue(propertyEntry.Metadata.FieldInfo.FieldType);
+                            if (obj != null && obj.Equals(propertyEntry.CurrentValue))
+                            {
+                                newValue = null;
+                            }
+                        }
+
+                        AuditEntryProperty auditEntryProperty = new()
+                        {
+                            Parent = auditEntry,
+                            PropertyEntry = propertyEntry,
+                            NewValue = newValue
+                        };
+                        auditEntry.Properties.Add(auditEntryProperty);
+                    }
+
+                    break;
+                case AuditEntryState.EntityModified:
+                    if (auditEntry.Entry.State == EntityState.Detached)
+                    {
+                        auditEntry.State = AuditEntryState.EntityDeleted;
+                        auditEntry.Properties.RemoveAll((x) => !x.PropertyEntry.Metadata.IsKey());
+                        break;
+                    }
+
+                    foreach (var property in auditEntry.Properties)
+                    {
+                        property.NewValue = property.PropertyEntry.CurrentValue;
+                    }
+
+                    break;
+            }
+        }
+    }
+
+    private void AuditEntityDeleted(AuditEntry entry, EntityEntry objectStateEntry)
+    {
+        foreach (var propertyEntry in objectStateEntry.Properties)
+        {
+            if (!propertyEntry.Metadata.IsKey() && !entry.Parent.Configuration.IsAuditedProperty(propertyEntry))
+            {
+                continue;
+            }
+
+            entry.Properties.Add(new()
+            {
+                Parent = entry,
+                PropertyEntry = propertyEntry,
+                OldValue = propertyEntry.OriginalValue
+            });
+        }
+    }
+
+    private void AuditEntityModified(CoalesceAudit audit, AuditEntry entry, EntityEntry objectStateEntry)
+    {
+        foreach (var propertyEntry in objectStateEntry.Properties)
+        {
+            if (!propertyEntry.Metadata.IsKey() && (
+                (!entry.Parent.Configuration.IsAuditedProperty(propertyEntry)) ||
+                object.Equals(propertyEntry.CurrentValue, propertyEntry.OriginalValue)
+            ))
+            {
+                continue;
+            }
+
+            AuditEntryProperty auditEntryProperty = new()
+            {
+                Parent = entry,
+                OldValue = propertyEntry.OriginalValue,
+                PropertyEntry = propertyEntry
+            };
+            entry.Properties.Add(auditEntryProperty);
+        }
+    }
+
+    internal static object? DefaultValue(Type type) => type.IsValueType ? Activator.CreateInstance(type) : null;
 
     internal async ValueTask PopulateOldDescriptions(DbContext db, bool async)
     {
         foreach (var entry in Entries)
         {
-            if (entry.State == Z.EntityFramework.Plus.AuditEntryState.EntityAdded) continue;
+            if (entry.State == AuditEntryState.EntityAdded) continue;
             foreach (var refNav in entry.Entry.References)
             {
-                if (entry.State == Z.EntityFramework.Plus.AuditEntryState.EntityModified)
+                if (entry.State == AuditEntryState.EntityModified)
                 {
                     if (!refNav.IsModified) continue;
 
@@ -45,10 +204,10 @@ internal class CoalesceAudit : Audit
     {
         foreach (var entry in Entries)
         {
-            if (entry.State == Z.EntityFramework.Plus.AuditEntryState.EntityDeleted) continue;
+            if (entry.State == AuditEntryState.EntityDeleted) continue;
             foreach (var refNav in entry.Entry.References)
             {
-                if (entry.State == Z.EntityFramework.Plus.AuditEntryState.EntityModified)
+                if (entry.State == AuditEntryState.EntityModified)
                 {
                     // We're capturing the new descriptions, but the navigation wasn't modified. Do nothing.
                     // We can't use refNav.IsModified here because we're in the post-save, so it'll always be false.

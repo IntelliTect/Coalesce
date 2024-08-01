@@ -18,6 +18,25 @@ namespace IntelliTect.Coalesce.Utilities
             return propertyLambda.GetExpressedProperty(typeof(T));
         }
 
+        public static IEnumerable<PropertyInfo> GetExpressedProperties<T>(this Expression<Func<T, object?>> propertyLambda)
+        {
+            ParameterExpression parameterExpression = propertyLambda.Parameters.Single();
+            if (propertyLambda.Body is NewExpression newExpression)
+            {
+                return newExpression.Arguments.Select((Expression x) =>
+                {
+                    if (x is not MemberExpression me)
+                    {
+                        throw new ArgumentException("Invalid expression " + propertyLambda);
+                    }
+
+                    return me.Member as PropertyInfo ?? throw new ArgumentException("Invalid member " + me.Member.ToString());
+                });
+            }
+
+            return [GetExpressedProperty(propertyLambda)];
+        }
+
         public static MemberInfo GetExpressedMember(this LambdaExpression memberLambda)
         {
             MemberExpression? member;
@@ -39,7 +58,7 @@ namespace IntelliTect.Coalesce.Utilities
             return member.Member;
         }
 
-        public static PropertyInfo GetExpressedProperty(this LambdaExpression lambda, Type? paramType)
+        public static PropertyInfo GetExpressedProperty(this LambdaExpression lambda, Type? paramType = null)
         {
             MemberInfo member = GetExpressedMember(lambda);
             PropertyInfo? propInfo = member as PropertyInfo;
@@ -48,8 +67,8 @@ namespace IntelliTect.Coalesce.Utilities
                 throw new ArgumentException($"Expression '{lambda}' doesn't refer to a property.");
 
             // If paramType is null, don't check this. Just a safety check where it makes sense, but sometimes, its ok not to check.
-            if (   paramType != null 
-                && paramType != propInfo.ReflectedType 
+            if (paramType != null
+                && paramType != propInfo.ReflectedType
                 && !paramType.IsSubclassOf(propInfo.ReflectedType!))
                 throw new ArgumentException($"Expression '{lambda}' refers to a property that is not from type {paramType}.");
 

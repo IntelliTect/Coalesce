@@ -49,7 +49,7 @@
                 @click="removeFilter(filter)"
                 title="Remove Filter"
               >
-                <i class="fa fa-trash"></i>
+                <i class="fa fa-times"></i>
               </v-btn>
               <v-btn
                 size="x-small"
@@ -88,6 +88,7 @@
               "
               clearable
               hide-details
+              density="compact"
             >
             </c-select>
 
@@ -102,6 +103,7 @@
               clearable
               hide-details
               multiple
+              density="compact"
             />
 
             <!-- Display a number multiselect for number props -->
@@ -141,18 +143,15 @@
       </v-card-text>
 
       <v-card-title> Add Filters </v-card-title>
-      <v-card-text>
-        <v-chip-group column style="max-width: 400px">
-          <v-chip
-            v-for="filter in undefinedFilters"
-            :key="filter.key"
-            small
-            color="primary"
-            @click="addFilter(filter)"
-          >
-            {{ filter.displayName }}
-          </v-chip>
-        </v-chip-group>
+      <v-card-text class="d-flex ga-1 flex-wrap">
+        <v-chip
+          v-for="filter in undefinedFilters"
+          :key="filter.key"
+          small
+          @click="addFilter(filter)"
+        >
+          {{ filter.displayName }}
+        </v-chip>
       </v-card-text>
     </v-card>
   </v-menu>
@@ -280,5 +279,8 @@ export default defineComponent({
 <style lang="scss">
 .c-list-filters--card {
   max-width: 500px;
+  .v-btn-toggle i.fa {
+    font-size: 1.1em;
+  }
 }
 </style>

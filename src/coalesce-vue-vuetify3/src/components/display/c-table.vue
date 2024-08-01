@@ -37,6 +37,7 @@
               : list.$items"
             :key="index"
           >
+            <slot name="item-prepend" :item="item" />
             <td
               v-for="prop in effectiveProps"
               :key="prop.name"
@@ -52,7 +53,10 @@
                 hint=""
                 density="compact"
                 variant="outlined"
+                rows="1"
+                auto-grow
               >
+                <!-- Rows and auto-grow for textarea inputs -->
                 <c-admin-display v-if="admin" :model="item" :for="prop" />
                 <c-display v-else :model="item" :for="prop" />
               </c-input>
@@ -162,12 +166,17 @@ export default defineComponent({
     max-height: 50px;
     max-width: 150px;
   }
-  &.c-table--editable {
+  &.c-table--editable .v-table tr {
     td {
-      padding: 0px 0px !important;
+      padding: 0px 0px;
     }
-    th,
+    th {
+      padding: 0px 8px;
+    }
     td {
+      .v-field {
+        font-size: 14px;
+      }
       .v-input {
         min-width: 120px;
       }
@@ -189,11 +198,9 @@ export default defineComponent({
         line-height: 1.1;
       }
     }
-    td {
-      vertical-align: top;
-    }
-    td > *:not(.v-input) {
-      padding: 4px 8px;
+    td:not(.c-admin-table--actions) > *:not(.v-input) {
+      display: block;
+      padding: 10px 8px;
     }
   }
 

@@ -15,7 +15,7 @@
       v-if="canCreate"
       class="c-admin-table-toolbar--button-create"
       variant="text"
-      :to="createRoute"
+      :to="getItemRoute()"
     >
       <v-icon :start="$vuetify.display.mdAndUp">$plus</v-icon>
       <span class="hidden-sm-and-down">Create</span>
@@ -81,23 +81,13 @@
 </template>
 
 <script lang="ts">
-import { PropType, defineComponent } from "vue";
+import { PropType, defineComponent, toRef } from "vue";
 import { useRouter } from "vue-router";
-import {
-  ListViewModel,
-  ModelType,
-  BehaviorFlags,
-  mapParamsToDto,
-} from "coalesce-vue";
+import { ListViewModel } from "coalesce-vue";
+import { useAdminTable } from "./useAdminTable";
 
 export default defineComponent({
   name: "c-admin-table-toolbar",
-
-  setup(props) {
-    return {
-      router: useRouter(),
-    };
-  },
 
   props: {
     list: { required: true, type: Object as PropType<ListViewModel> },
@@ -106,50 +96,9 @@ export default defineComponent({
     editable: { default: null, required: false, type: Boolean },
   },
 
-  computed: {
-    metadata(): ModelType {
-      return this.list.$metadata;
-    },
-
-    createRoute() {
-      // Resolve to an href to allow overriding of admin routes in userspace.
-      // If we just gave a named raw location, it would always use the coalesce admin route
-      // instead of the user-overridden one (that the user overrides by declaring another
-      // route with the same path).
-      return this.router.resolve({
-        name: "coalesce-admin-item",
-        params: {
-          type: this.metadata.name,
-        },
-        query: Object.fromEntries(
-          Object.entries(mapParamsToDto(this.list.$params) || {}).filter(
-            (entry) =>
-              entry[0].startsWith("filter.") ||
-              entry[0].startsWith("dataSource")
-          )
-        ),
-      }).fullPath;
-    },
-
-    canCreate() {
-      return (
-        this.metadata &&
-        (this.metadata.behaviorFlags & BehaviorFlags.Create) != 0
-      );
-    },
-
-    /** Calculated width for the "Page" text input, such that it fits the max page number. */
-    pageInputWidth() {
-      const totalCount = this.list.$load.totalCount || 1000;
-      return (
-        (
-          Math.max(this.list.$page, totalCount).toString() +
-          " of " +
-          totalCount +
-          "xx"
-        ).length.toString() + "ch"
-      );
-    },
+  setup(props) {
+    const tableProps = useAdminTable(toRef(props, "list"));
+    return { router: useRouter(), ...tableProps };
   },
 });
 </script>

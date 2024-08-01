@@ -28,14 +28,13 @@
       >
         <template #item-append="{ item }">
           <td width="1%" class="c-admin-table--actions">
-            <v-row class="flex-nowrap" no-gutters>
+            <div class="d-flex flex-nowrap text-no-wrap ga-1" no-gutters>
               <v-btn
                 v-if="canEdit || hasInstanceMethods"
-                class="mx-1"
                 title="Edit"
                 variant="text"
                 icon
-                :to="editRoute(item)"
+                :to="getItemRoute(item)"
               >
                 <!-- Using an <i> directly is much more performant than v-icon. -->
                 <i aria-hidden="true" class="v-icon notranslate fa fa-edit"></i>
@@ -43,7 +42,6 @@
 
               <v-btn
                 v-if="canDelete"
-                class="mx-1"
                 title="Delete"
                 variant="text"
                 icon
@@ -54,10 +52,20 @@
                   class="v-icon notranslate fa fa-trash-alt"
                 ></i>
               </v-btn>
-            </v-row>
+            </div>
           </td>
         </template>
       </c-table>
+
+      <v-btn
+        v-if="editable && canCreate"
+        @click="addItem"
+        prepend-icon="fa fa-plus"
+        :color
+        class="my-2"
+      >
+        Add Item
+      </v-btn>
 
       <c-list-pagination
         :list="list"
@@ -71,17 +79,16 @@
 <script lang="ts">
 import {
   ListViewModel,
-  ModelType,
   ViewModel,
-  BehaviorFlags,
   ListParameters,
   mapQueryToParams,
   mapParamsToDto,
   bindToQueryString,
 } from "coalesce-vue";
 
-import { defineComponent, PropType } from "vue";
+import { defineComponent, PropType, toRef } from "vue";
 import { useRouter } from "vue-router";
+import { useAdminTable } from "./useAdminTable";
 
 export default defineComponent({
   name: "c-admin-table",
@@ -93,8 +100,9 @@ export default defineComponent({
     queryBind: { type: Boolean, default: false },
   },
 
-  setup() {
-    return { router: useRouter() };
+  setup(props) {
+    const tableProps = useAdminTable(toRef(props, "list"));
+    return { router: useRouter(), ...tableProps };
   },
 
   data() {
@@ -110,34 +118,6 @@ export default defineComponent({
         "c-admin-table: prop `list` is required, and must be a ListViewModel."
       );
     },
-
-    metadata(): ModelType {
-      return this.viewModel.$metadata;
-    },
-
-    canEdit() {
-      return (
-        this.metadata &&
-        (this.metadata.behaviorFlags & BehaviorFlags.Edit) != 0 &&
-        !this.viewModel.$modelOnlyMode
-      );
-    },
-
-    canDelete() {
-      return (
-        this.metadata &&
-        (this.metadata.behaviorFlags & BehaviorFlags.Delete) != 0 &&
-        !this.viewModel.$modelOnlyMode
-      );
-    },
-
-    hasInstanceMethods() {
-      return (
-        this.metadata &&
-        Object.values(this.metadata.methods).some((m) => !m.isStatic) &&
-        !this.viewModel.$modelOnlyMode
-      );
-    },
   },
 
   methods: {
@@ -148,23 +128,10 @@ export default defineComponent({
       }
     },
 
-    editRoute(item: ViewModel) {
-      // Resolve to an href to allow overriding of admin routes in userspace.
-      // If we just gave a named raw location, it would always use the coalesce admin route
-      // instead of the user-overridden one (that the user overrides by declaring another
-      // route with the same path).
-      return this.router.resolve({
-        name: "coalesce-admin-item",
-        params: {
-          type: this.metadata.name,
-          id: item.$primaryKey,
-        },
-        query: this.queryBind
-          ? // If there's a data source for the list, pass it to the edit page
-            // in case that data source is the only thing allowing the item to be loaded.
-            mapParamsToDto({ dataSource: this.viewModel.$params.dataSource })
-          : {},
-      }).fullPath;
+    addItem() {
+      const viewModel = new ViewModel.typeLookup![this.metadata.name]();
+      viewModel.$params = this.list.$params;
+      this.list.$items.push(viewModel);
     },
   },
 

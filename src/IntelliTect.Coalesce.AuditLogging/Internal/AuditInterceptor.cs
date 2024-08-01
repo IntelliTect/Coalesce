@@ -9,12 +9,10 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
-using Z.EntityFramework.Plus;
 
 namespace IntelliTect.Coalesce.AuditLogging.Internal;
 
@@ -30,25 +28,6 @@ internal sealed class AuditInterceptor<TAuditLog> : SaveChangesInterceptor
 
     #region SavingChanges
 
-    private static readonly FieldInfo m_auditConfiguration = typeof(Audit)
-        .GetField("_configuration", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
-        ?? throw new NotSupportedException("Unknown version of Z.EntityFramework.Plus - field Audit._configuration not found.");
-
-    private void AttachConfig(Audit audit)
-    {
-        var configLazy = new Lazy<AuditConfiguration>(
-            () => _options.AuditConfiguration ?? AuditManager.DefaultConfiguration.Clone());
-
-        if (_options.AuditConfiguration is not null)
-        {
-            // Force the lazy to evaluate so that Audit.CurrentOrDefaultConfiguration 
-            // will return our instance instead of AuditManager.DefaultConfiguration.
-            var _ = configLazy.Value;
-        }
-
-        m_auditConfiguration.SetValue(audit, configLazy);
-    }
-
     public override async ValueTask<InterceptionResult<int>> SavingChangesAsync(
         DbContextEventData eventData,
         InterceptionResult<int> result,
@@ -56,10 +35,9 @@ internal sealed class AuditInterceptor<TAuditLog> : SaveChangesInterceptor
     {
         _audit = null;
         if (GetContext(eventData).SuppressAudit) return result;
-        
-        _audit = new CoalesceAudit();
-        AttachConfig(_audit);
-        _audit.PreSaveChanges(eventData.Context);
+
+        _audit = new CoalesceAudit(_options.AuditConfiguration ?? new());
+        _audit.PreSaveChanges(eventData.Context!);
 
         if (_options.PropertyDescriptions.HasFlag(PropertyDescriptionMode.FkListText))
         {
@@ -76,9 +54,8 @@ internal sealed class AuditInterceptor<TAuditLog> : SaveChangesInterceptor
         _audit = null;
         if (GetContext(eventData).SuppressAudit) return result;
 
-        _audit = new CoalesceAudit();
-        AttachConfig(_audit);
-        _audit.PreSaveChanges(eventData.Context);
+        _audit = new CoalesceAudit(_options.AuditConfiguration ?? new());
+        _audit.PreSaveChanges(eventData.Context!);
 
         if (_options.PropertyDescriptions.HasFlag(PropertyDescriptionMode.FkListText))
         {
@@ -328,8 +305,8 @@ internal sealed class AuditInterceptor<TAuditLog> : SaveChangesInterceptor
                 var auditLog = Activator.CreateInstance<TAuditLog>();
 
                 auditLog.Date = date;
-                auditLog.State = (IntelliTect.Coalesce.AuditLogging.AuditEntryState)e.State;
-                auditLog.Type = e.EntityTypeName;
+                auditLog.State = e.State;
+                auditLog.Type = e.Entry.Metadata.ClrType.Name;
                 auditLog.KeyValue = keyProperties is null 
                     ? null 
                     : string.Join(";", keyProperties.Select(p => e.Entry.CurrentValues[p]));
@@ -356,9 +333,9 @@ internal sealed class AuditInterceptor<TAuditLog> : SaveChangesInterceptor
                         {
                             PropertyName = property.PropertyName,
                             OldValue = property.OldValueFormatted,
-                            OldValueDescription = audit.OldValueDescriptions?.GetValueOrDefault((e, property.PropertyName)),
+                            OldValueDescription = property.OldValueDescription,
                             NewValue = property.NewValueFormatted,
-                            NewValueDescription = audit.NewValueDescriptions?.GetValueOrDefault((e, property.PropertyName))
+                            NewValueDescription = property.NewValueDescription
                         };
                     })
                     .Where(property => 

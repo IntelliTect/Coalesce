@@ -44,7 +44,7 @@ namespace Coalesce.Domain
                     .WithAugmentation<OperationContext>()
                     .WithMergeWindow(TimeSpan.FromSeconds(15))
                     .ConfigureAudit(x => x
-                        // Just a random example of EFPlus config:
+                        // Just a random example of audit config:
                         .ExcludeProperty<Person>(p => p.ProfilePic)
                     )
                 );

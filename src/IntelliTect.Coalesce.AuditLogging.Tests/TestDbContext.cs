@@ -30,6 +30,10 @@ class AppUser
 
     public string? Parent2Id { get; set; }
     public ParentWithUnMappedListText? Parent2 { get; set; }
+
+    public DateTimeOffset? NullableValueType { get; set; }
+
+    public bool BoolProp { get; set; }
 }
 
 class ParentWithMappedListText

@@ -3,40 +3,174 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata;
 using System;
-using System.Buffers;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-using Z.EntityFramework.Plus;
-
-using DescriptionStore = System.Collections.Generic.Dictionary<(Z.EntityFramework.Plus.AuditEntry, string), string?>;
 
 namespace IntelliTect.Coalesce.AuditLogging.Internal;
 
-internal class CoalesceAudit : Audit
+public class CoalesceAudit
 {
-    internal DescriptionStore? OldValueDescriptions;
-    internal DescriptionStore? NewValueDescriptions;
+    internal CoalesceAudit(AuditConfiguration configuration)
+    {
+        Configuration = configuration;
+    }
+
+    public List<AuditEntry> Entries { get; } = [];
+
+    internal AuditConfiguration Configuration { get; }
+
     private HashSet<(AuditEntry, INavigationBase)>? HasChanged;
+
+    internal void PreSaveChanges(DbContext context)
+    {
+        var audit = this;
+        var config = audit.Configuration;
+
+        context.ChangeTracker.DetectChanges();
+        foreach (EntityEntry item in context.ChangeTracker
+            .Entries()
+            .Where(x => x.State is EntityState.Added or EntityState.Modified or EntityState.Deleted)
+        )
+        {
+            if (!config.IsAuditedEntity(item)) continue;
+
+            AuditEntry auditEntry;
+            switch (item.State)
+            {
+                case EntityState.Added:
+                    audit.Entries.Add(new()
+                    {
+                        Parent = audit,
+                        Entry = item,
+                        State = AuditEntryState.EntityAdded
+                    });
+                    break;
+
+                case EntityState.Deleted:
+                    auditEntry = new()
+                    {
+                        Parent = audit,
+                        Entry = item,
+                        State = AuditEntryState.EntityDeleted
+                    };
+                    audit.Entries.Add(auditEntry);
+
+                    auditEntry.Properties = item.Properties
+                        .Where(p => p.Metadata.IsKey() || audit.Configuration.IsAuditedProperty(p))
+                        .Select(p => new AuditEntryProperty
+                        {
+                            Parent = auditEntry,
+                            PropertyEntry = p,
+                            OldValue = p.OriginalValue
+                        })
+                        .ToList();
+
+                    break;
+
+                case EntityState.Modified:
+                    auditEntry = new()
+                    {
+                        Parent = audit,
+                        Entry = item,
+                        State = AuditEntryState.EntityModified
+                    };
+                    audit.Entries.Add(auditEntry);
+
+                    auditEntry.Properties = item.Properties
+                        .Where(p => p.Metadata.IsKey() || (
+                            audit.Configuration.IsAuditedProperty(p) && 
+                            !object.Equals(p.CurrentValue, p.OriginalValue)
+                        ))
+                        .Select(p => new AuditEntryProperty
+                        {
+                            Parent = auditEntry,
+                            PropertyEntry = p,
+                            OldValue = p.OriginalValue
+                        })
+                        .ToList();
+
+                    break;
+            }
+        }
+    }
+
+    internal void PostSaveChanges()
+    {
+        foreach (var auditEntry in Entries)
+        {
+            switch (auditEntry.State)
+            {
+                case AuditEntryState.EntityAdded:
+                    foreach (var propertyEntry in auditEntry.Entry.Properties)
+                    {
+                        if (!propertyEntry.Metadata.IsKey() && !auditEntry.Parent.Configuration.IsAuditedProperty(propertyEntry))
+                        {
+                            continue;
+                        }
+
+                        object? newValue = propertyEntry.CurrentValue;
+                        if (newValue == null) continue;
+
+                        if (!auditEntry.Parent.Configuration.KeepAddedDefaultValues &&
+                            // Only applicable to types that can't be null,
+                            // i.e. non-nullable value tyepes:
+                            propertyEntry.Metadata.ClrType.IsValueType && 
+                            Nullable.GetUnderlyingType(propertyEntry.Metadata.ClrType) is null
+                        )
+                        {
+                            object defaultValue = Activator.CreateInstance(propertyEntry.Metadata.ClrType)!;
+                            if (defaultValue.Equals(propertyEntry.CurrentValue))
+                            {
+                                continue;
+                            }
+                        }
+
+                        AuditEntryProperty auditEntryProperty = new()
+                        {
+                            Parent = auditEntry,
+                            PropertyEntry = propertyEntry,
+                            NewValue = newValue
+                        };
+                        auditEntry.Properties.Add(auditEntryProperty);
+                    }
+
+                    break;
+                case AuditEntryState.EntityModified:
+                    if (auditEntry.Entry.State == EntityState.Detached)
+                    {
+                        auditEntry.State = AuditEntryState.EntityDeleted;
+                        auditEntry.Properties.RemoveAll((x) => !x.PropertyEntry.Metadata.IsKey());
+                        break;
+                    }
+
+                    foreach (var property in auditEntry.Properties)
+                    {
+                        property.NewValue = property.PropertyEntry.CurrentValue;
+                    }
+
+                    break;
+            }
+        }
+    }
 
     internal async ValueTask PopulateOldDescriptions(DbContext db, bool async)
     {
         foreach (var entry in Entries)
         {
-            if (entry.State == Z.EntityFramework.Plus.AuditEntryState.EntityAdded) continue;
+            if (entry.State == AuditEntryState.EntityAdded) continue;
             foreach (var refNav in entry.Entry.References)
             {
-                if (entry.State == Z.EntityFramework.Plus.AuditEntryState.EntityModified)
+                if (entry.State == AuditEntryState.EntityModified)
                 {
                     if (!refNav.IsModified) continue;
 
                     (HasChanged ??= new()).Add((entry, refNav.Metadata));
                 }
 
-                OldValueDescriptions ??= [];
-                await PopulateDescriptions(db, entry, refNav, OldValueDescriptions, isNew: false, async);
+                await PopulateDescriptions(db, entry, refNav, isNew: false, async);
             }
         }
     }
@@ -45,18 +179,17 @@ internal class CoalesceAudit : Audit
     {
         foreach (var entry in Entries)
         {
-            if (entry.State == Z.EntityFramework.Plus.AuditEntryState.EntityDeleted) continue;
+            if (entry.State == AuditEntryState.EntityDeleted) continue;
             foreach (var refNav in entry.Entry.References)
             {
-                if (entry.State == Z.EntityFramework.Plus.AuditEntryState.EntityModified)
+                if (entry.State == AuditEntryState.EntityModified)
                 {
                     // We're capturing the new descriptions, but the navigation wasn't modified. Do nothing.
                     // We can't use refNav.IsModified here because we're in the post-save, so it'll always be false.
                     if (HasChanged?.Contains((entry, refNav.Metadata)) != true) continue;
                 }
 
-                NewValueDescriptions ??= [];
-                await PopulateDescriptions(db, entry, refNav, NewValueDescriptions, isNew: true, async);
+                await PopulateDescriptions(db, entry, refNav, isNew: true, async);
             }
         }
     }
@@ -65,7 +198,6 @@ internal class CoalesceAudit : Audit
         DbContext db,
         AuditEntry entry,
         ReferenceEntry refNav,
-        DescriptionStore descriptionStore,
         bool isNew,
         bool async)
     {
@@ -93,13 +225,13 @@ internal class CoalesceAudit : Audit
             // FUTURE: We could instead prioritize the FK props that are not [InternalUse],
             // or the props that belong to the fewest number of FKs (TenantId in this example would always belong to at least 2 FKs).
             .Reverse()
-            .Select(p => p.Name)
             .FirstOrDefault();
 
-        if (auditProp is null)
-        {
-            return;
-        }
+        if (auditProp is null) return;
+
+        var auditPropEntry = entry.Properties.FirstOrDefault(p => p.PropertyEntry.Metadata == auditProp);
+
+        if (auditPropEntry is null) return;
 
         var targetClrType = targetEntityType.ClrType;
         var targetClassVm = ReflectionRepository.Global.GetOrAddType(targetClrType).ClassViewModel;
@@ -125,7 +257,15 @@ internal class CoalesceAudit : Audit
             keyValues[i++] = propVal;
         }
 
-        descriptionStore[(entry, auditProp)] = await GetListTextValue(db, targetClrType, keyValues, targetListText.PropertyInfo, async);
+        var description = await GetListTextValue(db, targetClrType, keyValues, targetListText.PropertyInfo, async);
+        if (isNew)
+        {
+            auditPropEntry.NewValueDescription = description;
+        }
+        else
+        {
+            auditPropEntry.OldValueDescription = description;
+        }
     }
 
     private static async ValueTask<string?> GetListTextValue(DbContext db, Type entityType, object[] keys, PropertyInfo prop, bool async)

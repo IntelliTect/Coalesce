@@ -1,6 +1,5 @@
 ﻿using IntelliTect.Coalesce.DataAnnotations;
 using System;
-using Z.EntityFramework.Plus;
 
 namespace IntelliTect.Coalesce.AuditLogging;
 
@@ -51,7 +50,7 @@ public class AuditOptions
     /// Internal so that it cannot be modified in a way that breaks the caching assumptions
     /// that we make in CoalesceAuditLoggingBuilder.
     /// </summary>
-    internal AuditConfiguration? AuditConfiguration { get; set; } = null;
+    internal AuditConfiguration? AuditConfiguration { get; set; }
 }
 
 /// <summary>

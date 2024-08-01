@@ -7,7 +7,6 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System.Runtime.CompilerServices;
-using Z.EntityFramework.Plus;
 
 namespace IntelliTect.Coalesce.AuditLogging.Tests;
 
@@ -274,7 +273,7 @@ public class AuditTests
 
         void Cleanup()
         {
-            db.AuditLogs.Delete();
+            db.AuditLogs.ExecuteDelete();
             db.ChangeTracker.Clear();
         }
         AuditLogProperty GetAuditLogProp()
@@ -368,7 +367,7 @@ public class AuditTests
 
         void Cleanup()
         {
-            db.AuditLogs.Delete();
+            db.AuditLogs.ExecuteDelete();
             db.ChangeTracker.Clear();
         }
         AuditLogProperty GetAuditLogProp()

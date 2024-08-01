@@ -372,7 +372,7 @@ namespace Coalesce.Domain
         {
             Db.Cases
                 .Include(c => c.CaseProducts).ThenInclude(cp => cp.Product)
-                .Where(c => AllowedStatuses.Contains(c.Status))
+                .Where(c => AllowedStatuses != null && AllowedStatuses.Contains(c.Status))
                 .Load();
 
             return Db.People

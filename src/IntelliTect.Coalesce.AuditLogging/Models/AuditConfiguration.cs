@@ -99,7 +99,11 @@ public class AuditConfiguration
     {
         var wrappedFormatter = (object v) => formatter((T)v);
 
-        Formatters.Add((e) => e.Metadata.ClrType.IsAssignableTo(typeof(T)) ? wrappedFormatter : null);
+        Formatters.Add((e) => 
+            e.Metadata.ClrType.IsAssignableTo(typeof(T)) || 
+            Nullable.GetUnderlyingType(e.Metadata.ClrType)?.IsAssignableTo(typeof(T)) == true 
+                ? wrappedFormatter 
+                : null);
 
         return this;
     }

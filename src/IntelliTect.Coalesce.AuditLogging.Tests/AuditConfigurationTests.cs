@@ -72,7 +72,7 @@ public class AuditConfigurationTests
         db.SaveChanges();
 
         Assert.Equal("3", db.AuditLogProperties.Single(p => p.PropertyName == "Name").NewValue);
-        Assert.Equal("1/1/1970 12:00:00 AM +00:00", db.AuditLogProperties.Single(p => p.PropertyName == "NullableValueType").NewValue);
+        Assert.Equal("1970-01-01T00:00:00.0000000+00:00", db.AuditLogProperties.Single(p => p.PropertyName == "NullableValueType").NewValue);
     }
 
     [Fact]

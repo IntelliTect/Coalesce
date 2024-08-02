@@ -1,10 +1,19 @@
 import { Grade } from "@test/targets.models";
 import { StudentViewModel } from "@test/targets.viewmodels";
-import { delay, mount } from "@test/util";
+import {
+  delay,
+  flushPromises,
+  getWrapper,
+  mount,
+  mountApp,
+  nextTick,
+  openMenu,
+} from "@test/util";
 import { CDatetimePicker } from "..";
 import { Case, ComplexModel } from "@test-targets/models.g";
 import { ComplexModelViewModel } from "@test-targets/viewmodels.g";
 import { AnyArgCaller } from "coalesce-vue";
+import { VForm } from "vuetify/components";
 
 describe("CDatetimePicker", () => {
   let model: StudentViewModel;
@@ -74,6 +83,41 @@ describe("CDatetimePicker", () => {
     () => <CDatetimePicker model={ds} for="minDate" />;
     //@ts-expect-error invalid param
     () => <CDatetimePicker model={ds} for="asdf" />;
+  });
+
+  test("disabled inherits from form", async () => {
+    const wrapper = mount(() => (
+      <VForm disabled>
+        <CDatetimePicker />
+      </VForm>
+    ));
+
+    expect(wrapper.find("input").element.disabled).toBeTruthy();
+  });
+
+  test("readonly inherits from form", async () => {
+    const wrapper = mount(() => (
+      <VForm readonly>
+        <CDatetimePicker />
+      </VForm>
+    ));
+
+    expect(wrapper.find("input").element.readOnly).toBeTruthy();
+  });
+
+  test("opens picker menu", async () => {
+    const date = new Date(18478289085);
+    const wrapper = mountApp(() => (
+      <CDatetimePicker modelValue={date} timeZone="America/Los_Angeles" />
+    )).findComponent(CDatetimePicker);
+
+    const overlay = await openMenu(wrapper);
+
+    expect(overlay.findAll(".c-time-picker__item-active")).toHaveLength(3);
+    expect(overlay.text()).contains("August 1970");
+    expect(overlay.text()).contains("Sun, Aug 2");
+    console.log(overlay.text());
+    expect(overlay.find(".c-time-picker-header").text()).equals("1:51 PM PDT");
   });
 
   test("caller model - date value", async () => {

@@ -7,6 +7,7 @@ import {
   enableAutoUnmount,
   ComponentMountingOptions,
   VueWrapper,
+  flushPromises,
 } from "@vue/test-utils";
 import { ArgumentsType } from "vitest";
 import {
@@ -14,14 +15,11 @@ import {
   h,
   ComponentPublicInstance,
   DefineComponent,
-  VNode,
-  CreateComponentPublicInstance,
   ComponentInstance,
 } from "vue";
 import type {
   ComponentExposed,
   ComponentProps,
-  ComponentSlots,
 } from "vue-component-type-helpers";
 import { createRouter, createWebHistory } from "vue-router";
 
@@ -30,6 +28,20 @@ import * as components from "vuetify/components";
 import * as directives from "vuetify/directives";
 import $metadata from "./targets.metadata";
 
+global.matchMedia ??= function (str: string) {
+  return {
+    matches: false,
+    media: str,
+    addEventListener() {},
+    dispatchEvent() {
+      return false;
+    },
+    onchange() {},
+    removeEventListener() {},
+    addListener() {},
+    removeListener() {},
+  };
+};
 global.ResizeObserver ??= class ResizeObserver {
   observe() {}
   unobserve() {}
@@ -196,6 +208,13 @@ export function getWrapper(selector = ".v-overlay-container") {
 
 export async function delay(ms: number) {
   await new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+export async function openMenu(wrapper: VueWrapper) {
+  await flushPromises();
+  await wrapper.find(".v-field").trigger("click");
+  await flushPromises();
+  return getWrapper(".v-overlay__content");
 }
 
 export { nextTick } from "vue";

@@ -264,7 +264,7 @@ onMounted(() => {
         // Don't animate when picking a value for the first time.
         !oldTime ||
         // Don't animate for users who don't want animation
-        window.matchMedia(`(prefers-reduced-motion: reduce)`).matches === true;
+        window.matchMedia(`(prefers-reduced-motion: reduce)`)?.matches === true;
 
       // Scroll the selected numbers into view in the time picker.
       // This is an interval because it has to keep updating as the modal

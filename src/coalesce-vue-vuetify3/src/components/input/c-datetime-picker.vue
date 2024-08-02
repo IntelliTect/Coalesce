@@ -47,7 +47,7 @@
       v-if="interactive"
       v-model="menu"
       activator="parent"
-      content-class="c-datetime-picker--menu"
+      content-class="c-datetime-picker__menu"
       :close-on-content-click="false"
       min-width="1px"
     >
@@ -97,7 +97,7 @@
 </template>
 
 <style lang="scss">
-.c-datetime-picker--menu {
+.c-datetime-picker__menu {
   > .v-card {
     @media screen and (max-width: 600px) {
       flex-wrap: wrap;

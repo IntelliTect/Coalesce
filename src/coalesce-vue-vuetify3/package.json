@@ -59,7 +59,7 @@
     "coalesce-vue": "../coalesce-vue",
     "eslint": "^8.0.0",
     "eslint-plugin-vue": "^9.27.0",
-    "jsdom": "^23.0.1",
+    "jsdom": "^24.1.1",
     "sass": "^1.69.7",
     "typescript": "5.3.3",
     "unplugin-vue-components": "^0.27.3",

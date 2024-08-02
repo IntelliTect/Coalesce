@@ -1,6 +1,6 @@
 <template>
   <v-text-field
-    v-if="native"
+    v-if="effectiveVariant == 'native'"
     class="c-datetime-picker"
     :type="
       internalDateKind == 'time'
@@ -37,6 +37,41 @@
     @update:model-value="textInputChanged($event, false)"
     @click.capture="showPickerMobile($event)"
   >
+    <v-menu
+      v-if="effectiveVariant == 'vuetify'"
+      v-model="menu"
+      activator="parent"
+      content-class="c-datetime-picker--menu"
+      :close-on-content-click="false"
+      min-width="1px"
+    >
+      <v-card>
+        <div class="d-flex">
+          <v-date-picker
+            v-if="showDate"
+            color="secondary"
+            :model-value="internalValueZoned"
+            density="comfortable"
+            scrollable
+            :rounded="false"
+            :allowed-dates="$attrs.allowedDates || $attrs['allowed-dates']"
+            @update:model-value="dateChanged"
+          >
+          </v-date-picker>
+          <v-divider vertical></v-divider>
+          <div>
+            <v-sheet color="secondary" class="c-time-picker-header">
+              {{ displayedTime }}
+            </v-sheet>
+            <c-time-picker
+              class="px-1"
+              :model-value="internalValueZoned"
+              @update:model-value="timeChanged"
+            ></c-time-picker>
+          </div>
+        </div>
+      </v-card>
+    </v-menu>
     <template #append-inner>
       <v-icon
         :icon="
@@ -74,6 +109,48 @@
   </v-text-field>
 </template>
 
+<style lang="scss">
+.c-datetime-picker--menu {
+  .v-date-picker {
+    width: 300px;
+  }
+  .v-picker-title {
+    display: none;
+  }
+  .v-picker__header {
+    padding: 0px;
+  }
+
+  .v-date-picker-header,
+  .c-time-picker-header {
+    height: auto;
+    padding: 12px 20px;
+    font-size: 32px;
+    line-height: 40px;
+  }
+
+  .v-date-picker-month__day {
+    width: 36px;
+
+    .v-btn {
+      font-size: 14px !important;
+      font-weight: 400;
+    }
+  }
+  .v-date-picker-years,
+  .v-date-picker-months {
+    // height: 232px;
+  }
+  .v-date-picker-months {
+    .v-date-picker-months__content {
+      padding: 8px;
+      grid-template-columns: repeat(3, 1fr);
+      grid-gap: 4px 8px;
+    }
+  }
+}
+</style>
+
 <script
   lang="ts"
   setup
@@ -105,7 +182,8 @@ import {
 import { computed, ref } from "vue";
 import { ForSpec, useMetadataProps } from "../c-metadata-component";
 import { watch } from "vue";
-
+import { VTimePickerControls } from "vuetify/labs/VTimePicker";
+import CTimePicker from "./c-time-picker.vue";
 defineOptions({
   name: "c-datetime-picker",
 
@@ -127,6 +205,8 @@ const props = withDefaults(
      */
     for?: ForSpec<TModel, DateValue>;
 
+    mode?: "native" | "native-picker" | "vuetify" | "auto";
+
     dateKind?: DateKind;
     dateFormat?: string;
     readonly?: boolean;
@@ -138,6 +218,7 @@ const props = withDefaults(
   }>(),
   {
     timeZone: getDefaultTimeZone() || undefined,
+    mode: "auto",
   }
 );
 
@@ -152,6 +233,15 @@ const focused = ref(false);
 const error = ref<string[]>([]);
 const menu = ref(false);
 const internalTextValue = ref<string>();
+
+const hasMobilePicker = /android|iphone/i.test(navigator.userAgent);
+const effectiveVariant = computed(() => {
+  if (props.mode == "auto") {
+    if (hasMobilePicker) return "native-picker";
+    return "vuetify";
+  }
+  return props.mode;
+});
 
 const interactive = computed(() => {
   // TODO: read state from any VForm that wraps us
@@ -183,6 +273,18 @@ const displayedValue = computed(() => {
     : null;
 });
 
+const displayedTime = computed(() => {
+  return internalValueZoned.value
+    ? format(
+        internalValueZoned.value,
+        "h:mm a" + (internalTimeZone.value ? " z" : ""),
+        {
+          timeZone: internalTimeZone.value || undefined,
+        }
+      )
+    : null;
+});
+
 const internalTimeZone = computed(() => {
   if (props.timeZone) {
     return props.timeZone;
@@ -190,7 +292,9 @@ const internalTimeZone = computed(() => {
   if (dateMeta.value) {
     if (!dateMeta.value.noOffset) {
       // date is a DateTimeOffset, so TZ conversions are meaningful.
-      return getDefaultTimeZone();
+      return (
+        getDefaultTimeZone() ?? Intl.DateTimeFormat().resolvedOptions().timeZone
+      );
     } else {
       // date is a DateTime, where TZ conversions would actually be harmful. Don't use the default.
       return null;
@@ -294,7 +398,7 @@ const timePart = computed(() => {
 });
 
 function showPickerMobile(event: MouseEvent) {
-  if (/android|iphone/i.test(navigator.userAgent)) {
+  if (hasMobilePicker) {
     showPicker(event);
   }
 }
@@ -303,7 +407,11 @@ function showPicker(event: MouseEvent) {
   if (!interactive.value) {
     return;
   }
-  
+
+  if (effectiveVariant.value == "vuetify") {
+    return;
+  }
+
   // Firefox Desktop only has pickers for date-only inputs.
   // It has no time picker, which makes this essentially useless on firefox for those cases.
   if (
@@ -436,17 +544,13 @@ function textInputChanged(val: string | Event, isNative: boolean) {
   if (isValid(value)) emitInput(value);
 }
 
-function timeChanged(val: string) {
+function timeChanged(input: Date) {
   error.value = [];
 
   var value = internalValueZoned.value || createDefaultDate();
 
-  var parts = /(\d\d):(\d\d)/.exec(val);
-  if (!parts)
-    throw `Time set by vuetify timepicker not in expected format: ${val}`;
-
-  value = setHours(value, parseInt(parts[1]));
-  value = setMinutes(value, parseInt(parts[2]));
+  value = setHours(value, input.getHours());
+  value = setMinutes(value, input.getMinutes());
 
   if (internalTimeZone.value) {
     value = fromZonedTime(value, internalTimeZone.value);
@@ -455,21 +559,17 @@ function timeChanged(val: string) {
   emitInput(value);
 }
 
-function dateChanged(val: string) {
+function dateChanged(input: Date) {
   error.value = [];
 
   var value = internalValueZoned.value || createDefaultDate();
 
-  var parts = /(\d\d\d\d)-(\d\d)-(\d\d)/.exec(val);
-  if (!parts)
-    throw `Date set by vuetify datepicker not in expected format: ${val}`;
-
   // Reset this first in case the year/month aren't valid for the current day.
   value = setDate(value, 1);
 
-  value = setYear(value, parseInt(parts[1]));
-  value = setMonth(value, parseInt(parts[2]) - 1);
-  value = setDate(value, parseInt(parts[3]));
+  value = setYear(value, input.getFullYear());
+  value = setMonth(value, input.getMonth());
+  value = setDate(value, input.getDate());
 
   if (internalTimeZone.value) {
     value = fromZonedTime(value, internalTimeZone.value);

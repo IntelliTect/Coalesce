@@ -1,7 +1,8 @@
 <template>
   <v-container grid-list-lg>
     <c-loader-status :loaders="{ 'no-initial-content': [caseVm.$load] }">
-      <v-card class="mb-10">
+      <c-time-picker></c-time-picker>
+      <v-card class="my-10">
         <v-row>
           <v-col>
             <c-select
@@ -125,7 +126,7 @@ export default class Test extends Base {
   isLoading: boolean = false;
   selectedTitle = null;
 
-  date = null;
+  date = new Date();
   caseVm = new CaseViewModel();
 
   async created() {

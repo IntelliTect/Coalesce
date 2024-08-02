@@ -13,8 +13,8 @@
     v-bind="inputBindAttrs"
     :rules="effectiveRules"
     :error-messages="error"
-    :readonly="readonly"
-    :disabled="disabled"
+    :readonly="isReadonly"
+    :disabled="isDisabled"
     autocomplete="off"
     v-model:focused="focused"
     @change="textInputChanged($event, true)"
@@ -27,8 +27,8 @@
     :rules="effectiveRules"
     :modelValue="internalTextValue == null ? displayedValue : internalTextValue"
     :error-messages="error"
-    :readonly="readonly"
-    :disabled="disabled"
+    :readonly="isReadonly"
+    :disabled="isDisabled"
     autocomplete="off"
     :placeholder="internalFormat"
     v-model:focused="focused"
@@ -36,6 +36,11 @@
     @keydown.escape="focused = false"
     @update:model-value="textInputChanged($event, false)"
     @click.capture="showPickerMobile($event)"
+    :append-inner-icon="
+      internalDateKind == 'time'
+        ? 'fa fa-clock cursor-pointer'
+        : 'fa fa-calendar-alt cursor-pointer'
+    "
   >
     <!-- TODO: Consider fullscreen modal on small devices -->
     <v-menu
@@ -47,48 +52,47 @@
       min-width="1px"
     >
       <v-fab
-        v-if="$vuetify.display.xs"
         app
         location="bottom right"
         color="secondary"
         size="x-small"
         icon="$complete"
         @click="menu = false"
+        :title="$vuetify.locale.t('$vuetify.close')"
       >
       </v-fab>
       <v-card class="d-flex">
         <v-date-picker
           v-if="showDate"
           color="secondary"
-          :model-value="internalValueZoned"
+          :modelValue="internalValueZoned"
+          @update:modelValue="dateChanged"
           density="comfortable"
           scrollable
           :rounded="false"
-          :allowed-dates="$attrs.allowedDates || $attrs['allowed-dates']"
-          @update:model-value="dateChanged"
+          :allowedDates="allowedDates"
+          :min="min ? startOfDay(min) : undefined"
+          :max="max ? endOfDay(max) : undefined"
+          v-bind="datePickerProps"
         >
         </v-date-picker>
 
         <v-divider vertical></v-divider>
 
-        <div v-if="showTime">
-          <v-sheet color="secondary" class="c-time-picker-header">
+        <c-time-picker
+          v-if="showTime"
+          :model-value="internalValueZoned"
+          @update:model-value="timeChanged"
+          :step="step"
+          :min="min"
+          :max="max"
+        >
+          <template #header>
             {{ displayedTime || "&nbsp;" }}
-          </v-sheet>
-          <c-time-picker
-            :model-value="internalValueZoned"
-            @update:model-value="timeChanged"
-          ></c-time-picker>
-        </div>
+          </template>
+        </c-time-picker>
       </v-card>
     </v-menu>
-    <template #append-inner>
-      <v-icon
-        :icon="
-          internalDateKind == 'time' ? 'fa fa-clock' : 'fa fa-calendar-alt'
-        "
-      ></v-icon>
-    </template>
   </v-text-field>
 </template>
 
@@ -112,10 +116,6 @@
   }
   .v-picker__header {
     padding: 0px;
-  }
-
-  .c-time-picker {
-    max-height: calc(100% - 64px);
   }
 
   .v-date-picker-header,
@@ -170,6 +170,8 @@ import {
   setHours,
   setMinutes,
   startOfDay,
+  endOfDay,
+  startOfHour,
 } from "date-fns";
 import { format, toZonedTime, fromZonedTime } from "date-fns-tz";
 import {
@@ -180,7 +182,7 @@ import {
   Model,
   DateValue,
 } from "coalesce-vue";
-import { computed, ref, nextTick, watch } from "vue";
+import { computed, inject, ref, watch } from "vue";
 import { ForSpec, useMetadataProps } from "../c-metadata-component";
 import CTimePicker from "./c-time-picker.vue";
 
@@ -205,19 +207,38 @@ const props = withDefaults(
      */
     for?: ForSpec<TModel, DateValue>;
 
+    /** Specifies whether this input is picking date, time, or both. */
     dateKind?: DateKind;
+    /** The format of the selected value displayed in the text field.*/
     dateFormat?: string;
     readonly?: boolean;
     disabled?: boolean;
     /** Use native HTML5 date picker rather than Vuetify. */
     native?: boolean;
     closeOnDatePicked?: boolean | null;
+
+    /** The IANA time zone name that the user will pick the date/time value in.
+     * Falls back to the value configured with `coalesce-vue`'s `setDefaultTimeZone`
+     * if the value bound to with `model`/`for` is a `DateTimeOffset`.
+     */
     timeZone?: string;
+
+    /** The allowed increments, in minutes, of the selectable value.
+     * Value should divide 60 evenly, or be multiples of 60 */
+    step?: number;
+
+    /** The minimum date/time value allowed. */
+    min?: Date;
+    /** The maximum date/time value allowed. */
+    max?: Date;
+    /** An array of permitted dates (items should have a time of midnight),
+     * or a function that returns true if a date is allowed for selection.
+     * Does not impact time selection. */
+    allowedDates?: Date[] | ((date: Date) => boolean);
+    // Object containing extra props to pass through to `v-date-picker`.
+    datePickerProps?: any;
   }>(),
-  {
-    timeZone: getDefaultTimeZone() || undefined,
-    mode: "auto",
-  }
+  { closeOnDatePicked: null }
 );
 
 const modelValue = defineModel<Date | null | undefined>();
@@ -234,9 +255,13 @@ const internalTextValue = ref<string>();
 
 const hasMobilePicker = /android|iphone/i.test(navigator.userAgent);
 
+const form: any = inject(Symbol.for("vuetify:form"));
+
+const isDisabled = computed(() => props.disabled || form?.isDisabled.value);
+const isReadonly = computed(() => props.readonly || form?.isReadonly.value);
+
 const interactive = computed(() => {
-  // TODO: read state from any VForm that wraps us
-  return !props.readonly && !props.disabled;
+  return !isDisabled.value && !isReadonly.value;
 });
 
 const dateMeta = computed(() => {
@@ -368,26 +393,6 @@ const showTime = computed(() => {
   );
 });
 
-const datePart = computed(() => {
-  return (
-    (internalValueZoned.value &&
-      format(internalValueZoned.value, "yyyy-MM-dd", {
-        timeZone: internalTimeZone.value || undefined,
-      })) ||
-    null
-  );
-});
-
-const timePart = computed(() => {
-  return (
-    (internalValueZoned.value &&
-      format(internalValueZoned.value, "HH:mm", {
-        timeZone: internalTimeZone.value || undefined,
-      })) ||
-    null
-  );
-});
-
 function showPickerMobile(event: MouseEvent) {
   if (hasMobilePicker) {
     showPicker(event);
@@ -432,8 +437,11 @@ function createDefaultDate() {
     if (!zone) return startOfDay(date);
 
     return fromZonedTime(startOfDay(toZonedTime(date, zone)), zone);
+  } else {
+    // Initialing with no minutes/seconds/milliseconds
+    // is usually going to be more useful then picking the current time's minutes/seconds.
+    return startOfHour(date);
   }
-  return date;
 }
 
 function parseUserInput(val: string) {
@@ -546,8 +554,9 @@ function timeChanged(input: Date) {
   emitInput(value);
 }
 
-function dateChanged(input: Date | null) {
-  if (!input) return;
+function dateChanged(input: unknown) {
+  // Typed as unknown because of bad types in vuetify
+  if (!input || !(input instanceof Date)) return;
 
   error.value = [];
 
@@ -578,6 +587,47 @@ function dateChanged(input: Date | null) {
 }
 
 function emitInput(value: Date | null) {
+  if (value) {
+    if (props.allowedDates) {
+      // With validation of allowedDates, we have to just return early without emitting
+      // since there's no logic we can apply to clamp the date to a valid date.
+
+      if (
+        Array.isArray(props.allowedDates) &&
+        !props.allowedDates.includes(startOfDay(value))
+      ) {
+        error.value.push("The selected date is not allowed.");
+        return;
+      } else if (
+        typeof props.allowedDates == "function" &&
+        !props.allowedDates(value)
+      ) {
+        error.value.push("The selected date is not allowed.");
+        return;
+      }
+    }
+
+    if (props.min && value.valueOf() < props.min.valueOf()) {
+      value = props.min;
+    }
+
+    if (props.max && value.valueOf() > props.max.valueOf()) {
+      value = props.max;
+    }
+
+    if (props.step) {
+      const stepMs = props.step * 60 * 1000;
+      let newTime = Math.round(value.valueOf() / stepMs) * stepMs;
+
+      // Applying step rounding may have taken us outside min/max,
+      // so shift by one step to bring us within bounds.
+      if (props.max && newTime > props.max.valueOf()) newTime -= stepMs;
+      else if (props.min && newTime < props.min.valueOf()) newTime += stepMs;
+
+      value = new Date(newTime);
+    }
+  }
+
   if (valueOwner.value && dateMeta.value) {
     (valueOwner.value as any)[dateMeta.value.name] = value;
   }
@@ -611,56 +661,4 @@ watch(focused, (focused) => {
     }
   }
 });
-
-watch([menu, timePart], async ([open], [_, oldTime]) => {
-  if (!open) return;
-
-  await nextTick();
-
-  const noAnimation =
-    // Don't animate when picking a value for the first time.
-    !oldTime ||
-    // Don't animate for users who don't want animation
-    window.matchMedia(`(prefers-reduced-motion: reduce)`).matches === true;
-
-  // Scroll the selected numbers into view in the time picker.
-  // This is an interval because it has to keep updating as the modal
-  // animates in and grows in height.
-  document.querySelectorAll(".c-time-picker__item-active").forEach((el) => {
-    const totalDuration = 350; // ms
-    let scrollTarget = 0;
-    const start = new Date().valueOf();
-    const parent = el.parentElement;
-    if (!parent) return;
-
-    //@ts-expect-error
-    clearInterval(parent._scrollAnimInterval);
-    //@ts-expect-error
-    const interval = (parent._scrollAnimInterval = setInterval(() => {
-      const rect = el.getBoundingClientRect();
-      const parentRect = parent.getBoundingClientRect();
-
-      // The top of the item relative to the top of the first item in the list.
-      const topInScrollFrame = rect.top - parentRect.top + parent.scrollTop;
-
-      scrollTarget =
-        topInScrollFrame - parent?.clientHeight / 2 + el.clientHeight / 2;
-      scrollTarget = Math.min(scrollTarget, parent.scrollHeight);
-      scrollTarget = Math.max(scrollTarget, 0);
-
-      parent.scrollTop = noAnimation
-        ? scrollTarget
-        : lerp(
-            parent.scrollTop,
-            scrollTarget,
-            (new Date().valueOf() - start) / totalDuration
-          );
-    }, 15));
-    setTimeout(() => clearInterval(interval), totalDuration);
-  });
-});
-
-function lerp(a: number, b: number, alpha: number) {
-  return a + alpha * (b - a);
-}
 </script>

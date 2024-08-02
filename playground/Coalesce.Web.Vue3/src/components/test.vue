@@ -33,6 +33,29 @@
         method="getCaseTitles"
         eager
       />
+      <v-btn @click="disabled = !disabled">Disable Toggle</v-btn>
+      <v-form :disabled="disabled">
+        <c-datetime-picker
+          label="DateTime min/max/step/allowed"
+          density="compact"
+          variant="outlined"
+          date-kind="datetime"
+          :min="new Date(1722627824331)"
+          :max="new Date(1725034169880)"
+          :allowedDates="(v: Date) => v.getDay() > 0 && v.getDay() < 6"
+          step="10"
+          v-model="date"
+          clearable
+        />
+
+        <c-datetime-picker
+          label="EST"
+          density="compact"
+          variant="outlined"
+          v-model="date"
+          timeZone="America/New_York"
+        />
+      </v-form>
 
       <c-datetime-picker
         label="Time"
@@ -128,7 +151,7 @@ export default class Test extends Base {
   personList = new PersonListViewModel();
   isLoading: boolean = false;
   selectedTitle = null;
-
+  disabled = false;
   date = new Date(1722558611283);
   caseVm = new CaseViewModel();
 

@@ -8,6 +8,7 @@ import {
   BetterComponentInstance,
   delay,
   mockEndpoint,
+  openMenu,
 } from "@test/util";
 import { VueWrapper } from "@vue/test-utils";
 import { AnyArgCaller, Model } from "coalesce-vue";
@@ -657,14 +658,7 @@ describe("CSelect", () => {
   // });
 });
 
-const menuContents = () => getWrapper(".c-select__menu-content");
-
-const openMenu = async (wrapper: VueWrapper) => {
-  await flushPromises();
-  await wrapper.find(".v-input__control").trigger("click");
-  await flushPromises();
-  return menuContents();
-};
+const menuContents = () => getWrapper(".v-overlay__content");
 
 export const selectFirstResult = async (wrapper: VueWrapper) => {
   const overlay = await openMenu(wrapper);

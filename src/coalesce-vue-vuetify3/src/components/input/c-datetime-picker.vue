@@ -13,8 +13,8 @@
     v-bind="inputBindAttrs"
     :rules="effectiveRules"
     :error-messages="error"
-    :readonly="readonly"
-    :disabled="disabled"
+    :readonly="isReadonly"
+    :disabled="isDisabled"
     autocomplete="off"
     v-model:focused="focused"
     @change="textInputChanged($event, true)"
@@ -27,8 +27,8 @@
     :rules="effectiveRules"
     :modelValue="internalTextValue == null ? displayedValue : internalTextValue"
     :error-messages="error"
-    :readonly="readonly"
-    :disabled="disabled"
+    :readonly="isReadonly"
+    :disabled="isDisabled"
     autocomplete="off"
     :placeholder="internalFormat"
     v-model:focused="focused"
@@ -36,43 +36,108 @@
     @keydown.escape="focused = false"
     @update:model-value="textInputChanged($event, false)"
     @click.capture="showPickerMobile($event)"
+    :append-inner-icon="
+      internalDateKind == 'time'
+        ? 'fa fa-clock cursor-pointer'
+        : 'fa fa-calendar-alt cursor-pointer'
+    "
   >
-    <template #append-inner>
-      <v-icon
-        :icon="
-          internalDateKind == 'time' ? 'fa fa-clock' : 'fa fa-calendar-alt'
-        "
-        @click="showPicker"
-      ></v-icon>
+    <!-- TODO: Consider fullscreen modal on small devices -->
+    <v-menu
+      v-if="interactive"
+      v-model="menu"
+      activator="parent"
+      content-class="c-datetime-picker__menu"
+      :close-on-content-click="false"
+      min-width="1px"
+    >
+      <v-fab
+        app
+        location="bottom right"
+        color="secondary"
+        size="x-small"
+        icon="$complete"
+        @click="menu = false"
+        :title="$vuetify.locale.t('$vuetify.close')"
+      >
+      </v-fab>
+      <v-card class="d-flex">
+        <v-date-picker
+          v-if="showDate"
+          color="secondary"
+          :modelValue="internalValueZoned"
+          @update:modelValue="dateChanged"
+          density="comfortable"
+          scrollable
+          :rounded="false"
+          :allowedDates="allowedDates"
+          :min="min ? startOfDay(min) : undefined"
+          :max="max ? endOfDay(max) : undefined"
+          v-bind="datePickerProps"
+        >
+        </v-date-picker>
 
-      <!-- 
-        Since vuetify3 doesn't have datepickers, 
-        use a native HTML5 date input to provide the calendar and clock input. 
-        We don't want to use a native HTML5 input as the root input element, because
-        the way they handle events is way too strange and finnicky.
-        See https://stackoverflow.com/questions/40762549/html5-input-type-date-onchange-event 
-      -->
-      <input
-        ref="nativeInput"
-        style="width: 0px; height: 0; position: absolute"
-        tabindex="-1"
-        aria-hidden="true"
-        :type="
-          internalDateKind == 'time'
-            ? 'time'
-            : internalDateKind == 'date'
-            ? 'date'
-            : 'datetime-local'
-        "
-        :value="nativeValue"
-        :readonly="readonly"
-        :disabled="disabled"
-        autocomplete="off"
-        @input="textInputChanged($event, true)"
-      />
-    </template>
+        <v-divider vertical></v-divider>
+
+        <c-time-picker
+          v-if="showTime"
+          :model-value="internalValueZoned"
+          @update:model-value="timeChanged"
+          :step="step"
+          :min="min"
+          :max="max"
+        >
+          <template #header>
+            {{ displayedTime || "&nbsp;" }}
+          </template>
+        </c-time-picker>
+      </v-card>
+    </v-menu>
   </v-text-field>
 </template>
+
+<style lang="scss">
+.c-datetime-picker__menu {
+  > .v-card {
+    @media screen and (max-width: 600px) {
+      flex-wrap: wrap;
+      > * {
+        width: 100%;
+        flex-grow: 1;
+      }
+    }
+  }
+  .v-date-picker {
+    width: 300px;
+    overflow-y: auto;
+  }
+  .v-picker-title {
+    display: none;
+  }
+
+  .v-date-picker-header {
+    height: auto;
+    padding: 6px 14px;
+    font-size: 32px;
+  }
+
+  .v-date-picker-month__day {
+    width: 36px;
+
+    .v-btn {
+      font-size: 14px !important;
+      font-weight: 400;
+    }
+  }
+  .v-date-picker-months {
+    .v-date-picker-months__content {
+      padding: 8px;
+      grid-template-columns: repeat(3, 1fr);
+      grid-gap: 4px 8px;
+    }
+  }
+}
+</style>
 
 <script
   lang="ts"
@@ -92,6 +157,8 @@ import {
   setHours,
   setMinutes,
   startOfDay,
+  endOfDay,
+  startOfHour,
 } from "date-fns";
 import { format, toZonedTime, fromZonedTime } from "date-fns-tz";
 import {
@@ -102,9 +169,9 @@ import {
   Model,
   DateValue,
 } from "coalesce-vue";
-import { computed, ref } from "vue";
+import { computed, inject, ref, watch } from "vue";
 import { ForSpec, useMetadataProps } from "../c-metadata-component";
-import { watch } from "vue";
+import CTimePicker from "./c-time-picker.vue";
 
 defineOptions({
   name: "c-datetime-picker",
@@ -127,18 +194,38 @@ const props = withDefaults(
      */
     for?: ForSpec<TModel, DateValue>;
 
+    /** Specifies whether this input is picking date, time, or both. */
     dateKind?: DateKind;
+    /** The format of the selected value displayed in the text field.*/
     dateFormat?: string;
     readonly?: boolean;
     disabled?: boolean;
     /** Use native HTML5 date picker rather than Vuetify. */
     native?: boolean;
     closeOnDatePicked?: boolean | null;
+
+    /** The IANA time zone name that the user will pick the date/time value in.
+     * Falls back to the value configured with `coalesce-vue`'s `setDefaultTimeZone`
+     * if the value bound to with `model`/`for` is a `DateTimeOffset`.
+     */
     timeZone?: string;
+
+    /** The allowed increments, in minutes, of the selectable value.
+     * Value should divide 60 evenly, or be multiples of 60 */
+    step?: number;
+
+    /** The minimum date/time value allowed. */
+    min?: Date;
+    /** The maximum date/time value allowed. */
+    max?: Date;
+    /** An array of permitted dates (items should have a time of midnight),
+     * or a function that returns true if a date is allowed for selection.
+     * Does not impact time selection. */
+    allowedDates?: Date[] | ((date: Date) => boolean);
+    // Object containing extra props to pass through to `v-date-picker`.
+    datePickerProps?: any;
   }>(),
-  {
-    timeZone: getDefaultTimeZone() || undefined,
-  }
+  { closeOnDatePicked: null }
 );
 
 const modelValue = defineModel<Date | null | undefined>();
@@ -153,9 +240,15 @@ const error = ref<string[]>([]);
 const menu = ref(false);
 const internalTextValue = ref<string>();
 
+const hasMobilePicker = /android|iphone/i.test(navigator.userAgent);
+
+const form: any = inject(Symbol.for("vuetify:form"));
+
+const isDisabled = computed(() => props.disabled || form?.isDisabled.value);
+const isReadonly = computed(() => props.readonly || form?.isReadonly.value);
+
 const interactive = computed(() => {
-  // TODO: read state from any VForm that wraps us
-  return !props.readonly && !props.disabled;
+  return !isDisabled.value && !isReadonly.value;
 });
 
 const dateMeta = computed(() => {
@@ -183,6 +276,18 @@ const displayedValue = computed(() => {
     : null;
 });
 
+const displayedTime = computed(() => {
+  return internalValueZoned.value
+    ? format(
+        internalValueZoned.value,
+        "h:mm a" + (internalTimeZone.value ? " z" : ""),
+        {
+          timeZone: internalTimeZone.value || undefined,
+        }
+      )
+    : null;
+});
+
 const internalTimeZone = computed(() => {
   if (props.timeZone) {
     return props.timeZone;
@@ -190,7 +295,9 @@ const internalTimeZone = computed(() => {
   if (dateMeta.value) {
     if (!dateMeta.value.noOffset) {
       // date is a DateTimeOffset, so TZ conversions are meaningful.
-      return getDefaultTimeZone();
+      return (
+        getDefaultTimeZone() ?? Intl.DateTimeFormat().resolvedOptions().timeZone
+      );
     } else {
       // date is a DateTime, where TZ conversions would actually be harmful. Don't use the default.
       return null;
@@ -273,28 +380,8 @@ const showTime = computed(() => {
   );
 });
 
-const datePart = computed(() => {
-  return (
-    (internalValueZoned.value &&
-      format(internalValueZoned.value, "yyyy-MM-dd", {
-        timeZone: internalTimeZone.value || undefined,
-      })) ||
-    null
-  );
-});
-
-const timePart = computed(() => {
-  return (
-    (internalValueZoned.value &&
-      format(internalValueZoned.value, "HH:mm", {
-        timeZone: internalTimeZone.value || undefined,
-      })) ||
-    null
-  );
-});
-
 function showPickerMobile(event: MouseEvent) {
-  if (/android|iphone/i.test(navigator.userAgent)) {
+  if (hasMobilePicker) {
     showPicker(event);
   }
 }
@@ -303,7 +390,7 @@ function showPicker(event: MouseEvent) {
   if (!interactive.value) {
     return;
   }
-  
+
   // Firefox Desktop only has pickers for date-only inputs.
   // It has no time picker, which makes this essentially useless on firefox for those cases.
   if (
@@ -337,8 +424,11 @@ function createDefaultDate() {
     if (!zone) return startOfDay(date);
 
     return fromZonedTime(startOfDay(toZonedTime(date, zone)), zone);
+  } else {
+    // Initialing with no minutes/seconds/milliseconds
+    // is usually going to be more useful then picking the current time's minutes/seconds.
+    return startOfHour(date);
   }
-  return date;
 }
 
 function parseUserInput(val: string) {
@@ -436,17 +526,13 @@ function textInputChanged(val: string | Event, isNative: boolean) {
   if (isValid(value)) emitInput(value);
 }
 
-function timeChanged(val: string) {
+function timeChanged(input: Date) {
   error.value = [];
 
   var value = internalValueZoned.value || createDefaultDate();
 
-  var parts = /(\d\d):(\d\d)/.exec(val);
-  if (!parts)
-    throw `Time set by vuetify timepicker not in expected format: ${val}`;
-
-  value = setHours(value, parseInt(parts[1]));
-  value = setMinutes(value, parseInt(parts[2]));
+  value = setHours(value, input.getHours());
+  value = setMinutes(value, input.getMinutes());
 
   if (internalTimeZone.value) {
     value = fromZonedTime(value, internalTimeZone.value);
@@ -455,21 +541,20 @@ function timeChanged(val: string) {
   emitInput(value);
 }
 
-function dateChanged(val: string) {
+function dateChanged(input: unknown) {
+  // Typed as unknown because of bad types in vuetify
+  if (!input || !(input instanceof Date)) return;
+
   error.value = [];
 
   var value = internalValueZoned.value || createDefaultDate();
 
-  var parts = /(\d\d\d\d)-(\d\d)-(\d\d)/.exec(val);
-  if (!parts)
-    throw `Date set by vuetify datepicker not in expected format: ${val}`;
-
   // Reset this first in case the year/month aren't valid for the current day.
   value = setDate(value, 1);
 
-  value = setYear(value, parseInt(parts[1]));
-  value = setMonth(value, parseInt(parts[2]) - 1);
-  value = setDate(value, parseInt(parts[3]));
+  value = setYear(value, input.getFullYear());
+  value = setMonth(value, input.getMonth());
+  value = setDate(value, input.getDate());
 
   if (internalTimeZone.value) {
     value = fromZonedTime(value, internalTimeZone.value);
@@ -489,6 +574,47 @@ function dateChanged(val: string) {
 }
 
 function emitInput(value: Date | null) {
+  if (value) {
+    if (props.allowedDates) {
+      // With validation of allowedDates, we have to just return early without emitting
+      // since there's no logic we can apply to clamp the date to a valid date.
+
+      if (
+        Array.isArray(props.allowedDates) &&
+        !props.allowedDates.includes(startOfDay(value))
+      ) {
+        error.value.push("The selected date is not allowed.");
+        return;
+      } else if (
+        typeof props.allowedDates == "function" &&
+        !props.allowedDates(value)
+      ) {
+        error.value.push("The selected date is not allowed.");
+        return;
+      }
+    }
+
+    if (props.min && value.valueOf() < props.min.valueOf()) {
+      value = props.min;
+    }
+
+    if (props.max && value.valueOf() > props.max.valueOf()) {
+      value = props.max;
+    }
+
+    if (props.step) {
+      const stepMs = props.step * 60 * 1000;
+      let newTime = Math.round(value.valueOf() / stepMs) * stepMs;
+
+      // Applying step rounding may have taken us outside min/max,
+      // so shift by one step to bring us within bounds.
+      if (props.max && newTime > props.max.valueOf()) newTime -= stepMs;
+      else if (props.min && newTime < props.min.valueOf()) newTime += stepMs;
+
+      value = new Date(newTime);
+    }
+  }
+
   if (valueOwner.value && dateMeta.value) {
     (valueOwner.value as any)[dateMeta.value.name] = value;
   }

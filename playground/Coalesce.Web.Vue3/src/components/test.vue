@@ -1,7 +1,8 @@
 <template>
   <v-container grid-list-lg>
     <c-loader-status :loaders="{ 'no-initial-content': [caseVm.$load] }">
-      <v-card class="mb-10">
+      <c-time-picker></c-time-picker>
+      <v-card class="my-10">
         <v-row>
           <v-col>
             <c-select
@@ -32,6 +33,29 @@
         method="getCaseTitles"
         eager
       />
+      <v-btn @click="disabled = !disabled">Disable Toggle</v-btn>
+      <v-form :disabled="disabled">
+        <c-datetime-picker
+          label="DateTime min/max/step/allowed"
+          density="compact"
+          variant="outlined"
+          date-kind="datetime"
+          :min="new Date(1722627824331)"
+          :max="new Date(1725034169880)"
+          :allowedDates="(v: Date) => v.getDay() > 0 && v.getDay() < 6"
+          step="10"
+          v-model="date"
+          clearable
+        />
+
+        <c-datetime-picker
+          label="EST"
+          density="compact"
+          variant="outlined"
+          v-model="date"
+          timeZone="America/New_York"
+        />
+      </v-form>
 
       <c-datetime-picker
         label="Time"
@@ -63,8 +87,11 @@
         date-kind="datetime"
         v-model="date"
       />
+      <c-input :model="caseVm" for="openedAt" variant="outlined"> </c-input>
 
+      <br />
       {{ date }}
+
       <c-select for="Person" v-model="caseVm.assignedTo"> </c-select>
       <c-select :model="caseVm" for="assignedTo"> </c-select>
       <c-select :model="caseVm" for="assignedTo" density="compact"> </c-select>
@@ -124,8 +151,8 @@ export default class Test extends Base {
   personList = new PersonListViewModel();
   isLoading: boolean = false;
   selectedTitle = null;
-
-  date = null;
+  disabled = false;
+  date = new Date(1722558611283);
   caseVm = new CaseViewModel();
 
   async created() {

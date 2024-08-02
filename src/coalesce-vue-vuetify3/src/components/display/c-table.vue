@@ -180,18 +180,15 @@ export default defineComponent({
       .v-input {
         min-width: 120px;
       }
+      .v-switch {
+        margin-left: 16px;
+      }
       .v-input__slot {
         margin-bottom: 0px;
       }
       .v-field__input {
         padding-left: 6px;
         padding-right: 6px;
-      }
-      // Remove extra padding on the top of v-switch components
-      // so they align nicely with other components.
-      .v-input--switch,
-      .v-input--checkbox {
-        margin-top: 6px;
       }
 
       textarea {

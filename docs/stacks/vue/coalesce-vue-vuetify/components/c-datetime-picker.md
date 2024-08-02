@@ -59,23 +59,44 @@ Defaults to:
 ::: warning
 When parsing a user's text input into the text field, c-datetime-picker will first attempt to parse it with the format specified by `dateFormat`, or the default as described above if not explicitly specified.
 
-If this fails, the date will be parsed with the [Date constructor](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/Date), but only if the `dateKind` is ``datetime`` or ``date``. This works fairly well on all modern browsers, but can still occasionally have issues. c-datetime-picker tries its best to filter out bad parses from the Date constructor, like dates with a year earlier than 1000.
+If this fails, Coalesce then tries a [large number of common formats](https://github.com/IntelliTect/Coalesce/blob/1fb00c7de5e363aaf3c1a78f45af3b949b11dff4/src/coalesce-vue/test/utils.spec.ts#L5).
+
+If that failed, then finally the date will be parsed with the [Date constructor](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/Date), but only if the `dateKind` is ``datetime`` or ``date``. This works fairly well on all modern browsers, but can still occasionally have issues. c-datetime-picker tries its best to filter out bad parses from the Date constructor, like dates with a year earlier than 1000.
 :::
+
+<Prop def="step?: number" lang="ts" />
+
+The increments, in minutes, of the selectable value. Values should divide 60 evenly, or be multiples of 60. For example, a step of 15 allows selection of :00, :15, :30, and :45 minute time values.
+
+<Prop def="min?: Date" lang="ts" />
+
+The smallest allowable date/time selection.
+
+<Prop def="max?: Date" lang="ts" />
+
+The largest allowable date/time selection.
+
+<Prop def="allowedDates?: Date[] | ((date: Date) => boolean)" lang="ts" />
+
+An array of permitted dates (items should have a time of midnight),
+or a function that returns true if a date is allowed for selection.
+Does not impact time selection.
+
+<Prop def="timeZone?: string" lang="ts" />
+
+The [IANA Time Zone Database](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) name that the user will pick the date/time value in.
+Defaults to the value configured with [`setDefaultTimeZone`](/stacks/vue/layers/models.md#member-setdefaulttimezone) if the value bound to with `model`/`for` is a `DateTimeOffset`.
 
 <Prop def="native?: boolean" lang="ts" />
 
-True if a native HTML5 input should be used instead of a popup menu with Vuetify date/time pickers inside of it.
-
-<Prop def="sideBySide?: boolean" lang="ts" />
-
-True if the calendar and clock should be shown side by side in the picker menu, rather than in separate tabs.
+True if a native HTML5 input should be used instead of a popup menu with date/time pickers inside of it.
 
 <Prop def="readonly?: boolean" lang="ts" />
 
-True if the component should be read-only.
+True if the component should be read-only. This state is also inherited from any wrapping `v-form`.
 
 <Prop def="disabled?: boolean" lang="ts" />
 
-True if the component should be disabled.
+True if the component should be disabled. This state is also inherited from any wrapping `v-form`.
 
 

@@ -3,7 +3,7 @@
     <v-app-bar>
       <v-toolbar-title style="line-height: 1">
         <router-link to="/" class="white--text">
-          Coalesce Vue Demo
+          Coalesce Vue 3 Playground
         </router-link>
       </v-toolbar-title>
 

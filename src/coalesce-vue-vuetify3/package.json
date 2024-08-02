@@ -42,7 +42,7 @@
   "peerDependencies": {
     "coalesce-vue": "../coalesce-vue",
     "vue": "^3.4.0",
-    "vuetify": "^3.4.0"
+    "vuetify": "^3.6.0"
   },
   "optionalDependencies": {
     "vue-router": "^4.1.0"
@@ -59,7 +59,7 @@
     "coalesce-vue": "../coalesce-vue",
     "eslint": "^8.0.0",
     "eslint-plugin-vue": "^9.27.0",
-    "jsdom": "^23.0.1",
+    "jsdom": "^24.1.1",
     "sass": "^1.69.7",
     "typescript": "5.3.3",
     "unplugin-vue-components": "^0.27.3",
@@ -68,7 +68,7 @@
     "vue": "^3.4.6",
     "vue-router": "^4.2.5",
     "vue-tsc": "^1.8.27",
-    "vuetify": "3.4.7"
+    "vuetify": "^3.6.14"
   },
   "postcss": {
     "//": "This is to silence warnings when consuming directly from Coalesce.Web.Vue3. Otherwise, not needed.",

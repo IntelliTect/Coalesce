@@ -1,76 +1,69 @@
 <template>
-  <div class="c-time-picker">
-    <div class="c-time-picker__column">
-      <div class="c-time-picker__column-items" aria-label="Hour">
-        <div
-          v-for="i in hours"
-          :key="'h-' + i"
-          @click="setHour(i)"
-          role="button"
-          class="c-time-picker__item c-time-picker__item-hour"
-          :class="{
-            'c-time-picker__item-active ':
-              model && model.getHours() % 12 == i % 12,
-          }"
-        >
-          {{ i.toString() }}
-        </div>
+  <v-sheet class="c-time-picker">
+    <div class="c-time-picker__column" aria-label="Hour">
+      <button
+        v-for="i in hours"
+        :key="'h-' + i"
+        @click="setHour(i)"
+        role="button"
+        tabindex="0"
+        class="c-time-picker__item c-time-picker__item-hour"
+        :class="{
+          'c-time-picker__item-active ':
+            modelValue && modelValue.getHours() % 12 == i % 12,
+        }"
+      >
+        {{ i.toString() }}
+      </button>
+    </div>
+    <div class="c-time-picker__column" aria-label="Minute">
+      <button
+        v-for="i in minutes"
+        :key="'m-' + i"
+        @click="setMinute(i)"
+        role="button"
+        class="c-time-picker__item c-time-picker__item-minute"
+        :class="{
+          'c-time-picker__item-active ': modelValue?.getMinutes() == i,
+        }"
+      >
+        {{ i.toString().padStart(2, "0") }}
+      </button>
+    </div>
+    <div class="c-time-picker__column" aria-label="AM/PM">
+      <div
+        v-for="(item, i) in meridiems"
+        :key="item"
+        class="c-time-picker__item c-time-picker__item-meridiam"
+        @click="setAM(i == 0)"
+        role="button"
+        :class="{
+          'c-time-picker__item-active':
+            modelValue && (i == 0) == modelValue.getHours() < 12,
+        }"
+      >
+        {{ item }}
       </div>
     </div>
-    <div class="c-time-picker__column">
-      <div class="c-time-picker__column-items" aria-label="Minute">
-        <div
-          v-for="i in minutes"
-          :key="'m-' + i"
-          @click="setMinute(i)"
-          role="button"
-          class="c-time-picker__item c-time-picker__item-minute"
-          :class="{
-            'c-time-picker__item-active ': model?.getMinutes() == i,
-          }"
-        >
-          {{ i.toString().padStart(2, "0") }}
-        </div>
-      </div>
-    </div>
-    <div class="c-time-picker__column">
-      <div class="c-time-picker__column-items" aria-label="AM/PM">
-        <div
-          v-for="item in ['AM', 'PM']"
-          :key="item"
-          class="c-time-picker__item c-time-picker__item-meridiam"
-          @click="setAM(item == 'AM')"
-          role="button"
-          :class="{
-            'c-time-picker__item-active ':
-              model && (item == 'AM') == model.getHours() < 12,
-          }"
-        >
-          {{ item }}
-        </div>
-      </div>
-    </div>
-  </div>
+  </v-sheet>
 </template>
 
 <style lang="scss">
 .c-time-picker {
   display: flex;
+  padding: 8px;
+  justify-content: space-around;
 }
 .c-time-picker__column {
-  margin: 8px 0px;
-  text-align: center;
-}
-.c-time-picker__column-items {
-  max-height: 320px;
+  max-height: 328px;
   overflow-y: auto;
   overflow-x: hidden;
-  margin: 4px;
+  padding: 8px 9px;
   border-radius: 8px;
   background-color: rgba(var(--v-theme-surface), 0.3);
 
   &::-webkit-scrollbar {
-    width: 6px;
+    width: 4px;
   }
 
   &::-webkit-scrollbar-track {
@@ -85,7 +78,9 @@
   }
 }
 .c-time-picker__item {
-  padding: 6px 14px;
+  display: block;
+  padding: 5px 14px;
+  min-width: 46px;
   margin: 0 4px;
   text-align: center;
   text-justify: center;
@@ -102,20 +97,22 @@
   }
 }
 </style>
-<script setup lang="ts">
-import { getHours, setHours, setMinutes } from "date-fns";
-import { computed } from "vue";
 
-const model = defineModel<Date>();
+<script setup lang="ts">
+import { format, getHours, setHours, setMinutes, startOfHour } from "date-fns";
+import { computed } from "vue";
 
 const props = withDefaults(
   defineProps<{
+    modelValue?: Date | null;
     /** The increments, in minutes, of the selectable value.
      * Values should divide 60 evenly, or be multiples of 60 */
     step: number;
   }>(),
   { step: 1 }
 );
+
+const emit = defineEmits<{ "update:modelValue": [arg: Date] }>();
 
 const hours = computed(() => {
   return [12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].filter(
@@ -127,17 +124,33 @@ const minutes = computed(() => {
   return Array.from(Array(60).keys()).filter((m) => m % props.step == 0);
 });
 
+const meridiems = [
+  format(new Date(0).setHours(0), "a"),
+  format(new Date(0).setHours(12), "a"),
+];
+
+function getDateToModify() {
+  return props.modelValue ?? startOfHour(new Date());
+}
+
 function setMinute(minute: number) {
-  model.value = setMinutes(model.value, minute);
+  const value = getDateToModify();
+  emitInput(setMinutes(value, minute));
 }
 
 function setHour(hour: number) {
-  hour = (hour % 12) + Math.floor(getHours(model.value) / 12) * 12;
-  model.value = setHours(model.value, hour);
+  const value = getDateToModify();
+  hour = (hour % 12) + Math.floor(getHours(value) / 12) * 12;
+  emitInput(setHours(value, hour));
 }
 
 function setAM(isAM: boolean) {
-  const hour = (getHours(model.value) % 12) + (isAM ? 0 : 12);
-  model.value = setHours(model.value, hour);
+  const value = getDateToModify();
+  const hour = (getHours(value) % 12) + (isAM ? 0 : 12);
+  emitInput(setHours(value, hour));
+}
+
+function emitInput(value: Date) {
+  emit("update:modelValue", value);
 }
 </script>

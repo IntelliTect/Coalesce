@@ -1,6 +1,6 @@
 <template>
   <v-text-field
-    v-if="effectiveVariant == 'native'"
+    v-if="native"
     class="c-datetime-picker"
     :type="
       internalDateKind == 'time'
@@ -37,38 +37,48 @@
     @update:model-value="textInputChanged($event, false)"
     @click.capture="showPickerMobile($event)"
   >
+    <!-- TODO: Consider fullscreen modal on small devices -->
     <v-menu
-      v-if="effectiveVariant == 'vuetify'"
+      v-if="interactive"
       v-model="menu"
       activator="parent"
       content-class="c-datetime-picker--menu"
       :close-on-content-click="false"
       min-width="1px"
     >
-      <v-card>
-        <div class="d-flex">
-          <v-date-picker
-            v-if="showDate"
-            color="secondary"
+      <v-fab
+        v-if="$vuetify.display.xs"
+        app
+        location="bottom right"
+        color="secondary"
+        size="x-small"
+        icon="$complete"
+        @click="menu = false"
+      >
+      </v-fab>
+      <v-card class="d-flex">
+        <v-date-picker
+          v-if="showDate"
+          color="secondary"
+          :model-value="internalValueZoned"
+          density="comfortable"
+          scrollable
+          :rounded="false"
+          :allowed-dates="$attrs.allowedDates || $attrs['allowed-dates']"
+          @update:model-value="dateChanged"
+        >
+        </v-date-picker>
+
+        <v-divider vertical></v-divider>
+
+        <div v-if="showTime">
+          <v-sheet color="secondary" class="c-time-picker-header">
+            {{ displayedTime || "&nbsp;" }}
+          </v-sheet>
+          <c-time-picker
             :model-value="internalValueZoned"
-            density="comfortable"
-            scrollable
-            :rounded="false"
-            :allowed-dates="$attrs.allowedDates || $attrs['allowed-dates']"
-            @update:model-value="dateChanged"
-          >
-          </v-date-picker>
-          <v-divider vertical></v-divider>
-          <div>
-            <v-sheet color="secondary" class="c-time-picker-header">
-              {{ displayedTime }}
-            </v-sheet>
-            <c-time-picker
-              class="px-1"
-              :model-value="internalValueZoned"
-              @update:model-value="timeChanged"
-            ></c-time-picker>
-          </div>
+            @update:model-value="timeChanged"
+          ></c-time-picker>
         </div>
       </v-card>
     </v-menu>
@@ -77,42 +87,25 @@
         :icon="
           internalDateKind == 'time' ? 'fa fa-clock' : 'fa fa-calendar-alt'
         "
-        @click="showPicker"
       ></v-icon>
-
-      <!-- 
-        Since vuetify3 doesn't have datepickers, 
-        use a native HTML5 date input to provide the calendar and clock input. 
-        We don't want to use a native HTML5 input as the root input element, because
-        the way they handle events is way too strange and finnicky.
-        See https://stackoverflow.com/questions/40762549/html5-input-type-date-onchange-event 
-      -->
-      <input
-        ref="nativeInput"
-        style="width: 0px; height: 0; position: absolute"
-        tabindex="-1"
-        aria-hidden="true"
-        :type="
-          internalDateKind == 'time'
-            ? 'time'
-            : internalDateKind == 'date'
-            ? 'date'
-            : 'datetime-local'
-        "
-        :value="nativeValue"
-        :readonly="readonly"
-        :disabled="disabled"
-        autocomplete="off"
-        @input="textInputChanged($event, true)"
-      />
     </template>
   </v-text-field>
 </template>
 
 <style lang="scss">
 .c-datetime-picker--menu {
+  > .v-card {
+    @media screen and (max-width: 600px) {
+      flex-wrap: wrap;
+      > * {
+        width: 100%;
+        flex-grow: 1;
+      }
+    }
+  }
   .v-date-picker {
     width: 300px;
+    overflow-y: auto;
   }
   .v-picker-title {
     display: none;
@@ -121,12 +114,20 @@
     padding: 0px;
   }
 
+  .c-time-picker {
+    max-height: calc(100% - 64px);
+  }
+
   .v-date-picker-header,
   .c-time-picker-header {
     height: auto;
     padding: 12px 20px;
     font-size: 32px;
     line-height: 40px;
+
+    @media screen and (max-width: 600px) {
+      padding: 4px 16px;
+    }
   }
 
   .v-date-picker-month__day {
@@ -179,11 +180,10 @@ import {
   Model,
   DateValue,
 } from "coalesce-vue";
-import { computed, ref } from "vue";
+import { computed, ref, nextTick, watch } from "vue";
 import { ForSpec, useMetadataProps } from "../c-metadata-component";
-import { watch } from "vue";
-import { VTimePickerControls } from "vuetify/labs/VTimePicker";
 import CTimePicker from "./c-time-picker.vue";
+
 defineOptions({
   name: "c-datetime-picker",
 
@@ -204,8 +204,6 @@ const props = withDefaults(
      * * A string in dot-notation that starts with a type name. E.g. `"Person.startDate"`.
      */
     for?: ForSpec<TModel, DateValue>;
-
-    mode?: "native" | "native-picker" | "vuetify" | "auto";
 
     dateKind?: DateKind;
     dateFormat?: string;
@@ -235,13 +233,6 @@ const menu = ref(false);
 const internalTextValue = ref<string>();
 
 const hasMobilePicker = /android|iphone/i.test(navigator.userAgent);
-const effectiveVariant = computed(() => {
-  if (props.mode == "auto") {
-    if (hasMobilePicker) return "native-picker";
-    return "vuetify";
-  }
-  return props.mode;
-});
 
 const interactive = computed(() => {
   // TODO: read state from any VForm that wraps us
@@ -408,10 +399,6 @@ function showPicker(event: MouseEvent) {
     return;
   }
 
-  if (effectiveVariant.value == "vuetify") {
-    return;
-  }
-
   // Firefox Desktop only has pickers for date-only inputs.
   // It has no time picker, which makes this essentially useless on firefox for those cases.
   if (
@@ -559,7 +546,9 @@ function timeChanged(input: Date) {
   emitInput(value);
 }
 
-function dateChanged(input: Date) {
+function dateChanged(input: Date | null) {
+  if (!input) return;
+
   error.value = [];
 
   var value = internalValueZoned.value || createDefaultDate();
@@ -622,4 +611,56 @@ watch(focused, (focused) => {
     }
   }
 });
+
+watch([menu, timePart], async ([open], [_, oldTime]) => {
+  if (!open) return;
+
+  await nextTick();
+
+  const noAnimation =
+    // Don't animate when picking a value for the first time.
+    !oldTime ||
+    // Don't animate for users who don't want animation
+    window.matchMedia(`(prefers-reduced-motion: reduce)`).matches === true;
+
+  // Scroll the selected numbers into view in the time picker.
+  // This is an interval because it has to keep updating as the modal
+  // animates in and grows in height.
+  document.querySelectorAll(".c-time-picker__item-active").forEach((el) => {
+    const totalDuration = 350; // ms
+    let scrollTarget = 0;
+    const start = new Date().valueOf();
+    const parent = el.parentElement;
+    if (!parent) return;
+
+    //@ts-expect-error
+    clearInterval(parent._scrollAnimInterval);
+    //@ts-expect-error
+    const interval = (parent._scrollAnimInterval = setInterval(() => {
+      const rect = el.getBoundingClientRect();
+      const parentRect = parent.getBoundingClientRect();
+
+      // The top of the item relative to the top of the first item in the list.
+      const topInScrollFrame = rect.top - parentRect.top + parent.scrollTop;
+
+      scrollTarget =
+        topInScrollFrame - parent?.clientHeight / 2 + el.clientHeight / 2;
+      scrollTarget = Math.min(scrollTarget, parent.scrollHeight);
+      scrollTarget = Math.max(scrollTarget, 0);
+
+      parent.scrollTop = noAnimation
+        ? scrollTarget
+        : lerp(
+            parent.scrollTop,
+            scrollTarget,
+            (new Date().valueOf() - start) / totalDuration
+          );
+    }, 15));
+    setTimeout(() => clearInterval(interval), totalDuration);
+  });
+});
+
+function lerp(a: number, b: number, alpha: number) {
+  return a + alpha * (b - a);
+}
 </script>

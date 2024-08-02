@@ -64,8 +64,11 @@
         date-kind="datetime"
         v-model="date"
       />
+      <c-input :model="caseVm" for="openedAt" variant="outlined"> </c-input>
 
+      <br />
       {{ date }}
+
       <c-select for="Person" v-model="caseVm.assignedTo"> </c-select>
       <c-select :model="caseVm" for="assignedTo"> </c-select>
       <c-select :model="caseVm" for="assignedTo" density="compact"> </c-select>
@@ -126,7 +129,7 @@ export default class Test extends Base {
   isLoading: boolean = false;
   selectedTitle = null;
 
-  date = new Date();
+  date = new Date(1722558611283);
   caseVm = new CaseViewModel();
 
   async created() {

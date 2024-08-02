@@ -114,20 +114,11 @@
   .v-picker-title {
     display: none;
   }
-  .v-picker__header {
-    padding: 0px;
-  }
 
-  .v-date-picker-header,
-  .c-time-picker-header {
+  .v-date-picker-header {
     height: auto;
-    padding: 12px 20px;
+    padding: 6px 14px;
     font-size: 32px;
-    line-height: 40px;
-
-    @media screen and (max-width: 600px) {
-      padding: 4px 16px;
-    }
   }
 
   .v-date-picker-month__day {
@@ -137,10 +128,6 @@
       font-size: 14px !important;
       font-weight: 400;
     }
-  }
-  .v-date-picker-years,
-  .v-date-picker-months {
-    // height: 232px;
   }
   .v-date-picker-months {
     .v-date-picker-months__content {

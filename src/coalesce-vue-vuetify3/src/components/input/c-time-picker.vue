@@ -61,7 +61,7 @@
 }
 
 .c-time-picker-header {
-  padding: 12px 20px;
+  padding: 6px 14px;
   font-size: 32px;
   line-height: 40px;
 }

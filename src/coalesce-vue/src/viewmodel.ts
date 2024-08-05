@@ -149,7 +149,8 @@ export abstract class ViewModel<
     : reactive(new Set<string>());
 
   // Backwards-compat with vue2 nonreactive sets.
-  _dirtyPropsVersion = IsVue2 ? ref(0) : undefined;
+  // Typed as any because vue ref unwrapping causes problems with a prop that is a maybe ref.
+  _dirtyPropsVersion: any = IsVue2 ? ref(0) : undefined;
 
   /**
    * Returns true if the values of the savable data properties of this ViewModel
@@ -162,7 +163,7 @@ export abstract class ViewModel<
     if (!val) {
       this._dirtyProps.clear();
       if (IsVue2 && this._dirtyProps.size) {
-        this._dirtyPropsVersion!.value++;
+        this._dirtyPropsVersion.value++;
       }
       this._isDirty.value = false;
     } else {
@@ -187,7 +188,7 @@ export abstract class ViewModel<
 
     if (dirty) {
       this._dirtyProps.add(propName);
-      if (IsVue2) this._dirtyPropsVersion!.value++;
+      if (IsVue2) this._dirtyPropsVersion.value++;
       this._isDirty.value = true;
 
       if (triggerAutosave && this._autoSaveState?.value?.active) {
@@ -196,7 +197,7 @@ export abstract class ViewModel<
       }
     } else {
       this._dirtyProps.delete(propName);
-      if (IsVue2) this._dirtyPropsVersion!.value++;
+      if (IsVue2) this._dirtyPropsVersion.value++;
       if (!this._dirtyProps.size) {
         this._isDirty.value = false;
       }

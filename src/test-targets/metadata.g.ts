@@ -2044,6 +2044,9 @@ export const EnumPk = domain.types.EnumPk = {
       get typeDef() { return domain.enums.EnumPkId },
       role: "primaryKey",
       createOnly: true,
+      rules: {
+        required: val => val != null || "Enum Pk Id is required.",
+      }
     },
     name: {
       name: "name",

@@ -368,6 +368,7 @@ namespace Coalesce.Web.Vue2.Api
             }
 
             item.UploadByteArray(
+                Db,
                 _params.file
             );
             var _result = new ItemResult();

@@ -143,9 +143,10 @@ namespace Coalesce.Domain
         /// Sets the FirstName to the given text.
         /// </summary>
         [Coalesce]
-        public Person Rename(string name, out IncludeTree includeTree)
+        public Person Rename(AppDbContext db, string name, out IncludeTree includeTree)
         {
             FirstName = name;
+            db.SaveChanges();
             includeTree = IncludeTree.For<Person>(p => p.IncludedSeparately(x => x.Company));
             return this;
         }
@@ -154,10 +155,11 @@ namespace Coalesce.Domain
         /// Removes spaces from the name and puts in dashes
         /// </summary>
         [Coalesce, Execute(DataSource = typeof(WithoutCases))]
-        public ItemResult ChangeSpacesToDashesInName()
+        public ItemResult ChangeSpacesToDashesInName(AppDbContext db)
         {
             var old = FirstName;
             FirstName = FirstName.Replace(" ", "-");
+            db.SaveChanges();
             return new ItemResult(true, $"Changed name from {old} to {FirstName}");
         }
 
@@ -207,9 +209,10 @@ namespace Coalesce.Domain
         /// Returns the user name
         /// </summary>
         [Coalesce]
-        public void SetBirthDate(DateOnly date, TimeOnly time)
+        public void SetBirthDate(AppDbContext db, DateOnly date, TimeOnly time)
         {
             BirthDate = date.ToDateTime(time);
+            db.SaveChanges();
         }
 
         [Coalesce]
@@ -254,15 +257,17 @@ namespace Coalesce.Domain
         {
             var random = (new Random()).Next();
             this.Email = $"test{random}@test.com";
+            db.SaveChanges();
             return $"New Email is: {this.Email}";
         }
 
         [Coalesce]
         [Execute(HttpMethod = HttpMethod.Patch)]
-        public Person ChangeFirstName (string firstName, Titles? title)
+        public Person ChangeFirstName (AppDbContext db, string firstName, Titles? title)
         {
             this.FirstName = firstName;
             Title ??= title;
+            db.SaveChanges();
             return this;
         }
 

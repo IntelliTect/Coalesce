@@ -98,6 +98,7 @@ export interface CaseViewModel extends $models.Case {
   duration: unknown | null;
 }
 export class CaseViewModel extends ViewModel<$models.Case, $apiClients.CaseApiClient, number> implements $models.Case  {
+  static DataSources = $models.Case.DataSources;
   
   
   public addToCaseProducts(initialData?: DeepPartial<$models.CaseProduct> | null) {
@@ -170,6 +171,7 @@ export class CaseViewModel extends ViewModel<$models.Case, $apiClients.CaseApiCl
 defineProps(CaseViewModel, $metadata.Case)
 
 export class CaseListViewModel extends ListViewModel<$models.Case, $apiClients.CaseApiClient, CaseViewModel> {
+  static DataSources = $models.Case.DataSources;
   
   public get getCaseTitles() {
     const getCaseTitles = this.$apiClient.$makeCaller(
@@ -239,6 +241,7 @@ export interface CaseDtoViewModel extends $models.CaseDto {
   assignedToName: string | null;
 }
 export class CaseDtoViewModel extends ViewModel<$models.CaseDto, $apiClients.CaseDtoApiClient, number> implements $models.CaseDto  {
+  static DataSources = $models.CaseDto.DataSources;
   
   public get asyncMethodOnIClassDto() {
     const asyncMethodOnIClassDto = this.$apiClient.$makeCaller(
@@ -259,6 +262,7 @@ export class CaseDtoViewModel extends ViewModel<$models.CaseDto, $apiClients.Cas
 defineProps(CaseDtoViewModel, $metadata.CaseDto)
 
 export class CaseDtoListViewModel extends ListViewModel<$models.CaseDto, $apiClients.CaseDtoApiClient, CaseDtoViewModel> {
+  static DataSources = $models.CaseDto.DataSources;
   
   constructor() {
     super($metadata.CaseDto, new $apiClients.CaseDtoApiClient())
@@ -329,6 +333,7 @@ export interface CompanyViewModel extends $models.Company {
   altName: string | null;
 }
 export class CompanyViewModel extends ViewModel<$models.Company, $apiClients.CompanyApiClient, number> implements $models.Company  {
+  static DataSources = $models.Company.DataSources;
   
   
   public addToEmployees(initialData?: DeepPartial<$models.Person> | null) {
@@ -353,6 +358,7 @@ export class CompanyViewModel extends ViewModel<$models.Company, $apiClients.Com
 defineProps(CompanyViewModel, $metadata.Company)
 
 export class CompanyListViewModel extends ListViewModel<$models.Company, $apiClients.CompanyApiClient, CompanyViewModel> {
+  static DataSources = $models.Company.DataSources;
   
   public get getCertainItems() {
     const getCertainItems = this.$apiClient.$makeCaller(
@@ -437,6 +443,7 @@ export interface PersonViewModel extends $models.Person {
   arbitraryCollectionOfStrings: string[] | null;
 }
 export class PersonViewModel extends ViewModel<$models.Person, $apiClients.PersonApiClient, number> implements $models.Person  {
+  static DataSources = $models.Person.DataSources;
   
   
   public addToCasesAssigned(initialData?: DeepPartial<$models.Case> | null) {
@@ -535,6 +542,7 @@ export class PersonViewModel extends ViewModel<$models.Person, $apiClients.Perso
 defineProps(PersonViewModel, $metadata.Person)
 
 export class PersonListViewModel extends ListViewModel<$models.Person, $apiClients.PersonApiClient, PersonViewModel> {
+  static DataSources = $models.Person.DataSources;
   
   /** 
     Adds two numbers.
@@ -680,6 +688,7 @@ export interface StandaloneReadCreateViewModel extends $models.StandaloneReadCre
   date: Date | null;
 }
 export class StandaloneReadCreateViewModel extends ViewModel<$models.StandaloneReadCreate, $apiClients.StandaloneReadCreateApiClient, number> implements $models.StandaloneReadCreate  {
+  static DataSources = $models.StandaloneReadCreate.DataSources;
   
   constructor(initialData?: DeepPartial<$models.StandaloneReadCreate> | null) {
     super($metadata.StandaloneReadCreate, new $apiClients.StandaloneReadCreateApiClient(), initialData)
@@ -688,6 +697,7 @@ export class StandaloneReadCreateViewModel extends ViewModel<$models.StandaloneR
 defineProps(StandaloneReadCreateViewModel, $metadata.StandaloneReadCreate)
 
 export class StandaloneReadCreateListViewModel extends ListViewModel<$models.StandaloneReadCreate, $apiClients.StandaloneReadCreateApiClient, StandaloneReadCreateViewModel> {
+  static DataSources = $models.StandaloneReadCreate.DataSources;
   
   constructor() {
     super($metadata.StandaloneReadCreate, new $apiClients.StandaloneReadCreateApiClient())
@@ -701,6 +711,7 @@ export interface StandaloneReadonlyViewModel extends $models.StandaloneReadonly 
   description: string | null;
 }
 export class StandaloneReadonlyViewModel extends ViewModel<$models.StandaloneReadonly, $apiClients.StandaloneReadonlyApiClient, number> implements $models.StandaloneReadonly  {
+  static DataSources = $models.StandaloneReadonly.DataSources;
   
   constructor(initialData?: DeepPartial<$models.StandaloneReadonly> | null) {
     super($metadata.StandaloneReadonly, new $apiClients.StandaloneReadonlyApiClient(), initialData)
@@ -709,6 +720,7 @@ export class StandaloneReadonlyViewModel extends ViewModel<$models.StandaloneRea
 defineProps(StandaloneReadonlyViewModel, $metadata.StandaloneReadonly)
 
 export class StandaloneReadonlyListViewModel extends ListViewModel<$models.StandaloneReadonly, $apiClients.StandaloneReadonlyApiClient, StandaloneReadonlyViewModel> {
+  static DataSources = $models.StandaloneReadonly.DataSources;
   
   constructor() {
     super($metadata.StandaloneReadonly, new $apiClients.StandaloneReadonlyApiClient())
@@ -722,6 +734,7 @@ export interface StandaloneReadWriteViewModel extends $models.StandaloneReadWrit
   date: Date | null;
 }
 export class StandaloneReadWriteViewModel extends ViewModel<$models.StandaloneReadWrite, $apiClients.StandaloneReadWriteApiClient, number> implements $models.StandaloneReadWrite  {
+  static DataSources = $models.StandaloneReadWrite.DataSources;
   
   constructor(initialData?: DeepPartial<$models.StandaloneReadWrite> | null) {
     super($metadata.StandaloneReadWrite, new $apiClients.StandaloneReadWriteApiClient(), initialData)
@@ -730,6 +743,7 @@ export class StandaloneReadWriteViewModel extends ViewModel<$models.StandaloneRe
 defineProps(StandaloneReadWriteViewModel, $metadata.StandaloneReadWrite)
 
 export class StandaloneReadWriteListViewModel extends ListViewModel<$models.StandaloneReadWrite, $apiClients.StandaloneReadWriteApiClient, StandaloneReadWriteViewModel> {
+  static DataSources = $models.StandaloneReadWrite.DataSources;
   
   constructor() {
     super($metadata.StandaloneReadWrite, new $apiClients.StandaloneReadWriteApiClient())

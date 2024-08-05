@@ -19,7 +19,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
             var b = new TypeScriptCodeBuilder(indentSize: 2);
             b.Line("import * as metadata from './metadata.g'");
             b.Line("import { Model, DataSource, convertToModel, mapToModel } from 'coalesce-vue/lib/model'");
-         //   b.Line("import { Domain, getEnumMeta, ModelType, ExternalType } from './coalesce/core/metadata' ");
+            b.Line("import { reactive } from 'vue'");
             b.Line();
 
             foreach (var model in Model.ClientEnums.OrderBy(e => e.ClientTypeName))
@@ -80,34 +80,32 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                 var dataSources = model.ClientDataSources(Model);
                 if (dataSources.Any())
                 {
-                    using (b.Block($"export namespace {name}"))
+                    using var _ = b.Block($"export namespace {name}");
+                    using var _2 = b.Block($"export namespace DataSources");
+
+                    foreach (var source in dataSources)
                     {
-                        using (b.Block("export namespace DataSources"))
+                        b.DocComment(source.Comment, true);
+                        var sourceMeta = $"metadata.{name}.dataSources.{source.ClientTypeName.ToCamelCase()}";
+
+                        using (b.Block($"export class {source.ClientTypeName} implements DataSource<typeof {sourceMeta}>"))
                         {
-                            foreach (var source in dataSources)
+                            b.Line($"readonly $metadata = {sourceMeta}");
+
+                            if (source.DataSourceParameters.Any())
                             {
-                                b.DocComment(source.Comment, true);
-                                var sourceMeta = $"metadata.{name}.dataSources.{source.ClientTypeName.ToCamelCase()}";
-
-                                using (b.Block($"export class {source.ClientTypeName} implements DataSource<typeof {sourceMeta}>"))
+                                foreach (var param in source.DataSourceParameters)
                                 {
-                                    b.Line($"readonly $metadata = {sourceMeta}");
+                                    b.DocComment(param.Comment ?? param.Description);
+                                    var typeString = new VueType(param.Type).TsType();
+                                    b.Line($"{param.JsVariable}: {typeString} | null = null");
+                                }
 
-                                    if (source.DataSourceParameters.Any())
-                                    {
-                                        foreach (var param in source.DataSourceParameters)
-                                        {
-                                            b.DocComment(param.Comment ?? param.Description);
-                                            var typeString = new VueType(param.Type).TsType();
-                                            b.Line($"{param.JsVariable}: {typeString} | null = null");
-                                        }
-
-                                        b.Line();
-                                        using (b.Block($"constructor(params?: Omit<Partial<{source.ClientTypeName}>, '$metadata'>)"))
-                                        {
-                                            b.Line($"if (params) Object.assign(this, params);");
-                                        }
-                                    }
+                                b.Line();
+                                using (b.Block($"constructor(params?: Omit<Partial<{source.ClientTypeName}>, '$metadata'>)"))
+                                {
+                                    b.Line($"if (params) Object.assign(this, params);");
+                                    b.Line($"return reactive(this);");
                                 }
                             }
                         }

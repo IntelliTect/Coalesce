@@ -191,7 +191,6 @@ namespace Coalesce.Web.Vue3.Api
                 Db,
                 _params.file
             );
-            await Db.SaveChangesAsync();
             var _result = new ItemResult();
             return _result;
         }
@@ -234,7 +233,6 @@ namespace Coalesce.Web.Vue3.Api
             var _methodResult = item.DownloadImage(
                 Db
             );
-            await Db.SaveChangesAsync();
             if (_methodResult != null)
             {
                 string _contentType = _methodResult.ContentType;
@@ -286,7 +284,6 @@ namespace Coalesce.Web.Vue3.Api
                 Db,
                 _params.file
             );
-            await Db.SaveChangesAsync();
             if (_methodResult.Object != null)
             {
                 string _contentType = _methodResult.Object.ContentType;
@@ -337,7 +334,6 @@ namespace Coalesce.Web.Vue3.Api
                 Db,
                 _params.files.ToList()
             );
-            await Db.SaveChangesAsync();
             var _result = new ItemResult();
             return _result;
         }
@@ -372,9 +368,9 @@ namespace Coalesce.Web.Vue3.Api
             }
 
             item.UploadByteArray(
+                Db,
                 _params.file
             );
-            await Db.SaveChangesAsync();
             var _result = new ItemResult();
             return _result;
         }

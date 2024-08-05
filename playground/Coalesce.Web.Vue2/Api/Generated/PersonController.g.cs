@@ -115,6 +115,7 @@ namespace Coalesce.Web.Vue2.Api
             IncludeTree includeTree = null;
             var _mappingContext = new MappingContext(Context);
             var _methodResult = item.Rename(
+                Db,
                 _params.name,
                 out includeTree
             );
@@ -139,7 +140,9 @@ namespace Coalesce.Web.Vue2.Api
                 return new ItemResult(itemResult);
             }
             var item = itemResult.Object;
-            var _methodResult = item.ChangeSpacesToDashesInName();
+            var _methodResult = item.ChangeSpacesToDashesInName(
+                Db
+            );
             var _result = new ItemResult(_methodResult);
             return _result;
         }
@@ -244,6 +247,7 @@ namespace Coalesce.Web.Vue2.Api
             }
 
             item.SetBirthDate(
+                Db,
                 _params.date,
                 _params.time
             );
@@ -391,6 +395,7 @@ namespace Coalesce.Web.Vue2.Api
             IncludeTree includeTree = null;
             var _mappingContext = new MappingContext(Context);
             var _methodResult = item.ChangeFirstName(
+                Db,
                 _params.firstName,
                 _params.title
             );

@@ -164,6 +164,7 @@ namespace Coalesce.Domain
             AttachmentSize = file.Length;
             AttachmentType = file.ContentType;
             AttachmentHash = SHA256.Create().ComputeHash(content);
+            await db.SaveChangesAsync();
         }
 
         [Coalesce]
@@ -197,9 +198,10 @@ namespace Coalesce.Domain
         }
 
         [Coalesce]
-        public void UploadByteArray(byte[] file)
+        public void UploadByteArray(AppDbContext db, byte[] file)
         {
             AttachmentContent = new CaseAttachmentContent() { Content = file };
+            db.SaveChanges();
         }
 
         //[DefaultDataSource]

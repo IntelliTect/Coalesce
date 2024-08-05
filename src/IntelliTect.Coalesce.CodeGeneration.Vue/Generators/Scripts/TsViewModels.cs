@@ -66,7 +66,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
             return Task.FromResult(b.ToString());
         }
 
-        private static void WriteViewModel(TypeScriptCodeBuilder b, ClassViewModel model)
+        private void WriteViewModel(TypeScriptCodeBuilder b, ClassViewModel model)
         {
             string name = model.ViewModelClassName;
             string modelName = new VueType(model.Type).TsType(modelPrefix: "$models");
@@ -105,6 +105,11 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
 
             using (b.Block($"export class {viewModelName} extends ViewModel<{modelName}, $apiClients.{name}ApiClient, {model.PrimaryKey.Type.TsType}> implements {modelName} "))
             {
+                if (model.ClientDataSources(Model).Any())
+                {
+                    b.Line($"static DataSources = {modelName}.DataSources;");
+                }
+
                 foreach (var prop in model.ClientProperties)
                 {
 
@@ -157,7 +162,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
             b.Line();
         }
 
-        private static void WriteListViewModel(TypeScriptCodeBuilder b, ClassViewModel model)
+        private void WriteListViewModel(TypeScriptCodeBuilder b, ClassViewModel model)
         {
             string name = model.ViewModelClassName;
 
@@ -168,6 +173,10 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
 
             using (b.Block($"export class {listViewModelName} extends ListViewModel<{modelName}, $apiClients.{name}ApiClient, {viewModelName}>"))
             {
+                if (model.ClientDataSources(Model).Any())
+                {
+                    b.Line($"static DataSources = {modelName}.DataSources;");
+                }
 
                 foreach (var method in model.ClientMethods.Where(m => m.IsStatic))
                 {

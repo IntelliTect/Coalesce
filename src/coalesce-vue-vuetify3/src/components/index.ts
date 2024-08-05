@@ -23,8 +23,8 @@ export { default as CSelectStringValue } from "./input/c-select-string-value.vue
 export { default as CSelectValues } from "./input/c-select-values.vue";
 export { default as CTable } from "./display/c-table.vue";
 
-// Type definitions for Volar intellisense support:
-declare module "@vue/runtime-core" {
+// Type definitions for intellisense support:
+declare module "vue" {
   interface GlobalComponents {
     CAdminAuditLogPage: typeof import(".")["CAdminAuditLogPage"];
     CAdminDisplay: typeof import(".")["CAdminDisplay"];

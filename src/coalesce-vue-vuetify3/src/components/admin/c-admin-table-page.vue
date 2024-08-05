@@ -25,7 +25,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, PropType, ref, watch } from "vue";
+import { computed, PropType, Ref, ref, watch } from "vue";
 import { HiddenAreas, ListViewModel, ModelType } from "coalesce-vue";
 
 const props = defineProps({
@@ -39,7 +39,8 @@ const props = defineProps({
   },
 });
 
-let listVM = ref<ListViewModel>();
+// Casted to any because this will never hold `undefined` after the following watcher runs:
+const listVM: Ref<ListViewModel> = ref<ListViewModel>() as any;
 watch(
   () => props.list,
   (list) => {

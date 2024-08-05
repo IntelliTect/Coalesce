@@ -302,19 +302,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
                         // string PK that is initialized with `null!`)
                         return false;
                     }
-
-                    if (Type.IsEnum)
-                    {
-                        // User-provided enum PK.
-                        // The intent here would be for the user to pick a value from a dropdown,
-                        // so it doesn't quite make sense that the server would have Behaviors
-                        // that provide the value (as it might for other types).
-                        return true;
-                    }
                     else
                     {
-                        // For other types of non-auto-generated PKs, allow them to remain optional
-                        // in case there is server-side logic in the behaviors that will generate a PK during the save.
+                        return true;
                     }
                 }
 

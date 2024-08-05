@@ -210,7 +210,14 @@
   setup
   generic="TModel extends Model | AnyArgCaller | undefined"
 >
-import { ComponentPublicInstance, ref, computed, nextTick, watch } from "vue";
+import {
+  ComponentPublicInstance,
+  ref,
+  computed,
+  nextTick,
+  watch,
+  camelize,
+} from "vue";
 import { useMetadataProps, ForSpec } from "../c-metadata-component";
 import {
   ModelApiClient,
@@ -297,7 +304,15 @@ const mainInputRef = ref<HTMLInputElement>();
 const listRef = ref<ComponentPublicInstance>();
 const searchRef = ref<ComponentPublicInstance>();
 
-const fieldAttrs = computed(() => VField.filterProps(inputBindAttrs.value));
+const fieldAttrs = computed(() =>
+  VField.filterProps(
+    Object.fromEntries(
+      // We have to perform prop name normalization ourselves here
+      // because vuetify's filterProps doesn't support the non-camelized names.
+      Object.entries(inputBindAttrs.value).map(([k, v]) => [camelize(k), v])
+    )
+  )
+);
 
 const { inputBindAttrs, modelMeta, valueMeta, valueOwner } = useMetadataProps(
   props,

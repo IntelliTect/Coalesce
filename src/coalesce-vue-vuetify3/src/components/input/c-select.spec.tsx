@@ -18,7 +18,10 @@ import { VForm } from "vuetify/components";
 import { CSelect } from "..";
 
 import { ComplexModel } from "@test-targets/models.g";
-import { ComplexModelViewModel } from "@test-targets/viewmodels.g";
+import {
+  CaseViewModel,
+  ComplexModelViewModel,
+} from "@test-targets/viewmodels.g";
 
 describe("CSelect", () => {
   let model = new Student({
@@ -650,6 +653,34 @@ describe("CSelect", () => {
 
     // Assert
     expect(model.currentCourse?.name).toBe("new thing");
+  });
+
+  describe("vuetify props passthrough", () => {
+    beforeEach(() => {
+      mockEndpoint("/Person/list", () => ({
+        wasSuccessful: true,
+        list: [],
+      }));
+    });
+    test("singleLine", async () => {
+      const model = new CaseViewModel();
+      const wrapper = mountApp(() => (
+        <CSelect model={model} for="assignedTo" singleLine></CSelect>
+      ));
+
+      // Assert
+      expect(wrapper.findAll(".v-field--single-line")).toHaveLength(1);
+    });
+
+    test("single-line", async () => {
+      const model = new CaseViewModel();
+      const wrapper = mountApp(() => (
+        <CSelect model={model} for="assignedTo" single-line></CSelect>
+      ));
+
+      // Assert
+      expect(wrapper.findAll(".v-field--single-line")).toHaveLength(1);
+    });
   });
 
   // test("BOILERPLATE", () => {

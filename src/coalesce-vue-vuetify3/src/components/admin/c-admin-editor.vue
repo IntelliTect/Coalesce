@@ -17,28 +17,39 @@
 
       <v-divider class="mx-4 my-0" vertical></v-divider>
 
-      <v-toolbar-title v-if="hasPk" class="hidden-xs-only">
+      <v-toolbar-title v-if="hasPk" class="hidden-xs">
         <c-display :model="model"></c-display>
       </v-toolbar-title>
 
       <v-spacer></v-spacer>
+      <v-btn
+        v-if="!model.$isAutoSaveEnabled"
+        @click="model.$bulkSave()"
+        title="Save"
+        :color="model.$isDirty ? 'success' : undefined"
+        :variant="model.$isDirty ? 'elevated' : 'text'"
+        :loading="model.$bulkSave.isLoading"
+        prepend-icon="fa fa-save"
+      >
+        <span class="hidden-sm-and-down">Save</span>
+      </v-btn>
       <v-btn
         v-if="canDelete"
         @click="deleteItemWithConfirmation()"
         variant="text"
         :disabled="!hasPk"
         title="Delete"
+        prepend-icon="fa fa-trash-alt"
       >
-        <v-icon start>fa fa-trash-alt</v-icon>
         <span class="hidden-sm-and-down">Delete</span>
       </v-btn>
       <v-btn
-        @click="model.$load()"
+        @click="reload"
         variant="text"
         :disabled="!hasPk"
         title="Reload"
+        prepend-icon="$loading"
       >
-        <v-icon start>$loading</v-icon>
         <span class="hidden-sm-and-down">Reload</span>
       </v-btn>
     </v-toolbar>
@@ -49,7 +60,7 @@
           [!showContent ? 'no-initial-content' : 'no-error-content']: [
             model.$load,
           ],
-          '': [model.$save, model.$delete],
+          '': [model.$save, model.$bulkSave, model.$delete],
         }"
       >
         <v-form ref="form">
@@ -153,6 +164,30 @@
         </v-form>
       </c-loader-status>
     </v-card-text>
+
+    <v-card-actions>
+      <v-spacer></v-spacer>
+      <v-btn
+        v-if="!model.$isAutoSaveEnabled"
+        @click="model.$bulkSave()"
+        title="Save"
+        :color="model.$isDirty ? 'success' : undefined"
+        :variant="model.$isDirty ? 'elevated' : 'text'"
+        :loading="model.$bulkSave.isLoading"
+        prepend-icon="fa fa-save"
+      >
+        <!-- TODO: (#413) ^^^ read dirty state for the whole bulk save. -->
+        <span class="hidden-sm-and-down">Save</span>
+      </v-btn>
+      <v-btn
+        v-else
+        disabled
+        prepend-icon="fa fa-save"
+        :loading="model.$save.isLoading"
+      >
+        Auto-save enabled
+      </v-btn>
+    </v-card-actions>
   </v-card>
 </template>
 
@@ -206,6 +241,13 @@ export default defineComponent({
         await this.model.$delete();
         this.$emit("deleted");
       }
+    },
+
+    async reload() {
+      this.model.$save.wasSuccessful = null;
+      this.model.$delete.wasSuccessful = null;
+      this.model.$bulkSave.wasSuccessful = null;
+      this.model.$load();
     },
   },
 

@@ -24,6 +24,10 @@ The [ListViewModel](/stacks/vue/layers/viewmodels.md) to render a table for.
 
 An optional list of available page sizes to offer through the [c-list-pagination](/stacks/vue/coalesce-vue-vuetify/components/c-list-pagination.md)'s [c-list-page-size](/stacks/vue/coalesce-vue-vuetify/components/c-list-page-size.md) component. Defaults to `[10, 25, 100]`.
 
+<Prop def="autoSave?: 'auto' | boolean = 'auto'" lang="ts" />
+
+Controls whether auto-save is used for items when in edit mode. If `auto` (the default), auto-saves are used as long as the type has no [init-only properties](/modeling/model-components/properties.md#init-only-properties).
+
 <Prop def="queryBind?: boolean" lang="ts" />
 
 If true, the [Data Source Standard Parameters](/modeling/model-components/data-sources.md#standard-parameters) of the provided [ListViewModel](/stacks/vue/layers/viewmodels.md) will be read from and written to the window's query string. The "Editable" state of the table will also be bound to the query string.

@@ -7,7 +7,8 @@
     <c-admin-table
       class="c-admin-table-page--table"
       :list="listVM"
-      :color="color"
+      :color
+      :autoSave
       :page-sizes="[10, 25, 100, 500]"
       query-bind
     >
@@ -17,62 +18,67 @@
       class="c-admin-table-page--methods"
       :model="listVM"
       :area="HiddenAreas.List"
-      :color="color"
+      :color
       auto-reload-model
     ></c-admin-methods>
   </v-container>
 </template>
 
-<script lang="ts">
-import { defineComponent, PropType, Ref, ref, toRefs } from "vue";
+<script lang="ts" setup>
+import { computed, PropType, ref, watch } from "vue";
 import { HiddenAreas, ListViewModel, ModelType } from "coalesce-vue";
 
-export default defineComponent({
-  name: "c-admin-table-page",
-
-  props: {
-    type: { required: false, type: String, default: null },
-    color: { required: false, type: String, default: null },
-    list: { required: false, type: Object as PropType<ListViewModel> },
-  },
-
-  setup(props) {
-    let listVM: Ref<ListViewModel>;
-    if (props.list) {
-      listVM = toRefs(props).list as any;
-    } else {
-      if (!props.type) {
-        throw Error(
-          "c-admin-table-page: If prop `list` is not provided, `type` is required."
-        );
-      } else if (!ListViewModel.typeLookup![props.type]) {
-        // TODO: Bake a `getOrThrow` into `typeLookup`.
-        throw Error(
-          `No model named ${props.type} is registered to ListViewModel.typeLookup`
-        );
-      }
-      listVM = ref(new ListViewModel.typeLookup![props.type]() as any);
-      listVM.value.$includes = "admin-list";
-    }
-
-    return { listVM, HiddenAreas };
-  },
-
-  computed: {
-    /** Support for common convention of exposing 'pageTitle' from router-view hosted components. */
-    pageTitle() {
-      return this.metadata.displayName + " List";
-    },
-
-    metadata(): ModelType {
-      if (this.listVM) {
-        return this.listVM.$metadata;
-      }
-      // TODO: this message is bad.
-      throw `No metadata available - no list provided, and couldn't create one.`;
-    },
+const props = defineProps({
+  type: { required: false, type: String, default: null },
+  color: { required: false, type: String, default: null },
+  list: { required: false, type: Object as PropType<ListViewModel> },
+  autoSave: {
+    required: false,
+    type: [String, Boolean] as PropType<"auto" | boolean>,
+    default: "auto",
   },
 });
+
+let listVM = ref<ListViewModel>();
+watch(
+  () => props.list,
+  (list) => {
+    if (list) {
+      listVM.value = list;
+      return;
+    }
+
+    if (!props.type) {
+      throw Error(
+        "c-admin-table-page: If prop `list` is not provided, `type` is required."
+      );
+    } else if (!ListViewModel.typeLookup![props.type]) {
+      // TODO: Bake a `getOrThrow` into `typeLookup`.
+      throw Error(
+        `No model named ${props.type} is registered to ListViewModel.typeLookup`
+      );
+    }
+
+    listVM.value = new ListViewModel.typeLookup![props.type]();
+    listVM.value.$includes = "admin-list";
+  },
+  { immediate: true }
+);
+
+const metadata = computed((): ModelType => {
+  if (listVM.value) {
+    return listVM.value.$metadata;
+  }
+
+  throw `No metadata available - no list provided, and couldn't create one.`;
+});
+
+/** Support for common convention of exposing 'pageTitle' from router-view hosted components. */
+const pageTitle = computed(() => {
+  return metadata.value.displayName + " List";
+});
+
+defineExpose({ pageTitle });
 </script>
 
 <style lang="scss">

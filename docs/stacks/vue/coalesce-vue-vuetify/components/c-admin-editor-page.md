@@ -9,24 +9,19 @@ A page for a creating/editing single [ViewModel](/stacks/vue/layers/viewmodels.m
 ## Examples
 
 ``` ts
-// router.ts or main.ts
-
-// WITHOUT Vuetify A la carte:
-import { CAdminEditorPage } from 'coalesce-vue-vuetify';
-// WITH Vuetify A-la-carte:
-import { CAdminEditorPage } from 'coalesce-vue-vuetify/lib';
+import { CAdminEditorPage } from 'coalesce-vue-vuetify3';
 
 const router = new Router({
-    // ...
-    routes: [
-        // ... other routes
-        {
-            path: '/admin/:type/edit/:id?',
-            name: 'coalesce-admin-item',
-            component: CAdminEditorPage,
-            props: true,
-        },
-    ]
+  // ...
+  routes: [
+    // ... other routes
+    {
+      path: '/admin/:type/edit/:id?',
+      name: 'coalesce-admin-item',
+      component: CAdminEditorPage,
+      props: true,
+    },
+  ]
 })
 ```
 
@@ -40,5 +35,8 @@ The PascalCase name of the type to be created/edited.
 
 The primary key of the item being edited. If null or not provided, the page will be creating a new instance of the provided `type` instead.
 
+<Prop def="autoSave?: 'auto' | boolean = 'auto'" lang="ts" />
+
+Controls whether auto-save is used for the item. If `auto` (the default), auto-saves are used as long as the type has no unsaved [init-only properties](/modeling/model-components/properties.md#init-only-properties).
 
 

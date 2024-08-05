@@ -29,8 +29,9 @@ import {
   HiddenAreas,
 } from "coalesce-vue";
 
-import { defineComponent } from "vue";
+import { PropType, computed, defineComponent, watch } from "vue";
 import { useRoute } from "vue-router";
+import { isPropReadOnly } from "../../util";
 
 export default defineComponent({
   name: "c-admin-editor-page",
@@ -39,6 +40,11 @@ export default defineComponent({
     type: { required: true, type: String },
     id: { required: false, type: [String, Number] },
     color: { required: false, type: String, default: null },
+    autoSave: {
+      required: false,
+      type: [String, Boolean] as PropType<"auto" | boolean>,
+      default: "auto",
+    },
   },
 
   setup(props) {
@@ -52,9 +58,27 @@ export default defineComponent({
     const viewModel = new ViewModel.typeLookup![props.type]();
     viewModel.$includes = "admin-editor";
 
+    const effectiveAutoSave = computed(() => {
+      const value = props.autoSave;
+      if (value == null || value == "auto") {
+        const meta = viewModel.$metadata;
+        for (const propName in meta.props) {
+          const prop = meta.props[propName];
+          if (prop.createOnly && !isPropReadOnly(prop, viewModel)) {
+            // This is an editable, create-only prop (which means the model isn't yet saved).
+            // Explicit saves must be used so the user can have a chance to fill out all create-only props.
+            return false;
+          }
+        }
+        return true;
+      }
+      return value;
+    });
+
     return {
       viewModel,
       HiddenAreas,
+      effectiveAutoSave,
     };
   },
 
@@ -140,7 +164,17 @@ export default defineComponent({
       );
     }
 
-    this.viewModel.$startAutoSave(this, { wait: 500 });
+    watch(
+      () => this.effectiveAutoSave,
+      (autoSave) => {
+        if (autoSave) {
+          this.viewModel.$startAutoSave(this, { wait: 500 });
+        } else {
+          this.viewModel.$stopAutoSave();
+        }
+      },
+      { immediate: true }
+    );
   },
 });
 </script>

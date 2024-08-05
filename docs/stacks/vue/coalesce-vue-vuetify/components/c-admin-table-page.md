@@ -9,24 +9,19 @@ A full-featured page for interacting with a [ListViewModel](/stacks/vue/layers/v
 ## Examples
 
 ``` ts
-// router.ts or main.ts
-
-// WITHOUT Vuetify A la carte:
-import { CAdminTablePage } from 'coalesce-vue-vuetify';
-// WITH Vuetify A-la-carte:
-import { CAdminTablePage } from 'coalesce-vue-vuetify/lib';
+import { CAdminTablePage } from 'coalesce-vue-vuetify3';
 
 const router = new Router({
-    // ...
-    routes: [
-        // ... other routes
-        {
-            path: '/admin/:type',
-            name: 'coalesce-admin-list',
-            component: CAdminTablePage,
-            props: true,
-        },
-    ]
+  // ...
+  routes: [
+    // ... other routes
+    {
+      path: '/admin/:type',
+      name: 'coalesce-admin-list',
+      component: CAdminTablePage,
+      props: true,
+    },
+  ]
 })
 ```
 
@@ -35,6 +30,10 @@ const router = new Router({
 <Prop def="type: string" lang="ts" />
 
 The PascalCase name of the type to be listed.
+
+<Prop def="autoSave?: 'auto' | boolean = 'auto'" lang="ts" />
+
+Controls whether auto-save is used for items when in edit mode. If `auto` (the default), auto-saves are used as long as the type has no [init-only properties](/modeling/model-components/properties.md#init-only-properties).
 
 <Prop def="list?: ListViewModel" lang="ts" />
 

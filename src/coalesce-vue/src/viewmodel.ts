@@ -5,9 +5,9 @@ import {
   markRaw,
   getCurrentInstance,
   toRaw,
-  type Ref,
   watch,
-  WatchStopHandle,
+  type Ref,
+  type WatchStopHandle,
 } from "vue";
 
 import {
@@ -181,9 +181,9 @@ export abstract class ViewModel<
       this._dirtyProps.add(propName);
       this._isDirty.value = true;
 
-      if (triggerAutosave && this._autoSaveState?.active) {
+      if (triggerAutosave && this._autoSaveState?.value?.active) {
         // If dirty, and autosave is enabled, queue an evaluation of autosave.
-        this._autoSaveState.trigger?.();
+        this._autoSaveState.value.trigger?.();
       }
     } else {
       this._dirtyProps.delete(propName);
@@ -910,7 +910,7 @@ export abstract class ViewModel<
     isCleanData: DataFreshness = true,
     purgeUnsaved: boolean = false
   ) {
-    if (this.$isDirty && this._autoSaveState?.active) {
+    if (this.$isDirty && this._autoSaveState?.value?.active) {
       updateViewModelFromModel(
         this as any,
         source,
@@ -1036,7 +1036,8 @@ export abstract class ViewModel<
   }
 
   /** @internal Internal autosave state. */
-  private _autoSaveState?: AutoCallState<AutoSaveOptions<any>>;
+  // Deliberately uninitialized ref to avoid allocations when nothing is listening.
+  _autoSaveState?: Ref<AutoCallState<AutoSaveOptions<any>> | undefined>;
 
   /**
    * Starts auto-saving of the instance when changes to its savable data properties occur.
@@ -1058,7 +1059,7 @@ export abstract class ViewModel<
    * @param options Options to control how the auto-saving is performed.
    */
   public $startAutoSave(vue: VueInstance, options: AutoSaveOptions<this> = {}) {
-    let state = this._autoSaveState;
+    let state = this._autoSaveState?.value;
 
     if (state?.active && state.options === options) {
       // If already active using the exact same options object, don't restart.
@@ -1074,8 +1075,14 @@ export abstract class ViewModel<
 
     this.$stopAutoSave();
 
-    state = this._autoSaveState ??= new AutoCallState<AutoSaveOptions<any>>();
+    state = new AutoCallState<AutoSaveOptions<any>>();
     state.options = options;
+
+    if (this._autoSaveState) {
+      this._autoSaveState.value = state;
+    } else {
+      this._autoSaveState = ref(state);
+    }
 
     let ranOnce = false;
 
@@ -1164,12 +1171,17 @@ export abstract class ViewModel<
 
   /** Stops auto-saving if it is currently enabled. */
   public $stopAutoSave() {
-    this._autoSaveState?.cleanup?.();
+    this._autoSaveState?.value?.cleanup?.();
   }
 
   /** Returns true if auto-saving is currently enabled. */
   public get $isAutoSaveEnabled() {
-    return this._autoSaveState?.active;
+    // Initialize the ref if not already initialized so we can track future writes.
+    if (!this._autoSaveState) {
+      this._autoSaveState = ref();
+      return false;
+    }
+    return this._autoSaveState?.value?.active;
   }
 
   /**
@@ -1842,7 +1854,7 @@ function viewModelCollectionMapItems<T extends ViewModel, TModel extends Model>(
     // If deep autosave is active, propagate it to the ViewModel instance being attached to the object graph.
     const autoSaveState: AutoCallState<AutoSaveOptions<any>> = (
       vmc.$parent as any
-    )._autoSaveState;
+    )._autoSaveState?.value;
     if (autoSaveState?.active && autoSaveState.options?.deep) {
       viewModel.$startAutoSave(autoSaveState.vue!, autoSaveState.options);
     }
@@ -2072,9 +2084,7 @@ export function defineProps<T extends new () => ViewModel<any, any>>(
                 }
 
                 // If deep autosave is active, propagate it to the new ViewModel instance.
-                const autoSaveState: AutoCallState<AutoSaveOptions<any>> = (
-                  this as any
-                )._autoSaveState;
+                const autoSaveState = this._autoSaveState?.value;
                 if (autoSaveState?.active && autoSaveState.options?.deep) {
                   incomingValue.$startAutoSave(
                     autoSaveState.vue!,

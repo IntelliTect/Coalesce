@@ -22,7 +22,9 @@
             ? []
             : [
                 ...viewModel.$items.map((i) => i.$delete),
-                ...viewModel.$items.map((i) => i.$save),
+                ...(!editable
+                  ? []
+                  : viewModel.$items.flatMap((i) => [i.$save, i.$bulkSave])),
               ],
         }"
       >
@@ -30,13 +32,26 @@
           <td width="1%" class="c-admin-table--actions">
             <div class="d-flex flex-nowrap text-no-wrap ga-1" no-gutters>
               <v-btn
+                v-if="editable && !effectiveAutoSave"
+                title="Save"
+                color="success"
+                :variant="item.$isDirty ? 'elevated' : 'text'"
+                :loading="item.$bulkSave.isLoading"
+                icon
+                @click="item.$bulkSave()"
+              >
+                <!-- TODO: (#413) ^^^ read dirty state for the whole bulk save. -->
+                <!-- Using an <i> directly is more performant than v-icon. -->
+                <i aria-hidden="true" class="v-icon notranslate fa fa-save"></i>
+              </v-btn>
+
+              <v-btn
                 v-if="canEdit || hasInstanceMethods"
                 title="Edit"
                 variant="text"
                 icon
                 :to="getItemRoute(item)"
               >
-                <!-- Using an <i> directly is much more performant than v-icon. -->
                 <i aria-hidden="true" class="v-icon notranslate fa fa-edit"></i>
               </v-btn>
 
@@ -46,6 +61,7 @@
                 variant="text"
                 icon
                 @click="deleteItemWithConfirmation(item)"
+                :loading="item.$delete.isLoading"
               >
                 <i
                   aria-hidden="true"
@@ -86,7 +102,7 @@ import {
   bindToQueryString,
 } from "coalesce-vue";
 
-import { defineComponent, PropType, toRef } from "vue";
+import { computed, defineComponent, PropType, ref, toRef } from "vue";
 import { useRouter } from "vue-router";
 import { useAdminTable } from "./useAdminTable";
 
@@ -98,16 +114,38 @@ export default defineComponent({
     pageSizes: { required: false, type: Array as PropType<number[]> },
     color: { required: false, type: String, default: null },
     queryBind: { type: Boolean, default: false },
+    autoSave: {
+      required: false,
+      type: [String, Boolean] as PropType<"auto" | boolean>,
+      default: "auto",
+    },
   },
 
   setup(props) {
     const tableProps = useAdminTable(toRef(props, "list"));
-    return { router: useRouter(), ...tableProps };
-  },
+    const editable = ref(false);
 
-  data() {
+    const effectiveAutoSave = computed(() => {
+      if (!editable.value) return false;
+
+      const value = props.autoSave;
+      if (value == null || value == "auto") {
+        const meta = tableProps.metadata.value;
+        for (const propName in meta.props) {
+          if (meta.props[propName].createOnly) {
+            return false;
+          }
+        }
+        return true;
+      }
+      return value;
+    });
+
     return {
-      editable: false,
+      router: useRouter(),
+      ...tableProps,
+      editable,
+      effectiveAutoSave,
     };
   },
 
@@ -207,11 +245,11 @@ export default defineComponent({
     }
 
     this.$watch(
-      () => this.editable,
-      (editable) => {
-        if (editable && !this.viewModel.$isAutoSaveEnabled) {
-          this.viewModel.$startAutoSave(this, { wait: 100 });
-        } else if (!editable && this.viewModel.$isAutoSaveEnabled) {
+      () => this.effectiveAutoSave,
+      (effectiveAutoSave) => {
+        if (effectiveAutoSave && !this.viewModel.$isAutoSaveEnabled) {
+          this.viewModel.$startAutoSave(this, { wait: 500 });
+        } else if (!effectiveAutoSave && this.viewModel.$isAutoSaveEnabled) {
           this.viewModel.$stopAutoSave();
         }
       },

@@ -1,6 +1,5 @@
 import * as metadata from './metadata.g'
-import { Model, DataSource, convertToModel, mapToModel } from 'coalesce-vue/lib/model'
-import { reactive } from 'vue'
+import { Model, DataSource, convertToModel, mapToModel, reactiveDataSource } from 'coalesce-vue/lib/model'
 
 export enum EnumPkId {
   Value0 = 0,
@@ -138,7 +137,7 @@ export namespace Case {
       
       constructor(params?: Omit<Partial<AllOpenCases>, '$metadata'>) {
         if (params) Object.assign(this, params);
-        return reactive(this);
+        return reactiveDataSource(this);
       }
     }
   }
@@ -438,7 +437,7 @@ export namespace Person {
       
       constructor(params?: Omit<Partial<NamesStartingWithAWithCases>, '$metadata'>) {
         if (params) Object.assign(this, params);
-        return reactive(this);
+        return reactiveDataSource(this);
       }
     }
     

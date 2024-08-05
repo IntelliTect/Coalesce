@@ -18,8 +18,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
         {
             var b = new TypeScriptCodeBuilder(indentSize: 2);
             b.Line("import * as metadata from './metadata.g'");
-            b.Line("import { Model, DataSource, convertToModel, mapToModel } from 'coalesce-vue/lib/model'");
-            b.Line("import { reactive } from 'vue'");
+            b.Line("import { Model, DataSource, convertToModel, mapToModel, reactiveDataSource } from 'coalesce-vue/lib/model'");
             b.Line();
 
             foreach (var model in Model.ClientEnums.OrderBy(e => e.ClientTypeName))
@@ -105,7 +104,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                                 using (b.Block($"constructor(params?: Omit<Partial<{source.ClientTypeName}>, '$metadata'>)"))
                                 {
                                     b.Line($"if (params) Object.assign(this, params);");
-                                    b.Line($"return reactive(this);");
+                                    b.Line($"return reactiveDataSource(this);");
                                 }
                             }
                         }

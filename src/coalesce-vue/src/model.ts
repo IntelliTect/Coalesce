@@ -1,6 +1,6 @@
 import { formatDistanceToNow, lightFormat } from "date-fns";
 import { format, formatInTimeZone } from "date-fns-tz";
-import { getCurrentInstance, nextTick } from "vue";
+import { getCurrentInstance, nextTick, reactive } from "vue";
 
 import type {
   ClassType,
@@ -1135,4 +1135,14 @@ export function useBindKeyToRouteOnCreate(
     keepQuery,
     routeName
   );
+}
+
+export function reactiveDataSource<T extends DataSource>(source: T) {
+  // Simple wrapper function around `reactive`. This exists because:
+  // - None of the generated code imports directly from `vue`. Adding such
+  //   an import for this one-off case feels weird, and also requires a lot
+  //   of extra project config to get the tests to import from the right place.
+  // - We don't want to just re-export `reactive` under its own name because then
+  //   IDEs will get confused about where to import `reactive` from.
+  return reactive(source) as T;
 }

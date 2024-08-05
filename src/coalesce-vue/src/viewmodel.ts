@@ -144,7 +144,12 @@ export abstract class ViewModel<
   private _isDirty = ref(false);
 
   /** @internal */
-  _dirtyProps = new Set<string>();
+  _dirtyProps: Set<string> = IsVue2
+    ? new Set<string>()
+    : reactive(new Set<string>());
+
+  // Backwards-compat with vue2 nonreactive sets.
+  _dirtyPropsVersion = IsVue2 ? ref(0) : undefined;
 
   /**
    * Returns true if the values of the savable data properties of this ViewModel
@@ -156,6 +161,9 @@ export abstract class ViewModel<
   public set $isDirty(val) {
     if (!val) {
       this._dirtyProps.clear();
+      if (IsVue2 && this._dirtyProps.size) {
+        this._dirtyPropsVersion!.value++;
+      }
       this._isDirty.value = false;
     } else {
       // When explicitly setting the whole model dirty,
@@ -179,6 +187,7 @@ export abstract class ViewModel<
 
     if (dirty) {
       this._dirtyProps.add(propName);
+      if (IsVue2) this._dirtyPropsVersion!.value++;
       this._isDirty.value = true;
 
       if (triggerAutosave && this._autoSaveState?.value?.active) {
@@ -187,12 +196,15 @@ export abstract class ViewModel<
       }
     } else {
       this._dirtyProps.delete(propName);
+      if (IsVue2) this._dirtyPropsVersion!.value++;
       if (!this._dirtyProps.size) {
         this._isDirty.value = false;
       }
     }
   }
   public $getPropDirty(propName: PropNames<TModel["$metadata"]>) {
+    if (IsVue2) this._dirtyPropsVersion?.value;
+
     return this._dirtyProps.has(propName);
   }
 

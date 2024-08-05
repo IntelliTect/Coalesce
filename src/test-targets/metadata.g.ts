@@ -723,9 +723,6 @@ export const ComplexModel = domain.types.ComplexModel = {
       type: "string",
       role: "value",
       createOnly: true,
-      rules: {
-        required: val => (val != null && val !== '') || "Restrict Init is required.",
-      }
     },
     adminReadableReferenceNavigationId: {
       name: "adminReadableReferenceNavigationId",
@@ -2047,9 +2044,6 @@ export const EnumPk = domain.types.EnumPk = {
       get typeDef() { return domain.enums.EnumPkId },
       role: "primaryKey",
       createOnly: true,
-      rules: {
-        required: val => val != null || "Enum Pk Id is required.",
-      }
     },
     name: {
       name: "name",
@@ -2613,9 +2607,6 @@ export const RequiredAndInitModel = domain.types.RequiredAndInitModel = {
       type: "string",
       role: "value",
       createOnly: true,
-      rules: {
-        required: val => (val != null && val !== '') || "Init Ref is required.",
-      }
     },
     initValue: {
       name: "initValue",
@@ -2623,9 +2614,13 @@ export const RequiredAndInitModel = domain.types.RequiredAndInitModel = {
       type: "number",
       role: "value",
       createOnly: true,
-      rules: {
-        required: val => val != null || "Init Value is required.",
-      }
+    },
+    nullableInitValue: {
+      name: "nullableInitValue",
+      displayName: "Nullable Init Value",
+      type: "number",
+      role: "value",
+      createOnly: true,
     },
   },
   methods: {
@@ -2949,6 +2944,34 @@ export const Test = domain.types.Test = {
     testName: {
       name: "testName",
       displayName: "Test Name",
+      type: "string",
+      role: "value",
+    },
+  },
+  methods: {
+  },
+  dataSources: {
+  },
+}
+export const ZipCode = domain.types.ZipCode = {
+  name: "ZipCode",
+  displayName: "Zip Code",
+  get displayProp() { return this.props.zip }, 
+  type: "model",
+  controllerRoute: "ZipCode",
+  get keyProp() { return this.props.zip }, 
+  behaviorFlags: 7 as BehaviorFlags,
+  props: {
+    zip: {
+      name: "zip",
+      displayName: "Zip",
+      type: "string",
+      role: "primaryKey",
+      createOnly: true,
+    },
+    state: {
+      name: "state",
+      displayName: "State",
       type: "string",
       role: "value",
     },
@@ -3702,6 +3725,7 @@ interface AppDomain extends Domain {
     ValidationTarget: typeof ValidationTarget
     ValidationTargetChild: typeof ValidationTargetChild
     WeatherData: typeof WeatherData
+    ZipCode: typeof ZipCode
   }
   services: {
     WeatherService: typeof WeatherService

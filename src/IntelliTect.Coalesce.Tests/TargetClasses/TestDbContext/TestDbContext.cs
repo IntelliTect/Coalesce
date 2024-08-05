@@ -27,6 +27,7 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         public DbSet<AbstractImpl> AbstractImpls { get; set; }
 
         public DbSet<EnumPk> EnumPks { get; set; }
+        public DbSet<ZipCode> ZipCodes { get; set; }
 
         public DbSet<StringIdentity> StringIdentities { get; set; }
 

@@ -328,18 +328,4 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         [Coalesce]
         public static void StaticCreate(ReadOnlyEntityUsedAsMethodInput foo) { }
     }
-
-    public class RequiredAndInitModel
-    {
-        public int Id { get; set; }
-
-#if NET7_0_OR_GREATER
-        public required string RequiredRef { get; set; }
-        public required int RequiredValue { get; set; }
-        public required string RequiredInitRef { get; init; }
-        public required int RequiredInitValue { get; init; }
-        public string InitRef { get; init; }
-        public int InitValue { get; init; }
-#endif
-    }
 }

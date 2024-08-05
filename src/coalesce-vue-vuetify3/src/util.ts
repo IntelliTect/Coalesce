@@ -24,9 +24,9 @@ export function isPropReadOnly(p: Property, model: ViewModel) {
     // This is checked first so editing gets disabled while a save is in progress.
     if (
       model.$save.isLoading ||
-      model.$save.wasSuccessful !== null ||
+      model.$save.wasSuccessful ||
       model.$load.isLoading ||
-      model.$load.wasSuccessful !== null
+      model.$load.wasSuccessful
     ) {
       return true;
     }

@@ -310,14 +310,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
                 if (HasRequiredKeyword) return true;
 
-                if (IsCreateOnly)
-                {
-                    // Init-only properties on entity types are inherently required
-                    // because they can't be set after the initial save.
-                    // TODO: https://github.com/IntelliTect/Coalesce/issues/386
-                    return true;
-                }
-
                 // Non-nullable foreign keys and their corresponding objects are implicitly required.
                 if (IsForeignKey && !Type.IsReferenceOrNullableValue)
                 {

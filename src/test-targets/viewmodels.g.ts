@@ -854,6 +854,7 @@ export interface RequiredAndInitModelViewModel extends $models.RequiredAndInitMo
   requiredInitValue: number | null;
   initRef: string | null;
   initValue: number | null;
+  nullableInitValue: number | null;
 }
 export class RequiredAndInitModelViewModel extends ViewModel<$models.RequiredAndInitModel, $apiClients.RequiredAndInitModelApiClient, number> implements $models.RequiredAndInitModel  {
   
@@ -1019,6 +1020,26 @@ export class TestListViewModel extends ListViewModel<$models.Test, $apiClients.T
 }
 
 
+export interface ZipCodeViewModel extends $models.ZipCode {
+  zip: string | null;
+  state: string | null;
+}
+export class ZipCodeViewModel extends ViewModel<$models.ZipCode, $apiClients.ZipCodeApiClient, string> implements $models.ZipCode  {
+  
+  constructor(initialData?: DeepPartial<$models.ZipCode> | null) {
+    super($metadata.ZipCode, new $apiClients.ZipCodeApiClient(), initialData)
+  }
+}
+defineProps(ZipCodeViewModel, $metadata.ZipCode)
+
+export class ZipCodeListViewModel extends ListViewModel<$models.ZipCode, $apiClients.ZipCodeApiClient, ZipCodeViewModel> {
+  
+  constructor() {
+    super($metadata.ZipCode, new $apiClients.ZipCodeApiClient())
+  }
+}
+
+
 export class WeatherServiceViewModel extends ServiceViewModel<typeof $metadata.WeatherService, $apiClients.WeatherServiceApiClient> {
   
   public get getWeather() {
@@ -1058,6 +1079,7 @@ const viewModelTypeLookup = ViewModel.typeLookup = {
   StandaloneReadWrite: StandaloneReadWriteViewModel,
   StringIdentity: StringIdentityViewModel,
   Test: TestViewModel,
+  ZipCode: ZipCodeViewModel,
 }
 const listViewModelTypeLookup = ListViewModel.typeLookup = {
   AbstractImpl: AbstractImplListViewModel,
@@ -1079,6 +1101,7 @@ const listViewModelTypeLookup = ListViewModel.typeLookup = {
   StandaloneReadWrite: StandaloneReadWriteListViewModel,
   StringIdentity: StringIdentityListViewModel,
   Test: TestListViewModel,
+  ZipCode: ZipCodeListViewModel,
 }
 const serviceViewModelTypeLookup = ServiceViewModel.typeLookup = {
   WeatherService: WeatherServiceViewModel,

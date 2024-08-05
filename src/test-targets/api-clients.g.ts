@@ -429,6 +429,11 @@ export class TestApiClient extends ModelApiClient<$models.Test> {
 }
 
 
+export class ZipCodeApiClient extends ModelApiClient<$models.ZipCode> {
+  constructor() { super($metadata.ZipCode) }
+}
+
+
 export class WeatherServiceApiClient extends ServiceApiClient<typeof $metadata.WeatherService> {
   constructor() { super($metadata.WeatherService) }
   public getWeather(location: $models.Location | null, dateTime?: Date | null, conditions?: $models.SkyConditions | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<$models.WeatherData>> {

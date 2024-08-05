@@ -534,6 +534,7 @@ export interface RequiredAndInitModel extends Model<typeof metadata.RequiredAndI
   requiredInitValue: number | null
   initRef: string | null
   initValue: number | null
+  nullableInitValue: number | null
 }
 export class RequiredAndInitModel {
   
@@ -636,6 +637,31 @@ export class Test {
   /** Instantiate a new Test, optionally basing it on the given data. */
   constructor(data?: Partial<Test> | {[k: string]: any}) {
     Object.assign(this, Test.map(data || {}));
+  }
+}
+
+
+export interface ZipCode extends Model<typeof metadata.ZipCode> {
+  zip: string | null
+  state: string | null
+}
+export class ZipCode {
+  
+  /** Mutates the input object and its descendents into a valid ZipCode implementation. */
+  static convert(data?: Partial<ZipCode>): ZipCode {
+    return convertToModel(data || {}, metadata.ZipCode) 
+  }
+  
+  /** Maps the input object and its descendents to a new, valid ZipCode implementation. */
+  static map(data?: Partial<ZipCode>): ZipCode {
+    return mapToModel(data || {}, metadata.ZipCode) 
+  }
+  
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.ZipCode; }
+  
+  /** Instantiate a new ZipCode, optionally basing it on the given data. */
+  constructor(data?: Partial<ZipCode> | {[k: string]: any}) {
+    Object.assign(this, ZipCode.map(data || {}));
   }
 }
 

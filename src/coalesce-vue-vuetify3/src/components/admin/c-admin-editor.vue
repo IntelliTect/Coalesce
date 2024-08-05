@@ -15,7 +15,7 @@
         {{ metadata.displayName }}
       </v-toolbar-title>
 
-      <v-divider class="mx-4 my-0" vertical></v-divider>
+      <v-divider class="ml-4 my-0" vertical></v-divider>
 
       <v-toolbar-title v-if="hasPk" class="hidden-xs">
         <c-display :model="model"></c-display>
@@ -77,6 +77,11 @@
               class="py-0 pr-3 py-md-3 font-weight-bold text-md-right c-admin-editor--label-col"
               align-self="start"
             >
+              <i
+                v-if="prop.createOnly && !isPropReadOnly(prop, model)"
+                class="fa fa-asterisk pr-1"
+                title="Field cannot be changed after save"
+              ></i>
               {{ prop.displayName }}
             </v-col>
             <v-col class="py-0" align-self="start" style="flex-basis: 1px">
@@ -213,7 +218,7 @@ export default defineComponent({
     watch(form, (form) => {
       form?.validate?.();
     });
-    return { form };
+    return { form, isPropReadOnly };
   },
 
   props: {

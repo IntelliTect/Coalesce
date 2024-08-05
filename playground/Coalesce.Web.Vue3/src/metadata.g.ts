@@ -979,9 +979,6 @@ export const Company = domain.types.Company = {
       type: "string",
       role: "value",
       createOnly: true,
-      rules: {
-        required: val => (val != null && val !== '') || "Address1 is required.",
-      }
     },
     address2: {
       name: "address2",

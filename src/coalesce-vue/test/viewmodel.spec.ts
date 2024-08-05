@@ -35,6 +35,7 @@ import {
   ComplexModelViewModel,
   PersonViewModel,
   TestViewModel,
+  ZipCodeViewModel,
 } from "../../test-targets/viewmodels.g";
 import {
   StudentViewModel,
@@ -1232,6 +1233,40 @@ describe("ViewModel", () => {
 
       bulkSaveEndpoint.destroy();
     });
+
+    test("creation of root entity with user-provided PK", async () => {
+      const bulkSaveEndpoint = mockEndpoint(
+        "/zipcode/bulkSave",
+        vitest.fn((req) => ({
+          wasSuccessful: true,
+          object: {
+            zip: "12345",
+            state: "wa",
+          },
+        }))
+      );
+
+      const vm = new ZipCodeViewModel({ zip: "12345", state: "wa" });
+      await vm.$bulkSave();
+
+      expect(vm.$getPropDirty("zip")).toBeFalsy();
+      expect(vm.zip).toBe("12345");
+      expect(vm.state).toBe("wa");
+
+      expect(JSON.parse(bulkSaveEndpoint.mock.calls[0][0].data)).toMatchObject({
+        items: [
+          {
+            action: "save",
+            type: "ZipCode",
+            data: { zip: "12345", state: "wa" },
+            refs: { zip: vm.$stableId },
+            root: true,
+          },
+        ],
+      });
+
+      bulkSaveEndpoint.destroy();
+    });
   });
 
   describe("autoSave", () => {
@@ -1716,7 +1751,7 @@ describe("ViewModel", () => {
 
       // Watchers should be destroyed on component unmount.
       destroy(wrapper);
-      expect((student as any)._autoSaveState.active).toBe(false);
+      expect(student._autoSaveState?.value?.active).toBe(false);
     });
 
     test("useAutoSave works with setup()", async () => {
@@ -1745,7 +1780,7 @@ describe("ViewModel", () => {
 
       // Watchers should be destroyed on component unmount.
       destroy(wrapper);
-      expect((student as any)._autoSaveState.active).toBe(false);
+      expect(student._autoSaveState?.value?.active).toBe(false);
     });
 
     describe("deep", () => {
@@ -2814,6 +2849,23 @@ describe("ViewModel", () => {
       vm.$isDirty = false;
       vm.$loadCleanData({ intCollection: [42, 99] });
       expect(vm.$isDirty).toBeFalsy();
+    });
+  });
+
+  describe("$getPropDirty", () => {
+    test("is reactive", async () => {
+      var vm = new StudentViewModel();
+      await nextTick();
+
+      let triggered = false;
+      watch(
+        () => vm.$getPropDirty("name"),
+        () => (triggered = true)
+      );
+      vm.name = "bob";
+      await nextTick();
+
+      expect(triggered).toBeTruthy();
     });
   });
 

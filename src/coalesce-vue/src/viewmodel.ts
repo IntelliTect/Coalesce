@@ -2613,8 +2613,11 @@ export function updateViewModelFromModel<
 class AutoCallState<TOptions = any> {
   active: boolean = false;
   cleanup: Function | null = null;
-  vue: VueInstance | null = null;
-  hooked = new WeakSet<VueInstance>();
+
+  // Note: these can't be properly typed because Vue ref unwrapping blows everything up.
+  vue: any | null = null;
+  hooked = new WeakSet<any>();
+
   options: TOptions | null = null;
   trigger: (() => void) | null = null;
 

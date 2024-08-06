@@ -747,6 +747,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                         DataType.PhoneNumber => "tel",
 
                         // Others:
+                        DataType.Html => "multiline", // No special handling for html (yet?), so just treat as multiline for now.
                         DataType.MultilineText => "multiline",
                         DataType.ImageUrl => "url-image",
                         _ => definingMember.GetAttributeValue<DataTypeAttribute>(a => a.CustomDataType)?.ToLowerInvariant() switch

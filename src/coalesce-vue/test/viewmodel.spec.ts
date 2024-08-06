@@ -6,6 +6,7 @@ import Vue, {
   nextTick,
   ref,
   watch,
+  watchEffect,
 } from "vue";
 import { AxiosRequestConfig, AxiosResponse } from "axios";
 
@@ -423,6 +424,45 @@ describe("ViewModel", () => {
       const promise = student.$save();
       await promise;
       expect(triggered).toBeTruthy();
+    });
+
+    test("$savingProps remains populated until response is loaded", async () => {
+      const saveEndpoint = mockEndpoint(
+        "/Case/save",
+        vitest.fn((req) => ({
+          wasSuccessful: true,
+          object: { caseKey: 1, title: "TEST", assignedToId: 1 },
+        }))
+      );
+
+      const vm = new CaseViewModel();
+      vm.$loadCleanData({ caseKey: 1 });
+      vm.title = "test";
+
+      let prematureTriggers = 0;
+      watchEffect(() => {
+        if (
+          !vm.$getPropDirty("title") &&
+          !vm.$savingProps.has("title") &&
+          !vm.assignedToId
+        ) {
+          // If there's ever a moment where `title` is clean, and not saving,
+          // but we haven't yet loaded the response from the save (assignedToId),
+          // this means that $savingProps was cleared out prematurely.
+
+          // When this test was added and the issue fixed,
+          // this was working in Vue2 but broken in Vue3.
+          prematureTriggers++;
+        }
+      });
+
+      await vm.$save();
+
+      expect(prematureTriggers).toBe(0);
+      expect(vm.title).toBe("TEST"); // MUST be uppercase, from our response. Not lowercase, from the request.
+      expect(vm.assignedToId).toBe(1);
+
+      saveEndpoint.destroy();
     });
 
     test("responses from $load while $save in progress do not overwrite props being saved", async () => {

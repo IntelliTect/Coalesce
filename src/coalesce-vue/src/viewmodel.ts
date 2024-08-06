@@ -537,9 +537,8 @@ export abstract class ViewModel<
                 false
               );
             }
-            throw e;
-          } finally {
             this.$savingProps = emptySet;
+            throw e;
           }
         }
       )
@@ -549,6 +548,7 @@ export abstract class ViewModel<
           return;
         }
 
+        this.$savingProps = emptySet;
         if (!this.$loadResponseFromSaves) {
           // The PK *MUST* be loaded so that the PK returned by a creation save call
           // will be used by subsequent update calls.

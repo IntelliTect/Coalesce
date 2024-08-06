@@ -6,8 +6,7 @@
     v-bind="inputBindAttrs"
     multiple
     chips
-    deletable-chips
-    small-chips
+    closable-chips
     no-filter
   >
   </v-combobox>

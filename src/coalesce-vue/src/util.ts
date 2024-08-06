@@ -301,6 +301,17 @@ function buildParams(
   var name;
   if (obj instanceof Array) {
     var isScalarArray = obj.every(isScalarFormValue);
+    if (obj.length == 0) {
+      // The "count=0" doesn't /really/ do anything in the aspnetcore model binder.
+      // "count" and "0" can both be any sequence of characters.
+      // However, it does *just enough* to trigger the setter on the generated C# DTO class
+      // and therefore trigger the property as being changed.
+      // Other forms that don't work (these throw model validation errors):
+      // - `collectionName=`
+      // - `collectionName=[]`
+      // - `collectionName=null`
+      add(prefix + ".count", "0");
+    }
     for (let i = 0, l = obj.length; i < l; i++) {
       const v = obj[i];
       if (isScalarArray || rbracket.test(prefix)) {

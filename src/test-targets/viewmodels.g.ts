@@ -228,6 +228,7 @@ export interface ComplexModelViewModel extends $models.ComplexModel {
   guid: string | null;
   guidNullable: string | null;
   intCollection: number[] | null;
+  enumCollection: $models.Statuses[] | null;
   nonNullNonZeroInt: number | null;
   clientValidationInt: number | null;
   clientValidationString: string | null;
@@ -251,9 +252,9 @@ export class ComplexModelViewModel extends ViewModel<$models.ComplexModel, $apiC
   public get methodWithManyParams() {
     const methodWithManyParams = this.$apiClient.$makeCaller(
       this.$metadata.methods.methodWithManyParams,
-      (c, singleExternal?: $models.ExternalParent | null, collectionExternal?: $models.ExternalParent[] | null, file?: File | null, strParam?: string | null, stringsParam?: string[] | null, dateTime?: Date | null, integer?: number | null, boolParam?: boolean | null, enumParam?: $models.Statuses | null, model?: $models.Company | null, modelCollection?: $models.Company[] | null) => c.methodWithManyParams(this.$primaryKey, singleExternal, collectionExternal, file, strParam, stringsParam, dateTime, integer, boolParam, enumParam, model, modelCollection),
-      () => ({singleExternal: null as $models.ExternalParent | null, collectionExternal: null as $models.ExternalParent[] | null, file: null as File | null, strParam: null as string | null, stringsParam: null as string[] | null, dateTime: null as Date | null, integer: null as number | null, boolParam: null as boolean | null, enumParam: null as $models.Statuses | null, model: null as $models.Company | null, modelCollection: null as $models.Company[] | null, }),
-      (c, args) => c.methodWithManyParams(this.$primaryKey, args.singleExternal, args.collectionExternal, args.file, args.strParam, args.stringsParam, args.dateTime, args.integer, args.boolParam, args.enumParam, args.model, args.modelCollection))
+      (c, singleExternal?: $models.ExternalParent | null, collectionExternal?: $models.ExternalParent[] | null, file?: File | null, strParam?: string | null, stringsParam?: string[] | null, dateTime?: Date | null, integer?: number | null, boolParam?: boolean | null, enumParam?: $models.Statuses | null, enumsParam?: $models.Statuses[] | null, model?: $models.Company | null, modelCollection?: $models.Company[] | null) => c.methodWithManyParams(this.$primaryKey, singleExternal, collectionExternal, file, strParam, stringsParam, dateTime, integer, boolParam, enumParam, enumsParam, model, modelCollection),
+      () => ({singleExternal: null as $models.ExternalParent | null, collectionExternal: null as $models.ExternalParent[] | null, file: null as File | null, strParam: null as string | null, stringsParam: null as string[] | null, dateTime: null as Date | null, integer: null as number | null, boolParam: null as boolean | null, enumParam: null as $models.Statuses | null, enumsParam: null as $models.Statuses[] | null, model: null as $models.Company | null, modelCollection: null as $models.Company[] | null, }),
+      (c, args) => c.methodWithManyParams(this.$primaryKey, args.singleExternal, args.collectionExternal, args.file, args.strParam, args.stringsParam, args.dateTime, args.integer, args.boolParam, args.enumParam, args.enumsParam, args.model, args.modelCollection))
     
     Object.defineProperty(this, 'methodWithManyParams', {value: methodWithManyParams});
     return methodWithManyParams

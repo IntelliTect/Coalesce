@@ -91,6 +91,9 @@ export interface CaseViewModel extends $models.Case {
   attachmentHash: string | null;
   severity: string | null;
   status: $models.Statuses | null;
+  numbers: number[] | null;
+  strings: string[] | null;
+  states: $models.Statuses[] | null;
   get caseProducts(): ViewModelCollection<CaseProductViewModel, $models.CaseProduct>;
   set caseProducts(value: (CaseProductViewModel | $models.CaseProduct)[] | null);
   devTeamAssignedId: number | null;

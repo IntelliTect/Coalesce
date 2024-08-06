@@ -46,7 +46,7 @@ import {
 import { Student, Advisor, Course, Grade } from "./targets.models";
 import * as metadata from "./targets.metadata";
 import { metaBase } from "./targets.metadata";
-import { ComplexModel, Test } from "@test-targets/models.g";
+import { ComplexModel, EnumPkId, Statuses, Test } from "@test-targets/models.g";
 
 function mockItemResult<T>(success: boolean, object: T) {
   return vitest.fn().mockResolvedValue(<AxiosItemResult<T>>{
@@ -619,6 +619,37 @@ describe("ViewModel", () => {
 
       expect(saveEndpoint.mock.calls[0][0].data).toBe(
         "name=bob&studentAdvisorId=7"
+      );
+
+      saveEndpoint.destroy();
+    });
+
+    test("can save empty primitive collection", async () => {
+      const saveEndpoint = mockEndpoint(
+        "/ComplexModel/save",
+        vitest.fn((req) => ({
+          wasSuccessful: true,
+          object: { complexModelId: 1 },
+        }))
+      );
+
+      const vm = new ComplexModelViewModel();
+      vm.$loadCleanData({
+        complexModelId: 1,
+        singleTestId: 1,
+        enumPkId: EnumPkId.Value0,
+        nonNullNonZeroInt: 2,
+        enumCollection: [Statuses.Cancelled],
+        intCollection: [1],
+      });
+      vm.enumCollection?.pop();
+      vm.intCollection?.pop();
+
+      await nextTick();
+      await vm.$save();
+
+      expect(saveEndpoint.mock.calls[0][0].data).toBe(
+        "complexModelId=1&intCollection.count=0&enumCollection.count=0"
       );
 
       saveEndpoint.destroy();

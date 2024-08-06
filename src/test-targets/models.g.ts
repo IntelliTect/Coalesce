@@ -282,6 +282,7 @@ export interface ComplexModel extends Model<typeof metadata.ComplexModel> {
   guid: string | null
   guidNullable: string | null
   intCollection: number[] | null
+  enumCollection: Statuses[] | null
   nonNullNonZeroInt: number | null
   clientValidationInt: number | null
   clientValidationString: string | null

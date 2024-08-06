@@ -136,12 +136,11 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         public Guid Guid { get; set; }
         public Guid? GuidNullable { get; set; }
 
-#if NET8_0_OR_GREATER
+
         // https://learn.microsoft.com/en-us/ef/core/what-is-new/ef-core-8.0/whatsnew#primitive-collections
-#else
-        [NotMapped]
-#endif
         public List<int> IntCollection { get; set; }
+        public List<Case.Statuses> EnumCollection { get; set; }
+
 
         [Range(1, 100)]
         public int NonNullNonZeroInt { get; set; }
@@ -175,6 +174,7 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
             int integer,
             bool boolParam,
             Case.Statuses enumParam,
+            Case.Statuses[] enumsParam,
             Company model,
             Company[] modelCollection
         )

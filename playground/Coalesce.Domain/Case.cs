@@ -100,6 +100,10 @@ namespace Coalesce.Domain
 
         public Statuses Status { get; set; }
 
+        public List<int> Numbers { get; set; }
+        public List<string> Strings { get; set; }
+        public List<Statuses> States { get; set; }
+
         [ManyToMany("Products")]
         [Search]
         public ICollection<CaseProduct> CaseProducts { get; set; }

@@ -32,6 +32,8 @@ describe("CInput", () => {
     () => <CInput model={vm} for="byteArrayProp" />;
     () => <CInput model={vm} for="singleTest" />;
     () => <CInput model={vm} for="tests" />;
+    () => <CInput model={vm} for="enumCollection" />;
+    () => <CInput model={vm} for="intCollection" />;
     //@ts-expect-error non-existent prop
     () => <CInput model={vm} for="_anyString" />;
     //@ts-expect-error missing `for`
@@ -64,6 +66,7 @@ describe("CInput", () => {
     () => <CInput model={caller} for="boolParam" />;
     () => <CInput model={caller} for="file" />;
     () => <CInput model={caller} for="stringsParam" />;
+    () => <CInput model={caller} for="enumsParam" />;
 
     // While external types don't make an input for CInput,
     // they aren't technically invalid either because they at least fall back to c-display.

@@ -930,6 +930,19 @@ export const ComplexModel = domain.types.ComplexModel = {
       },
       role: "value",
     },
+    enumCollection: {
+      name: "enumCollection",
+      displayName: "Enum Collection",
+      type: "collection",
+      itemType: {
+        name: "$collectionItem",
+        displayName: "",
+        role: "value",
+        type: "enum",
+        get typeDef() { return domain.enums.Statuses },
+      },
+      role: "value",
+    },
     nonNullNonZeroInt: {
       name: "nonNullNonZeroInt",
       displayName: "Non Null Non Zero Int",
@@ -1091,6 +1104,19 @@ export const ComplexModel = domain.types.ComplexModel = {
           displayName: "Enum Param",
           type: "enum",
           get typeDef() { return domain.enums.Statuses },
+          role: "value",
+        },
+        enumsParam: {
+          name: "enumsParam",
+          displayName: "Enums Param",
+          type: "collection",
+          itemType: {
+            name: "$collectionItem",
+            displayName: "",
+            role: "value",
+            type: "enum",
+            get typeDef() { return domain.enums.Statuses },
+          },
           role: "value",
         },
         model: {

@@ -59,6 +59,7 @@ import CSelectValues from "./c-select-values.vue";
 import CDisplay from "../display/c-display.vue";
 import CDatetimePicker from "./c-datetime-picker.vue";
 import {
+  VAutocomplete,
   VCheckbox,
   VFileInput,
   VSelect,
@@ -160,6 +161,7 @@ function render() {
       } else if (
         valueMeta.itemType.type != "model" &&
         valueMeta.itemType.type != "object" &&
+        valueMeta.itemType.type != "enum" &&
         valueMeta.itemType.type != "file"
       ) {
         addHandler(data, "update:modelValue", (v: any) =>
@@ -303,6 +305,18 @@ function render() {
 
         addHandler(data, "update:modelValue", onInput);
         return h(VFileInput, data, vuetifySlots);
+      } else if (valueMeta.itemType.type == "enum") {
+        data.items = valueMeta.itemType.typeDef.values;
+        data.multiple = true;
+        data["chips"] = true;
+        data["closable-chips"] = true;
+        data["item-title"] = "displayName";
+        data["item-value"] = "value";
+        // maps to the prop "subtitle" on v-list-item
+        data["item-props"] = (item: any) => ({ subtitle: item.description });
+
+        addHandler(data, "update:modelValue", onInput);
+        return h(VAutocomplete, data, vuetifySlots);
       }
   }
 

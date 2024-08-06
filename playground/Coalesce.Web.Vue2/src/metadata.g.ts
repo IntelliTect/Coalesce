@@ -443,6 +443,43 @@ export const Case = domain.types.Case = {
       get typeDef() { return domain.enums.Statuses },
       role: "value",
     },
+    numbers: {
+      name: "numbers",
+      displayName: "Numbers",
+      type: "collection",
+      itemType: {
+        name: "$collectionItem",
+        displayName: "",
+        role: "value",
+        type: "number",
+      },
+      role: "value",
+    },
+    strings: {
+      name: "strings",
+      displayName: "Strings",
+      type: "collection",
+      itemType: {
+        name: "$collectionItem",
+        displayName: "",
+        role: "value",
+        type: "string",
+      },
+      role: "value",
+    },
+    states: {
+      name: "states",
+      displayName: "States",
+      type: "collection",
+      itemType: {
+        name: "$collectionItem",
+        displayName: "",
+        role: "value",
+        type: "enum",
+        get typeDef() { return domain.enums.Statuses },
+      },
+      role: "value",
+    },
     caseProducts: {
       name: "caseProducts",
       displayName: "Case Products",

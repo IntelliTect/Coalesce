@@ -21,6 +21,9 @@ namespace Coalesce.Web.Vue2.Models
         private string _AttachmentType;
         private string _Severity;
         private Coalesce.Domain.Case.Statuses? _Status;
+        private System.Collections.Generic.ICollection<int> _Numbers;
+        private System.Collections.Generic.ICollection<string> _Strings;
+        private System.Collections.Generic.ICollection<Coalesce.Domain.Case.Statuses> _States;
         private int? _DevTeamAssignedId;
         private System.TimeSpan? _Duration;
 
@@ -69,6 +72,21 @@ namespace Coalesce.Web.Vue2.Models
             get => _Status;
             set { _Status = value; Changed(nameof(Status)); }
         }
+        public System.Collections.Generic.ICollection<int> Numbers
+        {
+            get => _Numbers;
+            set { _Numbers = value; Changed(nameof(Numbers)); }
+        }
+        public System.Collections.Generic.ICollection<string> Strings
+        {
+            get => _Strings;
+            set { _Strings = value; Changed(nameof(Strings)); }
+        }
+        public System.Collections.Generic.ICollection<Coalesce.Domain.Case.Statuses> States
+        {
+            get => _States;
+            set { _States = value; Changed(nameof(States)); }
+        }
         public int? DevTeamAssignedId
         {
             get => _DevTeamAssignedId;
@@ -98,6 +116,9 @@ namespace Coalesce.Web.Vue2.Models
             if (ShouldMapTo(nameof(AttachmentType)) && context.GetPropertyRestriction<Coalesce.Domain.Case.TestRestriction>().UserCanWrite(context, nameof(AttachmentType), entity, AttachmentType)) entity.AttachmentType = AttachmentType;
             if (ShouldMapTo(nameof(Severity))) entity.Severity = Severity;
             if (ShouldMapTo(nameof(Status))) entity.Status = (Status ?? entity.Status);
+            if (ShouldMapTo(nameof(Numbers))) entity.Numbers = Numbers?.ToList();
+            if (ShouldMapTo(nameof(Strings))) entity.Strings = Strings?.ToList();
+            if (ShouldMapTo(nameof(States))) entity.States = States?.ToList();
             if (ShouldMapTo(nameof(DevTeamAssignedId))) entity.DevTeamAssignedId = DevTeamAssignedId;
             if (ShouldMapTo(nameof(Duration))) entity.Duration = (Duration ?? entity.Duration);
         }
@@ -129,6 +150,9 @@ namespace Coalesce.Web.Vue2.Models
         public byte[] AttachmentHash { get; set; }
         public string Severity { get; set; }
         public Coalesce.Domain.Case.Statuses? Status { get; set; }
+        public System.Collections.Generic.ICollection<int> Numbers { get; set; }
+        public System.Collections.Generic.ICollection<string> Strings { get; set; }
+        public System.Collections.Generic.ICollection<Coalesce.Domain.Case.Statuses> States { get; set; }
         public int? DevTeamAssignedId { get; set; }
         public System.TimeSpan? Duration { get; set; }
         public Coalesce.Web.Vue2.Models.PersonResponse AssignedTo { get; set; }
@@ -154,6 +178,9 @@ namespace Coalesce.Web.Vue2.Models
             this.AttachmentHash = obj.AttachmentHash;
             this.Severity = obj.Severity;
             this.Status = obj.Status;
+            this.Numbers = obj.Numbers;
+            this.Strings = obj.Strings;
+            this.States = obj.States;
             this.DevTeamAssignedId = obj.DevTeamAssignedId;
             this.Duration = obj.Duration;
             var propValCaseProducts = obj.CaseProducts;

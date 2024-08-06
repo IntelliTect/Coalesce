@@ -132,6 +132,9 @@ export interface Case extends Model<typeof metadata.Case> {
   attachmentHash: string | null
   severity: string | null
   status: Statuses | null
+  numbers: number[] | null
+  strings: string[] | null
+  states: Statuses[] | null
   caseProducts: CaseProduct[] | null
   devTeamAssignedId: number | null
   devTeamAssigned: DevTeam | null

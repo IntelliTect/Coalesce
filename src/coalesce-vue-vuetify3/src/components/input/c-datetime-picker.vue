@@ -35,7 +35,7 @@
     @keydown.enter="focused = false"
     @keydown.escape="focused = false"
     @update:model-value="textInputChanged($event, false)"
-    @click.capture="showPickerMobile($event)"
+    @click="menu = !menu"
     :append-inner-icon="
       internalDateKind == 'time'
         ? 'fa fa-clock cursor-pointer'
@@ -49,6 +49,7 @@
       activator="parent"
       content-class="c-datetime-picker__menu"
       :close-on-content-click="false"
+      :open-on-click="false"
       min-width="1px"
     >
       <v-fab
@@ -233,14 +234,10 @@ const modelValue = defineModel<Date | null | undefined>();
 const { inputBindAttrs, modelMeta, valueMeta, valueOwner } =
   useMetadataProps(props);
 
-const nativeInput = ref<HTMLInputElement>();
-
 const focused = ref(false);
 const error = ref<string[]>([]);
 const menu = ref(false);
 const internalTextValue = ref<string>();
-
-const hasMobilePicker = /android|iphone/i.test(navigator.userAgent);
 
 const form: any = inject(Symbol.for("vuetify:form"));
 
@@ -379,43 +376,6 @@ const showTime = computed(() => {
     internalDateKind.value == "datetime" || internalDateKind.value == "time"
   );
 });
-
-function showPickerMobile(event: MouseEvent) {
-  if (hasMobilePicker) {
-    showPicker(event);
-  }
-}
-
-function showPicker(event: MouseEvent) {
-  if (!interactive.value) {
-    return;
-  }
-
-  // Firefox Desktop only has pickers for date-only inputs.
-  // It has no time picker, which makes this essentially useless on firefox for those cases.
-  if (
-    internalDateKind.value !== "date" &&
-    /firefox/i.test(navigator.userAgent) &&
-    !/android|iphone/i.test(navigator.userAgent)
-  ) {
-    return;
-  }
-
-  if (nativeInput.value?.showPicker) {
-    nativeInput.value.showPicker();
-    event.stopPropagation();
-    event.preventDefault();
-
-    // Immediately unfocus the input element,
-    // because vuetify will have focused it in its own handler.
-    // On mobile, we don't want the mobile keyboard to flash open for a few milliseconds,
-    // and on desktop when the native picker is open it intercepts ALL keyboard input,
-    // so having the text field is deceptive for the user.
-    (document.activeElement as HTMLElement)?.blur?.();
-
-    return true;
-  }
-}
 
 function createDefaultDate() {
   const date = new Date();

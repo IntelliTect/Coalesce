@@ -1,10 +1,6 @@
 <template>
   <v-card class="c-admin-editor" :class="'type-' + metadata.name">
-    <v-toolbar
-      class="c-admin-editor--toolbar"
-      density="compact"
-      :color="color"
-    >
+    <v-toolbar class="c-admin-editor--toolbar" density="compact" :color="color">
       <v-toolbar-title style="flex: 0 1 auto">
         <template v-if="showContent">
           <span v-if="!canEdit">View</span>
@@ -54,7 +50,9 @@
     </v-toolbar>
     <v-sheet v-if="metadata.description" :color="color">
       <v-divider />
-      <v-card-subtitle class="font-italic">{{ metadata.description }}</v-card-subtitle>
+      <v-card-subtitle class="font-italic">
+        {{ metadata.description }}
+      </v-card-subtitle>
     </v-sheet>
 
     <v-card-text class="pt-2">

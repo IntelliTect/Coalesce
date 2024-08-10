@@ -52,16 +52,17 @@
 
     <c-list-page class="c-admin-table-toolbar--page" :list="list" />
   </v-toolbar>
+
   <v-sheet :color="color">
     <v-divider />
     <span v-if="metadata.description">
-      <v-card-subtitle  class="font-italic">
+      <v-card-subtitle class="font-italic">
         {{ metadata.description }}
       </v-card-subtitle>
-      
       <v-divider />
     </span>
   </v-sheet>
+
   <v-toolbar :color="color">
     <v-text-field
       class="c-admin-table-toolbar--search ml-4"

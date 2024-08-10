@@ -11,6 +11,7 @@
               :key="'header-' + header.value"
               class="text-left"
               :class="{
+                ['fixed-table-column-right']: header.isFixed,
                 sortable: header.sortable,
                 ['prop-' + header.prop]: !!header.prop,
                 ['th-' + header.value]: !header.prop,
@@ -92,7 +93,10 @@ export default defineComponent({
     props: { required: false, type: Array as PropType<Array<string>> },
     admin: { required: false, type: Boolean },
     editable: { required: false, type: Boolean },
-    extraHeaders: { required: false, type: Array as PropType<Array<string>> },
+    extraHeaders: {
+      required: false,
+      type: Array as PropType<Array<{ header: string; isFixed: boolean }>>,
+    },
     loaders: { required: false, type: Object },
   },
 
@@ -121,12 +125,14 @@ export default defineComponent({
           sortable: o.type != "collection",
           align: "left",
           prop: o.name,
+          isFixed: false,
         })),
         ...(this.extraHeaders || []).map((h) => ({
-          text: h,
-          value: h,
+          text: h.header,
+          value: h.header,
           sortable: false,
           prop: undefined,
+          isFixed: h.isFixed,
         })),
       ];
     },

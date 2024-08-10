@@ -15,7 +15,9 @@
         :editable="editable"
         :list="viewModel"
         :extra-headers="
-          canEdit || canDelete || hasInstanceMethods ? ['Actions'] : []
+          canEdit || canDelete || hasInstanceMethods
+            ? [{ header: 'Actions', isFixed: true }]
+            : []
         "
         :loaders="{
           '': list.$modelOnlyMode
@@ -29,7 +31,10 @@
         }"
       >
         <template #item-append="{ item }">
-          <td width="1%" class="c-admin-table--actions">
+          <td
+            width="1%"
+            class="c-admin-table--actions fixed-table-column-right"
+          >
             <div class="d-flex flex-nowrap text-no-wrap ga-1" no-gutters>
               <v-btn
                 v-if="editable && !effectiveAutoSave"

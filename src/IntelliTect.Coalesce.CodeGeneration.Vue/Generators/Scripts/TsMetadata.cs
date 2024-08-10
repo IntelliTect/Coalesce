@@ -102,6 +102,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
         {
             b.StringProp("name", model.ClientTypeName);
             b.StringProp("displayName", model.DisplayName);
+            b.StringProp("description", model.GetAttributeValue<DescriptionAttribute>(a => a.Description));
+            
             if (model.ListTextProperty != null)
             {
                 // This might not be defined for external types, because sometimes it just doesn't make sense. We'll accommodate on the client.

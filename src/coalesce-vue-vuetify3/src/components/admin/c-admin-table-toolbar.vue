@@ -1,10 +1,5 @@
 <template>
-  <v-toolbar
-    extended
-    class="c-admin-table-toolbar"
-    density="comfortable"
-    :color="color"
-  >
+  <v-toolbar class="c-admin-table-toolbar" density="comfortable" :color="color">
     <v-toolbar-title class="c-admin-table-toolbar--model-name hidden-xs-only">
       {{ metadata.displayName }}
     </v-toolbar-title>
@@ -56,27 +51,34 @@
     <v-spacer></v-spacer>
 
     <c-list-page class="c-admin-table-toolbar--page" :list="list" />
+  </v-toolbar>
+  <v-sheet :color="color">
+    <v-divider />
+    <span v-if="metadata.description">
+      <v-card-subtitle  class="font-italic">
+        {{ metadata.description }}
+      </v-card-subtitle>
+      
+      <v-divider />
+    </span>
+  </v-sheet>
+  <v-toolbar :color="color">
+    <v-text-field
+      class="c-admin-table-toolbar--search ml-4"
+      hide-details
+      prepend-inner-icon="fa fa-search"
+      label="Search"
+      v-model="list.$params.search"
+      density="comfortable"
+      single-line
+      clearable
+    ></v-text-field>
+    <v-divider class="hidden-xs-only mx-4 my-0" vertical></v-divider>
+    <c-list-filters :list="list" />
 
-    <template v-slot:extension>
-      <v-text-field
-        class="c-admin-table-toolbar--search"
-        hide-details
-        prepend-inner-icon="fa fa-search"
-        label="Search"
-        v-model="list.$params.search"
-        density="comfortable"
-        single-line
-        clearable
-      ></v-text-field>
+    <v-spacer></v-spacer>
 
-      <v-divider class="hidden-xs-only mx-4 my-0" vertical></v-divider>
-
-      <c-list-filters :list="list" />
-
-      <v-spacer></v-spacer>
-
-      <c-list-page-size :list="list" :items="pageSizes" />
-    </template>
+    <c-list-page-size :list="list" :items="pageSizes" />
   </v-toolbar>
 </template>
 

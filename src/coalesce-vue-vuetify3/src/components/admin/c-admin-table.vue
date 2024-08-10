@@ -6,9 +6,7 @@
       @update:editable="editable = $event"
       :editable="canEdit ? editable : undefined"
       :color="color"
-      elevation="4"
     />
-
     <v-card-text>
       <c-table
         admin

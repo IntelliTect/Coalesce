@@ -8,8 +8,8 @@ Before you begin, ensure that you have all the requisite tools installed
 - A compatible IDE. 
   - Recommended:
     - Visual Studio for backend (C#) development 
-    - VS Code for frontend (Vue, TypeScript) development (with [Vue - Official](https://marketplace.visualstudio.com/items?itemName=Vue.volar) and [TypeScript Vue Plugin](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin))
-  - Also consider:
+    - VS Code for frontend (Vue, TypeScript) development (with [Vue - Official](https://marketplace.visualstudio.com/items?itemName=Vue.volar))
+  - Alternatively, you could use:
     - VS Code for full stack development.
     - JetBrains Rider
 

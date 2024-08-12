@@ -1,6 +1,11 @@
 <template>
   <v-card class="c-admin-editor" :class="'type-' + metadata.name">
-    <v-toolbar class="c-admin-editor--toolbar" density="compact" :color="color">
+    <v-toolbar
+      class="c-admin-editor--toolbar"
+      density="compact"
+      :color="color"
+      elevation="4"
+    >
       <v-toolbar-title style="flex: 0 1 auto">
         <template v-if="showContent">
           <span v-if="!canEdit">View</span>
@@ -48,12 +53,11 @@
         <span class="hidden-sm-and-down">Reload</span>
       </v-btn>
     </v-toolbar>
-    <v-sheet v-if="metadata.description" :color="color">
-      <v-divider />
-      <v-card-subtitle class="font-italic">
-        {{ metadata.description }}
-      </v-card-subtitle>
-    </v-sheet>
+
+    <div v-if="metadata.description" class="c-admin-table--description">
+      <i class="fa fa-info-circle"></i>
+      {{ metadata.displayName }}: {{ metadata.description }}
+    </div>
 
     <v-card-text class="pt-2">
       <c-loader-status

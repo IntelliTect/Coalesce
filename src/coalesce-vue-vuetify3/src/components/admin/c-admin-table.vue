@@ -7,6 +7,12 @@
       :editable="canEdit ? editable : undefined"
       :color="color"
     />
+
+    <div v-if="metadata.description" class="c-admin-table--description">
+      <i class="fa fa-info-circle"></i>
+      {{ metadata.displayName }}: {{ metadata.description }}
+    </div>
+
     <v-card-text>
       <c-table
         admin
@@ -262,6 +268,12 @@ export default defineComponent({
 </script>
 
 <style lang="scss">
+.c-admin-table--description {
+  font-size: 12px;
+  margin: 4px 16px;
+  opacity: 0.9;
+}
+
 .c-admin-table {
   a {
     text-decoration: none;

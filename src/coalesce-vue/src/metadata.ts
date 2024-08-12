@@ -151,7 +151,6 @@ export interface ModelType extends CustomReferenceTypeBase, ApiRoutedType {
 export interface DataSourceType extends Metadata {
   readonly type: "dataSource";
   readonly isDefault?: true;
-  readonly description?: string;
 
   /** The parameters of the data source.
    * Stored as `props` so it can be treated like a ModelType/ObjectType in many cases.

@@ -136,7 +136,6 @@ export const Titles = domain.enums.Titles = {
 export const AuditLog = domain.types.AuditLog = {
   name: "AuditLog",
   displayName: "Audit Log",
-  description: "",
   get displayProp() { return this.props.type }, 
   type: "model",
   controllerRoute: "AuditLog",
@@ -254,7 +253,6 @@ export const AuditLog = domain.types.AuditLog = {
 export const AuditLogProperty = domain.types.AuditLogProperty = {
   name: "AuditLogProperty",
   displayName: "Audit Log Property",
-  description: "",
   get displayProp() { return this.props.propertyName }, 
   type: "model",
   controllerRoute: "AuditLogProperty",
@@ -322,7 +320,6 @@ export const AuditLogProperty = domain.types.AuditLogProperty = {
 export const Case = domain.types.Case = {
   name: "Case",
   displayName: "Case",
-  description: "",
   get displayProp() { return this.props.title }, 
   type: "model",
   controllerRoute: "Case",
@@ -804,7 +801,6 @@ export const Case = domain.types.Case = {
       type: "dataSource",
       name: "AllOpenCases",
       displayName: "All Open Cases",
-      description: "",
       props: {
         minDate: {
           name: "minDate",
@@ -820,7 +816,6 @@ export const Case = domain.types.Case = {
 export const CaseDto = domain.types.CaseDto = {
   name: "CaseDto",
   displayName: "Case Dto",
-  description: "",
   get displayProp() { return this.props.caseId }, 
   type: "model",
   controllerRoute: "CaseDto",
@@ -888,7 +883,6 @@ export const CaseDto = domain.types.CaseDto = {
       type: "dataSource",
       name: "CaseDtoSource",
       displayName: "Case Dto Source",
-      description: "",
       props: {
       },
     },
@@ -897,7 +891,6 @@ export const CaseDto = domain.types.CaseDto = {
 export const CaseDtoStandalone = domain.types.CaseDtoStandalone = {
   name: "CaseDtoStandalone",
   displayName: "Case Dto Standalone",
-  description: "",
   get displayProp() { return this.props.caseId }, 
   type: "model",
   controllerRoute: "CaseDtoStandalone",
@@ -926,7 +919,6 @@ export const CaseDtoStandalone = domain.types.CaseDtoStandalone = {
 export const CaseProduct = domain.types.CaseProduct = {
   name: "CaseProduct",
   displayName: "Case Product",
-  description: "",
   get displayProp() { return this.props.caseProductId }, 
   type: "model",
   controllerRoute: "CaseProduct",
@@ -996,7 +988,6 @@ export const CaseProduct = domain.types.CaseProduct = {
 export const Company = domain.types.Company = {
   name: "Company",
   displayName: "Company",
-  description: "",
   get displayProp() { return this.props.altName }, 
   type: "model",
   controllerRoute: "Company",
@@ -1185,7 +1176,6 @@ export const Company = domain.types.Company = {
       type: "dataSource",
       name: "DefaultSource",
       displayName: "Default Source",
-      description: "",
       isDefault: true,
       props: {
       },
@@ -1195,7 +1185,6 @@ export const Company = domain.types.Company = {
 export const Log = domain.types.Log = {
   name: "Log",
   displayName: "Log",
-  description: "",
   get displayProp() { return this.props.logId }, 
   type: "model",
   controllerRoute: "Log",
@@ -1230,7 +1219,6 @@ export const Log = domain.types.Log = {
 export const Person = domain.types.Person = {
   name: "Person",
   displayName: "Person",
-  description: "",
   get displayProp() { return this.props.name }, 
   type: "model",
   controllerRoute: "Person",
@@ -1859,7 +1847,6 @@ export const Person = domain.types.Person = {
       type: "dataSource",
       name: "BOrCPeople",
       displayName: "B Or C People",
-      description: "",
       props: {
       },
     },
@@ -1867,7 +1854,6 @@ export const Person = domain.types.Person = {
       type: "dataSource",
       name: "NamesStartingWithAWithCases",
       displayName: "Names Starting With A With Cases",
-      description: "",
       props: {
         allowedStatuses: {
           name: "allowedStatuses",
@@ -1888,7 +1874,6 @@ export const Person = domain.types.Person = {
       type: "dataSource",
       name: "WithoutCases",
       displayName: "Without Cases",
-      description: "",
       isDefault: true,
       props: {
       },
@@ -1952,7 +1937,6 @@ export const Product = domain.types.Product = {
 export const StandaloneReadCreate = domain.types.StandaloneReadCreate = {
   name: "StandaloneReadCreate",
   displayName: "Standalone Read Create",
-  description: "",
   get displayProp() { return this.props.name }, 
   type: "model",
   controllerRoute: "StandaloneReadCreate",
@@ -1990,7 +1974,6 @@ export const StandaloneReadCreate = domain.types.StandaloneReadCreate = {
       type: "dataSource",
       name: "DefaultSource",
       displayName: "Default Source",
-      description: "",
       props: {
       },
     },
@@ -1999,7 +1982,6 @@ export const StandaloneReadCreate = domain.types.StandaloneReadCreate = {
 export const StandaloneReadonly = domain.types.StandaloneReadonly = {
   name: "StandaloneReadonly",
   displayName: "Standalone Readonly",
-  description: "",
   get displayProp() { return this.props.name }, 
   type: "model",
   controllerRoute: "StandaloneReadonly",
@@ -2039,7 +2021,6 @@ export const StandaloneReadonly = domain.types.StandaloneReadonly = {
       type: "dataSource",
       name: "DefaultSource",
       displayName: "Default Source",
-      description: "",
       props: {
       },
     },
@@ -2048,7 +2029,6 @@ export const StandaloneReadonly = domain.types.StandaloneReadonly = {
 export const StandaloneReadWrite = domain.types.StandaloneReadWrite = {
   name: "StandaloneReadWrite",
   displayName: "Standalone Read Write",
-  description: "",
   get displayProp() { return this.props.name }, 
   type: "model",
   controllerRoute: "StandaloneReadWrite",
@@ -2086,7 +2066,6 @@ export const StandaloneReadWrite = domain.types.StandaloneReadWrite = {
       type: "dataSource",
       name: "DefaultSource",
       displayName: "Default Source",
-      description: "",
       props: {
       },
     },
@@ -2095,7 +2074,6 @@ export const StandaloneReadWrite = domain.types.StandaloneReadWrite = {
 export const ZipCode = domain.types.ZipCode = {
   name: "ZipCode",
   displayName: "Zip Code",
-  description: "",
   get displayProp() { return this.props.zip }, 
   type: "model",
   controllerRoute: "ZipCode",
@@ -2130,7 +2108,6 @@ export const ZipCode = domain.types.ZipCode = {
 export const CaseSummary = domain.types.CaseSummary = {
   name: "CaseSummary",
   displayName: "Case Summary",
-  description: "",
   get displayProp() { return this.props.description }, 
   type: "object",
   props: {
@@ -2176,7 +2153,6 @@ export const CaseSummary = domain.types.CaseSummary = {
 export const DevTeam = domain.types.DevTeam = {
   name: "DevTeam",
   displayName: "Dev Team",
-  description: "",
   get displayProp() { return this.props.name }, 
   type: "object",
   props: {
@@ -2197,7 +2173,6 @@ export const DevTeam = domain.types.DevTeam = {
 export const Location = domain.types.Location = {
   name: "Location",
   displayName: "Location",
-  description: "",
   type: "object",
   props: {
     city: {
@@ -2223,7 +2198,6 @@ export const Location = domain.types.Location = {
 export const PersonCriteria = domain.types.PersonCriteria = {
   name: "PersonCriteria",
   displayName: "Person Criteria",
-  description: "",
   get displayProp() { return this.props.name }, 
   type: "object",
   props: {
@@ -2250,7 +2224,6 @@ export const PersonCriteria = domain.types.PersonCriteria = {
 export const PersonLocation = domain.types.PersonLocation = {
   name: "PersonLocation",
   displayName: "Person Location",
-  description: "",
   type: "object",
   props: {
     latitude: {
@@ -2270,7 +2243,6 @@ export const PersonLocation = domain.types.PersonLocation = {
 export const PersonStats = domain.types.PersonStats = {
   name: "PersonStats",
   displayName: "Person Stats",
-  description: "",
   get displayProp() { return this.props.name }, 
   type: "object",
   props: {
@@ -2330,7 +2302,6 @@ export const PersonStats = domain.types.PersonStats = {
 export const ProductDetails = domain.types.ProductDetails = {
   name: "ProductDetails",
   displayName: "Product Details",
-  description: "",
   get displayProp() { return this.props.manufacturingAddress }, 
   type: "object",
   props: {
@@ -2353,7 +2324,6 @@ export const ProductDetails = domain.types.ProductDetails = {
 export const StreetAddress = domain.types.StreetAddress = {
   name: "StreetAddress",
   displayName: "Street Address",
-  description: "",
   get displayProp() { return this.props.address }, 
   type: "object",
   props: {
@@ -2386,7 +2356,6 @@ export const StreetAddress = domain.types.StreetAddress = {
 export const WeatherData = domain.types.WeatherData = {
   name: "WeatherData",
   displayName: "Weather Data",
-  description: "",
   type: "object",
   props: {
     tempFahrenheit: {

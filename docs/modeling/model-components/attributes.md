@@ -21,7 +21,7 @@ The displayed name and description of a property, as well as the order in which 
 The displayed name of a property can also be set via the `[DisplayName]` attribute.
 
 ### [Description]
-The description of a class.
+The description of a type, such as a class, property, method, or parameter.
 
 ### [Required]
 

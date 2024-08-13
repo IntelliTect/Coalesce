@@ -54,7 +54,7 @@
       </v-btn>
     </v-toolbar>
 
-    <div v-if="metadata.description" class="c-admin-table--description">
+    <div v-if="metadata.description" class="c-admin-description">
       <i class="fa fa-info-circle"></i>
       {{ metadata.displayName }}: {{ metadata.description }}
     </div>

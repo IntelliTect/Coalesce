@@ -20,6 +20,9 @@ The displayed name and description of a property, as well as the order in which 
 
 The displayed name of a property can also be set via the `[DisplayName]` attribute.
 
+### [Description]
+The description of a type or member, such as a class, property, method, or parameter.
+
 ### [Required]
 
 Properties with `[Required]` will generate [client validation](/modeling/model-components/attributes/client-validation.md) and [server validation](/topics/security.md#server-side-data-validation) rules.

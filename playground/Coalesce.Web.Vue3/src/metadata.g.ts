@@ -1883,6 +1883,7 @@ export const Person = domain.types.Person = {
 export const Product = domain.types.Product = {
   name: "Product",
   displayName: "Product",
+  description: "A product that can be purchased.",
   get displayProp() { return this.props.name }, 
   type: "model",
   controllerRoute: "Product",

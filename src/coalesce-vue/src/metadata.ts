@@ -94,7 +94,10 @@ export interface Metadata {
 export interface CustomReferenceTypeBase extends Metadata {
   readonly type: ClassTypeDiscriminator;
 
-  /** The properties of a the represented type */
+  /** The description of the type itself. */
+  readonly description?: string;
+
+  /** The properties of the represented type */
   readonly props: { [propName in string]: Property };
 
   /**
@@ -148,6 +151,7 @@ export interface ModelType extends CustomReferenceTypeBase, ApiRoutedType {
 export interface DataSourceType extends Metadata {
   readonly type: "dataSource";
   readonly isDefault?: true;
+  readonly description?: string;
 
   /** The parameters of the data source.
    * Stored as `props` so it can be treated like a ModelType/ObjectType in many cases.

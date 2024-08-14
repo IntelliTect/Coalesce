@@ -8,7 +8,7 @@
       :color="color"
     />
 
-    <div v-if="metadata.description" class="c-admin-description">
+    <div v-if="metadata.description" class="c-admin-page--description">
       <i class="fa fa-info-circle"></i>
       {{ metadata.displayName }}: {{ metadata.description }}
     </div>
@@ -272,11 +272,5 @@ export default defineComponent({
   a {
     text-decoration: none;
   }
-}
-
-.c-admin-description {
-  font-size: 12px;
-  margin: 4px 16px;
-  opacity: 0.9;
 }
 </style>

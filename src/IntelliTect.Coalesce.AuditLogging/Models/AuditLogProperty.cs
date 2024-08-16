@@ -45,4 +45,11 @@ required
     /// Additional descriptive information about <see cref="NewValue"/>. For example, a string describing the value of a foreign key.
     /// </summary>
     public string? NewValueDescription { get; set; }
+
+    /// <summary>
+    /// Whether or not this property change is a candidate for merging
+    /// with an existing, recent audit log, per the rules described by <see cref="AuditOptions.MergeWindow"/>.
+    /// </summary>
+    [NotMapped, InternalUse]
+    public bool CanMerge { get; set; }
 }

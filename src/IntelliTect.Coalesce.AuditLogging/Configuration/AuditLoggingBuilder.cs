@@ -35,6 +35,13 @@ public class AuditLoggingBuilder<TAuditLog>
         return this;
     }
 
+    /// <inheritdoc cref="AuditOptions.MergeMode"/> 
+    public AuditLoggingBuilder<TAuditLog> WithMergeBehavior(MergeMode mergeMode)
+    {
+        options.MergeMode = mergeMode;
+        return this;
+    }
+
     /// <inheritdoc cref="AuditOptions.Descriptions"/> 
     public AuditLoggingBuilder<TAuditLog> WithDescriptions(DescriptionMode mode)
     {

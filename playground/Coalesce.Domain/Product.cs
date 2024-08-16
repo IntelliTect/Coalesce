@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using IntelliTect.Coalesce.DataAnnotations;
@@ -10,6 +11,7 @@ namespace Coalesce.Domain
     [Table("Product")]
     [Create(Roles = "Admin")]
     [Edit(Roles = "Admin")]
+    [Description("A product that can be purchased.")]
     public class Product
     {
         public int ProductId { get; set; }

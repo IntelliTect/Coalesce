@@ -71,10 +71,3 @@
     max-height: calc(100% - 9px);
   }
 }
-
-.fixed-table-column-right {
-  position: sticky;
-  right: 0;
-  background: rgb(var(--v-theme-surface-light));
-  box-shadow: -2px 2px 4px 0px rgba(0, 0, 0, 0.4);
-}

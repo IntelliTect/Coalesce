@@ -108,18 +108,9 @@ import {
   bindToQueryString,
 } from "coalesce-vue";
 
-import {
-  computed,
-  defineComponent,
-  onBeforeUnmount,
-  PropType,
-  ref,
-  toRef,
-  onMounted,
-} from "vue";
+import { computed, defineComponent, PropType, ref, toRef } from "vue";
 import { useRouter } from "vue-router";
 import { useAdminTable } from "./useAdminTable";
-import CTable from "@/display/c-table.vue";
 
 export default defineComponent({
   name: "c-admin-table",

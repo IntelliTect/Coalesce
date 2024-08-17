@@ -83,9 +83,9 @@ import {
   defineComponent,
   onBeforeMount,
   onMounted,
+  onUnmounted,
   PropType,
   ref,
-  nextTick,
 } from "vue";
 import {
   ListViewModel,
@@ -132,14 +132,13 @@ export default defineComponent({
     });
 
     onMounted(async () => {
-      await nextTick();
       if (cTable.value) {
         resizeObserver.observe(cTable.value);
       }
       checkHorizontalScrollbar();
     });
 
-    onBeforeMount(() => {
+    onUnmounted(() => {
       if (cTable.value) {
         resizeObserver.unobserve(cTable.value);
       }

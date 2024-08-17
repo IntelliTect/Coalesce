@@ -11,7 +11,8 @@
               :key="'header-' + header.value"
               class="text-left"
               :class="{
-                ['fixed-column-right']: header.isFixed && isHorizontalScrollbarVisible,
+                ['fixed-column-right']:
+                  header.isFixed && isHorizontalScrollbarVisible,
                 sortable: header.sortable,
                 ['prop-' + header.prop]: !!header.prop,
                 ['th-' + header.value]: !header.prop,
@@ -65,7 +66,11 @@
               <c-admin-display v-else-if="admin" :model="item" :for="prop" />
               <c-display v-else :model="item" :for="prop" />
             </td>
-            <slot name="item-append" :item="item" :isHorizontalScrollbarVisible="isHorizontalScrollbarVisible" />
+            <slot
+              name="item-append"
+              :item="item"
+              :isHorizontalScrollbarVisible="isHorizontalScrollbarVisible"
+            />
           </tr>
         </tbody>
       </v-table>
@@ -74,7 +79,14 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onBeforeMount, onMounted, PropType, ref, nextTick } from "vue";
+import {
+  defineComponent,
+  onBeforeMount,
+  onMounted,
+  PropType,
+  ref,
+  nextTick,
+} from "vue";
 import {
   ListViewModel,
   Property,
@@ -95,7 +107,9 @@ export default defineComponent({
     editable: { required: false, type: Boolean },
     extraHeaders: {
       required: false,
-      type: Array as PropType<Array<{ header: string; isFixed: boolean }>>,
+      type: Array as
+        | PropType<Array<{ header: string; isFixed: boolean }>>
+        | PropType<Array<string>>,
     },
     loaders: { required: false, type: Object },
   },
@@ -109,18 +123,17 @@ export default defineComponent({
       const tableElement = cTable.value?.querySelector("table");
       if (tableElement && divElement) {
         isHorizontalScrollbarVisible.value =
-        divElement.clientWidth < tableElement.clientWidth;
+          divElement.clientWidth < tableElement.clientWidth;
       }
     };
 
     const resizeObserver = new ResizeObserver(() => {
       checkHorizontalScrollbar();
-      console.log("Resize? ", isHorizontalScrollbarVisible.value);
     });
 
     onMounted(async () => {
       await nextTick();
-      if(cTable.value){
+      if (cTable.value) {
         resizeObserver.observe(cTable.value);
       }
       checkHorizontalScrollbar();
@@ -165,13 +178,25 @@ export default defineComponent({
           prop: o.name,
           isFixed: false,
         })),
-        ...(this.extraHeaders || []).map((h) => ({
-          text: h.header,
-          value: h.header,
-          sortable: false,
-          prop: undefined,
-          isFixed: h.isFixed,
-        })),
+        ...(this.extraHeaders || []).map((h) => {
+          if (typeof h === "string") {
+            return {
+              text: h,
+              value: h,
+              sortable: false,
+              prop: undefined,
+              isFixed: false,
+            };
+          } else {
+            return {
+              text: h.header,
+              value: h.header,
+              sortable: false,
+              prop: undefined,
+              isFixed: h.isFixed,
+            };
+          }
+        }),
       ];
     },
   },
@@ -251,7 +276,7 @@ export default defineComponent({
       font-size: 16px;
     }
   }
-  
+
   .fixed-column-right {
     position: sticky;
     right: 0;

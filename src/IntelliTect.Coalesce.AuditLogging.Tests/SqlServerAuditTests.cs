@@ -88,6 +88,35 @@ public class SqlServerAuditTests
         Assert.Equal(3, db.AuditLogs.Count()); // Now two records for EntityUpdated
     }
 
+    [SkippableFact]
+    public async Task WithSqlServer_CreatesNewRecordForUnmergableChanges()
+    {
+        // Arrange
+        using TestDbContext db = BuildDbContext();
+
+        var parent1 = new ParentWithMappedListText { CustomListTextField = "A" };
+        var parent2 = new ParentWithMappedListText { CustomListTextField = "B" };
+        var user = new AppUser { Name = "bob", Parent1 = parent1 };
+        db.Add(user);
+        db.Add(parent1);
+        db.Add(parent2);
+        await db.SaveChangesAsync();
+
+        // Act/Assert
+        user.Parent1 = parent2;
+        await db.SaveChangesAsync();
+
+        Assert.Equal(4, db.AuditLogs.Count()); // 3 adds, 1 update
+
+        // Act/Assert
+        user.Parent1 = parent1;
+        await db.SaveChangesAsync();
+
+        // Now two records for EntityModified because Parent1Id is a foreign key
+        // and is therefore not a default candidate for merges.
+        Assert.Equal(2, db.AuditLogs.Count(l => l.State == AuditEntryState.EntityModified));
+    }
+
     private static TestDbContext BuildDbContext()
     {
         var db = new TestDbContext(new DbContextOptionsBuilder<TestDbContext>()

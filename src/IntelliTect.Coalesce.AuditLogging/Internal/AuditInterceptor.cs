@@ -329,13 +329,33 @@ internal sealed class AuditInterceptor<TAuditLog> : SaveChangesInterceptor
                 auditLog.Properties = e.Properties
                     .Select(property =>
                     {
+                        var propMeta = property.PropertyEntry.Metadata;
+                        var propType = propMeta.ClrType;
+                        var propPureType = Nullable.GetUnderlyingType(propType) ?? propType;
+
                         return new AuditLogProperty
                         {
                             PropertyName = property.PropertyName,
                             OldValue = property.OldValueFormatted,
                             OldValueDescription = property.OldValueDescription,
                             NewValue = property.NewValueFormatted,
-                            NewValueDescription = property.NewValueDescription
+                            NewValueDescription = property.NewValueDescription,
+                            CanMerge = _options.MergeMode switch
+                            {
+                                MergeMode.None => false,
+                                MergeMode.All => true,
+
+                                MergeMode.NonDiscreteOnly =>
+                                    !propMeta.IsForeignKey() &&
+                                    !propPureType.IsEnum &&
+                                    propPureType != typeof(bool),
+
+                                MergeMode.StringsOnly =>
+                                    propType == typeof(string) &&
+                                    !propMeta.IsForeignKey(),
+
+                                _ => false
+                            }
                         };
                     })
                     .Where(property => 
@@ -358,7 +378,32 @@ internal sealed class AuditInterceptor<TAuditLog> : SaveChangesInterceptor
             return;
         }
 
-        if (_options.MergeWindow > TimeSpan.Zero && db.Database.ProviderName == "Microsoft.EntityFrameworkCore.SqlServer")
+        List<TAuditLog> mergeLogs = new();
+        List<TAuditLog> noMergeLogs = new();
+
+        if (
+            _options.MergeWindow > TimeSpan.Zero && 
+            db.Database.ProviderName == "Microsoft.EntityFrameworkCore.SqlServer"
+        )
+        {
+            foreach (var log in auditLogs)
+            {
+                if (log.State == AuditEntryState.EntityModified && log.Properties!.All(p => p.CanMerge))
+                {
+                    mergeLogs.Add(log);
+                }
+                else
+                {
+                    noMergeLogs.Add(log);
+                }
+            }
+        }
+        else
+        {
+            noMergeLogs = auditLogs;
+        }
+
+        if (mergeLogs.Count > 0)
         {
             var conn = db.Database.GetDbConnection();
             var cmd = conn.CreateCommand();
@@ -366,7 +411,7 @@ internal sealed class AuditInterceptor<TAuditLog> : SaveChangesInterceptor
 
             var jsonParam = cmd.CreateParameter();
             jsonParam.ParameterName = "MergePayload";
-            jsonParam.Value = JsonSerializer.Serialize(auditLogs, _mergeJsonOptions);
+            jsonParam.Value = JsonSerializer.Serialize(mergeLogs, _mergeJsonOptions);
 
 
             // MergeWindowSeconds, in seconds, that a record can be for it to be updated (rather than inserting a new one).
@@ -387,12 +432,13 @@ internal sealed class AuditInterceptor<TAuditLog> : SaveChangesInterceptor
                 db.Database.ExecuteSqlRaw(cmd.CommandText, jsonParam, mergeWindowParam);
             }
         }
-        else
+
+        if (noMergeLogs.Count > 0)
         {
             // Naïve insertion for providers where we don't know how to generate 
             // SQL that will merge existing entries, or when the merge feature is disabled.
 
-            db.AddRange(auditLogs);
+            db.AddRange(noMergeLogs);
 
             if (async)
             {

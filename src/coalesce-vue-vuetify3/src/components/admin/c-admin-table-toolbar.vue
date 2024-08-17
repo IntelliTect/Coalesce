@@ -4,6 +4,7 @@
     class="c-admin-table-toolbar"
     density="comfortable"
     :color="color"
+    elevation="4"
   >
     <v-toolbar-title class="c-admin-table-toolbar--model-name hidden-xs-only">
       {{ metadata.displayName }}

@@ -6,8 +6,12 @@
       @update:editable="editable = $event"
       :editable="canEdit ? editable : undefined"
       :color="color"
-      elevation="4"
     />
+
+    <div v-if="metadata.description" class="c-admin-page--description">
+      <i class="fa fa-info-circle"></i>
+      {{ metadata.displayName }}: {{ metadata.description }}
+    </div>
 
     <v-card-text>
       <c-table

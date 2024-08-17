@@ -149,11 +149,13 @@ This feature may be disabled by calling `.WithPropertyDescriptions(PropertyDescr
 
 
 ## Merging
-When using a supported database provider (currently only SQL Server), audit records for changes to the same entity will be merged together when the change is identical in all aspects to the previous audit record for that entity, with the sole exception of the old/new property values.
+When using a supported database provider (currently only SQL Server), audit records for changes to the same entity can be merged together when the change is identical in all aspects to the previous audit record for that entity, with the only allowed difference being the old/new property values.
 
 In other words, if the same user is making repeated changes to the same property on the same entity from the same page, then those changes will merge together into one audit record.
 
 This merging only happens together if the existing audit record is recent; the default cutoff for this is 30 seconds, but can be configured with `.WithMergeWindow(TimeSpan.FromSeconds(15))` when calling `UseCoalesceAuditLogging`. It can also be turned off by setting this value to `TimeSpan.Zero`. The merging logic respects all custom properties you add to your `IAuditLog` implementation, requiring their values to match between the existing and new audit records for a merge to occur.
+
+By default, only non-discrete properties (those that are not foreign keys, booleans, or enums) are candidates for merging, since it is usually only such fields that will have repeated changes while a user is typing in an auto-save user interface. For other types of properties, it is usually better to capture each discrete change. This can be configured with `.WithMergeBehavior()` when calling `UseCoalesceAuditLogging`, and can be overridden on a case-by-case basis by setting `AuditLogProperty.CanMerge` in your `IAuditOperationContext.Populate` implementation.
 
 ## Caveats
 Only changes that are tracked by the `DbContext`'s `ChangeTracker` can be audited. Changes that are made with raw SQL, or changes that are made with bulk update functions like [`ExecuteUpdate` or `ExecuteDelete`](https://learn.microsoft.com/en-us/ef/core/performance/efficient-updating?tabs=ef7) will not be audited using this package.
@@ -214,4 +216,4 @@ public abstract class TrackingBase
 }
 ```
 
-The overload `UseStamping<TStampable>` will provide the `ClaimsPrincipal` from the current HTTP request if present, defaulting to `null` if an operation occurs outside an HTTP request (e.g. a background job). The overloads `UseStamping<TStampable, TService>` and `UseStamping<TStampable, TService1, TService2>` can be used to inject services into the operation. If more than two services are needed, you should wrap those dependencies up into an additional services that takes them as dependencies.
+The overload `UseStamping<TStampable>` will provide the `ClaimsPrincipal` from the current HTTP request if present, defaulting to `null` if an operation occurs outside an HTTP request (e.g. a background job). The overloads `UseStamping<TStampable, TService>` and `UseStamping<TStampable, TService1, TService2>` can be used to inject services into the operation. If more than two services are needed, you should wrap those dependencies up into an additional service that takes them as dependencies.

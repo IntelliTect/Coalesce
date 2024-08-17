@@ -20,6 +20,9 @@ The displayed name and description of a property, as well as the order in which 
 
 The displayed name of a property can also be set via the `[DisplayName]` attribute.
 
+### [Description]
+The description of a type or member, such as a class, property, method, or parameter.
+
 ### [Required]
 
 Properties with `[Required]` will generate [client validation](/modeling/model-components/attributes/client-validation.md) and [server validation](/topics/security.md#server-side-data-validation) rules.
@@ -38,7 +41,7 @@ Properties with `[MaxLength]` will generate [client validation](/modeling/model-
 
 ### [DataType]
 
-Some values of `DataType` when provided to `DataTypeAttribute` on a `string` property will alter the behavior of the [Vue Components](/stacks/vue/coalesce-vue-vuetify/overview.md). See [c-display](/stacks/vue/coalesce-vue-vuetify/components/c-display.md) and See [c-display](/stacks/vue/coalesce-vue-vuetify/components/c-input.md) for details.
+Some values of `DataType` when provided to `DataTypeAttribute` on a `string` property will alter the behavior of the [Vue Components](/stacks/vue/coalesce-vue-vuetify/overview.md). See [c-display](/stacks/vue/coalesce-vue-vuetify/components/c-display.md) and [c-input](/stacks/vue/coalesce-vue-vuetify/components/c-input.md) for details.
 
 ### [ForeignKey]
 

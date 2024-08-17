@@ -21,6 +21,14 @@ public class AuditOptions
     /// </summary>
     public TimeSpan MergeWindow { get; internal set; } = TimeSpan.FromSeconds(30);
 
+    /// <summary>
+    /// If merging is enabled by a non-zero <see cref="MergeWindow"/>, controls which properties
+    /// are eligible for merging. Defaults to <see cref="MergeMode.NonDiscreteOnly"/>.
+    /// This can be overriden on a per-property basis by modifying <see cref="AuditLogProperty.CanMerge"/>
+    /// inside <see cref="IAuditOperationContext.Populate(IAuditLog, Microsoft.EntityFrameworkCore.ChangeTracking.EntityEntry)"/>.
+    /// </summary>
+    public MergeMode MergeMode { get; internal set; } = MergeMode.NonDiscreteOnly;
+
     public Type? OperationContextType { get; internal set; }
 
     /// <summary>
@@ -95,4 +103,28 @@ public enum DescriptionMode
     /// and defaults to a property named "Name" if one exists.
     /// </summary>
     ListText = 1 << 0,
+}
+
+public enum MergeMode
+{
+    /// <summary>
+    /// No properties are candidates for merging
+    /// </summary>
+    None = 0,
+
+    /// <summary>
+    /// All properties are candidates for merging
+    /// </summary>
+    All = 1,
+
+    /// <summary>
+    /// Only values that take on generally non-discrete values are candidates for merging.
+    /// This excludes foreign keys, enums, and booleans.
+    /// </summary>
+    NonDiscreteOnly = 2,
+
+    /// <summary>
+    /// Only non-key string properties are candidates for merging.
+    /// </summary>
+    StringsOnly = 3,
 }

@@ -13,7 +13,7 @@ A full-featured toolbar for a [ListViewModel](/stacks/vue/layers/viewmodels.md) 
 ```
 
 ``` vue-html
-<c-admin-table-toolbar :list="personList" color="pink" :editable.sync="isEditable" />
+<c-admin-table-toolbar :list="personList" color="pink" v-model:editable="isEditable" />
 ```
 
 ## Props
@@ -27,8 +27,9 @@ The [ListViewModel](/stacks/vue/layers/viewmodels.md) to render the toolbar for.
 The [color](https://vuetifyjs.com/en/styles/colors/) of the toolbar.
 
 <Prop def="editable?: boolean" lang="ts" />
+<Prop def="'update:editable'?: (boolean: $event) => void" lang="ts" />
 
-If provided, adds a button to toggle the value of this prop. Should be bound with the `.sync` modifier.
+If provided, adds a button to toggle editing state. Should be two-way bound with v-model.
 
 
 

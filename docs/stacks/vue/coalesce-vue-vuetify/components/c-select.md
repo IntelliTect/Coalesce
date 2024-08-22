@@ -22,10 +22,10 @@ Binding an arbitrary primary key value or an arbitrary object:
 
 ``` vue-html
   <!-- Binding a key: -->
-  <c-select for="Person" :key-value.sync="selectedPersonId" />
+  <c-select for="Person" v-model:key-value="selectedPersonId" />
 
   <!-- Binding an object: -->
-  <c-select for="Person" :object-value.sync="selectedPerson" />
+  <c-select for="Person" v-model:object-value="selectedPerson" />
   <c-select for="Person" v-model="selectedPerson" />
 ```
 
@@ -74,11 +74,11 @@ When binding the component with ``v-model``, accepts the ``value`` part of ``v-m
 
 <Prop def="keyValue?: any" lang="ts" />
 
-When bound with `:key-value.sync="keyValue"`, allows binding the primary key of the selected object explicitly.
+When bound with `v-model:key-value="keyValue"`, allows binding the primary key of the selected object explicitly.
 
 <Prop def="objectValue?: any" lang="ts" />
 
-When bound with `:object-value.sync="objectValue"`, allows binding the selected object explicitly.
+When bound with `v-model:object-value="objectValue"`, allows binding the selected object explicitly.
 
 <Prop def="clearable?: boolean" lang="ts" />
 

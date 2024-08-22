@@ -17,10 +17,6 @@ There are important differences between class-level security and property-level 
 
 This means that class-level security only affects calls made to that type's standard API endpoints (and any type's bulk save endpoint), but does not affect usages of that type on other types' navigation properties. For details on how to control navigation properties, see the [Security page section on Entity Reads](/topics/security.md) 
 
-### Complex Property Logic
-
-For property security, [`[Read]`](#read) and [`[Edit]`](#edit) can be used to apply role-based security. If you need logic more complicated than checking for the presence of a role, [[Restrict]](/modeling/model-components/attributes/restrict.md) offers the ability to write custom code to control the read and write permissions of a property.
-
 ## Implementations
 
 ### [Read]
@@ -106,8 +102,11 @@ public class Paycheck { ... }
 
 ### [Execute]
 
-A separate attribute for controlling method execution exists. Its documentation may be found on the [[Execute]](/modeling/model-components/attributes/execute.md) page.
+A separate attribute for controlling [custom method](/modeling/model-components/methods.md) execution exists. Its documentation may be found on the [ExecuteAttribute](/modeling/model-components/attributes/execute.md) page.
 
+### [Restrict]
+
+For property security, [`[Read]`](#read) and [`[Edit]`](#edit) can be used to apply role-based security. If you need logic more complicated than checking for the presence of a role, [RestrictAttribute](/modeling/model-components/attributes/restrict.md) offers the ability to write custom code to control the read and write permissions of a property.
 
 ## Attribute Properties
 

@@ -9,6 +9,8 @@ The `search` parameter of the API can also be formatted as ``PropertyName:Search
 
 By default, the system will search any field with the name 'Name'. If this doesn't exist, the ID is used as the only searchable field. Once you place the `Search` attribute on one or more properties on a model, only those annotated properties will be searched.
 
+Searching will not search on properties that are hidden from the user by [Security Attributes](./security-attribute.md).
+
 ## Searchable Property Types
 
 #### Strings

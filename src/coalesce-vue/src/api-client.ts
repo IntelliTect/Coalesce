@@ -116,16 +116,29 @@ export interface FilterParameters extends DataSourceParameters {
   /** A search term to search by. Searching behavior is determined by the server. */
   search?: string | null;
 
-  /** A collection of key-value pairs to filter by. Behavior is dependent on the type of each field, see Coalesce's full documentation for details. */
-  filter?: {
+  /** A collection of key-value pairs to filter by,
+   * where keys are property names on the type and values are as follows:
+   * 
+<!-- MARKER:filter-behaviors -->
+
+- Dates with a time component will be matched exactly.
+- Dates with no time component will match any dates that fell on that day.
+- Strings will match exactly unless an asterisk is found in the filter, in which case they will be matched with `string.StartsWith` with the asterisk stripped out.
+- Enums will match by string or numeric value. Multiple comma-delimited values will create a filter that will match on any of the provided values.
+- Numeric values will match exactly. Multiple comma-delimited values will create a filter that will match on any of the provided values. 
+- The values `null` and `"null"` match a `null` property value (except string properties).
+
+<!-- MARKER:end-filter-behaviors -->
+  */
+  filter: {
     [fieldName: string]: string | number | boolean | null | undefined;
-  } | null;
+  };
 }
 export class FilterParameters extends DataSourceParameters {
   constructor() {
     super();
     this.search = null;
-    this.filter = null;
+    this.filter = {};
   }
 }
 
@@ -297,7 +310,7 @@ export function mapQueryToParams<T extends StandardParameters>(
     if ("search" in dto) parameters.search = dto.search;
     for (const key in dto) {
       if (key.startsWith("filter.") && dto[key] !== undefined) {
-        parameters.filter = parameters.filter ?? {};
+        parameters.filter ??= {};
         parameters.filter[key.replace("filter.", "")] = dto[key];
       }
     }

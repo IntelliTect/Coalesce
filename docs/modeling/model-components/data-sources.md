@@ -244,20 +244,16 @@ A simple wrapper that calls `ApplyListPropertyFilters` and `ApplyListSearchTerm`
 
 <Prop def="IQueryable<T> ApplyListPropertyFilters(IQueryable<T> query, IFilterParameters parameters)" />
 
-For each value in `parameters.Filter`, invoke `ApplyListPropertyFilter` to apply a filter to the query.
+For each value in `parameters.Filter` that the user is allowed to read and filter by, invoke `ApplyListPropertyFilter` to apply a filter to the query.
 
 
 <Prop def="IQueryable<T> ApplyListPropertyFilter(IQueryable<T> query, PropertyViewModel prop, string value)" />
 
 Given a property and a client-provided string value, perform some filtering on that property.
 
-<!-- MARKER:filter-behaviors -->
-- Dates with a time component will be matched exactly.
-- Dates with no time component will match any dates that fell on that day.
-- Strings will match exactly unless an asterisk is found, in which case they will be matched with `string.StartsWith`.
-- Enums will match by string or numeric value. Multiple comma-delimited values will create a filter that will match on any of the provided values.
-- Numeric values will match exactly. Multiple comma-delimited values will create a filter that will match on any of the provided values.
-<!-- MARKER:end-filter-behaviors -->
+@[import-md "after":"MARKER:filter-behaviors", "before":"MARKER:end-filter-behaviors"](../../../src/coalesce-vue/src/api-client.ts)
+
+
 
 
 <Prop def="IQueryable<T> ApplyListSearchTerm(IQueryable<T> query, IFilterParameters parameters)" />

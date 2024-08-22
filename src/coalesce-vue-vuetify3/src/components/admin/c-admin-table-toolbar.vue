@@ -35,7 +35,7 @@
       v-if="editable !== null"
       class="c-admin-table-toolbar--button-editable"
       variant="text"
-      @click="$emit('update:editable', !editable)"
+      @click="editable = !editable"
       :title="editable ? 'Make Read-only' : 'Make Editable'"
     >
       <template v-if="!editable">
@@ -81,27 +81,25 @@
   </v-toolbar>
 </template>
 
-<script lang="ts">
-import { PropType, defineComponent, toRef } from "vue";
-import { useRouter } from "vue-router";
+<script setup lang="ts">
+import { PropType, toRef } from "vue";
 import { ListViewModel } from "coalesce-vue";
 import { useAdminTable } from "./useAdminTable";
 
-export default defineComponent({
-  name: "c-admin-table-toolbar",
-
-  props: {
-    list: { required: true, type: Object as PropType<ListViewModel> },
-    pageSizes: { required: false, type: Array as PropType<number[]> },
-    color: { required: false, type: String, default: null },
-    editable: { default: null, required: false, type: Boolean },
-  },
-
-  setup(props) {
-    const tableProps = useAdminTable(toRef(props, "list"));
-    return { router: useRouter(), ...tableProps };
-  },
+const props = defineProps({
+  list: { required: true, type: Object as PropType<ListViewModel> },
+  pageSizes: { required: false, type: Array as PropType<number[]> },
+  color: { required: false, type: String, default: null },
 });
+
+const editable = defineModel<boolean>("editable", {
+  default: null,
+  required: false,
+});
+
+const { metadata, canCreate, getItemRoute } = useAdminTable(
+  toRef(props, "list")
+);
 </script>
 
 <style lang="scss">

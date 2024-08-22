@@ -10,7 +10,7 @@
         <v-toolbar-title
           class="c-admin-table-toolbar--model-name hidden-xs-only"
         >
-          {{ list.$metadata.displayName }}
+          {{ listVm.$metadata.displayName }}
         </v-toolbar-title>
 
         <v-divider class="hidden-xs-only mx-4" vertical></v-divider>
@@ -18,7 +18,7 @@
         <v-btn
           class="c-admin-table-toolbar--button-reload"
           variant="text"
-          @click="list.$load()"
+          @click="listVm.$load()"
         >
           <v-icon start>$loading</v-icon>
           <span class="hidden-sm-and-down">Reload</span>
@@ -27,12 +27,12 @@
         <v-spacer></v-spacer>
 
         <span class="c-admin-table-toolbar--range hidden-sm-and-down">
-          Showing <c-list-range-display :list="list" />
+          Showing <c-list-range-display :list="listVm" />
         </span>
 
         <v-spacer></v-spacer>
 
-        <c-list-page class="c-admin-table-toolbar--page" :list="list" />
+        <c-list-page class="c-admin-table-toolbar--page" :list="listVm" />
 
         <template v-slot:extension>
           <v-defaults-provider
@@ -47,26 +47,28 @@
           >
             <div class="c-audit-logs--filters">
               <v-text-field
-                v-model="list.$params.filter!.type"
+                v-model="listVm.$params.filter!.type"
                 label="Type Name"
                 style="width: 150px"
-                @click:clear="$nextTick(() => (list.$params.filter!.type = ''))"
+                @click:clear="
+                  $nextTick(() => (listVm.$params.filter!.type = ''))
+                "
               />
 
               <v-text-field
-                v-model="list.$params.filter!.keyValue"
+                v-model="listVm.$params.filter!.keyValue"
                 label="Key Value"
                 style="width: 150px"
                 @click:clear="
-                  $nextTick(() => (list.$params.filter!.keyValue = ''))
+                  $nextTick(() => (listVm.$params.filter!.keyValue = ''))
                 "
               />
 
               <c-input
-                v-model="(list.$params.filter!.state)"
-                :for="list.$metadata.props.state"
+                v-model="(listVm.$params.filter!.state)"
+                :for="listVm.$metadata.props.state"
                 @click:clear="
-                  $nextTick(() => (list.$params.filter!.state = ''))
+                  $nextTick(() => (listVm.$params.filter!.state = ''))
                 "
                 style="min-width: 210px; max-width: 210px"
               />
@@ -74,13 +76,14 @@
               <c-select
                 v-if="userPropMeta"
                 :for="userPropMeta"
-                v-model:key-value="list.$params.filter![userPropMeta.foreignKey.name]"
+                v-model:key-value="listVm.$params.filter![userPropMeta.foreignKey.name]"
                 clearable
                 style="width: 240px"
                 @click:clear="
                   $nextTick(
                     () =>
-                      (list.$params.filter![userPropMeta.foreignKey.name] = '')
+                      (listVm.$params.filter![userPropMeta.foreignKey.name] =
+                        '')
                   )
                 "
               />
@@ -88,14 +91,14 @@
           </v-defaults-provider>
 
           <v-spacer></v-spacer>
-          <c-list-page-size :list="list" />
+          <c-list-page-size :list="listVm" />
         </template>
       </v-toolbar>
 
       <v-card-text>
         <c-loader-status
           :loaders="{
-            'no-initial-content no-error-content': [list.$load],
+            'no-initial-content no-error-content': [listVm.$load],
           }"
         >
           <v-table class="c-audit-logs--table">
@@ -242,7 +245,7 @@
           </v-table>
 
           <v-divider />
-          <c-list-pagination :list="list" class="mt-4" />
+          <c-list-pagination :list="listVm" class="mt-4" />
         </c-loader-status>
       </v-card-text>
     </v-card>
@@ -299,9 +302,9 @@ const props = withDefaults(
   { color: "primary" }
 );
 
-let list: AuditLogListViewModel;
+let listVm: AuditLogListViewModel;
 if (props.list) {
-  list = props.list!;
+  listVm = props.list!;
 } else {
   if (!props.type) {
     throw Error(
@@ -312,18 +315,18 @@ if (props.list) {
       `No model named ${props.type} is registered to ListViewModel.typeLookup`
     );
   }
-  list = new ListViewModel.typeLookup![props.type]() as any;
-  list.$load.setConcurrency("cancel");
-  list.$modelOnlyMode = true;
+  listVm = new ListViewModel.typeLookup![props.type]() as any;
+  listVm.$load.setConcurrency("cancel");
+  listVm.$modelOnlyMode = true;
 }
 
 const items = computed(() =>
-  list.$modelOnlyMode ? toRaw(list.$modelItems) : list.$items
+  listVm.$modelOnlyMode ? toRaw(listVm.$modelItems) : listVm.$items
 );
 
 const userPropMeta = computed(() => {
   return (
-    Object.values(list.$metadata.props)
+    Object.values(listVm.$metadata.props)
       .filter(
         (p): p is ModelReferenceNavigationProperty =>
           p.role == "referenceNavigation"
@@ -338,7 +341,7 @@ const userPropMeta = computed(() => {
 });
 
 const otherProps = computed(() => {
-  return Object.values(list.$metadata.props).filter(
+  return Object.values(listVm.$metadata.props).filter(
     (p) =>
       ((p.hidden || 0) & HiddenAreas.List) != HiddenAreas.List &&
       p != userPropMeta.value &&
@@ -381,7 +384,7 @@ function timeDiffClass(current: AuditLogBase, older?: AuditLogBase) {
   return diff == 0 ? "grey--text" : diff > 0 ? "text-success" : "text-error";
 }
 
-const filter = (list.$params.filter = {
+const filter = (listVm.$params.filter = {
   type: "",
   keyValue: "",
   state: "",
@@ -390,8 +393,8 @@ const filter = (list.$params.filter = {
 useBindToQueryString(filter, "type");
 useBindToQueryString(filter, "keyValue");
 useBindToQueryString(filter, "state");
-useBindToQueryString(list.$params, "page", "page", (p) => +p);
-useBindToQueryString(list.$params, "pageSize", "pageSize", (p) => +p);
+useBindToQueryString(listVm.$params, "page", "page", (p) => +p);
+useBindToQueryString(listVm.$params, "pageSize", "pageSize", (p) => +p);
 
 if (userPropMeta.value) {
   const fkName = userPropMeta.value.foreignKey.name;
@@ -399,8 +402,8 @@ if (userPropMeta.value) {
   useBindToQueryString(filter, fkName, "user");
 }
 
-list.$load();
-list.$useAutoLoad({ wait: 100 });
+listVm.$load();
+listVm.$useAutoLoad({ wait: 100 });
 
 defineExpose({
   /** Support for common convention of exposing 'pageTitle' from router-view hosted components. */

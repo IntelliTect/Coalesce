@@ -476,11 +476,12 @@ type TransportTypeSpecifier<T extends ApiRoutedType = any> =
 
 type ResultPromiseType<
   T extends TransportTypeSpecifier,
-  TResult
+  TResult,
+  TNonResult = never
 > = T extends ItemTransportTypeSpecifier
-  ? ItemResultPromise<TResult>
+  ? Promise<AxiosResponse<ItemResult<TResult>> | TNonResult>
   : T extends ListTransportTypeSpecifier
-  ? ListResultPromise<TResult>
+  ? Promise<AxiosResponse<ListResult<TResult>> | TNonResult>
   : never;
 
 type ApiCallerInvoker<
@@ -587,7 +588,9 @@ export class ApiClient<T extends ApiRoutedType> {
     resultType: TTransportType,
     invoker: ApiCallerInvoker<
       TArgs,
-      ResultPromiseType<TTransportType, TResult> | undefined | void,
+      | ResultPromiseType<TTransportType, TResult, undefined | void>
+      | undefined
+      | void,
       this
     >
   ): ApiStateType<TTransportType, TArgs, TResult>;
@@ -607,13 +610,17 @@ export class ApiClient<T extends ApiRoutedType> {
     resultType: TTransportType,
     invoker: ApiCallerInvoker<
       TArgs,
-      ResultPromiseType<TTransportType, TResult> | undefined | void,
+      | ResultPromiseType<TTransportType, TResult, undefined | void>
+      | undefined
+      | void,
       this
     >,
     argsFactory: () => TArgsObj,
     argsInvoker: ApiCallerArgsInvoker<
       TArgsObj,
-      ResultPromiseType<TTransportType, TResult> | undefined | void,
+      | ResultPromiseType<TTransportType, TResult, undefined | void>
+      | undefined
+      | void,
       this
     >
   ): ApiStateTypeWithArgs<TTransportType, TArgs, TArgsObj, TResult>;
@@ -627,13 +634,17 @@ export class ApiClient<T extends ApiRoutedType> {
     resultType: TTransportType,
     invoker: ApiCallerInvoker<
       TArgs,
-      ResultPromiseType<TTransportType, TResult> | undefined | void,
+      | ResultPromiseType<TTransportType, TResult, undefined | void>
+      | undefined
+      | void,
       this
     >,
     argsFactory?: () => TArgsObj,
     argsInvoker?: ApiCallerArgsInvoker<
       TArgsObj,
-      ResultPromiseType<TTransportType, TResult> | undefined | void,
+      | ResultPromiseType<TTransportType, TResult, undefined | void>
+      | undefined
+      | void,
       this
     >
   ): any {

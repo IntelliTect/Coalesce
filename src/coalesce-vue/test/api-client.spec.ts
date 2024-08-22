@@ -518,6 +518,38 @@ describe("$makeCaller", () => {
     caller.result = undefined;
   });
 
+  test("types: allows return undefined from async invoker func", async () => {
+    const endpointMock = makeEndpointMock();
+    const caller = new StudentApiClient().$makeCaller(
+      "item",
+      async (c, num: number) => {
+        if (num == 42) {
+          return;
+        }
+        const res = await endpointMock(num);
+        return res;
+      }
+    );
+
+    const arg = 42;
+    const result = await caller(arg);
+
+    // The typings are actually wrong at the moment - `undefined` is not one of the types of `result`, but it should be.
+    expect(result).toBeUndefined();
+
+    expect(endpointMock.mock.calls.length).toBe(0);
+    expect(caller.result).toBeNull();
+
+    // Typescript typing tests - all of these are valid types of `result`.
+    // Note that Typescript intellisense in VS code seems to be really messed up
+    // right now and shows that `result` is only `string`.:
+    caller.result = null;
+    caller.result = 13;
+
+    //@ts-expect-error `undefined` is not a valid value of `result`, even if the invoker doesn't always return.
+    caller.result = undefined;
+  });
+
   test("onFulfilled callbacks are awaited when promises returned", async () => {
     const endpointMock = makeEndpointMock();
     let awaited = false;

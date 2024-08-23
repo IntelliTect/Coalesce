@@ -747,46 +747,52 @@ describe("ViewModel", () => {
       response.refMap[originalAdvisor.$stableId] = 3;
       response.refMap[originalSteve.$stableId] = 4;
 
+      const preview = student.$bulkSavePreview();
       await student.$bulkSave();
 
+      const expected = [
+        {
+          action: "save",
+          type: "Student",
+          data: { studentId: null, studentAdvisorId: null, name: "scott" },
+          refs: {
+            studentId: student.$stableId,
+            studentAdvisorId: originalAdvisor.$stableId,
+          },
+          root: true,
+        },
+        {
+          action: "save",
+          type: "Advisor",
+          data: { advisorId: null, name: "bob" },
+          refs: { advisorId: originalAdvisor.$stableId },
+        },
+        {
+          action: "save",
+          type: "Course",
+          data: { courseId: null, name: "CS101", studentId: null },
+          refs: {
+            courseId: originalCourse.$stableId,
+            studentId: student.$stableId,
+          },
+        },
+        {
+          action: "save",
+          type: "Student",
+          data: { studentId: null, name: "steve" },
+          refs: {
+            studentId: originalSteve.$stableId,
+            studentAdvisorId: originalAdvisor.$stableId,
+          },
+        },
+      ];
       expect(JSON.parse(endpoint.mock.calls[0][0].data)).toMatchObject({
-        items: [
-          {
-            action: "save",
-            type: "Student",
-            data: { studentId: null, studentAdvisorId: null, name: "scott" },
-            refs: {
-              studentId: student.$stableId,
-              studentAdvisorId: originalAdvisor.$stableId,
-            },
-            root: true,
-          },
-          {
-            action: "save",
-            type: "Advisor",
-            data: { advisorId: null, name: "bob" },
-            refs: { advisorId: originalAdvisor.$stableId },
-          },
-          {
-            action: "save",
-            type: "Course",
-            data: { courseId: null, name: "CS101", studentId: null },
-            refs: {
-              courseId: originalCourse.$stableId,
-              studentId: student.$stableId,
-            },
-          },
-          {
-            action: "save",
-            type: "Student",
-            data: { studentId: null, name: "steve" },
-            refs: {
-              studentId: originalSteve.$stableId,
-              studentAdvisorId: originalAdvisor.$stableId,
-            },
-          },
-        ],
+        items: expected,
       });
+      expect(preview.isDirty).toBeTruthy();
+      expect(preview.errors).toHaveLength(0);
+      expect(preview.items.length).toEqual(preview.rawItems.length);
+      expect(preview.items).toMatchObject(expected);
 
       // Preserves non-circular instances:
       // Reference nav:

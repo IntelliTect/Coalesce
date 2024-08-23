@@ -254,6 +254,18 @@ For the response to a bulk save, the server will load and return the root ViewMo
 
 @[import-md "start":"export interface BulkSaveOptions", "end":"\n}\n", "prepend":"``` ts", "append":"```"](../../../../src/coalesce-vue/src/viewmodel.ts)
 
+
+<Prop def="$bulkSavePreview(options?: BulkSaveOptions) => {
+  isDirty: boolean;
+  errors: string[];
+  items: BulkSaveRequestItem[];
+  rawItems: BulkSaveRequestRawItem[];
+}" lang="ts" />
+
+Returns the payload that will be used for the `$bulkSave` operation.
+
+Useful for driving UI state, like preemptively showing errors, or determining if there are any objects with pending modifications. If you are using this to drive UI state, it is strongly recommended to wrap this call in a `computed` in your component to reduce excessive invocations.
+
 <Prop def="$remove(): void" lang="ts" />
 
 Removes the item from its parent collection (if it is in a collection), and marks the item for deletion in the next bulk save.

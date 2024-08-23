@@ -1,6 +1,6 @@
 import { formatDistanceToNow, lightFormat } from "date-fns";
 import { format, formatInTimeZone } from "date-fns-tz";
-import { getCurrentInstance, nextTick, reactive } from "vue";
+import { getCurrentInstance, isRef, nextTick, reactive } from "vue";
 
 import type {
   ClassType,
@@ -965,21 +965,68 @@ export function valueDisplay(
 
 const coalescePendingQuery = Symbol();
 
-export function bindToQueryString<T>(
+export interface BindToQueryStringOptions<TValue> {
+  /** The key in the query string that holds the bound value. */
+  queryKey?: string;
+  /** Convert the query string value to the model value. */
+  parse?: (v: string) => TValue;
+  /** Convert the bound value to a string representation to store in the query string. */
+  stringify?: (v: NonNullable<TValue>) => string | null | undefined;
+  /** Controls whether changes are pushed as new history state entries, or replace the current history entry. */
+  mode?: "push" | "replace";
+}
+
+export function bindToQueryString<
+  T = any,
+  TKey extends keyof T & string = keyof T & string
+>(
   vue: VueInstance,
   obj: T,
-  key: keyof T & string,
-  queryKey: string = key,
-  parse?: (v: string) => any,
-  mode: "push" | "replace" = "replace"
+  key: TKey,
+  options?: BindToQueryStringOptions<T[TKey]>
+): void;
+
+export function bindToQueryString<TValue>(
+  vue: VueInstance,
+  ref: { value: TValue },
+  /** The key on the query to bind to. Shorthand for specifying via options object */
+  queryKey: Exclude<string, "value">
+): void;
+
+export function bindToQueryString<TValue>(
+  vue: VueInstance,
+  ref: { value: TValue },
+  options: BindToQueryStringOptions<TValue> & { queryKey: string }
+): void;
+
+export function bindToQueryString<T, TKey extends keyof T & string>(
+  vue: VueInstance,
+  obj: T,
+  key: TKey,
+  {
+    queryKey = key,
+    mode = "replace",
+    parse,
+    stringify,
+  }: BindToQueryStringOptions<T[TKey]> = {}
 ) {
+  if (isRef(obj) && typeof key == "string" && key !== "value") {
+    return bindToQueryString(vue, obj, "value", { queryKey: key });
+  }
+
+  if (typeof key == "object") {
+    // Handle the overload that accepts a ref directly
+    //@ts-expect-error
+    return bindToQueryString(vue, obj, "value", key);
+  }
+
   const defaultValue = obj[key];
   const metadata = (obj as any)?.$metadata;
 
   // When the value changes, persist it to the query.
   vue.$watch(
     () => obj[key],
-    (v: any) => {
+    (v) => {
       if (!vue.$router || !vue.$route) {
         throw new Error(
           "Could not find $router or $route on the component instance. Is vue-router installed?"
@@ -992,6 +1039,8 @@ export function bindToQueryString<T>(
         [queryKey]:
           v == null || v === ""
             ? undefined
+            : stringify
+            ? stringify(v)
             : // Use metadata to format the value if the obj has any.
             metadata?.params?.[key]
             ? mapToDto(v, metadata.params[key])?.toString()
@@ -1020,7 +1069,11 @@ export function bindToQueryString<T>(
     }
   );
 
-  const updateObject = (v: any) => {
+  const updateObject = (v: string | null | undefined | (string | null)[]) => {
+    // If an array somehow, grab the first value
+    // (bindToQueryString doesn't support multiple same-named binds).
+    v = Array.isArray(v) ? v[0] : v;
+
     obj[key] =
       // Use the default value if null or undefined
       v == null
@@ -1041,7 +1094,7 @@ export function bindToQueryString<T>(
   // When the query changes, grab the new value.
   vue.$watch(
     () => vue.$route?.query[queryKey],
-    async (v: any) => {
+    async (v) => {
       if (IsVue3) {
         // In Vue3/VueRouter4, the component doesn't start tearing down immediately
         // upon route navigation - it takes an extra tick for that to happen.
@@ -1060,6 +1113,7 @@ export function bindToQueryString<T>(
         }
       }
 
+      // If an array somehow, grab the first value (bindToQueryString doesn't support multiple same-named binds).
       updateObject(v);
     }
   );
@@ -1068,19 +1122,34 @@ export function bindToQueryString<T>(
   updateObject(vue.$route?.query[queryKey]);
 }
 
-export function useBindToQueryString<T>(
+export function useBindToQueryString<T, TKey extends keyof T & string>(
   obj: T,
-  key: keyof T & string,
-  queryKey: string = key,
-  parse?: (v: string) => any,
-  mode: "push" | "replace" = "replace"
+  key: TKey,
+  options?: BindToQueryStringOptions<T[TKey]>
+): void;
+
+export function useBindToQueryString<TValue>(
+  ref: { value: TValue },
+  /** The key on the query to bind to. Shorthand for specifying via options object */
+  queryKey: Exclude<string, "value">
+): void;
+
+export function useBindToQueryString<TValue>(
+  ref: { value: TValue },
+  options: BindToQueryStringOptions<TValue> & { queryKey: string }
+): void;
+
+export function useBindToQueryString<T, TKey extends keyof T & string>(
+  obj: T,
+  key: TKey,
+  options?: BindToQueryStringOptions<T[TKey]>
 ) {
   const vue = getCurrentInstance()?.proxy;
   if (!vue)
     throw new Error(
       "useBindToQueryString can only be used inside setup(). Consider using bindToQueryString if you're not using Vue composition API."
     );
-  return bindToQueryString(vue, obj, key, queryKey, parse, mode);
+  return bindToQueryString(vue, obj, key, options);
 }
 
 export function bindKeyToRouteOnCreate(

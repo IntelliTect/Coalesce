@@ -72,26 +72,26 @@ namespace Coalesce.Domain
         public DateTimeOffset Date { get; set; }
 
         private static int nextId = 0;
-        private static ConcurrentDictionary<int, StandaloneReadWrite> backingStore = new ConcurrentDictionary<int, StandaloneReadWrite>();
-        public class DefaultSource : StandardDataSource<StandaloneReadWrite>
+        private static ConcurrentDictionary<int, StandaloneReadCreate> backingStore = new ConcurrentDictionary<int, StandaloneReadCreate>();
+        public class DefaultSource : StandardDataSource<StandaloneReadCreate>
         {
             public DefaultSource(CrudContext context) : base(context) { }
 
-            public override Task<IQueryable<StandaloneReadWrite>> GetQueryAsync(IDataSourceParameters parameters)
+            public override Task<IQueryable<StandaloneReadCreate>> GetQueryAsync(IDataSourceParameters parameters)
                 => Task.FromResult(backingStore.Values.AsQueryable());
         }
 
-        public class Behaviors : StandardBehaviors<StandaloneReadWrite>
+        public class Behaviors : StandardBehaviors<StandaloneReadCreate>
         {
             public Behaviors(CrudContext context) : base(context) { }
 
-            public override Task ExecuteDeleteAsync(StandaloneReadWrite item)
+            public override Task ExecuteDeleteAsync(StandaloneReadCreate item)
             {
                 backingStore.TryRemove(item.Id, out _);
                 return Task.CompletedTask;
             }
 
-            public override Task ExecuteSaveAsync(SaveKind kind, StandaloneReadWrite? oldItem, StandaloneReadWrite item)
+            public override Task ExecuteSaveAsync(SaveKind kind, StandaloneReadCreate? oldItem, StandaloneReadCreate item)
             {
                 item.Id = Interlocked.Increment(ref nextId);
                 backingStore.TryAdd(item.Id, item);

@@ -39,18 +39,25 @@ The following functions exported from ``coalesce-vue`` can be used with your mod
 
 
 <Prop def="// Vue Options API
-bindToQueryString(vue: Vue, obj: {}, key: string, queryKey: string = key, parse?: (v: any) => any, mode: 'push' | 'replace' = 'replace')
+bindToQueryString: {
+  (vue: Vue, obj: {}, key: string, options?: BindToQueryStringOptions);
+  (vue: Vue, ref: Ref<any>, queryKey: string);
+  (vue: Vue, ref: Ref<any>, options: BindToQueryStringOptions);
+}
 &nbsp;
 // Vue Composition API
-useBindToQueryString(obj: {}, key: string, queryKey: string = key, parse?: (v: any) => any, mode: 'push' | 'replace' = 'replace')" lang="ts" idPrefix="member-bindToQuery" />
+useBindToQueryString: {
+  (obj: {}, key: string, options?: BindToQueryStringOptions);
+  (ref: Ref<any>, queryKey: string);
+  (ref: Ref<any>, options: BindToQueryStringOptions);
+}" lang="ts" idPrefix="member-bindToQuery" />
 
-Binds property `key` of `obj` to query string parameter `queryKey`. When the object's value changes, the query string will be updated using [vue-router](https://router.vuejs.org/). When the query string changes, the object's value will be updated.
+@[import-md "start":"export interface BindToQueryStringOptions", "end":"\n}\n", "prepend":"``` ts", "append":"```"](../../../../src/coalesce-vue/src/model.ts)
 
-The query string will be updated using either `router.push` or `router.replace` depending on the value of parameter `mode`.
+Binds a value on an object, or the value of a ref, to the query string. When the object's value changes, the query string will be updated using [vue-router](https://router.vuejs.org/). When the query string changes, the object's value will be updated.
 
-If the query string contains a value when this is called, the object will be updated with that value immediately. 
+For example:
 
-If the object being bound to has `$metadata`, information from that metadata will be used to serialize and parse values to and from the query string. Otherwise, `String(value)` will be used to serialize the value, and the `parse` parameter (if provided) will be used to parse the value from the query string.
 
 <CodeTabs name="vue">
 <template #options>
@@ -60,11 +67,11 @@ import { bindToQueryString } from 'coalesce-vue';
 
 // In the 'created' Vue lifecycle hook on a component:
 created() {
-    // Bind pagination information to the query string:
-    bindToQueryString(this, this.listViewModel.$params, 'pageSize', 'pageSize', v => +v);
+  // Bind pagination information to the query string:
+  bindToQueryString(this, this.listViewModel.$params, 'pageSize', { parse: parseInt });
 
-    // Assuming the component has an 'activeTab' data member:
-    bindToQueryString(this, this, 'activeTab');
+  // Assuming the component has an 'activeTab' data member:
+  bindToQueryString(this, this, 'activeTab');
 }
 ```
 
@@ -73,28 +80,33 @@ created() {
 
 ``` ts
 import { useBindToQueryString } from 'coalesce-vue';
-setup() {
-    // Bind pagination information to the query string:
-    const list = new PersonListViewModel();
-    useBindToQueryString(list.$params, 'pageSize', 'pageSize', v => +v);
 
-    const activeTab = ref("1")
-    useBindToQueryString(activeTab, 'value', 'activeTab');
-}
+// Bind pagination information to the query string:
+const list = new PersonListViewModel();
+useBindToQueryString(list.$params, 'pageSize', { parse: parseInt });
+
+const activeTab = ref("1")
+useBindToQueryString(activeTab, 'activeTab');
+  
 ```
 
 </template>
 </CodeTabs>
+<p>
+The query string will be updated using either `router.push` or `router.replace` depending on the value of parameter `mode`.
+
+If the query string contains a value when this is called, the object will be updated with that value immediately. 
+
+If the object being bound to has `$metadata`, information from that metadata will be used to serialize and parse values to and from the query string. Otherwise, the `stringify` option (default: `String(value)`) will be used to serialize the value, and the `parse` option (if provided) will be used to parse the value from the query string.
+
+</p>
 
 
 
 
-
-
-<Prop def="// Vue Options API
+<Prop def="
 bindKeyToRouteOnCreate(vue: Vue, model: Model<ModelType>, routeParamName: string = 'id', keepQuery: boolean = false)
 &nbsp;
-// Vue Composition API
 useBindKeyToRouteOnCreate(model: Model<ModelType>, routeParamName: string = 'id', keepQuery: boolean = false)" lang="ts" idPrefix="member-bindKey" />
 
 When `model` is created (i.e. its primary key becomes non-null), replace the current URL with one that includes uses primary key for the route parameter named by `routeParamName`.
@@ -110,11 +122,11 @@ import { bindKeyToRouteOnCreate } from 'coalesce-vue';
 
 // In the 'created' Vue lifecycle hook on a component:
 created() {
-    if (this.id) {
-        this.viewModel.$load(this.id);
-    } else {
-        bindKeyToRouteOnCreate(this, this.viewModel);
-    }
+  if (this.id) {
+    this.viewModel.$load(this.id);
+  } else {
+    bindKeyToRouteOnCreate(this, this.viewModel);
+  }
 }
 ```
 
@@ -123,14 +135,15 @@ created() {
 
 ``` ts
 import { useBindKeyToRouteOnCreate } from 'coalesce-vue';
-setup(props) {
-    const viewModel = new PersonViewModel();
-    if (props.id) {
-        viewModel.$load(props.id);
-    } else {
-        useBindToQueryString(viewModel);
-    }
+
+const props = defineProps<{id: number}>();
+const viewModel = new PersonViewModel();
+if (props.id) {
+  viewModel.$load(props.id);
+} else {
+  useBindToQueryString(viewModel);
 }
+  
 ```
 
 </template>

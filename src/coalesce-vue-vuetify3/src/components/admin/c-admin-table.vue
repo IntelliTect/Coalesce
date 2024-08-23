@@ -179,14 +179,7 @@ export default defineComponent({
 
   created() {
     if (this.queryBind) {
-      bindToQueryString(
-        this,
-        this,
-        "editable",
-        "editable",
-        (v) => v === "true",
-        "replace"
-      );
+      bindToQueryString(this, this, "editable", { parse: (v) => v === "true" });
 
       // Establish the baseline parameters that do not need to be represented in the query string.
       // I.E. don't put the default values of parameters in the query string.

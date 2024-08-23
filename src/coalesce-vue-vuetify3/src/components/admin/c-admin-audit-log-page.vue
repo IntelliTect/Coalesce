@@ -253,7 +253,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, toRaw } from "vue";
+import { computed, reactive, toRaw } from "vue";
 import { differenceInMilliseconds } from "date-fns";
 import {
   HiddenAreas,
@@ -384,22 +384,22 @@ function timeDiffClass(current: AuditLogBase, older?: AuditLogBase) {
   return diff == 0 ? "grey--text" : diff > 0 ? "text-success" : "text-error";
 }
 
-const filter = (listVm.$params.filter = {
+const filter = (listVm.$params.filter = reactive({
   type: "",
   keyValue: "",
   state: "",
-}) as { [s: string]: string };
+}) as { [s: string]: string });
 
 useBindToQueryString(filter, "type");
 useBindToQueryString(filter, "keyValue");
 useBindToQueryString(filter, "state");
-useBindToQueryString(listVm.$params, "page", "page", (p) => +p);
-useBindToQueryString(listVm.$params, "pageSize", "pageSize", (p) => +p);
+useBindToQueryString(listVm.$params, "page", { parse: parseInt });
+useBindToQueryString(listVm.$params, "pageSize", { parse: parseInt });
 
 if (userPropMeta.value) {
   const fkName = userPropMeta.value.foreignKey.name;
   filter[fkName] = "";
-  useBindToQueryString(filter, fkName, "user");
+  useBindToQueryString(filter, fkName, { queryKey: "user" });
 }
 
 listVm.$load();

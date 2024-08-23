@@ -1,18 +1,103 @@
 /// <reference path="../node_modules/vitest/globals.d.ts" />
 
-import { defineComponent, h, nextTick } from "vue";
+import { createApp, defineComponent, h, nextTick, ref } from "vue";
 import {
   createRouter,
   RouterView,
   createWebHistory,
   RouterLink,
   createMemoryHistory,
+  Router,
 } from "vue-router";
-import { bindToQueryString } from "../src";
+import { bindToQueryString, VueInstance } from "../src";
 import { mount } from "@vue/test-utils";
 import { delay } from "../test/test-utils";
 
 describe("bindToQueryString", () => {
+  test("types", async () => {
+    async function test(func: (v: VueInstance, router: Router) => void) {
+      var router = createRouter({
+        history: createWebHistory(),
+        routes: [
+          {
+            path: "/",
+            component: defineComponent({
+              created() {
+                func(this, router);
+              },
+              render: () => h("div"),
+            }),
+          },
+        ],
+      });
+      const app = mount(
+        defineComponent({
+          render() {
+            return h(RouterView);
+          },
+        }),
+        {
+          global: { plugins: [router] },
+          attachTo: document.body,
+        }
+      );
+
+      await delay(10);
+    }
+
+    const dateRef = ref<Date>();
+    await test(async (v, router) => {
+      // Bind to object + key
+      bindToQueryString(v, dateRef, "value", {
+        parse(v) {
+          return v ? new Date(v) : undefined;
+        },
+        stringify(v) {
+          return v.toISOString();
+        },
+      });
+      dateRef.value = new Date(123455667);
+      await delay(1);
+      expect(router.currentRoute.value.query.value).toBe(
+        "1970-01-02T10:17:35.667Z"
+      );
+    });
+
+    await test(async (v, router) => {
+      // Direct bind to ref
+      bindToQueryString(v, dateRef, {
+        queryKey: "foo",
+        parse(v) {
+          return v ? new Date(v) : undefined;
+        },
+        stringify(v) {
+          return v.toISOString();
+        },
+      });
+      dateRef.value = new Date(123455667);
+      await delay(1);
+      expect(router.currentRoute.value.query.foo).toBe(
+        "1970-01-02T10:17:35.667Z"
+      );
+    });
+
+    const stringRef = ref<string>();
+    await test(async (v, router) => {
+      // Direct bind to ref with queryKey shorthand
+      bindToQueryString(v, stringRef, "foo");
+      stringRef.value = "qwerty";
+      await delay(1);
+      expect(router.currentRoute.value.query.foo).toBe("qwerty");
+    });
+
+    await test(async (v, router) => {
+      //@ts-expect-error Missing queryKey in options object.
+      () => bindToQueryString(v, dateRef, {});
+      //@ts-expect-error Missing options or queryKey.
+      () => bindToQueryString(v, dateRef);
+    });
+  });
+
   test("does not put values on new route when changing routes", async () => {
     let changeBoundValue: Function;
     var router = createRouter({

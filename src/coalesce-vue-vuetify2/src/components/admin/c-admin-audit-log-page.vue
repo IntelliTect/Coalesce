@@ -405,7 +405,7 @@ export default defineComponent({
     if (userPropMeta.value) {
       const fkName = userPropMeta.value.foreignKey.name;
       filter[fkName] = "";
-      useBindToQueryString(filter, fkName, "user");
+      useBindToQueryString(filter, fkName, { queryKey: "user" });
     }
 
     listVm.$params.filter = filter;
@@ -413,8 +413,8 @@ export default defineComponent({
     useBindToQueryString(filter, "type");
     useBindToQueryString(filter, "keyValue");
     useBindToQueryString(filter, "state");
-    useBindToQueryString(listVm.$params, "page", "page", (p) => +p);
-    useBindToQueryString(listVm.$params, "pageSize", "pageSize", (p) => +p);
+    useBindToQueryString(listVm.$params, "page", { parse: parseInt });
+    useBindToQueryString(listVm.$params, "pageSize", { parse: parseInt });
 
     listVm.$load();
     listVm.$useAutoLoad({ wait: 100 });

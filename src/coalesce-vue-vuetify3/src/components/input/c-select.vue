@@ -312,7 +312,6 @@ type PrimaryBindType = TFor extends ForeignKeyProperty
   : SelectedModelType;
 
 defineSlots<{
-  // FUTURE: strongly type `item` based on the forspec?
   ["item"]?(props: { item: SelectedModelType; search: string | null }): any;
   ["selected-item"]?(props: {
     item: SelectedModelType;

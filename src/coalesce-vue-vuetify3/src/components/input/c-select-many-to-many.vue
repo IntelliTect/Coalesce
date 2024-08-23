@@ -174,7 +174,7 @@ const listItems = computed(() => {
   return ret;
 });
 
-const listParams = computed((): ListParameters => {
+const listParams = computed((): Partial<ListParameters> => {
   return {
     pageSize: 100,
     ...props.params,

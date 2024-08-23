@@ -274,7 +274,7 @@ const props = withDefaults(
     preselectSingle?: boolean;
     openOnClear?: boolean;
     reloadOnOpen?: boolean;
-    params?: ListParameters;
+    params?: Partial<ListParameters>;
 
     // DONT use defineModel for these. We don't want to capture local state if the parent isn't binding it
     // since we have 4 different binding sources in this component, we'll get stuck on the values of the ones that aren't used.

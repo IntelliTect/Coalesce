@@ -39,52 +39,50 @@
             :defaults="{
               global: {
                 hideDetails: true,
-                density: 'comfortable',
+                density: 'compact',
+                variant: 'outlined',
                 clearable: true,
                 persistentClear: true,
               },
             }"
           >
             <div class="c-audit-logs--filters">
-              <v-text-field
-                v-model="listVm.$params.filter!.type"
-                label="Type Name"
-                style="width: 150px"
-                @click:clear="
-                  $nextTick(() => (listVm.$params.filter!.type = ''))
+              <v-combobox
+                v-model="filter.type"
+                :items="
+                  Object.values($coalesce.metadata.types)
+                    .filter((t) => 'controllerRoute' in t)
+                    .map((t) => t.name)
                 "
+                label="Entity Type"
+                style="width: 150px"
+                :clearable="!!filter.type"
+                :list-props="{ density: 'compact' }"
+                @click:clear="$nextTick(() => delete filter.type)"
               />
 
               <v-text-field
-                v-model="listVm.$params.filter!.keyValue"
+                v-model="filter.keyValue"
                 label="Key Value"
                 style="width: 150px"
-                @click:clear="
-                  $nextTick(() => (listVm.$params.filter!.keyValue = ''))
-                "
+                @click:clear="$nextTick(() => (filter.keyValue = ''))"
               />
 
               <c-input
-                v-model="(listVm.$params.filter!.state)"
+                v-model="filter.state"
                 :for="listVm.$metadata.props.state"
-                @click:clear="
-                  $nextTick(() => (listVm.$params.filter!.state = ''))
-                "
+                @click:clear="$nextTick(() => (filter.state = ''))"
                 style="min-width: 210px; max-width: 210px"
               />
 
               <c-select
                 v-if="userPropMeta"
                 :for="userPropMeta"
-                v-model:key-value="listVm.$params.filter![userPropMeta.foreignKey.name]"
+                v-model:key-value="filter[userPropMeta.foreignKey.name]"
                 clearable
                 style="width: 240px"
                 @click:clear="
-                  $nextTick(
-                    () =>
-                      (listVm.$params.filter![userPropMeta.foreignKey.name] =
-                        '')
-                  )
+                  $nextTick(() => (filter[userPropMeta.foreignKey.name] = ''))
                 "
               />
             </div>
@@ -423,9 +421,8 @@ defineExpose({
   display: flex;
   flex-wrap: nowrap;
   flex-grow: 1;
-  > * {
-    margin-right: 16px;
-  }
+  column-gap: 16px;
+  margin: 0 16px;
 }
 
 .c-audit-logs--table {

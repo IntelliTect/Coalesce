@@ -43,6 +43,17 @@
           type="text"
           ref="mainInputRef"
           v-model="mainValue"
+          @mousedown.stop.prevent="
+            // Intercept direct clicks on the input to short circuit `focused`
+            // and v-menu's activator handler, which introduce some latency before the menu opens
+            // if we allow the menu opening to be handled that way.
+            // Mousedown is needed to prevent `focused` from happening.
+            openMenu()
+          "
+          @click.stop.prevent="
+            // Prevent v-menu's activator handler from running (which is a click handler, not mousedown).
+            openMenu()
+          "
           @focus="focused = true"
           @blur="focused = false"
           :autofocus="autofocus"

@@ -38,7 +38,7 @@
           <v-defaults-provider
             :defaults="{
               global: {
-                hideDetails: true,
+                hideDetails: 'auto',
                 density: 'compact',
                 variant: 'outlined',
                 clearable: true,

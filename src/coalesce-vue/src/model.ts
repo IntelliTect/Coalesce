@@ -1,6 +1,13 @@
 import { formatDistanceToNow, lightFormat } from "date-fns";
 import { format, formatInTimeZone } from "date-fns-tz";
-import { getCurrentInstance, isRef, nextTick, reactive } from "vue";
+import {
+  getCurrentInstance,
+  isRef,
+  nextTick,
+  onActivated,
+  onDeactivated,
+  reactive,
+} from "vue";
 
 import type {
   ClassType,
@@ -1020,6 +1027,17 @@ export function bindToQueryString<T, TKey extends keyof T & string>(
     return bindToQueryString(vue, obj, "value", key);
   }
 
+  let paused = false;
+
+  onDeactivated(() => {
+    paused = true;
+  }, getInternalInstance(vue));
+
+  onActivated(() => {
+    paused = false;
+    updateObject(vue.$route?.query[queryKey]);
+  }, getInternalInstance(vue));
+
   const defaultValue = obj[key];
   const metadata = (obj as any)?.$metadata;
 
@@ -1027,6 +1045,9 @@ export function bindToQueryString<T, TKey extends keyof T & string>(
   vue.$watch(
     () => obj[key],
     (v) => {
+      if (paused) {
+        return;
+      }
       if (!vue.$router || !vue.$route) {
         throw new Error(
           "Could not find $router or $route on the component instance. Is vue-router installed?"
@@ -1108,12 +1129,11 @@ export function bindToQueryString<T, TKey extends keyof T & string>(
         // but by the time the other watcher above has a chance to run, the component is torn down
         // and so the bad values never make it back to the query string.
         await vue.$nextTick();
-        if (getInternalInstance(vue).isUnmounted) {
+        if (paused || getInternalInstance(vue).isUnmounted) {
           return;
         }
       }
 
-      // If an array somehow, grab the first value (bindToQueryString doesn't support multiple same-named binds).
       updateObject(v);
     }
   );

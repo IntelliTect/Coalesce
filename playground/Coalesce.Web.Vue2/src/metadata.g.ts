@@ -8,7 +8,7 @@ import {
 
 const domain: Domain = { enums: {}, types: {}, services: {} }
 export const AuditEntryState = domain.enums.AuditEntryState = {
-  name: "AuditEntryState",
+  name: "AuditEntryState" as const,
   displayName: "Audit Entry State",
   type: "enum",
   ...getEnumMeta<"EntityAdded"|"EntityDeleted"|"EntityModified">([
@@ -30,7 +30,7 @@ export const AuditEntryState = domain.enums.AuditEntryState = {
   ]),
 }
 export const Genders = domain.enums.Genders = {
-  name: "Genders",
+  name: "Genders" as const,
   displayName: "Genders",
   type: "enum",
   ...getEnumMeta<"NonSpecified"|"Male"|"Female">([
@@ -52,7 +52,7 @@ export const Genders = domain.enums.Genders = {
   ]),
 }
 export const SkyConditions = domain.enums.SkyConditions = {
-  name: "SkyConditions",
+  name: "SkyConditions" as const,
   displayName: "Sky Conditions",
   type: "enum",
   ...getEnumMeta<"Cloudy"|"PartyCloudy"|"Sunny">([
@@ -74,7 +74,7 @@ export const SkyConditions = domain.enums.SkyConditions = {
   ]),
 }
 export const Statuses = domain.enums.Statuses = {
-  name: "Statuses",
+  name: "Statuses" as const,
   displayName: "Statuses",
   type: "enum",
   ...getEnumMeta<"Open"|"InProgress"|"Resolved"|"ClosedNoSolution"|"Cancelled">([
@@ -107,7 +107,7 @@ export const Statuses = domain.enums.Statuses = {
   ]),
 }
 export const Titles = domain.enums.Titles = {
-  name: "Titles",
+  name: "Titles" as const,
   displayName: "Titles",
   type: "enum",
   ...getEnumMeta<"Mr"|"Ms"|"Mrs"|"Miss">([
@@ -134,7 +134,7 @@ export const Titles = domain.enums.Titles = {
   ]),
 }
 export const AuditLog = domain.types.AuditLog = {
-  name: "AuditLog",
+  name: "AuditLog" as const,
   displayName: "Audit Log",
   get displayProp() { return this.props.type }, 
   type: "model",
@@ -153,19 +153,19 @@ export const AuditLog = domain.types.AuditLog = {
       displayName: "User Id",
       type: "number",
       role: "foreignKey",
-      get principalKey() { return (domain.types.Person as ModelType).props.personId as PrimaryKeyProperty },
-      get principalType() { return (domain.types.Person as ModelType) },
-      get navigationProp() { return (domain.types.AuditLog as ModelType).props.user as ModelReferenceNavigationProperty },
+      get principalKey() { return (domain.types.Person as ModelType & { name: "Person" }).props.personId as PrimaryKeyProperty },
+      get principalType() { return (domain.types.Person as ModelType & { name: "Person" }) },
+      get navigationProp() { return (domain.types.AuditLog as ModelType & { name: "AuditLog" }).props.user as ModelReferenceNavigationProperty },
       hidden: 3 as HiddenAreas,
     },
     user: {
       name: "user",
       displayName: "User",
       type: "model",
-      get typeDef() { return (domain.types.Person as ModelType) },
+      get typeDef() { return (domain.types.Person as ModelType & { name: "Person" }) },
       role: "referenceNavigation",
-      get foreignKey() { return (domain.types.AuditLog as ModelType).props.userId as ForeignKeyProperty },
-      get principalKey() { return (domain.types.Person as ModelType).props.personId as PrimaryKeyProperty },
+      get foreignKey() { return (domain.types.AuditLog as ModelType & { name: "AuditLog" }).props.userId as ForeignKeyProperty },
+      get principalKey() { return (domain.types.Person as ModelType & { name: "Person" }).props.personId as PrimaryKeyProperty },
       dontSerialize: true,
     },
     id: {
@@ -201,7 +201,7 @@ export const AuditLog = domain.types.AuditLog = {
       name: "state",
       displayName: "Change Type",
       type: "enum",
-      get typeDef() { return domain.enums.AuditEntryState },
+      get typeDef() { return AuditEntryState },
       role: "value",
     },
     date: {
@@ -220,10 +220,10 @@ export const AuditLog = domain.types.AuditLog = {
         displayName: "",
         role: "value",
         type: "model",
-        get typeDef() { return (domain.types.AuditLogProperty as ModelType) },
+        get typeDef() { return (domain.types.AuditLogProperty as ModelType & { name: "AuditLogProperty" }) },
       },
       role: "collectionNavigation",
-      get foreignKey() { return (domain.types.AuditLogProperty as ModelType).props.parentId as ForeignKeyProperty },
+      get foreignKey() { return (domain.types.AuditLogProperty as ModelType & { name: "AuditLogProperty" }).props.parentId as ForeignKeyProperty },
       dontSerialize: true,
     },
     clientIp: {
@@ -251,7 +251,7 @@ export const AuditLog = domain.types.AuditLog = {
   },
 }
 export const AuditLogProperty = domain.types.AuditLogProperty = {
-  name: "AuditLogProperty",
+  name: "AuditLogProperty" as const,
   displayName: "Audit Log Property",
   get displayProp() { return this.props.propertyName }, 
   type: "model",
@@ -271,8 +271,8 @@ export const AuditLogProperty = domain.types.AuditLogProperty = {
       displayName: "Parent Id",
       type: "number",
       role: "foreignKey",
-      get principalKey() { return (domain.types.AuditLog as ModelType).props.id as PrimaryKeyProperty },
-      get principalType() { return (domain.types.AuditLog as ModelType) },
+      get principalKey() { return (domain.types.AuditLog as ModelType & { name: "AuditLog" }).props.id as PrimaryKeyProperty },
+      get principalType() { return (domain.types.AuditLog as ModelType & { name: "AuditLog" }) },
       rules: {
         required: val => val != null || "Parent Id is required.",
       }
@@ -318,7 +318,7 @@ export const AuditLogProperty = domain.types.AuditLogProperty = {
   },
 }
 export const Case = domain.types.Case = {
-  name: "Case",
+  name: "Case" as const,
   displayName: "Case",
   get displayProp() { return this.props.title }, 
   type: "model",
@@ -363,20 +363,20 @@ export const Case = domain.types.Case = {
       displayName: "Assigned To Id",
       type: "number",
       role: "foreignKey",
-      get principalKey() { return (domain.types.Person as ModelType).props.personId as PrimaryKeyProperty },
-      get principalType() { return (domain.types.Person as ModelType) },
-      get navigationProp() { return (domain.types.Case as ModelType).props.assignedTo as ModelReferenceNavigationProperty },
+      get principalKey() { return (domain.types.Person as ModelType & { name: "Person" }).props.personId as PrimaryKeyProperty },
+      get principalType() { return (domain.types.Person as ModelType & { name: "Person" }) },
+      get navigationProp() { return (domain.types.Case as ModelType & { name: "Case" }).props.assignedTo as ModelReferenceNavigationProperty },
       hidden: 3 as HiddenAreas,
     },
     assignedTo: {
       name: "assignedTo",
       displayName: "Assigned To",
       type: "model",
-      get typeDef() { return (domain.types.Person as ModelType) },
+      get typeDef() { return (domain.types.Person as ModelType & { name: "Person" }) },
       role: "referenceNavigation",
-      get foreignKey() { return (domain.types.Case as ModelType).props.assignedToId as ForeignKeyProperty },
-      get principalKey() { return (domain.types.Person as ModelType).props.personId as PrimaryKeyProperty },
-      get inverseNavigation() { return (domain.types.Person as ModelType).props.casesAssigned as ModelCollectionNavigationProperty },
+      get foreignKey() { return (domain.types.Case as ModelType & { name: "Case" }).props.assignedToId as ForeignKeyProperty },
+      get principalKey() { return (domain.types.Person as ModelType & { name: "Person" }).props.personId as PrimaryKeyProperty },
+      get inverseNavigation() { return (domain.types.Person as ModelType & { name: "Person" }).props.casesAssigned as ModelCollectionNavigationProperty },
       dontSerialize: true,
     },
     reportedById: {
@@ -384,9 +384,9 @@ export const Case = domain.types.Case = {
       displayName: "Reported By Id",
       type: "number",
       role: "foreignKey",
-      get principalKey() { return (domain.types.Person as ModelType).props.personId as PrimaryKeyProperty },
-      get principalType() { return (domain.types.Person as ModelType) },
-      get navigationProp() { return (domain.types.Case as ModelType).props.reportedBy as ModelReferenceNavigationProperty },
+      get principalKey() { return (domain.types.Person as ModelType & { name: "Person" }).props.personId as PrimaryKeyProperty },
+      get principalType() { return (domain.types.Person as ModelType & { name: "Person" }) },
+      get navigationProp() { return (domain.types.Case as ModelType & { name: "Case" }).props.reportedBy as ModelReferenceNavigationProperty },
       hidden: 3 as HiddenAreas,
     },
     reportedBy: {
@@ -394,11 +394,11 @@ export const Case = domain.types.Case = {
       displayName: "Reported By",
       description: "Person who originally reported the case",
       type: "model",
-      get typeDef() { return (domain.types.Person as ModelType) },
+      get typeDef() { return (domain.types.Person as ModelType & { name: "Person" }) },
       role: "referenceNavigation",
-      get foreignKey() { return (domain.types.Case as ModelType).props.reportedById as ForeignKeyProperty },
-      get principalKey() { return (domain.types.Person as ModelType).props.personId as PrimaryKeyProperty },
-      get inverseNavigation() { return (domain.types.Person as ModelType).props.casesReported as ModelCollectionNavigationProperty },
+      get foreignKey() { return (domain.types.Case as ModelType & { name: "Case" }).props.reportedById as ForeignKeyProperty },
+      get principalKey() { return (domain.types.Person as ModelType & { name: "Person" }).props.personId as PrimaryKeyProperty },
+      get inverseNavigation() { return (domain.types.Person as ModelType & { name: "Person" }).props.casesReported as ModelCollectionNavigationProperty },
       dontSerialize: true,
     },
     attachmentSize: {
@@ -440,7 +440,7 @@ export const Case = domain.types.Case = {
       name: "status",
       displayName: "Status",
       type: "enum",
-      get typeDef() { return domain.enums.Statuses },
+      get typeDef() { return Statuses },
       role: "value",
     },
     numbers: {
@@ -476,7 +476,7 @@ export const Case = domain.types.Case = {
         displayName: "",
         role: "value",
         type: "enum",
-        get typeDef() { return domain.enums.Statuses },
+        get typeDef() { return Statuses },
       },
       role: "value",
     },
@@ -489,19 +489,19 @@ export const Case = domain.types.Case = {
         displayName: "",
         role: "value",
         type: "model",
-        get typeDef() { return (domain.types.CaseProduct as ModelType) },
+        get typeDef() { return (domain.types.CaseProduct as ModelType & { name: "CaseProduct" }) },
       },
       role: "collectionNavigation",
-      get foreignKey() { return (domain.types.CaseProduct as ModelType).props.caseId as ForeignKeyProperty },
-      get inverseNavigation() { return (domain.types.CaseProduct as ModelType).props.case as ModelReferenceNavigationProperty },
+      get foreignKey() { return (domain.types.CaseProduct as ModelType & { name: "CaseProduct" }).props.caseId as ForeignKeyProperty },
+      get inverseNavigation() { return (domain.types.CaseProduct as ModelType & { name: "CaseProduct" }).props.case as ModelReferenceNavigationProperty },
       manyToMany: {
         name: "products",
         displayName: "Products",
-        get typeDef() { return (domain.types.Product as ModelType) },
-        get farForeignKey() { return (domain.types.CaseProduct as ModelType).props.productId as ForeignKeyProperty },
-        get farNavigationProp() { return (domain.types.CaseProduct as ModelType).props.product as ModelReferenceNavigationProperty },
-        get nearForeignKey() { return (domain.types.CaseProduct as ModelType).props.caseId as ForeignKeyProperty },
-        get nearNavigationProp() { return (domain.types.CaseProduct as ModelType).props.case as ModelReferenceNavigationProperty },
+        get typeDef() { return (domain.types.Product as ModelType & { name: "Product" }) },
+        get farForeignKey() { return (domain.types.CaseProduct as ModelType & { name: "CaseProduct" }).props.productId as ForeignKeyProperty },
+        get farNavigationProp() { return (domain.types.CaseProduct as ModelType & { name: "CaseProduct" }).props.product as ModelReferenceNavigationProperty },
+        get nearForeignKey() { return (domain.types.CaseProduct as ModelType & { name: "CaseProduct" }).props.caseId as ForeignKeyProperty },
+        get nearNavigationProp() { return (domain.types.CaseProduct as ModelType & { name: "CaseProduct" }).props.case as ModelReferenceNavigationProperty },
       },
       dontSerialize: true,
     },
@@ -515,7 +515,7 @@ export const Case = domain.types.Case = {
       name: "devTeamAssigned",
       displayName: "Dev Team Assigned",
       type: "object",
-      get typeDef() { return (domain.types.DevTeam as ObjectType) },
+      get typeDef() { return (domain.types.DevTeam as ObjectType & { name: "DevTeam" }) },
       role: "value",
       dontSerialize: true,
     },
@@ -575,7 +575,7 @@ export const Case = domain.types.Case = {
           displayName: "",
           role: "value",
           type: "model",
-          get typeDef() { return (domain.types.Case as ModelType) },
+          get typeDef() { return (domain.types.Case as ModelType & { name: "Case" }) },
         },
         role: "value",
       },
@@ -621,7 +621,7 @@ export const Case = domain.types.Case = {
           displayName: "Primary Key",
           type: "number",
           role: "value",
-          get source() { return (domain.types.Case as ModelType).props.caseKey },
+          get source() { return (domain.types.Case as ModelType & { name: "Case" }).props.caseKey },
           rules: {
             required: val => val != null || "Primary Key is required.",
           }
@@ -654,7 +654,7 @@ export const Case = domain.types.Case = {
           displayName: "Primary Key",
           type: "number",
           role: "value",
-          get source() { return (domain.types.Case as ModelType).props.caseKey },
+          get source() { return (domain.types.Case as ModelType & { name: "Case" }).props.caseKey },
           rules: {
             required: val => val != null || "Primary Key is required.",
           }
@@ -664,7 +664,7 @@ export const Case = domain.types.Case = {
           displayName: "Etag",
           type: "binary",
           role: "value",
-          get source() { return (domain.types.Case as ModelType).props.attachmentHash },
+          get source() { return (domain.types.Case as ModelType & { name: "Case" }).props.attachmentHash },
         },
       },
       return: {
@@ -685,7 +685,7 @@ export const Case = domain.types.Case = {
           displayName: "Primary Key",
           type: "number",
           role: "value",
-          get source() { return (domain.types.Case as ModelType).props.caseKey },
+          get source() { return (domain.types.Case as ModelType & { name: "Case" }).props.caseKey },
           rules: {
             required: val => val != null || "Primary Key is required.",
           }
@@ -718,7 +718,7 @@ export const Case = domain.types.Case = {
           displayName: "Primary Key",
           type: "number",
           role: "value",
-          get source() { return (domain.types.Case as ModelType).props.caseKey },
+          get source() { return (domain.types.Case as ModelType & { name: "Case" }).props.caseKey },
           rules: {
             required: val => val != null || "Primary Key is required.",
           }
@@ -757,7 +757,7 @@ export const Case = domain.types.Case = {
           displayName: "Primary Key",
           type: "number",
           role: "value",
-          get source() { return (domain.types.Case as ModelType).props.caseKey },
+          get source() { return (domain.types.Case as ModelType & { name: "Case" }).props.caseKey },
           rules: {
             required: val => val != null || "Primary Key is required.",
           }
@@ -791,7 +791,7 @@ export const Case = domain.types.Case = {
         name: "$return",
         displayName: "Result",
         type: "object",
-        get typeDef() { return (domain.types.CaseSummary as ObjectType) },
+        get typeDef() { return (domain.types.CaseSummary as ObjectType & { name: "CaseSummary" }) },
         role: "value",
       },
     },
@@ -799,7 +799,7 @@ export const Case = domain.types.Case = {
   dataSources: {
     allOpenCases: {
       type: "dataSource",
-      name: "AllOpenCases",
+      name: "AllOpenCases" as const,
       displayName: "All Open Cases",
       props: {
         minDate: {
@@ -814,7 +814,7 @@ export const Case = domain.types.Case = {
   },
 }
 export const CaseDto = domain.types.CaseDto = {
-  name: "CaseDto",
+  name: "CaseDto" as const,
   displayName: "Case Dto",
   get displayProp() { return this.props.caseId }, 
   type: "model",
@@ -855,7 +855,7 @@ export const CaseDto = domain.types.CaseDto = {
           displayName: "Primary Key",
           type: "number",
           role: "value",
-          get source() { return (domain.types.CaseDto as ModelType).props.caseId },
+          get source() { return (domain.types.CaseDto as ModelType & { name: "CaseDto" }).props.caseId },
           rules: {
             required: val => val != null || "Primary Key is required.",
           }
@@ -881,7 +881,7 @@ export const CaseDto = domain.types.CaseDto = {
   dataSources: {
     caseDtoSource: {
       type: "dataSource",
-      name: "CaseDtoSource",
+      name: "CaseDtoSource" as const,
       displayName: "Case Dto Source",
       props: {
       },
@@ -889,7 +889,7 @@ export const CaseDto = domain.types.CaseDto = {
   },
 }
 export const CaseDtoStandalone = domain.types.CaseDtoStandalone = {
-  name: "CaseDtoStandalone",
+  name: "CaseDtoStandalone" as const,
   displayName: "Case Dto Standalone",
   get displayProp() { return this.props.caseId }, 
   type: "model",
@@ -917,7 +917,7 @@ export const CaseDtoStandalone = domain.types.CaseDtoStandalone = {
   },
 }
 export const CaseProduct = domain.types.CaseProduct = {
-  name: "CaseProduct",
+  name: "CaseProduct" as const,
   displayName: "Case Product",
   get displayProp() { return this.props.caseProductId }, 
   type: "model",
@@ -937,9 +937,9 @@ export const CaseProduct = domain.types.CaseProduct = {
       displayName: "Case Id",
       type: "number",
       role: "foreignKey",
-      get principalKey() { return (domain.types.Case as ModelType).props.caseKey as PrimaryKeyProperty },
-      get principalType() { return (domain.types.Case as ModelType) },
-      get navigationProp() { return (domain.types.CaseProduct as ModelType).props.case as ModelReferenceNavigationProperty },
+      get principalKey() { return (domain.types.Case as ModelType & { name: "Case" }).props.caseKey as PrimaryKeyProperty },
+      get principalType() { return (domain.types.Case as ModelType & { name: "Case" }) },
+      get navigationProp() { return (domain.types.CaseProduct as ModelType & { name: "CaseProduct" }).props.case as ModelReferenceNavigationProperty },
       hidden: 3 as HiddenAreas,
       rules: {
         required: val => val != null || "Case is required.",
@@ -949,11 +949,11 @@ export const CaseProduct = domain.types.CaseProduct = {
       name: "case",
       displayName: "Case",
       type: "model",
-      get typeDef() { return (domain.types.Case as ModelType) },
+      get typeDef() { return (domain.types.Case as ModelType & { name: "Case" }) },
       role: "referenceNavigation",
-      get foreignKey() { return (domain.types.CaseProduct as ModelType).props.caseId as ForeignKeyProperty },
-      get principalKey() { return (domain.types.Case as ModelType).props.caseKey as PrimaryKeyProperty },
-      get inverseNavigation() { return (domain.types.Case as ModelType).props.caseProducts as ModelCollectionNavigationProperty },
+      get foreignKey() { return (domain.types.CaseProduct as ModelType & { name: "CaseProduct" }).props.caseId as ForeignKeyProperty },
+      get principalKey() { return (domain.types.Case as ModelType & { name: "Case" }).props.caseKey as PrimaryKeyProperty },
+      get inverseNavigation() { return (domain.types.Case as ModelType & { name: "Case" }).props.caseProducts as ModelCollectionNavigationProperty },
       dontSerialize: true,
     },
     productId: {
@@ -961,9 +961,9 @@ export const CaseProduct = domain.types.CaseProduct = {
       displayName: "Product Id",
       type: "number",
       role: "foreignKey",
-      get principalKey() { return (domain.types.Product as ModelType).props.productId as PrimaryKeyProperty },
-      get principalType() { return (domain.types.Product as ModelType) },
-      get navigationProp() { return (domain.types.CaseProduct as ModelType).props.product as ModelReferenceNavigationProperty },
+      get principalKey() { return (domain.types.Product as ModelType & { name: "Product" }).props.productId as PrimaryKeyProperty },
+      get principalType() { return (domain.types.Product as ModelType & { name: "Product" }) },
+      get navigationProp() { return (domain.types.CaseProduct as ModelType & { name: "CaseProduct" }).props.product as ModelReferenceNavigationProperty },
       hidden: 3 as HiddenAreas,
       rules: {
         required: val => val != null || "Product is required.",
@@ -973,10 +973,10 @@ export const CaseProduct = domain.types.CaseProduct = {
       name: "product",
       displayName: "Product",
       type: "model",
-      get typeDef() { return (domain.types.Product as ModelType) },
+      get typeDef() { return (domain.types.Product as ModelType & { name: "Product" }) },
       role: "referenceNavigation",
-      get foreignKey() { return (domain.types.CaseProduct as ModelType).props.productId as ForeignKeyProperty },
-      get principalKey() { return (domain.types.Product as ModelType).props.productId as PrimaryKeyProperty },
+      get foreignKey() { return (domain.types.CaseProduct as ModelType & { name: "CaseProduct" }).props.productId as ForeignKeyProperty },
+      get principalKey() { return (domain.types.Product as ModelType & { name: "Product" }).props.productId as PrimaryKeyProperty },
       dontSerialize: true,
     },
   },
@@ -986,7 +986,7 @@ export const CaseProduct = domain.types.CaseProduct = {
   },
 }
 export const Company = domain.types.Company = {
-  name: "Company",
+  name: "Company" as const,
   displayName: "Company",
   get displayProp() { return this.props.altName }, 
   type: "model",
@@ -1083,11 +1083,11 @@ export const Company = domain.types.Company = {
         displayName: "",
         role: "value",
         type: "model",
-        get typeDef() { return (domain.types.Person as ModelType) },
+        get typeDef() { return (domain.types.Person as ModelType & { name: "Person" }) },
       },
       role: "collectionNavigation",
-      get foreignKey() { return (domain.types.Person as ModelType).props.companyId as ForeignKeyProperty },
-      get inverseNavigation() { return (domain.types.Person as ModelType).props.company as ModelReferenceNavigationProperty },
+      get foreignKey() { return (domain.types.Person as ModelType & { name: "Person" }).props.companyId as ForeignKeyProperty },
+      get inverseNavigation() { return (domain.types.Person as ModelType & { name: "Person" }).props.company as ModelReferenceNavigationProperty },
       dontSerialize: true,
     },
     altName: {
@@ -1110,7 +1110,7 @@ export const Company = domain.types.Company = {
           displayName: "Primary Key",
           type: "number",
           role: "value",
-          get source() { return (domain.types.Company as ModelType).props.id },
+          get source() { return (domain.types.Company as ModelType & { name: "Company" }).props.id },
           rules: {
             required: val => val != null || "Primary Key is required.",
           }
@@ -1119,7 +1119,7 @@ export const Company = domain.types.Company = {
           name: "companyParam",
           displayName: "Company Param",
           type: "model",
-          get typeDef() { return (domain.types.Company as ModelType) },
+          get typeDef() { return (domain.types.Company as ModelType & { name: "Company" }) },
           role: "value",
           rules: {
             required: val => val != null || "Company Param is required.",
@@ -1165,7 +1165,7 @@ export const Company = domain.types.Company = {
           displayName: "",
           role: "value",
           type: "model",
-          get typeDef() { return (domain.types.Company as ModelType) },
+          get typeDef() { return (domain.types.Company as ModelType & { name: "Company" }) },
         },
         role: "value",
       },
@@ -1174,7 +1174,7 @@ export const Company = domain.types.Company = {
   dataSources: {
     defaultSource: {
       type: "dataSource",
-      name: "DefaultSource",
+      name: "DefaultSource" as const,
       displayName: "Default Source",
       isDefault: true,
       props: {
@@ -1183,7 +1183,7 @@ export const Company = domain.types.Company = {
   },
 }
 export const Log = domain.types.Log = {
-  name: "Log",
+  name: "Log" as const,
   displayName: "Log",
   get displayProp() { return this.props.logId }, 
   type: "model",
@@ -1217,7 +1217,7 @@ export const Log = domain.types.Log = {
   },
 }
 export const Person = domain.types.Person = {
-  name: "Person",
+  name: "Person" as const,
   displayName: "Person",
   get displayProp() { return this.props.name }, 
   type: "model",
@@ -1229,7 +1229,7 @@ export const Person = domain.types.Person = {
       name: "title",
       displayName: "Title",
       type: "enum",
-      get typeDef() { return domain.enums.Titles },
+      get typeDef() { return Titles },
       role: "value",
     },
     firstName: {
@@ -1273,7 +1273,7 @@ export const Person = domain.types.Person = {
       name: "gender",
       displayName: "Gender",
       type: "enum",
-      get typeDef() { return domain.enums.Genders },
+      get typeDef() { return Genders },
       role: "value",
       defaultValue: 0,
     },
@@ -1292,11 +1292,11 @@ export const Person = domain.types.Person = {
         displayName: "",
         role: "value",
         type: "model",
-        get typeDef() { return (domain.types.Case as ModelType) },
+        get typeDef() { return (domain.types.Case as ModelType & { name: "Case" }) },
       },
       role: "collectionNavigation",
-      get foreignKey() { return (domain.types.Case as ModelType).props.assignedToId as ForeignKeyProperty },
-      get inverseNavigation() { return (domain.types.Case as ModelType).props.assignedTo as ModelReferenceNavigationProperty },
+      get foreignKey() { return (domain.types.Case as ModelType & { name: "Case" }).props.assignedToId as ForeignKeyProperty },
+      get inverseNavigation() { return (domain.types.Case as ModelType & { name: "Case" }).props.assignedTo as ModelReferenceNavigationProperty },
       dontSerialize: true,
     },
     casesReported: {
@@ -1308,11 +1308,11 @@ export const Person = domain.types.Person = {
         displayName: "",
         role: "value",
         type: "model",
-        get typeDef() { return (domain.types.Case as ModelType) },
+        get typeDef() { return (domain.types.Case as ModelType & { name: "Case" }) },
       },
       role: "collectionNavigation",
-      get foreignKey() { return (domain.types.Case as ModelType).props.reportedById as ForeignKeyProperty },
-      get inverseNavigation() { return (domain.types.Case as ModelType).props.reportedBy as ModelReferenceNavigationProperty },
+      get foreignKey() { return (domain.types.Case as ModelType & { name: "Case" }).props.reportedById as ForeignKeyProperty },
+      get inverseNavigation() { return (domain.types.Case as ModelType & { name: "Case" }).props.reportedBy as ModelReferenceNavigationProperty },
       dontSerialize: true,
     },
     birthDate: {
@@ -1345,7 +1345,7 @@ export const Person = domain.types.Person = {
       name: "personStats",
       displayName: "Person Stats",
       type: "object",
-      get typeDef() { return (domain.types.PersonStats as ObjectType) },
+      get typeDef() { return (domain.types.PersonStats as ObjectType & { name: "PersonStats" }) },
       role: "value",
       hidden: 3 as HiddenAreas,
       dontSerialize: true,
@@ -1362,9 +1362,9 @@ export const Person = domain.types.Person = {
       displayName: "Company Id",
       type: "number",
       role: "foreignKey",
-      get principalKey() { return (domain.types.Company as ModelType).props.id as PrimaryKeyProperty },
-      get principalType() { return (domain.types.Company as ModelType) },
-      get navigationProp() { return (domain.types.Person as ModelType).props.company as ModelReferenceNavigationProperty },
+      get principalKey() { return (domain.types.Company as ModelType & { name: "Company" }).props.id as PrimaryKeyProperty },
+      get principalType() { return (domain.types.Company as ModelType & { name: "Company" }) },
+      get navigationProp() { return (domain.types.Person as ModelType & { name: "Person" }).props.company as ModelReferenceNavigationProperty },
       hidden: 3 as HiddenAreas,
       rules: {
         required: val => val != null || "Company is required.",
@@ -1374,11 +1374,11 @@ export const Person = domain.types.Person = {
       name: "company",
       displayName: "Company",
       type: "model",
-      get typeDef() { return (domain.types.Company as ModelType) },
+      get typeDef() { return (domain.types.Company as ModelType & { name: "Company" }) },
       role: "referenceNavigation",
-      get foreignKey() { return (domain.types.Person as ModelType).props.companyId as ForeignKeyProperty },
-      get principalKey() { return (domain.types.Company as ModelType).props.id as PrimaryKeyProperty },
-      get inverseNavigation() { return (domain.types.Company as ModelType).props.employees as ModelCollectionNavigationProperty },
+      get foreignKey() { return (domain.types.Person as ModelType & { name: "Person" }).props.companyId as ForeignKeyProperty },
+      get principalKey() { return (domain.types.Company as ModelType & { name: "Company" }).props.id as PrimaryKeyProperty },
+      get inverseNavigation() { return (domain.types.Company as ModelType & { name: "Company" }).props.employees as ModelCollectionNavigationProperty },
       dontSerialize: true,
     },
     arbitraryCollectionOfStrings: {
@@ -1406,7 +1406,7 @@ export const Person = domain.types.Person = {
           displayName: "Primary Key",
           type: "number",
           role: "value",
-          get source() { return (domain.types.Person as ModelType).props.personId },
+          get source() { return (domain.types.Person as ModelType & { name: "Person" }).props.personId },
           rules: {
             required: val => val != null || "Primary Key is required.",
           }
@@ -1425,7 +1425,7 @@ export const Person = domain.types.Person = {
         name: "$return",
         displayName: "Result",
         type: "model",
-        get typeDef() { return (domain.types.Person as ModelType) },
+        get typeDef() { return (domain.types.Person as ModelType & { name: "Person" }) },
         role: "value",
       },
     },
@@ -1440,7 +1440,7 @@ export const Person = domain.types.Person = {
           displayName: "Primary Key",
           type: "number",
           role: "value",
-          get source() { return (domain.types.Person as ModelType).props.personId },
+          get source() { return (domain.types.Person as ModelType & { name: "Person" }).props.personId },
           rules: {
             required: val => val != null || "Primary Key is required.",
           }
@@ -1510,7 +1510,7 @@ export const Person = domain.types.Person = {
           displayName: "Primary Key",
           type: "number",
           role: "value",
-          get source() { return (domain.types.Person as ModelType).props.personId },
+          get source() { return (domain.types.Person as ModelType & { name: "Person" }).props.personId },
           rules: {
             required: val => val != null || "Primary Key is required.",
           }
@@ -1536,7 +1536,7 @@ export const Person = domain.types.Person = {
           displayName: "Primary Key",
           type: "number",
           role: "value",
-          get source() { return (domain.types.Person as ModelType).props.personId },
+          get source() { return (domain.types.Person as ModelType & { name: "Person" }).props.personId },
           rules: {
             required: val => val != null || "Primary Key is required.",
           }
@@ -1597,7 +1597,7 @@ export const Person = domain.types.Person = {
           displayName: "Primary Key",
           type: "number",
           role: "value",
-          get source() { return (domain.types.Person as ModelType).props.personId },
+          get source() { return (domain.types.Person as ModelType & { name: "Person" }).props.personId },
           rules: {
             required: val => val != null || "Primary Key is required.",
           }
@@ -1642,7 +1642,7 @@ export const Person = domain.types.Person = {
           displayName: "Primary Key",
           type: "number",
           role: "value",
-          get source() { return (domain.types.Person as ModelType).props.personId },
+          get source() { return (domain.types.Person as ModelType & { name: "Person" }).props.personId },
           rules: {
             required: val => val != null || "Primary Key is required.",
           }
@@ -1666,7 +1666,7 @@ export const Person = domain.types.Person = {
           displayName: "Primary Key",
           type: "number",
           role: "value",
-          get source() { return (domain.types.Person as ModelType).props.personId },
+          get source() { return (domain.types.Person as ModelType & { name: "Person" }).props.personId },
           rules: {
             required: val => val != null || "Primary Key is required.",
           }
@@ -1684,7 +1684,7 @@ export const Person = domain.types.Person = {
           name: "title",
           displayName: "Title",
           type: "enum",
-          get typeDef() { return domain.enums.Titles },
+          get typeDef() { return Titles },
           role: "value",
         },
       },
@@ -1692,7 +1692,7 @@ export const Person = domain.types.Person = {
         name: "$return",
         displayName: "Result",
         type: "model",
-        get typeDef() { return (domain.types.Person as ModelType) },
+        get typeDef() { return (domain.types.Person as ModelType & { name: "Person" }) },
         role: "value",
       },
     },
@@ -1788,7 +1788,7 @@ export const Person = domain.types.Person = {
           name: "person",
           displayName: "Person",
           type: "model",
-          get typeDef() { return (domain.types.Person as ModelType) },
+          get typeDef() { return (domain.types.Person as ModelType & { name: "Person" }) },
           role: "value",
           rules: {
             required: val => val != null || "Person is required.",
@@ -1799,7 +1799,7 @@ export const Person = domain.types.Person = {
         name: "$return",
         displayName: "Result",
         type: "model",
-        get typeDef() { return (domain.types.Person as ModelType) },
+        get typeDef() { return (domain.types.Person as ModelType & { name: "Person" }) },
         role: "value",
       },
     },
@@ -1814,7 +1814,7 @@ export const Person = domain.types.Person = {
           name: "criteria",
           displayName: "Criteria",
           type: "object",
-          get typeDef() { return (domain.types.PersonCriteria as ObjectType) },
+          get typeDef() { return (domain.types.PersonCriteria as ObjectType & { name: "PersonCriteria" }) },
           role: "value",
           rules: {
             required: val => val != null || "Criteria is required.",
@@ -1836,7 +1836,7 @@ export const Person = domain.types.Person = {
           displayName: "",
           role: "value",
           type: "model",
-          get typeDef() { return (domain.types.Person as ModelType) },
+          get typeDef() { return (domain.types.Person as ModelType & { name: "Person" }) },
         },
         role: "value",
       },
@@ -1845,14 +1845,14 @@ export const Person = domain.types.Person = {
   dataSources: {
     bOrCPeople: {
       type: "dataSource",
-      name: "BOrCPeople",
+      name: "BOrCPeople" as const,
       displayName: "B Or C People",
       props: {
       },
     },
     namesStartingWithAWithCases: {
       type: "dataSource",
-      name: "NamesStartingWithAWithCases",
+      name: "NamesStartingWithAWithCases" as const,
       displayName: "Names Starting With A With Cases",
       props: {
         allowedStatuses: {
@@ -1864,7 +1864,7 @@ export const Person = domain.types.Person = {
             displayName: "",
             role: "value",
             type: "enum",
-            get typeDef() { return domain.enums.Statuses },
+            get typeDef() { return Statuses },
           },
           role: "value",
         },
@@ -1872,7 +1872,7 @@ export const Person = domain.types.Person = {
     },
     withoutCases: {
       type: "dataSource",
-      name: "WithoutCases",
+      name: "WithoutCases" as const,
       displayName: "Without Cases",
       isDefault: true,
       props: {
@@ -1881,8 +1881,9 @@ export const Person = domain.types.Person = {
   },
 }
 export const Product = domain.types.Product = {
-  name: "Product",
+  name: "Product" as const,
   displayName: "Product",
+  description: "A product that can be purchased.",
   get displayProp() { return this.props.name }, 
   type: "model",
   controllerRoute: "Product",
@@ -1906,7 +1907,7 @@ export const Product = domain.types.Product = {
       name: "details",
       displayName: "Details",
       type: "object",
-      get typeDef() { return (domain.types.ProductDetails as ObjectType) },
+      get typeDef() { return (domain.types.ProductDetails as ObjectType & { name: "ProductDetails" }) },
       role: "value",
       dontSerialize: true,
     },
@@ -1934,7 +1935,7 @@ export const Product = domain.types.Product = {
   },
 }
 export const StandaloneReadCreate = domain.types.StandaloneReadCreate = {
-  name: "StandaloneReadCreate",
+  name: "StandaloneReadCreate" as const,
   displayName: "Standalone Read Create",
   get displayProp() { return this.props.name }, 
   type: "model",
@@ -1971,7 +1972,7 @@ export const StandaloneReadCreate = domain.types.StandaloneReadCreate = {
   dataSources: {
     defaultSource: {
       type: "dataSource",
-      name: "DefaultSource",
+      name: "DefaultSource" as const,
       displayName: "Default Source",
       props: {
       },
@@ -1979,7 +1980,7 @@ export const StandaloneReadCreate = domain.types.StandaloneReadCreate = {
   },
 }
 export const StandaloneReadonly = domain.types.StandaloneReadonly = {
-  name: "StandaloneReadonly",
+  name: "StandaloneReadonly" as const,
   displayName: "Standalone Readonly",
   get displayProp() { return this.props.name }, 
   type: "model",
@@ -2018,7 +2019,7 @@ export const StandaloneReadonly = domain.types.StandaloneReadonly = {
   dataSources: {
     defaultSource: {
       type: "dataSource",
-      name: "DefaultSource",
+      name: "DefaultSource" as const,
       displayName: "Default Source",
       props: {
       },
@@ -2026,7 +2027,7 @@ export const StandaloneReadonly = domain.types.StandaloneReadonly = {
   },
 }
 export const StandaloneReadWrite = domain.types.StandaloneReadWrite = {
-  name: "StandaloneReadWrite",
+  name: "StandaloneReadWrite" as const,
   displayName: "Standalone Read Write",
   get displayProp() { return this.props.name }, 
   type: "model",
@@ -2063,7 +2064,7 @@ export const StandaloneReadWrite = domain.types.StandaloneReadWrite = {
   dataSources: {
     defaultSource: {
       type: "dataSource",
-      name: "DefaultSource",
+      name: "DefaultSource" as const,
       displayName: "Default Source",
       props: {
       },
@@ -2071,7 +2072,7 @@ export const StandaloneReadWrite = domain.types.StandaloneReadWrite = {
   },
 }
 export const ZipCode = domain.types.ZipCode = {
-  name: "ZipCode",
+  name: "ZipCode" as const,
   displayName: "Zip Code",
   get displayProp() { return this.props.zip }, 
   type: "model",
@@ -2105,7 +2106,7 @@ export const ZipCode = domain.types.ZipCode = {
   },
 }
 export const CaseSummary = domain.types.CaseSummary = {
-  name: "CaseSummary",
+  name: "CaseSummary" as const,
   displayName: "Case Summary",
   get displayProp() { return this.props.description }, 
   type: "object",
@@ -2150,7 +2151,7 @@ export const CaseSummary = domain.types.CaseSummary = {
   },
 }
 export const DevTeam = domain.types.DevTeam = {
-  name: "DevTeam",
+  name: "DevTeam" as const,
   displayName: "Dev Team",
   get displayProp() { return this.props.name }, 
   type: "object",
@@ -2170,7 +2171,7 @@ export const DevTeam = domain.types.DevTeam = {
   },
 }
 export const Location = domain.types.Location = {
-  name: "Location",
+  name: "Location" as const,
   displayName: "Location",
   type: "object",
   props: {
@@ -2195,7 +2196,7 @@ export const Location = domain.types.Location = {
   },
 }
 export const PersonCriteria = domain.types.PersonCriteria = {
-  name: "PersonCriteria",
+  name: "PersonCriteria" as const,
   displayName: "Person Criteria",
   get displayProp() { return this.props.name }, 
   type: "object",
@@ -2221,7 +2222,7 @@ export const PersonCriteria = domain.types.PersonCriteria = {
   },
 }
 export const PersonLocation = domain.types.PersonLocation = {
-  name: "PersonLocation",
+  name: "PersonLocation" as const,
   displayName: "Person Location",
   type: "object",
   props: {
@@ -2240,7 +2241,7 @@ export const PersonLocation = domain.types.PersonLocation = {
   },
 }
 export const PersonStats = domain.types.PersonStats = {
-  name: "PersonStats",
+  name: "PersonStats" as const,
   displayName: "Person Stats",
   get displayProp() { return this.props.name }, 
   type: "object",
@@ -2293,13 +2294,13 @@ export const PersonStats = domain.types.PersonStats = {
       name: "personLocation",
       displayName: "Person Location",
       type: "object",
-      get typeDef() { return (domain.types.PersonLocation as ObjectType) },
+      get typeDef() { return (domain.types.PersonLocation as ObjectType & { name: "PersonLocation" }) },
       role: "value",
     },
   },
 }
 export const ProductDetails = domain.types.ProductDetails = {
-  name: "ProductDetails",
+  name: "ProductDetails" as const,
   displayName: "Product Details",
   get displayProp() { return this.props.manufacturingAddress }, 
   type: "object",
@@ -2308,20 +2309,20 @@ export const ProductDetails = domain.types.ProductDetails = {
       name: "manufacturingAddress",
       displayName: "Manufacturing Address",
       type: "object",
-      get typeDef() { return (domain.types.StreetAddress as ObjectType) },
+      get typeDef() { return (domain.types.StreetAddress as ObjectType & { name: "StreetAddress" }) },
       role: "value",
     },
     companyHqAddress: {
       name: "companyHqAddress",
       displayName: "Company Hq Address",
       type: "object",
-      get typeDef() { return (domain.types.StreetAddress as ObjectType) },
+      get typeDef() { return (domain.types.StreetAddress as ObjectType & { name: "StreetAddress" }) },
       role: "value",
     },
   },
 }
 export const StreetAddress = domain.types.StreetAddress = {
-  name: "StreetAddress",
+  name: "StreetAddress" as const,
   displayName: "Street Address",
   get displayProp() { return this.props.address }, 
   type: "object",
@@ -2353,7 +2354,7 @@ export const StreetAddress = domain.types.StreetAddress = {
   },
 }
 export const WeatherData = domain.types.WeatherData = {
-  name: "WeatherData",
+  name: "WeatherData" as const,
   displayName: "Weather Data",
   type: "object",
   props: {
@@ -2373,7 +2374,7 @@ export const WeatherData = domain.types.WeatherData = {
       name: "location",
       displayName: "Location",
       type: "object",
-      get typeDef() { return (domain.types.Location as ObjectType) },
+      get typeDef() { return (domain.types.Location as ObjectType & { name: "Location" }) },
       role: "value",
     },
   },
@@ -2394,7 +2395,7 @@ export const WeatherService = domain.services.WeatherService = {
           name: "location",
           displayName: "Location",
           type: "object",
-          get typeDef() { return (domain.types.Location as ObjectType) },
+          get typeDef() { return (domain.types.Location as ObjectType & { name: "Location" }) },
           role: "value",
           rules: {
             required: val => val != null || "Location is required.",
@@ -2411,7 +2412,7 @@ export const WeatherService = domain.services.WeatherService = {
           name: "conditions",
           displayName: "Conditions",
           type: "enum",
-          get typeDef() { return domain.enums.SkyConditions },
+          get typeDef() { return SkyConditions },
           role: "value",
         },
       },
@@ -2419,7 +2420,7 @@ export const WeatherService = domain.services.WeatherService = {
         name: "$return",
         displayName: "Result",
         type: "object",
-        get typeDef() { return (domain.types.WeatherData as ObjectType) },
+        get typeDef() { return (domain.types.WeatherData as ObjectType & { name: "WeatherData" }) },
         role: "value",
       },
     },

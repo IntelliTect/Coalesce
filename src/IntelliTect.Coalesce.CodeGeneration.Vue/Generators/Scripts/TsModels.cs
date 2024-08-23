@@ -115,6 +115,26 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                 b.Line();
             }
 
+
+            using (b.Block("declare module \"coalesce-vue/lib/model\""))
+            {
+                using (b.Block("interface EnumTypeLookup"))
+                {
+                    foreach (var model in Model.ClientEnums.OrderBy(e => e.ClientTypeName))
+                    {
+                        b.Line($"{model.ClientTypeName}: {model.ClientTypeName}");
+                    }
+                }
+
+                using (b.Block("interface ModelTypeLookup"))
+                {
+                    foreach (var model in Model.ClientClasses.OrderBy(e => e.ClientTypeName))
+                    {
+                        b.Line($"{model.ClientTypeName}: {model.ClientTypeName}");
+                    }
+                }
+            }
+
             return Task.FromResult(b.ToString());
         }
     }

@@ -1552,6 +1552,11 @@ export abstract class ApiState<
 
       const resp = await promise;
 
+      if (!resp) {
+        this.isLoading = false;
+        return undefined;
+      }
+
       const data = resp.data;
       delete this._cancelToken;
 

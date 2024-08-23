@@ -1016,7 +1016,7 @@ export function bindToQueryString<T, TKey extends keyof T & string>(
     parse,
     stringify,
   }: BindToQueryStringOptions<T[TKey]> = {}
-) {
+): void {
   if (isRef(obj) && typeof key == "string" && key !== "value") {
     return bindToQueryString(vue, obj, "value", { queryKey: key });
   }
@@ -1163,7 +1163,7 @@ export function useBindToQueryString<T, TKey extends keyof T & string>(
   obj: T,
   key: TKey,
   options?: BindToQueryStringOptions<T[TKey]>
-) {
+): void {
   const vue = getCurrentInstance()?.proxy;
   if (!vue)
     throw new Error(

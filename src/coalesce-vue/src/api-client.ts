@@ -961,7 +961,7 @@ export class ModelApiClient<TModel extends Model<ModelType>> extends ApiClient<
   }
 
   public list(
-    parameters?: ListParameters,
+    parameters?: Partial<ListParameters>,
     config?: AxiosRequestConfig
   ): ListResultPromise<TModel> {
     return this.$invoke(
@@ -980,7 +980,7 @@ export class ModelApiClient<TModel extends Model<ModelType>> extends ApiClient<
   }
 
   public count(
-    parameters?: FilterParameters,
+    parameters?: Partial<FilterParameters>,
     config?: AxiosRequestConfig
   ): ItemResultPromise<number> {
     return this.$invoke(

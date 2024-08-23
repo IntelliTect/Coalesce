@@ -208,7 +208,12 @@
 <script
   lang="ts"
   setup
-  generic="TModel extends Model | AnyArgCaller | undefined"
+  generic="
+  TModel extends Model | AnyArgCaller | undefined, 
+  TFor extends ForSpec<
+    TModel,
+    ForeignKeyProperty | ModelReferenceNavigationProperty | ModelValue
+  > = any"
 >
 import {
   ComponentPublicInstance,
@@ -234,6 +239,12 @@ import {
   ModelValue,
   AnyArgCaller,
   ResponseCachingConfiguration,
+  ModelTypeLookup,
+  TypeDiscriminatorToType,
+  PrimaryKeyProperty,
+  PropNames,
+  ApiStateTypeWithArgs,
+  EnumValue,
 } from "coalesce-vue";
 import { VField } from "vuetify/components";
 
@@ -245,11 +256,72 @@ defineOptions({
   inheritAttrs: false,
 });
 
+type SelectedModelType = TFor extends string & keyof ModelTypeLookup
+  ? ModelTypeLookup[TFor]
+  : TFor extends ModelReferenceNavigationProperty | ModelValue
+  ? TFor["typeDef"]["name"] extends keyof ModelTypeLookup
+    ? ModelTypeLookup[TFor["typeDef"]["name"]]
+    : any
+  : TFor extends ForeignKeyProperty
+  ? TFor["principalType"]["name"] extends keyof ModelTypeLookup
+    ? ModelTypeLookup[TFor["principalType"]["name"]]
+    : any
+  : TModel extends ApiStateTypeWithArgs<any, any, infer TArgsObj, any>
+  ? TFor extends keyof TArgsObj
+    ? TArgsObj[TFor]
+    : any
+  : TModel extends Model
+  ? TFor extends PropNames<TModel["$metadata"]>
+    ? TModel["$metadata"]["props"][TFor] extends
+        | ModelReferenceNavigationProperty
+        | ModelValue
+      ? TModel["$metadata"]["props"][TFor]["typeDef"]["name"] extends keyof ModelTypeLookup
+        ? ModelTypeLookup[TModel["$metadata"]["props"][TFor]["typeDef"]["name"]]
+        : any
+      : TModel["$metadata"]["props"][TFor] extends ForeignKeyProperty
+      ? TModel["$metadata"]["props"][TFor]["principalType"]["name"] extends keyof ModelTypeLookup
+        ? ModelTypeLookup[TModel["$metadata"]["props"][TFor]["principalType"]["name"]]
+        : any
+      : any
+    : any
+  : Model<ModelType>;
+
+type ExtractValuesOfType<T, U> = {
+  [K in keyof T]: T[K] extends U ? T[K] : never;
+}[keyof T];
+
+type FindPk<TModel extends Model> = ExtractValuesOfType<
+  TModel["$metadata"]["props"],
+  PrimaryKeyProperty
+>;
+
+type SelectedPkType = FindPk<SelectedModelType> extends EnumValue
+  ? FindPk<SelectedModelType>["typeDef"]["name"] extends keyof ModelTypeLookup
+    ? ModelTypeLookup[FindPk<SelectedModelType>["typeDef"]["name"]]
+    : any
+  : TypeDiscriminatorToType<FindPk<SelectedModelType>["type"]>;
+
+type PrimaryBindType = TFor extends ForeignKeyProperty
+  ? SelectedPkType
+  : TModel extends Model
+  ? TFor extends PropNames<TModel["$metadata"]>
+    ? TModel["$metadata"]["props"][TFor] extends ForeignKeyProperty
+      ? SelectedPkType
+      : SelectedModelType
+    : SelectedModelType
+  : SelectedModelType;
+
 defineSlots<{
   // FUTURE: strongly type `item` based on the forspec?
-  ["item"]?(props: { item: any; search: string | null }): any;
-  ["selected-item"]?(props: { item: any; search: string | null }): any;
-  ["list-item"]?(props: { item: any; search: string | null }): any;
+  ["item"]?(props: { item: SelectedModelType; search: string | null }): any;
+  ["selected-item"]?(props: {
+    item: SelectedModelType;
+    search: string | null;
+  }): any;
+  ["list-item"]?(props: {
+    item: SelectedModelType;
+    search: string | null;
+  }): any;
 }>();
 
 const props = withDefaults(
@@ -262,10 +334,7 @@ const props = withDefaults(
      * * A direct reference to the metadata object. E.g. `model.$metadata.props.firstName`.
      * * A string in dot-notation that starts with a type name. E.g. `"Person.firstName"`.
      */
-    for: ForSpec<
-      TModel,
-      ForeignKeyProperty | ModelReferenceNavigationProperty | ModelValue
-    >;
+    for: TFor;
 
     autofocus?: boolean;
     clearable?: boolean;
@@ -278,26 +347,26 @@ const props = withDefaults(
 
     // DONT use defineModel for these. We don't want to capture local state if the parent isn't binding it
     // since we have 4 different binding sources in this component, we'll get stuck on the values of the ones that aren't used.
-    keyValue?: any;
-    objectValue?: Model;
-    modelValue?: any;
+    keyValue?: SelectedPkType | null;
+    objectValue?: SelectedModelType | null;
+    modelValue?: PrimaryBindType | null;
 
     /** Response caching configuration for the `/get` and `/list` API calls made by the component.
      * See https://intellitect.github.io/Coalesce/stacks/vue/layers/api-clients.html#response-caching. */
     cache?: ResponseCachingConfiguration | boolean;
 
     create?: {
-      getLabel: (search: string, items: Model<ModelType>[]) => string | false;
-      getItem: (search: string, label: string) => Promise<Model<ModelType>>;
+      getLabel: (search: string, items: SelectedModelType[]) => string | false;
+      getItem: (search: string, label: string) => Promise<SelectedModelType>;
     };
   }>(),
   { openOnClear: true, clearable: undefined }
 );
 
 const emit = defineEmits<{
-  "update:keyValue": [value: any];
-  "update:objectValue": [value: any];
-  "update:modelValue": [value: any];
+  "update:keyValue": [value: SelectedPkType | null];
+  "update:objectValue": [value: SelectedModelType | null];
+  "update:modelValue": [value: PrimaryBindType | null];
 }>();
 
 const mainInputRef = ref<HTMLInputElement>();
@@ -537,10 +606,10 @@ const effectiveRules = computed(() => {
 });
 
 const items = computed(() => {
-  return listCaller?.result || [];
+  return (listCaller?.result || []) as SelectedModelType[];
 });
 
-const listItems = computed((): Indexable<Model<ModelType>>[] => {
+const listItems = computed((): Indexable<SelectedModelType>[] => {
   return items.value;
 });
 
@@ -554,10 +623,7 @@ const createItemLabel = computed(() => {
   return null;
 });
 
-function onInput(
-  value: Model<ModelType> | null | undefined,
-  dontFocus = false
-) {
+function onInput(value: SelectedModelType | null, dontFocus = false) {
   value = value ?? null;
   if (value == null && !isClearable.value) {
     return;

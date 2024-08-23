@@ -39,11 +39,16 @@ namespace IntelliTect.Coalesce.Utilities
         public TypeScriptCodeBuilder StringProp(
             string propName,
             string? stringLiteral,
-            bool omitIfNull = false)
+            bool omitIfNull = false,
+            bool asConst = false)
         {
             if (stringLiteral is null && omitIfNull) return this;
 
-            Append(propName).Append(": \"").Append(stringLiteral.EscapeStringLiteralForTypeScript()).Append("\",").Line();
+            Append(propName).Append(": \"").Append(stringLiteral.EscapeStringLiteralForTypeScript()).Append("\"");
+
+            if (asConst) Append(" as const");
+
+            Append(",").Line();
             return this;
         }
 

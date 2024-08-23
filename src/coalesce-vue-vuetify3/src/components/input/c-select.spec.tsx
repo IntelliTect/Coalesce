@@ -11,16 +11,30 @@ import {
   openMenu,
 } from "@test/util";
 import { VueWrapper } from "@vue/test-utils";
-import { AnyArgCaller, Model } from "coalesce-vue";
+import {
+  AnyArgCaller,
+  ClassType,
+  ForeignKeyProperty,
+  Model,
+  ModelReferenceNavigationProperty,
+  PrimaryKeyProperty,
+} from "coalesce-vue";
 import { Mock } from "vitest";
 import { FunctionalComponent, ref } from "vue";
 import { VForm } from "vuetify/components";
 import { CSelect } from "..";
 
-import { ComplexModel } from "@test-targets/models.g";
+import {
+  Company,
+  ComplexModel,
+  EnumPk,
+  EnumPkId,
+  Test,
+} from "@test-targets/models.g";
 import {
   CaseViewModel,
   ComplexModelViewModel,
+  TestViewModel,
 } from "@test-targets/viewmodels.g";
 
 describe("CSelect", () => {
@@ -67,23 +81,39 @@ describe("CSelect", () => {
     );
   });
 
+  // prettier-ignore
   test("types", () => {
     const model = new ComplexModel({
       name: "bob",
     });
-    const vm = new ComplexModelViewModel();
-    const selectedAny = ref<any>();
+    const complexVm = new ComplexModelViewModel();
+    const testVm = new TestViewModel();
 
     const anyString: string = "foo";
     const genericModel: Model = model;
 
+    function receivesTestModel(model: Test | null) {}
+    function receivesComplexModel(model: ComplexModel | null) {}
+    function receivesNumber(model: number | null) {}
+
     // Binding to FK or ref nav on a ViewModel:
-    () => <CSelect model={vm} for="singleTest" />;
-    () => <CSelect model={vm} for="singleTestId" />;
-    () => <CSelect model={vm} for={vm.$metadata.props.singleTest} />;
+    () => <CSelect model={complexVm} for="singleTest" />;
+    () => (<CSelect model={complexVm} for="singleTest" onUpdate:modelValue={receivesTestModel} />);
+    () => (<CSelect model={complexVm} for="singleTest" onUpdate:objectValue={receivesTestModel} />);
+    // @ts-expect-error wrong event handler type.
+    () => (<CSelect model={complexVm} for="singleTest" onUpdate:objectValue={receivesComplexModel} />);
+    // @ts-expect-error wrong event handler type.
+    () => (<CSelect model={complexVm} for="singleTest" onUpdate:keyValue={receivesComplexModel} />);
+
+    () => <CSelect model={complexVm} for="singleTestId" />;
+    () => <CSelect model={complexVm} for="singleTestId" onUpdate:keyValue={receivesNumber} />;
+    // @ts-expect-error wrong event handler type.
+    () => <CSelect model={complexVm} for="singleTestId" onUpdate:modelValue={receivesTestModel} />;
+
+    () => <CSelect model={complexVm} for={complexVm.$metadata.props.singleTest} />;
 
     // Against models that might be null
-    () => <CSelect model={vm.referenceNavigation} for="referenceNavigation" />;
+    () => <CSelect model={complexVm.referenceNavigation} for="referenceNavigation" />;
 
     // Binding to plain Models:
     () => <CSelect model={model} for="singleTest" />;
@@ -91,54 +121,88 @@ describe("CSelect", () => {
     //@ts-expect-error wrong type of property
     () => <CSelect model={model} for="name" />;
     //@ts-expect-error wrong type of property
-    () => <CSelect model={vm} for={vm.$metadata.props.name} />;
+    () => <CSelect model={complexVm} for={complexVm.$metadata.props.name} />;
 
     // Untyped bindings:
     () => <CSelect model={genericModel} for={anyString} />;
     () => <CSelect model={model as any} for={anyString} />;
 
     // Binding with for + v-model
-    () => (
-      <CSelect
-        for="Test"
-        modelValue={selectedAny}
-        update:modelValue={() => {}}
-      />
-    );
-    () => (
-      <CSelect
-        for={vm.$metadata.props.singleTest}
-        modelValue={selectedAny}
-        update:modelValue={() => {}}
-      />
-    );
+    () => (<CSelect for="Test" modelValue={testVm} onUpdate:modelValue={receivesTestModel} />);
+    () => (<CSelect for="Test" modelValue={testVm} onUpdate:objectValue={receivesTestModel} />);
+    () => (<CSelect for="Test" modelValue={testVm} onUpdate:keyValue={receivesNumber} />);
+    () => (<CSelect for="Test" modelValue={testVm} onUpdate:keyValue={(e) => { e?.toFixed() }} />);
+    // @ts-expect-error wrong event handler type.
+    () => (<CSelect for="Test" modelValue={testVm} onUpdate:keyValue={receivesTestModel} />);
+    // @ts-expect-error wrong event handler type.
+    () => (<CSelect for="Test" modelValue={testVm} onUpdate:objectValue={(receivesComplexModel)} />);
+    // @ts-expect-error wrong event handler type.
+    () => (<CSelect for="Test" modelValue={testVm} onUpdate:modelValue={receivesComplexModel} />);
 
+    // @ts-expect-error wrong keyValue type.
+    () => (<CSelect for="Test" keyValue={anyString} />);
+    // @ts-expect-error wrong modelValue type.
+    () => (<CSelect for="Test" modelValue={complexVm} onUpdate:modelValue={receivesTestModel} />);
+
+    () => (<CSelect for="EnumPk" keyValue={EnumPkId.Value10} onUpdate:keyValue={(v: EnumPkId | null) => {}} />);
+    // @ts-expect-error keyValue type
+    () => (<CSelect for="EnumPk" keyValue={42} onUpdate:keyValue={(v: EnumPkId | null) => {}} />);
+    // @ts-expect-error onUpdate type
+    () => (<CSelect for="EnumPk" keyValue={EnumPkId.Value10} onUpdate:keyValue={receivesComplexModel} />);
+
+
+    // Prop types that are only weakly known, missing ability to resolve types
+    const weakModelProp: ModelReferenceNavigationProperty = complexVm.$metadata.props.singleTest;
+    () => (<CSelect for={weakModelProp} modelValue={testVm} onUpdate:modelValue={receivesTestModel} />);
+    () => (<CSelect for={weakModelProp} keyValue={42} onUpdate:keyValue={receivesNumber} />);
+
+    const weakFkProp: ForeignKeyProperty = complexVm.$metadata.props.singleTestId;
+    () => (<CSelect for={weakFkProp} modelValue={42} onUpdate:modelValue={receivesNumber} />);
+    () => (<CSelect for={weakFkProp} objectValue={testVm} onUpdate:objectValue={receivesTestModel} />);
+    () => (<CSelect for={weakFkProp} keyValue={42} onUpdate:keyValue={receivesNumber} />);
+    
+    () => (<CSelect model={genericModel} for="singleTest" modelValue={testVm} onUpdate:modelValue={receivesTestModel} />);
+    () => (<CSelect model={genericModel} for="singleTest" objectValue={testVm} onUpdate:objectValue={receivesTestModel} />);
+    () => (<CSelect model={genericModel} for="singleTest" keyValue={42} onUpdate:keyValue={receivesNumber} />);
+
+
+    () => (<CSelect for={complexVm.$metadata.props.singleTest} modelValue={testVm} onUpdate:modelValue={receivesTestModel} />);
+    // @ts-expect-error wrong modelValue and event types
+    () => (<CSelect for={complexVm.$metadata.props.singleTest} modelValue={42} onUpdate:modelValue={receivesNumber} />);
+
+    () => (<CSelect for={complexVm.$metadata.props.singleTestId} modelValue={42} onUpdate:modelValue={receivesNumber} />);
+    // @ts-expect-error wrong modelValue and event types
+    () => (<CSelect for={complexVm.$metadata.props.singleTestId} modelValue={testVm} onUpdate:modelValue={receivesTestModel} />);
+    
     // Binding to method parameters
-    () => <CSelect model={vm.methodWithManyParams} for="model" />;
-    () => (
-      <CSelect
-        model={vm.methodWithManyParams}
-        for={vm.$metadata.methods.methodWithManyParams.params.model}
-      />
-    );
-    //@ts-expect-error non-object method parameter
-    () => <CSelect model={vm.methodWithManyParams} for="integer" />;
+    () => <CSelect model={complexVm.methodWithManyParams} for="model" />;
+    () => <CSelect model={complexVm.methodWithManyParams} for="model" onUpdate:modelValue={(x: Company | null) => {console.log(x)}} />;
+    // @ts-expect-error wrong onUpdate:modelValue type
+    () => <CSelect model={complexVm.methodWithManyParams} for="model" onUpdate:modelValue={receivesTestModel} />;
+    // @ts-expect-error wrong modelValue type
+    () => <CSelect model={complexVm.methodWithManyParams} for="model" modelValue={complexVm} />;
+    () => (<CSelect model={complexVm.methodWithManyParams} for={complexVm.$metadata.methods.methodWithManyParams.params.model} />);
+    () => (<CSelect model={complexVm.methodWithManyParams}
+      for={complexVm.$metadata.methods.methodWithManyParams.params.model}
+      onUpdate:modelValue={(x: Company | null) => {console.log(x)}}
+    />);
+    () => (<CSelect model={complexVm.methodWithManyParams}
+      for={complexVm.$metadata.methods.methodWithManyParams.params.model}
+      // @ts-expect-error wrong onUpdate:modelValue type
+      onUpdate:modelValue={receivesTestModel}
+    />);
 
-    () => (
-      <CSelect model={vm.methodWithManyParams as AnyArgCaller} for="model" />
-    );
+    //@ts-expect-error non-object method parameter
+    () => <CSelect model={complexVm.methodWithManyParams} for="integer" />;
+
+    () => (<CSelect model={complexVm.methodWithManyParams as AnyArgCaller} for="model" />);
     // This has to be valid when we don't have a known type for the caller
-    () => (
-      <CSelect
-        model={vm.methodWithManyParams as AnyArgCaller}
-        for="specificString"
-      />
-    );
+    () => (<CSelect model={complexVm.methodWithManyParams as AnyArgCaller} for="specificString" />);
 
     //@ts-expect-error invalid model type
     () => <CSelect model={123} for="num" />;
     //@ts-expect-error invalid for type
-    () => <CSelect model={vm} for={123} />;
+    () => <CSelect model={complexVm} for={123} />;
   });
 
   test.each([
@@ -460,7 +524,7 @@ describe("CSelect", () => {
 
     test("mutates v-model on selection when bound by apicaller arg", async () => {
       const model = new StudentViewModel({});
-      const onUpdate = vitest.fn();
+      const onUpdate = vitest.fn<(x: Course | null) => void>();
 
       const wrapper = mountApp(() => (
         <CSelect

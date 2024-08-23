@@ -1183,3 +1183,49 @@ export class WeatherData {
 }
 
 
+declare module "coalesce-vue/lib/model" {
+  interface ModelTypeLookup {
+    EnumPkId: EnumPkId
+    Genders: Genders
+    SkyConditions: SkyConditions
+    Statuses: Statuses
+    Titles: Titles
+    AbstractImpl: AbstractImpl
+    AbstractModel: AbstractModel
+    Case: Case
+    CaseDtoStandalone: CaseDtoStandalone
+    CaseProduct: CaseProduct
+    Company: Company
+    ComplexModel: ComplexModel
+    ComplexModelDependent: ComplexModelDependent
+    EnumPk: EnumPk
+    ExternalChild: ExternalChild
+    ExternalChildAsInputOnly: ExternalChildAsInputOnly
+    ExternalChildAsOutputOnly: ExternalChildAsOutputOnly
+    ExternalParent: ExternalParent
+    ExternalParentAsInputOnly: ExternalParentAsInputOnly
+    ExternalParentAsOutputOnly: ExternalParentAsOutputOnly
+    ExternalTypeWithDtoProp: ExternalTypeWithDtoProp
+    InitRecordWithDefaultCtor: InitRecordWithDefaultCtor
+    InputOutputOnlyExternalTypeWithRequiredNonscalarProp: InputOutputOnlyExternalTypeWithRequiredNonscalarProp
+    Location: Location
+    OutputOnlyExternalTypeWithoutDefaultCtor: OutputOnlyExternalTypeWithoutDefaultCtor
+    OutputOnlyExternalTypeWithoutDefaultCtorWithInputMappableProperties: OutputOnlyExternalTypeWithoutDefaultCtorWithInputMappableProperties
+    OutputOnlyExternalTypeWithRequiredEntityProp: OutputOnlyExternalTypeWithRequiredEntityProp
+    Person: Person
+    PositionalRecord: PositionalRecord
+    Product: Product
+    ReadOnlyEntityUsedAsMethodInput: ReadOnlyEntityUsedAsMethodInput
+    RecursiveHierarchy: RecursiveHierarchy
+    RequiredAndInitModel: RequiredAndInitModel
+    Sibling: Sibling
+    StandaloneReadonly: StandaloneReadonly
+    StandaloneReadWrite: StandaloneReadWrite
+    StringIdentity: StringIdentity
+    Test: Test
+    ValidationTarget: ValidationTarget
+    ValidationTargetChild: ValidationTargetChild
+    WeatherData: WeatherData
+    ZipCode: ZipCode
+  }
+}

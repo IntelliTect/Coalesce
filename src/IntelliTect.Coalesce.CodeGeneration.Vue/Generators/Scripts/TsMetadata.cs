@@ -100,7 +100,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
 
         private void WriteCommonClassMetadata(TypeScriptCodeBuilder b, ClassViewModel model)
         {
-            b.StringProp("name", model.ClientTypeName);
+            b.StringProp("name", model.ClientTypeName, asConst: true);
             b.StringProp("displayName", model.DisplayName);
 
             var description = model.GetAttributeValue<DescriptionAttribute>(a => a.Description)
@@ -157,7 +157,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
         {
             using (b.Block($"export const {model.ClientTypeName} = domain.enums.{model.ClientTypeName} ="))
             {
-                b.StringProp("name", model.ClientTypeName);
+                b.StringProp("name", model.ClientTypeName, asConst: true);
                 b.StringProp("displayName", model.DisplayName);
                 b.StringProp("type", "enum");
 
@@ -209,8 +209,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
         {
             // We need to qualify with "domain." instead of the exported const
             // because in the case of a self-referential property, TypeScript can't handle recursive implicit type definitions.
-
-            return $"(domain.types.{obj.ViewModelClassName} as {(obj.IsDbMappedType ? "ModelType" : "ObjectType")})";
+            // Including the name here lets us access the name of the property's actual type from typeland. Used heavily in c-select.
+            return $"(domain.types.{obj.ViewModelClassName} as {(obj.IsDbMappedType ? "ModelType" : "ObjectType")} & {{ name: \"{obj.ClientTypeName}\" }})";
         }
 
         private void WriteClassPropertyMetadata(TypeScriptCodeBuilder b, ClassViewModel model, PropertyViewModel prop)
@@ -688,7 +688,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
             switch (kind)
             {
                 case TypeDiscriminator.Enum:
-                    b.Line($"get typeDef() {{ return domain.enums.{type.ClientTypeName} }},");
+                    b.Line($"get typeDef() {{ return {type.ClientTypeName} }},");
                     break;
 
                 case TypeDiscriminator.Model:

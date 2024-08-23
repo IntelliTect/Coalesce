@@ -810,3 +810,35 @@ export class WeatherData {
 }
 
 
+declare module "coalesce-vue/lib/model" {
+  interface ModelTypeLookup {
+    AuditEntryState: AuditEntryState
+    Genders: Genders
+    SkyConditions: SkyConditions
+    Statuses: Statuses
+    Titles: Titles
+    AuditLog: AuditLog
+    AuditLogProperty: AuditLogProperty
+    Case: Case
+    CaseDto: CaseDto
+    CaseDtoStandalone: CaseDtoStandalone
+    CaseProduct: CaseProduct
+    CaseSummary: CaseSummary
+    Company: Company
+    DevTeam: DevTeam
+    Location: Location
+    Log: Log
+    Person: Person
+    PersonCriteria: PersonCriteria
+    PersonLocation: PersonLocation
+    PersonStats: PersonStats
+    Product: Product
+    ProductDetails: ProductDetails
+    StandaloneReadCreate: StandaloneReadCreate
+    StandaloneReadonly: StandaloneReadonly
+    StandaloneReadWrite: StandaloneReadWrite
+    StreetAddress: StreetAddress
+    WeatherData: WeatherData
+    ZipCode: ZipCode
+  }
+}

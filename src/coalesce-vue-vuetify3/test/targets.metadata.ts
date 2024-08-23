@@ -10,11 +10,11 @@ import {
   solidify,
 } from "coalesce-vue";
 
-const metaBase = (name: string = "model") => {
+const metaBase = <TName extends string>(name: TName) => {
   return {
     name: name,
     displayName: name.substr(0, 1).toUpperCase() + name.substr(1),
-  };
+  } as const;
 };
 
 const value = (name: string = "prop") => {
@@ -29,6 +29,7 @@ const domain: Domain = { enums: {}, types: {}, services: {} };
 
 export const Course = (domain.types.Course = {
   ...metaBase("Course"),
+  name: "Course" as const,
   type: "model",
   behaviorFlags: 7 as BehaviorFlags,
   get keyProp() {
@@ -84,7 +85,7 @@ export const Course = (domain.types.Course = {
           .keyProp as PrimaryKeyProperty;
       },
       get typeDef() {
-        return domain.types.Student as ModelType;
+        return domain.types.Student as ModelType & { name: "Student" };
       },
     },
   },
@@ -313,7 +314,7 @@ export const Student = (domain.types.Student = {
           displayName: "Model",
           type: "model",
           get typeDef() {
-            return domain.types.Course as ModelType;
+            return domain.types.Course as ModelType & { name: "Course" };
           },
           role: "value",
         },

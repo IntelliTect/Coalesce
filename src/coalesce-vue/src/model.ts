@@ -33,6 +33,11 @@ import {
   getInternalInstance,
 } from "./util.js";
 
+/** Populated by generated code in order to perform lookups of actual model types
+ * using metadata names as inputs to the lookup.
+ */
+export interface ModelTypeLookup {}
+
 /**
  * Represents a model with metadata information.
  */

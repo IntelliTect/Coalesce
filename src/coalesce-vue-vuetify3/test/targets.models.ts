@@ -111,3 +111,11 @@ export interface DisplaysStudent
   name: string | null;
   student: Student | null;
 }
+
+declare module "coalesce-vue" {
+  interface ModelTypeLookup {
+    Course: Course;
+    Student: Student;
+    Advisor: Advisor;
+  }
+}

@@ -122,7 +122,10 @@ export default defineComponent({
     preselectSingle: { required: false, type: Boolean, default: false },
     openOnClear: { required: false, type: Boolean, default: true },
     reloadOnOpen: { required: false, type: Boolean, default: false },
-    params: { required: false, type: Object as PropType<ListParameters> },
+    params: {
+      required: false,
+      type: Object as PropType<Partial<ListParameters>>,
+    },
 
     /** Response caching configuration for the `/get` and `/list` API calls made by the component.
      * See https://intellitect.github.io/Coalesce/stacks/vue/layers/api-clients.html#response-caching. */

@@ -149,7 +149,7 @@ export default defineComponent({
       return ret;
     },
 
-    listParams(): ListParameters {
+    listParams(): Partial<ListParameters> {
       return {
         pageSize: 100,
         ...this.params,

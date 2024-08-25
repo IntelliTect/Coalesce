@@ -58,18 +58,15 @@ The name of the navigation property on the middle entity that points at the far 
 ``` c#
 public class Person
 {
-    public int PersonId { get; set; }
-    public string FirstName { get; set; }
-    public string LastName { get; set; }
-
+    ...
+    
     [ManyToMany("Appointments", FarNavigationProperty = nameof(PersonAppointment.Appointment))]
     public ICollection<PersonAppointment> PersonAppointments { get; set; }
 }
 
 public class Appointment
 {
-    public int AppointmentId { get; set; }
-    public DateTime AppointmentDate { get; set; }
+    ...
 
     [ManyToMany("People", FarNavigationProperty = nameof(PersonAppointment.Person))]
     public ICollection<PersonAppointment> PersonAppointments { get; set; }
@@ -77,15 +74,10 @@ public class Appointment
 
 public class PersonAppointment
 {
-    public int PersonAppointmentId { get; set; }
+    ...
 
-    public int PersonId { get; set; }
-    public Person Person { get; set; }
-
-    public int AppointmentId { get; set; }
-    public Appointment Appointment { get; set; }
-
-    // Additional reference requiring the use of FarNavigationProperty
+    // Adding a third reference navigation property in the middle table requires 
+    // the use of FarNavigationProperty in order to resolve ambiguity.
     public int WaiverId { get; set; }
     public Waiver Waiver { get; set; }
 }

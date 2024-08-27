@@ -1336,6 +1336,12 @@ export abstract class ApiState<
     }
   }
 
+  /** Invoke a call to the API endpoint after an affirmative confirmation from the user. */
+  confirmInvoke(message: string, ...args: TArgs) {
+    if (!confirm(message)) return;
+    return this._invokeInternal(this, this.invoker, [...args]);
+  }
+
   private _callbacks: {
     onFulfilled: Array<ApiStateHook<any>>;
     onRejected: Array<ApiStateHook<any>>;
@@ -1833,6 +1839,13 @@ export class ItemApiStateWithArgs<
     this.args = this.argsFactory();
   }
 
+  /** Invoke a call to the API endpoint after an affirmative confirmation from the user.
+   * If `args` is not provided, the values in `this.args` will be used for the method's parameters. */
+  public confirmInvokeWithArgs(message: string, args: TArgsObj = this.args) {
+    if (!confirm(message)) return;
+    return this.invokeWithArgs(args);
+  }
+
   /** Returns the URL for the endpoint, including querystring parameters, if invoked using `this.args`. */
   get url() {
     const request = this.apiClient._observeRequests(() => {
@@ -1988,6 +2001,13 @@ export class ListApiStateWithArgs<
   /** Replace `this.args` with a new, blank object containing default values (typically nulls) */
   public resetArgs() {
     this.args = this.argsFactory();
+  }
+
+  /** Invoke a call to the API endpoint after an affirmative confirmation from the user.
+   * If `args` is not provided, the values in `this.args` will be used for the method's parameters. */
+  public confirmInvokeWithArgs(message: string, args: TArgsObj = this.args) {
+    if (!confirm(message)) return;
+    return this.invokeWithArgs(args);
   }
 
   constructor(

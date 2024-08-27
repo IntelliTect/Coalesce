@@ -1074,6 +1074,25 @@ describe("$makeCaller with args object", () => {
     expect(caller.rawResponse.status).toBe(200);
   });
 
+  test("confirm is typed properly", async () => {
+    const endpointMock = makeEndpointMock();
+    const caller = new StudentApiClient().$makeCaller(
+      "item",
+      (c, num: number) => endpointMock(num),
+      () => ({ num: null as number | null }),
+      (c, args) => endpointMock(args.num)
+    );
+
+    window.confirm = vitest.fn(() => true);
+    const result = await caller.confirmInvokeWithArgs("Are you sure?", {
+      num: 10,
+    });
+    expect(result).toBe(10);
+    expect(caller.rawResponse.data.object).toBe(10);
+    expect(caller.rawResponse.status).toBe(200);
+    expect(window.confirm).toBeCalledTimes(1);
+  });
+
   test("allows return undefined from args invoker func", async () => {
     const endpointMock = makeEndpointMock();
     const caller = new StudentApiClient().$makeCaller(
@@ -1159,6 +1178,7 @@ describe("$makeCaller with args object", () => {
     expect(caller.rawResponse.status).toBe(200);
 
     await caller.invoke(42);
+    await caller.confirmInvoke("Are you sure?", 42);
     await caller.invokeWithArgs({ num: 42 });
     //@ts-expect-error
     await caller("asdf");

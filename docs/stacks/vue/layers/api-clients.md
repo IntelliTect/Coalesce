@@ -35,17 +35,20 @@ API Callers (typed with the name `ApiState` in `coalesce-vue`, sometimes also re
 
 #### Endpoint Invocation
 Each API Caller is itself a function, so it can be invoked to trigger an API request to the server.
+
 #### State management
 API Callers contain properties about the last request made, including things like ``wasSuccessful``, ``isLoading``, ``result``, and more.
+
 #### Concurrency Management
 Using `setConcurrency(mode)`, you can configure how each individual caller handles what happens when multiple requests are made simultaneously
+
 #### Argument Binding
 API Callers can be created so that they have an `args` object that can be bound to, using `.invokeWithArgs()` to make a request using those arguments as the API endpoint's parameters. The API Callers created for the [ViewModel Layer](/stacks/vue/layers/viewmodels.md) are all created this way.
 
 
 ### Creating and Invoking an API Caller
 
-API Callers can be created with the `$makeCaller` method of an API Client. The way in which it was created affects how it is invoked, as the parameters that the caller accepts are defined when it is created. 
+API Callers can be created with the `$makeCaller` method of an API Client. If desired, you can define parameters that will be accepted as input to each invocation.
 
 ::: tip
 During typical development, it is unlikely that you'll need to make a custom API Caller - the ones created for you on the generated [ViewModel Layer](/stacks/vue/layers/viewmodels.md) will usually suffice. However, creating your own can allow for some more advanced functionality.
@@ -131,11 +134,11 @@ True if there is currently a request pending for the API Caller.
     
 <Prop def="wasSuccessful: boolean | null" lang="ts" />
 
-A boolean indicating if the last request made was successful, or null if either no request has been made yet, or if a request has been made but has not yet completed.
+A boolean indicating if the last request was successful. `null` if no request has been made yet or if a request has been made but has not yet completed.
     
 <Prop def="message: string | null" lang="ts" />
 
-An error message from the last request, if any. Will be set to null upon successful completion of a request.
+An message from the last request. Typically an error message if the last request failed, but messages can also be provided with successful `ApiResult` responses in your [custom methods](/modeling/model-components/methods.md).
     
 <Prop def="hasResult: boolean" lang="ts" />
 
@@ -261,15 +264,24 @@ If a promise is returned, this promise will be awaited and will delay the settin
 
 <Prop def="invoke(...args: TArgs)" lang="ts" />
 
+Invokes the endpoint with provided args.
+
 The invoke function is a reference from the caller to itself. In other words, `caller.invoke === caller`.
 
+<Prop def="confirmInvoke(message: string, ...args: TArgs)" lang="ts" />
 
-<Prop def="invokeWithArgs(args?: {})" lang="ts" />
+Similar to `invoke`, but prompts for confirmation from the user (via `window.confirm`) with the provided message.
 
-If called a parameter, that parameter will be used as the args object. Otherwise, `caller.args` will be used.
+
+<Prop def="invokeWithArgs(args?: TArgs)" lang="ts" />
+
+Invokes the endpoint with the specified args, defaulting to `caller.args`.
 
 Only exists if the caller was created with the option of being invoked with an args object as described in the sections above.
 
+<Prop def="confirmInvokeWithArgs(message: string, args?: TArgs)" lang="ts" />
+
+Similar to `invokeWithArgs`, but prompts for confirmation from the user (via `window.confirm`) with the provided message.
 
 <Prop def="getResultObjectUrl(vue?: Vue): string | undefined" lang="ts" />
 

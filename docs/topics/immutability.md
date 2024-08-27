@@ -8,22 +8,24 @@ It is ultimately up to each individual use case when deciding when data needs to
 
 This page explores some techniques to achieve immutability in a Coalesce application.
 
-## Configuration vs Transactional data
+## Configuration data vs Transactional data
 
 ### Transactional Data
 
 In an application, transaction data is any data that represents an event or action that occurred at a particular time. A purchase, an invoice or account statement, a message or email, an audit or error log, a calendar event - these are all examples of transactional data.
 
+For purposes of this exercise, we're also lumping non-configuration master data under the umbrella of transactional data. For example, a master Customer record, or a User record.
+
 ### Configuration Data
 
-Configuration data is the data in a system that informs how transactions occur. The current price of an item, any kind of template, and even singleton configuration like a site's theme and colors.
+Configuration data (sometimes categorized under the umbrella of master data) is the data in a system that informs how transactions occur. The current price of an item, any kind of template, and even singleton configuration like a site's theme and colors.
 
-If you have configuration data that is linked to transactional data and affects how that transactional data is interpreted, that configuration data becomes a strong candidate for immutability.
+If you have configuration data that is linked to transactional data and affects how that transactional data is interpreted, that configuration data becomes a strong candidate for immutability. For example, an `InvoiceLine` record that references a `Product` by foreign key instead of having columns on `InvoiceLine` to hold the price and description of the product - any future updates to the product should not affect past invoices.
 
 
 ## General Techniques
 
-The following immutability techniques are applicable to both transaction and configuration data.
+The following immutability techniques are applicable to both transactional and configuration data.
 
 ### Disable edits
 
@@ -53,7 +55,7 @@ While not a immutability strategy on its own, implementing immutability usually 
 
 - Add a property to the type to indicate soft delete status (usually a `DateTimeOffset? DeletedDate { get; set; }`)
 - Choose how soft deletes will occur:
-  - To soft-delete items using the built-in `/delete` endpoint and `$delete` API on `ViewModel` instances, override `ExecuteDeleteAsync` on the type's [Behaviors](/modeling/model-components/behaviors.md) to set the `DeletedDate` and call `db.SaveChangesAsync()`. Do not call the base ExecuteDeleteAsync method (which will perform a hard delete). This approach also makes the Delete button in [admin pages](/stacks/vue/coalesce-vue-vuetify/overview.md#admin-components) to perform a soft delete.
+  - To soft-delete items using the built-in `/delete` endpoint and `$delete` API on `ViewModel` instances, override `ExecuteDeleteAsync` on the type's [Behaviors](/modeling/model-components/behaviors.md) to set the `DeletedDate` and call `db.SaveChangesAsync()`. Do not call the base ExecuteDeleteAsync method (which will perform a hard delete). This approach also makes the Delete button in [admin pages](/stacks/vue/coalesce-vue-vuetify/overview.md#admin-components) perform a soft delete.
   - Otherwise, set the soft delete flag using regular saves, just as you would change any other property. Don't forget to implement security restrictions around who can delete and un-delete records if that's important to your application.
 - Filter out soft-deleted values from selection in your custom UI pages. There are a few options here:
   - The simplest way is to use Coalesce's built-in [filtering](/modeling/model-components/data-sources.md#member-applylistpropertyfilter) to exclude soft-deleted items. This can be done from a [ListViewModel's $params.filter](/stacks/vue/layers/viewmodels.md#member-item-_params):
@@ -79,9 +81,7 @@ While not a immutability strategy on its own, implementing immutability usually 
 
 ## Configuration Immutability
 
-Configuration data is the data in a system that informs how transactions occur. The current price of an item, any kind of template, and even singleton configuration like a site's theme and colors.
-
-If you have configuration data that is linked to transactional data and affects how that transactional data is interpreted, that configuration data becomes a strong candidate for immutability as well.
+In addition to the general techniques above, the following are approaches are specifically relevant to handling configuration data:
 
 ### Enforce nothing, document consequences
 
@@ -155,7 +155,7 @@ public class ProductConfigurationVersion
 
 ```
 
-In this example, other configuration records that needs to reference the product can reference the `ProductConfiguration` record and not need to worry about requiring updates to foreign keys every time a new version of the product configuration is created. 
+In this example, other configuration records that need to reference the product can reference the `ProductConfiguration` record and not need to worry about performing updates to foreign keys every time a new version of the product configuration is created. 
 
-Transactional records, on the other hand, should have foreign keys that reference the `ProductConfigurationVersion` record so that the exact active version at the time of purchase is known. The principal configuration record can be acquired through the `Configuration` navigation property.
+Transactional records, on the other hand, should have foreign keys that reference the `ProductConfigurationVersion` record so that the exact active version at the time of purchase is known. The principal configuration record can be reached through the `Configuration` navigation property.
 

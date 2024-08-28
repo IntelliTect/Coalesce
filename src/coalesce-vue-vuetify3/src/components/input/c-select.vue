@@ -496,7 +496,7 @@ const modelObjectMeta = computed(() => {
 });
 
 /** The effective object (whose type is described by `modelObjectMeta`) that has been provided to the component. */
-const internalModelValue = computed(() => {
+const internalModelValue = computed((): SelectedModelType | null => {
   if (props.objectValue) {
     return props.objectValue;
   }
@@ -564,7 +564,7 @@ const internalModelValue = computed(() => {
 });
 
 /** The effective key (whose type is described by `modelObjectMeta`) that has been provided to the component. */
-const internalKeyValue = computed(() => {
+const internalKeyValue = computed((): SelectedPkType | null => {
   let value: any;
   if (props.keyValue) {
     value = props.keyValue;
@@ -793,7 +793,7 @@ if (!propMeta) {
  * A caller that will be used to resolve the full object when the only thing
  * that has been provided to c-select is a primary key value.
  */
-const getCaller = new ModelApiClient(modelObjectMeta.value)
+const getCaller = new ModelApiClient<SelectedModelType>(modelObjectMeta.value)
   .$useSimultaneousRequestCaching()
   .$makeCaller(
     "item",
@@ -805,7 +805,7 @@ const getCaller = new ModelApiClient(modelObjectMeta.value)
   )
   .setConcurrency("debounce");
 
-const listCaller = new ModelApiClient(modelObjectMeta.value)
+const listCaller = new ModelApiClient<SelectedModelType>(modelObjectMeta.value)
   .$useSimultaneousRequestCaching()
   .$makeCaller("list", (c) => {
     return c.list({

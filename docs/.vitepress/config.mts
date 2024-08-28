@@ -198,6 +198,7 @@ export default defineConfig({
           { text: "Config: Code Gen", link: "/topics/coalesce-json" },
           autoTitle("/concepts/include-tree"),
           autoTitle("/concepts/includes"),
+          autoTitle("/topics/upgrading"),
 
           { text: "Vue 2 to Vue 3", link: "/stacks/vue/vue2-to-vue3" },
           {

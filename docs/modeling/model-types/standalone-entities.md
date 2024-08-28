@@ -1,11 +1,139 @@
 
 # Standalone Entities
 
-In Coalesce, Standalone Entities are types that behave like [entity types](./entities.md) (they can support the full suite generated CRUD endpoints), but are not based on Entity Framework. These types are discovered by Coalesce by annotating them with `[Coalesce, StandaloneEntity]`.
+In Coalesce, Standalone Entities are types that behave like [entity types](./entities.md) (they can support the full suite of generated CRUD API endpoints), but are not required to be based on Entity Framework. These types are discovered by Coalesce by annotating them with `[Coalesce, StandaloneEntity]`.
 
 For these types, you must define at least one custom [Data Source](/modeling/model-components/data-sources.md), and optionally a [Behaviors](/modeling/model-components/behaviors.md) class as well. If no behaviors are defined, the type is implicitly read-only, equivalent to turning off create/edit/delete via the [Security Attributes](/modeling/model-components/attributes/security-attribute.md).
 
-To define data sources and behaviors for Standalone Entities, it is recommended you inherit from `StandardDataSource<T>` and `StandardBehaviors<T>`, respectively. For example:
+
+## Read-only with EF backing store
+
+In the below example, the standalone entity `PageListing` is used as a lightweight, read-only representation of a `Page` EF entity,
+with some properties omitted for performance (`Content`) and other properties simplified (`Author`).
+
+``` c#
+[Coalesce, StandaloneEntity]
+public class PageListing
+{
+    public int Id { get; set; }
+
+    [Search(SearchMethod = SearchAttribute.SearchMethods.Contains), ListText]
+    public string Title { get; set; } = "";
+
+    [DefaultOrderBy(OrderByDirections.Descending)]
+    public DateTimeOffset Date { get; set; }
+
+    public string Author { get; set; }
+
+    public class DefaultSource(CrudContext context) : StandardDataSource<PageListing>(context)
+    {
+        public override Task<IQueryable<PageListing>> GetQueryAsync(IDataSourceParameters parameters)
+          => db.Pages
+            .Where(p => p.IsPublished)
+            .Select(p => new PageListing 
+            {
+                Id = p.Id,
+                Title = p.Title,
+                DateModified = p.Date,
+                Author = p.CreatedBy.FullName
+            });
+    }
+}
+
+// EF entity model
+public class Page 
+{
+    public int Id { get; set; }
+    public string Title { get; set; }
+    public DateTimeOffset DateModified { get; set; }
+    public string Content { get; set; }
+    public bool IsPublished { get; set; }
+    public int CreatedById { get; set; }
+    public User CreatedBy { get; set; }
+}
+```
+
+
+## Read/write with EF backing store
+
+Building on the previous example, we can make the `Title` of a `PageListing` editable as follows:
+
+``` c#
+[Coalesce, StandaloneEntity]
+[Create(DenyAll)]
+[Delete(DenyAll)]
+public class PageListing
+{
+    // properties and data source same as previous example.
+
+    public class Behaviors(CrudContext<AppDbContext> context) : StandardBehaviors<PageListing>(context)
+    {
+        public override Task ExecuteSaveAsync(SaveKind kind, PageListing? oldItem, PageListing item)
+        {
+            // Note: `page` is guaranteed to exist here because the `PageListing item` instance
+            // is a projection from the Page table and was loaded from the type's data source 
+            // immediately before ExecuteSaveAsync was called.
+            var page = await context.DbContext.Pages.FindAsync(item.Id)!;
+
+            // Perform mapping of properties that should be savable, from `item` to the backing entity.
+            page.Title = item.Title;
+
+            await context.DbContext.SaveChangesAsync();
+        }
+
+        public override Task ExecuteDeleteAsync(PageListing item) => throw new NotSupportedException();
+    }
+}
+```
+
+To add support for creates or deletes, implement the additional necessary actions in the overridden methods on the behaviors, and remove the DenyAll attributes.
+
+
+``` c#
+[Coalesce, StandaloneEntity]
+[Create(DenyAll)]
+[Delete(DenyAll)]
+public class PageListing
+{
+    // properties and data source same as previous example.
+
+    public class Behaviors(CrudContext<AppDbContext> context) : StandardBehaviors<PageListing>(context)
+    {
+        public override async Task ExecuteSaveAsync(SaveKind kind, PageListing? oldItem, PageListing item)
+        {
+            Page page;
+            if (kind == SaveKind.Create)
+            {
+                context.DbContext.Add(page = new Page { CreatedById = User.GetUserId() });
+            }
+            else
+            {
+                page = await context.DbContext.Pages.FindAsync(item.Id)!;
+            }
+
+            page.Title = item.Title;
+            await context.DbContext.SaveChangesAsync();
+
+            // Propagate the new primary key back to the standalone entity instance 
+            // (in case this was a Create action instead of an Update).
+            item.Id = page.Id;
+        }
+
+        public override async Task ExecuteDeleteAsync(PageListing item)
+        {
+            var page = await context.DbContext.Pages.FindAsync(item.Id)!;
+            context.DbContext.Remove(page);
+            await context.DbContext.SaveChangesAsync();
+        }
+    }
+}
+```
+
+## Read-only without EF
+
+Standalone entities can be created with *any* kind of backing store you can imagine - an in-memory store, a Redis instance, or an external REST API, for example.
+
+The below example is admittedly contrived, as it is unlikely that you would be using an in-memory collection as a data persistence mechanism. A more likely real-world scenario would be to dependency inject an interface to some other data store.
 
 ``` c#
 [Coalesce, StandaloneEntity]
@@ -22,18 +150,27 @@ public class StandaloneExample
     private static int nextId = 0;
     private static ConcurrentDictionary<int, StandaloneExample> backingStore = new ConcurrentDictionary<int, StandaloneExample>();
 
-    public class DefaultSource : StandardDataSource<StandaloneExample>
+    public class DefaultSource(CrudContext context) : StandardDataSource<StandaloneExample>(context)
     {
-        public DefaultSource(CrudContext context) : base(context) { }
-
         public override Task<IQueryable<StandaloneExample>> GetQueryAsync(IDataSourceParameters parameters)
             => Task.FromResult(backingStore.Values.AsQueryable());
     }
+}
+```
 
-    public class Behaviors : StandardBehaviors<StandaloneExample>
+## Read/write without EF
+
+Building on the previous example, we can add support for saves and deletes by adding a Behaviors implementation:
+
+``` c#
+
+[Coalesce, StandaloneEntity]
+public class StandaloneExample
+{
+    // properties and data source same as previous example.
+
+    public class Behaviors(CrudContext context) : StandardBehaviors<StandaloneExample>(context)
     {
-        public Behaviors(CrudContext context) : base(context) { }
-
         public override Task ExecuteDeleteAsync(StandaloneExample item)
         {
             backingStore.TryRemove(item.Id, out _);
@@ -47,10 +184,10 @@ public class StandaloneExample
                 item.Id = Interlocked.Increment(ref nextId);
                 backingStore.TryAdd(item.Id, item);
             }
-            else
+            else if (backingStore.TryGetValue(item.Id, out var storeItem))
             {
-                backingStore.TryRemove(item.Id, out _);
-                backingStore.TryAdd(item.Id, item);
+                storeItem.Name = item.Name;
+                storeItem.Date = item.Date;
             }
             return Task.CompletedTask;
         }
@@ -58,4 +195,3 @@ public class StandaloneExample
 }
 ```
 
-The above example is admittedly contrived, as it is unlikely that you would be using an in-memory collection as a data persistence mechanism. A more likely real-world scenario would be to inject an interface to some other data store. Data Source and Behavior classes are instantiated using your application's service provider, so any registered service can be injected.

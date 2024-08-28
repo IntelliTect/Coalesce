@@ -1,12 +1,27 @@
 # Custom DTOs
 
-In addition to the generated [Generated C# DTOs](/stacks/agnostic/dtos.md) that Coalesce will create for you, you may also create your own implementations of an `IClassDto`. These types are first-class citizens in Coalesce - you will get a full suite of features surrounding them as if they were entities. This includes generated API Controllers, Admin Views, and full [TypeScript ViewModels](/stacks/vue/layers/viewmodels.md#viewmodels) and [TypeScript ListViewModels](/stacks/vue/layers/viewmodels.md#listviewmodels).
+In addition to the generated [Generated C# DTOs](/stacks/agnostic/dtos.md) that Coalesce will create for you, you may also create your own implementations of an `IClassDto`. These types are first-class citizens in Coalesce - you will get a full suite of features surrounding them as if they were entities. This includes generated API Controllers, admin pages, and full [TypeScript ViewModels](/stacks/vue/layers/viewmodels.md#viewmodels) and [TypeScript ListViewModels](/stacks/vue/layers/viewmodels.md#listviewmodels).
 
-The difference between a Custom DTO and the underlying entity that they represent is as follows:
 
-- The only time your custom DTO will be served is when it is requested directly from one of the endpoints on its generated controller, or when its type is explicitly used by a [method](/modeling/model-components/methods.md) or [property](../model-components/properties.md) of another type.
+## Purpose
 
-- When mapping data from your database, or mapping data incoming from the client, the DTO itself must manually map all properties, since there is no corresponding [Generated DTO](/stacks/agnostic/dtos.md). Attributes like [[DtoIncludes] & [DtoExcludes]](/modeling/model-components/attributes/dto-includes-excludes.md) and property-level security through [Security Attributes](/modeling/model-components/attributes/security-attribute.md) have no effect on custom DTOs, since those attribute only affect what get generated for [Generated C# DTOs](/stacks/agnostic/dtos.md).
+Custom DTOs have a fair amount of overlap with the capabilities of [Standalone Entities](./standalone-entities.md).
+
+- Both can expose a lightweight or alternate representation of an entity. For example, a "listing" version of an entity with large data members omitted (such that for performance, they've never retrieved from the database).
+- Both choose exactly how each property value is mapped between the client and the database. Each property mapping is written by hand by the developer.
+- Both expose their own set of API endpoints (`/get`, `/list`, `/save`, etc).
+
+However, standalone entities have the following advantages over custom DTOs:
+
+- Standalone entities are significantly easier to write than custom DTOs for [read-only use cases](./standalone-entities.md#read-only-with-ef-backing-store).
+- Standalone entities aren't limited to being based on an EF entity, while custom DTOs must always choose an entity type to be based upon.
+- Standalone entities support all security attributes, while custom DTOs do not support property-level [Security Attributes](/modeling/model-components/attributes/security-attribute.md), nor [[DtoIncludes] & [DtoExcludes]](/modeling/model-components/attributes/dto-includes-excludes.md). In custom DTOs, this logic must be written by hand in the MapTo/MapFrom methods when it is needed.
+- Standalone entities support surgical saves easily, while custom DTOs [require significant extra code](#surgical-saves).
+
+Custom DTOs have the following advantages over standalone entities:
+
+- You write all the mapping logic between the DTO and the entity, which can make it easier to implement large amounts of custom logic at this layer that standalone entities would need to implement with [Restrictions](/modeling/model-components/attributes/restrict.md). While these kinds of mapping restrictions can also be written in a standalone entity's [projected EF query](https://learn.microsoft.com/en-us/ef/core/performance/efficient-querying#project-only-properties-you-need), some logic can be difficult or impossible to represent in an EF query expression.
+
 
 
 ## Creating a Custom DTO
@@ -144,10 +159,10 @@ public class CaseDtoSource : ProjectedDtoDataSource<Case, CaseDto, AppDbContext>
 
 ## Surgical Saves
 
-The [Vue ViewModels](../../stacks/vue/layers/viewmodels.md) are configured for surgical saves by default. This can be disabled through the [`$saveMode`](/stacks/vue/layers/viewmodels.md#member-_savemode) property.
-
 <!-- MARKER:surgical-saves-warning -->
 Surgical saves require DTOs on the server that are capable of determining which of their properties have been set by the model binder, as surgical saves are sent from the client by entirely omitting properties from the ``x-www-form-urlencoded`` body that is sent to the server.
 
 The [Generated C# DTOs](/stacks/agnostic/dtos.md) implement the necessary logic for this; however, any [Custom DTOs](/modeling/model-types/dtos.md) must have this logic manually written by you, the developer. Either implement the same pattern that can be seen in the [Generated C# DTOs](/stacks/agnostic/dtos.md), or do not use surgical saves with Custom DTOs.
 <!-- MARKER:end-surgical-saves-warning -->
+
+The [Vue ViewModels](../../stacks/vue/layers/viewmodels.md) for custom DTOs have surgical saves disabled by default. This can be re-enabled through the [`$saveMode`](/stacks/vue/layers/viewmodels.md#member-_savemode) property if you've implemented the necessary logic on the server side.

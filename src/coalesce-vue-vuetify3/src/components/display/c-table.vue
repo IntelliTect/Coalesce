@@ -81,7 +81,6 @@
 <script lang="ts">
 import {
   defineComponent,
-  onBeforeMount,
   onMounted,
   onUnmounted,
   PropType,
@@ -115,12 +114,12 @@ export default defineComponent({
   },
 
   setup() {
-    const cTable = ref<HTMLDivElement | null>(null);
+    const cTable = ref<HTMLDivElement>();
     const isHorizontalScrollbarVisible = ref(false);
 
     const checkHorizontalScrollbar = () => {
       const divElement = cTable.value;
-      const tableElement = cTable.value?.querySelector("table");
+      const tableElement = divElement?.querySelector("table");
       if (tableElement && divElement) {
         isHorizontalScrollbarVisible.value =
           divElement.clientWidth < tableElement.clientWidth;
@@ -131,7 +130,7 @@ export default defineComponent({
       checkHorizontalScrollbar();
     });
 
-    onMounted(async () => {
+    onMounted(() => {
       if (cTable.value) {
         resizeObserver.observe(cTable.value);
       }
@@ -139,9 +138,7 @@ export default defineComponent({
     });
 
     onUnmounted(() => {
-      if (cTable.value) {
-        resizeObserver.unobserve(cTable.value);
-      }
+      resizeObserver.disconnect();
     });
 
     return {

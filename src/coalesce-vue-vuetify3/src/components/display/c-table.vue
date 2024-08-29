@@ -114,7 +114,7 @@ export default defineComponent({
   },
 
   setup() {
-    const cTable = ref<HTMLDivElement | null>(null);
+    const cTable = ref<HTMLDivElement>();
     const isHorizontalScrollbarVisible = ref(false);
 
     const checkHorizontalScrollbar = () => {

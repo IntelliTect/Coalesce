@@ -138,9 +138,7 @@ export default defineComponent({
     });
 
     onUnmounted(() => {
-      if (cTable.value) {
-        resizeObserver.unobserve(cTable.value);
-      }
+      resizeObserver.disconnect();
     });
 
     return {

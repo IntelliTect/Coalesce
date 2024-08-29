@@ -81,7 +81,6 @@
 <script lang="ts">
 import {
   defineComponent,
-  onBeforeMount,
   onMounted,
   onUnmounted,
   PropType,

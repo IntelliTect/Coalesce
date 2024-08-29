@@ -130,7 +130,7 @@ export default defineComponent({
       checkHorizontalScrollbar();
     });
 
-    onMounted(async () => {
+    onMounted(() => {
       if (cTable.value) {
         resizeObserver.observe(cTable.value);
       }

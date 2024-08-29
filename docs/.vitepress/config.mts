@@ -196,6 +196,7 @@ export default defineConfig({
           { text: "Config: ASP.NET Core", link: "/topics/startup" },
           autoTitle("/topics/audit-logging"),
           { text: "Config: Code Gen", link: "/topics/coalesce-json" },
+          autoTitle("/topics/immutability"),
           autoTitle("/concepts/include-tree"),
           autoTitle("/concepts/includes"),
           autoTitle("/topics/upgrading"),

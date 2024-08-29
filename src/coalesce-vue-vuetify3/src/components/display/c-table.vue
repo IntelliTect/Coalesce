@@ -120,7 +120,7 @@ export default defineComponent({
 
     const checkHorizontalScrollbar = () => {
       const divElement = cTable.value;
-      const tableElement = cTable.value?.querySelector("table");
+      const tableElement = divElement?.querySelector("table");
       if (tableElement && divElement) {
         isHorizontalScrollbarVisible.value =
           divElement.clientWidth < tableElement.clientWidth;

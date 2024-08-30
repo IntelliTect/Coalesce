@@ -49,9 +49,9 @@ If provided, specifies which properties, and their ordering, should be given a c
     
 If not provided, all non-key columns that aren't annotated with [[Hidden(HiddenAttribute.Areas.List)]](/modeling/model-components/attributes/hidden.md) are given a column.
 
-<Prop def="extraHeaders?: string[]" lang="ts" />
+<Prop def="extraHeaders?: string[] | {header: string; isFixed: boolean }[]" lang="ts" />
 
-The text contents of one or more extra ``th`` elements to render in the table. Should be used in conjunction with the ``item.append`` slot.
+The text contents of one or more extra ``th`` elements to render in the table. Each header can be defined as either fixed (sticky) or scrollable. Should be used in conjunction with the ``item.append`` slot.
 
 <Prop def="editable: boolean = false" lang="ts" />
 

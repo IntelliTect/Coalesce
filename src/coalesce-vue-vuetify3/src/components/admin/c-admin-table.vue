@@ -19,7 +19,9 @@
         :editable="editable"
         :list="viewModel"
         :extra-headers="
-          canEdit || canDelete || hasInstanceMethods ? ['Actions'] : []
+          canEdit || canDelete || hasInstanceMethods
+            ? [{ header: 'Actions', isFixed: true }]
+            : []
         "
         :loaders="{
           '': list.$modelOnlyMode
@@ -32,8 +34,12 @@
               ],
         }"
       >
-        <template #item-append="{ item }">
-          <td width="1%" class="c-admin-table--actions">
+        <template #item-append="{ item, isHorizontalScrollbarVisible }">
+          <td
+            width="1%"
+            :class="{ ['fixed-column-right']: isHorizontalScrollbarVisible }"
+            class="c-admin-table--actions"
+          >
             <div class="d-flex flex-nowrap text-no-wrap ga-1" no-gutters>
               <v-btn
                 v-if="editable && !effectiveAutoSave"

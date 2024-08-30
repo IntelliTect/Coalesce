@@ -23,7 +23,7 @@ A more complex example using more of the available options:
   :props="['firstName', 'lastName']"
   :extra-headers="['Actions']"
 >
-  <template #item.append="{item}"> 
+  <template #item-append="{item}"> 
     <td>
       <v-btn
         title="Edit"
@@ -51,7 +51,7 @@ If not provided, all non-key columns that aren't annotated with [[Hidden(HiddenA
 
 <Prop def="extraHeaders?: string[]" lang="ts" />
 
-The text contents of one or more extra ``th`` elements to render in the table. Should be used in conjunction with the ``item.append`` slot.
+The text contents of one or more extra ``th`` elements to render in the table. Should be used in conjunction with the ``item-append`` slot.
 
 <Prop def="editable: boolean = false" lang="ts" />
 
@@ -63,4 +63,4 @@ If true, properties in each table cell will be rendered with [c-admin-display](/
 
 ## Slots
 
-``item.append`` - A slot rendered after the ``td`` elements on each row that render the properties of each item in the table. Should be provided zero or more additional ``td`` elements. The number should match the number of additional headers provided to the `extraHeaders` prop.
+``item-append`` - A slot rendered after the ``td`` elements on each row that render the properties of each item in the table. Should be provided zero or more additional ``td`` elements. The number should match the number of additional headers provided to the `extraHeaders` prop.

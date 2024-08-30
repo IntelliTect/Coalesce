@@ -1,0 +1,4 @@
+*.g.cs linguist-generated=true
+*.g.ts linguist-generated=true
+auto-imports.d.ts linguist-generated=true
+components.d.ts linguist-generated=true

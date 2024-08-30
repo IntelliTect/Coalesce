@@ -1,0 +1,36 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <PackageType>Template</PackageType>
+    <PackageId>IntelliTect.Coalesce.Vue.Template</PackageId>
+    <Version>1.0.0</Version>
+    <TargetFramework>net8.0</TargetFramework>
+
+    <Title>Coalesce Vue Project Template</Title>
+    <Company>IntelliTect</Company>
+    <Authors>IntelliTect</Authors>
+    <Product>Coalesce Web Framework</Product>
+    <Copyright>Copyright IntelliTect © 2023, All Rights Reserved.</Copyright>
+    <DefaultLanguage>en-US</DefaultLanguage>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/IntelliTect/Coalesce.Vue.Template</PackageProjectUrl>
+    <PackageTags>dotnet-new IntelliTect Coalesce Vue</PackageTags>
+
+    <RepositoryUrl>https://github.com/IntelliTect/Coalesce.Vue.Template</RepositoryUrl>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+
+    <IncludeContentInPack>true</IncludeContentInPack>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <ContentTargetFolders>content</ContentTargetFolders>
+    <NoDefaultExcludes>true</NoDefaultExcludes>
+    <NoWarn>$(NoWarn);NU5128</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="content/**" Exclude="**\bin\**\*;**\obj\**\*;**\*.user;**\*.lock.json;**\.DS_Store;**\node_modules\**\*;**\.vs\**\*" />
+    <Compile Remove="**\*" />
+    <None Include="README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+</Project>

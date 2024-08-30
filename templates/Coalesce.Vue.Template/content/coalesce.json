@@ -1,0 +1,16 @@
+{
+  "webProject": {
+    "projectFile": "./Coalesce.Starter.Vue.Web/Coalesce.Starter.Vue.Web.csproj"
+  },
+  "dataProject": {
+    "projectFile": "./Coalesce.Starter.Vue.Data/Coalesce.Starter.Vue.Data.csproj"
+  },
+
+  "rootGenerator": "Vue",
+
+  "generatorConfig": {
+    "Scripts": {
+      "targetDirectory": "../src"
+    }
+  }
+}

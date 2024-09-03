@@ -14,7 +14,7 @@ Add a reference to the Nuget package `IntelliTect.Coalesce.AuditLogging` to your
 
 ``` xml:no-line-numbers{3}
 <ItemGroup>
-  <PackageReference Include="IntelliTect.Coalesce.Vue" Version="$(CoalesceVersion)" />
+  <PackageReference Include="IntelliTect.Coalesce" Version="$(CoalesceVersion)" />
   <PackageReference Include="IntelliTect.Coalesce.AuditLogging" Version="$(CoalesceVersion)" />
 </ItemGroup>
 ```

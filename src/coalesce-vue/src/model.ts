@@ -45,6 +45,11 @@ import {
  */
 export interface ModelTypeLookup {}
 
+/** Populated by generated code in order to perform lookups of actual enum types
+ * using metadata names as inputs to the lookup.
+ */
+export interface EnumTypeLookup {}
+
 /**
  * Represents a model with metadata information.
  */

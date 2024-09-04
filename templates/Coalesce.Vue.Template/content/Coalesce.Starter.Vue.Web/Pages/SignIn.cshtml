@@ -4,8 +4,6 @@
 @inject IAuthenticationSchemeProvider schemeProvider
 
 @{
-    ViewData["Title"] = "Log in";
-
     var externalLogins = (await schemeProvider.GetAllSchemesAsync()).Where(s => s.DisplayName != null);
 }
 
@@ -92,8 +90,9 @@
             Sign In
         </div>
 
-        <form asp-route-returnUrl="@Model.ReturnUrl" method="post" class="form-horizontal">
+        <form method="post" class="form-horizontal">
             @Html.AntiForgeryToken()
+            <input type="hidden" name="@nameof(Model.ReturnUrl)" value="@Model.ReturnUrl" />
             @foreach (var provider in externalLogins)
             {
                 <button type="submit" name="provider" value="@provider.Name" title="Log in with @provider.DisplayName">

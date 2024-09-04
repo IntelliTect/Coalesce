@@ -8,8 +8,10 @@ namespace Coalesce.Starter.Vue.Data.Models;
 [Read(nameof(Permission.ViewAuditLogs))]
 public class AuditLog : DefaultAuditLog
 {
+#if Identity
     public string? UserId { get; set; }
 
     [Display(Name = "Changed By")]
-    public AppUser? User { get; set; }
+    public User? User { get; set; }
+#endif
 }

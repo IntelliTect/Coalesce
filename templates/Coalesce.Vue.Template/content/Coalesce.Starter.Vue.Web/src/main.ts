@@ -3,6 +3,7 @@ import { createVuetify } from "vuetify";
 import { createCoalesceVuetify } from "coalesce-vue-vuetify3";
 import { aliases, fa } from "vuetify/iconsets/fa";
 import { AxiosClient as CoalesceAxiosClient } from "coalesce-vue";
+import { isAxiosError } from "axios";
 
 import App from "./App.vue";
 import router from "./router";
@@ -41,9 +42,10 @@ const vuetify = createVuetify({
   theme: {
     themes: {
       light: {
-        colors: {
-          primary: "#127815",
-        },
+        colors: {},
+      },
+      dark: {
+        colors: {},
       },
     },
   },
@@ -52,6 +54,15 @@ const vuetify = createVuetify({
 // SETUP: coalesce-vue
 CoalesceAxiosClient.defaults.baseURL = "/api";
 CoalesceAxiosClient.defaults.withCredentials = true;
+CoalesceAxiosClient.interceptors.response.use(undefined, (error) => {
+  if (isAxiosError(error) && error.response?.status == 401) {
+    console.warn("Received 401 from API endpoint. Refreshing for sign-in.");
+    window.location.reload();
+    return new Promise<void>(() => {
+      /* Never resolving promise so failure doesn't momentarily propagate to UI */
+    });
+  }
+});
 
 // SETUP: coalesce-vue-vuetify
 const coalesceVuetify = createCoalesceVuetify({
@@ -67,3 +78,5 @@ app.use(router);
 app.use(vuetify);
 app.use(coalesceVuetify);
 app.mount("#app");
+
+// TODO: Appinsights frontend

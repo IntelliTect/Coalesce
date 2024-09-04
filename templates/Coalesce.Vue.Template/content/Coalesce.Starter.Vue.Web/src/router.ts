@@ -2,9 +2,13 @@ import { createRouter, createWebHistory } from "vue-router";
 import {
   CAdminEditorPage,
   CAdminTablePage,
+  //#if AuditLogs
   CAdminAuditLogPage,
+  //#endif
 } from "coalesce-vue-vuetify3";
+//#if Identity
 import { Permission } from "./models.g";
+//#endif
 
 export default createRouter({
   history: createWebHistory(),
@@ -14,6 +18,14 @@ export default createRouter({
       name: "home",
       component: () => import("./views/Home.vue"),
     },
+    //#if ExampleModel
+    {
+      path: "/widget/:id(\\d+)?",
+      name: "widget-edit",
+      component: () => import("./views/WidgetEdit.vue"),
+      props: (r) => ({ id: +r.params.id }),
+    },
+    //#endif
     {
       path: "/admin",
       name: "admin",
@@ -33,12 +45,14 @@ export default createRouter({
       component: titledAdminPage(CAdminEditorPage),
       props: true,
     },
+    //#if AuditLogs
     {
       path: "/admin/audit",
       component: titledAdminPage(CAdminAuditLogPage),
-      meta: { permissions: [Permission.Admin] },
+      meta: { permissions: [Permission.ViewAuditLogs] },
       props: { type: "AuditLog" },
     },
+    //#endif
     {
       name: "error-404",
       path: "/:pathMatch(.*)*",
@@ -54,7 +68,9 @@ function titledAdminPage<
   T extends
     | typeof CAdminTablePage
     | typeof CAdminEditorPage
+    //#if AuditLogs
     | typeof CAdminAuditLogPage,
+  //#endif
 >(component: T) {
   return defineComponent({
     setup() {

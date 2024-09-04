@@ -13,10 +13,8 @@
     </PackageReference>
     
     <PackageReference Include="IntelliTect.Coalesce" Version="$(CoalesceVersion)" />
+    <!--#if (AuditLogs) -->
     <PackageReference Include="IntelliTect.Coalesce.AuditLogging" Version="$(CoalesceVersion)" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Utilities\" />
+    <!--#endif -->
   </ItemGroup>
 </Project>

@@ -4,8 +4,8 @@ using Microsoft.AspNetCore.Identity;
 [Edit(DenyAll)]
 [Create(DenyAll)]
 [Delete(DenyAll)]
-public class AppRoleClaim : IdentityRoleClaim<string>
+public class RoleClaim : IdentityRoleClaim<string>
 {
     [ForeignKey(nameof(RoleId))]
-    public AppRole? Role { get; set; }
+    public Role? Role { get; set; }
 }

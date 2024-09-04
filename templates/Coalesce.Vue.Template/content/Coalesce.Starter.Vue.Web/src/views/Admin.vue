@@ -32,6 +32,7 @@
 import $metadata from "@/metadata.g";
 
 const adminTypes = Object.values($metadata.types).filter(
+  // @ts-ignore may be errors if the project has only model or only object types
   (t) => t.type == "model",
 );
 </script>

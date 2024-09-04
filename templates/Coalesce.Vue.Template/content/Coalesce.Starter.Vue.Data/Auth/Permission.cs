@@ -1,7 +1,7 @@
 ﻿namespace Coalesce.Starter.Vue.Data;
 
 /// <summary>
-/// The permissions available for assignment to <see cref="Models.AppRole"/>s. 
+/// The permissions available for assignment to <see cref="Models.Role"/>s. 
 /// Permissions generally describe actions that a user can take within the application,
 /// while roles are usually representative of a job title or function.
 /// </summary>

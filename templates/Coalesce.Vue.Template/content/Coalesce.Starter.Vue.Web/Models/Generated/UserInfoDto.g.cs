@@ -8,12 +8,13 @@ using System.Security.Claims;
 
 namespace Coalesce.Starter.Vue.Web.Models
 {
-    public partial class UserInfoParameter : GeneratedParameterDto<Coalesce.Starter.Vue.Data.Services.UserInfo>
+    public partial class UserInfoParameter : GeneratedParameterDto<Coalesce.Starter.Vue.Data.Auth.UserInfo>
     {
         public UserInfoParameter() { }
 
         private string _Id;
         private string _UserName;
+        private string _FullName;
         private System.Collections.Generic.ICollection<string> _Roles;
         private System.Collections.Generic.ICollection<string> _Permissions;
 
@@ -26,6 +27,11 @@ namespace Coalesce.Starter.Vue.Web.Models
         {
             get => _UserName;
             set { _UserName = value; Changed(nameof(UserName)); }
+        }
+        public string FullName
+        {
+            get => _FullName;
+            set { _FullName = value; Changed(nameof(FullName)); }
         }
         public System.Collections.Generic.ICollection<string> Roles
         {
@@ -41,7 +47,7 @@ namespace Coalesce.Starter.Vue.Web.Models
         /// <summary>
         /// Map from the current DTO instance to the domain object.
         /// </summary>
-        public override void MapTo(Coalesce.Starter.Vue.Data.Services.UserInfo entity, IMappingContext context)
+        public override void MapTo(Coalesce.Starter.Vue.Data.Auth.UserInfo entity, IMappingContext context)
         {
             var includes = context.Includes;
 
@@ -49,6 +55,7 @@ namespace Coalesce.Starter.Vue.Web.Models
 
             if (ShouldMapTo(nameof(Id))) entity.Id = Id;
             if (ShouldMapTo(nameof(UserName))) entity.UserName = UserName;
+            if (ShouldMapTo(nameof(FullName))) entity.FullName = FullName;
             if (ShouldMapTo(nameof(Roles))) entity.Roles = Roles;
             if (ShouldMapTo(nameof(Permissions))) entity.Permissions = Permissions;
         }
@@ -56,11 +63,11 @@ namespace Coalesce.Starter.Vue.Web.Models
         /// <summary>
         /// Map from the current DTO instance to a new instance of the domain object.
         /// </summary>
-        public override Coalesce.Starter.Vue.Data.Services.UserInfo MapToNew(IMappingContext context)
+        public override Coalesce.Starter.Vue.Data.Auth.UserInfo MapToNew(IMappingContext context)
         {
             var includes = context.Includes;
 
-            var entity = new Coalesce.Starter.Vue.Data.Services.UserInfo()
+            var entity = new Coalesce.Starter.Vue.Data.Auth.UserInfo()
             {
                 Id = Id,
                 UserName = UserName,
@@ -69,30 +76,33 @@ namespace Coalesce.Starter.Vue.Web.Models
             };
 
             if (OnUpdate(entity, context)) return entity;
+            if (ShouldMapTo(nameof(FullName))) entity.FullName = FullName;
 
             return entity;
         }
     }
 
-    public partial class UserInfoResponse : GeneratedResponseDto<Coalesce.Starter.Vue.Data.Services.UserInfo>
+    public partial class UserInfoResponse : GeneratedResponseDto<Coalesce.Starter.Vue.Data.Auth.UserInfo>
     {
         public UserInfoResponse() { }
 
         public string Id { get; set; }
         public string UserName { get; set; }
+        public string FullName { get; set; }
         public System.Collections.Generic.ICollection<string> Roles { get; set; }
         public System.Collections.Generic.ICollection<string> Permissions { get; set; }
 
         /// <summary>
         /// Map from the domain object to the properties of the current DTO instance.
         /// </summary>
-        public override void MapFrom(Coalesce.Starter.Vue.Data.Services.UserInfo obj, IMappingContext context, IncludeTree tree = null)
+        public override void MapFrom(Coalesce.Starter.Vue.Data.Auth.UserInfo obj, IMappingContext context, IncludeTree tree = null)
         {
             if (obj == null) return;
             var includes = context.Includes;
 
             this.Id = obj.Id;
             this.UserName = obj.UserName;
+            this.FullName = obj.FullName;
             this.Roles = obj.Roles;
             this.Permissions = obj.Permissions;
         }

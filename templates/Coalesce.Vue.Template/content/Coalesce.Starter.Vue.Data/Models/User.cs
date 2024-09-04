@@ -2,14 +2,21 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Coalesce.Starter.Vue.Data.Models;
 
-[Edit("UserAdmin")]
-[Read]
+[Edit(nameof(Permission.UserAdmin))]
 [Create(DenyAll)]
 [Delete(DenyAll)]
-public class AppUser : IdentityUser
+public class User : IdentityUser
 {
     [Search(SearchMethod = SearchMethods.Contains)]
     public string? FullName { get; set; }
+
+#if UserPictures
+    [Read, Hidden]
+    public byte[]? PhotoMD5 { get; set; }
+
+    [InverseProperty(nameof(UserPhoto.User))]
+    public UserPhoto? Photo { get; set; }
+#endif
 
     [Search]
     public override string? UserName { get; set; }
@@ -51,8 +58,20 @@ public class AppUser : IdentityUser
 	public override bool LockoutEnabled { get; set; }
 
     [Read("UserAdmin")]
-    [InverseProperty(nameof(AppUserRole.User))]
+    [InverseProperty(nameof(UserRole.User))]
     [ManyToMany("Roles")]
-    public ICollection<AppUserRole>? UserRoles { get; set; }
+    public ICollection<UserRole>? UserRoles { get; set; }
 
+#if UserPictures
+    [Coalesce, Execute(HttpMethod = HttpMethod.Get, VaryByProperty = nameof(PhotoMD5))]
+    public ItemResult<IFile> GetPhoto(AppDbContext db)
+    {
+        return new IntelliTect.Coalesce.Models.File(db.UserPhotos
+            .Where(p => p.UserId == this.Id)
+            .Select(p => p.Content));
+    }
+#endif
+
+    // TODO: Make first user an admin.
+    // TODO: Seed an admin role with the admin permissions
 }

@@ -21,45 +21,45 @@ using System.Threading.Tasks;
 
 namespace Coalesce.Starter.Vue.Web.Api
 {
-    [Route("api/AppRoleClaim")]
+    [Route("api/RoleClaim")]
     [Authorize]
     [ServiceFilter(typeof(IApiActionFilter))]
-    public partial class AppRoleClaimController
-        : BaseApiController<AppRoleClaim, AppRoleClaimParameter, AppRoleClaimResponse, Coalesce.Starter.Vue.Data.AppDbContext>
+    public partial class RoleClaimController
+        : BaseApiController<RoleClaim, RoleClaimParameter, RoleClaimResponse, Coalesce.Starter.Vue.Data.AppDbContext>
     {
-        public AppRoleClaimController(CrudContext<Coalesce.Starter.Vue.Data.AppDbContext> context) : base(context)
+        public RoleClaimController(CrudContext<Coalesce.Starter.Vue.Data.AppDbContext> context) : base(context)
         {
-            GeneratedForClassViewModel = context.ReflectionRepository.GetClassViewModel<AppRoleClaim>();
+            GeneratedForClassViewModel = context.ReflectionRepository.GetClassViewModel<RoleClaim>();
         }
 
         [HttpGet("get/{id}")]
         [Authorize]
-        public virtual Task<ItemResult<AppRoleClaimResponse>> Get(
+        public virtual Task<ItemResult<RoleClaimResponse>> Get(
             int id,
             DataSourceParameters parameters,
-            IDataSource<AppRoleClaim> dataSource)
+            IDataSource<RoleClaim> dataSource)
             => GetImplementation(id, parameters, dataSource);
 
         [HttpGet("list")]
         [Authorize]
-        public virtual Task<ListResult<AppRoleClaimResponse>> List(
+        public virtual Task<ListResult<RoleClaimResponse>> List(
             ListParameters parameters,
-            IDataSource<AppRoleClaim> dataSource)
+            IDataSource<RoleClaim> dataSource)
             => ListImplementation(parameters, dataSource);
 
         [HttpGet("count")]
         [Authorize]
         public virtual Task<ItemResult<int>> Count(
             FilterParameters parameters,
-            IDataSource<AppRoleClaim> dataSource)
+            IDataSource<RoleClaim> dataSource)
             => CountImplementation(parameters, dataSource);
 
         [HttpPost("bulkSave")]
         [Authorize]
-        public virtual Task<ItemResult<AppRoleClaimResponse>> BulkSave(
+        public virtual Task<ItemResult<RoleClaimResponse>> BulkSave(
             [FromBody] BulkSaveRequest dto,
             [FromQuery] DataSourceParameters parameters,
-            IDataSource<AppRoleClaim> dataSource,
+            IDataSource<RoleClaim> dataSource,
             [FromServices] IDataSourceFactory dataSourceFactory,
             [FromServices] IBehaviorsFactory behaviorsFactory)
             => BulkSaveImplementation(dto, parameters, dataSource, dataSourceFactory, behaviorsFactory);

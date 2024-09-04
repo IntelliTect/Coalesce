@@ -8,9 +8,9 @@ using System.Security.Claims;
 
 namespace Coalesce.Starter.Vue.Web.Models
 {
-    public partial class AppRoleClaimParameter : GeneratedParameterDto<AppRoleClaim>
+    public partial class RoleClaimParameter : GeneratedParameterDto<RoleClaim>
     {
-        public AppRoleClaimParameter() { }
+        public RoleClaimParameter() { }
 
         private int? _Id;
         private string _RoleId;
@@ -41,7 +41,7 @@ namespace Coalesce.Starter.Vue.Web.Models
         /// <summary>
         /// Map from the current DTO instance to the domain object.
         /// </summary>
-        public override void MapTo(AppRoleClaim entity, IMappingContext context)
+        public override void MapTo(RoleClaim entity, IMappingContext context)
         {
             var includes = context.Includes;
 
@@ -56,28 +56,28 @@ namespace Coalesce.Starter.Vue.Web.Models
         /// <summary>
         /// Map from the current DTO instance to a new instance of the domain object.
         /// </summary>
-        public override AppRoleClaim MapToNew(IMappingContext context)
+        public override RoleClaim MapToNew(IMappingContext context)
         {
-            var entity = new AppRoleClaim();
+            var entity = new RoleClaim();
             MapTo(entity, context);
             return entity;
         }
     }
 
-    public partial class AppRoleClaimResponse : GeneratedResponseDto<AppRoleClaim>
+    public partial class RoleClaimResponse : GeneratedResponseDto<RoleClaim>
     {
-        public AppRoleClaimResponse() { }
+        public RoleClaimResponse() { }
 
         public int? Id { get; set; }
         public string RoleId { get; set; }
         public string ClaimType { get; set; }
         public string ClaimValue { get; set; }
-        public Coalesce.Starter.Vue.Web.Models.AppRoleResponse Role { get; set; }
+        public Coalesce.Starter.Vue.Web.Models.RoleResponse Role { get; set; }
 
         /// <summary>
         /// Map from the domain object to the properties of the current DTO instance.
         /// </summary>
-        public override void MapFrom(AppRoleClaim obj, IMappingContext context, IncludeTree tree = null)
+        public override void MapFrom(RoleClaim obj, IMappingContext context, IncludeTree tree = null)
         {
             if (obj == null) return;
             var includes = context.Includes;
@@ -87,7 +87,7 @@ namespace Coalesce.Starter.Vue.Web.Models
             this.ClaimType = obj.ClaimType;
             this.ClaimValue = obj.ClaimValue;
             if (tree == null || tree[nameof(this.Role)] != null)
-                this.Role = obj.Role.MapToDto<Coalesce.Starter.Vue.Data.Models.AppRole, AppRoleResponse>(context, tree?[nameof(this.Role)]);
+                this.Role = obj.Role.MapToDto<Coalesce.Starter.Vue.Data.Models.Role, RoleResponse>(context, tree?[nameof(this.Role)]);
 
         }
     }

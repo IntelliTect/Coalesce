@@ -120,7 +120,7 @@ namespace Coalesce.Starter.Vue.Web.Models
         public string ClientIp { get; set; }
         public string Referrer { get; set; }
         public string Endpoint { get; set; }
-        public Coalesce.Starter.Vue.Web.Models.AppUserResponse User { get; set; }
+        public Coalesce.Starter.Vue.Web.Models.UserResponse User { get; set; }
         public System.Collections.Generic.ICollection<Coalesce.Starter.Vue.Web.Models.AuditLogPropertyResponse> Properties { get; set; }
 
         /// <summary>
@@ -142,7 +142,7 @@ namespace Coalesce.Starter.Vue.Web.Models
             this.Referrer = obj.Referrer;
             this.Endpoint = obj.Endpoint;
             if (tree == null || tree[nameof(this.User)] != null)
-                this.User = obj.User.MapToDto<Coalesce.Starter.Vue.Data.Models.AppUser, AppUserResponse>(context, tree?[nameof(this.User)]);
+                this.User = obj.User.MapToDto<Coalesce.Starter.Vue.Data.Models.User, UserResponse>(context, tree?[nameof(this.User)]);
 
             var propValProperties = obj.Properties;
             if (propValProperties != null && (tree == null || tree[nameof(this.Properties)] != null))

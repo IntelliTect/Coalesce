@@ -19,129 +19,9 @@ export enum Permission {
 }
 
 
-export interface AppRole extends Model<typeof metadata.AppRole> {
-  name: string | null
-  roleClaims: AppRoleClaim[] | null
-  permissions: Permission[] | null
-  id: string | null
-}
-export class AppRole {
-  
-  /** Mutates the input object and its descendents into a valid AppRole implementation. */
-  static convert(data?: Partial<AppRole>): AppRole {
-    return convertToModel(data || {}, metadata.AppRole) 
-  }
-  
-  /** Maps the input object and its descendents to a new, valid AppRole implementation. */
-  static map(data?: Partial<AppRole>): AppRole {
-    return mapToModel(data || {}, metadata.AppRole) 
-  }
-  
-  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.AppRole; }
-  
-  /** Instantiate a new AppRole, optionally basing it on the given data. */
-  constructor(data?: Partial<AppRole> | {[k: string]: any}) {
-    Object.assign(this, AppRole.map(data || {}));
-  }
-}
-
-
-export interface AppRoleClaim extends Model<typeof metadata.AppRoleClaim> {
-  role: AppRole | null
-  id: number | null
-  roleId: string | null
-  claimType: string | null
-  claimValue: string | null
-}
-export class AppRoleClaim {
-  
-  /** Mutates the input object and its descendents into a valid AppRoleClaim implementation. */
-  static convert(data?: Partial<AppRoleClaim>): AppRoleClaim {
-    return convertToModel(data || {}, metadata.AppRoleClaim) 
-  }
-  
-  /** Maps the input object and its descendents to a new, valid AppRoleClaim implementation. */
-  static map(data?: Partial<AppRoleClaim>): AppRoleClaim {
-    return mapToModel(data || {}, metadata.AppRoleClaim) 
-  }
-  
-  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.AppRoleClaim; }
-  
-  /** Instantiate a new AppRoleClaim, optionally basing it on the given data. */
-  constructor(data?: Partial<AppRoleClaim> | {[k: string]: any}) {
-    Object.assign(this, AppRoleClaim.map(data || {}));
-  }
-}
-
-
-export interface AppUser extends Model<typeof metadata.AppUser> {
-  userName: string | null
-  accessFailedCount: number | null
-  lockoutEnd: Date | null
-  lockoutEnabled: boolean | null
-  userRoles: AppUserRole[] | null
-  id: string | null
-}
-export class AppUser {
-  
-  /** Mutates the input object and its descendents into a valid AppUser implementation. */
-  static convert(data?: Partial<AppUser>): AppUser {
-    return convertToModel(data || {}, metadata.AppUser) 
-  }
-  
-  /** Maps the input object and its descendents to a new, valid AppUser implementation. */
-  static map(data?: Partial<AppUser>): AppUser {
-    return mapToModel(data || {}, metadata.AppUser) 
-  }
-  
-  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.AppUser; }
-  
-  /** Instantiate a new AppUser, optionally basing it on the given data. */
-  constructor(data?: Partial<AppUser> | {[k: string]: any}) {
-    Object.assign(this, AppUser.map(data || {}));
-  }
-}
-
-
-export interface AppUserRole extends Model<typeof metadata.AppUserRole> {
-  id: string | null
-  user: AppUser | null
-  role: AppRole | null
-  userId: string | null
-  roleId: string | null
-}
-export class AppUserRole {
-  
-  /** Mutates the input object and its descendents into a valid AppUserRole implementation. */
-  static convert(data?: Partial<AppUserRole>): AppUserRole {
-    return convertToModel(data || {}, metadata.AppUserRole) 
-  }
-  
-  /** Maps the input object and its descendents to a new, valid AppUserRole implementation. */
-  static map(data?: Partial<AppUserRole>): AppUserRole {
-    return mapToModel(data || {}, metadata.AppUserRole) 
-  }
-  
-  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.AppUserRole; }
-  
-  /** Instantiate a new AppUserRole, optionally basing it on the given data. */
-  constructor(data?: Partial<AppUserRole> | {[k: string]: any}) {
-    Object.assign(this, AppUserRole.map(data || {}));
-  }
-}
-export namespace AppUserRole {
-  export namespace DataSources {
-    
-    export class DefaultSource implements DataSource<typeof metadata.AppUserRole.dataSources.defaultSource> {
-      readonly $metadata = metadata.AppUserRole.dataSources.defaultSource
-    }
-  }
-}
-
-
 export interface AuditLog extends Model<typeof metadata.AuditLog> {
   userId: string | null
-  user: AppUser | null
+  user: User | null
   id: number | null
   type: string | null
   keyValue: string | null
@@ -204,9 +84,132 @@ export class AuditLogProperty {
 }
 
 
+export interface Role extends Model<typeof metadata.Role> {
+  name: string | null
+  roleClaims: RoleClaim[] | null
+  permissions: Permission[] | null
+  id: string | null
+}
+export class Role {
+  
+  /** Mutates the input object and its descendents into a valid Role implementation. */
+  static convert(data?: Partial<Role>): Role {
+    return convertToModel(data || {}, metadata.Role) 
+  }
+  
+  /** Maps the input object and its descendents to a new, valid Role implementation. */
+  static map(data?: Partial<Role>): Role {
+    return mapToModel(data || {}, metadata.Role) 
+  }
+  
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.Role; }
+  
+  /** Instantiate a new Role, optionally basing it on the given data. */
+  constructor(data?: Partial<Role> | {[k: string]: any}) {
+    Object.assign(this, Role.map(data || {}));
+  }
+}
+
+
+export interface RoleClaim extends Model<typeof metadata.RoleClaim> {
+  role: Role | null
+  id: number | null
+  roleId: string | null
+  claimType: string | null
+  claimValue: string | null
+}
+export class RoleClaim {
+  
+  /** Mutates the input object and its descendents into a valid RoleClaim implementation. */
+  static convert(data?: Partial<RoleClaim>): RoleClaim {
+    return convertToModel(data || {}, metadata.RoleClaim) 
+  }
+  
+  /** Maps the input object and its descendents to a new, valid RoleClaim implementation. */
+  static map(data?: Partial<RoleClaim>): RoleClaim {
+    return mapToModel(data || {}, metadata.RoleClaim) 
+  }
+  
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.RoleClaim; }
+  
+  /** Instantiate a new RoleClaim, optionally basing it on the given data. */
+  constructor(data?: Partial<RoleClaim> | {[k: string]: any}) {
+    Object.assign(this, RoleClaim.map(data || {}));
+  }
+}
+
+
+export interface User extends Model<typeof metadata.User> {
+  fullName: string | null
+  photoMD5: string | null
+  userName: string | null
+  accessFailedCount: number | null
+  lockoutEnd: Date | null
+  lockoutEnabled: boolean | null
+  userRoles: UserRole[] | null
+  id: string | null
+}
+export class User {
+  
+  /** Mutates the input object and its descendents into a valid User implementation. */
+  static convert(data?: Partial<User>): User {
+    return convertToModel(data || {}, metadata.User) 
+  }
+  
+  /** Maps the input object and its descendents to a new, valid User implementation. */
+  static map(data?: Partial<User>): User {
+    return mapToModel(data || {}, metadata.User) 
+  }
+  
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.User; }
+  
+  /** Instantiate a new User, optionally basing it on the given data. */
+  constructor(data?: Partial<User> | {[k: string]: any}) {
+    Object.assign(this, User.map(data || {}));
+  }
+}
+
+
+export interface UserRole extends Model<typeof metadata.UserRole> {
+  id: string | null
+  user: User | null
+  role: Role | null
+  userId: string | null
+  roleId: string | null
+}
+export class UserRole {
+  
+  /** Mutates the input object and its descendents into a valid UserRole implementation. */
+  static convert(data?: Partial<UserRole>): UserRole {
+    return convertToModel(data || {}, metadata.UserRole) 
+  }
+  
+  /** Maps the input object and its descendents to a new, valid UserRole implementation. */
+  static map(data?: Partial<UserRole>): UserRole {
+    return mapToModel(data || {}, metadata.UserRole) 
+  }
+  
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.UserRole; }
+  
+  /** Instantiate a new UserRole, optionally basing it on the given data. */
+  constructor(data?: Partial<UserRole> | {[k: string]: any}) {
+    Object.assign(this, UserRole.map(data || {}));
+  }
+}
+export namespace UserRole {
+  export namespace DataSources {
+    
+    export class DefaultSource implements DataSource<typeof metadata.UserRole.dataSources.defaultSource> {
+      readonly $metadata = metadata.UserRole.dataSources.defaultSource
+    }
+  }
+}
+
+
 export interface UserInfo extends Model<typeof metadata.UserInfo> {
   id: string | null
   userName: string | null
+  fullName: string | null
   roles: string[] | null
   permissions: string[] | null
 }
@@ -237,12 +240,12 @@ declare module "coalesce-vue/lib/model" {
     Permission: Permission
   }
   interface ModelTypeLookup {
-    AppRole: AppRole
-    AppRoleClaim: AppRoleClaim
-    AppUser: AppUser
-    AppUserRole: AppUserRole
     AuditLog: AuditLog
     AuditLogProperty: AuditLogProperty
+    Role: Role
+    RoleClaim: RoleClaim
+    User: User
     UserInfo: UserInfo
+    UserRole: UserRole
   }
 }

@@ -1,8 +1,11 @@
 namespace Coalesce.Starter.Vue.Data.Models;
 
 public class Widget
+#if TrackingBase
+    : TrackingBase
+#endif
 {
-	public int WidgetId { get; set; }
+    public int WidgetId { get; set; }
 
 	public required string Name { get; set; }
 	

@@ -11,18 +11,24 @@ namespace Coalesce.Starter.Vue.Data;
 
 [Coalesce]
 public class AppDbContext
-	: IdentityDbContext<
-		AppUser,
-		AppRole,
+#if Identity
+    : IdentityDbContext<
+		User,
+		Role,
 		string,
 		IdentityUserClaim<string>,
-		AppUserRole,
+		UserRole,
 		IdentityUserLogin<string>,
-		AppRoleClaim,
+		RoleClaim,
 		IdentityUserToken<string>
-	>, 
-	IDataProtectionKeyContext, 
-	IAuditLogDbContext<AuditLog>
+	>
+#else
+    : DbContext
+#endif
+    , IDataProtectionKeyContext
+#if AuditLogs
+    , IAuditLogDbContext<AuditLog>
+#endif
 {
 	public bool SuppressAudit { get; set; } = false;
 	
@@ -30,16 +36,28 @@ public class AppDbContext
 
 	public AppDbContext(DbContextOptions options) : base(options) { }
 
+#if UserPictures
+    public DbSet<UserPhoto> UserPhotos { get; set; }
+#endif
+
+#if AuditLogs
     public DbSet<AuditLog> AuditLogs { get; set; }
     public DbSet<AuditLogProperty> AuditLogProperties { get; set; }
+#endif
+
+    public DbSet<Widget> Widgets { get; set; }
 
     [InternalUse]
     public DbSet<DataProtectionKey> DataProtectionKeys { get; set; }
 
+#if TrackingBase || AuditLogs
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         optionsBuilder
+#if TrackingBase
         .UseStamping<TrackingBase>((entity, user) => entity.SetTracking(user))
+#endif
+#if AuditLogs
         .UseCoalesceAuditLogging<AuditLog>(x => x
             .WithAugmentation<AuditOperationContext>()
             .ConfigureAudit(config =>
@@ -49,12 +67,17 @@ public class AppDbContext
                 config
                     .FormatType<byte[]>(ShaString)
                     .Exclude<DataProtectionKey>()
+#if TrackingBase
                     .ExcludeProperty<TrackingBase>(x => new { x.CreatedBy, x.CreatedById, x.CreatedOn, x.ModifiedBy, x.ModifiedById, x.ModifiedOn });
+#endif
             })
-        );
+        )
+#endif
+        ;
     }
+#endif
 
-	protected override void OnModelCreating(ModelBuilder builder)
+    protected override void OnModelCreating(ModelBuilder builder)
 	{
 		base.OnModelCreating(builder);
 
@@ -64,7 +87,8 @@ public class AppDbContext
 			relationship.DeleteBehavior = DeleteBehavior.Restrict;
 		}
 
-        builder.Entity<AppUserRole>(userRole =>
+#if Identity
+        builder.Entity<UserRole>(userRole =>
         {
             userRole.HasKey(ur => new { ur.UserId, ur.RoleId });
 
@@ -81,7 +105,7 @@ public class AppDbContext
                 .OnDelete(DeleteBehavior.Cascade);
         });
 
-        builder.Entity<AppRoleClaim>(e =>
+        builder.Entity<RoleClaim>(e =>
         {
             e.HasOne(ur => ur.Role)
                 .WithMany(x => x.RoleClaims)
@@ -90,5 +114,6 @@ public class AppDbContext
                 .IsRequired()
                 .OnDelete(DeleteBehavior.Cascade);
         });
-	}
+#endif
+    }
 }

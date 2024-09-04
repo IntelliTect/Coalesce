@@ -26,12 +26,12 @@ namespace Coalesce.Starter.Vue.Web.Api
     public partial class SecurityServiceController : Controller
     {
         protected ClassViewModel GeneratedForClassViewModel { get; }
-        protected Coalesce.Starter.Vue.Data.Services.SecurityService Service { get; }
+        protected Coalesce.Starter.Vue.Data.Auth.SecurityService Service { get; }
         protected CrudContext Context { get; }
 
-        public SecurityServiceController(CrudContext context, Coalesce.Starter.Vue.Data.Services.SecurityService service)
+        public SecurityServiceController(CrudContext context, Coalesce.Starter.Vue.Data.Auth.SecurityService service)
         {
-            GeneratedForClassViewModel = context.ReflectionRepository.GetClassViewModel<Coalesce.Starter.Vue.Data.Services.SecurityService>();
+            GeneratedForClassViewModel = context.ReflectionRepository.GetClassViewModel<Coalesce.Starter.Vue.Data.Auth.SecurityService>();
             Service = service;
             Context = context;
         }
@@ -49,7 +49,7 @@ namespace Coalesce.Starter.Vue.Web.Api
                 User
             );
             var _result = new ItemResult<UserInfoResponse>();
-            _result.Object = Mapper.MapToDto<Coalesce.Starter.Vue.Data.Services.UserInfo, UserInfoResponse>(_methodResult, _mappingContext, includeTree);
+            _result.Object = Mapper.MapToDto<Coalesce.Starter.Vue.Data.Auth.UserInfo, UserInfoResponse>(_methodResult, _mappingContext, includeTree);
             return _result;
         }
     }

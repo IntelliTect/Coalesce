@@ -1,24 +1,20 @@
 import { SecurityServiceViewModel } from "@/viewmodels.g";
-import { Permission, UserInfo } from "@/models.g";
+import {
+  //#if Identity
+  Permission,
+  //#endif
+  UserInfo,
+} from "@/models.g";
 
 const securityService = new SecurityServiceViewModel();
 securityService.whoAmI.setConcurrency("debounce");
-securityService.whoAmI.onRejected((e) => {
-  const caller = securityService.whoAmI;
-  if (caller.message && /you are not signed in/i.test(caller.message)) {
-    // This message we test for originates from the redirect handler in Program.cs.
-    // User is logged out. Full-page refresh to the public app's sign in page.
-    window.location.reload();
-  } else {
-    throw e;
-  }
-});
 
 /** Properties about the currently authenticated user */
 export const userInfo = computed(() => {
   return securityService.whoAmI.result ?? new UserInfo();
 });
 
+//#if Identity
 /** Returns true if the user has any of the specified permissions */
 export function can(...permission: Permission[]) {
   return (
@@ -27,6 +23,7 @@ export function can(...permission: Permission[]) {
     ) || false
   );
 }
+//#endif
 
 export const refreshUserInfo = () => securityService.whoAmI();
 
@@ -47,16 +44,24 @@ document.addEventListener(
   false,
 );
 
+refreshUserInfo();
+
 // Make useful properties available in vue <template>s
 declare module "@vue/runtime-core" {
   interface ComponentCustomProperties {
+    //#if Identity
     Permission: typeof Permission;
     $can: typeof can;
+    //#endif
     $userInfo: (typeof userInfo)["value"];
   }
 }
 export const globalProperties = {
+  //#if Identity
   Permission,
   $can: can,
-  $userInfo: userInfo,
+  //#endif
+  get $userInfo() {
+    return userInfo.value;
+  },
 };

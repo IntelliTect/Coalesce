@@ -1,16 +1,14 @@
 using Coalesce.Starter.Vue.Data.Coalesce;
 using Microsoft.AspNetCore.Identity;
-using System.Security.Claims;
-using System.Security;
 
 namespace Coalesce.Starter.Vue.Data.Models;
 
-[Create(DenyAll)]
-[Edit(DenyAll)]
-[Delete(DenyAll)]
-public class AppRole : IdentityRole
+[Create(nameof(Permission.UserAdmin))]
+[Edit(nameof(Permission.UserAdmin))]
+[Delete(nameof(Permission.UserAdmin))]
+public class Role : IdentityRole
 {
-    [Required, Search(SearchMethod = SearchAttribute.SearchMethods.Contains)]
+    [Required, Search(SearchMethod = SearchMethods.Contains)]
     public override string? Name { get; set; }
 
     [InternalUse]
@@ -20,9 +18,10 @@ public class AppRole : IdentityRole
     public override string? NormalizedName { get; set; }
 
     [Hidden(HiddenAttribute.Areas.List)]
-    [InverseProperty(nameof(AppRoleClaim.Role))]
-    public ICollection<AppRoleClaim>? RoleClaims { get; set; }
+    [InverseProperty(nameof(RoleClaim.Role))]
+    public ICollection<RoleClaim>? RoleClaims { get; set; }
 
+    // TODO: Permission editing
     [NotMapped, Hidden]
     public Permission[] Permissions => 
         RoleClaims is null 
@@ -33,9 +32,9 @@ public class AppRole : IdentityRole
             .ToArray();
 
 
-    public class Behaviors(RoleManager<AppRole> roleManager, CrudContext<AppDbContext> context) : AppBehaviors<AppRole>(context)
+    public class Behaviors(RoleManager<Role> roleManager, CrudContext<AppDbContext> context) : AppBehaviors<Role>(context)
     {
-        public override ItemResult BeforeSave(SaveKind kind, AppRole? oldItem, AppRole item)
+        public override ItemResult BeforeSave(SaveKind kind, Role? oldItem, Role item)
         {
             item.NormalizedName = roleManager.NormalizeKey(item.Name);
 

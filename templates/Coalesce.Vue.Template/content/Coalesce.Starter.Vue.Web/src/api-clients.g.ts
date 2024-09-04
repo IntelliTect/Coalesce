@@ -2,26 +2,6 @@ import * as $metadata from './metadata.g'
 import * as $models from './models.g'
 import { AxiosPromise, AxiosRequestConfig, ModelApiClient, ServiceApiClient, ItemResult, ListResult } from 'coalesce-vue/lib/api-client'
 
-export class AppRoleApiClient extends ModelApiClient<$models.AppRole> {
-  constructor() { super($metadata.AppRole) }
-}
-
-
-export class AppRoleClaimApiClient extends ModelApiClient<$models.AppRoleClaim> {
-  constructor() { super($metadata.AppRoleClaim) }
-}
-
-
-export class AppUserApiClient extends ModelApiClient<$models.AppUser> {
-  constructor() { super($metadata.AppUser) }
-}
-
-
-export class AppUserRoleApiClient extends ModelApiClient<$models.AppUserRole> {
-  constructor() { super($metadata.AppUserRole) }
-}
-
-
 export class AuditLogApiClient extends ModelApiClient<$models.AuditLog> {
   constructor() { super($metadata.AuditLog) }
 }
@@ -29,6 +9,35 @@ export class AuditLogApiClient extends ModelApiClient<$models.AuditLog> {
 
 export class AuditLogPropertyApiClient extends ModelApiClient<$models.AuditLogProperty> {
   constructor() { super($metadata.AuditLogProperty) }
+}
+
+
+export class RoleApiClient extends ModelApiClient<$models.Role> {
+  constructor() { super($metadata.Role) }
+}
+
+
+export class RoleClaimApiClient extends ModelApiClient<$models.RoleClaim> {
+  constructor() { super($metadata.RoleClaim) }
+}
+
+
+export class UserApiClient extends ModelApiClient<$models.User> {
+  constructor() { super($metadata.User) }
+  public getPhoto(id: string | null, etag?: string | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<File>> {
+    const $method = this.$metadata.methods.getPhoto
+    const $params =  {
+      id,
+      etag,
+    }
+    return this.$invoke($method, $params, $config)
+  }
+  
+}
+
+
+export class UserRoleApiClient extends ModelApiClient<$models.UserRole> {
+  constructor() { super($metadata.UserRole) }
 }
 
 

@@ -4,30 +4,36 @@ namespace Coalesce.Starter.Vue.Data.Models;
 
 public abstract class TrackingBase
 {
+#if Identity
     [ForeignKey("ModifiedById")]
     [Read, Display(Order = 1000010)]
-    public AppUser? ModifiedBy { get; set; }
+    public User? ModifiedBy { get; set; }
+#endif
+
     [Read]
     public string? ModifiedById { get; set; }
 
     [Read, Display(Order = 1000012)]
     public DateTimeOffset ModifiedOn { get; set; }
 
+#if Identity
     [ForeignKey("CreatedById")]
     [Read, Display(Order = 1000000)]
-    public virtual AppUser? CreatedBy { get; set; }
+    public User? CreatedBy { get; set; }
+#endif
+
     [Read]
     public string? CreatedById { get; set; }
 
     [Read, Display(Order = 1000002)]
-    public virtual DateTimeOffset CreatedOn { get; set; }
+    public DateTimeOffset CreatedOn { get; set; }
 
     [InternalUse]
-    public void SetTracking(string? userIdentityId)
+    public void SetTracking(string? userId)
     {
         if (CreatedById == null)
         {
-            CreatedById = userIdentityId;
+            CreatedById = userId;
         }
         if (CreatedOn == default)
         {
@@ -36,7 +42,7 @@ public abstract class TrackingBase
             CreatedOn = DateTimeOffset.Now;
         }
 
-        ModifiedById = userIdentityId;
+        ModifiedById = userId;
         ModifiedOn = DateTimeOffset.Now;
     }
 

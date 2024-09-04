@@ -1,5 +1,15 @@
-import { userInfo, can } from "@/user-service";
+import {
+  userInfo,
+  //#if Identity
+  can,
+  //#endif
+} from "@/user-service";
 
 export function useUser() {
-  return { userInfo, can };
+  return {
+    userInfo,
+    //#if Identity
+    can,
+    //#endif
+  };
 }

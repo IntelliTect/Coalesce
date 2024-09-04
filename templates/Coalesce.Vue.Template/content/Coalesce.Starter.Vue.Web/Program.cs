@@ -1,29 +1,22 @@
 using Coalesce.Starter.Vue.Data;
-using Coalesce.Starter.Vue.Data.Models;
+using Coalesce.Starter.Vue.Data.Auth;
+using Coalesce.Starter.Vue.Web;
 using IntelliTect.Coalesce;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Identity;
+#if AppInsights
+using Microsoft.ApplicationInsights.DependencyCollector;
+using Microsoft.ApplicationInsights.Extensibility;
+using Microsoft.Extensions.Logging.ApplicationInsights;
+#endif
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Logging.Console;
+#if OpenAPI
 using Microsoft.OpenApi.Models;
-using System.Security.Claims;
+#endif
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.DataProtection;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.Net.Http.Headers;
-using Microsoft.AspNetCore.Authentication.OAuth;
-using Coalesce.Starter.Vue.Data.Auth;
 
 var builder = WebApplication.CreateBuilder(new WebApplicationOptions
 {
@@ -45,6 +38,17 @@ builder.Configuration
 #region Configure Services
 
 var services = builder.Services;
+
+#if AppInsights
+services.AddApplicationInsightsTelemetry();
+services.AddSingleton<ITelemetryInitializer, AppInsightsTelemetryEnricher>();
+services.ConfigureTelemetryModule<DependencyTrackingTelemetryModule>((module, o) => {
+    module.EnableSqlCommandTextInstrumentation = true;
+});
+// App insights filters all logs to Warning by default.
+builder.Logging.AddFilter<ApplicationInsightsLoggerProvider>("Coalesce.Starter.Vue", LogLevel.Information);
+#endif
+
 
 services.AddDbContext<AppDbContext>(options => options
     .UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"), opt => opt
@@ -69,13 +73,21 @@ services
         options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
     });
 
+#if Identity
 builder.ConfigureAuthentication();
+#endif
 
+#if OpenAPI
 services.AddSwaggerGen(c =>
 {
     c.AddCoalesce();
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Current API", Version = "v1" });
 });
+#endif
+
+
+services.AddScoped<SecurityService>();
+
 
 #endregion
 
@@ -120,11 +132,13 @@ app.Use(async (context, next) =>
     await next();
 });
 
+#if OpenAPI
 app.MapSwagger();
 app.UseSwaggerUI(c =>
 {
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "Current API");
 });
+#endif
 
 app.MapRazorPages();
 app.MapDefaultControllerRoute();
@@ -145,11 +159,13 @@ using (var scope = app.Services.CreateScope())
 
     // Run database migrations.
     using var db = serviceScope.GetRequiredService<AppDbContext>();
-    db.Database.SetCommandTimeout(TimeSpan.FromMinutes(5));
-    //db.Database.Migrate();
-    // TODO: Temp
+    db.Database.SetCommandTimeout(TimeSpan.FromMinutes(10));
+#if KeepTemplateOnly
     db.Database.EnsureDeleted();
     db.Database.EnsureCreated();
+#else
+    db.Database.Migrate();
+#endif
 }
 
 app.Run();

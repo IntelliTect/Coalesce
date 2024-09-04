@@ -9,5 +9,11 @@
     <TypeScriptToolsVersion>5.5</TypeScriptToolsVersion>
 
     <CoalesceVersion>5.0.0-ci.20240828.1</CoalesceVersion>
+
+    <!--#if (KeepTemplateOnly) -->
+    <DefineConstants>
+      KeepTemplateOnly;AppInsights;OpenAPI;Identity;MicrosoftAuth;GoogleAuth;AuditLogs;UserPictures;TrackingBase;ExampleModel;
+    </DefineConstants>
+    <!--#endif -->
   </PropertyGroup>
 </Project>

@@ -10,9 +10,18 @@
 
   <ItemGroup>
     <PackageReference Include="IntelliTect.Coalesce.Vue" Version="$(CoalesceVersion)" />
+    <!--#if (OpenAPI) -->
     <PackageReference Include="IntelliTect.Coalesce.Swashbuckle" Version="$(CoalesceVersion)" />
+    <!--#endif -->
+    <!--#if (AppInsights) -->
+    <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.22.0" />
+    <!--#endif -->
+    <!--#if (MicrosoftAuth) -->
     <PackageReference Include="Microsoft.AspNetCore.Authentication.MicrosoftAccount" Version="8.0.8" />
+    <!--#endif -->
+    <!--#if (GoogleAuth) -->
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="8.0.8" />
+    <!--#endif -->
   </ItemGroup>
 
   <ItemGroup>

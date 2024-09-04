@@ -1,13 +1,18 @@
-using System.Diagnostics;
-using System.Web;
+using Coalesce.Starter.Vue.Data.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.Diagnostics;
 
 namespace Coalesce.Starter.Vue.Web.Controllers;
 
 #pragma warning disable CS1998 // Method lacks 'await' operators
 
-public class HomeController : Controller
+public class HomeController(
+#if Identity
+    SignInManager<User> signInManager
+#endif
+) : Controller
 {
     /// <summary>
     /// Spa route for vue-based parts of the app
@@ -47,4 +52,13 @@ public class HomeController : Controller
         ViewData["RequestId"] = Activity.Current?.Id ?? HttpContext.TraceIdentifier;
         return View();
     }
+
+#if Identity
+    [HttpGet]
+    public async new Task<ActionResult> SignOut()
+    {
+        await signInManager.SignOutAsync();
+        return Redirect("/");
+    }
+#endif
 }

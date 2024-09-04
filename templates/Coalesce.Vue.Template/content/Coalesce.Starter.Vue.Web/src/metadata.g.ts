@@ -53,279 +53,6 @@ export const Permission = domain.enums.Permission = {
   },
   ]),
 }
-export const AppRole = domain.types.AppRole = {
-  name: "AppRole" as const,
-  displayName: "App Role",
-  get displayProp() { return this.props.name }, 
-  type: "model",
-  controllerRoute: "AppRole",
-  get keyProp() { return this.props.id }, 
-  behaviorFlags: 0 as BehaviorFlags,
-  props: {
-    name: {
-      name: "name",
-      displayName: "Name",
-      type: "string",
-      role: "value",
-      rules: {
-        required: val => (val != null && val !== '') || "Name is required.",
-      }
-    },
-    roleClaims: {
-      name: "roleClaims",
-      displayName: "Role Claims",
-      type: "collection",
-      itemType: {
-        name: "$collectionItem",
-        displayName: "",
-        role: "value",
-        type: "model",
-        get typeDef() { return (domain.types.AppRoleClaim as ModelType & { name: "AppRoleClaim" }) },
-      },
-      role: "collectionNavigation",
-      get foreignKey() { return (domain.types.AppRoleClaim as ModelType & { name: "AppRoleClaim" }).props.roleId as ForeignKeyProperty },
-      get inverseNavigation() { return (domain.types.AppRoleClaim as ModelType & { name: "AppRoleClaim" }).props.role as ModelReferenceNavigationProperty },
-      hidden: 1 as HiddenAreas,
-      dontSerialize: true,
-    },
-    permissions: {
-      name: "permissions",
-      displayName: "Permissions",
-      type: "collection",
-      itemType: {
-        name: "$collectionItem",
-        displayName: "",
-        role: "value",
-        type: "enum",
-        get typeDef() { return Permission },
-      },
-      role: "value",
-      hidden: 3 as HiddenAreas,
-      dontSerialize: true,
-    },
-    id: {
-      name: "id",
-      displayName: "Id",
-      type: "string",
-      role: "primaryKey",
-      hidden: 3 as HiddenAreas,
-    },
-  },
-  methods: {
-  },
-  dataSources: {
-  },
-}
-export const AppRoleClaim = domain.types.AppRoleClaim = {
-  name: "AppRoleClaim" as const,
-  displayName: "App Role Claim",
-  get displayProp() { return this.props.id }, 
-  type: "model",
-  controllerRoute: "AppRoleClaim",
-  get keyProp() { return this.props.id }, 
-  behaviorFlags: 0 as BehaviorFlags,
-  props: {
-    role: {
-      name: "role",
-      displayName: "Role",
-      type: "model",
-      get typeDef() { return (domain.types.AppRole as ModelType & { name: "AppRole" }) },
-      role: "referenceNavigation",
-      get foreignKey() { return (domain.types.AppRoleClaim as ModelType & { name: "AppRoleClaim" }).props.roleId as ForeignKeyProperty },
-      get principalKey() { return (domain.types.AppRole as ModelType & { name: "AppRole" }).props.id as PrimaryKeyProperty },
-      get inverseNavigation() { return (domain.types.AppRole as ModelType & { name: "AppRole" }).props.roleClaims as ModelCollectionNavigationProperty },
-      dontSerialize: true,
-    },
-    id: {
-      name: "id",
-      displayName: "Id",
-      type: "number",
-      role: "primaryKey",
-      hidden: 3 as HiddenAreas,
-    },
-    roleId: {
-      name: "roleId",
-      displayName: "Role Id",
-      type: "string",
-      role: "foreignKey",
-      get principalKey() { return (domain.types.AppRole as ModelType & { name: "AppRole" }).props.id as PrimaryKeyProperty },
-      get principalType() { return (domain.types.AppRole as ModelType & { name: "AppRole" }) },
-      get navigationProp() { return (domain.types.AppRoleClaim as ModelType & { name: "AppRoleClaim" }).props.role as ModelReferenceNavigationProperty },
-      hidden: 3 as HiddenAreas,
-      rules: {
-        required: val => (val != null && val !== '') || "Role is required.",
-      }
-    },
-    claimType: {
-      name: "claimType",
-      displayName: "Claim Type",
-      type: "string",
-      role: "value",
-    },
-    claimValue: {
-      name: "claimValue",
-      displayName: "Claim Value",
-      type: "string",
-      role: "value",
-    },
-  },
-  methods: {
-  },
-  dataSources: {
-  },
-}
-export const AppUser = domain.types.AppUser = {
-  name: "AppUser" as const,
-  displayName: "App User",
-  get displayProp() { return this.props.id }, 
-  type: "model",
-  controllerRoute: "AppUser",
-  get keyProp() { return this.props.id }, 
-  behaviorFlags: 2 as BehaviorFlags,
-  props: {
-    userName: {
-      name: "userName",
-      displayName: "User Name",
-      type: "string",
-      role: "value",
-    },
-    accessFailedCount: {
-      name: "accessFailedCount",
-      displayName: "Access Failed Count",
-      type: "number",
-      role: "value",
-      dontSerialize: true,
-    },
-    lockoutEnd: {
-      name: "lockoutEnd",
-      displayName: "Lockout End",
-      type: "date",
-      dateKind: "datetime",
-      role: "value",
-      dontSerialize: true,
-    },
-    lockoutEnabled: {
-      name: "lockoutEnabled",
-      displayName: "Lockout Enabled",
-      type: "boolean",
-      role: "value",
-      dontSerialize: true,
-    },
-    userRoles: {
-      name: "userRoles",
-      displayName: "User Roles",
-      type: "collection",
-      itemType: {
-        name: "$collectionItem",
-        displayName: "",
-        role: "value",
-        type: "model",
-        get typeDef() { return (domain.types.AppUserRole as ModelType & { name: "AppUserRole" }) },
-      },
-      role: "collectionNavigation",
-      get foreignKey() { return (domain.types.AppUserRole as ModelType & { name: "AppUserRole" }).props.userId as ForeignKeyProperty },
-      get inverseNavigation() { return (domain.types.AppUserRole as ModelType & { name: "AppUserRole" }).props.user as ModelReferenceNavigationProperty },
-      manyToMany: {
-        name: "roles",
-        displayName: "Roles",
-        get typeDef() { return (domain.types.AppRole as ModelType & { name: "AppRole" }) },
-        get farForeignKey() { return (domain.types.AppUserRole as ModelType & { name: "AppUserRole" }).props.roleId as ForeignKeyProperty },
-        get farNavigationProp() { return (domain.types.AppUserRole as ModelType & { name: "AppUserRole" }).props.role as ModelReferenceNavigationProperty },
-        get nearForeignKey() { return (domain.types.AppUserRole as ModelType & { name: "AppUserRole" }).props.userId as ForeignKeyProperty },
-        get nearNavigationProp() { return (domain.types.AppUserRole as ModelType & { name: "AppUserRole" }).props.user as ModelReferenceNavigationProperty },
-      },
-      dontSerialize: true,
-    },
-    id: {
-      name: "id",
-      displayName: "Id",
-      type: "string",
-      role: "primaryKey",
-      hidden: 3 as HiddenAreas,
-    },
-  },
-  methods: {
-  },
-  dataSources: {
-  },
-}
-export const AppUserRole = domain.types.AppUserRole = {
-  name: "AppUserRole" as const,
-  displayName: "App User Role",
-  get displayProp() { return this.props.id }, 
-  type: "model",
-  controllerRoute: "AppUserRole",
-  get keyProp() { return this.props.id }, 
-  behaviorFlags: 5 as BehaviorFlags,
-  props: {
-    id: {
-      name: "id",
-      displayName: "Id",
-      type: "string",
-      role: "primaryKey",
-      hidden: 3 as HiddenAreas,
-    },
-    user: {
-      name: "user",
-      displayName: "User",
-      type: "model",
-      get typeDef() { return (domain.types.AppUser as ModelType & { name: "AppUser" }) },
-      role: "referenceNavigation",
-      get foreignKey() { return (domain.types.AppUserRole as ModelType & { name: "AppUserRole" }).props.userId as ForeignKeyProperty },
-      get principalKey() { return (domain.types.AppUser as ModelType & { name: "AppUser" }).props.id as PrimaryKeyProperty },
-      get inverseNavigation() { return (domain.types.AppUser as ModelType & { name: "AppUser" }).props.userRoles as ModelCollectionNavigationProperty },
-      dontSerialize: true,
-    },
-    role: {
-      name: "role",
-      displayName: "Role",
-      type: "model",
-      get typeDef() { return (domain.types.AppRole as ModelType & { name: "AppRole" }) },
-      role: "referenceNavigation",
-      get foreignKey() { return (domain.types.AppUserRole as ModelType & { name: "AppUserRole" }).props.roleId as ForeignKeyProperty },
-      get principalKey() { return (domain.types.AppRole as ModelType & { name: "AppRole" }).props.id as PrimaryKeyProperty },
-      dontSerialize: true,
-    },
-    userId: {
-      name: "userId",
-      displayName: "User Id",
-      type: "string",
-      role: "foreignKey",
-      get principalKey() { return (domain.types.AppUser as ModelType & { name: "AppUser" }).props.id as PrimaryKeyProperty },
-      get principalType() { return (domain.types.AppUser as ModelType & { name: "AppUser" }) },
-      get navigationProp() { return (domain.types.AppUserRole as ModelType & { name: "AppUserRole" }).props.user as ModelReferenceNavigationProperty },
-      hidden: 3 as HiddenAreas,
-      rules: {
-        required: val => (val != null && val !== '') || "User is required.",
-      }
-    },
-    roleId: {
-      name: "roleId",
-      displayName: "Role Id",
-      type: "string",
-      role: "foreignKey",
-      get principalKey() { return (domain.types.AppRole as ModelType & { name: "AppRole" }).props.id as PrimaryKeyProperty },
-      get principalType() { return (domain.types.AppRole as ModelType & { name: "AppRole" }) },
-      get navigationProp() { return (domain.types.AppUserRole as ModelType & { name: "AppUserRole" }).props.role as ModelReferenceNavigationProperty },
-      hidden: 3 as HiddenAreas,
-      rules: {
-        required: val => (val != null && val !== '') || "Role is required.",
-      }
-    },
-  },
-  methods: {
-  },
-  dataSources: {
-    defaultSource: {
-      type: "dataSource",
-      name: "DefaultSource" as const,
-      displayName: "Default Source",
-      isDefault: true,
-      props: {
-      },
-    },
-  },
-}
 export const AuditLog = domain.types.AuditLog = {
   name: "AuditLog" as const,
   displayName: "Audit Log",
@@ -340,8 +67,8 @@ export const AuditLog = domain.types.AuditLog = {
       displayName: "User Id",
       type: "string",
       role: "foreignKey",
-      get principalKey() { return (domain.types.AppUser as ModelType & { name: "AppUser" }).props.id as PrimaryKeyProperty },
-      get principalType() { return (domain.types.AppUser as ModelType & { name: "AppUser" }) },
+      get principalKey() { return (domain.types.User as ModelType & { name: "User" }).props.id as PrimaryKeyProperty },
+      get principalType() { return (domain.types.User as ModelType & { name: "User" }) },
       get navigationProp() { return (domain.types.AuditLog as ModelType & { name: "AuditLog" }).props.user as ModelReferenceNavigationProperty },
       hidden: 3 as HiddenAreas,
     },
@@ -349,10 +76,10 @@ export const AuditLog = domain.types.AuditLog = {
       name: "user",
       displayName: "Changed By",
       type: "model",
-      get typeDef() { return (domain.types.AppUser as ModelType & { name: "AppUser" }) },
+      get typeDef() { return (domain.types.User as ModelType & { name: "User" }) },
       role: "referenceNavigation",
       get foreignKey() { return (domain.types.AuditLog as ModelType & { name: "AuditLog" }).props.userId as ForeignKeyProperty },
-      get principalKey() { return (domain.types.AppUser as ModelType & { name: "AppUser" }).props.id as PrimaryKeyProperty },
+      get principalKey() { return (domain.types.User as ModelType & { name: "User" }).props.id as PrimaryKeyProperty },
       dontSerialize: true,
     },
     id: {
@@ -504,6 +231,325 @@ export const AuditLogProperty = domain.types.AuditLogProperty = {
   dataSources: {
   },
 }
+export const Role = domain.types.Role = {
+  name: "Role" as const,
+  displayName: "Role",
+  get displayProp() { return this.props.name }, 
+  type: "model",
+  controllerRoute: "Role",
+  get keyProp() { return this.props.id }, 
+  behaviorFlags: 0 as BehaviorFlags,
+  props: {
+    name: {
+      name: "name",
+      displayName: "Name",
+      type: "string",
+      role: "value",
+      rules: {
+        required: val => (val != null && val !== '') || "Name is required.",
+      }
+    },
+    roleClaims: {
+      name: "roleClaims",
+      displayName: "Role Claims",
+      type: "collection",
+      itemType: {
+        name: "$collectionItem",
+        displayName: "",
+        role: "value",
+        type: "model",
+        get typeDef() { return (domain.types.RoleClaim as ModelType & { name: "RoleClaim" }) },
+      },
+      role: "collectionNavigation",
+      get foreignKey() { return (domain.types.RoleClaim as ModelType & { name: "RoleClaim" }).props.roleId as ForeignKeyProperty },
+      get inverseNavigation() { return (domain.types.RoleClaim as ModelType & { name: "RoleClaim" }).props.role as ModelReferenceNavigationProperty },
+      hidden: 1 as HiddenAreas,
+      dontSerialize: true,
+    },
+    permissions: {
+      name: "permissions",
+      displayName: "Permissions",
+      type: "collection",
+      itemType: {
+        name: "$collectionItem",
+        displayName: "",
+        role: "value",
+        type: "enum",
+        get typeDef() { return Permission },
+      },
+      role: "value",
+      hidden: 3 as HiddenAreas,
+      dontSerialize: true,
+    },
+    id: {
+      name: "id",
+      displayName: "Id",
+      type: "string",
+      role: "primaryKey",
+      hidden: 3 as HiddenAreas,
+    },
+  },
+  methods: {
+  },
+  dataSources: {
+  },
+}
+export const RoleClaim = domain.types.RoleClaim = {
+  name: "RoleClaim" as const,
+  displayName: "Role Claim",
+  get displayProp() { return this.props.id }, 
+  type: "model",
+  controllerRoute: "RoleClaim",
+  get keyProp() { return this.props.id }, 
+  behaviorFlags: 0 as BehaviorFlags,
+  props: {
+    role: {
+      name: "role",
+      displayName: "Role",
+      type: "model",
+      get typeDef() { return (domain.types.Role as ModelType & { name: "Role" }) },
+      role: "referenceNavigation",
+      get foreignKey() { return (domain.types.RoleClaim as ModelType & { name: "RoleClaim" }).props.roleId as ForeignKeyProperty },
+      get principalKey() { return (domain.types.Role as ModelType & { name: "Role" }).props.id as PrimaryKeyProperty },
+      get inverseNavigation() { return (domain.types.Role as ModelType & { name: "Role" }).props.roleClaims as ModelCollectionNavigationProperty },
+      dontSerialize: true,
+    },
+    id: {
+      name: "id",
+      displayName: "Id",
+      type: "number",
+      role: "primaryKey",
+      hidden: 3 as HiddenAreas,
+    },
+    roleId: {
+      name: "roleId",
+      displayName: "Role Id",
+      type: "string",
+      role: "foreignKey",
+      get principalKey() { return (domain.types.Role as ModelType & { name: "Role" }).props.id as PrimaryKeyProperty },
+      get principalType() { return (domain.types.Role as ModelType & { name: "Role" }) },
+      get navigationProp() { return (domain.types.RoleClaim as ModelType & { name: "RoleClaim" }).props.role as ModelReferenceNavigationProperty },
+      hidden: 3 as HiddenAreas,
+      rules: {
+        required: val => (val != null && val !== '') || "Role is required.",
+      }
+    },
+    claimType: {
+      name: "claimType",
+      displayName: "Claim Type",
+      type: "string",
+      role: "value",
+    },
+    claimValue: {
+      name: "claimValue",
+      displayName: "Claim Value",
+      type: "string",
+      role: "value",
+    },
+  },
+  methods: {
+  },
+  dataSources: {
+  },
+}
+export const User = domain.types.User = {
+  name: "User" as const,
+  displayName: "User",
+  get displayProp() { return this.props.id }, 
+  type: "model",
+  controllerRoute: "User",
+  get keyProp() { return this.props.id }, 
+  behaviorFlags: 2 as BehaviorFlags,
+  props: {
+    fullName: {
+      name: "fullName",
+      displayName: "Full Name",
+      type: "string",
+      role: "value",
+    },
+    photoMD5: {
+      name: "photoMD5",
+      displayName: "Photo MD5",
+      type: "binary",
+      base64: true,
+      role: "value",
+      hidden: 3 as HiddenAreas,
+      dontSerialize: true,
+    },
+    userName: {
+      name: "userName",
+      displayName: "User Name",
+      type: "string",
+      role: "value",
+    },
+    accessFailedCount: {
+      name: "accessFailedCount",
+      displayName: "Access Failed Count",
+      type: "number",
+      role: "value",
+      dontSerialize: true,
+    },
+    lockoutEnd: {
+      name: "lockoutEnd",
+      displayName: "Lockout End",
+      type: "date",
+      dateKind: "datetime",
+      role: "value",
+      dontSerialize: true,
+    },
+    lockoutEnabled: {
+      name: "lockoutEnabled",
+      displayName: "Lockout Enabled",
+      type: "boolean",
+      role: "value",
+      dontSerialize: true,
+    },
+    userRoles: {
+      name: "userRoles",
+      displayName: "User Roles",
+      type: "collection",
+      itemType: {
+        name: "$collectionItem",
+        displayName: "",
+        role: "value",
+        type: "model",
+        get typeDef() { return (domain.types.UserRole as ModelType & { name: "UserRole" }) },
+      },
+      role: "collectionNavigation",
+      get foreignKey() { return (domain.types.UserRole as ModelType & { name: "UserRole" }).props.userId as ForeignKeyProperty },
+      get inverseNavigation() { return (domain.types.UserRole as ModelType & { name: "UserRole" }).props.user as ModelReferenceNavigationProperty },
+      manyToMany: {
+        name: "roles",
+        displayName: "Roles",
+        get typeDef() { return (domain.types.Role as ModelType & { name: "Role" }) },
+        get farForeignKey() { return (domain.types.UserRole as ModelType & { name: "UserRole" }).props.roleId as ForeignKeyProperty },
+        get farNavigationProp() { return (domain.types.UserRole as ModelType & { name: "UserRole" }).props.role as ModelReferenceNavigationProperty },
+        get nearForeignKey() { return (domain.types.UserRole as ModelType & { name: "UserRole" }).props.userId as ForeignKeyProperty },
+        get nearNavigationProp() { return (domain.types.UserRole as ModelType & { name: "UserRole" }).props.user as ModelReferenceNavigationProperty },
+      },
+      dontSerialize: true,
+    },
+    id: {
+      name: "id",
+      displayName: "Id",
+      type: "string",
+      role: "primaryKey",
+      hidden: 3 as HiddenAreas,
+    },
+  },
+  methods: {
+    getPhoto: {
+      name: "getPhoto",
+      displayName: "Get Photo",
+      transportType: "item",
+      httpMethod: "GET",
+      params: {
+        id: {
+          name: "id",
+          displayName: "Primary Key",
+          type: "string",
+          role: "value",
+          get source() { return (domain.types.User as ModelType & { name: "User" }).props.id },
+          rules: {
+            required: val => (val != null && val !== '') || "Primary Key is required.",
+          }
+        },
+        etag: {
+          name: "etag",
+          displayName: "Etag",
+          type: "binary",
+          role: "value",
+          get source() { return (domain.types.User as ModelType & { name: "User" }).props.photoMD5 },
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "file",
+        role: "value",
+      },
+    },
+  },
+  dataSources: {
+  },
+}
+export const UserRole = domain.types.UserRole = {
+  name: "UserRole" as const,
+  displayName: "User Role",
+  get displayProp() { return this.props.id }, 
+  type: "model",
+  controllerRoute: "UserRole",
+  get keyProp() { return this.props.id }, 
+  behaviorFlags: 5 as BehaviorFlags,
+  props: {
+    id: {
+      name: "id",
+      displayName: "Id",
+      type: "string",
+      role: "primaryKey",
+      hidden: 3 as HiddenAreas,
+    },
+    user: {
+      name: "user",
+      displayName: "User",
+      type: "model",
+      get typeDef() { return (domain.types.User as ModelType & { name: "User" }) },
+      role: "referenceNavigation",
+      get foreignKey() { return (domain.types.UserRole as ModelType & { name: "UserRole" }).props.userId as ForeignKeyProperty },
+      get principalKey() { return (domain.types.User as ModelType & { name: "User" }).props.id as PrimaryKeyProperty },
+      get inverseNavigation() { return (domain.types.User as ModelType & { name: "User" }).props.userRoles as ModelCollectionNavigationProperty },
+      dontSerialize: true,
+    },
+    role: {
+      name: "role",
+      displayName: "Role",
+      type: "model",
+      get typeDef() { return (domain.types.Role as ModelType & { name: "Role" }) },
+      role: "referenceNavigation",
+      get foreignKey() { return (domain.types.UserRole as ModelType & { name: "UserRole" }).props.roleId as ForeignKeyProperty },
+      get principalKey() { return (domain.types.Role as ModelType & { name: "Role" }).props.id as PrimaryKeyProperty },
+      dontSerialize: true,
+    },
+    userId: {
+      name: "userId",
+      displayName: "User Id",
+      type: "string",
+      role: "foreignKey",
+      get principalKey() { return (domain.types.User as ModelType & { name: "User" }).props.id as PrimaryKeyProperty },
+      get principalType() { return (domain.types.User as ModelType & { name: "User" }) },
+      get navigationProp() { return (domain.types.UserRole as ModelType & { name: "UserRole" }).props.user as ModelReferenceNavigationProperty },
+      hidden: 3 as HiddenAreas,
+      rules: {
+        required: val => (val != null && val !== '') || "User is required.",
+      }
+    },
+    roleId: {
+      name: "roleId",
+      displayName: "Role Id",
+      type: "string",
+      role: "foreignKey",
+      get principalKey() { return (domain.types.Role as ModelType & { name: "Role" }).props.id as PrimaryKeyProperty },
+      get principalType() { return (domain.types.Role as ModelType & { name: "Role" }) },
+      get navigationProp() { return (domain.types.UserRole as ModelType & { name: "UserRole" }).props.role as ModelReferenceNavigationProperty },
+      hidden: 3 as HiddenAreas,
+      rules: {
+        required: val => (val != null && val !== '') || "Role is required.",
+      }
+    },
+  },
+  methods: {
+  },
+  dataSources: {
+    defaultSource: {
+      type: "dataSource",
+      name: "DefaultSource" as const,
+      displayName: "Default Source",
+      isDefault: true,
+      props: {
+      },
+    },
+  },
+}
 export const UserInfo = domain.types.UserInfo = {
   name: "UserInfo" as const,
   displayName: "User Info",
@@ -526,6 +572,12 @@ export const UserInfo = domain.types.UserInfo = {
       rules: {
         required: val => (val != null && val !== '') || "User Name is required.",
       }
+    },
+    fullName: {
+      name: "fullName",
+      displayName: "Full Name",
+      type: "string",
+      role: "value",
     },
     roles: {
       name: "roles",
@@ -583,13 +635,13 @@ interface AppDomain extends Domain {
     Permission: typeof Permission
   }
   types: {
-    AppRole: typeof AppRole
-    AppRoleClaim: typeof AppRoleClaim
-    AppUser: typeof AppUser
-    AppUserRole: typeof AppUserRole
     AuditLog: typeof AuditLog
     AuditLogProperty: typeof AuditLogProperty
+    Role: typeof Role
+    RoleClaim: typeof RoleClaim
+    User: typeof User
     UserInfo: typeof UserInfo
+    UserRole: typeof UserRole
   }
   services: {
     SecurityService: typeof SecurityService

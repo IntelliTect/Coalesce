@@ -8,37 +8,32 @@
         </router-link>
       </v-toolbar-title>
 
+      <!--#if Identity || DarkMode -->
       <v-menu bottom offset-y>
         <template #activator="{ props }">
-          <v-list-item v-bind="props" style="overflow: visible">
-            <div class="d-flex align-center">
-              <user-avatar :user="$userInfo" style="font-size: 1.5em" />
-              {{ $userInfo.userName }}
-              <span class="caret ml-1"></span>
-            </div>
+          <v-list-item v-bind="props">
+            <!--#if Identity -->
+            <UserAvatar :user="$userInfo" />
+            <!--#endif -->
+            <!--#if (!Identity)
+            Settings
+            #endif -->
           </v-list-item>
         </template>
         <v-list min-width="300px">
-          <v-list-item :title="$userInfo.userName!">
+          <!--#if Identity -->
+          <v-list-item
+            :title="$userInfo.fullName!"
+            :subtitle="$userInfo.userName!"
+          >
             <template #prepend>
-              <user-avatar
-                :user="$userInfo"
-                style="font-size: 2.1em"
-                class="mr-6 ml-n1"
-              />
+              <UserAvatar :user="$userInfo" class="mr-2 ml-n1" />
             </template>
           </v-list-item>
           <v-divider class="mt-1" />
-          <v-list-item
-            to="/my-tasks"
-            prepend-icon="fa fa-list-check"
-            title="My Tasks"
-          />
-          <v-list-item
-            to="/preferences"
-            prepend-icon="fa fa-cog"
-            title="Preferences"
-          />
+          <!--#endif -->
+
+          <!--#if DarkMode -->
           <v-list-item prepend-icon="fas fa-moon">
             <v-switch
               label="Dark Mode"
@@ -50,15 +45,19 @@
               density="compact"
             />
           </v-list-item>
+          <!--#endif -->
 
+          <!--#if Identity -->
           <v-divider />
           <v-list-item
             href="/Home/SignOut"
             prepend-icon="fa fa-sign-out"
             title="Log Out"
           />
+          <!--#endif -->
         </v-list>
       </v-menu>
+      <!--#endif -->
     </v-app-bar>
     <v-navigation-drawer v-model="drawer">
       <v-list>
@@ -80,12 +79,17 @@
       <!-- https://stackoverflow.com/questions/52847979/what-is-router-view-key-route-fullpath -->
       <router-view v-slot="{ Component, route }">
         <transition name="router-transition" mode="out-in" appear>
+          <!--#if Identity -->
           <Forbidden
             v-if="isForbidden"
             :permissions="routeMeta?.permissions"
             key="$forbidden"
           />
+          <component v-else :is="Component" :key="route.path" />
+          <!--#endif -->
+          <!--#if (!Identity)
           <component :is="Component" :key="route.path" />
+          #endif -->
         </transition>
       </router-view>
     </v-main>
@@ -93,20 +97,30 @@
 </template>
 
 <script setup lang="ts">
-import { useLocalStorage, usePreferredDark } from "@vueuse/core";
+//#if Identity
 import { Permission } from "./models.g";
 import Forbidden from "./views/errors/Forbidden.vue";
+//#endif
+//#if DarkMode
+import { useLocalStorage, usePreferredDark } from "@vueuse/core";
+import { useTheme } from "vuetify";
+//#endif
 
 const drawer = ref<boolean | null>(null);
 
 const router = useRouter();
 const { userInfo } = useUser();
+//#if DarkMode
+const vuetifyTheme = useTheme();
 
 const theme = useLocalStorage(
   "theme",
   usePreferredDark().value ? "dark" : "light",
 );
+watch(theme, (v) => (vuetifyTheme.global.name.value = v), { immediate: true });
+//#endif
 
+//#if Identity
 const routeMeta = computed(() => {
   const route = router.currentRoute.value;
   return route?.meta as
@@ -130,6 +144,7 @@ const isForbidden = computed(() => {
 
   return false;
 });
+//#endif
 </script>
 
 <style lang="scss">

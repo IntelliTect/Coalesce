@@ -27,6 +27,169 @@
         "fallback": 5002
       },
       "replaces": "5002"
+    },
+    
+    "Identity": {
+      "type": "parameter",
+      "datatype": "bool"
+    },
+    "MicrosoftAuth": {
+      "type": "parameter",
+      "datatype": "bool"
+    },
+    "GoogleAuth": {
+      "type": "parameter",
+      "datatype": "bool"
+    },
+    "UserPictures": {
+      "type": "parameter",
+      "datatype": "bool"
+    },
+    "AuditLogs": {
+      "type": "parameter",
+      "datatype": "bool"
+    },
+    "ExampleModel": {
+      "type": "parameter",
+      "datatype": "bool",
+      "description": "Includes a 'Widget' example model with a basic Vue page and tests."
+    },
+    "DarkMode": {
+      "type": "parameter",
+      "datatype": "bool",
+      "description": "Adds features for user-togglable dark mode. Don't use if you're developing a light-only or dark-only application."
+    },
+    "TrackingBase": {
+      "type": "parameter",
+      "datatype": "bool",
+      "description": "Include a base entity class for tracking created/modified by and date stamps on each entity, and infrastructure for automatically setting those fields."
+    },
+    "AppInsights": {
+      "type": "parameter",
+      "datatype": "bool",
+      "description": "Include configuration and integrations with Azure Application Insights."
+    },
+    "OpenAPI": {
+      "type": "parameter",
+      "datatype": "bool",
+      "description": "Include configuration to expose an OpenAPI document and SwaggerUI using Swashbuckle."
+    }
+  },
+  "sources": [
+    {
+      "modifiers": [
+        {
+          "condition": "!Identity",
+          "exclude": [
+            "**/Program.Auth.cs",
+            "**/Forbidden.vue",
+            "**/SignIn.cshtml",
+            "**/SignIn.cshtml.cs",
+            "**/AppClaimTypes.cs",
+            "**/ClaimsPrincipalExtensions.cs",
+            "**/ClaimsPrincipalFactory.cs",
+            "**/Permission.cs",
+            "**/User.cs",
+            "**/UserRole.cs",
+            "**/Role.cs",
+            "**/RoleClaim.cs"
+          ]
+        },
+        {
+          "condition": "!(UserPictures && Identity)",
+          "exclude": [
+            "Coalesce.Starter.Vue.Data/Models/UserPhoto.cs"
+          ]
+        },
+        {
+          "condition": "!AuditLogs",
+          "exclude": [
+            "**/AuditOperationContext.cs",
+            "**/AuditLog.cs"
+          ]
+        },
+        {
+          "condition": "!TrackingBase",
+          "exclude": [
+            "**/TrackingBase.cs"
+          ]
+        },
+        {
+          "condition": "!AppInsights",
+          "exclude": [
+            "**/AppInsightsTelemetryEnricher.cs"
+          ]
+        },
+        {
+          "condition": "!GoogleAuth",
+          "exclude": [
+            "**/google-logo.svg"
+          ]
+        },
+        {
+          "condition": "!MicrosoftAuth",
+          "exclude": [
+            "**/microsoft-logo.svg"
+          ]
+        },
+        {
+          "condition": "!ExampleModel",
+          "exclude": [
+            "**/WidgetEdit.vue",
+            "**/WidgetEdit.spec.ts"
+          ]
+        }
+      ]
+    }
+  ],
+  "SpecialCustomOperations": {
+    "**.vue": {
+      "operations": [
+        {
+          "type": "conditional",
+          "configuration": {
+            "if": [ "//#if" ],
+            "else": [ "//#else" ],
+            "elseif": [ "//#elseif" ],
+            "endif": [ "//#endif" ],
+            "actionableIf": [ "////#if" ],
+            "actionableElse": [ "////#else" ],
+            "actionableElseif": [ "////#elseif" ],
+            "actions": [ "cStyleUncomment", "cStyleReduceComment" ],
+            "trim": true,
+            "wholeLine": true,
+            "evaluator": "C++"
+          }
+        },
+        {
+          "type": "conditional",
+          "configuration": {
+            "endif": [ "#endif", "<!--#endif" ],
+            "actionableIf": [ "<!--#if" ],
+            "actionableElse": [ "#else", "<!--#else" ],
+            "actionableElseif": [ "#elseif", "<!--#elseif", "#elif", "<!--#elif" ],
+            "trim": true,
+            "wholeLine": true,
+            "evaluator": "C++"
+          }
+        },
+        {
+          "type": "replacement",
+          "configuration": {
+            "original": "//",
+            "replacement": "",
+            "id": "cStyleUncomment"
+          }
+        },
+        {
+          "type": "replacement",
+          "configuration": {
+            "original": "////",
+            "replacement": "//",
+            "id": "cStyleReduceComment"
+          }
+        }
+      ]
     }
   }
 }

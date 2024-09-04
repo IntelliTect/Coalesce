@@ -3,123 +3,10 @@ import * as $models from './models.g'
 import * as $apiClients from './api-clients.g'
 import { ViewModel, ListViewModel, ViewModelCollection, ServiceViewModel, DeepPartial, defineProps } from 'coalesce-vue/lib/viewmodel'
 
-export interface AppRoleViewModel extends $models.AppRole {
-  name: string | null;
-  get roleClaims(): ViewModelCollection<AppRoleClaimViewModel, $models.AppRoleClaim>;
-  set roleClaims(value: (AppRoleClaimViewModel | $models.AppRoleClaim)[] | null);
-  permissions: $models.Permission[] | null;
-  id: string | null;
-}
-export class AppRoleViewModel extends ViewModel<$models.AppRole, $apiClients.AppRoleApiClient, string> implements $models.AppRole  {
-  
-  
-  public addToRoleClaims(initialData?: DeepPartial<$models.AppRoleClaim> | null) {
-    return this.$addChild('roleClaims', initialData) as AppRoleClaimViewModel
-  }
-  
-  constructor(initialData?: DeepPartial<$models.AppRole> | null) {
-    super($metadata.AppRole, new $apiClients.AppRoleApiClient(), initialData)
-  }
-}
-defineProps(AppRoleViewModel, $metadata.AppRole)
-
-export class AppRoleListViewModel extends ListViewModel<$models.AppRole, $apiClients.AppRoleApiClient, AppRoleViewModel> {
-  
-  constructor() {
-    super($metadata.AppRole, new $apiClients.AppRoleApiClient())
-  }
-}
-
-
-export interface AppRoleClaimViewModel extends $models.AppRoleClaim {
-  get role(): AppRoleViewModel | null;
-  set role(value: AppRoleViewModel | $models.AppRole | null);
-  id: number | null;
-  roleId: string | null;
-  claimType: string | null;
-  claimValue: string | null;
-}
-export class AppRoleClaimViewModel extends ViewModel<$models.AppRoleClaim, $apiClients.AppRoleClaimApiClient, number> implements $models.AppRoleClaim  {
-  
-  constructor(initialData?: DeepPartial<$models.AppRoleClaim> | null) {
-    super($metadata.AppRoleClaim, new $apiClients.AppRoleClaimApiClient(), initialData)
-  }
-}
-defineProps(AppRoleClaimViewModel, $metadata.AppRoleClaim)
-
-export class AppRoleClaimListViewModel extends ListViewModel<$models.AppRoleClaim, $apiClients.AppRoleClaimApiClient, AppRoleClaimViewModel> {
-  
-  constructor() {
-    super($metadata.AppRoleClaim, new $apiClients.AppRoleClaimApiClient())
-  }
-}
-
-
-export interface AppUserViewModel extends $models.AppUser {
-  userName: string | null;
-  accessFailedCount: number | null;
-  lockoutEnd: Date | null;
-  lockoutEnabled: boolean | null;
-  get userRoles(): ViewModelCollection<AppUserRoleViewModel, $models.AppUserRole>;
-  set userRoles(value: (AppUserRoleViewModel | $models.AppUserRole)[] | null);
-  id: string | null;
-}
-export class AppUserViewModel extends ViewModel<$models.AppUser, $apiClients.AppUserApiClient, string> implements $models.AppUser  {
-  
-  
-  public addToUserRoles(initialData?: DeepPartial<$models.AppUserRole> | null) {
-    return this.$addChild('userRoles', initialData) as AppUserRoleViewModel
-  }
-  
-  get roles(): ReadonlyArray<AppRoleViewModel> {
-    return (this.userRoles || []).map($ => $.role!).filter($ => $)
-  }
-  
-  constructor(initialData?: DeepPartial<$models.AppUser> | null) {
-    super($metadata.AppUser, new $apiClients.AppUserApiClient(), initialData)
-  }
-}
-defineProps(AppUserViewModel, $metadata.AppUser)
-
-export class AppUserListViewModel extends ListViewModel<$models.AppUser, $apiClients.AppUserApiClient, AppUserViewModel> {
-  
-  constructor() {
-    super($metadata.AppUser, new $apiClients.AppUserApiClient())
-  }
-}
-
-
-export interface AppUserRoleViewModel extends $models.AppUserRole {
-  id: string | null;
-  get user(): AppUserViewModel | null;
-  set user(value: AppUserViewModel | $models.AppUser | null);
-  get role(): AppRoleViewModel | null;
-  set role(value: AppRoleViewModel | $models.AppRole | null);
-  userId: string | null;
-  roleId: string | null;
-}
-export class AppUserRoleViewModel extends ViewModel<$models.AppUserRole, $apiClients.AppUserRoleApiClient, string> implements $models.AppUserRole  {
-  static DataSources = $models.AppUserRole.DataSources;
-  
-  constructor(initialData?: DeepPartial<$models.AppUserRole> | null) {
-    super($metadata.AppUserRole, new $apiClients.AppUserRoleApiClient(), initialData)
-  }
-}
-defineProps(AppUserRoleViewModel, $metadata.AppUserRole)
-
-export class AppUserRoleListViewModel extends ListViewModel<$models.AppUserRole, $apiClients.AppUserRoleApiClient, AppUserRoleViewModel> {
-  static DataSources = $models.AppUserRole.DataSources;
-  
-  constructor() {
-    super($metadata.AppUserRole, new $apiClients.AppUserRoleApiClient())
-  }
-}
-
-
 export interface AuditLogViewModel extends $models.AuditLog {
   userId: string | null;
-  get user(): AppUserViewModel | null;
-  set user(value: AppUserViewModel | $models.AppUser | null);
+  get user(): UserViewModel | null;
+  set user(value: UserViewModel | $models.User | null);
   id: number | null;
   type: string | null;
   keyValue: string | null;
@@ -178,6 +65,132 @@ export class AuditLogPropertyListViewModel extends ListViewModel<$models.AuditLo
 }
 
 
+export interface RoleViewModel extends $models.Role {
+  name: string | null;
+  get roleClaims(): ViewModelCollection<RoleClaimViewModel, $models.RoleClaim>;
+  set roleClaims(value: (RoleClaimViewModel | $models.RoleClaim)[] | null);
+  permissions: $models.Permission[] | null;
+  id: string | null;
+}
+export class RoleViewModel extends ViewModel<$models.Role, $apiClients.RoleApiClient, string> implements $models.Role  {
+  
+  
+  public addToRoleClaims(initialData?: DeepPartial<$models.RoleClaim> | null) {
+    return this.$addChild('roleClaims', initialData) as RoleClaimViewModel
+  }
+  
+  constructor(initialData?: DeepPartial<$models.Role> | null) {
+    super($metadata.Role, new $apiClients.RoleApiClient(), initialData)
+  }
+}
+defineProps(RoleViewModel, $metadata.Role)
+
+export class RoleListViewModel extends ListViewModel<$models.Role, $apiClients.RoleApiClient, RoleViewModel> {
+  
+  constructor() {
+    super($metadata.Role, new $apiClients.RoleApiClient())
+  }
+}
+
+
+export interface RoleClaimViewModel extends $models.RoleClaim {
+  get role(): RoleViewModel | null;
+  set role(value: RoleViewModel | $models.Role | null);
+  id: number | null;
+  roleId: string | null;
+  claimType: string | null;
+  claimValue: string | null;
+}
+export class RoleClaimViewModel extends ViewModel<$models.RoleClaim, $apiClients.RoleClaimApiClient, number> implements $models.RoleClaim  {
+  
+  constructor(initialData?: DeepPartial<$models.RoleClaim> | null) {
+    super($metadata.RoleClaim, new $apiClients.RoleClaimApiClient(), initialData)
+  }
+}
+defineProps(RoleClaimViewModel, $metadata.RoleClaim)
+
+export class RoleClaimListViewModel extends ListViewModel<$models.RoleClaim, $apiClients.RoleClaimApiClient, RoleClaimViewModel> {
+  
+  constructor() {
+    super($metadata.RoleClaim, new $apiClients.RoleClaimApiClient())
+  }
+}
+
+
+export interface UserViewModel extends $models.User {
+  fullName: string | null;
+  photoMD5: string | null;
+  userName: string | null;
+  accessFailedCount: number | null;
+  lockoutEnd: Date | null;
+  lockoutEnabled: boolean | null;
+  get userRoles(): ViewModelCollection<UserRoleViewModel, $models.UserRole>;
+  set userRoles(value: (UserRoleViewModel | $models.UserRole)[] | null);
+  id: string | null;
+}
+export class UserViewModel extends ViewModel<$models.User, $apiClients.UserApiClient, string> implements $models.User  {
+  
+  
+  public addToUserRoles(initialData?: DeepPartial<$models.UserRole> | null) {
+    return this.$addChild('userRoles', initialData) as UserRoleViewModel
+  }
+  
+  get roles(): ReadonlyArray<RoleViewModel> {
+    return (this.userRoles || []).map($ => $.role!).filter($ => $)
+  }
+  
+  public get getPhoto() {
+    const getPhoto = this.$apiClient.$makeCaller(
+      this.$metadata.methods.getPhoto,
+      (c) => c.getPhoto(this.$primaryKey, this.photoMD5),
+      () => ({}),
+      (c, args) => c.getPhoto(this.$primaryKey, this.photoMD5))
+    
+    Object.defineProperty(this, 'getPhoto', {value: getPhoto});
+    return getPhoto
+  }
+  
+  constructor(initialData?: DeepPartial<$models.User> | null) {
+    super($metadata.User, new $apiClients.UserApiClient(), initialData)
+  }
+}
+defineProps(UserViewModel, $metadata.User)
+
+export class UserListViewModel extends ListViewModel<$models.User, $apiClients.UserApiClient, UserViewModel> {
+  
+  constructor() {
+    super($metadata.User, new $apiClients.UserApiClient())
+  }
+}
+
+
+export interface UserRoleViewModel extends $models.UserRole {
+  id: string | null;
+  get user(): UserViewModel | null;
+  set user(value: UserViewModel | $models.User | null);
+  get role(): RoleViewModel | null;
+  set role(value: RoleViewModel | $models.Role | null);
+  userId: string | null;
+  roleId: string | null;
+}
+export class UserRoleViewModel extends ViewModel<$models.UserRole, $apiClients.UserRoleApiClient, string> implements $models.UserRole  {
+  static DataSources = $models.UserRole.DataSources;
+  
+  constructor(initialData?: DeepPartial<$models.UserRole> | null) {
+    super($metadata.UserRole, new $apiClients.UserRoleApiClient(), initialData)
+  }
+}
+defineProps(UserRoleViewModel, $metadata.UserRole)
+
+export class UserRoleListViewModel extends ListViewModel<$models.UserRole, $apiClients.UserRoleApiClient, UserRoleViewModel> {
+  static DataSources = $models.UserRole.DataSources;
+  
+  constructor() {
+    super($metadata.UserRole, new $apiClients.UserRoleApiClient())
+  }
+}
+
+
 export class SecurityServiceViewModel extends ServiceViewModel<typeof $metadata.SecurityService, $apiClients.SecurityServiceApiClient> {
   
   public get whoAmI() {
@@ -198,20 +211,20 @@ export class SecurityServiceViewModel extends ServiceViewModel<typeof $metadata.
 
 
 const viewModelTypeLookup = ViewModel.typeLookup = {
-  AppRole: AppRoleViewModel,
-  AppRoleClaim: AppRoleClaimViewModel,
-  AppUser: AppUserViewModel,
-  AppUserRole: AppUserRoleViewModel,
   AuditLog: AuditLogViewModel,
   AuditLogProperty: AuditLogPropertyViewModel,
+  Role: RoleViewModel,
+  RoleClaim: RoleClaimViewModel,
+  User: UserViewModel,
+  UserRole: UserRoleViewModel,
 }
 const listViewModelTypeLookup = ListViewModel.typeLookup = {
-  AppRole: AppRoleListViewModel,
-  AppRoleClaim: AppRoleClaimListViewModel,
-  AppUser: AppUserListViewModel,
-  AppUserRole: AppUserRoleListViewModel,
   AuditLog: AuditLogListViewModel,
   AuditLogProperty: AuditLogPropertyListViewModel,
+  Role: RoleListViewModel,
+  RoleClaim: RoleClaimListViewModel,
+  User: UserListViewModel,
+  UserRole: UserRoleListViewModel,
 }
 const serviceViewModelTypeLookup = ServiceViewModel.typeLookup = {
   SecurityService: SecurityServiceViewModel,

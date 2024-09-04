@@ -1,5 +1,5 @@
 <template>
-  <div class="c-table" :class="{ 'c-table--editable': editable }">
+  <div ref="cTable" class="c-table" :class="{ 'c-table--editable': editable }">
     <c-loader-status
       :loaders="{ 'no-initial-content': [list.$load], ...loaders }"
     >
@@ -11,6 +11,8 @@
               :key="'header-' + header.value"
               class="text-left"
               :class="{
+                ['fixed-column-right']:
+                  header.isFixed && isHorizontalScrollbarVisible,
                 sortable: header.sortable,
                 ['prop-' + header.prop]: !!header.prop,
                 ['th-' + header.value]: !header.prop,
@@ -64,7 +66,11 @@
               <c-admin-display v-else-if="admin" :model="item" :for="prop" />
               <c-display v-else :model="item" :for="prop" />
             </td>
-            <slot name="item-append" :item="item" />
+            <slot
+              name="item-append"
+              :item="item"
+              :isHorizontalScrollbarVisible="isHorizontalScrollbarVisible"
+            />
           </tr>
         </tbody>
       </v-table>
@@ -73,7 +79,13 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from "vue";
+import {
+  defineComponent,
+  onMounted,
+  onUnmounted,
+  PropType,
+  ref,
+} from "vue";
 import {
   ListViewModel,
   Property,
@@ -92,8 +104,47 @@ export default defineComponent({
     props: { required: false, type: Array as PropType<Array<string>> },
     admin: { required: false, type: Boolean },
     editable: { required: false, type: Boolean },
-    extraHeaders: { required: false, type: Array as PropType<Array<string>> },
+    extraHeaders: {
+      required: false,
+      type: Array as
+        | PropType<Array<{ header: string; isFixed: boolean }>>
+        | PropType<Array<string>>,
+    },
     loaders: { required: false, type: Object },
+  },
+
+  setup() {
+    const cTable = ref<HTMLDivElement>();
+    const isHorizontalScrollbarVisible = ref(false);
+
+    const checkHorizontalScrollbar = () => {
+      const divElement = cTable.value;
+      const tableElement = divElement?.querySelector("table");
+      if (tableElement && divElement) {
+        isHorizontalScrollbarVisible.value =
+          divElement.clientWidth < tableElement.clientWidth;
+      }
+    };
+
+    const resizeObserver = new ResizeObserver(() => {
+      checkHorizontalScrollbar();
+    });
+
+    onMounted(() => {
+      if (cTable.value) {
+        resizeObserver.observe(cTable.value);
+      }
+      checkHorizontalScrollbar();
+    });
+
+    onUnmounted(() => {
+      resizeObserver.disconnect();
+    });
+
+    return {
+      cTable,
+      isHorizontalScrollbarVisible,
+    };
   },
 
   computed: {
@@ -121,13 +172,27 @@ export default defineComponent({
           sortable: o.type != "collection",
           align: "left",
           prop: o.name,
+          isFixed: false,
         })),
-        ...(this.extraHeaders || []).map((h) => ({
-          text: h,
-          value: h,
-          sortable: false,
-          prop: undefined,
-        })),
+        ...(this.extraHeaders || []).map((h) => {
+          if (typeof h === "string") {
+            return {
+              text: h,
+              value: h,
+              sortable: false,
+              prop: undefined,
+              isFixed: false,
+            };
+          } else {
+            return {
+              text: h.header,
+              value: h.header,
+              sortable: false,
+              prop: undefined,
+              isFixed: h.isFixed,
+            };
+          }
+        }),
       ];
     },
   },
@@ -206,6 +271,13 @@ export default defineComponent({
     .v-icon {
       font-size: 16px;
     }
+  }
+
+  .fixed-column-right {
+    position: sticky;
+    right: 0;
+    background: rgb(var(--v-theme-surface-light));
+    box-shadow: -2px 2px 4px 0px rgba(0, 0, 0, 0.4);
   }
 }
 </style>

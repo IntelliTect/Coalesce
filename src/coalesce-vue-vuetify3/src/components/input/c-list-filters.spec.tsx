@@ -1,13 +1,13 @@
-import { StudentListViewModel } from "@test/targets.viewmodels";
 import { flushPromises, mountApp } from "@test/util";
 import { watch } from "vue";
 import { CListFilters } from "..";
+import { ComplexModelListViewModel } from "@test-targets/viewmodels.g";
 
 describe("CListFilters", () => {
   test("doesn't mutate list.$params without user interaction", async () => {
     // There was a bug where c-list-filters was initializing list.$params.filters
     // (if it wasn't set) on mount, which was then incorrectly triggering list autoload.
-    const list = new StudentListViewModel();
+    const list = new ComplexModelListViewModel();
 
     const watchTracker = vitest.fn();
     watch(() => list.$params, watchTracker, { deep: true });

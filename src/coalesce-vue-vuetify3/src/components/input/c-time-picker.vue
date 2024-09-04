@@ -150,8 +150,8 @@ const props = withDefaults(
     /** The increments, in minutes, of the selectable value.
      * Values should divide 60 evenly, or be multiples of 60 */
     step: number;
-    min?: Date;
-    max?: Date;
+    min?: Date | null;
+    max?: Date | null;
   }>(),
   { step: 1 }
 );

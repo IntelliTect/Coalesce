@@ -1,4 +1,5 @@
-﻿using IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext;
+﻿using IntelliTect.Coalesce.DataAnnotations;
+using IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -14,6 +15,7 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses
         public int ComplexModelId { get; set; }
         public ComplexModel ComplexModel { get; set; }
 
+        [ListText]
         public string TestName { get; set; }
     }
 }

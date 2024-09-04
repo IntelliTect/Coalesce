@@ -1,24 +1,17 @@
-import { Grade, Student } from "@test/targets.models";
-import { StudentViewModel } from "@test/targets.viewmodels";
-import { delay, mockEndpoint, mount, mountApp, nextTick } from "@test/util";
+import { delay, mockEndpoint, mount, mountApp, nextTick, openMenu } from "@test/util";
 import { VListItem } from "vuetify/components";
 import { CInput } from "..";
-import { Case, Company, ComplexModel } from "@test-targets/models.g";
-import { ComplexModelViewModel } from "@test-targets/viewmodels.g";
+import { Case, Company, ComplexModel, Statuses, Test } from "@test-targets/models.g";
+import { CaseViewModel, ComplexModelViewModel } from "@test-targets/viewmodels.g";
 import { Model } from "coalesce-vue";
-import { selectFirstResult } from "./c-select.spec";
+import { VueWrapper } from "@vue/test-utils";
 
 describe("CInput", () => {
-  let model: StudentViewModel;
+  let model: ComplexModelViewModel;
   beforeEach(() => {
-    model = new StudentViewModel({
+    model = new ComplexModelViewModel({
       name: "bob",
-      grade: Grade.Freshman,
-      password: "secretValue",
-      email: "bob@college.edu",
-      phone: "123-123-1234",
-      color: "#ff0000",
-      notes: "multiline\n\nstring",
+      enumNullable: Statuses.InProgress,
     });
   });
 
@@ -82,8 +75,8 @@ describe("CInput", () => {
   test.each([
     "name",
     // "Type.prop" w/ `model` is deprecated, no longer supported by types but still supported at runtime */
-    "Student.name" as "name",
-    new Student().$metadata.props.name,
+    "ComplexModel.name" as "name",
+    new ComplexModel().$metadata.props.name,
   ] as const)("metadata resolves - %s", async (forSpec) => {
     const wrapper = mount(() => <CInput model={model} for={forSpec} />);
 
@@ -97,49 +90,50 @@ describe("CInput", () => {
   });
 
   test("enum", async () => {
-    const wrapper = mount(() => <CInput model={model} for="grade" />);
+    const model = new CaseViewModel({status: Statuses.InProgress})
+    const wrapper = mount(() => <CInput model={model} for="status" />);
 
     // Assert resting state
-    expect(wrapper.find("label").text()).toEqual("Grade");
-    expect(wrapper.text()).contains("Freshman");
+    expect(wrapper.find("label").text()).toEqual("Status");
+    expect(wrapper.text()).contains("In Progress");
 
     // Open the dropdown and select the third item.
     // Incredibly annoyingly, VSelect opens on mousedown, not on click.
     // It specifically passes openOnClick=false to VMenu and implements its own mousedown handler.
     await wrapper.find(".v-field").trigger("mousedown");
-    await wrapper.findAllComponents(VListItem)[2].trigger("click");
+    await wrapper.findAllComponents(VListItem)[3].trigger("click");
 
-    // The selected value should now be Junior, the third value of the enum
-    expect(model.grade).toBe(Grade.Junior);
-    expect(wrapper.text()).contains("Junior");
+    // The selected value should now be the 4th value of the enum
+    expect(model.status).toBe(Statuses.ClosedNoSolution);
+    expect(wrapper.text()).contains("Closed, No Solution");
   });
 
   test("caller model - date value", async () => {
     const wrapper = mount(() => (
-      <CInput model={model.manyParams} for="startDate" />
+      <CInput model={model.methodWithManyParams} for="dateTime" />
     ));
 
     // Assert resting state
-    expect(wrapper.find("label").text()).toEqual("Start Date");
+    expect(wrapper.find("label").text()).toEqual("Date Time");
 
     // Set a value, and look for the value
-    model.manyParams.args.startDate = new Date("2023-08-16T01:02:03Z");
+    model.methodWithManyParams.args.dateTime = new Date("2023-08-16T01:02:03Z");
     await delay(10);
     expect(wrapper.find("input").element.value).contains("2023");
 
     // Perform an input on the component, and then look for the new value.
     await wrapper.find("input").setValue("1/3/2017");
     await delay(10);
-    expect(model.manyParams.args.startDate.getFullYear()).toBe(2017);
+    expect(model.methodWithManyParams.args.dateTime.getFullYear()).toBe(2017);
   });
 
   test.each([true, false])("bool (checkbox: %s)", async (checkbox) => {
     const wrapper = mount(() => (
-      <CInput model={model} for="isEnrolled" checkbox={checkbox} />
+      <CInput model={model} for="isActive" checkbox={checkbox} />
     ));
 
     // Assert resting state
-    expect(wrapper.find("label").text()).toEqual("Is Enrolled");
+    expect(wrapper.find("label").text()).toEqual("Is Active");
 
     // Click the input
     await nextTick();
@@ -148,7 +142,7 @@ describe("CInput", () => {
     await nextTick();
 
     // Value should now be true
-    expect(model.isEnrolled).toBe(true);
+    expect(model.isActive).toBe(true);
   });
 
   test("model via v-model", async () => {
@@ -156,15 +150,15 @@ describe("CInput", () => {
     const onUpdate = vitest.fn();
 
     const model = new ComplexModelViewModel({});
-    model.methodWithManyParams.args.model = new Company({
-      companyId: 100,
-      altName: "acme corp",
+    model.methodWithManyParams.args.model = new Test({
+      testId: 100,
+      testName: "acme corp",
     });
 
-    const newCompany = new Company({ companyId: 101, altName: "intellitect" });
-    mockEndpoint("/Company/list", () => ({
+    const newItem = new Test({ testId: 101, testName: "intellitect" });
+    mockEndpoint("/Test/list", () => ({
       wasSuccessful: true,
-      list: [newCompany],
+      list: [newItem],
     }));
 
     const wrapper = mountApp(() => (
@@ -180,7 +174,7 @@ describe("CInput", () => {
     await selectFirstResult(wrapper);
 
     // Assert: Emits event
-    expect(onUpdate).toHaveBeenCalledWith(newCompany);
+    expect(onUpdate).toHaveBeenCalledWith(newItem);
   });
 
   test("date via v-model", async () => {
@@ -208,3 +202,8 @@ describe("CInput", () => {
     expect(onUpdate).toHaveBeenCalledWith(new Date("1/3/2017"));
   });
 });
+
+async function selectFirstResult(wrapper: VueWrapper) {
+  const overlay = await openMenu(wrapper);
+  await overlay.find(".v-list-item").trigger("click");
+}

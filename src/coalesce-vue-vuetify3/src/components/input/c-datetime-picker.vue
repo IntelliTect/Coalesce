@@ -84,7 +84,7 @@
           v-if="showTime"
           :model-value="internalValueZoned"
           @update:model-value="timeChanged"
-          :step="step"
+          :step="step ?? undefined"
           :min="min"
           :max="max"
         >
@@ -196,33 +196,33 @@ const props = withDefaults(
     for?: ForSpec<TModel, DateValue>;
 
     /** Specifies whether this input is picking date, time, or both. */
-    dateKind?: DateKind;
+    dateKind?: DateKind | null;
     /** The format of the selected value displayed in the text field.*/
-    dateFormat?: string;
-    readonly?: boolean;
-    disabled?: boolean;
+    dateFormat?: string | null;
+    readonly?: boolean | null;
+    disabled?: boolean | null;
     /** Use native HTML5 date picker rather than Vuetify. */
-    native?: boolean;
+    native?: boolean | null;
     closeOnDatePicked?: boolean | null;
 
     /** The IANA time zone name that the user will pick the date/time value in.
      * Falls back to the value configured with `coalesce-vue`'s `setDefaultTimeZone`
      * if the value bound to with `model`/`for` is a `DateTimeOffset`.
      */
-    timeZone?: string;
+    timeZone?: string | null;
 
     /** The allowed increments, in minutes, of the selectable value.
      * Value should divide 60 evenly, or be multiples of 60 */
-    step?: number;
+    step?: number | null;
 
     /** The minimum date/time value allowed. */
-    min?: Date;
+    min?: Date | null;
     /** The maximum date/time value allowed. */
-    max?: Date;
+    max?: Date | null;
     /** An array of permitted dates (items should have a time of midnight),
      * or a function that returns true if a date is allowed for selection.
      * Does not impact time selection. */
-    allowedDates?: Date[] | ((date: Date) => boolean);
+    allowedDates?: Date[] | ((date: Date) => boolean) | null;
     // Object containing extra props to pass through to `v-date-picker`.
     datePickerProps?: any;
   }>(),

@@ -1,20 +1,14 @@
-import { Grade, Student } from "@test/targets.models";
 import { mount } from "@test/util";
 import { CDisplay } from "..";
-import { Case, ComplexModel } from "@test-targets/models.g";
-import { ComplexModelViewModel } from "@test-targets/viewmodels.g";
+import { Case, ComplexModel, Statuses } from "@test-targets/models.g";
+import { CaseViewModel, CompanyViewModel, ComplexModelViewModel, PersonViewModel } from "@test-targets/viewmodels.g";
 import { Model } from "coalesce-vue";
-import { h } from "vue";
 
 describe("CDisplay", () => {
-  const model = new Student({
+  const model = new ComplexModel({
     name: "bob",
-    grade: Grade.Freshman,
-    password: "secretValue",
-    email: "bob@college.edu",
-    phone: "123-123-1234",
+    enumNullable: Statuses.InProgress,
     color: "#ff0000",
-    notes: "multiline\n\nstring",
   });
 
   test("types", () => {
@@ -68,27 +62,27 @@ describe("CDisplay", () => {
   });
 
   test(":model for=propString", () => {
-    const wrapper = mount(() => <CDisplay model={model} for="grade" />);
+    const wrapper = mount(() => <CDisplay model={model} for="enumNullable" />);
 
-    expect(wrapper.text()).toContain("Freshman");
+    expect(wrapper.text()).toContain("In Progress");
   });
 
   test(":model for=metaObject", () => {
     const wrapper = mount(() => (
-      <CDisplay model={model} for={model.$metadata.props.grade} />
+      <CDisplay model={model} for={model.$metadata.props.enumNullable} />
     ));
 
-    expect(wrapper.text()).toContain("Freshman");
+    expect(wrapper.text()).toContain("In Progress");
   });
 
   test(":model for=qualifiedString", () => {
     // This syntax is now deprecated and no longer supported by types
     // (hence the cast to any), but is still supported at runtime for now.
     const wrapper = mount(() => (
-      <CDisplay model={model} for={"Student.grade" as any} />
+      <CDisplay model={model} for={"ComplexModel.enumNullable" as any} />
     ));
 
-    expect(wrapper.text()).toContain("Freshman");
+    expect(wrapper.text()).toContain("In Progress");
   });
 
   test(":value date", () => {
@@ -111,18 +105,20 @@ describe("CDisplay", () => {
   });
 
   test("password", async () => {
-    const wrapper = mount(() => <CDisplay model={model} for="password" />);
+    const model = new PersonViewModel({secretPhrase: "Hunter2"});
+    const wrapper = mount(() => <CDisplay model={model} for="secretPhrase" />);
 
     expect(wrapper.text()).toContain("••••••••");
-    expect(wrapper.text()).not.toContain("secretValue");
+    expect(wrapper.text()).not.toContain("Hunter2");
 
     await wrapper.find("[role=button]").trigger("click");
 
     expect(wrapper.text()).not.toContain("••••••••");
-    expect(wrapper.text()).toContain("secretValue");
+    expect(wrapper.text()).toContain("Hunter2");
   });
 
   test("email", async () => {
+    const model = new PersonViewModel({email: "bob@example.com"});
     const wrapper = mount(() => <CDisplay model={model} for="email" />);
 
     expect(wrapper.text()).toContain(model.email);
@@ -132,6 +128,7 @@ describe("CDisplay", () => {
   });
 
   test("phone", async () => {
+    const model = new CompanyViewModel({phone: "15095555555"});
     const wrapper = mount(() => <CDisplay model={model} for="phone" />);
 
     expect(wrapper.text()).toContain(model.phone);
@@ -144,8 +141,8 @@ describe("CDisplay", () => {
     [true, "✓"],
     [false, "✗"],
   ])("boolean %s", async (value, display) => {
-    model.isEnrolled = value;
-    const wrapper = mount(() => <CDisplay model={model} for="isEnrolled" />);
+    model.isActive = value;
+    const wrapper = mount(() => <CDisplay model={model} for="isActive" />);
 
     expect(wrapper.text()).toContain(display);
   });
@@ -164,9 +161,10 @@ describe("CDisplay", () => {
   });
 
   test("multiline", async () => {
-    const wrapper = mount(() => <CDisplay model={model} for="notes" />);
+    const model = new CaseViewModel({description: "foo\nbar"});
+    const wrapper = mount(() => <CDisplay model={model} for="description" />);
 
-    expect(wrapper.text()).toContain(model.notes);
+    expect(wrapper.text()).toContain(model.description);
     expect(wrapper.attributes()["style"]).toEqual("white-space: pre-wrap;");
   });
 });

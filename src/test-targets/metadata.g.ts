@@ -612,6 +612,7 @@ export const ComplexModel = domain.types.ComplexModel = {
     singleTest: {
       name: "singleTest",
       displayName: "Single Test",
+      description: "The active Test record for the model.",
       type: "model",
       get typeDef() { return (domain.types.Test as ModelType & { name: "Test" }) },
       role: "referenceNavigation",
@@ -809,6 +810,12 @@ export const ComplexModel = domain.types.ComplexModel = {
       name: "name",
       displayName: "Name",
       type: "string",
+      role: "value",
+    },
+    isActive: {
+      name: "isActive",
+      displayName: "Is Active",
+      type: "boolean",
       role: "value",
     },
     byteArrayProp: {
@@ -1123,7 +1130,7 @@ export const ComplexModel = domain.types.ComplexModel = {
           name: "model",
           displayName: "Model",
           type: "model",
-          get typeDef() { return (domain.types.Company as ModelType & { name: "Company" }) },
+          get typeDef() { return (domain.types.Test as ModelType & { name: "Test" }) },
           role: "value",
         },
         modelCollection: {
@@ -1135,7 +1142,7 @@ export const ComplexModel = domain.types.ComplexModel = {
             displayName: "",
             role: "value",
             type: "model",
-            get typeDef() { return (domain.types.Company as ModelType & { name: "Company" }) },
+            get typeDef() { return (domain.types.Test as ModelType & { name: "Test" }) },
           },
           role: "value",
         },
@@ -2933,7 +2940,7 @@ export const StringIdentity = domain.types.StringIdentity = {
 export const Test = domain.types.Test = {
   name: "Test" as const,
   displayName: "Test",
-  get displayProp() { return this.props.testId }, 
+  get displayProp() { return this.props.testName }, 
   type: "model",
   controllerRoute: "Test",
   get keyProp() { return this.props.testId }, 

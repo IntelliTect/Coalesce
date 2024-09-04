@@ -1,5 +1,3 @@
-import { Course, Student } from "@test/targets.models";
-import { StudentViewModel } from "@test/targets.viewmodels";
 import {
   getWrapper,
   mountApp,
@@ -13,11 +11,9 @@ import {
 import { VueWrapper } from "@vue/test-utils";
 import {
   AnyArgCaller,
-  ClassType,
   ForeignKeyProperty,
   Model,
   ModelReferenceNavigationProperty,
-  PrimaryKeyProperty,
 } from "coalesce-vue";
 import { Mock } from "vitest";
 import { FunctionalComponent, ref } from "vue";
@@ -27,7 +23,6 @@ import { CSelect } from "..";
 import {
   Company,
   ComplexModel,
-  EnumPk,
   EnumPkId,
   Test,
 } from "@test-targets/models.g";
@@ -38,27 +33,27 @@ import {
 } from "@test-targets/viewmodels.g";
 
 describe("CSelect", () => {
-  let model = new Student({
+  let model = new ComplexModel({
     name: "bob",
   });
 
   let listMock: Mock, get303Mock: Mock;
 
   beforeEach(() => {
-    model = new Student({
+    model = new ComplexModel({
       name: "bob",
     });
 
     listMock = mockEndpoint(
-      "/Courses/list",
+      "/Test/list",
       vitest.fn((config) => {
         const items = [
-          new Course({ courseId: 101, name: "foo 101" }),
-          new Course({ courseId: 202, name: "bar 202" }),
+          new Test({ testId: 101, testName: "foo 101" }),
+          new Test({ testId: 202, testName: "bar 202" }),
         ].filter(
           (c, i) =>
             (!config.params.search ||
-              c.name?.startsWith(config.params.search)) &&
+              c.testName?.startsWith(config.params.search)) &&
             (!config.params.pageSize || i < config.params.pageSize)
         );
         return {
@@ -73,10 +68,10 @@ describe("CSelect", () => {
     );
 
     get303Mock = mockEndpoint(
-      "/Courses/get/303",
+      "/Test/get/303",
       vitest.fn((config) => ({
         wasSuccessful: true,
-        object: new Course({ courseId: 303, name: "baz 303" }),
+        object: new Test({ testId: 303, testName: "baz 303" }),
       }))
     );
   });
@@ -146,7 +141,7 @@ describe("CSelect", () => {
 
     () => (<CSelect for="EnumPk" keyValue={EnumPkId.Value10} onUpdate:keyValue={(v: EnumPkId | null) => {}} />);
     // @ts-expect-error keyValue type
-    () => (<CSelect for="EnumPk" keyValue={42} onUpdate:keyValue={(v: EnumPkId | null) => {}} />);
+    () => (<CSelect for="EnumPk" keyValue={'42'} onUpdate:keyValue={(v: EnumPkId | null) => {}} />);
     // @ts-expect-error onUpdate type
     () => (<CSelect for="EnumPk" keyValue={EnumPkId.Value10} onUpdate:keyValue={receivesComplexModel} />);
 
@@ -176,20 +171,20 @@ describe("CSelect", () => {
     
     // Binding to method parameters
     () => <CSelect model={complexVm.methodWithManyParams} for="model" />;
-    () => <CSelect model={complexVm.methodWithManyParams} for="model" onUpdate:modelValue={(x: Company | null) => {console.log(x)}} />;
+    () => <CSelect model={complexVm.methodWithManyParams} for="model" onUpdate:modelValue={(x: Test | null) => {console.log(x)}} />;
     // @ts-expect-error wrong onUpdate:modelValue type
-    () => <CSelect model={complexVm.methodWithManyParams} for="model" onUpdate:modelValue={receivesTestModel} />;
+    () => <CSelect model={complexVm.methodWithManyParams} for="model" onUpdate:modelValue={receivesComplexModel} />;
     // @ts-expect-error wrong modelValue type
     () => <CSelect model={complexVm.methodWithManyParams} for="model" modelValue={complexVm} />;
     () => (<CSelect model={complexVm.methodWithManyParams} for={complexVm.$metadata.methods.methodWithManyParams.params.model} />);
     () => (<CSelect model={complexVm.methodWithManyParams}
       for={complexVm.$metadata.methods.methodWithManyParams.params.model}
-      onUpdate:modelValue={(x: Company | null) => {console.log(x)}}
+      onUpdate:modelValue={(x: Test | null) => {console.log(x)}}
     />);
     () => (<CSelect model={complexVm.methodWithManyParams}
       for={complexVm.$metadata.methods.methodWithManyParams.params.model}
       // @ts-expect-error wrong onUpdate:modelValue type
-      onUpdate:modelValue={receivesTestModel}
+      onUpdate:modelValue={receivesComplexModel}
     />);
 
     //@ts-expect-error non-object method parameter
@@ -207,26 +202,26 @@ describe("CSelect", () => {
 
   test.each([
     {
-      props: { model, for: "currentCourse" },
-      label: "Current Course",
-      hint: "The course that the student is currently attending.",
+      props: { model, for: "singleTest" },
+      label: "Single Test",
+      hint: "The active Test record for the model.",
     },
     {
-      props: { model, for: "currentCourseId" },
-      label: "Current Course",
-      hint: "The course that the student is currently attending.",
+      props: { model, for: "singleTestId" },
+      label: "Single Test",
+      hint: "The active Test record for the model.",
     },
     {
-      props: { model, for: model.$metadata.props.currentCourse },
-      label: "Current Course",
-      hint: "The course that the student is currently attending.",
+      props: { model, for: model.$metadata.props.singleTest },
+      label: "Single Test",
+      hint: "The active Test record for the model.",
     },
     {
-      props: { model, for: model.$metadata.props.currentCourseId },
-      label: "Current Course",
-      hint: "The course that the student is currently attending.",
+      props: { model, for: model.$metadata.props.singleTestId },
+      label: "Single Test",
+      hint: "The active Test record for the model.",
     },
-    { props: { for: "Course" }, label: "Course", hint: "" },
+    { props: { for: "Test" }, label: "Test", hint: "" },
   ])("metadata resolves - $props.for", async ({ props, label, hint }) => {
     // Arrange/Act
     const wrapper = mountApp(CSelect, { props }).findComponent(CSelect);
@@ -248,7 +243,7 @@ describe("CSelect", () => {
     test("label", async () => {
       const wrapper = mountApp(() => (
         <CSelect
-          for="Course"
+          for="Test"
           label="custom label"
           hint="custom hint"
           persistent-hint
@@ -296,7 +291,7 @@ describe("CSelect", () => {
   });
 
   test("autofocus applies to correct element", () => {
-    const wrapper = mountApp(() => <CSelect for="Course" autofocus></CSelect>);
+    const wrapper = mountApp(() => <CSelect for="Test" autofocus></CSelect>);
 
     const elements = wrapper.findAll("[autofocus]");
     expect(elements).toHaveLength(1);
@@ -306,7 +301,7 @@ describe("CSelect", () => {
   describe("hint", () => {
     test("shows persistent hint", () => {
       const wrapper = mountApp(() => (
-        <CSelect for="Course" hint="custom hint" persistent-hint></CSelect>
+        <CSelect for="Test" hint="custom hint" persistent-hint></CSelect>
       ));
 
       expect(wrapper.find(".v-messages").text()).toEqual("custom hint");
@@ -314,7 +309,7 @@ describe("CSelect", () => {
 
     test("shows non-persistent hint when focused", async () => {
       const wrapper = mountApp(() => (
-        <CSelect for="Course" hint="custom hint"></CSelect>
+        <CSelect for="Test" hint="custom hint"></CSelect>
       ));
 
       expect(wrapper.find(".v-messages").text()).toEqual("");
@@ -326,7 +321,7 @@ describe("CSelect", () => {
 
     test("allow null hint", async () => {
       const wrapper = mountApp(() => (
-        <CSelect for="Course" hint={null}></CSelect>
+        <CSelect for="Test" hint={null}></CSelect>
       ));
 
       expect(wrapper.find(".v-messages").text()).toEqual("");
@@ -355,20 +350,20 @@ describe("CSelect", () => {
     }
 
     describe.each([
-      { p: "currentCourse", d: "navigation" },
-      { p: "currentCourseId", d: "fk" },
+      { p: "singleTest", d: "navigation" },
+      { p: "singleTestId", d: "fk" },
     ] as const)("when bound by $d", ({ p: propName }) => {
       test("pulls validation from fk metadata", async () => {
         await assertValidation(
           () => <CSelect model={model} for={propName}></CSelect>,
-          "Current Course is required."
+          "Single Test is required."
         );
       });
 
       test("pulls validation from ViewModel instance", async () => {
-        const model = new StudentViewModel();
+        const model = new ComplexModelViewModel();
         model.$addRule(
-          "currentCourseId",
+          "singleTestId",
           "required",
           (v: any) => !!v || "Custom rule from VM."
         );
@@ -397,7 +392,7 @@ describe("CSelect", () => {
     test("keyValue fetches object from server", async () => {
       // Arrange/Act
       const wrapper = mountApp(() => (
-        <CSelect for="Course" keyValue={303}></CSelect>
+        <CSelect for="Test" keyValue={303}></CSelect>
       ));
       await flushPromises();
 
@@ -411,9 +406,9 @@ describe("CSelect", () => {
 
     test("model + FK-only fetches object from server", async () => {
       // Arrange/Act
-      const student = new Student({ currentCourseId: 303 });
+      const model = new ComplexModel({ singleTestId: 303 });
       const wrapper = mountApp(() => (
-        <CSelect model={student} for="currentCourse"></CSelect>
+        <CSelect model={model} for="singleTest"></CSelect>
       ));
       await flushPromises();
 
@@ -429,8 +424,8 @@ describe("CSelect", () => {
       // Arrange/Act
       const wrapper = mountApp(() => (
         <CSelect
-          for="Course"
-          objectValue={new Course({ courseId: 303, name: "baz 303" })}
+          for="Test"
+          objectValue={new Test({ testId: 303, testName: "baz 303" })}
         ></CSelect>
       ));
       await flushPromises();
@@ -446,8 +441,8 @@ describe("CSelect", () => {
       // Arrange/Act
       const wrapper = mountApp(() => (
         <CSelect
-          for="Course"
-          modelValue={new Course({ courseId: 303, name: "baz 303" })}
+          for="Test"
+          modelValue={new Test({ testId: 303, testName: "baz 303" })}
         ></CSelect>
       ));
       await flushPromises();
@@ -464,16 +459,16 @@ describe("CSelect", () => {
       const onUpdateKey = vitest.fn();
       const onUpdateObject = vitest.fn();
       const onUpdateModel = vitest.fn();
-      const model = new Course({ courseId: 303 });
+      const model = new Test({ testId: 303 });
 
       const wrapper = mountApp(() => (
         <CSelect
-          for="Course"
+          for="Test"
           onUpdate:keyValue={onUpdateKey}
           onUpdate:objectValue={onUpdateObject}
           onUpdate:modelValue={onUpdateModel}
         ></CSelect>
-      )).findComponent(CSelect<Course>);
+      )).findComponent(CSelect<Test>);
 
       // Act
       await selectFirstResult(wrapper);
@@ -481,14 +476,14 @@ describe("CSelect", () => {
       // Assert: Emits events
       expect(onUpdateKey).toHaveBeenCalledWith(101);
       expect(onUpdateObject).toHaveBeenCalledWith(
-        new Course({ courseId: 101, name: "foo 101" })
+        new Test({ testId: 101, testName: "foo 101" })
       );
       expect(onUpdateModel).toHaveBeenCalledWith(
-        new Course({ courseId: 101, name: "foo 101" })
+        new Test({ testId: 101, testName: "foo 101" })
       );
 
       // Assert: `model` prop not mutated because we're bound by type, not prop
-      expect(model.courseId).toBe(303);
+      expect(model.testId).toBe(303);
 
       // Assert: Menu closes after selection
       expect(wrapper.vm.menuOpen).toBe(false);
@@ -496,40 +491,40 @@ describe("CSelect", () => {
 
     test("mutates model on selection when bound by model", async () => {
       // Arrange
-      const model = new Student({ currentCourseId: 303 });
+      const model = new ComplexModel({ singleTestId: 303 });
       const wrapper = mountApp(() => (
-        <CSelect model={model} for="currentCourse"></CSelect>
+        <CSelect model={model} for="singleTest"></CSelect>
       )).findComponent(CSelect);
 
       // Act
       await selectFirstResult(wrapper);
 
       // Assert: `model` prop mutated
-      expect(model.currentCourseId).toBe(101);
-      expect(model.currentCourse?.courseId).toBe(101);
+      expect(model.singleTestId).toBe(101);
+      expect(model.singleTest?.testId).toBe(101);
     });
 
     test("mutates model on selection when bound by apicaller arg", async () => {
-      const model = new StudentViewModel({});
+      const model = new ComplexModelViewModel({});
       const wrapper = mountApp(() => (
-        <CSelect model={model.manyParams} for="model" />
+        <CSelect model={model.methodWithManyParams} for="model" />
       )).findComponent(CSelect);
 
       // Act
       await selectFirstResult(wrapper);
 
       // Assert: arg prop mutated
-      expect(model.manyParams.args.model?.courseId).toBe(101);
+      expect(model.methodWithManyParams.args.model?.testId).toBe(101);
     });
 
     test("mutates v-model on selection when bound by apicaller arg", async () => {
-      const model = new StudentViewModel({});
-      const onUpdate = vitest.fn<(x: Course | null) => void>();
+      const model = new ComplexModelViewModel({});
+      const onUpdate = vitest.fn<(x: Test | null) => void>();
 
       const wrapper = mountApp(() => (
         <CSelect
-          for={model.$metadata.methods.manyParams.params.model}
-          modelValue={model.manyParams.args.model}
+          for={model.$metadata.methods.methodWithManyParams.params.model}
+          modelValue={model.methodWithManyParams.args.model}
           onUpdate:modelValue={onUpdate}
         />
       )).findComponent(CSelect);
@@ -539,7 +534,7 @@ describe("CSelect", () => {
 
       // Assert
       expect(onUpdate).toHaveBeenCalledWith(
-        new Course({ courseId: 101, name: "foo 101" })
+        new Test({ testId: 101, testName: "foo 101" })
       );
     });
   });
@@ -547,7 +542,7 @@ describe("CSelect", () => {
   describe("interaction", () => {
     test("typing while focused opens search", async () => {
       const wrapper = mountApp(() => (
-        <CSelect model={model} for="currentCourse"></CSelect>
+        <CSelect model={model} for="singleTest"></CSelect>
       )).findComponent(CSelect<any>);
 
       await flushPromises();
@@ -577,8 +572,8 @@ describe("CSelect", () => {
 
     test("list is keyboard navigable", async () => {
       const wrapper = mountApp(() => (
-        <CSelect model={model} for="currentCourse" clearable></CSelect>
-      )).findComponent(CSelect<Student>);
+        <CSelect model={model} for="singleTest" clearable></CSelect>
+      )).findComponent(CSelect<ComplexModel>);
 
       const mainInput = wrapper.find("input");
 
@@ -604,17 +599,17 @@ describe("CSelect", () => {
       await menuInput.trigger("keydown.enter");
 
       expect(menuWrapper.find(".v-list-item--active").text()).toBe("bar 202");
-      expect(model.currentCourseId).toBe(202); // second result in the list
+      expect(model.singleTestId).toBe(202); // second result in the list
       expect(wrapper.vm.menuOpen).toBeFalsy();
 
       // Clear the selection with delete
       await mainInput.trigger("keydown.delete");
-      expect(model.currentCourseId).toBeNull();
+      expect(model.singleTestId).toBeNull();
     });
 
     describe.each(["disabled", "readonly"])("%s", (prop) => {
       async function assertNonInteractive(
-        wrapper: VueWrapper<BetterComponentInstance<typeof CSelect<Student>>>
+        wrapper: VueWrapper<BetterComponentInstance<typeof CSelect<ComplexModel>>>
       ) {
         // Clearable is ignored when disabled/readonly
         expect(wrapper.find(".v-field__clearable").exists()).toBeFalsy();
@@ -632,25 +627,25 @@ describe("CSelect", () => {
       }
 
       test("noninteractive via VForm", async () => {
-        model.currentCourse = new Course({ courseId: 101 });
+        model.singleTest = new Test({ testId: 101 });
         const wrapper = mountApp(() => (
           <VForm {...{ [prop]: true }}>
-            <CSelect model={model} for="currentCourse" clearable></CSelect>
+            <CSelect model={model} for="singleTest" clearable></CSelect>
           </VForm>
-        )).findComponent(CSelect<Student>);
+        )).findComponent(CSelect<ComplexModel>);
 
         assertNonInteractive(wrapper);
       });
       test("noninteractive via direct", () => {
-        model.currentCourse = new Course({ courseId: 101 });
+        model.singleTest = new Test({ testId: 101 });
         const wrapper = mountApp(() => (
           <CSelect
             model={model}
-            for="currentCourse"
+            for="singleTest"
             clearable
             {...{ [prop]: true }}
           ></CSelect>
-        )).findComponent(CSelect<Student>);
+        )).findComponent(CSelect<ComplexModel>);
 
         assertNonInteractive(wrapper);
       });
@@ -659,10 +654,10 @@ describe("CSelect", () => {
 
   test("preselect first", async () => {
     mountApp(() => (
-      <CSelect model={model} for="currentCourse" preselect-first></CSelect>
+      <CSelect model={model} for="singleTest" preselect-first></CSelect>
     )).findComponent(CSelect);
     await flushPromises();
-    expect(model.currentCourseId).toBe(101);
+    expect(model.singleTestId).toBe(101);
   });
 
   test.each([
@@ -674,13 +669,13 @@ describe("CSelect", () => {
       mountApp(() => (
         <CSelect
           model={model}
-          for="currentCourse"
+          for="singleTest"
           preselect-single
           params={{ pageSize: results }}
         ></CSelect>
       )).findComponent(CSelect);
       await flushPromises();
-      expect(model.currentCourseId).toBe(expected);
+      expect(model.singleTestId).toBe(expected);
     }
   );
 
@@ -688,14 +683,14 @@ describe("CSelect", () => {
     const wrapper = mountApp(() => (
       <CSelect
         model={model}
-        for="currentCourse"
+        for="singleTest"
         create={{
           getLabel(search: string) {
             if (search == "f") return "new thing";
             else return false;
           },
           async getItem(search: string, label: string) {
-            return new Course({ name: label });
+            return new Test({ testName: label });
           },
         }}
       ></CSelect>
@@ -716,7 +711,7 @@ describe("CSelect", () => {
     await createItem.trigger("click");
 
     // Assert
-    expect(model.currentCourse?.name).toBe("new thing");
+    expect(model.singleTest?.testName).toBe("new thing");
   });
 
   describe("vuetify props passthrough", () => {
@@ -755,7 +750,7 @@ describe("CSelect", () => {
 
 const menuContents = () => getWrapper(".v-overlay__content");
 
-export const selectFirstResult = async (wrapper: VueWrapper) => {
+async function selectFirstResult(wrapper: VueWrapper) {
   const overlay = await openMenu(wrapper);
   await overlay.find(".v-list-item").trigger("click");
-};
+}

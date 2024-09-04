@@ -1,12 +1,7 @@
-import { Grade } from "@test/targets.models";
-import { StudentViewModel } from "@test/targets.viewmodels";
 import {
   delay,
-  flushPromises,
-  getWrapper,
   mount,
   mountApp,
-  nextTick,
   openMenu,
 } from "@test/util";
 import { CDatetimePicker } from "..";
@@ -16,16 +11,10 @@ import { AnyArgCaller } from "coalesce-vue";
 import { VForm } from "vuetify/components";
 
 describe("CDatetimePicker", () => {
-  let model: StudentViewModel;
+  let model: ComplexModelViewModel;
   beforeEach(() => {
-    model = new StudentViewModel({
-      name: "bob",
-      grade: Grade.Freshman,
-      password: "secretValue",
-      email: "bob@college.edu",
-      phone: "123-123-1234",
-      color: "#ff0000",
-      notes: "multiline\n\nstring",
+    model = new ComplexModelViewModel({
+      name: "bob"
     });
   });
 
@@ -122,21 +111,21 @@ describe("CDatetimePicker", () => {
 
   test("caller model - date value", async () => {
     const wrapper = mount(() => (
-      <CDatetimePicker model={model.manyParams} for="startDate" />
+      <CDatetimePicker model={model.methodWithManyParams} for="dateTime" />
     ));
 
     // Assert resting state
-    expect(wrapper.find("label").text()).toEqual("Start Date");
+    expect(wrapper.find("label").text()).toEqual("Date Time");
 
     // Set a value, and look for the value
-    model.manyParams.args.startDate = new Date("2023-08-16T01:02:03Z");
+    model.methodWithManyParams.args.dateTime = new Date("2023-08-16T01:02:03Z");
     await delay(1);
     expect(wrapper.find("input").element.value).contains("2023");
 
     // Perform an input on the component, and then look for the new value.
     await wrapper.find("input").setValue("1/3/2017");
     await delay(1);
-    expect(model.manyParams.args.startDate.getFullYear()).toBe(2017);
+    expect(model.methodWithManyParams.args.dateTime.getFullYear()).toBe(2017);
   });
 
   test("validation rules are passed date, not string", async () => {
@@ -145,22 +134,21 @@ describe("CDatetimePicker", () => {
     );
 
     const wrapper = mount(() => (
-      //@ts-ignore useless error about extra properties
-      <CDatetimePicker model={model} for="birthDate" rules={[rule]} />
+      <CDatetimePicker model={model} for="systemDateOnly" rules={[rule]} />
     ));
 
     // Perform an input on the component, and then look at the args that were passed to the rule function:
     await wrapper.find("input").setValue("1/3/2017");
     await delay(1);
     expect(wrapper.text()).toContain("Year must be > 2017");
-    expect(model.birthDate?.getFullYear()).toBe(2017);
-    expect(rule).toHaveBeenLastCalledWith(model.birthDate);
+    expect(model.systemDateOnly?.getFullYear()).toBe(2017);
+    expect(rule).toHaveBeenLastCalledWith(model.systemDateOnly);
 
     // Do it again, but with a valid input this time. The error should be gone.
     await wrapper.find("input").setValue("1/3/2018");
     await delay(1);
     expect(wrapper.text()).not.toContain("Year must be > 2017");
-    expect(model.birthDate?.getFullYear()).toBe(2018);
-    expect(rule).toHaveBeenLastCalledWith(model.birthDate);
+    expect(model.systemDateOnly?.getFullYear()).toBe(2018);
+    expect(rule).toHaveBeenLastCalledWith(model.systemDateOnly);
   });
 });

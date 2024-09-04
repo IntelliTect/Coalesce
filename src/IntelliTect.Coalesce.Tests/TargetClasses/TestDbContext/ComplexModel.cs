@@ -35,6 +35,7 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         public IEnumerable<Test> UnmappedCollectionOfMappedModels => Tests.Reverse();
 
         public int SingleTestId { get; set; }
+        [Display(Description = "The active Test record for the model.")]
         public Test SingleTest { get; set; }
 
         public EnumPkId EnumPkId { get; set; }
@@ -100,6 +101,8 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         // Default searchable property
         [DefaultOrderBy(FieldOrder = 1)]
         public string Name { get; set; }
+
+        public bool IsActive { get; set; }
 
         public byte[] ByteArrayProp { get; set; }
 
@@ -175,8 +178,8 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
             bool boolParam,
             Case.Statuses enumParam,
             Case.Statuses[] enumsParam,
-            Company model,
-            Company[] modelCollection
+            Test model,
+            Test[] modelCollection
         )
         {
             return collectionExternal.FirstOrDefault() ?? singleExternal;

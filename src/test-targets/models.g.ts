@@ -243,6 +243,8 @@ export interface ComplexModel extends Model<typeof metadata.ComplexModel> {
   childrenWithoutRefNavProp: ComplexModelDependent[] | null
   unmappedCollectionOfMappedModels: Test[] | null
   singleTestId: number | null
+  
+  /** The active Test record for the model. */
   singleTest: Test | null
   enumPkId: EnumPkId | null
   enumPk: EnumPk | null
@@ -266,6 +268,7 @@ export interface ComplexModel extends Model<typeof metadata.ComplexModel> {
   noAutoIncludeByClassReferenceNavigationId: number | null
   noAutoIncludeByClassReferenceNavigation: Company | null
   name: string | null
+  isActive: boolean | null
   byteArrayProp: string | null
   string: string | null
   stringWithDefault: string | null
@@ -1184,12 +1187,14 @@ export class WeatherData {
 
 
 declare module "coalesce-vue/lib/model" {
-  interface ModelTypeLookup {
+  interface EnumTypeLookup {
     EnumPkId: EnumPkId
     Genders: Genders
     SkyConditions: SkyConditions
     Statuses: Statuses
     Titles: Titles
+  }
+  interface ModelTypeLookup {
     AbstractImpl: AbstractImpl
     AbstractModel: AbstractModel
     Case: Case

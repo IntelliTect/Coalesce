@@ -251,6 +251,7 @@ import {
   AnyArgCaller,
   ResponseCachingConfiguration,
   ModelTypeLookup,
+  EnumTypeLookup,
   TypeDiscriminatorToType,
   PrimaryKeyProperty,
   PropNames,
@@ -307,8 +308,8 @@ type FindPk<TModel extends Model> = ExtractValuesOfType<
 >;
 
 type SelectedPkType = FindPk<SelectedModelType> extends EnumValue
-  ? FindPk<SelectedModelType>["typeDef"]["name"] extends keyof ModelTypeLookup
-    ? ModelTypeLookup[FindPk<SelectedModelType>["typeDef"]["name"]]
+  ? FindPk<SelectedModelType>["typeDef"]["name"] extends keyof EnumTypeLookup
+    ? EnumTypeLookup[FindPk<SelectedModelType>["typeDef"]["name"]]
     : any
   : TypeDiscriminatorToType<FindPk<SelectedModelType>["type"]>;
 

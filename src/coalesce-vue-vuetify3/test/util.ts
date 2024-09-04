@@ -26,7 +26,7 @@ import { createRouter, createWebHistory } from "vue-router";
 import { createVuetify } from "vuetify";
 import * as components from "vuetify/components";
 import * as directives from "vuetify/directives";
-import $metadata from "./targets.metadata";
+import $metadata from "@test-targets/metadata.g";
 
 global.matchMedia ??= function (str: string) {
   return {

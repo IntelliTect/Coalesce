@@ -34,7 +34,7 @@ export class CompanyApiClient extends ModelApiClient<$models.Company> {
 
 export class ComplexModelApiClient extends ModelApiClient<$models.ComplexModel> {
   constructor() { super($metadata.ComplexModel) }
-  public methodWithManyParams(id: number | null, singleExternal?: $models.ExternalParent | null, collectionExternal?: $models.ExternalParent[] | null, file?: File | null, strParam?: string | null, stringsParam?: string[] | null, dateTime?: Date | null, integer?: number | null, boolParam?: boolean | null, enumParam?: $models.Statuses | null, enumsParam?: $models.Statuses[] | null, model?: $models.Company | null, modelCollection?: $models.Company[] | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<$models.ExternalParent>> {
+  public methodWithManyParams(id: number | null, singleExternal?: $models.ExternalParent | null, collectionExternal?: $models.ExternalParent[] | null, file?: File | null, strParam?: string | null, stringsParam?: string[] | null, dateTime?: Date | null, integer?: number | null, boolParam?: boolean | null, enumParam?: $models.Statuses | null, enumsParam?: $models.Statuses[] | null, model?: $models.Test | null, modelCollection?: $models.Test[] | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<$models.ExternalParent>> {
     const $method = this.$metadata.methods.methodWithManyParams
     const $params =  {
       id,

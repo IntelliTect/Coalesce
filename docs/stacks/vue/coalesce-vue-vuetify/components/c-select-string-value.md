@@ -18,9 +18,12 @@ Effectively, this is a server-driven autocomplete list.
 />
 ```
 
+``` ts
+const selectedTitle = ref<string>();
+```
 ``` vue-html
 <c-select-string-value 
-    v-model="title"
+    v-model="selectedTitle"
     label="Job Title"
     for="Person"
     method="getSuggestedJobTitles"
@@ -54,9 +57,8 @@ class Person
 
 A metadata specifier for the value being bound. One of:
     
-- A string with the name of the value belonging to `model`.
-- A direct reference to a metadata object.
-- A string in dot-notation that starts with a type name.
+- A string with the name of the bound value belonging to `model`, or a direct reference to a metadata object that describes the bound value belonging to `model`.
+- A string equal to the name of the type that owns the method described by `method`. Use `v-model` to bind the selected string value.
 
 <Prop def="model: Model" lang="ts" />
 

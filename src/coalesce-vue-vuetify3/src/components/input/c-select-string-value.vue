@@ -10,30 +10,24 @@
     v-bind="inputBindAttrs"
   >
   </v-combobox>
-  <!-- TODO: This component has a lot of issues in vuetify3:
-    - Dropdown menu hides until the second keystroke.
-    - Current value disappears when the component receives focus if the value has not yet been edited since the component mounted.
-  -->
 </template>
 
 <script lang="ts" setup generic="TModel extends Model">
-import { computed, ref } from "vue";
+import { computed, ref, watch, onMounted } from "vue";
 import {
   ModelApiClient,
   ItemResultPromise,
   Model,
   StringValue,
-  Method,
   CollectionValue,
   ItemMethod,
+  ModelType,
 } from "coalesce-vue";
 import {
   ForSpec,
   MethodForSpec,
   useMetadataProps,
 } from "../c-metadata-component";
-import { watch } from "vue";
-import { onMounted } from "vue";
 
 const MODEL_REQUIRED_MESSAGE =
   "c-select-string-value requires a model to be provided via the `model` prop, or a type to be provided via the `for` prop.";
@@ -54,12 +48,11 @@ type StringsStaticMethod = ItemMethod & {
 
 const props = defineProps<{
   /** An object owning the value to be edited that is specified by the `for` prop. */
-  model: TModel;
+  model?: TModel | null;
 
   /** A metadata specifier for the value being bound. One of:
-   * * A string with the name of the value belonging to `model`. E.g. `"autocompleteString"`.
-   * * A direct reference to the metadata object. E.g. `model.$metadata.props.autocompleteString`.
-   * * A string in dot-notation that starts with a type name. E.g. `"Person.autocompleteString"`.
+   * * A string with the name of the value belonging to `model`. E.g. `"jobTitle"`.
+   * * A direct reference to the metadata object. E.g. `model.$metadata.props.jobTitle`.
    */
   for: ForSpec<TModel, StringValue>;
 
@@ -70,43 +63,53 @@ const props = defineProps<{
 
 const modelValue = defineModel<string | null>();
 
-const {
-  inputBindAttrs,
-  valueMeta,
-  modelMeta: { value: modelMeta },
-  valueOwner,
-} = useMetadataProps(props);
+const { inputBindAttrs, valueMeta, modelMeta, valueOwner } =
+  useMetadataProps(props);
 
-if (!modelMeta || !("type" in modelMeta) || modelMeta.type != "model") {
+const methodOwner = computed((): ModelType => {
+  if (
+    modelMeta.value &&
+    typeof props.method == "string" &&
+    modelMeta.value.type == "model"
+  ) {
+    // <CSSV model={vm} for=propName >
+    return modelMeta.value;
+  }
+
+  if (valueMeta.value?.type == "model") {
+    // <CSSV for=TypeName method=methodName >
+    return valueMeta.value.typeDef;
+  }
+
   throw Error(MODEL_REQUIRED_MESSAGE);
-}
+});
 
-const methodMeta =
-  typeof props.method == "string"
-    ? modelMeta.methods[props.method]
-    : (props.method as Method);
+const methodMeta = computed(() => {
+  let method;
+  if (typeof props.method == "object") {
+    method = props.method;
+  } else {
+    method = methodOwner.value.methods[props.method];
+  }
 
-if (!methodMeta) {
-  throw Error(
-    `No method named ${props.method} could be found on type ${modelMeta.name}. Note: method name is expected to be camelCase.`
-  );
-}
+  if (
+    !method.isStatic ||
+    method.transportType != "item" ||
+    method.return.type != "collection" ||
+    method.return.itemType.type != "string"
+  ) {
+    throw Error(
+      "c-select-string-value requires a static model method that returns an array of strings."
+    );
+  }
 
-if (
-  !methodMeta.isStatic ||
-  methodMeta.transportType != "item" ||
-  methodMeta.return.type != "collection" ||
-  methodMeta.return.itemType.type != "string"
-) {
-  throw Error(
-    "c-select-string-value requires a static model method that returns an array of strings."
-  );
-}
+  return method;
+});
 
-const caller = new ModelApiClient(modelMeta)
+const caller = new ModelApiClient(methodOwner.value)
   .$useSimultaneousRequestCaching()
   .$makeCaller("item", (c, page?: number, search?: string) => {
-    return c.$invoke(methodMeta, {
+    return c.$invoke(methodMeta.value, {
       page,
       search,
       ...props.params,
@@ -144,7 +147,6 @@ const internalValue = computed((): string | null => {
   return modelValue.value ?? null;
 });
 
-// `unknown` because vuetify's types are a little weird right now (wont infer `string`)
 function onInput(value: string | null | undefined) {
   if (valueOwner.value && valueMeta.value) {
     (valueOwner.value as any)[valueMeta.value.name] = value;

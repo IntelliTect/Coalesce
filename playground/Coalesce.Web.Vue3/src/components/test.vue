@@ -30,8 +30,7 @@
       <c-select-string-value
         :model="caseVm"
         for="title"
-        method="getCaseTitles"
-        eager
+        method="getCaseTitles" list-when-empty
       />
       <v-btn @click="disabled = !disabled">Disable Toggle</v-btn>
       <v-form :disabled="disabled">

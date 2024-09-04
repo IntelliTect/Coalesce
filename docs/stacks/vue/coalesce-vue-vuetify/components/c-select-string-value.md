@@ -38,7 +38,9 @@ class Person
     public string JobTitle { get; set; }
 
     [Coalesce]
-    public static async Task<ICollection<string>> GetSuggestedJobTitles(AppDbContext db, string search) 
+    public static async Task<ICollection<string>> GetSuggestedJobTitles(
+      AppDbContext db, string search
+    )
     {
         return await db.People
             .Select(p => p.JobTitle)

@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System.Runtime.CompilerServices;
+using System.Security.Claims;
 
 namespace IntelliTect.Coalesce.AuditLogging.Tests;
 
@@ -464,7 +465,7 @@ class TestOperationContext(IHttpContextAccessor? httpContext = null) : IAuditOpe
 {
     public void Populate(TestAuditLog auditEntry, EntityEntry entry)
     {
-        auditEntry.UserId = httpContext?.HttpContext?.User?.GetUserId();
+        auditEntry.UserId = httpContext?.HttpContext?.User?.FindFirstValue(ClaimTypes.NameIdentifier);
         auditEntry.CustomField1 = "from TestOperationContext";
     }
 }

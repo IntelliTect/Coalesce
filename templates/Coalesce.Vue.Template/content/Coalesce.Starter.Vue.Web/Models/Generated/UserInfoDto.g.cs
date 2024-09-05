@@ -69,13 +69,13 @@ namespace Coalesce.Starter.Vue.Web.Models
 
             var entity = new Coalesce.Starter.Vue.Data.Auth.UserInfo()
             {
-                Id = Id,
-                UserName = UserName,
                 Roles = Roles,
                 Permissions = Permissions,
             };
 
             if (OnUpdate(entity, context)) return entity;
+            if (ShouldMapTo(nameof(Id))) entity.Id = Id;
+            if (ShouldMapTo(nameof(UserName))) entity.UserName = UserName;
             if (ShouldMapTo(nameof(FullName))) entity.FullName = FullName;
 
             return entity;

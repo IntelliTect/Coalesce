@@ -19,6 +19,13 @@ export enum Permission {
 }
 
 
+export enum WidgetCategory {
+  Whizbangs = 0,
+  Sprecklesprockets = 1,
+  Discombobulators = 2,
+}
+
+
 export interface AuditLog extends Model<typeof metadata.AuditLog> {
   userId: string | null
   user: User | null
@@ -86,7 +93,6 @@ export class AuditLogProperty {
 
 export interface Role extends Model<typeof metadata.Role> {
   name: string | null
-  roleClaims: RoleClaim[] | null
   permissions: Permission[] | null
   id: string | null
 }
@@ -111,42 +117,21 @@ export class Role {
 }
 
 
-export interface RoleClaim extends Model<typeof metadata.RoleClaim> {
-  role: Role | null
-  id: number | null
-  roleId: string | null
-  claimType: string | null
-  claimValue: string | null
-}
-export class RoleClaim {
-  
-  /** Mutates the input object and its descendents into a valid RoleClaim implementation. */
-  static convert(data?: Partial<RoleClaim>): RoleClaim {
-    return convertToModel(data || {}, metadata.RoleClaim) 
-  }
-  
-  /** Maps the input object and its descendents to a new, valid RoleClaim implementation. */
-  static map(data?: Partial<RoleClaim>): RoleClaim {
-    return mapToModel(data || {}, metadata.RoleClaim) 
-  }
-  
-  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.RoleClaim; }
-  
-  /** Instantiate a new RoleClaim, optionally basing it on the given data. */
-  constructor(data?: Partial<RoleClaim> | {[k: string]: any}) {
-    Object.assign(this, RoleClaim.map(data || {}));
-  }
-}
-
-
 export interface User extends Model<typeof metadata.User> {
   fullName: string | null
   photoMD5: string | null
   userName: string | null
-  accessFailedCount: number | null
+  email: string | null
+  
+  /** If set, the user will be blocked from signing in until this date. */
   lockoutEnd: Date | null
+  
+  /** If enabled, the user can be locked out. */
   lockoutEnabled: boolean | null
   userRoles: UserRole[] | null
+  
+  /** A summary of the effective permissions of the user, derived from their current roles. */
+  effectivePermissions: string | null
   id: string | null
 }
 export class User {
@@ -206,6 +191,39 @@ export namespace UserRole {
 }
 
 
+export interface Widget extends Model<typeof metadata.Widget> {
+  widgetId: number | null
+  name: string | null
+  category: WidgetCategory | null
+  inventedOn: Date | null
+  modifiedBy: User | null
+  modifiedById: string | null
+  modifiedOn: Date | null
+  createdBy: User | null
+  createdById: string | null
+  createdOn: Date | null
+}
+export class Widget {
+  
+  /** Mutates the input object and its descendents into a valid Widget implementation. */
+  static convert(data?: Partial<Widget>): Widget {
+    return convertToModel(data || {}, metadata.Widget) 
+  }
+  
+  /** Maps the input object and its descendents to a new, valid Widget implementation. */
+  static map(data?: Partial<Widget>): Widget {
+    return mapToModel(data || {}, metadata.Widget) 
+  }
+  
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.Widget; }
+  
+  /** Instantiate a new Widget, optionally basing it on the given data. */
+  constructor(data?: Partial<Widget> | {[k: string]: any}) {
+    Object.assign(this, Widget.map(data || {}));
+  }
+}
+
+
 export interface UserInfo extends Model<typeof metadata.UserInfo> {
   id: string | null
   userName: string | null
@@ -238,14 +256,15 @@ declare module "coalesce-vue/lib/model" {
   interface EnumTypeLookup {
     AuditEntryState: AuditEntryState
     Permission: Permission
+    WidgetCategory: WidgetCategory
   }
   interface ModelTypeLookup {
     AuditLog: AuditLog
     AuditLogProperty: AuditLogProperty
     Role: Role
-    RoleClaim: RoleClaim
     User: User
     UserInfo: UserInfo
     UserRole: UserRole
+    Widget: Widget
   }
 }

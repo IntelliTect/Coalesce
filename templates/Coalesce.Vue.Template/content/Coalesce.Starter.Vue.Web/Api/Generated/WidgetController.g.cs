@@ -21,64 +21,64 @@ using System.Threading.Tasks;
 
 namespace Coalesce.Starter.Vue.Web.Api
 {
-    [Route("api/Role")]
+    [Route("api/Widget")]
     [Authorize]
     [ServiceFilter(typeof(IApiActionFilter))]
-    public partial class RoleController
-        : BaseApiController<Coalesce.Starter.Vue.Data.Models.Role, RoleParameter, RoleResponse, Coalesce.Starter.Vue.Data.AppDbContext>
+    public partial class WidgetController
+        : BaseApiController<Coalesce.Starter.Vue.Data.Models.Widget, WidgetParameter, WidgetResponse, Coalesce.Starter.Vue.Data.AppDbContext>
     {
-        public RoleController(CrudContext<Coalesce.Starter.Vue.Data.AppDbContext> context) : base(context)
+        public WidgetController(CrudContext<Coalesce.Starter.Vue.Data.AppDbContext> context) : base(context)
         {
-            GeneratedForClassViewModel = context.ReflectionRepository.GetClassViewModel<Coalesce.Starter.Vue.Data.Models.Role>();
+            GeneratedForClassViewModel = context.ReflectionRepository.GetClassViewModel<Coalesce.Starter.Vue.Data.Models.Widget>();
         }
 
         [HttpGet("get/{id}")]
         [Authorize]
-        public virtual Task<ItemResult<RoleResponse>> Get(
-            string id,
+        public virtual Task<ItemResult<WidgetResponse>> Get(
+            int id,
             DataSourceParameters parameters,
-            IDataSource<Coalesce.Starter.Vue.Data.Models.Role> dataSource)
+            IDataSource<Coalesce.Starter.Vue.Data.Models.Widget> dataSource)
             => GetImplementation(id, parameters, dataSource);
 
         [HttpGet("list")]
         [Authorize]
-        public virtual Task<ListResult<RoleResponse>> List(
+        public virtual Task<ListResult<WidgetResponse>> List(
             ListParameters parameters,
-            IDataSource<Coalesce.Starter.Vue.Data.Models.Role> dataSource)
+            IDataSource<Coalesce.Starter.Vue.Data.Models.Widget> dataSource)
             => ListImplementation(parameters, dataSource);
 
         [HttpGet("count")]
         [Authorize]
         public virtual Task<ItemResult<int>> Count(
             FilterParameters parameters,
-            IDataSource<Coalesce.Starter.Vue.Data.Models.Role> dataSource)
+            IDataSource<Coalesce.Starter.Vue.Data.Models.Widget> dataSource)
             => CountImplementation(parameters, dataSource);
 
         [HttpPost("save")]
-        [Authorize(Roles = "UserAdmin")]
-        public virtual Task<ItemResult<RoleResponse>> Save(
-            [FromForm] RoleParameter dto,
+        [Authorize]
+        public virtual Task<ItemResult<WidgetResponse>> Save(
+            [FromForm] WidgetParameter dto,
             [FromQuery] DataSourceParameters parameters,
-            IDataSource<Coalesce.Starter.Vue.Data.Models.Role> dataSource,
-            IBehaviors<Coalesce.Starter.Vue.Data.Models.Role> behaviors)
+            IDataSource<Coalesce.Starter.Vue.Data.Models.Widget> dataSource,
+            IBehaviors<Coalesce.Starter.Vue.Data.Models.Widget> behaviors)
             => SaveImplementation(dto, parameters, dataSource, behaviors);
 
         [HttpPost("bulkSave")]
         [Authorize]
-        public virtual Task<ItemResult<RoleResponse>> BulkSave(
+        public virtual Task<ItemResult<WidgetResponse>> BulkSave(
             [FromBody] BulkSaveRequest dto,
             [FromQuery] DataSourceParameters parameters,
-            IDataSource<Coalesce.Starter.Vue.Data.Models.Role> dataSource,
+            IDataSource<Coalesce.Starter.Vue.Data.Models.Widget> dataSource,
             [FromServices] IDataSourceFactory dataSourceFactory,
             [FromServices] IBehaviorsFactory behaviorsFactory)
             => BulkSaveImplementation(dto, parameters, dataSource, dataSourceFactory, behaviorsFactory);
 
         [HttpPost("delete/{id}")]
-        [Authorize(Roles = "UserAdmin")]
-        public virtual Task<ItemResult<RoleResponse>> Delete(
-            string id,
-            IBehaviors<Coalesce.Starter.Vue.Data.Models.Role> behaviors,
-            IDataSource<Coalesce.Starter.Vue.Data.Models.Role> dataSource)
+        [Authorize]
+        public virtual Task<ItemResult<WidgetResponse>> Delete(
+            int id,
+            IBehaviors<Coalesce.Starter.Vue.Data.Models.Widget> behaviors,
+            IDataSource<Coalesce.Starter.Vue.Data.Models.Widget> dataSource)
             => DeleteImplementation(id, new DataSourceParameters(), dataSource, behaviors);
     }
 }

@@ -1,5 +1,8 @@
+using System.ComponentModel;
+
 namespace Coalesce.Starter.Vue.Data.Models;
 
+[Description("A sample model provided by the Coalesce template. Remove this when you start building your real data model.")]
 public class Widget
 #if TrackingBase
     : TrackingBase

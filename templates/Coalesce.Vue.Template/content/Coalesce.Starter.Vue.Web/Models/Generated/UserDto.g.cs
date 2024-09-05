@@ -15,6 +15,9 @@ namespace Coalesce.Starter.Vue.Web.Models
         private string _Id;
         private string _FullName;
         private string _UserName;
+        private string _Email;
+        private System.DateTimeOffset? _LockoutEnd;
+        private bool? _LockoutEnabled;
 
         public string Id
         {
@@ -31,6 +34,21 @@ namespace Coalesce.Starter.Vue.Web.Models
             get => _UserName;
             set { _UserName = value; Changed(nameof(UserName)); }
         }
+        public string Email
+        {
+            get => _Email;
+            set { _Email = value; Changed(nameof(Email)); }
+        }
+        public System.DateTimeOffset? LockoutEnd
+        {
+            get => _LockoutEnd;
+            set { _LockoutEnd = value; Changed(nameof(LockoutEnd)); }
+        }
+        public bool? LockoutEnabled
+        {
+            get => _LockoutEnabled;
+            set { _LockoutEnabled = value; Changed(nameof(LockoutEnabled)); }
+        }
 
         /// <summary>
         /// Map from the current DTO instance to the domain object.
@@ -44,6 +62,9 @@ namespace Coalesce.Starter.Vue.Web.Models
             if (ShouldMapTo(nameof(Id))) entity.Id = Id;
             if (ShouldMapTo(nameof(FullName))) entity.FullName = FullName;
             if (ShouldMapTo(nameof(UserName))) entity.UserName = UserName;
+            if (ShouldMapTo(nameof(Email)) && (context.IsInRoleCached("UserAdmin"))) entity.Email = Email;
+            if (ShouldMapTo(nameof(LockoutEnd)) && (context.IsInRoleCached("UserAdmin"))) entity.LockoutEnd = LockoutEnd;
+            if (ShouldMapTo(nameof(LockoutEnabled)) && (context.IsInRoleCached("UserAdmin"))) entity.LockoutEnabled = (LockoutEnabled ?? entity.LockoutEnabled);
         }
 
         /// <summary>
@@ -65,9 +86,10 @@ namespace Coalesce.Starter.Vue.Web.Models
         public string FullName { get; set; }
         public byte[] PhotoMD5 { get; set; }
         public string UserName { get; set; }
-        public int? AccessFailedCount { get; set; }
+        public string Email { get; set; }
         public System.DateTimeOffset? LockoutEnd { get; set; }
         public bool? LockoutEnabled { get; set; }
+        public string EffectivePermissions { get; set; }
         public System.Collections.Generic.ICollection<Coalesce.Starter.Vue.Web.Models.UserRoleResponse> UserRoles { get; set; }
 
         /// <summary>
@@ -84,9 +106,10 @@ namespace Coalesce.Starter.Vue.Web.Models
             this.UserName = obj.UserName;
             if ((context.IsInRoleCached("UserAdmin")))
             {
-                this.AccessFailedCount = obj.AccessFailedCount;
+                this.Email = obj.Email;
                 this.LockoutEnd = obj.LockoutEnd;
                 this.LockoutEnabled = obj.LockoutEnabled;
+                this.EffectivePermissions = obj.EffectivePermissions;
                 var propValUserRoles = obj.UserRoles;
                 if (propValUserRoles != null && (tree == null || tree[nameof(this.UserRoles)] != null))
                 {

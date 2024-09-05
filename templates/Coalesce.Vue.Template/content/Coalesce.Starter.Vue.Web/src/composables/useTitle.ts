@@ -37,5 +37,9 @@ export function useTitle(
       },
       { immediate: true, deep: true },
     );
+
+    onBeforeUnmount(() => {
+      document.title = titlePostfix;
+    });
   });
 }

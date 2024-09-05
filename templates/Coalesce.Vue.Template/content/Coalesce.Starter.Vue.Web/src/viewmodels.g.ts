@@ -67,17 +67,10 @@ export class AuditLogPropertyListViewModel extends ListViewModel<$models.AuditLo
 
 export interface RoleViewModel extends $models.Role {
   name: string | null;
-  get roleClaims(): ViewModelCollection<RoleClaimViewModel, $models.RoleClaim>;
-  set roleClaims(value: (RoleClaimViewModel | $models.RoleClaim)[] | null);
   permissions: $models.Permission[] | null;
   id: string | null;
 }
 export class RoleViewModel extends ViewModel<$models.Role, $apiClients.RoleApiClient, string> implements $models.Role  {
-  
-  
-  public addToRoleClaims(initialData?: DeepPartial<$models.RoleClaim> | null) {
-    return this.$addChild('roleClaims', initialData) as RoleClaimViewModel
-  }
   
   constructor(initialData?: DeepPartial<$models.Role> | null) {
     super($metadata.Role, new $apiClients.RoleApiClient(), initialData)
@@ -93,39 +86,22 @@ export class RoleListViewModel extends ListViewModel<$models.Role, $apiClients.R
 }
 
 
-export interface RoleClaimViewModel extends $models.RoleClaim {
-  get role(): RoleViewModel | null;
-  set role(value: RoleViewModel | $models.Role | null);
-  id: number | null;
-  roleId: string | null;
-  claimType: string | null;
-  claimValue: string | null;
-}
-export class RoleClaimViewModel extends ViewModel<$models.RoleClaim, $apiClients.RoleClaimApiClient, number> implements $models.RoleClaim  {
-  
-  constructor(initialData?: DeepPartial<$models.RoleClaim> | null) {
-    super($metadata.RoleClaim, new $apiClients.RoleClaimApiClient(), initialData)
-  }
-}
-defineProps(RoleClaimViewModel, $metadata.RoleClaim)
-
-export class RoleClaimListViewModel extends ListViewModel<$models.RoleClaim, $apiClients.RoleClaimApiClient, RoleClaimViewModel> {
-  
-  constructor() {
-    super($metadata.RoleClaim, new $apiClients.RoleClaimApiClient())
-  }
-}
-
-
 export interface UserViewModel extends $models.User {
   fullName: string | null;
   photoMD5: string | null;
   userName: string | null;
-  accessFailedCount: number | null;
+  email: string | null;
+  
+  /** If set, the user will be blocked from signing in until this date. */
   lockoutEnd: Date | null;
+  
+  /** If enabled, the user can be locked out. */
   lockoutEnabled: boolean | null;
   get userRoles(): ViewModelCollection<UserRoleViewModel, $models.UserRole>;
   set userRoles(value: (UserRoleViewModel | $models.UserRole)[] | null);
+  
+  /** A summary of the effective permissions of the user, derived from their current roles. */
+  effectivePermissions: string | null;
   id: string | null;
 }
 export class UserViewModel extends ViewModel<$models.User, $apiClients.UserApiClient, string> implements $models.User  {
@@ -191,6 +167,36 @@ export class UserRoleListViewModel extends ListViewModel<$models.UserRole, $apiC
 }
 
 
+export interface WidgetViewModel extends $models.Widget {
+  widgetId: number | null;
+  name: string | null;
+  category: $models.WidgetCategory | null;
+  inventedOn: Date | null;
+  get modifiedBy(): UserViewModel | null;
+  set modifiedBy(value: UserViewModel | $models.User | null);
+  modifiedById: string | null;
+  modifiedOn: Date | null;
+  get createdBy(): UserViewModel | null;
+  set createdBy(value: UserViewModel | $models.User | null);
+  createdById: string | null;
+  createdOn: Date | null;
+}
+export class WidgetViewModel extends ViewModel<$models.Widget, $apiClients.WidgetApiClient, number> implements $models.Widget  {
+  
+  constructor(initialData?: DeepPartial<$models.Widget> | null) {
+    super($metadata.Widget, new $apiClients.WidgetApiClient(), initialData)
+  }
+}
+defineProps(WidgetViewModel, $metadata.Widget)
+
+export class WidgetListViewModel extends ListViewModel<$models.Widget, $apiClients.WidgetApiClient, WidgetViewModel> {
+  
+  constructor() {
+    super($metadata.Widget, new $apiClients.WidgetApiClient())
+  }
+}
+
+
 export class SecurityServiceViewModel extends ServiceViewModel<typeof $metadata.SecurityService, $apiClients.SecurityServiceApiClient> {
   
   public get whoAmI() {
@@ -214,17 +220,17 @@ const viewModelTypeLookup = ViewModel.typeLookup = {
   AuditLog: AuditLogViewModel,
   AuditLogProperty: AuditLogPropertyViewModel,
   Role: RoleViewModel,
-  RoleClaim: RoleClaimViewModel,
   User: UserViewModel,
   UserRole: UserRoleViewModel,
+  Widget: WidgetViewModel,
 }
 const listViewModelTypeLookup = ListViewModel.typeLookup = {
   AuditLog: AuditLogListViewModel,
   AuditLogProperty: AuditLogPropertyListViewModel,
   Role: RoleListViewModel,
-  RoleClaim: RoleClaimListViewModel,
   User: UserListViewModel,
   UserRole: UserRoleListViewModel,
+  Widget: WidgetListViewModel,
 }
 const serviceViewModelTypeLookup = ServiceViewModel.typeLookup = {
   SecurityService: SecurityServiceViewModel,

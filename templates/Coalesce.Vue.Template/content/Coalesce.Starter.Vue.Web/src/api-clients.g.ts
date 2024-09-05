@@ -17,11 +17,6 @@ export class RoleApiClient extends ModelApiClient<$models.Role> {
 }
 
 
-export class RoleClaimApiClient extends ModelApiClient<$models.RoleClaim> {
-  constructor() { super($metadata.RoleClaim) }
-}
-
-
 export class UserApiClient extends ModelApiClient<$models.User> {
   constructor() { super($metadata.User) }
   public getPhoto(id: string | null, etag?: string | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<File>> {
@@ -38,6 +33,11 @@ export class UserApiClient extends ModelApiClient<$models.User> {
 
 export class UserRoleApiClient extends ModelApiClient<$models.UserRole> {
   constructor() { super($metadata.UserRole) }
+}
+
+
+export class WidgetApiClient extends ModelApiClient<$models.Widget> {
+  constructor() { super($metadata.Widget) }
 }
 
 

@@ -53,6 +53,28 @@ export const Permission = domain.enums.Permission = {
   },
   ]),
 }
+export const WidgetCategory = domain.enums.WidgetCategory = {
+  name: "WidgetCategory" as const,
+  displayName: "Widget Category",
+  type: "enum",
+  ...getEnumMeta<"Whizbangs"|"Sprecklesprockets"|"Discombobulators">([
+  {
+    value: 0,
+    strValue: "Whizbangs",
+    displayName: "Whizbangs",
+  },
+  {
+    value: 1,
+    strValue: "Sprecklesprockets",
+    displayName: "Sprecklesprockets",
+  },
+  {
+    value: 2,
+    strValue: "Discombobulators",
+    displayName: "Discombobulators",
+  },
+  ]),
+}
 export const AuditLog = domain.types.AuditLog = {
   name: "AuditLog" as const,
   displayName: "Audit Log",
@@ -234,11 +256,12 @@ export const AuditLogProperty = domain.types.AuditLogProperty = {
 export const Role = domain.types.Role = {
   name: "Role" as const,
   displayName: "Role",
+  description: "Roles are groups of permissions, analagous to job titles or functions.",
   get displayProp() { return this.props.name }, 
   type: "model",
   controllerRoute: "Role",
   get keyProp() { return this.props.id }, 
-  behaviorFlags: 0 as BehaviorFlags,
+  behaviorFlags: 7 as BehaviorFlags,
   props: {
     name: {
       name: "name",
@@ -248,23 +271,6 @@ export const Role = domain.types.Role = {
       rules: {
         required: val => (val != null && val !== '') || "Name is required.",
       }
-    },
-    roleClaims: {
-      name: "roleClaims",
-      displayName: "Role Claims",
-      type: "collection",
-      itemType: {
-        name: "$collectionItem",
-        displayName: "",
-        role: "value",
-        type: "model",
-        get typeDef() { return (domain.types.RoleClaim as ModelType & { name: "RoleClaim" }) },
-      },
-      role: "collectionNavigation",
-      get foreignKey() { return (domain.types.RoleClaim as ModelType & { name: "RoleClaim" }).props.roleId as ForeignKeyProperty },
-      get inverseNavigation() { return (domain.types.RoleClaim as ModelType & { name: "RoleClaim" }).props.role as ModelReferenceNavigationProperty },
-      hidden: 1 as HiddenAreas,
-      dontSerialize: true,
     },
     permissions: {
       name: "permissions",
@@ -278,8 +284,6 @@ export const Role = domain.types.Role = {
         get typeDef() { return Permission },
       },
       role: "value",
-      hidden: 3 as HiddenAreas,
-      dontSerialize: true,
     },
     id: {
       name: "id",
@@ -287,64 +291,6 @@ export const Role = domain.types.Role = {
       type: "string",
       role: "primaryKey",
       hidden: 3 as HiddenAreas,
-    },
-  },
-  methods: {
-  },
-  dataSources: {
-  },
-}
-export const RoleClaim = domain.types.RoleClaim = {
-  name: "RoleClaim" as const,
-  displayName: "Role Claim",
-  get displayProp() { return this.props.id }, 
-  type: "model",
-  controllerRoute: "RoleClaim",
-  get keyProp() { return this.props.id }, 
-  behaviorFlags: 0 as BehaviorFlags,
-  props: {
-    role: {
-      name: "role",
-      displayName: "Role",
-      type: "model",
-      get typeDef() { return (domain.types.Role as ModelType & { name: "Role" }) },
-      role: "referenceNavigation",
-      get foreignKey() { return (domain.types.RoleClaim as ModelType & { name: "RoleClaim" }).props.roleId as ForeignKeyProperty },
-      get principalKey() { return (domain.types.Role as ModelType & { name: "Role" }).props.id as PrimaryKeyProperty },
-      get inverseNavigation() { return (domain.types.Role as ModelType & { name: "Role" }).props.roleClaims as ModelCollectionNavigationProperty },
-      dontSerialize: true,
-    },
-    id: {
-      name: "id",
-      displayName: "Id",
-      type: "number",
-      role: "primaryKey",
-      hidden: 3 as HiddenAreas,
-    },
-    roleId: {
-      name: "roleId",
-      displayName: "Role Id",
-      type: "string",
-      role: "foreignKey",
-      get principalKey() { return (domain.types.Role as ModelType & { name: "Role" }).props.id as PrimaryKeyProperty },
-      get principalType() { return (domain.types.Role as ModelType & { name: "Role" }) },
-      get navigationProp() { return (domain.types.RoleClaim as ModelType & { name: "RoleClaim" }).props.role as ModelReferenceNavigationProperty },
-      hidden: 3 as HiddenAreas,
-      rules: {
-        required: val => (val != null && val !== '') || "Role is required.",
-      }
-    },
-    claimType: {
-      name: "claimType",
-      displayName: "Claim Type",
-      type: "string",
-      role: "value",
-    },
-    claimValue: {
-      name: "claimValue",
-      displayName: "Claim Value",
-      type: "string",
-      role: "value",
     },
   },
   methods: {
@@ -355,6 +301,7 @@ export const RoleClaim = domain.types.RoleClaim = {
 export const User = domain.types.User = {
   name: "User" as const,
   displayName: "User",
+  description: "A user profile within the application.",
   get displayProp() { return this.props.id }, 
   type: "model",
   controllerRoute: "User",
@@ -382,27 +329,26 @@ export const User = domain.types.User = {
       type: "string",
       role: "value",
     },
-    accessFailedCount: {
-      name: "accessFailedCount",
-      displayName: "Access Failed Count",
-      type: "number",
+    email: {
+      name: "email",
+      displayName: "Email",
+      type: "string",
       role: "value",
-      dontSerialize: true,
     },
     lockoutEnd: {
       name: "lockoutEnd",
       displayName: "Lockout End",
+      description: "If set, the user will be blocked from signing in until this date.",
       type: "date",
       dateKind: "datetime",
       role: "value",
-      dontSerialize: true,
     },
     lockoutEnabled: {
       name: "lockoutEnabled",
       displayName: "Lockout Enabled",
+      description: "If enabled, the user can be locked out.",
       type: "boolean",
       role: "value",
-      dontSerialize: true,
     },
     userRoles: {
       name: "userRoles",
@@ -427,6 +373,16 @@ export const User = domain.types.User = {
         get nearForeignKey() { return (domain.types.UserRole as ModelType & { name: "UserRole" }).props.userId as ForeignKeyProperty },
         get nearNavigationProp() { return (domain.types.UserRole as ModelType & { name: "UserRole" }).props.user as ModelReferenceNavigationProperty },
       },
+      dontSerialize: true,
+    },
+    effectivePermissions: {
+      name: "effectivePermissions",
+      displayName: "Effective Permissions",
+      description: "A summary of the effective permissions of the user, derived from their current roles.",
+      type: "string",
+      subtype: "multiline",
+      role: "value",
+      hidden: 1 as HiddenAreas,
       dontSerialize: true,
     },
     id: {
@@ -550,6 +506,113 @@ export const UserRole = domain.types.UserRole = {
     },
   },
 }
+export const Widget = domain.types.Widget = {
+  name: "Widget" as const,
+  displayName: "Widget",
+  description: "A sample model provided by the Coalesce template. Remove this when you start building your real data model.",
+  get displayProp() { return this.props.name }, 
+  type: "model",
+  controllerRoute: "Widget",
+  get keyProp() { return this.props.widgetId }, 
+  behaviorFlags: 7 as BehaviorFlags,
+  props: {
+    widgetId: {
+      name: "widgetId",
+      displayName: "Widget Id",
+      type: "number",
+      role: "primaryKey",
+      hidden: 3 as HiddenAreas,
+    },
+    name: {
+      name: "name",
+      displayName: "Name",
+      type: "string",
+      role: "value",
+      rules: {
+        required: val => (val != null && val !== '') || "Name is required.",
+      }
+    },
+    category: {
+      name: "category",
+      displayName: "Category",
+      type: "enum",
+      get typeDef() { return WidgetCategory },
+      role: "value",
+      rules: {
+        required: val => val != null || "Category is required.",
+      }
+    },
+    inventedOn: {
+      name: "inventedOn",
+      displayName: "Invented On",
+      type: "date",
+      dateKind: "datetime",
+      role: "value",
+    },
+    modifiedById: {
+      name: "modifiedById",
+      displayName: "Modified By Id",
+      type: "string",
+      role: "foreignKey",
+      get principalKey() { return (domain.types.User as ModelType & { name: "User" }).props.id as PrimaryKeyProperty },
+      get principalType() { return (domain.types.User as ModelType & { name: "User" }) },
+      get navigationProp() { return (domain.types.Widget as ModelType & { name: "Widget" }).props.modifiedBy as ModelReferenceNavigationProperty },
+      hidden: 3 as HiddenAreas,
+      dontSerialize: true,
+    },
+    createdById: {
+      name: "createdById",
+      displayName: "Created By Id",
+      type: "string",
+      role: "foreignKey",
+      get principalKey() { return (domain.types.User as ModelType & { name: "User" }).props.id as PrimaryKeyProperty },
+      get principalType() { return (domain.types.User as ModelType & { name: "User" }) },
+      get navigationProp() { return (domain.types.Widget as ModelType & { name: "Widget" }).props.createdBy as ModelReferenceNavigationProperty },
+      hidden: 3 as HiddenAreas,
+      dontSerialize: true,
+    },
+    createdBy: {
+      name: "createdBy",
+      displayName: "Created By",
+      type: "model",
+      get typeDef() { return (domain.types.User as ModelType & { name: "User" }) },
+      role: "referenceNavigation",
+      get foreignKey() { return (domain.types.Widget as ModelType & { name: "Widget" }).props.createdById as ForeignKeyProperty },
+      get principalKey() { return (domain.types.User as ModelType & { name: "User" }).props.id as PrimaryKeyProperty },
+      dontSerialize: true,
+    },
+    createdOn: {
+      name: "createdOn",
+      displayName: "Created On",
+      type: "date",
+      dateKind: "datetime",
+      role: "value",
+      dontSerialize: true,
+    },
+    modifiedBy: {
+      name: "modifiedBy",
+      displayName: "Modified By",
+      type: "model",
+      get typeDef() { return (domain.types.User as ModelType & { name: "User" }) },
+      role: "referenceNavigation",
+      get foreignKey() { return (domain.types.Widget as ModelType & { name: "Widget" }).props.modifiedById as ForeignKeyProperty },
+      get principalKey() { return (domain.types.User as ModelType & { name: "User" }).props.id as PrimaryKeyProperty },
+      dontSerialize: true,
+    },
+    modifiedOn: {
+      name: "modifiedOn",
+      displayName: "Modified On",
+      type: "date",
+      dateKind: "datetime",
+      role: "value",
+      dontSerialize: true,
+    },
+  },
+  methods: {
+  },
+  dataSources: {
+  },
+}
 export const UserInfo = domain.types.UserInfo = {
   name: "UserInfo" as const,
   displayName: "User Info",
@@ -560,18 +623,12 @@ export const UserInfo = domain.types.UserInfo = {
       displayName: "Id",
       type: "string",
       role: "value",
-      rules: {
-        required: val => (val != null && val !== '') || "Id is required.",
-      }
     },
     userName: {
       name: "userName",
       displayName: "User Name",
       type: "string",
       role: "value",
-      rules: {
-        required: val => (val != null && val !== '') || "User Name is required.",
-      }
     },
     fullName: {
       name: "fullName",
@@ -633,15 +690,16 @@ interface AppDomain extends Domain {
   enums: {
     AuditEntryState: typeof AuditEntryState
     Permission: typeof Permission
+    WidgetCategory: typeof WidgetCategory
   }
   types: {
     AuditLog: typeof AuditLog
     AuditLogProperty: typeof AuditLogProperty
     Role: typeof Role
-    RoleClaim: typeof RoleClaim
     User: typeof User
     UserInfo: typeof UserInfo
     UserRole: typeof UserRole
+    Widget: typeof Widget
   }
   services: {
     SecurityService: typeof SecurityService

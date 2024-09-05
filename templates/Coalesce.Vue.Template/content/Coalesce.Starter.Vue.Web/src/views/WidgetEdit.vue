@@ -51,7 +51,7 @@ import { useBindKeyToRouteOnCreate } from "coalesce-vue";
 
 const props = defineProps<{ id?: number }>();
 
-useTitle(() => item.name);
+useTitle(() => (props.id ? item.name || "Loading" : "Create Widget"));
 const form = useForm();
 
 // The properties on the generated ViewModels are already reactive.

@@ -1,28 +1,67 @@
 <template>
-  <v-container style="max-width: 600px">
+  <v-container style="max-width: 800px">
     <v-card>
-      <v-card-title> Coalesce Admin Pages </v-card-title>
-      <v-card-text class="black--text">
-        <ul>
-          <li v-for="typeMeta in adminTypes" :key="typeMeta.name">
-            <router-link
-              :to="{
-                name: 'coalesce-admin-list',
-                params: { type: typeMeta.name },
-              }"
-            >
-              {{ typeMeta.displayName }}
-            </router-link>
-          </li>
-        </ul>
-      </v-card-text>
-      <v-card-title> Other Pages </v-card-title>
+      <v-card-title> Coalesce Admin Tables </v-card-title>
+
       <v-card-text>
-        <ul>
-          <li>
-            <a href="/coalesce-security"> Coalesce Security Overview </a>
-          </li>
-        </ul>
+        <v-list density="compact">
+          <v-list-item
+            v-for="type in adminTypes"
+            :key="type.name"
+            :title="type.displayName"
+            :subtitle="type.description"
+            :to="{
+              name: 'coalesce-admin-list',
+              params: { type: type.name },
+            }"
+          >
+            <template #prepend>
+              <v-avatar color="surface-variant" class="font-weight-bold ml-n1">
+                {{
+                  type.displayName
+                    .split(" ")
+                    .map((w) => w[0])
+                    .join("")
+                    .slice(0, 4)
+                }}
+              </v-avatar>
+            </template>
+          </v-list-item>
+        </v-list>
+      </v-card-text>
+    </v-card>
+    <br />
+    <v-card>
+      <v-card-title> Other Pages </v-card-title>
+
+      <v-card-text>
+        <v-list compact>
+          <v-list-item
+            title="Coalesce Security Overview"
+            subtitle="An overview of how each property, method, and endpoint is served by Coalesce."
+            href="/coalesce-security"
+            prepend-icon="fa fa-lock-open"
+          >
+          </v-list-item>
+          <!--#if AuditLogs  -->
+          <v-list-item
+            title="Audit Logs"
+            subtitle="Logs of each data change made in the application."
+            to="/admin/audit"
+            prepend-icon="fa fa-clipboard-list"
+          >
+          </v-list-item>
+          <!--#endif  -->
+          <!--#if OpenAPI  -->
+          <v-list-item
+            title="Swagger UI"
+            subtitle="View OpenAPI/Swagger documentation for the application."
+            href="/swagger"
+            prepend-icon="fa fa-code"
+          >
+          </v-list-item>
+          <!--#endif  -->
+        </v-list>
       </v-card-text>
     </v-card>
   </v-container>
@@ -30,9 +69,20 @@
 
 <script setup lang="ts">
 import $metadata from "@/metadata.g";
+import { Domain, ModelType } from "coalesce-vue";
 
-const adminTypes = Object.values($metadata.types).filter(
-  // @ts-ignore may be errors if the project has only model or only object types
-  (t) => t.type == "model",
+const excludedTypes: Array<keyof typeof $metadata.types> = [
+  //#if AuditLogs
+  "AuditLog",
+  // "AuditLogProperty",
+  //#endif
+  //#if Identity
+  "UserRole",
+  //#endif
+];
+
+const adminTypes = Object.values(($metadata as Domain).types).filter(
+  //@ts-ignore may be errors if the project has only model or only object types
+  (t): t is ModelType => t.type == "model" && !excludedTypes.includes(t.name),
 );
 </script>

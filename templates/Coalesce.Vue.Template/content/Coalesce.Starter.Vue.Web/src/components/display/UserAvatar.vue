@@ -22,17 +22,14 @@
 </template>
 
 <script setup lang="ts">
-import {
-  //#if Identity
-  User,
-  //#endif
-  UserInfo,
-} from "@/models.g";
+import { User, UserInfo } from "@/models.g";
 //#if UserPictures
 import { UserViewModel } from "@/viewmodels.g";
 //#endif
 
-const props = defineProps<{ user: User | UserInfo }>();
+const props = defineProps<{
+  user: User | UserInfo;
+}>();
 
 const initials = computed(() => {
   const fullName = props.user.fullName;

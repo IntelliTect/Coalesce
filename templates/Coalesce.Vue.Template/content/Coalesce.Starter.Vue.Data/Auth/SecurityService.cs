@@ -1,4 +1,4 @@
-﻿using IntelliTect.Coalesce.Utilities;
+﻿using Coalesce.Starter.Vue.Data.Utilities;
 
 namespace Coalesce.Starter.Vue.Data.Auth;
 
@@ -11,9 +11,10 @@ public class SecurityService()
         return new UserInfo
         {
             Id = user.GetUserId(),
-            UserName = user.Identity?.Name,
+            UserName = user.GetUserName(),
 
 #if Identity
+            Email = user.GetEmail(),
             FullName = user.FindFirstValue(AppClaimTypes.FullName),
 
             Roles = user.Claims

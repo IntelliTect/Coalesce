@@ -1,15 +1,15 @@
 {
   "$schema": "http://json.schemastore.org/template",
   "author": "IntelliTect",
-  "classifications": [ "Web", "MVC", "Vue" ],
+  "classifications": ["Web", "MVC", "Vue"],
   "identity": "IntelliTect.Coalesce.Vue.Template",
   "name": "IntelliTect Coalesce Web App Vue Template",
   "shortName": "coalescevue",
   "tags": {
-    "language": "C#",            
-    "type":"project"
+    "language": "C#",
+    "type": "project"
   },
-  "sourceName": "Coalesce.Starter.Vue",              
+  "sourceName": "Coalesce.Starter.Vue",
   "preferNameDirectory": true,
   "symbols": {
     "KestrelPortGenerated": {
@@ -28,7 +28,7 @@
       },
       "replaces": "5002"
     },
-    
+
     "Identity": {
       "type": "parameter",
       "datatype": "bool"
@@ -81,8 +81,9 @@
         {
           "condition": "!Identity",
           "exclude": [
-            "**/Program.Auth.cs",
+            "**/ProgramAuth.cs",
             "**/Forbidden.vue",
+            "**/UserAvatar.vue",
             "**/SignIn.cshtml",
             "**/SignIn.cshtml.cs",
             "**/AppClaimTypes.cs",
@@ -91,53 +92,36 @@
             "**/Permission.cs",
             "**/User.cs",
             "**/UserRole.cs",
-            "**/Role.cs",
-            "**/RoleClaim.cs"
+            "**/Role.cs"
           ]
         },
         {
           "condition": "!(UserPictures && Identity)",
-          "exclude": [
-            "Coalesce.Starter.Vue.Data/Models/UserPhoto.cs"
-          ]
+          "exclude": ["Coalesce.Starter.Vue.Data/Models/UserPhoto.cs"]
         },
         {
           "condition": "!AuditLogs",
-          "exclude": [
-            "**/AuditOperationContext.cs",
-            "**/AuditLog.cs"
-          ]
+          "exclude": ["**/AuditOperationContext.cs", "**/AuditLog.cs"]
         },
         {
           "condition": "!TrackingBase",
-          "exclude": [
-            "**/TrackingBase.cs"
-          ]
+          "exclude": ["**/TrackingBase.cs"]
         },
         {
           "condition": "!AppInsights",
-          "exclude": [
-            "**/AppInsightsTelemetryEnricher.cs"
-          ]
+          "exclude": ["**/AppInsightsTelemetryEnricher.cs"]
         },
         {
           "condition": "!GoogleAuth",
-          "exclude": [
-            "**/google-logo.svg"
-          ]
+          "exclude": ["**/google-logo.svg"]
         },
         {
           "condition": "!MicrosoftAuth",
-          "exclude": [
-            "**/microsoft-logo.svg"
-          ]
+          "exclude": ["**/microsoft-logo.svg"]
         },
         {
           "condition": "!ExampleModel",
-          "exclude": [
-            "**/WidgetEdit.vue",
-            "**/WidgetEdit.spec.ts"
-          ]
+          "exclude": ["**/WidgetEdit.vue", "**/WidgetEdit.spec.ts"]
         }
       ]
     }
@@ -148,14 +132,14 @@
         {
           "type": "conditional",
           "configuration": {
-            "if": [ "//#if" ],
-            "else": [ "//#else" ],
-            "elseif": [ "//#elseif" ],
-            "endif": [ "//#endif" ],
-            "actionableIf": [ "////#if" ],
-            "actionableElse": [ "////#else" ],
-            "actionableElseif": [ "////#elseif" ],
-            "actions": [ "cStyleUncomment", "cStyleReduceComment" ],
+            "if": ["//#if"],
+            "else": ["//#else"],
+            "elseif": ["//#elseif"],
+            "endif": ["//#endif"],
+            "actionableIf": ["////#if"],
+            "actionableElse": ["////#else"],
+            "actionableElseif": ["////#elseif"],
+            "actions": ["cStyleUncomment", "cStyleReduceComment"],
             "trim": true,
             "wholeLine": true,
             "evaluator": "C++"
@@ -164,10 +148,15 @@
         {
           "type": "conditional",
           "configuration": {
-            "endif": [ "#endif", "<!--#endif" ],
-            "actionableIf": [ "<!--#if" ],
-            "actionableElse": [ "#else", "<!--#else" ],
-            "actionableElseif": [ "#elseif", "<!--#elseif", "#elif", "<!--#elif" ],
+            "endif": ["#endif", "<!--#endif"],
+            "actionableIf": ["<!--#if"],
+            "actionableElse": ["#else", "<!--#else"],
+            "actionableElseif": [
+              "#elseif",
+              "<!--#elseif",
+              "#elif",
+              "<!--#elif"
+            ],
             "trim": true,
             "wholeLine": true,
             "evaluator": "C++"

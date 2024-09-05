@@ -37,16 +37,22 @@ const vuetify = createVuetify({
     VAutocomplete: inputDefaults,
     VField: inputDefaults,
     VInput: inputDefaults,
-    VSwitch: { color: "primary" }, // https://github.com/vuetifyjs/vuetify/issues/16486
+    VSwitch: { color: "primary" },
   },
   theme: {
     themes: {
       light: {
-        colors: {},
+        colors: {
+          // TODO: Customize theme colors
+        },
       },
+      //#if DarkMode
       dark: {
-        colors: {},
+        colors: {
+          // TODO: Customize theme colors
+        },
       },
+      //#endif
     },
   },
 });
@@ -59,7 +65,7 @@ CoalesceAxiosClient.interceptors.response.use(undefined, (error) => {
     console.warn("Received 401 from API endpoint. Refreshing for sign-in.");
     window.location.reload();
     return new Promise<void>(() => {
-      /* Never resolving promise so failure doesn't momentarily propagate to UI */
+      /* Never resolving promise so failure doesn't momentarily propagate to UI before reload completes */
     });
   }
 });
@@ -74,9 +80,9 @@ Object.defineProperties(
   app.config.globalProperties,
   Object.getOwnPropertyDescriptors(userServiceProps),
 );
+
 app.use(router);
 app.use(vuetify);
 app.use(coalesceVuetify);
-app.mount("#app");
 
-// TODO: Appinsights frontend
+app.mount("#app");

@@ -7,6 +7,7 @@ public class UserInfo
     public string? UserName { get; set; }
 
 #if Identity
+    public string? Email { get; set; }
     public string? FullName { get; set; }
 
     public required ICollection<string> Roles { get; set; }

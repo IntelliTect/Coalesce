@@ -1,11 +1,12 @@
-using Microsoft.EntityFrameworkCore;
-using Coalesce.Starter.Vue.Data.Models;
-using System.Security.Cryptography;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
-using IntelliTect.Coalesce.AuditLogging;
 using Coalesce.Starter.Vue.Data.Coalesce;
+using Coalesce.Starter.Vue.Data.Models;
+#if AuditLogs
+using IntelliTect.Coalesce.AuditLogging;
+#endif
+using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using System.Security.Cryptography;
 
 namespace Coalesce.Starter.Vue.Data;
 
@@ -19,7 +20,7 @@ public class AppDbContext
 		IdentityUserClaim<string>,
 		UserRole,
 		IdentityUserLogin<string>,
-		RoleClaim,
+		IdentityRoleClaim<string>,
 		IdentityUserToken<string>
 	>
 #else
@@ -101,16 +102,6 @@ public class AppDbContext
             userRole.HasOne(ur => ur.User)
                 .WithMany(r => r.UserRoles)
                 .HasForeignKey(ur => ur.UserId)
-                .IsRequired()
-                .OnDelete(DeleteBehavior.Cascade);
-        });
-
-        builder.Entity<RoleClaim>(e =>
-        {
-            e.HasOne(ur => ur.Role)
-                .WithMany(x => x.RoleClaims)
-                .HasForeignKey(x => x.RoleId)
-                .HasPrincipalKey(x => x.Id)
                 .IsRequired()
                 .OnDelete(DeleteBehavior.Cascade);
         });

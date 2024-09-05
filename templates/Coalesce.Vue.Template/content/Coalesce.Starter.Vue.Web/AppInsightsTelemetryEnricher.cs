@@ -1,4 +1,4 @@
-﻿using IntelliTect.Coalesce.Utilities;
+﻿using Coalesce.Starter.Vue.Data.Utilities;
 using Microsoft.ApplicationInsights.Channel;
 using Microsoft.ApplicationInsights.DataContracts;
 using Microsoft.ApplicationInsights.Extensibility;
@@ -12,7 +12,7 @@ public class AppInsightsTelemetryEnricher(IHttpContextAccessor httpContextAccess
         var user = httpContextAccessor.HttpContext?.User;
         if (user is not null)
         {
-            telemetry.Context.User.AuthenticatedUserId = user.GetUserId();
+            telemetry.Context.User.AuthenticatedUserId = user.GetUserName();
         }
 
         if (telemetry is ExceptionTelemetry ex)

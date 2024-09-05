@@ -17,7 +17,7 @@ export interface CoalesceVuetifyInstance {
   readonly metadata: Domain;
 }
 
-declare module "@vue/runtime-core" {
+declare module "vue" {
   export interface ComponentCustomProperties {
     readonly $coalesce: CoalesceVuetifyInstance;
   }

@@ -84,7 +84,7 @@
           v-if="showTime"
           :model-value="internalValueZoned"
           @update:model-value="timeChanged"
-          :step="step"
+          :step="step ?? undefined"
           :min="min"
           :max="max"
         >
@@ -209,20 +209,20 @@ const props = withDefaults(
      * Falls back to the value configured with `coalesce-vue`'s `setDefaultTimeZone`
      * if the value bound to with `model`/`for` is a `DateTimeOffset`.
      */
-    timeZone?: string;
+    timeZone?: string | null;
 
     /** The allowed increments, in minutes, of the selectable value.
      * Value should divide 60 evenly, or be multiples of 60 */
-    step?: number;
+    step?: number | null;
 
     /** The minimum date/time value allowed. */
-    min?: Date;
+    min?: Date | null;
     /** The maximum date/time value allowed. */
-    max?: Date;
+    max?: Date | null;
     /** An array of permitted dates (items should have a time of midnight),
      * or a function that returns true if a date is allowed for selection.
      * Does not impact time selection. */
-    allowedDates?: Date[] | ((date: Date) => boolean);
+    allowedDates?: null | Date[] | ((date: Date) => boolean);
     // Object containing extra props to pass through to `v-date-picker`.
     datePickerProps?: any;
   }>(),

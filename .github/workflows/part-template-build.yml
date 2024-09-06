@@ -30,7 +30,7 @@ jobs:
           8.0.x
 
     - name: "Set dependency versions"
-      if: env.COALESCE_VERSION
+      if: success() && env.COALESCE_VERSION
       run: |
         $filePath = "./content/Directory.Build.props"
         $newVersion = "<CoalesceVersion>$env:COALESCE_VERSION</CoalesceVersion>"

@@ -39,7 +39,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - uses: rickstaa/action-create-tag@v1
-      if: ${{ !inputs.prereleaseSlug }}
+      if: ${{ success() && !inputs.prereleaseSlug }}
       with:
         tag: ${{ needs.meta.outputs.COALESCE_VERSION }}
 

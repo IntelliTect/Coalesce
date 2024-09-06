@@ -7,7 +7,7 @@ jobs:
 
     steps:
     - name: Download all workflow run artifacts
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
 
     - uses: actions/setup-node@v3
       with:
@@ -19,7 +19,7 @@ jobs:
         NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
     - name: npm publish coalesce-vue-vuetify
-      run: for f in ./coalesce-vue-vuetify/*.tgz; do npm publish $f --tag latest --access public; done 
+      run: for f in ./coalesce-vue-vuetify*/*.tgz; do npm publish $f --tag latest --access public; done 
       env:
         NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
@@ -29,7 +29,7 @@ jobs:
 
     steps:
     - name: Download all workflow run artifacts
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
 
     - name: dotnet nuget push
       run: dotnet nuget push "**/*.nupkg" -s https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_TOKEN }}

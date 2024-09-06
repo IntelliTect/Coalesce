@@ -1,0 +1,4 @@
+{
+    "dotnet.defaultSolution": "content\\Coalesce.Starter.Vue.sln",
+    "editor.formatOnSave": true,
+}

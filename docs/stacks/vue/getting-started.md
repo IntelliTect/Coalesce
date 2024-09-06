@@ -5,45 +5,95 @@
 Before you begin, ensure that you have all the requisite tools installed
 - Recent version of the [.NET SDK](https://dotnet.microsoft.com/en-us/download). If you have Visual Studio, you already have this.
 - A recent version of [Node.js](https://nodejs.org/) (an LTS version is recommended).
-- A compatible IDE. 
+- A compatible IDE 
   - Recommended:
     - Visual Studio for backend (C#) development 
     - VS Code for frontend (Vue, TypeScript) development (with [Vue - Official](https://marketplace.visualstudio.com/items?itemName=Vue.volar))
-  - Alternatively, you could use:
-    - VS Code for full stack development.
+  - Alternatively, you could use any of these:
+    - VS Code for full stack development
     - JetBrains Rider
 
 
 ## Creating a Project
 
-The quickest and easiest way to create a new Coalesce Vue application is to use the ``dotnet new`` template. In your favorite shell:
-    
-``` sh
+The quickest and easiest way to create a new Coalesce Vue application is to use the ``dotnet new`` template. 
+
+First, select the features that you would like included in your project, and choose the root .NET namespace of your project:
+
+<script setup>
+import TemplateBuilder from './TemplateBuilder.vue'
+import { ref, computed} from 'vue'
+const templateParams = ref("")
+const namespace = ref("")
+const effectiveNamespace = computed(() => namespace.value?.replace(/\.+$/, '') || 'MyCompany.MyProject')
+const effectiveFolder = computed(() => effectiveNamespace.value.split('.').at(-1))
+function copyCode() {
+  document.querySelector(".template-code .copy").click()
+}
+</script>
+
+<TemplateBuilder v-model:options="templateParams" v-model:namespace="namespace" />
+
+Next, click the button or manually copy the commands below into your favorite terminal, and execute them! This will create a root folder named <code>{{effectiveFolder}}</code> - execute the script in your `sources`/`repos`/etc folder.
+
+<button @click="copyCode()" style="
+    color: var(--vp-button-brand-text);
+    background-color: var(--vp-button-brand-bg);
+    border-radius: 20px;
+    padding: 0 20px;
+    line-height: 38px;
+    font-size: 14px;
+    display: inline-block;
+    margin: auto;
+    display: block;
+    font-weight: 600;
+">Copy CLI Commands</button>
+
+<style>
+  .template-code .copy { opacity: 1 !important }
+</style>
+<div class="template-code">
+
+``` sh-vue
 dotnet new install IntelliTect.Coalesce.Vue.Template
-dotnet new coalescevue -o MyCompany.MyProject
-cd MyCompany.MyProject/*.Web
+dotnet new coalescevue -n {{effectiveNamespace}} -o {{effectiveFolder}} {{templateParams}}
+cd {{effectiveFolder}}/*.Web
 npm ci
+dotnet restore
+dotnet coalesce
 ```
 
-<div style="display:flex">
-<a href="https://www.nuget.org/packages/IntelliTect.Coalesce.Vue.Template/" target="_blank" rel="noreferrer"><img src="https://img.shields.io/nuget/v/IntelliTect.Coalesce.Vue.Template?logo=nuget&color=0176b5" alt=""></a>
-&nbsp;
-<a href="https://github.com/IntelliTect/Coalesce.Vue.Template" target="_blank" rel="noreferrer"><img src="https://img.shields.io/badge/Github-Coalesce.Vue.Template-0176b5?logo=github" alt="Static Badge"></a> 
 </div>
 
+You now have a new Coalesce project! For the recommended development experience, open the `.Web` project in VS Code and open the root `.sln` file in Visual Studio.
+
+If any of the options you chose above require external integrations, you'll need to configure those - follow the instructions for each section that have been placed into `appsettings.json`.
+
+
 ## Project Structure
+
+### Data Project
+
+The data project contains all your [entity models](/modeling/model-types/entities.md), [services](/modeling/model-types/services.md), and most other custom backend code that you'll write while building your application. The code within it acts as the inputs to Coalesce's code generation, which outputs generated files into the Web project.
+
+### Web Project
+
+The Web project is an ASP.NET Core application where the generated outputs from Coalesce are placed. It's also where you'll build your rich front-end pages that users will use to interact with your application.
+
+The structure of the Web project follows the conventions of both ASP.NET Core and Vite. The frontend-specific folders are as follows:
+
+- ``/src`` - Files that should be compiled into your frontend application. CSS/SCSS, TypeScript, Vue SFCs, and so on.
+- ``/public`` - Static assets that should be served directly as files.
+- ``/wwwroot`` - Target for Vite's compiled output. This directory is excluded from git.
+- ``/Api/Generated`` - Output target for Coalesce's generated API Controllers.
+- ``/Models/Generated`` - Output target for Coalesce's [generated DTOs](/stacks/agnostic/dtos.md).
+- ``/Controllers/HomeController.cs`` - Controller that serves the root page of your Vue SPA, both in development and production. Some customizations can be added here.
 
 ::: tip Important
 The frontend build system uses [Vite](https://vitejs.dev/). You are strongly encouraged to read through at least the first few pages of the [Vite Documentation](https://vitejs.dev/guide/) before getting started on any development.
 :::
 
-The structure of the Web project follows the conventions of both ASP.NET Core and Vite. The frontend-specific folders are as follows:
-
-- ``/src`` - Files that should be compiled into your frontend application. CSS/SCSS, TypeScript, Vue SFCs, and so on.
-- ``/public`` - Static assets that should be served as files.
-- ``/wwwroot`` - Target for compiled output. This directory is excluded from git.
-
-During development, no special tooling is required to build your frontend code. Coalesce's ``UseViteDevelopmentServer`` in ASP.NET Core will take care of that automatically when the application starts. Just make sure NPM packages have been installed (`npm ci`).
+During development, no special effort is required to build your frontend code. Coalesce's ``UseViteDevelopmentServer`` in ASP.NET Core will take care of that automatically when the application starts. Just make sure NPM packages have been installed (`npm ci`).
 
 @[import-md "after":"MARKER:data-modeling", "before":"MARKER:data-modeling-end"](../agnostic/getting-started-modeling.md)
 

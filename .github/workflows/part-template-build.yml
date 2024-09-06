@@ -1,0 +1,56 @@
+on:
+  workflow_call:
+    inputs:
+      COALESCE_VERSION:
+        # If COALESCE_VERSION is provided, the template's dependencies will be updated
+        # to that version. Otherwise, the template's dependencies will be left alone.
+        # We pass it in when doing a release after the release assets have been published.
+        # We ignore it when doing CI builds when assets haven't yet been published.
+        required: false
+        type: string
+  
+jobs:
+  build: 
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: pwsh
+        working-directory: ./templates/Coalesce.Vue.Template
+    
+    env:
+      COALESCE_VERSION: ${{inputs.COALESCE_VERSION}}
+      
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup dotnet
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: | 
+          8.0.x
+
+    - name: "Set dependency versions"
+      if: success() && env.COALESCE_VERSION
+      run: |
+        $filePath = "./content/Directory.Build.props"
+        $newVersion = "<CoalesceVersion>$env:COALESCE_VERSION</CoalesceVersion>"
+        (Get-Content $filePath) -replace '<CoalesceVersion>.*?<\/CoalesceVersion>', $newVersion | Set-Content $filePath 
+        
+        cat $filePath
+
+        cd ./content/*.Web
+        echo $env:COALESCE_VERSION
+        npm i coalesce-vue@$env:COALESCE_VERSION --save
+        npm i coalesce-vue-vuetify3@$env:COALESCE_VERSION --save
+
+        cat package.json
+
+    - name: dotnet pack
+      run: |
+        dotnet pack -p:Version=$(!$env:COALESCE_VERSION ? '0.1.0' : $env:COALESCE_VERSION) -p:PackageOutputPath="${{ github.workspace }}/out/packages"
+    
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: template-packages
+        path: ${{ github.workspace }}/out/packages

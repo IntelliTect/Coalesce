@@ -1,0 +1,25 @@
+a {
+  text-decoration: none;
+}
+
+// Vuetify3 lost the padding for ul/ol that Vuetify2 had. Restore it.
+.v-application {
+  ul,
+  ol {
+    padding-left: 24px;
+  }
+}
+
+// Details under inputs are bottom-aligned by default. Undo that.
+.v-input__details {
+  align-items: normal;
+  padding-top: 3px;
+  overflow: visible;
+}
+
+.v-icon {
+  // Vuetify v-icon expects to be inline-flex,
+  // but fontawesome defaults to inline-block through this var.
+  // Without setting this, icon appearance can vary with CSS load order
+  --fa-display: inline-flex;
+}

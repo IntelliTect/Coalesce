@@ -1,0 +1,219 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "IntelliTect",
+  "classifications": ["Web", "MVC", "Vue"],
+  "identity": "IntelliTect.Coalesce.Vue.Template",
+  "name": "IntelliTect Coalesce Web App Vue Template",
+  "shortName": "coalescevue",
+  "tags": {
+    "language": "C#",
+    "type": "project"
+  },
+  "sourceName": "Coalesce.Starter.Vue",
+  "preferNameDirectory": true,
+  "symbols": {
+    "KestrelPortGenerated": {
+      "type": "generated",
+      "generator": "port",
+      "parameters": {
+        "fallback": 5001
+      },
+      "replaces": "5001"
+    },
+    "VitePortGenerated": {
+      "type": "generated",
+      "generator": "port",
+      "parameters": {
+        "fallback": 5002
+      },
+      "replaces": "5002"
+    },
+
+    "Identity": {
+      "type": "parameter",
+      "datatype": "bool",
+      "displayName": "ASP.NET Core Identity",
+      "description": "Adds ASP.NET Core Identity, providing user storage, authentication, and authorization mechanisms. Also includes a permission-based security model. If you don't include Identity, you'll have to build your auth stack from scratch.",
+      "$coalesceLink": "https://learn.microsoft.com/en-us/aspnet/core/security/authentication/identity"
+    },
+    "MicrosoftAuth": {
+      "type": "parameter",
+      "datatype": "bool",
+      "displayName": "Sign-in with Microsoft",
+      "description": "Adds Microsoft as an external authentication and account provider for Identity.",
+      "$coalesceRequires": ["and", "Identity"],
+      "$coalesceLink": "https://learn.microsoft.com/en-us/aspnet/core/security/authentication/social/microsoft-logins"
+    },
+    "GoogleAuth": {
+      "type": "parameter",
+      "datatype": "bool",
+      "displayName": "Sign-in with Google",
+      "description": "Adds Google as an external authentication and account provider for Identity.",
+      "$coalesceRequires": ["and", "Identity"],
+      "$coalesceLink": "https://learn.microsoft.com/en-us/aspnet/core/security/authentication/social/google-logins"
+    },
+    "UserPictures": {
+      "type": "parameter",
+      "datatype": "bool",
+      "displayName": "User Profile Pictures",
+      "description": "Adds infrastructure for acquiring, saving, and displaying user profile pictures.",
+      "$coalesceRequires": ["and", "Identity"]
+    },
+    "TrackingBase": {
+      "type": "parameter",
+      "datatype": "bool",
+      "displayName": "Tracking Base",
+      "description": "Include a base entity class for tracking created/modified by and date stamps on each entity, and infrastructure for automatically setting those fields."
+    },
+    "AuditLogs": {
+      "type": "parameter",
+      "datatype": "bool",
+      "displayName": "Audit Logging",
+      "description": "Adds Coalesce audit logging infrastructure, logging each change made to the database through Entity Framework.",
+      "$coalesceLink": "/topics/audit-logging.html"
+    },
+    "DarkMode": {
+      "type": "parameter",
+      "datatype": "bool",
+      "displayName": "Dark Mode Toggle",
+      "description": "Adds features for user-togglable dark mode. Don't use if you're developing a light-only or dark-only application."
+    },
+    "ExampleModel": {
+      "type": "parameter",
+      "datatype": "bool",
+      "displayName": "Sample Page",
+      "description": "Includes a 'Widget' example model with a basic Vue page, frontend tests, and backend tests."
+    },
+    "OpenAPI": {
+      "type": "parameter",
+      "datatype": "bool",
+      "displayName": "OpenAPI/Swagger",
+      "description": "Include configuration to expose an OpenAPI document and SwaggerUI using Swashbuckle."
+    },
+    "AppInsights": {
+      "type": "parameter",
+      "datatype": "bool",
+      "displayName": "Azure Application Insights",
+      "description": "Include configuration and integrations for Application Insights, both front-end and back-end.",
+      "$coalesceLink": "https://learn.microsoft.com/en-us/azure/azure-monitor/app/app-insights-overview"
+    }
+  },
+  "sources": [
+    {
+      "modifiers": [
+        {
+          "exclude": [
+            "**/[Bb]in/**",
+            "**/[Oo]bj/**",
+            "**/node_modules/**",
+            ".template.config/**/*",
+            "**/*.filelist",
+            "**/*.user",
+            "**/*.g.cs",
+            "**/*.g.ts",
+            "**/*.lock.json"
+          ]
+        },
+        {
+          "condition": "!Identity",
+          "exclude": [
+            "**/ProgramAuth.cs",
+            "**/Forbidden.vue",
+            "**/UserAvatar.vue",
+            "**/SignIn.cshtml",
+            "**/SignIn.cshtml.cs",
+            "**/AppClaimTypes.cs",
+            "**/ClaimsPrincipalFactory.cs",
+            "**/Permission.cs",
+            "**/User.cs",
+            "**/UserRole.cs",
+            "**/Role.cs"
+          ]
+        },
+        {
+          "condition": "!(UserPictures && Identity)",
+          "exclude": ["Coalesce.Starter.Vue.Data/Models/UserPhoto.cs"]
+        },
+        {
+          "condition": "!AuditLogs",
+          "exclude": ["**/AuditOperationContext.cs", "**/AuditLog.cs"]
+        },
+        {
+          "condition": "!TrackingBase",
+          "exclude": ["**/TrackingBase.cs"]
+        },
+        {
+          "condition": "!AppInsights",
+          "exclude": ["**/AppInsightsTelemetryEnricher.cs"]
+        },
+        {
+          "condition": "!GoogleAuth",
+          "exclude": ["**/google-logo.svg"]
+        },
+        {
+          "condition": "!MicrosoftAuth",
+          "exclude": ["**/microsoft-logo.svg"]
+        },
+        {
+          "condition": "!ExampleModel",
+          "exclude": ["**/WidgetEdit.vue", "**/WidgetEdit.spec.ts"]
+        }
+      ]
+    }
+  ],
+  "SpecialCustomOperations": {
+    "**.vue": {
+      "operations": [
+        {
+          "type": "conditional",
+          "configuration": {
+            "if": ["//#if"],
+            "else": ["//#else"],
+            "elseif": ["//#elseif"],
+            "endif": ["//#endif"],
+            "actionableIf": ["////#if"],
+            "actionableElse": ["////#else"],
+            "actionableElseif": ["////#elseif"],
+            "actions": ["cStyleUncomment", "cStyleReduceComment"],
+            "trim": true,
+            "wholeLine": true,
+            "evaluator": "C++"
+          }
+        },
+        {
+          "type": "conditional",
+          "configuration": {
+            "endif": ["#endif", "<!--#endif"],
+            "actionableIf": ["<!--#if"],
+            "actionableElse": ["#else", "<!--#else"],
+            "actionableElseif": [
+              "#elseif",
+              "<!--#elseif",
+              "#elif",
+              "<!--#elif"
+            ],
+            "trim": true,
+            "wholeLine": true,
+            "evaluator": "C++"
+          }
+        },
+        {
+          "type": "replacement",
+          "configuration": {
+            "original": "//",
+            "replacement": "",
+            "id": "cStyleUncomment"
+          }
+        },
+        {
+          "type": "replacement",
+          "configuration": {
+            "original": "////",
+            "replacement": "//",
+            "id": "cStyleReduceComment"
+          }
+        }
+      ]
+    }
+  }
+}

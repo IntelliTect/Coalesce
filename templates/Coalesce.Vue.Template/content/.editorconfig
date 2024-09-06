@@ -1,0 +1,10 @@
+root = true
+
+[*.{vue,ts,tsx,csproj,props,json}]
+indent_style = space
+indent_size = 2
+
+[*.cs]
+indent_style = space
+indent_size = 4
+csharp_style_namespace_declarations=file_scoped:suggestion

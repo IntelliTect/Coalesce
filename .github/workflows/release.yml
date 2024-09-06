@@ -14,23 +14,54 @@ on:
         - ''
 
 jobs:
-  build:
-    uses: ./.github/workflows/part-build.yml
+  meta:
+    uses: ./.github/workflows/part-compute-version.yml
     secrets: inherit
     with:
       prereleaseSlug: ${{ inputs.prereleaseSlug }}
       checkTagIsUnique: true
 
+  build:
+    uses: ./.github/workflows/part-build.yml
+    secrets: inherit
+    needs: meta
+    with:
+      COALESCE_VERSION: ${{ needs.meta.outputs.COALESCE_VERSION }}
+
   publish:
     uses: ./.github/workflows/part-publish.yml
-    needs: build
-    secrets: inherit 
+    needs: [build]
+    secrets: inherit
 
   create-release:
     runs-on: ubuntu-latest
-    needs: [build, publish]
+    needs: [meta, publish]
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - uses: rickstaa/action-create-tag@v1
+      if: ${{ success() && !inputs.prereleaseSlug }}
       with:
-        tag: ${{ needs.build.outputs.COALESCE_VERSION }}
+        tag: ${{ needs.meta.outputs.COALESCE_VERSION }}
+
+  build-template:
+    uses: ./.github/workflows/part-template-build.yml
+    secrets: inherit
+    needs: [meta, publish]
+    with:
+      # Versioned template build depends upon NPM packages being published,
+      # and nuget packages existing as local artifacts (since Nuget.org is so slow
+      # to make new packages available, we consume the local artifacts instead of waiting).
+      COALESCE_VERSION: ${{ needs.meta.outputs.COALESCE_VERSION }}
+
+  publish-template:
+    runs-on: ubuntu-latest
+    needs: [build-template]
+
+    steps:
+      - name: Download Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: template-packages
+
+      - name: dotnet nuget push
+        run: dotnet nuget push "**/*.nupkg" -s https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_TOKEN }}

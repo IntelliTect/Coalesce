@@ -196,13 +196,13 @@ const props = withDefaults(
     for?: ForSpec<TModel, DateValue>;
 
     /** Specifies whether this input is picking date, time, or both. */
-    dateKind?: DateKind;
+    dateKind?: DateKind | null;
     /** The format of the selected value displayed in the text field.*/
-    dateFormat?: string;
-    readonly?: boolean;
-    disabled?: boolean;
+    dateFormat?: string | null;
+    readonly?: boolean | null;
+    disabled?: boolean | null;
     /** Use native HTML5 date picker rather than Vuetify. */
-    native?: boolean;
+    native?: boolean | null;
     closeOnDatePicked?: boolean | null;
 
     /** The IANA time zone name that the user will pick the date/time value in.

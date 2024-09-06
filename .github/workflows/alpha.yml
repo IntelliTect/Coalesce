@@ -10,11 +10,18 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
-    uses: ./.github/workflows/part-build.yml
+  meta:
+    uses: ./.github/workflows/part-compute-version.yml
     secrets: inherit
     with:
       prereleaseSlug: ci
+
+  build:
+    uses: ./.github/workflows/part-build.yml
+    secrets: inherit
+    needs: meta
+    with:
+      COALESCE_VERSION: ${{ needs.meta.outputs.COALESCE_VERSION }}
 
   publish:
     if: success() && github.event_name == 'push'

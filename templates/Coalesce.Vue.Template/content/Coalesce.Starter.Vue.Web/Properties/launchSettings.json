@@ -1,0 +1,16 @@
+﻿{
+  "profiles": {
+    "Kestrel": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      
+      // Disables injection of MSFT's undesirable JS that force-refreshes the page when C# files are changed.
+      "hotReloadEnabled": false,
+
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "https://localhost:5001"
+    }
+  }
+}

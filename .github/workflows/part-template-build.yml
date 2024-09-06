@@ -53,8 +53,11 @@ jobs:
         cd ./content/*.Web
         npm i coalesce-vue@$env:COALESCE_VERSION --save
         npm i coalesce-vue-vuetify3@$env:COALESCE_VERSION --save
-
-    - run: ./TestLocal.ps1
+    
+    - name: TestLocal
+      shell: pwsh
+      run: |
+        ./TestLocal.ps1
 
     - run: dotnet pack
     

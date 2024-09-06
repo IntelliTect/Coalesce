@@ -13,7 +13,7 @@ jobs:
       COALESCE_VERSION: ${{inputs.COALESCE_VERSION}}
       
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Setup dotnet
       uses: actions/setup-dotnet@v2
       with:
@@ -42,7 +42,7 @@ jobs:
         working-directory: playground/Coalesce.Web.Vue2
       
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - uses: actions/setup-dotnet@v2
       with:
@@ -67,7 +67,7 @@ jobs:
         working-directory: playground/Coalesce.Web.Vue3
       
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - uses: actions/setup-dotnet@v2
       with:
@@ -96,7 +96,7 @@ jobs:
       COALESCE_VERSION: ${{inputs.COALESCE_VERSION}}
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - run: npm ci
     
@@ -149,7 +149,7 @@ jobs:
       COALESCE_VERSION: ${{inputs.COALESCE_VERSION}}
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     # build coalesce-vue
     - run: npm run build-local-deps
@@ -184,7 +184,7 @@ jobs:
       COALESCE_VERSION: ${{inputs.COALESCE_VERSION}}
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     # build coalesce-vue
     - run: npm run build-local-deps

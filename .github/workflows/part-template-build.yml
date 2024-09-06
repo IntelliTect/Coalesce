@@ -35,10 +35,13 @@ jobs:
       uses: actions/download-artifact@v3
       with:
         name: packages
-        path: ./local-nuget
+        path: ${{ github.workspace }}/local-nuget
 
-    - run: dotnet nuget add source "./local-nuget" --name "local-nuget"
+    - name: Add local nuget source
       if: env.COALESCE_VERSION
+      run: |
+        dotnet nuget add source "${{ github.workspace }}/local-nuget" --name "local-nuget"
+        ls ${{ github.workspace }}/local-nuget
 
     - name: "Set dependency versions"
       if: env.COALESCE_VERSION
@@ -46,10 +49,15 @@ jobs:
         $filePath = "./content/Directory.Build.props"
         $newVersion = "<CoalesceVersion>$env:COALESCE_VERSION</CoalesceVersion>"
         (Get-Content $filePath) -replace '<CoalesceVersion>.*?<\/CoalesceVersion>', $newVersion | Set-Content $filePath 
+        
+        cat $filePath
 
         cd ./content/*.Web
+        echo $env:COALESCE_VERSION
         npm i coalesce-vue@$env:COALESCE_VERSION --save
         npm i coalesce-vue-vuetify3@$env:COALESCE_VERSION --save
+
+        cat package.json
     
     - name: TestLocal
       run: ./TestLocal.ps1

@@ -15,11 +15,10 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Setup dotnet
-      uses: actions/setup-dotnet@v2
+      uses: actions/setup-dotnet@v4
       with:
         dotnet-version: | 
           8.0.x
-        include-prerelease: true
 
     - run: npm ci
       working-directory: src/coalesce-vue
@@ -29,7 +28,7 @@ jobs:
     - run: dotnet pack --no-build --configuration Release -p:PackageOutputPath="$(pwd)/out/packages"
 
     - name: 'Upload Artifact: NuGet Packages'
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: packages
         path: out/packages
@@ -44,11 +43,10 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - uses: actions/setup-dotnet@v2
+    - uses: actions/setup-dotnet@v4
       with:
         dotnet-version: | 
           8.0.x
-        include-prerelease: true
 
     - run: npm ci
       working-directory: src/coalesce-vue
@@ -69,11 +67,10 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - uses: actions/setup-dotnet@v2
+    - uses: actions/setup-dotnet@v4
       with:
         dotnet-version: | 
           8.0.x
-        include-prerelease: true
 
     - run: npm ci
       working-directory: src/coalesce-vue
@@ -133,7 +130,7 @@ jobs:
     - run: npm pack
 
     - name: Upload Artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: coalesce-vue
         path: src/coalesce-vue/coalesce-vue*.tgz
@@ -168,9 +165,9 @@ jobs:
     - run: npm pack
 
     - name: Upload Artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
-        name: coalesce-vue-vuetify
+        name: coalesce-vue-vuetify2
         path: src/coalesce-vue-vuetify2/*.tgz
 
 
@@ -204,7 +201,7 @@ jobs:
     - run: npm pack
 
     - name: Upload Artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
-        name: coalesce-vue-vuetify
+        name: coalesce-vue-vuetify3
         path: src/coalesce-vue-vuetify3/*.tgz

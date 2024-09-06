@@ -209,6 +209,7 @@ jobs:
   validate-template:
     runs-on: ubuntu-latest
     name: "test template: ${{matrix.testCase}}"
+    needs: [build-coalesce-vue, build-coalesce-vue-vuetify3, build-dotnet]
     strategy:
       matrix:
         testCase:

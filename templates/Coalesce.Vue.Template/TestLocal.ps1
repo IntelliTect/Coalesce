@@ -28,7 +28,7 @@ foreach ($testCase in $testCases) {
     Write-Output (!$testCase ? "<no options enabled>" : $testCase);
     Write-Output ""
 
-    Remove-Item $dir/Test.Template.Instance/* -Recurse
+    Remove-Item $dir/Test.Template.Instance/* -Recurse -ErrorAction SilentlyContinue
     Invoke-Expression "dotnet new coalescevue -o $dir/Test.Template.Instance $testcase"
 
     Push-Location $dir/Test.Template.Instance/*.Web

@@ -31,23 +31,28 @@
 
     "Identity": {
       "type": "parameter",
-      "datatype": "bool"
+      "datatype": "bool",
+      "description": "Adds ASP.NET Core Identity as an external authentication and account provider for Identity."
     },
     "MicrosoftAuth": {
       "type": "parameter",
-      "datatype": "bool"
+      "datatype": "bool",
+      "description": "Adds Microsoft as an external authentication and account provider for Identity."
     },
     "GoogleAuth": {
       "type": "parameter",
-      "datatype": "bool"
+      "datatype": "bool",
+      "description": "Adds Google as an external authentication and account provider for Identity."
     },
     "UserPictures": {
       "type": "parameter",
-      "datatype": "bool"
+      "datatype": "bool",
+      "description": "Adds infrastructure for acquiring, saving, and displaying user profile pictures."
     },
     "AuditLogs": {
       "type": "parameter",
-      "datatype": "bool"
+      "datatype": "bool",
+      "description": "Adds Coalesce audit logging infrastructure, logging each change made to the database through Entity Framework."
     },
     "ExampleModel": {
       "type": "parameter",

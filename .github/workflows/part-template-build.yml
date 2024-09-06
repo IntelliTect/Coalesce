@@ -59,7 +59,7 @@ jobs:
       run: |
         ./TestLocal.ps1
 
-    - run: dotnet pack -p:PackageOutputPath="$(pwd)/out/packages"
+    - run: dotnet pack -p:PackageOutputPath="out/packages"
     
     - name: Upload Artifacts
       uses: actions/upload-artifact@v3

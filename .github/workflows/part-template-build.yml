@@ -59,7 +59,7 @@ jobs:
       run: |
         ./TestLocal.ps1
 
-    - run: dotnet pack -p:PackageOutputPath="${{ github.workspace }}/out/packages"
+    - run: dotnet pack -p:Version=$env:COALESCE_VERSION -p:PackageOutputPath="${{ github.workspace }}/out/packages"
     
     - name: Upload Artifacts
       uses: actions/upload-artifact@v3

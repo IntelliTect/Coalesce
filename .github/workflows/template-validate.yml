@@ -11,5 +11,5 @@ on:
 
 jobs:
   meta:
-    uses: ./.github/workflows/template/part-build.yml
+    uses: ./.github/workflows/part-template-build.yml
     secrets: inherit

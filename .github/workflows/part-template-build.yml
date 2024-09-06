@@ -9,15 +9,12 @@ on:
         required: false
         type: string
   
-defaults:
-  run:
-    shell: pwsh
-
 jobs:
   build: 
     runs-on: ubuntu-latest
     defaults:
       run:
+        shell: pwsh
         working-directory: ./templates/Coalesce.Vue.Template
     
     env:
@@ -55,11 +52,9 @@ jobs:
         npm i coalesce-vue-vuetify3@$env:COALESCE_VERSION --save
     
     - name: TestLocal
-      shell: pwsh
-      run: |
-        ./TestLocal.ps1
+      run: ./TestLocal.ps1
 
-    - run: dotnet pack -p:Version=$env:COALESCE_VERSION -p:PackageOutputPath="${{ github.workspace }}/out/packages"
+    - run: dotnet pack -p:Version=$($env:COALESCE_VERSION ?? '0.1.0') -p:PackageOutputPath="${{ github.workspace }}/out/packages"
     
     - name: Upload Artifacts
       uses: actions/upload-artifact@v3

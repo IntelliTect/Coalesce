@@ -24,8 +24,8 @@ $testCases =
 foreach ($testCase in $testCases) {
     Write-Output "----------------------"
     Write-Output "-------TEST CASE------"
-    Write-Output "----------------------"
     Write-Output (!$testCase ? "<no options enabled>" : $testCase);
+    Write-Output "----------------------"
     Write-Output ""
 
     Remove-Item $dir/Test.Template.Instance/* -Recurse -Force -ErrorAction SilentlyContinue

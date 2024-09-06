@@ -1,4 +1,4 @@
-﻿using Coalesce.Starter.Vue.Data.Utilities;
+﻿using Coalesce.Starter.Vue.Data.Auth;
 using Microsoft.ApplicationInsights.Channel;
 using Microsoft.ApplicationInsights.DataContracts;
 using Microsoft.ApplicationInsights.Extensibility;

@@ -87,7 +87,6 @@
             "**/SignIn.cshtml",
             "**/SignIn.cshtml.cs",
             "**/AppClaimTypes.cs",
-            "**/ClaimsPrincipalExtensions.cs",
             "**/ClaimsPrincipalFactory.cs",
             "**/Permission.cs",
             "**/User.cs",

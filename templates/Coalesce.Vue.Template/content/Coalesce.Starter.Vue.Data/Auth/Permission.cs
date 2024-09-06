@@ -7,6 +7,14 @@
 /// </summary>
 public enum Permission
 {
+    // Note about usage of Permission values:
+    // The numeric values are stored in the database on `Role.Permissions`.
+    // The string value are stored in the user claims,
+    // issused by `ClaimsPrincipalFactory` and consumed by role-based security attributes with `nameof`.
+
+    // Therefore, use caution and avoid editing existing roles.
+    // Always assign new roles the next highest value, never reusing old numbers.
+
     [Display(Name = "Admin - General", Description = "Modify application configuration and other administrative functions excluding user/role management.")]
     Admin = 1,
 

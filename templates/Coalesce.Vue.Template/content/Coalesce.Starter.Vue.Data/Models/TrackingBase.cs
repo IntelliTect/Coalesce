@@ -1,4 +1,5 @@
-﻿using IntelliTect.Coalesce.Utilities;
+﻿using Coalesce.Starter.Vue.Data.Auth;
+using IntelliTect.Coalesce.Utilities;
 
 namespace Coalesce.Starter.Vue.Data.Models;
 

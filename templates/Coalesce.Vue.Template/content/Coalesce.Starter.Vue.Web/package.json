@@ -14,10 +14,9 @@
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^6.6.0",
-    "@microsoft/applicationinsights-web": "^3.3.2",
     "@vueuse/core": "^11.0.3",
-    "coalesce-vue": "5.0.0-ci.20240830.2",
-    "coalesce-vue-vuetify3": "5.0.0-ci.20240830.2",
+    "coalesce-vue": "5.0.0-ci.20240905.3",
+    "coalesce-vue-vuetify3": "5.0.0-ci.20240905.3",
     "typeface-roboto": "1.1.13",
     "vue": "^3.5.0",
     "vue-router": "^4.4.3",

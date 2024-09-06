@@ -53,7 +53,7 @@ document.addEventListener(
 refreshUserInfo();
 
 // Make useful properties available in vue <template>s
-declare module "@vue/runtime-core" {
+declare module "vue" {
   interface ComponentCustomProperties {
     //#if Identity
     Permission: typeof Permission;

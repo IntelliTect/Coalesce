@@ -1,5 +1,4 @@
-﻿using Coalesce.Starter.Vue.Data.Utilities;
-
+﻿
 namespace Coalesce.Starter.Vue.Data.Auth;
 
 [Coalesce, Service]
@@ -10,10 +9,10 @@ public class SecurityService()
     {
         return new UserInfo
         {
+#if Identity
             Id = user.GetUserId(),
             UserName = user.GetUserName(),
 
-#if Identity
             Email = user.GetEmail(),
             FullName = user.FindFirstValue(AppClaimTypes.FullName),
 
@@ -26,6 +25,9 @@ public class SecurityService()
                 .Where(c => c.Type == AppClaimTypes.Permission)
                 .Select(c => c.Value)
                 .ToList(),
+#else
+            Id = user.FindFirstValue(ClaimTypes.NameIdentifier),
+            UserName = user.Identity?.Name,
 #endif
         };
     }

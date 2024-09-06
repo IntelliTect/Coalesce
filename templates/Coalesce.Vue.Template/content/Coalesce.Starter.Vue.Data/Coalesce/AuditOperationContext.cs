@@ -1,6 +1,6 @@
-﻿using Coalesce.Starter.Vue.Data.Models;
+﻿using Coalesce.Starter.Vue.Data.Auth;
+using Coalesce.Starter.Vue.Data.Models;
 using IntelliTect.Coalesce.AuditLogging;
-using IntelliTect.Coalesce.Utilities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 

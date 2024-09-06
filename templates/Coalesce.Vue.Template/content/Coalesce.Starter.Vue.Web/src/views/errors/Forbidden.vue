@@ -27,7 +27,6 @@
     </template>
 
     <template #text>
-      <!-- This is deliberately off the bottom of the screen for mild obscurity -->
       <h3
         v-if="permissions?.length"
         class="text-center text-body-2 my-3 font-weight-light"

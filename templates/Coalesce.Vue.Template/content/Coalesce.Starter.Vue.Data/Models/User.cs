@@ -1,3 +1,4 @@
+using Coalesce.Starter.Vue.Data.Auth;
 using Coalesce.Starter.Vue.Data.Coalesce;
 using IntelliTect.Coalesce.Helpers;
 using IntelliTect.Coalesce.Utilities;

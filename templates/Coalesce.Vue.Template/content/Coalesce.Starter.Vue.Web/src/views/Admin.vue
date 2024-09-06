@@ -43,7 +43,17 @@
             prepend-icon="fa fa-lock-open"
           >
           </v-list-item>
-          <!--#if AuditLogs  -->
+          <!--#if AuditLogs && Identity -->
+          <v-list-item
+            title="Audit Logs"
+            subtitle="Logs of each data change made in the application."
+            to="/admin/audit"
+            prepend-icon="fa fa-clipboard-list"
+            :disabled="!$can(Permission.ViewAuditLogs)"
+          >
+          </v-list-item>
+          <!--#endif  -->
+          <!--#if AuditLogs && !Identity -->
           <v-list-item
             title="Audit Logs"
             subtitle="Logs of each data change made in the application."

@@ -14,23 +14,37 @@ on:
         - ''
 
 jobs:
-  build:
-    uses: ./.github/workflows/part-build.yml
+  meta:
+    uses: ./.github/workflows/part-compute-version.yml
     secrets: inherit
     with:
       prereleaseSlug: ${{ inputs.prereleaseSlug }}
       checkTagIsUnique: true
 
+  build:
+    uses: ./.github/workflows/part-build.yml
+    secrets: inherit
+    needs: meta
+    with:
+      COALESCE_VERSION: ${{ needs.meta.outputs.COALESCE_VERSION }}
+
+  build-template:
+    uses: ./.github/workflows/template/part-build.yml
+    secrets: inherit
+    needs: meta
+    with:
+      COALESCE_VERSION: ${{ needs.meta.outputs.COALESCE_VERSION }}
+
   publish:
     uses: ./.github/workflows/part-publish.yml
-    needs: build
+    needs: [build, build-template]
     secrets: inherit 
 
   create-release:
     runs-on: ubuntu-latest
-    needs: [build, publish]
+    needs: [meta, publish]
     steps:
     - uses: actions/checkout@v3
     - uses: rickstaa/action-create-tag@v1
       with:
-        tag: ${{ needs.build.outputs.COALESCE_VERSION }}
+        tag: ${{ needs.meta.outputs.COALESCE_VERSION }}

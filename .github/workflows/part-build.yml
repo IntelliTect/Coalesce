@@ -1,91 +1,16 @@
 on:
   workflow_call:
     inputs:
-      prereleaseSlug:
-        required: false
-        type: string
-      checkTagIsUnique:
-        required: false
-        type: boolean
-    outputs:
       COALESCE_VERSION:
-        description: "COALESCE_VERSION"
-        value: ${{ jobs.meta.outputs.COALESCE_VERSION }}
+        required: true
+        type: string
 
 jobs:
-  meta:
-    runs-on: ubuntu-latest
-    
-    outputs:
-      COALESCE_VERSION: ${{ steps.version.outputs.COALESCE_VERSION }}
-
-    steps:
-    - uses: actions/checkout@v3
-    
-    - name: "Verify and set COALESCE_VERSION variable"
-      id: version
-      shell: pwsh
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-        $apiBaseUrl = "${{ github.api_url }}/repos/${{ github.repository }}/actions"
-        $runInfo = curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "$apiBaseUrl/runs/${{ github.run_id }}";
-
-        $workflowId = $runInfo | jq -r .workflow_id;
-        $createdAt = $runInfo | jq -r .created_at;
-        $createdAtPST = [System.TimeZoneInfo]::ConvertTimeBySystemTimeZoneId( [System.DateTimeOffset](Get-Date -Date $createdAt), "America/Los_Angeles" );
-
-        echo "workflowId: $workflowId";
-        echo "createdAt: $createdAt ($createdAtPST)";
-          
-        # Get how many runs of this workflow have happened today
-        $dateFormat = "yyyy-MM-ddT00:00:00K"
-        $revRequestUrl = "$apiBaseUrl/workflows/$workflowId/runs?created=$($createdAtPST.ToString($dateFormat))..$($createdAtPST.AddDays(1).ToString($dateFormat))";
-        $rev = curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" $revRequestUrl | jq .total_count;
-
-        $path = "version.txt";
-        $version = "$((cat $path).Trim())"
-        $date = $createdAtPST.ToString("yyyyMMdd")
-        $prereleaseSlug = "${{ inputs.prereleaseSlug }}"
-        echo "Version from $($path): $version";
-        echo "Prerelease: $prereleaseSlug";
-        echo "Date: $date";
-        echo "Rev: $rev";
-        echo "checkTagIsUnique: ${{ inputs.checkTagIsUnique }}";
-
-        if ($prereleaseSlug) {
-          $version = "$version-$prereleaseSlug.$date.$rev"
-        }
-
-        echo "Computed version: $version";
-
-        try
-        {
-            [System.Management.Automation.SemanticVersion]::Parse($version);
-        }
-        catch
-        {
-            Write-Error "'$version' is an invalid SemVer version"
-            exit 1
-        }
-
-        if ("${{ inputs.checkTagIsUnique }}" -eq "true") {
-          if (git tag -l "$version") {
-            Write-Error "Tag $version already exists.";
-            exit 1;
-          }
-        }
-
-        echo "COALESCE_VERSION=$version" >> $env:GITHUB_OUTPUT
-        echo "# Version $version" >> $env:GITHUB_STEP_SUMMARY
-
-
   build-dotnet: 
-    needs: meta
     runs-on: ubuntu-latest
 
     env:
-      COALESCE_VERSION: ${{needs.meta.outputs.COALESCE_VERSION}}
+      COALESCE_VERSION: ${{inputs.COALESCE_VERSION}}
       
     steps:
     - uses: actions/checkout@v3
@@ -93,7 +18,6 @@ jobs:
       uses: actions/setup-dotnet@v2
       with:
         dotnet-version: | 
-          6.0.x
           8.0.x
         include-prerelease: true
 
@@ -112,7 +36,6 @@ jobs:
 
 
   validate-vue2-playground: 
-    needs: meta
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -124,7 +47,6 @@ jobs:
     - uses: actions/setup-dotnet@v2
       with:
         dotnet-version: | 
-          6.0.x
           8.0.x
         include-prerelease: true
 
@@ -139,7 +61,6 @@ jobs:
 
 
   validate-vue3-playground: 
-    needs: meta
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -166,14 +87,13 @@ jobs:
 
 
   build-coalesce-vue:
-    needs: meta
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: src/coalesce-vue
 
     env:
-      COALESCE_VERSION: ${{needs.meta.outputs.COALESCE_VERSION}}
+      COALESCE_VERSION: ${{inputs.COALESCE_VERSION}}
 
     steps:
     - uses: actions/checkout@v3
@@ -220,14 +140,13 @@ jobs:
 
 
   build-coalesce-vue-vuetify2:
-    needs: meta
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: src/coalesce-vue-vuetify2
 
     env:
-      COALESCE_VERSION: ${{needs.meta.outputs.COALESCE_VERSION}}
+      COALESCE_VERSION: ${{inputs.COALESCE_VERSION}}
 
     steps:
     - uses: actions/checkout@v3
@@ -256,14 +175,13 @@ jobs:
 
 
   build-coalesce-vue-vuetify3:
-    needs: meta
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: src/coalesce-vue-vuetify3
 
     env:
-      COALESCE_VERSION: ${{needs.meta.outputs.COALESCE_VERSION}}
+      COALESCE_VERSION: ${{inputs.COALESCE_VERSION}}
 
     steps:
     - uses: actions/checkout@v3

@@ -1,0 +1,65 @@
+on:
+  workflow_call:
+    inputs:
+      COALESCE_VERSION:
+        # If COALESCE_VERSION is provided, the template's dependencies will be updated
+        # to that version. Otherwise, the template's dependencies will be left alone.
+        # We pass it in when doing a release after the release assets have been published.
+        # We ignore it when doing CI builds when assets haven't yet been published.
+        required: false
+        type: string
+  
+defaults:
+  run:
+    shell: pwsh
+
+jobs:
+  build: 
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./templates/IntelliTect.Coalesce.Vue
+    
+    env:
+      COALESCE_VERSION: ${{inputs.COALESCE_VERSION}}
+      
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup dotnet
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: | 
+          8.0.x
+        include-prerelease: true
+
+    - name: Download Artifacts
+      if: env.COALESCE_VERSION
+      uses: actions/download-artifact@v3
+      with:
+        name: packages
+        path: ./local-nuget
+
+    - run: dotnet nuget add source "./local-nuget" --name "local-nuget"
+      if: env.COALESCE_VERSION
+
+    - name: "Set dependency versions"
+      if: env.COALESCE_VERSION
+      run: |
+        $filePath = "./content/Directory.Build.props"
+        $newVersion = "<CoalesceVersion>$env:COALESCE_VERSION</CoalesceVersion>"
+        (Get-Content $filePath) -replace '<CoalesceVersion>.*?<\/CoalesceVersion>', $newVersion | Set-Content $filePath 
+
+        cd ./content/*.Web
+        npm i coalesce-vue@$env:COALESCE_VERSION --save
+        npm i coalesce-vue-vuetify3@$env:COALESCE_VERSION --save
+
+    - run: ./TestLocal.ps1
+
+    - run: dotnet pack
+    
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: packages
+        path: ./*.nupkg

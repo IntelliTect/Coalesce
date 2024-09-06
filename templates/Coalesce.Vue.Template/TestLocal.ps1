@@ -22,13 +22,13 @@ $testCases =
 "--Identity --UserPictures --TrackingBase"
 
 foreach ($testCase in $testCases) {
-    echo "----------------------"
-    echo "-------TEST CASE------"
-    echo "----------------------"
-    echo (!$testCase ? "<no options enabled>" : $testCase);
-    echo ""
+    Write-Output "----------------------"
+    Write-Output "-------TEST CASE------"
+    Write-Output "----------------------"
+    Write-Output (!$testCase ? "<no options enabled>" : $testCase);
+    Write-Output ""
 
-    rm $dir/Test.Template.Instance/* -Recurse
+    Remove-Item $dir/Test.Template.Instance/* -Recurse
     Invoke-Expression "dotnet new coalescevue -o $dir/Test.Template.Instance $testcase"
 
     Push-Location $dir/Test.Template.Instance/*.Web

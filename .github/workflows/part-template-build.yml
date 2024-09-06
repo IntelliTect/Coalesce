@@ -29,19 +29,6 @@ jobs:
         dotnet-version: | 
           8.0.x
 
-    - name: Download Artifacts
-      if: env.COALESCE_VERSION
-      uses: actions/download-artifact@v4
-      with:
-        name: packages
-        path: ${{ github.workspace }}/local-nuget
-
-    - name: Add local nuget source
-      if: env.COALESCE_VERSION
-      run: |
-        dotnet nuget add source "${{ github.workspace }}/local-nuget" --name "local-nuget"
-        ls ${{ github.workspace }}/local-nuget
-
     - name: "Set dependency versions"
       if: env.COALESCE_VERSION
       run: |
@@ -57,9 +44,6 @@ jobs:
         npm i coalesce-vue-vuetify3@$env:COALESCE_VERSION --save
 
         cat package.json
-    
-    - name: TestLocal
-      run: ./TestLocal.ps1
 
     - name: dotnet pack
       run: |

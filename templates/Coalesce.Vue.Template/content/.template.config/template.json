@@ -84,6 +84,19 @@
     {
       "modifiers": [
         {
+          "exclude": [
+            "**/[Bb]in/**",
+            "**/[Oo]bj/**",
+            "**/node_modules/**",
+            ".template.config/**/*",
+            "**/*.filelist",
+            "**/*.user",
+            "**/*.g.cs",
+            "**/*.g.ts",
+            "**/*.lock.json"
+          ]
+        },
+        {
           "condition": "!Identity",
           "exclude": [
             "**/ProgramAuth.cs",

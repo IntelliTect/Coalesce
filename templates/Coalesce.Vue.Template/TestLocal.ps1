@@ -22,7 +22,6 @@ $testCases =
 "--Identity --UserPictures --TrackingBase"
 
 foreach ($testCase in $testCases) {
-    Write-Output "----------------------"
     Write-Output "-------TEST CASE------"
     Write-Output (!$testCase ? "<no options enabled>" : $testCase);
     Write-Output "----------------------"

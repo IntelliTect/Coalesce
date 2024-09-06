@@ -43,7 +43,7 @@
             prepend-icon="fa fa-lock-open"
           >
           </v-list-item>
-          <!--#if AuditLogs && Identity -->
+          <!--#if (AuditLogs && Identity) -->
           <v-list-item
             title="Audit Logs"
             subtitle="Logs of each data change made in the application."
@@ -53,7 +53,7 @@
           >
           </v-list-item>
           <!--#endif  -->
-          <!--#if AuditLogs && !Identity -->
+          <!--#if (AuditLogs && !Identity) -->
           <v-list-item
             title="Audit Logs"
             subtitle="Logs of each data change made in the application."

@@ -208,6 +208,7 @@ jobs:
 
   validate-template:
     runs-on: ubuntu-latest
+    name: "test template: ${{matrix.testCase}}"
     strategy:
       matrix:
         testCase:

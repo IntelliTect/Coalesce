@@ -128,7 +128,7 @@ public static class ProgramAuth
     }
 #endif
 
-#if GoogleAuth || MicrosoftAuth
+#if (GoogleAuth || MicrosoftAuth)
     private static Func<TicketReceivedContext, Task> OnTicketReceived(
         Func<User, AppDbContext, TicketReceivedContext, Task>? updateUser = null
     ) => async (TicketReceivedContext ctx) =>

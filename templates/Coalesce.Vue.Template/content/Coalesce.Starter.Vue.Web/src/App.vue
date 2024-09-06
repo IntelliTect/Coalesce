@@ -8,7 +8,7 @@
         </router-link>
       </v-toolbar-title>
 
-      <!--#if Identity || DarkMode -->
+      <!--#if (Identity || DarkMode) -->
       <v-menu bottom offset-y>
         <template #activator="{ props }">
           <v-list-item v-bind="props">

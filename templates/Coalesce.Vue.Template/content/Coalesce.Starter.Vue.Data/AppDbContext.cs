@@ -51,7 +51,7 @@ public class AppDbContext
     [InternalUse]
     public DbSet<DataProtectionKey> DataProtectionKeys { get; set; }
 
-#if TrackingBase || AuditLogs
+#if (TrackingBase || AuditLogs)
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         optionsBuilder

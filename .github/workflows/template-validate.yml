@@ -3,13 +3,13 @@ name: template-validate
 on:
   push:
     branches: [dev, next, ascott/new-template]
-    paths: ['templates/**']
+    paths: ['templates/**', '.github/workflows/**']
   pull_request:
     branches: [dev, next]
-    paths: ['templates/**']
+    paths: ['templates/**', '.github/workflows/**']
   workflow_dispatch:
 
 jobs:
-  meta:
+  build:
     uses: ./.github/workflows/part-template-build.yml
     secrets: inherit

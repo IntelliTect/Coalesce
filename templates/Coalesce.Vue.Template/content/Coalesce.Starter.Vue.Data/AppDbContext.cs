@@ -13,7 +13,7 @@ namespace Coalesce.Starter.Vue.Data;
 [Coalesce]
 public class AppDbContext
 #if Identity
-    : IdentityDbContext<
+	: IdentityDbContext<
 		User,
 		Role,
 		string,
@@ -24,11 +24,11 @@ public class AppDbContext
 		IdentityUserToken<string>
 	>
 #else
-    : DbContext
+	: DbContext
 #endif
-    , IDataProtectionKeyContext
+	, IDataProtectionKeyContext
 #if AuditLogs
-    , IAuditLogDbContext<AuditLog>
+	, IAuditLogDbContext<AuditLog>
 #endif
 {
 	public bool SuppressAudit { get; set; } = false;
@@ -38,47 +38,49 @@ public class AppDbContext
 	public AppDbContext(DbContextOptions options) : base(options) { }
 
 #if UserPictures
-    public DbSet<UserPhoto> UserPhotos { get; set; }
+	public DbSet<UserPhoto> UserPhotos { get; set; }
 #endif
 
 #if AuditLogs
-    public DbSet<AuditLog> AuditLogs { get; set; }
-    public DbSet<AuditLogProperty> AuditLogProperties { get; set; }
+	public DbSet<AuditLog> AuditLogs { get; set; }
+	public DbSet<AuditLogProperty> AuditLogProperties { get; set; }
 #endif
 
-    public DbSet<Widget> Widgets { get; set; }
+	public DbSet<Widget> Widgets { get; set; }
 
-    [InternalUse]
-    public DbSet<DataProtectionKey> DataProtectionKeys { get; set; }
+	[InternalUse]
+	public DbSet<DataProtectionKey> DataProtectionKeys { get; set; }
 
 #if (TrackingBase || AuditLogs)
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        optionsBuilder
+	protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+	{
+		optionsBuilder
 #if TrackingBase
-        .UseStamping<TrackingBase>((entity, user) => entity.SetTracking(user))
+		.UseStamping<TrackingBase>((entity, user) => entity.SetTracking(user))
 #endif
 #if AuditLogs
-        .UseCoalesceAuditLogging<AuditLog>(x => x
-            .WithAugmentation<AuditOperationContext>()
-            .ConfigureAudit(config =>
-            {
-                static string ShaString(byte[]? bytes) => bytes is null ? "" : Convert.ToBase64String(SHA1.HashData(bytes));
+		.UseCoalesceAuditLogging<AuditLog>(x => x
+			.WithAugmentation<AuditOperationContext>()
+			.ConfigureAudit(config =>
+			{
+				static string ShaString(byte[]? bytes) => bytes is null ? "" : Convert.ToBase64String(SHA1.HashData(bytes));
 
-                config
-                    .FormatType<byte[]>(ShaString)
-                    .Exclude<DataProtectionKey>()
+				config
+					.FormatType<byte[]>(ShaString)
+					.Exclude<DataProtectionKey>()
 #if TrackingBase
-                    .ExcludeProperty<TrackingBase>(x => new { x.CreatedBy, x.CreatedById, x.CreatedOn, x.ModifiedBy, x.ModifiedById, x.ModifiedOn });
+					.ExcludeProperty<TrackingBase>(x => new { x.CreatedBy, x.CreatedById, x.CreatedOn, x.ModifiedBy, x.ModifiedById, x.ModifiedOn });
+#else
+					;
 #endif
-            })
-        )
+			})
+		)
 #endif
-        ;
-    }
+		;
+	}
 #endif
 
-    protected override void OnModelCreating(ModelBuilder builder)
+	protected override void OnModelCreating(ModelBuilder builder)
 	{
 		base.OnModelCreating(builder);
 
@@ -89,22 +91,22 @@ public class AppDbContext
 		}
 
 #if Identity
-        builder.Entity<UserRole>(userRole =>
-        {
-            userRole.HasKey(ur => new { ur.UserId, ur.RoleId });
+		builder.Entity<UserRole>(userRole =>
+		{
+			userRole.HasKey(ur => new { ur.UserId, ur.RoleId });
 
-            userRole.HasOne(ur => ur.Role)
-                .WithMany()
-                .HasForeignKey(ur => ur.RoleId)
-                .IsRequired()
-                .OnDelete(DeleteBehavior.Cascade);
+			userRole.HasOne(ur => ur.Role)
+				.WithMany()
+				.HasForeignKey(ur => ur.RoleId)
+				.IsRequired()
+				.OnDelete(DeleteBehavior.Cascade);
 
-            userRole.HasOne(ur => ur.User)
-                .WithMany(r => r.UserRoles)
-                .HasForeignKey(ur => ur.UserId)
-                .IsRequired()
-                .OnDelete(DeleteBehavior.Cascade);
-        });
+			userRole.HasOne(ur => ur.User)
+				.WithMany(r => r.UserRoles)
+				.HasForeignKey(ur => ur.UserId)
+				.IsRequired()
+				.OnDelete(DeleteBehavior.Cascade);
+		});
 #endif
-    }
+	}
 }

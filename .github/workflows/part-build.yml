@@ -250,6 +250,11 @@ jobs:
 
     - name: "Set dependency versions"
       run: |
+        $ErrorActionPreference = "Stop"
+        $PSNativeCommandUseErrorActionPreference = $false
+
+        echo $env:COALESCE_VERSION
+
         $filePath = "./content/Directory.Build.props"
         $newVersion = "<CoalesceVersion>$env:COALESCE_VERSION</CoalesceVersion>"
         (Get-Content $filePath) -replace '<CoalesceVersion>.*?<\/CoalesceVersion>', $newVersion | Set-Content $filePath 
@@ -257,8 +262,8 @@ jobs:
         cat $filePath
 
         cd ./content/*.Web
-        npm i ${{ github.workspace }}/artifacts/packages/coalesce-vue*.tgz --save
-        npm i ${{ github.workspace }}/artifacts/packages/coalesce-vue-vuetify3*.tgz --save
+        npm i ${{ github.workspace }}/artifacts/coalesce-vue*.tgz --save
+        npm i ${{ github.workspace }}/artifacts/coalesce-vue-vuetify3*.tgz --save
 
         cat package.json
     

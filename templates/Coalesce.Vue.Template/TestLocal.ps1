@@ -1,3 +1,8 @@
+param (
+    [Parameter(Position=0)]
+    [string[]]$testCases
+)
+
 $dir = $PSScriptRoot
 $ErrorActionPreference = "Stop"
 $PSNativeCommandUseErrorActionPreference = $false
@@ -12,14 +17,6 @@ dotnet pack $(Get-ChildItem -Path "$dir/*.csproj") -o $dir/.
 dotnet new install $(Get-ChildItem -Path "$dir/IntelliTect.Coalesce.Vue.Template.*.nupkg").FullName
 
 dotnet new coalescevue --help
-
-$testCases = 
-# Nothing:
-"",
-# Everything:
-"--Identity --MicrosoftAuth --GoogleAuth --UserPictures --AuditLogs --ExampleModel --DarkMode --TrackingBase --AppInsights --OpenAPI",
-# Assorted partial variants:
-"--Identity --UserPictures --TrackingBase"
 
 foreach ($testCase in $testCases) {
     Write-Output "-------TEST CASE------"

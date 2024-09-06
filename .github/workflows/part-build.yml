@@ -205,3 +205,59 @@ jobs:
       with:
         name: coalesce-vue-vuetify3
         path: src/coalesce-vue-vuetify3/*.tgz
+
+  validate-template:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        testCase:
+          # Nothing:
+          - ""
+          # Everything:
+          - "--Identity --MicrosoftAuth --GoogleAuth --UserPictures --AuditLogs --ExampleModel --DarkMode --TrackingBase --AppInsights --OpenAPI"
+          # Assorted partial variants:
+          - "--Identity --UserPictures --TrackingBase"
+
+    defaults:
+      run:
+        shell: pwsh
+        working-directory: ./templates/Coalesce.Vue.Template
+
+    env:
+      COALESCE_VERSION: ${{inputs.COALESCE_VERSION}}
+      
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup dotnet
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: | 
+          8.0.x
+
+    - name: Download Artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: ${{ github.workspace }}/artifacts
+
+    - name: Add local nuget source
+      run: |
+        dotnet nuget add source "${{ github.workspace }}/artifacts/packages" --name "local-nuget"
+        ls ${{ github.workspace }}/local-nuget
+
+    - name: "Set dependency versions"
+      run: |
+        $filePath = "./content/Directory.Build.props"
+        $newVersion = "<CoalesceVersion>$env:COALESCE_VERSION</CoalesceVersion>"
+        (Get-Content $filePath) -replace '<CoalesceVersion>.*?<\/CoalesceVersion>', $newVersion | Set-Content $filePath 
+        
+        cat $filePath
+
+        cd ./content/*.Web
+        npm i ${{ github.workspace }}/artifacts/packages/coalesce-vue*.tgz --save
+        npm i ${{ github.workspace }}/artifacts/packages/coalesce-vue-vuetify3*.tgz --save
+
+        cat package.json
+    
+    - name: TestLocal
+      run: ./TestLocal.ps1 ${{ matrix.testCase }}

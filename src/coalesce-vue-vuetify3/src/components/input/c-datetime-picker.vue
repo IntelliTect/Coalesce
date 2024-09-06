@@ -222,7 +222,7 @@ const props = withDefaults(
     /** An array of permitted dates (items should have a time of midnight),
      * or a function that returns true if a date is allowed for selection.
      * Does not impact time selection. */
-    allowedDates?: Date[] | ((date: Date) => boolean) | null;
+    allowedDates?: null | Date[] | ((date: Date) => boolean);
     // Object containing extra props to pass through to `v-date-picker`.
     datePickerProps?: any;
   }>(),

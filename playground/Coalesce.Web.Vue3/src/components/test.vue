@@ -27,11 +27,11 @@
           </v-col>
         </v-row>
       </v-card>
+      <c-input :model=caseVm for=title></c-input>
       <c-select-string-value
         :model="caseVm"
         for="title"
-        method="getCaseTitles"
-        eager
+        method="getCaseTitles" 
       />
       <v-btn @click="disabled = !disabled">Disable Toggle</v-btn>
       <v-form :disabled="disabled">

@@ -77,10 +77,11 @@ describe("CSelectStringValue", () => {
         listWhenEmpty
       />);
 
-      await nextTick();
+      await delay(10);
+      expect(mock).toBeCalledTimes(1)
       await selectFirstResult(wrapper);
 
-      expect(mock).toBeCalledTimes(1)
+      expect(mock).toBeCalledTimes(2) // Another call happens after selection to search for the new value
       expect(vm.firstName).toBe("strFromServer")
     })
 
@@ -95,13 +96,35 @@ describe("CSelectStringValue", () => {
         onUpdate:modelValue={v => selectedString.value = v} 
       />);
 
-      await nextTick();
       await delay(10);
+      expect(mock).toBeCalledTimes(1)
       await selectFirstResult(wrapper);
 
-      expect(mock).toBeCalledTimes(1)
+      expect(mock).toBeCalledTimes(2) // Another call happens after selection to search for the new value
       expect(selectedString.value).toBe("strFromServer")
     })
+  })
+
+  test("search", async () =>{
+    const vm = new PersonViewModel();
+    const mock = mockEndpoint(vm.$metadata.methods.namesStartingWith, (req => ({
+      wasSuccessful: true,
+      object: ["strFromServer", "otherStrFromServer"].filter(item => item.includes(req.params.search || ""))
+    })));
+    
+    const wrapper = mountApp(() => <CSelectStringValue 
+      model={vm}
+      for="firstName" 
+      method="namesStartingWith"
+      listWhenEmpty
+    />);
+
+    await nextTick();
+    wrapper.find("input").setValue("oth")
+    await nextTick();
+    await selectFirstResult(wrapper);
+
+    expect(vm.firstName).toBe("otherStrFromServer")
   })
 });
 

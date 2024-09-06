@@ -5,8 +5,10 @@
     @update:modelValue="onInput"
     :loading="loading"
     :items="items"
-    :hide-no-data="false"
-    v-model:searchInput="search"
+    :hide-no-data="!listWhenEmpty"
+    v-model:search="search"
+    v-model:menu="menu"
+    v-model:focused="focused"
     v-bind="inputBindAttrs"
   >
   </v-combobox>
@@ -62,6 +64,8 @@ const props = defineProps<{
 }>();
 
 const modelValue = defineModel<string | null>();
+const menu = ref(false);
+const focused = ref(false);
 
 const { inputBindAttrs, valueMeta, modelMeta, valueOwner } =
   useMetadataProps(props);
@@ -126,7 +130,13 @@ watch(search, (newVal, oldVal) => {
   if (newVal != oldVal) {
     // Single equals intended. Works around https://github.com/vuetifyjs/vuetify/issues/7344,
     // since null == undefined, the transition from undefined to null will fail.
-    caller(1, newVal);
+    caller(1, newVal).then(() => {
+      if (focused.value) {
+        // when listWhenEmpty is falsy, vuetify's v-combobox will fail to open the dropdown on the first keystroke.
+        // It won't open until the second letter is pressed in the search term. This works around that.
+        menu.value = true;
+      }
+    });
   }
 });
 

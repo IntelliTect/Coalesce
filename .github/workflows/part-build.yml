@@ -246,14 +246,14 @@ jobs:
     - name: Add local nuget source
       run: |
         dotnet nuget add source "${{ github.workspace }}/artifacts/packages" --name "local-nuget"
-        ls ${{ github.workspace }}/artifacts/packages
 
     - name: "Set dependency versions"
       run: |
         $ErrorActionPreference = "Stop"
-        $PSNativeCommandUseErrorActionPreference = $false
+        $PSNativeCommandUseErrorActionPreference = $true
 
         echo $env:COALESCE_VERSION
+        ls ${{ github.workspace }}/artifacts
 
         $filePath = "./content/Directory.Build.props"
         $newVersion = "<CoalesceVersion>$env:COALESCE_VERSION</CoalesceVersion>"
@@ -262,8 +262,8 @@ jobs:
         cat $filePath
 
         cd ./content/*.Web
-        npm i ${{ github.workspace }}/artifacts/coalesce-vue*.tgz --save
-        npm i ${{ github.workspace }}/artifacts/coalesce-vue-vuetify3*.tgz --save
+        npm i $(Get-ChildItem -Path "${{ github.workspace }}/artifacts/coalesce-vue*.tgz").FullName --save
+        npm i $(Get-ChildItem -Path "${{ github.workspace }}/artifacts/coalesce-vue-vue3*.tgz").FullName --save
 
         cat package.json
     

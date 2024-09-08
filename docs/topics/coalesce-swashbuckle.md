@@ -48,23 +48,7 @@ By default, Swagger in ASP.NET Core offers a simple way to document APIs. It gen
 
 The `IntelliTect.Coalesce.Swashbuckle` package addresses the limitations of the default Swagger generation by providing custom Swagger filters. These filters enhance the readability and usability of your Swagger documentation for Coalesce-generated APIs.
 
-#### CoalesceDocumentFilter:
-
-**Purpose:** Cleans up unnecessary or redundant schema definitions in the Swagger document.
-
-**Functionality:** The filter removes empty or irrelevant definitions related to IDataSource and IBehaviors. These are interfaces used internally by Coalesce but do not need to appear in the Swagger documentation. By removing these definitions, the Swagger UI becomes more focused and less cluttered.
-
-#### CoalesceApiOperationFilter
-
-**Purpose:** Helps refine the operational details in the Swagger documentation for Coalesce-generated endpoints.
-
-**Functionality:** The filter processes various aspects of the API operations to provide cleaner generated API docs:
-
-- DTO Parameters: Adjusts the representation of DTO parameters to ensure only relevant properties are included.
-
-- Data Sources: Enhances the description and the schema of data source parameters so they are accurately represented.
-
-- Standard Parameters: It removes unnecessary parameters related to behaviors and data sources, improving the clarity of the generated swagger API documentation.
+The primary effect is an adjustment of parameter definitions to account for Coalesce's custom model binders that create instances of Data Sources and Behaviors on each request. These parameters will be updated in the OpenAPI document to account for data source parameters, filter parameters, and other model-specific customizations.
 
 ## Visual Comparison 
 

@@ -58,7 +58,7 @@ To illustrate the impact of the `IntelliTect.Coalesce.Swashbuckle` package, let'
 public class Patient
 {
     public int PatientId { get; init; }
-    public DateTime NextAppoitment { get; set; }
+    public DateTime NextAppointment { get; set; }
     // Additional parameters
 
     [DefaultDataSource]

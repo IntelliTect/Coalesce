@@ -59,7 +59,7 @@ public class Patient
 {
     public int PatientId { get; init; }
     public DateTime NextAppointment { get; set; }
-    // Additional parameters
+    // Additional properties
 
     [DefaultDataSource]
     public class PatientDataSource(CrudContext<AppDbContext> context) : StandardDataSource<Patient, AppDbContext>(context)

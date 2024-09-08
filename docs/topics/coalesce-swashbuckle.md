@@ -1,4 +1,4 @@
-# Coalesce Swashbuckle
+# OpenAPI/Swagger
 
 When using Coalesce to generate API endpoints, the default Swagger generation can sometimes result in verbose and confusing API definitions, especially when dealing with DataSources and Behaviors. To address these issues, the `IntelliTect.Coalesce.Swashbuckle` package offers enhancements for Swagger definitions, making your Coalesce-generated APIs clearer and more manageable.
 

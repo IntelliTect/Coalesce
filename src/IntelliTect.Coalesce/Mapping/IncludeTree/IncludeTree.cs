@@ -73,6 +73,8 @@ namespace IntelliTect.Coalesce
             }
         }
 
+        public override string ToString() => $"{PropertyName ?? "<root>"} -> {_children.Count}";
+
 #pragma warning disable EF1001 // Internal EF Core API usage.
 
         /// <summary>

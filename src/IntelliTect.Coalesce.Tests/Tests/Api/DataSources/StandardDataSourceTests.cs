@@ -20,13 +20,6 @@ namespace IntelliTect.Coalesce.Tests.Api.DataSources
 
     public class StandardDataSourceTests : TestDbContextFixture
     {
-        public StandardDataSource<Case, AppDbContext> CaseSource { get; }
-
-        public StandardDataSourceTests() : base()
-        {
-            CaseSource = Source<Case>();
-        }
-
         private StandardDataSource<T, AppDbContext> Source<T>()
             where T : class, new()
             => new StandardDataSource<T, AppDbContext>(CrudContext);

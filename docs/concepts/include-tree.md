@@ -110,7 +110,7 @@ No more extra data trailing off the end of the projects' employees!
 
 ### Custom Data Sources
 
-In most cases, you don't have to worry about creating an `IncludeTree`. When using the [Standard Data Source](/modeling/model-components/data-sources.md#standard-data-source) (or a derivative), the structure of the `.Include` and `.ThenInclude` calls will be captured automatically and be turned into an `IncludeTree`.
+In most cases, you don't have to worry about creating an `IncludeTree`. When using the [Standard Data Source](/modeling/model-components/data-sources.md#standard-data-source) (or a derivative), the structure of the `.Include` and `.ThenInclude` calls will be captured automatically and be turned into an `IncludeTree`. Projected queries are also supported, although very complex projections might not capture all paths - please open an issue if you find a scenario that doesn't work.
 
 However, there are sometimes cases where you perform complex loading in these methods that involves loading data into the current `DbContext` outside of the `IQueryable` that is returned from the method. The most common situation for this is needing to conditionally load related data - for example, load all children of an object where the child has a certain value of a Status property.
 
@@ -156,11 +156,7 @@ An `IncludeTree` can be obtained from any `IQueryable` by calling the `GetInclud
 In situations where your root object isn't on your `DbContext` (see [External Types](/modeling/model-types/external-types.md)), you can use `Enumerable.Empty<MyNonDbClass>().AsQueryable()` to get an `IQueryable` to start from. When you do this, you **must** use `IncludedSeparately` - the regular EF `Include` method won't work without a `DbSet`.
 :::
 
-See the following two techniques for returning an `IncludeTree` from a custom method:
-
-#### ItemResult.IncludeTree
-
-The easiest and most versatile way to return an `IncludeTree` from a custom method is to make that method return an `ItemResult<T>`, and then set the `IncludeTree` property of the `ItemResult` object. For example:
+To return an `IncludeTree` from a custom method is to make that method return an `ItemResult<T>`, and then set the `IncludeTree` property of the `ItemResult` object. For example:
 
 ``` c#
 public class Employee
@@ -183,32 +179,6 @@ public class Employee
 }
 ```
 
-#### Out Parameter
-
-To tell Coalesce about the structure of the data returned from a model method, you can also add `out IncludeTree includeTree` to the signature of the method. Inside your method, set `includeTree` to an instance of an `IncludeTree`. However, this approach cannot be used on `async` methods, since `out` parameters are not allowed on async methods in C#. For example:
-
-``` c#
-public class Employee
-{
-    public ICollection<Employee> GetChainOfCommand(AppDbContext db, out IncludeTree includeTree)
-    {
-        IQueryable<Employee> query = db.Employees
-            .Include(e => e.Supervisor);
-
-        var ret = new List<Employee>();
-        var current = this;
-        while (current.Supervisor != null)
-        {
-            ret.Push(current);
-            current = query.FirstOrDefault(e => e.EmployeeId == current.SupervisorId);
-        }
-
-        includeTree = query.GetIncludeTree();
-
-        return ret;
-    }
-}
-```
 
 ### External Type Caveats
 

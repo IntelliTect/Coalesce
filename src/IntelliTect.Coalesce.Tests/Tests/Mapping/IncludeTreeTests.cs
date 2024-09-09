@@ -1,10 +1,13 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using IntelliTect.Coalesce;
 using IntelliTect.Coalesce.Mapping.IncludeTrees;
 using IntelliTect.Coalesce.Tests.Fixtures;
+using IntelliTect.Coalesce.Tests.TargetClasses;
 using IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace IntelliTect.Coalesce.Tests.Mapping
 {
@@ -127,6 +130,85 @@ namespace IntelliTect.Coalesce.Tests.Mapping
 
             IncludeTree tree = queryable.GetIncludeTree();
             AssertBasicChecks(tree);
+        }
+
+        [Fact]
+        public void IncludeTree_ProjectedQuery_AnonymousTypes()
+        {
+            var queryable = db.People
+                .Select(p => new
+                {
+                    SimpleNavigation = p.Company,
+                    ComplexCollection = p.CasesAssigned.Select(c => new
+                    {
+                        CaseTitle = c.Title,
+                        Products = c.CaseProducts
+                            // Intermediate projection:
+                            .Select(p => new
+                            {
+                                p.Product,
+                                p.Case,
+                            })
+                            // This is the "real" projection.
+                            .Select(p => p.Product)
+                            // NewExpression in a position that isn't a projection.
+                            .OrderBy(p => new {p.Name}.Name)
+                            .ToList()
+                    })
+                });
+
+            IncludeTree tree = queryable.GetIncludeTree();
+            Assert.True(tree is { Count: 2 });
+            Assert.True(tree["SimpleNavigation"] is { Count: 0 });
+            Assert.True(tree["ComplexCollection"] is { Count: 1 });
+            Assert.True(tree["ComplexCollection"]["Products"] is { Count: 0 });
+        }
+
+        [Fact]
+        public void IncludeTree_ProjectedQuery_ConcreteTypes()
+        {
+            var queryable = db.Cases
+                .Select(c => new StandaloneProjected
+                {
+                    Id = c.CaseKey,
+                    OpenedBy = c.ReportedBy,
+                    OpenerAllOpenedCases = c.ReportedBy.CasesReported,
+                    Products = c.CaseProducts.Select(x => x.Product),
+                });
+
+            IncludeTree tree = queryable.GetIncludeTree();
+            Assert.True(tree is { Count: 3 });
+            Assert.True(tree["OpenedBy"] is { Count: 0 });
+            Assert.True(tree["OpenerAllOpenedCases"] is { Count: 0 });
+            Assert.True(tree["Products"] is { Count: 0 });
+        }
+
+        [Fact]
+        public void IncludeTree_ProjectedQuery_IncludedSeparately()
+        {
+            var queryable = db.Cases
+                .Select(c => new StandaloneProjected
+                {
+                    Id = c.CaseKey,
+                    OpenedBy = c.ReportedBy,
+                })
+                .IncludedSeparately(p => p.OpenerAllOpenedCases).ThenIncluded(c => c.CaseProducts)
+                ;
+
+            IncludeTree tree = queryable.GetIncludeTree();
+            Assert.True(tree is { Count: 2 });
+            Assert.True(tree["OpenedBy"] is { Count: 0 });
+            Assert.True(tree["OpenerAllOpenedCases"] is { Count: 1 });
+            Assert.True(tree["OpenerAllOpenedCases"]["CaseProducts"] is { Count: 0 });
+        }
+
+
+        private class StandaloneProjected
+        {
+            public int Id { get; set; }
+            public IEnumerable<Product> Products { get; set; }
+            public ICollection<Case> OpenerAllOpenedCases { get; set; }
+            public Person OpenedBy { get; set; }
         }
     }
 }

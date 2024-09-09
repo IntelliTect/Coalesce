@@ -2,6 +2,7 @@
 using IntelliTect.Coalesce.DataAnnotations;
 using IntelliTect.Coalesce.Models;
 using IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;

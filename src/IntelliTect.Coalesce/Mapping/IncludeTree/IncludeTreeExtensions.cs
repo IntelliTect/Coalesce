@@ -1,10 +1,12 @@
 ﻿using IntelliTect.Coalesce.Mapping.IncludeTrees;
+using IntelliTect.Coalesce.TypeDefinition;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query.Internal;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Threading.Tasks;
 
 // Deliberately namespaced to IntelliTect.Coalesce for ease of use.
@@ -64,6 +66,20 @@ namespace IntelliTect.Coalesce
                             }
                         }
 
+                        if (callExpr.Method.Name == nameof(Queryable.Select))
+                        {
+                            var visitor = new ProjectionVisitor();
+                            visitor.Visit(callExpr);
+
+                            foreach (var tree in visitor.Trees)
+                            {
+                                root.AddChild(tree);
+                            }
+
+                            // A projection is terminal. Anything before it doesn't matter.
+                            return root;
+                        }
+
                         expression = callExpr.Arguments[0];
                         break;
 
@@ -93,6 +109,84 @@ namespace IntelliTect.Coalesce
                 }
             }
         }
+
+        class ProjectionVisitor : ExpressionVisitor
+        {
+            public List<IncludeTree> Trees { get; } = [];
+
+            protected override Expression VisitMemberInit(MemberInitExpression node)
+            {
+                foreach (var binding in node.Bindings)
+                {
+                    if (binding is not MemberAssignment assignment) continue;
+
+                    var member = assignment.Member;
+                    var arg = assignment.Expression;
+                    VisitMemberAssignment(member, arg);
+                }
+
+                return node;
+            }
+
+            protected override Expression VisitNew(NewExpression node)
+            {
+                if (node.Members is null) return node;
+
+                for (var i = 0; i < node.Arguments.Count; i++)
+                {
+                    var member = node.Members[i];
+                    var arg = node.Arguments[i];
+                    VisitMemberAssignment(member, arg);
+                }
+
+                return node;
+            }
+
+            private void VisitMemberAssignment(MemberInfo member, Expression arg)
+            {
+                if (
+                    member is not PropertyInfo pi ||
+                    !ReflectionRepository.Global.GetOrAddType(pi.PropertyType).PureType.IsPOCO
+                )
+                {
+                    return;
+                }
+
+                var memberTree = new IncludeTree { PropertyName = member.Name };
+                Trees.Add(memberTree);
+
+                var subVisitor = new ProjectionVisitor();
+                subVisitor.Visit(arg);
+                foreach (var childTree in subVisitor.Trees)
+                {
+                    memberTree.AddChild(childTree);
+                }
+            }
+
+            protected override Expression VisitMethodCall(MethodCallExpression node)
+            {
+                if (node.Method.Name == nameof(Queryable.Select))
+                {
+                    // Only the body of the select is important.
+                    // Don't visit the target of the select, because it is either:
+                    // - A collection navigation or similar, which doesn't have anything useful in it.
+                    // - An earlier part of the query, which doesn't affect the ultimate projection.
+                    //   NOTE: This isn't strictly true. If we're re-projecting something that was projected
+                    //   with a more detailed definition earlier in the query, we should see about preserving the original.
+
+                    Visit(node.Arguments[1]);
+
+                    return node;
+                }
+                else
+                {
+                    // Not the method we're looking for. Climb up the method call chain.
+                    Visit(node.Arguments[0]);
+                    return node;
+                }
+            }
+        }
+
 
         /// <summary>
         /// Specifies additional related entities to include in serialized output of a Coalesce custom data source. 

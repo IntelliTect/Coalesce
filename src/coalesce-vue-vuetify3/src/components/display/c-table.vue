@@ -1,7 +1,7 @@
 <template>
   <div ref="cTable" class="c-table" :class="{ 'c-table--editable': editable }">
     <c-loader-status
-      :loaders="{ 'no-initial-content': [list.$load], ...loaders }"
+      :loaders="{ 'no-initial-content': [listVm.$load], ...loaders }"
     >
       <v-table style="--v-table-header-height: 40px">
         <thead>
@@ -17,14 +17,14 @@
                 ['prop-' + header.prop]: !!header.prop,
                 ['th-' + header.value]: !header.prop,
               }"
-              @click="header.sortable ? orderByToggle(header.value) : void 0"
+              @click="header.sortable ? orderByToggle(header.value) : undefined"
             >
               {{ header.text }}
-              <v-icon v-if="list.$params.orderBy == header.value">
+              <v-icon v-if="listVm.$params.orderBy == header.value">
                 fa fa-caret-up
               </v-icon>
               <v-icon
-                v-else-if="list.$params.orderByDescending == header.value"
+                v-else-if="listVm.$params.orderByDescending == header.value"
               >
                 fa fa-caret-down
               </v-icon>
@@ -34,9 +34,9 @@
 
         <tbody>
           <tr
-            v-for="(item, index) in list.$modelOnlyMode
-              ? list.$modelItems
-              : list.$items"
+            v-for="(item, index) in listVm.$modelOnlyMode
+              ? listVm.$modelItems
+              : listVm.$items"
             :key="index"
           >
             <slot name="item-prepend" :item="item" />
@@ -78,148 +78,126 @@
   </div>
 </template>
 
-<script lang="ts">
-import {
-  defineComponent,
-  onMounted,
-  onUnmounted,
-  PropType,
-  ref,
-} from "vue";
-import {
-  ListViewModel,
-  Property,
-  ModelType,
-  HiddenAreas,
-  ViewModel,
-} from "coalesce-vue";
+<script setup lang="ts" generic="TList extends ListViewModel = ListViewModel">
+import { computed, onMounted, onUnmounted, ref } from "vue";
+import { ListViewModel, ModelType, HiddenAreas } from "coalesce-vue";
 
 import { isPropReadOnly } from "../../util";
 
-export default defineComponent({
-  name: "c-table",
+const props = defineProps<{
+  list: TList;
+  props?: string[];
+  admin?: boolean;
+  editable?: boolean;
+  extraHeaders?: Array<{ header: string; isFixed: boolean }> | Array<string>;
+  loaders?: any;
+}>();
 
-  props: {
-    list: { required: true, type: Object as PropType<ListViewModel<any, any>> },
-    props: { required: false, type: Array as PropType<Array<string>> },
-    admin: { required: false, type: Boolean },
-    editable: { required: false, type: Boolean },
-    extraHeaders: {
-      required: false,
-      type: Array as
-        | PropType<Array<{ header: string; isFixed: boolean }>>
-        | PropType<Array<string>>,
-    },
-    loaders: { required: false, type: Object },
-  },
+type ViewModelType = TList extends ListViewModel<any, any, infer TViewModel>
+  ? TViewModel
+  : never;
 
-  setup() {
-    const cTable = ref<HTMLDivElement>();
-    const isHorizontalScrollbarVisible = ref(false);
+defineSlots<{
+  ["item-prepend"]?(props: { item: ViewModelType }): any;
+  ["item-append"]?(props: {
+    item: ViewModelType;
+    isHorizontalScrollbarVisible: boolean;
+  }): any;
+}>();
 
-    const checkHorizontalScrollbar = () => {
-      const divElement = cTable.value;
-      const tableElement = divElement?.querySelector("table");
-      if (tableElement && divElement) {
-        isHorizontalScrollbarVisible.value =
-          divElement.clientWidth < tableElement.clientWidth;
-      }
-    };
+// Silly wrapper because using `list` directly in the template
+// has Typescript bugs right now in vue-language-tools.
+const listVm = computed(() => props.list);
 
-    const resizeObserver = new ResizeObserver(() => {
-      checkHorizontalScrollbar();
-    });
+const cTable = ref<HTMLDivElement>();
+const isHorizontalScrollbarVisible = ref(false);
 
-    onMounted(() => {
-      if (cTable.value) {
-        resizeObserver.observe(cTable.value);
-      }
-      checkHorizontalScrollbar();
-    });
+const checkHorizontalScrollbar = () => {
+  const divElement = cTable.value;
+  const tableElement = divElement?.querySelector("table");
+  if (tableElement && divElement) {
+    isHorizontalScrollbarVisible.value =
+      divElement.clientWidth < tableElement.clientWidth;
+  }
+};
 
-    onUnmounted(() => {
-      resizeObserver.disconnect();
-    });
-
-    return {
-      cTable,
-      isHorizontalScrollbarVisible,
-    };
-  },
-
-  computed: {
-    metadata(): ModelType {
-      return this.list.$metadata;
-    },
-
-    effectiveProps() {
-      if (this.props && this.props.length) {
-        return this.props
-          .map((propName) => this.metadata.props[propName])
-          .filter((prop) => !!prop);
-      }
-
-      return Object.values(this.metadata.props).filter(
-        (p) => p.hidden === undefined || (p.hidden & HiddenAreas.List) == 0
-      );
-    },
-
-    headers() {
-      return [
-        ...this.effectiveProps.map((o) => ({
-          text: o.displayName,
-          value: o.name,
-          sortable: o.type != "collection",
-          align: "left",
-          prop: o.name,
-          isFixed: false,
-        })),
-        ...(this.extraHeaders || []).map((h) => {
-          if (typeof h === "string") {
-            return {
-              text: h,
-              value: h,
-              sortable: false,
-              prop: undefined,
-              isFixed: false,
-            };
-          } else {
-            return {
-              text: h.header,
-              value: h.header,
-              sortable: false,
-              prop: undefined,
-              isFixed: h.isFixed,
-            };
-          }
-        }),
-      ];
-    },
-  },
-
-  methods: {
-    isPropReadOnly(p: Property, model: ViewModel) {
-      return isPropReadOnly(p, model);
-    },
-
-    // TODO: put orderByToggle on ListViewModel.
-    orderByToggle(field: string) {
-      const list = this.list;
-      const params = list.$params;
-
-      if (params.orderBy == field && !params.orderByDescending) {
-        params.orderBy = null;
-        params.orderByDescending = field;
-      } else if (!params.orderBy && params.orderByDescending == field) {
-        params.orderBy = null;
-        params.orderByDescending = null;
-      } else {
-        params.orderBy = field;
-        params.orderByDescending = null;
-      }
-    },
-  },
+const resizeObserver = new ResizeObserver(() => {
+  checkHorizontalScrollbar();
 });
+
+onMounted(() => {
+  if (cTable.value) {
+    resizeObserver.observe(cTable.value);
+  }
+  checkHorizontalScrollbar();
+});
+
+onUnmounted(() => {
+  resizeObserver.disconnect();
+});
+
+const metadata = computed((): ModelType => props.list.$metadata);
+
+const effectiveProps = computed(() => {
+  if (props.props?.length) {
+    return props.props
+      .map((propName) => metadata.value.props[propName])
+      .filter((prop) => !!prop);
+  }
+
+  return Object.values(metadata.value.props).filter(
+    (p) => p.hidden === undefined || (p.hidden & HiddenAreas.List) == 0
+  );
+});
+
+const headers = computed(() => {
+  return [
+    ...effectiveProps.value.map((o) => ({
+      text: o.displayName,
+      value: o.name,
+      sortable: o.type != "collection",
+      align: "left",
+      prop: o.name,
+      isFixed: false,
+    })),
+    ...(props.extraHeaders || []).map((h) => {
+      if (typeof h === "string") {
+        return {
+          text: h,
+          value: h,
+          sortable: false,
+          prop: undefined,
+          isFixed: false,
+        };
+      } else {
+        return {
+          text: h.header,
+          value: h.header,
+          sortable: false,
+          prop: undefined,
+          isFixed: h.isFixed,
+        };
+      }
+    }),
+  ];
+});
+
+// TODO: put orderByToggle on ListViewModel.
+function orderByToggle(field: string) {
+  const list = props.list;
+  const params = list.$params;
+
+  if (params.orderBy == field && !params.orderByDescending) {
+    params.orderBy = null;
+    params.orderByDescending = field;
+  } else if (!params.orderBy && params.orderByDescending == field) {
+    params.orderBy = null;
+    params.orderByDescending = null;
+  } else {
+    params.orderBy = field;
+    params.orderByDescending = null;
+  }
+}
 </script>
 
 <style lang="scss">

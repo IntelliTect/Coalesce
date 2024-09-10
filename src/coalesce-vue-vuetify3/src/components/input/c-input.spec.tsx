@@ -1,8 +1,25 @@
-import { delay, mockEndpoint, mount, mountApp, nextTick, openMenu } from "@test/util";
-import { VListItem } from "vuetify/components";
+import {
+  delay,
+  mockEndpoint,
+  mount,
+  mountApp,
+  nextTick,
+  openMenu,
+} from "@test/util";
+import { VForm, VListItem } from "vuetify/components";
 import { CInput } from "..";
-import { Case, Company, ComplexModel, Statuses, Test } from "@test-targets/models.g";
-import { CaseViewModel, ComplexModelViewModel } from "@test-targets/viewmodels.g";
+import {
+  Case,
+  Company,
+  ComplexModel,
+  EnumPk,
+  Statuses,
+  Test,
+} from "@test-targets/models.g";
+import {
+  CaseViewModel,
+  ComplexModelViewModel,
+} from "@test-targets/viewmodels.g";
 import { Model } from "coalesce-vue";
 import { VueWrapper } from "@vue/test-utils";
 
@@ -15,18 +32,43 @@ describe("CInput", () => {
     });
   });
 
+  /* eslint-disable @typescript-eslint/no-unused-vars */
+  // prettier-ignore
   test("types", () => {
     const model = new ComplexModel();
     const vm = new ComplexModelViewModel();
     const ds = new Case.DataSources.AllOpenCases();
 
-    () => <CInput model={model} for="color" />;
-    () => <CInput model={vm} for="color" />;
-    () => <CInput model={vm} for="byteArrayProp" />;
-    () => <CInput model={vm} for="singleTest" />;
-    () => <CInput model={vm} for="tests" />;
-    () => <CInput model={vm} for="enumCollection" />;
-    () => <CInput model={vm} for="intCollection" />;
+    () => <CInput model={model} for="color" onUpdate:modelValue={(v: string | null) => { }} />;
+    //@ts-expect-error wrong event handler type
+    () => <CInput model={model} for="color" onUpdate:modelValue={(v: number | null) => { }} />;
+
+    () => <CInput model={vm} for="color" onUpdate:modelValue={(v: string | null) => { }} />;
+    //@ts-expect-error wrong event handler type
+    () => <CInput model={vm} for="color" onUpdate:modelValue={(v: number | null) => { }} />;
+
+    () => <CInput model={vm} for="dateTime" onUpdate:modelValue={(v: Date | null) => { }} />;
+    //@ts-expect-error wrong event handler type
+    () => <CInput model={vm} for="dateTime" onUpdate:modelValue={(v: number | null) => { }} />;
+
+    // () => <CInput model={vm} for="byteArrayProp" onUpdate:modelValue={(v: string) => { }} />;
+
+    () => <CInput model={vm} for="singleTest" onUpdate:modelValue={(v: Test | null) => { }} />;
+    //@ts-expect-error wrong event handler type
+    () => <CInput model={vm} for="singleTest" onUpdate:modelValue={(v: string | null) => { }} />;
+
+    () => <CInput model={vm} for="tests" onUpdate:modelValue={(v: Test[] | null) => { }} />;
+    //@ts-expect-error wrong event handler type
+    () => <CInput model={vm} for="tests" onUpdate:modelValue={(v: string | null) => { }} />;
+
+    () => <CInput model={vm} for="enumCollection" onUpdate:modelValue={(v: EnumPk[] | null) => { }} />;
+    //@ts-expect-error wrong event handler type
+    () => <CInput model={vm} for="enumCollection" onUpdate:modelValue={(v: string | null) => { }} />;
+
+    () => <CInput model={vm} for="intCollection" onUpdate:modelValue={(v: number[] | null) => { }} />;
+    //@ts-expect-error wrong event handler type
+    () => <CInput model={vm} for="intCollection" onUpdate:modelValue={(v: string[] | null) => { }} />;
+
     //@ts-expect-error non-existent prop
     () => <CInput model={vm} for="_anyString" />;
     //@ts-expect-error missing `for`
@@ -41,7 +83,7 @@ describe("CInput", () => {
     () => <CInput model={model as Model} for="_anyString" />;
     () => <CInput model={model as Model} for={vm.$metadata.props.color} />;
 
-    () => <CInput model={ds} for="minDate" />;
+    () => <CInput model={ds} for="minDate" onUpdate:modelValue={(v: Date | null) => { }} />;
     //@ts-expect-error non-existent prop
     () => <CInput model={ds} for="badString" />;
     //@ts-expect-error missing `for`
@@ -51,15 +93,15 @@ describe("CInput", () => {
     // Method caller args have fairly exhaustive cases here
     // for different types because ForSpec has unique handling
     // for caller args.
-    () => <CInput model={caller} for="dateTime" />;
-    () => <CInput model={caller} for="model" />;
-    () => <CInput model={caller} for="strParam" />;
-    () => <CInput model={caller} for="integer" />;
-    () => <CInput model={caller} for="enumParam" />;
-    () => <CInput model={caller} for="boolParam" />;
-    () => <CInput model={caller} for="file" />;
-    () => <CInput model={caller} for="stringsParam" />;
-    () => <CInput model={caller} for="enumsParam" />;
+    () => <CInput model={caller} for="dateTime" onUpdate:modelValue={(v: Date | null) => { }} />;
+    () => <CInput model={caller} for="model" onUpdate:modelValue={(v: Test | null) => { }} />;
+    () => <CInput model={caller} for="strParam" onUpdate:modelValue={(v: string | null) => { }} />;
+    () => <CInput model={caller} for="integer" onUpdate:modelValue={(v: number | null) => { }} />;
+    () => <CInput model={caller} for="enumParam" onUpdate:modelValue={(v: Statuses | null) => { }} />;
+    () => <CInput model={caller} for="boolParam" onUpdate:modelValue={(v: boolean | null) => { }} />;
+    () => <CInput model={caller} for="file" onUpdate:modelValue={(v: File | null) => { }} />;
+    () => <CInput model={caller} for="stringsParam" onUpdate:modelValue={(v: string[] | null) => { }} />;
+    () => <CInput model={caller} for="enumsParam" onUpdate:modelValue={(v: Statuses[] | null) => { }} />;
 
     // While external types don't make an input for CInput,
     // they aren't technically invalid either because they at least fall back to c-display.
@@ -90,7 +132,7 @@ describe("CInput", () => {
   });
 
   test("enum", async () => {
-    const model = new CaseViewModel({status: Statuses.InProgress})
+    const model = new CaseViewModel({ status: Statuses.InProgress });
     const wrapper = mount(() => <CInput model={model} for="status" />);
 
     // Assert resting state
@@ -200,6 +242,49 @@ describe("CInput", () => {
     await delay(1);
 
     expect(onUpdate).toHaveBeenCalledWith(new Date("1/3/2017"));
+  });
+
+  describe("rules", () => {
+    test("date - missing", async () => {
+      const model = new ComplexModelViewModel({});
+      const wrapper = mountApp(() => (
+        <VForm>
+          <CInput
+            model={model}
+            for="dateTime"
+            rules={[(v) => !!v || "Custom Rule Failure"]}
+          />
+        </VForm>
+      ));
+
+      await wrapper.findComponent(VForm).vm.validate();
+
+      expect(wrapper.find(".v-input--error").exists()).toBeTruthy();
+      expect(wrapper.find(".v-messages").text()).toEqual("Custom Rule Failure");
+    });
+
+    test("number - rule receives number, not string", async () => {
+      const model = new ComplexModelViewModel({ intNullable: 7 });
+      const rule = vitest.fn(
+        (v: number | null | undefined) => v === 7 || "Custom Rule Failure"
+      );
+      const wrapper = mountApp(() => (
+        <VForm>
+          <CInput model={model} for="intNullable" rules={[rule]} />
+        </VForm>
+      ));
+
+      await wrapper.findComponent(VForm).vm.validate();
+      expect(wrapper.find(".v-input--error").exists()).toBeFalsy();
+
+      wrapper.find("input").setValue("42");
+      await wrapper.findComponent(VForm).vm.validate();
+
+      expect(rule).toHaveBeenCalledWith(7);
+      expect(rule).lastCalledWith(42);
+      expect(rule).not.toHaveBeenCalledWith("7");
+      expect(rule).not.toHaveBeenCalledWith("42");
+    });
   });
 });
 

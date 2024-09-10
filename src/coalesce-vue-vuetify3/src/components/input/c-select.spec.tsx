@@ -20,12 +20,7 @@ import { FunctionalComponent, ref } from "vue";
 import { VForm } from "vuetify/components";
 import { CSelect } from "..";
 
-import {
-  Company,
-  ComplexModel,
-  EnumPkId,
-  Test,
-} from "@test-targets/models.g";
+import { Company, ComplexModel, EnumPkId, Test } from "@test-targets/models.g";
 import {
   CaseViewModel,
   ComplexModelViewModel,
@@ -198,6 +193,13 @@ describe("CSelect", () => {
     () => <CSelect model={123} for="num" />;
     //@ts-expect-error invalid for type
     () => <CSelect model={complexVm} for={123} />;
+
+
+
+    // Rules
+    () => <CSelect model={complexVm} for="singleTest" rules={[v => v === 7 || 'Must be 7']} />;
+    //@ts-expect-error invalid rule func (`v` is number, equality to string is invalid).
+    () => <CSelect model={complexVm} for="singleTest" rules={[v => v === "foo" || 'Must be 7']} />;
   });
 
   test.each([
@@ -609,7 +611,9 @@ describe("CSelect", () => {
 
     describe.each(["disabled", "readonly"])("%s", (prop) => {
       async function assertNonInteractive(
-        wrapper: VueWrapper<BetterComponentInstance<typeof CSelect<ComplexModel>>>
+        wrapper: VueWrapper<
+          BetterComponentInstance<typeof CSelect<ComplexModel>>
+        >
       ) {
         // Clearable is ignored when disabled/readonly
         expect(wrapper.find(".v-field__clearable").exists()).toBeFalsy();

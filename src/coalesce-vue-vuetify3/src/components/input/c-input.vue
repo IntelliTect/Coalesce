@@ -37,20 +37,31 @@ function addHandler(data: any, eventName: string, handler: Function) {
 <script
   lang="ts"
   setup
-  generic="TModel extends Model | DataSource | AnyArgCaller | undefined"
+  generic="TModel extends Model | DataSource | AnyArgCaller | undefined, 
+  TFor extends ForSpec<TModel> = any"
 >
-import { defineComponent, h, toHandlerKey, useSlots } from "vue";
+import { defineComponent, h, toHandlerKey, useSlots, useAttrs } from "vue";
 import {
   buildVuetifyAttrs,
   useMetadataProps,
   type ForSpec,
 } from "../c-metadata-component";
+import { TypedValidationRule } from "../../util";
 import {
   type Model,
   type DataSource,
   type AnyArgCaller,
   mapValueToModel,
   parseValue,
+  ApiStateTypeWithArgs,
+  ForeignKeyProperty,
+  ModelReferenceNavigationProperty,
+  ModelType,
+  ModelTypeLookup,
+  ModelValue,
+  PropNames,
+  TypeDiscriminatorToType,
+  CollectionProperty,
 } from "coalesce-vue";
 
 import CSelect from "./c-select.vue";
@@ -67,7 +78,42 @@ import {
   VTextarea,
   VTextField,
 } from "vuetify/components";
-import { useAttrs } from "vue";
+
+type ValueType = TFor extends string & keyof ModelTypeLookup
+  ? ModelTypeLookup[TFor]
+  : TFor extends ModelReferenceNavigationProperty | ModelValue
+  ? TFor["typeDef"]["name"] extends keyof ModelTypeLookup
+    ? ModelTypeLookup[TFor["typeDef"]["name"]]
+    : any
+  : TFor extends ForeignKeyProperty
+  ? TFor["principalType"]["name"] extends keyof ModelTypeLookup
+    ? ModelTypeLookup[TFor["principalType"]["name"]]
+    : any
+  : TModel extends ApiStateTypeWithArgs<any, any, infer TArgsObj, any>
+  ? TFor extends keyof TArgsObj
+    ? TArgsObj[TFor]
+    : any
+  : TModel extends Model
+  ? TFor extends PropNames<TModel["$metadata"]>
+    ? TModel["$metadata"]["props"][TFor] extends
+        | ModelReferenceNavigationProperty
+        | ModelValue
+      ? TModel["$metadata"]["props"][TFor]["typeDef"]["name"] extends keyof ModelTypeLookup
+        ? ModelTypeLookup[TModel["$metadata"]["props"][TFor]["typeDef"]["name"]]
+        : any
+      : TModel["$metadata"]["props"][TFor] extends ForeignKeyProperty
+      ? TModel["$metadata"]["props"][TFor]["principalType"]["name"] extends keyof ModelTypeLookup
+        ? ModelTypeLookup[TModel["$metadata"]["props"][TFor]["principalType"]["name"]]
+        : any
+      : TModel["$metadata"]["props"][TFor] extends CollectionProperty
+      ? Array<
+          TypeDiscriminatorToType<
+            TModel["$metadata"]["props"][TFor]["itemType"]["type"]
+          >
+        >
+      : TypeDiscriminatorToType<TModel["$metadata"]["props"][TFor]["type"]>
+    : any
+  : Model<ModelType>;
 
 defineOptions({
   name: "c-input",
@@ -86,21 +132,20 @@ const props = withDefaults(
      * * A direct reference to the metadata object. E.g. `model.$metadata.props.firstName`.
      * * A string in dot-notation that starts with a type name. E.g. `"Person.firstName"`.
      */
-    for: ForSpec<TModel>;
+    for: TFor;
 
-    modelValue?: any;
+    rules?: Array<TypedValidationRule<ValueType>>;
+
+    modelValue?: ValueType | null;
   }>(),
   {}
 );
 
-const {
-  modelMeta: modelMetaRef,
-  valueMeta: valueMetaRef,
-  valueOwner: valueOwnerRef,
-} = useMetadataProps(props);
+const { valueMeta: valueMetaRef, valueOwner: valueOwnerRef } =
+  useMetadataProps(props);
 
 const emit = defineEmits<{
-  (e: "update:modelValue", v: any): void;
+  (e: "update:modelValue", v: ValueType | null): void;
 }>();
 
 const attrs = useAttrs();
@@ -120,6 +165,7 @@ function render() {
 
   let data = {
     ...attrs, // Includes any non-props, as well as event handlers.
+    rules: props.rules ?? attrs.rules,
     modelValue: valueOwner
       ? valueOwner[valueMeta.name]
       : primitiveTypes.includes(valueMeta.type)

@@ -1,5 +1,12 @@
 import { Property, ViewModel, BehaviorFlags } from "coalesce-vue";
 
+type ValidationResult = string | boolean;
+export type TypedValidationRule<T> =
+  | ValidationResult
+  | PromiseLike<ValidationResult>
+  | ((value: T | null | undefined) => ValidationResult)
+  | ((value: T | null | undefined) => PromiseLike<ValidationResult>);
+
 export function isPropReadOnly(p: Property, model: ViewModel) {
   const metadata = model.$metadata;
   if (!metadata) return false;

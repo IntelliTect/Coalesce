@@ -235,6 +235,7 @@ import {
   camelize,
 } from "vue";
 import { useMetadataProps, ForSpec } from "../c-metadata-component";
+import { TypedValidationRule } from "../../util";
 import {
   ModelApiClient,
   Model,
@@ -365,6 +366,8 @@ const props = withDefaults(
     /** Response caching configuration for the `/get` and `/list` API calls made by the component.
      * See https://intellitect.github.io/Coalesce/stacks/vue/layers/api-clients.html#response-caching. */
     cache?: ResponseCachingConfiguration | boolean;
+
+    rules?: Array<TypedValidationRule<SelectedPkType>>;
 
     create?: {
       getLabel: (search: string, items: SelectedModelType[]) => string | false;
@@ -587,9 +590,9 @@ const internalKeyValue = computed((): SelectedPkType | null => {
 });
 
 /** The effective set of validation rules to pass to the v-select. */
-const effectiveRules = computed(() => {
+const effectiveRules = computed((): TypedValidationRule<SelectedPkType>[] => {
   // If we were explicitly given rules, use those.
-  if (inputBindAttrs.value.rules) return inputBindAttrs.value.rules;
+  if (props.rules) return props.rules;
 
   if (valueOwner.value instanceof ViewModel && modelKeyProp.value) {
     // We're binding to a ViewModel instance.
@@ -603,7 +606,8 @@ const effectiveRules = computed(() => {
     // of the selected model object.
     return valueOwner.value
       .$getRules(modelKeyProp.value)
-      ?.map((rule) => () => rule(internalKeyValue.value));
+      ?.map((rule) => () => rule(internalKeyValue.value))
+      ?? [];
   }
 
   // Look for validation rules from the metadata on the key prop.

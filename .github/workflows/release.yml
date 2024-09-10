@@ -28,9 +28,77 @@ jobs:
     with:
       COALESCE_VERSION: ${{ needs.meta.outputs.COALESCE_VERSION }}
 
+  validate-template:
+    runs-on: ubuntu-latest
+    name: "test template: ${{matrix.testCase}}"
+    needs: [meta, build]
+    strategy:
+      matrix:
+        testCase:
+          # Nothing:
+          - ""
+          # Everything:
+          - "--Identity --MicrosoftAuth --GoogleAuth --UserPictures --AuditLogs --ExampleModel --DarkMode --TrackingBase --AppInsights --OpenAPI"
+          # Assorted partial variants:
+          - "--Identity --UserPictures --TrackingBase"
+          - "--Identity --MicrosoftAuth --AuditLogs"
+
+    defaults:
+      run:
+        shell: pwsh
+        working-directory: ./templates/Coalesce.Vue.Template
+
+    env:
+      COALESCE_VERSION: ${{ needs.meta.outputs.COALESCE_VERSION }}
+      
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup dotnet
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: | 
+          8.0.x
+
+    - name: Download Artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: ${{ github.workspace }}/artifacts
+
+    - name: Add local nuget source
+      run: |
+        dotnet nuget add source "${{ github.workspace }}/artifacts/packages" --name "local-nuget"
+
+    # Install the coalesce packages that we just built so we can validate that the template
+    # works correctly with the version of Coalesce that we're releasing (which is also the version
+    # that will get substituted into the template when we build it in part-template-build).
+    # This isn't part of part-template-build because we want to validate before we publish any new versions.
+    - name: "Install newly built Coalesce packages"
+      run: |
+        $ErrorActionPreference = "Stop"
+        $PSNativeCommandUseErrorActionPreference = $true
+
+        echo $env:COALESCE_VERSION
+        ls ${{ github.workspace }}/artifacts
+
+        $filePath = "./content/Directory.Build.props"
+        $newVersion = "<CoalesceVersion>$env:COALESCE_VERSION</CoalesceVersion>"
+        (Get-Content $filePath) -replace '<CoalesceVersion>.*?<\/CoalesceVersion>', $newVersion | Set-Content $filePath 
+        
+        cat $filePath
+
+        cd ./content/*.Web
+        npm i $(Get-ChildItem -Path "${{ github.workspace }}/artifacts/coalesce-vue*.tgz").FullName --save
+        npm i $(Get-ChildItem -Path "${{ github.workspace }}/artifacts/coalesce-vue-vue3*.tgz").FullName --save
+
+        cat package.json
+    
+    - name: TestLocal
+      run: ./TestLocal.ps1 "${{ matrix.testCase }}"
+
   publish:
     uses: ./.github/workflows/part-publish.yml
-    needs: [build]
+    needs: [build, validate-template]
     secrets: inherit
 
   create-release:
@@ -46,11 +114,11 @@ jobs:
   build-template:
     uses: ./.github/workflows/part-template-build.yml
     secrets: inherit
+    # Versioned template build depends upon NPM packages being published,
+    # and nuget packages existing as local artifacts (since Nuget.org is so slow
+    # to make new packages available, we consume the local artifacts instead of waiting).
     needs: [meta, publish]
     with:
-      # Versioned template build depends upon NPM packages being published,
-      # and nuget packages existing as local artifacts (since Nuget.org is so slow
-      # to make new packages available, we consume the local artifacts instead of waiting).
       COALESCE_VERSION: ${{ needs.meta.outputs.COALESCE_VERSION }}
 
   publish-template:

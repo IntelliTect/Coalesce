@@ -26,8 +26,8 @@
         v-if="!model.$isAutoSaveEnabled"
         @click="model.$bulkSave()"
         title="Save"
-        :color="model.$isDirty ? 'success' : undefined"
-        :variant="model.$isDirty ? 'elevated' : 'text'"
+        :color="isBulkSaveDirty ? 'success' : undefined"
+        :variant="isBulkSaveDirty ? 'elevated' : 'text'"
         :loading="model.$bulkSave.isLoading"
         prepend-icon="fa fa-save"
       >
@@ -181,8 +181,8 @@
         v-if="!model.$isAutoSaveEnabled"
         @click="model.$bulkSave()"
         title="Save"
-        :color="model.$isDirty ? 'success' : undefined"
-        :variant="model.$isDirty ? 'elevated' : 'text'"
+        :color="isBulkSaveDirty ? 'success' : undefined"
+        :variant="isBulkSaveDirty ? 'elevated' : 'text'"
         :loading="model.$bulkSave.isLoading"
         prepend-icon="fa fa-save"
       >
@@ -223,6 +223,7 @@ export default defineComponent({
     watch(form, (form) => {
       form?.validate?.();
     });
+
     return { form, isPropReadOnly };
   },
 
@@ -309,6 +310,10 @@ export default defineComponent({
           p.hidden === undefined || (p.hidden & HiddenAreas.Edit) == 0
         // && (!p.dontSerialize || p.role == "referenceNavigation" || p.role == "collectionNavigation")
       );
+    },
+
+    isBulkSaveDirty() {
+      return this.model.$bulkSavePreview().isDirty;
     },
   },
 });

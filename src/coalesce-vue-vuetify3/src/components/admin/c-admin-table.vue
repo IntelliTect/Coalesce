@@ -45,12 +45,11 @@
                 v-if="editable && !effectiveAutoSave"
                 title="Save"
                 color="success"
-                :variant="item.$isDirty ? 'elevated' : 'text'"
+                :variant="item.$bulkSavePreview().isDirty ? 'elevated' : 'text'"
                 :loading="item.$bulkSave.isLoading"
                 icon
                 @click="item.$bulkSave()"
               >
-                <!-- TODO: (#413) ^^^ read dirty state for the whole bulk save. -->
                 <!-- Using an <i> directly is more performant than v-icon. -->
                 <i aria-hidden="true" class="v-icon notranslate fa fa-save"></i>
               </v-btn>

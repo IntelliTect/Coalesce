@@ -25,10 +25,10 @@ public class PageListing
 
     public string Author { get; set; }
 
-    public class DefaultSource(CrudContext context) : StandardDataSource<PageListing>(context)
+    public class DefaultSource(CrudContext<AppDbContext> context) : StandardDataSource<PageListing>(context)
     {
         public override Task<IQueryable<PageListing>> GetQueryAsync(IDataSourceParameters parameters)
-          => db.Pages
+          => context.DbContext.Pages
             .Where(p => p.IsPublished)
             .Select(p => new PageListing 
             {

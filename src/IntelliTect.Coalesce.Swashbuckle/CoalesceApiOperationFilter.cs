@@ -1,5 +1,6 @@
 ﻿using IntelliTect.Coalesce.Models;
 using IntelliTect.Coalesce.TypeDefinition;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
@@ -85,6 +86,15 @@ namespace IntelliTect.Coalesce.Swashbuckle
                         }
                     }
                 }
+            }
+
+            if (method.ResultType.IsA<ActionResult<ItemResult<IntelliTect.Coalesce.Models.IFile>>>())
+            {
+                operation.Responses["200"].Content.Clear();
+                operation.Responses["200"].Content["application/octet-stream"] = new OpenApiMediaType
+                {
+                    Schema = new() { Type = "string", Format = "binary" }
+                };
             }
         }
 

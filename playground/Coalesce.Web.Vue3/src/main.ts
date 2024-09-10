@@ -60,7 +60,7 @@ const router = createRouter({
       props: (route) => ({
         ...route.params,
         color: "primary",
-        autoSave: false,
+        // autoSave: false,
       }),
     },
   ],

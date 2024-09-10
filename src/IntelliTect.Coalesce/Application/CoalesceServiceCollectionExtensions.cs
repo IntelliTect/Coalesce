@@ -1,20 +1,19 @@
-﻿using IntelliTect.Coalesce.Api.DataSources;
+﻿using IntelliTect.Coalesce.Api.Behaviors;
+using IntelliTect.Coalesce.Api.Controllers;
+using IntelliTect.Coalesce.Api.DataSources;
 using IntelliTect.Coalesce.TypeDefinition;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.Options;
-using Microsoft.AspNetCore.Mvc;
-using IntelliTect.Coalesce.Api.Behaviors;
-using IntelliTect.Coalesce.Api.Controllers;
-using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using System.Reflection;
 
 namespace IntelliTect.Coalesce
@@ -32,8 +31,7 @@ namespace IntelliTect.Coalesce
             {
                 services.AddOptions<CoalesceOptions>().Configure<IWebHostEnvironment>((opts, hosting) =>
                 {
-                    opts.DetailedExceptionMessages =
-                        Microsoft.Extensions.Hosting.HostEnvironmentEnvExtensions.IsDevelopment(hosting);
+                    opts.DetailedExceptionMessages = hosting.IsDevelopment();
                 });
             }
 

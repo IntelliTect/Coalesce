@@ -2,7 +2,6 @@
 using IntelliTect.Coalesce.Models;
 using Microsoft.AspNetCore.Mvc.Filters;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace IntelliTect.Coalesce
@@ -22,6 +21,17 @@ namespace IntelliTect.Coalesce
         /// Return null to use the default response handling.
         /// </summary>
         public Func<ActionExecutedContext, ApiResult?>? ExceptionResponseFactory { get; set; }
+
+        private bool? _efErrors;
+        /// <summary>
+        /// Determines whether detailed error messages about EF model/migration errors are returned in error responses.
+        /// Requires <see cref="DetailedExceptionMessages"/> to be enabled, and defaults to that value.
+        /// </summary>
+        public bool DetailedEntityFrameworkExceptionMessages
+        {
+            get => DetailedExceptionMessages ? (_efErrors ?? DetailedExceptionMessages) : false;
+            set => _efErrors = value;
+        }
 
         /// <summary>
         /// If true, Coalesce will perform validation of incoming data using <see cref="ValidationAttribute"/>s

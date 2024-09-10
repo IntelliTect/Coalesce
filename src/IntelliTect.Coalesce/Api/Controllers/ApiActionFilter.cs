@@ -1,14 +1,19 @@
-﻿using System;
-using System.Linq;
-using IntelliTect.Coalesce.Models;
+﻿using IntelliTect.Coalesce.Models;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.AspNetCore.Mvc;
-using System.Net;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Options;
-using Microsoft.AspNetCore.Http;
+using System;
+using System.Collections.Generic;
+using System.Data.Common;
+using System.Linq;
+using System.Net;
 
 namespace IntelliTect.Coalesce.Api.Controllers
 {
@@ -54,8 +59,8 @@ namespace IntelliTect.Coalesce.Api.Controllers
                     // The response we send back also doesn't matter because
                     // the client will never see it.
                     context.ExceptionHandled = true;
-                    // 499 is a non-standard code "Client Closed Request" introduced by nginx .
-                    context.Result = new StatusCodeResult(499);
+                    
+                    context.Result = new StatusCodeResult(StatusCodes.Status499ClientClosedRequest);
                     return;
                 }
 
@@ -73,8 +78,22 @@ namespace IntelliTect.Coalesce.Api.Controllers
                     var requestId = context.HttpContext.TraceIdentifier;
                     if (options.Value.DetailedExceptionMessages)
                     {
+                        string message = context.Exception.Message;
+
+                        if (
+                            options.Value.DetailedEntityFrameworkExceptionMessages &&
+                            (context.Exception as DbException ?? context.Exception?.InnerException) is DbException
+                        )
+                        {
+                            var dbMessage = GetDbContextExceptionMessage(context);
+                            if (!string.IsNullOrWhiteSpace(dbMessage))
+                            {
+                                message = dbMessage + "\n\n" + message;
+                            }
+                        }
+
                         context.Result = new JsonResult(
-                            new ApiResult($"{context.Exception.Message} (request {requestId})")
+                            new ApiResult($"{message} (request {requestId})")
                         );
                     }
                     else
@@ -96,6 +115,60 @@ namespace IntelliTect.Coalesce.Api.Controllers
                 response.StatusCode = 
                     (int)HttpStatusCode.BadRequest;
             }
+        }
+
+        private static string GetDbContextExceptionMessage(ActionExecutedContext context)
+        {
+            List<string> messages = [];
+            try
+            {
+                var registeredContexts = context.HttpContext.RequestServices
+                    .GetServices<DbContextOptions>()
+                    .Select(o => o.ContextType)
+                    .Distinct();
+
+                foreach (var dbcontextType in registeredContexts)
+                {
+                    if (context.HttpContext.RequestServices.GetService(dbcontextType) is not DbContext db) continue;
+
+                    if (db.GetService<IDatabaseCreator>() is not IRelationalDatabaseCreator relationalDatabaseCreator) continue;
+                    var databaseExists = relationalDatabaseCreator.Exists();
+                    if (!databaseExists) continue;
+
+                    var migrationsAssembly = db.GetService<IMigrationsAssembly>();
+                    var historyRepository = db.GetService<IHistoryRepository>();
+                    if (!historyRepository.Exists())
+                    {
+                        // App is not using migrations.
+                        continue;
+                    }
+                    
+                    var dbMessage = "";
+                    const string fragmentAddMigration = "Add a migration by running `dotnet ef migrations add <migrationName>` in your Data project.";
+
+                    var pendingModelChanges = db.Database.HasPendingModelChanges();
+                    if (!pendingModelChanges && migrationsAssembly?.ModelSnapshot is null)
+                    {
+                        dbMessage = $"{dbcontextType.Name} has been migrated, but no migrations exist. " + fragmentAddMigration;
+                    }
+                    else if (pendingModelChanges)
+                    {
+                        dbMessage = $"{dbcontextType.Name} has model changes that have not been captured by a migration. " + fragmentAddMigration;
+                    }
+                    else if (db.Database.GetPendingMigrations().Any())
+                    {
+                        dbMessage = $"{dbcontextType.Name} has unapplied migrations. They may have an error, or may have not been attempted.";
+                    }
+                    if (dbMessage is "") continue;
+
+                    messages.Add(dbMessage);
+                }
+            }
+            catch { }
+
+            if (messages.Count == 0) return "";
+
+            return string.Join(" ", messages) + " This is the likely cause of the following error:";
         }
 
         public void OnResultExecuting(ResultExecutingContext context)

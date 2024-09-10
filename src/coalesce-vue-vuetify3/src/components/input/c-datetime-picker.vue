@@ -239,7 +239,7 @@ const error = ref<string[]>([]);
 const menu = ref(false);
 const internalTextValue = ref<string>();
 
-const form: any = inject(Symbol.for("vuetify:form"));
+const form: any = inject(Symbol.for("vuetify:form"), null);
 
 const isDisabled = computed(() => props.disabled || form?.isDisabled.value);
 const isReadonly = computed(() => props.readonly || form?.isReadonly.value);

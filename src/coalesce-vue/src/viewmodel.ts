@@ -1505,7 +1505,7 @@ export abstract class ListViewModel<
     return this.$params.page || 1;
   }
   public set $page(val) {
-    this.$params.page = Number(val);
+    this.$params.page = Math.max(1, Number(val));
   }
 
   public get $pageSize() {

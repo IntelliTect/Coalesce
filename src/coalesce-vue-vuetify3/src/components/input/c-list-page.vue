@@ -4,7 +4,7 @@
       variant="outlined"
       size="x-small"
       icon
-      @click="list.$previousPage()"
+      @click="list.$page = effectivePage - 1"
       :disabled="!list.$hasPreviousPage"
       title="Previous Page"
     >
@@ -17,7 +17,8 @@
       type="number"
       min="1"
       :max="list.$load.pageCount === -1 ? null : list.$load.pageCount"
-      v-model.number="list.$page"
+      :modelValue="effectivePage"
+      @update:model-value="list.$page = +$event"
       hide-details
       density="compact"
       variant="outlined"
@@ -32,7 +33,7 @@
       variant="outlined"
       size="x-small"
       icon
-      @click="list.$nextPage()"
+      @click="list.$page = effectivePage + 1"
       :disabled="!list.$hasNextPage"
       title="Next Page"
     >
@@ -41,15 +42,18 @@
   </div>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import { ListViewModel } from "coalesce-vue";
-import { defineComponent, PropType } from "vue";
+import { computed } from "vue";
 
-export default defineComponent({
-  name: "c-list-page",
-  props: {
-    list: { required: true, type: Object as PropType<ListViewModel> },
-  },
+const props = defineProps<{ list: ListViewModel }>();
+
+const effectivePage = computed(() => {
+  // Limit the displayed page to the effective page count.
+  // This is done in this component and not in the ListViewModel itself
+  // because if we modify $page when we get a response from the server,
+  // autoload lists will perform a duplicate load.
+  return Math.min(props.list.$page, props.list.$pageCount ?? props.list.$page);
 });
 </script>
 

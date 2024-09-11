@@ -74,6 +74,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
 
                 Uri relPath = new Uri(Environment.CurrentDirectory + Path.DirectorySeparatorChar).MakeRelativeUri(new Uri(outputFile));
 
+                this.ActionPerformed();
                 Logger?.LogInformation(
                     (DryRun ? " What if: " : "") + 
                     $"{(isRegen ? "Reg" : "G")}enerated: {Uri.UnescapeDataString(relPath.OriginalString)}"

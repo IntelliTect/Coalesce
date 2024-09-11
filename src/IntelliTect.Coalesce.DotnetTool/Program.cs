@@ -31,6 +31,10 @@ namespace IntelliTect.Coalesce.Cli
             Description = "Do not write output files to disk.", LongName = "what-if", ShortName = "WhatIf")]
         public bool DryRun { get; }
 
+        [Option(CommandOptionType.NoValue,
+            Description = "Verify that no output changes have been made. Use in CI builds to ensure that codegen has not been forgotten.", LongName = "verify", ShortName = "")]
+        public bool Verify { get; }
+
         [Argument(0, "config", Description =
             "Path to a coalesce.json configuration file that will drive generation.  If not specified, it will search in current folder.")]
         public string ConfigFile { get; }
@@ -120,6 +124,12 @@ namespace IntelliTect.Coalesce.Cli
             catch (Exception e)
             {
                 executor.Logger.LogError(e.ToString());
+                return -1;
+            }
+
+            if (Verify && executor.GenerationContext.ActionsPerformedCount > 0)
+            {
+                executor.Logger.LogError("Output has uncommitted changes. Run `dotnet coalesce` and commit the changes.");
                 return -1;
             }
 

@@ -4,6 +4,7 @@ using IntelliTect.Coalesce.TypeDefinition;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Generation
@@ -26,5 +27,12 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
         public string AreaName => CoalesceConfiguration.Output.AreaName;
 
         public string TypescriptModulePrefix => CoalesceConfiguration.Output.TypescriptModulePrefix;
+
+        private int actionCount = 0;
+        public void ActionPerformed()
+        {
+            Interlocked.Increment(ref actionCount);
+        }
+        public int ActionsPerformedCount => actionCount;
     }
 }

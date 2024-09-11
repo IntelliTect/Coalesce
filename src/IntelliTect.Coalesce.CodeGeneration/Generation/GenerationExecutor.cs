@@ -50,6 +50,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
         public ILogger<GenerationExecutor> Logger { get; private set; }
         public ServiceProvider ServiceProvider { get; private set; }
 
+        public GenerationContext GenerationContext => ServiceProvider.GetRequiredService<GenerationContext>();
+
         public Task GenerateAsync<TGenerator>()
             where TGenerator : IRootGenerator
         {
@@ -85,7 +87,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
 
 
             Logger = ServiceProvider.GetRequiredService<ILogger<GenerationExecutor>>();
-            var genContext = ServiceProvider.GetRequiredService<GenerationContext>();
+            var genContext = GenerationContext;
 
             Logger.LogInformation("Loading Projects:");
             await LoadProjects(Logger, genContext);

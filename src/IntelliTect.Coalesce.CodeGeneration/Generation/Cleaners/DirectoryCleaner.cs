@@ -41,6 +41,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
                 {
                     if (!knownGoodFiles.Any(goodFile => Path.GetFullPath(goodFile) == Path.GetFullPath(file)))
                     {
+                        Owner.ActionPerformed();
                         logger.LogWarning(
                             (DryRun ? " What if: " : "") + 
                             $"Deleting {file} because it was not in the generation outputs.");

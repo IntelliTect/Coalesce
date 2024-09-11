@@ -20,6 +20,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
         Task GenerateAsync();
 
         void Configure(JObject obj);
+        void ActionPerformed();
     }
 
     public interface IGenerator<TModel> : IGenerator

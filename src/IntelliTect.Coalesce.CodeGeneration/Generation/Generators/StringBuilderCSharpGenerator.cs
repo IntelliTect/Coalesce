@@ -15,10 +15,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
     {
         public StringBuilderCSharpGenerator(GeneratorServices services) : base(services)
         {
-            Services = services;
         }
 
-        public GeneratorServices Services { get; }
         public GenerationContext GenerationContext => Services.GenerationContext;
 
         // TODO: Should we remove AreaName entirely? Pretty sure nobody uses it.

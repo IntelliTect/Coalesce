@@ -26,6 +26,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
                 logger.LogTrace($"Cleaning {this}");
                 if (File.Exists(TargetPath))
                 {
+                    Owner.ActionPerformed();
                     logger.LogWarning(
                         (DryRun ? " What if: " : "") + 
                         $"Deleting {TargetPath} because it was explicitly flagged for removal."

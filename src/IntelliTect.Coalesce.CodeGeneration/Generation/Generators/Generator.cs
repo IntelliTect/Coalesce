@@ -15,11 +15,13 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
 
         protected Generator(GeneratorServices services)
         {
+            Services = services;
             Logger = services.LoggerFactory.CreateLogger(GetType().Name);
             Configure(services.CoalesceConfiguration);
             DryRun = services.CoalesceConfiguration.DryRun;
         }
 
+        protected GeneratorServices Services { get; }
         protected ILogger Logger { get; }
 
         public bool DryRun { get; private set; }
@@ -76,5 +78,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
                 }
             }
         }
+
+        public void ActionPerformed() => Services.GenerationContext.ActionPerformed();
     }
 }

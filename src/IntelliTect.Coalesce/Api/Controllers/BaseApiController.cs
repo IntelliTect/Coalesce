@@ -3,9 +3,11 @@ using IntelliTect.Coalesce.Api.DataSources;
 using IntelliTect.Coalesce.Models;
 using IntelliTect.Coalesce.TypeDefinition;
 using IntelliTect.Coalesce.TypeDefinition.Enums;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Net.Http.Headers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -88,6 +90,29 @@ namespace IntelliTect.Coalesce.Api.Controllers
         protected Task<ItemResult<TDtoOut?>> DeleteImplementation(object id, DataSourceParameters parameters, IDataSource<T> dataSource, IBehaviors<T> behaviors)
         {
             return behaviors.DeleteAsync<TDtoOut>(id, dataSource, parameters);
+        }
+
+        protected ActionResult File(IFile _methodResult)
+        {
+            string? _contentType = _methodResult.ContentType;
+            if (string.IsNullOrWhiteSpace(_contentType) && 
+                (
+                    string.IsNullOrWhiteSpace(_methodResult.Name) ||
+                    !new Microsoft.AspNetCore.StaticFiles.FileExtensionContentTypeProvider().TryGetContentType(_methodResult.Name, out _contentType)
+                )
+            )
+            {
+                _contentType = "application/octet-stream";
+            }
+
+            ContentDispositionHeaderValue cd = new(_methodResult.ForceDownload ? "attachment" : "inline");
+            cd.SetHttpFileName(_methodResult.Name);
+            Response.GetTypedHeaders().ContentDisposition = cd;
+
+            // Use range processing if the result stream isn't a MemoryStream.
+            // MemoryStreams are just going to mean we're dumping the whole byte array straight back to the client.
+            // Other streams might be more elegant, e.g. QueryableContentStream 
+            return File(_methodResult.Content!, _contentType, !(_methodResult.Content is System.IO.MemoryStream));
         }
     }
 

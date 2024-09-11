@@ -235,15 +235,7 @@ namespace Coalesce.Web.Vue2.Api
             );
             if (_methodResult != null)
             {
-                string _contentType = _methodResult.ContentType;
-                if (string.IsNullOrWhiteSpace(_contentType) && (
-                    string.IsNullOrWhiteSpace(_methodResult.Name) ||
-                    !(new Microsoft.AspNetCore.StaticFiles.FileExtensionContentTypeProvider().TryGetContentType(_methodResult.Name, out _contentType))
-                ))
-                {
-                    _contentType = "application/octet-stream";
-                }
-                return File(_methodResult.Content, _contentType, _methodResult.Name, !(_methodResult.Content is System.IO.MemoryStream));
+                return File(_methodResult);
             }
             else
             {
@@ -286,15 +278,7 @@ namespace Coalesce.Web.Vue2.Api
             );
             if (_methodResult.Object != null)
             {
-                string _contentType = _methodResult.Object.ContentType;
-                if (string.IsNullOrWhiteSpace(_contentType) && (
-                    string.IsNullOrWhiteSpace(_methodResult.Object.Name) ||
-                    !(new Microsoft.AspNetCore.StaticFiles.FileExtensionContentTypeProvider().TryGetContentType(_methodResult.Object.Name, out _contentType))
-                ))
-                {
-                    _contentType = "application/octet-stream";
-                }
-                return File(_methodResult.Object.Content, _contentType, _methodResult.Object.Name, !(_methodResult.Object.Content is System.IO.MemoryStream));
+                return File(_methodResult.Object);
             }
             var _result = new ItemResult<IntelliTect.Coalesce.Models.IFile>(_methodResult);
             _result.Object = _methodResult.Object;

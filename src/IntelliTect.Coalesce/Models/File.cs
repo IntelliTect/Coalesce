@@ -47,6 +47,14 @@ namespace IntelliTect.Coalesce.Models
         public string? ContentType { get; set; }
 
         public Stream? Content { get; set; }
+
+        /// <summary>
+        /// When used in a method result, forces the file to be downloaded by a browser
+        /// when the method's URL is opened directly as a link,
+        /// rather than attempting to display the file in the browser tab for supported content types.
+        /// This can also be forced with the `download` attribute on an `a` HTML element.
+        /// </summary>
+        public bool ForceDownload { get; set; }
     }
 
 }

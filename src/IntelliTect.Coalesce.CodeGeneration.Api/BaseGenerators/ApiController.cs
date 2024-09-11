@@ -407,22 +407,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
             {
                 using (b.Block($"if ({resultVar} != null)"))
                 {
-                    var fileNameVar = $"{resultVar}.{nameof(IFile.Name)}";
-                    b.Line($"string _contentType = {resultVar}.{nameof(IFile.ContentType)};");
-
-                    b.Line($"if (string.IsNullOrWhiteSpace(_contentType) && (");
-                    b.Indented($"string.IsNullOrWhiteSpace({fileNameVar}) ||");
-                    b.Indented($"!(new Microsoft.AspNetCore.StaticFiles.FileExtensionContentTypeProvider().TryGetContentType({fileNameVar}, out _contentType))");
-                    using (b.Block("))"))
-                    {
-                        b.Line($"_contentType = \"application/octet-stream\";");
-                    }
-
                     var contentStreamVar = $"{resultVar}.{nameof(IFile.Content)}";
-                    // Use range processing if the result stream isn't a MemoryStream.
-                    // MemoryStreams are just going to mean we're dumping the whole byte array straight back to the client.
-                    // Other streams might be more elegant, e.g. QueryableContentStream 
-                    b.Line($"return File({contentStreamVar}, _contentType, {fileNameVar}, !({contentStreamVar} is System.IO.MemoryStream));");
+                    b.Line($"return File({resultVar});");
                 }
 
                 if (!method.TaskUnwrappedReturnType.IsA<ApiResult>())

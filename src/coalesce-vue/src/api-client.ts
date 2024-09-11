@@ -811,12 +811,30 @@ export class ApiClient<T extends ApiRoutedType> {
           // Determine the name of the downloaded file.
           // https://stackoverflow.com/a/40940790
           let disposition = r.headers["content-disposition"];
-          let filename = "";
-          if (disposition && disposition.indexOf("attachment") !== -1) {
-            var filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
-            var matches = filenameRegex.exec(disposition);
-            if (matches != null && matches[1]) {
-              filename = matches[1].replace(/['"]/g, "");
+          let fileName = "";
+          if (disposition) {
+            const utf8FilenameRegex =
+              /filename\*=UTF-8''([\w%\-\.]+)(?:; ?|$)/i;
+            const asciiFilenameRegex =
+              /^filename=(["']?)(.*?[^\\])\1(?:; ?|$)/i;
+
+            if (utf8FilenameRegex.test(disposition)) {
+              fileName = decodeURIComponent(
+                utf8FilenameRegex.exec(disposition)![1]
+              );
+            } else {
+              // prevent ReDos attacks by anchoring the ascii regex to string start and
+              //  slicing off everything before 'filename='
+              const filenameStart = disposition
+                .toLowerCase()
+                .indexOf("filename=");
+              if (filenameStart >= 0) {
+                const partialDisposition = disposition.slice(filenameStart);
+                const matches = asciiFilenameRegex.exec(partialDisposition);
+                if (matches != null && matches[2]) {
+                  fileName = matches[2];
+                }
+              }
             }
           }
 
@@ -824,7 +842,7 @@ export class ApiClient<T extends ApiRoutedType> {
           const blob: Blob = r.data;
           r.data = <ItemResult<File>>{
             wasSuccessful: true,
-            object: new File([blob], filename, { type: blob.type }),
+            object: new File([blob], fileName, { type: blob.type }),
           };
           return r;
 

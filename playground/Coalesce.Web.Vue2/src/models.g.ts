@@ -811,12 +811,14 @@ export class WeatherData {
 
 
 declare module "coalesce-vue/lib/model" {
-  interface ModelTypeLookup {
+  interface EnumTypeLookup {
     AuditEntryState: AuditEntryState
     Genders: Genders
     SkyConditions: SkyConditions
     Statuses: Statuses
     Titles: Titles
+  }
+  interface ModelTypeLookup {
     AuditLog: AuditLog
     AuditLogProperty: AuditLogProperty
     Case: Case

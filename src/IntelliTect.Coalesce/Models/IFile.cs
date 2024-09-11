@@ -11,5 +11,6 @@ namespace IntelliTect.Coalesce.Models
         string? ContentType { get; }
         string? Name { get; }
         long Length { get; }
+        bool ForceDownload { get; }
     }
 }

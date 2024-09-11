@@ -107,7 +107,7 @@ if (app.Environment.IsDevelopment())
 
 	app.MapCoalesceSecurityOverview("coalesce-security");
 	
-	#if !Identity
+	#if (!Identity)
 	// TODO: Dummy authentication for initial development.
 	// Replace this with a proper authentication scheme like
 	// Windows Authentication, or an OIDC provider, or something else.

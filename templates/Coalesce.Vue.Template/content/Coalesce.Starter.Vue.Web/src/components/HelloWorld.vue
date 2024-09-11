@@ -25,7 +25,7 @@
               >create a migration with Entity Framework</a
             >.
 
-            <!--#if !Identity -->
+            <!--#if (!Identity) -->
             <h2 class="mt-5">3. Add Authentication</h2>
             <strong> Implement a proper authentication mechanism</strong> in
             Program.cs and remove the existing dummy authentication. If you want

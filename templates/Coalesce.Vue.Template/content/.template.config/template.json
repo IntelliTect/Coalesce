@@ -96,6 +96,13 @@
       "displayName": "Azure Application Insights",
       "description": "Include configuration and integrations for Application Insights, both front-end and back-end.",
       "$coalesceLink": "https://learn.microsoft.com/en-us/azure/azure-monitor/app/app-insights-overview"
+    },
+    "AzurePipelines": {
+      "type": "parameter",
+      "datatype": "bool",
+      "displayName": "CI: Azure Pipelines",
+      "description": "Include an azure-pipelines.yml build template. For deployments, a release pipeline is recommended (which don't support YAML config files).",
+      "$coalesceLink": "https://learn.microsoft.com/en-us/azure/devops/pipelines/create-first-pipeline?view=azure-devops&tabs=net%2Cbrowser"
     }
   },
   "sources": [
@@ -157,6 +164,10 @@
         {
           "condition": "!ExampleModel",
           "exclude": ["**/WidgetEdit.vue", "**/WidgetEdit.spec.ts"]
+        },
+        {
+          "condition": "!AzurePipelines",
+          "exclude": ["**/azure-pipelines.yml"]
         }
       ]
     }

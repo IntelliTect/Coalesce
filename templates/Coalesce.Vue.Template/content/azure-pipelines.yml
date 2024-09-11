@@ -1,0 +1,85 @@
+trigger:
+  - main
+
+pool:
+  vmImage: "ubuntu-latest"
+
+variables:
+  webDir: $(Build.Repository.LocalPath)/Coalesce.Starter.Vue.Web
+
+steps:
+  - checkout: self
+    lfs: true
+
+  - task: UseDotNet@2
+    inputs:
+      packageType: "sdk"
+      version: "8.x"
+      includePreviewVersions: true
+      performMultiLevelLookup: true
+
+  - task: UseNode@1
+    inputs:
+      version: "22.x"
+
+  - task: Npm@1
+    displayName: npm ci
+    inputs:
+      command: "ci"
+      workingDir: $(webDir)
+
+  - task: DotNetCoreCLI@2
+    inputs:
+      command: "restore"
+      projects: "**/*.sln"
+    displayName: Restore Nuget packages
+
+  - task: PowerShell@2
+    inputs:
+      targetType: "inline"
+      script: |
+        dotnet coalesce --what-if --verify
+      failOnStderr: true
+      workingDirectory: "$(webDir)"
+    displayName: Check Coalesce has run
+
+  - task: Npm@1
+    displayName: npm run lint
+    inputs:
+      command: "custom"
+      workingDir: $(webDir)
+      customCommand: "run lint"
+
+  - task: Npm@1
+    displayName: npm run build
+    inputs:
+      command: "custom"
+      workingDir: $(webDir)
+      customCommand: "run build"
+
+  - task: DotNetCoreCLI@2
+    displayName: dotnet build
+    inputs:
+      command: "build"
+      projects: "**/*.sln"
+      arguments: "--configuration Release --no-restore --no-incremental -p:CodeAnalysisTreatWarningsAsErrors=true -p:TreatWarningsAsErrors=true"
+
+  - task: DotNetCoreCLI@2
+    displayName: dotnet test
+    inputs:
+      command: "test"
+      projects: "**/*.sln"
+      arguments: "--no-build --configuration Release"
+
+  - task: DotNetCoreCLI@2
+    displayName: dotnet publish
+    inputs:
+      command: "publish"
+      publishWebProjects: true
+      arguments: --no-build --configuration Release -o $(Build.ArtifactStagingDirectory)
+
+  - task: PublishBuildArtifacts@1
+    inputs:
+      PathtoPublish: "$(Build.ArtifactStagingDirectory)"
+      ArtifactName: "drop"
+      publishLocation: "Container"

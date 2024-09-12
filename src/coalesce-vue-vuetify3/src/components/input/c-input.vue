@@ -259,7 +259,7 @@ function render() {
               onInput(valueOrEvent.target.value);
             }
           } else {
-            onInput(value);
+            onInput(valueOrEvent);
           }
         });
       } else {
@@ -324,17 +324,9 @@ function render() {
       return h(VSelect, data, vuetifySlots);
 
     case "file":
-      // v-file-input uses 'change' as its event, not 'input'.
-
-      // In Vuetify3, VFileInput ONLY takes an array, even for single file selection.
-      // It also explodes on null/undefined.
-      const value = data.modelValue;
-      if (!Array.isArray(value)) {
-        data.modelValue = [];
-        if (value) data.modelValue.push(value);
-      }
-
-      // Unwrap array on input
+      // Unwrap array on input. Vuetify used to not do this, and then they made a breaking change.
+      // https://github.com/vuetifyjs/vuetify/commit/581bbbcab572074ab090b244d54a34c062404992
+      // This wrapper maintains compatibility before and after this breaking change.
       const updateHandler: VFileInput["$props"]["onUpdate:modelValue"] = (
         value
       ) => onInput(Array.isArray(value) ? value[0] : value);

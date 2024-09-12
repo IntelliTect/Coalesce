@@ -171,25 +171,27 @@
                 >
                   <slot name="row-detail" :item="auditLog">
                     <table>
-                      <tr class="prop-state">
-                        <td>Change:</td>
-                        <td><c-display :model="auditLog" for="state" /></td>
-                      </tr>
-                      <tr
-                        v-for="propMeta in otherProps"
-                        :key="auditLog.id! + '-prop-' + propMeta.name!"
-                        :class="'prop-' + propMeta.name"
-                      >
-                        <td>{{ propMeta.displayName }}:</td>
-                        <td>
-                          <c-display
-                            :model="auditLog"
-                            :for="propMeta"
-                            class="text-grey"
-                          />
-                        </td>
-                      </tr>
-                      <slot name="row-detail-append" :item="auditLog" />
+                      <tbody>
+                        <tr class="prop-state">
+                          <td>Change:</td>
+                          <td><c-display :model="auditLog" for="state" /></td>
+                        </tr>
+                        <tr
+                          v-for="propMeta in otherProps"
+                          :key="auditLog.id! + '-prop-' + propMeta.name!"
+                          :class="'prop-' + propMeta.name"
+                        >
+                          <td>{{ propMeta.displayName }}:</td>
+                          <td>
+                            <c-display
+                              :model="auditLog"
+                              :for="propMeta"
+                              class="text-grey"
+                            />
+                          </td>
+                        </tr>
+                        <slot name="row-detail-append" :item="auditLog" />
+                      </tbody>
                     </table>
                   </slot>
                 </td>

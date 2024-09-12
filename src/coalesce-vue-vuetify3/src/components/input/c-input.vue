@@ -333,10 +333,12 @@ function render() {
         data.modelValue = [];
         if (value) data.modelValue.push(value);
       }
+
       // Unwrap array on input
-      addHandler(data, "update:modelValue", (value: any[]) =>
-        onInput(value[0])
-      );
+      const updateHandler: VFileInput["$props"]["onUpdate:modelValue"] = (
+        value
+      ) => onInput(Array.isArray(value) ? value[0] : value);
+      addHandler(data, "update:modelValue", updateHandler);
 
       return h(VFileInput, data, vuetifySlots);
 

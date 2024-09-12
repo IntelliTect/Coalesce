@@ -39,7 +39,7 @@ Outputs the Project Information needed for CodeGeneration to a file.
     <WriteLinesToFile Encoding="Unicode" File="$(OutputFile)" Lines="{" Overwrite="true"/>
     
     <WriteLinesToFile Encoding="Unicode" File="$(OutputFile)" Lines="DependenciesDesignTime: ["/>
-      <WriteLinesToFile Encoding="Unicode" File="$(OutputFile)" Lines="@(_DependenciesDesignTime->'{Path: %22%(Identity)%22, Name: %22%(Name)%22, Type: %22%(Type)%22, Target: %22%(Target)%22, Version: %22%(Version)%22, Resolved:%22%(Resolved)%22, Dependencies:%22%(Dependencies)%22 }, ')" />
+      <WriteLinesToFile Encoding="Unicode" File="$(OutputFile)" Lines="@(_PackageDependenciesDesignTime->'{Path: %22%(Identity)%22, Name: %22%(Name)%22, Type: %22%(Type)%22, Target: %22%(Target)%22, Version: %22%(Version)%22, Resolved:%22%(Resolved)%22, Dependencies:%22%(Dependencies)%22 }, ')" />
     <WriteLinesToFile Encoding="Unicode" File="$(OutputFile)" Lines="],"/>
 
 	  <ItemGroup>

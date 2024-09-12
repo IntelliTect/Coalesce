@@ -60,8 +60,16 @@ namespace IntelliTect.Coalesce.CodeGeneration.Utilities
                     Console.Write($"{ApplicationTimer.Stopwatch.ElapsedMilliseconds / 1000d:0.000}");
                     Console.ForegroundColor = ConsoleColor.DarkGray;
                     Console.Write("] ");
-                    Console.ResetColor();
+                    if (logLevel == LogLevel.Information)
+                    {
+                        Console.ResetColor();
+                    }
+                    else
+                    {
+                        Console.ForegroundColor = colorLevelMap[logLevel];
+                    }
                     Console.WriteLine(formatter(state, exception));
+                    Console.ResetColor();
                     Console.Out.Flush();
                 }
             }

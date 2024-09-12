@@ -1,23 +1,19 @@
 ﻿using IntelliTect.Coalesce.CodeGeneration.Analysis;
 using IntelliTect.Coalesce.CodeGeneration.Analysis.Base;
-using IntelliTect.Coalesce.CodeGeneration.Analysis.MsBuild;
 using IntelliTect.Coalesce.CodeGeneration.Analysis.Roslyn;
 using IntelliTect.Coalesce.CodeGeneration.Configuration;
 using IntelliTect.Coalesce.CodeGeneration.Templating.Resolution;
 using IntelliTect.Coalesce.CodeGeneration.Utilities;
 using IntelliTect.Coalesce.TypeDefinition;
 using IntelliTect.Coalesce.Validation;
-using Microsoft.DotNet.Cli.Utils;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Generation
@@ -42,6 +38,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
             services.AddSingleton<GeneratorServices>();
             services.AddSingleton<CompositeGeneratorServices>();
             services.AddSingleton<GenerationContext>();
+            services.AddSingleton<NpmDependencyAnalayzer>();
             services.AddTransient<IProjectContextFactory, RoslynProjectContextFactory>();
             ServiceProvider = services.BuildServiceProvider();
         }
@@ -93,6 +90,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
             await LoadProjects(Logger, genContext);
 
             var locator = genContext.DataProject.TypeLocator as RoslynTypeLocator;
+            var npmPackageVersionTask = ServiceProvider.GetRequiredService<NpmDependencyAnalayzer>().GetNpmPackageVersion("coalesce-vue");
 
             Logger.LogInformation("Gathering Types");
             var types = locator.GetAllTypes();
@@ -155,6 +153,23 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
 
             Logger.LogInformation("Generation Complete");
 
+
+            var generatorVersion = GetCodeGenVersion();
+            var npmPackageVersion = await npmPackageVersionTask;
+            if (npmPackageVersion is not null && npmPackageVersion != generatorVersion)
+            {
+                Logger.LogWarning($"Running Coalesce CLI {generatorVersion}, but NPM package `coalesce-vue` version is {npmPackageVersion}");
+            }
+        }
+
+        private string GetCodeGenVersion()
+        {
+            var generatorAssembly = Assembly.GetEntryAssembly();
+            return FileVersionInfo
+                .GetVersionInfo(generatorAssembly.Location)
+                .ProductVersion
+                // SourceLink will append the commit hash to the version, using '+' as a delimiter.
+                .Split('+').First();
         }
 
         private async Task LoadProjects(ILogger<GenerationExecutor> logger, GenerationContext genContext)
@@ -196,12 +211,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
                                 .GroupBy(r => new { r.Name, r.Version }).Select(g => g.First())
                                 .ToList();
 
-                            var generationVersion = FileVersionInfo
-                                .GetVersionInfo(Assembly.GetExecutingAssembly().Location)
-                                .ProductVersion
-                                // SourceLink will append the commit hash to the version, using '+' as a delimiter.
-                                .Split('+').First();
-
+                            var generationVersion = GetCodeGenVersion();
                             foreach (var coalescePkg in coalescePackages)
                             {
                                 if (coalescePkg.Version != generationVersion)

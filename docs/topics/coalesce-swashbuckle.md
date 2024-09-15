@@ -19,7 +19,7 @@ Add a reference to the `IntelliTect.Coalesce.Swashbuckle` NuGet package to your 
 
 ### Configure OpenAPI in Program.cs
 
-Update your Program.cs file to configure OpenAPI and include Coalesce-specific enhancements. This involves [setting up OpenAPI as usual](https://learn.microsoft.com/en-us/aspnet/core/tutorials/getting-started-with-swashbuckle?view=aspnetcore-8.0&tabs=visual-studio) and then applying the Coalesce configuration (Note: You do not need to install the `Swashbuckle.AspNetCore` package if you are using the coalesce one).
+Update your Program.cs file to configure OpenAPI and include Coalesce-specific enhancements. This involves [setting up OpenAPI as usual](https://learn.microsoft.com/en-us/aspnet/core/tutorials/getting-started-with-swashbuckle?view=aspnetcore-8.0&tabs=visual-studio) and then applying the Coalesce configuration (Note: You do not need to install the `Swashbuckle.AspNetCore` package if you are using the Coalesce one).
 
 ```c#:no-line-numbers
 builder.Services.AddSwaggerGen(config =>

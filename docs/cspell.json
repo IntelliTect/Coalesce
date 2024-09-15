@@ -35,12 +35,15 @@
         "autosaving",
         "dontSerialize",
         "overridable",
+        "discoverability",
 
         "netcoreapp",
         "netstandard",
         "mkdir",
         "wwwroot",
         "webp",
+        "Swashbuckle",
+        "swashbuckle"
     ],
     "ignorePaths": [
         "node_modules"

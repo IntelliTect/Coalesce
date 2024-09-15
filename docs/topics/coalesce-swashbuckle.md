@@ -67,7 +67,7 @@ public class Patient
         // ...
     }
 
-    public class PatientsWithUpcommingAppoitmentsDataSource(CrudContext<AppDbContext> context) : StandardDataSource<Patient, AppDbContext>(context)
+    public class PatientsWithUpcomingAppointmentsDataSource(CrudContext<AppDbContext> context) : StandardDataSource<Patient, AppDbContext>(context)
     {
         [Coalesce]
         public int MonthsOut { get; set; }

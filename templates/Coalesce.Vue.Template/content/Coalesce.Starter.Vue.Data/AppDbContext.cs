@@ -80,7 +80,7 @@ public class AppDbContext
 	}
 #endif
 
-	protected override void OnModelCreating(ModelBuilder builder)
+    protected override void OnModelCreating(ModelBuilder builder)
 	{
 		base.OnModelCreating(builder);
 
@@ -107,6 +107,11 @@ public class AppDbContext
 				.IsRequired()
 				.OnDelete(DeleteBehavior.Cascade);
 		});
+
+        builder.Entity<Role>(e =>
+        {
+            e.PrimitiveCollection(e => e.Permissions).ElementType().HasConversion<string>();
+        });
 #endif
 	}
 }

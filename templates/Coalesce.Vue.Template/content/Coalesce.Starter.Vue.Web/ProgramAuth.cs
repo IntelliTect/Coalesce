@@ -91,7 +91,7 @@ public static class ProgramAuth
     }
 
 #if UserPictures
-    private static async Task UpdateUserPhoto(User user, AppDbContext db, HttpClient client, Func<HttpRequestMessage> buildRequest)
+    private static async Task UpdateUserPhoto(User user, AppDbContext db, HttpClient client, Func<HttpRequestMessage> requestFactory)
     {
         UserPhoto? photo = user.Photo = db.UserPhotos.Where(p => p.UserId == user.Id).FirstOrDefault();
         if (photo is not null && photo.ModifiedOn >= DateTimeOffset.Now.AddDays(-7))
@@ -100,7 +100,7 @@ public static class ProgramAuth
             return;
         }
 
-        var request = buildRequest();
+        var request = requestFactory();
 
         if (request.RequestUri is null) return;
 
@@ -148,6 +148,7 @@ public static class ProgramAuth
 
         await signInManager.UserManager.UpdateAsync(user);
 
+        // ExternalLoginSignInAsync checks that the user isn't locked out.
         var result = await signInManager.ExternalLoginSignInAsync(
             remoteLoginInfo.LoginProvider, 
             remoteLoginInfo.ProviderKey, 
@@ -190,6 +191,8 @@ public static class ProgramAuth
         else if (remoteUserEmail is not null)
         {
             user = await signInManager.UserManager.FindByEmailAsync(remoteUserEmail);
+            // Don't match existing users by email if the email isn't confirmed.
+            if (user?.EmailConfirmed == false) user = null;
         }
 
         if (user is null)
@@ -201,7 +204,7 @@ public static class ProgramAuth
 
             user = new User { UserName = remoteUserEmail };
 
-            // If this user is the first user, give them all roles so the system has an admin.
+            // If this user is the first user, give them all roles so there is an initial admin.
             if (!db.Users.Any())
             {
                 user.UserRoles = db.Roles.Select(r => new UserRole { Role = r, User = user }).ToList();

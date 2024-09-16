@@ -1,3 +1,7 @@
+---
+title: "Config: Code Gen"
+---
+
 
 # Code Generation Configuration
 

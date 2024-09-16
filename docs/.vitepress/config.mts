@@ -193,15 +193,17 @@ export default defineConfig({
       {
         text: "Topics",
         items: [
-          { text: "Config: ASP.NET Core", link: "/topics/startup" },
-          autoTitle("/topics/audit-logging"),
-          { text: "Config: Code Gen", link: "/topics/coalesce-json" },
-          autoTitle("/topics/immutability"),
           autoTitle("/concepts/include-tree"),
           autoTitle("/concepts/includes"),
-          autoTitle("/topics/upgrading"),
 
-          { text: "Vue 2 to Vue 3", link: "/stacks/vue/vue2-to-vue3" },
+          autoTitle("/topics/coalesce-json"),
+          autoTitle("/topics/immutability"),
+          autoTitle("/topics/startup"),
+          autoTitle("/topics/audit-logging"),
+          autoTitle("/topics/upgrading"),
+          autoTitle("/topics/coalesce-swashbuckle"),
+
+          autoTitle("/stacks/vue/vue2-to-vue3"),
           {
             text: "Generated Code",
             link: "/stacks/agnostic/generation",

@@ -1,3 +1,7 @@
+---
+title: "Config: ASP.NET Core"
+---
+
 # Application Configuration
 
 

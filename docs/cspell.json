@@ -18,6 +18,8 @@
         "IntelliTect",
         "mkdir",
         "nameof",
+        "overridable",
+        "discoverability",
         "netcoreapp",
         "netstandard",
         "overridable",
@@ -37,7 +39,9 @@
         "Vitest",
         "Vuetify",
         "webp",
-        "wwwroot"
+        "wwwroot",
+        "Swashbuckle",
+        "swashbuckle"
     ],
     "ignorePaths": [
         "node_modules"

@@ -2,6 +2,8 @@
 
 [Documentation](https://intellitect.github.io/Coalesce) &middot; [Get Started](#Get-Started) &middot; [Builds](#Builds)
 
+Check out [The Coalesce Podcast](https://www.youtube.com/playlist?list=PLRjft3wXvK_srWUHS4w_lVrIfB4uNqfSD) for some step-by-step tutorials about Coalesce features.
+
 Coalesce is a framework for rapid-development of ASP.NET Core + Vue.js web applications. It works from the Entity Framework Core data model that you design, automating the creation of the glue - DTOs, API Controllers, and TypeScript - that sit between your data and the UI of your application. 
 
 ## Fundamentals

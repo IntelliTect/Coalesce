@@ -4,3 +4,4 @@ github.com/intellitect/coalesce/edit
 https://www.npmjs.com/package
 https://github.com/IntelliTect/Coalesce
 https://intellitect.com
+https://www.intellitect.com

@@ -1,5 +1,4 @@
-﻿using IntelliTect.Coalesce.Helpers;
-using IntelliTect.Coalesce.TypeDefinition;
+﻿using IntelliTect.Coalesce.TypeDefinition;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,7 +9,7 @@ namespace IntelliTect.Coalesce.DataAnnotations
     public abstract class SecurityAttribute : Attribute
 #pragma warning restore RCS1203 // Use AttributeUsageAttribute.
     {
-        public virtual SecurityPermissionLevels PermissionLevel { get; set; } = SecurityPermissionLevels.AllowAuthorized;
+        public virtual SecurityPermissionLevels PermissionLevel { get; set; } = SecurityPermissionLevels.AllowAuthenticated;
 
         public string Roles { get; set; } = "";
     }
@@ -26,7 +25,7 @@ namespace IntelliTect.Coalesce.DataAnnotations
                 return new SecurityPermission(name);
             }
 
-            var level = parent.GetAttributeValue<TAttribute, SecurityPermissionLevels>(a => a.PermissionLevel) ?? SecurityPermissionLevels.AllowAuthorized;
+            var level = parent.GetAttributeValue<TAttribute, SecurityPermissionLevels>(a => a.PermissionLevel) ?? SecurityPermissionLevels.AllowAuthenticated;
             object attributeRoles = parent.GetAttributeValue<TAttribute>(nameof(SecurityAttribute.Roles)) ?? "";
 
             // This will happen in roslyn-based contexts due to us also accepting string arrays for the roles.
@@ -41,7 +40,7 @@ namespace IntelliTect.Coalesce.DataAnnotations
             }
 
             return new SecurityPermission(
-                level: parent.GetAttributeValue<TAttribute, SecurityPermissionLevels>(a => a.PermissionLevel) ?? SecurityPermissionLevels.AllowAuthorized,
+                level: parent.GetAttributeValue<TAttribute, SecurityPermissionLevels>(a => a.PermissionLevel) ?? SecurityPermissionLevels.AllowAuthenticated,
                 roles: rolesString,
                 name: name
             );
@@ -50,8 +49,22 @@ namespace IntelliTect.Coalesce.DataAnnotations
 
     public enum SecurityPermissionLevels
     {
+        /// <summary>
+        /// Allow all users, including anonymous, unauthenticated users.
+        /// </summary>
         AllowAll = 1,
-        AllowAuthorized = 2,
-        DenyAll = 3
+
+        /// <summary>
+        /// Allow only authenticated users. This can be further restricted by specifying one or more allowed roles on the attribute.
+        /// </summary>
+        AllowAuthenticated = 2,
+
+        /// <summary>
+        /// Disable the action/endpoint. Where applicable, generated code for the endpoint will be omitted entirely.
+        /// </summary>
+        DenyAll = 3,
+
+        [Obsolete("Renamed to AllowAuthenticated")]
+        AllowAuthorized = AllowAuthenticated,
     }
 }

@@ -31,7 +31,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         }
 
         public bool HasAttribute { get; }
-        public SecurityPermissionLevels PermissionLevel { get; } = SecurityPermissionLevels.AllowAuthorized;
+        public SecurityPermissionLevels PermissionLevel { get; } = SecurityPermissionLevels.AllowAuthenticated;
 
         public bool AllowAnonymous => PermissionLevel == SecurityPermissionLevels.AllowAll;
 

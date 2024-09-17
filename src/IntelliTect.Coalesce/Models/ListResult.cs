@@ -1,32 +1,23 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace IntelliTect.Coalesce.Models
 {
-    public interface IListResult : IApiResult
-    {
-        int Page { get; }
-        int PageSize { get; }
-        int PageCount { get; }
-        int TotalCount { get; }
-    }
-
-    public class ListResult<T> : ApiResult, IListResult
+    public abstract class ListResult : ApiResult
     {
         public int Page { get; set; }
+
         public int PageSize { get; set; }
-        public int PageCount => 
-            TotalCount == -1 ? -1 
-            : PageSize == 0 ? 0 
+
+        public int PageCount =>
+            TotalCount == -1 ? -1
+            : PageSize == 0 ? 0
             : (TotalCount + PageSize - 1) / PageSize;
 
         public int TotalCount { get; set; }
 
-        public IList<T>? List { get; set; }
-        
-        public ListResult(): base() { }
+        public ListResult() { }
 
         public ListResult(bool wasSuccessful, string? message = null) : base(wasSuccessful, message) { }
 
@@ -34,8 +25,30 @@ namespace IntelliTect.Coalesce.Models
 
         public ListResult(ApiResult result) : base(result) { }
 
-        public ListResult(IListResult result, IList<T>? items = null)
-            : this(items, page: result.Page, totalCount: result.TotalCount, pageSize: result.PageSize, wasSuccessful: result.WasSuccessful, message: result.Message) { }
+        public ListResult(ListResult result) : base(result)
+        {
+            Page = result.Page;
+            TotalCount = result.TotalCount;
+            PageSize = result.PageSize;
+        }
+    }
+
+    public class ListResult<T> : ListResult
+    {
+        public IList<T>? List { get; set; }
+        
+        public ListResult() { }
+
+        public ListResult(bool wasSuccessful, string? message = null) : base(wasSuccessful, message) { }
+
+        public ListResult(string errorMessage) : base(errorMessage) { }
+
+        public ListResult(ApiResult result) : base(result) { }
+
+        public ListResult(ListResult result, IList<T>? items = null) : base(result)
+        {
+            List = items;
+        }
 
         public ListResult(IList<T>? items, int page, int totalCount, int pageSize, bool wasSuccessful = true, string? message = null)
         {

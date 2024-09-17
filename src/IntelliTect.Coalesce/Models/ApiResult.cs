@@ -1,14 +1,6 @@
-﻿using System;
-
-namespace IntelliTect.Coalesce.Models
+﻿namespace IntelliTect.Coalesce.Models
 {
-    public interface IApiResult
-    {
-        bool WasSuccessful { get; }
-        string? Message { get; }
-    }
-
-    public class ApiResult : IApiResult
+    public class ApiResult
     {
         public bool WasSuccessful { get; set; } = true;
 

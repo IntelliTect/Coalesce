@@ -2,35 +2,36 @@
 
 ## Breaking Changes
 
-- Removed support for Knockout.js
+- Support for Knockout.js, previously deprecated, has been fully removed.
 - Drop all .NET targets except .NET 8
 
 ### Breaking: Backend/C#
 
-- Removed automatic `DbContext.SaveChanges()` call from model instance method invocations. Model instance methods that intend to save their changes to the database now must inject a `DbContext` and perform this save explicitly. (#405)
+- Removed automatic `DbContext.SaveChanges()` call from model instance method API endpoints. Model instance methods that intend to save any changes to the database now must inject a `DbContext` and perform this save explicitly. (#405)
 - ASP.NET `ModelState` validation is now always performed against all inputs to all endpoints.
-- `ClaimsPrincipalExtensions` has been removed. Claim names/types can vary significantly depending on the authentication schemes used within a project, so these are best left defined on a per-project basis.
+- `ClaimsPrincipalExtensions` has been removed. Claim names/types can vary significantly depending on the authentication schemes used within a project, so these are best left defined on a per-project basis. Replacements are present in the new Coalesce project template.
 - `IDataSource.GetItemAsync` and `IDataSource.GetListAsync` no longer return tuples. The IncludeTree return from these methods is now attached to the ItemResult/ListResult.
 - `StandardBehaviors.AfterSave` is now `AfterSaveAsync` and has a different signature and semantics. Instead of modifying the resulting `item` and `includeTree` with `ref` parameters, these values can be optionally overridden by returning an ItemResult with its `Object` and `IncludeTree` properties populated with non-null values.
 - Generated DTOs now generate separate Parameter DTOs (for inputs) and Response DTOs (for outputs). This results in much cleaner and more accurate OpenAPI definitions.
 - `IntelliTect.Coalesce.AuditLogging` no longer utilizes `Z.EntityFramework.Plus` - the internal implementation is now purpose-built for Coalesce's needs. Most of the configuration options that were useful to Coalesce applications have been preserved with the same API.
-- Audit logging by default now only merges changes when all changes are to non-discrete properties. For all other changes, new records are inserted every time. A string is an example of a non-discrete property, while a foreign key is an example of a discrete property.
+- Audit logging by default now only merges changes when all changes are to non-discrete properties. For all other changes, new records are inserted every time. A plain string is an example of a non-discrete property, while a foreign key is an example of a discrete property.
+- `ListResult<T>` constructors have been adjusted to prevent incorrect overload resolution when cloning ListResult objects. The `IListResult` and `IApiResult` interfaces has been removed and replace with a non-generic `ListResult` abstract base class. (#445)
 
 ### Breaking: Frontend/Typescript
 
-- Many dependencies bumped to their latest versions, including `vue`, `vue-router`, `vuetify`, `typescript` (5.5+), `date-fns`, and more.
+- Many dependency minimum versions increased, including `vue`, `vue-router`, `vuetify`, `typescript` (5.5+), `date-fns`, and more.
 - `bindToQueryString`: some parameters were converted to an options object, overloads added for easier binding to a `ref` (#396)
 - API callers (e.g. `ViewModel.$save`) now directly return the inner data from their response ListResult/ItemResult instead of returning the outer axios response. The raw response of the previous request is now available on `.rawResponse`.
-- The content disposition of file downloads defaults "inline" instead of "attachment". This allows files to be opened for display in a browser tab. Forced downloads can still be achieved by placing the `download` attribute on the HTML `a` tag that links to the endpoint's URL, or by setting `ForceDownload` on the `File` object instantiated in your C# method.
+- The content disposition of file downloads defaults to "inline" instead of "attachment". This allows files to be opened for display in a browser tab. Forced downloads can still be achieved by placing the `download` attribute on the HTML `a` tag that links to the endpoint's URL, or by setting `ForceDownload` on the `File` object instantiated in your C# method.
 - `FilterParameters.filter` is always initialized to an empty object to make binding easier (no need to manually initialize it and sprinkle your code with null forgiveness operators).
 
 ## Deprecations
 
-- Support for Vue 2 is officially deprecated. `coalesce-vue-vuetify2` will receive critical bugfixes, but will no longer receive new features that Vue 3 receives.
+- Support for Vue 2 is officially deprecated. `coalesce-vue-vuetify2` will receive critical bugfixes, but will no longer receive new features that Vue 3 receives. If your application is still on Vue 2, you should [migrate ASAP](https://intellitect.github.io/Coalesce/stacks/vue/vue2-to-vue3.html).
 - `ControllerActionAttribute` has been merged into `ExecuteAttribute`.
 - `LoadFromDataSourceAttribute` has been merged into `ExecuteAttribute`.
 - `CreateControllerAttribute` deprecated in favor of using either `[InternalUse]` or `[Create]`/`[Read]`/`[Edit]`/`[Delete]` to preclude the API endpoints of types.
-- TypeScript API clients - `withSimultaneousRequestCaching` renamed to `useSimultaneousRequestCaching`.
+- TypeScript API clients: `withSimultaneousRequestCaching` renamed to `useSimultaneousRequestCaching`.
 - `SecurityPermissionLevels.AllowAuthorized` has been renamed to `SecurityPermissionLevels.AllowAuthenticated` (this enum is used by security attributes).
 - `ControllerAttribute` is deprecated.
 
@@ -85,6 +86,10 @@
 - Vite-plugin: handle invalid local cert files
 - Vite-plugin: handle nested `public` folder structures
 - Remove opening delay when clicking a c-select.
+
+---
+
+Notice: Coalesce versions prior to v5 did not use a typical release cadence. The changes for these versions have been broken down by month, up through April 2023.
 
 # 4.0.0 2024-07
 

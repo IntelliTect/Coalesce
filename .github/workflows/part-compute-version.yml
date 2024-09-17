@@ -43,8 +43,11 @@ jobs:
         $revRequestUrl = "$apiBaseUrl/workflows/$workflowId/runs?created=$($createdAtPST.ToString($dateFormat))..$($createdAtPST.AddDays(1).ToString($dateFormat))";
         $rev = curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" $revRequestUrl | jq .total_count;
 
-        $path = "version.txt";
-        $version = "$((cat $path).Trim())"
+        # Current version number is sourced from the top of CHANGELOG.md
+        $version = Get-Content -Path CHANGELOG.md -TotalCount 1
+
+        $version = $version.Trim('#').Trim()
+
         $date = $createdAtPST.ToString("yyyyMMdd")
         $prereleaseSlug = "${{ inputs.prereleaseSlug }}"
         echo "Version from $($path): $version";

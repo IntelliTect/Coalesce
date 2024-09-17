@@ -5,6 +5,7 @@ using Microsoft.ApplicationInsights.AspNetCore;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.Web;
 
 namespace Coalesce.Starter.Vue.Web.Controllers;
 
@@ -36,23 +37,30 @@ public class HomeController(
         using var reader = new StreamReader(fileInfo.CreateReadStream());
         string contents = await reader.ReadToEndAsync();
 
-        contents = contents.Replace("<head>", "<head>"
-#if AppInsights
-            + appInsightsSnippet.FullScript
-            // Remove the automatic trackPageView event that is fired on load.
-            // We fire our own page tracking events in router.ts to get better data.
-            + "<script>window.appInsights.queue.pop()</script>"
+        // OPTIONAL: Inject settings or other variables into index.html here.
+        // These will then be available as global variables in your Vue app:
+        string headPrepend = $"""
+        <script>
+            ASPNETCORE_ENVIRONMENT="{JsEncode(hostingEnvironment.EnvironmentName)}"
+        </script>
+        """;
 
+#if AppInsights
+        if (appInsightsSnippet.FullScript.Length > 0)
+        {
+            headPrepend +=
+                appInsightsSnippet.FullScript
+                // Remove the automatic trackPageView event that is fired on load.
+                // We fire our own page tracking events in router.ts to get better data.
+                + "<script>window.appInsights.queue.pop()</script>";
+        }
 #endif
-            // OPTIONAL: Inject settings or other variables into index.html here.
-            // These will then be available as global variables in your Vue app:
-            + $"""
-            <script>
-                ASPNETCORE_ENVIRONMENT="{hostingEnvironment.EnvironmentName}"
-            </script>
-            """);
+
+        contents = contents.Replace("<head>", "<head>" + headPrepend);
 
         return Content(contents, "text/html");
+
+        static string JsEncode(string s) => HttpUtility.JavaScriptStringEncode(s);
     }
 
 #if Identity

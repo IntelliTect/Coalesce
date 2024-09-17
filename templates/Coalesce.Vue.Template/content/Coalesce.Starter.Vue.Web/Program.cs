@@ -41,7 +41,10 @@ builder.Configuration
 var services = builder.Services;
 
 #if AppInsights
-services.AddApplicationInsightsTelemetry();
+services.AddApplicationInsightsTelemetry(b =>
+{
+    b.ConnectionString = builder.Configuration["ApplicationInsights:ConnectionString"];
+});
 services.AddSingleton<ITelemetryInitializer, AppInsightsTelemetryEnricher>();
 services.ConfigureTelemetryModule<DependencyTrackingTelemetryModule>((module, o) => {
 	module.EnableSqlCommandTextInstrumentation = true;

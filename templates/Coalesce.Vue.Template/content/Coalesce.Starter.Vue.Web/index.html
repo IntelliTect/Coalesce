@@ -22,7 +22,10 @@
           (localStorage.getItem("theme") == null &&
             window.matchMedia("(prefers-color-scheme: dark)").matches)
         ) {
-          document.write(`<style> :root { color-scheme: dark; } </style>`);
+          document.currentScript.insertAdjacentHTML(
+            "afterend",
+            `<style> :root { color-scheme: dark; } </style>`
+          );
         }
       </script>
       <style>

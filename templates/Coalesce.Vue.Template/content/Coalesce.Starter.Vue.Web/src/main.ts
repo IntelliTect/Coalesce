@@ -75,6 +75,23 @@ const coalesceVuetify = createCoalesceVuetify({
   metadata: $metadata,
 });
 
+//#if AppInsights
+// SETUP: app insights
+//@ts-expect-error AppInsights imported from backend JavaScriptSnippet; no types available.
+window.appInsights?.addTelemetryInitializer(function (envelope) {
+  debugger;
+  if (
+    envelope.baseType === "ExceptionData" &&
+    // Filter out unactionable, junk errors:
+    envelope.data?.message?.includes(
+      "ResizeObserver loop completed with undelivered notifications",
+    )
+  ) {
+    return false;
+  }
+});
+//#endif
+
 const app = createApp(App);
 Object.defineProperties(
   app.config.globalProperties,

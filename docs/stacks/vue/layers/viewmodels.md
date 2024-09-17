@@ -422,14 +422,19 @@ Starts auto-loading of the list as changes to its parameters occur. Loads are pe
 ``` ts
 type AutoLoadOptions<TThis> =
 { 
-    /** Time, in milliseconds, to debounce loads for.  */
-    wait?: number;
+  /** Time, in milliseconds, to debounce loads for.  */
+  wait?: number;
 
-    /** Additional options to pass to the third parameter of lodash's `debounce` function. */
-    debounce?: DebounceSettings;
+  /** Additional options to pass to the third parameter of lodash's `debounce` function. */
+  debounce?: DebounceSettings;
 
-    /** A function that will be called before loading that can return false to prevent a load. */
-    predicate?: (viewModel: TThis) => boolean;
+  /** A function that will be called before loading that can return false to prevent a load. */
+  predicate?: (viewModel: TThis) => boolean;
+
+  /** If true, an immediate initial load of the list will be performed. 
+   * Otherwise, the initial auto-load of the list won't occur until 
+   * the first change to its parameters occur. */
+  immediate?: boolean;
 }
 ```
 

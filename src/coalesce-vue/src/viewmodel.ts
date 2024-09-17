@@ -1627,6 +1627,11 @@ export abstract class ListViewModel<
       onChange
     );
     startAutoCall(this._autoLoadState, vue, watcher, enqueueLoad);
+
+    if (options.immediate) {
+      // Immediate load doesn't use `enqueueLoad` so that there's no delay.
+      this.$load();
+    }
   }
 
   /** Stops auto-loading if it is currently enabled. */
@@ -2034,6 +2039,9 @@ type DebounceOptions = {
 type AutoLoadOptions<TThis> = DebounceOptions & {
   /** A function that will be called before autoloading that can return false to prevent a load. */
   predicate?: (viewModel: TThis) => boolean;
+
+  /** If true, an immediate initial load of the list will be performed. Otherwise, the initial auto-load of the list won't occur until the first change to its parameters occur. */
+  immediate?: boolean;
 };
 
 type AutoSaveOptions<TThis> = DebounceOptions &

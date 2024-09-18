@@ -100,6 +100,13 @@ public class User : IdentityUser
         }
     }
 
+#if Tenancy
+    /// <summary>
+    /// The user is a global administrator, able to perform administrative actions against all tenants.
+    /// </summary>
+    public bool IsGlobalAdmin { get; set; }
+#endif
+
 #if UserPictures
     [Coalesce, Execute(HttpMethod = HttpMethod.Get, VaryByProperty = nameof(PhotoMD5))]
     public ItemResult<IFile> GetPhoto(AppDbContext db)

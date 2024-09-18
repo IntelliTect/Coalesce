@@ -1,6 +1,7 @@
 ﻿using Coalesce.Starter.Vue.Data.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
+using System.Security;
 
 namespace Coalesce.Starter.Vue.Data.Auth;
 
@@ -17,6 +18,18 @@ public class ClaimsPrincipalFactory(
 
         // Attach additional custom claims
         identity.AddClaim(new Claim(AppClaimTypes.FullName, user.FullName ?? ""));
+
+#if Tenancy
+        if (user.IsGlobalAdmin)
+        {
+            identity.AddClaim(new Claim(identity.RoleClaimType, AppClaimTypes.GlobalAdminRole));
+        }
+
+        // TODO: Validate that the user is still a member of the tenant.
+        // TODO: Allow pulling a new tenantID from the httpcontext Items
+        // for tenant switching
+        identity.AddClaim(new Claim(AppClaimTypes.TenantId, db.TenantIdOrThrow.ToString()));
+#endif
 
         // Store all the permissions in a dedicated identity
         // whose RoleClaimType is Permission so that they can still be treated like roles
@@ -35,6 +48,16 @@ public class ClaimsPrincipalFactory(
             Options.ClaimsIdentity.UserNameClaimType,
             AppClaimTypes.Permission);
 
-        return new ClaimsPrincipal([identity, permissionIdentity]);
+        ClaimsPrincipal result = new([identity, permissionIdentity]);
+
+#if Tenancy
+        if (!user.IsGlobalAdmin && result.IsInRole(AppClaimTypes.GlobalAdminRole))
+        {
+            // Safety/sanity check that the user hasn't been able to elevate to global admin
+            // by some unexpected claim or permission fulfilling the global admin role check:
+            throw new SecurityException($"User ${user.Id} unexpectly appears to be a global admin.");
+        }
+#endif
+        return result;
     }
 }

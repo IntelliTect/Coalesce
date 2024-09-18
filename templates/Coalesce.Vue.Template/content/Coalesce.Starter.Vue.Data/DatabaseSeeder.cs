@@ -1,13 +1,36 @@
-﻿namespace Coalesce.Starter.Vue.Data;
+﻿using Coalesce.Starter.Vue.Data.Models;
+
+namespace Coalesce.Starter.Vue.Data;
 
 public class DatabaseSeeder(AppDbContext db)
 {
     public void Seed()
     {
+#if Tenancy
+        // TODO: create initial tenant only if not externally sourced
+        if (!db.Tenants.Any())
+        {
+            var tenant = new Tenant { Name = "Demo Tenant" };
+            db.Add(tenant);
+            db.SaveChanges();
+
+            SeedTenant(tenant.TenantId);
+        }
+#elif Identity
+        SeedRoles();
+#endif
+    }
+
+#if Tenancy
+    public void SeedTenant(int tenantId)
+    {
+        db.TenantId = tenantId;
+
 #if Identity
         SeedRoles();
 #endif
     }
+#endif
 
 #if Identity
     private void SeedRoles()

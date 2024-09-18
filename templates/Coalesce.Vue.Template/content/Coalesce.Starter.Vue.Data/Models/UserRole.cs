@@ -7,6 +7,9 @@ namespace Coalesce.Starter.Vue.Data.Models;
 [Create(nameof(Permission.UserAdmin))]
 [Delete(nameof(Permission.UserAdmin))]
 public class UserRole : IdentityUserRole<string>
+#if Tenancy
+    , ITenanted
+#endif
 {
     // Fake PK for Coalesce since IdentityUserRole uses a composite PK.
     [NotMapped]
@@ -20,6 +23,14 @@ public class UserRole : IdentityUserRole<string>
             RoleId = split[1];
         }
     }
+
+#if Tenancy
+    [InternalUse]
+    [DefaultOrderBy(FieldOrder = 0)]
+    public int TenantId { get; set; }
+    [InternalUse]
+    public Tenant? Tenant { get; set; }
+#endif
 
     [DefaultOrderBy(FieldOrder = 0)]
     public User? User { get; set; }

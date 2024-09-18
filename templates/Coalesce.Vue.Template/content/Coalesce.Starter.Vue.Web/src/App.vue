@@ -62,11 +62,13 @@
     <v-navigation-drawer v-model="drawer">
       <v-list>
         <v-list-item to="/" prepend-icon="fas fa-home" title="Home" />
+        <!--#if ExampleModel -->
         <v-list-item
           to="/widget"
           prepend-icon="fas fa-palette"
           title="Custom Page Example"
         />
+        <!--#endif -->
         <v-list-item
           to="/admin"
           prepend-icon="fas fa-cogs"

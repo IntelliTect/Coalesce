@@ -7,6 +7,7 @@ global using System.ComponentModel.DataAnnotations;
 global using System.ComponentModel.DataAnnotations.Schema;
 global using static IntelliTect.Coalesce.DataAnnotations.SecurityPermissionLevels;
 global using System.Security.Claims;
+global using Coalesce.Starter.Vue.Data.Models;
 
 global using OrderByDirections = IntelliTect.Coalesce.DataAnnotations.DefaultOrderByAttribute.OrderByDirections;
 global using SearchMethods = IntelliTect.Coalesce.DataAnnotations.SearchAttribute.SearchMethods;

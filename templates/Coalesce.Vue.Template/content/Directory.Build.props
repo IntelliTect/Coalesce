@@ -8,10 +8,11 @@
     <TypeScriptCompileBlocked>true</TypeScriptCompileBlocked>
     <TypeScriptToolsVersion>5.5</TypeScriptToolsVersion>
 
-    <CoalesceVersion>5.0.0-ci.20240905.3</CoalesceVersion> 
+    <CoalesceVersion>5.0.0</CoalesceVersion> 
 
     <!--#if (KeepTemplateOnly) -->
-    <DefineConstants>KeepTemplateOnly;AppInsights;OpenAPI;Identity;MicrosoftAuth;GoogleAuth;AuditLogs;UserPictures;TrackingBase;ExampleModel</DefineConstants>
+    <DefineConstants>$(DefineConstants);KeepTemplateOnly;AppInsights;OpenAPI;Identity;MicrosoftAuth;GoogleAuth;AuditLogs;UserPictures;TrackingBase;ExampleModel</DefineConstants>
+    <DefineConstants>$(DefineConstants);Tenancy;TenantPerHostname;TenantCreateSelf;TenantCreateExternal;TenantCreateAdmin;TenantMemberInvites</DefineConstants>
     <!--#endif -->
   </PropertyGroup>
 </Project>

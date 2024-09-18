@@ -124,7 +124,8 @@
         {
           "condition": "!Identity",
           "exclude": [
-            "**/ProgramAuth.cs",
+            "**/AuthenticationConfiguration.cs",
+            "**/SignInService.cs",
             "**/Forbidden.vue",
             "**/UserAvatar.vue",
             "**/SignIn.cshtml",
@@ -135,6 +136,15 @@
             "**/User.cs",
             "**/UserRole.cs",
             "**/Role.cs"
+          ]
+        },
+        {
+          "condition": "!Tenancy",
+          "exclude": [
+            "**/Tenant.cs",
+            "**/TenantMembership.cs",
+            "**/ITenanted.cs",
+            "**/TenantedBase.cs"
           ]
         },
         {
@@ -163,7 +173,11 @@
         },
         {
           "condition": "!ExampleModel",
-          "exclude": ["**/WidgetEdit.vue", "**/WidgetEdit.spec.ts"]
+          "exclude": [
+            "**/WidgetEdit.vue",
+            "**/WidgetEdit.spec.ts",
+            "**/Widget.cs"
+          ]
         },
         {
           "condition": "!AzurePipelines",

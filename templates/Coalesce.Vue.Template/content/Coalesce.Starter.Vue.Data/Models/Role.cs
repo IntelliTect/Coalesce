@@ -8,9 +8,23 @@ namespace Coalesce.Starter.Vue.Data.Models;
 [Edit(nameof(Permission.UserAdmin))]
 [Delete(nameof(Permission.UserAdmin))]
 [Description("Roles are groups of permissions, analagous to job titles or functions.")]
-public class Role : IdentityRole
+public class Role
+#if Tenancy
+    : IdentityRole, ITenanted
+#else
+    : IdentityRole
+#endif
 {
-	[Required, Search(SearchMethod = SearchMethods.Contains)]
+#if Tenancy
+    [InternalUse]
+    [DefaultOrderBy(FieldOrder = 0)]
+    public int TenantId { get; set; }
+    [InternalUse]
+    [ForeignKey(nameof(TenantId))]
+    public Tenant? Tenant { get; set; }
+#endif
+
+    [Required, Search(SearchMethod = SearchMethods.Contains)]
 	public override string? Name { get; set; }
 
 	[InternalUse]
@@ -25,9 +39,35 @@ public class Role : IdentityRole
 	{
 		public override ItemResult BeforeSave(SaveKind kind, Role? oldItem, Role item)
 		{
-			item.NormalizedName = roleManager.NormalizeKey(item.Name);
+#if Tenancy
+            if (AppClaimTypes.GlobalAdminRole.Equals(item.Name, StringComparison.OrdinalIgnoreCase))
+            {
+                return $"{item.Name} is a reserved role name and cannot be used.";
+            }
+#endif
+
+            item.NormalizedName = roleManager.NormalizeKey(item.Name);
 
 			return base.BeforeSave(kind, oldItem, item);
 		}
 	}
 }
+
+#if Tenancy
+[InternalUse]
+public class RoleClaim : IdentityRoleClaim<string>, ITenanted
+{
+    [ForeignKey(nameof(RoleId))]
+    public Role? Role { get; set; }
+
+    [InternalUse]
+    [DefaultOrderBy(FieldOrder = 0)]
+    public int TenantId { get; set; }
+    [InternalUse]
+    [ForeignKey(nameof(TenantId))]
+    public Tenant? Tenant { get; set; }
+}
+#else
+[InternalUse]
+public class RoleClaim : IdentityRoleClaim<string> {}
+#endif

@@ -84,7 +84,7 @@ import { Domain, ModelType } from "coalesce-vue";
 const excludedTypes: Array<keyof typeof $metadata.types> = [
   //#if AuditLogs
   "AuditLog",
-  // "AuditLogProperty",
+  "AuditLogProperty",
   //#endif
   //#if Identity
   "UserRole",

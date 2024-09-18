@@ -18,6 +18,7 @@ using System.Security.Claims;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
+using Coalesce.Starter.Vue.Web.Auth;
 
 var builder = WebApplication.CreateBuilder(new WebApplicationOptions
 {
@@ -131,6 +132,16 @@ if (app.Environment.IsDevelopment())
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+//app.Use(async (context, next) =>
+//{
+//    if (context.User.GetTenantId() is int tenantId)
+//    {
+//        context.RequestServices.GetRequiredService<AppDbContext>().TenantId = tenantId;
+//    }
+
+//    await next(context);
+//});
 
 var containsFileHashRegex = new Regex(@"[.-][0-9a-zA-Z-_]{8}\.[^\.]*$", RegexOptions.Compiled);
 app.UseStaticFiles(new StaticFileOptions

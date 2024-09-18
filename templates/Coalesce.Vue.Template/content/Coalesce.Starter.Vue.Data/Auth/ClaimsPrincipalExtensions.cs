@@ -23,4 +23,10 @@ public static class ClaimsPrincipalExtensions
     public static string? GetUserName(this ClaimsPrincipal user)
         => user.FindFirstValue(ClaimTypes.Name);
 #endif
+#if Tenancy
+    public static int? GetTenantId(this ClaimsPrincipal user)
+        => user.FindFirstValue(AppClaimTypes.TenantId) is string s
+            ? int.Parse(s)
+            : null;
+#endif
 }

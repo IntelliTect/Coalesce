@@ -15,22 +15,31 @@ const router = createRouter({
   routes: [
     {
       path: "/",
-      name: "home",
       component: () => import("./views/Home.vue"),
     },
     //#if ExampleModel
     {
       path: "/widget/:id(\\d+)?",
-      name: "widget-edit",
       component: () => import("./views/WidgetEdit.vue"),
       props: (r) => ({ id: +r.params.id }),
     },
     //#endif
     {
       path: "/admin",
-      name: "admin",
       component: () => import("./views/Admin.vue"),
     },
+    //#if Identity
+    {
+      path: "/user/:id",
+      alias: "/admin/User/edit/:id",
+      props: true,
+      component: () => import("./views/UserProfile.vue"),
+    },
+    // {
+    //   path: "/admin/User/edit/:id",
+    //   redirect(to) { return `/user/` }
+    // }
+    // #endif
 
     // Coalesce admin routes
     {

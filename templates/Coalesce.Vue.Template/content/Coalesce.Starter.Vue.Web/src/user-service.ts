@@ -50,8 +50,6 @@ document.addEventListener(
   false,
 );
 
-refreshUserInfo();
-
 // Make useful properties available in vue <template>s
 declare module "vue" {
   interface ComponentCustomProperties {

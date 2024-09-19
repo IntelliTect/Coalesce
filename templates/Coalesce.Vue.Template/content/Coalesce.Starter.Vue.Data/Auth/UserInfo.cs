@@ -13,4 +13,7 @@ public class UserInfo
     public required ICollection<string> Roles { get; set; }
     public required ICollection<string> Permissions { get; set; }
 #endif
+#if Tenancy
+    public int? TenantId { get; set; }
+#endif
 }

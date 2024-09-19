@@ -32,7 +32,7 @@ public class SignInService(
 
         if (string.IsNullOrWhiteSpace(gSuiteDomain))
         {
-            await Forbid(ctx);
+            await Forbid(ctx, "Personal Google accounts are not permitted.");
             return;
         }
 
@@ -70,7 +70,7 @@ public class SignInService(
 
         if (string.IsNullOrWhiteSpace(entraTenantId))
         {
-            await Forbid(ctx);
+            await Forbid(ctx, "Personal accounts are not permitted.");
             return;
         }
 
@@ -94,9 +94,9 @@ public class SignInService(
         await SignInExternalUser(ctx, remoteLoginInfo);
     }
 
-    private static async Task Forbid(TicketReceivedContext ctx)
+    private static async Task Forbid(TicketReceivedContext ctx, string message = "Forbidden")
     {
-        await Results.Text("Forbidden", statusCode: StatusCodes.Status403Forbidden).ExecuteAsync(ctx.HttpContext);
+        await Results.Text(message, statusCode: StatusCodes.Status403Forbidden).ExecuteAsync(ctx.HttpContext);
         ctx.HandleResponse();
     }
 #endif

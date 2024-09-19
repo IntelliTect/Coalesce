@@ -298,6 +298,52 @@ export const Role = domain.types.Role = {
   dataSources: {
   },
 }
+export const Tenant = domain.types.Tenant = {
+  name: "Tenant" as const,
+  displayName: "Tenant",
+  get displayProp() { return this.props.name }, 
+  type: "model",
+  controllerRoute: "Tenant",
+  get keyProp() { return this.props.tenantId }, 
+  behaviorFlags: 2 as BehaviorFlags,
+  props: {
+    tenantId: {
+      name: "tenantId",
+      displayName: "Tenant Id",
+      type: "number",
+      role: "primaryKey",
+      hidden: 3 as HiddenAreas,
+    },
+    name: {
+      name: "name",
+      displayName: "Name",
+      type: "string",
+      role: "value",
+      rules: {
+        required: val => (val != null && val !== '') || "Name is required.",
+      }
+    },
+    externalId: {
+      name: "externalId",
+      displayName: "External Id",
+      type: "string",
+      role: "value",
+      dontSerialize: true,
+    },
+  },
+  methods: {
+  },
+  dataSources: {
+    defaultSource: {
+      type: "dataSource",
+      name: "DefaultSource" as const,
+      displayName: "Default Source",
+      isDefault: true,
+      props: {
+      },
+    },
+  },
+}
 export const User = domain.types.User = {
   name: "User" as const,
   displayName: "User",
@@ -335,20 +381,12 @@ export const User = domain.types.User = {
       type: "string",
       role: "value",
     },
-    lockoutEnd: {
-      name: "lockoutEnd",
-      displayName: "Lockout End",
-      description: "If set, the user will be blocked from signing in until this date.",
-      type: "date",
-      dateKind: "datetime",
-      role: "value",
-    },
-    lockoutEnabled: {
-      name: "lockoutEnabled",
-      displayName: "Lockout Enabled",
-      description: "If enabled, the user can be locked out.",
+    emailConfirmed: {
+      name: "emailConfirmed",
+      displayName: "Email Confirmed",
       type: "boolean",
       role: "value",
+      dontSerialize: true,
     },
     userRoles: {
       name: "userRoles",
@@ -384,6 +422,12 @@ export const User = domain.types.User = {
       role: "value",
       hidden: 1 as HiddenAreas,
       dontSerialize: true,
+    },
+    isGlobalAdmin: {
+      name: "isGlobalAdmin",
+      displayName: "Is Global Admin",
+      type: "boolean",
+      role: "value",
     },
     id: {
       name: "id",
@@ -425,8 +469,40 @@ export const User = domain.types.User = {
         role: "value",
       },
     },
+    evict: {
+      name: "evict",
+      displayName: "Evict",
+      transportType: "item",
+      httpMethod: "POST",
+      params: {
+        id: {
+          name: "id",
+          displayName: "Primary Key",
+          type: "string",
+          role: "value",
+          get source() { return (domain.types.User as ModelType & { name: "User" }).props.id },
+          rules: {
+            required: val => (val != null && val !== '') || "Primary Key is required.",
+          }
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "void",
+        role: "value",
+      },
+    },
   },
   dataSources: {
+    defaultSource: {
+      type: "dataSource",
+      name: "DefaultSource" as const,
+      displayName: "Default Source",
+      isDefault: true,
+      props: {
+      },
+    },
   },
 }
 export const UserRole = domain.types.UserRole = {
@@ -630,6 +706,12 @@ export const UserInfo = domain.types.UserInfo = {
       type: "string",
       role: "value",
     },
+    email: {
+      name: "email",
+      displayName: "Email",
+      type: "string",
+      role: "value",
+    },
     fullName: {
       name: "fullName",
       displayName: "Full Name",
@@ -658,6 +740,12 @@ export const UserInfo = domain.types.UserInfo = {
         role: "value",
         type: "string",
       },
+      role: "value",
+    },
+    tenantId: {
+      name: "tenantId",
+      displayName: "Tenant Id",
+      type: "number",
       role: "value",
     },
   },
@@ -696,6 +784,7 @@ interface AppDomain extends Domain {
     AuditLog: typeof AuditLog
     AuditLogProperty: typeof AuditLogProperty
     Role: typeof Role
+    Tenant: typeof Tenant
     User: typeof User
     UserInfo: typeof UserInfo
     UserRole: typeof UserRole

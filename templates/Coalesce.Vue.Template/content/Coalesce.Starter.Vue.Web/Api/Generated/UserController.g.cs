@@ -111,22 +111,39 @@ namespace Coalesce.Starter.Vue.Web.Api
             }
 
             var _methodResult = item.GetPhoto(
+                User,
                 Db
             );
             if (_methodResult.Object != null)
             {
-                string _contentType = _methodResult.Object.ContentType;
-                if (string.IsNullOrWhiteSpace(_contentType) && (
-                    string.IsNullOrWhiteSpace(_methodResult.Object.Name) ||
-                    !(new Microsoft.AspNetCore.StaticFiles.FileExtensionContentTypeProvider().TryGetContentType(_methodResult.Object.Name, out _contentType))
-                ))
-                {
-                    _contentType = "application/octet-stream";
-                }
-                return File(_methodResult.Object.Content, _contentType, _methodResult.Object.Name, !(_methodResult.Object.Content is System.IO.MemoryStream));
+                return File(_methodResult.Object);
             }
             var _result = new ItemResult<IntelliTect.Coalesce.Models.IFile>(_methodResult);
             _result.Object = _methodResult.Object;
+            return _result;
+        }
+
+        /// <summary>
+        /// Method: Evict
+        /// </summary>
+        [HttpPost("Evict")]
+        [Authorize(Roles = "UserAdmin")]
+        public virtual async Task<ItemResult> Evict(
+            [FromServices] IDataSourceFactory dataSourceFactory,
+            [FromForm(Name = "id")] string id)
+        {
+            var dataSource = dataSourceFactory.GetDataSource<Coalesce.Starter.Vue.Data.Models.User, Coalesce.Starter.Vue.Data.Models.User>("Default");
+            var itemResult = await dataSource.GetItemAsync(id, new DataSourceParameters());
+            if (!itemResult.WasSuccessful)
+            {
+                return new ItemResult(itemResult);
+            }
+            var item = itemResult.Object;
+            var _methodResult = item.Evict(
+                User,
+                Db
+            );
+            var _result = new ItemResult(_methodResult);
             return _result;
         }
     }

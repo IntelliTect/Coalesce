@@ -29,6 +29,10 @@ public class SecurityService()
             Id = user.FindFirstValue(ClaimTypes.NameIdentifier),
             UserName = user.Identity?.Name,
 #endif
+
+#if Tenancy
+            TenantId = user.GetTenantId()
+#endif
         };
     }
 }

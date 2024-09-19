@@ -1,7 +1,7 @@
 ﻿namespace Coalesce.Starter.Vue.Data.Models;
 
-[InternalUse]
 [Index(nameof(UserId), nameof(TenantId), IsUnique = true)]
+[InternalUse]
 public class TenantMembership : TenantedBase
 {
     public int TenantMembershipId { get; set; }

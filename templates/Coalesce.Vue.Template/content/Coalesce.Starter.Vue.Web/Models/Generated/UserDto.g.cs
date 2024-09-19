@@ -16,8 +16,7 @@ namespace Coalesce.Starter.Vue.Web.Models
         private string _FullName;
         private string _UserName;
         private string _Email;
-        private System.DateTimeOffset? _LockoutEnd;
-        private bool? _LockoutEnabled;
+        private bool? _IsGlobalAdmin;
 
         public string Id
         {
@@ -39,15 +38,10 @@ namespace Coalesce.Starter.Vue.Web.Models
             get => _Email;
             set { _Email = value; Changed(nameof(Email)); }
         }
-        public System.DateTimeOffset? LockoutEnd
+        public bool? IsGlobalAdmin
         {
-            get => _LockoutEnd;
-            set { _LockoutEnd = value; Changed(nameof(LockoutEnd)); }
-        }
-        public bool? LockoutEnabled
-        {
-            get => _LockoutEnabled;
-            set { _LockoutEnabled = value; Changed(nameof(LockoutEnabled)); }
+            get => _IsGlobalAdmin;
+            set { _IsGlobalAdmin = value; Changed(nameof(IsGlobalAdmin)); }
         }
 
         /// <summary>
@@ -60,11 +54,10 @@ namespace Coalesce.Starter.Vue.Web.Models
             if (OnUpdate(entity, context)) return;
 
             if (ShouldMapTo(nameof(Id))) entity.Id = Id;
-            if (ShouldMapTo(nameof(FullName))) entity.FullName = FullName;
-            if (ShouldMapTo(nameof(UserName))) entity.UserName = UserName;
-            if (ShouldMapTo(nameof(Email)) && (context.IsInRoleCached("UserAdmin"))) entity.Email = Email;
-            if (ShouldMapTo(nameof(LockoutEnd)) && (context.IsInRoleCached("UserAdmin"))) entity.LockoutEnd = LockoutEnd;
-            if (ShouldMapTo(nameof(LockoutEnabled)) && (context.IsInRoleCached("UserAdmin"))) entity.LockoutEnabled = (LockoutEnabled ?? entity.LockoutEnabled);
+            if (ShouldMapTo(nameof(FullName)) && context.GetPropertyRestriction<Coalesce.Starter.Vue.Data.Models.UserDataRestrictions>().UserCanWrite(context, nameof(FullName), entity, FullName)) entity.FullName = FullName;
+            if (ShouldMapTo(nameof(UserName)) && context.GetPropertyRestriction<Coalesce.Starter.Vue.Data.Models.UserDataRestrictions>().UserCanWrite(context, nameof(UserName), entity, UserName)) entity.UserName = UserName;
+            if (ShouldMapTo(nameof(Email)) && context.GetPropertyRestriction<Coalesce.Starter.Vue.Data.Models.UserDataRestrictions>().UserCanWrite(context, nameof(Email), entity, Email)) entity.Email = Email;
+            if (ShouldMapTo(nameof(IsGlobalAdmin)) && (context.IsInRoleCached("GlobalAdminRole"))) entity.IsGlobalAdmin = (IsGlobalAdmin ?? entity.IsGlobalAdmin);
         }
 
         /// <summary>
@@ -87,9 +80,9 @@ namespace Coalesce.Starter.Vue.Web.Models
         public byte[] PhotoMD5 { get; set; }
         public string UserName { get; set; }
         public string Email { get; set; }
-        public System.DateTimeOffset? LockoutEnd { get; set; }
-        public bool? LockoutEnabled { get; set; }
+        public bool? EmailConfirmed { get; set; }
         public string EffectivePermissions { get; set; }
+        public bool? IsGlobalAdmin { get; set; }
         public System.Collections.Generic.ICollection<Coalesce.Starter.Vue.Web.Models.UserRoleResponse> UserRoles { get; set; }
 
         /// <summary>
@@ -101,20 +94,19 @@ namespace Coalesce.Starter.Vue.Web.Models
             var includes = context.Includes;
 
             this.Id = obj.Id;
-            this.FullName = obj.FullName;
             this.PhotoMD5 = obj.PhotoMD5;
-            this.UserName = obj.UserName;
+            if (context.GetPropertyRestriction<Coalesce.Starter.Vue.Data.Models.UserDataRestrictions>().UserCanRead(context, nameof(FullName), obj)) this.FullName = obj.FullName;
+            if (context.GetPropertyRestriction<Coalesce.Starter.Vue.Data.Models.UserDataRestrictions>().UserCanRead(context, nameof(UserName), obj)) this.UserName = obj.UserName;
+            if (context.GetPropertyRestriction<Coalesce.Starter.Vue.Data.Models.UserDataRestrictions>().UserCanRead(context, nameof(Email), obj)) this.Email = obj.Email;
+            if (context.GetPropertyRestriction<Coalesce.Starter.Vue.Data.Models.UserDataRestrictions>().UserCanRead(context, nameof(EmailConfirmed), obj)) this.EmailConfirmed = obj.EmailConfirmed;
             if ((context.IsInRoleCached("UserAdmin")))
             {
-                this.Email = obj.Email;
-                this.LockoutEnd = obj.LockoutEnd;
-                this.LockoutEnabled = obj.LockoutEnabled;
                 this.EffectivePermissions = obj.EffectivePermissions;
                 var propValUserRoles = obj.UserRoles;
                 if (propValUserRoles != null && (tree == null || tree[nameof(this.UserRoles)] != null))
                 {
                     this.UserRoles = propValUserRoles
-                        .OrderBy(f => (f.User == null ? "" : f.User.Id)).ThenBy(f => (f.Role == null ? "" : f.Role.Name))
+                        .OrderBy(f => f.TenantId).ThenBy(f => (f.User == null ? "" : f.User.Id)).ThenBy(f => (f.Role == null ? 0 : f.Role.TenantId))
                         .Select(f => f.MapToDto<Coalesce.Starter.Vue.Data.Models.UserRole, UserRoleResponse>(context, tree?[nameof(this.UserRoles)])).ToList();
                 }
                 else if (propValUserRoles == null && tree?[nameof(this.UserRoles)] != null)
@@ -124,6 +116,7 @@ namespace Coalesce.Starter.Vue.Web.Models
 
             }
 
+            if ((context.IsInRoleCached("GlobalAdminRole"))) this.IsGlobalAdmin = obj.IsGlobalAdmin;
         }
     }
 }

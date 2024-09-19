@@ -1,19 +1,24 @@
-using Coalesce.Starter.Vue.Data.Auth;
-using Coalesce.Starter.Vue.Data.Coalesce;
 using IntelliTect.Coalesce.Helpers;
-using IntelliTect.Coalesce.Utilities;
 using Microsoft.AspNetCore.Identity;
 using System.ComponentModel;
 
 namespace Coalesce.Starter.Vue.Data.Models;
 
+#if Tenancy
+// Since users exist across tenants, a user may only edit their own profile.
+// Admins within a particular tenant cannot edit the properties of a user
+// that will affect other tenants.
+[Edit(AllowAuthenticated)]
+#else
 [Edit(nameof(Permission.UserAdmin))]
+#endif
 [Create(DenyAll)]
 [Delete(DenyAll)]
 [Description("A user profile within the application.")]
 public class User : IdentityUser
 {
     [Search(SearchMethod = SearchMethods.Contains)]
+    [Restrict<UserDataRestrictions>]
     public string? FullName { get; set; }
 
 #if UserPictures
@@ -25,6 +30,7 @@ public class User : IdentityUser
 #endif
 
     [Search]
+    [Restrict<UserDataRestrictions>]
     public override string? UserName { get; set; }
 
     [InternalUse]
@@ -44,11 +50,13 @@ public class User : IdentityUser
     [InternalUse]
     public override bool PhoneNumberConfirmed { get; set; }
 
-    [Read(nameof(Permission.UserAdmin)), Edit(nameof(Permission.UserAdmin))]
+    [Restrict<UserDataRestrictions>]
     public override string? Email { get; set; }
+
     [InternalUse]
     public override string? NormalizedEmail { get; set; }
-    [InternalUse]
+
+    [Restrict<UserDataRestrictions>, ReadOnly(true)]
     public override bool EmailConfirmed { get; set; }
 
 	[InternalUse]
@@ -63,7 +71,11 @@ public class User : IdentityUser
     public override int AccessFailedCount { get; set; }
 
     [Description("If set, the user will be blocked from signing in until this date.")]
+#if Tenancy
+    [InternalUse]
+#else
     [Read(nameof(Permission.UserAdmin)), Edit(nameof(Permission.UserAdmin))]
+#endif
     public override DateTimeOffset? LockoutEnd { get; set; }
 
 #if PasswordAuth
@@ -71,54 +83,83 @@ public class User : IdentityUser
 #else
     [Description("If enabled, the user can be locked out.")]
 #endif
+#if Tenancy
+    [InternalUse]
+#else
     [Read(nameof(Permission.UserAdmin)), Edit(nameof(Permission.UserAdmin))]
+#endif
     public override bool LockoutEnabled { get; set; }
 
-    [Read(nameof(Permission.UserAdmin))]
+    [Read(nameof(Permission.UserAdmin), NoAutoInclude = true)]
     [InverseProperty(nameof(UserRole.User))]
     [ManyToMany("Roles")]
     public ICollection<UserRole>? UserRoles { get; set; }
-
-    [Read(nameof(Permission.UserAdmin))]
-    [NotMapped, DataType(DataType.MultilineText)]
-    [Hidden(HiddenAttribute.Areas.List)]
-    [Display(Description = "A summary of the effective permissions of the user, derived from their current roles.")]
-    public string? EffectivePermissions
-    {
-        get
-        {
-            var currentPermissions = UserRoles
-                ?.SelectMany(u => u.Role?.Permissions!.Select(p => (p, u.Role)) ?? [])
-                .ToLookup(p => p.p, p => p.Role);
-
-            if (currentPermissions is null) return null;
-
-            return string.Join("\n", Enum.GetValues<Permission>().Select(p => currentPermissions.Contains(p)
-                ? $"✅ {p.GetDisplayName()} (via {string.Join(", ", currentPermissions[p].Select(r => r.Name))})"
-                : $"❌ {p.GetDisplayName()}"
-            ));
-        }
-    }
 
 #if Tenancy
     /// <summary>
     /// The user is a global administrator, able to perform administrative actions against all tenants.
     /// </summary>
+    [Read(nameof(AppClaimTypes.GlobalAdminRole))]
+    [Edit(nameof(AppClaimTypes.GlobalAdminRole))]
+    [Hidden]
     public bool IsGlobalAdmin { get; set; }
 #endif
 
 #if UserPictures
     [Coalesce, Execute(HttpMethod = HttpMethod.Get, VaryByProperty = nameof(PhotoMD5))]
-    public ItemResult<IFile> GetPhoto(AppDbContext db)
+    public ItemResult<IFile> GetPhoto(ClaimsPrincipal user, AppDbContext db)
     {
         return new IntelliTect.Coalesce.Models.File(db.UserPhotos
             .Where(p => p.UserId == this.Id)
+#if Tenancy
+            .Where(p => db.TenantMemberships.Any(tm => tm.UserId == this.Id && tm.TenantId == user.GetTenantId()))
+#endif
             .Select(p => p.Content))
         {
             ContentType = "image/*"
         };
     }
 #endif
+
+#if Tenancy
+    [Coalesce, Execute(Roles = nameof(Permission.UserAdmin))]
+    public ItemResult Evict(ClaimsPrincipal callingUser, AppDbContext db)
+    {
+        if (
+            Id == callingUser.GetUserId() && 
+            db.Users.Count(u => u.UserRoles!.Any(r => r.Role!.Permissions!.Contains(Permission.UserAdmin))) == 1
+        )
+        {
+            return "You cannot remove the last remaining user admin.";
+        }
+
+        this.SecurityStamp = Guid.NewGuid().ToString();
+        db.RemoveRange(db.UserRoles.Where(u => u.UserId == this.Id));
+        db.RemoveRange(db.TenantMemberships.Where(u => u.UserId == this.Id));
+        db.SaveChanges();
+
+        return true;
+    }
+#endif
+
+    [DefaultDataSource]
+    public class DefaultSource(CrudContext<AppDbContext> context) : AppDataSource<User>(context)
+    {
+        public override IQueryable<User> GetQuery(IDataSourceParameters parameters)
+        {
+            var query = base.GetQuery(parameters);
+            if (User.Can(Permission.UserAdmin))
+            {
+                query = query.Include(u => u.UserRoles!).ThenInclude(ur => ur.Role);
+            }
+
+#if Tenancy
+            return query.Where(u => Db.TenantMemberships.Any(tm => tm.UserId == u.Id && tm.TenantId == User.GetTenantId()));
+#else
+            return query;
+#endif
+        }
+    }
 
     public class UserBehaviors(
         CrudContext<AppDbContext> context, 
@@ -128,11 +169,19 @@ public class User : IdentityUser
     {
         public override ItemResult BeforeSave(SaveKind kind, User? oldItem, User item)
         {
+#if Tenancy
+            // Since users exist across tenants, a user may only edit their own profile.
+            // Admins within a particular tenant cannot edit the properties of a user
+            // that will affect other tenants.
+            if (item.Id != User.GetUserId() && !User.IsInRole(AppClaimTypes.GlobalAdminRole)) return "Forbidden.";
+#endif
+
             if (oldItem != null)
             {
                 if (item.Email != oldItem.Email)
                 {
                     item.NormalizedEmail = userManager.NormalizeEmail(item.Email);
+                    item.EmailConfirmed = false;
                     item.SecurityStamp = Guid.NewGuid().ToString();
                 }
 
@@ -173,5 +222,46 @@ public class User : IdentityUser
 
             return await base.AfterSaveAsync(kind, oldItem, item);
         }
+    }
+}
+
+public class UserDataRestrictions : IPropertyRestriction<User>
+{
+    public bool UserCanRead(IMappingContext context, string propertyName, User model)
+    {
+        if (context.User.GetUserId() == model.Id) return true;
+
+        return UserCanFilter(context, propertyName);
+    }
+
+    public bool UserCanFilter(IMappingContext context, string propertyName)
+    {
+        return propertyName switch
+        {
+            nameof(User.FullName) => true,
+            nameof(User.UserName) => true,
+#if Tenancy
+            _ => false
+#else
+        _ => context.User.Can(Permission.UserAdmin)
+#endif
+        };
+    }
+
+    public bool UserCanWrite(IMappingContext context, string propertyName, User? model, object? incomingValue)
+    {
+        if (model == null) return false; // Manual user creation isn't allowed.
+
+        if (context.User.GetUserId() == model.Id) return propertyName switch
+        {
+            nameof(User.FullName) => true,
+            _ => false
+        };
+
+#if Tenancy
+        return false;
+#else
+        return context.User.Can(Permission.UserAdmin);
+#endif
     }
 }

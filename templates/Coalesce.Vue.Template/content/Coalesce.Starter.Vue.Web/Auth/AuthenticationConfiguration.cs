@@ -18,7 +18,6 @@ public static class AuthenticationConfiguration
             .AddDefaultTokenProviders()
             .AddClaimsPrincipalFactory<ClaimsPrincipalFactory>();
 
-        builder.Services.AddScoped<ISecurityStampValidator, SecurityStampValidator>();
         builder.Services.AddScoped<SignInService>();
 
         builder.Services
@@ -69,6 +68,18 @@ public static class AuthenticationConfiguration
         builder.Services.ConfigureApplicationCookie(c =>
         {
             c.LoginPath = "/sign-in"; // Razor page "Pages/SignIn.cshtml"
+
+            var oldOnValidate = c.Events.OnValidatePrincipal;
+            c.Events.OnValidatePrincipal = async ctx =>
+            {
+                // Make the current tenantID of the user available to the rest of the request.
+                // This is the earliest possible point to do so after the auth cookie has been read.
+                ctx.HttpContext.RequestServices
+                    .GetRequiredService<AppDbContext>()
+                    .TenantId = ctx.Principal?.GetTenantId();
+
+                await oldOnValidate(ctx);
+            };
         });
     }
 

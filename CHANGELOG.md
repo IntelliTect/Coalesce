@@ -1,3 +1,7 @@
+# 5.0.1
+
+- `c-select-many-to-many`, when selecting an item, will now attempt to reuse a matching, previously removed item that has not yet been committed with a $bulkSave. This prevents unnecessary delete+create of the same item in a many-to-many when the user changes their mind about the inclusion of an item.
+
 # 5.0.0
 
 ## Breaking Changes

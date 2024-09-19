@@ -1038,7 +1038,7 @@ export abstract class ViewModel<
   /** Whether the item has been removed via `$remove()` and is pending for deletion in the next bulk save.
    * @internal
    * */
-  private _isRemoved = false;
+  _isRemoved = false;
 
   public get $isRemoved() {
     return this._isRemoved; // does this need to be reactive?

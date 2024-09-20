@@ -230,9 +230,9 @@
   "postActions": [
     {
       "actionId": "3A7C4B45-1F5D-4A30-959A-51B88E82B5D2",
-      "description": "Run npm lint:fix in the .Web directory after template instantiation",
+      "description": "Install npm packages, and run linter to resolve linting issues after template instantiation.",
       "manualInstructions": [
-        { "text": "Install npm packages, and run linter to resolve linting issues." }
+        { "text": "Run `npm install` then `npm run lint:fix` to resolve linting issues." }
       ],
       "args": {
         "executable": "node",

@@ -20,7 +20,7 @@ on:
 #
 # 3. Change these variables for your configuration:
 env:
-  AZURE_WEBAPP_NAME: Coalesce.Starter.Vue # set this to your app service name
+  AZURE_WEBAPP_NAME: MY_WEBAPP_NAME # set this to your app service name
 
 jobs:
   build-and-test:

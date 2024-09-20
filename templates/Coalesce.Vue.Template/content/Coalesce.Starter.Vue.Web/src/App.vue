@@ -111,9 +111,6 @@ const drawer = ref<boolean | null>(null);
 //#if Identity
 const router = useRouter();
 const { userInfo } = useUser();
-//#else
-useRouter();
-useUser();
 //#endif
 //#if DarkMode
 const vuetifyTheme = useTheme();

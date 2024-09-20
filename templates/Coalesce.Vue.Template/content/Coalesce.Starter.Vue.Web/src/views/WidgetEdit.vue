@@ -1,5 +1,5 @@
 <template>
-  <v-container style="max-width: 900px">
+  <v-container max-width="1000px">
     <v-card>
       <v-card-title class="d-flex">
         Coalesce Example

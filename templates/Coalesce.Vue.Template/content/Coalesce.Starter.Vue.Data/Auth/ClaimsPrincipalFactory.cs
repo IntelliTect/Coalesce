@@ -28,7 +28,7 @@ public class ClaimsPrincipalFactory(
         // TODO: Validate that the user is still a member of the tenant.
         // TODO: Allow pulling a new tenantID from the httpcontext Items
         // for tenant switching
-        identity.AddClaim(new Claim(AppClaimTypes.TenantId, db.TenantIdOrThrow.ToString()));
+        identity.AddClaim(new Claim(AppClaimTypes.TenantId, db.TenantIdOrThrow));
 #endif
 
         // Store all the permissions in a dedicated identity

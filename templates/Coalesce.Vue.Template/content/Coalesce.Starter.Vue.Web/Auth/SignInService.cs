@@ -64,9 +64,9 @@ public class SignInService(
         }
 
 #if TenantCreateExternal
-        string? entraTenantId = new JwtSecurityTokenHandler()
-            .ReadJwtToken(ctx.Properties!.GetTokenValue(OpenIdConnectParameterNames.AccessToken))
-            .Claims.FirstOrDefault(c => c.Type == "tid")?.Value;
+        var accessJtw = new JwtSecurityTokenHandler()
+            .ReadJwtToken(ctx.Properties!.GetTokenValue(OpenIdConnectParameterNames.AccessToken));
+        string? entraTenantId = accessJtw.Claims.FirstOrDefault(c => c.Type == "tid")?.Value;
 
         if (string.IsNullOrWhiteSpace(entraTenantId))
         {
@@ -139,7 +139,13 @@ public class SignInService(
 
             user = new User { UserName = remoteUserEmail };
 
-#if (!Tenancy)
+#if Tenancy
+            // If this user is the first user, make them the global admin
+            if (!db.Users.Any())
+            {
+                user.IsGlobalAdmin = true;
+            }
+#else
             // If this user is the first user, give them all roles so there is an initial admin.
             if (!db.Users.Any())
             {
@@ -177,15 +183,14 @@ public class SignInService(
         if (tenant is null)
         {
             // Automatically create a tenant in our application based on the external tenant.
-            // TODO: better name for the new tenant?
-            db.Tenants.Add(tenant = new() { ExternalId = externalId, Name = externalTenantId });
+            db.Tenants.Add(tenant = new() { ExternalId = externalId, Name = user.Email?.Split('@').Last() ?? externalId });
             await db.SaveChangesAsync();
 
             db.TenantId = tenant.TenantId;
             new DatabaseSeeder(db).SeedTenant(tenant.TenantId);
 
             // Give the first user in the tenant all roles so there is an initial admin.
-            user.UserRoles = db.Roles.Select(r => new UserRole { Role = r, User = user }).ToList();
+            user.UserRoles = db.Roles.Select(r => new UserRole { Role = r, User = user, TenantId = db.TenantId }).ToList();
 
             await db.SaveChangesAsync();
         }

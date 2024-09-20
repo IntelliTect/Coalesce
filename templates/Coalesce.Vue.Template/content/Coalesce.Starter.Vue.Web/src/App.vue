@@ -4,7 +4,10 @@
       <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
       <v-toolbar-title>
         <router-link to="/" style="color: inherit">
-          Coalesce Vue Template
+          Coalesce.Starter.Vue
+          <!--#if: Tenancy  -->
+          &mdash; {{ $userInfo.tenant?.name }}
+          <!--#endif  -->
         </router-link>
       </v-toolbar-title>
 
@@ -25,6 +28,7 @@
           <v-list-item
             :title="$userInfo.fullName!"
             :subtitle="$userInfo.userName!"
+            :to="`/user/${$userInfo.id}`"
           >
             <template #prepend>
               <UserAvatar :user="$userInfo" class="mr-2 ml-n1" />

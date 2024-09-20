@@ -5,10 +5,6 @@
 /// </summary>
 public interface ITenanted
 {
-    int TenantId { get; set; }
+    string TenantId { get; set; }
     Tenant? Tenant { get; set; }
-
-    static virtual IQueryable<T> WhereTenantMatches<T>(IQueryable<T> query, int tenantId)
-        where T : ITenanted
-        => query.Where(x => x.TenantId == tenantId);
 }

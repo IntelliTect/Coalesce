@@ -57,7 +57,7 @@ namespace Coalesce.Starter.Vue.Web.Models
             if (ShouldMapTo(nameof(FullName)) && context.GetPropertyRestriction<Coalesce.Starter.Vue.Data.Models.UserDataRestrictions>().UserCanWrite(context, nameof(FullName), entity, FullName)) entity.FullName = FullName;
             if (ShouldMapTo(nameof(UserName)) && context.GetPropertyRestriction<Coalesce.Starter.Vue.Data.Models.UserDataRestrictions>().UserCanWrite(context, nameof(UserName), entity, UserName)) entity.UserName = UserName;
             if (ShouldMapTo(nameof(Email)) && context.GetPropertyRestriction<Coalesce.Starter.Vue.Data.Models.UserDataRestrictions>().UserCanWrite(context, nameof(Email), entity, Email)) entity.Email = Email;
-            if (ShouldMapTo(nameof(IsGlobalAdmin)) && (context.IsInRoleCached("GlobalAdminRole"))) entity.IsGlobalAdmin = (IsGlobalAdmin ?? entity.IsGlobalAdmin);
+            if (ShouldMapTo(nameof(IsGlobalAdmin)) && (context.IsInRoleCached("GlobalAdmin"))) entity.IsGlobalAdmin = (IsGlobalAdmin ?? entity.IsGlobalAdmin);
         }
 
         /// <summary>
@@ -81,7 +81,6 @@ namespace Coalesce.Starter.Vue.Web.Models
         public string UserName { get; set; }
         public string Email { get; set; }
         public bool? EmailConfirmed { get; set; }
-        public string EffectivePermissions { get; set; }
         public bool? IsGlobalAdmin { get; set; }
         public System.Collections.Generic.ICollection<Coalesce.Starter.Vue.Web.Models.UserRoleResponse> UserRoles { get; set; }
 
@@ -99,14 +98,14 @@ namespace Coalesce.Starter.Vue.Web.Models
             if (context.GetPropertyRestriction<Coalesce.Starter.Vue.Data.Models.UserDataRestrictions>().UserCanRead(context, nameof(UserName), obj)) this.UserName = obj.UserName;
             if (context.GetPropertyRestriction<Coalesce.Starter.Vue.Data.Models.UserDataRestrictions>().UserCanRead(context, nameof(Email), obj)) this.Email = obj.Email;
             if (context.GetPropertyRestriction<Coalesce.Starter.Vue.Data.Models.UserDataRestrictions>().UserCanRead(context, nameof(EmailConfirmed), obj)) this.EmailConfirmed = obj.EmailConfirmed;
+            if ((context.IsInRoleCached("GlobalAdmin"))) this.IsGlobalAdmin = obj.IsGlobalAdmin;
             if ((context.IsInRoleCached("UserAdmin")))
             {
-                this.EffectivePermissions = obj.EffectivePermissions;
                 var propValUserRoles = obj.UserRoles;
                 if (propValUserRoles != null && (tree == null || tree[nameof(this.UserRoles)] != null))
                 {
                     this.UserRoles = propValUserRoles
-                        .OrderBy(f => f.TenantId).ThenBy(f => (f.User == null ? "" : f.User.Id)).ThenBy(f => (f.Role == null ? 0 : f.Role.TenantId))
+                        .OrderBy(f => f.TenantId).ThenBy(f => (f.User == null ? "" : f.User.Id)).ThenBy(f => (f.Role == null ? "" : f.Role.TenantId))
                         .Select(f => f.MapToDto<Coalesce.Starter.Vue.Data.Models.UserRole, UserRoleResponse>(context, tree?[nameof(this.UserRoles)])).ToList();
                 }
                 else if (propValUserRoles == null && tree?[nameof(this.UserRoles)] != null)
@@ -116,7 +115,6 @@ namespace Coalesce.Starter.Vue.Web.Models
 
             }
 
-            if ((context.IsInRoleCached("GlobalAdminRole"))) this.IsGlobalAdmin = obj.IsGlobalAdmin;
         }
     }
 }

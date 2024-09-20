@@ -13,7 +13,13 @@ public static class AuthenticationConfiguration
         var config = builder.Configuration;
 
         builder.Services
-            .AddIdentity<User, Role>()
+            .AddIdentity<User, Role>(c =>
+            {
+                c.ClaimsIdentity.RoleClaimType = AppClaimTypes.Role;
+                c.ClaimsIdentity.EmailClaimType = AppClaimTypes.Email;
+                c.ClaimsIdentity.UserIdClaimType = AppClaimTypes.UserId;
+                c.ClaimsIdentity.UserNameClaimType = AppClaimTypes.UserName;
+            })
             .AddEntityFrameworkStores<AppDbContext>()
             .AddDefaultTokenProviders()
             .AddClaimsPrincipalFactory<ClaimsPrincipalFactory>();

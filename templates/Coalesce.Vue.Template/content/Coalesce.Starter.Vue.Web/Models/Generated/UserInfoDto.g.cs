@@ -18,7 +18,7 @@ namespace Coalesce.Starter.Vue.Web.Models
         private string _FullName;
         private System.Collections.Generic.ICollection<string> _Roles;
         private System.Collections.Generic.ICollection<string> _Permissions;
-        private int? _TenantId;
+        private string _TenantId;
 
         public string Id
         {
@@ -50,7 +50,7 @@ namespace Coalesce.Starter.Vue.Web.Models
             get => _Permissions;
             set { _Permissions = value; Changed(nameof(Permissions)); }
         }
-        public int? TenantId
+        public string TenantId
         {
             get => _TenantId;
             set { _TenantId = value; Changed(nameof(TenantId)); }
@@ -108,7 +108,8 @@ namespace Coalesce.Starter.Vue.Web.Models
         public string FullName { get; set; }
         public System.Collections.Generic.ICollection<string> Roles { get; set; }
         public System.Collections.Generic.ICollection<string> Permissions { get; set; }
-        public int? TenantId { get; set; }
+        public string TenantId { get; set; }
+        public Coalesce.Starter.Vue.Web.Models.TenantResponse Tenant { get; set; }
 
         /// <summary>
         /// Map from the domain object to the properties of the current DTO instance.
@@ -125,6 +126,9 @@ namespace Coalesce.Starter.Vue.Web.Models
             this.Roles = obj.Roles;
             this.Permissions = obj.Permissions;
             this.TenantId = obj.TenantId;
+            if (tree == null || tree[nameof(this.Tenant)] != null)
+                this.Tenant = obj.Tenant.MapToDto<Coalesce.Starter.Vue.Data.Models.Tenant, TenantResponse>(context, tree?[nameof(this.Tenant)]);
+
         }
     }
 }

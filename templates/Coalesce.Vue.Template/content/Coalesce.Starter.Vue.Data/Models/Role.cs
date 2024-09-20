@@ -18,7 +18,7 @@ public class Role
 #if Tenancy
     [InternalUse]
     [DefaultOrderBy(FieldOrder = 0)]
-    public int TenantId { get; set; }
+    public string TenantId { get; set; } = null!;
     [InternalUse]
     [ForeignKey(nameof(TenantId))]
     public Tenant? Tenant { get; set; }
@@ -62,7 +62,7 @@ public class RoleClaim : IdentityRoleClaim<string>, ITenanted
 
     [InternalUse]
     [DefaultOrderBy(FieldOrder = 0)]
-    public int TenantId { get; set; }
+    public required string TenantId { get; set; }
     [InternalUse]
     [ForeignKey(nameof(TenantId))]
     public Tenant? Tenant { get; set; }

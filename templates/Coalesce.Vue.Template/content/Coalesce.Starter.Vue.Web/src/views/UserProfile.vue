@@ -1,5 +1,5 @@
 <template>
-  <v-container class="user-profile px-md-6">
+  <v-container max-width="1000px">
     <v-card>
       <v-card-title>User Profile</v-card-title>
       <c-loader-status

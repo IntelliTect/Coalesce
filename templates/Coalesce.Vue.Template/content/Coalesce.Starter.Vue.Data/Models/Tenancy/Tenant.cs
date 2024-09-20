@@ -1,4 +1,4 @@
-﻿
+﻿using System.ComponentModel;
 
 namespace Coalesce.Starter.Vue.Data.Models;
 
@@ -7,16 +7,15 @@ namespace Coalesce.Starter.Vue.Data.Models;
 [Create(DenyAll)]
 [Delete(DenyAll)]
 [Index(nameof(ExternalId), IsUnique = true)]
+[Display(Name = "Organization")]
 public class Tenant
 {
-    public int TenantId { get; set; }
+    public string TenantId { get; set; } = Guid.NewGuid().ToString();
 
     public required string Name { get; set; }
 
-    /// <summary>
-    /// An identifier representing the external source of the tenant.
-    /// </summary>
     [Read]
+    [Description("The external origin of this tenant. Other users who sign in with accounts from this external source will automatically join this organization.")]
     public string? ExternalId { get; set; }
 
     [DefaultDataSource]

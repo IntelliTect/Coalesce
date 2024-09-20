@@ -35,7 +35,7 @@ namespace Coalesce.Starter.Vue.Web.Api
         [HttpGet("get/{id}")]
         [Authorize]
         public virtual Task<ItemResult<TenantResponse>> Get(
-            int id,
+            string id,
             DataSourceParameters parameters,
             IDataSource<Coalesce.Starter.Vue.Data.Models.Tenant> dataSource)
             => GetImplementation(id, parameters, dataSource);

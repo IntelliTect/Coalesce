@@ -118,10 +118,10 @@ export class Role {
 
 
 export interface Tenant extends Model<typeof metadata.Tenant> {
-  tenantId: number | null
+  tenantId: string | null
   name: string | null
   
-  /** An identifier representing the external source of the tenant. */
+  /** The external origin of this tenant. Other users who sign in with accounts from this external source will automatically join this organization. */
   externalId: string | null
 }
 export class Tenant {
@@ -160,9 +160,6 @@ export interface User extends Model<typeof metadata.User> {
   email: string | null
   emailConfirmed: boolean | null
   userRoles: UserRole[] | null
-  
-  /** A summary of the effective permissions of the user, derived from their current roles. */
-  effectivePermissions: string | null
   
   /** The user is a global administrator, able to perform administrative actions against all tenants. */
   isGlobalAdmin: boolean | null
@@ -273,7 +270,8 @@ export interface UserInfo extends Model<typeof metadata.UserInfo> {
   fullName: string | null
   roles: string[] | null
   permissions: string[] | null
-  tenantId: number | null
+  tenantId: string | null
+  tenant: Tenant | null
 }
 export class UserInfo {
   

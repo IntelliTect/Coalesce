@@ -22,7 +22,7 @@ public class DatabaseSeeder(AppDbContext db)
     }
 
 #if Tenancy
-    public void SeedTenant(int tenantId)
+    public void SeedTenant(string tenantId)
     {
         db.TenantId = tenantId;
 
@@ -42,6 +42,7 @@ public class DatabaseSeeder(AppDbContext db)
                 Permissions = Enum.GetValues<Permission>().ToList(),
                 Name = "Admin",
                 NormalizedName = "ADMIN",
+                TenantId = db.TenantIdOrThrow
             });
 
             // NOTE: In a permissions-based authorization system,

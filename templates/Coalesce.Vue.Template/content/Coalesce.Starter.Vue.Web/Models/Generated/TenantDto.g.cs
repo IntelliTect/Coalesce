@@ -12,10 +12,10 @@ namespace Coalesce.Starter.Vue.Web.Models
     {
         public TenantParameter() { }
 
-        private int? _TenantId;
+        private string _TenantId;
         private string _Name;
 
-        public int? TenantId
+        public string TenantId
         {
             get => _TenantId;
             set { _TenantId = value; Changed(nameof(TenantId)); }
@@ -35,7 +35,7 @@ namespace Coalesce.Starter.Vue.Web.Models
 
             if (OnUpdate(entity, context)) return;
 
-            if (ShouldMapTo(nameof(TenantId))) entity.TenantId = (TenantId ?? entity.TenantId);
+            if (ShouldMapTo(nameof(TenantId))) entity.TenantId = TenantId;
             if (ShouldMapTo(nameof(Name))) entity.Name = Name;
         }
 
@@ -52,7 +52,7 @@ namespace Coalesce.Starter.Vue.Web.Models
             };
 
             if (OnUpdate(entity, context)) return entity;
-            if (ShouldMapTo(nameof(TenantId))) entity.TenantId = (TenantId ?? entity.TenantId);
+            if (ShouldMapTo(nameof(TenantId))) entity.TenantId = TenantId;
 
             return entity;
         }
@@ -62,7 +62,7 @@ namespace Coalesce.Starter.Vue.Web.Models
     {
         public TenantResponse() { }
 
-        public int? TenantId { get; set; }
+        public string TenantId { get; set; }
         public string Name { get; set; }
         public string ExternalId { get; set; }
 

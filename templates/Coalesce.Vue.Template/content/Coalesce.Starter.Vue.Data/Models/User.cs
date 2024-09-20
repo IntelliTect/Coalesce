@@ -99,8 +99,8 @@ public class User : IdentityUser
     /// <summary>
     /// The user is a global administrator, able to perform administrative actions against all tenants.
     /// </summary>
-    [Read(nameof(AppClaimTypes.GlobalAdminRole))]
-    [Edit(nameof(AppClaimTypes.GlobalAdminRole))]
+    [Read(AppClaimTypes.GlobalAdminRole)]
+    [Edit(AppClaimTypes.GlobalAdminRole)]
     [Hidden]
     public bool IsGlobalAdmin { get; set; }
 #endif
@@ -140,6 +140,35 @@ public class User : IdentityUser
 
         return true;
     }
+
+#if TenantMemberInvites
+    [Coalesce, Execute(Roles = nameof(Permission.UserAdmin))]
+    public ItemResult Invite(
+        ClaimsPrincipal callingUser, 
+        AppDbContext db, 
+        [DataType(DataType.EmailAddress)] string email, 
+        List<Role> roles
+    )
+    {
+        var user = db.Users.Where(u => u.Email == email && u.EmailConfirmed).FirstOrDefault();
+        if (user is not null)
+        {
+            if (db.TenantMemberships.Any(m => m.User == user))
+            {
+                return "A user with that email address already belongs to this organization.";
+            }
+
+            db.TenantMemberships.Add(new() { User = user });
+            db.UserRoles.AddRange(roles.Select(r => new UserRole { Role = r, User = user }));
+
+            return new(true, "The user was added to this organization. They can access it with their existing account.");
+        }
+
+        // TODO: Generate link
+        // TODO: Pre-emptively create user and assign membership
+        return "NYI";
+    }
+#endif
 #endif
 
     [DefaultDataSource]

@@ -87,13 +87,13 @@ export class RoleListViewModel extends ListViewModel<$models.Role, $apiClients.R
 
 
 export interface TenantViewModel extends $models.Tenant {
-  tenantId: number | null;
+  tenantId: string | null;
   name: string | null;
   
-  /** An identifier representing the external source of the tenant. */
+  /** The external origin of this tenant. Other users who sign in with accounts from this external source will automatically join this organization. */
   externalId: string | null;
 }
-export class TenantViewModel extends ViewModel<$models.Tenant, $apiClients.TenantApiClient, number> implements $models.Tenant  {
+export class TenantViewModel extends ViewModel<$models.Tenant, $apiClients.TenantApiClient, string> implements $models.Tenant  {
   static DataSources = $models.Tenant.DataSources;
   
   constructor(initialData?: DeepPartial<$models.Tenant> | null) {
@@ -119,9 +119,6 @@ export interface UserViewModel extends $models.User {
   emailConfirmed: boolean | null;
   get userRoles(): ViewModelCollection<UserRoleViewModel, $models.UserRole>;
   set userRoles(value: (UserRoleViewModel | $models.UserRole)[] | null);
-  
-  /** A summary of the effective permissions of the user, derived from their current roles. */
-  effectivePermissions: string | null;
   
   /** The user is a global administrator, able to perform administrative actions against all tenants. */
   isGlobalAdmin: boolean | null;

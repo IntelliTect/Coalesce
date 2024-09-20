@@ -36,6 +36,16 @@
 
       <v-card-text>
         <v-list compact>
+          <!--#if Tenancy  -->
+          <v-list-item
+            v-if="$can(Permission.Admin)"
+            title="Organization Settings"
+            subtitle="Edit the details of your organization."
+            :to="`/admin/Tenant/edit/${userInfo.tenantId}`"
+            prepend-icon="fa fa-users"
+          >
+          </v-list-item>
+          <!--#endif  -->
           <v-list-item
             title="Coalesce Security Overview"
             subtitle="An overview of how each property, method, and endpoint is served by Coalesce."
@@ -45,11 +55,11 @@
           </v-list-item>
           <!--#if (AuditLogs && Identity) -->
           <v-list-item
+            v-if="$can(Permission.ViewAuditLogs)"
             title="Audit Logs"
             subtitle="Logs of each data change made in the application."
             to="/admin/audit"
             prepend-icon="fa fa-clipboard-list"
-            :disabled="!$can(Permission.ViewAuditLogs)"
           >
           </v-list-item>
           <!--#endif  -->
@@ -79,6 +89,7 @@
 
 <script setup lang="ts">
 import $metadata from "@/metadata.g";
+import { userInfo } from "@/user-service";
 import { Domain, ModelType } from "coalesce-vue";
 
 const excludedTypes: Array<keyof typeof $metadata.types> = [
@@ -88,6 +99,9 @@ const excludedTypes: Array<keyof typeof $metadata.types> = [
   //#endif
   //#if Identity
   "UserRole",
+  //#endif
+  //#if Tenancy
+  "Tenant",
   //#endif
 ];
 

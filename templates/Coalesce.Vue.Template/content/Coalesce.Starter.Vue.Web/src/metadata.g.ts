@@ -300,7 +300,7 @@ export const Role = domain.types.Role = {
 }
 export const Tenant = domain.types.Tenant = {
   name: "Tenant" as const,
-  displayName: "Tenant",
+  displayName: "Organization",
   get displayProp() { return this.props.name }, 
   type: "model",
   controllerRoute: "Tenant",
@@ -310,7 +310,7 @@ export const Tenant = domain.types.Tenant = {
     tenantId: {
       name: "tenantId",
       displayName: "Tenant Id",
-      type: "number",
+      type: "string",
       role: "primaryKey",
       hidden: 3 as HiddenAreas,
     },
@@ -326,6 +326,7 @@ export const Tenant = domain.types.Tenant = {
     externalId: {
       name: "externalId",
       displayName: "External Id",
+      description: "The external origin of this tenant. Other users who sign in with accounts from this external source will automatically join this organization.",
       type: "string",
       role: "value",
       dontSerialize: true,
@@ -413,21 +414,12 @@ export const User = domain.types.User = {
       },
       dontSerialize: true,
     },
-    effectivePermissions: {
-      name: "effectivePermissions",
-      displayName: "Effective Permissions",
-      description: "A summary of the effective permissions of the user, derived from their current roles.",
-      type: "string",
-      subtype: "multiline",
-      role: "value",
-      hidden: 1 as HiddenAreas,
-      dontSerialize: true,
-    },
     isGlobalAdmin: {
       name: "isGlobalAdmin",
       displayName: "Is Global Admin",
       type: "boolean",
       role: "value",
+      hidden: 3 as HiddenAreas,
     },
     id: {
       name: "id",
@@ -745,8 +737,16 @@ export const UserInfo = domain.types.UserInfo = {
     tenantId: {
       name: "tenantId",
       displayName: "Tenant Id",
-      type: "number",
+      type: "string",
       role: "value",
+    },
+    tenant: {
+      name: "tenant",
+      displayName: "Tenant",
+      type: "model",
+      get typeDef() { return (domain.types.Tenant as ModelType & { name: "Tenant" }) },
+      role: "value",
+      dontSerialize: true,
     },
   },
 }

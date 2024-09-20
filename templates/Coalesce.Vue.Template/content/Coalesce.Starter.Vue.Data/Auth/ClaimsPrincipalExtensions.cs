@@ -24,9 +24,7 @@ public static class ClaimsPrincipalExtensions
         => user.FindFirstValue(ClaimTypes.Name);
 #endif
 #if Tenancy
-    public static int? GetTenantId(this ClaimsPrincipal user)
-        => user.FindFirstValue(AppClaimTypes.TenantId) is string s
-            ? int.Parse(s)
-            : null;
+    public static string? GetTenantId(this ClaimsPrincipal user)
+        => user.FindFirstValue(AppClaimTypes.TenantId);
 #endif
 }

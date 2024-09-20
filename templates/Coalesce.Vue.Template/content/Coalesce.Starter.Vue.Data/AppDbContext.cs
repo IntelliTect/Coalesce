@@ -35,17 +35,17 @@ public class AppDbContext
     public bool SuppressAudit { get; set; } = false;
 
 #if Tenancy
-    private int? _TenantId;
+    private string? _TenantId;
 
     /// <summary>
     /// The tenant ID used to filter results and assign new objects to a tenant.
     /// </summary>
-    public int? TenantId
+    public string? TenantId
     {
         get => _TenantId;
         set
         {
-            if (_TenantId.HasValue && value != _TenantId)
+            if (_TenantId != null && value != _TenantId)
             {
                 throw new InvalidOperationException("Cannot change the TenantId of an existing DbContext. Make a new one through DbContextFactory to perform operations on different tenants.");
             }
@@ -53,7 +53,7 @@ public class AppDbContext
         }
     }
 
-    public int TenantIdOrThrow => TenantId ?? throw new InvalidOperationException("TenantId not set on AppDbContext");
+    public string TenantIdOrThrow => TenantId ?? throw new InvalidOperationException("TenantId not set on AppDbContext");
 #endif
 
     public AppDbContext() { }

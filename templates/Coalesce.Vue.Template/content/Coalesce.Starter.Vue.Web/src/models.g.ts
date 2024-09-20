@@ -227,6 +227,7 @@ export class Widget {
 export interface UserInfo extends Model<typeof metadata.UserInfo> {
   id: string | null
   userName: string | null
+  email: string | null
   fullName: string | null
   roles: string[] | null
   permissions: string[] | null

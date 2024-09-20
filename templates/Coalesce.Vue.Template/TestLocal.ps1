@@ -20,7 +20,11 @@ dotnet new coalescevue --help
 
 foreach ($testCase in $testCases) {
     Write-Output "-------TEST CASE------"
-    Write-Output (!$testCase ? "<no options enabled>" : $testCase);
+    if (-not $testCase) {
+        Write-Output "<no options enabled>"
+    } else {
+        Write-Output $testCase
+    }
     Write-Output "----------------------"
     Write-Output ""
 

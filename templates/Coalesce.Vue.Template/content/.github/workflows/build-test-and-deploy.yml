@@ -14,7 +14,7 @@ on:
 # 1. Set up the following secrets in your repository:
 #   AZURE_WEBAPP_PUBLISH_PROFILE
 #
-# 2. Set up the Production Environment in the GitHub Repository Settings.
+# 2. Set up the production Environment in the GitHub Repository Settings.
 #   Environment Protection Rules are recommended to prevent accidental deployments.
 #   https://docs.github.com/actions/managing-workflow-runs-and-deployments/managing-deployments/managing-environments-for-deployment#deployment-protection-rules
 #

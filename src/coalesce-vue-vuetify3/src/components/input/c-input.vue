@@ -172,6 +172,7 @@ function render() {
       ? mapValueToModel(props.modelValue, valueMeta)
       : props.modelValue,
   } as any;
+  if (data.rules === undefined) delete data.rules;
 
   // Handle components that delegate to other c-metadata-component based components.
   // These components don't need to have complex attributes computed

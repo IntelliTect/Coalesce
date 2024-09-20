@@ -630,6 +630,12 @@ export const UserInfo = domain.types.UserInfo = {
       type: "string",
       role: "value",
     },
+    email: {
+      name: "email",
+      displayName: "Email",
+      type: "string",
+      role: "value",
+    },
     fullName: {
       name: "fullName",
       displayName: "Full Name",

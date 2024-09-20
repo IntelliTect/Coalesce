@@ -14,6 +14,7 @@ namespace Coalesce.Starter.Vue.Web.Models
 
         private string _Id;
         private string _UserName;
+        private string _Email;
         private string _FullName;
         private System.Collections.Generic.ICollection<string> _Roles;
         private System.Collections.Generic.ICollection<string> _Permissions;
@@ -27,6 +28,11 @@ namespace Coalesce.Starter.Vue.Web.Models
         {
             get => _UserName;
             set { _UserName = value; Changed(nameof(UserName)); }
+        }
+        public string Email
+        {
+            get => _Email;
+            set { _Email = value; Changed(nameof(Email)); }
         }
         public string FullName
         {
@@ -55,6 +61,7 @@ namespace Coalesce.Starter.Vue.Web.Models
 
             if (ShouldMapTo(nameof(Id))) entity.Id = Id;
             if (ShouldMapTo(nameof(UserName))) entity.UserName = UserName;
+            if (ShouldMapTo(nameof(Email))) entity.Email = Email;
             if (ShouldMapTo(nameof(FullName))) entity.FullName = FullName;
             if (ShouldMapTo(nameof(Roles))) entity.Roles = Roles;
             if (ShouldMapTo(nameof(Permissions))) entity.Permissions = Permissions;
@@ -76,6 +83,7 @@ namespace Coalesce.Starter.Vue.Web.Models
             if (OnUpdate(entity, context)) return entity;
             if (ShouldMapTo(nameof(Id))) entity.Id = Id;
             if (ShouldMapTo(nameof(UserName))) entity.UserName = UserName;
+            if (ShouldMapTo(nameof(Email))) entity.Email = Email;
             if (ShouldMapTo(nameof(FullName))) entity.FullName = FullName;
 
             return entity;
@@ -88,6 +96,7 @@ namespace Coalesce.Starter.Vue.Web.Models
 
         public string Id { get; set; }
         public string UserName { get; set; }
+        public string Email { get; set; }
         public string FullName { get; set; }
         public System.Collections.Generic.ICollection<string> Roles { get; set; }
         public System.Collections.Generic.ICollection<string> Permissions { get; set; }
@@ -102,6 +111,7 @@ namespace Coalesce.Starter.Vue.Web.Models
 
             this.Id = obj.Id;
             this.UserName = obj.UserName;
+            this.Email = obj.Email;
             this.FullName = obj.FullName;
             this.Roles = obj.Roles;
             this.Permissions = obj.Permissions;

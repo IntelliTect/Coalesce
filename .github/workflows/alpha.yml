@@ -4,6 +4,9 @@ on:
   pull_request:
     branches: [dev, next]
     paths-ignore: ['docs/**']
+  push:
+    branches: [dev, next]
+    paths-ignore: ['docs/**']
   workflow_dispatch:
 
 jobs:
@@ -19,9 +22,3 @@ jobs:
     needs: meta
     with:
       COALESCE_VERSION: ${{ needs.meta.outputs.COALESCE_VERSION }}
-
-  publish:
-    if: success() && github.event_name == 'push'
-    uses: ./.github/workflows/part-publish.yml
-    needs: build
-    secrets: inherit

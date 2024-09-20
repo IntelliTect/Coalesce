@@ -4,21 +4,22 @@
     "outDir": "./dist",
     "declaration": true,
     "emitDeclarationOnly": true,
+
+    // Type checking is done according to tsconfig.json,
+    // which is configured to be able to use coalesce-vue internal types.
+
+    // However, we must emit the types using the build copy of coalesce-vue
+    // so that typescript doesn't also emit types for coalesce-vue.
+    // We have to turn off typechecking to do this because
+    // the @internal types in coalesce-vue aren't available there.
+    "noCheck": true,
+
     "rootDir": "./src",
     "paths": {
-      "coalesce-vue": ["coalesce-vue"],
-      "coalesce-vue/*": ["coalesce-vue/*"],
-      "coalesce-vue/lib/*": ["coalesce-vue/lib/*"]
+      "coalesce-vue": ["../coalesce-vue/lib"],
+      "coalesce-vue/*": ["../coalesce-vue/lib/*"],
+      "coalesce-vue/lib/*": ["../coalesce-vue/lib/*"]
     }
   },
-  "include": ["src/index.ts"],
-  "exclude": [
-    "node_modules",
-    "../coalesce-vue",
-    "coalesce-vue",
-    "coalesce-vue/**/*",
-    "../coalesce-vue/src",
-    "../coalesce-vue/src/*",
-    "../coalesce-vue/**/*"
-  ]
+  "include": ["src/index.ts"]
 }

@@ -20,7 +20,8 @@
       "coalesce-vue/*": ["../coalesce-vue/src/*"],
       "coalesce-vue/lib/*": ["../coalesce-vue/src/*"],
       "vue": ["node_modules/vue"],
-      "vue/*": ["node_modules/vue/*"]
+      "vue/*": ["node_modules/vue/*"],
+      "vue-router": ["node_modules/vue-router"]
     },
     "lib": ["esnext", "dom", "dom.iterable", "scripthost"],
     "types": ["node", "vue-router", "vuetify", "vitest/globals"]

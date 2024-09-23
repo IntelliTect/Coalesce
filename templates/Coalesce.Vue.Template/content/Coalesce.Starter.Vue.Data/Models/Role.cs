@@ -40,7 +40,7 @@ public class Role
 		public override ItemResult BeforeSave(SaveKind kind, Role? oldItem, Role item)
 		{
 #if Tenancy
-            if (AppClaimTypes.GlobalAdminRole.Equals(item.Name, StringComparison.OrdinalIgnoreCase))
+            if (AppClaimValues.GlobalAdminRole.Equals(item.Name, StringComparison.OrdinalIgnoreCase))
             {
                 return $"{item.Name} is a reserved role name and cannot be used.";
             }

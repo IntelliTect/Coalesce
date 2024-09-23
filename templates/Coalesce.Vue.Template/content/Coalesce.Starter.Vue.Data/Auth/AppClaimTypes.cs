@@ -2,10 +2,6 @@
 
 public static class AppClaimTypes
 {
-#if Tenancy
-    public const string GlobalAdminRole = "GlobalAdmin";
-#endif
-
     public const string Role = "role";
     public const string Permission = "perm";
     public const string UserId = "sub";
@@ -16,3 +12,11 @@ public static class AppClaimTypes
     public const string TenantId = "tid";
 #endif
 }
+
+#if Tenancy
+public static class AppClaimValues
+{
+    public const string GlobalAdminRole = "GlobalAdmin";
+    public const string NullTenantId = "00000000-0000-0000-0000-000000000000";
+}
+#endif

@@ -1,0 +1,43 @@
+﻿@page "/select-org"
+@model Coalesce.Starter.Vue.Web.Pages.SelectTenantModel
+@using Coalesce.Starter.Vue.Data.Auth
+
+@{
+    Layout = "_Layout.cshtml";
+    ViewData["Title"] = "Choose Organization";
+}
+
+<form method="post" class="form-horizontal">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="@nameof(Model.ReturnUrl)" value="@Model.ReturnUrl" />
+    <span asp-validation-for="tenantId" class="text-danger"></span>
+    @foreach (var tenant in Model.Tenants)
+    {
+        <button 
+            style="justify-content: center;"
+            type="submit" 
+            name="tenantId" 
+            value="@tenant.TenantId" 
+            title="Log into @tenant.Name"
+        >
+            @tenant.Name
+        </button>
+    }
+    @if (!Model.Tenants.Any())
+    {
+        <div style="margin: 30px 0">
+            <b>@User.GetUserName()</b> is a not a member of any organization.
+        </div>
+    }
+</form>
+
+<hr />
+
+<form method="post" class="form-horizontal" action="/Home/SignOut">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="@nameof(Model.ReturnUrl)" value="@Model.ReturnUrl" />
+    
+    <button type="submit" style="justify-content: center;">
+        Sign Out
+    </button>
+</form>

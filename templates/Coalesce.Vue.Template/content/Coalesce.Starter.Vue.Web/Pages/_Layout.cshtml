@@ -1,0 +1,92 @@
+﻿@*#if (AppInsights)
+@inject Microsoft.ApplicationInsights.AspNetCore.JavaScriptSnippet JavaScriptSnippet
+#endif*@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+
+    @*#if (AppInsights)
+    @Html.Raw(JavaScriptSnippet.FullScript)
+    #endif*@
+    <style>
+        :root {
+            line-height: 1.5;
+            font-weight: 400;
+            background: #28292f;
+        }
+
+        .card {
+            background: #f3f3f3;
+            color: #1F1F1F;
+            padding: 1.5em;
+            margin: auto;
+            text-align: center;
+            margin-top: 20vh;
+            border-radius: 8px;
+            box-shadow: 0px 0px 20px 13px #00000066;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            margin: 0;
+            display: flex;
+            place-items: center;
+            min-width: 320px;
+            min-height: 70vh;
+        }
+
+        form {
+            margin: 0;
+        }
+
+        button {
+            font-family: inherit;
+            font-size: 1em;
+            display: flex;
+            align-items: center;
+            margin: 1em 0;
+            border-radius: 80px;
+            padding: 10px 12px;
+            padding-right: 16px;
+            font-weight: 500;
+            background-color: #fff;
+            color: #1F1F1F;
+            border: 1px solid #747775;
+            line-height: 1;
+            width: 100%;
+            cursor: pointer;
+            transition: all 0.2s ease
+        }
+
+            button img {
+                margin-right: 10px;
+                height: 20px
+            }
+
+            button:hover {
+                background-color: #eee;
+            }
+
+            button:focus,
+            button:focus-visible {
+                outline: 4px auto -webkit-focus-ring-color;
+            }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div style="display: flex; font-size: 1.8em; align-items: center; justify-content: center; margin-bottom: 1em">
+            @* <img src="/favicon.svg" style="height: 1.3em; padding-right: 0.2em" /> *@
+            @ViewData["Title"]
+        </div>
+
+        @RenderBody()
+    </div>
+
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

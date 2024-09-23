@@ -37,7 +37,6 @@ public class SignInService(
         }
 
         var tenant = await GetAndAssignUserExternalTenant(user, remoteLoginInfo, gSuiteDomain);
-        // todo: assign a tenantID claim for this tenant
 #endif
 
 #if UserPictures
@@ -74,8 +73,7 @@ public class SignInService(
             return;
         }
 
-        var tenant = await GetAndAssignUserExternalTenant(user, remoteLoginInfo, entraTenantId);
-        // todo: assign a tenantID claim for this tenant
+        //var tenant = await GetAndAssignUserExternalTenant(user, remoteLoginInfo, entraTenantId);
 #endif
 
 #if UserPictures

@@ -45,9 +45,9 @@ public class AppDbContext
         get => _TenantId;
         set
         {
-            if (_TenantId != null && value != _TenantId)
+            if (_TenantId != null && value != _TenantId && ChangeTracker.Entries().Any())
             {
-                throw new InvalidOperationException("Cannot change the TenantId of an existing DbContext. Make a new one through DbContextFactory to perform operations on different tenants.");
+                throw new InvalidOperationException("Cannot change the TenantId of an existing DbContext. Make a new one through DbContextFactory to perform operations on different tenants, or clear the change tracker.");
             }
             _TenantId = value;
         }

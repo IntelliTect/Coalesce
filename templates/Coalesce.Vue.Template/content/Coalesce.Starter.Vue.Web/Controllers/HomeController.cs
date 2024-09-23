@@ -1,10 +1,13 @@
+using Coalesce.Starter.Vue.Data.Auth;
 using Coalesce.Starter.Vue.Data.Models;
 #if AppInsights
 using Microsoft.ApplicationInsights.AspNetCore;
 #endif
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.WebUtilities;
 using System.Web;
 
 namespace Coalesce.Starter.Vue.Web.Controllers;
@@ -31,6 +34,15 @@ public class HomeController(
         [FromServices] IWebHostEnvironment hostingEnvironment
     )
     {
+#if Tenancy
+        if (!User.HasTenant())
+        {
+            return Redirect(
+                QueryHelpers.AddQueryString("/select-org", "ReturnUrl", Request.GetEncodedPathAndQuery())
+            );
+        }
+#endif
+
         var fileInfo = hostingEnvironment.WebRootFileProvider.GetFileInfo("index.html");
         if (!fileInfo.Exists) return NotFound($"{hostingEnvironment.WebRootPath}/index.html was not found");
 
@@ -65,6 +77,7 @@ public class HomeController(
 
 #if Identity
     [HttpGet]
+    [HttpPost]
     public async new Task<ActionResult> SignOut()
     {
         await signInManager.SignOutAsync();

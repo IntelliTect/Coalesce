@@ -99,8 +99,8 @@ public class User : IdentityUser
     /// <summary>
     /// The user is a global administrator, able to perform administrative actions against all tenants.
     /// </summary>
-    [Read(AppClaimTypes.GlobalAdminRole)]
-    [Edit(AppClaimTypes.GlobalAdminRole)]
+    [Read(AppClaimValues.GlobalAdminRole)]
+    [Edit(AppClaimValues.GlobalAdminRole)]
     [Hidden]
     public bool IsGlobalAdmin { get; set; }
 #endif
@@ -202,7 +202,7 @@ public class User : IdentityUser
             // Since users exist across tenants, a user may only edit their own profile.
             // Admins within a particular tenant cannot edit the properties of a user
             // that will affect other tenants.
-            if (item.Id != User.GetUserId() && !User.IsInRole(AppClaimTypes.GlobalAdminRole)) return "Forbidden.";
+            if (item.Id != User.GetUserId() && !User.IsInRole(AppClaimValues.GlobalAdminRole)) return "Forbidden.";
 #endif
 
             if (oldItem != null)

@@ -23,6 +23,8 @@ public class Tenant
     {
         public override IQueryable<Tenant> GetQuery(IDataSourceParameters parameters)
         {
+            // By default, only allow the current tenant to be read and modified.
+            // If desired, this can be made more permissive.
             return base.GetQuery(parameters)
                 .Where(t => t.TenantId == User.GetTenantId());
         }

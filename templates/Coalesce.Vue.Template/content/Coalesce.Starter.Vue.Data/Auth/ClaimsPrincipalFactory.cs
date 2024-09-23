@@ -1,5 +1,4 @@
-﻿using Coalesce.Starter.Vue.Data.Models;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using System.Security;
 
@@ -14,6 +13,23 @@ public class ClaimsPrincipalFactory(
 {
     public override async Task<ClaimsPrincipal> CreateAsync(User user)
     {
+#if Tenancy
+        var tenantId = db.TenantId;
+        if (string.IsNullOrWhiteSpace(tenantId))
+        {
+            // User doesn't have a selected tenant. Pick one for them.
+            var membership = await db.TenantMemberships
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(tm => tm.UserId == user.Id);
+            
+            // Default to the "null" tenant if the user belongs to no tenants.
+            // This allows the rest of the sign-in process to function,
+            // but will never match a real tenant or produce real roles/permissions.
+            // This allows new users to accept invitations or create their own tenant.
+            tenantId = db.TenantId = membership?.TenantId ?? AppClaimValues.NullTenantId;
+        }
+
+#endif
         var identity = await GenerateClaimsAsync(user);
 
         // Attach additional custom claims
@@ -22,13 +38,13 @@ public class ClaimsPrincipalFactory(
 #if Tenancy
         if (user.IsGlobalAdmin)
         {
-            identity.AddClaim(new Claim(identity.RoleClaimType, AppClaimTypes.GlobalAdminRole));
+            identity.AddClaim(new Claim(identity.RoleClaimType, AppClaimValues.GlobalAdminRole));
         }
 
         // TODO: Validate that the user is still a member of the tenant.
         // TODO: Allow pulling a new tenantID from the httpcontext Items
         // for tenant switching
-        identity.AddClaim(new Claim(AppClaimTypes.TenantId, db.TenantIdOrThrow));
+        identity.AddClaim(new Claim(AppClaimTypes.TenantId, tenantId));
 #endif
 
         // Store all the permissions in a dedicated identity
@@ -51,7 +67,7 @@ public class ClaimsPrincipalFactory(
         ClaimsPrincipal result = new([identity, permissionIdentity]);
 
 #if Tenancy
-        if (!user.IsGlobalAdmin && result.IsInRole(AppClaimTypes.GlobalAdminRole))
+        if (!user.IsGlobalAdmin && result.IsInRole(AppClaimValues.GlobalAdminRole))
         {
             // Safety/sanity check that the user hasn't been able to elevate to global admin
             // by some unexpected claim or permission fulfilling the global admin role check:

@@ -123,7 +123,6 @@ namespace IntelliTect.Coalesce.Validation
                         if (prop.ReferenceNavigationProperty is not null)
                         {
                             assert.IsNotNull(prop.ReferenceNavigationProperty.Object, "Object property related object not found.");
-                            assert.IsNotNull(prop.ReferenceNavigationProperty.Object?.PrimaryKey, "No primary key on type of this ID's Navigation Property.");
                         }
 
                         if (prop.Type.IsCollection)

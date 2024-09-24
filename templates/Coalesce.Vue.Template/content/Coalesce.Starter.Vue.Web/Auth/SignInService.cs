@@ -185,7 +185,7 @@ public class SignInService(
             await db.SaveChangesAsync();
 
             db.TenantId = tenant.TenantId;
-            new DatabaseSeeder(db).SeedNewTenant(tenant.TenantId, user.Id);
+            new DatabaseSeeder(db).SeedNewTenant(tenant, user.Id);
         }
         db.TenantId = tenant.TenantId;
 

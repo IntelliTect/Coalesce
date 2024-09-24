@@ -7,6 +7,10 @@ public class SecurityService()
     [Coalesce, Execute(HttpMethod = HttpMethod.Get)]
     public UserInfo WhoAmI(ClaimsPrincipal user, AppDbContext db)
     {
+#if Tenancy
+        var tenant = db.Tenants.Find(user.GetTenantId());
+#endif
+
         return new UserInfo
         {
 #if Identity
@@ -32,7 +36,7 @@ public class SecurityService()
 
 #if Tenancy
             TenantId = user.GetTenantId(),
-            Tenant = db.Tenants.Find(user.GetTenantId())
+            TenantName = tenant?.Name,
 #endif
         };
     }

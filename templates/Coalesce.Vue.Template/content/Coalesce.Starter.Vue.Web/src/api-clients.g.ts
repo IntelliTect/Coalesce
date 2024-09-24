@@ -41,6 +41,15 @@ export class UserApiClient extends ModelApiClient<$models.User> {
     return this.$invoke($method, $params, $config)
   }
   
+  public invite(email: string | null, role?: $models.Role | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<void>> {
+    const $method = this.$metadata.methods.invite
+    const $params =  {
+      email,
+      role,
+    }
+    return this.$invoke($method, $params, $config)
+  }
+  
 }
 
 

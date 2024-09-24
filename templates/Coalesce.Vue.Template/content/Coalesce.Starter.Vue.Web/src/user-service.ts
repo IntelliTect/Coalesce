@@ -14,6 +14,21 @@ securityService.whoAmI.onFulfilled(() => {
   window.appInsights?.setAuthenticatedUserContext(userInfo.value.userName);
 });
 //#endif
+//#if Tenancy
+let initialTenantId: string | null = null;
+securityService.whoAmI.onFulfilled(() => {
+  const tid = userInfo.value.tenantId;
+  if (initialTenantId && initialTenantId != tid) {
+    console.warn("Tenant has changed. Forcing page reload.");
+    window.location.reload();
+    return new Promise<void>(() => {
+      /* Never resolving promise so the new tenant info doesn't have a change to mix in the UI with the old tenant info. */
+    });
+  } else {
+    initialTenantId = tid;
+  }
+});
+//#endif
 
 /** Properties about the currently authenticated user */
 export const userInfo = computed(() => {

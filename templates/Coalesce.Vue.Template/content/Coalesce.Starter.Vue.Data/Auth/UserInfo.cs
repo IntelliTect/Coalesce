@@ -15,6 +15,6 @@ public class UserInfo
 #endif
 #if Tenancy
     public string? TenantId { get; set; }
-    public Tenant? Tenant { get; set; }
+    public string? TenantName { get; set; }
 #endif
 }

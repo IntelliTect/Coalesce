@@ -19,6 +19,9 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using Coalesce.Starter.Vue.Web.Auth;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.AspNetCore.Mvc.Routing;
+using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(new WebApplicationOptions
 {
@@ -92,6 +95,16 @@ services.AddSwaggerGen(c =>
 
 
 services.AddScoped<SecurityService>();
+
+#if TenantMemberInvites
+services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
+services.AddScoped<IUrlHelper>(x => {
+    var actionContext = x.GetRequiredService<IActionContextAccessor>().ActionContext;
+    var factory = x.GetRequiredService<IUrlHelperFactory>();
+    return factory.GetUrlHelper(actionContext!);
+});
+services.AddScoped<InvitationService>();
+#endif
 
 
 #endregion

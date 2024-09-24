@@ -6,7 +6,7 @@
         <router-link to="/" style="color: inherit">
           Coalesce.Starter.Vue
           <!--#if: Tenancy  -->
-          &mdash; {{ $userInfo.tenant?.name }}
+          &mdash; {{ $userInfo.tenantName }}
           <!--#endif  -->
         </router-link>
       </v-toolbar-title>
@@ -53,8 +53,16 @@
 
           <!--#if Identity -->
           <v-divider />
+          <!--#if Tenancy -->
+          <v-divider />
           <v-list-item
-            href="/Home/SignOut"
+            href="/select-org"
+            prepend-icon="fa fa-building"
+            title="Switch Organization"
+          />
+          <!--#endif -->
+          <v-list-item
+            href="/sign-out"
             prepend-icon="fa fa-sign-out"
             title="Log Out"
           />
@@ -73,11 +81,7 @@
           title="Custom Page Example"
         />
         <!--#endif -->
-        <v-list-item
-          to="/admin"
-          prepend-icon="fas fa-cogs"
-          title="Admin Pages"
-        />
+        <v-list-item to="/admin" prepend-icon="fas fa-cogs" title="Admin" />
       </v-list>
     </v-navigation-drawer>
 

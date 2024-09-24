@@ -5,7 +5,9 @@ using IntelliTect.Coalesce.AuditLogging;
 using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.EntityFrameworkCore.ValueGeneration;
 using System.Linq.Expressions;
 using System.Security.Cryptography;
 
@@ -47,7 +49,7 @@ public class AppDbContext
         {
             if (_TenantId != null && value != _TenantId && ChangeTracker.Entries().Any())
             {
-                throw new InvalidOperationException("Cannot change the TenantId of an existing DbContext. Make a new one through DbContextFactory to perform operations on different tenants, or clear the change tracker.");
+                throw new InvalidOperationException("Cannot change the TenantId of an active DbContext. Make a new one through DbContextFactory to perform operations on different tenants, or call ChangeTracker.Clear().");
             }
             _TenantId = value;
         }
@@ -194,6 +196,10 @@ public class AppDbContext
             var tenantIdProp = model.FindProperty(nameof(ITenanted.TenantId));
             if (key is { Properties.Count: 1 } && tenantIdProp is not null && key.Properties.Single() != tenantIdProp)
             {
+                // A value generator is added so that entities can be .Add()ed to the DbContext
+                // while their TenantID is still null (if EF can't figure out the TenantId through any other navigation prop).
+                tenantIdProp.SetValueGeneratorFactory((p,t) => new TenantIdValueGenerator());
+
                 var pkProp = key.Properties.Single();
                 var oldPkGenerated = pkProp.ValueGenerated;
 
@@ -243,6 +249,13 @@ public class AppDbContext
     }
 
 #if Tenancy
+    class TenantIdValueGenerator : ValueGenerator<string>
+    {
+        public override bool GeneratesTemporaryValues => false;
+
+        public override string Next(EntityEntry entry) => ((AppDbContext)entry.Context).TenantIdOrThrow;
+    }
+
     class TenantInterceptor : SaveChangesInterceptor
     {
         public override InterceptionResult<int> SavingChanges(DbContextEventData eventData, InterceptionResult<int> result)

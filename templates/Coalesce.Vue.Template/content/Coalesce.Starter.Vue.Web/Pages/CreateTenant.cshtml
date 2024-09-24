@@ -2,15 +2,12 @@
 @model Coalesce.Starter.Vue.Web.Pages.CreateTenantModel
 
 @{
-    Layout = "_Layout.cshtml";
     ViewData["Title"] = "New Organization";
 }
 
 <div asp-validation-summary="All" class="text-danger"></div>
 
-<form method="post" style="min-width: 350px">
-    @Html.AntiForgeryToken()
-
+<form method="post">
     <div class="mb-3">
         <label asp-for="Name" class="form-label"></label>
         <input asp-for="Name" class="form-control" autofocus />

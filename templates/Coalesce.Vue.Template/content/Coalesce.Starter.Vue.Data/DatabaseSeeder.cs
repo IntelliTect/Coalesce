@@ -7,23 +7,25 @@ public class DatabaseSeeder(AppDbContext db)
     public void Seed()
     {
 #if Tenancy
-        // TODO: create initial tenant only if not externally sourced
+#if !TenantCreateExternal
         if (!db.Tenants.Any())
         {
             var tenant = new Tenant { Name = "Demo Tenant" };
             db.Add(tenant);
             db.SaveChanges();
 
-            SeedNewTenant(tenant.TenantId);
+            SeedNewTenant(tenant);
         }
+#endif
 #elif Identity
         SeedRoles();
 #endif
     }
 
 #if Tenancy
-    public void SeedNewTenant(string tenantId, string? userId = null)
+    public void SeedNewTenant(Tenant tenant, string? userId = null)
     {
+        var tenantId = tenant.TenantId;
         db.TenantId = tenantId;
 
 #if Identity
@@ -32,8 +34,8 @@ public class DatabaseSeeder(AppDbContext db)
         if (userId is not null)
         {
             // Give the first user in the tenant all roles so there is an initial admin.
-            db.AddRange(db.Roles.Select(r => new UserRole { Role = r, UserId = userId, TenantId = db.TenantId }));
-            db.Add(new TenantMembership { TenantId = tenantId, UserId = userId });
+            db.AddRange(db.Roles.Select(r => new UserRole { Role = r, UserId = userId }));
+            db.Add(new TenantMembership { UserId = userId });
         }
 
         db.SaveChanges();

@@ -271,7 +271,7 @@ export interface UserInfo extends Model<typeof metadata.UserInfo> {
   roles: string[] | null
   permissions: string[] | null
   tenantId: string | null
-  tenant: Tenant | null
+  tenantName: string | null
 }
 export class UserInfo {
   

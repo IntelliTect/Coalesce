@@ -6,18 +6,26 @@
 @{
     var externalLogins = (await schemeProvider.GetAllSchemesAsync()).Where(s => s.DisplayName != null);
 
-    Layout = "_Layout.cshtml";
     ViewData["Title"] = "Sign In";
 }
 
+@*#if TenantMemberInvites *@
+@if (Model.ReturnUrl?.StartsWith("/invitation") == true)
+{
+    <div class="alert alert-primary" role="alert">
+        You have been invited to join an organization!
+        <br />
+        Sign in or create an account to continue.
+    </div>
+}
+@*#endif *@
 <form method="post">
-    @Html.AntiForgeryToken()
     <input type="hidden" name="@nameof(Model.ReturnUrl)" value="@Model.ReturnUrl" />
 
-    <div class="d-grid gap-2">
+    <div class="d-grid gap-3">
     @foreach (var provider in externalLogins)
     {
-        <button type="submit" name="provider" value="@provider.Name" title="Log in with @provider.DisplayName" class="btn btn-outline-dark text-start">
+        <button type="submit" name="provider" value="@provider.Name" title="Log in with @provider.DisplayName" class="btn btn-outline-dark rounded-pill">
             <img src="/@provider.Name-logo.svg" />
             Sign in with @provider.DisplayName
         </button>

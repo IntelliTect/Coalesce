@@ -485,6 +485,38 @@ export const User = domain.types.User = {
         role: "value",
       },
     },
+    invite: {
+      name: "invite",
+      displayName: "Invite",
+      transportType: "item",
+      httpMethod: "POST",
+      isStatic: true,
+      params: {
+        email: {
+          name: "email",
+          displayName: "Email",
+          type: "string",
+          subtype: "email",
+          role: "value",
+          rules: {
+            required: val => (val != null && val !== '') || "Email is required.",
+          }
+        },
+        role: {
+          name: "role",
+          displayName: "Role",
+          type: "model",
+          get typeDef() { return (domain.types.Role as ModelType & { name: "Role" }) },
+          role: "value",
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "void",
+        role: "value",
+      },
+    },
   },
   dataSources: {
     defaultSource: {
@@ -740,13 +772,11 @@ export const UserInfo = domain.types.UserInfo = {
       type: "string",
       role: "value",
     },
-    tenant: {
-      name: "tenant",
-      displayName: "Tenant",
-      type: "model",
-      get typeDef() { return (domain.types.Tenant as ModelType & { name: "Tenant" }) },
+    tenantName: {
+      name: "tenantName",
+      displayName: "Tenant Name",
+      type: "string",
       role: "value",
-      dontSerialize: true,
     },
   },
 }

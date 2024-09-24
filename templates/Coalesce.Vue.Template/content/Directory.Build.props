@@ -5,8 +5,6 @@
     <Nullable>enable</Nullable>
 
     <AccelerateBuildsInVisualStudio>true</AccelerateBuildsInVisualStudio>
-    <TypeScriptCompileBlocked>true</TypeScriptCompileBlocked>
-    <TypeScriptToolsVersion>5.5</TypeScriptToolsVersion>
 
     <CoalesceVersion>5.0.0</CoalesceVersion> 
 

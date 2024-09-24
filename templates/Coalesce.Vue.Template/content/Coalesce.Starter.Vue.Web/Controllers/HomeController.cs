@@ -1,22 +1,16 @@
 using Coalesce.Starter.Vue.Data.Auth;
-using Coalesce.Starter.Vue.Data.Models;
 #if AppInsights
 using Microsoft.ApplicationInsights.AspNetCore;
 #endif
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.Extensions;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
 using System.Web;
 
 namespace Coalesce.Starter.Vue.Web.Controllers;
 
-public class HomeController(
-#if Identity
-    SignInManager<User> signInManager
-#endif
-) : Controller
+public class HomeController() : Controller
 {
     /// <summary>
     /// Spa route for vue-based parts of the app
@@ -37,9 +31,7 @@ public class HomeController(
 #if Tenancy
         if (!User.HasTenant())
         {
-            return Redirect(
-                QueryHelpers.AddQueryString("/select-org", "ReturnUrl", Request.GetEncodedPathAndQuery())
-            );
+            return RedirectToPage("/SelectTenant", new { ReturnUrl = Request.GetEncodedPathAndQuery() });
         }
 #endif
 
@@ -74,14 +66,4 @@ public class HomeController(
 
         static string JsEncode(string s) => HttpUtility.JavaScriptStringEncode(s);
     }
-
-#if Identity
-    [HttpGet]
-    [HttpPost]
-    public async new Task<ActionResult> SignOut()
-    {
-        await signInManager.SignOutAsync();
-        return Redirect("/");
-    }
-#endif
 }

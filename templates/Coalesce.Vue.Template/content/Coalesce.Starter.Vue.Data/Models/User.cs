@@ -143,31 +143,62 @@ public class User : IdentityUser
 
 #if TenantMemberInvites
     [Coalesce, Execute(Roles = nameof(Permission.UserAdmin))]
-    public ItemResult Invite(
+    public static async Task<ItemResult> Invite(
         ClaimsPrincipal callingUser, 
-        AppDbContext db, 
-        [DataType(DataType.EmailAddress)] string email, 
-        List<Role> roles
+        AppDbContext db,
+        [Inject] InvitationService invitationService,
+        [DataType(DataType.EmailAddress)] string email,
+        Role? role
     )
     {
-        var user = db.Users.Where(u => u.Email == email && u.EmailConfirmed).FirstOrDefault();
+        Role[] roles = role is null ? [] : [role];
+
+        var invitation = new UserInvitation
+        {
+            Email = email,
+            Issued = DateTimeOffset.Now,
+            Roles = roles.Select(r => r.Id).ToArray(),
+            TenantId = db.TenantIdOrThrow
+        };
+
+        var user = await db.Users
+            .Where(u => u.Email == email && u.EmailConfirmed)
+            .FirstOrDefaultAsync();
+
         if (user is not null)
         {
-            if (db.TenantMemberships.Any(m => m.User == user))
-            {
-                return "A user with that email address already belongs to this organization.";
-            }
-
-            db.TenantMemberships.Add(new() { User = user });
-            db.UserRoles.AddRange(roles.Select(r => new UserRole { Role = r, User = user }));
-
-            return new(true, "The user was added to this organization. They can access it with their existing account.");
+            return await AcceptInvitation(db, invitation, user);
         }
 
-        // TODO: Generate link
-        // TODO: Pre-emptively create user and assign membership
-        return "NYI";
+        var link = invitationService.CreateInvitationLink(invitation);
+        return new(true, link);
     }
+
+    public static async Task<ItemResult> AcceptInvitation(
+        AppDbContext db,
+        UserInvitation invitation,
+        User? acceptingUser
+    )
+    {
+        var tenant = await db.Tenants.FindAsync(invitation.TenantId);
+
+        if (acceptingUser is null) return "User not found";
+        if (tenant is null) return "Tenant not found";
+
+        db.TenantId = invitation.TenantId;
+
+        if (await db.TenantMemberships.AnyAsync(m => m.User == acceptingUser))
+        {
+            return $"{acceptingUser.UserName ?? acceptingUser.Email} is already a member of {tenant.Name}.";
+        }
+
+        db.TenantMemberships.Add(new() { User = acceptingUser });
+        db.UserRoles.AddRange(invitation.Roles.Select(rid => new UserRole { RoleId = rid, User = acceptingUser }));
+        await db.SaveChangesAsync();
+
+        return new(true, $"{acceptingUser.UserName ?? acceptingUser.Email} has been added as a member of {tenant.Name}.");
+    }
+
 #endif
 #endif
 

@@ -8,7 +8,6 @@
 <div asp-validation-summary="All" class="text-danger"></div>
 
 <form method="post" class="d-grid gap-2">
-    @Html.AntiForgeryToken()
     <input type="hidden" name="@nameof(Model.ReturnUrl)" value="@Model.ReturnUrl" />
     @foreach (var tenant in Model.Tenants)
     {
@@ -39,8 +38,7 @@
 </form>
 @*#endif*@
 
-<form method="post" action="/Home/SignOut" class="d-grid gap-2 mt-3">
-    @Html.AntiForgeryToken()
+<form method="post" action="/sign-out" class="d-grid gap-2 mt-3">
     <input type="hidden" name="@nameof(Model.ReturnUrl)" value="@Model.ReturnUrl" />
     
     <button type="submit" class="btn btn-text">

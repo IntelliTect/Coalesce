@@ -167,6 +167,17 @@ defineProps(UserViewModel, $metadata.User)
 export class UserListViewModel extends ListViewModel<$models.User, $apiClients.UserApiClient, UserViewModel> {
   static DataSources = $models.User.DataSources;
   
+  public get invite() {
+    const invite = this.$apiClient.$makeCaller(
+      this.$metadata.methods.invite,
+      (c, email: string | null, role?: $models.Role | null) => c.invite(email, role),
+      () => ({email: null as string | null, role: null as $models.Role | null, }),
+      (c, args) => c.invite(args.email, args.role))
+    
+    Object.defineProperty(this, 'invite', {value: invite});
+    return invite
+  }
+  
   constructor() {
     super($metadata.User, new $apiClients.UserApiClient())
   }

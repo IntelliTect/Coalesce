@@ -146,5 +146,40 @@ namespace Coalesce.Starter.Vue.Web.Api
             var _result = new ItemResult(_methodResult);
             return _result;
         }
+
+        /// <summary>
+        /// Method: Invite
+        /// </summary>
+        [HttpPost("Invite")]
+        [Authorize(Roles = "UserAdmin")]
+        public virtual async Task<ItemResult> Invite(
+            [FromServices] Coalesce.Starter.Vue.Data.Auth.InvitationService invitationService,
+            [FromForm(Name = "email")] string email,
+            [FromForm(Name = "role")] RoleParameter role)
+        {
+            var _params = new
+            {
+                email = email,
+                role = role
+            };
+
+            if (Context.Options.ValidateAttributesForMethods)
+            {
+                var _validationResult = ItemResult.FromParameterValidation(
+                    GeneratedForClassViewModel!.MethodByName("Invite"), _params, HttpContext.RequestServices);
+                if (!_validationResult.WasSuccessful) return _validationResult;
+            }
+
+            var _mappingContext = new MappingContext(Context);
+            var _methodResult = await Coalesce.Starter.Vue.Data.Models.User.Invite(
+                User,
+                Db,
+                invitationService,
+                _params.email,
+                _params.role.MapToNew(_mappingContext)
+            );
+            var _result = new ItemResult(_methodResult);
+            return _result;
+        }
     }
 }

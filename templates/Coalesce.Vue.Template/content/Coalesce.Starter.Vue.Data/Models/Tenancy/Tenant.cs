@@ -14,9 +14,11 @@ public class Tenant
 
     public required string Name { get; set; }
 
+#if TenantCreateExternal
     [Read]
     [Description("The external origin of this tenant. Other users who sign in with accounts from this external source will automatically join this organization.")]
     public string? ExternalId { get; set; }
+#endif
 
     [DefaultDataSource]
     public class DefaultSource(CrudContext<AppDbContext> context) : AppDataSource<Tenant>(context)

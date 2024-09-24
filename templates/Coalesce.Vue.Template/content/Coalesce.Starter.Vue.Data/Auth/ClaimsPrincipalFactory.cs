@@ -20,6 +20,7 @@ public class ClaimsPrincipalFactory(
             // User doesn't have a selected tenant. Pick one for them.
             var membership = await db.TenantMemberships
                 .IgnoreQueryFilters()
+                .OrderBy(m => m.TenantMembershipId) // Prefer oldest membership
                 .FirstOrDefaultAsync(tm => tm.UserId == user.Id);
             
             // Default to the "null" tenant if the user belongs to no tenants.

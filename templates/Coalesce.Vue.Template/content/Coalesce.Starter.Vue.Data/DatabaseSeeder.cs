@@ -14,7 +14,7 @@ public class DatabaseSeeder(AppDbContext db)
             db.Add(tenant);
             db.SaveChanges();
 
-            SeedTenant(tenant.TenantId);
+            SeedNewTenant(tenant.TenantId);
         }
 #elif Identity
         SeedRoles();
@@ -22,12 +22,21 @@ public class DatabaseSeeder(AppDbContext db)
     }
 
 #if Tenancy
-    public void SeedTenant(string tenantId)
+    public void SeedNewTenant(string tenantId, string? userId = null)
     {
         db.TenantId = tenantId;
 
 #if Identity
         SeedRoles();
+
+        if (userId is not null)
+        {
+            // Give the first user in the tenant all roles so there is an initial admin.
+            db.AddRange(db.Roles.Select(r => new UserRole { Role = r, UserId = userId, TenantId = db.TenantId }));
+            db.Add(new TenantMembership { TenantId = tenantId, UserId = userId });
+        }
+
+        db.SaveChanges();
 #endif
     }
 #endif

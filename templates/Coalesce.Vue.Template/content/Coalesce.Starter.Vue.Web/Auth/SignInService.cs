@@ -73,7 +73,7 @@ public class SignInService(
             return;
         }
 
-        //var tenant = await GetAndAssignUserExternalTenant(user, remoteLoginInfo, entraTenantId);
+        var tenant = await GetAndAssignUserExternalTenant(user, remoteLoginInfo, entraTenantId);
 #endif
 
 #if UserPictures
@@ -185,12 +185,7 @@ public class SignInService(
             await db.SaveChangesAsync();
 
             db.TenantId = tenant.TenantId;
-            new DatabaseSeeder(db).SeedTenant(tenant.TenantId);
-
-            // Give the first user in the tenant all roles so there is an initial admin.
-            user.UserRoles = db.Roles.Select(r => new UserRole { Role = r, User = user, TenantId = db.TenantId }).ToList();
-
-            await db.SaveChangesAsync();
+            new DatabaseSeeder(db).SeedNewTenant(tenant.TenantId, user.Id);
         }
         db.TenantId = tenant.TenantId;
 

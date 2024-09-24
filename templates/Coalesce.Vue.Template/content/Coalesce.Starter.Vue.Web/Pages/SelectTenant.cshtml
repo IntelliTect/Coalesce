@@ -1,20 +1,18 @@
 ﻿@page "/select-org"
 @model Coalesce.Starter.Vue.Web.Pages.SelectTenantModel
-@using Coalesce.Starter.Vue.Data.Auth
 
 @{
-    Layout = "_Layout.cshtml";
     ViewData["Title"] = "Choose Organization";
 }
 
-<form method="post" class="form-horizontal">
+<div asp-validation-summary="All" class="text-danger"></div>
+
+<form method="post" class="d-grid gap-2">
     @Html.AntiForgeryToken()
     <input type="hidden" name="@nameof(Model.ReturnUrl)" value="@Model.ReturnUrl" />
-    <span asp-validation-for="tenantId" class="text-danger"></span>
     @foreach (var tenant in Model.Tenants)
     {
-        <button 
-            style="justify-content: center;"
+        <button class="btn btn-primary"
             type="submit" 
             name="tenantId" 
             value="@tenant.TenantId" 
@@ -25,19 +23,27 @@
     }
     @if (!Model.Tenants.Any())
     {
-        <div style="margin: 30px 0">
+        <p>
             <b>@User.GetUserName()</b> is a not a member of any organization.
-        </div>
+        </p>
     }
 </form>
 
 <hr />
 
-<form method="post" class="form-horizontal" action="/Home/SignOut">
+@*#if (TenantCreateSelf)*@
+    <form action="/new-org" method="GET" class="d-grid gap-2">
+    <button class="btn @(!Model.Tenants.Any() ? "btn-primary" : "btn-outline-dark")">
+        Create Organization
+    </button>
+</form>
+@*#endif*@
+
+<form method="post" action="/Home/SignOut" class="d-grid gap-2 mt-3">
     @Html.AntiForgeryToken()
     <input type="hidden" name="@nameof(Model.ReturnUrl)" value="@Model.ReturnUrl" />
     
-    <button type="submit" style="justify-content: center;">
+    <button type="submit" class="btn btn-text">
         Sign Out
     </button>
 </form>

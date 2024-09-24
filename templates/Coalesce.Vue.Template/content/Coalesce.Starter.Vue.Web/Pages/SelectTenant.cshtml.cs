@@ -17,7 +17,7 @@ namespace Coalesce.Starter.Vue.Web.Pages
 
         public List<Tenant> Tenants { get; private set; } = [];
 
-        public async void OnGet()
+        public async Task OnGet()
         {
             await LoadTenants();
         }

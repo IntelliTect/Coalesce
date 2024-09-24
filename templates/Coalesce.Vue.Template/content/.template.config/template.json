@@ -144,8 +144,13 @@
             "**/Tenant.cs",
             "**/TenantMembership.cs",
             "**/ITenanted.cs",
-            "**/TenantedBase.cs"
+            "**/TenantedBase.cs",
+            "**/SelectTenant.*"
           ]
+        },
+        {
+          "condition": "!TenantCreateSelf",
+          "exclude": ["**/CreateTenant.*"]
         },
         {
           "condition": "!(UserPictures && Identity)",

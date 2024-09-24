@@ -10,14 +10,17 @@
     ViewData["Title"] = "Sign In";
 }
 
-<form method="post" class="form-horizontal">
+<form method="post">
     @Html.AntiForgeryToken()
     <input type="hidden" name="@nameof(Model.ReturnUrl)" value="@Model.ReturnUrl" />
+
+    <div class="d-grid gap-2">
     @foreach (var provider in externalLogins)
     {
-        <button type="submit" name="provider" value="@provider.Name" title="Log in with @provider.DisplayName">
+        <button type="submit" name="provider" value="@provider.Name" title="Log in with @provider.DisplayName" class="btn btn-outline-dark text-start">
             <img src="/@provider.Name-logo.svg" />
             Sign in with @provider.DisplayName
         </button>
     }
+    </div>
 </form>

@@ -34,7 +34,7 @@ namespace Coalesce.Starter.Vue.Web.Pages
             DecodeInvitation();
             if (!ModelState.IsValid) return Page();
 
-            db.ResetToTenant(Invitation.TenantId);
+            db.ForceSetTenant(Invitation.TenantId);
 
             var user = await db.Users.FindAsync(User.GetUserId());
             var result = await Data.Models.User.AcceptInvitation(db, Invitation, user);

@@ -35,7 +35,7 @@ namespace Coalesce.Starter.Vue.Web.Pages
             }
             if (!ModelState.IsValid) return Page();
 
-            db.ResetToTenant(tenantId);
+            db.ForceSetTenant(tenantId);
 
             var user = await db.Users.FindAsync(User.GetUserId());
             await signInManager.RefreshSignInAsync(user!);

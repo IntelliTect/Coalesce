@@ -28,7 +28,7 @@ public class ClaimsPrincipalFactory(
             // but will never match a real tenant or produce real roles/permissions.
             // This allows new users to accept invitations or create their own tenant.
             tenantId = membership?.TenantId ?? AppClaimValues.NullTenantId;
-            db.ResetToTenant(tenantId);
+            db.ForceSetTenant(tenantId);
         }
         else
         {
@@ -39,7 +39,7 @@ public class ClaimsPrincipalFactory(
                 // This is a last-chance sanity check and should be impossible as long as the user's
                 // SecurityStamp is rerolled when they're evicted from a tenant. If the stamp isn't rerolled,
                 // a user could continually refresh their session within a tenant they were removed from.
-                db.ResetToTenant(tenantId = AppClaimValues.NullTenantId);
+                db.ForceSetTenant(tenantId = AppClaimValues.NullTenantId);
             }
         }
 

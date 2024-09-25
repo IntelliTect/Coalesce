@@ -1,3 +1,8 @@
+# 5.0.2
+
+- feat: better "not found" messages from data sources when the ID is null or empty string. (#447)
+- fix(template): adjust manual chunking configuration to avoid circular deps. (#455)
+
 # 5.0.1
 
 - fix: `c-input` once again respects the validation rules defined by the bound ViewModel.

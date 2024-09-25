@@ -59,7 +59,7 @@ public class CoalesceAudit
                     audit.Entries.Add(auditEntry);
 
                     auditEntry.Properties = item.Properties
-                        .Where(p => p.Metadata.IsKey() || audit.Configuration.IsAuditedProperty(p))
+                        .Where(p => audit.Configuration.IsAuditedProperty(p))
                         .Select(p => new AuditEntryProperty
                         {
                             Parent = auditEntry,
@@ -80,10 +80,10 @@ public class CoalesceAudit
                     audit.Entries.Add(auditEntry);
 
                     auditEntry.Properties = item.Properties
-                        .Where(p => p.Metadata.IsKey() || (
+                        .Where(p => 
                             audit.Configuration.IsAuditedProperty(p) && 
                             !object.Equals(p.CurrentValue, p.OriginalValue)
-                        ))
+                        )
                         .Select(p => new AuditEntryProperty
                         {
                             Parent = auditEntry,
@@ -106,7 +106,7 @@ public class CoalesceAudit
                 case AuditEntryState.EntityAdded:
                     foreach (var propertyEntry in auditEntry.Entry.Properties)
                     {
-                        if (!propertyEntry.Metadata.IsKey() && !auditEntry.Parent.Configuration.IsAuditedProperty(propertyEntry))
+                        if (!auditEntry.Parent.Configuration.IsAuditedProperty(propertyEntry))
                         {
                             continue;
                         }

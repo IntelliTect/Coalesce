@@ -31,7 +31,7 @@ namespace Coalesce.Starter.Vue.Web.Pages
             db.Tenants.Add(tenant);
             await db.SaveChangesAsync();
 
-            db.ChangeTracker.Clear();
+            db.ResetToTenant(tenant.TenantId);
             new DatabaseSeeder(db).SeedNewTenant(tenant, User.GetUserId());
 
             // Sign the user into the new tenant (uses `db.TenantId`).

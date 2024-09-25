@@ -3,6 +3,7 @@ using Coalesce.Starter.Vue.Data.Auth;
 using Coalesce.Starter.Vue.Data.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
+using System.Security.Claims;
 
 namespace Coalesce.Starter.Vue.Web.Auth;
 
@@ -75,6 +76,7 @@ public static class AuthenticationConfiguration
         {
             c.LoginPath = "/sign-in"; // Razor page "Pages/SignIn.cshtml"
 
+#if Tenancy
             var oldOnValidate = c.Events.OnValidatePrincipal;
             c.Events.OnValidatePrincipal = async ctx =>
             {
@@ -86,6 +88,7 @@ public static class AuthenticationConfiguration
 
                 await oldOnValidate(ctx);
             };
+#endif
         });
     }
 

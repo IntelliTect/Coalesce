@@ -27,7 +27,20 @@ public class ClaimsPrincipalFactory(
             // This allows the rest of the sign-in process to function,
             // but will never match a real tenant or produce real roles/permissions.
             // This allows new users to accept invitations or create their own tenant.
-            tenantId = db.TenantId = membership?.TenantId ?? AppClaimValues.NullTenantId;
+            tenantId = membership?.TenantId ?? AppClaimValues.NullTenantId;
+            db.ResetToTenant(tenantId);
+        }
+        else
+        {
+            var isTenantMember = await db.TenantMemberships
+                .AnyAsync(t => t.UserId == user.Id && t.TenantId == tenantId);
+            if (!isTenantMember)
+            {
+                // This is a last-chance sanity check and should be impossible as long as the user's
+                // SecurityStamp is rerolled when they're evicted from a tenant. If the stamp isn't rerolled,
+                // a user could continually refresh their session within a tenant they were removed from.
+                db.ResetToTenant(tenantId = AppClaimValues.NullTenantId);
+            }
         }
 
 #endif
@@ -42,9 +55,6 @@ public class ClaimsPrincipalFactory(
             identity.AddClaim(new Claim(identity.RoleClaimType, AppClaimValues.GlobalAdminRole));
         }
 
-        // TODO: Validate that the user is still a member of the tenant.
-        // TODO: Allow pulling a new tenantID from the httpcontext Items
-        // for tenant switching
         identity.AddClaim(new Claim(AppClaimTypes.TenantId, tenantId));
 #endif
 

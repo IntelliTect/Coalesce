@@ -171,6 +171,10 @@ public class User : IdentityUser
         }
 
         var link = invitationService.CreateInvitationLink(invitation);
+
+        // TODO: Implement email sending and send the invitation link directly to `email`.
+        // Returning it directly to the UI is a temporary measure.
+
         return new(true, link);
     }
 

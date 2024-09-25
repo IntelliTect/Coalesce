@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace Coalesce.Starter.Vue.Web.Pages
 {
@@ -32,11 +33,9 @@ namespace Coalesce.Starter.Vue.Web.Pages
             {
                 ModelState.AddModelError("tenantId", "Invalid Tenant");
             }
-
             if (!ModelState.IsValid) return Page();
 
-            db.ChangeTracker.Clear();
-            db.TenantId = tenantId;
+            db.ResetToTenant(tenantId);
 
             var user = await db.Users.FindAsync(User.GetUserId());
             await signInManager.RefreshSignInAsync(user!);

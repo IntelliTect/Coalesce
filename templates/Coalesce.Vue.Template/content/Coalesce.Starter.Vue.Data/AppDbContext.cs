@@ -49,13 +49,22 @@ public class AppDbContext
         {
             if (_TenantId != null && value != _TenantId && ChangeTracker.Entries().Any())
             {
-                throw new InvalidOperationException("Cannot change the TenantId of an active DbContext. Make a new one through DbContextFactory to perform operations on different tenants, or call ChangeTracker.Clear().");
+                throw new InvalidOperationException("Cannot change the TenantId of an active DbContext. Make a new one through DbContextFactory to perform operations on different tenants, or call ResetToTenant().");
             }
             _TenantId = value;
         }
     }
 
     public string TenantIdOrThrow => TenantId ?? throw new InvalidOperationException("TenantId not set on AppDbContext");
+
+    /// <summary>
+    /// Resets the <see cref="DbContext"/>'s change tracker and switches the current tenant to <paramref name="tenantId"/>.
+    /// </summary>
+    public void ResetToTenant(string tenantId)
+    {
+        ChangeTracker.Clear();
+        TenantId = TenantId;
+    }
 #endif
 
     public AppDbContext() { }

@@ -38,7 +38,7 @@
 </form>
 @*#endif*@
 
-<form method="post" action="/sign-out" class="d-grid gap-2 mt-3">
+<form method="post" asp-page="SignOut" class="d-grid gap-2 mt-3">
     <input type="hidden" name="@nameof(Model.ReturnUrl)" value="@Model.ReturnUrl" />
     
     <button type="submit" class="btn btn-text">

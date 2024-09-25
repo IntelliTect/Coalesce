@@ -177,15 +177,15 @@ namespace IntelliTect.Coalesce.TypeDefinition
             get
             {
                 var parameters = ClientParameters;
-                if (IsModelInstanceMethod)
+                if (IsModelInstanceMethod && Parent.PrimaryKey != null)
                 {
                     parameters = new[]
                     {
                         new ImplicitParameterViewModel(
                             this,
-                            Parent.PrimaryKey!,
+                            Parent.PrimaryKey,
                             "id", 
-                            "Primary Key" // TODO: Is this what we want? Also, i18n.
+                            "Primary Key"
                         )
                     }.Concat(parameters);
                 }

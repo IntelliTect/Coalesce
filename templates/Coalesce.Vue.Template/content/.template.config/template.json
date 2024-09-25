@@ -41,7 +41,7 @@
       "datatype": "bool",
       "displayName": "Sign-in with Microsoft",
       "description": "Adds Microsoft as an external authentication and account provider for Identity.",
-      "$coalesceRequires": ["and", "Identity"],
+      "$coalesceRequires": [ "and", "Identity" ],
       "$coalesceLink": "https://learn.microsoft.com/en-us/aspnet/core/security/authentication/social/microsoft-logins"
     },
     "GoogleAuth": {
@@ -49,7 +49,7 @@
       "datatype": "bool",
       "displayName": "Sign-in with Google",
       "description": "Adds Google as an external authentication and account provider for Identity.",
-      "$coalesceRequires": ["and", "Identity"],
+      "$coalesceRequires": [ "and", "Identity" ],
       "$coalesceLink": "https://learn.microsoft.com/en-us/aspnet/core/security/authentication/social/google-logins"
     },
     "UserPictures": {
@@ -57,7 +57,7 @@
       "datatype": "bool",
       "displayName": "User Profile Pictures",
       "description": "Adds infrastructure for acquiring, saving, and displaying user profile pictures.",
-      "$coalesceRequires": ["and", "Identity"]
+      "$coalesceRequires": [ "and", "Identity" ]
     },
     "TrackingBase": {
       "type": "parameter",
@@ -134,6 +134,13 @@
       "displayName": "CI: Azure Pipelines",
       "description": "Include an azure-pipelines.yml build template. For deployments, a release pipeline is recommended (which don't support YAML config files).",
       "$coalesceLink": "https://learn.microsoft.com/en-us/azure/devops/pipelines/create-first-pipeline?view=azure-devops&tabs=net%2Cbrowser"
+    },
+    "GithubActions": {
+      "type": "parameter",
+      "datatype": "bool",
+      "displayName": "CI: Github Actions",
+      "description": "Include an build-test-and-deploy.yml github action file template.",
+      "$coalesceLink": "https://docs.github.com/actions/use-cases-and-examples/deploying/deploying-net-to-azure-app-service"
     }
   },
   "sources": [
@@ -224,7 +231,11 @@
         },
         {
           "condition": "!AzurePipelines",
-          "exclude": ["**/azure-pipelines.yml"]
+          "exclude": [ "**/azure-pipelines.yml" ]
+        },
+        {
+          "condition": "!GithubActions",
+          "exclude": [ "**/.github" ]
         }
       ]
     }

@@ -301,11 +301,8 @@ export default defineComponent({
               // We need to mark the item as removed, but allow `emitInput` to handle
               // actually updating the collection bound to the input.
 
-              // @ts-expect-error internal state
               vm._isRemoved = true;
-              // @ts-ignore internal state
-              if (vm.$parent) {
-                // @ts-expect-error internal state
+              if (vm.$parent instanceof ViewModel) {
                 (vm.$parent.$removedItems ??= []).push(vm);
               }
             }

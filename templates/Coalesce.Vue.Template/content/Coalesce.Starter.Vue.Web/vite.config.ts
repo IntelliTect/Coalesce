@@ -24,7 +24,6 @@ export default defineConfig(async () => {
             // Workers can't be chunked with other things
             if (id.includes("worker")) return undefined;
 
-            if (id.match(/views/)) return "views";
             if (id.match(/vuetify/)) return "vuetify";
             if (id.match(/node_modules/)) return "vendor";
             return "index";

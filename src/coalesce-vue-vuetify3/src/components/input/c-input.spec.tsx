@@ -245,6 +245,22 @@ describe("CInput", () => {
   });
 
   describe("rules", () => {
+    test("implicit from metadata", async () => {
+      const model = new ComplexModelViewModel({ guid: "foo" });
+      const wrapper = mountApp(() => (
+        <VForm>
+          <CInput model={model} for="guid" />
+        </VForm>
+      ));
+
+      await wrapper.findComponent(VForm).vm.validate();
+
+      expect(wrapper.find(".v-input--error").exists()).toBeTruthy();
+      expect(wrapper.find(".v-messages").text()).toEqual(
+        "Guid does not match expected format."
+      );
+    });
+
     test("date - missing", async () => {
       const model = new ComplexModelViewModel({});
       const wrapper = mountApp(() => (

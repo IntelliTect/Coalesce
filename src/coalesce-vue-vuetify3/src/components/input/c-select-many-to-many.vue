@@ -323,11 +323,8 @@ function onInput(value: any[]) {
           // We need to mark the item as removed, but allow `emitInput` to handle
           // actually updating the collection bound to the input.
 
-          // @ts-expect-error internal state
           vm._isRemoved = true;
-          // @ts-ignore internal state
-          if (vm.$parent) {
-            // @ts-expect-error internal state
+          if (vm.$parent instanceof ViewModel) {
             (vm.$parent.$removedItems ??= []).push(vm);
           }
         }
@@ -340,14 +337,41 @@ function onInput(value: any[]) {
   // Check for added new items
   newItems.forEach((i) => {
     if (!existingItems.has(i)) {
-      const vm = ViewModelFactory.get(
-        i.$metadata.name,
-        i,
-        // All of the data of `i`, recursing into any nested objects, IS clean.
-        // However, `vm` itself is dirty because it is a brand new object with no PK.
-        true
-      );
-      vm.$isDirty = true;
+      let vm: ViewModel | undefined = undefined;
+
+      if (props.model instanceof ViewModel) {
+        // Look for a matching removed item (pending bulk save deletion):
+        const removedItems = props.model.$removedItems;
+        if (removedItems) {
+          const manyToMany = manyToManyMeta.value;
+          const itemIndex = removedItems.findIndex(
+            (x) =>
+              x.$metadata == i.$metadata &&
+              i[manyToMany.farForeignKey.name] ==
+                (x as any)[manyToMany.farForeignKey.name]
+          );
+
+          if (itemIndex >= 0) {
+            // We found a matching item that was previously flagged for removal
+            // (i.e. the user unchecked it moments ago). Restore it to prevent an unnecessary delete+create.
+            const item = removedItems[itemIndex];
+            removedItems.splice(itemIndex, 1);
+            item._isRemoved = false;
+            vm = item;
+          }
+        }
+      }
+
+      if (!vm) {
+        vm = ViewModelFactory.get(
+          i.$metadata.name,
+          i,
+          // All of the data of `i`, recursing into any nested objects, IS clean.
+          // However, `vm` itself is dirty because it is a brand new object with no PK.
+          true
+        );
+        vm.$isDirty = true;
+      }
       items.push(vm);
 
       if (props.model instanceof ViewModel && props.model.$isAutoSaveEnabled) {
@@ -360,9 +384,9 @@ function onInput(value: any[]) {
         vm.$save()
           .then(() => {
             // Save successful. No need to keep the state around.
-            emit("added", vm);
+            emit("added", vm!);
             currentLoaders.value = currentLoaders.value.filter(
-              (l) => l != vm.$save
+              (l) => l != vm!.$save
             );
           })
           .catch(() => {

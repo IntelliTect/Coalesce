@@ -1,3 +1,14 @@
+# 5.0.2
+
+- feat: better "not found" messages from data sources when the ID is null or empty string. (#447)
+- fix(template): adjust manual chunking configuration to avoid circular deps. (#455)
+- fix(audit): key props now respect configured property exclusions
+
+# 5.0.1
+
+- fix: `c-input` once again respects the validation rules defined by the bound ViewModel.
+- fix: `c-select-many-to-many`, when selecting an item, will now attempt to reuse a matching, previously removed item that has not yet been committed with a $bulkSave. This prevents unnecessary delete+create of the same item in a many-to-many when the user changes their mind about the inclusion of an item.
+
 # 5.0.0
 
 ## Breaking Changes

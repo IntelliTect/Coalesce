@@ -28,7 +28,7 @@
     "dist"
   ],
   "scripts": {
-    "build": "npm run build-local-deps && vite build && vue-tsc -p ./tsconfig.build-types.json && vue-tsc -p ./tsconfig.test-types.json && npm run buildts",
+    "build": "npm run build-local-deps && vite build && vue-tsc --noEmit && vue-tsc -p ./tsconfig.build-types.json && npm run buildts",
     "buildts": "tsc -p ./tsconfig.build-utils.json",
     "build-local-deps": "cd ../coalesce-vue && npm ci && npm run build",
     "test": "vitest",
@@ -61,7 +61,7 @@
     "eslint-plugin-vue": "^9.27.0",
     "jsdom": "^24.1.1",
     "sass": "^1.69.7",
-    "typescript": "5.3.3",
+    "typescript": "5.6.2",
     "unplugin-vue-components": "^0.27.4",
     "vite": "^5.3.4",
     "vitest": "^2.0.3",

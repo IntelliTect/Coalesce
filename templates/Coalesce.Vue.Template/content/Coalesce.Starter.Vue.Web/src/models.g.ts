@@ -59,6 +59,14 @@ export class AuditLog {
     Object.assign(this, AuditLog.map(data || {}));
   }
 }
+export namespace AuditLog {
+  export namespace DataSources {
+    
+    export class TenantedDataSource implements DataSource<typeof metadata.AuditLog.dataSources.tenantedDataSource> {
+      readonly $metadata = metadata.AuditLog.dataSources.tenantedDataSource
+    }
+  }
+}
 
 
 export interface AuditLogProperty extends Model<typeof metadata.AuditLogProperty> {
@@ -155,11 +163,12 @@ export namespace Tenant {
 
 export interface User extends Model<typeof metadata.User> {
   fullName: string | null
-  photoMD5: string | null
+  photoHash: string | null
   userName: string | null
   email: string | null
   emailConfirmed: boolean | null
   userRoles: UserRole[] | null
+  roleNames: string[] | null
   
   /** The user is a global administrator, able to perform administrative actions against all tenants. */
   isGlobalAdmin: boolean | null

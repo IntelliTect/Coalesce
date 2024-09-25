@@ -4,9 +4,11 @@
 [InternalUse]
 public class TenantMembership : TenantedBase
 {
-    public int TenantMembershipId { get; set; }
+    [Key]
+    [ForeignKey(nameof(User))]
+    public required string UserId { get; set; }
 
-    [Required]
-    public string UserId { get; set; } = default!;
     public User? User { get; set; }
+
+    // NB: The other half of this many-to-many join table is the Tenant, which comes from TenantedBase.
 }

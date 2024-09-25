@@ -184,6 +184,14 @@ export const AuditLog = domain.types.AuditLog = {
   methods: {
   },
   dataSources: {
+    tenantedDataSource: {
+      type: "dataSource",
+      name: "TenantedDataSource" as const,
+      displayName: "Tenanted Data Source",
+      isDefault: true,
+      props: {
+      },
+    },
   },
 }
 export const AuditLogProperty = domain.types.AuditLogProperty = {
@@ -349,7 +357,7 @@ export const User = domain.types.User = {
   name: "User" as const,
   displayName: "User",
   description: "A user profile within the application.",
-  get displayProp() { return this.props.id }, 
+  get displayProp() { return this.props.fullName }, 
   type: "model",
   controllerRoute: "User",
   get keyProp() { return this.props.id }, 
@@ -361,9 +369,9 @@ export const User = domain.types.User = {
       type: "string",
       role: "value",
     },
-    photoMD5: {
-      name: "photoMD5",
-      displayName: "Photo MD5",
+    photoHash: {
+      name: "photoHash",
+      displayName: "Photo Hash",
       type: "binary",
       base64: true,
       role: "value",
@@ -412,6 +420,20 @@ export const User = domain.types.User = {
         get nearForeignKey() { return (domain.types.UserRole as ModelType & { name: "UserRole" }).props.userId as ForeignKeyProperty },
         get nearNavigationProp() { return (domain.types.UserRole as ModelType & { name: "UserRole" }).props.user as ModelReferenceNavigationProperty },
       },
+      hidden: 3 as HiddenAreas,
+      dontSerialize: true,
+    },
+    roleNames: {
+      name: "roleNames",
+      displayName: "Roles",
+      type: "collection",
+      itemType: {
+        name: "$collectionItem",
+        displayName: "",
+        role: "value",
+        type: "string",
+      },
+      role: "value",
       dontSerialize: true,
     },
     isGlobalAdmin: {
@@ -451,7 +473,7 @@ export const User = domain.types.User = {
           displayName: "Etag",
           type: "binary",
           role: "value",
-          get source() { return (domain.types.User as ModelType & { name: "User" }).props.photoMD5 },
+          get source() { return (domain.types.User as ModelType & { name: "User" }).props.photoHash },
         },
       },
       return: {

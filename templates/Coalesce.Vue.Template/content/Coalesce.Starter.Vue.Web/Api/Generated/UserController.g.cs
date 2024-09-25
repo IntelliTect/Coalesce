@@ -93,7 +93,7 @@ namespace Coalesce.Starter.Vue.Web.Api
             }
             var item = itemResult.Object;
 
-            var _currentVaryValue = item.PhotoMD5;
+            var _currentVaryValue = item.PhotoHash;
             if (_currentVaryValue != default)
             {
                 var _expectedEtagHeader = new Microsoft.Net.Http.Headers.EntityTagHeaderValue('"' + Microsoft.AspNetCore.WebUtilities.Base64UrlTextEncoder.Encode(_currentVaryValue) + '"');

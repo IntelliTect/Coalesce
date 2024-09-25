@@ -7,18 +7,18 @@ public class DatabaseSeeder(AppDbContext db)
     public void Seed()
     {
 #if Tenancy
-#if !TenantCreateExternal
-        if (!db.Tenants.Any())
-        {
-            var tenant = new Tenant { Name = "Demo Tenant" };
-            db.Add(tenant);
-            db.SaveChanges();
+#if (!TenantCreateExternal && !TenantCreateSelf)
+		if (!db.Tenants.Any())
+		{
+			var tenant = new Tenant { Name = "Demo Tenant" };
+			db.Add(tenant);
+			db.SaveChanges();
 
-            SeedNewTenant(tenant);
-        }
+			SeedNewTenant(tenant);
+		}
 #endif
 #elif Identity
-        SeedRoles();
+		SeedRoles();
 #endif
     }
 
@@ -56,8 +56,9 @@ public class DatabaseSeeder(AppDbContext db)
                 TenantId = db.TenantIdOrThrow
             });
 
-            // NOTE: In a permissions-based authorization system,
-            // roles can freely be created by administrators in the admin pages.
+            // NOTE: In this application's permissions-based authorization system,
+            // additional roles can freely be created by administrators.
+            // You don't have to seed every possible role.
 
             db.SaveChanges();
         }

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -29,14 +30,10 @@ public class SignInService(
 #if TenantCreateExternal
         // Note: domain will be null for personal gmail accounts.
         string? gSuiteDomain = ctx.Principal!.FindFirstValue("hd");
-
-        if (string.IsNullOrWhiteSpace(gSuiteDomain))
+        if (!string.IsNullOrWhiteSpace(gSuiteDomain))
         {
-            await Forbid(ctx, "Personal Google accounts are not permitted.");
-            return;
+            var tenant = await GetAndAssignUserExternalTenant(user, remoteLoginInfo, gSuiteDomain);
         }
-
-        var tenant = await GetAndAssignUserExternalTenant(user, remoteLoginInfo, gSuiteDomain);
 #endif
 
 #if UserPictures
@@ -63,17 +60,25 @@ public class SignInService(
         }
 
 #if TenantCreateExternal
-        var accessJtw = new JwtSecurityTokenHandler()
-            .ReadJwtToken(ctx.Properties!.GetTokenValue(OpenIdConnectParameterNames.AccessToken));
-        string? entraTenantId = accessJtw.Claims.FirstOrDefault(c => c.Type == "tid")?.Value;
-
-        if (string.IsNullOrWhiteSpace(entraTenantId))
+        try
         {
-            await Forbid(ctx, "Personal accounts are not permitted.");
-            return;
-        }
+            var accessJwt = new JwtSecurityTokenHandler()
+                .ReadJwtToken(ctx.Properties!.GetTokenValue(OpenIdConnectParameterNames.AccessToken));
+            string? entraTenantId = accessJwt.Claims.FirstOrDefault(c => c.Type == "tid")?.Value;
 
-        var tenant = await GetAndAssignUserExternalTenant(user, remoteLoginInfo, entraTenantId);
+            if (string.IsNullOrWhiteSpace(entraTenantId))
+            {
+                await Forbid(ctx, "Personal accounts are not permitted.");
+                return;
+            }
+
+            var tenant = await GetAndAssignUserExternalTenant(user, remoteLoginInfo, entraTenantId);
+        }
+        catch (SecurityTokenMalformedException)
+        {
+            // Expected for personal MSFT accounts, which cannot automatically create an external tenant.
+            // Personal accounts use opaque access tokens, not JWTs.
+        }
 #endif
 
 #if UserPictures
@@ -184,7 +189,6 @@ public class SignInService(
             db.Tenants.Add(tenant = new() { ExternalId = externalId, Name = user.Email?.Split('@').Last() ?? externalId });
             await db.SaveChangesAsync();
 
-            db.TenantId = tenant.TenantId;
             new DatabaseSeeder(db).SeedNewTenant(tenant, user.Id);
         }
         db.TenantId = tenant.TenantId;
@@ -194,7 +198,7 @@ public class SignInService(
         {
             membership = new() { TenantId = tenant.TenantId, UserId = user.Id };
             db.Add(membership);
-            
+
             logger.LogInformation($"Automatically granting membership for user {user.Id} into tenant {tenant.TenantId} based on external tenant {externalId}");
 
             await db.SaveChangesAsync();
@@ -236,7 +240,7 @@ public class SignInService(
                 photo.Content = content;
                 photo.SetTracking(user.Id);
             }
-            user.PhotoMD5 = MD5.HashData(content);
+            user.PhotoHash = MD5.HashData(content);
         }
         catch { /* Failure is non-critical */ }
     }
@@ -269,4 +273,4 @@ public class SignInService(
     }
 
 #endif
-        }
+}

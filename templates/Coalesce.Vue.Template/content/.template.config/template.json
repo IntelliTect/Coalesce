@@ -84,6 +84,37 @@
       "displayName": "Sample Page",
       "description": "Includes a 'Widget' example model with a basic Vue page, frontend tests, and backend tests."
     },
+    "Tenancy": {
+      "type": "parameter",
+      "datatype": "bool",
+      "displayName": "Tenancy: Core",
+      "description": "Includes core infrastructure for supporting multiple tenants within one shared database."
+    },
+    "TenantCreateSelf": {
+      "type": "parameter",
+      "datatype": "bool",
+      "displayName": "Tenancy: Self-service",
+      "description": "Allows any signed in user to create additional tenants.",
+      "$coalesceRequires": ["and", "Tenancy"]
+    },
+    "TenantCreateExternal": {
+      "type": "parameter",
+      "datatype": "bool",
+      "displayName": "Tenancy: OIDC Integration",
+      "description": "Automatically creates a new tenant for external organizations (Microsoft Entra, Google GSuite), and grants automatic tenant membership to other users within those organizations.",
+      "$coalesceRequires": [
+        "and",
+        "Tenancy",
+        ["or", "MicrosoftAuth", "GoogleAuth"]
+      ]
+    },
+    "TenantMemberInvites": {
+      "type": "parameter",
+      "datatype": "bool",
+      "displayName": "Tenancy: Invitations",
+      "description": "Allows administrators within a tenant to create invitation links to grant membership to their tenant.",
+      "$coalesceRequires": ["and", "Tenancy"]
+    },
     "OpenAPI": {
       "type": "parameter",
       "datatype": "bool",
@@ -125,7 +156,6 @@
           "condition": "!Identity",
           "exclude": [
             "**/AuthenticationConfiguration.cs",
-            "**/SignInService.cs",
             "**/Forbidden.vue",
             "**/UserAvatar.vue",
             "**/SignIn.*",
@@ -137,6 +167,10 @@
             "**/UserRole.cs",
             "**/Role.cs"
           ]
+        },
+        {
+          "condition": "!MicrosoftAuth && !GoogleAuth",
+          "exclude": ["**/SignInService.cs"]
         },
         {
           "condition": "!Tenancy",
@@ -151,6 +185,10 @@
         {
           "condition": "!TenantCreateSelf",
           "exclude": ["**/CreateTenant.*"]
+        },
+        {
+          "condition": "!TenantMemberInvites",
+          "exclude": ["**/Invitation.*"]
         },
         {
           "condition": "!(UserPictures && Identity)",

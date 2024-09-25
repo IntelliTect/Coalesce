@@ -63,7 +63,7 @@ public class AppDbContext
     public void ForceSetTenant(string tenantId)
     {
         ChangeTracker.Clear();
-        TenantId = TenantId;
+        TenantId = tenantId;
     }
 #endif
 
@@ -92,7 +92,7 @@ public class AppDbContext
     [InternalUse]
     public DbSet<DataProtectionKey> DataProtectionKeys => Set<DataProtectionKey>();
 
-#if (TrackingBase || AuditLogs)
+#if (TrackingBase || AuditLogs || Tenancy)
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         optionsBuilder
@@ -113,10 +113,15 @@ public class AppDbContext
                     .FormatType<byte[]>(ShaString)
                     .Exclude<DataProtectionKey>()
 #if TrackingBase
-                    .ExcludeProperty<TrackingBase>(x => new { x.CreatedBy, x.CreatedById, x.CreatedOn, x.ModifiedBy, x.ModifiedById, x.ModifiedOn });
-#else
-					;
+                    .ExcludeProperty<TrackingBase>(x => new { x.CreatedBy, x.CreatedById, x.CreatedOn, x.ModifiedBy, x.ModifiedById, x.ModifiedOn })
 #endif
+#if Identity
+                    .ExcludeProperty<User>(x => new { x.PasswordHash })
+#endif
+#if Tenancy
+                    .ExcludeProperty<ITenanted>(x => new { x.TenantId })
+#endif
+                ;
             })
         )
 #endif
@@ -173,8 +178,6 @@ public class AppDbContext
 
 #if Tenancy
         // Setup tenancy model configuration. This should be after all other model configuration.
-
-
         foreach (var model in builder.Model
             .GetEntityTypes()
             .Where(e => e.ClrType.GetInterface(nameof(ITenanted)) != null)
@@ -194,8 +197,7 @@ public class AppDbContext
 
             // This is done in a way that is transparent to Coalesce since Coalesce
             // and APIs are essentially unconcerned with tenancy - the tenant is always derived
-            // from the logged in user and the hostname they're connecting from.
-            // Also because Coalesce doesn't support composite keys.
+            // from the logged in user. Also because Coalesce doesn't support composite keys.
 
             // Doing this lets us include tenantIDs as part of foreign keys,
             // and also affords us slightly more performance when doing joins
@@ -207,7 +209,7 @@ public class AppDbContext
             {
                 // A value generator is added so that entities can be .Add()ed to the DbContext
                 // while their TenantID is still null (if EF can't figure out the TenantId through any other navigation prop).
-                tenantIdProp.SetValueGeneratorFactory((p,t) => new TenantIdValueGenerator());
+                tenantIdProp.SetValueGeneratorFactory((p, t) => new TenantIdValueGenerator());
 
                 var pkProp = key.Properties.Single();
                 var oldPkGenerated = pkProp.ValueGenerated;
@@ -286,8 +288,8 @@ public class AppDbContext
         }
 
         public override ValueTask<InterceptionResult<int>> SavingChangesAsync(
-            DbContextEventData eventData, 
-            InterceptionResult<int> result, 
+            DbContextEventData eventData,
+            InterceptionResult<int> result,
             CancellationToken cancellationToken = default)
         {
             return new ValueTask<InterceptionResult<int>>(SavingChanges(eventData, result));

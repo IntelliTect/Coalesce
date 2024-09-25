@@ -20,6 +20,7 @@ const router = createRouter({
     //#if ExampleModel
     {
       path: "/widget/:id(\\d+)?",
+      name: "widget-edit",
       component: () => import("./views/WidgetEdit.vue"),
       props: (r) => ({ id: +r.params.id }),
     },

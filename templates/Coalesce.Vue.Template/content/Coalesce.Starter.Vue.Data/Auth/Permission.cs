@@ -1,4 +1,6 @@
-﻿namespace Coalesce.Starter.Vue.Data;
+﻿using System.Text.Json.Serialization;
+
+namespace Coalesce.Starter.Vue.Data;
 
 /// <summary>
 /// The permissions available for assignment to <see cref="Models.Role"/>s. 
@@ -7,7 +9,7 @@
 /// </summary>
 public enum Permission
 {
-    // Note: Enum values/numbers are not used. Only the names are used for persistence and API representation.
+    // Note: Enum values/numbers are not used for persistance - roles are stored as strings in the database.
 
     [Display(Name = "Admin - General", Description = "Modify application configuration and other administrative functions excluding user/role management.")]
     Admin = 1,

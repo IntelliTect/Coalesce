@@ -20,6 +20,7 @@ export interface AuditLogViewModel extends $models.AuditLog {
   endpoint: string | null;
 }
 export class AuditLogViewModel extends ViewModel<$models.AuditLog, $apiClients.AuditLogApiClient, number> implements $models.AuditLog  {
+  static DataSources = $models.AuditLog.DataSources;
   
   
   public addToProperties(initialData?: DeepPartial<$models.AuditLogProperty> | null) {
@@ -33,6 +34,7 @@ export class AuditLogViewModel extends ViewModel<$models.AuditLog, $apiClients.A
 defineProps(AuditLogViewModel, $metadata.AuditLog)
 
 export class AuditLogListViewModel extends ListViewModel<$models.AuditLog, $apiClients.AuditLogApiClient, AuditLogViewModel> {
+  static DataSources = $models.AuditLog.DataSources;
   
   constructor() {
     super($metadata.AuditLog, new $apiClients.AuditLogApiClient())
@@ -113,12 +115,13 @@ export class TenantListViewModel extends ListViewModel<$models.Tenant, $apiClien
 
 export interface UserViewModel extends $models.User {
   fullName: string | null;
-  photoMD5: string | null;
+  photoHash: string | null;
   userName: string | null;
   email: string | null;
   emailConfirmed: boolean | null;
   get userRoles(): ViewModelCollection<UserRoleViewModel, $models.UserRole>;
   set userRoles(value: (UserRoleViewModel | $models.UserRole)[] | null);
+  roleNames: string[] | null;
   
   /** The user is a global administrator, able to perform administrative actions against all tenants. */
   isGlobalAdmin: boolean | null;
@@ -139,9 +142,9 @@ export class UserViewModel extends ViewModel<$models.User, $apiClients.UserApiCl
   public get getPhoto() {
     const getPhoto = this.$apiClient.$makeCaller(
       this.$metadata.methods.getPhoto,
-      (c) => c.getPhoto(this.$primaryKey, this.photoMD5),
+      (c) => c.getPhoto(this.$primaryKey, this.photoHash),
       () => ({}),
-      (c, args) => c.getPhoto(this.$primaryKey, this.photoMD5))
+      (c, args) => c.getPhoto(this.$primaryKey, this.photoHash))
     
     Object.defineProperty(this, 'getPhoto', {value: getPhoto});
     return getPhoto

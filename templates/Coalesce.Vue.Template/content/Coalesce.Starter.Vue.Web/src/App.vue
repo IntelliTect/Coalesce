@@ -5,7 +5,7 @@
       <v-toolbar-title>
         <router-link to="/" style="color: inherit">
           Coalesce.Starter.Vue
-          <!--#if: Tenancy  -->
+          <!--#if Tenancy -->
           &mdash; {{ $userInfo.tenantName }}
           <!--#endif  -->
         </router-link>
@@ -54,7 +54,6 @@
           <!--#if Identity -->
           <v-divider />
           <!--#if Tenancy -->
-          <v-divider />
           <v-list-item
             href="/select-org"
             prepend-icon="fa fa-building"

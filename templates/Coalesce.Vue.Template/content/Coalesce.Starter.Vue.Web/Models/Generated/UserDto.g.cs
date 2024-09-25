@@ -77,10 +77,11 @@ namespace Coalesce.Starter.Vue.Web.Models
 
         public string Id { get; set; }
         public string FullName { get; set; }
-        public byte[] PhotoMD5 { get; set; }
+        public byte[] PhotoHash { get; set; }
         public string UserName { get; set; }
         public string Email { get; set; }
         public bool? EmailConfirmed { get; set; }
+        public System.Collections.Generic.ICollection<string> RoleNames { get; set; }
         public bool? IsGlobalAdmin { get; set; }
         public System.Collections.Generic.ICollection<Coalesce.Starter.Vue.Web.Models.UserRoleResponse> UserRoles { get; set; }
 
@@ -93,14 +94,14 @@ namespace Coalesce.Starter.Vue.Web.Models
             var includes = context.Includes;
 
             this.Id = obj.Id;
-            this.PhotoMD5 = obj.PhotoMD5;
+            this.PhotoHash = obj.PhotoHash;
             if (context.GetPropertyRestriction<Coalesce.Starter.Vue.Data.Models.UserDataRestrictions>().UserCanRead(context, nameof(FullName), obj)) this.FullName = obj.FullName;
             if (context.GetPropertyRestriction<Coalesce.Starter.Vue.Data.Models.UserDataRestrictions>().UserCanRead(context, nameof(UserName), obj)) this.UserName = obj.UserName;
             if (context.GetPropertyRestriction<Coalesce.Starter.Vue.Data.Models.UserDataRestrictions>().UserCanRead(context, nameof(Email), obj)) this.Email = obj.Email;
             if (context.GetPropertyRestriction<Coalesce.Starter.Vue.Data.Models.UserDataRestrictions>().UserCanRead(context, nameof(EmailConfirmed), obj)) this.EmailConfirmed = obj.EmailConfirmed;
-            if ((context.IsInRoleCached("GlobalAdmin"))) this.IsGlobalAdmin = obj.IsGlobalAdmin;
             if ((context.IsInRoleCached("UserAdmin")))
             {
+                this.RoleNames = obj.RoleNames?.ToList();
                 var propValUserRoles = obj.UserRoles;
                 if (propValUserRoles != null && (tree == null || tree[nameof(this.UserRoles)] != null))
                 {
@@ -115,6 +116,7 @@ namespace Coalesce.Starter.Vue.Web.Models
 
             }
 
+            if ((context.IsInRoleCached("GlobalAdmin"))) this.IsGlobalAdmin = obj.IsGlobalAdmin;
         }
     }
 }

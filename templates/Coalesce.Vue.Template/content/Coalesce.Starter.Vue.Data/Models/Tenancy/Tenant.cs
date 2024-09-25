@@ -6,7 +6,9 @@ namespace Coalesce.Starter.Vue.Data.Models;
 [Edit(Roles = nameof(Permission.Admin))]
 [Create(DenyAll)]
 [Delete(DenyAll)]
+#if TenantCreateExternal
 [Index(nameof(ExternalId), IsUnique = true)]
+#endif
 [Display(Name = "Organization")]
 public class Tenant
 {

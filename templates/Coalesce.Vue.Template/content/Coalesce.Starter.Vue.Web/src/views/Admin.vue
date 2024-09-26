@@ -41,7 +41,7 @@
             v-if="$can(Permission.Admin)"
             title="Organization Settings"
             subtitle="Edit the details of your organization."
-            :to="`/admin/Tenant/edit/${userInfo.tenantId}`"
+            :to="`/admin/Tenant/edit/${$userInfo.tenantId}`"
             prepend-icon="fa fa-users"
           >
           </v-list-item>
@@ -89,7 +89,6 @@
 
 <script setup lang="ts">
 import $metadata from "@/metadata.g";
-import { userInfo } from "@/user-service";
 import { Domain, ModelType } from "coalesce-vue";
 
 const excludedTypes: Array<keyof typeof $metadata.types> = [

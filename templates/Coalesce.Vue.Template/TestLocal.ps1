@@ -1,5 +1,5 @@
 param (
-    [Parameter(Position=0)]
+    [Parameter(Position = 0)]
     [string[]]$testCases
 )
 
@@ -22,14 +22,15 @@ foreach ($testCase in $testCases) {
     Write-Output "-------TEST CASE------"
     if (-not $testCase) {
         Write-Output "<no options enabled>"
-    } else {
+    }
+    else {
         Write-Output $testCase
     }
     Write-Output "----------------------"
     Write-Output ""
 
     Remove-Item $dir/Test.Template.Instance/* -Recurse -Force -ErrorAction SilentlyContinue
-    Invoke-Expression "dotnet new coalescevue -o $dir/Test.Template.Instance $testcase"
+    Invoke-Expression "dotnet new coalescevue -o $dir/Test.Template.Instance --force $testcase"
 
     Push-Location $dir/Test.Template.Instance/*.Web
     try {
@@ -37,6 +38,7 @@ foreach ($testCase in $testCases) {
         dotnet coalesce
         npm ci
         npm run build
+        npm run lint:fix # ensure all lint issues are auto-fixable
         dotnet build
     }
     finally {

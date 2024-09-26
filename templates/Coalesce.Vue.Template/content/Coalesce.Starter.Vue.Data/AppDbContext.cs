@@ -62,8 +62,11 @@ public class AppDbContext
     /// </summary>
     public void ForceSetTenant(string tenantId)
     {
-        ChangeTracker.Clear();
-        TenantId = tenantId;
+        if (TenantId != tenantId)
+        {
+            ChangeTracker.Clear();
+            TenantId = tenantId;
+        }
     }
 #endif
 

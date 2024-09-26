@@ -157,6 +157,10 @@ export namespace Tenant {
     export class DefaultSource implements DataSource<typeof metadata.Tenant.dataSources.defaultSource> {
       readonly $metadata = metadata.Tenant.dataSources.defaultSource
     }
+    
+    export class GlobalAdminSource implements DataSource<typeof metadata.Tenant.dataSources.globalAdminSource> {
+      readonly $metadata = metadata.Tenant.dataSources.globalAdminSource
+    }
   }
 }
 

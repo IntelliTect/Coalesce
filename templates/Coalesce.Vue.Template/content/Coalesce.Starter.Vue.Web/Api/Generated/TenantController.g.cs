@@ -72,5 +72,40 @@ namespace Coalesce.Starter.Vue.Web.Api
             [FromServices] IDataSourceFactory dataSourceFactory,
             [FromServices] IBehaviorsFactory behaviorsFactory)
             => BulkSaveImplementation(dto, parameters, dataSource, dataSourceFactory, behaviorsFactory);
+
+        // Methods from data class exposed through API Controller.
+
+        /// <summary>
+        /// Method: Create
+        /// </summary>
+        [HttpPost("Create")]
+        [Authorize(Roles = "GlobalAdmin")]
+        public virtual async Task<ItemResult> Create(
+            [FromServices] Coalesce.Starter.Vue.Data.Auth.InvitationService invitationService,
+            [FromForm(Name = "name")] string name,
+            [FromForm(Name = "adminEmail")] string adminEmail)
+        {
+            var _params = new
+            {
+                name = name,
+                adminEmail = adminEmail
+            };
+
+            if (Context.Options.ValidateAttributesForMethods)
+            {
+                var _validationResult = ItemResult.FromParameterValidation(
+                    GeneratedForClassViewModel!.MethodByName("Create"), _params, HttpContext.RequestServices);
+                if (!_validationResult.WasSuccessful) return _validationResult;
+            }
+
+            var _methodResult = await Coalesce.Starter.Vue.Data.Models.Tenant.Create(
+                Db,
+                invitationService,
+                _params.name,
+                _params.adminEmail
+            );
+            var _result = new ItemResult(_methodResult);
+            return _result;
+        }
     }
 }

@@ -53,7 +53,6 @@ public class DatabaseSeeder(AppDbContext db)
                 Permissions = Enum.GetValues<Permission>().ToList(),
                 Name = "Admin",
                 NormalizedName = "ADMIN",
-                TenantId = db.TenantIdOrThrow
             });
 
             // NOTE: In this application's permissions-based authorization system,

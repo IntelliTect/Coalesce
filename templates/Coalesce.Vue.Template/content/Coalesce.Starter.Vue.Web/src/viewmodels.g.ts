@@ -107,6 +107,17 @@ defineProps(TenantViewModel, $metadata.Tenant)
 export class TenantListViewModel extends ListViewModel<$models.Tenant, $apiClients.TenantApiClient, TenantViewModel> {
   static DataSources = $models.Tenant.DataSources;
   
+  public get create() {
+    const create = this.$apiClient.$makeCaller(
+      this.$metadata.methods.create,
+      (c, name: string | null, adminEmail: string | null) => c.create(name, adminEmail),
+      () => ({name: null as string | null, adminEmail: null as string | null, }),
+      (c, args) => c.create(args.name, args.adminEmail))
+    
+    Object.defineProperty(this, 'create', {value: create});
+    return create
+  }
+  
   constructor() {
     super($metadata.Tenant, new $apiClients.TenantApiClient())
   }
@@ -170,15 +181,15 @@ defineProps(UserViewModel, $metadata.User)
 export class UserListViewModel extends ListViewModel<$models.User, $apiClients.UserApiClient, UserViewModel> {
   static DataSources = $models.User.DataSources;
   
-  public get invite() {
-    const invite = this.$apiClient.$makeCaller(
-      this.$metadata.methods.invite,
-      (c, email: string | null, role?: $models.Role | null) => c.invite(email, role),
+  public get inviteUser() {
+    const inviteUser = this.$apiClient.$makeCaller(
+      this.$metadata.methods.inviteUser,
+      (c, email: string | null, role?: $models.Role | null) => c.inviteUser(email, role),
       () => ({email: null as string | null, role: null as $models.Role | null, }),
-      (c, args) => c.invite(args.email, args.role))
+      (c, args) => c.inviteUser(args.email, args.role))
     
-    Object.defineProperty(this, 'invite', {value: invite});
-    return invite
+    Object.defineProperty(this, 'inviteUser', {value: inviteUser});
+    return inviteUser
   }
   
   constructor() {

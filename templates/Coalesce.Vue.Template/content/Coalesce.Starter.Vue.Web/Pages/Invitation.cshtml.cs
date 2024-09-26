@@ -39,7 +39,7 @@ namespace Coalesce.Starter.Vue.Web.Pages
 			db.ForceSetTenant(Invitation.TenantId);
 
 			var user = await db.Users.FindAsync(User.GetUserId());
-			var result = await Data.Models.User.AcceptInvitation(db, Invitation, user);
+			var result = await invitationService.AcceptInvitation(Invitation, user);
 			if (!result.WasSuccessful)
 			{
 				ModelState.AddModelError(nameof(Code), result.Message);

@@ -38,7 +38,7 @@
           <!--#endif -->
 
           <!--#if DarkMode -->
-          <v-list-item prepend-icon="fas fa-moon">
+          <v-list-item prepend-icon="fa fa-moon">
             <v-switch
               label="Dark Mode"
               v-model="theme"
@@ -72,15 +72,24 @@
     </v-app-bar>
     <v-navigation-drawer v-model="drawer">
       <v-list>
-        <v-list-item to="/" prepend-icon="fas fa-home" title="Home" />
+        <v-list-item to="/" prepend-icon="fa fa-home" title="Home" />
         <!--#if ExampleModel -->
         <v-list-item
           to="/widget"
-          prepend-icon="fas fa-palette"
+          prepend-icon="fa fa-palette"
           title="Custom Page Example"
         />
         <!--#endif -->
-        <v-list-item to="/admin" prepend-icon="fas fa-cogs" title="Admin" />
+        <v-list-item to="/admin" prepend-icon="fa fa-cogs" title="Admin" />
+        <!--#if Tenancy -->
+        <v-divider></v-divider>
+        <v-list-item
+          v-if="$userInfo.roles?.includes('GlobalAdmin')"
+          to="/admin/Tenant?dataSource=GlobalAdminSource"
+          prepend-icon="fa fa-building"
+          title="All Tenants"
+        />
+        <!--#endif -->
       </v-list>
     </v-navigation-drawer>
 

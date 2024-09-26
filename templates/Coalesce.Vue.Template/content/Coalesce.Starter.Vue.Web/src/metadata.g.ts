@@ -341,6 +341,40 @@ export const Tenant = domain.types.Tenant = {
     },
   },
   methods: {
+    create: {
+      name: "create",
+      displayName: "Create",
+      transportType: "item",
+      httpMethod: "POST",
+      isStatic: true,
+      params: {
+        name: {
+          name: "name",
+          displayName: "Org Name",
+          type: "string",
+          role: "value",
+          rules: {
+            required: val => (val != null && val !== '') || "Org Name is required.",
+          }
+        },
+        adminEmail: {
+          name: "adminEmail",
+          displayName: "Admin Email",
+          type: "string",
+          subtype: "email",
+          role: "value",
+          rules: {
+            required: val => (val != null && val !== '') || "Admin Email is required.",
+          }
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "void",
+        role: "value",
+      },
+    },
   },
   dataSources: {
     defaultSource: {
@@ -348,6 +382,13 @@ export const Tenant = domain.types.Tenant = {
       name: "DefaultSource" as const,
       displayName: "Default Source",
       isDefault: true,
+      props: {
+      },
+    },
+    globalAdminSource: {
+      type: "dataSource",
+      name: "GlobalAdminSource" as const,
+      displayName: "Global Admin Source",
       props: {
       },
     },
@@ -507,9 +548,9 @@ export const User = domain.types.User = {
         role: "value",
       },
     },
-    invite: {
-      name: "invite",
-      displayName: "Invite",
+    inviteUser: {
+      name: "inviteUser",
+      displayName: "Invite User",
       transportType: "item",
       httpMethod: "POST",
       isStatic: true,

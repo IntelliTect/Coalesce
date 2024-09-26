@@ -19,6 +19,15 @@ export class RoleApiClient extends ModelApiClient<$models.Role> {
 
 export class TenantApiClient extends ModelApiClient<$models.Tenant> {
   constructor() { super($metadata.Tenant) }
+  public create(name: string | null, adminEmail: string | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<void>> {
+    const $method = this.$metadata.methods.create
+    const $params =  {
+      name,
+      adminEmail,
+    }
+    return this.$invoke($method, $params, $config)
+  }
+  
 }
 
 
@@ -41,8 +50,8 @@ export class UserApiClient extends ModelApiClient<$models.User> {
     return this.$invoke($method, $params, $config)
   }
   
-  public invite(email: string | null, role?: $models.Role | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<void>> {
-    const $method = this.$metadata.methods.invite
+  public inviteUser(email: string | null, role?: $models.Role | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<void>> {
+    const $method = this.$metadata.methods.inviteUser
     const $params =  {
       email,
       role,

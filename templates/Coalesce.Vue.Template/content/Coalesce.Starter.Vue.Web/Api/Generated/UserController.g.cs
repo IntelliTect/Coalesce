@@ -148,11 +148,11 @@ namespace Coalesce.Starter.Vue.Web.Api
         }
 
         /// <summary>
-        /// Method: Invite
+        /// Method: InviteUser
         /// </summary>
-        [HttpPost("Invite")]
+        [HttpPost("InviteUser")]
         [Authorize(Roles = "UserAdmin")]
-        public virtual async Task<ItemResult> Invite(
+        public virtual async Task<ItemResult> InviteUser(
             [FromServices] Coalesce.Starter.Vue.Data.Auth.InvitationService invitationService,
             [FromForm(Name = "email")] string email,
             [FromForm(Name = "role")] RoleParameter role)
@@ -166,13 +166,12 @@ namespace Coalesce.Starter.Vue.Web.Api
             if (Context.Options.ValidateAttributesForMethods)
             {
                 var _validationResult = ItemResult.FromParameterValidation(
-                    GeneratedForClassViewModel!.MethodByName("Invite"), _params, HttpContext.RequestServices);
+                    GeneratedForClassViewModel!.MethodByName("InviteUser"), _params, HttpContext.RequestServices);
                 if (!_validationResult.WasSuccessful) return _validationResult;
             }
 
             var _mappingContext = new MappingContext(Context);
-            var _methodResult = await Coalesce.Starter.Vue.Data.Models.User.Invite(
-                User,
+            var _methodResult = await Coalesce.Starter.Vue.Data.Models.User.InviteUser(
                 Db,
                 invitationService,
                 _params.email,

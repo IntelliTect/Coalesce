@@ -37,7 +37,7 @@ jobs:
         testCase:
           # Nothing:
           - ""
-          # Everything:
+          # Everything (except tenancy):
           - "--Identity --MicrosoftAuth --GoogleAuth --UserPictures --AuditLogs --ExampleModel --DarkMode --TrackingBase --AppInsights --OpenAPI"
           # Assorted partial variants:
           - "--Identity --UserPictures --TrackingBase"
@@ -45,6 +45,7 @@ jobs:
           # Tenancy variants:
           - "--Identity --Tenancy --TenantCreateExternal --MicrosoftAuth"
           - "--Identity --Tenancy --TenantCreateSelf --TenantMemberInvites --AuditLogs" # todo: add local accounts to this case when we add it
+          - "--Identity --Tenancy --TenantCreateAdmin --TenantMemberInvites --MicrosoftAuth" # todo: add local accounts to this case when we add it
 
 
     defaults:

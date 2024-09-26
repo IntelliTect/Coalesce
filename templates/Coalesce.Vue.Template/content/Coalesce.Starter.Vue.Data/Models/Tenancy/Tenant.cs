@@ -33,4 +33,36 @@ public class Tenant
                 .Where(t => t.TenantId == User.GetTenantId());
         }
     }
+
+    public class GlobalAdminSource(CrudContext<AppDbContext> context) : AppDataSource<Tenant>(context)
+    {
+        public override IQueryable<Tenant> GetQuery(IDataSourceParameters parameters)
+        {
+            if (!User.IsInRole(AppClaimValues.GlobalAdminRole))
+            {
+                return Enumerable.Empty<Tenant>().AsQueryable();
+            }
+
+            return base.GetQuery(parameters);
+        }
+    }
+
+#if TenantCreateAdmin
+    [Coalesce, Execute(AppClaimValues.GlobalAdminRole)]
+    public static async Task<ItemResult> Create(
+        AppDbContext db,
+        [Inject] InvitationService invitationService,
+        [Display(Name = "Org Name")] string name,
+        [DataType(DataType.EmailAddress)] string adminEmail)
+    {
+        Tenant tenant = new() { Name = name };
+        db.Tenants.Add(tenant);
+        await db.SaveChangesAsync();
+
+        db.ForceSetTenant(tenant.TenantId);
+        new DatabaseSeeder(db).SeedNewTenant(tenant);
+
+        return await invitationService.CreateAndSendInvitation(tenant.TenantId, adminEmail, db.Roles.ToArray());
+    }
+#endif
 }

@@ -6,7 +6,7 @@ import {
   CAdminAuditLogPage,
   //#endif
 } from "coalesce-vue-vuetify3";
-//#if Identity
+//#if (Identity && AuditLogs)
 import { Permission } from "./models.g";
 //#endif
 
@@ -59,7 +59,9 @@ const router = createRouter({
     {
       path: "/admin/audit",
       component: titledAdminPage(CAdminAuditLogPage),
+      //#if Identity
       meta: { permissions: [Permission.ViewAuditLogs] },
+      //#endif
       props: { type: "AuditLog" },
     },
     //#endif

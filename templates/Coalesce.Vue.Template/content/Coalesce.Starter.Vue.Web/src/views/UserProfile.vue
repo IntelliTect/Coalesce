@@ -13,8 +13,15 @@
         }"
       >
         <v-card-text>
+          <!--#if Tenancy -->
+          <!-- Since users transcend tenants, a user may only edit their own user attributes
+           since otherwise an admin in one tenant could affect how users show up in other tenants. -->
+          <c-input :model="user" for="userName" :readonly="!isMe"></c-input>
+          <c-input :model="user" for="fullName" :readonly="!isMe"></c-input>
+          <!--#else -->
           <c-input :model="user" for="userName"></c-input>
           <c-input :model="user" for="fullName"></c-input>
+          <!--#endif -->
 
           <c-input
             :model="user"
@@ -133,14 +140,16 @@ const isGlobalAdmin = computed(() =>
 
 async function removeFromTenant() {
   await user.evict.confirmInvoke(
-    "Really remove the user from this organization?",
+    `Really remove the user from the ${userInfo.value.tenantName} organization?`,
   );
   user.$load.wasSuccessful = null;
   router.back();
 }
 //#endif
 
-if (!isUserAdmin.value && props.id != userInfo.value.id) {
+const isMe = computed(() => props.id == userInfo.value.id);
+
+if (!isUserAdmin.value && !isMe.value) {
   // Non-admins can only view themselves
   router.replace({ name: "error-404" });
 } else {

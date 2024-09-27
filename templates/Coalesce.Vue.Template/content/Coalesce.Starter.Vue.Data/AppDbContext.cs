@@ -49,7 +49,7 @@ public class AppDbContext
         {
             if (_TenantId != null && value != _TenantId && ChangeTracker.Entries().Any())
             {
-                throw new InvalidOperationException("Cannot change the TenantId of an active DbContext. Make a new one through DbContextFactory to perform operations on different tenants, or call ForceSetTenant().");
+                throw new InvalidOperationException("Cannot change the TenantId of an active DbContext. Make a new one through IDbContextFactory to perform operations on different tenants, or call ForceSetTenant().");
             }
             _TenantId = value;
         }
@@ -119,7 +119,7 @@ public class AppDbContext
                     .ExcludeProperty<TrackingBase>(x => new { x.CreatedBy, x.CreatedById, x.CreatedOn, x.ModifiedBy, x.ModifiedById, x.ModifiedOn })
 #endif
 #if Identity
-                    .ExcludeProperty<User>(x => new { x.PasswordHash })
+                    .Format<User>(x => x.PasswordHash, x => "<password changed>")
 #endif
 #if Tenancy
                     .ExcludeProperty<ITenanted>(x => new { x.TenantId })

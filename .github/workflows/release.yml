@@ -43,7 +43,7 @@ jobs:
           - "--Identity --UserPictures --TrackingBase"
           - "--Identity --MicrosoftAuth --AuditLogs"
           # Tenancy variants:
-          - "--Identity --Tenancy --TenantCreateExternal --MicrosoftAuth"
+          - "--Identity --Tenancy --TenantCreateExternal --GoogleAuth"
           - "--Identity --Tenancy --TenantCreateSelf --TenantMemberInvites --AuditLogs" # todo: add local accounts to this case when we add it
           - "--Identity --Tenancy --TenantCreateAdmin --TenantMemberInvites --MicrosoftAuth" # todo: add local accounts to this case when we add it
 

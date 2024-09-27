@@ -8,17 +8,17 @@ public class DatabaseSeeder(AppDbContext db)
     {
 #if Tenancy
 #if (!TenantCreateExternal && !TenantCreateSelf)
-		if (!db.Tenants.Any())
-		{
-			var tenant = new Tenant { Name = "Demo Tenant" };
-			db.Add(tenant);
-			db.SaveChanges();
+        if (!db.Tenants.Any())
+        {
+            var tenant = new Tenant { Name = "Demo Tenant" };
+            db.Add(tenant);
+            db.SaveChanges();
 
-			SeedNewTenant(tenant);
-		}
+            SeedNewTenant(tenant);
+        }
 #endif
 #elif Identity
-		SeedRoles();
+        SeedRoles();
 #endif
     }
 

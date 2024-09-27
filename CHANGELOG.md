@@ -3,6 +3,7 @@
 - feat: better "not found" messages from data sources when the ID is null or empty string. (#447)
 - fix(template): adjust manual chunking configuration to avoid circular deps. (#455)
 - fix(audit): key props now respect configured property exclusions
+- fix: c-admin-method now preserves newlines when display success messages
 
 # 5.0.1
 

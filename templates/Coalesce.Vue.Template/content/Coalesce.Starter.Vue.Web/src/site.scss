@@ -23,3 +23,17 @@ a {
   // Without setting this, icon appearance can vary with CSS load order
   --fa-display: inline-flex;
 }
+
+// Visually distinguish readonly inputs
+.v-input--readonly {
+  .v-switch__track,
+  .v-switch__thumb {
+    border: 1px dashed rgba(var(--v-theme-on-surface), 0.7);
+  }
+  .v-field__outline__start,
+  .v-field__outline__end,
+  .v-field__outline__notch::before,
+  .v-field__outline__notch::after {
+    border-style: dashed;
+  }
+}

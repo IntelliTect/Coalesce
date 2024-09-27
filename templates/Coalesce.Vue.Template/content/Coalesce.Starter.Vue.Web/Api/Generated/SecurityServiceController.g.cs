@@ -41,12 +41,14 @@ namespace Coalesce.Starter.Vue.Web.Api
         /// </summary>
         [HttpGet("WhoAmI")]
         [Authorize]
-        public virtual ItemResult<UserInfoResponse> WhoAmI()
+        public virtual ItemResult<UserInfoResponse> WhoAmI(
+            [FromServices] Coalesce.Starter.Vue.Data.AppDbContext db)
         {
             IncludeTree includeTree = null;
             var _mappingContext = new MappingContext(Context);
             var _methodResult = Service.WhoAmI(
-                User
+                User,
+                db
             );
             var _result = new ItemResult<UserInfoResponse>();
             _result.Object = Mapper.MapToDto<Coalesce.Starter.Vue.Data.Auth.UserInfo, UserInfoResponse>(_methodResult, _mappingContext, includeTree);

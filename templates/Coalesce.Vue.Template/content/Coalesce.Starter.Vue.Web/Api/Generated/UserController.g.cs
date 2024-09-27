@@ -93,7 +93,7 @@ namespace Coalesce.Starter.Vue.Web.Api
             }
             var item = itemResult.Object;
 
-            var _currentVaryValue = item.PhotoMD5;
+            var _currentVaryValue = item.PhotoHash;
             if (_currentVaryValue != default)
             {
                 var _expectedEtagHeader = new Microsoft.Net.Http.Headers.EntityTagHeaderValue('"' + Microsoft.AspNetCore.WebUtilities.Base64UrlTextEncoder.Encode(_currentVaryValue) + '"');
@@ -111,6 +111,7 @@ namespace Coalesce.Starter.Vue.Web.Api
             }
 
             var _methodResult = item.GetPhoto(
+                User,
                 Db
             );
             if (_methodResult.Object != null)
@@ -119,6 +120,64 @@ namespace Coalesce.Starter.Vue.Web.Api
             }
             var _result = new ItemResult<IntelliTect.Coalesce.Models.IFile>(_methodResult);
             _result.Object = _methodResult.Object;
+            return _result;
+        }
+
+        /// <summary>
+        /// Method: Evict
+        /// </summary>
+        [HttpPost("Evict")]
+        [Authorize(Roles = "UserAdmin")]
+        public virtual async Task<ItemResult> Evict(
+            [FromServices] IDataSourceFactory dataSourceFactory,
+            [FromForm(Name = "id")] string id)
+        {
+            var dataSource = dataSourceFactory.GetDataSource<Coalesce.Starter.Vue.Data.Models.User, Coalesce.Starter.Vue.Data.Models.User>("Default");
+            var itemResult = await dataSource.GetItemAsync(id, new DataSourceParameters());
+            if (!itemResult.WasSuccessful)
+            {
+                return new ItemResult(itemResult);
+            }
+            var item = itemResult.Object;
+            var _methodResult = item.Evict(
+                User,
+                Db
+            );
+            var _result = new ItemResult(_methodResult);
+            return _result;
+        }
+
+        /// <summary>
+        /// Method: InviteUser
+        /// </summary>
+        [HttpPost("InviteUser")]
+        [Authorize(Roles = "UserAdmin")]
+        public virtual async Task<ItemResult> InviteUser(
+            [FromServices] Coalesce.Starter.Vue.Data.Auth.InvitationService invitationService,
+            [FromForm(Name = "email")] string email,
+            [FromForm(Name = "role")] RoleParameter role)
+        {
+            var _params = new
+            {
+                email = email,
+                role = role
+            };
+
+            if (Context.Options.ValidateAttributesForMethods)
+            {
+                var _validationResult = ItemResult.FromParameterValidation(
+                    GeneratedForClassViewModel!.MethodByName("InviteUser"), _params, HttpContext.RequestServices);
+                if (!_validationResult.WasSuccessful) return _validationResult;
+            }
+
+            var _mappingContext = new MappingContext(Context);
+            var _methodResult = await Coalesce.Starter.Vue.Data.Models.User.InviteUser(
+                Db,
+                invitationService,
+                _params.email,
+                _params.role.MapToNew(_mappingContext)
+            );
+            var _result = new ItemResult(_methodResult);
             return _result;
         }
     }

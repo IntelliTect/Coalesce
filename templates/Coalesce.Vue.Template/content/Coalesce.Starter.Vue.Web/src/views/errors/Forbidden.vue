@@ -50,7 +50,7 @@ const props = defineProps<{ permissions?: Permission[] }>();
 
 const logOutUrl = computed(
   () =>
-    "/Home/SignOut?ReturnUrl=" +
+    "/sign-out?ReturnUrl=" +
     encodeURIComponent(
       window.location.href.replace(window.location.origin, ""),
     ),

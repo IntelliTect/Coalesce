@@ -34,6 +34,8 @@ class AppUser
     public DateTimeOffset? NullableValueType { get; set; }
 
     public bool BoolProp { get; set; }
+
+    public SecurityPermissionLevels[]? EnumArray { get; set; }
 }
 
 class ParentWithMappedListText

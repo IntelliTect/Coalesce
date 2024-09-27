@@ -1,3 +1,4 @@
+using IntelliTect.Coalesce.DataAnnotations;
 using IntelliTect.Coalesce.Utilities;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -404,6 +405,22 @@ public class AuditTests
         // This ensures we don't waste database calls loading principal entities for no reason.
         Assert.Empty(db.ParentWithMappedListTexts.Local);
         Assert.Null(user.Parent1);
+    }
+
+    [Fact]
+    public void FormatsPrimitiveCollections()
+    {
+        using var db = BuildDbContext(b => b
+            .UseCoalesceAuditLogging<TestAuditLog>(x => x
+                .WithAugmentation<TestOperationContext>()
+            ));
+
+        db.Add(new AppUser { Name = "Bob", EnumArray = [SecurityPermissionLevels.DenyAll, SecurityPermissionLevels.AllowAuthenticated] });
+        db.SaveChanges();
+
+        var log = Assert.Single(db.AuditLogs);
+        var prop = Assert.Single(log.Properties!.Where(p => p.PropertyName == nameof(AppUser.EnumArray)));
+        Assert.Equal("[DenyAll, AllowAuthenticated]", prop.NewValue);
     }
 
     private WebApplicationBuilder CreateAppBuilder()

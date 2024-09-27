@@ -121,6 +121,11 @@ public class AuditConfiguration
                 return formatter(currentValue);
             }
         }
+        
+        if (currentValue is System.Collections.ICollection collection)
+        {
+            return $"[{string.Join(", ", collection.OfType<object>())}]";
+        }
 
         return currentValue.ToString();
     }

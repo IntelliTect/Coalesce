@@ -935,6 +935,22 @@ export class ApiClient<T extends ApiRoutedType> {
 
       if (paramValue === undefined) continue;
 
+      if (
+        paramValue === null &&
+        method.name != "save" &&
+        (paramMeta.type == "number" ||
+          paramMeta.type == "date" ||
+          paramMeta.type == "enum" ||
+          paramMeta.type == "boolean")
+      ) {
+        // FormData idiosyncrasy workaround:
+        // Skip nulls for root value type params - https://github.com/IntelliTect/Coalesce/issues/464
+        // Only for custom methods, though, which pass individual top-level parameters.
+        // `/save` works differently by binding the entire form to the DTO, and all
+        // props on DTOs are nullable, which interpret "" as null just fine.
+        continue;
+      }
+
       const pureType =
         paramMeta.type == "collection" ? paramMeta.itemType : paramMeta;
       if (pureType.type == "file" || pureType.type == "binary") {

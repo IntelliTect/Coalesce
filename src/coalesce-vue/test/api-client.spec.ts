@@ -27,7 +27,10 @@ import {
   ComplexModelApiClient,
   PersonApiClient,
 } from "@test-targets/api-clients.g";
-import { PersonListViewModel } from "@test-targets/viewmodels.g";
+import {
+  ComplexModelViewModel,
+  PersonListViewModel,
+} from "@test-targets/viewmodels.g";
 import { Person, Statuses } from "@test-targets/models.g";
 
 function makeAdapterMock(result?: any) {
@@ -207,6 +210,26 @@ describe("$invoke", () => {
     // The others should have been omitted entirely.
     const req: AxiosRequestConfig = mock.mock.lastCall?.[0];
     expect(req.data).toEqual("id=1&requiredInt=42");
+  });
+
+  test("does not send null value type params as emptystrings", async () => {
+    const mock = mockEndpoint(
+      "/ComplexModel/methodWithManyParams",
+      vitest.fn((req) => ({
+        wasSuccessful: true,
+      }))
+    );
+
+    const caller = new ComplexModelViewModel().methodWithManyParams;
+    await caller.invokeWithArgs();
+
+    // This is a formdata specific issue: aspnetcore throws ModelState errors
+    // when an emptystring (which is how we serialize null in formdata) is passed to a number, for example.
+    // https://github.com/IntelliTect/Coalesce/issues/464
+    const req: AxiosRequestConfig = mock.mock.lastCall?.[0];
+    expect(req.data).toEqual(
+      "singleExternal=&collectionExternal=&file=&strParam=&stringsParam=&enumsParam=&model=&modelCollection="
+    );
   });
 
   test("doesn't error when unexpected params are provided", async () => {

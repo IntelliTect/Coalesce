@@ -5,8 +5,9 @@
 - fix(template): adjust manual chunking configuration to avoid circular deps. (#455)
 - fix(audit): key props now respect configured property exclusions.
 - fix: c-admin-method now preserves newlines when displaying success messages.
-- fix: c-select not defaulting optional method parameters as clearable
-- fix: method object parameters passed sent as null on the client are received as a default instance of the object on the server (#456)
+- fix: c-select not defaulting optional method parameters as clearable.
+- fix: method object parameters passed sent as null on the client are received as a default instance of the object on the server. (#456)
+- fix: non-nullable value types as root custom method parameters rejected by ModelState validation. (#464)
 
 # 5.0.1
 

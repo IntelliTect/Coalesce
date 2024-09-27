@@ -103,7 +103,7 @@ namespace Coalesce.Web.Vue3.Api
             var item = itemResult.Object;
             var _params = new
             {
-                companyParam = companyParam,
+                companyParam = !Request.Form.HasAnyValue(nameof(companyParam)) ? null : companyParam,
                 name = name
             };
 
@@ -116,7 +116,7 @@ namespace Coalesce.Web.Vue3.Api
 
             var _mappingContext = new MappingContext(Context);
             item.ConflictingParameterNames(
-                _params.companyParam.MapToNew(_mappingContext),
+                _params.companyParam?.MapToNew(_mappingContext),
                 _params.name
             );
             var _result = new ItemResult();

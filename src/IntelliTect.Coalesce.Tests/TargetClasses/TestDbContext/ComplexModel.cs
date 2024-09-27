@@ -186,6 +186,8 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         }
 
 
+#nullable enable
+
         [Coalesce, Execute]
         public string MethodWithOptionalParams(
             // Required:
@@ -196,14 +198,14 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
             int? nullableInt,
             int intWithDefault = 42,
             Case.Statuses enumWithDefault = Case.Statuses.ClosedNoSolution,
-            string stringWithDefault = "foo"
+            string stringWithDefault = "foo",
+            Test? optionalObject = null,
+            Test[]? optionalObjectCollection = null
         )
         {
             return stringWithDefault;
         }
 
-
-#nullable enable
         [Coalesce, Execute]
         public int MethodWithRequiredAfterOptional(
             // Optional, by longstanding Coalesce convention - 
@@ -219,6 +221,7 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
             // If we're naive about the code gen for this method then it'll generate invalid typescript.
             return optionalInt;
         }
+
 #nullable restore
 
 

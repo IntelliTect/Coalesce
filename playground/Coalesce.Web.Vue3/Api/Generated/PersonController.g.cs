@@ -487,7 +487,7 @@ namespace Coalesce.Web.Vue3.Api
         {
             var _params = new
             {
-                person = person
+                person = !Request.Form.HasAnyValue(nameof(person)) ? null : person
             };
 
             if (Context.Options.ValidateAttributesForMethods)
@@ -501,7 +501,38 @@ namespace Coalesce.Web.Vue3.Api
             var _mappingContext = new MappingContext(Context);
             var _methodResult = Coalesce.Domain.Person.MethodWithEntityParameter(
                 Db,
-                _params.person.MapToNew(_mappingContext)
+                _params.person?.MapToNew(_mappingContext)
+            );
+            var _result = new ItemResult<PersonResponse>();
+            _result.Object = Mapper.MapToDto<Coalesce.Domain.Person, PersonResponse>(_methodResult, _mappingContext, includeTree);
+            return _result;
+        }
+
+        /// <summary>
+        /// Method: MethodWithOptionalEntityParameter
+        /// </summary>
+        [HttpPost("MethodWithOptionalEntityParameter")]
+        [Authorize]
+        public virtual ItemResult<PersonResponse> MethodWithOptionalEntityParameter(
+            [FromForm(Name = "person")] PersonParameter person)
+        {
+            var _params = new
+            {
+                person = !Request.Form.HasAnyValue(nameof(person)) ? null : person
+            };
+
+            if (Context.Options.ValidateAttributesForMethods)
+            {
+                var _validationResult = ItemResult.FromParameterValidation(
+                    GeneratedForClassViewModel!.MethodByName("MethodWithOptionalEntityParameter"), _params, HttpContext.RequestServices);
+                if (!_validationResult.WasSuccessful) return new ItemResult<PersonResponse>(_validationResult);
+            }
+
+            IncludeTree includeTree = null;
+            var _mappingContext = new MappingContext(Context);
+            var _methodResult = Coalesce.Domain.Person.MethodWithOptionalEntityParameter(
+                Db,
+                _params.person?.MapToNew(_mappingContext)
             );
             var _result = new ItemResult<PersonResponse>();
             _result.Object = Mapper.MapToDto<Coalesce.Domain.Person, PersonResponse>(_methodResult, _mappingContext, includeTree);
@@ -519,7 +550,7 @@ namespace Coalesce.Web.Vue3.Api
         {
             var _params = new
             {
-                criteria = criteria,
+                criteria = !Request.Form.HasAnyValue(nameof(criteria)) ? null : criteria,
                 page = page
             };
 
@@ -534,7 +565,7 @@ namespace Coalesce.Web.Vue3.Api
             var _mappingContext = new MappingContext(Context);
             var _methodResult = Coalesce.Domain.Person.SearchPeople(
                 Db,
-                _params.criteria.MapToNew(_mappingContext),
+                _params.criteria?.MapToNew(_mappingContext),
                 _params.page
             );
             var _result = new ListResult<PersonResponse>(_methodResult);

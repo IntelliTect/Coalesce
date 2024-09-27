@@ -276,6 +276,14 @@ export class PersonApiClient extends ModelApiClient<$models.Person> {
     return this.$invoke($method, $params, $config)
   }
   
+  public methodWithOptionalEntityParameter(person?: $models.Person | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<$models.Person>> {
+    const $method = this.$metadata.methods.methodWithOptionalEntityParameter
+    const $params =  {
+      person,
+    }
+    return this.$invoke($method, $params, $config)
+  }
+  
   public searchPeople(criteria: $models.PersonCriteria | null, page?: number | null, $config?: AxiosRequestConfig): AxiosPromise<ListResult<$models.Person>> {
     const $method = this.$metadata.methods.searchPeople
     const $params =  {

@@ -297,11 +297,14 @@ namespace Coalesce.Domain
             return strings;
         }
 
-        /// <summary>
-        /// Gets all the first names starting with the characters.
-        /// </summary>
         [Coalesce, Execute]
         public static Person MethodWithEntityParameter(AppDbContext db, Person person)
+        {
+            return person;
+        }
+
+        [Coalesce, Execute]
+        public static Person? MethodWithOptionalEntityParameter(AppDbContext db, Person? person)
         {
             return person;
         }

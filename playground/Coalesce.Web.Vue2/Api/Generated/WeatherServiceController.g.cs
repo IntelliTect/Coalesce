@@ -50,7 +50,7 @@ namespace Coalesce.Web.Vue2.Api
         {
             var _params = new
             {
-                location = location,
+                location = !Request.Form.HasAnyValue(nameof(location)) ? null : location,
                 dateTime = dateTime,
                 conditions = conditions
             };
@@ -66,7 +66,7 @@ namespace Coalesce.Web.Vue2.Api
             var _mappingContext = new MappingContext(Context);
             var _methodResult = await Service.GetWeatherAsync(
                 parameterDbContext,
-                _params.location.MapToNew(_mappingContext),
+                _params.location?.MapToNew(_mappingContext),
                 _params.dateTime,
                 _params.conditions
             );

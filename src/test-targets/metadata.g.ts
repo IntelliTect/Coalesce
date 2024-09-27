@@ -1211,6 +1211,26 @@ export const ComplexModel = domain.types.ComplexModel = {
           type: "string",
           role: "value",
         },
+        optionalObject: {
+          name: "optionalObject",
+          displayName: "Optional Object",
+          type: "model",
+          get typeDef() { return (domain.types.Test as ModelType & { name: "Test" }) },
+          role: "value",
+        },
+        optionalObjectCollection: {
+          name: "optionalObjectCollection",
+          displayName: "Optional Object Collection",
+          type: "collection",
+          itemType: {
+            name: "$collectionItem",
+            displayName: "",
+            role: "value",
+            type: "model",
+            get typeDef() { return (domain.types.Test as ModelType & { name: "Test" }) },
+          },
+          role: "value",
+        },
       },
       return: {
         name: "$return",

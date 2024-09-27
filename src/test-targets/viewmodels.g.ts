@@ -266,9 +266,9 @@ export class ComplexModelViewModel extends ViewModel<$models.ComplexModel, $apiC
   public get methodWithOptionalParams() {
     const methodWithOptionalParams = this.$apiClient.$makeCaller(
       this.$metadata.methods.methodWithOptionalParams,
-      (c, requiredInt: number | null, plainInt?: number | null, nullableInt?: number | null, intWithDefault?: number | null, enumWithDefault?: $models.Statuses | null, stringWithDefault?: string | null) => c.methodWithOptionalParams(this.$primaryKey, requiredInt, plainInt, nullableInt, intWithDefault, enumWithDefault, stringWithDefault),
-      () => ({requiredInt: null as number | null, plainInt: null as number | null, nullableInt: null as number | null, intWithDefault: null as number | null, enumWithDefault: null as $models.Statuses | null, stringWithDefault: null as string | null, }),
-      (c, args) => c.methodWithOptionalParams(this.$primaryKey, args.requiredInt, args.plainInt, args.nullableInt, args.intWithDefault, args.enumWithDefault, args.stringWithDefault))
+      (c, requiredInt: number | null, plainInt?: number | null, nullableInt?: number | null, intWithDefault?: number | null, enumWithDefault?: $models.Statuses | null, stringWithDefault?: string | null, optionalObject?: $models.Test | null, optionalObjectCollection?: $models.Test[] | null) => c.methodWithOptionalParams(this.$primaryKey, requiredInt, plainInt, nullableInt, intWithDefault, enumWithDefault, stringWithDefault, optionalObject, optionalObjectCollection),
+      () => ({requiredInt: null as number | null, plainInt: null as number | null, nullableInt: null as number | null, intWithDefault: null as number | null, enumWithDefault: null as $models.Statuses | null, stringWithDefault: null as string | null, optionalObject: null as $models.Test | null, optionalObjectCollection: null as $models.Test[] | null, }),
+      (c, args) => c.methodWithOptionalParams(this.$primaryKey, args.requiredInt, args.plainInt, args.nullableInt, args.intWithDefault, args.enumWithDefault, args.stringWithDefault, args.optionalObject, args.optionalObjectCollection))
     
     Object.defineProperty(this, 'methodWithOptionalParams', {value: methodWithOptionalParams});
     return methodWithOptionalParams

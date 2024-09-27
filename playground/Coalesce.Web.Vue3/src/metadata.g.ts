@@ -1803,6 +1803,29 @@ export const Person = domain.types.Person = {
         role: "value",
       },
     },
+    methodWithOptionalEntityParameter: {
+      name: "methodWithOptionalEntityParameter",
+      displayName: "Method With Optional Entity Parameter",
+      transportType: "item",
+      httpMethod: "POST",
+      isStatic: true,
+      params: {
+        person: {
+          name: "person",
+          displayName: "Person",
+          type: "model",
+          get typeDef() { return (domain.types.Person as ModelType & { name: "Person" }) },
+          role: "value",
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "model",
+        get typeDef() { return (domain.types.Person as ModelType & { name: "Person" }) },
+        role: "value",
+      },
+    },
     searchPeople: {
       name: "searchPeople",
       displayName: "Search People",

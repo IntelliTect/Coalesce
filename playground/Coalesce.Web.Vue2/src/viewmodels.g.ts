@@ -632,7 +632,6 @@ export class PersonListViewModel extends ListViewModel<$models.Person, $apiClien
     return methodWithStringArrayParameter
   }
   
-  /** Gets all the first names starting with the characters. */
   public get methodWithEntityParameter() {
     const methodWithEntityParameter = this.$apiClient.$makeCaller(
       this.$metadata.methods.methodWithEntityParameter,
@@ -642,6 +641,17 @@ export class PersonListViewModel extends ListViewModel<$models.Person, $apiClien
     
     Object.defineProperty(this, 'methodWithEntityParameter', {value: methodWithEntityParameter});
     return methodWithEntityParameter
+  }
+  
+  public get methodWithOptionalEntityParameter() {
+    const methodWithOptionalEntityParameter = this.$apiClient.$makeCaller(
+      this.$metadata.methods.methodWithOptionalEntityParameter,
+      (c, person?: $models.Person | null) => c.methodWithOptionalEntityParameter(person),
+      () => ({person: null as $models.Person | null, }),
+      (c, args) => c.methodWithOptionalEntityParameter(args.person))
+    
+    Object.defineProperty(this, 'methodWithOptionalEntityParameter', {value: methodWithOptionalEntityParameter});
+    return methodWithOptionalEntityParameter
   }
   
   /** Gets people matching the criteria, paginated by parameter 'page'. */

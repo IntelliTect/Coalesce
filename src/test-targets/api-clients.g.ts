@@ -54,7 +54,7 @@ export class ComplexModelApiClient extends ModelApiClient<$models.ComplexModel> 
     return this.$invoke($method, $params, $config)
   }
   
-  public methodWithOptionalParams(id: number | null, requiredInt: number | null, plainInt?: number | null, nullableInt?: number | null, intWithDefault?: number | null, enumWithDefault?: $models.Statuses | null, stringWithDefault?: string | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<string>> {
+  public methodWithOptionalParams(id: number | null, requiredInt: number | null, plainInt?: number | null, nullableInt?: number | null, intWithDefault?: number | null, enumWithDefault?: $models.Statuses | null, stringWithDefault?: string | null, optionalObject?: $models.Test | null, optionalObjectCollection?: $models.Test[] | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<string>> {
     const $method = this.$metadata.methods.methodWithOptionalParams
     const $params =  {
       id,
@@ -64,6 +64,8 @@ export class ComplexModelApiClient extends ModelApiClient<$models.ComplexModel> 
       intWithDefault,
       enumWithDefault,
       stringWithDefault,
+      optionalObject,
+      optionalObjectCollection,
     }
     return this.$invoke($method, $params, $config)
   }

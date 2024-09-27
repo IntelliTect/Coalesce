@@ -328,6 +328,17 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
             {
                 ret += ".ToList()";
             }
+            
+            if (param.PureType.HasClassViewModel)
+            {
+                // Object parameters still get instantiated by the aspnetcore model binder,
+                // even if they were passed as null from the frontend.
+                // We therefore need to do some work to undo that behavior so that what the
+                // method is called with from the client typescript is what ends up in C#.
+                // https://github.com/IntelliTect/Coalesce/issues/456
+
+                ret = $"!Request.Form.HasAnyValue(nameof({param.CsParameterName})) ? null : {ret}";
+            }
 
             return ret;
         }
@@ -360,11 +371,11 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
             {
                 if (param.Type.IsCollection)
                 {
-                    ret += $".Select(_m => _m.MapToNew({MappingContextVar}))";
+                    ret += $"?.Select(_m => _m.MapToNew({MappingContextVar}))";
                 }
                 else
                 {
-                    ret += $".MapToNew({MappingContextVar})";
+                    ret += $"?.MapToNew({MappingContextVar})";
                 }
             }
 

@@ -1,9 +1,4 @@
-import {
-  delay,
-  mount,
-  mountApp,
-  openMenu,
-} from "@test/util";
+import { delay, mount, mountApp, openMenu } from "@test/util";
 import { CDatetimePicker } from "..";
 import { Case, ComplexModel } from "@test-targets/models.g";
 import { ComplexModelViewModel } from "@test-targets/viewmodels.g";
@@ -14,7 +9,7 @@ describe("CDatetimePicker", () => {
   let model: ComplexModelViewModel;
   beforeEach(() => {
     model = new ComplexModelViewModel({
-      name: "bob"
+      name: "bob",
     });
   });
 
@@ -105,7 +100,6 @@ describe("CDatetimePicker", () => {
     expect(overlay.findAll(".c-time-picker__item-active")).toHaveLength(3);
     expect(overlay.text()).contains("August 1970");
     expect(overlay.text()).contains("Sun, Aug 2");
-    console.log(overlay.text());
     expect(overlay.find(".c-time-picker-header").text()).equals("1:51 PM PDT");
   });
 

@@ -37,12 +37,24 @@ public class SqliteDatabaseFixture : IDisposable
         using var db = new AppDbContextForSqlite(Options);
 
         db.Database.EnsureCreated();
-        Seed();
+        Seed(db);
     }
 
-    public void Seed()
+    public void Seed(AppDbContext db)
     {
-        // Seed baseline test data, if desired.
+        var seeder = new DatabaseSeeder(db);
+        seeder.Seed();
+
+#if Tenancy
+        if (!db.Tenants.Any())
+        {
+            var tenant = new Tenant { Name = "Test Tenant" };
+            db.Add(tenant);
+            db.SaveChanges();
+            db.TenantId = tenant.TenantId;
+            seeder.SeedNewTenant(tenant);
+        }
+#endif
     }
 
     public void Dispose()

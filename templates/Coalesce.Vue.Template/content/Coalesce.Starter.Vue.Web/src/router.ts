@@ -36,7 +36,7 @@ const router = createRouter({
       props: true,
       component: () => import("./views/UserProfile.vue"),
     },
-    // #endif
+    //#endif
 
     // Coalesce admin routes
     {
@@ -78,7 +78,7 @@ function titledAdminPage<
     | typeof CAdminEditorPage
     //#if AuditLogs
     | typeof CAdminAuditLogPage,
-    //#endif
+  //#endif
 >(component: T) {
   return defineComponent({
     setup() {

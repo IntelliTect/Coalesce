@@ -173,6 +173,7 @@
             "**/AuthenticationConfiguration.cs",
             "**/Forbidden.vue",
             "**/UserAvatar.vue",
+            "**/UserProfile.vue",
             "**/SignIn.*",
             "**/SignOut.*",
             "**/AppClaimTypes.cs",

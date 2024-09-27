@@ -184,6 +184,14 @@ export const AuditLog = domain.types.AuditLog = {
   methods: {
   },
   dataSources: {
+    tenantedDataSource: {
+      type: "dataSource",
+      name: "TenantedDataSource" as const,
+      displayName: "Tenanted Data Source",
+      isDefault: true,
+      props: {
+      },
+    },
   },
 }
 export const AuditLogProperty = domain.types.AuditLogProperty = {
@@ -298,11 +306,99 @@ export const Role = domain.types.Role = {
   dataSources: {
   },
 }
+export const Tenant = domain.types.Tenant = {
+  name: "Tenant" as const,
+  displayName: "Organization",
+  get displayProp() { return this.props.name }, 
+  type: "model",
+  controllerRoute: "Tenant",
+  get keyProp() { return this.props.tenantId }, 
+  behaviorFlags: 2 as BehaviorFlags,
+  props: {
+    tenantId: {
+      name: "tenantId",
+      displayName: "Tenant Id",
+      type: "string",
+      role: "primaryKey",
+      hidden: 3 as HiddenAreas,
+    },
+    name: {
+      name: "name",
+      displayName: "Name",
+      type: "string",
+      role: "value",
+      rules: {
+        required: val => (val != null && val !== '') || "Name is required.",
+      }
+    },
+    externalId: {
+      name: "externalId",
+      displayName: "External Id",
+      description: "The external origin of this tenant. Other users who sign in with accounts from this external source will automatically join this organization.",
+      type: "string",
+      role: "value",
+      dontSerialize: true,
+    },
+  },
+  methods: {
+    create: {
+      name: "create",
+      displayName: "Create",
+      transportType: "item",
+      httpMethod: "POST",
+      isStatic: true,
+      params: {
+        name: {
+          name: "name",
+          displayName: "Org Name",
+          type: "string",
+          role: "value",
+          rules: {
+            required: val => (val != null && val !== '') || "Org Name is required.",
+          }
+        },
+        adminEmail: {
+          name: "adminEmail",
+          displayName: "Admin Email",
+          type: "string",
+          subtype: "email",
+          role: "value",
+          rules: {
+            required: val => (val != null && val !== '') || "Admin Email is required.",
+          }
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "void",
+        role: "value",
+      },
+    },
+  },
+  dataSources: {
+    defaultSource: {
+      type: "dataSource",
+      name: "DefaultSource" as const,
+      displayName: "Default Source",
+      isDefault: true,
+      props: {
+      },
+    },
+    globalAdminSource: {
+      type: "dataSource",
+      name: "GlobalAdminSource" as const,
+      displayName: "Global Admin Source",
+      props: {
+      },
+    },
+  },
+}
 export const User = domain.types.User = {
   name: "User" as const,
   displayName: "User",
   description: "A user profile within the application.",
-  get displayProp() { return this.props.id }, 
+  get displayProp() { return this.props.fullName }, 
   type: "model",
   controllerRoute: "User",
   get keyProp() { return this.props.id }, 
@@ -313,15 +409,6 @@ export const User = domain.types.User = {
       displayName: "Full Name",
       type: "string",
       role: "value",
-    },
-    photoMD5: {
-      name: "photoMD5",
-      displayName: "Photo MD5",
-      type: "binary",
-      base64: true,
-      role: "value",
-      hidden: 3 as HiddenAreas,
-      dontSerialize: true,
     },
     userName: {
       name: "userName",
@@ -334,21 +421,23 @@ export const User = domain.types.User = {
       displayName: "Email",
       type: "string",
       role: "value",
+      dontSerialize: true,
     },
-    lockoutEnd: {
-      name: "lockoutEnd",
-      displayName: "Lockout End",
-      description: "If set, the user will be blocked from signing in until this date.",
-      type: "date",
-      dateKind: "datetime",
-      role: "value",
-    },
-    lockoutEnabled: {
-      name: "lockoutEnabled",
-      displayName: "Lockout Enabled",
-      description: "If enabled, the user can be locked out.",
+    emailConfirmed: {
+      name: "emailConfirmed",
+      displayName: "Email Confirmed",
       type: "boolean",
       role: "value",
+      dontSerialize: true,
+    },
+    photoHash: {
+      name: "photoHash",
+      displayName: "Photo Hash",
+      type: "binary",
+      base64: true,
+      role: "value",
+      hidden: 3 as HiddenAreas,
+      dontSerialize: true,
     },
     userRoles: {
       name: "userRoles",
@@ -373,17 +462,29 @@ export const User = domain.types.User = {
         get nearForeignKey() { return (domain.types.UserRole as ModelType & { name: "UserRole" }).props.userId as ForeignKeyProperty },
         get nearNavigationProp() { return (domain.types.UserRole as ModelType & { name: "UserRole" }).props.user as ModelReferenceNavigationProperty },
       },
+      hidden: 3 as HiddenAreas,
       dontSerialize: true,
     },
-    effectivePermissions: {
-      name: "effectivePermissions",
-      displayName: "Effective Permissions",
-      description: "A summary of the effective permissions of the user, derived from their current roles.",
-      type: "string",
-      subtype: "multiline",
+    roleNames: {
+      name: "roleNames",
+      displayName: "Roles",
+      type: "collection",
+      itemType: {
+        name: "$collectionItem",
+        displayName: "",
+        role: "value",
+        type: "string",
+      },
       role: "value",
-      hidden: 1 as HiddenAreas,
       dontSerialize: true,
+    },
+    isGlobalAdmin: {
+      name: "isGlobalAdmin",
+      displayName: "Is Global Admin",
+      description: "Global admins can perform some administrative actions against ALL tenants.",
+      type: "boolean",
+      role: "value",
+      hidden: 3 as HiddenAreas,
     },
     id: {
       name: "id",
@@ -415,7 +516,7 @@ export const User = domain.types.User = {
           displayName: "Etag",
           type: "binary",
           role: "value",
-          get source() { return (domain.types.User as ModelType & { name: "User" }).props.photoMD5 },
+          get source() { return (domain.types.User as ModelType & { name: "User" }).props.photoHash },
         },
       },
       return: {
@@ -425,8 +526,72 @@ export const User = domain.types.User = {
         role: "value",
       },
     },
+    evict: {
+      name: "evict",
+      displayName: "Evict",
+      transportType: "item",
+      httpMethod: "POST",
+      params: {
+        id: {
+          name: "id",
+          displayName: "Primary Key",
+          type: "string",
+          role: "value",
+          get source() { return (domain.types.User as ModelType & { name: "User" }).props.id },
+          rules: {
+            required: val => (val != null && val !== '') || "Primary Key is required.",
+          }
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "void",
+        role: "value",
+      },
+    },
+    inviteUser: {
+      name: "inviteUser",
+      displayName: "Invite User",
+      transportType: "item",
+      httpMethod: "POST",
+      isStatic: true,
+      params: {
+        email: {
+          name: "email",
+          displayName: "Email",
+          type: "string",
+          subtype: "email",
+          role: "value",
+          rules: {
+            required: val => (val != null && val !== '') || "Email is required.",
+          }
+        },
+        role: {
+          name: "role",
+          displayName: "Role",
+          type: "model",
+          get typeDef() { return (domain.types.Role as ModelType & { name: "Role" }) },
+          role: "value",
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "void",
+        role: "value",
+      },
+    },
   },
   dataSources: {
+    defaultSource: {
+      type: "dataSource",
+      name: "DefaultSource" as const,
+      displayName: "Default Source",
+      isDefault: true,
+      props: {
+      },
+    },
   },
 }
 export const UserRole = domain.types.UserRole = {
@@ -666,6 +831,18 @@ export const UserInfo = domain.types.UserInfo = {
       },
       role: "value",
     },
+    tenantId: {
+      name: "tenantId",
+      displayName: "Tenant Id",
+      type: "string",
+      role: "value",
+    },
+    tenantName: {
+      name: "tenantName",
+      displayName: "Tenant Name",
+      type: "string",
+      role: "value",
+    },
   },
 }
 export const SecurityService = domain.services.SecurityService = {
@@ -702,6 +879,7 @@ interface AppDomain extends Domain {
     AuditLog: typeof AuditLog
     AuditLogProperty: typeof AuditLogProperty
     Role: typeof Role
+    Tenant: typeof Tenant
     User: typeof User
     UserInfo: typeof UserInfo
     UserRole: typeof UserRole

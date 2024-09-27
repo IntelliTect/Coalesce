@@ -1,4 +1,5 @@
-﻿using IntelliTect.Coalesce;
+﻿using Coalesce.Starter.Vue.Data.Models;
+using IntelliTect.Coalesce;
 using IntelliTect.Coalesce.TypeDefinition;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
@@ -82,6 +83,10 @@ public class TestBase : IDisposable
     {
         var mocker = new MockerScope(standalone ? null : this);
         var db = new AppDbContextForSqlite(DbFixture.Options);
+#if Tenancy
+        db.TenantId = db.Tenants.OrderBy(t => t.TenantId).First().TenantId;
+#endif
+
         mocker.Use(DbFixture.Options);
         mocker.Use<AppDbContext>(db);
 

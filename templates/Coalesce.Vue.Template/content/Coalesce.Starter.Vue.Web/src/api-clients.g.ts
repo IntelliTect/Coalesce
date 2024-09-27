@@ -17,6 +17,20 @@ export class RoleApiClient extends ModelApiClient<$models.Role> {
 }
 
 
+export class TenantApiClient extends ModelApiClient<$models.Tenant> {
+  constructor() { super($metadata.Tenant) }
+  public create(name: string | null, adminEmail: string | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<void>> {
+    const $method = this.$metadata.methods.create
+    const $params =  {
+      name,
+      adminEmail,
+    }
+    return this.$invoke($method, $params, $config)
+  }
+  
+}
+
+
 export class UserApiClient extends ModelApiClient<$models.User> {
   constructor() { super($metadata.User) }
   public getPhoto(id: string | null, etag?: string | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<File>> {
@@ -24,6 +38,23 @@ export class UserApiClient extends ModelApiClient<$models.User> {
     const $params =  {
       id,
       etag,
+    }
+    return this.$invoke($method, $params, $config)
+  }
+  
+  public evict(id: string | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<void>> {
+    const $method = this.$metadata.methods.evict
+    const $params =  {
+      id,
+    }
+    return this.$invoke($method, $params, $config)
+  }
+  
+  public inviteUser(email: string | null, role?: $models.Role | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<void>> {
+    const $method = this.$metadata.methods.inviteUser
+    const $params =  {
+      email,
+      role,
     }
     return this.$invoke($method, $params, $config)
   }

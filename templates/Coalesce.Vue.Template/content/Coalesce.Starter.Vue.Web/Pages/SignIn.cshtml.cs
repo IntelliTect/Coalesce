@@ -10,17 +10,25 @@ namespace Coalesce.Starter.Vue.Web.Pages
         [BindProperty(SupportsGet = true)]
         public string? ReturnUrl { get; set; }
 
+        [BindProperty]
+        public string? Provider { get; set; }
+
         public void OnGet()
         {
         }
 
-        public IActionResult OnPost([FromForm] string provider)
+        public IActionResult OnPost()
         {
-            // Request a redirect to the external login provider.
-            return new ChallengeResult(provider, new()
+            if (!string.IsNullOrWhiteSpace(Provider))
             {
-                RedirectUri = ReturnUrl
-            });
+                // Request a redirect to the external login provider.
+                return new ChallengeResult(Provider, new()
+                {
+                    RedirectUri = ReturnUrl
+                });
+            }
+
+            return Page();
         }
     }
 }

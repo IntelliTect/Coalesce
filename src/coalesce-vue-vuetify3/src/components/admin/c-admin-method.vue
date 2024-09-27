@@ -88,9 +88,12 @@
             "
             class="c-method--result-success"
           >
-            <v-alert type="success" dense>{{
-              caller.message || "Success"
-            }}</v-alert>
+            <v-alert type="success" dense>
+              <span
+                class="text-pre-wrap"
+                v-text="caller.message || 'Success'"
+              ></span>
+            </v-alert>
           </span>
 
           <div v-if="caller.result && methodMeta.return.type == 'file'">

@@ -8,10 +8,27 @@ import {
 
 const securityService = new SecurityServiceViewModel();
 securityService.whoAmI.setConcurrency("debounce");
+
 //#if AppInsights
 securityService.whoAmI.onFulfilled(() => {
   //@ts-expect-error AppInsights imported from backend JavaScriptSnippet; no types available.
   window.appInsights?.setAuthenticatedUserContext(userInfo.value.userName);
+});
+//#endif
+
+//#if Tenancy
+let initialTenantId: string | null = null;
+securityService.whoAmI.onFulfilled(() => {
+  const tid = userInfo.value.tenantId;
+  if (initialTenantId && initialTenantId != tid) {
+    console.warn("Tenant has changed. Forcing page reload.");
+    window.location.reload();
+    return new Promise<void>(() => {
+      /* Never resolving promise so the new tenant info doesn't have a chance to mix in the UI with the old tenant info. */
+    });
+  } else {
+    initialTenantId = tid;
+  }
 });
 //#endif
 
@@ -49,8 +66,6 @@ document.addEventListener(
   },
   false,
 );
-
-refreshUserInfo();
 
 // Make useful properties available in vue <template>s
 declare module "vue" {

@@ -59,6 +59,14 @@ export class AuditLog {
     Object.assign(this, AuditLog.map(data || {}));
   }
 }
+export namespace AuditLog {
+  export namespace DataSources {
+    
+    export class TenantedDataSource implements DataSource<typeof metadata.AuditLog.dataSources.tenantedDataSource> {
+      readonly $metadata = metadata.AuditLog.dataSources.tenantedDataSource
+    }
+  }
+}
 
 
 export interface AuditLogProperty extends Model<typeof metadata.AuditLogProperty> {
@@ -117,21 +125,57 @@ export class Role {
 }
 
 
+export interface Tenant extends Model<typeof metadata.Tenant> {
+  tenantId: string | null
+  name: string | null
+  
+  /** The external origin of this tenant. Other users who sign in with accounts from this external source will automatically join this organization. */
+  externalId: string | null
+}
+export class Tenant {
+  
+  /** Mutates the input object and its descendents into a valid Tenant implementation. */
+  static convert(data?: Partial<Tenant>): Tenant {
+    return convertToModel(data || {}, metadata.Tenant) 
+  }
+  
+  /** Maps the input object and its descendents to a new, valid Tenant implementation. */
+  static map(data?: Partial<Tenant>): Tenant {
+    return mapToModel(data || {}, metadata.Tenant) 
+  }
+  
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.Tenant; }
+  
+  /** Instantiate a new Tenant, optionally basing it on the given data. */
+  constructor(data?: Partial<Tenant> | {[k: string]: any}) {
+    Object.assign(this, Tenant.map(data || {}));
+  }
+}
+export namespace Tenant {
+  export namespace DataSources {
+    
+    export class DefaultSource implements DataSource<typeof metadata.Tenant.dataSources.defaultSource> {
+      readonly $metadata = metadata.Tenant.dataSources.defaultSource
+    }
+    
+    export class GlobalAdminSource implements DataSource<typeof metadata.Tenant.dataSources.globalAdminSource> {
+      readonly $metadata = metadata.Tenant.dataSources.globalAdminSource
+    }
+  }
+}
+
+
 export interface User extends Model<typeof metadata.User> {
   fullName: string | null
-  photoMD5: string | null
   userName: string | null
   email: string | null
-  
-  /** If set, the user will be blocked from signing in until this date. */
-  lockoutEnd: Date | null
-  
-  /** If enabled, the user can be locked out. */
-  lockoutEnabled: boolean | null
+  emailConfirmed: boolean | null
+  photoHash: string | null
   userRoles: UserRole[] | null
+  roleNames: string[] | null
   
-  /** A summary of the effective permissions of the user, derived from their current roles. */
-  effectivePermissions: string | null
+  /** Global admins can perform some administrative actions against ALL tenants. */
+  isGlobalAdmin: boolean | null
   id: string | null
 }
 export class User {
@@ -151,6 +195,14 @@ export class User {
   /** Instantiate a new User, optionally basing it on the given data. */
   constructor(data?: Partial<User> | {[k: string]: any}) {
     Object.assign(this, User.map(data || {}));
+  }
+}
+export namespace User {
+  export namespace DataSources {
+    
+    export class DefaultSource implements DataSource<typeof metadata.User.dataSources.defaultSource> {
+      readonly $metadata = metadata.User.dataSources.defaultSource
+    }
   }
 }
 
@@ -231,6 +283,8 @@ export interface UserInfo extends Model<typeof metadata.UserInfo> {
   fullName: string | null
   roles: string[] | null
   permissions: string[] | null
+  tenantId: string | null
+  tenantName: string | null
 }
 export class UserInfo {
   
@@ -263,6 +317,7 @@ declare module "coalesce-vue/lib/model" {
     AuditLog: AuditLog
     AuditLogProperty: AuditLogProperty
     Role: Role
+    Tenant: Tenant
     User: User
     UserInfo: UserInfo
     UserRole: UserRole

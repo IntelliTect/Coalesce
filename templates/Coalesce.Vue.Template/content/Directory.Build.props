@@ -5,13 +5,12 @@
     <Nullable>enable</Nullable>
 
     <AccelerateBuildsInVisualStudio>true</AccelerateBuildsInVisualStudio>
-    <TypeScriptCompileBlocked>true</TypeScriptCompileBlocked>
-    <TypeScriptToolsVersion>5.5</TypeScriptToolsVersion>
 
-    <CoalesceVersion>5.0.0</CoalesceVersion> 
+    <CoalesceVersion>5.0.1</CoalesceVersion> 
 
     <!--#if (KeepTemplateOnly) -->
-    <DefineConstants>KeepTemplateOnly;AppInsights;OpenAPI;Identity;MicrosoftAuth;GoogleAuth;AuditLogs;UserPictures;TrackingBase;ExampleModel</DefineConstants>
+    <DefineConstants>$(DefineConstants);KeepTemplateOnly;AppInsights;OpenAPI;Identity;MicrosoftAuth;GoogleAuth;AuditLogs;UserPictures;TrackingBase;ExampleModel</DefineConstants>
+    <DefineConstants>$(DefineConstants);Tenancy;TenantPerHostname;TenantCreateSelf;TenantCreateExternal;TenantCreateAdmin;TenantMemberInvites</DefineConstants>
     <!--#endif -->
   </PropertyGroup>
 </Project>

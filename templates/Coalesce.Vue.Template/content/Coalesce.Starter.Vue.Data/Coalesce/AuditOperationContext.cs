@@ -1,6 +1,4 @@
-﻿using Coalesce.Starter.Vue.Data.Auth;
-using Coalesce.Starter.Vue.Data.Models;
-using IntelliTect.Coalesce.AuditLogging;
+﻿using IntelliTect.Coalesce.AuditLogging;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 
@@ -15,5 +13,21 @@ public class AuditOperationContext : DefaultAuditOperationContext<AuditLog>
         base.Populate(auditEntry, changedEntity);
 
         auditEntry.UserId = User?.GetUserId();
+
+#if Tenancy
+        auditEntry.TenantId = changedEntity.Entity switch
+        {
+            ITenanted tenanted => tenanted.TenantId,
+            Tenant tenant => tenant.TenantId,
+            _ => auditEntry.TenantId
+        };
+
+        if (auditEntry.TenantId is not null)
+        {
+            // Strip the TenantId out of the primary key because we stored it in its own column.
+            var tenantKeyPrefix = $"{auditEntry.TenantId};";
+            auditEntry.KeyValue = auditEntry.KeyValue?.Replace(tenantKeyPrefix, "");
+        }
+#endif
     }
 }

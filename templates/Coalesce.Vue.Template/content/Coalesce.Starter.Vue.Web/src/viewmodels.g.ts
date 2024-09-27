@@ -20,6 +20,7 @@ export interface AuditLogViewModel extends $models.AuditLog {
   endpoint: string | null;
 }
 export class AuditLogViewModel extends ViewModel<$models.AuditLog, $apiClients.AuditLogApiClient, number> implements $models.AuditLog  {
+  static DataSources = $models.AuditLog.DataSources;
   
   
   public addToProperties(initialData?: DeepPartial<$models.AuditLogProperty> | null) {
@@ -33,6 +34,7 @@ export class AuditLogViewModel extends ViewModel<$models.AuditLog, $apiClients.A
 defineProps(AuditLogViewModel, $metadata.AuditLog)
 
 export class AuditLogListViewModel extends ListViewModel<$models.AuditLog, $apiClients.AuditLogApiClient, AuditLogViewModel> {
+  static DataSources = $models.AuditLog.DataSources;
   
   constructor() {
     super($metadata.AuditLog, new $apiClients.AuditLogApiClient())
@@ -86,25 +88,58 @@ export class RoleListViewModel extends ListViewModel<$models.Role, $apiClients.R
 }
 
 
+export interface TenantViewModel extends $models.Tenant {
+  tenantId: string | null;
+  name: string | null;
+  
+  /** The external origin of this tenant. Other users who sign in with accounts from this external source will automatically join this organization. */
+  externalId: string | null;
+}
+export class TenantViewModel extends ViewModel<$models.Tenant, $apiClients.TenantApiClient, string> implements $models.Tenant  {
+  static DataSources = $models.Tenant.DataSources;
+  
+  constructor(initialData?: DeepPartial<$models.Tenant> | null) {
+    super($metadata.Tenant, new $apiClients.TenantApiClient(), initialData)
+  }
+}
+defineProps(TenantViewModel, $metadata.Tenant)
+
+export class TenantListViewModel extends ListViewModel<$models.Tenant, $apiClients.TenantApiClient, TenantViewModel> {
+  static DataSources = $models.Tenant.DataSources;
+  
+  public get create() {
+    const create = this.$apiClient.$makeCaller(
+      this.$metadata.methods.create,
+      (c, name: string | null, adminEmail: string | null) => c.create(name, adminEmail),
+      () => ({name: null as string | null, adminEmail: null as string | null, }),
+      (c, args) => c.create(args.name, args.adminEmail))
+    
+    Object.defineProperty(this, 'create', {value: create});
+    return create
+  }
+  
+  constructor() {
+    super($metadata.Tenant, new $apiClients.TenantApiClient())
+  }
+}
+
+
 export interface UserViewModel extends $models.User {
   fullName: string | null;
-  photoMD5: string | null;
   userName: string | null;
   email: string | null;
-  
-  /** If set, the user will be blocked from signing in until this date. */
-  lockoutEnd: Date | null;
-  
-  /** If enabled, the user can be locked out. */
-  lockoutEnabled: boolean | null;
+  emailConfirmed: boolean | null;
+  photoHash: string | null;
   get userRoles(): ViewModelCollection<UserRoleViewModel, $models.UserRole>;
   set userRoles(value: (UserRoleViewModel | $models.UserRole)[] | null);
+  roleNames: string[] | null;
   
-  /** A summary of the effective permissions of the user, derived from their current roles. */
-  effectivePermissions: string | null;
+  /** Global admins can perform some administrative actions against ALL tenants. */
+  isGlobalAdmin: boolean | null;
   id: string | null;
 }
 export class UserViewModel extends ViewModel<$models.User, $apiClients.UserApiClient, string> implements $models.User  {
+  static DataSources = $models.User.DataSources;
   
   
   public addToUserRoles(initialData?: DeepPartial<$models.UserRole> | null) {
@@ -118,12 +153,23 @@ export class UserViewModel extends ViewModel<$models.User, $apiClients.UserApiCl
   public get getPhoto() {
     const getPhoto = this.$apiClient.$makeCaller(
       this.$metadata.methods.getPhoto,
-      (c) => c.getPhoto(this.$primaryKey, this.photoMD5),
+      (c) => c.getPhoto(this.$primaryKey, this.photoHash),
       () => ({}),
-      (c, args) => c.getPhoto(this.$primaryKey, this.photoMD5))
+      (c, args) => c.getPhoto(this.$primaryKey, this.photoHash))
     
     Object.defineProperty(this, 'getPhoto', {value: getPhoto});
     return getPhoto
+  }
+  
+  public get evict() {
+    const evict = this.$apiClient.$makeCaller(
+      this.$metadata.methods.evict,
+      (c) => c.evict(this.$primaryKey),
+      () => ({}),
+      (c, args) => c.evict(this.$primaryKey))
+    
+    Object.defineProperty(this, 'evict', {value: evict});
+    return evict
   }
   
   constructor(initialData?: DeepPartial<$models.User> | null) {
@@ -133,6 +179,18 @@ export class UserViewModel extends ViewModel<$models.User, $apiClients.UserApiCl
 defineProps(UserViewModel, $metadata.User)
 
 export class UserListViewModel extends ListViewModel<$models.User, $apiClients.UserApiClient, UserViewModel> {
+  static DataSources = $models.User.DataSources;
+  
+  public get inviteUser() {
+    const inviteUser = this.$apiClient.$makeCaller(
+      this.$metadata.methods.inviteUser,
+      (c, email: string | null, role?: $models.Role | null) => c.inviteUser(email, role),
+      () => ({email: null as string | null, role: null as $models.Role | null, }),
+      (c, args) => c.inviteUser(args.email, args.role))
+    
+    Object.defineProperty(this, 'inviteUser', {value: inviteUser});
+    return inviteUser
+  }
   
   constructor() {
     super($metadata.User, new $apiClients.UserApiClient())
@@ -220,6 +278,7 @@ const viewModelTypeLookup = ViewModel.typeLookup = {
   AuditLog: AuditLogViewModel,
   AuditLogProperty: AuditLogPropertyViewModel,
   Role: RoleViewModel,
+  Tenant: TenantViewModel,
   User: UserViewModel,
   UserRole: UserRoleViewModel,
   Widget: WidgetViewModel,
@@ -228,6 +287,7 @@ const listViewModelTypeLookup = ListViewModel.typeLookup = {
   AuditLog: AuditLogListViewModel,
   AuditLogProperty: AuditLogPropertyListViewModel,
   Role: RoleListViewModel,
+  Tenant: TenantListViewModel,
   User: UserListViewModel,
   UserRole: UserRoleListViewModel,
   Widget: WidgetListViewModel,

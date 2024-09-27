@@ -1,3 +1,11 @@
+# 5.0.2
+
+- feat: Make "not found" messages from data sources clearer when the ID is null or empty string. (#447)
+- feat(template): Added multi-tenancy options to the template. (#441, #461)
+- fix(template): adjust manual chunking configuration to avoid circular deps. (#455)
+- fix(audit): key props now respect configured property exclusions.
+- fix: c-admin-method now preserves newlines when displaying success messages.
+
 # 5.0.1
 
 - fix: `c-input` once again respects the validation rules defined by the bound ViewModel.

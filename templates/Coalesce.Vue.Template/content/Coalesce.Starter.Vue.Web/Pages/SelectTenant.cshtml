@@ -1,0 +1,47 @@
+﻿@page "/select-org"
+@model Coalesce.Starter.Vue.Web.Pages.SelectTenantModel
+
+@{
+    ViewData["Title"] = "Choose Organization";
+}
+
+<div asp-validation-summary="All" class="text-danger"></div>
+
+<form method="post" class="d-grid gap-2">
+    <input type="hidden" name="@nameof(Model.ReturnUrl)" value="@Model.ReturnUrl" />
+    @foreach (var tenant in Model.Tenants)
+    {
+        <button class="btn btn-primary"
+            type="submit" 
+            name="tenantId" 
+            value="@tenant.TenantId" 
+            title="Log into @tenant.Name"
+        >
+            @tenant.Name
+        </button>
+    }
+    @if (!Model.Tenants.Any())
+    {
+        <p>
+            <b>@User.GetUserName()</b> is a not a member of any organization.
+        </p>
+    }
+</form>
+
+<hr />
+
+@*#if (TenantCreateSelf)*@
+    <form action="/new-org" method="GET" class="d-grid gap-2">
+    <button class="btn @(!Model.Tenants.Any() ? "btn-primary" : "btn-outline-dark")">
+        Create Organization
+    </button>
+</form>
+@*#endif*@
+
+<form method="post" asp-page="SignOut" class="d-grid gap-2 mt-3">
+    <input type="hidden" name="@nameof(Model.ReturnUrl)" value="@Model.ReturnUrl" />
+    
+    <button type="submit" class="btn btn-text">
+        Sign Out
+    </button>
+</form>

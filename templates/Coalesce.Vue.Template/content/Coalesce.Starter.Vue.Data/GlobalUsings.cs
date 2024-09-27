@@ -9,7 +9,9 @@ global using static IntelliTect.Coalesce.DataAnnotations.SecurityPermissionLevel
 global using System.Security.Claims;
 global using Coalesce.Starter.Vue.Data.Auth;
 global using Coalesce.Starter.Vue.Data.Coalesce;
+#if (Identity || ExampleModel)
 global using Coalesce.Starter.Vue.Data.Models;
+#endif
 
 global using OrderByDirections = IntelliTect.Coalesce.DataAnnotations.DefaultOrderByAttribute.OrderByDirections;
 global using SearchMethods = IntelliTect.Coalesce.DataAnnotations.SearchAttribute.SearchMethods;

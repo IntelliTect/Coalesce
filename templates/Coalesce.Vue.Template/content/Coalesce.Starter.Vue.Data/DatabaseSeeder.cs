@@ -1,6 +1,4 @@
-﻿using Coalesce.Starter.Vue.Data.Models;
-
-namespace Coalesce.Starter.Vue.Data;
+﻿namespace Coalesce.Starter.Vue.Data;
 
 public class DatabaseSeeder(AppDbContext db)
 {

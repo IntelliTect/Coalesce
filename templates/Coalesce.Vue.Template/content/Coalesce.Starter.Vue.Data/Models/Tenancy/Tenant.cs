@@ -27,8 +27,7 @@ public class Tenant
     {
         public override IQueryable<Tenant> GetQuery(IDataSourceParameters parameters)
         {
-            // By default, only allow the current tenant to be read and modified.
-            // If desired, this can be made more permissive.
+            // Only allow the current tenant to be read and modified.
             return base.GetQuery(parameters)
                 .Where(t => t.TenantId == User.GetTenantId());
         }
@@ -53,7 +52,8 @@ public class Tenant
         AppDbContext db,
         [Inject] InvitationService invitationService,
         [Display(Name = "Org Name")] string name,
-        [DataType(DataType.EmailAddress)] string adminEmail)
+        [DataType(DataType.EmailAddress)] string adminEmail
+    )
     {
         Tenant tenant = new() { Name = name };
         db.Tenants.Add(tenant);

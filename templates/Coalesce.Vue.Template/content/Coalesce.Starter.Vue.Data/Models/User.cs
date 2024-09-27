@@ -1,4 +1,3 @@
-using IntelliTect.Coalesce.Helpers;
 using Microsoft.AspNetCore.Identity;
 using System.ComponentModel;
 

@@ -1,6 +1,4 @@
-﻿using System.Text.Json.Serialization;
-
-namespace Coalesce.Starter.Vue.Data;
+﻿namespace Coalesce.Starter.Vue.Data;
 
 /// <summary>
 /// The permissions available for assignment to <see cref="Models.Role"/>s. 

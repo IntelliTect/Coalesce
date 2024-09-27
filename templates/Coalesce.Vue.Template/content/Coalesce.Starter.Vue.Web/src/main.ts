@@ -83,7 +83,6 @@ const coalesceVuetify = createCoalesceVuetify({
 // SETUP: app insights
 //@ts-expect-error AppInsights imported from backend JavaScriptSnippet; no types available.
 window.appInsights?.addTelemetryInitializer(function (envelope) {
-  debugger;
   if (
     envelope.baseType === "ExceptionData" &&
     // Filter out unactionable, junk errors:

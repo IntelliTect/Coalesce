@@ -53,7 +53,7 @@ services.AddSingleton<ITelemetryInitializer, AppInsightsTelemetryEnricher>();
 services.ConfigureTelemetryModule<DependencyTrackingTelemetryModule>((module, o) => {
 	module.EnableSqlCommandTextInstrumentation = true;
 });
-// App insights filters all logs to Warning by default.
+// App insights filters all logs to Warning by default. We want to include our own logging.
 builder.Logging.AddFilter<ApplicationInsightsLoggerProvider>("Coalesce.Starter.Vue", LogLevel.Information);
 #endif
 
@@ -97,12 +97,14 @@ services.AddSwaggerGen(c =>
 services.AddScoped<SecurityService>();
 
 #if TenantMemberInvites
+// Register IUrlHelper to allow for invite link generation.
 services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
 services.AddScoped<IUrlHelper>(x => {
     var actionContext = x.GetRequiredService<IActionContextAccessor>().ActionContext;
     var factory = x.GetRequiredService<IUrlHelperFactory>();
     return factory.GetUrlHelper(actionContext!);
 });
+
 services.AddScoped<InvitationService>();
 #endif
 
@@ -145,16 +147,6 @@ if (app.Environment.IsDevelopment())
 
 app.UseAuthentication();
 app.UseAuthorization();
-
-//app.Use(async (context, next) =>
-//{
-//    if (context.User.GetTenantId() is int tenantId)
-//    {
-//        context.RequestServices.GetRequiredService<AppDbContext>().TenantId = tenantId;
-//    }
-
-//    await next(context);
-//});
 
 var containsFileHashRegex = new Regex(@"[.-][0-9a-zA-Z-_]{8}\.[^\.]*$", RegexOptions.Compiled);
 app.UseStaticFiles(new StaticFileOptions

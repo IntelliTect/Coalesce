@@ -32,14 +32,10 @@ const router = createRouter({
     //#if Identity
     {
       path: "/user/:id",
-      alias: "/admin/User/edit/:id",
+      alias: "/admin/User/edit/:id", // Override coalesce admin page
       props: true,
       component: () => import("./views/UserProfile.vue"),
     },
-    // {
-    //   path: "/admin/User/edit/:id",
-    //   redirect(to) { return `/user/` }
-    // }
     // #endif
 
     // Coalesce admin routes
@@ -82,7 +78,7 @@ function titledAdminPage<
     | typeof CAdminEditorPage
     //#if AuditLogs
     | typeof CAdminAuditLogPage,
-  //#endif
+    //#endif
 >(component: T) {
   return defineComponent({
     setup() {

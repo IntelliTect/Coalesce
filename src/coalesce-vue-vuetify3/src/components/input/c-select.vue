@@ -430,7 +430,19 @@ const isClearable = computed((): boolean => {
     return props.clearable;
 
   // Check to see if the foreign key is nullable (i.e. doesn't have a 'required' rule).
-  return !!(modelKeyProp.value && !modelKeyProp.value.rules?.required);
+  if (modelKeyProp.value) {
+    return !modelKeyProp.value.rules?.required;
+  }
+
+  if (valueMeta.value && "rules" in valueMeta.value) {
+    return !valueMeta.value.rules?.required;
+  }
+
+  // Only default true when we're bound to a specific prop/param on some parent owner.
+  // This preserves longstanding behavior where a <c-select for=Person /> is non-clearable by default.
+  if (valueOwner.value) return true;
+
+  return false;
 });
 
 /** The property on `valueOwner` which holds the foreign key being selected for, or `null` if there is no such property. */
@@ -604,10 +616,11 @@ const effectiveRules = computed((): TypedValidationRule<SelectedPkType>[] => {
     // and is the prop that we generate things like `required` onto.
     // We need to translate the rule functions to pass the selected FK instead
     // of the selected model object.
-    return valueOwner.value
-      .$getRules(modelKeyProp.value)
-      ?.map((rule) => () => rule(internalKeyValue.value))
-      ?? [];
+    return (
+      valueOwner.value
+        .$getRules(modelKeyProp.value)
+        ?.map((rule) => () => rule(internalKeyValue.value)) ?? []
+    );
   }
 
   // Look for validation rules from the metadata on the key prop.

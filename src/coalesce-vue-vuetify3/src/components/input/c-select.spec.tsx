@@ -290,6 +290,31 @@ describe("CSelect", () => {
 
       expect(wrapper.find(".v-field__clearable").exists()).toBeTruthy();
     });
+
+    test("optional method param", async () => {
+      mockEndpoint("/Test/list", () => ({
+        wasSuccessful: true,
+        list: [],
+      }));
+
+      const model = new ComplexModelViewModel();
+      const wrapper = mountApp(() => (
+        <CSelect
+          model={model.methodWithOptionalParams}
+          for="optionalObject"
+        ></CSelect>
+      ));
+
+      const methodMeta = model.$metadata.methods.methodWithOptionalParams;
+
+      expect(
+        // @ts-expect-error We're asserting this prop doesn't have a required rule,
+        // but our types are so good that this even gets caught by typescript.
+        methodMeta.params.optionalObject.rules?.required
+      ).toBeFalsy();
+
+      expect(wrapper.find(".v-field__clearable").exists()).toBeTruthy();
+    });
   });
 
   test("autofocus applies to correct element", () => {

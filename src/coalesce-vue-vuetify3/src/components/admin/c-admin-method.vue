@@ -16,8 +16,8 @@
             lg="3"
           >
             <c-input
-              v-model="caller.args[param.name]"
-              :for="param"
+              :model="caller"
+              :for="param.name"
               hide-details="auto"
               density="compact"
               variant="outlined"

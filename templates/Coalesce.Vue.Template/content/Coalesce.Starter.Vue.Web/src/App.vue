@@ -80,7 +80,30 @@
           title="Custom Page Example"
         />
         <!--#endif -->
+        <v-divider></v-divider>
+        <!--#if Identity -->
+        <v-list-item
+          v-if="$can(Permission.UserAdmin)"
+          to="/admin/User"
+          prepend-icon="fa fa-users"
+          title="Users"
+        />
+        <v-list-item
+          v-if="$can(Permission.UserAdmin)"
+          to="/admin/Role"
+          prepend-icon="fa fa-id-card"
+          title="Roles"
+        />
+        <v-list-item
+          v-if="$can(Permission.Admin)"
+          to="/admin"
+          prepend-icon="fa fa-cogs"
+          title="Admin"
+        />
+        <!--#else
         <v-list-item to="/admin" prepend-icon="fa fa-cogs" title="Admin" />
+        #endif -->
+
         <!--#if Tenancy -->
         <v-divider></v-divider>
         <v-list-item

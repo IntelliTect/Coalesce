@@ -18,11 +18,12 @@
            since otherwise an admin in one tenant could affect how users show up in other tenants. -->
           <c-input :model="user" for="userName" :readonly="!isMe"></c-input>
           <c-input :model="user" for="fullName" :readonly="!isMe"></c-input>
-          <!--#else -->
+          <!--#else 
           <c-input :model="user" for="userName"></c-input>
           <c-input :model="user" for="fullName"></c-input>
-          <!--#endif -->
+          #endif -->
 
+          <!-- Note: Email is not editable because it comes from external providers -->
           <c-input
             :model="user"
             for="email"
@@ -111,6 +112,7 @@
             @click="user.$bulkSave()"
             :loading="user.$bulkSave.isLoading"
             :disabled="!user.$bulkSavePreview().isDirty"
+            :variant="!user.$bulkSavePreview().isDirty ? 'text' : 'elevated'"
           >
             Save
           </v-btn>

@@ -126,15 +126,15 @@ export class TenantListViewModel extends ListViewModel<$models.Tenant, $apiClien
 
 export interface UserViewModel extends $models.User {
   fullName: string | null;
-  photoHash: string | null;
   userName: string | null;
   email: string | null;
   emailConfirmed: boolean | null;
+  photoHash: string | null;
   get userRoles(): ViewModelCollection<UserRoleViewModel, $models.UserRole>;
   set userRoles(value: (UserRoleViewModel | $models.UserRole)[] | null);
   roleNames: string[] | null;
   
-  /** The user is a global administrator, able to perform administrative actions against all tenants. */
+  /** Global admins can perform some administrative actions against ALL tenants. */
   isGlobalAdmin: boolean | null;
   id: string | null;
 }

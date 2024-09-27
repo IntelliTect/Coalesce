@@ -110,7 +110,7 @@ public class AppDbContext
             .WithAugmentation<AuditOperationContext>()
             .ConfigureAudit(config =>
             {
-                static string ShaString(byte[]? bytes) => bytes is null ? "" : Convert.ToBase64String(SHA1.HashData(bytes));
+                static string ShaString(byte[]? bytes) => bytes is null ? "" : "SHA1:" + Convert.ToBase64String(SHA1.HashData(bytes));
 
                 config
                     .FormatType<byte[]>(ShaString)

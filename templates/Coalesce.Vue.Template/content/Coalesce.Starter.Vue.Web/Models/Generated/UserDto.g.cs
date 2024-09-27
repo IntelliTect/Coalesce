@@ -15,7 +15,6 @@ namespace Coalesce.Starter.Vue.Web.Models
         private string _Id;
         private string _FullName;
         private string _UserName;
-        private string _Email;
         private bool? _IsGlobalAdmin;
 
         public string Id
@@ -33,11 +32,6 @@ namespace Coalesce.Starter.Vue.Web.Models
             get => _UserName;
             set { _UserName = value; Changed(nameof(UserName)); }
         }
-        public string Email
-        {
-            get => _Email;
-            set { _Email = value; Changed(nameof(Email)); }
-        }
         public bool? IsGlobalAdmin
         {
             get => _IsGlobalAdmin;
@@ -54,9 +48,8 @@ namespace Coalesce.Starter.Vue.Web.Models
             if (OnUpdate(entity, context)) return;
 
             if (ShouldMapTo(nameof(Id))) entity.Id = Id;
-            if (ShouldMapTo(nameof(FullName)) && context.GetPropertyRestriction<Coalesce.Starter.Vue.Data.Models.UserDataRestrictions>().UserCanWrite(context, nameof(FullName), entity, FullName)) entity.FullName = FullName;
-            if (ShouldMapTo(nameof(UserName)) && context.GetPropertyRestriction<Coalesce.Starter.Vue.Data.Models.UserDataRestrictions>().UserCanWrite(context, nameof(UserName), entity, UserName)) entity.UserName = UserName;
-            if (ShouldMapTo(nameof(Email)) && context.GetPropertyRestriction<Coalesce.Starter.Vue.Data.Models.UserDataRestrictions>().UserCanWrite(context, nameof(Email), entity, Email)) entity.Email = Email;
+            if (ShouldMapTo(nameof(FullName))) entity.FullName = FullName;
+            if (ShouldMapTo(nameof(UserName))) entity.UserName = UserName;
             if (ShouldMapTo(nameof(IsGlobalAdmin)) && (context.IsInRoleCached("GlobalAdmin"))) entity.IsGlobalAdmin = (IsGlobalAdmin ?? entity.IsGlobalAdmin);
         }
 
@@ -77,10 +70,10 @@ namespace Coalesce.Starter.Vue.Web.Models
 
         public string Id { get; set; }
         public string FullName { get; set; }
-        public byte[] PhotoHash { get; set; }
         public string UserName { get; set; }
         public string Email { get; set; }
         public bool? EmailConfirmed { get; set; }
+        public byte[] PhotoHash { get; set; }
         public System.Collections.Generic.ICollection<string> RoleNames { get; set; }
         public bool? IsGlobalAdmin { get; set; }
         public System.Collections.Generic.ICollection<Coalesce.Starter.Vue.Web.Models.UserRoleResponse> UserRoles { get; set; }
@@ -94,11 +87,11 @@ namespace Coalesce.Starter.Vue.Web.Models
             var includes = context.Includes;
 
             this.Id = obj.Id;
+            this.FullName = obj.FullName;
+            this.UserName = obj.UserName;
+            this.Email = obj.Email;
+            this.EmailConfirmed = obj.EmailConfirmed;
             this.PhotoHash = obj.PhotoHash;
-            if (context.GetPropertyRestriction<Coalesce.Starter.Vue.Data.Models.UserDataRestrictions>().UserCanRead(context, nameof(FullName), obj)) this.FullName = obj.FullName;
-            if (context.GetPropertyRestriction<Coalesce.Starter.Vue.Data.Models.UserDataRestrictions>().UserCanRead(context, nameof(UserName), obj)) this.UserName = obj.UserName;
-            if (context.GetPropertyRestriction<Coalesce.Starter.Vue.Data.Models.UserDataRestrictions>().UserCanRead(context, nameof(Email), obj)) this.Email = obj.Email;
-            if (context.GetPropertyRestriction<Coalesce.Starter.Vue.Data.Models.UserDataRestrictions>().UserCanRead(context, nameof(EmailConfirmed), obj)) this.EmailConfirmed = obj.EmailConfirmed;
             if ((context.IsInRoleCached("UserAdmin")))
             {
                 this.RoleNames = obj.RoleNames?.ToList();

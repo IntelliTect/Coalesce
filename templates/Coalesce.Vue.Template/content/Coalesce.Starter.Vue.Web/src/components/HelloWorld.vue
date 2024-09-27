@@ -51,10 +51,100 @@
           </v-card-text>
         </v-card>
         <br />
+        <!--#if Tenancy -->
+        <v-card title="Tenancy">
+          <v-card-text>
+            <p>
+              You have created a multi-tenant Coalesce application. The tenancy
+              model implemented in this template works as follows:
+            </p>
+            <br />
+            <p>
+              Every entity that exists within a tenant implements
+              <code>ITenanted</code>.
+            </p>
+            <br />
+            <p>
+              Entity Framework model configuration is customized to place the
+              <code>TenantId</code> as the first part of a composite primary key
+              on <code>ITenanted</code> entities. Foreign keys between tenanted
+              entities are updated to include the <code>TenantId</code>, which
+              makes it 100% impossible for one tenant's data to become
+              accidentally linked to another tenant's data.
+            </p>
+            <br />
+            <p>
+              Entity Framework is configured with a global query filter to
+              automatically filter queries to the current tenant, and with
+              interceptors and value generators to automatically populate the
+              current TenantId on new entities.
+            </p>
+            <br />
+            <p>
+              Users exist independently of tenants, with their membership to
+              zero-or-more tenants recorded in the
+              <code>TenantMembership</code> table.
+            </p>
+            <br />
+            <p>
+              A user can have a special "GlobalAdmin" role, which could be
+              utilized in your custom code to allow administration of all
+              tenants.
+
+              <!--#if TenantCreateAdmin -->
+              Out of the box, the role allows for the creation of new tenants.
+              <!--#endif  -->
+            </p>
+          </v-card-text>
+        </v-card>
+        <!--#endif -->
+      </v-col>
+
+      <v-col cols="12" md="4">
         <v-card>
-          <v-card-title>
-            Development Environment Recommended Tooling:
-          </v-card-title>
+          <v-card-title> Quick Links </v-card-title>
+          <v-card-text>
+            <v-list density="compact" class="doc-links">
+              <v-list-item
+                title="Coalesce Documentation"
+                href="https://intellitect.github.io/Coalesce"
+                prepend-avatar="https://intellitect.github.io/Coalesce/coalesce-icon-color.svg"
+              >
+              </v-list-item>
+              <v-list-item
+                title="Vue Documentation"
+                href="https://vuejs.org/guide/introduction"
+                prepend-avatar="https://raw.githubusercontent.com/vitejs/vite/9885f6f113667c1e161dee5f30af1e91aeefa62f/docs/images/vue.svg"
+              >
+              </v-list-item>
+              <v-list-item
+                title="Vuetify Documentation"
+                href="https://vuetifyjs.com/en/"
+                prepend-avatar="https://cdn.vuetifyjs.com/docs/images/logos/vuetify-logo-v3-slim-light.svg"
+              ></v-list-item>
+              <v-list-item
+                title="Vite Documentation"
+                href="https://vitejs.dev/"
+                prepend-avatar="https://raw.githubusercontent.com/vitejs/vite/9885f6f113667c1e161dee5f30af1e91aeefa62f/docs/images/vite.svg"
+              >
+              </v-list-item>
+            </v-list>
+            <v-divider class="my-3" />
+            <h2 class="headline font-weight-light mb-3">Resources</h2>
+            <ul>
+              <li>
+                Check out
+                <a href="https://github.com/vuejs/awesome-vue" target="_blank">
+                  🎉 awesome-vue
+                </a>
+                for Vue components, libraries, examples, and more!
+              </li>
+            </ul>
+          </v-card-text>
+        </v-card>
+        <br />
+        <v-card>
+          <v-card-title> Development Recommended Tooling: </v-card-title>
           <v-card-text>
             <v-row align="center">
               <v-col style="flex-grow: 0">
@@ -158,50 +248,6 @@
                 </ul>
               </v-col>
             </v-row>
-          </v-card-text>
-        </v-card>
-      </v-col>
-
-      <v-col cols="12" md="4">
-        <v-card>
-          <v-card-title> Quick Links </v-card-title>
-          <v-card-text>
-            <v-list density="compact" class="doc-links">
-              <v-list-item
-                title="Coalesce Documentation"
-                href="https://intellitect.github.io/Coalesce"
-                prepend-avatar="https://intellitect.github.io/Coalesce/coalesce-icon-color.svg"
-              >
-              </v-list-item>
-              <v-list-item
-                title="Vue Documentation"
-                href="https://vuejs.org/guide/introduction"
-                prepend-avatar="https://raw.githubusercontent.com/vitejs/vite/9885f6f113667c1e161dee5f30af1e91aeefa62f/docs/images/vue.svg"
-              >
-              </v-list-item>
-              <v-list-item
-                title="Vuetify Documentation"
-                href="https://vuetifyjs.com/en/"
-                prepend-avatar="https://cdn.vuetifyjs.com/docs/images/logos/vuetify-logo-v3-slim-light.svg"
-              ></v-list-item>
-              <v-list-item
-                title="Vite Documentation"
-                href="https://vitejs.dev/"
-                prepend-avatar="https://raw.githubusercontent.com/vitejs/vite/9885f6f113667c1e161dee5f30af1e91aeefa62f/docs/images/vite.svg"
-              >
-              </v-list-item>
-            </v-list>
-            <v-divider class="my-3" />
-            <h2 class="headline font-weight-light mb-3">Resources</h2>
-            <ul>
-              <li>
-                Check out
-                <a href="https://github.com/vuejs/awesome-vue" target="_blank">
-                  🎉 awesome-vue
-                </a>
-                for Vue components, libraries, examples, and more!
-              </li>
-            </ul>
           </v-card-text>
         </v-card>
       </v-col>

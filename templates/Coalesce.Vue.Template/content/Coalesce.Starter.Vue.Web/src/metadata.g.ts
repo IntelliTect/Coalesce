@@ -410,15 +410,6 @@ export const User = domain.types.User = {
       type: "string",
       role: "value",
     },
-    photoHash: {
-      name: "photoHash",
-      displayName: "Photo Hash",
-      type: "binary",
-      base64: true,
-      role: "value",
-      hidden: 3 as HiddenAreas,
-      dontSerialize: true,
-    },
     userName: {
       name: "userName",
       displayName: "User Name",
@@ -430,12 +421,22 @@ export const User = domain.types.User = {
       displayName: "Email",
       type: "string",
       role: "value",
+      dontSerialize: true,
     },
     emailConfirmed: {
       name: "emailConfirmed",
       displayName: "Email Confirmed",
       type: "boolean",
       role: "value",
+      dontSerialize: true,
+    },
+    photoHash: {
+      name: "photoHash",
+      displayName: "Photo Hash",
+      type: "binary",
+      base64: true,
+      role: "value",
+      hidden: 3 as HiddenAreas,
       dontSerialize: true,
     },
     userRoles: {
@@ -480,6 +481,7 @@ export const User = domain.types.User = {
     isGlobalAdmin: {
       name: "isGlobalAdmin",
       displayName: "Is Global Admin",
+      description: "Global admins can perform some administrative actions against ALL tenants.",
       type: "boolean",
       role: "value",
       hidden: 3 as HiddenAreas,

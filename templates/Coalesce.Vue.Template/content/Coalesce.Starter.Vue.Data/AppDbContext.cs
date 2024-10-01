@@ -116,7 +116,7 @@ public class AppDbContext
                     .FormatType<byte[]>(ShaString)
                     .Exclude<DataProtectionKey>()
 #if TrackingBase
-                    .ExcludeProperty<TrackingBase>(x => new { x.CreatedBy, x.CreatedById, x.CreatedOn, x.ModifiedBy, x.ModifiedById, x.ModifiedOn })
+                    .ExcludeProperty<TrackingBase>(x => new { x.CreatedById, x.CreatedOn, x.ModifiedById, x.ModifiedOn })
 #endif
 #if Identity
                     .Format<User>(x => x.PasswordHash, x => "<password changed>")

@@ -505,10 +505,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
                         // Use the ForeignKey Attribute on the key property if it is there.
                         ?? EffectiveParent.Properties.SingleOrDefault(p => Name == p.GetAttributeValue<ForeignKeyAttribute>(a => a.Name))?.Name
 
-                        // See if this is a one-to-one using the parent's key
-                        // Look up the other object and check the key
-                        ?? (Object?.IsOneToOne ?? false ? EffectiveParent.PrimaryKey?.Name : null)
-
                         // Look for a property that follows convention.
                         ?? Name + ConventionalIdSuffix;
 

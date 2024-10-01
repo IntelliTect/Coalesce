@@ -1,3 +1,7 @@
+# 5.0.3
+
+- fix: Remove flawed logic that chooses the wrong foreign key for navigation properties where the target type of the navigation property has a primary key that also serves as a foreign key in some other relationship. In exceedingly rare cases, you may now have to add a `[ForeignKey(Name = ...)]` attribute to any navigation properties that may now throw a codegen validation error that their foreign key property cannot be discovered automatically. Related to this issue, `ClassViewModel.IsOneToOne` is now deprecated and slated for future removal.
+
 # 5.0.2
 
 - feat: Make "not found" messages from data sources clearer when the ID is null or empty string. (#447)

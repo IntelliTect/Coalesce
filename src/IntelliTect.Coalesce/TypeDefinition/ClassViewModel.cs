@@ -385,6 +385,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             ClientProperties.FirstOrDefault(f => f.Name == "Name") ??
             PrimaryKey;
 
+        [Obsolete("The logic in this property is flawed and does not consider that a single entity can participate in multiple relationships. It will be removed in a future version.")]
         public bool IsOneToOne => PrimaryKey?.IsForeignKey ?? false;
 
 #pragma warning disable CS0618 // Type or member is obsolete

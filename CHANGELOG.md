@@ -1,3 +1,7 @@
+# 5.0.4
+
+- fix: The "Max _N_ items retrieved" message in c-select now accounts for list calls that don't provide a count, e.g. by passing `noCount=true`.
+
 # 5.0.3
 
 - fix: Remove flawed logic that chooses the wrong foreign key for navigation properties where the target type of the navigation property has a primary key that also serves as a foreign key in some other relationship. In exceedingly rare cases, you may now have to add a `[ForeignKey(Name = ...)]` attribute to any navigation properties that may now throw a codegen validation error that their foreign key property cannot be discovered automatically. Related to this issue, `ClassViewModel.IsOneToOne` is now deprecated and slated for future removal.

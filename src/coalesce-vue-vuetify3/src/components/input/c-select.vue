@@ -166,7 +166,14 @@
           <!-- TODO: With this version of c-select (versus the v2 one),
         we can implement infinite scroll much easier. Consider doing this instead of having this message. -->
           <v-list-item
-            v-if="listCaller.pageCount && listCaller.pageCount > 1"
+            v-if="
+              // When we do know an actual page count:
+              (listCaller.pageCount && listCaller.pageCount > 1) ||
+              // When `noCount` is used or counting is disabled on the server:
+              (listCaller.pageCount == -1 &&
+                listCaller.pageSize &&
+                listItems.length >= listCaller.pageSize)
+            "
             class="text-grey font-italic"
           >
             Max {{ listCaller.pageSize }} items retrieved. Refine your search to

@@ -32,14 +32,12 @@ public abstract class TrackingBase
     [InternalUse]
     public void SetTracking(string? userId)
     {
-        if (CreatedById == null)
-        {
-            CreatedById = userId;
-        }
         if (CreatedOn == default)
         {
-            // CreatedOn is handled separately so that we can avoid resetting the 
-            // CreatedOn stamp if the entity wasn't created by a user.
+            // CreatedOn is checked so that we can avoid setting CreatedBy
+            // to some future modifying user if the entity was created with a CreatedOn
+            // stamp but not a CreatedBy stamp (which happens for entities created by migrations or background jobs).
+            CreatedById = userId;
             CreatedOn = DateTimeOffset.Now;
         }
 

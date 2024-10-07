@@ -22,16 +22,30 @@ namespace IntelliTect.Coalesce
         /// </summary>
         public Func<ActionExecutedContext, ApiResult?>? ExceptionResponseFactory { get; set; }
 
-        private bool? _efErrors;
+        private bool? _migrationErrors;
         /// <summary>
         /// Determines whether detailed error messages about EF model/migration errors are returned in error responses.
         /// Requires <see cref="DetailedExceptionMessages"/> to be enabled, and defaults to that value.
         /// </summary>
+        public bool DetailedEfMigrationExceptionMessages
+        {
+            get => DetailedExceptionMessages ? (_migrationErrors ?? DetailedExceptionMessages) : false;
+            set => _migrationErrors = value;
+        }
+
+        [Obsolete("Renamed to DetailedEFMigrationExceptionMessages")]
         public bool DetailedEntityFrameworkExceptionMessages
         {
-            get => DetailedExceptionMessages ? (_efErrors ?? DetailedExceptionMessages) : false;
-            set => _efErrors = value;
+            get => DetailedEfMigrationExceptionMessages;
+            set => DetailedEfMigrationExceptionMessages = value;
         }
+
+        /// <summary>
+        /// If true, Coalesce will transform some database exceptions into user-friendly messages when these exceptions occur in Save and Delete operations through <see cref="StandardBehaviors{T}"/>.
+        /// For SQL Server, this includes foreign key constraint violations and unique index violations.
+        /// These messages respect the security configuration of your models.
+        /// </summary>
+        public bool DetailedEfConstraintExceptionMessages { get; set; } = true;
 
         /// <summary>
         /// If true, Coalesce will perform validation of incoming data using <see cref="ValidationAttribute"/>s

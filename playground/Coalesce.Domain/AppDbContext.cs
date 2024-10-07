@@ -52,11 +52,31 @@ namespace Coalesce.Domain
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            // Remove cascading deletes.
+            foreach (var relationship in modelBuilder.Model.GetEntityTypes().SelectMany(e => e.GetForeignKeys()))
+            {
+                relationship.DeleteBehavior = DeleteBehavior.Restrict;
+            }
+
             modelBuilder.Entity<Product>().OwnsOne(p => p.Details, cb =>
             {
                 cb.OwnsOne(c => c.ManufacturingAddress);
                 cb.OwnsOne(c => c.CompanyHqAddress);
             });
+
+            //modelBuilder.Entity<Person>()
+            //    .HasMany(p => p.CasesAssigned)
+            //    .WithOne(p => p.AssignedTo)
+            //    .HasForeignKey(p => p.AssignedToId)
+            //    .HasPrincipalKey(p => p.PersonId)
+            //    .OnDelete(DeleteBehavior.Restrict);
+
+            //modelBuilder.Entity<Person>()
+            //    .HasMany(p => p.CasesReported)
+            //    .WithOne(p => p.ReportedBy)
+            //    .HasForeignKey(p => p.ReportedById)
+            //    .HasPrincipalKey(p => p.PersonId)
+            //    .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder
                 .Entity<Case>()

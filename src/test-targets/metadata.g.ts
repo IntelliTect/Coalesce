@@ -2482,6 +2482,18 @@ export const Product = domain.types.Product = {
       type: "string",
       role: "value",
     },
+    uniqueId1: {
+      name: "uniqueId1",
+      displayName: "ID1",
+      type: "string",
+      role: "value",
+    },
+    uniqueId2: {
+      name: "uniqueId2",
+      displayName: "ID2",
+      type: "string",
+      role: "value",
+    },
   },
   methods: {
   },

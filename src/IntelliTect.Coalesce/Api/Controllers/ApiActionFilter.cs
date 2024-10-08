@@ -81,11 +81,11 @@ namespace IntelliTect.Coalesce.Api.Controllers
                         string message = context.Exception.Message;
 
                         if (
-                            options.Value.DetailedEntityFrameworkExceptionMessages &&
+                            options.Value.DetailedEfMigrationExceptionMessages &&
                             (context.Exception as DbException ?? context.Exception?.InnerException) is DbException
                         )
                         {
-                            var dbMessage = GetDbContextExceptionMessage(context);
+                            var dbMessage = GetDbContextMigrationExceptionMessage(context);
                             if (!string.IsNullOrWhiteSpace(dbMessage))
                             {
                                 message = dbMessage + "\n\n" + message;
@@ -117,7 +117,7 @@ namespace IntelliTect.Coalesce.Api.Controllers
             }
         }
 
-        private static string GetDbContextExceptionMessage(ActionExecutedContext context)
+        private static string GetDbContextMigrationExceptionMessage(ActionExecutedContext context)
         {
             List<string> messages = [];
             try

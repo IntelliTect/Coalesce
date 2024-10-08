@@ -14,6 +14,7 @@ using System.Collections.Generic;
 using System.Data.Common;
 using System.Linq;
 using System.Net;
+using System.Text;
 
 namespace IntelliTect.Coalesce.Api.Controllers
 {
@@ -78,7 +79,14 @@ namespace IntelliTect.Coalesce.Api.Controllers
                     var requestId = context.HttpContext.TraceIdentifier;
                     if (options.Value.DetailedExceptionMessages)
                     {
-                        string message = context.Exception.Message;
+                        var messages = new StringBuilder();
+                        Exception? currentEx = context.Exception;
+                        while (currentEx is not null)
+                        {
+                            messages.AppendLine(currentEx.Message);
+                            currentEx = currentEx.InnerException;
+                        }
+                        string message = messages.ToString();
 
                         if (
                             options.Value.DetailedEfMigrationExceptionMessages &&

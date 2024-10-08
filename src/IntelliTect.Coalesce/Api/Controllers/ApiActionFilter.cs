@@ -40,7 +40,7 @@ namespace IntelliTect.Coalesce.Api.Controllers
                 if (errors.Any())
                 {
                     context.Result = new BadRequestObjectResult(
-                        new ApiResult(string.Join("\n; ", errors.Select(e => string.IsNullOrWhiteSpace(e.key) ? e.error : $"{e.key}: {e.error}")))
+                        new ApiResult(string.Join(" \n", errors.Select(e => string.IsNullOrWhiteSpace(e.key) ? e.error : $"{e.key}: {e.error}")))
                     );
                     return;
                 }

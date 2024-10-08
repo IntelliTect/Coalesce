@@ -25,7 +25,7 @@ import type {
   ServiceViewModel,
 } from "coalesce-vue";
 import { ApiState, ViewModel } from "coalesce-vue";
-import { computed, useAttrs } from "vue";
+import { computed, inject, useAttrs } from "vue";
 import { useMetadata } from "../composables/useMetadata";
 
 type PropsOf<TModel> = TModel extends {
@@ -406,4 +406,24 @@ export function useMetadataProps<TModel extends ModelAllowedType = Model>(
   );
 
   return { modelMeta, valueMeta, valueOwner, inputBindAttrs };
+}
+
+export function useCustomInput(props: {
+  readonly?: boolean | null;
+  disabled?: boolean | null;
+}) {
+  const form: any = inject(Symbol.for("vuetify:form"), null);
+
+  const isDisabled = computed(
+    (): boolean => props.disabled || form?.isDisabled.value
+  );
+
+  const isReadonly = computed(
+    (): boolean => props.readonly || form?.isReadonly.value
+  );
+
+  const isInteractive = computed((): boolean => {
+    return !isDisabled.value && !isReadonly.value;
+  });
+  return { form, isDisabled, isReadonly, isInteractive };
 }

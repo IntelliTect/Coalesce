@@ -9,18 +9,20 @@
     v-bind="inputBindAttrs"
     :rules="effectiveRules"
     :modelValue="internalModelValue"
-    #default="{ isDisabled, isReadonly, isValid }"
+    :disabled="isDisabled"
+    :readonly="isReadonly"
+    #default="{ isValid }"
   >
     <v-field
       :error="isValid.value === false"
       append-inner-icon="$dropdown"
       v-bind="fieldAttrs"
-      :clearable="!isDisabled.value && !isReadonly.value && isClearable"
+      :clearable="isInteractive && isClearable"
       :active="!!internalModelValue || focused || !!placeholder"
       :dirty="!!internalModelValue"
       :focused="focused"
       @click:clear.stop.prevent="onInput(null, true)"
-      @keydown="!isDisabled.value && !isReadonly.value && onInputKey($event)"
+      @keydown="onInputKey($event)"
     >
       <div class="v-field__input">
         <slot
@@ -57,8 +59,8 @@
           @focus="focused = true"
           @blur="focused = false"
           :autofocus="autofocus"
-          :disabled="isDisabled.value"
-          :readonly="isReadonly.value"
+          :disabled="isDisabled"
+          :readonly="isReadonly"
           :placeholder="internalModelValue ? undefined : placeholder"
         />
       </div>
@@ -66,11 +68,7 @@
 
     <v-menu
       :modelValue="menuOpen"
-      @update:modelValue="
-        !$event
-          ? closeMenu()
-          : !isDisabled.value && !isReadonly.value && openMenu()
-      "
+      @update:modelValue="!$event ? closeMenu() : openMenu()"
       activator="parent"
       :close-on-content-click="false"
       contentClass="c-select__menu-content"
@@ -241,7 +239,11 @@ import {
   watch,
   camelize,
 } from "vue";
-import { useMetadataProps, ForSpec } from "../c-metadata-component";
+import {
+  useMetadataProps,
+  ForSpec,
+  useCustomInput,
+} from "../c-metadata-component";
 import { TypedValidationRule } from "../../util";
 import {
   ModelApiClient,
@@ -355,6 +357,8 @@ const props = withDefaults(
      */
     for: TFor;
 
+    readonly?: boolean | null;
+    disabled?: boolean | null;
     autofocus?: boolean;
     clearable?: boolean;
     placeholder?: string;
@@ -403,6 +407,8 @@ const fieldAttrs = computed(() =>
     )
   )
 );
+
+const { isDisabled, isReadonly, isInteractive } = useCustomInput(props);
 
 const { inputBindAttrs, modelMeta, valueMeta, valueOwner } = useMetadataProps(
   props,
@@ -699,6 +705,8 @@ function onInput(value: SelectedModelType | null, dontFocus = false) {
 
 /** When a key is pressed on the top level input */
 function onInputKey(event: KeyboardEvent) {
+  if (!isInteractive.value) return;
+
   switch (event.key.toLowerCase()) {
     case "delete":
     case "backspace":
@@ -754,6 +762,8 @@ async function createItem() {
 }
 
 async function openMenu(select?: boolean) {
+  if (!isInteractive.value) return;
+
   if (select == undefined) {
     // Select the whole search input if it hasn't changed recently.
     // If it /has/ changed recently, it means the user is actively typing and probably

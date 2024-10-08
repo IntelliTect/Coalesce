@@ -44,7 +44,7 @@
   >
     <!-- TODO: Consider fullscreen modal on small devices -->
     <v-menu
-      v-if="interactive"
+      v-if="isInteractive"
       v-model="menu"
       activator="parent"
       content-class="c-datetime-picker__menu"
@@ -170,8 +170,12 @@ import {
   Model,
   DateValue,
 } from "coalesce-vue";
-import { computed, inject, ref, watch } from "vue";
-import { ForSpec, useMetadataProps } from "../c-metadata-component";
+import { computed, ref, watch } from "vue";
+import {
+  ForSpec,
+  useCustomInput,
+  useMetadataProps,
+} from "../c-metadata-component";
 import CTimePicker from "./c-time-picker.vue";
 
 defineOptions({
@@ -239,14 +243,7 @@ const error = ref<string[]>([]);
 const menu = ref(false);
 const internalTextValue = ref<string>();
 
-const form: any = inject(Symbol.for("vuetify:form"), null);
-
-const isDisabled = computed(() => props.disabled || form?.isDisabled.value);
-const isReadonly = computed(() => props.readonly || form?.isReadonly.value);
-
-const interactive = computed(() => {
-  return !isDisabled.value && !isReadonly.value;
-});
+const { isDisabled, isReadonly, isInteractive } = useCustomInput(props);
 
 const dateMeta = computed(() => {
   const meta = valueMeta.value;

@@ -64,20 +64,6 @@ namespace Coalesce.Domain
                 cb.OwnsOne(c => c.CompanyHqAddress);
             });
 
-            //modelBuilder.Entity<Person>()
-            //    .HasMany(p => p.CasesAssigned)
-            //    .WithOne(p => p.AssignedTo)
-            //    .HasForeignKey(p => p.AssignedToId)
-            //    .HasPrincipalKey(p => p.PersonId)
-            //    .OnDelete(DeleteBehavior.Restrict);
-
-            //modelBuilder.Entity<Person>()
-            //    .HasMany(p => p.CasesReported)
-            //    .WithOne(p => p.ReportedBy)
-            //    .HasForeignKey(p => p.ReportedById)
-            //    .HasPrincipalKey(p => p.PersonId)
-            //    .OnDelete(DeleteBehavior.Restrict);
-
             modelBuilder
                 .Entity<Case>()
                 .ToTable("Case")

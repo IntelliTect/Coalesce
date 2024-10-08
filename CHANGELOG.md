@@ -4,12 +4,14 @@
 - feat: Error responses now include inner exception messages when `DetailedExceptionMessages` is enabled. (#468)
 - feat(c-admin-table): Clicking a row takes you to the details page (#465)
 - feat(c-admin-table): Always show button for details page (#465)
+
 - fix(c-select): Not respecting disabled/readonly state in all cases when opening menu (#473)
+- fix(c-select): The "Max _N_ items retrieved" message now accounts for list calls that don't provide a count, e.g. by passing `noCount=true`.
 - fix(c-admin-editor): Don't show save button when read-only
+- fix(c-admin-table): Surgical saves not working for items added with the "Add Item" button in editable mode. (#472)
+- fix: handle sequences of digits when converting PascalCase to Title Case ("Is24h" => "Is 24h") (#469)
 
 - refactor: `CoalesceOptions.DetailedEntityFrameworkExceptionMessages` has been renamed to `CoalesceOptions.DetailedEFMigrationExceptionMessages`
-- fix: The "Max _N_ items retrieved" message in c-select now accounts for list calls that don't provide a count, e.g. by passing `noCount=true`.
-- fix: handle sequences of digits when converting PascalCase to Title Case ("Is24h" => "Is 24h") (#469)
 
 # 5.0.3
 

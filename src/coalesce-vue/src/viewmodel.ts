@@ -522,7 +522,7 @@ export abstract class ViewModel<
           // If the model is dirty when the request completes, we'll not load the response from the server.
           this.$isDirty = false;
           try {
-            return await c.save(data, { fields, ...this.$params });
+            return await c.save(data, { ...this.$params, fields });
           } catch (e) {
             for (const prop of dirtyProps) {
               this.$setPropDirty(

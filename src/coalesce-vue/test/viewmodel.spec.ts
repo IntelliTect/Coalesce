@@ -19,6 +19,7 @@ import {
   AxiosItemResult,
   AxiosListResult,
   ItemApiState,
+  ListParameters,
 } from "../src/api-client";
 import { mapToModel } from "../src/model";
 import {
@@ -35,6 +36,7 @@ import {
   ComplexModelListViewModel,
   ComplexModelViewModel,
   PersonViewModel,
+  ProductViewModel,
   TestViewModel,
   ZipCodeViewModel,
 } from "../../test-targets/viewmodels.g";
@@ -691,6 +693,29 @@ describe("ViewModel", () => {
       expect(saveEndpoint.mock.calls[0][0].data).toBe(
         "complexModelId=1&intCollection.count=0&enumCollection.count=0"
       );
+
+      saveEndpoint.destroy();
+    });
+
+    test("ViewModel with ListParameters can save surgically", async () => {
+      // We had a bug where viewmodels whose params are copied over from a list
+      // would fail to surgically save due to the ListParameters.fields
+      // overwriting the SaveParameters.fields
+
+      const saveEndpoint = mockEndpoint(
+        "/Product/save",
+        vitest.fn((req) => ({
+          wasSuccessful: true,
+          object: { productId: 1 },
+        }))
+      );
+
+      const vm = new ProductViewModel();
+      vm.$params = new ListParameters();
+      vm.name = "bob";
+      await vm.$save();
+
+      expect(saveEndpoint.mock.calls[0][0].data).toBe("name=bob");
 
       saveEndpoint.destroy();
     });

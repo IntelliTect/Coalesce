@@ -455,6 +455,8 @@ export namespace Person {
 export interface Product extends Model<typeof metadata.Product> {
   productId: number | null
   name: string | null
+  uniqueId1: string | null
+  uniqueId2: string | null
 }
 export class Product {
   

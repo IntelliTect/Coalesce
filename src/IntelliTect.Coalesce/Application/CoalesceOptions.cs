@@ -43,7 +43,7 @@ namespace IntelliTect.Coalesce
         /// <summary>
         /// If true, Coalesce will transform some database exceptions into user-friendly messages when these exceptions occur in Save and Delete operations through <see cref="StandardBehaviors{T}"/>.
         /// For SQL Server, this includes foreign key constraint violations and unique index violations.
-        /// These messages respect the security configuration of your models.
+        /// These messages respect the security configuration of your models. These messages only serve as a fallback to produce a more acceptable user experience in cases where the developer neglects to add appropriate validation or other handling of related entities.
         /// </summary>
         public bool DetailedEfConstraintExceptionMessages { get; set; } = true;
 

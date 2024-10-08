@@ -524,6 +524,12 @@ namespace IntelliTect.Coalesce
 
         #endregion
 
+        /// <summary>
+        /// Attempt to transform a database exception into a user-friendly error message.
+        /// Requires <see cref="CoalesceOptions.DetailedEfConstraintExceptionMessages"/> to be enabled.
+        /// </summary>
+        /// <param name="ex">The database exception that was thrown by EF</param>
+        /// <param name="incomingDto">The incoming dto that the current operation is consuming, if any. Used to distinguish errors that were triggered by the user's input, as opposed to errors triggered by custom code in the behaviors implementation.</param>
         public virtual ItemResult? GetExceptionResult(Exception ex, IParameterDto<T>? incomingDto)
         {
             if (!Context.Options.DetailedEfConstraintExceptionMessages) return null;
@@ -540,6 +546,8 @@ namespace IntelliTect.Coalesce
                 return null;
             }
 
+            // The INSERT statement conflicted with the FOREIGN KEY constraint "FK_CaseProduct_Product_ProductId". The conflict occurred in database "CoalesceDb", table "dbo.Product", column 'ProductId'.
+            // The UPDATE statement conflicted with the FOREIGN KEY constraint "FK_CaseProduct_Product_ProductId". The conflict occurred in database "CoalesceDb", table "dbo.Product", column 'ProductId'.
             // The DELETE statement conflicted with the REFERENCE constraint "FK_CaseProduct_Product_ProductId". The conflict occurred in database "CoalesceDb", table "dbo.CaseProduct", column 'ProductId'.
             Match match = Regex.Match(
                 dbException.Message,
@@ -574,7 +582,7 @@ namespace IntelliTect.Coalesce
 
                     var dependent = Context.ReflectionRepository.GetClassViewModel(conflictedTable.ClrType);
                     var referencedBy = dependent?.Type.IsInternalUse != false
-                        ? "other item" // Hide the type's name if it's internal
+                        ? "other item" // Hide the type's name if it's internal or unknown
                         : dependent.DisplayName;
 
                     return $"The {this.ClassViewModel.DisplayName} is still referenced by at least one {referencedBy}.";
@@ -597,13 +605,13 @@ namespace IntelliTect.Coalesce
                         ? fk!.Properties.FirstOrDefault(p => sparse.ChangedProperties.Contains(p.Name))
                         : fk!.Properties.FirstOrDefault(p => dependentCvm.PropertyByName(p.Name)?.SecurityInfo.Read.IsAllowed(User) == true);
 
-                    // Sanity check that the user was actually changing this prop
+                    // Check that the user was actually changing this prop
                     // (rather than the backend manually setting it in the behaviors).
                     // This will also enforce that the prop is at least writable under *some*
                     // circumstances and isn't read-only or internal through Coalesce.
                     if (changedFkProp is not null)
                     {
-                        var message = $"The value of '{referenceNavPvm.DisplayName}' is not valid.";
+                        var message = $"The value of {referenceNavPvm.DisplayName} is not valid.";
                         return new(false, message, [new ValidationIssue(changedFkProp.Name, message)]);
                     }
                 }
@@ -623,11 +631,10 @@ namespace IntelliTect.Coalesce
 
                 var table = dbContext.Model
                     .GetEntityTypes()
-                    .Where(t =>
+                    .FirstOrDefault(t =>
                         t.GetSchemaQualifiedTableName() == tableName ||
                         (t.GetSchema() is null && tableName.EndsWith('.' + t.GetTableName()))
-                    )
-                    .FirstOrDefault();
+                    );
 
                 var index = table?.GetIndexes().Where(f => f.GetDatabaseName() == constraint).FirstOrDefault();
 
@@ -644,36 +651,60 @@ namespace IntelliTect.Coalesce
                     // So, find the affected entity ourselves by reconstructing the error message:
                     var entity = dbUpdateException.Entries
                         // Find the entity described by the error message
-                        .Where(entry =>
+                        .FirstOrDefault(entry =>
                             entry.Metadata.Equals(table) &&
                             keyValue == string.Join(", ", index.Properties.Select(p => entry.CurrentValues[p]))
-                        )
-                        .FirstOrDefault();
+                        );
 
-                    if (entity is not null)
+                    if (entity is null)
                     {
-                        // Reconstruct the violated unique values using only the values that are editable through Coalesce.
-                        // This will eliminate internal parts of the constraint like a TenantId.
-                        var editableProps = index.Properties
-                            .Select(p => dependentCvm.PropertyByName(p.Name)!)
-                            .Where(pvm => pvm.SecurityInfo.Edit.IsAllowed(User))
-                            .ToList();
-
-                        if (editableProps.Count > 0 &&
-                            // Sanity check that the user was actually changing this prop
-                            // (rather than the backend manually setting it in the behaviors).
-                            // This will also enforce that the prop is at least writable under *some*
-                            // circumstances and isn't read-only or internal through Coalesce.
-                            (incomingDto is not ISparseDto sparse || editableProps.Any(p => sparse.ChangedProperties.Contains(p.Name)))
-                        )
-                        {
-                            var filteredKeyValues = editableProps
-                                .Select(p => $"{p.DisplayName} {entity.CurrentValues[p.Name]}");
-
-                            var message = $"A different item with {string.Join(" and ", filteredKeyValues)} already exists.";
-                            return new(false, message, editableProps.Select(p => new ValidationIssue(p.Name, message)));
-                        }
+                        return null;
                     }
+
+                    // Reconstruct the violated unique values using only the values that the user is allowed to read.
+                    // This will eliminate internal parts of the constraint like a TenantId.
+
+                    var mappingContext = new MappingContext(Context);
+                    var propViewModels = index.Properties
+                        .Select(p => dependentCvm.PropertyByName(p.Name)!)
+                        .ToList();
+
+                    // Check that the user was actually changing one of the props in the index
+                    // (rather than the backend manually setting it in the behaviors).
+                    // This will also enforce that the prop is at least writable under *some*
+                    // circumstances and isn't read-only or internal through Coalesce.
+                    if (incomingDto is ISparseDto sparse && !propViewModels.Any(p => sparse.ChangedProperties.Contains(p.Name)))
+                    {
+                        return null;
+                    }
+
+                    var propsWithSecurity = propViewModels.ConvertAll(p => new
+                    {
+                        Prop = p,
+                        UserCanRead = p.SecurityInfo.IsReadAllowed(mappingContext, entity.Entity),
+                    });
+
+                    // Only make this a user-friendly error if the user is allowed to read all parts of the index,
+                    // or if the unreadable parts of the index are internal use (which allows a TenantId to be excluded
+                    // while still presenting the rest of the props to the user).
+                    if (!propsWithSecurity.All(p => p.UserCanRead || p.Prop.IsInternalUse)) return null;
+
+                    var valuesDisplay = propsWithSecurity
+                        .Where(p => p.UserCanRead)
+                        .Select(p =>
+                        {
+                            var value = entity.CurrentValues[p.Prop.Name];
+                            if (!p.Prop.Type.IsNumber)
+                            {
+                                // Quote non-numbers so its clear what part of the message is the actual value
+                                value = $"'{value}'";
+                            }
+
+                            return $"{p.Prop.DisplayName} {value}";
+                        });
+
+                    var message = $"A different item with {string.Join(" and ", valuesDisplay)} already exists.";
+                    return new(false, message, propViewModels.Select(p => new ValidationIssue(p.Name, message)));
                 }
             }
 

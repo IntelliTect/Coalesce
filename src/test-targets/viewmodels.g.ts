@@ -772,6 +772,8 @@ export class PersonListViewModel extends ListViewModel<$models.Person, $apiClien
 export interface ProductViewModel extends $models.Product {
   productId: number | null;
   name: string | null;
+  uniqueId1: string | null;
+  uniqueId2: string | null;
 }
 export class ProductViewModel extends ViewModel<$models.Product, $apiClients.ProductApiClient, number> implements $models.Product  {
   

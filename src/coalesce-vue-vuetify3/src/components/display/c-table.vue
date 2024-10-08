@@ -3,7 +3,7 @@
     <c-loader-status
       :loaders="{ 'no-initial-content': [listVm.$load], ...loaders }"
     >
-      <v-table style="--v-table-header-height: 40px">
+      <v-table style="--v-table-header-height: 40px" v-bind="tableProps">
         <thead>
           <tr>
             <th
@@ -38,6 +38,7 @@
               ? listVm.$modelItems
               : listVm.$items"
             :key="index"
+            @click="onRowClick($event, item)"
           >
             <slot name="item-prepend" :item="item" />
             <td
@@ -57,6 +58,7 @@
                 variant="outlined"
                 rows="1"
                 auto-grow
+                validate-on="eager"
               >
                 <!-- Rows and auto-grow for textarea inputs -->
                 <c-admin-display v-if="admin" :model="item" :for="prop" />
@@ -81,16 +83,21 @@
 <script setup lang="ts" generic="TList extends ListViewModel = ListViewModel">
 import { computed, onMounted, onUnmounted, ref } from "vue";
 import { ListViewModel, ModelType, HiddenAreas } from "coalesce-vue";
-
+import { VTable } from "vuetify/components";
 import { isPropReadOnly } from "../../util";
 
 const props = defineProps<{
   list: TList;
+
+  /** The names of properties on the listed items to be shown as columns. */
   props?: string[];
   admin?: boolean;
   editable?: boolean;
   extraHeaders?: Array<{ header: string; isFixed: boolean }> | Array<string>;
   loaders?: any;
+
+  /** Additional props to pass to VTable */
+  tableProps?: VTable["$props"];
 }>();
 
 type ViewModelType = TList extends ListViewModel<any, any, infer TViewModel>
@@ -104,6 +111,8 @@ defineSlots<{
     isHorizontalScrollbarVisible: boolean;
   }): any;
 }>();
+
+const emit = defineEmits<{ "click:item": [arg: ViewModelType] }>();
 
 // Silly wrapper because using `list` directly in the template
 // has Typescript bugs right now in vue-language-tools.
@@ -197,6 +206,16 @@ function orderByToggle(field: string) {
     params.orderBy = field;
     params.orderByDescending = null;
   }
+}
+
+function onRowClick(event: MouseEvent, item: ViewModelType) {
+  if (props.editable) return;
+
+  if (event.target instanceof HTMLElement && event.target.closest("a,button")) {
+    return;
+  }
+
+  emit("click:item", item);
 }
 </script>
 

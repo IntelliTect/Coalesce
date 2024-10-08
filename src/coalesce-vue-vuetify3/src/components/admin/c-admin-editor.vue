@@ -175,7 +175,7 @@
       </c-loader-status>
     </v-card-text>
 
-    <v-card-actions>
+    <v-card-actions v-if="canEdit">
       <v-spacer></v-spacer>
       <v-btn
         v-if="!model.$isAutoSaveEnabled"
@@ -186,7 +186,6 @@
         :loading="model.$bulkSave.isLoading"
         prepend-icon="fa fa-save"
       >
-        <!-- TODO: (#413) ^^^ read dirty state for the whole bulk save. -->
         <span class="hidden-sm-and-down">Save</span>
       </v-btn>
       <v-btn

@@ -72,31 +72,41 @@ namespace IntelliTect.Coalesce.Utilities
         // Capitalize the first character and add a space before
         // each capitalized letter (except the first character).
         [return: System.Diagnostics.CodeAnalysis.NotNullIfNotNull("theString")]
-        public static string? ToProperCase(this string? theString)
+        public static string? ToProperCase(this string? input)
         {
             // If there are 0 or 1 characters, just return the string.
-            if (theString == null) return null;
-            if (theString.Length < 2) return theString.ToUpper();
+            if (input == null) return null;
+            if (input.Length < 2) return input.ToUpper();
 
-            StringBuilder returnedString = new(theString.Length);
-            returnedString.Append(char.ToUpper(theString[0]));
-            for (int i = 1; i < theString.Length; i++)
+            StringBuilder returnedString = new(input.Length);
+
+            returnedString.Append(char.ToUpper(input[0]));
+
+            for (int i = 1; i < input.Length; i++)
             {
-                if (char.IsLower(theString[i]))
+                if (char.IsLower(input[i]))
                 {
-                    returnedString.Append(theString[i]);
+                    returnedString.Append(input[i]);
                 }
                 else
                 {
-                    // If the next character is uppercase, don't insert a space.
-                    if (i + 1 < theString.Length && (char.IsLower(theString[i + 1]) || char.IsLower(theString[i - 1])))
+                    if (
+                        // If there is no next character,
+                        i + 1 >= input.Length ||
+                        // Or we're in the middle of a string of capital letters
+                        // (e.g. "R" in "HROnly" or "B" in "FBI"),
+                        (!char.IsLower(input[i - 1]) && !char.IsLower(input[i + 1])) ||
+                        // Or we're in the middle of a multi-digit number,
+                        (char.IsDigit(input[i - 1]) && char.IsDigit(input[i]))
+                    )
                     {
-                        returnedString.Append(' ');
-                        returnedString.Append(theString[i]);
+                        // ...don't insert a space.
+                        returnedString.Append(input[i]);
                     }
                     else
                     {
-                        returnedString.Append(theString[i]);
+                        returnedString.Append(' ');
+                        returnedString.Append(input[i]);
                     }
                 }
             }

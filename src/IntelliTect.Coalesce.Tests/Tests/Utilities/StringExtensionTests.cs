@@ -89,47 +89,78 @@ namespace IntelliTect.Coalesce.Tests.Utilities
         [Fact]
         public void ToProperCase_HandlesTwoCapitalsInARow()
         {
-            const string enumName = "HROnly";
-            Assert.Equal("HR Only", enumName.ToProperCase());
+            const string input = "HROnly";
+            Assert.Equal("HR Only", input.ToProperCase());
         }
+
         [Fact]
         public void ToProperCase_HandlesMultipleCapitalsInARow()
         {
-            const string enumName = "FBIOnly";
-            Assert.Equal("FBI Only", enumName.ToProperCase());
+            const string input = "FBIOnly";
+            Assert.Equal("FBI Only", input.ToProperCase());
         }
+
         [Fact]
         public void ToProperCase_HandlesOnlyTwoCapitals()
         {
-            const string enumName = "UI";
-            Assert.Equal("UI", enumName.ToProperCase());
+            const string input = "UI";
+            Assert.Equal("UI", input.ToProperCase());
         }
+
         [Fact]
         public void ToProperCase_HandlesANormalWord()
         {
-            const string enumName = "User";
-            Assert.Equal("User", enumName.ToProperCase());
+            const string input = "User";
+            Assert.Equal("User", input.ToProperCase());
         }
 
         [Fact]
         public void ToProperCase_HandlesANormalPhrase()
         {
-            const string enumName = "HelloWorld";
-            Assert.Equal("Hello World", enumName.ToProperCase());
+            const string input = "HelloWorld";
+            Assert.Equal("Hello World", input.ToProperCase());
         }
 
         [Fact]
         public void ToProperCase_HandlesCamelCase()
         {
-            const string enumName = "helloWorld";
-            Assert.Equal("Hello World", enumName.ToProperCase());
+            const string input = "helloWorld";
+            Assert.Equal("Hello World", input.ToProperCase());
         }
 
         [Fact]
         public void ToProperCase_HandlesCamelCaseWithAcronym()
         {
-            const string enumName = "helloWorldUI";
-            Assert.Equal("Hello World UI", enumName.ToProperCase());
+            const string input = "helloWorldUI";
+            Assert.Equal("Hello World UI", input.ToProperCase());
+        }
+
+        [Fact]
+        public void ToProperCase_HandlesNumberBeforeLowercase()
+        {
+            const string input = "Is1h";
+            Assert.Equal("Is 1h", input.ToProperCase());
+        }
+
+        [Fact]
+        public void ToProperCase_HandlesNumbersBeforeLowercase()
+        {
+            const string input = "Is24h";
+            Assert.Equal("Is 24h", input.ToProperCase());
+        }
+
+        [Fact]
+        public void ToProperCase_HandlesNumberBeforeUppercase()
+        {
+            const string input = "Is3D";
+            Assert.Equal("Is 3D", input.ToProperCase());
+        }
+
+        [Fact]
+        public void ToProperCase_HandlesNumbersBeforeUppercase()
+        {
+            const string input = "Is365Days";
+            Assert.Equal("Is 365 Days", input.ToProperCase());
         }
     }
 }

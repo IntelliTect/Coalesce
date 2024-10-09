@@ -1059,6 +1059,17 @@ export class WeatherServiceViewModel extends ServiceViewModel<typeof $metadata.W
     return getWeather
   }
   
+  public get fileUploadDownload() {
+    const fileUploadDownload = this.$apiClient.$makeCaller(
+      this.$metadata.methods.fileUploadDownload,
+      (c, file: File | null) => c.fileUploadDownload(file),
+      () => ({file: null as File | null, }),
+      (c, args) => c.fileUploadDownload(args.file))
+    
+    Object.defineProperty(this, 'fileUploadDownload', {value: fileUploadDownload});
+    return fileUploadDownload
+  }
+  
   constructor() {
     super($metadata.WeatherService, new $apiClients.WeatherServiceApiClient())
   }

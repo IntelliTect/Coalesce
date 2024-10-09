@@ -71,7 +71,7 @@ namespace IntelliTect.Coalesce.Utilities
 
         // Capitalize the first character and add a space before
         // each capitalized letter (except the first character).
-        [return: System.Diagnostics.CodeAnalysis.NotNullIfNotNull("theString")]
+        [return: System.Diagnostics.CodeAnalysis.NotNullIfNotNull("input")]
         public static string? ToProperCase(this string? input)
         {
             // If there are 0 or 1 characters, just return the string.

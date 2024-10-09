@@ -3748,6 +3748,29 @@ export const WeatherService = domain.services.WeatherService = {
         role: "value",
       },
     },
+    fileUploadDownload: {
+      name: "fileUploadDownload",
+      displayName: "File Upload Download",
+      transportType: "item",
+      httpMethod: "POST",
+      params: {
+        file: {
+          name: "file",
+          displayName: "File",
+          type: "file",
+          role: "value",
+          rules: {
+            required: val => val != null || "File is required.",
+          }
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "file",
+        role: "value",
+      },
+    },
   },
 }
 

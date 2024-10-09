@@ -16,15 +16,11 @@ using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.Api.Controllers
 {
-    public abstract class BaseApiController<T, TDtoIn, TDtoOut> : Controller
-        where T : class
-        where TDtoIn : class, IParameterDto<T>, new()
-        where TDtoOut : class, IResponseDto<T>, new()
+    public abstract class BaseApiController : Controller
     {
         protected BaseApiController(CrudContext context)
         {
             Context = context;
-            EntityClassViewModel = context.ReflectionRepository.GetClassViewModel<T>()!;
         }
 
         /// <summary>
@@ -33,16 +29,50 @@ namespace IntelliTect.Coalesce.Api.Controllers
         protected CrudContext Context { get; }
 
         /// <summary>
-        /// A ClassViewModel representing the entity type T that is served by this controller,
-        /// independent of the DTO that will encapsulate the type in inputs and outputs.
-        /// </summary>
-        protected ClassViewModel EntityClassViewModel { get; }
-
-        /// <summary>
         /// For generated controllers, the type that the controller was generated for.
         /// For custom IClassDtos, this is the DTO type. Otherwise, this is the entity type.
         /// </summary>
         protected ClassViewModel? GeneratedForClassViewModel { get; set; }
+
+        protected ActionResult File(IFile _methodResult)
+        {
+            string? _contentType = _methodResult.ContentType;
+            if (string.IsNullOrWhiteSpace(_contentType) &&
+                (
+                    string.IsNullOrWhiteSpace(_methodResult.Name) ||
+                    !new Microsoft.AspNetCore.StaticFiles.FileExtensionContentTypeProvider().TryGetContentType(_methodResult.Name, out _contentType)
+                )
+            )
+            {
+                _contentType = "application/octet-stream";
+            }
+
+            ContentDispositionHeaderValue cd = new(_methodResult.ForceDownload ? "attachment" : "inline");
+            cd.SetHttpFileName(_methodResult.Name);
+            Response.GetTypedHeaders().ContentDisposition = cd;
+
+            // Use range processing if the result stream isn't a MemoryStream.
+            // MemoryStreams are just going to mean we're dumping the whole byte array straight back to the client.
+            // Other streams might be more elegant, e.g. QueryableContentStream 
+            return File(_methodResult.Content!, _contentType, !(_methodResult.Content is System.IO.MemoryStream));
+        }
+    }
+
+    public abstract class BaseApiController<T, TDtoIn, TDtoOut> : BaseApiController
+        where T : class
+        where TDtoIn : class, IParameterDto<T>, new()
+        where TDtoOut : class, IResponseDto<T>, new()
+    {
+        protected BaseApiController(CrudContext context) : base(context)
+        {
+            EntityClassViewModel = context.ReflectionRepository.GetClassViewModel<T>()!;
+        }
+
+        /// <summary>
+        /// A ClassViewModel representing the entity type T that is served by this controller,
+        /// independent of the DTO that will encapsulate the type in inputs and outputs.
+        /// </summary>
+        protected ClassViewModel EntityClassViewModel { get; }
 
         protected Task<ItemResult<TDtoOut>> GetImplementation(object id, DataSourceParameters parameters, IDataSource<T> dataSource)
         {
@@ -90,29 +120,6 @@ namespace IntelliTect.Coalesce.Api.Controllers
         protected Task<ItemResult<TDtoOut?>> DeleteImplementation(object id, DataSourceParameters parameters, IDataSource<T> dataSource, IBehaviors<T> behaviors)
         {
             return behaviors.DeleteAsync<TDtoOut>(id, dataSource, parameters);
-        }
-
-        protected ActionResult File(IFile _methodResult)
-        {
-            string? _contentType = _methodResult.ContentType;
-            if (string.IsNullOrWhiteSpace(_contentType) && 
-                (
-                    string.IsNullOrWhiteSpace(_methodResult.Name) ||
-                    !new Microsoft.AspNetCore.StaticFiles.FileExtensionContentTypeProvider().TryGetContentType(_methodResult.Name, out _contentType)
-                )
-            )
-            {
-                _contentType = "application/octet-stream";
-            }
-
-            ContentDispositionHeaderValue cd = new(_methodResult.ForceDownload ? "attachment" : "inline");
-            cd.SetHttpFileName(_methodResult.Name);
-            Response.GetTypedHeaders().ContentDisposition = cd;
-
-            // Use range processing if the result stream isn't a MemoryStream.
-            // MemoryStreams are just going to mean we're dumping the whole byte array straight back to the client.
-            // Other streams might be more elegant, e.g. QueryableContentStream 
-            return File(_methodResult.Content!, _contentType, !(_methodResult.Content is System.IO.MemoryStream));
         }
     }
 

@@ -23,17 +23,14 @@ namespace Coalesce.Web.Vue2.Api
 {
     [Route("api/WeatherService")]
     [ServiceFilter(typeof(IApiActionFilter))]
-    public partial class WeatherServiceController : Controller
+    public partial class WeatherServiceController : BaseApiController
     {
-        protected ClassViewModel GeneratedForClassViewModel { get; }
         protected Coalesce.Domain.Services.IWeatherService Service { get; }
-        protected CrudContext Context { get; }
 
-        public WeatherServiceController(CrudContext context, Coalesce.Domain.Services.IWeatherService service)
+        public WeatherServiceController(CrudContext context, Coalesce.Domain.Services.IWeatherService service) : base(context)
         {
             GeneratedForClassViewModel = context.ReflectionRepository.GetClassViewModel<Coalesce.Domain.Services.IWeatherService>();
             Service = service;
-            Context = context;
         }
 
         /// <summary>

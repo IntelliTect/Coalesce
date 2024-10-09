@@ -1,5 +1,6 @@
 ﻿using IntelliTect.Coalesce;
 using IntelliTect.Coalesce.DataAnnotations;
+using IntelliTect.Coalesce.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 #nullable enable
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
 
 namespace IntelliTect.Coalesce.Tests.TargetClasses
 {
@@ -14,6 +16,8 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses
     public interface IWeatherService
     {
         Task<WeatherData> GetWeatherAsync(TestDbContext.AppDbContext parameterDbContext, Location location, DateTimeOffset? dateTime, SkyConditions? conditions);
+
+        Task<ItemResult<IFile>> FileUploadDownload(IFile file);
     }
 
     public class WeatherService : IWeatherService
@@ -25,6 +29,7 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses
             this.db = db;
         }
 
+        public async Task<ItemResult<IFile>> FileUploadDownload(IFile file) => new(file);
 
         public WeatherData GetWeather(TestDbContext.AppDbContext parameterDbContext, Location location, DateTimeOffset? dateTime)
             => new WeatherData { TempFahrenheit = 42, Humidity = db.Cases.Count(), Location = location };

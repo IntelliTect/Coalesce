@@ -24,7 +24,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                 WriteControllerRouteAttribute(b);
                 /* No controller-level security annotation is applied - all security for service controllers is on a per-action basis. */
                 b.Line("[ServiceFilter(typeof(IApiActionFilter))]");
-                using (b.Block($"public partial class {Model.ApiControllerClassName} : Controller"))
+                using (b.Block($"public partial class {Model.ApiControllerClassName} : BaseApiController"))
                 {
                     WriteClassContents(b);
                 }
@@ -33,15 +33,12 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
 
         private void WriteClassContents(CSharpCodeBuilder b)
         {
-            b.Line($"protected ClassViewModel GeneratedForClassViewModel {{ get; }}");
             b.Line($"protected {Model.FullyQualifiedName} Service {{ get; }}");
-            b.Line($"protected CrudContext Context {{ get; }}");
             b.Line();
-            using (b.Block($"public {Model.ApiControllerClassName}(CrudContext context, {Model.FullyQualifiedName} service)"))
+            using (b.Block($"public {Model.ApiControllerClassName}(CrudContext context, {Model.FullyQualifiedName} service) : base(context)"))
             {
                 b.Line($"GeneratedForClassViewModel = context.ReflectionRepository.GetClassViewModel<{Model.FullyQualifiedName}>();");
                 b.Line("Service = service;");
-                b.Line("Context = context;");
             }
 
             foreach (var method in Model.ClientMethods)

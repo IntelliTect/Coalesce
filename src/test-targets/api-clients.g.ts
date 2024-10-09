@@ -449,6 +449,14 @@ export class WeatherServiceApiClient extends ServiceApiClient<typeof $metadata.W
     return this.$invoke($method, $params, $config)
   }
   
+  public fileUploadDownload(file: File | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<File>> {
+    const $method = this.$metadata.methods.fileUploadDownload
+    const $params =  {
+      file,
+    }
+    return this.$invoke($method, $params, $config)
+  }
+  
 }
 
 

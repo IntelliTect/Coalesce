@@ -251,6 +251,16 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
 
         [Coalesce, Execute]
         public void MethodWithMultiFileParameter(ICollection<IFile> files) { }
+        [Coalesce, Execute]
+        public void MethodWithMultiFileParameterConcrete(ICollection<File> files) { }
+        [Coalesce, Execute]
+        public void MethodWithMultiFileParameterConcreteParam(ICollection<FileParameter> files) { }
+        [Coalesce, Execute]
+        public void MethodWithMultiFileParameterList(List<IFile> files) { }
+        [Coalesce, Execute]
+        public void MethodWithMultiFileParameterListConcrete(List<File> files) { }
+        [Coalesce, Execute]
+        public void MethodWithMultiFileParameterListConcreteParam(List<FileParameter> files) { }
 
         [Coalesce, Execute]
         public static string[] MethodWithStringArrayParameterAndReturn(string[] strings)

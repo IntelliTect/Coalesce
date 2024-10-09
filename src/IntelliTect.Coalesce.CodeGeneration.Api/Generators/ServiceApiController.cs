@@ -46,9 +46,21 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                 WriteControllerActionPreamble(b, method);
                 using (WriteControllerActionSignature(b, method))
                 {
+                    WriteFormDataParamsObject(b, method);
                     WriteMethodInvocation(b, method, "Service");
 
                     WriteMethodResultProcessBlock(b, method);
+                }
+
+                if (method.HasHttpRequestBody)
+                {
+                    WriteControllerActionJsonPreamble(b, method);
+                    using (WriteControllerActionJsonSignature(b, method))
+                    {
+                        WriteMethodInvocation(b, method, "Service");
+
+                        WriteMethodResultProcessBlock(b, method);
+                    }
                 }
             }
         }

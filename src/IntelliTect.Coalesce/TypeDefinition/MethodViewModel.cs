@@ -135,7 +135,10 @@ namespace IntelliTect.Coalesce.TypeDefinition
             this.GetAttributeValue<ExecuteAttribute, HttpMethod>(a => a.HttpMethod) ??
             HttpMethod.Post;
 
-        public bool HasHttpRequestBody => ApiActionHttpMethod != HttpMethod.Get && ApiActionHttpMethod != HttpMethod.Delete;
+        public bool HasHttpRequestBody =>
+            ApiActionHttpMethod != HttpMethod.Get &&
+            ApiActionHttpMethod != HttpMethod.Delete &&
+            ApiParameters.Any();
 
         public PropertyViewModel? VaryByProperty =>
             !IsModelInstanceMethod ? null :

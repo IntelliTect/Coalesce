@@ -36,28 +36,39 @@ namespace Coalesce.Web.Vue3.Api
         [Authorize]
         public virtual Task<ItemResult<CompanyResponse>> Get(
             int id,
-            DataSourceParameters parameters,
+            [FromQuery] DataSourceParameters parameters,
             IDataSource<Coalesce.Domain.Company> dataSource)
             => GetImplementation(id, parameters, dataSource);
 
         [HttpGet("list")]
         [Authorize]
         public virtual Task<ListResult<CompanyResponse>> List(
-            ListParameters parameters,
+            [FromQuery] ListParameters parameters,
             IDataSource<Coalesce.Domain.Company> dataSource)
             => ListImplementation(parameters, dataSource);
 
         [HttpGet("count")]
         [Authorize]
         public virtual Task<ItemResult<int>> Count(
-            FilterParameters parameters,
+            [FromQuery] FilterParameters parameters,
             IDataSource<Coalesce.Domain.Company> dataSource)
             => CountImplementation(parameters, dataSource);
 
         [HttpPost("save")]
+        [Consumes("application/x-www-form-urlencoded", "multipart/form-data")]
         [Authorize]
         public virtual Task<ItemResult<CompanyResponse>> Save(
             [FromForm] CompanyParameter dto,
+            [FromQuery] DataSourceParameters parameters,
+            IDataSource<Coalesce.Domain.Company> dataSource,
+            IBehaviors<Coalesce.Domain.Company> behaviors)
+            => SaveImplementation(dto, parameters, dataSource, behaviors);
+
+        [HttpPost("save")]
+        [Consumes("application/json")]
+        [Authorize]
+        public virtual Task<ItemResult<CompanyResponse>> SaveFromJson(
+            [FromBody] CompanyParameter dto,
             [FromQuery] DataSourceParameters parameters,
             IDataSource<Coalesce.Domain.Company> dataSource,
             IBehaviors<Coalesce.Domain.Company> behaviors)
@@ -88,25 +99,27 @@ namespace Coalesce.Web.Vue3.Api
         /// </summary>
         [HttpPost("ConflictingParameterNames")]
         [Authorize]
+        [Consumes("application/x-www-form-urlencoded", "multipart/form-data")]
         public virtual async Task<ItemResult> ConflictingParameterNames(
             [FromServices] IDataSourceFactory dataSourceFactory,
             [FromForm(Name = "id")] int id,
             [FromForm(Name = "companyParam")] CompanyParameter companyParam,
             [FromForm(Name = "name")] string name)
         {
+            var _params = new
+            {
+                Id = id,
+                CompanyParam = !Request.Form.HasAnyValue(nameof(companyParam)) ? null : companyParam,
+                Name = name
+            };
+
             var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Company, Coalesce.Domain.Company>("Default");
-            var itemResult = await dataSource.GetItemAsync(id, new DataSourceParameters());
+            var itemResult = await dataSource.GetItemAsync(_params.Id, new DataSourceParameters());
             if (!itemResult.WasSuccessful)
             {
                 return new ItemResult(itemResult);
             }
             var item = itemResult.Object;
-            var _params = new
-            {
-                companyParam = !Request.Form.HasAnyValue(nameof(companyParam)) ? null : companyParam,
-                name = name
-            };
-
             if (Context.Options.ValidateAttributesForMethods)
             {
                 var _validationResult = ItemResult.FromParameterValidation(
@@ -116,8 +129,49 @@ namespace Coalesce.Web.Vue3.Api
 
             var _mappingContext = new MappingContext(Context);
             item.ConflictingParameterNames(
-                _params.companyParam?.MapToNew(_mappingContext),
-                _params.name
+                _params.CompanyParam?.MapToNew(_mappingContext),
+                _params.Name
+            );
+            var _result = new ItemResult();
+            return _result;
+        }
+
+        public class ConflictingParameterNamesParameters
+        {
+            public int Id { get; set; }
+            public CompanyParameter CompanyParam { get; set; }
+            public string Name { get; set; }
+        }
+
+        /// <summary>
+        /// Method: ConflictingParameterNames
+        /// </summary>
+        [HttpPost("ConflictingParameterNames")]
+        [Authorize]
+        [Consumes("application/json")]
+        public virtual async Task<ItemResult> ConflictingParameterNames(
+            [FromServices] IDataSourceFactory dataSourceFactory,
+            [FromBody] ConflictingParameterNamesParameters _params
+        )
+        {
+            var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Company, Coalesce.Domain.Company>("Default");
+            var itemResult = await dataSource.GetItemAsync(_params.Id, new DataSourceParameters());
+            if (!itemResult.WasSuccessful)
+            {
+                return new ItemResult(itemResult);
+            }
+            var item = itemResult.Object;
+            if (Context.Options.ValidateAttributesForMethods)
+            {
+                var _validationResult = ItemResult.FromParameterValidation(
+                    GeneratedForClassViewModel!.MethodByName("ConflictingParameterNames"), _params, HttpContext.RequestServices);
+                if (!_validationResult.WasSuccessful) return _validationResult;
+            }
+
+            var _mappingContext = new MappingContext(Context);
+            item.ConflictingParameterNames(
+                _params.CompanyParam?.MapToNew(_mappingContext),
+                _params.Name
             );
             var _result = new ItemResult();
             return _result;
@@ -128,12 +182,13 @@ namespace Coalesce.Web.Vue3.Api
         /// </summary>
         [HttpPost("GetCertainItems")]
         [Authorize]
+        [Consumes("application/x-www-form-urlencoded", "multipart/form-data")]
         public virtual ItemResult<System.Collections.Generic.ICollection<CompanyResponse>> GetCertainItems(
             [FromForm(Name = "isDeleted")] bool isDeleted = false)
         {
             var _params = new
             {
-                isDeleted = isDeleted
+                IsDeleted = isDeleted
             };
 
             if (Context.Options.ValidateAttributesForMethods)
@@ -147,7 +202,40 @@ namespace Coalesce.Web.Vue3.Api
             var _mappingContext = new MappingContext(Context);
             var _methodResult = Coalesce.Domain.Company.GetCertainItems(
                 Db,
-                _params.isDeleted
+                _params.IsDeleted
+            );
+            var _result = new ItemResult<System.Collections.Generic.ICollection<CompanyResponse>>();
+            _result.Object = _methodResult?.ToList().Select(o => Mapper.MapToDto<Coalesce.Domain.Company, CompanyResponse>(o, _mappingContext, includeTree)).ToList();
+            return _result;
+        }
+
+        public class GetCertainItemsParameters
+        {
+            public bool IsDeleted { get; set; } = false;
+        }
+
+        /// <summary>
+        /// Method: GetCertainItems
+        /// </summary>
+        [HttpPost("GetCertainItems")]
+        [Authorize]
+        [Consumes("application/json")]
+        public virtual ItemResult<System.Collections.Generic.ICollection<CompanyResponse>> GetCertainItems(
+            [FromBody] GetCertainItemsParameters _params
+        )
+        {
+            if (Context.Options.ValidateAttributesForMethods)
+            {
+                var _validationResult = ItemResult.FromParameterValidation(
+                    GeneratedForClassViewModel!.MethodByName("GetCertainItems"), _params, HttpContext.RequestServices);
+                if (!_validationResult.WasSuccessful) return new ItemResult<System.Collections.Generic.ICollection<CompanyResponse>>(_validationResult);
+            }
+
+            IncludeTree includeTree = null;
+            var _mappingContext = new MappingContext(Context);
+            var _methodResult = Coalesce.Domain.Company.GetCertainItems(
+                Db,
+                _params.IsDeleted
             );
             var _result = new ItemResult<System.Collections.Generic.ICollection<CompanyResponse>>();
             _result.Object = _methodResult?.ToList().Select(o => Mapper.MapToDto<Coalesce.Domain.Company, CompanyResponse>(o, _mappingContext, includeTree)).ToList();

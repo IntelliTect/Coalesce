@@ -193,7 +193,7 @@ namespace IntelliTect.Coalesce.Tests.Tests.Models
                 .MethodByName(nameof(ValidationTarget.MethodWithMixedParameters));
             var dto = new
             {
-                email = "x@",
+                Email = "x@",
             };
 
             var result = ItemResult.FromParameterValidation(method, dto);
@@ -213,8 +213,8 @@ namespace IntelliTect.Coalesce.Tests.Tests.Models
                 .MethodByName(nameof(ValidationTarget.MethodWithMixedParameters));
             var dto = new
             {
-                email = "x@x.com",
-                target = new ValidationTargetDtoGen { }
+                Email = "x@x.com",
+                Target = new ValidationTargetDtoGen { }
             };
 
             var result = ItemResult.FromParameterValidation(method, dto);
@@ -234,8 +234,8 @@ namespace IntelliTect.Coalesce.Tests.Tests.Models
                 .MethodByName(nameof(ValidationTarget.MethodWithMixedParameters));
             var dto = new
             {
-                email = "x@x.com",
-                target = new ValidationTargetDtoGen
+                Email = "x@x.com",
+                Target = new ValidationTargetDtoGen
                 {
                     Number = 7,
                     RequiredChild = new()

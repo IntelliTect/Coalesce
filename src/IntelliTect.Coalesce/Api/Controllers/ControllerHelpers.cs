@@ -11,6 +11,20 @@ namespace IntelliTect.Coalesce.Api.Controllers
     public static class ControllerHelpers
 
     {
+        public static byte[] ReadAllBytes(this Stream stream, bool closeUnderlying = false)
+        {
+            if (stream is MemoryStream memoryStream)
+            {
+                return memoryStream.ToArray();
+            }
+
+            using (memoryStream = new MemoryStream())
+            {
+                stream.CopyTo(memoryStream);
+                if (closeUnderlying) stream.Dispose();
+                return memoryStream.ToArray();
+            }
+        }
         public static async Task<byte[]> ReadAllBytesAsync(this Stream stream, bool closeUnderlying = false)
         {
             if (stream is MemoryStream memoryStream)

@@ -1,7 +1,7 @@
 using Coalesce.Domain;
 using Coalesce.Domain.WebShared;
 using IntelliTect.Coalesce;
-using Microsoft.AspNetCore.Authentication;
+using Microsoft.OpenApi;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Console;
@@ -11,6 +11,8 @@ using System.Security.Claims;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
+using Microsoft.AspNetCore.Mvc.ApiExplorer;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 var builder = WebApplication.CreateBuilder(new WebApplicationOptions
 {
@@ -57,6 +59,9 @@ services.Configure<Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerOptions
 {
     options.Limits.MaxRequestBodySize = int.MaxValue; // testing big file uploads/downloads
 });
+
+
+//services.AddOpenApi(); // net9
 
 services.AddSwaggerGen(c =>
 {
@@ -116,6 +121,7 @@ app.Use(async (context, next) =>
 
 app.UseCors(c => c.AllowAnyOrigin().AllowAnyHeader());
 app.MapControllers();
+//app.MapOpenApi(); // net9
 app.MapSwagger();
 app.UseSwaggerUI(c =>
 {

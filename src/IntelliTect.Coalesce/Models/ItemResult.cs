@@ -231,7 +231,7 @@ namespace IntelliTect.Coalesce.Models
             foreach (var param in method.ClientParameters.OfType<ReflectionParameterViewModel>())
             {
                 string propName = param.Name;
-                var value = obj.GetType().GetProperty(param.CsParameterName)?.GetValue(obj);
+                var value = obj.GetType().GetProperty(param.PascalCaseName)?.GetValue(obj);
 
                 var validationContext = new ValidationContext(obj, serviceProvider, null)
                 {

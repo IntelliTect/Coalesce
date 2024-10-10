@@ -8,26 +8,10 @@ using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Swagger;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace IntelliTect.Coalesce.Swashbuckle
 {
-    public class CoalesceApiSchemaFilter : ISchemaFilter
-    {
-        public void Apply(OpenApiSchema schema, SchemaFilterContext context)
-        {
-            if (context.Type.IsAssignableTo(typeof(ISparseDto)))
-            {
-                string description = "This type supports partial/surgical modifications. Properties that are entirely omitted/undefined will be left unchanged on the target object.";
-
-                if (!string.IsNullOrWhiteSpace(schema.Description)) schema.Description += " " + description;
-                else schema.Description = description;
-            }
-
-        }
-    }
-
     public class CoalesceApiOperationFilter : IOperationFilter
     {
         private readonly ReflectionRepository reflectionRepository;

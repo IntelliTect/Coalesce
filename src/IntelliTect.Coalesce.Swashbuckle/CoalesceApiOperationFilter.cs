@@ -1,29 +1,90 @@
 ﻿using IntelliTect.Coalesce.Models;
 using IntelliTect.Coalesce.TypeDefinition;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ApiExplorer;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
+using Swashbuckle.AspNetCore.Swagger;
 using Swashbuckle.AspNetCore.SwaggerGen;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace IntelliTect.Coalesce.Swashbuckle
 {
+    public class CoalesceApiSchemaFilter : ISchemaFilter
+    {
+        public void Apply(OpenApiSchema schema, SchemaFilterContext context)
+        {
+            if (context.Type.IsAssignableTo(typeof(ISparseDto)))
+            {
+                string description = "This type supports partial/surgical modifications. Properties that are entirely omitted/undefined will be left unchanged on the target object.";
+
+                if (!string.IsNullOrWhiteSpace(schema.Description)) schema.Description += " " + description;
+                else schema.Description = description;
+            }
+
+        }
+    }
+
     public class CoalesceApiOperationFilter : IOperationFilter
     {
-        public CoalesceApiOperationFilter(ReflectionRepository reflectionRepository)
-        {
-            ReflectionRepository = reflectionRepository;
-        }
+        private readonly ReflectionRepository reflectionRepository;
+        private readonly IServiceProvider serviceProvider;
+        private readonly ILookup<(string HttpMethod, string RelativePath), ApiDescription> descriptionsByEndpoint;
 
-        public ReflectionRepository ReflectionRepository { get; }
+        public CoalesceApiOperationFilter(
+            ReflectionRepository reflectionRepository,
+            IApiDescriptionGroupCollectionProvider apiDescriptions,
+            IServiceProvider serviceProvider
+        )
+        {
+            this.reflectionRepository = reflectionRepository;
+            this.serviceProvider = serviceProvider;
+
+            descriptionsByEndpoint = apiDescriptions.ApiDescriptionGroups.Items
+                .SelectMany(g => g.Items)
+                .ToLookup(d => (d.HttpMethod, d.RelativePath));
+        }
 
         public void Apply(OpenApiOperation operation, OperationFilterContext context)
         {
-            var cvm = ReflectionRepository.GetClassViewModel(context.MethodInfo.DeclaringType);
+            var cvm = reflectionRepository.GetClassViewModel(context.MethodInfo.DeclaringType);
             var method = new ReflectionMethodViewModel(cvm, context.MethodInfo);
 
+            AddOtherBodyTypes(operation, context);
             ProcessDataSources(operation, context, method);
             ProcessStandardParameters(operation, method);
+        }
+
+        /// <summary>
+        /// Workaround https://github.com/domaindrivendev/Swashbuckle.AspNetCore/issues/2270
+        /// </summary>
+        private void AddOtherBodyTypes(OpenApiOperation operation, OperationFilterContext context)
+        {
+            var generator = serviceProvider.GetRequiredService<ISwaggerProvider>();
+            var description = context.ApiDescription;
+
+            var otherDescriptions = descriptionsByEndpoint[(description.HttpMethod, description.RelativePath)]
+                .Where(d => d != description);
+
+            foreach (var otherDescription in otherDescriptions)
+            {
+                var otherBody = generator
+                    .GetType()
+                    .GetMethod("GenerateRequestBody", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
+                    .Invoke(generator, [otherDescription, context.SchemaRepository]) as OpenApiRequestBody;
+
+                // To mirror legacy behavior before JSON-accepting endpoints were added to Coalesce,
+                // only add the "multipart/form-data" body, but not the urlencoded body.
+                foreach (var otherContent in otherBody.Content.Where(c => 
+                    c.Key is "multipart/form-data" or "application/json"
+                ))
+                {
+                    operation.RequestBody.Content.Add(otherContent);
+                }
+            }
         }
 
         private void ProcessStandardParameters(OpenApiOperation operation, MethodViewModel method)
@@ -89,7 +150,7 @@ namespace IntelliTect.Coalesce.Swashbuckle
                     paramVm.GetAttributeValue<DeclaredForAttribute>(a => a.DeclaredFor)
                     ?? paramVm.Type.GenericArgumentsFor(typeof(IDataSource<>))!.Single();
 
-                var dataSources = declaredFor.ClassViewModel.ClientDataSources(ReflectionRepository);
+                var dataSources = declaredFor.ClassViewModel.ClientDataSources(reflectionRepository);
 
                 var dataSourceParam = new OpenApiParameter
                 {

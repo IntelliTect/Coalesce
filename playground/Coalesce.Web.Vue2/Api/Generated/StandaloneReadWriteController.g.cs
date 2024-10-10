@@ -36,28 +36,39 @@ namespace Coalesce.Web.Vue2.Api
         [Authorize]
         public virtual Task<ItemResult<StandaloneReadWriteResponse>> Get(
             int id,
-            DataSourceParameters parameters,
+            [FromQuery] DataSourceParameters parameters,
             IDataSource<Coalesce.Domain.StandaloneReadWrite> dataSource)
             => GetImplementation(id, parameters, dataSource);
 
         [HttpGet("list")]
         [Authorize]
         public virtual Task<ListResult<StandaloneReadWriteResponse>> List(
-            ListParameters parameters,
+            [FromQuery] ListParameters parameters,
             IDataSource<Coalesce.Domain.StandaloneReadWrite> dataSource)
             => ListImplementation(parameters, dataSource);
 
         [HttpGet("count")]
         [Authorize]
         public virtual Task<ItemResult<int>> Count(
-            FilterParameters parameters,
+            [FromQuery] FilterParameters parameters,
             IDataSource<Coalesce.Domain.StandaloneReadWrite> dataSource)
             => CountImplementation(parameters, dataSource);
 
         [HttpPost("save")]
+        [Consumes("application/x-www-form-urlencoded", "multipart/form-data")]
         [Authorize]
         public virtual Task<ItemResult<StandaloneReadWriteResponse>> Save(
             [FromForm] StandaloneReadWriteParameter dto,
+            [FromQuery] DataSourceParameters parameters,
+            IDataSource<Coalesce.Domain.StandaloneReadWrite> dataSource,
+            IBehaviors<Coalesce.Domain.StandaloneReadWrite> behaviors)
+            => SaveImplementation(dto, parameters, dataSource, behaviors);
+
+        [HttpPost("save")]
+        [Consumes("application/json")]
+        [Authorize]
+        public virtual Task<ItemResult<StandaloneReadWriteResponse>> SaveFromJson(
+            [FromBody] StandaloneReadWriteParameter dto,
             [FromQuery] DataSourceParameters parameters,
             IDataSource<Coalesce.Domain.StandaloneReadWrite> dataSource,
             IBehaviors<Coalesce.Domain.StandaloneReadWrite> behaviors)

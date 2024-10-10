@@ -73,7 +73,7 @@ namespace IntelliTect.Coalesce.Models
 
         public static implicit operator File(FileParameter param) => new File
         {
-            Content = (param as IFile).Content,
+            Content = ((IFile)param).Content,
             ContentType = param.ContentType,
             Length = param.Length,
             Name = param.Name,

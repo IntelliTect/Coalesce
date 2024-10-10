@@ -36,28 +36,39 @@ namespace Coalesce.Web.Vue2.Api
         [Authorize]
         public virtual Task<ItemResult<Coalesce.Domain.CaseDto>> Get(
             int id,
-            DataSourceParameters parameters,
+            [FromQuery] DataSourceParameters parameters,
             [DeclaredFor(typeof(Coalesce.Domain.CaseDto))] IDataSource<Coalesce.Domain.Case> dataSource)
             => GetImplementation(id, parameters, dataSource);
 
         [HttpGet("list")]
         [Authorize]
         public virtual Task<ListResult<Coalesce.Domain.CaseDto>> List(
-            ListParameters parameters,
+            [FromQuery] ListParameters parameters,
             [DeclaredFor(typeof(Coalesce.Domain.CaseDto))] IDataSource<Coalesce.Domain.Case> dataSource)
             => ListImplementation(parameters, dataSource);
 
         [HttpGet("count")]
         [Authorize]
         public virtual Task<ItemResult<int>> Count(
-            FilterParameters parameters,
+            [FromQuery] FilterParameters parameters,
             [DeclaredFor(typeof(Coalesce.Domain.CaseDto))] IDataSource<Coalesce.Domain.Case> dataSource)
             => CountImplementation(parameters, dataSource);
 
         [HttpPost("save")]
+        [Consumes("application/x-www-form-urlencoded", "multipart/form-data")]
         [Authorize]
         public virtual Task<ItemResult<Coalesce.Domain.CaseDto>> Save(
             [FromForm] Coalesce.Domain.CaseDto dto,
+            [FromQuery] DataSourceParameters parameters,
+            [DeclaredFor(typeof(Coalesce.Domain.CaseDto))] IDataSource<Coalesce.Domain.Case> dataSource,
+            [DeclaredFor(typeof(Coalesce.Domain.CaseDto))] IBehaviors<Coalesce.Domain.Case> behaviors)
+            => SaveImplementation(dto, parameters, dataSource, behaviors);
+
+        [HttpPost("save")]
+        [Consumes("application/json")]
+        [Authorize]
+        public virtual Task<ItemResult<Coalesce.Domain.CaseDto>> SaveFromJson(
+            [FromBody] Coalesce.Domain.CaseDto dto,
             [FromQuery] DataSourceParameters parameters,
             [DeclaredFor(typeof(Coalesce.Domain.CaseDto))] IDataSource<Coalesce.Domain.Case> dataSource,
             [DeclaredFor(typeof(Coalesce.Domain.CaseDto))] IBehaviors<Coalesce.Domain.Case> behaviors)
@@ -88,23 +99,25 @@ namespace Coalesce.Web.Vue2.Api
         /// </summary>
         [HttpPost("AsyncMethodOnIClassDto")]
         [Authorize]
+        [Consumes("application/x-www-form-urlencoded", "multipart/form-data")]
         public virtual async Task<ItemResult<string>> AsyncMethodOnIClassDto(
             [FromServices] IDataSourceFactory dataSourceFactory,
             [FromForm(Name = "id")] int id,
             [FromForm(Name = "input")] string input)
         {
+            var _params = new
+            {
+                Id = id,
+                Input = input
+            };
+
             var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Case, Coalesce.Domain.CaseDto>("Default");
-            var itemResult = await dataSource.GetMappedItemAsync<Coalesce.Domain.CaseDto>(id, new DataSourceParameters());
+            var itemResult = await dataSource.GetMappedItemAsync<Coalesce.Domain.CaseDto>(_params.Id, new DataSourceParameters());
             if (!itemResult.WasSuccessful)
             {
                 return new ItemResult<string>(itemResult);
             }
             var item = itemResult.Object;
-            var _params = new
-            {
-                input = input
-            };
-
             if (Context.Options.ValidateAttributesForMethods)
             {
                 var _validationResult = ItemResult.FromParameterValidation(
@@ -113,7 +126,46 @@ namespace Coalesce.Web.Vue2.Api
             }
 
             var _methodResult = await item.AsyncMethodOnIClassDto(
-                _params.input
+                _params.Input
+            );
+            var _result = new ItemResult<string>();
+            _result.Object = _methodResult;
+            return _result;
+        }
+
+        public class AsyncMethodOnIClassDtoParameters
+        {
+            public int Id { get; set; }
+            public string Input { get; set; }
+        }
+
+        /// <summary>
+        /// Method: AsyncMethodOnIClassDto
+        /// </summary>
+        [HttpPost("AsyncMethodOnIClassDto")]
+        [Authorize]
+        [Consumes("application/json")]
+        public virtual async Task<ItemResult<string>> AsyncMethodOnIClassDto(
+            [FromServices] IDataSourceFactory dataSourceFactory,
+            [FromBody] AsyncMethodOnIClassDtoParameters _params
+        )
+        {
+            var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Case, Coalesce.Domain.CaseDto>("Default");
+            var itemResult = await dataSource.GetMappedItemAsync<Coalesce.Domain.CaseDto>(_params.Id, new DataSourceParameters());
+            if (!itemResult.WasSuccessful)
+            {
+                return new ItemResult<string>(itemResult);
+            }
+            var item = itemResult.Object;
+            if (Context.Options.ValidateAttributesForMethods)
+            {
+                var _validationResult = ItemResult.FromParameterValidation(
+                    GeneratedForClassViewModel!.MethodByName("AsyncMethodOnIClassDto"), _params, HttpContext.RequestServices);
+                if (!_validationResult.WasSuccessful) return new ItemResult<string>(_validationResult);
+            }
+
+            var _methodResult = await item.AsyncMethodOnIClassDto(
+                _params.Input
             );
             var _result = new ItemResult<string>();
             _result.Object = _methodResult;

@@ -96,104 +96,6 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
             b.Line(method.SecurityInfo.Execute.MvcAnnotation());
         }
 
-
-        protected IDisposable WriteControllerActionSignature(CSharpCodeBuilder b, MethodViewModel method)
-        {
-            if (method.HasHttpRequestBody)
-            {
-                b.Line("""[Consumes("application/x-www-form-urlencoded", "multipart/form-data")]""");
-            }
-            var returnType = method.ApiActionReturnTypeDeclaration;
-            if (method.ResultType.IsFile)
-            {
-                // Wrap the signature in ActionResult<> since file-returning methods
-                // have mixed return types due to use of the File() method on controllers.
-                // This is not baked into ApiActionReturnTypeDeclaration because it ONLY affects
-                // the signature, but not the places within the method that we instantiate the return type
-                // due to the implcit conversions from T to ActionResult<T>.
-                returnType = $"ActionResult<{returnType}>";
-            }
-            if (method.IsAwaitable || method.IsModelInstanceMethod || method.Parameters.Any(p => p.Type.IsByteArray))
-            {
-                returnType = $"async Task<{returnType}>";
-            }
-
-#pragma warning disable CS0618 // Type or member is obsolete
-            b.Append(Model.ApiActionAccessModifier);
-#pragma warning restore CS0618 // Type or member is obsolete
-            b.Append(" virtual ");
-            b.Append(returnType);
-            b.Append(" ");
-            b.Append(method.NameWithoutAsync);
-            b.Line("(");
-            using var indent = b.Indented();
-
-            if (method.IsModelInstanceMethod)
-            {
-                b.Line("[FromServices] IDataSourceFactory dataSourceFactory,");
-            }
-
-            foreach (var param in method.Parameters
-                .Where(f => f.IsDI && !f.IsNonArgumentDI)
-                .Concat(method.ApiParameters)
-                .OrderBy(p => p.HasDefaultValue))
-            {
-                string typeName;
-                if (param.PureType.IsFile)
-                {
-                    typeName = param.Type.IsCollection
-                        ? new ReflectionTypeViewModel(typeof(ICollection<Microsoft.AspNetCore.Http.IFormFile>)).FullyQualifiedName
-                        : new ReflectionTypeViewModel(typeof(Microsoft.AspNetCore.Http.IFormFile)).FullyQualifiedName;
-                }
-                else if (param.IsDI)
-                {
-                    typeName = param.Type.FullyQualifiedName;
-                }
-                else
-                {
-                    typeName = param.Type.NullableTypeForDto(isInput: true, dtoNamespace: null, dontEmitNullable: true);
-                }
-
-                if (param.ShouldInjectFromServices)
-                {
-                    b.Append("[FromServices] ");
-                }
-                else if (method.HasHttpRequestBody && !param.PureType.IsFile)
-                {
-                    // We must add [FromForm], because without it, AspNetCore's ApiExplorer, and subsequently Swashbuckle,
-                    // will assume these parameters to be from the querystring. This is well defined behavior in aspnetcore,
-                    // but is not what we ever want (https://docs.microsoft.com/en-us/aspnet/core/mvc/models/model-binding?view=aspnetcore-6.0#sources-1).
-
-                    // Furthermore, we must specify a Name because without it, top level parameters are ambiguous with nested parameters.
-                    // For example, for a custom method that takes a `class Case { string Name }` parameter and a `string name` parameter,
-                    // if the Case is passed as null and a name is passed a value, both the `name` parameter and `Case.Name` will be set to `name`.
-                    b.Append("[FromForm(Name = ").Append(param.CsParameterName.QuotedStringLiteralForCSharp()).Append(")] ");
-
-                    // File parameters must not be annotated with FromForm, as this will break their model binding.
-                    // They have their own special implicit model binder.
-                }
-                else if (!method.HasHttpRequestBody)
-                {
-                    b.Append("[FromQuery] ");
-                }
-
-                b.Append(typeName);
-                b.Append(" ");
-                b.Append(param.CsParameterName);
-                if (param.HasDefaultValue)
-                {
-                    b.Append(" = ");
-                    b.Append(param.CsDefaultValue);
-                }
-                b.Line(",");
-            }
-
-            b.TrimWhitespace().TrimEnd(",").Append(")");
-            indent.Dispose();
-            return b.Block();
-        }
-
-
         protected static void WriteControllerActionJsonPreamble(CSharpCodeBuilder b, MethodViewModel method)
         {
             if (!method.ApiParameters.Any()) return;
@@ -232,10 +134,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
             WriteControllerActionPreamble(b, method);
         }
 
-        protected IDisposable WriteControllerActionJsonSignature(CSharpCodeBuilder b, MethodViewModel method)
+        private void WriteControllerActionReturnSignature(CSharpCodeBuilder b, MethodViewModel method)
         {
-            b.Line("[Consumes(\"application/json\")]");
-
             var returnType = method.ApiActionReturnTypeDeclaration;
             if (method.ResultType.IsFile)
             {
@@ -258,6 +158,96 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
             b.Append(returnType);
             b.Append(" ");
             b.Append(method.NameWithoutAsync);
+        }
+
+        protected IDisposable WriteControllerActionSignature(CSharpCodeBuilder b, MethodViewModel method)
+        {
+            if (method.HasHttpRequestBody)
+            {
+                b.Line("""[Consumes("application/x-www-form-urlencoded", "multipart/form-data")]""");
+            }
+
+            WriteControllerActionReturnSignature(b, method);
+
+            b.Line("(");
+            using var indent = b.Indented();
+
+            if (method.IsModelInstanceMethod)
+            {
+                b.Line("[FromServices] IDataSourceFactory dataSourceFactory,");
+            }
+
+            foreach (var param in method.Parameters
+                .Where(f => f.IsDI && !f.IsNonArgumentDI)
+                .Concat(method.ApiParameters)
+                .OrderBy(p => p.HasDefaultValue))
+            {
+                string typeName;
+                if (param.PureType.IsFile)
+                {
+                    typeName = param.Type.IsCollection
+                        ? new ReflectionTypeViewModel(typeof(ICollection<Microsoft.AspNetCore.Http.IFormFile>)).FullyQualifiedName
+                        : new ReflectionTypeViewModel(typeof(Microsoft.AspNetCore.Http.IFormFile)).FullyQualifiedName;
+                }
+                else if (param.IsDI)
+                {
+                    typeName = param.Type.FullyQualifiedName;
+                }
+                else
+                {
+                    typeName = param.Type.NullableTypeForDto(isInput: true, dtoNamespace: null, dontEmitNullable: true);
+                }
+
+                if (param.ShouldInjectFromServices)
+                {
+                    b.Append("[FromServices] ");
+                }
+                else if (param.PureType.IsFile)
+                {
+                    // File parameters must not be annotated with FromForm, as this will break their model binding.
+                    // They have their own special implicit model binder.
+                }
+                else if (method.HasHttpRequestBody)
+                {
+                    // We must add [FromForm], because without it, AspNetCore's ApiExplorer, and subsequently Swashbuckle,
+                    // will assume these parameters to be from the querystring. This is well defined behavior in aspnetcore,
+                    // but is not what we ever want (https://docs.microsoft.com/en-us/aspnet/core/mvc/models/model-binding?view=aspnetcore-6.0#sources-1).
+
+                    // Furthermore, we must specify a Name because without it, top level parameters are ambiguous with nested parameters.
+                    // For example, for a custom method that takes a `class Case { string Name }` parameter and a `string name` parameter,
+                    // if the Case is passed as null and a name is passed a value, both the `name` parameter and `Case.Name` will be set to `name`.
+                    b.Append("[FromForm(Name = ").Append(param.CsParameterName.QuotedStringLiteralForCSharp()).Append(")] ");
+                }
+                else
+                {
+                    b.Append("[FromQuery] ");
+                }
+
+                b.Append(typeName);
+                b.Append(" ");
+                b.Append(param.CsParameterName);
+                if (param.HasDefaultValue)
+                {
+                    b.Append(" = ");
+                    b.Append(param.CsDefaultValue);
+                }
+                b.Line(",");
+            }
+
+            b.TrimWhitespace().TrimEnd(",").Append(")");
+            indent.Dispose();
+            return b.Block();
+        }
+
+        protected IDisposable WriteControllerActionJsonSignature(CSharpCodeBuilder b, MethodViewModel method)
+        {
+            if (method.ApiParameters.Any())
+            {
+                b.Line("[Consumes(\"application/json\")]");
+            }
+
+            WriteControllerActionReturnSignature(b, method);
+
             b.Line("(");
             using var indent = b.Indented();
 

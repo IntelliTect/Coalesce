@@ -20,14 +20,15 @@ namespace IntelliTect.Coalesce
         {
             swaggerGenOptions.OperationFilter<CoalesceApiOperationFilter>();
             swaggerGenOptions.DocumentFilter<CoalesceDocumentFilter>();
+            swaggerGenOptions.SchemaFilter<CoalesceApiSchemaFilter>();
 
             var oldResolver = swaggerGenOptions.SwaggerGeneratorOptions.ConflictingActionsResolver;
             swaggerGenOptions.SwaggerGeneratorOptions.ConflictingActionsResolver = (actions) =>
             {
-                var ret = actions.FirstOrDefault(a => a.SupportedRequestFormats.Any(f => f.MediaType == MediaTypeNames.Application.Json))
+                return actions.FirstOrDefault(a => a.SupportedRequestFormats
+                        .Any(f => f.MediaType == MediaTypeNames.Application.Json)
+                    )
                     ?? oldResolver?.Invoke(actions);
-
-                return ret;
             };
         }
     }

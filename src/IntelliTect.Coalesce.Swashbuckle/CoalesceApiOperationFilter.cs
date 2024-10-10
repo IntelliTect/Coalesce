@@ -2,45 +2,77 @@
 using IntelliTect.Coalesce.TypeDefinition;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
-using Microsoft.AspNetCore.Mvc.Controllers;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Swagger;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace IntelliTect.Coalesce.Swashbuckle
 {
     public class CoalesceApiOperationFilter : IOperationFilter
     {
-        public CoalesceApiOperationFilter(ReflectionRepository reflectionRepository)
-        {
-            ReflectionRepository = reflectionRepository;
-        }
+        private readonly ReflectionRepository reflectionRepository;
+        private readonly IServiceProvider serviceProvider;
+        private readonly ILookup<(string HttpMethod, string RelativePath), ApiDescription> descriptionsByEndpoint;
 
-        public ReflectionRepository ReflectionRepository { get; }
+        public CoalesceApiOperationFilter(
+            ReflectionRepository reflectionRepository,
+            IApiDescriptionGroupCollectionProvider apiDescriptions,
+            IServiceProvider serviceProvider
+        )
+        {
+            this.reflectionRepository = reflectionRepository;
+            this.serviceProvider = serviceProvider;
+
+            descriptionsByEndpoint = apiDescriptions.ApiDescriptionGroups.Items
+                .SelectMany(g => g.Items)
+                .ToLookup(d => (d.HttpMethod, d.RelativePath));
+        }
 
         public void Apply(OpenApiOperation operation, OperationFilterContext context)
         {
-            var cvm = ReflectionRepository.GetClassViewModel(context.MethodInfo.DeclaringType);
+            var cvm = reflectionRepository.GetClassViewModel(context.MethodInfo.DeclaringType);
             var method = new ReflectionMethodViewModel(cvm, context.MethodInfo);
 
+            AddOtherBodyTypes(operation, context);
             ProcessDataSources(operation, context, method);
             ProcessStandardParameters(operation, method);
         }
 
+        /// <summary>
+        /// Workaround https://github.com/domaindrivendev/Swashbuckle.AspNetCore/issues/2270
+        /// </summary>
+        private void AddOtherBodyTypes(OpenApiOperation operation, OperationFilterContext context)
+        {
+            var generator = serviceProvider.GetRequiredService<ISwaggerProvider>();
+            var description = context.ApiDescription;
+
+            var otherDescriptions = descriptionsByEndpoint[(description.HttpMethod, description.RelativePath)]
+                .Where(d => d != description);
+
+            foreach (var otherDescription in otherDescriptions)
+            {
+                var otherBody = generator
+                    .GetType()
+                    .GetMethod("GenerateRequestBody", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
+                    .Invoke(generator, [otherDescription, context.SchemaRepository]) as OpenApiRequestBody;
+
+                // To mirror legacy behavior before JSON-accepting endpoints were added to Coalesce,
+                // only add the "multipart/form-data" body, but not the urlencoded body.
+                foreach (var otherContent in otherBody.Content.Where(c => 
+                    c.Key is "multipart/form-data" or "application/json"
+                ))
+                {
+                    operation.RequestBody.Content.Add(otherContent);
+                }
+            }
+        }
+
         private void ProcessStandardParameters(OpenApiOperation operation, MethodViewModel method)
         {
-
-            // Remove behaviors - behaviors accept no input from the client.
-            foreach (var paramVm in method.Parameters.Where(p => p.Type.IsA(typeof(IBehaviors<>))))
-            {
-                operation.Parameters.Remove(operation.Parameters.Single(p => p.Name == paramVm.Name));
-            }
-
             foreach (var paramVm in method.Parameters.Where(p => p.Type.IsA<IDataSourceParameters>()))
             {
                 var paramType = paramVm.Type.ClassViewModel;
@@ -51,14 +83,8 @@ namespace IntelliTect.Coalesce.Swashbuckle
                 );
 
                 foreach (var noSetterProp in paramsUnion.Where(p =>
-                    // Remove params that have no setter. 
-                    // Honestly I'm clueless why this isn't default behavior, but OK.
-                    !p.PropViewModel.HasSetter
-
-                    // Remove the string "DataSource" parameter that is redundant with our data source model binding functionality.
-                    || (p.PropViewModel.Name == nameof(IDataSourceParameters.DataSource) && p.OperationParam.Schema.Type == "string")
-                    // Remove "Filter" - we'll enumerate all available filter params (for lack of a better solution with OpenAPI 2.0
-                    || (p.PropViewModel.Name == nameof(IFilterParameters.Filter) && p.OperationParam.Schema.Type == "object")
+                    // Remove "Filter" - we'll enumerate all available filter params
+                    (p.PropViewModel.Name == nameof(IFilterParameters.Filter) && p.OperationParam.Schema.Type == "object")
                 ))
                 {
                     operation.Parameters.Remove(noSetterProp.OperationParam);
@@ -104,27 +130,31 @@ namespace IntelliTect.Coalesce.Swashbuckle
             // but might as well not make assumptions if we don't have to.
             foreach (var paramVm in method.Parameters.Where(p => p.Type.IsA(typeof(IDataSource<>))))
             {
-                var dataSourceParam = operation.Parameters
-                    .Single(p => string.Equals(p.Name, paramVm.Name, StringComparison.OrdinalIgnoreCase) && p.Schema.Type == null);
-
                 var declaredFor =
                     paramVm.GetAttributeValue<DeclaredForAttribute>(a => a.DeclaredFor)
                     ?? paramVm.Type.GenericArgumentsFor(typeof(IDataSource<>))!.Single();
 
-                var dataSources = declaredFor.ClassViewModel.ClientDataSources(ReflectionRepository);
+                var dataSources = declaredFor.ClassViewModel.ClientDataSources(reflectionRepository);
 
-                dataSourceParam.Schema = new OpenApiSchema
+                var dataSourceParam = new OpenApiParameter
                 {
-                    Type = "string",
-                    Enum = (new string[] { IntelliTect.Coalesce.Api.DataSources.DataSourceFactory.DefaultSourceName })
+                    In = ParameterLocation.Query,
+                    Name = paramVm.Name,
+                    Required = false,
+                    Schema = new OpenApiSchema
+                    {
+                        Type = "string",
+                        Enum = (new string[] { IntelliTect.Coalesce.Api.DataSources.DataSourceFactory.DefaultSourceName })
                         .Concat(dataSources.Select(ds => ds.ClientTypeName))
                         .Select(n => new OpenApiString(n) as IOpenApiAny)
                         .ToList()
+                    },
                 };
+                operation.Parameters.Add(dataSourceParam);
 
                 foreach (var dataSource in dataSources)
                 {
-                    foreach (var dsParam in dataSources.SelectMany(s => s.DataSourceParameters))
+                    foreach (var dsParam in dataSource.DataSourceParameters)
                     {
                         var schema = context.SchemaGenerator.GenerateSchema(dsParam.Type.TypeInfo, context.SchemaRepository);
 

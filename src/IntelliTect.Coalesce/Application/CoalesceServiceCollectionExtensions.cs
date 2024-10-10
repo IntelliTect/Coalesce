@@ -78,6 +78,10 @@ namespace IntelliTect.Coalesce
             services.TryAddEnumerable(
                 ServiceDescriptor.Transient<IApiDescriptionProvider, FromFormNameFixingApiDescriptionProvider>());
 
+            // Make adjustments to the API explorer so that it doesn't cause .NET 9's OpenAPI generation to implode.
+            services.TryAddEnumerable(
+                ServiceDescriptor.Transient<IApiDescriptionProvider, IntelliTect.Coalesce.Api.CoalesceApiDescriptionProvider>());
+
             return services;
         }
 

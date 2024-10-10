@@ -81,7 +81,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
             }
         }
 
-        protected static void WriteControllerActionPreamble(CSharpCodeBuilder b, MethodViewModel method)
+        private static void WriteControllerActionPreamble(CSharpCodeBuilder b, MethodViewModel method)
         {
             var methodAnnotationName = $"Http{method.ApiActionHttpMethod}";
 
@@ -96,8 +96,45 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
             b.Line(method.SecurityInfo.Execute.MvcAnnotation());
         }
 
+        private static void WriteControllerActionJsonPreamble(CSharpCodeBuilder b, MethodViewModel method)
+        {
+            if (!method.ApiParameters.Any()) return;
 
-        protected IDisposable WriteControllerActionSignature(CSharpCodeBuilder b, MethodViewModel method)
+            b.Line();
+            using (b.Block($"public class {method.NameWithoutAsync}Parameters"))
+            {
+                foreach (var param in method.ApiParameters.OrderBy(p => p.HasDefaultValue))
+                {
+                    string typeName;
+                    if (param.PureType.IsFile)
+                    {
+                        typeName = "IntelliTect.Coalesce.Models.FileParameter";
+                        if (param.Type.IsCollection) typeName = $"ICollection<{typeName}>";
+                    }
+                    else
+                    {
+                        typeName = param.Type.NullableTypeForDto(isInput: true, dtoNamespace: null, dontEmitNullable: true);
+                    }
+
+                    b.Append("public ");
+                    b.Append(typeName);
+                    b.Append(" ");
+                    b.Append(param.PascalCaseName);
+                    b.Append(" { get; set; }");
+                    if (param.HasDefaultValue)
+                    {
+                        b.Append(" = ");
+                        b.Append(param.CsDefaultValue);
+                        b.Append(";");
+                    }
+                    b.Line();
+                }
+            }
+
+            WriteControllerActionPreamble(b, method);
+        }
+
+        private void WriteControllerActionReturnSignature(CSharpCodeBuilder b, MethodViewModel method)
         {
             var returnType = method.ApiActionReturnTypeDeclaration;
             if (method.ResultType.IsFile)
@@ -121,6 +158,19 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
             b.Append(returnType);
             b.Append(" ");
             b.Append(method.NameWithoutAsync);
+        }
+
+        protected IDisposable WriteControllerActionSignature(CSharpCodeBuilder b, MethodViewModel method)
+        {
+            WriteControllerActionPreamble(b, method);
+
+            if (method.HasHttpRequestBody)
+            {
+                b.Line("""[Consumes("application/x-www-form-urlencoded", "multipart/form-data")]""");
+            }
+
+            WriteControllerActionReturnSignature(b, method);
+
             b.Line("(");
             using var indent = b.Indented();
 
@@ -154,7 +204,12 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
                 {
                     b.Append("[FromServices] ");
                 }
-                else if (method.HasHttpRequestBody && !param.PureType.IsFile)
+                else if (param.PureType.IsFile)
+                {
+                    // File parameters must not be annotated with FromForm, as this will break their model binding.
+                    // They have their own special implicit model binder.
+                }
+                else if (method.HasHttpRequestBody)
                 {
                     // We must add [FromForm], because without it, AspNetCore's ApiExplorer, and subsequently Swashbuckle,
                     // will assume these parameters to be from the querystring. This is well defined behavior in aspnetcore,
@@ -164,9 +219,10 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
                     // For example, for a custom method that takes a `class Case { string Name }` parameter and a `string name` parameter,
                     // if the Case is passed as null and a name is passed a value, both the `name` parameter and `Case.Name` will be set to `name`.
                     b.Append("[FromForm(Name = ").Append(param.CsParameterName.QuotedStringLiteralForCSharp()).Append(")] ");
-
-                    // File parameters must not be annotated with FromForm, as this will break their model binding.
-                    // They have their own special implicit model binder.
+                }
+                else
+                {
+                    b.Append("[FromQuery] ");
                 }
 
                 b.Append(typeName);
@@ -182,6 +238,55 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
 
             b.TrimWhitespace().TrimEnd(",").Append(")");
             indent.Dispose();
+            var blockRet = b.Block();
+
+            WriteFormDataParamsObject(b, method);
+
+            return blockRet;
+        }
+
+        protected IDisposable WriteControllerActionJsonSignature(CSharpCodeBuilder b, MethodViewModel method)
+        {
+            WriteControllerActionJsonPreamble(b, method);
+
+            if (method.ApiParameters.Any())
+            {
+                b.Line("[Consumes(\"application/json\")]");
+            }
+
+            WriteControllerActionReturnSignature(b, method);
+
+            b.Line("(");
+            using var indent = b.Indented();
+
+            if (method.IsModelInstanceMethod)
+            {
+                b.Line("[FromServices] IDataSourceFactory dataSourceFactory,");
+            }
+
+            foreach (var param in method.Parameters
+                .Where(f => f.IsDI && !f.IsNonArgumentDI))
+            {
+                string typeName = param.Type.FullyQualifiedName;
+
+                if (param.ShouldInjectFromServices)
+                {
+                    b.Append("[FromServices] ");
+                }
+
+                b.Append(typeName);
+                b.Append(" ");
+                b.Append(param.CsParameterName);
+                b.Line(",");
+            }
+
+            if (method.ApiParameters.Any())
+            {
+                b.Line($"[FromBody] {method.NameWithoutAsync}Parameters _params");
+            }
+
+            indent.Dispose();
+            b.Line(")");
             return b.Block();
         }
 
@@ -197,27 +302,17 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
         /// The member on which to invoke the method. 
         /// This could be an variable holding an instance of a type, or a class reference if the method is static.
         /// </param>
-        public void WriteMethodInvocation(CSharpCodeBuilder b, MethodViewModel method, string owningMember)
+        public void WriteMethodInvocation(
+            CSharpCodeBuilder b, 
+            MethodViewModel method, 
+            string owningMember
+        )
         {
-
             var clientParameters = method.ClientParameters.ToList();
             if (clientParameters.Count > 0)
             {
-                using (b.Block("var _params = new", ";"))
-                {
-                    for (int i = 0; i < clientParameters.Count; i++)
-                    {
-                        var param = clientParameters[i];
-                        if (i != 0) b.Line(", ");
-                        b.Append(param.CsParameterName);
-                        b.Append(" = ");
-                        b.Append(GetMethodPreMapParameterExpression(clientParameters[i]));
-                    }
-                }
-                b.Line();
-
                 var validateAttributes = method.GetAttributeValue<ExecuteAttribute, bool>(
-                    e => e.ValidateAttributes, 
+                    e => e.ValidateAttributes,
                     e => e.ValidateAttributesHasValue);
                 if (validateAttributes == true)
                 {
@@ -268,6 +363,25 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
             b.Line(");");
         }
 
+        private void WriteFormDataParamsObject(CSharpCodeBuilder b, MethodViewModel method)
+        {
+            var clientParameters = method.ApiParameters.ToList();
+            if (clientParameters.Count == 0) return;
+
+            using (b.Block("var _params = new", ";"))
+            {
+                for (int i = 0; i < clientParameters.Count; i++)
+                {
+                    var param = clientParameters[i];
+                    if (i != 0) b.Line(", ");
+                    b.Append(param.PascalCaseName);
+                    b.Append(" = ");
+                    b.Append(GetMethodParameterFormDataMappingExpression(clientParameters[i]));
+                }
+            }
+            b.Line();
+        }
+
         private void WriteMethodValidation(CSharpCodeBuilder b, MethodViewModel method)
         {
             // You may be wondering... why don't we just check ModelState?
@@ -300,14 +414,14 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
         /// that maps the controller input to the argument of method being called.
         /// Does not perform DTO mapping, as this method produces the target of validation.
         /// </summary>
-        protected string GetMethodPreMapParameterExpression(ParameterViewModel param)
+        protected string GetMethodParameterFormDataMappingExpression(ParameterViewModel param)
         {
             var ret = param.CsParameterName;
 
             if (param.PureType.IsFile)
             {
                 ret = $"{ret} == null ? null : " + (param.Type.IsCollection
-                    ? $"{ret}.Select(f => ({param.PureType.FullyQualifiedName}){FileCtor("f")})"
+                    ? $"{ret}.Select(f => {FileCtor("f")})"
                     : $"{FileCtor(ret)} ");
 
                 static string FileCtor(string x) =>
@@ -365,7 +479,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
                 return param.CsParameterName;
             }
 
-            string ret = $"_params.{param.CsParameterName}";
+            string ret = $"_params.{param.PascalCaseName}";
 
             if (param.Type.PureType.ClassViewModel != null && !param.Type.PureType.ClassViewModel.IsCustomDto)
             {
@@ -381,6 +495,11 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
 
             if (param.Type.IsCollection)
             {
+                if (param.PureType.IsFile)
+                {
+                    ret += $".Cast<{param.PureType.FullyQualifiedName}>()";
+                }
+
                 if (param.Type.IsArray)
                     ret += ".ToArray()";
                 else

@@ -58,6 +58,9 @@ services.Configure<Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerOptions
     options.Limits.MaxRequestBodySize = int.MaxValue; // testing big file uploads/downloads
 });
 
+
+//services.AddOpenApi(); // net9
+
 services.AddSwaggerGen(c =>
 {
     c.AddCoalesce();
@@ -116,6 +119,7 @@ app.Use(async (context, next) =>
 
 app.UseCors(c => c.AllowAnyOrigin().AllowAnyHeader());
 app.MapControllers();
+//app.MapOpenApi(); // net9
 app.MapSwagger();
 app.UseSwaggerUI(c =>
 {

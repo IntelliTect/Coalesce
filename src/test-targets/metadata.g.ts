@@ -1497,6 +1497,186 @@ export const ComplexModel = domain.types.ComplexModel = {
         role: "value",
       },
     },
+    methodWithMultiFileParameterConcrete: {
+      name: "methodWithMultiFileParameterConcrete",
+      displayName: "Method With Multi File Parameter Concrete",
+      transportType: "item",
+      httpMethod: "POST",
+      params: {
+        id: {
+          name: "id",
+          displayName: "Primary Key",
+          type: "number",
+          role: "value",
+          get source() { return (domain.types.ComplexModel as ModelType & { name: "ComplexModel" }).props.complexModelId },
+          rules: {
+            required: val => val != null || "Primary Key is required.",
+          }
+        },
+        files: {
+          name: "files",
+          displayName: "Files",
+          type: "collection",
+          itemType: {
+            name: "$collectionItem",
+            displayName: "",
+            role: "value",
+            type: "file",
+          },
+          role: "value",
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "void",
+        role: "value",
+      },
+    },
+    methodWithMultiFileParameterConcreteParam: {
+      name: "methodWithMultiFileParameterConcreteParam",
+      displayName: "Method With Multi File Parameter Concrete Param",
+      transportType: "item",
+      httpMethod: "POST",
+      params: {
+        id: {
+          name: "id",
+          displayName: "Primary Key",
+          type: "number",
+          role: "value",
+          get source() { return (domain.types.ComplexModel as ModelType & { name: "ComplexModel" }).props.complexModelId },
+          rules: {
+            required: val => val != null || "Primary Key is required.",
+          }
+        },
+        files: {
+          name: "files",
+          displayName: "Files",
+          type: "collection",
+          itemType: {
+            name: "$collectionItem",
+            displayName: "",
+            role: "value",
+            type: "file",
+          },
+          role: "value",
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "void",
+        role: "value",
+      },
+    },
+    methodWithMultiFileParameterList: {
+      name: "methodWithMultiFileParameterList",
+      displayName: "Method With Multi File Parameter List",
+      transportType: "item",
+      httpMethod: "POST",
+      params: {
+        id: {
+          name: "id",
+          displayName: "Primary Key",
+          type: "number",
+          role: "value",
+          get source() { return (domain.types.ComplexModel as ModelType & { name: "ComplexModel" }).props.complexModelId },
+          rules: {
+            required: val => val != null || "Primary Key is required.",
+          }
+        },
+        files: {
+          name: "files",
+          displayName: "Files",
+          type: "collection",
+          itemType: {
+            name: "$collectionItem",
+            displayName: "",
+            role: "value",
+            type: "file",
+          },
+          role: "value",
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "void",
+        role: "value",
+      },
+    },
+    methodWithMultiFileParameterListConcrete: {
+      name: "methodWithMultiFileParameterListConcrete",
+      displayName: "Method With Multi File Parameter List Concrete",
+      transportType: "item",
+      httpMethod: "POST",
+      params: {
+        id: {
+          name: "id",
+          displayName: "Primary Key",
+          type: "number",
+          role: "value",
+          get source() { return (domain.types.ComplexModel as ModelType & { name: "ComplexModel" }).props.complexModelId },
+          rules: {
+            required: val => val != null || "Primary Key is required.",
+          }
+        },
+        files: {
+          name: "files",
+          displayName: "Files",
+          type: "collection",
+          itemType: {
+            name: "$collectionItem",
+            displayName: "",
+            role: "value",
+            type: "file",
+          },
+          role: "value",
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "void",
+        role: "value",
+      },
+    },
+    methodWithMultiFileParameterListConcreteParam: {
+      name: "methodWithMultiFileParameterListConcreteParam",
+      displayName: "Method With Multi File Parameter List Concrete Param",
+      transportType: "item",
+      httpMethod: "POST",
+      params: {
+        id: {
+          name: "id",
+          displayName: "Primary Key",
+          type: "number",
+          role: "value",
+          get source() { return (domain.types.ComplexModel as ModelType & { name: "ComplexModel" }).props.complexModelId },
+          rules: {
+            required: val => val != null || "Primary Key is required.",
+          }
+        },
+        files: {
+          name: "files",
+          displayName: "Files",
+          type: "collection",
+          itemType: {
+            name: "$collectionItem",
+            displayName: "",
+            role: "value",
+            type: "file",
+          },
+          role: "value",
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "void",
+        role: "value",
+      },
+    },
     methodWithStringArrayParameterAndReturn: {
       name: "methodWithStringArrayParameterAndReturn",
       displayName: "Method With String Array Parameter And Return",

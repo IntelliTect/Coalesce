@@ -362,6 +362,61 @@ export class ComplexModelViewModel extends ViewModel<$models.ComplexModel, $apiC
     return methodWithMultiFileParameter
   }
   
+  public get methodWithMultiFileParameterConcrete() {
+    const methodWithMultiFileParameterConcrete = this.$apiClient.$makeCaller(
+      this.$metadata.methods.methodWithMultiFileParameterConcrete,
+      (c, files?: File[] | null) => c.methodWithMultiFileParameterConcrete(this.$primaryKey, files),
+      () => ({files: null as File[] | null, }),
+      (c, args) => c.methodWithMultiFileParameterConcrete(this.$primaryKey, args.files))
+    
+    Object.defineProperty(this, 'methodWithMultiFileParameterConcrete', {value: methodWithMultiFileParameterConcrete});
+    return methodWithMultiFileParameterConcrete
+  }
+  
+  public get methodWithMultiFileParameterConcreteParam() {
+    const methodWithMultiFileParameterConcreteParam = this.$apiClient.$makeCaller(
+      this.$metadata.methods.methodWithMultiFileParameterConcreteParam,
+      (c, files?: File[] | null) => c.methodWithMultiFileParameterConcreteParam(this.$primaryKey, files),
+      () => ({files: null as File[] | null, }),
+      (c, args) => c.methodWithMultiFileParameterConcreteParam(this.$primaryKey, args.files))
+    
+    Object.defineProperty(this, 'methodWithMultiFileParameterConcreteParam', {value: methodWithMultiFileParameterConcreteParam});
+    return methodWithMultiFileParameterConcreteParam
+  }
+  
+  public get methodWithMultiFileParameterList() {
+    const methodWithMultiFileParameterList = this.$apiClient.$makeCaller(
+      this.$metadata.methods.methodWithMultiFileParameterList,
+      (c, files?: File[] | null) => c.methodWithMultiFileParameterList(this.$primaryKey, files),
+      () => ({files: null as File[] | null, }),
+      (c, args) => c.methodWithMultiFileParameterList(this.$primaryKey, args.files))
+    
+    Object.defineProperty(this, 'methodWithMultiFileParameterList', {value: methodWithMultiFileParameterList});
+    return methodWithMultiFileParameterList
+  }
+  
+  public get methodWithMultiFileParameterListConcrete() {
+    const methodWithMultiFileParameterListConcrete = this.$apiClient.$makeCaller(
+      this.$metadata.methods.methodWithMultiFileParameterListConcrete,
+      (c, files?: File[] | null) => c.methodWithMultiFileParameterListConcrete(this.$primaryKey, files),
+      () => ({files: null as File[] | null, }),
+      (c, args) => c.methodWithMultiFileParameterListConcrete(this.$primaryKey, args.files))
+    
+    Object.defineProperty(this, 'methodWithMultiFileParameterListConcrete', {value: methodWithMultiFileParameterListConcrete});
+    return methodWithMultiFileParameterListConcrete
+  }
+  
+  public get methodWithMultiFileParameterListConcreteParam() {
+    const methodWithMultiFileParameterListConcreteParam = this.$apiClient.$makeCaller(
+      this.$metadata.methods.methodWithMultiFileParameterListConcreteParam,
+      (c, files?: File[] | null) => c.methodWithMultiFileParameterListConcreteParam(this.$primaryKey, files),
+      () => ({files: null as File[] | null, }),
+      (c, args) => c.methodWithMultiFileParameterListConcreteParam(this.$primaryKey, args.files))
+    
+    Object.defineProperty(this, 'methodWithMultiFileParameterListConcreteParam', {value: methodWithMultiFileParameterListConcreteParam});
+    return methodWithMultiFileParameterListConcreteParam
+  }
+  
   public get downloadAttachment() {
     const downloadAttachment = this.$apiClient.$makeCaller(
       this.$metadata.methods.downloadAttachment,

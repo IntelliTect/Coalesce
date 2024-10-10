@@ -141,6 +141,51 @@ export class ComplexModelApiClient extends ModelApiClient<$models.ComplexModel> 
     return this.$invoke($method, $params, $config)
   }
   
+  public methodWithMultiFileParameterConcrete(id: number | null, files?: File[] | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<void>> {
+    const $method = this.$metadata.methods.methodWithMultiFileParameterConcrete
+    const $params =  {
+      id,
+      files,
+    }
+    return this.$invoke($method, $params, $config)
+  }
+  
+  public methodWithMultiFileParameterConcreteParam(id: number | null, files?: File[] | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<void>> {
+    const $method = this.$metadata.methods.methodWithMultiFileParameterConcreteParam
+    const $params =  {
+      id,
+      files,
+    }
+    return this.$invoke($method, $params, $config)
+  }
+  
+  public methodWithMultiFileParameterList(id: number | null, files?: File[] | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<void>> {
+    const $method = this.$metadata.methods.methodWithMultiFileParameterList
+    const $params =  {
+      id,
+      files,
+    }
+    return this.$invoke($method, $params, $config)
+  }
+  
+  public methodWithMultiFileParameterListConcrete(id: number | null, files?: File[] | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<void>> {
+    const $method = this.$metadata.methods.methodWithMultiFileParameterListConcrete
+    const $params =  {
+      id,
+      files,
+    }
+    return this.$invoke($method, $params, $config)
+  }
+  
+  public methodWithMultiFileParameterListConcreteParam(id: number | null, files?: File[] | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<void>> {
+    const $method = this.$metadata.methods.methodWithMultiFileParameterListConcreteParam
+    const $params =  {
+      id,
+      files,
+    }
+    return this.$invoke($method, $params, $config)
+  }
+  
   public methodWithStringArrayParameterAndReturn(strings?: string[] | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<string[]>> {
     const $method = this.$metadata.methods.methodWithStringArrayParameterAndReturn
     const $params =  {

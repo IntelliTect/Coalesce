@@ -136,8 +136,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             HttpMethod.Post;
 
         public bool HasHttpRequestBody =>
-            ApiActionHttpMethod != HttpMethod.Get &&
-            ApiActionHttpMethod != HttpMethod.Delete &&
+            ApiActionHttpMethod is not HttpMethod.Get and not HttpMethod.Delete &&
             ApiParameters.Any();
 
         public PropertyViewModel? VaryByProperty =>

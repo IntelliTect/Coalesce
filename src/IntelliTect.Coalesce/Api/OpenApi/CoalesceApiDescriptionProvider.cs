@@ -19,8 +19,7 @@ namespace IntelliTect.Coalesce.Api
     /// since these cause the OpenAPI generator to throw exceptions. We re-add these definitions with
     /// CoalesceApiOperationFilter (for Swashbuckle), or CLASS_TBD for the native aspnetcore OpenApi gen.
     /// </summary>
-    /// <param name="reflectionRepository"></param>
-    public class CoalesceApiDescriptionProvider(ReflectionRepository reflectionRepository) : IApiDescriptionProvider
+    internal class CoalesceApiDescriptionProvider(ReflectionRepository reflectionRepository) : IApiDescriptionProvider
     {
         public int Order => 0;
 

@@ -43,10 +43,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
 
             foreach (var method in Model.ClientMethods)
             {
-                WriteControllerActionPreamble(b, method);
                 using (WriteControllerActionSignature(b, method))
                 {
-                    WriteFormDataParamsObject(b, method);
                     WriteMethodInvocation(b, method, "Service");
 
                     WriteMethodResultProcessBlock(b, method);
@@ -54,7 +52,6 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
 
                 if (method.HasHttpRequestBody)
                 {
-                    WriteControllerActionJsonPreamble(b, method);
                     using (WriteControllerActionJsonSignature(b, method))
                     {
                         WriteMethodInvocation(b, method, "Service");

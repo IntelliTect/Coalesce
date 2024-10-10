@@ -168,52 +168,39 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                 b.Line();
                 b.Line("// Methods from data class exposed through API Controller.");
             }
+
             foreach (var method in Model.ClientMethods)
             {
                 // Write the action for parameterless methods and formdata methods
-                WriteControllerActionPreamble(b, method);
                 using (WriteControllerActionSignature(b, method))
                 {
-                    WriteFormDataParamsObject(b, method);
-                    if (method.IsStatic)
-                    {
-                        WriteMethodInvocation(b, method, method.Parent.FullyQualifiedName);
-                    }
-                    else
-                    {
-                        WriteInstanceMethodTargetLoading(b, method);
-
-                        var varyByProperty = method.VaryByProperty;
-                        if (varyByProperty != null)
-                        {
-                            WriteEtagProcessing(b, method, varyByProperty);
-                        }
-
-                        WriteMethodInvocation(b, method, "item");
-                    }
-
-                    WriteMethodResultProcessBlock(b, method);
+                    WriteMethodBody(b, method);
                 }
 
                 if (method.HasHttpRequestBody)
                 {
-                    WriteControllerActionJsonPreamble(b, method);
+                    // Write the JSON-accepting endpoint if there is a body.
                     using (WriteControllerActionJsonSignature(b, method))
                     {
-                        if (method.IsStatic)
-                        {
-                            WriteMethodInvocation(b, method, method.Parent.FullyQualifiedName);
-                        }
-                        else
-                        {
-                            WriteInstanceMethodTargetLoading(b, method);
-                            WriteMethodInvocation(b, method, "item");
-                        }
-
-                        WriteMethodResultProcessBlock(b, method);
+                        WriteMethodBody(b, method);
                     }
                 }
             }
+        }
+
+        private void WriteMethodBody(CSharpCodeBuilder b, MethodViewModel method)
+        {
+            if (method.IsStatic)
+            {
+                WriteMethodInvocation(b, method, method.Parent.FullyQualifiedName);
+            }
+            else
+            {
+                WriteInstanceMethodTargetLoading(b, method);
+                WriteMethodInvocation(b, method, "item");
+            }
+
+            WriteMethodResultProcessBlock(b, method);
         }
 
         private void WriteInstanceMethodTargetLoading(CSharpCodeBuilder b, MethodViewModel method)
@@ -235,10 +222,15 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                 b.Line($"return new {method.ApiActionReturnTypeDeclaration}(itemResult);");
             }
             b.Line("var item = itemResult.Object;");
+
+            WriteEtagProcessing(b, method);
         }
 
-        private static void WriteEtagProcessing(CSharpCodeBuilder b, MethodViewModel method, PropertyViewModel varyByProperty)
+        private static void WriteEtagProcessing(CSharpCodeBuilder b, MethodViewModel method)
         {
+            var varyByProperty = method.VaryByProperty;
+            if (varyByProperty is null) return;
+
             b.Line();
 
             b.Line($"var _currentVaryValue = item.{varyByProperty.Name};");

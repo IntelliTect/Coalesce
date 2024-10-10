@@ -25,6 +25,7 @@ namespace IntelliTect.Coalesce.Api.Controllers
                 return memoryStream.ToArray();
             }
         }
+
         public static async Task<byte[]> ReadAllBytesAsync(this Stream stream, bool closeUnderlying = false)
         {
             if (stream is MemoryStream memoryStream)

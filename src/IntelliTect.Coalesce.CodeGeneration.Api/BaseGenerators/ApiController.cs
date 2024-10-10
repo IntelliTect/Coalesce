@@ -81,7 +81,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
             }
         }
 
-        protected static void WriteControllerActionPreamble(CSharpCodeBuilder b, MethodViewModel method)
+        private static void WriteControllerActionPreamble(CSharpCodeBuilder b, MethodViewModel method)
         {
             var methodAnnotationName = $"Http{method.ApiActionHttpMethod}";
 
@@ -96,7 +96,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
             b.Line(method.SecurityInfo.Execute.MvcAnnotation());
         }
 
-        protected static void WriteControllerActionJsonPreamble(CSharpCodeBuilder b, MethodViewModel method)
+        private static void WriteControllerActionJsonPreamble(CSharpCodeBuilder b, MethodViewModel method)
         {
             if (!method.ApiParameters.Any()) return;
 
@@ -162,6 +162,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
 
         protected IDisposable WriteControllerActionSignature(CSharpCodeBuilder b, MethodViewModel method)
         {
+            WriteControllerActionPreamble(b, method);
+
             if (method.HasHttpRequestBody)
             {
                 b.Line("""[Consumes("application/x-www-form-urlencoded", "multipart/form-data")]""");
@@ -236,11 +238,17 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
 
             b.TrimWhitespace().TrimEnd(",").Append(")");
             indent.Dispose();
-            return b.Block();
+            var blockRet = b.Block();
+
+            WriteFormDataParamsObject(b, method);
+
+            return blockRet;
         }
 
         protected IDisposable WriteControllerActionJsonSignature(CSharpCodeBuilder b, MethodViewModel method)
         {
+            WriteControllerActionJsonPreamble(b, method);
+
             if (method.ApiParameters.Any())
             {
                 b.Line("[Consumes(\"application/json\")]");
@@ -355,7 +363,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
             b.Line(");");
         }
 
-        protected void WriteFormDataParamsObject(CSharpCodeBuilder b, MethodViewModel method)
+        private void WriteFormDataParamsObject(CSharpCodeBuilder b, MethodViewModel method)
         {
             var clientParameters = method.ApiParameters.ToList();
             if (clientParameters.Count == 0) return;

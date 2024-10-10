@@ -213,8 +213,8 @@ namespace IntelliTect.Coalesce.Tests.Tests.Models
                 .MethodByName(nameof(ValidationTarget.MethodWithMixedParameters));
             var dto = new
             {
-                Email = "x@x.com",
-                Target = new ValidationTargetDtoGen { }
+                email = "x@x.com",
+                target = new ValidationTargetDtoGen { }
             };
 
             var result = ItemResult.FromParameterValidation(method, dto);

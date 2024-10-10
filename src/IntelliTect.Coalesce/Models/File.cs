@@ -1,13 +1,6 @@
-﻿using IntelliTect.Coalesce.Api.Controllers;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Data.Common;
+﻿using System;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.Models
 {
@@ -56,35 +49,6 @@ namespace IntelliTect.Coalesce.Models
         /// This can also be forced with the `download` attribute on an `a` HTML element.
         /// </summary>
         public bool ForceDownload { get; set; }
-    }
-
-    public class FileParameter : IFile
-    {
-        public required byte[] Content { get; set; }
-
-        public string? ContentType { get; set; }
-
-        public string? Name { get; set; }
-
-        public long Length => Content.Length;
-
-        bool IFile.ForceDownload => false;
-        Stream? IFile.Content => new MemoryStream(Content);
-
-        public static implicit operator File(FileParameter param) => new File
-        {
-            Content = ((IFile)param).Content,
-            ContentType = param.ContentType,
-            Length = param.Length,
-            Name = param.Name,
-        };
-
-        public static implicit operator FileParameter(File param) => new FileParameter
-        {
-            Content = param.Content?.ReadAllBytes() ?? [],
-            ContentType = param.ContentType,
-            Name = param.Name,
-        };
     }
 
 }

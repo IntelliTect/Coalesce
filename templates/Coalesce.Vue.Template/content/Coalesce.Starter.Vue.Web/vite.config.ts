@@ -57,9 +57,9 @@ export default defineConfig({
     // https://github.com/vuetifyjs/vuetify-loader/tree/master/packages/vite-plugin#readme
     createVuetify({
       autoImport: true,
-      styles: {
-        configFile: "src/styles/vuetify.scss",
-      },
+      // OPTIONAL: https://github.com/vuetifyjs/vuetify-loader/tree/master/packages/vite-plugin#style-loading
+      // Customize vuetify's styles with sass variables
+      // styles: { configFile: "src/styles/settings.scss" },
     }),
 
     {

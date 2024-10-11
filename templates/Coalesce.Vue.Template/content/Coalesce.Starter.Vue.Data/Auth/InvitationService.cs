@@ -13,11 +13,12 @@ public class InvitationService(
     private IDataProtector GetProtector() => dataProtector.CreateProtector("invitations");
 
     public async Task<ItemResult> CreateAndSendInvitation(
-        string tenantId,
         string email,
         Role[] roles
     )
     {
+        var tenantId = db.TenantIdOrThrow;
+
         if (roles.Any(r => r.TenantId != tenantId)) return "Role/tenant mismatch";
 
         var invitation = new UserInvitation
@@ -34,6 +35,7 @@ public class InvitationService(
 
         if (user is not null)
         {
+            // Immediately accept the invitation if the user's email address already exists
             return await AcceptInvitation(invitation, user);
         }
 
@@ -47,12 +49,10 @@ public class InvitationService(
 
     public async Task<ItemResult> AcceptInvitation(
         UserInvitation invitation,
-        User? acceptingUser
+        User acceptingUser
     )
     {
         var tenant = await db.Tenants.FindAsync(invitation.TenantId);
-
-        if (acceptingUser is null) return "User not found";
         if (tenant is null) return "Tenant not found";
 
         // Note: `acceptingUser` will be untracked after ForceSetTenant.

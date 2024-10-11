@@ -62,7 +62,7 @@ public class Tenant
         db.ForceSetTenant(tenant.TenantId);
         new DatabaseSeeder(db).SeedNewTenant(tenant);
 
-        return await invitationService.CreateAndSendInvitation(tenant.TenantId, adminEmail, db.Roles.ToArray());
+        return await invitationService.CreateAndSendInvitation(adminEmail, db.Roles.ToArray());
     }
 #endif
 }

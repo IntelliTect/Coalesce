@@ -147,7 +147,7 @@ public class User : IdentityUser
     )
     {
         Role[] roles = role is null ? [] : [role];
-        return await invitationService.CreateAndSendInvitation(db.TenantIdOrThrow, email, roles);
+        return await invitationService.CreateAndSendInvitation(email, roles);
     }
 #endif
 #endif

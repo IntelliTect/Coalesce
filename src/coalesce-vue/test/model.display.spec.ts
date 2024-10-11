@@ -1,6 +1,6 @@
 import * as model from "../src/model";
 import * as $metadata from "./targets.metadata";
-import { ObjectValue, Value } from "../src/metadata";
+import type { ObjectValue, Value } from "../src/metadata";
 import { shortStringify } from "./test-utils";
 import { format, subYears } from "date-fns";
 import { toDate } from "date-fns-tz";

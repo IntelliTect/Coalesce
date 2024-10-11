@@ -23,12 +23,12 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
         {
             var b = new TypeScriptCodeBuilder(indentSize: 2);
 
-            using (b.Block("import", " from 'coalesce-vue/lib/metadata'"))
+            b.Line("import { getEnumMeta, solidify } from 'coalesce-vue/lib/metadata'");
+            using (b.Block("import type", " from 'coalesce-vue/lib/metadata'"))
             {
-                b.Line("Domain, getEnumMeta, solidify, ModelType, ObjectType,");
+                b.Line("Domain, ModelType, ObjectType, HiddenAreas, BehaviorFlags, ");
                 b.Line("PrimitiveProperty, ForeignKeyProperty, PrimaryKeyProperty,");
-                b.Line("ModelCollectionNavigationProperty, ModelReferenceNavigationProperty,");
-                b.Line("HiddenAreas, BehaviorFlags");
+                b.Line("ModelCollectionNavigationProperty, ModelReferenceNavigationProperty");
             }
             b.Line();
             b.Line();

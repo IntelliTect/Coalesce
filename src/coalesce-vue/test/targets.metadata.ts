@@ -1,18 +1,14 @@
-import {
+import type {
   ObjectType,
-  BasicCollectionProperty,
-  getEnumMeta,
-  ObjectProperty,
   ModelType,
   ModelCollectionNavigationProperty,
-  ClassType,
   Domain,
   ForeignKeyProperty,
   PrimaryKeyProperty,
   ModelReferenceNavigationProperty,
-  solidify,
   BehaviorFlags,
 } from "../src/metadata";
+import { solidify, getEnumMeta } from "../src/metadata";
 
 export const metaBase = (name: string = "model") => {
   const pascalName = name.substr(0, 1).toUpperCase() + name.substr(1);

@@ -1,6 +1,6 @@
 import * as model from "../src/model";
 import * as $metadata from "./targets.metadata";
-import {
+import type {
   ModelValue,
   ObjectValue,
   Value,
@@ -8,11 +8,11 @@ import {
   CollectionValue,
 } from "../src/metadata";
 import { shortStringify, expectDeepMatch } from "./test-utils";
-import { Indexable } from "../src/util";
+import { type Indexable } from "../src/util";
 import {
   twoWayConversions,
   studentValue,
-  MappingData,
+  type MappingData,
   displaysStudentValue,
 } from "./model.shared";
 import { Course } from "./targets.models";

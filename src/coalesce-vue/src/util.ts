@@ -6,7 +6,7 @@ import type {
   WatchOptions,
 } from "vue";
 import { version } from "vue";
-import { DateKind } from "./metadata";
+import type { DateKind } from "./metadata";
 
 export type OwnProps<T, TExclude> = Pick<T, Exclude<keyof T, keyof TExclude>>;
 

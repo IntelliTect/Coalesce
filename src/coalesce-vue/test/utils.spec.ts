@@ -1,5 +1,5 @@
 import { defineComponent, getCurrentInstance } from "vue";
-import { DateKind, bindToQueryString } from "../src";
+import { type DateKind, bindToQueryString } from "../src";
 import { IsVue2, parseDateUserInput } from "../src/util";
 
 describe("parseDateUserInput", () => {

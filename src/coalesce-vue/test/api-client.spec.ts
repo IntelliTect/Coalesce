@@ -1,20 +1,16 @@
-import { ComponentPublicInstance } from "vue";
-import {
-  AxiosError,
-  AxiosResponse,
-  AxiosAdapter,
-  AxiosRequestConfig,
-} from "axios";
+import { type ComponentPublicInstance } from "vue";
+import { AxiosError, type AxiosAdapter, type AxiosResponse } from "axios";
 import { mount } from "@vue/test-utils";
 
-import { ItemMethod } from "../src/metadata";
+import { type ItemMethod } from "../src/metadata";
 import {
   AxiosClient,
-  ItemResult,
-  ItemResultPromise,
   ListParameters,
-  AxiosListResult,
-  ListResultPromise,
+  type ItemResult,
+  type ItemResultPromise,
+  type AxiosRequestConfig,
+  type AxiosListResult,
+  type ListResultPromise,
 } from "../src/api-client";
 import { getInternalInstance, IsVue2 } from "../src/util";
 import { delay, mountData, mockEndpoint } from "./test-utils";

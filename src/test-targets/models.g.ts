@@ -1,5 +1,6 @@
 import * as metadata from './metadata.g'
-import { Model, DataSource, convertToModel, mapToModel, reactiveDataSource } from 'coalesce-vue/lib/model'
+import { convertToModel, mapToModel, reactiveDataSource } from 'coalesce-vue/lib/model'
+import type { Model, DataSource } from 'coalesce-vue/lib/model'
 
 export enum EnumPkId {
   Value0 = 0,

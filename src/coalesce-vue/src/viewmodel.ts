@@ -10,10 +10,7 @@ import {
   type WatchStopHandle,
 } from "vue";
 
-import {
-  ModelReferenceNavigationProperty,
-  resolvePropMeta,
-} from "./metadata.js";
+import { resolvePropMeta } from "./metadata.js";
 import type {
   ModelType,
   PropertyOrName,
@@ -29,7 +26,7 @@ import {
   DataSourceParameters,
   ServiceApiClient,
   mapParamsToDto,
-  BulkSaveRequestItem,
+  type BulkSaveRequestItem,
 } from "./api-client.js";
 import {
   type Model,
@@ -39,7 +36,7 @@ import {
   mapToModel,
   mapToDtoFiltered,
   mapToDto,
-  DisplayOptions,
+  type DisplayOptions,
 } from "./model.js";
 import {
   type Indexable,

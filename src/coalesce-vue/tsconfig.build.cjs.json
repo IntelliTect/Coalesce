@@ -3,9 +3,8 @@
   "compilerOptions": {
     "outDir": "./lib/cjs",
     "module": "commonjs",
-    "target": "es2015"
+    "target": "es2018",
+    "verbatimModuleSyntax": false
   },
-  "include": [
-    "src/**/*"
-  ]
+  "include": ["src/**/*"]
 }

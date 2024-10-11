@@ -1,7 +1,11 @@
-import { ItemResult, ModelApiClient } from "../src/api-client";
+import {
+  ModelApiClient,
+  type ItemResult,
+  type AxiosPromise,
+  type AxiosRequestConfig,
+} from "../src/api-client";
 import * as $models from "./targets.models";
 import * as $metadata from "./targets.metadata";
-import { AxiosPromise, AxiosRequestConfig } from "axios";
 
 export class StudentApiClient extends ModelApiClient<$models.Student> {
   constructor() {

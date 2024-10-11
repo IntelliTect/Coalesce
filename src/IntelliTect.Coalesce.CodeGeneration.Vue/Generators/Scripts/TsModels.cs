@@ -18,7 +18,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
         {
             var b = new TypeScriptCodeBuilder(indentSize: 2);
             b.Line("import * as metadata from './metadata.g'");
-            b.Line("import { Model, DataSource, convertToModel, mapToModel, reactiveDataSource } from 'coalesce-vue/lib/model'");
+            b.Line("import { convertToModel, mapToModel, reactiveDataSource } from 'coalesce-vue/lib/model'");
+            b.Line("import type { Model, DataSource } from 'coalesce-vue/lib/model'");
             b.Line();
 
             foreach (var model in Model.ClientEnums.OrderBy(e => e.ClientTypeName))

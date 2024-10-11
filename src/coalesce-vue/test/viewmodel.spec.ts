@@ -1,23 +1,21 @@
-import Vue, {
+import {
   computed,
   defineComponent,
   getCurrentInstance,
-  inject,
   nextTick,
   ref,
   watch,
   watchEffect,
 } from "vue";
-import { AxiosRequestConfig, AxiosResponse } from "axios";
 
 import { mount } from "@vue/test-utils";
 import { delay, destroy, mountData, mockEndpoint } from "./test-utils";
 
-import { ModelType } from "../src/metadata";
+import { type ModelType } from "../src/metadata";
 import {
-  AxiosClient,
-  AxiosItemResult,
-  AxiosListResult,
+  type AxiosItemResult,
+  type AxiosListResult,
+  type AxiosRequestConfig,
   ItemApiState,
   ListParameters,
 } from "../src/api-client";

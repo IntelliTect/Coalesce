@@ -91,6 +91,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Tests
                 "target": "ES2021",
                 "strict": true,
                 "moduleResolution": "node",
+                "verbatimModuleSyntax": true,
                 "baseUrl": ".",
                 "paths": {
                   "coalesce-vue/lib/*": [ "{{workingDirectory}}/src/*" ],

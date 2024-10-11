@@ -1,13 +1,13 @@
 import {
   onBeforeUnmount,
-  Ref,
   ref,
   markRaw,
   getCurrentInstance,
   shallowRef,
+  type Ref,
 } from "vue";
 
-import {
+import type {
   ModelType,
   Method,
   Service,
@@ -21,29 +21,29 @@ import {
   PropNames,
 } from "./metadata.js";
 import {
-  Model,
   convertToModel,
   mapToDto,
-  DataSource,
   mapToModel,
   mapToDtoFiltered,
   parseValue,
+  type Model,
+  type DataSource,
 } from "./model.js";
 import {
-  Indexable,
   objectToQueryString,
   objectToFormData,
   ReactiveFlags_SKIP,
   getInternalInstance,
-  VueInstance,
+  type Indexable,
+  type VueInstance,
 } from "./util.js";
 
 import axios, {
-  AxiosPromise,
-  AxiosResponse,
+  type AxiosPromise,
+  type AxiosResponse,
+  type AxiosRequestConfig,
+  type CancelTokenSource,
   AxiosError,
-  AxiosRequestConfig,
-  CancelTokenSource,
 } from "axios";
 
 // Re-exports for more convenient imports in generated code.

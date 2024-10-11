@@ -7,7 +7,7 @@ namespace Coalesce.Starter.Vue.Data.Models;
 [Create(nameof(Permission.UserAdmin))]
 [Edit(nameof(Permission.UserAdmin))]
 [Delete(nameof(Permission.UserAdmin))]
-[Description("Roles are groups of permissions, analagous to job titles or functions.")]
+[Description("Roles are groups of permissions, analogous to job titles or functions.")]
 public class Role
 #if Tenancy
     : IdentityRole, ITenanted

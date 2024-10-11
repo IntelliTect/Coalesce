@@ -6,7 +6,8 @@
   <PropertyGroup Condition=" '$(TargetFramework)' == 'net6.0' ">
     <DotNetPackageVersionSpec>6.0.*</DotNetPackageVersionSpec>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'net8.0' ">
+  <!-- TargetFramework is empty for projects that aren't multi-targeting (i.e. the playground projects) -->
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'net8.0' or '$(TargetFramework)' == '' ">
     <DotNetPackageVersionSpec>8.0.10</DotNetPackageVersionSpec>
   </PropertyGroup>
   <ItemGroup>

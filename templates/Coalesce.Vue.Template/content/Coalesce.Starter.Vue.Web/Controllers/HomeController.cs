@@ -42,7 +42,8 @@ public class HomeController() : Controller
         string contents = await reader.ReadToEndAsync();
 
         // OPTIONAL: Inject settings or other variables into index.html here.
-        // These will then be available as global variables in your Vue app:
+        // These will then be available as global variables in your Vue app.
+        // Declare them as globals in env.d.ts.
         string headPrepend = $"""
         <script>
             ASPNETCORE_ENVIRONMENT="{JsEncode(hostingEnvironment.EnvironmentName)}"

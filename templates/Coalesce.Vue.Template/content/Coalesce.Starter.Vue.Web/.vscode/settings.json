@@ -1,9 +1,10 @@
 {
   "typescript.tsdk": "node_modules\\typescript\\lib",
+  "dotnet.defaultSolution": "../Coalesce.Starter.Vue.sln",
+  "dotnet.automaticallyCreateSolutionInWorkspace": false,
   "editor.formatOnSave": true,
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "explicit"
   },
-  "dotnet.automaticallyCreateSolutionInWorkspace": false,
   "cSpell.words": ["Vite", "unplugin", "iconsets", "viewmodels", "composables"]
 }

@@ -40,8 +40,8 @@
           <!--#if DarkMode -->
           <v-list-item prepend-icon="fa fa-moon">
             <v-switch
-              label="Dark Mode"
               v-model="theme"
+              label="Dark Mode"
               true-value="dark"
               false-value="light"
               hide-details
@@ -123,10 +123,10 @@
           <!--#if Identity -->
           <Forbidden
             v-if="isForbidden"
-            :permissions="routeMeta?.permissions"
             key="$forbidden"
+            :permissions="routeMeta?.permissions"
           />
-          <component v-else :is="Component" :key="route.path" />
+          <component :is="Component" v-else :key="route.path" />
           <!--#endif -->
           <!--#if (!Identity)
           <component :is="Component" :key="route.path" />

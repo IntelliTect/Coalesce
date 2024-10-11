@@ -98,7 +98,7 @@ function titledAdminPage<
 
 //#if AppInsights
 // Azure Monitor Application Insights configuration
-let flushPageView: Function | undefined;
+let flushPageView: (() => void) | undefined;
 router.beforeEach((to, from) => {
   if (to.path != from.path) {
     // If there's a previous page view still unsent,

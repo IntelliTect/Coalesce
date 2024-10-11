@@ -1,6 +1,5 @@
 import { createCoalesceVuetify } from "coalesce-vue-vuetify3";
 import { enableAutoUnmount, mount } from "@vue/test-utils";
-import { ArgumentsType } from "vitest";
 
 import { createVuetify } from "vuetify";
 import $metadata from "@/metadata.g";
@@ -14,6 +13,8 @@ const vuetify = createVuetify({});
 const coalesceVuetify = createCoalesceVuetify({
   metadata: $metadata,
 });
+
+type ArgumentsType<T> = T extends (...args: infer U) => any ? U : never;
 
 const mountComponent = function (
   component: ArgumentsType<typeof mount>[0],

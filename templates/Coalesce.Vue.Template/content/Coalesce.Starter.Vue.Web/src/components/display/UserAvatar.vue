@@ -35,11 +35,11 @@ const initials = computed(() => {
   const fullName = props.user.fullName;
   if (!fullName) return "";
 
-  var firstInitialMatch = /, (.)/.exec(fullName);
+  const firstInitialMatch = /, (.)/.exec(fullName);
   if (firstInitialMatch) {
     return firstInitialMatch[1] + fullName.charAt(0);
   } else {
-    var lastInitialMatch = / ([^ ])[^ ]+$/.exec(fullName);
+    const lastInitialMatch = / ([^ ])[^ ]+$/.exec(fullName);
     if (lastInitialMatch) {
       return fullName.charAt(0) + lastInitialMatch[1];
     } else {
@@ -59,7 +59,8 @@ const userVm = computed(() => {
 
 const photoUrl = computed(() => userVm.value?.getPhoto?.url || undefined);
 watch(photoUrl, () => {
-  (imageLoaded.value = false), (imageFailed.value = false);
+  imageLoaded.value = false;
+  imageFailed.value = false;
 });
 //#endif
 </script>

@@ -95,7 +95,7 @@
 
 <script setup lang="ts">
 import $metadata from "@/metadata.g";
-import { Domain, ModelType } from "coalesce-vue";
+import type { Domain, ModelType } from "coalesce-vue";
 
 const excludedTypes: Array<keyof typeof $metadata.types> = [
   //#if AuditLogs
@@ -111,7 +111,8 @@ const excludedTypes: Array<keyof typeof $metadata.types> = [
 ];
 
 const adminTypes = Object.values(($metadata as Domain).types).filter(
-  //@ts-ignore may be errors if the project has only model or only object types
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore may be errors if the project has only model or only object types
   (t): t is ModelType => t.type == "model" && !excludedTypes.includes(t.name),
 );
 </script>

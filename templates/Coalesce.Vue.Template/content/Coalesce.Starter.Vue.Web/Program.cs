@@ -5,7 +5,7 @@ using IntelliTect.Coalesce;
 #if AppInsights
 using Microsoft.ApplicationInsights.DependencyCollector;
 using Microsoft.ApplicationInsights.Extensibility;
-using Microsoft.Extensions.Logging.ApplicationInsights;
+using Microsoft.Extensions.Logging.ApplicationInsights; 
 #endif
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;

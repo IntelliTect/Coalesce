@@ -8,7 +8,7 @@
           //#if Tenancy
           '': [user.$bulkSave, user.evict],
           //#else
-          '': [user.$bulkSave],
+          //'': [user.$bulkSave],
           //#endif
         }"
       >
@@ -109,10 +109,10 @@
           <v-btn
             color="success"
             prepend-icon="fa fa-save"
-            @click="user.$bulkSave()"
             :loading="user.$bulkSave.isLoading"
             :disabled="!user.$bulkSavePreview().isDirty"
             :variant="!user.$bulkSavePreview().isDirty ? 'text' : 'elevated'"
+            @click="user.$bulkSave()"
           >
             Save
           </v-btn>

@@ -7,9 +7,9 @@
     <template #actions>
       <v-btn
         size="x-large"
-        @click="$router.back()"
         variant="outlined"
         color="primary"
+        @click="$router.back()"
       >
         <v-icon start>fa fa-arrow-left</v-icon> Back
       </v-btn>

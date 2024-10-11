@@ -1,5 +1,6 @@
-import {
-  Domain, getEnumMeta, solidify, ModelType, ObjectType,
+import { getEnumMeta, solidify } from 'coalesce-vue/lib/metadata'
+import type {
+  Domain, ModelType, ObjectType,
   PrimitiveProperty, ForeignKeyProperty, PrimaryKeyProperty,
   ModelCollectionNavigationProperty, ModelReferenceNavigationProperty,
   HiddenAreas, BehaviorFlags

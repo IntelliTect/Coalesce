@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <!-- All these frameworks are included for testing code generation.
     Override the used framework by specifying (framework: "tfm") in coalesce.json. -->
@@ -12,17 +12,15 @@
     <ProjectReference Include="..\..\src\IntelliTect.Coalesce.AuditLogging\IntelliTect.Coalesce.AuditLogging.csproj" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net8.0' ">
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.6" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.6" />
-  </ItemGroup>
-
   <ItemGroup>
-    <PackageReference Include="GenFu" Version="1.4.22" />
-    <PackageReference Include="Bogus" Version="34.0.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" />
+
+    <PackageReference Include="GenFu" />
+    <PackageReference Include="Bogus" />
 
     <!-- Necessary because GenFu has a hard dep against NETStandard.Library 1.6, which screws up a lot of things. -->
-    <PackageReference Include="NETStandard.Library" Version="2.0.3" />
+    <PackageReference Include="NETStandard.Library" />
   </ItemGroup>
   
 </Project>

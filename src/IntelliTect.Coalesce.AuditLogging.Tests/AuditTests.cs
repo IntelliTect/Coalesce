@@ -222,7 +222,7 @@ public class AuditTests
         await db.SaveChangesAsync();
 
         var log = db.AuditLogs.Include(l => l.Properties).Single(e => e.Type == nameof(AppUser));
-        var typeChangeProp = Assert.Single(log.Properties!.Where(p => p.PropertyName == nameof(AppUser.Parent1Id)));
+        var typeChangeProp = Assert.Single(log.Properties!, p => p.PropertyName == nameof(AppUser.Parent1Id));
 
         Assert.Equal(expected, typeChangeProp.NewValueDescription);
     }
@@ -281,7 +281,7 @@ public class AuditTests
         AuditLogProperty GetAuditLogProp()
         {
             var log = db.AuditLogs.Include(l => l.Properties).Single(e => e.Type == nameof(AppUser));
-            return Assert.Single(log.Properties!.Where(p => p.PropertyName == nameof(AppUser.Parent1Id)));
+            return Assert.Single(log.Properties!, p => p.PropertyName == nameof(AppUser.Parent1Id));
         }
     }
 
@@ -317,7 +317,7 @@ public class AuditTests
         AuditLogProperty GetAuditLogProp()
         {
             var log = db.AuditLogs.Include(l => l.Properties).Single(e => e.Type == nameof(AppUser));
-            return Assert.Single(log.Properties!.Where(p => p.PropertyName == nameof(AppUser.Parent1Id)));
+            return Assert.Single(log.Properties!, p => p.PropertyName == nameof(AppUser.Parent1Id));
         }
     }
 
@@ -375,7 +375,7 @@ public class AuditTests
         AuditLogProperty GetAuditLogProp()
         {
             var log = db.AuditLogs.Include(l => l.Properties).Single(e => e.Type == nameof(AppUser));
-            return Assert.Single(log.Properties!.Where(p => p.PropertyName == nameof(AppUser.Parent2Id)));
+            return Assert.Single(log.Properties!, p => p.PropertyName == nameof(AppUser.Parent2Id));
         }
     }
 
@@ -419,7 +419,7 @@ public class AuditTests
         db.SaveChanges();
 
         var log = Assert.Single(db.AuditLogs);
-        var prop = Assert.Single(log.Properties!.Where(p => p.PropertyName == nameof(AppUser.EnumArray)));
+        var prop = Assert.Single(log.Properties!, p => p.PropertyName == nameof(AppUser.EnumArray));
         Assert.Equal("[DenyAll, AllowAuthenticated]", prop.NewValue);
     }
 

@@ -6,7 +6,7 @@
 
     <AccelerateBuildsInVisualStudio>true</AccelerateBuildsInVisualStudio>
 
-    <CoalesceVersion>5.0.1</CoalesceVersion> 
+    <CoalesceVersion>5.0.3</CoalesceVersion> 
 
     <!--#if (KeepTemplateOnly) -->
     <DefineConstants>$(DefineConstants);KeepTemplateOnly;AppInsights;OpenAPI;Identity;MicrosoftAuth;GoogleAuth;AuditLogs;UserPictures;TrackingBase;ExampleModel</DefineConstants>

@@ -9,7 +9,7 @@
   </PropertyGroup>
 	
   <ItemGroup>
-    <PackageReference Include="Roslynator.Analyzers" Version="4.2.0">
+    <PackageReference Include="Roslynator.Analyzers">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>analyzers</IncludeAssets>
     </PackageReference>

@@ -32,7 +32,7 @@ public class SqlServerAuditTests
         // Assert
         var entry = Assert.Single(db.AuditLogs.Include(c => c.Properties).Where(c => c.State == AuditEntryState.EntityModified));
 
-        var propChange = Assert.Single(entry.Properties);
+        var propChange = Assert.Single(entry.Properties!);
         Assert.Equal(nameof(AppUser.Title), propChange.PropertyName);
         Assert.Equal("Intern", propChange.OldValue);
         Assert.Equal("CEO", propChange.NewValue);

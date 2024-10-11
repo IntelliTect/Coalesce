@@ -17,10 +17,10 @@ namespace IntelliTect.Coalesce.Swashbuckle.Tests
         {
             var doc = await Fixture.GetDocumentAsync();
 
-            Assert.Empty(doc.Components.Schemas.Where(s =>
+            Assert.DoesNotContain(doc.Components.Schemas, s =>
                 s.Key.Contains("IDataSource", StringComparison.InvariantCultureIgnoreCase) ||
                 s.Key.Contains("IBehaviors", StringComparison.InvariantCultureIgnoreCase)
-            ));
+            );
         }
 
         [Fact]

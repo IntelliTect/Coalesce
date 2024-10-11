@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <Import Project="../Common.props" />
 	<PropertyGroup>
 		<Description>Vue.js shared code for server projects for IntelliTect.Coalesce</Description>
@@ -10,7 +10,7 @@
 	</ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="$(DotNetPackageVersionSpec)" />
+    <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" />
   </ItemGroup>
 
 </Project>

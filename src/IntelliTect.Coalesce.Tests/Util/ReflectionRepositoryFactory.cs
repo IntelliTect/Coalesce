@@ -155,7 +155,7 @@ namespace IntelliTect.Coalesce.Tests.Util
 
             if (!errors.Any()) return;
 
-            Assert.False(true, string.Join("\n", errors.Select(error =>
+            Assert.Fail(string.Join("\n", errors.Select(error =>
                 error.ToString() +
                 $" near `" +
                 error.Location.SourceTree.ToString().Substring(error.Location.SourceSpan.Start, error.Location.SourceSpan.Length) +

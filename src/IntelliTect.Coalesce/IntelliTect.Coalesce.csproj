@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <Import Project="../Common.props" />
 	<PropertyGroup>
 		<Description>Core framework library for IntelliTect.Coalesce</Description>
@@ -12,20 +12,16 @@
 	</ItemGroup>
 
 	<ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" />
+  </ItemGroup>
+
+	<ItemGroup>
 	  <None Remove="Application\SecurityOverview.html" />
 	</ItemGroup>
 
 	<ItemGroup>
 	  <EmbeddedResource Include="Application\SecurityOverview.html" />
 	</ItemGroup>
-
-	<ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="$(DotNetPackageVersionSpec)" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="$(DotNetPackageVersionSpec)" />
-	</ItemGroup>
-
-  <ItemGroup>
-    <!-- C# 12-->
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.8.*-*" />
-  </ItemGroup>
 </Project>

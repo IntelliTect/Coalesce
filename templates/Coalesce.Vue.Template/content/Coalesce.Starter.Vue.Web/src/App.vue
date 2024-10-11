@@ -114,6 +114,12 @@
         />
         <!--#endif -->
       </v-list>
+
+      <div
+        class="position-absolute left-0 bottom-0 px-1 text-caption text-grey text-center"
+      >
+        {{ buildDate }}
+      </div>
     </v-navigation-drawer>
 
     <v-main>
@@ -146,6 +152,7 @@ import Forbidden from "./views/errors/Forbidden.vue";
 import { useLocalStorage, usePreferredDark } from "@vueuse/core";
 import { useTheme } from "vuetify";
 //#endif
+import { format } from "date-fns-tz";
 
 const drawer = ref<boolean | null>(null);
 
@@ -188,6 +195,11 @@ const isForbidden = computed(() => {
   return false;
 });
 //#endif
+
+const buildDate = computed(() => {
+  if (!BUILD_DATE) return "";
+  return "build " + format(BUILD_DATE, "yyyy-MM-dd hh:mm a z");
+});
 </script>
 
 <style lang="scss">

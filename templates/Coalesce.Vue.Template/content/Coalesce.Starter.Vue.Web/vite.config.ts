@@ -61,6 +61,18 @@ export default defineConfig({
         configFile: "src/styles/vuetify.scss",
       },
     }),
+
+    {
+      name: "inject-build-date",
+      transformIndexHtml() {
+        return [
+          {
+            tag: "script",
+            children: `BUILD_DATE = new Date('${new Date().toISOString()}');`,
+          },
+        ];
+      },
+    },
   ],
 
   resolve: {

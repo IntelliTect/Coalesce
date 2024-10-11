@@ -74,7 +74,7 @@ jobs:
         if: github.event_name != 'pull_request'
         uses: actions/upload-artifact@v4
         with:
-          name: .coalesce-app
+          name: web-app
           path: ${{ github.workspace }}/publish
           if-no-files-found: error
 
@@ -92,7 +92,7 @@ jobs:
       - name: Download artifact for deployment
         uses: actions/download-artifact@v4
         with:
-          name: .coalesce-app
+          name: web-app
 
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3

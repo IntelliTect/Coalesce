@@ -17,10 +17,10 @@
     <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.22.0" />
     <!--#endif -->
     <!--#if (MicrosoftAuth) -->
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.MicrosoftAccount" Version="8.0.8" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.MicrosoftAccount" Version="8.0.10" />
     <!--#endif -->
     <!--#if (GoogleAuth) -->
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="8.0.8" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="8.0.10" />
     <!--#endif -->
   </ItemGroup>
 

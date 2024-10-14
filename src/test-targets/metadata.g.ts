@@ -2058,6 +2058,38 @@ export const ComplexModel = domain.types.ComplexModel = {
         role: "value",
       },
     },
+    sameMethodNameAsMethodOnDifferentType: {
+      name: "sameMethodNameAsMethodOnDifferentType",
+      displayName: "Same Method Name As Method On Different Type",
+      transportType: "item",
+      httpMethod: "POST",
+      params: {
+        id: {
+          name: "id",
+          displayName: "Primary Key",
+          type: "number",
+          role: "value",
+          get source() { return (domain.types.ComplexModel as ModelType & { name: "ComplexModel" }).props.complexModelId },
+          rules: {
+            required: val => val != null || "Primary Key is required.",
+          }
+        },
+        input: {
+          name: "input",
+          displayName: "Input",
+          type: "model",
+          get typeDef() { return (domain.types.CaseDtoStandalone as ModelType & { name: "CaseDtoStandalone" }) },
+          role: "value",
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "model",
+        get typeDef() { return (domain.types.CaseDtoStandalone as ModelType & { name: "CaseDtoStandalone" }) },
+        role: "value",
+      },
+    },
     hasTopLevelParamWithSameNameAsObjectProp: {
       name: "hasTopLevelParamWithSameNameAsObjectProp",
       displayName: "Has Top Level Param With Same Name As Object Prop",
@@ -2257,6 +2289,38 @@ export const ComplexModelDependent = domain.types.ComplexModelDependent = {
     },
   },
   methods: {
+    sameMethodNameAsMethodOnDifferentType: {
+      name: "sameMethodNameAsMethodOnDifferentType",
+      displayName: "Same Method Name As Method On Different Type",
+      transportType: "item",
+      httpMethod: "POST",
+      params: {
+        id: {
+          name: "id",
+          displayName: "Primary Key",
+          type: "number",
+          role: "value",
+          get source() { return (domain.types.ComplexModelDependent as ModelType & { name: "ComplexModelDependent" }).props.id },
+          rules: {
+            required: val => val != null || "Primary Key is required.",
+          }
+        },
+        input: {
+          name: "input",
+          displayName: "Input",
+          type: "model",
+          get typeDef() { return (domain.types.CaseDtoStandalone as ModelType & { name: "CaseDtoStandalone" }) },
+          role: "value",
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "model",
+        get typeDef() { return (domain.types.CaseDtoStandalone as ModelType & { name: "CaseDtoStandalone" }) },
+        role: "value",
+      },
+    },
   },
   dataSources: {
   },

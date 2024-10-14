@@ -538,6 +538,17 @@ export class ComplexModelViewModel extends ViewModel<$models.ComplexModel, $apiC
     return customDto
   }
   
+  public get sameMethodNameAsMethodOnDifferentType() {
+    const sameMethodNameAsMethodOnDifferentType = this.$apiClient.$makeCaller(
+      this.$metadata.methods.sameMethodNameAsMethodOnDifferentType,
+      (c, input?: $models.CaseDtoStandalone | null) => c.sameMethodNameAsMethodOnDifferentType(this.$primaryKey, input),
+      () => ({input: null as $models.CaseDtoStandalone | null, }),
+      (c, args) => c.sameMethodNameAsMethodOnDifferentType(this.$primaryKey, args.input))
+    
+    Object.defineProperty(this, 'sameMethodNameAsMethodOnDifferentType', {value: sameMethodNameAsMethodOnDifferentType});
+    return sameMethodNameAsMethodOnDifferentType
+  }
+  
   public get methodWithPositionRecord() {
     const methodWithPositionRecord = this.$apiClient.$makeCaller(
       this.$metadata.methods.methodWithPositionRecord,
@@ -635,6 +646,17 @@ export interface ComplexModelDependentViewModel extends $models.ComplexModelDepe
   name: string | null;
 }
 export class ComplexModelDependentViewModel extends ViewModel<$models.ComplexModelDependent, $apiClients.ComplexModelDependentApiClient, number> implements $models.ComplexModelDependent  {
+  
+  public get sameMethodNameAsMethodOnDifferentType() {
+    const sameMethodNameAsMethodOnDifferentType = this.$apiClient.$makeCaller(
+      this.$metadata.methods.sameMethodNameAsMethodOnDifferentType,
+      (c, input?: $models.CaseDtoStandalone | null) => c.sameMethodNameAsMethodOnDifferentType(this.$primaryKey, input),
+      () => ({input: null as $models.CaseDtoStandalone | null, }),
+      (c, args) => c.sameMethodNameAsMethodOnDifferentType(this.$primaryKey, args.input))
+    
+    Object.defineProperty(this, 'sameMethodNameAsMethodOnDifferentType', {value: sameMethodNameAsMethodOnDifferentType});
+    return sameMethodNameAsMethodOnDifferentType
+  }
   
   constructor(initialData?: DeepPartial<$models.ComplexModelDependent> | null) {
     super($metadata.ComplexModelDependent, new $apiClients.ComplexModelDependentApiClient(), initialData)

@@ -317,6 +317,9 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         public CaseDtoStandalone CustomDto(CaseDtoStandalone input) => input;
 
         [Coalesce]
+        public CaseDtoStandalone SameMethodNameAsMethodOnDifferentType(CaseDtoStandalone input) => input;
+
+        [Coalesce]
         [ControllerAction(Method = HttpMethod.Post)]
         public static ItemResult HasTopLevelParamWithSameNameAsObjectProp(
             int complexModelId,

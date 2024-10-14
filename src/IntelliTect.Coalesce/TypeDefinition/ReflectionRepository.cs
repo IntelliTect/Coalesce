@@ -26,7 +26,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         private readonly ConcurrentHashSet<DbContextTypeUsage> _contexts = new();
         private readonly ConcurrentHashSet<ClassViewModel> _entities = new();
-        private ILookup<ClassViewModel, EntityTypeUsage>? _entityUsages = null;
 
         private readonly ConcurrentHashSet<CrudStrategyTypeUsage> _behaviors = new();
         private readonly ConcurrentHashSet<CrudStrategyTypeUsage> _dataSources = new();
@@ -43,9 +42,16 @@ namespace IntelliTect.Coalesce.TypeDefinition
         private readonly object _discoverLock = new();
 
         public ReadOnlyHashSet<DbContextTypeUsage> DbContexts => new(_contexts);
+
+        private ILookup<ClassViewModel, EntityTypeUsage>? _entityUsages = null;
         public ILookup<ClassViewModel, EntityTypeUsage> EntityUsages => _entityUsages ??= DbContexts
             .SelectMany(contextUsage => contextUsage.Entities)
             .ToLookup(entityUsage => entityUsage.ClassViewModel);
+
+        private ILookup<string, MethodViewModel>? _clientMethods = null;
+        public ILookup<string, MethodViewModel> ClientMethodsLookup => _clientMethods ??= ControllerBackedClasses
+            .SelectMany(c => c.ClientMethods)
+            .ToLookup(m => m.Name);
 
         private ReadOnlyDictionary<string, ClassViewModel>? _clientTypes;
         public ReadOnlyDictionary<string, ClassViewModel> ClientTypesLookup 
@@ -175,6 +181,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
             // Null this out so it gets recomputed on next access.
             _clientTypes = null;
+            _clientMethods = null;
 
             if (type.IsA<DbContext>())
             {

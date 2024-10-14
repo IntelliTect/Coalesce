@@ -299,6 +299,15 @@ export class ComplexModelApiClient extends ModelApiClient<$models.ComplexModel> 
     return this.$invoke($method, $params, $config)
   }
   
+  public sameMethodNameAsMethodOnDifferentType(id: number | null, input?: $models.CaseDtoStandalone | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<$models.CaseDtoStandalone>> {
+    const $method = this.$metadata.methods.sameMethodNameAsMethodOnDifferentType
+    const $params =  {
+      id,
+      input,
+    }
+    return this.$invoke($method, $params, $config)
+  }
+  
   public hasTopLevelParamWithSameNameAsObjectProp(complexModelId?: number | null, model?: $models.ComplexModel | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<void>> {
     const $method = this.$metadata.methods.hasTopLevelParamWithSameNameAsObjectProp
     const $params =  {
@@ -349,6 +358,15 @@ export class ComplexModelApiClient extends ModelApiClient<$models.ComplexModel> 
 
 export class ComplexModelDependentApiClient extends ModelApiClient<$models.ComplexModelDependent> {
   constructor() { super($metadata.ComplexModelDependent) }
+  public sameMethodNameAsMethodOnDifferentType(id: number | null, input?: $models.CaseDtoStandalone | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<$models.CaseDtoStandalone>> {
+    const $method = this.$metadata.methods.sameMethodNameAsMethodOnDifferentType
+    const $params =  {
+      id,
+      input,
+    }
+    return this.$invoke($method, $params, $config)
+  }
+  
 }
 
 

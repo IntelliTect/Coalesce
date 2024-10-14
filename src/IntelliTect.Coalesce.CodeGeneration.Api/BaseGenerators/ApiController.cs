@@ -101,7 +101,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
             if (!method.ApiParameters.Any()) return;
 
             b.Line();
-            using (b.Block($"public class {method.NameWithoutAsync}Parameters"))
+            using (b.Block($"public class {method.ParameterClassName}"))
             {
                 foreach (var param in method.ApiParameters.OrderBy(p => p.HasDefaultValue))
                 {
@@ -282,7 +282,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
 
             if (method.ApiParameters.Any())
             {
-                b.Line($"[FromBody] {method.NameWithoutAsync}Parameters _params");
+                b.Line($"[FromBody] {method.ParameterClassName} _params");
             }
 
             indent.Dispose();

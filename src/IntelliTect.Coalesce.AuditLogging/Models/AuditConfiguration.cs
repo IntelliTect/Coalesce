@@ -41,27 +41,59 @@ public class AuditConfiguration
         return this;
     }
 
-    public AuditConfiguration Include<T>()
+    /// <summary>
+    /// Exclude all entity types when auditing. 
+    /// Types can subsequently be re-included by calling `Include`.
+    /// </summary>
+    public AuditConfiguration Exclude()
     {
-        EntityPredicates.Add((x) => (x.Entity is T) ? true : null);
+        EntityPredicates.Add((x) => false);
         return this;
     }
 
+    /// <summary>
+    /// Exclude the specified entity type when auditing.
+    /// </summary>
     public AuditConfiguration Exclude<T>()
     {
         EntityPredicates.Add((x) => (x.Entity is T) ? false : null);
         return this;
     }
 
+    /// <summary>
+    /// Exclude entities matching the predicate when auditing.
+    /// </summary>
+    public AuditConfiguration Exclude(Func<EntityEntry, bool> predicate)
+    {
+        EntityPredicates.Add((x) => predicate(x) ? false : null);
+        return this;
+    }
+
+    /// <summary>
+    /// Include the specified entity type when auditing.
+    /// </summary>
+    public AuditConfiguration Include<T>()
+    {
+        EntityPredicates.Add((x) => (x.Entity is T) ? true : null);
+        return this;
+    }
+
+    /// <summary>
+    /// Include entities matching the predicate when auditing.
+    /// </summary>
     public AuditConfiguration Include(Func<EntityEntry, bool> predicate)
     {
         EntityPredicates.Add((x) => predicate(x) ? true : null);
         return this;
     }
 
-    public AuditConfiguration Exclude(Func<EntityEntry, bool> predicate)
+    /// <summary>
+    /// Exclude all properties when auditing. 
+    /// Properties can subsequently be re-included by calling `IncludeProperty`.
+    /// </summary>
+    public AuditConfiguration ExcludeProperty()
     {
-        EntityPredicates.Add((x) => predicate(x) ? false : null);
+        PropertyPredicates.Add((e) => false);
         return this;
     }
 
@@ -76,6 +108,21 @@ public class AuditConfiguration
         var props = propNames.ToHashSet();
 
         PropertyPredicates.Add((e) => e.EntityEntry.Entity is T && props.Contains(e.Metadata.Name) ? false : null);
+
+        return this;
+    }
+
+    public AuditConfiguration IncludeProperty<T>(Expression<Func<T, object?>> propertySelector)
+    {
+        var props = propertySelector.GetExpressedProperties<T>().Select(p => p.Name).ToArray();
+        return IncludeProperty<T>(props);
+    }
+
+    public AuditConfiguration IncludeProperty<T>(params string[] propNames)
+    {
+        var props = propNames.ToHashSet();
+
+        PropertyPredicates.Add((e) => e.EntityEntry.Entity is T && props.Contains(e.Metadata.Name) ? true : null);
 
         return this;
     }

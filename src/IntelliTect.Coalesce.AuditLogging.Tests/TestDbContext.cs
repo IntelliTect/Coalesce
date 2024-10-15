@@ -1,5 +1,7 @@
 ﻿using IntelliTect.Coalesce.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace IntelliTect.Coalesce.AuditLogging.Tests;
 
@@ -15,6 +17,9 @@ internal class TestDbContext : DbContext, IAuditLogDbContext<TestAuditLog>
 
     public DbSet<TestAuditLog> AuditLogs => Set<TestAuditLog>();
     public DbSet<AuditLogProperty> AuditLogProperties => Set<AuditLogProperty>();
+
+    public DbSet<OneToOneParent> OneToOneParent => Set<OneToOneParent>();
+    public DbSet<OneToOneChild> OneToOneChild => Set<OneToOneChild>();
 
     public bool SuppressAudit { get; set; }
 }
@@ -54,6 +59,29 @@ class ParentWithUnMappedListText
 
     [ListText]
     public string CustomListTextField => "Name:" + Name;
+}
+
+class OneToOneParent
+{
+    [Key]
+    public int ParentId { get; set; }
+
+    public string? Name { get; set; }
+
+    [InverseProperty("Parent")]
+    public OneToOneChild? Child { get; set; }
+}
+
+class OneToOneChild
+{
+    [Key, DatabaseGenerated(DatabaseGeneratedOption.None)]
+    public int ParentId { get; set; }
+
+    public string? Name { get; set; }
+
+    [ForeignKey(nameof(ParentId))]
+    [InverseProperty("Child")]
+    public OneToOneParent? Parent { get; set; }
 }
 
 internal class TestAuditLog : DefaultAuditLog

@@ -1153,12 +1153,12 @@ describe("$makeCaller with args object", () => {
 
     const caller = new StudentApiClient().$makeCaller(
       "item",
-      (c) => c.getFile(42, "bob"),
+      (c) => c.getFile(42, null),
       () => ({}),
-      (c, args) => c.getFile(42, "bob")
+      (c, args) => c.getFile(42, "bob+/")
     );
 
-    expect(caller.url).toBe("/api/Students/getFile?id=42&etag=bob");
+    expect(caller.url).toBe("/api/Students/getFile?id=42&etag=bob%2B%2F");
     expect(adapter).toBeCalledTimes(0);
   });
 

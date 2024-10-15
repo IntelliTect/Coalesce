@@ -408,6 +408,25 @@ public class AuditTests
     }
 
     [Fact]
+    public async Task PropertyDesc_DoesntBreakForOneToOneWhenPkIsFk()
+    {
+        // Arrange
+        using var db = BuildDbContext(b => b
+            .UseCoalesceAuditLogging<TestAuditLog>(x => x
+                .WithAugmentation<TestOperationContext>()
+            ));
+
+        // Act
+        var entity = new OneToOneParent { Name = "bob" };
+        db.Add(entity);
+        await db.SaveChangesAsync();
+
+
+        // Assert
+        var log = Assert.Single(db.AuditLogs.Include(l => l.Properties));
+    }
+
+    [Fact]
     public void FormatsPrimitiveCollections()
     {
         using var db = BuildDbContext(b => b

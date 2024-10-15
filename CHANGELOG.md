@@ -3,6 +3,7 @@
 - feat: All Coalesce-generated endpoints that accept a formdata body now also accept a JSON body. Existing formdata endpoints remain unchanged.
 - feat: Automatically produce user-friendly response messages in behaviors for Save and Delete operations that fail due to a violation of a SQL Server foreign key or unique constraint. This behavior can be controlled with the `DetailedEfConstraintExceptionMessages` setting in `.AddCoalesce(c => c.Configure(o => { ... }))`, or by overriding `StandardBehaviors.GetExceptionResult`. This is not a substitute for adding proper validation or other handling of related entities - it only exists to provide a better user experience in cases where the developer has forgotten to handle these situations. This behavior does respect Coalesce's security model and won't produce descriptions of types or values that the user is not allowed to see. (#468)
 - feat: Error responses now include inner exception messages when `DetailedExceptionMessages` is enabled. (#468)
+- feat: Add additional audit configuration methods to allow for allow-listing certain properties.
 - feat(c-admin-table): Clicking a row takes you to the details page (#465)
 - feat(c-admin-table): Always show button for details page (#465)
 

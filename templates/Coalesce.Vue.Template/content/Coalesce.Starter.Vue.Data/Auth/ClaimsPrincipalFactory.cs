@@ -19,12 +19,12 @@ public class ClaimsPrincipalFactory(
         {
             // User doesn't have a selected tenant. Pick one for them.
             var membership = await db.TenantMemberships
-                .IgnoreQueryFilters()
+                .IgnoreTenancy()
 #if TrackingBase
                 .OrderBy(m => m.CreatedOn) // Prefer oldest membership
 #endif
                 .FirstOrDefaultAsync(tm => tm.UserId == user.Id);
-            
+
             // Default to the "null" tenant if the user belongs to no tenants.
             // This allows the rest of the sign-in process to function,
             // but will never match a real tenant or produce real roles/permissions.
@@ -72,7 +72,7 @@ public class ClaimsPrincipalFactory(
             .Select(p => new Claim(AppClaimTypes.Permission, p.ToString()));
 
         var permissionIdentity = new ClaimsIdentity(
-            permissions, 
+            permissions,
             "Permissions",
             Options.ClaimsIdentity.UserNameClaimType,
             AppClaimTypes.Permission);

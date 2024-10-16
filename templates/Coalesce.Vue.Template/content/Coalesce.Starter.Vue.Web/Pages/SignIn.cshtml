@@ -19,6 +19,29 @@
     </div>
 }
 @*#endif *@
+@*#if LocalAuth *@
+<form method="post" class="d-grid gap-2 mt-3">
+    <input type="hidden" name="@nameof(Model.ReturnUrl)" value="@Model.ReturnUrl" />
+
+    <div>
+        <label asp-for="Username" class="form-label" autocomplete="username"></label>
+        <input asp-for="Username" class="form-control" autofocus required  />
+    </div>
+    <div>
+        <label asp-for="Password" class="form-label" autocomplete="current-password"></label>
+        <input asp-for="Password" class="form-control" required />
+    </div>
+
+    <div asp-validation-summary="All" class="text-danger" style="margin-bottom: -0.5rem"></div>
+
+    <button type="submit" class="btn btn-primary rounded-pill">Sign in</button>
+
+    <a href="/register">Sign up</a>
+
+    <a href="/forgot-password">Forgot Password</a>
+</form>
+<hr class="my-3"/>
+@*#endif *@
 <form method="post">
     <input type="hidden" name="@nameof(Model.ReturnUrl)" value="@Model.ReturnUrl" />
 

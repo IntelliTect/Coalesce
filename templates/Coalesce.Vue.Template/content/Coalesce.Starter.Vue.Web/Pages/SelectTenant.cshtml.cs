@@ -7,52 +7,50 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata;
 
-namespace Coalesce.Starter.Vue.Web.Pages
+namespace Coalesce.Starter.Vue.Web.Pages;
+
+[Authorize]
+public class SelectTenantModel(AppDbContext db) : PageModel
 {
-    [Authorize]
-    public class SelectTenantModel(AppDbContext db) : PageModel
+    [BindProperty(SupportsGet = true)]
+    public string? ReturnUrl { get; set; }
+
+    public List<Tenant> Tenants { get; private set; } = [];
+
+    public async Task OnGet()
     {
-        [BindProperty(SupportsGet = true)]
-        public string? ReturnUrl { get; set; }
+        await LoadTenants();
+    }
 
-        public List<Tenant> Tenants { get; private set; } = [];
-
-        public async Task OnGet()
+    public async Task<IActionResult> OnPost(
+        [FromForm] string tenantId,
+        [FromServices] SignInManager<User> signInManager
+    )
+    {
+        await LoadTenants();
+        if (!Tenants.Any(t => t.TenantId == tenantId))
         {
-            await LoadTenants();
+            ModelState.AddModelError("tenantId", "Invalid Tenant");
         }
+        if (!ModelState.IsValid) return Page();
 
-        public async Task<IActionResult> OnPost(
-            [FromForm] string tenantId,
-            [FromServices] SignInManager<User> signInManager
-        )
-        {
-            await LoadTenants();
-            if (!Tenants.Any(t => t.TenantId == tenantId))
-            {
-                ModelState.AddModelError("tenantId", "Invalid Tenant");
-            }
-            if (!ModelState.IsValid) return Page();
+        db.ForceSetTenant(tenantId);
 
-            db.ForceSetTenant(tenantId);
+        var user = await db.Users.FindAsync(User.GetUserId());
+        await signInManager.RefreshSignInAsync(user!);
 
-            var user = await db.Users.FindAsync(User.GetUserId());
-            await signInManager.RefreshSignInAsync(user!);
+        return LocalRedirect(string.IsNullOrWhiteSpace(ReturnUrl) ? "/" : ReturnUrl);
+    }
 
-            return LocalRedirect(string.IsNullOrWhiteSpace(ReturnUrl) ? "/" : ReturnUrl);
-        }
-
-        private async Task LoadTenants()
-        {
-            var userId = User.GetUserId();
-            Tenants = await db.TenantMemberships
-                .IgnoreTenancy()
-                .Where(tm => tm.UserId == userId)
-                .Select(tm => tm.Tenant!)
-                .OrderBy(t => t.Name)
-                .ToListAsync();
-        }
+    private async Task LoadTenants()
+    {
+        var userId = User.GetUserId();
+        Tenants = await db.TenantMemberships
+            .IgnoreTenancy()
+            .Where(tm => tm.UserId == userId)
+            .Select(tm => tm.Tenant!)
+            .OrderBy(t => t.Name)
+            .ToListAsync();
     }
 }

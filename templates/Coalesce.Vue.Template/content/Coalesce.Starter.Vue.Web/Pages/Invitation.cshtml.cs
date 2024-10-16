@@ -10,67 +10,66 @@ using System.ComponentModel.DataAnnotations;
 
 #nullable disable
 
-namespace Coalesce.Starter.Vue.Web.Pages
+namespace Coalesce.Starter.Vue.Web.Pages;
+
+[Authorize]
+public class InvitationModel(
+    InvitationService invitationService,
+    SignInManager<User> signInManager,
+    AppDbContext db
+) : PageModel
 {
-    [Authorize]
-    public class InvitationModel(
-        InvitationService invitationService,
-        SignInManager<User> signInManager,
-        AppDbContext db
-    ) : PageModel
+    [BindProperty(SupportsGet = true), Required]
+    public string Code { get; set; }
+
+    internal UserInvitation Invitation { get; private set; }
+
+    internal Tenant Tenant { get; private set; }
+
+    public void OnGet()
     {
-        [BindProperty(SupportsGet = true), Required]
-        public string Code { get; set; }
+        DecodeInvitation();
+    }
 
-        internal UserInvitation Invitation { get; private set; }
+    public async Task<IActionResult> OnPost()
+    {
+        DecodeInvitation();
+        if (!ModelState.IsValid) return Page();
 
-        internal Tenant Tenant { get; private set; }
+        db.ForceSetTenant(Invitation.TenantId);
 
-        public void OnGet()
+        var user = await db.Users.FindAsync(User.GetUserId());
+        var result = await invitationService.AcceptInvitation(Invitation, user!);
+        if (!result.WasSuccessful)
         {
-            DecodeInvitation();
+            ModelState.AddModelError(nameof(Code), result.Message);
+            return Page();
         }
 
-        public async Task<IActionResult> OnPost()
+        // Sign the user into the newly joined tenant (uses `db.TenantId`).
+        await signInManager.RefreshSignInAsync(user);
+
+        return Redirect("/");
+    }
+
+    private void DecodeInvitation()
+    {
+        if (string.IsNullOrWhiteSpace(Code)) return;
+
+        var decodeResult = invitationService.DecodeInvitation(Code);
+        if (!decodeResult.WasSuccessful)
         {
-            DecodeInvitation();
-            if (!ModelState.IsValid) return Page();
-
-            db.ForceSetTenant(Invitation.TenantId);
-
-            var user = await db.Users.FindAsync(User.GetUserId());
-            var result = await invitationService.AcceptInvitation(Invitation, user!);
-            if (!result.WasSuccessful)
-            {
-                ModelState.AddModelError(nameof(Code), result.Message);
-                return Page();
-            }
-
-            // Sign the user into the newly joined tenant (uses `db.TenantId`).
-            await signInManager.RefreshSignInAsync(user);
-
-            return Redirect("/");
+            ModelState.AddModelError(nameof(Code), decodeResult.Message);
+            return;
         }
+        Invitation = decodeResult.Object;
 
-        private void DecodeInvitation()
+        var tenant = db.Tenants.Find(Invitation.TenantId);
+        if (tenant is null)
         {
-            if (string.IsNullOrWhiteSpace(Code)) return;
-
-            var decodeResult = invitationService.DecodeInvitation(Code);
-            if (!decodeResult.WasSuccessful)
-            {
-                ModelState.AddModelError(nameof(Code), decodeResult.Message);
-                return;
-            }
-            Invitation = decodeResult.Object;
-
-            var tenant = db.Tenants.Find(Invitation.TenantId);
-            if (tenant is null)
-            {
-                ModelState.AddModelError(nameof(Code), "The invitation link is not valid.");
-                return;
-            }
-            Tenant = tenant;
+            ModelState.AddModelError(nameof(Code), "The invitation link is not valid.");
+            return;
         }
+        Tenant = tenant;
     }
 }

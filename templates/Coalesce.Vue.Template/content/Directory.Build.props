@@ -9,7 +9,7 @@
     <CoalesceVersion>5.0.3</CoalesceVersion> 
 
     <!--#if (KeepTemplateOnly) -->
-    <DefineConstants>$(DefineConstants);KeepTemplateOnly;AppInsights;OpenAPI;Identity;MicrosoftAuth;GoogleAuth;AuditLogs;UserPictures;TrackingBase;ExampleModel</DefineConstants>
+    <DefineConstants>$(DefineConstants);KeepTemplateOnly;AppInsights;OpenAPI;Identity;MicrosoftAuth;GoogleAuth;LocalAuth;AuditLogs;UserPictures;TrackingBase;ExampleModel</DefineConstants>
     <DefineConstants>$(DefineConstants);Tenancy;TenantPerHostname;TenantCreateSelf;TenantCreateExternal;TenantCreateAdmin;TenantMemberInvites</DefineConstants>
     <!--#endif -->
   </PropertyGroup>

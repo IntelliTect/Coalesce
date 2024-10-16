@@ -24,6 +24,9 @@
     {
         <p>
             <b>@User.GetUserName()</b> is a not a member of any organization.
+@*#if (TenantMemberInvites)*@
+            If you received an invitation, please open the invitation link that you were sent.
+@*#endif*@
         </p>
     }
 </form>

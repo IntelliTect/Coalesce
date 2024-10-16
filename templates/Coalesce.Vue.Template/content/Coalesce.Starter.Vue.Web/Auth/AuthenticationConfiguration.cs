@@ -3,6 +3,8 @@ using Coalesce.Starter.Vue.Data.Auth;
 using Coalesce.Starter.Vue.Data.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using System.Security.Claims;
 
 namespace Coalesce.Starter.Vue.Web.Auth;
@@ -20,10 +22,26 @@ public static class AuthenticationConfiguration
                 c.ClaimsIdentity.EmailClaimType = AppClaimTypes.Email;
                 c.ClaimsIdentity.UserIdClaimType = AppClaimTypes.UserId;
                 c.ClaimsIdentity.UserNameClaimType = AppClaimTypes.UserName;
+
+                c.User.RequireUniqueEmail = true;
+#if LocalAuth
+                // https://pages.nist.gov/800-63-4/sp800-63b.html#passwordver
+                c.Password.RequireNonAlphanumeric = false;
+                c.Password.RequireDigit = false;
+                c.Password.RequireUppercase = false;
+                c.Password.RequireLowercase = false;
+                c.Password.RequiredLength = 15;
+#endif
             })
             .AddEntityFrameworkStores<AppDbContext>()
             .AddDefaultTokenProviders()
             .AddClaimsPrincipalFactory<ClaimsPrincipalFactory>();
+
+#if LocalAuth
+        // todo: different implementation that throws?
+        builder.Services.TryAddTransient<IEmailSender, NoOpEmailSender>();
+        builder.Services.AddScoped<UserManagementService>();
+#endif
 
 #if (GoogleAuth || MicrosoftAuth)
         builder.Services.AddScoped<SignInService>();

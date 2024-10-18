@@ -1,9 +1,9 @@
 ﻿using Coalesce.Starter.Vue.Data;
 using Coalesce.Starter.Vue.Data.Auth;
+using Coalesce.Starter.Vue.Data.Communication;
 using Coalesce.Starter.Vue.Data.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Coalesce.Starter.Vue.Web;
@@ -37,8 +37,6 @@ public static class ProgramAuthConfiguration
             .AddClaimsPrincipalFactory<ClaimsPrincipalFactory>();
 
 #if LocalAuth
-        // todo: different implementation that throws?
-        builder.Services.TryAddTransient<IEmailSender, NoOpEmailSender>();
         builder.Services.AddScoped<UserManagementService>();
 #endif
 

@@ -27,8 +27,4 @@
   <ItemGroup>
     <DotNetCliToolReference Include="IntelliTect.Coalesce.Tools" Version="$(CoalesceVersion)" />
   </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Auth\" />
-  </ItemGroup>
 </Project>

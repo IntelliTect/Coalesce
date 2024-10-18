@@ -10,12 +10,10 @@
 }
 
 @*#if TenantMemberInvites *@
-@if (Model.ReturnUrl?.StartsWith("/invitation") == true)
+@if (Model.ReturnUrl?.StartsWith("/invitation", StringComparison.OrdinalIgnoreCase) == true)
 {
-    <div class="alert alert-primary" role="alert">
-        You have been invited to join an organization!
-        <br />
-        Sign in or create an account to continue.
+    <div class="alert alert-primary limit-width" role="alert">
+        You have been invited to join an organization! Sign in or create an account to continue.
     </div>
 }
 @*#endif *@
@@ -37,7 +35,7 @@
     <button type="submit" class="btn btn-primary rounded-pill">Sign in</button>
 
     <div class="d-flex gap-2 mt-2 justify-content-center">
-        <a asp-page="Register">Sign up</a>
+        <a asp-page="Register" asp-route-ReturnUrl="@Model.ReturnUrl">Sign up</a>
         •
         <a asp-page="ForgotPassword">Forgot Password</a>
     </div>

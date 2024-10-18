@@ -21,7 +21,14 @@
     </form>
     return;
 }
-
+@*#if TenantMemberInvites *@
+@if (Model.ReturnUrl?.StartsWith("/invitation", StringComparison.OrdinalIgnoreCase) == true)
+{
+    <div class="alert alert-primary limit-width" role="alert">
+        Note: The invitation you received requires you to sign up with the same email address that received the invitation.
+    </div>
+}
+@*#endif *@
 <form method="post" class="d-grid gap-2 mt-3">
     <div>
         <label asp-for="Email" class="form-label"></label>

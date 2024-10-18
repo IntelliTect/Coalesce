@@ -22,6 +22,10 @@ using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.AspNetCore.Mvc;
+using Coalesce.Starter.Vue.Data.Communication;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Azure.Core;
+using Azure.Identity;
 
 var builder = WebApplication.CreateBuilder(new WebApplicationOptions
 {
@@ -84,16 +88,29 @@ services
 
 #if Identity
 builder.ConfigureAuthentication();
-#endif
 
+#endif
+#if EmailSendGrid
+services.Configure<SendGridEmailOptions>(builder.Configuration.GetSection("Communication:SendGrid"));
+services.AddTransient<IEmailService, SendGridEmailService>();
+
+#elif EmailAzure
+services.AddSingleton<TokenCredential, DefaultAzureCredential>();
+services.Configure<AzureEmailOptions>(builder.Configuration.GetSection("Communication:Azure"));
+services.AddTransient<IEmailService, AzureEmailService>();
+
+#else
+services.AddTransient<IEmailService, NoOpEmailService>();
+
+#endif
 #if OpenAPI
 services.AddSwaggerGen(c =>
 {
     c.AddCoalesce();
     c.SwaggerDoc("current", new OpenApiInfo { Title = "Current API", Version = "current" });
 });
-#endif
 
+#endif
 
 services.AddScoped<SecurityService>();
 
@@ -108,8 +125,8 @@ services.AddScoped<IUrlHelper>(x =>
 });
 
 services.AddScoped<InvitationService>();
-#endif
 
+#endif
 
 #endregion
 

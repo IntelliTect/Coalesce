@@ -65,7 +65,7 @@ public class RegisterModel(
         }
 
         var emailResult = await userManagementService.SendEmailConfirmationRequest(user);
-        if (userManager.Options.SignIn.RequireConfirmedAccount || true)
+        if (userManager.Options.SignIn.RequireConfirmedAccount)
         {
             SuccessMessage = emailResult.Message;
             return Page();

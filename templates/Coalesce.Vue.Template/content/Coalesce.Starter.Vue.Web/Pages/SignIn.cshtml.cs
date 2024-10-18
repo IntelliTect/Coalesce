@@ -38,10 +38,7 @@ public class SignInModel(SignInManager<User> signInManager) : PageModel
         {
             return LocalRedirect(ReturnUrl ?? "/");
         }
-        //else if (result.RequiresTwoFactor)
-        //{
-        //    return RedirectToPage("./LoginWith2fa", new { ReturnUrl = ReturnUrl });
-        //}
+
         ModelState.AddModelError(string.Empty, result.IsLockedOut ? "Account locked out" : "Invalid login attempt.");
 #endif
 

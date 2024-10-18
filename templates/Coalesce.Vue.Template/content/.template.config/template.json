@@ -52,6 +52,14 @@
       "$coalesceRequires": ["and", "Identity"],
       "$coalesceLink": "https://learn.microsoft.com/en-us/aspnet/core/security/authentication/social/google-logins"
     },
+    "LocalAuth": {
+      "type": "parameter",
+      "datatype": "bool",
+      "displayName": "Sign-in with Username/Password",
+      "description": "Adds infrastructure for supporting individual user accounts with first-party usernames and passwords.",
+      "$coalesceRequires": ["and", "Identity"],
+      "$coalesceLink": "https://learn.microsoft.com/en-us/aspnet/core/security/authentication/individual"
+    },
     "UserPictures": {
       "type": "parameter",
       "datatype": "bool",
@@ -136,6 +144,20 @@
       "description": "Include configuration and integrations for Application Insights, both front-end and back-end.",
       "$coalesceLink": "https://learn.microsoft.com/en-us/azure/azure-monitor/app/app-insights-overview"
     },
+    "EmailAzure": {
+      "type": "parameter",
+      "datatype": "bool",
+      "displayName": "Email: Azure Communication Services",
+      "description": "Include basic code for sending email with Azure Communication Services. See instructions in appsettings.json - the official ACS documentation is very confusing.",
+      "$coalesceLink": "https://learn.microsoft.com/en-us/azure/communication-services/concepts/email/prepare-email-communication-resource"
+    },
+    "EmailSendGrid": {
+      "type": "parameter",
+      "datatype": "bool",
+      "displayName": "Email: Twilio SendGrid",
+      "description": "Include basic code for sending email with Twilio SendGrid.",
+      "$coalesceLink": "https://www.twilio.com/docs/sendgrid/for-developers/sending-email/email-api-quickstart-for-c"
+    },
     "AzurePipelines": {
       "type": "parameter",
       "datatype": "bool",
@@ -170,7 +192,7 @@
         {
           "condition": "!Identity",
           "exclude": [
-            "**/AuthenticationConfiguration.cs",
+            "**/ProgramAuthConfiguration.cs",
             "**/Forbidden.vue",
             "**/UserAvatar.vue",
             "**/UserProfile.vue",
@@ -186,7 +208,17 @@
         },
         {
           "condition": "!MicrosoftAuth && !GoogleAuth",
-          "exclude": ["**/SignInService.cs"]
+          "exclude": ["**/ExternalLogin.*"]
+        },
+        {
+          "condition": "!LocalAuth",
+          "exclude": [
+            "**/ResetPassword.*",
+            "**/Register.*",
+            "**/ForgotPassword.*",
+            "**/ConfirmEmail.*",
+            "**/UserManagementService.cs"
+          ]
         },
         {
           "condition": "!Tenancy",
@@ -234,6 +266,14 @@
         {
           "condition": "!MicrosoftAuth",
           "exclude": ["**/microsoft-logo.svg"]
+        },
+        {
+          "condition": "!EmailAzure",
+          "exclude": ["**/AzureEmailOptions.cs", "**/AzureEmailService.cs"]
+        },
+        {
+          "condition": "!EmailSendGrid",
+          "exclude": ["**/SendGridEmailService.cs", "**/AzureEmailService.cs"]
         },
         {
           "condition": "!ExampleModel",

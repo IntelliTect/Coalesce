@@ -180,8 +180,8 @@ public class ExternalLoginModel(
                 // who is squatting on an email address in the system on hopes of hijacking the account.
                 // The person who owns the current verified external login needs to sign into that account with its password,
                 // including performing a "forgot password" request if the password isn't actually known.
-                return $"An existing unverified user account with email address {remoteUserEmail} already exists." +
-                    $"You must log into this account with its username and password and verify the account's email address" +
+                return $"An existing unverified user account with email address {remoteUserEmail} already exists. " +
+                    $"You must log into this account with its username and password and verify the account's email address " +
                     $"before you can link the account to your {info.ProviderDisplayName} login.";
             }
         }

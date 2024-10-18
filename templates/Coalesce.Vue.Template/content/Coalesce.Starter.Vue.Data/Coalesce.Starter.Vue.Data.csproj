@@ -23,5 +23,11 @@
     <!--#if (AuditLogs) -->
     <PackageReference Include="IntelliTect.Coalesce.AuditLogging" Version="$(CoalesceVersion)" />
     <!--#endif -->
+    <!--#if (EmailAzure) -->
+    <PackageReference Include="Azure.Communication.Email" Version="1.0.1" />
+    <!--#endif -->
+    <!--#if (EmailSendGrid) -->
+    <PackageReference Include="SendGrid" Version="9.29.3" />
+    <!--#endif -->
   </ItemGroup>
 </Project>

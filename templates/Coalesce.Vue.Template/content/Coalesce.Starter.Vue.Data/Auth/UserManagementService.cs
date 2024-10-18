@@ -1,5 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI.Services;
+﻿using Coalesce.Starter.Vue.Data.Communication;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using System.Net.Mail;
@@ -10,7 +10,7 @@ namespace Coalesce.Starter.Vue.Data.Auth;
 public class UserManagementService(
     UserManager<User> _userManager,
     IUrlHelper urlHelper,
-    IEmailSender emailSender
+    IEmailService emailSender
 )
 {
     public async Task<ItemResult> SendEmailConfirmationRequest(User user)
@@ -22,21 +22,21 @@ public class UserManagementService(
 
         var link = urlHelper.PageLink("/ConfirmEmail", values: new { userId = user.Id, code = code })!;
 
-        // TODO: Generalize this into the email sending abstractions
-        if (emailSender is NoOpEmailSender && Debugger.IsAttached) Debugger.Break(); // DEVELOPMENT: Grab the value of `link`.
-
-        await emailSender.SendEmailAsync(
+        var result = await emailSender.SendEmailAsync(
             user.Email,
             "Confirm your email",
             $"""
-            Please <a href='{HtmlEncoder.Default.Encode(link)}'>click here</a> to confirm your account.
+            Please <a href="{HtmlEncoder.Default.Encode(link)}">click here</a> to confirm your account.
             If you didn't request this, ignore this email and do not click the link.
             """
         );
 
-        // todo: handle failure
-        var itemResult = new ItemResult(true, $"An email was sent to {user.Email}. Please click the link in the email to confirm your account.");
-        return itemResult;
+        if (result.WasSuccessful)
+        {
+            result.Message += " Please click the link in the email to confirm your account.";
+        }
+
+        return result;
     }
 
     public async Task<ItemResult> SendEmailChangeRequest(User user, string newEmail)
@@ -60,18 +60,21 @@ public class UserManagementService(
 
         var link = urlHelper.PageLink("/ConfirmEmail", values: new { userId = user.Id, code = code, newEmail = newEmail })!;
 
-        await emailSender.SendEmailAsync(
+        var result = await emailSender.SendEmailAsync(
             newEmail, 
             "Confirm your email",
             $"""
-            Please <a href='{HtmlEncoder.Default.Encode(link)}'>click here</a> to complete your email change request.
+            Please <a href="{HtmlEncoder.Default.Encode(link)}">click here</a> to complete your email change request.
             If you didn't request this, ignore this email and do not click the link.
             """
         );
 
-        // todo: handle failure
-        var itemResult = new ItemResult(true, $"An email was sent to {newEmail}. Please click the link in the email to complete the change.");
-        return itemResult;
+        if (result.WasSuccessful)
+        {
+            result.Message += " Please click the link in the email to complete the change.";
+        }
+
+        return result;
     }
 
     public async Task<ItemResult> SendPasswordResetRequest(User? user)
@@ -82,19 +85,18 @@ public class UserManagementService(
 
             var link = urlHelper.PageLink("ResetPassword", values: new { userId = user.Id, code = code })!;
 
-            // todo: handle failure
             await emailSender.SendEmailAsync(
                 user.Email,
                 "Password Reset",
                 $"""
-                Please <a href='{HtmlEncoder.Default.Encode(link)}'>click here</a> to reset your password.
+                Please <a href="{HtmlEncoder.Default.Encode(link)}">click here</a> to reset your password.
                 If you didn't request this, ignore this email and do not click the link.
                 """
             );
         }
 
         return new ItemResult(true,
-            "If the provided user account exists, the email address on the account " +
-            "will be receiving an email shortly with directions to reset your password.");
+            "If the user account exists, the email address on the account " +
+            "will receive an email shortly with password reset instructions.");
     }
 }

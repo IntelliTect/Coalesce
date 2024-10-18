@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.DataProtection;
+﻿using Coalesce.Starter.Vue.Data.Communication;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Encodings.Web;
 using System.Text.Json;
 
 namespace Coalesce.Starter.Vue.Data.Auth;
@@ -7,7 +9,8 @@ namespace Coalesce.Starter.Vue.Data.Auth;
 public class InvitationService(
     AppDbContext db,
     IDataProtectionProvider dataProtector,
-    IUrlHelper urlHelper
+    IUrlHelper urlHelper,
+    IEmailService emailService
 )
 {
     private IDataProtector GetProtector() => dataProtector.CreateProtector("invitations");
@@ -19,8 +22,9 @@ public class InvitationService(
     {
         var tenantId = db.TenantIdOrThrow;
 
-        if (roles.Any(r => r.TenantId != tenantId)) return "Role/tenant mismatch";
+        if (roles.Any(r => db.Roles.FirstOrDefault(dbRole => dbRole.Id == r.Id) is null)) return "One or more roles are invalid";
 
+        var tenant = db.Tenants.Find(tenantId)!;
         var invitation = new UserInvitation
         {
             Email = email,
@@ -41,10 +45,11 @@ public class InvitationService(
 
         var link = CreateInvitationLink(invitation);
 
-        // TODO: Implement email sending and send the invitation link directly to `email`.
-        // Returning it directly in the result message is a temporary measure.
-
-        return new(true, message: $"Give the following invitation link to {email}:\n\n{link}");
+        return await emailService.SendEmailAsync(email, $"Invitation to {tenant.Name}", 
+            $"""
+            You have been invited to join the <b>{HtmlEncoder.Default.Encode(tenant.Name)}</b> organization.
+            Please <a href="{HtmlEncoder.Default.Encode(link)}">click here</a> to accept the invitation.
+            """);
     }
 
     public async Task<ItemResult> AcceptInvitation(
@@ -55,13 +60,23 @@ public class InvitationService(
         var tenant = await db.Tenants.FindAsync(invitation.TenantId);
         if (tenant is null) return "Tenant not found";
 
+        if (!invitation.Email.Equals(acceptingUser.Email, StringComparison.OrdinalIgnoreCase))
+        {
+            return $"Your email address doesn't match the intended recipient of this invitation.";
+        }
+
         // Note: `acceptingUser` will be untracked after ForceSetTenant.
         db.ForceSetTenant(invitation.TenantId);
+        acceptingUser = db.Users.Find(acceptingUser.Id)!;
 
         if (await db.TenantMemberships.AnyAsync(m => m.User == acceptingUser))
         {
             return $"{acceptingUser.UserName ?? acceptingUser.Email} is already a member of {tenant.Name}.";
         }
+
+        // Since invitations are emailed to users, they also act as an email confirmation.
+        // If this is not true for your application, delete this line.
+        acceptingUser.EmailConfirmed = true;
 
         db.TenantMemberships.Add(new() { UserId = acceptingUser.Id });
         db.UserRoles.AddRange(invitation.Roles.Select(rid => new UserRole { RoleId = rid, UserId = acceptingUser.Id }));

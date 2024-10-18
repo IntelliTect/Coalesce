@@ -55,13 +55,13 @@
           <v-divider />
           <!--#if Tenancy -->
           <v-list-item
-            href="/select-org"
+            href="/SelectTenant"
             prepend-icon="fa fa-building"
             title="Switch Organization"
           />
           <!--#endif -->
           <v-list-item
-            href="/sign-out"
+            href="/SignOut"
             prepend-icon="fa fa-sign-out"
             title="Log Out"
           />

@@ -1,4 +1,4 @@
-﻿@page "/register"
+﻿@page
 @using Microsoft.AspNetCore.Identity
 @using Microsoft.Extensions.Options
 
@@ -10,10 +10,22 @@
     int passwordMinlength = identityOptions.Value.Password.RequiredLength;
 }
 
+@if (Model.SuccessMessage is not null)
+{
+    <p>@Model.SuccessMessage</p>
+
+    <form method="get" action="/" class="d-grid mt-3">
+        <button type="submit" class="btn btn-primary">
+            Continue
+        </button>
+    </form>
+    return;
+}
+
 <form method="post" class="d-grid gap-2 mt-3">
     <div>
         <label asp-for="Email" class="form-label"></label>
-        <input asp-for="Email" class="form-control" autocomplete="username" required />
+        <input asp-for="Email" class="form-control" autocomplete="username" required autofocus />
     </div>
     <div>
         <label asp-for="Password" class="form-label"></label>

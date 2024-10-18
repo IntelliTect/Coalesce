@@ -1,6 +1,5 @@
-import { getEnumMeta, solidify } from 'coalesce-vue/lib/metadata'
-import type {
-  Domain, ModelType, ObjectType,
+import {
+  Domain, getEnumMeta, solidify, ModelType, ObjectType,
   PrimitiveProperty, ForeignKeyProperty, PrimaryKeyProperty,
   ModelCollectionNavigationProperty, ModelReferenceNavigationProperty,
   HiddenAreas, BehaviorFlags
@@ -265,7 +264,7 @@ export const AuditLogProperty = domain.types.AuditLogProperty = {
 export const Role = domain.types.Role = {
   name: "Role" as const,
   displayName: "Role",
-  description: "Roles are groups of permissions, analagous to job titles or functions.",
+  description: "Roles are groups of permissions, analogous to job titles or functions.",
   get displayProp() { return this.props.name }, 
   type: "model",
   controllerRoute: "Role",
@@ -574,6 +573,115 @@ export const User = domain.types.User = {
           type: "model",
           get typeDef() { return (domain.types.Role as ModelType & { name: "Role" }) },
           role: "value",
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "void",
+        role: "value",
+      },
+    },
+    setEmail: {
+      name: "setEmail",
+      displayName: "Set Email",
+      transportType: "item",
+      httpMethod: "POST",
+      params: {
+        id: {
+          name: "id",
+          displayName: "Primary Key",
+          type: "string",
+          role: "value",
+          get source() { return (domain.types.User as ModelType & { name: "User" }).props.id },
+          rules: {
+            required: val => (val != null && val !== '') || "Primary Key is required.",
+          }
+        },
+        newEmail: {
+          name: "newEmail",
+          displayName: "New Email",
+          type: "string",
+          subtype: "email",
+          role: "value",
+          rules: {
+            required: val => (val != null && val !== '') || "New Email is required.",
+          }
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "void",
+        role: "value",
+      },
+    },
+    sendEmailConfirmation: {
+      name: "sendEmailConfirmation",
+      displayName: "Send Email Confirmation",
+      transportType: "item",
+      httpMethod: "POST",
+      params: {
+        id: {
+          name: "id",
+          displayName: "Primary Key",
+          type: "string",
+          role: "value",
+          get source() { return (domain.types.User as ModelType & { name: "User" }).props.id },
+          rules: {
+            required: val => (val != null && val !== '') || "Primary Key is required.",
+          }
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "void",
+        role: "value",
+      },
+    },
+    setPassword: {
+      name: "setPassword",
+      displayName: "Set Password",
+      transportType: "item",
+      httpMethod: "POST",
+      params: {
+        id: {
+          name: "id",
+          displayName: "Primary Key",
+          type: "string",
+          role: "value",
+          get source() { return (domain.types.User as ModelType & { name: "User" }).props.id },
+          rules: {
+            required: val => (val != null && val !== '') || "Primary Key is required.",
+          }
+        },
+        currentPassword: {
+          name: "currentPassword",
+          displayName: "Current Password",
+          type: "string",
+          subtype: "password",
+          role: "value",
+        },
+        newPassword: {
+          name: "newPassword",
+          displayName: "New Password",
+          type: "string",
+          subtype: "password",
+          role: "value",
+          rules: {
+            required: val => (val != null && val !== '') || "New Password is required.",
+          }
+        },
+        confirmNewPassword: {
+          name: "confirmNewPassword",
+          displayName: "Confirm New Password",
+          type: "string",
+          subtype: "password",
+          role: "value",
+          rules: {
+            required: val => (val != null && val !== '') || "Confirm New Password is required.",
+          }
         },
       },
       return: {

@@ -18,6 +18,11 @@
         :root {
             line-height: 1.5;
             font-weight: 400;
+            --preferred-width: 350px;
+        }
+
+        p, .limit-width {
+            max-width: var(--preferred-width);
         }
 
         body {
@@ -35,11 +40,14 @@
             margin-right: 10px;
             height: 20px
         }
+        a {
+            text-decoration: none;
+        }
     </style>
 </head>
 <body>
     
-    <div class="card shadow-lg mx-auto mt-3" style="min-width: 350px">
+    <div class="card shadow-lg mx-auto mt-3" style="min-width: var(--preferred-width)">
         <div class="card-body p-4">
             <h3 class="card-title text-center mb-4">
                 @* <img src="/logo.svg" style="height: 1.3em; padding-right: 0.2em" /> *@

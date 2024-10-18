@@ -13,9 +13,6 @@ public class SignInModel(SignInManager<User> signInManager) : PageModel
     [BindProperty(SupportsGet = true)]
     public string? ReturnUrl { get; set; }
 
-    [BindProperty]
-    public string? Provider { get; set; }
-
 #if LocalAuth
     [Required]
     [BindProperty]
@@ -33,15 +30,6 @@ public class SignInModel(SignInManager<User> signInManager) : PageModel
 
     public async Task<IActionResult> OnPostAsync()
     {
-        if (!string.IsNullOrWhiteSpace(Provider))
-        {
-            // Request a redirect to the external login provider.
-            return new ChallengeResult(Provider, new()
-            {
-                RedirectUri = ReturnUrl
-            });
-        }
-
 #if LocalAuth
         if (!ModelState.IsValid) return Page();
 

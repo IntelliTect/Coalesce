@@ -75,7 +75,7 @@ public class InvitationService(
         var inviteJson = JsonSerializer.Serialize(invitation);
         var inviteCode = GetProtector().Protect(inviteJson);
 
-        return urlHelper.PageLink("Invitation", values: new { code = inviteCode })!;
+        return urlHelper.PageLink("/Invitation", values: new { code = inviteCode })!;
     }
 
     public ItemResult<UserInvitation> DecodeInvitation(string code)

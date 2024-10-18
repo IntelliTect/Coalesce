@@ -5,11 +5,10 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using System.Security.Claims;
 
-namespace Coalesce.Starter.Vue.Web.Auth;
+namespace Coalesce.Starter.Vue.Web;
 
-public static class AuthenticationConfiguration
+public static class ProgramAuthConfiguration
 {
     public static void ConfigureAuthentication(this WebApplicationBuilder builder)
     {
@@ -43,10 +42,6 @@ public static class AuthenticationConfiguration
         builder.Services.AddScoped<UserManagementService>();
 #endif
 
-#if (GoogleAuth || MicrosoftAuth)
-        builder.Services.AddScoped<SignInService>();
-#endif
-
         builder.Services
             .AddAuthentication()
 #if GoogleAuth
@@ -60,12 +55,6 @@ public static class AuthenticationConfiguration
 #if UserPictures
                 options.ClaimActions.MapJsonKey("pictureUrl", "picture");
 #endif
-                options.Events.OnTicketReceived = async ctx =>
-                {
-                    await ctx.HttpContext.RequestServices
-                        .GetRequiredService<SignInService>()
-                        .OnGoogleTicketReceived(ctx);
-                };
             })
 #endif
 #if MicrosoftAuth
@@ -76,13 +65,6 @@ public static class AuthenticationConfiguration
 #if (UserPictures || TenantCreateExternal)
                 options.SaveTokens = true;
 #endif
-
-                options.Events.OnTicketReceived = async ctx =>
-                {
-                    await ctx.HttpContext.RequestServices
-                        .GetRequiredService<SignInService>()
-                        .OnMicrosoftTicketReceived(ctx);
-                };
             })
 #endif
             ;
@@ -96,7 +78,7 @@ public static class AuthenticationConfiguration
 
         builder.Services.ConfigureApplicationCookie(c =>
         {
-            c.LoginPath = "/sign-in"; // Razor page "Pages/SignIn.cshtml"
+            c.LoginPath = "/SignIn"; // Razor page "Pages/SignIn.cshtml"
 
 #if Tenancy
             var oldOnValidate = c.Events.OnValidatePrincipal;

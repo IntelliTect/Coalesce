@@ -1,4 +1,4 @@
-﻿@page "/sign-in"
+﻿@page
 @using Microsoft.AspNetCore.Authentication
 @model Coalesce.Starter.Vue.Web.Pages.SignInModel
 @inject IAuthenticationSchemeProvider schemeProvider
@@ -36,22 +36,30 @@
 
     <button type="submit" class="btn btn-primary rounded-pill">Sign in</button>
 
-    <a href="/register">Sign up</a>
-
-    <a href="/forgot-password">Forgot Password</a>
-</form>
-<hr class="my-3"/>
-@*#endif *@
-<form method="post">
-    <input type="hidden" name="@nameof(Model.ReturnUrl)" value="@Model.ReturnUrl" />
-
-    <div class="d-grid gap-3">
-    @foreach (var provider in externalLogins)
-    {
-        <button type="submit" name="provider" value="@provider.Name" title="Log in with @provider.DisplayName" class="btn btn-outline-dark rounded-pill">
-            <img src="/@provider.Name-logo.svg" />
-            Sign in with @provider.DisplayName
-        </button>
-    }
+    <div class="d-flex gap-2 mt-2 justify-content-center">
+        <a asp-page="Register">Sign up</a>
+        •
+        <a asp-page="ForgotPassword">Forgot Password</a>
     </div>
 </form>
+@if (externalLogins.Any())
+{
+    <hr class="my-4" />
+}
+@*#endif *@
+@if (externalLogins.Any())
+{
+    <form method="post" asp-page="ExternalLogin">
+        <input type="hidden" asp-for="ReturnUrl" />
+
+        <div class="d-grid gap-3">
+            @foreach (var provider in externalLogins)
+            {
+                <button type="submit" name="provider" value="@provider.Name" title="Log in with @provider.DisplayName" class="btn btn-outline-dark rounded-pill">
+                    <img src="/@provider.Name-logo.svg" />
+                    Sign in with @provider.DisplayName
+                </button>
+            }
+        </div>
+    </form>
+}

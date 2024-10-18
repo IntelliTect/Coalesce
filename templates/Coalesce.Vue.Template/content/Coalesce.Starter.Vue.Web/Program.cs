@@ -5,7 +5,7 @@ using IntelliTect.Coalesce;
 #if AppInsights
 using Microsoft.ApplicationInsights.DependencyCollector;
 using Microsoft.ApplicationInsights.Extensibility;
-using Microsoft.Extensions.Logging.ApplicationInsights; 
+using Microsoft.Extensions.Logging.ApplicationInsights;
 #endif
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
@@ -14,12 +14,10 @@ using Microsoft.Extensions.Logging.Console;
 #if OpenAPI
 using Microsoft.OpenApi.Models;
 #endif
-using System.Security.Claims;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 #if Identity
-using Coalesce.Starter.Vue.Web.Auth;
 #endif
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Routing;

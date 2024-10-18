@@ -1,8 +1,7 @@
-﻿using Microsoft.AspNetCore.Http.Extensions;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Routing;
+using System.Diagnostics;
 using System.Net.Mail;
 using System.Text.Encodings.Web;
 
@@ -21,7 +20,10 @@ public class UserManagementService(
 
         var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
 
-        var link = urlHelper.PageLink("ConfirmEmail", values: new { userId = user.Id, code = code })!;
+        var link = urlHelper.PageLink("/ConfirmEmail", values: new { userId = user.Id, code = code })!;
+
+        // TODO: Generalize this into the email sending abstractions
+        if (emailSender is NoOpEmailSender && Debugger.IsAttached) Debugger.Break(); // DEVELOPMENT: Grab the value of `link`.
 
         await emailSender.SendEmailAsync(
             user.Email,
@@ -33,7 +35,7 @@ public class UserManagementService(
         );
 
         // todo: handle failure
-        var itemResult = new ItemResult(true, $"An email was sent to {user.Email}. Please click the link in the email.");
+        var itemResult = new ItemResult(true, $"An email was sent to {user.Email}. Please click the link in the email to confirm your account.");
         return itemResult;
     }
 
@@ -56,7 +58,7 @@ public class UserManagementService(
 
         var code = await _userManager.GenerateChangeEmailTokenAsync(user, newEmail);
 
-        var link = urlHelper.PageLink("ConfirmEmail", values: new { userId = user.Id, code = code, newEmail = newEmail })!;
+        var link = urlHelper.PageLink("/ConfirmEmail", values: new { userId = user.Id, code = code, newEmail = newEmail })!;
 
         await emailSender.SendEmailAsync(
             newEmail, 

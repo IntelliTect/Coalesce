@@ -160,7 +160,7 @@ namespace Coalesce.Starter.Vue.Web.Api
             var _params = new
             {
                 email = email,
-                role = role
+                role = !Request.Form.HasAnyValue(nameof(role)) ? null : role
             };
 
             if (Context.Options.ValidateAttributesForMethods)
@@ -175,7 +175,118 @@ namespace Coalesce.Starter.Vue.Web.Api
                 Db,
                 invitationService,
                 _params.email,
-                _params.role.MapToNew(_mappingContext)
+                _params.role?.MapToNew(_mappingContext)
+            );
+            var _result = new ItemResult(_methodResult);
+            return _result;
+        }
+
+        /// <summary>
+        /// Method: SetEmail
+        /// </summary>
+        [HttpPost("SetEmail")]
+        [Authorize]
+        public virtual async Task<ItemResult> SetEmail(
+            [FromServices] IDataSourceFactory dataSourceFactory,
+            [FromServices] Coalesce.Starter.Vue.Data.Auth.UserManagementService userService,
+            [FromForm(Name = "id")] string id,
+            [FromForm(Name = "newEmail")] string newEmail)
+        {
+            var dataSource = dataSourceFactory.GetDataSource<Coalesce.Starter.Vue.Data.Models.User, Coalesce.Starter.Vue.Data.Models.User>("Default");
+            var itemResult = await dataSource.GetItemAsync(id, new DataSourceParameters());
+            if (!itemResult.WasSuccessful)
+            {
+                return new ItemResult(itemResult);
+            }
+            var item = itemResult.Object;
+            var _params = new
+            {
+                newEmail = newEmail
+            };
+
+            if (Context.Options.ValidateAttributesForMethods)
+            {
+                var _validationResult = ItemResult.FromParameterValidation(
+                    GeneratedForClassViewModel!.MethodByName("SetEmail"), _params, HttpContext.RequestServices);
+                if (!_validationResult.WasSuccessful) return _validationResult;
+            }
+
+            var _methodResult = await item.SetEmail(
+                userService,
+                User,
+                _params.newEmail
+            );
+            var _result = new ItemResult(_methodResult);
+            return _result;
+        }
+
+        /// <summary>
+        /// Method: SendEmailConfirmation
+        /// </summary>
+        [HttpPost("SendEmailConfirmation")]
+        [Authorize]
+        public virtual async Task<ItemResult> SendEmailConfirmation(
+            [FromServices] IDataSourceFactory dataSourceFactory,
+            [FromServices] Coalesce.Starter.Vue.Data.Auth.UserManagementService userService,
+            [FromForm(Name = "id")] string id)
+        {
+            var dataSource = dataSourceFactory.GetDataSource<Coalesce.Starter.Vue.Data.Models.User, Coalesce.Starter.Vue.Data.Models.User>("Default");
+            var itemResult = await dataSource.GetItemAsync(id, new DataSourceParameters());
+            if (!itemResult.WasSuccessful)
+            {
+                return new ItemResult(itemResult);
+            }
+            var item = itemResult.Object;
+            var _methodResult = await item.SendEmailConfirmation(
+                userService,
+                User
+            );
+            var _result = new ItemResult(_methodResult);
+            return _result;
+        }
+
+        /// <summary>
+        /// Method: SetPassword
+        /// </summary>
+        [HttpPost("SetPassword")]
+        [Authorize]
+        public virtual async Task<ItemResult> SetPassword(
+            [FromServices] IDataSourceFactory dataSourceFactory,
+            [FromServices] Microsoft.AspNetCore.Identity.UserManager<Coalesce.Starter.Vue.Data.Models.User> userManager,
+            [FromServices] Microsoft.AspNetCore.Identity.SignInManager<Coalesce.Starter.Vue.Data.Models.User> signInManager,
+            [FromForm(Name = "id")] string id,
+            [FromForm(Name = "currentPassword")] string currentPassword,
+            [FromForm(Name = "newPassword")] string newPassword,
+            [FromForm(Name = "confirmNewPassword")] string confirmNewPassword)
+        {
+            var dataSource = dataSourceFactory.GetDataSource<Coalesce.Starter.Vue.Data.Models.User, Coalesce.Starter.Vue.Data.Models.User>("Default");
+            var itemResult = await dataSource.GetItemAsync(id, new DataSourceParameters());
+            if (!itemResult.WasSuccessful)
+            {
+                return new ItemResult(itemResult);
+            }
+            var item = itemResult.Object;
+            var _params = new
+            {
+                currentPassword = currentPassword,
+                newPassword = newPassword,
+                confirmNewPassword = confirmNewPassword
+            };
+
+            if (Context.Options.ValidateAttributesForMethods)
+            {
+                var _validationResult = ItemResult.FromParameterValidation(
+                    GeneratedForClassViewModel!.MethodByName("SetPassword"), _params, HttpContext.RequestServices);
+                if (!_validationResult.WasSuccessful) return _validationResult;
+            }
+
+            var _methodResult = await item.SetPassword(
+                userManager,
+                signInManager,
+                User,
+                _params.currentPassword,
+                _params.newPassword,
+                _params.confirmNewPassword
             );
             var _result = new ItemResult(_methodResult);
             return _result;

@@ -1,4 +1,5 @@
-﻿using Coalesce.Starter.Vue.Data.Auth;
+﻿using Coalesce.Starter.Vue.Data;
+using Coalesce.Starter.Vue.Data.Auth;
 using Coalesce.Starter.Vue.Data.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -10,6 +11,7 @@ namespace Coalesce.Starter.Vue.Web.Pages;
 
 [AllowAnonymous]
 public class RegisterModel(
+    AppDbContext db,
     UserManager<User> userManager,
     SignInManager<User> signInManager,
     UserManagementService userManagementService
@@ -37,6 +39,8 @@ public class RegisterModel(
     [Compare(nameof(Password), ErrorMessage = "The password and confirmation password do not match.")]
     public string ConfirmPassword { get; set; } = null!;
 
+    public string? SuccessMessage { get; set; }
+
     public async Task<IActionResult> OnPostAsync()
     {
         if (!ModelState.IsValid) return Page();
@@ -46,6 +50,8 @@ public class RegisterModel(
             UserName = Email,
             Email = Email
         };
+
+        new DatabaseSeeder(db).InitializeFirstUser(user);
 
         var result = await userManager.CreateAsync(user, Password);
 
@@ -58,10 +64,11 @@ public class RegisterModel(
             return Page();
         }
 
-        await userManagementService.SendEmailConfirmationRequest(user);
-        if (userManager.Options.SignIn.RequireConfirmedAccount)
+        var emailResult = await userManagementService.SendEmailConfirmationRequest(user);
+        if (userManager.Options.SignIn.RequireConfirmedAccount || true)
         {
-            return RedirectToPage("RegisterConfirmation", new { email = Email, returnUrl = ReturnUrl });
+            SuccessMessage = emailResult.Message;
+            return Page();
         }
         else
         {

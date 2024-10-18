@@ -172,6 +172,39 @@ export class UserViewModel extends ViewModel<$models.User, $apiClients.UserApiCl
     return evict
   }
   
+  public get setEmail() {
+    const setEmail = this.$apiClient.$makeCaller(
+      this.$metadata.methods.setEmail,
+      (c, newEmail: string | null) => c.setEmail(this.$primaryKey, newEmail),
+      () => ({newEmail: null as string | null, }),
+      (c, args) => c.setEmail(this.$primaryKey, args.newEmail))
+    
+    Object.defineProperty(this, 'setEmail', {value: setEmail});
+    return setEmail
+  }
+  
+  public get sendEmailConfirmation() {
+    const sendEmailConfirmation = this.$apiClient.$makeCaller(
+      this.$metadata.methods.sendEmailConfirmation,
+      (c) => c.sendEmailConfirmation(this.$primaryKey),
+      () => ({}),
+      (c, args) => c.sendEmailConfirmation(this.$primaryKey))
+    
+    Object.defineProperty(this, 'sendEmailConfirmation', {value: sendEmailConfirmation});
+    return sendEmailConfirmation
+  }
+  
+  public get setPassword() {
+    const setPassword = this.$apiClient.$makeCaller(
+      this.$metadata.methods.setPassword,
+      (c, currentPassword: string | null, newPassword: string | null, confirmNewPassword: string | null) => c.setPassword(this.$primaryKey, currentPassword, newPassword, confirmNewPassword),
+      () => ({currentPassword: null as string | null, newPassword: null as string | null, confirmNewPassword: null as string | null, }),
+      (c, args) => c.setPassword(this.$primaryKey, args.currentPassword, args.newPassword, args.confirmNewPassword))
+    
+    Object.defineProperty(this, 'setPassword', {value: setPassword});
+    return setPassword
+  }
+  
   constructor(initialData?: DeepPartial<$models.User> | null) {
     super($metadata.User, new $apiClients.UserApiClient(), initialData)
   }

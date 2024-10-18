@@ -1,3 +1,7 @@
+# 5.2.0
+
+- feat: Added a `reset` method to all API caller objects. This method resets all stateful fields on the object to default values.
+
 # 5.1.0
 
 - feat: All Coalesce-generated endpoints that accept a formdata body now also accept a JSON body. Existing formdata endpoints remain unchanged. `coalesce-vue` does not yet use these new endpoints.

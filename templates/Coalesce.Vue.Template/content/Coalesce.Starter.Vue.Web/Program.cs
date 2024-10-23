@@ -5,7 +5,7 @@ using IntelliTect.Coalesce;
 #if AppInsights
 using Microsoft.ApplicationInsights.DependencyCollector;
 using Microsoft.ApplicationInsights.Extensibility;
-using Microsoft.Extensions.Logging.ApplicationInsights; 
+using Microsoft.Extensions.Logging.ApplicationInsights;
 #endif
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
@@ -14,16 +14,18 @@ using Microsoft.Extensions.Logging.Console;
 #if OpenAPI
 using Microsoft.OpenApi.Models;
 #endif
-using System.Security.Claims;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 #if Identity
-using Coalesce.Starter.Vue.Web.Auth;
 #endif
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.AspNetCore.Mvc;
+using Coalesce.Starter.Vue.Data.Communication;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Azure.Core;
+using Azure.Identity;
 
 var builder = WebApplication.CreateBuilder(new WebApplicationOptions
 {
@@ -86,16 +88,29 @@ services
 
 #if Identity
 builder.ConfigureAuthentication();
-#endif
 
+#endif
+#if EmailSendGrid
+services.Configure<SendGridEmailOptions>(builder.Configuration.GetSection("Communication:SendGrid"));
+services.AddTransient<IEmailService, SendGridEmailService>();
+
+#elif EmailAzure
+services.AddSingleton<TokenCredential, DefaultAzureCredential>();
+services.Configure<AzureEmailOptions>(builder.Configuration.GetSection("Communication:Azure"));
+services.AddTransient<IEmailService, AzureEmailService>();
+
+#else
+services.AddTransient<IEmailService, NoOpEmailService>();
+
+#endif
 #if OpenAPI
 services.AddSwaggerGen(c =>
 {
     c.AddCoalesce();
     c.SwaggerDoc("current", new OpenApiInfo { Title = "Current API", Version = "current" });
 });
-#endif
 
+#endif
 
 services.AddScoped<SecurityService>();
 
@@ -110,8 +125,8 @@ services.AddScoped<IUrlHelper>(x =>
 });
 
 services.AddScoped<InvitationService>();
-#endif
 
+#endif
 
 #endregion
 

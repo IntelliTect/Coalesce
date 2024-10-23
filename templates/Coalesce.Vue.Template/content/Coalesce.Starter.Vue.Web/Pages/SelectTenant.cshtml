@@ -1,4 +1,4 @@
-﻿@page "/select-org"
+﻿@page
 @model Coalesce.Starter.Vue.Web.Pages.SelectTenantModel
 
 @{
@@ -24,6 +24,10 @@
     {
         <p>
             <b>@User.GetUserName()</b> is a not a member of any organization.
+@*#if (TenantMemberInvites)*@
+            <br />
+            If you received an invitation, please open the invitation link.
+@*#endif*@
         </p>
     }
 </form>
@@ -31,7 +35,7 @@
 <hr />
 
 @*#if (TenantCreateSelf)*@
-    <form action="/new-org" method="GET" class="d-grid gap-2">
+<form asp-page="CreateTenant" method="GET" class="d-grid gap-2">
     <button class="btn @(!Model.Tenants.Any() ? "btn-primary" : "btn-outline-dark")">
         Create Organization
     </button>

@@ -152,6 +152,59 @@ public class User : IdentityUser
 #endif
 #endif
 
+#if (LocalAuth)
+    [Coalesce]
+    public async Task<ItemResult> SetEmail(
+        [Inject] UserManagementService userService,
+        ClaimsPrincipal currentUser,
+        [DataType(DataType.EmailAddress)] string newEmail
+    )
+    {
+        if (currentUser.GetUserId() != this.Id && !currentUser.Can(Permission.UserAdmin)) return "Unauthorized.";
+        return await userService.SendEmailChangeRequest(this, newEmail);
+    }
+
+    [Coalesce]
+    public async Task<ItemResult> SendEmailConfirmation(
+        [Inject] UserManagementService userService,
+        ClaimsPrincipal currentUser
+    )
+    {
+        if (currentUser.GetUserId() != this.Id && !currentUser.Can(Permission.UserAdmin)) return "Unauthorized.";
+        return await userService.SendEmailConfirmationRequest(this);
+    }
+
+    [Coalesce]
+    public async Task<ItemResult> SetPassword(
+        [Inject] UserManager<User> userManager,
+        [Inject] SignInManager<User> signInManager,
+        ClaimsPrincipal currentUser,
+        [DataType(DataType.Password)] string? currentPassword,
+        [DataType(DataType.Password)] string newPassword,
+        [DataType(DataType.Password)] string confirmNewPassword
+    )
+    {
+        if (currentUser.GetUserId() != this.Id) return "Unauthorized.";
+
+        if (newPassword != confirmNewPassword) return "New passwords must match";
+
+        var result = this.PasswordHash is null
+            ? await userManager.AddPasswordAsync(this, newPassword)
+            : await userManager.ChangePasswordAsync(this, currentPassword ?? "", newPassword);
+
+        if (!result.Succeeded)
+        {
+            return string.Join("; ", result.Errors.Select(e => e.Description));
+        }
+
+        if (currentUser.GetUserId() == this.Id)
+        {
+            await signInManager.RefreshSignInAsync(this);
+        }
+        return new ItemResult(true, $"Password was successfully changed.");
+    }
+#endif
+
     [DefaultDataSource]
     public class DefaultSource(CrudContext<AppDbContext> context) : AppDataSource<User>(context)
     {

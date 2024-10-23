@@ -1278,6 +1278,20 @@ export abstract class ApiState<
     return this.__rawResponse.value;
   }
 
+  /** Reset all state fields of the instance.
+   * Does not reset configuration like response caching and concurrency mode.
+   */
+  public reset() {
+    if (this.isLoading)
+      throw new Error("Cannot reset while a request is pending.");
+    this.hasResult = false;
+    this.result = null;
+    this.wasSuccessful = null;
+    this.message = null;
+    this.isLoading = false;
+    this.__rawResponse.value = undefined;
+  }
+
   private __responseCacheConfig?: ResponseCachingConfiguration;
   /**
    * Enable response caching for the API caller,
@@ -1768,6 +1782,18 @@ export class ItemApiState<TArgs extends any[], TResult> extends ApiState<
     super(apiClient, invoker);
   }
 
+  public override reset(): void {
+    super.reset();
+    this.result = null;
+    this.validationIssues = null;
+    if (this._objectUrl?.url) {
+      URL.revokeObjectURL(this._objectUrl.url);
+      this._objectUrl.url = undefined;
+      this._objectUrl.target = undefined;
+      this._objectUrl = undefined;
+    }
+  }
+
   private _objectUrl?: {
     url?: string;
     target?: TResult;
@@ -1855,6 +1881,13 @@ export class ItemApiStateWithArgs<
   }
   set args(v) {
     this.__args.value = v;
+  }
+
+  public override reset(resetArgs = true) {
+    super.reset();
+    if (resetArgs) {
+      this.resetArgs();
+    }
   }
 
   /** Invokes a call to this API endpoint.
@@ -1991,6 +2024,15 @@ export class ListApiState<TArgs extends any[], TResult> extends ApiState<
     super(apiClient, invoker);
   }
 
+  override reset() {
+    super.reset();
+    this.result = null;
+    this.totalCount = null;
+    this.pageCount = null;
+    this.pageSize = null;
+    this.page = null;
+  }
+
   protected setResponseProps(data: ListResult<TResult>) {
     this.wasSuccessful = data.wasSuccessful;
     this.message = data.message || null;
@@ -2021,6 +2063,13 @@ export class ListApiStateWithArgs<
   }
   set args(v) {
     this.__args.value = v;
+  }
+
+  public override reset(resetArgs = true) {
+    super.reset();
+    if (resetArgs) {
+      this.resetArgs();
+    }
   }
 
   /** Invokes a call to this API endpoint.

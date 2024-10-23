@@ -1,0 +1,18 @@
+﻿@page
+@model Coalesce.Starter.Vue.Web.Pages.ConfirmEmailModel
+@{
+    ViewData["Title"] = "Confirm email";
+}
+
+<div asp-validation-summary="All" class="text-danger"></div>
+
+@if (ModelState.IsValid)
+{
+    <p>Thank you for confirming your email.</p>
+
+    <form method="get" action="/" class="d-grid mt-3">
+        <button type="submit" class="btn btn-primary">
+            Continue
+        </button>
+    </form>
+}

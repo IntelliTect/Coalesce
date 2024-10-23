@@ -1,13 +1,14 @@
 ﻿using Coalesce.Starter.Vue.Data;
 using Coalesce.Starter.Vue.Data.Auth;
+using Coalesce.Starter.Vue.Data.Communication;
 using Coalesce.Starter.Vue.Data.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
-using System.Security.Claims;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
-namespace Coalesce.Starter.Vue.Web.Auth;
+namespace Coalesce.Starter.Vue.Web;
 
-public static class AuthenticationConfiguration
+public static class ProgramAuthConfiguration
 {
     public static void ConfigureAuthentication(this WebApplicationBuilder builder)
     {
@@ -20,13 +21,23 @@ public static class AuthenticationConfiguration
                 c.ClaimsIdentity.EmailClaimType = AppClaimTypes.Email;
                 c.ClaimsIdentity.UserIdClaimType = AppClaimTypes.UserId;
                 c.ClaimsIdentity.UserNameClaimType = AppClaimTypes.UserName;
+
+                c.User.RequireUniqueEmail = true;
+#if LocalAuth
+                // https://pages.nist.gov/800-63-4/sp800-63b.html#passwordver
+                c.Password.RequireNonAlphanumeric = false;
+                c.Password.RequireDigit = false;
+                c.Password.RequireUppercase = false;
+                c.Password.RequireLowercase = false;
+                c.Password.RequiredLength = 15;
+#endif
             })
             .AddEntityFrameworkStores<AppDbContext>()
             .AddDefaultTokenProviders()
             .AddClaimsPrincipalFactory<ClaimsPrincipalFactory>();
 
-#if (GoogleAuth || MicrosoftAuth)
-        builder.Services.AddScoped<SignInService>();
+#if LocalAuth
+        builder.Services.AddScoped<UserManagementService>();
 #endif
 
         builder.Services
@@ -42,12 +53,6 @@ public static class AuthenticationConfiguration
 #if UserPictures
                 options.ClaimActions.MapJsonKey("pictureUrl", "picture");
 #endif
-                options.Events.OnTicketReceived = async ctx =>
-                {
-                    await ctx.HttpContext.RequestServices
-                        .GetRequiredService<SignInService>()
-                        .OnGoogleTicketReceived(ctx);
-                };
             })
 #endif
 #if MicrosoftAuth
@@ -58,13 +63,6 @@ public static class AuthenticationConfiguration
 #if (UserPictures || TenantCreateExternal)
                 options.SaveTokens = true;
 #endif
-
-                options.Events.OnTicketReceived = async ctx =>
-                {
-                    await ctx.HttpContext.RequestServices
-                        .GetRequiredService<SignInService>()
-                        .OnMicrosoftTicketReceived(ctx);
-                };
             })
 #endif
             ;
@@ -78,7 +76,7 @@ public static class AuthenticationConfiguration
 
         builder.Services.ConfigureApplicationCookie(c =>
         {
-            c.LoginPath = "/sign-in"; // Razor page "Pages/SignIn.cshtml"
+            c.LoginPath = "/SignIn"; // Razor page "Pages/SignIn.cshtml"
 
 #if Tenancy
             var oldOnValidate = c.Events.OnValidatePrincipal;

@@ -59,6 +59,34 @@ export class UserApiClient extends ModelApiClient<$models.User> {
     return this.$invoke($method, $params, $config)
   }
   
+  public setEmail(id: string | null, newEmail: string | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<void>> {
+    const $method = this.$metadata.methods.setEmail
+    const $params =  {
+      id,
+      newEmail,
+    }
+    return this.$invoke($method, $params, $config)
+  }
+  
+  public sendEmailConfirmation(id: string | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<void>> {
+    const $method = this.$metadata.methods.sendEmailConfirmation
+    const $params =  {
+      id,
+    }
+    return this.$invoke($method, $params, $config)
+  }
+  
+  public setPassword(id: string | null, currentPassword: string | null, newPassword: string | null, confirmNewPassword: string | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<void>> {
+    const $method = this.$metadata.methods.setPassword
+    const $params =  {
+      id,
+      currentPassword,
+      newPassword,
+      confirmNewPassword,
+    }
+    return this.$invoke($method, $params, $config)
+  }
+  
 }
 
 

@@ -7,38 +7,37 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.ComponentModel.DataAnnotations;
 
-namespace Coalesce.Starter.Vue.Web.Pages
+namespace Coalesce.Starter.Vue.Web.Pages;
+
+[Authorize]
+public class CreateTenantModel(AppDbContext db) : PageModel
 {
-    [Authorize]
-    public class CreateTenantModel(AppDbContext db) : PageModel
+    [Required]
+    [BindProperty]
+    [Display(Name = "Organization Name")]
+    public string? Name { get; set; }
+
+    public void OnGet()
     {
-        [Required]
-        [BindProperty]
-        [Display(Name = "Organization Name")]
-        public string? Name { get; set; }
+    }
 
-        public void OnGet()
-        {
-        }
+    public async Task<IActionResult> OnPostAsync(
+        [FromServices] SignInManager<User> signInManager
+    )
+    {
+        if (!ModelState.IsValid) return Page();
 
-        public async Task<IActionResult> OnPostAsync(
-            [FromServices] SignInManager<User> signInManager
-        )
-        {
-            if (!ModelState.IsValid) return Page();
+        Tenant tenant = new() { Name = Name! };
+        db.Tenants.Add(tenant);
+        await db.SaveChangesAsync();
 
-            Tenant tenant = new() { Name = Name! };
-            db.Tenants.Add(tenant);
-            await db.SaveChangesAsync();
+        db.ForceSetTenant(tenant.TenantId);
+        new DatabaseSeeder(db).SeedNewTenant(tenant, User.GetUserId());
 
-            db.ForceSetTenant(tenant.TenantId);
-            new DatabaseSeeder(db).SeedNewTenant(tenant, User.GetUserId());
+        // Sign the user into the new tenant (uses `db.TenantId`).
+        var user = await db.Users.FindAsync(User.GetUserId());
+        await signInManager.RefreshSignInAsync(user!);
 
-            // Sign the user into the new tenant (uses `db.TenantId`).
-            var user = await db.Users.FindAsync(User.GetUserId());
-            await signInManager.RefreshSignInAsync(user!);
-
-            return Redirect("/");
-        }
+        return Redirect("/");
     }
 }

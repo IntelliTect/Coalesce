@@ -44,8 +44,8 @@ jobs:
           - "--Identity --MicrosoftAuth --AuditLogs"
           # Tenancy variants:
           - "--Identity --Tenancy --TenantCreateExternal --GoogleAuth"
-          - "--Identity --Tenancy --TenantCreateSelf --TenantMemberInvites --AuditLogs" # todo: add local accounts to this case when we add it
-          - "--Identity --Tenancy --TenantCreateAdmin --TenantMemberInvites --MicrosoftAuth" # todo: add local accounts to this case when we add it
+          - "--Identity --Tenancy --TenantCreateSelf --TenantMemberInvites --AuditLogs --LocalAuth --EmailSendGrid"
+          - "--Identity --Tenancy --TenantCreateAdmin --TenantMemberInvites --MicrosoftAuth --LocalAuth --EmailAzure"
 
 
     defaults:

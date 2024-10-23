@@ -14,11 +14,9 @@ const coalesceVuetify = createCoalesceVuetify({
   metadata: $metadata,
 });
 
-type ArgumentsType<T> = T extends (...args: infer U) => any ? U : never;
-
 const mountComponent = function (
-  component: ArgumentsType<typeof mount>[0],
-  options: ArgumentsType<typeof mount>[1],
+  component: Parameters<typeof mount>[0],
+  options: Parameters<typeof mount>[1],
 ) {
   return mount(component, {
     ...options,
@@ -26,7 +24,7 @@ const mountComponent = function (
     global: {
       plugins: [vuetify, coalesceVuetify, router],
     },
-  } as ArgumentsType<typeof mount>[1]);
+  } as Parameters<typeof mount>[1]);
 } as typeof mount;
 
 export { nextTick } from "vue";

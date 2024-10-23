@@ -120,6 +120,8 @@ public class AppDbContext
 #endif
 #if Identity
                     .Format<User>(x => x.PasswordHash, x => "<password changed>")
+                    .Format<User>(x => x.SecurityStamp, x => "<stamp changed>")
+                    .ExcludeProperty<User>(x => new { x.ConcurrencyStamp })
 #endif
 #if Tenancy
                     .ExcludeProperty<ITenanted>(x => new { x.TenantId })

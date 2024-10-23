@@ -29,7 +29,9 @@ export default [
           endOfLine: "auto",
         },
       ],
+
       "vue/multi-word-component-names": "off",
+      "vue/no-template-shadow": ["error", { allow: ["props"] }],
 
       "prefer-const": "error",
       "no-debugger": process.env.NODE_ENV === "production" ? "warn" : "off",

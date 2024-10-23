@@ -23,8 +23,9 @@ public class SendGridEmailService(
     {
         if (!env.IsProduction())
         {
-            return await new NoOpEmailService(env)
-                .SendEmailAsync(to, subject, htmlMessage);
+            logger.LogWarning("Suppressed email send of '{subject}' to {to}:\n\n{content}", 
+                subject, to, htmlMessage);
+            return await new NoOpEmailService(env).SendEmailAsync(to, subject, htmlMessage);
         }
 
         var apiKey = config.CurrentValue.ApiKey;

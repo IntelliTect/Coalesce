@@ -18,8 +18,9 @@ public class AzureEmailService(
     {
         if (!env.IsProduction())
         {
-            return await new NoOpEmailService(env)
-                .SendEmailAsync(to, subject, htmlMessage);
+            logger.LogWarning("Suppressed email send of '{subject}' to {to}:\n\n{content}",
+                subject, to, htmlMessage);
+            return await new NoOpEmailService(env).SendEmailAsync(to, subject, htmlMessage);
         }
 
         var endpoint = config.CurrentValue.Endpoint;

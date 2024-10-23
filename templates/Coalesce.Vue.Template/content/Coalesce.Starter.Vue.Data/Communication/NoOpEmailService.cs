@@ -2,7 +2,9 @@
 
 namespace Coalesce.Starter.Vue.Data.Communication;
 
-public class NoOpEmailService(IHostEnvironment env) : IEmailService
+public class NoOpEmailService(
+    IHostEnvironment env
+) : IEmailService
 {
     public Task<ItemResult> SendEmailAsync(string to, string subject, string htmlMessage)
     {

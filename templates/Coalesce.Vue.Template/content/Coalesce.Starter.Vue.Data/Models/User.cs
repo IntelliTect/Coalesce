@@ -205,30 +205,6 @@ public class User : IdentityUser
     }
 #endif
 
-    [InternalUse]
-    public void InitializeFirstUser(AppDbContext db)
-    {
-#if Tenancy
-        // If this user is the first user, make them the global admin
-        this.IsGlobalAdmin = true;
-
-#if (!TenantCreateSelf && !TenantCreateExternal)
-        // Ensure that the very first user belongs to a tenant so they can create more tenants.
-        var tenant = await db.Tenants.FirstOrDefaultAsync(t => t.Name == "Demo Tenant");
-        if (tenant is not null) 
-        {
-            db.TenantId = tenant.TenantId;
-            db.TenantMemberships.Add(new() { TenantId = tenant.TenantId, User = this });
-            this.UserRoles = db.Roles.Select(r => new UserRole { Role = r, User = this }).ToList();
-            logger.LogInformation($"Granting demo tenant membership for initial user {this.Id}");
-        }
-#endif
-#else
-        // If this user is the first user, give them all roles so there is an initial admin.
-        this.UserRoles = db.Roles.Select(r => new UserRole { Role = r, User = this }).ToList();
-#endif
-    }
-
     [DefaultDataSource]
     public class DefaultSource(CrudContext<AppDbContext> context) : AppDataSource<User>(context)
     {

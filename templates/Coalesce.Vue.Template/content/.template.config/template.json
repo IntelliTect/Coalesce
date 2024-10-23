@@ -273,7 +273,7 @@
         },
         {
           "condition": "!EmailSendGrid",
-          "exclude": ["**/SendGridEmailService.cs", "**/AzureEmailService.cs"]
+          "exclude": ["**/SendGridEmailOptions.cs", "**/SendGridEmailService.cs"]
         },
         {
           "condition": "!ExampleModel",

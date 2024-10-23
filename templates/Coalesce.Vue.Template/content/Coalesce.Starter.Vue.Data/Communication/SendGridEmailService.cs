@@ -6,13 +6,6 @@ using SendGrid.Helpers.Mail;
 
 namespace Coalesce.Starter.Vue.Data.Communication;
 
-public class SendGridEmailOptions
-{
-    public string? ApiKey { get; set; }
-
-    public string? SenderEmail { get; set; }
-}
-
 public class SendGridEmailService(
     IHostEnvironment env,
     IOptionsMonitor<SendGridEmailOptions> config,

@@ -1787,8 +1787,6 @@ export class ItemApiState<TArgs extends any[], TResult> extends ApiState<
     this.result = null;
     this.validationIssues = null;
     if (this._objectUrl?.url) {
-      // If we got this far and we have a stored URL, it doesn't match the current result.
-      // Destroy that URL and then we'll make a new one.
       URL.revokeObjectURL(this._objectUrl.url);
       this._objectUrl.url = undefined;
       this._objectUrl.target = undefined;

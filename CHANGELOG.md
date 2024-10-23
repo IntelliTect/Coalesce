@@ -1,45 +1,64 @@
 # 5.2.0
 
-- feat: Added a `reset` method to all API caller objects. This method resets all stateful fields on the object to default values.
+## Features
+
+- Added a `reset` method to all [API caller objects](https://intellitect.github.io/Coalesce/stacks/vue/layers/api-clients.html#api-callers). This method resets all stateful fields on the object to default values.
+- Template: Added username/password auth option (aka individual user accounts, aka local accounts)
 
 # 5.1.0
 
-- feat: All Coalesce-generated endpoints that accept a formdata body now also accept a JSON body. Existing formdata endpoints remain unchanged. `coalesce-vue` does not yet use these new endpoints.
-- feat: Automatically produce user-friendly response messages in behaviors for Save and Delete operations that fail due to a violation of a SQL Server foreign key or unique constraint. This behavior can be controlled with the `DetailedEfConstraintExceptionMessages` setting in `.AddCoalesce(c => c.Configure(o => { ... }))`, or by overriding `StandardBehaviors.GetExceptionResult`. This is not a substitute for adding proper validation or other handling of related entities - it only exists to provide a better user experience in cases where the developer has forgotten to handle these situations. This behavior does respect Coalesce's security model and won't produce descriptions of types or values that the user is not allowed to see. (#468)
-- feat: Error responses now include inner exception messages when `DetailedExceptionMessages` is enabled. (#468)
-- feat: Add additional audit configuration methods to allow for allow-listing certain properties.
-- feat(c-admin-table): Clicking a row takes you to the details page (#465)
-- feat(c-admin-table): Always show button for details page (#465)
+## Features
 
-- fix: Service controllers missing `ActionResult File(IFile)` method. (#474)
-- fix: Handle sequences of digits when converting PascalCase to Title Case ("Is24h" => "Is 24h") (#469)
-- fix(c-select): Not respecting disabled/readonly state in all cases when opening menu (#473)
-- fix(c-select): The "Max _N_ items retrieved" message now accounts for list calls that don't provide a count, e.g. by passing `noCount=true`.
-- fix(c-admin-editor): Don't show save button when read-only
-- fix(c-admin-table): Surgical saves not working for items added with the "Add Item" button in editable mode. (#472)
+- All Coalesce-generated endpoints that accept a formdata body now also accept a JSON body. Existing formdata endpoints remain unchanged. `coalesce-vue` does not yet use these new endpoints.
+- Automatically produce user-friendly response messages in behaviors for Save and Delete operations that fail due to a violation of a SQL Server foreign key or unique constraint. This behavior can be controlled with the `DetailedEfConstraintExceptionMessages` setting in `.AddCoalesce(c => c.Configure(o => { ... }))`, or by overriding `StandardBehaviors.GetExceptionResult`. This is not a substitute for adding proper validation or other handling of related entities - it only exists to provide a better user experience in cases where the developer has forgotten to handle these situations. This behavior does respect Coalesce's security model and won't produce descriptions of types or values that the user is not allowed to see. (#468)
+- Error responses now include inner exception messages when `DetailedExceptionMessages` is enabled. (#468)
+- Add additional audit configuration methods to allow for allow-listing certain properties.
+- `c-admin-table`: Clicking a row takes you to the details page (#465)
+- `c-admin-table`: Always show button for details page (#465)
 
-- refactor: `CoalesceOptions.DetailedEntityFrameworkExceptionMessages` has been renamed to `CoalesceOptions.DetailedEFMigrationExceptionMessages`
+
+## Fixes
+
+- Service controllers missing `ActionResult File(IFile)` method. (#474)
+- Handle sequences of digits when converting PascalCase to Title Case ("Is24h" => "Is 24h") (#469)
+- `c-select`: Not respecting disabled/readonly state in all cases when opening menu (#473)
+- `c-select`: The "Max _N_ items retrieved" message now accounts for list calls that don't provide a count, e.g. by passing `noCount=true`.
+- `c-admin-editor`: Don't show save button when read-only
+- `c-admin-table`: Surgical saves not working for items added with the "Add Item" button in editable mode. (#472)
+
+## Other
+
+- `CoalesceOptions.DetailedEntityFrameworkExceptionMessages` has been renamed to `CoalesceOptions.DetailedEFMigrationExceptionMessages`
 
 # 5.0.3
 
-- fix: Remove flawed logic that chooses the wrong foreign key for navigation properties where the target type of the navigation property has a primary key that also serves as a foreign key in some other relationship. In exceedingly rare cases, you may now have to add a `[ForeignKey(Name = ...)]` attribute to any navigation properties that may now throw a codegen validation error that their foreign key property cannot be discovered automatically. Related to this issue, `ClassViewModel.IsOneToOne` is now deprecated and slated for future removal.
+## Fixes 
+
+- Remove flawed logic that chooses the wrong foreign key for navigation properties where the target type of the navigation property has a primary key that also serves as a foreign key in some other relationship. In exceedingly rare cases, you may now have to add a `[ForeignKey(Name = ...)]` attribute to any navigation properties that may now throw a codegen validation error that their foreign key property cannot be discovered automatically. Related to this issue, `ClassViewModel.IsOneToOne` is now deprecated and slated for future removal.
 
 # 5.0.2
 
-- feat: Make "not found" messages from data sources clearer when the ID is null or empty string. (#447)
-- feat(template): Added multi-tenancy options to the template. (#441, #461)
-- fix(template): adjust manual chunking configuration to avoid circular deps. (#455)
-- fix(audit): key props now respect configured property exclusions.
-- fix(audit): improper default formatting for primitive collections. (#459)
-- fix: c-admin-method now preserves newlines when displaying success messages.
-- fix: c-select not defaulting optional method parameters as clearable.
-- fix: method object parameters passed sent as null on the client are received as a default instance of the object on the server. (#456)
-- fix: non-nullable value types as root custom method parameters rejected by ModelState validation. (#464)
+## Features
+
+- Make "not found" messages from data sources clearer when the ID is null or empty string. (#447)
+- Added multi-tenancy options to the template. (#441, #461)
+
+## Fixes 
+
+- Template: adjust manual chunking configuration to avoid circular deps. (#455)
+- Audit logs: key props now respect configured property exclusions.
+- Audit logs: improper default formatting for primitive collections. (#459)
+- `c-admin-method` now preserves newlines when displaying success messages.
+- `c-select` not defaulting optional method parameters as clearable.
+- Method object parameters passed sent as null on the client were received as a default instance of the object on the server. (#456)
+- Non-nullable value types as root custom method parameters were rejected by ModelState validation. (#464)
 
 # 5.0.1
 
-- fix: `c-input` once again respects the validation rules defined by the bound ViewModel.
-- fix: `c-select-many-to-many`, when selecting an item, will now attempt to reuse a matching, previously removed item that has not yet been committed with a $bulkSave. This prevents unnecessary delete+create of the same item in a many-to-many when the user changes their mind about the inclusion of an item.
+## Fixes
+
+- `c-input` once again respects the validation rules defined by the bound ViewModel.
+- `c-select-many-to-many`, when selecting an item, will now attempt to reuse a matching, previously removed item that has not yet been committed with a $bulkSave. This prevents unnecessary delete+create of the same item in a many-to-many when the user changes their mind about the inclusion of an item.
 
 # 5.0.0
 

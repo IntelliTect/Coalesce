@@ -8,7 +8,7 @@ using System.Text.Encodings.Web;
 namespace Coalesce.Starter.Vue.Data.Auth;
 
 public class UserManagementService(
-    UserManager<User> _userManager,
+    UserManager<User> userManager,
     IUrlHelper urlHelper,
     IEmailService emailSender
 )
@@ -18,7 +18,7 @@ public class UserManagementService(
         if (user.EmailConfirmed) return "Email is already confirmed.";
         if (string.IsNullOrWhiteSpace(user.Email)) return "User has no email";
 
-        var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+        var code = await userManager.GenerateEmailConfirmationTokenAsync(user);
 
         var link = urlHelper.PageLink("/ConfirmEmail", values: new { userId = user.Id, code = code })!;
 
@@ -45,7 +45,7 @@ public class UserManagementService(
         // Regular users can only fetch themselves out of the data source,
         // admins can only view users in their own tenant,
         // and tenant admins can view everyone.
-        
+
         if (string.IsNullOrEmpty(newEmail) || !MailAddress.TryCreate(newEmail, out _))
         {
             return "New email is not valid.";
@@ -56,12 +56,12 @@ public class UserManagementService(
             return "New email is not different.";
         }
 
-        var code = await _userManager.GenerateChangeEmailTokenAsync(user, newEmail);
+        var code = await userManager.GenerateChangeEmailTokenAsync(user, newEmail);
 
         var link = urlHelper.PageLink("/ConfirmEmail", values: new { userId = user.Id, code = code, newEmail = newEmail })!;
 
         var result = await emailSender.SendEmailAsync(
-            newEmail, 
+            newEmail,
             "Confirm your email",
             $"""
             Please <a href="{HtmlEncoder.Default.Encode(link)}">click here</a> to complete your email change request.
@@ -81,7 +81,7 @@ public class UserManagementService(
     {
         if (user?.Email is not null)
         {
-            var code = await _userManager.GeneratePasswordResetTokenAsync(user);
+            var code = await userManager.GeneratePasswordResetTokenAsync(user);
 
             var link = urlHelper.PageLink("ResetPassword", values: new { userId = user.Id, code = code })!;
 

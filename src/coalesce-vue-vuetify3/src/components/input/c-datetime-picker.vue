@@ -79,7 +79,7 @@
         >
           <template v-slot:actions>
             <v-btn
-              @click="modelValue = new Date()"
+              @click="setToday"
               :class="showTime ? '' : 'mr-10'"
             >
               Today
@@ -169,6 +169,7 @@ import {
   startOfDay,
   endOfDay,
   startOfHour,
+  set,
 } from "date-fns";
 import { format, toZonedTime, fromZonedTime } from "date-fns-tz";
 import {
@@ -590,6 +591,34 @@ function emitInput(value: Date | null) {
 
   if (modelValue.value != value) {
     modelValue.value = value;
+  }
+}
+
+function setToday() {
+  const now = new Date();
+  const today = startOfDay(now);
+
+  // Preserve existing time if it's set
+  if (internalValueZoned.value) {
+    const existingDate = internalValueZoned.value;
+
+    const newDate = set(today, {
+      hours: existingDate.getHours(),
+      minutes: existingDate.getMinutes(),
+      seconds: existingDate.getSeconds(),
+      milliseconds: existingDate.getMilliseconds(),
+    });
+
+    if (internalTimeZone.value) {
+      // Adjust for the specified time zone
+      modelValue.value = fromZonedTime(newDate, internalTimeZone.value);
+    } else {
+      // No time zone specified, use the new date as is
+      modelValue.value = newDate;
+    }
+  } else {
+    // No existing date/time, just set to start of today
+    modelValue.value = today;
   }
 }
 

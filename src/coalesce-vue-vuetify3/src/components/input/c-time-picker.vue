@@ -73,7 +73,7 @@
 }
 
 .c-time-picker__column {
-  max-height: 328px;
+  max-height: 365px;
   overflow-y: auto;
   overflow-x: hidden;
   padding: 8px 9px;

@@ -75,7 +75,16 @@
           :min="min ? startOfDay(min) : undefined"
           :max="max ? endOfDay(max) : undefined"
           v-bind="datePickerProps"
+          :show-adjacent-months="true"
         >
+          <template v-slot:actions>
+            <v-btn
+              @click="modelValue = new Date()"
+              :class="showTime ? '' : 'mr-10'"
+            >
+              Today
+            </v-btn>
+          </template>
         </v-date-picker>
 
         <v-divider vertical></v-divider>

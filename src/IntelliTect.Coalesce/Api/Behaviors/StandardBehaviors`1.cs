@@ -539,9 +539,9 @@ namespace IntelliTect.Coalesce
                 return null;
             }
 
-            DbContext? dbContext = dbUpdateException.Entries.FirstOrDefault()?.Context;
+            IModel? model = dbUpdateException.Entries.FirstOrDefault()?.Metadata.Model;
 
-            if (dbUpdateException.InnerException is not DbException dbException || dbContext is null)
+            if (dbUpdateException.InnerException is not DbException dbException || model is null)
             {
                 return null;
             }
@@ -560,7 +560,7 @@ namespace IntelliTect.Coalesce
                 string table = match.Groups["table"].Value;
                 string column = match.Groups["column"].Value;
 
-                var conflictedTable = dbContext.Model
+                var conflictedTable = model
                     .GetEntityTypes()
                     .Where(t =>
                         t.GetSchemaQualifiedTableName() == table ||
@@ -629,7 +629,7 @@ namespace IntelliTect.Coalesce
                 string tableName = match.Groups["table"].Value;
                 string keyValue = match.Groups["keyValue"].Value;
 
-                var table = dbContext.Model
+                var table = model
                     .GetEntityTypes()
                     .FirstOrDefault(t =>
                         t.GetSchemaQualifiedTableName() == tableName ||

@@ -241,6 +241,25 @@ public class SqlServerExceptionResultTests
         Assert.Null(result);
     }
 
+    [Fact]
+    public void DbContextIsDisposed()
+    {
+        Db.Add(new Product { UniqueId1 = "qwerty" });
+
+        var exception = CreateException(
+            "Cannot insert duplicate key row in object 'dbo.Product' with unique index 'IX_Product_UniqueId1'. " +
+            "The duplicate key value is (qwerty)");
+
+        // The context might dispose before GetExceptionResult is reached if the user is using an IDbContextFactory
+        // with a `using` inside their ExecuteSaveAsync implementation.
+        Db.Dispose();
+
+        var result = Behaviors<Product>()
+            .GetExceptionResult(exception, new TestSparseDto<Product>() { ChangedProperties = { "UniqueId1" } });
+
+        result.AssertError("A different item with ID1 'qwerty' already exists.");
+    }
+
     private DbUpdateException CreateException(string error)
     {
         return new DbUpdateException("", CreateSqlException(547, error), Db.ChangeTracker.Entries().ToList());

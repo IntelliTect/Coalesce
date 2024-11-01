@@ -18,6 +18,7 @@ public class Role
 #if Tenancy
     [InternalUse]
     [DefaultOrderBy(FieldOrder = 0)]
+    [MaxLength(36)]
     public string TenantId { get; set; } = null!;
     [InternalUse]
     [ForeignKey(nameof(TenantId))]
@@ -62,6 +63,7 @@ public class RoleClaim : IdentityRoleClaim<string>, ITenanted
 
     [InternalUse]
     [DefaultOrderBy(FieldOrder = 0)]
+    [MaxLength(36)]
     public required string TenantId { get; set; }
     [InternalUse]
     [ForeignKey(nameof(TenantId))]

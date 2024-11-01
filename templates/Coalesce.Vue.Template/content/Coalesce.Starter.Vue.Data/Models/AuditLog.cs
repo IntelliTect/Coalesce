@@ -21,7 +21,7 @@ public class AuditLog : DefaultAuditLog
     // NOTE: Audit logs are *optionally* tenanted because they can log changes
     // to non-tenanted entities as well. Read security is implemented in the below datasource.
 
-    [InternalUse]
+    [InternalUse, MaxLength(36)]
     public string? TenantId { get; set; }
     [InternalUse]
     public Tenant? Tenant { get; set; }

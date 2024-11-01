@@ -27,6 +27,7 @@ public class UserRole : IdentityUserRole<string>
 #if Tenancy
     [InternalUse]
     [DefaultOrderBy(FieldOrder = 0)]
+    [MaxLength(36)]
     public string TenantId { get; set; } = null!;
     [InternalUse]
     public Tenant? Tenant { get; set; }

@@ -74,7 +74,7 @@ public class DatabaseSeeder(AppDbContext db)
 
 #if (!TenantCreateSelf && !TenantCreateExternal)
         // Ensure that the very first user belongs to a tenant so they can create more tenants.
-        var tenant = await db.Tenants.FirstOrDefaultAsync(t => t.Name == "Demo Tenant");
+        var tenant = db.Tenants.FirstOrDefault(t => t.Name == "Demo Tenant");
         if (tenant is not null) 
         {
             db.TenantId = tenant.TenantId;

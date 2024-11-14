@@ -84,7 +84,7 @@ public class AppDbContext
     public DbSet<TenantMembership> TenantMemberships => Set<TenantMembership>();
 #endif
 
-#if UserPictures
+#if (Identity && UserPictures)
     public DbSet<UserPhoto> UserPhotos => Set<UserPhoto>();
 #endif
 

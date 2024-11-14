@@ -2,8 +2,12 @@
 using Coalesce.Starter.Vue.Data.Models;
 using IntelliTect.Coalesce.Models;
 using Microsoft.AspNetCore.Authentication;
+#if GoogleAuth
 using Microsoft.AspNetCore.Authentication.Google;
+#endif
+#if MicrosoftAuth
 using Microsoft.AspNetCore.Authentication.MicrosoftAccount;
+#endif
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -29,7 +33,7 @@ public class ExternalLoginModel(
     public string? ReturnUrl { get; set; }
 
     public string? ErrorMessage { get; set; }
-        
+
     public IActionResult OnGet() => RedirectToPage("Login");
 
     public IActionResult OnPost(string provider)
@@ -131,7 +135,7 @@ public class ExternalLoginModel(
 #if UserPictures
         // Populate or update user photo from Microsoft Graph
         await UpdateUserPhoto(user,
-            HttpContext.RequestServices.GetRequiredService<IOptions<MicrosoftAccountOptions>>().Value.Backchannel, 
+            HttpContext.RequestServices.GetRequiredService<IOptions<MicrosoftAccountOptions>>().Value.Backchannel,
             () =>
             {
                 var request = new HttpRequestMessage(HttpMethod.Get, "https://graph.microsoft.com/v1.0/me/photos/96x96/$value");
@@ -229,10 +233,10 @@ public class ExternalLoginModel(
         if (tenant is null)
         {
             // Automatically create a tenant in our application based on the external tenant.
-            db.Tenants.Add(tenant = new() 
+            db.Tenants.Add(tenant = new()
             {
-                ExternalId = externalId, 
-                Name = user.Email?.Split('@').Last() ?? externalId 
+                ExternalId = externalId,
+                Name = user.Email?.Split('@').Last() ?? externalId
             });
             await db.SaveChangesAsync();
 

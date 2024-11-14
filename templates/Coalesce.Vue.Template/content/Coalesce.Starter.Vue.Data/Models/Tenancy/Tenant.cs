@@ -12,6 +12,7 @@ namespace Coalesce.Starter.Vue.Data.Models;
 [Display(Name = "Organization")]
 public class Tenant
 {
+    [MaxLength(36)]
     public string TenantId { get; set; } = Guid.NewGuid().ToString();
 
     public required string Name { get; set; }

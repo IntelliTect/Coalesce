@@ -7,7 +7,7 @@ public abstract class TenantedBase
     : ITenanted
 #endif
 {
-    [InternalUse, Required]
+    [InternalUse, Required, MaxLength(36)]
     public string TenantId { get; set; } = null!;
     [InternalUse]
     public Tenant? Tenant { get; set; }

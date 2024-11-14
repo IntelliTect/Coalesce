@@ -4,6 +4,7 @@
 [InternalUse]
 public class TenantMembership : TenantedBase
 {
+    [MaxLength(36)]
     public string TenantMembershipId { get; set; } = Guid.NewGuid().ToString();
 
     [Required]

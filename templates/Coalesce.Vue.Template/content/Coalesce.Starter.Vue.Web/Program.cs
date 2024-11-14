@@ -14,6 +14,7 @@ using Microsoft.Extensions.Logging.Console;
 #if OpenAPI
 using Microsoft.OpenApi.Models;
 #endif
+using System.Security.Claims;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;

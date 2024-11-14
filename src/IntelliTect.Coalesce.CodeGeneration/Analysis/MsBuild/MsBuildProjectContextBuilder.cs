@@ -73,7 +73,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Analysis.MsBuild
             {
                 using var stream = thisAssembly.GetManifestResourceStream($"{baseResourceName}.{file.Replace("/", ".")}");
                 var fileBytes = new byte[stream.Length];
-                stream.Read(fileBytes, 0, fileBytes.Length);
+                stream.ReadExactly(fileBytes);
 
                 var filePath = Path.Combine(targetLocation, file);
                 Directory.CreateDirectory(Path.GetDirectoryName(filePath));

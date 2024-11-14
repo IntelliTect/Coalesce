@@ -26,7 +26,7 @@ namespace Coalesce.Domain.WebShared
             var cookie = context.Request.Cookies.FirstOrDefault(c => c.Key == "SecurityTestRole");
             if (!cookie.Equals(default(KeyValuePair<string, string>))
                 && validRoles.Contains(cookie.Value)
-                && context.Request.Host.Value.Contains("localhost", System.StringComparison.OrdinalIgnoreCase))
+                && context.Request.Host.Value?.Contains("localhost", System.StringComparison.OrdinalIgnoreCase) == true)
             {
                 if (cookie.Value != "None")
                 {
@@ -39,7 +39,7 @@ namespace Coalesce.Domain.WebShared
                 cookie = context.Request.Cookies.FirstOrDefault(c => c.Key == "DemoUserRole");
                 if (!cookie.Equals(default(KeyValuePair<string, string>))
                     && validRoles.Contains(cookie.Value)
-                    && context.Request.Host.Value.Contains("localhost", System.StringComparison.OrdinalIgnoreCase))
+                    && context.Request.Host.Value?.Contains("localhost", System.StringComparison.OrdinalIgnoreCase) == true)
                 {
                     await SignInUser(context, "DemoUser", cookie.Value);
                 }

@@ -161,7 +161,7 @@ namespace Coalesce.Domain
             }
 
             var content = new byte[file.Length];
-            await file.Content.ReadAsync(content.AsMemory());
+            await file.Content.ReadExactlyAsync(content.AsMemory());
 
             AttachmentContent = new CaseAttachmentContent() { CaseKey = CaseKey, Content = content };
             AttachmentName = file.Name;

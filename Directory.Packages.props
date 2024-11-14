@@ -3,12 +3,12 @@
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
     <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'net6.0' ">
-    <DotNetPackageVersionSpec>6.0.*</DotNetPackageVersionSpec>
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'net8.0'">
+    <DotNetPackageVersionSpec>8.0.10</DotNetPackageVersionSpec>
   </PropertyGroup>
   <!-- TargetFramework is empty for projects that aren't multi-targeting (i.e. the playground projects) -->
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'net8.0' or '$(TargetFramework)' == '' ">
-    <DotNetPackageVersionSpec>8.0.10</DotNetPackageVersionSpec>
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'net9.0' or '$(TargetFramework)' == '' ">
+    <DotNetPackageVersionSpec>9.0.0</DotNetPackageVersionSpec>
   </PropertyGroup>
   <ItemGroup>
     <PackageVersion Include="Bogus" Version="35.6.1" />
@@ -41,14 +41,14 @@
     <PackageVersion Include="xunit.runner.visualstudio" Version="2.8.2" />
     <PackageVersion Include="Xunit.SkippableFact" Version="1.4.13" />
     <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="8.0.0" />
-    <PackageVersion Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
-    <PackageVersion Include="Microsoft.Extensions.Configuration.Binder" Version="8.0.2" />
-    <PackageVersion Include="Microsoft.Extensions.Configuration.CommandLine" Version="8.0.0" />
-    <PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="8.0.1" />
-    <PackageVersion Include="Microsoft.Extensions.Logging.Console" Version="8.0.1" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration" Version="9.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Binder" Version="9.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.CommandLine" Version="9.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="9.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Console" Version="9.0.0" />
     <PackageVersion Include="Microsoft.VisualStudio.Web.CodeGeneration" Version="2.2.4" />
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageVersion Include="System.Text.Json" Version="8.0.5" />
+    <PackageVersion Include="System.Text.Json" Version="9.0.0" />
     <PackageVersion Include="System.Runtime.Caching" Version="8.0.1" />
   </ItemGroup>
 </Project>

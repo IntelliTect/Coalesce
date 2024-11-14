@@ -87,6 +87,7 @@ namespace IntelliTect.Coalesce
             public Func<QueryContext, TResult> CreateCompiledQuery<TResult>(Expression query) => Throw<Func<QueryContext, TResult>>();
             public TResult Execute<TResult>(Expression query) => Throw<TResult>();
             public TResult ExecuteAsync<TResult>(Expression query, CancellationToken cancellationToken) => Throw<TResult>();
+            public Expression<Func<QueryContext, TResult>> PrecompileQuery<TResult>(Expression query, bool async) => Throw<Expression<Func<QueryContext, TResult>>>();
 
             [DoesNotReturn]
             private T Throw<T>()

@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <Import Project="../Common.props" />
   <PropertyGroup>
+    <TargetFrameworks>net8.0</TargetFrameworks>
     <Description>
       Provides Swashbuckle SwaggerGen filters to enhance definitions of Coalesce APIs in OpenAPI documents.
       Add using `services.AddSwaggerGen(c =&gt; c.AddCoalesce() );`.

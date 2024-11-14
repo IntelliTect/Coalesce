@@ -4,9 +4,11 @@ using IntelliTect.Coalesce;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Console;
 using Microsoft.Net.Http.Headers;
 using Microsoft.OpenApi.Models;
+using Scalar.AspNetCore;
 using System.Security.Claims;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -59,7 +61,7 @@ services.Configure<Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerOptions
 });
 
 
-//services.AddOpenApi(); // net9
+services.AddOpenApi();
 
 services.AddSwaggerGen(c =>
 {
@@ -119,7 +121,10 @@ app.Use(async (context, next) =>
 
 app.UseCors(c => c.AllowAnyOrigin().AllowAnyHeader());
 app.MapControllers();
-//app.MapOpenApi(); // net9
+
+app.MapOpenApi();
+app.MapScalarApiReference();
+
 app.MapSwagger();
 app.UseSwaggerUI(c =>
 {

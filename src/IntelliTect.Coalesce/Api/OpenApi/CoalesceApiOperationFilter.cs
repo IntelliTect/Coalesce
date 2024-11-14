@@ -1,71 +1,95 @@
-﻿using IntelliTect.Coalesce.Models;
+﻿#if NET9_0_OR_GREATER
+using IntelliTect.Coalesce.Api.Controllers;
+using IntelliTect.Coalesce.Models;
 using IntelliTect.Coalesce.TypeDefinition;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
+using Microsoft.AspNetCore.Mvc.Controllers;
+using Microsoft.AspNetCore.OpenApi;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
-using Swashbuckle.AspNetCore.Swagger;
-using Swashbuckle.AspNetCore.SwaggerGen;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
-namespace IntelliTect.Coalesce.Swashbuckle
+namespace IntelliTect.Coalesce.Api.OpenApi
 {
-    public class CoalesceApiOperationFilter : IOperationFilter
+    internal class CoalesceApiOperationFilter : IOpenApiOperationTransformer
     {
         private readonly ReflectionRepository reflectionRepository;
-        private readonly IServiceProvider serviceProvider;
-        private readonly ILookup<(string HttpMethod, string RelativePath), ApiDescription> descriptionsByEndpoint;
+        private readonly ILookup<(string? HttpMethod, string? RelativePath), ApiDescription> descriptionsByEndpoint;
 
         public CoalesceApiOperationFilter(
-            ReflectionRepository reflectionRepository,
             IApiDescriptionGroupCollectionProvider apiDescriptions,
-            IServiceProvider serviceProvider
+            ReflectionRepository reflectionRepository
         )
         {
             this.reflectionRepository = reflectionRepository;
-            this.serviceProvider = serviceProvider;
 
             descriptionsByEndpoint = apiDescriptions.ApiDescriptionGroups.Items
                 .SelectMany(g => g.Items)
                 .ToLookup(d => (d.HttpMethod, d.RelativePath));
         }
 
-        public void Apply(OpenApiOperation operation, OperationFilterContext context)
+        public Task TransformAsync(
+            OpenApiOperation operation, 
+            OpenApiOperationTransformerContext context, 
+            CancellationToken cancellationToken)
         {
-            var cvm = reflectionRepository.GetClassViewModel(context.MethodInfo.DeclaringType);
-            var method = new ReflectionMethodViewModel(cvm, context.MethodInfo);
+            if (context.Description.ActionDescriptor is not ControllerActionDescriptor cad ||
+                !cad.ControllerTypeInfo.IsAssignableTo(typeof(BaseApiController)))
+            {
+                return Task.CompletedTask;
+            }
+
+            var methodInfo = cad.MethodInfo;
+            var cvm = reflectionRepository.GetClassViewModel(methodInfo.DeclaringType!)!;
+            var method = new ReflectionMethodViewModel(cvm, methodInfo);
 
             AddOtherBodyTypes(operation, context);
             ProcessDataSources(operation, context, method);
             ProcessStandardParameters(operation, method);
+
+            return Task.CompletedTask;
         }
 
         /// <summary>
-        /// Workaround https://github.com/domaindrivendev/Swashbuckle.AspNetCore/issues/2270
+        /// Workaround https://github.com/dotnet/aspnetcore/issues/58329
         /// </summary>
-        private void AddOtherBodyTypes(OpenApiOperation operation, OperationFilterContext context)
+        private async void AddOtherBodyTypes(OpenApiOperation operation, OpenApiOperationTransformerContext context)
         {
-            var generator = serviceProvider.GetRequiredService<ISwaggerProvider>();
-            var description = context.ApiDescription;
+            Type? docServiceType = Type.GetType("Microsoft.AspNetCore.OpenApi.OpenApiDocumentService,Microsoft.AspNetCore.OpenApi");
+            if (docServiceType is null) return;
+
+            var description = context.Description;
 
             var otherDescriptions = descriptionsByEndpoint[(description.HttpMethod, description.RelativePath)]
                 .Where(d => d != description);
 
             foreach (var otherDescription in otherDescriptions)
             {
-                var otherBody = generator
-                    .GetType()
-                    .GetMethod("GenerateRequestBody", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
-                    .Invoke(generator, [otherDescription, context.SchemaRepository]) as OpenApiRequestBody;
+                object docService = context.ApplicationServices.GetRequiredKeyedService(docServiceType, context.DocumentName);
+                var resultTask = docServiceType
+                    .GetMethod("GetRequestBodyAsync", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)?
+                    .Invoke(docService, [
+                        // ApiDescription description,
+                        otherDescription,
+                        // IServiceProvider scopedServiceProvider,
+                        context.ApplicationServices,
+                        // IOpenApiSchemaTransformer[] schemaTransformers,
+                        // TODO: Too hard to acquire schema transformers here.
+                        Array.Empty<IOpenApiSchemaTransformer>(),
+                        // CancellationToken cancellationToken
+                        CancellationToken.None
+                    ]) as Task<OpenApiRequestBody>;
 
-                // To mirror legacy behavior before JSON-accepting endpoints were added to Coalesce,
-                // only add the "multipart/form-data" body, but not the urlencoded body.
-                foreach (var otherContent in otherBody.Content.Where(c => 
-                    c.Key is "multipart/form-data" or "application/json"
-                ))
+                if (resultTask is null) continue;
+
+                var result = await resultTask;
+                foreach (var otherContent in result.Content)
                 {
                     operation.RequestBody.Content.Add(otherContent);
                 }
@@ -76,9 +100,9 @@ namespace IntelliTect.Coalesce.Swashbuckle
         {
             foreach (var paramVm in method.Parameters.Where(p => p.Type.IsA<IDataSourceParameters>()))
             {
-                var paramType = paramVm.Type.ClassViewModel;
+                var paramType = paramVm.Type.ClassViewModel!;
 
-                // Join our ParameterViewModels with the Swashbuckle IParameters.
+                // Join our ParameterViewModels with the OpenApiParameters.
                 var paramsUnion = paramType.ClientProperties.Join(
                     operation.Parameters, p => p.Name, p => p.Name, (pvm, nbp) => (PropViewModel: pvm, OperationParam: nbp)
                 );
@@ -98,9 +122,9 @@ namespace IntelliTect.Coalesce.Swashbuckle
                         .GenericArgumentsFor(typeof(IntelliTect.Coalesce.Api.Controllers.BaseApiController<,,>))
                         ?[0];
 
-                    if (modelType != null)
+                    if (modelType?.ClassViewModel is ClassViewModel cvm)
                     {
-                        foreach (var filterProp in modelType.ClassViewModel.ClientProperties.Where(p => p.IsUrlFilterParameter))
+                        foreach (var filterProp in cvm.ClientProperties.Where(p => p.IsUrlFilterParameter))
                         {
                             operation.Parameters.Add(new OpenApiParameter
                             {
@@ -125,7 +149,7 @@ namespace IntelliTect.Coalesce.Swashbuckle
             }
         }
 
-        private void ProcessDataSources(OpenApiOperation operation, OperationFilterContext context, MethodViewModel method)
+        private void ProcessDataSources(OpenApiOperation operation, OpenApiOperationTransformerContext context, MethodViewModel method)
         {
             var iDataSourceParam = method.Parameters.FirstOrDefault(p => p.Type.IsA(typeof(IDataSource<>)));
             if (iDataSourceParam is null) return;
@@ -150,14 +174,14 @@ namespace IntelliTect.Coalesce.Swashbuckle
 
                 foreach (var param in dataSources.SelectMany(ds => ds.DataSourceParameters).GroupBy(ds => ds.Name))
                 {
-                    var openApiParam = operation.Parameters.FirstOrDefault(p =>
+                    var openApiParam = operation.Parameters.FirstOrDefault(p => 
                         p.Name.Equals($"{dataSourceNameParam.Name}.{param.Key}", StringComparison.OrdinalIgnoreCase));
 
                     if (openApiParam is not null)
                     {
                         var dataSourceNames = string.Join(", ", param.Select(p => p.EffectiveParent.ClientTypeName));
 
-                        openApiParam.Description = string.Join(". \n", (new List<string>(param.Select(p => p.Description))
+                        openApiParam.Description = string.Join(". \n", (new List<string?>(param.Select(p => p.Description))
                         {
                             $"Used by data source{(param.Count() == 1 ? "" : "s")} {dataSourceNames}."
                         }).Where(s => !string.IsNullOrWhiteSpace(s)).Distinct());
@@ -167,3 +191,4 @@ namespace IntelliTect.Coalesce.Swashbuckle
         }
     }
 }
+#endif

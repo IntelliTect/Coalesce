@@ -17,6 +17,10 @@
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" />
   </ItemGroup>
 
+  <ItemGroup Condition="'$(TargetFramework)' == 'net9.0'">
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
+  </ItemGroup>
+
 	<ItemGroup>
 	  <None Remove="Application\SecurityOverview.html" />
 	</ItemGroup>

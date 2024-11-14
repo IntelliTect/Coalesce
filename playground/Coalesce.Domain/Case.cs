@@ -8,6 +8,7 @@ using IntelliTect.Coalesce.Utilities;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.IO;
@@ -222,6 +223,7 @@ namespace Coalesce.Domain
             public AllOpenCases(CrudContext<AppDbContext> context) : base(context) { }
 
             [Coalesce]
+            [Description("Only include cases opened on or after this date")]
             public DateTimeOffset? MinDate { get; set; }
 
             public override IQueryable<Case> GetQuery(IDataSourceParameters parameters) => Db.Cases

@@ -2,6 +2,11 @@
 
 ## Features
 
+- Added support for .NET 9.
+- `IntelliTect.Coalesce.Swashbuckle` is now deprecated in favor of `Microsoft.AspNetCore.OpenApi` for .NET 9+ projects. To upgrade:
+  - Replace `services.AddSwaggerGen(...)` with `services.AddOpenApi()`.
+  - Replace `app.MapSwagger()` with `app.MapOpenApi()`.
+  - Replace `app.UseSwaggerUI()` with `app.MapScalarApiReference()` from package `Scalar.AspNetCore`. The OpenAPI UI maps to `/scalar/v1` by default.
 - Added a `reset` method to all [API caller objects](https://intellitect.github.io/Coalesce/stacks/vue/layers/api-clients.html#api-callers). This method resets all stateful fields on the object to default values.
 - Template: Added username/password auth option (aka individual user accounts, aka local accounts)
 

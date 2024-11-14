@@ -805,6 +805,7 @@ export const Case = domain.types.Case = {
         minDate: {
           name: "minDate",
           displayName: "Min Date",
+          description: "Only include cases opened on or after this date",
           type: "date",
           dateKind: "datetime",
           role: "value",

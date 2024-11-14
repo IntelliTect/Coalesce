@@ -204,10 +204,10 @@ namespace Coalesce.Web.Vue3.Api
         /// <summary>
         /// Method: UploadImage
         /// </summary>
-        [HttpPost("UploadImage2")]
+        [HttpPost("UploadImage")]
         [Authorize]
         [Consumes("application/x-www-form-urlencoded", "multipart/form-data")]
-        public virtual async Task<ItemResult> UploadImage2(
+        public virtual async Task<ItemResult> UploadImage(
             [FromServices] IDataSourceFactory dataSourceFactory,
             [FromForm(Name = "id")] int id,
             Microsoft.AspNetCore.Http.IFormFile file)

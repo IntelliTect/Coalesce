@@ -165,6 +165,8 @@ export namespace Case {
     
     export class AllOpenCases implements DataSource<typeof metadata.Case.dataSources.allOpenCases> {
       readonly $metadata = metadata.Case.dataSources.allOpenCases
+      
+      /** Only include cases opened on or after this date */
       minDate: Date | null = null
       
       constructor(params?: Omit<Partial<AllOpenCases>, '$metadata'>) {

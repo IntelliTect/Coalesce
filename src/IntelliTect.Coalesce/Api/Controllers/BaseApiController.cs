@@ -5,6 +5,7 @@ using IntelliTect.Coalesce.TypeDefinition;
 using IntelliTect.Coalesce.TypeDefinition.Enums;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Net.Http.Headers;
@@ -16,6 +17,19 @@ using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.Api.Controllers
 {
+    [AttributeUsage(AttributeTargets.Class)]
+    internal sealed class CoalesceApiControllerAttribute : Attribute, IControllerModelConvention
+    {
+        public void Apply(ControllerModel controller)
+        {
+            foreach (var action in controller.Actions)
+            {
+                new ApiVisibilityConvention().Apply(action);
+            }
+        }
+    }
+
+    [CoalesceApiController]
     public abstract class BaseApiController : Controller
     {
         protected BaseApiController(CrudContext context)

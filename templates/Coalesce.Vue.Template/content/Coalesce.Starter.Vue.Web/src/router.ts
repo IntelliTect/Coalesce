@@ -37,6 +37,13 @@ const router = createRouter({
       component: () => import("./views/UserProfile.vue"),
     },
     //#endif
+    //#if OpenAPI
+    {
+      path: "/openapi",
+      props: true,
+      component: () => import("./views/OpenAPI.vue"),
+    },
+    //#endif
 
     // Coalesce admin routes
     {

@@ -3,17 +3,12 @@
 ## Features
 
 - Added support for .NET 9.
-- `IntelliTect.Coalesce.Swashbuckle` is now deprecated in favor of `Microsoft.AspNetCore.OpenApi` for .NET 9+ projects. To upgrade:
-  - Replace `services.AddSwaggerGen(...)` with `services.AddOpenApi()`.
-  - Replace `app.MapSwagger()` with `app.MapOpenApi()`.
-  - Replace `app.UseSwaggerUI()` with `app.MapScalarApiReference()` from package `Scalar.AspNetCore`. The OpenAPI UI maps to `/scalar/v1` by default.
 - Added a `reset` method to all [API caller objects](https://intellitect.github.io/Coalesce/stacks/vue/layers/api-clients.html#api-callers). This method resets all stateful fields on the object to default values.
 - Template: Added username/password auth option (aka individual user accounts, aka local accounts)
 
 ## Fixes
 
 - Fix an ObjectDisposedException from `StandardBehaviors.GetExceptionResult` when using an `IDbContextFactory` in an `Execute[Save|Delete]Async` implementation.
-
 
 # 5.1.0
 
@@ -25,7 +20,6 @@
 - Add additional audit configuration methods to allow for allow-listing certain properties.
 - `c-admin-table`: Clicking a row takes you to the details page (#465)
 - `c-admin-table`: Always show button for details page (#465)
-
 
 ## Fixes
 
@@ -42,7 +36,7 @@
 
 # 5.0.3
 
-## Fixes 
+## Fixes
 
 - Remove flawed logic that chooses the wrong foreign key for navigation properties where the target type of the navigation property has a primary key that also serves as a foreign key in some other relationship. In exceedingly rare cases, you may now have to add a `[ForeignKey(Name = ...)]` attribute to any navigation properties that may now throw a codegen validation error that their foreign key property cannot be discovered automatically. Related to this issue, `ClassViewModel.IsOneToOne` is now deprecated and slated for future removal.
 
@@ -53,7 +47,7 @@
 - Make "not found" messages from data sources clearer when the ID is null or empty string. (#447)
 - Added multi-tenancy options to the template. (#441, #461)
 
-## Fixes 
+## Fixes
 
 - Template: adjust manual chunking configuration to avoid circular deps. (#455)
 - Audit logs: key props now respect configured property exclusions.

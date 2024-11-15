@@ -44,9 +44,9 @@
               </v-list-item>
               <!--#if OpenAPI  -->
               <v-list-item
-                title="Swagger UI"
-                subtitle="View OpenAPI/Swagger documentation for the application."
-                href="/swagger"
+                title="Open API"
+                subtitle="View OpenAPI documentation for the application."
+                to="/openapi"
                 prepend-icon="fa fa-code"
               >
               </v-list-item>

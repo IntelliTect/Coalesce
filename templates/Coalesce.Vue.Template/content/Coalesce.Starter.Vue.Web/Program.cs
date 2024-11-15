@@ -13,6 +13,7 @@ using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Logging.Console;
 #if OpenAPI
 using Microsoft.OpenApi.Models;
+using Scalar.AspNetCore;
 #endif
 using System.Security.Claims;
 using System.Text.Json;
@@ -192,10 +193,7 @@ app.Use(async (context, next) =>
 
 #if OpenAPI
 app.MapSwagger();
-app.UseSwaggerUI(c =>
-{
-    c.SwaggerEndpoint("/swagger/current/swagger.json", "Current API");
-});
+app.MapScalarApiReference(c => c.OpenApiRoutePattern = "/swagger/{documentName}/swagger.json");
 #endif
 
 app.MapRazorPages();

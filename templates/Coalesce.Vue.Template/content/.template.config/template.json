@@ -95,8 +95,8 @@
     "OpenAPI": {
       "type": "parameter",
       "datatype": "bool",
-      "displayName": "OpenAPI/Swagger",
-      "description": "Include configuration to expose an OpenAPI document and SwaggerUI using Swashbuckle."
+      "displayName": "OpenAPI",
+      "description": "Include configuration to expose an OpenAPI document, and interactive UI with Scalar."
     },
     "Tenancy": {
       "type": "parameter",
@@ -273,7 +273,10 @@
         },
         {
           "condition": "!EmailSendGrid",
-          "exclude": ["**/SendGridEmailOptions.cs", "**/SendGridEmailService.cs"]
+          "exclude": [
+            "**/SendGridEmailOptions.cs",
+            "**/SendGridEmailService.cs"
+          ]
         },
         {
           "condition": "!ExampleModel",
@@ -282,6 +285,10 @@
             "**/WidgetEdit.spec.ts",
             "**/Widget.cs"
           ]
+        },
+        {
+          "condition": "!OpenAPI",
+          "exclude": ["**/OpenAPI.vue"]
         },
         {
           "condition": "!AzurePipelines",

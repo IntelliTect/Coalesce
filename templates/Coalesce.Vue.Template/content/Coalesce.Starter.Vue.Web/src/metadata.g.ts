@@ -1,8 +1,8 @@
-import {
-  Domain, getEnumMeta, solidify, ModelType, ObjectType,
+import { getEnumMeta, solidify } from 'coalesce-vue/lib/metadata'
+import type {
+  Domain, ModelType, ObjectType, HiddenAreas, BehaviorFlags, 
   PrimitiveProperty, ForeignKeyProperty, PrimaryKeyProperty,
-  ModelCollectionNavigationProperty, ModelReferenceNavigationProperty,
-  HiddenAreas, BehaviorFlags
+  ModelCollectionNavigationProperty, ModelReferenceNavigationProperty
 } from 'coalesce-vue/lib/metadata'
 
 
@@ -945,6 +945,9 @@ export const UserInfo = domain.types.UserInfo = {
       displayName: "Tenant Id",
       type: "string",
       role: "value",
+      rules: {
+        maxLength: val => !val || val.length <= 36 || "Tenant Id may not be more than 36 characters.",
+      }
     },
     tenantName: {
       name: "tenantName",

@@ -19,6 +19,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Tests
 {
     public class TargetClassesFullGenerationTest : CodeGenTestBase
     {
+        // #IF directive so this doesn't needlessly run for multiple TFMs. It only needs to run for one.
 #if NET8_0
         /// <summary>
         /// This test isn't asserting anything in .NET land.

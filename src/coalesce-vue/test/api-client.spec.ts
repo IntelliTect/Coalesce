@@ -27,7 +27,7 @@ import {
   ComplexModelViewModel,
   PersonListViewModel,
 } from "@test-targets/viewmodels.g";
-import { Person, Statuses } from "@test-targets/models.g";
+import { ExternalParent, Person, Statuses } from "@test-targets/models.g";
 
 function makeAdapterMock(result?: any) {
   return makeEndpointMock<AxiosRequestConfig>(result);
@@ -898,23 +898,31 @@ describe("$makeCaller", () => {
   });
 
   describe("useResponseCaching", () => {
-    test("dehydrates and hydrates object results", async () => {
-      let studentId = 1;
-      AxiosClient.defaults.adapter = () =>
-        makeEndpointMock({
-          name: "steve",
-          studentWrapperObject: {
-            name: "bob",
-            student: {
-              studentId: studentId++,
-              name: "bob",
+    test.only("dehydrates and hydrates object results", async () => {
+      let requestNum = 1;
+
+      const mock = mockEndpoint(
+        new ComplexModelViewModel().$metadata.methods
+          .instanceGetMethodWithObjParam,
+        vitest.fn(async (req) => {
+          return {
+            wasSuccessful: true,
+            object: {
+              ...req.params.obj,
+              valueArray: [requestNum++],
             },
-          },
-        } as Advisor)();
+          };
+        })
+      );
 
       const runTest = () => {
-        const caller = new StudentApiClient().$makeCaller("item", (c) =>
-          c.getWithObjParam(42, new Advisor({ name: "steve" }))
+        const caller = new ComplexModelApiClient().$makeCaller(
+          "item",
+          (c, param: number) =>
+            c.instanceGetMethodWithObjParam(
+              param,
+              new ExternalParent({ stringList: ["foo"] })
+            )
         );
         caller.useResponseCaching();
         return caller;
@@ -923,11 +931,20 @@ describe("$makeCaller", () => {
       // Make the first caller and invoke it, which will populate the cache.
       const caller1 = runTest();
       expect(caller1.result).toBeNull();
-      await caller1();
+      await caller1(42);
       expect(caller1.result).not.toBeNull();
+      expect(caller1.result).toMatchObject(
+        new ExternalParent({ stringList: ["foo"], valueArray: [1] })
+      );
       const cacheValue = Object.values(sessionStorage)[0];
       expect(cacheValue).not.toBeFalsy();
       expect(cacheValue).not.toContain("$metadata");
+
+      expect(mock).toBeCalledTimes(1);
+      expect(mock.mock.calls[0][0].params).toMatchObject({
+        id: 42,
+        obj: { stringList: ["foo"] },
+      });
 
       // Make another caller. It will be dormant until invoked.
       const caller2 = runTest();
@@ -937,18 +954,9 @@ describe("$makeCaller", () => {
       expect(caller2.isLoading).toBe(false);
 
       // Invoke the caller. At this point, the cached response will get loaded.
-      const caller2Promise = caller2();
+      const caller2Promise = caller2(42);
       expect(caller2.result).toMatchObject(
-        new Advisor({
-          name: "steve",
-          studentWrapperObject: {
-            name: "bob",
-            student: {
-              studentId: 1,
-              name: "bob",
-            },
-          },
-        })
+        new ExternalParent({ stringList: ["foo"], valueArray: [1] })
       );
       expect(caller2.wasSuccessful).toBe(true);
       expect(caller2.hasResult).toBe(true);
@@ -958,20 +966,16 @@ describe("$makeCaller", () => {
       // Observe that the results are set with the new api response.
       await caller2Promise;
       expect(caller2.result).toMatchObject(
-        new Advisor({
-          name: "steve",
-          studentWrapperObject: {
-            name: "bob",
-            student: {
-              studentId: 2,
-              name: "bob",
-            },
-          },
-        })
+        new ExternalParent({ stringList: ["foo"], valueArray: [2] })
       );
       expect(caller2.wasSuccessful).toBe(true);
       expect(caller2.hasResult).toBe(true);
       expect(caller2.isLoading).toBe(false);
+      expect(mock).toBeCalledTimes(2);
+      expect(mock.mock.calls[1][0].params).toMatchObject({
+        id: 42,
+        obj: { stringList: ["foo"] },
+      });
     });
 
     test("respects stored max age", async () => {

@@ -285,6 +285,17 @@ export class ComplexModelViewModel extends ViewModel<$models.ComplexModel, $apiC
     return methodWithRequiredAfterOptional
   }
   
+  public get instanceGetMethodWithObjParam() {
+    const instanceGetMethodWithObjParam = this.$apiClient.$makeCaller(
+      this.$metadata.methods.instanceGetMethodWithObjParam,
+      (c, obj?: $models.ExternalParent | null) => c.instanceGetMethodWithObjParam(this.$primaryKey, obj),
+      () => ({obj: null as $models.ExternalParent | null, }),
+      (c, args) => c.instanceGetMethodWithObjParam(this.$primaryKey, args.obj))
+    
+    Object.defineProperty(this, 'instanceGetMethodWithObjParam', {value: instanceGetMethodWithObjParam});
+    return instanceGetMethodWithObjParam
+  }
+  
   public get methodWithExternalTypesWithSinglePurpose() {
     const methodWithExternalTypesWithSinglePurpose = this.$apiClient.$makeCaller(
       this.$metadata.methods.methodWithExternalTypesWithSinglePurpose,

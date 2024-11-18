@@ -1,3 +1,9 @@
+# 5.2.1
+
+## Fixes
+
+- API clients with response caching enabled were not passing parameters correctly
+
 # 5.2.0
 
 ## Features

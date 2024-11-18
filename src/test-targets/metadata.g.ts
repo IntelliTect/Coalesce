@@ -1279,6 +1279,38 @@ export const ComplexModel = domain.types.ComplexModel = {
         role: "value",
       },
     },
+    instanceGetMethodWithObjParam: {
+      name: "instanceGetMethodWithObjParam",
+      displayName: "Instance Get Method With Obj Param",
+      transportType: "item",
+      httpMethod: "GET",
+      params: {
+        id: {
+          name: "id",
+          displayName: "Primary Key",
+          type: "number",
+          role: "value",
+          get source() { return (domain.types.ComplexModel as ModelType & { name: "ComplexModel" }).props.complexModelId },
+          rules: {
+            required: val => val != null || "Primary Key is required.",
+          }
+        },
+        obj: {
+          name: "obj",
+          displayName: "Obj",
+          type: "object",
+          get typeDef() { return (domain.types.ExternalParent as ObjectType & { name: "ExternalParent" }) },
+          role: "value",
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "object",
+        get typeDef() { return (domain.types.ExternalParent as ObjectType & { name: "ExternalParent" }) },
+        role: "value",
+      },
+    },
     methodWithExternalTypesWithSinglePurpose: {
       name: "methodWithExternalTypesWithSinglePurpose",
       displayName: "Method With External Types With Single Purpose",

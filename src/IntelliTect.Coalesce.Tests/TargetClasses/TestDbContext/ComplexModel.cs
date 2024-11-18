@@ -224,6 +224,11 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
 
 #nullable restore
 
+        [Coalesce, Execute(HttpMethod = HttpMethod.Get)]
+        public ExternalParent InstanceGetMethodWithObjParam(ExternalParent obj)
+        {
+            return obj;
+        }
 
         [Coalesce, Execute]
         public ExternalParentAsOutputOnly MethodWithExternalTypesWithSinglePurpose(

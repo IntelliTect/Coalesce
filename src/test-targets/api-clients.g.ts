@@ -81,6 +81,15 @@ export class ComplexModelApiClient extends ModelApiClient<$models.ComplexModel> 
     return this.$invoke($method, $params, $config)
   }
   
+  public instanceGetMethodWithObjParam(id: number | null, obj?: $models.ExternalParent | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<$models.ExternalParent>> {
+    const $method = this.$metadata.methods.instanceGetMethodWithObjParam
+    const $params =  {
+      id,
+      obj,
+    }
+    return this.$invoke($method, $params, $config)
+  }
+  
   public methodWithExternalTypesWithSinglePurpose(id: number | null, single?: $models.ExternalParentAsInputOnly | null, collection?: $models.ExternalParentAsInputOnly[] | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<$models.ExternalParentAsOutputOnly>> {
     const $method = this.$metadata.methods.methodWithExternalTypesWithSinglePurpose
     const $params =  {

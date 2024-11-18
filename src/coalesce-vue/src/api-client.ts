@@ -1490,7 +1490,7 @@ export abstract class ApiState<
 
         invoker = async () => {
           const [promise, requests] = apiClient._observeRequests(
-            () => originalInvoker.apply(thisArg, [apiClient, ...arguments]),
+            () => originalInvoker.apply(thisArg, [apiClient, ...args]),
             true
           );
           const { request, method } = requests[0];

@@ -898,7 +898,7 @@ describe("$makeCaller", () => {
   });
 
   describe("useResponseCaching", () => {
-    test.only("dehydrates and hydrates object results", async () => {
+    test("dehydrates and hydrates object results", async () => {
       let requestNum = 1;
 
       const mock = mockEndpoint(

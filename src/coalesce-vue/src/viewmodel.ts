@@ -210,7 +210,7 @@ export abstract class ViewModel<
   private _params: Ref<DataSourceParameters> = ref(new DataSourceParameters());
 
   /** The parameters that will be passed to `/get`, `/save`, and `/delete` calls. */
-  public get $params() {
+  public get $params(): DataSourceParameters {
     return this._params.value;
   }
   public set $params(val) {
@@ -218,7 +218,7 @@ export abstract class ViewModel<
   }
 
   /** Wrapper for `$params.dataSource` */
-  public get $dataSource() {
+  public get $dataSource(): DataSourceParameters["dataSource"] {
     return this.$params.dataSource;
   }
   public set $dataSource(val) {
@@ -1376,7 +1376,7 @@ export abstract class ListViewModel<
   private _params = ref(new ListParameters());
 
   /** The parameters that will be passed to `/list` and `/count` calls. */
-  public get $params() {
+  public get $params(): ListParameters {
     return this._params.value;
   }
   public set $params(val) {
@@ -1384,7 +1384,7 @@ export abstract class ListViewModel<
   }
 
   /** Wrapper for `$params.dataSource` */
-  public get $dataSource() {
+  public get $dataSource(): ListParameters["dataSource"] {
     return this.$params.dataSource;
   }
   public set $dataSource(val) {

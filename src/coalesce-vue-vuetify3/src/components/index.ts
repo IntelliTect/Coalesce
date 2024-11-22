@@ -18,6 +18,7 @@ export { default as CListPagination } from "./input/c-list-pagination.vue";
 export { default as CListRangeDisplay } from "./display/c-list-range-display.vue";
 export { default as CLoaderStatus } from "./display/c-loader-status.vue";
 export { default as CSelect } from "./input/c-select.vue";
+export { default as CSelectMultiple } from "./input/c-select-multiple.vue";
 export { default as CSelectManyToMany } from "./input/c-select-many-to-many.vue";
 export { default as CSelectStringValue } from "./input/c-select-string-value.vue";
 export { default as CSelectValues } from "./input/c-select-values.vue";
@@ -45,6 +46,7 @@ declare module "vue" {
     CListRangeDisplay: typeof import(".")["CListRangeDisplay"];
     CLoaderStatus: typeof import(".")["CLoaderStatus"];
     CSelect: typeof import(".")["CSelect"];
+    CSelectMultiple: typeof import(".")["CSelectMultiple"];
     CSelectManyToMany: typeof import(".")["CSelectManyToMany"];
     CSelectStringValue: typeof import(".")["CSelectStringValue"];
     CSelectValues: typeof import(".")["CSelectValues"];

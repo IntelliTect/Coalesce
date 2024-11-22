@@ -667,6 +667,10 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
         {
             var kind = type.TsTypeKind;
             var subtype = definingMember.GetAttributeValue<DataTypeAttribute, DataType>(a => a.DataType);
+            if (subtype is null && definingMember.GetAttribute<UrlAttribute>() is not null)
+            {
+                subtype = DataType.Url;
+            }
 
             switch (kind)
             {

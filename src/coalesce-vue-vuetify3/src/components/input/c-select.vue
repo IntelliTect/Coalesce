@@ -1,186 +1,134 @@
 <template>
-  <v-input
+  <v-autocomplete
     class="c-select"
-    :class="{
-      'c-select--is-menu-active': menuOpen,
-    }"
+    :modelValue="internalModelValue"
+    @update:modelValue="onInput"
+    :items="listItems"
+    ref="rootRef"
     :error-messages="error"
-    :focused="focused"
+    v-model:search="mainValue"
+    v-model:menu="menuOpen"
+    :item-title="(item) => modelDisplay(item)"
+    :item-value="modelObjectMeta.keyProp.name"
+    :return-object="true"
+    :menuProps="{
+      contentClass: 'c-select-multiple__menu-content',
+    }"
     v-bind="inputBindAttrs"
     :rules="effectiveRules"
-    :modelValue="internalModelValue"
     :disabled="isDisabled"
     :readonly="isReadonly"
-    #default="{ isValid }"
+    :clearable="isInteractive && isClearable"
+    @click:clear.stop.prevent="onInput(null, true)"
+    no-filter
   >
-    <v-field
-      :error="isValid.value === false"
-      append-inner-icon="$dropdown"
-      v-bind="fieldAttrs"
-      :clearable="isInteractive && isClearable"
-      :active="!!internalModelValue || focused || !!placeholder"
-      :dirty="!!internalModelValue"
-      :focused="focused"
-      @click:clear.stop.prevent="onInput(null, true)"
-      @keydown="onInputKey($event)"
-    >
-      <div class="v-field__input">
-        <slot
-          v-if="internalModelValue"
-          name="selected-item"
-          :item="internalModelValue"
-          :search="search"
-        >
-          <span class="v-select__selection">
-            <slot name="item" :item="internalModelValue" :search="search">
-              <c-display
-                class="v-select__selection-text"
-                :model="internalModelValue"
-              />
-            </slot>
-          </span>
-        </slot>
-
-        <input
-          type="text"
-          ref="mainInputRef"
-          v-model="mainValue"
-          @mousedown.stop.prevent="
-            // Intercept direct clicks on the input to short circuit `focused`
-            // and v-menu's activator handler, which introduce some latency before the menu opens
-            // if we allow the menu opening to be handled that way.
-            // Mousedown is needed to prevent `focused` from happening.
-            openMenu()
-          "
-          @click.stop.prevent="
-            // Prevent v-menu's activator handler from running (which is a click handler, not mousedown).
-            openMenu()
-          "
-          @focus="focused = true"
-          @blur="focused = false"
-          :autofocus="autofocus"
-          :disabled="isDisabled"
-          :readonly="isReadonly"
-          :placeholder="internalModelValue ? undefined : placeholder"
-        />
-      </div>
-    </v-field>
-
-    <v-menu
-      :modelValue="menuOpen"
-      @update:modelValue="!$event ? closeMenu() : openMenu()"
-      activator="parent"
-      :close-on-content-click="false"
-      contentClass="c-select__menu-content"
-      origin="top"
-      location="top"
-    >
-      <v-sheet
-        @keydown.capture.down.stop.prevent="
-          pendingSelection = Math.min(
-            listItems.length - 1,
-            pendingSelection + 1
-          )
+    <template #prepend-item>
+      <v-text-field
+        v-model="search"
+        ref="searchRef"
+        hide-details="auto"
+        prepend-inner-icon="fa fa-search ml-3 mr-1"
+        :loading="listCaller.isLoading"
+        :error-messages="
+          listCaller.wasSuccessful == false
+            ? listCaller.message ?? undefined
+            : ''
         "
-        @keydown.capture.up.stop.prevent="
-          pendingSelection = Math.max(0, pendingSelection - 1)
+        @keydown.down.prevent="
+          $event.target.closest('.v-list').querySelector('.v-list-item').focus()
         "
-        @keydown.capture.enter.stop.prevent="confirmPendingSelection"
-        @keydown.capture.tab.stop.prevent="confirmPendingSelection"
+        clearable
+        placeholder="Search"
+        variant="filled"
+        density="compact"
+        tabindex="-1"
+        style="
+          position: sticky;
+          top: 0;
+          background: rgb(var(--v-theme-surface));
+          padding-top: 8px;
+          z-index: 3;
+        "
       >
-        <v-text-field
-          v-model="search"
-          ref="searchRef"
-          hide-details="auto"
-          prepend-inner-icon="fa fa-search"
-          :loading="listCaller.isLoading"
-          :error-messages="
-            listCaller.wasSuccessful == false
-              ? listCaller.message ?? undefined
-              : ''
-          "
-          clearable
-          placeholder="Search"
-          variant="filled"
-          density="compact"
+        <!-- TODO: The clearable button is focusable, but shouldn't be. Make our own fake one  -->
+      </v-text-field>
+
+      <v-list-item
+        v-if="createItemLabel"
+        class="c-select__create-item"
+        @click="createItem"
+        :loading="createItemLoading"
+      >
+        <template #prepend>
+          <v-progress-circular
+            class="mr-6"
+            indeterminate
+            v-if="createItemLoading"
+          ></v-progress-circular>
+          <v-icon v-else>$plus</v-icon>
+        </template>
+        <v-list-item-title>
+          {{ createItemLabel }}
+        </v-list-item-title>
+        <v-list-item-subtitle
+          v-if="createItemError"
+          class="text-error font-weight-bold"
         >
-        </v-text-field>
+          {{ createItemError }}
+        </v-list-item-subtitle>
+      </v-list-item>
+    </template>
 
-        <!-- TODO: i18n -->
-        <div
-          v-if="!createItemLabel && !listItems.length"
-          class="grey--text px-4 my-3 font-italic"
-        >
-          <v-fade-transition mode="out-in">
-            <span v-if="listCaller.isLoading">Loading...</span>
-            <span v-else>No results found.</span>
-          </v-fade-transition>
-        </div>
+    <template #append-item>
+      <v-list-item
+        v-if="
+          // When we do know an actual page count:
+          (listCaller.pageCount && listCaller.pageCount > 1) ||
+          // When `noCount` is used or counting is disabled on the server:
+          (listCaller.pageCount == -1 &&
+            listCaller.pageSize &&
+            listItems.length >= listCaller.pageSize)
+        "
+        class="text-grey font-italic"
+      >
+        Max {{ listCaller.pageSize }} items retrieved. Refine your search to
+        view more.
+      </v-list-item>
+    </template>
 
-        <!-- This height shows 7 full items, with a final item partially out 
-        of the scroll area to improve visual hints to the user that the can scroll the list. -->
-        <v-list class="py-0" max-height="302" ref="listRef" density="compact">
-          <v-list-item
-            v-if="createItemLabel"
-            class="c-select__create-item"
-            @click="createItem"
-            :loading="createItemLoading"
-          >
-            <template #prepend>
-              <v-progress-circular
-                class="mr-6"
-                indeterminate
-                v-if="createItemLoading"
-              ></v-progress-circular>
-              <v-icon v-else>$plus</v-icon>
-            </template>
-            <v-list-item-title>
-              {{ createItemLabel }}
-            </v-list-item-title>
-            <v-list-item-subtitle
-              v-if="createItemError"
-              class="text-error font-weight-bold"
-            >
-              {{ createItemError }}
-            </v-list-item-subtitle>
-          </v-list-item>
+    <template #item="{ item, props }">
+      <v-list-item v-bind="{ ...props, title: undefined }">
+        <v-list-item-title>
+          <slot name="list-item" :item="item.raw" :search="search">
+            <slot name="item" :item="item.raw" :search="search">
+              <c-display :model="item.raw" />
+            </slot>
+          </slot>
+        </v-list-item-title>
+      </v-list-item>
+    </template>
 
-          <v-list-item
-            v-for="(item, i) in listItems"
-            :key="item[modelObjectMeta.keyProp.name]"
-            @click="onInput(item)"
-            :value="i"
-            :active="pendingSelection == i"
-          >
-            <v-list-item-title>
-              <slot name="list-item" :item="item" :search="search">
-                <slot name="item" :item="item" :search="search">
-                  <c-display :model="item" />
-                </slot>
-              </slot>
-            </v-list-item-title>
-          </v-list-item>
+    <template #selection="{ item }">
+      <slot name="selected-item" :item="item.raw" :search="search">
+        <slot name="item" :item="item.raw" :search="search">
+          <c-display :model="item.raw" />
+        </slot>
+      </slot>
+    </template>
 
-          <!-- TODO: With this version of c-select (versus the v2 one),
-        we can implement infinite scroll much easier. Consider doing this instead of having this message. -->
-          <v-list-item
-            v-if="
-              // When we do know an actual page count:
-              (listCaller.pageCount && listCaller.pageCount > 1) ||
-              // When `noCount` is used or counting is disabled on the server:
-              (listCaller.pageCount == -1 &&
-                listCaller.pageSize &&
-                listItems.length >= listCaller.pageSize)
-            "
-            class="text-grey font-italic"
-          >
-            Max {{ listCaller.pageSize }} items retrieved. Refine your search to
-            view more.
-          </v-list-item>
-        </v-list>
-      </v-sheet>
-    </v-menu>
-  </v-input>
+    <template #no-data>
+      <v-list-item
+        v-if="!createItemLabel && !listItems.length"
+        class="font-italic text-grey"
+      >
+        <v-list-item-title>
+          <!-- TODO: i18n -->
+          <span v-if="listCaller.isLoading">Loading...</span>
+          <span v-else>No results found.</span>
+        </v-list-item-title>
+      </v-list-item>
+    </template>
+  </v-autocomplete>
 </template>
 
 <style lang="scss">
@@ -214,10 +162,6 @@
       transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     }
   }
-
-  &.c-select--is-menu-active .v-field__append-inner > .v-icon {
-    transform: rotate(180deg);
-  }
 }
 </style>
 
@@ -238,6 +182,7 @@ import {
   nextTick,
   watch,
   camelize,
+  onMounted,
 } from "vue";
 import {
   useMetadataProps,
@@ -267,8 +212,9 @@ import {
   PropNames,
   ApiStateTypeWithArgs,
   EnumValue,
+  modelDisplay,
 } from "coalesce-vue";
-import { VField } from "vuetify/components";
+import { VField, VAutocomplete } from "vuetify/components";
 
 defineOptions({
   name: "c-select",
@@ -394,19 +340,8 @@ const emit = defineEmits<{
   "update:modelValue": [value: PrimaryBindType | null];
 }>();
 
-const mainInputRef = ref<HTMLInputElement>();
-const listRef = ref<ComponentPublicInstance>();
+const rootRef = ref<VAutocomplete>();
 const searchRef = ref<ComponentPublicInstance>();
-
-const fieldAttrs = computed(() =>
-  VField.filterProps(
-    Object.fromEntries(
-      // We have to perform prop name normalization ourselves here
-      // because vuetify's filterProps doesn't support the non-camelized names.
-      Object.entries(inputBindAttrs.value).map(([k, v]) => [camelize(k), v])
-    )
-  )
-);
 
 const { isDisabled, isReadonly, isInteractive } = useCustomInput(props);
 
@@ -420,14 +355,12 @@ const { inputBindAttrs, modelMeta, valueMeta, valueOwner } = useMetadataProps(
 
 const search = ref(null as string | null);
 const error = ref([] as string[]);
-const focused = ref(false);
 const menuOpen = ref(false);
 const menuOpenForced = ref(false);
 const searchChanged = ref(new Date());
 const mainValue = ref("");
 const createItemLoading = ref(false);
 const createItemError = ref("" as string | null);
-const pendingSelection = ref(0);
 
 /** The model representing the current selected item
  * in the case that only the PK was provided to the component.
@@ -688,7 +621,6 @@ function onInput(value: SelectedModelType | null, dontFocus = false) {
   emit("update:modelValue", primaryBindKind.value == "key" ? key : value);
   emit("update:objectValue", value);
   emit("update:keyValue", key);
-  pendingSelection.value = value ? listItems.value.indexOf(value) : 0;
 
   // When the input value is cleared, re-focus the dropdown
   // to allow the user to enter new search input.
@@ -701,46 +633,6 @@ function onInput(value: SelectedModelType | null, dontFocus = false) {
       closeMenu(true);
     }
   }
-}
-
-/** When a key is pressed on the top level input */
-function onInputKey(event: KeyboardEvent) {
-  if (!isInteractive.value) return;
-
-  switch (event.key.toLowerCase()) {
-    case "delete":
-    case "backspace":
-      if (!menuOpen.value) {
-        onInput(null, true);
-        event.stopPropagation();
-        event.preventDefault();
-      }
-      return;
-    case "esc":
-    case "escape":
-      event.stopPropagation();
-      event.preventDefault();
-      closeMenu(true);
-      return;
-    case " ":
-    case "enter":
-    case "up":
-    case "arrowup":
-    case "down":
-    case "arrowdown":
-    case "spacebar":
-    case "space":
-      event.stopPropagation();
-      event.preventDefault();
-      openMenu();
-      return;
-  }
-}
-
-function confirmPendingSelection() {
-  var item = listItems.value[pendingSelection.value];
-  if (!item) return;
-  onInput(item);
 }
 
 async function createItem() {
@@ -776,6 +668,14 @@ async function openMenu(select?: boolean) {
 
   if (props.reloadOnOpen) listCaller();
 
+  const input = await focusInnerSearch();
+
+  if (select) {
+    input.select();
+  }
+}
+
+async function focusInnerSearch() {
   await nextTick();
   const input = searchRef.value?.$el.querySelector("input") as HTMLInputElement;
 
@@ -790,19 +690,17 @@ async function openMenu(select?: boolean) {
   menuOpenForced.value = true;
 
   while (
-    // cap waiting at 100ms
-    start + 100 > performance.now() &&
+    // cap waiting at 1000ms
+    start + 1000 > performance.now() &&
     (!input.offsetParent || input != document.activeElement)
   ) {
     input.focus();
-    await new Promise((resolve) => setTimeout(resolve, 1));
+    await new Promise((resolve) => setTimeout(resolve, 10));
   }
 
   menuOpenForced.value = false;
 
-  if (select) {
-    input.select();
-  }
+  return input;
 }
 
 function closeMenu(force = false) {
@@ -811,12 +709,7 @@ function closeMenu(force = false) {
 
   menuOpenForced.value = false;
   menuOpen.value = false;
-  mainInputRef.value?.focus();
-}
-
-function toggleMenu() {
-  if (menuOpen.value) closeMenu();
-  else openMenu();
+  rootRef.value?.focus();
 }
 
 const propMeta = valueMeta.value;
@@ -849,9 +742,6 @@ const listCaller = new ModelApiClient<SelectedModelType>(modelObjectMeta.value)
       search: search.value || undefined,
     });
   })
-  .onFulfilled(() => {
-    pendingSelection.value = 0;
-  })
   .onRejected((state) => {
     error.value = [state.message || "Unknown Error"];
   })
@@ -870,18 +760,6 @@ watch(
   },
   { immediate: true }
 );
-
-watch(pendingSelection, async () => {
-  await nextTick();
-  await nextTick();
-  var listDiv = listRef.value?.$el as HTMLElement;
-  var selectedItem = listDiv?.querySelector(".v-list-item--active");
-  selectedItem?.scrollIntoView?.({
-    behavior: "auto",
-    block: "nearest",
-    inline: "nearest",
-  });
-});
 
 watch(search, (newVal: any, oldVal: any) => {
   searchChanged.value = new Date();
@@ -906,6 +784,18 @@ watch(mainValue, (val) => {
 
 watch(createItemLabel, () => {
   createItemError.value = null;
+});
+
+onMounted(() => {
+  const input = rootRef.value?.$el.querySelector(
+    ".v-text-field input"
+  ) as HTMLInputElement;
+  input.onfocus = async function () {
+    await nextTick();
+    if (menuOpen.value) {
+      focusInnerSearch();
+    }
+  };
 });
 
 // Load the initial contents of the list.

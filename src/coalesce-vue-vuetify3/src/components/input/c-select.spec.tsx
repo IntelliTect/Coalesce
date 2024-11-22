@@ -117,6 +117,14 @@ describe("CSelect", () => {
     () => <CSelect model={genericModel} for={anyString} />;
     () => <CSelect model={model as any} for={anyString} />;
 
+
+
+    // Multiple
+    function receivesTestModels(model: Test[] | null) {}
+    () => (<CSelect for="Test" multiple modelValue={[testVm]} onUpdate:modelValue={receivesTestModels} />);
+
+
+
     // Binding with for + v-model
     () => (<CSelect for="Test" modelValue={testVm} onUpdate:modelValue={receivesTestModel} />);
     () => (<CSelect for="Test" modelValue={testVm} onUpdate:objectValue={receivesTestModel} />);

@@ -12,14 +12,14 @@
     :item-value="modelObjectMeta.keyProp.name"
     :return-object="true"
     :menuProps="{
-      contentClass: 'c-select-multiple__menu-content',
+      contentClass: 'c-select__menu-content',
     }"
     v-bind="inputBindAttrs"
     :rules="effectiveRules"
     :disabled="isDisabled"
     :readonly="isReadonly"
     :clearable="isInteractive && isClearable"
-    @click:clear.stop.prevent="onInput(null, true)"
+    :open-on-clear="openOnClear"
     no-filter
   >
     <template #prepend-item>
@@ -46,7 +46,7 @@
           position: sticky;
           top: 0;
           background: rgb(var(--v-theme-surface));
-          padding-top: 8px;
+          padding-top: 0px;
           z-index: 3;
         "
       >
@@ -132,6 +132,10 @@
 </template>
 
 <style lang="scss">
+.c-select__menu-content .v-list {
+  padding-top: 0px;
+}
+
 .c-select {
   .v-field {
     align-items: center;
@@ -597,7 +601,7 @@ const createItemLabel = computed(() => {
   return null;
 });
 
-function onInput(value: SelectedModelType | null, dontFocus = false) {
+function onInput(value: SelectedModelType | null) {
   value = value ?? null;
   if (value == null && !isClearable.value) {
     return;
@@ -621,18 +625,6 @@ function onInput(value: SelectedModelType | null, dontFocus = false) {
   emit("update:modelValue", primaryBindKind.value == "key" ? key : value);
   emit("update:objectValue", value);
   emit("update:keyValue", key);
-
-  // When the input value is cleared, re-focus the dropdown
-  // to allow the user to enter new search input.
-  // Without this, pressing backspace to delete the current value
-  // will cause the search field to lose focus and further keyboard input will do nothing.
-  if (!dontFocus) {
-    if (!value) {
-      openMenu();
-    } else {
-      closeMenu(true);
-    }
-  }
 }
 
 async function createItem() {
@@ -701,15 +693,6 @@ async function focusInnerSearch() {
   menuOpenForced.value = false;
 
   return input;
-}
-
-function closeMenu(force = false) {
-  if (!menuOpen.value) return;
-  if (menuOpenForced.value && !force) return;
-
-  menuOpenForced.value = false;
-  menuOpen.value = false;
-  rootRef.value?.focus();
 }
 
 const propMeta = valueMeta.value;
@@ -811,7 +794,7 @@ listCaller().then(() => {
     (props.preselectFirst ||
       (props.preselectSingle && items.value.length === 1))
   ) {
-    onInput(first, true);
+    onInput(first);
   }
 });
 

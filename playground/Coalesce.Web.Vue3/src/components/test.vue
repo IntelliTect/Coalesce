@@ -166,6 +166,7 @@ export default class Test extends Base {
 
     await this.caseVm.$load(15);
     await this.caseVm.downloadImage();
+    await this.caseVm.$startAutoSave(this);
     await this.company.$load(1);
 
     //await this.person.$load(1);

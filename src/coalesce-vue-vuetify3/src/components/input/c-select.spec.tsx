@@ -83,8 +83,10 @@ describe("CSelect", () => {
     const genericModel: Model = model;
 
     function receivesTestModel(model: Test | null) {}
+    function receivesTestModels(model: Test[] | null) {}
     function receivesComplexModel(model: ComplexModel | null) {}
     function receivesNumber(model: number | null) {}
+    function receivesNumbers(model: number[] | null) {}
 
     // Binding to FK or ref nav on a ViewModel:
     () => <CSelect model={complexVm} for="singleTest" />;
@@ -117,6 +119,20 @@ describe("CSelect", () => {
     () => <CSelect model={genericModel} for={anyString} />;
     () => <CSelect model={model as any} for={anyString} />;
 
+    // Multiple
+    () => (<CSelect for="Test" multiple modelValue={[testVm]}
+      onUpdate:modelValue={receivesTestModels}
+      onUpdate:objectValue={receivesTestModels}
+      onUpdate:keyValue={receivesNumbers} />);
+    //@ts-expect-error arrays passed to non-multiple
+    () => (<CSelect for="Test" modelValue={[testVm]} onUpdate:modelValue={receivesTestModels} />);
+    //@ts-expect-error arrays required for multiple
+    () => (<CSelect for="Test" multiple modelValue={[testVm]} onUpdate:modelValue={receivesTestModel}  />);
+    //@ts-expect-error arrays required for multiple
+    () => (<CSelect for="Test" multiple modelValue={[testVm]} onUpdate:objectValue={receivesTestModel}  />);
+    //@ts-expect-error arrays required for multiple
+    () => (<CSelect for="Test" multiple modelValue={[testVm]} onUpdate:keyValue={receivesNumbers}  />);
+    
     // Binding with for + v-model
     () => (<CSelect for="Test" modelValue={testVm} onUpdate:modelValue={receivesTestModel} />);
     () => (<CSelect for="Test" modelValue={testVm} onUpdate:objectValue={receivesTestModel} />);

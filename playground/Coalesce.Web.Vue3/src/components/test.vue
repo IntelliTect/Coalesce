@@ -1,8 +1,16 @@
 <template>
   <v-container grid-list-lg>
     <c-loader-status :loaders="{ 'no-initial-content': [caseVm.$load] }">
-      <c-time-picker></c-time-picker>
-      <v-card class="my-10">
+      <c-select
+        for="Person"
+        v-model="people"
+        multiple
+        density="compact"
+        variant="outlined"
+      >
+      </c-select>
+
+      <v-card class="my-2">
         <v-row>
           <v-col>
             <c-select
@@ -27,11 +35,11 @@
           </v-col>
         </v-row>
       </v-card>
-      <c-input :model=caseVm for=title></c-input>
+      <c-input :model="caseVm" for="title"></c-input>
       <c-select-string-value
         :model="caseVm"
         for="title"
-        method="getCaseTitles" 
+        method="getCaseTitles"
       />
       <v-btn @click="disabled = !disabled">Disable Toggle</v-btn>
       <v-form :disabled="disabled">
@@ -154,6 +162,7 @@ export default class Test extends Base {
   disabled = false;
   date = new Date(1722558611283);
   caseVm = new CaseViewModel();
+  people = [];
 
   async created() {
     this.personList.$dataSource =

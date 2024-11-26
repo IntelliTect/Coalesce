@@ -1,6 +1,7 @@
 # 5.3.0
 
 - Added `multiple` prop to `c-select`, allowing for the selection of multiple models.
+- `c-select-many-to-many` is now based on `c-select` rather than `v-autocomplete`. As a result, it has gained support for all of the props and slots of `c-select`.
 
 # 5.2.1
 

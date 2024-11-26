@@ -30,7 +30,12 @@
           v-for="item in internalModelValue"
           :key="item[modelObjectMeta.keyProp.name]"
         >
-          <slot name="selected-item" :item="item" :search="search">
+          <slot
+            name="selected-item"
+            :item="item"
+            :search="search"
+            :remove="() => onInput(item)"
+          >
             <slot name="item" :item="item" :search="search">
               <v-chip
                 v-if="effectiveMultiple"
@@ -400,6 +405,8 @@ defineSlots<{
   ["selected-item"]?(props: {
     item: SelectedModelTypeSingle;
     search: string | null;
+    /** Remove/unselect the item. Only applicable for multiselect/multiple mode. */
+    remove: () => void;
   }): any;
   ["list-item"]?(props: {
     item: SelectedModelTypeSingle;

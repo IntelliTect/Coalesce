@@ -167,8 +167,8 @@ createMethods = {
 
 ## Slots
 
-`#item="{ item, search }"` - Slot used to customize the text of both items inside the list, as well as the text of selected items. By default, items are rendered with [c-display](/stacks/vue/coalesce-vue-vuetify/components/c-display.md). Slot is passed a parameter `item` containing a [model instance](/stacks/vue/layers/models.md), and `search` containing the current search query.
+`#item="{ item: TModel, search: string }"` - Slot used to customize the text of both items inside the list, as well as the text of selected items. By default, items are rendered with [c-display](/stacks/vue/coalesce-vue-vuetify/components/c-display.md). Slot is passed a parameter `item` containing a [model instance](/stacks/vue/layers/models.md), and `search` containing the current search query.
 
-`#list-item="{ item, search }"` - Slot used to customize the text of items inside the list. If not provided, falls back to the `item` slot.
+`#list-item="{ item: TModel, search: string, selected: boolean }"` - Slot used to customize the text of items inside the list. If not provided, falls back to the `item` slot. Contents are wrapped in a `v-list-item-title`.
 
-`#selected-item="{ item, search }"` - Slot used to customize the text of selected items. If not provided, falls back to the `item` slot.
+`#selected-item="{ item: TModel, search: string, remove: () => void }"` - Slot used to customize the text of selected items. If not provided, falls back to the `item` slot. The `remove` function will deselect the item and is only valid when using multi-select.

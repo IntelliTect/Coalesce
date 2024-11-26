@@ -812,6 +812,13 @@ export const Case = domain.types.Case = {
         },
       },
     },
+    missingManyToManyFarSide: {
+      type: "dataSource",
+      name: "MissingManyToManyFarSide" as const,
+      displayName: "Missing Many To Many Far Side",
+      props: {
+      },
+    },
   },
 }
 export const CaseDto = domain.types.CaseDto = {

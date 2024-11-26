@@ -100,31 +100,6 @@
       <br />
       {{ date }}
 
-      <c-select for="Person" v-model="caseVm.assignedTo"> </c-select>
-      <c-select :model="caseVm" for="assignedTo"> </c-select>
-      <c-select :model="caseVm" for="assignedTo" density="compact"> </c-select>
-      <c-select
-        :model="caseVm"
-        for="assignedTo"
-        density="compact"
-        variant="outlined"
-      >
-      </c-select>
-
-      <v-defaults-provider
-        :defaults="{
-          VInput: { density: 'compact' },
-          VField: { variant: 'outlined' },
-        }"
-      >
-        <c-select
-          :model="caseVm"
-          for="assignedTo"
-          label="Outlined via v-defaults-provider"
-        >
-        </c-select>
-      </v-defaults-provider>
-
       <img
         v-if="caseVm.caseKey"
         :src="caseVm.downloadImage.getResultObjectUrl()"

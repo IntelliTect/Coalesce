@@ -59,6 +59,8 @@ Examples of other props:
 
 ## Props
 
+Note: In addition to the below props, `c-select` also supports most props that are supported by Vuetify's [v-text-field](https://vuetifyjs.com/en/components/text-fields/#api).
+
 <Prop def="for: string | ForeignKeyProperty | ModelReferenceNavigationProperty | ModelType" lang="ts" />
 
 A metadata specifier for the value being bound. One of:
@@ -66,11 +68,6 @@ A metadata specifier for the value being bound. One of:
 - The name of a foreign key or reference navigation property belonging to `model`. 
 - The name of a model type.
 - A direct reference to a metadata object.
-- A string in dot-notation that starts with a type name that resolves to a foreign key or reference navigation property.
-
-::: tip
-When binding by a key value, if the corresponding object cannot be found (e.g. there is no navigation property, or the navigation property is null), c-select will automatically attempt to load the object from the server so it can be displayed in the UI.
-:::
 
 <Prop def="model?: Model" lang="ts" />
 
@@ -87,11 +84,17 @@ When binding the component with ``v-model``, accepts the ``value`` part of ``v-m
 
 Enables multi-select functionality. Bindings for `modelValue`, `keyValue`, and `objectValue` will accept and emit arrays instead of single values.
 
-<Prop def="keyValue?: any" lang="ts" />
+<Prop def="keyValue?: TKey
+'onUpdate:keyValue': (value: TKey) => void" lang="ts" />
 
 When bound with `v-model:key-value="keyValue"`, allows binding the primary key of the selected object explicitly. Binds an array when in multi-select mode.
 
-<Prop def="objectValue?: any" lang="ts" />
+::: tip
+When binding by a key value, if the corresponding object cannot be found (e.g. there is no navigation property, or the navigation property is null), c-select will automatically attempt to load the object from the server so it can be displayed in the UI.
+:::
+
+<Prop def="objectValue?: TModel
+'onUpdate:objectValue': (value: TModel) => void" lang="ts" />
 
 When bound with `v-model:object-value="objectValue"`, allows binding the selected object explicitly. Binds an array when in multi-select mode.
 

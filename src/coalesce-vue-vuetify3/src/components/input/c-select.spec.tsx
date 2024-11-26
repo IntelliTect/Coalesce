@@ -185,6 +185,7 @@ describe("CSelect", () => {
     // ********
     // Binding with for + v-model
     // ********
+    () => (<CSelect for={testVm.$metadata} modelValue={testVm} onUpdate:modelValue={receivesTestModel} />);
     () => (<CSelect for="Test" modelValue={testVm} onUpdate:modelValue={receivesTestModel} />);
     () => (<CSelect for="Test" modelValue={testVm} onUpdate:objectValue={receivesTestModel} />);
     () => (<CSelect for="Test" modelValue={testVm} onUpdate:keyValue={receivesNumber} />);

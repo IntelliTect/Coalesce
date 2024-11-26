@@ -47,10 +47,8 @@
 
     <v-main>
       <router-view v-slot="{ Component }">
-        <transition name="router-transition" mode="out-in" appear>
-          <!-- https://stackoverflow.com/questions/52847979/what-is-router-view-key-route-fullpath -->
-          <component ref="routerView" :is="Component" :key="$route.path" />
-        </transition>
+        <!-- https://stackoverflow.com/questions/52847979/what-is-router-view-key-route-fullpath -->
+        <component ref="routerView" :is="Component" :key="$route.path" />
       </router-view>
     </v-main>
   </v-app>

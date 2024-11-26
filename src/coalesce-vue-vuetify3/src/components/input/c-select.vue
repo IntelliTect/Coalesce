@@ -35,16 +35,14 @@
               <v-chip
                 v-if="effectiveMultiple"
                 size="small"
-                closable
+                :closable="canDeselect"
                 @click:close="onInput(item)"
               >
-                <c-display :model="item" />
+                {{ itemTitle(item) }}
               </v-chip>
-              <c-display
-                v-else
-                class="v-select__selection-text"
-                :model="item"
-              />
+              <span v-else class="v-select__selection-text">
+                {{ itemTitle(item) }}
+              </span>
             </slot>
           </slot>
         </span>
@@ -181,7 +179,7 @@
                 :selected="item.selected"
               >
                 <slot name="item" :item="item.model" :search="search">
-                  <c-display :model="item.model" />
+                  {{ itemTitle(item.model) }}
                 </slot>
               </slot>
             </v-list-item-title>
@@ -299,7 +297,6 @@ import {
   getMessageForError,
   mapValueToModel,
   ViewModel,
-  Indexable,
   ModelValue,
   AnyArgCaller,
   ResponseCachingConfiguration,
@@ -310,8 +307,8 @@ import {
   PropNames,
   ApiStateTypeWithArgs,
   EnumValue,
-  mapToModel,
   ModelCollectionValue,
+  modelDisplay,
 } from "coalesce-vue";
 import { VField } from "vuetify/components";
 
@@ -423,7 +420,9 @@ const props = withDefaults(
      */
     for: TFor;
 
-    multiple?: TMultiple & boolean;
+    multiple?: TMultiple & boolean; // `& boolean`: https://github.com/vuejs/core/issues/9877
+    canDeselect?: boolean;
+
     readonly?: boolean | null;
     disabled?: boolean | null;
     autofocus?: boolean;
@@ -447,6 +446,7 @@ const props = withDefaults(
 
     rules?: Array<TypedValidationRule<SelectedPkType>>;
 
+    itemTitle?: (item: SelectedModelTypeSingle) => string | null;
     create?: {
       getLabel: (
         search: string,
@@ -458,13 +458,21 @@ const props = withDefaults(
       ) => Promise<SelectedModelTypeSingle>;
     };
   }>(),
-  { openOnClear: true, clearable: undefined, multiple: undefined }
+  {
+    openOnClear: true,
+    canDeselect: true,
+    clearable: undefined,
+    multiple: undefined,
+    itemTitle: modelDisplay,
+  }
 );
 
 const emit = defineEmits<{
   "update:keyValue": [value: SelectedPkType | null];
   "update:objectValue": [value: SelectedModelType | null];
   "update:modelValue": [value: PrimaryBindType | null];
+  /** Fired when an item is selected or deselected in `multiple` mode. */
+  selectionChanged: [values: SelectedModelTypeSingle[], selected: boolean];
 }>();
 
 const mainInputRef = ref<HTMLInputElement>();
@@ -800,6 +808,10 @@ const effectiveMultiple = computed(() => {
 function onInput(value: SelectedModelTypeSingle | null, dontFocus = false) {
   value = value ?? null;
 
+  if (value === null && !props.canDeselect) {
+    return;
+  }
+
   const key = value ? (value as any)[modelObjectMeta.value.keyProp.name] : null;
   let newKey, newObjectValue: any;
 
@@ -807,6 +819,7 @@ function onInput(value: SelectedModelTypeSingle | null, dontFocus = false) {
     if (value == null) {
       newObjectValue = [];
       newKey = [];
+      emit("selectionChanged", [...internalModelValue.value], false);
     } else {
       const selectedKeys = [...selectedKeysSet.value];
       const selectedModels = [...internalModelValue.value];
@@ -816,20 +829,26 @@ function onInput(value: SelectedModelTypeSingle | null, dontFocus = false) {
           selectedKeys.push(key);
           selectedModels.push(value);
           internallyFetchedModels.set(key, new WeakRef(value));
+          emit("selectionChanged", [value], true);
         } else {
+          if (!props.canDeselect) return;
           selectedKeys.splice(idx, 1);
           const modelIdx = selectedModels.indexOf(value);
           if (modelIdx !== -1) {
             selectedModels.splice(idx, 1);
           }
+          emit("selectionChanged", [value], false);
         }
       } else {
         // Key may be null if the item came from `props.create` and isn't saved yet.
         const idx = selectedModels.indexOf(value);
         if (idx === -1) {
           selectedModels.push(value);
+          emit("selectionChanged", [value], true);
         } else {
+          if (!props.canDeselect) return;
           selectedModels.splice(idx, 1);
+          emit("selectionChanged", [value], false);
         }
       }
 

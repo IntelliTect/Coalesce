@@ -205,8 +205,14 @@ function render() {
           emit("update:modelValue", v)
         );
         return h(CSelectManyToMany<any>, data, slots);
+      } else if (valueMeta.itemType.type == "model") {
+        data.model = props.model;
+        data.for = props.for;
+        addHandler(data, "update:modelValue", (v: any) =>
+          emit("update:modelValue", v)
+        );
+        return h(CSelect<any>, data, slots);
       } else if (
-        valueMeta.itemType.type != "model" &&
         valueMeta.itemType.type != "object" &&
         valueMeta.itemType.type != "enum" &&
         valueMeta.itemType.type != "file"
@@ -249,7 +255,8 @@ function render() {
         // If this is a create-only property (e.g. an editable primary key),
         // emit the value on change(leaving the field)
         // instead of on every keystroke. If we were to emit on every keystroke,
-        // the very first character the user types would end up as the field value.
+        // the very first character the user types would end up as the field value
+        // when autosaves are being used.
         addHandler(data, "change", (valueOrEvent: Event | string) => {
           if (valueOrEvent instanceof Event) {
             // Vuetify3: workaround https://github.com/vuetifyjs/vuetify/issues/16637

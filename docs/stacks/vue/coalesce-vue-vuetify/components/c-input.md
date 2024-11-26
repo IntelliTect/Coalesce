@@ -20,6 +20,7 @@ A summary of the components delegated to, by type:
 - date: [c-datetime-picker](/stacks/vue/coalesce-vue-vuetify/components/c-datetime-picker.md)
 - model: [c-select](/stacks/vue/coalesce-vue-vuetify/components/c-select.md)
 - [[ManyToMany]](/modeling/model-components/attributes/many-to-many.md) collection: [c-select-many-to-many](/stacks/vue/coalesce-vue-vuetify/components/c-select-many-to-many.md)
+- Model collection (not many-to-many): [c-select](/stacks/vue/coalesce-vue-vuetify/components/c-select.md)
 - Non-object collection: [c-select-values](/stacks/vue/coalesce-vue-vuetify/components/c-select-values.md)
 
 Any other unsupported type will simply be displayed with [c-display](/stacks/vue/coalesce-vue-vuetify/components/c-display.md), unless a [default slot](https://vuejs.org/guide/components/slots.html) is provided - in that case, the default slot will be rendered instead.

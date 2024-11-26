@@ -29,6 +29,17 @@ Binding an arbitrary primary key value or an arbitrary object:
   <c-select for="Person" v-model="selectedPerson" />
 ```
 
+Multi-select:
+
+``` vue-html
+  <!-- Binding selected primary keys: -->
+  <c-select for="Person" multiple v-model:key-value="selectedPeopleIds" />
+
+  <!-- Binding selected objects: -->
+  <c-select for="Person" multiple v-model="selectedPeople" />
+  <c-select for="Person" multiple v-model:object-value="selectedPeople" />
+```
+
 Examples of other props:
 
 ``` vue-html
@@ -72,13 +83,17 @@ modelValue?: any // Vue 3" lang="ts" />
 
 When binding the component with ``v-model``, accepts the ``value`` part of ``v-model``. If `for` was specified as a foreign key, this will expect a key; likewise, if `for` was specified as a type or as a navigation property, this will expect an object.
 
+<Prop def="multiple?: boolean" lang="ts" />
+
+Enables multi-select functionality. Bindings for `modelValue`, `keyValue`, and `objectValue` will accept and emit arrays instead of single values.
+
 <Prop def="keyValue?: any" lang="ts" />
 
-When bound with `v-model:key-value="keyValue"`, allows binding the primary key of the selected object explicitly.
+When bound with `v-model:key-value="keyValue"`, allows binding the primary key of the selected object explicitly. Binds an array when in multi-select mode.
 
 <Prop def="objectValue?: any" lang="ts" />
 
-When bound with `v-model:object-value="objectValue"`, allows binding the selected object explicitly.
+When bound with `v-model:object-value="objectValue"`, allows binding the selected object explicitly. Binds an array when in multi-select mode.
 
 <Prop def="clearable?: boolean" lang="ts" />
 

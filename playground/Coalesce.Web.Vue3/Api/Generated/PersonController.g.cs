@@ -839,11 +839,13 @@ namespace Coalesce.Web.Vue3.Api
         [Authorize]
         [Consumes("application/x-www-form-urlencoded", "multipart/form-data")]
         public virtual ItemResult<PersonResponse> MethodWithEntityParameter(
-            [FromForm(Name = "person")] PersonParameter person)
+            [FromForm(Name = "person")] PersonParameter person,
+            [FromForm(Name = "people")] PersonParameter[] people)
         {
             var _params = new
             {
-                Person = !Request.Form.HasAnyValue(nameof(person)) ? null : person
+                Person = !Request.Form.HasAnyValue(nameof(person)) ? null : person,
+                People = !Request.Form.HasAnyValue(nameof(people)) ? null : people.ToList()
             };
 
             if (Context.Options.ValidateAttributesForMethods)
@@ -857,7 +859,8 @@ namespace Coalesce.Web.Vue3.Api
             var _mappingContext = new MappingContext(Context);
             var _methodResult = Coalesce.Domain.Person.MethodWithEntityParameter(
                 Db,
-                _params.Person?.MapToNew(_mappingContext)
+                _params.Person?.MapToNew(_mappingContext),
+                _params.People?.Select(_m => _m.MapToNew(_mappingContext)).ToArray()
             );
             var _result = new ItemResult<PersonResponse>();
             _result.Object = Mapper.MapToDto<Coalesce.Domain.Person, PersonResponse>(_methodResult, _mappingContext, includeTree);
@@ -867,6 +870,7 @@ namespace Coalesce.Web.Vue3.Api
         public class MethodWithEntityParameterParameters
         {
             public PersonParameter Person { get; set; }
+            public PersonParameter[] People { get; set; }
         }
 
         /// <summary>
@@ -890,7 +894,8 @@ namespace Coalesce.Web.Vue3.Api
             var _mappingContext = new MappingContext(Context);
             var _methodResult = Coalesce.Domain.Person.MethodWithEntityParameter(
                 Db,
-                _params.Person?.MapToNew(_mappingContext)
+                _params.Person?.MapToNew(_mappingContext),
+                _params.People?.Select(_m => _m.MapToNew(_mappingContext)).ToArray()
             );
             var _result = new ItemResult<PersonResponse>();
             _result.Object = Mapper.MapToDto<Coalesce.Domain.Person, PersonResponse>(_methodResult, _mappingContext, includeTree);

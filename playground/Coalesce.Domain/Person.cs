@@ -298,7 +298,7 @@ namespace Coalesce.Domain
         }
 
         [Coalesce, Execute]
-        public static Person MethodWithEntityParameter(AppDbContext db, Person person)
+        public static Person MethodWithEntityParameter(AppDbContext db, Person person, Person[] people)
         {
             return person;
         }

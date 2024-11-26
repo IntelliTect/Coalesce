@@ -23,6 +23,7 @@ import type {
   ApiStateTypeWithArgs,
   ListViewModel,
   ServiceViewModel,
+  ModelCollectionValue,
 } from "coalesce-vue";
 import { ApiState, ViewModel } from "coalesce-vue";
 import { computed, inject, useAttrs } from "vue";
@@ -87,6 +88,7 @@ TModel extends Model ?
         ValueKind extends (NumberValue & {role: 'value'}) ? number :
         ValueKind extends FileValue ? File :
         ValueKind extends BooleanValue ? boolean :
+        ValueKind extends ModelCollectionValue ? (Model<ModelType>[]) :
         ValueKind extends CollectionValue ? (string[] | number[]) :
         ValueKind extends Property ? never :
         ValueKind extends Value ? any :

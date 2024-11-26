@@ -1795,6 +1795,22 @@ export const Person = domain.types.Person = {
             required: val => val != null || "Person is required.",
           }
         },
+        people: {
+          name: "people",
+          displayName: "People",
+          type: "collection",
+          itemType: {
+            name: "$collectionItem",
+            displayName: "",
+            role: "value",
+            type: "model",
+            get typeDef() { return (domain.types.Person as ModelType & { name: "Person" }) },
+          },
+          role: "value",
+          rules: {
+            required: val => val != null || "People is required.",
+          }
+        },
       },
       return: {
         name: "$return",

@@ -26,12 +26,15 @@ import "@/viewmodels.g";
 import $metadata from "@/metadata.g";
 
 import testWorker from "./worker.ts?worker";
+import Examples from "./components/Examples.vue";
 new testWorker();
 
 new Worker(new URL("./worker.ts", import.meta.url));
 
 AxiosClient.defaults.baseURL = "/api";
 AxiosClient.defaults.withCredentials = true;
+
+const examples = import.meta.glob('@/examples/**/*.vue')
 
 const router = createRouter({
   history: createWebHistory(),
@@ -46,6 +49,14 @@ const router = createRouter({
       path: "/audit-logs",
       component: CAdminAuditLogPage,
       props: { type: "AuditLog" },
+    },
+    {
+      path: "/examples", 
+      component: Examples,
+      children: Object.entries(examples).map(x => ({
+        path: x[0].replace('/src/examples/', '').replace('.vue', ''),
+        component: x[1]
+      }))
     },
     {
       path: "/admin/:type",

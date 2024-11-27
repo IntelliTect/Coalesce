@@ -27,13 +27,14 @@
       <div class="v-field__input">
         <span
           class="v-autocomplete__selection"
-          v-for="item in internalModelValue"
+          v-for="(item, index) in internalModelValue"
           :key="item[modelObjectMeta.keyProp.name]"
         >
           <slot
             name="selected-item"
             :item="item"
             :search="search"
+            :index
             :remove="() => onInput(item)"
           >
             <slot name="item" :item="item" :search="search">
@@ -273,7 +274,7 @@
   TModel extends Model | AnyArgCaller | undefined, 
   TFor extends ForSpec<
     TModel,
-    ForeignKeyProperty | ModelReferenceNavigationProperty | ModelValue | (ModelCollectionValue & {manyToMany: never})
+    ForeignKeyProperty | ModelReferenceNavigationProperty | ModelValue | (ModelCollectionValue & {manyToMany: never}) | ModelType
   > = any,
   TMultiple extends boolean = false"
 >
@@ -405,6 +406,7 @@ defineSlots<{
   ["selected-item"]?(props: {
     item: SelectedModelTypeSingle;
     search: string | null;
+    index: number;
     /** Remove/unselect the item. Only applicable for multiselect/multiple mode. */
     remove: () => void;
   }): any;
@@ -520,7 +522,7 @@ const pendingSelection = ref(0);
  * in the case that only the PK was provided to the component.
  */
 const internallyFetchedModels = new Map<
-  any,
+  SelectedPkTypeSingle,
   WeakRef<SelectedModelTypeSingle>
 >();
 
@@ -664,7 +666,7 @@ const internalModelValue = computed((): SelectedModelTypeSingle[] => {
     // All we have is the PK. First, check if it is already in our item array.
     // If so, capture it. If not, request the object from the server.
     const item = items.value.filter(
-      (i) => key === (i as any)[modelObjectMeta.value.keyProp.name]
+      (i) => key === i[modelObjectMeta.value.keyProp.name]
     )[0];
     if (item) {
       // eslint-disable-next-line vue/no-side-effects-in-computed-properties
@@ -705,10 +707,10 @@ const internalModelValue = computed((): SelectedModelTypeSingle[] => {
 });
 
 /** The effective key (whose type is described by `modelObjectMeta`) that has been provided to the component. */
-const internalKeyValue = computed((): SelectedPkType[] => {
-  let value: any;
+const internalKeyValue = computed((): SelectedPkTypeSingle[] => {
+  let value: SelectedPkTypeSingle[];
   if (props.keyValue) {
-    value = toArray(props.keyValue);
+    value = toArray(props.keyValue) as SelectedPkTypeSingle[];
   } else if (valueOwner.value && modelKeyProp.value) {
     value = toArray(valueOwner.value[modelKeyProp.value.name]);
   } else if (props.modelValue && primaryBindKind.value == "key") {
@@ -719,9 +721,7 @@ const internalKeyValue = computed((): SelectedPkType[] => {
 
   // Parse the values in case we were given a string instead of a number, or something like that, via the `keyValue` prop.
   // This prevents `internalModelValue` from getting confused and infinitely calling the `getCaller`.
-  return value.map((v: any) =>
-    mapValueToModel(v, modelObjectMeta.value.keyProp)
-  );
+  return value.map((v) => mapValueToModel(v, modelObjectMeta.value.keyProp));
 });
 
 const selectedKeysSet = computed(
@@ -819,7 +819,7 @@ function onInput(value: SelectedModelTypeSingle | null, dontFocus = false) {
     return;
   }
 
-  const key = value ? (value as any)[modelObjectMeta.value.keyProp.name] : null;
+  const key = value ? value[modelObjectMeta.value.keyProp.name] : null;
   let newKey, newObjectValue: any;
 
   if (effectiveMultiple.value) {
@@ -1045,7 +1045,7 @@ const getCaller = new ModelApiClient<SelectedModelTypeSingle>(
     function () {
       throw "expected calls to be made with invokeWithArgs";
     },
-    () => ({ ids: [] as any[] }),
+    () => ({ ids: [] as SelectedPkTypeSingle[] }),
     (c, args) => {
       if (!args.ids.length) return;
 
@@ -1135,7 +1135,7 @@ watch(pendingSelection, async () => {
   });
 });
 
-watch(search, (newVal: any, oldVal: any) => {
+watch(search, (newVal, oldVal) => {
   searchChanged.value = new Date();
   if (newVal != oldVal) {
     listCaller();

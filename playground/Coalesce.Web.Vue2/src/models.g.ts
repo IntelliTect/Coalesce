@@ -174,6 +174,10 @@ export namespace Case {
         return reactiveDataSource(this);
       }
     }
+    
+    export class MissingManyToManyFarSide implements DataSource<typeof metadata.Case.dataSources.missingManyToManyFarSide> {
+      readonly $metadata = metadata.Case.dataSources.missingManyToManyFarSide
+    }
   }
 }
 

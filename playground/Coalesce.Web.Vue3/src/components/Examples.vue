@@ -7,14 +7,17 @@
       >
         <v-list density="compact" style="width: 220px">
           <template v-for="dir in pages">
-            <v-list-subheader
-              class="font-weight-bold text-uppercase ml-n2 mt-3"
-              >{{ dir.name }}</v-list-subheader
+            <div
+              class="font-weight-medium text-uppercase mt-3 mx-2 pt-3 pb-1"
+              style="border-top: 1px solid rgba(var(--v-theme-on-surface), 0.3)"
             >
+              {{ dir.name }}
+            </div>
             <v-list-item
               v-for="page in dir.children"
               :to="'/examples/' + page.path"
               :title="page.name"
+              class="pl-8"
             >
             </v-list-item>
           </template>

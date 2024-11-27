@@ -1,5 +1,4 @@
 <template>
-  <!-- TODO: Allow c-select to bind directly to ModelType metadata -->
   <c-select
     class="c-select-many-to-many"
     v-bind="inputBindAttrs"

@@ -12,14 +12,11 @@
         label="Dark Mode"
         v-model="darkMode"
         hide-details
-        class="ml-2"
+        class="mx-3"
         density="compact"
       />
 
-      <v-btn variant="text" to="/">Home</v-btn>
-      <v-btn variant="text" to="/examples">Examples</v-btn>
-      <v-btn variant="text" to="/test">Test</v-btn>
-      <v-btn variant="text" to="/test-setup">Test2</v-btn>
+      <v-btn variant="text" to="/examples">Examples/Tests</v-btn>
       <v-btn variant="text" to="/audit-logs">Audit</v-btn>
       <v-btn variant="text" href="/swagger">Swagger</v-btn>
       <v-btn variant="text" href="/scalar/v1">OpenAPI</v-btn>

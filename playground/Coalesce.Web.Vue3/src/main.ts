@@ -34,12 +34,11 @@ new Worker(new URL("./worker.ts", import.meta.url));
 AxiosClient.defaults.baseURL = "/api";
 AxiosClient.defaults.withCredentials = true;
 
-const examples = import.meta.glob('@/examples/**/*.vue')
+const examples = import.meta.glob("@/examples/**/*.vue");
 
 const router = createRouter({
   history: createWebHistory(),
   routes: [
-    { path: "/", component: () => import("@/components/HelloWorld.vue") },
     { path: "/test", component: () => import("./components/test.vue") },
     {
       path: "/test-setup",
@@ -51,12 +50,13 @@ const router = createRouter({
       props: { type: "AuditLog" },
     },
     {
-      path: "/examples", 
+      path: "/examples",
+      alias: "/",
       component: Examples,
-      children: Object.entries(examples).map(x => ({
-        path: x[0].replace('/src/examples/', '').replace('.vue', ''),
-        component: x[1]
-      }))
+      children: Object.entries(examples).map((x) => ({
+        path: x[0].replace("/src/examples/", "").replace(".vue", ""),
+        component: x[1],
+      })),
     },
     {
       path: "/admin/:type",

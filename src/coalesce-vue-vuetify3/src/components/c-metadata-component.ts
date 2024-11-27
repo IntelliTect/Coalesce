@@ -48,7 +48,7 @@ type MethodsOf<TModel> = TModel extends {
 // prettier-ignore
 export type ForSpec<
   TModel extends ModelAllowedType | unknown = unknown,
-  ValueKind extends Value = Value
+  ValueKind extends Value | ClassType = Value | ClassType
 > = 
 // Handle binding of `:model` to a Model or ViewModel:
 TModel extends Model ? 
@@ -112,7 +112,7 @@ TModel extends Model ?
     )
   
 // Fallback to allowing anything:
-: undefined | string | ValueKind | (ValueKind extends ModelValue ? ModelType : never);
+: undefined | string | ValueKind ;
 
 export type MethodForSpec<
   TModel extends

@@ -69,6 +69,10 @@ A metadata specifier for the value being bound. One of:
 - The name of a model type.
 - A direct reference to a metadata object.
 
+::: tip
+When the binding can only locate a PK value and the corresponding object cannot be found (e.g. there is no navigation property, or the navigation property is null), c-select will automatically attempt to load the object from the server so it can be displayed in the UI.
+:::
+
 <Prop def="model?: Model" lang="ts" />
 
 An object owning the value that was specified by the `for` prop. If provided, the input will be bound to the corresponding property on the `model` object.
@@ -88,10 +92,6 @@ Enables multi-select functionality. Bindings for `modelValue`, `keyValue`, and `
 'onUpdate:keyValue': (value: TKey) => void" lang="ts" />
 
 When bound with `v-model:key-value="keyValue"`, allows binding the primary key of the selected object explicitly. Binds an array when in multi-select mode.
-
-::: tip
-When binding by a key value, if the corresponding object cannot be found (e.g. there is no navigation property, or the navigation property is null), c-select will automatically attempt to load the object from the server so it can be displayed in the UI.
-:::
 
 <Prop def="objectValue?: TModel
 'onUpdate:objectValue': (value: TModel) => void" lang="ts" />
@@ -171,4 +171,4 @@ createMethods = {
 
 `#list-item="{ item: TModel, search: string, selected: boolean }"` - Slot used to customize the text of items inside the list. If not provided, falls back to the `item` slot. Contents are wrapped in a `v-list-item-title`.
 
-`#selected-item="{ item: TModel, search: string, remove: () => void }"` - Slot used to customize the text of selected items. If not provided, falls back to the `item` slot. The `remove` function will deselect the item and is only valid when using multi-select.
+`#selected-item="{ item: TModel, search: string, index:  number, remove: () => void }"` - Slot used to customize the text of selected items. If not provided, falls back to the `item` slot. The `remove` function will deselect the item and is only valid when using multi-select.

@@ -67,7 +67,7 @@
     "vitest": "^2.0.3",
     "vue": "^3.4.6",
     "vue-router": "^4.4.1",
-    "vue-tsc": "^2.1.4",
+    "vue-tsc": "^2.1.10",
     "vuetify": "^3.7.1"
   },
   "postcss": {

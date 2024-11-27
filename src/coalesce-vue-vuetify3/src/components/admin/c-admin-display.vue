@@ -109,7 +109,7 @@ function render() {
     }
   }
 
-  return h(CDisplay<TModel>, { ...props });
+  return h(CDisplay, { ...props });
 }
 </script>
 

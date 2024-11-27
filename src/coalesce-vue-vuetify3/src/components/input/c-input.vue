@@ -32,6 +32,45 @@ function addHandler(data: any, eventName: string, handler: Function) {
     oldValue.push(handler);
   }
 }
+
+type _ValueType<
+  TModel extends Model | DataSource | AnyArgCaller | undefined,
+  TFor extends ForSpec<TModel>
+> = TFor extends string & keyof ModelTypeLookup
+  ? ModelTypeLookup[TFor]
+  : TFor extends ModelReferenceNavigationProperty | ModelValue
+  ? TFor["typeDef"]["name"] extends keyof ModelTypeLookup
+    ? ModelTypeLookup[TFor["typeDef"]["name"]]
+    : any
+  : TFor extends ForeignKeyProperty
+  ? TFor["principalType"]["name"] extends keyof ModelTypeLookup
+    ? ModelTypeLookup[TFor["principalType"]["name"]]
+    : any
+  : TModel extends ApiStateTypeWithArgs<any, any, infer TArgsObj, any>
+  ? TFor extends keyof TArgsObj
+    ? TArgsObj[TFor]
+    : any
+  : TModel extends Model
+  ? TFor extends PropNames<TModel["$metadata"]>
+    ? TModel["$metadata"]["props"][TFor] extends
+        | ModelReferenceNavigationProperty
+        | ModelValue
+      ? TModel["$metadata"]["props"][TFor]["typeDef"]["name"] extends keyof ModelTypeLookup
+        ? ModelTypeLookup[TModel["$metadata"]["props"][TFor]["typeDef"]["name"]]
+        : any
+      : TModel["$metadata"]["props"][TFor] extends ForeignKeyProperty
+      ? TModel["$metadata"]["props"][TFor]["principalType"]["name"] extends keyof ModelTypeLookup
+        ? ModelTypeLookup[TModel["$metadata"]["props"][TFor]["principalType"]["name"]]
+        : any
+      : TModel["$metadata"]["props"][TFor] extends CollectionProperty
+      ? Array<
+          TypeDiscriminatorToType<
+            TModel["$metadata"]["props"][TFor]["itemType"]["type"]
+          >
+        >
+      : TypeDiscriminatorToType<TModel["$metadata"]["props"][TFor]["type"]>
+    : any
+  : Model<ModelType>;
 </script>
 
 <script
@@ -79,41 +118,7 @@ import {
   VTextField,
 } from "vuetify/components";
 
-type ValueType = TFor extends string & keyof ModelTypeLookup
-  ? ModelTypeLookup[TFor]
-  : TFor extends ModelReferenceNavigationProperty | ModelValue
-  ? TFor["typeDef"]["name"] extends keyof ModelTypeLookup
-    ? ModelTypeLookup[TFor["typeDef"]["name"]]
-    : any
-  : TFor extends ForeignKeyProperty
-  ? TFor["principalType"]["name"] extends keyof ModelTypeLookup
-    ? ModelTypeLookup[TFor["principalType"]["name"]]
-    : any
-  : TModel extends ApiStateTypeWithArgs<any, any, infer TArgsObj, any>
-  ? TFor extends keyof TArgsObj
-    ? TArgsObj[TFor]
-    : any
-  : TModel extends Model
-  ? TFor extends PropNames<TModel["$metadata"]>
-    ? TModel["$metadata"]["props"][TFor] extends
-        | ModelReferenceNavigationProperty
-        | ModelValue
-      ? TModel["$metadata"]["props"][TFor]["typeDef"]["name"] extends keyof ModelTypeLookup
-        ? ModelTypeLookup[TModel["$metadata"]["props"][TFor]["typeDef"]["name"]]
-        : any
-      : TModel["$metadata"]["props"][TFor] extends ForeignKeyProperty
-      ? TModel["$metadata"]["props"][TFor]["principalType"]["name"] extends keyof ModelTypeLookup
-        ? ModelTypeLookup[TModel["$metadata"]["props"][TFor]["principalType"]["name"]]
-        : any
-      : TModel["$metadata"]["props"][TFor] extends CollectionProperty
-      ? Array<
-          TypeDiscriminatorToType<
-            TModel["$metadata"]["props"][TFor]["itemType"]["type"]
-          >
-        >
-      : TypeDiscriminatorToType<TModel["$metadata"]["props"][TFor]["type"]>
-    : any
-  : Model<ModelType>;
+type ValueType = _ValueType<TModel, TFor>;
 
 defineOptions({
   name: "c-input",

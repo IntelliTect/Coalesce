@@ -267,15 +267,85 @@
 }
 </style>
 
+<script lang="ts">
+// These types are declared outside the component so that vue-tsc doesn't have to inline
+// every single type declaration, which spans thousands of lines and ultimately exceeds
+// the limit on what tsc is even capable of emitting
+
+type CSelectModelSpec = Model | AnyArgCaller | undefined;
+
+type CSelectForSpec<TModel extends CSelectModelSpec> = ForSpec<
+  TModel,
+  | ForeignKeyProperty
+  | ModelReferenceNavigationProperty
+  | ModelValue
+  | (ModelCollectionValue & { manyToMany: never })
+  | ModelType
+>;
+
+type _SelectedModelType<
+  TModel extends CSelectModelSpec,
+  TFor extends CSelectForSpec<TModel>,
+  TMultiple extends boolean
+> = TFor extends string & keyof ModelTypeLookup
+  ? // `for="TypeName"`
+    TMultiple extends true
+    ? Array<ModelTypeLookup[TFor]>
+    : ModelTypeLookup[TFor]
+  : TFor extends ModelReferenceNavigationProperty | ModelValue
+  ? TFor["typeDef"]["name"] extends keyof ModelTypeLookup
+    ? ModelTypeLookup[TFor["typeDef"]["name"]]
+    : any
+  : TFor extends ForeignKeyProperty
+  ? TFor["principalType"]["name"] extends keyof ModelTypeLookup
+    ? ModelTypeLookup[TFor["principalType"]["name"]]
+    : any
+  : TModel extends ApiStateTypeWithArgs<any, any, infer TArgsObj, any>
+  ? TFor extends keyof TArgsObj
+    ? TMultiple extends true
+      ? TArgsObj[TFor] extends Array<any> | null | undefined
+        ? TArgsObj[TFor]
+        : never // Ban use of `multiple` prop when binding to something we know isn't an array
+      : TArgsObj[TFor]
+    : any
+  : TModel extends Model
+  ? TFor extends PropNames<TModel["$metadata"]>
+    ? TModel["$metadata"]["props"][TFor] extends
+        | ModelReferenceNavigationProperty
+        | ModelValue
+      ? TModel["$metadata"]["props"][TFor]["typeDef"]["name"] extends keyof ModelTypeLookup
+        ? ModelTypeLookup[TModel["$metadata"]["props"][TFor]["typeDef"]["name"]]
+        : any
+      : TModel["$metadata"]["props"][TFor] extends ForeignKeyProperty
+      ? TModel["$metadata"]["props"][TFor]["principalType"]["name"] extends keyof ModelTypeLookup
+        ? ModelTypeLookup[TModel["$metadata"]["props"][TFor]["principalType"]["name"]]
+        : any
+      : any
+    : any
+  : Model<ModelType>;
+
+type ExtractValuesOfType<T, U> = {
+  [K in keyof T]: T[K] extends U ? T[K] : never;
+}[keyof T];
+
+type FindPk<TModel extends Model> = ExtractValuesOfType<
+  TModel["$metadata"]["props"],
+  PrimaryKeyProperty
+>;
+
+type ModelToPkType<TModel extends Model> = FindPk<TModel> extends EnumValue
+  ? FindPk<TModel>["typeDef"]["name"] extends keyof EnumTypeLookup
+    ? EnumTypeLookup[FindPk<TModel>["typeDef"]["name"]]
+    : any
+  : TypeDiscriminatorToType<FindPk<TModel>["type"]>;
+</script>
+
 <script
   lang="ts"
   setup
   generic="
-  TModel extends Model | AnyArgCaller | undefined, 
-  TFor extends ForSpec<
-    TModel,
-    ForeignKeyProperty | ModelReferenceNavigationProperty | ModelValue | (ModelCollectionValue & {manyToMany: never}) | ModelType
-  > = any,
+  TModel extends CSelectModelSpec, 
+  TFor extends CSelectForSpec<TModel> = any,
   TMultiple extends boolean = false"
 >
 import {
@@ -326,51 +396,7 @@ defineOptions({
   inheritAttrs: false,
 });
 
-type SelectedModelType = TFor extends string & keyof ModelTypeLookup
-  ? // `for="TypeName"`
-    TMultiple extends true
-    ? Array<ModelTypeLookup[TFor]>
-    : ModelTypeLookup[TFor]
-  : TFor extends ModelReferenceNavigationProperty | ModelValue
-  ? TFor["typeDef"]["name"] extends keyof ModelTypeLookup
-    ? ModelTypeLookup[TFor["typeDef"]["name"]]
-    : any
-  : TFor extends ForeignKeyProperty
-  ? TFor["principalType"]["name"] extends keyof ModelTypeLookup
-    ? ModelTypeLookup[TFor["principalType"]["name"]]
-    : any
-  : TModel extends ApiStateTypeWithArgs<any, any, infer TArgsObj, any>
-  ? TFor extends keyof TArgsObj
-    ? TMultiple extends true
-      ? TArgsObj[TFor] extends Array<any> | null | undefined
-        ? TArgsObj[TFor]
-        : never // Ban use of `multiple` prop when binding to something we know isn't an array
-      : TArgsObj[TFor]
-    : any
-  : TModel extends Model
-  ? TFor extends PropNames<TModel["$metadata"]>
-    ? TModel["$metadata"]["props"][TFor] extends
-        | ModelReferenceNavigationProperty
-        | ModelValue
-      ? TModel["$metadata"]["props"][TFor]["typeDef"]["name"] extends keyof ModelTypeLookup
-        ? ModelTypeLookup[TModel["$metadata"]["props"][TFor]["typeDef"]["name"]]
-        : any
-      : TModel["$metadata"]["props"][TFor] extends ForeignKeyProperty
-      ? TModel["$metadata"]["props"][TFor]["principalType"]["name"] extends keyof ModelTypeLookup
-        ? ModelTypeLookup[TModel["$metadata"]["props"][TFor]["principalType"]["name"]]
-        : any
-      : any
-    : any
-  : Model<ModelType>;
-
-type ExtractValuesOfType<T, U> = {
-  [K in keyof T]: T[K] extends U ? T[K] : never;
-}[keyof T];
-
-type FindPk<TModel extends Model> = ExtractValuesOfType<
-  TModel["$metadata"]["props"],
-  PrimaryKeyProperty
->;
+type SelectedModelType = _SelectedModelType<TModel, TFor, TMultiple>;
 
 type SelectedModelTypeSingle = SelectedModelType extends Array<
   infer U extends Model<ModelType>
@@ -378,11 +404,7 @@ type SelectedModelTypeSingle = SelectedModelType extends Array<
   ? U
   : SelectedModelType;
 
-type SelectedPkTypeSingle = FindPk<SelectedModelTypeSingle> extends EnumValue
-  ? FindPk<SelectedModelTypeSingle>["typeDef"]["name"] extends keyof EnumTypeLookup
-    ? EnumTypeLookup[FindPk<SelectedModelTypeSingle>["typeDef"]["name"]]
-    : any
-  : TypeDiscriminatorToType<FindPk<SelectedModelTypeSingle>["type"]>;
+type SelectedPkTypeSingle = ModelToPkType<SelectedModelTypeSingle>;
 
 type SelectedPkType = TMultiple extends true
   ? SelectedPkTypeSingle[]

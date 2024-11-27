@@ -59,7 +59,7 @@ Examples of other props:
 
 ## Props
 
-Note: In addition to the below props, `c-select` also supports most props that are supported by Vuetify's [v-text-field](https://vuetifyjs.com/en/components/text-fields/#api).
+Note: In addition to the below props, `c-select` also supports most props that are supported by Vuetify's [v-text-field](https://vuetifyjs.com/en/components/text-fields/).
 
 <Prop def="for: string | ForeignKeyProperty | ModelReferenceNavigationProperty | ModelType" lang="ts" />
 

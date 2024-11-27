@@ -112,7 +112,7 @@ TModel extends Model ?
     )
   
 // Fallback to allowing anything:
-: undefined | string | ValueKind ;
+: undefined | string | ValueKind;
 
 export type MethodForSpec<
   TModel extends

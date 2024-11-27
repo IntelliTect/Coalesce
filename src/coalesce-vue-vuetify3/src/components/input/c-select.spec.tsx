@@ -157,7 +157,7 @@ describe("CSelect", () => {
     // Implicit `multiple` for object collection
     () => (<CSelect model={complexVm.methodWithManyParams} for="modelCollection" modelValue={[testVm]} onUpdate:modelValue={receivesTestModels} />);
     
-    //@ts-expect-error Explicit `multiple` for object collection requires arrays
+    //@ts-expect-error Explicit `multiple` for object non-collection is disallowed
     () => (<CSelect model={complexVm.methodWithManyParams} for="model" multiple modelValue={[testVm]} onUpdate:modelValue={receivesTestModels} />);
     //@ts-expect-error Explicit `multiple` for object non-collection is disallowed
     () => (<CSelect model={complexVm.methodWithManyParams} for="model" multiple modelValue={testVm} onUpdate:modelValue={receivesTestModel} />);

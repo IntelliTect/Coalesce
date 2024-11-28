@@ -20,6 +20,7 @@
               density="compact"
               class="my-4"
               error-messages="sdfsdf"
+              :params="{useRef: true}"
             >
             </c-select>
           </v-col>
@@ -147,6 +148,7 @@ export default class Test extends Base {
     this.personList.$params.noCount = true;
     this.personList.$load();
 
+    this.caseVm.$params.useRef = true;
     await this.caseVm.$load(15);
     await this.caseVm.downloadImage();
     await this.company.$load(1);

@@ -86,11 +86,18 @@ export interface DataSourceParameters {
    * Classes are found in `models.g.ts` as `<ModelName>.DataSources.<DataSourceName>`, e.g. `Person.DataSources.WithRelations`.
    */
   dataSource?: DataSource<DataSourceType> | null;
+
+  /** If true, request that the server use System.Text.Json reference preservation handling when serializing the response,
+   * which can significantly reduce the size of the response payload. This will also cause the resulting
+   * `Model` and `ViewModel` instances on the client to be deduplicated.
+   */
+  useRef?: boolean;
 }
 export class DataSourceParameters {
   constructor() {
     this.includes = null;
     this.dataSource = null;
+    this.useRef = false;
   }
 }
 
@@ -753,12 +760,22 @@ export class ApiClient<T extends ApiRoutedType> {
       query = mappedParams;
     }
 
+    let headers = config?.headers;
+    if (standardParameters?.useRef) {
+      headers = {
+        ...config?.headers,
+        Accept: standardParameters?.useRef
+          ? ["application/json+ref", "application/json"]
+          : ["application/json"],
+      };
+    }
     const axiosRequest = <AxiosRequestConfig>{
       method: method.httpMethod,
       url: url,
       data: body,
       responseType: method.return.type == "file" ? "blob" : "json",
       cancelToken: this._cancelToken,
+      headers,
       ...config,
       params: {
         ...query,

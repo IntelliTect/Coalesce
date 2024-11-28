@@ -13,12 +13,11 @@ namespace IntelliTect.Coalesce.Mapping
         {
             if (obj == null) return default;
 
-            // See if the object is already created, but only if we aren't restricting by an includes tree.
-            // If we do have an IncludeTree, we know the exact structure of our return data, so we don't need to worry about circular refs.
-            if (tree == null && context.TryGetMapping(obj, out TDto? existing)) return existing;
+            // See if we already mapped this object:
+            if (context.TryGetMapping(obj, tree, out TDto? existing)) return existing;
 
             var dto = new TDto();
-            if (tree == null) context.AddMapping(obj, dto);
+            context.AddMapping(obj, tree, dto);
 
             dto.MapFrom(obj, context, tree);
 

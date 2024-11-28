@@ -141,9 +141,9 @@ export abstract class ViewModel<
   private _isDirty = ref(false);
 
   /** @internal */
-  _dirtyProps: Set<string> = IsVue2
-    ? new Set<string>()
-    : reactive(new Set<string>());
+  _dirtyProps: Set<PropNames<TModel["$metadata"]>> = IsVue2
+    ? new Set()
+    : reactive(new Set());
 
   // Backwards-compat with vue2 nonreactive sets.
   // Typed as any because vue ref unwrapping causes problems with a prop that is a maybe ref.
@@ -469,76 +469,71 @@ export abstract class ViewModel<
    */
   get $save() {
     const $save = this.$apiClient
-      .$makeCaller(
-        "item",
-        async function (this: ViewModel, c, overrideProps?: Partial<TModel>) {
-          if (this.$hasError) {
-            throw Error(joinErrors(this.$getErrors()));
-          }
-
-          // Capture the dirty props before we set $isDirty = false;
-          const dirtyProps = [...this._dirtyProps];
-
-          // Copy the dirty props into a list that we'll be mutating
-          // into the list of ALL props that we would need to send
-          // for surgical saves.
-          const propsToSave = [...dirtyProps];
-
-          // If we were passed any override props, send those too.
-          // Use case of override props is changing some field
-          // where we don't want the local UI to reflect that new value
-          // until we know that value has been saved to the server.
-          // A further example is saving some property that will have sever-determined effects
-          // on other properties on the model where we don't want an inconsistent intermediate state.
-          let data: TModel = this as any;
-          if (overrideProps) {
-            data = {
-              ...this.$data,
-              ...overrideProps,
-              $metadata: this.$metadata,
-            };
-            propsToSave.push(...Object.keys(overrideProps));
-          }
-
-          // We always send the PK if it exists, regardless of dirty status or save mode.
-          if (this.$primaryKey != null) {
-            propsToSave.push(this.$metadata.keyProp.name);
-          }
-
-          this.$savingProps = new Set(propsToSave);
-
-          // If doing surgical saves,
-          // only save the props that are dirty and/or explicitly requested.
-          const fields =
-            this.$saveMode == "surgical"
-              ? ([...this.$savingProps] as any)
-              : null;
-
-          // Before we make the save call, set isDirty = false.
-          // This lets us detect changes that happen to the model while our save request is pending.
-          // If the model is dirty when the request completes, we'll not load the response from the server.
-          this.$isDirty = false;
-          try {
-            return await c.save(data, { ...this.$params, fields });
-          } catch (e) {
-            for (const prop of dirtyProps) {
-              this.$setPropDirty(
-                prop,
-                true,
-                // Don't re-trigger autosave on save failure.
-                // Wait for next prop change to trigger it again.
-                // Otherwise, if the wait timeout is zero,
-                // the save will keep triggering as fast as possible.
-                // Note that this could be a candidate for a user-customizable option
-                // in the future.
-                false
-              );
-            }
-            this.$savingProps = emptySet;
-            throw e;
-          }
+      .$makeCaller("item", async (c, overrideProps?: Partial<TModel>) => {
+        if (this.$hasError) {
+          throw Error(joinErrors(this.$getErrors()));
         }
-      )
+
+        // Capture the dirty props before we set $isDirty = false;
+        const dirtyProps = [...this._dirtyProps];
+
+        // Copy the dirty props into a list that we'll be mutating
+        // into the list of ALL props that we would need to send
+        // for surgical saves.
+        const propsToSave: string[] = [...dirtyProps];
+
+        // If we were passed any override props, send those too.
+        // Use case of override props is changing some field
+        // where we don't want the local UI to reflect that new value
+        // until we know that value has been saved to the server.
+        // A further example is saving some property that will have sever-determined effects
+        // on other properties on the model where we don't want an inconsistent intermediate state.
+        let data: TModel = this as any;
+        if (overrideProps) {
+          data = {
+            ...this.$data,
+            ...overrideProps,
+            $metadata: this.$metadata,
+          };
+          propsToSave.push(...Object.keys(overrideProps));
+        }
+
+        // We always send the PK if it exists, regardless of dirty status or save mode.
+        if (this.$primaryKey != null) {
+          propsToSave.push(this.$metadata.keyProp.name);
+        }
+
+        this.$savingProps = new Set(propsToSave);
+
+        // If doing surgical saves,
+        // only save the props that are dirty and/or explicitly requested.
+        const fields =
+          this.$saveMode == "surgical" ? ([...this.$savingProps] as any) : null;
+
+        // Before we make the save call, set isDirty = false.
+        // This lets us detect changes that happen to the model while our save request is pending.
+        // If the model is dirty when the request completes, we'll not load the response from the server.
+        this.$isDirty = false;
+        try {
+          return await c.save(data, { ...this.$params, fields });
+        } catch (e) {
+          for (const prop of dirtyProps) {
+            this.$setPropDirty(
+              prop,
+              true,
+              // Don't re-trigger autosave on save failure.
+              // Wait for next prop change to trigger it again.
+              // Otherwise, if the wait timeout is zero,
+              // the save will keep triggering as fast as possible.
+              // Note that this could be a candidate for a user-customizable option
+              // in the future.
+              false
+            );
+          }
+          this.$savingProps = emptySet;
+          throw e;
+        }
+      })
       .onFulfilled(function (this: ViewModel) {
         if (!this.$save.result) {
           // Can't do anything useful if the save returned no data.
@@ -575,7 +570,7 @@ export abstract class ViewModel<
   get $bulkSave() {
     const $bulkSave = this.$apiClient.$makeCaller(
       "item",
-      async function (this: ViewModel, c, options?: BulkSaveOptions) {
+      async (c, options?: BulkSaveOptions) => {
         const {
           items: itemsToSend,
           rawItems: dataToSend,
@@ -985,7 +980,7 @@ export abstract class ViewModel<
    */
   get $delete() {
     const $delete = this.$apiClient
-      .$makeCaller("item", function (this: ViewModel, c) {
+      .$makeCaller("item", (c) => {
         if (this._existsOnServer) {
           return c.delete(this.$primaryKey, this.$params);
         } else {

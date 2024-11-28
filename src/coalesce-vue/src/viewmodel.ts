@@ -143,7 +143,7 @@ export abstract class ViewModel<
   /** @internal */
   _dirtyProps: Set<PropNames<TModel["$metadata"]>> = IsVue2
     ? new Set()
-    : reactive(new Set());
+    : (reactive(new Set()) as any); // as any to avoid ref unwrapping madness
 
   // Backwards-compat with vue2 nonreactive sets.
   // Typed as any because vue ref unwrapping causes problems with a prop that is a maybe ref.

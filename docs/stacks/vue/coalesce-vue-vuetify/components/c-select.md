@@ -29,6 +29,17 @@ Binding an arbitrary primary key value or an arbitrary object:
   <c-select for="Person" v-model="selectedPerson" />
 ```
 
+Multi-select:
+
+``` vue-html
+  <!-- Binding selected primary keys: -->
+  <c-select for="Person" multiple v-model:key-value="selectedPeopleIds" />
+
+  <!-- Binding selected objects: -->
+  <c-select for="Person" multiple v-model="selectedPeople" />
+  <c-select for="Person" multiple v-model:object-value="selectedPeople" />
+```
+
 Examples of other props:
 
 ``` vue-html
@@ -48,6 +59,8 @@ Examples of other props:
 
 ## Props
 
+Note: In addition to the below props, `c-select` also supports most props that are supported by Vuetify's [v-text-field](https://vuetifyjs.com/en/components/text-fields/).
+
 <Prop def="for: string | ForeignKeyProperty | ModelReferenceNavigationProperty | ModelType" lang="ts" />
 
 A metadata specifier for the value being bound. One of:
@@ -55,10 +68,9 @@ A metadata specifier for the value being bound. One of:
 - The name of a foreign key or reference navigation property belonging to `model`. 
 - The name of a model type.
 - A direct reference to a metadata object.
-- A string in dot-notation that starts with a type name that resolves to a foreign key or reference navigation property.
 
 ::: tip
-When binding by a key value, if the corresponding object cannot be found (e.g. there is no navigation property, or the navigation property is null), c-select will automatically attempt to load the object from the server so it can be displayed in the UI.
+When the binding can only locate a PK value and the corresponding object cannot be found (e.g. there is no navigation property, or the navigation property is null), c-select will automatically attempt to load the object from the server so it can be displayed in the UI.
 :::
 
 <Prop def="model?: Model" lang="ts" />
@@ -72,13 +84,19 @@ modelValue?: any // Vue 3" lang="ts" />
 
 When binding the component with ``v-model``, accepts the ``value`` part of ``v-model``. If `for` was specified as a foreign key, this will expect a key; likewise, if `for` was specified as a type or as a navigation property, this will expect an object.
 
-<Prop def="keyValue?: any" lang="ts" />
+<Prop def="multiple?: boolean" lang="ts" />
 
-When bound with `v-model:key-value="keyValue"`, allows binding the primary key of the selected object explicitly.
+Enables multi-select functionality. Bindings for `modelValue`, `keyValue`, and `objectValue` will accept and emit arrays instead of single values.
 
-<Prop def="objectValue?: any" lang="ts" />
+<Prop def="keyValue?: TKey
+'onUpdate:keyValue': (value: TKey) => void" lang="ts" />
 
-When bound with `v-model:object-value="objectValue"`, allows binding the selected object explicitly.
+When bound with `v-model:key-value="keyValue"`, allows binding the primary key of the selected object explicitly. Binds an array when in multi-select mode.
+
+<Prop def="objectValue?: TModel
+'onUpdate:objectValue': (value: TModel) => void" lang="ts" />
+
+When bound with `v-model:object-value="objectValue"`, allows binding the selected object explicitly. Binds an array when in multi-select mode.
 
 <Prop def="clearable?: boolean" lang="ts" />
 
@@ -149,8 +167,8 @@ createMethods = {
 
 ## Slots
 
-`#item="{ item, search }"` - Slot used to customize the text of both items inside the list, as well as the text of selected items. By default, items are rendered with [c-display](/stacks/vue/coalesce-vue-vuetify/components/c-display.md). Slot is passed a parameter `item` containing a [model instance](/stacks/vue/layers/models.md), and `search` containing the current search query.
+`#item="{ item: TModel, search: string }"` - Slot used to customize the text of both items inside the list, as well as the text of selected items. By default, items are rendered with [c-display](/stacks/vue/coalesce-vue-vuetify/components/c-display.md). Slot is passed a parameter `item` containing a [model instance](/stacks/vue/layers/models.md), and `search` containing the current search query.
 
-`#list-item="{ item, search }"` - Slot used to customize the text of items inside the list. If not provided, falls back to the `item` slot.
+`#list-item="{ item: TModel, search: string, selected: boolean }"` - Slot used to customize the text of items inside the list. If not provided, falls back to the `item` slot. Contents are wrapped in a `v-list-item-title`.
 
-`#selected-item="{ item, search }"` - Slot used to customize the text of selected items. If not provided, falls back to the `item` slot.
+`#selected-item="{ item: TModel, search: string, index:  number, remove: () => void }"` - Slot used to customize the text of selected items. If not provided, falls back to the `item` slot. The `remove` function will deselect the item and is only valid when using multi-select.

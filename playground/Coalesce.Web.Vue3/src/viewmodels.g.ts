@@ -635,9 +635,9 @@ export class PersonListViewModel extends ListViewModel<$models.Person, $apiClien
   public get methodWithEntityParameter() {
     const methodWithEntityParameter = this.$apiClient.$makeCaller(
       this.$metadata.methods.methodWithEntityParameter,
-      (c, person: $models.Person | null) => c.methodWithEntityParameter(person),
-      () => ({person: null as $models.Person | null, }),
-      (c, args) => c.methodWithEntityParameter(args.person))
+      (c, person: $models.Person | null, people: $models.Person[] | null) => c.methodWithEntityParameter(person, people),
+      () => ({person: null as $models.Person | null, people: null as $models.Person[] | null, }),
+      (c, args) => c.methodWithEntityParameter(args.person, args.people))
     
     Object.defineProperty(this, 'methodWithEntityParameter', {value: methodWithEntityParameter});
     return methodWithEntityParameter

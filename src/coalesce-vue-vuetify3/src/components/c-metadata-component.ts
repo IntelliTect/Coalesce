@@ -23,6 +23,7 @@ import type {
   ApiStateTypeWithArgs,
   ListViewModel,
   ServiceViewModel,
+  ModelCollectionValue,
 } from "coalesce-vue";
 import { ApiState, ViewModel } from "coalesce-vue";
 import { computed, inject, useAttrs } from "vue";
@@ -47,7 +48,7 @@ type MethodsOf<TModel> = TModel extends {
 // prettier-ignore
 export type ForSpec<
   TModel extends ModelAllowedType | unknown = unknown,
-  ValueKind extends Value = Value
+  ValueKind extends Value | ClassType = Value | ClassType
 > = 
 // Handle binding of `:model` to a Model or ViewModel:
 TModel extends Model ? 
@@ -87,6 +88,7 @@ TModel extends Model ?
         ValueKind extends (NumberValue & {role: 'value'}) ? number :
         ValueKind extends FileValue ? File :
         ValueKind extends BooleanValue ? boolean :
+        ValueKind extends ModelCollectionValue ? (Model<ModelType>[]) :
         ValueKind extends CollectionValue ? (string[] | number[]) :
         ValueKind extends Property ? never :
         ValueKind extends Value ? any :
@@ -170,128 +172,132 @@ export function getValueMeta(
     return null;
   }
 
-  if (typeof forVal != "string") {
-    return forVal;
-  }
-
-  if (forVal.length === 0) {
-    throw `prop 'for' must not be an empty string`;
-  }
-
-  if (modelMeta && "props" in modelMeta) {
-    // Handle the 90% case: check if 'for' is a prop on 'model'
-    const matchedProp = modelMeta.props[forVal];
-    if (matchedProp) {
-      return matchedProp;
-    }
-  }
-
-  const forParts = forVal.split(".");
-
   let tail: ClassType | Method | Property | Value | undefined = undefined;
   let tailKind: "type" | "method" | "property" | "value" | undefined =
     undefined;
 
-  if (modelMeta) {
-    if ("params" in modelMeta) {
-      tail = modelMeta;
-      tailKind = "method";
-    } else if (
-      modelMeta.type == "object" ||
-      modelMeta.type == "model" ||
-      modelMeta.type == "dataSource"
-    ) {
-      tail = modelMeta;
+  if (typeof forVal != "string") {
+    if ("props" in forVal) {
+      tail = forVal;
       tailKind = "type";
+    } else {
+      return forVal;
     }
-  }
+  } else {
+    if (forVal.length === 0) {
+      throw `prop 'for' must not be an empty string`;
+    }
 
-  $metadata ??= useMetadata();
-
-  for (let i = 0; i < forParts.length; i++) {
-    const forPart = forParts[i];
-    const forPartNext = forParts[i + 1];
-
-    // Check if 'for' is a type name. Type name is only valid in the first position.
-    if (i == 0 && $metadata) {
-      if (forPart in $metadata.types) {
-        tail = ($metadata.types as any)[forPart];
-        tailKind = "type";
-        continue;
-      }
-      if (forPart in $metadata.enums) {
-        const type: EnumType = ($metadata.enums as any)[forPart];
-        tail = <Value>{
-          type: type.type,
-          displayName: type.displayName,
-          name: "",
-          role: "value",
-          typeDef: type,
-        };
-        tailKind = "value";
-        continue;
+    if (modelMeta && "props" in modelMeta) {
+      // Handle the 90% case: check if 'for' is a prop on 'model'
+      const matchedProp = modelMeta.props[forVal];
+      if (matchedProp) {
+        return matchedProp;
       }
     }
 
-    if (tailKind == "type") {
-      // See if the part is a prop name.
-      const type = tail as ClassType;
-      if (type.props[forPart]) {
-        tail = type.props[forPart];
-        tailKind = "property";
-        continue;
-      }
-
-      // See if the part is a method name.
-      if (type.type == "model" && type.methods[forPart]) {
-        tail = type.methods[forPart];
+    const forParts = forVal.split(".");
+    if (modelMeta) {
+      if ("params" in modelMeta) {
+        tail = modelMeta;
         tailKind = "method";
-        continue;
-      }
-
-      // forPart wasn't itself a method or prop.
-      // Check if forPart is the literal string "props" or "method"
-      // and the actual name is the following token.
-      if (forPart == "props" && type.props[forPartNext]) {
-        i++;
-        tail = type.props[forPartNext];
-        tailKind = "property";
-        continue;
-      }
-
-      if (
-        forPart == "methods" &&
-        type.type == "model" &&
-        type.methods[forPartNext]
+      } else if (
+        modelMeta.type == "object" ||
+        modelMeta.type == "model" ||
+        modelMeta.type == "dataSource"
       ) {
-        i++;
-        tail = type.methods[forPartNext];
-        tailKind = "method";
-        continue;
-      }
-    } else if (tailKind == "method") {
-      const method = tail as Method;
-      if (method.params[forPart]) {
-        tail = method.params[forPart];
-        tailKind = "value";
-        continue;
-      }
-
-      // Check if forPart is the literal string "params"
-      // and the actual name is the following token.
-      if (forPart == "params" && method.params[forPartNext]) {
-        i++;
-        tail = method.params[forPartNext];
-        tailKind = "value";
-        continue;
+        tail = modelMeta;
+        tailKind = "type";
       }
     }
 
-    throw Error(
-      `Could not resolve token '${forPart}'${
-        forVal != forPart ? " in " + forVal : ""
-      } from ${tailKind} '${tail?.name}'`
-    );
+    $metadata ??= useMetadata();
+
+    for (let i = 0; i < forParts.length; i++) {
+      const forPart = forParts[i];
+      const forPartNext = forParts[i + 1];
+
+      // Check if 'for' is a type name. Type name is only valid in the first position.
+      if (i == 0 && $metadata) {
+        if (forPart in $metadata.types) {
+          tail = ($metadata.types as any)[forPart];
+          tailKind = "type";
+          continue;
+        }
+        if (forPart in $metadata.enums) {
+          const type: EnumType = ($metadata.enums as any)[forPart];
+          tail = <Value>{
+            type: type.type,
+            displayName: type.displayName,
+            name: "",
+            role: "value",
+            typeDef: type,
+          };
+          tailKind = "value";
+          continue;
+        }
+      }
+
+      if (tailKind == "type") {
+        // See if the part is a prop name.
+        const type = tail as ClassType;
+        if (type.props[forPart]) {
+          tail = type.props[forPart];
+          tailKind = "property";
+          continue;
+        }
+
+        // See if the part is a method name.
+        if (type.type == "model" && type.methods[forPart]) {
+          tail = type.methods[forPart];
+          tailKind = "method";
+          continue;
+        }
+
+        // forPart wasn't itself a method or prop.
+        // Check if forPart is the literal string "props" or "method"
+        // and the actual name is the following token.
+        if (forPart == "props" && type.props[forPartNext]) {
+          i++;
+          tail = type.props[forPartNext];
+          tailKind = "property";
+          continue;
+        }
+
+        if (
+          forPart == "methods" &&
+          type.type == "model" &&
+          type.methods[forPartNext]
+        ) {
+          i++;
+          tail = type.methods[forPartNext];
+          tailKind = "method";
+          continue;
+        }
+      } else if (tailKind == "method") {
+        const method = tail as Method;
+        if (method.params[forPart]) {
+          tail = method.params[forPart];
+          tailKind = "value";
+          continue;
+        }
+
+        // Check if forPart is the literal string "params"
+        // and the actual name is the following token.
+        if (forPart == "params" && method.params[forPartNext]) {
+          i++;
+          tail = method.params[forPartNext];
+          tailKind = "value";
+          continue;
+        }
+      }
+
+      throw Error(
+        `Could not resolve token '${forPart}'${
+          forVal != forPart ? " in " + forVal : ""
+        } from ${tailKind} '${tail?.name}'`
+      );
+    }
   }
 
   if (!tail) {

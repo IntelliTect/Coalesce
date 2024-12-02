@@ -232,6 +232,15 @@ namespace Coalesce.Domain
                 .IncludeChildren();
         }
 
+        public class MissingManyToManyFarSide(CrudContext<AppDbContext> context) : StandardDataSource<Case, AppDbContext>(context)
+        {
+            public override IQueryable<Case> GetQuery(IDataSourceParameters parameters) => Db.Cases
+                .Include(c => c.CaseProducts)
+                .Include(c => c.AssignedTo)
+                .Include(c => c.ReportedBy);
+        }
+
+
         /// <summary>
         /// Returns a list of summary information about Cases
         /// </summary>

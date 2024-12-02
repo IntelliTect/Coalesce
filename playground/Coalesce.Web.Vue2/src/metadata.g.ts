@@ -812,6 +812,13 @@ export const Case = domain.types.Case = {
         },
       },
     },
+    missingManyToManyFarSide: {
+      type: "dataSource",
+      name: "MissingManyToManyFarSide" as const,
+      displayName: "Missing Many To Many Far Side",
+      props: {
+      },
+    },
   },
 }
 export const CaseDto = domain.types.CaseDto = {
@@ -1793,6 +1800,22 @@ export const Person = domain.types.Person = {
           role: "value",
           rules: {
             required: val => val != null || "Person is required.",
+          }
+        },
+        people: {
+          name: "people",
+          displayName: "People",
+          type: "collection",
+          itemType: {
+            name: "$collectionItem",
+            displayName: "",
+            role: "value",
+            type: "model",
+            get typeDef() { return (domain.types.Person as ModelType & { name: "Person" }) },
+          },
+          role: "value",
+          rules: {
+            required: val => val != null || "People is required.",
           }
         },
       },

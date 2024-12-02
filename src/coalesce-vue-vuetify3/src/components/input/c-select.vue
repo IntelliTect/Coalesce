@@ -3,183 +3,223 @@
     class="c-select"
     :class="{
       'c-select--is-menu-active': menuOpen,
+      'c-select--multiple': effectiveMultiple,
     }"
-    :error-messages="error"
     :focused="focused"
     v-bind="inputBindAttrs"
     :rules="effectiveRules"
-    :modelValue="internalModelValue"
+    :modelValue="effectiveMultiple ? internalModelValue : internalModelValue[0]"
     :disabled="isDisabled"
     :readonly="isReadonly"
-    #default="{ isValid }"
   >
-    <v-field
-      :error="isValid.value === false"
-      append-inner-icon="$dropdown"
-      v-bind="fieldAttrs"
-      :clearable="isInteractive && isClearable"
-      :active="!!internalModelValue || focused || !!placeholder"
-      :dirty="!!internalModelValue"
-      :focused="focused"
-      @click:clear.stop.prevent="onInput(null, true)"
-      @keydown="onInputKey($event)"
-    >
-      <div class="v-field__input">
-        <slot
-          v-if="internalModelValue"
-          name="selected-item"
-          :item="internalModelValue"
-          :search="search"
-        >
-          <span class="v-select__selection">
-            <slot name="item" :item="internalModelValue" :search="search">
-              <c-display
-                class="v-select__selection-text"
-                :model="internalModelValue"
-              />
-            </slot>
-          </span>
-        </slot>
-
-        <input
-          type="text"
-          ref="mainInputRef"
-          v-model="mainValue"
-          @mousedown.stop.prevent="
-            // Intercept direct clicks on the input to short circuit `focused`
-            // and v-menu's activator handler, which introduce some latency before the menu opens
-            // if we allow the menu opening to be handled that way.
-            // Mousedown is needed to prevent `focused` from happening.
-            openMenu()
-          "
-          @click.stop.prevent="
-            // Prevent v-menu's activator handler from running (which is a click handler, not mousedown).
-            openMenu()
-          "
-          @focus="focused = true"
-          @blur="focused = false"
-          :autofocus="autofocus"
-          :disabled="isDisabled"
-          :readonly="isReadonly"
-          :placeholder="internalModelValue ? undefined : placeholder"
-        />
-      </div>
-    </v-field>
-
-    <v-menu
-      :modelValue="menuOpen"
-      @update:modelValue="!$event ? closeMenu() : openMenu()"
-      activator="parent"
-      :close-on-content-click="false"
-      contentClass="c-select__menu-content"
-      origin="top"
-      location="top"
-    >
-      <v-sheet
-        @keydown.capture.down.stop.prevent="
-          pendingSelection = Math.min(
-            listItems.length - 1,
-            pendingSelection + 1
-          )
-        "
-        @keydown.capture.up.stop.prevent="
-          pendingSelection = Math.max(0, pendingSelection - 1)
-        "
-        @keydown.capture.enter.stop.prevent="confirmPendingSelection"
-        @keydown.capture.tab.stop.prevent="confirmPendingSelection"
+    <template v-for="(_, slot) of passthroughSlots" v-slot:[slot]="scope">
+      <slot :name="slot" v-bind="(scope as any)" />
+    </template>
+    <template #default="{ isValid }">
+      <v-field
+        :error="isValid.value === false"
+        append-inner-icon="$dropdown"
+        v-bind="fieldAttrs"
+        :clearable="isInteractive && isClearable"
+        :active="!!selectedKeysSet.size || focused || !!placeholder"
+        :dirty="!!selectedKeysSet.size"
+        :focused="focused"
+        @click:clear.stop.prevent="onInput(null, true)"
+        @keydown="onInputKey($event)"
       >
-        <v-text-field
-          v-model="search"
-          ref="searchRef"
-          hide-details="auto"
-          prepend-inner-icon="fa fa-search"
-          :loading="listCaller.isLoading"
-          :error-messages="
-            listCaller.wasSuccessful == false
-              ? listCaller.message ?? undefined
-              : ''
-          "
-          clearable
-          placeholder="Search"
-          variant="filled"
-          density="compact"
-        >
-        </v-text-field>
+        <template v-for="(_, slot) of passthroughSlots" v-slot:[slot]="scope">
+          <slot :name="slot" v-bind="(scope as any)" />
+        </template>
 
-        <!-- TODO: i18n -->
-        <div
-          v-if="!createItemLabel && !listItems.length"
-          class="grey--text px-4 my-3 font-italic"
-        >
-          <v-fade-transition mode="out-in">
-            <span v-if="listCaller.isLoading">Loading...</span>
-            <span v-else>No results found.</span>
-          </v-fade-transition>
-        </div>
-
-        <!-- This height shows 7 full items, with a final item partially out 
-        of the scroll area to improve visual hints to the user that the can scroll the list. -->
-        <v-list class="py-0" max-height="302" ref="listRef" density="compact">
-          <v-list-item
-            v-if="createItemLabel"
-            class="c-select__create-item"
-            @click="createItem"
-            :loading="createItemLoading"
-          >
-            <template #prepend>
-              <v-progress-circular
-                class="mr-6"
-                indeterminate
-                v-if="createItemLoading"
-              ></v-progress-circular>
-              <v-icon v-else>$plus</v-icon>
-            </template>
-            <v-list-item-title>
-              {{ createItemLabel }}
-            </v-list-item-title>
-            <v-list-item-subtitle
-              v-if="createItemError"
-              class="text-error font-weight-bold"
+        <template #default>
+          <div class="v-field__input">
+            <span
+              class="v-autocomplete__selection"
+              v-for="(item, index) in internalModelValue"
+              :key="item[modelObjectMeta.keyProp.name]"
             >
-              {{ createItemError }}
-            </v-list-item-subtitle>
-          </v-list-item>
-
-          <v-list-item
-            v-for="(item, i) in listItems"
-            :key="item[modelObjectMeta.keyProp.name]"
-            @click="onInput(item)"
-            :value="i"
-            :active="pendingSelection == i"
-          >
-            <v-list-item-title>
-              <slot name="list-item" :item="item" :search="search">
+              <slot
+                name="selected-item"
+                :item="item"
+                :search="search"
+                :index
+                :remove="() => onInput(item)"
+              >
                 <slot name="item" :item="item" :search="search">
-                  <c-display :model="item" />
+                  <v-chip
+                    v-if="effectiveMultiple"
+                    size="small"
+                    :closable="canDeselect"
+                    @click:close="onInput(item)"
+                  >
+                    {{ itemTitle(item) }}
+                  </v-chip>
+                  <span v-else class="v-select__selection-text">
+                    {{ itemTitle(item) }}
+                  </span>
                 </slot>
               </slot>
-            </v-list-item-title>
-          </v-list-item>
+            </span>
 
-          <!-- TODO: With this version of c-select (versus the v2 one),
-        we can implement infinite scroll much easier. Consider doing this instead of having this message. -->
-          <v-list-item
-            v-if="
-              // When we do know an actual page count:
-              (listCaller.pageCount && listCaller.pageCount > 1) ||
-              // When `noCount` is used or counting is disabled on the server:
-              (listCaller.pageCount == -1 &&
-                listCaller.pageSize &&
-                listItems.length >= listCaller.pageSize)
+            <input
+              type="text"
+              ref="mainInputRef"
+              v-model="mainValue"
+              @mousedown.stop.prevent="
+                // Intercept direct clicks on the input to short circuit `focused`
+                // and v-menu's activator handler, which introduce some latency before the menu opens
+                // if we allow the menu opening to be handled that way.
+                // Mousedown is needed to prevent `focused` from happening.
+                openMenu()
+              "
+              @click.stop.prevent="
+                // Prevent v-menu's activator handler from running (which is a click handler, not mousedown).
+                openMenu()
+              "
+              @focus="focused = true"
+              @blur="focused = false"
+              :autofocus="autofocus"
+              :disabled="isDisabled"
+              :readonly="isReadonly"
+              :placeholder="selectedKeysSet.size ? undefined : placeholder"
+            />
+          </div>
+        </template>
+      </v-field>
+
+      <v-menu
+        :modelValue="menuOpen"
+        @update:modelValue="!$event ? closeMenu() : openMenu()"
+        activator="parent"
+        :close-on-content-click="false"
+        contentClass="c-select__menu-content"
+        origin="top"
+        location="bottom"
+      >
+        <v-sheet
+          @keydown.capture.down.stop.prevent="
+            pendingSelection = Math.min(
+              listItems.length - 1,
+              pendingSelection + 1
+            )
+          "
+          @keydown.capture.up.stop.prevent="
+            pendingSelection = Math.max(0, pendingSelection - 1)
+          "
+          @keydown.capture.enter.stop.prevent="confirmPendingSelection"
+          @keydown.capture.tab.stop.prevent="confirmPendingSelection"
+        >
+          <v-text-field
+            v-model="search"
+            ref="searchRef"
+            hide-details="auto"
+            prepend-inner-icon="fa fa-search"
+            :loading="listCaller.isLoading"
+            :error-messages="
+              listCaller.wasSuccessful == false
+                ? listCaller.message ?? undefined
+                : ''
             "
-            class="text-grey font-italic"
+            clearable
+            placeholder="Search"
+            variant="filled"
+            density="compact"
           >
-            Max {{ listCaller.pageSize }} items retrieved. Refine your search to
-            view more.
-          </v-list-item>
-        </v-list>
-      </v-sheet>
-    </v-menu>
+          </v-text-field>
+
+          <!-- TODO: i18n -->
+          <div
+            v-if="!createItemLabel && !listItems.length"
+            class="grey--text px-4 my-3 font-italic"
+          >
+            <v-fade-transition mode="out-in">
+              <span v-if="listCaller.isLoading">Loading...</span>
+              <span v-else>No results found.</span>
+            </v-fade-transition>
+          </div>
+
+          <!-- This height shows 7 full items, with a final item partially out 
+        of the scroll area to improve visual hints to the user that the can scroll the list. -->
+          <v-list
+            class="py-0"
+            max-height="302"
+            ref="listRef"
+            density="compact"
+            :aria-multiselectable="effectiveMultiple"
+            role="listbox"
+          >
+            <v-list-item
+              v-if="createItemLabel"
+              class="c-select__create-item"
+              @click="createItem"
+              :loading="createItemLoading"
+            >
+              <template #prepend>
+                <v-progress-circular
+                  size="20"
+                  indeterminate
+                  v-if="createItemLoading"
+                ></v-progress-circular>
+                <v-icon v-else>$plus</v-icon>
+              </template>
+              <v-list-item-title>
+                {{ createItemLabel }}
+              </v-list-item-title>
+              <v-list-item-subtitle
+                v-if="createItemError"
+                class="text-error font-weight-bold"
+              >
+                {{ createItemError }}
+              </v-list-item-subtitle>
+            </v-list-item>
+
+            <v-list-item
+              v-for="(item, i) in listItems"
+              :key="item.key"
+              @click="onInput(item.model)"
+              :value="i"
+              :class="{ 'pending-selection': pendingSelection == i }"
+              :active="item.selected"
+              role="option"
+              :aria-selected="item.selected"
+            >
+              <template #prepend v-if="effectiveMultiple">
+                <v-checkbox-btn tabindex="-1" :modelValue="item.selected" />
+              </template>
+              <v-list-item-title>
+                <slot
+                  name="list-item"
+                  :item="item.model"
+                  :search="search"
+                  :selected="item.selected"
+                >
+                  <slot name="item" :item="item.model" :search="search">
+                    {{ itemTitle(item.model) }}
+                  </slot>
+                </slot>
+              </v-list-item-title>
+            </v-list-item>
+
+            <!-- TODO: With this version of c-select (versus the v2 one),
+        we can implement infinite scroll much easier. Consider doing this instead of having this message. -->
+            <v-list-item
+              v-if="
+                // When we do know an actual page count:
+                (listCaller.pageCount && listCaller.pageCount > 1) ||
+                // When `noCount` is used or counting is disabled on the server:
+                (listCaller.pageCount == -1 &&
+                  listCaller.pageSize &&
+                  listItems.length >= listCaller.pageSize)
+              "
+              class="text-grey font-italic"
+            >
+              Max {{ listCaller.pageSize }} items retrieved. Refine your search
+              to view more.
+            </v-list-item>
+          </v-list>
+        </v-sheet>
+      </v-menu>
+    </template>
   </v-input>
 </template>
 
@@ -192,7 +232,7 @@
   .v-field__field {
     align-items: center;
     .v-field__input {
-      flex-wrap: nowrap;
+      // flex-wrap: nowrap;
       input {
         min-width: 0;
         flex: 1 1;
@@ -219,67 +259,49 @@
     transform: rotate(180deg);
   }
 }
+
+.c-select__menu-content {
+  .v-list-item.pending-selection {
+    &::after {
+      opacity: calc(0.15 * var(--v-theme-overlay-multiplier));
+    }
+    &:not(.v-list-item--active) > .v-list-item__overlay {
+      opacity: calc(0.05 * var(--v-theme-overlay-multiplier));
+    }
+  }
+}
+.c-select__create-item {
+  .v-list-item__prepend {
+    width: 40px;
+  }
+}
 </style>
 
-<script
-  lang="ts"
-  setup
-  generic="
-  TModel extends Model | AnyArgCaller | undefined, 
-  TFor extends ForSpec<
-    TModel,
-    ForeignKeyProperty | ModelReferenceNavigationProperty | ModelValue
-  > = any"
->
-import {
-  ComponentPublicInstance,
-  ref,
-  computed,
-  nextTick,
-  watch,
-  camelize,
-} from "vue";
-import {
-  useMetadataProps,
-  ForSpec,
-  useCustomInput,
-} from "../c-metadata-component";
-import { TypedValidationRule } from "../../util";
-import {
-  ModelApiClient,
-  Model,
-  ModelType,
-  ForeignKeyProperty,
-  ModelReferenceNavigationProperty,
-  ListParameters,
-  mapParamsToDto,
-  getMessageForError,
-  mapValueToModel,
-  ViewModel,
-  Indexable,
-  ModelValue,
-  AnyArgCaller,
-  ResponseCachingConfiguration,
-  ModelTypeLookup,
-  EnumTypeLookup,
-  TypeDiscriminatorToType,
-  PrimaryKeyProperty,
-  PropNames,
-  ApiStateTypeWithArgs,
-  EnumValue,
-} from "coalesce-vue";
-import { VField } from "vuetify/components";
+<script lang="ts">
+// These types are declared outside the component so that vue-tsc doesn't have to inline
+// every single type declaration, which spans thousands of lines and ultimately exceeds
+// the limit on what tsc is even capable of emitting
 
-defineOptions({
-  name: "c-select",
-  // We manually pass attrs via inputBindAttrs, so disable the default Vue behavior.
-  // If we don't do this, some HTML attrs (e.g. tabindex) will incorrectly be placed
-  // on the root element rather than on the search field in Vuetify component.
-  inheritAttrs: false,
-});
+type CSelectModelSpec = Model | AnyArgCaller | undefined;
 
-type SelectedModelType = TFor extends string & keyof ModelTypeLookup
-  ? ModelTypeLookup[TFor]
+type CSelectForSpec<TModel extends CSelectModelSpec> = ForSpec<
+  TModel,
+  | ForeignKeyProperty
+  | ModelReferenceNavigationProperty
+  | ModelValue
+  | (ModelCollectionValue & { manyToMany: never })
+  | ModelType
+>;
+
+type _SelectedModelType<
+  TModel extends CSelectModelSpec,
+  TFor extends CSelectForSpec<TModel>,
+  TMultiple extends boolean
+> = TFor extends string & keyof ModelTypeLookup
+  ? // `for="TypeName"`
+    TMultiple extends true
+    ? Array<ModelTypeLookup[TFor]>
+    : ModelTypeLookup[TFor]
   : TFor extends ModelReferenceNavigationProperty | ModelValue
   ? TFor["typeDef"]["name"] extends keyof ModelTypeLookup
     ? ModelTypeLookup[TFor["typeDef"]["name"]]
@@ -290,7 +312,11 @@ type SelectedModelType = TFor extends string & keyof ModelTypeLookup
     : any
   : TModel extends ApiStateTypeWithArgs<any, any, infer TArgsObj, any>
   ? TFor extends keyof TArgsObj
-    ? TArgsObj[TFor]
+    ? TMultiple extends true
+      ? TArgsObj[TFor] extends Array<any> | null | undefined
+        ? TArgsObj[TFor]
+        : never // Ban use of `multiple` prop when binding to something we know isn't an array
+      : TArgsObj[TFor]
     : any
   : TModel extends Model
   ? TFor extends PropNames<TModel["$metadata"]>
@@ -317,11 +343,91 @@ type FindPk<TModel extends Model> = ExtractValuesOfType<
   PrimaryKeyProperty
 >;
 
-type SelectedPkType = FindPk<SelectedModelType> extends EnumValue
-  ? FindPk<SelectedModelType>["typeDef"]["name"] extends keyof EnumTypeLookup
-    ? EnumTypeLookup[FindPk<SelectedModelType>["typeDef"]["name"]]
+type ModelToPkType<TModel extends Model> = FindPk<TModel> extends EnumValue
+  ? FindPk<TModel>["typeDef"]["name"] extends keyof EnumTypeLookup
+    ? EnumTypeLookup[FindPk<TModel>["typeDef"]["name"]]
     : any
-  : TypeDiscriminatorToType<FindPk<SelectedModelType>["type"]>;
+  : TypeDiscriminatorToType<FindPk<TModel>["type"]>;
+</script>
+
+<script
+  lang="ts"
+  setup
+  generic="
+  TModel extends CSelectModelSpec, 
+  TFor extends CSelectForSpec<TModel> = any,
+  TMultiple extends boolean = false"
+>
+import {
+  ComponentPublicInstance,
+  ref,
+  computed,
+  nextTick,
+  watch,
+  camelize,
+  useSlots,
+} from "vue";
+import {
+  useMetadataProps,
+  ForSpec,
+  useCustomInput,
+} from "../c-metadata-component";
+import { TypedValidationRule } from "../../util";
+import {
+  ModelApiClient,
+  Model,
+  ModelType,
+  ForeignKeyProperty,
+  ModelReferenceNavigationProperty,
+  ListParameters,
+  mapParamsToDto,
+  getMessageForError,
+  mapValueToModel,
+  ViewModel,
+  ModelValue,
+  AnyArgCaller,
+  ResponseCachingConfiguration,
+  ModelTypeLookup,
+  EnumTypeLookup,
+  TypeDiscriminatorToType,
+  PrimaryKeyProperty,
+  PropNames,
+  ApiStateTypeWithArgs,
+  EnumValue,
+  ModelCollectionValue,
+  modelDisplay,
+} from "coalesce-vue";
+import { VField } from "vuetify/components";
+
+const slots = useSlots();
+const passthroughSlots = computed(() => {
+  const ret = { ...slots };
+  delete ret.default;
+  // cast to unknown needed to prevent TS errors in the template that can't be suppressed.
+  return ret as unknown;
+});
+
+defineOptions({
+  name: "c-select",
+  // We manually pass attrs via inputBindAttrs, so disable the default Vue behavior.
+  // If we don't do this, some HTML attrs (e.g. tabindex) will incorrectly be placed
+  // on the root element rather than on the search field in Vuetify component.
+  inheritAttrs: false,
+});
+
+type SelectedModelType = _SelectedModelType<TModel, TFor, TMultiple>;
+
+type SelectedModelTypeSingle = SelectedModelType extends Array<
+  infer U extends Model<ModelType>
+>
+  ? U
+  : SelectedModelType;
+
+type SelectedPkTypeSingle = ModelToPkType<SelectedModelTypeSingle>;
+
+type SelectedPkType = TMultiple extends true
+  ? SelectedPkTypeSingle[]
+  : SelectedPkTypeSingle;
 
 type PrimaryBindType = TFor extends ForeignKeyProperty
   ? SelectedPkType
@@ -334,14 +440,21 @@ type PrimaryBindType = TFor extends ForeignKeyProperty
   : SelectedModelType;
 
 defineSlots<{
-  ["item"]?(props: { item: SelectedModelType; search: string | null }): any;
-  ["selected-item"]?(props: {
-    item: SelectedModelType;
+  ["item"]?(props: {
+    item: SelectedModelTypeSingle;
     search: string | null;
   }): any;
-  ["list-item"]?(props: {
-    item: SelectedModelType;
+  ["selected-item"]?(props: {
+    item: SelectedModelTypeSingle;
     search: string | null;
+    index: number;
+    /** Remove/unselect the item. Only applicable for multiselect/multiple mode. */
+    remove: () => void;
+  }): any;
+  ["list-item"]?(props: {
+    item: SelectedModelTypeSingle;
+    search: string | null;
+    selected: boolean;
   }): any;
 }>();
 
@@ -356,6 +469,9 @@ const props = withDefaults(
      * * A string in dot-notation that starts with a type name. E.g. `"Person.firstName"`.
      */
     for: TFor;
+
+    multiple?: TMultiple & boolean; // `& boolean`: https://github.com/vuejs/core/issues/9877
+    canDeselect?: boolean;
 
     readonly?: boolean | null;
     disabled?: boolean | null;
@@ -380,18 +496,33 @@ const props = withDefaults(
 
     rules?: Array<TypedValidationRule<SelectedPkType>>;
 
+    itemTitle?: (item: SelectedModelTypeSingle) => string | null;
     create?: {
-      getLabel: (search: string, items: SelectedModelType[]) => string | false;
-      getItem: (search: string, label: string) => Promise<SelectedModelType>;
+      getLabel: (
+        search: string,
+        items: SelectedModelTypeSingle[]
+      ) => string | false;
+      getItem: (
+        search: string,
+        label: string
+      ) => Promise<SelectedModelTypeSingle>;
     };
   }>(),
-  { openOnClear: true, clearable: undefined }
+  {
+    openOnClear: true,
+    canDeselect: true,
+    clearable: undefined,
+    multiple: undefined,
+    itemTitle: modelDisplay,
+  }
 );
 
 const emit = defineEmits<{
   "update:keyValue": [value: SelectedPkType | null];
   "update:objectValue": [value: SelectedModelType | null];
   "update:modelValue": [value: PrimaryBindType | null];
+  /** Fired when an item is selected or deselected in `multiple` mode. */
+  selectionChanged: [values: SelectedModelTypeSingle[], selected: boolean];
 }>();
 
 const mainInputRef = ref<HTMLInputElement>();
@@ -419,7 +550,6 @@ const { inputBindAttrs, modelMeta, valueMeta, valueOwner } = useMetadataProps(
 );
 
 const search = ref(null as string | null);
-const error = ref([] as string[]);
 const focused = ref(false);
 const menuOpen = ref(false);
 const menuOpenForced = ref(false);
@@ -429,18 +559,27 @@ const createItemLoading = ref(false);
 const createItemError = ref("" as string | null);
 const pendingSelection = ref(0);
 
-/** The model representing the current selected item
+/** The models representing the current selected item(s)
  * in the case that only the PK was provided to the component.
- * This is maintained in a variable to prevent its reference from
- * changing unexpectedly, which causes Vuetify to annoying things.
  */
-const keyFetchedModel = ref(null as any);
+const internallyFetchedModels = new Map<
+  SelectedPkTypeSingle,
+  WeakRef<SelectedModelTypeSingle>
+>();
+
+function toArray<T>(x: T | T[] | null | undefined) {
+  return Array.isArray(x) ? x : x == null ? [] : [x];
+}
 
 /** The effective clearability state of the dropdown. */
 const isClearable = computed((): boolean => {
   if (typeof props.clearable == "boolean")
     // If explicitly given a value, use that value.
     return props.clearable;
+
+  if (effectiveMultiple.value) {
+    return true;
+  }
 
   // Check to see if the foreign key is nullable (i.e. doesn't have a 'required' rule).
   if (modelKeyProp.value) {
@@ -472,7 +611,11 @@ const modelKeyProp = computed((): ForeignKeyProperty | null => {
 
 /** The property on `valueOwner` which holds the model object being selected for, or `null` if there is no such property. */
 const modelObjectProp = computed(
-  (): ModelReferenceNavigationProperty | ModelValue | null => {
+  ():
+    | ModelReferenceNavigationProperty
+    | ModelValue
+    | ModelCollectionValue
+    | null => {
     const meta = valueMeta.value!;
     if (meta.role == "foreignKey" && "navigationProp" in meta) {
       return meta.navigationProp || null;
@@ -480,8 +623,13 @@ const modelObjectProp = computed(
     if (meta.role == "referenceNavigation" && "foreignKey" in meta) {
       return meta;
     }
-    if (meta.role == "value" && meta.type == "model") {
-      return meta;
+    if (meta.role == "value") {
+      if (meta.type == "model") {
+        return meta;
+      }
+      if (meta.type == "collection" && meta.itemType.type == "model") {
+        return meta as ModelCollectionValue;
+      }
     }
     return null;
   }
@@ -499,7 +647,7 @@ const primaryBindKind = computed(() => {
   if (valueMeta.value.role == "foreignKey") {
     return "key";
   }
-  if (valueMeta.value.type == "model") {
+  if (valueMeta.value.type == "model" || valueMeta.value.type == "collection") {
     if (typeof props.modelValue != "object" && props.modelValue !== undefined) {
       throw (
         "Expected a model object to be bound to modelValue, but received a " +
@@ -519,100 +667,113 @@ const modelObjectMeta = computed(() => {
     return meta.principalType;
   } else if (meta.type == "model") {
     return meta.typeDef;
+  } else if (meta.type == "collection" && meta.itemType.type == "model") {
+    return meta.itemType.typeDef;
   } else {
     throw `Value ${meta.name} must be a foreignKey or model type to use c-select.`;
   }
 });
 
 /** The effective object (whose type is described by `modelObjectMeta`) that has been provided to the component. */
-const internalModelValue = computed((): SelectedModelType | null => {
+const internalModelValue = computed((): SelectedModelTypeSingle[] => {
   if (props.objectValue) {
-    return props.objectValue;
+    return toArray(props.objectValue);
   }
   if (
     valueOwner.value &&
     modelObjectProp.value &&
     valueOwner.value[modelObjectProp.value.name]
   ) {
-    return valueOwner.value[modelObjectProp.value.name];
+    return toArray(valueOwner.value[modelObjectProp.value.name]);
   }
 
   if (props.modelValue && primaryBindKind.value == "model") {
-    return props.modelValue;
+    return toArray(props.modelValue);
   }
 
-  if (internalKeyValue.value) {
+  let ret = [];
+  let needsLoad = [];
+  for (const key of internalKeyValue.value) {
     // See if we already have a model that we're using to represent a key-only binding.
     // Storing this object prevents it from flipping between different instances
     // obtained from either getCaller or listCaller,
     // which causes vuetify to reset its search when the object passed to v-select's `modelValue` prop changes.
-    if (
-      keyFetchedModel.value &&
-      internalKeyValue.value ===
-        keyFetchedModel.value[modelObjectMeta.value.keyProp.name]
-    ) {
-      return keyFetchedModel.value;
+    const keyFetchedModel = internallyFetchedModels.get(key)?.deref();
+    if (keyFetchedModel) {
+      ret.push(keyFetchedModel);
+      continue;
     }
 
     // All we have is the PK. First, check if it is already in our item array.
     // If so, capture it. If not, request the object from the server.
     const item = items.value.filter(
-      (i) =>
-        internalKeyValue.value ===
-        (i as any)[modelObjectMeta.value.keyProp.name]
+      (i) => key === i[modelObjectMeta.value.keyProp.name]
     )[0];
     if (item) {
       // eslint-disable-next-line vue/no-side-effects-in-computed-properties
-      keyFetchedModel.value = item;
-      return item;
+      internallyFetchedModels.set(key, new WeakRef(item));
+      ret.push(item);
+      continue;
     }
 
     // See if we obtained the item via getCaller.
-    const singleItem = getCaller.result;
-    if (
-      singleItem &&
-      internalKeyValue.value ===
-        (singleItem as any)[modelObjectMeta.value.keyProp.name]
-    ) {
+    const singleItem = getCaller.result?.find(
+      (x) => key === x[modelObjectMeta.value.keyProp.name]
+    );
+    if (singleItem) {
       // eslint-disable-next-line vue/no-side-effects-in-computed-properties
-      keyFetchedModel.value = singleItem;
-      return singleItem;
+      internallyFetchedModels.set(key, new WeakRef(singleItem));
+      ret.push(singleItem);
+      continue;
     }
 
-    if (!listCaller.isLoading && getCaller.args.id != internalKeyValue.value) {
-      // Only request the single item if the list isn't currently loading,
-      // and if the last requested key is not the key we're looking for.
-      // (this prevents an infinite loop of invokes if the call to the server fails.)
-      // The single item may end up coming back from a pending list call.
-      // eslint-disable-next-line vue/no-side-effects-in-computed-properties
-      getCaller.args.id = internalKeyValue.value;
-      getCaller.invokeWithArgs();
-    }
+    needsLoad.push(key);
   }
-  return null;
+
+  if (
+    !listCaller.isLoading &&
+    !getCaller.isLoading &&
+    needsLoad.some((needed) => !getCaller.args.ids.includes(needed))
+  ) {
+    // Only request the item if the list isn't currently loading,
+    // since the item may end up coming back from a pending list call.
+    // Also only load if any of the needed keys are missing from the last requested server call.
+    // (this prevents an infinite loop of invokes if the call to the server fails.)
+    // eslint-disable-next-line vue/no-side-effects-in-computed-properties
+    getCaller.args.ids = needsLoad;
+    getCaller.invokeWithArgs();
+  }
+
+  return ret;
 });
 
 /** The effective key (whose type is described by `modelObjectMeta`) that has been provided to the component. */
-const internalKeyValue = computed((): SelectedPkType | null => {
-  let value: any;
+const internalKeyValue = computed((): SelectedPkTypeSingle[] => {
+  let value: SelectedPkTypeSingle[];
   if (props.keyValue) {
-    value = props.keyValue;
+    value = toArray(props.keyValue) as SelectedPkTypeSingle[];
   } else if (valueOwner.value && modelKeyProp.value) {
-    value = valueOwner.value[modelKeyProp.value.name];
+    value = toArray(valueOwner.value[modelKeyProp.value.name]);
   } else if (props.modelValue && primaryBindKind.value == "key") {
-    value = props.modelValue;
+    value = toArray(props.modelValue);
   } else {
-    value = null;
+    value = [];
   }
 
-  if (value != null) {
-    // Parse the value in case we were given a string instead of a number, or something like that, via the `keyValue` prop.
-    // This prevents `internalModelValue` from getting confused and infinitely calling the `getCaller`.
-    return mapValueToModel(value, modelObjectMeta.value.keyProp);
-  }
-
-  return null;
+  // Parse the values in case we were given a string instead of a number, or something like that, via the `keyValue` prop.
+  // This prevents `internalModelValue` from getting confused and infinitely calling the `getCaller`.
+  return value.map((v) => mapValueToModel(v, modelObjectMeta.value.keyProp));
 });
+
+const selectedKeysSet = computed(
+  () =>
+    new Set([
+      ...internalKeyValue.value,
+      ...internalModelValue.value.map(
+        (x) => x[modelObjectMeta.value.keyProp.name]
+      ),
+    ])
+);
 
 /** The effective set of validation rules to pass to the v-select. */
 const effectiveRules = computed((): TypedValidationRule<SelectedPkType>[] => {
@@ -632,7 +793,12 @@ const effectiveRules = computed((): TypedValidationRule<SelectedPkType>[] => {
     return (
       valueOwner.value
         .$getRules(modelKeyProp.value)
-        ?.map((rule) => () => rule(internalKeyValue.value)) ?? []
+        ?.map(
+          (rule) => () =>
+            effectiveMultiple.value
+              ? rule(internalKeyValue.value)
+              : rule(internalKeyValue.value[0])
+        ) ?? []
     );
   }
 
@@ -647,11 +813,16 @@ const effectiveRules = computed((): TypedValidationRule<SelectedPkType>[] => {
 });
 
 const items = computed(() => {
-  return (listCaller?.result || []) as SelectedModelType[];
+  return (listCaller?.result || []) as SelectedModelTypeSingle[];
 });
 
-const listItems = computed((): Indexable<SelectedModelType>[] => {
-  return items.value;
+const listItems = computed(() => {
+  const pkName = modelObjectMeta.value.keyProp.name;
+  return items.value.map((item) => ({
+    model: item,
+    key: item[pkName],
+    selected: selectedKeysSet.value.has(item[pkName]),
+  }));
 });
 
 const createItemLabel = computed(() => {
@@ -664,37 +835,108 @@ const createItemLabel = computed(() => {
   return null;
 });
 
-function onInput(value: SelectedModelType | null, dontFocus = false) {
+const effectiveMultiple = computed(() => {
+  let multiple: boolean = props.multiple ?? false;
+  if (valueMeta.value?.type == "collection") {
+    if ("manyToMany" in valueMeta.value) {
+      throw new Error(
+        `c-select cannot be used with the many-to-many value '${valueMeta.value.name}'. Use c-select-many-to-many instead.`
+      );
+    }
+    multiple = true;
+  } else if (valueOwner.value && valueMeta.value && multiple) {
+    throw new Error(
+      `The 'multiple' prop cannot be used with the non-collection value '${valueMeta.value.name}'.`
+    );
+  }
+
+  return multiple;
+});
+
+function onInput(value: SelectedModelTypeSingle | null, dontFocus = false) {
   value = value ?? null;
-  if (value == null && !isClearable.value) {
+
+  if (value === null && !props.canDeselect) {
     return;
   }
 
-  // Clear any manual errors
-  error.value = [];
+  const key = value ? value[modelObjectMeta.value.keyProp.name] : null;
+  let newKey, newObjectValue: any;
 
-  const key = value ? (value as any)[modelObjectMeta.value.keyProp.name] : null;
-  keyFetchedModel.value = value;
+  if (effectiveMultiple.value) {
+    if (value == null) {
+      newObjectValue = [];
+      newKey = [];
+      emit("selectionChanged", [...internalModelValue.value], false);
+    } else {
+      const selectedKeys = [...selectedKeysSet.value];
+      const selectedModels = [...internalModelValue.value];
+      if (key != null) {
+        const idx = selectedKeys.indexOf(key);
+        if (idx === -1) {
+          selectedKeys.push(key);
+          selectedModels.push(value);
+          internallyFetchedModels.set(key, new WeakRef(value));
+          emit("selectionChanged", [value], true);
+        } else {
+          if (!props.canDeselect) return;
+          selectedKeys.splice(idx, 1);
+          const modelIdx = selectedModels.indexOf(value);
+          if (modelIdx !== -1) {
+            selectedModels.splice(idx, 1);
+          }
+          emit("selectionChanged", [value], false);
+        }
+      } else {
+        // Key may be null if the item came from `props.create` and isn't saved yet.
+        const idx = selectedModels.indexOf(value);
+        if (idx === -1) {
+          selectedModels.push(value);
+          emit("selectionChanged", [value], true);
+        } else {
+          if (!props.canDeselect) return;
+          selectedModels.splice(idx, 1);
+          emit("selectionChanged", [value], false);
+        }
+      }
 
-  if (valueOwner.value) {
-    if (modelKeyProp.value) {
-      valueOwner.value[modelKeyProp.value.name] = key;
+      newObjectValue = selectedModels;
+      newKey = selectedKeys;
     }
-    if (modelObjectProp.value) {
-      valueOwner.value[modelObjectProp.value.name] = value;
+  } else {
+    if (value == null && !isClearable.value) {
+      return;
+    }
+    newObjectValue = value;
+    newKey = key;
+    if (value) {
+      internallyFetchedModels.set(key, new WeakRef(value));
     }
   }
 
-  emit("update:modelValue", primaryBindKind.value == "key" ? key : value);
-  emit("update:objectValue", value);
-  emit("update:keyValue", key);
-  pendingSelection.value = value ? listItems.value.indexOf(value) : 0;
+  if (valueOwner.value) {
+    if (modelKeyProp.value) {
+      valueOwner.value[modelKeyProp.value.name] = newKey;
+    }
+    if (modelObjectProp.value) {
+      valueOwner.value[modelObjectProp.value.name] = newObjectValue;
+    }
+  }
+
+  emit(
+    "update:modelValue",
+    primaryBindKind.value == "key" ? newKey : newObjectValue
+  );
+  emit("update:objectValue", newObjectValue);
+  emit("update:keyValue", newKey);
+
+  pendingSelection.value = value ? items.value.indexOf(value) : 0;
 
   // When the input value is cleared, re-focus the dropdown
   // to allow the user to enter new search input.
   // Without this, pressing backspace to delete the current value
   // will cause the search field to lose focus and further keyboard input will do nothing.
-  if (!dontFocus) {
+  if (!dontFocus && !effectiveMultiple.value) {
     if (!value) {
       openMenu();
     } else {
@@ -711,7 +953,15 @@ function onInputKey(event: KeyboardEvent) {
     case "delete":
     case "backspace":
       if (!menuOpen.value) {
-        onInput(null, true);
+        if (effectiveMultiple.value) {
+          // Delete only the last item when deleting items with multi-select
+          const lastItem = internalModelValue.value.at(-1);
+          if (lastItem) {
+            onInput(lastItem, true);
+          }
+        } else {
+          onInput(null, true);
+        }
         event.stopPropagation();
         event.preventDefault();
       }
@@ -738,7 +988,7 @@ function onInputKey(event: KeyboardEvent) {
 }
 
 function confirmPendingSelection() {
-  var item = listItems.value[pendingSelection.value];
+  var item = items.value[pendingSelection.value];
   if (!item) return;
   onInput(item);
 }
@@ -790,8 +1040,8 @@ async function openMenu(select?: boolean) {
   menuOpenForced.value = true;
 
   while (
-    // cap waiting at 100ms
-    start + 100 > performance.now() &&
+    // cap waiting
+    start + 500 > performance.now() &&
     (!input.offsetParent || input != document.activeElement)
   ) {
     input.focus();
@@ -819,8 +1069,7 @@ function toggleMenu() {
   else openMenu();
 }
 
-const propMeta = valueMeta.value;
-if (!propMeta) {
+if (!valueMeta.value) {
   throw "c-select requires value metadata. Specify it with the 'for' prop'";
 }
 
@@ -828,19 +1077,66 @@ if (!propMeta) {
  * A caller that will be used to resolve the full object when the only thing
  * that has been provided to c-select is a primary key value.
  */
-const getCaller = new ModelApiClient<SelectedModelType>(modelObjectMeta.value)
+const getCaller = new ModelApiClient<SelectedModelTypeSingle>(
+  modelObjectMeta.value
+)
   .$useSimultaneousRequestCaching()
   .$makeCaller(
-    "item",
+    "list",
     function () {
       throw "expected calls to be made with invokeWithArgs";
     },
-    () => ({ id: null as any }),
-    (c, args) => c.get(args.id)
+    () => ({ ids: [] as SelectedPkTypeSingle[] }),
+    (c, args) => {
+      if (!args.ids.length) return;
+
+      if (args.ids.length == 1) {
+        return c.get(args.ids[0], props.params).then((res) => ({
+          ...res,
+          data: {
+            ...res.data,
+            // Convert ItemResult to ListResult
+            list: res.data.object ? [res.data.object] : [],
+          },
+        }));
+      } else if (
+        args.ids.length > 1 &&
+        modelObjectMeta.value.keyProp.type == "number"
+      ) {
+        return c.list({
+          ...props.params,
+          filter: {
+            ...props.params?.filter,
+            [modelObjectMeta.value.keyProp.name]: args.ids.join(","),
+          },
+          pageSize: args.ids.length,
+          noCount: true,
+        });
+      } else {
+        // Multiple values that we can't query with a CSV-filtered list call.
+        const promises = args.ids.map((id) => c.get(id, props.params));
+        return Promise.allSettled(promises).then((res) => {
+          const items = res
+            .filter((res) => res.status == "fulfilled")
+            .map((res) => res.value);
+          return {
+            ...items[0],
+            data: {
+              wasSuccessful: items.length > 0,
+              list: items
+                .filter((r) => r.data.object)
+                .map((r) => r.data.object!),
+            },
+          };
+        });
+      }
+    }
   )
   .setConcurrency("debounce");
 
-const listCaller = new ModelApiClient<SelectedModelType>(modelObjectMeta.value)
+const listCaller = new ModelApiClient<SelectedModelTypeSingle>(
+  modelObjectMeta.value
+)
   .$useSimultaneousRequestCaching()
   .$makeCaller("list", (c) => {
     return c.list({
@@ -851,9 +1147,6 @@ const listCaller = new ModelApiClient<SelectedModelType>(modelObjectMeta.value)
   })
   .onFulfilled(() => {
     pendingSelection.value = 0;
-  })
-  .onRejected((state) => {
-    error.value = [state.message || "Unknown Error"];
   })
   .setConcurrency("debounce");
 
@@ -875,7 +1168,7 @@ watch(pendingSelection, async () => {
   await nextTick();
   await nextTick();
   var listDiv = listRef.value?.$el as HTMLElement;
-  var selectedItem = listDiv?.querySelector(".v-list-item--active");
+  var selectedItem = listDiv?.querySelector(".pending-selection");
   selectedItem?.scrollIntoView?.({
     behavior: "auto",
     block: "nearest",
@@ -883,7 +1176,7 @@ watch(pendingSelection, async () => {
   });
 });
 
-watch(search, (newVal: any, oldVal: any) => {
+watch(search, (newVal, oldVal) => {
   searchChanged.value = new Date();
   if (newVal != oldVal) {
     listCaller();
@@ -910,7 +1203,7 @@ watch(createItemLabel, () => {
 
 // Load the initial contents of the list.
 listCaller().then(() => {
-  if (internalModelValue.value || internalKeyValue.value) {
+  if (selectedKeysSet.value.size) {
     // Don't preselect if there's already a value selected.
     return;
   }

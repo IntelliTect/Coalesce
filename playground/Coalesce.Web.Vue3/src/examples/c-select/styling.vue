@@ -10,6 +10,33 @@
   >
   </c-select>
 
+  <c-select
+    :model="caseVm"
+    for="assignedTo"
+    prepend-icon="fa fa-circle-chevron-left"
+    prepend-inner-icon="fa fa-chevron-left"
+  >
+    <template #append> sdfsdf </template>
+  </c-select>
+
+  <h1>slots passthrough</h1>
+  <c-select
+    :model="caseVm"
+    for="assignedTo"
+    prepend-icon="fa fa-circle-chevron-left"
+    prepend-inner-icon="fa fa-chevron-left"
+    append-inner-icon="fa fa-chevron-right"
+    append-icon="fa fa-circle-chevron-right"
+  >
+    <template #prepend>
+      <v-chip>v-input</v-chip>
+    </template>
+    <template #append-inner>
+      <v-chip>v-field</v-chip>
+    </template>
+    <template #default> Default - shouldn't be seen </template>
+  </c-select>
+
   <h1>compact/outlined via v-defaults-provider</h1>
   <v-defaults-provider
     :defaults="{

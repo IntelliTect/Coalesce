@@ -11,205 +11,215 @@
     :modelValue="effectiveMultiple ? internalModelValue : internalModelValue[0]"
     :disabled="isDisabled"
     :readonly="isReadonly"
-    #default="{ isValid }"
   >
-    <v-field
-      :error="isValid.value === false"
-      append-inner-icon="$dropdown"
-      v-bind="fieldAttrs"
-      :clearable="isInteractive && isClearable"
-      :active="!!selectedKeysSet.size || focused || !!placeholder"
-      :dirty="!!selectedKeysSet.size"
-      :focused="focused"
-      @click:clear.stop.prevent="onInput(null, true)"
-      @keydown="onInputKey($event)"
-    >
-      <div class="v-field__input">
-        <span
-          class="v-autocomplete__selection"
-          v-for="(item, index) in internalModelValue"
-          :key="item[modelObjectMeta.keyProp.name]"
-        >
-          <slot
-            name="selected-item"
-            :item="item"
-            :search="search"
-            :index
-            :remove="() => onInput(item)"
-          >
-            <slot name="item" :item="item" :search="search">
-              <v-chip
-                v-if="effectiveMultiple"
-                size="small"
-                :closable="canDeselect"
-                @click:close="onInput(item)"
-              >
-                {{ itemTitle(item) }}
-              </v-chip>
-              <span v-else class="v-select__selection-text">
-                {{ itemTitle(item) }}
-              </span>
-            </slot>
-          </slot>
-        </span>
-
-        <input
-          type="text"
-          ref="mainInputRef"
-          v-model="mainValue"
-          @mousedown.stop.prevent="
-            // Intercept direct clicks on the input to short circuit `focused`
-            // and v-menu's activator handler, which introduce some latency before the menu opens
-            // if we allow the menu opening to be handled that way.
-            // Mousedown is needed to prevent `focused` from happening.
-            openMenu()
-          "
-          @click.stop.prevent="
-            // Prevent v-menu's activator handler from running (which is a click handler, not mousedown).
-            openMenu()
-          "
-          @focus="focused = true"
-          @blur="focused = false"
-          :autofocus="autofocus"
-          :disabled="isDisabled"
-          :readonly="isReadonly"
-          :placeholder="selectedKeysSet.size ? undefined : placeholder"
-        />
-      </div>
-    </v-field>
-
-    <v-menu
-      :modelValue="menuOpen"
-      @update:modelValue="!$event ? closeMenu() : openMenu()"
-      activator="parent"
-      :close-on-content-click="false"
-      contentClass="c-select__menu-content"
-      origin="top"
-      location="bottom"
-    >
-      <v-sheet
-        @keydown.capture.down.stop.prevent="
-          pendingSelection = Math.min(
-            listItems.length - 1,
-            pendingSelection + 1
-          )
-        "
-        @keydown.capture.up.stop.prevent="
-          pendingSelection = Math.max(0, pendingSelection - 1)
-        "
-        @keydown.capture.enter.stop.prevent="confirmPendingSelection"
-        @keydown.capture.tab.stop.prevent="confirmPendingSelection"
+    <template v-for="(_, slot) of passthroughSlots" v-slot:[slot]="scope">
+      <slot :name="slot" v-bind="(scope as any)" />
+    </template>
+    <template #default="{ isValid }">
+      <v-field
+        :error="isValid.value === false"
+        append-inner-icon="$dropdown"
+        v-bind="fieldAttrs"
+        :clearable="isInteractive && isClearable"
+        :active="!!selectedKeysSet.size || focused || !!placeholder"
+        :dirty="!!selectedKeysSet.size"
+        :focused="focused"
+        @click:clear.stop.prevent="onInput(null, true)"
+        @keydown="onInputKey($event)"
       >
-        <v-text-field
-          v-model="search"
-          ref="searchRef"
-          hide-details="auto"
-          prepend-inner-icon="fa fa-search"
-          :loading="listCaller.isLoading"
-          :error-messages="
-            listCaller.wasSuccessful == false
-              ? listCaller.message ?? undefined
-              : ''
-          "
-          clearable
-          placeholder="Search"
-          variant="filled"
-          density="compact"
-        >
-        </v-text-field>
+        <template v-for="(_, slot) of passthroughSlots" v-slot:[slot]="scope">
+          <slot :name="slot" v-bind="(scope as any)" />
+        </template>
 
-        <!-- TODO: i18n -->
-        <div
-          v-if="!createItemLabel && !listItems.length"
-          class="grey--text px-4 my-3 font-italic"
-        >
-          <v-fade-transition mode="out-in">
-            <span v-if="listCaller.isLoading">Loading...</span>
-            <span v-else>No results found.</span>
-          </v-fade-transition>
-        </div>
-
-        <!-- This height shows 7 full items, with a final item partially out 
-        of the scroll area to improve visual hints to the user that the can scroll the list. -->
-        <v-list
-          class="py-0"
-          max-height="302"
-          ref="listRef"
-          density="compact"
-          :aria-multiselectable="effectiveMultiple"
-          role="listbox"
-        >
-          <v-list-item
-            v-if="createItemLabel"
-            class="c-select__create-item"
-            @click="createItem"
-            :loading="createItemLoading"
-          >
-            <template #prepend>
-              <v-progress-circular
-                size="20"
-                indeterminate
-                v-if="createItemLoading"
-              ></v-progress-circular>
-              <v-icon v-else>$plus</v-icon>
-            </template>
-            <v-list-item-title>
-              {{ createItemLabel }}
-            </v-list-item-title>
-            <v-list-item-subtitle
-              v-if="createItemError"
-              class="text-error font-weight-bold"
+        <template #default>
+          <div class="v-field__input">
+            <span
+              class="v-autocomplete__selection"
+              v-for="(item, index) in internalModelValue"
+              :key="item[modelObjectMeta.keyProp.name]"
             >
-              {{ createItemError }}
-            </v-list-item-subtitle>
-          </v-list-item>
-
-          <v-list-item
-            v-for="(item, i) in listItems"
-            :key="item.key"
-            @click="onInput(item.model)"
-            :value="i"
-            :class="{ 'pending-selection': pendingSelection == i }"
-            :active="item.selected"
-            role="option"
-            :aria-selected="item.selected"
-          >
-            <template #prepend v-if="effectiveMultiple">
-              <v-checkbox-btn tabindex="-1" :modelValue="item.selected" />
-            </template>
-            <v-list-item-title>
               <slot
-                name="list-item"
-                :item="item.model"
+                name="selected-item"
+                :item="item"
                 :search="search"
-                :selected="item.selected"
+                :index
+                :remove="() => onInput(item)"
               >
-                <slot name="item" :item="item.model" :search="search">
-                  {{ itemTitle(item.model) }}
+                <slot name="item" :item="item" :search="search">
+                  <v-chip
+                    v-if="effectiveMultiple"
+                    size="small"
+                    :closable="canDeselect"
+                    @click:close="onInput(item)"
+                  >
+                    {{ itemTitle(item) }}
+                  </v-chip>
+                  <span v-else class="v-select__selection-text">
+                    {{ itemTitle(item) }}
+                  </span>
                 </slot>
               </slot>
-            </v-list-item-title>
-          </v-list-item>
+            </span>
 
-          <!-- TODO: With this version of c-select (versus the v2 one),
-        we can implement infinite scroll much easier. Consider doing this instead of having this message. -->
-          <v-list-item
-            v-if="
-              // When we do know an actual page count:
-              (listCaller.pageCount && listCaller.pageCount > 1) ||
-              // When `noCount` is used or counting is disabled on the server:
-              (listCaller.pageCount == -1 &&
-                listCaller.pageSize &&
-                listItems.length >= listCaller.pageSize)
+            <input
+              type="text"
+              ref="mainInputRef"
+              v-model="mainValue"
+              @mousedown.stop.prevent="
+                // Intercept direct clicks on the input to short circuit `focused`
+                // and v-menu's activator handler, which introduce some latency before the menu opens
+                // if we allow the menu opening to be handled that way.
+                // Mousedown is needed to prevent `focused` from happening.
+                openMenu()
+              "
+              @click.stop.prevent="
+                // Prevent v-menu's activator handler from running (which is a click handler, not mousedown).
+                openMenu()
+              "
+              @focus="focused = true"
+              @blur="focused = false"
+              :autofocus="autofocus"
+              :disabled="isDisabled"
+              :readonly="isReadonly"
+              :placeholder="selectedKeysSet.size ? undefined : placeholder"
+            />
+          </div>
+        </template>
+      </v-field>
+
+      <v-menu
+        :modelValue="menuOpen"
+        @update:modelValue="!$event ? closeMenu() : openMenu()"
+        activator="parent"
+        :close-on-content-click="false"
+        contentClass="c-select__menu-content"
+        origin="top"
+        location="bottom"
+      >
+        <v-sheet
+          @keydown.capture.down.stop.prevent="
+            pendingSelection = Math.min(
+              listItems.length - 1,
+              pendingSelection + 1
+            )
+          "
+          @keydown.capture.up.stop.prevent="
+            pendingSelection = Math.max(0, pendingSelection - 1)
+          "
+          @keydown.capture.enter.stop.prevent="confirmPendingSelection"
+          @keydown.capture.tab.stop.prevent="confirmPendingSelection"
+        >
+          <v-text-field
+            v-model="search"
+            ref="searchRef"
+            hide-details="auto"
+            prepend-inner-icon="fa fa-search"
+            :loading="listCaller.isLoading"
+            :error-messages="
+              listCaller.wasSuccessful == false
+                ? listCaller.message ?? undefined
+                : ''
             "
-            class="text-grey font-italic"
+            clearable
+            placeholder="Search"
+            variant="filled"
+            density="compact"
           >
-            Max {{ listCaller.pageSize }} items retrieved. Refine your search to
-            view more.
-          </v-list-item>
-        </v-list>
-      </v-sheet>
-    </v-menu>
+          </v-text-field>
+
+          <!-- TODO: i18n -->
+          <div
+            v-if="!createItemLabel && !listItems.length"
+            class="grey--text px-4 my-3 font-italic"
+          >
+            <v-fade-transition mode="out-in">
+              <span v-if="listCaller.isLoading">Loading...</span>
+              <span v-else>No results found.</span>
+            </v-fade-transition>
+          </div>
+
+          <!-- This height shows 7 full items, with a final item partially out 
+        of the scroll area to improve visual hints to the user that the can scroll the list. -->
+          <v-list
+            class="py-0"
+            max-height="302"
+            ref="listRef"
+            density="compact"
+            :aria-multiselectable="effectiveMultiple"
+            role="listbox"
+          >
+            <v-list-item
+              v-if="createItemLabel"
+              class="c-select__create-item"
+              @click="createItem"
+              :loading="createItemLoading"
+            >
+              <template #prepend>
+                <v-progress-circular
+                  size="20"
+                  indeterminate
+                  v-if="createItemLoading"
+                ></v-progress-circular>
+                <v-icon v-else>$plus</v-icon>
+              </template>
+              <v-list-item-title>
+                {{ createItemLabel }}
+              </v-list-item-title>
+              <v-list-item-subtitle
+                v-if="createItemError"
+                class="text-error font-weight-bold"
+              >
+                {{ createItemError }}
+              </v-list-item-subtitle>
+            </v-list-item>
+
+            <v-list-item
+              v-for="(item, i) in listItems"
+              :key="item.key"
+              @click="onInput(item.model)"
+              :value="i"
+              :class="{ 'pending-selection': pendingSelection == i }"
+              :active="item.selected"
+              role="option"
+              :aria-selected="item.selected"
+            >
+              <template #prepend v-if="effectiveMultiple">
+                <v-checkbox-btn tabindex="-1" :modelValue="item.selected" />
+              </template>
+              <v-list-item-title>
+                <slot
+                  name="list-item"
+                  :item="item.model"
+                  :search="search"
+                  :selected="item.selected"
+                >
+                  <slot name="item" :item="item.model" :search="search">
+                    {{ itemTitle(item.model) }}
+                  </slot>
+                </slot>
+              </v-list-item-title>
+            </v-list-item>
+
+            <!-- TODO: With this version of c-select (versus the v2 one),
+        we can implement infinite scroll much easier. Consider doing this instead of having this message. -->
+            <v-list-item
+              v-if="
+                // When we do know an actual page count:
+                (listCaller.pageCount && listCaller.pageCount > 1) ||
+                // When `noCount` is used or counting is disabled on the server:
+                (listCaller.pageCount == -1 &&
+                  listCaller.pageSize &&
+                  listItems.length >= listCaller.pageSize)
+              "
+              class="text-grey font-italic"
+            >
+              Max {{ listCaller.pageSize }} items retrieved. Refine your search
+              to view more.
+            </v-list-item>
+          </v-list>
+        </v-sheet>
+      </v-menu>
+    </template>
   </v-input>
 </template>
 
@@ -355,6 +365,7 @@ import {
   nextTick,
   watch,
   camelize,
+  useSlots,
 } from "vue";
 import {
   useMetadataProps,
@@ -387,6 +398,14 @@ import {
   modelDisplay,
 } from "coalesce-vue";
 import { VField } from "vuetify/components";
+
+const slots = useSlots();
+const passthroughSlots = computed(() => {
+  const ret = { ...slots };
+  delete ret.default;
+  // cast to unknown needed to prevent TS errors in the template that can't be suppressed.
+  return ret as unknown;
+});
 
 defineOptions({
   name: "c-select",

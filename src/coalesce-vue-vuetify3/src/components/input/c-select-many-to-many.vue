@@ -14,7 +14,11 @@
     :error-messages="error"
     :itemTitle="itemText"
     :disabled="disabled || forceDisabled"
-  />
+  >
+    <template v-for="(_, slot) of $slots" v-slot:[slot]="scope">
+      <slot :name="slot" v-bind="scope" />
+    </template>
+  </c-select>
 </template>
 
 <script lang="ts" setup generic="TModel extends Model">

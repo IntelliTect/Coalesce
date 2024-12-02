@@ -2,9 +2,9 @@
   <c-select
     class="c-select-many-to-many"
     v-bind="inputBindAttrs"
-    :for="foreignItemModelType"
+    :for="farItemModelType"
     multiple
-    :modelValue="foreignItems"
+    :modelValue="farItems"
     @selectionChanged="selectionChanged"
     :clearable="
       !canDelete ? false : clearable === undefined ? false : clearable
@@ -107,15 +107,15 @@ const forceDisabled = computed(() => {
   }
 });
 
-function mapForeignItemToMiddleItem(middleItem: any) {
+function mapFarItemToMiddleItem(farItem: any) {
   const manyToMany = manyToManyMeta.value;
   const model = props.model as Model<ModelType>;
   return convertToModel(
     {
-      [manyToMany.farForeignKey.name]: (middleItem as any)[
-        foreignItemKeyPropName.value!
+      [manyToMany.farForeignKey.name]: (farItem as any)[
+        farItemKeyPropName.value!
       ],
-      [manyToMany.farNavigationProp.name]: middleItem,
+      [manyToMany.farNavigationProp.name]: farItem,
       [manyToMany.nearForeignKey.name]: modelPkValue.value,
       [manyToMany.nearNavigationProp.name]: model,
     },
@@ -171,16 +171,16 @@ const internalValue = computed((): any[] => {
   return modelValue.value || [];
 });
 
-const foreignItems = computed((): any[] => {
+const farItems = computed((): any[] => {
   return internalValue.value.map((x) => {
-    let ret = foreignItemOf(x);
+    let ret = farItemOf(x);
     if (!ret) {
       ret = convertToModel(
         {
-          [foreignItemKeyPropName.value]:
+          [farItemKeyPropName.value]:
             x[manyToManyMeta.value.farForeignKey.name],
         },
-        foreignItemModelType.value
+        farItemModelType.value
       );
       (ret as any)[fakeItemMarker] = true;
     }
@@ -188,12 +188,12 @@ const foreignItems = computed((): any[] => {
   });
 });
 
-const foreignItemModelType = computed((): ModelType => {
+const farItemModelType = computed((): ModelType => {
   return manyToManyMeta.value.typeDef;
 });
 
-const foreignItemKeyPropName = computed((): string => {
-  return foreignItemModelType.value.keyProp.name;
+const farItemKeyPropName = computed((): string => {
+  return farItemModelType.value.keyProp.name;
 });
 
 function pushLoader(loader: ApiState<any, any>) {
@@ -210,26 +210,24 @@ function pushLoader(loader: ApiState<any, any>) {
   currentLoaders.value = newArray;
 }
 
-function itemText(foreignItem: any): string | null {
+function itemText(farItem: any): string | null {
   if (typeof props.itemTitle === "function") {
     // This mapping of the foreign item back to the middle item
     // exists for backwards compatibility with the implementation of
     // c-select-many-to-many before it became based upon c-select[multiple].
     // https://github.com/IntelliTect/Coalesce/issues/497
-    const item = mapForeignItemToMiddleItem(foreignItem);
-    return props.itemTitle(item);
+    const middleItem = mapFarItemToMiddleItem(farItem);
+    return props.itemTitle(middleItem);
   }
 
-  if (foreignItem[fakeItemMarker]) {
+  if (farItem[fakeItemMarker]) {
     // The foreign item is a "fake" item, indicating that the far side navigation property
     // was missing from the middle model. Fall back on displaying the PK.
-    return (
-      modelDisplay(foreignItem) ?? foreignItem[foreignItemKeyPropName.value]
-    );
+    return modelDisplay(farItem) ?? farItem[farItemKeyPropName.value];
   } else {
     // Don't fall back to displaying the FK if the foreign item is "real",
     // since the display property of the model might really be null.
-    return modelDisplay(foreignItem);
+    return modelDisplay(farItem);
   }
 }
 
@@ -243,7 +241,7 @@ function selectionChanged(farItems: any[], selected: boolean) {
       const vm = newItems.find(
         (x) =>
           (x as any)[manyToMany.farForeignKey.name] ==
-          farItem[foreignItemKeyPropName.value]
+          farItem[farItemKeyPropName.value]
       );
 
       if (vm instanceof ViewModel && canDelete.value) {
@@ -295,7 +293,7 @@ function selectionChanged(farItems: any[], selected: boolean) {
             (x) =>
               x.$metadata == collectionMeta.value.itemType.typeDef &&
               (x as any)[manyToMany.farForeignKey.name] ==
-                farItem[foreignItemKeyPropName.value]
+                farItem[farItemKeyPropName.value]
           );
 
           if (itemIndex >= 0) {
@@ -310,7 +308,7 @@ function selectionChanged(farItems: any[], selected: boolean) {
       }
 
       if (!vm) {
-        const middleItem = mapForeignItemToMiddleItem(farItem);
+        const middleItem = mapFarItemToMiddleItem(farItem);
         vm = ViewModelFactory.get(
           middleItem.$metadata.name,
           middleItem,
@@ -355,10 +353,7 @@ function emitInput(items: any[]) {
   modelValue.value = items;
 }
 
-function foreignItemOf(value: any): Indexable<Model> | null | undefined {
-  return value[manyToManyMeta.value!.farNavigationProp.name];
+function farItemOf(value: any): Indexable<Model> | null | undefined {
+  return value[manyToManyMeta.value.farNavigationProp.name];
 }
-
-// Access this so it will throw an error if the meta props aren't in order.
-manyToManyMeta.value;
 </script>

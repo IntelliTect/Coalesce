@@ -209,7 +209,7 @@ function render() {
         addHandler(data, "update:modelValue", (v: any) =>
           emit("update:modelValue", v)
         );
-        return h(CSelectManyToMany<any>, data, slots);
+        return h(CSelectManyToMany<any, any>, data, slots);
       } else if (valueMeta.itemType.type == "model") {
         data.model = props.model;
         data.for = props.for;

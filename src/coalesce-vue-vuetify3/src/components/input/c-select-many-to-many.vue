@@ -98,7 +98,7 @@ type InheritedSlots<
   setup
   generic="
   TModel extends Model, 
-  TFor extends ForSpec<TModel, (ModelCollectionNavigationProperty & { manyToMany: {} })> "
+  TFor extends ForSpec<TModel, (ModelCollectionNavigationProperty & { manyToMany: {} })>"
 >
 import { ForSpec, useMetadataProps } from "../c-metadata-component";
 import {

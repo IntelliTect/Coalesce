@@ -15,13 +15,91 @@
     :itemTitle="itemText"
     :disabled="disabled || forceDisabled"
   >
-    <template v-for="(_, slot) of $slots" v-slot:[slot]="scope">
-      <slot :name="slot" v-bind="scope" />
+    <template v-for="(_, slot) of ($slots as {})" v-slot:[slot]="scope">
+      <slot :name="slot" v-bind="(scope as any)" />
     </template>
   </c-select>
 </template>
 
-<script lang="ts" setup generic="TModel extends Model">
+<script lang="ts">
+import CSelect from "./c-select.vue";
+
+type _FarItemType<
+  TModel extends Model,
+  TFor extends ForSpec<
+    TModel,
+    ModelCollectionNavigationProperty & { manyToMany: {} }
+  >
+> = TFor extends PropNames<TModel["$metadata"]>
+  ? TModel["$metadata"]["props"][TFor] extends
+      | ModelCollectionNavigationProperty & { manyToMany: {} }
+    ? TModel["$metadata"]["props"][TFor]["manyToMany"]["typeDef"]["name"] extends keyof ModelTypeLookup
+      ? ModelTypeLookup[TModel["$metadata"]["props"][TFor]["manyToMany"]["typeDef"]["name"]]
+      : any
+    : any
+  : Model<ModelType>;
+
+type _MiddleItemType<
+  TModel extends Model,
+  TFor extends ForSpec<
+    TModel,
+    ModelCollectionNavigationProperty & { manyToMany: {} }
+  >
+> = TFor extends PropNames<TModel["$metadata"]>
+  ? TModel["$metadata"]["props"][TFor] extends
+      | ModelCollectionNavigationProperty & { manyToMany: {} }
+    ? TModel["$metadata"]["props"][TFor]["itemType"]["name"] extends keyof ModelTypeLookup
+      ? ModelTypeLookup[TModel["$metadata"]["props"][TFor]["itemType"]["name"]]
+      : any
+    : any
+  : Model<ModelType>;
+
+type ComponentSlots<T> = T extends (
+  props: any,
+  ctx: { slots: infer S; attrs: any; emit: any },
+  ...args: any
+) => any
+  ? NonNullable<S>
+  : {};
+
+type _InheritedSlots<
+  TModel extends Model,
+  TFor extends ForSpec<
+    TModel,
+    ModelCollectionNavigationProperty & { manyToMany: {} }
+  >
+> = ComponentSlots<
+  typeof CSelect<
+    undefined,
+    _FarItemType<TModel, TFor>["$metadata"]["name"],
+    true
+  >
+>;
+
+// This useless mapped type prevents vue-tsc from getting confused
+// and failing to emit any types at all. When it encountered the mapped type,
+// it doesn't know how to handle it and so leaves it un-transformed.
+type InheritedSlots<
+  TModel extends Model,
+  TFor extends ForSpec<
+    TModel,
+    ModelCollectionNavigationProperty & { manyToMany: {} }
+  >
+> = {
+  [Property in keyof _InheritedSlots<TModel, TFor>]: _InheritedSlots<
+    TModel,
+    TFor
+  >[Property];
+};
+</script>
+
+<script
+  lang="ts"
+  setup
+  generic="
+  TModel extends Model, 
+  TFor extends ForSpec<TModel, (ModelCollectionNavigationProperty & { manyToMany: {} })> "
+>
 import { ForSpec, useMetadataProps } from "../c-metadata-component";
 import {
   Model,
@@ -34,6 +112,8 @@ import {
   Indexable,
   ModelCollectionNavigationProperty,
   BehaviorFlags,
+  PropNames,
+  ModelTypeLookup,
 } from "coalesce-vue";
 
 import { computed, ref } from "vue";
@@ -47,6 +127,12 @@ defineOptions({
   inheritAttrs: false,
 });
 
+type FarItemType = _FarItemType<TModel, TFor>;
+type MiddleItemType = _MiddleItemType<TModel, TFor>;
+type MiddleItemViewModel = MiddleItemType & ViewModel;
+
+defineSlots<InheritedSlots<TModel, TFor>>();
+
 const modelValue = defineModel<Model[] | null>();
 const props = withDefaults(
   defineProps<{
@@ -58,12 +144,9 @@ const props = withDefaults(
      * * A direct reference to the metadata object. E.g. `model.$metadata.props.caseProducts`.
      * * A string in dot-notation that starts with a type name. E.g. `"Case.caseProducts"`.
      */
-    for: ForSpec<
-      TModel,
-      ModelCollectionNavigationProperty & { manyToMany: {} }
-    >;
+    for: TFor;
 
-    itemTitle?: (item: any) => string;
+    itemTitle?: (item: MiddleItemType) => string;
 
     clearable?: boolean;
     disabled?: boolean;
@@ -74,10 +157,10 @@ const props = withDefaults(
 );
 
 const emit = defineEmits<{
-  (e: "deleting", vm: ViewModel): void;
-  (e: "deleted", vm: ViewModel): void;
-  (e: "adding", vm: ViewModel): void;
-  (e: "added", vm: ViewModel): void;
+  deleting: [vm: MiddleItemViewModel];
+  deleted: [vm: MiddleItemViewModel];
+  adding: [vm: MiddleItemViewModel];
+  added: [vm: MiddleItemViewModel];
 }>();
 
 const fakeItemMarker = Symbol();
@@ -111,20 +194,18 @@ const forceDisabled = computed(() => {
   }
 });
 
-function mapFarItemToMiddleItem(farItem: any) {
+function mapFarItemToMiddleItem(farItem: Indexable<FarItemType>) {
   const manyToMany = manyToManyMeta.value;
   const model = props.model as Model<ModelType>;
   return convertToModel(
     {
-      [manyToMany.farForeignKey.name]: (farItem as any)[
-        farItemKeyPropName.value!
-      ],
+      [manyToMany.farForeignKey.name]: farItem[farItemKeyPropName.value!],
       [manyToMany.farNavigationProp.name]: farItem,
       [manyToMany.nearForeignKey.name]: modelPkValue.value,
       [manyToMany.nearNavigationProp.name]: model,
     },
     collectionMeta.value.itemType.typeDef
-  );
+  ) as MiddleItemType;
 }
 
 const isLoading = computed((): boolean => {
@@ -168,14 +249,14 @@ const manyToManyMeta = computed(() => {
   );
 });
 
-const internalValue = computed((): any[] => {
+const internalValue = computed((): Indexable<MiddleItemType>[] => {
   if (props.model && collectionMeta.value) {
     return (props.model as any)[collectionMeta.value.name] || [];
   }
-  return modelValue.value || [];
+  return (modelValue.value as MiddleItemType[]) || [];
 });
 
-const farItems = computed((): any[] => {
+const farItems = computed((): FarItemType[] => {
   return internalValue.value.map((x) => {
     let ret = farItemOf(x);
     if (!ret) {
@@ -185,7 +266,7 @@ const farItems = computed((): any[] => {
             x[manyToManyMeta.value.farForeignKey.name],
         },
         farItemModelType.value
-      );
+      ) as FarItemType;
       (ret as any)[fakeItemMarker] = true;
     }
     return ret;
@@ -214,7 +295,7 @@ function pushLoader(loader: ApiState<any, any>) {
   currentLoaders.value = newArray;
 }
 
-function itemText(farItem: any): string | null {
+function itemText(farItem: Indexable<FarItemType>): string | null {
   if (typeof props.itemTitle === "function") {
     // This mapping of the foreign item back to the middle item
     // exists for backwards compatibility with the implementation of
@@ -235,7 +316,10 @@ function itemText(farItem: any): string | null {
   }
 }
 
-function selectionChanged(farItems: any[], selected: boolean) {
+function selectionChanged(
+  farItems: Indexable<FarItemType>[],
+  selected: boolean
+) {
   const manyToMany = manyToManyMeta.value;
 
   let newItems = [...internalValue.value];
@@ -287,7 +371,7 @@ function selectionChanged(farItems: any[], selected: boolean) {
       newItems = newItems.filter((x) => x !== vm);
     } else {
       // item selected
-      let vm: ViewModel | undefined = undefined;
+      let vm: MiddleItemViewModel | undefined = undefined;
 
       if (props.model instanceof ViewModel) {
         // Look for a matching removed item (pending bulk save deletion):
@@ -306,7 +390,7 @@ function selectionChanged(farItems: any[], selected: boolean) {
             const item = removedItems[itemIndex];
             removedItems.splice(itemIndex, 1);
             item._isRemoved = false;
-            vm = item;
+            vm = item as any as MiddleItemViewModel;
           }
         }
       }
@@ -319,7 +403,7 @@ function selectionChanged(farItems: any[], selected: boolean) {
           // All of the data of `middleItem`, recursing into any nested objects, IS clean.
           // However, `vm` itself is dirty because it is a brand new object with no PK.
           true
-        );
+        ) as any as MiddleItemViewModel;
         vm.$isDirty = true;
       }
 
@@ -349,7 +433,7 @@ function selectionChanged(farItems: any[], selected: boolean) {
   emitInput(newItems);
 }
 
-function emitInput(items: any[]) {
+function emitInput(items: MiddleItemType[]) {
   if (props.model) {
     return ((props.model as any)[collectionMeta.value.name] = items);
   }
@@ -357,7 +441,9 @@ function emitInput(items: any[]) {
   modelValue.value = items;
 }
 
-function farItemOf(value: any): Indexable<Model> | null | undefined {
+function farItemOf(
+  value: Indexable<MiddleItemType>
+): Indexable<FarItemType> | null | undefined {
   return value[manyToManyMeta.value.farNavigationProp.name];
 }
 </script>

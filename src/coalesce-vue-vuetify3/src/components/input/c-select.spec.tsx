@@ -269,6 +269,15 @@ describe("CSelect", () => {
     () => <CSelect model={complexVm} for="singleTest" rules={[v => v === 7 || 'Must be 7']} />;
     //@ts-expect-error invalid rule func (`v` is number, equality to string is invalid).
     () => <CSelect model={complexVm} for="singleTest" rules={[v => v === "foo" || 'Must be 7']} />;
+    
+    // ********
+    // Vuetify props
+    // ********
+    () => <CSelect for="Test" variant="outlined" />;
+    //@ts-expect-error
+    () => <CSelect for="Test" variant="bad-variant" />;
+
+    () => <CSelect for="Test"  />;
   });
 
   test.each([

@@ -13,7 +13,7 @@
     :readonly="isReadonly"
   >
     <template v-for="(_, slot) of passthroughSlots" v-slot:[slot]="scope">
-      <slot :name="slot" v-bind="(scope as any)" />
+      <slot :name="slot" v-bind="scope" />
     </template>
     <template #default="{ isValid }">
       <v-field
@@ -28,7 +28,7 @@
         @keydown="onInputKey($event)"
       >
         <template v-for="(_, slot) of passthroughSlots" v-slot:[slot]="scope">
-          <slot :name="slot" v-bind="(scope as any)" />
+          <slot :name="slot" v-bind="scope" />
         </template>
 
         <template #default>
@@ -49,7 +49,7 @@
                   <v-chip
                     v-if="effectiveMultiple"
                     size="small"
-                    :closable="canDeselect"
+                    :closable="!!canDeselect"
                     @click:close="onInput(item)"
                   >
                     {{ itemTitle(item) }}
@@ -78,10 +78,12 @@
               "
               @focus="focused = true"
               @blur="focused = false"
-              :autofocus="autofocus"
+              :autofocus="autofocus ?? false"
               :disabled="isDisabled"
               :readonly="isReadonly"
-              :placeholder="selectedKeysSet.size ? undefined : placeholder"
+              :placeholder="
+                selectedKeysSet.size ? undefined : placeholder ?? undefined
+              "
             />
           </div>
         </template>
@@ -334,6 +336,8 @@ type _SelectedModelType<
     : any
   : Model<ModelType>;
 
+type _Single<T> = T extends Array<infer U> ? U : T;
+
 type ExtractValuesOfType<T, U> = {
   [K in keyof T]: T[K] extends U ? T[K] : never;
 }[keyof T];
@@ -348,6 +352,28 @@ type ModelToPkType<TModel extends Model> = FindPk<TModel> extends EnumValue
     ? EnumTypeLookup[FindPk<TModel>["typeDef"]["name"]]
     : any
   : TypeDiscriminatorToType<FindPk<TModel>["type"]>;
+
+type InheritedProps = Omit<
+  VInput["$props"] & VField["$props"],
+  | InheritExcludePropNames
+  | "readonly"
+  | "disabled"
+  | "hint"
+  | "direction"
+  | "rules"
+  | "clearable"
+  | "focused"
+  | "dirty"
+  | "active"
+>;
+
+type _InheritedSlots = Omit<VInput["$slots"] & VField["$slots"], "default">;
+// This useless mapped type prevents vue-tsc from getting confused
+// and failing to emit any types at all. When it encountered the mapped type,
+// it doesn't know how to handle it and so leaves it un-transformed.
+type InheritedSlots = {
+  [Property in keyof _InheritedSlots]: _InheritedSlots[Property];
+};
 </script>
 
 <script
@@ -365,12 +391,12 @@ import {
   nextTick,
   watch,
   camelize,
-  useSlots,
 } from "vue";
 import {
   useMetadataProps,
   ForSpec,
   useCustomInput,
+  InheritExcludePropNames,
 } from "../c-metadata-component";
 import { TypedValidationRule } from "../../util";
 import {
@@ -397,15 +423,7 @@ import {
   ModelCollectionValue,
   modelDisplay,
 } from "coalesce-vue";
-import { VField } from "vuetify/components";
-
-const slots = useSlots();
-const passthroughSlots = computed(() => {
-  const ret = { ...slots };
-  delete ret.default;
-  // cast to unknown needed to prevent TS errors in the template that can't be suppressed.
-  return ret as unknown;
-});
+import { VField, VInput } from "vuetify/components";
 
 defineOptions({
   name: "c-select",
@@ -417,11 +435,7 @@ defineOptions({
 
 type SelectedModelType = _SelectedModelType<TModel, TFor, TMultiple>;
 
-type SelectedModelTypeSingle = SelectedModelType extends Array<
-  infer U extends Model<ModelType>
->
-  ? U
-  : SelectedModelType;
+type SelectedModelTypeSingle = _Single<SelectedModelType>;
 
 type SelectedPkTypeSingle = ModelToPkType<SelectedModelTypeSingle>;
 
@@ -439,7 +453,7 @@ type PrimaryBindType = TFor extends ForeignKeyProperty
     : SelectedModelType
   : SelectedModelType;
 
-defineSlots<{
+type SlotTypes = {
   ["item"]?(props: {
     item: SelectedModelTypeSingle;
     search: string | null;
@@ -456,58 +470,61 @@ defineSlots<{
     search: string | null;
     selected: boolean;
   }): any;
-}>();
+} & InheritedSlots;
+const slots = defineSlots<SlotTypes>();
 
 const props = withDefaults(
-  defineProps<{
-    /** An object owning the value to be edited that is specified by the `for` prop. */
-    model?: TModel | null;
+  defineProps<
+    {
+      /** An object owning the value to be edited that is specified by the `for` prop. */
+      model?: TModel | null;
 
-    /** A metadata specifier for the value being bound. One of:
-     * * A string with the name of the value belonging to `model`. E.g. `"firstName"`.
-     * * A direct reference to the metadata object. E.g. `model.$metadata.props.firstName`.
-     * * A string in dot-notation that starts with a type name. E.g. `"Person.firstName"`.
-     */
-    for: TFor;
+      /** A metadata specifier for the value being bound. One of:
+       * * A string with the name of the value belonging to `model`. E.g. `"firstName"`.
+       * * A direct reference to the metadata object. E.g. `model.$metadata.props.firstName`.
+       * * A string in dot-notation that starts with a type name. E.g. `"Person.firstName"`.
+       */
+      for: TFor;
 
-    multiple?: TMultiple & boolean; // `& boolean`: https://github.com/vuejs/core/issues/9877
-    canDeselect?: boolean;
+      multiple?: TMultiple & boolean; // `& boolean`: https://github.com/vuejs/core/issues/9877
+      canDeselect?: boolean | null;
 
-    readonly?: boolean | null;
-    disabled?: boolean | null;
-    autofocus?: boolean;
-    clearable?: boolean;
-    placeholder?: string;
-    preselectFirst?: boolean;
-    preselectSingle?: boolean;
-    openOnClear?: boolean;
-    reloadOnOpen?: boolean;
-    params?: Partial<ListParameters>;
+      readonly?: boolean | null;
+      disabled?: boolean | null;
+      autofocus?: boolean | null;
+      clearable?: boolean | null;
+      placeholder?: string | null;
+      preselectFirst?: boolean | null;
+      preselectSingle?: boolean | null;
+      openOnClear?: boolean | null;
+      reloadOnOpen?: boolean | null;
+      params?: Partial<ListParameters>;
 
-    // DONT use defineModel for these. We don't want to capture local state if the parent isn't binding it
-    // since we have 4 different binding sources in this component, we'll get stuck on the values of the ones that aren't used.
-    keyValue?: SelectedPkType | null;
-    objectValue?: SelectedModelType | null;
-    modelValue?: PrimaryBindType | null;
+      // DONT use defineModel for these. We don't want to capture local state if the parent isn't binding it
+      // since we have 4 different binding sources in this component, we'll get stuck on the values of the ones that aren't used.
+      keyValue?: SelectedPkType | null;
+      objectValue?: SelectedModelType | null;
+      modelValue?: PrimaryBindType | null;
 
-    /** Response caching configuration for the `/get` and `/list` API calls made by the component.
-     * See https://intellitect.github.io/Coalesce/stacks/vue/layers/api-clients.html#response-caching. */
-    cache?: ResponseCachingConfiguration | boolean;
+      /** Response caching configuration for the `/get` and `/list` API calls made by the component.
+       * See https://intellitect.github.io/Coalesce/stacks/vue/layers/api-clients.html#response-caching. */
+      cache?: ResponseCachingConfiguration | boolean;
 
-    rules?: Array<TypedValidationRule<SelectedPkType>>;
+      rules?: Array<TypedValidationRule<SelectedPkType>>;
 
-    itemTitle?: (item: SelectedModelTypeSingle) => string | null;
-    create?: {
-      getLabel: (
-        search: string,
-        items: SelectedModelTypeSingle[]
-      ) => string | false;
-      getItem: (
-        search: string,
-        label: string
-      ) => Promise<SelectedModelTypeSingle>;
-    };
-  }>(),
+      itemTitle?: (item: SelectedModelTypeSingle) => string | null;
+      create?: {
+        getLabel: (
+          search: string,
+          items: SelectedModelTypeSingle[]
+        ) => string | false;
+        getItem: (
+          search: string,
+          label: string
+        ) => Promise<SelectedModelTypeSingle>;
+      };
+    } & /* @vue-ignore */ InheritedProps
+  >(),
   {
     openOnClear: true,
     canDeselect: true,
@@ -524,6 +541,13 @@ const emit = defineEmits<{
   /** Fired when an item is selected or deselected in `multiple` mode. */
   selectionChanged: [values: SelectedModelTypeSingle[], selected: boolean];
 }>();
+
+const passthroughSlots = computed(() => {
+  const ret = { ...slots };
+  //@ts-expect-error Runtime safety - already forbidden by types.
+  delete ret.default;
+  return ret;
+});
 
 const mainInputRef = ref<HTMLInputElement>();
 const listRef = ref<ComponentPublicInstance>();

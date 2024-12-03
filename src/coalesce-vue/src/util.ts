@@ -10,7 +10,7 @@ import type { DateKind } from "./metadata";
 
 export type OwnProps<T, TExclude> = Pick<T, Exclude<keyof T, keyof TExclude>>;
 
-export type Indexable<T> = { [k: string]: any | undefined } & T;
+export type Indexable<T> = { [k: string | symbol]: any | undefined } & T;
 
 export type DeepPartial<T> =
   | T

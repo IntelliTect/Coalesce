@@ -18,11 +18,21 @@
     autocomplete="off"
     v-model:focused="focused"
     @change="textInputChanged($event, true)"
-  ></v-text-field>
+  >
+    <template v-for="(_, slot) of $slots" v-slot:[slot]="scope">
+      <slot :name="slot" v-bind="scope" />
+    </template>
+  </v-text-field>
 
   <v-text-field
     v-else
     class="c-datetime-picker"
+    :placeholder="internalFormat"
+    :append-inner-icon="
+      internalDateKind == 'time'
+        ? 'fa fa-clock cursor-pointer'
+        : 'fa fa-calendar-alt cursor-pointer'
+    "
     v-bind="inputBindAttrs"
     :rules="effectiveRules"
     :modelValue="internalTextValue == null ? displayedValue : internalTextValue"
@@ -30,70 +40,70 @@
     :readonly="isReadonly"
     :disabled="isDisabled"
     autocomplete="off"
-    :placeholder="internalFormat"
     v-model:focused="focused"
     @keydown.enter="focused = false"
     @keydown.escape="focused = false"
     @update:model-value="textInputChanged($event, false)"
     @click="menu = !menu"
-    :append-inner-icon="
-      internalDateKind == 'time'
-        ? 'fa fa-clock cursor-pointer'
-        : 'fa fa-calendar-alt cursor-pointer'
-    "
   >
-    <!-- TODO: Consider fullscreen modal on small devices -->
-    <v-menu
-      v-if="isInteractive"
-      v-model="menu"
-      activator="parent"
-      content-class="c-datetime-picker__menu"
-      :close-on-content-click="false"
-      :open-on-click="false"
-      min-width="1px"
-    >
-      <v-fab
-        app
-        location="bottom right"
-        color="secondary"
-        size="x-small"
-        icon="$complete"
-        @click="menu = false"
-        :title="$vuetify.locale.t('$vuetify.close')"
+    <template v-for="(_, slot) of $slots" v-slot:[slot]="scope">
+      <slot :name="slot" v-bind="scope" />
+    </template>
+    <template #default>
+      <!-- TODO: Consider fullscreen modal on small devices -->
+      <v-menu
+        v-if="isInteractive"
+        v-model="menu"
+        activator="parent"
+        content-class="c-datetime-picker__menu"
+        :close-on-content-click="false"
+        :open-on-click="false"
+        min-width="1px"
       >
-      </v-fab>
-      <v-card class="d-flex">
-        <v-date-picker
-          v-if="showDate"
-          color="secondary"
-          :modelValue="internalValueZoned"
-          @update:modelValue="dateChanged"
-          density="comfortable"
-          scrollable
-          :rounded="false"
-          :allowedDates="allowedDates"
-          :min="min ? startOfDay(min) : undefined"
-          :max="max ? endOfDay(max) : undefined"
-          v-bind="datePickerProps"
+        <v-fab
+          app
+          location="bottom right"
+          :color="color"
+          size="x-small"
+          icon="$complete"
+          @click="menu = false"
+          :title="$vuetify.locale.t('$vuetify.close')"
         >
-        </v-date-picker>
+        </v-fab>
+        <v-card class="d-flex">
+          <v-date-picker
+            v-if="showDate"
+            :color="color!"
+            :modelValue="internalValueZoned"
+            @update:modelValue="dateChanged"
+            density="comfortable"
+            scrollable
+            :rounded="false"
+            :allowedDates="(allowedDates as any)"
+            :min="min ? startOfDay(min) : undefined"
+            :max="max ? endOfDay(max) : undefined"
+            v-bind="datePickerProps"
+          >
+          </v-date-picker>
 
-        <v-divider vertical></v-divider>
+          <v-divider vertical></v-divider>
 
-        <c-time-picker
-          v-if="showTime"
-          :model-value="internalValueZoned"
-          @update:model-value="timeChanged"
-          :step="step ?? undefined"
-          :min="min"
-          :max="max"
-        >
-          <template #header>
-            {{ displayedTime || "&nbsp;" }}
-          </template>
-        </c-time-picker>
-      </v-card>
-    </v-menu>
+          <c-time-picker
+            v-if="showTime"
+            :model-value="internalValueZoned"
+            @update:model-value="timeChanged"
+            :step="step ?? undefined"
+            :min="min"
+            :max="max"
+            :color
+          >
+            <template #header>
+              {{ displayedTime || "&nbsp;" }}
+            </template>
+          </c-time-picker>
+        </v-card>
+      </v-menu>
+    </template>
   </v-text-field>
 </template>
 
@@ -140,6 +150,35 @@
 }
 </style>
 
+<script lang="ts">
+import { VTextField, VDatePicker } from "vuetify/components";
+import { TypedValidationRule } from "../../util";
+
+type InheritedProps = Omit<
+  VTextField["$props"],
+  | InheritExcludePropNames
+  | "readonly"
+  | "disabled"
+  | "rules"
+  | "errorMessages"
+  | "focused"
+  | "onUpdate:focused"
+>;
+
+type DatePickerProps = Omit<
+  VDatePicker["$props"],
+  InheritExcludePropNames | "position"
+>;
+
+type _InheritedSlots = Omit<VTextField["$slots"], "default">;
+// This useless mapped type prevents vue-tsc from getting confused
+// and failing to emit any types at all. When it encountered the mapped type,
+// it doesn't know how to handle it and so leaves it un-transformed.
+type InheritedSlots = {
+  [Property in keyof _InheritedSlots]: _InheritedSlots[Property];
+};
+</script>
+
 <script
   lang="ts"
   setup
@@ -173,6 +212,7 @@ import {
 import { computed, ref, watch } from "vue";
 import {
   ForSpec,
+  InheritExcludePropNames,
   useCustomInput,
   useMetadataProps,
 } from "../c-metadata-component";
@@ -188,50 +228,56 @@ defineOptions({
 });
 
 const props = withDefaults(
-  defineProps<{
-    /** An object owning the value to be edited that is specified by the `for` prop. */
-    model?: TModel | null;
+  defineProps<
+    {
+      /** An object owning the value to be edited that is specified by the `for` prop. */
+      model?: TModel | null;
 
-    /** A metadata specifier for the value being bound. One of:
-     * * A string with the name of the value belonging to `model`. E.g. `"startDate"`.
-     * * A direct reference to the metadata object. E.g. `model.$metadata.props.startDate`.
-     * * A string in dot-notation that starts with a type name. E.g. `"Person.startDate"`.
-     */
-    for?: ForSpec<TModel, DateValue>;
+      /** A metadata specifier for the value being bound. One of:
+       * * A string with the name of the value belonging to `model`. E.g. `"startDate"`.
+       * * A direct reference to the metadata object. E.g. `model.$metadata.props.startDate`.
+       * * A string in dot-notation that starts with a type name. E.g. `"Person.startDate"`.
+       */
+      for?: ForSpec<TModel, DateValue>;
 
-    /** Specifies whether this input is picking date, time, or both. */
-    dateKind?: DateKind | null;
-    /** The format of the selected value displayed in the text field.*/
-    dateFormat?: string | null;
-    readonly?: boolean | null;
-    disabled?: boolean | null;
-    /** Use native HTML5 date picker rather than Vuetify. */
-    native?: boolean | null;
-    closeOnDatePicked?: boolean | null;
+      rules?: Array<TypedValidationRule<Date>>;
+      /** Specifies whether this input is picking date, time, or both. */
+      dateKind?: DateKind | null;
+      /** The format of the selected value displayed in the text field.*/
+      dateFormat?: string | null;
+      readonly?: boolean | null;
+      disabled?: boolean | null;
+      /** Use native HTML5 date picker rather than Vuetify. */
+      native?: boolean | null;
+      color?: string | null;
+      closeOnDatePicked?: boolean | null;
 
-    /** The IANA time zone name that the user will pick the date/time value in.
-     * Falls back to the value configured with `coalesce-vue`'s `setDefaultTimeZone`
-     * if the value bound to with `model`/`for` is a `DateTimeOffset`.
-     */
-    timeZone?: string | null;
+      /** The IANA time zone name that the user will pick the date/time value in.
+       * Falls back to the value configured with `coalesce-vue`'s `setDefaultTimeZone`
+       * if the value bound to with `model`/`for` is a `DateTimeOffset`.
+       */
+      timeZone?: string | null;
 
-    /** The allowed increments, in minutes, of the selectable value.
-     * Value should divide 60 evenly, or be multiples of 60 */
-    step?: number | null;
+      /** The allowed increments, in minutes, of the selectable value.
+       * Value should divide 60 evenly, or be multiples of 60 */
+      step?: number | null;
 
-    /** The minimum date/time value allowed. */
-    min?: Date | null;
-    /** The maximum date/time value allowed. */
-    max?: Date | null;
-    /** An array of permitted dates (items should have a time of midnight),
-     * or a function that returns true if a date is allowed for selection.
-     * Does not impact time selection. */
-    allowedDates?: null | Date[] | ((date: Date) => boolean);
-    // Object containing extra props to pass through to `v-date-picker`.
-    datePickerProps?: any;
-  }>(),
-  { closeOnDatePicked: null }
+      /** The minimum date/time value allowed. */
+      min?: Date | null;
+      /** The maximum date/time value allowed. */
+      max?: Date | null;
+      /** An array of permitted dates (items should have a time of midnight),
+       * or a function that returns true if a date is allowed for selection.
+       * Does not impact time selection. */
+      allowedDates?: null | Date[] | ((date: Date) => boolean);
+      // Object containing extra props to pass through to `v-date-picker`.
+      datePickerProps?: DatePickerProps;
+    } & /* @vue-ignore */ InheritedProps
+  >(),
+  { closeOnDatePicked: null, color: "secondary" }
 );
+
+defineSlots<InheritedSlots>();
 
 const modelValue = defineModel<Date | null | undefined>();
 
@@ -356,6 +402,7 @@ const internalFormat = computed(() => {
 
 /** The effective set of validation rules to pass to the text field. Ensures that the real Date value is passed to the rule, rather than the text field's string value. */
 const effectiveRules = computed(() => {
+  if (props.rules) return props.rules;
   return inputBindAttrs.value.rules?.map(
     (ruleFunc: (value: Date | null | undefined) => string | boolean) => () =>
       ruleFunc(internalValue.value)

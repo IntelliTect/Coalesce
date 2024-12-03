@@ -35,22 +35,12 @@
         multiple
         v-model:keyValue="selectedIds2"
         v-model:objectValue="selectedModels2"
-        :rules="[(v: any) => `Rule test: rule received ${v}`]"
+        :rules="[(v) => `Rule test: rule received ${v}`]"
       ></c-select>
     </v-col>
     <v-col>
       <div>{{ selectedIds2 }}</div>
       <div>[{{ selectedModels2.map((x) => modelDisplay(x)).join(", ") }}]</div>
-    </v-col>
-  </v-row>
-
-  <h1>v-model via c-input</h1>
-  <v-row>
-    <v-col>
-      <c-input for="Person" multiple v-model="selectedModels3"></c-input>
-    </v-col>
-    <v-col>
-      <div>[{{ selectedModels3.map((x) => modelDisplay(x)).join(", ") }}]</div>
     </v-col>
   </v-row>
 

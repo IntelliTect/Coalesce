@@ -1,5 +1,5 @@
-import { CAdminEditorPage, CAdminTablePage } from "@/index";
-import { createCoalesceVuetify } from "@/install";
+import { CAdminEditorPage, CAdminTablePage } from "../src";
+import { createCoalesceVuetify } from "../src/install";
 import {
   mount,
   DOMWrapper,

@@ -2,6 +2,7 @@ import { CSelectManyToMany } from "..";
 import { CaseViewModel } from "@test-targets/viewmodels.g";
 
 describe("CSelectManyToMany", () => {
+  // prettier-ignore
   test("types", () => {
     const caseVm = new CaseViewModel();
 

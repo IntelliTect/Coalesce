@@ -12,6 +12,7 @@
     :modelValue="nativeValue"
     v-bind="inputBindAttrs"
     :rules="effectiveRules"
+    :validation-value="internalValue"
     :error-messages="error"
     :readonly="isReadonly"
     :disabled="isDisabled"
@@ -36,6 +37,7 @@
     v-bind="inputBindAttrs"
     :rules="effectiveRules"
     :modelValue="internalTextValue == null ? displayedValue : internalTextValue"
+    :validation-value="internalValue"
     :error-messages="error"
     :readonly="isReadonly"
     :disabled="isDisabled"
@@ -163,6 +165,7 @@ type InheritedProps = Omit<
   | "errorMessages"
   | "focused"
   | "onUpdate:focused"
+  | "validationValue"
 >;
 
 type DatePickerProps = Omit<
@@ -400,13 +403,9 @@ const internalFormat = computed(() => {
   }
 });
 
-/** The effective set of validation rules to pass to the text field. Ensures that the real Date value is passed to the rule, rather than the text field's string value. */
+/** The effective set of validation rules to pass to the text field. */
 const effectiveRules = computed(() => {
-  if (props.rules) return props.rules;
-  return inputBindAttrs.value.rules?.map(
-    (ruleFunc: (value: Date | null | undefined) => string | boolean) => () =>
-      ruleFunc(internalValue.value)
-  );
+  return props.rules ?? inputBindAttrs.value.rules;
 });
 
 const showDate = computed(() => {

@@ -304,14 +304,11 @@ type _SelectedModelType<
     TMultiple extends true
     ? Array<ModelTypeLookup[TFor]>
     : ModelTypeLookup[TFor]
-  : TFor extends ModelReferenceNavigationProperty | ModelValue
-  ? TFor["typeDef"]["name"] extends keyof ModelTypeLookup
-    ? ModelTypeLookup[TFor["typeDef"]["name"]]
-    : any
-  : TFor extends ForeignKeyProperty
-  ? TFor["principalType"]["name"] extends keyof ModelTypeLookup
-    ? ModelTypeLookup[TFor["principalType"]["name"]]
-    : any
+  : TFor extends
+      | ModelReferenceNavigationProperty
+      | ModelValue
+      | ForeignKeyProperty
+  ? ValueOrFkToModelType<TFor>
   : TModel extends ApiStateTypeWithArgs<any, any, infer TArgsObj, any>
   ? TFor extends keyof TArgsObj
     ? TMultiple extends true
@@ -322,17 +319,7 @@ type _SelectedModelType<
     : any
   : TModel extends Model
   ? TFor extends PropNames<TModel["$metadata"]>
-    ? TModel["$metadata"]["props"][TFor] extends
-        | ModelReferenceNavigationProperty
-        | ModelValue
-      ? TModel["$metadata"]["props"][TFor]["typeDef"]["name"] extends keyof ModelTypeLookup
-        ? ModelTypeLookup[TModel["$metadata"]["props"][TFor]["typeDef"]["name"]]
-        : any
-      : TModel["$metadata"]["props"][TFor] extends ForeignKeyProperty
-      ? TModel["$metadata"]["props"][TFor]["principalType"]["name"] extends keyof ModelTypeLookup
-        ? ModelTypeLookup[TModel["$metadata"]["props"][TFor]["principalType"]["name"]]
-        : any
-      : any
+    ? ValueOrFkToModelType<TModel["$metadata"]["props"][TFor]>
     : any
   : Model<ModelType>;
 
@@ -347,11 +334,7 @@ type FindPk<TModel extends Model> = ExtractValuesOfType<
   PrimaryKeyProperty
 >;
 
-type ModelToPkType<TModel extends Model> = FindPk<TModel> extends EnumValue
-  ? FindPk<TModel>["typeDef"]["name"] extends keyof EnumTypeLookup
-    ? EnumTypeLookup[FindPk<TModel>["typeDef"]["name"]]
-    : any
-  : TypeDiscriminatorToType<FindPk<TModel>["type"]>;
+type ModelToPkType<TModel extends Model> = MetadataToModelType<FindPk<TModel>>;
 
 type InheritedProps = Omit<
   VInput["$props"] & VField["$props"],
@@ -414,14 +397,13 @@ import {
   AnyArgCaller,
   ResponseCachingConfiguration,
   ModelTypeLookup,
-  EnumTypeLookup,
-  TypeDiscriminatorToType,
   PrimaryKeyProperty,
   PropNames,
   ApiStateTypeWithArgs,
-  EnumValue,
   ModelCollectionValue,
   modelDisplay,
+  MetadataToModelType,
+  ValueOrFkToModelType,
 } from "coalesce-vue";
 import { VField, VInput } from "vuetify/components";
 

@@ -33,9 +33,9 @@ type _FarItemType<
 > = TFor extends PropNames<TModel["$metadata"]>
   ? TModel["$metadata"]["props"][TFor] extends
       | ModelCollectionNavigationProperty & { manyToMany: {} }
-    ? TModel["$metadata"]["props"][TFor]["manyToMany"]["typeDef"]["name"] extends keyof ModelTypeLookup
-      ? ModelTypeLookup[TModel["$metadata"]["props"][TFor]["manyToMany"]["typeDef"]["name"]]
-      : any
+    ? MetadataToModelType<
+        TModel["$metadata"]["props"][TFor]["manyToMany"]["typeDef"]
+      >
     : any
   : Model<ModelType>;
 
@@ -48,9 +48,7 @@ type _MiddleItemType<
 > = TFor extends PropNames<TModel["$metadata"]>
   ? TModel["$metadata"]["props"][TFor] extends
       | ModelCollectionNavigationProperty & { manyToMany: {} }
-    ? TModel["$metadata"]["props"][TFor]["itemType"]["name"] extends keyof ModelTypeLookup
-      ? ModelTypeLookup[TModel["$metadata"]["props"][TFor]["itemType"]["name"]]
-      : any
+    ? MetadataToModelType<TModel["$metadata"]["props"][TFor]["itemType"]>
     : any
   : Model<ModelType>;
 
@@ -112,7 +110,7 @@ import {
   ModelCollectionNavigationProperty,
   BehaviorFlags,
   PropNames,
-  ModelTypeLookup,
+  MetadataToModelType,
 } from "coalesce-vue";
 
 import { computed, ref } from "vue";
@@ -134,7 +132,7 @@ type MiddleItemViewModel = MiddleItemType & ViewModel;
 
 defineSlots<InheritedSlots<TModel, TFor>>();
 
-const modelValue = defineModel<Model[] | null>();
+const modelValue = defineModel<MiddleItemType[] | null>();
 const props = withDefaults(
   defineProps<{
     /** An object owning the value to be edited that is specified by the `for` prop. */

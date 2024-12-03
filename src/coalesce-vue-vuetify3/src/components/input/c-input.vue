@@ -36,41 +36,21 @@ function addHandler(data: any, eventName: string, handler: Function) {
 type _ValueType<
   TModel extends Model | DataSource | AnyArgCaller | undefined,
   TFor extends ForSpec<TModel>
-> = TFor extends string & keyof ModelTypeLookup
-  ? ModelTypeLookup[TFor]
-  : TFor extends ModelReferenceNavigationProperty | ModelValue
-  ? TFor["typeDef"]["name"] extends keyof ModelTypeLookup
-    ? ModelTypeLookup[TFor["typeDef"]["name"]]
-    : any
-  : TFor extends ForeignKeyProperty
-  ? TFor["principalType"]["name"] extends keyof ModelTypeLookup
-    ? ModelTypeLookup[TFor["principalType"]["name"]]
-    : any
-  : TModel extends ApiStateTypeWithArgs<any, any, infer TArgsObj, any>
+> = TModel extends ApiStateTypeWithArgs<any, any, infer TArgsObj, any>
   ? TFor extends keyof TArgsObj
     ? TArgsObj[TFor]
     : any
-  : TModel extends Model
-  ? TFor extends PropNames<TModel["$metadata"]>
-    ? TModel["$metadata"]["props"][TFor] extends
-        | ModelReferenceNavigationProperty
-        | ModelValue
-      ? TModel["$metadata"]["props"][TFor]["typeDef"]["name"] extends keyof ModelTypeLookup
-        ? ModelTypeLookup[TModel["$metadata"]["props"][TFor]["typeDef"]["name"]]
-        : any
-      : TModel["$metadata"]["props"][TFor] extends ForeignKeyProperty
-      ? TModel["$metadata"]["props"][TFor]["principalType"]["name"] extends keyof ModelTypeLookup
-        ? ModelTypeLookup[TModel["$metadata"]["props"][TFor]["principalType"]["name"]]
-        : any
-      : TModel["$metadata"]["props"][TFor] extends CollectionProperty
-      ? Array<
-          TypeDiscriminatorToType<
-            TModel["$metadata"]["props"][TFor]["itemType"]["type"]
-          >
-        >
-      : TypeDiscriminatorToType<TModel["$metadata"]["props"][TFor]["type"]>
+  : TFor extends Value
+  ? MetadataToModelType<TFor>
+  : TFor extends string
+  ? TFor extends keyof ModelTypeLookup
+    ? ModelTypeLookup[TFor]
+    : TModel extends Model
+    ? TFor extends PropNames<TModel["$metadata"]>
+      ? MetadataToModelType<TModel["$metadata"]["props"][TFor]>
+      : any
     : any
-  : Model<ModelType>;
+  : any;
 </script>
 
 <script
@@ -93,14 +73,10 @@ import {
   mapValueToModel,
   parseValue,
   ApiStateTypeWithArgs,
-  ForeignKeyProperty,
-  ModelReferenceNavigationProperty,
-  ModelType,
   ModelTypeLookup,
-  ModelValue,
   PropNames,
-  TypeDiscriminatorToType,
-  CollectionProperty,
+  Value,
+  MetadataToModelType,
 } from "coalesce-vue";
 
 import CSelect from "./c-select.vue";
@@ -179,6 +155,10 @@ function render() {
   } as any;
   if (data.rules === undefined) delete data.rules;
 
+  // Do not pass the default slot through to vuetify.
+  // It will put it in a weird spot in most inputs.
+  const { default: defaultSlot, ...vuetifySlots } = slots;
+
   // Handle components that delegate to other c-metadata-component based components.
   // These components don't need to have complex attributes computed
   // because they will perform the same computation of attributes themselves.
@@ -191,7 +171,7 @@ function render() {
       addHandler(data, "update:modelValue", (v: any) =>
         emit("update:modelValue", v)
       );
-      return h(CDatetimePicker, data, slots);
+      return h(CDatetimePicker, data, vuetifySlots);
 
     case "model":
       data.model = props.model;
@@ -199,7 +179,7 @@ function render() {
       addHandler(data, "update:modelValue", (v: any) =>
         emit("update:modelValue", v)
       );
-      return h(CSelect<any>, data, slots);
+      return h(CSelect<any>, data, vuetifySlots);
 
     case "collection":
       data.model = props.model;
@@ -209,14 +189,14 @@ function render() {
         addHandler(data, "update:modelValue", (v: any) =>
           emit("update:modelValue", v)
         );
-        return h(CSelectManyToMany<any, any>, data, slots);
+        return h(CSelectManyToMany<any, any>, data, vuetifySlots);
       } else if (valueMeta.itemType.type == "model") {
         data.model = props.model;
         data.for = props.for;
         addHandler(data, "update:modelValue", (v: any) =>
           emit("update:modelValue", v)
         );
-        return h(CSelect<any>, data, slots);
+        return h(CSelect<any>, data, vuetifySlots);
       } else if (
         valueMeta.itemType.type != "object" &&
         valueMeta.itemType.type != "enum" &&
@@ -225,7 +205,7 @@ function render() {
         addHandler(data, "update:modelValue", (v: any) =>
           emit("update:modelValue", v)
         );
-        return h(CSelectValues<any>, data, slots);
+        return h(CSelectValues<any>, data, vuetifySlots);
       } else {
         // console.warn(`Unsupported collection type ${valueMeta.itemType.type} for v-input`)
       }
@@ -247,10 +227,6 @@ function render() {
     }
     emit("update:modelValue", parsed);
   };
-
-  // Do not pass the default slot through to vuetify.
-  // It will put it in a weird spot in most inputs.
-  const { default: defaultSlot, ...vuetifySlots } = slots;
 
   // Handle components that delegate immediately to Vuetify
   switch (valueMeta.type) {

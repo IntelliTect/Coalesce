@@ -91,13 +91,13 @@ export interface DataSourceParameters {
    * which can significantly reduce the size of the response payload. This will also cause the resulting
    * `Model` and `ViewModel` instances on the client to be deduplicated.
    */
-  useRef?: boolean;
+  refResponse?: boolean;
 }
 export class DataSourceParameters {
   constructor() {
     this.includes = null;
     this.dataSource = null;
-    this.useRef = false;
+    this.refResponse = false;
   }
 }
 
@@ -761,10 +761,10 @@ export class ApiClient<T extends ApiRoutedType> {
     }
 
     let headers = config?.headers;
-    if (standardParameters?.useRef) {
+    if (standardParameters?.refResponse) {
       headers = {
         ...config?.headers,
-        Accept: standardParameters?.useRef
+        Accept: standardParameters?.refResponse
           ? ["application/json+ref", "application/json"]
           : ["application/json"],
       };
@@ -775,8 +775,8 @@ export class ApiClient<T extends ApiRoutedType> {
       data: body,
       responseType: method.return.type == "file" ? "blob" : "json",
       cancelToken: this._cancelToken,
-      headers,
       ...config,
+      headers,
       params: {
         ...query,
         ...(config && config.params ? config.params : null),

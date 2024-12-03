@@ -51,6 +51,87 @@ type _ValueType<
       : any
     : any
   : any;
+
+// This isn't perfect because c-input delegates to so many different types,
+// but its good enough to get most of them.
+type InheritedProps = Omit<
+  VInput["$props"] & VField["$props"],
+  | InheritExcludePropNames
+  | "direction"
+  | "rules"
+  | "focused"
+  | "dirty"
+  | "active"
+>;
+
+type ProducesSelect<
+  TModel extends Model | DataSource | AnyArgCaller | undefined,
+  TFor extends ForSpec<TModel>
+> = TFor extends EnumValue | (CollectionValue & { itemType: EnumValue })
+  ? true
+  : TFor extends string
+  ? TFor extends keyof EnumTypeLookup
+    ? true
+    : TModel extends Model
+    ? TFor extends PropNames<TModel["$metadata"]>
+      ? TModel["$metadata"]["props"][TFor] extends
+          | EnumValue
+          | (CollectionValue & { itemType: EnumValue })
+        ? true
+        : false
+      : false
+    : false
+  : false;
+
+// Duplicated from Vuetify because Vuetify doesn't export this type
+// https://github.com/vuetifyjs/vuetify/blob/a36dfb8c4764376ce2af0d994983238dbd96f5bf/packages/vuetify/src/composables/list-items.ts#L10
+interface ListItem<T = any> {
+  value: any;
+  raw: T;
+  title: string;
+  props: {
+    [key: string]: any;
+    title: string;
+    value: any;
+  };
+  children?: ListItem<T>[];
+}
+
+type _InheritedSlots<
+  TModel extends Model | DataSource | AnyArgCaller | undefined,
+  TFor extends ForSpec<TModel>
+> = ProducesSelect<TModel, TFor> extends true
+  ? // These slots for v-select/v-autocomplete are duplicated from Vuetify because Vuetify doesn't export their types correctly.
+    Omit<VInput["$slots"] & VField["$slots"], "default"> & {
+      item?(props: {
+        item: ListItem<_ValueType<TModel, TFor>>;
+        index: number;
+        props: Record<string, unknown>;
+      }): any;
+      chip?(props: {
+        item: ListItem<_ValueType<TModel, TFor>>;
+        index: number;
+        props: Record<string, unknown>;
+      }): any;
+      selection?(props: {
+        item: ListItem<_ValueType<TModel, TFor>>;
+        index: number;
+      }): any;
+    }
+  : Omit<VInput["$slots"] & VField["$slots"], "default">;
+
+// This extra mapped type prevents vue-tsc from getting confused
+// and failing to emit any types at all. When it encountered the mapped type,
+// it doesn't know how to handle it and so leaves it un-transformed.
+type InheritedSlots<
+  TModel extends Model | DataSource | AnyArgCaller | undefined,
+  TFor extends ForSpec<TModel>
+> = {
+  [Property in keyof _InheritedSlots<TModel, TFor>]?: _InheritedSlots<
+    TModel,
+    TFor
+  >[Property];
+};
 </script>
 
 <script
@@ -59,9 +140,10 @@ type _ValueType<
   generic="TModel extends Model | DataSource | AnyArgCaller | undefined, 
   TFor extends ForSpec<TModel> = any"
 >
-import { defineComponent, h, toHandlerKey, useSlots, useAttrs } from "vue";
+import { defineComponent, h, toHandlerKey, useAttrs } from "vue";
 import {
   buildVuetifyAttrs,
+  InheritExcludePropNames,
   useMetadataProps,
   type ForSpec,
 } from "../c-metadata-component";
@@ -77,6 +159,9 @@ import {
   PropNames,
   Value,
   MetadataToModelType,
+  EnumValue,
+  CollectionValue,
+  EnumTypeLookup,
 } from "coalesce-vue";
 
 import CSelect from "./c-select.vue";
@@ -87,7 +172,9 @@ import CDatetimePicker from "./c-datetime-picker.vue";
 import {
   VAutocomplete,
   VCheckbox,
+  VField,
   VFileInput,
+  VInput,
   VSelect,
   VSwitch,
   VTextarea,
@@ -104,21 +191,23 @@ defineOptions({
 });
 
 const props = withDefaults(
-  defineProps<{
-    /** An object owning the value to be edited that is specified by the `for` prop. */
-    model?: TModel | null;
+  defineProps<
+    {
+      /** An object owning the value to be edited that is specified by the `for` prop. */
+      model?: TModel | null;
 
-    /** A metadata specifier for the value being bound. One of:
-     * * A string with the name of the value belonging to `model`. E.g. `"firstName"`.
-     * * A direct reference to the metadata object. E.g. `model.$metadata.props.firstName`.
-     * * A string in dot-notation that starts with a type name. E.g. `"Person.firstName"`.
-     */
-    for: TFor;
+      /** A metadata specifier for the value being bound. One of:
+       * * A string with the name of the value belonging to `model`. E.g. `"firstName"`.
+       * * A direct reference to the metadata object. E.g. `model.$metadata.props.firstName`.
+       * * A string in dot-notation that starts with a type name. E.g. `"Person.firstName"`.
+       */
+      for: TFor;
 
-    rules?: Array<TypedValidationRule<ValueType>>;
+      rules?: Array<TypedValidationRule<ValueType>>;
 
-    modelValue?: ValueType | null;
-  }>(),
+      modelValue?: ValueType | null;
+    } & /* @vue-ignore */ InheritedProps
+  >(),
   {}
 );
 
@@ -131,8 +220,7 @@ const emit = defineEmits<{
 
 const attrs = useAttrs();
 
-defineSlots(); // Empty defineSlots() prevents TS errors for passthrough slots.
-const slots = useSlots();
+const slots = defineSlots<InheritedSlots<TModel, TFor>>();
 
 function render() {
   const valueMeta = valueMetaRef.value;
@@ -157,6 +245,7 @@ function render() {
 
   // Do not pass the default slot through to vuetify.
   // It will put it in a weird spot in most inputs.
+  // @ts-expect-error `default` slot already forbidden by types - this is a runtime safety check.
   const { default: defaultSlot, ...vuetifySlots } = slots;
 
   // Handle components that delegate to other c-metadata-component based components.

@@ -142,6 +142,13 @@ describe("CInput", () => {
     () => <CInput model={caller} for="badString" />;
     //@ts-expect-error missing `for`
     () => <CInput model={caller} />;
+
+    // ******
+    // Vuetify props
+    // ******
+    () => <CInput model={model} for="color" variant="outlined" />;
+    //@ts-expect-error bad prop value
+    () => <CInput model={model} for="color" variant="bad-variant" />;
   });
 
   test.each([

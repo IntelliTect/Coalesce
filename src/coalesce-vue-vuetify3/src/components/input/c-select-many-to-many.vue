@@ -23,6 +23,7 @@
 
 <script lang="ts">
 import CSelect from "./c-select.vue";
+import { ComponentSlots } from "../../util";
 
 type _FarItemType<
   TModel extends Model,
@@ -51,14 +52,6 @@ type _MiddleItemType<
     ? MetadataToModelType<TModel["$metadata"]["props"][TFor]["itemType"]>
     : any
   : Model<ModelType>;
-
-type ComponentSlots<T> = T extends (
-  props: any,
-  ctx: { slots: infer S; attrs: any; emit: any },
-  ...args: any
-) => any
-  ? NonNullable<S>
-  : {};
 
 type _InheritedSlots<
   TModel extends Model,

@@ -1,11 +1,18 @@
 <template>
   <!-- Test that passthrough slots aren't a type error -->
   <c-input :model="vm" for="enumNullable" hide-details="auto" v-bind="$attrs">
-    <template #prepend-inner>
-      <span>foo</span>
+    <template #prepend-inner="{ isActive }">
+      <span>foo: {{ isActive.value }}</span>
     </template>
     <template #item="item">
-      <span>{{ item.props.value }}</span>
+      <span>{{
+        (() => {
+          //@ts-expect-error item is an enum number, cast to string should be invalid
+          item.item.raw as string;
+
+          return item.item.raw as number;
+        })()
+      }}</span>
     </template>
   </c-input>
 </template>

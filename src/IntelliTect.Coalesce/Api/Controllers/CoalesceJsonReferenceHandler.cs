@@ -7,7 +7,10 @@ using System.Text.Json.Serialization;
 
 namespace IntelliTect.Coalesce.Api.Controllers;
 
-
+/// <summary>
+/// A modified implementation of the default <see cref="PreserveReferenceResolver"/> that
+/// avoids putting IDs/refs on items that will never be duplicated (the root response, and collections).
+/// </summary>
 internal sealed class CoalesceJsonReferenceHandler : ReferenceHandler
 {
     public override ReferenceResolver CreateResolver() => new PreserveReferenceResolver();

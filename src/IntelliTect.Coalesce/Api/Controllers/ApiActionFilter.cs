@@ -27,6 +27,8 @@ namespace IntelliTect.Coalesce.Api.Controllers
         protected readonly ILogger<ApiActionFilter> logger;
         protected readonly IOptions<CoalesceOptions> options;
 
+        private static readonly MediaTypeHeaderValue RefTypeHeader = new MediaTypeHeaderValue("application/json+ref");
+
         public ApiActionFilter(ILogger<ApiActionFilter> logger, IOptions<CoalesceOptions> options)
         {
             this.logger = logger;
@@ -119,8 +121,7 @@ namespace IntelliTect.Coalesce.Api.Controllers
 
             if (context.Result is ObjectResult result)
             {
-                var refHeader = new MediaTypeHeaderValue("application/json+ref");
-                if (context.HttpContext.Request.GetTypedHeaders().Accept.Any(h => h.IsSubsetOf(refHeader)))
+                if (context.HttpContext.Request.GetTypedHeaders().Accept.Any(h => h.IsSubsetOf(RefTypeHeader)))
                 {
                     var jsonOptions = context.HttpContext.RequestServices.GetService<IOptions<JsonOptions>>()?.Value ?? new JsonOptions
                     {

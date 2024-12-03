@@ -2,7 +2,8 @@
 
 - Added `multiple` prop to `c-select`, allowing for the selection of multiple models.
 - `c-select-many-to-many` is now based on `c-select` rather than `v-autocomplete`. As a result, it has gained support for all of the props and slots of `c-select`.
-- Added strong types for pass-through Vuetify slots and props to `c-select`, `c-select-many-to-many`, and `c-datetime-picker`.
+- Added strong types for pass-through Vuetify slots and props to `c-input`, `c-select`, `c-select-many-to-many`, and `c-datetime-picker`.
+- Added a `color` prop to `c-datetime-picker`.
 
 # 5.2.1
 

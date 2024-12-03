@@ -368,11 +368,11 @@ type InheritedProps = Omit<
 >;
 
 type _InheritedSlots = Omit<VInput["$slots"] & VField["$slots"], "default">;
-// This useless mapped type prevents vue-tsc from getting confused
+// This extra mapped type prevents vue-tsc from getting confused
 // and failing to emit any types at all. When it encountered the mapped type,
 // it doesn't know how to handle it and so leaves it un-transformed.
 type InheritedSlots = {
-  [Property in keyof _InheritedSlots]: _InheritedSlots[Property];
+  [Property in keyof _InheritedSlots]?: _InheritedSlots[Property];
 };
 </script>
 

@@ -19,8 +19,8 @@
     v-model:focused="focused"
     @change="textInputChanged($event, true)"
   >
-    <template v-for="(_, slot) of $slots" v-slot:[slot]="scope">
-      <slot :name="slot" v-bind="scope" />
+    <template v-for="(_, slot) of ($slots as {})" v-slot:[slot]="scope">
+      <slot :name="slot" v-bind="(scope as any)" />
     </template>
   </v-text-field>
 
@@ -46,8 +46,8 @@
     @update:model-value="textInputChanged($event, false)"
     @click="menu = !menu"
   >
-    <template v-for="(_, slot) of $slots" v-slot:[slot]="scope">
-      <slot :name="slot" v-bind="scope" />
+    <template v-for="(_, slot) of ($slots as {})" v-slot:[slot]="scope">
+      <slot :name="slot" v-bind="(scope as any)" />
     </template>
     <template #default>
       <!-- TODO: Consider fullscreen modal on small devices -->
@@ -171,11 +171,11 @@ type DatePickerProps = Omit<
 >;
 
 type _InheritedSlots = Omit<VTextField["$slots"], "default">;
-// This useless mapped type prevents vue-tsc from getting confused
+// This extra mapped type prevents vue-tsc from getting confused
 // and failing to emit any types at all. When it encountered the mapped type,
 // it doesn't know how to handle it and so leaves it un-transformed.
 type InheritedSlots = {
-  [Property in keyof _InheritedSlots]: _InheritedSlots[Property];
+  [Property in keyof _InheritedSlots]?: _InheritedSlots[Property];
 };
 </script>
 

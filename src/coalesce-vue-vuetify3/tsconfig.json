@@ -13,7 +13,6 @@
     "allowSyntheticDefaultImports": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"],
       "@test/*": ["test/*"],
       "@test-targets/*": ["../test-targets/*"],
       "coalesce-vue": ["../coalesce-vue/src"],

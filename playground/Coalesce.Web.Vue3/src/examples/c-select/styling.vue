@@ -31,10 +31,9 @@
     <template #prepend>
       <v-chip>v-input</v-chip>
     </template>
-    <template #append-inner>
-      <v-chip>v-field</v-chip>
+    <template #append-inner="{ isActive }">
+      <v-chip>v-field (active: {{ isActive.value }})</v-chip>
     </template>
-    <template #default> Default - shouldn't be seen </template>
   </c-select>
 
   <h1>compact/outlined via v-defaults-provider</h1>

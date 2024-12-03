@@ -54,19 +54,60 @@ describe("CDatetimePicker", () => {
     //@ts-expect-error wrong value type
     () => <CDatetimePicker modelValue={selectedDate as string} />;
 
+    // *****
+    // API caller args
+    // *****
     const caller = vm.methodWithManyParams;
     () => <CDatetimePicker model={caller} for="dateTime" />;
     () => <CDatetimePicker model={caller as AnyArgCaller} for="dateTime" />;
     () => <CDatetimePicker model={caller as AnyArgCaller} for="anyString" />;
-
     //@ts-expect-error non-existent param
     () => <CDatetimePicker model={caller} for="asdf" />;
     //@ts-expect-error non-date param
     () => <CDatetimePicker model={caller} for="integer" />;
 
+    // *****
+    // Data source parameters
+    // *****
     () => <CDatetimePicker model={ds} for="minDate" />;
     //@ts-expect-error invalid param
     () => <CDatetimePicker model={ds} for="asdf" />;
+
+    // *****
+    // Vuetify props
+    // *****
+    () => <CDatetimePicker model={ds} for="minDate" variant="filled" />;
+    //@ts-expect-error variant doesn't exist
+    () => <CDatetimePicker model={ds} for="minDate" variant="bad-variant" />;
+
+    // *****
+    // datePickerProps
+    // *****
+    () => (
+      <CDatetimePicker
+        model={ds}
+        for="minDate"
+        datePickerProps={{
+          weeksInMonth: "dynamic",
+        }}
+      />
+    );
+    //@ts-expect-error invalid datePickerProps
+    () => <CDatetimePicker datePickerProps={{ weeksInMonth: "invalid" }} />;
+
+    // *****
+    // Rules
+    // *****
+    // Good rules
+    const dateRule = (date: Date | null | undefined) => !!date || "test";
+    () => <CDatetimePicker model={ds} for="minDate" rules={[dateRule]} />;
+
+    // Bad rules
+    const badDateRule = (date: string | null | undefined) => !!date || "test";
+    //@ts-expect-error rules must be array
+    () => <CDatetimePicker model={ds} for="minDate" rules={dateRule} />;
+    //@ts-expect-error invalid rules
+    () => <CDatetimePicker model={ds} for="minDate" rules={[badDateRule]} />;
   });
 
   test("disabled inherits from form", async () => {

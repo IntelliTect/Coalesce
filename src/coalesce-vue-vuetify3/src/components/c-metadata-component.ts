@@ -26,7 +26,13 @@ import type {
   ModelCollectionValue,
 } from "coalesce-vue";
 import { ApiState, ViewModel } from "coalesce-vue";
-import { computed, inject, useAttrs } from "vue";
+import {
+  computed,
+  inject,
+  useAttrs,
+  type AllowedComponentProps,
+  type VNodeProps,
+} from "vue";
 import { useMetadata } from "../composables/useMetadata";
 
 type PropsOf<TModel> = TModel extends {
@@ -433,3 +439,11 @@ export function useCustomInput(props: {
   });
   return { form, isDisabled, isReadonly, isInteractive };
 }
+
+export type InheritExcludePropNames =
+  | keyof VNodeProps
+  | keyof AllowedComponentProps
+  | "onUpdate:modelValue"
+  | "modelValue"
+  | `v-slot${string}`
+  | "$children";

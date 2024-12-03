@@ -29,6 +29,13 @@ import type {
   NumberValue,
   StringValue,
   ModelCollectionNavigationProperty,
+  ModelReferenceNavigationProperty,
+  ForeignKeyProperty,
+  ModelCollectionValue,
+  CollectionProperty,
+  TypeDiscriminatorToType,
+  EnumType,
+  ObjectType,
 } from "./metadata.js";
 import { resolvePropMeta } from "./metadata.js";
 import {
@@ -41,14 +48,45 @@ import {
 } from "./util.js";
 
 /** Populated by generated code in order to perform lookups of actual model types
- * using metadata names as inputs to the lookup.
+ * using metadata names as inputs to the lookup. `MetadataToModelType` is recommended for lookups.
  */
 export interface ModelTypeLookup {}
 
 /** Populated by generated code in order to perform lookups of actual enum types
- * using metadata names as inputs to the lookup.
+ * using metadata names as inputs to the lookup. `MetadataToModelType` is recommended for lookups.
  */
 export interface EnumTypeLookup {}
+
+// prettier-ignore
+/**
+ * Maps value or type metadata to its corresponding concrete model type implementation.
+ */
+export type MetadataToModelType<TValue extends Value | ObjectType | ModelType | EnumType> =
+  TValue extends ModelType | ObjectType
+  ? TValue["name"] extends keyof ModelTypeLookup
+    ? ModelTypeLookup[TValue["name"]]
+    : any
+
+: TValue extends EnumType
+  ? TValue["name"] extends keyof EnumTypeLookup
+    ? EnumTypeLookup[TValue["name"]]
+    : any
+
+: TValue extends CollectionValue
+  ? Array<MetadataToModelType<TValue["itemType"]>>
+
+: TValue extends ModelValue | EnumValue
+  ? MetadataToModelType<TValue["typeDef"]>
+
+: TypeDiscriminatorToType<TValue["type"]>;
+
+/** Maps value metadata to its corresponding concrete model type implementation.
+ * Foreign key values are mapped to the type of their referenced principal entity.
+ */
+export type ValueOrFkToModelType<TValue extends Value> =
+  TValue extends ForeignKeyProperty
+    ? MetadataToModelType<TValue["principalType"]>
+    : MetadataToModelType<TValue>;
 
 /**
  * Represents a model with metadata information.

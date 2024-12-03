@@ -24,6 +24,10 @@
   </v-row>
 
   <h1>far-side not loaded</h1>
+  <p>
+    Expected: selected items only show as their PK, and the display on the right
+    is all ???
+  </p>
   <v-row>
     <v-col>
       <c-select-many-to-many :model="caseVm3" for="caseProducts" />

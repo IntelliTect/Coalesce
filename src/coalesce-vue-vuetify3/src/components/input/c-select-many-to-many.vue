@@ -109,7 +109,6 @@ import {
   ViewModel,
   ViewModelFactory,
   ApiState,
-  Indexable,
   ModelCollectionNavigationProperty,
   BehaviorFlags,
   PropNames,
@@ -117,6 +116,8 @@ import {
 } from "coalesce-vue";
 
 import { computed, ref } from "vue";
+
+type Indexable<T> = { [k: string | symbol]: any | undefined } & T;
 
 defineOptions({
   name: "c-select-many-to-many",

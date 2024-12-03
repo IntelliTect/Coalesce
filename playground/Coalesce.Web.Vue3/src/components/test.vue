@@ -23,6 +23,16 @@
               :params="{ refResponse: true }"
             >
             </c-select>
+            <c-select
+              :model="caseVm"
+              for="assignedTo"
+              variant="outlined"
+              density="compact"
+              class="my-4"
+              error-messages="sdfsdf"
+              :params="{ refResponse: true }"
+            >
+            </c-select>
           </v-col>
           <v-col>
             <c-input

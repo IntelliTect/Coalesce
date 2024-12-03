@@ -769,6 +769,8 @@ export class ApiClient<T extends ApiRoutedType> {
           : ["application/json"],
       };
     }
+    let cacheKey = JSON.stringify(headers);
+
     const axiosRequest = <AxiosRequestConfig>{
       method: method.httpMethod,
       url: url,
@@ -797,14 +799,13 @@ export class ApiClient<T extends ApiRoutedType> {
     }
 
     let doCache = false;
-    let cacheKey: string;
 
     if (
       method.httpMethod === "GET" &&
       this._simultaneousGetCaching &&
       !config
     ) {
-      cacheKey = AxiosClient.getUri(axiosRequest);
+      cacheKey += "_" + AxiosClient.getUri(axiosRequest);
       if (simultaneousGetCache.has(cacheKey)) {
         return simultaneousGetCache.get(cacheKey) as any;
       } else {

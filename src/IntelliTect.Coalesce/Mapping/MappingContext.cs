@@ -16,8 +16,7 @@ namespace IntelliTect.Coalesce.Mapping
 
         public IServiceProvider? Services { get; }
 
-        public Dictionary<object, object> MappedObjects { get; } = new();
-
+        private Dictionary<(object, IncludeTree?, Type), object> _mappedObjects { get; } = new();
         private Dictionary<string, bool>? _roleCache;
         private Dictionary<Type, IPropertyRestriction>? _restrictionCache;
 
@@ -43,19 +42,20 @@ namespace IntelliTect.Coalesce.Mapping
             return _roleCache[role] = User?.IsInRole(role) ?? false;
         }
 
-        public void AddMapping(object sourceObject, object mappedObject)
+        public void AddMapping(object sourceObject, IncludeTree? includeTree, object mappedObject)
         {
-            MappedObjects[sourceObject] = mappedObject;
+            _mappedObjects[(sourceObject, includeTree, mappedObject.GetType())] = mappedObject;
         }
 
         public bool TryGetMapping<TDto>(
             object sourceObject,
+            IncludeTree? includeTree,
             [System.Diagnostics.CodeAnalysis.NotNullWhen(true)]
             out TDto? mappedObject
         )
             where TDto : class
         {
-            if (!MappedObjects.TryGetValue(sourceObject, out object? existingMapped) || existingMapped is not TDto)
+            if (!_mappedObjects.TryGetValue((sourceObject, includeTree, typeof(TDto)), out object? existingMapped))
             {
                 mappedObject = default;
                 return false; 

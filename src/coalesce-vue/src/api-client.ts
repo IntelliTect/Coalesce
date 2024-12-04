@@ -86,11 +86,18 @@ export interface DataSourceParameters {
    * Classes are found in `models.g.ts` as `<ModelName>.DataSources.<DataSourceName>`, e.g. `Person.DataSources.WithRelations`.
    */
   dataSource?: DataSource<DataSourceType> | null;
+
+  /** If true, request that the server use System.Text.Json reference preservation handling when serializing the response,
+   * which can significantly reduce the size of the response payload. This will also cause the resulting
+   * `Model` and `ViewModel` instances on the client to be deduplicated.
+   */
+  refResponse?: boolean;
 }
 export class DataSourceParameters {
   constructor() {
     this.includes = null;
     this.dataSource = null;
+    this.refResponse = false;
   }
 }
 
@@ -753,6 +760,17 @@ export class ApiClient<T extends ApiRoutedType> {
       query = mappedParams;
     }
 
+    let headers = config?.headers;
+    if (standardParameters?.refResponse) {
+      headers = {
+        ...config?.headers,
+        Accept: standardParameters?.refResponse
+          ? ["application/json+ref", "application/json"]
+          : ["application/json"],
+      };
+    }
+    let cacheKey = JSON.stringify(headers);
+
     const axiosRequest = <AxiosRequestConfig>{
       method: method.httpMethod,
       url: url,
@@ -760,6 +778,7 @@ export class ApiClient<T extends ApiRoutedType> {
       responseType: method.return.type == "file" ? "blob" : "json",
       cancelToken: this._cancelToken,
       ...config,
+      headers,
       params: {
         ...query,
         ...(config && config.params ? config.params : null),
@@ -780,14 +799,13 @@ export class ApiClient<T extends ApiRoutedType> {
     }
 
     let doCache = false;
-    let cacheKey: string;
 
     if (
       method.httpMethod === "GET" &&
       this._simultaneousGetCaching &&
       !config
     ) {
-      cacheKey = AxiosClient.getUri(axiosRequest);
+      cacheKey += "_" + AxiosClient.getUri(axiosRequest);
       if (simultaneousGetCache.has(cacheKey)) {
         return simultaneousGetCache.get(cacheKey) as any;
       } else {

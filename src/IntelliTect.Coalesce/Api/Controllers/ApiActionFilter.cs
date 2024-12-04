@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
@@ -9,12 +10,15 @@ using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Microsoft.Net.Http.Headers;
 using System;
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace IntelliTect.Coalesce.Api.Controllers
 {
@@ -22,6 +26,8 @@ namespace IntelliTect.Coalesce.Api.Controllers
     {
         protected readonly ILogger<ApiActionFilter> logger;
         protected readonly IOptions<CoalesceOptions> options;
+
+        private static readonly MediaTypeHeaderValue RefTypeHeader = new MediaTypeHeaderValue("application/json+ref");
 
         public ApiActionFilter(ILogger<ApiActionFilter> logger, IOptions<CoalesceOptions> options)
         {
@@ -113,15 +119,32 @@ namespace IntelliTect.Coalesce.Api.Controllers
                 }
             }
 
-            if (response.StatusCode == (int)HttpStatusCode.OK
-                && context.Result is ObjectResult result
-                && result.Value is ApiResult apiResult
-                && !apiResult.WasSuccessful
-            )
+            if (context.Result is ObjectResult result)
             {
-                result.StatusCode = 
-                response.StatusCode = 
-                    (int)HttpStatusCode.BadRequest;
+                if (context.HttpContext.Request.GetTypedHeaders().Accept.Any(h => h.IsSubsetOf(RefTypeHeader)))
+                {
+                    var jsonOptions = context.HttpContext.RequestServices.GetService<IOptions<JsonOptions>>()?.Value ?? new JsonOptions
+                    {
+                        JsonSerializerOptions =
+                        {
+                            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+                        }
+                    };
+                    var newOptions = new JsonSerializerOptions(jsonOptions.JsonSerializerOptions)
+                    {
+                        ReferenceHandler = new CoalesceJsonReferenceHandler()
+                    };
+                    result.Formatters.Add(new SystemTextJsonOutputFormatter(newOptions));
+                }
+
+                if (response.StatusCode == (int)HttpStatusCode.OK && 
+                    result.Value is ApiResult apiResult && 
+                    !apiResult.WasSuccessful)
+                {
+                    result.StatusCode =
+                    response.StatusCode =
+                        (int)HttpStatusCode.BadRequest;
+                }
             }
         }
 

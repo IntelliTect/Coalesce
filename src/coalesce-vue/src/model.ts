@@ -288,6 +288,7 @@ export function parseValue(
 
 class ModelConversionVisitor extends Visitor<any, any[] | null, any | null> {
   private objects = new Map<object, object>();
+  private refs = new Map<object, object>();
 
   public override visitValue(value: any, meta: Value): any {
     // Models shouldn't contain undefined - only nulls where a value isn't present.
@@ -313,6 +314,21 @@ class ModelConversionVisitor extends Visitor<any, any[] | null, any | null> {
     // Prevent infinite recursion on circular object graphs.
     if (this.objects.has(value))
       return this.objects.get(value)! as Model<TMeta>;
+
+    if ("$ref" in value) {
+      const target = this.refs.get(value.$ref);
+      if (!target) {
+        console.warn(`Unresolved $ref ${value.$ref} in object`);
+      }
+      value = target;
+    }
+
+    if ("$id" in value) {
+      this.refs.set(value.$id, value);
+      if (this.mode == "convert") {
+        delete value.$id;
+      }
+    }
 
     const props = meta.props;
 

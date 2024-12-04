@@ -409,6 +409,19 @@ import {
 } from "coalesce-vue";
 import { VField, VInput } from "vuetify/components";
 
+/* DEV NOTES:
+ * - Experimented with moving this back to be based on v-autocomplete on 2024 Nov 22. Found issues:
+ *    - When the menu opens, a janky scroll to the selected item occurs,
+ *      with pre-scroll content flashing into view for a few frames.
+ *    - Scroll of the list doesn't reset when searching, no easy way to do this manually
+ *    - Arrow key navigation relies on tab focus, which fundamentally doesn't work with virtual scrolling.
+ *      Specifically, hitting "UpArrow" when the top item is selected wraps around to the bottom of the list,
+ *      but the bottom of the rendered list is really only somewhere in the middle of the true list.
+ *    - Menu isn't animated when it opens for some reason
+ *    - Have to use direct DOM manipulation to intercept focus events on the search input inside the v-autocomplete.
+ *      Very hard to get this to behave consistently.
+ */
+
 defineOptions({
   name: "c-select",
   // We manually pass attrs via inputBindAttrs, so disable the default Vue behavior.

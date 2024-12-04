@@ -694,6 +694,8 @@ describe("CSelect", () => {
       await mainInput.trigger("keydown.esc");
       expect(wrapper.vm.menuOpen).toBeFalsy();
 
+      await delay(400);
+
       // Open it again
       await mainInput.trigger("keydown.space");
       expect(wrapper.vm.menuOpen).toBeTruthy();

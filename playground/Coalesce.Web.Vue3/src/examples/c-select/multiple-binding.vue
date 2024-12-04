@@ -16,6 +16,7 @@
         for="Person"
         multiple
         v-model:objectValue="selectedModels"
+        open-on-clear
         :create="{
           getLabel(search: string, items: Person[]) { return items.length == 0 ? search : false },
           async getItem(search: string, label: string) { return new Person({ name: label }) }

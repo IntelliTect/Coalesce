@@ -1,5 +1,6 @@
 <template>
   <v-input
+    ref="rootRef"
     class="c-select"
     :class="{
       'c-select--is-menu-active': menuOpen,
@@ -99,6 +100,7 @@
         location="bottom"
       >
         <v-sheet
+          ref="menuContentRef"
           @keydown.capture.down.stop.prevent="
             pendingSelection = Math.min(
               listItems.length - 1,
@@ -110,6 +112,7 @@
           "
           @keydown.capture.enter.stop.prevent="confirmPendingSelection"
           @keydown.capture.tab.stop.prevent="confirmPendingSelection"
+          @blur.capture="onMenuContentBlur"
         >
           <v-text-field
             v-model="search"
@@ -145,7 +148,6 @@
           <v-list
             class="py-0"
             max-height="302"
-            ref="listRef"
             density="compact"
             :aria-multiselectable="effectiveMultiple"
             role="listbox"
@@ -508,7 +510,7 @@ const props = withDefaults(
     } & /* @vue-ignore */ InheritedProps
   >(),
   {
-    openOnClear: true,
+    openOnClear: false,
     canDeselect: true,
     clearable: undefined,
     multiple: undefined,
@@ -531,8 +533,9 @@ const passthroughSlots = computed(() => {
   return ret;
 });
 
+const rootRef = ref<ComponentPublicInstance>();
 const mainInputRef = ref<HTMLInputElement>();
-const listRef = ref<ComponentPublicInstance>();
+const menuContentRef = ref<ComponentPublicInstance>();
 const searchRef = ref<ComponentPublicInstance>();
 
 const fieldAttrs = computed(() =>
@@ -945,9 +948,24 @@ function onInput(value: SelectedModelTypeSingle | null, dontFocus = false) {
   if (!dontFocus && !effectiveMultiple.value) {
     if (!value) {
       openMenu();
+      return;
     } else {
       closeMenu(true);
+      return;
     }
+  }
+
+  if (value == null && props.openOnClear) {
+    openMenu();
+  }
+}
+
+function onMenuContentBlur(event: FocusEvent) {
+  if (
+    !menuContentRef.value?.$el.contains(event.relatedTarget as HTMLElement) &&
+    !rootRef.value?.$el.contains(event.target as HTMLElement)
+  ) {
+    closeMenu(true);
   }
 }
 
@@ -1018,7 +1036,7 @@ async function createItem() {
 }
 
 async function openMenu(select?: boolean) {
-  if (!isInteractive.value) return;
+  if (!isInteractive.value || forceClosed) return;
 
   if (select == undefined) {
     // Select the whole search input if it hasn't changed recently.
@@ -1061,7 +1079,13 @@ async function openMenu(select?: boolean) {
   }
 }
 
+let forceClosed = false;
 function closeMenu(force = false) {
+  if (force) {
+    forceClosed = true;
+    setTimeout(() => (forceClosed = false), 300);
+  }
+
   if (!menuOpen.value) return;
   if (menuOpenForced.value && !force) return;
 
@@ -1173,7 +1197,7 @@ watch(
 watch(pendingSelection, async () => {
   await nextTick();
   await nextTick();
-  var listDiv = listRef.value?.$el as HTMLElement;
+  var listDiv = menuContentRef.value?.$el as HTMLElement;
   var selectedItem = listDiv?.querySelector(".pending-selection");
   selectedItem?.scrollIntoView?.({
     behavior: "auto",

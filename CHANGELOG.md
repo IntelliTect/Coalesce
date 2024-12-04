@@ -1,10 +1,17 @@
 # 5.3.0
 
+## Features
+
 - Added `multiple` prop to `c-select`, allowing for the selection of multiple models.
 - `c-select-many-to-many` is now based on `c-select` rather than `v-autocomplete`. As a result, it has gained support for all of the props and slots of `c-select`.
 - Added strong types for pass-through Vuetify slots and props to `c-input`, `c-select`, `c-select-many-to-many`, and `c-datetime-picker`.
 - Added a `color` prop to `c-datetime-picker`.
 - Added experimental client-side support for System.Text.Json's PreserveReferences reference handling option in server responses. This does not require changes to your JSON settings in Program.cs - instead, it is activated by setting `refResponse` on the `DataSourceParameters` for a request (i.e. the `$params` object on a ViewModel or ListViewModel). This option can significantly reduce response sizes in cases where the same object occurs many times in a response.
+
+## Fixes
+
+- `c-select` `open-on-clear` prop once again functions as expected.
+- `c-select` now closes when changing focus to other elements on the page
 
 # 5.2.1
 

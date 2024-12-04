@@ -15,7 +15,7 @@
       <c-input :model="caseVm" for="status" variant="outlined">
         <template #item="{ item, props }">
           <v-list-item v-bind="props" :title="undefined">
-            {{ item.title }}: {{ item.value }}
+            {{ item.raw.displayName }}: {{ item.value }}
           </v-list-item>
         </template>
         <template #selection="{ item }">

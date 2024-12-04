@@ -7,10 +7,10 @@
     <template #item="item">
       <span>{{
         (() => {
-          //@ts-expect-error item is an enum number, cast to string should be invalid
+          //@ts-expect-error item.raw is enum metadata, cast to string should be invalid
           item.item.raw as string;
 
-          return item.item.raw as number;
+          return item.item.raw.displayName as string;
         })()
       }}</span>
     </template>

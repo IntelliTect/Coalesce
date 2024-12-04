@@ -64,24 +64,24 @@ type InheritedProps = Omit<
   | "active"
 >;
 
-type ProducesSelect<
+type SelectSlotItemType<
   TModel extends Model | DataSource | AnyArgCaller | undefined,
   TFor extends ForSpec<TModel>
 > = TFor extends EnumValue | (CollectionValue & { itemType: EnumValue })
-  ? true
+  ? EnumMember
   : TFor extends string
   ? TFor extends keyof EnumTypeLookup
-    ? true
+    ? EnumMember
     : TModel extends Model
     ? TFor extends PropNames<TModel["$metadata"]>
       ? TModel["$metadata"]["props"][TFor] extends
           | EnumValue
           | (CollectionValue & { itemType: EnumValue })
-        ? true
-        : false
-      : false
-    : false
-  : false;
+        ? EnumMember
+        : never
+      : never
+    : never
+  : never;
 
 // Duplicated from Vuetify because Vuetify doesn't export this type
 // https://github.com/vuetifyjs/vuetify/blob/a36dfb8c4764376ce2af0d994983238dbd96f5bf/packages/vuetify/src/composables/list-items.ts#L10
@@ -100,21 +100,21 @@ interface ListItem<T = any> {
 type _InheritedSlots<
   TModel extends Model | DataSource | AnyArgCaller | undefined,
   TFor extends ForSpec<TModel>
-> = ProducesSelect<TModel, TFor> extends true
-  ? // These slots for v-select/v-autocomplete are duplicated from Vuetify because Vuetify doesn't export their types correctly.
+> = SelectSlotItemType<TModel, TFor> extends {}
+  ? // These slots for v-select/v-autocomplete are duplicated from Vuetify because Vuetify doesn't export their types correctly for generic components.
     Omit<VInput["$slots"] & VField["$slots"], "default"> & {
       item?(props: {
-        item: ListItem<_ValueType<TModel, TFor>>;
+        item: ListItem<SelectSlotItemType<TModel, TFor>>;
         index: number;
         props: Record<string, unknown>;
       }): any;
       chip?(props: {
-        item: ListItem<_ValueType<TModel, TFor>>;
+        item: ListItem<SelectSlotItemType<TModel, TFor>>;
         index: number;
         props: Record<string, unknown>;
       }): any;
       selection?(props: {
-        item: ListItem<_ValueType<TModel, TFor>>;
+        item: ListItem<SelectSlotItemType<TModel, TFor>>;
         index: number;
       }): any;
     }
@@ -162,6 +162,7 @@ import {
   EnumValue,
   CollectionValue,
   EnumTypeLookup,
+  EnumMember,
 } from "coalesce-vue";
 
 import CSelect from "./c-select.vue";

@@ -35,9 +35,9 @@
         <template #default>
           <div class="v-field__input">
             <span
-              class="v-autocomplete__selection"
               v-for="(item, index) in internalModelValue"
               :key="item[modelObjectMeta.keyProp.name]"
+              class="v-select__selection"
             >
               <slot
                 name="selected-item"

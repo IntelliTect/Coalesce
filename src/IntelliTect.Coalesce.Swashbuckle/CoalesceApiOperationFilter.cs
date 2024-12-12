@@ -61,6 +61,8 @@ namespace IntelliTect.Coalesce.Swashbuckle
                     .GetMethod("GenerateRequestBody", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
                     .Invoke(generator, [otherDescription, context.SchemaRepository]) as OpenApiRequestBody;
 
+                if (otherBody is null) continue;
+
                 // To mirror legacy behavior before JSON-accepting endpoints were added to Coalesce,
                 // only add the "multipart/form-data" body, but not the urlencoded body.
                 foreach (var otherContent in otherBody.Content.Where(c => 

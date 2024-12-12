@@ -89,6 +89,8 @@ namespace IntelliTect.Coalesce.Api.OpenApi
                 if (resultTask is null) continue;
 
                 var result = await resultTask;
+                if (result is null) continue;
+
                 foreach (var otherContent in result.Content)
                 {
                     operation.RequestBody.Content.Add(otherContent);

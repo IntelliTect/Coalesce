@@ -147,6 +147,7 @@ export abstract class ViewModel<
 
   // Backwards-compat with vue2 nonreactive sets.
   // Typed as any because vue ref unwrapping causes problems with a prop that is a maybe ref.
+  /** @internal */
   _dirtyPropsVersion: any = IsVue2 ? ref(0) : undefined;
 
   /**

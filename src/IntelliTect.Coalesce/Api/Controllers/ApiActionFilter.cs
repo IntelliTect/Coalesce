@@ -13,6 +13,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.Net.Http.Headers;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data.Common;
 using System.Linq;
 using System.Net;
@@ -93,10 +94,11 @@ namespace IntelliTect.Coalesce.Api.Controllers
                             currentEx = currentEx.InnerException;
                         }
                         string message = messages.ToString();
-
+                        
                         if (
                             options.Value.DetailedEfMigrationExceptionMessages &&
-                            (context.Exception as DbException ?? context.Exception?.InnerException) is DbException
+                            (context.Exception as DbException ?? context.Exception?.InnerException) is DbException dbEx &&
+                            dbEx.InnerException is not Win32Exception { NativeErrorCode: 258 } // The wait operation timed out
                         )
                         {
                             var dbMessage = GetDbContextMigrationExceptionMessage(context);
@@ -199,7 +201,7 @@ namespace IntelliTect.Coalesce.Api.Controllers
 
             if (messages.Count == 0) return "";
 
-            return string.Join(" ", messages) + " This is the likely cause of the following error:";
+            return string.Join(" ", messages) + " This is possibly the cause of the following error:";
         }
 
         public void OnResultExecuting(ResultExecutingContext context)

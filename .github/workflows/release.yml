@@ -106,6 +106,8 @@ jobs:
     uses: ./.github/workflows/part-publish.yml
     needs: [build, validate-template]
     secrets: inherit
+    with:
+      prereleaseSlug: ${{ inputs.prereleaseSlug }}
 
   create-release:
     runs-on: ubuntu-latest

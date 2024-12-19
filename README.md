@@ -27,11 +27,6 @@ See the [Getting Started page](https://intellitect.github.io/Coalesce/stacks/vue
 
 After you create your project, be sure to reading through the rest of [the Documentation](https://intellitect.github.io/Coalesce) to see all the things that Coalesce can do.
 
-## Builds
-|build|IntelliTect.Coalesce|coalesce-vue
-|:--:|:--:|:--:|:--:
-|[![GitHub Workflow Status (branch)](https://img.shields.io/github/actions/workflow/status/IntelliTect/Coalesce/release.yml?branch=dev&label=Build%20Status&logo=github)](https://github.com/IntelliTect/Coalesce/actions/workflows/release.yml)|[![NuGet](https://img.shields.io/nuget/v/IntelliTect.Coalesce)](https://www.nuget.org/packages/IntelliTect.Coalesce)|[![npm](https://img.shields.io/npm/v/coalesce-vue/latest.svg)](https://www.npmjs.com/package/coalesce-vue)
-
 
 ## Support
 Full support for Coalesce is available. Please contact us for more information at info@intellitect.com.

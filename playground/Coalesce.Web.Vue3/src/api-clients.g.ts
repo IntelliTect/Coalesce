@@ -123,6 +123,11 @@ export class CaseProductApiClient extends ModelApiClient<$models.CaseProduct> {
 }
 
 
+export class CaseStandaloneApiClient extends ModelApiClient<$models.CaseStandalone> {
+  constructor() { super($metadata.CaseStandalone) }
+}
+
+
 export class CompanyApiClient extends ModelApiClient<$models.Company> {
   constructor() { super($metadata.Company) }
   public conflictingParameterNames(id: number | null, companyParam: $models.Company | null, name: string | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<void>> {

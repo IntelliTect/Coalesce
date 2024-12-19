@@ -18,14 +18,14 @@ namespace IntelliTect.Coalesce
             var expression = queryable.Expression;
             IncludeTree root = new IncludeTree { PropertyName = rootName };
 
-            var visitor = new ProjectionVisitor();
+            var visitor = new IncludeTreeVisitor();
             visitor.Visit(expression);
             foreach (var tree in visitor.Trees) root.AddChild(tree);
 
             return root;
         }
 
-        class ProjectionVisitor : ExpressionVisitor
+        internal class IncludeTreeVisitor : ExpressionVisitor
         {
             public List<IncludeTree> Trees { get; } = [];
 
@@ -72,7 +72,7 @@ namespace IntelliTect.Coalesce
                 var memberTree = new IncludeTree { PropertyName = member.Name };
                 Trees.Add(memberTree);
 
-                var subVisitor = new ProjectionVisitor();
+                var subVisitor = new IncludeTreeVisitor();
                 subVisitor.Visit(arg);
                 foreach (var childTree in subVisitor.Trees)
                 {
@@ -153,7 +153,6 @@ namespace IntelliTect.Coalesce
                 }
                 else
                 {
-
                     // Not the method we're looking for. Climb up the method call chain.
                     Visit(node.Arguments[0]);
                 }

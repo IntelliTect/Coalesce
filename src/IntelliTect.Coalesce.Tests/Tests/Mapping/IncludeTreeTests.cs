@@ -202,6 +202,25 @@ namespace IntelliTect.Coalesce.Tests.Mapping
             Assert.True(tree["OpenerAllOpenedCases"]["CaseProducts"] is { Count: 0 });
         }
 
+        [Fact]
+        public void IncludeTree_ProjectedQuery_ProjectedIncludedProp_DoesNotUsePriorIncludes()
+        {
+            // See comments on https://github.com/IntelliTect/Coalesce/issues/478#issuecomment-2555963059
+            // for why we don't want to respect .Includes that happen before a projection
+            var queryable = db.Cases
+                .Include(c => c.ReportedBy.Company)
+                .Select(c => new StandaloneProjected
+                {
+                    Id = c.CaseKey,
+                    OpenedBy = c.ReportedBy,
+                })
+                ;
+
+            IncludeTree tree = queryable.GetIncludeTree();
+            Assert.True(tree is { Count: 1 });
+            Assert.True(tree["OpenedBy"] is { Count: 0 });
+        }
+
 
         private class StandaloneProjected
         {

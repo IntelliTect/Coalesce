@@ -12,41 +12,43 @@ import {
 import { bindToQueryString, VueInstance } from "../src";
 import { mount } from "@vue/test-utils";
 import { delay } from "../test/test-utils";
+import { reactive } from "vue";
+import { Person } from "../../test-targets/models.g";
 
 describe("bindToQueryString", () => {
-  test("types", async () => {
-    async function test(func: (v: VueInstance, router: Router) => void) {
-      var router = createRouter({
-        history: createWebHistory(),
-        routes: [
-          {
-            path: "/",
-            component: defineComponent({
-              created() {
-                func(this, router);
-              },
-              render: () => h("div"),
-            }),
-          },
-        ],
-      });
-      const app = mount(
-        defineComponent({
-          render() {
-            return h(RouterView);
-          },
-        }),
+  async function runTest(func: (v: VueInstance, router: Router) => void) {
+    var router = createRouter({
+      history: createWebHistory(),
+      routes: [
         {
-          global: { plugins: [router] },
-          attachTo: document.body,
-        }
-      );
+          path: "/",
+          component: defineComponent({
+            created() {
+              func(this, router);
+            },
+            render: () => h("div"),
+          }),
+        },
+      ],
+    });
+    const app = mount(
+      defineComponent({
+        render() {
+          return h(RouterView);
+        },
+      }),
+      {
+        global: { plugins: [router] },
+        attachTo: document.body,
+      }
+    );
 
-      await delay(10);
-    }
+    await delay(10);
+  }
 
+  test("object+key", async () => {
     const dateRef = ref<Date>();
-    await test(async (v, router) => {
+    await runTest(async (v, router) => {
       // Bind to object + key
       bindToQueryString(v, dateRef, "value", {
         parse(v) {
@@ -62,8 +64,11 @@ describe("bindToQueryString", () => {
         "1970-01-02T10:17:35.667Z"
       );
     });
+  });
 
-    await test(async (v, router) => {
+  test("direct bind to ref", async () => {
+    const dateRef = ref<Date>();
+    await runTest(async (v, router) => {
       // Direct bind to ref
       bindToQueryString(v, dateRef, {
         queryKey: "foo",
@@ -80,21 +85,45 @@ describe("bindToQueryString", () => {
         "1970-01-02T10:17:35.667Z"
       );
     });
+  });
 
+  test("Direct bind to ref with queryKey shorthand", async () => {
     const stringRef = ref<string>();
-    await test(async (v, router) => {
+    await runTest(async (v, router) => {
       // Direct bind to ref with queryKey shorthand
       bindToQueryString(v, stringRef, "foo");
       stringRef.value = "qwerty";
       await delay(1);
       expect(router.currentRoute.value.query.foo).toBe("qwerty");
     });
+  });
 
-    await test(async (v, router) => {
+  test("bad types", async () => {
+    await runTest(async (v, router) => {
       //@ts-expect-error Missing queryKey in options object.
       () => bindToQueryString(v, dateRef, {});
       //@ts-expect-error Missing options or queryKey.
       () => bindToQueryString(v, dateRef);
+    });
+  });
+
+  test("bound to primitive collection", async () => {
+    const dataSource = reactive(
+      new Person.DataSources.NamesStartingWithAWithCases()
+    );
+    await runTest(async (v, router) => {
+      bindToQueryString(v, dataSource, "allowedStatuses");
+      dataSource.allowedStatuses = [1, 2];
+      await delay(1);
+      expect(router.currentRoute.value.query.allowedStatuses).toBe("1,2");
+
+      router.push("/?allowedStatuses=2,3");
+      await delay(1);
+      expect(dataSource.allowedStatuses).toStrictEqual([2, 3]);
+
+      router.push("/?allowedStatuses=");
+      await delay(1);
+      expect(dataSource.allowedStatuses).toStrictEqual([]);
     });
   });
 

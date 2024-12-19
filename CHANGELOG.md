@@ -7,6 +7,7 @@
 - Added strong types for pass-through Vuetify slots and props to `c-input`, `c-select`, `c-select-many-to-many`, and `c-datetime-picker`.
 - Added a `color` prop to `c-datetime-picker`.
 - Added experimental client-side support for System.Text.Json's PreserveReferences reference handling option in server responses. This does not require changes to your JSON settings in Program.cs - instead, it is activated by setting `refResponse` on the `DataSourceParameters` for a request (i.e. the `$params` object on a ViewModel or ListViewModel). This option can significantly reduce response sizes in cases where the same object occurs many times in a response.
+- `useBindToQueryString`/`bindToQueryString` supports primitive collections from metadata without needing to specify explicit parsing logic
 
 ## Fixes
 

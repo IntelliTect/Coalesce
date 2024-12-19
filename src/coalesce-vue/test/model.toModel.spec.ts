@@ -17,6 +17,7 @@ import {
 } from "./model.shared";
 import { Course } from "./targets.models";
 import { convertToModel } from "../src/model";
+import { ComplexModel } from "@test-targets/metadata.g";
 
 const studentProps = $metadata.Student.props;
 
@@ -133,6 +134,11 @@ const dtoToModelMappings = <MappingData[]>[
       convertToModel({}, $metadata.Course),
       convertToModel({}, $metadata.Course),
     ],
+  },
+  {
+    meta: ComplexModel.props.intCollection,
+    dto: "1,2,3",
+    model: [1, 2, 3],
   },
   ...unparsable(studentProps.courses, "abc", 123, {}, true),
 

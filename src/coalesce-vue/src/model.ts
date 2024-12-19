@@ -240,6 +240,17 @@ export function parseValue(
       throw parseError(value, meta);
 
     case "collection":
+      if (
+        type === "string" &&
+        meta.itemType.type != "model" &&
+        meta.itemType.type != "object"
+      ) {
+        return value
+          .split(",")
+          .filter((v: any) => v)
+          .map((v: any) => parseValue(v, meta.itemType));
+      }
+
       if (type !== "object" || !Array.isArray(value))
         throw parseError(value, meta);
 

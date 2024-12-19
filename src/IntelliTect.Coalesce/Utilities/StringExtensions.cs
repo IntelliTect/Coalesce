@@ -131,6 +131,8 @@ namespace IntelliTect.Coalesce.Utilities
         [return: System.Diagnostics.CodeAnalysis.NotNullIfNotNull("str")]
         public static string? EscapeStringLiteralForTypeScript(this string? str) => str?
             .Replace(@"\", @"\\")
+            .Replace("\r", @"\r")
+            .Replace("\n", @"\n")
             .Replace("\"", "\\\"");
 
         [return: System.Diagnostics.CodeAnalysis.NotNullIfNotNull("str")]

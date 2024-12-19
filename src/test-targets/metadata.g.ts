@@ -715,12 +715,14 @@ export const ComplexModel = domain.types.ComplexModel = {
     restrictedString: {
       name: "restrictedString",
       displayName: "Restricted String",
+      description: "This is a multiline string in an attribute.\r\nThis is a second line in the string.",
       type: "string",
       role: "value",
     },
     restrictInit: {
       name: "restrictInit",
       displayName: "Restrict Init",
+      description: "This is a multiline string\n via explicit escaped newline",
       type: "string",
       role: "value",
       createOnly: true,

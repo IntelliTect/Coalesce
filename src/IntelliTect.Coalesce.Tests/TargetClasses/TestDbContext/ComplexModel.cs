@@ -70,9 +70,14 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         public string AdminReadableString { get; set; }
 
         [Restrict<AuthenticatedRestriction>]
+        [Display(Description = """
+            This is a multiline string in an attribute.
+            This is a second line in the string.
+            """)]
         public string RestrictedString { get; set; }
 
         [Restrict<AuthenticatedRestriction>]
+        [Display(Description = "This is a multiline string\n via explicit escaped newline")]
         public string RestrictInit { get; init; }
 
         [Read(RoleNames.Admin)]

@@ -199,7 +199,17 @@ export interface ComplexModelViewModel extends $models.ComplexModel {
   dateOnlyViaAttribute: Date | null;
   unmappedSettableString: string | null;
   adminReadableString: string | null;
+  
+  /** 
+    This is a multiline string in an attribute.
+    This is a second line in the string.
+  */
   restrictedString: string | null;
+  
+  /** 
+    This is a multiline string
+     via explicit escaped newline
+  */
   restrictInit: string | null;
   adminReadableReferenceNavigationId: number | null;
   get adminReadableReferenceNavigation(): ComplexModelViewModel | null;

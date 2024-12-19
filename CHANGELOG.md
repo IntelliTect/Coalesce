@@ -13,6 +13,7 @@
 
 - `c-select` `open-on-clear` prop once again functions as expected.
 - `c-select` now closes when changing focus to other elements on the page
+- Multi-line strings now emit correctly into generated metadata (e.g. a multi-line description for a property)
 
 # 5.2.1
 

@@ -75,9 +75,8 @@
           :min="min ? startOfDay(min) : undefined"
           :max="max ? endOfDay(max) : undefined"
           v-bind="datePickerProps"
-          :show-adjacent-months="true"
         >
-          <template v-slot:actions>
+          <template v-slot:actions v-if="showTodayButton">
             <v-btn @click="setToday" :disabled="!isTodayInRange"> Today </v-btn>
             <v-spacer />
           </template>
@@ -232,6 +231,9 @@ const props = withDefaults(
     allowedDates?: null | Date[] | ((date: Date) => boolean);
     // Object containing extra props to pass through to `v-date-picker`.
     datePickerProps?: any;
+    /** Determines whether the 'Today' button is displayed in the date picker actions.
+     * When enabled, the 'Today' button allows users to quickly select the current date. */
+    showTodayButton?: boolean;
   }>(),
   { closeOnDatePicked: null }
 );

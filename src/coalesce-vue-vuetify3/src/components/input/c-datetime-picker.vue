@@ -77,7 +77,7 @@
           v-bind="datePickerProps"
         >
           <template v-slot:actions v-if="showTodayButton">
-            <v-btn @click="setToday" :disabled="!isTodayInRange"> Today </v-btn>
+            <v-btn @click="setToday" :disabled="!isDateAllowed(new Date())"> Today </v-btn>
             <v-spacer />
           </template>
         </v-date-picker>
@@ -386,11 +386,6 @@ const showTime = computed(() => {
   );
 });
 
-const isTodayInRange = computed(() => {
-  const today = getToday();
-  return isDateAllowed(today);
-});
-
 function createDefaultDate() {
   const date = new Date();
   if (props.dateKind == "date") {
@@ -616,36 +611,8 @@ function isDateAllowed(date: Date) {
   return true;
 }
 
-function getToday() {
-  const now = new Date();
-  const today = startOfDay(now);
-
-  // Preserve existing time if it's set
-  if (internalValueZoned.value) {
-    const existingDate = internalValueZoned.value;
-
-    const newDate = set(today, {
-      hours: existingDate.getHours(),
-      minutes: existingDate.getMinutes(),
-      seconds: existingDate.getSeconds(),
-      milliseconds: existingDate.getMilliseconds(),
-    });
-
-    if (internalTimeZone.value) {
-      // Adjust for the specified time zone
-      return fromZonedTime(newDate, internalTimeZone.value);
-    } else {
-      // No time zone specified, use the new date as is
-      return newDate;
-    }
-  } else {
-    // No existing date/time, just set to start of today
-    return today;
-  }
-}
-
 function setToday() {
-  modelValue.value = getToday();
+  dateChanged(new Date())
 }
 
 function close() {

@@ -23,6 +23,7 @@
   <v-text-field
     v-else
     class="c-datetime-picker"
+    :class="{ 'today-btn': showTodayButton }"
     v-bind="inputBindAttrs"
     :rules="effectiveRules"
     :modelValue="internalTextValue == null ? displayedValue : internalTextValue"
@@ -77,7 +78,9 @@
           v-bind="datePickerProps"
         >
           <template v-slot:actions v-if="showTodayButton">
-            <v-btn @click="setToday" :disabled="!isDateAllowed(new Date())"> Today </v-btn>
+            <v-btn @click="setToday" :disabled="!isDateAllowed(new Date())">
+              Today
+            </v-btn>
             <v-spacer />
           </template>
         </v-date-picker>
@@ -112,6 +115,11 @@
       }
     }
   }
+
+  .today-btn .c-time-picker__column {
+    max-height: 365px;
+  }
+
   .v-date-picker {
     width: 300px;
     overflow-y: auto;
@@ -164,8 +172,6 @@ import {
   startOfDay,
   endOfDay,
   startOfHour,
-  set,
-  isWithinInterval,
 } from "date-fns";
 import { format, toZonedTime, fromZonedTime } from "date-fns-tz";
 import {
@@ -612,7 +618,7 @@ function isDateAllowed(date: Date) {
 }
 
 function setToday() {
-  dateChanged(new Date())
+  dateChanged(new Date());
 }
 
 function close() {

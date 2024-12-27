@@ -78,12 +78,8 @@
           :show-adjacent-months="true"
         >
           <template v-slot:actions>
-            <v-btn
-              @click="setToday"
-              :class="showTime ? '' : 'mr-10'"
-            >
-              Today
-            </v-btn>
+            <v-btn @click="setToday" :disabled="!isTodayInRange"> Today </v-btn>
+            <v-spacer />
           </template>
         </v-date-picker>
 
@@ -170,6 +166,7 @@ import {
   endOfDay,
   startOfHour,
   set,
+  isWithinInterval,
 } from "date-fns";
 import { format, toZonedTime, fromZonedTime } from "date-fns-tz";
 import {
@@ -387,6 +384,11 @@ const showTime = computed(() => {
   );
 });
 
+const isTodayInRange = computed(() => {
+  const today = getToday();
+  return isDateAllowed(today);
+});
+
 function createDefaultDate() {
   const date = new Date();
   if (props.dateKind == "date") {
@@ -545,31 +547,20 @@ function dateChanged(input: unknown) {
 
 function emitInput(value: Date | null) {
   if (value) {
-    if (props.allowedDates) {
-      // With validation of allowedDates, we have to just return early without emitting
-      // since there's no logic we can apply to clamp the date to a valid date.
-
-      if (
-        Array.isArray(props.allowedDates) &&
-        !props.allowedDates.includes(startOfDay(value))
-      ) {
-        error.value.push("The selected date is not allowed.");
-        return;
-      } else if (
-        typeof props.allowedDates == "function" &&
-        !props.allowedDates(value)
-      ) {
-        error.value.push("The selected date is not allowed.");
-        return;
-      }
-    }
-
+    // Clamp value within min and max bounds
     if (props.min && value.valueOf() < props.min.valueOf()) {
       value = props.min;
     }
 
     if (props.max && value.valueOf() > props.max.valueOf()) {
       value = props.max;
+    }
+
+    if (!isDateAllowed(value)) {
+      // With validation of allowedDates, we have to just return early without emitting
+      // since there's no logic we can apply to clamp the date to a valid date.
+      error.value.push("The selected date is not allowed.");
+      return;
     }
 
     if (props.step) {
@@ -594,7 +585,36 @@ function emitInput(value: Date | null) {
   }
 }
 
-function setToday() {
+function isDateAllowed(date: Date) {
+  if (!date) return false;
+
+  const minDate = props.min ? startOfDay(props.min) : null;
+  const maxDate = props.max ? endOfDay(props.max) : null;
+
+  // Check min and max constraints
+  if (minDate && date < minDate) return false;
+  if (maxDate && date > maxDate) return false;
+
+  // Check allowedDates array or function
+  if (props.allowedDates) {
+    if (
+      Array.isArray(props.allowedDates) &&
+      !props.allowedDates.some(
+        (allowedDate) =>
+          startOfDay(allowedDate).getTime() === startOfDay(date).getTime()
+      )
+    ) {
+      return false;
+    }
+    if (typeof props.allowedDates === "function" && !props.allowedDates(date)) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+function getToday() {
   const now = new Date();
   const today = startOfDay(now);
 
@@ -611,15 +631,19 @@ function setToday() {
 
     if (internalTimeZone.value) {
       // Adjust for the specified time zone
-      modelValue.value = fromZonedTime(newDate, internalTimeZone.value);
+      return fromZonedTime(newDate, internalTimeZone.value);
     } else {
       // No time zone specified, use the new date as is
-      modelValue.value = newDate;
+      return newDate;
     }
   } else {
     // No existing date/time, just set to start of today
-    modelValue.value = today;
+    return today;
   }
+}
+
+function setToday() {
+  modelValue.value = getToday();
 }
 
 function close() {

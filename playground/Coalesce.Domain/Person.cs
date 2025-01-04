@@ -335,9 +335,10 @@ namespace Coalesce.Domain
         }
 
         [Coalesce, DefaultDataSource]
-        public class WithoutCases : StandardDataSource<Person, AppDbContext>
+        public class WithoutCases(CrudContext<AppDbContext> context) : StandardDataSource<Person, AppDbContext>(context)
         {
-            public WithoutCases(CrudContext<AppDbContext> context) : base(context) { }
+            [Coalesce]
+            public PersonCriteria? PersonCriteria { get; set; }
 
             public override IQueryable<Person> GetQuery(IDataSourceParameters parameters)
                 //=> Db.People.Include(p => p.Company);

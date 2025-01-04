@@ -419,6 +419,12 @@ export namespace Person {
     
     export class WithoutCases implements DataSource<typeof metadata.Person.dataSources.withoutCases> {
       readonly $metadata = metadata.Person.dataSources.withoutCases
+      personCriteria: PersonCriteria | null = null
+      
+      constructor(params?: Omit<Partial<WithoutCases>, '$metadata'>) {
+        if (params) Object.assign(this, params);
+        return reactiveDataSource(this);
+      }
     }
   }
 }

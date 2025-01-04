@@ -1962,6 +1962,13 @@ export const Person = domain.types.Person = {
       displayName: "Without Cases",
       isDefault: true,
       props: {
+        personCriteria: {
+          name: "personCriteria",
+          displayName: "Person Criteria",
+          type: "object",
+          get typeDef() { return (domain.types.PersonCriteria as ObjectType & { name: "PersonCriteria" }) },
+          role: "value",
+        },
       },
     },
   },

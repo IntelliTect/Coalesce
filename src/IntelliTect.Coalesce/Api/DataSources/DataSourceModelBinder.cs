@@ -9,6 +9,13 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Mvc;
+using System.Text.Json;
+using Microsoft.AspNetCore.Mvc.Formatters;
+using System.Collections;
+using IntelliTect.Coalesce.Mapping;
 
 namespace IntelliTect.Coalesce.Api.DataSources
 {
@@ -68,8 +75,117 @@ namespace IntelliTect.Coalesce.Api.DataSources
             var desiredPropertyViewModels = 
                 new ReflectionTypeViewModel(dataSourceType).ClassViewModel!.DataSourceParameters;
 
+            List<PropertyViewModel> modelBinderProps = new();
+            CrudContext? crudContext = null;
+            JsonOptions? jsonOptions = null;
+            foreach (var prop in desiredPropertyViewModels)
+            {
+                var propType = prop.Type;
+                string queryParamName = bindingContext.ModelName + "." + prop.Name;
+
+                if (
+                    bindingContext.ValueProvider.GetValue(queryParamName) is { Length: 1 } result &&
+                    result.Values is [string { Length: > 1 } str] &&
+                    (str[0] switch
+                    {
+                        '{' => propType.IsPOCO,
+                        '[' => propType.IsCollection,
+                        _ => false
+                    })
+                )
+                {
+                    jsonOptions ??= bindingContext.HttpContext.RequestServices.GetService<IOptions<JsonOptions>>()?.Value ?? new JsonOptions();
+
+                    // TODO: Apply model validation?
+                    // TODO: Add tests
+                    // TODO: Client support
+
+                    try
+                    {
+                        Type deserializeTarget = prop.PropertyInfo.PropertyType;
+                        if (propType.PureType.ClassViewModel is ClassViewModel pureTypeCvm && !pureTypeCvm.IsCustomDto)
+                        {
+                            crudContext ??= bindingContext.HttpContext.RequestServices.GetRequiredService<CrudContext>();
+
+                            var entityTypeViewModel = pureTypeCvm.BaseViewModel;
+                            var dtoClassViewModel = crudContext.ReflectionRepository.GeneratedParameterDtos[entityTypeViewModel];
+
+                            deserializeTarget = dtoClassViewModel.Type.TypeInfo;
+                            var mappingContext = new MappingContext(crudContext);
+                            if (propType.IsCollection)
+                            {
+                                deserializeTarget = typeof(List<>).MakeGenericType(deserializeTarget);
+
+                                object? value = JsonSerializer.Deserialize(str, deserializeTarget, jsonOptions.JsonSerializerOptions);
+                                if (value is IList values)
+                                {
+                                    IList results = (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(propType.TypeInfo))!;
+                                    foreach (var dto in values)
+                                    {
+                                        object model = (dto as dynamic).MapToNew(mappingContext);
+                                        results.Add(model);
+                                    }
+                                    if (propType.IsArray)
+                                    {
+                                        Array array = Array.CreateInstance(propType.TypeInfo, results.Count);
+                                        results.GetType().GetMethod("CopyTo", [array.GetType()])!.Invoke(results, [array]);
+
+                                        prop.PropertyInfo.SetValue(dataSource, array);
+                                    }
+                                    else
+                                    {
+                                        prop.PropertyInfo.SetValue(dataSource, results);
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                object? dto = JsonSerializer.Deserialize(str, deserializeTarget, jsonOptions.JsonSerializerOptions);
+                                object? model = dto == null ? null : ((dynamic)dto).MapToNew(mappingContext);
+                                prop.PropertyInfo.SetValue(dataSource, model);
+                            }
+                        }
+                        else
+                        {
+                            object? value = JsonSerializer.Deserialize(str, deserializeTarget, jsonOptions.JsonSerializerOptions);
+                            prop.PropertyInfo.SetValue(dataSource, value);
+                        }
+                    }
+                    // This catch logic from 
+                    // https://github.com/dotnet/aspnetcore/blob/c096dbbbe652f03be926502d790eb499682eea13/src/Mvc/Mvc.Core/src/Formatters/SystemTextJsonInputFormatter.cs#L113
+                    catch (JsonException jsonException)
+                    {
+                        var path = jsonException.Path ?? string.Empty;
+                        path = queryParamName + '.' + path;
+
+                        Exception modelStateException = jsonOptions.AllowInputFormatterExceptionMessages 
+                            ? new InputFormatterException(jsonException.Message, jsonException) 
+                            : jsonException;
+
+                        bindingContext.ModelState.TryAddModelError(
+                            path, 
+                            modelStateException, 
+                            bindingContext.ModelMetadata.GetMetadataForProperty(dataSourceType, prop.Name));
+                    }
+                    catch (Exception exception) when (exception is FormatException || exception is OverflowException)
+                    {
+                        // The code in System.Text.Json never throws these exceptions. However a custom converter could produce these errors for instance when
+                        // parsing a value. These error messages are considered safe to report to users using ModelState.
+
+                        bindingContext.ModelState.TryAddModelError(string.Empty,
+                            exception, 
+                            bindingContext.ModelMetadata.GetMetadataForProperty(dataSourceType, prop.Name));
+                    }
+
+                }
+                else
+                {
+                    modelBinderProps.Add(prop);
+                }
+            }
+
             // Get the ASP.NET MVC metadata objects for these properties.
-            var desiredPropertiesMetadata = desiredPropertyViewModels
+            var desiredPropertiesMetadata = modelBinderProps
                 .Select(propViewModel => bindingContext.ModelMetadata.GetMetadataForProperty(dataSourceType, propViewModel.Name))
                 .ToList();
 

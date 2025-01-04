@@ -170,7 +170,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             .Where(p =>
                 !p.IsInternalUse && p.HasPublicSetter && p.HasAttribute<CoalesceAttribute>()
                 // These are the only supported types, for now
-                && (p.PureType.IsPrimitive || p.PureType.IsDateOrTime)
+                && (p.PureType.IsPrimitive || p.PureType.IsDateOrTime || p.PureType.IsPOCO)
             );
 
         /// <summary>

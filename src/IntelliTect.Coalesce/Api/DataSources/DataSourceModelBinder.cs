@@ -72,13 +72,18 @@ namespace IntelliTect.Coalesce.Api.DataSources
 
 
             // From our concrete dataSource, figure out which properties on it are injectable parameters.
-            var desiredPropertyViewModels = 
-                new ReflectionTypeViewModel(dataSourceType).ClassViewModel!.DataSourceParameters;
+            var propsToBind = new ReflectionTypeViewModel(dataSourceType)
+                .ClassViewModel!.DataSourceParameters
+                .Select(propViewModel => (
+                    PropViewModel: propViewModel, 
+                    BindingMeta: bindingContext.ModelMetadata.GetMetadataForProperty(dataSourceType, propViewModel.Name)
+                ))
+                .ToList();
 
-            List<PropertyViewModel> modelBinderProps = new();
+            List<ModelMetadata> modelBinderProps = new();
             CrudContext? crudContext = null;
             JsonOptions? jsonOptions = null;
-            foreach (var prop in desiredPropertyViewModels)
+            foreach (var (prop, bindingMeta) in propsToBind)
             {
                 var propType = prop.Type;
                 string queryParamName = bindingContext.ModelName + "." + prop.Name;
@@ -95,10 +100,6 @@ namespace IntelliTect.Coalesce.Api.DataSources
                 )
                 {
                     jsonOptions ??= bindingContext.HttpContext.RequestServices.GetService<IOptions<JsonOptions>>()?.Value ?? new JsonOptions();
-
-                    // TODO: Apply model validation?
-                    // TODO: Add tests
-                    // TODO: Client support
 
                     try
                     {
@@ -119,7 +120,7 @@ namespace IntelliTect.Coalesce.Api.DataSources
                                 object? value = JsonSerializer.Deserialize(str, deserializeTarget, jsonOptions.JsonSerializerOptions);
                                 if (value is IList values)
                                 {
-                                    IList results = (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(propType.TypeInfo))!;
+                                    IList results = (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(propType.PureType.TypeInfo))!;
                                     foreach (var dto in values)
                                     {
                                         object model = (dto as dynamic).MapToNew(mappingContext);
@@ -127,9 +128,8 @@ namespace IntelliTect.Coalesce.Api.DataSources
                                     }
                                     if (propType.IsArray)
                                     {
-                                        Array array = Array.CreateInstance(propType.TypeInfo, results.Count);
+                                        Array array = Array.CreateInstance(propType.PureType.TypeInfo, results.Count);
                                         results.GetType().GetMethod("CopyTo", [array.GetType()])!.Invoke(results, [array]);
-
                                         prop.PropertyInfo.SetValue(dataSource, array);
                                     }
                                     else
@@ -180,26 +180,21 @@ namespace IntelliTect.Coalesce.Api.DataSources
                 }
                 else
                 {
-                    modelBinderProps.Add(prop);
+                    modelBinderProps.Add(bindingMeta);
                 }
             }
-
-            // Get the ASP.NET MVC metadata objects for these properties.
-            var desiredPropertiesMetadata = modelBinderProps
-                .Select(propViewModel => bindingContext.ModelMetadata.GetMetadataForProperty(dataSourceType, propViewModel.Name))
-                .ToList();
 
             // Tell the validation stage that it should only perform validation 
             // on the specific properties which we are binding to (and not ALL properties on the dataSource).
             bindingContext.ValidationState[dataSource] = new ValidationStateEntry()
             {
-                Strategy = new SelectivePropertyComplexObjectValidationStrategy(desiredPropertiesMetadata)
+                Strategy = new SelectivePropertyComplexObjectValidationStrategy(propsToBind.Select(x => x.BindingMeta).ToList())
             };
 
 #pragma warning disable CS0618 // Type or member is obsolete:
             // Will keep using until ComplexTypeModelBinder is fully gone, 
             // in order to maintain compat with all targeted .NET versions.
-            var childBinder = new ComplexTypeModelBinder(desiredPropertiesMetadata.ToDictionary(
+            var childBinder = new ComplexTypeModelBinder(modelBinderProps.ToDictionary(
                 property => property,
                 property => modelBinderFactory.CreateBinder(new ModelBinderFactoryContext
                 {
@@ -224,7 +219,7 @@ namespace IntelliTect.Coalesce.Api.DataSources
                 bindingContext.ModelName,
                 dataSource))
             {
-                bindingContext.PropertyFilter = p => desiredPropertiesMetadata.Contains(p);
+                bindingContext.PropertyFilter = p => modelBinderProps.Contains(p);
 
                 // We call the private method "BindModelCoreAsync" here because
                 // "BindModelAsync" performs a check to see if we should bother instantiating the root model (our dataSource).
@@ -277,7 +272,7 @@ namespace IntelliTect.Coalesce.Api.DataSources
                 if (model == null) return Enumerable.Empty<ValidationEntry>().GetEnumerator();
 
                 return properties
-                    .Select(p => new ValidationEntry(p, ModelNames.CreatePropertyModelName(key, p.BinderModelName ?? p.PropertyName), model))
+                    .Select(p => new ValidationEntry(p, ModelNames.CreatePropertyModelName(key, p.BinderModelName ?? p.PropertyName), p.PropertyGetter(model)))
                     .GetEnumerator();
             }
         }

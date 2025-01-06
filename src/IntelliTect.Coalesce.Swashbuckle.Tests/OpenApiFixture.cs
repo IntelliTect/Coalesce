@@ -28,20 +28,7 @@ namespace IntelliTect.Coalesce.Swashbuckle.Tests
 
         public OpenApiFixture()
         {
-            var suite = new GenerationExecutor(
-                    new() { WebProject = new() { RootNamespace = "MyProject" } },
-                    Microsoft.Extensions.Logging.LogLevel.Information
-                )
-                .CreateRootGenerator<ApiOnlySuite>()
-                .WithModel(ReflectionRepositoryFactory.Symbol)
-                .WithOutputPath(".");
-
-            var compilation = CodeGenTestBase.GetCSharpCompilation(suite).Result;
-
-            using var ms = new MemoryStream();
-            EmitResult emitResult = compilation.Emit(ms);
-            Assert.True(emitResult.Success);
-            Assembly assembly = Assembly.Load(ms.ToArray());
+            Assembly assembly = CodeGenTestBase.WebAssembly.Value;
 
             var hostBuilder = new HostBuilder()
                 .ConfigureWebHost(webHost =>
@@ -89,21 +76,6 @@ namespace IntelliTect.Coalesce.Swashbuckle.Tests
             Assert.Empty(diagnostic.Errors);
             Assert.Empty(diagnostic.Warnings);
             return openApiDocument;
-        }
-
-        public class ApiOnlySuite : CompositeGenerator<ReflectionRepository>, IRootGenerator
-        {
-            public ApiOnlySuite(CompositeGeneratorServices services) : base(services) { }
-
-            public override IEnumerable<IGenerator> GetGenerators()
-            {
-                yield return Generator<IntelliTect.Coalesce.CodeGeneration.Api.Generators.Models>()
-                    .WithModel(Model)
-                    .AppendOutputPath("Models");
-
-                yield return Generator<Controllers>()
-                    .WithModel(Model);
-            }
         }
     }
 }

@@ -456,6 +456,16 @@ export namespace Person {
       }
     }
     
+    export class ParameterTestsSource implements DataSource<typeof metadata.Person.dataSources.parameterTestsSource> {
+      readonly $metadata = metadata.Person.dataSources.parameterTestsSource
+      personCriteria: PersonCriteria | null = null
+      
+      constructor(params?: Omit<Partial<ParameterTestsSource>, '$metadata'>) {
+        if (params) Object.assign(this, params);
+        return reactiveDataSource(this);
+      }
+    }
+    
     export class WithoutCases implements DataSource<typeof metadata.Person.dataSources.withoutCases> {
       readonly $metadata = metadata.Person.dataSources.withoutCases
     }
@@ -1024,6 +1034,34 @@ export class OutputOnlyExternalTypeWithRequiredEntityProp {
 }
 
 
+export interface PersonCriteria extends Model<typeof metadata.PersonCriteria> {
+  personIds: number[] | null
+  name: string | null
+  subCriteria: PersonCriteria[] | null
+  gender: Genders | null
+  date: Date | null
+}
+export class PersonCriteria {
+  
+  /** Mutates the input object and its descendents into a valid PersonCriteria implementation. */
+  static convert(data?: Partial<PersonCriteria>): PersonCriteria {
+    return convertToModel(data || {}, metadata.PersonCriteria) 
+  }
+  
+  /** Maps the input object and its descendents to a new, valid PersonCriteria implementation. */
+  static map(data?: Partial<PersonCriteria>): PersonCriteria {
+    return mapToModel(data || {}, metadata.PersonCriteria) 
+  }
+  
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.PersonCriteria; }
+  
+  /** Instantiate a new PersonCriteria, optionally basing it on the given data. */
+  constructor(data?: Partial<PersonCriteria> | {[k: string]: any}) {
+    Object.assign(this, PersonCriteria.map(data || {}));
+  }
+}
+
+
 export interface PositionalRecord extends Model<typeof metadata.PositionalRecord> {
   string: string | null
   num: number | null
@@ -1231,6 +1269,7 @@ declare module "coalesce-vue/lib/model" {
     OutputOnlyExternalTypeWithoutDefaultCtorWithInputMappableProperties: OutputOnlyExternalTypeWithoutDefaultCtorWithInputMappableProperties
     OutputOnlyExternalTypeWithRequiredEntityProp: OutputOnlyExternalTypeWithRequiredEntityProp
     Person: Person
+    PersonCriteria: PersonCriteria
     PositionalRecord: PositionalRecord
     Product: Product
     ReadOnlyEntityUsedAsMethodInput: ReadOnlyEntityUsedAsMethodInput

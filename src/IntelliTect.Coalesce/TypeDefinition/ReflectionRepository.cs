@@ -16,6 +16,7 @@ using System.Threading;
 using IntelliTect.Coalesce.Models;
 using System.Collections.ObjectModel;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace IntelliTect.Coalesce.TypeDefinition
 {
@@ -354,10 +355,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             {
                 foreach (var parameter in strategyType.ClassViewModel.DataSourceParameters)
                 {
-                    if (parameter.PureType.IsEnum)
-                    {
-                        _enums.Add(parameter.PureType.NullableValueUnderlyingType);
-                    }
+                    ConditionallyAddAndDiscoverTypesOn(parameter);
                 }
             }
 

@@ -23,7 +23,7 @@
 
       <v-spacer></v-spacer>
       <v-btn
-        v-if="!model.$isAutoSaveEnabled"
+        v-if="!model.$isAutoSaveEnabled && showContent"
         @click="model.$bulkSave()"
         title="Save"
         :color="isBulkSaveDirty ? 'success' : undefined"
@@ -175,7 +175,7 @@
       </c-loader-status>
     </v-card-text>
 
-    <v-card-actions v-if="canEdit">
+    <v-card-actions v-if="canEdit && showContent">
       <v-spacer></v-spacer>
       <v-btn
         v-if="!model.$isAutoSaveEnabled"

@@ -93,7 +93,7 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
 
         [DateType(DateTypeAttribute.DateTypes.DateOnly)]
         public DateTime? BirthDate { get; set; }
-        
+
         /// <summary>
         /// Calculated name of the person. eg., Mr. Michael Stokesbary.
         /// A concatenation of <see cref="Title"/>, <see cref="FirstName"/>, and <see cref="LastName"/>.
@@ -151,10 +151,10 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         /// <summary>
         /// Returns the user name
         /// </summary>
-        [Coalesce,Execute(Roles = RoleNames.Admin)]
+        [Coalesce, Execute(Roles = RoleNames.Admin)]
         public static string GetUser(ClaimsPrincipal user)
         {
-            if (user!= null && user.Identity != null) return user.Identity.Name;
+            if (user != null && user.Identity != null) return user.Identity.Name;
             return "Unknown";
         }
 
@@ -253,7 +253,49 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
     {
         public BorCPeople(CrudContext<AppDbContext> context) : base(context) { }
 
-        public override IQueryable<Person> GetQuery(IDataSourceParameters parameters) => 
+        public override IQueryable<Person> GetQuery(IDataSourceParameters parameters) =>
             Db.People.Where(f => f.LastName.StartsWith("B") || f.LastName.StartsWith("c"));
+    }
+
+
+    public class PersonCriteria
+    {
+        [Length(2, 5)]
+        public int[] PersonIds { get; set; }
+        public string Name { get; set; }
+        public PersonCriteria[] SubCriteria { get; set; }
+        public Person.Genders Gender { get; set; }
+        public DateTimeOffset Date { get; set; }
+        [Edit("Admin")]
+        public string AdminOnly { get; set; }
+    }
+
+    [Coalesce]
+    public class ParameterTestsSource(CrudContext<AppDbContext> context) : StandardDataSource<Person, AppDbContext>(context)
+    {
+        [Coalesce]
+        public PersonCriteria PersonCriterion { get; set; }
+
+        [Coalesce]
+        public PersonCriteria[] PersonCriteriaArray { get; set; }
+
+        [Coalesce]
+        public List<PersonCriteria> PersonCriteriaList { get; set; }
+
+        [Coalesce]
+        public ICollection<PersonCriteria> PersonCriteriaICollection { get; set; }
+
+        [Coalesce]
+        [Length(2, 5)]
+        public int[] IntArray { get; set; }
+
+        [Coalesce]
+        public List<int> IntList { get; set; }
+
+        [Coalesce]
+        public ICollection<int> IntICollection { get; set; }
+
+        [Coalesce]
+        public byte[] Bytes { get; set; }
     }
 }

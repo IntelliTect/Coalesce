@@ -169,8 +169,10 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public IEnumerable<PropertyViewModel> DataSourceParameters => Properties
             .Where(p =>
                 !p.IsInternalUse && p.HasPublicSetter && p.HasAttribute<CoalesceAttribute>()
-                // These are the only supported types, for now
-                && (p.PureType.IsPrimitive || p.PureType.IsDateOrTime)
+                && p.PureType.TsTypeKind 
+                    is not TypeDiscriminator.File 
+                    and not TypeDiscriminator.Void 
+                    and not TypeDiscriminator.Unknown
             );
 
         /// <summary>

@@ -263,7 +263,13 @@ export function objectToQueryString(
     items[items.length] =
       encodeURIComponent(key) +
       "=" +
-      encodeURIComponent(value == null ? "" : value);
+      encodeURIComponent(value == null ? "" : value)
+        // %2C - comma - is not reserved in query strings.
+        // Other characters here are JSON characters.
+        // Asp.net core seems to have no trouble at all taking these in un-encoded.
+        .replace(/%(2C|5B|5D|22|7B|7D|3A|20)/g, (str, hex) =>
+          String.fromCharCode(parseInt(hex, 16))
+        );
   };
 
   buildParams("", a, add);
@@ -299,7 +305,21 @@ function buildParams(
   add: (key: string, value: any) => void
 ) {
   var name;
-  if (obj instanceof Array) {
+
+  if (
+    prefix.startsWith("dataSource.") &&
+    (obj instanceof Array || typeof obj == "object") &&
+    obj
+  ) {
+    // Object and array data source parameters can be parsed as json by DataSourceModelBinder. Skip null and undefined values.
+    add(
+      prefix,
+      JSON.stringify(obj, (key, value) => {
+        if (value == null) return undefined;
+        return value;
+      })
+    );
+  } else if (obj instanceof Array) {
     var isScalarArray = obj.every(isScalarFormValue);
     if (obj.length == 0) {
       // The "count=0" doesn't /really/ do anything in the aspnetcore model binder.

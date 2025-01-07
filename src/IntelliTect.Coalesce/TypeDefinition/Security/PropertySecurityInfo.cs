@@ -218,7 +218,12 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 }
 
                 // If nothing was found recusively, use the API permissions of the type if it has a CRUD api.
-                if (p.EffectiveParent is { IsDbMappedType: true } or { IsStandaloneEntity: true })
+                if (p.EffectiveParent.Type.IsA(typeof(IDataSource<>)) && p.HasAttribute<CoalesceAttribute>())
+                {
+                    // Property is a data source parameter. 
+                    return false;
+                }
+                else if (p.EffectiveParent is { IsDbMappedType: true } or { IsStandaloneEntity: true })
                 {
                     return p.EffectiveParent.SecurityInfo.Create.NoAccess;
                 }

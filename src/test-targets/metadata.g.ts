@@ -2728,6 +2728,102 @@ export const Person = domain.types.Person = {
         },
       },
     },
+    parameterTestsSource: {
+      type: "dataSource",
+      name: "ParameterTestsSource" as const,
+      displayName: "Parameter Tests Source",
+      props: {
+        personCriterion: {
+          name: "personCriterion",
+          displayName: "Person Criterion",
+          type: "object",
+          get typeDef() { return (domain.types.PersonCriteria as ObjectType & { name: "PersonCriteria" }) },
+          role: "value",
+        },
+        personCriteriaArray: {
+          name: "personCriteriaArray",
+          displayName: "Person Criteria Array",
+          type: "collection",
+          itemType: {
+            name: "$collectionItem",
+            displayName: "",
+            role: "value",
+            type: "object",
+            get typeDef() { return (domain.types.PersonCriteria as ObjectType & { name: "PersonCriteria" }) },
+          },
+          role: "value",
+        },
+        personCriteriaList: {
+          name: "personCriteriaList",
+          displayName: "Person Criteria List",
+          type: "collection",
+          itemType: {
+            name: "$collectionItem",
+            displayName: "",
+            role: "value",
+            type: "object",
+            get typeDef() { return (domain.types.PersonCriteria as ObjectType & { name: "PersonCriteria" }) },
+          },
+          role: "value",
+        },
+        personCriteriaICollection: {
+          name: "personCriteriaICollection",
+          displayName: "Person Criteria I Collection",
+          type: "collection",
+          itemType: {
+            name: "$collectionItem",
+            displayName: "",
+            role: "value",
+            type: "object",
+            get typeDef() { return (domain.types.PersonCriteria as ObjectType & { name: "PersonCriteria" }) },
+          },
+          role: "value",
+        },
+        intArray: {
+          name: "intArray",
+          displayName: "Int Array",
+          type: "collection",
+          itemType: {
+            name: "$collectionItem",
+            displayName: "",
+            role: "value",
+            type: "number",
+          },
+          role: "value",
+        },
+        intList: {
+          name: "intList",
+          displayName: "Int List",
+          type: "collection",
+          itemType: {
+            name: "$collectionItem",
+            displayName: "",
+            role: "value",
+            type: "number",
+          },
+          role: "value",
+        },
+        intICollection: {
+          name: "intICollection",
+          displayName: "Int I Collection",
+          type: "collection",
+          itemType: {
+            name: "$collectionItem",
+            displayName: "",
+            role: "value",
+            type: "number",
+          },
+          role: "value",
+        },
+        bytes: {
+          name: "bytes",
+          displayName: "Bytes",
+          type: "binary",
+          base64: true,
+          role: "value",
+        },
+      },
+    },
     withoutCases: {
       type: "dataSource",
       name: "WithoutCases" as const,
@@ -3838,6 +3934,59 @@ export const OutputOnlyExternalTypeWithRequiredEntityProp = domain.types.OutputO
     },
   },
 }
+export const PersonCriteria = domain.types.PersonCriteria = {
+  name: "PersonCriteria" as const,
+  displayName: "Person Criteria",
+  get displayProp() { return this.props.name }, 
+  type: "object",
+  props: {
+    personIds: {
+      name: "personIds",
+      displayName: "Person Ids",
+      type: "collection",
+      itemType: {
+        name: "$collectionItem",
+        displayName: "",
+        role: "value",
+        type: "number",
+      },
+      role: "value",
+    },
+    name: {
+      name: "name",
+      displayName: "Name",
+      type: "string",
+      role: "value",
+    },
+    subCriteria: {
+      name: "subCriteria",
+      displayName: "Sub Criteria",
+      type: "collection",
+      itemType: {
+        name: "$collectionItem",
+        displayName: "",
+        role: "value",
+        type: "object",
+        get typeDef() { return (domain.types.PersonCriteria as ObjectType & { name: "PersonCriteria" }) },
+      },
+      role: "value",
+    },
+    gender: {
+      name: "gender",
+      displayName: "Gender",
+      type: "enum",
+      get typeDef() { return Genders },
+      role: "value",
+    },
+    date: {
+      name: "date",
+      displayName: "Date",
+      type: "date",
+      dateKind: "datetime",
+      role: "value",
+    },
+  },
+}
 export const PositionalRecord = domain.types.PositionalRecord = {
   name: "PositionalRecord" as const,
   displayName: "Positional Record",
@@ -4084,6 +4233,7 @@ interface AppDomain extends Domain {
     OutputOnlyExternalTypeWithoutDefaultCtorWithInputMappableProperties: typeof OutputOnlyExternalTypeWithoutDefaultCtorWithInputMappableProperties
     OutputOnlyExternalTypeWithRequiredEntityProp: typeof OutputOnlyExternalTypeWithRequiredEntityProp
     Person: typeof Person
+    PersonCriteria: typeof PersonCriteria
     PositionalRecord: typeof PositionalRecord
     Product: typeof Product
     ReadOnlyEntityUsedAsMethodInput: typeof ReadOnlyEntityUsedAsMethodInput

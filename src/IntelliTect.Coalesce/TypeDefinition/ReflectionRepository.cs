@@ -1,21 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Linq.Expressions;
-using Microsoft.EntityFrameworkCore;
-using System.Reflection;
-using Microsoft.CodeAnalysis;
-using IntelliTect.Coalesce.DataAnnotations;
-using IntelliTect.Coalesce.Utilities;
-using System.Collections.Concurrent;
+﻿using IntelliTect.Coalesce.Models;
 using IntelliTect.Coalesce.TypeUsage;
-using IntelliTect.Coalesce.Api;
-using System.Threading;
-using IntelliTect.Coalesce.Models;
+using IntelliTect.Coalesce.Utilities;
+using Microsoft.CodeAnalysis;
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
 
 namespace IntelliTect.Coalesce.TypeDefinition
 {
@@ -354,10 +348,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             {
                 foreach (var parameter in strategyType.ClassViewModel.DataSourceParameters)
                 {
-                    if (parameter.PureType.IsEnum)
-                    {
-                        _enums.Add(parameter.PureType.NullableValueUnderlyingType);
-                    }
+                    ConditionallyAddAndDiscoverTypesOn(parameter);
                 }
             }
 

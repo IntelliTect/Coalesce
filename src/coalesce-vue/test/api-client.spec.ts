@@ -27,7 +27,13 @@ import {
   ComplexModelViewModel,
   PersonListViewModel,
 } from "@test-targets/viewmodels.g";
-import { ExternalParent, Person, Statuses } from "@test-targets/models.g";
+import {
+  ExternalParent,
+  Genders,
+  Person,
+  PersonCriteria,
+  Statuses,
+} from "@test-targets/models.g";
 
 function makeAdapterMock(result?: any) {
   return makeEndpointMock<AxiosRequestConfig>(result);
@@ -427,11 +433,40 @@ describe("$invoke", () => {
     );
     await personList.$load();
 
-    // NOTE: This ensure that the `dataSource.allowedStatuses[]=` syntax is not used,
-    // which aspnetcore doesn't support.
+    expect(AxiosClient.getUri(mock.mock.lastCall![0])).toBe(
+      "/api/Person/list?page=1&pageSize=10&dataSource=NamesStartingWithAWithCases&dataSource.allowedStatuses=[0,1]"
+    );
+  });
+
+  test("data source object parameter", async () => {
+    const mock = mockEndpoint(
+      "/Person/list",
+      vitest.fn((req: AxiosRequestConfig) => {
+        return {
+          wasSuccessful: true,
+          list: [],
+        };
+      })
+    );
+
+    const personList = new PersonListViewModel();
+    personList.$dataSource = new Person.DataSources.ParameterTestsSource({
+      personCriterion: new PersonCriteria({
+        gender: Genders.Female,
+        name: "Grace",
+        personIds: [1, 2, 3],
+        subCriteria: [
+          new PersonCriteria({
+            name: "Bob Newbie",
+            personIds: [],
+          }),
+        ],
+      }),
+    });
+    await personList.$load();
 
     expect(AxiosClient.getUri(mock.mock.lastCall![0])).toBe(
-      "/api/Person/list?page=1&pageSize=10&dataSource=NamesStartingWithAWithCases&dataSource.allowedStatuses=0&dataSource.allowedStatuses=1"
+      `/api/Person/list?page=1&pageSize=10&dataSource=ParameterTestsSource&dataSource.personCriterion={"personIds":[1,2,3],"name":"Grace","subCriteria":[{"personIds":[],"name":"Bob Newbie"}],"gender":2}`
     );
   });
 

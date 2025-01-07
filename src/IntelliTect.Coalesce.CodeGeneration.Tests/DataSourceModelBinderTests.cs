@@ -23,6 +23,8 @@ using Xunit;
 using IntelliTect.Coalesce.Utilities;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using IntelliTect.Coalesce.Api.Controllers;
+using Microsoft.AspNetCore.Http;
+using System.Security.Claims;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Tests
 {
@@ -134,6 +136,16 @@ namespace IntelliTect.Coalesce.CodeGeneration.Tests
             Assert.Equal(
                 """{"wasSuccessful":false,"message":"dataSource.IntArray: The field IntArray must be a string or collection type with a minimum length of '2' and maximum length of '5'."}""",
                 await res.Content.ReadAsStringAsync());
+        }
+
+        [Fact]
+        public async Task Security_UsesSecurityFromDtos()
+        {
+            HttpClient client = GetClient();
+            var res = await client.GetStringAsync("""/test/test?dataSource=ParameterTestsSource&dataSource.PersonCriterion={"adminOnly":"bob"}""");
+
+            // Not in admin role, so `adminOnly` isn't received
+            Assert.Equal("""{"personCriterion":{"gender":0,"date":"0001-01-01T00:00:00+00:00"}}""", res);
         }
 
         private static HttpClient GetClient() => GetClient<TestController>();

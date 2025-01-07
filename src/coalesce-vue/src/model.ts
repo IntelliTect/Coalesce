@@ -188,6 +188,7 @@ export function parseValue(
 ): null | Uint8Array | string;
 export function parseValue(value: any, meta: ModelValue): null | object;
 export function parseValue(value: any, meta: ObjectValue): null | object;
+export function parseValue(value: any, meta: ClassType): null | object;
 export function parseValue(
   value: any,
   meta: PrimitiveValue
@@ -196,7 +197,7 @@ export function parseValue(value: any, meta: UnknownValue): null | unknown;
 export function parseValue(value: any[], meta: CollectionValue): Array<any>;
 export function parseValue(
   value: any,
-  meta: Value
+  meta: Value | ClassType
 ): null | string | number | boolean | object | Date | Array<any> | unknown {
   if (value == null) {
     return null;
@@ -240,15 +241,20 @@ export function parseValue(
       throw parseError(value, meta);
 
     case "collection":
-      if (
-        type === "string" &&
-        meta.itemType.type != "model" &&
-        meta.itemType.type != "object"
-      ) {
-        return value
-          .split(",")
-          .filter((v: any) => v)
-          .map((v: any) => parseValue(v, meta.itemType));
+      if (type === "string") {
+        if (value[0] === "[") {
+          return JSON.parse(value).map((v: any) =>
+            parseValue(v, meta.itemType)
+          );
+        } else if (
+          meta.itemType.type != "model" &&
+          meta.itemType.type != "object"
+        ) {
+          return value
+            .split(",")
+            .filter((v: any) => v)
+            .map((v: any) => parseValue(v, meta.itemType));
+        }
       }
 
       if (type !== "object" || !Array.isArray(value))
@@ -258,6 +264,13 @@ export function parseValue(
 
     case "model":
     case "object":
+      if (type === "string") {
+        if (value.length == 0) return {};
+        if (value[0] === "{") {
+          return JSON.parse(value);
+        }
+      }
+
       if (type !== "object" || Array.isArray(value))
         throw parseError(value, meta);
 
@@ -319,8 +332,7 @@ class ModelConversionVisitor extends Visitor<any, any[] | null, any | null> {
   ): null | Model<TMeta> {
     if (value == null) return null;
 
-    if (typeof value !== "object" || Array.isArray(value))
-      throw parseError(value, meta);
+    value = parseValue(value, meta);
 
     // Prevent infinite recursion on circular object graphs.
     if (this.objects.has(value))
@@ -1124,6 +1136,15 @@ export function bindToQueryString<T, TKey extends keyof T & string>(
         );
       }
 
+      function toString(v: any) {
+        if (typeof v === "object" && v && !(v instanceof Date)) {
+          return JSON.stringify(v, (key, value) => {
+            if (value == null) return undefined;
+            return value;
+          });
+        }
+        return v?.tostring();
+      }
       const newQuery = {
         ...//@ts-expect-error
         (vue.$router[coalescePendingQuery] || vue.$route.query),
@@ -1134,9 +1155,9 @@ export function bindToQueryString<T, TKey extends keyof T & string>(
             ? stringify(v)
             : // Use metadata to format the value if the obj has any.
             metadata?.params?.[key]
-            ? mapToDto(v, metadata.params[key])?.toString()
+            ? toString(mapToDto(v, metadata.params[key]))
             : metadata?.props?.[key]
-            ? mapToDto(v, metadata.props[key])?.toString()
+            ? toString(mapToDto(v, metadata.props[key]))
             : // TODO: Add $metadata to DataSourceParameters/FilterParameters/ListParameters, and then support that as well.
               // Fallback to .tostring()
               String(v) ?? undefined,

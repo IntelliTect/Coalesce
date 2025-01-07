@@ -451,7 +451,7 @@ describe("$invoke", () => {
 
     const personList = new PersonListViewModel();
     personList.$dataSource = new Person.DataSources.ParameterTestsSource({
-      personCriteria: new PersonCriteria({
+      personCriterion: new PersonCriteria({
         gender: Genders.Female,
         name: "Grace",
         personIds: [1, 2, 3],
@@ -466,7 +466,7 @@ describe("$invoke", () => {
     await personList.$load();
 
     expect(AxiosClient.getUri(mock.mock.lastCall![0])).toBe(
-      `/api/Person/list?page=1&pageSize=10&dataSource=ParameterTestsSource&dataSource.personCriteria={"personIds":[1,2,3],"name":"Grace","subCriteria":[{"personIds":[],"name":"Bob Newbie"}],"gender":2}`
+      `/api/Person/list?page=1&pageSize=10&dataSource=ParameterTestsSource&dataSource.personCriterion={"personIds":[1,2,3],"name":"Grace","subCriteria":[{"personIds":[],"name":"Bob Newbie"}],"gender":2}`
     );
   });
 

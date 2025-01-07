@@ -458,7 +458,14 @@ export namespace Person {
     
     export class ParameterTestsSource implements DataSource<typeof metadata.Person.dataSources.parameterTestsSource> {
       readonly $metadata = metadata.Person.dataSources.parameterTestsSource
-      personCriteria: PersonCriteria | null = null
+      personCriterion: PersonCriteria | null = null
+      personCriteriaArray: PersonCriteria[] | null = null
+      personCriteriaList: PersonCriteria[] | null = null
+      personCriteriaICollection: PersonCriteria[] | null = null
+      intArray: number[] | null = null
+      intList: number[] | null = null
+      intICollection: number[] | null = null
+      bytes: string | null = null
       
       constructor(params?: Omit<Partial<ParameterTestsSource>, '$metadata'>) {
         if (params) Object.assign(this, params);

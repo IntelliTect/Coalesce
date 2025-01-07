@@ -262,7 +262,6 @@ namespace IntelliTect.Coalesce.Api.DataSources
                 this.properties = properties;
             }
 
-
             /// <inheritdoc />
             public IEnumerator<ValidationEntry> GetChildren(
                 ModelMetadata metadata,
@@ -272,7 +271,10 @@ namespace IntelliTect.Coalesce.Api.DataSources
                 if (model == null) return Enumerable.Empty<ValidationEntry>().GetEnumerator();
 
                 return properties
-                    .Select(p => new ValidationEntry(p, ModelNames.CreatePropertyModelName(key, p.BinderModelName ?? p.PropertyName), p.PropertyGetter(model)))
+                    .Select(p => new ValidationEntry(
+                        p, 
+                        ModelNames.CreatePropertyModelName(key, p.BinderModelName ?? p.PropertyName), 
+                        p.PropertyGetter!(model)))
                     .GetEnumerator();
             }
         }

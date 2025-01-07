@@ -76,12 +76,12 @@ list.$load(1);
 
 ## Standard Parameters
 
-All methods on `IDataSource<T>` take a parameter that contains all the client-specified parameters for things paging, searching, sorting, and filtering information. Almost all virtual methods on `StandardDataSource` are also passed the relevant set of parameters. 
+All methods on `IDataSource<T>` take a parameter that contains all the client-specified parameters for things paging, searching, sorting, and filtering information. Almost all virtual methods on `StandardDataSource` are also passed the relevant set of parameters. The parameters are contained in the `IDataSourceParameters` type or one of its derivatives, `IFilterParameters` (adds filtering and search parameters) or `IListParameters` (filters + pagination).
 
 
 ## Custom Parameters
 
-On any data source that you create, you may add additional properties annotated with `[Coalesce]` that will then be exposed as parameters to the client. These property parameters can be primitives (numeric types, strings, enums), dates (DateTime, DateTimeOffset, DateOnly, TimeOnly), and collections of the preceding types.
+On any data source that you create, you may add additional properties annotated with `[Coalesce]` that will then be exposed as parameters to the client. These property parameters can be any type supported by Coalesce, including primitives, dates, [Entity Models](/modeling/model-types/entities.md), [External Types](/modeling/model-types/external-types.md), or collections of any of these.
     
 ``` c#
 [Coalesce]

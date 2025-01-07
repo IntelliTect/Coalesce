@@ -266,6 +266,8 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         public PersonCriteria[] SubCriteria { get; set; }
         public Person.Genders Gender { get; set; }
         public DateTimeOffset Date { get; set; }
+        [Edit("Admin")]
+        public string AdminOnly { get; set; }
     }
 
     [Coalesce]

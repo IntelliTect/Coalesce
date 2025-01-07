@@ -13,7 +13,7 @@ import { bindToQueryString, VueInstance } from "../src";
 import { mount } from "@vue/test-utils";
 import { delay } from "../test/test-utils";
 import { reactive } from "vue";
-import { Person } from "../../test-targets/models.g";
+import { Person, PersonCriteria } from "../../test-targets/models.g";
 
 describe("bindToQueryString", () => {
   async function runTest(func: (v: VueInstance, router: Router) => void) {
@@ -115,7 +115,7 @@ describe("bindToQueryString", () => {
       bindToQueryString(v, dataSource, "allowedStatuses");
       dataSource.allowedStatuses = [1, 2];
       await delay(1);
-      expect(router.currentRoute.value.query.allowedStatuses).toBe("1,2");
+      expect(router.currentRoute.value.query.allowedStatuses).toBe("[1,2]");
 
       router.push("/?allowedStatuses=2,3");
       await delay(1);
@@ -124,6 +124,34 @@ describe("bindToQueryString", () => {
       router.push("/?allowedStatuses=");
       await delay(1);
       expect(dataSource.allowedStatuses).toStrictEqual([]);
+    });
+  });
+
+  test("bound to object", async () => {
+    const dataSource = reactive(new Person.DataSources.ParameterTestsSource());
+    await runTest(async (v, router) => {
+      bindToQueryString(v, dataSource, "personCriterion");
+      dataSource.personCriterion = new PersonCriteria({
+        name: "b&personCriterion=ob",
+        personIds: [1, 2],
+      });
+      await delay(1);
+      expect(router.currentRoute.value.query.personCriterion).toBe(
+        `{"personIds":[1,2],"name":"b&personCriterion=ob"}`
+      );
+
+      router.push(`/?personCriterion={"name":"bob2","personIds":[1,2,3]}`);
+      await delay(1);
+      expect(dataSource.personCriterion).toMatchObject(
+        new PersonCriteria({
+          name: "bob2",
+          personIds: [1, 2, 3],
+        })
+      );
+
+      router.push("/?personCriterion=");
+      await delay(1);
+      expect(dataSource.personCriterion).toMatchObject(new PersonCriteria({}));
     });
   });
 

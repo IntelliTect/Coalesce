@@ -319,7 +319,6 @@ function buildParams(
         return value;
       })
     );
-    debugger;
   } else if (obj instanceof Array) {
     var isScalarArray = obj.every(isScalarFormValue);
     if (obj.length == 0) {

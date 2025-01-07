@@ -1143,7 +1143,7 @@ export function bindToQueryString<T, TKey extends keyof T & string>(
             return value;
           });
         }
-        return v?.tostring();
+        return v?.toString();
       }
       const newQuery = {
         ...//@ts-expect-error
@@ -1159,7 +1159,7 @@ export function bindToQueryString<T, TKey extends keyof T & string>(
             : metadata?.props?.[key]
             ? toString(mapToDto(v, metadata.props[key]))
             : // TODO: Add $metadata to DataSourceParameters/FilterParameters/ListParameters, and then support that as well.
-              // Fallback to .tostring()
+              // Fallback to .toString()
               String(v) ?? undefined,
       };
 

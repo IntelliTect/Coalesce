@@ -281,6 +281,20 @@ describe("CInput", () => {
     expect(onUpdate).toHaveBeenCalledWith(new Date("1/3/2017"));
   });
 
+  test("collection navigation doesn't produce c-select", () => {
+    // Non many-to-many model collection navigation  props should not produce an input,
+    // so that they can fall back on their default slot (e.g. for c-admin-editor)
+
+    const model = new ComplexModelViewModel({});
+    const wrapper = mountApp(() => (
+      <CInput model={model} for="tests">
+        <div>Default Slot Content</div>
+      </CInput>
+    )).findComponent(CInput);
+
+    expect(wrapper.text()).toBe("Default Slot Content");
+  });
+
   describe("rules", () => {
     test("implicit from metadata", async () => {
       const model = new ComplexModelViewModel({ guid: "foo" });

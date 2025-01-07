@@ -280,7 +280,12 @@ function render() {
           emit("update:modelValue", v)
         );
         return h(CSelectManyToMany<any, any>, data, vuetifySlots);
-      } else if (valueMeta.itemType.type == "model") {
+      } else if (
+        valueMeta.itemType.type == "model" &&
+        valueMeta.role == "value"
+      ) {
+        // Plain (non-relational) collections of models.
+        // E.g. for method parameters.
         data.model = props.model;
         data.for = props.for;
         addHandler(data, "update:modelValue", (v: any) =>
@@ -288,6 +293,7 @@ function render() {
         );
         return h(CSelect<any>, data, vuetifySlots);
       } else if (
+        valueMeta.itemType.type != "model" &&
         valueMeta.itemType.type != "object" &&
         valueMeta.itemType.type != "enum" &&
         valueMeta.itemType.type != "file"
@@ -296,8 +302,6 @@ function render() {
           emit("update:modelValue", v)
         );
         return h(CSelectValues<any>, data, vuetifySlots);
-      } else {
-        // console.warn(`Unsupported collection type ${valueMeta.itemType.type} for v-input`)
       }
   }
 

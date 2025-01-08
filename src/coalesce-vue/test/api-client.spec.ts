@@ -11,6 +11,8 @@ import {
   type AxiosRequestConfig,
   type AxiosListResult,
   type ListResultPromise,
+  mapParamsToDto,
+  mapQueryToParams,
 } from "../src/api-client";
 import { getInternalInstance, IsVue2 } from "../src/util";
 import { delay, mountData, mockEndpoint } from "./test-utils";
@@ -1345,5 +1347,48 @@ describe("$makeCaller with args object", () => {
       expect(calls[1]).resolves.toBeFalsy();
       expect(calls[2]).resolves.toBeTruthy();
     });
+  });
+});
+
+describe("mapQueryToParams", () => {
+  test("round-trips", () => {
+    const params = new ListParameters();
+    params.page = 2;
+    params.pageSize = 3;
+    params.fields = ["test1", "test2"];
+    params.includes = "includes";
+    params.search = "needle";
+    params.filter = {
+      name: "bob",
+      int: "1",
+      bool: "true",
+    };
+    params.noCount = true;
+    params.orderBy = "orderBy";
+    params.orderByDescending = "orderByDesc";
+    params.dataSource = new Person.DataSources.ParameterTestsSource({
+      bytes: "SGVsbG8gV29ybGQ=",
+      intArray: [1, 2, 3],
+      personCriterion: new PersonCriteria({
+        gender: Genders.Female,
+        name: "Grace",
+      }),
+      personCriteriaArray: [
+        new PersonCriteria({
+          gender: Genders.Female,
+          name: "Grace",
+        }),
+      ],
+    });
+
+    const string = JSON.stringify(mapParamsToDto(params));
+    const parsed = mapQueryToParams(
+      JSON.parse(string),
+      ListParameters,
+      new Person().$metadata
+    );
+
+    expect(parsed).toMatchObject(params);
+    expect(string).toBe(JSON.stringify(mapParamsToDto(parsed)));
   });
 });

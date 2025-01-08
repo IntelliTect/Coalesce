@@ -264,6 +264,7 @@ export function parseValue(
 
     case "model":
     case "object":
+    case "dataSource":
       if (type === "string") {
         if (value.length == 0) return {};
         if (value[0] === "{") {

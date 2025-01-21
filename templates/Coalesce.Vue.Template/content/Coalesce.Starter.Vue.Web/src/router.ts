@@ -40,7 +40,6 @@ const router = createRouter({
     //#if OpenAPI
     {
       path: "/openapi",
-      props: true,
       component: () => import("./views/OpenAPI.vue"),
     },
     //#endif

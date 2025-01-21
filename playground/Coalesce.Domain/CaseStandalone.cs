@@ -1,7 +1,5 @@
 ﻿using IntelliTect.Coalesce;
-using Microsoft.EntityFrameworkCore;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace Coalesce.Domain
 {
@@ -15,7 +13,7 @@ namespace Coalesce.Domain
         [DefaultDataSource]
         public class DefaultSource(CrudContext<AppDbContext> context) : StandardDataSource<CaseStandalone, AppDbContext>(context)
         {
-            public override async Task<IQueryable<CaseStandalone>> GetQueryAsync(IDataSourceParameters parameters)
+            public override IQueryable<CaseStandalone> GetQuery(IDataSourceParameters parameters)
             {
                 return Db.Cases
                     .Select(c => new CaseStandalone

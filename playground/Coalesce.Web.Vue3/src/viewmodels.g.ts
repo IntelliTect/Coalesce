@@ -677,6 +677,17 @@ export class PersonListViewModel extends ListViewModel<$models.Person, $apiClien
     return methodWithOptionalEntityParameter
   }
   
+  public get methodWithExplicitlyInjectedDataSource() {
+    const methodWithExplicitlyInjectedDataSource = this.$apiClient.$makeCaller(
+      this.$metadata.methods.methodWithExplicitlyInjectedDataSource,
+      (c) => c.methodWithExplicitlyInjectedDataSource(),
+      () => ({}),
+      (c, args) => c.methodWithExplicitlyInjectedDataSource())
+    
+    Object.defineProperty(this, 'methodWithExplicitlyInjectedDataSource', {value: methodWithExplicitlyInjectedDataSource});
+    return methodWithExplicitlyInjectedDataSource
+  }
+  
   /** Gets people matching the criteria, paginated by parameter 'page'. */
   public get searchPeople() {
     const searchPeople = this.$apiClient.$makeCaller(

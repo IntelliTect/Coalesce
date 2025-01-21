@@ -1,4 +1,5 @@
 ﻿using IntelliTect.Coalesce.TypeDefinition;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
@@ -38,17 +39,25 @@ namespace IntelliTect.Coalesce.Api
         {
             var parameters = operation.ParameterDescriptions;
 
+            var standardCrudStrategyParameters = method.Parameters.Where(p =>
+                !p.HasAttribute<FromServicesAttribute>() && (
+                    p.Type.IsA(typeof(IBehaviors<>)) ||
+                    p.Type.IsA(typeof(IDataSource<>))
+                )
+            );
+
             // Remove crud strategy parameters, which are bound with a custom model binder
             // and can't meaningfully be represented by the API explorer.
             // We add them back in in CoalesceApiOperationFilter.
             // They break the new Microsoft.AspNetCore.OpenApi package in .NET 9
             // if we leave them present in the API descriptions.
-            foreach (var paramVm in method.Parameters.Where(p =>
-                p.Type.IsA(typeof(IBehaviors<>)) || 
-                p.Type.IsA(typeof(IDataSource<>))
-            ))
+            foreach (var paramVm in standardCrudStrategyParameters)
             {
-                parameters.Remove(parameters.Single(p => p.Name == paramVm.Name));
+                var matchingParam = parameters.SingleOrDefault(p => p.Name == paramVm.Name);
+                if (matchingParam is not null)
+                {
+                    parameters.Remove(matchingParam);
+                }
             }
 
             foreach (var paramVm in method.Parameters.Where(p => p.Type.IsA<IDataSourceParameters>()))
@@ -70,7 +79,7 @@ namespace IntelliTect.Coalesce.Api
                 }
             }
 
-            foreach (var paramVm in method.Parameters.Where(p => p.Type.IsA(typeof(IDataSource<>))))
+            foreach (var paramVm in standardCrudStrategyParameters.Where(p => p.Type.IsA(typeof(IDataSource<>))))
             {
                 var declaredFor =
                     paramVm.GetAttributeValue<DeclaredForAttribute>(a => a.DeclaredFor)

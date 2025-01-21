@@ -309,6 +309,15 @@ namespace Coalesce.Domain
             return person;
         }
 
+
+        [Coalesce, Execute]
+        public static Person? MethodWithExplicitlyInjectedDataSource(AppDbContext db, [Inject] Person.WithoutCases dataSource)
+        {
+            // This method is an ad-hoc test for CoalesceApiDescriptionProvider
+            // to check that it handles DS parameters that aren't bound with our custom model binder correctly.
+            return null;
+        }
+
         /// <summary>
         /// Gets people matching the criteria, paginated by parameter 'page'.
         /// </summary>

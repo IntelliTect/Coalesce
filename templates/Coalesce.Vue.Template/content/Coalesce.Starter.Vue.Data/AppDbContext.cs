@@ -119,7 +119,7 @@ public class AppDbContext
                     .ExcludeProperty<TrackingBase>(x => new { x.CreatedById, x.CreatedOn, x.ModifiedById, x.ModifiedOn })
 #endif
 #if Identity
-                    .Format<User>(x => x.PasswordHash, x => "<password changed>")
+                    .Format<User>(x => x.PasswordHash, x => "<password changed/rehashed>")
                     .Format<User>(x => x.SecurityStamp, x => "<stamp changed>")
                     .ExcludeProperty<User>(x => new { x.ConcurrencyStamp })
 #endif

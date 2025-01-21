@@ -45,6 +45,7 @@ services.AddCoalesce<AppDbContext>(c => c.Configure(o =>
     o.ValidateAttributesForMethods = true;
     o.ValidateAttributesForSaves = true;
 }));
+services.AddScoped<Person.WithoutCases>();
 
 services
     .AddMvc()

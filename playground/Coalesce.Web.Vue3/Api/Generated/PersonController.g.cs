@@ -968,6 +968,25 @@ namespace Coalesce.Web.Vue3.Api
         }
 
         /// <summary>
+        /// Method: MethodWithExplicitlyInjectedDataSource
+        /// </summary>
+        [HttpPost("MethodWithExplicitlyInjectedDataSource")]
+        [Authorize]
+        public virtual ItemResult<PersonResponse> MethodWithExplicitlyInjectedDataSource(
+            [FromServices] Coalesce.Domain.Person.WithoutCases dataSource)
+        {
+            IncludeTree includeTree = null;
+            var _mappingContext = new MappingContext(Context);
+            var _methodResult = Coalesce.Domain.Person.MethodWithExplicitlyInjectedDataSource(
+                Db,
+                dataSource
+            );
+            var _result = new ItemResult<PersonResponse>();
+            _result.Object = Mapper.MapToDto<Coalesce.Domain.Person, PersonResponse>(_methodResult, _mappingContext, includeTree);
+            return _result;
+        }
+
+        /// <summary>
         /// Method: SearchPeople
         /// </summary>
         [HttpPost("SearchPeople")]

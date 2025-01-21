@@ -1,3 +1,9 @@
+# 5.3.1
+
+## Fixes
+
+- Fix error thrown by `CoalesceApiDescriptionProvider` when a custom method on a model or service has an explicitly `[Inject]`ed data source parameter.
+
 # 5.3.0
 
 ## Features

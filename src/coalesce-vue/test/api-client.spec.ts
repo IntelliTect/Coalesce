@@ -213,7 +213,7 @@ describe("$invoke", () => {
     // The request payload should have only included the parameters we actually provided.
     // The others should have been omitted entirely.
     const req: AxiosRequestConfig = mock.mock.lastCall?.[0];
-    expect(req.data).toEqual("id=1&requiredInt=42");
+    expect(req.data).toEqual('{"id":1,"requiredInt":42}');
   });
 
   test("does not send null value type params as emptystrings", async () => {
@@ -258,7 +258,56 @@ describe("$invoke", () => {
     expect(mock.mock.calls[0][0]).toMatchObject({ params: { id: 1 } });
   });
 
-  test("passes single file as FormData", async () => {
+  test("passes file in method with only other scalar parameters as FormData", async () => {
+    // RATIONALE: File methods with only other scalar parameters can benefit from reduced request size
+    // by sending the file in multipart formdata since it requires no size-increasing encoding like base64.
+
+    // Since all other parameters are only simple scalar values
+
+    const mock = (AxiosClient.defaults.adapter = vitest.fn().mockResolvedValue(<
+      AxiosResponse<any>
+    >{
+      data: { wasSuccessful: true, object: "" },
+      status: 200,
+    }));
+
+    const methodMeta: ItemMethod = {
+      name: "test",
+      displayName: "",
+      httpMethod: "POST",
+      return: { displayName: "", name: "$return", type: "void", role: "value" },
+      transportType: "item",
+      params: {
+        id: { type: "number", role: "value", displayName: "", name: "id" },
+        file: { type: "file", role: "value", displayName: "", name: "file" },
+      },
+    };
+    const file = new File([new ArrayBuffer(1)], "fileName", {
+      type: "application/pdf",
+    });
+
+    const response = await new StudentApiClient().$invoke(methodMeta, {
+      id: 42,
+      file,
+    });
+
+    expect(mock).toBeCalledTimes(1);
+    const formData = mock.mock.calls[0][0].data as FormData;
+    expect(formData).toBeInstanceOf(FormData);
+    expect(formData.get("id")).toBe("42");
+    expect(formData.get("file")).toBe(file);
+  });
+
+  test("passes file in method with other complex parameters as JSON", async () => {
+    // RATIONALE: Methods with complex parameters might have a large number of key-value
+    // pairs to pass as form data. If we sent the request as multipart formdata,
+    // this makes the request VERY large and verbose in order to transport all the nested properties
+    // of the complex type parameters.
+
+    // If we instead send these as JSON, the file content takes up a bit more space as base64,
+    // but the overall request is simpler, and we also don't need to worry about
+    // all the strange idiosyncrasies with sending complex objects as form data.
+
     const mock = (AxiosClient.defaults.adapter = vitest.fn().mockResolvedValue(<
       AxiosResponse<any>
     >{
@@ -295,12 +344,9 @@ describe("$invoke", () => {
     });
 
     expect(mock).toBeCalledTimes(1);
-    const formData = mock.mock.calls[0][0].data as FormData;
-    expect(formData).toBeInstanceOf(FormData);
-    expect(formData.get("id")).toBe("42");
-    expect(formData.get("file")).toBe(file);
-    expect(formData.get("student[name]")).toBe("bob&bob=bob");
-    expect(formData.get("student[studentAdvisorId]")).toBe("");
+    expect(mock.mock.calls[0][0].data).toBe(
+      '{"id":42,"file":{"content":"AA==","contentType":"application/pdf","name":"fileName"},"student":{"name":"bob&bob=bob","studentAdvisorId":null}}'
+    );
   });
 
   test("passes file array as FormData", async () => {
@@ -356,7 +402,7 @@ describe("$invoke", () => {
     expect(formData.getAll("files")).toEqual([file1, file2]);
   });
 
-  test("passes Uint8Array as FormData", async () => {
+  test("passes Uint8Array as JSON", async () => {
     const mock = (AxiosClient.defaults.adapter = vitest.fn().mockResolvedValue(<
       AxiosResponse<any>
     >{
@@ -382,17 +428,7 @@ describe("$invoke", () => {
       bin,
     });
 
-    expect(mock).toBeCalledTimes(1);
-    const formData = mock.mock.calls[0][0].data as FormData;
-    expect(formData).toBeInstanceOf(FormData);
-    expect(formData.get("id")).toBe("42");
-
-    // This can only assert on size, not content,
-    // since jsdom's Blob/File classes don't properly implement the spec
-    // (https://w3c.github.io/FileAPI/#stream-method-algo).
-    // https://github.com/jsdom/jsdom/issues/2555.
-    // This is cast as File because FormData converts Blob to File.
-    expect((formData.get("bin") as File).size).toBe(3);
+    expect(mock.mock.calls[0][0].data).toBe('{"id":42,"bin":"ESIz"}');
   });
 
   test("POST passes null correctly", async () => {
@@ -413,7 +449,9 @@ describe("$invoke", () => {
       { fields: ["studentAdvisorId", "name"] }
     );
 
-    expect(mock.mock.calls[0][0].data).toBe("name=bob&studentAdvisorId=");
+    expect(mock.mock.calls[0][0].data).toBe(
+      '{"name":"bob","studentAdvisorId":null}'
+    );
   });
 
   test("data source collection parameter", async () => {

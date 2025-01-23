@@ -657,7 +657,11 @@ class MapToDtoVisitor extends Visitor<
       return parsed;
     }
 
-    throw new Error("Unexpected raw binary value in JSON context");
+    if (parsed instanceof Uint8Array) {
+      return btoa(String.fromCharCode(...value));
+    }
+
+    throw new Error("Unexpected data type in binary property");
   }
 
   protected visitPrimitiveValue(value: any, meta: PrimitiveValue) {

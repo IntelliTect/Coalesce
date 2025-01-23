@@ -420,6 +420,141 @@ export function getMessageForError(error: unknown): string {
   }
 }
 
+async function blobToBase64(blob: Blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve((reader.result as string).split(",")[1]); // Extract Base64 part
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
+async function blobToFileParameter(blob: Blob) {
+  return {
+    // Convert to match our C# FileParameter class
+    content: await blobToBase64(blob),
+    contentType: blob.type,
+    name: blob instanceof File ? blob.name : null,
+  };
+}
+
+/**
+ * Maps the given method parameters to values suitable for transport.
+ * @param method The method whose parameters need mapping
+ * @param params The values of the parameter to map
+ */
+function getRequestQuery<TMethod extends Method>(
+  method: TMethod,
+  params: ParamsObject<TMethod>
+) {
+  const formatted: {
+    [paramName: string]: ReturnType<typeof mapToDto> | File | Blob | Uint8Array;
+  } = {};
+  for (var paramName in method.params) {
+    const paramMeta = method.params[paramName];
+    const paramValue = params[paramName];
+
+    if (paramValue === undefined) continue;
+
+    if (
+      paramValue === null &&
+      (paramMeta.type == "number" ||
+        paramMeta.type == "date" ||
+        paramMeta.type == "enum" ||
+        paramMeta.type == "boolean")
+    ) {
+      // FormData idiosyncrasy workaround:
+      // Skip nulls for root value type params - https://github.com/IntelliTect/Coalesce/issues/464
+      continue;
+    }
+
+    formatted[paramName] = mapToDto(paramValue, paramMeta);
+  }
+  return formatted;
+}
+
+async function getRequestBody<TMethod extends Method>(
+  method: TMethod,
+  params: ParamsObject<TMethod>
+) {
+  // Prefer multipart form data when there's at least one file
+  // and all other parameters are non-complex.
+  // This allows files to be sent raw rather than using base64 in json.
+  const useMultipartFormData =
+    Object.values(method.params).some(
+      (p) => (p.type == "collection" ? p.itemType : p).type == "file"
+    ) &&
+    Object.values(method.params).every(
+      (p) =>
+        (p.type == "collection" ? p.itemType : p).type == "file" ||
+        (p.type != "collection" && p.type != "model" && p.type != "object")
+    );
+
+  if (useMultipartFormData) {
+    const mappedParams: { [paramName: string]: any } = {};
+    for (var name in method.params) {
+      const meta = method.params[name];
+      const value = params[name];
+
+      if (value === undefined) continue;
+
+      if (
+        value === null &&
+        (meta.type == "number" ||
+          meta.type == "date" ||
+          meta.type == "enum" ||
+          meta.type == "boolean")
+      ) {
+        // FormData idiosyncrasy workaround:
+        // Skip nulls for root value type params - https://github.com/IntelliTect/Coalesce/issues/464
+        continue;
+      }
+
+      const pureType = meta.type == "collection" ? meta.itemType : meta;
+      if (pureType.type == "file" || pureType.type == "binary") {
+        // Preserve top-level files and binary (and arrays of such) as their original format
+        mappedParams[name] = parseValue(value, meta);
+      } else {
+        mappedParams[name] = mapToDto(value, meta);
+      }
+    }
+
+    return objectToFormData(mappedParams);
+  } else {
+    // Send JSON.
+
+    const mappedParams: { [paramName: string]: any } = {};
+    for (var name in method.params) {
+      const meta = method.params[name];
+      let value = params[name] as any;
+
+      if (value === undefined) continue;
+
+      // Look for top-level files and file arrays.
+      // Files currently can't be nested any more deeply than that.
+      // We have to convert them to base64 ahead of time
+      // since the conversion is an async process.
+      const pureType = meta.type == "collection" ? meta.itemType : meta;
+      if (pureType.type == "file") {
+        if (value instanceof Blob) {
+          value = await blobToFileParameter(value);
+        } else if (value instanceof Array) {
+          for (let i = 0; i < value.length; i++) {
+            const inner = value[i];
+            if (inner instanceof Blob) {
+              value[i] = await blobToFileParameter(inner);
+            }
+          }
+        }
+        mappedParams[name] = value;
+      } else {
+        mappedParams[name] = mapToDto(value, meta);
+      }
+    }
+
+    return mappedParams;
+  }
+}
 export type AxiosItemResult<T> = AxiosResponse<ItemResult<T>>;
 export type AxiosListResult<T> = AxiosResponse<ListResult<T>>;
 export type ItemResultPromise<T> = Promise<AxiosResponse<ItemResult<T>>>;
@@ -480,6 +615,16 @@ type ListTransportTypeSpecifier<T extends ApiRoutedType = any> =
 type TransportTypeSpecifier<T extends ApiRoutedType = any> =
   | ItemTransportTypeSpecifier<T>
   | ListTransportTypeSpecifier<T>;
+
+type ResultType<
+  T extends TransportTypeSpecifier,
+  TResult,
+  TNonResult = never
+> = T extends ItemTransportTypeSpecifier
+  ? AxiosResponse<ItemResult<TResult>> | TNonResult
+  : T extends ListTransportTypeSpecifier
+  ? AxiosResponse<ListResult<TResult>> | TNonResult
+  : never;
 
 type ResultPromiseType<
   T extends TransportTypeSpecifier,
@@ -715,52 +860,20 @@ export class ApiClient<T extends ApiRoutedType> {
    * @param params The parameters to provide to the API method.
    * @param config A full `AxiosRequestConfig` to merge in.
    */
-  public $invoke<TMethod extends Method>(
+  public async $invoke<TMethod extends Method>(
     method: TMethod,
     params: ParamsObject<TMethod>,
     config?: AxiosRequestConfig,
     standardParameters?: DataSourceParameters
-  ): ResultPromiseType<
-    TMethod,
-    TypeDiscriminatorToType<TMethod["return"]["type"]>
+  ): Promise<
+    ResultType<TMethod, TypeDiscriminatorToType<TMethod["return"]["type"]>>
   > {
-    const mappedParams = this.$mapParams(method, params);
     const url = `/${this.$metadata.controllerRoute}/${method.name}`;
 
     let body: any;
     let query: any;
 
-    if (method.httpMethod != "GET" && method.httpMethod != "DELETE") {
-      // The HTTP method has a body.
-
-      query = undefined;
-
-      const formData = objectToFormData(mappedParams);
-      let hasFile = false;
-      formData.forEach((v) => (hasFile ||= v instanceof File));
-
-      if (hasFile) {
-        // If the endpoint has any files or raw binary, we need to use a FormData.
-        // (Blobs become Files when put into FormData, and we serialize UInt8Array into a Blob)
-        // This will form a multipart/form-data response.
-        body = formData;
-      } else if (method.json) {
-        // The server expects json for this method. Pass the object directly,
-        // which axios will serialize as json.
-        body = mappedParams;
-      } else {
-        // No top-level special values - just handle the params normally.
-        // This will form a application/x-www-form-urlencoded response.
-        body = objectToQueryString(mappedParams);
-      }
-    } else {
-      // The HTTP method has no body.
-
-      body = undefined;
-      query = mappedParams;
-    }
-
-    let headers = config?.headers;
+    let headers = config?.headers ?? {};
     if (standardParameters?.refResponse) {
       headers = {
         ...config?.headers,
@@ -769,6 +882,19 @@ export class ApiClient<T extends ApiRoutedType> {
           : ["application/json"],
       };
     }
+
+    if (method.httpMethod != "GET" && method.httpMethod != "DELETE") {
+      // The HTTP method has a body.
+
+      query = undefined;
+      body = await getRequestBody(method, params);
+    } else {
+      // The HTTP method has no body.
+
+      body = undefined;
+      query = getRequestQuery(method, params);
+    }
+
     let cacheKey = JSON.stringify(headers);
 
     const axiosRequest = <AxiosRequestConfig>{
@@ -932,53 +1058,6 @@ export class ApiClient<T extends ApiRoutedType> {
     } finally {
       this._observedRequests = old;
     }
-  }
-
-  /**
-   * Maps the given method parameters to values suitable for transport.
-   * @param method The method whose parameters need mapping
-   * @param params The values of the parameter to map
-   */
-  protected $mapParams(method: Method, params: { [paramName: string]: any }) {
-    const formatted: {
-      [paramName: string]:
-        | ReturnType<typeof mapToDto>
-        | File
-        | Blob
-        | Uint8Array;
-    } = {};
-    for (var paramName in method.params) {
-      const paramMeta = method.params[paramName];
-      const paramValue = params[paramName];
-
-      if (paramValue === undefined) continue;
-
-      if (
-        paramValue === null &&
-        method.name != "save" &&
-        (paramMeta.type == "number" ||
-          paramMeta.type == "date" ||
-          paramMeta.type == "enum" ||
-          paramMeta.type == "boolean")
-      ) {
-        // FormData idiosyncrasy workaround:
-        // Skip nulls for root value type params - https://github.com/IntelliTect/Coalesce/issues/464
-        // Only for custom methods, though, which pass individual top-level parameters.
-        // `/save` works differently by binding the entire form to the DTO, and all
-        // props on DTOs are nullable, which interpret "" as null just fine.
-        continue;
-      }
-
-      const pureType =
-        paramMeta.type == "collection" ? paramMeta.itemType : paramMeta;
-      if (pureType.type == "file" || pureType.type == "binary") {
-        // Preserve top-level files and binary (and arrays of such) as their original format
-        formatted[paramName] = parseValue(paramValue, paramMeta);
-      } else {
-        formatted[paramName] = mapToDto(paramValue, paramMeta);
-      }
-    }
-    return formatted;
   }
 }
 

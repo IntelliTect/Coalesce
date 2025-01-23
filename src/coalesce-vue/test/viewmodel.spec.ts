@@ -658,7 +658,7 @@ describe("ViewModel", () => {
       await student.$save();
 
       expect(saveEndpoint.mock.calls[0][0].data).toBe(
-        "name=bob&studentAdvisorId=7"
+        '{"name":"bob","studentAdvisorId":7}'
       );
 
       saveEndpoint.destroy();
@@ -689,7 +689,7 @@ describe("ViewModel", () => {
       await vm.$save();
 
       expect(saveEndpoint.mock.calls[0][0].data).toBe(
-        "complexModelId=1&intCollection.count=0&enumCollection.count=0"
+        '{"complexModelId":1,"intCollection":[],"enumCollection":[]}'
       );
 
       saveEndpoint.destroy();
@@ -713,7 +713,7 @@ describe("ViewModel", () => {
       vm.name = "bob";
       await vm.$save();
 
-      expect(saveEndpoint.mock.calls[0][0].data).toBe("name=bob");
+      expect(saveEndpoint.mock.calls[0][0].data).toBe('{"name":"bob"}');
 
       saveEndpoint.destroy();
     });
@@ -3071,7 +3071,7 @@ describe("ViewModel", () => {
       // The request payload should have only included the parameters we actually provided.
       // The others should have been omitted entirely.
       const req: AxiosRequestConfig = mock.mock.lastCall?.[0];
-      expect(req.data).toEqual("id=3&requiredInt=42");
+      expect(req.data).toBe('{"id":3,"requiredInt":42}');
     });
   });
 });

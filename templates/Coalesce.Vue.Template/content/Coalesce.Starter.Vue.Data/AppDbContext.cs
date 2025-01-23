@@ -170,8 +170,8 @@ public class AppDbContext
             // Fix index that doesn't account for tenanted roles
             e.Metadata.RemoveIndex(e.Metadata.GetIndexes().Where(i => i.Properties[0].Name == nameof(Role.NormalizedName)).Single());
             e.HasIndex(r => new { r.TenantId, r.NormalizedName }).IsUnique();
-#endif
 
+#endif
             e.HasMany<RoleClaim>()
                 .WithOne(rc => rc.Role)
                 .HasPrincipalKey(r => r.Id)
@@ -182,21 +182,32 @@ public class AppDbContext
 #endif
 
 #if Tenancy
-        // Setup tenancy model configuration. This should be after all other model configuration.
+        // Configure multi-tenancy. This MUST BE LAST.
+        ConfigureTenancy(builder);
+#endif
+    }
+
+#if Tenancy
+    private void ConfigureTenancy(ModelBuilder builder)
+    {
         foreach (var model in builder.Model
             .GetEntityTypes()
             .Where(e => e.ClrType.GetInterface(nameof(ITenanted)) != null)
             .ToList())
         {
             // Create the global query filter for the model that will restrict data to the current tenant.
-            var param = Expression.Parameter(model.ClrType);
-            model.SetQueryFilter(Expression.Lambda(
-                Expression.Equal(
-                    Expression.MakeMemberAccess(param, model.ClrType.GetProperty("TenantId")!),
-                    Expression.MakeMemberAccess(Expression.Constant(this), this.GetType().GetProperty("TenantIdOrThrow")!)
-                ),
-                param
-            ));
+            // A non-null `BaseType` indicates a concrete type in a TPH or TPT setup, which aren't allowed their own query filters.
+            if (model.BaseType is null)
+            {
+                var param = Expression.Parameter(model.ClrType);
+                model.SetQueryFilter(Expression.Lambda(
+                    Expression.Equal(
+                        Expression.MakeMemberAccess(param, model.ClrType.GetProperty("TenantId")!),
+                        Expression.MakeMemberAccess(Expression.Constant(this), this.GetType().GetProperty("TenantIdOrThrow")!)
+                    ),
+                    param
+                ));
+            }
 
             // Put the tenantID as the first part of each tenanted entity's PK.
 
@@ -225,7 +236,7 @@ public class AppDbContext
                     // See https://stackoverflow.com/questions/49592274/how-to-create-autoincrement-column-in-sqlite-using-ef-core
                     // So, do the next best thing and add a second FK to all relationships that includes the tenantID.
 
-                    var tenantedAk = model.AddKey(new[] { tenantIdProp, pkProp })!;
+                    var tenantedAk = model.AddKey([tenantIdProp, pkProp])!;
 
                     foreach (var fk in model.GetReferencingForeignKeys().ToList())
                     {
@@ -245,15 +256,19 @@ public class AppDbContext
                     // SQL Server:
 
                     // TenantID goes first, for clustering.
-                    var newPk = model.SetPrimaryKey(new[] { tenantIdProp, pkProp })!;
+                    var newPk = model.BaseType != null
+                        // A non-null `BaseType` indicates a concrete type in a TPH or TPT setup,
+                        // which can only inherit the PK from their base type.
+                        ? model.FindPrimaryKey()!
+                        : model.SetPrimaryKey([tenantIdProp, pkProp])!;
 
                     foreach (var fk in model.GetReferencingForeignKeys().ToList())
                     {
-                        fk.SetProperties(new[] {
+                        fk.SetProperties([
                             fk.DeclaringEntityType.FindProperty(nameof(ITenanted.TenantId))
                                 ?? throw new InvalidOperationException($"Foreign key from untenanted entity {fk.DeclaringEntityType} cannot reference tenanted principal {model}"),
                             fk.Properties.Single()
-                        }, newPk);
+                        ], newPk);
                     }
 
                     // Keep the old PK prop as an identity column if it previously was before we changed the PK.
@@ -261,10 +276,8 @@ public class AppDbContext
                 }
             }
         }
-#endif
     }
 
-#if Tenancy
     class TenantIdValueGenerator : ValueGenerator<string>
     {
         public override bool GeneratesTemporaryValues => false;

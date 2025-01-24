@@ -56,8 +56,7 @@ See [DisplayOptions](/stacks/vue/layers/models.md#displayoptions) for details on
 
 Specify options for formatting some kinds of values, including dates. See [DisplayOptions](/stacks/vue/layers/models.md#displayoptions) for details.
 
-<Prop def="value: any // Vue 2
-modelValue: any // Vue 3" lang="ts" />
+<Prop def="modelValue: any" lang="ts" />
 
 Can be provided the value to be displayed in conjunction with the `for` prop, as an alternative to the `model` prop.
 

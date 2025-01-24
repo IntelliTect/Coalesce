@@ -78,9 +78,7 @@ An optional set of [Data Source Standard Parameters](/modeling/model-components/
 
 True if the method should be invoked and the list displayed when the entered search term is blank.
 
-<Prop def="eager?: boolean = false" lang="ts" />
 
-True if the bound value should be updated as the user types. Otherwise, the bound value is updated when focus is lost or when a suggested value is chosen. This is only applicable for Vuetify 2 - in Vuetify 3, this is the default behavior.
 
 
 

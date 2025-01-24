@@ -35,31 +35,6 @@ jobs:
         path: out/packages
 
 
-  validate-vue2-playground: 
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: playground/Coalesce.Web.Vue2
-      
-    steps:
-    - uses: actions/checkout@v4
-
-    - uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: | 
-          8.0.x
-          9.0.x
-
-    - run: npm ci
-      working-directory: src/coalesce-vue
-    - run: npm ci
-      working-directory: src/coalesce-vue-vuetify2
-    - run: npm ci
-    - run: npm run coalesce
-    - run: npm run build
-    - run: dotnet build --configuration Release
-
-
   validate-vue3-playground: 
     runs-on: ubuntu-latest
     defaults:
@@ -103,22 +78,8 @@ jobs:
     - name: npm version
       run: npm version $COALESCE_VERSION --no-git-tag-version
     
-    - name: npm run test (Vue2)
-      run: npm run test -- --coverage --reporter=default --reporter=junit --outputFile coalesce-vue2.results.xml
-    
-    - name: npm run test (Vue3)
-      run: |
-        set -e;
-
-        cd vue3-tests
-        npm ci;
-
-        # Run a build to check the TS types, since vitest doesn't do full typechecking.
-        npm run build;
-
-        # no coverage on this one, since it'll be identical to vue2 and also doesn't work
-        # since it ignores the files from outside the vue3-tests directory.
-        npm run test -- --reporter=default --reporter=junit --outputFile coalesce-vue3.results.xml
+    - name: npm run test
+      run: npm run test -- --coverage --reporter=default --reporter=junit --outputFile coalesce-vue.results.xml
     
 
     # Currently broken with vitest: https://github.com/dorny/test-reporter/issues/187
@@ -137,41 +98,6 @@ jobs:
       with:
         name: coalesce-vue
         path: src/coalesce-vue/coalesce-vue*.tgz
-
-
-  build-coalesce-vue-vuetify2:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: src/coalesce-vue-vuetify2
-
-    env:
-      COALESCE_VERSION: ${{inputs.COALESCE_VERSION}}
-
-    steps:
-    - uses: actions/checkout@v4
-
-    # build coalesce-vue
-    - run: npm run build-local-deps
-    - run: npm ci
-    - run: npm run build
-
-    # now we'll setup the real versions of things.
-    # Change the package.json with the correct version of coalesce-vue, 
-    # but do not use any npm commands to do so as they'll freak out that the version isn't published.
-    - name: update *dependencies["coalesce-vue"] version
-      run: cat <<< "$(cat package.json | jq ".peerDependencies[\"coalesce-vue\"] = \"$COALESCE_VERSION\" | .devDependencies[\"coalesce-vue\"] = \"$COALESCE_VERSION\" ")" > package.json
-
-    - name: npm version
-      run: npm version $COALESCE_VERSION --no-git-tag-version
-
-    - run: npm pack
-
-    - name: Upload Artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: coalesce-vue-vuetify2
-        path: src/coalesce-vue-vuetify2/*.tgz
 
 
   build-coalesce-vue-vuetify3:

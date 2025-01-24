@@ -87,10 +87,9 @@ An object owning the value that was specified by the `for` prop. If provided, th
 
 <!-- MARKER:c-for-model-props-end -->
 
-<Prop def="value?: any // Vue 2
-modelValue?: any // Vue 3" lang="ts" />
+<Prop def="modelValue?: any" lang="ts" />
 
-If binding the component with ``v-model``, accepts the ``value`` part of ``v-model``.
+If binding the component with ``v-model``, accepts the ``modelValue`` part of ``v-model``.
 
 ## Slots
 

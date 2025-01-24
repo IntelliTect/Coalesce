@@ -89,7 +89,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Tests
             $$"""
             {
               "compilerOptions": {
-                "target": "ES2021",
+                "target": "ES2022",
                 "strict": true,
                 "moduleResolution": "node",
                 "verbatimModuleSyntax": true,
@@ -135,7 +135,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Tests
                 new BehaviorsFactory(services, ReflectionRepositoryFactory.Reflection)
             );
 
-            // We serialize here to force evaulation of all the lazy IEnumerables in the data.
+            // We serialize here to force evaluation of all the lazy IEnumerables in the data.
             // Otherwise, we wouldn't be testing very much here.
             // We're ultimately just testing that this doesn't throw right now.
             // Not looking for any specific output.

@@ -216,7 +216,12 @@ describe("$invoke", () => {
     expect(req.data).toEqual('{"id":1,"requiredInt":42}');
   });
 
-  test("does not send null value type params as emptystrings", async () => {
+  test("does not send null value top level params", async () => {
+    // Much like how null values on entity models end up mapping to their default value
+    // when the DTO maps to the entity, we should similarly treat nulls in the method args
+    // object as "not set" (effectively undefined, but using `null` instead since that's
+    // how that has worked in Coalesce since Vue 2).
+
     const mock = mockEndpoint(
       "/ComplexModel/methodWithManyParams",
       vitest.fn((req) => ({
@@ -227,13 +232,8 @@ describe("$invoke", () => {
     const caller = new ComplexModelViewModel().methodWithManyParams;
     await caller.invokeWithArgs();
 
-    // This is a formdata specific issue: aspnetcore throws ModelState errors
-    // when an emptystring (which is how we serialize null in formdata) is passed to a number, for example.
-    // https://github.com/IntelliTect/Coalesce/issues/464
     const req: AxiosRequestConfig = mock.mock.lastCall?.[0];
-    expect(req.data).toEqual(
-      "singleExternal=&collectionExternal=&file=&strParam=&stringsParam=&enumsParam=&model=&modelCollection="
-    );
+    expect(req.data).toEqual("{}");
   });
 
   test("doesn't error when unexpected params are provided", async () => {

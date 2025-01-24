@@ -1115,7 +1115,7 @@ export function bindToQueryString<T, TKey extends keyof T & string>(
     return bindToQueryString(vue, obj, "value", key);
   }
 
-  vue = getPublicInstance(vue);
+  const vuePublic = getPublicInstance(vue);
   const vueInternal = getInternalInstance(vue);
 
   let paused = false;
@@ -1126,20 +1126,20 @@ export function bindToQueryString<T, TKey extends keyof T & string>(
 
   onActivated(() => {
     paused = false;
-    updateObject(vue.$route?.query[queryKey]);
+    updateObject(vuePublic.$route?.query[queryKey]);
   }, vueInternal);
 
   const defaultValue = obj[key];
   const metadata = (obj as any)?.$metadata;
 
   // When the value changes, persist it to the query.
-  vue.$watch(
+  vuePublic.$watch(
     () => obj[key],
     (v) => {
       if (paused) {
         return;
       }
-      if (!vue.$router || !vue.$route) {
+      if (!vuePublic.$router || !vuePublic.$route) {
         throw new Error(
           "Could not find $router or $route on the component instance. Is vue-router installed?"
         );
@@ -1184,7 +1184,7 @@ export function bindToQueryString<T, TKey extends keyof T & string>(
       //@ts-expect-error
       nextTick(() => delete vue.$router[coalescePendingQuery]);
 
-      vue.$router[mode]({
+      vuePublic.$router[mode]({
         query: newQuery,
       }).catch((err: any) => {});
     }
@@ -1213,8 +1213,8 @@ export function bindToQueryString<T, TKey extends keyof T & string>(
   };
 
   // When the query changes, grab the new value.
-  vue.$watch(
-    () => vue.$route?.query[queryKey],
+  vuePublic.$watch(
+    () => vuePublic.$route?.query[queryKey],
     async (v) => {
       // In Vue3/VueRouter4, the component doesn't start tearing down immediately
       // upon route navigation - it takes an extra tick for that to happen.
@@ -1224,7 +1224,7 @@ export function bindToQueryString<T, TKey extends keyof T & string>(
       // and start setting those (or `defaultValue`) onto the component instance, which will then trigger
       // the other watcher above which will put those new values back into the querystring of the new route.
 
-      await vue.$nextTick();
+      await vuePublic.$nextTick();
       if (paused || vueInternal.isUnmounted) {
         return;
       }
@@ -1234,7 +1234,7 @@ export function bindToQueryString<T, TKey extends keyof T & string>(
   );
 
   // Fix #332: circumvent the `await nextTick` above on the initial call"
-  updateObject(vue.$route?.query[queryKey]);
+  updateObject(vuePublic.$route?.query[queryKey]);
 }
 
 export function useBindToQueryString<T, TKey extends keyof T & string>(
@@ -1274,27 +1274,27 @@ export function bindKeyToRouteOnCreate(
   keepQuery: boolean = false,
   routeName?: ComponentPublicInstance["$route"]["name"]
 ) {
-  vue = getPublicInstance(vue);
+  const publicVue = getPublicInstance(vue);
 
-  if (!vue.$router || !vue.$route) {
+  if (!publicVue.$router || !publicVue.$route) {
     throw new Error(
       "Could not find $router or $route on the component instance. Is vue-router installed?"
     );
   }
 
-  routeName = routeName ?? vue.$route.name;
-  vue.$watch(
+  routeName = routeName ?? publicVue.$route.name;
+  publicVue.$watch(
     () => (model as any)[model.$metadata.keyProp.name],
     (pk: any, o: any) => {
       if (!routeName) {
         throw Error("Cannot use bindKeyToRouteOnCreate with unnamed routes.");
       }
       if (pk && !o) {
-        const { href } = vue.$router!.resolve({
-          name: routeName ?? vue.$route!.name,
-          query: keepQuery ? vue.$route!.query : {},
+        const { href } = publicVue.$router!.resolve({
+          name: routeName ?? publicVue.$route!.name,
+          query: keepQuery ? publicVue.$route!.query : {},
           params: {
-            ...vue.$route!.params,
+            ...publicVue.$route!.params,
             [routeParamName]: pk,
           },
         });

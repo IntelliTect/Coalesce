@@ -580,9 +580,6 @@ export interface MethodBase extends Metadata {
   /** The query string (GET/DELETE only) or body parameters of the method */
   readonly params: { [paramName in string]: MethodParameter };
 
-  /** If true, the request body is json */
-  readonly json?: boolean;
-
   /** Enum indicating what admin views the method is hidden on, if any. */
   readonly hidden?: HiddenAreas;
 }

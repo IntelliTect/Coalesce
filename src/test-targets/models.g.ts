@@ -1047,6 +1047,7 @@ export interface PersonCriteria extends Model<typeof metadata.PersonCriteria> {
   subCriteria: PersonCriteria[] | null
   gender: Genders | null
   date: Date | null
+  adminOnly: string | null
 }
 export class PersonCriteria {
   

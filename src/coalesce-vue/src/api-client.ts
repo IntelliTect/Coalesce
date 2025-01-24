@@ -532,6 +532,12 @@ async function getRequestBody<TMethod extends Method>(
 
       if (value === undefined) continue;
 
+      if (value === null && method.name != "save") {
+        // Skip top-level nulls (except for /save, i.e. only for custom methods)
+        // See test "does not send null value top level params" for some explanation.
+        continue;
+      }
+
       // Look for top-level files and file arrays.
       // Files currently can't be nested any more deeply than that.
       // We have to convert them to base64 ahead of time
@@ -1181,7 +1187,6 @@ export class ModelApiClient<TModel extends Model<ModelType>> extends ApiClient<
             type: "unknown",
           },
         },
-        json: true,
         return: this.$itemValueMeta,
       },
       data,

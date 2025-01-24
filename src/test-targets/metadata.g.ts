@@ -3985,6 +3985,12 @@ export const PersonCriteria = domain.types.PersonCriteria = {
       dateKind: "datetime",
       role: "value",
     },
+    adminOnly: {
+      name: "adminOnly",
+      displayName: "Admin Only",
+      type: "string",
+      role: "value",
+    },
   },
 }
 export const PositionalRecord = domain.types.PositionalRecord = {

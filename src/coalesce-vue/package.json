@@ -9,13 +9,11 @@
   "exports": {
     ".": {
       "types": "./lib/index.d.ts",
-      "import": "./lib/index.js",
-      "require": "./lib/cjs/index.js"
+      "import": "./lib/index.js"
     },
     "./lib/*": {
       "types": "./lib/*.d.ts",
-      "import": "./lib/*.js",
-      "require": "./lib/cjs/*.js"
+      "import": "./lib/*.js"
     }
   },
   "repository": "https://github.com/IntelliTect/Coalesce",
@@ -23,7 +21,7 @@
   "license": "Apache-2.0",
   "private": false,
   "scripts": {
-    "build": "tsc --noEmit && tsc -p ./tsconfig.build.esm.json && tsc -p ./tsconfig.build.cjs.json",
+    "build": "tsc --noEmit && tsc -p ./tsconfig.build.esm.json",
     "prepack": "npm run build",
     "test": "vitest",
     "coverage": "vitest --coverage"

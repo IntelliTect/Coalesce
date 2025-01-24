@@ -7,6 +7,7 @@ import {
   onActivated,
   onDeactivated,
   reactive,
+  type ComponentPublicInstance,
 } from "vue";
 
 import type {
@@ -43,8 +44,8 @@ import {
   isNullOrWhitespace,
   type VueInstance,
   parseJSONDate,
-  IsVue3,
   getInternalInstance,
+  getPublicInstance,
 } from "./util.js";
 
 /** Populated by generated code in order to perform lookups of actual model types
@@ -1114,16 +1115,19 @@ export function bindToQueryString<T, TKey extends keyof T & string>(
     return bindToQueryString(vue, obj, "value", key);
   }
 
+  vue = getPublicInstance(vue);
+  const vueInternal = getInternalInstance(vue);
+
   let paused = false;
 
   onDeactivated(() => {
     paused = true;
-  }, getInternalInstance(vue));
+  }, vueInternal);
 
   onActivated(() => {
     paused = false;
     updateObject(vue.$route?.query[queryKey]);
-  }, getInternalInstance(vue));
+  }, vueInternal);
 
   const defaultValue = obj[key];
   const metadata = (obj as any)?.$metadata;
@@ -1212,22 +1216,17 @@ export function bindToQueryString<T, TKey extends keyof T & string>(
   vue.$watch(
     () => vue.$route?.query[queryKey],
     async (v) => {
-      if (IsVue3) {
-        // In Vue3/VueRouter4, the component doesn't start tearing down immediately
-        // upon route navigation - it takes an extra tick for that to happen.
+      // In Vue3/VueRouter4, the component doesn't start tearing down immediately
+      // upon route navigation - it takes an extra tick for that to happen.
 
-        // If we don't guard here, then this watcher will pick up the query values of the new route
-        // (which are probably all undefined for the keys we're watching for),
-        // and start setting those (or `defaultValue`) onto the component instance, which will then trigger
-        // the other watcher above which will put those new values back into the querystring of the new route.
+      // If we don't guard here, then this watcher will pick up the query values of the new route
+      // (which are probably all undefined for the keys we're watching for),
+      // and start setting those (or `defaultValue`) onto the component instance, which will then trigger
+      // the other watcher above which will put those new values back into the querystring of the new route.
 
-        // Vue2 has a similar issue where this watcher still runs when leaving the route,
-        // but by the time the other watcher above has a chance to run, the component is torn down
-        // and so the bad values never make it back to the query string.
-        await vue.$nextTick();
-        if (paused || getInternalInstance(vue).isUnmounted) {
-          return;
-        }
+      await vue.$nextTick();
+      if (paused || vueInternal.isUnmounted) {
+        return;
       }
 
       updateObject(v);
@@ -1273,8 +1272,10 @@ export function bindKeyToRouteOnCreate(
   model: Model<ModelType>,
   routeParamName: string = "id",
   keepQuery: boolean = false,
-  routeName?: VueInstance["$route"]["name"]
+  routeName?: ComponentPublicInstance["$route"]["name"]
 ) {
+  vue = getPublicInstance(vue);
+
   if (!vue.$router || !vue.$route) {
     throw new Error(
       "Could not find $router or $route on the component instance. Is vue-router installed?"
@@ -1311,9 +1312,9 @@ export function useBindKeyToRouteOnCreate(
   model: Model<ModelType>,
   routeParamName: string = "id",
   keepQuery: boolean = false,
-  routeName?: VueInstance["$route"]["name"]
+  routeName?: ComponentPublicInstance["$route"]["name"]
 ) {
-  const vue = getCurrentInstance()?.proxy;
+  const vue = getCurrentInstance();
   if (!vue)
     throw new Error(
       "useBindToQueryString can only be used inside setup(). Consider using bindToQueryString if you're not using Vue composition API."

@@ -4,6 +4,7 @@ import type {
   ReactiveFlags,
   CreateComponentPublicInstance,
   WatchOptions,
+  ComponentInternalInstance,
 } from "vue";
 import { version } from "vue";
 import type { DateKind } from "./metadata";
@@ -377,34 +378,14 @@ function buildParams(
  */
 export const ReactiveFlags_SKIP = "__v_skip" as ReactiveFlags.SKIP;
 
-type RelevantVueProps = "$route" | "$router" | "$nextTick";
-/** A type that accepts a component instance in both Vue2 and Vue3. Notably, the type of `this` in methods in the options API is not assignable to ComponentPublicInstance, but it is to CreateComponentPublicInstance. */
-export type VueInstance = Pick<
-  ComponentPublicInstance | CreateComponentPublicInstance,
-  RelevantVueProps
-> & {
-  // $watch is defined independently because its `this` type on the callback messes things up.
-  $watch(
-    expOrFn: string,
-    callback: (n: any, o: any) => void,
-    options?: WatchOptions
-  ): () => void;
-  $watch<T>(
-    expOrFn: () => T,
-    callback: (n: T, o: T) => void,
-    options?: WatchOptions
-  ): () => void;
-};
+export type VueInstance = ComponentPublicInstance | ComponentInternalInstance;
 
-export function getInternalInstance(vue: VueInstance): any {
-  // This returns `any` because its just kind of impossible to type correctly.
-
-  // @ts-ignore vue2/vue3 compat shim.
-  if ("$" in vue) return vue.$;
-  // Vue2.7 doesn't have a notion of InternalInstance,
-  // so places that use it in Vue3 use the public instance instead.
-  return vue;
+export function getInternalInstance(
+  vue: VueInstance
+): ComponentInternalInstance {
+  return "$" in vue ? vue.$ : vue;
 }
 
-export const IsVue2 = version.charAt(0) == "2";
-export const IsVue3 = version.charAt(0) == "3";
+export function getPublicInstance(vue: VueInstance): ComponentPublicInstance {
+  return "$" in vue ? vue : vue.proxy!;
+}

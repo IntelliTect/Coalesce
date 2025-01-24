@@ -5,6 +5,8 @@ import {
   getCurrentInstance,
   shallowRef,
   type Ref,
+  type ComponentPublicInstance,
+  type ComponentInternalInstance,
 } from "vue";
 
 import type {
@@ -1902,7 +1904,7 @@ export class ItemApiState<TArgs extends any[], TResult> extends ApiState<
    * @param vue A Vue instance through which the lifecycle of the object URL will be managed.
    */
   public getResultObjectUrl(
-    vue: VueInstance | null | undefined = getCurrentInstance()?.proxy
+    vue: VueInstance | null | undefined = getCurrentInstance()
   ): undefined | (TResult extends Blob ? string : never) {
     const result = this.result;
     if (result == this._objectUrl?.target) {
@@ -2217,24 +2219,11 @@ export type AnyArgCaller<
   | ListApiStateWithArgs<TArgs, TArgsObj, TResult>
   | ItemApiStateWithArgs<TArgs, TArgsObj, TResult>;
 
-//@ts-expect-error: only exists in vue3, but not vue2.
 declare module "@vue/reactivity" {
   export interface RefUnwrapBailTypes {
     // Prevent Vue's type helpers from brutalizing these types,
     // which are manually marked to skip reactivity (ReactiveFlags_SKIP)
     // and therefore are never unwrapped anyway.
-    coalesceApiModels: ApiState<any, any> | ApiClient<any>;
-  }
-}
-
-// The vue2 version of this interface:
-declare module "vue" {
-  // If we don't also declare GlobalComponents here,
-  // then all component intellisense breaks for vue2.
-  // I have absolutely no idea why.
-  export interface GlobalComponents {}
-
-  export interface RefUnwrapBailTypes {
     coalesceApiModels: ApiState<any, any> | ApiClient<any>;
   }
 }

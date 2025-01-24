@@ -7,13 +7,13 @@ import {
   createWebHistory,
   RouterLink,
   createMemoryHistory,
-  Router,
+  type Router,
 } from "vue-router";
-import { bindToQueryString, VueInstance } from "../src";
+import { bindToQueryString, type VueInstance } from "../src";
 import { mount } from "@vue/test-utils";
-import { delay } from "../test/test-utils";
+import { delay } from "./test-utils";
 import { reactive } from "vue";
-import { Person, PersonCriteria } from "../../test-targets/models.g";
+import { Person, PersonCriteria } from "@test-targets/models.g";
 
 describe("bindToQueryString", () => {
   async function runTest(func: (v: VueInstance, router: Router) => void) {
@@ -288,7 +288,10 @@ describe("bindToQueryString", () => {
           path: "/",
           component: defineComponent({
             data() {
-              return { boundValue: "", boundValue2: "" };
+              return {
+                boundValue: "" as string | null,
+                boundValue2: "" as string | null,
+              };
             },
             created() {
               setBoundValues = (b) => (this.boundValue = this.boundValue2 = b);

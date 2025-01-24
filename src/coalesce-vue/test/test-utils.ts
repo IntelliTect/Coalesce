@@ -1,6 +1,5 @@
 import { mount } from "@vue/test-utils";
 import { defineComponent } from "vue";
-import { IsVue2 } from "../src/util";
 
 export * from "../src/test-utils";
 

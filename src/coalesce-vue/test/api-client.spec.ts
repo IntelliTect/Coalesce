@@ -14,7 +14,7 @@ import {
   mapParamsToDto,
   mapQueryToParams,
 } from "../src/api-client";
-import { getInternalInstance, IsVue2 } from "../src/util";
+import { getInternalInstance } from "../src/util";
 import { delay, mountData, mockEndpoint } from "./test-utils";
 
 import { StudentApiClient } from "./targets.apiclients";
@@ -937,9 +937,8 @@ describe("$makeCaller", () => {
     const wrapper = mount({ template: "<div></div>" });
     const vue = wrapper.vm as ComponentPublicInstance;
 
-    const beforeUnmountHooks = () =>
-      // @ts-ignore vue2/3 compat
-      IsVue2 ? vue.$options.beforeDestroy : getInternalInstance(vue)["bum"];
+    // @ts-expect-error vue internal property
+    const beforeUnmountHooks = () => getInternalInstance(vue)["bum"];
 
     // Act/assert - before any invocation.
     expect(caller.getResultObjectUrl(vue)).toBeUndefined();
@@ -965,8 +964,7 @@ describe("$makeCaller", () => {
 
     // Act/Assert - Teardown
 
-    // @ts-ignore vue2/3 compat
-    IsVue2 ? wrapper.destroy() : wrapper.unmount();
+    wrapper.unmount();
 
     expect(revokeUrlMock).toBeCalledWith(url2);
     expect(beforeUnmountHooks()).toHaveLength(1);

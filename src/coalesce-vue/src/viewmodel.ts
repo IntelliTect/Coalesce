@@ -44,8 +44,7 @@ import {
   type VueInstance,
   ReactiveFlags_SKIP,
   getInternalInstance,
-  IsVue2,
-  IsVue3,
+  getPublicInstance,
 } from "./util.js";
 import { debounce } from "lodash-es";
 import type { Cancelable, DebounceSettings } from "lodash";
@@ -133,22 +132,12 @@ export abstract class ViewModel<
   }
 
   /**
-    This bool could be computed from the size of the set,
-    but this wouldn't trigger reactivity because Vue 2 doesn't have reactivity
-    for types like Set and Map.
     @internal 
    */
   private _isDirty = ref(false);
 
   /** @internal */
-  _dirtyProps: Set<PropNames<TModel["$metadata"]>> = IsVue2
-    ? new Set()
-    : (reactive(new Set()) as any); // as any to avoid ref unwrapping madness
-
-  // Backwards-compat with vue2 nonreactive sets.
-  // Typed as any because vue ref unwrapping causes problems with a prop that is a maybe ref.
-  /** @internal */
-  _dirtyPropsVersion: any = IsVue2 ? ref(0) : undefined;
+  _dirtyProps: Set<PropNames<TModel["$metadata"]>> = reactive(new Set()) as any; // as any to avoid ref unwrapping madness
 
   /**
    * Returns true if the values of the savable data properties of this ViewModel
@@ -160,9 +149,6 @@ export abstract class ViewModel<
   public set $isDirty(val) {
     if (!val) {
       this._dirtyProps.clear();
-      if (IsVue2 && this._dirtyProps.size) {
-        this._dirtyPropsVersion.value++;
-      }
       this._isDirty.value = false;
     } else {
       // When explicitly setting the whole model dirty,
@@ -186,7 +172,6 @@ export abstract class ViewModel<
 
     if (dirty) {
       this._dirtyProps.add(propName);
-      if (IsVue2) this._dirtyPropsVersion.value++;
       this._isDirty.value = true;
 
       if (triggerAutosave && this._autoSaveState?.value?.active) {
@@ -195,15 +180,12 @@ export abstract class ViewModel<
       }
     } else {
       this._dirtyProps.delete(propName);
-      if (IsVue2) this._dirtyPropsVersion.value++;
       if (!this._dirtyProps.size) {
         this._isDirty.value = false;
       }
     }
   }
   public $getPropDirty(propName: PropNames<TModel["$metadata"]>) {
-    if (IsVue2) this._dirtyPropsVersion?.value;
-
     return this._dirtyProps.has(propName);
   }
 
@@ -1165,7 +1147,7 @@ export abstract class ViewModel<
       isPending = true;
       // This MUST happen on next tick in case $isDirty was set to true automatically
       // and is about to be manually (or by $loadFromModel) set to false.
-      vue.$nextTick(() => {
+      getPublicInstance(vue).$nextTick(() => {
         isPending = false;
         enqueueSave();
       });
@@ -1446,16 +1428,6 @@ export abstract class ListViewModel<
       // replace the entire ref when doing this lazy initialization.
       // See test "$items initializer doesn't trigger reactivity".
       this._items = ref(value);
-
-      if (IsVue2) {
-        // bugfix: in vue2, since $items is wrapping over a `ref` and this is the getter
-        // and should therefore act as a read of the ref, we need to force a read
-        // of the ref to track a dependency on `_items` on behalf of whatever accessed `$items`.
-        // This is only necessary in Vue2 because the ViewModelCollection instance won't be made
-        // reactive until it is assigned into a reactive object (like a ref).
-        // See test "$items is reactive when first usage is a read"
-        this._items.value.length.toString();
-      }
     }
     return value;
   }
@@ -1577,6 +1549,8 @@ export abstract class ListViewModel<
    * @param options Options that control the auto-load behavior.
    */
   public $startAutoLoad(vue: VueInstance, options: AutoLoadOptions<this> = {}) {
+    vue = getPublicInstance(vue);
+
     const {
       wait = 1000,
       predicate = undefined,
@@ -1655,6 +1629,8 @@ export abstract class ListViewModel<
    * @param options Options to control how the auto-saving is performed.
    */
   public $startAutoSave(vue: VueInstance, options: AutoSaveOptions<this> = {}) {
+    vue = getPublicInstance(vue);
+
     if (this._lightweight) {
       throw new Error("Autosave cannot be used with $modelOnlyMode enabled.");
     }
@@ -1928,19 +1904,13 @@ export class ViewModelCollection<
   $hasLoaded!: boolean;
 
   override push(...items: (T | Partial<TModel>)[]): number {
-    // MUST evaluate the .map() before grabbing the .push() (Vue2 only limitation)
-    // method from the proto. See test "newly loaded additional items are reactive".
     const viewModelItems = viewModelCollectionMapItems<T, TModel>(
       items,
       this,
       true
     );
 
-    if (IsVue3) {
-      return super.push(...viewModelItems);
-    }
-
-    return resolveProto(this).push.apply(this, viewModelItems);
+    return super.push(...viewModelItems);
   }
 
   override splice(start: number, deleteCount?: number, ...items: T[]): T[] {
@@ -1948,15 +1918,7 @@ export class ViewModelCollection<
       ? viewModelCollectionMapItems(items, this, true)
       : items;
 
-    if (IsVue3) {
-      return super.splice(start, deleteCount as any, ...viewModelItems);
-    }
-    return resolveProto(this).splice.call(
-      this,
-      start,
-      deleteCount as any,
-      ...viewModelItems
-    );
+    return super.splice(start, deleteCount as any, ...viewModelItems);
   }
 
   constructor(
@@ -1988,37 +1950,19 @@ export class ViewModelCollection<
       },
     });
 
-    if (IsVue2) {
-      Object.defineProperties(this, {
-        push: {
-          value: ViewModelCollection.prototype.push,
-          enumerable: false,
-          writable: false,
-          configurable: false,
-        },
-        splice: {
-          value: ViewModelCollection.prototype.splice,
-          enumerable: false,
-          writable: false,
-          configurable: false,
-        },
-      });
-      return this;
-    } else {
-      // Force methods like .filter, .slice to produce plain arrays,
-      // not new ViewModelCollection instances.
-      // See test "$items.filter produces a plain array".
-      Object.defineProperties(this, {
-        constructor: {
-          value: Array.constructor,
-          enumerable: false,
-          writable: false,
-          configurable: false,
-        },
-      });
+    // Force methods like .filter, .slice to produce plain arrays,
+    // not new ViewModelCollection instances.
+    // See test "$items.filter produces a plain array".
+    Object.defineProperties(this, {
+      constructor: {
+        value: Array.constructor,
+        enumerable: false,
+        writable: false,
+        configurable: false,
+      },
+    });
 
-      return reactive(this) as this;
-    }
+    return reactive(this) as this;
   }
 }
 
@@ -2703,24 +2647,11 @@ const watcherFinalizationRegistry =
       })
     : undefined;
 
-//@ts-expect-error: only exists in vue3, but not vue2.
 declare module "@vue/reactivity" {
   export interface RefUnwrapBailTypes {
     // Prevent Vue's type helpers from brutalizing coalesce view models,
     // which are manually marked to skip reactivity (ReactiveFlags_SKIP)
     // and therefore are never unwrapped anyway.
-    coalesceViewModels: ViewModel | ListViewModel | ServiceViewModel;
-  }
-}
-
-// The vue2 version of this interface:
-declare module "vue" {
-  // If we don't also declare GlobalComponents here,
-  // then all component intellisense breaks for vue2.
-  // I have absolutely no idea why.
-  export interface GlobalComponents {}
-
-  export interface RefUnwrapBailTypes {
     coalesceViewModels: ViewModel | ListViewModel | ServiceViewModel;
   }
 }

@@ -1,6 +1,6 @@
 import { defineComponent, getCurrentInstance } from "vue";
 import { type DateKind, bindToQueryString } from "../src";
-import { IsVue2, parseDateUserInput } from "../src/util";
+import { parseDateUserInput } from "../src/util";
 
 describe("parseDateUserInput", () => {
   const defaultDefaultDate = new Date(2020, 10, 7);

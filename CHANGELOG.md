@@ -1,3 +1,8 @@
+# 6.0.0
+
+- Vue 2 support has been dropped.
+- All endpoints with bodies are now send as JSON instead of form data, with the exception of those endpoints with file parameters and only scalar parameters (no complex parameters) beyond the file parameters.
+
 # 5.3.1
 
 ## Fixes

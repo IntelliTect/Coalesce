@@ -149,7 +149,7 @@ const props = withDefaults(
     modelValue?: Date | null;
     /** The increments, in minutes, of the selectable value.
      * Values should divide 60 evenly, or be multiples of 60 */
-    step: number;
+    step?: number;
     min?: Date | null;
     max?: Date | null;
     color?: string | null;

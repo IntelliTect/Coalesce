@@ -1,4 +1,4 @@
-# Entity Models
+# EF Entity Models
 
 Models are the core business objects of your application - they serve as the fundamental representation of data in your application. The design of your models is very important. In [Entity Framework Core](https://docs.microsoft.com/en-us/ef/core/) (EF), data models are just Plain Old CLR Objects (POCOs).
 
@@ -6,7 +6,7 @@ Models are the core business objects of your application - they serve as the fun
 
 To start building your data model that Coalesce will generate code for, follow the best practices for [EF Core](https://docs.microsoft.com/en-us/ef/core/). Guidance on this topic is available in abundance in the [Entity Framework Core documentation](https://docs.microsoft.com/en-us/ef/core/).
 
-Don't worry about querying or saving data when you're just getting started - Coalesce will provide a lot of that functionality for you, and it is very easy to customize what Coalesce offers later. To get started, just build your POCOs and `DbContext` classes. Annotate your `DbContext` class with `[Coalesce]` so that Coalesce will discover it and generate code based off of your context for you.
+Don't worry about querying or saving data when you're just getting started - Coalesce will provide a lot of that functionality for you, and it is very easy to customize what Coalesce offers later. To get started, just build your entity classes and `DbContext` class. Annotate your `DbContext` class with `[Coalesce]` so that Coalesce will discover it and generate code based off of your context for you. Also ensure that each entity model has a `DbSet` property on the context - this is how Coalesce discovers your entity model types.
 
 Before you start building, you are highly encouraged to read the sections below. The linked pages explain in greater detail what Coalesce will build for you for each part of your data model.
 

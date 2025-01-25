@@ -12,7 +12,7 @@ These classes provide a wide array of functionality that is useful when interact
 
 The following members can be found on the generated [Entity](/modeling/model-types/entities.md) and [Custom DTO](/modeling/model-types/dtos.md) ViewModels, exported from `viewmodels.g.ts` as `<TypeName>ViewModel`.
 
-### Model Data Properties
+### Generated Members Properties
 
 Each ViewModel class implements the corresponding interface from the [Model Layer](/stacks/vue/layers/models.md), meaning that the ViewModel has a data property for each [Property](/modeling/model-components/properties.md) on the model. Object-typed properties will be typed as the corresponding generated ViewModel.
 
@@ -26,15 +26,28 @@ There are a few special behaviors when assigning to different kinds of data prop
 - If deep auto-saves are enabled on the instance being assigned to, auto-save will be spread to the incoming object, and to all other objects reachable from that object.
 
 #### Model Collection Properties
-  - When assigning an entire array, any items in the array that are not a ViewModel instance will have an instance created for them.
-  - The same rule goes for pushing items into the existing array for a model collection - a new ViewModel instance will be created and be used instead of the object(s) being pushed.
-    
+- When assigning an entire array, any items in the array that are not a ViewModel instance will have an instance created for them.
+- The same rule goes for pushing items into the existing array for a model collection - a new ViewModel instance will be created and be used instead of the object(s) being pushed.
+  
 #### Foreign Key Properties
-If the corresponding navigation property contains an object, and that object's primary key doesn't match the new foreign key value being assigned, the navigation property will be set to null.
+- If the corresponding navigation property contains an object, and that object's primary key doesn't match the new foreign key value being assigned, the navigation property will be set to null.
 
 
-### Other Data Properties & Functions
 
+### Other Generated Members
+
+#### API Callers
+- For each of the instance [Methods](/modeling/model-components/methods.md) of the type, an [API Caller](/stacks/vue/layers/api-clients.md#api-callers) will be generated.
+
+#### `addTo*()` Functions
+- For each [collection navigation property](/modeling/model-components/properties.md), a method is generated that will create a new instance of the ViewModel for the collected type, add it to the collection, and then return the new object.
+    
+#### Many-to-many helper collections
+- For each [[ManyToMany]](/modeling/model-components/attributes/many-to-many.md) [collection navigation property](/modeling/model-components/properties.md), a getter-only property is generated that returns a collection of the object on the far side of the many-to-many relationship. Nulls are filtered from this collection.
+
+
+
+### Data Properties & Functions
 
 <Prop def="readonly $metadata: ModelType" lang="ts" />
 
@@ -310,18 +323,6 @@ You can obtain an array from a generator with `Array.from(vm.$getErrors())` or `
 <Prop def="readonly $hasError: boolean" lang="ts" />
 
 Indicates if any properties have validation errors.
-
-
-### Generated Members
-
-#### API Callers
-For each of the instance [Methods](/modeling/model-components/methods.md) of the type, an [API Caller](/stacks/vue/layers/api-clients.md#api-callers) will be generated.
-
-#### `addTo*()` Functions
-For each [collection navigation property](/modeling/model-components/properties.md), a method is generated that will create a new instance of the ViewModel for the collected type, add it to the collection, and then return the new object.
-    
-#### Many-to-many helper collections
-For each [collection navigation property](/modeling/model-components/properties.md) annotated with [[ManyToMany]](/modeling/model-components/attributes/many-to-many.md), a getter-only property is generated that returns a collection of the object on the far side of the many-to-many relationship. Nulls are filtered from this collection.
 
 
 

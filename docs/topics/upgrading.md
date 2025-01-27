@@ -1,26 +1,19 @@
 # Upgrading Coalesce
 
-Upgrading your project's version of Coalesce is a relatively straightforward process, but the process does involve a few different steps.
-
-
-## Decide new version
-
-The first step, which you may have already done, is decide which version you're upgrading to. Coalesce projects generally favor the use of CI builds which are released as soon as new features are developed, rather than formal release versions that come out at a much slower cadence.
-
-The latest version of Coalesce can be viewed [on npm](https://www.npmjs.com/package/coalesce-vue?activeTab=versions) or [on NuGet](https://www.nuget.org/packages/IntelliTect.Coalesce#versions-body-tab).
+Upgrading your project's version of Coalesce is a relatively straightforward process. The latest version of Coalesce can be viewed [on npm](https://www.npmjs.com/package/coalesce-vue?activeTab=versions) or [on NuGet](https://www.nuget.org/packages/IntelliTect.Coalesce#versions-body-tab).
 
 You should always use the same version for both NPM and NuGet dependencies. Having mismatched versions in a single project can introduce errors or subtle bugs.
 
 ## NPM upgrades
 
-Next, upgrade the NPM dependencies in your web project.
+First, upgrade the NPM dependencies in your web project.
 
 1. Open `package.json` in your web project and replace the versions of `coalesce-vue` and `coalesce-vue-vuetify3` with the new version number.
 ``` json 
 {
   "dependencies": {
-    "coalesce-vue": "5.0.0-ci.20XX0806.2",
-    "coalesce-vue-vuetify3": "5.0.0-ci.20XX0806.2",
+    "coalesce-vue": "5.3.1",
+    "coalesce-vue-vuetify3": "5.3.1",
   }
 }
 ```
@@ -30,14 +23,14 @@ Next, upgrade the NPM dependencies in your web project.
 
 ## NuGet upgrades
 
-Coalesce projects have a single variable, `CoalesceVersion`, to control all Coalesce NuGet package dependencies, declared in `Directory.Build.props`. This file is in the root of the solution, next to the `.sln` file; it is also included in the "Solution Items" folder in Visual Studio's Solution Explorer.
+Coalesce projects usually have a single variable, `CoalesceVersion`, to control all Coalesce NuGet package dependencies, declared in `Directory.Build.props`. This file is in the root of the solution, next to the `.sln` file; it is also included in the "Solution Items" folder in Visual Studio's Solution Explorer.
 
 To upgrade the NuGet packages:
 1. Update the value of `CoalesceVersion` with the new version number.
 ``` xml
 <Project>
   <PropertyGroup>
-    <CoalesceVersion>5.0.0-ci.20XX0806.2</CoalesceVersion>
+    <CoalesceVersion>5.3.1</CoalesceVersion>
   </PropertyGroup>
 </Project>
 ```

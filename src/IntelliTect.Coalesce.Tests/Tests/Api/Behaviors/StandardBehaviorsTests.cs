@@ -5,12 +5,13 @@ using IntelliTect.Coalesce.Tests.TargetClasses;
 using IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext;
 using IntelliTect.Coalesce.Tests.Util;
 using Microsoft.EntityFrameworkCore;
+using Moq;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace IntelliTect.Coalesce.Tests.Api.DataSources
+namespace IntelliTect.Coalesce.Tests.Tests.Api.Behaviors
 {
     public class StandardBehaviorsTests : TestDbContextFixture
     {
@@ -125,6 +126,68 @@ namespace IntelliTect.Coalesce.Tests.Api.DataSources
             public override void MapTo(StandaloneReadWrite obj, IMappingContext context) => throw new System.NotImplementedException();
 
             public override StandaloneReadWrite MapToNew(IMappingContext context) => throw new System.NotImplementedException();
+        }
+
+        [Fact]
+        public async Task DeleteAsync_ReturnsSuccessAndNull()
+        {
+            // Arrange
+            var behaviors = Behaviors<Case>();
+            var ds = Source<Case>()
+                .AddModel(new Case { CaseKey = 1, Description = "bob" });
+            Db.ChangeTracker.Clear();
+
+            // Act
+            var result = await behaviors.DeleteAsync<TestDto<Case>>(1, ds, new DataSourceParameters());
+
+            // Assert
+            Assert.True(result.WasSuccessful);
+            Assert.Null(result.Object);
+        }
+
+        [Fact]
+        public async Task DeleteAsync_ReturnsFailureFromAfterDeleteAsync()
+        {
+            // Arrange
+            var mock = new Mock<StandardBehaviors<Case, AppDbContext>>(CrudContext);
+            mock.CallBase = true;
+            mock.Setup(b => b.AfterDeleteAsync(It.IsAny<Case>())).ReturnsAsync("AfterDeleteFailure");
+            var behaviors = mock.Object;
+
+            var ds = Source<Case>()
+                .AddModel(new Case { CaseKey = 1, Description = "bob" });
+            Db.ChangeTracker.Clear();
+
+            // Act
+            var result = await behaviors.DeleteAsync<TestDto<Case>>(1, ds, new DataSourceParameters());
+
+            // Assert
+            Assert.False(result.WasSuccessful);
+            Assert.Equal("AfterDeleteFailure", result.Message);
+        }
+
+        [Fact]
+        public async Task DeleteAsync_ReturnsItemFromAfterDeleteAsync()
+        {
+            var expectedResult = new ItemResult<Case>(new Case { Description = "Deleted" }, new IncludeTree());
+
+            // Arrange
+            var mock = new Mock<StandardBehaviors<Case, AppDbContext>>(CrudContext);
+            mock.CallBase = true;
+            mock.Setup(b => b.AfterDeleteAsync(It.IsAny<Case>())).ReturnsAsync(expectedResult);
+            var behaviors = mock.Object;
+
+            var ds = Source<Case>()
+                .AddModel(new Case { CaseKey = 1, Description = "bob" });
+            Db.ChangeTracker.Clear();
+
+            // Act
+            var result = await behaviors.DeleteAsync<TestDto<Case>>(1, ds, new DataSourceParameters());
+
+            // Assert
+            Assert.True(result.WasSuccessful);
+            Assert.Equal("Deleted", result.Object.SourceEntity.Description);
+            Assert.Equal(expectedResult.IncludeTree, result.Object.SourceIncludeTree);
         }
     }
 }

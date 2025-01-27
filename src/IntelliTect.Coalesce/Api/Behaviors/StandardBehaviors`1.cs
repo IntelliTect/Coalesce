@@ -435,41 +435,41 @@ namespace IntelliTect.Coalesce
             var includeTree = postDeleteGetResult.IncludeTree;
             var deletedItem = postDeleteGetResult.Object;
 
+            var afterDelete = await AfterDeleteAsync(deletedItem ?? item);
+            if (afterDelete == null)
+            {
+                throw new InvalidOperationException("Received null from result of AfterDeleteAsync. Expected an ItemResult.");
+            }
+            else if (!afterDelete.WasSuccessful)
+            {
+                return new ItemResult<TDto?>(afterDelete);
+            }
+            else
+            {
+                deletedItem = afterDelete.Object ?? deletedItem;
+                includeTree = afterDelete.IncludeTree ?? includeTree;
+            }
 
             if (deletedItem == null)
             {
                 // If the item was not retrieved, it was actually deleted.
                 // Don't return the item to the client since it no longer exists (in the context of the applicable data source, anyway).
-
-                AfterDelete(ref item, ref includeTree);
                 return true;
             }
-            else
+
+            // If the item WAS retrieved, it was soft deleted and still visible to the current user through a data source.
+            // We return it to the client to signal two things:
+            // 1) Update the item on which delete was called with the new object.
+            // 2) Don't remove the item from its parent collections on the client, since it still exists through the requested data source.
+
+            if (postDeleteDs is IResultTransformer<T> transformer)
             {
-                // If the item WAS retrieved, it was soft deleted and still visible to the current user through a data source.
-                // We return it to the client to signal two things:
-                // 1) Update the item on which delete was called with the new object.
-                // 2) Don't remove the item from its parent collections on the client, since it still exists through the requested data source.
-
-                // Allow the user to override this behavior using the AfterDelete method.
-                AfterDelete(ref deletedItem, ref includeTree);
-
-                // If the user nulled out the item, they don't want to send it back to the client.
-                // This is fine, and is documented behavior.
-                if (deletedItem == null)
-                {
-                    return true;
-                }
-
-                if (postDeleteDs is IResultTransformer<T> transformer)
-                {
-                    await transformer.TransformResultsAsync(Array.AsReadOnly(new[] { deletedItem }), parameters);
-                }
-
-                return new ItemResult<TDto?>(
-                    deletedItem.MapToDto<T, TDto>(new MappingContext(Context, parameters.Includes), includeTree)
-                );
+                await transformer.TransformResultsAsync(Array.AsReadOnly(new[] { deletedItem }), parameters);
             }
+
+            return new ItemResult<TDto?>(
+                deletedItem.MapToDto<T, TDto>(new MappingContext(Context, parameters.Includes), includeTree)
+            );
         }
 
         /// <summary>
@@ -492,7 +492,6 @@ namespace IntelliTect.Coalesce
         /// <returns>An ItemResult that, if indicating failure, will halt the delete operation.</returns>
         public virtual Task<ItemResult> BeforeDeleteAsync(T item) => Task.FromResult(BeforeDelete(item));
 
-
         /// <summary>
         /// Executes the delete action against the database and saves the change.
         /// This may be overridden to change what action is actually performed against the database 
@@ -511,16 +510,17 @@ namespace IntelliTect.Coalesce
         /// If the item still exists in the database, this will be a a fresh copy of the item retrieved from the database,
         /// complete with any relations that were included as a result of being loaded 
         /// from the dataSource that was specified by the client.
-        /// This ref parameter may have its value changed in order to send a modified object back to the client.
-        /// Set to null to return no object to the client.
         /// </param>
-        /// <param name="includeTree">
-        /// The includeTree that will be used to map the deleted item for serialization and transmission to the client.
-        /// The includeTree is obtained from the dataSource that was used to load the deleted item.
-        /// This ref parameter may have its value changed to send a different object structure to the client.
-        /// In the case where the deleted item was not retrieved from the database, changing this will have no effect.
-        /// </param>
-        public virtual void AfterDelete(ref T item, ref IncludeTree? includeTree) { }
+        /// <returns>
+        /// If a non-successful <see cref="ItemResult"/> is returned, a failure response will be 
+        /// returned immediately without the updated item attached to the response.
+        /// If a successful <see cref="ItemResult{T}"/> is returned, then a non-null <see cref="ItemResult{T}.Object"/> 
+        /// on the result will override the item sent in the response, and a non-null <see cref="ApiResult.IncludeTree"/> 
+        /// on the result will override the include tree used to map that item to the DTO. If these properties are left null 
+        /// (e.g. you return <see langword="true"/>), <paramref name="item"/> will be returned in the response to the client
+        /// if it still exists in the database, or `null` if the item doesn't still exist in the database.
+        /// </returns>
+        public virtual Task<ItemResult<T>> AfterDeleteAsync(T item) => Task.FromResult<ItemResult<T>>(true);
 
         #endregion
 

@@ -20,6 +20,7 @@ namespace IntelliTect.Coalesce.Tests.Util
         public long? Id { get; set; }
 
         public T? SourceEntity { get; private set; }
+        public IncludeTree? SourceIncludeTree { get; private set; }
 
         public Action<TestDto<T>, T>? MapFrom { get; set; }
         public Action<T>? MapTo { get; set; }
@@ -27,6 +28,7 @@ namespace IntelliTect.Coalesce.Tests.Util
         void IResponseDto<T>.MapFrom(T obj, IMappingContext context, IncludeTree? tree)
         {
             SourceEntity = obj;
+            SourceIncludeTree = tree;
             MapFrom?.Invoke(this, obj);
         }
 

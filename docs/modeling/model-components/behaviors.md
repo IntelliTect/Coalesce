@@ -121,7 +121,7 @@ DeleteAsync
         BeforeDelete
     ExecuteDeleteAsync
         GetDbSet
-    AfterDelete
+    AfterDeleteAsync
 ```
 
 ### Method Details
@@ -190,9 +190,13 @@ Performs the delete action against the database. The implementation of this meth
 Overriding this allows for changing this row-deletion implementation to something else, like setting of a soft delete flag, or copying the data into another archival table before deleting.
 
 
-<Prop def="void AfterDelete(ref T item, ref IncludeTree? includeTree)" />
+<Prop def="Task<ItemResult<T>> AfterDeleteAsync(T item)" />
 
-Allows for performing any sort of cleanup actions after a delete has completed. If the item was still able to be retrieved from the database after the delete operation completed, this method allows lets you modify or replace the item that is sent back to the client by setting `ref T item` to another object or to null. Setting `ref IncludeTree includeTree` will override the [Include Tree](/concepts/include-tree.md) used to shape the response object.
+Allows for performing any sort of cleanup actions after a delete has completed. 
+
+If a non-successful `ItemResult` is returned, a failure response will be returned immediately without the updated item attached to the response. This will not prevent modifications to the database since changes have already been saved at this point. 
+
+If a successful `ItemResult` is returned, then a non-null `Object` on the result will override the item sent in the response, and a non-null `IncludeTree` on the result will override the include tree used to map that item to the DTO. If these properties are left null (e.g. you return `true`), the response will not be modified.
 
 
 

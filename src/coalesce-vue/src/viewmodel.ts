@@ -365,35 +365,40 @@ export abstract class ViewModel<
     return this.$effectiveRules[typeof prop == "string" ? prop : prop.name];
   }
 
-  /** Returns a generator that provides all error messages for the current model
+  /** Returns an array of all error messages for the current model
     in accordance with:
     - The rules defined for the model's properties' metadata, 
     - Custom rules added by calling `$addRule`
     - Any rules that where ignored by calling `this.$removeRule`,
   */
-  public *$getErrors(
-    prop?: string | Property
-  ): Generator<string, void, unknown> {
-    if (prop) {
-      const propName = typeof prop == "string" ? prop : prop.name;
+  public $getErrors(prop?: string | Property): string[] {
+    const ret: string[] = [];
+    const effectiveRules = this.$effectiveRules;
 
-      const effectiveRules = this.$effectiveRules[propName];
-      if (!effectiveRules) return;
+    const desiredProp = prop
+      ? typeof prop == "string"
+        ? prop
+        : prop.name
+      : undefined;
 
-      for (const rule of effectiveRules) {
+    for (const propName in effectiveRules) {
+      if (desiredProp && desiredProp != propName) continue;
+
+      const propRules = effectiveRules[propName];
+      if (!propRules) continue;
+
+      for (const rule of propRules) {
         const result = rule(this.$data[propName]);
-        if (result !== true) yield result;
-      }
-    } else {
-      for (const propName in this.$effectiveRules) {
-        yield* this.$getErrors(propName);
+        if (result !== true) ret.push(result);
       }
     }
+
+    return ret;
   }
 
   /** True if `this.$getErrors()` is returning at least one error. */
   public get $hasError() {
-    return !!this.$getErrors().next().value;
+    return !!this.$getErrors().length;
   }
 
   /**

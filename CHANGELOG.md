@@ -4,6 +4,7 @@
 
 - Vue 2 support has been dropped.
 - The CommonJS build of coalesce-vue has been dropped.
+- `ViewModel.$getErrors` now returns a `string[]` instead of a `Generator<string>`.
 
 ## Major Changes
 

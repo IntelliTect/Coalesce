@@ -1377,6 +1377,41 @@ export abstract class ListViewModel<
     this.$params.includes = val;
   }
 
+  /** Wrapper for `$params.search` */
+  public get $search() {
+    return this.$params.search;
+  }
+  public set $search(val) {
+    this.$params.search = val;
+  }
+
+  /** Wrapper for `$params.filter`.
+   * 
+   * A collection of key-value pairs to filter by,
+   * where keys are property names on the type and values are as follows:
+   * 
+- Strings will match exactly unless an asterisk is found in the filter, in which case they will be matched with `string.StartsWith` with the asterisk stripped out.
+- Numeric values will match exactly. Multiple comma-delimited values will create a filter that will match on any of the provided values. 
+- Enums will match by string or numeric value. Multiple comma-delimited values will create a filter that will match on any of the provided values.
+- Dates with a time component will be matched exactly.
+- Dates with no time component will match any dates that fell on that day.
+- The values `null` and `"null"` match a `null` property value (except string properties).
+  */
+  public get $filter() {
+    return this.$params.filter;
+  }
+  public set $filter(val) {
+    this.$params.filter = val;
+  }
+
+  /** Wrapper for `$params.orderBy` */
+  public get $orderBy() {
+    return this.$params.orderBy;
+  }
+  public set $orderBy(val) {
+    this.$params.orderBy = val;
+  }
+
   /**
    * @internal
    */
@@ -1466,6 +1501,7 @@ export abstract class ListViewModel<
     if (this.$hasNextPage) this.$params.page = (this.$params.page || 1) + 1;
   }
 
+  /** Wrapper for `$params.page` */
   public get $page() {
     return this.$params.page || 1;
   }
@@ -1473,6 +1509,7 @@ export abstract class ListViewModel<
     this.$params.page = Math.max(1, Number(val));
   }
 
+  /** Wrapper for `$params.pageSize` */
   public get $pageSize() {
     return this.$params.pageSize || 1;
   }
@@ -1480,6 +1517,7 @@ export abstract class ListViewModel<
     this.$params.pageSize = Number(val);
   }
 
+  /** The number of pages returned by the last successful load. */
   public get $pageCount() {
     return this.$load.pageCount;
   }

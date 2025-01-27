@@ -130,11 +130,11 @@ export interface FilterParameters extends DataSourceParameters {
    * 
 <!-- MARKER:filter-behaviors -->
 
+- Strings will match exactly unless an asterisk is found in the filter, in which case they will be matched with `string.StartsWith` with the asterisk stripped out.
+- Numeric values will match exactly. Multiple comma-delimited values will create a filter that will match on any of the provided values. 
+- Enums will match by string or numeric value. Multiple comma-delimited values will create a filter that will match on any of the provided values.
 - Dates with a time component will be matched exactly.
 - Dates with no time component will match any dates that fell on that day.
-- Strings will match exactly unless an asterisk is found in the filter, in which case they will be matched with `string.StartsWith` with the asterisk stripped out.
-- Enums will match by string or numeric value. Multiple comma-delimited values will create a filter that will match on any of the provided values.
-- Numeric values will match exactly. Multiple comma-delimited values will create a filter that will match on any of the provided values. 
 - The values `null` and `"null"` match a `null` property value (except string properties).
 
 <!-- MARKER:end-filter-behaviors -->
@@ -162,15 +162,15 @@ export interface ListParameters extends FilterParameters {
   noCount?: boolean | null;
 
   /**
-   * The name of a field to order the results by.
+   * The name of a field to order the results by. If suffixed with " DESC", results will be sorted descending (same as using non-suffixed `orderByDescending`)
    *  If this and `orderByDescending` are blank, default ordering determined by the server will be used.
    * */
   orderBy?: string | null;
+
   /**
    * The name of a field to order the results by in descending order.
    * If this and `orderBy` are blank, default ordering determined by the server will be used.
    * */
-
   orderByDescending?: string | null;
 
   /**

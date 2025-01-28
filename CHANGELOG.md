@@ -1,3 +1,9 @@
+# 5.3.2
+
+## Fixes
+
+- Fix error in .NET 9 thrown by vite development middleware if the HTTPS cert directory doesn't exist.
+
 # 5.3.1
 
 ## Fixes

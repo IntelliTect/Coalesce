@@ -3,6 +3,7 @@
 ## Fixes
 
 - Fix error in .NET 9 thrown by vite development middleware if the HTTPS cert directory doesn't exist.
+- Fix `ViewModel.$load` and `ListViewModel.$load` not properly working with `.useResponseCaching()`.
 
 # 5.3.1
 

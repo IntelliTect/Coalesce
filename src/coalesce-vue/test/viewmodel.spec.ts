@@ -174,6 +174,39 @@ describe("ViewModel", () => {
     });
   });
 
+  describe("$load", () => {
+    test("$load respects response caching", async () => {
+      let i = 1;
+      mockEndpoint("/ComplexModel/get/1", async (req) => {
+        await delay(10);
+        return {
+          wasSuccessful: true,
+          object: { complexModelId: 1, name: "Response " + i++ },
+        };
+      });
+
+      const makeVm = () => {
+        const vm = new ComplexModelViewModel();
+        vm.$load.useResponseCaching({ maxAgeSeconds: 20 });
+        return vm;
+      };
+
+      // Make the first caller and invoke it, which will populate the cache.
+      await makeVm().$load(1);
+
+      // Make another caller.
+      const vm2 = makeVm();
+
+      // Upon first invocation, the cache will be used.
+      const loadPromise = vm2.$load(1);
+      expect(vm2.name).toBe("Response 1");
+
+      // After the real API call has a chance to finish, the new results should be loaded.
+      await loadPromise;
+      expect(vm2.name).toBe("Response 2");
+    });
+  });
+
   describe("$save", () => {
     const saveMock = mockItemResult(true, <Student>{
       studentId: 3,
@@ -809,7 +842,9 @@ describe("ViewModel", () => {
           },
         },
       ];
-      expect(JSON.parse(endpoint.mock.calls[0][0].data)).toMatchObject({
+
+      const parsed = JSON.parse(endpoint.mock.calls[0][0].data);
+      expect(parsed).toMatchObject({
         items: expected,
       });
       expect(preview.isDirty).toBeTruthy();
@@ -3316,6 +3351,37 @@ describe("ListViewModel", () => {
       expect(item0).toBe(list.$items[0]);
       expect(item1).toBe(list.$items[1]);
       expect(item0.name).toBe("Steve");
+    });
+
+    test("$load respects response caching", async () => {
+      let i = 1;
+      mockEndpoint("/ComplexModel/list", async (req) => {
+        await delay(10);
+        return {
+          wasSuccessful: true,
+          list: [{ complexModelId: 1, name: "Response " + i++ }],
+        };
+      });
+
+      const makeList = () => {
+        const list = new ComplexModelListViewModel();
+        list.$load.useResponseCaching({ maxAgeSeconds: 20 });
+        return list;
+      };
+
+      // Make the first caller and invoke it, which will populate the cache.
+      await makeList().$load();
+
+      // Make another caller.
+      const list2 = makeList();
+
+      // Upon first invocation, the cache will be used.
+      const loadPromise = list2.$load();
+      expect(list2.$items[0].name).toBe("Response 1");
+
+      // After the real API call has a chance to finish, the new results should be loaded.
+      await loadPromise;
+      expect(list2.$items[0].name).toBe("Response 2");
     });
   });
 

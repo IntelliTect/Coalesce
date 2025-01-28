@@ -418,21 +418,32 @@ export abstract class ViewModel<
    * A function for invoking the `/get` endpoint, and a set of properties about the state of the last call.
    */
   get $load() {
-    const $load = this.$apiClient.$makeCaller("item", (c, id?: TPrimaryKey) => {
-      const startTime = performance.now();
+    const $load = this.$apiClient
+      .$makeCaller("item", (c, id?: TPrimaryKey) => {
+        const startTime = performance.now();
 
-      return c
-        .get(id != null ? id : this.$primaryKey, this.$params)
-        .then((r) => {
-          const result = r.data.object;
-          if (result) {
-            // We do `purgeUnsaved` (arg2) here, since $load() is always an explicit user action
-            // that may be serving as a "reset" of local state.
-            this.$loadFromModel(result, startTime, true);
-          }
-          return r;
-        });
-    });
+        return c
+          .get(id != null ? id : this.$primaryKey, this.$params)
+          .then((r) => {
+            // @ts-expect-error passing data through to `onFulfilled`
+            r.__startTime = startTime;
+            return r;
+          });
+      })
+      .onFulfilled((state) => {
+        const result = state.result;
+
+        // If there's no captured start time, assume the data is from response caching
+        // and use the oldest possible time (0).
+        // @ts-expect-error passed through from invoker
+        const startTime = state.rawResponse?.__startTime ?? 0;
+
+        if (result) {
+          // We do `purgeUnsaved` (arg2) here, since $load() is always an explicit user action
+          // that may be serving as a "reset" of local state.
+          this.$loadFromModel(result, startTime, true);
+        }
+      });
 
     // Lazy getter technique - don't create the caller until/unless it is needed,
     // since creation of api callers is a little expensive.
@@ -1516,11 +1527,24 @@ export abstract class ListViewModel<
    * A function for invoking the `/load` endpoint, and a set of properties about the state of the last call.
    */
   get $load() {
-    const $load = this.$apiClient.$makeCaller("list", (c) => {
-      const startTime = performance.now();
-      return c.list(this.$params).then((r) => {
+    const $load = this.$apiClient
+      .$makeCaller("list", (c) => {
+        const startTime = performance.now();
+        return c.list(this.$params).then((r) => {
+          // @ts-expect-error passing data through to `onFulfilled`
+          r.__startTime = startTime;
+          return r;
+        });
+      })
+      .onFulfilled((state) => {
         if (!this._lightweight) {
-          const result = r.data.list;
+          const result = state.result;
+
+          // If there's no captured start time, assume the data is from response caching
+          // and use the oldest possible time (0).
+          // @ts-expect-error passed through from invoker
+          const startTime = state.rawResponse?.__startTime ?? 0;
+
           if (result) {
             this.$items = rebuildModelCollectionForViewModelCollection<
               TModel,
@@ -1528,9 +1552,7 @@ export abstract class ListViewModel<
             >(this.$metadata, this.$items, result, startTime, true);
           }
         }
-        return r;
       });
-    });
 
     // Lazy getter technique - don't create the caller until/unless it is needed,
     // since creation of api callers is a little expensive.
@@ -1766,7 +1788,18 @@ export class ViewModelFactory {
     if (map.has(initialData)) {
       return map.get(initialData)!;
     }
-    const vmCtor = ViewModel.typeLookup![typeName];
+
+    if (initialData instanceof ViewModel) {
+      return initialData;
+    }
+
+    if (ViewModel.typeLookup === null) {
+      throw Error(
+        "Static `ViewModel.typeLookup` is not defined. It should get defined in viewmodels.g.ts."
+      );
+    }
+
+    const vmCtor = ViewModel.typeLookup[typeName];
     const vm = new vmCtor() as unknown as ViewModel;
     map.set(initialData, vm);
 
@@ -1871,11 +1904,6 @@ function viewModelCollectionMapItems<T extends ViewModel, TModel extends Model>(
       viewModel = val;
     } else {
       // Incoming is a Model. Make a ViewModel from it.
-      if (ViewModel.typeLookup === null) {
-        throw Error(
-          "Static `ViewModel.typeLookup` is not defined. It should get defined in viewmodels.g.ts."
-        );
-      }
       viewModel = val = ViewModelFactory.get(
         collectedTypeMeta.name,
         val,
@@ -2322,89 +2350,92 @@ function rebuildModelCollectionForViewModelCollection<
   isCleanData: DataFreshness,
   purgeUnsaved: boolean
 ) {
-  if (!Array.isArray(currentValue)) {
-    currentValue = [];
-  }
-
-  let incomingLength = incomingValue.length;
-  let currentLength = currentValue.length;
-
-  // There are existing items. We need to surgically merge in the incoming items,
-  // keeping existing ViewModels the same based on keys.
-  const pkName = type.keyProp.name;
-  const existingItemsMap = new Map<any, TItem>();
-  const existingItemsWithoutPk = [];
-  for (let i = 0; i < currentLength; i++) {
-    const item = currentValue[i];
-    const itemPk = item.$primaryKey;
-
-    if (itemPk) {
-      existingItemsMap.set(itemPk, item);
-    } else {
-      existingItemsWithoutPk.push(item);
+  ViewModelFactory.scope((factory) => {
+    if (!Array.isArray(currentValue)) {
+      currentValue = [];
     }
-  }
 
-  // Rebuild the currentValue array, using existing items when they exist,
-  // otherwise using the incoming items.
+    let incomingLength = incomingValue.length;
+    let currentLength = currentValue.length;
 
-  for (let i = 0; i < incomingLength; i++) {
-    const incomingItem = incomingValue[i];
-    const incomingItemPk = incomingItem[pkName];
-    const existingItem = existingItemsMap.get(incomingItemPk);
+    // There are existing items. We need to surgically merge in the incoming items,
+    // keeping existing ViewModels the same based on keys.
+    const pkName = type.keyProp.name;
+    const existingItemsMap = new Map<any, TItem>();
+    const existingItemsWithoutPk = [];
+    for (let i = 0; i < currentLength; i++) {
+      const item = currentValue[i];
+      const itemPk = item.$primaryKey;
 
-    if (existingItem) {
-      existingItem.$loadFromModel(incomingItem, isCleanData);
-
-      if (currentValue[i] === existingItem) {
-        // The existing item is not moving position. Do nothing.
+      if (itemPk) {
+        existingItemsMap.set(itemPk, item);
       } else {
-        // Replace the item currently at this position with the existing item.
-        currentValue.splice(i, 1, existingItem);
-      }
-    } else {
-      // No need to $loadFromModel on the incoming item.
-      // The setter for the collection will transform its contents into ViewModels for us.
-
-      if (currentValue[i]) {
-        // There is something else already in the array at this position. Replace it.
-        currentValue.splice(i, 1, incomingItem);
-      } else {
-        // Nothing in the current array at this position. Just stick it in.
-        currentValue.push(incomingItem);
+        existingItemsWithoutPk.push(item);
       }
     }
-  }
 
-  if (existingItemsWithoutPk.length && !purgeUnsaved) {
-    // Add to the end of the collection any existing items that do not have primary keys.
-    // This behavior exists to prevent losing items on the client
-    // that may not yet be saved in the event that the parent of the collection
-    // get reloaded from a save.
-    // If this behavior is undesirable in a specific circumstance,
-    // it is trivial to manually remove unsaved items after a .$save() is peformed.
+    // Rebuild the currentValue array, using existing items when they exist,
+    // otherwise using the incoming items.
 
-    const existingItemsLength = existingItemsWithoutPk.length;
-    for (let i = 0; i < existingItemsLength; i++) {
-      const existingItem = existingItemsWithoutPk[i];
-      const currentItem = currentValue[incomingLength];
+    for (let i = 0; i < incomingLength; i++) {
+      const incomingItem = incomingValue[i];
+      const incomingItemPk = incomingItem[pkName];
+      const existingItem = existingItemsMap.get(incomingItemPk);
 
-      if (existingItem === currentItem) {
-        // The existing item is not moving position. Do nothing.
+      if (existingItem) {
+        factory.set(incomingItem, existingItem);
+
+        existingItem.$loadFromModel(incomingItem, isCleanData);
+
+        if (currentValue[i] === existingItem) {
+          // The existing item is not moving position. Do nothing.
+        } else {
+          // Replace the item currently at this position with the existing item.
+          currentValue.splice(i, 1, existingItem);
+        }
       } else {
-        // Replace the item currently at this position with the existing item.
-        currentValue.splice(incomingLength, 1, existingItem);
+        const incomingVm = factory.get(type.name, incomingItem) as TItem;
+
+        if (currentValue[i]) {
+          // There is something else already in the array at this position. Replace it.
+          currentValue.splice(i, 1, incomingVm);
+        } else {
+          // Nothing in the current array at this position. Just stick it in.
+          currentValue.push(incomingVm);
+        }
       }
-
-      incomingLength += 1;
     }
-  }
 
-  // If the new collection is shorter than the existing length,
-  // remove the extra items.
-  if (currentLength > incomingLength) {
-    currentValue.splice(incomingLength, currentLength - incomingLength);
-  }
+    if (existingItemsWithoutPk.length && !purgeUnsaved) {
+      // Add to the end of the collection any existing items that do not have primary keys.
+      // This behavior exists to prevent losing items on the client
+      // that may not yet be saved in the event that the parent of the collection
+      // get reloaded from a save.
+      // If this behavior is undesirable in a specific circumstance,
+      // it is trivial to manually remove unsaved items after a .$save() is peformed.
+
+      const existingItemsLength = existingItemsWithoutPk.length;
+      for (let i = 0; i < existingItemsLength; i++) {
+        const existingItem = existingItemsWithoutPk[i];
+        const currentItem = currentValue[incomingLength];
+
+        if (existingItem === currentItem) {
+          // The existing item is not moving position. Do nothing.
+        } else {
+          // Replace the item currently at this position with the existing item.
+          currentValue.splice(incomingLength, 1, existingItem);
+        }
+
+        incomingLength += 1;
+      }
+    }
+
+    // If the new collection is shorter than the existing length,
+    // remove the extra items.
+    if (currentLength > incomingLength) {
+      currentValue.splice(incomingLength, currentLength - incomingLength);
+    }
+  }, isCleanData);
 
   // Let the receiving ViewModelCollection handle the conversion of the contents
   // into ViewModel instances.

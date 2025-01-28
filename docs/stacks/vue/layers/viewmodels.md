@@ -298,13 +298,9 @@ This can be used to remove either a rule that was provided by the generated [Met
 Returns an array of active rule functions for the specified property, or `undefined` if the property has no active validation rules.
 
 
-<Prop def="$getErrors(prop?: string | Property): Generator<string>" lang="ts" />
+<Prop def="$getErrors(prop?: string | Property): string[]" lang="ts" />
 
-Returns a [generator](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Generator) that provides all error messages for either a specific property (if provided) or the entire model (if no prop argument is provided).
-
-::: tip
-You can obtain an array from a generator with `Array.from(vm.$getErrors())` or `[...vm.$getErrors()]`
-:::
+Returns an array of all error messages for either a specific property (if provided) or the entire model (if no prop argument is provided).
 
 
 <Prop def="readonly $hasError: boolean" lang="ts" />
@@ -393,12 +389,33 @@ Methods that will decrement or increment `$page`, respectively. Each does nothin
 
 <Prop def="$page: number" lang="ts" />
 
-Getter/setter wrapper for `$params.page`. Controls the page that will be requested on the next invocation of `$load`.
+Getter/setter wrapper for `$params.page`. Controls the page that will be requested for invocations of `$load`.
 
 
 <Prop def="$pageSize: number" lang="ts" />
 
-Getter/setter wrapper for `$params.pageSize`. Controls the page that will be requested on the next invocation of `$load`.
+Getter/setter wrapper for `$params.pageSize`. Controls the page size that will be requested for invocations of `$load`.
+
+
+<Prop def="$search: string | null" lang="ts" />
+
+Getter/setter wrapper for `$params.search`. Controls the search term that will be sent to invocations of `$load`.
+
+See [[Search]](/modeling/model-components/attributes/search.md) for a detailed look at how default searching works in Coalesce.
+
+
+<Prop def="$filter: { [fieldName: string]?: string | number | boolean | null }" lang="ts" />
+
+Getter/setter wrapper for `$params.filter`. Controls the filters that will be sent to invocations of `$load`. This is a dictionary-style object where keys are property names and values are the value to filter by, applied on server by the type's DataSource's [ApplyListPropertyFilters](/modeling/model-components/data-sources.md#member-applylistpropertyfilter) method according to the following default rules:
+
+@[import-md "after":"MARKER:filter-behaviors", "before":"MARKER:end-filter-behaviors"](../../../../src/coalesce-vue/src/api-client.ts)
+
+<br>
+
+
+<Prop def="$orderBy: number" lang="ts" />
+
+Getter/setter wrapper for `$params.orderBy`. Controls the sorting that will be requested for invocations of `$load`.
 
 
 <Prop def="readonly $pageCount: number" lang="ts" />

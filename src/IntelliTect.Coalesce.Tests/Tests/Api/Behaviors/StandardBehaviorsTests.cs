@@ -146,7 +146,7 @@ namespace IntelliTect.Coalesce.Tests.Tests.Api.Behaviors
         }
 
         [Fact]
-        public async Task DeleteAsync_ReturnsFailureFromAfterDeleteAsync()
+        public async Task DeleteAsync_AfterDeleteFailure_ReturnsFailure()
         {
             // Arrange
             var mock = new Mock<StandardBehaviors<Case, AppDbContext>>(CrudContext);
@@ -167,7 +167,7 @@ namespace IntelliTect.Coalesce.Tests.Tests.Api.Behaviors
         }
 
         [Fact]
-        public async Task DeleteAsync_ReturnsItemFromAfterDeleteAsync()
+        public async Task DeleteAsync_AfterDeleteReturnsItem_ReturnsItem()
         {
             var expectedResult = new ItemResult<Case>(new Case { Description = "Deleted" }, new IncludeTree());
 

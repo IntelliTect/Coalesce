@@ -2,7 +2,7 @@
 
 <!-- MARKER:summary -->
 
-The ViewModel layer, generated as `viewmodels.g.ts`, exports a ViewModel class for each API-backed type in your data model ([Entity Models](/modeling/model-types/entities.md), [Custom DTOs](/modeling/model-types/dtos.md), and [Services](/modeling/model-types/services.md)). It also exports a ListViewModel type for [Entity Models](/modeling/model-types/entities.md) and [Custom DTOs](/modeling/model-types/dtos.md).
+The ViewModel layer, generated as `viewmodels.g.ts`, exports a ViewModel class for each API-backed type in your data model ([CRUD Models](/modeling/model-types/crud.md) and [Services](/modeling/model-types/services.md)). It also exports a ListViewModel type for [CRUD Models](/modeling/model-types/crud.md).
 
 These classes provide a wide array of functionality that is useful when interacting with your data model through a user interface. The generated ViewModels are the primary way that Coalesce is used when developing a Vue application.
 
@@ -10,9 +10,9 @@ These classes provide a wide array of functionality that is useful when interact
 
 ## ViewModels 
 
-The following members can be found on the generated [Entity](/modeling/model-types/entities.md) and [Custom DTO](/modeling/model-types/dtos.md) ViewModels, exported from `viewmodels.g.ts` as `<TypeName>ViewModel`.
+The following members can be found on the generated [CRUD Model](/modeling/model-types/crud.md) ViewModels, exported from `viewmodels.g.ts` as `<TypeName>ViewModel`.
 
-### Generated Members Properties
+### Generated Members
 
 Each ViewModel class implements the corresponding interface from the [Model Layer](/stacks/vue/layers/models.md), meaning that the ViewModel has a data property for each [Property](/modeling/model-components/properties.md) on the model. Object-typed properties will be typed as the corresponding generated ViewModel.
 

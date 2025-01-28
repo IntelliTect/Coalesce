@@ -12,7 +12,18 @@ Before you start building, you are highly encouraged to read the sections below.
 
 ### Properties
 
-Read [Properties](/modeling/model-components/properties.md) for an outline of the different types of properties that you may place on your models and the code that Coalesce will generate for each of them.
+Read [Properties](/modeling/model-components/properties.md) for an outline of the different types of properties that you may place on your models and the code that Coalesce will generate for each of them. In addition, the following considerations apply for the relational aspects of your data model:
+
+#### Primary Key
+To work with Coalesce, your model must have a single property for a primary key. By convention, this property should be named the same as your model class with `Id` appended to that name, but you can also annotate a property with `[Key]` or name it exactly "Id" to denote it as the primary key.
+
+#### Foreign Keys & Reference Navigation Properties
+While a foreign key may be defined in EF via `DbContext.OnModelCreating` or similar methods, Coalesce won't know that a property is a foreign key unless it is accompanied by a corresponding reference navigation property, and vice versa - Coalesce cannot examine your EF model metadata at generation time - it can only see the API surface of your C# code.
+
+In cases where the foreign key is not named after the navigation property with `"Id"` appended, the `[ForeignKeyAttribute]` may be used on either the key or the navigation property to denote the other property of the pair, in accordance with the recommendations set forth by [EF Core's Modeling Guidelines](https://learn.microsoft.com/en-us/ef/core/modeling/relationships/mapping-attributes#foreignkeyattribute).
+
+#### Collection Navigation Properties
+Collection navigation properties can be used in a straightforward manner. In the event where the inverse property on the other side of the relationship cannot be determined, `[InversePropertyAttribute]` will need to be used. [EF Core provides documentation](https://learn.microsoft.com/en-us/ef/core/modeling/relationships/mapping-attributes#inversepropertyattribute) on how to use this attribute. Errors will be displayed at generation time if an inverse property cannot be determined without the attribute.
 
 
 ### Attributes

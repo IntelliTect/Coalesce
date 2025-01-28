@@ -17,7 +17,7 @@ The following table is a quick reference of scenarios you might encounter and ho
 <tr>
 <td rowspan=4>
 
-[Entity](/modeling/model-types/entities.md) Reads:
+[CRUD](/modeling/model-types/crud.md) Reads:
 `/get`, <br> `/list`, <br> `/count`
 </td>
 <td>Disable</td>
@@ -73,7 +73,7 @@ Any custom code:
 <tr>
 <td rowspan=5>
 
-[Entity](/modeling/model-types/entities.md) Mutations:
+[CRUD](/modeling/model-types/crud.md) Mutations:
 `/save`, <br> `/bulkSave`, <br> `/delete`
 
 </td>
@@ -157,7 +157,7 @@ N/A - explicit opt-in required via `[Coalesce]`
 <tr>
 <td>
 
-Restrict Targets (only [instance methods](/modeling/model-components/methods.md#instance-methods))
+Restrict [instance methods](/modeling/model-components/methods.md#instance-methods) Targets
 </td>
 <td>
 
@@ -261,7 +261,7 @@ Classes can be hidden from Coalesce entirely by annotating them with `[InternalU
 
 ### Class Security Attributes
 
-For each of your [Entities](/modeling/model-types/entities.md) and [Custom DTOs](/modeling/model-types/dtos.md), Coalesce generates a set of CRUD API endpoints (`/get`, `/list`, `/count`, `/save`, `/bulkSave`, and `/delete`).
+For each of your [CRUD Models](/modeling/model-types/crud.md), Coalesce generates a set of API endpoints (`/get`, `/list`, `/count`, `/save`, `/bulkSave`, and `/delete`).
 
 The default behavior is that all endpoints require an authenticated user (anonymous users are rejected).
 
@@ -385,7 +385,7 @@ public class Employee
 
 ## Property/Column Security
 
-Security applied via attributes to properties in Coalesce affects all usages of that property across all Coalesce-generated APIs. This includes usages of that property on types that occur as children of other types, which is a spot where class-level or endpoint-level security generally does not apply. [These attributes](/modeling/model-components/attributes/security-attribute.md) can be placed on the properties on your [Entities](/modeling/model-types/entities.md) and [External Types](/modeling/model-types/external-types.md) to apply role-based restrictions to that property.
+Security applied to properties with attributes in Coalesce affects all usages of that property across all Coalesce-generated APIs. This includes usages of that property on types that occur as children of other types, which is a spot where class-level or endpoint-level security generally does not apply. [These attributes](/modeling/model-components/attributes/security-attribute.md) can be placed on the properties on your [Entities](/modeling/model-types/entities.md) and [External Types](/modeling/model-types/external-types.md) to apply role-based restrictions to that property.
 
 - `ReadAttribute` limits the roles that can read values from that property in responses from the server.
 - `EditAttribute` limits the roles that can write values to that property in requests made to the server.
@@ -501,11 +501,11 @@ use a custom method on the model to accept and set the new value.
 
 ### Data Sources
 
-In Coalesce, [Data Sources](/modeling/model-components/data-sources.md) are the mechanism that you can extend to implement row-level security on your [Entities](/modeling/model-types/entities.md) and [Custom DTOs](/modeling/model-types/dtos.md).
+In Coalesce, [Data Sources](/modeling/model-components/data-sources.md) are the mechanism that you can extend to implement row-level security on your [CRUD Models](/modeling/model-types/crud.md).
 
 Data Sources are used when fetching results for `/get`, `/list`, and `/count` endpoints, and when fetching the target or result of a `/save`, `/bulkSave`, or `/delete`, and when fetching the invocation target of an [Instance Method](/modeling/model-components/methods.md#instance-methods).
 
-By default, your entities will be fetched using the [Standard Data Source](/modeling/model-components/data-sources.md#standard-data-source), but you can declare a custom default data source for each of your entities to override this default functionality. The default functionality here includes the [default loading behavior](/modeling/model-components/data-sources.md#default-loading-behavior), a feature where the Standard Data Source automatically includes the immediate relationships of requested entities. This can be suppressed by overriding the `GetQuery` method on your custom data source and not calling the base method, or by placing `[Read(NoAutoInclude = true)]` on classes or navigation properties that you do not want automatically included.
+By default, your models will be fetched using the [Standard Data Source](/modeling/model-components/data-sources.md#standard-data-source), but you can declare a custom default data source for each of your models to override this default functionality. The default functionality here includes the [default loading behavior](/modeling/model-components/data-sources.md#default-loading-behavior), a feature where the Standard Data Source automatically includes the immediate relationships of requested models. This can be suppressed by overriding the `GetQuery` method on your custom data source and not calling the base method, or by placing `[Read(NoAutoInclude = true)]` on classes or navigation properties that you do not want automatically included.
 
 For most use cases, all your security rules will be implemented in the [GetQuery/GetQueryAsync](/modeling/model-components/data-sources.md#member-getquery) method. This is the most foundational method of the data source that all other functions in the data source build upon. Any predicates applied to the query of a type's default data source will affect all of the type's generated API endpoints (except for static custom methods).
 
@@ -670,9 +670,9 @@ public override async Task TransformResultsAsync(
 
 ### Behaviors
 
-In Coalesce, [Behaviors](/modeling/model-components/behaviors.md) are the extension point to implement row-level security or other customizations of create/edit/delete operations on your [Entities](/modeling/model-types/entities.md) and [Custom DTOs](/modeling/model-types/dtos.md). Behaviors are implemented on top of data sources, meaning the client request will be rejected if the requested entity for modification cannot be loaded from the entity's default data source.
+In Coalesce, [Behaviors](/modeling/model-components/behaviors.md) are the extension point to implement row-level security or other customizations of create/edit/delete operations on your [CRUD Models](/modeling/model-types/crud.md). Behaviors are implemented on top of data sources, meaning the client request will be rejected if the requested entity for modification cannot be loaded from the entity's default data source.
 
-By default, each entity will use the [Standard Behaviors](/modeling/model-components/behaviors.md#behaviors), but you can declare a [custom behaviors class](/modeling/model-components/behaviors.md#defining-behaviors) for each of your entities to override this default functionality.
+By default, each entity will use the [Standard Behaviors](/modeling/model-components/behaviors.md#behaviors), but you can declare a [custom behaviors class](/modeling/model-components/behaviors.md#defining-behaviors) for each of your models to override this default functionality.
 
 For most use cases, all your security rules will be implemented in the [BeforeSave/BeforeSaveAsync](/modeling/model-components/behaviors.md#member-beforesaveasync) and [BeforeDelete/BeforeDeleteAsync](/modeling/model-components/behaviors.md#member-beforedeleteasync) methods.
 
@@ -733,7 +733,7 @@ Enabling [`ValidateAttributesForMethods`](/modeling/model-components/attributes/
 
 ### Saves and Deletes
 
-Validation of `/save`, `/bulkSave`, and `/delete` actions against [Entities](/modeling/model-types/entities.md) and [Custom DTOs](/modeling/model-types/dtos.md) are performed by the [Behaviors](/modeling/model-components/behaviors.md) for the type. Automatic [attribute based validation](#attribute-validation) can be used (saves only), or Behaviors can be overridden to perform validation and other customization of the save and delete process, as in the following example:
+Validation of `/save`, `/bulkSave`, and `/delete` actions against [CRUD Models](/modeling/model-types/crud.md) are performed by the [Behaviors](/modeling/model-components/behaviors.md) for the type. Automatic [attribute based validation](#attribute-validation) can be used (saves only), or Behaviors can be overridden to perform validation and other customization of the save and delete process, as in the following example:
 
 ```c#
 public class Employee

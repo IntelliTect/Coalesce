@@ -47,12 +47,12 @@ Coalesce will generate a full vertical stack of code for you:
 ### Backend C#
 
 #### API Controllers
-For each of your [Entity Models](/modeling/model-types/entities.md), [Custom DTOs](/modeling/model-types/dtos.md), and [Services](/modeling/model-types/services.md), an API controller is created in the ``/Api/Generated`` directory of your web project. These controllers provide a number of endpoints for interacting with your data.
+For each of your [CRUD Models](/modeling/model-types/crud.md) and [Services](/modeling/model-types/services.md), an API controller is created in the ``/Api/Generated`` directory of your web project. These controllers provide a number of endpoints for interacting with your data.
 
 These controllers can be secured at a high level using [Security Attributes](/modeling/model-components/attributes/security-attribute.md), and when applicable to the type, with [Data Sources](/modeling/model-components/data-sources.md) and [Behaviors](/modeling/model-components/behaviors.md).
 
 #### C# DTOs
-For each of your [Entity Models](/modeling/model-types/entities.md), a C# DTO class is created. These classes are used to hold the data that will be serialized and sent to the client, as well as data that has been received from the client before it has been mapped back to your EF POCO class.
+For each of your [Entity Models](/modeling/model-types/entities.md) and [Standalone Entities](/modeling/model-types/standalone-entities.md), a C# DTO class is created. These classes are used to hold the data that will be serialized and sent to the client, as well as data that has been received from the client before it has been mapped back to your EF POCO class.
 
 See [Generated C# DTOs](/stacks/agnostic/dtos.md) for more information.
 

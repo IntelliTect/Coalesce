@@ -13,12 +13,12 @@ The following kinds of properties may be declared on your models.
 Most common built-in primitive and scalar data types (numerics, strings, booleans, enums, `DateTime`, `DateTimeOffset`), and their nullable variants, are all supported as model properties. Collections of these types are also supported.
 
 ### Non-mapped POCOs
-Properties of a type that are not on your `DbContext` will also have corresponding properties generated on the [TypeScript ViewModels](/stacks/vue/layers/viewmodels.md#model-data-properties) typed as [Plain Models](/stacks/vue/layers/models.md), and the values of such properties will be sent with the object to the client when requested. Properties of this type will also be sent back to the server by the client when they are encountered.
+Properties of a type that are not on your `DbContext` will also have corresponding properties generated on the [TypeScript ViewModels](/stacks/vue/layers/viewmodels.md#generated-members) typed as [Plain Models](/stacks/vue/layers/models.md), and the values of such properties will be sent with the object to the client when requested. Properties of this type will also be sent back to the server by the client when they are encountered.
 
 See [External Types](/modeling/model-types/external-types.md) for more information.
 
 ### Getter-only Properties
-Any property that only has a getter will also have a corresponding property generated in the [TypeScript ViewModels](/stacks/vue/layers/viewmodels.md#model-data-properties) and will receive values of the property from the server, but values won't be sent back to the server.
+Any property that only has a getter will also have a corresponding property generated in the [TypeScript ViewModels](/stacks/vue/layers/viewmodels.md#generated-members) and will receive values of the property from the server, but values won't be sent back to the server.
 
 If such a property is defined as an auto-property, the `[NotMapped]` attribute should be used to prevent EF Core from attempting to map such a property to your database.
 

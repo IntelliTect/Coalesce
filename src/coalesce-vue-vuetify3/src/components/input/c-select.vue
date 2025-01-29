@@ -626,6 +626,11 @@ const modelKeyProp = computed((): ForeignKeyProperty | null => {
     return meta;
   }
   if (meta.role == "referenceNavigation" && "foreignKey" in meta) {
+    if (meta.foreignKey.role == "primaryKey") {
+      throw new Error(
+        "c-select cannot be used for properties whose foreign key is simultaneously a primary key."
+      );
+    }
     return meta.foreignKey;
   }
   return null;

@@ -427,10 +427,37 @@ export class OneToOneChild2 {
 }
 
 
+export interface OneToOneManyChildren extends Model<typeof metadata.OneToOneManyChildren> {
+  id: number | null
+  oneToOneParentId: number | null
+  oneToOneParent: OneToOneParent | null
+}
+export class OneToOneManyChildren {
+  
+  /** Mutates the input object and its descendents into a valid OneToOneManyChildren implementation. */
+  static convert(data?: Partial<OneToOneManyChildren>): OneToOneManyChildren {
+    return convertToModel(data || {}, metadata.OneToOneManyChildren) 
+  }
+  
+  /** Maps the input object and its descendents to a new, valid OneToOneManyChildren implementation. */
+  static map(data?: Partial<OneToOneManyChildren>): OneToOneManyChildren {
+    return mapToModel(data || {}, metadata.OneToOneManyChildren) 
+  }
+  
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.OneToOneManyChildren; }
+  
+  /** Instantiate a new OneToOneManyChildren, optionally basing it on the given data. */
+  constructor(data?: Partial<OneToOneManyChildren> | {[k: string]: any}) {
+    Object.assign(this, OneToOneManyChildren.map(data || {}));
+  }
+}
+
+
 export interface OneToOneParent extends Model<typeof metadata.OneToOneParent> {
   id: number | null
   child1: OneToOneChild1 | null
   child2: OneToOneChild2 | null
+  manyChildren: OneToOneManyChildren[] | null
 }
 export class OneToOneParent {
   
@@ -1351,6 +1378,7 @@ declare module "coalesce-vue/lib/model" {
     Location: Location
     OneToOneChild1: OneToOneChild1
     OneToOneChild2: OneToOneChild2
+    OneToOneManyChildren: OneToOneManyChildren
     OneToOneParent: OneToOneParent
     OutputOnlyExternalTypeWithoutDefaultCtor: OutputOnlyExternalTypeWithoutDefaultCtor
     OutputOnlyExternalTypeWithoutDefaultCtorWithInputMappableProperties: OutputOnlyExternalTypeWithoutDefaultCtorWithInputMappableProperties

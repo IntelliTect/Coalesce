@@ -4,10 +4,8 @@ using IntelliTect.Coalesce.Tests.Util;
 using IntelliTect.Coalesce.TypeDefinition;
 using IntelliTect.Coalesce.TypeDefinition.Enums;
 using Microsoft.EntityFrameworkCore;
-using System.Text;
-using Xunit;
+using System.ComponentModel;
 using static IntelliTect.Coalesce.DataAnnotations.DateTypeAttribute;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace IntelliTect.Coalesce.Tests.TypeDefinition
 {
@@ -298,18 +296,44 @@ namespace IntelliTect.Coalesce.Tests.TypeDefinition
         }
 
         [Theory]
-        [PropertyViewModelData<OneToOneChild1>(nameof(OneToOneChild1.Parent))]
-        [PropertyViewModelData<OneToOneChild2>(nameof(OneToOneChild2.Parent))]
-        public void OneToOne_ChildNavigations_HasCorrectMetadata(PropertyViewModelData data)
+        [PropertyViewModelData<OneToOneChild1>(nameof(OneToOneChild1.Parent), "Child1")]
+        [PropertyViewModelData<OneToOneChild2>(nameof(OneToOneChild2.Parent), "Child2")]
+        public void OneToOne_ChildNavigations_HasCorrectMetadata(PropertyViewModelData data, string inverse)
         {
             PropertyViewModel vm = data;
             Assert.Equal(PropertyRole.ReferenceNavigation, vm.Role);
             Assert.Equal(vm.Parent.PropertyByName("ParentId"), vm.ForeignKeyProperty);
+            Assert.Equal(inverse, vm.InverseProperty.Name);
+        }
 
-            // We currently assume that reverence inverses are only ever collection navigations.
-            // This could change in the future, but at least for now the typescript types don't allow
-            // for representing this here, which is fine and doesn't currently hurt anything.
-            Assert.Null(vm.InverseProperty);
+        [Theory]
+        [PropertyViewModelData<OneToOneManyChildren>(nameof(OneToOneManyChildren.OneToOneParent))]
+        [Description("https://github.com/IntelliTect/Coalesce/commit/513db257dda32b99099355f1a6de0f5fbf367f5a")]
+        public void ReferenceNavigation_HasCorrectFkWhenPrincipalAlsoParticipatesInOneToOne(PropertyViewModelData data)
+        {
+            PropertyViewModel prop = data;
+
+            // Precodition: Principal participates in a one-to-one
+            Assert.True(prop.Object!.PrimaryKey.IsForeignKey);
+
+            // Correct foreign key here is ParentId, not the child's PK.
+            Assert.Equal(PropertyRole.ReferenceNavigation, prop.Role);
+            Assert.Equal(nameof(OneToOneManyChildren.OneToOneParentId), prop.ForeignKeyProperty.Name);
+        }
+
+        [Theory]
+        [PropertyViewModelData<OneToOneParent>(nameof(OneToOneParent.ManyChildren))]
+        [Description("https://github.com/IntelliTect/Coalesce/commit/513db257dda32b99099355f1a6de0f5fbf367f5a")]
+        public void CollectionNavigation_HasCorrectFkWhenPrincipalAlsoParticipatesInOneToOne(PropertyViewModelData data)
+        {
+            PropertyViewModel prop = data;
+
+            // Precodition: Principal participates in a one-to-one
+            Assert.True(prop.EffectiveParent.PrimaryKey.IsForeignKey);
+
+            // Correct foreign key here is ParentId, not the child's PK.
+            Assert.Equal(PropertyRole.CollectionNavigation, prop.Role);
+            Assert.Equal(nameof(OneToOneManyChildren.OneToOneParentId), prop.ForeignKeyProperty.Name);
         }
 
     }

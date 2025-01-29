@@ -2415,6 +2415,7 @@ export const OneToOneChild1 = domain.types.OneToOneChild1 = {
       role: "referenceNavigation",
       get foreignKey() { return (domain.types.OneToOneChild1 as ModelType & { name: "OneToOneChild1" }).props.parentId as PrimaryKeyProperty },
       get principalKey() { return (domain.types.OneToOneParent as ModelType & { name: "OneToOneParent" }).props.id as PrimaryKeyProperty },
+      get inverseNavigation() { return (domain.types.OneToOneParent as ModelType & { name: "OneToOneParent" }).props.child1 as ModelCollectionNavigationProperty },
       dontSerialize: true,
     },
   },
@@ -2447,6 +2448,53 @@ export const OneToOneChild2 = domain.types.OneToOneChild2 = {
       role: "referenceNavigation",
       get foreignKey() { return (domain.types.OneToOneChild2 as ModelType & { name: "OneToOneChild2" }).props.parentId as PrimaryKeyProperty },
       get principalKey() { return (domain.types.OneToOneParent as ModelType & { name: "OneToOneParent" }).props.id as PrimaryKeyProperty },
+      get inverseNavigation() { return (domain.types.OneToOneParent as ModelType & { name: "OneToOneParent" }).props.child2 as ModelCollectionNavigationProperty },
+      dontSerialize: true,
+    },
+  },
+  methods: {
+  },
+  dataSources: {
+  },
+}
+export const OneToOneManyChildren = domain.types.OneToOneManyChildren = {
+  name: "OneToOneManyChildren" as const,
+  displayName: "One To One Many Children",
+  get displayProp() { return this.props.id }, 
+  type: "model",
+  controllerRoute: "OneToOneManyChildren",
+  get keyProp() { return this.props.id }, 
+  behaviorFlags: 7 as BehaviorFlags,
+  props: {
+    id: {
+      name: "id",
+      displayName: "Id",
+      type: "number",
+      role: "primaryKey",
+      hidden: 3 as HiddenAreas,
+    },
+    oneToOneParentId: {
+      name: "oneToOneParentId",
+      displayName: "One To One Parent Id",
+      type: "number",
+      role: "foreignKey",
+      get principalKey() { return (domain.types.OneToOneParent as ModelType & { name: "OneToOneParent" }).props.id as PrimaryKeyProperty },
+      get principalType() { return (domain.types.OneToOneParent as ModelType & { name: "OneToOneParent" }) },
+      get navigationProp() { return (domain.types.OneToOneManyChildren as ModelType & { name: "OneToOneManyChildren" }).props.oneToOneParent as ModelReferenceNavigationProperty },
+      hidden: 3 as HiddenAreas,
+      rules: {
+        required: val => val != null || "One To One Parent is required.",
+      }
+    },
+    oneToOneParent: {
+      name: "oneToOneParent",
+      displayName: "One To One Parent",
+      type: "model",
+      get typeDef() { return (domain.types.OneToOneParent as ModelType & { name: "OneToOneParent" }) },
+      role: "referenceNavigation",
+      get foreignKey() { return (domain.types.OneToOneManyChildren as ModelType & { name: "OneToOneManyChildren" }).props.oneToOneParentId as ForeignKeyProperty },
+      get principalKey() { return (domain.types.OneToOneParent as ModelType & { name: "OneToOneParent" }).props.id as PrimaryKeyProperty },
+      get inverseNavigation() { return (domain.types.OneToOneParent as ModelType & { name: "OneToOneParent" }).props.manyChildren as ModelCollectionNavigationProperty },
       dontSerialize: true,
     },
   },
@@ -2491,6 +2539,22 @@ export const OneToOneParent = domain.types.OneToOneParent = {
       get foreignKey() { return (domain.types.OneToOneParent as ModelType & { name: "OneToOneParent" }).props.id as PrimaryKeyProperty },
       get principalKey() { return (domain.types.OneToOneChild2 as ModelType & { name: "OneToOneChild2" }).props.parentId as PrimaryKeyProperty },
       get inverseNavigation() { return (domain.types.OneToOneChild2 as ModelType & { name: "OneToOneChild2" }).props.parent as ModelCollectionNavigationProperty },
+      dontSerialize: true,
+    },
+    manyChildren: {
+      name: "manyChildren",
+      displayName: "Many Children",
+      type: "collection",
+      itemType: {
+        name: "$collectionItem",
+        displayName: "",
+        role: "value",
+        type: "model",
+        get typeDef() { return (domain.types.OneToOneManyChildren as ModelType & { name: "OneToOneManyChildren" }) },
+      },
+      role: "collectionNavigation",
+      get foreignKey() { return (domain.types.OneToOneManyChildren as ModelType & { name: "OneToOneManyChildren" }).props.oneToOneParentId as ForeignKeyProperty },
+      get inverseNavigation() { return (domain.types.OneToOneManyChildren as ModelType & { name: "OneToOneManyChildren" }).props.oneToOneParent as ModelReferenceNavigationProperty },
       dontSerialize: true,
     },
   },
@@ -4345,6 +4409,7 @@ interface AppDomain extends Domain {
     Location: typeof Location
     OneToOneChild1: typeof OneToOneChild1
     OneToOneChild2: typeof OneToOneChild2
+    OneToOneManyChildren: typeof OneToOneManyChildren
     OneToOneParent: typeof OneToOneParent
     OutputOnlyExternalTypeWithoutDefaultCtor: typeof OutputOnlyExternalTypeWithoutDefaultCtor
     OutputOnlyExternalTypeWithoutDefaultCtorWithInputMappableProperties: typeof OutputOnlyExternalTypeWithoutDefaultCtorWithInputMappableProperties

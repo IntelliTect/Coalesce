@@ -394,6 +394,11 @@ export class OneToOneChild2ApiClient extends ModelApiClient<$models.OneToOneChil
 }
 
 
+export class OneToOneManyChildrenApiClient extends ModelApiClient<$models.OneToOneManyChildren> {
+  constructor() { super($metadata.OneToOneManyChildren) }
+}
+
+
 export class OneToOneParentApiClient extends ModelApiClient<$models.OneToOneParent> {
   constructor() { super($metadata.OneToOneParent) }
 }

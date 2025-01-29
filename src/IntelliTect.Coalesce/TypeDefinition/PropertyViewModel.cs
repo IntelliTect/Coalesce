@@ -443,7 +443,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// Returns true if this property is a foreign key.
         /// Guarantees that <see cref="ForeignKeyPrincipalType"/> is not null.
         /// </summary>
-        public bool IsForeignKey => ForeignKeyPrincipalType != null;
+        public bool IsForeignKey => 
+            ForeignKeyPrincipalType != null || 
+            EffectiveParent.ClientProperties.Any(p => p != this && p.ForeignKeyProperty == this);
 
 
         public DatabaseGeneratedOption DatabaseGenerated
@@ -510,13 +512,28 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
                     prop = EffectiveParent.PropertyByName(name);
 
-                    if (prop == null && InverseProperty?.Role == PropertyRole.ReferenceNavigation)
+                    if (prop == null)
                     {
                         // If the other side of the relationship is also a reference navigation,
                         // this is a 1-to-1. If there's otherwise no FK specified, assume that the PK
                         // of this type is the FK we're looking for here.
                         // See test models "OneToOneParent"/"OneToOneChild1" for example.
-                        return EffectiveParent.PrimaryKey;
+
+                        if (this.HasAttribute<InversePropertyAttribute>() &&
+                            InverseProperty?.Role == PropertyRole.ReferenceNavigation)
+                        {
+                            // Only look at `InverseProperty` if explicitly annotated.
+                            // Otherwise, this will cause infinite recursion.
+                            return EffectiveParent.PrimaryKey;
+                        }
+
+                        if (Object!.ClientProperties.Any(p => 
+                            p.ForeignKeyProperty == Object.PrimaryKey && 
+                            p.Type == this.EffectiveParent.Type
+                        ))
+                        {
+                            return EffectiveParent.PrimaryKey;
+                        }
                     }
                 }
 
@@ -694,6 +711,13 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     return Object.ClientProperties.FirstOrDefault(p =>
                         p.Role == PropertyRole.CollectionNavigation
                         && p.InverseProperty == this
+                    )
+                    // Or, try to find 1-to-1 reference navigations
+                    ?? Object.ClientProperties.FirstOrDefault(p =>
+                        p.Role == PropertyRole.ReferenceNavigation && 
+                        p.Type == EffectiveParent.Type &&
+                        p.ForeignKeyProperty?.IsPrimaryKey == true
+
                     );
                 }
 

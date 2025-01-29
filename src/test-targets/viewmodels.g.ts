@@ -755,14 +755,43 @@ export class OneToOneChild2ListViewModel extends ListViewModel<$models.OneToOneC
 }
 
 
+export interface OneToOneManyChildrenViewModel extends $models.OneToOneManyChildren {
+  id: number | null;
+  oneToOneParentId: number | null;
+  get oneToOneParent(): OneToOneParentViewModel | null;
+  set oneToOneParent(value: OneToOneParentViewModel | $models.OneToOneParent | null);
+}
+export class OneToOneManyChildrenViewModel extends ViewModel<$models.OneToOneManyChildren, $apiClients.OneToOneManyChildrenApiClient, number> implements $models.OneToOneManyChildren  {
+  
+  constructor(initialData?: DeepPartial<$models.OneToOneManyChildren> | null) {
+    super($metadata.OneToOneManyChildren, new $apiClients.OneToOneManyChildrenApiClient(), initialData)
+  }
+}
+defineProps(OneToOneManyChildrenViewModel, $metadata.OneToOneManyChildren)
+
+export class OneToOneManyChildrenListViewModel extends ListViewModel<$models.OneToOneManyChildren, $apiClients.OneToOneManyChildrenApiClient, OneToOneManyChildrenViewModel> {
+  
+  constructor() {
+    super($metadata.OneToOneManyChildren, new $apiClients.OneToOneManyChildrenApiClient())
+  }
+}
+
+
 export interface OneToOneParentViewModel extends $models.OneToOneParent {
   id: number | null;
   get child1(): OneToOneChild1ViewModel | null;
   set child1(value: OneToOneChild1ViewModel | $models.OneToOneChild1 | null);
   get child2(): OneToOneChild2ViewModel | null;
   set child2(value: OneToOneChild2ViewModel | $models.OneToOneChild2 | null);
+  get manyChildren(): ViewModelCollection<OneToOneManyChildrenViewModel, $models.OneToOneManyChildren>;
+  set manyChildren(value: (OneToOneManyChildrenViewModel | $models.OneToOneManyChildren)[] | null);
 }
 export class OneToOneParentViewModel extends ViewModel<$models.OneToOneParent, $apiClients.OneToOneParentApiClient, number> implements $models.OneToOneParent  {
+  
+  
+  public addToManyChildren(initialData?: DeepPartial<$models.OneToOneManyChildren> | null) {
+    return this.$addChild('manyChildren', initialData) as OneToOneManyChildrenViewModel
+  }
   
   constructor(initialData?: DeepPartial<$models.OneToOneParent> | null) {
     super($metadata.OneToOneParent, new $apiClients.OneToOneParentApiClient(), initialData)
@@ -1251,6 +1280,7 @@ const viewModelTypeLookup = ViewModel.typeLookup = {
   EnumPk: EnumPkViewModel,
   OneToOneChild1: OneToOneChild1ViewModel,
   OneToOneChild2: OneToOneChild2ViewModel,
+  OneToOneManyChildren: OneToOneManyChildrenViewModel,
   OneToOneParent: OneToOneParentViewModel,
   Person: PersonViewModel,
   Product: ProductViewModel,
@@ -1276,6 +1306,7 @@ const listViewModelTypeLookup = ListViewModel.typeLookup = {
   EnumPk: EnumPkListViewModel,
   OneToOneChild1: OneToOneChild1ListViewModel,
   OneToOneChild2: OneToOneChild2ListViewModel,
+  OneToOneManyChildren: OneToOneManyChildrenListViewModel,
   OneToOneParent: OneToOneParentListViewModel,
   Person: PersonListViewModel,
   Product: ProductListViewModel,

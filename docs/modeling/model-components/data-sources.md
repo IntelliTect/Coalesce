@@ -258,7 +258,7 @@ Given a property and a client-provided string value, perform some filtering on t
 
 <Prop def="IQueryable<T> ApplyListSearchTerm(IQueryable<T> query, IFilterParameters parameters)" />
 
-Applies filters to the query based on the specified search term. See [[Search]](/modeling/model-components/attributes/search.md) for a detailed look at how searching works in Coalesce.
+Applies predicates to the query based on the search term in `parameters.Search`. See [[Search]](/modeling/model-components/attributes/search.md) for a detailed look at how searching works in Coalesce.
 
 
 <Prop def="IQueryable<T> ApplyListSorting(IQueryable<T> query, IListParameters parameters)" />

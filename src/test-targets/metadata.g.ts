@@ -2391,6 +2391,114 @@ export const EnumPk = domain.types.EnumPk = {
   dataSources: {
   },
 }
+export const OneToOneChild1 = domain.types.OneToOneChild1 = {
+  name: "OneToOneChild1" as const,
+  displayName: "One To One Child1",
+  get displayProp() { return this.props.parentId }, 
+  type: "model",
+  controllerRoute: "OneToOneChild1",
+  get keyProp() { return this.props.parentId }, 
+  behaviorFlags: 7 as BehaviorFlags,
+  props: {
+    parentId: {
+      name: "parentId",
+      displayName: "Parent Id",
+      type: "number",
+      role: "primaryKey",
+      hidden: 3 as HiddenAreas,
+    },
+    parent: {
+      name: "parent",
+      displayName: "Parent",
+      type: "model",
+      get typeDef() { return (domain.types.OneToOneParent as ModelType & { name: "OneToOneParent" }) },
+      role: "referenceNavigation",
+      get foreignKey() { return (domain.types.OneToOneChild1 as ModelType & { name: "OneToOneChild1" }).props.parentId as PrimaryKeyProperty },
+      get principalKey() { return (domain.types.OneToOneParent as ModelType & { name: "OneToOneParent" }).props.id as PrimaryKeyProperty },
+      dontSerialize: true,
+    },
+  },
+  methods: {
+  },
+  dataSources: {
+  },
+}
+export const OneToOneChild2 = domain.types.OneToOneChild2 = {
+  name: "OneToOneChild2" as const,
+  displayName: "One To One Child2",
+  get displayProp() { return this.props.parentId }, 
+  type: "model",
+  controllerRoute: "OneToOneChild2",
+  get keyProp() { return this.props.parentId }, 
+  behaviorFlags: 7 as BehaviorFlags,
+  props: {
+    parentId: {
+      name: "parentId",
+      displayName: "Parent Id",
+      type: "number",
+      role: "primaryKey",
+      hidden: 3 as HiddenAreas,
+    },
+    parent: {
+      name: "parent",
+      displayName: "Parent",
+      type: "model",
+      get typeDef() { return (domain.types.OneToOneParent as ModelType & { name: "OneToOneParent" }) },
+      role: "referenceNavigation",
+      get foreignKey() { return (domain.types.OneToOneChild2 as ModelType & { name: "OneToOneChild2" }).props.parentId as PrimaryKeyProperty },
+      get principalKey() { return (domain.types.OneToOneParent as ModelType & { name: "OneToOneParent" }).props.id as PrimaryKeyProperty },
+      dontSerialize: true,
+    },
+  },
+  methods: {
+  },
+  dataSources: {
+  },
+}
+export const OneToOneParent = domain.types.OneToOneParent = {
+  name: "OneToOneParent" as const,
+  displayName: "One To One Parent",
+  get displayProp() { return this.props.id }, 
+  type: "model",
+  controllerRoute: "OneToOneParent",
+  get keyProp() { return this.props.id }, 
+  behaviorFlags: 7 as BehaviorFlags,
+  props: {
+    id: {
+      name: "id",
+      displayName: "Id",
+      type: "number",
+      role: "primaryKey",
+      hidden: 3 as HiddenAreas,
+    },
+    child1: {
+      name: "child1",
+      displayName: "Child1",
+      type: "model",
+      get typeDef() { return (domain.types.OneToOneChild1 as ModelType & { name: "OneToOneChild1" }) },
+      role: "referenceNavigation",
+      get foreignKey() { return (domain.types.OneToOneParent as ModelType & { name: "OneToOneParent" }).props.id as PrimaryKeyProperty },
+      get principalKey() { return (domain.types.OneToOneChild1 as ModelType & { name: "OneToOneChild1" }).props.parentId as PrimaryKeyProperty },
+      get inverseNavigation() { return (domain.types.OneToOneChild1 as ModelType & { name: "OneToOneChild1" }).props.parent as ModelCollectionNavigationProperty },
+      dontSerialize: true,
+    },
+    child2: {
+      name: "child2",
+      displayName: "Child2",
+      type: "model",
+      get typeDef() { return (domain.types.OneToOneChild2 as ModelType & { name: "OneToOneChild2" }) },
+      role: "referenceNavigation",
+      get foreignKey() { return (domain.types.OneToOneParent as ModelType & { name: "OneToOneParent" }).props.id as PrimaryKeyProperty },
+      get principalKey() { return (domain.types.OneToOneChild2 as ModelType & { name: "OneToOneChild2" }).props.parentId as PrimaryKeyProperty },
+      get inverseNavigation() { return (domain.types.OneToOneChild2 as ModelType & { name: "OneToOneChild2" }).props.parent as ModelCollectionNavigationProperty },
+      dontSerialize: true,
+    },
+  },
+  methods: {
+  },
+  dataSources: {
+  },
+}
 export const Person = domain.types.Person = {
   name: "Person" as const,
   displayName: "Person",
@@ -3985,6 +4093,12 @@ export const PersonCriteria = domain.types.PersonCriteria = {
       dateKind: "datetime",
       role: "value",
     },
+    adminOnly: {
+      name: "adminOnly",
+      displayName: "Admin Only",
+      type: "string",
+      role: "value",
+    },
   },
 }
 export const PositionalRecord = domain.types.PositionalRecord = {
@@ -4229,6 +4343,9 @@ interface AppDomain extends Domain {
     InitRecordWithDefaultCtor: typeof InitRecordWithDefaultCtor
     InputOutputOnlyExternalTypeWithRequiredNonscalarProp: typeof InputOutputOnlyExternalTypeWithRequiredNonscalarProp
     Location: typeof Location
+    OneToOneChild1: typeof OneToOneChild1
+    OneToOneChild2: typeof OneToOneChild2
+    OneToOneParent: typeof OneToOneParent
     OutputOnlyExternalTypeWithoutDefaultCtor: typeof OutputOnlyExternalTypeWithoutDefaultCtor
     OutputOnlyExternalTypeWithoutDefaultCtorWithInputMappableProperties: typeof OutputOnlyExternalTypeWithoutDefaultCtorWithInputMappableProperties
     OutputOnlyExternalTypeWithRequiredEntityProp: typeof OutputOnlyExternalTypeWithRequiredEntityProp

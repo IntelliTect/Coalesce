@@ -377,6 +377,82 @@ export class EnumPk {
 }
 
 
+export interface OneToOneChild1 extends Model<typeof metadata.OneToOneChild1> {
+  parentId: number | null
+  parent: OneToOneParent | null
+}
+export class OneToOneChild1 {
+  
+  /** Mutates the input object and its descendents into a valid OneToOneChild1 implementation. */
+  static convert(data?: Partial<OneToOneChild1>): OneToOneChild1 {
+    return convertToModel(data || {}, metadata.OneToOneChild1) 
+  }
+  
+  /** Maps the input object and its descendents to a new, valid OneToOneChild1 implementation. */
+  static map(data?: Partial<OneToOneChild1>): OneToOneChild1 {
+    return mapToModel(data || {}, metadata.OneToOneChild1) 
+  }
+  
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.OneToOneChild1; }
+  
+  /** Instantiate a new OneToOneChild1, optionally basing it on the given data. */
+  constructor(data?: Partial<OneToOneChild1> | {[k: string]: any}) {
+    Object.assign(this, OneToOneChild1.map(data || {}));
+  }
+}
+
+
+export interface OneToOneChild2 extends Model<typeof metadata.OneToOneChild2> {
+  parentId: number | null
+  parent: OneToOneParent | null
+}
+export class OneToOneChild2 {
+  
+  /** Mutates the input object and its descendents into a valid OneToOneChild2 implementation. */
+  static convert(data?: Partial<OneToOneChild2>): OneToOneChild2 {
+    return convertToModel(data || {}, metadata.OneToOneChild2) 
+  }
+  
+  /** Maps the input object and its descendents to a new, valid OneToOneChild2 implementation. */
+  static map(data?: Partial<OneToOneChild2>): OneToOneChild2 {
+    return mapToModel(data || {}, metadata.OneToOneChild2) 
+  }
+  
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.OneToOneChild2; }
+  
+  /** Instantiate a new OneToOneChild2, optionally basing it on the given data. */
+  constructor(data?: Partial<OneToOneChild2> | {[k: string]: any}) {
+    Object.assign(this, OneToOneChild2.map(data || {}));
+  }
+}
+
+
+export interface OneToOneParent extends Model<typeof metadata.OneToOneParent> {
+  id: number | null
+  child1: OneToOneChild1 | null
+  child2: OneToOneChild2 | null
+}
+export class OneToOneParent {
+  
+  /** Mutates the input object and its descendents into a valid OneToOneParent implementation. */
+  static convert(data?: Partial<OneToOneParent>): OneToOneParent {
+    return convertToModel(data || {}, metadata.OneToOneParent) 
+  }
+  
+  /** Maps the input object and its descendents to a new, valid OneToOneParent implementation. */
+  static map(data?: Partial<OneToOneParent>): OneToOneParent {
+    return mapToModel(data || {}, metadata.OneToOneParent) 
+  }
+  
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.OneToOneParent; }
+  
+  /** Instantiate a new OneToOneParent, optionally basing it on the given data. */
+  constructor(data?: Partial<OneToOneParent> | {[k: string]: any}) {
+    Object.assign(this, OneToOneParent.map(data || {}));
+  }
+}
+
+
 export interface Person extends Model<typeof metadata.Person> {
   
   /** ID for the person object. */
@@ -1047,6 +1123,7 @@ export interface PersonCriteria extends Model<typeof metadata.PersonCriteria> {
   subCriteria: PersonCriteria[] | null
   gender: Genders | null
   date: Date | null
+  adminOnly: string | null
 }
 export class PersonCriteria {
   
@@ -1272,6 +1349,9 @@ declare module "coalesce-vue/lib/model" {
     InitRecordWithDefaultCtor: InitRecordWithDefaultCtor
     InputOutputOnlyExternalTypeWithRequiredNonscalarProp: InputOutputOnlyExternalTypeWithRequiredNonscalarProp
     Location: Location
+    OneToOneChild1: OneToOneChild1
+    OneToOneChild2: OneToOneChild2
+    OneToOneParent: OneToOneParent
     OutputOnlyExternalTypeWithoutDefaultCtor: OutputOnlyExternalTypeWithoutDefaultCtor
     OutputOnlyExternalTypeWithoutDefaultCtorWithInputMappableProperties: OutputOnlyExternalTypeWithoutDefaultCtorWithInputMappableProperties
     OutputOnlyExternalTypeWithRequiredEntityProp: OutputOnlyExternalTypeWithRequiredEntityProp

@@ -36,6 +36,10 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         [InternalUse]
         public DbSet<DbSetIsInternalUse> Internals { get; set; }
 
+        public DbSet<OneToOneParent> OneToOneParents { get; set; }
+        public DbSet<OneToOneChild1> OneToOneChild1s { get; set; }
+        public DbSet<OneToOneChild2> OneToOneChild2s { get; set; }
+
         public AppDbContext() : this(Guid.NewGuid().ToString()) { }
 
         public AppDbContext(string memoryDatabaseName)

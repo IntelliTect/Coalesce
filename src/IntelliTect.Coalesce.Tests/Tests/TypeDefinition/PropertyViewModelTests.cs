@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Text;
 using Xunit;
 using static IntelliTect.Coalesce.DataAnnotations.DateTypeAttribute;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace IntelliTect.Coalesce.Tests.TypeDefinition
 {
@@ -283,5 +284,33 @@ namespace IntelliTect.Coalesce.Tests.TypeDefinition
             PropertyViewModel vm = data;
             Assert.Equal(expected, vm.Comment, ignoreLineEndingDifferences: true);
         }
+
+
+        [Theory]
+        [PropertyViewModelData<OneToOneParent>(nameof(OneToOneParent.Child1))]
+        [PropertyViewModelData<OneToOneParent>(nameof(OneToOneParent.Child2))]
+        public void OneToOne_ParentNavigations_HasCorrectMetadata(PropertyViewModelData data)
+        {
+            PropertyViewModel vm = data;
+            Assert.Equal(PropertyRole.ReferenceNavigation, vm.Role);
+            Assert.Equal(vm.Parent.PropertyByName(nameof(OneToOneParent.Id)), vm.ForeignKeyProperty);
+            Assert.Equal(nameof(OneToOneChild1.Parent), vm.InverseProperty.Name);
+        }
+
+        [Theory]
+        [PropertyViewModelData<OneToOneChild1>(nameof(OneToOneChild1.Parent))]
+        [PropertyViewModelData<OneToOneChild2>(nameof(OneToOneChild2.Parent))]
+        public void OneToOne_ChildNavigations_HasCorrectMetadata(PropertyViewModelData data)
+        {
+            PropertyViewModel vm = data;
+            Assert.Equal(PropertyRole.ReferenceNavigation, vm.Role);
+            Assert.Equal(vm.Parent.PropertyByName("ParentId"), vm.ForeignKeyProperty);
+
+            // We currently assume that reverence inverses are only ever collection navigations.
+            // This could change in the future, but at least for now the typescript types don't allow
+            // for representing this here, which is fine and doesn't currently hurt anything.
+            Assert.Null(vm.InverseProperty);
+        }
+
     }
 }

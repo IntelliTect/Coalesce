@@ -26,6 +26,27 @@ In cases where the foreign key is not named after the navigation property with `
 Collection navigation properties can be used in a straightforward manner. In the event where the inverse property on the other side of the relationship cannot be determined, `[InversePropertyAttribute]` will need to be used. [EF Core provides documentation](https://learn.microsoft.com/en-us/ef/core/modeling/relationships/mapping-attributes#inversepropertyattribute) on how to use this attribute. Errors will be displayed at generation time if an inverse property cannot be determined without the attribute.
 
 
+#### One-to-one Relationships
+One-to-one relationships can be represented in Coalesce, but require fairly specific configuration to satisfy both EF and Coalesce's needs. Specifically, the dependent/child side of the one-to-one (the entity whose PK is also a FK), must explicitly annotate its PK with `[ForeignKey]` pointing at the parent navigation property. For example:
+
+``` c#
+public class OneToOneParent
+{
+    public int Id { get; set; }
+
+    public OneToOneChild? Child { get; set; }
+}
+
+public class OneToOneChild
+{
+    [Key, ForeignKey("Parent")]
+    public int ParentId { get; set; }
+
+    public OneToOneParent? Parent { get; set; }
+}
+```
+
+
 ### Attributes
 
 Coalesce provides a number of C# attributes that can be used to decorate your model classes and their properties in order to customize behavior, appearance, security, and more. Coalesce also supports a number of annotations from `System.ComponentModel.DataAnnotations`.

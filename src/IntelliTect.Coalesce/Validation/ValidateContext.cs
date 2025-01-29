@@ -168,7 +168,7 @@ namespace IntelliTect.Coalesce.Validation
                     }
                     catch (Exception ex)
                     {
-                        assert.IsTrue(false, $"Exception: {ex.Message}");
+                        assert.IsTrue(false, $"Exception: {ex.ToString()}");
                     }
                 }
 

@@ -509,6 +509,15 @@ namespace IntelliTect.Coalesce.TypeDefinition
                         ?? Name + ConventionalIdSuffix;
 
                     prop = EffectiveParent.PropertyByName(name);
+
+                    if (prop == null && InverseProperty?.Role == PropertyRole.ReferenceNavigation)
+                    {
+                        // If the other side of the relationship is also a reference navigation,
+                        // this is a 1-to-1. If there's otherwise no FK specified, assume that the PK
+                        // of this type is the FK we're looking for here.
+                        // See test models "OneToOneParent"/"OneToOneChild1" for example.
+                        return EffectiveParent.PrimaryKey;
+                    }
                 }
 
                 if (prop == null || !prop.Type.IsValidKeyType || !prop.IsDbMapped)
@@ -541,7 +550,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     this.GetAttributeValue<ForeignKeyAttribute>(a => a.Name)
 
                     // Use the ForeignKey Attribute on the object property if it is there.
-                    ?? EffectiveParent.Properties.SingleOrDefault(p => Name == p.GetAttributeValue<ForeignKeyAttribute>(a => a.Name))?.Name
+                    ?? EffectiveParent.Properties.FirstOrDefault(p => Name == p.GetAttributeValue<ForeignKeyAttribute>(a => a.Name))?.Name
 
                     // Else, by convention remove the Id at the end.
                     ?? (Name.EndsWith(ConventionalIdSuffix) ? Name.Substring(0, Name.Length - ConventionalIdSuffix.Length) : null);

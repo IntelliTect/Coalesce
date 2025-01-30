@@ -7,13 +7,11 @@
 - `ViewModel.$getErrors` now returns a `string[]` instead of a `Generator<string>`.
 - `StandardBehaviors.AfterDelete` is now `AfterDeleteAsync` and has a different signature and semantics. Instead of modifying the resulting `item` and `includeTree` with `ref` parameters, these values can be optionally overridden by returning an ItemResult with its `Object` and `IncludeTree` properties populated with non-null values.
 
-## Major Changes
-
-- All endpoints with bodies are now send as JSON instead of form data, with the exception of those endpoints with file parameters and only scalar parameters (no complex parameters) beyond the file parameters.
-
 ## Features
 
+- All endpoints with bodies are now send as JSON instead of form data, with the exception of those endpoints with file parameters and only scalar parameters (no complex parameters) beyond the file parameters.
 - Added `$search`, `$filter`, and `$orderBy` shorthands to ListViewModel.
+- Coalesce's Vite middleware (`UseViteDevelopmentServer`) now checks if your installed NPM packages match what's defined in package.json and package-lock.json, presenting an in-browser warning if they do not. This helps avoid forgetting to reinstall packages after pulling down changes in multi-developer projects.
 
 # 5.3.1
 

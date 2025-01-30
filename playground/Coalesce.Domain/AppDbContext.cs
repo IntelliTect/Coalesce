@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Linq;
+using System.Security.Cryptography;
 
 // [assembly: CoalesceConfiguration(NoAutoInclude = true)]
 
@@ -43,10 +44,15 @@ namespace Coalesce.Domain
                 .UseCoalesceAuditLogging<AuditLog>(x => x
                     .WithAugmentation<OperationContext>()
                     .WithMergeWindow(TimeSpan.FromSeconds(15))
-                    .ConfigureAudit(x => x
-                        // Just a random example of audit config:
-                        .ExcludeProperty<Person>(p => p.ProfilePic)
-                    )
+                    .ConfigureAudit(config =>
+                    {
+                        static string ShaString(byte[]? bytes) => bytes is null ? "" : "SHA1:" + Convert.ToBase64String(SHA1.HashData(bytes));
+
+                        config
+                            .FormatType<byte[]>(ShaString)
+                            // Just a random example of audit config:
+                            .ExcludeProperty<Person>(p => p.ProfilePic);
+                    })
                 );
         }
 

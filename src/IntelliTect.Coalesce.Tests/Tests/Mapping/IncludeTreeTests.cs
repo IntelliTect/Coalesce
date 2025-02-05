@@ -72,6 +72,33 @@ namespace IntelliTect.Coalesce.Tests.Mapping
             AssertBasicChecks(tree);
         }
 
+        [Fact]
+        public void IncludeTree_StaticFor()
+        {
+            var tree = IncludeTree.For<Person>(q => q
+                .Include(p => p.Company)
+                .Include(p => p.CasesAssigned).ThenInclude(c => c.CaseProducts).ThenInclude(c => c.Case.AssignedTo)
+                .Include(p => p.CasesAssigned).ThenInclude(c => c.CaseProducts).ThenInclude(c => c.Case.ReportedBy)
+                .IncludedSeparately(e => e.CasesReported).ThenIncluded(c => c.ReportedBy.Company)
+                .IncludedSeparately(e => e.CasesReported).ThenIncluded(c => c.ReportedBy.CasesAssigned)
+            );
+
+            AssertBasicChecks(tree);
+        }
+
+        [Fact]
+        public void IncludeTree_StaticQueryFor()
+        {
+            var tree = IncludeTree.QueryFor<Person>()
+                .Include(p => p.Company)
+                .Include(p => p.CasesAssigned).ThenInclude(c => c.CaseProducts).ThenInclude(c => c.Case.AssignedTo)
+                .Include(p => p.CasesAssigned).ThenInclude(c => c.CaseProducts).ThenInclude(c => c.Case.ReportedBy)
+                .IncludedSeparately(e => e.CasesReported).ThenIncluded(c => c.ReportedBy.Company)
+                .IncludedSeparately(e => e.CasesReported).ThenIncluded(c => c.ReportedBy.CasesAssigned)
+                .GetIncludeTree();
+
+            AssertBasicChecks(tree);
+        }
 
         [Fact]
         public void IncludeTree_BasicStringChecks()

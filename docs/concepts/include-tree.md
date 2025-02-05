@@ -153,28 +153,39 @@ If you have [custom methods](/modeling/model-components/methods.md) that return 
 ::: tip
 An `IncludeTree` can be obtained from any `IQueryable` by calling the `GetIncludeTree` extension method (`using IntelliTect.Coalesce.Helpers.IncludeTree`).
 
-In situations where your root object isn't on your `DbContext` (see [External Types](/modeling/model-types/external-types.md)), you can use `Enumerable.Empty<MyNonDbClass>().AsQueryable()` to get an `IQueryable` to start from. When you do this, you **must** use `IncludedSeparately` - the regular EF `Include` method won't work without a `DbSet`.
+In situations where you need to create an `IncludeTree` without a `DbContext`, there are static methods on `IncludeTree` to help with this.
+
+``` c#
+IncludeTree tree = IncludeTree.For<Person>(q => q
+    .Include(p => p.Company)
+    .Include(p => p.CasesAssigned).ThenInclude(c => c.CaseProducts)
+);
+// OR
+IncludeTree tree = IncludeTree.QueryFor<Person>()
+    .Include(p => p.Company)
+    .Include(p => p.CasesAssigned).ThenInclude(c => c.CaseProducts)
+    .GetIncludeTree();
+```
 :::
 
-To return an `IncludeTree` from a custom method is to make that method return an `ItemResult<T>`, and then set the `IncludeTree` property of the `ItemResult` object. For example:
+To return an `IncludeTree` from a custom method, make that method return an `ItemResult<T>`, and then set the `IncludeTree` property of the `ItemResult` object. For example:
 
 ``` c#
 public class Employee
 {
-    public async Task<ItemResult<ICollection<Employee>>> GetChainOfCommand(AppDbContext db)
+    public async Task<ItemResult<List<Employee>>> GetChainOfCommand(AppDbContext db)
     {
-        IQueryable<Employee> query = db.Employees
-            .Include(e => e.Supervisor);
+        IQueryable<Employee> query = db.Employees.Include(e => e.Supervisor);
 
-        var ret = new List<Employee>();
+        var results = new List<Employee>();
         var current = this;
         while (current.Supervisor != null)
         {
-            ret.Push(current);
+            results.Push(current);
             current = await query.FirstOrDefaultAsync(e => e.EmployeeId == current.SupervisorId);
         }
 
-        return new(ret, includeTree: query.GetIncludeTree());
+        return new(results, includeTree: query.GetIncludeTree());
     }
 }
 ```

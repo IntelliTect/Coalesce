@@ -5,6 +5,7 @@
 - Fix error in .NET 9 thrown by vite development middleware if the HTTPS cert directory doesn't exist.
 - Fix `ViewModel.$load` and `ListViewModel.$load` not properly working with `.useResponseCaching()`.
 - Entities that own multiple one-to-one relationships should no longer throw errors when generating.
+- Don't duplicate data source parameters in OpenAPI parameter collections.
 
 # 5.3.1
 

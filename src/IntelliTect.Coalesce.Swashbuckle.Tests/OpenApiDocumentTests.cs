@@ -73,5 +73,19 @@ namespace IntelliTect.Coalesce.Swashbuckle.Tests
             Assert.Single(properties, p => p.Key == "complexModelId");
             Assert.Single(properties, p => p.Key.Equals("model.complexModelId", StringComparison.InvariantCultureIgnoreCase));
         }
+
+        [Fact]
+        public async Task DataSourceWithInheritance_DoesNotDuplicateSharedParameters()
+        {
+            var doc = await Fixture.GetDocumentAsync();
+
+            var parameters = doc
+                .Paths["/api/Person/list"]
+                .Operations[Microsoft.OpenApi.Models.OperationType.Get]
+                .Parameters;
+
+            var param = Assert.Single(parameters, p => p.Name == "dataSource.IntArray");
+            Assert.Equal("Used by data sources ParameterTestsSource, ParameterTestsSourceSubclass.", param.Description);
+        }
     }
 }

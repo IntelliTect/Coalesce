@@ -87,19 +87,19 @@ namespace IntelliTect.Coalesce.Api
 
                 var dataSources = declaredFor.ClassViewModel!.ClientDataSources(reflectionRepository);
 
-                foreach (var dataSource in dataSources)
+                foreach (var group in dataSources.SelectMany(ds => ds.DataSourceParameters).GroupBy(ds => ds.Name))
                 {
-                    foreach (var dsParam in dataSource.DataSourceParameters)
+                    var dsParam = group.First();
+                    var dataSource = dsParam.Parent;
+
+                    operation.ParameterDescriptions.Add(new ApiParameterDescription()
                     {
-                        operation.ParameterDescriptions.Add(new ApiParameterDescription()
-                        {
-                            Source = BindingSource.Query,
-                            Name = $"{paramVm.Name}.{dsParam.Name}",
-                            IsRequired = false,
-                            Type = dsParam.Type.TypeInfo,
-                            ModelMetadata = operation.ParameterDescriptions.First().ModelMetadata.GetMetadataForProperty(dataSource.Type.TypeInfo, dsParam.Name)
-                        });
-                    }
+                        Source = BindingSource.Query,
+                        Name = $"{paramVm.Name}.{dsParam.Name}",
+                        IsRequired = false,
+                        Type = dsParam.Type.TypeInfo,
+                        ModelMetadata = operation.ParameterDescriptions.First().ModelMetadata.GetMetadataForProperty(dataSource.Type.TypeInfo, dsParam.Name)
+                    });
                 }
             }
         }

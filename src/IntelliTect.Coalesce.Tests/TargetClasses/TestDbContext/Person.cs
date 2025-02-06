@@ -298,4 +298,9 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         [Coalesce]
         public byte[] Bytes { get; set; }
     }
+
+    [Coalesce]
+    public class ParameterTestsSourceSubclass(CrudContext<AppDbContext> context) : ParameterTestsSource(context)
+    {
+    }
 }

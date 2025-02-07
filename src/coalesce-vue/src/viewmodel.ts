@@ -546,7 +546,7 @@ export abstract class ViewModel<
           throw e;
         }
       })
-      .onFulfilled(function (this: ViewModel) {
+      .onFulfilled(() => {
         if (!this.$save.result) {
           // Can't do anything useful if the save returned no data.
           return;
@@ -999,7 +999,7 @@ export abstract class ViewModel<
           this._removeFromParentCollection();
         }
       })
-      .onFulfilled(function (this: ViewModel) {
+      .onFulfilled(() => {
         this._removeFromParentCollection();
       });
 

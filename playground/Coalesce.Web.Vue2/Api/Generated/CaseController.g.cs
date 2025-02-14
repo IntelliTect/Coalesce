@@ -292,7 +292,7 @@ namespace Coalesce.Web.Vue2.Api
             var _params = new
             {
                 Id = id,
-                Etag = etag ?? await ((await Request.ReadFormAsync()).Files[nameof(etag)]?.OpenReadStream().ReadAllBytesAsync(true) ?? Task.FromResult<byte[]>(null))
+                Etag = etag
             };
 
             var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Case, Coalesce.Domain.Case>("Default");

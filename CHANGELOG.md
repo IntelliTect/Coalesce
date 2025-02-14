@@ -7,6 +7,8 @@
 - Entities that own multiple one-to-one relationships should no longer throw errors when generating.
 - Don't duplicate data source parameters in OpenAPI parameter collections.
 - Fix error `this._removeFromParentCollection is not a function` thrown when calling `ViewModel.$delete.confirmInvoke()`.
+- Remove incorrect generation of `ReadFormAsync` for binary parameters on GET endpoints.
+
 
 # 5.3.1
 

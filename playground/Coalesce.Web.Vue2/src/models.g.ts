@@ -419,6 +419,12 @@ export namespace Person {
     
     export class WithoutCases implements DataSource<typeof metadata.Person.dataSources.withoutCases> {
       readonly $metadata = metadata.Person.dataSources.withoutCases
+      personCriteria: PersonCriteria | null = null
+      
+      constructor(params?: Omit<Partial<WithoutCases>, '$metadata'>) {
+        if (params) Object.assign(this, params);
+        return reactiveDataSource(this);
+      }
     }
   }
 }
@@ -473,6 +479,39 @@ export class ZipCode {
   /** Instantiate a new ZipCode, optionally basing it on the given data. */
   constructor(data?: Partial<ZipCode> | {[k: string]: any}) {
     Object.assign(this, ZipCode.map(data || {}));
+  }
+}
+
+
+export interface CaseStandalone extends Model<typeof metadata.CaseStandalone> {
+  id: number | null
+  assignedTo: Person | null
+}
+export class CaseStandalone {
+  
+  /** Mutates the input object and its descendents into a valid CaseStandalone implementation. */
+  static convert(data?: Partial<CaseStandalone>): CaseStandalone {
+    return convertToModel(data || {}, metadata.CaseStandalone) 
+  }
+  
+  /** Maps the input object and its descendents to a new, valid CaseStandalone implementation. */
+  static map(data?: Partial<CaseStandalone>): CaseStandalone {
+    return mapToModel(data || {}, metadata.CaseStandalone) 
+  }
+  
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.CaseStandalone; }
+  
+  /** Instantiate a new CaseStandalone, optionally basing it on the given data. */
+  constructor(data?: Partial<CaseStandalone> | {[k: string]: any}) {
+    Object.assign(this, CaseStandalone.map(data || {}));
+  }
+}
+export namespace CaseStandalone {
+  export namespace DataSources {
+    
+    export class DefaultSource implements DataSource<typeof metadata.CaseStandalone.dataSources.defaultSource> {
+      readonly $metadata = metadata.CaseStandalone.dataSources.defaultSource
+    }
   }
 }
 
@@ -832,6 +871,7 @@ declare module "coalesce-vue/lib/model" {
     CaseDto: CaseDto
     CaseDtoStandalone: CaseDtoStandalone
     CaseProduct: CaseProduct
+    CaseStandalone: CaseStandalone
     CaseSummary: CaseSummary
     Company: Company
     DevTeam: DevTeam

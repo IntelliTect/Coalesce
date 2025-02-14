@@ -319,6 +319,29 @@ export class CaseProductListViewModel extends ListViewModel<$models.CaseProduct,
 }
 
 
+export interface CaseStandaloneViewModel extends $models.CaseStandalone {
+  id: number | null;
+  get assignedTo(): PersonViewModel | null;
+  set assignedTo(value: PersonViewModel | $models.Person | null);
+}
+export class CaseStandaloneViewModel extends ViewModel<$models.CaseStandalone, $apiClients.CaseStandaloneApiClient, number> implements $models.CaseStandalone  {
+  static DataSources = $models.CaseStandalone.DataSources;
+  
+  constructor(initialData?: DeepPartial<$models.CaseStandalone> | null) {
+    super($metadata.CaseStandalone, new $apiClients.CaseStandaloneApiClient(), initialData)
+  }
+}
+defineProps(CaseStandaloneViewModel, $metadata.CaseStandalone)
+
+export class CaseStandaloneListViewModel extends ListViewModel<$models.CaseStandalone, $apiClients.CaseStandaloneApiClient, CaseStandaloneViewModel> {
+  static DataSources = $models.CaseStandalone.DataSources;
+  
+  constructor() {
+    super($metadata.CaseStandalone, new $apiClients.CaseStandaloneApiClient())
+  }
+}
+
+
 export interface CompanyViewModel extends $models.Company {
   id: number | null;
   name: string | null;
@@ -654,6 +677,17 @@ export class PersonListViewModel extends ListViewModel<$models.Person, $apiClien
     return methodWithOptionalEntityParameter
   }
   
+  public get methodWithExplicitlyInjectedDataSource() {
+    const methodWithExplicitlyInjectedDataSource = this.$apiClient.$makeCaller(
+      this.$metadata.methods.methodWithExplicitlyInjectedDataSource,
+      (c) => c.methodWithExplicitlyInjectedDataSource(),
+      () => ({}),
+      (c, args) => c.methodWithExplicitlyInjectedDataSource())
+    
+    Object.defineProperty(this, 'methodWithExplicitlyInjectedDataSource', {value: methodWithExplicitlyInjectedDataSource});
+    return methodWithExplicitlyInjectedDataSource
+  }
+  
   /** Gets people matching the criteria, paginated by parameter 'page'. */
   public get searchPeople() {
     const searchPeople = this.$apiClient.$makeCaller(
@@ -810,6 +844,7 @@ const viewModelTypeLookup = ViewModel.typeLookup = {
   CaseDto: CaseDtoViewModel,
   CaseDtoStandalone: CaseDtoStandaloneViewModel,
   CaseProduct: CaseProductViewModel,
+  CaseStandalone: CaseStandaloneViewModel,
   Company: CompanyViewModel,
   Log: LogViewModel,
   Person: PersonViewModel,
@@ -826,6 +861,7 @@ const listViewModelTypeLookup = ListViewModel.typeLookup = {
   CaseDto: CaseDtoListViewModel,
   CaseDtoStandalone: CaseDtoStandaloneListViewModel,
   CaseProduct: CaseProductListViewModel,
+  CaseStandalone: CaseStandaloneListViewModel,
   Company: CompanyListViewModel,
   Log: LogListViewModel,
   Person: PersonListViewModel,

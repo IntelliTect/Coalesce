@@ -993,6 +993,45 @@ export const CaseProduct = domain.types.CaseProduct = {
   dataSources: {
   },
 }
+export const CaseStandalone = domain.types.CaseStandalone = {
+  name: "CaseStandalone" as const,
+  displayName: "Case Standalone",
+  get displayProp() { return this.props.id }, 
+  type: "model",
+  controllerRoute: "CaseStandalone",
+  get keyProp() { return this.props.id }, 
+  behaviorFlags: 0 as BehaviorFlags,
+  props: {
+    id: {
+      name: "id",
+      displayName: "Id",
+      type: "number",
+      role: "primaryKey",
+      hidden: 3 as HiddenAreas,
+      dontSerialize: true,
+    },
+    assignedTo: {
+      name: "assignedTo",
+      displayName: "Assigned To",
+      type: "model",
+      get typeDef() { return (domain.types.Person as ModelType & { name: "Person" }) },
+      role: "value",
+      dontSerialize: true,
+    },
+  },
+  methods: {
+  },
+  dataSources: {
+    defaultSource: {
+      type: "dataSource",
+      name: "DefaultSource" as const,
+      displayName: "Default Source",
+      isDefault: true,
+      props: {
+      },
+    },
+  },
+}
 export const Company = domain.types.Company = {
   name: "Company" as const,
   displayName: "Company",
@@ -1850,6 +1889,22 @@ export const Person = domain.types.Person = {
         role: "value",
       },
     },
+    methodWithExplicitlyInjectedDataSource: {
+      name: "methodWithExplicitlyInjectedDataSource",
+      displayName: "Method With Explicitly Injected Data Source",
+      transportType: "item",
+      httpMethod: "POST",
+      isStatic: true,
+      params: {
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "model",
+        get typeDef() { return (domain.types.Person as ModelType & { name: "Person" }) },
+        role: "value",
+      },
+    },
     searchPeople: {
       name: "searchPeople",
       displayName: "Search People",
@@ -1923,6 +1978,13 @@ export const Person = domain.types.Person = {
       displayName: "Without Cases",
       isDefault: true,
       props: {
+        personCriteria: {
+          name: "personCriteria",
+          displayName: "Person Criteria",
+          type: "object",
+          get typeDef() { return (domain.types.PersonCriteria as ObjectType & { name: "PersonCriteria" }) },
+          role: "value",
+        },
       },
     },
   },
@@ -2489,6 +2551,7 @@ interface AppDomain extends Domain {
     CaseDto: typeof CaseDto
     CaseDtoStandalone: typeof CaseDtoStandalone
     CaseProduct: typeof CaseProduct
+    CaseStandalone: typeof CaseStandalone
     CaseSummary: typeof CaseSummary
     Company: typeof Company
     DevTeam: typeof DevTeam

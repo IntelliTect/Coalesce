@@ -36,28 +36,39 @@ namespace Coalesce.Starter.Vue.Web.Api
         [Authorize]
         public virtual Task<ItemResult<WidgetResponse>> Get(
             int id,
-            DataSourceParameters parameters,
+            [FromQuery] DataSourceParameters parameters,
             IDataSource<Coalesce.Starter.Vue.Data.Models.Widget> dataSource)
             => GetImplementation(id, parameters, dataSource);
 
         [HttpGet("list")]
         [Authorize]
         public virtual Task<ListResult<WidgetResponse>> List(
-            ListParameters parameters,
+            [FromQuery] ListParameters parameters,
             IDataSource<Coalesce.Starter.Vue.Data.Models.Widget> dataSource)
             => ListImplementation(parameters, dataSource);
 
         [HttpGet("count")]
         [Authorize]
         public virtual Task<ItemResult<int>> Count(
-            FilterParameters parameters,
+            [FromQuery] FilterParameters parameters,
             IDataSource<Coalesce.Starter.Vue.Data.Models.Widget> dataSource)
             => CountImplementation(parameters, dataSource);
 
         [HttpPost("save")]
+        [Consumes("application/x-www-form-urlencoded", "multipart/form-data")]
         [Authorize]
         public virtual Task<ItemResult<WidgetResponse>> Save(
             [FromForm] WidgetParameter dto,
+            [FromQuery] DataSourceParameters parameters,
+            IDataSource<Coalesce.Starter.Vue.Data.Models.Widget> dataSource,
+            IBehaviors<Coalesce.Starter.Vue.Data.Models.Widget> behaviors)
+            => SaveImplementation(dto, parameters, dataSource, behaviors);
+
+        [HttpPost("save")]
+        [Consumes("application/json")]
+        [Authorize]
+        public virtual Task<ItemResult<WidgetResponse>> SaveFromJson(
+            [FromBody] WidgetParameter dto,
             [FromQuery] DataSourceParameters parameters,
             IDataSource<Coalesce.Starter.Vue.Data.Models.Widget> dataSource,
             IBehaviors<Coalesce.Starter.Vue.Data.Models.Widget> behaviors)

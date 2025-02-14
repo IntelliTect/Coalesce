@@ -26,8 +26,10 @@ using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.AspNetCore.Mvc;
 using Coalesce.Starter.Vue.Data.Communication;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+#if EmailAzure
 using Azure.Core;
 using Azure.Identity;
+#endif
 
 var builder = WebApplication.CreateBuilder(new WebApplicationOptions
 {

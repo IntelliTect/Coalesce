@@ -6,7 +6,7 @@
 
     <AccelerateBuildsInVisualStudio>true</AccelerateBuildsInVisualStudio>
 
-    <CoalesceVersion>5.2.0-beta.20241114.4</CoalesceVersion> 
+    <CoalesceVersion>5.3.2</CoalesceVersion> 
 
     <!--#if (KeepTemplateOnly) -->
     <DefineConstants>$(DefineConstants);KeepTemplateOnly;AppInsights;OpenAPI;AuditLogs;TrackingBase;ExampleModel</DefineConstants>

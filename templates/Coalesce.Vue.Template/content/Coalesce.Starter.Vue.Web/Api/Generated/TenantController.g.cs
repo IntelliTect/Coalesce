@@ -36,28 +36,39 @@ namespace Coalesce.Starter.Vue.Web.Api
         [Authorize]
         public virtual Task<ItemResult<TenantResponse>> Get(
             string id,
-            DataSourceParameters parameters,
+            [FromQuery] DataSourceParameters parameters,
             IDataSource<Coalesce.Starter.Vue.Data.Models.Tenant> dataSource)
             => GetImplementation(id, parameters, dataSource);
 
         [HttpGet("list")]
         [Authorize]
         public virtual Task<ListResult<TenantResponse>> List(
-            ListParameters parameters,
+            [FromQuery] ListParameters parameters,
             IDataSource<Coalesce.Starter.Vue.Data.Models.Tenant> dataSource)
             => ListImplementation(parameters, dataSource);
 
         [HttpGet("count")]
         [Authorize]
         public virtual Task<ItemResult<int>> Count(
-            FilterParameters parameters,
+            [FromQuery] FilterParameters parameters,
             IDataSource<Coalesce.Starter.Vue.Data.Models.Tenant> dataSource)
             => CountImplementation(parameters, dataSource);
 
         [HttpPost("save")]
+        [Consumes("application/x-www-form-urlencoded", "multipart/form-data")]
         [Authorize]
         public virtual Task<ItemResult<TenantResponse>> Save(
             [FromForm] TenantParameter dto,
+            [FromQuery] DataSourceParameters parameters,
+            IDataSource<Coalesce.Starter.Vue.Data.Models.Tenant> dataSource,
+            IBehaviors<Coalesce.Starter.Vue.Data.Models.Tenant> behaviors)
+            => SaveImplementation(dto, parameters, dataSource, behaviors);
+
+        [HttpPost("save")]
+        [Consumes("application/json")]
+        [Authorize]
+        public virtual Task<ItemResult<TenantResponse>> SaveFromJson(
+            [FromBody] TenantParameter dto,
             [FromQuery] DataSourceParameters parameters,
             IDataSource<Coalesce.Starter.Vue.Data.Models.Tenant> dataSource,
             IBehaviors<Coalesce.Starter.Vue.Data.Models.Tenant> behaviors)
@@ -80,6 +91,7 @@ namespace Coalesce.Starter.Vue.Web.Api
         /// </summary>
         [HttpPost("Create")]
         [Authorize(Roles = "GlobalAdmin")]
+        [Consumes("application/x-www-form-urlencoded", "multipart/form-data")]
         public virtual async Task<ItemResult> Create(
             [FromServices] Coalesce.Starter.Vue.Data.Auth.InvitationService invitationService,
             [FromForm(Name = "name")] string name,
@@ -87,8 +99,8 @@ namespace Coalesce.Starter.Vue.Web.Api
         {
             var _params = new
             {
-                name = name,
-                adminEmail = adminEmail
+                Name = name,
+                AdminEmail = adminEmail
             };
 
             if (Context.Options.ValidateAttributesForMethods)
@@ -101,8 +113,42 @@ namespace Coalesce.Starter.Vue.Web.Api
             var _methodResult = await Coalesce.Starter.Vue.Data.Models.Tenant.Create(
                 Db,
                 invitationService,
-                _params.name,
-                _params.adminEmail
+                _params.Name,
+                _params.AdminEmail
+            );
+            var _result = new ItemResult(_methodResult);
+            return _result;
+        }
+
+        public class CreateParameters
+        {
+            public string Name { get; set; }
+            public string AdminEmail { get; set; }
+        }
+
+        /// <summary>
+        /// Method: Create
+        /// </summary>
+        [HttpPost("Create")]
+        [Authorize(Roles = "GlobalAdmin")]
+        [Consumes("application/json")]
+        public virtual async Task<ItemResult> Create(
+            [FromServices] Coalesce.Starter.Vue.Data.Auth.InvitationService invitationService,
+            [FromBody] CreateParameters _params
+        )
+        {
+            if (Context.Options.ValidateAttributesForMethods)
+            {
+                var _validationResult = ItemResult.FromParameterValidation(
+                    GeneratedForClassViewModel!.MethodByName("Create"), _params, HttpContext.RequestServices);
+                if (!_validationResult.WasSuccessful) return _validationResult;
+            }
+
+            var _methodResult = await Coalesce.Starter.Vue.Data.Models.Tenant.Create(
+                Db,
+                invitationService,
+                _params.Name,
+                _params.AdminEmail
             );
             var _result = new ItemResult(_methodResult);
             return _result;

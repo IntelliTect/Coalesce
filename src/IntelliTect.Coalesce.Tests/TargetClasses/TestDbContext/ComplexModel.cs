@@ -22,6 +22,8 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         [Coalesce]
         public const EnumPkId MagicEnum = EnumPkId.Value10;
 
+        public const int UnexpostedConst = 42;
+
         [DefaultOrderBy(FieldOrder = 2)]
         public int ComplexModelId { get; set; }
 

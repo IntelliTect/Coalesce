@@ -1,4 +1,5 @@
 ﻿using IntelliTect.Coalesce.Tests.TargetClasses;
+using IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext;
 using IntelliTect.Coalesce.Tests.Util;
 using Xunit;
 
@@ -56,6 +57,19 @@ namespace IntelliTect.Coalesce.Tests.TypeDefinition
 
             // Edit role is defined on both, so the one on AbstractImpl should be the effective one:
             Assert.True(vm.SecurityInfo.Edit.NoAccess);
+        }
+
+        [Theory]
+        [ClassViewModelData(typeof(ComplexModel))]
+        public void ClientConsts_IncludesConsts(ClassViewModelData data)
+        {
+            var vm = data.ClassViewModel;
+
+            Assert.Contains(vm.ClientConsts, c => c.Name == nameof(ComplexModel.MagicNumber) && c.Value.Equals(ComplexModel.MagicNumber));
+            Assert.Contains(vm.ClientConsts, c => c.Name == nameof(ComplexModel.MagicString) && c.Value.Equals(ComplexModel.MagicString));
+            Assert.Contains(vm.ClientConsts, c => c.Name == nameof(ComplexModel.MagicEnum) && ((int)c.Value).Equals((int)ComplexModel.MagicEnum));
+
+            Assert.DoesNotContain(vm.ClientConsts, c => c.Name == nameof(ComplexModel.UnexpostedConst));
         }
     }
 }

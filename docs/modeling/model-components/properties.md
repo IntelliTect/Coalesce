@@ -25,6 +25,8 @@ If such a property is defined as an auto-property, the `[NotMapped]` attribute s
 ### Init-only Properties
 Properties on [CRUD Models](/modeling/model-types/crud.md) that use an `init` accessor rather than a `set` accessor will be implicitly treated as required, and can also only have a value provided when the entity is created for the first time. Any values provided during save actions for init-only properties when updating an existing entity will be ignored.
 
+### Const Fields
+Const fields declared on your models, services, and data sources, if annotated with `[Coalesce]`, will be emitted into the generated TypeScript Models and ViewModels. For example, `[Coalesce] public const int MagicNumber = 42;`.
 
 
 ## Property Customization

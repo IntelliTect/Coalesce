@@ -65,5 +65,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             .Select(t => ReflectionTypeViewModel.GetOrCreate(ReflectionRepository, t))
             .ToList()
             .AsReadOnly();
+
+        public override IEnumerable<LiteralViewModel> ClientConsts => throw new NotImplementedException();
     }
 }

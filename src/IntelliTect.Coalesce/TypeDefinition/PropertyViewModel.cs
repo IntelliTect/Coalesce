@@ -106,7 +106,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// Returns whether or not the property may be exposed to the client.
         /// </summary>
-        public bool IsClientProperty => !IsInternalUse && HasGetter && !Type.IsInternalUse;
+        public bool IsClientProperty => !IsInternalUse && HasGetter && !Type.IsInternalUse && !IsStatic;
         
         public bool PureTypeOnContext => Object?.IsDbMappedType ?? false;
 
@@ -241,7 +241,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// Returns the default value specified by <see cref="DefaultValueAttribute"/>, if present.
         /// </summary>
-        public object? DefaultValue => this.GetAttributeValue<DefaultValueAttribute>(nameof(DefaultValueAttribute.Value));
+        public LiteralViewModel? DefaultValue => this.GetAttributeValue<DefaultValueAttribute>(nameof(DefaultValueAttribute.Value)) is { } defaultValue
+            ? new(Type, defaultValue)
+            : null;
 
         /// <summary>
         /// If true, there is an API controller that is serving this type of data.

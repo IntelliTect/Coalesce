@@ -1,4 +1,5 @@
 ﻿using IntelliTect.Coalesce.CodeGeneration.Generation;
+using IntelliTect.Coalesce.CodeGeneration.Utilities;
 using IntelliTect.Coalesce.CodeGeneration.Vue.Utils;
 using IntelliTect.Coalesce.TypeDefinition;
 using IntelliTect.Coalesce.Utilities;
@@ -55,6 +56,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
 
                 using (b.Block($"export class {name}"))
                 {
+                    WriteConsts(b, model);
+
                     b.DocComment($"Mutates the input object and its descendents into a valid {name} implementation.");
                     using (b.Block($"static convert(data?: Partial<{name}>): {name}"))
                     {
@@ -91,6 +94,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                         using (b.Block($"export class {source.ClientTypeName} implements DataSource<typeof {sourceMeta}>"))
                         {
                             b.Line($"readonly $metadata = {sourceMeta}");
+
+                            WriteConsts(b, source);
 
                             if (source.DataSourceParameters.Any())
                             {
@@ -137,6 +142,16 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
             }
 
             return Task.FromResult(b.ToString());
+        }
+
+        static internal void WriteConsts(TypeScriptCodeBuilder b, ClassViewModel vm)
+        {
+            if (vm.ClientConsts.Any()) b.Line();
+
+            foreach (var value in vm.ClientConsts)
+            {
+                b.Line($"static {value.Name.ToCamelCase()} = {value.ValueLiteralForTypeScript("")}");
+            }
         }
     }
 }

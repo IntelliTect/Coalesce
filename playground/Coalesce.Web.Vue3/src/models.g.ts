@@ -143,6 +143,10 @@ export interface Case extends Model<typeof metadata.Case> {
 }
 export class Case {
   
+  static magicNumber = 42
+  static magicString = "42"
+  static magicEnum = Statuses.ClosedNoSolution
+  
   /** Mutates the input object and its descendents into a valid Case implementation. */
   static convert(data?: Partial<Case>): Case {
     return convertToModel(data || {}, metadata.Case) 

@@ -194,6 +194,9 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         [Coalesce, DefaultDataSource]
         public class WithoutCases : StandardDataSource<Person, AppDbContext>
         {
+            [Coalesce]
+            public const int MagicNumber = 42;
+
             public WithoutCases(CrudContext<AppDbContext> context) : base(context) { }
 
             public override IQueryable<Person> GetQuery(IDataSourceParameters parameters)

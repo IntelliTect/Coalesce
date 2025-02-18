@@ -42,6 +42,15 @@ namespace Coalesce.Domain
 
 #nullable disable
 
+        [Coalesce]
+        public const int MagicNumber = 42;
+        [Coalesce]
+        public const string MagicString = "42";
+        [Coalesce]
+        public const Statuses MagicEnum = Statuses.ClosedNoSolution;
+
+        public const int MagicUnexposedNumber = 42;
+
         /// <summary>
         /// The Primary key for the Case object
         /// </summary>

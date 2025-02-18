@@ -34,6 +34,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public abstract bool IsStatic { get; }
         public abstract bool IsRecord { get; }
 
+        public abstract IEnumerable<LiteralViewModel> ClientConsts { get; }
+
         public string FullyQualifiedName => Type.FullyQualifiedName;
 
 

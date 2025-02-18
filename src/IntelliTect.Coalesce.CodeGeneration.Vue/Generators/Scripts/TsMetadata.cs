@@ -1,4 +1,5 @@
 ﻿using IntelliTect.Coalesce.CodeGeneration.Generation;
+using IntelliTect.Coalesce.CodeGeneration.Utilities;
 using IntelliTect.Coalesce.DataAnnotations;
 using IntelliTect.Coalesce.TypeDefinition;
 using IntelliTect.Coalesce.TypeDefinition.Enums;
@@ -318,33 +319,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                     var defaultValue = prop.DefaultValue;
                     if (defaultValue is not null)
                     {
-                        if (
-                            prop.Type.TsTypeKind is TypeDiscriminator.String &&
-                            defaultValue is string stringValue
-                        )
-                        {
-                            b.StringProp("defaultValue", stringValue);
-                        }
-                        else if (
-                            prop.Type.TsTypeKind is TypeDiscriminator.Boolean &&
-                            defaultValue is true or false
-                        )
-                        {
-                            b.Prop("defaultValue", defaultValue.ToString().ToLowerInvariant());
-                        }
-                        else if (
-                            prop.Type.TsTypeKind is TypeDiscriminator.Number or TypeDiscriminator.Enum &&
-                            double.TryParse(defaultValue.ToString(), out _)
-                        )
-                        {
-                            b.Prop("defaultValue", defaultValue.ToString());
-                        }
-                        else
-                        {
-                            throw new InvalidOperationException(
-                                $"Default value {defaultValue} does not match property type {prop.Type}, " +
-                                $"or type does not support default values.");
-                        }
+                        b.Prop("defaultValue", defaultValue.ValueLiteralForTypeScript());
                     }
 
                     List<string> rules = GetValidationRules(prop, (prop.ReferenceNavigationProperty ?? prop).DisplayName);

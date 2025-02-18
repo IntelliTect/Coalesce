@@ -1,4 +1,5 @@
 ﻿using IntelliTect.Coalesce.TypeDefinition;
+using IntelliTect.Coalesce.Utilities;
 using System.Collections.Generic;
 using System.Linq;
 

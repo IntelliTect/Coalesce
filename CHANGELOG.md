@@ -13,6 +13,7 @@
 - Added `$search`, `$filter`, and `$orderBy` shorthands to ListViewModel.
 - Coalesce's Vite middleware (`UseViteDevelopmentServer`) now checks if your installed NPM packages match what's defined in package.json and package-lock.json, presenting an in-browser warning if they do not. This helps avoid forgetting to reinstall packages after pulling down changes in multi-developer projects.
 - Added a `filter` prop to `c-input` for enum inputs to restrict the values available for selection.
+- Const fields in C#, if annotated with `[Coalesce]`, are now emitted into generated TypeScript.
 
 # 5.3.3
 

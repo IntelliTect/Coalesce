@@ -2,6 +2,7 @@
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using IntelliTect.Coalesce.Helpers;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace IntelliTect.Coalesce.TypeDefinition
 {
@@ -109,5 +110,14 @@ namespace IntelliTect.Coalesce.TypeDefinition
             .GetTypeMembers()
             .Select(t => SymbolTypeViewModel.GetOrCreate(ReflectionRepository, t))
             .ToList().AsReadOnly();
+
+        public override IEnumerable<LiteralViewModel> ClientConsts => Symbol.GetMembers()
+            .OfType<IFieldSymbol>()
+            .Where(m => 
+                m.IsConst &&
+                m.HasConstantValue &&
+                m.GetAttributeProvider().HasAttribute<CoalesceAttribute>()
+            )
+            .Select(m => new LiteralViewModel(SymbolTypeViewModel.GetOrCreate(ReflectionRepository, m.Type), m.ConstantValue!, m.Name));
     }
 }

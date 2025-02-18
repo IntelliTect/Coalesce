@@ -15,6 +15,9 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses
     [Coalesce, Service]
     public interface IWeatherService
     {
+        [Coalesce]
+        public const int MagicNumber = 42;
+
         Task<WeatherData> GetWeatherAsync(TestDbContext.AppDbContext parameterDbContext, Location location, DateTimeOffset? dateTime, SkyConditions? conditions);
 
         Task<ItemResult<IFile>> FileUploadDownload(IFile file);

@@ -103,6 +103,10 @@ export interface CaseViewModel extends $models.Case {
 export class CaseViewModel extends ViewModel<$models.Case, $apiClients.CaseApiClient, number> implements $models.Case  {
   static DataSources = $models.Case.DataSources;
   
+  static MagicNumber = 42
+  static MagicString = "42"
+  static MagicEnum = $models.Statuses.ClosedNoSolution
+  
   
   public addToCaseProducts(initialData?: DeepPartial<$models.CaseProduct> | null) {
     return this.$addChild('caseProducts', initialData) as CaseProductViewModel
@@ -175,6 +179,10 @@ defineProps(CaseViewModel, $metadata.Case)
 
 export class CaseListViewModel extends ListViewModel<$models.Case, $apiClients.CaseApiClient, CaseViewModel> {
   static DataSources = $models.Case.DataSources;
+  
+  static magicNumber = 42
+  static magicString = "42"
+  static magicEnum = $models.Statuses.ClosedNoSolution
   
   public get getCaseTitles() {
     const getCaseTitles = this.$apiClient.$makeCaller(

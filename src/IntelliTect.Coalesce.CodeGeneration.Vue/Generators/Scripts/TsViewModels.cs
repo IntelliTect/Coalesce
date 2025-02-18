@@ -110,6 +110,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                     b.Line($"static DataSources = {modelName}.DataSources;");
                 }
 
+                WriteConsts(b, model);
+
                 foreach (var prop in model.ClientProperties)
                 {
 
@@ -178,6 +180,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                     b.Line($"static DataSources = {modelName}.DataSources;");
                 }
 
+                WriteConsts(b, model);
+
                 foreach (var method in model.ClientMethods.Where(m => m.IsStatic))
                 {
                     WriteMethodCaller(b, method);
@@ -201,6 +205,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
 
             using (b.Block($"export class {viewModelName} extends ServiceViewModel<typeof {metadataName}, $apiClients.{name}ApiClient>"))
             {
+                WriteConsts(b, model);
+
                 foreach (var method in model.ClientMethods)
                 {
                     WriteMethodCaller(b, method);
@@ -284,6 +290,16 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                     }
                     return prefix + p.JsVariable;
                 }
+            }
+        }
+
+        static internal void WriteConsts(TypeScriptCodeBuilder b, ClassViewModel vm)
+        {
+            if (vm.ClientConsts.Any()) b.Line();
+
+            foreach (var value in vm.ClientConsts)
+            {
+                b.Line($"static {value.Name.ToCamelCase()} = {value.ValueLiteralForTypeScript("$models.")}");
             }
         }
     }

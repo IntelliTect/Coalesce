@@ -15,6 +15,13 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
 {
     public class ComplexModel
     {
+        [Coalesce]
+        public const int MagicNumber = 42;
+        [Coalesce]
+        public const string MagicString = "42";
+        [Coalesce]
+        public const EnumPkId MagicEnum = EnumPkId.Value10;
+
         [DefaultOrderBy(FieldOrder = 2)]
         public int ComplexModelId { get; set; }
 

@@ -1,5 +1,8 @@
 # 5.3.3
 
+## Fixes
+- Add model validation error when ForeignKeyAttribute references a navigation prop that doesn't exist.
+- Fix code gen performance regression introduced in 5.3.2
 
 # 5.3.2
 

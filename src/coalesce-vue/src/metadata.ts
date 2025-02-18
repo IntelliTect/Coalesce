@@ -490,9 +490,14 @@ export interface ModelReferenceNavigationProperty
   extends PropertyBase,
     ModelValue {
   readonly role: "referenceNavigation";
-  readonly foreignKey: ForeignKeyProperty;
+  // Note: This can be a PrimaryKey in a 1-to-1 situation where the child record's
+  // PK is the foreign key into the parent's type.
+  readonly foreignKey: ForeignKeyProperty | PrimaryKeyProperty;
   readonly principalKey: PrimaryKeyProperty;
-  readonly inverseNavigation?: ModelCollectionNavigationProperty;
+  // Note: Can be a `ModelReferenceNavigationProperty` for a 1-to-1
+  readonly inverseNavigation?:
+    | ModelReferenceNavigationProperty
+    | ModelCollectionNavigationProperty;
 }
 
 /**

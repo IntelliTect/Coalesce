@@ -15,8 +15,8 @@
   "dependencies": {
     "@fortawesome/fontawesome-free": "^6.6.0",
     "@vueuse/core": "^11.0.3",
-    "coalesce-vue": "5.2.0-beta.20241114.4",
-    "coalesce-vue-vuetify3": "5.2.0-beta.20241114.4",
+    "coalesce-vue": "5.3.2",
+    "coalesce-vue-vuetify3": "5.3.2",
     "typeface-roboto": "1.1.13",
     "vue": "^3.5.11",
     "vue-router": "^4.4.5",

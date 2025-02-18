@@ -153,28 +153,39 @@ If you have [custom methods](/modeling/model-components/methods.md) that return 
 ::: tip
 An `IncludeTree` can be obtained from any `IQueryable` by calling the `GetIncludeTree` extension method (`using IntelliTect.Coalesce.Helpers.IncludeTree`).
 
-In situations where your root object isn't on your `DbContext` (see [External Types](/modeling/model-types/external-types.md)), you can use `Enumerable.Empty<MyNonDbClass>().AsQueryable()` to get an `IQueryable` to start from. When you do this, you **must** use `IncludedSeparately` - the regular EF `Include` method won't work without a `DbSet`.
+In situations where you need to create an `IncludeTree` without a `DbContext`, there are static methods on `IncludeTree` to help with this.
+
+``` c#
+IncludeTree tree = IncludeTree.For<Person>(q => q
+    .Include(p => p.Company)
+    .Include(p => p.CasesAssigned).ThenInclude(c => c.CaseProducts)
+);
+// OR
+IncludeTree tree = IncludeTree.QueryFor<Person>()
+    .Include(p => p.Company)
+    .Include(p => p.CasesAssigned).ThenInclude(c => c.CaseProducts)
+    .GetIncludeTree();
+```
 :::
 
-To return an `IncludeTree` from a custom method is to make that method return an `ItemResult<T>`, and then set the `IncludeTree` property of the `ItemResult` object. For example:
+To return an `IncludeTree` from a custom method, make that method return an `ItemResult<T>`, and then set the `IncludeTree` property of the `ItemResult` object. For example:
 
 ``` c#
 public class Employee
 {
-    public async Task<ItemResult<ICollection<Employee>>> GetChainOfCommand(AppDbContext db)
+    public async Task<ItemResult<List<Employee>>> GetChainOfCommand(AppDbContext db)
     {
-        IQueryable<Employee> query = db.Employees
-            .Include(e => e.Supervisor);
+        IQueryable<Employee> query = db.Employees.Include(e => e.Supervisor);
 
-        var ret = new List<Employee>();
+        var results = new List<Employee>();
         var current = this;
         while (current.Supervisor != null)
         {
-            ret.Push(current);
+            results.Push(current);
             current = await query.FirstOrDefaultAsync(e => e.EmployeeId == current.SupervisorId);
         }
 
-        return new(ret, includeTree: query.GetIncludeTree());
+        return new(results, includeTree: query.GetIncludeTree());
     }
 }
 ```
@@ -182,8 +193,8 @@ public class Employee
 
 ### External Type Caveats
 
-One important point remains regarding `IncludeTree` - it is not used to control the serialization of objects which are not mapped to the database, known as [External Types](/modeling/model-types/external-types.md). External Types are always put into the DTOs when encountered (unless otherwise prevented by [[DtoIncludes] & [DtoExcludes]](/modeling/model-components/attributes/dto-includes-excludes.md) or [Security Attributes](/modeling/model-components/attributes/security-attribute.md)), with the assumption that because these objects are created by you (as opposed to Entity Framework), you are responsible for preventing any undesired circular references.
+One important point remains regarding `IncludeTree` - it is not used to control the serialization of [External Types](/modeling/model-types/external-types.md) - it only affects [EF Models](/modeling/model-types/crud.md) (Entities and entity-backed Custom DTOs). External Types are **always** mapped to DTOs when encountered (unless otherwise prevented by [[DtoIncludes] & [DtoExcludes]](/modeling/model-components/attributes/dto-includes-excludes.md) or [Security Attributes](/modeling/model-components/attributes/security-attribute.md)), with the assumption that because these objects are created by you (as opposed to Entity Framework), you are responsible for preventing any undesired circular references.
 
-By not filtering unmapped properties, you as the developer don't need to account for them in every place throughout your application where they appear - instead, they 'just work' and show up on the client as expected.
+By not filtering External Types, you as the developer don't need to account for them in every place throughout your application where they appear - instead, they 'just work' and show up on the client as expected.
 
-Note also that this statement does not apply to database-mapped objects that hang off of unmapped objects - any time a database-mapped object appears, it will be controlled by your include tree. If no include tree is present (because nothing was specified for the unmapped property), these mapped objects hanging off of unmapped objects will be serialized freely and with all circular references, unless you include some calls to `.IncludedSeparately(m => m.MyUnmappedProperty.MyMappedProperty)` to limit those objects down.
+Note also that this statement does not apply to EF Models that hang off of External Types - any place a EF Models appears, it will be controlled by your include tree. If no include tree is present (because nothing was specified for the External Type member), these EF Models hanging off of External Types will be serialized freely and with all circular references, unless you include some calls to `.IncludedSeparately(m => m.MyExternalType.MyEfEntity)` to limit those objects down.

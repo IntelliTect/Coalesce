@@ -50,14 +50,9 @@ function getComponentCategory(item: (typeof vuetifyComponents)[0]) {
 
 const attributes = fs
   .readdirSync(
-    path.resolve(
-      __dirname,
-      "../modeling/model-components/attributes"
-    )
+    path.resolve(__dirname, "../modeling/model-components/attributes")
   )
-  .map((f) =>
-    autoTitle("/modeling/model-components/attributes/" + f)
-  );
+  .map((f) => autoTitle("/modeling/model-components/attributes/" + f));
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
@@ -97,7 +92,7 @@ export default defineConfig({
     },
 
     editLink: {
-      pattern: 'https://github.com/IntelliTect/Coalesce/blob/dev/docs/:path'
+      pattern: "https://github.com/IntelliTect/Coalesce/blob/dev/docs/:path",
     },
 
     sidebar: [
@@ -111,17 +106,17 @@ export default defineConfig({
       {
         text: "Data Modeling",
         items: [
-          autoTitle("/modeling/model-types/entities"),
-          autoTitle("/modeling/model-types/external-types"),
-          autoTitle("/modeling/model-types/services"),
           {
-            text: "Advanced",
-            collapsed: true,
+            ...autoTitle("/modeling/model-types/crud"),
+            collapsed: false,
             items: [
-              autoTitle("/modeling/model-types/dtos"),
+              autoTitle("/modeling/model-types/entities"),
               autoTitle("/modeling/model-types/standalone-entities"),
-            ]
+              autoTitle("/modeling/model-types/dtos"),
+            ],
           },
+          autoTitle("/modeling/model-types/services"),
+          autoTitle("/modeling/model-types/external-types"),
         ],
       },
       {
@@ -136,12 +131,13 @@ export default defineConfig({
             link: "/modeling/model-components/attributes.html",
             collapsed: true,
             items: [
-              ...attributes.filter(f => !f.deprecated),
+              ...attributes.filter((f) => !f.deprecated),
               {
                 text: "Deprecated",
                 collapsed: true,
-                items: attributes.filter(f => f.deprecated),
-              }]
+                items: attributes.filter((f) => f.deprecated),
+              },
+            ],
           },
           autoTitle("/modeling/model-components/methods"),
           autoTitle("/modeling/model-components/data-sources"),
@@ -168,24 +164,30 @@ export default defineConfig({
             text: "Display",
             collapsed: false,
             items: [
-              ...vuetifyComponents.filter((i) => getComponentCategory(i) == "display"),
+              ...vuetifyComponents.filter(
+                (i) => getComponentCategory(i) == "display"
+              ),
             ],
           },
           {
             text: "Input",
             collapsed: false,
             items: [
-              ...vuetifyComponents.filter((i) => getComponentCategory(i) == "input").sort((a,b) => {
-                if (a.text == 'c-input') return -1;
-                return a.text.localeCompare(b.text);
-              }),
+              ...vuetifyComponents
+                .filter((i) => getComponentCategory(i) == "input")
+                .sort((a, b) => {
+                  if (a.text == "c-input") return -1;
+                  return a.text.localeCompare(b.text);
+                }),
             ],
           },
           {
             text: "Admin",
             collapsed: true,
             items: [
-              ...vuetifyComponents.filter((i) => getComponentCategory(i) == "admin"),
+              ...vuetifyComponents.filter(
+                (i) => getComponentCategory(i) == "admin"
+              ),
             ],
           },
         ],

@@ -133,15 +133,6 @@ namespace IntelliTect.Coalesce.Validation
                                 assert.IsNotNull(prop.InverseProperty, $"An Inverse Property named '{prop.Parent.Name}' was not found on {prop.Object}. " +
                                     $"Add an InverseProperty attribute on {prop.Parent.Name}.{prop.Name} to specify the actual name of the inverse property.", isWarning: true);
                             }
-                            if (prop.Role == PropertyRole.CollectionNavigation)
-                            {
-                                if (prop.InverseProperty != null)
-                                {
-                                    assert.IsTrue(prop.InverseProperty.IsPOCO, "The inverse property of a collection navigation should reference the corresponding reference navigation on the other side of the relationship.");
-                                }
-
-                                assert.IsNotNull(prop.ForeignKeyProperty, "Could not find the foreign key of the navigation property");
-                            }
                         }
                         if (prop.IsManytoManyCollection &&
                             assert.IsNotNull(prop.ManyToManyCollectionName, $"Many to Many collection name does not exist") &&
@@ -165,10 +156,27 @@ namespace IntelliTect.Coalesce.Validation
                         {
                             assert.IsTrue(prop.IsDbMapped, "Property with [DefaultOrderBy] must be DB mapped.");
                         }
+
+                        switch (prop.Role)
+                        {
+                            case PropertyRole.ForeignKey:
+                                assert.IsNotNull(
+                                    prop.ForeignKeyPrincipalType,
+                                    "Unable to determine the principal type referenced by this foreign key. Try annotating the foreign key with [ForeignKey(<name of reference navigation property>)].");
+                                break;
+
+                            case PropertyRole.CollectionNavigation:
+                                assert.IsTrue(
+                                    prop.InverseProperty == null || prop.InverseProperty.IsPOCO, 
+                                    "The inverse property of a collection navigation should reference the corresponding reference navigation on the other side of the relationship.");
+
+                                assert.IsNotNull(prop.ForeignKeyProperty, "Could not find the foreign key of the navigation property");
+                                break;
+                        }
                     }
                     catch (Exception ex)
                     {
-                        assert.IsTrue(false, $"Exception: {ex.Message}");
+                        assert.IsTrue(false, $"Exception: {ex.ToString()}");
                     }
                 }
 

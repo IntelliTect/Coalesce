@@ -578,7 +578,7 @@ export const AxiosClient = axios.create();
 AxiosClient.defaults.baseURL = "/api";
 AxiosClient.defaults.paramsSerializer = (p) => objectToQueryString(p, false);
 
-// Set X-Requested-With: XmlHttpRequest to prevent aspnetcore from serving HTML and redirects to API requests.
+// Set X-Requested-With: XMLHttpRequest to prevent aspnetcore from serving HTML and redirects to API requests.
 // https://github.com/dotnet/aspnetcore/blob/c440ebcf49badd49f0e2cdde1b0a74992af04158/src/Security/Authentication/Cookies/src/CookieAuthenticationEvents.cs#L107-L111
 AxiosClient.interceptors.request.use((config) => {
   const url = (config.baseURL ?? "") + (config.url ?? "");

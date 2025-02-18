@@ -376,7 +376,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
                     if (i != 0) b.Line(", ");
                     b.Append(param.PascalCaseName);
                     b.Append(" = ");
-                    b.Append(GetMethodParameterFormDataMappingExpression(clientParameters[i]));
+                    b.Append(GetMethodParameterFormDataMappingExpression(method, clientParameters[i]));
                 }
             }
             b.Line();
@@ -414,7 +414,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
         /// that maps the controller input to the argument of method being called.
         /// Does not perform DTO mapping, as this method produces the target of validation.
         /// </summary>
-        protected string GetMethodParameterFormDataMappingExpression(ParameterViewModel param)
+        protected string GetMethodParameterFormDataMappingExpression(MethodViewModel method, ParameterViewModel param)
         {
             var ret = param.CsParameterName;
 
@@ -428,7 +428,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
                     $"new IntelliTect.Coalesce.Models.File {{ Name = {x}.FileName, ContentType = {x}.ContentType, Length = {x}.Length, Content = {x}.OpenReadStream() }}";
             }
 
-            if (param.Type.IsByteArray)
+            if (param.Type.IsByteArray && method.HasHttpRequestBody)
             {
                 // For binary data posted as a JS Blob, it comes across as a file.
                 // Such files must be manually pulled out of the form data

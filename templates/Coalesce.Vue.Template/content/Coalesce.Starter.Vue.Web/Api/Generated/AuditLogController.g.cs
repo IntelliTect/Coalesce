@@ -36,21 +36,21 @@ namespace Coalesce.Starter.Vue.Web.Api
         [Authorize(Roles = "ViewAuditLogs")]
         public virtual Task<ItemResult<AuditLogResponse>> Get(
             long id,
-            DataSourceParameters parameters,
+            [FromQuery] DataSourceParameters parameters,
             IDataSource<Coalesce.Starter.Vue.Data.Models.AuditLog> dataSource)
             => GetImplementation(id, parameters, dataSource);
 
         [HttpGet("list")]
         [Authorize(Roles = "ViewAuditLogs")]
         public virtual Task<ListResult<AuditLogResponse>> List(
-            ListParameters parameters,
+            [FromQuery] ListParameters parameters,
             IDataSource<Coalesce.Starter.Vue.Data.Models.AuditLog> dataSource)
             => ListImplementation(parameters, dataSource);
 
         [HttpGet("count")]
         [Authorize(Roles = "ViewAuditLogs")]
         public virtual Task<ItemResult<int>> Count(
-            FilterParameters parameters,
+            [FromQuery] FilterParameters parameters,
             IDataSource<Coalesce.Starter.Vue.Data.Models.AuditLog> dataSource)
             => CountImplementation(parameters, dataSource);
 

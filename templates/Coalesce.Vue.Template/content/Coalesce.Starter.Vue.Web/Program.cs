@@ -26,8 +26,10 @@ using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.AspNetCore.Mvc;
 using Coalesce.Starter.Vue.Data.Communication;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+#if EmailAzure
 using Azure.Core;
 using Azure.Identity;
+#endif
 
 var builder = WebApplication.CreateBuilder(new WebApplicationOptions
 {
@@ -116,7 +118,7 @@ services.AddSwaggerGen(c =>
 
 services.AddScoped<SecurityService>();
 
-#if TenantMemberInvites
+#if (TenantMemberInvites || LocalAuth)
 // Register IUrlHelper to allow for invite link generation.
 services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
 services.AddScoped<IUrlHelper>(x =>
@@ -125,9 +127,9 @@ services.AddScoped<IUrlHelper>(x =>
     var factory = x.GetRequiredService<IUrlHelperFactory>();
     return factory.GetUrlHelper(actionContext!);
 });
-
+#endif
+#if TenantMemberInvites
 services.AddScoped<InvitationService>();
-
 #endif
 
 #endregion

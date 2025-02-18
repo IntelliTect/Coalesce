@@ -79,6 +79,11 @@ list.$load(1);
 All methods on `IDataSource<T>` take a parameter that contains all the client-specified parameters for things paging, searching, sorting, and filtering information. Almost all virtual methods on `StandardDataSource` are also passed the relevant set of parameters. The parameters are contained in the `IDataSourceParameters` type or one of its derivatives, `IFilterParameters` (adds filtering and search parameters) or `IListParameters` (filters + pagination). These parameters can be set on the client through the `$params` member on [ViewModels](/stacks/vue/layers/viewmodels.md#viewmodels) and [ListViewModels](/stacks/vue/layers/viewmodels.md#listviewmodels), or less commonly by passing them directly when using the [API Clients](/stacks/vue/layers/api-clients.md) directly. 
 
 
+### Ref Responses
+
+An additional parameter on `DataSourceParameters` is available on the client only - `refResponse`. If set to true - e.g. `listVm.$params.refResponse = true;`, Coalesce will pass a header value of `Accept: application/json+ref` with the API request. This will instruct the server to use [System.Text.Json's PreserveReferences handling](https://learn.microsoft.com/en-us/dotnet/standard/serialization/system-text-json/preserve-references#preserve-references-and-handle-circular-references) when serializing the response. This allows identical objects that occur multiple times in the response to only have one copy sent across the wire. This also results in only a single, shared instance of this object on the client in the results from the API clients, cascading through to the ViewModels as well. This can significantly reduce response sizes by deduplicating multiple copies of the same data, as well as CPU and memory load on both the client and server.
+
+
 ## Custom Parameters
 
 On any data source that you create, you may add additional properties annotated with `[Coalesce]` that will then be exposed as parameters to the client. These property parameters can be any type supported by Coalesce, including primitives, dates, [Entity Models](/modeling/model-types/entities.md), [External Types](/modeling/model-types/external-types.md), or collections of these types.
@@ -258,7 +263,7 @@ Given a property and a client-provided string value, perform some filtering on t
 
 <Prop def="IQueryable<T> ApplyListSearchTerm(IQueryable<T> query, IFilterParameters parameters)" />
 
-Applies filters to the query based on the specified search term. See [[Search]](/modeling/model-components/attributes/search.md) for a detailed look at how searching works in Coalesce.
+Applies predicates to the query based on the search term in `parameters.Search`. See [[Search]](/modeling/model-components/attributes/search.md) for a detailed look at how searching works in Coalesce.
 
 
 <Prop def="IQueryable<T> ApplyListSorting(IQueryable<T> query, IListParameters parameters)" />

@@ -2,7 +2,7 @@
 
 <!-- MARKER:summary -->
 
-The ViewModel layer, generated as `viewmodels.g.ts`, exports a ViewModel class for each API-backed type in your data model ([Entity Models](/modeling/model-types/entities.md), [Custom DTOs](/modeling/model-types/dtos.md), and [Services](/modeling/model-types/services.md)). It also exports a ListViewModel type for [Entity Models](/modeling/model-types/entities.md) and [Custom DTOs](/modeling/model-types/dtos.md).
+The ViewModel layer, generated as `viewmodels.g.ts`, exports a ViewModel class for each API-backed type in your data model ([CRUD Models](/modeling/model-types/crud.md) and [Services](/modeling/model-types/services.md)). It also exports a ListViewModel type for [CRUD Models](/modeling/model-types/crud.md).
 
 These classes provide a wide array of functionality that is useful when interacting with your data model through a user interface. The generated ViewModels are the primary way that Coalesce is used when developing a Vue application.
 
@@ -10,9 +10,9 @@ These classes provide a wide array of functionality that is useful when interact
 
 ## ViewModels 
 
-The following members can be found on the generated [Entity](/modeling/model-types/entities.md) and [Custom DTO](/modeling/model-types/dtos.md) ViewModels, exported from `viewmodels.g.ts` as `<TypeName>ViewModel`.
+The following members can be found on the generated [CRUD Model](/modeling/model-types/crud.md) ViewModels, exported from `viewmodels.g.ts` as `<TypeName>ViewModel`.
 
-### Model Data Properties
+### Generated Members
 
 Each ViewModel class implements the corresponding interface from the [Model Layer](/stacks/vue/layers/models.md), meaning that the ViewModel has a data property for each [Property](/modeling/model-components/properties.md) on the model. Object-typed properties will be typed as the corresponding generated ViewModel.
 
@@ -26,15 +26,28 @@ There are a few special behaviors when assigning to different kinds of data prop
 - If deep auto-saves are enabled on the instance being assigned to, auto-save will be spread to the incoming object, and to all other objects reachable from that object.
 
 #### Model Collection Properties
-  - When assigning an entire array, any items in the array that are not a ViewModel instance will have an instance created for them.
-  - The same rule goes for pushing items into the existing array for a model collection - a new ViewModel instance will be created and be used instead of the object(s) being pushed.
-    
+- When assigning an entire array, any items in the array that are not a ViewModel instance will have an instance created for them.
+- The same rule goes for pushing items into the existing array for a model collection - a new ViewModel instance will be created and be used instead of the object(s) being pushed.
+  
 #### Foreign Key Properties
-If the corresponding navigation property contains an object, and that object's primary key doesn't match the new foreign key value being assigned, the navigation property will be set to null.
+- If the corresponding navigation property contains an object, and that object's primary key doesn't match the new foreign key value being assigned, the navigation property will be set to null.
 
 
-### Other Data Properties & Functions
 
+### Other Generated Members
+
+#### API Callers
+- For each of the instance [Methods](/modeling/model-components/methods.md) of the type, an [API Caller](/stacks/vue/layers/api-clients.md#api-callers) will be generated.
+
+#### `addTo*()` Functions
+- For each [collection navigation property](/modeling/model-components/properties.md), a method is generated that will create a new instance of the ViewModel for the collected type, add it to the collection, and then return the new object.
+    
+#### Many-to-many helper collections
+- For each [[ManyToMany]](/modeling/model-components/attributes/many-to-many.md) [collection navigation property](/modeling/model-components/properties.md), a getter-only property is generated that returns a collection of the object on the far side of the many-to-many relationship. Nulls are filtered from this collection.
+
+
+
+### Data Properties & Functions
 
 <Prop def="readonly $metadata: ModelType" lang="ts" />
 
@@ -120,7 +133,7 @@ An [API Caller](/stacks/vue/layers/api-clients.md#api-callers) for the ``/save``
 
 This caller is used for both manually-triggered saves in custom code and for auto-saves. If the [Rules/Validation](/stacks/vue/layers/viewmodels.md#rules-validation) report any errors when the caller is invoked, an error will be thrown.
 
-`overrideProps` can provide properties to save that override the [data properties](#model-data-properties) on the ViewModel instance. This allows for manually saving a change to a property without setting the property on the ViewModel instance into a dirty state. This makes it easier to handle some scenarios where changing the value of the property may put the UI into a logically inconsistent state until the save response has been returned from the server - for example, if a change to one property affects the computed value of other properties.
+`overrideProps` can provide properties to save that override the [data properties](#generated-members) on the ViewModel instance. This allows for manually saving a change to a property without setting the property on the ViewModel instance into a dirty state. This makes it easier to handle some scenarios where changing the value of the property may put the UI into a logically inconsistent state until the save response has been returned from the server - for example, if a change to one property affects the computed value of other properties.
 
 When a save creates a new record and a new primary key is returned from the server, any entities attached to the current ViewModel via a collection navigation property will have their foreign keys set to the new primary key. This behavior, combined with the usage of deep auto-saves, allows for complex object graphs to be constructed even before any model in the graph has been created.
 
@@ -306,18 +319,6 @@ Returns an array of all error messages for either a specific property (if provid
 <Prop def="readonly $hasError: boolean" lang="ts" />
 
 Indicates if any properties have validation errors.
-
-
-### Generated Members
-
-#### API Callers
-For each of the instance [Methods](/modeling/model-components/methods.md) of the type, an [API Caller](/stacks/vue/layers/api-clients.md#api-callers) will be generated.
-
-#### `addTo*()` Functions
-For each [collection navigation property](/modeling/model-components/properties.md), a method is generated that will create a new instance of the ViewModel for the collected type, add it to the collection, and then return the new object.
-    
-#### Many-to-many helper collections
-For each [collection navigation property](/modeling/model-components/properties.md) annotated with [[ManyToMany]](/modeling/model-components/attributes/many-to-many.md), a getter-only property is generated that returns a collection of the object on the far side of the many-to-many relationship. Nulls are filtered from this collection.
 
 
 

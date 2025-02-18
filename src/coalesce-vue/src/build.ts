@@ -594,6 +594,10 @@ export async function getCertPaths(certName?: string) {
       ? `${process.env.APPDATA}/ASP.NET/https`
       : `${process.env.HOME}/.aspnet/https`;
 
+  if (!fs.existsSync(baseFolder)) {
+    fs.mkdirSync(baseFolder, { recursive: true });
+  }
+
   const certificateArg =
     certName ??
     process.argv

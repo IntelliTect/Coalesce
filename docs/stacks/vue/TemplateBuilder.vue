@@ -139,7 +139,7 @@ const selections = ref([
   "DarkMode",
   "AuditLogs",
   "UserPictures",
-  // "ExampleModel",
+  "LocalAuth" // https://github.com/IntelliTect/Coalesce/issues/522
 ]);
 
 watch(

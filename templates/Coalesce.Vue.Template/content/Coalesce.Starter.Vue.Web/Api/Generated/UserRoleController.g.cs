@@ -36,28 +36,39 @@ namespace Coalesce.Starter.Vue.Web.Api
         [Authorize(Roles = "UserAdmin")]
         public virtual Task<ItemResult<UserRoleResponse>> Get(
             string id,
-            DataSourceParameters parameters,
+            [FromQuery] DataSourceParameters parameters,
             IDataSource<Coalesce.Starter.Vue.Data.Models.UserRole> dataSource)
             => GetImplementation(id, parameters, dataSource);
 
         [HttpGet("list")]
         [Authorize(Roles = "UserAdmin")]
         public virtual Task<ListResult<UserRoleResponse>> List(
-            ListParameters parameters,
+            [FromQuery] ListParameters parameters,
             IDataSource<Coalesce.Starter.Vue.Data.Models.UserRole> dataSource)
             => ListImplementation(parameters, dataSource);
 
         [HttpGet("count")]
         [Authorize(Roles = "UserAdmin")]
         public virtual Task<ItemResult<int>> Count(
-            FilterParameters parameters,
+            [FromQuery] FilterParameters parameters,
             IDataSource<Coalesce.Starter.Vue.Data.Models.UserRole> dataSource)
             => CountImplementation(parameters, dataSource);
 
         [HttpPost("save")]
+        [Consumes("application/x-www-form-urlencoded", "multipart/form-data")]
         [Authorize]
         public virtual Task<ItemResult<UserRoleResponse>> Save(
             [FromForm] UserRoleParameter dto,
+            [FromQuery] DataSourceParameters parameters,
+            IDataSource<Coalesce.Starter.Vue.Data.Models.UserRole> dataSource,
+            IBehaviors<Coalesce.Starter.Vue.Data.Models.UserRole> behaviors)
+            => SaveImplementation(dto, parameters, dataSource, behaviors);
+
+        [HttpPost("save")]
+        [Consumes("application/json")]
+        [Authorize]
+        public virtual Task<ItemResult<UserRoleResponse>> SaveFromJson(
+            [FromBody] UserRoleParameter dto,
             [FromQuery] DataSourceParameters parameters,
             IDataSource<Coalesce.Starter.Vue.Data.Models.UserRole> dataSource,
             IBehaviors<Coalesce.Starter.Vue.Data.Models.UserRole> behaviors)

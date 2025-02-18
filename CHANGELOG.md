@@ -14,6 +14,24 @@
 - Coalesce's Vite middleware (`UseViteDevelopmentServer`) now checks if your installed NPM packages match what's defined in package.json and package-lock.json, presenting an in-browser warning if they do not. This helps avoid forgetting to reinstall packages after pulling down changes in multi-developer projects.
 - Added a `filter` prop to `c-input` for enum inputs to restrict the values available for selection.
 
+# 5.3.3
+
+## Fixes
+- Add model validation error when ForeignKeyAttribute references a navigation prop that doesn't exist.
+- Fix code gen performance regression introduced in 5.3.2
+
+# 5.3.2
+
+## Fixes
+
+- Fix error in .NET 9 thrown by vite development middleware if the HTTPS cert directory doesn't exist.
+- Fix `ViewModel.$load` and `ListViewModel.$load` not properly working with `.useResponseCaching()`.
+- Entities that own multiple one-to-one relationships should no longer throw errors when generating.
+- Don't duplicate data source parameters in OpenAPI parameter collections.
+- Fix error `this._removeFromParentCollection is not a function` thrown when calling `ViewModel.$delete.confirmInvoke()`.
+- Remove incorrect generation of `ReadFormAsync` for binary parameters on GET endpoints.
+
+
 # 5.3.1
 
 ## Fixes

@@ -384,6 +384,26 @@ export class EnumPkApiClient extends ModelApiClient<$models.EnumPk> {
 }
 
 
+export class OneToOneChild1ApiClient extends ModelApiClient<$models.OneToOneChild1> {
+  constructor() { super($metadata.OneToOneChild1) }
+}
+
+
+export class OneToOneChild2ApiClient extends ModelApiClient<$models.OneToOneChild2> {
+  constructor() { super($metadata.OneToOneChild2) }
+}
+
+
+export class OneToOneManyChildrenApiClient extends ModelApiClient<$models.OneToOneManyChildren> {
+  constructor() { super($metadata.OneToOneManyChildren) }
+}
+
+
+export class OneToOneParentApiClient extends ModelApiClient<$models.OneToOneParent> {
+  constructor() { super($metadata.OneToOneParent) }
+}
+
+
 export class PersonApiClient extends ModelApiClient<$models.Person> {
   constructor() { super($metadata.Person) }
   public rename(id: number | null, name?: string | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<$models.Person>> {

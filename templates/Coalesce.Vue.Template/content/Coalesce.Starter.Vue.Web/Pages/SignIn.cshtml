@@ -23,7 +23,7 @@
 
     <div>
         <label asp-for="Username" class="form-label" autocomplete="username"></label>
-        <input asp-for="Username" class="form-control" autofocus required  />
+        <input asp-for="Username" class="form-control" autofocus required />
     </div>
     <div>
         <label asp-for="Password" class="form-label" autocomplete="current-password"></label>
@@ -53,7 +53,8 @@
         <div class="d-grid gap-3">
             @foreach (var provider in externalLogins)
             {
-                <button type="submit" name="provider" value="@provider.Name" title="Log in with @provider.DisplayName" class="btn btn-outline-dark rounded-pill">
+                <button type="submit" name="provider" value="@provider.Name" title="Log in with @provider.DisplayName"
+                    class="btn btn-outline-dark rounded-pill">
                     <img src="/@provider.Name-logo.svg" />
                     Sign in with @provider.DisplayName
                 </button>
@@ -61,3 +62,15 @@
         </div>
     </form>
 }
+@*#if (!LocalAuth) *@
+@if (!externalLogins.Any())
+{
+    <div class="alert alert-primary text-center" role="alert">
+        No external login providers have been configured, and local accounts were not added from the project template.
+        <br>
+        You will need to <a href="https://learn.microsoft.com/en-us/aspnet/core/security/authentication/social">
+            setup some other login provider
+        </a>.
+    </div>
+}
+@*#endif *@

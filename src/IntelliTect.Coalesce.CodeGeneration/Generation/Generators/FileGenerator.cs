@@ -52,8 +52,12 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
                 }
             });
 
-            using (var contents = await GetOutputAsync().ConfigureAwait(false))
+
+            Uri relPath = new Uri(Environment.CurrentDirectory + Path.DirectorySeparatorChar).MakeRelativeUri(new Uri(outputFile));
+
+            try
             {
+                using var contents = await GetOutputAsync().ConfigureAwait(false);
                 Logger?.LogTrace($"Got output for {this}");
 
                 if (!(await FileUtilities.HasDifferencesAsync(contents, await outputExistingContents)))
@@ -72,13 +76,15 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
                     await fileStream.FlushAsync();
                 }
 
-                Uri relPath = new Uri(Environment.CurrentDirectory + Path.DirectorySeparatorChar).MakeRelativeUri(new Uri(outputFile));
-
                 this.ActionPerformed();
                 Logger?.LogInformation(
-                    (DryRun ? " What if: " : "") + 
+                    (DryRun ? " What if: " : "") +
                     $"{(isRegen ? "Reg" : "G")}enerated: {Uri.UnescapeDataString(relPath.OriginalString)}"
                 );
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"An error was thrown while generating the content of {relPath}", ex);
             }
         }
 

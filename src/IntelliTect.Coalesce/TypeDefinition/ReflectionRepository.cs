@@ -189,8 +189,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 // Remove them from that set now that we know they're entities
                 _externalTypes.RemoveRange(entityCvms);
 
-                // Null this out so it gets recomputed on next access.
-                _entityUsages = null;
+                ClearEntityUsageCache();
 
                 foreach (var entity in context.Entities)
                 {
@@ -230,6 +229,19 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 DiscoverExternalMethodTypesOn(classViewModel);
                 DiscoverExternalPropertyTypesOn(classViewModel);
                 DiscoverNestedCrudStrategiesOn(classViewModel);
+            }
+        }
+
+        private void ClearEntityUsageCache()
+        {
+            // Null this out so it gets recomputed on next access.
+            _entityUsages = null;
+            foreach (var type in _allTypeViewModels.Values)
+            {
+                if (type.ClassViewModel is ClassViewModel cvm)
+                {
+                    cvm.ClearEntityUsageCache();
+                }
             }
         }
 

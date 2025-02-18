@@ -457,5 +457,14 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             return !(lhs == rhs);
         }
+
+
+        internal void ClearEntityUsageCache()
+        {
+            foreach (var prop in _Properties ?? [])
+            {
+                prop.ClearEntityUsageCache();
+            }
+        }
     }
 }

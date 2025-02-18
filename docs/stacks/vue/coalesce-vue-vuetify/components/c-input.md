@@ -91,6 +91,11 @@ An object owning the value that was specified by the `for` prop. If provided, th
 
 If binding the component with ``v-model``, accepts the ``modelValue`` part of ``v-model``.
 
+
+<Prop def="filter?: (value: EnumMember)" lang="ts" />
+
+If binding to an enum, filters the enum members that are available for selection.
+
 ## Slots
 
 ``default`` - Used to display fallback content if c-input does not support the type of the value being bound. Generally this does not need to be used, as you should avoid creating c-input components for unsupported types in the first place.

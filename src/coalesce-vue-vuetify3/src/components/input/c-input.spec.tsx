@@ -149,6 +149,19 @@ describe("CInput", () => {
     () => <CInput model={model} for="color" variant="outlined" />;
     //@ts-expect-error bad prop value
     () => <CInput model={model} for="color" variant="bad-variant" />;
+
+
+    // ******
+    // Enum filter
+    // ******
+    () => <CInput model={vm} for="enumNullable" filter={(v) => v.description == "foo"} />;
+    () => <CInput model={caller} for="enumParam" filter={(v) => v.description == "foo"} />;
+    () => <CInput model={vm} for="enumCollection" filter={(v) => v.description == "foo"} />;
+    () => <CInput model={caller} for="enumsParam" filter={(v) => v.description == "foo"} />;
+    // @ts-expect-error wrong type
+    () => <CInput model={caller} for="strParam" filter={(v) => v.description == "foo"} />;
+    // @ts-expect-error wrong type
+    () => <CInput model={vm} for="string" filter={(v) => v.description == "foo"} />;
   });
 
   test.each([
@@ -176,7 +189,7 @@ describe("CInput", () => {
     expect(wrapper.find("label").text()).toEqual("Status");
     expect(wrapper.text()).contains("In Progress");
 
-    // Open the dropdown and select the third item.
+    // Open the dropdown and select the 4th item.
     // Incredibly annoyingly, VSelect opens on mousedown, not on click.
     // It specifically passes openOnClick=false to VMenu and implements its own mousedown handler.
     await wrapper.find(".v-field").trigger("mousedown");
@@ -185,6 +198,26 @@ describe("CInput", () => {
     // The selected value should now be the 4th value of the enum
     expect(model.status).toBe(Statuses.ClosedNoSolution);
     expect(wrapper.text()).contains("Closed, No Solution");
+  });
+
+  test("enum filtered", async () => {
+    const model = new CaseViewModel({ status: Statuses.InProgress });
+    const wrapper = mount(() => (
+      <CInput
+        model={model}
+        for="status"
+        filter={(v) => v.value != Statuses.ClosedNoSolution}
+      />
+    ));
+
+    // Open the dropdown and select the 4th item.
+    await wrapper.find(".v-field").trigger("mousedown");
+    await wrapper.findAllComponents(VListItem)[3].trigger("click");
+
+    // The selected value should now be the 4th value of the list,
+    // which is the 5th value of the enum because ClosedNoSolution was the 4th and we filtered it out.
+    expect(model.status).toBe(Statuses.Cancelled);
+    expect(wrapper.text()).contains("Cancelled");
   });
 
   test("caller model - date value", async () => {

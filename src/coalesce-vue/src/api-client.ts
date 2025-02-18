@@ -661,9 +661,9 @@ export type ApiStateType<
   TArgs extends any[],
   TResult
 > = T extends ItemTransportTypeSpecifier
-  ? ItemApiState<TArgs, TResult>
+  ? ItemApiState<TArgs, TResult, T extends ItemMethod ? T : ItemMethod>
   : T extends ListTransportTypeSpecifier
-  ? ListApiState<TArgs, TResult>
+  ? ListApiState<TArgs, TResult, T extends ListMethod ? T : ListMethod>
   : never;
 
 export type ApiStateTypeWithArgs<
@@ -672,9 +672,19 @@ export type ApiStateTypeWithArgs<
   TArgsObj extends {},
   TResult
 > = T extends ItemTransportTypeSpecifier
-  ? ItemApiStateWithArgs<TArgs, TArgsObj, TResult>
+  ? ItemApiStateWithArgs<
+      TArgs,
+      TArgsObj,
+      TResult,
+      T extends ItemMethod ? T : ItemMethod
+    >
   : T extends ListTransportTypeSpecifier
-  ? ListApiStateWithArgs<TArgs, TArgsObj, TResult>
+  ? ListApiStateWithArgs<
+      TArgs,
+      TArgsObj,
+      TResult,
+      T extends ListMethod ? T : ListMethod
+    >
   : never;
 
 export interface BulkSaveRequest {
@@ -1840,17 +1850,22 @@ function purgeStaleCacheEntries(storage: Storage) {
 purgeStaleCacheEntries(localStorage);
 purgeStaleCacheEntries(sessionStorage);
 
-export interface ItemApiState<TArgs extends any[], TResult> {
+export interface ItemApiState<
+  TArgs extends any[],
+  TResult,
+  TMethod extends ItemMethod | undefined = ItemMethod
+> {
   // Do not put a doc comment on the call signature:
   // it'll hide the doc comment of the caller's definition.
   (...args: TArgs): Promise<TResult>;
 }
-export class ItemApiState<TArgs extends any[], TResult> extends ApiState<
-  TArgs,
-  TResult
-> {
+export class ItemApiState<
+  TArgs extends any[],
+  TResult,
+  TMethod extends ItemMethod | undefined = ItemMethod
+> extends ApiState<TArgs, TResult> {
   /** The metadata of the method being called, if it was provided. */
-  $metadata?: ItemMethod;
+  $metadata?: TMethod;
 
   private readonly __validationIssues = ref<ValidationIssue[] | null>(null);
   /** Validation issues returned by the previous request. */
@@ -1976,8 +1991,9 @@ export class ItemApiState<TArgs extends any[], TResult> extends ApiState<
 export class ItemApiStateWithArgs<
   TArgs extends any[],
   TArgsObj,
-  TResult
-> extends ItemApiState<TArgs, TResult> {
+  TResult,
+  TMethod extends ItemMethod | undefined = ItemMethod
+> extends ItemApiState<TArgs, TResult, TMethod> {
   private readonly __args = ref<TArgsObj>() as Ref<TArgsObj>;
   /** Values that will be used as arguments if the method is invoked with `this.invokeWithArgs()`. */
   get args() {
@@ -2059,12 +2075,13 @@ export interface ListApiState<TArgs extends any[], TResult> {
   /** Invokes a call to this API endpoint. */
   (...args: TArgs): Promise<TResult[]>;
 }
-export class ListApiState<TArgs extends any[], TResult> extends ApiState<
-  TArgs,
-  TResult
-> {
+export class ListApiState<
+  TArgs extends any[],
+  TResult,
+  TMethod extends ListMethod | undefined = ListMethod
+> extends ApiState<TArgs, TResult> {
   /** The metadata of the method being called, if it was provided. */
-  $metadata?: ListMethod;
+  $metadata?: TMethod;
 
   private readonly __page = ref<number | null>(null);
   /** Page number returned by the previous request. */
@@ -2158,8 +2175,9 @@ export class ListApiState<TArgs extends any[], TResult> extends ApiState<
 export class ListApiStateWithArgs<
   TArgs extends any[],
   TArgsObj,
-  TResult
-> extends ListApiState<TArgs, TResult> {
+  TResult,
+  TMethod extends ListMethod | undefined = ListMethod
+> extends ListApiState<TArgs, TResult, TMethod> {
   private readonly __args = ref<TArgsObj>() as Ref<TArgsObj>;
   /** Values that will be used as arguments if the method is invoked with `this.invokeWithArgs()`. */
   get args() {

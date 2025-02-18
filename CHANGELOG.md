@@ -12,6 +12,7 @@
 - All endpoints with bodies are now send as JSON instead of form data, with the exception of those endpoints with file parameters and only scalar parameters (no complex parameters) beyond the file parameters.
 - Added `$search`, `$filter`, and `$orderBy` shorthands to ListViewModel.
 - Coalesce's Vite middleware (`UseViteDevelopmentServer`) now checks if your installed NPM packages match what's defined in package.json and package-lock.json, presenting an in-browser warning if they do not. This helps avoid forgetting to reinstall packages after pulling down changes in multi-developer projects.
+- Added a `filter` prop to `c-input` for enum inputs to restrict the values available for selection.
 
 # 5.3.1
 

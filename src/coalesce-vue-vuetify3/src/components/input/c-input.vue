@@ -67,7 +67,17 @@ type InheritedProps = Omit<
 type SelectSlotItemType<
   TModel extends Model | DataSource | AnyArgCaller | undefined,
   TFor extends ForSpec<TModel>
-> = TFor extends EnumValue | (CollectionValue & { itemType: EnumValue })
+> = TModel extends ApiStateTypeWithArgs<infer TMethod, any, any, any>
+  ? TMethod extends Method
+    ? TFor extends keyof TMethod["params"]
+      ? TMethod["params"][TFor] extends
+          | EnumValue
+          | (CollectionValue & { itemType: EnumValue })
+        ? EnumMember
+        : never
+      : never
+    : never
+  : TFor extends EnumValue | (CollectionValue & { itemType: EnumValue })
   ? EnumMember
   : TFor extends string
   ? TFor extends keyof EnumTypeLookup
@@ -163,6 +173,7 @@ import {
   CollectionValue,
   EnumTypeLookup,
   EnumMember,
+  Method,
 } from "coalesce-vue";
 
 import CSelect from "./c-select.vue";
@@ -191,26 +202,30 @@ defineOptions({
   },
 });
 
-const props = withDefaults(
-  defineProps<
-    {
-      /** An object owning the value to be edited that is specified by the `for` prop. */
-      model?: TModel | null;
+const props = defineProps<
+  {
+    /** An object owning the value to be edited that is specified by the `for` prop. */
+    model?: TModel | null;
 
-      /** A metadata specifier for the value being bound. One of:
-       * * A string with the name of the value belonging to `model`. E.g. `"firstName"`.
-       * * A direct reference to the metadata object. E.g. `model.$metadata.props.firstName`.
-       * * A string in dot-notation that starts with a type name. E.g. `"Person.firstName"`.
-       */
-      for: TFor;
+    /** A metadata specifier for the value being bound. One of:
+     * * A string with the name of the value belonging to `model`. E.g. `"firstName"`.
+     * * A direct reference to the metadata object. E.g. `model.$metadata.props.firstName`.
+     * * A string in dot-notation that starts with a type name. E.g. `"Person.firstName"`.
+     */
+    for: TFor;
 
-      rules?: Array<TypedValidationRule<ValueType>>;
+    rules?: Array<TypedValidationRule<ValueType>>;
 
-      modelValue?: ValueType | null;
-    } & /* @vue-ignore */ InheritedProps
-  >(),
-  {}
-);
+    modelValue?: ValueType | null;
+
+    /** For enum inputs, a function that can be used to filter the values available for selection. */
+    filter?: SelectSlotItemType<TModel, TFor> extends never
+      ? never
+      : SelectSlotItemType<TModel, TFor> extends EnumMember
+      ? (value: EnumMember) => boolean
+      : never;
+  } & /* @vue-ignore */ InheritedProps
+>();
 
 const { valueMeta: valueMetaRef, valueOwner: valueOwnerRef } =
   useMetadataProps(props);
@@ -269,7 +284,7 @@ function render() {
       addHandler(data, "update:modelValue", (v: any) =>
         emit("update:modelValue", v)
       );
-      return h(CSelect<any>, data, vuetifySlots);
+      return h(CSelect as any, data, vuetifySlots);
 
     case "collection":
       data.model = props.model;
@@ -279,7 +294,7 @@ function render() {
         addHandler(data, "update:modelValue", (v: any) =>
           emit("update:modelValue", v)
         );
-        return h(CSelectManyToMany<any, any>, data, vuetifySlots);
+        return h(CSelectManyToMany as any, data, vuetifySlots);
       } else if (
         valueMeta.itemType.type == "model" &&
         valueMeta.role == "value"
@@ -291,7 +306,7 @@ function render() {
         addHandler(data, "update:modelValue", (v: any) =>
           emit("update:modelValue", v)
         );
-        return h(CSelect<any>, data, vuetifySlots);
+        return h(CSelect as any, data, vuetifySlots);
       } else if (
         valueMeta.itemType.type != "model" &&
         valueMeta.itemType.type != "object" &&
@@ -301,7 +316,7 @@ function render() {
         addHandler(data, "update:modelValue", (v: any) =>
           emit("update:modelValue", v)
         );
-        return h(CSelectValues<any>, data, vuetifySlots);
+        return h(CSelectValues as any, data, vuetifySlots);
       }
   }
 
@@ -399,11 +414,17 @@ function render() {
 
     case "enum":
       addHandler(data, "update:modelValue", onInput);
-      data.items = valueMeta.typeDef.values;
-      data["item-title"] = "displayName";
-      data["item-value"] = "value";
+      let items = valueMeta.typeDef.values;
+      if (props.filter) {
+        items = items.filter(props.filter);
+      }
+      data.items = items;
+      data["item-title"] = "displayName" satisfies keyof EnumMember;
+      data["item-value"] = "value" satisfies keyof EnumMember;
       // maps to the prop "subtitle" on v-list-item
-      data["item-props"] = (item: any) => ({ subtitle: item.description });
+      data["item-props"] = (item: EnumMember) => ({
+        subtitle: item.description,
+      });
       return h(VSelect, data, vuetifySlots);
 
     case "file":

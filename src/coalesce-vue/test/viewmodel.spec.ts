@@ -59,8 +59,16 @@ function mockItemResult<T>(success: boolean, object: T) {
 }
 
 describe("ViewModel", () => {
-  test("is assignable to generic untyped ViewModel", () => {
-    const vm: ViewModel = new StudentViewModel();
+  describe("types", () => {
+    test("is assignable to generic untyped ViewModel", () => {
+      const vm: ViewModel = new StudentViewModel();
+    });
+
+    test("$loadCleanData is chainable", () => {
+      const vm: StudentViewModel = new StudentViewModel().$loadCleanData({
+        studentId: 1,
+      });
+    });
   });
 
   describe.each(["$load", "$save", "$delete", "$bulkSave"] as const)(

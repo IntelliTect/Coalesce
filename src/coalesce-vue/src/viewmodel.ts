@@ -951,6 +951,9 @@ export abstract class ViewModel<
         this.$isDirty = false;
       }
     }
+
+    // Allow chaining. Mainly for inline initialization as `new VM().$loadCleanData()`
+    return this;
   }
 
   /**

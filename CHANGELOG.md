@@ -14,10 +14,12 @@
 - Coalesce's Vite middleware (`UseViteDevelopmentServer`) now checks if your installed NPM packages match what's defined in package.json and package-lock.json, presenting an in-browser warning if they do not. This helps avoid forgetting to reinstall packages after pulling down changes in multi-developer projects.
 - Added a `filter` prop to `c-input` for enum inputs to restrict the values available for selection.
 - Const fields in C#, if annotated with `[Coalesce]`, are now emitted into generated TypeScript.
+- `ViewModel.$loadCleanData()` now returns the VM instance, to support call chaining.
 
 # 5.3.3
 
 ## Fixes
+
 - Add model validation error when ForeignKeyAttribute references a navigation prop that doesn't exist.
 - Fix code gen performance regression introduced in 5.3.2
 
@@ -31,7 +33,6 @@
 - Don't duplicate data source parameters in OpenAPI parameter collections.
 - Fix error `this._removeFromParentCollection is not a function` thrown when calling `ViewModel.$delete.confirmInvoke()`.
 - Remove incorrect generation of `ReadFormAsync` for binary parameters on GET endpoints.
-
 
 # 5.3.1
 

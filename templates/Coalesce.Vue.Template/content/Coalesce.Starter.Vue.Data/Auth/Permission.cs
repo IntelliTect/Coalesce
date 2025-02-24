@@ -14,6 +14,7 @@ public enum Permission
 
     [Display(Name = "Admin - Users", Description = "Add and modify users accounts and their assigned roles. Edit roles and their permissions.")]
     UserAdmin,
-
+#if AuditLogs
     ViewAuditLogs
+#endif
 }

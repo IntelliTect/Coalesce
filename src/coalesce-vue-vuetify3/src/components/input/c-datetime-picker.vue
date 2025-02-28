@@ -28,13 +28,13 @@
   <v-text-field
     v-else
     class="c-datetime-picker"
+    :class="{ 'has-today-btn': showTodayButton }"
     :placeholder="internalFormat"
     :append-inner-icon="
       internalDateKind == 'time'
         ? 'fa fa-clock cursor-pointer'
         : 'fa fa-calendar-alt cursor-pointer'
     "
-    :class="{ 'today-btn': showTodayButton }"
     v-bind="inputBindAttrs"
     :rules="effectiveRules"
     :modelValue="internalTextValue == null ? displayedValue : internalTextValue"
@@ -87,14 +87,11 @@
             :max="max ? endOfDay(max) : undefined"
             v-bind="datePickerProps"
           >
+            <template v-slot:actions v-if="showTodayButton">
+              <v-btn @click="setToday"> Today </v-btn>
+              <v-spacer />
+            </template>
           </v-date-picker>
-          <template v-slot:actions v-if="showTodayButton">
-            <v-btn @click="setToday" :disabled="!isDateAllowed(new Date())">
-              Today
-            </v-btn>
-            <v-spacer />
-          </template>
-        </v-date-picker>
 
           <v-divider vertical></v-divider>
 
@@ -128,11 +125,9 @@
       }
     }
   }
-
-  .today-btn .c-time-picker__column {
+  .has-today-btn {
     max-height: 365px;
   }
-
   .v-date-picker {
     width: 300px;
     overflow-y: auto;
@@ -278,20 +273,21 @@ const props = withDefaults(
        * Value should divide 60 evenly, or be multiples of 60 */
       step?: number | null;
 
-    /** The minimum date/time value allowed. */
-    min?: Date | null;
-    /** The maximum date/time value allowed. */
-    max?: Date | null;
-    /** An array of permitted dates (items should have a time of midnight),
-     * or a function that returns true if a date is allowed for selection.
-     * Does not impact time selection. */
-    allowedDates?: null | Date[] | ((date: Date) => boolean);
-    // Object containing extra props to pass through to `v-date-picker`.
-    datePickerProps?: any;
-    /** Determines whether the 'Today' button is displayed in the date picker actions.
-     * When enabled, the 'Today' button allows users to quickly select the current date. */
-    showTodayButton?: boolean;
-  }>(),
+      /** The minimum date/time value allowed. */
+      min?: Date | null;
+      /** The maximum date/time value allowed. */
+      max?: Date | null;
+      /** An array of permitted dates (items should have a time of midnight),
+       * or a function that returns true if a date is allowed for selection.
+       * Does not impact time selection. */
+      allowedDates?: null | Date[] | ((date: Date) => boolean);
+      // Object containing extra props to pass through to `v-date-picker`.
+      datePickerProps?: DatePickerProps;
+      /** Determines whether the 'Today' button is displayed in the date picker actions.
+       * When enabled, the 'Today' button allows users to quickly select the current date. */
+      showTodayButton?: boolean;
+    } & /* @vue-ignore */ InheritedProps
+  >(),
   { closeOnDatePicked: null, color: "secondary" }
 );
 

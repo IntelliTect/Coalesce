@@ -65,54 +65,48 @@
           step="10"
           v-model="date"
           clearable
-          showTodayButton
-          />
-          
-          <c-datetime-picker
+        />
+
+        <c-datetime-picker
           label="EST"
           density="compact"
           variant="outlined"
           v-model="date"
           timeZone="America/New_York"
-          showTodayButton
-          />
-        </v-form>
-        
-        <c-datetime-picker
+        />
+      </v-form>
+
+      <c-datetime-picker
         label="Time"
         density="compact"
         variant="outlined"
         date-kind="time"
         v-model="date"
-        showTodayButton
-        />
-        <c-datetime-picker
+      />
+      <c-datetime-picker
         label="DateTime"
         density="compact"
         variant="outlined"
         date-kind="datetime"
         v-model="date"
         clearable
-        showTodayButton
-        />
-        <c-datetime-picker
+      />
+      <c-datetime-picker
         label="Date"
         density="compact"
         variant="outlined"
         date-kind="date"
         v-model="date"
-        showTodayButton
-        />
-        <c-datetime-picker
+      />
+      <c-datetime-picker
         label="DateTime Native"
         native
         density="compact"
         variant="outlined"
         date-kind="datetime"
         v-model="date"
-        showTodayButton
       />
-      <c-input :model="caseVm" for="openedAt" variant="outlined" showTodayButton> </c-input>
+      <c-input :model="caseVm" for="openedAt" variant="outlined"> </c-input>
 
       <br />
       {{ date }}

@@ -10,6 +10,7 @@
           firstDayOfWeek: 3,
           viewMode: 'year',
         }"
+        showTodayButton
       ></c-datetime-picker>
     </v-col>
     <v-col>
@@ -41,6 +42,7 @@
         :model="vm"
         for="lastBath"
         color="purple"
+        showTodayButton
       ></c-datetime-picker>
     </v-col>
     <v-col>

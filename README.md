@@ -2,6 +2,8 @@
 
 [Documentation](https://intellitect.github.io/Coalesce) &middot; [Get Started](#Get-Started) &middot; [Builds](#Builds)
 
+[![GitHub Workflow Status (branch)](https://img.shields.io/github/actions/workflow/status/IntelliTect/Coalesce/release.yml?branch=dev&label=Build%20Status&logo=github)](https://github.com/IntelliTect/Coalesce/actions/workflows/release.yml) [![NuGet](https://img.shields.io/nuget/v/IntelliTect.Coalesce)](https://www.nuget.org/packages/IntelliTect.Coalesce) [![npm](https://img.shields.io/npm/v/coalesce-vue/latest.svg)](https://www.npmjs.com/package/coalesce-vue)
+
 Check out [The Coalesce Podcast](https://www.youtube.com/playlist?list=PLRjft3wXvK_srWUHS4w_lVrIfB4uNqfSD) for some step-by-step tutorials about Coalesce features.
 
 Coalesce is a framework for rapid-development of ASP.NET Core + Vue.js web applications. It works from the Entity Framework Core data model that you design, automating the creation of the glue - DTOs, API Controllers, and TypeScript - that sit between your data and the UI of your application. 
@@ -21,19 +23,9 @@ Coalesce is a framework for rapid-development of ASP.NET Core + Vue.js web appli
 
 ## Get Started
 
-The best way to get started with Coalesce is using the `dotnet new` template:
+See the [Getting Started page](https://intellitect.github.io/Coalesce/stacks/vue/getting-started.html#creating-a-project) in the documentation for an interactive template command builder that makes it easy to start a new Coalesce project with the features you need.
 
-* [Vue](https://github.com/IntelliTect/Coalesce.Vue.Template): `dotnet new install IntelliTect.Coalesce.Vue.Template; dotnet new coalescevue -o MyCompany.MyApp`
-
-This command will use the current folder name for the project names, namespaces, etc. It will create a solution in the current folder with .Data and .Web projects.
-
-After you create your project, you should start reading through [the Documentation](https://intellitect.github.io/Coalesce) to see all the things that Coalesce can do.
-
-## Builds
-|channel|build|IntelliTect.Coalesce|coalesce-vue
-|:--:|:--:|:--:|:--:
-|dev|[![GitHub Workflow Status (branch)](https://img.shields.io/github/actions/workflow/status/IntelliTect/Coalesce/alpha.yml?branch=dev&label=Build%20Status&logo=github)](https://github.com/IntelliTect/Coalesce/actions/workflows/alpha.yml)|[![NuGet](https://img.shields.io/static/v1?color=blue&label=nuget&logo=nuget&message=alpha%20prereleases)](https://www.nuget.org/packages/IntelliTect.Coalesce)|[![npm](https://img.shields.io/npm/v/coalesce-vue/latest.svg)](https://www.npmjs.com/package/coalesce-vue)
-|master|[![GitHub Workflow Status (branch)](https://img.shields.io/github/actions/workflow/status/IntelliTect/Coalesce/release.yml?label=Build%20Status&logo=github)](https://github.com/IntelliTect/Coalesce/actions/workflows/release.yml)|[![NuGet](https://img.shields.io/nuget/v/IntelliTect.Coalesce.svg?label=nuget&logo=nuget)](https://www.nuget.org/packages/IntelliTect.Coalesce)
+After you create your project, be sure to reading through the rest of [the Documentation](https://intellitect.github.io/Coalesce) to see all the things that Coalesce can do.
 
 
 ## Support

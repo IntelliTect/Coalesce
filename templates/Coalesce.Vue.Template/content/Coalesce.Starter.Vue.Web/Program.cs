@@ -13,28 +13,40 @@ using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Logging.Console;
 #if OpenAPI
 using Microsoft.OpenApi.Models;
+using Scalar.AspNetCore;
 #endif
 using System.Security.Claims;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
+#if Identity
+#endif
+using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.AspNetCore.Mvc.Routing;
+using Microsoft.AspNetCore.Mvc;
+using Coalesce.Starter.Vue.Data.Communication;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+#if EmailAzure
+using Azure.Core;
+using Azure.Identity;
+#endif
 
 var builder = WebApplication.CreateBuilder(new WebApplicationOptions
 {
-	Args = args,
-	// Explicit declaration prevents ASP.NET Core from erroring if wwwroot doesn't exist at startup:
-	WebRootPath = "wwwroot"
+    Args = args,
+    // Explicit declaration prevents ASP.NET Core from erroring if wwwroot doesn't exist at startup:
+    WebRootPath = "wwwroot"
 });
 
 builder.Logging
-	.AddConsole()
-	// Filter out Request Starting/Request Finished noise:
-	.AddFilter<ConsoleLoggerProvider>("Microsoft.AspNetCore.Hosting.Diagnostics", LogLevel.Warning);
+    .AddConsole()
+    // Filter out Request Starting/Request Finished noise:
+    .AddFilter<ConsoleLoggerProvider>("Microsoft.AspNetCore.Hosting.Diagnostics", LogLevel.Warning);
 
 builder.Configuration
-	.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-	.AddJsonFile("appsettings.localhost.json", optional: true, reloadOnChange: true)
-	.AddEnvironmentVariables();
+    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+    .AddJsonFile("appsettings.localhost.json", optional: true, reloadOnChange: true)
+    .AddEnvironmentVariables();
 
 #region Configure Services
 
@@ -46,52 +58,79 @@ services.AddApplicationInsightsTelemetry(b =>
     b.ConnectionString = builder.Configuration["ApplicationInsights:ConnectionString"];
 });
 services.AddSingleton<ITelemetryInitializer, AppInsightsTelemetryEnricher>();
-services.ConfigureTelemetryModule<DependencyTrackingTelemetryModule>((module, o) => {
-	module.EnableSqlCommandTextInstrumentation = true;
+services.ConfigureTelemetryModule<DependencyTrackingTelemetryModule>((module, o) =>
+{
+    module.EnableSqlCommandTextInstrumentation = true;
 });
-// App insights filters all logs to Warning by default.
+// App insights filters all logs to Warning by default. We want to include our own logging.
 builder.Logging.AddFilter<ApplicationInsightsLoggerProvider>("Coalesce.Starter.Vue", LogLevel.Information);
 #endif
 
 
 services.AddDbContext<AppDbContext>(options => options
-	.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"), opt => opt
-		.EnableRetryOnFailure()
-		.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery)
-	)
-	// Ignored because it interferes with the construction of Coalesce IncludeTrees via .Include()
-	.ConfigureWarnings(warnings => warnings.Ignore(CoreEventId.NavigationBaseIncludeIgnored))
+    .UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"), opt => opt
+        .EnableRetryOnFailure()
+        .UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery)
+    )
+    // Ignored because it interferes with the construction of Coalesce IncludeTrees via .Include()
+    .ConfigureWarnings(warnings => warnings.Ignore(CoreEventId.NavigationBaseIncludeIgnored))
 );
 
 services.AddCoalesce<AppDbContext>();
 
 services.AddDataProtection()
-	.PersistKeysToDbContext<AppDbContext>();
+    .PersistKeysToDbContext<AppDbContext>();
 
 services
-	.AddMvc()
-	.AddJsonOptions(options =>
-	{
-		options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
-		options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
-		options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
-	});
+    .AddMvc()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+        options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+    });
 
 #if Identity
 builder.ConfigureAuthentication();
-#endif
 
+#endif
+#if EmailSendGrid
+services.Configure<SendGridEmailOptions>(builder.Configuration.GetSection("Communication:SendGrid"));
+services.AddTransient<IEmailService, SendGridEmailService>();
+
+#elif EmailAzure
+services.AddSingleton<TokenCredential, DefaultAzureCredential>();
+services.Configure<AzureEmailOptions>(builder.Configuration.GetSection("Communication:Azure"));
+services.AddTransient<IEmailService, AzureEmailService>();
+
+#else
+services.AddTransient<IEmailService, NoOpEmailService>();
+
+#endif
 #if OpenAPI
 services.AddSwaggerGen(c =>
 {
-	c.AddCoalesce();
-	c.SwaggerDoc("current", new OpenApiInfo { Title = "Current API", Version = "current" });
+    c.AddCoalesce();
+    c.SwaggerDoc("current", new OpenApiInfo { Title = "Current API", Version = "current" });
 });
-#endif
 
+#endif
 
 services.AddScoped<SecurityService>();
 
+#if (TenantMemberInvites || LocalAuth)
+// Register IUrlHelper to allow for invite link generation.
+services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
+services.AddScoped<IUrlHelper>(x =>
+{
+    var actionContext = x.GetRequiredService<IActionContextAccessor>().ActionContext;
+    var factory = x.GetRequiredService<IUrlHelperFactory>();
+    return factory.GetUrlHelper(actionContext!);
+});
+#endif
+#if TenantMemberInvites
+services.AddScoped<InvitationService>();
+#endif
 
 #endregion
 
@@ -101,16 +140,16 @@ var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
-	app.UseDeveloperExceptionPage();
+    app.UseDeveloperExceptionPage();
 
-	app.UseViteDevelopmentServer(c =>
-	{
-		c.DevServerPort = 5002;
-	});
+    app.UseViteDevelopmentServer(c =>
+    {
+        c.DevServerPort = 5002;
+    });
 
-	app.MapCoalesceSecurityOverview("coalesce-security");
-	
-	#if (!Identity)
+    app.MapCoalesceSecurityOverview("coalesce-security");
+
+#if (!Identity)
 	// TODO: Dummy authentication for initial development.
 	// Replace this with a proper authentication scheme like
 	// Windows Authentication, or an OIDC provider, or something else.
@@ -126,7 +165,7 @@ if (app.Environment.IsDevelopment())
 		await next.Invoke();
 	});
 	// End Dummy Authentication.
-	#endif
+#endif
 }
 
 app.UseAuthentication();
@@ -135,31 +174,28 @@ app.UseAuthorization();
 var containsFileHashRegex = new Regex(@"[.-][0-9a-zA-Z-_]{8}\.[^\.]*$", RegexOptions.Compiled);
 app.UseStaticFiles(new StaticFileOptions
 {
-	OnPrepareResponse = ctx =>
-	{
-		// vite puts 8-char hashes before the file extension.
-		// Use this to determine if we can send a long-term cache duration.
-		if (containsFileHashRegex.IsMatch(ctx.File.Name))
-		{
-			ctx.Context.Response.GetTypedHeaders().CacheControl = new() { Public = true, MaxAge = TimeSpan.FromDays(30) };
-		}
-	}
+    OnPrepareResponse = ctx =>
+    {
+        // vite puts 8-char hashes before the file extension.
+        // Use this to determine if we can send a long-term cache duration.
+        if (containsFileHashRegex.IsMatch(ctx.File.Name))
+        {
+            ctx.Context.Response.GetTypedHeaders().CacheControl = new() { Public = true, MaxAge = TimeSpan.FromDays(30) };
+        }
+    }
 });
 
 // For all requests that aren't to static files, disallow caching by default.
 // Individual endpoints may override this.
 app.Use(async (context, next) =>
 {
-	context.Response.GetTypedHeaders().CacheControl = new() { NoCache = true, NoStore = true };
-	await next();
+    context.Response.GetTypedHeaders().CacheControl = new() { NoCache = true, NoStore = true };
+    await next();
 });
 
 #if OpenAPI
 app.MapSwagger();
-app.UseSwaggerUI(c =>
-{
-	c.SwaggerEndpoint("/swagger/current/swagger.json", "Current API");
-});
+app.MapScalarApiReference(c => c.OpenApiRoutePattern = "/swagger/{documentName}/swagger.json");
 #endif
 
 app.MapRazorPages();
@@ -177,18 +213,18 @@ app.MapFallbackToController("Index", "Home");
 // Initialize/migrate database.
 using (var scope = app.Services.CreateScope())
 {
-	var serviceScope = scope.ServiceProvider;
+    var serviceScope = scope.ServiceProvider;
 
-	// Run database migrations.
-	using var db = serviceScope.GetRequiredService<AppDbContext>();
-	db.Database.SetCommandTimeout(TimeSpan.FromMinutes(10));
+    // Run database migrations.
+    using var db = serviceScope.GetRequiredService<AppDbContext>();
+    db.Database.SetCommandTimeout(TimeSpan.FromMinutes(10));
 #if KeepTemplateOnly
-	db.Database.EnsureDeleted();
-	db.Database.EnsureCreated();
+    db.Database.EnsureDeleted();
+    db.Database.EnsureCreated();
 #else
 	db.Database.Migrate();
 #endif
-    new DatabaseSeeder(db).Seed();
+    ActivatorUtilities.GetServiceOrCreateInstance<DatabaseSeeder>(serviceScope).Seed();
 }
 
 app.Run();

@@ -1,3 +1,119 @@
+# 5.3.3
+
+## Fixes
+- Add model validation error when ForeignKeyAttribute references a navigation prop that doesn't exist.
+- Fix code gen performance regression introduced in 5.3.2
+
+# 5.3.2
+
+## Fixes
+
+- Fix error in .NET 9 thrown by vite development middleware if the HTTPS cert directory doesn't exist.
+- Fix `ViewModel.$load` and `ListViewModel.$load` not properly working with `.useResponseCaching()`.
+- Entities that own multiple one-to-one relationships should no longer throw errors when generating.
+- Don't duplicate data source parameters in OpenAPI parameter collections.
+- Fix error `this._removeFromParentCollection is not a function` thrown when calling `ViewModel.$delete.confirmInvoke()`.
+- Remove incorrect generation of `ReadFormAsync` for binary parameters on GET endpoints.
+
+
+# 5.3.1
+
+## Fixes
+
+- Fix error thrown by `CoalesceApiDescriptionProvider` when a custom method on a model or service has an explicitly `[Inject]`ed data source parameter.
+
+# 5.3.0
+
+## Features
+
+- Added `multiple` prop to `c-select`, allowing for the selection of multiple models.
+- `c-select-many-to-many` is now based on `c-select` rather than `v-autocomplete`. As a result, it has gained support for all of the props and slots of `c-select`.
+- Added strong types for pass-through Vuetify slots and props to `c-input`, `c-select`, `c-select-many-to-many`, and `c-datetime-picker`.
+- Added a `color` prop to `c-datetime-picker`.
+- Added experimental client-side support for System.Text.Json's PreserveReferences reference handling option in server responses. This does not require changes to your JSON settings in Program.cs - instead, it is activated by setting `refResponse` on the `DataSourceParameters` for a request (i.e. the `$params` object on a ViewModel or ListViewModel). This option can significantly reduce response sizes in cases where the same object occurs many times in a response.
+- `useBindToQueryString`/`bindToQueryString` supports primitive collections from metadata without needing to specify explicit parsing logic
+- Data Sources now support complex type (object, and arrays of objects) parameters
+- Object and array data source parameters can now be passed as JSON, allowing for significantly reduced URL size for parameters like collections of numbers.
+
+## Fixes
+
+- `c-select` `open-on-clear` prop once again functions as expected.
+- `c-select` now closes when changing focus to other elements on the page
+- Multi-line strings now emit correctly into generated metadata (e.g. a multi-line description for a property)
+- Validation attributes on data source parameters are enforced correctly
+
+# 5.2.1
+
+## Fixes
+
+- API clients with response caching enabled were not passing parameters correctly
+
+# 5.2.0
+
+## Features
+
+- Added support for .NET 9.
+- Added a `reset` method to all [API caller objects](https://intellitect.github.io/Coalesce/stacks/vue/layers/api-clients.html#api-callers). This method resets all stateful fields on the object to default values.
+- Template: Added username/password auth option (aka individual user accounts, aka local accounts)
+
+## Fixes
+
+- Fix an ObjectDisposedException from `StandardBehaviors.GetExceptionResult` when using an `IDbContextFactory` in an `Execute[Save|Delete]Async` implementation.
+
+# 5.1.0
+
+## Features
+
+- All Coalesce-generated endpoints that accept a formdata body now also accept a JSON body. Existing formdata endpoints remain unchanged. `coalesce-vue` does not yet use these new endpoints.
+- Automatically produce user-friendly response messages in behaviors for Save and Delete operations that fail due to a violation of a SQL Server foreign key or unique constraint. This behavior can be controlled with the `DetailedEfConstraintExceptionMessages` setting in `.AddCoalesce(c => c.Configure(o => { ... }))`, or by overriding `StandardBehaviors.GetExceptionResult`. This is not a substitute for adding proper validation or other handling of related entities - it only exists to provide a better user experience in cases where the developer has forgotten to handle these situations. This behavior does respect Coalesce's security model and won't produce descriptions of types or values that the user is not allowed to see. (#468)
+- Error responses now include inner exception messages when `DetailedExceptionMessages` is enabled. (#468)
+- Add additional audit configuration methods to allow for allow-listing certain properties.
+- `c-admin-table`: Clicking a row takes you to the details page (#465)
+- `c-admin-table`: Always show button for details page (#465)
+
+## Fixes
+
+- Service controllers missing `ActionResult File(IFile)` method. (#474)
+- Handle sequences of digits when converting PascalCase to Title Case ("Is24h" => "Is 24h") (#469)
+- `c-select`: Not respecting disabled/readonly state in all cases when opening menu (#473)
+- `c-select`: The "Max _N_ items retrieved" message now accounts for list calls that don't provide a count, e.g. by passing `noCount=true`.
+- `c-admin-editor`: Don't show save button when read-only
+- `c-admin-table`: Surgical saves not working for items added with the "Add Item" button in editable mode. (#472)
+
+## Other
+
+- `CoalesceOptions.DetailedEntityFrameworkExceptionMessages` has been renamed to `CoalesceOptions.DetailedEFMigrationExceptionMessages`
+
+# 5.0.3
+
+## Fixes
+
+- Remove flawed logic that chooses the wrong foreign key for navigation properties where the target type of the navigation property has a primary key that also serves as a foreign key in some other relationship. In exceedingly rare cases, you may now have to add a `[ForeignKey(Name = ...)]` attribute to any navigation properties that may now throw a codegen validation error that their foreign key property cannot be discovered automatically. Related to this issue, `ClassViewModel.IsOneToOne` is now deprecated and slated for future removal.
+
+# 5.0.2
+
+## Features
+
+- Make "not found" messages from data sources clearer when the ID is null or empty string. (#447)
+- Added multi-tenancy options to the template. (#441, #461)
+
+## Fixes
+
+- Template: adjust manual chunking configuration to avoid circular deps. (#455)
+- Audit logs: key props now respect configured property exclusions.
+- Audit logs: improper default formatting for primitive collections. (#459)
+- `c-admin-method` now preserves newlines when displaying success messages.
+- `c-select` not defaulting optional method parameters as clearable.
+- Method object parameters passed sent as null on the client were received as a default instance of the object on the server. (#456)
+- Non-nullable value types as root custom method parameters were rejected by ModelState validation. (#464)
+
+# 5.0.1
+
+## Fixes
+
+- `c-input` once again respects the validation rules defined by the bound ViewModel.
+- `c-select-many-to-many`, when selecting an item, will now attempt to reuse a matching, previously removed item that has not yet been committed with a $bulkSave. This prevents unnecessary delete+create of the same item in a many-to-many when the user changes their mind about the inclusion of an item.
+
 # 5.0.0
 
 ## Breaking Changes

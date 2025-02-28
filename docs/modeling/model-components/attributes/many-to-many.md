@@ -8,7 +8,7 @@ support automatic intermediate mapping tables, this field is used to
 allow for direct reference of the many-to-many collections from the
 ViewModel.
 
-The named specified in the attribute will be used as the name of a collection of the objects on the other side of the relationship in the generated [TypeScript ViewModels](/stacks/vue/layers/viewmodels.md#model-data-properties). 
+The named specified in the attribute will be used as the name of a collection of the objects on the other side of the relationship in the generated [TypeScript ViewModels](/stacks/vue/layers/viewmodels.md#generated-members). 
 
 ## Example Usage
 In this example, we have a Person entity and an Appointment entity that share a many-to-many relationship. The PersonAppointment entity serves as the required middle table.

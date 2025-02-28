@@ -4,9 +4,11 @@ using IntelliTect.Coalesce;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Console;
 using Microsoft.Net.Http.Headers;
 using Microsoft.OpenApi.Models;
+using Scalar.AspNetCore;
 using System.Security.Claims;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -43,6 +45,7 @@ services.AddCoalesce<AppDbContext>(c => c.Configure(o =>
     o.ValidateAttributesForMethods = true;
     o.ValidateAttributesForSaves = true;
 }));
+services.AddScoped<Person.WithoutCases>();
 
 services
     .AddMvc()
@@ -57,6 +60,9 @@ services.Configure<Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerOptions
 {
     options.Limits.MaxRequestBodySize = int.MaxValue; // testing big file uploads/downloads
 });
+
+
+services.AddOpenApi();
 
 services.AddSwaggerGen(c =>
 {
@@ -116,6 +122,10 @@ app.Use(async (context, next) =>
 
 app.UseCors(c => c.AllowAnyOrigin().AllowAnyHeader());
 app.MapControllers();
+
+app.MapOpenApi();
+app.MapScalarApiReference();
+
 app.MapSwagger();
 app.UseSwaggerUI(c =>
 {

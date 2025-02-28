@@ -60,16 +60,16 @@ namespace IntelliTect.Coalesce.Tests.Tests.Api.DataSources
 
         public class DefaultSource(CrudContext<AppDbContext> context) : StandardDataSource<StandaloneProjected>(context)
         {
-            public override async Task<IQueryable<StandaloneProjected>> GetQueryAsync(IDataSourceParameters parameters)
+            public override Task<IQueryable<StandaloneProjected>> GetQueryAsync(IDataSourceParameters parameters)
             {
-                return context.DbContext.Cases
+                return Task.FromResult(context.DbContext.Cases
                     .Select(c => new StandaloneProjected
                     {
                         Id = c.CaseKey,
                         OpenedBy = c.ReportedBy,
                         OpenerAllOpenedCases = c.ReportedBy.CasesReported,
                         Products = c.CaseProducts.Select(x => x.Product),
-                    });
+                    }));
             }
         }
     }

@@ -1,7 +1,7 @@
 import * as $metadata from './metadata.g'
 import * as $models from './models.g'
 import * as $apiClients from './api-clients.g'
-import { ViewModel, ListViewModel, ViewModelCollection, ServiceViewModel, DeepPartial, defineProps } from 'coalesce-vue/lib/viewmodel'
+import { ViewModel, ListViewModel, ViewModelCollection, ServiceViewModel, type DeepPartial, defineProps } from 'coalesce-vue/lib/viewmodel'
 
 export interface AbstractImplViewModel extends $models.AbstractImpl {
   implOnlyField: string | null;
@@ -199,7 +199,17 @@ export interface ComplexModelViewModel extends $models.ComplexModel {
   dateOnlyViaAttribute: Date | null;
   unmappedSettableString: string | null;
   adminReadableString: string | null;
+  
+  /** 
+    This is a multiline string in an attribute.
+    This is a second line in the string.
+  */
   restrictedString: string | null;
+  
+  /** 
+    This is a multiline string
+     via explicit escaped newline
+  */
   restrictInit: string | null;
   adminReadableReferenceNavigationId: number | null;
   get adminReadableReferenceNavigation(): ComplexModelViewModel | null;
@@ -266,9 +276,9 @@ export class ComplexModelViewModel extends ViewModel<$models.ComplexModel, $apiC
   public get methodWithOptionalParams() {
     const methodWithOptionalParams = this.$apiClient.$makeCaller(
       this.$metadata.methods.methodWithOptionalParams,
-      (c, requiredInt: number | null, plainInt?: number | null, nullableInt?: number | null, intWithDefault?: number | null, enumWithDefault?: $models.Statuses | null, stringWithDefault?: string | null) => c.methodWithOptionalParams(this.$primaryKey, requiredInt, plainInt, nullableInt, intWithDefault, enumWithDefault, stringWithDefault),
-      () => ({requiredInt: null as number | null, plainInt: null as number | null, nullableInt: null as number | null, intWithDefault: null as number | null, enumWithDefault: null as $models.Statuses | null, stringWithDefault: null as string | null, }),
-      (c, args) => c.methodWithOptionalParams(this.$primaryKey, args.requiredInt, args.plainInt, args.nullableInt, args.intWithDefault, args.enumWithDefault, args.stringWithDefault))
+      (c, requiredInt: number | null, plainInt?: number | null, nullableInt?: number | null, intWithDefault?: number | null, enumWithDefault?: $models.Statuses | null, stringWithDefault?: string | null, optionalObject?: $models.Test | null, optionalObjectCollection?: $models.Test[] | null) => c.methodWithOptionalParams(this.$primaryKey, requiredInt, plainInt, nullableInt, intWithDefault, enumWithDefault, stringWithDefault, optionalObject, optionalObjectCollection),
+      () => ({requiredInt: null as number | null, plainInt: null as number | null, nullableInt: null as number | null, intWithDefault: null as number | null, enumWithDefault: null as $models.Statuses | null, stringWithDefault: null as string | null, optionalObject: null as $models.Test | null, optionalObjectCollection: null as $models.Test[] | null, }),
+      (c, args) => c.methodWithOptionalParams(this.$primaryKey, args.requiredInt, args.plainInt, args.nullableInt, args.intWithDefault, args.enumWithDefault, args.stringWithDefault, args.optionalObject, args.optionalObjectCollection))
     
     Object.defineProperty(this, 'methodWithOptionalParams', {value: methodWithOptionalParams});
     return methodWithOptionalParams
@@ -283,6 +293,17 @@ export class ComplexModelViewModel extends ViewModel<$models.ComplexModel, $apiC
     
     Object.defineProperty(this, 'methodWithRequiredAfterOptional', {value: methodWithRequiredAfterOptional});
     return methodWithRequiredAfterOptional
+  }
+  
+  public get instanceGetMethodWithObjParam() {
+    const instanceGetMethodWithObjParam = this.$apiClient.$makeCaller(
+      this.$metadata.methods.instanceGetMethodWithObjParam,
+      (c, obj?: $models.ExternalParent | null) => c.instanceGetMethodWithObjParam(this.$primaryKey, obj),
+      () => ({obj: null as $models.ExternalParent | null, }),
+      (c, args) => c.instanceGetMethodWithObjParam(this.$primaryKey, args.obj))
+    
+    Object.defineProperty(this, 'instanceGetMethodWithObjParam', {value: instanceGetMethodWithObjParam});
+    return instanceGetMethodWithObjParam
   }
   
   public get methodWithExternalTypesWithSinglePurpose() {
@@ -360,6 +381,61 @@ export class ComplexModelViewModel extends ViewModel<$models.ComplexModel, $apiC
     
     Object.defineProperty(this, 'methodWithMultiFileParameter', {value: methodWithMultiFileParameter});
     return methodWithMultiFileParameter
+  }
+  
+  public get methodWithMultiFileParameterConcrete() {
+    const methodWithMultiFileParameterConcrete = this.$apiClient.$makeCaller(
+      this.$metadata.methods.methodWithMultiFileParameterConcrete,
+      (c, files?: File[] | null) => c.methodWithMultiFileParameterConcrete(this.$primaryKey, files),
+      () => ({files: null as File[] | null, }),
+      (c, args) => c.methodWithMultiFileParameterConcrete(this.$primaryKey, args.files))
+    
+    Object.defineProperty(this, 'methodWithMultiFileParameterConcrete', {value: methodWithMultiFileParameterConcrete});
+    return methodWithMultiFileParameterConcrete
+  }
+  
+  public get methodWithMultiFileParameterConcreteParam() {
+    const methodWithMultiFileParameterConcreteParam = this.$apiClient.$makeCaller(
+      this.$metadata.methods.methodWithMultiFileParameterConcreteParam,
+      (c, files?: File[] | null) => c.methodWithMultiFileParameterConcreteParam(this.$primaryKey, files),
+      () => ({files: null as File[] | null, }),
+      (c, args) => c.methodWithMultiFileParameterConcreteParam(this.$primaryKey, args.files))
+    
+    Object.defineProperty(this, 'methodWithMultiFileParameterConcreteParam', {value: methodWithMultiFileParameterConcreteParam});
+    return methodWithMultiFileParameterConcreteParam
+  }
+  
+  public get methodWithMultiFileParameterList() {
+    const methodWithMultiFileParameterList = this.$apiClient.$makeCaller(
+      this.$metadata.methods.methodWithMultiFileParameterList,
+      (c, files?: File[] | null) => c.methodWithMultiFileParameterList(this.$primaryKey, files),
+      () => ({files: null as File[] | null, }),
+      (c, args) => c.methodWithMultiFileParameterList(this.$primaryKey, args.files))
+    
+    Object.defineProperty(this, 'methodWithMultiFileParameterList', {value: methodWithMultiFileParameterList});
+    return methodWithMultiFileParameterList
+  }
+  
+  public get methodWithMultiFileParameterListConcrete() {
+    const methodWithMultiFileParameterListConcrete = this.$apiClient.$makeCaller(
+      this.$metadata.methods.methodWithMultiFileParameterListConcrete,
+      (c, files?: File[] | null) => c.methodWithMultiFileParameterListConcrete(this.$primaryKey, files),
+      () => ({files: null as File[] | null, }),
+      (c, args) => c.methodWithMultiFileParameterListConcrete(this.$primaryKey, args.files))
+    
+    Object.defineProperty(this, 'methodWithMultiFileParameterListConcrete', {value: methodWithMultiFileParameterListConcrete});
+    return methodWithMultiFileParameterListConcrete
+  }
+  
+  public get methodWithMultiFileParameterListConcreteParam() {
+    const methodWithMultiFileParameterListConcreteParam = this.$apiClient.$makeCaller(
+      this.$metadata.methods.methodWithMultiFileParameterListConcreteParam,
+      (c, files?: File[] | null) => c.methodWithMultiFileParameterListConcreteParam(this.$primaryKey, files),
+      () => ({files: null as File[] | null, }),
+      (c, args) => c.methodWithMultiFileParameterListConcreteParam(this.$primaryKey, args.files))
+    
+    Object.defineProperty(this, 'methodWithMultiFileParameterListConcreteParam', {value: methodWithMultiFileParameterListConcreteParam});
+    return methodWithMultiFileParameterListConcreteParam
   }
   
   public get downloadAttachment() {
@@ -483,6 +559,17 @@ export class ComplexModelViewModel extends ViewModel<$models.ComplexModel, $apiC
     return customDto
   }
   
+  public get sameMethodNameAsMethodOnDifferentType() {
+    const sameMethodNameAsMethodOnDifferentType = this.$apiClient.$makeCaller(
+      this.$metadata.methods.sameMethodNameAsMethodOnDifferentType,
+      (c, input?: $models.CaseDtoStandalone | null) => c.sameMethodNameAsMethodOnDifferentType(this.$primaryKey, input),
+      () => ({input: null as $models.CaseDtoStandalone | null, }),
+      (c, args) => c.sameMethodNameAsMethodOnDifferentType(this.$primaryKey, args.input))
+    
+    Object.defineProperty(this, 'sameMethodNameAsMethodOnDifferentType', {value: sameMethodNameAsMethodOnDifferentType});
+    return sameMethodNameAsMethodOnDifferentType
+  }
+  
   public get methodWithPositionRecord() {
     const methodWithPositionRecord = this.$apiClient.$makeCaller(
       this.$metadata.methods.methodWithPositionRecord,
@@ -581,6 +668,17 @@ export interface ComplexModelDependentViewModel extends $models.ComplexModelDepe
 }
 export class ComplexModelDependentViewModel extends ViewModel<$models.ComplexModelDependent, $apiClients.ComplexModelDependentApiClient, number> implements $models.ComplexModelDependent  {
   
+  public get sameMethodNameAsMethodOnDifferentType() {
+    const sameMethodNameAsMethodOnDifferentType = this.$apiClient.$makeCaller(
+      this.$metadata.methods.sameMethodNameAsMethodOnDifferentType,
+      (c, input?: $models.CaseDtoStandalone | null) => c.sameMethodNameAsMethodOnDifferentType(this.$primaryKey, input),
+      () => ({input: null as $models.CaseDtoStandalone | null, }),
+      (c, args) => c.sameMethodNameAsMethodOnDifferentType(this.$primaryKey, args.input))
+    
+    Object.defineProperty(this, 'sameMethodNameAsMethodOnDifferentType', {value: sameMethodNameAsMethodOnDifferentType});
+    return sameMethodNameAsMethodOnDifferentType
+  }
+  
   constructor(initialData?: DeepPartial<$models.ComplexModelDependent> | null) {
     super($metadata.ComplexModelDependent, new $apiClients.ComplexModelDependentApiClient(), initialData)
   }
@@ -611,6 +709,100 @@ export class EnumPkListViewModel extends ListViewModel<$models.EnumPk, $apiClien
   
   constructor() {
     super($metadata.EnumPk, new $apiClients.EnumPkApiClient())
+  }
+}
+
+
+export interface OneToOneChild1ViewModel extends $models.OneToOneChild1 {
+  parentId: number | null;
+  get parent(): OneToOneParentViewModel | null;
+  set parent(value: OneToOneParentViewModel | $models.OneToOneParent | null);
+}
+export class OneToOneChild1ViewModel extends ViewModel<$models.OneToOneChild1, $apiClients.OneToOneChild1ApiClient, number> implements $models.OneToOneChild1  {
+  
+  constructor(initialData?: DeepPartial<$models.OneToOneChild1> | null) {
+    super($metadata.OneToOneChild1, new $apiClients.OneToOneChild1ApiClient(), initialData)
+  }
+}
+defineProps(OneToOneChild1ViewModel, $metadata.OneToOneChild1)
+
+export class OneToOneChild1ListViewModel extends ListViewModel<$models.OneToOneChild1, $apiClients.OneToOneChild1ApiClient, OneToOneChild1ViewModel> {
+  
+  constructor() {
+    super($metadata.OneToOneChild1, new $apiClients.OneToOneChild1ApiClient())
+  }
+}
+
+
+export interface OneToOneChild2ViewModel extends $models.OneToOneChild2 {
+  parentId: number | null;
+  get parent(): OneToOneParentViewModel | null;
+  set parent(value: OneToOneParentViewModel | $models.OneToOneParent | null);
+}
+export class OneToOneChild2ViewModel extends ViewModel<$models.OneToOneChild2, $apiClients.OneToOneChild2ApiClient, number> implements $models.OneToOneChild2  {
+  
+  constructor(initialData?: DeepPartial<$models.OneToOneChild2> | null) {
+    super($metadata.OneToOneChild2, new $apiClients.OneToOneChild2ApiClient(), initialData)
+  }
+}
+defineProps(OneToOneChild2ViewModel, $metadata.OneToOneChild2)
+
+export class OneToOneChild2ListViewModel extends ListViewModel<$models.OneToOneChild2, $apiClients.OneToOneChild2ApiClient, OneToOneChild2ViewModel> {
+  
+  constructor() {
+    super($metadata.OneToOneChild2, new $apiClients.OneToOneChild2ApiClient())
+  }
+}
+
+
+export interface OneToOneManyChildrenViewModel extends $models.OneToOneManyChildren {
+  id: number | null;
+  oneToOneParentId: number | null;
+  get oneToOneParent(): OneToOneParentViewModel | null;
+  set oneToOneParent(value: OneToOneParentViewModel | $models.OneToOneParent | null);
+}
+export class OneToOneManyChildrenViewModel extends ViewModel<$models.OneToOneManyChildren, $apiClients.OneToOneManyChildrenApiClient, number> implements $models.OneToOneManyChildren  {
+  
+  constructor(initialData?: DeepPartial<$models.OneToOneManyChildren> | null) {
+    super($metadata.OneToOneManyChildren, new $apiClients.OneToOneManyChildrenApiClient(), initialData)
+  }
+}
+defineProps(OneToOneManyChildrenViewModel, $metadata.OneToOneManyChildren)
+
+export class OneToOneManyChildrenListViewModel extends ListViewModel<$models.OneToOneManyChildren, $apiClients.OneToOneManyChildrenApiClient, OneToOneManyChildrenViewModel> {
+  
+  constructor() {
+    super($metadata.OneToOneManyChildren, new $apiClients.OneToOneManyChildrenApiClient())
+  }
+}
+
+
+export interface OneToOneParentViewModel extends $models.OneToOneParent {
+  id: number | null;
+  get child1(): OneToOneChild1ViewModel | null;
+  set child1(value: OneToOneChild1ViewModel | $models.OneToOneChild1 | null);
+  get child2(): OneToOneChild2ViewModel | null;
+  set child2(value: OneToOneChild2ViewModel | $models.OneToOneChild2 | null);
+  get manyChildren(): ViewModelCollection<OneToOneManyChildrenViewModel, $models.OneToOneManyChildren>;
+  set manyChildren(value: (OneToOneManyChildrenViewModel | $models.OneToOneManyChildren)[] | null);
+}
+export class OneToOneParentViewModel extends ViewModel<$models.OneToOneParent, $apiClients.OneToOneParentApiClient, number> implements $models.OneToOneParent  {
+  
+  
+  public addToManyChildren(initialData?: DeepPartial<$models.OneToOneManyChildren> | null) {
+    return this.$addChild('manyChildren', initialData) as OneToOneManyChildrenViewModel
+  }
+  
+  constructor(initialData?: DeepPartial<$models.OneToOneParent> | null) {
+    super($metadata.OneToOneParent, new $apiClients.OneToOneParentApiClient(), initialData)
+  }
+}
+defineProps(OneToOneParentViewModel, $metadata.OneToOneParent)
+
+export class OneToOneParentListViewModel extends ListViewModel<$models.OneToOneParent, $apiClients.OneToOneParentApiClient, OneToOneParentViewModel> {
+  
+  constructor() {
+    super($metadata.OneToOneParent, new $apiClients.OneToOneParentApiClient())
   }
 }
 
@@ -772,6 +964,8 @@ export class PersonListViewModel extends ListViewModel<$models.Person, $apiClien
 export interface ProductViewModel extends $models.Product {
   productId: number | null;
   name: string | null;
+  uniqueId1: string | null;
+  uniqueId2: string | null;
 }
 export class ProductViewModel extends ViewModel<$models.Product, $apiClients.ProductApiClient, number> implements $models.Product  {
   
@@ -1057,6 +1251,17 @@ export class WeatherServiceViewModel extends ServiceViewModel<typeof $metadata.W
     return getWeather
   }
   
+  public get fileUploadDownload() {
+    const fileUploadDownload = this.$apiClient.$makeCaller(
+      this.$metadata.methods.fileUploadDownload,
+      (c, file: File | null) => c.fileUploadDownload(file),
+      () => ({file: null as File | null, }),
+      (c, args) => c.fileUploadDownload(args.file))
+    
+    Object.defineProperty(this, 'fileUploadDownload', {value: fileUploadDownload});
+    return fileUploadDownload
+  }
+  
   constructor() {
     super($metadata.WeatherService, new $apiClients.WeatherServiceApiClient())
   }
@@ -1073,6 +1278,10 @@ const viewModelTypeLookup = ViewModel.typeLookup = {
   ComplexModel: ComplexModelViewModel,
   ComplexModelDependent: ComplexModelDependentViewModel,
   EnumPk: EnumPkViewModel,
+  OneToOneChild1: OneToOneChild1ViewModel,
+  OneToOneChild2: OneToOneChild2ViewModel,
+  OneToOneManyChildren: OneToOneManyChildrenViewModel,
+  OneToOneParent: OneToOneParentViewModel,
   Person: PersonViewModel,
   Product: ProductViewModel,
   ReadOnlyEntityUsedAsMethodInput: ReadOnlyEntityUsedAsMethodInputViewModel,
@@ -1095,6 +1304,10 @@ const listViewModelTypeLookup = ListViewModel.typeLookup = {
   ComplexModel: ComplexModelListViewModel,
   ComplexModelDependent: ComplexModelDependentListViewModel,
   EnumPk: EnumPkListViewModel,
+  OneToOneChild1: OneToOneChild1ListViewModel,
+  OneToOneChild2: OneToOneChild2ListViewModel,
+  OneToOneManyChildren: OneToOneManyChildrenListViewModel,
+  OneToOneParent: OneToOneParentListViewModel,
   Person: PersonListViewModel,
   Product: ProductListViewModel,
   ReadOnlyEntityUsedAsMethodInput: ReadOnlyEntityUsedAsMethodInputListViewModel,

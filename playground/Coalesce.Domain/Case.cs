@@ -8,6 +8,7 @@ using IntelliTect.Coalesce.Utilities;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.IO;
@@ -161,7 +162,7 @@ namespace Coalesce.Domain
             }
 
             var content = new byte[file.Length];
-            await file.Content.ReadAsync(content.AsMemory());
+            await file.Content.ReadExactlyAsync(content.AsMemory());
 
             AttachmentContent = new CaseAttachmentContent() { CaseKey = CaseKey, Content = content };
             AttachmentName = file.Name;
@@ -222,6 +223,7 @@ namespace Coalesce.Domain
             public AllOpenCases(CrudContext<AppDbContext> context) : base(context) { }
 
             [Coalesce]
+            [Description("Only include cases opened on or after this date")]
             public DateTimeOffset? MinDate { get; set; }
 
             public override IQueryable<Case> GetQuery(IDataSourceParameters parameters) => Db.Cases
@@ -229,6 +231,15 @@ namespace Coalesce.Domain
                 .Where(c => MinDate == null || c.OpenedAt > MinDate)
                 .IncludeChildren();
         }
+
+        public class MissingManyToManyFarSide(CrudContext<AppDbContext> context) : StandardDataSource<Case, AppDbContext>(context)
+        {
+            public override IQueryable<Case> GetQuery(IDataSourceParameters parameters) => Db.Cases
+                .Include(c => c.CaseProducts)
+                .Include(c => c.AssignedTo)
+                .Include(c => c.ReportedBy);
+        }
+
 
         /// <summary>
         /// Returns a list of summary information about Cases

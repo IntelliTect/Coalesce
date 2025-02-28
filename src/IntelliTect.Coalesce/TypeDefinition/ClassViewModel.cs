@@ -169,8 +169,10 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public IEnumerable<PropertyViewModel> DataSourceParameters => Properties
             .Where(p =>
                 !p.IsInternalUse && p.HasPublicSetter && p.HasAttribute<CoalesceAttribute>()
-                // These are the only supported types, for now
-                && (p.PureType.IsPrimitive || p.PureType.IsDateOrTime)
+                && p.PureType.TsTypeKind 
+                    is not TypeDiscriminator.File 
+                    and not TypeDiscriminator.Void 
+                    and not TypeDiscriminator.Unknown
             );
 
         /// <summary>
@@ -385,6 +387,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             ClientProperties.FirstOrDefault(f => f.Name == "Name") ??
             PrimaryKey;
 
+        [Obsolete("The logic in this property is flawed and does not consider that a single entity can participate in multiple relationships. It will be removed in a future version.")]
         public bool IsOneToOne => PrimaryKey?.IsForeignKey ?? false;
 
 #pragma warning disable CS0618 // Type or member is obsolete
@@ -453,6 +456,15 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public static bool operator != (ClassViewModel? lhs, ClassViewModel? rhs)
         {
             return !(lhs == rhs);
+        }
+
+
+        internal void ClearEntityUsageCache()
+        {
+            foreach (var prop in _Properties ?? [])
+            {
+                prop.ClearEntityUsageCache();
+            }
         }
     }
 }

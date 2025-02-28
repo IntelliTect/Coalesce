@@ -76,29 +76,29 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
             {
                 // ENDPOINT: /get/{id}
                 b.Line();
-                b.Line("[HttpGet(\"get/{id}\")]");
+                b.Line("""[HttpGet("get/{id}")]""");
                 b.Line($"{securityInfo.Read.MvcAnnotation()}");
                 b.Line($"{accessModifier} virtual Task<ItemResult<{Model.ResponseDtoTypeName}>> Get(");
                 b.Indented($"{primaryKeyParameter},");
-                b.Indented($"DataSourceParameters parameters,");
+                b.Indented($"[FromQuery] DataSourceParameters parameters,");
                 b.Indented($"{dataSourceParameter})");
                 b.Indented($"=> GetImplementation(id, parameters, dataSource);");
 
                 // ENDPOINT: /list
                 b.Line();
-                b.Line("[HttpGet(\"list\")]");
+                b.Line("""[HttpGet("list")]""");
                 b.Line($"{securityInfo.Read.MvcAnnotation()}");
                 b.Line($"{accessModifier} virtual Task<ListResult<{Model.ResponseDtoTypeName}>> List(");
-                b.Indented($"ListParameters parameters,");
+                b.Indented($"[FromQuery] ListParameters parameters,");
                 b.Indented($"{dataSourceParameter})");
                 b.Indented($"=> ListImplementation(parameters, dataSource);");
 
                 // ENDPOINT: /count
                 b.Line();
-                b.Line("[HttpGet(\"count\")]");
+                b.Line("""[HttpGet("count")]""");
                 b.Line($"{securityInfo.Read.MvcAnnotation()}");
                 b.Line($"{accessModifier} virtual Task<ItemResult<int>> Count(");
-                b.Indented($"FilterParameters parameters,");
+                b.Indented($"[FromQuery] FilterParameters parameters,");
                 b.Indented($"{dataSourceParameter})");
                 b.Indented($"=> CountImplementation(parameters, dataSource);");
             }
@@ -107,10 +107,22 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
             {
                 // ENDPOINT: /save
                 b.Line();
-                b.Line("[HttpPost(\"save\")]");
+                b.Line("""[HttpPost("save")]""");
+                b.Line("""[Consumes("application/x-www-form-urlencoded", "multipart/form-data")]""");
                 b.Line($"{securityInfo.Save.MvcAnnotation()}");
                 b.Line($"{accessModifier} virtual Task<ItemResult<{Model.ResponseDtoTypeName}>> Save(");
                 b.Indented($"[FromForm] {Model.ParameterDtoTypeName} dto,");
+                b.Indented($"[FromQuery] DataSourceParameters parameters,");
+                b.Indented($"{dataSourceParameter},");
+                b.Indented($"{behaviorsParameter})");
+                b.Indented($"=> SaveImplementation(dto, parameters, dataSource, behaviors);");
+
+                b.Line();
+                b.Line("""[HttpPost("save")]""");
+                b.Line("""[Consumes("application/json")]""");
+                b.Line($"{securityInfo.Save.MvcAnnotation()}");
+                b.Line($"{accessModifier} virtual Task<ItemResult<{Model.ResponseDtoTypeName}>> SaveFromJson(");
+                b.Indented($"[FromBody] {Model.ParameterDtoTypeName} dto,");
                 b.Indented($"[FromQuery] DataSourceParameters parameters,");
                 b.Indented($"{dataSourceParameter},");
                 b.Indented($"{behaviorsParameter})");
@@ -156,51 +168,69 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                 b.Line();
                 b.Line("// Methods from data class exposed through API Controller.");
             }
+
             foreach (var method in Model.ClientMethods)
             {
-                WriteControllerActionPreamble(b, method);
+                // Write the action for parameterless methods and formdata methods
                 using (WriteControllerActionSignature(b, method))
                 {
-                    if (method.IsStatic)
+                    WriteMethodBody(b, method);
+                }
+
+                if (method.HasHttpRequestBody)
+                {
+                    // Write the JSON-accepting endpoint if there is a body.
+                    using (WriteControllerActionJsonSignature(b, method))
                     {
-                        WriteMethodInvocation(b, method, method.Parent.FullyQualifiedName);
+                        WriteMethodBody(b, method);
                     }
-                    else
-                    {
-                        b.Line($"var dataSource = dataSourceFactory.GetDataSource<" +
-                            $"{Model.BaseViewModel.FullyQualifiedName}, {Model.FullyQualifiedName}>" +
-                            $"(\"{method.LoadFromDataSourceName}\");");
-
-                        if (Model.IsCustomDto)
-                        {
-                            b.Line($"var itemResult = await dataSource.GetMappedItemAsync<{Model.FullyQualifiedName}>(id, new DataSourceParameters());");
-                        }
-                        else
-                        {
-                            b.Line("var itemResult = await dataSource.GetItemAsync(id, new DataSourceParameters());");
-                        }
-                        using (b.Block("if (!itemResult.WasSuccessful)"))
-                        {
-                            b.Line($"return new {method.ApiActionReturnTypeDeclaration}(itemResult);");
-                        }
-                        b.Line("var item = itemResult.Object;");
-
-                        var varyByProperty = method.VaryByProperty;
-                        if (varyByProperty != null)
-                        {
-                            WriteEtagProcessing(b, method, varyByProperty);
-                        }
-
-                        WriteMethodInvocation(b, method, "item");
-                    }
-
-                    WriteMethodResultProcessBlock(b, method);
                 }
             }
         }
 
-        private static void WriteEtagProcessing(CSharpCodeBuilder b, MethodViewModel method, PropertyViewModel varyByProperty)
+        private void WriteMethodBody(CSharpCodeBuilder b, MethodViewModel method)
         {
+            if (method.IsStatic)
+            {
+                WriteMethodInvocation(b, method, method.Parent.FullyQualifiedName);
+            }
+            else
+            {
+                WriteInstanceMethodTargetLoading(b, method);
+                WriteMethodInvocation(b, method, "item");
+            }
+
+            WriteMethodResultProcessBlock(b, method);
+        }
+
+        private void WriteInstanceMethodTargetLoading(CSharpCodeBuilder b, MethodViewModel method)
+        {
+            b.Line($"var dataSource = dataSourceFactory.GetDataSource<" +
+                $"{Model.BaseViewModel.FullyQualifiedName}, {Model.FullyQualifiedName}>" +
+                $"(\"{method.LoadFromDataSourceName}\");");
+
+            if (Model.IsCustomDto)
+            {
+                b.Line($"var itemResult = await dataSource.GetMappedItemAsync<{Model.FullyQualifiedName}>(_params.Id, new DataSourceParameters());");
+            }
+            else
+            {
+                b.Line("var itemResult = await dataSource.GetItemAsync(_params.Id, new DataSourceParameters());");
+            }
+            using (b.Block("if (!itemResult.WasSuccessful)"))
+            {
+                b.Line($"return new {method.ApiActionReturnTypeDeclaration}(itemResult);");
+            }
+            b.Line("var item = itemResult.Object;");
+
+            WriteEtagProcessing(b, method);
+        }
+
+        private static void WriteEtagProcessing(CSharpCodeBuilder b, MethodViewModel method)
+        {
+            var varyByProperty = method.VaryByProperty;
+            if (varyByProperty is null) return;
+
             b.Line();
 
             b.Line($"var _currentVaryValue = item.{varyByProperty.Name};");

@@ -5,8 +5,12 @@ namespace Coalesce.Starter.Vue.Data.Auth;
 public class SecurityService()
 {
     [Coalesce, Execute(HttpMethod = HttpMethod.Get)]
-    public UserInfo WhoAmI(ClaimsPrincipal user)
+    public UserInfo WhoAmI(ClaimsPrincipal user, AppDbContext db)
     {
+#if Tenancy
+        var tenant = db.Tenants.Find(user.GetTenantId());
+#endif
+
         return new UserInfo
         {
 #if Identity
@@ -28,6 +32,11 @@ public class SecurityService()
 #else
             Id = user.FindFirstValue(ClaimTypes.NameIdentifier),
             UserName = user.Identity?.Name,
+#endif
+
+#if Tenancy
+            TenantId = user.GetTenantId(),
+            TenantName = tenant?.Name,
 #endif
         };
     }

@@ -52,6 +52,12 @@ namespace Coalesce.Domain
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            // Remove cascading deletes.
+            foreach (var relationship in modelBuilder.Model.GetEntityTypes().SelectMany(e => e.GetForeignKeys()))
+            {
+                relationship.DeleteBehavior = DeleteBehavior.Restrict;
+            }
+
             modelBuilder.Entity<Product>().OwnsOne(p => p.Details, cb =>
             {
                 cb.OwnsOne(c => c.ManufacturingAddress);

@@ -1,21 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Linq.Expressions;
-using Microsoft.EntityFrameworkCore;
-using System.Reflection;
-using Microsoft.CodeAnalysis;
-using IntelliTect.Coalesce.DataAnnotations;
-using IntelliTect.Coalesce.Utilities;
-using System.Collections.Concurrent;
+﻿using IntelliTect.Coalesce.Models;
 using IntelliTect.Coalesce.TypeUsage;
-using IntelliTect.Coalesce.Api;
-using System.Threading;
-using IntelliTect.Coalesce.Models;
+using IntelliTect.Coalesce.Utilities;
+using Microsoft.CodeAnalysis;
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
 
 namespace IntelliTect.Coalesce.TypeDefinition
 {
@@ -26,7 +20,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         private readonly ConcurrentHashSet<DbContextTypeUsage> _contexts = new();
         private readonly ConcurrentHashSet<ClassViewModel> _entities = new();
-        private ILookup<ClassViewModel, EntityTypeUsage>? _entityUsages = null;
 
         private readonly ConcurrentHashSet<CrudStrategyTypeUsage> _behaviors = new();
         private readonly ConcurrentHashSet<CrudStrategyTypeUsage> _dataSources = new();
@@ -43,9 +36,16 @@ namespace IntelliTect.Coalesce.TypeDefinition
         private readonly object _discoverLock = new();
 
         public ReadOnlyHashSet<DbContextTypeUsage> DbContexts => new(_contexts);
+
+        private ILookup<ClassViewModel, EntityTypeUsage>? _entityUsages = null;
         public ILookup<ClassViewModel, EntityTypeUsage> EntityUsages => _entityUsages ??= DbContexts
             .SelectMany(contextUsage => contextUsage.Entities)
             .ToLookup(entityUsage => entityUsage.ClassViewModel);
+
+        private ILookup<string, MethodViewModel>? _clientMethods = null;
+        public ILookup<string, MethodViewModel> ClientMethodsLookup => _clientMethods ??= ControllerBackedClasses
+            .SelectMany(c => c.ClientMethods)
+            .ToLookup(m => m.Name);
 
         private ReadOnlyDictionary<string, ClassViewModel>? _clientTypes;
         public ReadOnlyDictionary<string, ClassViewModel> ClientTypesLookup 
@@ -175,6 +175,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
             // Null this out so it gets recomputed on next access.
             _clientTypes = null;
+            _clientMethods = null;
 
             if (type.IsA<DbContext>())
             {
@@ -188,8 +189,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 // Remove them from that set now that we know they're entities
                 _externalTypes.RemoveRange(entityCvms);
 
-                // Null this out so it gets recomputed on next access.
-                _entityUsages = null;
+                ClearEntityUsageCache();
 
                 foreach (var entity in context.Entities)
                 {
@@ -229,6 +229,19 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 DiscoverExternalMethodTypesOn(classViewModel);
                 DiscoverExternalPropertyTypesOn(classViewModel);
                 DiscoverNestedCrudStrategiesOn(classViewModel);
+            }
+        }
+
+        private void ClearEntityUsageCache()
+        {
+            // Null this out so it gets recomputed on next access.
+            _entityUsages = null;
+            foreach (var type in _allTypeViewModels.Values)
+            {
+                if (type.ClassViewModel is ClassViewModel cvm)
+                {
+                    cvm.ClearEntityUsageCache();
+                }
             }
         }
 
@@ -347,10 +360,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             {
                 foreach (var parameter in strategyType.ClassViewModel.DataSourceParameters)
                 {
-                    if (parameter.PureType.IsEnum)
-                    {
-                        _enums.Add(parameter.PureType.NullableValueUnderlyingType);
-                    }
+                    ConditionallyAddAndDiscoverTypesOn(parameter);
                 }
             }
 

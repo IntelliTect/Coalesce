@@ -4,8 +4,19 @@ public static class AppClaimTypes
 {
     public const string Role = "role";
     public const string Permission = "perm";
-    public const string UserId = ClaimTypes.NameIdentifier;
-    public const string UserName = ClaimTypes.Name;
-    public const string Email = ClaimTypes.Email;
-    public const string FullName = nameof(FullName);
+    public const string UserId = "sub";
+    public const string UserName = "username";
+    public const string Email = "email";
+    public const string FullName = "name";
+#if Tenancy
+    public const string TenantId = "tid";
+#endif
 }
+
+#if Tenancy
+public static class AppClaimValues
+{
+    public const string GlobalAdminRole = "GlobalAdmin";
+    public const string NullTenantId = "00000000-0000-0000-0000-000000000000";
+}
+#endif

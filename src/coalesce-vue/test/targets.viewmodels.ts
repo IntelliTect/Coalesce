@@ -9,7 +9,7 @@ import * as apiClients from "./targets.apiclients";
 import {
   ViewModel,
   ListViewModel,
-  DeepPartial,
+  type DeepPartial,
   defineProps,
 } from "../src/viewmodel";
 

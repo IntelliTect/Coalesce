@@ -1,8 +1,8 @@
-import {
-  Domain, getEnumMeta, solidify, ModelType, ObjectType,
+import { getEnumMeta, solidify } from 'coalesce-vue/lib/metadata'
+import type {
+  Domain, ModelType, ObjectType, HiddenAreas, BehaviorFlags, 
   PrimitiveProperty, ForeignKeyProperty, PrimaryKeyProperty,
-  ModelCollectionNavigationProperty, ModelReferenceNavigationProperty,
-  HiddenAreas, BehaviorFlags
+  ModelCollectionNavigationProperty, ModelReferenceNavigationProperty
 } from 'coalesce-vue/lib/metadata'
 
 
@@ -805,10 +805,18 @@ export const Case = domain.types.Case = {
         minDate: {
           name: "minDate",
           displayName: "Min Date",
+          description: "Only include cases opened on or after this date",
           type: "date",
           dateKind: "datetime",
           role: "value",
         },
+      },
+    },
+    missingManyToManyFarSide: {
+      type: "dataSource",
+      name: "MissingManyToManyFarSide" as const,
+      displayName: "Missing Many To Many Far Side",
+      props: {
       },
     },
   },
@@ -983,6 +991,45 @@ export const CaseProduct = domain.types.CaseProduct = {
   methods: {
   },
   dataSources: {
+  },
+}
+export const CaseStandalone = domain.types.CaseStandalone = {
+  name: "CaseStandalone" as const,
+  displayName: "Case Standalone",
+  get displayProp() { return this.props.id }, 
+  type: "model",
+  controllerRoute: "CaseStandalone",
+  get keyProp() { return this.props.id }, 
+  behaviorFlags: 0 as BehaviorFlags,
+  props: {
+    id: {
+      name: "id",
+      displayName: "Id",
+      type: "number",
+      role: "primaryKey",
+      hidden: 3 as HiddenAreas,
+      dontSerialize: true,
+    },
+    assignedTo: {
+      name: "assignedTo",
+      displayName: "Assigned To",
+      type: "model",
+      get typeDef() { return (domain.types.Person as ModelType & { name: "Person" }) },
+      role: "value",
+      dontSerialize: true,
+    },
+  },
+  methods: {
+  },
+  dataSources: {
+    defaultSource: {
+      type: "dataSource",
+      name: "DefaultSource" as const,
+      displayName: "Default Source",
+      isDefault: true,
+      props: {
+      },
+    },
   },
 }
 export const Company = domain.types.Company = {
@@ -1794,6 +1841,61 @@ export const Person = domain.types.Person = {
             required: val => val != null || "Person is required.",
           }
         },
+        people: {
+          name: "people",
+          displayName: "People",
+          type: "collection",
+          itemType: {
+            name: "$collectionItem",
+            displayName: "",
+            role: "value",
+            type: "model",
+            get typeDef() { return (domain.types.Person as ModelType & { name: "Person" }) },
+          },
+          role: "value",
+          rules: {
+            required: val => val != null || "People is required.",
+          }
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "model",
+        get typeDef() { return (domain.types.Person as ModelType & { name: "Person" }) },
+        role: "value",
+      },
+    },
+    methodWithOptionalEntityParameter: {
+      name: "methodWithOptionalEntityParameter",
+      displayName: "Method With Optional Entity Parameter",
+      transportType: "item",
+      httpMethod: "POST",
+      isStatic: true,
+      params: {
+        person: {
+          name: "person",
+          displayName: "Person",
+          type: "model",
+          get typeDef() { return (domain.types.Person as ModelType & { name: "Person" }) },
+          role: "value",
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "model",
+        get typeDef() { return (domain.types.Person as ModelType & { name: "Person" }) },
+        role: "value",
+      },
+    },
+    methodWithExplicitlyInjectedDataSource: {
+      name: "methodWithExplicitlyInjectedDataSource",
+      displayName: "Method With Explicitly Injected Data Source",
+      transportType: "item",
+      httpMethod: "POST",
+      isStatic: true,
+      params: {
       },
       return: {
         name: "$return",
@@ -1876,6 +1978,13 @@ export const Person = domain.types.Person = {
       displayName: "Without Cases",
       isDefault: true,
       props: {
+        personCriteria: {
+          name: "personCriteria",
+          displayName: "Person Criteria",
+          type: "object",
+          get typeDef() { return (domain.types.PersonCriteria as ObjectType & { name: "PersonCriteria" }) },
+          role: "value",
+        },
       },
     },
   },
@@ -2442,6 +2551,7 @@ interface AppDomain extends Domain {
     CaseDto: typeof CaseDto
     CaseDtoStandalone: typeof CaseDtoStandalone
     CaseProduct: typeof CaseProduct
+    CaseStandalone: typeof CaseStandalone
     CaseSummary: typeof CaseSummary
     Company: typeof Company
     DevTeam: typeof DevTeam

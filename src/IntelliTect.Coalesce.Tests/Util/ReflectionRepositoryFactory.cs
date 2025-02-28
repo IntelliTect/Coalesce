@@ -20,9 +20,12 @@ namespace IntelliTect.Coalesce.Tests.Util
             MakeFromReflection(ReflectionRepository.Global);
         }
 
+        /// <summary>
+        /// Syntax trees for all the files in the TargetClasses directory
+        /// </summary>
         public static readonly IReadOnlyCollection<SyntaxTree> ModelSyntaxTrees = GetModelSyntaxTrees();
 
-        internal static readonly CSharpCompilation Compilation = GetCompilation(new SyntaxTree[0]);
+        internal static readonly CSharpCompilation Compilation = GetCompilation(ModelSyntaxTrees);
         internal static readonly List<ITypeSymbol> Symbols = GetAllSymbols();
 
         public static readonly ReflectionRepository Symbol = MakeFromSymbols();
@@ -74,6 +77,10 @@ namespace IntelliTect.Coalesce.Tests.Util
             rr.AddAssembly<ComplexModel>();
         }
 
+        /// <summary>
+        /// Produce SyntaxTrees for all the models that are inputs to our tests,
+        /// located in the TargetClasses directory.
+        /// </summary>
         private static IReadOnlyCollection<SyntaxTree> GetModelSyntaxTrees()
         {
             var asm = Assembly.GetExecutingAssembly();
@@ -134,7 +141,7 @@ namespace IntelliTect.Coalesce.Tests.Util
 
             var compilation = CSharpCompilation.Create(
                 SymbolDiscoveryAssemblyName,
-                trees.Concat(ModelSyntaxTrees),
+                trees,
                 assemblies,
                 new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
             );
@@ -155,7 +162,7 @@ namespace IntelliTect.Coalesce.Tests.Util
 
             if (!errors.Any()) return;
 
-            Assert.False(true, string.Join("\n", errors.Select(error =>
+            Assert.Fail(string.Join("\n", errors.Select(error =>
                 error.ToString() +
                 $" near `" +
                 error.Location.SourceTree.ToString().Substring(error.Location.SourceSpan.Start, error.Location.SourceSpan.Length) +

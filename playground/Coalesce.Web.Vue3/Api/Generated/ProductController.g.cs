@@ -36,28 +36,39 @@ namespace Coalesce.Web.Vue3.Api
         [Authorize]
         public virtual Task<ItemResult<ProductResponse>> Get(
             int id,
-            DataSourceParameters parameters,
+            [FromQuery] DataSourceParameters parameters,
             IDataSource<Coalesce.Domain.Product> dataSource)
             => GetImplementation(id, parameters, dataSource);
 
         [HttpGet("list")]
         [Authorize]
         public virtual Task<ListResult<ProductResponse>> List(
-            ListParameters parameters,
+            [FromQuery] ListParameters parameters,
             IDataSource<Coalesce.Domain.Product> dataSource)
             => ListImplementation(parameters, dataSource);
 
         [HttpGet("count")]
         [Authorize]
         public virtual Task<ItemResult<int>> Count(
-            FilterParameters parameters,
+            [FromQuery] FilterParameters parameters,
             IDataSource<Coalesce.Domain.Product> dataSource)
             => CountImplementation(parameters, dataSource);
 
         [HttpPost("save")]
+        [Consumes("application/x-www-form-urlencoded", "multipart/form-data")]
         [Authorize(Roles = "Admin")]
         public virtual Task<ItemResult<ProductResponse>> Save(
             [FromForm] ProductParameter dto,
+            [FromQuery] DataSourceParameters parameters,
+            IDataSource<Coalesce.Domain.Product> dataSource,
+            IBehaviors<Coalesce.Domain.Product> behaviors)
+            => SaveImplementation(dto, parameters, dataSource, behaviors);
+
+        [HttpPost("save")]
+        [Consumes("application/json")]
+        [Authorize(Roles = "Admin")]
+        public virtual Task<ItemResult<ProductResponse>> SaveFromJson(
+            [FromBody] ProductParameter dto,
             [FromQuery] DataSourceParameters parameters,
             IDataSource<Coalesce.Domain.Product> dataSource,
             IBehaviors<Coalesce.Domain.Product> behaviors)

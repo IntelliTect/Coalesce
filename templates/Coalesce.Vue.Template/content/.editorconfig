@@ -1,6 +1,6 @@
 root = true
 
-[*.{vue,ts,tsx,csproj,props,json}]
+[*.{vue,ts,tsx,csproj,props,json,html,scss}]
 indent_style = space
 indent_size = 2
 

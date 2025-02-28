@@ -19,7 +19,7 @@ namespace IntelliTect.Coalesce.TypeUsage
                 // as well as any props that aren't in the Microsoft namespace.
                 // This prevents us from picking up things from Microsoft.AspNetCore.Identity.EntityFrameworkCore
                 // that don't have keys & other properties that Coalesce can work with.
-                .Where(p => p.Parent.Equals(classViewModel) || !p.PureType.FullNamespace.StartsWith(nameof(Microsoft)))
+                .Where(p => p.Parent.Equals(classViewModel) || !p.PureType.FullNamespace.StartsWith(nameof(Microsoft) + "."))
 
                 .Where(p => p.Type.IsA(typeof(DbSet<>)))
                 .Select(p => new EntityTypeUsage(this, p.PureType, p.Name))

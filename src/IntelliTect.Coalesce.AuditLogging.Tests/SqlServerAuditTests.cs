@@ -5,7 +5,13 @@ namespace IntelliTect.Coalesce.AuditLogging.Tests;
 
 public class SqlServerAuditTests
 {
-    private const string SqlServerConnString = "Server=(localdb)\\MSSQLLocalDB;Database=CoalesceAuditLoggingTests;Trusted_Connection=True;Timeout=5";
+    private const string SqlServerConnString = "Server=(localdb)\\MSSQLLocalDB;Database=CoalesceAuditLoggingTests" +
+#if NET9_0
+"net9" +
+#else
+"net8" +
+#endif
+        ";Trusted_Connection=True;Timeout=5";
 
     [SkippableFact]
     public async Task WithSqlServer_UpdatesExistingRecordForLikeChanges()
@@ -32,7 +38,7 @@ public class SqlServerAuditTests
         // Assert
         var entry = Assert.Single(db.AuditLogs.Include(c => c.Properties).Where(c => c.State == AuditEntryState.EntityModified));
 
-        var propChange = Assert.Single(entry.Properties);
+        var propChange = Assert.Single(entry.Properties!);
         Assert.Equal(nameof(AppUser.Title), propChange.PropertyName);
         Assert.Equal("Intern", propChange.OldValue);
         Assert.Equal("CEO", propChange.NewValue);

@@ -13,9 +13,6 @@ namespace IntelliTect.Coalesce.Swashbuckle
         {
             // Get rid of bad schema definitions that we don't use.
             var defsToRemove = swaggerDoc.Components.Schemas.Keys.Where(d =>
-                // Data sources and behaviors are fixed up by CoalesceApiOperationFilter
-                d.EndsWith(nameof(IDataSource<object>)) ||
-                d.EndsWith(nameof(IBehaviors<object>)) ||
                 // These get incorrectly put here if your API surface has file responses.
                 d.Equals(nameof(IFile)) ||
                 d.Equals("IFileItemResult") ||

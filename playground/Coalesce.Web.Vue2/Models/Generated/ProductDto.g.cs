@@ -49,7 +49,7 @@ namespace Coalesce.Web.Vue2.Models
 
             if (ShouldMapTo(nameof(ProductId))) entity.ProductId = (ProductId ?? entity.ProductId);
             if (ShouldMapTo(nameof(Name))) entity.Name = Name;
-            if (ShouldMapTo(nameof(UniqueId)) && (context.IsInRoleCached("User") && context.IsInRoleCached("Admin"))) entity.UniqueId = (UniqueId ?? entity.UniqueId);
+            if (ShouldMapTo(nameof(UniqueId)) && (context.IsInRoleCached("Admin"))) entity.UniqueId = (UniqueId ?? entity.UniqueId);
             if (ShouldMapTo(nameof(Unknown))) entity.Unknown = Unknown;
         }
 
@@ -84,11 +84,11 @@ namespace Coalesce.Web.Vue2.Models
 
             this.ProductId = obj.ProductId;
             this.Name = obj.Name;
+            this.UniqueId = obj.UniqueId;
             this.Unknown = obj.Unknown;
 
             this.Details = obj.Details.MapToDto<Coalesce.Domain.ProductDetails, ProductDetailsResponse>(context, tree?[nameof(this.Details)]);
 
-            if ((context.IsInRoleCached("User"))) this.UniqueId = obj.UniqueId;
         }
     }
 }

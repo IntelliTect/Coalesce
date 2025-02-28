@@ -297,13 +297,25 @@ namespace Coalesce.Domain
             return strings;
         }
 
-        /// <summary>
-        /// Gets all the first names starting with the characters.
-        /// </summary>
         [Coalesce, Execute]
-        public static Person MethodWithEntityParameter(AppDbContext db, Person person)
+        public static Person MethodWithEntityParameter(AppDbContext db, Person person, Person[] people)
         {
             return person;
+        }
+
+        [Coalesce, Execute]
+        public static Person? MethodWithOptionalEntityParameter(AppDbContext db, Person? person)
+        {
+            return person;
+        }
+
+
+        [Coalesce, Execute]
+        public static Person? MethodWithExplicitlyInjectedDataSource(AppDbContext db, [Inject] Person.WithoutCases dataSource)
+        {
+            // This method is an ad-hoc test for CoalesceApiDescriptionProvider
+            // to check that it handles DS parameters that aren't bound with our custom model binder correctly.
+            return null;
         }
 
         /// <summary>
@@ -332,9 +344,10 @@ namespace Coalesce.Domain
         }
 
         [Coalesce, DefaultDataSource]
-        public class WithoutCases : StandardDataSource<Person, AppDbContext>
+        public class WithoutCases(CrudContext<AppDbContext> context) : StandardDataSource<Person, AppDbContext>(context)
         {
-            public WithoutCases(CrudContext<AppDbContext> context) : base(context) { }
+            [Coalesce]
+            public PersonCriteria? PersonCriteria { get; set; }
 
             public override IQueryable<Person> GetQuery(IDataSourceParameters parameters)
                 //=> Db.People.Include(p => p.Company);

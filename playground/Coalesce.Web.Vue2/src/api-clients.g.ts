@@ -1,6 +1,7 @@
 import * as $metadata from './metadata.g'
 import * as $models from './models.g'
-import { AxiosPromise, AxiosRequestConfig, ModelApiClient, ServiceApiClient, ItemResult, ListResult } from 'coalesce-vue/lib/api-client'
+import { ModelApiClient, ServiceApiClient } from 'coalesce-vue/lib/api-client'
+import type { AxiosPromise, AxiosRequestConfig, ItemResult, ListResult } from 'coalesce-vue/lib/api-client'
 
 export class AuditLogApiClient extends ModelApiClient<$models.AuditLog> {
   constructor() { super($metadata.AuditLog) }
@@ -119,6 +120,11 @@ export class CaseDtoStandaloneApiClient extends ModelApiClient<$models.CaseDtoSt
 
 export class CaseProductApiClient extends ModelApiClient<$models.CaseProduct> {
   constructor() { super($metadata.CaseProduct) }
+}
+
+
+export class CaseStandaloneApiClient extends ModelApiClient<$models.CaseStandalone> {
+  constructor() { super($metadata.CaseStandalone) }
 }
 
 
@@ -268,10 +274,26 @@ export class PersonApiClient extends ModelApiClient<$models.Person> {
     return this.$invoke($method, $params, $config)
   }
   
-  public methodWithEntityParameter(person: $models.Person | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<$models.Person>> {
+  public methodWithEntityParameter(person: $models.Person | null, people: $models.Person[] | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<$models.Person>> {
     const $method = this.$metadata.methods.methodWithEntityParameter
     const $params =  {
       person,
+      people,
+    }
+    return this.$invoke($method, $params, $config)
+  }
+  
+  public methodWithOptionalEntityParameter(person?: $models.Person | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<$models.Person>> {
+    const $method = this.$metadata.methods.methodWithOptionalEntityParameter
+    const $params =  {
+      person,
+    }
+    return this.$invoke($method, $params, $config)
+  }
+  
+  public methodWithExplicitlyInjectedDataSource($config?: AxiosRequestConfig): AxiosPromise<ItemResult<$models.Person>> {
+    const $method = this.$metadata.methods.methodWithExplicitlyInjectedDataSource
+    const $params =  {
     }
     return this.$invoke($method, $params, $config)
   }

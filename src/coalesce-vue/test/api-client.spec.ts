@@ -1,20 +1,18 @@
-import { ComponentPublicInstance } from "vue";
-import {
-  AxiosError,
-  AxiosResponse,
-  AxiosAdapter,
-  AxiosRequestConfig,
-} from "axios";
+import { type ComponentPublicInstance } from "vue";
+import { AxiosError, type AxiosAdapter, type AxiosResponse } from "axios";
 import { mount } from "@vue/test-utils";
 
-import { ItemMethod } from "../src/metadata";
+import { type ItemMethod } from "../src/metadata";
 import {
   AxiosClient,
-  ItemResult,
-  ItemResultPromise,
   ListParameters,
-  AxiosListResult,
-  ListResultPromise,
+  type ItemResult,
+  type ItemResultPromise,
+  type AxiosRequestConfig,
+  type AxiosListResult,
+  type ListResultPromise,
+  mapParamsToDto,
+  mapQueryToParams,
 } from "../src/api-client";
 import { getInternalInstance, IsVue2 } from "../src/util";
 import { delay, mountData, mockEndpoint } from "./test-utils";
@@ -27,8 +25,17 @@ import {
   ComplexModelApiClient,
   PersonApiClient,
 } from "@test-targets/api-clients.g";
-import { PersonListViewModel } from "@test-targets/viewmodels.g";
-import { Person, Statuses } from "@test-targets/models.g";
+import {
+  ComplexModelViewModel,
+  PersonListViewModel,
+} from "@test-targets/viewmodels.g";
+import {
+  ExternalParent,
+  Genders,
+  Person,
+  PersonCriteria,
+  Statuses,
+} from "@test-targets/models.g";
 
 function makeAdapterMock(result?: any) {
   return makeEndpointMock<AxiosRequestConfig>(result);
@@ -207,6 +214,26 @@ describe("$invoke", () => {
     // The others should have been omitted entirely.
     const req: AxiosRequestConfig = mock.mock.lastCall?.[0];
     expect(req.data).toEqual("id=1&requiredInt=42");
+  });
+
+  test("does not send null value type params as emptystrings", async () => {
+    const mock = mockEndpoint(
+      "/ComplexModel/methodWithManyParams",
+      vitest.fn((req) => ({
+        wasSuccessful: true,
+      }))
+    );
+
+    const caller = new ComplexModelViewModel().methodWithManyParams;
+    await caller.invokeWithArgs();
+
+    // This is a formdata specific issue: aspnetcore throws ModelState errors
+    // when an emptystring (which is how we serialize null in formdata) is passed to a number, for example.
+    // https://github.com/IntelliTect/Coalesce/issues/464
+    const req: AxiosRequestConfig = mock.mock.lastCall?.[0];
+    expect(req.data).toEqual(
+      "singleExternal=&collectionExternal=&file=&strParam=&stringsParam=&enumsParam=&model=&modelCollection="
+    );
   });
 
   test("doesn't error when unexpected params are provided", async () => {
@@ -408,11 +435,40 @@ describe("$invoke", () => {
     );
     await personList.$load();
 
-    // NOTE: This ensure that the `dataSource.allowedStatuses[]=` syntax is not used,
-    // which aspnetcore doesn't support.
+    expect(AxiosClient.getUri(mock.mock.lastCall![0])).toBe(
+      "/api/Person/list?page=1&pageSize=10&dataSource=NamesStartingWithAWithCases&dataSource.allowedStatuses=[0,1]"
+    );
+  });
+
+  test("data source object parameter", async () => {
+    const mock = mockEndpoint(
+      "/Person/list",
+      vitest.fn((req: AxiosRequestConfig) => {
+        return {
+          wasSuccessful: true,
+          list: [],
+        };
+      })
+    );
+
+    const personList = new PersonListViewModel();
+    personList.$dataSource = new Person.DataSources.ParameterTestsSource({
+      personCriterion: new PersonCriteria({
+        gender: Genders.Female,
+        name: "Grace",
+        personIds: [1, 2, 3],
+        subCriteria: [
+          new PersonCriteria({
+            name: "Bob Newbie",
+            personIds: [],
+          }),
+        ],
+      }),
+    });
+    await personList.$load();
 
     expect(AxiosClient.getUri(mock.mock.lastCall![0])).toBe(
-      "/api/Person/list?page=1&pageSize=10&dataSource=NamesStartingWithAWithCases&dataSource.allowedStatuses=0&dataSource.allowedStatuses=1"
+      `/api/Person/list?page=1&pageSize=10&dataSource=ParameterTestsSource&dataSource.personCriterion={"personIds":[1,2,3],"name":"Grace","subCriteria":[{"personIds":[],"name":"Bob Newbie"}],"gender":2}`
     );
   });
 
@@ -880,22 +936,30 @@ describe("$makeCaller", () => {
 
   describe("useResponseCaching", () => {
     test("dehydrates and hydrates object results", async () => {
-      let studentId = 1;
-      AxiosClient.defaults.adapter = () =>
-        makeEndpointMock({
-          name: "steve",
-          studentWrapperObject: {
-            name: "bob",
-            student: {
-              studentId: studentId++,
-              name: "bob",
+      let requestNum = 1;
+
+      const mock = mockEndpoint(
+        new ComplexModelViewModel().$metadata.methods
+          .instanceGetMethodWithObjParam,
+        vitest.fn(async (req) => {
+          return {
+            wasSuccessful: true,
+            object: {
+              ...req.params.obj,
+              valueArray: [requestNum++],
             },
-          },
-        } as Advisor)();
+          };
+        })
+      );
 
       const runTest = () => {
-        const caller = new StudentApiClient().$makeCaller("item", (c) =>
-          c.getWithObjParam(42, new Advisor({ name: "steve" }))
+        const caller = new ComplexModelApiClient().$makeCaller(
+          "item",
+          (c, param: number) =>
+            c.instanceGetMethodWithObjParam(
+              param,
+              new ExternalParent({ stringList: ["foo"] })
+            )
         );
         caller.useResponseCaching();
         return caller;
@@ -904,11 +968,20 @@ describe("$makeCaller", () => {
       // Make the first caller and invoke it, which will populate the cache.
       const caller1 = runTest();
       expect(caller1.result).toBeNull();
-      await caller1();
+      await caller1(42);
       expect(caller1.result).not.toBeNull();
+      expect(caller1.result).toMatchObject(
+        new ExternalParent({ stringList: ["foo"], valueArray: [1] })
+      );
       const cacheValue = Object.values(sessionStorage)[0];
       expect(cacheValue).not.toBeFalsy();
       expect(cacheValue).not.toContain("$metadata");
+
+      expect(mock).toBeCalledTimes(1);
+      expect(mock.mock.calls[0][0].params).toMatchObject({
+        id: 42,
+        obj: { stringList: ["foo"] },
+      });
 
       // Make another caller. It will be dormant until invoked.
       const caller2 = runTest();
@@ -918,18 +991,9 @@ describe("$makeCaller", () => {
       expect(caller2.isLoading).toBe(false);
 
       // Invoke the caller. At this point, the cached response will get loaded.
-      const caller2Promise = caller2();
+      const caller2Promise = caller2(42);
       expect(caller2.result).toMatchObject(
-        new Advisor({
-          name: "steve",
-          studentWrapperObject: {
-            name: "bob",
-            student: {
-              studentId: 1,
-              name: "bob",
-            },
-          },
-        })
+        new ExternalParent({ stringList: ["foo"], valueArray: [1] })
       );
       expect(caller2.wasSuccessful).toBe(true);
       expect(caller2.hasResult).toBe(true);
@@ -939,20 +1003,16 @@ describe("$makeCaller", () => {
       // Observe that the results are set with the new api response.
       await caller2Promise;
       expect(caller2.result).toMatchObject(
-        new Advisor({
-          name: "steve",
-          studentWrapperObject: {
-            name: "bob",
-            student: {
-              studentId: 2,
-              name: "bob",
-            },
-          },
-        })
+        new ExternalParent({ stringList: ["foo"], valueArray: [2] })
       );
       expect(caller2.wasSuccessful).toBe(true);
       expect(caller2.hasResult).toBe(true);
       expect(caller2.isLoading).toBe(false);
+      expect(mock).toBeCalledTimes(2);
+      expect(mock.mock.calls[1][0].params).toMatchObject({
+        id: 42,
+        obj: { stringList: ["foo"] },
+      });
     });
 
     test("respects stored max age", async () => {
@@ -1134,12 +1194,12 @@ describe("$makeCaller with args object", () => {
 
     const caller = new StudentApiClient().$makeCaller(
       "item",
-      (c) => c.getFile(42, "bob"),
+      (c) => c.getFile(42, null),
       () => ({}),
-      (c, args) => c.getFile(42, "bob")
+      (c, args) => c.getFile(42, "bob+/")
     );
 
-    expect(caller.url).toBe("/api/Students/getFile?id=42&etag=bob");
+    expect(caller.url).toBe("/api/Students/getFile?id=42&etag=bob%2B%2F");
     expect(adapter).toBeCalledTimes(0);
   });
 
@@ -1287,5 +1347,48 @@ describe("$makeCaller with args object", () => {
       expect(calls[1]).resolves.toBeFalsy();
       expect(calls[2]).resolves.toBeTruthy();
     });
+  });
+});
+
+describe("mapQueryToParams", () => {
+  test("round-trips", () => {
+    const params = new ListParameters();
+    params.page = 2;
+    params.pageSize = 3;
+    params.fields = ["test1", "test2"];
+    params.includes = "includes";
+    params.search = "needle";
+    params.filter = {
+      name: "bob",
+      int: "1",
+      bool: "true",
+    };
+    params.noCount = true;
+    params.orderBy = "orderBy";
+    params.orderByDescending = "orderByDesc";
+    params.dataSource = new Person.DataSources.ParameterTestsSource({
+      bytes: "SGVsbG8gV29ybGQ=",
+      intArray: [1, 2, 3],
+      personCriterion: new PersonCriteria({
+        gender: Genders.Female,
+        name: "Grace",
+      }),
+      personCriteriaArray: [
+        new PersonCriteria({
+          gender: Genders.Female,
+          name: "Grace",
+        }),
+      ],
+    });
+
+    const string = JSON.stringify(mapParamsToDto(params));
+    const parsed = mapQueryToParams(
+      JSON.parse(string),
+      ListParameters,
+      new Person().$metadata
+    );
+
+    expect(parsed).toMatchObject(params);
+    expect(string).toBe(JSON.stringify(mapParamsToDto(parsed)));
   });
 });

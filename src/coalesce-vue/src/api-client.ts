@@ -1,13 +1,13 @@
 import {
   onBeforeUnmount,
-  Ref,
   ref,
   markRaw,
   getCurrentInstance,
   shallowRef,
+  type Ref,
 } from "vue";
 
-import {
+import type {
   ModelType,
   Method,
   Service,
@@ -21,29 +21,29 @@ import {
   PropNames,
 } from "./metadata.js";
 import {
-  Model,
   convertToModel,
   mapToDto,
-  DataSource,
   mapToModel,
   mapToDtoFiltered,
   parseValue,
+  type Model,
+  type DataSource,
 } from "./model.js";
 import {
-  Indexable,
   objectToQueryString,
   objectToFormData,
   ReactiveFlags_SKIP,
   getInternalInstance,
-  VueInstance,
+  type Indexable,
+  type VueInstance,
 } from "./util.js";
 
 import axios, {
-  AxiosPromise,
-  AxiosResponse,
+  type AxiosPromise,
+  type AxiosResponse,
+  type AxiosRequestConfig,
+  type CancelTokenSource,
   AxiosError,
-  AxiosRequestConfig,
-  CancelTokenSource,
 } from "axios";
 
 // Re-exports for more convenient imports in generated code.
@@ -86,11 +86,18 @@ export interface DataSourceParameters {
    * Classes are found in `models.g.ts` as `<ModelName>.DataSources.<DataSourceName>`, e.g. `Person.DataSources.WithRelations`.
    */
   dataSource?: DataSource<DataSourceType> | null;
+
+  /** If true, request that the server use System.Text.Json reference preservation handling when serializing the response,
+   * which can significantly reduce the size of the response payload. This will also cause the resulting
+   * `Model` and `ViewModel` instances on the client to be deduplicated.
+   */
+  refResponse?: boolean;
 }
 export class DataSourceParameters {
   constructor() {
     this.includes = null;
     this.dataSource = null;
+    this.refResponse = false;
   }
 }
 
@@ -428,7 +435,7 @@ export const AxiosClient = axios.create();
 AxiosClient.defaults.baseURL = "/api";
 AxiosClient.defaults.paramsSerializer = (p) => objectToQueryString(p, false);
 
-// Set X-Requested-With: XmlHttpRequest to prevent aspnetcore from serving HTML and redirects to API requests.
+// Set X-Requested-With: XMLHttpRequest to prevent aspnetcore from serving HTML and redirects to API requests.
 // https://github.com/dotnet/aspnetcore/blob/c440ebcf49badd49f0e2cdde1b0a74992af04158/src/Security/Authentication/Cookies/src/CookieAuthenticationEvents.cs#L107-L111
 AxiosClient.interceptors.request.use((config) => {
   const url = (config.baseURL ?? "") + (config.url ?? "");
@@ -753,6 +760,17 @@ export class ApiClient<T extends ApiRoutedType> {
       query = mappedParams;
     }
 
+    let headers = config?.headers;
+    if (standardParameters?.refResponse) {
+      headers = {
+        ...config?.headers,
+        Accept: standardParameters?.refResponse
+          ? ["application/json+ref", "application/json"]
+          : ["application/json"],
+      };
+    }
+    let cacheKey = JSON.stringify(headers);
+
     const axiosRequest = <AxiosRequestConfig>{
       method: method.httpMethod,
       url: url,
@@ -760,6 +778,7 @@ export class ApiClient<T extends ApiRoutedType> {
       responseType: method.return.type == "file" ? "blob" : "json",
       cancelToken: this._cancelToken,
       ...config,
+      headers,
       params: {
         ...query,
         ...(config && config.params ? config.params : null),
@@ -780,14 +799,13 @@ export class ApiClient<T extends ApiRoutedType> {
     }
 
     let doCache = false;
-    let cacheKey: string;
 
     if (
       method.httpMethod === "GET" &&
       this._simultaneousGetCaching &&
       !config
     ) {
-      cacheKey = AxiosClient.getUri(axiosRequest);
+      cacheKey += "_" + AxiosClient.getUri(axiosRequest);
       if (simultaneousGetCache.has(cacheKey)) {
         return simultaneousGetCache.get(cacheKey) as any;
       } else {
@@ -934,6 +952,22 @@ export class ApiClient<T extends ApiRoutedType> {
       const paramValue = params[paramName];
 
       if (paramValue === undefined) continue;
+
+      if (
+        paramValue === null &&
+        method.name != "save" &&
+        (paramMeta.type == "number" ||
+          paramMeta.type == "date" ||
+          paramMeta.type == "enum" ||
+          paramMeta.type == "boolean")
+      ) {
+        // FormData idiosyncrasy workaround:
+        // Skip nulls for root value type params - https://github.com/IntelliTect/Coalesce/issues/464
+        // Only for custom methods, though, which pass individual top-level parameters.
+        // `/save` works differently by binding the entire form to the DTO, and all
+        // props on DTOs are nullable, which interpret "" as null just fine.
+        continue;
+      }
 
       const pureType =
         paramMeta.type == "collection" ? paramMeta.itemType : paramMeta;
@@ -1262,6 +1296,20 @@ export abstract class ApiState<
     return this.__rawResponse.value;
   }
 
+  /** Reset all state fields of the instance.
+   * Does not reset configuration like response caching and concurrency mode.
+   */
+  public reset() {
+    if (this.isLoading)
+      throw new Error("Cannot reset while a request is pending.");
+    this.hasResult = false;
+    this.result = null;
+    this.wasSuccessful = null;
+    this.message = null;
+    this.isLoading = false;
+    this.__rawResponse.value = undefined;
+  }
+
   private __responseCacheConfig?: ResponseCachingConfiguration;
   /**
    * Enable response caching for the API caller,
@@ -1460,7 +1508,7 @@ export abstract class ApiState<
 
         invoker = async () => {
           const [promise, requests] = apiClient._observeRequests(
-            () => originalInvoker.apply(thisArg, [apiClient, ...arguments]),
+            () => originalInvoker.apply(thisArg, [apiClient, ...args]),
             true
           );
           const { request, method } = requests[0];
@@ -1752,6 +1800,18 @@ export class ItemApiState<TArgs extends any[], TResult> extends ApiState<
     super(apiClient, invoker);
   }
 
+  public override reset(): void {
+    super.reset();
+    this.result = null;
+    this.validationIssues = null;
+    if (this._objectUrl?.url) {
+      URL.revokeObjectURL(this._objectUrl.url);
+      this._objectUrl.url = undefined;
+      this._objectUrl.target = undefined;
+      this._objectUrl = undefined;
+    }
+  }
+
   private _objectUrl?: {
     url?: string;
     target?: TResult;
@@ -1839,6 +1899,13 @@ export class ItemApiStateWithArgs<
   }
   set args(v) {
     this.__args.value = v;
+  }
+
+  public override reset(resetArgs = true) {
+    super.reset();
+    if (resetArgs) {
+      this.resetArgs();
+    }
   }
 
   /** Invokes a call to this API endpoint.
@@ -1975,6 +2042,15 @@ export class ListApiState<TArgs extends any[], TResult> extends ApiState<
     super(apiClient, invoker);
   }
 
+  override reset() {
+    super.reset();
+    this.result = null;
+    this.totalCount = null;
+    this.pageCount = null;
+    this.pageSize = null;
+    this.page = null;
+  }
+
   protected setResponseProps(data: ListResult<TResult>) {
     this.wasSuccessful = data.wasSuccessful;
     this.message = data.message || null;
@@ -2005,6 +2081,13 @@ export class ListApiStateWithArgs<
   }
   set args(v) {
     this.__args.value = v;
+  }
+
+  public override reset(resetArgs = true) {
+    super.reset();
+    if (resetArgs) {
+      this.resetArgs();
+    }
   }
 
   /** Invokes a call to this API endpoint.

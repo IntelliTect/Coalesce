@@ -6,7 +6,7 @@ import {
   CAdminAuditLogPage,
   //#endif
 } from "coalesce-vue-vuetify3";
-//#if Identity
+//#if (Identity && AuditLogs)
 import { Permission } from "./models.g";
 //#endif
 
@@ -15,7 +15,6 @@ const router = createRouter({
   routes: [
     {
       path: "/",
-      name: "home",
       component: () => import("./views/Home.vue"),
     },
     //#if ExampleModel
@@ -28,9 +27,22 @@ const router = createRouter({
     //#endif
     {
       path: "/admin",
-      name: "admin",
       component: () => import("./views/Admin.vue"),
     },
+    //#if Identity
+    {
+      path: "/user/:id",
+      alias: "/admin/User/edit/:id", // Override coalesce admin page
+      props: true,
+      component: () => import("./views/UserProfile.vue"),
+    },
+    //#endif
+    //#if OpenAPI
+    {
+      path: "/openapi",
+      component: () => import("./views/OpenAPI.vue"),
+    },
+    //#endif
 
     // Coalesce admin routes
     {
@@ -49,7 +61,9 @@ const router = createRouter({
     {
       path: "/admin/audit",
       component: titledAdminPage(CAdminAuditLogPage),
+      //#if Identity
       meta: { permissions: [Permission.ViewAuditLogs] },
+      //#endif
       props: { type: "AuditLog" },
     },
     //#endif
@@ -90,7 +104,7 @@ function titledAdminPage<
 
 //#if AppInsights
 // Azure Monitor Application Insights configuration
-let flushPageView: Function | undefined;
+let flushPageView: (() => void) | undefined;
 router.beforeEach((to, from) => {
   if (to.path != from.path) {
     // If there's a previous page view still unsent,

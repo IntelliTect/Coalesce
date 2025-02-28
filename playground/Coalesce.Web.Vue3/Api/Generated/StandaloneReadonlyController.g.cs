@@ -36,21 +36,21 @@ namespace Coalesce.Web.Vue3.Api
         [Authorize]
         public virtual Task<ItemResult<StandaloneReadonlyResponse>> Get(
             int id,
-            DataSourceParameters parameters,
+            [FromQuery] DataSourceParameters parameters,
             IDataSource<Coalesce.Domain.StandaloneReadonly> dataSource)
             => GetImplementation(id, parameters, dataSource);
 
         [HttpGet("list")]
         [Authorize]
         public virtual Task<ListResult<StandaloneReadonlyResponse>> List(
-            ListParameters parameters,
+            [FromQuery] ListParameters parameters,
             IDataSource<Coalesce.Domain.StandaloneReadonly> dataSource)
             => ListImplementation(parameters, dataSource);
 
         [HttpGet("count")]
         [Authorize]
         public virtual Task<ItemResult<int>> Count(
-            FilterParameters parameters,
+            [FromQuery] FilterParameters parameters,
             IDataSource<Coalesce.Domain.StandaloneReadonly> dataSource)
             => CountImplementation(parameters, dataSource);
     }

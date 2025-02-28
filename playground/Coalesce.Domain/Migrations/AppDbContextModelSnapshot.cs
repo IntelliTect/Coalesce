@@ -309,6 +309,9 @@ namespace Coalesce.Domain.Migrations
 
                     b.HasKey("ProductId");
 
+                    b.HasIndex("UniqueId")
+                        .IsUnique();
+
                     b.ToTable("Product");
                 });
 
@@ -365,7 +368,8 @@ namespace Coalesce.Domain.Migrations
                 {
                     b.HasOne("Coalesce.Domain.Person", "User")
                         .WithMany()
-                        .HasForeignKey("UserId");
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("User");
                 });
@@ -374,11 +378,13 @@ namespace Coalesce.Domain.Migrations
                 {
                     b.HasOne("Coalesce.Domain.Person", "AssignedTo")
                         .WithMany("CasesAssigned")
-                        .HasForeignKey("AssignedToId");
+                        .HasForeignKey("AssignedToId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("Coalesce.Domain.Person", "ReportedBy")
                         .WithMany("CasesReported")
-                        .HasForeignKey("ReportedById");
+                        .HasForeignKey("ReportedById")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("AssignedTo");
 
@@ -390,7 +396,7 @@ namespace Coalesce.Domain.Migrations
                     b.HasOne("Coalesce.Domain.Case", null)
                         .WithOne("AttachmentContent")
                         .HasForeignKey("Coalesce.Domain.Case+CaseAttachmentContent", "CaseKey")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
 
@@ -399,13 +405,13 @@ namespace Coalesce.Domain.Migrations
                     b.HasOne("Coalesce.Domain.Case", "Case")
                         .WithMany("CaseProducts")
                         .HasForeignKey("CaseId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Coalesce.Domain.Product", "Product")
                         .WithMany()
                         .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Case");
@@ -418,7 +424,7 @@ namespace Coalesce.Domain.Migrations
                     b.HasOne("Coalesce.Domain.Company", "Company")
                         .WithMany("Employees")
                         .HasForeignKey("CompanyId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Company");
@@ -502,7 +508,7 @@ namespace Coalesce.Domain.Migrations
                     b.HasOne("Coalesce.Domain.AuditLog", null)
                         .WithMany("Properties")
                         .HasForeignKey("ParentId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
 

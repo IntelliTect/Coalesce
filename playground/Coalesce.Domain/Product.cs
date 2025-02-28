@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using IntelliTect.Coalesce.DataAnnotations;
+using Microsoft.EntityFrameworkCore;
 
 #nullable disable
 
@@ -12,6 +13,7 @@ namespace Coalesce.Domain
     [Create(Roles = "Admin")]
     [Edit(Roles = "Admin")]
     [Description("A product that can be purchased.")]
+    [Index(nameof(UniqueId), IsUnique = true)]
     public class Product
     {
         public int ProductId { get; set; }
@@ -23,10 +25,10 @@ namespace Coalesce.Domain
         public ProductDetails Details { get; set; }
 
         [Column("ProductUniqueId")]
-        [Read(Roles = "User")]
+        [Read]
         [Edit(Roles = "Admin")]
         [DataType(DataType.Password)]
-        public Guid UniqueId { get; set; }
+        public Guid UniqueId { get; set; } = Guid.NewGuid();
 
         [NotMapped]
         public object Unknown { get; set; } = "unknown value";

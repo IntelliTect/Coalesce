@@ -1,0 +1,21 @@
+﻿@page 
+@model Coalesce.Starter.Vue.Web.Pages.CreateTenantModel
+
+@{
+    ViewData["Title"] = "New Organization";
+}
+
+<div asp-validation-summary="All" class="text-danger"></div>
+
+<form method="post">
+    <div class="mb-3">
+        <label asp-for="Name" class="form-label"></label>
+        <input asp-for="Name" class="form-control" autofocus />
+    </div>
+
+    <div class="d-grid gap-2 mt-5">
+        <button type="submit" class="btn btn-primary">
+            Create
+        </button>
+    </div>
+</form>

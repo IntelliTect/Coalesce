@@ -36,28 +36,39 @@ namespace Coalesce.Starter.Vue.Web.Api
         [Authorize]
         public virtual Task<ItemResult<RoleResponse>> Get(
             string id,
-            DataSourceParameters parameters,
+            [FromQuery] DataSourceParameters parameters,
             IDataSource<Coalesce.Starter.Vue.Data.Models.Role> dataSource)
             => GetImplementation(id, parameters, dataSource);
 
         [HttpGet("list")]
         [Authorize]
         public virtual Task<ListResult<RoleResponse>> List(
-            ListParameters parameters,
+            [FromQuery] ListParameters parameters,
             IDataSource<Coalesce.Starter.Vue.Data.Models.Role> dataSource)
             => ListImplementation(parameters, dataSource);
 
         [HttpGet("count")]
         [Authorize]
         public virtual Task<ItemResult<int>> Count(
-            FilterParameters parameters,
+            [FromQuery] FilterParameters parameters,
             IDataSource<Coalesce.Starter.Vue.Data.Models.Role> dataSource)
             => CountImplementation(parameters, dataSource);
 
         [HttpPost("save")]
+        [Consumes("application/x-www-form-urlencoded", "multipart/form-data")]
         [Authorize(Roles = "UserAdmin")]
         public virtual Task<ItemResult<RoleResponse>> Save(
             [FromForm] RoleParameter dto,
+            [FromQuery] DataSourceParameters parameters,
+            IDataSource<Coalesce.Starter.Vue.Data.Models.Role> dataSource,
+            IBehaviors<Coalesce.Starter.Vue.Data.Models.Role> behaviors)
+            => SaveImplementation(dto, parameters, dataSource, behaviors);
+
+        [HttpPost("save")]
+        [Consumes("application/json")]
+        [Authorize(Roles = "UserAdmin")]
+        public virtual Task<ItemResult<RoleResponse>> SaveFromJson(
+            [FromBody] RoleParameter dto,
             [FromQuery] DataSourceParameters parameters,
             IDataSource<Coalesce.Starter.Vue.Data.Models.Role> dataSource,
             IBehaviors<Coalesce.Starter.Vue.Data.Models.Role> behaviors)

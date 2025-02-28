@@ -16,8 +16,8 @@
             lg="3"
           >
             <c-input
-              v-model="caller.args[param.name]"
-              :for="param"
+              :model="caller"
+              :for="param.name"
               hide-details="auto"
               density="compact"
               variant="outlined"
@@ -88,9 +88,12 @@
             "
             class="c-method--result-success"
           >
-            <v-alert type="success" dense>{{
-              caller.message || "Success"
-            }}</v-alert>
+            <v-alert type="success" dense>
+              <span
+                class="text-pre-wrap"
+                v-text="caller.message || 'Success'"
+              ></span>
+            </v-alert>
           </span>
 
           <div v-if="caller.result && methodMeta.return.type == 'file'">

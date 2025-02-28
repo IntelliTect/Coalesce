@@ -4,7 +4,10 @@
       <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
       <v-toolbar-title>
         <router-link to="/" style="color: inherit">
-          Coalesce Vue Template
+          Coalesce.Starter.Vue
+          <!--#if Tenancy -->
+          &mdash; {{ $userInfo.tenantName }}
+          <!--#endif  -->
         </router-link>
       </v-toolbar-title>
 
@@ -25,6 +28,7 @@
           <v-list-item
             :title="$userInfo.fullName!"
             :subtitle="$userInfo.userName!"
+            :to="`/user/${$userInfo.id}`"
           >
             <template #prepend>
               <UserAvatar :user="$userInfo" class="mr-2 ml-n1" />
@@ -34,10 +38,10 @@
           <!--#endif -->
 
           <!--#if DarkMode -->
-          <v-list-item prepend-icon="fas fa-moon">
+          <v-list-item prepend-icon="fa fa-moon">
             <v-switch
-              label="Dark Mode"
               v-model="theme"
+              label="Dark Mode"
               true-value="dark"
               false-value="light"
               hide-details
@@ -49,8 +53,15 @@
 
           <!--#if Identity -->
           <v-divider />
+          <!--#if Tenancy -->
           <v-list-item
-            href="/Home/SignOut"
+            href="/SelectTenant"
+            prepend-icon="fa fa-building"
+            title="Switch Organization"
+          />
+          <!--#endif -->
+          <v-list-item
+            href="/SignOut"
             prepend-icon="fa fa-sign-out"
             title="Log Out"
           />
@@ -61,18 +72,54 @@
     </v-app-bar>
     <v-navigation-drawer v-model="drawer">
       <v-list>
-        <v-list-item to="/" prepend-icon="fas fa-home" title="Home" />
+        <v-list-item to="/" prepend-icon="fa fa-home" title="Home" />
+        <!--#if ExampleModel -->
         <v-list-item
           to="/widget"
-          prepend-icon="fas fa-palette"
+          prepend-icon="fa fa-palette"
           title="Custom Page Example"
         />
+        <!--#endif -->
+        <v-divider></v-divider>
+        <!--#if Identity -->
         <v-list-item
-          to="/admin"
-          prepend-icon="fas fa-cogs"
-          title="Admin Pages"
+          v-if="$can(Permission.UserAdmin)"
+          to="/admin/User"
+          prepend-icon="fa fa-users"
+          title="Users"
         />
+        <v-list-item
+          v-if="$can(Permission.UserAdmin)"
+          to="/admin/Role"
+          prepend-icon="fa fa-id-card"
+          title="Roles"
+        />
+        <v-list-item
+          v-if="$can(Permission.Admin)"
+          to="/admin"
+          prepend-icon="fa fa-cogs"
+          title="Admin"
+        />
+        <!--#else
+        <v-list-item to="/admin" prepend-icon="fa fa-cogs" title="Admin" />
+        #endif -->
+
+        <!--#if Tenancy -->
+        <v-divider></v-divider>
+        <v-list-item
+          v-if="$userInfo.roles?.includes('GlobalAdmin')"
+          to="/admin/Tenant?dataSource=GlobalAdminSource"
+          prepend-icon="fa fa-building"
+          title="All Tenants"
+        />
+        <!--#endif -->
       </v-list>
+
+      <div
+        class="position-absolute left-0 bottom-0 px-1 text-caption text-grey text-center"
+      >
+        {{ buildDate }}
+      </div>
     </v-navigation-drawer>
 
     <v-main>
@@ -82,10 +129,10 @@
           <!--#if Identity -->
           <Forbidden
             v-if="isForbidden"
-            :permissions="routeMeta?.permissions"
             key="$forbidden"
+            :permissions="routeMeta?.permissions"
           />
-          <component v-else :is="Component" :key="route.path" />
+          <component :is="Component" v-else :key="route.path" />
           <!--#endif -->
           <!--#if (!Identity)
           <component :is="Component" :key="route.path" />
@@ -105,11 +152,14 @@ import Forbidden from "./views/errors/Forbidden.vue";
 import { useLocalStorage, usePreferredDark } from "@vueuse/core";
 import { useTheme } from "vuetify";
 //#endif
+import { format } from "date-fns-tz";
 
 const drawer = ref<boolean | null>(null);
 
+//#if Identity
 const router = useRouter();
 const { userInfo } = useUser();
+//#endif
 //#if DarkMode
 const vuetifyTheme = useTheme();
 
@@ -145,6 +195,11 @@ const isForbidden = computed(() => {
   return false;
 });
 //#endif
+
+const buildDate = computed(() => {
+  if (!BUILD_DATE) return "";
+  return "build " + format(BUILD_DATE, "yyyy-MM-dd hh:mm a z");
+});
 </script>
 
 <style lang="scss">

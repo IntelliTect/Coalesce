@@ -2,7 +2,7 @@
 
 <!-- MARKER:summary -->
 
-The API client layer, generated as `api-clients.g.ts`, exports a class for each API controller that was generated for your data model. These classes are stateless and provide one method for each API endpoint. This includes both the standard set of endpoints created for [Entity Models](/modeling/model-types/entities.md) and [Custom DTOs](/modeling/model-types/dtos.md), as well as any custom [Methods](/modeling/model-components/methods.md) on the aforementioned types, as well as any methods on your [Services](/modeling/model-types/services.md).
+The API client layer, generated as `api-clients.g.ts`, exports a class for each API controller that was generated for your data model. These classes are stateless and provide one method for each API endpoint. This includes both the standard set of endpoints created for [CRUD Models](/modeling/model-types/crud.md), as well as any custom [Methods](/modeling/model-components/methods.md) on the aforementioned types, as well as any methods on your [Services](/modeling/model-types/services.md).
 
 <!-- MARKER:summary-end -->
 
@@ -14,11 +14,11 @@ As with all the layers, the [source code of coalesce-vue](https://github.com/Int
 
 ### API Client
     
-A class, generated for each controller-backed type in your data model as `<ModelName>ApiClient` and exported from `api-clients.g.ts` containing one method for each API endpoint.
+API Clients are classes, generated for each controller-backed type in your data model as `<ModelName>ApiClient` and exported from `api-clients.g.ts` containing a method for each API endpoint.
 
 Each method on the API client takes in the regular parameters of the method as you would expect, as well as an optional `AxiosRequestConfig` parameter at the end that can be used to provide additional configuration for the single request, if needed.
 
-For the methods that correspond to the standard set of CRUD endpoints that Coalesce provides (``get``, ``list``, ``count``, ``save``, ``delete``), an additional parameter `parameters` is available that accepts the set of [Standard Parameters](/modeling/model-components/data-sources.md#standard-parameters) appropriate for the endpoint.
+For the methods that correspond to the standard set of CRUD endpoints that Coalesce provides (``get``, ``list``, ``count``, ``save``, ``bulkSave``, ``delete``), an additional parameter `parameters` is available that accepts the set of [Standard Parameters](/modeling/model-components/data-sources.md#standard-parameters) appropriate for the endpoint.
 
 Each method returns a `Promise<AxiosResponse<TApiResult>>` where `TApiResult` is either `ItemResult`, `ItemResult<T>`, or `ListResult<T>`, depending on the return type of the API endpoint. `AxiosResponse` is the [response object from axios](https://axios-http.com/docs/res_schema), containing the `TApiResult` in its `data` property, as well as other properties like `headers`. The returned type `T` is automatically converted into valid [Model implementations](/stacks/vue/layers/models.md) for you.
 
@@ -35,12 +35,12 @@ API Callers (typed with the name `ApiState` in `coalesce-vue`, sometimes also re
 
 #### Endpoint Invocation
 Each API Caller is itself a function, so it can be invoked to trigger an API request to the server.
-
+  
 #### State management
-API Callers contain properties about the last request made, including things like ``wasSuccessful``, ``isLoading``, ``result``, and more.
+API Callers contain properties about the last request made, including things like ``wasSuccessful``, ``isLoading``, ``result``, and more. [Read More](#properties).
 
 #### Concurrency Management
-Using `setConcurrency(mode)`, you can configure how each individual caller handles what happens when multiple requests are made simultaneously
+Using `setConcurrency(mode)`, you can configure how each individual caller handles what happens when multiple requests are made simultaneously. [Read More](#concurrency-mode).
 
 #### Argument Binding
 API Callers can be created so that they have an `args` object that can be bound to, using `.invokeWithArgs()` to make a request using those arguments as the API endpoint's parameters. The API Callers created for the [ViewModel Layer](/stacks/vue/layers/viewmodels.md) are all created this way.
@@ -56,15 +56,13 @@ During typical development, it is unlikely that you'll need to make a custom API
 
 Some examples:
 
-``` ts
-// Preamble for all the examples below:
-import { PersonApiClient } from '@/api-clients.g';
-const client = new PersonApiClient;
-```
-
 A caller that takes no additional parameters:
 
 ``` ts
+// Preamble for all the examples below:
+import { PersonApiClient } from '@/api-clients.g';
+const client = new PersonApiClient();
+
 const caller = client.$makeCaller(
     "item", 
     c => c.namesStartingWith("A")

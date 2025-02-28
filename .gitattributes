@@ -6,5 +6,3 @@ playground/**/Scripts/Coalesce/* linguist-generated=true
 playground/**/Scripts/Coalesce/**/* linguist-generated=true
 playground/**/Views/Generated/* linguist-generated=true
 playground/**/Views/Generated/**/* linguist-generated=true
-
-* text eol=lf

@@ -1,7 +1,6 @@
 ﻿using IntelliTect.Coalesce.Mapping.IncludeTrees;
 using IntelliTect.Coalesce.TypeDefinition;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Query.Internal;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,101 +17,19 @@ namespace IntelliTect.Coalesce
         {
             var expression = queryable.Expression;
             IncludeTree root = new IncludeTree { PropertyName = rootName };
-            IncludeTree? currentNode = null;
-            IncludeTree head, tail;
 
-            // When we get to the root of the queryable, it won't be a MethodCallExpression.
-            while (true)
-            {
-                switch (expression)
-                {
-                    case MethodCallExpression callExpr:
-                        // callExpr.Arguments[0] is the entire previous query.
-                        // callExpr.Arguments[1] is the lambda for the property specifier
+            var visitor = new IncludeTreeVisitor();
+            visitor.Visit(expression);
+            foreach (var tree in visitor.Trees) root.AddChild(tree);
 
-                        if (callExpr.Method.Name == nameof(EntityFrameworkQueryableExtensions.Include)
-                         || callExpr.Method.Name == nameof(EntityFrameworkQueryableExtensions.ThenInclude))
-                        {
-                            if (callExpr.Arguments[1] is UnaryExpression unary)
-                            {
-                                // Handles lambda includes
-                                var body = FindMemberAccessExpression(unary.Operand);
-                                head = IncludeTree.ParseMemberExpression(body, out tail);
-                            }
-                            else if (callExpr.Arguments[1] is ConstantExpression constant)
-                            {
-                                // Handles string includes
-                                head = IncludeTree.ParseConstantExpression(constant, out tail);
-                            }
-                            else
-                            {
-                                throw new InvalidOperationException($"Unhandled .{callExpr.Method.Name} expression type {callExpr.Arguments[1].GetType()}");
-                            }
-                    
-                            // If we had a child from a ThenInclude, add it to the tail of this node.
-                            if (currentNode != null)
-                            {
-                                tail.AddChild(currentNode);
-                            }
-
-                            // Save the head of this expression in case we're parsing a ThenInclude.
-                            currentNode = head;
-
-                            if (callExpr.Method.Name == nameof(EntityFrameworkQueryableExtensions.Include))
-                            {
-                                // Finally, add the current node to the root, since a .Include doesn't have parents.
-                                root.AddChild(head);
-                                currentNode = null;
-                            }
-                        }
-
-                        if (callExpr.Method.Name == nameof(Queryable.Select))
-                        {
-                            var visitor = new ProjectionVisitor();
-                            visitor.Visit(callExpr);
-
-                            foreach (var tree in visitor.Trees)
-                            {
-                                root.AddChild(tree);
-                            }
-
-                            // A projection is terminal. Anything before it doesn't matter.
-                            return root;
-                        }
-
-                        expression = callExpr.Arguments[0];
-                        break;
-
-                    case IncludedSeparatelyExpression includeExpr:
-                        head = IncludeTree.ParseMemberExpression(includeExpr.IncludedExpression, out tail);
-
-                        // If we had a child from a ThenInclude, add it to the tail of this node.
-                        if (currentNode != null)
-                            tail.AddChild(currentNode);
-
-                        // Save the head of this expression in case we're parsing a ThenInclude.
-                        currentNode = head;
-
-                        if (includeExpr.IsRoot)
-                        {
-                            // Finally, add the current node to the root, since a .Include doesn't have parents.
-                            root.AddChild(head);
-                            currentNode = null;
-                        }
-
-                        // Reduce will give us the previous expression.
-                        expression = includeExpr.Reduce();
-                        break;
-
-                    default:
-                        return root;
-                }
-            }
+            return root;
         }
 
-        class ProjectionVisitor : ExpressionVisitor
+        internal class IncludeTreeVisitor : ExpressionVisitor
         {
             public List<IncludeTree> Trees { get; } = [];
+
+            IncludeTree? tail;
 
             protected override Expression VisitMemberInit(MemberInitExpression node)
             {
@@ -155,12 +72,36 @@ namespace IntelliTect.Coalesce
                 var memberTree = new IncludeTree { PropertyName = member.Name };
                 Trees.Add(memberTree);
 
-                var subVisitor = new ProjectionVisitor();
+                var subVisitor = new IncludeTreeVisitor();
                 subVisitor.Visit(arg);
                 foreach (var childTree in subVisitor.Trees)
                 {
                     memberTree.AddChild(childTree);
                 }
+            }
+
+            protected override Expression VisitExtension(Expression node)
+            {
+                if (node is not IncludedSeparatelyExpression includeExpr) return base.VisitExtension(node);
+
+                // visit everyting up until this point
+                Visit(includeExpr.Reduce());
+
+                IncludeTree? oldTail = tail;
+                var head = IncludeTree.ParseMemberExpression(includeExpr.IncludedExpression, out tail);
+
+                if (includeExpr.IsRoot)
+                {
+                    // Finally, add the current node as a root, since a .Include doesn't have parents.
+                    Trees.Add(head);
+                } 
+                else
+                {
+                    oldTail!.AddChild(head);
+                }
+
+                // Reduce will give us the previous expression.
+                return node;
             }
 
             protected override Expression VisitMethodCall(MethodCallExpression node)
@@ -175,15 +116,48 @@ namespace IntelliTect.Coalesce
                     //   with a more detailed definition earlier in the query, we should see about preserving the original.
 
                     Visit(node.Arguments[1]);
+                }
+                else if (node.Method.Name == nameof(EntityFrameworkQueryableExtensions.Include)
+                     || node.Method.Name == nameof(EntityFrameworkQueryableExtensions.ThenInclude)
+                )
+                {
+                    Visit(node.Arguments[0]);
 
-                    return node;
+                    IncludeTree head;
+                    IncludeTree? oldTail = tail;
+                    if (node.Arguments[1] is UnaryExpression unary)
+                    {
+                        // Handles lambda includes
+                        var body = FindMemberAccessExpression(unary.Operand);
+                        head = IncludeTree.ParseMemberExpression(body, out tail);
+                    }
+                    else if (node.Arguments[1] is ConstantExpression constant)
+                    {
+                        // Handles string includes
+                        head = IncludeTree.ParseConstantExpression(constant, out tail);
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException($"Unhandled .{node.Method.Name} expression type {node.Arguments[1].GetType()}");
+                    }
+
+                    if (node.Method.Name == nameof(EntityFrameworkQueryableExtensions.Include))
+                    {
+                        // Finally, add the current node as a root, since a .Include doesn't have parents.
+                        Trees.Add(head);
+                    }
+                    else
+                    {
+                        oldTail!.AddChild(head);
+                    }
                 }
                 else
                 {
                     // Not the method we're looking for. Climb up the method call chain.
                     Visit(node.Arguments[0]);
-                    return node;
                 }
+
+                return node;
             }
         }
 

@@ -18,11 +18,7 @@
         admin
         :editable="editable"
         :list="viewModel"
-        :extra-headers="
-          canEdit || canDelete || hasInstanceMethods
-            ? [{ header: 'Actions', isFixed: true }]
-            : []
-        "
+        :extra-headers="[{ header: 'Actions', isFixed: true }]"
         :loaders="{
           '': list.$modelOnlyMode
             ? []
@@ -33,6 +29,7 @@
                   : viewModel.$items.flatMap((i) => [i.$save, i.$bulkSave])),
               ],
         }"
+        @click:item="(item) => $router.push(getItemRoute(item))"
       >
         <template #item-append="{ item, isHorizontalScrollbarVisible }">
           <td
@@ -55,13 +52,18 @@
               </v-btn>
 
               <v-btn
-                v-if="canEdit || hasInstanceMethods"
-                title="Edit"
+                :title="canEdit || hasInstanceMethods ? 'Edit' : 'View'"
                 variant="text"
                 icon
                 :to="getItemRoute(item)"
               >
-                <i aria-hidden="true" class="v-icon notranslate fa fa-edit"></i>
+                <i
+                  aria-hidden="true"
+                  class="v-icon notranslate fa"
+                  :class="
+                    canEdit || hasInstanceMethods ? 'fa-edit' : 'fa-ellipsis-h'
+                  "
+                ></i>
               </v-btn>
 
               <v-btn
@@ -267,8 +269,23 @@ export default defineComponent({
 
 <style lang="scss">
 .c-admin-table {
-  a {
+  .c-table:not(.c-table--editable) tbody tr {
+    &:hover {
+      cursor: pointer;
+      td:not(.fixed-column-right) {
+        background: rgba(var(--v-border-color), var(--v-hover-opacity));
+      }
+    }
+  }
+  a:not(.v-btn) {
     text-decoration: none;
+
+    // Prevents unclickable space between wrapped lines in links that have to wrap to multiple lines:
+    display: inline-block;
+
+    &:hover {
+      filter: brightness(1.2);
+    }
   }
 }
 </style>

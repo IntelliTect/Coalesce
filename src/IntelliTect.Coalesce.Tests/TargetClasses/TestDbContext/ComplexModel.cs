@@ -70,9 +70,14 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         public string AdminReadableString { get; set; }
 
         [Restrict<AuthenticatedRestriction>]
+        [Display(Description = """
+            This is a multiline string in an attribute.
+            This is a second line in the string.
+            """)]
         public string RestrictedString { get; set; }
 
         [Restrict<AuthenticatedRestriction>]
+        [Display(Description = "This is a multiline string\n via explicit escaped newline")]
         public string RestrictInit { get; init; }
 
         [Read(RoleNames.Admin)]
@@ -186,6 +191,8 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         }
 
 
+#nullable enable
+
         [Coalesce, Execute]
         public string MethodWithOptionalParams(
             // Required:
@@ -196,14 +203,14 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
             int? nullableInt,
             int intWithDefault = 42,
             Case.Statuses enumWithDefault = Case.Statuses.ClosedNoSolution,
-            string stringWithDefault = "foo"
+            string stringWithDefault = "foo",
+            Test? optionalObject = null,
+            Test[]? optionalObjectCollection = null
         )
         {
             return stringWithDefault;
         }
 
-
-#nullable enable
         [Coalesce, Execute]
         public int MethodWithRequiredAfterOptional(
             // Optional, by longstanding Coalesce convention - 
@@ -219,8 +226,14 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
             // If we're naive about the code gen for this method then it'll generate invalid typescript.
             return optionalInt;
         }
+
 #nullable restore
 
+        [Coalesce, Execute(HttpMethod = HttpMethod.Get)]
+        public ExternalParent InstanceGetMethodWithObjParam(ExternalParent obj)
+        {
+            return obj;
+        }
 
         [Coalesce, Execute]
         public ExternalParentAsOutputOnly MethodWithExternalTypesWithSinglePurpose(
@@ -248,6 +261,16 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
 
         [Coalesce, Execute]
         public void MethodWithMultiFileParameter(ICollection<IFile> files) { }
+        [Coalesce, Execute]
+        public void MethodWithMultiFileParameterConcrete(ICollection<File> files) { }
+        [Coalesce, Execute]
+        public void MethodWithMultiFileParameterConcreteParam(ICollection<FileParameter> files) { }
+        [Coalesce, Execute]
+        public void MethodWithMultiFileParameterList(List<IFile> files) { }
+        [Coalesce, Execute]
+        public void MethodWithMultiFileParameterListConcrete(List<File> files) { }
+        [Coalesce, Execute]
+        public void MethodWithMultiFileParameterListConcreteParam(List<FileParameter> files) { }
 
         [Coalesce, Execute]
         public static string[] MethodWithStringArrayParameterAndReturn(string[] strings)
@@ -302,6 +325,9 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
 
         [Coalesce]
         public CaseDtoStandalone CustomDto(CaseDtoStandalone input) => input;
+
+        [Coalesce]
+        public CaseDtoStandalone SameMethodNameAsMethodOnDifferentType(CaseDtoStandalone input) => input;
 
         [Coalesce]
         [ControllerAction(Method = HttpMethod.Post)]

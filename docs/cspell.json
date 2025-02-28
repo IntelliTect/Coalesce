@@ -2,6 +2,7 @@
     "version": "0.2",
     "language": "en",
     "words": [
+        "appsettings",
         "autosave",
         "autosaving",
         "Axios",
@@ -30,6 +31,7 @@
         "readonly",
         "snapshotted",
         "Stampable",
+        "TPCT",
         "treeshaken",
         "typeof",
         "unplugin",

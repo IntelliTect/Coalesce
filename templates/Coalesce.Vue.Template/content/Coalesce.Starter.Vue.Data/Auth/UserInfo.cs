@@ -13,4 +13,9 @@ public class UserInfo
     public required ICollection<string> Roles { get; set; }
     public required ICollection<string> Permissions { get; set; }
 #endif
+#if Tenancy
+    [MaxLength(36)]
+    public string? TenantId { get; set; }
+    public string? TenantName { get; set; }
+#endif
 }

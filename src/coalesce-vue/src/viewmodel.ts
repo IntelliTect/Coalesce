@@ -10,10 +10,7 @@ import {
   type WatchStopHandle,
 } from "vue";
 
-import {
-  ModelReferenceNavigationProperty,
-  resolvePropMeta,
-} from "./metadata.js";
+import { resolvePropMeta } from "./metadata.js";
 import type {
   ModelType,
   PropertyOrName,
@@ -29,7 +26,7 @@ import {
   DataSourceParameters,
   ServiceApiClient,
   mapParamsToDto,
-  BulkSaveRequestItem,
+  type BulkSaveRequestItem,
 } from "./api-client.js";
 import {
   type Model,
@@ -39,7 +36,7 @@ import {
   mapToModel,
   mapToDtoFiltered,
   mapToDto,
-  DisplayOptions,
+  type DisplayOptions,
 } from "./model.js";
 import {
   type Indexable,
@@ -144,12 +141,13 @@ export abstract class ViewModel<
   private _isDirty = ref(false);
 
   /** @internal */
-  _dirtyProps: Set<string> = IsVue2
-    ? new Set<string>()
-    : reactive(new Set<string>());
+  _dirtyProps: Set<PropNames<TModel["$metadata"]>> = IsVue2
+    ? new Set()
+    : (reactive(new Set()) as any); // as any to avoid ref unwrapping madness
 
   // Backwards-compat with vue2 nonreactive sets.
   // Typed as any because vue ref unwrapping causes problems with a prop that is a maybe ref.
+  /** @internal */
   _dirtyPropsVersion: any = IsVue2 ? ref(0) : undefined;
 
   /**
@@ -213,7 +211,7 @@ export abstract class ViewModel<
   private _params: Ref<DataSourceParameters> = ref(new DataSourceParameters());
 
   /** The parameters that will be passed to `/get`, `/save`, and `/delete` calls. */
-  public get $params() {
+  public get $params(): DataSourceParameters {
     return this._params.value;
   }
   public set $params(val) {
@@ -221,7 +219,7 @@ export abstract class ViewModel<
   }
 
   /** Wrapper for `$params.dataSource` */
-  public get $dataSource() {
+  public get $dataSource(): DataSourceParameters["dataSource"] {
     return this.$params.dataSource;
   }
   public set $dataSource(val) {
@@ -420,21 +418,32 @@ export abstract class ViewModel<
    * A function for invoking the `/get` endpoint, and a set of properties about the state of the last call.
    */
   get $load() {
-    const $load = this.$apiClient.$makeCaller("item", (c, id?: TPrimaryKey) => {
-      const startTime = performance.now();
+    const $load = this.$apiClient
+      .$makeCaller("item", (c, id?: TPrimaryKey) => {
+        const startTime = performance.now();
 
-      return c
-        .get(id != null ? id : this.$primaryKey, this.$params)
-        .then((r) => {
-          const result = r.data.object;
-          if (result) {
-            // We do `purgeUnsaved` (arg2) here, since $load() is always an explicit user action
-            // that may be serving as a "reset" of local state.
-            this.$loadFromModel(result, startTime, true);
-          }
-          return r;
-        });
-    });
+        return c
+          .get(id != null ? id : this.$primaryKey, this.$params)
+          .then((r) => {
+            // @ts-expect-error passing data through to `onFulfilled`
+            r.__startTime = startTime;
+            return r;
+          });
+      })
+      .onFulfilled((state) => {
+        const result = state.result;
+
+        // If there's no captured start time, assume the data is from response caching
+        // and use the oldest possible time (0).
+        // @ts-expect-error passed through from invoker
+        const startTime = state.rawResponse?.__startTime ?? 0;
+
+        if (result) {
+          // We do `purgeUnsaved` (arg2) here, since $load() is always an explicit user action
+          // that may be serving as a "reset" of local state.
+          this.$loadFromModel(result, startTime, true);
+        }
+      });
 
     // Lazy getter technique - don't create the caller until/unless it is needed,
     // since creation of api callers is a little expensive.
@@ -472,77 +481,72 @@ export abstract class ViewModel<
    */
   get $save() {
     const $save = this.$apiClient
-      .$makeCaller(
-        "item",
-        async function (this: ViewModel, c, overrideProps?: Partial<TModel>) {
-          if (this.$hasError) {
-            throw Error(joinErrors(this.$getErrors()));
-          }
-
-          // Capture the dirty props before we set $isDirty = false;
-          const dirtyProps = [...this._dirtyProps];
-
-          // Copy the dirty props into a list that we'll be mutating
-          // into the list of ALL props that we would need to send
-          // for surgical saves.
-          const propsToSave = [...dirtyProps];
-
-          // If we were passed any override props, send those too.
-          // Use case of override props is changing some field
-          // where we don't want the local UI to reflect that new value
-          // until we know that value has been saved to the server.
-          // A further example is saving some property that will have sever-determined effects
-          // on other properties on the model where we don't want an inconsistent intermediate state.
-          let data: TModel = this as any;
-          if (overrideProps) {
-            data = {
-              ...this.$data,
-              ...overrideProps,
-              $metadata: this.$metadata,
-            };
-            propsToSave.push(...Object.keys(overrideProps));
-          }
-
-          // We always send the PK if it exists, regardless of dirty status or save mode.
-          if (this.$primaryKey != null) {
-            propsToSave.push(this.$metadata.keyProp.name);
-          }
-
-          this.$savingProps = new Set(propsToSave);
-
-          // If doing surgical saves,
-          // only save the props that are dirty and/or explicitly requested.
-          const fields =
-            this.$saveMode == "surgical"
-              ? ([...this.$savingProps] as any)
-              : null;
-
-          // Before we make the save call, set isDirty = false.
-          // This lets us detect changes that happen to the model while our save request is pending.
-          // If the model is dirty when the request completes, we'll not load the response from the server.
-          this.$isDirty = false;
-          try {
-            return await c.save(data, { fields, ...this.$params });
-          } catch (e) {
-            for (const prop of dirtyProps) {
-              this.$setPropDirty(
-                prop,
-                true,
-                // Don't re-trigger autosave on save failure.
-                // Wait for next prop change to trigger it again.
-                // Otherwise, if the wait timeout is zero,
-                // the save will keep triggering as fast as possible.
-                // Note that this could be a candidate for a user-customizable option
-                // in the future.
-                false
-              );
-            }
-            this.$savingProps = emptySet;
-            throw e;
-          }
+      .$makeCaller("item", async (c, overrideProps?: Partial<TModel>) => {
+        if (this.$hasError) {
+          throw Error(joinErrors(this.$getErrors()));
         }
-      )
-      .onFulfilled(function (this: ViewModel) {
+
+        // Capture the dirty props before we set $isDirty = false;
+        const dirtyProps = [...this._dirtyProps];
+
+        // Copy the dirty props into a list that we'll be mutating
+        // into the list of ALL props that we would need to send
+        // for surgical saves.
+        const propsToSave: string[] = [...dirtyProps];
+
+        // If we were passed any override props, send those too.
+        // Use case of override props is changing some field
+        // where we don't want the local UI to reflect that new value
+        // until we know that value has been saved to the server.
+        // A further example is saving some property that will have sever-determined effects
+        // on other properties on the model where we don't want an inconsistent intermediate state.
+        let data: TModel = this as any;
+        if (overrideProps) {
+          data = {
+            ...this.$data,
+            ...overrideProps,
+            $metadata: this.$metadata,
+          };
+          propsToSave.push(...Object.keys(overrideProps));
+        }
+
+        // We always send the PK if it exists, regardless of dirty status or save mode.
+        if (this.$primaryKey != null) {
+          propsToSave.push(this.$metadata.keyProp.name);
+        }
+
+        this.$savingProps = new Set(propsToSave);
+
+        // If doing surgical saves,
+        // only save the props that are dirty and/or explicitly requested.
+        const fields =
+          this.$saveMode == "surgical" ? ([...this.$savingProps] as any) : null;
+
+        // Before we make the save call, set isDirty = false.
+        // This lets us detect changes that happen to the model while our save request is pending.
+        // If the model is dirty when the request completes, we'll not load the response from the server.
+        this.$isDirty = false;
+        try {
+          return await c.save(data, { ...this.$params, fields });
+        } catch (e) {
+          for (const prop of dirtyProps) {
+            this.$setPropDirty(
+              prop,
+              true,
+              // Don't re-trigger autosave on save failure.
+              // Wait for next prop change to trigger it again.
+              // Otherwise, if the wait timeout is zero,
+              // the save will keep triggering as fast as possible.
+              // Note that this could be a candidate for a user-customizable option
+              // in the future.
+              false
+            );
+          }
+          this.$savingProps = emptySet;
+          throw e;
+        }
+      })
+      .onFulfilled(() => {
         if (!this.$save.result) {
           // Can't do anything useful if the save returned no data.
           return;
@@ -578,7 +582,7 @@ export abstract class ViewModel<
   get $bulkSave() {
     const $bulkSave = this.$apiClient.$makeCaller(
       "item",
-      async function (this: ViewModel, c, options?: BulkSaveOptions) {
+      async (c, options?: BulkSaveOptions) => {
         const {
           items: itemsToSend,
           rawItems: dataToSend,
@@ -988,14 +992,14 @@ export abstract class ViewModel<
    */
   get $delete() {
     const $delete = this.$apiClient
-      .$makeCaller("item", function (this: ViewModel, c) {
+      .$makeCaller("item", (c) => {
         if (this._existsOnServer) {
           return c.delete(this.$primaryKey, this.$params);
         } else {
           this._removeFromParentCollection();
         }
       })
-      .onFulfilled(function (this: ViewModel) {
+      .onFulfilled(() => {
         this._removeFromParentCollection();
       });
 
@@ -1038,7 +1042,7 @@ export abstract class ViewModel<
   /** Whether the item has been removed via `$remove()` and is pending for deletion in the next bulk save.
    * @internal
    * */
-  private _isRemoved = false;
+  _isRemoved = false;
 
   public get $isRemoved() {
     return this._isRemoved; // does this need to be reactive?
@@ -1379,7 +1383,7 @@ export abstract class ListViewModel<
   private _params = ref(new ListParameters());
 
   /** The parameters that will be passed to `/list` and `/count` calls. */
-  public get $params() {
+  public get $params(): ListParameters {
     return this._params.value;
   }
   public set $params(val) {
@@ -1387,7 +1391,7 @@ export abstract class ListViewModel<
   }
 
   /** Wrapper for `$params.dataSource` */
-  public get $dataSource() {
+  public get $dataSource(): ListParameters["dataSource"] {
     return this.$params.dataSource;
   }
   public set $dataSource(val) {
@@ -1523,11 +1527,24 @@ export abstract class ListViewModel<
    * A function for invoking the `/load` endpoint, and a set of properties about the state of the last call.
    */
   get $load() {
-    const $load = this.$apiClient.$makeCaller("list", (c) => {
-      const startTime = performance.now();
-      return c.list(this.$params).then((r) => {
+    const $load = this.$apiClient
+      .$makeCaller("list", (c) => {
+        const startTime = performance.now();
+        return c.list(this.$params).then((r) => {
+          // @ts-expect-error passing data through to `onFulfilled`
+          r.__startTime = startTime;
+          return r;
+        });
+      })
+      .onFulfilled((state) => {
         if (!this._lightweight) {
-          const result = r.data.list;
+          const result = state.result;
+
+          // If there's no captured start time, assume the data is from response caching
+          // and use the oldest possible time (0).
+          // @ts-expect-error passed through from invoker
+          const startTime = state.rawResponse?.__startTime ?? 0;
+
           if (result) {
             this.$items = rebuildModelCollectionForViewModelCollection<
               TModel,
@@ -1535,9 +1552,7 @@ export abstract class ListViewModel<
             >(this.$metadata, this.$items, result, startTime, true);
           }
         }
-        return r;
       });
-    });
 
     // Lazy getter technique - don't create the caller until/unless it is needed,
     // since creation of api callers is a little expensive.
@@ -1773,7 +1788,18 @@ export class ViewModelFactory {
     if (map.has(initialData)) {
       return map.get(initialData)!;
     }
-    const vmCtor = ViewModel.typeLookup![typeName];
+
+    if (initialData instanceof ViewModel) {
+      return initialData;
+    }
+
+    if (ViewModel.typeLookup === null) {
+      throw Error(
+        "Static `ViewModel.typeLookup` is not defined. It should get defined in viewmodels.g.ts."
+      );
+    }
+
+    const vmCtor = ViewModel.typeLookup[typeName];
     const vm = new vmCtor() as unknown as ViewModel;
     map.set(initialData, vm);
 
@@ -1878,11 +1904,6 @@ function viewModelCollectionMapItems<T extends ViewModel, TModel extends Model>(
       viewModel = val;
     } else {
       // Incoming is a Model. Make a ViewModel from it.
-      if (ViewModel.typeLookup === null) {
-        throw Error(
-          "Static `ViewModel.typeLookup` is not defined. It should get defined in viewmodels.g.ts."
-        );
-      }
       viewModel = val = ViewModelFactory.get(
         collectedTypeMeta.name,
         val,
@@ -2329,89 +2350,92 @@ function rebuildModelCollectionForViewModelCollection<
   isCleanData: DataFreshness,
   purgeUnsaved: boolean
 ) {
-  if (!Array.isArray(currentValue)) {
-    currentValue = [];
-  }
-
-  let incomingLength = incomingValue.length;
-  let currentLength = currentValue.length;
-
-  // There are existing items. We need to surgically merge in the incoming items,
-  // keeping existing ViewModels the same based on keys.
-  const pkName = type.keyProp.name;
-  const existingItemsMap = new Map<any, TItem>();
-  const existingItemsWithoutPk = [];
-  for (let i = 0; i < currentLength; i++) {
-    const item = currentValue[i];
-    const itemPk = item.$primaryKey;
-
-    if (itemPk) {
-      existingItemsMap.set(itemPk, item);
-    } else {
-      existingItemsWithoutPk.push(item);
+  ViewModelFactory.scope((factory) => {
+    if (!Array.isArray(currentValue)) {
+      currentValue = [];
     }
-  }
 
-  // Rebuild the currentValue array, using existing items when they exist,
-  // otherwise using the incoming items.
+    let incomingLength = incomingValue.length;
+    let currentLength = currentValue.length;
 
-  for (let i = 0; i < incomingLength; i++) {
-    const incomingItem = incomingValue[i];
-    const incomingItemPk = incomingItem[pkName];
-    const existingItem = existingItemsMap.get(incomingItemPk);
+    // There are existing items. We need to surgically merge in the incoming items,
+    // keeping existing ViewModels the same based on keys.
+    const pkName = type.keyProp.name;
+    const existingItemsMap = new Map<any, TItem>();
+    const existingItemsWithoutPk = [];
+    for (let i = 0; i < currentLength; i++) {
+      const item = currentValue[i];
+      const itemPk = item.$primaryKey;
 
-    if (existingItem) {
-      existingItem.$loadFromModel(incomingItem, isCleanData);
-
-      if (currentValue[i] === existingItem) {
-        // The existing item is not moving position. Do nothing.
+      if (itemPk) {
+        existingItemsMap.set(itemPk, item);
       } else {
-        // Replace the item currently at this position with the existing item.
-        currentValue.splice(i, 1, existingItem);
-      }
-    } else {
-      // No need to $loadFromModel on the incoming item.
-      // The setter for the collection will transform its contents into ViewModels for us.
-
-      if (currentValue[i]) {
-        // There is something else already in the array at this position. Replace it.
-        currentValue.splice(i, 1, incomingItem);
-      } else {
-        // Nothing in the current array at this position. Just stick it in.
-        currentValue.push(incomingItem);
+        existingItemsWithoutPk.push(item);
       }
     }
-  }
 
-  if (existingItemsWithoutPk.length && !purgeUnsaved) {
-    // Add to the end of the collection any existing items that do not have primary keys.
-    // This behavior exists to prevent losing items on the client
-    // that may not yet be saved in the event that the parent of the collection
-    // get reloaded from a save.
-    // If this behavior is undesirable in a specific circumstance,
-    // it is trivial to manually remove unsaved items after a .$save() is peformed.
+    // Rebuild the currentValue array, using existing items when they exist,
+    // otherwise using the incoming items.
 
-    const existingItemsLength = existingItemsWithoutPk.length;
-    for (let i = 0; i < existingItemsLength; i++) {
-      const existingItem = existingItemsWithoutPk[i];
-      const currentItem = currentValue[incomingLength];
+    for (let i = 0; i < incomingLength; i++) {
+      const incomingItem = incomingValue[i];
+      const incomingItemPk = incomingItem[pkName];
+      const existingItem = existingItemsMap.get(incomingItemPk);
 
-      if (existingItem === currentItem) {
-        // The existing item is not moving position. Do nothing.
+      if (existingItem) {
+        factory.set(incomingItem, existingItem);
+
+        existingItem.$loadFromModel(incomingItem, isCleanData);
+
+        if (currentValue[i] === existingItem) {
+          // The existing item is not moving position. Do nothing.
+        } else {
+          // Replace the item currently at this position with the existing item.
+          currentValue.splice(i, 1, existingItem);
+        }
       } else {
-        // Replace the item currently at this position with the existing item.
-        currentValue.splice(incomingLength, 1, existingItem);
+        const incomingVm = factory.get(type.name, incomingItem) as TItem;
+
+        if (currentValue[i]) {
+          // There is something else already in the array at this position. Replace it.
+          currentValue.splice(i, 1, incomingVm);
+        } else {
+          // Nothing in the current array at this position. Just stick it in.
+          currentValue.push(incomingVm);
+        }
       }
-
-      incomingLength += 1;
     }
-  }
 
-  // If the new collection is shorter than the existing length,
-  // remove the extra items.
-  if (currentLength > incomingLength) {
-    currentValue.splice(incomingLength, currentLength - incomingLength);
-  }
+    if (existingItemsWithoutPk.length && !purgeUnsaved) {
+      // Add to the end of the collection any existing items that do not have primary keys.
+      // This behavior exists to prevent losing items on the client
+      // that may not yet be saved in the event that the parent of the collection
+      // get reloaded from a save.
+      // If this behavior is undesirable in a specific circumstance,
+      // it is trivial to manually remove unsaved items after a .$save() is peformed.
+
+      const existingItemsLength = existingItemsWithoutPk.length;
+      for (let i = 0; i < existingItemsLength; i++) {
+        const existingItem = existingItemsWithoutPk[i];
+        const currentItem = currentValue[incomingLength];
+
+        if (existingItem === currentItem) {
+          // The existing item is not moving position. Do nothing.
+        } else {
+          // Replace the item currently at this position with the existing item.
+          currentValue.splice(incomingLength, 1, existingItem);
+        }
+
+        incomingLength += 1;
+      }
+    }
+
+    // If the new collection is shorter than the existing length,
+    // remove the extra items.
+    if (currentLength > incomingLength) {
+      currentValue.splice(incomingLength, currentLength - incomingLength);
+    }
+  }, isCleanData);
 
   // Let the receiving ViewModelCollection handle the conversion of the contents
   // into ViewModel instances.

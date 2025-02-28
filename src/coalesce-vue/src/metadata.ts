@@ -153,20 +153,20 @@ export interface DataSourceType extends Metadata {
   readonly isDefault?: true;
   readonly description?: string;
 
-  /** The parameters of the data source.
-   * Stored as `props` so it can be treated like a ModelType/ObjectType in many cases.
-   */
+  // Note: this is named `props`, not `params`,
+  // so it can be treated like a ModelType/ObjectType in many cases.
+  /** The parameters of the data source. */
   readonly props: {
     [paramName in string]:
       | PrimitiveProperty
       | DateProperty
       | EnumProperty
-      | (BasicCollectionProperty & {
-          itemType: PrimitiveValue | DateValue | EnumValue;
-        });
+      | ObjectProperty
+      | UnknownProperty
+      | BinaryProperty
+      | ModelValueProperty
+      | BasicCollectionProperty;
   };
-  // NOTE: this union is the currently supported set of data source parameters.
-  // When we support more types in the future (e.g. objects), adjust accordingly.
 }
 
 export interface Service extends Metadata, ApiRoutedType {
@@ -490,9 +490,14 @@ export interface ModelReferenceNavigationProperty
   extends PropertyBase,
     ModelValue {
   readonly role: "referenceNavigation";
-  readonly foreignKey: ForeignKeyProperty;
+  // Note: This can be a PrimaryKey in a 1-to-1 situation where the child record's
+  // PK is the foreign key into the parent's type.
+  readonly foreignKey: ForeignKeyProperty | PrimaryKeyProperty;
   readonly principalKey: PrimaryKeyProperty;
-  readonly inverseNavigation?: ModelCollectionNavigationProperty;
+  // Note: Can be a `ModelReferenceNavigationProperty` for a 1-to-1
+  readonly inverseNavigation?:
+    | ModelReferenceNavigationProperty
+    | ModelCollectionNavigationProperty;
 }
 
 /**

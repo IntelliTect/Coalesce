@@ -19,6 +19,7 @@ jobs:
       with:
         dotnet-version: | 
           8.0.x
+          9.0.x
 
     - run: npm ci
       working-directory: src/coalesce-vue
@@ -47,6 +48,7 @@ jobs:
       with:
         dotnet-version: | 
           8.0.x
+          9.0.x
 
     - run: npm ci
       working-directory: src/coalesce-vue
@@ -71,6 +73,7 @@ jobs:
       with:
         dotnet-version: | 
           8.0.x
+          9.0.x
 
     - run: npm ci
       working-directory: src/coalesce-vue

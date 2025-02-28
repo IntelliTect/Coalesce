@@ -1,6 +1,5 @@
 import { createCoalesceVuetify } from "coalesce-vue-vuetify3";
 import { enableAutoUnmount, mount } from "@vue/test-utils";
-import { ArgumentsType } from "vitest";
 
 import { createVuetify } from "vuetify";
 import $metadata from "@/metadata.g";
@@ -16,8 +15,8 @@ const coalesceVuetify = createCoalesceVuetify({
 });
 
 const mountComponent = function (
-  component: ArgumentsType<typeof mount>[0],
-  options: ArgumentsType<typeof mount>[1],
+  component: Parameters<typeof mount>[0],
+  options: Parameters<typeof mount>[1],
 ) {
   return mount(component, {
     ...options,
@@ -25,7 +24,7 @@ const mountComponent = function (
     global: {
       plugins: [vuetify, coalesceVuetify, router],
     },
-  } as ArgumentsType<typeof mount>[1]);
+  } as Parameters<typeof mount>[1]);
 } as typeof mount;
 
 export { nextTick } from "vue";

@@ -1,6 +1,7 @@
 import * as $metadata from './metadata.g'
 import * as $models from './models.g'
-import { AxiosPromise, AxiosRequestConfig, ModelApiClient, ServiceApiClient, ItemResult, ListResult } from 'coalesce-vue/lib/api-client'
+import { ModelApiClient, ServiceApiClient } from 'coalesce-vue/lib/api-client'
+import type { AxiosPromise, AxiosRequestConfig, ItemResult, ListResult } from 'coalesce-vue/lib/api-client'
 
 export class AbstractImplApiClient extends ModelApiClient<$models.AbstractImpl> {
   constructor() { super($metadata.AbstractImpl) }
@@ -54,7 +55,7 @@ export class ComplexModelApiClient extends ModelApiClient<$models.ComplexModel> 
     return this.$invoke($method, $params, $config)
   }
   
-  public methodWithOptionalParams(id: number | null, requiredInt: number | null, plainInt?: number | null, nullableInt?: number | null, intWithDefault?: number | null, enumWithDefault?: $models.Statuses | null, stringWithDefault?: string | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<string>> {
+  public methodWithOptionalParams(id: number | null, requiredInt: number | null, plainInt?: number | null, nullableInt?: number | null, intWithDefault?: number | null, enumWithDefault?: $models.Statuses | null, stringWithDefault?: string | null, optionalObject?: $models.Test | null, optionalObjectCollection?: $models.Test[] | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<string>> {
     const $method = this.$metadata.methods.methodWithOptionalParams
     const $params =  {
       id,
@@ -64,6 +65,8 @@ export class ComplexModelApiClient extends ModelApiClient<$models.ComplexModel> 
       intWithDefault,
       enumWithDefault,
       stringWithDefault,
+      optionalObject,
+      optionalObjectCollection,
     }
     return this.$invoke($method, $params, $config)
   }
@@ -74,6 +77,15 @@ export class ComplexModelApiClient extends ModelApiClient<$models.ComplexModel> 
       id,
       optionalInt,
       singleExternal,
+    }
+    return this.$invoke($method, $params, $config)
+  }
+  
+  public instanceGetMethodWithObjParam(id: number | null, obj?: $models.ExternalParent | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<$models.ExternalParent>> {
+    const $method = this.$metadata.methods.instanceGetMethodWithObjParam
+    const $params =  {
+      id,
+      obj,
     }
     return this.$invoke($method, $params, $config)
   }
@@ -132,6 +144,51 @@ export class ComplexModelApiClient extends ModelApiClient<$models.ComplexModel> 
   
   public methodWithMultiFileParameter(id: number | null, files?: File[] | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<void>> {
     const $method = this.$metadata.methods.methodWithMultiFileParameter
+    const $params =  {
+      id,
+      files,
+    }
+    return this.$invoke($method, $params, $config)
+  }
+  
+  public methodWithMultiFileParameterConcrete(id: number | null, files?: File[] | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<void>> {
+    const $method = this.$metadata.methods.methodWithMultiFileParameterConcrete
+    const $params =  {
+      id,
+      files,
+    }
+    return this.$invoke($method, $params, $config)
+  }
+  
+  public methodWithMultiFileParameterConcreteParam(id: number | null, files?: File[] | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<void>> {
+    const $method = this.$metadata.methods.methodWithMultiFileParameterConcreteParam
+    const $params =  {
+      id,
+      files,
+    }
+    return this.$invoke($method, $params, $config)
+  }
+  
+  public methodWithMultiFileParameterList(id: number | null, files?: File[] | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<void>> {
+    const $method = this.$metadata.methods.methodWithMultiFileParameterList
+    const $params =  {
+      id,
+      files,
+    }
+    return this.$invoke($method, $params, $config)
+  }
+  
+  public methodWithMultiFileParameterListConcrete(id: number | null, files?: File[] | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<void>> {
+    const $method = this.$metadata.methods.methodWithMultiFileParameterListConcrete
+    const $params =  {
+      id,
+      files,
+    }
+    return this.$invoke($method, $params, $config)
+  }
+  
+  public methodWithMultiFileParameterListConcreteParam(id: number | null, files?: File[] | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<void>> {
+    const $method = this.$metadata.methods.methodWithMultiFileParameterListConcreteParam
     const $params =  {
       id,
       files,
@@ -251,6 +308,15 @@ export class ComplexModelApiClient extends ModelApiClient<$models.ComplexModel> 
     return this.$invoke($method, $params, $config)
   }
   
+  public sameMethodNameAsMethodOnDifferentType(id: number | null, input?: $models.CaseDtoStandalone | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<$models.CaseDtoStandalone>> {
+    const $method = this.$metadata.methods.sameMethodNameAsMethodOnDifferentType
+    const $params =  {
+      id,
+      input,
+    }
+    return this.$invoke($method, $params, $config)
+  }
+  
   public hasTopLevelParamWithSameNameAsObjectProp(complexModelId?: number | null, model?: $models.ComplexModel | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<void>> {
     const $method = this.$metadata.methods.hasTopLevelParamWithSameNameAsObjectProp
     const $params =  {
@@ -301,11 +367,40 @@ export class ComplexModelApiClient extends ModelApiClient<$models.ComplexModel> 
 
 export class ComplexModelDependentApiClient extends ModelApiClient<$models.ComplexModelDependent> {
   constructor() { super($metadata.ComplexModelDependent) }
+  public sameMethodNameAsMethodOnDifferentType(id: number | null, input?: $models.CaseDtoStandalone | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<$models.CaseDtoStandalone>> {
+    const $method = this.$metadata.methods.sameMethodNameAsMethodOnDifferentType
+    const $params =  {
+      id,
+      input,
+    }
+    return this.$invoke($method, $params, $config)
+  }
+  
 }
 
 
 export class EnumPkApiClient extends ModelApiClient<$models.EnumPk> {
   constructor() { super($metadata.EnumPk) }
+}
+
+
+export class OneToOneChild1ApiClient extends ModelApiClient<$models.OneToOneChild1> {
+  constructor() { super($metadata.OneToOneChild1) }
+}
+
+
+export class OneToOneChild2ApiClient extends ModelApiClient<$models.OneToOneChild2> {
+  constructor() { super($metadata.OneToOneChild2) }
+}
+
+
+export class OneToOneManyChildrenApiClient extends ModelApiClient<$models.OneToOneManyChildren> {
+  constructor() { super($metadata.OneToOneManyChildren) }
+}
+
+
+export class OneToOneParentApiClient extends ModelApiClient<$models.OneToOneParent> {
+  constructor() { super($metadata.OneToOneParent) }
 }
 
 
@@ -443,6 +538,14 @@ export class WeatherServiceApiClient extends ServiceApiClient<typeof $metadata.W
       location,
       dateTime,
       conditions,
+    }
+    return this.$invoke($method, $params, $config)
+  }
+  
+  public fileUploadDownload(file: File | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<File>> {
+    const $method = this.$metadata.methods.fileUploadDownload
+    const $params =  {
+      file,
     }
     return this.$invoke($method, $params, $config)
   }

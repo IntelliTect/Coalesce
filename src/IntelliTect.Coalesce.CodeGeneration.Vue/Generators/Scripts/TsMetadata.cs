@@ -23,12 +23,12 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
         {
             var b = new TypeScriptCodeBuilder(indentSize: 2);
 
-            using (b.Block("import", " from 'coalesce-vue/lib/metadata'"))
+            b.Line("import { getEnumMeta, solidify } from 'coalesce-vue/lib/metadata'");
+            using (b.Block("import type", " from 'coalesce-vue/lib/metadata'"))
             {
-                b.Line("Domain, getEnumMeta, solidify, ModelType, ObjectType,");
+                b.Line("Domain, ModelType, ObjectType, HiddenAreas, BehaviorFlags, ");
                 b.Line("PrimitiveProperty, ForeignKeyProperty, PrimaryKeyProperty,");
-                b.Line("ModelCollectionNavigationProperty, ModelReferenceNavigationProperty,");
-                b.Line("HiddenAreas, BehaviorFlags");
+                b.Line("ModelCollectionNavigationProperty, ModelReferenceNavigationProperty");
             }
             b.Line();
             b.Line();
@@ -242,7 +242,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                     case PropertyRole.ReferenceNavigation:
                         // TS Type: "ModelReferenceNavigationProperty"
                         b.StringProp("role", "referenceNavigation");
-                        b.Line($"get foreignKey() {{ return {GetClassMetadataRef(model)}.props.{prop.ForeignKeyProperty.JsVariable} as ForeignKeyProperty }},");
+                        // Note: `prop.ForeignKeyProperty.Role` might be PrimaryKey, not ForeignKey, in the case of 1-to-1 relationships.
+                        b.Line($"get foreignKey() {{ return {GetClassMetadataRef(model)}.props.{prop.ForeignKeyProperty.JsVariable} as {prop.ForeignKeyProperty.Role}Property }},");
                         b.Line($"get principalKey() {{ return {GetClassMetadataRef(prop.Object)}.props.{prop.Object.PrimaryKey.JsVariable} as PrimaryKeyProperty }},");
 
                         if (prop.InverseProperty != null)

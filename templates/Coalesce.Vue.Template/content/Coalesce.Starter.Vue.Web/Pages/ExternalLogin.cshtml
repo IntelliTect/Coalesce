@@ -1,0 +1,19 @@
+﻿@page
+@model ExternalLoginModel
+@{
+    ViewData["Title"] = "Sign In";
+}
+
+
+@if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+{
+    <p class="text-danger my-2">
+        <strong>@Model.ErrorMessage</strong>
+    </p>
+
+    <form method="get" asp-page="SignIn" class="d-grid mt-3">
+        <button type="submit" class="btn btn-primary">
+            Back
+        </button>
+    </form>
+}

@@ -197,6 +197,13 @@ namespace IntelliTect.Coalesce
         /// <param name="id">The key of the item that was requested.</param>
         public virtual string GetNotFoundMessage(object id)
         {
+            id = id switch
+            {
+                "" => "\"\"",
+                null => "<null>",
+                _ => id
+            };
+
             return $"{ClassViewModel.DisplayName} item with ID {id} was not found.";
         }
 

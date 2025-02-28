@@ -9,6 +9,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace IntelliTect.Coalesce.TypeDefinition
 {
@@ -125,6 +126,16 @@ namespace IntelliTect.Coalesce.TypeDefinition
         [Obsolete("This method cannot account for any custom IPropertyRestrictions.")]
         public bool IsReadAllowed(ClaimsPrincipal? user) => Read.IsAllowed(user);
 
+        public bool IsReadAllowed(IMappingContext mappingContext, object model)
+        {
+            if (!Read.IsAllowed(mappingContext.User)) return false;
+
+            return Prop.SecurityInfo.Restrictions.All(r => mappingContext
+                .GetPropertyRestriction(r.TypeInfo)
+                .UserCanRead(mappingContext, Prop.Name, model)
+            );
+        }
+
         /// <summary>
         /// If true, the user can initialize the field on a new instance of the object.
         /// </summary>
@@ -207,7 +218,12 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 }
 
                 // If nothing was found recusively, use the API permissions of the type if it has a CRUD api.
-                if (p.EffectiveParent is { IsDbMappedType: true } or { IsStandaloneEntity: true })
+                if (p.EffectiveParent.Type.IsA(typeof(IDataSource<>)) && p.HasAttribute<CoalesceAttribute>())
+                {
+                    // Property is a data source parameter. 
+                    return false;
+                }
+                else if (p.EffectiveParent is { IsDbMappedType: true } or { IsStandaloneEntity: true })
                 {
                     return p.EffectiveParent.SecurityInfo.Create.NoAccess;
                 }

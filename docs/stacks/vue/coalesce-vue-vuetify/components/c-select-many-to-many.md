@@ -19,50 +19,17 @@ It is unlikely that you'll ever need to use this component directly - it is high
 ``` vue-html
 <c-select-many-to-many 
     :model="case" 
-    for="caseProducts" 
-    dense
-    outlined
-/>
-```
-
-``` vue-html
-<c-select-many-to-many 
-    v-model="case.caseProducts" 
-    for="Case.caseProducts" 
+    for="caseProducts"
+    variant="outlined"
+    density="compact"
 />
 ```
 
 ## Props
 
-<Prop def="for: string | Property | Value" lang="ts" />
+See [c-select / Props](./c-select.md#props). 
 
-A metadata specifier for the value being bound. One of:
-    
-- A string with the name of the value belonging to `model`.
-- A direct reference to a metadata object.
-- A string in dot-notation that starts with a type name.
-
-::: tip Note
-c-select-many-to-many expects metadata for the "real" collection navigation property on a model. If you provide it the string you passed to [[ManyToMany]](/modeling/model-components/attributes/many-to-many.md), an error wil be thrown.
-:::
-
-<Prop def="model?: Model" lang="ts" />
-
-An object owning the value that was specified by the `for` prop. If provided, the input will be bound to the corresponding property on the `model` object.
-
-<Prop def="value?: any // Vue 2
-modelValue?: any // Vue 3" lang="ts" />
-
-If binding the component with ``v-model``, accepts the ``value`` part of ``v-model``.
-    
-<Prop def="params?: ListParameters" lang="ts" />
-
-An optional set of [Data Source Standard Parameters](/modeling/model-components/data-sources.md#standard-parameters) to pass to API calls made to the server.
-
-<Prop def="cache?: ResponseCachingConfiguration | boolean" lang="ts" />
-
-If provided and non-false, enables [response caching](/stacks/vue/layers/api-clients.md#response-caching) on the component's internal API caller.
-    
+Since `c-select-many-to-many` internally uses `c-select` as its implementation, all props of `c-select` are also supported by `c-select-many-to-many`.
 
 ## Events
 

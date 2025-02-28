@@ -10,6 +10,7 @@ import { VForm, VListItem } from "vuetify/components";
 import { CInput } from "..";
 import {
   Case,
+  CaseProduct,
   Company,
   ComplexModel,
   EnumPk,
@@ -37,6 +38,7 @@ describe("CInput", () => {
   test("types", () => {
     const model = new ComplexModel();
     const vm = new ComplexModelViewModel();
+    const caseVm = new CaseViewModel();
     const ds = new Case.DataSources.AllOpenCases();
 
     () => <CInput model={model} for="color" onUpdate:modelValue={(v: string | null) => { }} />;
@@ -54,6 +56,7 @@ describe("CInput", () => {
     // () => <CInput model={vm} for="byteArrayProp" onUpdate:modelValue={(v: string) => { }} />;
 
     () => <CInput model={vm} for="singleTest" onUpdate:modelValue={(v: Test | null) => { }} />;
+    () => <CInput model={vm} for="singleTestId" onUpdate:modelValue={(v: number | null) => { }} />;
     //@ts-expect-error wrong event handler type
     () => <CInput model={vm} for="singleTest" onUpdate:modelValue={(v: string | null) => { }} />;
 
@@ -61,13 +64,18 @@ describe("CInput", () => {
     //@ts-expect-error wrong event handler type
     () => <CInput model={vm} for="tests" onUpdate:modelValue={(v: string | null) => { }} />;
 
-    () => <CInput model={vm} for="enumCollection" onUpdate:modelValue={(v: EnumPk[] | null) => { }} />;
+    () => <CInput model={vm} for="enumCollection" onUpdate:modelValue={(v: Statuses[] | null) => { }} />;
     //@ts-expect-error wrong event handler type
     () => <CInput model={vm} for="enumCollection" onUpdate:modelValue={(v: string | null) => { }} />;
 
     () => <CInput model={vm} for="intCollection" onUpdate:modelValue={(v: number[] | null) => { }} />;
     //@ts-expect-error wrong event handler type
     () => <CInput model={vm} for="intCollection" onUpdate:modelValue={(v: string[] | null) => { }} />;
+
+    // Many-to-many
+    () => <CInput model={caseVm} for="caseProducts" onUpdate:modelValue={(v: CaseProduct[] | null) => { }} />;
+    //@ts-expect-error wrong event handler type
+    () => <CInput model={caseVm} for="caseProducts" onUpdate:modelValue={(v: number[] | null) => { }} />;
 
     //@ts-expect-error non-existent prop
     () => <CInput model={vm} for="_anyString" />;
@@ -102,6 +110,28 @@ describe("CInput", () => {
     () => <CInput model={caller} for="file" onUpdate:modelValue={(v: File | null) => { }} />;
     () => <CInput model={caller} for="stringsParam" onUpdate:modelValue={(v: string[] | null) => { }} />;
     () => <CInput model={caller} for="enumsParam" onUpdate:modelValue={(v: Statuses[] | null) => { }} />;
+    () => <CInput model={caller} for="modelCollection" onUpdate:modelValue={(v: Test[] | null) => { }} />;
+
+    // @ts-expect-error wrong type
+    () => <CInput model={caller} for="dateTime" onUpdate:modelValue={(v: string | null) => { }} />;
+    // @ts-expect-error wrong type
+    () => <CInput model={caller} for="model" onUpdate:modelValue={(v: string | null) => { }} />;
+    // @ts-expect-error wrong type
+    () => <CInput model={caller} for="strParam" onUpdate:modelValue={(v: number | null) => { }} />;
+    // @ts-expect-error wrong type
+    () => <CInput model={caller} for="integer" onUpdate:modelValue={(v: string | null) => { }} />;
+    // @ts-expect-error wrong type
+    () => <CInput model={caller} for="enumParam" onUpdate:modelValue={(v: string | null) => { }} />;
+    // @ts-expect-error wrong type
+    () => <CInput model={caller} for="boolParam" onUpdate:modelValue={(v: string | null) => { }} />;
+    // @ts-expect-error wrong type
+    () => <CInput model={caller} for="file" onUpdate:modelValue={(v: string | null) => { }} />;
+    // @ts-expect-error wrong type
+    () => <CInput model={caller} for="stringsParam" onUpdate:modelValue={(v: string | null) => { }} />;
+    // @ts-expect-error wrong type
+    () => <CInput model={caller} for="enumsParam" onUpdate:modelValue={(v: string | null) => { }} />;
+    // @ts-expect-error wrong type
+    () => <CInput model={caller} for="modelCollection" onUpdate:modelValue={(v: string | null) => { }} />;
 
     // While external types don't make an input for CInput,
     // they aren't technically invalid either because they at least fall back to c-display.
@@ -112,6 +142,13 @@ describe("CInput", () => {
     () => <CInput model={caller} for="badString" />;
     //@ts-expect-error missing `for`
     () => <CInput model={caller} />;
+
+    // ******
+    // Vuetify props
+    // ******
+    () => <CInput model={model} for="color" variant="outlined" />;
+    //@ts-expect-error bad prop value
+    () => <CInput model={model} for="color" variant="bad-variant" />;
   });
 
   test.each([
@@ -244,7 +281,37 @@ describe("CInput", () => {
     expect(onUpdate).toHaveBeenCalledWith(new Date("1/3/2017"));
   });
 
+  test("collection navigation doesn't produce c-select", () => {
+    // Non many-to-many model collection navigation  props should not produce an input,
+    // so that they can fall back on their default slot (e.g. for c-admin-editor)
+
+    const model = new ComplexModelViewModel({});
+    const wrapper = mountApp(() => (
+      <CInput model={model} for="tests">
+        <div>Default Slot Content</div>
+      </CInput>
+    )).findComponent(CInput);
+
+    expect(wrapper.text()).toBe("Default Slot Content");
+  });
+
   describe("rules", () => {
+    test("implicit from metadata", async () => {
+      const model = new ComplexModelViewModel({ guid: "foo" });
+      const wrapper = mountApp(() => (
+        <VForm>
+          <CInput model={model} for="guid" />
+        </VForm>
+      ));
+
+      await wrapper.findComponent(VForm).vm.validate();
+
+      expect(wrapper.find(".v-input--error").exists()).toBeTruthy();
+      expect(wrapper.find(".v-messages").text()).toEqual(
+        "Guid does not match expected format."
+      );
+    });
+
     test("date - missing", async () => {
       const model = new ComplexModelViewModel({});
       const wrapper = mountApp(() => (

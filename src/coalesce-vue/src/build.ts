@@ -1,9 +1,9 @@
 import type { Plugin, ResolvedConfig, ViteDevServer } from "vite";
 import MagicString from "magic-string";
 
-import path from "node:path";
-import os from "node:os";
-import fs from "node:fs";
+import * as path from "node:path";
+import * as os from "node:os";
+import * as fs from "node:fs";
 import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { spawn } from "node:child_process";
 import { TLSSocket } from "node:tls";
@@ -525,6 +525,10 @@ export async function getCertPaths(certName?: string) {
     process.env.APPDATA !== undefined && process.env.APPDATA !== ""
       ? `${process.env.APPDATA}/ASP.NET/https`
       : `${process.env.HOME}/.aspnet/https`;
+
+  if (!fs.existsSync(baseFolder)) {
+    fs.mkdirSync(baseFolder, { recursive: true });
+  }
 
   const certificateArg =
     certName ??

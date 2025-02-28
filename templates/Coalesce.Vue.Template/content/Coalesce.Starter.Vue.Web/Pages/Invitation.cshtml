@@ -1,0 +1,34 @@
+﻿@page 
+@model Coalesce.Starter.Vue.Web.Pages.InvitationModel
+@{
+    ViewData["Title"] = "Join Organization";
+}
+
+<div asp-validation-summary="All" class="text-danger"></div>
+
+@if (ModelState.IsValid)
+{
+    <p>
+        You have been invited to join the <b>@Model.Tenant.Name</b> organization. You will join as <b>@User.GetUserName()</b>.
+    </p>
+
+    <form method="post" class="d-grid">
+        <input asp-for="Code" type="hidden" />
+        <button type="submit" class="btn btn-primary">
+            Accept Invitation
+        </button>
+    </form>
+
+    <form method="get" asp-page="SignIn" class="d-grid mt-3">
+        <input type="hidden" name="ReturnUrl" value="@(Request.Path + Request.QueryString)" />
+        <button type="submit" class="btn btn-outline-dark">
+            Switch Account
+        </button>
+    </form>
+
+    <form method="get" asp-page="SignIn" class="d-grid mt-3">
+        <button type="submit" class="btn btn-outline-dark">
+            Decline
+        </button>
+    </form>
+}

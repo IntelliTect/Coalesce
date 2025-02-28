@@ -1,6 +1,6 @@
 import * as model from "../src/model";
 import * as $metadata from "./targets.metadata";
-import {
+import type {
   ModelValue,
   ObjectValue,
   Value,
@@ -8,15 +8,16 @@ import {
   CollectionValue,
 } from "../src/metadata";
 import { shortStringify, expectDeepMatch } from "./test-utils";
-import { Indexable } from "../src/util";
+import { type Indexable } from "../src/util";
 import {
   twoWayConversions,
   studentValue,
-  MappingData,
+  type MappingData,
   displaysStudentValue,
 } from "./model.shared";
 import { Course } from "./targets.models";
 import { convertToModel } from "../src/model";
+import { ComplexModel } from "@test-targets/metadata.g";
 
 const studentProps = $metadata.Student.props;
 
@@ -133,6 +134,11 @@ const dtoToModelMappings = <MappingData[]>[
       convertToModel({}, $metadata.Course),
       convertToModel({}, $metadata.Course),
     ],
+  },
+  {
+    meta: ComplexModel.props.intCollection,
+    dto: "1,2,3",
+    model: [1, 2, 3],
   },
   ...unparsable(studentProps.courses, "abc", 123, {}, true),
 

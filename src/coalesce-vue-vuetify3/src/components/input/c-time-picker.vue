@@ -1,6 +1,6 @@
 <template>
   <v-sheet class="c-time-picker" ref="root">
-    <v-sheet color="secondary" class="c-time-picker-header">
+    <v-sheet :color="color!" class="c-time-picker-header">
       <slot name="header">
         {{ isValid(modelValue) ? format(modelValue!, "h:mm a") : "- : - -" }}
       </slot>
@@ -15,7 +15,7 @@
           tabindex="0"
           class="c-time-picker__item c-time-picker__item-hour"
           :class="{
-            'c-time-picker__item-active ':
+            [activeItemClass]:
               modelValue && modelValue.getHours() % 12 == i % 12,
           }"
         >
@@ -30,7 +30,7 @@
           :disabled="!testValid({ minutes: i })"
           class="c-time-picker__item c-time-picker__item-minute"
           :class="{
-            'c-time-picker__item-active ': modelValue?.getMinutes() == i,
+            [activeItemClass]: modelValue?.getMinutes() == i,
           }"
         >
           {{ i.toString().padStart(2, "0") }}
@@ -44,7 +44,7 @@
           @click="setAM(i == 0)"
           :disabled="!testMeridiamValid(i == 0)"
           :class="{
-            'c-time-picker__item-active':
+            [activeItemClass]:
               modelValue && (i == 0) == modelValue.getHours() < 12,
           }"
         >
@@ -152,8 +152,9 @@ const props = withDefaults(
     step: number;
     min?: Date | null;
     max?: Date | null;
+    color?: string | null;
   }>(),
-  { step: 1 }
+  { step: 1, color: "secondary" }
 );
 
 const emit = defineEmits<{ "update:modelValue": [arg: Date] }>();
@@ -175,6 +176,9 @@ const meridiems = [
   format(new Date(0).setHours(12), "a"),
 ];
 
+const activeItemClass = computed(
+  () => "c-time-picker__item-active bg-" + props.color
+);
 function getDateToModify() {
   return props.modelValue ?? startOfHour(new Date());
 }

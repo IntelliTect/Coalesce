@@ -442,6 +442,9 @@ defineExpose({
   }
 }
 
+.c-audit-logs--column-details {
+  min-width: 280px;
+}
 .c-audit-logs--column-entity {
   min-width: 180px;
 }

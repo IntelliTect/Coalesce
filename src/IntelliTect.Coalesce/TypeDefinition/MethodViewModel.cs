@@ -135,7 +135,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
             this.GetAttributeValue<ExecuteAttribute, HttpMethod>(a => a.HttpMethod) ??
             HttpMethod.Post;
 
-        public bool HasHttpRequestBody => ApiActionHttpMethod != HttpMethod.Get && ApiActionHttpMethod != HttpMethod.Delete;
+        public bool HasHttpRequestBody =>
+            ApiActionHttpMethod is not HttpMethod.Get and not HttpMethod.Delete &&
+            ApiParameters.Any();
 
         public PropertyViewModel? VaryByProperty =>
             !IsModelInstanceMethod ? null :
@@ -169,6 +171,28 @@ namespace IntelliTect.Coalesce.TypeDefinition
             .Where(f => !f.IsDI);
 
         /// <summary>
+        /// The generated class that wraps the method parameters for JSON-accepting API endpoints
+        /// </summary>
+        public string ParameterClassName
+        {
+            get
+            {
+                var parameterClassName = $"{NameWithoutAsync}Parameters";
+
+                // Disambiguate the parameter class name using the owning type's name
+                // if there are mutliple same-name methods in the application.
+                // This prevents Swashbuckle from throwing errors when it uses
+                // only the class name as the OpenAPI schema name.
+                if (Parent.ReflectionRepository?.ClientMethodsLookup[Name].Count() > 1)
+                {
+                    parameterClassName = Parent.Name + parameterClassName;
+                }
+
+                return parameterClassName;
+            }
+        }
+
+        /// <summary>
         /// List of parameters that are part of the endpoint's API surface.
         /// Includes implicit parameters that are not defined on the underlying implementation.
         /// </summary>
@@ -177,15 +201,15 @@ namespace IntelliTect.Coalesce.TypeDefinition
             get
             {
                 var parameters = ClientParameters;
-                if (IsModelInstanceMethod)
+                if (IsModelInstanceMethod && Parent.PrimaryKey != null)
                 {
                     parameters = new[]
                     {
                         new ImplicitParameterViewModel(
                             this,
-                            Parent.PrimaryKey!,
+                            Parent.PrimaryKey,
                             "id", 
-                            "Primary Key" // TODO: Is this what we want? Also, i18n.
+                            "Primary Key"
                         )
                     }.Concat(parameters);
                 }

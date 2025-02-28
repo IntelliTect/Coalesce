@@ -1,6 +1,6 @@
-import { AxiosRequestConfig, AxiosResponse } from "axios";
+import type { AxiosRequestConfig, AxiosResponse } from "axios";
 
-import { AxiosClient, ItemResult, ListResult } from "./api-client.js";
+import { AxiosClient, type ItemResult, type ListResult } from "./api-client.js";
 import type {
   ItemMethod,
   ListMethod,

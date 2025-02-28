@@ -7,14 +7,17 @@ import { isAxiosError } from "axios";
 
 import App from "./App.vue";
 import router from "./router";
-import { globalProperties as userServiceProps } from "./user-service";
+import {
+  refreshUserInfo,
+  globalProperties as userServiceProps,
+} from "./user-service";
 
 // Import global CSS and Fonts:
 import "typeface-roboto";
 import "@fortawesome/fontawesome-free/css/all.css";
 import "coalesce-vue-vuetify3/styles.css";
-import "@/site.scss";
 import "vuetify/styles";
+import "@/styles/site.scss";
 
 import $metadata from "@/metadata.g";
 // viewmodels.g has side effects - it populates the global lookup on ViewModel and ListViewModel.
@@ -68,6 +71,7 @@ CoalesceAxiosClient.interceptors.response.use(undefined, (error) => {
       /* Never resolving promise so failure doesn't momentarily propagate to UI before reload completes */
     });
   }
+  return Promise.reject(error);
 });
 
 // SETUP: coalesce-vue-vuetify
@@ -79,7 +83,6 @@ const coalesceVuetify = createCoalesceVuetify({
 // SETUP: app insights
 //@ts-expect-error AppInsights imported from backend JavaScriptSnippet; no types available.
 window.appInsights?.addTelemetryInitializer(function (envelope) {
-  debugger;
   if (
     envelope.baseType === "ExceptionData" &&
     // Filter out unactionable, junk errors:
@@ -102,4 +105,12 @@ app.use(router);
 app.use(vuetify);
 app.use(coalesceVuetify);
 
-app.mount("#app");
+refreshUserInfo()
+  .then(() => {
+    app.mount("#app");
+  })
+  .catch((e) => {
+    alert(
+      "Unable to contact the application server. Please refresh the page to try again.",
+    );
+  });

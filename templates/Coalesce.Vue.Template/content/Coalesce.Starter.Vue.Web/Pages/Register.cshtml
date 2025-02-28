@@ -1,0 +1,60 @@
+﻿@page
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.Extensions.Options
+
+@model Coalesce.Starter.Vue.Web.Pages.RegisterModel
+@inject IOptions<IdentityOptions> identityOptions
+
+@{
+    ViewData["Title"] = "Register";
+    int passwordMinlength = identityOptions.Value.Password.RequiredLength;
+}
+
+@if (Model.SuccessMessage is not null)
+{
+    <p>@Model.SuccessMessage</p>
+
+    <form method="get" action="/" class="d-grid mt-3">
+        <button type="submit" class="btn btn-primary">
+            Continue
+        </button>
+    </form>
+    return;
+}
+@*#if TenantMemberInvites *@
+@if (Model.ReturnUrl?.StartsWith("/invitation", StringComparison.OrdinalIgnoreCase) == true)
+{
+    <div class="alert alert-primary limit-width" role="alert">
+        Note: The invitation you received requires you to sign up with the same email address that received the invitation.
+    </div>
+}
+@*#endif *@
+<form method="post" class="d-grid gap-2 mt-3">
+    <div>
+        <label asp-for="Email" class="form-label"></label>
+        <input asp-for="Email" class="form-control" autocomplete="username" required autofocus />
+    </div>
+    <div>
+        <label asp-for="Password" class="form-label"></label>
+        <input asp-for="Password" id="password" class="form-control" autocomplete="new-password" required minlength="@passwordMinlength" oninput="validatePassword()" />
+        <div id="emailHelp" class="form-text">Passwords must be at least @passwordMinlength characters.</div>
+    </div>
+    <div>
+        <label asp-for="ConfirmPassword" class="form-label"></label>
+        <input asp-for="ConfirmPassword" id="confirm_password" class="form-control" autocomplete="new-password" required oninput="validatePassword()" />
+    </div>
+
+    <div asp-validation-summary="All" class="text-danger"></div>
+
+    <button type="submit" class="btn btn-primary rounded-pill">Register</button>
+</form>
+
+<script>
+    const password = document.getElementById("password");
+    const confirm_password = document.getElementById("confirm_password");
+
+    function validatePassword() {
+        confirm_password.setCustomValidity(
+            password.value != confirm_password.value ? "Passwords Don't Match" : '');
+    }
+</script>

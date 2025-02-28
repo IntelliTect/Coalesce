@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
@@ -9,11 +10,16 @@ using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Microsoft.Net.Http.Headers;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data.Common;
 using System.Linq;
 using System.Net;
+using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace IntelliTect.Coalesce.Api.Controllers
 {
@@ -21,6 +27,8 @@ namespace IntelliTect.Coalesce.Api.Controllers
     {
         protected readonly ILogger<ApiActionFilter> logger;
         protected readonly IOptions<CoalesceOptions> options;
+
+        private static readonly MediaTypeHeaderValue RefTypeHeader = new MediaTypeHeaderValue("application/json+ref");
 
         public ApiActionFilter(ILogger<ApiActionFilter> logger, IOptions<CoalesceOptions> options)
         {
@@ -39,7 +47,7 @@ namespace IntelliTect.Coalesce.Api.Controllers
                 if (errors.Any())
                 {
                     context.Result = new BadRequestObjectResult(
-                        new ApiResult(string.Join("\n; ", errors.Select(e => string.IsNullOrWhiteSpace(e.key) ? e.error : $"{e.key}: {e.error}")))
+                        new ApiResult(string.Join(" \n", errors.Select(e => string.IsNullOrWhiteSpace(e.key) ? e.error : $"{e.key}: {e.error}")))
                     );
                     return;
                 }
@@ -78,14 +86,22 @@ namespace IntelliTect.Coalesce.Api.Controllers
                     var requestId = context.HttpContext.TraceIdentifier;
                     if (options.Value.DetailedExceptionMessages)
                     {
-                        string message = context.Exception.Message;
-
+                        var messages = new StringBuilder();
+                        Exception? currentEx = context.Exception;
+                        while (currentEx is not null)
+                        {
+                            messages.AppendLine(currentEx.Message);
+                            currentEx = currentEx.InnerException;
+                        }
+                        string message = messages.ToString();
+                        
                         if (
-                            options.Value.DetailedEntityFrameworkExceptionMessages &&
-                            (context.Exception as DbException ?? context.Exception?.InnerException) is DbException
+                            options.Value.DetailedEfMigrationExceptionMessages &&
+                            (context.Exception as DbException ?? context.Exception?.InnerException) is DbException dbEx &&
+                            dbEx.InnerException is not Win32Exception { NativeErrorCode: 258 } // The wait operation timed out
                         )
                         {
-                            var dbMessage = GetDbContextExceptionMessage(context);
+                            var dbMessage = GetDbContextMigrationExceptionMessage(context);
                             if (!string.IsNullOrWhiteSpace(dbMessage))
                             {
                                 message = dbMessage + "\n\n" + message;
@@ -105,19 +121,36 @@ namespace IntelliTect.Coalesce.Api.Controllers
                 }
             }
 
-            if (response.StatusCode == (int)HttpStatusCode.OK
-                && context.Result is ObjectResult result
-                && result.Value is ApiResult apiResult
-                && !apiResult.WasSuccessful
-            )
+            if (context.Result is ObjectResult result)
             {
-                result.StatusCode = 
-                response.StatusCode = 
-                    (int)HttpStatusCode.BadRequest;
+                if (context.HttpContext.Request.GetTypedHeaders().Accept.Any(h => h.IsSubsetOf(RefTypeHeader)))
+                {
+                    var jsonOptions = context.HttpContext.RequestServices.GetService<IOptions<JsonOptions>>()?.Value ?? new JsonOptions
+                    {
+                        JsonSerializerOptions =
+                        {
+                            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+                        }
+                    };
+                    var newOptions = new JsonSerializerOptions(jsonOptions.JsonSerializerOptions)
+                    {
+                        ReferenceHandler = new CoalesceJsonReferenceHandler()
+                    };
+                    result.Formatters.Add(new SystemTextJsonOutputFormatter(newOptions));
+                }
+
+                if (response.StatusCode == (int)HttpStatusCode.OK && 
+                    result.Value is ApiResult apiResult && 
+                    !apiResult.WasSuccessful)
+                {
+                    result.StatusCode =
+                    response.StatusCode =
+                        (int)HttpStatusCode.BadRequest;
+                }
             }
         }
 
-        private static string GetDbContextExceptionMessage(ActionExecutedContext context)
+        private static string GetDbContextMigrationExceptionMessage(ActionExecutedContext context)
         {
             List<string> messages = [];
             try
@@ -168,7 +201,7 @@ namespace IntelliTect.Coalesce.Api.Controllers
 
             if (messages.Count == 0) return "";
 
-            return string.Join(" ", messages) + " This is the likely cause of the following error:";
+            return string.Join(" ", messages) + " This is possibly the cause of the following error:";
         }
 
         public void OnResultExecuting(ResultExecutingContext context)

@@ -1,4 +1,6 @@
-﻿using System;
+﻿using IntelliTect.Coalesce.Models;
+using System;
+using System.Collections.Generic;
 
 #nullable enable
 
@@ -31,6 +33,12 @@ namespace IntelliTect.Coalesce.Tests.Util
         void IParameterDto<T>.MapTo(T obj, IMappingContext context)
         {
             MapTo?.Invoke(obj);
-        } 
+        }
+    }
+
+    internal class TestSparseDto<T> : TestDto<T>, ISparseDto
+        where T : class
+    {
+        public ISet<string> ChangedProperties { get; } = new HashSet<string>();
     }
 }

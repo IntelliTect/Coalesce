@@ -1,4 +1,8 @@
 {
+    "editor.formatOnPaste": false,
+    "editor.formatOnSave": true,
+    "editor.formatOnType": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
     "typescript.tsdk": "node_modules\\typescript\\lib",
     "dotnet.defaultSolution": "Coalesce.Web.Vue3.sln"
 }

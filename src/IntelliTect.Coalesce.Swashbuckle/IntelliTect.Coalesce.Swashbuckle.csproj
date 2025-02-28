@@ -1,9 +1,10 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <Import Project="../Common.props" />
   <PropertyGroup>
+    <TargetFrameworks>net8.0</TargetFrameworks>
     <Description>
       Provides Swashbuckle SwaggerGen filters to enhance definitions of Coalesce APIs in OpenAPI documents.
-      Add using `services.AddSwaggerGen(c => c.AddCoalesce() );`.
+      Add using `services.AddSwaggerGen(c =&gt; c.AddCoalesce() );`.
     </Description>
     <!-- Don't put curly braces in the example in the description above - it will trigger https://github.com/Microsoft/msbuild/issues/1357 -->
 
@@ -21,7 +22,7 @@
       so that it isn't necessary for consumers to install any additional packages,
       which could increase the likelyhood of a version mismatch as projects mature.
     -->
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" />
   </ItemGroup>
 
 </Project>

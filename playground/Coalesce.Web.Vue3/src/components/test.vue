@@ -1,8 +1,16 @@
 <template>
   <v-container grid-list-lg>
     <c-loader-status :loaders="{ 'no-initial-content': [caseVm.$load] }">
-      <c-time-picker></c-time-picker>
-      <v-card class="my-10">
+      <c-select
+        for="Person"
+        v-model="people"
+        multiple
+        density="compact"
+        variant="outlined"
+      >
+      </c-select>
+
+      <v-card class="my-2">
         <v-row>
           <v-col>
             <c-select
@@ -12,6 +20,17 @@
               density="compact"
               class="my-4"
               error-messages="sdfsdf"
+              :params="{ refResponse: true }"
+            >
+            </c-select>
+            <c-select
+              :model="caseVm"
+              for="assignedTo"
+              variant="outlined"
+              density="compact"
+              class="my-4"
+              error-messages="sdfsdf"
+              :params="{ refResponse: true }"
             >
             </c-select>
           </v-col>
@@ -27,11 +46,11 @@
           </v-col>
         </v-row>
       </v-card>
-      <c-input :model=caseVm for=title></c-input>
+      <c-input :model="caseVm" for="title"></c-input>
       <c-select-string-value
         :model="caseVm"
         for="title"
-        method="getCaseTitles" 
+        method="getCaseTitles"
       />
       <v-btn @click="disabled = !disabled">Disable Toggle</v-btn>
       <v-form :disabled="disabled">
@@ -98,31 +117,6 @@
       <br />
       {{ date }}
 
-      <c-select for="Person" v-model="caseVm.assignedTo"> </c-select>
-      <c-select :model="caseVm" for="assignedTo"> </c-select>
-      <c-select :model="caseVm" for="assignedTo" density="compact"> </c-select>
-      <c-select
-        :model="caseVm"
-        for="assignedTo"
-        density="compact"
-        variant="outlined"
-      >
-      </c-select>
-
-      <v-defaults-provider
-        :defaults="{
-          VInput: { density: 'compact' },
-          VField: { variant: 'outlined' },
-        }"
-      >
-        <c-select
-          :model="caseVm"
-          for="assignedTo"
-          label="Outlined via v-defaults-provider"
-        >
-        </c-select>
-      </v-defaults-provider>
-
       <img
         v-if="caseVm.caseKey"
         :src="caseVm.downloadImage.getResultObjectUrl()"
@@ -160,6 +154,7 @@ export default class Test extends Base {
   disabled = false;
   date = new Date(1722558611283);
   caseVm = new CaseViewModel();
+  people = [];
 
   async created() {
     this.personList.$dataSource =
@@ -169,6 +164,7 @@ export default class Test extends Base {
     this.personList.$params.noCount = true;
     this.personList.$load();
 
+    this.caseVm.$params.refResponse = true;
     await this.caseVm.$load(15);
     await this.caseVm.downloadImage();
     await this.company.$load(1);

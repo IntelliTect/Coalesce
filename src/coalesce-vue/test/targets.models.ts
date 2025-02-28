@@ -1,5 +1,10 @@
 import * as metadata from "./targets.metadata";
-import { Model, DataSource, convertToModel, mapToModel } from "../src/model";
+import {
+  type Model,
+  type DataSource,
+  convertToModel,
+  mapToModel,
+} from "../src/model";
 
 export enum Grade {
   Freshman = 9,

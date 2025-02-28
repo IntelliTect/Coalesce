@@ -1,5 +1,5 @@
 import * as $metadata from "./targets.metadata";
-import { ObjectValue, Value, ModelValue } from "../src/metadata";
+import type { ObjectValue, Value, ModelValue } from "../src/metadata";
 import { format } from "date-fns";
 
 const studentProps = $metadata.Student.props;

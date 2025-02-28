@@ -1,13 +1,12 @@
 # External Types
 
-In Coalesce, any type which is connected to your data model but is not directly part of it is considered to be an "external type".
+In Coalesce, any data class exposed by Coalesce that isn't a [CRUD Model](/modeling/model-types/crud.md) is considered to be an "external type".
 
 The collection of external types for a data model looks like this:
     
-1. Take all of the api-served types in your data model. This includes [Entity Models](/modeling/model-types/entities.md) and [Custom DTOs](/modeling/model-types/dtos.md).
-2. Take all of the property types, method parameters, and method return types of these types.
-3. Any of these types which are not built-in scalar types and not one of the aforementioned api-served types are external types.
-4. For any external type discovered, any of the property types which qualify under the above rules are also external types.
+1. Take all of the exposed property types, method parameters, and method return types of your [CRUD Models](/modeling/model-types/crud.md), as well as method parameters and returns from [Services](/modeling/model-types/services.md).
+2. Any of these types which are not built-in scalar types and not one of the aforementioned CRUD models are external types.
+3. For any external type discovered, any of the property types which qualify under the above rules are also external types.
 
 
 ::: warning
@@ -81,4 +80,4 @@ public abstract class PluginResult {
 
 ## Loading & Serialization
 
-External types have slightly different behavior when undergoing serialization to be sent to the client. Unlike database-mapped types which are subject to the rules of [Include Tree](/concepts/include-tree.md), external types ignore the Include Tree when being mapped to DTOs for serialization. Read [External Type Caveats](/concepts/include-tree.md#external-type-caveats) for a more detailed explanation of this exception.
+External types have slightly different behavior when undergoing serialization to be sent to the client. Unlike CRUD Models types which are subject to the rules of [Include Tree](/concepts/include-tree.md), external types ignore the Include Tree when being mapped to DTOs for serialization. Read [External Type Caveats](/concepts/include-tree.md#external-type-caveats) for a more detailed explanation of this exception.

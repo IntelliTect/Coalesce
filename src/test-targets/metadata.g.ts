@@ -1,8 +1,8 @@
-import {
-  Domain, getEnumMeta, solidify, ModelType, ObjectType,
+import { getEnumMeta, solidify } from 'coalesce-vue/lib/metadata'
+import type {
+  Domain, ModelType, ObjectType, HiddenAreas, BehaviorFlags, 
   PrimitiveProperty, ForeignKeyProperty, PrimaryKeyProperty,
-  ModelCollectionNavigationProperty, ModelReferenceNavigationProperty,
-  HiddenAreas, BehaviorFlags
+  ModelCollectionNavigationProperty, ModelReferenceNavigationProperty
 } from 'coalesce-vue/lib/metadata'
 
 
@@ -715,12 +715,14 @@ export const ComplexModel = domain.types.ComplexModel = {
     restrictedString: {
       name: "restrictedString",
       displayName: "Restricted String",
+      description: "This is a multiline string in an attribute.\r\nThis is a second line in the string.",
       type: "string",
       role: "value",
     },
     restrictInit: {
       name: "restrictInit",
       displayName: "Restrict Init",
+      description: "This is a multiline string\n via explicit escaped newline",
       type: "string",
       role: "value",
       createOnly: true,
@@ -1211,6 +1213,26 @@ export const ComplexModel = domain.types.ComplexModel = {
           type: "string",
           role: "value",
         },
+        optionalObject: {
+          name: "optionalObject",
+          displayName: "Optional Object",
+          type: "model",
+          get typeDef() { return (domain.types.Test as ModelType & { name: "Test" }) },
+          role: "value",
+        },
+        optionalObjectCollection: {
+          name: "optionalObjectCollection",
+          displayName: "Optional Object Collection",
+          type: "collection",
+          itemType: {
+            name: "$collectionItem",
+            displayName: "",
+            role: "value",
+            type: "model",
+            get typeDef() { return (domain.types.Test as ModelType & { name: "Test" }) },
+          },
+          role: "value",
+        },
       },
       return: {
         name: "$return",
@@ -1256,6 +1278,38 @@ export const ComplexModel = domain.types.ComplexModel = {
         name: "$return",
         displayName: "Result",
         type: "number",
+        role: "value",
+      },
+    },
+    instanceGetMethodWithObjParam: {
+      name: "instanceGetMethodWithObjParam",
+      displayName: "Instance Get Method With Obj Param",
+      transportType: "item",
+      httpMethod: "GET",
+      params: {
+        id: {
+          name: "id",
+          displayName: "Primary Key",
+          type: "number",
+          role: "value",
+          get source() { return (domain.types.ComplexModel as ModelType & { name: "ComplexModel" }).props.complexModelId },
+          rules: {
+            required: val => val != null || "Primary Key is required.",
+          }
+        },
+        obj: {
+          name: "obj",
+          displayName: "Obj",
+          type: "object",
+          get typeDef() { return (domain.types.ExternalParent as ObjectType & { name: "ExternalParent" }) },
+          role: "value",
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "object",
+        get typeDef() { return (domain.types.ExternalParent as ObjectType & { name: "ExternalParent" }) },
         role: "value",
       },
     },
@@ -1444,6 +1498,186 @@ export const ComplexModel = domain.types.ComplexModel = {
     methodWithMultiFileParameter: {
       name: "methodWithMultiFileParameter",
       displayName: "Method With Multi File Parameter",
+      transportType: "item",
+      httpMethod: "POST",
+      params: {
+        id: {
+          name: "id",
+          displayName: "Primary Key",
+          type: "number",
+          role: "value",
+          get source() { return (domain.types.ComplexModel as ModelType & { name: "ComplexModel" }).props.complexModelId },
+          rules: {
+            required: val => val != null || "Primary Key is required.",
+          }
+        },
+        files: {
+          name: "files",
+          displayName: "Files",
+          type: "collection",
+          itemType: {
+            name: "$collectionItem",
+            displayName: "",
+            role: "value",
+            type: "file",
+          },
+          role: "value",
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "void",
+        role: "value",
+      },
+    },
+    methodWithMultiFileParameterConcrete: {
+      name: "methodWithMultiFileParameterConcrete",
+      displayName: "Method With Multi File Parameter Concrete",
+      transportType: "item",
+      httpMethod: "POST",
+      params: {
+        id: {
+          name: "id",
+          displayName: "Primary Key",
+          type: "number",
+          role: "value",
+          get source() { return (domain.types.ComplexModel as ModelType & { name: "ComplexModel" }).props.complexModelId },
+          rules: {
+            required: val => val != null || "Primary Key is required.",
+          }
+        },
+        files: {
+          name: "files",
+          displayName: "Files",
+          type: "collection",
+          itemType: {
+            name: "$collectionItem",
+            displayName: "",
+            role: "value",
+            type: "file",
+          },
+          role: "value",
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "void",
+        role: "value",
+      },
+    },
+    methodWithMultiFileParameterConcreteParam: {
+      name: "methodWithMultiFileParameterConcreteParam",
+      displayName: "Method With Multi File Parameter Concrete Param",
+      transportType: "item",
+      httpMethod: "POST",
+      params: {
+        id: {
+          name: "id",
+          displayName: "Primary Key",
+          type: "number",
+          role: "value",
+          get source() { return (domain.types.ComplexModel as ModelType & { name: "ComplexModel" }).props.complexModelId },
+          rules: {
+            required: val => val != null || "Primary Key is required.",
+          }
+        },
+        files: {
+          name: "files",
+          displayName: "Files",
+          type: "collection",
+          itemType: {
+            name: "$collectionItem",
+            displayName: "",
+            role: "value",
+            type: "file",
+          },
+          role: "value",
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "void",
+        role: "value",
+      },
+    },
+    methodWithMultiFileParameterList: {
+      name: "methodWithMultiFileParameterList",
+      displayName: "Method With Multi File Parameter List",
+      transportType: "item",
+      httpMethod: "POST",
+      params: {
+        id: {
+          name: "id",
+          displayName: "Primary Key",
+          type: "number",
+          role: "value",
+          get source() { return (domain.types.ComplexModel as ModelType & { name: "ComplexModel" }).props.complexModelId },
+          rules: {
+            required: val => val != null || "Primary Key is required.",
+          }
+        },
+        files: {
+          name: "files",
+          displayName: "Files",
+          type: "collection",
+          itemType: {
+            name: "$collectionItem",
+            displayName: "",
+            role: "value",
+            type: "file",
+          },
+          role: "value",
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "void",
+        role: "value",
+      },
+    },
+    methodWithMultiFileParameterListConcrete: {
+      name: "methodWithMultiFileParameterListConcrete",
+      displayName: "Method With Multi File Parameter List Concrete",
+      transportType: "item",
+      httpMethod: "POST",
+      params: {
+        id: {
+          name: "id",
+          displayName: "Primary Key",
+          type: "number",
+          role: "value",
+          get source() { return (domain.types.ComplexModel as ModelType & { name: "ComplexModel" }).props.complexModelId },
+          rules: {
+            required: val => val != null || "Primary Key is required.",
+          }
+        },
+        files: {
+          name: "files",
+          displayName: "Files",
+          type: "collection",
+          itemType: {
+            name: "$collectionItem",
+            displayName: "",
+            role: "value",
+            type: "file",
+          },
+          role: "value",
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "void",
+        role: "value",
+      },
+    },
+    methodWithMultiFileParameterListConcreteParam: {
+      name: "methodWithMultiFileParameterListConcreteParam",
+      displayName: "Method With Multi File Parameter List Concrete Param",
       transportType: "item",
       httpMethod: "POST",
       params: {
@@ -1858,6 +2092,38 @@ export const ComplexModel = domain.types.ComplexModel = {
         role: "value",
       },
     },
+    sameMethodNameAsMethodOnDifferentType: {
+      name: "sameMethodNameAsMethodOnDifferentType",
+      displayName: "Same Method Name As Method On Different Type",
+      transportType: "item",
+      httpMethod: "POST",
+      params: {
+        id: {
+          name: "id",
+          displayName: "Primary Key",
+          type: "number",
+          role: "value",
+          get source() { return (domain.types.ComplexModel as ModelType & { name: "ComplexModel" }).props.complexModelId },
+          rules: {
+            required: val => val != null || "Primary Key is required.",
+          }
+        },
+        input: {
+          name: "input",
+          displayName: "Input",
+          type: "model",
+          get typeDef() { return (domain.types.CaseDtoStandalone as ModelType & { name: "CaseDtoStandalone" }) },
+          role: "value",
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "model",
+        get typeDef() { return (domain.types.CaseDtoStandalone as ModelType & { name: "CaseDtoStandalone" }) },
+        role: "value",
+      },
+    },
     hasTopLevelParamWithSameNameAsObjectProp: {
       name: "hasTopLevelParamWithSameNameAsObjectProp",
       displayName: "Has Top Level Param With Same Name As Object Prop",
@@ -2057,6 +2323,38 @@ export const ComplexModelDependent = domain.types.ComplexModelDependent = {
     },
   },
   methods: {
+    sameMethodNameAsMethodOnDifferentType: {
+      name: "sameMethodNameAsMethodOnDifferentType",
+      displayName: "Same Method Name As Method On Different Type",
+      transportType: "item",
+      httpMethod: "POST",
+      params: {
+        id: {
+          name: "id",
+          displayName: "Primary Key",
+          type: "number",
+          role: "value",
+          get source() { return (domain.types.ComplexModelDependent as ModelType & { name: "ComplexModelDependent" }).props.id },
+          rules: {
+            required: val => val != null || "Primary Key is required.",
+          }
+        },
+        input: {
+          name: "input",
+          displayName: "Input",
+          type: "model",
+          get typeDef() { return (domain.types.CaseDtoStandalone as ModelType & { name: "CaseDtoStandalone" }) },
+          role: "value",
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "model",
+        get typeDef() { return (domain.types.CaseDtoStandalone as ModelType & { name: "CaseDtoStandalone" }) },
+        role: "value",
+      },
+    },
   },
   dataSources: {
   },
@@ -2086,6 +2384,178 @@ export const EnumPk = domain.types.EnumPk = {
       displayName: "Name",
       type: "string",
       role: "value",
+    },
+  },
+  methods: {
+  },
+  dataSources: {
+  },
+}
+export const OneToOneChild1 = domain.types.OneToOneChild1 = {
+  name: "OneToOneChild1" as const,
+  displayName: "One To One Child1",
+  get displayProp() { return this.props.parentId }, 
+  type: "model",
+  controllerRoute: "OneToOneChild1",
+  get keyProp() { return this.props.parentId }, 
+  behaviorFlags: 7 as BehaviorFlags,
+  props: {
+    parentId: {
+      name: "parentId",
+      displayName: "Parent Id",
+      type: "number",
+      role: "primaryKey",
+      hidden: 3 as HiddenAreas,
+    },
+    parent: {
+      name: "parent",
+      displayName: "Parent",
+      type: "model",
+      get typeDef() { return (domain.types.OneToOneParent as ModelType & { name: "OneToOneParent" }) },
+      role: "referenceNavigation",
+      get foreignKey() { return (domain.types.OneToOneChild1 as ModelType & { name: "OneToOneChild1" }).props.parentId as PrimaryKeyProperty },
+      get principalKey() { return (domain.types.OneToOneParent as ModelType & { name: "OneToOneParent" }).props.id as PrimaryKeyProperty },
+      get inverseNavigation() { return (domain.types.OneToOneParent as ModelType & { name: "OneToOneParent" }).props.child1 as ModelCollectionNavigationProperty },
+      dontSerialize: true,
+    },
+  },
+  methods: {
+  },
+  dataSources: {
+  },
+}
+export const OneToOneChild2 = domain.types.OneToOneChild2 = {
+  name: "OneToOneChild2" as const,
+  displayName: "One To One Child2",
+  get displayProp() { return this.props.parentId }, 
+  type: "model",
+  controllerRoute: "OneToOneChild2",
+  get keyProp() { return this.props.parentId }, 
+  behaviorFlags: 7 as BehaviorFlags,
+  props: {
+    parentId: {
+      name: "parentId",
+      displayName: "Parent Id",
+      type: "number",
+      role: "primaryKey",
+      hidden: 3 as HiddenAreas,
+    },
+    parent: {
+      name: "parent",
+      displayName: "Parent",
+      type: "model",
+      get typeDef() { return (domain.types.OneToOneParent as ModelType & { name: "OneToOneParent" }) },
+      role: "referenceNavigation",
+      get foreignKey() { return (domain.types.OneToOneChild2 as ModelType & { name: "OneToOneChild2" }).props.parentId as PrimaryKeyProperty },
+      get principalKey() { return (domain.types.OneToOneParent as ModelType & { name: "OneToOneParent" }).props.id as PrimaryKeyProperty },
+      get inverseNavigation() { return (domain.types.OneToOneParent as ModelType & { name: "OneToOneParent" }).props.child2 as ModelCollectionNavigationProperty },
+      dontSerialize: true,
+    },
+  },
+  methods: {
+  },
+  dataSources: {
+  },
+}
+export const OneToOneManyChildren = domain.types.OneToOneManyChildren = {
+  name: "OneToOneManyChildren" as const,
+  displayName: "One To One Many Children",
+  get displayProp() { return this.props.id }, 
+  type: "model",
+  controllerRoute: "OneToOneManyChildren",
+  get keyProp() { return this.props.id }, 
+  behaviorFlags: 7 as BehaviorFlags,
+  props: {
+    id: {
+      name: "id",
+      displayName: "Id",
+      type: "number",
+      role: "primaryKey",
+      hidden: 3 as HiddenAreas,
+    },
+    oneToOneParentId: {
+      name: "oneToOneParentId",
+      displayName: "One To One Parent Id",
+      type: "number",
+      role: "foreignKey",
+      get principalKey() { return (domain.types.OneToOneParent as ModelType & { name: "OneToOneParent" }).props.id as PrimaryKeyProperty },
+      get principalType() { return (domain.types.OneToOneParent as ModelType & { name: "OneToOneParent" }) },
+      get navigationProp() { return (domain.types.OneToOneManyChildren as ModelType & { name: "OneToOneManyChildren" }).props.oneToOneParent as ModelReferenceNavigationProperty },
+      hidden: 3 as HiddenAreas,
+      rules: {
+        required: val => val != null || "One To One Parent is required.",
+      }
+    },
+    oneToOneParent: {
+      name: "oneToOneParent",
+      displayName: "One To One Parent",
+      type: "model",
+      get typeDef() { return (domain.types.OneToOneParent as ModelType & { name: "OneToOneParent" }) },
+      role: "referenceNavigation",
+      get foreignKey() { return (domain.types.OneToOneManyChildren as ModelType & { name: "OneToOneManyChildren" }).props.oneToOneParentId as ForeignKeyProperty },
+      get principalKey() { return (domain.types.OneToOneParent as ModelType & { name: "OneToOneParent" }).props.id as PrimaryKeyProperty },
+      get inverseNavigation() { return (domain.types.OneToOneParent as ModelType & { name: "OneToOneParent" }).props.manyChildren as ModelCollectionNavigationProperty },
+      dontSerialize: true,
+    },
+  },
+  methods: {
+  },
+  dataSources: {
+  },
+}
+export const OneToOneParent = domain.types.OneToOneParent = {
+  name: "OneToOneParent" as const,
+  displayName: "One To One Parent",
+  get displayProp() { return this.props.id }, 
+  type: "model",
+  controllerRoute: "OneToOneParent",
+  get keyProp() { return this.props.id }, 
+  behaviorFlags: 7 as BehaviorFlags,
+  props: {
+    id: {
+      name: "id",
+      displayName: "Id",
+      type: "number",
+      role: "primaryKey",
+      hidden: 3 as HiddenAreas,
+    },
+    child1: {
+      name: "child1",
+      displayName: "Child1",
+      type: "model",
+      get typeDef() { return (domain.types.OneToOneChild1 as ModelType & { name: "OneToOneChild1" }) },
+      role: "referenceNavigation",
+      get foreignKey() { return (domain.types.OneToOneParent as ModelType & { name: "OneToOneParent" }).props.id as PrimaryKeyProperty },
+      get principalKey() { return (domain.types.OneToOneChild1 as ModelType & { name: "OneToOneChild1" }).props.parentId as PrimaryKeyProperty },
+      get inverseNavigation() { return (domain.types.OneToOneChild1 as ModelType & { name: "OneToOneChild1" }).props.parent as ModelCollectionNavigationProperty },
+      dontSerialize: true,
+    },
+    child2: {
+      name: "child2",
+      displayName: "Child2",
+      type: "model",
+      get typeDef() { return (domain.types.OneToOneChild2 as ModelType & { name: "OneToOneChild2" }) },
+      role: "referenceNavigation",
+      get foreignKey() { return (domain.types.OneToOneParent as ModelType & { name: "OneToOneParent" }).props.id as PrimaryKeyProperty },
+      get principalKey() { return (domain.types.OneToOneChild2 as ModelType & { name: "OneToOneChild2" }).props.parentId as PrimaryKeyProperty },
+      get inverseNavigation() { return (domain.types.OneToOneChild2 as ModelType & { name: "OneToOneChild2" }).props.parent as ModelCollectionNavigationProperty },
+      dontSerialize: true,
+    },
+    manyChildren: {
+      name: "manyChildren",
+      displayName: "Many Children",
+      type: "collection",
+      itemType: {
+        name: "$collectionItem",
+        displayName: "",
+        role: "value",
+        type: "model",
+        get typeDef() { return (domain.types.OneToOneManyChildren as ModelType & { name: "OneToOneManyChildren" }) },
+      },
+      role: "collectionNavigation",
+      get foreignKey() { return (domain.types.OneToOneManyChildren as ModelType & { name: "OneToOneManyChildren" }).props.oneToOneParentId as ForeignKeyProperty },
+      get inverseNavigation() { return (domain.types.OneToOneManyChildren as ModelType & { name: "OneToOneManyChildren" }).props.oneToOneParent as ModelReferenceNavigationProperty },
+      dontSerialize: true,
     },
   },
   methods: {
@@ -2430,6 +2900,102 @@ export const Person = domain.types.Person = {
         },
       },
     },
+    parameterTestsSource: {
+      type: "dataSource",
+      name: "ParameterTestsSource" as const,
+      displayName: "Parameter Tests Source",
+      props: {
+        personCriterion: {
+          name: "personCriterion",
+          displayName: "Person Criterion",
+          type: "object",
+          get typeDef() { return (domain.types.PersonCriteria as ObjectType & { name: "PersonCriteria" }) },
+          role: "value",
+        },
+        personCriteriaArray: {
+          name: "personCriteriaArray",
+          displayName: "Person Criteria Array",
+          type: "collection",
+          itemType: {
+            name: "$collectionItem",
+            displayName: "",
+            role: "value",
+            type: "object",
+            get typeDef() { return (domain.types.PersonCriteria as ObjectType & { name: "PersonCriteria" }) },
+          },
+          role: "value",
+        },
+        personCriteriaList: {
+          name: "personCriteriaList",
+          displayName: "Person Criteria List",
+          type: "collection",
+          itemType: {
+            name: "$collectionItem",
+            displayName: "",
+            role: "value",
+            type: "object",
+            get typeDef() { return (domain.types.PersonCriteria as ObjectType & { name: "PersonCriteria" }) },
+          },
+          role: "value",
+        },
+        personCriteriaICollection: {
+          name: "personCriteriaICollection",
+          displayName: "Person Criteria I Collection",
+          type: "collection",
+          itemType: {
+            name: "$collectionItem",
+            displayName: "",
+            role: "value",
+            type: "object",
+            get typeDef() { return (domain.types.PersonCriteria as ObjectType & { name: "PersonCriteria" }) },
+          },
+          role: "value",
+        },
+        intArray: {
+          name: "intArray",
+          displayName: "Int Array",
+          type: "collection",
+          itemType: {
+            name: "$collectionItem",
+            displayName: "",
+            role: "value",
+            type: "number",
+          },
+          role: "value",
+        },
+        intList: {
+          name: "intList",
+          displayName: "Int List",
+          type: "collection",
+          itemType: {
+            name: "$collectionItem",
+            displayName: "",
+            role: "value",
+            type: "number",
+          },
+          role: "value",
+        },
+        intICollection: {
+          name: "intICollection",
+          displayName: "Int I Collection",
+          type: "collection",
+          itemType: {
+            name: "$collectionItem",
+            displayName: "",
+            role: "value",
+            type: "number",
+          },
+          role: "value",
+        },
+        bytes: {
+          name: "bytes",
+          displayName: "Bytes",
+          type: "binary",
+          base64: true,
+          role: "value",
+        },
+      },
+    },
     withoutCases: {
       type: "dataSource",
       name: "WithoutCases" as const,
@@ -2459,6 +3025,18 @@ export const Product = domain.types.Product = {
     name: {
       name: "name",
       displayName: "Name",
+      type: "string",
+      role: "value",
+    },
+    uniqueId1: {
+      name: "uniqueId1",
+      displayName: "ID1",
+      type: "string",
+      role: "value",
+    },
+    uniqueId2: {
+      name: "uniqueId2",
+      displayName: "ID2",
       type: "string",
       role: "value",
     },
@@ -3528,6 +4106,65 @@ export const OutputOnlyExternalTypeWithRequiredEntityProp = domain.types.OutputO
     },
   },
 }
+export const PersonCriteria = domain.types.PersonCriteria = {
+  name: "PersonCriteria" as const,
+  displayName: "Person Criteria",
+  get displayProp() { return this.props.name }, 
+  type: "object",
+  props: {
+    personIds: {
+      name: "personIds",
+      displayName: "Person Ids",
+      type: "collection",
+      itemType: {
+        name: "$collectionItem",
+        displayName: "",
+        role: "value",
+        type: "number",
+      },
+      role: "value",
+    },
+    name: {
+      name: "name",
+      displayName: "Name",
+      type: "string",
+      role: "value",
+    },
+    subCriteria: {
+      name: "subCriteria",
+      displayName: "Sub Criteria",
+      type: "collection",
+      itemType: {
+        name: "$collectionItem",
+        displayName: "",
+        role: "value",
+        type: "object",
+        get typeDef() { return (domain.types.PersonCriteria as ObjectType & { name: "PersonCriteria" }) },
+      },
+      role: "value",
+    },
+    gender: {
+      name: "gender",
+      displayName: "Gender",
+      type: "enum",
+      get typeDef() { return Genders },
+      role: "value",
+    },
+    date: {
+      name: "date",
+      displayName: "Date",
+      type: "date",
+      dateKind: "datetime",
+      role: "value",
+    },
+    adminOnly: {
+      name: "adminOnly",
+      displayName: "Admin Only",
+      type: "string",
+      role: "value",
+    },
+  },
+}
 export const PositionalRecord = domain.types.PositionalRecord = {
   name: "PositionalRecord" as const,
   displayName: "Positional Record",
@@ -3716,6 +4353,29 @@ export const WeatherService = domain.services.WeatherService = {
         role: "value",
       },
     },
+    fileUploadDownload: {
+      name: "fileUploadDownload",
+      displayName: "File Upload Download",
+      transportType: "item",
+      httpMethod: "POST",
+      params: {
+        file: {
+          name: "file",
+          displayName: "File",
+          type: "file",
+          role: "value",
+          rules: {
+            required: val => val != null || "File is required.",
+          }
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "file",
+        role: "value",
+      },
+    },
   },
 }
 
@@ -3747,10 +4407,15 @@ interface AppDomain extends Domain {
     InitRecordWithDefaultCtor: typeof InitRecordWithDefaultCtor
     InputOutputOnlyExternalTypeWithRequiredNonscalarProp: typeof InputOutputOnlyExternalTypeWithRequiredNonscalarProp
     Location: typeof Location
+    OneToOneChild1: typeof OneToOneChild1
+    OneToOneChild2: typeof OneToOneChild2
+    OneToOneManyChildren: typeof OneToOneManyChildren
+    OneToOneParent: typeof OneToOneParent
     OutputOnlyExternalTypeWithoutDefaultCtor: typeof OutputOnlyExternalTypeWithoutDefaultCtor
     OutputOnlyExternalTypeWithoutDefaultCtorWithInputMappableProperties: typeof OutputOnlyExternalTypeWithoutDefaultCtorWithInputMappableProperties
     OutputOnlyExternalTypeWithRequiredEntityProp: typeof OutputOnlyExternalTypeWithRequiredEntityProp
     Person: typeof Person
+    PersonCriteria: typeof PersonCriteria
     PositionalRecord: typeof PositionalRecord
     Product: typeof Product
     ReadOnlyEntityUsedAsMethodInput: typeof ReadOnlyEntityUsedAsMethodInput

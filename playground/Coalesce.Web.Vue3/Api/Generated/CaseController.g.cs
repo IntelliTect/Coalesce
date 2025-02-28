@@ -36,28 +36,39 @@ namespace Coalesce.Web.Vue3.Api
         [AllowAnonymous]
         public virtual Task<ItemResult<CaseResponse>> Get(
             int id,
-            DataSourceParameters parameters,
+            [FromQuery] DataSourceParameters parameters,
             IDataSource<Coalesce.Domain.Case> dataSource)
             => GetImplementation(id, parameters, dataSource);
 
         [HttpGet("list")]
         [AllowAnonymous]
         public virtual Task<ListResult<CaseResponse>> List(
-            ListParameters parameters,
+            [FromQuery] ListParameters parameters,
             IDataSource<Coalesce.Domain.Case> dataSource)
             => ListImplementation(parameters, dataSource);
 
         [HttpGet("count")]
         [AllowAnonymous]
         public virtual Task<ItemResult<int>> Count(
-            FilterParameters parameters,
+            [FromQuery] FilterParameters parameters,
             IDataSource<Coalesce.Domain.Case> dataSource)
             => CountImplementation(parameters, dataSource);
 
         [HttpPost("save")]
+        [Consumes("application/x-www-form-urlencoded", "multipart/form-data")]
         [AllowAnonymous]
         public virtual Task<ItemResult<CaseResponse>> Save(
             [FromForm] CaseParameter dto,
+            [FromQuery] DataSourceParameters parameters,
+            IDataSource<Coalesce.Domain.Case> dataSource,
+            IBehaviors<Coalesce.Domain.Case> behaviors)
+            => SaveImplementation(dto, parameters, dataSource, behaviors);
+
+        [HttpPost("save")]
+        [Consumes("application/json")]
+        [AllowAnonymous]
+        public virtual Task<ItemResult<CaseResponse>> SaveFromJson(
+            [FromBody] CaseParameter dto,
             [FromQuery] DataSourceParameters parameters,
             IDataSource<Coalesce.Domain.Case> dataSource,
             IBehaviors<Coalesce.Domain.Case> behaviors)
@@ -88,12 +99,13 @@ namespace Coalesce.Web.Vue3.Api
         /// </summary>
         [HttpPost("GetCaseTitles")]
         [Authorize]
+        [Consumes("application/x-www-form-urlencoded", "multipart/form-data")]
         public virtual ItemResult<System.Collections.Generic.ICollection<string>> GetCaseTitles(
             [FromForm(Name = "search")] string search)
         {
             var _params = new
             {
-                search = search
+                Search = search
             };
 
             if (Context.Options.ValidateAttributesForMethods)
@@ -105,7 +117,38 @@ namespace Coalesce.Web.Vue3.Api
 
             var _methodResult = Coalesce.Domain.Case.GetCaseTitles(
                 Db,
-                _params.search
+                _params.Search
+            );
+            var _result = new ItemResult<System.Collections.Generic.ICollection<string>>();
+            _result.Object = _methodResult?.ToList();
+            return _result;
+        }
+
+        public class GetCaseTitlesParameters
+        {
+            public string Search { get; set; }
+        }
+
+        /// <summary>
+        /// Method: GetCaseTitles
+        /// </summary>
+        [HttpPost("GetCaseTitles")]
+        [Authorize]
+        [Consumes("application/json")]
+        public virtual ItemResult<System.Collections.Generic.ICollection<string>> GetCaseTitles(
+            [FromBody] GetCaseTitlesParameters _params
+        )
+        {
+            if (Context.Options.ValidateAttributesForMethods)
+            {
+                var _validationResult = ItemResult.FromParameterValidation(
+                    GeneratedForClassViewModel!.MethodByName("GetCaseTitles"), _params, HttpContext.RequestServices);
+                if (!_validationResult.WasSuccessful) return new ItemResult<System.Collections.Generic.ICollection<string>>(_validationResult);
+            }
+
+            var _methodResult = Coalesce.Domain.Case.GetCaseTitles(
+                Db,
+                _params.Search
             );
             var _result = new ItemResult<System.Collections.Generic.ICollection<string>>();
             _result.Object = _methodResult?.ToList();
@@ -163,23 +206,25 @@ namespace Coalesce.Web.Vue3.Api
         /// </summary>
         [HttpPost("UploadImage")]
         [Authorize]
+        [Consumes("application/x-www-form-urlencoded", "multipart/form-data")]
         public virtual async Task<ItemResult> UploadImage(
             [FromServices] IDataSourceFactory dataSourceFactory,
             [FromForm(Name = "id")] int id,
             Microsoft.AspNetCore.Http.IFormFile file)
         {
+            var _params = new
+            {
+                Id = id,
+                File = file == null ? null : new IntelliTect.Coalesce.Models.File { Name = file.FileName, ContentType = file.ContentType, Length = file.Length, Content = file.OpenReadStream() }
+            };
+
             var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Case, Coalesce.Domain.Case>("Default");
-            var itemResult = await dataSource.GetItemAsync(id, new DataSourceParameters());
+            var itemResult = await dataSource.GetItemAsync(_params.Id, new DataSourceParameters());
             if (!itemResult.WasSuccessful)
             {
                 return new ItemResult(itemResult);
             }
             var item = itemResult.Object;
-            var _params = new
-            {
-                file = file == null ? null : new IntelliTect.Coalesce.Models.File { Name = file.FileName, ContentType = file.ContentType, Length = file.Length, Content = file.OpenReadStream() }
-            };
-
             if (Context.Options.ValidateAttributesForMethods)
             {
                 var _validationResult = ItemResult.FromParameterValidation(
@@ -189,7 +234,46 @@ namespace Coalesce.Web.Vue3.Api
 
             await item.UploadImage(
                 Db,
-                _params.file
+                _params.File
+            );
+            var _result = new ItemResult();
+            return _result;
+        }
+
+        public class UploadImageParameters
+        {
+            public int Id { get; set; }
+            public IntelliTect.Coalesce.Models.FileParameter File { get; set; }
+        }
+
+        /// <summary>
+        /// Method: UploadImage
+        /// </summary>
+        [HttpPost("UploadImage")]
+        [Authorize]
+        [Consumes("application/json")]
+        public virtual async Task<ItemResult> UploadImage(
+            [FromServices] IDataSourceFactory dataSourceFactory,
+            [FromBody] UploadImageParameters _params
+        )
+        {
+            var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Case, Coalesce.Domain.Case>("Default");
+            var itemResult = await dataSource.GetItemAsync(_params.Id, new DataSourceParameters());
+            if (!itemResult.WasSuccessful)
+            {
+                return new ItemResult(itemResult);
+            }
+            var item = itemResult.Object;
+            if (Context.Options.ValidateAttributesForMethods)
+            {
+                var _validationResult = ItemResult.FromParameterValidation(
+                    GeneratedForClassViewModel!.MethodByName("UploadImage"), _params, HttpContext.RequestServices);
+                if (!_validationResult.WasSuccessful) return _validationResult;
+            }
+
+            await item.UploadImage(
+                Db,
+                _params.File
             );
             var _result = new ItemResult();
             return _result;
@@ -202,11 +286,17 @@ namespace Coalesce.Web.Vue3.Api
         [Authorize]
         public virtual async Task<ActionResult<ItemResult<IntelliTect.Coalesce.Models.IFile>>> DownloadImage(
             [FromServices] IDataSourceFactory dataSourceFactory,
-            int id,
-            byte[] etag)
+            [FromQuery] int id,
+            [FromQuery] byte[] etag)
         {
+            var _params = new
+            {
+                Id = id,
+                Etag = etag
+            };
+
             var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Case, Coalesce.Domain.Case>("Default");
-            var itemResult = await dataSource.GetItemAsync(id, new DataSourceParameters());
+            var itemResult = await dataSource.GetItemAsync(_params.Id, new DataSourceParameters());
             if (!itemResult.WasSuccessful)
             {
                 return new ItemResult<IntelliTect.Coalesce.Models.IFile>(itemResult);
@@ -248,23 +338,25 @@ namespace Coalesce.Web.Vue3.Api
         /// </summary>
         [HttpPost("UploadAndDownload")]
         [Authorize]
+        [Consumes("application/x-www-form-urlencoded", "multipart/form-data")]
         public virtual async Task<ActionResult<ItemResult<IntelliTect.Coalesce.Models.IFile>>> UploadAndDownload(
             [FromServices] IDataSourceFactory dataSourceFactory,
             [FromForm(Name = "id")] int id,
             Microsoft.AspNetCore.Http.IFormFile file)
         {
+            var _params = new
+            {
+                Id = id,
+                File = file == null ? null : new IntelliTect.Coalesce.Models.File { Name = file.FileName, ContentType = file.ContentType, Length = file.Length, Content = file.OpenReadStream() }
+            };
+
             var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Case, Coalesce.Domain.Case>("Default");
-            var itemResult = await dataSource.GetItemAsync(id, new DataSourceParameters());
+            var itemResult = await dataSource.GetItemAsync(_params.Id, new DataSourceParameters());
             if (!itemResult.WasSuccessful)
             {
                 return new ItemResult<IntelliTect.Coalesce.Models.IFile>(itemResult);
             }
             var item = itemResult.Object;
-            var _params = new
-            {
-                file = file == null ? null : new IntelliTect.Coalesce.Models.File { Name = file.FileName, ContentType = file.ContentType, Length = file.Length, Content = file.OpenReadStream() }
-            };
-
             if (Context.Options.ValidateAttributesForMethods)
             {
                 var _validationResult = ItemResult.FromParameterValidation(
@@ -274,7 +366,51 @@ namespace Coalesce.Web.Vue3.Api
 
             var _methodResult = await item.UploadAndDownload(
                 Db,
-                _params.file
+                _params.File
+            );
+            if (_methodResult.Object != null)
+            {
+                return File(_methodResult.Object);
+            }
+            var _result = new ItemResult<IntelliTect.Coalesce.Models.IFile>(_methodResult);
+            _result.Object = _methodResult.Object;
+            return _result;
+        }
+
+        public class UploadAndDownloadParameters
+        {
+            public int Id { get; set; }
+            public IntelliTect.Coalesce.Models.FileParameter File { get; set; }
+        }
+
+        /// <summary>
+        /// Method: UploadAndDownload
+        /// </summary>
+        [HttpPost("UploadAndDownload")]
+        [Authorize]
+        [Consumes("application/json")]
+        public virtual async Task<ActionResult<ItemResult<IntelliTect.Coalesce.Models.IFile>>> UploadAndDownload(
+            [FromServices] IDataSourceFactory dataSourceFactory,
+            [FromBody] UploadAndDownloadParameters _params
+        )
+        {
+            var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Case, Coalesce.Domain.Case>("Default");
+            var itemResult = await dataSource.GetItemAsync(_params.Id, new DataSourceParameters());
+            if (!itemResult.WasSuccessful)
+            {
+                return new ItemResult<IntelliTect.Coalesce.Models.IFile>(itemResult);
+            }
+            var item = itemResult.Object;
+            if (Context.Options.ValidateAttributesForMethods)
+            {
+                var _validationResult = ItemResult.FromParameterValidation(
+                    GeneratedForClassViewModel!.MethodByName("UploadAndDownload"), _params, HttpContext.RequestServices);
+                if (!_validationResult.WasSuccessful) return new ItemResult<IntelliTect.Coalesce.Models.IFile>(_validationResult);
+            }
+
+            var _methodResult = await item.UploadAndDownload(
+                Db,
+                _params.File
             );
             if (_methodResult.Object != null)
             {
@@ -290,23 +426,25 @@ namespace Coalesce.Web.Vue3.Api
         /// </summary>
         [HttpPost("UploadImages")]
         [Authorize]
+        [Consumes("application/x-www-form-urlencoded", "multipart/form-data")]
         public virtual async Task<ItemResult> UploadImages(
             [FromServices] IDataSourceFactory dataSourceFactory,
             [FromForm(Name = "id")] int id,
             System.Collections.Generic.ICollection<Microsoft.AspNetCore.Http.IFormFile> files)
         {
+            var _params = new
+            {
+                Id = id,
+                Files = files == null ? null : files.Select(f => new IntelliTect.Coalesce.Models.File { Name = f.FileName, ContentType = f.ContentType, Length = f.Length, Content = f.OpenReadStream() }).ToList()
+            };
+
             var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Case, Coalesce.Domain.Case>("Default");
-            var itemResult = await dataSource.GetItemAsync(id, new DataSourceParameters());
+            var itemResult = await dataSource.GetItemAsync(_params.Id, new DataSourceParameters());
             if (!itemResult.WasSuccessful)
             {
                 return new ItemResult(itemResult);
             }
             var item = itemResult.Object;
-            var _params = new
-            {
-                files = files == null ? null : files.Select(f => (IntelliTect.Coalesce.Models.IFile)new IntelliTect.Coalesce.Models.File { Name = f.FileName, ContentType = f.ContentType, Length = f.Length, Content = f.OpenReadStream() }).ToList()
-            };
-
             if (Context.Options.ValidateAttributesForMethods)
             {
                 var _validationResult = ItemResult.FromParameterValidation(
@@ -316,7 +454,46 @@ namespace Coalesce.Web.Vue3.Api
 
             await item.UploadImages(
                 Db,
-                _params.files.ToList()
+                _params.Files.Cast<IntelliTect.Coalesce.Models.IFile>().ToList()
+            );
+            var _result = new ItemResult();
+            return _result;
+        }
+
+        public class UploadImagesParameters
+        {
+            public int Id { get; set; }
+            public ICollection<IntelliTect.Coalesce.Models.FileParameter> Files { get; set; }
+        }
+
+        /// <summary>
+        /// Method: UploadImages
+        /// </summary>
+        [HttpPost("UploadImages")]
+        [Authorize]
+        [Consumes("application/json")]
+        public virtual async Task<ItemResult> UploadImages(
+            [FromServices] IDataSourceFactory dataSourceFactory,
+            [FromBody] UploadImagesParameters _params
+        )
+        {
+            var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Case, Coalesce.Domain.Case>("Default");
+            var itemResult = await dataSource.GetItemAsync(_params.Id, new DataSourceParameters());
+            if (!itemResult.WasSuccessful)
+            {
+                return new ItemResult(itemResult);
+            }
+            var item = itemResult.Object;
+            if (Context.Options.ValidateAttributesForMethods)
+            {
+                var _validationResult = ItemResult.FromParameterValidation(
+                    GeneratedForClassViewModel!.MethodByName("UploadImages"), _params, HttpContext.RequestServices);
+                if (!_validationResult.WasSuccessful) return _validationResult;
+            }
+
+            await item.UploadImages(
+                Db,
+                _params.Files.Cast<IntelliTect.Coalesce.Models.IFile>().ToList()
             );
             var _result = new ItemResult();
             return _result;
@@ -327,23 +504,25 @@ namespace Coalesce.Web.Vue3.Api
         /// </summary>
         [HttpPost("UploadByteArray")]
         [Authorize]
+        [Consumes("application/x-www-form-urlencoded", "multipart/form-data")]
         public virtual async Task<ItemResult> UploadByteArray(
             [FromServices] IDataSourceFactory dataSourceFactory,
             [FromForm(Name = "id")] int id,
             [FromForm(Name = "file")] byte[] file)
         {
+            var _params = new
+            {
+                Id = id,
+                File = file ?? await ((await Request.ReadFormAsync()).Files[nameof(file)]?.OpenReadStream().ReadAllBytesAsync(true) ?? Task.FromResult<byte[]>(null))
+            };
+
             var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Case, Coalesce.Domain.Case>("Default");
-            var itemResult = await dataSource.GetItemAsync(id, new DataSourceParameters());
+            var itemResult = await dataSource.GetItemAsync(_params.Id, new DataSourceParameters());
             if (!itemResult.WasSuccessful)
             {
                 return new ItemResult(itemResult);
             }
             var item = itemResult.Object;
-            var _params = new
-            {
-                file = file ?? await ((await Request.ReadFormAsync()).Files[nameof(file)]?.OpenReadStream().ReadAllBytesAsync(true) ?? Task.FromResult<byte[]>(null))
-            };
-
             if (Context.Options.ValidateAttributesForMethods)
             {
                 var _validationResult = ItemResult.FromParameterValidation(
@@ -353,7 +532,46 @@ namespace Coalesce.Web.Vue3.Api
 
             item.UploadByteArray(
                 Db,
-                _params.file
+                _params.File
+            );
+            var _result = new ItemResult();
+            return _result;
+        }
+
+        public class UploadByteArrayParameters
+        {
+            public int Id { get; set; }
+            public byte[] File { get; set; }
+        }
+
+        /// <summary>
+        /// Method: UploadByteArray
+        /// </summary>
+        [HttpPost("UploadByteArray")]
+        [Authorize]
+        [Consumes("application/json")]
+        public virtual async Task<ItemResult> UploadByteArray(
+            [FromServices] IDataSourceFactory dataSourceFactory,
+            [FromBody] UploadByteArrayParameters _params
+        )
+        {
+            var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Case, Coalesce.Domain.Case>("Default");
+            var itemResult = await dataSource.GetItemAsync(_params.Id, new DataSourceParameters());
+            if (!itemResult.WasSuccessful)
+            {
+                return new ItemResult(itemResult);
+            }
+            var item = itemResult.Object;
+            if (Context.Options.ValidateAttributesForMethods)
+            {
+                var _validationResult = ItemResult.FromParameterValidation(
+                    GeneratedForClassViewModel!.MethodByName("UploadByteArray"), _params, HttpContext.RequestServices);
+                if (!_validationResult.WasSuccessful) return _validationResult;
+            }
+
+            item.UploadByteArray(
+                Db,
+                _params.File
             );
             var _result = new ItemResult();
             return _result;

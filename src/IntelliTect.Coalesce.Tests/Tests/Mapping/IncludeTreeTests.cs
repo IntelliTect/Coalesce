@@ -72,6 +72,33 @@ namespace IntelliTect.Coalesce.Tests.Mapping
             AssertBasicChecks(tree);
         }
 
+        [Fact]
+        public void IncludeTree_StaticFor()
+        {
+            var tree = IncludeTree.For<Person>(q => q
+                .Include(p => p.Company)
+                .Include(p => p.CasesAssigned).ThenInclude(c => c.CaseProducts).ThenInclude(c => c.Case.AssignedTo)
+                .Include(p => p.CasesAssigned).ThenInclude(c => c.CaseProducts).ThenInclude(c => c.Case.ReportedBy)
+                .IncludedSeparately(e => e.CasesReported).ThenIncluded(c => c.ReportedBy.Company)
+                .IncludedSeparately(e => e.CasesReported).ThenIncluded(c => c.ReportedBy.CasesAssigned)
+            );
+
+            AssertBasicChecks(tree);
+        }
+
+        [Fact]
+        public void IncludeTree_StaticQueryFor()
+        {
+            var tree = IncludeTree.QueryFor<Person>()
+                .Include(p => p.Company)
+                .Include(p => p.CasesAssigned).ThenInclude(c => c.CaseProducts).ThenInclude(c => c.Case.AssignedTo)
+                .Include(p => p.CasesAssigned).ThenInclude(c => c.CaseProducts).ThenInclude(c => c.Case.ReportedBy)
+                .IncludedSeparately(e => e.CasesReported).ThenIncluded(c => c.ReportedBy.Company)
+                .IncludedSeparately(e => e.CasesReported).ThenIncluded(c => c.ReportedBy.CasesAssigned)
+                .GetIncludeTree();
+
+            AssertBasicChecks(tree);
+        }
 
         [Fact]
         public void IncludeTree_BasicStringChecks()
@@ -200,6 +227,25 @@ namespace IntelliTect.Coalesce.Tests.Mapping
             Assert.True(tree["OpenedBy"] is { Count: 0 });
             Assert.True(tree["OpenerAllOpenedCases"] is { Count: 1 });
             Assert.True(tree["OpenerAllOpenedCases"]["CaseProducts"] is { Count: 0 });
+        }
+
+        [Fact]
+        public void IncludeTree_ProjectedQuery_ProjectedIncludedProp_DoesNotUsePriorIncludes()
+        {
+            // See comments on https://github.com/IntelliTect/Coalesce/issues/478#issuecomment-2555963059
+            // for why we don't want to respect .Includes that happen before a projection
+            var queryable = db.Cases
+                .Include(c => c.ReportedBy.Company)
+                .Select(c => new StandaloneProjected
+                {
+                    Id = c.CaseKey,
+                    OpenedBy = c.ReportedBy,
+                })
+                ;
+
+            IncludeTree tree = queryable.GetIncludeTree();
+            Assert.True(tree is { Count: 1 });
+            Assert.True(tree["OpenedBy"] is { Count: 0 });
         }
 
 

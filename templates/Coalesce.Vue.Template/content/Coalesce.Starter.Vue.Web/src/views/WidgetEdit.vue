@@ -1,5 +1,5 @@
 <template>
-  <v-container style="max-width: 900px">
+  <v-container max-width="1000px">
     <v-card>
       <v-card-title class="d-flex">
         Coalesce Example
@@ -28,12 +28,12 @@
           </c-loader-status>
 
           <v-alert
-            type="error"
             v-if="
               (item.$save.message || item.$load.message)?.match(
                 /invalid object name/i,
               )
             "
+            type="error"
           >
             The error above indicates that you have not yet created an Entity
             Framework Migration. You can add one by running

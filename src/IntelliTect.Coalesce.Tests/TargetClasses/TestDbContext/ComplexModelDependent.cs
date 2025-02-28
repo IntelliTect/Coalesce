@@ -8,5 +8,8 @@
         public int ParentId { get; set; }
 
         public string Name { get; set; }
+
+        [Coalesce]
+        public CaseDtoStandalone SameMethodNameAsMethodOnDifferentType(CaseDtoStandalone input) => input;
     }
 }

@@ -20,7 +20,13 @@ import { FunctionalComponent, ref } from "vue";
 import { VForm } from "vuetify/components";
 import { CSelect } from "..";
 
-import { Company, ComplexModel, EnumPkId, Test } from "@test-targets/models.g";
+import {
+  Case,
+  Company,
+  ComplexModel,
+  EnumPkId,
+  Test,
+} from "@test-targets/models.g";
 import {
   CaseViewModel,
   ComplexModelViewModel,
@@ -83,8 +89,10 @@ describe("CSelect", () => {
     const genericModel: Model = model;
 
     function receivesTestModel(model: Test | null) {}
+    function receivesTestModels(model: Test[] | null) {}
     function receivesComplexModel(model: ComplexModel | null) {}
     function receivesNumber(model: number | null) {}
+    function receivesNumbers(model: number[] | null) {}
 
     // Binding to FK or ref nav on a ViewModel:
     () => <CSelect model={complexVm} for="singleTest" />;
@@ -100,6 +108,11 @@ describe("CSelect", () => {
     // @ts-expect-error wrong event handler type.
     () => <CSelect model={complexVm} for="singleTestId" onUpdate:modelValue={receivesTestModel} />;
 
+    () => <CSelect model={complexVm} for="singleTest" create={{
+      getLabel(search: string, items: Test[]) { return items.length == 0 ? search : false },
+      async getItem(search: string, label: string) { return new Test({ testName: label }) }
+    }}/>;
+
     () => <CSelect model={complexVm} for={complexVm.$metadata.props.singleTest} />;
 
     // Against models that might be null
@@ -110,14 +123,69 @@ describe("CSelect", () => {
     () => <CSelect model={model} for="singleTestId" />;
     //@ts-expect-error wrong type of property
     () => <CSelect model={model} for="name" />;
+    //@ts-expect-error Cannot bind to many-to-many
+    () => <CSelect model={new Case} for="caseProducts" />;
     //@ts-expect-error wrong type of property
     () => <CSelect model={complexVm} for={complexVm.$metadata.props.name} />;
 
     // Untyped bindings:
     () => <CSelect model={genericModel} for={anyString} />;
     () => <CSelect model={model as any} for={anyString} />;
+    
+    //@ts-expect-error invalid `model` type
+    () => <CSelect model={123} for="num" />;
+    //@ts-expect-error invalid `for` type
+    () => <CSelect model={complexVm} for={123} />;
 
+
+
+    // ********
+    // Multiple
+    // ********
+    () => (<CSelect for="Test" multiple modelValue={[testVm]}
+      onUpdate:modelValue={receivesTestModels}
+      onUpdate:objectValue={receivesTestModels}
+      onUpdate:keyValue={receivesNumbers}
+      create={{
+        getLabel(search: string, items: Test[]) { return items.length == 0 ? search : false },
+        async getItem(search: string, label: string) { return new Test({ testName: label }) }
+      }}
+    />);
+    
+    // Explicit `multiple` for object collection
+    () => (<CSelect model={complexVm.methodWithManyParams} for="modelCollection" multiple modelValue={[testVm]} onUpdate:modelValue={receivesTestModels} />);
+    // Implicit `multiple` for object collection
+    () => (<CSelect model={complexVm.methodWithManyParams} for="modelCollection" modelValue={[testVm]} onUpdate:modelValue={receivesTestModels} />);
+    
+    //@ts-expect-error Explicit `multiple` for object non-collection is disallowed
+    () => (<CSelect model={complexVm.methodWithManyParams} for="model" multiple modelValue={[testVm]} onUpdate:modelValue={receivesTestModels} />);
+    //@ts-expect-error Explicit `multiple` for object non-collection is disallowed
+    () => (<CSelect model={complexVm.methodWithManyParams} for="model" multiple modelValue={testVm} onUpdate:modelValue={receivesTestModel} />);
+    //@ts-expect-error Arrays passed to non-multiple binding
+    () => (<CSelect model={complexVm.methodWithManyParams} for="model" modelValue={[testVm]} onUpdate:modelValue={receivesTestModels} />);
+    
+    //@ts-expect-error arrays passed to non-multiple
+    () => (<CSelect for="Test" modelValue={[testVm]} onUpdate:modelValue={receivesTestModels} />);
+    
+    //@ts-expect-error arrays required for multiple
+    () => (<CSelect for="Test" multiple modelValue={testVm}  />);
+    //@ts-expect-error arrays required for multiple
+    () => (<CSelect for="Test" multiple onUpdate:modelValue={receivesTestModel}  />);
+    //@ts-expect-error arrays required for multiple
+    () => (<CSelect for="Test" multiple objectValue={testVm} />);
+    //@ts-expect-error arrays required for multiple
+    () => (<CSelect for="Test" multiple onUpdate:objectValue={receivesTestModel} />);
+    //@ts-expect-error arrays required for multiple
+    () => (<CSelect for="Test" multiple keyValue={2} />);
+    //@ts-expect-error arrays required for multiple
+    () => (<CSelect for="Test" multiple onUpdate:keyValue={receivesNumber}  />);
+    
+
+
+    // ********
     // Binding with for + v-model
+    // ********
+    () => (<CSelect for={testVm.$metadata} modelValue={testVm} onUpdate:modelValue={receivesTestModel} />);
     () => (<CSelect for="Test" modelValue={testVm} onUpdate:modelValue={receivesTestModel} />);
     () => (<CSelect for="Test" modelValue={testVm} onUpdate:objectValue={receivesTestModel} />);
     () => (<CSelect for="Test" modelValue={testVm} onUpdate:keyValue={receivesNumber} />);
@@ -141,7 +209,9 @@ describe("CSelect", () => {
     () => (<CSelect for="EnumPk" keyValue={EnumPkId.Value10} onUpdate:keyValue={receivesComplexModel} />);
 
 
+    // ********
     // Prop types that are only weakly known, missing ability to resolve types
+    // ********
     const weakModelProp: ModelReferenceNavigationProperty = complexVm.$metadata.props.singleTest;
     () => (<CSelect for={weakModelProp} modelValue={testVm} onUpdate:modelValue={receivesTestModel} />);
     () => (<CSelect for={weakModelProp} keyValue={42} onUpdate:keyValue={receivesNumber} />);
@@ -156,6 +226,9 @@ describe("CSelect", () => {
     () => (<CSelect model={genericModel} for="singleTest" keyValue={42} onUpdate:keyValue={receivesNumber} />);
 
 
+    // ********
+    // Passing concrete metadata objects
+    // ********
     () => (<CSelect for={complexVm.$metadata.props.singleTest} modelValue={testVm} onUpdate:modelValue={receivesTestModel} />);
     // @ts-expect-error wrong modelValue and event types
     () => (<CSelect for={complexVm.$metadata.props.singleTest} modelValue={42} onUpdate:modelValue={receivesNumber} />);
@@ -189,17 +262,22 @@ describe("CSelect", () => {
     // This has to be valid when we don't have a known type for the caller
     () => (<CSelect model={complexVm.methodWithManyParams as AnyArgCaller} for="specificString" />);
 
-    //@ts-expect-error invalid model type
-    () => <CSelect model={123} for="num" />;
-    //@ts-expect-error invalid for type
-    () => <CSelect model={complexVm} for={123} />;
 
-
-
+    // ********
     // Rules
+    // ********
     () => <CSelect model={complexVm} for="singleTest" rules={[v => v === 7 || 'Must be 7']} />;
     //@ts-expect-error invalid rule func (`v` is number, equality to string is invalid).
     () => <CSelect model={complexVm} for="singleTest" rules={[v => v === "foo" || 'Must be 7']} />;
+    
+    // ********
+    // Vuetify props
+    // ********
+    () => <CSelect for="Test" variant="outlined" />;
+    //@ts-expect-error
+    () => <CSelect for="Test" variant="bad-variant" />;
+
+    () => <CSelect for="Test"  />;
   });
 
   test.each([
@@ -286,6 +364,31 @@ describe("CSelect", () => {
         //@ts-expect-error We're asserting this prop doesn't have a required rule,
         // but our types are so good that this even gets caught by typescript.
         model.$metadata.props.referenceNavigationId.rules?.required
+      ).toBeFalsy();
+
+      expect(wrapper.find(".v-field__clearable").exists()).toBeTruthy();
+    });
+
+    test("optional method param", async () => {
+      mockEndpoint("/Test/list", () => ({
+        wasSuccessful: true,
+        list: [],
+      }));
+
+      const model = new ComplexModelViewModel();
+      const wrapper = mountApp(() => (
+        <CSelect
+          model={model.methodWithOptionalParams}
+          for="optionalObject"
+        ></CSelect>
+      ));
+
+      const methodMeta = model.$metadata.methods.methodWithOptionalParams;
+
+      expect(
+        // @ts-expect-error We're asserting this prop doesn't have a required rule,
+        // but our types are so good that this even gets caught by typescript.
+        methodMeta.params.optionalObject.rules?.required
       ).toBeFalsy();
 
       expect(wrapper.find(".v-field__clearable").exists()).toBeTruthy();
@@ -591,6 +694,8 @@ describe("CSelect", () => {
       await mainInput.trigger("keydown.esc");
       expect(wrapper.vm.menuOpen).toBeFalsy();
 
+      await delay(400);
+
       // Open it again
       await mainInput.trigger("keydown.space");
       expect(wrapper.vm.menuOpen).toBeTruthy();
@@ -600,7 +705,7 @@ describe("CSelect", () => {
       // Pick it
       await menuInput.trigger("keydown.enter");
 
-      expect(menuWrapper.find(".v-list-item--active").text()).toBe("bar 202");
+      expect(menuWrapper.find(".pending-selection").text()).toBe("bar 202");
       expect(model.singleTestId).toBe(202); // second result in the list
       expect(wrapper.vm.menuOpen).toBeFalsy();
 

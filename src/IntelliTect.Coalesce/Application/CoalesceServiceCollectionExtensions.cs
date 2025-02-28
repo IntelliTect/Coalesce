@@ -15,6 +15,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+#if NET9_0_OR_GREATER
+using IntelliTect.Coalesce.Api.OpenApi;
+using Microsoft.AspNetCore.OpenApi;
+#endif
 
 namespace IntelliTect.Coalesce
 {
@@ -77,6 +81,16 @@ namespace IntelliTect.Coalesce
             // Workaround for https://github.com/dotnet/aspnetcore/issues/43815
             services.TryAddEnumerable(
                 ServiceDescriptor.Transient<IApiDescriptionProvider, FromFormNameFixingApiDescriptionProvider>());
+
+            // Make adjustments to the API explorer so that it doesn't cause .NET 9's OpenAPI generation to implode.
+            services.TryAddEnumerable(
+                ServiceDescriptor.Transient<IApiDescriptionProvider, IntelliTect.Coalesce.Api.CoalesceApiDescriptionProvider>());
+#if NET9_0_OR_GREATER
+            services.ConfigureAll<OpenApiOptions>(x =>
+            {
+                x.AddOperationTransformer<CoalesceApiOperationFilter>();
+            });
+#endif
 
             return services;
         }

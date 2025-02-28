@@ -34,15 +34,8 @@
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
 
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'net6.0' ">
-    <DotNetPackageVersionSpec>6.0.*</DotNetPackageVersionSpec>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'net8.0' ">
-    <DotNetPackageVersionSpec>8.0.6</DotNetPackageVersionSpec>
-  </PropertyGroup>
-
   <ItemGroup>
-    <SourceRoot Include="$(MSBuildThisFileDirectory)/../"/>
+    <SourceRoot Include="$(MSBuildThisFileDirectory)/../" />
   </ItemGroup>
 
   <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
@@ -56,11 +49,11 @@
   </PropertyGroup>
 
   <ItemGroup Condition="$(IsPackable) == 'true'">
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All"/>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="All" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Roslynator.Analyzers" Version="4.2.0">
+    <PackageReference Include="Roslynator.Analyzers">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>analyzers</IncludeAssets>
     </PackageReference>

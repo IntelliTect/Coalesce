@@ -29,6 +29,13 @@ import type {
   NumberValue,
   StringValue,
   ModelCollectionNavigationProperty,
+  ModelReferenceNavigationProperty,
+  ForeignKeyProperty,
+  ModelCollectionValue,
+  CollectionProperty,
+  TypeDiscriminatorToType,
+  EnumType,
+  ObjectType,
 } from "./metadata.js";
 import { resolvePropMeta } from "./metadata.js";
 import {
@@ -41,14 +48,45 @@ import {
 } from "./util.js";
 
 /** Populated by generated code in order to perform lookups of actual model types
- * using metadata names as inputs to the lookup.
+ * using metadata names as inputs to the lookup. `MetadataToModelType` is recommended for lookups.
  */
 export interface ModelTypeLookup {}
 
 /** Populated by generated code in order to perform lookups of actual enum types
- * using metadata names as inputs to the lookup.
+ * using metadata names as inputs to the lookup. `MetadataToModelType` is recommended for lookups.
  */
 export interface EnumTypeLookup {}
+
+// prettier-ignore
+/**
+ * Maps value or type metadata to its corresponding concrete model type implementation.
+ */
+export type MetadataToModelType<TValue extends Value | ObjectType | ModelType | EnumType> =
+  TValue extends ModelType | ObjectType
+  ? TValue["name"] extends keyof ModelTypeLookup
+    ? ModelTypeLookup[TValue["name"]]
+    : any
+
+: TValue extends EnumType
+  ? TValue["name"] extends keyof EnumTypeLookup
+    ? EnumTypeLookup[TValue["name"]]
+    : any
+
+: TValue extends CollectionValue
+  ? Array<MetadataToModelType<TValue["itemType"]>>
+
+: TValue extends ModelValue | EnumValue
+  ? MetadataToModelType<TValue["typeDef"]>
+
+: TypeDiscriminatorToType<TValue["type"]>;
+
+/** Maps value metadata to its corresponding concrete model type implementation.
+ * Foreign key values are mapped to the type of their referenced principal entity.
+ */
+export type ValueOrFkToModelType<TValue extends Value> =
+  TValue extends ForeignKeyProperty
+    ? MetadataToModelType<TValue["principalType"]>
+    : MetadataToModelType<TValue>;
 
 /**
  * Represents a model with metadata information.
@@ -150,6 +188,7 @@ export function parseValue(
 ): null | Uint8Array | string;
 export function parseValue(value: any, meta: ModelValue): null | object;
 export function parseValue(value: any, meta: ObjectValue): null | object;
+export function parseValue(value: any, meta: ClassType): null | object;
 export function parseValue(
   value: any,
   meta: PrimitiveValue
@@ -158,7 +197,7 @@ export function parseValue(value: any, meta: UnknownValue): null | unknown;
 export function parseValue(value: any[], meta: CollectionValue): Array<any>;
 export function parseValue(
   value: any,
-  meta: Value
+  meta: Value | ClassType
 ): null | string | number | boolean | object | Date | Array<any> | unknown {
   if (value == null) {
     return null;
@@ -202,6 +241,22 @@ export function parseValue(
       throw parseError(value, meta);
 
     case "collection":
+      if (type === "string") {
+        if (value[0] === "[") {
+          return JSON.parse(value).map((v: any) =>
+            parseValue(v, meta.itemType)
+          );
+        } else if (
+          meta.itemType.type != "model" &&
+          meta.itemType.type != "object"
+        ) {
+          return value
+            .split(",")
+            .filter((v: any) => v)
+            .map((v: any) => parseValue(v, meta.itemType));
+        }
+      }
+
       if (type !== "object" || !Array.isArray(value))
         throw parseError(value, meta);
 
@@ -209,6 +264,14 @@ export function parseValue(
 
     case "model":
     case "object":
+    case "dataSource":
+      if (type === "string") {
+        if (value.length == 0) return {};
+        if (value[0] === "{") {
+          return JSON.parse(value);
+        }
+      }
+
       if (type !== "object" || Array.isArray(value))
         throw parseError(value, meta);
 
@@ -250,6 +313,7 @@ export function parseValue(
 
 class ModelConversionVisitor extends Visitor<any, any[] | null, any | null> {
   private objects = new Map<object, object>();
+  private refs = new Map<object, object>();
 
   public override visitValue(value: any, meta: Value): any {
     // Models shouldn't contain undefined - only nulls where a value isn't present.
@@ -269,12 +333,26 @@ class ModelConversionVisitor extends Visitor<any, any[] | null, any | null> {
   ): null | Model<TMeta> {
     if (value == null) return null;
 
-    if (typeof value !== "object" || Array.isArray(value))
-      throw parseError(value, meta);
+    value = parseValue(value, meta);
 
     // Prevent infinite recursion on circular object graphs.
     if (this.objects.has(value))
       return this.objects.get(value)! as Model<TMeta>;
+
+    if ("$ref" in value) {
+      const target = this.refs.get(value.$ref);
+      if (!target) {
+        console.warn(`Unresolved $ref ${value.$ref} in object`);
+      }
+      value = target;
+    }
+
+    if ("$id" in value) {
+      this.refs.set(value.$id, value);
+      if (this.mode == "convert") {
+        delete value.$id;
+      }
+    }
 
     const props = meta.props;
 
@@ -1059,6 +1137,15 @@ export function bindToQueryString<T, TKey extends keyof T & string>(
         );
       }
 
+      function toString(v: any) {
+        if (typeof v === "object" && v && !(v instanceof Date)) {
+          return JSON.stringify(v, (key, value) => {
+            if (value == null) return undefined;
+            return value;
+          });
+        }
+        return v?.toString();
+      }
       const newQuery = {
         ...//@ts-expect-error
         (vue.$router[coalescePendingQuery] || vue.$route.query),
@@ -1069,11 +1156,11 @@ export function bindToQueryString<T, TKey extends keyof T & string>(
             ? stringify(v)
             : // Use metadata to format the value if the obj has any.
             metadata?.params?.[key]
-            ? mapToDto(v, metadata.params[key])?.toString()
+            ? toString(mapToDto(v, metadata.params[key]))
             : metadata?.props?.[key]
-            ? mapToDto(v, metadata.props[key])?.toString()
+            ? toString(mapToDto(v, metadata.props[key]))
             : // TODO: Add $metadata to DataSourceParameters/FilterParameters/ListParameters, and then support that as well.
-              // Fallback to .tostring()
+              // Fallback to .toString()
               String(v) ?? undefined,
       };
 

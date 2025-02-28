@@ -1,7 +1,10 @@
-﻿using IntelliTect.Coalesce.CodeGeneration.Generation;
+﻿using IntelliTect.Coalesce.CodeGeneration.Api.Generators;
+using IntelliTect.Coalesce.CodeGeneration.Generation;
 using IntelliTect.Coalesce.Tests.Util;
+using IntelliTect.Coalesce.TypeDefinition;
 using IntelliTect.Coalesce.Validation;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.Emit;
 using Microsoft.CodeAnalysis.Text;
 using System;
 using System.Collections.Generic;
@@ -12,8 +15,6 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using System.Text;
-using System.Text.Json;
-using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -21,6 +22,43 @@ namespace IntelliTect.Coalesce.CodeGeneration.Tests
 {
     public class CodeGenTestBase
     {
+        public static Lazy<Assembly> WebAssembly { get; } = new(GetWebAssembly);
+
+        private static Assembly GetWebAssembly()
+        {
+            var suite = new GenerationExecutor(
+                    new() { WebProject = new() { RootNamespace = "MyProject" } },
+                    Microsoft.Extensions.Logging.LogLevel.Information
+                )
+                .CreateRootGenerator<ApiOnlySuite>()
+                .WithModel(ReflectionRepositoryFactory.Symbol)
+                .WithOutputPath(".");
+
+            var compilation = GetCSharpCompilation(suite).Result;
+
+            using var ms = new MemoryStream();
+            EmitResult emitResult = compilation.Emit(ms);
+            Assert.True(emitResult.Success);
+            var assembly = Assembly.Load(ms.ToArray());
+            ReflectionRepository.Global.AddAssembly(assembly);
+            return assembly;
+        }
+
+        public class ApiOnlySuite : CompositeGenerator<ReflectionRepository>, IRootGenerator
+        {
+            public ApiOnlySuite(CompositeGeneratorServices services) : base(services) { }
+
+            public override IEnumerable<IGenerator> GetGenerators()
+            {
+                yield return Generator<IntelliTect.Coalesce.CodeGeneration.Api.Generators.Models>()
+                    .WithModel(Model)
+                    .AppendOutputPath("Models");
+
+                yield return Generator<Controllers>()
+                    .WithModel(Model);
+            }
+        }
+
         protected GenerationExecutor BuildExecutor()
         {
             return new GenerationExecutor(

@@ -1,9 +1,14 @@
 
 # Standalone Entities
 
-In Coalesce, Standalone Entities are types that behave like [entity types](./entities.md) (they can support the full suite of generated CRUD API endpoints), but are not required to be based on Entity Framework. These types are discovered by Coalesce by annotating them with `[Coalesce, StandaloneEntity]`.
+<!-- MARKER:summary -->
+Standalone Entities are CRUD model types that support all the standard features of [CRUD Models](/modeling/model-types/crud.md), but are not required to be based on Entity Framework. Instead, you the developer must define a data source that produces instances of the model. This **can** be an Entity Framework query, but could also be any other mechanism that you can imagine and write in C#.
+<!-- MARKER:summary-end -->
 
-For these types, you must define at least one custom [Data Source](/modeling/model-components/data-sources.md), and optionally a [Behaviors](/modeling/model-components/behaviors.md) class as well. If no behaviors are defined, the type is implicitly read-only, equivalent to turning off create/edit/delete via the [Security Attributes](/modeling/model-components/attributes/security-attribute.md).
+To define a Standalone Entity:
+1. Make a class and annotate it with `[Coalesce, StandaloneEntity]`.
+2. Define a default [Data Source](/modeling/model-components/data-sources.md) for the type, usually inheriting from `StandardDataSource<T>`
+3. Optionally, define a [Behaviors](/modeling/model-components/behaviors.md) class as well to give the model create/edit/delete capabilities. If no behaviors are defined, the model is read-only.
 
 
 ## Read-only with EF backing store
@@ -25,10 +30,11 @@ public class PageListing
 
     public string Author { get; set; }
 
-    public class DefaultSource(CrudContext<AppDbContext> context) : StandardDataSource<PageListing>(context)
+    public class DefaultSource(CrudContext<AppDbContext> context) 
+        : StandardDataSource<PageListing>(context)
     {
         public override Task<IQueryable<PageListing>> GetQueryAsync(IDataSourceParameters parameters)
-          => context.DbContext.Pages
+        => context.DbContext.Pages
             .Where(p => p.IsPublished)
             .Select(p => new PageListing 
             {

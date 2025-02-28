@@ -1,107 +1,76 @@
-﻿@page "/sign-in"
+﻿@page
 @using Microsoft.AspNetCore.Authentication
 @model Coalesce.Starter.Vue.Web.Pages.SignInModel
 @inject IAuthenticationSchemeProvider schemeProvider
 
 @{
     var externalLogins = (await schemeProvider.GetAllSchemesAsync()).Where(s => s.DisplayName != null);
+
+    ViewData["Title"] = "Sign In";
 }
 
-<html>
+@*#if TenantMemberInvites *@
+@if (Model.ReturnUrl?.StartsWith("/invitation", StringComparison.OrdinalIgnoreCase) == true)
+{
+    <div class="alert alert-primary limit-width" role="alert">
+        You have been invited to join an organization! Sign in or create an account to continue.
+    </div>
+}
+@*#endif *@
+@*#if LocalAuth *@
+<form method="post" class="d-grid gap-2 mt-3">
+    <input type="hidden" name="@nameof(Model.ReturnUrl)" value="@Model.ReturnUrl" />
 
-<head>
-    <title>Sign In</title>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <div>
+        <label asp-for="Username" class="form-label" autocomplete="username"></label>
+        <input asp-for="Username" class="form-control" autofocus required />
+    </div>
+    <div>
+        <label asp-for="Password" class="form-label" autocomplete="current-password"></label>
+        <input asp-for="Password" class="form-control" required />
+    </div>
 
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <div asp-validation-summary="All" class="text-danger" style="margin-bottom: -0.5rem"></div>
 
-    <style>
-        :root {
-            line-height: 1.5;
-            font-weight: 400;
-            background: #28292f;
-        }
+    <button type="submit" class="btn btn-primary rounded-pill">Sign in</button>
 
-        .card {
-            background: #f9f9f9;
-            color: #1F1F1F;
-            padding: 1.5em;
-            margin: auto;
-            text-align: center;
-            margin-top: 20vh;
-            border-radius: 8px;
-            box-shadow: 0px 0px 20px 13px #00000066;
-        }
+    <div class="d-flex gap-2 mt-2 justify-content-center">
+        <a asp-page="Register" asp-route-ReturnUrl="@Model.ReturnUrl">Sign up</a>
+        •
+        <a asp-page="ForgotPassword">Forgot Password</a>
+    </div>
+</form>
+@if (externalLogins.Any())
+{
+    <hr class="my-4" />
+}
+@*#endif *@
+@if (externalLogins.Any())
+{
+    <form method="post" asp-page="ExternalLogin">
+        <input type="hidden" asp-for="ReturnUrl" />
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-            margin: 0;
-            display: flex;
-            place-items: center;
-            min-width: 320px;
-            min-height: 70vh;
-        }
-
-        form {
-            margin: 0;
-        }
-
-        button {
-            font-family: inherit;
-            font-size: 1em;
-            display: flex;
-            align-items: center;
-            margin-top: 1em;
-            border-radius: 80px;
-            padding: 10px 12px;
-            padding-right: 16px;
-            font-weight: 500;
-            background-color: #fff;
-            color: #1F1F1F;
-            border: 1px solid #747775;
-            line-height: 1;
-            width: 100%;
-            cursor: pointer;
-            transition: all 0.2s ease
-        }
-
-            button img {
-                margin-right: 10px;
-                height: 20px
-            }
-
-            button:hover {
-                background-color: #eee;
-            }
-
-            button:focus,
-            button:focus-visible {
-                outline: 4px auto -webkit-focus-ring-color;
-            }
-    </style>
-</head>
-
-<body>
-    <div class="card">
-        <div style="display: flex; font-size: 1.8em; align-items: center; justify-content: center; margin-bottom: 1em">
-            @* <img src="/favicon.svg" style="height: 1.3em; padding-right: 0.2em" /> *@
-            Sign In
-        </div>
-
-        <form method="post" class="form-horizontal">
-            @Html.AntiForgeryToken()
-            <input type="hidden" name="@nameof(Model.ReturnUrl)" value="@Model.ReturnUrl" />
+        <div class="d-grid gap-3">
             @foreach (var provider in externalLogins)
             {
-                <button type="submit" name="provider" value="@provider.Name" title="Log in with @provider.DisplayName">
+                <button type="submit" name="provider" value="@provider.Name" title="Log in with @provider.DisplayName"
+                    class="btn btn-outline-dark rounded-pill">
                     <img src="/@provider.Name-logo.svg" />
                     Sign in with @provider.DisplayName
                 </button>
             }
-        </form>
+        </div>
+    </form>
+}
+@*#if (!LocalAuth) *@
+@if (!externalLogins.Any())
+{
+    <div class="alert alert-primary text-center" role="alert">
+        No external login providers have been configured, and local accounts were not added from the project template.
+        <br>
+        You will need to <a href="https://learn.microsoft.com/en-us/aspnet/core/security/authentication/social">
+            setup some other login provider
+        </a>.
     </div>
-</body>
-
-</html>
+}
+@*#endif *@

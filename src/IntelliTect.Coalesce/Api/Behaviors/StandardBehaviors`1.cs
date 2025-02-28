@@ -3,11 +3,16 @@ using IntelliTect.Coalesce.Helpers;
 using IntelliTect.Coalesce.Mapping;
 using IntelliTect.Coalesce.Models;
 using IntelliTect.Coalesce.TypeDefinition;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Data.Common;
+using System.Linq;
 using System.Reflection;
 using System.Security.Claims;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce
@@ -293,7 +298,16 @@ namespace IntelliTect.Coalesce
                 return new ItemResult<TDtoOut?>(beforeSave);
             }
 
-            await ExecuteSaveAsync(kind, originalItem, item);
+            try
+            {
+                await ExecuteSaveAsync(kind, originalItem, item);
+            }
+            catch (Exception ex)
+            {
+                var exResult = GetExceptionResult(ex, incomingDto);
+                if (exResult is not null) return new ItemResult<TDtoOut?>(exResult);
+                throw;
+            }
 
             // Pull the object to get any changes.
             ItemResult<T> newItem = await FetchObjectAfterSaveAsync(dataSource, parameters, item);
@@ -402,8 +416,16 @@ namespace IntelliTect.Coalesce
             // Perform the delete operation against the database.
             // By default, this removes the item from its DbSet<> and calls SaveChanges().
             // This might be overridden to set a deleted flag on the object instead.
-            await ExecuteDeleteAsync(item);
-
+            try
+            {
+                await ExecuteDeleteAsync(item);
+            }
+            catch (Exception ex)
+            {
+                var exResult = GetExceptionResult(ex, null);
+                if (exResult is not null) return new ItemResult<TDto?>(exResult);
+                throw;
+            }
 
 
             // Pull the object to see if it can still be seen by the user.
@@ -501,5 +523,192 @@ namespace IntelliTect.Coalesce
         public virtual void AfterDelete(ref T item, ref IncludeTree? includeTree) { }
 
         #endregion
+
+        /// <summary>
+        /// Attempt to transform a database exception into a user-friendly error message.
+        /// Requires <see cref="CoalesceOptions.DetailedEfConstraintExceptionMessages"/> to be enabled.
+        /// </summary>
+        /// <param name="ex">The database exception that was thrown by EF</param>
+        /// <param name="incomingDto">The incoming dto that the current operation is consuming, if any. Used to distinguish errors that were triggered by the user's input, as opposed to errors triggered by custom code in the behaviors implementation.</param>
+        public virtual ItemResult? GetExceptionResult(Exception ex, IParameterDto<T>? incomingDto)
+        {
+            if (!Context.Options.DetailedEfConstraintExceptionMessages) return null;
+
+            if (ex is not DbUpdateException dbUpdateException)
+            {
+                return null;
+            }
+
+            IModel? model = dbUpdateException.Entries.FirstOrDefault()?.Metadata.Model;
+
+            if (dbUpdateException.InnerException is not DbException dbException || model is null)
+            {
+                return null;
+            }
+
+            // The INSERT statement conflicted with the FOREIGN KEY constraint "FK_CaseProduct_Product_ProductId". The conflict occurred in database "CoalesceDb", table "dbo.Product", column 'ProductId'.
+            // The UPDATE statement conflicted with the FOREIGN KEY constraint "FK_CaseProduct_Product_ProductId". The conflict occurred in database "CoalesceDb", table "dbo.Product", column 'ProductId'.
+            // The DELETE statement conflicted with the REFERENCE constraint "FK_CaseProduct_Product_ProductId". The conflict occurred in database "CoalesceDb", table "dbo.CaseProduct", column 'ProductId'.
+            Match match = Regex.Match(
+                dbException.Message,
+                @"(?<kind>INSERT|UPDATE|DELETE) statement conflicted with the (?:FOREIGN KEY|REFERENCE) constraint ""(?<constraint>[^""]+)""\. The conflict occurred in database ""[^""]+"", table ""(?<table>[^""]+)"", column '(?<column>[^']+)'");
+
+            if (match.Success)
+            {
+                string kind = match.Groups["kind"].Value;
+                string constraint = match.Groups["constraint"].Value;
+                string table = match.Groups["table"].Value;
+                string column = match.Groups["column"].Value;
+
+                var conflictedTable = model
+                    .GetEntityTypes()
+                    .Where(t =>
+                        t.GetSchemaQualifiedTableName() == table ||
+                        (t.GetSchema() is null && table.EndsWith('.' + t.GetTableName()))
+                    )
+                    .FirstOrDefault();
+
+                if (conflictedTable is null) return null;
+
+                if (kind is "DELETE")
+                {
+                    if (
+                        // This operation isn't deleting this single entity, so it might have been some other entity being deleted that triggered the violation.
+                        dbUpdateException.Entries.Any(entry => entry.State == EntityState.Deleted && entry.Metadata.ClrType != typeof(T) && !entry.Metadata.IsOwned())
+                    )
+                    {
+                        return null;
+                    }
+
+                    var dependent = Context.ReflectionRepository.GetClassViewModel(conflictedTable.ClrType);
+                    var referencedBy = dependent?.Type.IsInternalUse != false
+                        ? "other item" // Hide the type's name if it's internal or unknown
+                        : dependent.DisplayName;
+
+                    return $"The {this.ClassViewModel.DisplayName} is still referenced by at least one {referencedBy}.";
+                }
+
+                var fk = conflictedTable.GetReferencingForeignKeys().Where(f => f.GetConstraintName() == constraint).FirstOrDefault();
+                var dependentEntity = fk?.DeclaringEntityType;
+                var referenceNav = fk?.DependentToPrincipal;
+
+                if (
+                    referenceNav is not null &&
+                    dependentEntity is not null &&
+                    dependentEntity.ClrType == typeof(T) &&
+                    Context.ReflectionRepository.GetClassViewModel(dependentEntity.ClrType) is ClassViewModel dependentCvm &&
+                    dependentCvm.PropertyByName(referenceNav.Name) is PropertyViewModel referenceNavPvm
+                )
+                {
+                    // Find the FK prop that was changed. This will filter out an internal part of an FK like TenantId.
+                    var changedFkProp = incomingDto is ISparseDto sparse
+                        ? fk!.Properties.FirstOrDefault(p => sparse.ChangedProperties.Contains(p.Name))
+                        : fk!.Properties.FirstOrDefault(p => dependentCvm.PropertyByName(p.Name)?.SecurityInfo.Read.IsAllowed(User) == true);
+
+                    // Check that the user was actually changing this prop
+                    // (rather than the backend manually setting it in the behaviors).
+                    // This will also enforce that the prop is at least writable under *some*
+                    // circumstances and isn't read-only or internal through Coalesce.
+                    if (changedFkProp is not null)
+                    {
+                        var message = $"The value of {referenceNavPvm.DisplayName} is not valid.";
+                        return new(false, message, [new ValidationIssue(changedFkProp.Name, message)]);
+                    }
+                }
+            }
+
+            // Cannot insert duplicate key row in object 'dbo.Product' with unique index 'IX_Product_ProductUniqueId'. The duplicate key value is (acab7c64-5cbd-472f-8f06-e442c037eda9)
+            // Cannot insert duplicate key row in object 'dbo.Table_1' with unique index 'IX_Unique_Foo_Bar'. The duplicate key value is (as,df, gh,jk).
+            match = Regex.Match(
+                dbException.Message,
+                @"Cannot insert duplicate key row in object '(?<table>[^""]+)' with unique index '(?<constraint>[^""]+)'. The duplicate key value is \((?<keyValue>[^']+)\)");
+
+            if (match.Success)
+            {
+                string constraint = match.Groups["constraint"].Value;
+                string tableName = match.Groups["table"].Value;
+                string keyValue = match.Groups["keyValue"].Value;
+
+                var table = model
+                    .GetEntityTypes()
+                    .FirstOrDefault(t =>
+                        t.GetSchemaQualifiedTableName() == tableName ||
+                        (t.GetSchema() is null && tableName.EndsWith('.' + t.GetTableName()))
+                    );
+
+                var index = table?.GetIndexes().Where(f => f.GetDatabaseName() == constraint).FirstOrDefault();
+
+                if (
+                    index is not null &&
+                    table is not null &&
+                    table.ClrType == typeof(T) &&
+                    Context.ReflectionRepository.GetClassViewModel(table.ClrType) is ClassViewModel dependentCvm
+                )
+                {
+                    // The value may be contained in "keyValue" pulled from the database error,
+                    // but SQL Server doesn't quote strings in the error message, so we don't really
+                    // know how to find the right value since there could be commas in the middle of strings.
+                    // So, find the affected entity ourselves by reconstructing the error message:
+                    var entity = dbUpdateException.Entries
+                        // Find the entity described by the error message
+                        .FirstOrDefault(entry =>
+                            entry.Metadata.Equals(table) &&
+                            keyValue == string.Join(", ", index.Properties.Select(p => entry.CurrentValues[p]))
+                        );
+
+                    if (entity is null)
+                    {
+                        return null;
+                    }
+
+                    // Reconstruct the violated unique values using only the values that the user is allowed to read.
+                    // This will eliminate internal parts of the constraint like a TenantId.
+
+                    var mappingContext = new MappingContext(Context);
+                    var propViewModels = index.Properties
+                        .Select(p => dependentCvm.PropertyByName(p.Name)!)
+                        .ToList();
+
+                    // Check that the user was actually changing one of the props in the index
+                    // (rather than the backend manually setting it in the behaviors).
+                    // This will also enforce that the prop is at least writable under *some*
+                    // circumstances and isn't read-only or internal through Coalesce.
+                    if (incomingDto is ISparseDto sparse && !propViewModels.Any(p => sparse.ChangedProperties.Contains(p.Name)))
+                    {
+                        return null;
+                    }
+
+                    var propsWithSecurity = propViewModels.ConvertAll(p => new
+                    {
+                        Prop = p,
+                        UserCanRead = p.SecurityInfo.IsReadAllowed(mappingContext, entity.Entity),
+                    });
+
+                    // Only make this a user-friendly error if the user is allowed to read all parts of the index,
+                    // or if the unreadable parts of the index are internal use (which allows a TenantId to be excluded
+                    // while still presenting the rest of the props to the user).
+                    if (!propsWithSecurity.All(p => p.UserCanRead || p.Prop.IsInternalUse)) return null;
+
+                    var valuesDisplay = propsWithSecurity
+                        .Where(p => p.UserCanRead)
+                        .Select(p =>
+                        {
+                            var value = entity.CurrentValues[p.Prop.Name];
+                            if (!p.Prop.Type.IsNumber)
+                            {
+                                // Quote non-numbers so its clear what part of the message is the actual value
+                                value = $"'{value}'";
+                            }
+
+                            return $"{p.Prop.DisplayName} {value}";
+                        });
+
+                    var message = $"A different item with {string.Join(" and ", valuesDisplay)} already exists.";
+                    return new(false, message, propViewModels.Select(p => new ValidationIssue(p.Name, message)));
+                }
+            }
+
+            return null;
+        }
     }
 }

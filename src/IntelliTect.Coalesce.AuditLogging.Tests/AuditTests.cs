@@ -1,3 +1,4 @@
+using IntelliTect.Coalesce.DataAnnotations;
 using IntelliTect.Coalesce.Utilities;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -221,7 +222,7 @@ public class AuditTests
         await db.SaveChangesAsync();
 
         var log = db.AuditLogs.Include(l => l.Properties).Single(e => e.Type == nameof(AppUser));
-        var typeChangeProp = Assert.Single(log.Properties!.Where(p => p.PropertyName == nameof(AppUser.Parent1Id)));
+        var typeChangeProp = Assert.Single(log.Properties!, p => p.PropertyName == nameof(AppUser.Parent1Id));
 
         Assert.Equal(expected, typeChangeProp.NewValueDescription);
     }
@@ -280,7 +281,7 @@ public class AuditTests
         AuditLogProperty GetAuditLogProp()
         {
             var log = db.AuditLogs.Include(l => l.Properties).Single(e => e.Type == nameof(AppUser));
-            return Assert.Single(log.Properties!.Where(p => p.PropertyName == nameof(AppUser.Parent1Id)));
+            return Assert.Single(log.Properties!, p => p.PropertyName == nameof(AppUser.Parent1Id));
         }
     }
 
@@ -316,7 +317,7 @@ public class AuditTests
         AuditLogProperty GetAuditLogProp()
         {
             var log = db.AuditLogs.Include(l => l.Properties).Single(e => e.Type == nameof(AppUser));
-            return Assert.Single(log.Properties!.Where(p => p.PropertyName == nameof(AppUser.Parent1Id)));
+            return Assert.Single(log.Properties!, p => p.PropertyName == nameof(AppUser.Parent1Id));
         }
     }
 
@@ -374,7 +375,7 @@ public class AuditTests
         AuditLogProperty GetAuditLogProp()
         {
             var log = db.AuditLogs.Include(l => l.Properties).Single(e => e.Type == nameof(AppUser));
-            return Assert.Single(log.Properties!.Where(p => p.PropertyName == nameof(AppUser.Parent2Id)));
+            return Assert.Single(log.Properties!, p => p.PropertyName == nameof(AppUser.Parent2Id));
         }
     }
 
@@ -404,6 +405,41 @@ public class AuditTests
         // This ensures we don't waste database calls loading principal entities for no reason.
         Assert.Empty(db.ParentWithMappedListTexts.Local);
         Assert.Null(user.Parent1);
+    }
+
+    [Fact]
+    public async Task PropertyDesc_DoesntBreakForOneToOneWhenPkIsFk()
+    {
+        // Arrange
+        using var db = BuildDbContext(b => b
+            .UseCoalesceAuditLogging<TestAuditLog>(x => x
+                .WithAugmentation<TestOperationContext>()
+            ));
+
+        // Act
+        var entity = new OneToOneParent { Name = "bob" };
+        db.Add(entity);
+        await db.SaveChangesAsync();
+
+
+        // Assert
+        var log = Assert.Single(db.AuditLogs.Include(l => l.Properties));
+    }
+
+    [Fact]
+    public void FormatsPrimitiveCollections()
+    {
+        using var db = BuildDbContext(b => b
+            .UseCoalesceAuditLogging<TestAuditLog>(x => x
+                .WithAugmentation<TestOperationContext>()
+            ));
+
+        db.Add(new AppUser { Name = "Bob", EnumArray = [SecurityPermissionLevels.DenyAll, SecurityPermissionLevels.AllowAuthenticated] });
+        db.SaveChanges();
+
+        var log = Assert.Single(db.AuditLogs);
+        var prop = Assert.Single(log.Properties!, p => p.PropertyName == nameof(AppUser.EnumArray));
+        Assert.Equal("[DenyAll, AllowAuthenticated]", prop.NewValue);
     }
 
     private WebApplicationBuilder CreateAppBuilder()

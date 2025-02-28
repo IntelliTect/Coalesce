@@ -59,6 +59,7 @@ dotnet new install IntelliTect.Coalesce.Vue.Template
 dotnet new coalescevue -n {{effectiveNamespace}} -o {{effectiveFolder}} {{templateParams}}
 cd {{effectiveFolder}}/*.Web
 npm ci
+npm run lint:fix
 dotnet restore
 dotnet coalesce
 ```

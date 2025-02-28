@@ -7,9 +7,9 @@
     <template #actions>
       <v-btn
         size="x-large"
-        @click="$router.back()"
         variant="outlined"
         color="primary"
+        @click="$router.back()"
       >
         <v-icon start>fa fa-arrow-left</v-icon> Back
       </v-btn>
@@ -50,7 +50,7 @@ const props = defineProps<{ permissions?: Permission[] }>();
 
 const logOutUrl = computed(
   () =>
-    "/Home/SignOut?ReturnUrl=" +
+    "/SignOut?ReturnUrl=" +
     encodeURIComponent(
       window.location.href.replace(window.location.origin, ""),
     ),

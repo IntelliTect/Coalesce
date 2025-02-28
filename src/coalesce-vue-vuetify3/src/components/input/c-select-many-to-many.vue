@@ -1,46 +1,114 @@
 <template>
-  <v-autocomplete
+  <c-select
     class="c-select-many-to-many"
-    :modelValue="internalValue"
-    @update:modelValue="onInput"
+    v-bind="inputBindAttrs"
+    :for="farItemModelType"
     multiple
-    chips
-    small-chips
-    :closable-chips="canDelete"
+    :modelValue="farItems"
+    @selectionChanged="selectionChanged"
+    :clearable="
+      !canDelete ? false : clearable === undefined ? false : clearable
+    "
+    :can-deselect="canDelete"
     :loading="isLoading"
     :error-messages="error"
-    :items="listItems"
-    v-model:search="search"
-    :item-title="itemText"
-    :item-value="itemValue"
-    :return-object="true"
-    :disabled="isDisabled"
-    no-filter
-    v-bind="inputBindAttrs"
+    :itemTitle="itemText"
+    :disabled="disabled || forceDisabled"
   >
-  </v-autocomplete>
+    <template v-for="(_, slot) of ($slots as {})" v-slot:[slot]="scope">
+      <slot :name="slot" v-bind="(scope as any)" />
+    </template>
+  </c-select>
 </template>
 
-<script lang="ts" setup generic="TModel extends Model">
+<script lang="ts">
+import CSelect from "./c-select.vue";
+import { ComponentSlots } from "../../util";
+
+type _FarItemType<
+  TModel extends Model,
+  TFor extends ForSpec<
+    TModel,
+    ModelCollectionNavigationProperty & { manyToMany: {} }
+  >
+> = TFor extends PropNames<TModel["$metadata"]>
+  ? TModel["$metadata"]["props"][TFor] extends
+      | ModelCollectionNavigationProperty & { manyToMany: {} }
+    ? MetadataToModelType<
+        TModel["$metadata"]["props"][TFor]["manyToMany"]["typeDef"]
+      >
+    : any
+  : Model<ModelType>;
+
+type _MiddleItemType<
+  TModel extends Model,
+  TFor extends ForSpec<
+    TModel,
+    ModelCollectionNavigationProperty & { manyToMany: {} }
+  >
+> = TFor extends PropNames<TModel["$metadata"]>
+  ? TModel["$metadata"]["props"][TFor] extends
+      | ModelCollectionNavigationProperty & { manyToMany: {} }
+    ? MetadataToModelType<TModel["$metadata"]["props"][TFor]["itemType"]>
+    : any
+  : Model<ModelType>;
+
+type _InheritedSlots<
+  TModel extends Model,
+  TFor extends ForSpec<
+    TModel,
+    ModelCollectionNavigationProperty & { manyToMany: {} }
+  >
+> = ComponentSlots<
+  typeof CSelect<
+    undefined,
+    _FarItemType<TModel, TFor>["$metadata"]["name"],
+    true
+  >
+>;
+
+// This extra mapped type prevents vue-tsc from getting confused
+// and failing to emit any types at all. When it encountered the mapped type,
+// it doesn't know how to handle it and so leaves it un-transformed.
+type InheritedSlots<
+  TModel extends Model,
+  TFor extends ForSpec<
+    TModel,
+    ModelCollectionNavigationProperty & { manyToMany: {} }
+  >
+> = {
+  [Property in keyof _InheritedSlots<TModel, TFor>]?: _InheritedSlots<
+    TModel,
+    TFor
+  >[Property];
+};
+</script>
+
+<script
+  lang="ts"
+  setup
+  generic="
+  TModel extends Model, 
+  TFor extends ForSpec<TModel, (ModelCollectionNavigationProperty & { manyToMany: {} })>"
+>
 import { ForSpec, useMetadataProps } from "../c-metadata-component";
 import {
-  ListParameters,
   Model,
   ModelType,
   convertToModel,
-  ModelApiClient,
-  mapParamsToDto,
   modelDisplay,
   ViewModel,
   ViewModelFactory,
-  BehaviorFlags,
   ApiState,
-  Indexable,
   ModelCollectionNavigationProperty,
-  ResponseCachingConfiguration,
+  BehaviorFlags,
+  PropNames,
+  MetadataToModelType,
 } from "coalesce-vue";
 
-import { computed, ref, watch } from "vue";
+import { computed, ref } from "vue";
+
+type Indexable<T> = { [k: string | symbol]: any | undefined } & T;
 
 defineOptions({
   name: "c-select-many-to-many",
@@ -51,37 +119,46 @@ defineOptions({
   inheritAttrs: false,
 });
 
-const modelValue = defineModel<Model[] | null>();
-const props = defineProps<{
-  /** An object owning the value to be edited that is specified by the `for` prop. */
-  model: TModel;
+type FarItemType = _FarItemType<TModel, TFor>;
+type MiddleItemType = _MiddleItemType<TModel, TFor>;
+type MiddleItemViewModel = MiddleItemType & ViewModel;
 
-  /** A metadata specifier for the value being bound. One of:
-   * * A string with the name of the value belonging to `model`. E.g. `"caseProducts"`.
-   * * A direct reference to the metadata object. E.g. `model.$metadata.props.caseProducts`.
-   * * A string in dot-notation that starts with a type name. E.g. `"Case.caseProducts"`.
-   */
-  for: ForSpec<TModel, ModelCollectionNavigationProperty & { manyToMany: {} }>;
+defineSlots<InheritedSlots<TModel, TFor>>();
 
-  params?: ListParameters;
+const modelValue = defineModel<MiddleItemType[] | null>();
+const props = withDefaults(
+  defineProps<{
+    /** An object owning the value to be edited that is specified by the `for` prop. */
+    model: TModel;
 
-  /** Response caching configuration for the `/get` and `/list` API calls made by the component.
-   * See https://intellitect.github.io/Coalesce/stacks/vue/layers/api-clients.html#response-caching. */
-  cache?: ResponseCachingConfiguration | boolean;
+    /** A metadata specifier for the value being bound. One of:
+     * * A string with the name of the value belonging to `model`. E.g. `"caseProducts"`.
+     * * A direct reference to the metadata object. E.g. `model.$metadata.props.caseProducts`.
+     * * A string in dot-notation that starts with a type name. E.g. `"Case.caseProducts"`.
+     */
+    for: TFor;
 
-  itemTitle?: (item: any) => string;
-}>();
+    itemTitle?: (item: MiddleItemType) => string;
+
+    clearable?: boolean;
+    disabled?: boolean;
+  }>(),
+  {
+    clearable: undefined,
+  }
+);
 
 const emit = defineEmits<{
-  (e: "deleting", vm: ViewModel): void;
-  (e: "deleted", vm: ViewModel): void;
-  (e: "adding", vm: ViewModel): void;
-  (e: "added", vm: ViewModel): void;
+  deleting: [vm: MiddleItemViewModel];
+  deleted: [vm: MiddleItemViewModel];
+  adding: [vm: MiddleItemViewModel];
+  added: [vm: MiddleItemViewModel];
 }>();
+
+const fakeItemMarker = Symbol();
 
 const { inputBindAttrs, valueMeta } = useMetadataProps(props);
 
-const search = ref<string>();
 const currentLoaders = ref([] as ApiState<any, any>[]);
 
 const modelPkValue = computed(() => {
@@ -89,7 +166,7 @@ const modelPkValue = computed(() => {
   return model ? (model as any)[model.$metadata.keyProp.name] : null;
 });
 
-const isDisabled = computed(() => {
+const forceDisabled = computed(() => {
   if (props.model instanceof ViewModel && props.model.$isAutoSaveEnabled) {
     // If autosave is enabled (and therefore we're going to be calling
     // APIs on the viewmodel automatically, we can only do so if we're able
@@ -109,78 +186,19 @@ const isDisabled = computed(() => {
   }
 });
 
-const items = computed(() => {
-  const items = listCaller.result || [];
+function mapFarItemToMiddleItem(farItem: Indexable<FarItemType>) {
   const manyToMany = manyToManyMeta.value;
-
   const model = props.model as Model<ModelType>;
-
-  // Map the items into fake instances of the join entity.
-  return items.map((i) =>
-    convertToModel(
-      {
-        [manyToMany.farForeignKey.name]: (i as any)[
-          foreignItemKeyPropName.value!
-        ],
-        [manyToMany.farNavigationProp.name]: i,
-        [manyToMany.nearForeignKey.name]: modelPkValue.value,
-        [manyToMany.nearNavigationProp.name]: model,
-      },
-      collectionMeta.value.itemType.typeDef
-    )
-  );
-});
-
-const listItems = computed(() => {
-  const added = new Set();
-  const ret = [];
-
-  // Make a lookup of all the candidate items
-  // so we can use this to determine if a selected item
-  // matches the search criteria that the server is using.
-  const candidateItems = new Map<any, any>();
-  for (const item of items.value) {
-    const key = itemValue(item);
-    candidateItems.set(key, item);
-  }
-
-  for (const item of internalValue.value) {
-    // Put the selected values first
-    const key = itemValue(item);
-    added.add(key);
-
-    // If we're not searching, put all the selected items at the start of the list.
-    // If we are searching, add the selected item if the server returned it as a candidate for the current search query,
-    // or if it matches locally by name (to avoid weird/unexpected behavior if server search criteria is weird).
-    if (
-      !search.value ||
-      candidateItems.has(key) ||
-      itemText(item)?.toLowerCase().includes(search.value.toLowerCase())
-    ) {
-      ret.push(item);
-    }
-  }
-
-  for (const item of items.value) {
-    // Add in all the non-selected values after the selected values,
-    // excluding any items previously listed.
-    // Vuetify2 would deduplicate for us; Vuetify3 does not.
-    const key = itemValue(item);
-    if (added.has(key)) continue;
-    added.add(key);
-    ret.push(item);
-  }
-
-  return ret;
-});
-
-const listParams = computed((): Partial<ListParameters> => {
-  return {
-    pageSize: 100,
-    ...props.params,
-    search: search.value || undefined,
-  };
-});
+  return convertToModel(
+    {
+      [manyToMany.farForeignKey.name]: farItem[farItemKeyPropName.value!],
+      [manyToMany.farNavigationProp.name]: farItem,
+      [manyToMany.nearForeignKey.name]: modelPkValue.value,
+      [manyToMany.nearNavigationProp.name]: model,
+    },
+    collectionMeta.value.itemType.typeDef
+  ) as MiddleItemType;
+}
 
 const isLoading = computed((): boolean => {
   return currentLoaders.value.some((l) => l.isLoading);
@@ -223,19 +241,36 @@ const manyToManyMeta = computed(() => {
   );
 });
 
-const internalValue = computed((): any[] => {
+const internalValue = computed((): Indexable<MiddleItemType>[] => {
   if (props.model && collectionMeta.value) {
     return (props.model as any)[collectionMeta.value.name] || [];
   }
-  return modelValue.value || [];
+  return (modelValue.value as MiddleItemType[]) || [];
 });
 
-const foreignItemModelType = computed((): ModelType => {
+const farItems = computed((): FarItemType[] => {
+  return internalValue.value.map((x) => {
+    let ret = farItemOf(x);
+    if (!ret) {
+      ret = convertToModel(
+        {
+          [farItemKeyPropName.value]:
+            x[manyToManyMeta.value.farForeignKey.name],
+        },
+        farItemModelType.value
+      ) as FarItemType;
+      (ret as any)[fakeItemMarker] = true;
+    }
+    return ret;
+  });
+});
+
+const farItemModelType = computed((): ModelType => {
   return manyToManyMeta.value.typeDef;
 });
 
-const foreignItemKeyPropName = computed((): string => {
-  return foreignItemModelType.value.keyProp.name;
+const farItemKeyPropName = computed((): string => {
+  return farItemModelType.value.keyProp.name;
 });
 
 function pushLoader(loader: ApiState<any, any>) {
@@ -252,48 +287,43 @@ function pushLoader(loader: ApiState<any, any>) {
   currentLoaders.value = newArray;
 }
 
-function itemText(item: any): string | null {
+function itemText(farItem: Indexable<FarItemType>): string | null {
   if (typeof props.itemTitle === "function") {
-    return props.itemTitle(item);
+    // This mapping of the foreign item back to the middle item
+    // exists for backwards compatibility with the implementation of
+    // c-select-many-to-many before it became based upon c-select[multiple].
+    // https://github.com/IntelliTect/Coalesce/issues/497
+    const middleItem = mapFarItemToMiddleItem(farItem);
+    return props.itemTitle(middleItem);
   }
 
-  const foreignItem = foreignItemOf(item);
-  if (!foreignItem) {
-    const itemFarFk = manyToManyMeta.value.farForeignKey;
-    const itemFarNav = manyToManyMeta.value.farNavigationProp;
-    console.warn(
-      `c-select-many-to-many: Unable to display the name of %o because '${itemFarNav.name}' is not loaded.`,
-      item
-    );
-
-    return item[itemFarFk.name] || modelDisplay(item);
+  if (farItem[fakeItemMarker]) {
+    // The foreign item is a "fake" item, indicating that the far side navigation property
+    // was missing from the middle model. Fall back on displaying the PK.
+    return modelDisplay(farItem) ?? farItem[farItemKeyPropName.value];
+  } else {
+    // Don't fall back to displaying the FK if the foreign item is "real",
+    // since the display property of the model might really be null.
+    return modelDisplay(farItem);
   }
-
-  return modelDisplay(foreignItem);
 }
 
-function itemValue(item: any) {
-  if (Array.isArray(item)) {
-    // Workaround for https://github.com/vuetifyjs/vuetify/issues/8793
-    return null;
-  }
+function selectionChanged(
+  farItems: Indexable<FarItemType>[],
+  selected: boolean
+) {
+  const manyToMany = manyToManyMeta.value;
 
-  const foreignItem = foreignItemOf(item);
-  if (foreignItem) {
-    return foreignItem[foreignItemKeyPropName.value];
-  }
-  return item[manyToManyMeta.value.farForeignKey.name];
-}
+  let newItems = [...internalValue.value];
 
-function onInput(value: any[]) {
-  const existingItems = new Set(internalValue.value);
-  const newItems = new Set(value);
+  for (const farItem of farItems) {
+    if (!selected) {
+      const vm = newItems.find(
+        (x) =>
+          (x as any)[manyToMany.farForeignKey.name] ==
+          farItem[farItemKeyPropName.value]
+      );
 
-  const items: any[] = [];
-
-  // Check for deleted existing items
-  internalValue.value.forEach((vm) => {
-    if (!newItems.has(vm)) {
       if (vm instanceof ViewModel && canDelete.value) {
         if (
           props.model instanceof ViewModel &&
@@ -323,32 +353,51 @@ function onInput(value: any[]) {
           // We need to mark the item as removed, but allow `emitInput` to handle
           // actually updating the collection bound to the input.
 
-          // @ts-expect-error internal state
           vm._isRemoved = true;
-          // @ts-ignore internal state
-          if (vm.$parent) {
-            // @ts-expect-error internal state
+          if (vm.$parent instanceof ViewModel) {
             (vm.$parent.$removedItems ??= []).push(vm);
           }
         }
       }
-    } else {
-      items.push(vm);
-    }
-  });
 
-  // Check for added new items
-  newItems.forEach((i) => {
-    if (!existingItems.has(i)) {
-      const vm = ViewModelFactory.get(
-        i.$metadata.name,
-        i,
-        // All of the data of `i`, recursing into any nested objects, IS clean.
-        // However, `vm` itself is dirty because it is a brand new object with no PK.
-        true
-      );
-      vm.$isDirty = true;
-      items.push(vm);
+      newItems = newItems.filter((x) => x !== vm);
+    } else {
+      // item selected
+      let vm: MiddleItemViewModel | undefined = undefined;
+
+      if (props.model instanceof ViewModel) {
+        // Look for a matching removed item (pending bulk save deletion):
+        const removedItems = props.model.$removedItems;
+        if (removedItems) {
+          const itemIndex = removedItems.findIndex(
+            (x) =>
+              x.$metadata == collectionMeta.value.itemType.typeDef &&
+              (x as any)[manyToMany.farForeignKey.name] ==
+                farItem[farItemKeyPropName.value]
+          );
+
+          if (itemIndex >= 0) {
+            // We found a matching item that was previously flagged for removal
+            // (i.e. the user unchecked it moments ago). Restore it to prevent an unnecessary delete+create.
+            const item = removedItems[itemIndex];
+            removedItems.splice(itemIndex, 1);
+            item._isRemoved = false;
+            vm = item as any as MiddleItemViewModel;
+          }
+        }
+      }
+
+      if (!vm) {
+        const middleItem = mapFarItemToMiddleItem(farItem);
+        vm = ViewModelFactory.get(
+          middleItem.$metadata.name,
+          middleItem,
+          // All of the data of `middleItem`, recursing into any nested objects, IS clean.
+          // However, `vm` itself is dirty because it is a brand new object with no PK.
+          true
+        ) as any as MiddleItemViewModel;
+        vm.$isDirty = true;
+      }
 
       if (props.model instanceof ViewModel && props.model.$isAutoSaveEnabled) {
         // Only perform a save if the model we're bound to is autosaving.
@@ -360,9 +409,9 @@ function onInput(value: any[]) {
         vm.$save()
           .then(() => {
             // Save successful. No need to keep the state around.
-            emit("added", vm);
+            emit("added", vm!);
             currentLoaders.value = currentLoaders.value.filter(
-              (l) => l != vm.$save
+              (l) => l != vm!.$save
             );
           })
           .catch(() => {
@@ -370,13 +419,13 @@ function onInput(value: any[]) {
             emitInput(internalValue.value.filter((i) => i != vm));
           });
       }
+      newItems = [...internalValue.value, vm];
     }
-  });
-
-  emitInput(items);
+  }
+  emitInput(newItems);
 }
 
-function emitInput(items: any[]) {
+function emitInput(items: MiddleItemType[]) {
   if (props.model) {
     return ((props.model as any)[collectionMeta.value.name] = items);
   }
@@ -384,35 +433,9 @@ function emitInput(items: any[]) {
   modelValue.value = items;
 }
 
-function foreignItemOf(value: any): Indexable<Model> | null | undefined {
-  return value[manyToManyMeta.value!.farNavigationProp.name];
+function farItemOf(
+  value: Indexable<MiddleItemType>
+): Indexable<FarItemType> | null | undefined {
+  return value[manyToManyMeta.value.farNavigationProp.name];
 }
-
-// This needs to be late initialized so we have the correct "this" reference.
-const listCaller = new ModelApiClient(foreignItemModelType.value)
-  .$useSimultaneousRequestCaching()
-  .$makeCaller("list", (c) => {
-    return c.list(listParams.value);
-  })
-  .setConcurrency("debounce");
-
-watch(
-  () => props.cache,
-  () => {
-    listCaller.useResponseCaching(props.cache === true ? {} : props.cache);
-  },
-  { immediate: true }
-);
-
-watch(
-  () => JSON.stringify(mapParamsToDto(listParams.value)),
-  () => {
-    pushLoader(listCaller);
-    listCaller!();
-  }
-);
-
-// Access this so it will throw an error if the meta props aren't in order.
-manyToManyMeta.value;
-listCaller();
 </script>

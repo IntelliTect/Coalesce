@@ -237,3 +237,8 @@ table td {
     padding-left: 1rem !important;
   }
 }
+
+// Join together consecutive code blocks
+.vp-doc div[class*='language-'] + div[class*='language-'] {
+  margin-top: -30px;
+}

@@ -109,7 +109,23 @@ public class TestBase : IDisposable
         // preferring real implementations where possible
         // in order to improve test fidelity.
 
+        foreach (var setup in _persistentSetups) setup(mocker);
+
         return mocker;
+    }
+
+    private readonly List<Action<MockerScope>> _persistentSetups = [];
+
+    /// <summary>
+    /// Register per-test mocker setup that is applied immediately, and again on each <see cref="RefreshServices"/> call.
+    /// </summary>
+    protected void PersistentSetup(Action<MockerScope> setup)
+    {
+        _persistentSetups.Add(setup);
+        if (_CurrentMocker is not null)
+        {
+            setup(_CurrentMocker);
+        }
     }
 
     public virtual void Dispose()

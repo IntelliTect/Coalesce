@@ -86,7 +86,7 @@ namespace IntelliTect.Coalesce.Utilities
                 // passing the instanceTarget as the first param.
                 return Expression.Call(
                     method,
-                    [instanceTarget, .. methodParams]
+                    methodParams is null ? [instanceTarget] : [instanceTarget, ..methodParams]
                 );
             }
 

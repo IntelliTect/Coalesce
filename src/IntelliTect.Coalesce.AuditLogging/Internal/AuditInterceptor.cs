@@ -290,7 +290,9 @@ internal sealed class AuditInterceptor<TAuditLog> : SaveChangesInterceptor
             ? null 
             : (IAuditOperationContext<TAuditLog>)ActivatorUtilities.GetServiceOrCreateInstance(serviceProvider, _options.OperationContextType);
 
-        var date = DateTimeOffset.Now; // This must be the exact same date for all items for the merge logic in the SQL to work properly.
+        // This must be the exact same date for all items for the merge logic in the SQL to work properly.
+        // UtcNow is used (instead of Now) because Postgres doesn't support non-zero offset values.
+        var date = DateTimeOffset.UtcNow;
 
         var auditLogs = audit.Entries
             .Where(e => e.Entity is not IAuditLog && e.Entity is not AuditLogProperty)

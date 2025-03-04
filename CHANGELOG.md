@@ -1,3 +1,8 @@
+# 5.3.4
+## Fixes
+- Adjust DateTimeOffset handling to support Postgres restrictions of not allowing non-zero offsets.
+
+
 # 5.3.3
 
 ## Fixes

@@ -576,6 +576,23 @@ export namespace Person {
       }
     }
     
+    export class ParameterTestsSourceSubclass implements DataSource<typeof metadata.Person.dataSources.parameterTestsSourceSubclass> {
+      readonly $metadata = metadata.Person.dataSources.parameterTestsSourceSubclass
+      personCriterion: PersonCriteria | null = null
+      personCriteriaArray: PersonCriteria[] | null = null
+      personCriteriaList: PersonCriteria[] | null = null
+      personCriteriaICollection: PersonCriteria[] | null = null
+      intArray: number[] | null = null
+      intList: number[] | null = null
+      intICollection: number[] | null = null
+      bytes: string | null = null
+      
+      constructor(params?: Omit<Partial<ParameterTestsSourceSubclass>, '$metadata'>) {
+        if (params) Object.assign(this, params);
+        return reactiveDataSource(this);
+      }
+    }
+    
     export class WithoutCases implements DataSource<typeof metadata.Person.dataSources.withoutCases> {
       readonly $metadata = metadata.Person.dataSources.withoutCases
     }

@@ -97,6 +97,15 @@ namespace IntelliTect.Coalesce.Utilities
             );
         }
 
+        public static Expression Call(this Expression instanceTarget, string method, params Expression[]? methodParams)
+        {
+            var methodInfo = instanceTarget.Type.GetMethod(
+                method,
+                methodParams.Select(p => p.Type).ToArray()
+            );
+            return instanceTarget.Call(methodInfo, methodParams);
+        }
+
         public static Expression Prop(this Expression instance, string prop)
             => Expression.Property(instance, prop);
 

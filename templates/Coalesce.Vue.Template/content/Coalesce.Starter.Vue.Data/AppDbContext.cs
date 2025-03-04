@@ -121,6 +121,7 @@ public class AppDbContext
 #if Identity
                     .Format<User>(x => x.PasswordHash, x => "<password changed/rehashed>")
                     .Format<User>(x => x.SecurityStamp, x => "<stamp changed>")
+                    .Exclude<IdentityUserToken<string>>() 
                     .ExcludeProperty<User>(x => new { x.ConcurrencyStamp })
 #endif
 #if Tenancy

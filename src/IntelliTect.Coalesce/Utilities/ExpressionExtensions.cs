@@ -97,12 +97,13 @@ namespace IntelliTect.Coalesce.Utilities
             );
         }
 
-        public static Expression Call(this Expression instanceTarget, string method, params Expression[]? methodParams)
+        public static Expression Call(this Expression instanceTarget, string method, params Expression[] methodParams)
         {
             var methodInfo = instanceTarget.Type.GetMethod(
                 method,
                 methodParams.Select(p => p.Type).ToArray()
-            );
+            ) ?? throw new MissingMethodException($"Can't find method {method} on {instanceTarget.Type.FullName}");
+
             return instanceTarget.Call(methodInfo, methodParams);
         }
 

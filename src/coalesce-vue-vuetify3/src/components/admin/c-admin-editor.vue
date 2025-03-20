@@ -23,7 +23,7 @@
 
       <v-spacer></v-spacer>
       <v-btn
-        v-if="!model.$isAutoSaveEnabled && showContent"
+        v-if="!model.$isAutoSaveEnabled && showContent && canEdit"
         @click="model.$bulkSave()"
         title="Save"
         :color="isBulkSaveDirty ? 'success' : undefined"

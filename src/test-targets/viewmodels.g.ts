@@ -252,6 +252,10 @@ export interface ComplexModelViewModel extends $models.ComplexModel {
 }
 export class ComplexModelViewModel extends ViewModel<$models.ComplexModel, $apiClients.ComplexModelApiClient, number> implements $models.ComplexModel  {
   
+  static magicNumber = 42
+  static magicString = "42"
+  static magicEnum = $models.EnumPkId.Value10
+  
   
   public addToTests(initialData?: DeepPartial<$models.Test> | null) {
     return this.$addChild('tests', initialData) as TestViewModel
@@ -621,6 +625,10 @@ export class ComplexModelViewModel extends ViewModel<$models.ComplexModel, $apiC
 defineProps(ComplexModelViewModel, $metadata.ComplexModel)
 
 export class ComplexModelListViewModel extends ListViewModel<$models.ComplexModel, $apiClients.ComplexModelApiClient, ComplexModelViewModel> {
+  
+  static magicNumber = 42
+  static magicString = "42"
+  static magicEnum = $models.EnumPkId.Value10
   
   public get methodWithStringArrayParameterAndReturn() {
     const methodWithStringArrayParameterAndReturn = this.$apiClient.$makeCaller(
@@ -1239,6 +1247,8 @@ export class ZipCodeListViewModel extends ListViewModel<$models.ZipCode, $apiCli
 
 
 export class WeatherServiceViewModel extends ServiceViewModel<typeof $metadata.WeatherService, $apiClients.WeatherServiceApiClient> {
+  
+  static magicNumber = 42
   
   public get getWeather() {
     const getWeather = this.$apiClient.$makeCaller(

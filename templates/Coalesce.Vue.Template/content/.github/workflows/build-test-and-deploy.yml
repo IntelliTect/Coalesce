@@ -34,7 +34,7 @@ jobs:
       - name: Use .NET SDK
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 8.x
+          dotnet-version: 9.x
           include-preview: true
 
       - name: Use Node.js

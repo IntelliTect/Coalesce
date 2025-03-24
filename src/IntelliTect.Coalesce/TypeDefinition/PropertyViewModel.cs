@@ -837,10 +837,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 }
 
                 var obj = Object;
-                if (obj != null && obj.IsDbMappedType)
+                if (IsDbMapped && EffectiveParent.IsDbMappedType)
                 {
-                    if (Type.IsCollection && 
-                        obj.PrimaryKey != null && 
+                    if (Type.IsCollection &&
                         (InverseProperty != null || this.HasAttribute<ForeignKeyAttribute>())
                     )
                     {

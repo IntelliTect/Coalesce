@@ -274,7 +274,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
                         // First, check for errors that can probably be fixed with a package restore.
                         if (TestLinesForRetry(
                             "run a nuget package restore",
-                            "The type or namespace name 'System' could not be found in the global namespace"
+                            "The type or namespace name 'System' could not be found in the global namespace",
+                            "NuGet restore might have only partially completed"
                         )) {
                             shouldRetry = true;
                             restorePackages = true;
@@ -302,7 +303,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Generation
                         {
                             // Error message looks like something that might go away if we try again. Lets try again in a second.
                             await Task.Delay(projectLoadRetryDelayMs);
-                            logger.LogWarning(ex, $"Error analyzing {config.ProjectFile}, probably due to file contention. Attempting retry {retry} of {maxProjectLoadRetries}. (use '--verbosity debug' to see errors)");
+                            logger.LogWarning(ex, $"Error analyzing {config.ProjectFile}, probably due to {(restorePackages ? "missing packages" : "file contention")}. Attempting retry {retry} of {maxProjectLoadRetries}. (use '--verbosity debug' to see errors)");
                         }
                         else
                         {

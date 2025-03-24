@@ -8,12 +8,18 @@
               <!--#if Tenancy  -->
               <v-list-item
                 v-if="$can(Permission.Admin)"
-                title="Organization Settings"
+                title="My Organization Settings"
                 subtitle="Edit the details of your organization."
                 :to="`/admin/Tenant/edit/${$userInfo.tenantId}`"
                 prepend-icon="fa fa-users"
-              >
-              </v-list-item>
+              />
+              <v-list-item
+                v-if="$userInfo.roles?.includes('GlobalAdmin')"
+                to="/admin/Tenant?dataSource=GlobalAdminSource"
+                prepend-icon="fa fa-building"
+                title="All Organizations"
+                subtitle="Perform administration of all organizations."
+              />
               <!--#endif  -->
               <!--#if (AuditLogs && Identity) -->
               <v-list-item
@@ -22,8 +28,7 @@
                 subtitle="Logs of each data change made in the application."
                 to="/admin/audit"
                 prepend-icon="fa fa-clipboard-list"
-              >
-              </v-list-item>
+              />
               <!--#endif  -->
               <!--#if (AuditLogs && !Identity)
               <v-list-item
@@ -40,16 +45,14 @@
                 subtitle="An overview of how each property, method, and endpoint is served by Coalesce."
                 href="/coalesce-security"
                 prepend-icon="fa fa-lock-open"
-              >
-              </v-list-item>
+              />
               <!--#if OpenAPI  -->
               <v-list-item
                 title="Open API"
                 subtitle="View OpenAPI documentation for the application."
                 to="/openapi"
                 prepend-icon="fa fa-code"
-              >
-              </v-list-item>
+              />
               <!--#endif  -->
             </v-list>
           </v-card-text>

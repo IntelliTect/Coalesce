@@ -514,7 +514,7 @@ const props = withDefaults(
         getLabel: (
           search: string,
           items: SelectedModelTypeSingle[]
-        ) => string | false;
+        ) => string | false | null | undefined;
         getItem: (
           search: string,
           label: string

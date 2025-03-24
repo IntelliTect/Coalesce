@@ -146,108 +146,72 @@
         <v-card>
           <v-card-title> Development Recommended Tooling: </v-card-title>
           <v-card-text>
-            <v-row align="center">
-              <v-col style="flex-grow: 0">
-                <img
-                  src="https://visualstudio.microsoft.com/wp-content/uploads/2021/10/Product-Icon.svg"
-                  width="64"
-                />
-              </v-col>
-              <v-col>
-                <p>
-                  Visual Studio is recommended for back-end C# work, but other
-                  IDEs like Rider or VS Code can also be used.
-                </p>
-                Recommended extensions:
-                <ul class="mt-1">
-                  <li>
-                    <a
-                      href="https://marketplace.visualstudio.com/items?itemName=MadsKristensen.NpmTaskRunner64"
-                    >
-                      NPM Task Runner
-                    </a>
-                    (for easily running
-                    <code>dotnet coalesce</code>)
-                  </li>
-                </ul>
-              </v-col>
-            </v-row>
-            <v-row align="center">
-              <v-col style="flex-grow: 0">
-                <img
-                  src="https://code.visualstudio.com/assets/images/code-stable.png"
-                  width="64"
-                />
-              </v-col>
-              <v-col>
-                VS Code is recommended for front-end Vue/Typescript work, with
-                these extensions:
-                <ul class="mt-1">
-                  <li>
-                    <a
-                      href="https://marketplace.visualstudio.com/items?itemName=Vue.volar"
-                    >
-                      Vue - Official
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      href="https://marketplace.visualstudio.com/items?itemName=antfu.goto-alias"
-                    >
-                      Goto definition alias
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      href="https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint"
-                    >
-                      ESLint
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      href="https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode"
-                    >
-                      Prettier
-                    </a>
-                  </li>
-                </ul>
-              </v-col>
-            </v-row>
-            <v-row>
-              <v-col style="flex-grow: 0">
-                <div class="browser-logos">
-                  <img
-                    class="f1"
-                    src="https://raw.githubusercontent.com/vuejs/devtools/1b1d1d0ce62e78b5cd8e628c89b31b6ed6df7a73/packages/docs/src/public/logo-chrome.svg"
-                    width="64"
-                  />
-                  <img
-                    class="f2"
-                    src="https://raw.githubusercontent.com/vuejs/devtools/1b1d1d0ce62e78b5cd8e628c89b31b6ed6df7a73/packages/docs/src/public/logo-edge.png"
-                    width="64"
-                  />
-                  <img
-                    class="f3"
-                    src="https://raw.githubusercontent.com/vuejs/devtools/1b1d1d0ce62e78b5cd8e628c89b31b6ed6df7a73/packages/docs/src/public/logo-firefox.svg"
-                    width="64"
-                  />
-                </div>
-              </v-col>
-              <v-col>
-                Recommended browser extensions:
-                <ul class="mt-1">
-                  <li>
-                    <a
-                      href="https://devtools.vuejs.org/guide/installation.html"
-                      target="_blank"
-                    >
-                      Vue Devtools
-                    </a>
-                  </li>
-                </ul>
-              </v-col>
-            </v-row>
+            
+            <div>
+              <p>
+                <b>Visual Studio</b> is recommended for back-end C# work, but
+                other IDEs like Rider or VS Code can also be used.
+              </p>
+              Recommended extensions:
+              <ul class="mt-1">
+                <li>
+                  <a
+                    href="https://marketplace.visualstudio.com/items?itemName=MadsKristensen.NpmTaskRunner64"
+                  >
+                    NPM Task Runner
+                  </a>
+                  (for easily running
+                  <code>dotnet coalesce</code>)
+                </li>
+              </ul>
+            </div>
+            <div class="mt-4">
+              <b>VS Code</b> is recommended for front-end Vue/Typescript work,
+              with these extensions:
+              <ul class="mt-1">
+                <li>
+                  <a
+                    href="https://marketplace.visualstudio.com/items?itemName=Vue.volar"
+                  >
+                    Vue - Official
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="https://marketplace.visualstudio.com/items?itemName=antfu.goto-alias"
+                  >
+                    Goto definition alias
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint"
+                  >
+                    ESLint
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode"
+                  >
+                    Prettier
+                  </a>
+                </li>
+              </ul>
+            </div>
+            <div class="mt-4">
+              Recommended <b>browser extensions</b>:
+              <ul class="mt-1">
+                <li>
+                  <a
+                    href="https://devtools.vuejs.org/guide/installation.html"
+                    target="_blank"
+                  >
+                    Vue Devtools
+                  </a>
+                </li>
+              </ul>
+            </div>
           </v-card-text>
         </v-card>
       </v-col>

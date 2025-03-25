@@ -1,11 +1,19 @@
-# 5.3.4
-## Fixes
-- Adjust DateTimeOffset handling to support Postgres restrictions of not allowing non-zero offsets.
+# 5.3.5
 
+## Fixes
+
+- Fix error in c-select-many-to-many when the near side is part of an inheritance hierarchy.
+
+# 5.3.4
+
+## Fixes
+
+- Adjust DateTimeOffset handling to support Postgres restrictions of not allowing non-zero offsets.
 
 # 5.3.3
 
 ## Fixes
+
 - Add model validation error when ForeignKeyAttribute references a navigation prop that doesn't exist.
 - Fix code gen performance regression introduced in 5.3.2
 
@@ -19,7 +27,6 @@
 - Don't duplicate data source parameters in OpenAPI parameter collections.
 - Fix error `this._removeFromParentCollection is not a function` thrown when calling `ViewModel.$delete.confirmInvoke()`.
 - Remove incorrect generation of `ReadFormAsync` for binary parameters on GET endpoints.
-
 
 # 5.3.1
 

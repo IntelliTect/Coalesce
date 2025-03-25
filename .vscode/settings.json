@@ -1,3 +1,9 @@
 {
-    "dotnet.defaultSolution": "Coalesce.sln"
-}
+    "dotnet.defaultSolution": "Coalesce.sln",
+    
+    "editor.formatOnPaste": false,
+    "editor.formatOnSave": true,
+    "editor.formatOnType": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  }
+  

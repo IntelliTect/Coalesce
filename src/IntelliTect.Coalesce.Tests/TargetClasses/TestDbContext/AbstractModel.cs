@@ -1,4 +1,6 @@
 ﻿using IntelliTect.Coalesce.DataAnnotations;
+using IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext;
+using System.Collections.Generic;
 
 namespace IntelliTect.Coalesce.Tests.TargetClasses
 {
@@ -10,12 +12,32 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses
     {
         public int Id { get; set; }
 
-        public string Discriminatior { get; set; }
+        public string Discriminator { get; set; }
+
+        [ManyToMany("People")]
+        public List<AbstractModelPerson> AbstractModelPeople { get; set; }
     }
 
     [Edit(PermissionLevel = SecurityPermissionLevels.DenyAll)]
-    public class AbstractImpl : AbstractModel
+    public class AbstractImpl1 : AbstractModel
     {
-        public string ImplOnlyField { get; set; }
+        public string Impl1OnlyField { get; set; }
+    }
+
+    [Edit(PermissionLevel = SecurityPermissionLevels.DenyAll)]
+    public class AbstractImpl2 : AbstractModel
+    {
+        public string Impl2OnlyField { get; set; }
+    }
+
+    public class AbstractModelPerson
+    {
+        public int Id { get; set; }
+
+        public int PersonId { get; set; }
+        public Person Person { get; set; }
+
+        public int AbstractModelId { get; set; }
+        public AbstractModel AbstractModel { get; set; }
     }
 }

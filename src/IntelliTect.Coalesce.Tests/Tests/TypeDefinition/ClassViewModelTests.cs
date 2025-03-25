@@ -44,7 +44,7 @@ namespace IntelliTect.Coalesce.Tests.TypeDefinition
         }
 
         [Theory]
-        [ClassViewModelData(typeof(AbstractImpl))]
+        [ClassViewModelData(typeof(AbstractImpl1))]
         public void GetAttribute_RespectsInheritance(ClassViewModelData data)
         {
             var vm = data.ClassViewModel;

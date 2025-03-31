@@ -13,6 +13,7 @@ if (import.meta.hot) {
             z-index: 999999;
             position: absolute;
             width: 100%;
+            top: 0;
           }
           #coalesce-npm-check-result code {
             font-weight: bold;

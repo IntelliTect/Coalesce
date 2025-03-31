@@ -1,19 +1,17 @@
-﻿using System;
+﻿using IntelliTect.Coalesce.DataAnnotations;
+using IntelliTect.Coalesce.Helpers.Search;
+using IntelliTect.Coalesce.TypeDefinition.Enums;
+using IntelliTect.Coalesce.Utilities;
+using Microsoft.CodeAnalysis;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
-using System.ComponentModel;
-using IntelliTect.Coalesce.DataAnnotations;
-using IntelliTect.Coalesce.Utilities;
-using Microsoft.CodeAnalysis;
-using System.Text;
-using IntelliTect.Coalesce.Helpers.Search;
-using System.Linq.Expressions;
-using IntelliTect.Coalesce.TypeDefinition.Enums;
-using System.Diagnostics.CodeAnalysis;
 
 namespace IntelliTect.Coalesce.TypeDefinition
 {

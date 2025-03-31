@@ -165,7 +165,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 string? propName = this.GetAttributeValue<ManyToManyAttribute>(a => a.FarNavigationProperty);
                 if (propName != null && propName == ManyToManyNearNavigationProperty?.Name)
                 {
-                    throw new Exception(
+                    throw new CoalesceModelException(
                         "ManyToManyAtttribute.FarNavigationProperty is referencing the near side of " +
                         "the many-to-many relationship, which is not allowed. " +
                         "To configure the near side of the many-to-many relationship, use [InverseProperty].");
@@ -182,7 +182,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 {
                     if (firstCandidate != null)
                     {
-                        throw new Exception(
+                        throw new CoalesceModelException(
                             "Found more than one candidate far navigation property for [ManyToMany] collection. To fix this, set ManyToManyAtttribute.FarNavigationProperty to the name of one of these candidate properties: " +
                             string.Concat(candidates.Select(p => $"\n    {Object}.{p.Name}")));
                     }

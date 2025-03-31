@@ -331,7 +331,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             var servedClass = servedType.ClassViewModel;
             if (servedClass == null)
             {
-                throw new InvalidOperationException($"{servedType} is not a valid type argument for a {iface}.");
+                throw new CoalesceModelException($"{servedType} is not a valid type argument for a {iface}.");
             }
 
             // See if we were expecting that the strategy be declared for a particular type
@@ -339,7 +339,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             var explicitlyDeclaredFor = strategyType.GetAttributeValue<DeclaredForAttribute>(a => a.DeclaredFor)?.ClassViewModel;
             if (explicitlyDeclaredFor != null && declaredFor != null && !explicitlyDeclaredFor.Equals(declaredFor))
             {
-                throw new InvalidOperationException(
+                throw new CoalesceModelException(
                     $"Expected that {strategyType} is declared for {declaredFor}, but it was explicitly declared for {explicitlyDeclaredFor} instead.");
             }
 
@@ -350,8 +350,14 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
             if (declaredFor.IsCustomDto && !servedClass.Equals(declaredFor.DtoBaseViewModel))
             {
-                throw new InvalidOperationException($"{strategyType} is not a valid {iface} for {declaredFor} - " +
+                throw new CoalesceModelException($"{strategyType} is not a valid {iface.Name} for {declaredFor}. " +
                     $"{strategyType} must satisfy {iface} with type parameter <{declaredFor.DtoBaseViewModel}>.");
+            }
+
+            if (!declaredFor.IsCustomDto && !servedClass.Equals(declaredFor))
+            {
+                throw new CoalesceModelException($"{strategyType} is not a valid {iface.Name} for {declaredFor}. " +
+                    $"{strategyType} must satisfy {iface} with type parameter <{declaredFor}>.");
             }
 
             set.Add(new CrudStrategyTypeUsage(strategyType.ClassViewModel, servedClass, declaredFor));

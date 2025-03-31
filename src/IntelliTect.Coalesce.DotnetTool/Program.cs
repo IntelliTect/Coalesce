@@ -11,6 +11,7 @@ using IntelliTect.Coalesce.CodeGeneration.Analysis;
 using IntelliTect.Coalesce.CodeGeneration.Configuration;
 using IntelliTect.Coalesce.CodeGeneration.Generation;
 using IntelliTect.Coalesce.CodeGeneration.Utilities;
+using IntelliTect.Coalesce.TypeDefinition;
 using McMaster.Extensions.CommandLineUtils;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -114,6 +115,12 @@ namespace IntelliTect.Coalesce.Cli
             try
             {
                 await executor.GenerateAsync(rootGenerator);
+            }
+            catch (CoalesceModelException e)
+            {
+                // Only write the message here, not a full exception.ToString() w/ stack trace
+                executor.Logger.LogError(e.Message);
+                return -1;
             }
             catch (ProjectAnalysisException e)
             {

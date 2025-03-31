@@ -823,6 +823,53 @@ describe("CSelect", () => {
     expect(model.singleTest?.testName).toBe("new thing");
   });
 
+  test("create with deferred save, clears required validation message after save", async () => {
+    const vm = new ComplexModelViewModel();
+
+    const saveMock = mockEndpoint(
+      "/Test/save",
+      vitest.fn(() => ({
+        wasSuccessful: true,
+        object: { testId: 1, testName: "foo" },
+      }))
+    );
+
+    const wrapper = mountApp(() => (
+      <CSelect
+        model={vm}
+        for="singleTest"
+        validateOn="eager"
+        create={{
+          getLabel(search: string) {
+            return search;
+          },
+          async getItem(search: string, label: string) {
+            return new TestViewModel({
+              testName: label,
+              complexModelId: 42,
+            });
+          },
+        }}
+      ></CSelect>
+    )).findComponent(CSelect);
+
+    const menuWrapper = await openMenu(wrapper);
+    await menuWrapper.find("input").setValue("foo");
+
+    // Select the new item entry.
+    const createItem = menuWrapper.find(".c-select__create-item");
+    await createItem.trigger("click");
+
+    // Item still unsaved, validation message should be present.
+    expect(wrapper.text()).toContain("Single Test is required");
+
+    await delay(10);
+    vm.singleTest!.$save();
+    await delay(10);
+
+    expect(wrapper.text()).not.toContain("Single Test is required");
+  });
+
   describe("vuetify props passthrough", () => {
     beforeEach(() => {
       mockEndpoint("/Person/list", () => ({

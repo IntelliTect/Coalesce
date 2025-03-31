@@ -376,6 +376,7 @@ import {
   nextTick,
   watch,
   camelize,
+  onBeforeUnmount,
 } from "vue";
 import {
   useMetadataProps,
@@ -546,7 +547,7 @@ const passthroughSlots = computed(() => {
   return ret;
 });
 
-const rootRef = ref<ComponentPublicInstance>();
+const rootRef = ref<VInput>();
 const mainInputRef = ref<HTMLInputElement>();
 const menuContentRef = ref<ComponentPublicInstance>();
 const searchRef = ref<ComponentPublicInstance>();
@@ -1035,6 +1036,9 @@ function confirmPendingSelection() {
   onInput(item);
 }
 
+const teardownQueue: Array<() => void> = [];
+onBeforeUnmount(() => teardownQueue.forEach((fn) => fn()));
+
 async function createItem() {
   if (!createItemLabel.value) return;
   try {
@@ -1044,7 +1048,22 @@ async function createItem() {
       createItemLabel.value
     );
     if (!item) return;
+
+    // If the newly created item doesn't have a PK when we call onInput
+    // and emit the selected value, Vuetify's validation won't re-run on its own
+    // once the item gains a primary key. This could happen if selecting the item
+    // opens a dialog, for example, and the item is eventually saved by that dialog.
+    // This is tested by test case "create with deferred save"
+    if (!item[modelObjectMeta.value.keyProp.name]) {
+      const watcher = watch(
+        () => item[modelObjectMeta.value.keyProp.name],
+        (pk) => pk && rootRef.value?.validate()
+      );
+      teardownQueue.push(watcher);
+    }
+
     onInput(item);
+
     listCaller(); // Refresh the list, because the new item is probably now in the results.
   } catch (e: unknown) {
     createItemError.value = getMessageForError(e);

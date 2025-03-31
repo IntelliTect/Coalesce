@@ -181,6 +181,84 @@ namespace Coalesce.Web.Vue3.Api
         }
 
         /// <summary>
+        /// Method: UploadPicture
+        /// </summary>
+        [HttpPost("UploadPicture")]
+        [Authorize]
+        [Consumes("application/x-www-form-urlencoded", "multipart/form-data")]
+        public virtual async Task<ItemResult> UploadPicture(
+            [FromServices] IDataSourceFactory dataSourceFactory,
+            [FromForm(Name = "id")] int id,
+            Microsoft.AspNetCore.Http.IFormFile file)
+        {
+            var _params = new
+            {
+                Id = id,
+                File = file == null ? null : new IntelliTect.Coalesce.Models.File { Name = file.FileName, ContentType = file.ContentType, Length = file.Length, Content = file.OpenReadStream() }
+            };
+
+            var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Person, Coalesce.Domain.Person>("Default");
+            var itemResult = await dataSource.GetItemAsync(_params.Id, new DataSourceParameters());
+            if (!itemResult.WasSuccessful)
+            {
+                return new ItemResult(itemResult);
+            }
+            var item = itemResult.Object;
+            if (Context.Options.ValidateAttributesForMethods)
+            {
+                var _validationResult = ItemResult.FromParameterValidation(
+                    GeneratedForClassViewModel!.MethodByName("UploadPicture"), _params, HttpContext.RequestServices);
+                if (!_validationResult.WasSuccessful) return _validationResult;
+            }
+
+            item.UploadPicture(
+                Db,
+                _params.File
+            );
+            var _result = new ItemResult();
+            return _result;
+        }
+
+        public class UploadPictureParameters
+        {
+            public int Id { get; set; }
+            public IntelliTect.Coalesce.Models.FileParameter File { get; set; }
+        }
+
+        /// <summary>
+        /// Method: UploadPicture
+        /// </summary>
+        [HttpPost("UploadPicture")]
+        [Authorize]
+        [Consumes("application/json")]
+        public virtual async Task<ItemResult> UploadPicture(
+            [FromServices] IDataSourceFactory dataSourceFactory,
+            [FromBody] UploadPictureParameters _params
+        )
+        {
+            var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Person, Coalesce.Domain.Person>("Default");
+            var itemResult = await dataSource.GetItemAsync(_params.Id, new DataSourceParameters());
+            if (!itemResult.WasSuccessful)
+            {
+                return new ItemResult(itemResult);
+            }
+            var item = itemResult.Object;
+            if (Context.Options.ValidateAttributesForMethods)
+            {
+                var _validationResult = ItemResult.FromParameterValidation(
+                    GeneratedForClassViewModel!.MethodByName("UploadPicture"), _params, HttpContext.RequestServices);
+                if (!_validationResult.WasSuccessful) return _validationResult;
+            }
+
+            item.UploadPicture(
+                Db,
+                _params.File
+            );
+            var _result = new ItemResult();
+            return _result;
+        }
+
+        /// <summary>
         /// Method: ChangeSpacesToDashesInName
         /// </summary>
         [HttpPost("ChangeSpacesToDashesInName")]

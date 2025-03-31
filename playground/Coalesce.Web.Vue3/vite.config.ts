@@ -56,7 +56,9 @@ export default defineConfig(async ({ command, mode }) => {
       }),
 
       // Integrations with UseViteDevelopmentServer from IntelliTect.Coalesce.Vue
-      createAspNetCoreHmrPlugin(),
+      createAspNetCoreHmrPlugin({
+        checkPackageVersions: false
+      }),
 
       // Perform type checking during development and build time.
       // createCheckerPlugin({

@@ -1,4 +1,5 @@
 ﻿using IntelliTect.Coalesce;
+using IntelliTect.Coalesce.Api.Controllers;
 using IntelliTect.Coalesce.DataAnnotations;
 using IntelliTect.Coalesce.Models;
 using Microsoft.EntityFrameworkCore;
@@ -108,7 +109,7 @@ namespace Coalesce.Domain
         [Hidden]
         public PersonStats PersonStats => new PersonStats { Name = Name, Height = 10, Weight = 20 };
 
-        [InternalUse]
+        // [InternalUse]
         public byte[] ProfilePic { get; set; }
 
         /// <summary>
@@ -149,6 +150,13 @@ namespace Coalesce.Domain
             db.SaveChanges();
             includeTree = IncludeTree.For<Person>(p => p.IncludedSeparately(x => x.Company));
             return this;
+        }
+
+        [Coalesce]
+        public void UploadPicture(AppDbContext db, IFile file)
+        {
+            ProfilePic = file.Content!.ReadAllBytes();
+            db.SaveChanges();
         }
 
         /// <summary>

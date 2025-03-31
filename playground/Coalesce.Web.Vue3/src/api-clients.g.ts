@@ -167,6 +167,15 @@ export class PersonApiClient extends ModelApiClient<$models.Person> {
     return this.$invoke($method, $params, $config)
   }
   
+  public uploadPicture(id: number | null, file: File | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<void>> {
+    const $method = this.$metadata.methods.uploadPicture
+    const $params =  {
+      id,
+      file,
+    }
+    return this.$invoke($method, $params, $config)
+  }
+  
   public changeSpacesToDashesInName(id: number | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<void>> {
     const $method = this.$metadata.methods.changeSpacesToDashesInName
     const $params =  {

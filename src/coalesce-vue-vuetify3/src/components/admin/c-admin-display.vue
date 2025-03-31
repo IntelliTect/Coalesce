@@ -9,6 +9,7 @@ import {
 
 import CDisplay, { type CDisplayProps } from "../display/c-display.vue";
 import { useRouter } from "vue-router";
+import { detectFileFormat } from "../../util";
 
 const props = withDefaults(defineProps<CDisplayProps<TModel>>(), {
   element: "span",
@@ -48,7 +49,7 @@ function render() {
     throw Error("Cannot display a method");
   }
 
-  if (modelMeta && "type" in modelMeta && modelMeta?.type == "model") {
+  if (modelMeta && "type" in modelMeta && modelMeta.type == "model") {
     const pkValue = (model as any)[modelMeta.keyProp.name];
 
     // Display collection navigations as counts with links to the c-admin-table-page for the collection
@@ -106,6 +107,26 @@ function render() {
           () => propDisplay(model, narrowedMeta) ?? fkValue
         );
       }
+    }
+  }
+
+  if (meta.type == "binary") {
+    const value = (model as any)[meta.name];
+
+    if (value) {
+      return h(
+        "a",
+        {
+          href: '#',
+          onClick: () => {
+            const link = document.createElement("a");
+            link.href = `data:application/octet-stream;base64,${value}`;
+            link.download = meta.name + '.' + (detectFileFormat(value) || 'bin');
+            link.click();
+          },
+        },
+        h(CDisplay, { ...props })
+      );
     }
   }
 

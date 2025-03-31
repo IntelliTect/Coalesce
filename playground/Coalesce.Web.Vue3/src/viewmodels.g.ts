@@ -103,9 +103,9 @@ export interface CaseViewModel extends $models.Case {
 export class CaseViewModel extends ViewModel<$models.Case, $apiClients.CaseApiClient, number> implements $models.Case  {
   static DataSources = $models.Case.DataSources;
   
-  static MagicNumber = 42
-  static MagicString = "42"
-  static MagicEnum = $models.Statuses.ClosedNoSolution
+  static magicNumber = 42
+  static magicString = "42"
+  static magicEnum = $models.Statuses.ClosedNoSolution
   
   
   public addToCaseProducts(initialData?: DeepPartial<$models.CaseProduct> | null) {
@@ -464,6 +464,7 @@ export interface PersonViewModel extends $models.Person {
   lastBath: Date | null;
   nextUpgrade: Date | null;
   personStats: $models.PersonStats | null;
+  profilePic: string | null;
   
   /** Calculated name of the person. eg., Mr. Michael Stokesbary. */
   name: string | null;
@@ -499,6 +500,17 @@ export class PersonViewModel extends ViewModel<$models.Person, $apiClients.Perso
     
     Object.defineProperty(this, 'rename', {value: rename});
     return rename
+  }
+  
+  public get uploadPicture() {
+    const uploadPicture = this.$apiClient.$makeCaller(
+      this.$metadata.methods.uploadPicture,
+      (c, file: File | null) => c.uploadPicture(this.$primaryKey, file),
+      () => ({file: null as File | null, }),
+      (c, args) => c.uploadPicture(this.$primaryKey, args.file))
+    
+    Object.defineProperty(this, 'uploadPicture', {value: uploadPicture});
+    return uploadPicture
   }
   
   /** Removes spaces from the name and puts in dashes */

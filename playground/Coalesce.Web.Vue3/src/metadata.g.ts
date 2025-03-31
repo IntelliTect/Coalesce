@@ -1397,6 +1397,13 @@ export const Person = domain.types.Person = {
       hidden: 3 as HiddenAreas,
       dontSerialize: true,
     },
+    profilePic: {
+      name: "profilePic",
+      displayName: "Profile Pic",
+      type: "binary",
+      base64: true,
+      role: "value",
+    },
     name: {
       name: "name",
       displayName: "Name",
@@ -1473,6 +1480,39 @@ export const Person = domain.types.Person = {
         displayName: "Result",
         type: "model",
         get typeDef() { return (domain.types.Person as ModelType & { name: "Person" }) },
+        role: "value",
+      },
+    },
+    uploadPicture: {
+      name: "uploadPicture",
+      displayName: "Upload Picture",
+      transportType: "item",
+      httpMethod: "POST",
+      params: {
+        id: {
+          name: "id",
+          displayName: "Primary Key",
+          type: "number",
+          role: "value",
+          get source() { return (domain.types.Person as ModelType & { name: "Person" }).props.personId },
+          rules: {
+            required: val => val != null || "Primary Key is required.",
+          }
+        },
+        file: {
+          name: "file",
+          displayName: "File",
+          type: "file",
+          role: "value",
+          rules: {
+            required: val => val != null || "File is required.",
+          }
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "void",
         role: "value",
       },
     },

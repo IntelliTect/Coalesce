@@ -22,6 +22,7 @@ namespace Coalesce.Web.Vue3.Models
         private System.DateTime? _BirthDate;
         private System.DateTime? _LastBath;
         private System.DateTimeOffset? _NextUpgrade;
+        private byte[] _ProfilePic;
         private int? _CompanyId;
         private System.Collections.Generic.ICollection<string> _ArbitraryCollectionOfStrings;
 
@@ -75,6 +76,11 @@ namespace Coalesce.Web.Vue3.Models
             get => _NextUpgrade;
             set { _NextUpgrade = value; Changed(nameof(NextUpgrade)); }
         }
+        public byte[] ProfilePic
+        {
+            get => _ProfilePic;
+            set { _ProfilePic = value; Changed(nameof(ProfilePic)); }
+        }
         public int? CompanyId
         {
             get => _CompanyId;
@@ -105,6 +111,7 @@ namespace Coalesce.Web.Vue3.Models
             if (ShouldMapTo(nameof(BirthDate))) entity.BirthDate = BirthDate;
             if (ShouldMapTo(nameof(LastBath))) entity.LastBath = LastBath;
             if (ShouldMapTo(nameof(NextUpgrade))) entity.NextUpgrade = NextUpgrade;
+            if (ShouldMapTo(nameof(ProfilePic))) entity.ProfilePic = ProfilePic;
             if (ShouldMapTo(nameof(CompanyId))) entity.CompanyId = (CompanyId ?? entity.CompanyId);
             if (ShouldMapTo(nameof(ArbitraryCollectionOfStrings))) entity.ArbitraryCollectionOfStrings = ArbitraryCollectionOfStrings?.ToList();
         }
@@ -134,6 +141,7 @@ namespace Coalesce.Web.Vue3.Models
         public System.DateTime? BirthDate { get; set; }
         public System.DateTime? LastBath { get; set; }
         public System.DateTimeOffset? NextUpgrade { get; set; }
+        public byte[] ProfilePic { get; set; }
         public string Name { get; set; }
         public int? CompanyId { get; set; }
         public System.Collections.Generic.ICollection<string> ArbitraryCollectionOfStrings { get; set; }
@@ -160,6 +168,7 @@ namespace Coalesce.Web.Vue3.Models
             this.BirthDate = obj.BirthDate;
             this.LastBath = obj.LastBath;
             this.NextUpgrade = obj.NextUpgrade;
+            this.ProfilePic = obj.ProfilePic;
             this.Name = obj.Name;
             this.CompanyId = obj.CompanyId;
             this.ArbitraryCollectionOfStrings = obj.ArbitraryCollectionOfStrings;

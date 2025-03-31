@@ -373,6 +373,7 @@ export interface Person extends Model<typeof metadata.Person> {
   lastBath: Date | null
   nextUpgrade: Date | null
   personStats: PersonStats | null
+  profilePic: string | null
   
   /** Calculated name of the person. eg., Mr. Michael Stokesbary. */
   name: string | null

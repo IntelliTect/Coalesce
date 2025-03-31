@@ -15,6 +15,7 @@
 - Added a `filter` prop to `c-input` for enum inputs to restrict the values available for selection.
 - Const fields in C#, if annotated with `[Coalesce]`, are now emitted into generated TypeScript.
 - `ViewModel.$loadCleanData()` now returns the VM instance, to support call chaining.
+- `c-admin-display` now renders clickable links for binary values that will download the value as a file, instead of only showing the length in bytes.
 
 # 5.3.3
 

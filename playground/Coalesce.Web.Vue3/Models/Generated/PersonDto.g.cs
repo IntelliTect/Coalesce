@@ -5,10 +5,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
+using System.Text.Json.Serialization;
 
 namespace Coalesce.Web.Vue3.Models
 {
-    public partial class PersonParameter : GeneratedParameterDto<Coalesce.Domain.Person>
+    public partial class PersonParameter : SparseDto, IGeneratedParameterDto<Coalesce.Domain.Person>
     {
         public PersonParameter() { }
 
@@ -95,11 +96,9 @@ namespace Coalesce.Web.Vue3.Models
         /// <summary>
         /// Map from the current DTO instance to the domain object.
         /// </summary>
-        public override void MapTo(Coalesce.Domain.Person entity, IMappingContext context)
+        public void MapTo(Coalesce.Domain.Person entity, IMappingContext context)
         {
             var includes = context.Includes;
-
-            if (OnUpdate(entity, context)) return;
 
             if (ShouldMapTo(nameof(PersonId))) entity.PersonId = (PersonId ?? entity.PersonId);
             if (ShouldMapTo(nameof(Title))) entity.Title = Title;
@@ -119,15 +118,22 @@ namespace Coalesce.Web.Vue3.Models
         /// <summary>
         /// Map from the current DTO instance to a new instance of the domain object.
         /// </summary>
-        public override Coalesce.Domain.Person MapToNew(IMappingContext context)
+        public Coalesce.Domain.Person MapToNew(IMappingContext context)
         {
             var entity = new Coalesce.Domain.Person();
             MapTo(entity, context);
             return entity;
         }
+
+        public Coalesce.Domain.Person MapToModelOrNew(Coalesce.Domain.Person obj, IMappingContext context)
+        {
+            if (obj is null) return MapToNew(context);
+            MapTo(obj, context);
+            return obj;
+        }
     }
 
-    public partial class PersonResponse : GeneratedResponseDto<Coalesce.Domain.Person>
+    public partial class PersonResponse : IGeneratedResponseDto<Coalesce.Domain.Person>
     {
         public PersonResponse() { }
 
@@ -153,7 +159,7 @@ namespace Coalesce.Web.Vue3.Models
         /// <summary>
         /// Map from the domain object to the properties of the current DTO instance.
         /// </summary>
-        public override void MapFrom(Coalesce.Domain.Person obj, IMappingContext context, IncludeTree tree = null)
+        public void MapFrom(Coalesce.Domain.Person obj, IMappingContext context, IncludeTree tree = null)
         {
             if (obj == null) return;
             var includes = context.Includes;

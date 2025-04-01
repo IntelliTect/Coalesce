@@ -65,6 +65,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
             return reflectionRepository?.GetOrAddType(symbol) ?? new SymbolTypeViewModel(reflectionRepository, symbol);
         }
 
+        public override TypeViewModel? BaseType => Symbol.BaseType is null ? null : GetOrCreate(ReflectionRepository, Symbol.BaseType);
+
         public override IAttributeProvider Assembly
             => Symbol.ContainingAssembly.GetAttributeProvider();
 

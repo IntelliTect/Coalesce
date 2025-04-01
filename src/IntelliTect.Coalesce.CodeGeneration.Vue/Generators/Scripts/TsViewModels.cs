@@ -41,7 +41,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
 
             using (b.Block("const viewModelTypeLookup = ViewModel.typeLookup ="))
             {
-                foreach (var model in Model.CrudApiBackedClasses.OrderBy(e => e.ClientTypeName))
+                foreach (var model in Model.CrudApiBackedClasses.Where(e => !e.Type.IsAbstract).OrderBy(e => e.ClientTypeName))
                 {
                     b.Line($"{model.ViewModelClassName}: {model.ViewModelClassName}ViewModel,");
                 }
@@ -72,6 +72,12 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
             string modelName = new VueType(model.Type).TsType(modelPrefix: "$models");
             string viewModelName = new VueType(model.Type).TsType(viewModel: true);
             string metadataName = $"$metadata.{name}";
+
+            if (model.Type.IsAbstract)
+            {
+                b.Line($"export type {viewModelName} = {string.Join(" | ", model.ClientDerivedTypes.Select(t => new VueType(t.Type).TsType(viewModel: true)))}");
+                return;
+            }
 
             using (b.Block($"export interface {viewModelName} extends {modelName}"))
             {

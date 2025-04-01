@@ -60,7 +60,7 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses
 
 #nullable disable
 
-    public partial class ValidationTargetDtoGen : GeneratedParameterDto<ValidationTarget>
+    public partial class ValidationTargetDtoGen : SparseDto, IGeneratedParameterDto<ValidationTarget>
     {
         public ValidationTargetDtoGen() { }
 
@@ -111,14 +111,14 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses
         /// <summary>
         /// Map from the current DTO instance to the domain object.
         /// </summary>
-        public override void MapTo(ValidationTarget entity, IMappingContext context)
+        public void MapTo(ValidationTarget entity, IMappingContext context)
             => throw new NotImplementedException(
                 "This 'generated dto' is actually hand-written for these tests. Mapping methods are unused.");
 
         /// <summary>
         /// Map from the current DTO instance to a new instance of the domain object.
         /// </summary>
-        public override ValidationTarget MapToNew(IMappingContext context)
+        public ValidationTarget MapToNew(IMappingContext context)
         {
             var entity = new ValidationTarget();
             MapTo(entity, context);
@@ -126,7 +126,7 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses
         }
     }
 
-    public partial class ValidationTargetChildDtoGen : GeneratedParameterDto<ValidationTargetChild>
+    public partial class ValidationTargetChildDtoGen : SparseDto, IGeneratedParameterDto<ValidationTargetChild>
     {
         public ValidationTargetChildDtoGen() { }
 
@@ -147,11 +147,9 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses
         /// <summary>
         /// Map from the current DTO instance to the domain object.
         /// </summary>
-        public override void MapTo(ValidationTargetChild entity, IMappingContext context)
+        public void MapTo(ValidationTargetChild entity, IMappingContext context)
         {
             var includes = context.Includes;
-
-            if (OnUpdate(entity, context)) return;
 
             if (ShouldMapTo(nameof(RequiredVal))) entity.RequiredVal = (RequiredVal ?? entity.RequiredVal);
             if (ShouldMapTo(nameof(String))) entity.String = String;
@@ -160,7 +158,7 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses
         /// <summary>
         /// Map from the current DTO instance to a new instance of the domain object.
         /// </summary>
-        public override ValidationTargetChild MapToNew(IMappingContext context)
+        public ValidationTargetChild MapToNew(IMappingContext context)
         {
             var entity = new ValidationTargetChild();
             MapTo(entity, context);

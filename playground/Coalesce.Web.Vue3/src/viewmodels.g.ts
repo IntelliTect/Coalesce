@@ -3,6 +3,36 @@ import * as $models from './models.g'
 import * as $apiClients from './api-clients.g'
 import { ViewModel, ListViewModel, ViewModelCollection, ServiceViewModel, type DeepPartial, defineProps } from 'coalesce-vue/lib/viewmodel'
 
+export type AbstractClassViewModel = AbstractClassImplViewModel
+export class AbstractClassListViewModel extends ListViewModel<$models.AbstractClass, $apiClients.AbstractClassApiClient, AbstractClassViewModel> {
+  
+  constructor() {
+    super($metadata.AbstractClass, new $apiClients.AbstractClassApiClient())
+  }
+}
+
+
+export interface AbstractClassImplViewModel extends $models.AbstractClassImpl {
+  implString: string | null;
+  id: number | null;
+  abstractClassString: string | null;
+}
+export class AbstractClassImplViewModel extends ViewModel<$models.AbstractClassImpl, $apiClients.AbstractClassImplApiClient, number> implements $models.AbstractClassImpl  {
+  
+  constructor(initialData?: DeepPartial<$models.AbstractClassImpl> | null) {
+    super($metadata.AbstractClassImpl, new $apiClients.AbstractClassImplApiClient(), initialData)
+  }
+}
+defineProps(AbstractClassImplViewModel, $metadata.AbstractClassImpl)
+
+export class AbstractClassImplListViewModel extends ListViewModel<$models.AbstractClassImpl, $apiClients.AbstractClassImplApiClient, AbstractClassImplViewModel> {
+  
+  constructor() {
+    super($metadata.AbstractClassImpl, new $apiClients.AbstractClassImplApiClient())
+  }
+}
+
+
 export interface AuditLogViewModel extends $models.AuditLog {
   message: string | null;
   userId: number | null;
@@ -62,6 +92,47 @@ export class AuditLogPropertyListViewModel extends ListViewModel<$models.AuditLo
   
   constructor() {
     super($metadata.AuditLogProperty, new $apiClients.AuditLogPropertyApiClient())
+  }
+}
+
+
+export interface BaseClassViewModel extends $models.BaseClass {
+  id: number | null;
+  baseClassString: string | null;
+}
+export class BaseClassViewModel extends ViewModel<$models.BaseClass, $apiClients.BaseClassApiClient, number> implements $models.BaseClass  {
+  
+  constructor(initialData?: DeepPartial<$models.BaseClass> | null) {
+    super($metadata.BaseClass, new $apiClients.BaseClassApiClient(), initialData)
+  }
+}
+defineProps(BaseClassViewModel, $metadata.BaseClass)
+
+export class BaseClassListViewModel extends ListViewModel<$models.BaseClass, $apiClients.BaseClassApiClient, BaseClassViewModel> {
+  
+  constructor() {
+    super($metadata.BaseClass, new $apiClients.BaseClassApiClient())
+  }
+}
+
+
+export interface BaseClassDerivedViewModel extends $models.BaseClassDerived {
+  derivedClassString: string | null;
+  id: number | null;
+  baseClassString: string | null;
+}
+export class BaseClassDerivedViewModel extends ViewModel<$models.BaseClassDerived, $apiClients.BaseClassDerivedApiClient, number> implements $models.BaseClassDerived  {
+  
+  constructor(initialData?: DeepPartial<$models.BaseClassDerived> | null) {
+    super($metadata.BaseClassDerived, new $apiClients.BaseClassDerivedApiClient(), initialData)
+  }
+}
+defineProps(BaseClassDerivedViewModel, $metadata.BaseClassDerived)
+
+export class BaseClassDerivedListViewModel extends ListViewModel<$models.BaseClassDerived, $apiClients.BaseClassDerivedApiClient, BaseClassDerivedViewModel> {
+  
+  constructor() {
+    super($metadata.BaseClassDerived, new $apiClients.BaseClassDerivedApiClient())
   }
 }
 
@@ -858,8 +929,11 @@ export class WeatherServiceViewModel extends ServiceViewModel<typeof $metadata.W
 
 
 const viewModelTypeLookup = ViewModel.typeLookup = {
+  AbstractClassImpl: AbstractClassImplViewModel,
   AuditLog: AuditLogViewModel,
   AuditLogProperty: AuditLogPropertyViewModel,
+  BaseClass: BaseClassViewModel,
+  BaseClassDerived: BaseClassDerivedViewModel,
   Case: CaseViewModel,
   CaseDto: CaseDtoViewModel,
   CaseDtoStandalone: CaseDtoStandaloneViewModel,
@@ -875,8 +949,12 @@ const viewModelTypeLookup = ViewModel.typeLookup = {
   ZipCode: ZipCodeViewModel,
 }
 const listViewModelTypeLookup = ListViewModel.typeLookup = {
+  AbstractClass: AbstractClassListViewModel,
+  AbstractClassImpl: AbstractClassImplListViewModel,
   AuditLog: AuditLogListViewModel,
   AuditLogProperty: AuditLogPropertyListViewModel,
+  BaseClass: BaseClassListViewModel,
+  BaseClassDerived: BaseClassDerivedListViewModel,
   Case: CaseListViewModel,
   CaseDto: CaseDtoListViewModel,
   CaseDtoStandalone: CaseDtoStandaloneListViewModel,

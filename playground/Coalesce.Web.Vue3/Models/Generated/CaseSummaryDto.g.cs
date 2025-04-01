@@ -5,10 +5,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
+using System.Text.Json.Serialization;
 
 namespace Coalesce.Web.Vue3.Models
 {
-    public partial class CaseSummaryParameter : GeneratedParameterDto<Coalesce.Domain.CaseSummary>
+    public partial class CaseSummaryParameter : SparseDto, IGeneratedParameterDto<Coalesce.Domain.CaseSummary>
     {
         public CaseSummaryParameter() { }
 
@@ -53,11 +54,9 @@ namespace Coalesce.Web.Vue3.Models
         /// <summary>
         /// Map from the current DTO instance to the domain object.
         /// </summary>
-        public override void MapTo(Coalesce.Domain.CaseSummary entity, IMappingContext context)
+        public void MapTo(Coalesce.Domain.CaseSummary entity, IMappingContext context)
         {
             var includes = context.Includes;
-
-            if (OnUpdate(entity, context)) return;
 
             if (ShouldMapTo(nameof(CaseSummaryId))) entity.CaseSummaryId = (CaseSummaryId ?? entity.CaseSummaryId);
             if (ShouldMapTo(nameof(OpenCases))) entity.OpenCases = (OpenCases ?? entity.OpenCases);
@@ -70,15 +69,22 @@ namespace Coalesce.Web.Vue3.Models
         /// <summary>
         /// Map from the current DTO instance to a new instance of the domain object.
         /// </summary>
-        public override Coalesce.Domain.CaseSummary MapToNew(IMappingContext context)
+        public Coalesce.Domain.CaseSummary MapToNew(IMappingContext context)
         {
             var entity = new Coalesce.Domain.CaseSummary();
             MapTo(entity, context);
             return entity;
         }
+
+        public Coalesce.Domain.CaseSummary MapToModelOrNew(Coalesce.Domain.CaseSummary obj, IMappingContext context)
+        {
+            if (obj is null) return MapToNew(context);
+            MapTo(obj, context);
+            return obj;
+        }
     }
 
-    public partial class CaseSummaryResponse : GeneratedResponseDto<Coalesce.Domain.CaseSummary>
+    public partial class CaseSummaryResponse : IGeneratedResponseDto<Coalesce.Domain.CaseSummary>
     {
         public CaseSummaryResponse() { }
 
@@ -92,7 +98,7 @@ namespace Coalesce.Web.Vue3.Models
         /// <summary>
         /// Map from the domain object to the properties of the current DTO instance.
         /// </summary>
-        public override void MapFrom(Coalesce.Domain.CaseSummary obj, IMappingContext context, IncludeTree tree = null)
+        public void MapFrom(Coalesce.Domain.CaseSummary obj, IMappingContext context, IncludeTree tree = null)
         {
             if (obj == null) return;
             var includes = context.Includes;

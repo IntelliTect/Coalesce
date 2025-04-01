@@ -1357,7 +1357,7 @@ export interface BulkSaveRequestRawItem {
 export abstract class ListViewModel<
   TModel extends Model<ModelType> = any,
   TApi extends ModelApiClient<TModel> = ModelApiClient<TModel>,
-  TItem extends ViewModel<TModel, TApi> = ViewModel<TModel, TApi>
+  TItem extends ViewModel = ViewModel<TModel, TApi>
 > {
   /** Make nonreactive with Vue, preventing ViewModel instance from being wrapped with a Proxy.
    * Instead, we make individual members reactive with `reactive`/`ref`.
@@ -1826,7 +1826,20 @@ export class ViewModelFactory {
       );
     }
 
-    const vmCtor = ViewModel.typeLookup[typeName];
+    let vmCtor = ViewModel.typeLookup[typeName];
+    if (!vmCtor) {
+      // If the ViewModel type is missing but the type has metadata,
+      // use the type's metadata. This case happens if `typeName` is abstract
+      // and therefore has no concrete ViewModel type.
+      if ("$metadata" in initialData) {
+        vmCtor = ViewModel.typeLookup[initialData.$metadata.name];
+      }
+    }
+    if (!vmCtor) {
+      throw Error(
+        `Type ${typeName} does not have a generated ViewModel class. If this is an abstract type, use one of the type's concrete implementations instead.`
+      );
+    }
     const vm = new vmCtor() as unknown as ViewModel;
     map.set(initialData, vm);
 
@@ -1917,7 +1930,11 @@ function viewModelCollectionMapItems<T extends ViewModel, TModel extends Model>(
       );
     }
     // Sanity check. Probably not crucial if this ends up causing issues. A warning would probably suffice too.
-    else if ("$metadata" in val && val.$metadata != collectedTypeMeta) {
+    else if (
+      "$metadata" in val &&
+      val.$metadata != collectedTypeMeta &&
+      !collectedTypeMeta.derivedTypes?.includes(val.$metadata)
+    ) {
       throw Error(
         `Type mismatch - attempted to assign a ${
           val.$metadata.name

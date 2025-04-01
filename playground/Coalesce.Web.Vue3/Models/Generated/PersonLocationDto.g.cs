@@ -5,10 +5,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
+using System.Text.Json.Serialization;
 
 namespace Coalesce.Web.Vue3.Models
 {
-    public partial class PersonLocationParameter : GeneratedParameterDto<Coalesce.Domain.PersonLocation>
+    public partial class PersonLocationParameter : SparseDto, IGeneratedParameterDto<Coalesce.Domain.PersonLocation>
     {
         public PersonLocationParameter() { }
 
@@ -29,11 +30,9 @@ namespace Coalesce.Web.Vue3.Models
         /// <summary>
         /// Map from the current DTO instance to the domain object.
         /// </summary>
-        public override void MapTo(Coalesce.Domain.PersonLocation entity, IMappingContext context)
+        public void MapTo(Coalesce.Domain.PersonLocation entity, IMappingContext context)
         {
             var includes = context.Includes;
-
-            if (OnUpdate(entity, context)) return;
 
             if (ShouldMapTo(nameof(Latitude))) entity.Latitude = (Latitude ?? entity.Latitude);
             if (ShouldMapTo(nameof(Longitude))) entity.Longitude = (Longitude ?? entity.Longitude);
@@ -42,15 +41,22 @@ namespace Coalesce.Web.Vue3.Models
         /// <summary>
         /// Map from the current DTO instance to a new instance of the domain object.
         /// </summary>
-        public override Coalesce.Domain.PersonLocation MapToNew(IMappingContext context)
+        public Coalesce.Domain.PersonLocation MapToNew(IMappingContext context)
         {
             var entity = new Coalesce.Domain.PersonLocation();
             MapTo(entity, context);
             return entity;
         }
+
+        public Coalesce.Domain.PersonLocation MapToModelOrNew(Coalesce.Domain.PersonLocation obj, IMappingContext context)
+        {
+            if (obj is null) return MapToNew(context);
+            MapTo(obj, context);
+            return obj;
+        }
     }
 
-    public partial class PersonLocationResponse : GeneratedResponseDto<Coalesce.Domain.PersonLocation>
+    public partial class PersonLocationResponse : IGeneratedResponseDto<Coalesce.Domain.PersonLocation>
     {
         public PersonLocationResponse() { }
 
@@ -60,7 +66,7 @@ namespace Coalesce.Web.Vue3.Models
         /// <summary>
         /// Map from the domain object to the properties of the current DTO instance.
         /// </summary>
-        public override void MapFrom(Coalesce.Domain.PersonLocation obj, IMappingContext context, IncludeTree tree = null)
+        public void MapFrom(Coalesce.Domain.PersonLocation obj, IMappingContext context, IncludeTree tree = null)
         {
             if (obj == null) return;
             var includes = context.Includes;

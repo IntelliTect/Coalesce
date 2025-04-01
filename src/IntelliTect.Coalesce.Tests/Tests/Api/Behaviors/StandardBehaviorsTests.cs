@@ -97,13 +97,13 @@ namespace IntelliTect.Coalesce.Tests.Tests.Api.Behaviors
             Assert.Equal((SaveKind.Update, 42), result);
         }
 
-        class RequiredAndInitModelParameterDto : GeneratedParameterDto<RequiredAndInitModel>
+        class RequiredAndInitModelParameterDto : IParameterDto<RequiredAndInitModel>
         {
             public int Id { get; set; }
 
-            public override void MapTo(RequiredAndInitModel obj, IMappingContext context) => throw new System.NotImplementedException();
+            public void MapTo(RequiredAndInitModel obj, IMappingContext context) => throw new System.NotImplementedException();
 
-            public override RequiredAndInitModel MapToNew(IMappingContext context) => throw new System.NotImplementedException();
+            public RequiredAndInitModel MapToNew(IMappingContext context) => throw new System.NotImplementedException();
         }
 
         [Fact]
@@ -119,13 +119,13 @@ namespace IntelliTect.Coalesce.Tests.Tests.Api.Behaviors
             Assert.Equal((SaveKind.Update, 42), result);
         }
 
-        class StandaloneReadWriteDto : GeneratedParameterDto<StandaloneReadWrite>
+        class StandaloneReadWriteDto : IParameterDto<StandaloneReadWrite>
         {
             public int Id { get; set; }
 
-            public override void MapTo(StandaloneReadWrite obj, IMappingContext context) => throw new System.NotImplementedException();
+            public void MapTo(StandaloneReadWrite obj, IMappingContext context) => throw new System.NotImplementedException();
 
-            public override StandaloneReadWrite MapToNew(IMappingContext context) => throw new System.NotImplementedException();
+            public StandaloneReadWrite MapToNew(IMappingContext context) => throw new System.NotImplementedException();
         }
 
         [Fact]

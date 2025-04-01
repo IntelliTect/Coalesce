@@ -31,7 +31,7 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
 
 #nullable disable
 
-    public partial class StringIdentityDtoGen : GeneratedParameterDto<StringIdentity>
+    public partial class StringIdentityDtoGen : SparseDto, IGeneratedParameterDto<StringIdentity>
     {
         public StringIdentityDtoGen() { }
 
@@ -81,14 +81,14 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         /// <summary>
         /// Map from the current DTO instance to the domain object.
         /// </summary>
-        public override void MapTo(StringIdentity entity, IMappingContext context)
+        public void MapTo(StringIdentity entity, IMappingContext context)
             => throw new NotImplementedException(
                 "This 'generated dto' is actually hand-written for these tests. Mapping methods are unused.");
 
         /// <summary>
         /// Map from the current DTO instance to a new instance of the domain object.
         /// </summary>
-        public override StringIdentity MapToNew(IMappingContext context)
+        public StringIdentity MapToNew(IMappingContext context)
         {
             var entity = new StringIdentity();
             MapTo(entity, context);

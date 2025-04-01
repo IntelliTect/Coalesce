@@ -5,10 +5,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
+using System.Text.Json.Serialization;
 
 namespace Coalesce.Web.Vue3.Models
 {
-    public partial class CaseParameter : GeneratedParameterDto<Coalesce.Domain.Case>
+    public partial class CaseParameter : SparseDto, IGeneratedParameterDto<Coalesce.Domain.Case>
     {
         public CaseParameter() { }
 
@@ -101,11 +102,9 @@ namespace Coalesce.Web.Vue3.Models
         /// <summary>
         /// Map from the current DTO instance to the domain object.
         /// </summary>
-        public override void MapTo(Coalesce.Domain.Case entity, IMappingContext context)
+        public void MapTo(Coalesce.Domain.Case entity, IMappingContext context)
         {
             var includes = context.Includes;
-
-            if (OnUpdate(entity, context)) return;
 
             if (ShouldMapTo(nameof(CaseKey))) entity.CaseKey = (CaseKey ?? entity.CaseKey);
             if (ShouldMapTo(nameof(Title))) entity.Title = Title;
@@ -126,15 +125,22 @@ namespace Coalesce.Web.Vue3.Models
         /// <summary>
         /// Map from the current DTO instance to a new instance of the domain object.
         /// </summary>
-        public override Coalesce.Domain.Case MapToNew(IMappingContext context)
+        public Coalesce.Domain.Case MapToNew(IMappingContext context)
         {
             var entity = new Coalesce.Domain.Case();
             MapTo(entity, context);
             return entity;
         }
+
+        public Coalesce.Domain.Case MapToModelOrNew(Coalesce.Domain.Case obj, IMappingContext context)
+        {
+            if (obj is null) return MapToNew(context);
+            MapTo(obj, context);
+            return obj;
+        }
     }
 
-    public partial class CaseResponse : GeneratedResponseDto<Coalesce.Domain.Case>
+    public partial class CaseResponse : IGeneratedResponseDto<Coalesce.Domain.Case>
     {
         public CaseResponse() { }
 
@@ -163,7 +169,7 @@ namespace Coalesce.Web.Vue3.Models
         /// <summary>
         /// Map from the domain object to the properties of the current DTO instance.
         /// </summary>
-        public override void MapFrom(Coalesce.Domain.Case obj, IMappingContext context, IncludeTree tree = null)
+        public void MapFrom(Coalesce.Domain.Case obj, IMappingContext context, IncludeTree tree = null)
         {
             if (obj == null) return;
             var includes = context.Includes;

@@ -104,7 +104,7 @@ namespace IntelliTect.Coalesce
             var pk = ClassViewModel.PrimaryKey ?? throw new InvalidOperationException("Data sources cannot save items that lack a PK");
             PropertyViewModel dtoPkInfo;
 
-            if (incomingDto is GeneratedParameterDto<T> genDto)
+            if (incomingDto is IGeneratedParameterDto<T> genDto)
             {
                 // For generated DTOs, simplify by matching the PK name since it will always match.
                 dtoPkInfo = dtoClassViewModel.PropertyByName(pk.Name)!;

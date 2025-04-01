@@ -57,7 +57,7 @@ export function useAdminTable(list: MaybeRef<ListViewModel>) {
     return router.resolve({
       name: "coalesce-admin-item",
       params: {
-        type: metadata.value.name,
+        type: item?.$metadata.name ?? metadata.value.name,
         id: item?.$primaryKey,
       },
       query: Object.fromEntries(

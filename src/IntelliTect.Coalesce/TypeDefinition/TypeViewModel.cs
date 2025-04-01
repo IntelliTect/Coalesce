@@ -90,6 +90,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public abstract TypeViewModel[]? GenericArgumentsFor(Type type);
 
+        public abstract TypeViewModel? BaseType { get; }
+
         public bool IsA<T>() => IsA(typeof(T));
 
         /// <summary>

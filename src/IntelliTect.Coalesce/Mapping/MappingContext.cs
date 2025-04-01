@@ -1,10 +1,13 @@
 ﻿using IntelliTect.Coalesce.DataAnnotations;
+using IntelliTect.Coalesce.TypeDefinition;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Text;
+using System.Text.Json.Serialization;
+using System.Text.Json.Serialization.Metadata;
 
 namespace IntelliTect.Coalesce.Mapping
 {
@@ -19,6 +22,7 @@ namespace IntelliTect.Coalesce.Mapping
         private Dictionary<(object, IncludeTree?, Type), object> _mappedObjects { get; } = new();
         private Dictionary<string, bool>? _roleCache;
         private Dictionary<Type, IPropertyRestriction>? _restrictionCache;
+        private Dictionary<Type, Type>? _responseDtoTypes;
 
         public MappingContext(
             ClaimsPrincipal? user = null, 
@@ -76,6 +80,27 @@ namespace IntelliTect.Coalesce.Mapping
             _restrictionCache.Add(type, restriction);
 
             return restriction;
+        }
+
+        public Type GetRealDtoType<TDto, T>(T entity)
+            where T : class
+            where TDto : class, IResponseDto<T>, new()
+        {
+            Type entityType = entity.GetType();
+            _responseDtoTypes ??= new();
+
+            if (_responseDtoTypes.TryGetValue(entityType, out Type? ret)) return ret;
+
+            var candidates = typeof(TDto).GetAttributes<JsonDerivedTypeAttribute>();
+            Type exactDtoType = typeof(IResponseDto<>).MakeGenericType(entityType);
+            var chosen = candidates
+                .Select(c => c.Instance)
+                .FirstOrDefault(c => c.DerivedType.IsAssignableTo(exactDtoType))?.DerivedType 
+                ?? typeof(TDto);
+
+            _responseDtoTypes.TryAdd(entityType, chosen);
+
+            return chosen;
         }
     }
 }

@@ -3,6 +3,16 @@ import * as $models from './models.g'
 import { ModelApiClient, ServiceApiClient } from 'coalesce-vue/lib/api-client'
 import type { AxiosPromise, AxiosRequestConfig, ItemResult, ListResult } from 'coalesce-vue/lib/api-client'
 
+export class AbstractClassApiClient extends ModelApiClient<$models.AbstractClass> {
+  constructor() { super($metadata.AbstractClass) }
+}
+
+
+export class AbstractClassImplApiClient extends ModelApiClient<$models.AbstractClassImpl> {
+  constructor() { super($metadata.AbstractClassImpl) }
+}
+
+
 export class AuditLogApiClient extends ModelApiClient<$models.AuditLog> {
   constructor() { super($metadata.AuditLog) }
 }
@@ -10,6 +20,16 @@ export class AuditLogApiClient extends ModelApiClient<$models.AuditLog> {
 
 export class AuditLogPropertyApiClient extends ModelApiClient<$models.AuditLogProperty> {
   constructor() { super($metadata.AuditLogProperty) }
+}
+
+
+export class BaseClassApiClient extends ModelApiClient<$models.BaseClass> {
+  constructor() { super($metadata.BaseClass) }
+}
+
+
+export class BaseClassDerivedApiClient extends ModelApiClient<$models.BaseClassDerived> {
+  constructor() { super($metadata.BaseClassDerived) }
 }
 
 

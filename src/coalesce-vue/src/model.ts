@@ -355,6 +355,16 @@ class ModelConversionVisitor extends Visitor<any, any[] | null, any | null> {
       }
     }
 
+    if ("$type" in value) {
+      meta =
+        ("derivedTypes" in meta &&
+          (meta.derivedTypes?.find((t) => t.name == value.$type) as TMeta)) ||
+        meta;
+      if (this.mode == "convert") {
+        delete value.$type;
+      }
+    }
+
     const props = meta.props;
 
     let target: Indexable<Model<TMeta>>;

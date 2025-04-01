@@ -160,8 +160,8 @@ namespace IntelliTect.Coalesce.Models
             // we pull the attributes from the DTO since:
             // 1) The DTO props probably dont map 1-to-1 to the model props
             // 2) The developer wrote the custom DTO and can put attributes directly on it.
-            var attributeSource = typeViewModel.IsA(typeof(GeneratedParameterDto<>))
-                ? typeViewModel.GenericArgumentsFor(typeof(GeneratedParameterDto<>))![0].ClassViewModel!
+            var attributeSource = typeViewModel.IsA(typeof(IGeneratedParameterDto<>))
+                ? typeViewModel.GenericArgumentsFor(typeof(IGeneratedParameterDto<>))![0].ClassViewModel!
                 : cvm;
 
             foreach (var prop in cvm.ClientProperties)

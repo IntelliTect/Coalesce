@@ -83,6 +83,35 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public ClassViewModel BaseViewModel => DtoBaseViewModel ?? this;
 
+        public IEnumerable<ClassViewModel> ClientDerivedTypes => ReflectionRepository?.ClientClasses
+            .Where(cvm =>
+            {
+                var baseType = cvm.Type.BaseType;
+                while (baseType != null)
+                {
+                    if (baseType == Type) return true;
+                    baseType = baseType.BaseType;
+                }
+                return false;
+            }) ?? [];
+
+        public IEnumerable<ClassViewModel> ClientBaseTypes
+        {
+            get
+            {
+                var baseType = Type.BaseType;
+                while (baseType != null)
+                {
+                    var cvm = baseType.ClassViewModel;
+                    if (cvm is not null && ReflectionRepository?.ClientClasses.Contains(cvm) == true)
+                    {
+                        yield return cvm;
+                    }
+                    baseType = baseType.BaseType;
+                }
+            }
+        }
+
         /// <summary>
         /// If this class implements IClassDto, return true.
         /// </summary>

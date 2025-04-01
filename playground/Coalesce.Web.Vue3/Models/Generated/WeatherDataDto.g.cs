@@ -5,10 +5,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
+using System.Text.Json.Serialization;
 
 namespace Coalesce.Web.Vue3.Models
 {
-    public partial class WeatherDataParameter : GeneratedParameterDto<Coalesce.Domain.Services.WeatherData>
+    public partial class WeatherDataParameter : SparseDto, IGeneratedParameterDto<Coalesce.Domain.Services.WeatherData>
     {
         public WeatherDataParameter() { }
 
@@ -35,11 +36,9 @@ namespace Coalesce.Web.Vue3.Models
         /// <summary>
         /// Map from the current DTO instance to the domain object.
         /// </summary>
-        public override void MapTo(Coalesce.Domain.Services.WeatherData entity, IMappingContext context)
+        public void MapTo(Coalesce.Domain.Services.WeatherData entity, IMappingContext context)
         {
             var includes = context.Includes;
-
-            if (OnUpdate(entity, context)) return;
 
             if (ShouldMapTo(nameof(TempFahrenheit))) entity.TempFahrenheit = (TempFahrenheit ?? entity.TempFahrenheit);
             if (ShouldMapTo(nameof(Humidity))) entity.Humidity = (Humidity ?? entity.Humidity);
@@ -49,15 +48,22 @@ namespace Coalesce.Web.Vue3.Models
         /// <summary>
         /// Map from the current DTO instance to a new instance of the domain object.
         /// </summary>
-        public override Coalesce.Domain.Services.WeatherData MapToNew(IMappingContext context)
+        public Coalesce.Domain.Services.WeatherData MapToNew(IMappingContext context)
         {
             var entity = new Coalesce.Domain.Services.WeatherData();
             MapTo(entity, context);
             return entity;
         }
+
+        public Coalesce.Domain.Services.WeatherData MapToModelOrNew(Coalesce.Domain.Services.WeatherData obj, IMappingContext context)
+        {
+            if (obj is null) return MapToNew(context);
+            MapTo(obj, context);
+            return obj;
+        }
     }
 
-    public partial class WeatherDataResponse : GeneratedResponseDto<Coalesce.Domain.Services.WeatherData>
+    public partial class WeatherDataResponse : IGeneratedResponseDto<Coalesce.Domain.Services.WeatherData>
     {
         public WeatherDataResponse() { }
 
@@ -68,7 +74,7 @@ namespace Coalesce.Web.Vue3.Models
         /// <summary>
         /// Map from the domain object to the properties of the current DTO instance.
         /// </summary>
-        public override void MapFrom(Coalesce.Domain.Services.WeatherData obj, IMappingContext context, IncludeTree tree = null)
+        public void MapFrom(Coalesce.Domain.Services.WeatherData obj, IMappingContext context, IncludeTree tree = null)
         {
             if (obj == null) return;
             var includes = context.Includes;

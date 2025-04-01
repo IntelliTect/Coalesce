@@ -106,6 +106,12 @@ export interface CustomReferenceTypeBase extends Metadata {
    * To get a textual representation of any object, use function `modelDisplay` from the `model` module.
    */
   readonly displayProp?: Property;
+
+  /** The types that this type inherits from. */
+  readonly baseTypes?: CustomReferenceTypeBase[];
+
+  /** The types that inherit this type. */
+  readonly derivedTypes?: CustomReferenceTypeBase[];
 }
 
 export interface ApiRoutedType {

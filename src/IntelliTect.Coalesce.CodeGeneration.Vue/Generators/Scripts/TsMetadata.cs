@@ -117,6 +117,32 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                 // This might not be defined for external types, because sometimes it just doesn't make sense. We'll accommodate on the client.
                 b.Line($"get displayProp() {{ return this.props.{model.ListTextProperty.JsVariable} }}, ");
             }
+
+            var derivedTypes = model.ClientDerivedTypes.ToList();
+            if (derivedTypes.Any())
+            {
+                using (b.Line("get derivedTypes() { return [").Indented())
+                {
+                    foreach (var type in derivedTypes)
+                    {
+                        b.Append(GetClassMetadataRef(type)).Line(",");
+                    }
+                }
+                b.Line("]},");
+            }
+
+            var baseTypes = model.ClientBaseTypes.ToList();
+            if (baseTypes.Any())
+            {
+                using (b.Line("get baseTypes() { return [").Indented())
+                {
+                    foreach (var type in baseTypes)
+                    {
+                        b.Append(GetClassMetadataRef(type)).Line(",");
+                    }
+                }
+                b.Line("]},");
+            }
         }
 
         private void WriteExternalTypeMetadata(TypeScriptCodeBuilder b, ClassViewModel model)

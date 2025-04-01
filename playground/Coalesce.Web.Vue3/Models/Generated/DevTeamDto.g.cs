@@ -5,10 +5,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
+using System.Text.Json.Serialization;
 
 namespace Coalesce.Web.Vue3.Models
 {
-    public partial class DevTeamParameter : GeneratedParameterDto<Coalesce.Domain.External.DevTeam>
+    public partial class DevTeamParameter : SparseDto, IGeneratedParameterDto<Coalesce.Domain.External.DevTeam>
     {
         public DevTeamParameter() { }
 
@@ -29,11 +30,9 @@ namespace Coalesce.Web.Vue3.Models
         /// <summary>
         /// Map from the current DTO instance to the domain object.
         /// </summary>
-        public override void MapTo(Coalesce.Domain.External.DevTeam entity, IMappingContext context)
+        public void MapTo(Coalesce.Domain.External.DevTeam entity, IMappingContext context)
         {
             var includes = context.Includes;
-
-            if (OnUpdate(entity, context)) return;
 
             if (ShouldMapTo(nameof(DevTeamId))) entity.DevTeamId = (DevTeamId ?? entity.DevTeamId);
             if (ShouldMapTo(nameof(Name))) entity.Name = Name;
@@ -42,15 +41,22 @@ namespace Coalesce.Web.Vue3.Models
         /// <summary>
         /// Map from the current DTO instance to a new instance of the domain object.
         /// </summary>
-        public override Coalesce.Domain.External.DevTeam MapToNew(IMappingContext context)
+        public Coalesce.Domain.External.DevTeam MapToNew(IMappingContext context)
         {
             var entity = new Coalesce.Domain.External.DevTeam();
             MapTo(entity, context);
             return entity;
         }
+
+        public Coalesce.Domain.External.DevTeam MapToModelOrNew(Coalesce.Domain.External.DevTeam obj, IMappingContext context)
+        {
+            if (obj is null) return MapToNew(context);
+            MapTo(obj, context);
+            return obj;
+        }
     }
 
-    public partial class DevTeamResponse : GeneratedResponseDto<Coalesce.Domain.External.DevTeam>
+    public partial class DevTeamResponse : IGeneratedResponseDto<Coalesce.Domain.External.DevTeam>
     {
         public DevTeamResponse() { }
 
@@ -60,7 +66,7 @@ namespace Coalesce.Web.Vue3.Models
         /// <summary>
         /// Map from the domain object to the properties of the current DTO instance.
         /// </summary>
-        public override void MapFrom(Coalesce.Domain.External.DevTeam obj, IMappingContext context, IncludeTree tree = null)
+        public void MapFrom(Coalesce.Domain.External.DevTeam obj, IMappingContext context, IncludeTree tree = null)
         {
             if (obj == null) return;
             var includes = context.Includes;

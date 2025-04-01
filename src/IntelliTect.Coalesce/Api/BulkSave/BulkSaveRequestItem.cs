@@ -50,7 +50,7 @@ namespace IntelliTect.Coalesce.Api
         /// </summary>
         internal ClassViewModel ParamDtoClassViewModel { get; set; } = null!;
 
-        internal ClassViewModel DeclaredForClassViewModel => ParamDtoClassViewModel.Type.IsA(typeof(GeneratedParameterDto<>))
+        internal ClassViewModel DeclaredForClassViewModel => ParamDtoClassViewModel.Type.IsA(typeof(IGeneratedParameterDto<>))
             ? ClassViewModel // Strategies and annotations for generated DTOs are always declared on the entity itself
             : ParamDtoClassViewModel // Strategies and annotations for non-generated DTOs (i.e. custom DTOs) will be declared for that custom DTO.
             ;

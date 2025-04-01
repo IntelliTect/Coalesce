@@ -177,7 +177,7 @@ namespace IntelliTect.Coalesce.Helpers.Search
                     ));
                 }
             }
-            else if (propType.IsNumber || propType.IsGuid)
+            else if (propType.IsNumber || propType.IsGuid || propType.IsUri)
             {
                 var propertyClrType = propType.TypeInfo;
                 var typeConverter = System.ComponentModel.TypeDescriptor.GetConverter(propertyClrType);

@@ -86,7 +86,7 @@ namespace IntelliTect.Coalesce.Utilities
                 // passing the instanceTarget as the first param.
                 return Expression.Call(
                     method,
-                    [instanceTarget, ..(methodParams ?? [])]
+                    methodParams is null ? [instanceTarget] : [instanceTarget, .. methodParams]
                 );
             }
 
@@ -95,6 +95,16 @@ namespace IntelliTect.Coalesce.Utilities
                 method,
                 methodParams
             );
+        }
+
+        public static Expression Call(this Expression instanceTarget, string method, params Expression[] methodParams)
+        {
+            var methodInfo = instanceTarget.Type.GetMethod(
+                method,
+                methodParams.Select(p => p.Type).ToArray()
+            ) ?? throw new MissingMethodException($"Can't find method {method} on {instanceTarget.Type.FullName}");
+
+            return instanceTarget.Call(methodInfo, methodParams);
         }
 
         public static Expression Prop(this Expression instance, string prop)

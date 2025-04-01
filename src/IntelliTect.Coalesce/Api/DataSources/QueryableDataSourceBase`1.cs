@@ -1,6 +1,7 @@
 ﻿using IntelliTect.Coalesce.DataAnnotations;
 using IntelliTect.Coalesce.TypeDefinition;
 using IntelliTect.Coalesce.Utilities;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -205,9 +206,15 @@ namespace IntelliTect.Coalesce
 
                         try
                         {
+                            var typeConverter = System.ComponentModel.TypeDescriptor.GetConverter(type);
+                            if (!typeConverter.IsValid(item))
+                            {
+                                return (Success: false, Result: null);
+                            }
+
                             object result = type == typeof(Guid)
                                 ? Guid.Parse(item)
-                                : Convert.ChangeType(item, type);
+                                : typeConverter.ConvertFromString(item);
 
                             return (Success: true, Result: result);
                         }

@@ -423,12 +423,6 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                 else if (prop.GetAttributeValue<ClientValidationAttribute, int>(a => a.MaxLength) is int maxLength and not int.MinValue)
                     Max(maxLength, clientValidationError);
 
-                if (prop.GetValidationAttribute<UrlAttribute>() is (true, string urlMessage))
-                {
-                    const string urlPattern = @"^((https?|ftp):\/\/.)";
-                    rules.Add($"url: val => !val || /{urlPattern}/.test(val) {Error(clientValidationError, $"{propName} must be a valid URL.")}");
-                }
-
                 // https://emailregex.com/
                 const string emailRegex = @"^(([^<>()\[\]\\.,;:\s@""]+(\.[^<> ()\[\]\\.,;:\s@""]+)*)|("".+ ""))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$";
                 if (prop.GetAttributeValue<ClientValidationAttribute, bool>(a => a.IsEmail) == true)
@@ -483,6 +477,18 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                     if (prop.GetAttributeValue<ClientValidationAttribute, double>(a => a.MaxValue) is double maxValue and not double.MinValue)
                         Max(maxValue, false, clientValidationError);
                 }
+            }
+
+            // UrlAttribute could be on a string or a Uri
+            if (prop.GetValidationAttribute<UrlAttribute>() is (true, string urlMessage))
+            {
+                const string urlPattern = @"^((https?|ftp):\/\/.)";
+                rules.Add($"url: val => !val || /{urlPattern}/.test(val) {Error(clientValidationError, $"{propName} must be a valid URL.")}");
+            }
+            else if (prop.Type.IsUri)
+            {
+                const string uriPattern = @"^[a-zA-Z][\w+.-]*:.+";
+                rules.Add($"uri: val => !val || /{uriPattern}/.test(val) {Error(clientValidationError, $"{propName} must be a valid URI.")}");
             }
 
             return rules;

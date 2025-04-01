@@ -103,7 +103,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                 }
             }
 
-            using (b.Block($"export class {viewModelName} extends ViewModel<{modelName}, $apiClients.{name}ApiClient, {model.PrimaryKey.Type.TsType}> implements {modelName} "))
+            using (b.Block($"export class {viewModelName} extends ViewModel<{modelName}, $apiClients.{name}ApiClient, {new VueType(model.PrimaryKey.Type).TsType(modelPrefix: "$models")}> implements {modelName} "))
             {
                 if (model.ClientDataSources(Model).Any())
                 {

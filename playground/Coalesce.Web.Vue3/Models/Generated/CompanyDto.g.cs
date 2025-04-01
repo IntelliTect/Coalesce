@@ -21,7 +21,7 @@ namespace Coalesce.Web.Vue3.Models
         private string _ZipCode;
         private string _Phone;
         private string _WebsiteUrl;
-        private string _LogoUrl;
+        private System.Uri _LogoUrl;
         private bool? _IsDeleted;
 
         public int? Id
@@ -69,7 +69,7 @@ namespace Coalesce.Web.Vue3.Models
             get => _WebsiteUrl;
             set { _WebsiteUrl = value; Changed(nameof(WebsiteUrl)); }
         }
-        public string LogoUrl
+        public System.Uri LogoUrl
         {
             get => _LogoUrl;
             set { _LogoUrl = value; Changed(nameof(LogoUrl)); }
@@ -142,7 +142,7 @@ namespace Coalesce.Web.Vue3.Models
         public string ZipCode { get; set; }
         public string Phone { get; set; }
         public string WebsiteUrl { get; set; }
-        public string LogoUrl { get; set; }
+        public System.Uri LogoUrl { get; set; }
         public bool? IsDeleted { get; set; }
         public string AltName { get; set; }
         public System.Collections.Generic.ICollection<Coalesce.Web.Vue3.Models.PersonResponse> Employees { get; set; }

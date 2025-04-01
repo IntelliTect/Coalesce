@@ -108,6 +108,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public TypeDiscriminator TsTypeKind =>
             IsString ? TypeDiscriminator.String :
             IsGuid ? TypeDiscriminator.String :
+            IsUri ? TypeDiscriminator.String :
             IsByteArray ? TypeDiscriminator.Binary :
             IsNumber ? TypeDiscriminator.Number :
             IsBool ? TypeDiscriminator.Boolean :
@@ -136,81 +137,10 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
         }
 
-        [Obsolete("Deprecated")]
-        public string CsConvertFromString
-        {
-            get
-            {
-                if (IsString) return "";
-                if (IsPOCO) return "(object)";
-                if (IsEnum) return "Convert.ToInt32";
-                if (IsNumber) return "Convert.To" + Name;
-                if (IsDateTime) return "DateTime.Parse";
-                if (IsDateTimeOffset) return "DateTimeOffset.Parse";
-                if (IsBool) return "Convert.ToBoolean";
-                if (IsGuid) return "Guid.Parse";
-                return "(object)";
-            }
-        }
-
         /// <summary>
         /// True if the type is supported by Coalesce as a key type.
         /// </summary>
-        public bool IsValidKeyType => IsString || IsIntegral || IsEnum || IsGuid;
-
-        /// <summary>
-        /// Best approximation of a TypeScript type definition for the type.
-        /// </summary>
-        public string TsType
-        {
-            get
-            {
-                if (IsByteArray) return "string";
-                if (IsCollection && IsNumber) return "number[]";
-                if (IsCollection) return PureType.TsTypePlain + "[]";
-                if (IsGuid) return "string";
-                return TsTypePlain;
-            }
-        }
-
-        /// <summary>
-        /// Exrepssion that will convert from a string to the data's actual type.
-        /// </summary>
-        public string TsConvertFromString(string expression)
-        {
-            if (IsBool) return $"({expression}.toUpperCase() == 'TRUE')";
-            if (IsEnum || IsIntegral) return $"parseInt({expression})";
-            if (IsNumber) return $"parseFloat({expression})";
-            if (IsDate) return $"moment({expression})";
-            return expression;
-        }
-
-
-        /// <summary>
-        /// Best approximation of a TypeScript type definition for the type, not accounting for arrays.
-        /// Collection types will be typed as "any". Use TsType to get correct collection types.
-        /// </summary>
-        private string TsTypePlain
-        {
-            get
-            {
-                switch (TsTypeKind)
-                {
-                    case TypeDiscriminator.String: return "string";
-                    case TypeDiscriminator.Boolean: return "boolean";
-                    case TypeDiscriminator.Date: return "moment.Moment";
-                    case TypeDiscriminator.Enum: return "number";
-                    case TypeDiscriminator.Number: return "number";
-                    case TypeDiscriminator.Void: return "void";
-                    case TypeDiscriminator.File: return "File";
-                    case TypeDiscriminator.Unknown: return "any";
-                }
-
-                if (IsPOCO) return $"ViewModels.{PureType.Name}";
-                if (IsClass) return PureType.Name;
-                return "any";
-            }
-        }
+        public bool IsValidKeyType => IsString || IsIntegral || IsEnum || IsGuid || IsUri;
 
         public virtual bool IsInternalUse => this.HasAttribute<InternalUseAttribute>() || (PureType != this && PureType.IsInternalUse);
 
@@ -244,6 +174,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public bool IsString => IsA<string>();
 
         public bool IsGuid => NullableValueUnderlyingType.IsA<Guid>();
+
+        public bool IsUri => IsA<Uri>();
 
         /// <summary>
         /// True if the property is a DateTime or Nullable DateTime
@@ -353,10 +285,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
             !IsCollection && 
             !FullNamespace.StartsWith("System") && 
             !IsFile;
-
-        public string TsDeclaration => $"{Name}: {TsType}";
-
-        public string TsDeclarationPlain(string parameterName) => $"{parameterName}: {TsTypePlain}";
 
         public string NullableTypeForDto(bool isInput, string? dtoNamespace, bool dontEmitNullable = false)
         {

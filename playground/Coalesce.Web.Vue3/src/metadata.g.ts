@@ -1114,6 +1114,9 @@ export const Company = domain.types.Company = {
       type: "string",
       subtype: "url-image",
       role: "value",
+      rules: {
+        uri: val => !val || /^[a-zA-Z][\w+.-]*:.+/.test(val) || "Logo Url must be a valid URI.",
+      }
     },
     isDeleted: {
       name: "isDeleted",

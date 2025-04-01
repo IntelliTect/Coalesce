@@ -153,6 +153,7 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         public Guid Guid { get; set; }
         public Guid? GuidNullable { get; set; }
 
+        public Uri Uri { get; set; }
 
         // https://learn.microsoft.com/en-us/ef/core/what-is-new/ef-core-8.0/whatsnew#primitive-collections
         public List<int> IntCollection { get; set; }
@@ -193,7 +194,9 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
             Case.Statuses enumParam,
             Case.Statuses[] enumsParam,
             Test model,
-            Test[] modelCollection
+            Test[] modelCollection,
+            Uri uri,
+            Uri[] uris
         )
         {
             return collectionExternal.FirstOrDefault() ?? singleExternal;

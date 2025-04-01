@@ -5,6 +5,7 @@ using IntelliTect.Coalesce;
 using System.Threading.Tasks;
 using System.Linq;
 using System.ComponentModel.DataAnnotations;
+using System;
 
 namespace Coalesce.Domain
 {
@@ -38,7 +39,8 @@ namespace Coalesce.Domain
         public string WebsiteUrl { get; set; }
 
         [DataType(DataType.ImageUrl)]
-        public string LogoUrl { get; set; }
+        [Search(SearchMethod = SearchAttribute.SearchMethods.BeginsWith)]
+        public Uri LogoUrl { get; set; }
 
         public bool IsDeleted { get; set; }
 

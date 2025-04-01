@@ -7,7 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace IntelliTect.Coalesce.Tests.Tests.Api.DataSources
+namespace IntelliTect.Coalesce.Tests.Api.DataSources
 {
     public class ProjectedStandaloneEntityTests : TestDbContextFixture
     {

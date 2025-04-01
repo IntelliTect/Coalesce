@@ -16,6 +16,7 @@
 - Const fields in C#, if annotated with `[Coalesce]`, are now emitted into generated TypeScript.
 - `ViewModel.$loadCleanData()` now returns the VM instance, to support call chaining.
 - `c-admin-display` now renders clickable links for binary values that will download the value as a file, instead of only showing the length in bytes.
+- `System.Uri` is now support as a type, mapping to a `string` in TypeScript.
 
 # 5.3.3
 

@@ -310,6 +310,33 @@ namespace IntelliTect.Coalesce.Tests.Api.DataSources
             Assert.Equal(shouldMatch ? 1 : 0, query.Count());
         }
 
+        public static IEnumerable<object[]> Filter_MatchesUriData = new[]
+        {
+            new object[] { true, new Uri("mailto:test"), "mailto:test" },
+            new object[] { true, new Uri("https://www.google.com/"), "https://www.google.com/" },
+            new object[] { true, new Uri("https://john.doe@www.example.com:1234/forum/questions/?tag=networking&order=newest#top"), "https://john.doe@www.example.com:1234/forum/questions/?tag=networking&order=newest#top" },
+
+            new object[] { false, new Uri("mailto:test"), "http://foo.com" },
+
+            // Null or empty inputs always do nothing - these will always match.
+            new object[] { true, new Uri("foo:bar"), "" },
+            new object[] { true, new Uri("foo:bar"), null },
+
+            // String "null" input should match null values
+            new object[] { true, null, "null" },
+        };
+
+        [Theory]
+        [MemberData(nameof(Filter_MatchesUriData))]
+        public void ApplyListPropertyFilter_WhenPropIsUri_FiltersProp(
+            bool shouldMatch, Uri propValue, string inputValue)
+        {
+            var (prop, query) = PropertyFiltersTestHelper<ComplexModel, Uri>(
+                m => m.Uri, propValue, inputValue);
+
+            Assert.Equal(shouldMatch ? 1 : 0, query.Count());
+        }
+
         [Theory]
         [InlineData(true, 1, "1")]
         [InlineData(true, 1, "1,2")]

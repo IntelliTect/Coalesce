@@ -705,7 +705,7 @@ export interface EnumPkViewModel extends $models.EnumPk {
   enumPkId: $models.EnumPkId | null;
   name: string | null;
 }
-export class EnumPkViewModel extends ViewModel<$models.EnumPk, $apiClients.EnumPkApiClient, number> implements $models.EnumPk  {
+export class EnumPkViewModel extends ViewModel<$models.EnumPk, $apiClients.EnumPkApiClient, $models.EnumPkId> implements $models.EnumPk  {
   
   constructor(initialData?: DeepPartial<$models.EnumPk> | null) {
     super($metadata.EnumPk, new $apiClients.EnumPkApiClient(), initialData)

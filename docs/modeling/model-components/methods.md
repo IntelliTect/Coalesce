@@ -4,15 +4,13 @@ Any public methods annotated with the [[Coalesce]](/modeling/model-components/at
 
 These custom methods allow you to implement any custom server-side functionality in your Coalesce application that falls outside of the standard CRUD functions that are generated for your entities.
 
-
 ## Declaring Methods
-
 
 ### Instance Methods
 
 Instance Methods can be declared on your [Entity classes](/modeling/model-types/entities.md). For example:
 
-``` c#
+```c#
 public class User
 {
     public int UserId { get; set; }
@@ -28,10 +26,10 @@ public class User
         if (string.IsNullOrWhitespace(Email)) return "Recipient has no email";
         if (string.IsNullOrWhitespace(message)) return "Message is required";
 
-        await client.SendMailAsync(new MailMessage(  
+        await client.SendMailAsync(new MailMessage(
             from: sender.GetEmailAddress(),
             to: Email,
-            subject: "Message from MyApp",  
+            subject: "Message from MyApp",
             body: message
         ));
         return true;
@@ -45,15 +43,15 @@ When an instance method is invoked, the target model instance will be loaded usi
 Instance methods are generated onto the TypeScript ViewModels.
 
 #### When should I use Instance Methods?
-Instance methods, as opposed to [static](#static-methods) or [service](#service-methods) methods, are a good fit when implementing an action that directly acts on or depends upon a specific instance of one of your entity types. One of their biggest benefits is the automatic row-level security from data sources as described above.
 
+Instance methods, as opposed to [static](#static-methods) or [service](#service-methods) methods, are a good fit when implementing an action that directly acts on or depends upon a specific instance of one of your entity types. One of their biggest benefits is the automatic row-level security from data sources as described above.
 
 ### Static Methods
 
 Static Methods can be declared on your [Entity classes](/modeling/model-types/entities.md). For example:
 
-``` c#
-public class Person 
+```c#
+public class Person
 {
     public int PersonId { get; set; }
 
@@ -62,7 +60,7 @@ public class Person
     [Coalesce]
     public static ICollection<string> NamesStartingWith(
         AppDbContext db,
-        string characters 
+        string characters
     ) {
         return db.People
             .Select(p => p.FirstName)
@@ -75,7 +73,8 @@ public class Person
 Static methods are generated onto the TypeScript ListViewModels. All of the same members that are generated for instance methods are also generated for static methods.
 
 #### When should I use Static Methods?
-Static methods are a good fit for actions that don't operate on a specific instance of an entity type, but whose functionality is still closely coupled with a specific, concrete entity type. 
+
+Static methods are a good fit for actions that don't operate on a specific instance of an entity type, but whose functionality is still closely coupled with a specific, concrete entity type.
 
 For example, imagine you have a File entity class. You could make a static method on that class that accepts a file as a parameter. This method would persist that file to storage and then save a new entity to the database. You would then [disable Create](/topics/security.md#endpoint-security) on that entity, since the default `/save` endpoint cannot accept file uploads.
 
@@ -85,20 +84,20 @@ Or, imagine an Invoice class. You might make a static method that returns a summ
 
 Service methods can be declared on a [Coalesce Service](/modeling/model-types/services.md) class:
 
-``` c#
+```c#
 [Coalesce, Service]
-public class MyService 
+public class MyService
 {
   [Coalesce]
   public string MyServiceMethod() => "Hello, World!";
 }
 ```
 
-Or, they can be declared via a [Coalesce Service](/modeling/model-types/services.md) *interface* that has an implementation registered with dependency injection:
+Or, they can be declared via a [Coalesce Service](/modeling/model-types/services.md) _interface_ that has an implementation registered with dependency injection:
 
-``` c#
+```c#
 [Coalesce, Service]
-public interface IMyService 
+public interface IMyService
 {
   string MyServiceMethod() => "Hello, World!";
 }
@@ -107,139 +106,155 @@ public interface IMyService
 When declaring service methods by interface, a [Coalesce] attribute on each method is not needed - the entire interface is exposed by Coalesce.
 
 #### When should I use Service Methods?
+
 [Services](/modeling/model-types/services.md) are a catch-all feature and can be used for almost any conceivable purpose in Coalesce to implement custom functionality that needs to be invoked by your front-end app.
 
-However, there are some reasons why you might *not* want to use a service:
-* If the method logically operates on a single entity instance, and/or if using an instance method would let you utilize the row-level security already implemented by one of your data sources to authorize who can invoke the method.
-* If the service would only have one or two methods and would logically make sense as a static or instance method. In other words, if adding a new service class would be detrimental to the organization of your codebase and create "file sprawl".
+However, there are some reasons why you might _not_ want to use a service:
+
+- If the method logically operates on a single entity instance, and/or if using an instance method would let you utilize the row-level security already implemented by one of your data sources to authorize who can invoke the method.
+- If the service would only have one or two methods and would logically make sense as a static or instance method. In other words, if adding a new service class would be detrimental to the organization of your codebase and create "file sprawl".
 
 On the other hand, services have some benefits that instance and static methods cannot provide:
-* Coalesce Services can be declared with an interface, rather than a concrete type, allowing for their implementation to be substituted more easily. For example, a service providing an external integration that you want to mock or stub during automated testing and/or local development.
+
+- Coalesce Services can be declared with an interface, rather than a concrete type, allowing for their implementation to be substituted more easily. For example, a service providing an external integration that you want to mock or stub during automated testing and/or local development.
 
 ## Parameters
 
 The following parameters can be added to your methods:
 
-
 <table>
 <thead><tr><td>Type</td><td>Description</td></tr></thead>
 <tr><td>
 
 Primitives, Dates, and other Scalars
+
 </td><td>
 
-Most common built-in primitive and scalar data types (numerics, strings, booleans, enums, `DateTime`, `DateTimeOffset`), and their nullable variants, are accepted as parameters to be passed from the client to the method call. 
-</td></tr>
+Most common built-in primitive (numerics, strings, booleans) and other scalar data types (enums, `DateTime`, `DateTimeOffset`, `Guid`, `Uri`), and their nullable variants, are accepted as parameters to be passed from the client to the method call.
 
+</td></tr>
 
 <tr><td>
 
 [Entity Models](/modeling/model-types/entities.md)
+
 </td><td>
 
 When invoking the method on the client, the object's properties will only be serialized one level deep. If an entity model parameter has additional child object properties, they will not be included in the invocation of the method - only the object's primitive & date properties will be deserialized from the client.
+
 </td></tr>
 
 <tr><td>
 
 [External Types](/modeling/model-types/external-types.md)
+
 </td><td>
 
 Unlike entity model parameters, external type parameters will be serialized and sent by the client to an arbitrarily deep level, excluding any entity model properties that may be nested inside an external type.
-</td></tr>
 
+</td></tr>
 
 <tr><td>
 
 Files
+
 </td><td>
 
 Methods can accept file uploads by using a parameter of type `IntelliTect.Coalesce.Models.IFile` (or any derived type, like `IntelliTect.Coalesce.Models.File`).
-</td></tr>
 
+</td></tr>
 
 <tr><td>
 
 [ICollection&lt;T>](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.icollection-1), [IEnumerable&lt;T>](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.ienumerable-1)
+
 </td><td>
 
 Collections of any of the above valid parameter types above are also valid parameter types.
-</td></tr>
 
+</td></tr>
 
 <tr><td>
 
 [DbContext](https://learn.microsoft.com/en-us/dotnet/api/microsoft.entityframeworkcore.dbcontext)
+
 </td><td>
 
 EF Core `DbContext` types are injected automatically.
-</td></tr>
 
+</td></tr>
 
 <tr><td>
 
 [ClaimsPrincipal](https://learn.microsoft.com/en-us/dotnet/api/system.security.claims.claimsprincipal)
+
 </td><td>
 
 Passes through from `HttpContext.User`.
-</td></tr>
 
+</td></tr>
 
 <tr><td>
 
 [CancellationToken](https://learn.microsoft.com/en-us/dotnet/api/system.threading.cancellationtoken)
+
 </td><td>
 
 Passes through from `HttpContext.RequestAborted`.
-</td></tr>
 
+</td></tr>
 
 <tr><td>
 
 [[Inject]](/modeling/model-components/attributes/inject.md)
+
 </td><td>
 
 Parameters with the [[Inject]](/modeling/model-components/attributes/inject.md) attribute are injected from the application's `IServiceProvider`.
-</td></tr>
 
+</td></tr>
 
 <tr><td>
 
 `out` [IncludeTree](/concepts/include-tree.md)
+
 </td><td>
 
 Deprecated. If you need to return an [Include Tree](/concepts/include-tree.md) to shape the serialization of the method's return value, you should use an `ItemResult<T>` return value and populate the `IncludeTree` property on the `ItemResult` object.
+
 </td></tr>
 </table>
-
 
 ## Return Values
 
 You can return virtually anything from these methods:
 
-
 <table>
 <thead><tr><td>Type</td><td>Description</td></tr></thead>
 <tr><td>
 
 Primitives, Dates, and other Scalars
+
 </td><td>
 
 Most common built-in primitive and scalar data types (numerics, strings, booleans, enums, `DateTime`, `DateTimeOffset`), and their nullable variants, may be returned from methods.
-</td></tr>
 
+</td></tr>
 
 <tr><td>
 
 [Entity Models](/modeling/model-types/entities.md)
+
 </td><td>
 
 Any of the types of your models may be returned.
+
 </td></tr>
 
 <tr><td>
 
 [External Types](/modeling/model-types/external-types.md)
+
 </td><td>
 
 Any [External Types](/modeling/model-types/external-types.md) you define may also be returned from a method.
@@ -247,40 +262,47 @@ Any [External Types](/modeling/model-types/external-types.md) you define may als
 When returning custom types from methods, be careful of the types of their properties. Coalesce will **recursively** discover and generate code for all public properties of your [External Types](/modeling/model-types/external-types.md). If you accidentally include a type that you do not own, these generated types could get out of hand extremely quickly.
 
 Mark any properties you don't want generated with the [[InternalUse]](/modeling/model-components/attributes/internal-use.md) attribute, or give them a non-public access modifier. Whenever possible, don't return types that you don't own or control.
-</td></tr>
 
+</td></tr>
 
 <tr><td>
 
 [ICollection&lt;T>](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.icollection-1), [IEnumerable&lt;T>](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.ienumerable-1)
+
 </td><td>
 
 Collections of any of the above valid return types above are also valid return types. IEnumerables are useful for generator functions using `yield`. `ICollection` is highly suggested over `IEnumerable` whenever appropriate, though.
+
 </td></tr>
 
 <tr><td>
 
 [IQueryable&lt;T>](https://learn.microsoft.com/en-us/dotnet/api/system.linq.iqueryable)
+
 </td><td>
 
-Queryables of the valid return types above are valid return types. The query will be evaluated, and Coalesce will attempt to pull an [Include Tree](/concepts/include-tree.md) from the queryable to shape the response. 
+Queryables of the valid return types above are valid return types. The query will be evaluated, and Coalesce will attempt to pull an [Include Tree](/concepts/include-tree.md) from the queryable to shape the response.
 
 When [Include Tree](/concepts/include-tree.md) functionality is needed to shape the response but an `IQueryable<>` return type is not feasible, an `ItemResult` return value with an `IncludeTree` set on it will do the trick as well.
+
 </td></tr>
 
 <tr><td>
 
 [Files](#file-downloads)
+
 </td><td>
 
-Methods can return file downloads using type `IntelliTect.Coalesce.Models.IFile` (or any derived type, like `IntelliTect.Coalesce.Models.File`). 
+Methods can return file downloads using type `IntelliTect.Coalesce.Models.IFile` (or any derived type, like `IntelliTect.Coalesce.Models.File`).
 
-Please see the [File Downloads](#file-downloads) section below for more details 
+Please see the [File Downloads](#file-downloads) section below for more details
+
 </td></tr>
 
 <tr><td>
 
 `ItemResult<T>`, `ItemResult`, `ListResult<T>`
+
 </td><td>
 
 An `IntelliTect.Coalesce.Models.ItemResult<T>` of any of the valid return types above, including collections, is valid, as well as its non-generic variant `ItemResult`, and its list variant `ListResult<T>`.
@@ -288,14 +310,13 @@ An `IntelliTect.Coalesce.Models.ItemResult<T>` of any of the valid return types 
 Use an `ItemResult` whenever you might need to signal failure and return an error message from a custom method. The `WasSuccessful` and `Message` properties on the result object will be sent along to the client to indicate success or failure of the method. The type `T` will be mapped to the appropriate DTO object before being serialized as normal.
 
 An [Include Tree](/concepts/include-tree.md) can be set on the object's `IncludeTree` parameter to shape the serialization of the method's returned value.
+
 </td></tr>
 </table>
 
-
-
 ## Security
 
-You can implement role-based security on a method by placing the [[Execute]](/modeling/model-components/attributes/execute.md) on the method. Placing this attribute on the method with no roles specified will simply require that the calling user be authenticated. 
+You can implement role-based security on a method by placing the [[Execute]](/modeling/model-components/attributes/execute.md) on the method. Placing this attribute on the method with no roles specified will simply require that the calling user be authenticated.
 
 Security for instance methods is also controlled by the data source that loads the instance - if the data source can't provide an instance of the requested model, the method won't be executed.
 
@@ -309,14 +330,12 @@ See [API Callers](/stacks/vue/layers/api-clients.md#api-callers) and [ViewModel 
 Any Task-returning methods with "Async" as a suffix to the C# method's name will have the "Async" suffix stripped from the generated Typescript.
 :::
 
-
-
-
 ## Method Annotations
 
 Methods can be annotated with attributes to control API exposure and TypeScript generation.
 
 ### [Coalesce]
+
 The [[Coalesce]](/modeling/model-components/attributes/coalesce.md) attribute causes the method to be exposed via a generated API controller. This is not needed for methods defined on an interface marked with [`[Service]`](/modeling/model-types/services.md) - Coalesce assumes that all methods on the interface are intended to be exposed. If this is not desired, create a new, more restricted interface with only the desired methods to be exposed.
 
 ### [Display]
@@ -324,15 +343,15 @@ The [[Coalesce]](/modeling/model-components/attributes/coalesce.md) attribute ca
 The displayed name and description of a method, can be set via the [`[Display]`](https://learn.microsoft.com/en-us/dotnet/api/system.componentmodel.dataannotations.displayattribute) attribute.
 
 ### [Execute]
+
 The [[Execute]](/modeling/model-components/attributes/execute.md) controls most other aspects of custom methods:
 
 - Role-based security
 - HTTP Method
 - HTTP Caching
-- Data Source (for model instance methods) 
+- Data Source (for model instance methods)
 - Attribute validation enable/disable
 - Parameter auto-clear after execute in admin UI
-    
 
 ## File Downloads
 
@@ -347,33 +366,35 @@ There are a few conveniences for easily consuming downloaded files from your cus
 
 The [API Callers](/stacks/vue/layers/api-clients.md#api-callers) have a property `url`. This can be provided directly to your HTML template, with the browser invoking the endpoint automatically.
 
-
-``` ts
-import { PersonViewModel } from '@/viewmodels.g'
+```ts
+import { PersonViewModel } from "@/viewmodels.g";
 
 var viewModel = new PersonViewModel();
 viewModel.$load(1);
 ```
-``` html
-<img :src="downloadPicture.url">
+
+```html
+<img :src="downloadPicture.url" />
 ```
-----
+
+---
+
 Alternatively, the [API Callers](/stacks/vue/layers/api-clients.md#api-callers) for file-returning methods have a method `getResultObjectUrl(vue)`. If the method was invoked programmatically (i.e. via `caller()`, `caller.invoke()`, or `caller.invokeWithArgs()`), this method returns an [Object URL](https://developer.mozilla.org/en-US/docs/Web/API/URL/createObjectURL) that can be set as the `src` of an `image` or `video` HTML tag.
 
-``` ts
-import { PersonViewModel } from '@/viewmodels.g'
+```ts
+import { PersonViewModel } from "@/viewmodels.g";
 
 var viewModel = new PersonViewModel();
 await viewModel.$load(1);
 await viewModel.downloadPicture();
 ```
-``` html
-<img :src="downloadPicture.getResultObjectUrl()">
+
+```html
+<img :src="downloadPicture.getResultObjectUrl()" />
 ```
 
 </template>
 </CodeTabs>
-
 
 ### Database-stored Files
 
@@ -387,7 +408,7 @@ For files that are stored in your database, Coalesce supports a pattern that all
 
 The following is an example of utilizing Table Splitting for database-stored files. Generally speaking, metadata about the file should be stored on the "main" entity, and only the bytes of the content should be split into a separate entity.
 
-``` c#
+```c#
 public class AppDbContext : DbContext
 {
     public DbSet<Case> Cases { get; set; }
@@ -467,9 +488,8 @@ public class CaseAttachmentContent
 
 ### Other File Storage
 
-For any other storage mechanism, implementations are similar to the database storage approach above. However, instead of table splitting or using a whole separate table, the file contents are simply stored elsewhere. Continue storing metadata about the file on the primary entity, and implement upload/download methods as desired that wrap the storage provider. 
+For any other storage mechanism, implementations are similar to the database storage approach above. However, instead of table splitting or using a whole separate table, the file contents are simply stored elsewhere. Continue storing metadata about the file on the primary entity, and implement upload/download methods as desired that wrap the storage provider.
 
 For downloads, prefer directly providing the underlying `Stream` to the `IFile` versus wrapping a `byte[]` in a `MemoryStream`. This will reduce server memory usage and garbage collector churn.
 
 For cloud storage providers where complex security logic is not needed, consider having clients consume the URL of the cloud resource directly rather than passing the file content through your own server.
-

@@ -116,6 +116,20 @@ namespace IntelliTect.Coalesce.Tests.Api
         }
 
         [Theory]
+        [InlineData(true, "mailto:test", "mailto:test")]
+        [InlineData(true, "mailto:test", "mailto:TEST")]
+        [InlineData(false, "mailto:test", "https://www.google.com/")]
+        public void Search_Uri_SearchesCorrectly(
+            bool shouldMatch, string propValue, string inputValue)
+        {
+            SearchHelper(
+                (ComplexModel t) => t.Uri,
+                inputValue,
+                new Uri(propValue),
+                shouldMatch);
+        }
+
+        [Theory]
         [InlineData(true, "a1", "a1")]
         [InlineData(true, "A1", "a1")]
         [InlineData(true, "a1", "A1")]

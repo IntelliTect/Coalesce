@@ -10,14 +10,16 @@
 ## Features
 
 - All endpoints with bodies are now send as JSON instead of form data, with the exception of those endpoints with file parameters and only scalar parameters (no complex parameters) beyond the file parameters.
-- Added `$search`, `$filter`, and `$orderBy` shorthands to ListViewModel.
 - Coalesce's Vite middleware (`UseViteDevelopmentServer`) now checks if your installed NPM packages match what's defined in package.json and package-lock.json, presenting an in-browser warning if they do not. This helps avoid forgetting to reinstall packages after pulling down changes in multi-developer projects.
-- Added a `filter` prop to `c-input` for enum inputs to restrict the values available for selection.
 - Const fields in C#, if annotated with `[Coalesce]`, are now emitted into generated TypeScript.
-- `ViewModel.$loadCleanData()` now returns the VM instance, to support call chaining.
-- `c-admin-display` now renders clickable links for binary values that will download the value as a file, instead of only showing the length in bytes.
 - `System.Uri` is now support as a type, mapping to a `string` in TypeScript.
 - Interfaces used as parameters in Coalesce-exposed methods are now automatically injected from services, without the need to specify `[InjectAttribute]`. This does not include known data-like interfaces including `IEnumerable`, `ICollection`, and `IFile`.
+
+- `ViewModel.$loadCleanData()` now returns the VM instance, to support call chaining.
+- `ListViewModel` now has shorthand properties for `$search`, `$filter`, and `$orderBy`.
+- `c-input`: Added a `filter` prop to for enum inputs to restrict the values available for selection.
+- `c-admin-display`: Binary values now render as links that will download the value as a file, instead of only showing the length in bytes.
+- `c-datetime-picker`: Added prop `showTodayButton`
 
 # 5.3.6
 
@@ -32,7 +34,6 @@
 - Adjust DateTimeOffset handling to support Postgres restrictions of not allowing non-zero offsets.
 
 # 5.3.3
-
 
 - Add model validation error when ForeignKeyAttribute references a navigation prop that doesn't exist.
 - Fix code gen performance regression introduced in 5.3.2

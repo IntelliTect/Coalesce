@@ -23,7 +23,12 @@
             </div>
           </div>
           <div style="font-size: 12px; line-height: 1.3; margin-top: 4px">
-            <div style="white-space: pre-wrap">{{ param.description }} <a v-if="param.link" :href="param.link" target="_blank"> Read More</a></div>
+            <div style="white-space: pre-wrap">
+              {{ param.description }}
+              <a v-if="param.link" :href="param.link" target="_blank">
+                Read More</a
+              >
+            </div>
 
             <div
               v-if="param.requires"
@@ -139,13 +144,16 @@ const selections = ref([
   "DarkMode",
   "AuditLogs",
   "UserPictures",
-  "LocalAuth" // https://github.com/IntelliTect/Coalesce/issues/522
+  "LocalAuth", // https://github.com/IntelliTect/Coalesce/issues/522
 ]);
 
 watch(
   selections,
   (s) => {
-    options.value = s.map((x) => "--" + x).join(" ");
+    options.value = s
+      .filter((x) => parameters.find((p) => p.key == x)?.meetsReqs)
+      .map((x) => "--" + x)
+      .join(" ");
   },
   { immediate: true }
 );

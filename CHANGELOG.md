@@ -3,9 +3,9 @@
 ## Breaking Changes
 
 - Vue 2 support has been dropped.
-- The CommonJS build of coalesce-vue has been dropped - only the ESM build remains. Most projects should be unaffected.
-- `ViewModel.$getErrors` now returns a `string[]` instead of a `Generator<string>`.
 - `StandardBehaviors.AfterDelete` is now `AfterDeleteAsync` and has a different signature and semantics. Instead of modifying the resulting `item` and `includeTree` with `ref` parameters, these values can be optionally overridden by returning an ItemResult with its `Object` and `IncludeTree` properties populated with non-null values.
+- `ViewModel.$getErrors` now returns a `string[]` instead of a `Generator<string>`.
+- The CommonJS build of coalesce-vue has been dropped - only the ESM build remains. Most projects should be unaffected.
 
 ## Features
 
@@ -17,6 +17,7 @@
 - `ViewModel.$loadCleanData()` now returns the VM instance, to support call chaining.
 - `c-admin-display` now renders clickable links for binary values that will download the value as a file, instead of only showing the length in bytes.
 - `System.Uri` is now support as a type, mapping to a `string` in TypeScript.
+- Interfaces used as parameters in Coalesce-exposed methods are now automatically injected from services, without the need to specify `[InjectAttribute]`. This does not include known data-like interfaces including `IEnumerable`, `ICollection`, and `IFile`.
 
 # 5.3.3
 

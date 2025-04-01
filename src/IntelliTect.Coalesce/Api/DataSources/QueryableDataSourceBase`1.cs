@@ -214,7 +214,7 @@ namespace IntelliTect.Coalesce
 
                             object result = type == typeof(Guid)
                                 ? Guid.Parse(item)
-                                : typeConverter.ConvertFromString(item);
+                                : typeConverter.ConvertFromString(item)!;
 
                             return (Success: true, Result: result);
                         }

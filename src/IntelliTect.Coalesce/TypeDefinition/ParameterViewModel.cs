@@ -45,7 +45,15 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// True if this is an injected method parameter that should be represented by a controller action argument.
         /// </summary>
-        public bool ShouldInjectFromServices => HasInjectAttribute || (!IsAutoInjectedContext && IsDbContext);
+        public bool ShouldInjectFromServices => 
+            HasInjectAttribute ||
+            // Only DbContexts that are not the `IsAutoInjectedContext` are injected from services.
+            // The auto-injected context is sourced from the controller, not the action parameters.
+            (!IsAutoInjectedContext && IsDbContext) ||
+            // Interfaces that are not known data types (file, collections) are always injected
+            // because Coalesce couldn't otherwise possibly know the implementation type to use.
+            (Type.IsInterface && !Type.IsFile && !Type.IsCollection)
+            ;
 
         /// <summary>
         /// True if the parameter is marked with <see cref="InjectAttribute"/>

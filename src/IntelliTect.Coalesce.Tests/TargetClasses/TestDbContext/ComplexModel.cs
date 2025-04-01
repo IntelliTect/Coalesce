@@ -269,7 +269,7 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         public InputOutputOnlyExternalTypeWithRequiredNonscalarProp MethodWithInputOutputOnlyExternalTypeWithRequiredNonscalarProp(InputOutputOnlyExternalTypeWithRequiredNonscalarProp i) => i;
 
         [Coalesce, Execute]
-        public void MethodWithSingleFileParameter(IFile file) { }
+        public void MethodWithSingleFileParameter(IFile file, IWeatherService implicitInjectedService) { }
 
         [Coalesce, Execute]
         public void MethodWithMultiFileParameter(ICollection<IFile> files) { }

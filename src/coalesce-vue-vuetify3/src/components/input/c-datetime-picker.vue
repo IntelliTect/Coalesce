@@ -28,6 +28,7 @@
   <v-text-field
     v-else
     class="c-datetime-picker"
+    :class="{ 'has-today-btn': showTodayButton }"
     :placeholder="internalFormat"
     :append-inner-icon="
       internalDateKind == 'time'
@@ -86,6 +87,10 @@
             :max="max ? endOfDay(max) : undefined"
             v-bind="datePickerProps"
           >
+            <template v-slot:actions v-if="showTodayButton">
+              <v-btn @click="setToday"> Today </v-btn>
+              <v-spacer />
+            </template>
           </v-date-picker>
 
           <v-divider vertical></v-divider>
@@ -119,6 +124,9 @@
         flex-grow: 1;
       }
     }
+  }
+  .has-today-btn {
+    max-height: 365px;
   }
   .v-date-picker {
     width: 300px;
@@ -275,6 +283,9 @@ const props = withDefaults(
       allowedDates?: null | Date[] | ((date: Date) => boolean);
       // Object containing extra props to pass through to `v-date-picker`.
       datePickerProps?: DatePickerProps;
+      /** Determines whether the 'Today' button is displayed in the date picker actions.
+       * When enabled, the 'Today' button allows users to quickly select the current date. */
+      showTodayButton?: boolean;
     } & /* @vue-ignore */ InheritedProps
   >(),
   { closeOnDatePicked: null, color: "secondary" }
@@ -625,6 +636,10 @@ function emitInput(value: Date | null) {
   if (modelValue.value != value) {
     modelValue.value = value;
   }
+}
+
+function setToday() {
+  dateChanged(new Date());
 }
 
 function close() {

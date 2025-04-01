@@ -4,14 +4,13 @@ In Coalesce, all data that is retrieved from your database through the generated
 
 In addition to this standard data source, Coalesce allows you to create custom data sources that provide complete control over the way data is loaded and serialized for transfer to a requesting client. These data sources are defined on a per-model basis, and you can have as many of them as you like for each model.
 
-
 ## Defining Data Sources
 
 By default, each of your models that Coalesce exposes will expose the standard data source (`IntelliTect.Coalesce.StandardDataSource<T, TContext>`). This data source provides all the standard functionality one would expect - paging, sorting, searching, filtering, and so on. Each of these component pieces is implemented in one or more virtual methods, making the `StandardDataSource` a great place to start from when implementing your own data source. To suppress this behavior of always exposing the raw `StandardDataSource`, create your own custom data source and annotate it with `[DefaultDataSource]`.
 
-To implement your own custom data source, you simply need to define a class that implements `IntelliTect.Coalesce.IDataSource<T>`. To expose your data source to Coalesce, either place it as a nested class of the type `T` that you data source serves, or annotate it with the `[Coalesce]` attribute. Of course, the easiest way to create a data source that doesn't require you to re-engineer a great deal of logic would be to inherit from `IntelliTect.Coalesce.StandardDataSource<T, TContext>`, and then override only the parts that you need.
+To implement your own custom data source, you simply need to define a class that implements `IntelliTect.Coalesce.IDataSource<T>`. To expose your data source to Coalesce, either place it as a nested class of the type `T` that your data source serves, or annotate it with the `[Coalesce]` attribute. Of course, the easiest way to create a data source that doesn't require you to re-engineer a great deal of logic would be to inherit from `IntelliTect.Coalesce.StandardDataSource<T, TContext>`, and then override only the parts that you need.
 
-``` c#
+```c#
 public class Person
 {
     [DefaultDataSource]
@@ -19,7 +18,7 @@ public class Person
     {
         public IncludeFamily(CrudContext<AppDbContext> context) : base(context) { }
 
-        public override IQueryable<Person> GetQuery(IDataSourceParameters parameters) 
+        public override IQueryable<Person> GetQuery(IDataSourceParameters parameters)
             => Db.People
             .Where(f => User.IsInRole("Admin") || f.CreatedById == User.GetUserId())
             .Include(f => f.Parents).ThenInclude(s => s.Parents)
@@ -32,7 +31,7 @@ public class NamesStartingWithA : StandardDataSource<Person, AppDbContext>
 {
     public NamesStartingWithA(CrudContext<AppDbContext> context) : base(context) { }
 
-    public override IQueryable<Person> GetQuery(IDataSourceParameters parameters) 
+    public override IQueryable<Person> GetQuery(IDataSourceParameters parameters)
         => Db.People.Include(f => f.Siblings).Where(f => f.FirstName.StartsWith("A"));
 }
 ```
@@ -43,11 +42,9 @@ The structure of the `IQueryable` built by the various methods of `StandardDataS
 If you create a custom data source that has custom logic for securing your data, be aware that the default implementation of `StandardDataSource` (or your custom default implementation - see below) is still exposed unless you annotate one of your custom data sources with `[DefaultDataSource]`. Doing so will replace the default data source with the annotated class for your type `T`.
 :::
 
-
 ### Dependency Injection
 
 All data sources are instantiated using dependency injection and your application's `IServiceProvider`. As a result, you can add whatever constructor parameters you desire to your data sources as long as a value for them can be resolved from your application's services. The single parameter to the `StandardDataSource` is resolved in this way - the `CrudContext<TContext>` contains the common set of objects most commonly used, including the `DbContext` and the `ClaimsPrincipal` representing the current user.
-
 
 ## Consuming Data Sources
 
@@ -56,9 +53,9 @@ All data sources are instantiated using dependency injection and your applicatio
 
 The [ViewModels](/stacks/vue/layers/viewmodels.md#viewmodels) and [ListViewModels](/stacks/vue/layers/viewmodels.md#listviewmodels) each have a property called `$dataSource`. This property accepts an instance of a [DataSource](/stacks/vue/layers/models.md) class generated in the [Model Layer](/stacks/vue/layers/models.md).
 
-``` ts
-import { Person } from '@/models.g'
-import { PersonViewModel, PersonListViewModel } from '@/viewmodels.g'
+```ts
+import { Person } from "@/models.g";
+import { PersonViewModel, PersonListViewModel } from "@/viewmodels.g";
 
 var viewModel = new PersonViewModel();
 viewModel.$dataSource = new Person.DataSources.IncludeFamily();
@@ -72,23 +69,19 @@ list.$load(1);
 </template>
 </CodeTabs>
 
-
-
 ## Standard Parameters
 
-All methods on `IDataSource<T>` take a parameter that contains all the client-specified parameters for things paging, searching, sorting, and filtering information. Almost all virtual methods on `StandardDataSource` are also passed the relevant set of parameters. The parameters are contained in the `IDataSourceParameters` type or one of its derivatives, `IFilterParameters` (adds filtering and search parameters) or `IListParameters` (filters + pagination). These parameters can be set on the client through the `$params` member on [ViewModels](/stacks/vue/layers/viewmodels.md#viewmodels) and [ListViewModels](/stacks/vue/layers/viewmodels.md#listviewmodels), or less commonly by passing them directly when using the [API Clients](/stacks/vue/layers/api-clients.md) directly. 
-
+All methods on `IDataSource<T>` take a parameter that contains all the client-specified parameters for things paging, searching, sorting, and filtering information. Almost all virtual methods on `StandardDataSource` are also passed the relevant set of parameters. The parameters are contained in the `IDataSourceParameters` type or one of its derivatives, `IFilterParameters` (adds filtering and search parameters) or `IListParameters` (filters + pagination). These parameters can be set on the client through the `$params` member on [ViewModels](/stacks/vue/layers/viewmodels.md#viewmodels) and [ListViewModels](/stacks/vue/layers/viewmodels.md#listviewmodels), or less commonly by passing them directly when using the [API Clients](/stacks/vue/layers/api-clients.md) directly.
 
 ### Ref Responses
 
 An additional parameter on `DataSourceParameters` is available on the client only - `refResponse`. If set to true - e.g. `listVm.$params.refResponse = true;`, Coalesce will pass a header value of `Accept: application/json+ref` with the API request. This will instruct the server to use [System.Text.Json's PreserveReferences handling](https://learn.microsoft.com/en-us/dotnet/standard/serialization/system-text-json/preserve-references#preserve-references-and-handle-circular-references) when serializing the response. This allows identical objects that occur multiple times in the response to only have one copy sent across the wire. This also results in only a single, shared instance of this object on the client in the results from the API clients, cascading through to the ViewModels as well. This can significantly reduce response sizes by deduplicating multiple copies of the same data, as well as CPU and memory load on both the client and server.
 
-
 ## Custom Parameters
 
 On any data source that you create, you may add additional properties annotated with `[Coalesce]` that will then be exposed as parameters to the client. These property parameters can be any type supported by Coalesce, including primitives, dates, [Entity Models](/modeling/model-types/entities.md), [External Types](/modeling/model-types/external-types.md), or collections of these types.
-    
-``` c#
+
+```c#
 [Coalesce]
 public class NamesStartingWith : StandardDataSource<Person, AppDbContext>
 {
@@ -97,7 +90,7 @@ public class NamesStartingWith : StandardDataSource<Person, AppDbContext>
     [Coalesce]
     public string StartsWith { get; set; }
 
-    public override IQueryable<Person> GetQuery(IDataSourceParameters parameters) 
+    public override IQueryable<Person> GetQuery(IDataSourceParameters parameters)
         => Db.People.Include(f => f.Siblings)
         .Where(f => string.IsNullOrWhitespace(StartsWith) ? true : f.FirstName.StartsWith(StartsWith));
 }
@@ -112,12 +105,13 @@ You can setup [TypeScript List ViewModels](/stacks/vue/layers/viewmodels.md) to 
 
 To automatically reload a [ListViewModel](/stacks/vue/layers/viewmodels.md) when data source parameters change, simply use the list's `$useAutoLoad` or `$startAutoLoad` function:
 
-``` ts
-import { Person } from '@/models.g';
-import { PersonListViewModel } from '@/viewmodels.g';
+```ts
+import { Person } from "@/models.g";
+import { PersonListViewModel } from "@/viewmodels.g";
 
-const list = new PersonListViewModel;
-const dataSource = list.$dataSource = new Person.DataSources.NamesStartingWith
+const list = new PersonListViewModel();
+const dataSource = (list.$dataSource =
+  new Person.DataSources.NamesStartingWith());
 list.$useAutoLoad(); // When using options API, use $startAutoLoad(this) instead.
 
 // Trigger a reload:
@@ -127,14 +121,9 @@ dataSource.startsWith = "Jo";
 </template>
 </CodeTabs>
 
-
-
 ## Standard Data Source
 
 The standard data sources, `IntelliTect.Coalesce.StandardDataSource<T>` and its EntityFramework-supporting sibling `IntelliTect.Coalesce.StandardDataSource<T, TContext>`, contain a significant number of properties and methods that can be utilized and/or overridden at your leisure.
-
-
-
 
 ### Default Loading Behavior
 
@@ -142,10 +131,9 @@ When an object or list of objects is requested, the default behavior of the the 
 
 Clients can suppress this per-request by setting `.$includes = "none"` on your TypeScript [ViewModel](/stacks/vue/layers/viewmodels.md#viewmodels) or [ListViewModel](/stacks/vue/layers/viewmodels.md#listviewmodels), but note this is not a security mechanism and should only be used to reduce payload size or improve response time.
 
-On the server, you can suppress this behavior by placing `[Read(NoAutoInclude = true)]` on either an entire class (affecting all navigation properties of that type), or on specific navigation properties. When placed on a entity class that holds sensitive data, this can help ensure you don't accidentally leak records due to forgetting to customize the data sources of the types whose navigation properties reference your sensitive entity. 
+On the server, you can suppress this behavior by placing `[Read(NoAutoInclude = true)]` on either an entire class (affecting all navigation properties of that type), or on specific navigation properties. When placed on a entity class that holds sensitive data, this can help ensure you don't accidentally leak records due to forgetting to customize the data sources of the types whose navigation properties reference your sensitive entity.
 
 You can also suppress this for your entire application by placing `[assembly: CoalesceConfiguration(NoAutoInclude = true)]` on the assembly that holds your models.
-
 
 ### Properties
 
@@ -169,7 +157,7 @@ The max number of search terms to process when interpreting a search term word-b
 
 <Prop def="int DefaultPageSize" />
 
-The page size to use if none is specified by the client.  Override by setting a value in the constructor.
+The page size to use if none is specified by the client. Override by setting a value in the constructor.
 
 <Prop def="int MaxPageSize" />
 
@@ -177,11 +165,11 @@ The maximum page size that will be served. By default, client-specified page siz
 
 ### Method Overview
 
-The standard data source contains 19 different methods which can be overridden in your derived class to control its behavior. 
+The standard data source contains 19 different methods which can be overridden in your derived class to control its behavior.
 
 These methods often call one another, so overriding one method may cause some other method to no longer be called. The hierarchy of method calls, ignoring any logic or conditions contained within, is as follows:
 
-``` :no-line-numbers
+```:no-line-numbers
 GetMappedItemAsync
     GetItemAsync
         GetQueryAsync
@@ -219,7 +207,7 @@ GetCountAsync
 ### Method Details
 
 All of the methods outlined above can be overridden. A description of each of the non-interface inner methods is as follows:
-    
+
 <Prop def="IQueryable<T> GetQuery(IDataSourceParameters parameters);
 Task<IQueryable<T>> GetQueryAsync(IDataSourceParameters parameters);" />
 
@@ -241,16 +229,13 @@ Allows for explicitly specifying the [Include Tree](/concepts/include-tree.md) t
 
 Called by other methods in the standard data source to determine whether or not EF Core async methods will be used to evaluate queries. This may be globally disabled when bugs like https://github.com/dotnet/SqlClient/issues/593 are present in EF Core.
 
-
 <Prop def="IQueryable<T> ApplyListFiltering(IQueryable<T> query, IFilterParameters parameters)" />
 
 A simple wrapper that calls `ApplyListPropertyFilters` and `ApplyListSearchTerm`.
 
-
 <Prop def="IQueryable<T> ApplyListPropertyFilters(IQueryable<T> query, IFilterParameters parameters)" />
 
 For each value in `parameters.Filter` that the user is allowed to read and filter by, invoke `ApplyListPropertyFilter` to apply a filter to the query.
-
 
 <Prop def="IQueryable<T> ApplyListPropertyFilter(IQueryable<T> query, PropertyViewModel prop, string value)" />
 
@@ -258,23 +243,17 @@ Given a property and a client-provided string value, perform some filtering on t
 
 @[import-md "after":"MARKER:filter-behaviors", "before":"MARKER:end-filter-behaviors"](../../../src/coalesce-vue/src/api-client.ts)
 
-
-
-
 <Prop def="IQueryable<T> ApplyListSearchTerm(IQueryable<T> query, IFilterParameters parameters)" />
 
 Applies predicates to the query based on the search term in `parameters.Search`. See [[Search]](/modeling/model-components/attributes/search.md) for a detailed look at how searching works in Coalesce.
-
 
 <Prop def="IQueryable<T> ApplyListSorting(IQueryable<T> query, IListParameters parameters)" />
 
 If any client-specified sort orders are present, invokes `ApplyListClientSpecifiedSorting`. Otherwise, invokes `ApplyListDefaultSorting`.
 
-
 <Prop def="IQueryable<T> ApplyListClientSpecifiedSorting(IQueryable<T> query, IListParameters parameters)" />
 
 Applies sorting to the query based on sort orders specified by the client. If the client specified `"none"` as the sort field, no sorting will take place.
-
 
 <Prop def="IQueryable<T> ApplyListDefaultSorting(IQueryable<T> query)" />
 
@@ -282,21 +261,18 @@ Applies default sorting behavior to the query, including behavior defined with u
 
 <!-- .. TODO - need a centralized doc page about sorting in Coalesce. -->
 
-
 <Prop def="IQueryable<T> ApplyListPaging(IQueryable<T> query, IListParameters parameters, int? totalCount, out int page, out int pageSize)" />
 
 Applies paging to the query based on incoming parameters. Provides the actual page and pageSize that were used as out parameters.
-    
 
 <Prop def="Task<int> GetListTotalCountAsync(IQueryable<T> query, IFilterParameters parameters)" />
 
-Simple wrapper around invoking `.Count()` on a query. 
-
+Simple wrapper around invoking `.Count()` on a query.
 
 <Prop def="void TransformResults(IReadOnlyList<T> results, IDataSourceParameters parameters);
 Task TransformResultsAsync(IReadOnlyList<T> results, IDataSourceParameters parameters);" />
 
-Allows for transformation of a result set after the query has been evaluated. 
+Allows for transformation of a result set after the query has been evaluated.
 This will be called for both lists of items and for single items. This can be used for populating non-mapped properties on a model, or conditionally loading navigation properties using logic that depends upon the contents of each loaded record.
 
 This method is only called immediately before mapping to a DTO; it does not affect operations that don't involve mapping to a DTO - e.g. when loading the target of a `/save` operation or when loading the invocation target of an [instance method](/modeling/model-components/methods.md#instance-methods).
@@ -305,11 +281,9 @@ See the [Security](/topics/security.md#transform-results) page for an example on
 
 Do not use `TransformResults` to modify any database-mapped scalar properties, since such changes could be inadvertently persisted to the database.
 
-
 <Prop def="IList<TDto> TrimListFields<TDto>(IList<TDto> mappedResult, IListParameters parameters)" />
 
 Performs trimming of the fields of the result set based on the parameters given to the data source. Can be overridden to forcibly disable this, override the behavior to always trim specific fields, or any other functionality desired.
-
 
 ## Globally Replacing the Standard Data Source
 
@@ -317,8 +291,7 @@ You can, of course, create a custom base data source that all your custom implem
 
 Simply create a class that implements `IEntityFrameworkDataSource<,>` (the `StandardDataSource<,>` already does - feel free to inherit from it), then register it at application startup like so:
 
-
-``` c#
+```c#
 public class MyDataSource<T, TContext> : StandardDataSource<T, TContext>
     where T : class
     where TContext : DbContext
@@ -331,7 +304,7 @@ public class MyDataSource<T, TContext> : StandardDataSource<T, TContext>
 }
 ```
 
-``` c#
+```c#
 public void ConfigureServices(IServiceCollection services)
 {
     services.AddCoalesce(b =>

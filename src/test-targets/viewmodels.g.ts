@@ -3,32 +3,86 @@ import * as $models from './models.g'
 import * as $apiClients from './api-clients.g'
 import { ViewModel, ListViewModel, ViewModelCollection, ServiceViewModel, type DeepPartial, defineProps } from 'coalesce-vue/lib/viewmodel'
 
-export interface AbstractImplViewModel extends $models.AbstractImpl {
-  implOnlyField: string | null;
+export interface AbstractImpl1ViewModel extends $models.AbstractImpl1 {
+  impl1OnlyField: string | null;
   id: number | null;
-  discriminatior: string | null;
+  discriminator: string | null;
+  get abstractModelPeople(): ViewModelCollection<AbstractModelPersonViewModel, $models.AbstractModelPerson>;
+  set abstractModelPeople(value: (AbstractModelPersonViewModel | $models.AbstractModelPerson)[] | null);
 }
-export class AbstractImplViewModel extends ViewModel<$models.AbstractImpl, $apiClients.AbstractImplApiClient, number> implements $models.AbstractImpl  {
+export class AbstractImpl1ViewModel extends ViewModel<$models.AbstractImpl1, $apiClients.AbstractImpl1ApiClient, number> implements $models.AbstractImpl1  {
   
-  constructor(initialData?: DeepPartial<$models.AbstractImpl> | null) {
-    super($metadata.AbstractImpl, new $apiClients.AbstractImplApiClient(), initialData)
+  
+  public addToAbstractModelPeople(initialData?: DeepPartial<$models.AbstractModelPerson> | null) {
+    return this.$addChild('abstractModelPeople', initialData) as AbstractModelPersonViewModel
+  }
+  
+  get people(): ReadonlyArray<PersonViewModel> {
+    return (this.abstractModelPeople || []).map($ => $.person!).filter($ => $)
+  }
+  
+  constructor(initialData?: DeepPartial<$models.AbstractImpl1> | null) {
+    super($metadata.AbstractImpl1, new $apiClients.AbstractImpl1ApiClient(), initialData)
   }
 }
-defineProps(AbstractImplViewModel, $metadata.AbstractImpl)
+defineProps(AbstractImpl1ViewModel, $metadata.AbstractImpl1)
 
-export class AbstractImplListViewModel extends ListViewModel<$models.AbstractImpl, $apiClients.AbstractImplApiClient, AbstractImplViewModel> {
+export class AbstractImpl1ListViewModel extends ListViewModel<$models.AbstractImpl1, $apiClients.AbstractImpl1ApiClient, AbstractImpl1ViewModel> {
   
   constructor() {
-    super($metadata.AbstractImpl, new $apiClients.AbstractImplApiClient())
+    super($metadata.AbstractImpl1, new $apiClients.AbstractImpl1ApiClient())
+  }
+}
+
+
+export interface AbstractImpl2ViewModel extends $models.AbstractImpl2 {
+  impl2OnlyField: string | null;
+  id: number | null;
+  discriminator: string | null;
+  get abstractModelPeople(): ViewModelCollection<AbstractModelPersonViewModel, $models.AbstractModelPerson>;
+  set abstractModelPeople(value: (AbstractModelPersonViewModel | $models.AbstractModelPerson)[] | null);
+}
+export class AbstractImpl2ViewModel extends ViewModel<$models.AbstractImpl2, $apiClients.AbstractImpl2ApiClient, number> implements $models.AbstractImpl2  {
+  
+  
+  public addToAbstractModelPeople(initialData?: DeepPartial<$models.AbstractModelPerson> | null) {
+    return this.$addChild('abstractModelPeople', initialData) as AbstractModelPersonViewModel
+  }
+  
+  get people(): ReadonlyArray<PersonViewModel> {
+    return (this.abstractModelPeople || []).map($ => $.person!).filter($ => $)
+  }
+  
+  constructor(initialData?: DeepPartial<$models.AbstractImpl2> | null) {
+    super($metadata.AbstractImpl2, new $apiClients.AbstractImpl2ApiClient(), initialData)
+  }
+}
+defineProps(AbstractImpl2ViewModel, $metadata.AbstractImpl2)
+
+export class AbstractImpl2ListViewModel extends ListViewModel<$models.AbstractImpl2, $apiClients.AbstractImpl2ApiClient, AbstractImpl2ViewModel> {
+  
+  constructor() {
+    super($metadata.AbstractImpl2, new $apiClients.AbstractImpl2ApiClient())
   }
 }
 
 
 export interface AbstractModelViewModel extends $models.AbstractModel {
   id: number | null;
-  discriminatior: string | null;
+  discriminator: string | null;
+  get abstractModelPeople(): ViewModelCollection<AbstractModelPersonViewModel, $models.AbstractModelPerson>;
+  set abstractModelPeople(value: (AbstractModelPersonViewModel | $models.AbstractModelPerson)[] | null);
 }
 export class AbstractModelViewModel extends ViewModel<$models.AbstractModel, $apiClients.AbstractModelApiClient, number> implements $models.AbstractModel  {
+  
+  
+  public addToAbstractModelPeople(initialData?: DeepPartial<$models.AbstractModelPerson> | null) {
+    return this.$addChild('abstractModelPeople', initialData) as AbstractModelPersonViewModel
+  }
+  
+  get people(): ReadonlyArray<PersonViewModel> {
+    return (this.abstractModelPeople || []).map($ => $.person!).filter($ => $)
+  }
   
   constructor(initialData?: DeepPartial<$models.AbstractModel> | null) {
     super($metadata.AbstractModel, new $apiClients.AbstractModelApiClient(), initialData)
@@ -40,6 +94,31 @@ export class AbstractModelListViewModel extends ListViewModel<$models.AbstractMo
   
   constructor() {
     super($metadata.AbstractModel, new $apiClients.AbstractModelApiClient())
+  }
+}
+
+
+export interface AbstractModelPersonViewModel extends $models.AbstractModelPerson {
+  id: number | null;
+  personId: number | null;
+  get person(): PersonViewModel | null;
+  set person(value: PersonViewModel | $models.Person | null);
+  abstractModelId: number | null;
+  get abstractModel(): AbstractModelViewModel | null;
+  set abstractModel(value: AbstractModelViewModel | $models.AbstractModel | null);
+}
+export class AbstractModelPersonViewModel extends ViewModel<$models.AbstractModelPerson, $apiClients.AbstractModelPersonApiClient, number> implements $models.AbstractModelPerson  {
+  
+  constructor(initialData?: DeepPartial<$models.AbstractModelPerson> | null) {
+    super($metadata.AbstractModelPerson, new $apiClients.AbstractModelPersonApiClient(), initialData)
+  }
+}
+defineProps(AbstractModelPersonViewModel, $metadata.AbstractModelPerson)
+
+export class AbstractModelPersonListViewModel extends ListViewModel<$models.AbstractModelPerson, $apiClients.AbstractModelPersonApiClient, AbstractModelPersonViewModel> {
+  
+  constructor() {
+    super($metadata.AbstractModelPerson, new $apiClients.AbstractModelPersonApiClient())
   }
 }
 
@@ -1279,8 +1358,10 @@ export class WeatherServiceViewModel extends ServiceViewModel<typeof $metadata.W
 
 
 const viewModelTypeLookup = ViewModel.typeLookup = {
-  AbstractImpl: AbstractImplViewModel,
+  AbstractImpl1: AbstractImpl1ViewModel,
+  AbstractImpl2: AbstractImpl2ViewModel,
   AbstractModel: AbstractModelViewModel,
+  AbstractModelPerson: AbstractModelPersonViewModel,
   Case: CaseViewModel,
   CaseDtoStandalone: CaseDtoStandaloneViewModel,
   CaseProduct: CaseProductViewModel,
@@ -1305,8 +1386,10 @@ const viewModelTypeLookup = ViewModel.typeLookup = {
   ZipCode: ZipCodeViewModel,
 }
 const listViewModelTypeLookup = ListViewModel.typeLookup = {
-  AbstractImpl: AbstractImplListViewModel,
+  AbstractImpl1: AbstractImpl1ListViewModel,
+  AbstractImpl2: AbstractImpl2ListViewModel,
   AbstractModel: AbstractModelListViewModel,
+  AbstractModelPerson: AbstractModelPersonListViewModel,
   Case: CaseListViewModel,
   CaseDtoStandalone: CaseDtoStandaloneListViewModel,
   CaseProduct: CaseProductListViewModel,

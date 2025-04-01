@@ -46,35 +46,64 @@ export enum Titles {
 }
 
 
-export interface AbstractImpl extends Model<typeof metadata.AbstractImpl> {
-  implOnlyField: string | null
+export interface AbstractImpl1 extends Model<typeof metadata.AbstractImpl1> {
+  impl1OnlyField: string | null
   id: number | null
-  discriminatior: string | null
+  discriminator: string | null
+  abstractModelPeople: AbstractModelPerson[] | null
 }
-export class AbstractImpl {
+export class AbstractImpl1 {
   
-  /** Mutates the input object and its descendents into a valid AbstractImpl implementation. */
-  static convert(data?: Partial<AbstractImpl>): AbstractImpl {
-    return convertToModel(data || {}, metadata.AbstractImpl) 
+  /** Mutates the input object and its descendents into a valid AbstractImpl1 implementation. */
+  static convert(data?: Partial<AbstractImpl1>): AbstractImpl1 {
+    return convertToModel(data || {}, metadata.AbstractImpl1) 
   }
   
-  /** Maps the input object and its descendents to a new, valid AbstractImpl implementation. */
-  static map(data?: Partial<AbstractImpl>): AbstractImpl {
-    return mapToModel(data || {}, metadata.AbstractImpl) 
+  /** Maps the input object and its descendents to a new, valid AbstractImpl1 implementation. */
+  static map(data?: Partial<AbstractImpl1>): AbstractImpl1 {
+    return mapToModel(data || {}, metadata.AbstractImpl1) 
   }
   
-  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.AbstractImpl; }
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.AbstractImpl1; }
   
-  /** Instantiate a new AbstractImpl, optionally basing it on the given data. */
-  constructor(data?: Partial<AbstractImpl> | {[k: string]: any}) {
-    Object.assign(this, AbstractImpl.map(data || {}));
+  /** Instantiate a new AbstractImpl1, optionally basing it on the given data. */
+  constructor(data?: Partial<AbstractImpl1> | {[k: string]: any}) {
+    Object.assign(this, AbstractImpl1.map(data || {}));
+  }
+}
+
+
+export interface AbstractImpl2 extends Model<typeof metadata.AbstractImpl2> {
+  impl2OnlyField: string | null
+  id: number | null
+  discriminator: string | null
+  abstractModelPeople: AbstractModelPerson[] | null
+}
+export class AbstractImpl2 {
+  
+  /** Mutates the input object and its descendents into a valid AbstractImpl2 implementation. */
+  static convert(data?: Partial<AbstractImpl2>): AbstractImpl2 {
+    return convertToModel(data || {}, metadata.AbstractImpl2) 
+  }
+  
+  /** Maps the input object and its descendents to a new, valid AbstractImpl2 implementation. */
+  static map(data?: Partial<AbstractImpl2>): AbstractImpl2 {
+    return mapToModel(data || {}, metadata.AbstractImpl2) 
+  }
+  
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.AbstractImpl2; }
+  
+  /** Instantiate a new AbstractImpl2, optionally basing it on the given data. */
+  constructor(data?: Partial<AbstractImpl2> | {[k: string]: any}) {
+    Object.assign(this, AbstractImpl2.map(data || {}));
   }
 }
 
 
 export interface AbstractModel extends Model<typeof metadata.AbstractModel> {
   id: number | null
-  discriminatior: string | null
+  discriminator: string | null
+  abstractModelPeople: AbstractModelPerson[] | null
 }
 export class AbstractModel {
   
@@ -93,6 +122,34 @@ export class AbstractModel {
   /** Instantiate a new AbstractModel, optionally basing it on the given data. */
   constructor(data?: Partial<AbstractModel> | {[k: string]: any}) {
     Object.assign(this, AbstractModel.map(data || {}));
+  }
+}
+
+
+export interface AbstractModelPerson extends Model<typeof metadata.AbstractModelPerson> {
+  id: number | null
+  personId: number | null
+  person: Person | null
+  abstractModelId: number | null
+  abstractModel: AbstractModel | null
+}
+export class AbstractModelPerson {
+  
+  /** Mutates the input object and its descendents into a valid AbstractModelPerson implementation. */
+  static convert(data?: Partial<AbstractModelPerson>): AbstractModelPerson {
+    return convertToModel(data || {}, metadata.AbstractModelPerson) 
+  }
+  
+  /** Maps the input object and its descendents to a new, valid AbstractModelPerson implementation. */
+  static map(data?: Partial<AbstractModelPerson>): AbstractModelPerson {
+    return mapToModel(data || {}, metadata.AbstractModelPerson) 
+  }
+  
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.AbstractModelPerson; }
+  
+  /** Instantiate a new AbstractModelPerson, optionally basing it on the given data. */
+  constructor(data?: Partial<AbstractModelPerson> | {[k: string]: any}) {
+    Object.assign(this, AbstractModelPerson.map(data || {}));
   }
 }
 
@@ -1380,8 +1437,10 @@ declare module "coalesce-vue/lib/model" {
     Titles: Titles
   }
   interface ModelTypeLookup {
-    AbstractImpl: AbstractImpl
+    AbstractImpl1: AbstractImpl1
+    AbstractImpl2: AbstractImpl2
     AbstractModel: AbstractModel
+    AbstractModelPerson: AbstractModelPerson
     Case: Case
     CaseDtoStandalone: CaseDtoStandalone
     CaseProduct: CaseProduct

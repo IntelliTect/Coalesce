@@ -19,16 +19,25 @@
 - `System.Uri` is now support as a type, mapping to a `string` in TypeScript.
 - Interfaces used as parameters in Coalesce-exposed methods are now automatically injected from services, without the need to specify `[InjectAttribute]`. This does not include known data-like interfaces including `IEnumerable`, `ICollection`, and `IFile`.
 
+# 5.3.6
+
+- Fix error in bulk saves where models that belong to inheritance hierarchies would get skipped over while performing collection fixup.
+
+# 5.3.5
+
+- Fix error in c-select-many-to-many when the near side is part of an inheritance hierarchy.
+
+# 5.3.4
+
+- Adjust DateTimeOffset handling to support Postgres restrictions of not allowing non-zero offsets.
+
 # 5.3.3
 
-## Fixes
 
 - Add model validation error when ForeignKeyAttribute references a navigation prop that doesn't exist.
 - Fix code gen performance regression introduced in 5.3.2
 
 # 5.3.2
-
-## Fixes
 
 - Fix error in .NET 9 thrown by vite development middleware if the HTTPS cert directory doesn't exist.
 - Fix `ViewModel.$load` and `ListViewModel.$load` not properly working with `.useResponseCaching()`.
@@ -38,8 +47,6 @@
 - Remove incorrect generation of `ReadFormAsync` for binary parameters on GET endpoints.
 
 # 5.3.1
-
-## Fixes
 
 - Fix error thrown by `CoalesceApiDescriptionProvider` when a custom method on a model or service has an explicitly `[Inject]`ed data source parameter.
 

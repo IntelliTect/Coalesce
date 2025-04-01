@@ -3,13 +3,23 @@ import * as $models from './models.g'
 import { ModelApiClient, ServiceApiClient } from 'coalesce-vue/lib/api-client'
 import type { AxiosPromise, AxiosRequestConfig, ItemResult, ListResult } from 'coalesce-vue/lib/api-client'
 
-export class AbstractImplApiClient extends ModelApiClient<$models.AbstractImpl> {
-  constructor() { super($metadata.AbstractImpl) }
+export class AbstractImpl1ApiClient extends ModelApiClient<$models.AbstractImpl1> {
+  constructor() { super($metadata.AbstractImpl1) }
+}
+
+
+export class AbstractImpl2ApiClient extends ModelApiClient<$models.AbstractImpl2> {
+  constructor() { super($metadata.AbstractImpl2) }
 }
 
 
 export class AbstractModelApiClient extends ModelApiClient<$models.AbstractModel> {
   constructor() { super($metadata.AbstractModel) }
+}
+
+
+export class AbstractModelPersonApiClient extends ModelApiClient<$models.AbstractModelPerson> {
+  constructor() { super($metadata.AbstractModelPerson) }
 }
 
 

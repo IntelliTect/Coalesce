@@ -24,7 +24,9 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         public DbSet<Test> Tests { get; set; }
 
         public DbSet<AbstractModel> AbstractModels { get; set; }
-        public DbSet<AbstractImpl> AbstractImpls { get; set; }
+        public DbSet<AbstractModelPerson> AbstractModelPeople { get; set; }
+        public DbSet<AbstractImpl1> AbstractImpl1s { get; set; }
+        public DbSet<AbstractImpl2> AbstractImpl2s { get; set; }
 
         public DbSet<EnumPk> EnumPks { get; set; }
         public DbSet<ZipCode> ZipCodes { get; set; }
@@ -60,8 +62,9 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
             base.OnModelCreating(modelBuilder);
 
             modelBuilder.Entity<AbstractModel>()
-                .HasDiscriminator(b => b.Discriminatior)
-                .HasValue<AbstractImpl>("impl");
+                .HasDiscriminator(b => b.Discriminator)
+                .HasValue<AbstractImpl1>("impl1")
+                .HasValue<AbstractImpl2>("impl2");
         }
     }
 

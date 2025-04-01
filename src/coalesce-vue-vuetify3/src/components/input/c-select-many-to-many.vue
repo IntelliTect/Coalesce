@@ -189,13 +189,23 @@ const forceDisabled = computed(() => {
 function mapFarItemToMiddleItem(farItem: Indexable<FarItemType>) {
   const manyToMany = manyToManyMeta.value;
   const model = props.model as Model<ModelType>;
+  const middleModelRaw = {
+    [manyToMany.farForeignKey.name]: farItem[farItemKeyPropName.value!],
+    [manyToMany.farNavigationProp.name]: farItem,
+    [manyToMany.nearForeignKey.name]: modelPkValue.value,
+  };
+
+  if (model?.$metadata == manyToMany.nearNavigationProp.typeDef) {
+    // hack(ish): only assign the near nav prop if it matches the expected type.
+    // The case where this might not match is an inheritance hierarchy (e.g. TPH)
+    // where `model` is an instance of a derived type and `nearNavigationProp` is the base type.
+    // Assigning the near nav prop is just a "nice to have" that isn't at all essential.
+    // https://github.com/IntelliTect/Coalesce/issues/536
+    middleModelRaw[manyToMany.nearNavigationProp.name] = model;
+  }
+
   return convertToModel(
-    {
-      [manyToMany.farForeignKey.name]: farItem[farItemKeyPropName.value!],
-      [manyToMany.farNavigationProp.name]: farItem,
-      [manyToMany.nearForeignKey.name]: modelPkValue.value,
-      [manyToMany.nearNavigationProp.name]: model,
-    },
+    middleModelRaw,
     collectionMeta.value.itemType.typeDef
   ) as MiddleItemType;
 }

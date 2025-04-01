@@ -731,7 +731,12 @@ export abstract class ViewModel<
             if (
               !principal &&
               collection?.$parent instanceof ViewModel &&
-              collection.$metadata == prop.inverseNavigation
+              (collection.$metadata == prop.inverseNavigation ||
+                // Handle inheritance hierarchies (i.e. TPH):
+                // The collection is the same collection, but has a different metadata instance
+                // so direct equality won't work.
+                (collection.$metadata.name == prop.inverseNavigation?.name &&
+                  collection.$metadata.type == prop.inverseNavigation.type))
             ) {
               // The reference navigation property has no value,
               // and the foreign key has no value,

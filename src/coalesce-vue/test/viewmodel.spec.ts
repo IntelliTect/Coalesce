@@ -37,6 +37,7 @@ import {
   ProductViewModel,
   TestViewModel,
   ZipCodeViewModel,
+  AbstractImpl1ViewModel,
 } from "../../test-targets/viewmodels.g";
 import {
   StudentViewModel,
@@ -1404,6 +1405,52 @@ describe("ViewModel", () => {
             data: { zip: "12345", state: "wa" },
             refs: { zip: vm.$stableId },
             root: true,
+          },
+        ],
+      });
+
+      bulkSaveEndpoint.destroy();
+    });
+
+    test("creation of TPH entity with many-to-many that references base type", async () => {
+      const bulkSaveEndpoint = mockEndpoint(
+        "/AbstractImpl1/bulkSave",
+        vitest.fn((req) => ({
+          wasSuccessful: true,
+          object: null,
+        }))
+      );
+
+      // This tests the fact that the metadata instance of
+      // `AbstractImpl1ViewModel.abstractModelPeople.$metadata` is the one owned by `AbstractImpl1`'s metadata,
+      // but the metadata instance of `AbstractModelPerson.$metadata.props.abstractModel.inverseNavigation`
+      // is the copy of the same collection that is owned by `AbstractModel`'s metadata.
+      //
+      // The collection navigation fixup logic in bulk saves has to allow for this type to be different.
+
+      const person = new PersonViewModel();
+      person.$loadCleanData({ personId: 1, name: "bob" });
+      const vm = new AbstractImpl1ViewModel({ impl1OnlyField: "fieldval" });
+      vm.abstractModelPeople.push({ person });
+      await vm.$bulkSave();
+
+      expect(JSON.parse(bulkSaveEndpoint.mock.calls[0][0].data)).toMatchObject({
+        items: [
+          {
+            action: "save",
+            type: "AbstractImpl1",
+            data: { id: null, impl1OnlyField: "fieldval" },
+            refs: { id: vm.$stableId },
+            root: true,
+          },
+          {
+            action: "save",
+            type: "AbstractModelPerson",
+            data: { id: null },
+            refs: {
+              id: vm.abstractModelPeople[0].$stableId,
+              abstractModelId: vm.$stableId,
+            },
           },
         ],
       });

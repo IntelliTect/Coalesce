@@ -122,6 +122,9 @@ namespace IntelliTect.Coalesce
                     {
                         DateTimeOffset dateTimeOffset = new DateTimeOffset(parsedValue, Context.TimeZone.GetUtcOffset(parsedValue));
 
+                        // convert to UTC, to support Postgres which doesn't allow non-zero offsets
+                        dateTimeOffset = dateTimeOffset.ToUniversalTime();
+
                         min = dateTimeOffset.AsQueryParam(propType);
                         max = dateTimeOffset.AddDays(1).AsQueryParam(propType);
                     }
@@ -144,7 +147,9 @@ namespace IntelliTect.Coalesce
                     else
                     {
                         // Date and Time
-                        return query.WhereExpression(it => Expression.Equal(it.Prop(prop), min));
+                        // The == operator doesn't work well here in memory (which our tests use),
+                        // so we have to generate it as a call to .Equals.
+                        return query.WhereExpression(it => min.Call("Equals", Expression.Convert(it.Prop(prop), typeof(object))));
                     }
                 }
                 else

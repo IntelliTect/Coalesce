@@ -139,6 +139,10 @@ namespace IntelliTect.Coalesce.Helpers.Search
                     if (propType.IsDateTimeOffset)
                     {
                         var offset = new DateTimeOffset(dt, context.TimeZone.GetUtcOffset(dt));
+
+                        // convert to UTC, to support Postgres which doesn't allow non-zero offsets
+                        offset = offset.ToUniversalTime();
+
                         min = offset.AsQueryParam(propType);
                         max = offset.Add(range.Value).AsQueryParam(propType);
                     }

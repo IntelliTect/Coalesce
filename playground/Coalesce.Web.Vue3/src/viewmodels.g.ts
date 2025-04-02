@@ -6,6 +6,28 @@ import { ViewModel, ListViewModel, ViewModelCollection, ServiceViewModel, type D
 export type AbstractClassViewModel = AbstractClassImplViewModel
 export class AbstractClassListViewModel extends ListViewModel<$models.AbstractClass, $apiClients.AbstractClassApiClient, AbstractClassViewModel> {
   
+  public get getCount() {
+    const getCount = this.$apiClient.$makeCaller(
+      this.$metadata.methods.getCount,
+      (c) => c.getCount(),
+      () => ({}),
+      (c, args) => c.getCount())
+    
+    Object.defineProperty(this, 'getCount', {value: getCount});
+    return getCount
+  }
+  
+  public get echoAbstractModel() {
+    const echoAbstractModel = this.$apiClient.$makeCaller(
+      this.$metadata.methods.echoAbstractModel,
+      (c, model: $models.AbstractClass | null) => c.echoAbstractModel(model),
+      () => ({model: null as $models.AbstractClass | null, }),
+      (c, args) => c.echoAbstractModel(args.model))
+    
+    Object.defineProperty(this, 'echoAbstractModel', {value: echoAbstractModel});
+    return echoAbstractModel
+  }
+  
   constructor() {
     super($metadata.AbstractClass, new $apiClients.AbstractClassApiClient())
   }
@@ -30,6 +52,17 @@ export class AbstractClassImplViewModel extends ViewModel<$models.AbstractClassI
     return (this.abstractModelPeople || []).map($ => $.person!).filter($ => $)
   }
   
+  public get getId() {
+    const getId = this.$apiClient.$makeCaller(
+      this.$metadata.methods.getId,
+      (c) => c.getId(this.$primaryKey),
+      () => ({}),
+      (c, args) => c.getId(this.$primaryKey))
+    
+    Object.defineProperty(this, 'getId', {value: getId});
+    return getId
+  }
+  
   constructor(initialData?: DeepPartial<$models.AbstractClassImpl> | null) {
     super($metadata.AbstractClassImpl, new $apiClients.AbstractClassImplApiClient(), initialData)
   }
@@ -37,6 +70,28 @@ export class AbstractClassImplViewModel extends ViewModel<$models.AbstractClassI
 defineProps(AbstractClassImplViewModel, $metadata.AbstractClassImpl)
 
 export class AbstractClassImplListViewModel extends ListViewModel<$models.AbstractClassImpl, $apiClients.AbstractClassImplApiClient, AbstractClassImplViewModel> {
+  
+  public get getCount() {
+    const getCount = this.$apiClient.$makeCaller(
+      this.$metadata.methods.getCount,
+      (c) => c.getCount(),
+      () => ({}),
+      (c, args) => c.getCount())
+    
+    Object.defineProperty(this, 'getCount', {value: getCount});
+    return getCount
+  }
+  
+  public get echoAbstractModel() {
+    const echoAbstractModel = this.$apiClient.$makeCaller(
+      this.$metadata.methods.echoAbstractModel,
+      (c, model: $models.AbstractClass | null) => c.echoAbstractModel(model),
+      () => ({model: null as $models.AbstractClass | null, }),
+      (c, args) => c.echoAbstractModel(args.model))
+    
+    Object.defineProperty(this, 'echoAbstractModel', {value: echoAbstractModel});
+    return echoAbstractModel
+  }
   
   constructor() {
     super($metadata.AbstractClassImpl, new $apiClients.AbstractClassImplApiClient())

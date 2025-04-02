@@ -1,6 +1,7 @@
 ﻿using IntelliTect.Coalesce.DataAnnotations;
 using IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace IntelliTect.Coalesce.Tests.TargetClasses
 {
@@ -16,6 +17,15 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses
 
         [ManyToMany("People")]
         public List<AbstractModelPerson> AbstractModelPeople { get; set; }
+
+        [Coalesce]
+        public int GetId() => Id;
+
+        [Coalesce]
+        public static int GetCount(AppDbContext db) => db.AbstractModels.Count();
+
+        [Coalesce]
+        public static AbstractModel EchoAbstractModel(AbstractModel model) => model;
     }
 
     [Edit(PermissionLevel = SecurityPermissionLevels.DenyAll)]

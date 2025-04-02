@@ -33,6 +33,12 @@ namespace Coalesce.Web.Vue3.Models
         /// </summary>
         public void MapTo(Coalesce.Domain.AbstractClass entity, IMappingContext context)
         {
+            switch (this)
+            {
+                case AbstractClassImplParameter _AbstractClassImpl:
+                    _AbstractClassImpl.MapTo(entity, context);
+                    return;
+            }
             var includes = context.Includes;
 
             if (ShouldMapTo(nameof(Id))) entity.Id = (Id ?? entity.Id);
@@ -44,9 +50,14 @@ namespace Coalesce.Web.Vue3.Models
         /// </summary>
         public Coalesce.Domain.AbstractClass MapToNew(IMappingContext context)
         {
+            switch (this)
+            {
+                case AbstractClassImplParameter _AbstractClassImpl:
+                    return _AbstractClassImpl.MapToNew(context);
+            }
             // Unacceptable constructors:
             // Type has no public constructors.
-            throw new NotSupportedException("Type AbstractClass does not have a constructor suitable for use by Coalesce for new object instantiation. Fortunately, this type appears to never be used in an input position in a Coalesce-generated API.");
+            throw new NotSupportedException("Type AbstractClass is abstract and therefore will never be instantiated directly by Coalesce.");
         }
 
         public Coalesce.Domain.AbstractClass MapToModelOrNew(Coalesce.Domain.AbstractClass obj, IMappingContext context)
@@ -72,6 +83,12 @@ namespace Coalesce.Web.Vue3.Models
         public void MapFrom(Coalesce.Domain.AbstractClass obj, IMappingContext context, IncludeTree tree = null)
         {
             if (obj == null) return;
+            switch (this)
+            {
+                case AbstractClassImplResponse _AbstractClassImpl:
+                    _AbstractClassImpl.MapFrom((Coalesce.Domain.AbstractClassImpl)obj, context, tree);
+                    return;
+            }
             var includes = context.Includes;
 
             this.Id = obj.Id;

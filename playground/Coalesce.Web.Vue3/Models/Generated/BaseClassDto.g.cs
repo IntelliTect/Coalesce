@@ -34,6 +34,12 @@ namespace Coalesce.Web.Vue3.Models
         /// </summary>
         public void MapTo(Coalesce.Domain.BaseClass entity, IMappingContext context)
         {
+            switch (this)
+            {
+                case BaseClassDerivedParameter _BaseClassDerived:
+                    _BaseClassDerived.MapTo(entity, context);
+                    return;
+            }
             var includes = context.Includes;
 
             if (ShouldMapTo(nameof(Id))) entity.Id = (Id ?? entity.Id);
@@ -45,6 +51,11 @@ namespace Coalesce.Web.Vue3.Models
         /// </summary>
         public Coalesce.Domain.BaseClass MapToNew(IMappingContext context)
         {
+            switch (this)
+            {
+                case BaseClassDerivedParameter _BaseClassDerived:
+                    return _BaseClassDerived.MapToNew(context);
+            }
             var entity = new Coalesce.Domain.BaseClass();
             MapTo(entity, context);
             return entity;
@@ -73,6 +84,12 @@ namespace Coalesce.Web.Vue3.Models
         public void MapFrom(Coalesce.Domain.BaseClass obj, IMappingContext context, IncludeTree tree = null)
         {
             if (obj == null) return;
+            switch (this)
+            {
+                case BaseClassDerivedResponse _BaseClassDerived:
+                    _BaseClassDerived.MapFrom((Coalesce.Domain.BaseClassDerived)obj, context, tree);
+                    return;
+            }
             var includes = context.Includes;
 
             this.Id = obj.Id;

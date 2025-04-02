@@ -1,5 +1,7 @@
-﻿using IntelliTect.Coalesce.DataAnnotations;
+﻿using IntelliTect.Coalesce;
+using IntelliTect.Coalesce.DataAnnotations;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Coalesce.Domain
 {
@@ -11,6 +13,15 @@ namespace Coalesce.Domain
 
         [ManyToMany("People")]
         public List<AbstractClassPerson>? AbstractModelPeople { get; set; }
+
+        [Coalesce]
+        public int GetId() => Id;
+
+        [Coalesce]
+        public static int GetCount(AppDbContext db) => db.AbstractClasses.Count();
+
+        [Coalesce]
+        public static AbstractClass EchoAbstractModel(AbstractClass model) => model;
     }
 
     public class AbstractClassImpl : AbstractClass

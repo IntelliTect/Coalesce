@@ -19,26 +19,11 @@ namespace IntelliTect.Coalesce.Mapping
 
             var realDtoType = context.GetResponseDtoType<TDto, T>(obj);
 
-            if (realDtoType == typeof(TDto))
-            {
-                // Bypass dynamic behavior if there's no inheritance hierarchy.
-                TDto dto = new TDto();
-                context.AddMapping(obj, tree, dto);
-                dto.MapFrom(obj, context, tree);
+            TDto dto = (TDto)Activator.CreateInstance(realDtoType)!;
+            context.AddMapping(obj, tree, dto);
+            dto.MapFrom(obj, context, tree);
 
-                return dto;
-            }
-            else
-            {
-                // Dynamic is used here for both `dto` and `obj` so that the
-                // runtime will select the correct overload of MapTo in the inheritance hierarchy.
-                dynamic dto = Activator.CreateInstance(realDtoType)!;
-                context.AddMapping(obj, tree, dto);
-
-                dto.MapFrom(obj as dynamic, context, tree);
-
-                return dto;
-            }
+            return dto;
         }
 
         public static T MapToModel<T, TDto>(this TDto dto, T entity, IMappingContext context)

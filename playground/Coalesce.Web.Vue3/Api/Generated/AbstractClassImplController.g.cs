@@ -91,5 +91,142 @@ namespace Coalesce.Web.Vue3.Api
             IBehaviors<Coalesce.Domain.AbstractClassImpl> behaviors,
             IDataSource<Coalesce.Domain.AbstractClassImpl> dataSource)
             => DeleteImplementation(id, new DataSourceParameters(), dataSource, behaviors);
+
+        // Methods from data class exposed through API Controller.
+
+        /// <summary>
+        /// Method: GetId
+        /// </summary>
+        [HttpPost("GetId")]
+        [Authorize]
+        [Consumes("application/x-www-form-urlencoded", "multipart/form-data")]
+        public virtual async Task<ItemResult<int>> GetId(
+            [FromServices] IDataSourceFactory dataSourceFactory,
+            [FromForm(Name = "id")] int id)
+        {
+            var _params = new
+            {
+                Id = id
+            };
+
+            var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.AbstractClassImpl, Coalesce.Domain.AbstractClassImpl>("Default");
+            var itemResult = await dataSource.GetItemAsync(_params.Id, new DataSourceParameters());
+            if (!itemResult.WasSuccessful)
+            {
+                return new ItemResult<int>(itemResult);
+            }
+            var item = itemResult.Object;
+            var _methodResult = item.GetId();
+            var _result = new ItemResult<int>();
+            _result.Object = _methodResult;
+            return _result;
+        }
+
+        public class AbstractClassGetIdParameters
+        {
+            public int Id { get; set; }
+        }
+
+        /// <summary>
+        /// Method: GetId
+        /// </summary>
+        [HttpPost("GetId")]
+        [Authorize]
+        [Consumes("application/json")]
+        public virtual async Task<ItemResult<int>> GetId(
+            [FromServices] IDataSourceFactory dataSourceFactory,
+            [FromBody] AbstractClassGetIdParameters _params
+        )
+        {
+            var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.AbstractClassImpl, Coalesce.Domain.AbstractClassImpl>("Default");
+            var itemResult = await dataSource.GetItemAsync(_params.Id, new DataSourceParameters());
+            if (!itemResult.WasSuccessful)
+            {
+                return new ItemResult<int>(itemResult);
+            }
+            var item = itemResult.Object;
+            var _methodResult = item.GetId();
+            var _result = new ItemResult<int>();
+            _result.Object = _methodResult;
+            return _result;
+        }
+
+        /// <summary>
+        /// Method: GetCount
+        /// </summary>
+        [HttpPost("GetCount")]
+        [Authorize]
+        public virtual ItemResult<int> GetCount()
+        {
+            var _methodResult = Coalesce.Domain.AbstractClass.GetCount(
+                Db
+            );
+            var _result = new ItemResult<int>();
+            _result.Object = _methodResult;
+            return _result;
+        }
+
+        /// <summary>
+        /// Method: EchoAbstractModel
+        /// </summary>
+        [HttpPost("EchoAbstractModel")]
+        [Authorize]
+        [Consumes("application/x-www-form-urlencoded", "multipart/form-data")]
+        public virtual ItemResult<AbstractClassResponse> EchoAbstractModel(
+            [FromForm(Name = "model")] AbstractClassParameter model)
+        {
+            var _params = new
+            {
+                Model = !Request.Form.HasAnyValue(nameof(model)) ? null : model
+            };
+
+            if (Context.Options.ValidateAttributesForMethods)
+            {
+                var _validationResult = ItemResult.FromParameterValidation(
+                    GeneratedForClassViewModel!.MethodByName("EchoAbstractModel"), _params, HttpContext.RequestServices);
+                if (!_validationResult.WasSuccessful) return new ItemResult<AbstractClassResponse>(_validationResult);
+            }
+
+            IncludeTree includeTree = null;
+            var _mappingContext = new MappingContext(Context);
+            var _methodResult = Coalesce.Domain.AbstractClass.EchoAbstractModel(
+                _params.Model?.MapToNew(_mappingContext)
+            );
+            var _result = new ItemResult<AbstractClassResponse>();
+            _result.Object = Mapper.MapToDto<Coalesce.Domain.AbstractClass, AbstractClassResponse>(_methodResult, _mappingContext, includeTree);
+            return _result;
+        }
+
+        public class AbstractClassEchoAbstractModelParameters
+        {
+            public AbstractClassParameter Model { get; set; }
+        }
+
+        /// <summary>
+        /// Method: EchoAbstractModel
+        /// </summary>
+        [HttpPost("EchoAbstractModel")]
+        [Authorize]
+        [Consumes("application/json")]
+        public virtual ItemResult<AbstractClassResponse> EchoAbstractModel(
+            [FromBody] AbstractClassEchoAbstractModelParameters _params
+        )
+        {
+            if (Context.Options.ValidateAttributesForMethods)
+            {
+                var _validationResult = ItemResult.FromParameterValidation(
+                    GeneratedForClassViewModel!.MethodByName("EchoAbstractModel"), _params, HttpContext.RequestServices);
+                if (!_validationResult.WasSuccessful) return new ItemResult<AbstractClassResponse>(_validationResult);
+            }
+
+            IncludeTree includeTree = null;
+            var _mappingContext = new MappingContext(Context);
+            var _methodResult = Coalesce.Domain.AbstractClass.EchoAbstractModel(
+                _params.Model?.MapToNew(_mappingContext)
+            );
+            var _result = new ItemResult<AbstractClassResponse>();
+            _result.Object = Mapper.MapToDto<Coalesce.Domain.AbstractClass, AbstractClassResponse>(_methodResult, _mappingContext, includeTree);
+            return _result;
+        }
     }
 }

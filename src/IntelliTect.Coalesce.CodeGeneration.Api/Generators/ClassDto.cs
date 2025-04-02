@@ -107,6 +107,22 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                 b.DocComment("Map from the current DTO instance to the domain object.");
                 using (b.Block($"public void MapTo({Model.FullyQualifiedName} entity, IMappingContext context)"))
                 {
+                    var derivedTypes = Model.ClientDerivedTypes.ToList();
+                    if (derivedTypes.Any())
+                    {
+                        // Dispatch to derived types, since usages of this DTO in other generated code will
+                        // dispatch calls to the base type version of this method rather than the derived types.
+                        using (b.Block("switch (this)"))
+                        {
+                            foreach (var derived in derivedTypes)
+                            {
+                                b.Line($"case {derived.ParameterDtoTypeName} _{derived.Name}:");
+                                b.Indented($"_{derived.Name}.MapTo(entity, context);");
+                                b.Indented("return;");
+                            }
+                        }
+                    }
+
                     b.Line("var includes = context.Includes;");
                     b.Line();
 
@@ -123,6 +139,21 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                 b.DocComment("Map from the current DTO instance to a new instance of the domain object.");
                 using (b.Block($"public {(baseType is null ? "" : "new ")}{Model.FullyQualifiedName} MapToNew(IMappingContext context)"))
                 {
+                    var derivedTypes = Model.ClientDerivedTypes.ToList();
+                    if (derivedTypes.Any())
+                    {
+                        // Dispatch to derived types, since usages of this DTO in other generated code will
+                        // dispatch calls to the base type version of this method rather than the derived types.
+                        using (b.Block("switch (this)"))
+                        {
+                            foreach (var derived in derivedTypes)
+                            {
+                                b.Line($"case {derived.ParameterDtoTypeName} _{derived.Name}:");
+                                b.Indented($"return _{derived.Name}.MapToNew(context);");
+                            }
+                        }
+                    }
+
                     var properties = orderedProps
                         .Where(p => p.SecurityInfo.Init.IsAllowed())
                         .ToDictionary(p => p.Name, StringComparer.OrdinalIgnoreCase);
@@ -148,7 +179,13 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                         b.Line("// Unacceptable constructors:");
                         foreach (var reason in reasons) b.Append("// ").Line(reason);
 
-                        if (properties.Count == 0)
+                        if (Model.Type.IsAbstract)
+                        {
+                            // There's no constructor we can use, but also no properties that can even be mapped.
+                            b.Line("throw new NotSupportedException(" +
+                                $"\"Type {Model.Name} is abstract and therefore will never be instantiated directly by Coalesce.\");");
+                        }
+                        else if (properties.Count == 0)
                         {
                             // There's no constructor we can use, but also no properties that can even be mapped.
                             b.Line("throw new NotSupportedException(" +
@@ -244,8 +281,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                         if (obj is null) return MapToNew(context);
                         MapTo(obj, context);
                         return obj;
-                    }
-                    """);
+                }
+                """);
             }
         }
 
@@ -292,6 +329,23 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                 using (b.Block($"public void MapFrom({Model.FullyQualifiedName} obj, IMappingContext context, IncludeTree tree = null)"))
                 {
                     b.Line("if (obj == null) return;");
+
+                    var derivedTypes = Model.ClientDerivedTypes.ToList();
+                    if (derivedTypes.Any())
+                    {
+                        // Dispatch to derived types, since usages of this DTO in other generated code will
+                        // dispatch calls to the base type version of this method rather than the derived types.
+                        using (b.Block("switch (this)"))
+                        {
+                            foreach (var derived in derivedTypes)
+                            {
+                                b.Line($"case {derived.ResponseDtoTypeName} _{derived.Name}:");
+                                b.Indented($"_{derived.Name}.MapFrom(({derived.FullyQualifiedName})obj, context, tree);");
+                                b.Indented($"return;");
+                            }
+                        }
+                    }
+
                     b.Line("var includes = context.Includes;");
                     b.Line();
 

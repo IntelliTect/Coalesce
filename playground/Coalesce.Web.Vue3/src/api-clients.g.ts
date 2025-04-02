@@ -5,11 +5,57 @@ import type { AxiosPromise, AxiosRequestConfig, ItemResult, ListResult } from 'c
 
 export class AbstractClassApiClient extends ModelApiClient<$models.AbstractClass> {
   constructor() { super($metadata.AbstractClass) }
+  public getId(id: number | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<number>> {
+    const $method = this.$metadata.methods.getId
+    const $params =  {
+      id,
+    }
+    return this.$invoke($method, $params, $config)
+  }
+  
+  public getCount($config?: AxiosRequestConfig): AxiosPromise<ItemResult<number>> {
+    const $method = this.$metadata.methods.getCount
+    const $params =  {
+    }
+    return this.$invoke($method, $params, $config)
+  }
+  
+  public echoAbstractModel(model: $models.AbstractClass | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<$models.AbstractClass>> {
+    const $method = this.$metadata.methods.echoAbstractModel
+    const $params =  {
+      model,
+    }
+    return this.$invoke($method, $params, $config)
+  }
+  
 }
 
 
 export class AbstractClassImplApiClient extends ModelApiClient<$models.AbstractClassImpl> {
   constructor() { super($metadata.AbstractClassImpl) }
+  public getId(id: number | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<number>> {
+    const $method = this.$metadata.methods.getId
+    const $params =  {
+      id,
+    }
+    return this.$invoke($method, $params, $config)
+  }
+  
+  public getCount($config?: AxiosRequestConfig): AxiosPromise<ItemResult<number>> {
+    const $method = this.$metadata.methods.getCount
+    const $params =  {
+    }
+    return this.$invoke($method, $params, $config)
+  }
+  
+  public echoAbstractModel(model: $models.AbstractClass | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<$models.AbstractClass>> {
+    const $method = this.$metadata.methods.echoAbstractModel
+    const $params =  {
+      model,
+    }
+    return this.$invoke($method, $params, $config)
+  }
+  
 }
 
 

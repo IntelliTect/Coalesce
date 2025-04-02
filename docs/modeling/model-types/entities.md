@@ -10,25 +10,27 @@ Don't worry about querying or saving data when you're just getting started - Coa
 
 As you start building, you are highly encouraged to read the sections below. The linked pages explain in greater detail what Coalesce will build for you for each part of your data model.
 
-
 ## Relational Modeling
 
 ### Primary Keys
+
 To work with Coalesce, your model must have a single property for a primary key. By convention, this property should be named the same as your model class with `Id` appended to that name, but you can also annotate a property with `[Key]` or name it exactly "Id" to denote it as the primary key.
 
 ### Foreign Keys & Reference Navigation Properties
+
 While a foreign key may be defined in EF via `DbContext.OnModelCreating` or similar methods, Coalesce won't know that a property is a foreign key unless it is accompanied by a corresponding reference navigation property, and vice versa - Coalesce cannot examine your EF model metadata at generation time - it can only see the API surface of your C# code.
 
 In cases where the foreign key is not named after the navigation property with `"Id"` appended, the `[ForeignKeyAttribute]` may be used on either the key or the navigation property to denote the other property of the pair, in accordance with the recommendations set forth by [EF Core's Modeling Guidelines](https://learn.microsoft.com/en-us/ef/core/modeling/relationships/mapping-attributes#foreignkeyattribute).
 
 ### Collection Navigation Properties
+
 On entities that are the "one" side of a one-to-many relationship, collection navigation properties can be defined and used in the typical manner. In the event where the inverse property on the other side of the relationship cannot be determined, `[InversePropertyAttribute]` will need to be used. [EF Core provides documentation](https://learn.microsoft.com/en-us/ef/core/modeling/relationships/mapping-attributes#inversepropertyattribute) on how to use this attribute. Errors will be displayed at generation time if an inverse property cannot be determined without the attribute.
 
-
 ### One-to-one Relationships
+
 One-to-one relationships can be represented in Coalesce, but require fairly specific configuration to satisfy both EF and Coalesce's needs. Specifically, the dependent/child side of the one-to-one (the entity whose PK is also a FK), must explicitly annotate its PK with `[ForeignKey]` pointing at the parent navigation property. For example:
 
-``` c#
+```c#
 public class OneToOneParent
 {
     public int Id { get; set; }
@@ -49,12 +51,11 @@ Alternatively, you could also implement a one-to-one like a normal many-to-many 
 
 ### Inheritance (TPH and TPT)
 
-Coalesce is compatible with TPH, TPT, and TPCT entity hierarchies. Define your models as you normally would per [the EF documentation](https://learn.microsoft.com/en-us/ef/core/modeling/inheritance). Coalesce can work with your hierarchy model, with the following notes and caveats:
+Coalesce is compatible with TPH, TPT, and TPCT entity hierarchies. Define your models as you normally would per [the EF documentation](https://learn.microsoft.com/en-us/ef/core/modeling/inheritance). Coalesce can work with your hierarchy model, with the following notes:
 
-* Abstract base classes are supported, and will be available for read via `/get`, `/list`, and `/count` endpoints if they have a public `DbSet` property on the `DbContext` and are not disabled via [attributes](/topics/security.md#endpoint-security). Abstract base classes also support [Custom Methods](/modeling/model-components/methods.md) without issue. Modification actions (save/delete) on abstract base types are not supported. The responses from `/get` and `/list` on the abstract base will be serialized as the DTO type for the abstract base class without any polymorphism, meaning that these API responses will not include any "extra" properties that are defined on the concrete types for these entities. If you need properties from the concrete types, query those directly from their own API endpoints, or define abstract getter properties on the base type that are implemented on each concrete type.
-* The polymorphism / inheritance hierarchy of your C# models will not be reflected in the generated [TypeScript ViewModels](/stacks/vue/layers/viewmodels.md). However, since TypeScript types are structural, as opposed to C#'s nominal types, you can easily use your types polymorphically when working with the [Model Layer](/stacks/vue/layers/models.md), or use union types when working with the ViewModels.
-* If you want to expose the discriminator property to the client, map it to a .NET property on the base type [per EF documentation](https://learn.microsoft.com/en-us/ef/core/modeling/inheritance#table-per-hierarchy-and-discriminator-configuration).
-
+- Abstract base classes are supported, and will be available for read via `/get`, `/list`, and `/count` endpoints if they have a public `DbSet` property on the `DbContext` and are not disabled via [attributes](/topics/security.md#endpoint-security). Abstract base classes also support [Custom Methods](/modeling/model-components/methods.md) without issue.
+- API responses that are declared to serve the abstract base type will serve instances of the concrete, derived types, respecting all the [property security](/topics/security.md#propertycolumn-security) of those concrete types. A [TypeScript ViewModel](/stacks/vue/layers/viewmodels.md) is not generated for an abstract type; it is instead emitted as a union of all the concrete ViewModel types that derive from the abstract type. On other other hand, the generated [Model](/stacks/vue/layers/models.md) types do mirror your C# inheritance hierarchy using regular TypeScript class inheritance.
+- If you want to expose the discriminator property to the client, map it to a .NET property on the base type [per EF documentation](https://learn.microsoft.com/en-us/ef/core/modeling/inheritance#table-per-hierarchy-and-discriminator-configuration).
 
 ## Other Model Customization
 
@@ -62,22 +63,19 @@ Coalesce is compatible with TPH, TPT, and TPCT entity hierarchies. Define your m
 
 Read [Properties](/modeling/model-components/properties.md) for an outline of the different types of properties that you may place on your models and the code that Coalesce will generate for each of them. The above section also details the specific needs of properties that have a relational role in your model.
 
-
 ### Attributes
 
 Coalesce provides a number of C# attributes that can be used to decorate your model classes and their properties in order to customize behavior, appearance, security, and more. Coalesce also supports a number of annotations from `System.ComponentModel.DataAnnotations`.
 
 Read [Attributes](/modeling/model-components/attributes.md) to learn more.
 
-
 ### Methods
 
 You can place both static and interface methods on your model classes. Any public methods annotated with [[Coalesce]](/modeling/model-components/attributes/coalesce.md) will have a generated API endpoint and corresponding generated TypeScript members for calling this API endpoint. Read [Methods](/modeling/model-components/methods.md) to learn more.
 
-
 ## Customizing CRUD Operations
 
-Once you've got a solid data model in place, its time to start customizing the way that Coalesce will *read* your data, as well as the way that it will handle your data when processing *creates*, *updates*, and *deletes*.
+Once you've got a solid data model in place, its time to start customizing the way that Coalesce will _read_ your data, as well as the way that it will handle your data when processing _creates_, _updates_, and _deletes_.
 
 ### Data Sources
 
@@ -86,4 +84,3 @@ The method by which you can control what data the users of your application can 
 ### Behaviors
 
 Behaviors in Coalesce are to mutating data as data sources are to reading data. Defining a behaviors class for a model allows complete control over the way that Coalesce will create, update, and delete your application's data in response to requests made through its generated API. Read [Behaviors](/modeling/model-components/behaviors.md) to learn more.
-

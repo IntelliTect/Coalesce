@@ -83,7 +83,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public ClassViewModel BaseViewModel => DtoBaseViewModel ?? this;
 
-        public IEnumerable<ClassViewModel> ClientDerivedTypes => ReflectionRepository?.ClientClasses
+        public IEnumerable<ClassViewModel> ClientDerivedTypes => (ReflectionRepository?.ClientClasses
             .Where(cvm =>
             {
                 var baseType = cvm.Type.BaseType;
@@ -93,7 +93,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     baseType = baseType.BaseType;
                 }
                 return false;
-            }) ?? [];
+            }) ?? []).OrderBy(cvm => cvm.Name);
 
         public IEnumerable<ClassViewModel> ClientBaseTypes
         {

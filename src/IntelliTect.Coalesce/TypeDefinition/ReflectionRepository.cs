@@ -157,7 +157,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         private void ProcessAddedType(TypeViewModel type)
         {
-            // TODO: How does this handle inheritance hierarhcies where a type can implement IGeneratedParameterDto more than once?
             var generatedDtoEntity = type.GenericArgumentsFor(typeof(IGeneratedParameterDto<>))?[0];
             if (generatedDtoEntity?.ClassViewModel is ClassViewModel cvm)
             {

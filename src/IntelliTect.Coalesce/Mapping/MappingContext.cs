@@ -82,12 +82,17 @@ namespace IntelliTect.Coalesce.Mapping
             return restriction;
         }
 
-        public Type GetRealDtoType<TDto, T>(T entity)
+        /// <summary>
+        /// Find the exact response DTO type to use for the given entity.
+        /// Chooses the derived type that was generated for the entity if there is one,
+        /// rather than <typeparamref name="TDto"/> which might be a base DTO type.
+        /// </summary>
+        public Type GetResponseDtoType<TDto, T>(T entity)
             where T : class
             where TDto : class, IResponseDto<T>, new()
         {
             Type entityType = entity.GetType();
-            _responseDtoTypes ??= new();
+            _responseDtoTypes ??= [];
 
             if (_responseDtoTypes.TryGetValue(entityType, out Type? ret)) return ret;
 

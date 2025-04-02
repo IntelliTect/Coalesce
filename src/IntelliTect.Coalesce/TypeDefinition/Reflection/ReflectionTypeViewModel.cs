@@ -36,17 +36,12 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
             IEnumerable<Type> GetBaseClassesAndInterfaces(Type t)
             {
-                // From https://stackoverflow.com/a/17143662
-                return t.BaseType == null || t.BaseType == typeof(object)
-                    ? t.GetInterfaces()
-                    : Enumerable
-                        .Repeat(t.BaseType, 1)
-                        .Concat(t.GetInterfaces())
-                        .Concat(GetBaseClassesAndInterfaces(t.BaseType))
-                        .Distinct();
+                return (t.BaseType == null || t.BaseType == typeof(object) ? [] : GetBaseClassesAndInterfaces(t.BaseType))
+                    .Append(t)
+                    .Concat(t.GetInterfaces());
             }
 
-            BaseClassesAndInterfaces = GetBaseClassesAndInterfaces(Info).Concat(new[] { Info }).ToList();
+            BaseClassesAndInterfaces = GetBaseClassesAndInterfaces(Info).Distinct().Reverse().ToList();
 
             ClassViewModel = ShouldCreateClassViewModel
                 ? new ReflectionClassViewModel(this)

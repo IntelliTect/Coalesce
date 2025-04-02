@@ -150,12 +150,6 @@ const dtoToModelMappings = <MappingData[]>[
     dto: { advisorId: 1, extraneousProp: true },
     model: { advisorId: 1, $metadata: $metadata.Advisor },
   },
-  {
-    // Expected base type, but with actual derived type.
-    meta: $metadata2.AbstractModel,
-    dto: { $type: "AbstractImpl1", id: 1, impl1OnlyField: "foo" },
-    model: new $models.AbstractImpl1({ id: 1, impl1OnlyField: "foo" }),
-  },
 
   // Object
   {

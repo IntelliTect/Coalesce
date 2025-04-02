@@ -568,13 +568,14 @@ class MapToDtoVisitor extends Visitor<
     this.depth++;
 
     if (value == null) return null;
-    const props = meta.props;
     const output: any = {};
 
     if ("derivedTypes" in meta || "baseTypes" in meta) {
+      meta = value.$metadata ?? meta;
       output.$type = meta.name;
     }
 
+    const props = meta.props;
     for (const propName in props) {
       const propMeta = props[propName];
 

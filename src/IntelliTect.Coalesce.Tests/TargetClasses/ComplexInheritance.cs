@@ -20,6 +20,8 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses
         }
     }
 
+    public class ComplexInheritanceDerived : ComplexInheritance, IAmInheritedMultipleTimes<ComplexInheritanceDerived> { }
+
     public interface IAmInheritedMultipleTimes<T> : IHaveMultipleTypes<IAmSimple, long, decimal>
     {
 

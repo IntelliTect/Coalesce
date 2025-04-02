@@ -17,7 +17,7 @@ namespace IntelliTect.Coalesce.Mapping
             // See if we already mapped this object:
             if (context.TryGetMapping(obj, tree, out TDto? existing)) return existing;
 
-            var realDtoType = context.GetRealDtoType<TDto, T>(obj);
+            var realDtoType = context.GetResponseDtoType<TDto, T>(obj);
 
             if (realDtoType == typeof(TDto))
             {

@@ -1,6 +1,8 @@
 import * as $metadata from "./targets.metadata";
 import type { ObjectValue, Value, ModelValue } from "../src/metadata";
 import { format } from "date-fns";
+import * as $metadata2 from "@test-targets/metadata.g";
+import * as $models from "@test-targets/models.g";
 
 const studentProps = $metadata.Student.props;
 
@@ -100,6 +102,13 @@ export const twoWayConversions = <MappingData[]>[
         "yyyy-MM-dd'T'HH:mm:ss.SSSXXX"
       ),
     },
+  },
+  {
+    // Expected base type, but with actual derived type.
+    // Should round-trip as the derived type.
+    meta: $metadata2.AbstractModel,
+    dto: { $type: "AbstractImpl1", id: 1, impl1OnlyField: "foo" },
+    model: new $models.AbstractImpl1({ id: 1, impl1OnlyField: "foo" }),
   },
 
   // Unknown

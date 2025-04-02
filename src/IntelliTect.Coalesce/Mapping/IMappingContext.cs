@@ -27,7 +27,7 @@ namespace IntelliTect.Coalesce
             where TRestriction : IPropertyRestriction
             => (TRestriction)GetPropertyRestriction(typeof(TRestriction));
 
-        Type GetRealDtoType<TDto, T>(T entity)
+        Type GetResponseDtoType<TDto, T>(T entity)
             where TDto : class, IResponseDto<T>, new()
             where T : class;
     }

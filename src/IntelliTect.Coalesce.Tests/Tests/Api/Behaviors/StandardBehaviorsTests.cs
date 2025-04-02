@@ -119,7 +119,7 @@ namespace IntelliTect.Coalesce.Tests.Tests.Api.Behaviors
             Assert.Equal((SaveKind.Update, 42), result);
         }
 
-        class StandaloneReadWriteDto : IParameterDto<StandaloneReadWrite>
+        class StandaloneReadWriteDto : SparseDto, IGeneratedParameterDto<StandaloneReadWrite>
         {
             public int Id { get; set; }
 

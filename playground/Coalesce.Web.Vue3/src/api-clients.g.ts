@@ -13,6 +13,11 @@ export class AbstractClassImplApiClient extends ModelApiClient<$models.AbstractC
 }
 
 
+export class AbstractClassPersonApiClient extends ModelApiClient<$models.AbstractClassPerson> {
+  constructor() { super($metadata.AbstractClassPerson) }
+}
+
+
 export class AuditLogApiClient extends ModelApiClient<$models.AuditLog> {
   constructor() { super($metadata.AuditLog) }
 }

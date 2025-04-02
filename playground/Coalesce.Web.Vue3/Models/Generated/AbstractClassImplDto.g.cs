@@ -24,7 +24,7 @@ namespace Coalesce.Web.Vue3.Models
         /// <summary>
         /// Map from the current DTO instance to the domain object.
         /// </summary>
-        public new void MapTo(Coalesce.Domain.AbstractClassImpl entity, IMappingContext context)
+        public void MapTo(Coalesce.Domain.AbstractClassImpl entity, IMappingContext context)
         {
             var includes = context.Includes;
 
@@ -68,6 +68,18 @@ namespace Coalesce.Web.Vue3.Models
             this.Id = obj.Id;
             this.ImplString = obj.ImplString;
             this.AbstractClassString = obj.AbstractClassString;
+            var propValAbstractModelPeople = obj.AbstractModelPeople;
+            if (propValAbstractModelPeople != null && (tree == null || tree[nameof(this.AbstractModelPeople)] != null))
+            {
+                this.AbstractModelPeople = propValAbstractModelPeople
+                    .OrderBy(f => f.Id)
+                    .Select(f => f.MapToDto<Coalesce.Domain.AbstractClassPerson, AbstractClassPersonResponse>(context, tree?[nameof(this.AbstractModelPeople)])).ToList();
+            }
+            else if (propValAbstractModelPeople == null && tree?[nameof(this.AbstractModelPeople)] != null)
+            {
+                this.AbstractModelPeople = new AbstractClassPersonResponse[0];
+            }
+
         }
     }
 }

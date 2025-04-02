@@ -48,6 +48,7 @@ export enum Titles {
 export interface AbstractClass<TMeta extends ClassType = typeof metadata.AbstractClass | typeof metadata.AbstractClassImpl> extends Model<TMeta> {
   id: number | null
   abstractClassString: string | null
+  abstractModelPeople: AbstractClassPerson[] | null
 }
 export class AbstractClass {
   
@@ -74,6 +75,7 @@ export interface AbstractClassImpl extends Model<typeof metadata.AbstractClassIm
   implString: string | null
   id: number | null
   abstractClassString: string | null
+  abstractModelPeople: AbstractClassPerson[] | null
 }
 export class AbstractClassImpl {
   
@@ -92,6 +94,34 @@ export class AbstractClassImpl {
   /** Instantiate a new AbstractClassImpl, optionally basing it on the given data. */
   constructor(data?: Partial<AbstractClassImpl> | {[k: string]: any}) {
     Object.assign(this, AbstractClassImpl.map(data || {}));
+  }
+}
+
+
+export interface AbstractClassPerson extends Model<typeof metadata.AbstractClassPerson> {
+  id: number | null
+  personId: number | null
+  person: Person | null
+  abstractClassId: number | null
+  abstractClass: AbstractClass | null
+}
+export class AbstractClassPerson {
+  
+  /** Mutates the input object and its descendants into a valid AbstractClassPerson implementation. */
+  static convert(data?: Partial<AbstractClassPerson>): AbstractClassPerson {
+    return convertToModel<AbstractClassPerson>(data || {}, metadata.AbstractClassPerson) 
+  }
+  
+  /** Maps the input object and its descendants to a new, valid AbstractClassPerson implementation. */
+  static map(data?: Partial<AbstractClassPerson>): AbstractClassPerson {
+    return mapToModel<AbstractClassPerson>(data || {}, metadata.AbstractClassPerson) 
+  }
+  
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.AbstractClassPerson; }
+  
+  /** Instantiate a new AbstractClassPerson, optionally basing it on the given data. */
+  constructor(data?: Partial<AbstractClassPerson> | {[k: string]: any}) {
+    Object.assign(this, AbstractClassPerson.map(data || {}));
   }
 }
 
@@ -975,6 +1005,7 @@ declare module "coalesce-vue/lib/model" {
   interface ModelTypeLookup {
     AbstractClass: AbstractClass
     AbstractClassImpl: AbstractClassImpl
+    AbstractClassPerson: AbstractClassPerson
     AuditLog: AuditLog
     AuditLogProperty: AuditLogProperty
     BaseClass: BaseClass

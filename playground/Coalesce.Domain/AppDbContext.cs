@@ -33,6 +33,7 @@ namespace Coalesce.Domain
 
         public DbSet<AbstractClass> AbstractClasses { get; set; }
         public DbSet<AbstractClassImpl> AbstractClassImpls { get; set; }
+        public DbSet<AbstractClassPerson> AbstractClassPeople { get; set; }
 
 #nullable restore
 

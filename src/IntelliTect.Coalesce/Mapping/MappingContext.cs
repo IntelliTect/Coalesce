@@ -91,11 +91,11 @@ namespace IntelliTect.Coalesce.Mapping
 
             if (_responseDtoTypes.TryGetValue(entityType, out Type? ret)) return ret;
 
-            var candidates = typeof(TDto).GetAttributes<JsonDerivedTypeAttribute>();
+            var candidates = typeof(TDto).GetAttributes<JsonDerivedTypeAttribute>()
+                .Select(c => c.Instance.DerivedType);
             Type exactDtoType = typeof(IResponseDto<>).MakeGenericType(entityType);
             var chosen = candidates
-                .Select(c => c.Instance)
-                .FirstOrDefault(c => c.DerivedType.IsAssignableTo(exactDtoType))?.DerivedType 
+                .FirstOrDefault(c => c.IsAssignableTo(exactDtoType))
                 ?? typeof(TDto);
 
             _responseDtoTypes.TryAdd(entityType, chosen);

@@ -733,10 +733,14 @@ export abstract class ViewModel<
               collection?.$parent instanceof ViewModel &&
               (collection.$metadata == prop.inverseNavigation ||
                 // Handle inheritance hierarchies (i.e. TPH):
-                // The collection is the same collection, but has a different metadata instance
-                // so direct equality won't work.
+                // The collection is effectively the same collection,
+                // but has a different metadata instance so direct equality won't work.
+                // Instead, we check that it has the same name and that the actual intended value
+                // of the reference navigation (`collection.$parent`) is a derived type of the declared type.
                 (collection.$metadata.name == prop.inverseNavigation?.name &&
-                  collection.$metadata.type == prop.inverseNavigation.type))
+                  prop.typeDef.derivedTypes?.includes(
+                    collection.$parent.$metadata
+                  )))
             ) {
               // The reference navigation property has no value,
               // and the foreign key has no value,
@@ -1826,20 +1830,20 @@ export class ViewModelFactory {
       );
     }
 
-    let vmCtor = ViewModel.typeLookup[typeName];
-    if (!vmCtor) {
-      // If the ViewModel type is missing but the type has metadata,
-      // use the type's metadata. This case happens if `typeName` is abstract
-      // and therefore has no concrete ViewModel type.
-      if ("$metadata" in initialData) {
-        vmCtor = ViewModel.typeLookup[initialData.$metadata.name];
-      }
-    }
+    // If the incoming data has metadata, use it.
+    // This allows derived types to instantiate as their real type
+    // when loading them into a collection or property of the base type.
+    const vmCtor =
+      "$metadata" in initialData
+        ? ViewModel.typeLookup[initialData.$metadata.name]
+        : ViewModel.typeLookup[typeName];
+
     if (!vmCtor) {
       throw Error(
         `Type ${typeName} does not have a generated ViewModel class. If this is an abstract type, use one of the type's concrete implementations instead.`
       );
     }
+
     const vm = new vmCtor() as unknown as ViewModel;
     map.set(initialData, vm);
 
@@ -2146,7 +2150,12 @@ export function defineProps<T extends new () => ViewModel>(
                     `Cannot assign a non-object to ${metadata.name}.${propName}`
                   );
                 } else if ("$metadata" in incomingValue) {
-                  if (incomingValue.$metadata.name != prop.typeDef.name) {
+                  if (
+                    incomingValue.$metadata.name != prop.typeDef.name &&
+                    !prop.typeDef.derivedTypes?.includes(
+                      incomingValue.$metadata
+                    )
+                  ) {
                     throw Error(
                       `Type mismatch - attempted to assign a ${incomingValue.$metadata.name} to ${metadata.name}.${propName}`
                     );

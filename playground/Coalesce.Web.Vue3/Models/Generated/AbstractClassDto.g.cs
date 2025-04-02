@@ -64,6 +64,7 @@ namespace Coalesce.Web.Vue3.Models
 
         public int? Id { get; set; }
         public string AbstractClassString { get; set; }
+        public System.Collections.Generic.ICollection<Coalesce.Web.Vue3.Models.AbstractClassPersonResponse> AbstractModelPeople { get; set; }
 
         /// <summary>
         /// Map from the domain object to the properties of the current DTO instance.
@@ -75,6 +76,18 @@ namespace Coalesce.Web.Vue3.Models
 
             this.Id = obj.Id;
             this.AbstractClassString = obj.AbstractClassString;
+            var propValAbstractModelPeople = obj.AbstractModelPeople;
+            if (propValAbstractModelPeople != null && (tree == null || tree[nameof(this.AbstractModelPeople)] != null))
+            {
+                this.AbstractModelPeople = propValAbstractModelPeople
+                    .OrderBy(f => f.Id)
+                    .Select(f => f.MapToDto<Coalesce.Domain.AbstractClassPerson, AbstractClassPersonResponse>(context, tree?[nameof(this.AbstractModelPeople)])).ToList();
+            }
+            else if (propValAbstractModelPeople == null && tree?[nameof(this.AbstractModelPeople)] != null)
+            {
+                this.AbstractModelPeople = new AbstractClassPersonResponse[0];
+            }
+
         }
     }
 }

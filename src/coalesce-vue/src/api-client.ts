@@ -1159,17 +1159,28 @@ export class ModelApiClient<TModel extends Model<ModelType>> extends ApiClient<
   ): ItemResultPromise<TModel> {
     const { fields, ...params } = parameters ?? new SaveParameters<TModel>();
 
+    const paramsMeta = Object.fromEntries([
+      [
+        "$type",
+        {
+          type: "string",
+          name: "$type",
+          displayName: "$type",
+          role: "value",
+        },
+      ],
+      ...Object.entries(this.$metadata.props).filter(
+        (p) => !p[1].dontSerialize
+      ),
+    ]);
+
     return this.$invoke(
       {
         name: "save",
         displayName: "save",
         transportType: "item",
         httpMethod: "POST",
-        params: Object.fromEntries(
-          Object.entries(this.$metadata.props).filter(
-            (p) => !p[1].dontSerialize
-          )
-        ),
+        params: paramsMeta,
         return: this.$itemValueMeta,
       },
       mapToDtoFiltered(item, fields)!,

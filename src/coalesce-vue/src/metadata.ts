@@ -656,6 +656,12 @@ export function resolvePropMeta<TProp extends Property>(
     if (silent) return undefined;
     throw `Unknown property ${propOrString}`;
   } else if (metadata.props[propMeta.name] !== propMeta) {
+    const resolvedPropMeta = metadata.props[propMeta.name];
+    if (resolvedPropMeta) {
+      // This case happens when we receive a propMeta object owned by a baseType
+      // when `metadata` represents a derived type.
+      return resolvedPropMeta;
+    }
     if (silent) return undefined;
     throw `Property ${propMeta.name} does not belong to object of type ${metadata.name}`;
   }

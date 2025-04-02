@@ -356,12 +356,26 @@ class ModelConversionVisitor extends Visitor<any, any[] | null, any | null> {
     }
 
     if ("$type" in value) {
+      // Handle incoming type metadata from System.Text.Json API responses
       meta =
         ("derivedTypes" in meta &&
           (meta.derivedTypes?.find((t) => t.name == value.$type) as TMeta)) ||
         meta;
       if (this.mode == "convert") {
         delete value.$type;
+      }
+    } else if ("$metadata" in value && value.$metadata !== meta) {
+      if (
+        "derivedTypes" in meta &&
+        meta.derivedTypes?.includes(value.$metadata)
+      ) {
+        meta = value.$metadata;
+      } else if (this.mode == "convert") {
+        // If there already is metadata but it doesn't match,
+        // this is bad - someone passed mismatched parameters.
+        throw Error(
+          `While trying to convert object, found metadata for ${value.$metadata.name} where metadata for ${meta.name} was expected.`
+        );
       }
     }
 
@@ -371,26 +385,17 @@ class ModelConversionVisitor extends Visitor<any, any[] | null, any | null> {
     if (this.mode == "convert") {
       this.objects.set(value, value);
 
-      // If there already is metadata but it doesn't match,
-      // this is bad - someone passed mismatched parameters.
+      if (value.$metadata == meta) {
+        // Performance optimization: If the object already looks like a model,
+        // and we're converting, don't descend into its child props,
+        // because they should already be correct.
+        // If they *aren't* correct, something is messed up somewhere else
+        // and is assigning non-models to props that should only be accepting models.
 
-      if ("$metadata" in value) {
-        if (value.$metadata !== meta) {
-          throw Error(
-            `While trying to convert object, found metadata for ${value.$metadata.name} where metadata for ${meta.name} was expected.`
-          );
-        } else {
-          // Performance optimization: If the object already looks like a model,
-          // and we're converting, don't descend into its child props,
-          // because they should already be correct.
-          // If they *aren't* correct, something is messed up somewhere else
-          // and is assigining non-models to props that should only be accepting models.
-
-          // If we don't do this optimization, we can end up with horrible call stacks
-          // when creating a new model with initial data that includes references
-          // to existing models that have an extensive amount of interconnected data.
-          return value;
-        }
+        // If we don't do this optimization, we can end up with horrible call stacks
+        // when creating a new model with initial data that includes references
+        // to existing models that have an extensive amount of interconnected data.
+        return value;
       } else {
         value.$metadata = meta;
         target = value;
@@ -565,6 +570,11 @@ class MapToDtoVisitor extends Visitor<
     if (value == null) return null;
     const props = meta.props;
     const output: any = {};
+
+    if ("derivedTypes" in meta || "baseTypes" in meta) {
+      output.$type = meta.name;
+    }
+
     for (const propName in props) {
       const propMeta = props[propName];
 
@@ -763,7 +773,9 @@ export function mapToDtoFiltered<T extends Model<ClassType>>(
   var dto = mapToDto(object) as any;
 
   if (props && dto) {
-    const filteredDto: any = {};
+    const filteredDto: any = {
+      $type: dto.$type,
+    };
     for (const field of props) {
       if (field in dto) {
         filteredDto[field] = dto[field];

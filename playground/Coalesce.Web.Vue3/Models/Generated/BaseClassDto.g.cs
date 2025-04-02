@@ -9,6 +9,7 @@ using System.Text.Json.Serialization;
 
 namespace Coalesce.Web.Vue3.Models
 {
+    [JsonDerivedType(typeof(BaseClassParameter), typeDiscriminator: "BaseClass")]
     [JsonDerivedType(typeof(BaseClassDerivedParameter), typeDiscriminator: "BaseClassDerived")]
     public partial class BaseClassParameter : SparseDto, IGeneratedParameterDto<Coalesce.Domain.BaseClass>
     {
@@ -57,6 +58,7 @@ namespace Coalesce.Web.Vue3.Models
         }
     }
 
+    [JsonDerivedType(typeof(BaseClassResponse), typeDiscriminator: "BaseClass")]
     [JsonDerivedType(typeof(BaseClassDerivedResponse), typeDiscriminator: "BaseClassDerived")]
     public partial class BaseClassResponse : IGeneratedResponseDto<Coalesce.Domain.BaseClass>
     {

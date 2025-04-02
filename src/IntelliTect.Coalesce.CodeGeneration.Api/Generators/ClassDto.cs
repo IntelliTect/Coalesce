@@ -58,7 +58,9 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
 
         private void WriteParameterDto(CSharpCodeBuilder b)
         {
-            foreach (var derived in Model.ClientDerivedTypes)
+            var allVariants = Model.ClientDerivedTypes;
+            if (allVariants.Any() && !Model.Type.IsAbstract) allVariants = allVariants.Prepend(Model);
+            foreach (var derived in allVariants)
             {
                 b.Line($"[JsonDerivedType(typeof({derived.ParameterDtoTypeName}), typeDiscriminator: {derived.ClientTypeName.QuotedStringLiteralForCSharp()})]");
             }
@@ -84,7 +86,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                         .ThenBy(p => p.ClassFieldOrder)
                     .ToList();
 
-                var ownProps = orderedProps.Where(p => baseType is null || baseType.PropertyByName(p.Name) is null);
+                var ownProps = orderedProps.Where(p => baseType?.PropertyByName(p.Name) is null);
 
                 b.Line();
                 foreach (PropertyViewModel prop in ownProps)
@@ -249,7 +251,9 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
 
         private void WriteResponseDto(CSharpCodeBuilder b)
         {
-            foreach (var derived in Model.ClientDerivedTypes)
+            var allVariants = Model.ClientDerivedTypes;
+            if (allVariants.Any() && !Model.Type.IsAbstract) allVariants = allVariants.Prepend(Model);
+            foreach (var derived in allVariants)
             {
                 b.Line($"[JsonDerivedType(typeof({derived.ResponseDtoTypeName}), typeDiscriminator: {derived.ClientTypeName.QuotedStringLiteralForCSharp()})]");
             }
@@ -277,7 +281,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                         .ThenBy(p => p.ClassFieldOrder)
                     .ToList();
 
-                var ownProps = orderedProps.Where(p => baseType is null || baseType.PropertyByName(p.Name) is null);
+                var ownProps = orderedProps.Where(p => baseType?.PropertyByName(p.Name) is null);
 
                 foreach (PropertyViewModel prop in ownProps)
                 {

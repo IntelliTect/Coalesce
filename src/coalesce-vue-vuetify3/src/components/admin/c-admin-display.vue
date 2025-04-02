@@ -10,6 +10,7 @@ import {
 import CDisplay, { type CDisplayProps } from "../display/c-display.vue";
 import { useRouter } from "vue-router";
 import { detectFileFormat } from "../../util";
+import { getRefNavRoute } from "./util";
 
 const props = withDefaults(defineProps<CDisplayProps<TModel>>(), {
   element: "span",
@@ -92,17 +93,7 @@ function render() {
         return h(
           resolveComponent("router-link"),
           {
-            // Resolve to an href to allow overriding of admin routes in userspace.
-            // If we just gave a named raw location, it would always use the coalesce admin route
-            // instead of the user-overridden one (that the user overrides by declaring another
-            // route with the same path).
-            to: router.resolve({
-              name: "coalesce-admin-item",
-              params: {
-                type: meta.typeDef.name,
-                id: (model as any)[meta.foreignKey.name],
-              },
-            }).fullPath,
+            to: getRefNavRoute(router, model, meta),
           },
           () => propDisplay(model, narrowedMeta) ?? fkValue
         );
@@ -117,11 +108,12 @@ function render() {
       return h(
         "a",
         {
-          href: '#',
+          href: "#",
           onClick: () => {
             const link = document.createElement("a");
             link.href = `data:application/octet-stream;base64,${value}`;
-            link.download = meta.name + '.' + (detectFileFormat(value) || 'bin');
+            link.download =
+              meta.name + "." + (detectFileFormat(value) || "bin");
             link.click();
           },
         },

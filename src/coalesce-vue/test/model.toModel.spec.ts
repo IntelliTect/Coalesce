@@ -17,7 +17,8 @@ import {
 } from "./model.shared";
 import { Course } from "./targets.models";
 import { convertToModel } from "../src/model";
-import { ComplexModel } from "@test-targets/metadata.g";
+import * as $metadata2 from "@test-targets/metadata.g";
+import * as $models from "@test-targets/models.g";
 
 const studentProps = $metadata.Student.props;
 
@@ -136,7 +137,7 @@ const dtoToModelMappings = <MappingData[]>[
     ],
   },
   {
-    meta: ComplexModel.props.intCollection,
+    meta: $metadata2.ComplexModel.props.intCollection,
     dto: "1,2,3",
     model: [1, 2, 3],
   },
@@ -148,6 +149,12 @@ const dtoToModelMappings = <MappingData[]>[
     meta: studentProps.advisor,
     dto: { advisorId: 1, extraneousProp: true },
     model: { advisorId: 1, $metadata: $metadata.Advisor },
+  },
+  {
+    // Expected base type, but with actual derived type.
+    meta: $metadata2.AbstractModel,
+    dto: { $type: "AbstractImpl1", id: 1, impl1OnlyField: "foo" },
+    model: new $models.AbstractImpl1({ id: 1, impl1OnlyField: "foo" }),
   },
 
   // Object
@@ -161,7 +168,7 @@ const dtoToModelMappings = <MappingData[]>[
 
 // Test for both `map` and `convert` using the cases above.
 dtoToModelMappings.forEach(
-  ({ meta: value, model: modelValue, dto: dtoValue, error }) => {
+  ({ meta, model: modelValue, dto: dtoValue, error }) => {
     const expectedOutcomeDesc = error
       ? `throws /${error}/`
       : `returns ${shortStringify(modelValue)}`;
@@ -169,9 +176,9 @@ dtoToModelMappings.forEach(
     const testTitle = `for ${shortStringify(dtoValue)}, ${expectedOutcomeDesc}`;
 
     describe("mapValueToModel", () => {
-      describe(value.type, () => {
+      describe(meta.type, () => {
         test(testTitle, () => {
-          const doMap = () => model.mapValueToModel(dtoValue, value);
+          const doMap = () => model.mapValueToModel(dtoValue, meta);
           if (error) {
             expect(doMap).toThrowError(new RegExp(error));
             return;
@@ -190,9 +197,9 @@ dtoToModelMappings.forEach(
     });
 
     describe("convertValueToModel", () => {
-      describe(value.type, () => {
+      describe(meta.type, () => {
         test(testTitle, () => {
-          const doMap = () => model.convertValueToModel(dtoValue, value);
+          const doMap = () => model.convertValueToModel(dtoValue, meta);
           if (error) {
             expect(doMap).toThrowError(new RegExp(error));
             return;
@@ -273,6 +280,30 @@ describe.each(["convertToModel", "mapToModel"] as const)("%s", (methodName) => {
     expect((mapped as Indexable<typeof mapped>).parent.children[0]).toBe(
       mapped
     );
+  });
+
+  test("produces existing derived type when base type is requested", () => {
+    const mapped = model[methodName](
+      new $models.AbstractImpl1({
+        id: 1,
+        impl1OnlyField: "foo",
+      }),
+      $metadata2.AbstractModel // request base type
+    );
+
+    expect(mapped).toBeInstanceOf($models.AbstractImpl1);
+  });
+
+  test("respects System.Text.Json references", () => {
+    const mapped = model[methodName](
+      {
+        $id: 1,
+        tests: [{ $id: 2, testName: "foo" }, { $ref: 2 }],
+      },
+      $metadata2.ComplexModel
+    ) as $models.ComplexModel;
+
+    expect(mapped.tests![0]).toStrictEqual(mapped.tests![1]);
   });
 });
 

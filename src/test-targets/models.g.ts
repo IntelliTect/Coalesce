@@ -1,6 +1,7 @@
 import * as metadata from './metadata.g'
 import { convertToModel, mapToModel, reactiveDataSource } from 'coalesce-vue/lib/model'
 import type { Model, DataSource } from 'coalesce-vue/lib/model'
+import type { ClassType } from 'coalesce-vue/lib/metadata'
 
 export enum EnumPkId {
   Value0 = 0,
@@ -46,6 +47,32 @@ export enum Titles {
 }
 
 
+export interface AbstractModel<TMeta extends ClassType = typeof metadata.AbstractModel | typeof metadata.AbstractImpl2 | typeof metadata.AbstractImpl1> extends Model<TMeta> {
+  id: number | null
+  discriminator: string | null
+  abstractModelPeople: AbstractModelPerson[] | null
+}
+export class AbstractModel {
+  
+  /** Mutates the input object and its descendants into a valid AbstractModel implementation. */
+  static convert(data?: Partial<AbstractModel>): AbstractModel {
+    return convertToModel<AbstractModel>(data || {}, metadata.AbstractModel) 
+  }
+  
+  /** Maps the input object and its descendants to a new, valid AbstractModel implementation. */
+  static map(data?: Partial<AbstractModel>): AbstractModel {
+    return mapToModel<AbstractModel>(data || {}, metadata.AbstractModel) 
+  }
+  
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.AbstractModel || x?.$metadata.baseTypes?.includes(metadata.AbstractModel); }
+  
+  /** Instantiate a new AbstractModel, optionally basing it on the given data. */
+  constructor(data?: Partial<AbstractModel> | {[k: string]: any}) {
+    Object.assign(this, AbstractModel.map(data || {}));
+  }
+}
+
+
 export interface AbstractImpl1 extends Model<typeof metadata.AbstractImpl1> {
   impl1OnlyField: string | null
   id: number | null
@@ -54,14 +81,14 @@ export interface AbstractImpl1 extends Model<typeof metadata.AbstractImpl1> {
 }
 export class AbstractImpl1 {
   
-  /** Mutates the input object and its descendents into a valid AbstractImpl1 implementation. */
+  /** Mutates the input object and its descendants into a valid AbstractImpl1 implementation. */
   static convert(data?: Partial<AbstractImpl1>): AbstractImpl1 {
-    return convertToModel(data || {}, metadata.AbstractImpl1) 
+    return convertToModel<AbstractImpl1>(data || {}, metadata.AbstractImpl1) 
   }
   
-  /** Maps the input object and its descendents to a new, valid AbstractImpl1 implementation. */
+  /** Maps the input object and its descendants to a new, valid AbstractImpl1 implementation. */
   static map(data?: Partial<AbstractImpl1>): AbstractImpl1 {
-    return mapToModel(data || {}, metadata.AbstractImpl1) 
+    return mapToModel<AbstractImpl1>(data || {}, metadata.AbstractImpl1) 
   }
   
   static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.AbstractImpl1; }
@@ -81,14 +108,14 @@ export interface AbstractImpl2 extends Model<typeof metadata.AbstractImpl2> {
 }
 export class AbstractImpl2 {
   
-  /** Mutates the input object and its descendents into a valid AbstractImpl2 implementation. */
+  /** Mutates the input object and its descendants into a valid AbstractImpl2 implementation. */
   static convert(data?: Partial<AbstractImpl2>): AbstractImpl2 {
-    return convertToModel(data || {}, metadata.AbstractImpl2) 
+    return convertToModel<AbstractImpl2>(data || {}, metadata.AbstractImpl2) 
   }
   
-  /** Maps the input object and its descendents to a new, valid AbstractImpl2 implementation. */
+  /** Maps the input object and its descendants to a new, valid AbstractImpl2 implementation. */
   static map(data?: Partial<AbstractImpl2>): AbstractImpl2 {
-    return mapToModel(data || {}, metadata.AbstractImpl2) 
+    return mapToModel<AbstractImpl2>(data || {}, metadata.AbstractImpl2) 
   }
   
   static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.AbstractImpl2; }
@@ -96,32 +123,6 @@ export class AbstractImpl2 {
   /** Instantiate a new AbstractImpl2, optionally basing it on the given data. */
   constructor(data?: Partial<AbstractImpl2> | {[k: string]: any}) {
     Object.assign(this, AbstractImpl2.map(data || {}));
-  }
-}
-
-
-export interface AbstractModel extends Model<typeof metadata.AbstractModel> {
-  id: number | null
-  discriminator: string | null
-  abstractModelPeople: AbstractModelPerson[] | null
-}
-export class AbstractModel {
-  
-  /** Mutates the input object and its descendents into a valid AbstractModel implementation. */
-  static convert(data?: Partial<AbstractModel>): AbstractModel {
-    return convertToModel(data || {}, metadata.AbstractModel) 
-  }
-  
-  /** Maps the input object and its descendents to a new, valid AbstractModel implementation. */
-  static map(data?: Partial<AbstractModel>): AbstractModel {
-    return mapToModel(data || {}, metadata.AbstractModel) 
-  }
-  
-  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.AbstractModel; }
-  
-  /** Instantiate a new AbstractModel, optionally basing it on the given data. */
-  constructor(data?: Partial<AbstractModel> | {[k: string]: any}) {
-    Object.assign(this, AbstractModel.map(data || {}));
   }
 }
 
@@ -135,14 +136,14 @@ export interface AbstractModelPerson extends Model<typeof metadata.AbstractModel
 }
 export class AbstractModelPerson {
   
-  /** Mutates the input object and its descendents into a valid AbstractModelPerson implementation. */
+  /** Mutates the input object and its descendants into a valid AbstractModelPerson implementation. */
   static convert(data?: Partial<AbstractModelPerson>): AbstractModelPerson {
-    return convertToModel(data || {}, metadata.AbstractModelPerson) 
+    return convertToModel<AbstractModelPerson>(data || {}, metadata.AbstractModelPerson) 
   }
   
-  /** Maps the input object and its descendents to a new, valid AbstractModelPerson implementation. */
+  /** Maps the input object and its descendants to a new, valid AbstractModelPerson implementation. */
   static map(data?: Partial<AbstractModelPerson>): AbstractModelPerson {
-    return mapToModel(data || {}, metadata.AbstractModelPerson) 
+    return mapToModel<AbstractModelPerson>(data || {}, metadata.AbstractModelPerson) 
   }
   
   static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.AbstractModelPerson; }
@@ -169,14 +170,14 @@ export interface Case extends Model<typeof metadata.Case> {
 }
 export class Case {
   
-  /** Mutates the input object and its descendents into a valid Case implementation. */
+  /** Mutates the input object and its descendants into a valid Case implementation. */
   static convert(data?: Partial<Case>): Case {
-    return convertToModel(data || {}, metadata.Case) 
+    return convertToModel<Case>(data || {}, metadata.Case) 
   }
   
-  /** Maps the input object and its descendents to a new, valid Case implementation. */
+  /** Maps the input object and its descendants to a new, valid Case implementation. */
   static map(data?: Partial<Case>): Case {
-    return mapToModel(data || {}, metadata.Case) 
+    return mapToModel<Case>(data || {}, metadata.Case) 
   }
   
   static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.Case; }
@@ -208,14 +209,14 @@ export interface CaseDtoStandalone extends Model<typeof metadata.CaseDtoStandalo
 }
 export class CaseDtoStandalone {
   
-  /** Mutates the input object and its descendents into a valid CaseDtoStandalone implementation. */
+  /** Mutates the input object and its descendants into a valid CaseDtoStandalone implementation. */
   static convert(data?: Partial<CaseDtoStandalone>): CaseDtoStandalone {
-    return convertToModel(data || {}, metadata.CaseDtoStandalone) 
+    return convertToModel<CaseDtoStandalone>(data || {}, metadata.CaseDtoStandalone) 
   }
   
-  /** Maps the input object and its descendents to a new, valid CaseDtoStandalone implementation. */
+  /** Maps the input object and its descendants to a new, valid CaseDtoStandalone implementation. */
   static map(data?: Partial<CaseDtoStandalone>): CaseDtoStandalone {
-    return mapToModel(data || {}, metadata.CaseDtoStandalone) 
+    return mapToModel<CaseDtoStandalone>(data || {}, metadata.CaseDtoStandalone) 
   }
   
   static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.CaseDtoStandalone; }
@@ -236,14 +237,14 @@ export interface CaseProduct extends Model<typeof metadata.CaseProduct> {
 }
 export class CaseProduct {
   
-  /** Mutates the input object and its descendents into a valid CaseProduct implementation. */
+  /** Mutates the input object and its descendants into a valid CaseProduct implementation. */
   static convert(data?: Partial<CaseProduct>): CaseProduct {
-    return convertToModel(data || {}, metadata.CaseProduct) 
+    return convertToModel<CaseProduct>(data || {}, metadata.CaseProduct) 
   }
   
-  /** Maps the input object and its descendents to a new, valid CaseProduct implementation. */
+  /** Maps the input object and its descendants to a new, valid CaseProduct implementation. */
   static map(data?: Partial<CaseProduct>): CaseProduct {
-    return mapToModel(data || {}, metadata.CaseProduct) 
+    return mapToModel<CaseProduct>(data || {}, metadata.CaseProduct) 
   }
   
   static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.CaseProduct; }
@@ -271,14 +272,14 @@ export interface Company extends Model<typeof metadata.Company> {
 }
 export class Company {
   
-  /** Mutates the input object and its descendents into a valid Company implementation. */
+  /** Mutates the input object and its descendants into a valid Company implementation. */
   static convert(data?: Partial<Company>): Company {
-    return convertToModel(data || {}, metadata.Company) 
+    return convertToModel<Company>(data || {}, metadata.Company) 
   }
   
-  /** Maps the input object and its descendents to a new, valid Company implementation. */
+  /** Maps the input object and its descendants to a new, valid Company implementation. */
   static map(data?: Partial<Company>): Company {
-    return mapToModel(data || {}, metadata.Company) 
+    return mapToModel<Company>(data || {}, metadata.Company) 
   }
   
   static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.Company; }
@@ -352,6 +353,7 @@ export interface ComplexModel extends Model<typeof metadata.ComplexModel> {
   long: number | null
   guid: string | null
   guidNullable: string | null
+  uri: string | null
   intCollection: number[] | null
   enumCollection: Statuses[] | null
   nonNullNonZeroInt: number | null
@@ -368,14 +370,14 @@ export class ComplexModel {
   static magicString = "42"
   static magicEnum = EnumPkId.Value10
   
-  /** Mutates the input object and its descendents into a valid ComplexModel implementation. */
+  /** Mutates the input object and its descendants into a valid ComplexModel implementation. */
   static convert(data?: Partial<ComplexModel>): ComplexModel {
-    return convertToModel(data || {}, metadata.ComplexModel) 
+    return convertToModel<ComplexModel>(data || {}, metadata.ComplexModel) 
   }
   
-  /** Maps the input object and its descendents to a new, valid ComplexModel implementation. */
+  /** Maps the input object and its descendants to a new, valid ComplexModel implementation. */
   static map(data?: Partial<ComplexModel>): ComplexModel {
-    return mapToModel(data || {}, metadata.ComplexModel) 
+    return mapToModel<ComplexModel>(data || {}, metadata.ComplexModel) 
   }
   
   static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.ComplexModel; }
@@ -394,14 +396,14 @@ export interface ComplexModelDependent extends Model<typeof metadata.ComplexMode
 }
 export class ComplexModelDependent {
   
-  /** Mutates the input object and its descendents into a valid ComplexModelDependent implementation. */
+  /** Mutates the input object and its descendants into a valid ComplexModelDependent implementation. */
   static convert(data?: Partial<ComplexModelDependent>): ComplexModelDependent {
-    return convertToModel(data || {}, metadata.ComplexModelDependent) 
+    return convertToModel<ComplexModelDependent>(data || {}, metadata.ComplexModelDependent) 
   }
   
-  /** Maps the input object and its descendents to a new, valid ComplexModelDependent implementation. */
+  /** Maps the input object and its descendants to a new, valid ComplexModelDependent implementation. */
   static map(data?: Partial<ComplexModelDependent>): ComplexModelDependent {
-    return mapToModel(data || {}, metadata.ComplexModelDependent) 
+    return mapToModel<ComplexModelDependent>(data || {}, metadata.ComplexModelDependent) 
   }
   
   static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.ComplexModelDependent; }
@@ -419,14 +421,14 @@ export interface EnumPk extends Model<typeof metadata.EnumPk> {
 }
 export class EnumPk {
   
-  /** Mutates the input object and its descendents into a valid EnumPk implementation. */
+  /** Mutates the input object and its descendants into a valid EnumPk implementation. */
   static convert(data?: Partial<EnumPk>): EnumPk {
-    return convertToModel(data || {}, metadata.EnumPk) 
+    return convertToModel<EnumPk>(data || {}, metadata.EnumPk) 
   }
   
-  /** Maps the input object and its descendents to a new, valid EnumPk implementation. */
+  /** Maps the input object and its descendants to a new, valid EnumPk implementation. */
   static map(data?: Partial<EnumPk>): EnumPk {
-    return mapToModel(data || {}, metadata.EnumPk) 
+    return mapToModel<EnumPk>(data || {}, metadata.EnumPk) 
   }
   
   static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.EnumPk; }
@@ -444,14 +446,14 @@ export interface OneToOneChild1 extends Model<typeof metadata.OneToOneChild1> {
 }
 export class OneToOneChild1 {
   
-  /** Mutates the input object and its descendents into a valid OneToOneChild1 implementation. */
+  /** Mutates the input object and its descendants into a valid OneToOneChild1 implementation. */
   static convert(data?: Partial<OneToOneChild1>): OneToOneChild1 {
-    return convertToModel(data || {}, metadata.OneToOneChild1) 
+    return convertToModel<OneToOneChild1>(data || {}, metadata.OneToOneChild1) 
   }
   
-  /** Maps the input object and its descendents to a new, valid OneToOneChild1 implementation. */
+  /** Maps the input object and its descendants to a new, valid OneToOneChild1 implementation. */
   static map(data?: Partial<OneToOneChild1>): OneToOneChild1 {
-    return mapToModel(data || {}, metadata.OneToOneChild1) 
+    return mapToModel<OneToOneChild1>(data || {}, metadata.OneToOneChild1) 
   }
   
   static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.OneToOneChild1; }
@@ -469,14 +471,14 @@ export interface OneToOneChild2 extends Model<typeof metadata.OneToOneChild2> {
 }
 export class OneToOneChild2 {
   
-  /** Mutates the input object and its descendents into a valid OneToOneChild2 implementation. */
+  /** Mutates the input object and its descendants into a valid OneToOneChild2 implementation. */
   static convert(data?: Partial<OneToOneChild2>): OneToOneChild2 {
-    return convertToModel(data || {}, metadata.OneToOneChild2) 
+    return convertToModel<OneToOneChild2>(data || {}, metadata.OneToOneChild2) 
   }
   
-  /** Maps the input object and its descendents to a new, valid OneToOneChild2 implementation. */
+  /** Maps the input object and its descendants to a new, valid OneToOneChild2 implementation. */
   static map(data?: Partial<OneToOneChild2>): OneToOneChild2 {
-    return mapToModel(data || {}, metadata.OneToOneChild2) 
+    return mapToModel<OneToOneChild2>(data || {}, metadata.OneToOneChild2) 
   }
   
   static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.OneToOneChild2; }
@@ -495,14 +497,14 @@ export interface OneToOneManyChildren extends Model<typeof metadata.OneToOneMany
 }
 export class OneToOneManyChildren {
   
-  /** Mutates the input object and its descendents into a valid OneToOneManyChildren implementation. */
+  /** Mutates the input object and its descendants into a valid OneToOneManyChildren implementation. */
   static convert(data?: Partial<OneToOneManyChildren>): OneToOneManyChildren {
-    return convertToModel(data || {}, metadata.OneToOneManyChildren) 
+    return convertToModel<OneToOneManyChildren>(data || {}, metadata.OneToOneManyChildren) 
   }
   
-  /** Maps the input object and its descendents to a new, valid OneToOneManyChildren implementation. */
+  /** Maps the input object and its descendants to a new, valid OneToOneManyChildren implementation. */
   static map(data?: Partial<OneToOneManyChildren>): OneToOneManyChildren {
-    return mapToModel(data || {}, metadata.OneToOneManyChildren) 
+    return mapToModel<OneToOneManyChildren>(data || {}, metadata.OneToOneManyChildren) 
   }
   
   static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.OneToOneManyChildren; }
@@ -522,14 +524,14 @@ export interface OneToOneParent extends Model<typeof metadata.OneToOneParent> {
 }
 export class OneToOneParent {
   
-  /** Mutates the input object and its descendents into a valid OneToOneParent implementation. */
+  /** Mutates the input object and its descendants into a valid OneToOneParent implementation. */
   static convert(data?: Partial<OneToOneParent>): OneToOneParent {
-    return convertToModel(data || {}, metadata.OneToOneParent) 
+    return convertToModel<OneToOneParent>(data || {}, metadata.OneToOneParent) 
   }
   
-  /** Maps the input object and its descendents to a new, valid OneToOneParent implementation. */
+  /** Maps the input object and its descendants to a new, valid OneToOneParent implementation. */
   static map(data?: Partial<OneToOneParent>): OneToOneParent {
-    return mapToModel(data || {}, metadata.OneToOneParent) 
+    return mapToModel<OneToOneParent>(data || {}, metadata.OneToOneParent) 
   }
   
   static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.OneToOneParent; }
@@ -584,14 +586,14 @@ export interface Person extends Model<typeof metadata.Person> {
 }
 export class Person {
   
-  /** Mutates the input object and its descendents into a valid Person implementation. */
+  /** Mutates the input object and its descendants into a valid Person implementation. */
   static convert(data?: Partial<Person>): Person {
-    return convertToModel(data || {}, metadata.Person) 
+    return convertToModel<Person>(data || {}, metadata.Person) 
   }
   
-  /** Maps the input object and its descendents to a new, valid Person implementation. */
+  /** Maps the input object and its descendants to a new, valid Person implementation. */
   static map(data?: Partial<Person>): Person {
-    return mapToModel(data || {}, metadata.Person) 
+    return mapToModel<Person>(data || {}, metadata.Person) 
   }
   
   static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.Person; }
@@ -671,14 +673,14 @@ export interface Product extends Model<typeof metadata.Product> {
 }
 export class Product {
   
-  /** Mutates the input object and its descendents into a valid Product implementation. */
+  /** Mutates the input object and its descendants into a valid Product implementation. */
   static convert(data?: Partial<Product>): Product {
-    return convertToModel(data || {}, metadata.Product) 
+    return convertToModel<Product>(data || {}, metadata.Product) 
   }
   
-  /** Maps the input object and its descendents to a new, valid Product implementation. */
+  /** Maps the input object and its descendants to a new, valid Product implementation. */
   static map(data?: Partial<Product>): Product {
-    return mapToModel(data || {}, metadata.Product) 
+    return mapToModel<Product>(data || {}, metadata.Product) 
   }
   
   static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.Product; }
@@ -696,14 +698,14 @@ export interface ReadOnlyEntityUsedAsMethodInput extends Model<typeof metadata.R
 }
 export class ReadOnlyEntityUsedAsMethodInput {
   
-  /** Mutates the input object and its descendents into a valid ReadOnlyEntityUsedAsMethodInput implementation. */
+  /** Mutates the input object and its descendants into a valid ReadOnlyEntityUsedAsMethodInput implementation. */
   static convert(data?: Partial<ReadOnlyEntityUsedAsMethodInput>): ReadOnlyEntityUsedAsMethodInput {
-    return convertToModel(data || {}, metadata.ReadOnlyEntityUsedAsMethodInput) 
+    return convertToModel<ReadOnlyEntityUsedAsMethodInput>(data || {}, metadata.ReadOnlyEntityUsedAsMethodInput) 
   }
   
-  /** Maps the input object and its descendents to a new, valid ReadOnlyEntityUsedAsMethodInput implementation. */
+  /** Maps the input object and its descendants to a new, valid ReadOnlyEntityUsedAsMethodInput implementation. */
   static map(data?: Partial<ReadOnlyEntityUsedAsMethodInput>): ReadOnlyEntityUsedAsMethodInput {
-    return mapToModel(data || {}, metadata.ReadOnlyEntityUsedAsMethodInput) 
+    return mapToModel<ReadOnlyEntityUsedAsMethodInput>(data || {}, metadata.ReadOnlyEntityUsedAsMethodInput) 
   }
   
   static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.ReadOnlyEntityUsedAsMethodInput; }
@@ -724,14 +726,14 @@ export interface RecursiveHierarchy extends Model<typeof metadata.RecursiveHiera
 }
 export class RecursiveHierarchy {
   
-  /** Mutates the input object and its descendents into a valid RecursiveHierarchy implementation. */
+  /** Mutates the input object and its descendants into a valid RecursiveHierarchy implementation. */
   static convert(data?: Partial<RecursiveHierarchy>): RecursiveHierarchy {
-    return convertToModel(data || {}, metadata.RecursiveHierarchy) 
+    return convertToModel<RecursiveHierarchy>(data || {}, metadata.RecursiveHierarchy) 
   }
   
-  /** Maps the input object and its descendents to a new, valid RecursiveHierarchy implementation. */
+  /** Maps the input object and its descendants to a new, valid RecursiveHierarchy implementation. */
   static map(data?: Partial<RecursiveHierarchy>): RecursiveHierarchy {
-    return mapToModel(data || {}, metadata.RecursiveHierarchy) 
+    return mapToModel<RecursiveHierarchy>(data || {}, metadata.RecursiveHierarchy) 
   }
   
   static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.RecursiveHierarchy; }
@@ -755,14 +757,14 @@ export interface RequiredAndInitModel extends Model<typeof metadata.RequiredAndI
 }
 export class RequiredAndInitModel {
   
-  /** Mutates the input object and its descendents into a valid RequiredAndInitModel implementation. */
+  /** Mutates the input object and its descendants into a valid RequiredAndInitModel implementation. */
   static convert(data?: Partial<RequiredAndInitModel>): RequiredAndInitModel {
-    return convertToModel(data || {}, metadata.RequiredAndInitModel) 
+    return convertToModel<RequiredAndInitModel>(data || {}, metadata.RequiredAndInitModel) 
   }
   
-  /** Maps the input object and its descendents to a new, valid RequiredAndInitModel implementation. */
+  /** Maps the input object and its descendants to a new, valid RequiredAndInitModel implementation. */
   static map(data?: Partial<RequiredAndInitModel>): RequiredAndInitModel {
-    return mapToModel(data || {}, metadata.RequiredAndInitModel) 
+    return mapToModel<RequiredAndInitModel>(data || {}, metadata.RequiredAndInitModel) 
   }
   
   static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.RequiredAndInitModel; }
@@ -783,14 +785,14 @@ export interface Sibling extends Model<typeof metadata.Sibling> {
 }
 export class Sibling {
   
-  /** Mutates the input object and its descendents into a valid Sibling implementation. */
+  /** Mutates the input object and its descendants into a valid Sibling implementation. */
   static convert(data?: Partial<Sibling>): Sibling {
-    return convertToModel(data || {}, metadata.Sibling) 
+    return convertToModel<Sibling>(data || {}, metadata.Sibling) 
   }
   
-  /** Maps the input object and its descendents to a new, valid Sibling implementation. */
+  /** Maps the input object and its descendants to a new, valid Sibling implementation. */
   static map(data?: Partial<Sibling>): Sibling {
-    return mapToModel(data || {}, metadata.Sibling) 
+    return mapToModel<Sibling>(data || {}, metadata.Sibling) 
   }
   
   static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.Sibling; }
@@ -812,14 +814,14 @@ export interface StringIdentity extends Model<typeof metadata.StringIdentity> {
 }
 export class StringIdentity {
   
-  /** Mutates the input object and its descendents into a valid StringIdentity implementation. */
+  /** Mutates the input object and its descendants into a valid StringIdentity implementation. */
   static convert(data?: Partial<StringIdentity>): StringIdentity {
-    return convertToModel(data || {}, metadata.StringIdentity) 
+    return convertToModel<StringIdentity>(data || {}, metadata.StringIdentity) 
   }
   
-  /** Maps the input object and its descendents to a new, valid StringIdentity implementation. */
+  /** Maps the input object and its descendants to a new, valid StringIdentity implementation. */
   static map(data?: Partial<StringIdentity>): StringIdentity {
-    return mapToModel(data || {}, metadata.StringIdentity) 
+    return mapToModel<StringIdentity>(data || {}, metadata.StringIdentity) 
   }
   
   static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.StringIdentity; }
@@ -839,14 +841,14 @@ export interface Test extends Model<typeof metadata.Test> {
 }
 export class Test {
   
-  /** Mutates the input object and its descendents into a valid Test implementation. */
+  /** Mutates the input object and its descendants into a valid Test implementation. */
   static convert(data?: Partial<Test>): Test {
-    return convertToModel(data || {}, metadata.Test) 
+    return convertToModel<Test>(data || {}, metadata.Test) 
   }
   
-  /** Maps the input object and its descendents to a new, valid Test implementation. */
+  /** Maps the input object and its descendants to a new, valid Test implementation. */
   static map(data?: Partial<Test>): Test {
-    return mapToModel(data || {}, metadata.Test) 
+    return mapToModel<Test>(data || {}, metadata.Test) 
   }
   
   static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.Test; }
@@ -864,14 +866,14 @@ export interface ZipCode extends Model<typeof metadata.ZipCode> {
 }
 export class ZipCode {
   
-  /** Mutates the input object and its descendents into a valid ZipCode implementation. */
+  /** Mutates the input object and its descendants into a valid ZipCode implementation. */
   static convert(data?: Partial<ZipCode>): ZipCode {
-    return convertToModel(data || {}, metadata.ZipCode) 
+    return convertToModel<ZipCode>(data || {}, metadata.ZipCode) 
   }
   
-  /** Maps the input object and its descendents to a new, valid ZipCode implementation. */
+  /** Maps the input object and its descendants to a new, valid ZipCode implementation. */
   static map(data?: Partial<ZipCode>): ZipCode {
-    return mapToModel(data || {}, metadata.ZipCode) 
+    return mapToModel<ZipCode>(data || {}, metadata.ZipCode) 
   }
   
   static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.ZipCode; }
@@ -888,14 +890,14 @@ export interface ExternalChild extends Model<typeof metadata.ExternalChild> {
 }
 export class ExternalChild {
   
-  /** Mutates the input object and its descendents into a valid ExternalChild implementation. */
+  /** Mutates the input object and its descendants into a valid ExternalChild implementation. */
   static convert(data?: Partial<ExternalChild>): ExternalChild {
-    return convertToModel(data || {}, metadata.ExternalChild) 
+    return convertToModel<ExternalChild>(data || {}, metadata.ExternalChild) 
   }
   
-  /** Maps the input object and its descendents to a new, valid ExternalChild implementation. */
+  /** Maps the input object and its descendants to a new, valid ExternalChild implementation. */
   static map(data?: Partial<ExternalChild>): ExternalChild {
-    return mapToModel(data || {}, metadata.ExternalChild) 
+    return mapToModel<ExternalChild>(data || {}, metadata.ExternalChild) 
   }
   
   static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.ExternalChild; }
@@ -913,14 +915,14 @@ export interface ExternalChildAsInputOnly extends Model<typeof metadata.External
 }
 export class ExternalChildAsInputOnly {
   
-  /** Mutates the input object and its descendents into a valid ExternalChildAsInputOnly implementation. */
+  /** Mutates the input object and its descendants into a valid ExternalChildAsInputOnly implementation. */
   static convert(data?: Partial<ExternalChildAsInputOnly>): ExternalChildAsInputOnly {
-    return convertToModel(data || {}, metadata.ExternalChildAsInputOnly) 
+    return convertToModel<ExternalChildAsInputOnly>(data || {}, metadata.ExternalChildAsInputOnly) 
   }
   
-  /** Maps the input object and its descendents to a new, valid ExternalChildAsInputOnly implementation. */
+  /** Maps the input object and its descendants to a new, valid ExternalChildAsInputOnly implementation. */
   static map(data?: Partial<ExternalChildAsInputOnly>): ExternalChildAsInputOnly {
-    return mapToModel(data || {}, metadata.ExternalChildAsInputOnly) 
+    return mapToModel<ExternalChildAsInputOnly>(data || {}, metadata.ExternalChildAsInputOnly) 
   }
   
   static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.ExternalChildAsInputOnly; }
@@ -938,14 +940,14 @@ export interface ExternalChildAsOutputOnly extends Model<typeof metadata.Externa
 }
 export class ExternalChildAsOutputOnly {
   
-  /** Mutates the input object and its descendents into a valid ExternalChildAsOutputOnly implementation. */
+  /** Mutates the input object and its descendants into a valid ExternalChildAsOutputOnly implementation. */
   static convert(data?: Partial<ExternalChildAsOutputOnly>): ExternalChildAsOutputOnly {
-    return convertToModel(data || {}, metadata.ExternalChildAsOutputOnly) 
+    return convertToModel<ExternalChildAsOutputOnly>(data || {}, metadata.ExternalChildAsOutputOnly) 
   }
   
-  /** Maps the input object and its descendents to a new, valid ExternalChildAsOutputOnly implementation. */
+  /** Maps the input object and its descendants to a new, valid ExternalChildAsOutputOnly implementation. */
   static map(data?: Partial<ExternalChildAsOutputOnly>): ExternalChildAsOutputOnly {
-    return mapToModel(data || {}, metadata.ExternalChildAsOutputOnly) 
+    return mapToModel<ExternalChildAsOutputOnly>(data || {}, metadata.ExternalChildAsOutputOnly) 
   }
   
   static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.ExternalChildAsOutputOnly; }
@@ -979,14 +981,14 @@ export interface ExternalParent extends Model<typeof metadata.ExternalParent> {
 }
 export class ExternalParent {
   
-  /** Mutates the input object and its descendents into a valid ExternalParent implementation. */
+  /** Mutates the input object and its descendants into a valid ExternalParent implementation. */
   static convert(data?: Partial<ExternalParent>): ExternalParent {
-    return convertToModel(data || {}, metadata.ExternalParent) 
+    return convertToModel<ExternalParent>(data || {}, metadata.ExternalParent) 
   }
   
-  /** Maps the input object and its descendents to a new, valid ExternalParent implementation. */
+  /** Maps the input object and its descendants to a new, valid ExternalParent implementation. */
   static map(data?: Partial<ExternalParent>): ExternalParent {
-    return mapToModel(data || {}, metadata.ExternalParent) 
+    return mapToModel<ExternalParent>(data || {}, metadata.ExternalParent) 
   }
   
   static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.ExternalParent; }
@@ -1003,14 +1005,14 @@ export interface ExternalParentAsInputOnly extends Model<typeof metadata.Externa
 }
 export class ExternalParentAsInputOnly {
   
-  /** Mutates the input object and its descendents into a valid ExternalParentAsInputOnly implementation. */
+  /** Mutates the input object and its descendants into a valid ExternalParentAsInputOnly implementation. */
   static convert(data?: Partial<ExternalParentAsInputOnly>): ExternalParentAsInputOnly {
-    return convertToModel(data || {}, metadata.ExternalParentAsInputOnly) 
+    return convertToModel<ExternalParentAsInputOnly>(data || {}, metadata.ExternalParentAsInputOnly) 
   }
   
-  /** Maps the input object and its descendents to a new, valid ExternalParentAsInputOnly implementation. */
+  /** Maps the input object and its descendants to a new, valid ExternalParentAsInputOnly implementation. */
   static map(data?: Partial<ExternalParentAsInputOnly>): ExternalParentAsInputOnly {
-    return mapToModel(data || {}, metadata.ExternalParentAsInputOnly) 
+    return mapToModel<ExternalParentAsInputOnly>(data || {}, metadata.ExternalParentAsInputOnly) 
   }
   
   static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.ExternalParentAsInputOnly; }
@@ -1027,14 +1029,14 @@ export interface ExternalParentAsOutputOnly extends Model<typeof metadata.Extern
 }
 export class ExternalParentAsOutputOnly {
   
-  /** Mutates the input object and its descendents into a valid ExternalParentAsOutputOnly implementation. */
+  /** Mutates the input object and its descendants into a valid ExternalParentAsOutputOnly implementation. */
   static convert(data?: Partial<ExternalParentAsOutputOnly>): ExternalParentAsOutputOnly {
-    return convertToModel(data || {}, metadata.ExternalParentAsOutputOnly) 
+    return convertToModel<ExternalParentAsOutputOnly>(data || {}, metadata.ExternalParentAsOutputOnly) 
   }
   
-  /** Maps the input object and its descendents to a new, valid ExternalParentAsOutputOnly implementation. */
+  /** Maps the input object and its descendants to a new, valid ExternalParentAsOutputOnly implementation. */
   static map(data?: Partial<ExternalParentAsOutputOnly>): ExternalParentAsOutputOnly {
-    return mapToModel(data || {}, metadata.ExternalParentAsOutputOnly) 
+    return mapToModel<ExternalParentAsOutputOnly>(data || {}, metadata.ExternalParentAsOutputOnly) 
   }
   
   static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.ExternalParentAsOutputOnly; }
@@ -1054,14 +1056,14 @@ export interface ExternalTypeWithDtoProp extends Model<typeof metadata.ExternalT
 }
 export class ExternalTypeWithDtoProp {
   
-  /** Mutates the input object and its descendents into a valid ExternalTypeWithDtoProp implementation. */
+  /** Mutates the input object and its descendants into a valid ExternalTypeWithDtoProp implementation. */
   static convert(data?: Partial<ExternalTypeWithDtoProp>): ExternalTypeWithDtoProp {
-    return convertToModel(data || {}, metadata.ExternalTypeWithDtoProp) 
+    return convertToModel<ExternalTypeWithDtoProp>(data || {}, metadata.ExternalTypeWithDtoProp) 
   }
   
-  /** Maps the input object and its descendents to a new, valid ExternalTypeWithDtoProp implementation. */
+  /** Maps the input object and its descendants to a new, valid ExternalTypeWithDtoProp implementation. */
   static map(data?: Partial<ExternalTypeWithDtoProp>): ExternalTypeWithDtoProp {
-    return mapToModel(data || {}, metadata.ExternalTypeWithDtoProp) 
+    return mapToModel<ExternalTypeWithDtoProp>(data || {}, metadata.ExternalTypeWithDtoProp) 
   }
   
   static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.ExternalTypeWithDtoProp; }
@@ -1080,14 +1082,14 @@ export interface InitRecordWithDefaultCtor extends Model<typeof metadata.InitRec
 }
 export class InitRecordWithDefaultCtor {
   
-  /** Mutates the input object and its descendents into a valid InitRecordWithDefaultCtor implementation. */
+  /** Mutates the input object and its descendants into a valid InitRecordWithDefaultCtor implementation. */
   static convert(data?: Partial<InitRecordWithDefaultCtor>): InitRecordWithDefaultCtor {
-    return convertToModel(data || {}, metadata.InitRecordWithDefaultCtor) 
+    return convertToModel<InitRecordWithDefaultCtor>(data || {}, metadata.InitRecordWithDefaultCtor) 
   }
   
-  /** Maps the input object and its descendents to a new, valid InitRecordWithDefaultCtor implementation. */
+  /** Maps the input object and its descendants to a new, valid InitRecordWithDefaultCtor implementation. */
   static map(data?: Partial<InitRecordWithDefaultCtor>): InitRecordWithDefaultCtor {
-    return mapToModel(data || {}, metadata.InitRecordWithDefaultCtor) 
+    return mapToModel<InitRecordWithDefaultCtor>(data || {}, metadata.InitRecordWithDefaultCtor) 
   }
   
   static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.InitRecordWithDefaultCtor; }
@@ -1105,14 +1107,14 @@ export interface InputOutputOnlyExternalTypeWithRequiredNonscalarProp extends Mo
 }
 export class InputOutputOnlyExternalTypeWithRequiredNonscalarProp {
   
-  /** Mutates the input object and its descendents into a valid InputOutputOnlyExternalTypeWithRequiredNonscalarProp implementation. */
+  /** Mutates the input object and its descendants into a valid InputOutputOnlyExternalTypeWithRequiredNonscalarProp implementation. */
   static convert(data?: Partial<InputOutputOnlyExternalTypeWithRequiredNonscalarProp>): InputOutputOnlyExternalTypeWithRequiredNonscalarProp {
-    return convertToModel(data || {}, metadata.InputOutputOnlyExternalTypeWithRequiredNonscalarProp) 
+    return convertToModel<InputOutputOnlyExternalTypeWithRequiredNonscalarProp>(data || {}, metadata.InputOutputOnlyExternalTypeWithRequiredNonscalarProp) 
   }
   
-  /** Maps the input object and its descendents to a new, valid InputOutputOnlyExternalTypeWithRequiredNonscalarProp implementation. */
+  /** Maps the input object and its descendants to a new, valid InputOutputOnlyExternalTypeWithRequiredNonscalarProp implementation. */
   static map(data?: Partial<InputOutputOnlyExternalTypeWithRequiredNonscalarProp>): InputOutputOnlyExternalTypeWithRequiredNonscalarProp {
-    return mapToModel(data || {}, metadata.InputOutputOnlyExternalTypeWithRequiredNonscalarProp) 
+    return mapToModel<InputOutputOnlyExternalTypeWithRequiredNonscalarProp>(data || {}, metadata.InputOutputOnlyExternalTypeWithRequiredNonscalarProp) 
   }
   
   static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.InputOutputOnlyExternalTypeWithRequiredNonscalarProp; }
@@ -1131,14 +1133,14 @@ export interface Location extends Model<typeof metadata.Location> {
 }
 export class Location {
   
-  /** Mutates the input object and its descendents into a valid Location implementation. */
+  /** Mutates the input object and its descendants into a valid Location implementation. */
   static convert(data?: Partial<Location>): Location {
-    return convertToModel(data || {}, metadata.Location) 
+    return convertToModel<Location>(data || {}, metadata.Location) 
   }
   
-  /** Maps the input object and its descendents to a new, valid Location implementation. */
+  /** Maps the input object and its descendants to a new, valid Location implementation. */
   static map(data?: Partial<Location>): Location {
-    return mapToModel(data || {}, metadata.Location) 
+    return mapToModel<Location>(data || {}, metadata.Location) 
   }
   
   static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.Location; }
@@ -1156,14 +1158,14 @@ export interface OutputOnlyExternalTypeWithoutDefaultCtor extends Model<typeof m
 }
 export class OutputOnlyExternalTypeWithoutDefaultCtor {
   
-  /** Mutates the input object and its descendents into a valid OutputOnlyExternalTypeWithoutDefaultCtor implementation. */
+  /** Mutates the input object and its descendants into a valid OutputOnlyExternalTypeWithoutDefaultCtor implementation. */
   static convert(data?: Partial<OutputOnlyExternalTypeWithoutDefaultCtor>): OutputOnlyExternalTypeWithoutDefaultCtor {
-    return convertToModel(data || {}, metadata.OutputOnlyExternalTypeWithoutDefaultCtor) 
+    return convertToModel<OutputOnlyExternalTypeWithoutDefaultCtor>(data || {}, metadata.OutputOnlyExternalTypeWithoutDefaultCtor) 
   }
   
-  /** Maps the input object and its descendents to a new, valid OutputOnlyExternalTypeWithoutDefaultCtor implementation. */
+  /** Maps the input object and its descendants to a new, valid OutputOnlyExternalTypeWithoutDefaultCtor implementation. */
   static map(data?: Partial<OutputOnlyExternalTypeWithoutDefaultCtor>): OutputOnlyExternalTypeWithoutDefaultCtor {
-    return mapToModel(data || {}, metadata.OutputOnlyExternalTypeWithoutDefaultCtor) 
+    return mapToModel<OutputOnlyExternalTypeWithoutDefaultCtor>(data || {}, metadata.OutputOnlyExternalTypeWithoutDefaultCtor) 
   }
   
   static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.OutputOnlyExternalTypeWithoutDefaultCtor; }
@@ -1180,14 +1182,14 @@ export interface OutputOnlyExternalTypeWithoutDefaultCtorWithInputMappableProper
 }
 export class OutputOnlyExternalTypeWithoutDefaultCtorWithInputMappableProperties {
   
-  /** Mutates the input object and its descendents into a valid OutputOnlyExternalTypeWithoutDefaultCtorWithInputMappableProperties implementation. */
+  /** Mutates the input object and its descendants into a valid OutputOnlyExternalTypeWithoutDefaultCtorWithInputMappableProperties implementation. */
   static convert(data?: Partial<OutputOnlyExternalTypeWithoutDefaultCtorWithInputMappableProperties>): OutputOnlyExternalTypeWithoutDefaultCtorWithInputMappableProperties {
-    return convertToModel(data || {}, metadata.OutputOnlyExternalTypeWithoutDefaultCtorWithInputMappableProperties) 
+    return convertToModel<OutputOnlyExternalTypeWithoutDefaultCtorWithInputMappableProperties>(data || {}, metadata.OutputOnlyExternalTypeWithoutDefaultCtorWithInputMappableProperties) 
   }
   
-  /** Maps the input object and its descendents to a new, valid OutputOnlyExternalTypeWithoutDefaultCtorWithInputMappableProperties implementation. */
+  /** Maps the input object and its descendants to a new, valid OutputOnlyExternalTypeWithoutDefaultCtorWithInputMappableProperties implementation. */
   static map(data?: Partial<OutputOnlyExternalTypeWithoutDefaultCtorWithInputMappableProperties>): OutputOnlyExternalTypeWithoutDefaultCtorWithInputMappableProperties {
-    return mapToModel(data || {}, metadata.OutputOnlyExternalTypeWithoutDefaultCtorWithInputMappableProperties) 
+    return mapToModel<OutputOnlyExternalTypeWithoutDefaultCtorWithInputMappableProperties>(data || {}, metadata.OutputOnlyExternalTypeWithoutDefaultCtorWithInputMappableProperties) 
   }
   
   static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.OutputOnlyExternalTypeWithoutDefaultCtorWithInputMappableProperties; }
@@ -1205,14 +1207,14 @@ export interface OutputOnlyExternalTypeWithRequiredEntityProp extends Model<type
 }
 export class OutputOnlyExternalTypeWithRequiredEntityProp {
   
-  /** Mutates the input object and its descendents into a valid OutputOnlyExternalTypeWithRequiredEntityProp implementation. */
+  /** Mutates the input object and its descendants into a valid OutputOnlyExternalTypeWithRequiredEntityProp implementation. */
   static convert(data?: Partial<OutputOnlyExternalTypeWithRequiredEntityProp>): OutputOnlyExternalTypeWithRequiredEntityProp {
-    return convertToModel(data || {}, metadata.OutputOnlyExternalTypeWithRequiredEntityProp) 
+    return convertToModel<OutputOnlyExternalTypeWithRequiredEntityProp>(data || {}, metadata.OutputOnlyExternalTypeWithRequiredEntityProp) 
   }
   
-  /** Maps the input object and its descendents to a new, valid OutputOnlyExternalTypeWithRequiredEntityProp implementation. */
+  /** Maps the input object and its descendants to a new, valid OutputOnlyExternalTypeWithRequiredEntityProp implementation. */
   static map(data?: Partial<OutputOnlyExternalTypeWithRequiredEntityProp>): OutputOnlyExternalTypeWithRequiredEntityProp {
-    return mapToModel(data || {}, metadata.OutputOnlyExternalTypeWithRequiredEntityProp) 
+    return mapToModel<OutputOnlyExternalTypeWithRequiredEntityProp>(data || {}, metadata.OutputOnlyExternalTypeWithRequiredEntityProp) 
   }
   
   static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.OutputOnlyExternalTypeWithRequiredEntityProp; }
@@ -1234,14 +1236,14 @@ export interface PersonCriteria extends Model<typeof metadata.PersonCriteria> {
 }
 export class PersonCriteria {
   
-  /** Mutates the input object and its descendents into a valid PersonCriteria implementation. */
+  /** Mutates the input object and its descendants into a valid PersonCriteria implementation. */
   static convert(data?: Partial<PersonCriteria>): PersonCriteria {
-    return convertToModel(data || {}, metadata.PersonCriteria) 
+    return convertToModel<PersonCriteria>(data || {}, metadata.PersonCriteria) 
   }
   
-  /** Maps the input object and its descendents to a new, valid PersonCriteria implementation. */
+  /** Maps the input object and its descendants to a new, valid PersonCriteria implementation. */
   static map(data?: Partial<PersonCriteria>): PersonCriteria {
-    return mapToModel(data || {}, metadata.PersonCriteria) 
+    return mapToModel<PersonCriteria>(data || {}, metadata.PersonCriteria) 
   }
   
   static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.PersonCriteria; }
@@ -1260,14 +1262,14 @@ export interface PositionalRecord extends Model<typeof metadata.PositionalRecord
 }
 export class PositionalRecord {
   
-  /** Mutates the input object and its descendents into a valid PositionalRecord implementation. */
+  /** Mutates the input object and its descendants into a valid PositionalRecord implementation. */
   static convert(data?: Partial<PositionalRecord>): PositionalRecord {
-    return convertToModel(data || {}, metadata.PositionalRecord) 
+    return convertToModel<PositionalRecord>(data || {}, metadata.PositionalRecord) 
   }
   
-  /** Maps the input object and its descendents to a new, valid PositionalRecord implementation. */
+  /** Maps the input object and its descendants to a new, valid PositionalRecord implementation. */
   static map(data?: Partial<PositionalRecord>): PositionalRecord {
-    return mapToModel(data || {}, metadata.PositionalRecord) 
+    return mapToModel<PositionalRecord>(data || {}, metadata.PositionalRecord) 
   }
   
   static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.PositionalRecord; }
@@ -1286,14 +1288,14 @@ export interface StandaloneReadonly extends Model<typeof metadata.StandaloneRead
 }
 export class StandaloneReadonly {
   
-  /** Mutates the input object and its descendents into a valid StandaloneReadonly implementation. */
+  /** Mutates the input object and its descendants into a valid StandaloneReadonly implementation. */
   static convert(data?: Partial<StandaloneReadonly>): StandaloneReadonly {
-    return convertToModel(data || {}, metadata.StandaloneReadonly) 
+    return convertToModel<StandaloneReadonly>(data || {}, metadata.StandaloneReadonly) 
   }
   
-  /** Maps the input object and its descendents to a new, valid StandaloneReadonly implementation. */
+  /** Maps the input object and its descendants to a new, valid StandaloneReadonly implementation. */
   static map(data?: Partial<StandaloneReadonly>): StandaloneReadonly {
-    return mapToModel(data || {}, metadata.StandaloneReadonly) 
+    return mapToModel<StandaloneReadonly>(data || {}, metadata.StandaloneReadonly) 
   }
   
   static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.StandaloneReadonly; }
@@ -1320,14 +1322,14 @@ export interface StandaloneReadWrite extends Model<typeof metadata.StandaloneRea
 }
 export class StandaloneReadWrite {
   
-  /** Mutates the input object and its descendents into a valid StandaloneReadWrite implementation. */
+  /** Mutates the input object and its descendants into a valid StandaloneReadWrite implementation. */
   static convert(data?: Partial<StandaloneReadWrite>): StandaloneReadWrite {
-    return convertToModel(data || {}, metadata.StandaloneReadWrite) 
+    return convertToModel<StandaloneReadWrite>(data || {}, metadata.StandaloneReadWrite) 
   }
   
-  /** Maps the input object and its descendents to a new, valid StandaloneReadWrite implementation. */
+  /** Maps the input object and its descendants to a new, valid StandaloneReadWrite implementation. */
   static map(data?: Partial<StandaloneReadWrite>): StandaloneReadWrite {
-    return mapToModel(data || {}, metadata.StandaloneReadWrite) 
+    return mapToModel<StandaloneReadWrite>(data || {}, metadata.StandaloneReadWrite) 
   }
   
   static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.StandaloneReadWrite; }
@@ -1358,14 +1360,14 @@ export interface ValidationTarget extends Model<typeof metadata.ValidationTarget
 }
 export class ValidationTarget {
   
-  /** Mutates the input object and its descendents into a valid ValidationTarget implementation. */
+  /** Mutates the input object and its descendants into a valid ValidationTarget implementation. */
   static convert(data?: Partial<ValidationTarget>): ValidationTarget {
-    return convertToModel(data || {}, metadata.ValidationTarget) 
+    return convertToModel<ValidationTarget>(data || {}, metadata.ValidationTarget) 
   }
   
-  /** Maps the input object and its descendents to a new, valid ValidationTarget implementation. */
+  /** Maps the input object and its descendants to a new, valid ValidationTarget implementation. */
   static map(data?: Partial<ValidationTarget>): ValidationTarget {
-    return mapToModel(data || {}, metadata.ValidationTarget) 
+    return mapToModel<ValidationTarget>(data || {}, metadata.ValidationTarget) 
   }
   
   static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.ValidationTarget; }
@@ -1383,14 +1385,14 @@ export interface ValidationTargetChild extends Model<typeof metadata.ValidationT
 }
 export class ValidationTargetChild {
   
-  /** Mutates the input object and its descendents into a valid ValidationTargetChild implementation. */
+  /** Mutates the input object and its descendants into a valid ValidationTargetChild implementation. */
   static convert(data?: Partial<ValidationTargetChild>): ValidationTargetChild {
-    return convertToModel(data || {}, metadata.ValidationTargetChild) 
+    return convertToModel<ValidationTargetChild>(data || {}, metadata.ValidationTargetChild) 
   }
   
-  /** Maps the input object and its descendents to a new, valid ValidationTargetChild implementation. */
+  /** Maps the input object and its descendants to a new, valid ValidationTargetChild implementation. */
   static map(data?: Partial<ValidationTargetChild>): ValidationTargetChild {
-    return mapToModel(data || {}, metadata.ValidationTargetChild) 
+    return mapToModel<ValidationTargetChild>(data || {}, metadata.ValidationTargetChild) 
   }
   
   static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.ValidationTargetChild; }
@@ -1409,14 +1411,14 @@ export interface WeatherData extends Model<typeof metadata.WeatherData> {
 }
 export class WeatherData {
   
-  /** Mutates the input object and its descendents into a valid WeatherData implementation. */
+  /** Mutates the input object and its descendants into a valid WeatherData implementation. */
   static convert(data?: Partial<WeatherData>): WeatherData {
-    return convertToModel(data || {}, metadata.WeatherData) 
+    return convertToModel<WeatherData>(data || {}, metadata.WeatherData) 
   }
   
-  /** Maps the input object and its descendents to a new, valid WeatherData implementation. */
+  /** Maps the input object and its descendants to a new, valid WeatherData implementation. */
   static map(data?: Partial<WeatherData>): WeatherData {
-    return mapToModel(data || {}, metadata.WeatherData) 
+    return mapToModel<WeatherData>(data || {}, metadata.WeatherData) 
   }
   
   static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.WeatherData; }

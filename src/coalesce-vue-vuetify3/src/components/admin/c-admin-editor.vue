@@ -121,14 +121,8 @@
                     variant="outlined"
                     tabindex="-1"
                     title="View selected item"
-                    :disabled="!(model as any)[prop.foreignKey.name]"
-                    :to="{
-                      name: 'coalesce-admin-item',
-                      params: {
-                        type: prop.typeDef.name,
-                        id: (model as any)[prop.foreignKey.name],
-                      },
-                    }"
+                    :disabled="!getRefNavRoute($router, model, prop)"
+                    :to="getRefNavRoute($router, model, prop)"
                   >
                     <v-icon>fa fa-ellipsis-h</v-icon>
                   </v-btn>
@@ -209,6 +203,7 @@ import {
   HiddenAreas,
 } from "coalesce-vue";
 
+import { getRefNavRoute } from "./util";
 import { isPropReadOnly } from "../../util";
 import { PropType, defineComponent, ref, watch } from "vue";
 
@@ -238,6 +233,7 @@ export default defineComponent({
   },
 
   methods: {
+    getRefNavRoute,
     propInputBinds(p: Property) {
       let readonly = isPropReadOnly(p, this.model);
 

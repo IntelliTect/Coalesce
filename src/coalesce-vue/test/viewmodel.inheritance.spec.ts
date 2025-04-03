@@ -83,10 +83,35 @@ describe("abstract proxy", () => {
     impl1OnlyField: "foo",
   };
 
+  test("class name", async () => {
+    const vm = new AbstractModelViewModel();
+    expect(vm.constructor.name).toBe("AbstractModelViewModelProxy");
+  });
+
   test("becomes concrete type when loaded with initial data", async () => {
     const vm = new AbstractModelViewModel(new AbstractImpl1(expectedData));
 
     assertIsImpl1(vm);
+  });
+
+  test("can load when ID is provided by initial data", async () => {
+    const loadMock = mockEndpoint(
+      "/AbstractModel/get/1",
+      vitest.fn((req) => ({
+        wasSuccessful: true,
+        object: {
+          $type: "AbstractImpl1",
+          ...expectedData,
+        },
+      }))
+    );
+
+    const vm = new AbstractModelViewModel({ id: 1 });
+    expect(vm.id).toBe(1);
+    await vm.$load();
+
+    assertIsImpl1(vm);
+    assertLoaded(vm);
   });
 
   test("becomes concrete type after $load", async () => {
@@ -105,19 +130,23 @@ describe("abstract proxy", () => {
     await vm.$load(1);
 
     assertIsImpl1(vm);
+    assertLoaded(vm);
+  });
 
+  function assertLoaded(vm: AbstractModelViewModel) {
     expect(vm.$load.wasSuccessful).toBe(true);
     expect(vm.$load.isLoading).toBe(false);
     expect(vm.$load.result).toBeInstanceOf(AbstractImpl1);
     expect(vm.$load.message).toBeFalsy();
     expect(vm.$load.hasResult).toBeTruthy();
-  });
+  }
 
   function assertIsImpl1(vm: AbstractModelViewModel) {
     expect(vm.id).toBe(1);
     expect(vm.discriminator).toBe("discrim1");
     expect(vm).toBeInstanceOf(AbstractImpl1);
     expect(vm).toBeInstanceOf(AbstractImpl1ViewModel);
+    expect(vm.constructor.name).toBe("AbstractImpl1ViewModel");
 
     expect(vm.$metadata).toStrictEqual(new AbstractImpl1().$metadata);
     expect(vm.$apiClient).toBeInstanceOf(AbstractImpl1ApiClient);

@@ -1374,9 +1374,9 @@ export function createAbstractProxyViewModelType<
         - Instantiate a concrete implementation of this abstract type instead of this abstract proxy
       `);
     }
-    class vmProxy extends ViewModel {
-      constructor() {
-        super(metadata, apiClient);
+    class AbstractVmProxy extends ViewModel {
+      constructor(initialDirtyData?: any) {
+        super(metadata, apiClient, initialDirtyData);
       }
 
       [$loadProxy]!: ItemApiState<any, any, any>;
@@ -1400,9 +1400,12 @@ export function createAbstractProxyViewModelType<
         });
       }
     }
-    defineProps(vmProxy, metadata);
+    Object.defineProperty(AbstractVmProxy, "name", {
+      value: metadata.name + "ViewModelProxy",
+    });
+    defineProps(AbstractVmProxy, metadata);
 
-    let vm = new vmProxy();
+    let vm = new AbstractVmProxy(initialData);
 
     let $load = (vm[$loadProxy] = apiClient
       .$makeCaller("item", (c, id?: any) => {

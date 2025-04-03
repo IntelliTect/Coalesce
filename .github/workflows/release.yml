@@ -4,14 +4,14 @@ on:
   workflow_dispatch:
     inputs:
       prereleaseSlug:
-        description: 'Prerelease slug (optional)'
+        description: "Prerelease slug (optional)"
         required: false
-        default: ''
+        default: ""
         type: choice
         options:
-        - rc
-        - beta
-        - ''
+          - rc
+          - beta
+          - ""
 
 jobs:
   meta:
@@ -47,7 +47,6 @@ jobs:
           - "--Identity --Tenancy --TenantCreateSelf --TenantMemberInvites --AuditLogs --LocalAuth --EmailSendGrid"
           - "--Identity --Tenancy --TenantCreateAdmin --TenantMemberInvites --MicrosoftAuth --LocalAuth --EmailAzure"
 
-
     defaults:
       run:
         shell: pwsh
@@ -55,52 +54,52 @@ jobs:
 
     env:
       COALESCE_VERSION: ${{ needs.meta.outputs.COALESCE_VERSION }}
-      
+
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Setup dotnet
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: | 
-          8.0.x
-          9.0.x
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            9.0.x
 
-    - name: Download Artifacts
-      uses: actions/download-artifact@v4
-      with:
-        path: ${{ github.workspace }}/artifacts
+      - name: Download Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: ${{ github.workspace }}/artifacts
 
-    - name: Add local nuget source
-      run: |
-        dotnet nuget add source "${{ github.workspace }}/artifacts/packages" --name "local-nuget"
+      - name: Add local nuget source
+        run: |
+          dotnet nuget add source "${{ github.workspace }}/artifacts/packages" --name "local-nuget"
 
-    # Install the coalesce packages that we just built so we can validate that the template
-    # works correctly with the version of Coalesce that we're releasing (which is also the version
-    # that will get substituted into the template when we build it in part-template-build).
-    # This isn't part of part-template-build because we want to validate before we publish any new versions.
-    - name: "Install newly built Coalesce packages"
-      run: |
-        $ErrorActionPreference = "Stop"
-        $PSNativeCommandUseErrorActionPreference = $true
+      # Install the coalesce packages that we just built so we can validate that the template
+      # works correctly with the version of Coalesce that we're releasing (which is also the version
+      # that will get substituted into the template when we build it in part-template-build).
+      # This isn't part of part-template-build because we want to validate before we publish any new versions.
+      - name: "Install newly built Coalesce packages"
+        run: |
+          $ErrorActionPreference = "Stop"
+          $PSNativeCommandUseErrorActionPreference = $true
 
-        echo $env:COALESCE_VERSION
-        ls ${{ github.workspace }}/artifacts
+          echo $env:COALESCE_VERSION
+          ls ${{ github.workspace }}/artifacts -alR
 
-        $filePath = "./content/Directory.Build.props"
-        $newVersion = "<CoalesceVersion>$env:COALESCE_VERSION</CoalesceVersion>"
-        (Get-Content $filePath) -replace '<CoalesceVersion>.*?<\/CoalesceVersion>', $newVersion | Set-Content $filePath 
-        
-        cat $filePath
+          $filePath = "./content/Directory.Build.props"
+          $newVersion = "<CoalesceVersion>$env:COALESCE_VERSION</CoalesceVersion>"
+          (Get-Content $filePath) -replace '<CoalesceVersion>.*?<\/CoalesceVersion>', $newVersion | Set-Content $filePath 
 
-        cd ./content/*.Web
-        npm i $(Get-ChildItem -Path "${{ github.workspace }}/artifacts/coalesce-vue*.tgz").FullName --save
-        npm i $(Get-ChildItem -Path "${{ github.workspace }}/artifacts/coalesce-vue-vue3*.tgz").FullName --save
+          cat $filePath
 
-        cat package.json
-    
-    - name: TestLocal
-      run: ./TestLocal.ps1 "${{ matrix.testCase }}"
+          cd ./content/*.Web
+          npm i $(Get-ChildItem -Path "${{ github.workspace }}/artifacts/coalesce-vue*.tgz").FullName --save
+          npm i $(Get-ChildItem -Path "${{ github.workspace }}/artifacts/coalesce-vue-vue3*.tgz").FullName --save
+
+          cat package.json
+
+      - name: TestLocal
+        run: ./TestLocal.ps1 "${{ matrix.testCase }}"
 
   publish:
     uses: ./.github/workflows/part-publish.yml
@@ -113,11 +112,11 @@ jobs:
     runs-on: ubuntu-latest
     needs: [meta, publish]
     steps:
-    - uses: actions/checkout@v4
-    - uses: rickstaa/action-create-tag@v1
-      if: ${{ success() && !inputs.prereleaseSlug }}
-      with:
-        tag: ${{ needs.meta.outputs.COALESCE_VERSION }}
+      - uses: actions/checkout@v4
+      - uses: rickstaa/action-create-tag@v1
+        if: ${{ success() && !inputs.prereleaseSlug }}
+        with:
+          tag: ${{ needs.meta.outputs.COALESCE_VERSION }}
 
   build-template:
     uses: ./.github/workflows/part-template-build.yml

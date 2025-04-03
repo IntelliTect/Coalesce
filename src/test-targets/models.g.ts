@@ -75,6 +75,8 @@ export class AbstractModel {
 
 export interface AbstractImpl1 extends Model<typeof metadata.AbstractImpl1> {
   impl1OnlyField: string | null
+  parentId: number | null
+  parent: AbstractModel | null
   id: number | null
   discriminator: string | null
   abstractModelPeople: AbstractModelPerson[] | null

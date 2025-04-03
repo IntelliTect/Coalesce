@@ -101,6 +101,19 @@ namespace IntelliTect.Coalesce.Tests.Mapping
         }
 
         [Fact]
+        public void IncludeTree_CastedIncludes()
+        {
+            var tree = IncludeTree.QueryFor<AbstractModel>()
+                .Include(p => ((AbstractImpl1)p).Parent).ThenInclude(p => (p as AbstractImpl1).Parent).ThenInclude(p => p.AbstractModelPeople)
+                .GetIncludeTree();
+
+            Assert.NotNull(tree
+                [nameof(AbstractImpl1.Parent)]
+                [nameof(AbstractImpl1.Parent)]
+                [nameof(AbstractImpl1.AbstractModelPeople)]);
+        }
+
+        [Fact]
         public void IncludeTree_BasicStringChecks()
         {
             IQueryable<Person> queryable = db.People

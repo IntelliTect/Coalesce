@@ -5,6 +5,9 @@ import { ViewModel, ListViewModel, ViewModelCollection, ServiceViewModel, type D
 
 export interface AbstractImpl1ViewModel extends $models.AbstractImpl1 {
   impl1OnlyField: string | null;
+  parentId: number | null;
+  get parent(): AbstractModelViewModel | null;
+  set parent(value: AbstractModelViewModel | $models.AbstractModel | null);
   id: number | null;
   discriminator: string | null;
   get abstractModelPeople(): ViewModelCollection<AbstractModelPersonViewModel, $models.AbstractModelPerson>;

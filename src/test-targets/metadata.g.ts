@@ -152,6 +152,29 @@ export const AbstractImpl1 = domain.types.AbstractImpl1 = {
       type: "string",
       role: "value",
     },
+    parentId: {
+      name: "parentId",
+      displayName: "Parent Id",
+      type: "number",
+      role: "foreignKey",
+      get principalKey() { return (domain.types.AbstractModel as ModelType & { name: "AbstractModel" }).props.id as PrimaryKeyProperty },
+      get principalType() { return (domain.types.AbstractModel as ModelType & { name: "AbstractModel" }) },
+      get navigationProp() { return (domain.types.AbstractImpl1 as ModelType & { name: "AbstractImpl1" }).props.parent as ModelReferenceNavigationProperty },
+      hidden: 3 as HiddenAreas,
+      rules: {
+        required: val => val != null || "Parent is required.",
+      }
+    },
+    parent: {
+      name: "parent",
+      displayName: "Parent",
+      type: "model",
+      get typeDef() { return (domain.types.AbstractModel as ModelType & { name: "AbstractModel" }) },
+      role: "referenceNavigation",
+      get foreignKey() { return (domain.types.AbstractImpl1 as ModelType & { name: "AbstractImpl1" }).props.parentId as ForeignKeyProperty },
+      get principalKey() { return (domain.types.AbstractModel as ModelType & { name: "AbstractModel" }).props.id as PrimaryKeyProperty },
+      dontSerialize: true,
+    },
     id: {
       name: "id",
       displayName: "Id",

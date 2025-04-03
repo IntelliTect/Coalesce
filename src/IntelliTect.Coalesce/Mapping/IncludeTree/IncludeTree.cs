@@ -122,25 +122,29 @@ namespace IntelliTect.Coalesce
 
         internal static IncludeTree ParseMemberExpression(MemberExpression expr, out IncludeTree tail)
         {
-            var newNode = tail = new IncludeTree();
-
-            newNode.PropertyName = expr.Member.Name;
-            var head = newNode;
+            var head = tail = new IncludeTree();
+            head.PropertyName = expr.Member.Name;
 
             // If this lambda was a multi-level property specifier, walk up the chain and add each property as the parent of currentNode.
             // For example, .Include(e => e.Application.ApplicationType)
-            while (expr.Expression!.NodeType != ExpressionType.Parameter)
+            var current = expr.Expression;
+            while (UnwrapUnary(current!) is MemberExpression memberExpression)
             {
-                newNode = new IncludeTree();
-
+                var newNode = new IncludeTree();
+                newNode.PropertyName = memberExpression.Member.Name;
                 newNode.AddChild(head);
-
-                expr = (MemberExpression)expr.Expression;
-                newNode.PropertyName = expr.Member.Name;
                 head = newNode;
+
+                current = memberExpression.Expression;
             }
 
             return head;
+        }
+
+        private static Expression UnwrapUnary(Expression expr)
+        {
+            while (expr is UnaryExpression unary) expr = unary.Operand;
+            return expr;
         }
 
         internal static IncludeTree ParseConstantExpression(ConstantExpression expr, out IncludeTree tail)

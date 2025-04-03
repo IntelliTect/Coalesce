@@ -23,7 +23,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
             b.Line("import * as $metadata from './metadata.g'");
             b.Line("import * as $models from './models.g'");
             b.Line("import * as $apiClients from './api-clients.g'");
-            b.Line("import { ViewModel, ListViewModel, ViewModelCollection, ServiceViewModel, type DeepPartial, defineProps } from 'coalesce-vue/lib/viewmodel'");
+            b.Line("import { ViewModel, ListViewModel, ViewModelCollection, ServiceViewModel, type DeepPartial, defineProps, createAbstractProxyViewModelType } from 'coalesce-vue/lib/viewmodel'");
             b.Line();
 
             foreach (var model in Model.CrudApiBackedClasses.OrderBy(e => e.ClientTypeName))
@@ -76,6 +76,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
             if (model.Type.IsAbstract)
             {
                 b.Line($"export type {viewModelName} = {string.Join(" | ", model.ClientDerivedTypes.Select(t => new VueType(t.Type).TsType(viewModel: true)))}");
+                b.Line($"export const {viewModelName} = createAbstractProxyViewModelType<{modelName}, {viewModelName}>({metadataName}, $apiClients.{name}ApiClient)");
+                b.Line();
                 return;
             }
 

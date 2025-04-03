@@ -27,6 +27,7 @@ import {
   ServiceApiClient,
   mapParamsToDto,
   type BulkSaveRequestItem,
+  ItemApiState,
 } from "./api-client.js";
 import {
   type Model,
@@ -105,7 +106,6 @@ export abstract class ViewModel<
   /** 
     Underlying object which will hold the backing values
     of the custom getters/setters. Not for external use.
-    Must exist in order to for Vue to pick it up and add reactivity.
     @internal 
   */
   private $data: TModel & { [propName: string]: any };
@@ -1343,6 +1343,104 @@ export abstract class ViewModel<
       ctor.hasPropDefaults ??= false;
     }
   }
+}
+
+const $loadProxy = Symbol("$loadProxy");
+export function createAbstractProxyViewModelType<
+  TModel extends Model<ModelType>,
+  TViewModel extends ViewModel
+>(
+  metadata: ModelType,
+  apiClientCtor: { new (): ModelApiClient<any> }
+): {
+  new (initialData?: DeepPartial<TModel> | null): TViewModel;
+} {
+  return function abstractProxy(initialData?: DeepPartial<any> | null) {
+    const apiClient = new apiClientCtor();
+
+    if (initialData && "$metadata" in initialData) {
+      return ViewModelFactory.get(
+        initialData.$metadata!.name!,
+        initialData,
+        true
+      );
+    }
+
+    function unsupportedError() {
+      return new Error(`"Operation not supported: This ViewModel instance is a proxy for an abstract type, with its concrete implementation not yet decided.
+
+      Try one of the following to obtain a concrete implementation:
+        - $load(...) or $loadFromModel(...) data for a concrete implementation
+        - Instantiate a concrete implementation of this abstract type instead of this abstract proxy
+      `);
+    }
+    class vmProxy extends ViewModel {
+      constructor() {
+        super(metadata, apiClient);
+      }
+
+      [$loadProxy]!: ItemApiState<any, any, any>;
+
+      override get $load() {
+        return this[$loadProxy];
+      }
+      override get $save() {
+        return apiClient.$makeCaller("item", (c) => {
+          throw unsupportedError();
+        });
+      }
+      override get $bulkSave() {
+        return apiClient.$makeCaller("item", (c) => {
+          throw unsupportedError();
+        });
+      }
+      override get $delete() {
+        return apiClient.$makeCaller("item", (c) => {
+          throw unsupportedError();
+        });
+      }
+    }
+    defineProps(vmProxy, metadata);
+
+    let vm = new vmProxy();
+
+    let $load = (vm[$loadProxy] = apiClient
+      .$makeCaller("item", (c, id?: any) => {
+        return c.get(id != null ? id : vm.$primaryKey, vm.$params);
+      })
+      .onFulfilled((state) => {
+        const result = state.result;
+
+        var realCtor = ViewModel.typeLookup![result!.$metadata.name];
+
+        // Grab real metadata and API client instances of the concrete type.
+        const { $apiClient, $metadata } = new realCtor();
+
+        // Convert the ViewModel instance to the target type:
+        Object.setPrototypeOf(vm, realCtor.prototype);
+        //@ts-expect-error normally readonly.
+        vm.$metadata = $metadata;
+
+        // Convert the ApiClient instance to the target type:
+        Object.setPrototypeOf(vm.$apiClient, Object.getPrototypeOf($apiClient));
+        vm.$apiClient.$metadata = $metadata;
+
+        // Populate the properties of the $load caller on the real $load caller instance.
+        //@ts-expect-error protected prop or fn
+        vm.$load.setResponseProps($load.rawResponse.data);
+        //@ts-expect-error protected prop or fn
+        vm.$load.__rawResponse.value = $load.rawResponse;
+        vm.$load.isLoading = false;
+        vm.$load.concurrencyMode = $load.concurrencyMode;
+
+        //@ts-expect-error cleaning up for GC
+        vm[$loadProxy] = $load = undefined;
+
+        vm.$loadCleanData(result);
+      }));
+
+    return vm;
+  } as any;
 }
 
 export interface BulkSaveRequestRawItem {

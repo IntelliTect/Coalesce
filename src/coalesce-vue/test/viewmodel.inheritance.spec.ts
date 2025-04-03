@@ -4,9 +4,11 @@ import {
   PersonViewModel,
   AbstractImpl1ViewModel,
   AbstractModelPersonViewModel,
+  AbstractModelViewModel,
 } from "../../test-targets/viewmodels.g";
 import { AbstractImpl1 } from "@test-targets/models.g";
 import { ViewModelFactory } from "../src";
+import { AbstractImpl1ApiClient } from "@test-targets/api-clients.g";
 
 describe("ViewModel", () => {
   test("$bulkSave creation of TPH entity with many-to-many that references base type", async () => {
@@ -72,4 +74,58 @@ describe("ViewModel", () => {
     expect(vm.abstractModel).toBeInstanceOf(AbstractImpl1ViewModel);
     expect(vm.abstractModelId).toBe(42);
   });
+});
+
+describe("abstract proxy", () => {
+  const expectedData = {
+    id: 1,
+    discriminator: "discrim1",
+    impl1OnlyField: "foo",
+  };
+
+  test("becomes concrete type when loaded with initial data", async () => {
+    const vm = new AbstractModelViewModel(new AbstractImpl1(expectedData));
+
+    assertIsImpl1(vm);
+  });
+
+  test("becomes concrete type after $load", async () => {
+    const loadMock = mockEndpoint(
+      "/AbstractModel/get",
+      vitest.fn((req) => ({
+        wasSuccessful: true,
+        object: {
+          $type: "AbstractImpl1",
+          ...expectedData,
+        },
+      }))
+    );
+
+    const vm = new AbstractModelViewModel();
+    await vm.$load(1);
+
+    assertIsImpl1(vm);
+
+    expect(vm.$load.wasSuccessful).toBe(true);
+    expect(vm.$load.isLoading).toBe(false);
+    expect(vm.$load.result).toBeInstanceOf(AbstractImpl1);
+    expect(vm.$load.message).toBeFalsy();
+    expect(vm.$load.hasResult).toBeTruthy();
+  });
+
+  function assertIsImpl1(vm: AbstractModelViewModel) {
+    expect(vm.id).toBe(1);
+    expect(vm.discriminator).toBe("discrim1");
+    expect(vm).toBeInstanceOf(AbstractImpl1);
+    expect(vm).toBeInstanceOf(AbstractImpl1ViewModel);
+
+    expect(vm.$metadata).toStrictEqual(new AbstractImpl1().$metadata);
+    expect(vm.$apiClient).toBeInstanceOf(AbstractImpl1ApiClient);
+    expect(vm.$apiClient.$metadata).toStrictEqual(
+      new AbstractImpl1().$metadata
+    );
+
+    const impl1 = vm as AbstractImpl1ViewModel;
+    expect(impl1.impl1OnlyField).toBe("foo");
+  }
 });

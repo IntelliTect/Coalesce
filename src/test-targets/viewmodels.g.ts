@@ -1,7 +1,7 @@
 import * as $metadata from './metadata.g'
 import * as $models from './models.g'
 import * as $apiClients from './api-clients.g'
-import { ViewModel, ListViewModel, ViewModelCollection, ServiceViewModel, type DeepPartial, defineProps } from 'coalesce-vue/lib/viewmodel'
+import { ViewModel, ListViewModel, ViewModelCollection, ServiceViewModel, type DeepPartial, defineProps, createAbstractProxyViewModelType } from 'coalesce-vue/lib/viewmodel'
 
 export interface AbstractImpl1ViewModel extends $models.AbstractImpl1 {
   impl1OnlyField: string | null;
@@ -134,6 +134,8 @@ export class AbstractImpl2ListViewModel extends ListViewModel<$models.AbstractIm
 
 
 export type AbstractModelViewModel = AbstractImpl1ViewModel | AbstractImpl2ViewModel
+export const AbstractModelViewModel = createAbstractProxyViewModelType<$models.AbstractModel, AbstractModelViewModel>($metadata.AbstractModel, $apiClients.AbstractModelApiClient)
+
 export class AbstractModelListViewModel extends ListViewModel<$models.AbstractModel, $apiClients.AbstractModelApiClient, AbstractModelViewModel> {
   
   public get getCount() {

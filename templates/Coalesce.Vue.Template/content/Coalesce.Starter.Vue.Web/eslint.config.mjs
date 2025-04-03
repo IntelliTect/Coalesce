@@ -32,6 +32,7 @@ export default [
 
       "vue/multi-word-component-names": "off",
       "vue/no-template-shadow": ["error", { allow: ["props"] }],
+      "vue/no-mutating-props": ["error", { shallowOnly: true }],
 
       "prefer-const": "error",
       "no-debugger": process.env.NODE_ENV === "production" ? "warn" : "off",

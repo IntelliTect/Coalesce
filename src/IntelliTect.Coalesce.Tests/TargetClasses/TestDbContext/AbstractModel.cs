@@ -33,7 +33,7 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses
     {
         public string Impl1OnlyField { get; set; }
 
-        public int ParentId { get; set; }
+        public int? ParentId { get; set; }
         public AbstractModel Parent { get; set; }
     }
 

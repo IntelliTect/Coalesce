@@ -161,9 +161,6 @@ export const AbstractImpl1 = domain.types.AbstractImpl1 = {
       get principalType() { return (domain.types.AbstractModel as ModelType & { name: "AbstractModel" }) },
       get navigationProp() { return (domain.types.AbstractImpl1 as ModelType & { name: "AbstractImpl1" }).props.parent as ModelReferenceNavigationProperty },
       hidden: 3 as HiddenAreas,
-      rules: {
-        required: val => val != null || "Parent is required.",
-      }
     },
     parent: {
       name: "parent",

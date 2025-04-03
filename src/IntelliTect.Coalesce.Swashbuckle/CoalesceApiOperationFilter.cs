@@ -36,7 +36,7 @@ namespace IntelliTect.Coalesce.Swashbuckle
         public void Apply(OpenApiOperation operation, OperationFilterContext context)
         {
             var cvm = reflectionRepository.GetClassViewModel(context.MethodInfo.DeclaringType);
-            var method = new ReflectionMethodViewModel(cvm, context.MethodInfo);
+            var method = new ReflectionMethodViewModel(context.MethodInfo, cvm, cvm);
 
             AddOtherBodyTypes(operation, context);
             ProcessDataSources(operation, context, method);

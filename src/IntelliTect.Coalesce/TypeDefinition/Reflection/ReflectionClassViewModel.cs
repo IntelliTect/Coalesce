@@ -46,16 +46,20 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public override IReadOnlyCollection<MethodViewModel> Constructors => Info
             .GetConstructors()
             .Where(m => m.IsPublic && !m.IsSpecialName)
-            .Select(m => new ReflectionMethodViewModel(this, m))
+            .Select(m => new ReflectionMethodViewModel(m, this, this))
             .Where(m => !m.IsInternalUse)
             .Cast<MethodViewModel>()
             .ToList()
             .AsReadOnly();
 
-        protected override IReadOnlyCollection<MethodViewModel> RawMethods => Info
+        protected override IReadOnlyCollection<MethodViewModel> RawMethods(ClassViewModel effectiveParent) => Info
             .GetMethods()
             .Where(m => m.IsPublic && !m.IsSpecialName)
-            .Select(m => new ReflectionMethodViewModel(this, m))
+            .Select((m, i) => new ReflectionMethodViewModel(
+                m,
+                GetOrCreate(ReflectionRepository, m.DeclaringType!),
+                effectiveParent
+            ))
             .Cast<MethodViewModel>()
             .ToList()
             .AsReadOnly();

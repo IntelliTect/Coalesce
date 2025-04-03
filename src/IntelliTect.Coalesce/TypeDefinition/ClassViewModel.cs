@@ -148,7 +148,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         protected abstract IReadOnlyCollection<PropertyViewModel> RawProperties(ClassViewModel effectiveParent);
         public abstract IReadOnlyCollection<MethodViewModel> Constructors { get; }
-        protected abstract IReadOnlyCollection<MethodViewModel> RawMethods { get; }
+        protected abstract IReadOnlyCollection<MethodViewModel> RawMethods(ClassViewModel effectiveParent);
         protected abstract IReadOnlyCollection<TypeViewModel> RawNestedTypes { get; }
 
         /// <summary>
@@ -225,7 +225,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// This collection is internal to prevent accidental exposing of methods that should not be exposed.
         /// </remarks>
         internal IReadOnlyCollection<MethodViewModel> Methods =>
-            _Methods ?? (_Methods = RawMethods
+            _Methods ?? (_Methods = RawMethods(this)
                 .Where(m => !excludedMethodNames.Contains(m.Name)
                     && (!IsCustomDto || (m.Name != nameof(IClassDto<object>.MapFrom) && m.Name != nameof(IClassDto<object>.MapTo))))
                 .ToList().AsReadOnly());

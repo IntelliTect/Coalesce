@@ -21,6 +21,17 @@ export class AbstractImpl1ViewModel extends ViewModel<$models.AbstractImpl1, $ap
     return (this.abstractModelPeople || []).map($ => $.person!).filter($ => $)
   }
   
+  public get getId() {
+    const getId = this.$apiClient.$makeCaller(
+      this.$metadata.methods.getId,
+      (c) => c.getId(this.$primaryKey),
+      () => ({}),
+      (c, args) => c.getId(this.$primaryKey))
+    
+    Object.defineProperty(this, 'getId', {value: getId});
+    return getId
+  }
+  
   constructor(initialData?: DeepPartial<$models.AbstractImpl1> | null) {
     super($metadata.AbstractImpl1, new $apiClients.AbstractImpl1ApiClient(), initialData)
   }
@@ -28,6 +39,28 @@ export class AbstractImpl1ViewModel extends ViewModel<$models.AbstractImpl1, $ap
 defineProps(AbstractImpl1ViewModel, $metadata.AbstractImpl1)
 
 export class AbstractImpl1ListViewModel extends ListViewModel<$models.AbstractImpl1, $apiClients.AbstractImpl1ApiClient, AbstractImpl1ViewModel> {
+  
+  public get getCount() {
+    const getCount = this.$apiClient.$makeCaller(
+      this.$metadata.methods.getCount,
+      (c) => c.getCount(),
+      () => ({}),
+      (c, args) => c.getCount())
+    
+    Object.defineProperty(this, 'getCount', {value: getCount});
+    return getCount
+  }
+  
+  public get echoAbstractModel() {
+    const echoAbstractModel = this.$apiClient.$makeCaller(
+      this.$metadata.methods.echoAbstractModel,
+      (c, model?: $models.AbstractModel | null) => c.echoAbstractModel(model),
+      () => ({model: null as $models.AbstractModel | null, }),
+      (c, args) => c.echoAbstractModel(args.model))
+    
+    Object.defineProperty(this, 'echoAbstractModel', {value: echoAbstractModel});
+    return echoAbstractModel
+  }
   
   constructor() {
     super($metadata.AbstractImpl1, new $apiClients.AbstractImpl1ApiClient())
@@ -53,6 +86,17 @@ export class AbstractImpl2ViewModel extends ViewModel<$models.AbstractImpl2, $ap
     return (this.abstractModelPeople || []).map($ => $.person!).filter($ => $)
   }
   
+  public get getId() {
+    const getId = this.$apiClient.$makeCaller(
+      this.$metadata.methods.getId,
+      (c) => c.getId(this.$primaryKey),
+      () => ({}),
+      (c, args) => c.getId(this.$primaryKey))
+    
+    Object.defineProperty(this, 'getId', {value: getId});
+    return getId
+  }
+  
   constructor(initialData?: DeepPartial<$models.AbstractImpl2> | null) {
     super($metadata.AbstractImpl2, new $apiClients.AbstractImpl2ApiClient(), initialData)
   }
@@ -61,14 +105,58 @@ defineProps(AbstractImpl2ViewModel, $metadata.AbstractImpl2)
 
 export class AbstractImpl2ListViewModel extends ListViewModel<$models.AbstractImpl2, $apiClients.AbstractImpl2ApiClient, AbstractImpl2ViewModel> {
   
+  public get getCount() {
+    const getCount = this.$apiClient.$makeCaller(
+      this.$metadata.methods.getCount,
+      (c) => c.getCount(),
+      () => ({}),
+      (c, args) => c.getCount())
+    
+    Object.defineProperty(this, 'getCount', {value: getCount});
+    return getCount
+  }
+  
+  public get echoAbstractModel() {
+    const echoAbstractModel = this.$apiClient.$makeCaller(
+      this.$metadata.methods.echoAbstractModel,
+      (c, model?: $models.AbstractModel | null) => c.echoAbstractModel(model),
+      () => ({model: null as $models.AbstractModel | null, }),
+      (c, args) => c.echoAbstractModel(args.model))
+    
+    Object.defineProperty(this, 'echoAbstractModel', {value: echoAbstractModel});
+    return echoAbstractModel
+  }
+  
   constructor() {
     super($metadata.AbstractImpl2, new $apiClients.AbstractImpl2ApiClient())
   }
 }
 
 
-export type AbstractModelViewModel = AbstractImpl2ViewModel | AbstractImpl1ViewModel
+export type AbstractModelViewModel = AbstractImpl1ViewModel | AbstractImpl2ViewModel
 export class AbstractModelListViewModel extends ListViewModel<$models.AbstractModel, $apiClients.AbstractModelApiClient, AbstractModelViewModel> {
+  
+  public get getCount() {
+    const getCount = this.$apiClient.$makeCaller(
+      this.$metadata.methods.getCount,
+      (c) => c.getCount(),
+      () => ({}),
+      (c, args) => c.getCount())
+    
+    Object.defineProperty(this, 'getCount', {value: getCount});
+    return getCount
+  }
+  
+  public get echoAbstractModel() {
+    const echoAbstractModel = this.$apiClient.$makeCaller(
+      this.$metadata.methods.echoAbstractModel,
+      (c, model?: $models.AbstractModel | null) => c.echoAbstractModel(model),
+      () => ({model: null as $models.AbstractModel | null, }),
+      (c, args) => c.echoAbstractModel(args.model))
+    
+    Object.defineProperty(this, 'echoAbstractModel', {value: echoAbstractModel});
+    return echoAbstractModel
+  }
   
   constructor() {
     super($metadata.AbstractModel, new $apiClients.AbstractModelApiClient())

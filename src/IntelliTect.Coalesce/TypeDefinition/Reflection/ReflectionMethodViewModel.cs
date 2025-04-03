@@ -12,7 +12,11 @@ namespace IntelliTect.Coalesce.TypeDefinition
     {
         private MethodBase Info { get; }
 
-        public ReflectionMethodViewModel(ClassViewModel parent, MethodBase methodInfo) : base(parent)
+        public ReflectionMethodViewModel(
+            MethodBase methodInfo, 
+            ClassViewModel declaringParent, 
+            ClassViewModel effectiveParent
+        ) : base(declaringParent, effectiveParent)
         {
             Info = methodInfo;
         }

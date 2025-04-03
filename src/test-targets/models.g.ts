@@ -47,7 +47,7 @@ export enum Titles {
 }
 
 
-export interface AbstractModel<TMeta extends ClassType = typeof metadata.AbstractModel | typeof metadata.AbstractImpl2 | typeof metadata.AbstractImpl1> extends Model<TMeta> {
+export interface AbstractModel<TMeta extends ClassType = typeof metadata.AbstractModel | typeof metadata.AbstractImpl1 | typeof metadata.AbstractImpl2> extends Model<TMeta> {
   id: number | null
   discriminator: string | null
   abstractModelPeople: AbstractModelPerson[] | null

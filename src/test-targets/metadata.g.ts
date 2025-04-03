@@ -192,6 +192,68 @@ export const AbstractImpl1 = domain.types.AbstractImpl1 = {
     },
   },
   methods: {
+    getId: {
+      name: "getId",
+      displayName: "Get Id",
+      transportType: "item",
+      httpMethod: "POST",
+      params: {
+        id: {
+          name: "id",
+          displayName: "Primary Key",
+          type: "number",
+          role: "value",
+          get source() { return (domain.types.AbstractModel as ModelType & { name: "AbstractModel" }).props.id },
+          rules: {
+            required: val => val != null || "Primary Key is required.",
+          }
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "number",
+        role: "value",
+      },
+    },
+    getCount: {
+      name: "getCount",
+      displayName: "Get Count",
+      transportType: "item",
+      httpMethod: "POST",
+      isStatic: true,
+      params: {
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "number",
+        role: "value",
+      },
+    },
+    echoAbstractModel: {
+      name: "echoAbstractModel",
+      displayName: "Echo Abstract Model",
+      transportType: "item",
+      httpMethod: "POST",
+      isStatic: true,
+      params: {
+        model: {
+          name: "model",
+          displayName: "Model",
+          type: "model",
+          get typeDef() { return (domain.types.AbstractModel as ModelType & { name: "AbstractModel" }) },
+          role: "value",
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "model",
+        get typeDef() { return (domain.types.AbstractModel as ModelType & { name: "AbstractModel" }) },
+        role: "value",
+      },
+    },
   },
   dataSources: {
   },
@@ -254,6 +316,68 @@ export const AbstractImpl2 = domain.types.AbstractImpl2 = {
     },
   },
   methods: {
+    getId: {
+      name: "getId",
+      displayName: "Get Id",
+      transportType: "item",
+      httpMethod: "POST",
+      params: {
+        id: {
+          name: "id",
+          displayName: "Primary Key",
+          type: "number",
+          role: "value",
+          get source() { return (domain.types.AbstractModel as ModelType & { name: "AbstractModel" }).props.id },
+          rules: {
+            required: val => val != null || "Primary Key is required.",
+          }
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "number",
+        role: "value",
+      },
+    },
+    getCount: {
+      name: "getCount",
+      displayName: "Get Count",
+      transportType: "item",
+      httpMethod: "POST",
+      isStatic: true,
+      params: {
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "number",
+        role: "value",
+      },
+    },
+    echoAbstractModel: {
+      name: "echoAbstractModel",
+      displayName: "Echo Abstract Model",
+      transportType: "item",
+      httpMethod: "POST",
+      isStatic: true,
+      params: {
+        model: {
+          name: "model",
+          displayName: "Model",
+          type: "model",
+          get typeDef() { return (domain.types.AbstractModel as ModelType & { name: "AbstractModel" }) },
+          role: "value",
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "model",
+        get typeDef() { return (domain.types.AbstractModel as ModelType & { name: "AbstractModel" }) },
+        role: "value",
+      },
+    },
   },
   dataSources: {
   },
@@ -262,9 +386,10 @@ export const AbstractModel = domain.types.AbstractModel = {
   name: "AbstractModel" as const,
   displayName: "Abstract Model",
   get displayProp() { return this.props.id }, 
+  abstract: true,
   get derivedTypes() { return [
-    (domain.types.AbstractImpl2 as ModelType & { name: "AbstractImpl2" }),
     (domain.types.AbstractImpl1 as ModelType & { name: "AbstractImpl1" }),
+    (domain.types.AbstractImpl2 as ModelType & { name: "AbstractImpl2" }),
   ]},
   type: "model",
   controllerRoute: "AbstractModel",
@@ -311,6 +436,68 @@ export const AbstractModel = domain.types.AbstractModel = {
     },
   },
   methods: {
+    getId: {
+      name: "getId",
+      displayName: "Get Id",
+      transportType: "item",
+      httpMethod: "POST",
+      params: {
+        id: {
+          name: "id",
+          displayName: "Primary Key",
+          type: "number",
+          role: "value",
+          get source() { return (domain.types.AbstractModel as ModelType & { name: "AbstractModel" }).props.id },
+          rules: {
+            required: val => val != null || "Primary Key is required.",
+          }
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "number",
+        role: "value",
+      },
+    },
+    getCount: {
+      name: "getCount",
+      displayName: "Get Count",
+      transportType: "item",
+      httpMethod: "POST",
+      isStatic: true,
+      params: {
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "number",
+        role: "value",
+      },
+    },
+    echoAbstractModel: {
+      name: "echoAbstractModel",
+      displayName: "Echo Abstract Model",
+      transportType: "item",
+      httpMethod: "POST",
+      isStatic: true,
+      params: {
+        model: {
+          name: "model",
+          displayName: "Model",
+          type: "model",
+          get typeDef() { return (domain.types.AbstractModel as ModelType & { name: "AbstractModel" }) },
+          role: "value",
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "model",
+        get typeDef() { return (domain.types.AbstractModel as ModelType & { name: "AbstractModel" }) },
+        role: "value",
+      },
+    },
   },
   dataSources: {
   },

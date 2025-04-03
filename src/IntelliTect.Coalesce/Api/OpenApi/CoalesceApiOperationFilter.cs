@@ -47,7 +47,7 @@ namespace IntelliTect.Coalesce.Api.OpenApi
 
             var methodInfo = cad.MethodInfo;
             var cvm = reflectionRepository.GetClassViewModel(methodInfo.DeclaringType!)!;
-            var method = new ReflectionMethodViewModel(cvm, methodInfo);
+            var method = new ReflectionMethodViewModel(methodInfo, cvm, cvm);
 
             AddOtherBodyTypes(operation, context);
             ProcessDataSources(operation, context, method);

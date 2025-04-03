@@ -122,7 +122,7 @@ namespace Coalesce.Web.Vue3.Api
             return _result;
         }
 
-        public class AbstractClassGetIdParameters
+        public class AbstractClassImplGetIdParameters
         {
             public int Id { get; set; }
         }
@@ -135,7 +135,7 @@ namespace Coalesce.Web.Vue3.Api
         [Consumes("application/json")]
         public virtual async Task<ItemResult<int>> GetId(
             [FromServices] IDataSourceFactory dataSourceFactory,
-            [FromBody] AbstractClassGetIdParameters _params
+            [FromBody] AbstractClassImplGetIdParameters _params
         )
         {
             var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.AbstractClassImpl, Coalesce.Domain.AbstractClassImpl>("Default");
@@ -197,7 +197,7 @@ namespace Coalesce.Web.Vue3.Api
             return _result;
         }
 
-        public class AbstractClassEchoAbstractModelParameters
+        public class AbstractClassImplEchoAbstractModelParameters
         {
             public AbstractClassParameter Model { get; set; }
         }
@@ -209,7 +209,7 @@ namespace Coalesce.Web.Vue3.Api
         [Authorize]
         [Consumes("application/json")]
         public virtual ItemResult<AbstractClassResponse> EchoAbstractModel(
-            [FromBody] AbstractClassEchoAbstractModelParameters _params
+            [FromBody] AbstractClassImplEchoAbstractModelParameters _params
         )
         {
             if (Context.Options.ValidateAttributesForMethods)

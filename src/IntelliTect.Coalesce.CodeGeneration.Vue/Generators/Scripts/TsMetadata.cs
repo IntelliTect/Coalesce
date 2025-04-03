@@ -118,6 +118,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                 b.Line($"get displayProp() {{ return this.props.{model.ListTextProperty.JsVariable} }}, ");
             }
 
+            if (model.Type.IsAbstract) b.Prop("abstract", "true");
+
             var derivedTypes = model.ClientDerivedTypes.ToList();
             if (derivedTypes.Any())
             {

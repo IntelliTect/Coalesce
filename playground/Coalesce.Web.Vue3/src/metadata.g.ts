@@ -137,6 +137,7 @@ export const AbstractClass = domain.types.AbstractClass = {
   name: "AbstractClass" as const,
   displayName: "Abstract Class",
   get displayProp() { return this.props.id }, 
+  abstract: true,
   get derivedTypes() { return [
     (domain.types.AbstractClassImpl as ModelType & { name: "AbstractClassImpl" }),
   ]},

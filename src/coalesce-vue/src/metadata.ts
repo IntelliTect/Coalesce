@@ -112,6 +112,8 @@ export interface CustomReferenceTypeBase extends Metadata {
 
   /** The types that inherit this type. */
   readonly derivedTypes?: CustomReferenceTypeBase[];
+
+  readonly abstract?: boolean;
 }
 
 export interface ApiRoutedType {
@@ -152,6 +154,9 @@ export interface ModelType extends CustomReferenceTypeBase, ApiRoutedType {
 
   /** The data sources that can be used to query the API for objects of this type. */
   readonly dataSources: { [sourceName in string]: DataSourceType };
+
+  /** The types that inherit this type. */
+  readonly derivedTypes?: ModelType[];
 }
 
 export interface DataSourceType extends Metadata {

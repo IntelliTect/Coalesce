@@ -84,15 +84,14 @@
         </template>
       </c-table>
 
-      <v-btn
-        v-if="editable && canCreate"
-        @click="addItem"
-        prepend-icon="fa fa-plus"
+      <c-admin-create-btn
+        v-if="editable"
+        :list
+        @add="addItem"
+        label="Add Item"
         :color
         class="my-2"
-      >
-        Add Item
-      </v-btn>
+      ></c-admin-create-btn>
 
       <c-list-pagination
         :list="list"
@@ -111,14 +110,19 @@ import {
   mapQueryToParams,
   mapParamsToDto,
   bindToQueryString,
+  ModelType,
 } from "coalesce-vue";
 
 import { computed, defineComponent, PropType, ref, toRef } from "vue";
 import { useRouter } from "vue-router";
 import { useAdminTable } from "./useAdminTable";
+import { copyParamsToNewViewModel } from "./util";
+
+import CAdminCreateBtn from "./c-admin-create-btn.vue";
 
 export default defineComponent({
   name: "c-admin-table",
+  components: { CAdminCreateBtn },
 
   props: {
     list: { required: true, type: Object as PropType<ListViewModel> },
@@ -177,9 +181,9 @@ export default defineComponent({
       }
     },
 
-    addItem() {
-      const viewModel = new ViewModel.typeLookup![this.metadata.name]();
-      viewModel.$params = this.list.$params;
+    addItem(meta: ModelType) {
+      const viewModel = new ViewModel.typeLookup![meta.name]();
+      copyParamsToNewViewModel(viewModel, this.list.$params);
       this.list.$items.push(viewModel);
     },
   },

@@ -1,4 +1,10 @@
-import { Model, ModelReferenceNavigationProperty } from "coalesce-vue";
+import {
+  ListParameters,
+  mapValueToModel,
+  Model,
+  ModelReferenceNavigationProperty,
+  ViewModel,
+} from "coalesce-vue";
 import { Router } from "vue-router";
 
 export function getRefNavRoute(
@@ -22,4 +28,25 @@ export function getRefNavRoute(
       id: fk,
     },
   }).fullPath;
+}
+
+export function copyParamsToNewViewModel(
+  vm: ViewModel,
+  params: ListParameters
+) {
+  vm.$params.dataSource = params.dataSource;
+  if (params.filter) {
+    for (const propName in vm.$metadata.props) {
+      const prop = vm.$metadata.props[propName];
+      const filterValue = params.filter[propName];
+      if (filterValue != null) {
+        try {
+          (vm as any)[propName] = mapValueToModel(filterValue, prop);
+        } catch (e) {
+          // mapValueToModel will throw for unmappable values.
+          console.error(`Could not map filter parameter ${propName}. ${e}`);
+        }
+      }
+    }
+  }
 }

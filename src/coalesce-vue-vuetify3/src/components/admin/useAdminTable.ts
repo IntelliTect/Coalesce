@@ -11,13 +11,21 @@ import { useRouter } from "vue-router";
 export function useAdminTable(list: MaybeRef<ListViewModel>) {
   const metadata = computed((): ModelType => unref(list).$metadata);
 
-  const canCreate = computed(() => {
+  const creatableTypes = computed(() => {
     const meta = metadata.value;
-    return (
-      meta &&
-      (meta.behaviorFlags & BehaviorFlags.Create) != 0 &&
-      !unref(list).$modelOnlyMode
-    );
+    if (!meta || unref(list).$modelOnlyMode) return [];
+
+    const types = [meta, ...(meta.derivedTypes ?? [])];
+    return types
+      .filter((type) => (type.behaviorFlags & BehaviorFlags.Create) != 0)
+      .map((type) => ({
+        metadata: type,
+        route: getItemRoute(undefined, type),
+      }));
+  });
+
+  const canCreate = computed(() => {
+    return !!creatableTypes.value.length;
   });
 
   const canEdit = computed(() => {
@@ -49,7 +57,7 @@ export function useAdminTable(list: MaybeRef<ListViewModel>) {
 
   const router = useRouter();
 
-  function getItemRoute(item?: ViewModel) {
+  function getItemRoute(item?: ViewModel, meta?: ModelType) {
     // Resolve to an href to allow overriding of admin routes in userspace.
     // If we just gave a named raw location, it would always use the coalesce admin route
     // instead of the user-overridden one (that the user overrides by declaring another
@@ -57,7 +65,7 @@ export function useAdminTable(list: MaybeRef<ListViewModel>) {
     return router.resolve({
       name: "coalesce-admin-item",
       params: {
-        type: item?.$metadata.name ?? metadata.value.name,
+        type: (item?.$metadata ?? meta ?? metadata.value).name,
         id: item?.$primaryKey,
       },
       query: Object.fromEntries(
@@ -71,6 +79,7 @@ export function useAdminTable(list: MaybeRef<ListViewModel>) {
 
   return {
     metadata,
+    creatableTypes,
     canCreate,
     canEdit,
     canDelete,

@@ -11,6 +11,21 @@ describe("CLoaderStatus", () => {
       <CLS loaders={{ "": [vm.$load, vm.$save, vm.methodWithManyParams] }} />
     );
 
+    // Allow falsy loaders
+    () => (
+      <CLS
+        loaders={{
+          "": [
+            vm.$load,
+            null,
+            undefined,
+            false,
+            "methodWithManyParams" in vm && vm.methodWithManyParams,
+          ],
+        }}
+      />
+    );
+
     () => (
       <CLS
         loaders={{

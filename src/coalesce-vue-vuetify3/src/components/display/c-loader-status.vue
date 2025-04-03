@@ -79,7 +79,7 @@ import { computed, camelize } from "vue";
 import { ApiState, ItemApiState, ListApiState } from "coalesce-vue";
 
 type AnyLoader = ItemApiState<any, any> | ListApiState<any, any>;
-type AnyLoaderMaybe = AnyLoader | null | undefined;
+type AnyLoaderMaybe = AnyLoader | null | undefined | false;
 
 // Since the component props are the most general level of flags
 // and all flags default to true, include only the props that will
@@ -170,8 +170,8 @@ const loaderFlags = computed(() => {
   let loaders = props.loaders;
   if (Array.isArray(loaders)) {
     loaders = { "": loaders };
-  } else if (loaders == null) {
-    // An attempt to pass a single loader that was nullish.
+  } else if (!loaders) {
+    // An attempt to pass a single loader that was falsy.
     loaders = { "": [] };
   } else if (loaders instanceof ApiState) {
     loaders = { "": [loaders] };

@@ -93,8 +93,8 @@ jobs:
           cat $filePath
 
           cd ./content/*.Web
-          npm i $(Get-ChildItem -Path "${{ github.workspace }}/artifacts/coalesce-vue*.tgz").FullName --save
-          npm i $(Get-ChildItem -Path "${{ github.workspace }}/artifacts/coalesce-vue-vue3*.tgz").FullName --save
+          npm i $(Get-ChildItem -Path "${{ github.workspace }}/artifacts/coalesce-vue/coalesce-vue*.tgz").FullName --save
+          npm i $(Get-ChildItem -Path "${{ github.workspace }}/artifacts/coalesce-vue-vue3/coalesce-vue-vue3*.tgz").FullName --save
 
           cat package.json
 

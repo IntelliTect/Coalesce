@@ -12,15 +12,12 @@
 
     <v-divider class="hidden-xs-only mx-4" vertical></v-divider>
 
-    <v-btn
-      v-if="canCreate"
-      class="c-admin-table-toolbar--button-create"
+    <c-admin-create-btn
+      :list
+      @add="addItem"
       variant="text"
-      :to="getItemRoute()"
-    >
-      <v-icon :start="$vuetify.display.mdAndUp">$plus</v-icon>
-      <span class="hidden-sm-and-down">Create</span>
-    </v-btn>
+      label="Create"
+    ></c-admin-create-btn>
 
     <v-btn
       class="c-admin-table-toolbar--button-reload"
@@ -83,8 +80,11 @@
 
 <script setup lang="ts">
 import { PropType, toRef } from "vue";
-import { ListViewModel } from "coalesce-vue";
+import { ListViewModel, ModelType } from "coalesce-vue";
 import { useAdminTable } from "./useAdminTable";
+
+import CAdminCreateBtn from "./c-admin-create-btn.vue";
+import { useRouter } from "vue-router";
 
 const props = defineProps({
   list: { required: true, type: Object as PropType<ListViewModel> },
@@ -97,9 +97,12 @@ const editable = defineModel<boolean>("editable", {
   required: false,
 });
 
-const { metadata, canCreate, getItemRoute } = useAdminTable(
-  toRef(props, "list")
-);
+const { metadata } = useAdminTable(toRef(props, "list"));
+
+const router = useRouter();
+function addItem(meta: ModelType, route: string) {
+  router.push(route);
+}
 </script>
 
 <style lang="scss">

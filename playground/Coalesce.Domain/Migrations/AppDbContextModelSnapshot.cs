@@ -17,10 +17,58 @@ namespace Coalesce.Domain.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.6")
+                .HasAnnotation("ProductVersion", "8.0.10")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("Coalesce.Domain.AbstractClass", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AbstractClassString")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Discriminator")
+                        .IsRequired()
+                        .HasMaxLength(21)
+                        .HasColumnType("nvarchar(21)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("AbstractClasses");
+
+                    b.HasDiscriminator().HasValue("AbstractClass");
+
+                    b.UseTphMappingStrategy();
+                });
+
+            modelBuilder.Entity("Coalesce.Domain.AbstractClassPerson", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AbstractClassId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PersonId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AbstractClassId");
+
+                    b.HasIndex("PersonId");
+
+                    b.ToTable("AbstractClassPeople");
+                });
 
             modelBuilder.Entity("Coalesce.Domain.AuditLog", b =>
                 {
@@ -73,6 +121,31 @@ namespace Coalesce.Domain.Migrations
                     b.HasIndex("Type", "KeyValue");
 
                     b.ToTable("AuditLogs");
+                });
+
+            modelBuilder.Entity("Coalesce.Domain.BaseClass", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("BaseClassString")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Discriminator")
+                        .IsRequired()
+                        .HasMaxLength(21)
+                        .HasColumnType("nvarchar(21)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("BaseClasses");
+
+                    b.HasDiscriminator().HasValue("BaseClass");
+
+                    b.UseTphMappingStrategy();
                 });
 
             modelBuilder.Entity("Coalesce.Domain.Case", b =>
@@ -364,6 +437,45 @@ namespace Coalesce.Domain.Migrations
                     b.ToTable("AuditLogProperties");
                 });
 
+            modelBuilder.Entity("Coalesce.Domain.AbstractClassImpl", b =>
+                {
+                    b.HasBaseType("Coalesce.Domain.AbstractClass");
+
+                    b.Property<string>("ImplString")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasDiscriminator().HasValue("AbstractClassImpl");
+                });
+
+            modelBuilder.Entity("Coalesce.Domain.BaseClassDerived", b =>
+                {
+                    b.HasBaseType("Coalesce.Domain.BaseClass");
+
+                    b.Property<string>("DerivedClassString")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasDiscriminator().HasValue("BaseClassDerived");
+                });
+
+            modelBuilder.Entity("Coalesce.Domain.AbstractClassPerson", b =>
+                {
+                    b.HasOne("Coalesce.Domain.AbstractClass", "AbstractClass")
+                        .WithMany("AbstractModelPeople")
+                        .HasForeignKey("AbstractClassId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Coalesce.Domain.Person", "Person")
+                        .WithMany()
+                        .HasForeignKey("PersonId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("AbstractClass");
+
+                    b.Navigation("Person");
+                });
+
             modelBuilder.Entity("Coalesce.Domain.AuditLog", b =>
                 {
                     b.HasOne("Coalesce.Domain.Person", "User")
@@ -510,6 +622,11 @@ namespace Coalesce.Domain.Migrations
                         .HasForeignKey("ParentId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Coalesce.Domain.AbstractClass", b =>
+                {
+                    b.Navigation("AbstractModelPeople");
                 });
 
             modelBuilder.Entity("Coalesce.Domain.AuditLog", b =>

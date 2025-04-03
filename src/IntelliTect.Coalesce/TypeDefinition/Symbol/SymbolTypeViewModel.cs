@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.TypeDefinition
@@ -38,18 +39,17 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 ? SymbolTypeViewModel.GetOrCreate(reflectionRepository, ((IArrayTypeSymbol)Symbol).ElementType)
                 : null;
 
-            var types = new List<INamedTypeSymbol>();
-            var target = Symbol as INamedTypeSymbol;
-            while (target != null)
+            IEnumerable<INamedTypeSymbol> GetBaseClassesAndInterfaces(ITypeSymbol t)
             {
-                types.Add(target);
-                target = target.BaseType;
+                return (t.BaseType == null ? [] : GetBaseClassesAndInterfaces(t.BaseType))
+                    .Concat(t is INamedTypeSymbol ns ? [ns] : [])
+                    .Concat(t.AllInterfaces);
             }
-            foreach (var iface in Symbol.AllInterfaces)
-            {
-                types.Add(iface);
-            }
-            AssignableToLookup = types.ToLookup(t => t.MetadataName);
+
+            BaseClassesAndInterfaces = GetBaseClassesAndInterfaces(Symbol).Distinct().Reverse().ToList();
+            AssignableToLookup = BaseClassesAndInterfaces.ToLookup(t => t.MetadataName);
+
+
 
             ClassViewModel = ShouldCreateClassViewModel
                 ? new SymbolClassViewModel(this)
@@ -64,6 +64,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             return reflectionRepository?.GetOrAddType(symbol) ?? new SymbolTypeViewModel(reflectionRepository, symbol);
         }
+
+        public override TypeViewModel? BaseType => Symbol.BaseType is null ? null : GetOrCreate(ReflectionRepository, Symbol.BaseType);
 
         public override IAttributeProvider Assembly
             => Symbol.ContainingAssembly.GetAttributeProvider();
@@ -161,38 +163,30 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// keyed by a base type's <see cref="ISymbol.MetadataName"/>.
         /// </summary>
         private ILookup<string, INamedTypeSymbol> AssignableToLookup { get; }
+        private List<INamedTypeSymbol> BaseClassesAndInterfaces { get; }
 
-        /// <summary>
-        /// Find the ITypeSymbol that satisfies the inheritance relationship "this : typeToCheck"
-        /// </summary>
-        /// <param name="typeToCheck"></param>
-        /// <returns></returns>
-        private INamedTypeSymbol? GetSatisfyingBaseTypeSymbol(Type typeToCheck)
+        private INamedTypeSymbol? GetSatisfyingBaseType(Type type)
         {
-            if (typeToCheck.IsConstructedGenericType)
-            {
-                throw new ArgumentException(
-                    "SymbolTypeViewModels can't currently check if a symbol is assignable to a specific constructed generic. " +
-                    "It can only check against non-constructed generics.", nameof(typeToCheck));
-            }
-
-            // KNOWN SHORTCOMING: This method only checks the name of the type, and not its namespace.
-            // For now, this is OK, but should probably be improved in the future so that MyNamespace.String != System.String.
-
-            return AssignableToLookup[typeToCheck.Name].FirstOrDefault();
+            return BaseClassesAndInterfaces.FirstOrDefault(x =>
+                x.Equals(type) ||
+                // KNOWN SHORTCOMING: This method only checks the name of the type, and not its namespace.
+                // For now, this is OK, but should probably be improved in the future so that MyNamespace.String != System.String.
+                x.MetadataName == type.Name
+            );
         }
 
-
-        /// <summary>
-        /// Get the generic parameters used to satisfy the inheritance relationship with the given type.
-        /// </summary>
         public override TypeViewModel[]? GenericArgumentsFor(Type type) =>
-            GetSatisfyingBaseTypeSymbol(type)?
-            .TypeArguments
-            .Select(t => SymbolTypeViewModel.GetOrCreate(ReflectionRepository, t))
-            .ToArray();
+            GetSatisfyingBaseType(type)?
+                .TypeArguments
+                .Select(t => GetOrCreate(ReflectionRepository, t))
+                .ToArray();
 
-        public override bool IsA(Type type) => GetSatisfyingBaseTypeSymbol(type) != null;
+        public override bool IsA(Type type)
+        {
+            // KNOWN SHORTCOMING: This method only checks the name of the type, and not its namespace.
+            // For now, this is OK, but should probably be improved in the future so that MyNamespace.String != System.String.
+            return AssignableToLookup.Contains(type.Name);
+        }
 
         public override bool Equals(object? obj)
         {

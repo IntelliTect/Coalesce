@@ -106,6 +106,14 @@ export interface CustomReferenceTypeBase extends Metadata {
    * To get a textual representation of any object, use function `modelDisplay` from the `model` module.
    */
   readonly displayProp?: Property;
+
+  /** The types that this type inherits from. */
+  readonly baseTypes?: CustomReferenceTypeBase[];
+
+  /** The types that inherit this type. */
+  readonly derivedTypes?: CustomReferenceTypeBase[];
+
+  readonly abstract?: boolean;
 }
 
 export interface ApiRoutedType {
@@ -146,6 +154,9 @@ export interface ModelType extends CustomReferenceTypeBase, ApiRoutedType {
 
   /** The data sources that can be used to query the API for objects of this type. */
   readonly dataSources: { [sourceName in string]: DataSourceType };
+
+  /** The types that inherit this type. */
+  readonly derivedTypes?: ModelType[];
 }
 
 export interface DataSourceType extends Metadata {
@@ -650,6 +661,12 @@ export function resolvePropMeta<TProp extends Property>(
     if (silent) return undefined;
     throw `Unknown property ${propOrString}`;
   } else if (metadata.props[propMeta.name] !== propMeta) {
+    const resolvedPropMeta = metadata.props[propMeta.name];
+    if (resolvedPropMeta) {
+      // This case happens when we receive a propMeta object owned by a baseType
+      // when `metadata` represents a derived type.
+      return resolvedPropMeta;
+    }
     if (silent) return undefined;
     throw `Property ${propMeta.name} does not belong to object of type ${metadata.name}`;
   }

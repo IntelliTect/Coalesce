@@ -23,12 +23,23 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
     public abstract partial class MethodViewModel : IAttributeProvider
     {
-        internal MethodViewModel(ClassViewModel parent)
+        internal MethodViewModel(ClassViewModel declaringParent, ClassViewModel effectiveParent)
         {
-            Parent = parent;
+            Parent = declaringParent;
+            EffectiveParent = effectiveParent;
         }
+        /// <summary>
+        /// The class that the method was declared on. 
+        /// For the class that is the context in which the method was requested,
+        /// use <see cref="EffectiveParent"/>
+        /// </summary>
+        public ClassViewModel Parent { get; protected set; }
 
-        public ClassViewModel Parent { get; }
+        /// <summary>
+        /// The class that is the context in which the method was requested.
+        /// Not nessecarily the class that the method is declared on. For that, use <see cref="Parent"/>
+        /// </summary>
+        public ClassViewModel EffectiveParent { get; protected set; }
 
         public abstract bool IsStatic { get; }
 
@@ -185,7 +196,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 // only the class name as the OpenAPI schema name.
                 if (Parent.ReflectionRepository?.ClientMethodsLookup[Name].Count() > 1)
                 {
-                    parameterClassName = Parent.Name + parameterClassName;
+                    parameterClassName = EffectiveParent.Name + parameterClassName;
                 }
 
                 return parameterClassName;

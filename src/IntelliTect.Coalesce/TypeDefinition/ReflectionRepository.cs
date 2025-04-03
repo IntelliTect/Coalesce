@@ -108,7 +108,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     .AsParallel()
                     .Where(type => 
                         !type.IsInternalUse &&
-                        (type.HasAttribute<CoalesceAttribute>() || type.IsA(typeof(GeneratedParameterDto<>)))
+                        (type.HasAttribute<CoalesceAttribute>() || type.IsA(typeof(IGeneratedParameterDto<>)))
                     )
                 );
             }
@@ -157,7 +157,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         private void ProcessAddedType(TypeViewModel type)
         {
-            var generatedDtoEntity = type.GenericArgumentsFor(typeof(GeneratedParameterDto<>))?[0];
+            var generatedDtoEntity = type.GenericArgumentsFor(typeof(IGeneratedParameterDto<>))?[0];
             if (generatedDtoEntity?.ClassViewModel is ClassViewModel cvm)
             {
                 _generatedParamDtos[cvm] = type.ClassViewModel!;

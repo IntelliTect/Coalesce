@@ -21,6 +21,17 @@ export class AbstractImpl1ViewModel extends ViewModel<$models.AbstractImpl1, $ap
     return (this.abstractModelPeople || []).map($ => $.person!).filter($ => $)
   }
   
+  public get getId() {
+    const getId = this.$apiClient.$makeCaller(
+      this.$metadata.methods.getId,
+      (c) => c.getId(this.$primaryKey),
+      () => ({}),
+      (c, args) => c.getId(this.$primaryKey))
+    
+    Object.defineProperty(this, 'getId', {value: getId});
+    return getId
+  }
+  
   constructor(initialData?: DeepPartial<$models.AbstractImpl1> | null) {
     super($metadata.AbstractImpl1, new $apiClients.AbstractImpl1ApiClient(), initialData)
   }
@@ -28,6 +39,28 @@ export class AbstractImpl1ViewModel extends ViewModel<$models.AbstractImpl1, $ap
 defineProps(AbstractImpl1ViewModel, $metadata.AbstractImpl1)
 
 export class AbstractImpl1ListViewModel extends ListViewModel<$models.AbstractImpl1, $apiClients.AbstractImpl1ApiClient, AbstractImpl1ViewModel> {
+  
+  public get getCount() {
+    const getCount = this.$apiClient.$makeCaller(
+      this.$metadata.methods.getCount,
+      (c) => c.getCount(),
+      () => ({}),
+      (c, args) => c.getCount())
+    
+    Object.defineProperty(this, 'getCount', {value: getCount});
+    return getCount
+  }
+  
+  public get echoAbstractModel() {
+    const echoAbstractModel = this.$apiClient.$makeCaller(
+      this.$metadata.methods.echoAbstractModel,
+      (c, model?: $models.AbstractModel | null) => c.echoAbstractModel(model),
+      () => ({model: null as $models.AbstractModel | null, }),
+      (c, args) => c.echoAbstractModel(args.model))
+    
+    Object.defineProperty(this, 'echoAbstractModel', {value: echoAbstractModel});
+    return echoAbstractModel
+  }
   
   constructor() {
     super($metadata.AbstractImpl1, new $apiClients.AbstractImpl1ApiClient())
@@ -53,6 +86,17 @@ export class AbstractImpl2ViewModel extends ViewModel<$models.AbstractImpl2, $ap
     return (this.abstractModelPeople || []).map($ => $.person!).filter($ => $)
   }
   
+  public get getId() {
+    const getId = this.$apiClient.$makeCaller(
+      this.$metadata.methods.getId,
+      (c) => c.getId(this.$primaryKey),
+      () => ({}),
+      (c, args) => c.getId(this.$primaryKey))
+    
+    Object.defineProperty(this, 'getId', {value: getId});
+    return getId
+  }
+  
   constructor(initialData?: DeepPartial<$models.AbstractImpl2> | null) {
     super($metadata.AbstractImpl2, new $apiClients.AbstractImpl2ApiClient(), initialData)
   }
@@ -61,36 +105,58 @@ defineProps(AbstractImpl2ViewModel, $metadata.AbstractImpl2)
 
 export class AbstractImpl2ListViewModel extends ListViewModel<$models.AbstractImpl2, $apiClients.AbstractImpl2ApiClient, AbstractImpl2ViewModel> {
   
+  public get getCount() {
+    const getCount = this.$apiClient.$makeCaller(
+      this.$metadata.methods.getCount,
+      (c) => c.getCount(),
+      () => ({}),
+      (c, args) => c.getCount())
+    
+    Object.defineProperty(this, 'getCount', {value: getCount});
+    return getCount
+  }
+  
+  public get echoAbstractModel() {
+    const echoAbstractModel = this.$apiClient.$makeCaller(
+      this.$metadata.methods.echoAbstractModel,
+      (c, model?: $models.AbstractModel | null) => c.echoAbstractModel(model),
+      () => ({model: null as $models.AbstractModel | null, }),
+      (c, args) => c.echoAbstractModel(args.model))
+    
+    Object.defineProperty(this, 'echoAbstractModel', {value: echoAbstractModel});
+    return echoAbstractModel
+  }
+  
   constructor() {
     super($metadata.AbstractImpl2, new $apiClients.AbstractImpl2ApiClient())
   }
 }
 
 
-export interface AbstractModelViewModel extends $models.AbstractModel {
-  id: number | null;
-  discriminator: string | null;
-  get abstractModelPeople(): ViewModelCollection<AbstractModelPersonViewModel, $models.AbstractModelPerson>;
-  set abstractModelPeople(value: (AbstractModelPersonViewModel | $models.AbstractModelPerson)[] | null);
-}
-export class AbstractModelViewModel extends ViewModel<$models.AbstractModel, $apiClients.AbstractModelApiClient, number> implements $models.AbstractModel  {
-  
-  
-  public addToAbstractModelPeople(initialData?: DeepPartial<$models.AbstractModelPerson> | null) {
-    return this.$addChild('abstractModelPeople', initialData) as AbstractModelPersonViewModel
-  }
-  
-  get people(): ReadonlyArray<PersonViewModel> {
-    return (this.abstractModelPeople || []).map($ => $.person!).filter($ => $)
-  }
-  
-  constructor(initialData?: DeepPartial<$models.AbstractModel> | null) {
-    super($metadata.AbstractModel, new $apiClients.AbstractModelApiClient(), initialData)
-  }
-}
-defineProps(AbstractModelViewModel, $metadata.AbstractModel)
-
+export type AbstractModelViewModel = AbstractImpl1ViewModel | AbstractImpl2ViewModel
 export class AbstractModelListViewModel extends ListViewModel<$models.AbstractModel, $apiClients.AbstractModelApiClient, AbstractModelViewModel> {
+  
+  public get getCount() {
+    const getCount = this.$apiClient.$makeCaller(
+      this.$metadata.methods.getCount,
+      (c) => c.getCount(),
+      () => ({}),
+      (c, args) => c.getCount())
+    
+    Object.defineProperty(this, 'getCount', {value: getCount});
+    return getCount
+  }
+  
+  public get echoAbstractModel() {
+    const echoAbstractModel = this.$apiClient.$makeCaller(
+      this.$metadata.methods.echoAbstractModel,
+      (c, model?: $models.AbstractModel | null) => c.echoAbstractModel(model),
+      () => ({model: null as $models.AbstractModel | null, }),
+      (c, args) => c.echoAbstractModel(args.model))
+    
+    Object.defineProperty(this, 'echoAbstractModel', {value: echoAbstractModel});
+    return echoAbstractModel
+  }
   
   constructor() {
     super($metadata.AbstractModel, new $apiClients.AbstractModelApiClient())
@@ -319,6 +385,7 @@ export interface ComplexModelViewModel extends $models.ComplexModel {
   long: number | null;
   guid: string | null;
   guidNullable: string | null;
+  uri: string | null;
   intCollection: number[] | null;
   enumCollection: $models.Statuses[] | null;
   nonNullNonZeroInt: number | null;
@@ -348,9 +415,9 @@ export class ComplexModelViewModel extends ViewModel<$models.ComplexModel, $apiC
   public get methodWithManyParams() {
     const methodWithManyParams = this.$apiClient.$makeCaller(
       this.$metadata.methods.methodWithManyParams,
-      (c, singleExternal?: $models.ExternalParent | null, collectionExternal?: $models.ExternalParent[] | null, file?: File | null, strParam?: string | null, stringsParam?: string[] | null, dateTime?: Date | null, integer?: number | null, boolParam?: boolean | null, enumParam?: $models.Statuses | null, enumsParam?: $models.Statuses[] | null, model?: $models.Test | null, modelCollection?: $models.Test[] | null) => c.methodWithManyParams(this.$primaryKey, singleExternal, collectionExternal, file, strParam, stringsParam, dateTime, integer, boolParam, enumParam, enumsParam, model, modelCollection),
-      () => ({singleExternal: null as $models.ExternalParent | null, collectionExternal: null as $models.ExternalParent[] | null, file: null as File | null, strParam: null as string | null, stringsParam: null as string[] | null, dateTime: null as Date | null, integer: null as number | null, boolParam: null as boolean | null, enumParam: null as $models.Statuses | null, enumsParam: null as $models.Statuses[] | null, model: null as $models.Test | null, modelCollection: null as $models.Test[] | null, }),
-      (c, args) => c.methodWithManyParams(this.$primaryKey, args.singleExternal, args.collectionExternal, args.file, args.strParam, args.stringsParam, args.dateTime, args.integer, args.boolParam, args.enumParam, args.enumsParam, args.model, args.modelCollection))
+      (c, singleExternal?: $models.ExternalParent | null, collectionExternal?: $models.ExternalParent[] | null, file?: File | null, strParam?: string | null, stringsParam?: string[] | null, dateTime?: Date | null, integer?: number | null, boolParam?: boolean | null, enumParam?: $models.Statuses | null, enumsParam?: $models.Statuses[] | null, model?: $models.Test | null, modelCollection?: $models.Test[] | null, uri?: string | null, uris?: string[] | null) => c.methodWithManyParams(this.$primaryKey, singleExternal, collectionExternal, file, strParam, stringsParam, dateTime, integer, boolParam, enumParam, enumsParam, model, modelCollection, uri, uris),
+      () => ({singleExternal: null as $models.ExternalParent | null, collectionExternal: null as $models.ExternalParent[] | null, file: null as File | null, strParam: null as string | null, stringsParam: null as string[] | null, dateTime: null as Date | null, integer: null as number | null, boolParam: null as boolean | null, enumParam: null as $models.Statuses | null, enumsParam: null as $models.Statuses[] | null, model: null as $models.Test | null, modelCollection: null as $models.Test[] | null, uri: null as string | null, uris: null as string[] | null, }),
+      (c, args) => c.methodWithManyParams(this.$primaryKey, args.singleExternal, args.collectionExternal, args.file, args.strParam, args.stringsParam, args.dateTime, args.integer, args.boolParam, args.enumParam, args.enumsParam, args.model, args.modelCollection, args.uri, args.uris))
     
     Object.defineProperty(this, 'methodWithManyParams', {value: methodWithManyParams});
     return methodWithManyParams
@@ -1360,7 +1427,6 @@ export class WeatherServiceViewModel extends ServiceViewModel<typeof $metadata.W
 const viewModelTypeLookup = ViewModel.typeLookup = {
   AbstractImpl1: AbstractImpl1ViewModel,
   AbstractImpl2: AbstractImpl2ViewModel,
-  AbstractModel: AbstractModelViewModel,
   AbstractModelPerson: AbstractModelPersonViewModel,
   Case: CaseViewModel,
   CaseDtoStandalone: CaseDtoStandaloneViewModel,

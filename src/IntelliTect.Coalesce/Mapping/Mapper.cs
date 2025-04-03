@@ -1,6 +1,7 @@
 ﻿using System.Security.Claims;
 using IntelliTect.Coalesce.TypeDefinition;
 using System.Collections.Concurrent;
+using System;
 
 namespace IntelliTect.Coalesce.Mapping
 {
@@ -16,9 +17,10 @@ namespace IntelliTect.Coalesce.Mapping
             // See if we already mapped this object:
             if (context.TryGetMapping(obj, tree, out TDto? existing)) return existing;
 
-            var dto = new TDto();
-            context.AddMapping(obj, tree, dto);
+            var realDtoType = context.GetResponseDtoType<TDto, T>(obj);
 
+            TDto dto = (TDto)Activator.CreateInstance(realDtoType)!;
+            context.AddMapping(obj, tree, dto);
             dto.MapFrom(obj, context, tree);
 
             return dto;

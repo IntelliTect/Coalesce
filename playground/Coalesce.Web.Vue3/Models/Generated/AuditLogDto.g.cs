@@ -5,10 +5,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
+using System.Text.Json.Serialization;
 
 namespace Coalesce.Web.Vue3.Models
 {
-    public partial class AuditLogParameter : GeneratedParameterDto<Coalesce.Domain.AuditLog>
+    public partial class AuditLogParameter : SparseDto, IGeneratedParameterDto<Coalesce.Domain.AuditLog>
     {
         public AuditLogParameter() { }
 
@@ -83,11 +84,9 @@ namespace Coalesce.Web.Vue3.Models
         /// <summary>
         /// Map from the current DTO instance to the domain object.
         /// </summary>
-        public override void MapTo(Coalesce.Domain.AuditLog entity, IMappingContext context)
+        public void MapTo(Coalesce.Domain.AuditLog entity, IMappingContext context)
         {
             var includes = context.Includes;
-
-            if (OnUpdate(entity, context)) return;
 
             if (ShouldMapTo(nameof(Id))) entity.Id = (Id ?? entity.Id);
             if (ShouldMapTo(nameof(Message))) entity.Message = Message;
@@ -105,15 +104,22 @@ namespace Coalesce.Web.Vue3.Models
         /// <summary>
         /// Map from the current DTO instance to a new instance of the domain object.
         /// </summary>
-        public override Coalesce.Domain.AuditLog MapToNew(IMappingContext context)
+        public Coalesce.Domain.AuditLog MapToNew(IMappingContext context)
         {
             var entity = new Coalesce.Domain.AuditLog();
             MapTo(entity, context);
             return entity;
         }
+
+        public Coalesce.Domain.AuditLog MapToModelOrNew(Coalesce.Domain.AuditLog obj, IMappingContext context)
+        {
+            if (obj is null) return MapToNew(context);
+            MapTo(obj, context);
+            return obj;
+        }
     }
 
-    public partial class AuditLogResponse : GeneratedResponseDto<Coalesce.Domain.AuditLog>
+    public partial class AuditLogResponse : IGeneratedResponseDto<Coalesce.Domain.AuditLog>
     {
         public AuditLogResponse() { }
 
@@ -134,7 +140,7 @@ namespace Coalesce.Web.Vue3.Models
         /// <summary>
         /// Map from the domain object to the properties of the current DTO instance.
         /// </summary>
-        public override void MapFrom(Coalesce.Domain.AuditLog obj, IMappingContext context, IncludeTree tree = null)
+        public void MapFrom(Coalesce.Domain.AuditLog obj, IMappingContext context, IncludeTree tree = null)
         {
             if (obj == null) return;
             var includes = context.Includes;

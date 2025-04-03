@@ -5,10 +5,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
+using System.Text.Json.Serialization;
 
 namespace Coalesce.Web.Vue3.Models
 {
-    public partial class ProductParameter : GeneratedParameterDto<Coalesce.Domain.Product>
+    public partial class ProductParameter : SparseDto, IGeneratedParameterDto<Coalesce.Domain.Product>
     {
         public ProductParameter() { }
 
@@ -41,11 +42,9 @@ namespace Coalesce.Web.Vue3.Models
         /// <summary>
         /// Map from the current DTO instance to the domain object.
         /// </summary>
-        public override void MapTo(Coalesce.Domain.Product entity, IMappingContext context)
+        public void MapTo(Coalesce.Domain.Product entity, IMappingContext context)
         {
             var includes = context.Includes;
-
-            if (OnUpdate(entity, context)) return;
 
             if (ShouldMapTo(nameof(ProductId))) entity.ProductId = (ProductId ?? entity.ProductId);
             if (ShouldMapTo(nameof(Name))) entity.Name = Name;
@@ -56,15 +55,22 @@ namespace Coalesce.Web.Vue3.Models
         /// <summary>
         /// Map from the current DTO instance to a new instance of the domain object.
         /// </summary>
-        public override Coalesce.Domain.Product MapToNew(IMappingContext context)
+        public Coalesce.Domain.Product MapToNew(IMappingContext context)
         {
             var entity = new Coalesce.Domain.Product();
             MapTo(entity, context);
             return entity;
         }
+
+        public Coalesce.Domain.Product MapToModelOrNew(Coalesce.Domain.Product obj, IMappingContext context)
+        {
+            if (obj is null) return MapToNew(context);
+            MapTo(obj, context);
+            return obj;
+        }
     }
 
-    public partial class ProductResponse : GeneratedResponseDto<Coalesce.Domain.Product>
+    public partial class ProductResponse : IGeneratedResponseDto<Coalesce.Domain.Product>
     {
         public ProductResponse() { }
 
@@ -77,7 +83,7 @@ namespace Coalesce.Web.Vue3.Models
         /// <summary>
         /// Map from the domain object to the properties of the current DTO instance.
         /// </summary>
-        public override void MapFrom(Coalesce.Domain.Product obj, IMappingContext context, IncludeTree tree = null)
+        public void MapFrom(Coalesce.Domain.Product obj, IMappingContext context, IncludeTree tree = null)
         {
             if (obj == null) return;
             var includes = context.Includes;

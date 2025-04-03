@@ -53,56 +53,47 @@ namespace IntelliTect.Coalesce.TypeDefinition
             return result.AsReadOnly();
         }
 
-        protected override IReadOnlyCollection<MethodViewModel> RawMethods
+        protected override IReadOnlyCollection<MethodViewModel> RawMethods(ClassViewModel effectiveParent)
         {
-            get
-            {
-                var result = Symbol.GetMembers()
-                    .Where(f => f.Kind == SymbolKind.Method && f.DeclaredAccessibility == Accessibility.Public)
-                    .Cast<IMethodSymbol>()
-                    .Where(f => f.MethodKind == MethodKind.Ordinary)
-                    .Select(s => new SymbolMethodViewModel(s, this))
-                    .ToList();
+            var result = Symbol.GetMembers()
+                .Where(f => f.Kind == SymbolKind.Method && f.DeclaredAccessibility == Accessibility.Public)
+                .Cast<IMethodSymbol>()
+                .Select((s, i) => new SymbolMethodViewModel(s, this, effectiveParent))
+                .Cast<MethodViewModel>()
+                .ToList();
 
-                void AddSymbolMethods(INamedTypeSymbol symbol)
+            // Add methods from the base class
+            if (Symbol.BaseType != null && Symbol.BaseType.Name != "Object")
+            {
+                var parentSymbol = GetOrCreate(ReflectionRepository, Symbol.BaseType);
+                if (parentSymbol != null)
                 {
-                    var parentSymbol = GetOrCreate(ReflectionRepository, symbol);
+                    result.AddRange(parentSymbol.RawMethods(effectiveParent));
+                }
+            }
+
+            // If this type is itself an interface, add inherited interfaces.
+            // This is used for interface-based Service interfaces.
+            if (Symbol.TypeKind == TypeKind.Interface)
+            {
+                foreach (var iface in Symbol.AllInterfaces)
+                {
+                    var parentSymbol = GetOrCreate(ReflectionRepository, iface);
                     if (parentSymbol != null)
                     {
-                        result.AddRange(parentSymbol.Methods
-                            .Cast<SymbolMethodViewModel>()
-                            // Don't add overriden methods
-                            .Where(baseMethod => !result.Any(method => SymbolEqualityComparer.Default.Equals(method.Symbol.OverriddenMethod, baseMethod.Symbol))
-                        ));
+                        result.AddRange(parentSymbol.RawMethods(effectiveParent));
                     }
                 }
-
-                // Add methods from the base class
-                if (Symbol.BaseType != null && Symbol.BaseType.Name != "Object")
-                {
-                    AddSymbolMethods(Symbol.BaseType);
-                }
-
-                // If this type is itself an interface, add inherited interfaces.
-                // This is used for interface-based Service interfaces.
-                if (Symbol.TypeKind == TypeKind.Interface)
-                {
-                    foreach (var iface in Symbol.AllInterfaces)
-                    {
-                        AddSymbolMethods(iface);
-
-                    }
-                }
-
-                return result.Distinct().ToList().AsReadOnly();
             }
+
+            return result.AsReadOnly();
         }
 
         public override IReadOnlyCollection<MethodViewModel> Constructors => Symbol.GetMembers()
             .Where(m => m.Kind == SymbolKind.Method && m.DeclaredAccessibility == Accessibility.Public)
             .Cast<IMethodSymbol>()
             .Where(m => m.MethodKind == MethodKind.Constructor)
-            .Select(m => new SymbolMethodViewModel(m, this))
+            .Select(m => new SymbolMethodViewModel(m, this, this))
             .Where(m => !m.IsInternalUse)
             .ToList();
 

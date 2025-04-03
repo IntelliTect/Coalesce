@@ -88,7 +88,17 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public abstract bool IsA(Type type);
 
+        /// <summary>
+        /// <para>
+        /// Get the generic parameters used to satisfy the inheritance relationship with the given type.
+        /// </para>
+        /// <para>
+        /// If the type is implemented more than once on the type (i.e. an interface), the usage placed on the most specific type in the hierarchy will be returned.
+        /// </para>
+        /// </summary>
         public abstract TypeViewModel[]? GenericArgumentsFor(Type type);
+
+        public abstract TypeViewModel? BaseType { get; }
 
         public bool IsA<T>() => IsA(typeof(T));
 

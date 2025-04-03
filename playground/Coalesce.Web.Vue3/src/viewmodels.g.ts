@@ -3,6 +3,127 @@ import * as $models from './models.g'
 import * as $apiClients from './api-clients.g'
 import { ViewModel, ListViewModel, ViewModelCollection, ServiceViewModel, type DeepPartial, defineProps } from 'coalesce-vue/lib/viewmodel'
 
+export type AbstractClassViewModel = AbstractClassImplViewModel
+export class AbstractClassListViewModel extends ListViewModel<$models.AbstractClass, $apiClients.AbstractClassApiClient, AbstractClassViewModel> {
+  
+  public get getCount() {
+    const getCount = this.$apiClient.$makeCaller(
+      this.$metadata.methods.getCount,
+      (c) => c.getCount(),
+      () => ({}),
+      (c, args) => c.getCount())
+    
+    Object.defineProperty(this, 'getCount', {value: getCount});
+    return getCount
+  }
+  
+  public get echoAbstractModel() {
+    const echoAbstractModel = this.$apiClient.$makeCaller(
+      this.$metadata.methods.echoAbstractModel,
+      (c, model: $models.AbstractClass | null) => c.echoAbstractModel(model),
+      () => ({model: null as $models.AbstractClass | null, }),
+      (c, args) => c.echoAbstractModel(args.model))
+    
+    Object.defineProperty(this, 'echoAbstractModel', {value: echoAbstractModel});
+    return echoAbstractModel
+  }
+  
+  constructor() {
+    super($metadata.AbstractClass, new $apiClients.AbstractClassApiClient())
+  }
+}
+
+
+export interface AbstractClassImplViewModel extends $models.AbstractClassImpl {
+  implString: string | null;
+  id: number | null;
+  abstractClassString: string | null;
+  get abstractModelPeople(): ViewModelCollection<AbstractClassPersonViewModel, $models.AbstractClassPerson>;
+  set abstractModelPeople(value: (AbstractClassPersonViewModel | $models.AbstractClassPerson)[] | null);
+}
+export class AbstractClassImplViewModel extends ViewModel<$models.AbstractClassImpl, $apiClients.AbstractClassImplApiClient, number> implements $models.AbstractClassImpl  {
+  
+  
+  public addToAbstractModelPeople(initialData?: DeepPartial<$models.AbstractClassPerson> | null) {
+    return this.$addChild('abstractModelPeople', initialData) as AbstractClassPersonViewModel
+  }
+  
+  get people(): ReadonlyArray<PersonViewModel> {
+    return (this.abstractModelPeople || []).map($ => $.person!).filter($ => $)
+  }
+  
+  public get getId() {
+    const getId = this.$apiClient.$makeCaller(
+      this.$metadata.methods.getId,
+      (c) => c.getId(this.$primaryKey),
+      () => ({}),
+      (c, args) => c.getId(this.$primaryKey))
+    
+    Object.defineProperty(this, 'getId', {value: getId});
+    return getId
+  }
+  
+  constructor(initialData?: DeepPartial<$models.AbstractClassImpl> | null) {
+    super($metadata.AbstractClassImpl, new $apiClients.AbstractClassImplApiClient(), initialData)
+  }
+}
+defineProps(AbstractClassImplViewModel, $metadata.AbstractClassImpl)
+
+export class AbstractClassImplListViewModel extends ListViewModel<$models.AbstractClassImpl, $apiClients.AbstractClassImplApiClient, AbstractClassImplViewModel> {
+  
+  public get getCount() {
+    const getCount = this.$apiClient.$makeCaller(
+      this.$metadata.methods.getCount,
+      (c) => c.getCount(),
+      () => ({}),
+      (c, args) => c.getCount())
+    
+    Object.defineProperty(this, 'getCount', {value: getCount});
+    return getCount
+  }
+  
+  public get echoAbstractModel() {
+    const echoAbstractModel = this.$apiClient.$makeCaller(
+      this.$metadata.methods.echoAbstractModel,
+      (c, model: $models.AbstractClass | null) => c.echoAbstractModel(model),
+      () => ({model: null as $models.AbstractClass | null, }),
+      (c, args) => c.echoAbstractModel(args.model))
+    
+    Object.defineProperty(this, 'echoAbstractModel', {value: echoAbstractModel});
+    return echoAbstractModel
+  }
+  
+  constructor() {
+    super($metadata.AbstractClassImpl, new $apiClients.AbstractClassImplApiClient())
+  }
+}
+
+
+export interface AbstractClassPersonViewModel extends $models.AbstractClassPerson {
+  id: number | null;
+  personId: number | null;
+  get person(): PersonViewModel | null;
+  set person(value: PersonViewModel | $models.Person | null);
+  abstractClassId: number | null;
+  get abstractClass(): AbstractClassViewModel | null;
+  set abstractClass(value: AbstractClassViewModel | $models.AbstractClass | null);
+}
+export class AbstractClassPersonViewModel extends ViewModel<$models.AbstractClassPerson, $apiClients.AbstractClassPersonApiClient, number> implements $models.AbstractClassPerson  {
+  
+  constructor(initialData?: DeepPartial<$models.AbstractClassPerson> | null) {
+    super($metadata.AbstractClassPerson, new $apiClients.AbstractClassPersonApiClient(), initialData)
+  }
+}
+defineProps(AbstractClassPersonViewModel, $metadata.AbstractClassPerson)
+
+export class AbstractClassPersonListViewModel extends ListViewModel<$models.AbstractClassPerson, $apiClients.AbstractClassPersonApiClient, AbstractClassPersonViewModel> {
+  
+  constructor() {
+    super($metadata.AbstractClassPerson, new $apiClients.AbstractClassPersonApiClient())
+  }
+}
+
+
 export interface AuditLogViewModel extends $models.AuditLog {
   message: string | null;
   userId: number | null;
@@ -62,6 +183,47 @@ export class AuditLogPropertyListViewModel extends ListViewModel<$models.AuditLo
   
   constructor() {
     super($metadata.AuditLogProperty, new $apiClients.AuditLogPropertyApiClient())
+  }
+}
+
+
+export interface BaseClassViewModel extends $models.BaseClass {
+  id: number | null;
+  baseClassString: string | null;
+}
+export class BaseClassViewModel extends ViewModel<$models.BaseClass, $apiClients.BaseClassApiClient, number> implements $models.BaseClass  {
+  
+  constructor(initialData?: DeepPartial<$models.BaseClass> | null) {
+    super($metadata.BaseClass, new $apiClients.BaseClassApiClient(), initialData)
+  }
+}
+defineProps(BaseClassViewModel, $metadata.BaseClass)
+
+export class BaseClassListViewModel extends ListViewModel<$models.BaseClass, $apiClients.BaseClassApiClient, BaseClassViewModel> {
+  
+  constructor() {
+    super($metadata.BaseClass, new $apiClients.BaseClassApiClient())
+  }
+}
+
+
+export interface BaseClassDerivedViewModel extends $models.BaseClassDerived {
+  derivedClassString: string | null;
+  id: number | null;
+  baseClassString: string | null;
+}
+export class BaseClassDerivedViewModel extends ViewModel<$models.BaseClassDerived, $apiClients.BaseClassDerivedApiClient, number> implements $models.BaseClassDerived  {
+  
+  constructor(initialData?: DeepPartial<$models.BaseClassDerived> | null) {
+    super($metadata.BaseClassDerived, new $apiClients.BaseClassDerivedApiClient(), initialData)
+  }
+}
+defineProps(BaseClassDerivedViewModel, $metadata.BaseClassDerived)
+
+export class BaseClassDerivedListViewModel extends ListViewModel<$models.BaseClassDerived, $apiClients.BaseClassDerivedApiClient, BaseClassDerivedViewModel> {
+  
+  constructor() {
+    super($metadata.BaseClassDerived, new $apiClients.BaseClassDerivedApiClient())
   }
 }
 
@@ -858,8 +1020,12 @@ export class WeatherServiceViewModel extends ServiceViewModel<typeof $metadata.W
 
 
 const viewModelTypeLookup = ViewModel.typeLookup = {
+  AbstractClassImpl: AbstractClassImplViewModel,
+  AbstractClassPerson: AbstractClassPersonViewModel,
   AuditLog: AuditLogViewModel,
   AuditLogProperty: AuditLogPropertyViewModel,
+  BaseClass: BaseClassViewModel,
+  BaseClassDerived: BaseClassDerivedViewModel,
   Case: CaseViewModel,
   CaseDto: CaseDtoViewModel,
   CaseDtoStandalone: CaseDtoStandaloneViewModel,
@@ -875,8 +1041,13 @@ const viewModelTypeLookup = ViewModel.typeLookup = {
   ZipCode: ZipCodeViewModel,
 }
 const listViewModelTypeLookup = ListViewModel.typeLookup = {
+  AbstractClass: AbstractClassListViewModel,
+  AbstractClassImpl: AbstractClassImplListViewModel,
+  AbstractClassPerson: AbstractClassPersonListViewModel,
   AuditLog: AuditLogListViewModel,
   AuditLogProperty: AuditLogPropertyListViewModel,
+  BaseClass: BaseClassListViewModel,
+  BaseClassDerived: BaseClassDerivedListViewModel,
   Case: CaseListViewModel,
   CaseDto: CaseDtoListViewModel,
   CaseDtoStandalone: CaseDtoStandaloneListViewModel,

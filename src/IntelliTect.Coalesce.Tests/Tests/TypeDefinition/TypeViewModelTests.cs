@@ -5,6 +5,7 @@ using IntelliTect.Coalesce.Tests.Util;
 using IntelliTect.Coalesce.TypeDefinition;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Text;
@@ -260,6 +261,23 @@ namespace IntelliTect.Coalesce.Tests.TypeDefinition
             Assert.True(type.IsGeneric);
             Assert.Equal(type, type.PureType);
             Assert.Null(type.FirstTypeArgument);
+        }
+
+        [Theory]
+        [ClassViewModelData(typeof(ComplexInheritanceDerived))]
+        public void DerivedClass_GenericArgumentsFor_ReturnsDerivedInterfaceUsage(ClassViewModelData data)
+        {
+            // It is important for ReflectionRepository._generatedParamDtos that
+            // we get the most specific interface implementation when asking about the
+            // symbol that satisfies a particular interface. Otherwise, it'll pick the base type
+            // when trying to find the `IGeneratedParameterDto<>` symbol for a derived type.
+
+            var type = data.TypeViewModel;
+
+            Assert.Equal(
+                nameof(ComplexInheritanceDerived),
+                type.GenericArgumentsFor(typeof(IAmInheritedMultipleTimes<>))[0].Name
+            );
         }
     }
 }

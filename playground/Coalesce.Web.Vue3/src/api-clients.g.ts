@@ -3,6 +3,67 @@ import * as $models from './models.g'
 import { ModelApiClient, ServiceApiClient } from 'coalesce-vue/lib/api-client'
 import type { AxiosPromise, AxiosRequestConfig, ItemResult, ListResult } from 'coalesce-vue/lib/api-client'
 
+export class AbstractClassApiClient extends ModelApiClient<$models.AbstractClass> {
+  constructor() { super($metadata.AbstractClass) }
+  public getId(id: number | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<number>> {
+    const $method = this.$metadata.methods.getId
+    const $params =  {
+      id,
+    }
+    return this.$invoke($method, $params, $config)
+  }
+  
+  public getCount($config?: AxiosRequestConfig): AxiosPromise<ItemResult<number>> {
+    const $method = this.$metadata.methods.getCount
+    const $params =  {
+    }
+    return this.$invoke($method, $params, $config)
+  }
+  
+  public echoAbstractModel(model: $models.AbstractClass | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<$models.AbstractClass>> {
+    const $method = this.$metadata.methods.echoAbstractModel
+    const $params =  {
+      model,
+    }
+    return this.$invoke($method, $params, $config)
+  }
+  
+}
+
+
+export class AbstractClassImplApiClient extends ModelApiClient<$models.AbstractClassImpl> {
+  constructor() { super($metadata.AbstractClassImpl) }
+  public getId(id: number | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<number>> {
+    const $method = this.$metadata.methods.getId
+    const $params =  {
+      id,
+    }
+    return this.$invoke($method, $params, $config)
+  }
+  
+  public getCount($config?: AxiosRequestConfig): AxiosPromise<ItemResult<number>> {
+    const $method = this.$metadata.methods.getCount
+    const $params =  {
+    }
+    return this.$invoke($method, $params, $config)
+  }
+  
+  public echoAbstractModel(model: $models.AbstractClass | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<$models.AbstractClass>> {
+    const $method = this.$metadata.methods.echoAbstractModel
+    const $params =  {
+      model,
+    }
+    return this.$invoke($method, $params, $config)
+  }
+  
+}
+
+
+export class AbstractClassPersonApiClient extends ModelApiClient<$models.AbstractClassPerson> {
+  constructor() { super($metadata.AbstractClassPerson) }
+}
+
+
 export class AuditLogApiClient extends ModelApiClient<$models.AuditLog> {
   constructor() { super($metadata.AuditLog) }
 }
@@ -10,6 +71,16 @@ export class AuditLogApiClient extends ModelApiClient<$models.AuditLog> {
 
 export class AuditLogPropertyApiClient extends ModelApiClient<$models.AuditLogProperty> {
   constructor() { super($metadata.AuditLogProperty) }
+}
+
+
+export class BaseClassApiClient extends ModelApiClient<$models.BaseClass> {
+  constructor() { super($metadata.BaseClass) }
+}
+
+
+export class BaseClassDerivedApiClient extends ModelApiClient<$models.BaseClassDerived> {
+  constructor() { super($metadata.BaseClassDerived) }
 }
 
 

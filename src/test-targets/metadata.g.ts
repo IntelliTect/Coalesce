@@ -138,6 +138,9 @@ export const AbstractImpl1 = domain.types.AbstractImpl1 = {
   name: "AbstractImpl1" as const,
   displayName: "Abstract Impl1",
   get displayProp() { return this.props.id }, 
+  get baseTypes() { return [
+    (domain.types.AbstractModel as ModelType & { name: "AbstractModel" }),
+  ]},
   type: "model",
   controllerRoute: "AbstractImpl1",
   get keyProp() { return this.props.id }, 
@@ -189,6 +192,68 @@ export const AbstractImpl1 = domain.types.AbstractImpl1 = {
     },
   },
   methods: {
+    getId: {
+      name: "getId",
+      displayName: "Get Id",
+      transportType: "item",
+      httpMethod: "POST",
+      params: {
+        id: {
+          name: "id",
+          displayName: "Primary Key",
+          type: "number",
+          role: "value",
+          get source() { return (domain.types.AbstractModel as ModelType & { name: "AbstractModel" }).props.id },
+          rules: {
+            required: val => val != null || "Primary Key is required.",
+          }
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "number",
+        role: "value",
+      },
+    },
+    getCount: {
+      name: "getCount",
+      displayName: "Get Count",
+      transportType: "item",
+      httpMethod: "POST",
+      isStatic: true,
+      params: {
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "number",
+        role: "value",
+      },
+    },
+    echoAbstractModel: {
+      name: "echoAbstractModel",
+      displayName: "Echo Abstract Model",
+      transportType: "item",
+      httpMethod: "POST",
+      isStatic: true,
+      params: {
+        model: {
+          name: "model",
+          displayName: "Model",
+          type: "model",
+          get typeDef() { return (domain.types.AbstractModel as ModelType & { name: "AbstractModel" }) },
+          role: "value",
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "model",
+        get typeDef() { return (domain.types.AbstractModel as ModelType & { name: "AbstractModel" }) },
+        role: "value",
+      },
+    },
   },
   dataSources: {
   },
@@ -197,6 +262,9 @@ export const AbstractImpl2 = domain.types.AbstractImpl2 = {
   name: "AbstractImpl2" as const,
   displayName: "Abstract Impl2",
   get displayProp() { return this.props.id }, 
+  get baseTypes() { return [
+    (domain.types.AbstractModel as ModelType & { name: "AbstractModel" }),
+  ]},
   type: "model",
   controllerRoute: "AbstractImpl2",
   get keyProp() { return this.props.id }, 
@@ -248,6 +316,68 @@ export const AbstractImpl2 = domain.types.AbstractImpl2 = {
     },
   },
   methods: {
+    getId: {
+      name: "getId",
+      displayName: "Get Id",
+      transportType: "item",
+      httpMethod: "POST",
+      params: {
+        id: {
+          name: "id",
+          displayName: "Primary Key",
+          type: "number",
+          role: "value",
+          get source() { return (domain.types.AbstractModel as ModelType & { name: "AbstractModel" }).props.id },
+          rules: {
+            required: val => val != null || "Primary Key is required.",
+          }
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "number",
+        role: "value",
+      },
+    },
+    getCount: {
+      name: "getCount",
+      displayName: "Get Count",
+      transportType: "item",
+      httpMethod: "POST",
+      isStatic: true,
+      params: {
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "number",
+        role: "value",
+      },
+    },
+    echoAbstractModel: {
+      name: "echoAbstractModel",
+      displayName: "Echo Abstract Model",
+      transportType: "item",
+      httpMethod: "POST",
+      isStatic: true,
+      params: {
+        model: {
+          name: "model",
+          displayName: "Model",
+          type: "model",
+          get typeDef() { return (domain.types.AbstractModel as ModelType & { name: "AbstractModel" }) },
+          role: "value",
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "model",
+        get typeDef() { return (domain.types.AbstractModel as ModelType & { name: "AbstractModel" }) },
+        role: "value",
+      },
+    },
   },
   dataSources: {
   },
@@ -256,6 +386,11 @@ export const AbstractModel = domain.types.AbstractModel = {
   name: "AbstractModel" as const,
   displayName: "Abstract Model",
   get displayProp() { return this.props.id }, 
+  abstract: true,
+  get derivedTypes() { return [
+    (domain.types.AbstractImpl1 as ModelType & { name: "AbstractImpl1" }),
+    (domain.types.AbstractImpl2 as ModelType & { name: "AbstractImpl2" }),
+  ]},
   type: "model",
   controllerRoute: "AbstractModel",
   get keyProp() { return this.props.id }, 
@@ -301,6 +436,68 @@ export const AbstractModel = domain.types.AbstractModel = {
     },
   },
   methods: {
+    getId: {
+      name: "getId",
+      displayName: "Get Id",
+      transportType: "item",
+      httpMethod: "POST",
+      params: {
+        id: {
+          name: "id",
+          displayName: "Primary Key",
+          type: "number",
+          role: "value",
+          get source() { return (domain.types.AbstractModel as ModelType & { name: "AbstractModel" }).props.id },
+          rules: {
+            required: val => val != null || "Primary Key is required.",
+          }
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "number",
+        role: "value",
+      },
+    },
+    getCount: {
+      name: "getCount",
+      displayName: "Get Count",
+      transportType: "item",
+      httpMethod: "POST",
+      isStatic: true,
+      params: {
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "number",
+        role: "value",
+      },
+    },
+    echoAbstractModel: {
+      name: "echoAbstractModel",
+      displayName: "Echo Abstract Model",
+      transportType: "item",
+      httpMethod: "POST",
+      isStatic: true,
+      params: {
+        model: {
+          name: "model",
+          displayName: "Model",
+          type: "model",
+          get typeDef() { return (domain.types.AbstractModel as ModelType & { name: "AbstractModel" }) },
+          role: "value",
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "model",
+        get typeDef() { return (domain.types.AbstractModel as ModelType & { name: "AbstractModel" }) },
+        role: "value",
+      },
+    },
   },
   dataSources: {
   },
@@ -1108,6 +1305,15 @@ export const ComplexModel = domain.types.ComplexModel = {
         pattern: val => !val || /^\s*[{(]?[0-9A-Fa-f]{8}[-]?(?:[0-9A-Fa-f]{4}[-]?){3}[0-9A-Fa-f]{12}[)}]?\s*$/.test(val) || "Guid Nullable does not match expected format.",
       }
     },
+    uri: {
+      name: "uri",
+      displayName: "Uri",
+      type: "string",
+      role: "value",
+      rules: {
+        uri: val => !val || /^[a-zA-Z][\w+.-]*:.+/.test(val) || "Uri must be a valid URI.",
+      }
+    },
     intCollection: {
       name: "intCollection",
       displayName: "Int Collection",
@@ -1326,6 +1532,27 @@ export const ComplexModel = domain.types.ComplexModel = {
             role: "value",
             type: "model",
             get typeDef() { return (domain.types.Test as ModelType & { name: "Test" }) },
+          },
+          role: "value",
+        },
+        uri: {
+          name: "uri",
+          displayName: "Uri",
+          type: "string",
+          role: "value",
+          rules: {
+            uri: val => !val || /^[a-zA-Z][\w+.-]*:.+/.test(val) || "Uri must be a valid URI.",
+          }
+        },
+        uris: {
+          name: "uris",
+          displayName: "Uris",
+          type: "collection",
+          itemType: {
+            name: "$collectionItem",
+            displayName: "",
+            role: "value",
+            type: "string",
           },
           role: "value",
         },

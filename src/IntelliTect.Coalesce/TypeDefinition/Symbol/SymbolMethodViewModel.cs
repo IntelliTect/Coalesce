@@ -10,7 +10,11 @@ namespace IntelliTect.Coalesce.TypeDefinition
     {
         internal IMethodSymbol Symbol { get; }
 
-        public SymbolMethodViewModel(IMethodSymbol symbol, ClassViewModel parent) : base(parent)
+        public SymbolMethodViewModel(
+            IMethodSymbol symbol,
+            ClassViewModel declaringParent,
+            ClassViewModel effectiveParent
+        ) : base(declaringParent, effectiveParent)
         {
             Symbol = symbol;
         }

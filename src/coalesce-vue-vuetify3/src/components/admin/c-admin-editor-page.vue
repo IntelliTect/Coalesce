@@ -32,6 +32,7 @@ import {
 import { PropType, computed, defineComponent, watch } from "vue";
 import { useRoute } from "vue-router";
 import { isPropReadOnly } from "../../util";
+import { copyParamsToNewViewModel } from "./util";
 
 export default defineComponent({
   name: "c-admin-editor-page",
@@ -138,23 +139,7 @@ export default defineComponent({
     if (this.id) {
       await this.viewModel.$load(this.id);
     } else {
-      if (params.filter) {
-        for (const propName in this.metadata.props) {
-          const prop = this.metadata.props[propName];
-          const filterValue = params.filter[propName];
-          if (filterValue != null) {
-            try {
-              (this.viewModel as any)[propName] = mapValueToModel(
-                filterValue,
-                prop
-              );
-            } catch (e) {
-              // mapValueToModel will throw for unmappable values.
-              console.error(`Could not map filter parameter ${propName}. ${e}`);
-            }
-          }
-        }
-      }
+      copyParamsToNewViewModel(this.viewModel, params);
 
       bindKeyToRouteOnCreate(
         this,

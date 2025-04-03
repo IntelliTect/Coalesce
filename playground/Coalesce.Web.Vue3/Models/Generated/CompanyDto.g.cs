@@ -5,10 +5,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
+using System.Text.Json.Serialization;
 
 namespace Coalesce.Web.Vue3.Models
 {
-    public partial class CompanyParameter : GeneratedParameterDto<Coalesce.Domain.Company>
+    public partial class CompanyParameter : SparseDto, IGeneratedParameterDto<Coalesce.Domain.Company>
     {
         public CompanyParameter() { }
 
@@ -83,11 +84,9 @@ namespace Coalesce.Web.Vue3.Models
         /// <summary>
         /// Map from the current DTO instance to the domain object.
         /// </summary>
-        public override void MapTo(Coalesce.Domain.Company entity, IMappingContext context)
+        public void MapTo(Coalesce.Domain.Company entity, IMappingContext context)
         {
             var includes = context.Includes;
-
-            if (OnUpdate(entity, context)) return;
 
             if (ShouldMapTo(nameof(Id))) entity.Id = (Id ?? entity.Id);
             if (ShouldMapTo(nameof(Name))) entity.Name = Name;
@@ -104,7 +103,7 @@ namespace Coalesce.Web.Vue3.Models
         /// <summary>
         /// Map from the current DTO instance to a new instance of the domain object.
         /// </summary>
-        public override Coalesce.Domain.Company MapToNew(IMappingContext context)
+        public Coalesce.Domain.Company MapToNew(IMappingContext context)
         {
             var includes = context.Includes;
 
@@ -113,8 +112,6 @@ namespace Coalesce.Web.Vue3.Models
                 Name = Name,
                 Address1 = Address1,
             };
-
-            if (OnUpdate(entity, context)) return entity;
             if (ShouldMapTo(nameof(Id))) entity.Id = (Id ?? entity.Id);
             if (ShouldMapTo(nameof(Address2))) entity.Address2 = Address2;
             if (ShouldMapTo(nameof(City))) entity.City = City;
@@ -127,9 +124,16 @@ namespace Coalesce.Web.Vue3.Models
 
             return entity;
         }
+
+        public Coalesce.Domain.Company MapToModelOrNew(Coalesce.Domain.Company obj, IMappingContext context)
+        {
+            if (obj is null) return MapToNew(context);
+            MapTo(obj, context);
+            return obj;
+        }
     }
 
-    public partial class CompanyResponse : GeneratedResponseDto<Coalesce.Domain.Company>
+    public partial class CompanyResponse : IGeneratedResponseDto<Coalesce.Domain.Company>
     {
         public CompanyResponse() { }
 
@@ -150,7 +154,7 @@ namespace Coalesce.Web.Vue3.Models
         /// <summary>
         /// Map from the domain object to the properties of the current DTO instance.
         /// </summary>
-        public override void MapFrom(Coalesce.Domain.Company obj, IMappingContext context, IncludeTree tree = null)
+        public void MapFrom(Coalesce.Domain.Company obj, IMappingContext context, IncludeTree tree = null)
         {
             if (obj == null) return;
             var includes = context.Includes;

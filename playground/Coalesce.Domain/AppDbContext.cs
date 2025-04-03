@@ -28,6 +28,13 @@ namespace Coalesce.Domain
         public DbSet<AuditLog> AuditLogs { get; set; }
         public DbSet<AuditLogProperty> AuditLogProperties { get; set; }
 
+        public DbSet<BaseClass> BaseClasses { get; set; }
+        public DbSet<BaseClassDerived> BaseClassDerivations { get; set; }
+
+        public DbSet<AbstractClass> AbstractClasses { get; set; }
+        public DbSet<AbstractClassImpl> AbstractClassImpls { get; set; }
+        public DbSet<AbstractClassPerson> AbstractClassPeople { get; set; }
+
 #nullable restore
 
         public AppDbContext()

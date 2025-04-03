@@ -29,7 +29,7 @@ namespace IntelliTect.Coalesce.Api
 
                 var methodInfo = cad.MethodInfo;
                 var cvm = reflectionRepository.GetClassViewModel(methodInfo.DeclaringType!)!;
-                var method = new ReflectionMethodViewModel(cvm, methodInfo);
+                var method = new ReflectionMethodViewModel(methodInfo, cvm, cvm);
 
                 ProcessStandardParameters(operation, method);
             }

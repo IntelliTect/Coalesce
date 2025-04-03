@@ -5,10 +5,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
+using System.Text.Json.Serialization;
 
 namespace Coalesce.Web.Vue3.Models
 {
-    public partial class StreetAddressParameter : GeneratedParameterDto<Coalesce.Domain.StreetAddress>
+    public partial class StreetAddressParameter : SparseDto, IGeneratedParameterDto<Coalesce.Domain.StreetAddress>
     {
         public StreetAddressParameter() { }
 
@@ -41,11 +42,9 @@ namespace Coalesce.Web.Vue3.Models
         /// <summary>
         /// Map from the current DTO instance to the domain object.
         /// </summary>
-        public override void MapTo(Coalesce.Domain.StreetAddress entity, IMappingContext context)
+        public void MapTo(Coalesce.Domain.StreetAddress entity, IMappingContext context)
         {
             var includes = context.Includes;
-
-            if (OnUpdate(entity, context)) return;
 
             if (ShouldMapTo(nameof(Address))) entity.Address = Address;
             if (ShouldMapTo(nameof(City))) entity.City = City;
@@ -56,15 +55,22 @@ namespace Coalesce.Web.Vue3.Models
         /// <summary>
         /// Map from the current DTO instance to a new instance of the domain object.
         /// </summary>
-        public override Coalesce.Domain.StreetAddress MapToNew(IMappingContext context)
+        public Coalesce.Domain.StreetAddress MapToNew(IMappingContext context)
         {
             var entity = new Coalesce.Domain.StreetAddress();
             MapTo(entity, context);
             return entity;
         }
+
+        public Coalesce.Domain.StreetAddress MapToModelOrNew(Coalesce.Domain.StreetAddress obj, IMappingContext context)
+        {
+            if (obj is null) return MapToNew(context);
+            MapTo(obj, context);
+            return obj;
+        }
     }
 
-    public partial class StreetAddressResponse : GeneratedResponseDto<Coalesce.Domain.StreetAddress>
+    public partial class StreetAddressResponse : IGeneratedResponseDto<Coalesce.Domain.StreetAddress>
     {
         public StreetAddressResponse() { }
 
@@ -76,7 +82,7 @@ namespace Coalesce.Web.Vue3.Models
         /// <summary>
         /// Map from the domain object to the properties of the current DTO instance.
         /// </summary>
-        public override void MapFrom(Coalesce.Domain.StreetAddress obj, IMappingContext context, IncludeTree tree = null)
+        public void MapFrom(Coalesce.Domain.StreetAddress obj, IMappingContext context, IncludeTree tree = null)
         {
             if (obj == null) return;
             var includes = context.Includes;

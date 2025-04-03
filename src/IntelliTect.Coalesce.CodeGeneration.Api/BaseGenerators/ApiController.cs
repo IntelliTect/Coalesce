@@ -481,7 +481,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
 
             string ret = $"_params.{param.PascalCaseName}";
 
-            if (param.Type.PureType.ClassViewModel != null && !param.Type.PureType.ClassViewModel.IsCustomDto)
+            var cvm = param.Type.PureType.ClassViewModel;
+            if (cvm != null && !cvm.IsCustomDto)
             {
                 if (param.Type.IsCollection)
                 {

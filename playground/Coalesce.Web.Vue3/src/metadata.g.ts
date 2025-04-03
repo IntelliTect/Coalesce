@@ -133,6 +133,324 @@ export const Titles = domain.enums.Titles = {
   },
   ]),
 }
+export const AbstractClass = domain.types.AbstractClass = {
+  name: "AbstractClass" as const,
+  displayName: "Abstract Class",
+  get displayProp() { return this.props.id }, 
+  abstract: true,
+  get derivedTypes() { return [
+    (domain.types.AbstractClassImpl as ModelType & { name: "AbstractClassImpl" }),
+  ]},
+  type: "model",
+  controllerRoute: "AbstractClass",
+  get keyProp() { return this.props.id }, 
+  behaviorFlags: 0 as BehaviorFlags,
+  props: {
+    id: {
+      name: "id",
+      displayName: "Id",
+      type: "number",
+      role: "primaryKey",
+      hidden: 3 as HiddenAreas,
+    },
+    abstractClassString: {
+      name: "abstractClassString",
+      displayName: "Abstract Class String",
+      type: "string",
+      role: "value",
+    },
+    abstractModelPeople: {
+      name: "abstractModelPeople",
+      displayName: "Abstract Model People",
+      type: "collection",
+      itemType: {
+        name: "$collectionItem",
+        displayName: "",
+        role: "value",
+        type: "model",
+        get typeDef() { return (domain.types.AbstractClassPerson as ModelType & { name: "AbstractClassPerson" }) },
+      },
+      role: "collectionNavigation",
+      get foreignKey() { return (domain.types.AbstractClassPerson as ModelType & { name: "AbstractClassPerson" }).props.abstractClassId as ForeignKeyProperty },
+      get inverseNavigation() { return (domain.types.AbstractClassPerson as ModelType & { name: "AbstractClassPerson" }).props.abstractClass as ModelReferenceNavigationProperty },
+      manyToMany: {
+        name: "people",
+        displayName: "People",
+        get typeDef() { return (domain.types.Person as ModelType & { name: "Person" }) },
+        get farForeignKey() { return (domain.types.AbstractClassPerson as ModelType & { name: "AbstractClassPerson" }).props.personId as ForeignKeyProperty },
+        get farNavigationProp() { return (domain.types.AbstractClassPerson as ModelType & { name: "AbstractClassPerson" }).props.person as ModelReferenceNavigationProperty },
+        get nearForeignKey() { return (domain.types.AbstractClassPerson as ModelType & { name: "AbstractClassPerson" }).props.abstractClassId as ForeignKeyProperty },
+        get nearNavigationProp() { return (domain.types.AbstractClassPerson as ModelType & { name: "AbstractClassPerson" }).props.abstractClass as ModelReferenceNavigationProperty },
+      },
+      dontSerialize: true,
+    },
+  },
+  methods: {
+    getId: {
+      name: "getId",
+      displayName: "Get Id",
+      transportType: "item",
+      httpMethod: "POST",
+      params: {
+        id: {
+          name: "id",
+          displayName: "Primary Key",
+          type: "number",
+          role: "value",
+          get source() { return (domain.types.AbstractClass as ModelType & { name: "AbstractClass" }).props.id },
+          rules: {
+            required: val => val != null || "Primary Key is required.",
+          }
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "number",
+        role: "value",
+      },
+    },
+    getCount: {
+      name: "getCount",
+      displayName: "Get Count",
+      transportType: "item",
+      httpMethod: "POST",
+      isStatic: true,
+      params: {
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "number",
+        role: "value",
+      },
+    },
+    echoAbstractModel: {
+      name: "echoAbstractModel",
+      displayName: "Echo Abstract Model",
+      transportType: "item",
+      httpMethod: "POST",
+      isStatic: true,
+      params: {
+        model: {
+          name: "model",
+          displayName: "Model",
+          type: "model",
+          get typeDef() { return (domain.types.AbstractClass as ModelType & { name: "AbstractClass" }) },
+          role: "value",
+          rules: {
+            required: val => val != null || "Model is required.",
+          }
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "model",
+        get typeDef() { return (domain.types.AbstractClass as ModelType & { name: "AbstractClass" }) },
+        role: "value",
+      },
+    },
+  },
+  dataSources: {
+  },
+}
+export const AbstractClassImpl = domain.types.AbstractClassImpl = {
+  name: "AbstractClassImpl" as const,
+  displayName: "Abstract Class Impl",
+  get displayProp() { return this.props.id }, 
+  get baseTypes() { return [
+    (domain.types.AbstractClass as ModelType & { name: "AbstractClass" }),
+  ]},
+  type: "model",
+  controllerRoute: "AbstractClassImpl",
+  get keyProp() { return this.props.id }, 
+  behaviorFlags: 7 as BehaviorFlags,
+  props: {
+    implString: {
+      name: "implString",
+      displayName: "Impl String",
+      type: "string",
+      role: "value",
+    },
+    id: {
+      name: "id",
+      displayName: "Id",
+      type: "number",
+      role: "primaryKey",
+      hidden: 3 as HiddenAreas,
+    },
+    abstractClassString: {
+      name: "abstractClassString",
+      displayName: "Abstract Class String",
+      type: "string",
+      role: "value",
+    },
+    abstractModelPeople: {
+      name: "abstractModelPeople",
+      displayName: "Abstract Model People",
+      type: "collection",
+      itemType: {
+        name: "$collectionItem",
+        displayName: "",
+        role: "value",
+        type: "model",
+        get typeDef() { return (domain.types.AbstractClassPerson as ModelType & { name: "AbstractClassPerson" }) },
+      },
+      role: "collectionNavigation",
+      get foreignKey() { return (domain.types.AbstractClassPerson as ModelType & { name: "AbstractClassPerson" }).props.abstractClassId as ForeignKeyProperty },
+      get inverseNavigation() { return (domain.types.AbstractClassPerson as ModelType & { name: "AbstractClassPerson" }).props.abstractClass as ModelReferenceNavigationProperty },
+      manyToMany: {
+        name: "people",
+        displayName: "People",
+        get typeDef() { return (domain.types.Person as ModelType & { name: "Person" }) },
+        get farForeignKey() { return (domain.types.AbstractClassPerson as ModelType & { name: "AbstractClassPerson" }).props.personId as ForeignKeyProperty },
+        get farNavigationProp() { return (domain.types.AbstractClassPerson as ModelType & { name: "AbstractClassPerson" }).props.person as ModelReferenceNavigationProperty },
+        get nearForeignKey() { return (domain.types.AbstractClassPerson as ModelType & { name: "AbstractClassPerson" }).props.abstractClassId as ForeignKeyProperty },
+        get nearNavigationProp() { return (domain.types.AbstractClassPerson as ModelType & { name: "AbstractClassPerson" }).props.abstractClass as ModelReferenceNavigationProperty },
+      },
+      dontSerialize: true,
+    },
+  },
+  methods: {
+    getId: {
+      name: "getId",
+      displayName: "Get Id",
+      transportType: "item",
+      httpMethod: "POST",
+      params: {
+        id: {
+          name: "id",
+          displayName: "Primary Key",
+          type: "number",
+          role: "value",
+          get source() { return (domain.types.AbstractClass as ModelType & { name: "AbstractClass" }).props.id },
+          rules: {
+            required: val => val != null || "Primary Key is required.",
+          }
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "number",
+        role: "value",
+      },
+    },
+    getCount: {
+      name: "getCount",
+      displayName: "Get Count",
+      transportType: "item",
+      httpMethod: "POST",
+      isStatic: true,
+      params: {
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "number",
+        role: "value",
+      },
+    },
+    echoAbstractModel: {
+      name: "echoAbstractModel",
+      displayName: "Echo Abstract Model",
+      transportType: "item",
+      httpMethod: "POST",
+      isStatic: true,
+      params: {
+        model: {
+          name: "model",
+          displayName: "Model",
+          type: "model",
+          get typeDef() { return (domain.types.AbstractClass as ModelType & { name: "AbstractClass" }) },
+          role: "value",
+          rules: {
+            required: val => val != null || "Model is required.",
+          }
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "model",
+        get typeDef() { return (domain.types.AbstractClass as ModelType & { name: "AbstractClass" }) },
+        role: "value",
+      },
+    },
+  },
+  dataSources: {
+  },
+}
+export const AbstractClassPerson = domain.types.AbstractClassPerson = {
+  name: "AbstractClassPerson" as const,
+  displayName: "Abstract Class Person",
+  get displayProp() { return this.props.id }, 
+  type: "model",
+  controllerRoute: "AbstractClassPerson",
+  get keyProp() { return this.props.id }, 
+  behaviorFlags: 7 as BehaviorFlags,
+  props: {
+    id: {
+      name: "id",
+      displayName: "Id",
+      type: "number",
+      role: "primaryKey",
+      hidden: 3 as HiddenAreas,
+    },
+    personId: {
+      name: "personId",
+      displayName: "Person Id",
+      type: "number",
+      role: "foreignKey",
+      get principalKey() { return (domain.types.Person as ModelType & { name: "Person" }).props.personId as PrimaryKeyProperty },
+      get principalType() { return (domain.types.Person as ModelType & { name: "Person" }) },
+      get navigationProp() { return (domain.types.AbstractClassPerson as ModelType & { name: "AbstractClassPerson" }).props.person as ModelReferenceNavigationProperty },
+      hidden: 3 as HiddenAreas,
+      rules: {
+        required: val => val != null || "Person is required.",
+      }
+    },
+    person: {
+      name: "person",
+      displayName: "Person",
+      type: "model",
+      get typeDef() { return (domain.types.Person as ModelType & { name: "Person" }) },
+      role: "referenceNavigation",
+      get foreignKey() { return (domain.types.AbstractClassPerson as ModelType & { name: "AbstractClassPerson" }).props.personId as ForeignKeyProperty },
+      get principalKey() { return (domain.types.Person as ModelType & { name: "Person" }).props.personId as PrimaryKeyProperty },
+      dontSerialize: true,
+    },
+    abstractClassId: {
+      name: "abstractClassId",
+      displayName: "Abstract Class Id",
+      type: "number",
+      role: "foreignKey",
+      get principalKey() { return (domain.types.AbstractClass as ModelType & { name: "AbstractClass" }).props.id as PrimaryKeyProperty },
+      get principalType() { return (domain.types.AbstractClass as ModelType & { name: "AbstractClass" }) },
+      get navigationProp() { return (domain.types.AbstractClassPerson as ModelType & { name: "AbstractClassPerson" }).props.abstractClass as ModelReferenceNavigationProperty },
+      hidden: 3 as HiddenAreas,
+      rules: {
+        required: val => val != null || "Abstract Class is required.",
+      }
+    },
+    abstractClass: {
+      name: "abstractClass",
+      displayName: "Abstract Class",
+      type: "model",
+      get typeDef() { return (domain.types.AbstractClass as ModelType & { name: "AbstractClass" }) },
+      role: "referenceNavigation",
+      get foreignKey() { return (domain.types.AbstractClassPerson as ModelType & { name: "AbstractClassPerson" }).props.abstractClassId as ForeignKeyProperty },
+      get principalKey() { return (domain.types.AbstractClass as ModelType & { name: "AbstractClass" }).props.id as PrimaryKeyProperty },
+      get inverseNavigation() { return (domain.types.AbstractClass as ModelType & { name: "AbstractClass" }).props.abstractModelPeople as ModelCollectionNavigationProperty },
+      dontSerialize: true,
+    },
+  },
+  methods: {
+  },
+  dataSources: {
+  },
+}
 export const AuditLog = domain.types.AuditLog = {
   name: "AuditLog" as const,
   displayName: "Audit Log",
@@ -308,6 +626,74 @@ export const AuditLogProperty = domain.types.AuditLogProperty = {
     newValueDescription: {
       name: "newValueDescription",
       displayName: "New Value Description",
+      type: "string",
+      role: "value",
+    },
+  },
+  methods: {
+  },
+  dataSources: {
+  },
+}
+export const BaseClass = domain.types.BaseClass = {
+  name: "BaseClass" as const,
+  displayName: "Base Class",
+  get displayProp() { return this.props.id }, 
+  get derivedTypes() { return [
+    (domain.types.BaseClassDerived as ModelType & { name: "BaseClassDerived" }),
+  ]},
+  type: "model",
+  controllerRoute: "BaseClass",
+  get keyProp() { return this.props.id }, 
+  behaviorFlags: 7 as BehaviorFlags,
+  props: {
+    id: {
+      name: "id",
+      displayName: "Id",
+      type: "number",
+      role: "primaryKey",
+      hidden: 3 as HiddenAreas,
+    },
+    baseClassString: {
+      name: "baseClassString",
+      displayName: "Base Class String",
+      type: "string",
+      role: "value",
+    },
+  },
+  methods: {
+  },
+  dataSources: {
+  },
+}
+export const BaseClassDerived = domain.types.BaseClassDerived = {
+  name: "BaseClassDerived" as const,
+  displayName: "Base Class Derived",
+  get displayProp() { return this.props.id }, 
+  get baseTypes() { return [
+    (domain.types.BaseClass as ModelType & { name: "BaseClass" }),
+  ]},
+  type: "model",
+  controllerRoute: "BaseClassDerived",
+  get keyProp() { return this.props.id }, 
+  behaviorFlags: 7 as BehaviorFlags,
+  props: {
+    derivedClassString: {
+      name: "derivedClassString",
+      displayName: "Derived Class String",
+      type: "string",
+      role: "value",
+    },
+    id: {
+      name: "id",
+      displayName: "Id",
+      type: "number",
+      role: "primaryKey",
+      hidden: 3 as HiddenAreas,
+    },
+    baseClassString: {
+      name: "baseClassString",
+      displayName: "Base Class String",
       type: "string",
       role: "value",
     },
@@ -2588,8 +2974,13 @@ interface AppDomain extends Domain {
     Titles: typeof Titles
   }
   types: {
+    AbstractClass: typeof AbstractClass
+    AbstractClassImpl: typeof AbstractClassImpl
+    AbstractClassPerson: typeof AbstractClassPerson
     AuditLog: typeof AuditLog
     AuditLogProperty: typeof AuditLogProperty
+    BaseClass: typeof BaseClass
+    BaseClassDerived: typeof BaseClassDerived
     Case: typeof Case
     CaseDto: typeof CaseDto
     CaseDtoStandalone: typeof CaseDtoStandalone

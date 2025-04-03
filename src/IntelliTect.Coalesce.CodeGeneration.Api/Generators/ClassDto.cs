@@ -38,7 +38,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                 "System",
                 "System.Linq",
                 "System.Collections.Generic",
-                "System.Security.Claims"
+                "System.Security.Claims",
+                "System.Text.Json.Serialization",
             };
             foreach (var ns in namespaces.OrderBy(n => n))
             {
@@ -57,7 +58,20 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
 
         private void WriteParameterDto(CSharpCodeBuilder b)
         {
-            using (b.Block($"public partial class {Model.ParameterDtoTypeName} : GeneratedParameterDto<{Model.FullyQualifiedName}>"))
+            var allVariants = Model.ClientDerivedTypes;
+            if (allVariants.Any() && !Model.Type.IsAbstract) allVariants = allVariants.Prepend(Model);
+            foreach (var derived in allVariants)
+            {
+                b.Line($"[JsonDerivedType(typeof({derived.ParameterDtoTypeName}), typeDiscriminator: {derived.ClientTypeName.QuotedStringLiteralForCSharp()})]");
+            }
+
+            ClassViewModel baseType = Model.ClientBaseTypes.FirstOrDefault();
+
+            string inheritClause = baseType is not null
+                ? $"{baseType.ParameterDtoTypeName}, IGeneratedParameterDto<{Model.FullyQualifiedName}>"
+                : $"SparseDto, IGeneratedParameterDto<{Model.FullyQualifiedName}>";
+
+            using (b.Block($"public partial class {Model.ParameterDtoTypeName} : {inheritClause}"))
             {
                 b.Line($"public {Model.ParameterDtoTypeName}() {{ }}");
 
@@ -72,14 +86,16 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                         .ThenBy(p => p.ClassFieldOrder)
                     .ToList();
 
+                var ownProps = orderedProps.Where(p => baseType?.PropertyByName(p.Name) is null);
+
                 b.Line();
-                foreach (PropertyViewModel prop in orderedProps)
+                foreach (PropertyViewModel prop in ownProps)
                 {
                     b.Line($"private {prop.Type.NullableTypeForDto(isInput: true, dtoNamespace: DtoNamespace)} _{prop.Name};");
                 }
 
                 b.Line();
-                foreach (PropertyViewModel prop in orderedProps)
+                foreach (PropertyViewModel prop in ownProps)
                 {
                     using (b.Block($"public {prop.Type.NullableTypeForDto(isInput: true, dtoNamespace: DtoNamespace)} {prop.Name}"))
                     {
@@ -89,11 +105,25 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                 }
 
                 b.DocComment("Map from the current DTO instance to the domain object.");
-                using (b.Block($"public override void MapTo({Model.FullyQualifiedName} entity, IMappingContext context)"))
+                using (b.Block($"public void MapTo({Model.FullyQualifiedName} entity, IMappingContext context)"))
                 {
+                    var derivedTypes = Model.ClientDerivedTypes.ToList();
+                    if (derivedTypes.Any())
+                    {
+                        // Dispatch to derived types, since usages of this DTO in other generated code will
+                        // dispatch calls to the base type version of this method rather than the derived types.
+                        using (b.Block("switch (this)"))
+                        {
+                            foreach (var derived in derivedTypes)
+                            {
+                                b.Line($"case {derived.ParameterDtoTypeName} _{derived.Name}:");
+                                b.Indented($"_{derived.Name}.MapTo(entity, context);");
+                                b.Indented("return;");
+                            }
+                        }
+                    }
+
                     b.Line("var includes = context.Includes;");
-                    b.Line();
-                    b.Line("if (OnUpdate(entity, context)) return;");
                     b.Line();
 
                     WriteSetters(b, orderedProps
@@ -107,8 +137,23 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                 }
 
                 b.DocComment("Map from the current DTO instance to a new instance of the domain object.");
-                using (b.Block($"public override {Model.FullyQualifiedName} MapToNew(IMappingContext context)"))
+                using (b.Block($"public {(baseType is null ? "" : "new ")}{Model.FullyQualifiedName} MapToNew(IMappingContext context)"))
                 {
+                    var derivedTypes = Model.ClientDerivedTypes.ToList();
+                    if (derivedTypes.Any())
+                    {
+                        // Dispatch to derived types, since usages of this DTO in other generated code will
+                        // dispatch calls to the base type version of this method rather than the derived types.
+                        using (b.Block("switch (this)"))
+                        {
+                            foreach (var derived in derivedTypes)
+                            {
+                                b.Line($"case {derived.ParameterDtoTypeName} _{derived.Name}:");
+                                b.Indented($"return _{derived.Name}.MapToNew(context);");
+                            }
+                        }
+                    }
+
                     var properties = orderedProps
                         .Where(p => p.SecurityInfo.Init.IsAllowed())
                         .ToDictionary(p => p.Name, StringComparer.OrdinalIgnoreCase);
@@ -134,12 +179,17 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                         b.Line("// Unacceptable constructors:");
                         foreach (var reason in reasons) b.Append("// ").Line(reason);
 
-                        if (properties.Count == 0)
+                        if (Model.Type.IsAbstract)
+                        {
+                            // There's no constructor we can use, but also no properties that can even be mapped.
+                            b.Line("throw new NotSupportedException(" +
+                                $"\"Type {Model.Name} is abstract and therefore will never be instantiated directly by Coalesce.\");");
+                        }
+                        else if (properties.Count == 0)
                         {
                             // There's no constructor we can use, but also no properties that can even be mapped.
                             b.Line("throw new NotSupportedException(" +
                                 $"\"Type {Model.Name} has no initializable properties and so cannot be used as an input to any Coalesce-generated APIs.\");");
-                            return;
                         }
                         else if (properties.All(p => p.Value.SecurityInfo.Init.IsUnused))
                         {
@@ -148,88 +198,110 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                             b.Line("throw new NotSupportedException(" +
                                 $"\"Type {Model.Name} does not have a constructor suitable for use by Coalesce for new object instantiation. " +
                                 "Fortunately, this type appears to never be used in an input position in a Coalesce-generated API.\");");
-                            return;
                         }
                         else
                         {
                             throw new Exception($"Unable to find an appropriate constructor for type {Model.FullyQualifiedName}. The following public constructors were found to be insufficient: \n\n {string.Join("\n", reasons)}");
                         }
                     }
-
-                    var ctorUsage = bestCtor.DtoMapToNewConstructorUsage;
-                    var ctorParams = ctorUsage.CtorParams;
-                    var initParams = ctorUsage.InitParams;
-
-                    if (!ctorParams.Any() && !initParams.Any())
-                    {
-                        b.Line($"var entity = new {Model.FullyQualifiedName}();");
-                        b.Line($"MapTo(entity, context);");
-                        b.Line($"return entity;");
-                        return;
-                    }
-
-                    b.Line("var includes = context.Includes;");
-                    b.Line();
-
-                    b.Append($"var entity = new {Model.FullyQualifiedName}(");
-                    if (ctorParams.Any()) b.Line();
-                    for (int i = 0; i < ctorParams.Count; i++)
-                    {
-                        b.Indented(InlinePropertyRhs(ctorParams[i]) + (i < ctorParams.Count - 1 ? "," : ""));
-                    }
-                    b.Append(")");
-
-                    if (initParams.Any())
-                    {
-                        using (b.Block(closeWith: ";"))
-                        {
-                            foreach (var prop in initParams)
-                            {
-                                b.Line($"{prop.Name} = {InlinePropertyRhs(prop)},");
-                            }
-                        }
-                    }
                     else
                     {
-                        b.Append(";");
-                    }
+                        var ctorUsage = bestCtor.DtoMapToNewConstructorUsage;
+                        var ctorParams = ctorUsage.CtorParams;
+                        var initParams = ctorUsage.InitParams;
 
-                    b.Line();
-                    b.Line("if (OnUpdate(entity, context)) return entity;");
-
-                    WriteSetters(b, ctorUsage.SetParams
-                        .Select(p =>
+                        if (!ctorParams.Any() && !initParams.Any())
                         {
-                            var (conditional, setter) = DtoToModelPropertySetter(p, p.SecurityInfo.Init);
-                            conditional = conditional.Prepend($"ShouldMapTo(nameof({p.Name}))");
-                            return (conditional, $"entity.{p.Name} = {setter};");
-                        }));
-
-                    b.Line();
-                    b.Line("return entity;");
-
-                    string InlinePropertyRhs(PropertyViewModel p)
-                    {
-                        // Init-only props must be set here where we instantiate the type.
-                        // They cannot be handled by the record
-                        var (conditional, setter) = DtoToModelPropertySetter(p, p.SecurityInfo.Init, modelVar: null);
-
-                        if (conditional.Any())
-                        {
-                            return $"({string.Join(" && ", conditional)}) ? {setter} : default";
+                            b.Line($"var entity = new {Model.FullyQualifiedName}();");
+                            b.Line($"MapTo(entity, context);");
+                            b.Line($"return entity;");
                         }
                         else
                         {
-                            return setter;
+                            b.Line("var includes = context.Includes;");
+                            b.Line();
+
+                            b.Append($"var entity = new {Model.FullyQualifiedName}(");
+                            if (ctorParams.Any()) b.Line();
+                            for (int i = 0; i < ctorParams.Count; i++)
+                            {
+                                b.Indented(InlinePropertyRhs(ctorParams[i]) + (i < ctorParams.Count - 1 ? "," : ""));
+                            }
+                            b.Append(")");
+
+                            if (initParams.Any())
+                            {
+                                using (b.Block(closeWith: ";"))
+                                {
+                                    foreach (var prop in initParams)
+                                    {
+                                        b.Line($"{prop.Name} = {InlinePropertyRhs(prop)},");
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                b.Append(";");
+                            }
+
+                            WriteSetters(b, ctorUsage.SetParams
+                                .Select(p =>
+                                {
+                                    var (conditional, setter) = DtoToModelPropertySetter(p, p.SecurityInfo.Init);
+                                    conditional = conditional.Prepend($"ShouldMapTo(nameof({p.Name}))");
+                                    return (conditional, $"entity.{p.Name} = {setter};");
+                                }));
+
+                            b.Line();
+                            b.Line("return entity;");
+                        }
+
+                        string InlinePropertyRhs(PropertyViewModel p)
+                        {
+                            // Init-only props must be set here where we instantiate the type.
+                            // They cannot be handled by the record
+                            var (conditional, setter) = DtoToModelPropertySetter(p, p.SecurityInfo.Init, modelVar: null);
+
+                            if (conditional.Any())
+                            {
+                                return $"({string.Join(" && ", conditional)}) ? {setter} : default";
+                            }
+                            else
+                            {
+                                return setter;
+                            }
                         }
                     }
                 }
+
+                b.Line();
+                b.Line($$"""
+                    public {{Model.FullyQualifiedName}} MapToModelOrNew({{Model.FullyQualifiedName}} obj, IMappingContext context)
+                    {
+                        if (obj is null) return MapToNew(context);
+                        MapTo(obj, context);
+                        return obj;
+                }
+                """);
             }
         }
 
         private void WriteResponseDto(CSharpCodeBuilder b)
         {
-            using (b.Block($"public partial class {Model.ResponseDtoTypeName} : GeneratedResponseDto<{Model.FullyQualifiedName}>"))
+            var allVariants = Model.ClientDerivedTypes;
+            if (allVariants.Any() && !Model.Type.IsAbstract) allVariants = allVariants.Prepend(Model);
+            foreach (var derived in allVariants)
+            {
+                b.Line($"[JsonDerivedType(typeof({derived.ResponseDtoTypeName}), typeDiscriminator: {derived.ClientTypeName.QuotedStringLiteralForCSharp()})]");
+            }
+
+            ClassViewModel baseType = Model.ClientBaseTypes.FirstOrDefault();
+
+            string inheritClause = baseType is not null
+                ? $"{baseType.ResponseDtoTypeName}, IGeneratedResponseDto<{Model.FullyQualifiedName}>"
+                : $"IGeneratedResponseDto<{Model.FullyQualifiedName}>";
+
+            using (b.Block($"public partial class {Model.ResponseDtoTypeName} : {inheritClause}"))
             {
                 b.Line($"public {Model.ResponseDtoTypeName}() {{ }}");
 
@@ -246,15 +318,34 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                         .ThenBy(p => p.ClassFieldOrder)
                     .ToList();
 
-                foreach (PropertyViewModel prop in orderedProps)
+                var ownProps = orderedProps.Where(p => baseType?.PropertyByName(p.Name) is null);
+
+                foreach (PropertyViewModel prop in ownProps)
                 {
                     b.Line($"public {prop.Type.NullableTypeForDto(isInput: false, dtoNamespace: DtoNamespace)} {prop.Name} {{ get; set; }}");
                 }
 
                 b.DocComment("Map from the domain object to the properties of the current DTO instance.");
-                using (b.Block($"public override void MapFrom({Model.FullyQualifiedName} obj, IMappingContext context, IncludeTree tree = null)"))
+                using (b.Block($"public void MapFrom({Model.FullyQualifiedName} obj, IMappingContext context, IncludeTree tree = null)"))
                 {
                     b.Line("if (obj == null) return;");
+
+                    var derivedTypes = Model.ClientDerivedTypes.ToList();
+                    if (derivedTypes.Any())
+                    {
+                        // Dispatch to derived types, since usages of this DTO in other generated code will
+                        // dispatch calls to the base type version of this method rather than the derived types.
+                        using (b.Block("switch (this)"))
+                        {
+                            foreach (var derived in derivedTypes)
+                            {
+                                b.Line($"case {derived.ResponseDtoTypeName} _{derived.Name}:");
+                                b.Indented($"_{derived.Name}.MapFrom(({derived.FullyQualifiedName})obj, context, tree);");
+                                b.Indented($"return;");
+                            }
+                        }
+                    }
+
                     b.Line("var includes = context.Includes;");
                     b.Line();
 

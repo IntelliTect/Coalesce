@@ -79,7 +79,10 @@ import { computed, camelize } from "vue";
 import { ApiState, ItemApiState, ListApiState } from "coalesce-vue";
 
 type AnyLoader = ItemApiState<any, any> | ListApiState<any, any>;
-type AnyLoaderMaybe = AnyLoader | null | undefined | false;
+
+type AnyLoaderMaybe =
+  // Intersection with `Function` makes vue emit correct runtime props.
+  (AnyLoader & Function) | null | undefined | false;
 
 // Since the component props are the most general level of flags
 // and all flags default to true, include only the props that will

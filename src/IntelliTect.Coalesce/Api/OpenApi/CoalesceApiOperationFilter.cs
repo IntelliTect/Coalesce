@@ -162,7 +162,7 @@ namespace IntelliTect.Coalesce.Api.OpenApi
 
             var dataSources = declaredFor.ClassViewModel!.ClientDataSources(reflectionRepository);
 
-            var dataSourceNameParam = operation.Parameters.FirstOrDefault(p => p.Name == nameof(IDataSourceParameters.DataSource));
+            var dataSourceNameParam = operation.Parameters?.FirstOrDefault(p => p.Name == nameof(IDataSourceParameters.DataSource));
             if (dataSourceNameParam is not null)
             {
                 dataSourceNameParam.Schema = new OpenApiSchema
@@ -176,7 +176,7 @@ namespace IntelliTect.Coalesce.Api.OpenApi
 
                 foreach (var param in dataSources.SelectMany(ds => ds.DataSourceParameters).GroupBy(ds => ds.Name))
                 {
-                    var openApiParam = operation.Parameters.FirstOrDefault(p => 
+                    var openApiParam = operation.Parameters?.FirstOrDefault(p => 
                         p.Name.Equals($"{dataSourceNameParam.Name}.{param.Key}", StringComparison.OrdinalIgnoreCase));
 
                     if (openApiParam is not null)

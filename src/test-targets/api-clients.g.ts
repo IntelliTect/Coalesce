@@ -535,6 +535,13 @@ export class PersonApiClient extends ModelApiClient<$models.Person> {
     return this.$invoke($method, $params, $config)
   }
   
+  public methodWithExplicitlyInjectedDataSource($config?: AxiosRequestConfig): AxiosPromise<ItemResult<$models.Person>> {
+    const $method = this.$metadata.methods.methodWithExplicitlyInjectedDataSource
+    const $params =  {
+    }
+    return this.$invoke($method, $params, $config)
+  }
+  
 }
 
 

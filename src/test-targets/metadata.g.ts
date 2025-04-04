@@ -3293,6 +3293,22 @@ export const Person = domain.types.Person = {
         role: "value",
       },
     },
+    methodWithExplicitlyInjectedDataSource: {
+      name: "methodWithExplicitlyInjectedDataSource",
+      displayName: "Method With Explicitly Injected Data Source",
+      transportType: "item",
+      httpMethod: "POST",
+      isStatic: true,
+      params: {
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "model",
+        get typeDef() { return (domain.types.Person as ModelType & { name: "Person" }) },
+        role: "value",
+      },
+    },
   },
   dataSources: {
     borCPeople: {

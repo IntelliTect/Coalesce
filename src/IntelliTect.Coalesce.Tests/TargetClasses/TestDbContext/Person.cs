@@ -191,6 +191,14 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
             );
         }
 
+        [Coalesce, Execute]
+        public static Person MethodWithExplicitlyInjectedDataSource(AppDbContext db, [Inject] Person.WithoutCases dataSource)
+        {
+            // This method is an ad-hoc test for CoalesceApiDescriptionProvider
+            // to check that it handles DS parameters that aren't bound with our custom model binder correctly.
+            return null;
+        }
+
         [Coalesce, DefaultDataSource]
         public class WithoutCases : StandardDataSource<Person, AppDbContext>
         {

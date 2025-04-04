@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace IntelliTect.Coalesce.Api
@@ -32,6 +34,27 @@ namespace IntelliTect.Coalesce.Api
                 var method = new ReflectionMethodViewModel(methodInfo, cvm, cvm);
 
                 ProcessStandardParameters(operation, method);
+                FixEnumSerializationType(operation, method);
+            }
+        }
+
+        /// <summary>
+        /// Workaround https://github.com/dotnet/aspnetcore/issues/61327 by correcting enum types from String
+        /// to their underlying integral type. Coalesce also just generally only handles enums as numbers on the wire anyway,
+        /// so this is also more correctl.
+        /// </summary>
+        private void FixEnumSerializationType(ApiDescription operation, ReflectionMethodViewModel method)
+        {
+            var parameters = operation.ParameterDescriptions;
+            foreach (var parameter in parameters)
+            {
+                if (
+                    parameter.ParameterDescriptor?.ParameterType?.IsAssignableTo(typeof(Enum)) == true &&
+                    parameter.Type == typeof(string)
+                )
+                {
+                    parameter.Type = Enum.GetUnderlyingType(parameter.ParameterDescriptor.ParameterType);
+                }
             }
         }
 
@@ -91,13 +114,29 @@ namespace IntelliTect.Coalesce.Api
                 {
                     var dsParam = group.First();
                     var dataSource = dsParam.Parent;
+                    var type = dsParam.Type.TypeInfo;
+
+                    // If the datasource parameter is a class, transform the type into its generated parameter DTO,
+                    // which is what is actually used at runtime by DataSourceModelBinder.
+                    if (
+                        reflectionRepository.GetOrAddType(type) is TypeViewModel tvm &&
+                        tvm.PureType.ClassViewModel is ClassViewModel cvm &&
+                        reflectionRepository.GeneratedParameterDtos.GetValueOrDefault(cvm) is ClassViewModel paramDtoType
+                    )
+                    {
+                        type = paramDtoType.Type.TypeInfo;
+                        if (tvm.IsCollection)
+                        {
+                            type = type.MakeArrayType();
+                        }
+                    }
 
                     operation.ParameterDescriptions.Add(new ApiParameterDescription()
                     {
                         Source = BindingSource.Query,
                         Name = $"{paramVm.Name}.{dsParam.Name}",
                         IsRequired = false,
-                        Type = dsParam.Type.TypeInfo,
+                        Type = type,
                         ModelMetadata = operation.ParameterDescriptions.First().ModelMetadata.GetMetadataForProperty(dataSource.Type.TypeInfo, dsParam.Name)
                     });
                 }

@@ -1,4 +1,4 @@
-import { mockEndpoint } from "./test-utils";
+import { delay, mockEndpoint } from "./test-utils";
 
 import {
   PersonViewModel,
@@ -9,6 +9,7 @@ import {
 import { AbstractImpl1 } from "@test-targets/models.g";
 import { ViewModelFactory } from "../src";
 import { AbstractImpl1ApiClient } from "@test-targets/api-clients.g";
+import { computed, ref } from "vue";
 
 describe("ViewModel", () => {
   test("$bulkSave creation of TPH entity with many-to-many that references base type", async () => {
@@ -83,19 +84,8 @@ describe("abstract proxy", () => {
     impl1OnlyField: "foo",
   };
 
-  test("class name", async () => {
-    const vm = new AbstractModelViewModel();
-    expect(vm.constructor.name).toBe("AbstractModelViewModelProxy");
-  });
-
-  test("becomes concrete type when loaded with initial data", async () => {
-    const vm = new AbstractModelViewModel(new AbstractImpl1(expectedData));
-
-    assertIsImpl1(vm);
-  });
-
-  test("can load when ID is provided by initial data", async () => {
-    const loadMock = mockEndpoint(
+  function mockGet() {
+    mockEndpoint(
       "/AbstractModel/get/1",
       vitest.fn((req) => ({
         wasSuccessful: true,
@@ -105,6 +95,22 @@ describe("abstract proxy", () => {
         },
       }))
     );
+  }
+
+  test("class name", async () => {
+    const vm = new AbstractModelViewModel();
+    expect(vm.constructor.name).toBe("AbstractModelViewModelProxy");
+  });
+
+  test("becomes concrete type when loaded with initial data", async () => {
+    const vm = new AbstractModelViewModel(new AbstractImpl1(expectedData));
+
+    expect(vm.$getPropDirty("id")).toBeTruthy();
+    assertIsImpl1(vm);
+  });
+
+  test("can load when ID is provided by initial data", async () => {
+    mockGet();
 
     const vm = new AbstractModelViewModel({ id: 1 });
     expect(vm.id).toBe(1);
@@ -115,22 +121,47 @@ describe("abstract proxy", () => {
   });
 
   test("becomes concrete type after $load", async () => {
-    const loadMock = mockEndpoint(
-      "/AbstractModel/get",
-      vitest.fn((req) => ({
-        wasSuccessful: true,
-        object: {
-          $type: "AbstractImpl1",
-          ...expectedData,
-        },
-      }))
-    );
+    mockGet();
 
     const vm = new AbstractModelViewModel();
     await vm.$load(1);
 
     assertIsImpl1(vm);
     assertLoaded(vm);
+  });
+
+  test("instanceof is reactive", async () => {
+    mockGet();
+
+    const vm = new AbstractModelViewModel();
+
+    // Dummy ref because Vue will always recompute a computed on every access if the computed has no deps.
+    const dummyRef = ref(1);
+
+    const isImpl1 = computed(
+      () => dummyRef.value && vm instanceof AbstractImpl1ViewModel
+    );
+    expect(isImpl1.value).toBeFalsy();
+
+    await vm.$load(1);
+    expect(isImpl1.value).toBeTruthy();
+  });
+
+  test("$metadata is reactive", async () => {
+    mockGet();
+
+    const vm = new AbstractModelViewModel();
+
+    // Dummy ref because Vue will always recompute a computed on every access if the computed has no deps.
+    const dummyRef = ref(1);
+
+    const isImpl1 = computed(
+      () => dummyRef.value && vm.$metadata.name == "AbstractImpl1"
+    );
+    expect(isImpl1.value).toBeFalsy();
+
+    await vm.$load(1);
+    expect(isImpl1.value).toBeTruthy();
   });
 
   function assertLoaded(vm: AbstractModelViewModel) {

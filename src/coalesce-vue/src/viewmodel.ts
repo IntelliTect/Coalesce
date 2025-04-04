@@ -1279,11 +1279,13 @@ export abstract class ViewModel<
     }
   }
 
-  constructor(
-    // The following MUST be declared in the constructor so its value will be available to property initializers.
+  /** The metadata representing the type of data that this ViewModel handles. */
+  public declare readonly $metadata: TModel["$metadata"];
 
-    /** The metadata representing the type of data that this ViewModel handles. */
-    public readonly $metadata: TModel["$metadata"],
+  constructor(
+    // Metadata is set on the prototype by `defineProps`.
+    // This parameter only exists for backwards-compat.
+    $metadata: TModel["$metadata"],
 
     /** Instance of an API client for the model through which direct, stateless API requests may be made. */
     public readonly $apiClient: TApi,
@@ -1346,6 +1348,11 @@ export abstract class ViewModel<
 }
 
 const $loadProxy = Symbol("$loadProxy");
+const $protoVersion = Symbol("$protoVersion");
+/** Create a class that represents an abstract model type
+ * and will turn itself into the proper concrete ViewModel type
+ * when loaded.
+ */
 export function createAbstractProxyViewModelType<
   TModel extends Model<ModelType>,
   TViewModel extends ViewModel
@@ -1355,95 +1362,115 @@ export function createAbstractProxyViewModelType<
 ): {
   new (initialData?: DeepPartial<TModel> | null): TViewModel;
 } {
-  return function abstractProxy(initialData?: DeepPartial<any> | null) {
-    const apiClient = new apiClientCtor();
-
-    if (initialData && "$metadata" in initialData) {
-      return ViewModelFactory.get(
-        initialData.$metadata!.name!,
-        initialData,
-        true
-      );
-    }
-
-    function unsupportedError() {
-      return new Error(`"Operation not supported: This ViewModel instance is a proxy for an abstract type, with its concrete implementation not yet decided.
+  function unsupportedError() {
+    return new Error(`"Operation not supported: This ViewModel instance is a proxy for an abstract type, with its concrete implementation not yet decided.
 
       Try one of the following to obtain a concrete implementation:
         - $load(...) or $loadFromModel(...) data for a concrete implementation
         - Instantiate a concrete implementation of this abstract type instead of this abstract proxy
       `);
+  }
+
+  class AbstractVmProxy extends ViewModel<TModel, ModelApiClient<TModel>> {
+    [$loadProxy]?: ItemApiState<any, any, any>;
+    [$protoVersion]? = ref(0);
+
+    override get $load() {
+      return this[$loadProxy]!;
     }
-    class AbstractVmProxy extends ViewModel {
-      constructor(initialDirtyData?: any) {
-        super(metadata, apiClient, initialDirtyData);
-      }
-
-      [$loadProxy]!: ItemApiState<any, any, any>;
-
-      override get $load() {
-        return this[$loadProxy];
-      }
-      override get $save() {
-        return apiClient.$makeCaller("item", (c) => {
-          throw unsupportedError();
-        });
-      }
-      override get $bulkSave() {
-        return apiClient.$makeCaller("item", (c) => {
-          throw unsupportedError();
-        });
-      }
-      override get $delete() {
-        return apiClient.$makeCaller("item", (c) => {
-          throw unsupportedError();
-        });
-      }
+    override get $save() {
+      return this.$apiClient.$makeCaller("item", (c) => {
+        throw unsupportedError();
+      }) as any;
     }
-    Object.defineProperty(AbstractVmProxy, "name", {
-      value: metadata.name + "ViewModelProxy",
-    });
-    defineProps(AbstractVmProxy, metadata);
+    override get $bulkSave() {
+      return this.$apiClient.$makeCaller("item", (c) => {
+        throw unsupportedError();
+      }) as any;
+    }
+    override get $delete() {
+      return this.$apiClient.$makeCaller("item", (c) => {
+        throw unsupportedError();
+      }) as any;
+    }
 
-    let vm = new AbstractVmProxy(initialData);
+    constructor(initialDirtyData?: any) {
+      if (
+        initialDirtyData &&
+        "$metadata" in initialDirtyData &&
+        ViewModel.typeLookup?.[initialDirtyData.$metadata.name]
+      ) {
+        // We know the real concrete type of this ViewModel from the metadata.
+        // Return the proper instance directly, bypassing the conversion process.
+        return ViewModelFactory.get(
+          initialDirtyData.$metadata.name,
+          initialDirtyData,
+          false
+        ) as any;
+      }
 
-    let $load = (vm[$loadProxy] = apiClient
-      .$makeCaller("item", (c, id?: any) => {
-        return c.get(id != null ? id : vm.$primaryKey, vm.$params);
-      })
-      .onFulfilled((state) => {
-        const result = state.result;
+      super(metadata, new apiClientCtor(), initialDirtyData);
 
-        var realCtor = ViewModel.typeLookup![result!.$metadata.name];
+      const vm = this;
 
-        // Grab real metadata and API client instances of the concrete type.
-        const { $apiClient, $metadata } = new realCtor();
+      let $load = (vm[$loadProxy] = vm.$apiClient
+        .$makeCaller("item", (c, id?: any) => {
+          return c.get(id != null ? id : vm.$primaryKey, vm.$params);
+        })
+        .onFulfilled((state) => {
+          const result = state.result!;
 
-        // Convert the ViewModel instance to the target type:
-        Object.setPrototypeOf(vm, realCtor.prototype);
-        //@ts-expect-error normally readonly.
-        vm.$metadata = $metadata;
+          var realCtor = ViewModel.typeLookup![result.$metadata.name];
 
-        // Convert the ApiClient instance to the target type:
-        Object.setPrototypeOf(vm.$apiClient, Object.getPrototypeOf($apiClient));
-        vm.$apiClient.$metadata = $metadata;
+          // Grab real metadata and API client instances of the concrete type.
+          const { $apiClient, $metadata } = new realCtor();
 
-        // Populate the properties of the $load caller on the real $load caller instance.
-        //@ts-expect-error protected prop or fn
-        vm.$load.setResponseProps($load.rawResponse.data);
-        //@ts-expect-error protected prop or fn
-        vm.$load.__rawResponse.value = $load.rawResponse;
-        vm.$load.isLoading = false;
-        vm.$load.concurrencyMode = $load.concurrencyMode;
+          // Update the tracking ref for prototype version so that instanceof is reactive.
+          vm[$protoVersion]!.value++;
+          delete vm[$protoVersion];
 
-        //@ts-expect-error cleaning up for GC
-        vm[$loadProxy] = $load = undefined;
+          // Convert the ViewModel instance to the target type:
+          Object.setPrototypeOf(vm, realCtor.prototype);
 
-        vm.$loadCleanData(result);
-      }));
+          // Convert the ApiClient instance to the target type:
+          Object.setPrototypeOf(
+            vm.$apiClient,
+            Object.getPrototypeOf($apiClient)
+          );
+          vm.$apiClient.$metadata = $metadata;
 
-    return vm;
-  } as any;
+          // Populate the properties of the $load caller on the real $load caller instance.
+          //@ts-expect-error protected prop or fn
+          vm.$load.setResponseProps($load.rawResponse.data);
+          //@ts-expect-error protected prop or fn
+          vm.$load.__rawResponse.value = $load.rawResponse;
+          vm.$load.isLoading = false;
+          vm.$load.concurrencyMode = $load.concurrencyMode;
+
+          //@ts-expect-error cleaning up for GC
+          $load = undefined;
+          delete vm[$loadProxy];
+
+          vm.$loadCleanData(result);
+        }));
+    }
+  }
+
+  Object.defineProperty(AbstractVmProxy, "name", {
+    value: metadata.name + "ViewModelProxy",
+  });
+
+  defineProps(AbstractVmProxy, metadata);
+
+  // Make `$metadata` reactive so components depending on it update when it changes.
+  Object.defineProperty(AbstractVmProxy.prototype, "$metadata", {
+    get() {
+      this[$protoVersion]?.value.toString();
+      return metadata;
+    },
+  });
+
+  return AbstractVmProxy as any;
 }
 
 export interface BulkSaveRequestRawItem {
@@ -2230,6 +2257,25 @@ export function defineProps<T extends new () => ViewModel>(
 ) {
   const props = Object.values(metadata.props);
   const descriptors = {} as PropertyDescriptorMap;
+
+  if (metadata.baseTypes?.some((base) => base.abstract)) {
+    // Make the `instanceof` operator against this type reactive if the type
+    // has a known abstract base class such that an instance could change types via AbstractVmProxy
+    Object.defineProperty(ctor, Symbol.hasInstance, {
+      value(x: any) {
+        // Take a dependency, tracked per instance, that will update when the instance changes type.
+        x[$protoVersion]?.value.toString();
+        return Object[Symbol.hasInstance].call(this, x);
+      },
+    });
+  }
+
+  descriptors["$metadata"] = {
+    enumerable: true,
+    configurable: true,
+    value: metadata,
+  };
+
   for (let i = 0; i < props.length; i++) {
     const prop = props[i];
     const propName = prop.name;

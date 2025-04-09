@@ -792,6 +792,31 @@ export class EnumPkListViewModel extends ListViewModel<$models.EnumPk, $apiClien
 }
 
 
+export interface MultipleParentsViewModel extends $models.MultipleParents {
+  id: number | null;
+  parent1Id: number | null;
+  get parent1(): Parent1ViewModel | null;
+  set parent1(value: Parent1ViewModel | $models.Parent1 | null);
+  parent2Id: number | null;
+  get parent2(): Parent2ViewModel | null;
+  set parent2(value: Parent2ViewModel | $models.Parent2 | null);
+}
+export class MultipleParentsViewModel extends ViewModel<$models.MultipleParents, $apiClients.MultipleParentsApiClient, number> implements $models.MultipleParents  {
+  
+  constructor(initialData?: DeepPartial<$models.MultipleParents> | null) {
+    super($metadata.MultipleParents, new $apiClients.MultipleParentsApiClient(), initialData)
+  }
+}
+defineProps(MultipleParentsViewModel, $metadata.MultipleParents)
+
+export class MultipleParentsListViewModel extends ListViewModel<$models.MultipleParents, $apiClients.MultipleParentsApiClient, MultipleParentsViewModel> {
+  
+  constructor() {
+    super($metadata.MultipleParents, new $apiClients.MultipleParentsApiClient())
+  }
+}
+
+
 export interface OneToOneChild1ViewModel extends $models.OneToOneChild1 {
   parentId: number | null;
   get parent(): OneToOneParentViewModel | null;
@@ -882,6 +907,58 @@ export class OneToOneParentListViewModel extends ListViewModel<$models.OneToOneP
   
   constructor() {
     super($metadata.OneToOneParent, new $apiClients.OneToOneParentApiClient())
+  }
+}
+
+
+export interface Parent1ViewModel extends $models.Parent1 {
+  id: number | null;
+  get children(): ViewModelCollection<MultipleParentsViewModel, $models.MultipleParents>;
+  set children(value: (MultipleParentsViewModel | $models.MultipleParents)[] | null);
+}
+export class Parent1ViewModel extends ViewModel<$models.Parent1, $apiClients.Parent1ApiClient, number> implements $models.Parent1  {
+  
+  
+  public addToChildren(initialData?: DeepPartial<$models.MultipleParents> | null) {
+    return this.$addChild('children', initialData) as MultipleParentsViewModel
+  }
+  
+  constructor(initialData?: DeepPartial<$models.Parent1> | null) {
+    super($metadata.Parent1, new $apiClients.Parent1ApiClient(), initialData)
+  }
+}
+defineProps(Parent1ViewModel, $metadata.Parent1)
+
+export class Parent1ListViewModel extends ListViewModel<$models.Parent1, $apiClients.Parent1ApiClient, Parent1ViewModel> {
+  
+  constructor() {
+    super($metadata.Parent1, new $apiClients.Parent1ApiClient())
+  }
+}
+
+
+export interface Parent2ViewModel extends $models.Parent2 {
+  id: number | null;
+  get children(): ViewModelCollection<MultipleParentsViewModel, $models.MultipleParents>;
+  set children(value: (MultipleParentsViewModel | $models.MultipleParents)[] | null);
+}
+export class Parent2ViewModel extends ViewModel<$models.Parent2, $apiClients.Parent2ApiClient, number> implements $models.Parent2  {
+  
+  
+  public addToChildren(initialData?: DeepPartial<$models.MultipleParents> | null) {
+    return this.$addChild('children', initialData) as MultipleParentsViewModel
+  }
+  
+  constructor(initialData?: DeepPartial<$models.Parent2> | null) {
+    super($metadata.Parent2, new $apiClients.Parent2ApiClient(), initialData)
+  }
+}
+defineProps(Parent2ViewModel, $metadata.Parent2)
+
+export class Parent2ListViewModel extends ListViewModel<$models.Parent2, $apiClients.Parent2ApiClient, Parent2ViewModel> {
+  
+  constructor() {
+    super($metadata.Parent2, new $apiClients.Parent2ApiClient())
   }
 }
 
@@ -1359,10 +1436,13 @@ const viewModelTypeLookup = ViewModel.typeLookup = {
   ComplexModel: ComplexModelViewModel,
   ComplexModelDependent: ComplexModelDependentViewModel,
   EnumPk: EnumPkViewModel,
+  MultipleParents: MultipleParentsViewModel,
   OneToOneChild1: OneToOneChild1ViewModel,
   OneToOneChild2: OneToOneChild2ViewModel,
   OneToOneManyChildren: OneToOneManyChildrenViewModel,
   OneToOneParent: OneToOneParentViewModel,
+  Parent1: Parent1ViewModel,
+  Parent2: Parent2ViewModel,
   Person: PersonViewModel,
   Product: ProductViewModel,
   ReadOnlyEntityUsedAsMethodInput: ReadOnlyEntityUsedAsMethodInputViewModel,
@@ -1387,10 +1467,13 @@ const listViewModelTypeLookup = ListViewModel.typeLookup = {
   ComplexModel: ComplexModelListViewModel,
   ComplexModelDependent: ComplexModelDependentListViewModel,
   EnumPk: EnumPkListViewModel,
+  MultipleParents: MultipleParentsListViewModel,
   OneToOneChild1: OneToOneChild1ListViewModel,
   OneToOneChild2: OneToOneChild2ListViewModel,
   OneToOneManyChildren: OneToOneManyChildrenListViewModel,
   OneToOneParent: OneToOneParentListViewModel,
+  Parent1: Parent1ListViewModel,
+  Parent2: Parent2ListViewModel,
   Person: PersonListViewModel,
   Product: ProductListViewModel,
   ReadOnlyEntityUsedAsMethodInput: ReadOnlyEntityUsedAsMethodInputListViewModel,

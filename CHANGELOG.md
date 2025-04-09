@@ -1,3 +1,7 @@
+# 5.3.8
+
+- Fix error in bulk saves where inheritance workaround added in 5.3.6 was not specific enough.
+
 # 5.3.7
 
 - Fix error in bulk saves where children of a model that has been `$remove()`'d where neither the children nor the removed model have PKs would still attempt to create.

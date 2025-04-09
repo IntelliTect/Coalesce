@@ -749,7 +749,14 @@ export abstract class ViewModel<
                 // The collection is the same collection, but has a different metadata instance
                 // so direct equality won't work.
                 (collection.$metadata.name == prop.inverseNavigation?.name &&
-                  collection.$metadata.type == prop.inverseNavigation.type))
+                  collection.$metadata.type == prop.inverseNavigation.type &&
+                  //@ts-expect-error
+                  collection.$metadata.itemType?.typeDef ==
+                    //@ts-expect-error
+                    prop.inverseNavigation.itemType?.typeDef &&
+                  //@ts-expect-error
+                  collection.$metadata.foreignKey?.name ==
+                    prop.inverseNavigation.foreignKey?.name))
             ) {
               // The reference navigation property has no value,
               // and the foreign key has no value,

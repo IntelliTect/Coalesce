@@ -394,6 +394,11 @@ export class EnumPkApiClient extends ModelApiClient<$models.EnumPk> {
 }
 
 
+export class MultipleParentsApiClient extends ModelApiClient<$models.MultipleParents> {
+  constructor() { super($metadata.MultipleParents) }
+}
+
+
 export class OneToOneChild1ApiClient extends ModelApiClient<$models.OneToOneChild1> {
   constructor() { super($metadata.OneToOneChild1) }
 }
@@ -411,6 +416,16 @@ export class OneToOneManyChildrenApiClient extends ModelApiClient<$models.OneToO
 
 export class OneToOneParentApiClient extends ModelApiClient<$models.OneToOneParent> {
   constructor() { super($metadata.OneToOneParent) }
+}
+
+
+export class Parent1ApiClient extends ModelApiClient<$models.Parent1> {
+  constructor() { super($metadata.Parent1) }
+}
+
+
+export class Parent2ApiClient extends ModelApiClient<$models.Parent2> {
+  constructor() { super($metadata.Parent2) }
 }
 
 

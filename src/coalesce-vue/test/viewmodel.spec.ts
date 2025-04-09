@@ -38,6 +38,9 @@ import {
   TestViewModel,
   ZipCodeViewModel,
   AbstractImpl1ViewModel,
+  MultipleParentsViewModel,
+  Parent1ViewModel,
+  Parent2ViewModel,
 } from "../../test-targets/viewmodels.g";
 import {
   StudentViewModel,
@@ -1442,6 +1445,59 @@ describe("ViewModel", () => {
             refs: {
               id: vm.abstractModelPeople[0].$stableId,
               abstractModelId: vm.$stableId,
+            },
+          },
+        ],
+      });
+
+      bulkSaveEndpoint.destroy();
+    });
+
+    test("child with multiple parents that reference child by same-named collection navigation", async () => {
+      // This test tests that the TPH type variance allowances aren't too permissive when
+      // comparing navigation properties by name.
+
+      const bulkSaveEndpoint = mockEndpoint(
+        "/Parent1/bulkSave",
+        vitest.fn((req) => ({
+          wasSuccessful: true,
+          object: null,
+        }))
+      );
+
+      const vm = new Parent1ViewModel({
+        children: [{}],
+      });
+
+      // Preconditions:
+      // Navigation property from the child must not be set,
+      // forcing bulk save to find the parent via `$parent.
+      expect(vm.children[0].parent1).toBeNull();
+      // There should be a collection nav on the other parent with the same name
+      expect(new Parent2ViewModel().$metadata.props.children.name).toBe(
+        vm.$metadata.props.children.name
+      );
+
+      await vm.$bulkSave();
+
+      const data = JSON.parse(bulkSaveEndpoint.mock.calls[0][0].data);
+      expect(data.items[1].refs).not.toHaveProperty("parent2Id");
+      expect(JSON.parse(bulkSaveEndpoint.mock.calls[0][0].data)).toMatchObject({
+        items: [
+          {
+            action: "save",
+            type: "Parent1",
+            data: { id: null },
+            refs: { id: vm.$stableId },
+            root: true,
+          },
+          {
+            action: "save",
+            type: "MultipleParents",
+            data: { id: null },
+            refs: {
+              id: vm.children[0].$stableId,
+              parent1Id: vm.$stableId,
             },
           },
         ],

@@ -434,6 +434,34 @@ export class EnumPk {
 }
 
 
+export interface MultipleParents extends Model<typeof metadata.MultipleParents> {
+  id: number | null
+  parent1Id: number | null
+  parent1: Parent1 | null
+  parent2Id: number | null
+  parent2: Parent2 | null
+}
+export class MultipleParents {
+  
+  /** Mutates the input object and its descendents into a valid MultipleParents implementation. */
+  static convert(data?: Partial<MultipleParents>): MultipleParents {
+    return convertToModel(data || {}, metadata.MultipleParents) 
+  }
+  
+  /** Maps the input object and its descendents to a new, valid MultipleParents implementation. */
+  static map(data?: Partial<MultipleParents>): MultipleParents {
+    return mapToModel(data || {}, metadata.MultipleParents) 
+  }
+  
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.MultipleParents; }
+  
+  /** Instantiate a new MultipleParents, optionally basing it on the given data. */
+  constructor(data?: Partial<MultipleParents> | {[k: string]: any}) {
+    Object.assign(this, MultipleParents.map(data || {}));
+  }
+}
+
+
 export interface OneToOneChild1 extends Model<typeof metadata.OneToOneChild1> {
   parentId: number | null
   parent: OneToOneParent | null
@@ -533,6 +561,56 @@ export class OneToOneParent {
   /** Instantiate a new OneToOneParent, optionally basing it on the given data. */
   constructor(data?: Partial<OneToOneParent> | {[k: string]: any}) {
     Object.assign(this, OneToOneParent.map(data || {}));
+  }
+}
+
+
+export interface Parent1 extends Model<typeof metadata.Parent1> {
+  id: number | null
+  children: MultipleParents[] | null
+}
+export class Parent1 {
+  
+  /** Mutates the input object and its descendents into a valid Parent1 implementation. */
+  static convert(data?: Partial<Parent1>): Parent1 {
+    return convertToModel(data || {}, metadata.Parent1) 
+  }
+  
+  /** Maps the input object and its descendents to a new, valid Parent1 implementation. */
+  static map(data?: Partial<Parent1>): Parent1 {
+    return mapToModel(data || {}, metadata.Parent1) 
+  }
+  
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.Parent1; }
+  
+  /** Instantiate a new Parent1, optionally basing it on the given data. */
+  constructor(data?: Partial<Parent1> | {[k: string]: any}) {
+    Object.assign(this, Parent1.map(data || {}));
+  }
+}
+
+
+export interface Parent2 extends Model<typeof metadata.Parent2> {
+  id: number | null
+  children: MultipleParents[] | null
+}
+export class Parent2 {
+  
+  /** Mutates the input object and its descendents into a valid Parent2 implementation. */
+  static convert(data?: Partial<Parent2>): Parent2 {
+    return convertToModel(data || {}, metadata.Parent2) 
+  }
+  
+  /** Maps the input object and its descendents to a new, valid Parent2 implementation. */
+  static map(data?: Partial<Parent2>): Parent2 {
+    return mapToModel(data || {}, metadata.Parent2) 
+  }
+  
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.Parent2; }
+  
+  /** Instantiate a new Parent2, optionally basing it on the given data. */
+  constructor(data?: Partial<Parent2> | {[k: string]: any}) {
+    Object.assign(this, Parent2.map(data || {}));
   }
 }
 
@@ -1452,6 +1530,7 @@ declare module "coalesce-vue/lib/model" {
     InitRecordWithDefaultCtor: InitRecordWithDefaultCtor
     InputOutputOnlyExternalTypeWithRequiredNonscalarProp: InputOutputOnlyExternalTypeWithRequiredNonscalarProp
     Location: Location
+    MultipleParents: MultipleParents
     OneToOneChild1: OneToOneChild1
     OneToOneChild2: OneToOneChild2
     OneToOneManyChildren: OneToOneManyChildren
@@ -1459,6 +1538,8 @@ declare module "coalesce-vue/lib/model" {
     OutputOnlyExternalTypeWithoutDefaultCtor: OutputOnlyExternalTypeWithoutDefaultCtor
     OutputOnlyExternalTypeWithoutDefaultCtorWithInputMappableProperties: OutputOnlyExternalTypeWithoutDefaultCtorWithInputMappableProperties
     OutputOnlyExternalTypeWithRequiredEntityProp: OutputOnlyExternalTypeWithRequiredEntityProp
+    Parent1: Parent1
+    Parent2: Parent2
     Person: Person
     PersonCriteria: PersonCriteria
     PositionalRecord: PositionalRecord

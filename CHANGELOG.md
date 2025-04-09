@@ -1,3 +1,7 @@
+# 5.3.7
+
+- Fix error in bulk saves where children of a model that has been `$remove()`'d where neither the children nor the removed model have PKs would still attempt to create.
+
 # 5.3.6
 
 - Fix error in bulk saves where models that belong to inheritance hierarchies would get skipped over while performing collection fixup.

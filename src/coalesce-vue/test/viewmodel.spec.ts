@@ -1449,6 +1449,70 @@ describe("ViewModel", () => {
 
       bulkSaveEndpoint.destroy();
     });
+
+    test("added children, then removed, do not attempt to create", async () => {
+      const bulkSaveEndpoint = mockEndpoint(
+        "/Person/bulkSave",
+        vitest.fn((req) => ({
+          wasSuccessful: true,
+          object: null,
+        }))
+      );
+
+      const existingProduct = new ProductViewModel();
+      existingProduct.$loadCleanData({ productId: 1, name: "widget" });
+
+      const person = new PersonViewModel();
+      person.$loadCleanData({ personId: 1 });
+      const case1 = person.addToCasesAssigned({
+        caseProducts: [{ product: existingProduct }],
+      });
+      const case2 = person.addToCasesAssigned({
+        title: "Title",
+        caseProducts: [{ product: existingProduct }],
+      });
+      case1.$remove();
+
+      await person.$bulkSave();
+
+      expect(JSON.parse(bulkSaveEndpoint.mock.calls[0][0].data)).toMatchObject({
+        items: [
+          {
+            action: "none",
+            type: "Person",
+            data: { personId: 1 },
+            refs: { personId: person.$stableId },
+            root: true,
+          },
+          {
+            action: "save",
+            data: {
+              assignedToId: 1,
+              caseKey: null,
+              title: "Title",
+            },
+            refs: {
+              caseKey: case2.$stableId,
+            },
+            type: "Case",
+          },
+          {
+            action: "save",
+            data: {
+              caseProductId: null,
+              productId: 1,
+            },
+            refs: {
+              caseId: case2.$stableId,
+              caseProductId: case2.caseProducts[0].$stableId,
+            },
+            type: "CaseProduct",
+          },
+        ],
+      });
+
+      bulkSaveEndpoint.destroy();
+    });
   });
 
   describe("autoSave", () => {

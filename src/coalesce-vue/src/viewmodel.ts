@@ -709,7 +709,7 @@ export abstract class ViewModel<
 
           if (prop.role == "collectionNavigation") {
             const dependents = model.$data[prop.name];
-            if (dependents) {
+            if (dependents && (model._existsOnServer || !model._isRemoved)) {
               nextModels.push(...dependents);
             }
           } else if (prop.role == "referenceNavigation") {
@@ -740,7 +740,10 @@ export abstract class ViewModel<
                 (collection.$metadata.name == prop.inverseNavigation?.name &&
                   prop.typeDef.derivedTypes?.includes(
                     collection.$parent.$metadata
-                  )))
+                  ) &&
+                  //@ts-expect-error
+                  collection.$metadata.foreignKey?.name ==
+                    prop.inverseNavigation?.foreignKey?.name))
             ) {
               // The reference navigation property has no value,
               // and the foreign key has no value,
@@ -795,7 +798,7 @@ export abstract class ViewModel<
 
       if (model._isRemoved) {
         action = model._existsOnServer
-          ? "delete" // Delete items that have a PK are sent as a delete
+          ? "delete" // Removed items that have a PK are sent as a delete
           : "none"; // Do not send removed items that never had a PK.
       } else {
         // Save items that are dirty, or never saved, or have unresolved refs in the payload

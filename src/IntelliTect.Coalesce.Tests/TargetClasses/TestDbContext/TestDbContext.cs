@@ -43,6 +43,10 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         public DbSet<OneToOneChild2> OneToOneChild2s { get; set; }
         public DbSet<OneToOneManyChildren> OneToOneManyChildren { get; set; }
 
+        public DbSet<MultipleParents> MultipleParents { get; set; }
+        public DbSet<Parent1> Parent1s { get; set; }
+        public DbSet<Parent2> Parent2s { get; set; }
+
 
         public AppDbContext() : this(Guid.NewGuid().ToString()) { }
 

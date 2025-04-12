@@ -653,7 +653,7 @@ namespace IntelliTect.Coalesce
                         // Find the entity described by the error message
                         .FirstOrDefault(entry =>
                             entry.Metadata.Equals(table) &&
-                            keyValue == string.Join(", ", index.Properties.Select(p => entry.CurrentValues[p]))
+                            keyValue == string.Join(", ", index.Properties.Select(p => entry.CurrentValues[p] ?? "<NULL>"))
                         );
 
                     if (entity is null)
@@ -694,7 +694,11 @@ namespace IntelliTect.Coalesce
                         .Select(p =>
                         {
                             var value = entity.CurrentValues[p.Prop.Name];
-                            if (!p.Prop.Type.IsNumber)
+                            if (value is null)
+                            {
+                                value = "<NULL>";
+                            }
+                            else if (!p.Prop.Type.IsNumber)
                             {
                                 // Quote non-numbers so its clear what part of the message is the actual value
                                 value = $"'{value}'";

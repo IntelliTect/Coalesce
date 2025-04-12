@@ -84,7 +84,7 @@ public class ClaimsPrincipalFactory(
         {
             // Safety/sanity check that the user hasn't been able to elevate to global admin
             // by some unexpected claim or permission fulfilling the global admin role check:
-            throw new SecurityException($"User ${user.Id} unexpectly appears to be a global admin.");
+            throw new SecurityException($"User ${user.Id} unexpectedly appears to be a global admin.");
         }
 #endif
         return result;

@@ -183,6 +183,21 @@ public class SqlServerExceptionResultTests
     }
 
     [Fact]
+    public void UniqueIndexConflict_HandlesNull()
+    {
+        Db.Add(new Product { UniqueId1 = "qwe, rty" });
+
+        var exception = CreateException(
+            "Cannot insert duplicate key row in object 'dbo.Product' with unique index 'IX_Product_UniqueId1_UniqueId2'. " +
+            "The duplicate key value is (qwe, rty, <NULL>)");
+
+        var result = Behaviors<Product>()
+            .GetExceptionResult(exception, new TestSparseDto<Product>() { ChangedProperties = { "UniqueId1" } });
+
+        result.AssertError("A different item with ID1 'qwe, rty' and ID2 <NULL> already exists.");
+    }
+
+    [Fact]
     public void UniqueIndexConflict_MultiPropIndex_PartiallyChanged()
     {
         Db.Add(new Product { UniqueId1 = "qwe, rty", UniqueId2 = "foo,bar" });

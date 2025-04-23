@@ -189,8 +189,13 @@ const forceDisabled = computed(() => {
 function mapFarItemToMiddleItem(farItem: Indexable<FarItemType>) {
   const manyToMany = manyToManyMeta.value;
   const model = props.model as Model<ModelType>;
+
+  const farFk = farItem[farItemKeyPropName.value!];
+  const existingMiddle = farFkToMiddleItemLookup.value.get(farFk);
+  if (existingMiddle) return existingMiddle;
+
   const middleModelRaw = {
-    [manyToMany.farForeignKey.name]: farItem[farItemKeyPropName.value!],
+    [manyToMany.farForeignKey.name]: farFk,
     [manyToMany.farNavigationProp.name]: farItem,
     [manyToMany.nearForeignKey.name]: modelPkValue.value,
     [manyToMany.nearNavigationProp.name]: model,
@@ -265,6 +270,15 @@ const farItems = computed((): FarItemType[] => {
     }
     return ret;
   });
+});
+
+const farFkToMiddleItemLookup = computed(() => {
+  var map = new Map<any, MiddleItemType>();
+  const farFkName = manyToManyMeta.value.farForeignKey.name;
+  for (const middleItem of internalValue.value) {
+    map.set(middleItem[farFkName], middleItem);
+  }
+  return map;
 });
 
 const farItemModelType = computed((): ModelType => {

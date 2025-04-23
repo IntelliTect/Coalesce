@@ -21,6 +21,7 @@
 - `c-input`: Added a `filter` prop to for enum inputs to restrict the values available for selection.
 - `c-admin-display`: Binary values now render as links that will download the value as a file, instead of only showing the length in bytes.
 - `c-datetime-picker`: Added prop `showTodayButton`
+- `c-select-many-to-many`: The `itemTitle` prop now receives the existing selected middle entity instance, if there is one.
 
 # 5.3.8
 

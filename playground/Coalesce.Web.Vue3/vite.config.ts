@@ -32,7 +32,7 @@ export default defineConfig(async ({ command, mode }) => {
 
     plugins: [
       (await import("vite-plugin-inspect")).default(),
-      
+
       createVuePlugin({
         template: { transformAssetUrls },
       }),
@@ -57,7 +57,7 @@ export default defineConfig(async ({ command, mode }) => {
 
       // Integrations with UseViteDevelopmentServer from IntelliTect.Coalesce.Vue
       createAspNetCoreHmrPlugin({
-        checkPackageVersions: false
+        checkPackageVersions: false,
       }),
 
       // Perform type checking during development and build time.
@@ -104,6 +104,17 @@ export default defineConfig(async ({ command, mode }) => {
           libRoot + "coalesce-vue-vuetify3",
           ".",
         ],
+      },
+    },
+
+    css: {
+      preprocessorOptions: {
+        scss: {
+          api: "modern",
+        },
+        sass: {
+          api: "modern",
+        },
       },
     },
 

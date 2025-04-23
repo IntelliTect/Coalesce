@@ -36,6 +36,25 @@
       <c-display :model="caseVm3" for="caseProducts"></c-display>
     </v-col>
   </v-row>
+
+  <h1>itemText</h1>
+  <p>Expected: displays PK of middle items, new items show 'new'</p>
+  <v-row>
+    <v-col>
+      <c-select-many-to-many
+        :model="caseVm2"
+        for="caseProducts"
+        clearable
+        :itemTitle="
+          (item) =>
+            (item.caseProductId?.toString() || 'new') + ':' + item.product?.name
+        "
+      />
+    </v-col>
+    <v-col>
+      <c-display :model="caseVm2" for="caseProducts"></c-display>
+    </v-col>
+  </v-row>
 </template>
 
 <script setup lang="ts">

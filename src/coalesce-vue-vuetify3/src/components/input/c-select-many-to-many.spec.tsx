@@ -13,6 +13,9 @@ describe("CSelectManyToMany", () => {
         for={caseVm.$metadata.props.caseProducts}
       />
     );
+    () => <CSelectManyToMany model={caseVm} for="caseProducts"
+      itemTitle={(model) => model.caseProductId!.toFixed()}
+    />;
 
     //@ts-expect-error wrong type
     () => <CSelectManyToMany model={caseVm} for="long" />;
@@ -20,6 +23,9 @@ describe("CSelectManyToMany", () => {
       //@ts-expect-error wrong type
       <CSelectManyToMany model={caseVm} for={caseVm.$metadata.props.caseKey} />
     );
+
+    //@ts-expect-error wrong parameter type on itemTitle
+    () => <CSelectManyToMany model={caseVm} for="caseProducts" itemTitle={(x: CaseViewModel) => x.toString()} />;
 
     //@ts-expect-error missing `model`
     () => <CSelectManyToMany for={caseVm.$metadata.props.caseProducts} />;

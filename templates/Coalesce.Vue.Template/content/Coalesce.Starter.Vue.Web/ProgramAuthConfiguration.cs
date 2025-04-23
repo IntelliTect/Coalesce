@@ -10,6 +10,10 @@ namespace Coalesce.Starter.Vue.Web;
 
 public static class ProgramAuthConfiguration
 {
+#if (GoogleAuth || MicrosoftAuth)
+    private const string SwitchingAccountCookieName = "switching-account";
+
+#endif
     public static void ConfigureAuthentication(this WebApplicationBuilder builder)
     {
         var config = builder.Configuration;
@@ -53,6 +57,16 @@ public static class ProgramAuthConfiguration
 #if UserPictures
                 options.ClaimActions.MapJsonKey("pictureUrl", "picture");
 #endif
+
+                var old = options.Events.OnRedirectToAuthorizationEndpoint;
+                options.Events.OnRedirectToAuthorizationEndpoint = ctx =>
+                {
+                    if (ctx.Request.Cookies.ContainsKey(SwitchingAccountCookieName))
+                    {
+                        ctx.RedirectUri += "&prompt=select_account";
+                    }
+                    return old(ctx);
+                };
             })
 #endif
 #if MicrosoftAuth
@@ -63,6 +77,16 @@ public static class ProgramAuthConfiguration
 #if (UserPictures || TenantCreateExternal)
                 options.SaveTokens = true;
 #endif
+
+                var oldOnRedirect = options.Events.OnRedirectToAuthorizationEndpoint;
+                options.Events.OnRedirectToAuthorizationEndpoint = ctx =>
+                {
+                    if (ctx.Request.Cookies.ContainsKey(SwitchingAccountCookieName))
+                    {
+                        ctx.RedirectUri += "&prompt=select_account";
+                    }
+                    return oldOnRedirect(ctx);
+                };
             })
 #endif
             ;
@@ -77,8 +101,8 @@ public static class ProgramAuthConfiguration
         builder.Services.ConfigureApplicationCookie(c =>
         {
             c.LoginPath = "/SignIn"; // Razor page "Pages/SignIn.cshtml"
-
 #if Tenancy
+
             var oldOnValidate = c.Events.OnValidatePrincipal;
             c.Events.OnValidatePrincipal = async ctx =>
             {
@@ -89,6 +113,21 @@ public static class ProgramAuthConfiguration
                     .TenantId = ctx.Principal?.GetTenantId();
 
                 await oldOnValidate(ctx);
+            };
+#endif
+#if (GoogleAuth || MicrosoftAuth)
+
+            c.Events.OnSigningOut = ctx =>
+            {
+                // Enable prompting to switch external accounts on re-login.
+                ctx.Response.Cookies.Append(SwitchingAccountCookieName, "1", new()
+                {
+                    HttpOnly = true,
+                    Expires = DateTimeOffset.UtcNow.AddMinutes(5),
+                    IsEssential = true,
+                    SameSite = SameSiteMode.Lax
+                });
+                return Task.CompletedTask;
             };
 #endif
         });

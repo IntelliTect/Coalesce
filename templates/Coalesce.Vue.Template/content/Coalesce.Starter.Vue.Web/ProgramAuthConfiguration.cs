@@ -10,7 +10,7 @@ namespace Coalesce.Starter.Vue.Web;
 
 public static class ProgramAuthConfiguration
 {
-#if (GoogleAuth || MicrosoftAuth)
+#if (GoogleAuth || MicrosoftAuth || OtherOAuth)
     private const string SwitchingAccountCookieName = "switching-account";
 
 #endif
@@ -89,6 +89,43 @@ public static class ProgramAuthConfiguration
                 };
             })
 #endif
+#if OtherOAuth
+            .AddOAuth("MyOtherOAuth", displayName: "My Unconfigured OAuth Provider", options =>
+            {
+                // TODO: Update/replace this configuration with the settings needed for your OAuth provider.
+                // The scheme name "MyOtherOAuth" is also referenced in ExternalLogin.cshtml.cs.
+
+                // If your provider offers a NuGet package (e.g. Microsoft.AspNetCore.Authentication.MicrosoftAccount)
+                // you'll almost certainly be better served by using that instead of this generic .AddOAuth() configuration;
+                // it will eliminate the need for most of the configuration besides ClientId/ClientSecret.
+
+                options.ClientId = config["Authentication:MyOtherOAuth:ClientId"]!;
+                options.ClientSecret = config["Authentication:MyOtherOAuth:ClientSecret"]!;
+
+                options.CallbackPath = "/signin-my-other-oauth"; // This path can be anything, as long as it doesn't conflict with another route in your app.
+                options.AuthorizationEndpoint = "https://example.com/api/oauth2/authorize";
+                options.TokenEndpoint = "https://example.com/api/oauth2/token";
+                options.UsePkce = true;
+                options.Scope.Add("openid");
+                options.Scope.Add("profile");
+                options.Scope.Add("email");
+#if (UserPictures || TenantCreateExternal)
+                // Capturing tokens is likely necessary for profile pictures and/or external tenant identification.
+                options.SaveTokens = true;
+#endif
+
+                // NOTE: Your OAuth provider might not respect the prompt=select_account flag.
+                var oldOnRedirect = options.Events.OnRedirectToAuthorizationEndpoint;
+                options.Events.OnRedirectToAuthorizationEndpoint = ctx =>
+                {
+                    if (ctx.Request.Cookies.ContainsKey(SwitchingAccountCookieName))
+                    {
+                        ctx.RedirectUri += "&prompt=select_account";
+                    }
+                    return oldOnRedirect(ctx);
+                };
+            })
+#endif
             ;
 
         builder.Services.Configure<SecurityStampValidatorOptions>(o =>
@@ -115,7 +152,7 @@ public static class ProgramAuthConfiguration
                 await oldOnValidate(ctx);
             };
 #endif
-#if (GoogleAuth || MicrosoftAuth)
+#if (GoogleAuth || MicrosoftAuth || OtherOAuth)
 
             c.Events.OnSigningOut = ctx =>
             {

@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authentication.Google;
 #if MicrosoftAuth
 using Microsoft.AspNetCore.Authentication.MicrosoftAccount;
 #endif
+using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -64,6 +65,10 @@ public class ExternalLoginModel(
 #if MicrosoftAuth
             case MicrosoftAccountDefaults.AuthenticationScheme:
                 return await OnMicrosoftTicketReceived(info);
+#endif
+#if OtherOAuth
+            case "MyOtherOAuth":
+                return await OnMyOtherOAuthTicketReceived(info);
 #endif
             default:
                 ErrorMessage = "Unknown external provider";
@@ -145,6 +150,41 @@ public class ExternalLoginModel(
 
 #endif
         // OPTIONAL: Populate additional fields on `user` specific to Microsoft, if any.
+
+        await signInManager.UserManager.UpdateAsync(user);
+
+        return await SignInExternalUser(info);
+    }
+#endif
+
+
+#if OtherOAuth
+    private async Task<IActionResult> OnMyOtherOAuthTicketReceived(ExternalLoginInfo info)
+    {
+        var result = await GetOrCreateUser(info);
+        if (!result.WasSuccessful || result.Object is not User user)
+        {
+            return Forbid(result.Message);
+        }
+
+#if TenantCreateExternal
+        // TODO: Determine an identifier for the external tenant that will
+        // be used to create and assign membership to a tenant within this application.
+        string? externalTenantIdentifier = null;
+        if (!string.IsNullOrWhiteSpace(externalTenantIdentifier))
+        {
+            await GetAndAssignUserExternalTenant(user, info, externalTenantIdentifier);
+        }
+#endif
+
+#if UserPictures
+        await UpdateUserPhoto(user,
+            // NOTE: If you switch to using a dedicated NuGet package for your OAuth provider, your options type might not be `OAuthOptions`.
+            HttpContext.RequestServices.GetRequiredKeyedService<IOptions<OAuthOptions>>(info.ProviderKey).Value.Backchannel,
+            () => throw new NotImplementedException("Implement code to construct an HttpRequestMessage that will fetch a profile picture from the OAuth provider, or delete this code if that is not possible."));
+
+#endif
+        // OPTIONAL: Populate additional fields on `user` specific to your provider, if any.
 
         await signInManager.UserManager.UpdateAsync(user);
 
@@ -269,12 +309,12 @@ public class ExternalLoginModel(
             return;
         }
 
-        var request = requestFactory();
-
-        if (request.RequestUri is null) return;
-
         try
         {
+            var request = requestFactory();
+
+            if (request.RequestUri is null) return;
+
             var response = await client.SendAsync(request);
             if (!response.IsSuccessStatusCode) return;
 

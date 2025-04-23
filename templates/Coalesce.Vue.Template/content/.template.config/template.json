@@ -52,6 +52,14 @@
       "$coalesceRequires": ["and", "Identity"],
       "$coalesceLink": "https://learn.microsoft.com/en-us/aspnet/core/security/authentication/social/google-logins"
     },
+    "OtherOAuth": {
+      "type": "parameter",
+      "datatype": "bool",
+      "displayName": "Sign-in with other OAuth/OIDC",
+      "description": "Adds generic code to help you add a different OAuth/OIDC external authentication and account provider for Identity.",
+      "$coalesceRequires": ["and", "Identity"],
+      "$coalesceLink": "https://learn.microsoft.com/en-us/aspnet/core/security/authentication/social/other-logins"
+    },
     "LocalAuth": {
       "type": "parameter",
       "datatype": "bool",
@@ -127,7 +135,7 @@
       "$coalesceRequires": [
         "and",
         "Tenancy",
-        ["or", "MicrosoftAuth", "GoogleAuth"]
+        ["or", "MicrosoftAuth", "GoogleAuth", "OtherOAuth"]
       ]
     },
     "TenantMemberInvites": {
@@ -207,7 +215,7 @@
           ]
         },
         {
-          "condition": "!MicrosoftAuth && !GoogleAuth",
+          "condition": "!MicrosoftAuth && !GoogleAuth && !OtherOAuth",
           "exclude": ["**/ExternalLogin.*"]
         },
         {

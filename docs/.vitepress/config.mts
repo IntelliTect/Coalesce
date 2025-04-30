@@ -75,7 +75,12 @@ export default defineConfig({
     // https://vitepress.dev/reference/default-theme-config
     nav: [
       { text: "Home", link: "/" },
-      { text: "Guide", link: "/introduction", activeMatch: "/.+" },
+      {
+        text: "Guide",
+        link: "/introduction",
+        activeMatch: "^/(?!changelog).+",
+      },
+      { text: "Changelog", link: "/changelog" },
     ],
 
     socialLinks: [

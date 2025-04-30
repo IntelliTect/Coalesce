@@ -1,22 +1,22 @@
-
 # Getting Started
 
 ## Environment Setup
+
 Before you begin, ensure that you have all the requisite tools installed
+
 - Recent version of the [.NET SDK](https://dotnet.microsoft.com/en-us/download). If you have Visual Studio, you already have this.
 - A recent version of [Node.js](https://nodejs.org/) (an LTS version is recommended).
-- A compatible IDE 
+- A compatible IDE
   - Recommended:
-    - Visual Studio for backend (C#) development 
+    - Visual Studio for backend (C#) development
     - VS Code for frontend (Vue, TypeScript) development (with [Vue - Official](https://marketplace.visualstudio.com/items?itemName=Vue.volar))
   - Alternatively, you could use any of these:
     - VS Code for full stack development
     - JetBrains Rider
 
-
 ## Creating a Project
 
-The quickest and easiest way to create a new Coalesce Vue application is to use the ``dotnet new`` template. 
+The quickest and easiest way to create a new Coalesce Vue application is to use the `dotnet new` template.
 
 First, select the features that you would like included in your project, and choose the root .NET namespace of your project:
 
@@ -37,16 +37,16 @@ function copyCode() {
 Next, click the button or manually copy the commands below into your favorite terminal, and execute them! This will create a root folder named <code>{{effectiveFolder}}</code> - execute the script in your `sources`/`repos`/etc folder.
 
 <button @click="copyCode()" style="
-    color: var(--vp-button-brand-text);
-    background-color: var(--vp-button-brand-bg);
-    border-radius: 20px;
-    padding: 0 20px;
-    line-height: 38px;
-    font-size: 14px;
-    display: inline-block;
-    margin: auto;
-    display: block;
-    font-weight: 600;
+color: var(--vp-button-brand-text);
+background-color: var(--vp-button-brand-bg);
+border-radius: 20px;
+padding: 0 20px;
+line-height: 38px;
+font-size: 14px;
+display: inline-block;
+margin: auto;
+display: block;
+font-weight: 600;
 ">Copy CLI Commands</button>
 
 <style>
@@ -54,7 +54,7 @@ Next, click the button or manually copy the commands below into your favorite te
 </style>
 <div class="template-code">
 
-``` sh-vue
+```sh-vue
 dotnet new install IntelliTect.Coalesce.Vue.Template
 dotnet new coalescevue -n {{effectiveNamespace}} -o {{effectiveFolder}} {{templateParams}}
 cd {{effectiveFolder}}/*.Web
@@ -62,6 +62,7 @@ npm ci
 npm run lint:fix
 dotnet restore
 dotnet coalesce
+
 ```
 
 </div>
@@ -69,7 +70,6 @@ dotnet coalesce
 You now have a new Coalesce project! For the recommended development experience, open the `.Web` project in VS Code and open the root `.sln` file in Visual Studio.
 
 If any of the options you chose above require external integrations, you'll need to configure those - follow the instructions for each section that have been placed into `appsettings.json`.
-
 
 ## Project Structure
 
@@ -83,28 +83,27 @@ The Web project is an ASP.NET Core application where the generated outputs from 
 
 The structure of the Web project follows the conventions of both ASP.NET Core and Vite. The frontend-specific folders are as follows:
 
-- ``/src`` - Files that should be compiled into your frontend application. CSS/SCSS, TypeScript, Vue SFCs, and so on.
-- ``/public`` - Static assets that should be served directly as files.
-- ``/wwwroot`` - Target for Vite's compiled output. This directory is excluded from git.
-- ``/Api/Generated`` - Output target for Coalesce's generated API Controllers.
-- ``/Models/Generated`` - Output target for Coalesce's [generated DTOs](/stacks/agnostic/dtos.md).
-- ``/Controllers/HomeController.cs`` - Controller that serves the root page of your Vue SPA, both in development and production. Some customizations can be added here.
+- `/src` - Files that should be compiled into your frontend application. CSS/SCSS, TypeScript, Vue SFCs, and so on.
+- `/public` - Static assets that should be served directly as files.
+- `/wwwroot` - Target for Vite's compiled output. This directory is excluded from git.
+- `/Api/Generated` - Output target for Coalesce's generated API Controllers.
+- `/Models/Generated` - Output target for Coalesce's [generated DTOs](/stacks/agnostic/dtos.md).
+- `/Controllers/HomeController.cs` - Controller that serves the root page of your Vue SPA, both in development and production. Some customizations can be added here.
 
 ::: tip Important
 The frontend build system uses [Vite](https://vitejs.dev/). You are strongly encouraged to read through at least the first few pages of the [Vite Documentation](https://vitejs.dev/guide/) before getting started on any development.
 :::
 
-During development, no special effort is required to build your frontend code. Coalesce's ``UseViteDevelopmentServer`` in ASP.NET Core will take care of that automatically when the application starts. Just make sure NPM packages have been installed (`npm ci`).
+During development, no special effort is required to build your frontend code. Coalesce's `UseViteDevelopmentServer` in ASP.NET Core will take care of that automatically when the application starts. Just make sure NPM packages have been installed (`npm ci`).
 
 @[import-md "after":"MARKER:data-modeling", "before":"MARKER:data-modeling-end"](../agnostic/getting-started-modeling.md)
 
-
 ## Building Pages & Features
 
-Lets say we've created a [model](/modeling/model-types/entities.md) called `Person` as follows, and we've ran code generation with ``dotnet coalesce``:
+Lets say we've created a [model](/modeling/model-types/entities.md) called `Person` as follows, and we've ran code generation with `dotnet coalesce`:
 
-``` c#
-namespace MyApplication.Data.Models 
+```c#
+namespace MyApplication.Data.Models
 {
     public class Person
     {
@@ -115,9 +114,9 @@ namespace MyApplication.Data.Models
 }
 ```
 
-We can create a details page for a Person by creating a [Single File Component](https://vuejs.org/guide/scaling-up/sfc.html) in ``MyApplication.Web/src/views/person-details.vue``:
+We can create a details page for a Person by creating a [Single File Component](https://vuejs.org/guide/scaling-up/sfc.html) in `MyApplication.Web/src/views/person-details.vue`:
 
-``` vue
+```vue
 <template>
   <dl>
     <dt>Name</dt>
@@ -132,7 +131,7 @@ We can create a details page for a Person by creating a [Single File Component](
   </dl>
 </template>
 
-<script setup lang="ts"> 
+<script setup lang="ts">
 import { PersonViewModel } from "@/viewmodels.g";
 
 const props = defineProps<{ id: number }>();
@@ -148,10 +147,9 @@ In the code above, [c-display](/stacks/vue/coalesce-vue-vuetify/components/c-dis
 For simple property types like `string` and `number` you can always use simple template interpolation syntax, but for more complex properties like dates, [c-display](/stacks/vue/coalesce-vue-vuetify/components/c-display.md) is handy to use because it includes features like built-in date formatting.
 :::
 
+We then need to add route to this new view. In `MyApplication.Web/src/router.ts`, add a new item to the `routes` array:
 
-We then need to add route to this new view. In ``MyApplication.Web/src/router.ts``, add a new item to the `routes` array:
-
-``` ts
+```ts
 // In the `routes` array, add the following item:
 {
   path: '/person/:id',
@@ -161,6 +159,6 @@ We then need to add route to this new view. In ``MyApplication.Web/src/router.ts
 },
 ```
 
-With these pieces in place, we now have a functioning page that will display details about a person. We can start up the application (or, if it was already running, refresh the page) and navigate to ``/person/1`` (assuming a person with ID 1 exists - if not, navigate to ``/admin/Person`` and create one).
+With these pieces in place, we now have a functioning page that will display details about a person. We can start up the application (or, if it was already running, refresh the page) and navigate to `/person/1` (assuming a person with ID 1 exists - if not, navigate to `/admin/Person` and create one).
 
 From this point, you can start adding more fields, more features, and more flair to the page. Check out all the other documentation in the sidebar to see what else Coalesce has to offer, including the [Vue Overview](/stacks/vue/overview.md).

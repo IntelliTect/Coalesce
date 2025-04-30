@@ -3,19 +3,18 @@
 ## Breaking Changes
 
 - Vue 2 support has been dropped.
-- The types generated for inheritance hierarchies has changed significantly. If two or more models in a type hierarchy (i.e. a base type and a derived type) are both exposed by Coalesce, that relationship is now mirrored through the generated DTOs and the generated TypeScript. The generated ViewModels classes for abstract classes are now just proxies intended to be used only for loading one of the concrete implementation types.
+- The types generated for inheritance hierarchies has changed significantly. If two or more models in a type hierarchy (i.e. a base type and a derived type) are both exposed by Coalesce, that relationship is now reflected throughout the generated DTOs, generated TypeScript, and admin pages. The generated ViewModels classes for abstract classes are now just proxies intended to be used only for loading one of the concrete implementation types.
 - `StandardBehaviors.AfterDelete` is now `AfterDeleteAsync` and has a different signature and semantics. Instead of modifying the resulting `item` and `includeTree` with `ref` parameters, these values can be optionally overridden by returning an ItemResult with its `Object` and `IncludeTree` properties populated with non-null values.
 - `ViewModel.$getErrors` now returns a `string[]` instead of a `Generator<string>`.
 - The CommonJS build of coalesce-vue has been dropped - only the ESM build remains. Most projects should be unaffected.
 
 ## Features
 
-- All endpoints with bodies are now send as JSON instead of form data, with the exception of those endpoints with file parameters and only scalar parameters (no complex parameters) beyond the file parameters.
+- All endpoints with bodies are now send as JSON instead of form data, with the exception of endpoints that have file parameter(s) and no other non-scalar parameters.
 - Coalesce's Vite middleware (`UseViteDevelopmentServer`) now checks if your installed NPM packages match what's defined in package.json and package-lock.json, presenting an in-browser warning if they do not. This helps avoid forgetting to reinstall packages after pulling down changes in multi-developer projects.
 - Const fields in C#, if annotated with `[Coalesce]`, are now emitted into generated TypeScript.
 - `System.Uri` is now support as a type, mapping to a `string` in TypeScript.
 - Interfaces used as parameters in Coalesce-exposed methods are now automatically injected from services, without the need to specify `[InjectAttribute]`. This does not include known data-like interfaces including `IEnumerable`, `ICollection`, and `IFile`.
-
 - `ViewModel.$loadCleanData()` now returns the VM instance, to support call chaining.
 - `ListViewModel` now has shorthand properties for `$search`, `$filter`, and `$orderBy`.
 - `c-input`: Added a `filter` prop to for enum inputs to restrict the values available for selection.
@@ -29,7 +28,7 @@
 
 # 5.3.7
 
-- Fix error in bulk saves where children of a model that has been `$remove()`'d where neither the children nor the removed model have PKs would still attempt to create.
+- Fix error in bulk saves where children of a model that has been `$remove()`'d would still attempt to create even if neither the children nor the removed model have PKs.
 
 # 5.3.6
 

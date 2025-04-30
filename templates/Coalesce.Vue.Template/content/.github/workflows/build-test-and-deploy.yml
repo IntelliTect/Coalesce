@@ -35,7 +35,7 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 9.x
-          include-preview: true
+          dotnet-quality: preview
 
       - name: Use Node.js
         uses: actions/setup-node@v4
@@ -62,7 +62,7 @@ jobs:
         working-directory: Coalesce.Starter.Vue.Web
 
       - name: dotnet build
-        run: dotnet build --configuration Release --no-restore --no-incremental 
+        run: dotnet build --configuration Release --no-restore --no-incremental
 
       - name: dotnet test
         run: dotnet test --configuration Release --no-restore --no-build
@@ -85,7 +85,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name != 'pull_request'
     environment:
-      name: 'production'
+      name: "production"
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
 
     steps:
@@ -96,8 +96,9 @@ jobs:
 
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
+        id: deploy-to-webapp
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
-          slot-name: 'production'
+          slot-name: "production"
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
           package: .

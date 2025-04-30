@@ -1,13 +1,12 @@
 # Behaviors
 
-*In a CRUD system, creating, updating, and deleting are considered especially different from reading. In Coalesce, the dedicated classes that perform these operations are derivatives of a special interface known as the* `IBehaviors<T>`. *These are their stories*.
+_In a CRUD system, creating, updating, and deleting are considered especially different from reading. In Coalesce, the dedicated classes that perform these operations are derivatives of a special interface known as the_ `IBehaviors<T>`. _These are their stories_.
 
-----
+---
 
 Coalesce separates out the parts of your API that read your data from the parts that mutate it. The read portion is performed by [Data Sources](/modeling/model-components/data-sources.md), and the mutations are performed by behaviors. Like data sources, there exists a standard set of behaviors that Coalesce provides out-of-the-box that cover the most common use cases for creating, updating, and deleting objects in your data model.
 
 Also like data sources, these functions can be easily overridden on a per-model basis, allowing complete control over the ways in which your data is mutated by the APIs that Coalesce generates. However, unlike data sources which can have as many implementations per model as you like, you can only have one set of behaviors.
-
 
 ## Defining Behaviors
 
@@ -19,7 +18,7 @@ When you define a set of custom behaviors, take note that these are only used by
 
 To create your own behaviors, you simply need to define a class that implements `IntelliTect.Coalesce.IBehaviors<T>`. To expose your behaviors to Coalesce, either place it as a nested class of the type `T` that your behaviors are for, or annotate it with the `[Coalesce]` attribute. Of course, the easiest way to create behaviors that doesn't require you to re-engineer a great deal of logic would be to inherit from `IntelliTect.Coalesce.StandardBehaviors<T, TContext>`, and then override only the parts that you need.
 
-``` c#
+```c#
 public class Case
 {
     public int CaseId { get; set; }
@@ -48,7 +47,7 @@ public class CaseBehaviors : StandardBehaviors<Case, AppDbContext>
         return true;
     }
 
-    public override ItemResult BeforeDelete(Case item) 
+    public override ItemResult BeforeDelete(Case item)
         => User.IsInRole("Manager") ? true : "Unauthorized";
 
     public override Task ExecuteDeleteAsync(Case item)
@@ -63,7 +62,6 @@ public class CaseBehaviors : StandardBehaviors<Case, AppDbContext>
 ### Dependency Injection
 
 All behaviors are instantiated using dependency injection and your application's `IServiceProvider`. As a result, you can add whatever constructor parameters you desire to your behaviors as long as a value for them can be resolved from your application's services. The single parameter to the `StandardBehaviors` is resolved in this way - the `CrudContext<TContext>` contains the common set of objects most commonly used, including the `DbContext` and the `ClaimsPrincipal` representing the current user.
-
 
 ## Standard Behaviors
 
@@ -101,11 +99,11 @@ A data source that, if set, will override the data source that is used to retrie
 
 ### Method Overview
 
-The standard behaviors implementation contains many different methods which can be overridden in your derived class to control functionality. 
+The standard behaviors implementation contains many different methods which can be overridden in your derived class to control functionality.
 
 These methods often call one another, so overriding one method may cause some other method to no longer be called. The hierarchy of method calls, ignoring any logic or conditions contained within, is as follows:
 
-``` :no-line-numbers
+```:no-line-numbers
 SaveAsync
     DetermineSaveKindAsync
     GetDbSet
@@ -114,6 +112,7 @@ SaveAsync
     BeforeSaveAsync
         BeforeSave
     ExecuteSaveAsync
+    FetchObjectAfterSaveAsync
     AfterSaveAsync
 
 DeleteAsync
@@ -128,11 +127,9 @@ DeleteAsync
 
 All of the methods outlined above can be overridden. A description of each of the methods is as follows:
 
-
 <Prop def="Task<ItemResult<TDto?>> SaveAsync<TDto>(TDto incomingDto, IDataSource<T> dataSource, IDataSourceParameters parameters)" />
 
 Save the given item. This is the main entry point for saving, and takes a DTO as a parameter. This method is responsible for performing mapping to your EF models and ultimately saving to your database. If it is required that you access properties from the incoming DTO in this method, a set of extension methods `GetValue` and `GetObject` are available on the DTO for accessing properties that are mapped 1:1 with your EF models.
-
 
 <Prop def="Task<(SaveKind Kind, object? IncomingKey)> DetermineSaveKindAsync<TDto>(TDto incomingDto, IDataSource<T> dataSource, IDataSourceParameters parameters)" />
 
@@ -140,35 +137,34 @@ Given the incoming DTO on which Save has been called, examine its properties to 
 
 This method is called outside of the standard data source by the base API controller to perform role-based security on saves at the controller level.
 
-
 <Prop def="DbSet<T> GetDbSet()" />
 
 Returns a `DbSet<T>` that items can be added to (creates) or remove from (deletes).
 
-
 <Prop def="ItemResult ValidateDto(SaveKind kind, IClassDto<T> dto)" />
 
-Provides a chance to validate the properties of the DTO object itself, as opposed to doing validation in `BeforeSave` of the properties of the model after the DTO has been mapped to the model. This also where [attribute-based validation](/topics/security.md#attribute-validation) is performed. 
+Provides a chance to validate the properties of the DTO object itself, as opposed to doing validation in `BeforeSave` of the properties of the model after the DTO has been mapped to the model. This also where [attribute-based validation](/topics/security.md#attribute-validation) is performed.
 
-To perform custom validation in this method (uncommon), there are a number of extension methods on `IClassDto<T>` that can be used to access the value of the properties of [Generated C# DTOs](/stacks/agnostic/dtos.md). For behaviors on [Custom DTOs](/modeling/model-types/dtos.md) where the DTO type is known, simply cast to the correct type. 
-
+To perform custom validation in this method (uncommon), there are a number of extension methods on `IClassDto<T>` that can be used to access the value of the properties of [Generated C# DTOs](/stacks/agnostic/dtos.md). For behaviors on [Custom DTOs](/modeling/model-types/dtos.md) where the DTO type is known, simply cast to the correct type.
 
 <Prop def="T MapIncomingDto<TDto>(SaveKind kind, T? item, TDto dto, IDataSourceParameters parameters)" />
 
 Map the properties of the incoming DTO to the model that will be saved to the database. For a `SaveKind.Create`, this will call the `MapToNew` method on the DTO and a new instance must be returned (`item` will be null). For a `SaveKind.Update`, this will call the `MapTo` method on the DTO, and the incoming `item` must be returned. If more precise control is needed, extension methods on `IClassDto<T>` or casting to a known type can be used to get specific values. If all else fails, the DTO can be reflected upon.
 
-
 <Prop def="Task<ItemResult> BeforeSaveAsync(SaveKind kind, T? oldItem, T item);
 ItemResult BeforeSave(SaveKind kind, T? oldItem, T item)" />
 
-Extension point for derived classes to intercept a save attempt and either reject it by returning an unsuccessful result, or approve it by returning success. The incoming item can also be modified at will in this method to override changes that the client made as desired.    
+Extension point for derived classes to intercept a save attempt and either reject it by returning an unsuccessful result, or approve it by returning success. The incoming item can also be modified at will in this method to override changes that the client made as desired.
 
+<Prop def="Task<ItemResult<T>> FetchObjectAfterSaveAsync(IDataSource<T> dataSource, IDataSourceParameters parameters, T item)" />
 
-<Prop def="ItemResult<T> AfterSaveAsync(SaveKind kind, T? oldItem, T item)" />
+By default, after a save occurs, the saved item will be re-queried from the database using the Data Source specified in `OverridePostSaveResultDataSource`, or the Data Source specified by the client in their request, or the type's default data source, in that order. You can override this method to load the post-save object in a different way. The item returned by `FetchObjectAfterSaveAsync` will be the one passed to `AfterSaveAsync` and is also the object that is ultimately returned to the client.
 
-Extension point for derived classes to perform actions after a save operation has been completed. 
+<Prop def="Task<ItemResult<T>> AfterSaveAsync(SaveKind kind, T? oldItem, T item)" />
 
-If a non-successful `ItemResult` is returned, a failure response will be returned immediately without the updated item attached to the response. This will not prevent modifications to the database since changes have already been saved at this point. 
+Extension point for derived classes to perform actions after a save operation has been completed.
+
+If a non-successful `ItemResult` is returned, a failure response will be returned immediately without the updated item attached to the response. This will not prevent modifications to the database since changes have already been saved at this point.
 
 If a successful `ItemResult` is returned, then a non-null `Object` on the result will override the item sent in the response, and a non-null `IncludeTree` on the result will override the include tree used to map that item to the DTO. If these properties are left null (e.g. you return `true`), the original `item` will be returned in the response to the client.
 
@@ -176,29 +172,24 @@ If a successful `ItemResult` is returned, then a non-null `Object` on the result
 
 Deletes the given item.
 
-
 <Prop def="Task<ItemResult> BeforeDeleteAsync(T item);
 ItemResult BeforeDelete(T item)" />
 
 Provides an easy way to intercept a delete request and potentially reject it (by returning a non-success ItemResult).
 
-
 <Prop def="Task ExecuteDeleteAsync(T item)" />
 
-Performs the delete action against the database. The implementation of this method removes the item from its corresponding `DbSet<T>`, and then calls `Db.SaveChangesAsync()`. 
+Performs the delete action against the database. The implementation of this method removes the item from its corresponding `DbSet<T>`, and then calls `Db.SaveChangesAsync()`.
 
 Overriding this allows for changing this row-deletion implementation to something else, like setting of a soft delete flag, or copying the data into another archival table before deleting.
 
-
 <Prop def="Task<ItemResult<T>> AfterDeleteAsync(T item)" />
 
-Allows for performing any sort of cleanup actions after a delete has completed. 
+Allows for performing any sort of cleanup actions after a delete has completed.
 
-If a non-successful `ItemResult` is returned, a failure response will be returned immediately without the updated item attached to the response. This will not prevent modifications to the database since changes have already been saved at this point. 
+If a non-successful `ItemResult` is returned, a failure response will be returned immediately without the updated item attached to the response. This will not prevent modifications to the database since changes have already been saved at this point.
 
 If a successful `ItemResult` is returned, then a non-null `Object` on the result will override the item sent in the response, and a non-null `IncludeTree` on the result will override the include tree used to map that item to the DTO. If these properties are left null (e.g. you return `true`), the response will not be modified.
-
-
 
 ## Globally Replacing the Standard Behaviors
 
@@ -206,8 +197,7 @@ You can, of course, create a custom base behaviors class that all your custom im
 
 Simply create a class that implements `IEntityFrameworkBehaviors<,>` (the `StandardBehaviors<,>` already does - feel free to inherit from it), then register it at application startup like so:
 
-
-``` c#
+```c#
 public class MyBehaviors<T, TContext> : StandardBehaviors<T, TContext>
     where T : class
     where TContext : DbContext
@@ -220,7 +210,7 @@ public class MyBehaviors<T, TContext> : StandardBehaviors<T, TContext>
 }
 ```
 
-``` c#
+```c#
 public void ConfigureServices(IServiceCollection services)
 {
     services.AddCoalesce(b =>

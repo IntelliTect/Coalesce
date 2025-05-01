@@ -17,6 +17,12 @@
     "declaration": true,
     "lib": ["es2015", "es2017", "dom", "ES2021.WeakRef"],
     "types": ["vitest/globals", "vue-router"],
+    "typeRoots": [
+      "./node_modules/@types",
+      "./node_modules",
+      "../../node_modules/@types",
+      "../../node_modules"
+    ],
 
     "paths": {
       "@test-targets/*": ["../test-targets/*"],

@@ -27,6 +27,8 @@ jobs:
           fetch-depth: 0
 
       - run: npm ci
+        working-directory: ${{ github.workspace }}
+
       - run: npm run build
 
       # please check out the docs of the workflow for more details

@@ -19,7 +19,7 @@ export default defineConfig({
     outDir: "dist",
     rollupOptions: {
       external: [
-        // ...Object.keys(pkg.dependencies),
+        ...Object.keys(pkg.dependencies),
         ...Object.keys(pkg.peerDependencies),
         ...Object.keys(pkg.optionalDependencies),
       ].map((pkg) => new RegExp("^" + pkg)),

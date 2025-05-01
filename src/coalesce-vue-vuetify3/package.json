@@ -34,6 +34,11 @@
     "test": "vitest",
     "coverage": "vitest --coverage"
   },
+  "dependencies": {
+    "date-fns": "^3.0.0",
+    "date-fns-tz": "^3.0.0",
+    "tslib": "^2.6.2"
+  },
   "peerDependencies": {
     "coalesce-vue": "0.1.0-local",
     "vuetify": "^3.7.1"

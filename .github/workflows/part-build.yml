@@ -70,9 +70,6 @@ jobs:
       - run: npm ci
         working-directory: ${{ github.workspace }}
 
-      - name: npm version
-        run: npm version $COALESCE_VERSION --no-git-tag-version
-
       - name: npm run test
         run: npm run test -- --coverage --reporter=default --reporter=junit --outputFile coalesce-vue.results.xml
 
@@ -84,6 +81,9 @@ jobs:
       #     name: coalesce-vue tests
       #     path: '**/*.results.xml'
       #     reporter: jest-junit
+
+      - name: update version
+        run: sed -i "s/0.1.0-local/$COALESCE_VERSION/g" package.json
 
       - run: npm pack
 
@@ -112,14 +112,8 @@ jobs:
       - run: npm run build
       - run: npm run test
 
-      # now we'll setup the real versions of things.
-      # Change the package.json with the correct version of coalesce-vue,
-      # but do not use any npm commands to do so as they'll freak out that the version isn't published.
-      - name: update *dependencies["coalesce-vue"] version
-        run: cat <<< "$(cat package.json | jq ".peerDependencies[\"coalesce-vue\"] = \"$COALESCE_VERSION\" | .devDependencies[\"coalesce-vue\"] = \"$COALESCE_VERSION\" ")" > package.json
-
-      - name: npm version
-        run: npm version $COALESCE_VERSION --no-git-tag-version
+      - name: update version
+        run: sed -i "s/0.1.0-local/$COALESCE_VERSION/g" package.json
 
       - run: npm pack
 

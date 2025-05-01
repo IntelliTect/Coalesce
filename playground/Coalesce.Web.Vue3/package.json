@@ -1,6 +1,6 @@
 {
   "name": "coalesce-web-vue3",
-  "version": "0.0.0",
+  "version": "0.1.0-local",
   "private": true,
   "type": "module",
   "scripts": {

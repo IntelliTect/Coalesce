@@ -22,7 +22,6 @@ jobs:
             9.0.x
 
       - run: npm ci
-        working-directory: src/coalesce-vue
       - run: dotnet restore
       - run: dotnet build --no-restore --configuration Release /WarnAsError
       - run: dotnet test --no-build --configuration Release
@@ -49,10 +48,6 @@ jobs:
             8.0.x
             9.0.x
 
-      - run: npm ci
-        working-directory: src/coalesce-vue
-      - run: npm ci
-        working-directory: src/coalesce-vue-vuetify3
       - run: npm ci
       - run: npm run coalesce
       - run: npm run build
@@ -107,9 +102,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # build coalesce-vue
-      - run: npm run build-local-deps
       - run: npm ci
+      - run: npm run build-local-deps # build coalesce-vue
       - run: npm run build
       - run: npm run test
 

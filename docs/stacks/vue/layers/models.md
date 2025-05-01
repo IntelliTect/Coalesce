@@ -92,16 +92,16 @@ useBindToQueryString(activeTab, 'activeTab');
 
 </template>
 </CodeTabs>
-<p>
+
+<div>
+
 The query string will be updated using either `router.push` or `router.replace` depending on the value of parameter `mode`.
 
 If the query string contains a value when this is called, the object will be updated with that value immediately. 
 
 If the object being bound to has `$metadata`, information from that metadata will be used to serialize and parse values to and from the query string. Otherwise, the `stringify` option (default: `String(value)`) will be used to serialize the value, and the `parse` option (if provided) will be used to parse the value from the query string.
 
-</p>
-
-
+</div>
 
 
 <Prop def="
@@ -188,7 +188,7 @@ Maps the input to a representation suitable for JSON serialization.
 
 Will not serialize child objects or collections whose metadata includes `dontSerialize`. Will only recurse to a maximum depth of 3.
 
-<a id="VueModelDisplayFunctions"></a>
+<a id="vuemodeldisplayfunctions"></a>
 
 
 <Prop def="modelDisplay(model: Model, options?: DisplayOptions): string" lang="ts" />

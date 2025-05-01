@@ -9,19 +9,15 @@
   "scripts": {
     "dev": "vitepress dev",
     "linkcheck": "linkcheck localhost:8087/Coalesce -e --skip-file ./.vitepress/linkcheck-skip-file.txt",
-    "build": "cspell \"**/*.md\" && vitepress build --outDir .vitepress/dist/Coalesce && start-server-and-test 'serve -Ll 8087 ./.vitepress/dist' 8087 linkcheck"
+    "build": "cspell \"**/*.md\" && vitepress build --outDir .vitepress/dist/Coalesce && node check-links.mjs"
   },
   "dependencies": {
     "shiki": "1.4.0"
   },
   "devDependencies": {
-    "cspell": "^5.20.0",
-    "glob": "^8.0.1",
     "gray-matter": "^4.0.3",
-    "linkcheck-bin": "3.0.0-0",
-    "sass": "^1.69.5",
-    "serve": "^14.2.3",
-    "start-server-and-test": "^2.0.3",
-    "vitepress": "1.1.4"
+    "linkcheck-bin": "file:linkcheck-bin-3.0.0-1.fix-issue-56.tgz",
+    "serve-handler": "^6.1.6",
+    "vitepress": "2.0.0-alpha.5"
   }
 }

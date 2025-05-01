@@ -1,6 +1,10 @@
 {
-    "dotnet.defaultSolution": "Coalesce.sln",
-    "editor.formatOnPaste": false,
-    "editor.formatOnSave": true,
-    "editor.formatOnType": true,
+  "dotnet.defaultSolution": "Coalesce.sln",
+  "editor.formatOnPaste": false,
+  "editor.formatOnSave": true,
+  "editor.formatOnType": true,
+  "[markdown]": {
+    // The markdown formatter flat out ruins some of our docs
+    "editor.formatOnSave": false
+  }
 }

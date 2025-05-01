@@ -48,7 +48,6 @@ import {
   getPublicInstance,
 } from "./util.js";
 import { debounce } from "lodash-es";
-import type { Cancelable, DebounceSettings } from "lodash";
 
 export type { DeepPartial } from "./util.js";
 
@@ -2201,7 +2200,7 @@ type DebounceOptions = {
   /** Time, in milliseconds, to delay. Passed as the second parameter to lodash's `debounce` function. */
   wait?: number;
   /** Additional options to pass to the third parameter of lodash's `debounce` function. */
-  debounce?: DebounceSettings;
+  debounce?: Parameters<typeof debounce>[2];
 };
 
 type AutoLoadOptions<TThis> = DebounceOptions & {
@@ -2862,7 +2861,7 @@ function startAutoCall(
   state: AutoCallState,
   vue: VueInstance,
   watcher?: () => void,
-  debouncer?: Cancelable
+  debouncer?: { cancel(): void; }
 ) {
   if (!state.hooked.has(vue)) {
     state.hooked.add(vue);

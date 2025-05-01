@@ -11,7 +11,7 @@ describe("CSelectStringValue", () => {
     const vm = new PersonViewModel();
     const method = vm.$metadata.methods.namesStartingWith;
     const badMethod = vm.$metadata.methods.rename;
-    const selectedString = ref<string | null>("foo");
+    const selectedString = ref<string | null | undefined>("foo");
 
     () => <CSelectStringValue model={vm} for="name" method={method} />;
     () => <CSelectStringValue model={vm as any} for="name" method={method} />;
@@ -87,7 +87,7 @@ describe("CSelectStringValue", () => {
 
     test("for=TypeName method=methodName v-model=selectedValue", async () =>{
       // Arrange/Act
-      const selectedString = ref<string | null>("foo");
+      const selectedString = ref<string | null | undefined>("foo");
       const wrapper = mountApp(() => <CSelectStringValue 
         for="Person" 
         method="namesStartingWith" 

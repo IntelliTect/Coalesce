@@ -43,7 +43,7 @@
  *   in custom container, badges, etc.
  * -------------------------------------------------------------------------- */
 
- :root {
+:root {
   --vp-c-default-1: var(--vp-c-gray-1);
   --vp-c-default-2: var(--vp-c-gray-2);
   --vp-c-default-3: var(--vp-c-gray-3);
@@ -75,11 +75,15 @@
   --vp-code-block-bg: #2b2b2b;
 }
 
+.shiki {
+  background-color: var(--vp-code-block-bg) !important;
+}
+
 // Since we force all code backgrounds to dark,
 // we need to set an explicit base text color in light mode
 // so that unhighlighted code blocks are readable. #356
 html:not(.dark) .vp-doc div[class*="language-"] code {
-  color: var(--vp-c-bg)
+  color: var(--vp-c-bg);
 }
 
 .dark {
@@ -123,7 +127,10 @@ html:not(.dark) .vp-doc div[class*="language-"] code {
   );
   --vp-home-hero-image-opacity: 0.5;
   --vp-home-hero-image-spread-mult: 1.5;
-  --vp-home-hero-image-filter: blur(calc(44px * var(--vp-home-hero-image-spread-mult))) opacity(var(--vp-home-hero-image-opacity));
+  --vp-home-hero-image-filter: blur(
+      calc(44px * var(--vp-home-hero-image-spread-mult))
+    )
+    opacity(var(--vp-home-hero-image-opacity));
 }
 .dark {
   --vp-home-hero-image-background-image: linear-gradient(
@@ -136,13 +143,19 @@ html:not(.dark) .vp-doc div[class*="language-"] code {
 
 @media (min-width: 640px) {
   :root {
-    --vp-home-hero-image-filter: blur(calc(56px * var(--vp-home-hero-image-spread-mult))) opacity(var(--vp-home-hero-image-opacity));
+    --vp-home-hero-image-filter: blur(
+        calc(56px * var(--vp-home-hero-image-spread-mult))
+      )
+      opacity(var(--vp-home-hero-image-opacity));
   }
 }
 
 @media (min-width: 960px) {
   :root {
-    --vp-home-hero-image-filter: blur(calc(68px * var(--vp-home-hero-image-spread-mult))) opacity(var(--vp-home-hero-image-opacity));
+    --vp-home-hero-image-filter: blur(
+        calc(68px * var(--vp-home-hero-image-spread-mult))
+      )
+      opacity(var(--vp-home-hero-image-opacity));
   }
 }
 
@@ -155,7 +168,6 @@ html:not(.dark) .vp-doc div[class*="language-"] code {
   --vp-custom-block-tip-text: var(--vp-c-text-1);
   --vp-custom-block-tip-bg: var(--vp-c-brand-soft);
   --vp-custom-block-tip-code-bg: var(--vp-c-brand-soft);
-  
 }
 
 /**
@@ -165,7 +177,6 @@ html:not(.dark) .vp-doc div[class*="language-"] code {
 .DocSearch {
   --docsearch-primary-color: var(--vp-c-brand-1) !important;
 }
-
 
 a {
   color: var(--vp-c-brand-1);
@@ -193,13 +204,13 @@ html {
 }
 
 //For table cells that contain only code, remove cell padding:
-td:has(> div[class*=language-]:only-child:not(.line-numbers-mode)) {
+td:has(> div[class*="language-"]:only-child:not(.line-numbers-mode)) {
   > div {
     background-color: transparent !important;
 
     &:before {
       top: 0;
-      right: 0.5em
+      right: 0.5em;
     }
     // margin: 12px 0 !important;
 
@@ -216,7 +227,7 @@ td:has(> div[class*=language-]:only-child:not(.line-numbers-mode)) {
       padding-left: 16px;
     }
   }
-} 
+}
 
 .dark .light-only {
   display: none !important;
@@ -227,11 +238,12 @@ html:not(.dark) .dark-only {
 
 // Improve information density in tables, e.g. on the security overview page.
 table td {
-  li, ul {
-    margin: 0px !important
+  li,
+  ul {
+    margin: 0px !important;
   }
   p {
-    margin: 0px !important
+    margin: 0px !important;
   }
   > ul {
     padding-left: 1rem !important;
@@ -239,6 +251,6 @@ table td {
 }
 
 // Join together consecutive code blocks
-.vp-doc div[class*='language-'] + div[class*='language-'] {
+.vp-doc div[class*="language-"] + div[class*="language-"] {
   margin-top: -30px;
 }

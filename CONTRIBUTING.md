@@ -11,12 +11,7 @@
 
 ## Installing dependencies
 
-Install NPM dependencies in the following projects by running `npm ci` in each directory:
-
-- `src/coalesce-vue`
-- `src/coalesce-vue-vuetify3`
-- `playground/Coalesce.Web.Vue3` (if you plan to run the Vue3 playground)
-- `docs` (if you plan to run the docs)
+This project uses NPM workspaces. To install NPM packages, you only need to run `npm ci` once, in the repository root.
 
 ## Debugging Code Generation
 
@@ -51,7 +46,6 @@ dotnet run -- <path-to-coalesce.json> --debug
 
 ```bash
 cd docs
-npm ci
 npm run dev
 ```
 
@@ -61,7 +55,6 @@ Then open the documentation in your browser at the URL provided in the output af
 
 ```bash
 cd playground/Coalesce.Web.Vue3
-npm ci
 npm run coalesce
 ```
 

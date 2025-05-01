@@ -1,5 +1,3 @@
-/// <reference path="../node_modules/vitest/globals.d.ts" />
-
 import { createApp, defineComponent, h, nextTick, ref } from "vue";
 import {
   createRouter,
@@ -40,7 +38,7 @@ describe("bindToQueryString", () => {
       {
         global: { plugins: [router] },
         attachTo: document.body,
-      }
+      },
     );
 
     await delay(10);
@@ -61,7 +59,7 @@ describe("bindToQueryString", () => {
       dateRef.value = new Date(123455667);
       await delay(1);
       expect(router.currentRoute.value.query.value).toBe(
-        "1970-01-02T10:17:35.667Z"
+        "1970-01-02T10:17:35.667Z",
       );
     });
   });
@@ -82,7 +80,7 @@ describe("bindToQueryString", () => {
       dateRef.value = new Date(123455667);
       await delay(1);
       expect(router.currentRoute.value.query.foo).toBe(
-        "1970-01-02T10:17:35.667Z"
+        "1970-01-02T10:17:35.667Z",
       );
     });
   });
@@ -109,7 +107,7 @@ describe("bindToQueryString", () => {
 
   test("bound to primitive collection", async () => {
     const dataSource = reactive(
-      new Person.DataSources.NamesStartingWithAWithCases()
+      new Person.DataSources.NamesStartingWithAWithCases(),
     );
     await runTest(async (v, router) => {
       bindToQueryString(v, dataSource, "allowedStatuses");
@@ -137,7 +135,7 @@ describe("bindToQueryString", () => {
       });
       await delay(1);
       expect(router.currentRoute.value.query.personCriterion).toBe(
-        `{"personIds":[1,2],"name":"b&personCriterion=ob"}`
+        `{"personIds":[1,2],"name":"b&personCriterion=ob"}`,
       );
 
       router.push(`/?personCriterion={"name":"bob2","personIds":[1,2,3]}`);
@@ -146,7 +144,7 @@ describe("bindToQueryString", () => {
         new PersonCriteria({
           name: "bob2",
           personIds: [1, 2, 3],
-        })
+        }),
       );
 
       router.push("/?personCriterion=");
@@ -201,7 +199,7 @@ describe("bindToQueryString", () => {
       {
         global: { plugins: [router] },
         attachTo: document.body,
-      }
+      },
     );
 
     try {
@@ -259,7 +257,7 @@ describe("bindToQueryString", () => {
       {
         global: { plugins: [router] },
         attachTo: document.body,
-      }
+      },
     );
 
     try {
@@ -312,7 +310,7 @@ describe("bindToQueryString", () => {
       }),
       {
         global: { plugins: [router] },
-      }
+      },
     );
 
     // wait for mount

@@ -1,9 +1,11 @@
 <template>
-  <h4 v-if="html" v-html="html" class="code-prop" :id="idAttr">
-  </h4>
+  <h4 v-if="html" v-html="html" class="code-prop" :id="idAttr"></h4>
   <h4 v-else class="code-prop" :id="idAttr">
     <!-- Temporary uncolored content that matches the result as best as possible to avoid FOUC -->
-    <pre class="shiki" style="line-height: 1.18; padding-top: 1px; padding-bottom: 4px;">
+    <pre
+      class="shiki"
+      style="line-height: 1.18; padding-top: 1px; padding-bottom: 4px"
+    >
       <code>
         {{def}}
       </code>
@@ -11,16 +13,18 @@
   </h4>
 </template>
 
-
 <style lang="scss">
-
 p + .code-prop {
   margin-top: 36px;
+}
+
+h4.code-prop {
+  font-size: 16px;
 }
 .code-prop {
   margin-top: 10px;
   font-weight: inherit !important;
-  
+
   .shiki {
     margin: 0;
     padding: 2px 8px;
@@ -38,9 +42,15 @@ p + .code-prop {
   + :not(#{$selector}),
   + :not(#{$selector}) + :not(#{$selector}),
   + :not(#{$selector}) + :not(#{$selector}) + :not(#{$selector}),
-  + :not(#{$selector}) + :not(#{$selector}) + :not(#{$selector}) + :not(#{$selector}),
-  + :not(#{$selector}) + :not(#{$selector}) + :not(#{$selector}) + :not(#{$selector}) + :not(#{$selector})
-  {
+  + :not(#{$selector})
+    + :not(#{$selector})
+    + :not(#{$selector})
+    + :not(#{$selector}),
+  + :not(#{$selector})
+    + :not(#{$selector})
+    + :not(#{$selector})
+    + :not(#{$selector})
+    + :not(#{$selector}) {
     // Position the elements following the <Prop> to be left-indented past the code block,
     // and reduce the top margin to be a little closer to the code block.
     margin-top: 4px;
@@ -49,24 +59,23 @@ p + .code-prop {
 }
 </style>
 
-
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { defineComponent } from "vue";
 
 var highlighters = new Map<string, ReturnType<typeof highlighterFactory>>();
 async function highlighterFactory(lang) {
   // Dynamic import to avoid dependency in production builds
-  const shiki = await import('shiki');
+  const shiki = await import("shiki");
   const highlighter = await shiki.getHighlighter({
-    themes: ['dark-plus'],
-    langs: [lang]
+    themes: ["dark-plus"],
+    langs: [lang],
   });
   return { highlighter, shiki };
 }
 
 function getHighlighter(lang) {
   if (highlighters.has(lang)) return highlighters.get(lang);
-  
+
   // cache the promise itself so multiple concurrent invocations
   // don't make multiple requests to the CDN
   const promise = highlighterFactory(lang);
@@ -82,7 +91,7 @@ export default defineComponent({
     },
     lang: {
       type: String,
-      default: 'c#',
+      default: "c#",
     },
     ctor: {
       type: [Number, String],
@@ -98,30 +107,30 @@ export default defineComponent({
     },
     idPrefix: {
       type: String,
-      default: 'member',
+      default: "member",
     },
   },
 
   data() {
     return {
-      idAttr: '',
-      html: ''
-    }
+      idAttr: "",
+      html: "",
+    };
   },
 
   async serverPrefetch() {
     await this.renderHtml();
   },
-  
+
   beforeMount() {
     // Copy pre-rendered HTML from the static render if it is present.
-    this.html = this.$el?.innerHTML
-    this.idAttr = this.$el?.id
+    this.html = this.$el?.innerHTML;
+    this.idAttr = this.$el?.id;
 
     if (!this.html) {
       // If pre-rendered HTML is not present, dynamically render it.
       // We set a watcher on the definition for better development experience
-      this.$watch('def', () => this.renderHtml(), { immediate: true })
+      this.$watch("def", () => this.renderHtml(), { immediate: true });
     }
   },
 
@@ -129,71 +138,81 @@ export default defineComponent({
     async renderHtml() {
       var ctorDesc: string | null = null;
       if (this.ctor) {
-        ctorDesc = '// Also settable via constructor parameter #' + this.ctor;
+        ctorDesc = "// Also settable via constructor parameter #" + this.ctor;
 
-        if ((this.lang == "c#" || this.lang == "csharp") && (!this.def.match(/\bset\b/))) {
-          ctorDesc = '// ONLY settable via constructor parameter #' + this.ctor;
+        if (
+          (this.lang == "c#" || this.lang == "csharp") &&
+          !this.def.match(/\bset\b/)
+        ) {
+          ctorDesc = "// ONLY settable via constructor parameter #" + this.ctor;
         }
       }
 
       // Wrap in a class so the syntax is highlighted correctly
-      const code = 
-        (this.noClass ? '' : 'public class x {' )
-        + (ctorDesc ? '\n' + ctorDesc : '')
-        + '\n' + this.def 
-        + (this.noClass ? '' : '\n}' );
-
+      const code =
+        (this.noClass ? "" : "public class x {") +
+        (ctorDesc ? "\n" + ctorDesc : "") +
+        "\n" +
+        this.def +
+        (this.noClass ? "" : "\n}");
 
       if (this.id) {
-        this.idAttr = this.id
+        this.idAttr = this.id;
       } else if (this.lang == "ts") {
         // Typescript is pretty nice in that the member name is always first in its declaration.
         // No types on the left hand side.
         // "namespace" is included as part of the attr if present.
-        const result = /(?:(?:readonly|public|static|protected|private|abstract|export) )*((?:namespace )?[\w$-]+)/.exec(this.def);
-        this.idAttr = result ? this.idPrefix + '-' + result[1] : null
+        const result =
+          /(?:(?:readonly|public|static|protected|private|abstract|export) )*((?:namespace )?[\w$-]+)/.exec(
+            this.def,
+          );
+        this.idAttr = result ? this.idPrefix + "-" + result[1] : null;
       } else if (this.lang == "c#") {
         // For C#, there's always a type on the left hand side.
-        // The name should be immediately preceded by a space, 
+        // The name should be immediately preceded by a space,
         // and followed by a:
-        // - `<` (generic method) 
-        // - `(` (nongeneric method) 
-        // - ` {` (prop definition) 
+        // - `<` (generic method)
+        // - `(` (nongeneric method)
+        // - ` {` (prop definition)
         // - `<eol>` (field definition, or prop where {get;set;} were omitted from the def)
         const result = / (\w+)(?:<|\(| \{|$)/.exec(this.def);
-        this.idAttr = result ? this.idPrefix + '-' + result[1] : null
+        this.idAttr = result ? this.idPrefix + "-" + result[1] : null;
       }
 
       if (!this.idAttr) {
-        throw new Error("Unable to compute id for Prop " + this.def)
+        throw new Error("Unable to compute id for Prop " + this.def);
       }
 
+      // https://github.com/mdit-vue/mdit-vue/blob/7aa8e1b1e848672baf4f9454312ec67573a9e9f7/packages/shared/src/slugify.ts#L9
+      const rSpecial = /[\s~`!@#$%^&*()\-_+=[\]{}|\\;:"'“”‘’<>,.?/]+/g;
       this.idAttr = this.idAttr
-        .toLowerCase()
-        .replace(/[ &<>"']/g,'-')
-        .replace(/\$/g,'_')
+        .normalize("NFKD")
+        .replace(rSpecial, "-")
+        // Remove continuous separators
+        .replace(/-{2,}/g, "-")
+        .toLowerCase();
 
       const { highlighter } = await getHighlighter(this.lang)!;
-      
+
       const noClass = this.noClass;
       let html = highlighter.codeToHtml(code, {
         lang: this.lang,
-        theme: 'dark-plus',
+        theme: "dark-plus",
         transformers: [
-          { 
+          {
             tokens(tokens) {
               if (!noClass) {
                 // Strip out the fake class wrapper that was added to get the colors right:
                 tokens.shift();
                 tokens.pop();
               }
-            }
-          }
-        ]
-      })
-      
+            },
+          },
+        ],
+      });
+
       this.html = `<a class="header-anchor" href="#${this.idAttr}" aria-hidden="true"></a>${html}`;
-    }
-  }
+    },
+  },
 });
 </script>

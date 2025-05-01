@@ -3,11 +3,11 @@ name: docs
 on:
   push:
     branches: [dev]
-    paths: ['docs/**']
+    paths: ["docs/**"]
   pull_request:
     branches: [dev]
-    paths: ['docs/**']
-    
+    paths: ["docs/**"]
+
   # trigger deployment manually
   workflow_dispatch:
 
@@ -26,19 +26,10 @@ jobs:
           # fetch all commits to get last updated time or other git log info
           fetch-depth: 0
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          # choose node.js version to use
-          node-version: '16'
+      - run: npm ci
+        working-directory: ${{ github.workspace }}
 
-      # install dependencies if the cache did not hit
-      - name: Install dependencies
-        run: npm ci
-
-      # run build script
-      - name: Build Site
-        run: npm run build
+      - run: npm run build
 
       # please check out the docs of the workflow for more details
       # @see https://github.com/crazy-max/ghaction-github-pages

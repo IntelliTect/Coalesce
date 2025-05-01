@@ -6,60 +6,57 @@ on:
         type: string
 
 jobs:
-  build-dotnet: 
+  build-dotnet:
     runs-on: ubuntu-latest
 
     env:
       COALESCE_VERSION: ${{inputs.COALESCE_VERSION}}
-      
+
     steps:
-    - uses: actions/checkout@v4
-    - name: Setup dotnet
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: | 
-          8.0.x
-          9.0.x
+      - uses: actions/checkout@v4
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            9.0.x
 
-    - run: npm ci
-      working-directory: src/coalesce-vue
-    - run: dotnet restore
-    - run: dotnet build --no-restore --configuration Release
-    - run: dotnet test --no-build --configuration Release
-    - run: dotnet pack --no-build --configuration Release -p:PackageOutputPath="$(pwd)/out/packages"
+      - run: npm ci
+        working-directory: src/coalesce-vue
+      - run: dotnet restore
+      - run: dotnet build --no-restore --configuration Release /WarnAsError
+      - run: dotnet test --no-build --configuration Release
+      - run: dotnet pack --no-build --configuration Release -p:PackageOutputPath="$(pwd)/out/packages"
 
-    - name: 'Upload Artifact: NuGet Packages'
-      uses: actions/upload-artifact@v4
-      with:
-        name: packages
-        path: out/packages
+      - name: "Upload Artifact: NuGet Packages"
+        uses: actions/upload-artifact@v4
+        with:
+          name: packages
+          path: out/packages
 
-
-  validate-vue3-playground: 
+  validate-vue3-playground:
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: playground/Coalesce.Web.Vue3
-      
+
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: | 
-          8.0.x
-          9.0.x
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            9.0.x
 
-    - run: npm ci
-      working-directory: src/coalesce-vue
-    - run: npm ci
-      working-directory: src/coalesce-vue-vuetify3
-    - run: npm ci
-    - run: npm run coalesce
-    - run: npm run build
-    - run: dotnet build --configuration Release
-
-
+      - run: npm ci
+        working-directory: src/coalesce-vue
+      - run: npm ci
+        working-directory: src/coalesce-vue-vuetify3
+      - run: npm ci
+      - run: npm run coalesce
+      - run: npm run build
+      - run: dotnet build --configuration Release
 
   build-coalesce-vue:
     runs-on: ubuntu-latest
@@ -71,34 +68,32 @@ jobs:
       COALESCE_VERSION: ${{inputs.COALESCE_VERSION}}
 
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - run: npm ci
-    
-    - name: npm version
-      run: npm version $COALESCE_VERSION --no-git-tag-version
-    
-    - name: npm run test
-      run: npm run test -- --coverage --reporter=default --reporter=junit --outputFile coalesce-vue.results.xml
-    
+      - run: npm ci
 
-    # Currently broken with vitest: https://github.com/dorny/test-reporter/issues/187
-    # - name: Publish Test Results
-    #   uses: dorny/test-reporter@v1
-    #   if: always() && github.event_name != 'pull_request'
-    #   with:
-    #     name: coalesce-vue tests
-    #     path: '**/*.results.xml'
-    #     reporter: jest-junit
+      - name: npm version
+        run: npm version $COALESCE_VERSION --no-git-tag-version
 
-    - run: npm pack
+      - name: npm run test
+        run: npm run test -- --coverage --reporter=default --reporter=junit --outputFile coalesce-vue.results.xml
 
-    - name: Upload Artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: coalesce-vue
-        path: src/coalesce-vue/coalesce-vue*.tgz
+      # Currently broken with vitest: https://github.com/dorny/test-reporter/issues/187
+      # - name: Publish Test Results
+      #   uses: dorny/test-reporter@v1
+      #   if: always() && github.event_name != 'pull_request'
+      #   with:
+      #     name: coalesce-vue tests
+      #     path: '**/*.results.xml'
+      #     reporter: jest-junit
 
+      - run: npm pack
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: coalesce-vue
+          path: src/coalesce-vue/coalesce-vue*.tgz
 
   build-coalesce-vue-vuetify3:
     runs-on: ubuntu-latest
@@ -110,28 +105,27 @@ jobs:
       COALESCE_VERSION: ${{inputs.COALESCE_VERSION}}
 
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    # build coalesce-vue
-    - run: npm run build-local-deps
-    - run: npm ci
-    - run: npm run build
-    - run: npm run test
+      # build coalesce-vue
+      - run: npm run build-local-deps
+      - run: npm ci
+      - run: npm run build
+      - run: npm run test
 
-    # now we'll setup the real versions of things.
-    # Change the package.json with the correct version of coalesce-vue, 
-    # but do not use any npm commands to do so as they'll freak out that the version isn't published.
-    - name: update *dependencies["coalesce-vue"] version
-      run: cat <<< "$(cat package.json | jq ".peerDependencies[\"coalesce-vue\"] = \"$COALESCE_VERSION\" | .devDependencies[\"coalesce-vue\"] = \"$COALESCE_VERSION\" ")" > package.json
+      # now we'll setup the real versions of things.
+      # Change the package.json with the correct version of coalesce-vue,
+      # but do not use any npm commands to do so as they'll freak out that the version isn't published.
+      - name: update *dependencies["coalesce-vue"] version
+        run: cat <<< "$(cat package.json | jq ".peerDependencies[\"coalesce-vue\"] = \"$COALESCE_VERSION\" | .devDependencies[\"coalesce-vue\"] = \"$COALESCE_VERSION\" ")" > package.json
 
-    - name: npm version
-      run: npm version $COALESCE_VERSION --no-git-tag-version
+      - name: npm version
+        run: npm version $COALESCE_VERSION --no-git-tag-version
 
-    - run: npm pack
+      - run: npm pack
 
-    - name: Upload Artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: coalesce-vue-vuetify3
-        path: src/coalesce-vue-vuetify3/*.tgz
-
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: coalesce-vue-vuetify3
+          path: src/coalesce-vue-vuetify3/*.tgz

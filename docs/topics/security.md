@@ -12,7 +12,7 @@ The following table is a quick reference of scenarios you might encounter and ho
 <th width=190px>Restriction</th>
 <th>Technique</th>
 </tr>
-</thead>
+</thead><tbody>
 
 <tr>
 <td rowspan=4>
@@ -248,7 +248,7 @@ Custom security
 </td>
 </tr>
 
-</table>
+</tbody></table>
 
 
 ## Endpoint Security
@@ -275,7 +275,7 @@ This security is applied to the generated [controllers](https://learn.microsoft.
 <th>Endpoints</th>
 <th>Governing Attributes</th>
 </tr>
-</thead>
+</thead><tbody>
 <tr>
 <td>
 
@@ -339,7 +339,7 @@ This security is applied to the generated [controllers](https://learn.microsoft.
 
 </td>
 </tr>
-</table>
+</tbody></table>
 
 Here are some examples of applying security attributes to an entity class. If a particular action doesn't need to be restricted, you can omit that attribute, but this example shows usages of all four:
 

@@ -111,6 +111,7 @@
       "datatype": "bool",
       "displayName": "Tenancy: Core",
       "description": "Includes core infrastructure for supporting multiple tenants within one shared database, with shared user accounts.",
+      "$coalesceLink": "/topics/template-features.html#tenancy",
       "$coalesceRequires": ["and", "Identity"]
     },
     "TenantCreateSelf": {

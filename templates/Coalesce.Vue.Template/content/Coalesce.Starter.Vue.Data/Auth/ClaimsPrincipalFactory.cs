@@ -34,6 +34,7 @@ public class ClaimsPrincipalFactory(
         }
         else
         {
+            // There's already a TenantId set. Validate that the user is really a member of it.
             var isTenantMember = await db.TenantMemberships
                 .AnyAsync(t => t.UserId == user.Id && t.TenantId == tenantId);
             if (!isTenantMember)

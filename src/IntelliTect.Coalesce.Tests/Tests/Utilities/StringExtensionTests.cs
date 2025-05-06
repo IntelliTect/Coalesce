@@ -7,7 +7,7 @@ namespace IntelliTect.Coalesce.Tests.Utilities
     public class StringExtensionTests
     {
         [Fact]
-        public void CanGetIdentifierWithSpaces()
+        public void GetValidCSharpIdentifier_CanGetIdentifierWithSpaces()
         {
             string input = "Oh No";
 
@@ -17,7 +17,7 @@ namespace IntelliTect.Coalesce.Tests.Utilities
         }
 
         [Fact]
-        public void CanGetIdentifierWithPrefix()
+        public void GetValidCSharpIdentifier_CanGetIdentifierWithPrefix()
         {
             string input = "MyVariable";
 
@@ -27,7 +27,7 @@ namespace IntelliTect.Coalesce.Tests.Utilities
         }
 
         [Fact]
-        public void CanGetValidIdentifierWhenItIsAlreadyValid()
+        public void GetValidCSharpIdentifier_CanGetValidIdentifierWhenItIsAlreadyValid()
         {
             string input = "IamValidCSharp";
 
@@ -37,7 +37,7 @@ namespace IntelliTect.Coalesce.Tests.Utilities
         }
 
         [Fact]
-        public void CanGetValidIdentifierWhenSourceContainsUnderscore()
+        public void GetValidCSharpIdentifier_CanGetValidIdentifierWhenSourceContainsUnderscore()
         {
             string input = "_in_put_";
 
@@ -47,7 +47,7 @@ namespace IntelliTect.Coalesce.Tests.Utilities
         }
 
         [Fact]
-        public void CanGetValidIdentifierWhenSourceContainsUnicode()
+        public void GetValidCSharpIdentifier_CanGetValidIdentifierWhenSourceContainsUnicode()
         {
             string input = @"Uni\u15F0code";
 
@@ -57,7 +57,7 @@ namespace IntelliTect.Coalesce.Tests.Utilities
         }
 
         [Fact]
-        public void GetGetIdentifierForKeyword()
+        public void GetValidCSharpIdentifier_GetGetIdentifierForKeyword()
         {
             string input = "class";
 
@@ -67,7 +67,7 @@ namespace IntelliTect.Coalesce.Tests.Utilities
         }
 
         [Fact]
-        public void CanGetIdentifierForNumericString()
+        public void GetValidCSharpIdentifier_CanGetIdentifierForNumericString()
         {
             string input = "0123";
 
@@ -77,13 +77,21 @@ namespace IntelliTect.Coalesce.Tests.Utilities
         }
 
         [Fact]
-        public void CanGetIndetifierFromVerbatimIdentifier()
+        public void GetValidCSharpIdentifier_CanGetIndetifierFromVerbatimIdentifier()
         {
             string input = "@if";
 
             string identifier = input.GetValidCSharpIdentifier();
 
             Assert.Equal("@if", identifier);
+        }
+
+        [Theory]
+        [InlineData("case")]
+        [InlineData("await")]
+        public void GetValidCSharpIdentifier_EscapesReservedWord(string input)
+        {
+            Assert.Equal("@" + input, input.GetValidCSharpIdentifier());
         }
 
         [Fact]

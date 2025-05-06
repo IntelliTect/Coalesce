@@ -108,17 +108,6 @@ namespace IntelliTect.Coalesce.TypeDefinition
         
         public bool PureTypeOnContext => Object?.IsDbMappedType ?? false;
 
-        public static readonly Regex JsKeywordRegex = new Regex(
-            "^(?:do|if|in|for|let|new|try|var|case|else|enum|eval|false|null|this|true" +
-            "|void|with|break|catch|class|const|super|throw|while|yield|delete|export|import" +
-            "|public|return|static|switch|typeof|default|extends|finally|package|private" +
-            "|continue|debugger|function|arguments|interface|protected|implements|instanceof)$");
-
-        /// <summary>
-        /// Returns true if the value if JsVariable is a reserved keyword in JavaScript.
-        /// </summary>
-        public bool JsVariableIsReserved => JsKeywordRegex.IsMatch(JsVariable);
-
         /// <summary>
         /// Text property name for things like enums. PureType+'Text'
         /// </summary>

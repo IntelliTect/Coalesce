@@ -72,6 +72,13 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         [Search]
         [ManyToMany("Products")]
         public ICollection<CaseProduct> CaseProducts { get; set; }
+
+        [Coalesce]
+        public string MethodWithJsReservedParamName(
+            Case @case, string function, int var, bool async, string await,
+            string[] arguments, string implements, bool delete, bool @true
+        )
+            => @case.ToString();
         
         public class AllOpenCases : StandardDataSource<Case, AppDbContext>
         {

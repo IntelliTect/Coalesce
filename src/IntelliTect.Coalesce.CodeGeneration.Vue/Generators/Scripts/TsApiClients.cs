@@ -82,7 +82,17 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                 {
                     foreach (var param in method.ApiParameters)
                     {
-                        b.Line($"{param.JsVariable},");
+                        var paramName = param.JsVariable.GetValidJsIdentifier();
+                        var initializer = param.JsVariable;
+
+                        if (paramName == initializer)
+                        {
+                            b.Line($"{paramName},");
+                        }
+                        else
+                        {
+                            b.Line($"{initializer}: {paramName},");
+                        }
                     }
                 }
 

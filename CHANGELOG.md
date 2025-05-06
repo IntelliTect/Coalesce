@@ -22,6 +22,9 @@
 - `c-datetime-picker`: Added prop `showTodayButton`
 - `c-select-many-to-many`: The `itemTitle` prop now receives the existing selected middle entity instance, if there is one.
 
+## Fixes
+- Fix error in codegen when using JS reserved keywords or C# contextual keywords as parameter names.
+
 # 5.3.8
 
 - Fix error in bulk saves where inheritance workaround added in 5.3.6 was not specific enough.

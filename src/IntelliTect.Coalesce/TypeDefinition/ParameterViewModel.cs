@@ -78,7 +78,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public string PascalCaseName => Name.ToPascalCase();
 
-        public string CsParameterName => Name.ToCamelCase();
+        public string CsParameterName => Name.ToCamelCase().GetValidCSharpIdentifier();
 
         public abstract bool HasDefaultValue { get; }
         protected abstract object? RawDefaultValue { get; }

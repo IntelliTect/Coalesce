@@ -296,6 +296,9 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                         }
                         return $"this.{src.JsVariable}";
                     }
+
+                    if (prefix == "") return p.JsVariable.GetValidJsIdentifier();
+
                     return prefix + p.JsVariable;
                 }
             }

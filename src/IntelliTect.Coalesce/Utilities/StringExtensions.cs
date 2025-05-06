@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Web;
@@ -164,9 +165,31 @@ namespace IntelliTect.Coalesce.Utilities
             {
                 @string = $"_{@string}";
             }
-            else if (SyntaxFacts.GetKeywordKind(@string) != SyntaxKind.None)
+            else if (SyntaxFacts.GetKeywordKind(@string) != SyntaxKind.None || SyntaxFacts.GetContextualKeywordKind(@string) != SyntaxKind.None)
             {
                 @string = $"@{@string}";
+            }
+
+            return @string;
+        }
+
+        private static readonly HashSet<string> JsKeywords = new HashSet<string>
+        {
+            "do", "if", "in", "for", "let", "new", "try", "var", "case", "else", "enum", "eval",
+            "false", "null", "this", "true", "void", "with", "break", "catch", "class", "const",
+            "super", "throw", "while", "yield", "delete", "export", "import", "public", "return",
+            "static", "switch", "typeof", "default", "extends", "finally", "package", "private",
+            "continue", "debugger", "function", "arguments", "interface", "protected", "implements",
+            "instanceof"
+        };
+
+        public static string GetValidJsIdentifier(this string @string)
+        {
+            var reserved = JsKeywords.Contains(@string);
+
+            if (reserved)
+            {
+                return @string + "_";
             }
 
             return @string;

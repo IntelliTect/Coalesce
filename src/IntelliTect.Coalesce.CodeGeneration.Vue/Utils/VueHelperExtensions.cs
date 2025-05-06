@@ -23,7 +23,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Utils
 
             return paramList.Select(p => (
                 p, 
-                p.JsVariable +
+                p.JsVariable.GetValidJsIdentifier() +
                     (!IsRequired(p) ? "?" : "") +
                     ": " +
                     $"{new VueType(p.Type, paramTypeFlags).TsType("$models")} | null",

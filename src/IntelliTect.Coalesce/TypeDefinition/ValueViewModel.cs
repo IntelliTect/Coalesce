@@ -6,6 +6,7 @@ using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace IntelliTect.Coalesce.TypeDefinition
 {
@@ -34,7 +35,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             this.GetAttributeValue<DisplayAttribute>(a => a.Description) ?? 
             this.GetAttributeValue<DescriptionAttribute>(a => a.Description);
 
-        public string JsVariable => Name.ToCamelCase();
+        public virtual string JsVariable => Name.ToCamelCase();
 
         /// <summary>
         /// Gets the raw, unaltered type of the value.

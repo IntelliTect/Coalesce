@@ -218,7 +218,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
                     // Furthermore, we must specify a Name because without it, top level parameters are ambiguous with nested parameters.
                     // For example, for a custom method that takes a `class Case { string Name }` parameter and a `string name` parameter,
                     // if the Case is passed as null and a name is passed a value, both the `name` parameter and `Case.Name` will be set to `name`.
-                    b.Append("[FromForm(Name = ").Append(param.CsParameterName.QuotedStringLiteralForCSharp()).Append(")] ");
+                    b.Append("[FromForm(Name = ").Append(param.JsVariable.QuotedStringLiteralForCSharp()).Append(")] ");
                 }
                 else
                 {
@@ -435,7 +435,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
                 // because the model binder by default will only bind byte[]
                 // as base64 data. However, we want to support receiving either
                 // raw binary OR base64 without knowing ahead of time what we'll get.
-                ret += $" ?? await ((await Request.ReadFormAsync()).Files[nameof({param.CsParameterName})]?.OpenReadStream().ReadAllBytesAsync(true) ?? Task.FromResult<{param.Type.FullyQualifiedName}>(null))";
+                ret += $" ?? await ((await Request.ReadFormAsync()).Files[{param.JsVariable.QuotedStringLiteralForCSharp()}]?.OpenReadStream().ReadAllBytesAsync(true) ?? Task.FromResult<{param.Type.FullyQualifiedName}>(null))";
             }
 
             if (param.Type.IsCollection)
@@ -451,7 +451,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
                 // method is called with from the client typescript is what ends up in C#.
                 // https://github.com/IntelliTect/Coalesce/issues/456
 
-                ret = $"!Request.Form.HasAnyValue(nameof({param.CsParameterName})) ? null : {ret}";
+                ret = $"!Request.Form.HasAnyValue({param.JsVariable.QuotedStringLiteralForCSharp()}) ? null : {ret}";
             }
 
             return ret;

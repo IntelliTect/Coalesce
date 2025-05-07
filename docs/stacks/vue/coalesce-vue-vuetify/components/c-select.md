@@ -10,7 +10,7 @@ Used for selecting values for foreign key and navigation properties, or for sele
 
 ## Examples
 
-Binding to a navigation property or foreign key of a model:
+Binding to a reference navigation property or foreign key of a model:
 
 ``` vue-html
   <c-select :model="person" for="company" />
@@ -40,6 +40,16 @@ Multi-select:
   <c-select for="Person" multiple v-model:object-value="selectedPeople" />
 ```
 
+Binding to a collection navigation property of a model:
+
+``` vue-html
+  <c-select :model="person" for="casesAssigned" />
+```
+
+This will assign `person` and its PK to the inverse navigation property of the relationship (`Case.AssignedTo`) when items are selected, and will null those properties when items are deselected. Note that this scenario is not delegated to by `c-input` automatically and requires direct usage of `c-select` since it is a fairly unusual scenario and usually requires additional customization (e.g. the `params` and `create` props) to make it function well.
+
+----
+
 Examples of other props:
 
 ``` vue-html
@@ -61,12 +71,12 @@ Examples of other props:
 
 Note: In addition to the below props, `c-select` also supports most props that are supported by Vuetify's [v-text-field](https://vuetifyjs.com/en/components/text-fields/).
 
-<Prop def="for: string | ForeignKeyProperty | ModelReferenceNavigationProperty | ModelType" lang="ts" />
+<Prop def="for: string | Value | Property | ModelType" lang="ts" />
 
 A metadata specifier for the value being bound. One of:
 
-- The name of a foreign key or reference navigation property belonging to `model`. 
 - The name of a model type.
+- The name of a foreign key or navigation property belonging to `model`. 
 - A direct reference to a metadata object.
 
 ::: tip

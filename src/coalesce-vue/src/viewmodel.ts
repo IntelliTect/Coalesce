@@ -99,7 +99,9 @@ export abstract class ViewModel<
   /** @internal  */
   $parentCollection: ViewModelCollection<this, TModel> | null = null;
 
-  /** @internal Removed items, pending deletion in a bulk save */
+  /** @internal Items previously associated with this ViewModel that
+   * need to be visited and processed by any future bulk saves.
+   * Items are not strictly pending deletion. */
   $removedItems?: ViewModel[];
 
   /** 

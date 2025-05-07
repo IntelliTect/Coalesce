@@ -18,7 +18,7 @@ If for whatever reason you find yourself adding Coalesce to an existing project,
 ## Display Components
 
 <table>
-<thead><tr><th width="170px">Component</th><th>Description</th></tr></thead>
+<thead><tr><th width="170px">Component</th><th>Description</th></tr></thead><tbody>
 <tr><td>
 
 [c-display](./components/c-display.md)
@@ -51,13 +51,13 @@ If for whatever reason you find yourself adding Coalesce to an existing project,
 
 @[import-md "after":"MARKER:summary", "before":"MARKER:summary-end"](./components/c-table.md) 
 </td></tr>
-</table>
+</tbody></table>
 
 
 ## Input Components
 
 <table>
-<thead><tr><th width="170px">Component</th><th>Description</th></tr></thead>
+<thead><tr><th width="170px">Component</th><th>Description</th></tr></thead><tbody>
 <tr><td>
 
 [c-input](./components/c-input.md)
@@ -139,13 +139,13 @@ If for whatever reason you find yourself adding Coalesce to an existing project,
 @[import-md "after":"MARKER:summary", "before":"MARKER:summary-end"](./components/c-list-page.md) 
 </td></tr>
 
-</table>
+</tbody></table>
 
 
 ## Admin Components
 
 <table>
-<thead><tr><th width="170px">Component</th><th>Description</th></tr></thead>
+<thead><tr><th width="170px">Component</th><th>Description</th></tr></thead><tbody>
 <tr><td>
 
 [c-admin-method](./components/c-admin-method.md)
@@ -217,4 +217,4 @@ If for whatever reason you find yourself adding Coalesce to an existing project,
 
 @[import-md "after":"MARKER:summary", "before":"MARKER:summary-end"](./components/c-admin-audit-log-page.md) 
 </td></tr>
-</table>
+</tbody></table>

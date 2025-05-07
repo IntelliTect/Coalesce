@@ -25,11 +25,13 @@ import {
   Company,
   ComplexModel,
   EnumPkId,
+  Person,
   Test,
 } from "@test-targets/models.g";
 import {
   CaseViewModel,
   ComplexModelViewModel,
+  PersonViewModel,
   TestViewModel,
 } from "@test-targets/viewmodels.g";
 
@@ -118,13 +120,20 @@ describe("CSelect", () => {
     // Against models that might be null
     () => <CSelect model={complexVm.referenceNavigation} for="referenceNavigation" />;
 
+    // Binding to collection navigation
+    () => <CSelect model={new Person} for="casesAssigned" />;
+
+    // Unfortunately, after adding support for binding to non-many-to-many collection navigation props,
+    // there doesn't seem to be any practical way to exclude manyToMany props anymore with TS.
+    // This is still a runtime error, but we can't enforce it with types.
+    // // @ts-expect-error Cannot bind to many-to-many
+    // () => <CSelect model={new Case} for="caseProducts" />;
+
     // Binding to plain Models:
     () => <CSelect model={model} for="singleTest" />;
     () => <CSelect model={model} for="singleTestId" />;
     //@ts-expect-error wrong type of property
     () => <CSelect model={model} for="name" />;
-    //@ts-expect-error Cannot bind to many-to-many
-    () => <CSelect model={new Case} for="caseProducts" />;
     //@ts-expect-error wrong type of property
     () => <CSelect model={complexVm} for={complexVm.$metadata.props.name} />;
 
@@ -675,11 +684,119 @@ describe("CSelect", () => {
 
       // Assert
       expect(model.tests).toHaveLength(1);
-      expect(model.tests[0].testId).toBe(101);
+      const selectedItem = model.tests[0];
+      expect(selectedItem.testId).toBe(101);
 
       // Emitted event value should exactly equal by instance the resulting value on `model`.
-      expect(onUpdateObject.mock.calls[0][0][0]).toBe(model.tests[0]);
-      expect(onSelectionChanged.mock.calls[0][0][0]).toBe(model.tests[0]);
+      expect(onUpdateObject.mock.calls[0][0][0]).toBe(selectedItem);
+      expect(onSelectionChanged.mock.calls[0][0][0]).toBe(selectedItem);
+    });
+
+    test.each(["menu", "chip"])(
+      "deselect by %s click emits existing ViewModel",
+      async (method) => {
+        // Arrange
+        const model = new ComplexModelViewModel({ singleTestId: 303 });
+        const onSelectionChanged = vitest.fn();
+        const wrapper = mountApp(() => (
+          <CSelect
+            for="Test"
+            multiple
+            onUpdate:modelValue={(v) => (model.tests = v)}
+            modelValue={model.tests}
+            onSelectionChanged={onSelectionChanged}
+          ></CSelect>
+        )).findComponent(CSelect);
+
+        // Act
+        await selectFirstResult(wrapper);
+        const selectedItem = model.tests[0];
+
+        method == "menu"
+          ? await deselectMenuResult(wrapper, 0)
+          : await deselectChipResult(wrapper, 0);
+
+        // Assert
+        // Emitted event value should exactly equal by instance the resulting value on `model`.
+        expect(onSelectionChanged.mock.calls[0][0][0]).toBe(selectedItem);
+        expect(onSelectionChanged.mock.calls[1][0][0]).toBe(selectedItem);
+        expect(selectedItem).toBeInstanceOf(TestViewModel);
+      }
+    );
+
+    test("collectionNavigation binding sets inverse nav on select", async () => {
+      // Arrange
+      const model = new ComplexModelViewModel().$loadCleanData({
+        complexModelId: 1,
+      });
+
+      const wrapper = mountApp(() => (
+        <CSelect model={model} for="tests"></CSelect>
+      )).findComponent(CSelect);
+
+      // Act
+      await selectFirstResult(wrapper);
+
+      // Assert
+      expect(model.tests).toHaveLength(1);
+      const added = model.tests[0];
+      expect(added.complexModel).toBe(model);
+      expect(added.complexModelId).toBe(model.complexModelId);
+
+      expect(model.$bulkSavePreview().items).toEqual([
+        {
+          action: "none",
+          data: { complexModelId: 1 },
+          refs: { complexModelId: model.$stableId },
+          root: true,
+          type: "ComplexModel",
+        },
+        {
+          action: "save",
+          data: { complexModelId: 1, testId: 101 },
+          refs: { testId: added.$stableId },
+          type: "Test",
+        },
+      ]);
+    });
+
+    test("collectionNavigation clears inverse nav on deselect", async () => {
+      // Arrange
+      const model = new ComplexModelViewModel().$loadCleanData({
+        complexModelId: 1,
+        tests: [{ testId: 101, testName: "foo 101", complexModelId: 2 }],
+      });
+
+      const wrapper = mountApp(() => (
+        <CSelect model={model} for="tests"></CSelect>
+      )).findComponent(CSelect);
+
+      // Act
+      await deselectChipResult(wrapper, 0);
+
+      // Assert
+      expect(model.tests).toHaveLength(0);
+      const removed = model.$removedItems![0] as TestViewModel;
+      expect(removed).not.toBeUndefined();
+      expect(removed).toBeInstanceOf(TestViewModel);
+      expect(removed.complexModel).toBeNull();
+      expect(removed.complexModelId).toBeNull();
+
+      expect(model.$bulkSavePreview().items).toEqual([
+        {
+          action: "none",
+          data: { complexModelId: 1 },
+          refs: { complexModelId: model.$stableId },
+          root: true,
+          type: "ComplexModel",
+        },
+        {
+          action: "save",
+          data: { complexModelId: null, testId: 101 },
+          refs: { testId: removed.$stableId },
+          type: "Test",
+        },
+      ]);
     });
   });
 
@@ -948,4 +1065,11 @@ const menuContents = () => getWrapper(".v-overlay__content");
 async function selectFirstResult(wrapper: VueWrapper) {
   const overlay = await openMenu(wrapper);
   await overlay.find(".v-list-item").trigger("click");
+}
+async function deselectChipResult(wrapper: VueWrapper, idx: number) {
+  await wrapper.findAll(".v-chip__close")[idx].trigger("click");
+}
+async function deselectMenuResult(wrapper: VueWrapper, idx: number) {
+  const overlay = await openMenu(wrapper);
+  await overlay.findAll(".v-list-item--active")[idx].trigger("click");
 }

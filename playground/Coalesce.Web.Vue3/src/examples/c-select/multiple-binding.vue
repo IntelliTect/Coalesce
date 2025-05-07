@@ -18,8 +18,12 @@
         v-model:objectValue="selectedModels"
         open-on-clear
         :create="{
-          getLabel(search: string, items: Person[]) { return items.length == 0 ? search : false },
-          async getItem(search: string, label: string) { return new Person({ name: label }) }
+          getLabel(search: string, items: Person[]) {
+            return items.length == 0 ? search : false;
+          },
+          async getItem(search: string, label: string) {
+            return new Person({ name: label });
+          },
         }"
       ></c-select>
     </v-col>
@@ -66,7 +70,22 @@
     </v-col>
   </v-row>
 
-  <h1>plain v-autocomplete multiple</h1>
+  <h1>for non-many-to-many collection navigation</h1>
+  <v-row v-if="person">
+    <v-col>
+      <c-select :model="person" for="casesAssigned" />
+      <h3>Via c-input</h3>
+      <c-input :model="person" for="casesAssigned" />
+    </v-col>
+    <v-col>
+      <v-btn @click="person.$bulkSave()"> Save </v-btn>
+      <div>
+        <c-display :model="person" for="casesAssigned" />
+      </div>
+    </v-col>
+  </v-row>
+
+  <h1>plain v-autocomplete multiple (for styling/visual reference)</h1>
   <v-row>
     <v-col>
       <v-autocomplete
@@ -87,9 +106,9 @@
 
 <script setup lang="ts">
 import { Case, Person } from "@/models.g";
-import { PersonListViewModel } from "@/viewmodels.g";
+import { PersonListViewModel, PersonViewModel } from "@/viewmodels.g";
 import { modelDisplay, useBindToQueryString } from "coalesce-vue";
-import { ref } from "vue";
+import { computed, ref } from "vue";
 
 const selectedIds = ref<number[]>([]);
 useBindToQueryString(selectedIds, {
@@ -100,6 +119,9 @@ useBindToQueryString(selectedIds, {
 
 const personList = new PersonListViewModel();
 personList.methodWithEntityParameter.args.person = new Person({ companyId: 1 });
+
+personList.$load();
+const person = computed(() => personList.$items[0]);
 
 const caseVm = new Case();
 const selectedModels = ref<Person[]>([]);

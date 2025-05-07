@@ -21,6 +21,7 @@
 - `c-datetime-picker`: Added prop `showTodayButton`
 - `c-input`: Added a `filter` prop to for enum inputs to restrict the values available for selection.
 - `c-select`: When bound to a `ViewModel` or `ViewModelCollection`, selected items are converted to `ViewModel` instances before being emitted so that event handlers will receive the final object instance, rather than the intermediate plain model instance.
+- `c-select`: Now supports bound to a non-many-to-many collection navigation property. Selecting an item will populate the foreign key of the dependent item, and deselecting an item will clear the foreign key. This mechanism is only available when using c-select directly - it is not delegated by c-input.
 - `c-select-many-to-many`: The `itemTitle` prop now receives the existing selected middle entity instance, if there is one.
 
 ## Fixes

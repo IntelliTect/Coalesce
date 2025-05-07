@@ -282,7 +282,7 @@
 </style>
 
 <script lang="ts">
-// These types are declared outside the component so that vue-tsc doesn't have to inline
+// These types are declared outside the `setup` script so that vue-tsc doesn't have to inline
 // every single type declaration, which spans thousands of lines and ultimately exceeds
 // the limit on what tsc is even capable of emitting
 
@@ -293,7 +293,7 @@ type CSelectForSpec<TModel extends CSelectModelSpec> = ForSpec<
   | ForeignKeyProperty
   | ModelReferenceNavigationProperty
   | ModelValue
-  | (ModelCollectionValue & { manyToMany: never })
+  | ModelCollectionValue
   | ModelType
 >;
 
@@ -410,6 +410,7 @@ import {
   ValueOrFkToModelType,
   ViewModelFactory,
   ViewModelCollection,
+  ModelCollectionNavigationProperty,
 } from "coalesce-vue";
 import { VField, VInput } from "vuetify/components";
 
@@ -481,9 +482,9 @@ const props = withDefaults(
       model?: TModel | null;
 
       /** A metadata specifier for the value being bound. One of:
-       * * A string with the name of the value belonging to `model`. E.g. `"firstName"`.
+       * * A string with the name of type to select. E.g. `"Person"`.
+       * * A string with the name of the value belonging to `model`. E.g. `"supervisor"`.
        * * A direct reference to the metadata object. E.g. `model.$metadata.props.firstName`.
-       * * A string in dot-notation that starts with a type name. E.g. `"Person.firstName"`.
        */
       for: TFor;
 
@@ -646,6 +647,7 @@ const modelObjectProp = computed(
     | ModelReferenceNavigationProperty
     | ModelValue
     | ModelCollectionValue
+    | ModelCollectionNavigationProperty
     | null => {
     const meta = valueMeta.value!;
     if (meta.role == "foreignKey" && "navigationProp" in meta) {
@@ -654,13 +656,11 @@ const modelObjectProp = computed(
     if (meta.role == "referenceNavigation" && "foreignKey" in meta) {
       return meta;
     }
-    if (meta.role == "value") {
-      if (meta.type == "model") {
-        return meta;
-      }
-      if (meta.type == "collection" && meta.itemType.type == "model") {
-        return meta as ModelCollectionValue;
-      }
+    if (meta.type == "model") {
+      return meta;
+    }
+    if (meta.type == "collection" && meta.itemType.type == "model") {
+      return meta as ModelCollectionValue | ModelCollectionNavigationProperty;
     }
     return null;
   },
@@ -868,16 +868,25 @@ const createItemLabel = computed((): string | null => {
 
 const effectiveMultiple = computed((): boolean => {
   let multiple: boolean = props.multiple ?? false;
-  if (valueMeta.value?.type == "collection") {
-    if ("manyToMany" in valueMeta.value) {
+  const _valueMeta = valueMeta.value;
+
+  if (_valueMeta?.type == "collection") {
+    if ("manyToMany" in _valueMeta) {
       throw new Error(
-        `c-select cannot be used with the many-to-many value '${valueMeta.value.name}'. Use c-select-many-to-many instead.`,
+        `c-select cannot be used with the many-to-many value '${_valueMeta.name}'. Use c-select-many-to-many instead.`,
       );
     }
+    if (_valueMeta.role == "collectionNavigation") {
+      if (!("inverseNavigation" in _valueMeta)) {
+        throw new Error(
+          "c-select requires that bound collection navigation properties have a defined inverse property.",
+        );
+      }
+    }
     multiple = true;
-  } else if (valueOwner.value && valueMeta.value && multiple) {
+  } else if (valueOwner.value && _valueMeta && multiple) {
     throw new Error(
-      `The 'multiple' prop cannot be used with the non-collection value '${valueMeta.value.name}'.`,
+      `The 'multiple' prop cannot be used with the non-collection value '${_valueMeta.name}'.`,
     );
   }
 
@@ -914,6 +923,48 @@ function convertValue<T extends SelectedModelTypeSingle | null>(value: T): T {
   return value;
 }
 
+function selectionChanged(
+  values: SelectedModelTypeSingle[],
+  selected: boolean,
+) {
+  const owner = valueOwner.value;
+  const prop = modelObjectProp.value;
+  if (
+    owner &&
+    prop &&
+    prop.type == "collection" &&
+    "inverseNavigation" in prop
+  ) {
+    for (const item of values) {
+      if (selected) {
+        // Assign the selected item's parent through the navigation to be `valueOwner`.
+        // This will also populate the FK on `item` through viewmodel setters.
+        item[prop.inverseNavigation!.name] = owner;
+        if ((item as any) instanceof ViewModel) {
+          // Force dirty the FK in case the cached item loaded by our list
+          // was stale and already has the FK value we're after.
+          // This avoids breakage that happens if you deselect an existing selection,
+          // save, open the menu, and re-select the item, and save again.
+          (item as ViewModel).$setPropDirty(prop.foreignKey.name, true);
+        }
+      } else {
+        // Item unselected. Sever the relationship through the navigation.
+        item[prop.foreignKey.name] = null;
+        item[prop.inverseNavigation!.name] = null;
+
+        // Ensure the severed item will be discovered by bulk saves
+        // after it is imminently removed from its current collection.
+        // Note that this won't outright delete `item` since we're not setting `_isRemoved`.
+        if (owner instanceof ViewModel) {
+          (owner.$removedItems ??= []).push(item);
+        }
+      }
+    }
+  }
+
+  emit("selectionChanged", values, selected);
+}
+
 function onInput(
   value: SelectedModelTypeSingle | null,
   dontFocus = false,
@@ -924,7 +975,8 @@ function onInput(
     return;
   }
 
-  const key = value ? value[modelObjectMeta.value.keyProp.name] : null;
+  const pkName = modelObjectMeta.value.keyProp.name;
+  const key = value ? value[pkName] : null;
   let newKey, newObjectValue: any;
 
   if (effectiveMultiple.value) {
@@ -932,12 +984,13 @@ function onInput(
       // Clear button clicked on a multi-select
       newObjectValue = [];
       newKey = [];
-      emit("selectionChanged", [...internalModelValue.value], false);
+      selectionChanged([...internalModelValue.value], false);
     } else {
       // Multi-select selection changed.
 
       const selectedKeys = [...selectedKeysSet.value];
       const selectedModels = [...internalModelValue.value];
+
       if (key != null) {
         const idx = selectedKeys.indexOf(key);
         if (idx === -1) {
@@ -946,27 +999,29 @@ function onInput(
           selectedKeys.push(key);
           selectedModels.push(newValue);
           internallyFetchedModels.set(key, new WeakRef(newValue));
-          emit("selectionChanged", [newValue], true);
+          selectionChanged([newValue], true);
         } else {
           if (!props.canDeselect) return;
           selectedKeys.splice(idx, 1);
-          const modelIdx = selectedModels.indexOf(value);
+          const modelIdx = selectedModels.findIndex((x) => x[pkName] == key);
           if (modelIdx !== -1) {
+            value = selectedModels[modelIdx] ?? value;
             selectedModels.splice(idx, 1);
           }
-          emit("selectionChanged", [value], false);
+          selectionChanged([value!], false);
         }
       } else {
         // Key may be null if the item came from `props.create` and isn't saved yet.
-        const idx = selectedModels.indexOf(value);
-        if (idx === -1) {
+        const modelIdx = selectedModels.indexOf(value);
+        if (modelIdx === -1) {
           const newValue = convertValue(value);
           selectedModels.push(newValue);
-          emit("selectionChanged", [newValue], true);
+          selectionChanged([newValue], true);
         } else {
           if (!props.canDeselect) return;
-          selectedModels.splice(idx, 1);
-          emit("selectionChanged", [value], false);
+          value = selectedModels[modelIdx] ?? value;
+          selectedModels.splice(modelIdx, 1);
+          selectionChanged([value!], false);
         }
       }
 

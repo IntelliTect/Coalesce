@@ -83,7 +83,7 @@
               :disabled="isDisabled"
               :readonly="isReadonly"
               :placeholder="
-                selectedKeysSet.size ? undefined : placeholder ?? undefined
+                selectedKeysSet.size ? undefined : (placeholder ?? undefined)
               "
             />
           </div>
@@ -104,7 +104,7 @@
           @keydown.capture.down.stop.prevent="
             pendingSelection = Math.min(
               listItems.length - 1,
-              pendingSelection + 1
+              pendingSelection + 1,
             )
           "
           @keydown.capture.up.stop.prevent="
@@ -122,7 +122,7 @@
             :loading="listCaller.isLoading"
             :error-messages="
               listCaller.wasSuccessful == false
-                ? listCaller.message ?? undefined
+                ? (listCaller.message ?? undefined)
                 : ''
             "
             clearable
@@ -300,30 +300,30 @@ type CSelectForSpec<TModel extends CSelectModelSpec> = ForSpec<
 type _SelectedModelType<
   TModel extends CSelectModelSpec,
   TFor extends CSelectForSpec<TModel>,
-  TMultiple extends boolean
+  TMultiple extends boolean,
 > = TFor extends string & keyof ModelTypeLookup
   ? // `for="TypeName"`
     TMultiple extends true
     ? Array<ModelTypeLookup[TFor]>
     : ModelTypeLookup[TFor]
   : TFor extends
-      | ModelReferenceNavigationProperty
-      | ModelValue
-      | ForeignKeyProperty
-  ? ValueOrFkToModelType<TFor>
-  : TModel extends ApiStateTypeWithArgs<any, any, infer TArgsObj, any>
-  ? TFor extends keyof TArgsObj
-    ? TMultiple extends true
-      ? TArgsObj[TFor] extends Array<any> | null | undefined
-        ? TArgsObj[TFor]
-        : never // Ban use of `multiple` prop when binding to something we know isn't an array
-      : TArgsObj[TFor]
-    : any
-  : TModel extends Model
-  ? TFor extends PropNames<TModel["$metadata"]>
-    ? ValueOrFkToModelType<TModel["$metadata"]["props"][TFor]>
-    : any
-  : Model<ModelType>;
+        | ModelReferenceNavigationProperty
+        | ModelValue
+        | ForeignKeyProperty
+    ? ValueOrFkToModelType<TFor>
+    : TModel extends ApiStateTypeWithArgs<any, any, infer TArgsObj, any>
+      ? TFor extends keyof TArgsObj
+        ? TMultiple extends true
+          ? TArgsObj[TFor] extends Array<any> | null | undefined
+            ? TArgsObj[TFor]
+            : never // Ban use of `multiple` prop when binding to something we know isn't an array
+          : TArgsObj[TFor]
+        : any
+      : TModel extends Model
+        ? TFor extends PropNames<TModel["$metadata"]>
+          ? ValueOrFkToModelType<TModel["$metadata"]["props"][TFor]>
+          : any
+        : Model<ModelType>;
 
 type _Single<T> = T extends Array<infer U> ? U : T;
 
@@ -365,9 +365,10 @@ type InheritedSlots = {
   lang="ts"
   setup
   generic="
-  TModel extends CSelectModelSpec, 
-  TFor extends CSelectForSpec<TModel> = any,
-  TMultiple extends boolean = false"
+    TModel extends CSelectModelSpec,
+    TFor extends CSelectForSpec<TModel> = any,
+    TMultiple extends boolean = false
+  "
 >
 import {
   ComponentPublicInstance,
@@ -407,6 +408,8 @@ import {
   modelDisplay,
   MetadataToModelType,
   ValueOrFkToModelType,
+  ViewModelFactory,
+  ViewModelCollection,
 } from "coalesce-vue";
 import { VField, VInput } from "vuetify/components";
 
@@ -444,12 +447,12 @@ type SelectedPkType = TMultiple extends true
 type PrimaryBindType = TFor extends ForeignKeyProperty
   ? SelectedPkType
   : TModel extends Model
-  ? TFor extends PropNames<TModel["$metadata"]>
-    ? TModel["$metadata"]["props"][TFor] extends ForeignKeyProperty
-      ? SelectedPkType
+    ? TFor extends PropNames<TModel["$metadata"]>
+      ? TModel["$metadata"]["props"][TFor] extends ForeignKeyProperty
+        ? SelectedPkType
+        : SelectedModelType
       : SelectedModelType
-    : SelectedModelType
-  : SelectedModelType;
+    : SelectedModelType;
 
 type SlotTypes = {
   ["item"]?(props: {
@@ -514,11 +517,11 @@ const props = withDefaults(
       create?: {
         getLabel: (
           search: string,
-          items: SelectedModelTypeSingle[]
+          items: SelectedModelTypeSingle[],
         ) => string | false | null | undefined;
         getItem: (
           search: string,
-          label: string
+          label: string,
         ) => Promise<SelectedModelTypeSingle>;
       };
     } & /* @vue-ignore */ InheritedProps
@@ -529,7 +532,7 @@ const props = withDefaults(
     clearable: undefined,
     multiple: undefined,
     itemTitle: modelDisplay,
-  }
+  },
 );
 
 const emit = defineEmits<{
@@ -557,9 +560,9 @@ const fieldAttrs = computed(() =>
     Object.fromEntries(
       // We have to perform prop name normalization ourselves here
       // because vuetify's filterProps doesn't support the non-camelized names.
-      Object.entries(inputBindAttrs.value).map(([k, v]) => [camelize(k), v])
-    )
-  )
+      Object.entries(inputBindAttrs.value).map(([k, v]) => [camelize(k), v]),
+    ),
+  ),
 );
 
 const { isDisabled, isReadonly, isInteractive } = useCustomInput(props);
@@ -569,7 +572,7 @@ const { inputBindAttrs, modelMeta, valueMeta, valueOwner } = useMetadataProps(
   (v) =>
     // Use the navigation metadata (if exists) to drive the logic in here,
     // as it will be a better source to pull label, hint, etc. from.
-    v.role == "foreignKey" && "navigationProp" in v ? v.navigationProp! : v
+    v.role == "foreignKey" && "navigationProp" in v ? v.navigationProp! : v,
 );
 
 const search = ref(null as string | null);
@@ -629,7 +632,7 @@ const modelKeyProp = computed((): ForeignKeyProperty | null => {
   if (meta.role == "referenceNavigation" && "foreignKey" in meta) {
     if (meta.foreignKey.role == "primaryKey") {
       throw new Error(
-        "c-select cannot be used for properties whose foreign key is simultaneously a primary key."
+        "c-select cannot be used for properties whose foreign key is simultaneously a primary key.",
       );
     }
     return meta.foreignKey;
@@ -660,14 +663,14 @@ const modelObjectProp = computed(
       }
     }
     return null;
-  }
+  },
 );
 
 /**
  * Whether the metadata provided to `for` and retrieved via `valueMeta` is for a key or an object.
  * Dictates whether v-model will attempt to bind a key or an object.
  */
-const primaryBindKind = computed(() => {
+const primaryBindKind = computed((): "model" | "key" => {
   if (!valueMeta.value) {
     throw "c-select requires metadata";
   }
@@ -689,7 +692,7 @@ const primaryBindKind = computed(() => {
 });
 
 /** The metadata of the type being selected by the dropdown. */
-const modelObjectMeta = computed(() => {
+const modelObjectMeta = computed((): ModelType => {
   var meta = valueMeta.value!;
   if (meta.role == "foreignKey" && "principalType" in meta) {
     return meta.principalType;
@@ -735,7 +738,7 @@ const internalModelValue = computed((): SelectedModelTypeSingle[] => {
     // All we have is the PK. First, check if it is already in our item array.
     // If so, capture it. If not, request the object from the server.
     const item = items.value.filter(
-      (i) => key === i[modelObjectMeta.value.keyProp.name]
+      (i) => key === i[modelObjectMeta.value.keyProp.name],
     )[0];
     if (item) {
       // eslint-disable-next-line vue/no-side-effects-in-computed-properties
@@ -746,7 +749,7 @@ const internalModelValue = computed((): SelectedModelTypeSingle[] => {
 
     // See if we obtained the item via getCaller.
     const singleItem = getCaller.result?.find(
-      (x) => key === x[modelObjectMeta.value.keyProp.name]
+      (x) => key === x[modelObjectMeta.value.keyProp.name],
     );
     if (singleItem) {
       // eslint-disable-next-line vue/no-side-effects-in-computed-properties
@@ -794,13 +797,13 @@ const internalKeyValue = computed((): SelectedPkTypeSingle[] => {
 });
 
 const selectedKeysSet = computed(
-  () =>
+  (): Set<any> =>
     new Set([
       ...internalKeyValue.value,
       ...internalModelValue.value.map(
-        (x) => x[modelObjectMeta.value.keyProp.name]
+        (x) => x[modelObjectMeta.value.keyProp.name],
       ),
-    ])
+    ]),
 );
 
 /** The effective set of validation rules to pass to the v-select. */
@@ -825,7 +828,7 @@ const effectiveRules = computed((): TypedValidationRule<SelectedPkType>[] => {
           (rule) => () =>
             effectiveMultiple.value
               ? rule(internalKeyValue.value)
-              : rule(internalKeyValue.value[0])
+              : rule(internalKeyValue.value[0]),
         ) ?? []
     );
   }
@@ -840,8 +843,8 @@ const effectiveRules = computed((): TypedValidationRule<SelectedPkType>[] => {
   return [];
 });
 
-const items = computed(() => {
-  return (listCaller?.result || []) as SelectedModelTypeSingle[];
+const items = computed((): SelectedModelTypeSingle[] => {
+  return listCaller?.result || [];
 });
 
 const listItems = computed(() => {
@@ -853,7 +856,7 @@ const listItems = computed(() => {
   }));
 });
 
-const createItemLabel = computed(() => {
+const createItemLabel = computed((): string | null => {
   if (!props.create || !search.value) return null;
 
   const result = props.create.getLabel(search.value, items.value);
@@ -863,25 +866,58 @@ const createItemLabel = computed(() => {
   return null;
 });
 
-const effectiveMultiple = computed(() => {
+const effectiveMultiple = computed((): boolean => {
   let multiple: boolean = props.multiple ?? false;
   if (valueMeta.value?.type == "collection") {
     if ("manyToMany" in valueMeta.value) {
       throw new Error(
-        `c-select cannot be used with the many-to-many value '${valueMeta.value.name}'. Use c-select-many-to-many instead.`
+        `c-select cannot be used with the many-to-many value '${valueMeta.value.name}'. Use c-select-many-to-many instead.`,
       );
     }
     multiple = true;
   } else if (valueOwner.value && valueMeta.value && multiple) {
     throw new Error(
-      `The 'multiple' prop cannot be used with the non-collection value '${valueMeta.value.name}'.`
+      `The 'multiple' prop cannot be used with the non-collection value '${valueMeta.value.name}'.`,
     );
   }
 
   return multiple;
 });
 
-function onInput(value: SelectedModelTypeSingle | null, dontFocus = false) {
+/** 
+  Converts the provided single item into a ViewModel instance 
+  if we're going to be assigning the item into a ViewModel or ViewModelCollection.
+
+  We do this preemptively so that the object instance
+  that we emit from events will be identical to the instance that lands on valueOwner.
+
+  Implements https://github.com/IntelliTect/Coalesce/issues/543
+*/
+function convertValue<T extends SelectedModelTypeSingle | null>(value: T): T {
+  if (!value) return value;
+
+  if (
+    !((value as any) instanceof ViewModel) &&
+    ((valueOwner.value instanceof ViewModel && modelObjectProp.value) ||
+      internalModelValue.value instanceof ViewModelCollection)
+  ) {
+    return ViewModelFactory.get(
+      value.$metadata.name,
+      value,
+      // Assume the data is clean if it has a PK.
+      // This mirrors the behavior of model prop setters on ViewModel instances,
+      // which is the code that we're preempting here.
+      !!value[value.$metadata.keyProp.name],
+    ) as any;
+  }
+
+  return value;
+}
+
+function onInput(
+  value: SelectedModelTypeSingle | null,
+  dontFocus = false,
+): void {
   value = value ?? null;
 
   if (value === null && !props.canDeselect) {
@@ -893,19 +929,24 @@ function onInput(value: SelectedModelTypeSingle | null, dontFocus = false) {
 
   if (effectiveMultiple.value) {
     if (value == null) {
+      // Clear button clicked on a multi-select
       newObjectValue = [];
       newKey = [];
       emit("selectionChanged", [...internalModelValue.value], false);
     } else {
+      // Multi-select selection changed.
+
       const selectedKeys = [...selectedKeysSet.value];
       const selectedModels = [...internalModelValue.value];
       if (key != null) {
         const idx = selectedKeys.indexOf(key);
         if (idx === -1) {
+          const newValue = convertValue(value)!;
+
           selectedKeys.push(key);
-          selectedModels.push(value);
-          internallyFetchedModels.set(key, new WeakRef(value));
-          emit("selectionChanged", [value], true);
+          selectedModels.push(newValue);
+          internallyFetchedModels.set(key, new WeakRef(newValue));
+          emit("selectionChanged", [newValue], true);
         } else {
           if (!props.canDeselect) return;
           selectedKeys.splice(idx, 1);
@@ -919,8 +960,9 @@ function onInput(value: SelectedModelTypeSingle | null, dontFocus = false) {
         // Key may be null if the item came from `props.create` and isn't saved yet.
         const idx = selectedModels.indexOf(value);
         if (idx === -1) {
-          selectedModels.push(value);
-          emit("selectionChanged", [value], true);
+          const newValue = convertValue(value);
+          selectedModels.push(newValue);
+          emit("selectionChanged", [newValue], true);
         } else {
           if (!props.canDeselect) return;
           selectedModels.splice(idx, 1);
@@ -935,10 +977,11 @@ function onInput(value: SelectedModelTypeSingle | null, dontFocus = false) {
     if (value == null && !isClearable.value) {
       return;
     }
-    newObjectValue = value;
+    const newValue = convertValue(value);
+    newObjectValue = newValue;
     newKey = key;
-    if (value) {
-      internallyFetchedModels.set(key, new WeakRef(value));
+    if (newValue) {
+      internallyFetchedModels.set(key, new WeakRef(newValue));
     }
   }
 
@@ -953,7 +996,7 @@ function onInput(value: SelectedModelTypeSingle | null, dontFocus = false) {
 
   emit(
     "update:modelValue",
-    primaryBindKind.value == "key" ? newKey : newObjectValue
+    primaryBindKind.value == "key" ? newKey : newObjectValue,
   );
   emit("update:objectValue", newObjectValue);
   emit("update:keyValue", newKey);
@@ -979,7 +1022,7 @@ function onInput(value: SelectedModelTypeSingle | null, dontFocus = false) {
   }
 }
 
-function onMenuContentBlur(event: FocusEvent) {
+function onMenuContentBlur(event: FocusEvent): void {
   if (
     !menuContentRef.value?.$el.contains(event.relatedTarget as HTMLElement) &&
     !rootRef.value?.$el.contains(event.target as HTMLElement)
@@ -989,7 +1032,7 @@ function onMenuContentBlur(event: FocusEvent) {
 }
 
 /** When a key is pressed on the top level input */
-function onInputKey(event: KeyboardEvent) {
+function onInputKey(event: KeyboardEvent): void {
   if (!isInteractive.value) return;
 
   switch (event.key.toLowerCase()) {
@@ -1030,7 +1073,7 @@ function onInputKey(event: KeyboardEvent) {
   }
 }
 
-function confirmPendingSelection() {
+function confirmPendingSelection(): void {
   var item = items.value[pendingSelection.value];
   if (!item) return;
   onInput(item);
@@ -1039,13 +1082,13 @@ function confirmPendingSelection() {
 const teardownQueue: Array<() => void> = [];
 onBeforeUnmount(() => teardownQueue.forEach((fn) => fn()));
 
-async function createItem() {
+async function createItem(): Promise<void> {
   if (!createItemLabel.value) return;
   try {
     createItemLoading.value = true;
     const item = await props.create!.getItem(
       search.value!,
-      createItemLabel.value
+      createItemLabel.value,
     );
     if (!item) return;
 
@@ -1057,7 +1100,7 @@ async function createItem() {
     if (!item[modelObjectMeta.value.keyProp.name]) {
       const watcher = watch(
         () => item[modelObjectMeta.value.keyProp.name],
-        (pk) => pk && rootRef.value?.validate()
+        (pk) => pk && rootRef.value?.validate(),
       );
       teardownQueue.push(watcher);
     }
@@ -1072,7 +1115,7 @@ async function createItem() {
   }
 }
 
-async function openMenu(select?: boolean) {
+async function openMenu(select?: boolean): Promise<void> {
   if (!isInteractive.value || forceClosed) return;
 
   if (select == undefined) {
@@ -1117,7 +1160,7 @@ async function openMenu(select?: boolean) {
 }
 
 let forceClosed = false;
-function closeMenu(force = false) {
+function closeMenu(force = false): void {
   if (force) {
     forceClosed = true;
     setTimeout(() => (forceClosed = false), 300);
@@ -1131,7 +1174,7 @@ function closeMenu(force = false) {
   mainInputRef.value?.focus();
 }
 
-function toggleMenu() {
+function toggleMenu(): void {
   if (menuOpen.value) closeMenu();
   else openMenu();
 }
@@ -1145,7 +1188,7 @@ if (!valueMeta.value) {
  * that has been provided to c-select is a primary key value.
  */
 const getCaller = new ModelApiClient<SelectedModelTypeSingle>(
-  modelObjectMeta.value
+  modelObjectMeta.value,
 )
   .$useSimultaneousRequestCaching()
   .$makeCaller(
@@ -1197,12 +1240,12 @@ const getCaller = new ModelApiClient<SelectedModelTypeSingle>(
           };
         });
       }
-    }
+    },
   )
   .setConcurrency("debounce");
 
 const listCaller = new ModelApiClient<SelectedModelTypeSingle>(
-  modelObjectMeta.value
+  modelObjectMeta.value,
 )
   .$useSimultaneousRequestCaching()
   .$makeCaller("list", (c) => {
@@ -1219,7 +1262,7 @@ const listCaller = new ModelApiClient<SelectedModelTypeSingle>(
 
 watch(
   () => JSON.stringify(mapParamsToDto(props.params)),
-  () => listCaller()
+  () => listCaller(),
 );
 
 watch(
@@ -1228,7 +1271,7 @@ watch(
     getCaller.useResponseCaching(c === true ? {} : c);
     listCaller.useResponseCaching(c === true ? {} : c);
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 watch(pendingSelection, async () => {

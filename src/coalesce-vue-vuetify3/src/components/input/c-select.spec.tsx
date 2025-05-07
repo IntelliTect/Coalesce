@@ -564,7 +564,6 @@ describe("CSelect", () => {
       const onUpdateKey = vitest.fn();
       const onUpdateObject = vitest.fn();
       const onUpdateModel = vitest.fn();
-      const model = new Test({ testId: 303 });
 
       const wrapper = mountApp(() => (
         <CSelect
@@ -587,18 +586,24 @@ describe("CSelect", () => {
         new Test({ testId: 101, testName: "foo 101" })
       );
 
-      // Assert: `model` prop not mutated because we're bound by type, not prop
-      expect(model.testId).toBe(303);
-
       // Assert: Menu closes after selection
       expect(wrapper.vm.menuOpen).toBe(false);
     });
 
-    test("mutates model on selection when bound by model", async () => {
+    test.each([
+      new ComplexModel({ singleTestId: 303 }),
+      new ComplexModelViewModel({ singleTestId: 303 }),
+    ])("mutates model on selection when bound by model", async (model) => {
       // Arrange
-      const model = new ComplexModel({ singleTestId: 303 });
+      const onUpdateObject = vitest.fn();
+      const onUpdateModel = vitest.fn();
       const wrapper = mountApp(() => (
-        <CSelect model={model} for="singleTest"></CSelect>
+        <CSelect
+          model={model}
+          for="singleTest"
+          onUpdate:modelValue={onUpdateModel}
+          onUpdate:objectValue={onUpdateObject}
+        ></CSelect>
       )).findComponent(CSelect);
 
       // Act
@@ -607,6 +612,10 @@ describe("CSelect", () => {
       // Assert: `model` prop mutated
       expect(model.singleTestId).toBe(101);
       expect(model.singleTest?.testId).toBe(101);
+
+      // Emitted event value should exactly equal by instance the resulting value on `model`.
+      expect(onUpdateModel.mock.calls[0][0]).toBe(model.singleTest);
+      expect(onUpdateObject.mock.calls[0][0]).toBe(model.singleTest);
     });
 
     test("mutates model on selection when bound by apicaller arg", async () => {
@@ -641,6 +650,36 @@ describe("CSelect", () => {
       expect(onUpdate).toHaveBeenCalledWith(
         new Test({ testId: 101, testName: "foo 101" })
       );
+    });
+  });
+
+  describe("multiple", () => {
+    test("emits ViewModel to onSelectionChanged when bound by ViewModelCollection", async () => {
+      // Arrange
+      const model = new ComplexModelViewModel({ singleTestId: 303 });
+      const onUpdateObject = vitest.fn();
+      const onSelectionChanged = vitest.fn();
+      const wrapper = mountApp(() => (
+        <CSelect
+          for="Test"
+          multiple
+          onUpdate:modelValue={(v) => (model.tests = v)}
+          modelValue={model.tests}
+          onSelectionChanged={onSelectionChanged}
+          onUpdate:objectValue={onUpdateObject}
+        ></CSelect>
+      )).findComponent(CSelect);
+
+      // Act
+      await selectFirstResult(wrapper);
+
+      // Assert
+      expect(model.tests).toHaveLength(1);
+      expect(model.tests[0].testId).toBe(101);
+
+      // Emitted event value should exactly equal by instance the resulting value on `model`.
+      expect(onUpdateObject.mock.calls[0][0][0]).toBe(model.tests[0]);
+      expect(onSelectionChanged.mock.calls[0][0][0]).toBe(model.tests[0]);
     });
   });
 

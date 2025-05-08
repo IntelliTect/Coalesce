@@ -1,17 +1,17 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <Import Project="../Common.props" />
-	<PropertyGroup>
-		<Description>Core framework library for IntelliTect.Coalesce</Description>
-		<PlatformTarget>AnyCPU</PlatformTarget>
+  <PropertyGroup>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PlatformTarget>AnyCPU</PlatformTarget>
 
-		<Nullable>enable</Nullable>
-	</PropertyGroup>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
 
-	<ItemGroup>
-	  <FrameworkReference Include="Microsoft.AspNetCore.App" />
-	</ItemGroup>
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
 
-	<ItemGroup>
+  <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" />
@@ -21,11 +21,12 @@
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
   </ItemGroup>
 
-	<ItemGroup>
-	  <None Remove="Application\SecurityOverview.html" />
-	</ItemGroup>
+  <ItemGroup>
+    <None Remove="Application\SecurityOverview.html" />
+    <None Include="../../README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
 
-	<ItemGroup>
-	  <EmbeddedResource Include="Application\SecurityOverview.html" />
-	</ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Application\SecurityOverview.html" />
+  </ItemGroup>
 </Project>

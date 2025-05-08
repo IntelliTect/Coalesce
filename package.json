@@ -7,10 +7,6 @@
     "playground/*",
     "docs"
   ],
-  "dependencies": {
-    "vue": "^3.5.4",
-    "tslib": "^2.6.2"
-  },
   "devDependencies": {
     "@types/node": "^22.15.3",
     "@vitejs/plugin-vue": "^5.2.3",

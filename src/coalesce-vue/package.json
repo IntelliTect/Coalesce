@@ -38,7 +38,8 @@
     "date-fns-tz": "^3.0.0",
     "lodash-es": "^4.17.15",
     "magic-string": "^0.30.5",
-    "tslib": "^2.6.2"
+    "tslib": "^2.6.2",
+    "vue": "^3.5.4"
   },
   "optionalDependencies": {
     "vue-router": "^4.0.0"

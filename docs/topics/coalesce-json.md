@@ -26,7 +26,7 @@ A full example of a `coalesce.json` file, along with an explanation of each prop
 
         // Optional: Framework to use when evaluating & building dependencies.
         // Not needed if your project only specifies a single framework - only required for multi-targeting projects.
-        "framework": "netcoreapp2.0",
+        "framework": "net8.0",
 
         // Optional: Build configuration to use when evaluating & building dependencies.
         // Defaults to "Debug".
@@ -43,7 +43,7 @@ A full example of a `coalesce.json` file, along with an explanation of each prop
 
         // Optional: Framework to use when evaluating & building dependencies.
         // Not needed if your project only specifies a single framework - only required for multi-targeting projects.
-        "framework": "netstandard2.0",
+        "framework": "net8.0",
 
         // Optional: Build configuration to use when evaluating & building dependencies.
         // Defaults to "Release".

@@ -11,9 +11,10 @@ namespace Coalesce.Starter.Vue.Data.Test;
 
 public class TestBase : IDisposable
 {
-    protected SqliteDatabaseFixture DbFixture { get; }
+    private SqliteDatabaseFixture DbFixture { get; }
 
     private MockerScope? _CurrentMocker;
+    private readonly List<Action<MockerScope>> _persistentSetups = [];
 
     protected AutoMocker Mocker => _CurrentMocker ?? throw new InvalidOperationException("The current mocker has been disposed.");
 
@@ -28,24 +29,6 @@ public class TestBase : IDisposable
         DbFixture = new SqliteDatabaseFixture();
 
         _CurrentMocker = BeginMockScope(standalone: false);
-    }
-
-    public class MockerScope : AutoMocker, IDisposable
-    {
-        private readonly TestBase? _Parent;
-
-        public MockerScope(TestBase? parent) : base(MockBehavior.Loose)
-        {
-            _Parent = parent;
-            if (parent != null) parent._CurrentMocker = this;
-        }
-
-        public void Dispose()
-        {
-            if (_Parent == null) return;
-            Interlocked.CompareExchange(ref _Parent._CurrentMocker, null, this);
-            this.AsDisposable().Dispose();
-        }
     }
 
     /// <summary>
@@ -78,6 +61,19 @@ public class TestBase : IDisposable
     /// (an unusual thing to be doing in unit tests).
     /// </summary>
     protected MockerScope BeginMockScope() => BeginMockScope(true);
+
+    /// <summary>
+    /// Register per-test or per-class mocker setup that is applied immediately,
+    /// and then again on each <see cref="RefreshServices"/> call.
+    /// </summary>
+    protected void PersistentSetup(Action<AutoMocker> setup)
+    {
+        _persistentSetups.Add(setup);
+        if (_CurrentMocker is not null)
+        {
+            setup(_CurrentMocker);
+        }
+    }
 
     private MockerScope BeginMockScope(bool standalone = false)
     {
@@ -114,23 +110,27 @@ public class TestBase : IDisposable
         return mocker;
     }
 
-    private readonly List<Action<MockerScope>> _persistentSetups = [];
-
-    /// <summary>
-    /// Register per-test mocker setup that is applied immediately, and again on each <see cref="RefreshServices"/> call.
-    /// </summary>
-    protected void PersistentSetup(Action<MockerScope> setup)
-    {
-        _persistentSetups.Add(setup);
-        if (_CurrentMocker is not null)
-        {
-            setup(_CurrentMocker);
-        }
-    }
-
     public virtual void Dispose()
     {
         _CurrentMocker?.Dispose();
         DbFixture.Dispose();
+    }
+
+    public class MockerScope : AutoMocker, IDisposable
+    {
+        private readonly TestBase? _Parent;
+
+        public MockerScope(TestBase? parent) : base(MockBehavior.Loose)
+        {
+            _Parent = parent;
+            if (parent != null) parent._CurrentMocker = this;
+        }
+
+        public void Dispose()
+        {
+            if (_Parent == null) return;
+            Interlocked.CompareExchange(ref _Parent._CurrentMocker, null, this);
+            this.AsDisposable().Dispose();
+        }
     }
 }

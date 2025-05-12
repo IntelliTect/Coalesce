@@ -9,7 +9,7 @@ public class SqliteDatabaseFixture : IDisposable
     private readonly SqliteConnection _HoldOpenConnection;
 
     public DbContextOptions<AppDbContext> Options { get; }
-        
+
     private static readonly ILoggerFactory _LoggerFac = LoggerFactory.Create(b =>
     {
         b.SetMinimumLevel(LogLevel.Error);
@@ -23,7 +23,7 @@ public class SqliteDatabaseFixture : IDisposable
 
         // Per https://docs.microsoft.com/en-us/dotnet/standard/data/sqlite/in-memory-databases#shareable-in-memory-databases,
         // a connection must be kept open in order to preserve a particular in-memory SQLite instance.
-        // EF doesn't hold connections open necessarily, so we'll do this ourselves.
+        // EF doesn't hold connections open, so we'll do this ourselves.
         _HoldOpenConnection = new SqliteConnection(connString);
         _HoldOpenConnection.Open();
 

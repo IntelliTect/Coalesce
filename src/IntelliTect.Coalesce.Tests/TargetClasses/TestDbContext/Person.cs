@@ -4,6 +4,7 @@ using IntelliTect.Coalesce.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
@@ -138,11 +139,11 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
 
         /// <summary>
         /// Adds two numbers.
+        /// 
+        /// This comment also includes multiple lines so I can test multi-line xmldoc comments.
         /// </summary>
-        /// <param name="numberOne"></param>
-        /// <param name="numberTwo"></param>
-        /// <returns></returns>
         [Coalesce]
+        [Description("Adds two numbers together.")]
         public static int Add(int numberOne, int numberTwo)
         {
             return numberOne + numberTwo;

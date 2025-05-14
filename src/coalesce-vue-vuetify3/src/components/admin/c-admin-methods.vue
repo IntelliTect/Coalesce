@@ -13,14 +13,20 @@
         <c-display :model="viewModel"></c-display>
       </v-toolbar-title>
     </v-toolbar>
-    <v-expansion-panels class="c-methods">
+    <v-expansion-panels class="c-methods" variant="accordion">
       <v-expansion-panel
         v-for="method in methods"
         :key="method.name"
         :class="'method-' + method.name"
       >
-        <v-expansion-panel-title>
-          <div>{{ method.displayName }}</div>
+        <v-expansion-panel-title static>
+          <div>
+            <div>{{ method.displayName }}</div>
+
+            <div v-if="method.description" class="c-admin-method--description">
+              {{ method.description }}
+            </div>
+          </div>
         </v-expansion-panel-title>
         <v-expansion-panel-text>
           <c-admin-method
@@ -70,7 +76,7 @@ export default defineComponent({
       if (this.model instanceof ListViewModel) return this.model;
       if (this.model instanceof ServiceViewModel) return this.model;
       throw Error(
-        "c-method: prop `model` is required, and must be a ViewModel."
+        "c-method: prop `model` is required, and must be a ViewModel.",
       );
     },
 
@@ -90,11 +96,17 @@ export default defineComponent({
       return Object.values(this.metadata.methods).filter(
         (m) =>
           !!m.isStatic == this.isStatic &&
-          (!this.area || ((m.hidden || 0) & this.area) == 0)
+          (!this.area || ((m.hidden || 0) & this.area) == 0),
       );
     },
   },
 });
 </script>
 
-<style lang="scss"></style>
+<style lang="scss">
+.c-admin-method--description {
+  font-size: 12px;
+  opacity: 0.7;
+  padding-top: 4px;
+}
+</style>

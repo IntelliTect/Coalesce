@@ -16,7 +16,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
         public override Task<string> BuildOutputAsync()
         {
             var b = new TypeScriptCodeBuilder(indentSize: 2);
-            b.Lines(new [] {
+            b.Lines(new[] {
                 "import * as $metadata from './metadata.g'",
                 "import * as $models from './models.g'",
                 "import { ModelApiClient, ServiceApiClient } from 'coalesce-vue/lib/api-client'",
@@ -75,6 +75,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                 ? $"{method.TransportType}<void>"
                 : $"{method.TransportType}<{new VueType(method.TransportTypeGenericParameter, VueType.Flags.RawBinary).TsType("$models")}>";
 
+            b.DocComment(method.Comment ?? method.Description, true);
             using (b.Block($"public {method.JsVariable}({signature}): AxiosPromise<{resultType}>"))
             {
                 b.Line($"const $method = this.$metadata.methods.{method.JsVariable}");

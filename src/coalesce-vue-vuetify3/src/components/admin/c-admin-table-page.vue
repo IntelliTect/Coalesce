@@ -51,19 +51,19 @@ watch(
 
     if (!props.type) {
       throw Error(
-        "c-admin-table-page: If prop `list` is not provided, `type` is required."
+        "c-admin-table-page: If prop `list` is not provided, `type` is required.",
       );
     } else if (!ListViewModel.typeLookup![props.type]) {
       // TODO: Bake a `getOrThrow` into `typeLookup`.
       throw Error(
-        `No model named ${props.type} is registered to ListViewModel.typeLookup`
+        `No model named ${props.type} is registered to ListViewModel.typeLookup`,
       );
     }
 
     listVM.value = new ListViewModel.typeLookup![props.type]();
     listVM.value.$includes = "admin-list";
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 const metadata = computed((): ModelType => {
@@ -87,5 +87,10 @@ defineExpose({ pageTitle });
   .c-admin-table-page--methods {
     margin-top: 30px;
   }
+
+  // Add overscroll to bottom of page so that opening/closing expansion panels
+  // doesn't cause scroll jank. This also makes adding/deleting
+  // items from the list cause less jank too.
+  margin-bottom: 50vh;
 }
 </style>

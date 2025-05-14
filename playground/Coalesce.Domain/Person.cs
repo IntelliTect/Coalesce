@@ -176,12 +176,10 @@ namespace Coalesce.Domain
         /// 
         /// This comment also includes multiple lines so I can test multi-line xmldoc comments.
         /// </summary>
-        /// <param name="numberOne"></param>
-        /// <param name="numberTwo"></param>
-        /// <returns></returns>
         [Coalesce]
+        [Description("Adds two numbers together.")]
         public static ItemResult<int> Add(
-            int numberOne, 
+            int numberOne,
             [Range(0, 10000)] int numberTwo = 42
         )
         {
@@ -201,7 +199,7 @@ namespace Coalesce.Domain
         /// <summary>
         /// Returns the user name
         /// </summary>
-        [Coalesce,Execute(Roles = "Admin")]
+        [Coalesce, Execute(Roles = "Admin")]
         public static string GetUser(ClaimsPrincipal user)
         {
             return user?.Identity?.Name ?? "Unknown";
@@ -225,9 +223,10 @@ namespace Coalesce.Domain
 
         [Coalesce]
         [Execute(HttpMethod = HttpMethod.Get)]
+        [Description("Returns a count of all people in the database whose last name starts with the specified value.")]
         public static long PersonCount(AppDbContext db, string lastNameStartsWith = "")
         {
-            return db.People.Count(f=>f.LastName.StartsWith(lastNameStartsWith));
+            return db.People.Count(f => f.LastName.StartsWith(lastNameStartsWith));
         }
 
         [Coalesce]
@@ -271,7 +270,7 @@ namespace Coalesce.Domain
 
         [Coalesce]
         [Execute(HttpMethod = HttpMethod.Patch)]
-        public Person ChangeFirstName (AppDbContext db, string firstName, Titles? title)
+        public Person ChangeFirstName(AppDbContext db, string firstName, Titles? title)
         {
             this.FirstName = firstName;
             Title ??= title;
@@ -293,7 +292,7 @@ namespace Coalesce.Domain
         /// <summary>
         /// Gets all the first names starting with the characters.
         /// </summary>
-        [Coalesce,Execute]
+        [Coalesce, Execute]
         public static IEnumerable<string> NamesStartingWith(AppDbContext db, string characters)
         {
             return db.People.Where(f => f.FirstName.StartsWith(characters)).Select(f => f.Name).ToList();
@@ -416,7 +415,7 @@ namespace Coalesce.Domain
     {
         public BOrCPeople(CrudContext<AppDbContext> context) : base(context) { }
 
-        public override IQueryable<Person> GetQuery(IDataSourceParameters parameters) => 
+        public override IQueryable<Person> GetQuery(IDataSourceParameters parameters) =>
             Db.People.Where(f => f.LastName.StartsWith("B") || f.LastName.StartsWith("c"));
     }
 

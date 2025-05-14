@@ -85,7 +85,8 @@ export default defineConfig({
   server: {
     host: "0.0.0.0",
     fs: {
-      allow: [libRoot + "coalesce-vue", libRoot + "coalesce-vue-vuetify3", "."],
+      // repo root, where some NPM packages may be restored to
+      allow: [path.resolve(__dirname, "../../")],
     },
   },
 

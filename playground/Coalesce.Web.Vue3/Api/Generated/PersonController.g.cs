@@ -189,12 +189,12 @@ namespace Coalesce.Web.Vue3.Api
         public virtual async Task<ItemResult> UploadPicture(
             [FromServices] IDataSourceFactory dataSourceFactory,
             [FromForm(Name = "id")] int id,
-            Microsoft.AspNetCore.Http.IFormFile file)
+            Microsoft.AspNetCore.Http.IFormFile @file)
         {
             var _params = new
             {
                 Id = id,
-                File = file == null ? null : new IntelliTect.Coalesce.Models.File { Name = file.FileName, ContentType = file.ContentType, Length = file.Length, Content = file.OpenReadStream() }
+                File = @file == null ? null : new IntelliTect.Coalesce.Models.File { Name = @file.FileName, ContentType = @file.ContentType, Length = @file.Length, Content = @file.OpenReadStream() }
             };
 
             var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Person, Coalesce.Domain.Person>("Default");
@@ -922,8 +922,8 @@ namespace Coalesce.Web.Vue3.Api
         {
             var _params = new
             {
-                Person = !Request.Form.HasAnyValue(nameof(person)) ? null : person,
-                People = !Request.Form.HasAnyValue(nameof(people)) ? null : people.ToList()
+                Person = !Request.Form.HasAnyValue("person") ? null : person,
+                People = !Request.Form.HasAnyValue("people") ? null : people.ToList()
             };
 
             if (Context.Options.ValidateAttributesForMethods)
@@ -991,7 +991,7 @@ namespace Coalesce.Web.Vue3.Api
         {
             var _params = new
             {
-                Person = !Request.Form.HasAnyValue(nameof(person)) ? null : person
+                Person = !Request.Form.HasAnyValue("person") ? null : person
             };
 
             if (Context.Options.ValidateAttributesForMethods)
@@ -1076,7 +1076,7 @@ namespace Coalesce.Web.Vue3.Api
         {
             var _params = new
             {
-                Criteria = !Request.Form.HasAnyValue(nameof(criteria)) ? null : criteria,
+                Criteria = !Request.Form.HasAnyValue("criteria") ? null : criteria,
                 Page = page
             };
 

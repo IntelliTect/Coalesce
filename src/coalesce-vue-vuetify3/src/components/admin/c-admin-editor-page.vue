@@ -52,7 +52,7 @@ export default defineComponent({
     if (!ViewModel.typeLookup![props.type]) {
       // TODO: Bake a `getOrThrow` into `typeLookup`.
       throw Error(
-        `No model named ${props.type} is registered to ViewModel.typeLookup`
+        `No model named ${props.type} is registered to ViewModel.typeLookup`,
       );
     }
 
@@ -132,7 +132,7 @@ export default defineComponent({
     const params = mapQueryToParams(
       useRoute().query,
       ListParameters,
-      this.metadata
+      this.metadata,
     );
     this.viewModel.$dataSource = params.dataSource;
 
@@ -145,7 +145,7 @@ export default defineComponent({
         this,
         this.viewModel,
         "id",
-        /* keep the querystring in case it has data source parameters */ true
+        /* keep the querystring in case it has data source parameters */ true,
       );
     }
 
@@ -158,7 +158,7 @@ export default defineComponent({
           this.viewModel.$stopAutoSave();
         }
       },
-      { immediate: true }
+      { immediate: true },
     );
   },
 });
@@ -171,5 +171,9 @@ export default defineComponent({
   .c-admin-editor-page--methods {
     margin-top: 30px;
   }
+
+  // Add overscroll to bottom of page so that opening/closing method expansion panels
+  // doesn't cause scroll jank
+  margin-bottom: 50vh;
 }
 </style>

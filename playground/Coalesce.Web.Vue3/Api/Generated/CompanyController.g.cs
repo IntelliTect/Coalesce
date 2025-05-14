@@ -109,7 +109,7 @@ namespace Coalesce.Web.Vue3.Api
             var _params = new
             {
                 Id = id,
-                CompanyParam = !Request.Form.HasAnyValue(nameof(companyParam)) ? null : companyParam,
+                CompanyParam = !Request.Form.HasAnyValue("companyParam") ? null : companyParam,
                 Name = name
             };
 

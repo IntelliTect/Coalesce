@@ -149,7 +149,7 @@ namespace Coalesce.Web.Vue3.Api
         {
             var _params = new
             {
-                Model = !Request.Form.HasAnyValue(nameof(model)) ? null : model
+                Model = !Request.Form.HasAnyValue("model") ? null : model
             };
 
             if (Context.Options.ValidateAttributesForMethods)

@@ -170,7 +170,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// Convenient accessor for the MethodInfo when in reflection-based contexts.
         /// </summary>
-        public virtual MethodInfo MethodInfo => 
+        public virtual MethodInfo MethodInfo =>
             throw new InvalidOperationException("MethodInfo not available in the current context");
 
         public string JsVariable => NameWithoutAsync.ToCamelCase();
@@ -219,7 +219,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                         new ImplicitParameterViewModel(
                             this,
                             Parent.PrimaryKey,
-                            "id", 
+                            "id",
                             "Primary Key"
                         )
                     }.Concat(parameters);
@@ -247,6 +247,13 @@ namespace IntelliTect.Coalesce.TypeDefinition
             this.GetAttributeValue<DisplayNameAttribute>(a => a.DisplayName) ??
             this.GetAttributeValue<DisplayAttribute>(a => a.Name) ??
             NameWithoutAsync.ToProperCase()!;
+
+        /// <summary>
+        /// Returns the description from the DisplayAttribute or DescriptionAttribute, if present.
+        /// </summary>
+        public virtual string? Description =>
+            this.GetAttributeValue<DisplayAttribute>(a => a.Description) ??
+            this.GetAttributeValue<DescriptionAttribute>(a => a.Description);
 
         /// <summary>
         /// For the specified area, returns true if the method has a hidden attribute.
@@ -277,12 +284,12 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// If true, this is a method that may be called by a client.
         /// </summary>
-        public bool IsClientMethod => 
+        public bool IsClientMethod =>
             !IsInternalUse &&
             Parent.WillCreateApiController &&
-            !SecurityInfo.Execute.NoAccess && 
+            !SecurityInfo.Execute.NoAccess &&
             // Services only have instance methods - no static methods.
-            (!Parent.IsService || !IsStatic) && 
+            (!Parent.IsService || !IsStatic) &&
             // Interface services always expose all their declared methods.
             ((Parent.IsService && Parent.Type.IsInterface) || this.HasAttribute<CoalesceAttribute>());
 
@@ -291,7 +298,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             get
             {
 #pragma warning disable CS0618 // Type or member is obsolete
-                var type = 
+                var type =
                     this.GetAttributeValue<LoadFromDataSourceAttribute>(a => a.DataSourceType) ??
 #pragma warning restore CS0618 // Type or member is obsolete
                     this.GetAttributeValue<ExecuteAttribute>(a => a.DataSource);

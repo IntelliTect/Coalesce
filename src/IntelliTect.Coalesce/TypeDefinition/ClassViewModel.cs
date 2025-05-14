@@ -122,7 +122,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// </summary>
         public ClassViewModel? DtoBaseViewModel =>
             (
-                Type.GenericArgumentsFor(typeof(IParameterDto<>)) ?? 
+                Type.GenericArgumentsFor(typeof(IParameterDto<>)) ??
                 Type.GenericArgumentsFor(typeof(IResponseDto<>))
             )?[0].ClassViewModel;
 
@@ -200,9 +200,9 @@ namespace IntelliTect.Coalesce.TypeDefinition
         public IEnumerable<PropertyViewModel> DataSourceParameters => Properties
             .Where(p =>
                 !p.IsInternalUse && p.HasPublicSetter && p.HasAttribute<CoalesceAttribute>()
-                && p.PureType.TsTypeKind 
-                    is not TypeDiscriminator.File 
-                    and not TypeDiscriminator.Void 
+                && p.PureType.TsTypeKind
+                    is not TypeDiscriminator.File
+                    and not TypeDiscriminator.Void
                     and not TypeDiscriminator.Unknown
             );
 
@@ -434,6 +434,13 @@ namespace IntelliTect.Coalesce.TypeDefinition
             this.GetAttributeValue<DisplayAttribute>(a => a.Name) ??
             ClientTypeName.ToProperCase();
 
+        /// <summary>
+        /// Returns the description from the DisplayAttribute or DescriptionAttribute, if present.
+        /// </summary>
+        public virtual string? Description =>
+            this.GetAttributeValue<DisplayAttribute>(a => a.Description) ??
+            this.GetAttributeValue<DescriptionAttribute>(a => a.Description);
+
         public bool IsDbMappedType => DbContext != null;
 
         /// <summary>
@@ -451,7 +458,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// For entities, the context that owns the DbSet by which the entity was discovered.
         /// For DTOs, the context that owns the underlying entity, or the explicitly provided context.
         /// </summary>
-        public ClassViewModel? DbContext => 
+        public ClassViewModel? DbContext =>
             DbContextUsage?.Context.ClassViewModel
             ?? Type.GenericArgumentsFor(typeof(IClassDto<,>))?[1].ClassViewModel
             ?? DtoBaseViewModel?.DbContext;
@@ -462,8 +469,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public bool IsDefaultDataSource => this.HasAttribute<DefaultDataSourceAttribute>();
 
-        public IEnumerable<AttributeViewModel<TAttribute>> GetAttributes<TAttribute>() 
-            where TAttribute : Attribute 
+        public IEnumerable<AttributeViewModel<TAttribute>> GetAttributes<TAttribute>()
+            where TAttribute : Attribute
             => Type.GetAttributes<TAttribute>();
 
         public override string ToString() => FullyQualifiedName;
@@ -474,7 +481,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
 
         public override int GetHashCode() => this.Type.GetHashCode();
 
-        public static bool operator == (ClassViewModel? lhs, ClassViewModel? rhs)
+        public static bool operator ==(ClassViewModel? lhs, ClassViewModel? rhs)
         {
             if (lhs is null)
             {
@@ -484,7 +491,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             return lhs.Equals(rhs);
         }
 
-        public static bool operator != (ClassViewModel? lhs, ClassViewModel? rhs)
+        public static bool operator !=(ClassViewModel? lhs, ClassViewModel? rhs)
         {
             return !(lhs == rhs);
         }

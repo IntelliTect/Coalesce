@@ -62,18 +62,18 @@ export type TypeDiscriminator = NonCollectionTypeDiscriminator | "collection";
 export type TypeDiscriminatorToType<T> = T extends "string"
   ? string
   : T extends "number"
-  ? number
-  : T extends "boolean"
-  ? boolean
-  : T extends "date"
-  ? Date
-  : T extends "file"
-  ? File
-  : T extends "unknown"
-  ? unknown
-  : T extends "binary"
-  ? Uint8Array | string
-  : any;
+    ? number
+    : T extends "boolean"
+      ? boolean
+      : T extends "date"
+        ? Date
+        : T extends "file"
+          ? File
+          : T extends "unknown"
+            ? unknown
+            : T extends "binary"
+              ? Uint8Array | string
+              : any;
 
 /* -----------------------------
    ------- TYPE METADATA -------
@@ -199,7 +199,7 @@ export type EnumMembers<K extends string> = { [strValue in K]: EnumMember } & {
 
 /** Utility function for creating the required properties of `EnumType<>` from an array of `EnumValue`  */
 export function getEnumMeta<K extends string>(
-  values: EnumMember[]
+  values: EnumMember[],
 ): {
   readonly valueLookup: EnumMembers<K>;
   readonly values: EnumMember[];
@@ -303,7 +303,7 @@ export interface ValueMeta<TType extends TypeDiscriminator> extends Metadata {
  */
 export interface ValueMetaWithTypeDef<
   TType extends TypeDiscriminator,
-  TTypeDef extends Metadata
+  TTypeDef extends Metadata,
 > extends ValueMeta<TType> {
   /** Full description of the type represented by this value. */
   readonly typeDef: TTypeDef;
@@ -585,6 +585,8 @@ export type MethodParameter = Value & {
 };
 
 export interface MethodBase extends Metadata {
+  readonly description?: string;
+
   /** The HTTP method to use when calling the method. */
   readonly httpMethod: "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
 
@@ -630,7 +632,7 @@ export type KeysOfType<TObject, Type> = {
 
 export type PropNames<
   TMeta extends ClassType,
-  Kind extends Property = Property
+  Kind extends Property = Property,
 > = KeysOfType<TMeta["props"], Kind>;
 
 // This doesn't support restriction of property kind - typescript makes unintelligible intellisense tooltips if we do.
@@ -641,17 +643,17 @@ export type PropertyOrName<TMeta extends ClassType> =
 
 export function resolvePropMeta<TProp extends Property>(
   metadata: ClassType,
-  propOrString: TProp | string
+  propOrString: TProp | string,
 ): Exclude<TProp, string>;
 export function resolvePropMeta<TProp extends Property>(
   metadata: ClassType,
   propOrString: TProp | string,
-  silent: true
+  silent: true,
 ): Exclude<TProp, string> | undefined;
 export function resolvePropMeta<TProp extends Property>(
   metadata: ClassType,
   propOrString: TProp | string,
-  silent: boolean = false
+  silent: boolean = false,
 ) {
   const propMeta =
     typeof propOrString == "string"

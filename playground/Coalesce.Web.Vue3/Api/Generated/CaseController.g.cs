@@ -210,12 +210,12 @@ namespace Coalesce.Web.Vue3.Api
         public virtual async Task<ItemResult> UploadImage(
             [FromServices] IDataSourceFactory dataSourceFactory,
             [FromForm(Name = "id")] int id,
-            Microsoft.AspNetCore.Http.IFormFile file)
+            Microsoft.AspNetCore.Http.IFormFile @file)
         {
             var _params = new
             {
                 Id = id,
-                File = file == null ? null : new IntelliTect.Coalesce.Models.File { Name = file.FileName, ContentType = file.ContentType, Length = file.Length, Content = file.OpenReadStream() }
+                File = @file == null ? null : new IntelliTect.Coalesce.Models.File { Name = @file.FileName, ContentType = @file.ContentType, Length = @file.Length, Content = @file.OpenReadStream() }
             };
 
             var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Case, Coalesce.Domain.Case>("Default");
@@ -342,12 +342,12 @@ namespace Coalesce.Web.Vue3.Api
         public virtual async Task<ActionResult<ItemResult<IntelliTect.Coalesce.Models.IFile>>> UploadAndDownload(
             [FromServices] IDataSourceFactory dataSourceFactory,
             [FromForm(Name = "id")] int id,
-            Microsoft.AspNetCore.Http.IFormFile file)
+            Microsoft.AspNetCore.Http.IFormFile @file)
         {
             var _params = new
             {
                 Id = id,
-                File = file == null ? null : new IntelliTect.Coalesce.Models.File { Name = file.FileName, ContentType = file.ContentType, Length = file.Length, Content = file.OpenReadStream() }
+                File = @file == null ? null : new IntelliTect.Coalesce.Models.File { Name = @file.FileName, ContentType = @file.ContentType, Length = @file.Length, Content = @file.OpenReadStream() }
             };
 
             var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Case, Coalesce.Domain.Case>("Default");
@@ -508,12 +508,12 @@ namespace Coalesce.Web.Vue3.Api
         public virtual async Task<ItemResult> UploadByteArray(
             [FromServices] IDataSourceFactory dataSourceFactory,
             [FromForm(Name = "id")] int id,
-            [FromForm(Name = "file")] byte[] file)
+            [FromForm(Name = "file")] byte[] @file)
         {
             var _params = new
             {
                 Id = id,
-                File = file ?? await ((await Request.ReadFormAsync()).Files[nameof(file)]?.OpenReadStream().ReadAllBytesAsync(true) ?? Task.FromResult<byte[]>(null))
+                File = @file ?? await ((await Request.ReadFormAsync()).Files["file"]?.OpenReadStream().ReadAllBytesAsync(true) ?? Task.FromResult<byte[]>(null))
             };
 
             var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Case, Coalesce.Domain.Case>("Default");

@@ -86,7 +86,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                     }
                 }
             }
-            
+
             b.Line();
             b.Line("solidify(domain)");
             b.Line();
@@ -104,9 +104,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
             b.StringProp("name", model.ClientTypeName, asConst: true);
             b.StringProp("displayName", model.DisplayName);
 
-            var description = model.GetAttributeValue<DescriptionAttribute>(a => a.Description)
-                ?? model.GetAttributeValue<DisplayAttribute>(a => a.Description);
-
+            var description = model.Description;
             if (!string.IsNullOrWhiteSpace(description))
             {
                 b.StringProp("description", description);
@@ -168,9 +166,9 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                 b.Line($"get keyProp() {{ return this.props.{model.PrimaryKey.JsVariable} }}, ");
 
                 var securityInfo = model.SecurityInfo;
-                int flags = 
+                int flags =
                     (securityInfo.IsCreateAllowed() ? 1 << 0 : 0) |
-                    (securityInfo.IsEditAllowed() ? 1 << 1 : 0) | 
+                    (securityInfo.IsEditAllowed() ? 1 << 1 : 0) |
                     (securityInfo.IsDeleteAllowed() ? 1 << 2 : 0);
                 b.Prop("behaviorFlags", flags.ToString() + " as BehaviorFlags");
 
@@ -286,7 +284,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                         // TS Type: "ModelCollectionNavigationProperty"
                         b.StringProp("role", "collectionNavigation");
                         b.Line($"get foreignKey() {{ return {GetClassMetadataRef(prop.Object)}.props.{prop.ForeignKeyProperty.JsVariable} as ForeignKeyProperty }},");
-                        
+
                         if (prop.InverseProperty != null)
                         {
                             b.Line($"get inverseNavigation() {{ return {GetClassMetadataRef(prop.Object)}.props.{prop.InverseProperty.JsVariable} as ModelReferenceNavigationProperty }},");
@@ -336,11 +334,11 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
 
 
                 if (prop.IsClientWritable && prop.IsClientSerializable && (
-                    prop.Type.TsTypeKind is 
-                        TypeDiscriminator.Number or 
-                        TypeDiscriminator.String or 
-                        TypeDiscriminator.Boolean or 
-                        TypeDiscriminator.Enum or 
+                    prop.Type.TsTypeKind is
+                        TypeDiscriminator.Number or
+                        TypeDiscriminator.String or
+                        TypeDiscriminator.Boolean or
+                        TypeDiscriminator.Enum or
                         TypeDiscriminator.Date
                 ))
                 {
@@ -546,6 +544,13 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
 
                 b.StringProp("name", method.JsVariable);
                 b.StringProp("displayName", method.DisplayName);
+
+                var description = method.Description;
+                if (!string.IsNullOrWhiteSpace(description))
+                {
+                    b.StringProp("description", description);
+                }
+
                 b.StringProp("transportType", method.TransportType.ToString().Replace("Result", "").ToLower());
                 b.StringProp("httpMethod", method.ApiActionHttpMethod.ToString().ToUpperInvariant());
 
@@ -660,7 +665,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
         {
             b.StringProp("name", value.JsVariable);
             b.StringProp("displayName", value.DisplayName);
-            
+
             if (!string.IsNullOrWhiteSpace(value.Description))
             {
                 b.StringProp("description", value.Description);
@@ -773,7 +778,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                         {
                             "color" => "color",
                             _ =>
-                                definingMember.HasAttribute<UrlAttribute>() ? "url" : 
+                                definingMember.HasAttribute<UrlAttribute>() ? "url" :
                                 definingMember.HasAttribute<EmailAddressAttribute>() ? "email" :
                                 definingMember.HasAttribute<PhoneAttribute>() ? "tel" :
                                 null

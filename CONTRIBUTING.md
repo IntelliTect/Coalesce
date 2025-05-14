@@ -53,9 +53,6 @@ Then open the documentation in your browser at the URL provided in the output af
 
 ## Running the Vue3 Playground Project
 
-```bash
-cd playground/Coalesce.Web.Vue3
-npm run coalesce
-```
+Execute `dotnet run`, or launch the `playground/Coalesce.Web.Vue3` project from Visual Studio.
 
-Then, `dotnet run` or launch from Visual Studio.
+If you need to run code generation for the playground project, run `npm run coalesce` in the `playground/Coalesce.Web.Vue3` directory. This will compile and then execute the local Coalesce CLI against the playground project.

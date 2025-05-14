@@ -1932,6 +1932,7 @@ export const Person = domain.types.Person = {
     add: {
       name: "add",
       displayName: "Add",
+      description: "Adds two numbers together.",
       transportType: "item",
       httpMethod: "POST",
       isStatic: true,
@@ -2044,6 +2045,7 @@ export const Person = domain.types.Person = {
     personCount: {
       name: "personCount",
       displayName: "Person Count",
+      description: "Returns a count of all people in the database whose last name starts with the specified value.",
       transportType: "item",
       httpMethod: "GET",
       isStatic: true,

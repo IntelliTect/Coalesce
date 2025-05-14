@@ -100,9 +100,8 @@ const props = defineProps<{
   tableProps?: VTable["$props"];
 }>();
 
-type ViewModelType = TList extends ListViewModel<any, any, infer TViewModel>
-  ? TViewModel
-  : never;
+type ViewModelType =
+  TList extends ListViewModel<any, any, infer TViewModel> ? TViewModel : never;
 
 defineSlots<{
   ["item-prepend"]?(props: { item: ViewModelType }): any;
@@ -155,7 +154,7 @@ const effectiveProps = computed(() => {
   }
 
   return Object.values(metadata.value.props).filter(
-    (p) => p.hidden === undefined || (p.hidden & HiddenAreas.List) == 0
+    (p) => p.hidden === undefined || (p.hidden & HiddenAreas.List) == 0,
   );
 });
 
@@ -273,8 +272,12 @@ function onRowClick(event: MouseEvent, item: ViewModelType) {
   .fixed-column-right {
     position: sticky;
     right: 0;
-    background: rgb(var(--v-theme-surface-light));
+    background: rgba(var(--v-theme-surface-light), 0.4);
+    backdrop-filter: blur(10px);
     box-shadow: -2px 2px 4px 0px rgba(0, 0, 0, 0.4);
+  }
+  th.fixed-column-right {
+    border-top-left-radius: 8px;
   }
 }
 </style>

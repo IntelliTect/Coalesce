@@ -168,7 +168,7 @@ export default defineComponent({
     viewModel(): ListViewModel {
       if (this.list instanceof ListViewModel) return this.list;
       throw Error(
-        "c-admin-table: prop `list` is required, and must be a ListViewModel."
+        "c-admin-table: prop `list` is required, and must be a ListViewModel.",
       );
     },
   },
@@ -218,7 +218,7 @@ export default defineComponent({
                 // so that any that aren't in the new mappedParams object get unset
                 ...(typeof old == "object"
                   ? Object.fromEntries(
-                      Object.entries(old!).map((e) => [e[0], undefined])
+                      Object.entries(old!).map((e) => [e[0], undefined]),
                     )
                   : {}),
                 // Then layer on any new params, overwriting any that got set to undefined previously.
@@ -231,7 +231,7 @@ export default defineComponent({
               throw err;
             });
         },
-        { deep: true }
+        { deep: true },
       );
 
       // When the query changes, grab the new parameter values.
@@ -245,10 +245,10 @@ export default defineComponent({
               ...v,
             },
             ListParameters,
-            this.viewModel.$metadata
+            this.viewModel.$metadata,
           );
         },
-        { immediate: true }
+        { immediate: true },
       );
     }
 
@@ -261,7 +261,7 @@ export default defineComponent({
           this.viewModel.$stopAutoSave();
         }
       },
-      { immediate: true }
+      { immediate: true },
     );
 
     this.viewModel.$load.setConcurrency("debounce");

@@ -4,26 +4,30 @@
       class="my-0 c-method--section c-method--params"
       v-if="filteredParams.length"
     >
-      <v-col> Parameters </v-col>
-      <v-col class="py-0">
-        <v-row class="my-0">
-          <v-col
-            v-for="param in filteredParams"
-            :key="param.name"
-            cols="12"
-            sm="6"
-            md="4"
-            lg="3"
-          >
-            <c-input
-              :model="caller"
-              :for="param.name"
-              hide-details="auto"
-              density="compact"
-              variant="outlined"
-            />
-          </v-col>
-        </v-row>
+      <v-col
+        v-for="param in filteredParams"
+        :key="param.name"
+        cols="12"
+        sm="6"
+        md="4"
+        lg="3"
+      >
+        <c-input
+          :model="caller"
+          :for="param.name"
+          hide-details="auto"
+          density="compact"
+          variant="outlined"
+        >
+          <v-text-field
+            density="compact"
+            variant="outlined"
+            disabled
+            readonly
+            :label="param.displayName"
+            error-messages="Data type not supported for admin page input."
+          ></v-text-field>
+        </c-input>
       </v-col>
     </v-row>
 
@@ -33,11 +37,11 @@
           v-if="methodMeta.return.type == 'file' && !filteredParams.length"
         >
           <v-btn color="primary" @click="invoke" :loading="caller.isLoading">
-            <span v-if="filteredParams.length">Execute</span>
-            <span v-else>
-              <v-icon start>fa fa-search</v-icon>
+            <template v-if="filteredParams.length">Execute</template>
+            <template v-else>
+              <v-icon start>fa fa-fw fa-search</v-icon>
               Preview
-            </span>
+            </template>
           </v-btn>
           <v-btn
             class="mt-1"
@@ -45,7 +49,7 @@
             @click="invokeAndDownload"
             :loading="caller.isLoading"
           >
-            <v-icon start>fa fa-download</v-icon>
+            <v-icon start>fa fa-fw fa-download</v-icon>
             Download
           </v-btn>
         </template>
@@ -218,7 +222,7 @@ const caller = computed((): AnyArgCaller => {
   const caller = (viewModel.value as any)[methodMeta.value.name];
   if (!caller)
     throw Error(
-      `Method '${methodMeta.value.name}' doesn't exist on provided model.`
+      `Method '${methodMeta.value.name}' doesn't exist on provided model.`,
     );
   return caller;
 });
@@ -277,8 +281,8 @@ function downloadFileResult() {
   > .v-col:first-child {
     font-size: 18px;
     flex-grow: 0;
-    min-width: 170px;
-    text-align: right;
+    // min-width: 170px;
+    //text-align: right;
   }
 }
 .c-method--result {

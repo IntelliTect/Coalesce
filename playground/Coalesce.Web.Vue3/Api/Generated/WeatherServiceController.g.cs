@@ -48,7 +48,7 @@ namespace Coalesce.Web.Vue3.Api
         {
             var _params = new
             {
-                Location = !Request.Form.HasAnyValue(nameof(location)) ? null : location,
+                Location = !Request.Form.HasAnyValue("location") ? null : location,
                 DateTime = dateTime,
                 Conditions = conditions
             };

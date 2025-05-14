@@ -1,4 +1,6 @@
-﻿using IntelliTect.Coalesce.Helpers.Search;
+﻿using IntelliTect.Coalesce.Api;
+using IntelliTect.Coalesce.DataAnnotations;
+using IntelliTect.Coalesce.Helpers.Search;
 using IntelliTect.Coalesce.Tests.TargetClasses;
 using IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext;
 using IntelliTect.Coalesce.TypeDefinition;
@@ -60,7 +62,7 @@ namespace IntelliTect.Coalesce.Tests.Api
         {
             SearchHelper(
                 (ComplexModel t) => t.DateTimeOffset,
-                searchTerm,
+                "datetimeoffset:" + searchTerm,
                 searchCandidate,
                 expectedMatch,
                 TimeZoneInfo.CreateCustomTimeZone("test", TimeSpan.FromHours(utcOffset), "test", "test"));
@@ -95,7 +97,7 @@ namespace IntelliTect.Coalesce.Tests.Api
         {
             SearchHelper(
                 (ComplexModel t) => t.DateTime,
-                searchTerm,
+                "datetime:" + searchTerm,
                 searchCandidate,
                 expectedMatch,
                 TimeZoneInfo.CreateCustomTimeZone("test", TimeSpan.FromHours(new Random().Next(-11, 12)), "test", "test"));
@@ -110,7 +112,7 @@ namespace IntelliTect.Coalesce.Tests.Api
         {
             SearchHelper(
                 (ComplexModel t) => t.Guid,
-                inputValue,
+                "guid:" + inputValue,
                 Guid.Parse(propValue),
                 shouldMatch);
         }
@@ -124,7 +126,7 @@ namespace IntelliTect.Coalesce.Tests.Api
         {
             SearchHelper(
                 (ComplexModel t) => t.Uri,
-                inputValue,
+                "uri:" + inputValue,
                 new Uri(propValue),
                 shouldMatch);
         }
@@ -139,7 +141,7 @@ namespace IntelliTect.Coalesce.Tests.Api
         {
             SearchHelper(
                 (ComplexModel t) => t.StringSearchedEqualsInsensitive,
-                inputValue,
+                "StringSearchedEqualsInsensitive:" + inputValue,
                 propValue,
                 shouldMatch);
         }
@@ -156,7 +158,7 @@ namespace IntelliTect.Coalesce.Tests.Api
             // casing matches because all these tests evaluate in memory.
             SearchHelper(
                 (ComplexModel t) => t.StringSearchedEqualsNatural,
-                inputValue,
+                "StringSearchedEqualsNatural:" + inputValue,
                 propValue,
                 shouldMatch);
         }
@@ -175,7 +177,7 @@ namespace IntelliTect.Coalesce.Tests.Api
         {
             SearchHelper(
                 (ComplexModel t) => t.Int,
-                inputValue,
+                "Int:" + inputValue,
                 propValue,
                 shouldMatch);
         }
@@ -193,6 +195,42 @@ namespace IntelliTect.Coalesce.Tests.Api
                 shouldMatch);
         }
 
+        [Theory]
+        [InlineData(true, "needle", "needlestack", "stackneedle", "foo")]
+        [InlineData(true, "needle stack", "needlestack", "stackneedle", "foo")]
+        [InlineData(true, "foo stack needle", "needlestack", "stackneedle", "foo")]
+        [InlineData(false, "needle stack bar", "needlestack", "stackneedle", "foo")]
+        public void Search_ComplexCollection_SearchesCorrectly(
+            bool shouldMatch, string query, string field1, string field2, string field3)
+        {
+            SearchHelper(
+                (HasCollection t) => t.Children,
+                query,
+                [new Collected { Field1 = field1, Field2 = field2, Field3 = field3 }],
+                shouldMatch);
+        }
+
+        public class HasCollection
+        {
+            [Search]
+            public List<Collected> Children { get; set; }
+        }
+        public class Collected
+        {
+            [Search(IsSplitOnSpaces = true)]
+            public string Field1 { get; set; }
+
+            [Search(IsSplitOnSpaces = true)]
+            public string Field2 { get; set; }
+
+            [Search(IsSplitOnSpaces = true)]
+            public string Field3 { get; set; }
+        }
+
+        public class SearchTestDataSource<T>(CrudContext context) : QueryableDataSourceBase<T>(context)
+            where T : class
+        {
+        }
 
         private void SearchHelper<T, TProp>(
             Expression<Func<T, TProp>> propSelector,
@@ -201,32 +239,20 @@ namespace IntelliTect.Coalesce.Tests.Api
             bool expectedMatch,
             TimeZoneInfo timeZoneInfo = null
         )
-            where T : new()
+            where T : class, new()
         {
             var classViewModel = new ReflectionClassViewModel(typeof(T));
             var prop = classViewModel.PropertyBySelector(propSelector);
             var context = new CrudContext(() => new ClaimsPrincipal(), timeZoneInfo ?? TimeZoneInfo.Local);
 
-            var param = Expression.Parameter(typeof(T));
-            var searchClauses = prop
-                .SearchProperties(classViewModel, maxDepth: 2, force: true)
-                .SelectMany(p => p.GetLinqSearchStatements(
-                    context,
-                    param,
-                    searchTerm
-                ))
-                .Select(t => t.statement)
-                .ToList();
-
             T model = new T();
             prop.PropertyInfo.SetValue(model, searchCandidate);
 
-            var matchedItems = searchClauses.Any()
-                ? new[] { model }
-                    .AsQueryable()
-                    .Where(Expression.Lambda<Func<T, bool>>(searchClauses.OrAny(), param))
-                    .ToArray()
-                : new T[0];
+            var ds = new SearchTestDataSource<T>(context);
+            var query = new List<T> { model }.AsQueryable();
+            query = ds.ApplyListSearchTerm(query, new FilterParameters { Search = searchTerm });
+
+            var matchedItems = query.ToArray();
 
             if (expectedMatch)
                 Assert.True(matchedItems.Length == 1, $"{searchTerm} didn't match {searchCandidate}.");

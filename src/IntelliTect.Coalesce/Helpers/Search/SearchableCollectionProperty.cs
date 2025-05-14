@@ -1,14 +1,9 @@
 ﻿using IntelliTect.Coalesce.TypeDefinition;
-using System;
+using IntelliTect.Coalesce.Utilities;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Security.Claims;
 using System.Linq.Expressions;
-using Microsoft.EntityFrameworkCore.Query;
 using System.Reflection;
-using IntelliTect.Coalesce.Utilities;
 
 namespace IntelliTect.Coalesce.Helpers.Search
 {
@@ -29,33 +24,30 @@ namespace IntelliTect.Coalesce.Helpers.Search
                 return Enumerable.Empty<(PropertyViewModel, Expression)>();
             }
 
-            var accessor = Expression.Property(propertyParent, Property.Name);
+            // collection: `parent.Children`
+            var collection = Expression.Property(propertyParent, Property.Name);
+            var anyParam = Expression.Parameter(Property.PureType.TypeInfo);
 
-            return Children
-                .SelectMany(c => {
-                    var anyParam = Expression.Parameter(Property.PureType.TypeInfo);
+            var childExprs = Children
+                .SelectMany(c => c
+                    .GetLinqSearchStatements(context, anyParam, rawSearchTerm)
+                    .Select(x => x.statement)
+                ).OrAny();
 
-                    return c.GetLinqSearchStatements(context, anyParam, rawSearchTerm).Select(t =>
-                    {
-                        var expr = accessor.Call(
-                            EnumerableAnyWithPredicate.MakeGenericMethod(Property.PureType.TypeInfo),
-                            Expression.Lambda(
-                                t.statement,
-                                anyParam
-                            )
-                        );
-
-                        // This will get optimized away when translating to SQL,
-                        // but guarding against null is necessary to perform our
-                        // search tests in memory.
-                        expr = Expression.AndAlso(
-                            Expression.NotEqual(accessor, Expression.Constant(null)),
-                            expr
-                        );
-
-                        return (t.property, expr);
-                    });
-                });
+            return [(Property, Expression.AndAlso(
+                
+                // This NotEqual will get optimized away when translating to SQL,
+                // but guarding against null is necessary to perform our
+                // search tests in memory.
+                Expression.NotEqual(collection, Expression.Constant(null)),
+                collection.Call(
+                    EnumerableAnyWithPredicate.MakeGenericMethod(Property.PureType.TypeInfo),
+                    Expression.Lambda(
+                        childExprs,
+                        anyParam
+                    )
+                )
+            ))];
         }
 
         private static readonly MethodInfo EnumerableAnyWithPredicate

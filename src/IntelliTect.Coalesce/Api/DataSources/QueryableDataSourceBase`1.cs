@@ -1,7 +1,6 @@
 ﻿using IntelliTect.Coalesce.DataAnnotations;
 using IntelliTect.Coalesce.TypeDefinition;
 using IntelliTect.Coalesce.Utilities;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -268,9 +267,9 @@ namespace IntelliTect.Coalesce
             var param = Expression.Parameter(typeof(T));
 
             // See if the user has specified a field with a colon and search on that first
-            if (searchTerm.Contains(":"))
+            if (searchTerm.Contains(':'))
             {
-                var fieldValueParts = searchTerm.Split(new string[] { ":" }, StringSplitOptions.None);
+                var fieldValueParts = searchTerm.Split(':', 2, StringSplitOptions.None);
 
                 var field = fieldValueParts[0].Trim();
                 var value = fieldValueParts[1].Trim();

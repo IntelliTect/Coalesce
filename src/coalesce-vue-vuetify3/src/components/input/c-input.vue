@@ -441,6 +441,8 @@ function render() {
       ) => onInput(Array.isArray(value) ? value[0] : value);
       addHandler(data, "update:modelValue", updateHandler);
 
+      data.accept ??= valueMeta.fileType;
+
       return h(VFileInput, data, vuetifySlots);
 
     case "collection":
@@ -451,6 +453,7 @@ function render() {
         // Doing it like this will work in older vuetify versions too.
         data.multiple = "";
         data.modelValue ??= [];
+        data.accept ??= valueMeta.itemType.fileType;
 
         addHandler(data, "update:modelValue", onInput);
         return h(VFileInput, data, vuetifySlots);

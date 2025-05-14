@@ -120,6 +120,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
             }
         }
 
+        public string? FileTypes => this.GetAttributeValue<FileTypeAttribute>(a => a.FileTypes);
+
         public override string ToString() => $"{Type} {Name}";
     }
 }

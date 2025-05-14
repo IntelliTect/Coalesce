@@ -713,6 +713,91 @@ export const Case = domain.types.Case = {
     },
   },
   methods: {
+    methodWithJsReservedParamName: {
+      name: "methodWithJsReservedParamName",
+      displayName: "Method With Js Reserved Param Name",
+      transportType: "item",
+      httpMethod: "POST",
+      params: {
+        id: {
+          name: "id",
+          displayName: "Primary Key",
+          type: "number",
+          role: "value",
+          get source() { return (domain.types.Case as ModelType & { name: "Case" }).props.caseKey },
+          rules: {
+            required: val => val != null || "Primary Key is required.",
+          }
+        },
+        case: {
+          name: "case",
+          displayName: "Case",
+          type: "model",
+          get typeDef() { return (domain.types.Case as ModelType & { name: "Case" }) },
+          role: "value",
+        },
+        function: {
+          name: "function",
+          displayName: "Function",
+          type: "string",
+          role: "value",
+        },
+        var: {
+          name: "var",
+          displayName: "Var",
+          type: "number",
+          role: "value",
+        },
+        async: {
+          name: "async",
+          displayName: "Async",
+          type: "boolean",
+          role: "value",
+        },
+        await: {
+          name: "await",
+          displayName: "Await",
+          type: "string",
+          role: "value",
+        },
+        arguments: {
+          name: "arguments",
+          displayName: "Arguments",
+          type: "collection",
+          itemType: {
+            name: "$collectionItem",
+            displayName: "",
+            role: "value",
+            type: "string",
+          },
+          role: "value",
+        },
+        implements: {
+          name: "implements",
+          displayName: "Implements",
+          type: "string",
+          role: "value",
+        },
+        delete: {
+          name: "delete",
+          displayName: "Delete",
+          type: "boolean",
+          role: "value",
+        },
+        true: {
+          name: "true",
+          displayName: "True",
+          type: "boolean",
+          role: "value",
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "string",
+        role: "value",
+      },
+    },
   },
   dataSources: {
     allOpenCases: {
@@ -1913,6 +1998,7 @@ export const ComplexModel = domain.types.ComplexModel = {
           name: "file",
           displayName: "File",
           type: "file",
+          fileType: "image/*",
           role: "value",
         },
       },
@@ -1948,6 +2034,7 @@ export const ComplexModel = domain.types.ComplexModel = {
             displayName: "",
             role: "value",
             type: "file",
+            fileType: "image/*",
           },
           role: "value",
         },
@@ -3352,6 +3439,7 @@ export const Person = domain.types.Person = {
     add: {
       name: "add",
       displayName: "Add",
+      description: "Adds two numbers together.",
       transportType: "item",
       httpMethod: "POST",
       isStatic: true,

@@ -761,6 +761,13 @@ namespace IntelliTect.Coalesce.CodeGeneration.Vue.Generators
                     }
                     break;
 
+                case TypeDiscriminator.File:
+                    if (definingMember is ParameterViewModel param && param.FileTypes is not null)
+                    {
+                        b.StringProp("fileType", param.FileTypes);
+                    }
+                    break;
+
                 case TypeDiscriminator.String:
                     b.StringProp("subtype", subtype switch
                     {

@@ -6,12 +6,13 @@
 - Pull request titles should follow [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/#summary).
 - Unless your change is trivial (e.g. a minor documentation update, or fixing an obvious bug), it is unlikely to be accepted if you haven't discussed the work with project maintainers in a Github issue.
 - Changes should be accompanied by appropriate automated tests.
+- Changes should be accompanied by appropriate documentation if they affect Coalesce's API surface.
 - For TypeScript/Vue code, Eslint is used to enforce style and formatting.
 - For C#, you are expected to write well-formatted, well-organized code.
 
 ## Installing dependencies
 
-This project uses NPM workspaces. To install NPM packages, you only need to run `npm ci` once, in the repository root.
+This project uses NPM workspaces. To install NPM packages, you only need to run `npm ci` once, in the repository root. Running `npm ci` in any other directory will cause problems.
 
 ## Debugging Code Generation
 

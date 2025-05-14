@@ -1016,6 +1016,7 @@ export const Case = domain.types.Case = {
           name: "file",
           displayName: "File",
           type: "file",
+          fileType: "image/*",
           role: "value",
           rules: {
             required: val => val != null || "File is required.",
@@ -1118,6 +1119,7 @@ export const Case = domain.types.Case = {
             displayName: "",
             role: "value",
             type: "file",
+            fileType: "image/*",
           },
           role: "value",
           rules: {

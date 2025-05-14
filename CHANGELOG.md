@@ -17,7 +17,8 @@
 - Interfaces used as parameters in Coalesce-exposed methods are now automatically injected from services, without the need to specify `[InjectAttribute]`. This does not include known data-like interfaces including `IEnumerable`, `ICollection`, and `IFile`.
 - `ViewModel.$loadCleanData()` now returns the VM instance, to support call chaining.
 - `ListViewModel` now has shorthand properties for `$search`, `$filter`, and `$orderBy`.
-- Custom methods now support descriptions via `DescriptionAttribute`. These are displayed in the admin pages.
+- Custom methods now support descriptions via `DescriptionAttribute`. These are displayed in the admin pages. 
+- Added `FileTypeAttribute` to control allowed file types for custom method file parameters.
 - `c-admin-display`: Binary values now render as links that will download the value as a file, instead of only showing the length in bytes.
 - `c-datetime-picker`: Added prop `showTodayButton`
 - `c-input`: Added a `filter` prop to for enum inputs to restrict the values available for selection.

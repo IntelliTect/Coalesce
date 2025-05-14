@@ -361,6 +361,7 @@ export interface DateValue extends ValueMeta<"date"> {
 
 export interface FileValue extends ValueMeta<"file"> {
   readonly role: "value";
+  readonly fileType?: string;
 }
 
 export interface BinaryValue extends ValueMeta<"binary"> {

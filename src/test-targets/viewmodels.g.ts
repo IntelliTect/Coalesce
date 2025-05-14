@@ -222,6 +222,17 @@ export class CaseViewModel extends ViewModel<$models.Case, $apiClients.CaseApiCl
     return (this.caseProducts || []).map($ => $.product!).filter($ => $)
   }
   
+  public get methodWithJsReservedParamName() {
+    const methodWithJsReservedParamName = this.$apiClient.$makeCaller(
+      this.$metadata.methods.methodWithJsReservedParamName,
+      (c, case_?: $models.Case | null, function_?: string | null, var_?: number | null, async?: boolean | null, await?: string | null, arguments_?: string[] | null, implements_?: string | null, delete_?: boolean | null, true_?: boolean | null) => c.methodWithJsReservedParamName(this.$primaryKey, case_, function_, var_, async, await, arguments_, implements_, delete_, true_),
+      () => ({case: null as $models.Case | null, function: null as string | null, var: null as number | null, async: null as boolean | null, await: null as string | null, arguments: null as string[] | null, implements: null as string | null, delete: null as boolean | null, true: null as boolean | null, }),
+      (c, args) => c.methodWithJsReservedParamName(this.$primaryKey, args.case, args.function, args.var, args.async, args.await, args.arguments, args.implements, args.delete, args.true))
+    
+    Object.defineProperty(this, 'methodWithJsReservedParamName', {value: methodWithJsReservedParamName});
+    return methodWithJsReservedParamName
+  }
+  
   constructor(initialData?: DeepPartial<$models.Case> | null) {
     super($metadata.Case, new $apiClients.CaseApiClient(), initialData)
   }
@@ -1143,7 +1154,11 @@ defineProps(PersonViewModel, $metadata.Person)
 export class PersonListViewModel extends ListViewModel<$models.Person, $apiClients.PersonApiClient, PersonViewModel> {
   static DataSources = $models.Person.DataSources;
   
-  /** Adds two numbers. */
+  /** 
+    Adds two numbers.
+    
+    This comment also includes multiple lines so I can test multi-line xmldoc comments.
+  */
   public get add() {
     const add = this.$apiClient.$makeCaller(
       this.$metadata.methods.add,

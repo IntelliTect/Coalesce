@@ -451,14 +451,14 @@ export interface MultipleParents extends Model<typeof metadata.MultipleParents> 
 }
 export class MultipleParents {
   
-  /** Mutates the input object and its descendents into a valid MultipleParents implementation. */
+  /** Mutates the input object and its descendants into a valid MultipleParents implementation. */
   static convert(data?: Partial<MultipleParents>): MultipleParents {
-    return convertToModel(data || {}, metadata.MultipleParents) 
+    return convertToModel<MultipleParents>(data || {}, metadata.MultipleParents) 
   }
   
-  /** Maps the input object and its descendents to a new, valid MultipleParents implementation. */
+  /** Maps the input object and its descendants to a new, valid MultipleParents implementation. */
   static map(data?: Partial<MultipleParents>): MultipleParents {
-    return mapToModel(data || {}, metadata.MultipleParents) 
+    return mapToModel<MultipleParents>(data || {}, metadata.MultipleParents) 
   }
   
   static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.MultipleParents; }
@@ -579,14 +579,14 @@ export interface Parent1 extends Model<typeof metadata.Parent1> {
 }
 export class Parent1 {
   
-  /** Mutates the input object and its descendents into a valid Parent1 implementation. */
+  /** Mutates the input object and its descendants into a valid Parent1 implementation. */
   static convert(data?: Partial<Parent1>): Parent1 {
-    return convertToModel(data || {}, metadata.Parent1) 
+    return convertToModel<Parent1>(data || {}, metadata.Parent1) 
   }
   
-  /** Maps the input object and its descendents to a new, valid Parent1 implementation. */
+  /** Maps the input object and its descendants to a new, valid Parent1 implementation. */
   static map(data?: Partial<Parent1>): Parent1 {
-    return mapToModel(data || {}, metadata.Parent1) 
+    return mapToModel<Parent1>(data || {}, metadata.Parent1) 
   }
   
   static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.Parent1; }
@@ -604,14 +604,14 @@ export interface Parent2 extends Model<typeof metadata.Parent2> {
 }
 export class Parent2 {
   
-  /** Mutates the input object and its descendents into a valid Parent2 implementation. */
+  /** Mutates the input object and its descendants into a valid Parent2 implementation. */
   static convert(data?: Partial<Parent2>): Parent2 {
-    return convertToModel(data || {}, metadata.Parent2) 
+    return convertToModel<Parent2>(data || {}, metadata.Parent2) 
   }
   
-  /** Maps the input object and its descendents to a new, valid Parent2 implementation. */
+  /** Maps the input object and its descendants to a new, valid Parent2 implementation. */
   static map(data?: Partial<Parent2>): Parent2 {
-    return mapToModel(data || {}, metadata.Parent2) 
+    return mapToModel<Parent2>(data || {}, metadata.Parent2) 
   }
   
   static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.Parent2; }

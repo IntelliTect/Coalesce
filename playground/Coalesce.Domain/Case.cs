@@ -163,7 +163,7 @@ namespace Coalesce.Domain
         }
 
         [Coalesce]
-        public async Task UploadImage(AppDbContext db, IFile file)
+        public async Task UploadImage(AppDbContext db, [FileType("image/*")] IFile file)
         {
             if (file.Content == null)
             {
@@ -203,7 +203,7 @@ namespace Coalesce.Domain
         }
 
         [Coalesce]
-        public async Task UploadImages(AppDbContext db, ICollection<IFile> files)
+        public async Task UploadImages(AppDbContext db, [FileType("image/*")] ICollection<IFile> files)
         {
             foreach (var file in files)
             {

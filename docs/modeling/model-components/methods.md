@@ -160,7 +160,7 @@ Files
 
 </td><td>
 
-Methods can accept file uploads by using a parameter of type `IntelliTect.Coalesce.Models.IFile` (or any derived type, like `IntelliTect.Coalesce.Models.File`).
+Methods can accept file uploads by using a parameter of type `IntelliTect.Coalesce.Models.IFile` (or any derived type, like `IntelliTect.Coalesce.Models.File`). [FileTypeAttribute](./attributes/file-type.md) can be placed on these parameters to suggest allowed file types to the user in the browser.
 
 </td></tr>
 

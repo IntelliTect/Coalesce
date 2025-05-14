@@ -180,7 +180,7 @@ namespace IntelliTect.Coalesce.Utilities
             "super", "throw", "while", "yield", "delete", "export", "import", "public", "return",
             "static", "switch", "typeof", "default", "extends", "finally", "package", "private",
             "continue", "debugger", "function", "arguments", "interface", "protected", "implements",
-            "instanceof"
+            "instanceof", "async", "await"
         };
 
         public static string GetValidJsIdentifier(this string @string)

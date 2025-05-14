@@ -225,7 +225,7 @@ export class CaseViewModel extends ViewModel<$models.Case, $apiClients.CaseApiCl
   public get methodWithJsReservedParamName() {
     const methodWithJsReservedParamName = this.$apiClient.$makeCaller(
       this.$metadata.methods.methodWithJsReservedParamName,
-      (c, case_?: $models.Case | null, function_?: string | null, var_?: number | null, async?: boolean | null, await?: string | null, arguments_?: string[] | null, implements_?: string | null, delete_?: boolean | null, true_?: boolean | null) => c.methodWithJsReservedParamName(this.$primaryKey, case_, function_, var_, async, await, arguments_, implements_, delete_, true_),
+      (c, case_?: $models.Case | null, function_?: string | null, var_?: number | null, async_?: boolean | null, await_?: string | null, arguments_?: string[] | null, implements_?: string | null, delete_?: boolean | null, true_?: boolean | null) => c.methodWithJsReservedParamName(this.$primaryKey, case_, function_, var_, async_, await_, arguments_, implements_, delete_, true_),
       () => ({case: null as $models.Case | null, function: null as string | null, var: null as number | null, async: null as boolean | null, await: null as string | null, arguments: null as string[] | null, implements: null as string | null, delete: null as boolean | null, true: null as boolean | null, }),
       (c, args) => c.methodWithJsReservedParamName(this.$primaryKey, args.case, args.function, args.var, args.async, args.await, args.arguments, args.implements, args.delete, args.true))
     

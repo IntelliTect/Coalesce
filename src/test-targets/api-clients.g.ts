@@ -104,15 +104,15 @@ export class AbstractModelPersonApiClient extends ModelApiClient<$models.Abstrac
 export class CaseApiClient extends ModelApiClient<$models.Case> {
   constructor() { super($metadata.Case) }
   
-  public methodWithJsReservedParamName(id: number | null, case_?: $models.Case | null, function_?: string | null, var_?: number | null, async?: boolean | null, await?: string | null, arguments_?: string[] | null, implements_?: string | null, delete_?: boolean | null, true_?: boolean | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<string>> {
+  public methodWithJsReservedParamName(id: number | null, case_?: $models.Case | null, function_?: string | null, var_?: number | null, async_?: boolean | null, await_?: string | null, arguments_?: string[] | null, implements_?: string | null, delete_?: boolean | null, true_?: boolean | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<string>> {
     const $method = this.$metadata.methods.methodWithJsReservedParamName
     const $params =  {
       id,
       case: case_,
       function: function_,
       var: var_,
-      async,
-      await,
+      async: async_,
+      await: await_,
       arguments: arguments_,
       implements: implements_,
       delete: delete_,

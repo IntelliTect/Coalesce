@@ -210,7 +210,13 @@ function orderByToggle(field: string) {
 function onRowClick(event: MouseEvent, item: ViewModelType) {
   if (props.editable) return;
 
+  // Clicks on links inside rows are not considered row clicks.
   if (event.target instanceof HTMLElement && event.target.closest("a,button")) {
+    return;
+  }
+
+  // Browsers will emit a click even if the user was clicking-and-dragging to select text.
+  if (window.getSelection()?.toString()) {
     return;
   }
 
@@ -272,12 +278,23 @@ function onRowClick(event: MouseEvent, item: ViewModelType) {
   .fixed-column-right {
     position: sticky;
     right: 0;
-    background: rgba(var(--v-theme-surface-light), 0.4);
-    backdrop-filter: blur(10px);
+    background: rgba(var(--v-theme-surface), 0.7);
+    backdrop-filter: blur(12px);
+    .v-theme--dark & {
+      background: rgba(var(--v-theme-surface), 0.85);
+      backdrop-filter: blur(12px) brightness(3);
+    }
     box-shadow: -2px 2px 4px 0px rgba(0, 0, 0, 0.4);
   }
   th.fixed-column-right {
     border-top-left-radius: 8px;
+  }
+}
+
+// Workaround https://bugzilla.mozilla.org/show_bug.cgi?id=1803813
+@-moz-document url-prefix() {
+  *:has(.fixed-column-right) {
+    border-radius: 0 !important;
   }
 }
 </style>

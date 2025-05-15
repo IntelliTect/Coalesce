@@ -10,7 +10,11 @@
     "*.css"
   ],
   "exports": {
-    ".": "./dist/coalesce-vue-vuetify3.js",
+    ".": {
+      "style": "./dist/coalesce-vue-vuetify.css",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/coalesce-vue-vuetify3.js"
+    },
     "./*": "./dist/*",
     "./styles": "./dist/coalesce-vue-vuetify.css",
     "./styles.css": "./dist/coalesce-vue-vuetify.css"

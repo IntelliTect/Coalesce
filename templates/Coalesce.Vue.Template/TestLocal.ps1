@@ -4,6 +4,11 @@ param (
 )
 
 $dir = $PSScriptRoot
+
+# outDir must lie outside of the repository so that NPM and typescript
+# don't try to use our NPM workspace when resolving packages.
+$outDir = Join-Path -Path ([System.IO.Path]::GetTempPath()) -ChildPath "Coalesce.Template.TestInstance"
+
 $ErrorActionPreference = "Stop"
 $PSNativeCommandUseErrorActionPreference = $false
 
@@ -29,10 +34,10 @@ foreach ($testCase in $testCases) {
     Write-Output "----------------------"
     Write-Output ""
 
-    Remove-Item $dir/Test.Template.Instance/* -Recurse -Force -ErrorAction SilentlyContinue
-    Invoke-Expression "dotnet new coalescevue -o $dir/Test.Template.Instance --force $testcase"
+    Remove-Item $outDir/* -Recurse -Force -ErrorAction SilentlyContinue
+    Invoke-Expression "dotnet new coalescevue -o $outDir --force $testcase"
 
-    Push-Location $dir/Test.Template.Instance/*.Web
+    Push-Location $outDir/*.Web
     try {
         dotnet restore
         dotnet coalesce

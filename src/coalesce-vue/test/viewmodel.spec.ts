@@ -3670,4 +3670,121 @@ describe("ListViewModel", () => {
       expect(item2.$isAutoSaveEnabled).toBeFalsy();
     });
   });
+
+  describe("$bulkSave", () => {
+    test("saves all items in the list", async () => {
+      const list = new CaseListViewModel();
+      
+      const bulkSaveEndpoint = mockEndpoint(
+        "/Case/bulkSave",
+        vitest.fn((req) => ({
+          wasSuccessful: true,
+          refMap: {} as any,
+          object: {
+            caseKey: 1,
+            title: "Case 1 Updated",
+          },
+        }))
+      );
+
+      const item1 = new CaseViewModel({ title: "Case 1" });
+      const item2 = new CaseViewModel({ title: "Case 2" });
+      list.$items.push(item1, item2);
+
+      await list.$bulkSave();
+
+      expect(bulkSaveEndpoint).toBeCalledTimes(1);
+      
+      // Verify that the bulk save includes both items
+      const requestData = JSON.parse(bulkSaveEndpoint.mock.calls[0][0].data);
+      expect(requestData.items).toHaveLength(2);
+      expect(requestData.items[0].data.title).toBe("Case 1");
+      expect(requestData.items[1].data.title).toBe("Case 2");
+
+      bulkSaveEndpoint.destroy();
+    });
+
+    test("throws error when list is empty", async () => {
+      const list = new CaseListViewModel();
+
+      await expect(list.$bulkSave()).rejects.toThrowError(
+        "Cannot perform bulk save on an empty list. Add items to $items before calling $bulkSave."
+      );
+    });
+
+    test("throws error when in model-only mode", () => {
+      const list = new CaseListViewModel();
+      list.$modelOnlyMode = true;
+
+      expect(() => list.$bulkSave()).toThrowError(
+        "Bulk save cannot be used with $modelOnlyMode enabled."
+      );
+    });
+
+    test("$bulkSavePreview returns empty result for empty list", () => {
+      const list = new CaseListViewModel();
+
+      const preview = list.$bulkSavePreview();
+
+      expect(preview.isDirty).toBe(false);
+      expect(preview.errors).toHaveLength(0);
+      expect(preview.items).toHaveLength(0);
+      expect(preview.rawItems).toHaveLength(0);
+    });
+
+    test("$bulkSavePreview throws error when in model-only mode", () => {
+      const list = new CaseListViewModel();
+      list.$modelOnlyMode = true;
+
+      expect(() => list.$bulkSavePreview()).toThrowError(
+        "Bulk save preview cannot be used with $modelOnlyMode enabled."
+      );
+    });
+
+    test("$bulkSavePreview includes all items", () => {
+      const list = new CaseListViewModel();
+      
+      const item1 = new CaseViewModel({ title: "Case 1" });
+      const item2 = new CaseViewModel({ title: "Case 2" });
+      list.$items.push(item1, item2);
+
+      const preview = list.$bulkSavePreview();
+
+      expect(preview.items).toHaveLength(2);
+      expect(preview.rawItems).toHaveLength(2);
+    });
+
+    test("respects BulkSaveOptions predicate", () => {
+      const list = new CaseListViewModel();
+      
+      const item1 = new CaseViewModel({ title: "Include me" });
+      const item2 = new CaseViewModel({ title: "Exclude me" });
+      list.$items.push(item1, item2);
+
+      const preview = list.$bulkSavePreview({
+        predicate: (vm, action) => (vm as any).title !== "Exclude me"
+      });
+
+      expect(preview.items).toHaveLength(1);
+      expect(preview.items[0].data.title).toBe("Include me");
+    });
+
+    test("merges additionalRoots from options", () => {
+      const list = new CaseListViewModel();
+      
+      const item1 = new CaseViewModel({ title: "In list" });
+      list.$items.push(item1);
+
+      const additionalItem = new CaseViewModel({ title: "Additional" });
+
+      const preview = list.$bulkSavePreview({
+        additionalRoots: [additionalItem]
+      });
+
+      expect(preview.items).toHaveLength(2);
+      const titles = preview.items.map(item => item.data.title);
+      expect(titles).toContain("In list");
+      expect(titles).toContain("Additional");
+    });
+  });
 });

@@ -1732,6 +1732,137 @@ export abstract class ListViewModel<
     return this._autoSaveState?.active;
   }
 
+  /**
+   * A function for invoking the `/bulkSave` endpoint, and a set of properties about the state of the last call.
+   *
+   * A bulk save will save/delete all items in this list and all reachable relationships in a single round trip and database transaction.
+   */
+  get $bulkSave() {
+    if (this._lightweight) {
+      throw new Error("Bulk save cannot be used with $modelOnlyMode enabled.");
+    }
+
+    const $bulkSave = this.$apiClient.$makeCaller(
+      "item",
+      async (c, options?: BulkSaveOptions) => {
+
+        if (this.$items.length === 0) {
+          throw new Error("Cannot perform bulk save on an empty list. Add items to $items before calling $bulkSave.");
+        }
+
+        const {
+          items: itemsToSend,
+          rawItems: dataToSend,
+          errors,
+          _allItems: dataByRef,
+        } = this.$bulkSavePreview(options);
+
+        if (errors.length) {
+          // Somewhat user-friendly error: this could be shown in a c-loader-status
+          // if a developer isn't eagerly checking validation before enabling a save button:
+          throw Error(joinErrors(errors));
+        }
+
+        const ret = await c.bulkSave(
+          { items: itemsToSend },
+          { ...this.$params }
+        );
+
+        if (ret.data?.wasSuccessful) {
+          // Load models with their new primary key so that instances can be uniquely
+          // identified when loading them with the data returned by the client,
+          // allowing the original ViewModel instances to be preserved instead of being replaced.
+          // `refMap` maps `ref` values to the resulting primary key produced by the server.
+          const refMap = ret.data.refMap;
+          for (const ref in refMap) {
+            const model = dataByRef.get(+ref)?.model;
+            if (model) model.$primaryKey = refMap[ref];
+          }
+
+          // For ListViewModel, we don't load a specific result object since there's no meaningful root.
+          // Individual ViewModels will be updated via their own mechanisms based on the refMap.
+          const result = ret.data.object;
+          if (result) {
+            const age = performance.now();
+
+            // Find the first item in the list to load the result into
+            const firstItem = this.$items[0];
+            if (firstItem) {
+              // `purgeUnsaved = true` here (arg3) since the bulk save should have covered the entire object graph.
+              firstItem.$loadFromModel(result, age, true);
+            }
+
+            const unloadedTypes = new Set(
+              dataToSend
+                .filter(
+                  (d) =>
+                    d.action == "save" &&
+                    d.model._dataAge != age &&
+                    // We currently don't have a good way to reload additionalRoots items.
+                    !options?.additionalRoots?.includes(d.model)
+                )
+                .map((d) => d.model.$metadata.name)
+            );
+
+            if (unloadedTypes.size > 0) {
+              console.warn(
+                `One or more ${[...unloadedTypes.values()].join(
+                  " and "
+                )} items were saved by a bulk save, but were not returned by the response. The Data Source of the bulk save target may not be returning all entities.`
+              );
+            }
+          }
+        }
+
+        return ret;
+      }
+    );
+
+    // Lazy getter technique - don't create the caller until/unless it is needed,
+    // since creation of api callers is a little expensive.
+    Object.defineProperty(this, "$bulkSave", { value: $bulkSave });
+
+    return $bulkSave;
+  }
+
+  /** Returns the payload that will be used for the `$bulkSave` operation.
+   *
+   * Useful for driving UI state like preemptively showing errors,
+   * or determining if there are any objects with pending modifications.
+   */
+  public $bulkSavePreview(options?: BulkSaveOptions) {
+    if (this._lightweight) {
+      throw new Error("Bulk save preview cannot be used with $modelOnlyMode enabled.");
+    }
+
+    if (this.$items.length === 0) {
+      return {
+        isDirty: false,
+        errors: [],
+        items: [],
+        rawItems: [],
+        _allItems: new Map<number, BulkSaveRequestRawItem>(),
+      };
+    }
+
+    // Use the first item as the primary root for the bulk save operation
+    const firstItem = this.$items[0];
+    
+    // Pass the remaining items as additional roots
+    const additionalRoots = this.$items.slice(1);
+    
+    // Merge with any additional roots provided in options
+    const mergedOptions: BulkSaveOptions = {
+      ...options,
+      additionalRoots: [
+        ...(options?.additionalRoots || []),
+        ...additionalRoots,
+      ],
+    };
+
+    return firstItem.$bulkSavePreview(mergedOptions);
+  }
+
   constructor(
     // The following MUST be declared in the constructor so its value will be available to property initializers.
 

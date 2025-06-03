@@ -465,6 +465,30 @@ Turns off auto-saving of the items in the list, and turns of propagation of auto
 Returns true if auto-save is currently active on the instance.
 
 
+### Bulk saves
+
+<Prop def="$bulkSave: ItemApiState;
+$bulkSave(options: BulkSaveOptions) => ItemResultPromise<TModel>;" lang="ts" />
+
+Bulk saves all items in the list and their reachable relationships in one API call and one database transaction. This includes creation, updates, and deletions of entities across all items in `$items`.
+
+The implementation uses the first item in `$items` as the primary root and treats all other items as additional roots for the bulk save operation. If the list is empty, an error will be thrown.
+
+Cannot be used when `$modelOnlyMode` is enabled.
+
+<Prop def="$bulkSavePreview(options?: BulkSaveOptions) => {
+  isDirty: boolean;
+  errors: string[];
+  items: BulkSaveRequestItem[];
+  rawItems: BulkSaveRequestRawItem[];
+}" lang="ts" />
+
+Returns the payload that will be used for the `$bulkSave` operation for all items in the list.
+
+Useful for driving UI state, like preemptively showing errors, or determining if there are any objects with pending modifications across the entire list. If the list is empty, returns an empty result.
+
+Cannot be used when `$modelOnlyMode` is enabled.
+
 
 ### Generated Members
 

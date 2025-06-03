@@ -1,6 +1,5 @@
 using Coalesce.Starter.Vue.Data.Auth;
 #if AppInsights
-using Microsoft.ApplicationInsights.AspNetCore;
 #endif
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.Extensions;
@@ -21,9 +20,9 @@ public class HomeController() : Controller
     [ResponseCache(Location = ResponseCacheLocation.None, NoStore = true)]
     [Authorize]
     public async Task<IActionResult> Index(
-#if AppInsights
-        [FromServices] JavaScriptSnippet appInsightsSnippet,
-#endif
+//#if AppInsights
+//        [FromServices] JavaScriptSnippet appInsightsSnippet,
+//#endif
         [FromServices] IWebHostEnvironment hostingEnvironment
     )
     {
@@ -49,16 +48,17 @@ public class HomeController() : Controller
         </script>
         """;
 
-#if AppInsights
-        if (appInsightsSnippet.FullScript.Length > 0)
-        {
-            headPrepend +=
-                appInsightsSnippet.FullScript
-                // Remove the automatic trackPageView event that is fired on load.
-                // We fire our own page tracking events in router.ts to get better data.
-                + "<script>window.appInsights.queue.pop()</script>";
-        }
-#endif
+// TODO: Move to client packages
+//#if AppInsights
+//        if (appInsightsSnippet.FullScript.Length > 0)
+//        {
+//            headPrepend +=
+//                appInsightsSnippet.FullScript
+//                // Remove the automatic trackPageView event that is fired on load.
+//                // We fire our own page tracking events in router.ts to get better data.
+//                + "<script>window.appInsights.queue.pop()</script>";
+//        }
+//#endif
 
         contents = contents.Replace("<head>", "<head>" + headPrepend);
 

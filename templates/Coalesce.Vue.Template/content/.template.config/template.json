@@ -230,6 +230,10 @@
           ]
         },
         {
+          "condition": "!(LocalAuth || TenantMemberInvites || TenantCreateAdmin || EmailSendGrid || EmailAzure)",
+          "exclude": ["**/NoOpEmailService.*", "**/IEmailService.*"]
+        },
+        {
           "condition": "!Tenancy",
           "exclude": [
             "**/Tenant.cs",
@@ -305,7 +309,7 @@
         },
         {
           "condition": "!GithubActions",
-          "exclude": ["**/.github"]
+          "exclude": ["**/.github/workflows/build-test-and-deploy.yml"]
         }
       ]
     }

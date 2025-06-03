@@ -2,11 +2,6 @@ using Coalesce.Starter.Vue.Data;
 using Coalesce.Starter.Vue.Data.Auth;
 using Coalesce.Starter.Vue.Web;
 using IntelliTect.Coalesce;
-#if AppInsights
-using Microsoft.ApplicationInsights.DependencyCollector;
-using Microsoft.ApplicationInsights.Extensibility;
-using Microsoft.Extensions.Logging.ApplicationInsights;
-#endif
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
@@ -38,6 +33,8 @@ var builder = WebApplication.CreateBuilder(new WebApplicationOptions
     WebRootPath = "wwwroot"
 });
 
+builder.AddServiceDefaults();
+
 builder.Logging
     .AddConsole()
     // Filter out Request Starting/Request Finished noise:
@@ -52,23 +49,8 @@ builder.Configuration
 
 var services = builder.Services;
 
-#if AppInsights
-services.AddApplicationInsightsTelemetry(b =>
-{
-    b.ConnectionString = builder.Configuration["ApplicationInsights:ConnectionString"];
-});
-services.AddSingleton<ITelemetryInitializer, AppInsightsTelemetryEnricher>();
-services.ConfigureTelemetryModule<DependencyTrackingTelemetryModule>((module, o) =>
-{
-    module.EnableSqlCommandTextInstrumentation = true;
-});
-// App insights filters all logs to Warning by default. We want to include our own logging.
-builder.Logging.AddFilter<ApplicationInsightsLoggerProvider>("Coalesce.Starter.Vue", LogLevel.Information);
-#endif
-
-
 services.AddDbContext<AppDbContext>(options => options
-    .UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"), opt => opt
+    .UseSqlServer(builder.Configuration.GetConnectionString("sqldb"), opt => opt
         .EnableRetryOnFailure()
         .UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery)
     )
@@ -103,7 +85,7 @@ services.AddSingleton<TokenCredential, DefaultAzureCredential>();
 services.Configure<AzureEmailOptions>(builder.Configuration.GetSection("Communication:Azure"));
 services.AddTransient<IEmailService, AzureEmailService>();
 
-#else
+#elif (LocalAuth || TenantMemberInvites || TenantCreateAdmin)
 services.AddTransient<IEmailService, NoOpEmailService>();
 
 #endif
@@ -118,7 +100,7 @@ services.AddSwaggerGen(c =>
 
 services.AddScoped<SecurityService>();
 
-#if (TenantMemberInvites || LocalAuth)
+#if (LocalAuth || TenantMemberInvites || TenantCreateAdmin)
 // Register IUrlHelper to allow for invite link generation.
 services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
 services.AddScoped<IUrlHelper>(x =>
@@ -127,8 +109,7 @@ services.AddScoped<IUrlHelper>(x =>
     var factory = x.GetRequiredService<IUrlHelperFactory>();
     return factory.GetUrlHelper(actionContext!);
 });
-#endif
-#if TenantMemberInvites
+
 services.AddScoped<InvitationService>();
 #endif
 
@@ -150,21 +131,21 @@ if (app.Environment.IsDevelopment())
     app.MapCoalesceSecurityOverview("coalesce-security");
 
 #if (!Identity)
-	// TODO: Dummy authentication for initial development.
-	// Replace this with a proper authentication scheme like
-	// Windows Authentication, or an OIDC provider, or something else.
-	// If you wanted to use ASP.NET Core Identity, you're recommended
-	// to keep the "--Identity" parameter to the Coalesce template enabled.
-	app.Use(async (context, next) =>
-	{
-		Claim[] claims = [new Claim(ClaimTypes.Name, "developmentuser")];
+    // TODO: Dummy authentication for initial development.
+    // Replace this with a proper authentication scheme like
+    // Windows Authentication, or an OIDC provider, or something else.
+    // If you wanted to use ASP.NET Core Identity, you're recommended
+    // to keep the "--Identity" parameter to the Coalesce template enabled.
+    app.Use(async (context, next) =>
+    {
+        Claim[] claims = [new Claim(ClaimTypes.Name, "developmentuser")];
 
-		var identity = new ClaimsIdentity(claims, "dummy-auth");
-		context.User = new ClaimsPrincipal(identity);
+        var identity = new ClaimsIdentity(claims, "dummy-auth");
+        context.User = new ClaimsPrincipal(identity);
 
-		await next.Invoke();
-	});
-	// End Dummy Authentication.
+        await next.Invoke();
+    });
+    // End Dummy Authentication.
 #endif
 }
 
@@ -222,7 +203,7 @@ using (var scope = app.Services.CreateScope())
     db.Database.EnsureDeleted();
     db.Database.EnsureCreated();
 #else
-	db.Database.Migrate();
+    db.Database.Migrate();
 #endif
     ActivatorUtilities.GetServiceOrCreateInstance<DatabaseSeeder>(serviceScope).Seed();
 }

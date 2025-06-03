@@ -153,7 +153,7 @@
             role="listbox"
           >
             <v-list-item
-              v-if="createItemLabel"
+              v-if="createItemLabel && !props.create?.appendToEnd"
               class="c-select__create-item"
               @click="createItem"
               :loading="createItemLoading"
@@ -202,6 +202,31 @@
                   </slot>
                 </slot>
               </v-list-item-title>
+            </v-list-item>
+
+            <v-list-item
+              v-if="createItemLabel && props.create?.appendToEnd"
+              class="c-select__create-item"
+              @click="createItem"
+              :loading="createItemLoading"
+            >
+              <template #prepend>
+                <v-progress-circular
+                  size="20"
+                  indeterminate
+                  v-if="createItemLoading"
+                ></v-progress-circular>
+                <v-icon v-else>$plus</v-icon>
+              </template>
+              <v-list-item-title>
+                {{ createItemLabel }}
+              </v-list-item-title>
+              <v-list-item-subtitle
+                v-if="createItemError"
+                class="text-error font-weight-bold"
+              >
+                {{ createItemError }}
+              </v-list-item-subtitle>
             </v-list-item>
 
             <!-- TODO: With this version of c-select (versus the v2 one),
@@ -519,6 +544,7 @@ const props = withDefaults(
           search: string,
           label: string
         ) => Promise<SelectedModelTypeSingle>;
+        appendToEnd?: boolean;
       };
     } & /* @vue-ignore */ InheritedProps
   >(),

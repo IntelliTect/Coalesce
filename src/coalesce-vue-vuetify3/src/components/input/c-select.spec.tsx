@@ -823,6 +823,72 @@ describe("CSelect", () => {
     expect(model.singleTest?.testName).toBe("new thing");
   });
 
+  test("create appendToEnd=false (default)", async () => {
+    const wrapper = mountApp(() => (
+      <CSelect
+        model={model}
+        for="singleTest"
+        create={{
+          getLabel(search: string) {
+            if (search == "f") return "new thing";
+            else return false;
+          },
+          async getItem(search: string, label: string) {
+            return new Test({ testName: label });
+          },
+          appendToEnd: false,
+        }}
+      ></CSelect>
+    )).findComponent(CSelect);
+    await flushPromises();
+
+    // Set our search value to fulfil getLabel's predicate
+    const menuWrapper = await openMenu(wrapper);
+    await menuWrapper.find("input").setValue("f");
+
+    // Verify the create item appears at the beginning (before list items)
+    const listItems = menuWrapper.findAll(".v-list-item");
+    const createItemIndex = listItems.findIndex(item => 
+      item.classes().includes("c-select__create-item")
+    );
+    
+    // The create item should be at index 0 (first item)
+    expect(createItemIndex).toBe(0);
+  });
+
+  test("create appendToEnd=true", async () => {
+    const wrapper = mountApp(() => (
+      <CSelect
+        model={model}
+        for="singleTest"
+        create={{
+          getLabel(search: string) {
+            if (search == "f") return "new thing";
+            else return false;
+          },
+          async getItem(search: string, label: string) {
+            return new Test({ testName: label });
+          },
+          appendToEnd: true,
+        }}
+      ></CSelect>
+    )).findComponent(CSelect);
+    await flushPromises();
+
+    // Set our search value to fulfil getLabel's predicate
+    const menuWrapper = await openMenu(wrapper);
+    await menuWrapper.find("input").setValue("f");
+
+    // Verify the create item appears at the end (after list items)
+    const listItems = menuWrapper.findAll(".v-list-item");
+    const createItemIndex = listItems.findIndex(item => 
+      item.classes().includes("c-select__create-item")
+    );
+    
+    // The create item should be at the last position
+    expect(createItemIndex).toBe(listItems.length - 1);
+  });
+
   describe("vuetify props passthrough", () => {
     beforeEach(() => {
       mockEndpoint("/Person/list", () => ({

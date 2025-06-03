@@ -27,7 +27,7 @@
       <!-- Must include an empty element so vuetify doesn't fall back to the slot's default -->
       <span v-else></span>
     </template>
-    <template slot="prepend-item" v-if="createItemLabel">
+    <template slot="prepend-item" v-if="createItemLabel && !create.appendToEnd">
       <v-list-item @click="createItem">
         <v-list-item-avatar class="mr-1 my-0">
           <v-icon color="success">fa fa-plus</v-icon>
@@ -41,6 +41,17 @@
       </v-list-item>
     </template>
     <template slot="append-item">
+      <v-list-item v-if="createItemLabel && create.appendToEnd" @click="createItem">
+        <v-list-item-avatar class="mr-1 my-0">
+          <v-icon color="success">fa fa-plus</v-icon>
+        </v-list-item-avatar>
+        <v-list-item-content>
+          <v-list-item-title>
+            <span class="grey--text"> Create: </span>
+            {{ createItemLabel }}
+          </v-list-item-title>
+        </v-list-item-content>
+      </v-list-item>
       <!-- TODO: i18n -->
       <div
         class="grey--text px-4 my-3"
@@ -142,6 +153,7 @@ export default defineComponent({
       type: Object as PropType<{
         getLabel: (search: string, items: Model<ModelType>[]) => string | false;
         getItem: (search: string, label: string) => Promise<Model<ModelType>>;
+        appendToEnd?: boolean;
       }>,
     },
   },

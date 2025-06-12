@@ -280,7 +280,22 @@ Applies sorting to the query based on sort orders specified by the client. If th
 
 Applies default sorting behavior to the query, including behavior defined with use of `[DefaultOrderBy]` in C# POCOs, as well as fallback sorting to `"Name"` or primary key properties.
 
-<!-- .. TODO - need a centralized doc page about sorting in Coalesce. -->
+::: details Sorting in Coalesce
+Coalesce provides flexible sorting capabilities through multiple mechanisms:
+
+**Client-side Sorting:**
+- Users can sort by any readable property through the generated TypeScript interfaces
+- Multiple sort fields can be specified with `list.$params.orderBy = "field1 asc, field2 desc"`
+- Sort order can be cleared with `list.$params.orderBy = "none"`
+
+**Default Sorting:**
+- Use `[DefaultOrderBy]` attribute on properties to specify default sort order
+- Fallback sorting automatically applies to `Name` properties or primary keys if no other sorting is specified
+- Custom default sorting can be implemented by overriding `ApplyListDefaultSorting`
+
+**Custom Sorting:**
+Override `ApplyListSorting` or `ApplyListClientSpecifiedSorting` in your data source to implement custom sorting logic.
+:::
 
 
 <Prop def="IQueryable<T> ApplyListPaging(IQueryable<T> query, IListParameters parameters, int? totalCount, out int page, out int pageSize)" />

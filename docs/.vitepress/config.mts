@@ -199,9 +199,13 @@ export default defineConfig({
           autoTitle("/concepts/includes"),
 
           autoTitle("/topics/coalesce-json"),
+          autoTitle("/topics/best-practices"),
+          autoTitle("/topics/complete-tutorial"),
           autoTitle("/topics/immutability"),
           autoTitle("/topics/startup"),
           autoTitle("/topics/audit-logging"),
+          autoTitle("/topics/integration-patterns"),
+          autoTitle("/topics/troubleshooting"),
           autoTitle("/topics/upgrading"),
           autoTitle("/topics/coalesce-swashbuckle"),
 

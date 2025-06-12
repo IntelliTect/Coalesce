@@ -4,9 +4,37 @@ Coalesce provides a number of C# attributes that can be used to decorate your mo
 
 ## Coalesce Attributes
 
-Browse the list in the sidebar to learn about the attributes that Coalesce provides that can be used to decorate your models.
+Coalesce provides the following attributes that can be used to decorate your models, properties, and methods:
 
-<!-- TODO: Is there some kind of metadata we can use to dynamically source the coalesce attribute page and list them here instead of directing the reader to the sidebar? -->
+### Core Attributes
+- **[[Coalesce]](/modeling/model-components/attributes/coalesce.md)** - Marks classes, properties, and methods for inclusion in code generation
+- **[[InternalUse]](/modeling/model-components/attributes/internal-use.md)** - Excludes items from client-side generation while keeping them available server-side
+
+### Security Attributes  
+- **[[Read], [Edit], [Create], [Delete]](/modeling/model-components/attributes/security-attribute.md)** - Control access permissions for operations
+- **[[Execute]](/modeling/model-components/attributes/execute.md)** - Specify required roles for method execution
+- **[[Restrict]](/modeling/model-components/attributes/restrict.md)** - Apply additional restrictions to operations
+
+### Display & Behavior Attributes
+- **[[Hidden]](/modeling/model-components/attributes/hidden.md)** - Hide properties from generated admin interfaces
+- **[[Search]](/modeling/model-components/attributes/search.md)** - Configure search behavior for properties
+- **[[ListText]](/modeling/model-components/attributes/list-text.md)** - Specify the display text for objects in lists and dropdowns
+- **[[DefaultOrderBy]](/modeling/model-components/attributes/default-order-by.md)** - Set default sorting for collections
+
+### Data Handling Attributes
+- **[[DateType]](/modeling/model-components/attributes/date-type.md)** - Specify how date/time properties should be handled
+- **[[ManyToMany]](/modeling/model-components/attributes/many-to-many.md)** - Configure many-to-many relationships
+- **[[DtoIncludes], [DtoExcludes]](/modeling/model-components/attributes/dto-includes-excludes.md)** - Control what gets included in DTOs
+
+### Advanced Attributes
+- **[[Inject]](/modeling/model-components/attributes/inject.md)** - Inject services into method parameters
+- **[[LoadFromDataSource]](/modeling/model-components/attributes/load-from-data-source.md)** - Specify custom data source for loading entities
+- **[[ClientValidation]](/modeling/model-components/attributes/client-validation.md)** - Add custom client-side validation
+- **[[Controller]](/modeling/model-components/attributes/controller.md)** - Customize controller generation
+- **[[ControllerAction]](/modeling/model-components/attributes/controller-action.md)** - Customize individual controller actions  
+- **[[CreateController]](/modeling/model-components/attributes/create-controller.md)** - Control whether to generate controllers
+
+Browse the individual attribute pages in the sidebar for detailed information and examples.
 
 ## ComponentModel Attributes
 

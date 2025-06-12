@@ -78,6 +78,27 @@ monotonous to build:
 - Out-of-the-box [Vue Components](/stacks/vue/coalesce-vue-vuetify/overview.md) for common controls like dates, selecting objects via drop downs, enums, etc. Dropdowns support searching and paging automatically.
 - A complete set of admin pages are provided, allowing you to read, create, edit, and delete data straight away without writing any additional code.
 
+## Learning Path
+
+### 1. **Start Here** 
+Begin with the [Getting Started](/stacks/vue/getting-started.md) guide to create your first project and understand the basic concepts.
+
+### 2. **Complete Tutorial**  
+Work through the [Complete Tutorial](/topics/complete-tutorial.md) to build a full task management application and see all the pieces working together.
+
+### 3. **Core Concepts**
+Learn about [Data Modeling](/modeling/model-types/crud.md), [Security](/topics/security.md), and [Data Sources](/modeling/model-components/data-sources.md) to understand how to structure your application.
+
+### 4. **Advanced Topics**
+Explore [Best Practices](/topics/best-practices.md), [Integration Patterns](/topics/integration-patterns.md), and [Troubleshooting](/topics/troubleshooting.md) for production-ready applications.
+
+## Quick Reference
+
+- **Need help?** Check the [Troubleshooting Guide](/topics/troubleshooting.md)
+- **Building integrations?** See [Integration Patterns](/topics/integration-patterns.md)  
+- **Performance issues?** Review [Best Practices](/topics/best-practices.md)
+- **Security questions?** Read the [Security Documentation](/topics/security.md)
+
 ## Getting Started
 
-To get started with Coalesce, check out [Getting Started](/stacks/vue/getting-started.md).
+Ready to build your first Coalesce application? Head over to [Getting Started](/stacks/vue/getting-started.md) to create a new project in minutes.

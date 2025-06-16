@@ -128,8 +128,7 @@ namespace IntelliTect.Coalesce
         /// Register <see cref="IUrlHelper" /> as a service that can be injected
         /// when operating in the context of an executing action (i.e. a controller endpoint).
         /// </summary>
-        public static IServiceCollection AddUrlHelper<TContext>(this IServiceCollection services)
-            where TContext : DbContext
+        public static IServiceCollection AddUrlHelper(this IServiceCollection services)
         {
             if (services == null) throw new ArgumentNullException(nameof(services));
 

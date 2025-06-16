@@ -54,7 +54,7 @@ services.Configure<Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerOptions
     options.Limits.MaxRequestBodySize = int.MaxValue; // testing big file uploads/downloads
 });
 
-
+services.AddUrlHelper();
 services.AddOpenApi();
 
 services.AddSwaggerGen(c =>

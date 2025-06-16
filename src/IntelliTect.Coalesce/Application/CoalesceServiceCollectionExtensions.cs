@@ -15,6 +15,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.AspNetCore.Mvc.Routing;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+
+
+
+
 #if NET9_0_OR_GREATER
 using IntelliTect.Coalesce.Api.OpenApi;
 using Microsoft.AspNetCore.OpenApi;
@@ -48,11 +56,18 @@ namespace IntelliTect.Coalesce
             var entryAsm = Assembly.GetEntryAssembly();
             if (entryAsm is not null)
             {
-                // Needed to disover the generated DTOs for bulk saves:
+                // Needed to discover the generated DTOs for bulk saves:
                 ReflectionRepository.Global.AddAssembly(entryAsm);
             }
 
             services.AddTransient<IConfigureOptions<MvcOptions>, ConfigureMvc>();
+
+            services.Configure<JsonOptions>(options =>
+            {
+                options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+                options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+                options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+            });
 
             services.TryAddScoped<IApiActionFilter, ApiActionFilter>();
 
@@ -60,7 +75,7 @@ namespace IntelliTect.Coalesce
             {
                 foreach (var type in types) services.TryAddScoped(type.Key, type.Value);
             }
-            
+
             services.TryAddScoped<IDataSourceFactory, DataSourceFactory>();
             AddFactoryDefaultTypes(DataSourceFactory.DefaultTypes);
 
@@ -100,9 +115,29 @@ namespace IntelliTect.Coalesce
         {
             if (services == null) throw new ArgumentNullException(nameof(services));
 
-            services.AddCoalesce(b => {
+            services.AddCoalesce(b =>
+            {
                 b.AddContext<TContext>();
                 builder?.Invoke(b);
+            });
+
+            return services;
+        }
+
+        /// <summary>
+        /// Register <see cref="IUrlHelper" /> as a service that can be injected
+        /// when operating in the context of an executing action (i.e. a controller endpoint).
+        /// </summary>
+        public static IServiceCollection AddUrlHelper(this IServiceCollection services)
+        {
+            if (services == null) throw new ArgumentNullException(nameof(services));
+
+            services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
+            services.AddScoped<IUrlHelper>(x =>
+            {
+                var actionContext = x.GetRequiredService<IActionContextAccessor>().ActionContext;
+                var factory = x.GetRequiredService<IUrlHelperFactory>();
+                return factory.GetUrlHelper(actionContext!);
             });
 
             return services;

@@ -5,10 +5,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
+using System.Text.Json.Serialization;
 
 namespace Coalesce.Starter.Vue.Web.Models
 {
-    public partial class WidgetParameter : GeneratedParameterDto<Coalesce.Starter.Vue.Data.Models.Widget>
+    public partial class WidgetParameter : SparseDto, IGeneratedParameterDto<Coalesce.Starter.Vue.Data.Models.Widget>
     {
         public WidgetParameter() { }
 
@@ -41,11 +42,9 @@ namespace Coalesce.Starter.Vue.Web.Models
         /// <summary>
         /// Map from the current DTO instance to the domain object.
         /// </summary>
-        public override void MapTo(Coalesce.Starter.Vue.Data.Models.Widget entity, IMappingContext context)
+        public void MapTo(Coalesce.Starter.Vue.Data.Models.Widget entity, IMappingContext context)
         {
             var includes = context.Includes;
-
-            if (OnUpdate(entity, context)) return;
 
             if (ShouldMapTo(nameof(WidgetId))) entity.WidgetId = (WidgetId ?? entity.WidgetId);
             if (ShouldMapTo(nameof(Name))) entity.Name = Name;
@@ -56,7 +55,7 @@ namespace Coalesce.Starter.Vue.Web.Models
         /// <summary>
         /// Map from the current DTO instance to a new instance of the domain object.
         /// </summary>
-        public override Coalesce.Starter.Vue.Data.Models.Widget MapToNew(IMappingContext context)
+        public Coalesce.Starter.Vue.Data.Models.Widget MapToNew(IMappingContext context)
         {
             var includes = context.Includes;
 
@@ -65,16 +64,21 @@ namespace Coalesce.Starter.Vue.Web.Models
                 Name = Name,
                 Category = (Category ?? default),
             };
-
-            if (OnUpdate(entity, context)) return entity;
             if (ShouldMapTo(nameof(WidgetId))) entity.WidgetId = (WidgetId ?? entity.WidgetId);
             if (ShouldMapTo(nameof(InventedOn))) entity.InventedOn = InventedOn;
 
             return entity;
         }
+
+        public Coalesce.Starter.Vue.Data.Models.Widget MapToModelOrNew(Coalesce.Starter.Vue.Data.Models.Widget obj, IMappingContext context)
+        {
+            if (obj is null) return MapToNew(context);
+            MapTo(obj, context);
+            return obj;
+        }
     }
 
-    public partial class WidgetResponse : GeneratedResponseDto<Coalesce.Starter.Vue.Data.Models.Widget>
+    public partial class WidgetResponse : IGeneratedResponseDto<Coalesce.Starter.Vue.Data.Models.Widget>
     {
         public WidgetResponse() { }
 
@@ -92,7 +96,7 @@ namespace Coalesce.Starter.Vue.Web.Models
         /// <summary>
         /// Map from the domain object to the properties of the current DTO instance.
         /// </summary>
-        public override void MapFrom(Coalesce.Starter.Vue.Data.Models.Widget obj, IMappingContext context, IncludeTree tree = null)
+        public void MapFrom(Coalesce.Starter.Vue.Data.Models.Widget obj, IMappingContext context, IncludeTree tree = null)
         {
             if (obj == null) return;
             var includes = context.Includes;

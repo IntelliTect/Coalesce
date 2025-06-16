@@ -1,10 +1,8 @@
 ﻿using Coalesce.Starter.Vue.Data;
 using Coalesce.Starter.Vue.Data.Auth;
-using Coalesce.Starter.Vue.Data.Communication;
 using Coalesce.Starter.Vue.Data.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Coalesce.Starter.Vue.Web;
 

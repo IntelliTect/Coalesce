@@ -20,6 +20,7 @@ export class RoleApiClient extends ModelApiClient<$models.Role> {
 
 export class TenantApiClient extends ModelApiClient<$models.Tenant> {
   constructor() { super($metadata.Tenant) }
+  
   public create(name: string | null, adminEmail: string | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<void>> {
     const $method = this.$metadata.methods.create
     const $params =  {
@@ -34,6 +35,7 @@ export class TenantApiClient extends ModelApiClient<$models.Tenant> {
 
 export class UserApiClient extends ModelApiClient<$models.User> {
   constructor() { super($metadata.User) }
+  
   public getPhoto(id: string | null, etag?: string | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<File>> {
     const $method = this.$metadata.methods.getPhoto
     const $params =  {
@@ -43,6 +45,7 @@ export class UserApiClient extends ModelApiClient<$models.User> {
     return this.$invoke($method, $params, $config)
   }
   
+  
   public evict(id: string | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<void>> {
     const $method = this.$metadata.methods.evict
     const $params =  {
@@ -50,6 +53,7 @@ export class UserApiClient extends ModelApiClient<$models.User> {
     }
     return this.$invoke($method, $params, $config)
   }
+  
   
   public inviteUser(email: string | null, role?: $models.Role | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<void>> {
     const $method = this.$metadata.methods.inviteUser
@@ -60,6 +64,7 @@ export class UserApiClient extends ModelApiClient<$models.User> {
     return this.$invoke($method, $params, $config)
   }
   
+  
   public setEmail(id: string | null, newEmail: string | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<void>> {
     const $method = this.$metadata.methods.setEmail
     const $params =  {
@@ -69,6 +74,7 @@ export class UserApiClient extends ModelApiClient<$models.User> {
     return this.$invoke($method, $params, $config)
   }
   
+  
   public sendEmailConfirmation(id: string | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<void>> {
     const $method = this.$metadata.methods.sendEmailConfirmation
     const $params =  {
@@ -76,6 +82,7 @@ export class UserApiClient extends ModelApiClient<$models.User> {
     }
     return this.$invoke($method, $params, $config)
   }
+  
   
   public setPassword(id: string | null, currentPassword: string | null, newPassword: string | null, confirmNewPassword: string | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<void>> {
     const $method = this.$metadata.methods.setPassword
@@ -103,6 +110,7 @@ export class WidgetApiClient extends ModelApiClient<$models.Widget> {
 
 export class SecurityServiceApiClient extends ServiceApiClient<typeof $metadata.SecurityService> {
   constructor() { super($metadata.SecurityService) }
+  
   public whoAmI($config?: AxiosRequestConfig): AxiosPromise<ItemResult<$models.UserInfo>> {
     const $method = this.$metadata.methods.whoAmI
     const $params =  {

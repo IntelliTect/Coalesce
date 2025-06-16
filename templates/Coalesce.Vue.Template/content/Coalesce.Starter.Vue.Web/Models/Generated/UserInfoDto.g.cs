@@ -5,10 +5,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
+using System.Text.Json.Serialization;
 
 namespace Coalesce.Starter.Vue.Web.Models
 {
-    public partial class UserInfoParameter : GeneratedParameterDto<Coalesce.Starter.Vue.Data.Auth.UserInfo>
+    public partial class UserInfoParameter : SparseDto, IGeneratedParameterDto<Coalesce.Starter.Vue.Data.Auth.UserInfo>
     {
         public UserInfoParameter() { }
 
@@ -65,11 +66,9 @@ namespace Coalesce.Starter.Vue.Web.Models
         /// <summary>
         /// Map from the current DTO instance to the domain object.
         /// </summary>
-        public override void MapTo(Coalesce.Starter.Vue.Data.Auth.UserInfo entity, IMappingContext context)
+        public void MapTo(Coalesce.Starter.Vue.Data.Auth.UserInfo entity, IMappingContext context)
         {
             var includes = context.Includes;
-
-            if (OnUpdate(entity, context)) return;
 
             if (ShouldMapTo(nameof(Id))) entity.Id = Id;
             if (ShouldMapTo(nameof(UserName))) entity.UserName = UserName;
@@ -84,7 +83,7 @@ namespace Coalesce.Starter.Vue.Web.Models
         /// <summary>
         /// Map from the current DTO instance to a new instance of the domain object.
         /// </summary>
-        public override Coalesce.Starter.Vue.Data.Auth.UserInfo MapToNew(IMappingContext context)
+        public Coalesce.Starter.Vue.Data.Auth.UserInfo MapToNew(IMappingContext context)
         {
             var includes = context.Includes;
 
@@ -93,8 +92,6 @@ namespace Coalesce.Starter.Vue.Web.Models
                 Roles = Roles,
                 Permissions = Permissions,
             };
-
-            if (OnUpdate(entity, context)) return entity;
             if (ShouldMapTo(nameof(Id))) entity.Id = Id;
             if (ShouldMapTo(nameof(UserName))) entity.UserName = UserName;
             if (ShouldMapTo(nameof(Email))) entity.Email = Email;
@@ -104,9 +101,16 @@ namespace Coalesce.Starter.Vue.Web.Models
 
             return entity;
         }
+
+        public Coalesce.Starter.Vue.Data.Auth.UserInfo MapToModelOrNew(Coalesce.Starter.Vue.Data.Auth.UserInfo obj, IMappingContext context)
+        {
+            if (obj is null) return MapToNew(context);
+            MapTo(obj, context);
+            return obj;
+        }
     }
 
-    public partial class UserInfoResponse : GeneratedResponseDto<Coalesce.Starter.Vue.Data.Auth.UserInfo>
+    public partial class UserInfoResponse : IGeneratedResponseDto<Coalesce.Starter.Vue.Data.Auth.UserInfo>
     {
         public UserInfoResponse() { }
 
@@ -122,7 +126,7 @@ namespace Coalesce.Starter.Vue.Web.Models
         /// <summary>
         /// Map from the domain object to the properties of the current DTO instance.
         /// </summary>
-        public override void MapFrom(Coalesce.Starter.Vue.Data.Auth.UserInfo obj, IMappingContext context, IncludeTree tree = null)
+        public void MapFrom(Coalesce.Starter.Vue.Data.Auth.UserInfo obj, IMappingContext context, IncludeTree tree = null)
         {
             if (obj == null) return;
             var includes = context.Includes;

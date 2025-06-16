@@ -1,3 +1,4 @@
+using IntelliTect.Coalesce.Helpers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 
@@ -7,10 +8,11 @@ public class DevelopmentAppDbContextFactory : IDesignTimeDbContextFactory<AppDbC
 {
     public AppDbContext CreateDbContext(string[] args)
     {
-        // This is only used when adding migrations and updating the database from the cmd line.
+        // This is only used by the EF Core CLI tooling (`dotnet ef`).
         // It shouldn't ever be used in code where it might end up running in production.
+
         var builder = new DbContextOptionsBuilder<AppDbContext>();
-        builder.UseSqlServer("Server=(localdb)\\MSSQLLocalDB;Database=Coalesce.Starter.Vue;Trusted_Connection=True;TrustServerCertificate=True;");
+        builder.UseSqlServer(DevelopmentConnectionStringLocator.Find());
         return new AppDbContext(builder.Options);
     }
 }

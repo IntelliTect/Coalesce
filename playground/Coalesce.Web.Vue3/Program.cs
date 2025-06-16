@@ -47,21 +47,14 @@ services.AddCoalesce<AppDbContext>(c => c.Configure(o =>
 }));
 services.AddScoped<Person.WithoutCases>();
 
-services
-    .AddMvc()
-    .AddJsonOptions(options =>
-    {
-        options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
-        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
-        options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
-    });
+services.AddMvc();
 
 services.Configure<Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerOptions>(options =>
 {
     options.Limits.MaxRequestBodySize = int.MaxValue; // testing big file uploads/downloads
 });
 
-
+services.AddUrlHelper();
 services.AddOpenApi();
 
 services.AddSwaggerGen(c =>
@@ -95,30 +88,8 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.UseMiddleware<DemoMiddleware>();
 
-var containsFileHashRegex = new Regex(@"\.[0-9a-fA-F]{8}\.[^\.]*$", RegexOptions.Compiled);
-app.UseStaticFiles(new StaticFileOptions
-{
-    OnPrepareResponse = ctx =>
-    {
-        // vite puts 8-hex-char hashes before the file extension.
-        // Use this to determine if we can send a long-term cache duration.
-        if (containsFileHashRegex.IsMatch(ctx.File.Name))
-        {
-            ctx.Context.Response.GetTypedHeaders().CacheControl =
-                new CacheControlHeaderValue { Public = true, MaxAge = TimeSpan.FromDays(30) };
-        }
-    }
-});
-
-// For all requests that aren't to static files, disallow caching by default.
-// Individual endpoints may override this.
-app.Use(async (context, next) =>
-{
-    context.Response.GetTypedHeaders().CacheControl =
-        new CacheControlHeaderValue { NoCache = true, NoStore = true, };
-
-    await next();
-});
+app.UseViteStaticFiles();
+app.UseNoCacheResponseHeader();
 
 app.UseCors(c => c.AllowAnyOrigin().AllowAnyHeader());
 app.MapControllers();

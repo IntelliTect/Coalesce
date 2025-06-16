@@ -11,6 +11,7 @@
   },
   "sourceName": "Coalesce.Starter.Vue",
   "preferNameDirectory": true,
+  "guids": ["a0519206-1884-46ae-9307-ec95105646e5"],
   "symbols": {
     "KestrelPortGenerated": {
       "type": "generated",
@@ -27,6 +28,30 @@
         "fallback": 5002
       },
       "replaces": "5002"
+    },
+    "AspirePortGenerated": {
+      "type": "generated",
+      "generator": "port",
+      "parameters": {
+        "fallback": 5003
+      },
+      "replaces": "5003"
+    },
+    "AspireOtlpPortGenerated": {
+      "type": "generated",
+      "generator": "port",
+      "parameters": {
+        "fallback": 5004
+      },
+      "replaces": "5004"
+    },
+    "AspireServicePortGenerated": {
+      "type": "generated",
+      "generator": "port",
+      "parameters": {
+        "fallback": 5005
+      },
+      "replaces": "5005"
     },
 
     "Identity": {
@@ -230,6 +255,10 @@
           ]
         },
         {
+          "condition": "!(LocalAuth || TenantMemberInvites || TenantCreateAdmin || EmailSendGrid || EmailAzure)",
+          "exclude": ["**/NoOpEmailService.*", "**/IEmailService.*"]
+        },
+        {
           "condition": "!Tenancy",
           "exclude": [
             "**/Tenant.cs",
@@ -305,7 +334,7 @@
         },
         {
           "condition": "!GithubActions",
-          "exclude": ["**/.github"]
+          "exclude": ["**/.github/workflows/build-test-and-deploy.yml"]
         }
       ]
     }

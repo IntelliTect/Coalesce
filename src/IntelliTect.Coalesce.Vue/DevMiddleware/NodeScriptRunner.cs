@@ -15,7 +15,7 @@ namespace IntelliTect.Coalesce.Vue.DevMiddleware
     internal class NodeScriptRunner : IDisposable
     {
         private Process? _npmProcess;
-        public EventedStreamReader StdOut { get; private set;  }
+        public EventedStreamReader StdOut { get; private set; }
         public EventedStreamReader StdErr { get; private set; }
 
         public event EventHandler? Exited;
@@ -120,7 +120,7 @@ namespace IntelliTect.Coalesce.Vue.DevMiddleware
             {
                 var message = $"Failed to start '{commandName}'. To resolve this:.\n\n"
                             + $"[1] Ensure that '{commandName}' is installed and can be found in one of the PATH directories.\n"
-                            + $"    Current PATH enviroment variable is: { Environment.GetEnvironmentVariable("PATH") }\n"
+                            + $"    Current PATH enviroment variable is: {Environment.GetEnvironmentVariable("PATH")}\n"
                             + "    Make sure the executable is in one of those directories, or update your PATH.\n\n"
                             + "[2] See the InnerException for further details of the cause.";
                 throw new InvalidOperationException(message, ex);

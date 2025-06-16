@@ -1,11 +1,8 @@
 using Coalesce.Starter.Vue.Data.Auth;
-#if AppInsights
-using Microsoft.ApplicationInsights.AspNetCore;
-#endif
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
-using System.Web;
+using System.Text.Json;
 
 namespace Coalesce.Starter.Vue.Web.Controllers;
 
@@ -21,9 +18,7 @@ public class HomeController() : Controller
     [ResponseCache(Location = ResponseCacheLocation.None, NoStore = true)]
     [Authorize]
     public async Task<IActionResult> Index(
-#if AppInsights
-        [FromServices] JavaScriptSnippet appInsightsSnippet,
-#endif
+        [FromServices] IConfiguration config,
         [FromServices] IWebHostEnvironment hostingEnvironment
     )
     {
@@ -43,27 +38,17 @@ public class HomeController() : Controller
         // OPTIONAL: Inject settings or other variables into index.html here.
         // These will then be available as global variables in your Vue app.
         // Declare them as globals in env.d.ts.
-        string headPrepend = $"""
-        <script>
-            ASPNETCORE_ENVIRONMENT="{JsEncode(hostingEnvironment.EnvironmentName)}"
-        </script>
-        """;
-
+        Dictionary<string, object?> globalVars = new() {
+            ["ASPNETCORE_ENVIRONMENT"] = hostingEnvironment.EnvironmentName,
 #if AppInsights
-        if (appInsightsSnippet.FullScript.Length > 0)
-        {
-            headPrepend +=
-                appInsightsSnippet.FullScript
-                // Remove the automatic trackPageView event that is fired on load.
-                // We fire our own page tracking events in router.ts to get better data.
-                + "<script>window.appInsights.queue.pop()</script>";
-        }
+            ["APPLICATIONINSIGHTS_CONNECTION_STRING"] = config["APPLICATIONINSIGHTS_CONNECTION_STRING"],
 #endif
+        };
 
-        contents = contents.Replace("<head>", "<head>" + headPrepend);
+        string globalVariables = string.Join(';', globalVars.Select(v => $"{v.Key} = {JsonSerializer.Serialize(v.Value)}"));
+
+        contents = contents.Replace("<head>", $"<head><script>{globalVariables}</script>");
 
         return Content(contents, "text/html");
-
-        static string JsEncode(string s) => HttpUtility.JavaScriptStringEncode(s);
     }
 }

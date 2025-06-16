@@ -73,6 +73,10 @@ If any of the options you chose above require external integrations, you'll need
 
 ## Project Structure
 
+### AppHost Project
+
+The AppHost project is a [.NET Aspire](https://learn.microsoft.com/en-us/dotnet/aspire/get-started/aspire-overview) dev-time orchestration project. It is recommended you set this as your startup project when developing, although this is not strictly required if your project only has SQL Server as its sole dependency. If you're not familiar with .NET Aspire, you're strongly encouraged to read through its [overview documentation](https://learn.microsoft.com/en-us/dotnet/aspire/get-started/aspire-overview#dev-time-orchestration) and learn about the features of the [Aspire dashboard](https://learn.microsoft.com/en-us/dotnet/aspire/fundamentals/dashboard/explore).
+
 ### Data Project
 
 The data project contains all your [entity models](/modeling/model-types/entities.md), [services](/modeling/model-types/services.md), and most other custom backend code that you'll write while building your application. The code within it acts as the inputs to Coalesce's code generation, which outputs generated files into the Web project.
@@ -81,7 +85,7 @@ The data project contains all your [entity models](/modeling/model-types/entitie
 
 The Web project is an ASP.NET Core application where the generated outputs from Coalesce are placed. It's also where you'll build your rich front-end pages that users will use to interact with your application.
 
-The structure of the Web project follows the conventions of both ASP.NET Core and Vite. The frontend-specific folders are as follows:
+The structure of the Web project follows the conventions of both ASP.NET Core and Vite. Some specific files and folders are as follows:
 
 - `/src` - Files that should be compiled into your frontend application. CSS/SCSS, TypeScript, Vue SFCs, and so on.
 - `/public` - Static assets that should be served directly as files.
@@ -89,6 +93,7 @@ The structure of the Web project follows the conventions of both ASP.NET Core an
 - `/Api/Generated` - Output target for Coalesce's generated API Controllers.
 - `/Models/Generated` - Output target for Coalesce's [generated DTOs](/stacks/agnostic/dtos.md).
 - `/Controllers/HomeController.cs` - Controller that serves the root page of your Vue SPA, both in development and production. Some customizations can be added here.
+- `/ProgramServiceDefaults.cs` - [.NET Aspire Service Defaults configuration](https://learn.microsoft.com/en-us/dotnet/aspire/fundamentals/service-defaults), including Open Telemetry configuration, health checks, and resiliency configuration. Since Coalesce projects typically only have one .NET service (the web application), this file is not in a separate project. If your solution grows beyond that, you're encouraged to split this out of the Web project.
 
 ::: tip Important
 The frontend build system uses [Vite](https://vitejs.dev/). You are strongly encouraged to read through at least the first few pages of the [Vite Documentation](https://vitejs.dev/guide/) before getting started on any development.

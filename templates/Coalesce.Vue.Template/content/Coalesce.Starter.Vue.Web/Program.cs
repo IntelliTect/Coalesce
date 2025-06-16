@@ -30,19 +30,19 @@ var builder = WebApplication.CreateBuilder(new WebApplicationOptions
     WebRootPath = "wwwroot"
 });
 
-builder.AddServiceDefaults();
-
 builder.Configuration
     .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
     .AddJsonFile("appsettings.localhost.json", optional: true, reloadOnChange: true)
     .AddEnvironmentVariables();
+
+builder.AddServiceDefaults();
 
 #region Configure Services
 
 var services = builder.Services;
 
 services.AddDbContext<AppDbContext>(options => options
-    .UseSqlServer(builder.Configuration.GetConnectionString("sqldb"), opt => opt
+    .UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"), opt => opt
         .EnableRetryOnFailure()
         .UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery)
     )

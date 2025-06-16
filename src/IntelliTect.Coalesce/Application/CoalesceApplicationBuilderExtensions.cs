@@ -38,7 +38,7 @@ public static partial class CoalesceApplicationBuilderExtensions
 
     /// <summary>
     /// Add a CacheControl: no-cache, no-store header to all responses that reach this point in the pipeline.
-    /// This middleware is a pre-hook and so can be overridden by other middleware or by individual endpoints.
+    /// This middleware is a pre-hook and so the resulting Cache-Control can be overridden by other middleware or by individual endpoints.
     /// This middleware prevents browsers from unexpectedly caching API responses.
     /// </summary>
     public static IApplicationBuilder UseNoCacheResponseHeader(this IApplicationBuilder app)

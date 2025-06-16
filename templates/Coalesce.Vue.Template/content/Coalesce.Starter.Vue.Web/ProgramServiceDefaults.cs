@@ -4,18 +4,19 @@ using Azure.Monitor.OpenTelemetry.AspNetCore;
 using Coalesce.Starter.Vue.Data.Auth;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Hosting;
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
 
-namespace Microsoft.Extensions.Hosting;
+namespace Coalesce.Starter.Vue.Web;
 
 // Adds common .NET Aspire services: service discovery, resilience, health checks, and OpenTelemetry.
 // To learn more about using this class, see https://aka.ms/dotnet/aspire/service-defaults
 // Note that since Coalesce projects usually only have one service, this file is not maintained in a separate project.
 // You are encouraged to move it into a dedicated class library project if your solution grows.
 
-public static class ServiceDefaults
+public static class ProgramServiceDefaults
 {
     private const string HealthEndpointPath = "/health";
     private const string AlivenessEndpointPath = "/alive";

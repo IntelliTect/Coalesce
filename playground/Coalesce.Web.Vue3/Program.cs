@@ -91,16 +91,6 @@ app.UseMiddleware<DemoMiddleware>();
 app.UseViteStaticFiles();
 app.UseNoCacheResponseHeader();
 
-// For all requests that aren't to static files, disallow caching by default.
-// Individual endpoints may override this.
-app.Use(async (context, next) =>
-{
-    context.Response.GetTypedHeaders().CacheControl =
-        new CacheControlHeaderValue { NoCache = true, NoStore = true, };
-
-    await next();
-});
-
 app.UseCors(c => c.AllowAnyOrigin().AllowAnyHeader());
 app.MapControllers();
 

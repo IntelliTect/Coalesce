@@ -34,19 +34,6 @@ namespace IntelliTect.Coalesce
             return null;
         }
 
-        public static DirectoryInfo? FindDirectoryInAncestorDirectory(
-            this DirectoryInfo directory, Func<DirectoryInfo, bool> predicate)
-        {
-            var curDirectory = directory;
-            while (curDirectory != null)
-            {
-                var match = curDirectory.EnumerateDirectories().FirstOrDefault(predicate);
-                if (match != null) return match;
-                curDirectory = curDirectory.Parent;
-            }
-            return null;
-        }
-
         public static DirectoryInfo? GetDirectory(this DirectoryInfo directory, string child)
         {
             return new DirectoryInfo(Path.Combine(directory.FullName, child));

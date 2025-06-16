@@ -9,6 +9,9 @@ using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.OpenApi.Models;
 using Scalar.AspNetCore;
 #endif
+using System.Security.Claims;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 #if Identity
 #endif
@@ -84,14 +87,7 @@ services.AddScoped<SecurityService>();
 
 #if (LocalAuth || TenantMemberInvites || TenantCreateAdmin)
 // Register IUrlHelper to allow for invite link generation.
-services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
-services.AddScoped<IUrlHelper>(x =>
-{
-    var actionContext = x.GetRequiredService<IActionContextAccessor>().ActionContext;
-    var factory = x.GetRequiredService<IUrlHelperFactory>();
-    return factory.GetUrlHelper(actionContext!);
-});
-
+services.AddUrlHelper();
 services.AddScoped<InvitationService>();
 #endif
 
@@ -134,29 +130,8 @@ if (app.Environment.IsDevelopment())
 app.UseAuthentication();
 app.UseAuthorization();
 
-// TODO: Use new extensions
-
-var containsFileHashRegex = new Regex(@"[.-][0-9a-zA-Z-_]{8}\.[^\.]*$", RegexOptions.Compiled);
-app.UseStaticFiles(new StaticFileOptions
-{
-    OnPrepareResponse = ctx =>
-    {
-        // vite puts 8-char hashes before the file extension.
-        // Use this to determine if we can send a long-term cache duration.
-        if (containsFileHashRegex.IsMatch(ctx.File.Name))
-        {
-            ctx.Context.Response.Headers.CacheControl = "max-age=2592000, public";
-        }
-    }
-});
-
-// For all requests that aren't to static files, disallow caching by default.
-// Individual endpoints may override this.
-app.Use(async (context, next) =>
-{
-    context.Response.Headers.CacheControl = "no-cache, no-store";
-    await next();
-});
+app.UseViteStaticFiles();
+app.UseNoCacheResponseHeader();
 
 #if OpenAPI
 app.MapSwagger();

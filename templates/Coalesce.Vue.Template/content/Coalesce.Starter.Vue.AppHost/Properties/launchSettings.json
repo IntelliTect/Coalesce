@@ -9,28 +9,12 @@
       // Disables injection of MSFT's undesirable JS that force-refreshes the page when C# files are changed.
       "hotReloadEnabled": false,
 
-      "applicationUrl": "https://localhost:17134;http://localhost:15200",
+      "applicationUrl": "https://localhost:5003",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "DOTNET_ENVIRONMENT": "Development",
-        "DOTNET_DASHBOARD_OTLP_ENDPOINT_URL": "https://localhost:21060",
-        "DOTNET_RESOURCE_SERVICE_ENDPOINT_URL": "https://localhost:22098"
-      }
-    },
-    "http": {
-      "commandName": "Project",
-      "dotnetRunMessages": true,
-      "launchBrowser": true,
-
-      // Disables injection of MSFT's undesirable JS that force-refreshes the page when C# files are changed.
-      "hotReloadEnabled": false,
-
-      "applicationUrl": "http://localhost:15200",
-      "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development",
-        "DOTNET_ENVIRONMENT": "Development",
-        "DOTNET_DASHBOARD_OTLP_ENDPOINT_URL": "http://localhost:19276",
-        "DOTNET_RESOURCE_SERVICE_ENDPOINT_URL": "http://localhost:20058"
+        "DOTNET_DASHBOARD_OTLP_ENDPOINT_URL": "https://localhost:5004",
+        "DOTNET_RESOURCE_SERVICE_ENDPOINT_URL": "https://localhost:5005"
       }
     }
   }

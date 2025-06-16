@@ -11,8 +11,10 @@ using OpenTelemetry.Trace;
 namespace Microsoft.Extensions.Hosting;
 
 // Adds common .NET Aspire services: service discovery, resilience, health checks, and OpenTelemetry.
-// This project should be referenced by each service project in your solution.
-// To learn more about using this project, see https://aka.ms/dotnet/aspire/service-defaults
+// To learn more about using this class, see https://aka.ms/dotnet/aspire/service-defaults
+// Note that since Coalesce projects usually only have one service, this file is not maintained in a separate project.
+// You are encouraged to move it into a dedicated class library project if your solution grows.
+
 public static class ServiceDefaults
 {
     private const string HealthEndpointPath = "/health";
@@ -28,10 +30,7 @@ public static class ServiceDefaults
 
         builder.Services.ConfigureHttpClientDefaults(http =>
         {
-            // Turn on resilience by default
             http.AddStandardResilienceHandler();
-
-            // Turn on service discovery by default
             http.AddServiceDiscovery();
         });
 
@@ -83,20 +82,16 @@ public static class ServiceDefaults
 
     private static TBuilder AddOpenTelemetryExporters<TBuilder>(this TBuilder builder) where TBuilder : IHostApplicationBuilder
     {
-        var useOtlpExporter = !string.IsNullOrWhiteSpace(builder.Configuration["OTEL_EXPORTER_OTLP_ENDPOINT"]);
-
-        if (useOtlpExporter)
+        if (builder.Configuration["OTEL_EXPORTER_OTLP_ENDPOINT"] is string { Length: > 0 })
         {
             builder.Services.AddOpenTelemetry().UseOtlpExporter();
         }
 
 #if AppInsights
-        if (!string.IsNullOrEmpty(builder.Configuration["APPLICATIONINSIGHTS_CONNECTION_STRING"]))
+        if (builder.Configuration["APPLICATIONINSIGHTS_CONNECTION_STRING"] is string { Length: > 0 } aiConnStr)
         {
-            builder.Services.AddOpenTelemetry().UseAzureMonitor();
+            builder.Services.AddOpenTelemetry().UseAzureMonitor(opt => opt.ConnectionString = aiConnStr );
         }
-        // TODO: Is this needed?
-        //builder.Logging.AddFilter<ApplicationInsightsLoggerProvider>("Coalesce.Starter.Vue", LogLevel.Information);
 #endif
 
         return builder;

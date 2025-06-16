@@ -16,8 +16,40 @@ using System.Text.RegularExpressions;
 
 namespace IntelliTect.Coalesce;
 
-public static class CoalesceApplicationBuilderExtensions
+public static partial class CoalesceApplicationBuilderExtensions
 {
+    /// <summary>
+    /// Add static file middleware, and configure it to place a long client cache duration (30 days)
+    /// on any files that contain a cache-busting hash as produced by Vite's build output.
+    /// </summary>
+    public static IApplicationBuilder UseViteStaticFiles(this IApplicationBuilder app)
+    {
+        return app.UseStaticFiles(new StaticFileOptions
+        {
+            OnPrepareResponse = ctx =>
+            {
+                if (ContainsFileHashRegex().IsMatch(ctx.File.Name))
+                {
+                    ctx.Context.Response.Headers.CacheControl = "max-age=2592000, public";
+                }
+            }
+        });
+    }
+
+    /// <summary>
+    /// Add a CacheControl: no-cache, no-store header to all responses that reach this point in the pipeline.
+    /// This middleware is a pre-hook and so can be overridden by other middleware or by individual endpoints.
+    /// This middleware prevents browsers from unexpectedly caching API responses.
+    /// </summary>
+    public static IApplicationBuilder UseNoCacheResponseHeader(this IApplicationBuilder app)
+    {
+        return app.Use((context, next) =>
+        {
+            context.Response.Headers.CacheControl = "no-cache, no-store";
+            return next(context);
+        });
+    }
+
     /// <summary>
     /// Map a route that will present an HTML page featuring a high level overview of all 
     /// types exposed by Coalesce and the static security rules that govern them.
@@ -31,8 +63,8 @@ public static class CoalesceApplicationBuilderExtensions
             var dsFactory = context.RequestServices.GetRequiredService<IDataSourceFactory>();
             var behaviorsFactory = context.RequestServices.GetRequiredService<IBehaviorsFactory>();
 
-            var data = GetSecurityOverviewData(repo, dsFactory, behaviorsFactory); 
-            
+            var data = GetSecurityOverviewData(repo, dsFactory, behaviorsFactory);
+
             var serializeOptions = new JsonSerializerOptions
             {
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase
@@ -214,4 +246,10 @@ public static class CoalesceApplicationBuilderExtensions
                 ? t.PureType.Name : null,
         };
     }
+
+    // vite puts 8-hex-char hashes before the file extension.
+    // Use this to determine if we can send a long-term cache duration.
+    [GeneratedRegex(@"\.[0-9a-fA-F]{8}\.[^\.]*$", RegexOptions.Compiled)]
+    private static partial Regex ContainsFileHashRegex();
+
 }

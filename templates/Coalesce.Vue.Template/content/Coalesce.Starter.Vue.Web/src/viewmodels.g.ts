@@ -1,7 +1,7 @@
 import * as $metadata from './metadata.g'
 import * as $models from './models.g'
 import * as $apiClients from './api-clients.g'
-import { ViewModel, ListViewModel, ViewModelCollection, ServiceViewModel, type DeepPartial, defineProps } from 'coalesce-vue/lib/viewmodel'
+import { ViewModel, ListViewModel, ViewModelCollection, ServiceViewModel, type DeepPartial, defineProps, createAbstractProxyViewModelType } from 'coalesce-vue/lib/viewmodel'
 
 export interface AuditLogViewModel extends $models.AuditLog {
   userId: string | null;

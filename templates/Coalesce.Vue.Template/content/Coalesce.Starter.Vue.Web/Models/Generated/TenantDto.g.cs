@@ -5,10 +5,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
+using System.Text.Json.Serialization;
 
 namespace Coalesce.Starter.Vue.Web.Models
 {
-    public partial class TenantParameter : GeneratedParameterDto<Coalesce.Starter.Vue.Data.Models.Tenant>
+    public partial class TenantParameter : SparseDto, IGeneratedParameterDto<Coalesce.Starter.Vue.Data.Models.Tenant>
     {
         public TenantParameter() { }
 
@@ -29,11 +30,9 @@ namespace Coalesce.Starter.Vue.Web.Models
         /// <summary>
         /// Map from the current DTO instance to the domain object.
         /// </summary>
-        public override void MapTo(Coalesce.Starter.Vue.Data.Models.Tenant entity, IMappingContext context)
+        public void MapTo(Coalesce.Starter.Vue.Data.Models.Tenant entity, IMappingContext context)
         {
             var includes = context.Includes;
-
-            if (OnUpdate(entity, context)) return;
 
             if (ShouldMapTo(nameof(TenantId))) entity.TenantId = TenantId;
             if (ShouldMapTo(nameof(Name))) entity.Name = Name;
@@ -42,7 +41,7 @@ namespace Coalesce.Starter.Vue.Web.Models
         /// <summary>
         /// Map from the current DTO instance to a new instance of the domain object.
         /// </summary>
-        public override Coalesce.Starter.Vue.Data.Models.Tenant MapToNew(IMappingContext context)
+        public Coalesce.Starter.Vue.Data.Models.Tenant MapToNew(IMappingContext context)
         {
             var includes = context.Includes;
 
@@ -50,15 +49,20 @@ namespace Coalesce.Starter.Vue.Web.Models
             {
                 Name = Name,
             };
-
-            if (OnUpdate(entity, context)) return entity;
             if (ShouldMapTo(nameof(TenantId))) entity.TenantId = TenantId;
 
             return entity;
         }
+
+        public Coalesce.Starter.Vue.Data.Models.Tenant MapToModelOrNew(Coalesce.Starter.Vue.Data.Models.Tenant obj, IMappingContext context)
+        {
+            if (obj is null) return MapToNew(context);
+            MapTo(obj, context);
+            return obj;
+        }
     }
 
-    public partial class TenantResponse : GeneratedResponseDto<Coalesce.Starter.Vue.Data.Models.Tenant>
+    public partial class TenantResponse : IGeneratedResponseDto<Coalesce.Starter.Vue.Data.Models.Tenant>
     {
         public TenantResponse() { }
 
@@ -69,7 +73,7 @@ namespace Coalesce.Starter.Vue.Web.Models
         /// <summary>
         /// Map from the domain object to the properties of the current DTO instance.
         /// </summary>
-        public override void MapFrom(Coalesce.Starter.Vue.Data.Models.Tenant obj, IMappingContext context, IncludeTree tree = null)
+        public void MapFrom(Coalesce.Starter.Vue.Data.Models.Tenant obj, IMappingContext context, IncludeTree tree = null)
         {
             if (obj == null) return;
             var includes = context.Includes;

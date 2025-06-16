@@ -215,7 +215,7 @@ namespace Coalesce.Starter.Vue.Web.Api
             var _params = new
             {
                 Email = email,
-                Role = !Request.Form.HasAnyValue(nameof(role)) ? null : role
+                Role = !Request.Form.HasAnyValue("role") ? null : role
             };
 
             if (Context.Options.ValidateAttributesForMethods)

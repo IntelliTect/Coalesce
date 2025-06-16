@@ -5,25 +5,22 @@ using IntelliTect.Coalesce;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
-using Microsoft.Extensions.Logging.Console;
 #if OpenAPI
 using Microsoft.OpenApi.Models;
 using Scalar.AspNetCore;
 #endif
-using System.Security.Claims;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 #if Identity
 #endif
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.AspNetCore.Mvc;
-using Coalesce.Starter.Vue.Data.Communication;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 #if EmailAzure
 using Azure.Core;
 using Azure.Identity;
+#endif
+#if (LocalAuth || TenantMemberInvites || TenantCreateAdmin || EmailSendGrid || EmailAzure)
+using Coalesce.Starter.Vue.Data.Communication;
 #endif
 
 var builder = WebApplication.CreateBuilder(new WebApplicationOptions
@@ -34,11 +31,6 @@ var builder = WebApplication.CreateBuilder(new WebApplicationOptions
 });
 
 builder.AddServiceDefaults();
-
-builder.Logging
-    .AddConsole()
-    // Filter out Request Starting/Request Finished noise:
-    .AddFilter<ConsoleLoggerProvider>("Microsoft.AspNetCore.Hosting.Diagnostics", LogLevel.Warning);
 
 builder.Configuration
     .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
@@ -59,18 +51,8 @@ services.AddDbContext<AppDbContext>(options => options
 );
 
 services.AddCoalesce<AppDbContext>();
-
-services.AddDataProtection()
-    .PersistKeysToDbContext<AppDbContext>();
-
-services
-    .AddMvc()
-    .AddJsonOptions(options =>
-    {
-        options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
-        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
-        options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
-    });
+services.AddDataProtection().PersistKeysToDbContext<AppDbContext>();
+services.AddMvc();
 
 #if Identity
 builder.ConfigureAuthentication();
@@ -152,6 +134,8 @@ if (app.Environment.IsDevelopment())
 app.UseAuthentication();
 app.UseAuthorization();
 
+// TODO: Use new extensions
+
 var containsFileHashRegex = new Regex(@"[.-][0-9a-zA-Z-_]{8}\.[^\.]*$", RegexOptions.Compiled);
 app.UseStaticFiles(new StaticFileOptions
 {
@@ -161,7 +145,7 @@ app.UseStaticFiles(new StaticFileOptions
         // Use this to determine if we can send a long-term cache duration.
         if (containsFileHashRegex.IsMatch(ctx.File.Name))
         {
-            ctx.Context.Response.GetTypedHeaders().CacheControl = new() { Public = true, MaxAge = TimeSpan.FromDays(30) };
+            ctx.Context.Response.Headers.CacheControl = "max-age=2592000, public";
         }
     }
 });
@@ -170,7 +154,7 @@ app.UseStaticFiles(new StaticFileOptions
 // Individual endpoints may override this.
 app.Use(async (context, next) =>
 {
-    context.Response.GetTypedHeaders().CacheControl = new() { NoCache = true, NoStore = true };
+    context.Response.Headers.CacheControl = "no-cache, no-store";
     await next();
 });
 
@@ -200,7 +184,7 @@ using (var scope = app.Services.CreateScope())
     using var db = serviceScope.GetRequiredService<AppDbContext>();
     db.Database.SetCommandTimeout(TimeSpan.FromMinutes(10));
 #if KeepTemplateOnly
-    db.Database.EnsureDeleted();
+    //db.Database.EnsureDeleted();
     db.Database.EnsureCreated();
 #else
     db.Database.Migrate();

@@ -1,6 +1,7 @@
 import * as metadata from './metadata.g'
 import { convertToModel, mapToModel, reactiveDataSource } from 'coalesce-vue/lib/model'
 import type { Model, DataSource } from 'coalesce-vue/lib/model'
+import type { ClassType } from 'coalesce-vue/lib/metadata'
 
 export enum AuditEntryState {
   EntityAdded = 0,
@@ -43,14 +44,14 @@ export interface AuditLog extends Model<typeof metadata.AuditLog> {
 }
 export class AuditLog {
   
-  /** Mutates the input object and its descendents into a valid AuditLog implementation. */
+  /** Mutates the input object and its descendants into a valid AuditLog implementation. */
   static convert(data?: Partial<AuditLog>): AuditLog {
-    return convertToModel(data || {}, metadata.AuditLog) 
+    return convertToModel<AuditLog>(data || {}, metadata.AuditLog) 
   }
   
-  /** Maps the input object and its descendents to a new, valid AuditLog implementation. */
+  /** Maps the input object and its descendants to a new, valid AuditLog implementation. */
   static map(data?: Partial<AuditLog>): AuditLog {
-    return mapToModel(data || {}, metadata.AuditLog) 
+    return mapToModel<AuditLog>(data || {}, metadata.AuditLog) 
   }
   
   static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.AuditLog; }
@@ -81,14 +82,14 @@ export interface AuditLogProperty extends Model<typeof metadata.AuditLogProperty
 }
 export class AuditLogProperty {
   
-  /** Mutates the input object and its descendents into a valid AuditLogProperty implementation. */
+  /** Mutates the input object and its descendants into a valid AuditLogProperty implementation. */
   static convert(data?: Partial<AuditLogProperty>): AuditLogProperty {
-    return convertToModel(data || {}, metadata.AuditLogProperty) 
+    return convertToModel<AuditLogProperty>(data || {}, metadata.AuditLogProperty) 
   }
   
-  /** Maps the input object and its descendents to a new, valid AuditLogProperty implementation. */
+  /** Maps the input object and its descendants to a new, valid AuditLogProperty implementation. */
   static map(data?: Partial<AuditLogProperty>): AuditLogProperty {
-    return mapToModel(data || {}, metadata.AuditLogProperty) 
+    return mapToModel<AuditLogProperty>(data || {}, metadata.AuditLogProperty) 
   }
   
   static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.AuditLogProperty; }
@@ -107,14 +108,14 @@ export interface Role extends Model<typeof metadata.Role> {
 }
 export class Role {
   
-  /** Mutates the input object and its descendents into a valid Role implementation. */
+  /** Mutates the input object and its descendants into a valid Role implementation. */
   static convert(data?: Partial<Role>): Role {
-    return convertToModel(data || {}, metadata.Role) 
+    return convertToModel<Role>(data || {}, metadata.Role) 
   }
   
-  /** Maps the input object and its descendents to a new, valid Role implementation. */
+  /** Maps the input object and its descendants to a new, valid Role implementation. */
   static map(data?: Partial<Role>): Role {
-    return mapToModel(data || {}, metadata.Role) 
+    return mapToModel<Role>(data || {}, metadata.Role) 
   }
   
   static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.Role; }
@@ -135,14 +136,14 @@ export interface Tenant extends Model<typeof metadata.Tenant> {
 }
 export class Tenant {
   
-  /** Mutates the input object and its descendents into a valid Tenant implementation. */
+  /** Mutates the input object and its descendants into a valid Tenant implementation. */
   static convert(data?: Partial<Tenant>): Tenant {
-    return convertToModel(data || {}, metadata.Tenant) 
+    return convertToModel<Tenant>(data || {}, metadata.Tenant) 
   }
   
-  /** Maps the input object and its descendents to a new, valid Tenant implementation. */
+  /** Maps the input object and its descendants to a new, valid Tenant implementation. */
   static map(data?: Partial<Tenant>): Tenant {
-    return mapToModel(data || {}, metadata.Tenant) 
+    return mapToModel<Tenant>(data || {}, metadata.Tenant) 
   }
   
   static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.Tenant; }
@@ -181,14 +182,14 @@ export interface User extends Model<typeof metadata.User> {
 }
 export class User {
   
-  /** Mutates the input object and its descendents into a valid User implementation. */
+  /** Mutates the input object and its descendants into a valid User implementation. */
   static convert(data?: Partial<User>): User {
-    return convertToModel(data || {}, metadata.User) 
+    return convertToModel<User>(data || {}, metadata.User) 
   }
   
-  /** Maps the input object and its descendents to a new, valid User implementation. */
+  /** Maps the input object and its descendants to a new, valid User implementation. */
   static map(data?: Partial<User>): User {
-    return mapToModel(data || {}, metadata.User) 
+    return mapToModel<User>(data || {}, metadata.User) 
   }
   
   static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.User; }
@@ -217,14 +218,14 @@ export interface UserRole extends Model<typeof metadata.UserRole> {
 }
 export class UserRole {
   
-  /** Mutates the input object and its descendents into a valid UserRole implementation. */
+  /** Mutates the input object and its descendants into a valid UserRole implementation. */
   static convert(data?: Partial<UserRole>): UserRole {
-    return convertToModel(data || {}, metadata.UserRole) 
+    return convertToModel<UserRole>(data || {}, metadata.UserRole) 
   }
   
-  /** Maps the input object and its descendents to a new, valid UserRole implementation. */
+  /** Maps the input object and its descendants to a new, valid UserRole implementation. */
   static map(data?: Partial<UserRole>): UserRole {
-    return mapToModel(data || {}, metadata.UserRole) 
+    return mapToModel<UserRole>(data || {}, metadata.UserRole) 
   }
   
   static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.UserRole; }
@@ -258,14 +259,14 @@ export interface Widget extends Model<typeof metadata.Widget> {
 }
 export class Widget {
   
-  /** Mutates the input object and its descendents into a valid Widget implementation. */
+  /** Mutates the input object and its descendants into a valid Widget implementation. */
   static convert(data?: Partial<Widget>): Widget {
-    return convertToModel(data || {}, metadata.Widget) 
+    return convertToModel<Widget>(data || {}, metadata.Widget) 
   }
   
-  /** Maps the input object and its descendents to a new, valid Widget implementation. */
+  /** Maps the input object and its descendants to a new, valid Widget implementation. */
   static map(data?: Partial<Widget>): Widget {
-    return mapToModel(data || {}, metadata.Widget) 
+    return mapToModel<Widget>(data || {}, metadata.Widget) 
   }
   
   static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.Widget; }
@@ -289,14 +290,14 @@ export interface UserInfo extends Model<typeof metadata.UserInfo> {
 }
 export class UserInfo {
   
-  /** Mutates the input object and its descendents into a valid UserInfo implementation. */
+  /** Mutates the input object and its descendants into a valid UserInfo implementation. */
   static convert(data?: Partial<UserInfo>): UserInfo {
-    return convertToModel(data || {}, metadata.UserInfo) 
+    return convertToModel<UserInfo>(data || {}, metadata.UserInfo) 
   }
   
-  /** Maps the input object and its descendents to a new, valid UserInfo implementation. */
+  /** Maps the input object and its descendants to a new, valid UserInfo implementation. */
   static map(data?: Partial<UserInfo>): UserInfo {
-    return mapToModel(data || {}, metadata.UserInfo) 
+    return mapToModel<UserInfo>(data || {}, metadata.UserInfo) 
   }
   
   static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.UserInfo; }

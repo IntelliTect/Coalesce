@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using IntelliTect.Coalesce.Helpers;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using System;
@@ -13,7 +14,7 @@ namespace Coalesce.Domain
         public AppDbContext CreateDbContext(string[] args)
         {
             var builder = new DbContextOptionsBuilder<AppDbContext>();
-            builder.UseSqlServer("Server=(localdb)\\MSSQLLocalDB;Database=CoalesceDb;Trusted_Connection=True;");
+            builder.UseSqlServer(DevelopmentConnectionStringLocator.Find(projectDirectorySuffixes: [".Vue3"]));
             return new AppDbContext(builder.Options);
         }
     }

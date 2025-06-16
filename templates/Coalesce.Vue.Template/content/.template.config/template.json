@@ -28,6 +28,30 @@
       },
       "replaces": "5002"
     },
+    "AspirePortGenerated": {
+      "type": "generated",
+      "generator": "port",
+      "parameters": {
+        "fallback": 5003
+      },
+      "replaces": "5003"
+    },
+    "AspireOtlpPortGenerated": {
+      "type": "generated",
+      "generator": "port",
+      "parameters": {
+        "fallback": 5004
+      },
+      "replaces": "5004"
+    },
+    "AspireServicePortGenerated": {
+      "type": "generated",
+      "generator": "port",
+      "parameters": {
+        "fallback": 5005
+      },
+      "replaces": "5005"
+    },
 
     "Identity": {
       "type": "parameter",

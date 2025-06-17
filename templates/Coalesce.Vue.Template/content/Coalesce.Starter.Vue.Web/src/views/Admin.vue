@@ -54,6 +54,26 @@
                 prepend-icon="fa fa-code"
               />
               <!--#endif  -->
+              <!--#if Hangfire  -->
+              <!--#if Tenancy  -->
+              <v-list-item
+                v-if="$userInfo.roles?.includes('GlobalAdmin')"
+                href="/hangfire"
+                prepend-icon="fa fa-briefcase"
+                title="Hangfire"
+                subtitle="View the Hangfire background job dashboard."
+              />
+              <!--#endif  -->
+              <!--#if (!Tenancy)
+              <v-list-item
+                v-if="$can(Permission.Admin)"
+                href="/hangfire"
+                prepend-icon="fa fa-briefcase"
+                title="Hangfire"
+                subtitle="View the Hangfire background job dashboard."
+              />
+              #endif  -->
+              <!--#endif  -->
             </v-list>
           </v-card-text>
         </v-card>

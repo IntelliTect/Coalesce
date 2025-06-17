@@ -25,6 +25,11 @@ using Azure.Identity;
 #if (LocalAuth || TenantMemberInvites || TenantCreateAdmin || EmailSendGrid || EmailAzure)
 using Coalesce.Starter.Vue.Data.Communication;
 #endif
+#if Hangfire
+using Hangfire;
+using Hangfire.SqlServer;
+using Microsoft.AspNetCore.Authorization;
+#endif
 
 var builder = WebApplication.CreateBuilder(new WebApplicationOptions
 {
@@ -91,6 +96,26 @@ services.AddUrlHelper();
 services.AddScoped<InvitationService>();
 #endif
 
+#if Hangfire
+services.AddHangfire((config) =>
+{
+    config.UseSqlServerStorage(builder.Configuration.GetConnectionString("DefaultConnection"), new()
+    {
+        // The Hangfire schema is installed manually below after DB migrations are ran
+        // so that the database has a chance to be created before Hangfire starts connecting to it.
+        PrepareSchemaIfNecessary = false,
+        TryAutoDetectSchemaDependentOptions = false,
+        DisableGlobalLocks = true,
+        UseIgnoreDupKeyOption = true,
+    });
+});
+services.AddHangfireServer(c =>
+{
+    // Hangfire default worker count is 20, which is usually excessive for most needs.
+    c.WorkerCount = 5;
+});
+#endif
+
 #endregion
 
 #region Configure HTTP Pipeline
@@ -137,7 +162,15 @@ app.UseNoCacheResponseHeader();
 app.MapSwagger();
 app.MapScalarApiReference(c => c.OpenApiRoutePattern = "/swagger/{documentName}/swagger.json");
 #endif
-
+#if Hangfire
+app.MapHangfireDashboard("/hangfire", new () { Authorization = [] }).RequireAuthorization(
+#if Tenancy
+    new AuthorizeAttribute { Roles = builder.Environment.IsDevelopment() ? null : AppClaimValues.GlobalAdminRole }
+#else
+    new AuthorizeAttribute { Roles = builder.Environment.IsDevelopment() ? null : nameof(Permission.Admin) }
+#endif
+);
+#endif
 app.MapRazorPages();
 app.MapDefaultControllerRoute();
 
@@ -161,8 +194,16 @@ using (var scope = app.Services.CreateScope())
 #if KeepTemplateOnly
     //db.Database.EnsureDeleted();
     db.Database.EnsureCreated();
+
 #else
     db.Database.Migrate();
+
+#endif
+#if Hangfire
+    // Install Hangfire storage only after the database has definitely been created.
+    // https://github.com/HangfireIO/Hangfire/issues/2139
+    SqlServerObjectsInstaller.Install(db.Database.GetDbConnection(), null, true);
+
 #endif
     ActivatorUtilities.GetServiceOrCreateInstance<DatabaseSeeder>(serviceScope).Seed();
 }

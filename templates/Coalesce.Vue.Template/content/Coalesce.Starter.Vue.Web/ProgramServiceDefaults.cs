@@ -47,34 +47,37 @@ public static class ProgramServiceDefaults
         });
 
         builder.Services.AddOpenTelemetry()
-            .WithMetrics(metrics =>
-            {
-                metrics.AddAspNetCoreInstrumentation()
-                    .AddHttpClientInstrumentation()
-                    .AddSqlClientInstrumentation()
-                    .AddRuntimeInstrumentation();
-            })
-            .WithTracing(tracing =>
-            {
-                tracing.AddSource(builder.Environment.ApplicationName)
-                    .AddAspNetCoreInstrumentation(tracing =>
-                    {
-                        // Exclude health check requests from tracing
-                        tracing.Filter = context =>
-                            !context.Request.Path.StartsWithSegments(HealthEndpointPath)
-                            && !context.Request.Path.StartsWithSegments(AlivenessEndpointPath);
+            .WithMetrics(metrics => metrics
+                .AddAspNetCoreInstrumentation()
+                .AddHttpClientInstrumentation()
+                .AddSqlClientInstrumentation()
+                .AddRuntimeInstrumentation()
+            )
+            .WithTracing(tracing => tracing
+                .AddSource(builder.Environment.ApplicationName)
+                .AddAspNetCoreInstrumentation(tracing =>
+                {
+                    // Exclude health check requests from tracing
+                    tracing.Filter = context =>
+                        !context.Request.Path.StartsWithSegments(HealthEndpointPath)
+                        && !context.Request.Path.StartsWithSegments(AlivenessEndpointPath);
 
-                        tracing.EnrichWithHttpResponse = (activity, response) =>
-                        {
-                            activity.SetTag("enduser.id", response.HttpContext.User.GetUserId());
-                        };
-                    })
-                    .AddHttpClientInstrumentation()
-                    .AddSqlClientInstrumentation(tracing =>
+                    tracing.EnrichWithHttpResponse = (activity, response) =>
                     {
-                        tracing.SetDbStatementForText = true;
-                    });
-            });
+                        activity.SetTag("enduser.id", response.HttpContext.User.GetUserId());
+                    };
+                })
+                .AddHttpClientInstrumentation()
+                .AddSqlClientInstrumentation(tracing =>
+                {
+                    tracing.SetDbStatementForText = true;
+                    tracing.Enrich = (activity, _, cmd) => activity.SetCustomProperty("sqlCommand", cmd);
+                })
+#if Hangfire
+                .AddHangfireInstrumentation()
+                .AddHangfireSqlServerNoiseFilter("sqlCommand")
+#endif
+        );
 
         builder.AddOpenTelemetryExporters();
 

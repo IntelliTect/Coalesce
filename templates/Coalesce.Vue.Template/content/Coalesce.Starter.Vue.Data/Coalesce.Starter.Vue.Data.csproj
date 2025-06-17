@@ -23,5 +23,8 @@
     <!--#if (EmailSendGrid) -->
     <PackageReference Include="SendGrid" Version="9.29.3" />
     <!--#endif -->
+    <!--#if (Hangfire) -->
+    <PackageReference Include="Hangfire.Core" Version="1.8.20" />
+    <!--#endif -->
   </ItemGroup>
 </Project>

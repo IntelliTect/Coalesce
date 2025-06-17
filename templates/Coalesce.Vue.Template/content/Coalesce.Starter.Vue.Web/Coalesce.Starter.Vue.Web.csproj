@@ -34,6 +34,11 @@
     <!--#if (GoogleAuth) -->
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="9.0.0" />
     <!--#endif -->
+    <!--#if (Hangfire) -->
+    <PackageReference Include="Hangfire.SqlServer" Version="1.8.20" />
+    <PackageReference Include="Hangfire.AspNetCore" Version="1.8.20" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.Hangfire" Version="1.9.0-beta.1" />
+    <!--#endif -->
   </ItemGroup>
 
   <ItemGroup>

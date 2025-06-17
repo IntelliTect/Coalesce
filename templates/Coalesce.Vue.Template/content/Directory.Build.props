@@ -6,7 +6,7 @@
 
     <AccelerateBuildsInVisualStudio>true</AccelerateBuildsInVisualStudio>
 
-    <CoalesceVersion>6.0.0-beta.20250515.2</CoalesceVersion>
+    <CoalesceVersion>6.0.0-beta.20250616.1</CoalesceVersion>
     
     <!-- Disable Source Link attribute in non-library projects to avoid hot reload issues -->
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
@@ -14,7 +14,7 @@
     <!--#if (KeepTemplateOnly) -->
     <DefineConstants>$(DefineConstants);KeepTemplateOnly;AppInsights;OpenAPI;AuditLogs;TrackingBase;ExampleModel</DefineConstants>
     <DefineConstants>$(DefineConstants);Identity;UserPictures;MicrosoftAuth;GoogleAuth;LocalAuth;OtherOAuth</DefineConstants>
-    <DefineConstants>$(DefineConstants);EmailAzure;EmailSendGrid</DefineConstants>
+    <DefineConstants>$(DefineConstants);EmailAzure;EmailSendGrid;Hangfire</DefineConstants>
     <DefineConstants>$(DefineConstants);Tenancy;TenantPerHostname;TenantCreateSelf;TenantCreateExternal;TenantCreateAdmin;TenantMemberInvites</DefineConstants>
     <!--#endif -->
   </PropertyGroup>

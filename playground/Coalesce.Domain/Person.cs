@@ -277,7 +277,7 @@ namespace Coalesce.Domain
             this.FirstName = firstName;
             Title ??= title;
             db.SaveChanges();
-            return new(this);// { IncludeTree = new() };
+            return this;
         }
 
 

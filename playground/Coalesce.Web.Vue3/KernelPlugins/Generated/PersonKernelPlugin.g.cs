@@ -15,24 +15,23 @@ using System.Security.Claims;
 namespace Coalesce.Web.Vue3.KernelPlugins;
 #pragma warning disable CS1998
 
-public class PersonKernelPlugin(
-    CrudContext<Coalesce.Domain.AppDbContext> context, 
-    IDataSourceFactory dsFactory, 
-    Coalesce.Domain.Services.IWeatherService IWeatherService
-) : KernelPluginBase<Coalesce.Domain.Person>(context)
+public class PersonKernelPlugin(CrudContext<Coalesce.Domain.AppDbContext> context, IDataSourceFactory dsFactory, Coalesce.Domain.Services.IWeatherService IWeatherService) : KernelPluginBase<Coalesce.Domain.Person>(context)
 {
     protected Coalesce.Domain.AppDbContext Db => context.DbContext;
 
     [KernelFunction("get_person")]
     [Description("Gets a Person by its PersonId value. test description.")]
-    public async Task<ItemResult<PersonResponse>> GetPerson(int personId)
+    public async Task<string> GetPerson(int personId)
     {
-        if (!_isScoped) return await InvokeScoped<ItemResult<PersonResponse>>(GetPerson, personId);
-        if (!GeneratedForClassViewModel.SecurityInfo.IsReadAllowed(context.User)) return "Unauthorized.";
+        if (!_isScoped) return await InvokeScoped<string>(GetPerson, personId);
+        return await Json(async () =>
+        {
+            if (!GeneratedForClassViewModel.SecurityInfo.IsReadAllowed(context.User)) return "Unauthorized.";
 
-        var dataSource = dsFactory.GetDataSource<Coalesce.Domain.Person, Coalesce.Domain.Person>("WithoutCases");
-        var dataSourceParams = new DataSourceParameters { DataSource = "WithoutCases" };
-        return await dataSource.GetMappedItemAsync<PersonResponse>(personId, dataSourceParams);
+            var dataSource = dsFactory.GetDataSource<Coalesce.Domain.Person, Coalesce.Domain.Person>("WithoutCases");
+            var dataSourceParams = new DataSourceParameters { DataSource = "WithoutCases" };
+            return await dataSource.GetMappedItemAsync<PersonResponse>(personId, dataSourceParams);
+        });
     }
 
     [KernelFunction("list_person")]
@@ -46,96 +45,105 @@ public class PersonKernelPlugin(
     )
     {
         if (!_isScoped) return await InvokeScoped<string>(ListPerson, search, page, countOnly, fields, personCriteria);
-        if (!GeneratedForClassViewModel.SecurityInfo.IsReadAllowed(context.User)) return Json(new ItemResult(errorMessage: "Unauthorized."));
-
-        var dataSource = (Coalesce.Domain.Person.WithoutCases)dsFactory.GetDataSource<Coalesce.Domain.Person, Coalesce.Domain.Person>("WithoutCases");
-        MappingContext mappingContext = new(context);
-        dataSource.PersonCriteria = personCriteria?.MapToNew(mappingContext);
-
-        var listParams = new ListParameters { DataSource = "WithoutCases", Search = search, Page = page, Fields = string.Join(',', fields), PageSize = 100 };
-        if (countOnly)
+        return await Json(async () =>
         {
-            var result = await dataSource.GetCountAsync(listParams);
-            return Json(new ListResult<object>(result) { TotalCount = result.Object });
-        }
-        return Json(await dataSource.GetMappedListAsync<PersonResponse>(listParams));
+            if (!GeneratedForClassViewModel.SecurityInfo.IsReadAllowed(context.User)) return new ListResult<PersonResponse>(errorMessage: "Unauthorized.");
+
+            var dataSource = (Coalesce.Domain.Person.WithoutCases)dsFactory.GetDataSource<Coalesce.Domain.Person, Coalesce.Domain.Person>("WithoutCases");
+            MappingContext mappingContext = new(context);
+            dataSource.PersonCriteria = personCriteria?.MapToNew(mappingContext);
+
+            var listParams = new ListParameters { DataSource = "WithoutCases", Search = search, Page = page, Fields = string.Join(',', fields), PageSize = 100 };
+            if (countOnly)
+            {
+                var result = await dataSource.GetCountAsync(listParams);
+                return new ListResult<PersonResponse>(result) { TotalCount = result.Object };
+            }
+            return await dataSource.GetMappedListAsync<PersonResponse>(listParams);
+        });
     }
 
     [KernelFunction("ChangeFirstName")]
     [Description("Changes a person's first name, and optionally assigns a title if they don't yet have one.")]
-    public async Task<ItemResult<PersonResponse>> ChangeFirstName(
+    public async Task<string> ChangeFirstName(
         int id,
         string firstName,
         Coalesce.Domain.Person.Titles? title)
     {
-        if (!_isScoped) return await InvokeScoped<ItemResult<PersonResponse>>(ChangeFirstName, id, firstName, title);
-        var _method = GeneratedForClassViewModel!.MethodByName("ChangeFirstName");
-        if (!_method.SecurityInfo.IsExecuteAllowed(context.User)) return new ItemResult<PersonResponse>(errorMessage: "Unauthorized");
-        var _params = new
+        if (!_isScoped) return await InvokeScoped<string>(ChangeFirstName, id, firstName, title);
+        return await Json(async () =>
         {
-            Id = id,
-            FirstName = firstName,
-            Title = title
-        };
+            var _method = GeneratedForClassViewModel!.MethodByName("ChangeFirstName");
+            if (!_method.SecurityInfo.IsExecuteAllowed(context.User)) return new ItemResult<PersonResponse>(errorMessage: "Unauthorized");
+            var _params = new
+            {
+                Id = id,
+                FirstName = firstName,
+                Title = title
+            };
 
-        var dataSource = dsFactory.GetDataSource<Coalesce.Domain.Person, Coalesce.Domain.Person>("Default");
-        var itemResult = await dataSource.GetItemAsync(_params.Id, new DataSourceParameters());
-        if (!itemResult.WasSuccessful)
-        {
-            return new ItemResult<PersonResponse>(itemResult);
-        }
-        var item = itemResult.Object;
-        if (Context.Options.ValidateAttributesForMethods)
-        {
-            var _validationResult = ItemResult.FromParameterValidation(_method, _params, ServiceProvider);
-            if (!_validationResult.WasSuccessful) return new ItemResult<PersonResponse>(_validationResult);
-        }
+            var dataSource = dsFactory.GetDataSource<Coalesce.Domain.Person, Coalesce.Domain.Person>("Default");
+            var itemResult = await dataSource.GetItemAsync(_params.Id, new DataSourceParameters());
+            if (!itemResult.WasSuccessful)
+            {
+                return new ItemResult<PersonResponse>(itemResult);
+            }
+            var item = itemResult.Object;
+            if (Context.Options.ValidateAttributesForMethods)
+            {
+                var _validationResult = ItemResult.FromParameterValidation(_method, _params, ServiceProvider);
+                if (!_validationResult.WasSuccessful) return new ItemResult<PersonResponse>(_validationResult);
+            }
 
-        IncludeTree includeTree = null;
-        var _mappingContext = new MappingContext(Context);
-        var _methodResult = item.ChangeFirstName(
-            Db,
-            _params.FirstName,
-            _params.Title
-        );
-        var _result = new ItemResult<PersonResponse>(_methodResult);
-        _result.Object = Mapper.MapToDto<Coalesce.Domain.Person, PersonResponse>(_methodResult.Object, _mappingContext, includeTree ?? _methodResult.IncludeTree);
-        return _result;
+            IncludeTree includeTree = null;
+            var _mappingContext = new MappingContext(Context);
+            var _methodResult = item.ChangeFirstName(
+                Db,
+                _params.FirstName,
+                _params.Title
+            );
+            var _result = new ItemResult<PersonResponse>(_methodResult);
+            _result.Object = Mapper.MapToDto<Coalesce.Domain.Person, PersonResponse>(_methodResult.Object, _mappingContext, includeTree ?? _methodResult.IncludeTree);
+            return _result;
+        });
     }
 
     [KernelFunction("SearchPeople")]
     [Description("Finds people whose birthday falls on a given month, and/or people with a specific email domain.")]
-    public async Task<ListResult<PersonResponse>> SearchPeople(
+    public async Task<string> SearchPeople(
         PersonCriteriaParameter criteria,
         int page)
     {
-        if (!_isScoped) return await InvokeScoped<ListResult<PersonResponse>>(SearchPeople, criteria, page);
-        var _method = GeneratedForClassViewModel!.MethodByName("SearchPeople");
-        if (!_method.SecurityInfo.IsExecuteAllowed(context.User)) return new ListResult<PersonResponse>(errorMessage: "Unauthorized");
-        var _params = new
+        if (!_isScoped) return await InvokeScoped<string>(SearchPeople, criteria, page);
+        return await Json(async () =>
         {
-            Criteria = criteria,
-            Page = page
-        };
-        var weather = IWeatherService;
+            var _method = GeneratedForClassViewModel!.MethodByName("SearchPeople");
+            if (!_method.SecurityInfo.IsExecuteAllowed(context.User)) return new ListResult<PersonResponse>(errorMessage: "Unauthorized");
+            var _params = new
+            {
+                Criteria = criteria,
+                Page = page
+            };
+            var weather = IWeatherService;
 
-        if (Context.Options.ValidateAttributesForMethods)
-        {
-            var _validationResult = ItemResult.FromParameterValidation(_method, _params, ServiceProvider);
-            if (!_validationResult.WasSuccessful) return new ListResult<PersonResponse>(_validationResult);
-        }
+            if (Context.Options.ValidateAttributesForMethods)
+            {
+                var _validationResult = ItemResult.FromParameterValidation(_method, _params, ServiceProvider);
+                if (!_validationResult.WasSuccessful) return new ListResult<PersonResponse>(_validationResult);
+            }
 
-        IncludeTree includeTree = null;
-        var _mappingContext = new MappingContext(Context);
-        var _methodResult = Coalesce.Domain.Person.SearchPeople(
-            Db,
-            _params.Criteria?.MapToNew(_mappingContext),
-            _params.Page,
-            weather
-        );
-        var _result = new ListResult<PersonResponse>(_methodResult);
-        _result.List = _methodResult.List?.ToList().Select(o => Mapper.MapToDto<Coalesce.Domain.Person, PersonResponse>(o, _mappingContext, includeTree ?? _methodResult.IncludeTree)).ToList();
-        return _result;
+            IncludeTree includeTree = null;
+            var _mappingContext = new MappingContext(Context);
+            var _methodResult = Coalesce.Domain.Person.SearchPeople(
+                Db,
+                _params.Criteria?.MapToNew(_mappingContext),
+                _params.Page,
+                weather
+            );
+            var _result = new ListResult<PersonResponse>(_methodResult);
+            _result.List = _methodResult.List?.ToList().Select(o => Mapper.MapToDto<Coalesce.Domain.Person, PersonResponse>(o, _mappingContext, includeTree ?? _methodResult.IncludeTree)).ToList();
+            return _result;
+        });
     }
 
 }

@@ -1,6 +1,7 @@
 ﻿using IntelliTect.Coalesce.TypeDefinition;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
@@ -32,9 +33,15 @@ namespace IntelliTect.Coalesce.Api
             return await (Task<TResult>)action.Method.Invoke(scopedInstance, args)!;
         }
 
-        protected string Json(object obj)
+        /// <summary>
+        /// Workaround for https://github.com/microsoft/semantic-kernel/issues/12532 so we can control JSON serialization.
+        /// </summary>
+        protected async Task<string> Json(Func<Task<object>> func)
         {
-            return JsonSerializer.Serialize(obj, new JsonSerializerOptions { ReferenceHandler = ReferenceHandler.IgnoreCycles });
+            return JsonSerializer.Serialize(await func(), new JsonSerializerOptions { 
+                ReferenceHandler = ReferenceHandler.IgnoreCycles,
+                Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+            });
         }
     }
 

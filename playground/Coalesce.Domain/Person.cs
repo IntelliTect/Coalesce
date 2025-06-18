@@ -1,4 +1,5 @@
-﻿using IntelliTect.Coalesce;
+﻿using Coalesce.Domain.Services;
+using IntelliTect.Coalesce;
 using IntelliTect.Coalesce.Api.Controllers;
 using IntelliTect.Coalesce.DataAnnotations;
 using IntelliTect.Coalesce.Models;
@@ -270,12 +271,13 @@ namespace Coalesce.Domain
 
         [Coalesce]
         [Execute(HttpMethod = HttpMethod.Patch)]
-        public Person ChangeFirstName(AppDbContext db, string firstName, Titles? title)
+        [KernelPlugin("Changes a person's first name, and optionally assigns a title if they don't yet have one.")]
+        public ItemResult<Person> ChangeFirstName(AppDbContext db, string firstName, Titles? title)
         {
             this.FirstName = firstName;
             Title ??= title;
             db.SaveChanges();
-            return this;
+            return new(this);// { IncludeTree = new() };
         }
 
 
@@ -329,7 +331,8 @@ namespace Coalesce.Domain
         /// Gets people matching the criteria, paginated by parameter 'page'.
         /// </summary>
         [Coalesce]
-        public static ListResult<Person> SearchPeople(AppDbContext db, PersonCriteria criteria, int page)
+        [KernelPlugin("Finds people whose birthday falls on a given month, and/or people with a specific email domain.")]
+        public static ListResult<Person> SearchPeople(AppDbContext db, PersonCriteria criteria, int page, [Inject] IWeatherService weather)
         {
             const int pageSize = 10;
             IQueryable<Person> query = db.People;
@@ -350,6 +353,7 @@ namespace Coalesce.Domain
             return new ListResult<Person>(query, page, pageSize);
         }
 
+        [KernelPlugin("test description")]
         [Coalesce, DefaultDataSource]
         public class WithoutCases(CrudContext<AppDbContext> context) : StandardDataSource<Person, AppDbContext>(context)
         {

@@ -46,6 +46,7 @@ namespace Coalesce.Web.Vue3.Api
             [FromForm(Name = "dateTime")] System.DateTimeOffset? dateTime,
             [FromForm(Name = "conditions")] Coalesce.Domain.Services.SkyConditions? conditions)
         {
+            var _method = GeneratedForClassViewModel!.MethodByName("GetWeatherAsync");
             var _params = new
             {
                 Location = !Request.Form.HasAnyValue("location") ? null : location,
@@ -55,8 +56,7 @@ namespace Coalesce.Web.Vue3.Api
 
             if (Context.Options.ValidateAttributesForMethods)
             {
-                var _validationResult = ItemResult.FromParameterValidation(
-                    GeneratedForClassViewModel!.MethodByName("GetWeatherAsync"), _params, HttpContext.RequestServices);
+                var _validationResult = ItemResult.FromParameterValidation(_method, _params, ServiceProvider);
                 if (!_validationResult.WasSuccessful) return new ItemResult<WeatherDataResponse>(_validationResult);
             }
 
@@ -92,10 +92,10 @@ namespace Coalesce.Web.Vue3.Api
             [FromBody] GetWeatherParameters _params
         )
         {
+            var _method = GeneratedForClassViewModel!.MethodByName("GetWeatherAsync");
             if (Context.Options.ValidateAttributesForMethods)
             {
-                var _validationResult = ItemResult.FromParameterValidation(
-                    GeneratedForClassViewModel!.MethodByName("GetWeatherAsync"), _params, HttpContext.RequestServices);
+                var _validationResult = ItemResult.FromParameterValidation(_method, _params, ServiceProvider);
                 if (!_validationResult.WasSuccessful) return new ItemResult<WeatherDataResponse>(_validationResult);
             }
 

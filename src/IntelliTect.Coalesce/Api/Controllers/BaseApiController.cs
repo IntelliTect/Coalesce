@@ -42,6 +42,8 @@ namespace IntelliTect.Coalesce.Api.Controllers
         /// </summary>
         protected CrudContext Context { get; }
 
+        protected IServiceProvider? ServiceProvider => Context.ServiceProvider;
+
         /// <summary>
         /// For generated controllers, the type that the controller was generated for.
         /// For custom IClassDtos, this is the DTO type. Otherwise, this is the entity type.

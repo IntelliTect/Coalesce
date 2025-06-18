@@ -105,6 +105,7 @@ namespace Coalesce.Web.Vue3.Api
             [FromForm(Name = "id")] int id,
             [FromForm(Name = "input")] string input)
         {
+            var _method = GeneratedForClassViewModel!.MethodByName("AsyncMethodOnIClassDto");
             var _params = new
             {
                 Id = id,
@@ -120,8 +121,7 @@ namespace Coalesce.Web.Vue3.Api
             var item = itemResult.Object;
             if (Context.Options.ValidateAttributesForMethods)
             {
-                var _validationResult = ItemResult.FromParameterValidation(
-                    GeneratedForClassViewModel!.MethodByName("AsyncMethodOnIClassDto"), _params, HttpContext.RequestServices);
+                var _validationResult = ItemResult.FromParameterValidation(_method, _params, ServiceProvider);
                 if (!_validationResult.WasSuccessful) return new ItemResult<string>(_validationResult);
             }
 
@@ -150,6 +150,7 @@ namespace Coalesce.Web.Vue3.Api
             [FromBody] AsyncMethodOnIClassDtoParameters _params
         )
         {
+            var _method = GeneratedForClassViewModel!.MethodByName("AsyncMethodOnIClassDto");
             var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Case, Coalesce.Domain.CaseDto>("Default");
             var itemResult = await dataSource.GetMappedItemAsync<Coalesce.Domain.CaseDto>(_params.Id, new DataSourceParameters());
             if (!itemResult.WasSuccessful)
@@ -159,8 +160,7 @@ namespace Coalesce.Web.Vue3.Api
             var item = itemResult.Object;
             if (Context.Options.ValidateAttributesForMethods)
             {
-                var _validationResult = ItemResult.FromParameterValidation(
-                    GeneratedForClassViewModel!.MethodByName("AsyncMethodOnIClassDto"), _params, HttpContext.RequestServices);
+                var _validationResult = ItemResult.FromParameterValidation(_method, _params, ServiceProvider);
                 if (!_validationResult.WasSuccessful) return new ItemResult<string>(_validationResult);
             }
 

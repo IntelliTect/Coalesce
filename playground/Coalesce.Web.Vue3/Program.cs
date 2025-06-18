@@ -1,14 +1,20 @@
 using Coalesce.Domain;
+using Coalesce.Domain.Services;
 using Coalesce.Domain.WebShared;
+using Coalesce.Web.Vue3.KernelPlugins;
 using IntelliTect.Coalesce;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Console;
+using Microsoft.Extensions.Options;
 using Microsoft.Net.Http.Headers;
 using Microsoft.OpenApi.Models;
+using Microsoft.SemanticKernel;
 using Scalar.AspNetCore;
+using System.Reflection;
 using System.Security.Claims;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -28,11 +34,26 @@ builder.Logging
 
 builder.Configuration
     .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+    .AddUserSecrets<Program>()
     .AddEnvironmentVariables();
 
 #region Configure Services
 
 var services = builder.Services;
+
+var modelId = "gpt-4.1";
+var endpoint = "https://ascott-openai-test.openai.azure.com/";
+var apiKey = builder.Configuration["AiKey"];
+
+services.AddScoped((IServiceProvider serviceProvider) => 
+    KernelPluginFactory.CreateFromType<PersonKernelPlugin>(
+        serviceProvider.GetService<IOptions<JsonOptions>>().Value.JsonSerializerOptions, 
+        "Person", 
+        serviceProvider
+    ));
+
+services.AddKernel()
+    .AddAzureOpenAIChatCompletion("gpt-4.1", modelId: modelId, endpoint: endpoint, apiKey: apiKey);
 
 services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"), opt => opt
@@ -63,6 +84,7 @@ services.AddSwaggerGen(c =>
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
 });
 
+services.AddScoped<IWeatherService, WeatherService>();
 
 services.AddAuthentication(DemoMiddleware.AuthenticationScheme).AddCookie(DemoMiddleware.AuthenticationScheme);
 

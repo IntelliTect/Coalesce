@@ -76,6 +76,7 @@ namespace Coalesce.Web.Vue3.Api
             [FromServices] IDataSourceFactory dataSourceFactory,
             [FromForm(Name = "id")] int id)
         {
+            var _method = GeneratedForClassViewModel!.MethodByName("GetId");
             var _params = new
             {
                 Id = id
@@ -110,6 +111,7 @@ namespace Coalesce.Web.Vue3.Api
             [FromBody] AbstractClassGetIdParameters _params
         )
         {
+            var _method = GeneratedForClassViewModel!.MethodByName("GetId");
             var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.AbstractClass, Coalesce.Domain.AbstractClass>("Default");
             var itemResult = await dataSource.GetItemAsync(_params.Id, new DataSourceParameters());
             if (!itemResult.WasSuccessful)
@@ -130,6 +132,7 @@ namespace Coalesce.Web.Vue3.Api
         [Authorize]
         public virtual ItemResult<int> GetCount()
         {
+            var _method = GeneratedForClassViewModel!.MethodByName("GetCount");
             var _methodResult = Coalesce.Domain.AbstractClass.GetCount(
                 Db
             );
@@ -147,6 +150,7 @@ namespace Coalesce.Web.Vue3.Api
         public virtual ItemResult<AbstractClassResponse> EchoAbstractModel(
             [FromForm(Name = "model")] AbstractClassParameter model)
         {
+            var _method = GeneratedForClassViewModel!.MethodByName("EchoAbstractModel");
             var _params = new
             {
                 Model = !Request.Form.HasAnyValue("model") ? null : model
@@ -154,8 +158,7 @@ namespace Coalesce.Web.Vue3.Api
 
             if (Context.Options.ValidateAttributesForMethods)
             {
-                var _validationResult = ItemResult.FromParameterValidation(
-                    GeneratedForClassViewModel!.MethodByName("EchoAbstractModel"), _params, HttpContext.RequestServices);
+                var _validationResult = ItemResult.FromParameterValidation(_method, _params, ServiceProvider);
                 if (!_validationResult.WasSuccessful) return new ItemResult<AbstractClassResponse>(_validationResult);
             }
 
@@ -184,10 +187,10 @@ namespace Coalesce.Web.Vue3.Api
             [FromBody] AbstractClassEchoAbstractModelParameters _params
         )
         {
+            var _method = GeneratedForClassViewModel!.MethodByName("EchoAbstractModel");
             if (Context.Options.ValidateAttributesForMethods)
             {
-                var _validationResult = ItemResult.FromParameterValidation(
-                    GeneratedForClassViewModel!.MethodByName("EchoAbstractModel"), _params, HttpContext.RequestServices);
+                var _validationResult = ItemResult.FromParameterValidation(_method, _params, ServiceProvider);
                 if (!_validationResult.WasSuccessful) return new ItemResult<AbstractClassResponse>(_validationResult);
             }
 

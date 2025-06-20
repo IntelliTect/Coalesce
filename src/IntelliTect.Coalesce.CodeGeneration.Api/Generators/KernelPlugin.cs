@@ -1,5 +1,6 @@
 ﻿using IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators;
 using IntelliTect.Coalesce.CodeGeneration.Generation;
+using IntelliTect.Coalesce.Models;
 using IntelliTect.Coalesce.TypeDefinition;
 using IntelliTect.Coalesce.Utilities;
 using System;
@@ -68,6 +69,7 @@ public class KernelPlugin(GeneratorServices services) : ApiService(services)
         {
             "IntelliTect.Coalesce",
             "IntelliTect.Coalesce.Api",
+            "IntelliTect.Coalesce.Api.Behaviors",
             "IntelliTect.Coalesce.Api.DataSources",
             "IntelliTect.Coalesce.Mapping",
             "IntelliTect.Coalesce.Models",
@@ -97,6 +99,7 @@ public class KernelPlugin(GeneratorServices services) : ApiService(services)
         List<string> injectedServices = [
             $"{crudCtxType} context",
             $"IDataSourceFactory dsFactory",
+            $"IBehaviorsFactory bhFactory",
         ];
 
         // Individual method dependencies must be ctor injected so that InvokedScoped
@@ -120,6 +123,7 @@ public class KernelPlugin(GeneratorServices services) : ApiService(services)
         {
             WriteDataSourceGetItemFunction(b, ds);
             WriteDataSourceListFunction(b, ds);
+            WriteSaveFunction(b);
         }
 
         foreach (var method in Model.ClientMethods.Where(ds => ds.HasAttribute<KernelPluginAttribute>()))
@@ -210,7 +214,7 @@ public class KernelPlugin(GeneratorServices services) : ApiService(services)
             using var json = b.Block("return await Json(async () => ", ");");
 
             WriteMethodViewModelVar(b, method);
-            b.Line($"if (!_method.SecurityInfo.IsExecuteAllowed(context.User)) return new {method.ApiActionReturnTypeDeclaration}(errorMessage: \"Unauthorized\");");
+            b.Line($"if (!_method.SecurityInfo.IsExecuteAllowed(User)) return new {method.ApiActionReturnTypeDeclaration}(errorMessage: \"Unauthorized\");");
 
             var clientParameters = method.ApiParameters.ToList();
             if (clientParameters.Count > 0)
@@ -266,6 +270,10 @@ public class KernelPlugin(GeneratorServices services) : ApiService(services)
         b.Line();
     }
 
+    // todo: add a disambiguator string to KPA that we add to the function name, in case a single type has multiple exposed DS's.
+    // todo: add flags to KPA to enable/disable specific actions (read, list, ...?)
+
+
     private void WriteDataSourceGetItemFunction(CSharpCodeBuilder b, ClassViewModel ds)
     {
         var description = ds.GetAttributeValue<KernelPluginAttribute>(kp => kp.Description);
@@ -274,11 +282,9 @@ public class KernelPlugin(GeneratorServices services) : ApiService(services)
         var declaredFor = Model.FullyQualifiedName;
         var dsNameString = ds.Name.QuotedStringLiteralForCSharp();
 
-        // todo: add a disambiguator string to KPA that we add to the function name, in case a single type has multiple exposed DS's.
-        // todo: add flags to KPA to enable/disable specific actions (read, list, ...?)
 
         b.Line($"[KernelFunction(\"get_{Model.Name.ToLower()}\")]");
-        b.Line($"[Description(\"Gets a {Model.Name} by its {Model.PrimaryKey.Name} value. {description}.\")]");
+        b.Line($"[Description(\"Gets a {Model.DisplayName} by its {Model.PrimaryKey.Name} value. {description}.\")]");
 
         var resultType = $"ItemResult<{Model.ResponseDtoTypeName}>";
         using (b.Block($"public async Task<string> Get{Model.Name}({Model.PrimaryKey.Type.FullyQualifiedName} {pkVar})"))
@@ -288,7 +294,7 @@ public class KernelPlugin(GeneratorServices services) : ApiService(services)
             // Workaround for https://github.com/microsoft/semantic-kernel/issues/12532
             using var json = b.Block("return await Json(async () => ", ");");
 
-            b.Line("if (!GeneratedForClassViewModel.SecurityInfo.IsReadAllowed(context.User)) return \"Unauthorized.\";");
+            b.Line("if (!GeneratedForClassViewModel.SecurityInfo.IsReadAllowed(User)) return \"Unauthorized.\";");
             b.Line();
 
             b.Line($"var dataSource = dsFactory.GetDataSource<{Model.BaseViewModel.FullyQualifiedName}, {Model.FullyQualifiedName}>({dsNameString});");
@@ -306,13 +312,11 @@ public class KernelPlugin(GeneratorServices services) : ApiService(services)
         var declaredFor = Model.FullyQualifiedName;
         var dsNameString = ds.Name.QuotedStringLiteralForCSharp();
 
-        // todo: add a disambiguator string to KPA that we add to the function name, in case a single type has multiple exposed DS's.
-        // todo: add flags to KPA to enable/disable specific actions (read, list, ...?)
 
         var resultType = $"ListResult<{Model.ResponseDtoTypeName}>";
 
         b.Line($"[KernelFunction(\"list_{Model.Name.ToLower()}\")]");
-        b.Line($"[Description(\"Lists {Model.Name} records. {description}. The search parameter can search on properties {string.Join(",", Model.SearchProperties().Select(p => p.Property.Name))}. The fields parameter should be used if you only need some of the following fields: {string.Join(",", Model.ClientProperties.Select(p => p.Name))}\")]");
+        b.Line($"[Description(\"Lists {Model.DisplayName} records. {description}. The search parameter can search on properties {string.Join(",", Model.SearchProperties().Select(p => p.Property.Name))}. The fields parameter should be used if you only need some of the following fields: {string.Join(",", Model.ClientProperties.Select(p => p.Name))}\")]");
         using (b.Block($"""
             public async Task<string> List{Model.Name}(
                     string search, 
@@ -323,13 +327,13 @@ public class KernelPlugin(GeneratorServices services) : ApiService(services)
                 )
             """))
         {
-            b.Line($"if (!_isScoped) return await InvokeScoped<string> (List{Model.Name}, search, page, countOnly, fields{string.Concat(ds.DataSourceParameters.Select(p => ", " + p.JsonName))});");
+            b.Line($"if (!_isScoped) return await InvokeScoped<string>(List{Model.Name}, search, page, countOnly, fields{string.Concat(ds.DataSourceParameters.Select(p => ", " + p.JsonName))});");
 
             // Workaround for https://github.com/microsoft/semantic-kernel/issues/12532
             using var json = b.Block("return await Json(async () => ", ");");
 
 
-            b.Line($"if (!GeneratedForClassViewModel.SecurityInfo.IsReadAllowed(context.User)) return new {resultType}(errorMessage: \"Unauthorized.\");");
+            b.Line($"if (!GeneratedForClassViewModel.SecurityInfo.IsReadAllowed(User)) return new {resultType}(errorMessage: \"Unauthorized.\");");
             b.Line();
 
             b.Line($"var dataSource = ({ds.Type.FullyQualifiedName})dsFactory.GetDataSource<{Model.BaseViewModel.FullyQualifiedName}, {Model.FullyQualifiedName}>({dsNameString});");
@@ -347,6 +351,50 @@ public class KernelPlugin(GeneratorServices services) : ApiService(services)
                 b.Line($"return new {resultType}(result) {{ TotalCount = result.Object }};");
             }
             b.Line($"return await dataSource.GetMappedListAsync<{Model.ResponseDtoTypeName}>(listParams);");
+        }
+        b.Line();
+    }
+
+    private void WriteSaveFunction(CSharpCodeBuilder b)
+    {
+        if (!Model.SecurityInfo.IsSaveAllowed()) return;
+
+        var pkVar = Model.PrimaryKey.JsonName;
+        var declaredFor = Model.FullyQualifiedName;
+        var isSparse = !Model.IsCustomDto || Model.Type.IsA<ISparseDto>();
+
+
+        var resultType = $"ItemResult<{Model.ResponseDtoTypeName}>";
+
+        b.Line($"[KernelFunction(\"save_{Model.Name.ToLower()}\")]");
+
+        List<string> descriptionParts = [];
+        if (Model.SecurityInfo.IsCreateAllowed()) descriptionParts.Add($"Creates a new {Model.DisplayName}. ");
+        if (Model.SecurityInfo.IsEditAllowed()) descriptionParts.Add($"Updates an existing {Model.DisplayName}. ");
+        if (isSparse) descriptionParts.Add("Only provide value of the fields that need to be changed.");
+
+        b.Line($"[Description({string.Concat(descriptionParts).QuotedStringLiteralForCSharp()})]");
+        using (b.Block($"""
+            public async Task<string> Save{Model.Name}({Model.ParameterDtoTypeName} dto)
+            """))
+        {
+            b.Line($"if (!_isScoped) return await InvokeScoped<string>(Save{Model.Name}, dto);");
+
+            // Workaround for https://github.com/microsoft/semantic-kernel/issues/12532
+            using var json = b.Block("return await Json(async () => ", ");");
+
+            b.Line($"var dataSource = dsFactory.GetDefaultDataSource<{Model.BaseViewModel.FullyQualifiedName}, {Model.FullyQualifiedName}>();");
+            b.Line($"var behaviors = bhFactory.GetBehaviors<{Model.BaseViewModel.FullyQualifiedName}>(GeneratedForClassViewModel);");
+
+            b.Lines(
+                "var kind = (await behaviors.DetermineSaveKindAsync(dto, dataSource, new DataSourceParameters())).Kind;",
+                "if (kind == SaveKind.Create && !GeneratedForClassViewModel.SecurityInfo.IsCreateAllowed(User))",
+                $"    return \"Creation of {Model.DisplayName} items not allowed.\";",
+                "if (kind == SaveKind.Update && !GeneratedForClassViewModel.SecurityInfo.IsEditAllowed(User))",
+                $"    return \"Editing of {Model.DisplayName} items not allowed.\";"
+            );
+
+            b.Line($"return await behaviors.SaveAsync<{Model.ParameterDtoTypeName}, {Model.ResponseDtoTypeName}>(dto, dataSource, new DataSourceParameters());");
         }
         b.Line();
     }

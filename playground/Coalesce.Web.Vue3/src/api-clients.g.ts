@@ -250,6 +250,16 @@ export class LogApiClient extends ModelApiClient<$models.Log> {
 export class PersonApiClient extends ModelApiClient<$models.Person> {
   constructor() { super($metadata.Person) }
   
+  public chat(history: string | null, prompt: string | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<$models.ChatResponse>> {
+    const $method = this.$metadata.methods.chat
+    const $params =  {
+      history,
+      prompt,
+    }
+    return this.$invoke($method, $params, $config)
+  }
+  
+  
   /** Sets the FirstName to the given text. */
   public rename(id: number | null, name: string | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<$models.Person>> {
     const $method = this.$metadata.methods.rename

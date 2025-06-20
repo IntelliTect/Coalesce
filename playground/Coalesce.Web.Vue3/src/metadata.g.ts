@@ -1840,6 +1840,37 @@ export const Person = domain.types.Person = {
     },
   },
   methods: {
+    chat: {
+      name: "chat",
+      displayName: "Chat",
+      transportType: "item",
+      httpMethod: "POST",
+      isStatic: true,
+      params: {
+        history: {
+          name: "history",
+          displayName: "History",
+          type: "string",
+          role: "value",
+        },
+        prompt: {
+          name: "prompt",
+          displayName: "Prompt",
+          type: "string",
+          role: "value",
+          rules: {
+            required: val => (val != null && val !== '') || "Prompt is required.",
+          }
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "object",
+        get typeDef() { return (domain.types.ChatResponse as ObjectType & { name: "ChatResponse" }) },
+        role: "value",
+      },
+    },
     rename: {
       name: "rename",
       displayName: "Rename",
@@ -2692,6 +2723,31 @@ export const CaseSummary = domain.types.CaseSummary = {
     },
   },
 }
+export const ChatResponse = domain.types.ChatResponse = {
+  name: "ChatResponse" as const,
+  displayName: "Chat Response",
+  type: "object",
+  props: {
+    response: {
+      name: "response",
+      displayName: "Response",
+      type: "string",
+      role: "value",
+      rules: {
+        required: val => (val != null && val !== '') || "Response is required.",
+      }
+    },
+    history: {
+      name: "history",
+      displayName: "History",
+      type: "string",
+      role: "value",
+      rules: {
+        required: val => (val != null && val !== '') || "History is required.",
+      }
+    },
+  },
+}
 export const DevTeam = domain.types.DevTeam = {
   name: "DevTeam" as const,
   displayName: "Dev Team",
@@ -2991,6 +3047,7 @@ interface AppDomain extends Domain {
     CaseProduct: typeof CaseProduct
     CaseStandalone: typeof CaseStandalone
     CaseSummary: typeof CaseSummary
+    ChatResponse: typeof ChatResponse
     Company: typeof Company
     DevTeam: typeof DevTeam
     Location: typeof Location

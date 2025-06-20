@@ -95,6 +95,94 @@ namespace Coalesce.Web.Vue3.Api
         // Methods from data class exposed through API Controller.
 
         /// <summary>
+        /// Method: Chat
+        /// </summary>
+        [HttpPost("Chat")]
+        [Authorize]
+        [Consumes("application/x-www-form-urlencoded", "multipart/form-data")]
+        public virtual async Task<ItemResult<ChatResponseResponse>> Chat(
+            [FromServices] Microsoft.SemanticKernel.Kernel kernel,
+            [FromServices] Microsoft.SemanticKernel.ChatCompletion.IChatCompletionService ccs,
+            [FromServices] Microsoft.AspNetCore.DataProtection.IDataProtectionProvider dpp,
+            [FromServices] Microsoft.Extensions.Logging.ILogger<Coalesce.Domain.Person> logger,
+            [FromForm(Name = "cancellationToken")] System.Threading.CancellationToken cancellationToken,
+            [FromForm(Name = "history")] string history,
+            [FromForm(Name = "prompt")] string prompt)
+        {
+            var _method = GeneratedForClassViewModel!.MethodByName("Chat");
+            var _params = new
+            {
+                History = history,
+                Prompt = prompt
+            };
+
+            if (Context.Options.ValidateAttributesForMethods)
+            {
+                var _validationResult = ItemResult.FromParameterValidation(_method, _params, ServiceProvider);
+                if (!_validationResult.WasSuccessful) return new ItemResult<ChatResponseResponse>(_validationResult);
+            }
+
+            IncludeTree includeTree = null;
+            var _mappingContext = new MappingContext(Context);
+            var _methodResult = await Coalesce.Domain.Person.Chat(
+                kernel,
+                ccs,
+                dpp,
+                logger,
+                _params.History,
+                _params.Prompt,
+                cancellationToken
+            );
+            var _result = new ItemResult<ChatResponseResponse>();
+            _result.Object = Mapper.MapToDto<Coalesce.Domain.Person.ChatResponse, ChatResponseResponse>(_methodResult, _mappingContext, includeTree);
+            return _result;
+        }
+
+        public class ChatParameters
+        {
+            public string History { get; set; }
+            public string Prompt { get; set; }
+        }
+
+        /// <summary>
+        /// Method: Chat
+        /// </summary>
+        [HttpPost("Chat")]
+        [Authorize]
+        [Consumes("application/json")]
+        public virtual async Task<ItemResult<ChatResponseResponse>> Chat(
+            [FromServices] Microsoft.SemanticKernel.Kernel kernel,
+            [FromServices] Microsoft.SemanticKernel.ChatCompletion.IChatCompletionService ccs,
+            [FromServices] Microsoft.AspNetCore.DataProtection.IDataProtectionProvider dpp,
+            [FromServices] Microsoft.Extensions.Logging.ILogger<Coalesce.Domain.Person> logger,
+            System.Threading.CancellationToken cancellationToken,
+            [FromBody] ChatParameters _params
+        )
+        {
+            var _method = GeneratedForClassViewModel!.MethodByName("Chat");
+            if (Context.Options.ValidateAttributesForMethods)
+            {
+                var _validationResult = ItemResult.FromParameterValidation(_method, _params, ServiceProvider);
+                if (!_validationResult.WasSuccessful) return new ItemResult<ChatResponseResponse>(_validationResult);
+            }
+
+            IncludeTree includeTree = null;
+            var _mappingContext = new MappingContext(Context);
+            var _methodResult = await Coalesce.Domain.Person.Chat(
+                kernel,
+                ccs,
+                dpp,
+                logger,
+                _params.History,
+                _params.Prompt,
+                cancellationToken
+            );
+            var _result = new ItemResult<ChatResponseResponse>();
+            _result.Object = Mapper.MapToDto<Coalesce.Domain.Person.ChatResponse, ChatResponseResponse>(_methodResult, _mappingContext, includeTree);
+            return _result;
+        }
+
+        /// <summary>
         /// Method: Rename
         /// </summary>
         [HttpPost("Rename")]

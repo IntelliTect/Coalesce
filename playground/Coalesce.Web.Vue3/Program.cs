@@ -46,6 +46,7 @@ var endpoint = "https://ascott-openai-test.openai.azure.com/";
 var apiKey = builder.Configuration["AiKey"];
 
 services.AddScoped((IServiceProvider serviceProvider) => KernelPluginFactory.CreateFromType<PersonKernelPlugin>("Person", serviceProvider));
+services.AddScoped((IServiceProvider serviceProvider) => KernelPluginFactory.CreateFromType<CompanyKernelPlugin>("Company", serviceProvider));
 
 services.AddKernel()
     .AddAzureOpenAIChatCompletion("gpt-4.1", modelId: modelId, endpoint: endpoint, apiKey: apiKey);

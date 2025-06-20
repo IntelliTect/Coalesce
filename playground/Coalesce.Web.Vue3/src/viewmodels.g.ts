@@ -754,6 +754,17 @@ defineProps(PersonViewModel, $metadata.Person)
 export class PersonListViewModel extends ListViewModel<$models.Person, $apiClients.PersonApiClient, PersonViewModel> {
   static DataSources = $models.Person.DataSources;
   
+  public get chat() {
+    const chat = this.$apiClient.$makeCaller(
+      this.$metadata.methods.chat,
+      (c, history: string | null, prompt: string | null) => c.chat(history, prompt),
+      () => ({history: null as string | null, prompt: null as string | null, }),
+      (c, args) => c.chat(args.history, args.prompt))
+    
+    Object.defineProperty(this, 'chat', {value: chat});
+    return chat
+  }
+  
   /** 
     Adds two numbers.
     

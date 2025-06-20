@@ -17,6 +17,7 @@ namespace Coalesce.Domain
         public int Id { get; set; }
 
 
+        [Search(SearchMethod = SearchAttribute.SearchMethods.Contains)]
 #if NET7_0_OR_GREATER
         required
 #endif
@@ -67,6 +68,7 @@ namespace Coalesce.Domain
         }
 
         [DefaultDataSource]
+        [KernelPlugin("")]
         public class DefaultSource : StandardDataSource<Company, AppDbContext>
         {
             public DefaultSource(CrudContext<AppDbContext> context) : base(context) { }

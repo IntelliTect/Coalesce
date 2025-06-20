@@ -266,20 +266,18 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     return ArrayType!;
                 }
 
-                if (IsGeneric)
+                if (IsCollection)
                 {
-                    if (IsCollection)
-                    {
-                        return (
-                            GenericArgumentsFor(typeof(ICollection<>))
-                            ?? GenericArgumentsFor(typeof(IEnumerable<>))
-                        )?[0]
-                        ?? FirstTypeArgument!;
-                    }
-                    if (IsReferenceOrNullableValue && FirstTypeArgument is not null)
-                    {
-                        return FirstTypeArgument!;
-                    }
+                    return (
+                        GenericArgumentsFor(typeof(ICollection<>))
+                        ?? GenericArgumentsFor(typeof(IEnumerable<>))
+                    )?[0]
+                    ?? FirstTypeArgument!;
+                }
+
+                if (IsGeneric &&IsReferenceOrNullableValue && FirstTypeArgument is not null)
+                {
+                    return FirstTypeArgument!;
                 }
 
                 return this;

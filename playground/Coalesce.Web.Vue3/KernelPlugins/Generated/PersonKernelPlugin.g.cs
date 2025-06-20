@@ -1,6 +1,7 @@
 using Coalesce.Web.Vue3.Models;
 using IntelliTect.Coalesce;
 using IntelliTect.Coalesce.Api;
+using IntelliTect.Coalesce.Api.Behaviors;
 using IntelliTect.Coalesce.Api.DataSources;
 using IntelliTect.Coalesce.Mapping;
 using IntelliTect.Coalesce.Models;
@@ -15,7 +16,7 @@ using System.Security.Claims;
 namespace Coalesce.Web.Vue3.KernelPlugins;
 #pragma warning disable CS1998
 
-public class PersonKernelPlugin(CrudContext<Coalesce.Domain.AppDbContext> context, IDataSourceFactory dsFactory, Coalesce.Domain.Services.IWeatherService IWeatherService) : KernelPluginBase<Coalesce.Domain.Person>(context)
+public class PersonKernelPlugin(CrudContext<Coalesce.Domain.AppDbContext> context, IDataSourceFactory dsFactory, IBehaviorsFactory bhFactory, Coalesce.Domain.Services.IWeatherService IWeatherService) : KernelPluginBase<Coalesce.Domain.Person>(context)
 {
     protected Coalesce.Domain.AppDbContext Db => context.DbContext;
 
@@ -26,7 +27,7 @@ public class PersonKernelPlugin(CrudContext<Coalesce.Domain.AppDbContext> contex
         if (!_isScoped) return await InvokeScoped<string>(GetPerson, personId);
         return await Json(async () =>
         {
-            if (!GeneratedForClassViewModel.SecurityInfo.IsReadAllowed(context.User)) return "Unauthorized.";
+            if (!GeneratedForClassViewModel.SecurityInfo.IsReadAllowed(User)) return "Unauthorized.";
 
             var dataSource = dsFactory.GetDataSource<Coalesce.Domain.Person, Coalesce.Domain.Person>("WithoutCases");
             var dataSourceParams = new DataSourceParameters { DataSource = "WithoutCases" };
@@ -47,7 +48,7 @@ public class PersonKernelPlugin(CrudContext<Coalesce.Domain.AppDbContext> contex
         if (!_isScoped) return await InvokeScoped<string>(ListPerson, search, page, countOnly, fields, personCriteria);
         return await Json(async () =>
         {
-            if (!GeneratedForClassViewModel.SecurityInfo.IsReadAllowed(context.User)) return new ListResult<PersonResponse>(errorMessage: "Unauthorized.");
+            if (!GeneratedForClassViewModel.SecurityInfo.IsReadAllowed(User)) return new ListResult<PersonResponse>(errorMessage: "Unauthorized.");
 
             var dataSource = (Coalesce.Domain.Person.WithoutCases)dsFactory.GetDataSource<Coalesce.Domain.Person, Coalesce.Domain.Person>("WithoutCases");
             MappingContext mappingContext = new(context);
@@ -63,6 +64,24 @@ public class PersonKernelPlugin(CrudContext<Coalesce.Domain.AppDbContext> contex
         });
     }
 
+    [KernelFunction("save_person")]
+    [Description("Creates a new Person. Updates an existing Person. Only provide value of the fields that need to be changed.")]
+    public async Task<string> SavePerson(PersonParameter dto)
+    {
+        if (!_isScoped) return await InvokeScoped<string>(SavePerson, dto);
+        return await Json(async () =>
+        {
+            var dataSource = dsFactory.GetDefaultDataSource<Coalesce.Domain.Person, Coalesce.Domain.Person>();
+            var behaviors = bhFactory.GetBehaviors<Coalesce.Domain.Person>(GeneratedForClassViewModel);
+            var kind = (await behaviors.DetermineSaveKindAsync(dto, dataSource, new DataSourceParameters())).Kind;
+            if (kind == SaveKind.Create && !GeneratedForClassViewModel.SecurityInfo.IsCreateAllowed(User))
+                return "Creation of Person items not allowed.";
+            if (kind == SaveKind.Update && !GeneratedForClassViewModel.SecurityInfo.IsEditAllowed(User))
+                return "Editing of Person items not allowed.";
+            return await behaviors.SaveAsync<PersonParameter, PersonResponse>(dto, dataSource, new DataSourceParameters());
+        });
+    }
+
     [KernelFunction("ChangeFirstName")]
     [Description("Changes a person's first name, and optionally assigns a title if they don't yet have one.")]
     public async Task<string> ChangeFirstName(
@@ -74,7 +93,7 @@ public class PersonKernelPlugin(CrudContext<Coalesce.Domain.AppDbContext> contex
         return await Json(async () =>
         {
             var _method = GeneratedForClassViewModel!.MethodByName("ChangeFirstName");
-            if (!_method.SecurityInfo.IsExecuteAllowed(context.User)) return new ItemResult<PersonResponse>(errorMessage: "Unauthorized");
+            if (!_method.SecurityInfo.IsExecuteAllowed(User)) return new ItemResult<PersonResponse>(errorMessage: "Unauthorized");
             var _params = new
             {
                 Id = id,
@@ -118,7 +137,7 @@ public class PersonKernelPlugin(CrudContext<Coalesce.Domain.AppDbContext> contex
         return await Json(async () =>
         {
             var _method = GeneratedForClassViewModel!.MethodByName("SearchPeople");
-            if (!_method.SecurityInfo.IsExecuteAllowed(context.User)) return new ListResult<PersonResponse>(errorMessage: "Unauthorized");
+            if (!_method.SecurityInfo.IsExecuteAllowed(User)) return new ListResult<PersonResponse>(errorMessage: "Unauthorized");
             var _params = new
             {
                 Criteria = criteria,

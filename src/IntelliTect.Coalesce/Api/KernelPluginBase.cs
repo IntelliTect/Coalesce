@@ -1,6 +1,7 @@
 ﻿using IntelliTect.Coalesce.TypeDefinition;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Security.Claims;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -12,6 +13,8 @@ namespace IntelliTect.Coalesce.Api
         where T : class
     {
         protected CrudContext Context { get; } = context;
+
+        protected ClaimsPrincipal User => Context.User;
 
         protected ClassViewModel GeneratedForClassViewModel { get; } = context.ReflectionRepository.GetClassViewModel<T>()!;
 

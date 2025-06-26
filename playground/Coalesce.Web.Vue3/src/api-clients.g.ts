@@ -250,16 +250,6 @@ export class LogApiClient extends ModelApiClient<$models.Log> {
 export class PersonApiClient extends ModelApiClient<$models.Person> {
   constructor() { super($metadata.Person) }
   
-  public chat(history: string | null, prompt: string | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<$models.ChatResponse>> {
-    const $method = this.$metadata.methods.chat
-    const $params =  {
-      history,
-      prompt,
-    }
-    return this.$invoke($method, $params, $config)
-  }
-  
-  
   /** Sets the FirstName to the given text. */
   public rename(id: number | null, name: string | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<$models.Person>> {
     const $method = this.$metadata.methods.rename
@@ -474,6 +464,62 @@ export class StandaloneReadWriteApiClient extends ModelApiClient<$models.Standal
 
 export class ZipCodeApiClient extends ModelApiClient<$models.ZipCode> {
   constructor() { super($metadata.ZipCode) }
+}
+
+
+export class AIAgentServiceApiClient extends ServiceApiClient<typeof $metadata.AIAgentService> {
+  constructor() { super($metadata.AIAgentService) }
+  
+  /** A chat agent that orchestrates other agents */
+  public orchestratedAgent(history: string | null, prompt: string | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<$models.ChatResponse>> {
+    const $method = this.$metadata.methods.orchestratedAgent
+    const $params =  {
+      history,
+      prompt,
+    }
+    return this.$invoke($method, $params, $config)
+  }
+  
+  
+  /** A chat agent that delegates to other chat completion services. */
+  public metaCompletionAgent(history: string | null, prompt: string | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<$models.ChatResponse>> {
+    const $method = this.$metadata.methods.metaCompletionAgent
+    const $params =  {
+      history,
+      prompt,
+    }
+    return this.$invoke($method, $params, $config)
+  }
+  
+  
+  /** A chat agent that directly uses all kernel plugin tools. */
+  public omniToolAgent(history: string | null, prompt: string | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<$models.ChatResponse>> {
+    const $method = this.$metadata.methods.omniToolAgent
+    const $params =  {
+      history,
+      prompt,
+    }
+    return this.$invoke($method, $params, $config)
+  }
+  
+  
+  public personAgent(prompt: string | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<$models.ChatResponse>> {
+    const $method = this.$metadata.methods.personAgent
+    const $params =  {
+      prompt,
+    }
+    return this.$invoke($method, $params, $config)
+  }
+  
+  
+  public productAgent(prompt: string | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<$models.ChatResponse>> {
+    const $method = this.$metadata.methods.productAgent
+    const $params =  {
+      prompt,
+    }
+    return this.$invoke($method, $params, $config)
+  }
+  
 }
 
 

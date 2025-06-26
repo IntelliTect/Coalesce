@@ -754,17 +754,6 @@ defineProps(PersonViewModel, $metadata.Person)
 export class PersonListViewModel extends ListViewModel<$models.Person, $apiClients.PersonApiClient, PersonViewModel> {
   static DataSources = $models.Person.DataSources;
   
-  public get chat() {
-    const chat = this.$apiClient.$makeCaller(
-      this.$metadata.methods.chat,
-      (c, history: string | null, prompt: string | null) => c.chat(history, prompt),
-      () => ({history: null as string | null, prompt: null as string | null, }),
-      (c, args) => c.chat(args.history, args.prompt))
-    
-    Object.defineProperty(this, 'chat', {value: chat});
-    return chat
-  }
-  
   /** 
     Adds two numbers.
     
@@ -910,6 +899,7 @@ export interface ProductViewModel extends $models.Product {
   unknown: unknown | null;
 }
 export class ProductViewModel extends ViewModel<$models.Product, $apiClients.ProductApiClient, number> implements $models.Product  {
+  static DataSources = $models.Product.DataSources;
   
   constructor(initialData?: DeepPartial<$models.Product> | null) {
     super($metadata.Product, new $apiClients.ProductApiClient(), initialData)
@@ -918,6 +908,7 @@ export class ProductViewModel extends ViewModel<$models.Product, $apiClients.Pro
 defineProps(ProductViewModel, $metadata.Product)
 
 export class ProductListViewModel extends ListViewModel<$models.Product, $apiClients.ProductApiClient, ProductViewModel> {
+  static DataSources = $models.Product.DataSources;
   
   constructor() {
     super($metadata.Product, new $apiClients.ProductApiClient())
@@ -1014,6 +1005,72 @@ export class ZipCodeListViewModel extends ListViewModel<$models.ZipCode, $apiCli
 }
 
 
+export class AIAgentServiceViewModel extends ServiceViewModel<typeof $metadata.AIAgentService, $apiClients.AIAgentServiceApiClient> {
+  
+  /** A chat agent that orchestrates other agents */
+  public get orchestratedAgent() {
+    const orchestratedAgent = this.$apiClient.$makeCaller(
+      this.$metadata.methods.orchestratedAgent,
+      (c, history: string | null, prompt: string | null) => c.orchestratedAgent(history, prompt),
+      () => ({history: null as string | null, prompt: null as string | null, }),
+      (c, args) => c.orchestratedAgent(args.history, args.prompt))
+    
+    Object.defineProperty(this, 'orchestratedAgent', {value: orchestratedAgent});
+    return orchestratedAgent
+  }
+  
+  /** A chat agent that delegates to other chat completion services. */
+  public get metaCompletionAgent() {
+    const metaCompletionAgent = this.$apiClient.$makeCaller(
+      this.$metadata.methods.metaCompletionAgent,
+      (c, history: string | null, prompt: string | null) => c.metaCompletionAgent(history, prompt),
+      () => ({history: null as string | null, prompt: null as string | null, }),
+      (c, args) => c.metaCompletionAgent(args.history, args.prompt))
+    
+    Object.defineProperty(this, 'metaCompletionAgent', {value: metaCompletionAgent});
+    return metaCompletionAgent
+  }
+  
+  /** A chat agent that directly uses all kernel plugin tools. */
+  public get omniToolAgent() {
+    const omniToolAgent = this.$apiClient.$makeCaller(
+      this.$metadata.methods.omniToolAgent,
+      (c, history: string | null, prompt: string | null) => c.omniToolAgent(history, prompt),
+      () => ({history: null as string | null, prompt: null as string | null, }),
+      (c, args) => c.omniToolAgent(args.history, args.prompt))
+    
+    Object.defineProperty(this, 'omniToolAgent', {value: omniToolAgent});
+    return omniToolAgent
+  }
+  
+  public get personAgent() {
+    const personAgent = this.$apiClient.$makeCaller(
+      this.$metadata.methods.personAgent,
+      (c, prompt: string | null) => c.personAgent(prompt),
+      () => ({prompt: null as string | null, }),
+      (c, args) => c.personAgent(args.prompt))
+    
+    Object.defineProperty(this, 'personAgent', {value: personAgent});
+    return personAgent
+  }
+  
+  public get productAgent() {
+    const productAgent = this.$apiClient.$makeCaller(
+      this.$metadata.methods.productAgent,
+      (c, prompt: string | null) => c.productAgent(prompt),
+      () => ({prompt: null as string | null, }),
+      (c, args) => c.productAgent(args.prompt))
+    
+    Object.defineProperty(this, 'productAgent', {value: productAgent});
+    return productAgent
+  }
+  
+  constructor() {
+    super($metadata.AIAgentService, new $apiClients.AIAgentServiceApiClient())
+  }
+}
+
+
 export class WeatherServiceViewModel extends ServiceViewModel<typeof $metadata.WeatherService, $apiClients.WeatherServiceApiClient> {
   
   public get getWeather() {
@@ -1077,6 +1134,7 @@ const listViewModelTypeLookup = ListViewModel.typeLookup = {
   ZipCode: ZipCodeListViewModel,
 }
 const serviceViewModelTypeLookup = ServiceViewModel.typeLookup = {
+  AIAgentService: AIAgentServiceViewModel,
   WeatherService: WeatherServiceViewModel,
 }
 

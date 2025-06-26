@@ -5,6 +5,7 @@ using IntelliTect.Coalesce.DataAnnotations;
 using IntelliTect.Coalesce.Models;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
@@ -149,74 +150,7 @@ namespace Coalesce.Domain
 
 #nullable restore
 
-
-        public record ChatResponse(string response, string history);
-
-        [Coalesce]
-        public static async Task<ChatResponse> Chat(
-            [Inject] Kernel kernel,
-            [Inject] IChatCompletionService ccs,
-            [Inject] IDataProtectionProvider dpp,
-            [Inject] ILogger<Person> logger,
-            string? history,
-            string prompt,
-            CancellationToken cancellationToken
-        )
-        {
-            var protector = dpp.CreateProtector("PersonChat");
-            var previousHistory = string.IsNullOrWhiteSpace(history)
-                ? new()
-                : JsonSerializer.Deserialize<ChatHistory>(protector.Unprotect(history)) ?? new();
-
-            var effectiveHistory = new ChatHistory();
-            effectiveHistory.AddSystemMessage($"""
-                The current date is {DateTimeOffset.Now}.
-                Be concice in your responses, not overly wordy. Do not format with markdown.
-                When listing data, gather subsequent pages using the page parameter. If you don't do this, state so in your response.
-                """);
-            effectiveHistory.AddRange(previousHistory.Where(message => message.Role != AuthorRole.System));
-            effectiveHistory.AddUserMessage(prompt);
-
-            var reducer = new ChatHistorySummarizationReducer(ccs, targetCount: 4, thresholdCount: 8); 
-            var reducedMessages = await reducer.ReduceAsync(effectiveHistory);
-            if (reducedMessages is not null) effectiveHistory = new(reducedMessages);
-
-            // Snapshot the history before the request
-            // so we can roll it back in case token limits are reached.
-            ChatHistory preCompletionHistory = new(effectiveHistory);
-            string result;
-            try
-            {
-                // Note: effectiveHistory will get populated with all function calls
-                // that occur as part of completing the request. It won't get populated
-                // with the assistant response message, though.
-                var response = await ccs.GetChatMessageContentAsync(
-                    effectiveHistory,
-                    executionSettings: new()
-                    {
-                        FunctionChoiceBehavior = FunctionChoiceBehavior.Auto()
-                    },
-                    kernel: kernel,
-                    cancellationToken);
-                result = response.ToString();
-            }
-            catch (HttpOperationException ex) when (ex.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
-            {
-                logger.LogWarning(ex, "Unable to complete chat completion request.");
-                result = "Chat services are currently busy, or your request is too complicated.";
-                // Roll back history which may have just been populated with an overwhelming number of tokens.
-                effectiveHistory = preCompletionHistory;
-            }
-
-            effectiveHistory.AddAssistantMessage(result);
-            var newHistory = protector.Protect(JsonSerializer.Serialize(effectiveHistory, new JsonSerializerOptions()
-            {
-                Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
-            }));
-
-            return new(result, newHistory);
-
-        }
+        
 
         /// <summary>
         /// Sets the FirstName to the given text.

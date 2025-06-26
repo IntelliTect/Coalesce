@@ -29,9 +29,21 @@ public class KernelPlugins : CompositeGenerator<ReflectionRepository>
                     model.SecurityInfo.IsReadAllowed() ||
                     model.SecurityInfo.IsSaveAllowed() ||
                     model.SecurityInfo.IsDeleteAllowed()
-                ) &&
-                model.ClientDataSources(Model).Any(ds => ds.HasAttribute<KernelPluginAttribute>())
+                ) && (
+                    model.ClientDataSources(Model).Any(ds => ds.HasAttribute<KernelPluginAttribute>()) ||
+                    model.KernelMethods.Any()
+                )
             )
+            {
+                yield return Generator<KernelPlugin>()
+                    .WithModel(model)
+                    .AppendOutputPath($"KernelPlugins/Generated/{model.ClientTypeName}KernelPlugin.g.cs");
+            }
+        }
+
+        foreach (var model in Model.Services)
+        {
+            if (model.KernelMethods.Any())
             {
                 yield return Generator<KernelPlugin>()
                     .WithModel(model)
@@ -102,10 +114,14 @@ public class KernelPlugin(GeneratorServices services) : ApiService(services)
             $"IBehaviorsFactory bhFactory",
         ];
 
+        if (Model.IsService)
+        {
+            injectedServices.Add($"{Model.Type.FullyQualifiedName} _service");
+        }
+
         // Individual method dependencies must be ctor injected so that InvokedScoped
         // can acquire new instances of those services.
-        foreach (var param in Model.ClientMethods
-            .Where(ds => ds.HasAttribute<KernelPluginAttribute>())
+        foreach (var param in Model.KernelMethods
             .SelectMany(method => method.Parameters)
             .Where(p => p.ShouldInjectFromServices)
         )
@@ -126,7 +142,7 @@ public class KernelPlugin(GeneratorServices services) : ApiService(services)
             WriteSaveFunction(b);
         }
 
-        foreach (var method in Model.ClientMethods.Where(ds => ds.HasAttribute<KernelPluginAttribute>()))
+        foreach (var method in Model.KernelMethods)
         {
             WriteMethodFunction(b, method);
         }
@@ -193,8 +209,6 @@ public class KernelPlugin(GeneratorServices services) : ApiService(services)
     {
         var description = method.GetAttributeValue<KernelPluginAttribute>(kp => kp.Description);
 
-        var pkVar = Model.PrimaryKey.JsonName;
-
         if (method.ResultType.IsFile)
         {
             throw new NotSupportedException("File result types are not supported in kernel plugins.");
@@ -241,6 +255,10 @@ public class KernelPlugin(GeneratorServices services) : ApiService(services)
             if (method.IsStatic)
             {
                 WriteMethodInvocation(b, method, method.Parent.FullyQualifiedName);
+            }
+            else if (method.EffectiveParent.IsService)
+            {
+                WriteMethodInvocation(b, method, "_service");
             }
             else
             {

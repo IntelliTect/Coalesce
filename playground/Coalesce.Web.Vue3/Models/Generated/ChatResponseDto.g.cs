@@ -9,7 +9,7 @@ using System.Text.Json.Serialization;
 
 namespace Coalesce.Web.Vue3.Models
 {
-    public partial class ChatResponseParameter : SparseDto, IGeneratedParameterDto<Coalesce.Domain.Person.ChatResponse>
+    public partial class ChatResponseParameter : SparseDto, IGeneratedParameterDto<Coalesce.Domain.AIAgentService.ChatResponse>
     {
         public ChatResponseParameter() { }
 
@@ -30,7 +30,7 @@ namespace Coalesce.Web.Vue3.Models
         /// <summary>
         /// Map from the current DTO instance to the domain object.
         /// </summary>
-        public void MapTo(Coalesce.Domain.Person.ChatResponse entity, IMappingContext context)
+        public void MapTo(Coalesce.Domain.AIAgentService.ChatResponse entity, IMappingContext context)
         {
             var includes = context.Includes;
 
@@ -39,11 +39,11 @@ namespace Coalesce.Web.Vue3.Models
         /// <summary>
         /// Map from the current DTO instance to a new instance of the domain object.
         /// </summary>
-        public Coalesce.Domain.Person.ChatResponse MapToNew(IMappingContext context)
+        public Coalesce.Domain.AIAgentService.ChatResponse MapToNew(IMappingContext context)
         {
             var includes = context.Includes;
 
-            var entity = new Coalesce.Domain.Person.ChatResponse(
+            var entity = new Coalesce.Domain.AIAgentService.ChatResponse(
                 response,
                 history
             )
@@ -55,7 +55,7 @@ namespace Coalesce.Web.Vue3.Models
             return entity;
         }
 
-        public Coalesce.Domain.Person.ChatResponse MapToModelOrNew(Coalesce.Domain.Person.ChatResponse obj, IMappingContext context)
+        public Coalesce.Domain.AIAgentService.ChatResponse MapToModelOrNew(Coalesce.Domain.AIAgentService.ChatResponse obj, IMappingContext context)
         {
             if (obj is null) return MapToNew(context);
             MapTo(obj, context);
@@ -63,7 +63,7 @@ namespace Coalesce.Web.Vue3.Models
         }
     }
 
-    public partial class ChatResponseResponse : IGeneratedResponseDto<Coalesce.Domain.Person.ChatResponse>
+    public partial class ChatResponseResponse : IGeneratedResponseDto<Coalesce.Domain.AIAgentService.ChatResponse>
     {
         public ChatResponseResponse() { }
 
@@ -73,7 +73,7 @@ namespace Coalesce.Web.Vue3.Models
         /// <summary>
         /// Map from the domain object to the properties of the current DTO instance.
         /// </summary>
-        public void MapFrom(Coalesce.Domain.Person.ChatResponse obj, IMappingContext context, IncludeTree tree = null)
+        public void MapFrom(Coalesce.Domain.AIAgentService.ChatResponse obj, IMappingContext context, IncludeTree tree = null)
         {
             if (obj == null) return;
             var includes = context.Includes;

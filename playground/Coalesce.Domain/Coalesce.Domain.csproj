@@ -19,6 +19,10 @@
 
     <PackageReference Include="GenFu" />
     <PackageReference Include="Bogus" />
+    <PackageReference Include="Microsoft.SemanticKernel.Agents.Core" />
+    <PackageReference Include="Microsoft.SemanticKernel.Agents.Magentic" />
+    <PackageReference Include="Microsoft.SemanticKernel.Agents.Orchestration" />
+    <PackageReference Include="Microsoft.SemanticKernel.Agents.Runtime.InProcess" />
 
     <!-- Necessary because GenFu has a hard dep against NETStandard.Library 1.6, which screws up a lot of things. -->
     <PackageReference Include="NETStandard.Library" />

@@ -48,7 +48,17 @@
         <component ref="routerView" :is="Component" :key="$route.path" />
       </router-view>
 
-      <ChatAI />
+      <ChatAI
+        title="Orchestrated"
+        endpoint="orchestratedAgent"
+        style="right: 800px"
+      />
+      <ChatAI
+        title="MetaCompletion"
+        endpoint="metaCompletionAgent"
+        style="right: 400px"
+      />
+      <ChatAI title="OmniTool" endpoint="omniToolAgent" style="right: 0px" />
     </v-main>
   </v-app>
 </template>

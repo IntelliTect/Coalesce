@@ -594,6 +594,14 @@ export class Product {
     Object.assign(this, Product.map(data || {}));
   }
 }
+export namespace Product {
+  export namespace DataSources {
+    
+    export class DefaultSource implements DataSource<typeof metadata.Product.dataSources.defaultSource> {
+      readonly $metadata = metadata.Product.dataSources.defaultSource
+    }
+  }
+}
 
 
 export interface ZipCode extends Model<typeof metadata.ZipCode> {

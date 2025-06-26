@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using IntelliTect.Coalesce;
 using IntelliTect.Coalesce.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
 
@@ -32,6 +33,11 @@ namespace Coalesce.Domain
 
         [NotMapped]
         public object Unknown { get; set; } = "unknown value";
+
+        [DefaultDataSource, KernelPlugin("")]
+        public class DefaultSource(CrudContext<AppDbContext> context) : StandardDataSource<Product, AppDbContext>(context)
+        {
+        }
     }
 
     public class ProductDetails

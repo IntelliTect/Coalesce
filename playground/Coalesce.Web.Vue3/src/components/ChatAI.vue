@@ -27,7 +27,7 @@
     >
       <span class="d-flex align-center">
         <v-icon class="mr-2" size="20">fa-solid fa-robot</v-icon>
-        AI Assistant
+        {{ title }}
       </span>
       <div class="d-flex align-center">
         <v-btn
@@ -68,7 +68,7 @@
             {{ msg.content }}
           </div>
         </div>
-        <div v-if="personList.chat.isLoading" class="chat-bubble-row ai">
+        <div v-if="endpoint.isLoading" class="chat-bubble-row ai">
           <div
             class="chat-bubble ai text-pre-wrap d-flex align-center"
             style="min-width: 48px; min-height: 32px"
@@ -83,7 +83,7 @@
           </div>
         </div>
         <div
-          v-if="!messages.length && !personList.chat.isLoading"
+          v-if="!messages.length && !endpoint.isLoading"
           class="text-medium-emphasis text-center py-8"
         >
           No messages yet. Start the conversation!
@@ -100,11 +100,12 @@
           class="w-100"
           variant="solo"
           @keydown.enter.exact.prevent="send"
+          @keydown.up.exact.prevent="fillLastMessage"
           hide-details
         />
         <v-btn
           :disabled="!input.trim()"
-          :loading="personList.chat.isLoading"
+          :loading="endpoint.isLoading"
           @click="send"
           color="primary"
           variant="flat"
@@ -120,9 +121,23 @@
 <script setup lang="ts">
 import { ref, nextTick, watch, useTemplateRef } from "vue";
 import { useEdgeResize } from "@/composables/useEdgeResize";
-import { PersonListViewModel } from "@/viewmodels.g";
+import { AIAgentServiceViewModel, PersonListViewModel } from "@/viewmodels.g";
 
-const personList = new PersonListViewModel();
+type CallableEndpointKeys = {
+  [K in keyof AIAgentServiceViewModel]: AIAgentServiceViewModel[K] extends {
+    invoke: Function;
+  }
+    ? K
+    : never;
+}[keyof AIAgentServiceViewModel];
+
+const props = defineProps<{
+  title: string;
+  endpoint: CallableEndpointKeys;
+}>();
+const service = new AIAgentServiceViewModel();
+const endpoint = service[props.endpoint];
+
 const input = ref("");
 const messages = ref<{ role: "user" | "ai"; content: string }[]>([]);
 const history = ref<string>("");
@@ -139,7 +154,7 @@ async function send() {
   pushMessage({ role: "user", content: userMsg });
   input.value = "";
   try {
-    const result = await personList.chat(history.value, userMsg);
+    const result = await endpoint.invoke(history.value, userMsg);
     history.value = result.history!;
     pushMessage({
       role: "ai",
@@ -148,7 +163,7 @@ async function send() {
   } catch (e) {
     pushMessage({
       role: "ai",
-      content: "[Error: " + personList.chat.message + "]",
+      content: "[Error: " + endpoint.message + "]",
     });
   }
 }
@@ -158,6 +173,18 @@ function resetChat() {
   history.value = "";
   input.value = "";
   focusInput();
+}
+
+function fillLastMessage() {
+  // Find the last user message
+  const lastUserMessage = messages.value
+    .slice()
+    .reverse()
+    .find((msg) => msg.role === "user");
+
+  if (lastUserMessage) {
+    input.value = lastUserMessage.content;
+  }
 }
 
 function pushMessage(message: { role: "user" | "ai"; content: string }) {

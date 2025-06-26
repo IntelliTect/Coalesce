@@ -1840,37 +1840,6 @@ export const Person = domain.types.Person = {
     },
   },
   methods: {
-    chat: {
-      name: "chat",
-      displayName: "Chat",
-      transportType: "item",
-      httpMethod: "POST",
-      isStatic: true,
-      params: {
-        history: {
-          name: "history",
-          displayName: "History",
-          type: "string",
-          role: "value",
-        },
-        prompt: {
-          name: "prompt",
-          displayName: "Prompt",
-          type: "string",
-          role: "value",
-          rules: {
-            required: val => (val != null && val !== '') || "Prompt is required.",
-          }
-        },
-      },
-      return: {
-        name: "$return",
-        displayName: "Result",
-        type: "object",
-        get typeDef() { return (domain.types.ChatResponse as ObjectType & { name: "ChatResponse" }) },
-        role: "value",
-      },
-    },
     rename: {
       name: "rename",
       displayName: "Rename",
@@ -2505,6 +2474,14 @@ export const Product = domain.types.Product = {
   methods: {
   },
   dataSources: {
+    defaultSource: {
+      type: "dataSource",
+      name: "DefaultSource" as const,
+      displayName: "Default Source",
+      isDefault: true,
+      props: {
+      },
+    },
   },
 }
 export const StandaloneReadCreate = domain.types.StandaloneReadCreate = {
@@ -2977,6 +2954,152 @@ export const WeatherData = domain.types.WeatherData = {
     },
   },
 }
+export const AIAgentService = domain.services.AIAgentService = {
+  name: "AIAgentService",
+  displayName: "AI Agent Service",
+  type: "service",
+  controllerRoute: "AIAgentService",
+  methods: {
+    orchestratedAgent: {
+      name: "orchestratedAgent",
+      displayName: "Orchestrated Agent",
+      transportType: "item",
+      httpMethod: "POST",
+      params: {
+        history: {
+          name: "history",
+          displayName: "History",
+          type: "string",
+          role: "value",
+        },
+        prompt: {
+          name: "prompt",
+          displayName: "Prompt",
+          type: "string",
+          role: "value",
+          rules: {
+            required: val => (val != null && val !== '') || "Prompt is required.",
+          }
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "object",
+        get typeDef() { return (domain.types.ChatResponse as ObjectType & { name: "ChatResponse" }) },
+        role: "value",
+      },
+    },
+    metaCompletionAgent: {
+      name: "metaCompletionAgent",
+      displayName: "Meta Completion Agent",
+      transportType: "item",
+      httpMethod: "POST",
+      params: {
+        history: {
+          name: "history",
+          displayName: "History",
+          type: "string",
+          role: "value",
+        },
+        prompt: {
+          name: "prompt",
+          displayName: "Prompt",
+          type: "string",
+          role: "value",
+          rules: {
+            required: val => (val != null && val !== '') || "Prompt is required.",
+          }
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "object",
+        get typeDef() { return (domain.types.ChatResponse as ObjectType & { name: "ChatResponse" }) },
+        role: "value",
+      },
+    },
+    omniToolAgent: {
+      name: "omniToolAgent",
+      displayName: "Omni Tool Agent",
+      transportType: "item",
+      httpMethod: "POST",
+      params: {
+        history: {
+          name: "history",
+          displayName: "History",
+          type: "string",
+          role: "value",
+        },
+        prompt: {
+          name: "prompt",
+          displayName: "Prompt",
+          type: "string",
+          role: "value",
+          rules: {
+            required: val => (val != null && val !== '') || "Prompt is required.",
+          }
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "object",
+        get typeDef() { return (domain.types.ChatResponse as ObjectType & { name: "ChatResponse" }) },
+        role: "value",
+      },
+    },
+    personAgent: {
+      name: "personAgent",
+      displayName: "Person Agent",
+      transportType: "item",
+      httpMethod: "POST",
+      params: {
+        prompt: {
+          name: "prompt",
+          displayName: "Prompt",
+          type: "string",
+          role: "value",
+          rules: {
+            required: val => (val != null && val !== '') || "Prompt is required.",
+          }
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "object",
+        get typeDef() { return (domain.types.ChatResponse as ObjectType & { name: "ChatResponse" }) },
+        role: "value",
+      },
+    },
+    productAgent: {
+      name: "productAgent",
+      displayName: "Product Agent",
+      transportType: "item",
+      httpMethod: "POST",
+      params: {
+        prompt: {
+          name: "prompt",
+          displayName: "Prompt",
+          type: "string",
+          role: "value",
+          rules: {
+            required: val => (val != null && val !== '') || "Prompt is required.",
+          }
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "object",
+        get typeDef() { return (domain.types.ChatResponse as ObjectType & { name: "ChatResponse" }) },
+        role: "value",
+      },
+    },
+  },
+}
 export const WeatherService = domain.services.WeatherService = {
   name: "WeatherService",
   displayName: "Weather Service",
@@ -3066,6 +3189,7 @@ interface AppDomain extends Domain {
     ZipCode: typeof ZipCode
   }
   services: {
+    AIAgentService: typeof AIAgentService
     WeatherService: typeof WeatherService
   }
 }

@@ -47,6 +47,8 @@ var apiKey = builder.Configuration["AiKey"];
 
 services.AddScoped((IServiceProvider serviceProvider) => KernelPluginFactory.CreateFromType<PersonKernelPlugin>("Person", serviceProvider));
 services.AddScoped((IServiceProvider serviceProvider) => KernelPluginFactory.CreateFromType<CompanyKernelPlugin>("Company", serviceProvider));
+services.AddScoped((IServiceProvider serviceProvider) => KernelPluginFactory.CreateFromType<ProductKernelPlugin>("Product", serviceProvider));
+services.AddScoped((IServiceProvider serviceProvider) => KernelPluginFactory.CreateFromType<AIAgentServiceKernelPlugin>("AIAgentService", serviceProvider));
 
 services.AddKernel()
     .AddAzureOpenAIChatCompletion("gpt-4.1", modelId: modelId, endpoint: endpoint, apiKey: apiKey);
@@ -80,6 +82,7 @@ services.AddSwaggerGen(c =>
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
 });
 
+services.AddScoped<AIAgentService>();
 services.AddScoped<IWeatherService, WeatherService>();
 
 services.AddAuthentication(DemoMiddleware.AuthenticationScheme).AddCookie(DemoMiddleware.AuthenticationScheme);

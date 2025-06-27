@@ -131,7 +131,9 @@ namespace IntelliTect.Coalesce.Utilities
         [return: System.Diagnostics.CodeAnalysis.NotNullIfNotNull("str")]
         public static string? EscapeStringLiteralForTypeScript(this string? str) => str?
             .Replace(@"\", @"\\")
-            .Replace("\r", @"\r")
+            // Normalize newlines to \n so there aren't differences in generated output depending on git checkout style
+            // since git won't normalize these escape sequences.
+            .Replace("\r\n", @"\n")
             .Replace("\n", @"\n")
             .Replace("\"", "\\\"");
 

@@ -893,7 +893,7 @@ export const ComplexModel = domain.types.ComplexModel = {
     restrictedString: {
       name: "restrictedString",
       displayName: "Restricted String",
-      description: "This is a multiline string in an attribute.\r\nThis is a second line in the string.",
+      description: "This is a multiline string in an attribute.\nThis is a second line in the string.",
       type: "string",
       role: "value",
     },

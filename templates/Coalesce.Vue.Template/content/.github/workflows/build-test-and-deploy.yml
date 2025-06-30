@@ -1,6 +1,5 @@
 name: Build, Test, and Deploy Coalesce.Starter.Vue
 
-# https://docs.github.com/actions/writing-workflows/choosing-when-your-workflow-runs/events-that-trigger-workflows
 on:
   push:
     branches:
@@ -8,19 +7,8 @@ on:
   pull_request:
   workflow_dispatch:
 
-# CONFIGURATION
-# For help, go to https://github.com/Azure/Actions
-#
-# 1. Set up the production Environment in the GitHub Repository Settings.
-#   Environment Protection Rules are recommended to prevent accidental deployments.
-#   https://docs.github.com/actions/managing-workflow-runs-and-deployments/managing-deployments/managing-environments-for-deployment#deployment-protection-rules
-#
-# 2. Set up the following secrets in your repository - https://docs.github.com/actions/security-for-github-actions/security-guides/using-secrets-in-github-actions#creating-secrets-for-an-environment
-#   AZURE_WEBAPP_PUBLISH_PROFILE
-#
-# 3. Change these variables for your configuration:
 env:
-  AZURE_WEBAPP_NAME: MY_WEBAPP_NAME # set this to your app service name
+  AZURE_WEBAPP_NAME: MY_WEBAPP_NAME
 
 jobs:
   build-and-test:
@@ -35,7 +23,6 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 9.x
-          include-preview: true
 
       - name: Use Node.js
         uses: actions/setup-node@v4
@@ -62,7 +49,7 @@ jobs:
         working-directory: Coalesce.Starter.Vue.Web
 
       - name: dotnet build
-        run: dotnet build --configuration Release --no-restore --no-incremental 
+        run: dotnet build --configuration Release --no-restore --no-incremental
 
       - name: dotnet test
         run: dotnet test --configuration Release --no-restore --no-build
@@ -74,30 +61,32 @@ jobs:
         if: github.event_name != 'pull_request'
         uses: actions/upload-artifact@v4
         with:
-          name: web-app
+          name: Coalesce.Starter.Vue.Web
           path: ${{ github.workspace }}/publish
           if-no-files-found: error
 
   # Deploys the app to Azure App Service
+  # TODO: See the following documentation for how to acquire and store the AZURE_WEBAPP_PUBLISH_PROFILE secret
   # https://docs.github.com/actions/use-cases-and-examples/deploying/deploying-net-to-azure-app-service
   deploy-production:
     needs: build-and-test
     runs-on: ubuntu-latest
     if: github.event_name != 'pull_request'
     environment:
-      name: 'production'
+      name: "production"
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
 
     steps:
       - name: Download artifact for deployment
         uses: actions/download-artifact@v4
         with:
-          name: web-app
+          name: Coalesce.Starter.Vue.Web
 
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
+        id: deploy-to-webapp
         with:
-          app-name: ${{ env.AZURE_WEBAPP_NAME }}
-          slot-name: 'production'
+          app-name: "MY-WEBAPP-NAME" # TODO: set this to your app service name
+          slot-name: "production"
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
           package: .

@@ -49,6 +49,11 @@ namespace IntelliTect.Coalesce.DataAnnotations
         bool UserCanWrite(IMappingContext context, string propertyName, object? model, object? incomingValue);
     }
 
+    /// <summary>
+    /// Generic version of <see cref="IPropertyRestriction"/> that provides strongly-typed
+    /// method overloads for a specific model type.
+    /// </summary>
+    /// <typeparam name="TModel">The model type that this restriction applies to.</typeparam>
     public interface IPropertyRestriction<TModel> : IPropertyRestriction
         where TModel : class
     {

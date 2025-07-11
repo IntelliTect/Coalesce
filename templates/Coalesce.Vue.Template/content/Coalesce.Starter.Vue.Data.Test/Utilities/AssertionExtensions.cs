@@ -27,9 +27,8 @@ public static class AssertionExtensions
     /// </summary>
     public static void AssertSuccess(this ApiResult result, string? message = null)
     {
-        // Returns a more useful assertion error than only checking WasSuccessful.
+        Assert.True(result.WasSuccessful, result.Message);
         Assert.Equal(message, result.Message);
-        Assert.True(result.WasSuccessful);
     }
 
     /// <summary>
@@ -37,8 +36,8 @@ public static class AssertionExtensions
     /// </summary>
     public static T AssertSuccess<T>(this ItemResult<T> result)
     {
+        Assert.True(result.WasSuccessful, result.Message);
         Assert.Null(result.Message);
-        Assert.True(result.WasSuccessful);
         return result.Object ?? throw new ArgumentException("Sucessful result unexpectedly returned null object");
     }
 
@@ -57,7 +56,7 @@ public static class AssertionExtensions
     public static async Task AssertSuccess(this Task<ItemResult> resultTask)
     {
         var result = await resultTask;
-        Assert.True(result.WasSuccessful);
+        Assert.True(result.WasSuccessful, result.Message);
     }
 
     /// <summary>

@@ -2511,6 +2511,37 @@ export const ComplexModel = domain.types.ComplexModel = {
         role: "value",
       },
     },
+    postWithImplicitDiParameters: {
+      name: "postWithImplicitDiParameters",
+      displayName: "Post With Implicit Di Parameters",
+      transportType: "item",
+      httpMethod: "POST",
+      params: {
+        id: {
+          name: "id",
+          displayName: "Primary Key",
+          type: "number",
+          role: "value",
+          get source() { return (domain.types.ComplexModel as ModelType & { name: "ComplexModel" }).props.complexModelId },
+          rules: {
+            required: val => val != null || "Primary Key is required.",
+          }
+        },
+        input: {
+          name: "input",
+          displayName: "Input",
+          type: "object",
+          get typeDef() { return (domain.types.ExternalTypeWithDtoProp as ObjectType & { name: "ExternalTypeWithDtoProp" }) },
+          role: "value",
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "void",
+        role: "value",
+      },
+    },
     methodWithOptionalEnumParam: {
       name: "methodWithOptionalEnumParam",
       displayName: "Method With Optional Enum Param",

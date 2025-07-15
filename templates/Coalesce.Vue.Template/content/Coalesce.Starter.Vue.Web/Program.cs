@@ -83,7 +83,11 @@ services.AddTransient<IEmailService, NoOpEmailService>();
 services.AddSwaggerGen(c =>
 {
     c.AddCoalesce();
-    c.SwaggerDoc("current", new OpenApiInfo { Title = "Current API", Version = "current" });
+    c.SwaggerDoc("current", new OpenApiInfo { 
+        Title = "Current API", 
+        Version = "current",
+        Description = "This API surface is auto-generated and is subject to change at any time."
+    });
 });
 
 #endif

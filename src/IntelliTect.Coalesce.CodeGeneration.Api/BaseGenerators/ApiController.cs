@@ -204,6 +204,10 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
                 {
                     b.Append("[FromServices] ");
                 }
+                else if (param.IsDI)
+                {
+                    // Do nothing. This is a non-service injection (i.e. ClaimsPrincipal or CancellationToken)
+                }
                 else if (param.PureType.IsFile)
                 {
                     // File parameters must not be annotated with FromForm, as this will break their model binding.
@@ -303,8 +307,8 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
         /// This could be an variable holding an instance of a type, or a class reference if the method is static.
         /// </param>
         public void WriteMethodInvocation(
-            CSharpCodeBuilder b, 
-            MethodViewModel method, 
+            CSharpCodeBuilder b,
+            MethodViewModel method,
             string owningMember
         )
         {
@@ -442,7 +446,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
             {
                 ret += ".ToList()";
             }
-            
+
             if (param.PureType.HasClassViewModel)
             {
                 // Object parameters still get instantiated by the aspnetcore model binder,
@@ -551,7 +555,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
                         // and serve a blank {wasSuccessful: true} response.
                         b.Line($"return NotFound();");
                     }
-                    
+
                     // Stop generating, since all generated code paths have returned,
                     // so we don't generate unreachable code.
                     return;

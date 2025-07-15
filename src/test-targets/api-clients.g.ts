@@ -416,6 +416,16 @@ export class ComplexModelApiClient extends ModelApiClient<$models.ComplexModel> 
   }
   
   
+  public postWithImplicitDiParameters(id: number | null, input?: $models.ExternalTypeWithDtoProp | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<void>> {
+    const $method = this.$metadata.methods.postWithImplicitDiParameters
+    const $params =  {
+      id,
+      input,
+    }
+    return this.$invoke($method, $params, $config)
+  }
+  
+  
   public methodWithOptionalEnumParam(id: number | null, status?: $models.Statuses | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<void>> {
     const $method = this.$metadata.methods.methodWithOptionalEnumParam
     const $params =  {

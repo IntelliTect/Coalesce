@@ -19,7 +19,11 @@
     <PackageVersion Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="$(DotNetPackageVersionSpec)" />
     <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="9.0.0" />
     <PackageVersion Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="$(DotNetPackageVersionSpec)" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="4.8.0" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.4" />
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.8.0" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Analyzer.Testing.XUnit" Version="1.1.2" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.CodeFix.Testing.XUnit" Version="1.1.2" />
     <PackageVersion Include="Microsoft.Data.SqlClient" Version="5.2.2" />
     <PackageVersion Include="Microsoft.DotNet.Cli.Utils" Version="2.0.0" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="$(DotNetPackageVersionSpec)" />
@@ -33,7 +37,6 @@
     <PackageVersion Include="Microsoft.OpenApi.Readers" Version="1.6.22" />
     <PackageVersion Include="Moq" Version="4.20.72" />
     <PackageVersion Include="Moq.AutoMock" Version="3.5.0" />
-    <PackageVersion Include="NETStandard.Library" Version="2.0.3" />
     <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.4" />
     <PackageVersion Include="Pomelo.EntityFrameworkCore.MySql" Version="8.0.2" />
     <PackageVersion Include="Roslynator.Analyzers" Version="4.12.7" />

@@ -1,0 +1,47 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <IsPackable>true</IsPackable>
+    <DevelopmentDependency>true</DevelopmentDependency>
+    <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+    <PackageDescription>Roslyn analyzers for IntelliTect.Coalesce that help identify common issues and provide code fixes.</PackageDescription>
+    <Company>IntelliTect</Company>
+    <Authors>IntelliTect</Authors>
+    <Product>Coalesce Web Framework</Product>
+    <Copyright>Copyright IntelliTect © 2020, All Rights Reserved.</Copyright>
+    <DefaultLanguage>en-US</DefaultLanguage>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/IntelliTect/Coalesce/</PackageProjectUrl>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <PackageTags>IntelliTect Coalesce MVC API Web Framework Generation Generator Analyzer</PackageTags>
+    <RepositoryUrl>https://github.com/IntelliTect/Coalesce</RepositoryUrl>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" PrivateAssets="all" />
+  </ItemGroup>
+
+  <!-- Temporarily comment out the project reference until build issues are resolved
+  <ItemGroup>
+    <ProjectReference Include="..\IntelliTect.Coalesce\IntelliTect.Coalesce.csproj" PrivateAssets="all" />
+  </ItemGroup>
+  -->
+
+  <!-- Self-referencing analyzer entry removed to fix build issues
+  <ItemGroup>
+    <Analyzer Include="$(OutputPath)\$(AssemblyName).dll" />
+  </ItemGroup>
+  -->
+
+  <ItemGroup>
+    <None Include="tools\install.ps1" Pack="true" PackagePath="tools\install.ps1" />
+    <None Include="tools\uninstall.ps1" Pack="true" PackagePath="tools\uninstall.ps1" />
+  </ItemGroup>
+
+</Project>

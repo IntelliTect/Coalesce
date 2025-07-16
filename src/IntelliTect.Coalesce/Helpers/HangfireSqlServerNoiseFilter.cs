@@ -19,7 +19,9 @@ public static class TracerProviderBuilderExtensions
     /// </param>
     /// <returns>The instance of <see cref="TracerProviderBuilder"/> to chain the calls.</returns>
     public static TracerProviderBuilder AddHangfireSqlServerNoiseFilter(
-        this TracerProviderBuilder builder, string sqlCommandPropertyName) => builder.AddProcessor(new HangfireSqlServerNoiseFilterProcessor(sqlCommandPropertyName));
+        this TracerProviderBuilder builder, 
+        string sqlCommandPropertyName
+    ) => builder.AddProcessor(new HangfireSqlServerNoiseFilterProcessor(sqlCommandPropertyName));
 }
 
 internal sealed class HangfireSqlServerNoiseFilterProcessor(string sqlCommandPropertyName) : BaseProcessor<Activity>
@@ -37,16 +39,17 @@ internal sealed class HangfireSqlServerNoiseFilterProcessor(string sqlCommandPro
 
         if (commandText is not null &&
             activity.Status != ActivityStatusCode.Error &&
-            IsHangfireThread(Thread.CurrentThread) && (
-            commandText?.Contains("[HangFire]") == true ||
-            commandText?.StartsWith("exec sp_getapplock ", StringComparison.InvariantCultureIgnoreCase) == true ||
-            commandText is
-                "Commit" or
-                "sp_getapplock" or
-                "sp_releaseapplock" or
-                "set xact_abort on;set nocount on;" or
-                "SELECT SYSUTCDATETIME()"
-        ))
+            IsHangfireThread(Thread.CurrentThread) && 
+            (
+                commandText?.Contains("[HangFire]") == true ||
+                commandText?.StartsWith("exec sp_getapplock ", StringComparison.InvariantCultureIgnoreCase) == true ||
+                commandText is
+                    "Commit" or
+                    "sp_getapplock" or
+                    "sp_releaseapplock" or
+                    "set xact_abort on;set nocount on;" or
+                    "SELECT SYSUTCDATETIME()"
+            ))
         {
             // Sample out
             activity.ActivityTraceFlags &= ~ActivityTraceFlags.Recorded;

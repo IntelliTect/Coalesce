@@ -50,6 +50,7 @@ public class KernelPlugin(GeneratorServices services) : ApiService(services)
             "System.Linq",
             "System.Collections.Generic",
             "System.Security.Claims",
+            "System.Threading.Tasks",
             // This is the output namespace for the generated DTOs
             $"{namespaceName}.Models"
         };
@@ -145,6 +146,12 @@ public class KernelPlugin(GeneratorServices services) : ApiService(services)
             {
                 // DI injections are always pulled from ctor injections
                 continue;
+            }
+
+            var description = param.GetAttributeValue<KernelPluginAttribute>(kp => kp.Description);
+            if (description is not null)
+            {
+                b.Line($"[Description({description.QuotedStringLiteralForCSharp()})]");
             }
 
             paramNames.Add(param.CsParameterName);
@@ -371,12 +378,16 @@ public class KernelPlugin(GeneratorServices services) : ApiService(services)
         if (Model.SecurityInfo.IsEditAllowed()) descriptionParts.Add($"Updates an existing {Model.DisplayName}");
         descriptionParts = [string.Join(" or ", descriptionParts) + "."];
 
-        if (isSparse) descriptionParts.Add(" Only provide value of the fields that need to be changed.");
-
         b.Line($"[Description({string.Concat(descriptionParts).QuotedStringLiteralForCSharp()})]");
         using (b.Block($"""
-            public async Task<string> Save{Model.Name}({Model.ParameterDtoTypeName} dto)
-            """))
+            public async Task<string> Save{Model.Name}(
+                [Description({(isSparse
+                    ? "The values to update. Only provide value of the fields that need to be changed."
+                    : "Provide the value of all fields, even those that are not being changed."
+                ).QuotedStringLiteralForCSharp()})]
+                {Model.ParameterDtoTypeName} dto
+            )
+        """))
         {
             b.Line($"if (!_isScoped) return await InvokeScoped<string>(Save{Model.Name}, dto);");
 

@@ -129,6 +129,7 @@ namespace IntelliTect.Coalesce.Tests.Util
 
             // Other assemblies that are ONLY introduced by generated code:
             Load(typeof(Microsoft.AspNetCore.StaticFiles.FileExtensionContentTypeProvider).Assembly);
+            Load(typeof(Microsoft.SemanticKernel.KernelPlugin).Assembly);
 
             // Now that we've eagerly loaded all possible dependencies,
             // gather their locations so we can feed those locations to Roslyn.

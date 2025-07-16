@@ -86,8 +86,9 @@ services.AddTransient<IEmailService, NoOpEmailService>();
 services.AddSwaggerGen(c =>
 {
     c.AddCoalesce();
-    c.SwaggerDoc("current", new OpenApiInfo { 
-        Title = "Current API", 
+    c.SwaggerDoc("current", new OpenApiInfo
+    {
+        Title = "Current API",
         Version = "current",
         Description = "This API surface is auto-generated and is subject to change at any time."
     });
@@ -127,12 +128,8 @@ services.AddHangfireServer(c =>
 foreach (var pluginType in Assembly.GetExecutingAssembly().GetTypes().Where(t => t.BaseType?.Name == "KernelPluginBase`1"))
     services.AddScoped(sp => KernelPluginFactory.CreateFromType(pluginType, pluginType.Name, sp));
 services.AddScoped<AIAgentService>();
-services.AddAzureOpenAIChatCompletion(
-    deploymentName: "gpt-4.1",
-    endpoint: "https://ascott-openai-test.openai.azure.com/",
-    //credentials: new DefaultAzureCredential()
-    apiKey: builder.Configuration["AiKey"]!
-);
+builder.AddAzureOpenAIClient(connectionName: "OpenAI").AddChatClient(deploymentName: "chat");
+services.AddAzureOpenAIChatCompletion(deploymentName: "chat");
 #endif
 
 #endregion

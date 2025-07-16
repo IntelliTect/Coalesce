@@ -18,7 +18,14 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses
         [Coalesce]
         public const int MagicNumber = 42;
 
-        Task<WeatherData> GetWeatherAsync(TestDbContext.AppDbContext parameterDbContext, Location location, DateTimeOffset? dateTime, SkyConditions? conditions);
+        [KernelPlugin("GetWeatherAsync")]
+        Task<WeatherData> GetWeatherAsync(
+            TestDbContext.AppDbContext parameterDbContext,
+            [KernelPlugin("The location where weather data should be determined")]
+            Location location, 
+            DateTimeOffset? dateTime,
+            SkyConditions? conditions
+        );
 
         Task<ItemResult<IFile>> FileUploadDownload(IFile file);
     }

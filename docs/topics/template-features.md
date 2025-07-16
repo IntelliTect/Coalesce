@@ -47,3 +47,71 @@ A special role, `GlobalAdmin`, is used to control actions reserved for system ad
 The recommended way of handling background jobs in a Coalesce multi-tenant application (e.g. when using Hangfire) is to only handle a single tenant per job invocation. If you have jobs that need to loop over all tenants, it is usually best to have that master job queue up an individual job for each tenant, rather than trying to process data for all tenants in one job. This avoids the complexity and risk of having single instances of your application's service classes handle and process data from more than one tenant in their lifecycle.
 
 Or, if the above is not feasible, at least [create a new service scope](https://learn.microsoft.com/en-us/dotnet/api/microsoft.extensions.dependencyinjection.iservicescopefactory.createscope) per tenant and execute handling of each tenant only using services obtained from that scope.
+
+
+
+## AI Chat
+
+The AI Chat feature adds Microsoft Semantic Kernel integration with Azure OpenAI to provide an AI-powered chat assistant in your application. This feature includes a pre-configured chat agent service and a Vue component for user interaction.
+
+### Configuration
+
+Azure OpenAI can be configured in two ways: through .NET Aspire (recommended) or by manually configuring connection strings.
+
+#### Using .NET Aspire (Recommended)
+
+When launching with the Aspire AppHost, Azure OpenAI will configure and provision cloud resources automatically with [Aspire's local provisioning](https://learn.microsoft.com/en-us/dotnet/aspire/azure/local-provisioning#configuration). Configure the required Azure settings in your AppHost project's `appsettings.json`, `appsettings.localhost.json`, or `dotnet user-secrets`:
+
+```json
+{
+  "Azure": {
+    "SubscriptionId": "<Your subscription id>",
+    "AllowResourceGroupCreation": true,
+    "ResourceGroup": "<Valid resource group name>",
+    "Location": "<Valid Azure location>" // e.g. westus3
+  }
+}
+```
+
+If there's an existing resource you'd rather use instead of provisioning a new resource, see the documentation for [Connecting to an existing Azure OpenAI service](https://learn.microsoft.com/en-us/dotnet/aspire/azureai/azureai-openai-integration?tabs=package-reference#connect-to-an-existing-azure-openai-service).
+
+For more details on Aspire Azure OpenAI integration, see the [official documentation](https://learn.microsoft.com/en-us/dotnet/aspire/azureai/azureai-openai-integration).
+
+#### Manual Configuration (Without Aspire)
+
+If you're not using Aspire, you can configure Azure OpenAI connection strings directly in your application settings:
+
+Including a Key is optional; if omitted, [DefaultAzureCredential](https://learn.microsoft.com/en-us/dotnet/api/azure.identity.defaultazurecredential) will be used to authenticate.
+
+**appsettings.json:** or **appsettings.localhost.json**
+```json
+{
+  "ConnectionStrings": {
+    "OpenAI": "Endpoint=https://your-resource.openai.azure.com/;Key=your-api-key"
+  }
+}
+```
+
+**Using User Secrets (recommended for local development):**
+```bash
+dotnet user-secrets set "ConnectionStrings:OpenAI" "Endpoint=https://your-resource.openai.azure.com/;Key=your-api-key"
+```
+
+### Implementation
+
+The AI Chat feature includes:
+
+- **AIAgentService**: A Coalesce service that handles chat interactions using Semantic Kernel agents
+- **Chat History Protection**: Chat history is encrypted using ASP.NET Core Data Protection to prevent tampering
+- **Token Management**: Automatic history reduction when token limits are approached
+- **Error Handling**: Graceful handling of rate limiting and other Azure OpenAI service errors
+
+The chat agent is configured with:
+- Automatic function calling capabilities
+- Chat history summarization to manage token limits
+- Built-in error handling for rate limits and service unavailability
+- Data protection for chat history persistence
+
+### Usage
+
+Once configured, users can access the AI chat through the included Vue component. The chat agent can be extended with additional functionality by applying the [`KernelPlugin`](/modeling/model-components/attributes/kernel-plugin.md) attribute to your entities, methods, and data sources to expose them as AI-callable functions.

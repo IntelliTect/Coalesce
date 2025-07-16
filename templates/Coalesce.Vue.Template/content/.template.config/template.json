@@ -178,6 +178,20 @@
       "description": "Include configuration and integrations for Application Insights, both front-end and back-end.",
       "$coalesceLink": "https://learn.microsoft.com/en-us/azure/azure-monitor/app/app-insights-overview"
     },
+    "Hangfire": {
+      "type": "parameter",
+      "datatype": "bool",
+      "displayName": "Hangfire",
+      "description": "Add packages, configuration, and telemetry for Hangfire, a background job runner.",
+      "$coalesceLink": "https://www.hangfire.io/"
+    },
+    "AIChat": {
+      "type": "parameter",
+      "datatype": "bool",
+      "displayName": "AI Chat with Semantic Kernel + Azure Open AI",
+      "description": "Add packages and configuration for creating an AI chat assistant in your application.",
+      "$coalesceLink": "/topics/template-features.html#ai-chat"
+    },
     "EmailAzure": {
       "type": "parameter",
       "datatype": "bool",
@@ -191,20 +205,6 @@
       "displayName": "Email: Twilio SendGrid",
       "description": "Include basic code for sending email with Twilio SendGrid.",
       "$coalesceLink": "https://www.twilio.com/docs/sendgrid/for-developers/sending-email/email-api-quickstart-for-c"
-    },
-    "Hangfire": {
-      "type": "parameter",
-      "datatype": "bool",
-      "displayName": "Hangfire",
-      "description": "Add packages, configuration, and telemetry for Hangfire, a background job runner.",
-      "$coalesceLink": "https://www.hangfire.io/"
-    },
-    "AIChat": {
-      "type": "parameter",
-      "datatype": "bool",
-      "displayName": "AI: Semantic Kernel + Azure Open AI",
-      "description": "Add packages and configuration for creating an AI chat assistant in your application."
-      // TODO: add doc link
     },
     "AzurePipelines": {
       "type": "parameter",

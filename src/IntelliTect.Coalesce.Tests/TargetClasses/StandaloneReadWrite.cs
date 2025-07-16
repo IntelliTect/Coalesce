@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 namespace IntelliTect.Coalesce.Tests.TargetClasses
 {
     [Coalesce, StandaloneEntity]
+    [KernelPlugin("StandaloneReadWrite", DeleteEnabled = true, SaveEnabled = true)]
     public class StandaloneReadWrite
     {
         public int Id { get; set; }

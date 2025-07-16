@@ -29,6 +29,9 @@ using Coalesce.Starter.Vue.Data.Communication;
 using Hangfire;
 using Hangfire.SqlServer;
 using Microsoft.AspNetCore.Authorization;
+using System.Reflection;
+using Microsoft.SemanticKernel;
+using Coalesce.Starter.Vue.Data.Services;
 #endif
 
 var builder = WebApplication.CreateBuilder(new WebApplicationOptions
@@ -116,6 +119,18 @@ services.AddHangfireServer(c =>
 });
 #endif
 
+#if AIChat
+foreach (var pluginType in Assembly.GetExecutingAssembly().GetTypes().Where(t => t.BaseType?.Name == "KernelPluginBase`1"))
+    services.AddScoped(sp => KernelPluginFactory.CreateFromType(pluginType, pluginType.Name, sp));
+services.AddScoped<AIAgentService>();
+services.AddAzureOpenAIChatCompletion(
+    deploymentName: "gpt-4.1",
+    endpoint: "https://ascott-openai-test.openai.azure.com/",
+    //credentials: new DefaultAzureCredential()
+    apiKey: builder.Configuration["AiKey"]!
+);
+#endif
+
 #endregion
 
 #region Configure HTTP Pipeline
@@ -163,7 +178,7 @@ app.MapSwagger();
 app.MapScalarApiReference(c => c.OpenApiRoutePattern = "/swagger/{documentName}/swagger.json");
 #endif
 #if Hangfire
-app.MapHangfireDashboard("/hangfire", new () { Authorization = [] }).RequireAuthorization(
+app.MapHangfireDashboard("/hangfire", new() { Authorization = [] }).RequireAuthorization(
 #if Tenancy
     new AuthorizeAttribute { Roles = builder.Environment.IsDevelopment() ? null : AppClaimValues.GlobalAdminRole }
 #else

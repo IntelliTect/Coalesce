@@ -36,13 +36,16 @@ public class CompanyKernelPlugin(CrudContext<Coalesce.Domain.AppDbContext> conte
     }
 
     [KernelFunction("list_company")]
-    [Description("Lists Company records. . The search parameter can search on properties Name,LogoUrl. The fields parameter should be used if you only need some of the following fields: Id,Name,Address1,Address2,City,State,ZipCode,Phone,WebsiteUrl,LogoUrl,IsDeleted,Employees,AltName")]
+    [Description("Lists Company records. .")]
     public async Task<string> ListCompany(
+        [Description("Search within properties Name,LogoUrl")]
         string search,
+        [Description("Provide values greater than 1 to query subsequent pages of data")]
         int page,
+        [Description("Provide true if you only need a count of results.")]
         bool countOnly,
+        [Description("Leave empty if you need whole objects, or provide any of these field names to trim the response: Id,Name,Address1,Address2,City,State,ZipCode,Phone,WebsiteUrl,LogoUrl,IsDeleted,Employees,AltName")]
         string[] fields
-
     )
     {
         if (!_isScoped) return await InvokeScoped<string>(ListCompany, search, page, countOnly, fields);
@@ -60,24 +63,6 @@ public class CompanyKernelPlugin(CrudContext<Coalesce.Domain.AppDbContext> conte
                 return new ListResult<CompanyResponse>(result) { TotalCount = result.Object };
             }
             return await dataSource.GetMappedListAsync<CompanyResponse>(listParams);
-        });
-    }
-
-    [KernelFunction("save_company")]
-    [Description("Creates a new Company. Updates an existing Company. Only provide value of the fields that need to be changed.")]
-    public async Task<string> SaveCompany(CompanyParameter dto)
-    {
-        if (!_isScoped) return await InvokeScoped<string>(SaveCompany, dto);
-        return await Json(async () =>
-        {
-            var dataSource = dsFactory.GetDefaultDataSource<Coalesce.Domain.Company, Coalesce.Domain.Company>();
-            var behaviors = bhFactory.GetBehaviors<Coalesce.Domain.Company>(GeneratedForClassViewModel);
-            var kind = (await behaviors.DetermineSaveKindAsync(dto, dataSource, new DataSourceParameters())).Kind;
-            if (kind == SaveKind.Create && !GeneratedForClassViewModel.SecurityInfo.IsCreateAllowed(User))
-                return "Creation of Company items not allowed.";
-            if (kind == SaveKind.Update && !GeneratedForClassViewModel.SecurityInfo.IsEditAllowed(User))
-                return "Editing of Company items not allowed.";
-            return await behaviors.SaveAsync<CompanyParameter, CompanyResponse>(dto, dataSource, new DataSourceParameters());
         });
     }
 

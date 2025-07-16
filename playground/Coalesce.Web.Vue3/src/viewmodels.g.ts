@@ -1007,62 +1007,16 @@ export class ZipCodeListViewModel extends ListViewModel<$models.ZipCode, $apiCli
 
 export class AIAgentServiceViewModel extends ServiceViewModel<typeof $metadata.AIAgentService, $apiClients.AIAgentServiceApiClient> {
   
-  /** A chat agent that orchestrates other agents */
-  public get orchestratedAgent() {
-    const orchestratedAgent = this.$apiClient.$makeCaller(
-      this.$metadata.methods.orchestratedAgent,
-      (c, history: string | null, prompt: string | null) => c.orchestratedAgent(history, prompt),
-      () => ({history: null as string | null, prompt: null as string | null, }),
-      (c, args) => c.orchestratedAgent(args.history, args.prompt))
-    
-    Object.defineProperty(this, 'orchestratedAgent', {value: orchestratedAgent});
-    return orchestratedAgent
-  }
-  
-  /** A chat agent that delegates to other chat completion services. */
-  public get metaCompletionAgent() {
-    const metaCompletionAgent = this.$apiClient.$makeCaller(
-      this.$metadata.methods.metaCompletionAgent,
-      (c, history: string | null, prompt: string | null) => c.metaCompletionAgent(history, prompt),
-      () => ({history: null as string | null, prompt: null as string | null, }),
-      (c, args) => c.metaCompletionAgent(args.history, args.prompt))
-    
-    Object.defineProperty(this, 'metaCompletionAgent', {value: metaCompletionAgent});
-    return metaCompletionAgent
-  }
-  
   /** A chat agent that directly uses all kernel plugin tools. */
-  public get omniToolAgent() {
-    const omniToolAgent = this.$apiClient.$makeCaller(
-      this.$metadata.methods.omniToolAgent,
-      (c, history: string | null, prompt: string | null) => c.omniToolAgent(history, prompt),
+  public get chatAgent() {
+    const chatAgent = this.$apiClient.$makeCaller(
+      this.$metadata.methods.chatAgent,
+      (c, history: string | null, prompt: string | null) => c.chatAgent(history, prompt),
       () => ({history: null as string | null, prompt: null as string | null, }),
-      (c, args) => c.omniToolAgent(args.history, args.prompt))
+      (c, args) => c.chatAgent(args.history, args.prompt))
     
-    Object.defineProperty(this, 'omniToolAgent', {value: omniToolAgent});
-    return omniToolAgent
-  }
-  
-  public get personAgent() {
-    const personAgent = this.$apiClient.$makeCaller(
-      this.$metadata.methods.personAgent,
-      (c, prompt: string | null) => c.personAgent(prompt),
-      () => ({prompt: null as string | null, }),
-      (c, args) => c.personAgent(args.prompt))
-    
-    Object.defineProperty(this, 'personAgent', {value: personAgent});
-    return personAgent
-  }
-  
-  public get productAgent() {
-    const productAgent = this.$apiClient.$makeCaller(
-      this.$metadata.methods.productAgent,
-      (c, prompt: string | null) => c.productAgent(prompt),
-      () => ({prompt: null as string | null, }),
-      (c, args) => c.productAgent(args.prompt))
-    
-    Object.defineProperty(this, 'productAgent', {value: productAgent});
-    return productAgent
+    Object.defineProperty(this, 'chatAgent', {value: chatAgent});
+    return chatAgent
   }
   
   constructor() {

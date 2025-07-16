@@ -48,17 +48,7 @@
         <component ref="routerView" :is="Component" :key="$route.path" />
       </router-view>
 
-      <ChatAI
-        title="Orchestrated"
-        endpoint="orchestratedAgent"
-        style="right: 800px"
-      />
-      <ChatAI
-        title="MetaCompletion"
-        endpoint="metaCompletionAgent"
-        style="right: 400px"
-      />
-      <ChatAI title="OmniTool" endpoint="omniToolAgent" style="right: 0px" />
+      <AIChat title="OmniTool" endpoint="chatAgent" class="right-0" />
     </v-main>
   </v-app>
 </template>
@@ -67,7 +57,7 @@
 import { computed } from "vue";
 import { useTheme } from "vuetify";
 import $metadata from "@/metadata.g";
-import ChatAI from "@/components/ChatAI.vue";
+import AIChat from "@/components/AIChat.vue";
 
 const theme = useTheme();
 const darkMode = computed({

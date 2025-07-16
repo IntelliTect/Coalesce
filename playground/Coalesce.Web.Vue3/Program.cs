@@ -1,3 +1,4 @@
+using Azure.Identity;
 using Coalesce.Domain;
 using Coalesce.Domain.Services;
 using Coalesce.Domain.WebShared;
@@ -14,6 +15,7 @@ using Microsoft.Net.Http.Headers;
 using Microsoft.OpenApi.Models;
 using Microsoft.SemanticKernel;
 using Scalar.AspNetCore;
+using System.ClientModel;
 using System.Reflection;
 using System.Security.Claims;
 using System.Text.Json;
@@ -40,18 +42,6 @@ builder.Configuration
 #region Configure Services
 
 var services = builder.Services;
-
-var modelId = "gpt-4.1";
-var endpoint = "https://ascott-openai-test.openai.azure.com/";
-var apiKey = builder.Configuration["AiKey"];
-
-services.AddScoped((IServiceProvider serviceProvider) => KernelPluginFactory.CreateFromType<PersonKernelPlugin>("Person", serviceProvider));
-services.AddScoped((IServiceProvider serviceProvider) => KernelPluginFactory.CreateFromType<CompanyKernelPlugin>("Company", serviceProvider));
-services.AddScoped((IServiceProvider serviceProvider) => KernelPluginFactory.CreateFromType<ProductKernelPlugin>("Product", serviceProvider));
-services.AddScoped((IServiceProvider serviceProvider) => KernelPluginFactory.CreateFromType<AIAgentServiceKernelPlugin>("AIAgentService", serviceProvider));
-
-services.AddKernel()
-    .AddAzureOpenAIChatCompletion("gpt-4.1", modelId: modelId, endpoint: endpoint, apiKey: apiKey);
 
 services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"), opt => opt
@@ -82,8 +72,18 @@ services.AddSwaggerGen(c =>
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
 });
 
-services.AddScoped<AIAgentService>();
 services.AddScoped<IWeatherService, WeatherService>();
+
+foreach (var pluginType in Assembly.GetExecutingAssembly().GetTypes().Where(t => t.BaseType?.Name == "KernelPluginBase`1"))
+    services.AddScoped(sp => KernelPluginFactory.CreateFromType(pluginType, pluginType.Name, sp));
+services.AddScoped<AIAgentService>();
+services.AddAzureOpenAIChatCompletion(
+    deploymentName: "gpt-4.1",
+    endpoint: "https://ascott-openai-test.openai.azure.com/",
+    //credentials: new DefaultAzureCredential()
+    apiKey: builder.Configuration["AiKey"]!
+);
+
 
 services.AddAuthentication(DemoMiddleware.AuthenticationScheme).AddCookie(DemoMiddleware.AuthenticationScheme);
 

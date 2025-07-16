@@ -36,13 +36,16 @@ public class ProductKernelPlugin(CrudContext<Coalesce.Domain.AppDbContext> conte
     }
 
     [KernelFunction("list_product")]
-    [Description("Lists Product records. . The search parameter can search on properties Name. The fields parameter should be used if you only need some of the following fields: ProductId,Name,Details,UniqueId,Unknown")]
+    [Description("Lists Product records. .")]
     public async Task<string> ListProduct(
+        [Description("Search within properties Name")]
         string search,
+        [Description("Provide values greater than 1 to query subsequent pages of data")]
         int page,
+        [Description("Provide true if you only need a count of results.")]
         bool countOnly,
+        [Description("Leave empty if you need whole objects, or provide any of these field names to trim the response: ProductId,Name,Details,UniqueId,Unknown")]
         string[] fields
-
     )
     {
         if (!_isScoped) return await InvokeScoped<string>(ListProduct, search, page, countOnly, fields);
@@ -60,24 +63,6 @@ public class ProductKernelPlugin(CrudContext<Coalesce.Domain.AppDbContext> conte
                 return new ListResult<ProductResponse>(result) { TotalCount = result.Object };
             }
             return await dataSource.GetMappedListAsync<ProductResponse>(listParams);
-        });
-    }
-
-    [KernelFunction("save_product")]
-    [Description("Creates a new Product. Updates an existing Product. Only provide value of the fields that need to be changed.")]
-    public async Task<string> SaveProduct(ProductParameter dto)
-    {
-        if (!_isScoped) return await InvokeScoped<string>(SaveProduct, dto);
-        return await Json(async () =>
-        {
-            var dataSource = dsFactory.GetDefaultDataSource<Coalesce.Domain.Product, Coalesce.Domain.Product>();
-            var behaviors = bhFactory.GetBehaviors<Coalesce.Domain.Product>(GeneratedForClassViewModel);
-            var kind = (await behaviors.DetermineSaveKindAsync(dto, dataSource, new DataSourceParameters())).Kind;
-            if (kind == SaveKind.Create && !GeneratedForClassViewModel.SecurityInfo.IsCreateAllowed(User))
-                return "Creation of Product items not allowed.";
-            if (kind == SaveKind.Update && !GeneratedForClassViewModel.SecurityInfo.IsEditAllowed(User))
-                return "Editing of Product items not allowed.";
-            return await behaviors.SaveAsync<ProductParameter, ProductResponse>(dto, dataSource, new DataSourceParameters());
         });
     }
 

@@ -51,7 +51,7 @@ namespace IntelliTect.Coalesce
 
             // Needed for CrudContext to access the current user.
             services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-            services.TryAddSingleton(_ => ReflectionRepository.Global);
+            services.TryAddSingleton(ReflectionRepository.Global);
 
             var entryAsm = Assembly.GetEntryAssembly();
             if (entryAsm is not null)

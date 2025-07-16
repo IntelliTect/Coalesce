@@ -108,6 +108,22 @@ export class WidgetApiClient extends ModelApiClient<$models.Widget> {
 }
 
 
+export class AIAgentServiceApiClient extends ServiceApiClient<typeof $metadata.AIAgentService> {
+  constructor() { super($metadata.AIAgentService) }
+  
+  /** A chat agent that directly uses all kernel plugin tools. */
+  public chatAgent(history: string | null, prompt: string | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<$models.ChatResponse>> {
+    const $method = this.$metadata.methods.chatAgent
+    const $params =  {
+      history,
+      prompt,
+    }
+    return this.$invoke($method, $params, $config)
+  }
+  
+}
+
+
 export class SecurityServiceApiClient extends ServiceApiClient<typeof $metadata.SecurityService> {
   constructor() { super($metadata.SecurityService) }
   

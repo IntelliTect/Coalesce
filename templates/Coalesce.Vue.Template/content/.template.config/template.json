@@ -199,6 +199,13 @@
       "description": "Add packages, configuration, and telemetry for Hangfire, a background job runner.",
       "$coalesceLink": "https://www.hangfire.io/"
     },
+    "AIChat": {
+      "type": "parameter",
+      "datatype": "bool",
+      "displayName": "AI: Semantic Kernel + Azure Open AI",
+      "description": "Add packages and configuration for creating an AI chat assistant in your application."
+      // TODO: add doc link
+    },
     "AzurePipelines": {
       "type": "parameter",
       "datatype": "bool",
@@ -334,6 +341,10 @@
         {
           "condition": "!OpenAPI",
           "exclude": ["**/OpenAPI.vue"]
+        },
+        {
+          "condition": "!AIChat",
+          "exclude": ["**/AIChat.vue", "**/AIAgentService.cs"]
         },
         {
           "condition": "!AzurePipelines",

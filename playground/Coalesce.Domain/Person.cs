@@ -3,12 +3,7 @@ using IntelliTect.Coalesce;
 using IntelliTect.Coalesce.Api.Controllers;
 using IntelliTect.Coalesce.DataAnnotations;
 using IntelliTect.Coalesce.Models;
-using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.SemanticKernel;
-using Microsoft.SemanticKernel.ChatCompletion;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -16,15 +11,16 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Security.Claims;
-using System.Text.Encodings.Web;
-using System.Text.Json;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Coalesce.Domain
 {
     [Edit(PermissionLevel = SecurityPermissionLevels.AllowAll)]
     [Table("Person")]
+    [KernelPlugin(
+        Description = "A person.",
+        SaveEnabled = true,
+        DeleteEnabled = true
+    )]
     public class Person
     {
 #nullable disable
@@ -369,6 +365,7 @@ namespace Coalesce.Domain
         public class WithoutCases(CrudContext<AppDbContext> context) : StandardDataSource<Person, AppDbContext>(context)
         {
             [Coalesce]
+            [KernelPlugin("A set of parameters that are ignored entirely.")]
             public PersonCriteria? PersonCriteria { get; set; }
 
             public override IQueryable<Person> GetQuery(IDataSourceParameters parameters)

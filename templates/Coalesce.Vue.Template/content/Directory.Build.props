@@ -14,7 +14,7 @@
     <!--#if (KeepTemplateOnly) -->
     <DefineConstants>$(DefineConstants);KeepTemplateOnly;AppInsights;OpenAPI;AuditLogs;TrackingBase;ExampleModel</DefineConstants>
     <DefineConstants>$(DefineConstants);Identity;UserPictures;MicrosoftAuth;GoogleAuth;LocalAuth;OtherOAuth</DefineConstants>
-    <DefineConstants>$(DefineConstants);EmailAzure;EmailSendGrid;Hangfire</DefineConstants>
+    <DefineConstants>$(DefineConstants);EmailAzure;EmailSendGrid;Hangfire;AIChat</DefineConstants>
     <DefineConstants>$(DefineConstants);Tenancy;TenantPerHostname;TenantCreateSelf;TenantCreateExternal;TenantCreateAdmin;TenantMemberInvites</DefineConstants>
     <!--#endif -->
   </PropertyGroup>

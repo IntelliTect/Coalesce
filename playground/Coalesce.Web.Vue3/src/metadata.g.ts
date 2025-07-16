@@ -2960,9 +2960,9 @@ export const AIAgentService = domain.services.AIAgentService = {
   type: "service",
   controllerRoute: "AIAgentService",
   methods: {
-    orchestratedAgent: {
-      name: "orchestratedAgent",
-      displayName: "Orchestrated Agent",
+    chatAgent: {
+      name: "chatAgent",
+      displayName: "Chat Agent",
       transportType: "item",
       httpMethod: "POST",
       params: {
@@ -2972,114 +2972,6 @@ export const AIAgentService = domain.services.AIAgentService = {
           type: "string",
           role: "value",
         },
-        prompt: {
-          name: "prompt",
-          displayName: "Prompt",
-          type: "string",
-          role: "value",
-          rules: {
-            required: val => (val != null && val !== '') || "Prompt is required.",
-          }
-        },
-      },
-      return: {
-        name: "$return",
-        displayName: "Result",
-        type: "object",
-        get typeDef() { return (domain.types.ChatResponse as ObjectType & { name: "ChatResponse" }) },
-        role: "value",
-      },
-    },
-    metaCompletionAgent: {
-      name: "metaCompletionAgent",
-      displayName: "Meta Completion Agent",
-      transportType: "item",
-      httpMethod: "POST",
-      params: {
-        history: {
-          name: "history",
-          displayName: "History",
-          type: "string",
-          role: "value",
-        },
-        prompt: {
-          name: "prompt",
-          displayName: "Prompt",
-          type: "string",
-          role: "value",
-          rules: {
-            required: val => (val != null && val !== '') || "Prompt is required.",
-          }
-        },
-      },
-      return: {
-        name: "$return",
-        displayName: "Result",
-        type: "object",
-        get typeDef() { return (domain.types.ChatResponse as ObjectType & { name: "ChatResponse" }) },
-        role: "value",
-      },
-    },
-    omniToolAgent: {
-      name: "omniToolAgent",
-      displayName: "Omni Tool Agent",
-      transportType: "item",
-      httpMethod: "POST",
-      params: {
-        history: {
-          name: "history",
-          displayName: "History",
-          type: "string",
-          role: "value",
-        },
-        prompt: {
-          name: "prompt",
-          displayName: "Prompt",
-          type: "string",
-          role: "value",
-          rules: {
-            required: val => (val != null && val !== '') || "Prompt is required.",
-          }
-        },
-      },
-      return: {
-        name: "$return",
-        displayName: "Result",
-        type: "object",
-        get typeDef() { return (domain.types.ChatResponse as ObjectType & { name: "ChatResponse" }) },
-        role: "value",
-      },
-    },
-    personAgent: {
-      name: "personAgent",
-      displayName: "Person Agent",
-      transportType: "item",
-      httpMethod: "POST",
-      params: {
-        prompt: {
-          name: "prompt",
-          displayName: "Prompt",
-          type: "string",
-          role: "value",
-          rules: {
-            required: val => (val != null && val !== '') || "Prompt is required.",
-          }
-        },
-      },
-      return: {
-        name: "$return",
-        displayName: "Result",
-        type: "object",
-        get typeDef() { return (domain.types.ChatResponse as ObjectType & { name: "ChatResponse" }) },
-        role: "value",
-      },
-    },
-    productAgent: {
-      name: "productAgent",
-      displayName: "Product Agent",
-      transportType: "item",
-      httpMethod: "POST",
-      params: {
         prompt: {
           name: "prompt",
           displayName: "Prompt",

@@ -1,5 +1,6 @@
 
-using Coalesce.Web.Vue3.Models;
+using Coalesce.Starter.Vue.Data.Services;
+using Coalesce.Starter.Vue.Web.Models;
 using IntelliTect.Coalesce;
 using IntelliTect.Coalesce.Api;
 using IntelliTect.Coalesce.Api.Behaviors;
@@ -19,17 +20,17 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 
-namespace Coalesce.Web.Vue3.Api
+namespace Coalesce.Starter.Vue.Web.Api
 {
     [Route("api/AIAgentService")]
     [ServiceFilter(typeof(IApiActionFilter))]
     public partial class AIAgentServiceController : BaseApiController
     {
-        protected Coalesce.Domain.AIAgentService Service { get; }
+        protected AIAgentService Service { get; }
 
-        public AIAgentServiceController(CrudContext context, Coalesce.Domain.AIAgentService service) : base(context)
+        public AIAgentServiceController(CrudContext context, AIAgentService service) : base(context)
         {
-            GeneratedForClassViewModel = context.ReflectionRepository.GetClassViewModel<Coalesce.Domain.AIAgentService>();
+            GeneratedForClassViewModel = context.ReflectionRepository.GetClassViewModel<AIAgentService>();
             Service = service;
         }
 
@@ -44,7 +45,6 @@ namespace Coalesce.Web.Vue3.Api
             [FromForm(Name = "history")] string history,
             [FromForm(Name = "prompt")] string prompt)
         {
-            var _method = GeneratedForClassViewModel!.MethodByName("ChatAgent");
             var _params = new
             {
                 History = history,
@@ -53,7 +53,8 @@ namespace Coalesce.Web.Vue3.Api
 
             if (Context.Options.ValidateAttributesForMethods)
             {
-                var _validationResult = ItemResult.FromParameterValidation(_method, _params, ServiceProvider);
+                var _validationResult = ItemResult.FromParameterValidation(
+                    GeneratedForClassViewModel!.MethodByName("ChatAgent"), _params, HttpContext.RequestServices);
                 if (!_validationResult.WasSuccessful) return new ItemResult<ChatResponseResponse>(_validationResult);
             }
 
@@ -65,7 +66,7 @@ namespace Coalesce.Web.Vue3.Api
                 cancellationToken
             );
             var _result = new ItemResult<ChatResponseResponse>();
-            _result.Object = Mapper.MapToDto<Coalesce.Domain.AIAgentService.ChatResponse, ChatResponseResponse>(_methodResult, _mappingContext, includeTree);
+            _result.Object = Mapper.MapToDto<AIAgentService.ChatResponse, ChatResponseResponse>(_methodResult, _mappingContext, includeTree);
             return _result;
         }
 
@@ -86,10 +87,10 @@ namespace Coalesce.Web.Vue3.Api
             [FromBody] ChatAgentParameters _params
         )
         {
-            var _method = GeneratedForClassViewModel!.MethodByName("ChatAgent");
             if (Context.Options.ValidateAttributesForMethods)
             {
-                var _validationResult = ItemResult.FromParameterValidation(_method, _params, ServiceProvider);
+                var _validationResult = ItemResult.FromParameterValidation(
+                    GeneratedForClassViewModel!.MethodByName("ChatAgent"), _params, HttpContext.RequestServices);
                 if (!_validationResult.WasSuccessful) return new ItemResult<ChatResponseResponse>(_validationResult);
             }
 
@@ -101,7 +102,7 @@ namespace Coalesce.Web.Vue3.Api
                 cancellationToken
             );
             var _result = new ItemResult<ChatResponseResponse>();
-            _result.Object = Mapper.MapToDto<Coalesce.Domain.AIAgentService.ChatResponse, ChatResponseResponse>(_methodResult, _mappingContext, includeTree);
+            _result.Object = Mapper.MapToDto<AIAgentService.ChatResponse, ChatResponseResponse>(_methodResult, _mappingContext, includeTree);
             return _result;
         }
     }

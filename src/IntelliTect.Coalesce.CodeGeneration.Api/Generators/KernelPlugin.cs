@@ -11,48 +11,6 @@ using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators;
 
-public class KernelPlugins : CompositeGenerator<ReflectionRepository>
-{
-    public KernelPlugins(CompositeGeneratorServices services) : base(services) { }
-
-    public override IEnumerable<ICleaner> GetCleaners()
-    {
-        yield return Cleaner<DirectoryCleaner>()
-            .AppendTargetPath("KernelPlugins/Generated");
-    }
-
-    public override IEnumerable<IGenerator> GetGenerators()
-    {
-        foreach (var model in Model.CrudApiBackedClasses)
-        {
-            if (model.WillCreateApiController && (
-                    model.SecurityInfo.IsReadAllowed() ||
-                    model.SecurityInfo.IsSaveAllowed() ||
-                    model.SecurityInfo.IsDeleteAllowed()
-                ) && (
-                    model.ClientDataSources(Model).Any(ds => ds.HasAttribute<KernelPluginAttribute>()) ||
-                    model.KernelMethods.Any()
-                )
-            )
-            {
-                yield return Generator<KernelPlugin>()
-                    .WithModel(model)
-                    .AppendOutputPath($"KernelPlugins/Generated/{model.ClientTypeName}KernelPlugin.g.cs");
-            }
-        }
-
-        foreach (var model in Model.Services)
-        {
-            if (model.KernelMethods.Any())
-            {
-                yield return Generator<KernelPlugin>()
-                    .WithModel(model)
-                    .AppendOutputPath($"KernelPlugins/Generated/{model.ClientTypeName}KernelPlugin.g.cs");
-            }
-        }
-    }
-}
-
 public class KernelPlugin(GeneratorServices services) : ApiService(services)
 {
     protected string FullNamespace
@@ -135,11 +93,13 @@ public class KernelPlugin(GeneratorServices services) : ApiService(services)
         if (dbContext is not null) b.Line($"protected {dbContext.FullyQualifiedName} Db => context.DbContext;");
         b.Line();
 
+        WriteSaveFunction(b);
+        WriteDeleteFunction(b);
+
         foreach (var ds in Model.ClientDataSources(Model.ReflectionRepository).Where(ds => ds.HasAttribute<KernelPluginAttribute>()))
         {
             WriteDataSourceGetItemFunction(b, ds);
             WriteDataSourceListFunction(b, ds);
-            WriteSaveFunction(b);
         }
 
         foreach (var method in Model.KernelMethods)
@@ -213,9 +173,6 @@ public class KernelPlugin(GeneratorServices services) : ApiService(services)
         {
             throw new NotSupportedException("File result types are not supported in kernel plugins.");
         }
-
-        // todo: add a disambiguator string to KPA that we add to the function name, in case a single type has multiple exposed DS's.
-        // todo: add flags to KPA to enable/disable specific actions (read, list, ...?)
 
         b.Line($"[KernelFunction(\"{method.NameWithoutAsync}\")]");
         b.Line($"[Description({description.QuotedStringLiteralForCSharp()})]");
@@ -332,16 +289,36 @@ public class KernelPlugin(GeneratorServices services) : ApiService(services)
 
 
         var resultType = $"ListResult<{Model.ResponseDtoTypeName}>";
+        string dataSourceParams = string.Concat(ds.DataSourceParameters.Select(p =>
+        {
+            string ret = ", \n";
+            string desc =
+                p.GetAttributeValue<KernelPluginAttribute>(a => a.Description)
+                ?? p.Description;
+
+            if (!string.IsNullOrWhiteSpace(desc))
+            {
+                ret += $"        [Description({desc.QuotedStringLiteralForCSharp()})]\n";
+            }
+
+            ret += $"        {p.Type.NullableTypeForDto(true, null, dontEmitNullable: true)} {p.JsonName} = default";
+
+            return ret;
+        }));
 
         b.Line($"[KernelFunction(\"list_{Model.Name.ToLower()}\")]");
-        b.Line($"[Description(\"Lists {Model.DisplayName} records. {description}. The search parameter can search on properties {string.Join(",", Model.SearchProperties().Select(p => p.Property.Name))}. The fields parameter should be used if you only need some of the following fields: {string.Join(",", Model.ClientProperties.Select(p => p.Name))}\")]");
+        b.Line($"[Description(\"Lists {Model.DisplayName} records. {description}.\")]");
+
         using (b.Block($"""
-            public async Task<string> List{Model.Name}(
+                public async Task<string> List{Model.Name}(
+                    [Description("Search within properties {string.Join(",", Model.SearchProperties().Select(p => p.Property.Name))}")]
                     string search, 
+                    [Description("Provide values greater than 1 to query subsequent pages of data")]
                     int page,
+                    [Description("Provide true if you only need a count of results.")]
                     bool countOnly,
-                    string[] fields
-                    {string.Concat(ds.DataSourceParameters.Select(p => ", " + p.Type.NullableTypeForDto(true, null, dontEmitNullable: true) + " " + p.JsonName + " = default"))}
+                    [Description("Leave empty if you need whole objects, or provide any of these field names to trim the response: {string.Join(",", Model.ClientProperties.Select(p => p.Name))}")]
+                    string[] fields{dataSourceParams}
                 )
             """))
         {
@@ -377,6 +354,9 @@ public class KernelPlugin(GeneratorServices services) : ApiService(services)
     {
         if (!Model.SecurityInfo.IsSaveAllowed()) return;
 
+        var kpa = Model.GetAttribute<KernelPluginAttribute>();
+        if (kpa?.GetValue(a => a.SaveEnabled) != true) return;
+
         var pkVar = Model.PrimaryKey.JsonName;
         var declaredFor = Model.FullyQualifiedName;
         var isSparse = !Model.IsCustomDto || Model.Type.IsA<ISparseDto>();
@@ -387,9 +367,11 @@ public class KernelPlugin(GeneratorServices services) : ApiService(services)
         b.Line($"[KernelFunction(\"save_{Model.Name.ToLower()}\")]");
 
         List<string> descriptionParts = [];
-        if (Model.SecurityInfo.IsCreateAllowed()) descriptionParts.Add($"Creates a new {Model.DisplayName}. ");
-        if (Model.SecurityInfo.IsEditAllowed()) descriptionParts.Add($"Updates an existing {Model.DisplayName}. ");
-        if (isSparse) descriptionParts.Add("Only provide value of the fields that need to be changed.");
+        if (Model.SecurityInfo.IsCreateAllowed()) descriptionParts.Add($"Creates a new {Model.DisplayName}");
+        if (Model.SecurityInfo.IsEditAllowed()) descriptionParts.Add($"Updates an existing {Model.DisplayName}");
+        descriptionParts = [string.Join(" or ", descriptionParts) + "."];
+
+        if (isSparse) descriptionParts.Add(" Only provide value of the fields that need to be changed.");
 
         b.Line($"[Description({string.Concat(descriptionParts).QuotedStringLiteralForCSharp()})]");
         using (b.Block($"""
@@ -413,6 +395,42 @@ public class KernelPlugin(GeneratorServices services) : ApiService(services)
             );
 
             b.Line($"return await behaviors.SaveAsync<{Model.ParameterDtoTypeName}, {Model.ResponseDtoTypeName}>(dto, dataSource, new DataSourceParameters());");
+        }
+        b.Line();
+    }
+
+    private void WriteDeleteFunction(CSharpCodeBuilder b)
+    {
+        if (!Model.SecurityInfo.IsDeleteAllowed()) return;
+
+        var kpa = Model.GetAttribute<KernelPluginAttribute>();
+        if (kpa?.GetValue(a => a.DeleteEnabled) != true) return;
+
+        var pkVar = Model.PrimaryKey.JsonName;
+        var declaredFor = Model.FullyQualifiedName;
+
+        var resultType = $"ItemResult<{Model.ResponseDtoTypeName}>";
+
+        b.Line($"[KernelFunction(\"delete_{Model.Name.ToLower()}\")]");
+        b.Line($"[Description(\"Deletes an existing {Model.DisplayName}.\")]");
+        using (b.Block($"""
+            public async Task<string> Delete{Model.Name}({Model.PrimaryKey.Type.FullyQualifiedName} {pkVar})
+            """))
+        {
+            b.Line($"if (!_isScoped) return await InvokeScoped<string>(Delete{Model.Name}, {pkVar});");
+
+            // Workaround for https://github.com/microsoft/semantic-kernel/issues/12532
+            using var json = b.Block("return await Json(async () => ", ");");
+
+            b.Line($"var dataSource = dsFactory.GetDefaultDataSource<{Model.BaseViewModel.FullyQualifiedName}, {Model.FullyQualifiedName}>();");
+            b.Line($"var behaviors = bhFactory.GetBehaviors<{Model.BaseViewModel.FullyQualifiedName}>(GeneratedForClassViewModel);");
+
+            b.Lines(
+                "if (!GeneratedForClassViewModel.SecurityInfo.IsDeleteAllowed(User))",
+                $"    return \"Deleting of {Model.DisplayName} items not allowed.\";"
+            );
+
+            b.Line($"return await behaviors.DeleteAsync<{Model.ResponseDtoTypeName}>({pkVar}, dataSource, new DataSourceParameters());");
         }
         b.Line();
     }

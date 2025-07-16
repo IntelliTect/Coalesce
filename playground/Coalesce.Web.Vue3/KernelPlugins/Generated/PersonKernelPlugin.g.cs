@@ -20,6 +20,39 @@ public class PersonKernelPlugin(CrudContext<Coalesce.Domain.AppDbContext> contex
 {
     protected Coalesce.Domain.AppDbContext Db => context.DbContext;
 
+    [KernelFunction("save_person")]
+    [Description("Creates a new Person or Updates an existing Person. Only provide value of the fields that need to be changed.")]
+    public async Task<string> SavePerson(PersonParameter dto)
+    {
+        if (!_isScoped) return await InvokeScoped<string>(SavePerson, dto);
+        return await Json(async () =>
+        {
+            var dataSource = dsFactory.GetDefaultDataSource<Coalesce.Domain.Person, Coalesce.Domain.Person>();
+            var behaviors = bhFactory.GetBehaviors<Coalesce.Domain.Person>(GeneratedForClassViewModel);
+            var kind = (await behaviors.DetermineSaveKindAsync(dto, dataSource, new DataSourceParameters())).Kind;
+            if (kind == SaveKind.Create && !GeneratedForClassViewModel.SecurityInfo.IsCreateAllowed(User))
+                return "Creation of Person items not allowed.";
+            if (kind == SaveKind.Update && !GeneratedForClassViewModel.SecurityInfo.IsEditAllowed(User))
+                return "Editing of Person items not allowed.";
+            return await behaviors.SaveAsync<PersonParameter, PersonResponse>(dto, dataSource, new DataSourceParameters());
+        });
+    }
+
+    [KernelFunction("delete_person")]
+    [Description("Deletes an existing Person.")]
+    public async Task<string> DeletePerson(int personId)
+    {
+        if (!_isScoped) return await InvokeScoped<string>(DeletePerson, personId);
+        return await Json(async () =>
+        {
+            var dataSource = dsFactory.GetDefaultDataSource<Coalesce.Domain.Person, Coalesce.Domain.Person>();
+            var behaviors = bhFactory.GetBehaviors<Coalesce.Domain.Person>(GeneratedForClassViewModel);
+            if (!GeneratedForClassViewModel.SecurityInfo.IsDeleteAllowed(User))
+                return "Deleting of Person items not allowed.";
+            return await behaviors.DeleteAsync<PersonResponse>(personId, dataSource, new DataSourceParameters());
+        });
+    }
+
     [KernelFunction("get_person")]
     [Description("Gets a Person by its PersonId value. test description.")]
     public async Task<string> GetPerson(int personId)
@@ -36,13 +69,18 @@ public class PersonKernelPlugin(CrudContext<Coalesce.Domain.AppDbContext> contex
     }
 
     [KernelFunction("list_person")]
-    [Description("Lists Person records. test description. The search parameter can search on properties FirstName,LastName. The fields parameter should be used if you only need some of the following fields: PersonId,Title,FirstName,LastName,Email,Gender,Height,CasesAssigned,CasesReported,BirthDate,LastBath,NextUpgrade,PersonStats,ProfilePic,Name,CompanyId,Company,ArbitraryCollectionOfStrings")]
+    [Description("Lists Person records. test description.")]
     public async Task<string> ListPerson(
+        [Description("Search within properties FirstName,LastName")]
         string search,
+        [Description("Provide values greater than 1 to query subsequent pages of data")]
         int page,
+        [Description("Provide true if you only need a count of results.")]
         bool countOnly,
-        string[] fields
-        , PersonCriteriaParameter personCriteria = default
+        [Description("Leave empty if you need whole objects, or provide any of these field names to trim the response: PersonId,Title,FirstName,LastName,Email,Gender,Height,CasesAssigned,CasesReported,BirthDate,LastBath,NextUpgrade,PersonStats,ProfilePic,Name,CompanyId,Company,ArbitraryCollectionOfStrings")]
+        string[] fields,
+        [Description("A set of parameters that are ignored entirely.")]
+        PersonCriteriaParameter personCriteria = default
     )
     {
         if (!_isScoped) return await InvokeScoped<string>(ListPerson, search, page, countOnly, fields, personCriteria);
@@ -61,24 +99,6 @@ public class PersonKernelPlugin(CrudContext<Coalesce.Domain.AppDbContext> contex
                 return new ListResult<PersonResponse>(result) { TotalCount = result.Object };
             }
             return await dataSource.GetMappedListAsync<PersonResponse>(listParams);
-        });
-    }
-
-    [KernelFunction("save_person")]
-    [Description("Creates a new Person. Updates an existing Person. Only provide value of the fields that need to be changed.")]
-    public async Task<string> SavePerson(PersonParameter dto)
-    {
-        if (!_isScoped) return await InvokeScoped<string>(SavePerson, dto);
-        return await Json(async () =>
-        {
-            var dataSource = dsFactory.GetDefaultDataSource<Coalesce.Domain.Person, Coalesce.Domain.Person>();
-            var behaviors = bhFactory.GetBehaviors<Coalesce.Domain.Person>(GeneratedForClassViewModel);
-            var kind = (await behaviors.DetermineSaveKindAsync(dto, dataSource, new DataSourceParameters())).Kind;
-            if (kind == SaveKind.Create && !GeneratedForClassViewModel.SecurityInfo.IsCreateAllowed(User))
-                return "Creation of Person items not allowed.";
-            if (kind == SaveKind.Update && !GeneratedForClassViewModel.SecurityInfo.IsEditAllowed(User))
-                return "Editing of Person items not allowed.";
-            return await behaviors.SaveAsync<PersonParameter, PersonResponse>(dto, dataSource, new DataSourceParameters());
         });
     }
 

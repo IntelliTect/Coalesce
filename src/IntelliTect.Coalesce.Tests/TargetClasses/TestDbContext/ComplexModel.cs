@@ -6,6 +6,7 @@ using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -131,11 +132,11 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         [DefaultValue(Math.PI)]
         // Double's min/max are the biggest magnitude values that can occur in Range.
         // This ensures we don't have overflows or incorrect parsing to smaller numeric types.
-        [Range(double.MinValue, double.MaxValue)] 
+        [Range(double.MinValue, double.MaxValue)]
         public double DoubleWithDefault { get; set; }
 
         [DefaultValue(EnumPkId.Value10)]
-        public EnumPkId EnumWithDefault{ get; set; }
+        public EnumPkId EnumWithDefault { get; set; }
 
         [DataType("Color")]
         public string Color { get; set; }
@@ -328,6 +329,14 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         [ControllerAction(Method = HttpMethod.Get)]
         [Coalesce]
         public Task MethodWithOptionalCancellationToken(string q, CancellationToken cancellationToken = default) => Task.CompletedTask;
+
+        [Coalesce]
+        public Task PostWithImplicitDiParameters(
+            ExternalTypeWithDtoProp input,
+            CancellationToken cancellationToken,
+            ClaimsPrincipal user,
+            AppDbContext db
+        ) => Task.CompletedTask;
 
         [Coalesce]
         public Task MethodWithOptionalEnumParam(Case.Statuses status = Case.Statuses.Open) => Task.CompletedTask;

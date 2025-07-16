@@ -692,6 +692,17 @@ export class ComplexModelViewModel extends ViewModel<$models.ComplexModel, $apiC
     return methodWithOptionalCancellationToken
   }
   
+  public get postWithImplicitDiParameters() {
+    const postWithImplicitDiParameters = this.$apiClient.$makeCaller(
+      this.$metadata.methods.postWithImplicitDiParameters,
+      (c, input?: $models.ExternalTypeWithDtoProp | null) => c.postWithImplicitDiParameters(this.$primaryKey, input),
+      () => ({input: null as $models.ExternalTypeWithDtoProp | null, }),
+      (c, args) => c.postWithImplicitDiParameters(this.$primaryKey, args.input))
+    
+    Object.defineProperty(this, 'postWithImplicitDiParameters', {value: postWithImplicitDiParameters});
+    return postWithImplicitDiParameters
+  }
+  
   public get methodWithOptionalEnumParam() {
     const methodWithOptionalEnumParam = this.$apiClient.$makeCaller(
       this.$metadata.methods.methodWithOptionalEnumParam,

@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 using System.Text.Json.Nodes;
 
 namespace IntelliTect.Coalesce.Helpers;
@@ -53,7 +54,8 @@ public static class DevelopmentConnectionStringLocator
                     try
                     {
                         var json = File.ReadAllText(configFile);
-                        var root = JsonNode.Parse(json);
+                        var documentOptions = new JsonDocumentOptions { CommentHandling = JsonCommentHandling.Skip };
+                        var root = JsonNode.Parse(json, null, documentOptions);
                         var connStrings = root?["ConnectionStrings"];
                         if (connStrings is JsonObject)
                         {
@@ -73,7 +75,6 @@ public static class DevelopmentConnectionStringLocator
                 }
             }
 
-            curDirectory = curDirectory.Parent;
             if (
                 curDirectory != null && (
                 curDirectory.EnumerateDirectories(".git").Any() ||
@@ -84,6 +85,8 @@ public static class DevelopmentConnectionStringLocator
                 // We reached the top of the project. Stop looking.
                 return null;
             }
+
+            curDirectory = curDirectory?.Parent;
         }
 
         return null;

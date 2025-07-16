@@ -10,7 +10,7 @@ namespace IntelliTect.Coalesce.Analyzers.Test
         [Fact]
         public async Task ReadAttribute_OnProperty_WithPermissionLevel_ReportsDiagnostic()
         {
-            var test = @"
+            var testCode = TestCode.TestAttributes + @"
 using IntelliTect.Coalesce.DataAnnotations;
 
 namespace TestNamespace
@@ -22,15 +22,13 @@ namespace TestNamespace
     }
 }";
 
-            await VerifyCodeFixAsync(test, test);
+            await VerifyAnalyzerAsync(testCode);
         }
 
         [Fact]
         public async Task ReadAttribute_OnProperty_WithoutPermissionLevel_DoesNotReportDiagnostic()
         {
-            var test = @"
-using IntelliTect.Coalesce.DataAnnotations;
-
+            var testCode = TestCode.TestAttributes + @"
 namespace TestNamespace
 {
     public class TestClass
@@ -43,15 +41,13 @@ namespace TestNamespace
     }
 }";
 
-            await VerifyCodeFixAsync(test, test);
+            await VerifyAnalyzerAsync(testCode);
         }
 
         [Fact]
         public async Task ReadAttribute_OnClass_WithPermissionLevel_DoesNotReportDiagnostic()
         {
-            var test = @"
-using IntelliTect.Coalesce.DataAnnotations;
-
+            var testCode = TestCode.TestAttributes + @"
 namespace TestNamespace
 {
     [Read(SecurityPermissionLevels.AllowAuthenticated)]
@@ -61,15 +57,13 @@ namespace TestNamespace
     }
 }";
 
-            await VerifyCodeFixAsync(test, test);
+            await VerifyAnalyzerAsync(testCode);
         }
 
         [Fact]
         public async Task ReadAttribute_OnProperty_CodeFix_RemovesPermissionLevel()
         {
-            var test = @"
-using IntelliTect.Coalesce.DataAnnotations;
-
+            var testCode = TestCode.TestAttributes + @"
 namespace TestNamespace
 {
     public class TestClass
@@ -79,9 +73,7 @@ namespace TestNamespace
     }
 }";
 
-            var fixedCode = @"
-using IntelliTect.Coalesce.DataAnnotations;
-
+            var fixedCode = TestCode.TestAttributes + @"
 namespace TestNamespace
 {
     public class TestClass
@@ -91,15 +83,13 @@ namespace TestNamespace
     }
 }";
 
-            await VerifyCodeFixAsync(test, fixedCode);
+            await VerifyCodeFixAsync(testCode, fixedCode);
         }
 
         [Fact]
         public async Task ReadAttribute_OnProperty_CodeFix_RemovesPermissionLevel_KeepsRoles()
         {
-            var test = @"
-using IntelliTect.Coalesce.DataAnnotations;
-
+            var testCode = TestCode.TestAttributes + @"
 namespace TestNamespace
 {
     public class TestClass
@@ -109,9 +99,7 @@ namespace TestNamespace
     }
 }";
 
-            var fixedCode = @"
-using IntelliTect.Coalesce.DataAnnotations;
-
+            var fixedCode = TestCode.TestAttributes + @"
 namespace TestNamespace
 {
     public class TestClass
@@ -121,7 +109,17 @@ namespace TestNamespace
     }
 }";
 
-            await VerifyCodeFixAsync(test, fixedCode);
+            await VerifyCodeFixAsync(testCode, fixedCode);
+        }
+
+        private static async Task VerifyAnalyzerAsync(string source)
+        {
+            var test = new CSharpAnalyzerTest<ReadAttributePermissionLevelAnalyzer, DefaultVerifier>
+            {
+                TestCode = source,
+            };
+
+            await test.RunAsync();
         }
 
         private static async Task VerifyCodeFixAsync(string source, string fixedSource)
@@ -131,9 +129,6 @@ namespace TestNamespace
                 TestCode = source,
                 FixedCode = fixedSource,
             };
-
-            // Add reference to IntelliTect.Coalesce
-            test.TestState.AdditionalReferences.Add(typeof(IntelliTect.Coalesce.DataAnnotations.ReadAttribute).Assembly);
 
             await test.RunAsync();
         }

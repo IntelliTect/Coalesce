@@ -8,7 +8,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\IntelliTect.Coalesce.Analyzers\IntelliTect.Coalesce.Analyzers.csproj" />
+    <!-- Temporarily comment out main Coalesce project reference due to build issues
     <ProjectReference Include="..\IntelliTect.Coalesce\IntelliTect.Coalesce.csproj" />
+    -->
   </ItemGroup>
   
   <ItemGroup>

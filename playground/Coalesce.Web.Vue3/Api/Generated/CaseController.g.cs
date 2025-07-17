@@ -458,7 +458,7 @@ namespace Coalesce.Web.Vue3.Api
 
             await item.UploadImages(
                 Db,
-                _params.Files.Cast<IntelliTect.Coalesce.Models.IFile>().ToList()
+                _params.Files?.Cast<IntelliTect.Coalesce.Models.IFile>()?.ToList()
             );
             var _result = new ItemResult();
             return _result;
@@ -497,7 +497,7 @@ namespace Coalesce.Web.Vue3.Api
 
             await item.UploadImages(
                 Db,
-                _params.Files.Cast<IntelliTect.Coalesce.Models.IFile>().ToList()
+                _params.Files?.Cast<IntelliTect.Coalesce.Models.IFile>()?.ToList()
             );
             var _result = new ItemResult();
             return _result;

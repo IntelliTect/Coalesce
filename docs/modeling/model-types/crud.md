@@ -14,6 +14,7 @@ To this end, there are three different methods of defining models that support C
 - [Custom Methods](/modeling/model-components/methods.md)
 - [TypeScript ViewModels](/stacks/vue/layers/viewmodels.md#viewmodels) and [TypeScript ListViewModels](/stacks/vue/layers/viewmodels.md#listviewmodels)
 - [Data Sources](/modeling/model-components/data-sources.md) and [Behaviors](/modeling/model-components/behaviors.md)
+- [Semantic Kernel plugins](/modeling/model-components/attributes/semantic-kernel.md) for CRUD operations (save/delete) when annotated with `[SemanticKernel]` (and get/list operations via annotating one of the type's data sources.)
 - Admin pages
 
 

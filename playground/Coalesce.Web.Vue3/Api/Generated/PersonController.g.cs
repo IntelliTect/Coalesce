@@ -881,7 +881,7 @@ namespace Coalesce.Web.Vue3.Api
 
             var _methodResult = Coalesce.Domain.Person.MethodWithStringArrayParameter(
                 Db,
-                _params.Strings.ToArray()
+                _params.Strings?.ToArray()
             );
             var _result = new ItemResult<string[]>();
             _result.Object = _methodResult?.ToArray();
@@ -912,7 +912,7 @@ namespace Coalesce.Web.Vue3.Api
 
             var _methodResult = Coalesce.Domain.Person.MethodWithStringArrayParameter(
                 Db,
-                _params.Strings.ToArray()
+                _params.Strings?.ToArray()
             );
             var _result = new ItemResult<string[]>();
             _result.Object = _methodResult?.ToArray();
@@ -947,7 +947,7 @@ namespace Coalesce.Web.Vue3.Api
             var _methodResult = Coalesce.Domain.Person.MethodWithEntityParameter(
                 Db,
                 _params.Person?.MapToNew(_mappingContext),
-                _params.People?.Select(_m => _m.MapToNew(_mappingContext)).ToArray()
+                _params.People?.Select(_m => _m.MapToNew(_mappingContext))?.ToArray()
             );
             var _result = new ItemResult<PersonResponse>();
             _result.Object = Mapper.MapToDto<Coalesce.Domain.Person, PersonResponse>(_methodResult, _mappingContext, includeTree);
@@ -982,7 +982,7 @@ namespace Coalesce.Web.Vue3.Api
             var _methodResult = Coalesce.Domain.Person.MethodWithEntityParameter(
                 Db,
                 _params.Person?.MapToNew(_mappingContext),
-                _params.People?.Select(_m => _m.MapToNew(_mappingContext)).ToArray()
+                _params.People?.Select(_m => _m.MapToNew(_mappingContext))?.ToArray()
             );
             var _result = new ItemResult<PersonResponse>();
             _result.Object = Mapper.MapToDto<Coalesce.Domain.Person, PersonResponse>(_methodResult, _mappingContext, includeTree);

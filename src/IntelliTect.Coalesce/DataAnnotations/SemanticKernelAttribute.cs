@@ -6,7 +6,7 @@ namespace IntelliTect.Coalesce
     /// <summary>
     /// Configures Semantic Kernel function generation for entities, data sources, data source parameters, and methods.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Parameter, AllowMultiple = false)]
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Parameter, AllowMultiple = false, Inherited = false)]
     public class SemanticKernelAttribute : Attribute
     {
         public SemanticKernelAttribute()

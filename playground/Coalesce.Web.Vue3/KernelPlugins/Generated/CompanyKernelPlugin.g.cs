@@ -17,20 +17,22 @@ using System.Threading.Tasks;
 namespace Coalesce.Web.Vue3.KernelPlugins;
 #pragma warning disable CS1998
 
-public class CompanyKernelPlugin(CrudContext<Coalesce.Domain.AppDbContext> context, IDataSourceFactory dsFactory, IBehaviorsFactory bhFactory) : KernelPluginBase<Coalesce.Domain.Company>(context)
+public class CompanyKernelPlugin(CrudContext<Coalesce.Domain.AppDbContext> context, IDataSourceFactory dataSourceFactory, IBehaviorsFactory behaviorsFactory) : KernelPluginBase<Coalesce.Domain.Company>(context)
 {
     protected Coalesce.Domain.AppDbContext Db => context.DbContext;
 
     [KernelFunction("get_company")]
     [Description("Gets a Company by its Id value. .")]
-    public async Task<string> GetCompany(int id)
+    public async Task<string> GetCompany(
+        int id)
     {
         if (!_isScoped) return await InvokeScoped<string>(GetCompany, id);
+
         return await Json(async () =>
         {
             if (!GeneratedForClassViewModel.SecurityInfo.IsReadAllowed(User)) return "Unauthorized.";
 
-            var dataSource = dsFactory.GetDataSource<Coalesce.Domain.Company, Coalesce.Domain.Company>("DefaultSource");
+            var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Company, Coalesce.Domain.Company>("DefaultSource");
             var dataSourceParams = new DataSourceParameters { DataSource = "DefaultSource" };
             return await dataSource.GetMappedItemAsync<CompanyResponse>(id, dataSourceParams);
         });
@@ -46,25 +48,24 @@ public class CompanyKernelPlugin(CrudContext<Coalesce.Domain.AppDbContext> conte
         [Description("Provide true if you only need a count of results.")]
         bool countOnly,
         [Description("Leave empty if you need whole objects, or provide any of these field names to trim the response: Id,Name,Address1,Address2,City,State,ZipCode,Phone,WebsiteUrl,LogoUrl,IsDeleted,Employees,AltName")]
-        string[] fields
-    )
+        string[] fields)
     {
         if (!_isScoped) return await InvokeScoped<string>(ListCompany, search, page, countOnly, fields);
+
         return await Json(async () =>
         {
             if (!GeneratedForClassViewModel.SecurityInfo.IsReadAllowed(User)) return new ListResult<CompanyResponse>(errorMessage: "Unauthorized.");
 
-            var dataSource = (Coalesce.Domain.Company.DefaultSource)dsFactory.GetDataSource<Coalesce.Domain.Company, Coalesce.Domain.Company>("DefaultSource");
-            MappingContext mappingContext = new(context);
+            var _dataSource = (Coalesce.Domain.Company.DefaultSource)dataSourceFactory.GetDataSource<Coalesce.Domain.Company, Coalesce.Domain.Company>("DefaultSource");
+            MappingContext _mappingContext = new(context);
 
             var listParams = new ListParameters { DataSource = "DefaultSource", Search = search, Page = page, Fields = string.Join(',', fields), PageSize = 100 };
             if (countOnly)
             {
-                var result = await dataSource.GetCountAsync(listParams);
+                var result = await _dataSource.GetCountAsync(listParams);
                 return new ListResult<CompanyResponse>(result) { TotalCount = result.Object };
             }
-            return await dataSource.GetMappedListAsync<CompanyResponse>(listParams);
+            return await _dataSource.GetMappedListAsync<CompanyResponse>(listParams);
         });
     }
-
 }

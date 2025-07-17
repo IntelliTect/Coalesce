@@ -1,12 +1,8 @@
 ﻿using IntelliTect.Coalesce.CodeGeneration.Generation;
 using IntelliTect.Coalesce.TypeDefinition;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators;
 using IntelliTect.Coalesce.Utilities;
 using System.Linq;
-using IntelliTect.Coalesce.DataAnnotations;
 using Microsoft.AspNetCore.WebUtilities;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
@@ -17,11 +13,10 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
 
         public override void BuildOutput(CSharpCodeBuilder b)
         {
-            var securityInfo = Model.SecurityInfo;
-            string namespaceName = WriteNamespaces(b);
+            WriteNamespaces(b);
 
             b.Line();
-            using (b.Block($"namespace {namespaceName}.Api"))
+            using (b.Block($"namespace {GetAreaNamespace()}.Api"))
             {
                 WriteControllerRouteAttribute(b);
                 b.Line("[Authorize]");
@@ -42,7 +37,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                 b.Line("{");
                 using (b.Indented())
                 {
-                    WriteClassContents(b, securityInfo);
+                    WriteClassContents(b, Model.SecurityInfo);
                 }
                 b.Line("}");
             }
@@ -64,7 +59,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                 behaviorsParameter = declaredForAttr + behaviorsParameter;
             }
 
-            using (b.Block(Model.DbContext != null 
+            using (b.Block(Model.DbContext != null
                 ? $"public {Model.ApiControllerClassName}(CrudContext<{Model.DbContext.Type.FullyQualifiedName}> context) : base(context)"
                 : $"public {Model.ApiControllerClassName}(CrudContext context) : base(context)"
             ))
@@ -197,33 +192,11 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
             else
             {
                 WriteInstanceMethodTargetLoading(b, method);
+                WriteEtagProcessing(b, method);
                 WriteMethodInvocation(b, method, "item");
             }
 
             WriteMethodResultProcessBlock(b, method);
-        }
-
-        private void WriteInstanceMethodTargetLoading(CSharpCodeBuilder b, MethodViewModel method)
-        {
-            b.Line($"var dataSource = dataSourceFactory.GetDataSource<" +
-                $"{Model.BaseViewModel.FullyQualifiedName}, {Model.FullyQualifiedName}>" +
-                $"(\"{method.LoadFromDataSourceName}\");");
-
-            if (Model.IsCustomDto)
-            {
-                b.Line($"var itemResult = await dataSource.GetMappedItemAsync<{Model.FullyQualifiedName}>(_params.Id, new DataSourceParameters());");
-            }
-            else
-            {
-                b.Line("var itemResult = await dataSource.GetItemAsync(_params.Id, new DataSourceParameters());");
-            }
-            using (b.Block("if (!itemResult.WasSuccessful)"))
-            {
-                b.Line($"return new {method.ApiActionReturnTypeDeclaration}(itemResult);");
-            }
-            b.Line("var item = itemResult.Object;");
-
-            WriteEtagProcessing(b, method);
         }
 
         private static void WriteEtagProcessing(CSharpCodeBuilder b, MethodViewModel method)
@@ -270,7 +243,7 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
                     {
                         // JS dates only have millisecond precision, so truncate the server value to milliseconds.
                         // Truncation is what happens on the JS side to anything more precise than a millisecond.
-                        { IsDateTimeOffset: true } => 
+                        { IsDateTimeOffset: true } =>
                             "_currentVaryValue.AddTicks(-_currentVaryValue.Ticks % TimeSpan.TicksPerMillisecond) == etag",
                         { IsByteArray: true } => "_currentVaryValue.SequenceEqual(etag)",
                         _ => "_currentVaryValue == etag"

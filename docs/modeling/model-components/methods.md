@@ -493,3 +493,31 @@ For any other storage mechanism, implementations are similar to the database sto
 For downloads, prefer directly providing the underlying `Stream` to the `IFile` versus wrapping a `byte[]` in a `MemoryStream`. This will reduce server memory usage and garbage collector churn.
 
 For cloud storage providers where complex security logic is not needed, consider having clients consume the URL of the cloud resource directly rather than passing the file content through your own server.
+
+
+## Semantic Kernel (AI)
+
+Methods can be exposed as [Semantic Kernel plugins](/modeling/model-components/attributes/semantic-kernel.md) by applying the `[SemanticKernel]` attribute. This enables AI-powered interactions with your application's functionality through functions that the AI can call.
+
+```c#
+public class Person
+{
+    public int PersonId { get; set; }
+    public string FirstName { get; set; }
+    public string? Title { get; set; }
+
+    [Coalesce]
+    [SemanticKernel("Changes a person's first name, and optionally assigns a title if they don't yet have one.")]
+    public string Rename(string newFirstName, string? newTitle = null) 
+    {
+        FirstName = newFirstName;
+        if (newTitle != null && string.IsNullOrEmpty(Title))
+        {
+            Title = newTitle;
+        }
+        return $"Hello, {FirstName}!";
+    }
+}
+```
+
+When annotated with `[SemanticKernel]`, the method becomes available as an AI-callable function, allowing an AI assistant to perform actions and retrieve information from your application. This works for instance methods, static methods, and service methods.

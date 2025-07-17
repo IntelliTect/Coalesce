@@ -46,6 +46,7 @@ If you create a custom data source that has custom logic for securing your data,
 
 All data sources are instantiated using dependency injection and your application's `IServiceProvider`. As a result, you can add whatever constructor parameters you desire to your data sources as long as a value for them can be resolved from your application's services. The single parameter to the `StandardDataSource` is resolved in this way - the `CrudContext<TContext>` contains the common set of objects most commonly used, including the `DbContext` and the `ClaimsPrincipal` representing the current user.
 
+
 ## Consuming Data Sources
 
 <CodeTabs>
@@ -68,6 +69,27 @@ list.$load(1);
 
 </template>
 </CodeTabs>
+
+### Semantic Kernel (AI)
+
+Data sources can be exposed as [Semantic Kernel plugins](/modeling/model-components/attributes/semantic-kernel.md) by applying the `[SemanticKernel]` attribute. This will generate the data source's get and list functionality into kernel functions that can be invoked by an LLM.
+
+```c#
+[Coalesce]
+[SemanticKernel("Retrieves products available for sale")]
+public class AvailableProducts : StandardDataSource<Product, AppDbContext>
+{
+    public AvailableProducts(CrudContext<AppDbContext> context) : base(context) { }
+
+    [SemanticKernel("Filter by product category")]
+    public string? Category { get; set; }
+
+    public override IQueryable<Product> GetQuery(IDataSourceParameters parameters)
+        => Db.Products
+            .Where(p => p.IsAvailable)
+            .Where(p => Category == null || p.Category == Category);
+}
+```
 
 ## Standard Parameters
 

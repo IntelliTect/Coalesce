@@ -5,9 +5,7 @@ using IntelliTect.Coalesce.Models;
 using IntelliTect.Coalesce.TypeDefinition;
 using IntelliTect.Coalesce.Utilities;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
 {
@@ -17,9 +15,18 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
         {
         }
 
-
         public const string MethodResultVar = "_methodResult";
         public const string MappingContextVar = "_mappingContext";
+
+        protected string GetAreaNamespace()
+        {
+            string namespaceName = Namespace;
+            if (!string.IsNullOrWhiteSpace(AreaName))
+            {
+                namespaceName += "." + AreaName;
+            }
+            return namespaceName;
+        }
 
         /// <summary>
         /// For a method invocation controller action, writes the actual invocation of the method.
@@ -144,6 +151,27 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
             }
 
             return $"_params.{param.PascalCaseName}{param.MapToModelChain(MappingContextVar)}";
+        }
+
+        protected void WriteInstanceMethodTargetLoading(CSharpCodeBuilder b, MethodViewModel method)
+        {
+            b.Line($"var dataSource = dataSourceFactory.GetDataSource<" +
+                $"{Model.BaseViewModel.FullyQualifiedName}, {Model.FullyQualifiedName}>" +
+                $"(\"{method.LoadFromDataSourceName}\");");
+
+            if (Model.IsCustomDto)
+            {
+                b.Line($"var itemResult = await dataSource.GetMappedItemAsync<{Model.FullyQualifiedName}>(_params.Id, new DataSourceParameters());");
+            }
+            else
+            {
+                b.Line("var itemResult = await dataSource.GetItemAsync(_params.Id, new DataSourceParameters());");
+            }
+            using (b.Block("if (!itemResult.WasSuccessful)"))
+            {
+                b.Line($"return new {method.ApiActionReturnTypeDeclaration}(itemResult);");
+            }
+            b.Line("var item = itemResult.Object;");
         }
 
         /// <summary>

@@ -20,13 +20,10 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
         /// <summary>
         /// Writes the common set of namespaces used by API controllers.
         /// </summary>
-        protected string WriteNamespaces(CSharpCodeBuilder b)
+        protected void WriteNamespaces(CSharpCodeBuilder b)
         {
-            string namespaceName = Namespace;
-            if (!string.IsNullOrWhiteSpace(AreaName))
-            {
-                namespaceName += "." + AreaName;
-            }
+            var namespaceName = GetAreaNamespace();
+
             var namespaces = new[]
             {
                 "IntelliTect.Coalesce",
@@ -57,8 +54,6 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators
             {
                 b.Line($"using {ns};");
             }
-
-            return namespaceName;
         }
 
         /// <summary>

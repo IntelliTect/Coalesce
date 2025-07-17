@@ -360,7 +360,7 @@ namespace Coalesce.Domain
             return new ListResult<Person>(query, page, pageSize);
         }
 
-        [SemanticKernel("test description")]
+        [SemanticKernel("")]
         [Coalesce, DefaultDataSource]
         public class WithoutCases(CrudContext<AppDbContext> context) : StandardDataSource<Person, AppDbContext>(context)
         {
@@ -398,11 +398,13 @@ namespace Coalesce.Domain
 
 
     [Coalesce]
+    [SemanticKernel("Retrieves people whose first name start with 'A', and their cases.")]
     public class NamesStartingWithAWithCases : StandardDataSource<Person, AppDbContext>
     {
         public NamesStartingWithAWithCases(CrudContext<AppDbContext> context) : base(context) { }
 
         [Coalesce]
+        [SemanticKernel("Filter the cases returned to only those with these statuses.")]
         public List<Case.Statuses>? AllowedStatuses { get; set; }
 
         public override IQueryable<Person> GetQuery(IDataSourceParameters parameters)

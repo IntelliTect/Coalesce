@@ -56,6 +56,9 @@ For each of your [Entity Models](/modeling/model-types/entities.md) and [Standal
 
 See [Generated C# DTOs](/stacks/agnostic/dtos.md) for more information.
 
+#### Semantic Kernel Plugins
+For models, methods, and data sources annotated with the [[SemanticKernel]](/modeling/model-components/attributes/semantic-kernel.md) attribute, plugin classes are generated in the `/KernelPlugins/Generated` directory. These plugins expose your application's functionality as AI-callable functions that can be used with Microsoft Semantic Kernel for building AI-powered features.
+
 ### Frontend - Vue
 
 An overview of the Vue generated code can be found at [Vue Overview](/stacks/vue/overview.md).

@@ -12,7 +12,7 @@ public static class ApiCodeGenerationExtensions
     {
         if (permission.NoAccess) throw new InvalidOperationException($"Cannot emit an annotation for security level {SecurityPermissionLevels.DenyAll}");
         if (permission.AllowAnonymous) return "[AllowAnonymous]";
-        if (permission.HasRoles) return string.Concat(permission.RoleLists.Select(rl => 
+        if (permission.HasRoles) return string.Concat(permission.RoleLists.Select(rl =>
             $"[Authorize(Roles={string.Join(",", rl).QuotedStringLiteralForCSharp()})]"));
         return "[Authorize]";
     }
@@ -38,13 +38,13 @@ public static class ApiCodeGenerationExtensions
         {
             if (param.PureType.IsFile)
             {
-                ret += $".Cast<{param.PureType.FullyQualifiedName}>()";
+                ret += $"?.Cast<{param.PureType.FullyQualifiedName}>()";
             }
 
             if (param.Type.IsArray)
-                ret += ".ToArray()";
+                ret += "?.ToArray()";
             else
-                ret += ".ToList()";
+                ret += "?.ToList()";
         }
 
         return ret;

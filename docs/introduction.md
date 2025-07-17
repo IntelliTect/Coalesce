@@ -77,6 +77,7 @@ monotonous to build:
 - APIs to interact with your models via endpoints like List, Get, Save, and more.
 - Out-of-the-box [Vue Components](/stacks/vue/coalesce-vue-vuetify/overview.md) for common controls like dates, selecting objects via drop downs, enums, etc. Dropdowns support searching and paging automatically.
 - A complete set of admin pages are provided, allowing you to read, create, edit, and delete data straight away without writing any additional code.
+- [Semantic Kernel plugins](/modeling/model-components/semantic-kernel.md) that enable interaction with your application through an AI chat assistant or other LLM-based tool.
 
 ## Getting Started
 

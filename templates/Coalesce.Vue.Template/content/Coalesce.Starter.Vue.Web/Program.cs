@@ -125,8 +125,10 @@ services.AddHangfireServer(c =>
 #endif
 
 #if AIChat
+// Dynamically register all Coalesce-generated kernel plugins
 foreach (var pluginType in Assembly.GetExecutingAssembly().GetTypes().Where(t => t.BaseType?.Name == "KernelPluginBase`1"))
     services.AddScoped(sp => KernelPluginFactory.CreateFromType(pluginType, pluginType.Name, sp));
+    
 services.AddScoped<AIAgentService>();
 builder.AddAzureOpenAIClient(connectionName: "OpenAI").AddChatClient(deploymentName: "chat");
 services.AddAzureOpenAIChatCompletion(deploymentName: "chat");

@@ -2,7 +2,7 @@
 
 `IntelliTect.Coalesce.SemanticKernelAttribute`
 
-Configures [Microsoft Semantic Kernel](https://learn.microsoft.com/en-us/semantic-kernel/overview/) plugin generation for CRUD models, data sources, data source parameters, and methods. When applied, Coalesce generates Semantic Kernel [plugin classes](https://learn.microsoft.com/en-us/semantic-kernel/concepts/plugins/?pivots=programming-language-csharp) that expose your application's functionality as AI-callable functions.
+Enables and configures [Microsoft Semantic Kernel](https://learn.microsoft.com/en-us/semantic-kernel/overview/) plugin generation for CRUD models, data sources, and custom methods. When applied, Coalesce generates Semantic Kernel [plugin classes](https://learn.microsoft.com/en-us/semantic-kernel/concepts/plugins/?pivots=programming-language-csharp) that expose your application's functionality as AI-callable functions.
 
 This attribute can be applied to:
 - **[Data Sources](/modeling/model-components/data-sources.md)**: Exposes data source operations (get, list) as Semantic Kernel functions
@@ -10,6 +10,8 @@ This attribute can be applied to:
 - **[Methods](/modeling/model-components/methods.md)**: Exposes custom methods as Semantic Kernel functions
   - **Method Parameters**: Provides semantic descriptions for parameters on custom methods
 - **[CRUD Models](/modeling/model-types/crud.md)**: Generates CUD operations (save, delete) as Semantic Kernel functions
+
+The Coalesce framework does not directly provide the means to consume these kernel plugins. However, the project template does have an [option](/topics/template-features.md#ai-chat) to include a simple AI Chat assistant as an introduction to consuming Semantic Kernel plugins and functions. For other use cases, consult the [Semantic Kernel](https://learn.microsoft.com/en-us/semantic-kernel/overview/) documentation.
 
 ## Example Usage
 

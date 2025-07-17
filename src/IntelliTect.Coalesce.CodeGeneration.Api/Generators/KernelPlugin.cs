@@ -51,13 +51,23 @@ public class KernelPlugin(GeneratorServices services) : ApiService(services)
 
         List<string> injectedServices = [
             $"{crudCtxType} context",
-            $"IDataSourceFactory dataSourceFactory",
-            $"IBehaviorsFactory behaviorsFactory",
         ];
 
         if (Model.IsService)
         {
             injectedServices.Add($"{Model.Type.FullyQualifiedName} _service");
+        }
+        else
+        {
+            injectedServices.Add($"IDataSourceFactory dataSourceFactory");
+        }
+
+        if (Model.GetAttribute<SemanticKernelAttribute>() is { } ska && (
+            ska.GetValue(a => a.SaveEnabled) == true ||
+            ska.GetValue(a => a.DeleteEnabled) == true
+        ))
+        {
+            injectedServices.Add("IBehaviorsFactory behaviorsFactory");
         }
 
         // Individual method dependencies must be ctor injected so that InvokedScoped

@@ -4,12 +4,12 @@
     <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(TargetFramework)' == 'net8.0'">
-    <DotNetPackageVersionSpec>8.0.10</DotNetPackageVersionSpec>
+    <DotNetPackageVersionSpec>8.0.18</DotNetPackageVersionSpec>
   </PropertyGroup>
   <!-- TargetFramework is empty for projects that aren't multi-targeting (i.e. the playground
   projects) -->
   <PropertyGroup Condition=" '$(TargetFramework)' == 'net9.0' or '$(TargetFramework)' == '' ">
-    <DotNetPackageVersionSpec>9.0.3</DotNetPackageVersionSpec>
+    <DotNetPackageVersionSpec>9.0.7</DotNetPackageVersionSpec>
   </PropertyGroup>
   <ItemGroup>
     <PackageVersion Include="Bogus" Version="35.6.1" />
@@ -56,7 +56,7 @@
     <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="8.0.0" />
     <PackageVersion Include="Microsoft.VisualStudio.Web.CodeGeneration" Version="2.2.4" />
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageVersion Include="System.Text.Json" Version="9.0.6" />
+    <PackageVersion Include="System.Text.Json" Version="$(DotNetPackageVersionSpec)" />
     <PackageVersion Include="System.Runtime.Caching" Version="8.0.1" />
     <PackageVersion Include="OpenTelemetry" Version="1.12.0" />
   </ItemGroup>

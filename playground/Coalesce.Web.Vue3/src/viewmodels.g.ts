@@ -1030,9 +1030,9 @@ export class WeatherServiceViewModel extends ServiceViewModel<typeof $metadata.W
   public get getWeather() {
     const getWeather = this.$apiClient.$makeCaller(
       this.$metadata.methods.getWeather,
-      (c, location: $models.Location | null, dateTime?: Date | null, conditions?: $models.SkyConditions | null) => c.getWeather(location, dateTime, conditions),
-      () => ({location: null as $models.Location | null, dateTime: null as Date | null, conditions: null as $models.SkyConditions | null, }),
-      (c, args) => c.getWeather(args.location, args.dateTime, args.conditions))
+      (c, location: $models.Location | null, dateTime?: Date | null) => c.getWeather(location, dateTime),
+      () => ({location: null as $models.Location | null, dateTime: null as Date | null, }),
+      (c, args) => c.getWeather(args.location, args.dateTime))
     
     Object.defineProperty(this, 'getWeather', {value: getWeather});
     return getWeather

@@ -17,7 +17,7 @@ using System.Threading.Tasks;
 namespace Coalesce.Web.Vue3.KernelPlugins;
 #pragma warning disable CS1998
 
-public class CompanyKernelPlugin(CrudContext<Coalesce.Domain.AppDbContext> context, IDataSourceFactory dataSourceFactory, IBehaviorsFactory behaviorsFactory) : KernelPluginBase<Coalesce.Domain.Company>(context)
+public class CompanyKernelPlugin(CrudContext<Coalesce.Domain.AppDbContext> context, IDataSourceFactory dataSourceFactory) : KernelPluginBase<Coalesce.Domain.Company>(context)
 {
     protected Coalesce.Domain.AppDbContext Db => context.DbContext;
 

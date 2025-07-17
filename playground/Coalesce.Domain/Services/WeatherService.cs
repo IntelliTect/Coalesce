@@ -11,7 +11,8 @@ namespace Coalesce.Domain.Services
     [Coalesce, Service]
     public interface IWeatherService
     {
-        Task<WeatherData> GetWeatherAsync(AppDbContext parameterDbContext, Location location, DateTimeOffset? dateTime, SkyConditions? conditions);
+        [SemanticKernel("Returns weather data for the given location")]
+        Task<WeatherData> GetWeatherAsync(AppDbContext parameterDbContext, Location location, DateTimeOffset? dateTime);
     }
 
     public class WeatherService : IWeatherService
@@ -27,7 +28,7 @@ namespace Coalesce.Domain.Services
         public WeatherData GetWeather(AppDbContext parameterDbContext, Location location, DateTimeOffset? dateTime)
             => new WeatherData { TempFahrenheit = 42, Humidity = db.Cases.Count(), Location = location };
 
-        public async Task<WeatherData> GetWeatherAsync (AppDbContext parameterDbContext, Location location, DateTimeOffset? dateTime, SkyConditions? conditions)
+        public async Task<WeatherData> GetWeatherAsync (AppDbContext parameterDbContext, Location location, DateTimeOffset? dateTime)
         {
             await Task.Delay(2000);
             return GetWeather(parameterDbContext, location, dateTime);

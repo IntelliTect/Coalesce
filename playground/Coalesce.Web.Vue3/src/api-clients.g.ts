@@ -486,12 +486,11 @@ export class AIAgentServiceApiClient extends ServiceApiClient<typeof $metadata.A
 export class WeatherServiceApiClient extends ServiceApiClient<typeof $metadata.WeatherService> {
   constructor() { super($metadata.WeatherService) }
   
-  public getWeather(location: $models.Location | null, dateTime?: Date | null, conditions?: $models.SkyConditions | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<$models.WeatherData>> {
+  public getWeather(location: $models.Location | null, dateTime?: Date | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<$models.WeatherData>> {
     const $method = this.$metadata.methods.getWeather
     const $params =  {
       location,
       dateTime,
-      conditions,
     }
     return this.$invoke($method, $params, $config)
   }

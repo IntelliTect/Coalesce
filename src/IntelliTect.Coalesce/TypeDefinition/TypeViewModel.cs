@@ -128,8 +128,8 @@ namespace IntelliTect.Coalesce.TypeDefinition
             IsFile ? TypeDiscriminator.File :
             IsDictionary ? TypeDiscriminator.Unknown : // No support for dictionaries on the frontend.
             IsCollection ? TypeDiscriminator.Collection :
-            ClassViewModel != null 
-                ? (ClassViewModel.IsDbMappedType ? TypeDiscriminator.Model : TypeDiscriminator.Object) 
+            ClassViewModel != null
+                ? (ClassViewModel.IsDbMappedType ? TypeDiscriminator.Model : TypeDiscriminator.Object)
                 : TypeDiscriminator.Unknown;
 
         public string CsDefaultValue
@@ -275,7 +275,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                     ?? FirstTypeArgument!;
                 }
 
-                if (IsGeneric &&IsReferenceOrNullableValue && FirstTypeArgument is not null)
+                if (IsGeneric && IsReferenceOrNullableValue && FirstTypeArgument is not null)
                 {
                     return FirstTypeArgument!;
                 }
@@ -287,11 +287,11 @@ namespace IntelliTect.Coalesce.TypeDefinition
         /// <summary>
         /// Returns true if the type is a reference type outside the System namespace.
         /// </summary>
-        public bool IsPOCO => 
-            IsReferenceType && 
-            !IsArray && 
-            !IsCollection && 
-            !FullNamespace.StartsWith("System") && 
+        public bool IsPOCO =>
+            IsReferenceType &&
+            !IsArray &&
+            !IsCollection &&
+            !FullNamespace.StartsWith("System") &&
             !IsFile;
 
         public string NullableTypeForDto(bool isInput, string? dtoNamespace, bool dontEmitNullable = false)
@@ -340,7 +340,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
                 var regex = new Regex($@"({model.Name})(>|$)");
                 typeName = regex.Replace(typeName, $"{dtoName}$2");
                 typeName = typeName.Replace(
-                    model.Type.FullNamespace + ".", 
+                    model.Type.FullNamespace + ".",
                     string.IsNullOrWhiteSpace(dtoNamespace) ? "" : dtoNamespace + ".");
 
                 return typeName;
@@ -358,7 +358,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
         {
             if (!(obj is TypeViewModel that)) return false;
 
-            return 
+            return
                 this.VerboseFullyQualifiedName == that.VerboseFullyQualifiedName &&
                 // Ensure we don't conflate reflection and symbol types together:
                 this.GetType() == that.GetType();

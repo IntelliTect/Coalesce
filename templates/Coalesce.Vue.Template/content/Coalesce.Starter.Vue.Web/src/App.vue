@@ -141,7 +141,7 @@
       </router-view>
       <!--#if AIChat -->
       <AIChat title="AI Assistant" endpoint="chatAgent" class="right-0" />
-      <!--#AIChat -->
+      <!--#endif -->
     </v-main>
   </v-app>
 </template>

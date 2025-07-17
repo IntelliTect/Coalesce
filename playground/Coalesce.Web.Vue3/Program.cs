@@ -78,10 +78,9 @@ foreach (var pluginType in Assembly.GetExecutingAssembly().GetTypes().Where(t =>
     services.AddScoped(sp => KernelPluginFactory.CreateFromType(pluginType, pluginType.Name, sp));
 services.AddScoped<AIAgentService>();
 services.AddAzureOpenAIChatCompletion(
-    deploymentName: "gpt-4.1",
-    endpoint: "https://ascott-openai-test.openai.azure.com/",
-    //credentials: new DefaultAzureCredential()
-    apiKey: builder.Configuration["AiKey"]!
+    deploymentName: builder.Configuration["Azure:OpenAI:Deployment"]!,
+    endpoint: builder.Configuration["Azure:OpenAI:Endpoint"]!,
+    apiKey: builder.Configuration["Azure:OpenAI:Key"]!
 );
 
 

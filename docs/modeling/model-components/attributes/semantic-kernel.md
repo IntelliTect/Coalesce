@@ -11,7 +11,7 @@ This attribute can be applied to:
   - **Method Parameters**: Provides semantic descriptions for parameters on custom methods
 - **[CRUD Models](/modeling/model-types/crud.md)**: Generates CUD operations (save, delete) as Semantic Kernel functions
 
-The Coalesce framework does not directly provide the means to consume these kernel plugins. However, the project template does have an [option](/topics/template-features.md#ai-chat) to include a simple AI Chat assistant as an introduction to consuming Semantic Kernel plugins and functions. For other use cases, consult the [Semantic Kernel](https://learn.microsoft.com/en-us/semantic-kernel/overview/) documentation.
+Coalesce itself does not directly provide the means to consume these kernel plugins. However, the project template does have an [option](/topics/template-features.md#ai-chat) to include a simple AI Chat assistant as an introduction to consuming Semantic Kernel plugins and functions. For other use cases, consult the [Semantic Kernel](https://learn.microsoft.com/en-us/semantic-kernel/overview/) documentation.
 
 ## Example Usage
 

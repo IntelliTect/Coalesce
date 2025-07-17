@@ -89,6 +89,7 @@ public class PersonKernelPlugin(CrudContext<Coalesce.Domain.AppDbContext> contex
         bool countOnly,
         [Description("Leave empty if you need whole objects, or provide any of these field names to trim the response: PersonId,Title,FirstName,LastName,Email,Gender,Height,CasesAssigned,CasesReported,BirthDate,LastBath,NextUpgrade,PersonStats,ProfilePic,Name,CompanyId,Company,ArbitraryCollectionOfStrings")]
         string[] fields,
+        [Description("Filter the cases returned to only those with these statuses.")]
         System.Collections.Generic.ICollection<Coalesce.Domain.Case.Statuses> allowedStatuses = default)
     {
         if (!_isScoped) return await InvokeScoped<string>(ListPersonNamesStartingWithAWithCases, search, page, countOnly, fields, allowedStatuses);
@@ -173,6 +174,7 @@ public class PersonKernelPlugin(CrudContext<Coalesce.Domain.AppDbContext> contex
     public async Task<string> ChangeFirstName(
         int id,
         string firstName,
+        [Description("A new title for the person. Provide null to leave the title unchanged.")]
         Coalesce.Domain.Person.Titles? title)
     {
         if (!_isScoped) return await InvokeScoped<string>(ChangeFirstName, id, firstName, title);

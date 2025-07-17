@@ -39,6 +39,9 @@ namespace IntelliTect.Coalesce.CodeGeneration.Tests
                 "Models": {
                     "disabled": true
                 },
+                "KernelPlugins": {
+                    "disabled": true
+                },
                 "Scripts": {
                     "targetDirectory": "../"
                 }

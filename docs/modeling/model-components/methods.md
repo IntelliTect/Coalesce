@@ -497,7 +497,7 @@ For cloud storage providers where complex security logic is not needed, consider
 
 ## Semantic Kernel (AI)
 
-Methods can be exposed as [Semantic Kernel plugins](/modeling/model-components/attributes/semantic-kernel.md) by applying the `[SemanticKernel]` attribute. This enables AI-powered interactions with your application's functionality through functions that the AI can call.
+Methods can be exposed as [Semantic Kernel plugins](/modeling/model-components/attributes/semantic-kernel.md) by applying the `[SemanticKernel]` attribute. This enables AI-powered interactions with your application's functionality through functions that the AI can call. When the attribute is placed on a [parameter](#parameters), it provides a description of that parameter to the LLM.
 
 ```c#
 public class Person
@@ -507,11 +507,15 @@ public class Person
     public string? Title { get; set; }
 
     [Coalesce]
-    [SemanticKernel("Changes a person's first name, and optionally assigns a title if they don't yet have one.")]
-    public string Rename(string newFirstName, string? newTitle = null) 
+    [SemanticKernel("Changes a person's first name, and optionally assigns a title.")]
+    public string Rename(
+      string newFirstName,
+      [SemanticKernel("A new title for the person. Provide null to leave the title unchanged.")]
+      string? newTitle = null
+    ) 
     {
         FirstName = newFirstName;
-        if (newTitle != null && string.IsNullOrEmpty(Title))
+        if (newTitle != null)
         {
             Title = newTitle;
         }

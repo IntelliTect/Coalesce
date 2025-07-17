@@ -72,7 +72,7 @@ list.$load(1);
 
 ### Semantic Kernel (AI)
 
-Data sources can be exposed as [Semantic Kernel plugins](/modeling/model-components/attributes/semantic-kernel.md) by applying the `[SemanticKernel]` attribute. This will generate the data source's get and list functionality into kernel functions that can be invoked by an LLM.
+Data sources can be exposed as [Semantic Kernel plugins](/modeling/model-components/attributes/semantic-kernel.md) by applying the `[SemanticKernel]` attribute. This will generate the data source's get and list functionality into kernel functions that can be invoked by an LLM. When the attribute is placed on a [parameter](#custom-parameters), it provides a description of that parameter to the LLM.
 
 ```c#
 [Coalesce]

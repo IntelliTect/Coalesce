@@ -211,7 +211,9 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         [Coalesce, Execute]
         public string MethodWithOptionalParams(
             // Required:
-            [Required] int requiredInt,
+            [Required]
+            [SemanticKernel("This integer is required. It may be the answer to the ultimate question of life, the universe, and everything.")]
+            int requiredInt,
 
             // Optional:
             int plainInt, // By longstanding Coalesce convention, value types are optional if not explicitly required.

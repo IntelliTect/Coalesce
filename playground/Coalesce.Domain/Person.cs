@@ -146,8 +146,6 @@ namespace Coalesce.Domain
 
 #nullable restore
 
-
-
         /// <summary>
         /// Sets the FirstName to the given text.
         /// </summary>
@@ -279,9 +277,14 @@ namespace Coalesce.Domain
         [Coalesce]
         [Execute(HttpMethod = HttpMethod.Patch)]
         [SemanticKernel("Changes a person's first name, and optionally assigns a title if they don't yet have one.")]
-        public ItemResult<Person> ChangeFirstName(AppDbContext db, string firstName, Titles? title)
+        public ItemResult<Person> ChangeFirstName(
+            AppDbContext db,
+            string firstName,
+            [SemanticKernel("A new title for the person. Provide null to leave the title unchanged.")]
+            Titles? title
+        )
         {
-            this.FirstName = firstName;
+            FirstName = firstName;
             Title ??= title;
             db.SaveChanges();
             return this;

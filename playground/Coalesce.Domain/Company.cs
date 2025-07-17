@@ -18,11 +18,7 @@ namespace Coalesce.Domain
 
 
         [Search(SearchMethod = SearchAttribute.SearchMethods.Contains)]
-#if NET7_0_OR_GREATER
-        required
-#endif
-        public string Name
-        { get; set; }
+        public required string Name { get; set; }
 
         public string Address1 { get; init; }
 

@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 namespace IntelliTect.Coalesce.Tests.TargetClasses
 {
     [Coalesce, StandaloneEntity]
-    [KernelPlugin("StandaloneReadonly", DeleteEnabled = true, SaveEnabled = true)] // should generate nothing.
+    [SemanticKernel("StandaloneReadonly", DeleteEnabled = true, SaveEnabled = true)] // should generate nothing.
     public class StandaloneReadonly
     {
         public int Id { get; set; }
@@ -26,7 +26,7 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses
         public string Description { get; set; } = "";
 
         [Coalesce]
-        [KernelPlugin("StandaloneReadonly InstanceMethod")]
+        [SemanticKernel("StandaloneReadonly InstanceMethod")]
         public Task<ItemResult<int>> InstanceMethod(
             [Inject] WeatherService weather,
             [Inject] AppDbContext explicitDbInjection,
@@ -37,7 +37,7 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses
         }
 
         [Coalesce]
-        [KernelPlugin("StandaloneReadonly StaticMethod")]
+        [SemanticKernel("StandaloneReadonly StaticMethod")]
         public static Task<ItemResult<int>> StaticMethod(
             [Inject] WeatherService weather,
             [Inject] AppDbContext explicitDbInjection,
@@ -47,7 +47,7 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses
             return Task.FromResult(new ItemResult<int>(42));
         }
 
-        [KernelPlugin("StandaloneReadonly DefaultSource")]
+        [SemanticKernel("StandaloneReadonly DefaultSource")]
         public class DefaultSource : StandardDataSource<StandaloneReadonly>
         {
             public DefaultSource(CrudContext context) : base(context)

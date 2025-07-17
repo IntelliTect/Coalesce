@@ -20,8 +20,8 @@ public class KernelPlugins : CompositeGenerator<ReflectionRepository>
         foreach (var model in Model.CrudApiBackedClasses)
         {
             if (
-                model.HasAttribute<KernelPluginAttribute>() ||
-                model.ClientDataSources(Model).Any(ds => ds.HasAttribute<KernelPluginAttribute>()) ||
+                model.HasAttribute<SemanticKernelAttribute>() ||
+                model.ClientDataSources(Model).Any(ds => ds.HasAttribute<SemanticKernelAttribute>()) ||
                 model.KernelMethods.Any()
             )
             {

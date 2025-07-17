@@ -97,7 +97,7 @@ public class KernelPlugin(GeneratorServices services) : ApiService(services)
         WriteSaveFunction(b);
         WriteDeleteFunction(b);
 
-        foreach (var ds in Model.ClientDataSources(Model.ReflectionRepository).Where(ds => ds.HasAttribute<KernelPluginAttribute>()))
+        foreach (var ds in Model.ClientDataSources(Model.ReflectionRepository).Where(ds => ds.HasAttribute<SemanticKernelAttribute>()))
         {
             WriteDataSourceGetItemFunction(b, ds);
             WriteDataSourceListFunction(b, ds);
@@ -148,7 +148,7 @@ public class KernelPlugin(GeneratorServices services) : ApiService(services)
                 continue;
             }
 
-            var description = param.GetAttributeValue<KernelPluginAttribute>(kp => kp.Description);
+            var description = param.GetAttributeValue<SemanticKernelAttribute>(kp => kp.Description);
             if (description is not null)
             {
                 b.Line($"[Description({description.QuotedStringLiteralForCSharp()})]");
@@ -174,7 +174,7 @@ public class KernelPlugin(GeneratorServices services) : ApiService(services)
 
     private void WriteMethodFunction(CSharpCodeBuilder b, MethodViewModel method)
     {
-        var description = method.GetAttributeValue<KernelPluginAttribute>(kp => kp.Description);
+        var description = method.GetAttributeValue<SemanticKernelAttribute>(kp => kp.Description);
 
         if (method.ResultType.IsFile)
         {
@@ -258,7 +258,7 @@ public class KernelPlugin(GeneratorServices services) : ApiService(services)
 
     private void WriteDataSourceGetItemFunction(CSharpCodeBuilder b, ClassViewModel ds)
     {
-        var description = ds.GetAttributeValue<KernelPluginAttribute>(kp => kp.Description);
+        var description = ds.GetAttributeValue<SemanticKernelAttribute>(kp => kp.Description);
 
         var pkVar = Model.PrimaryKey.JsonName;
         var declaredFor = Model.FullyQualifiedName;
@@ -288,7 +288,7 @@ public class KernelPlugin(GeneratorServices services) : ApiService(services)
 
     private void WriteDataSourceListFunction(CSharpCodeBuilder b, ClassViewModel ds)
     {
-        var description = ds.GetAttributeValue<KernelPluginAttribute>(kp => kp.Description);
+        var description = ds.GetAttributeValue<SemanticKernelAttribute>(kp => kp.Description);
 
         var pkVar = Model.PrimaryKey.JsonName;
         var declaredFor = Model.FullyQualifiedName;
@@ -300,7 +300,7 @@ public class KernelPlugin(GeneratorServices services) : ApiService(services)
         {
             string ret = ", \n";
             string desc =
-                p.GetAttributeValue<KernelPluginAttribute>(a => a.Description)
+                p.GetAttributeValue<SemanticKernelAttribute>(a => a.Description)
                 ?? p.Description;
 
             if (!string.IsNullOrWhiteSpace(desc))
@@ -361,7 +361,7 @@ public class KernelPlugin(GeneratorServices services) : ApiService(services)
     {
         if (!Model.SecurityInfo.IsSaveAllowed()) return;
 
-        var kpa = Model.GetAttribute<KernelPluginAttribute>();
+        var kpa = Model.GetAttribute<SemanticKernelAttribute>();
         if (kpa?.GetValue(a => a.SaveEnabled) != true) return;
 
         var pkVar = Model.PrimaryKey.JsonName;
@@ -414,7 +414,7 @@ public class KernelPlugin(GeneratorServices services) : ApiService(services)
     {
         if (!Model.SecurityInfo.IsDeleteAllowed()) return;
 
-        var kpa = Model.GetAttribute<KernelPluginAttribute>();
+        var kpa = Model.GetAttribute<SemanticKernelAttribute>();
         if (kpa?.GetValue(a => a.DeleteEnabled) != true) return;
 
         var pkVar = Model.PrimaryKey.JsonName;

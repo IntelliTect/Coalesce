@@ -21,7 +21,8 @@ namespace Coalesce.Domain
 #if NET7_0_OR_GREATER
         required
 #endif
-        public string Name { get; set; }
+        public string Name
+        { get; set; }
 
         public string Address1 { get; init; }
 
@@ -68,7 +69,7 @@ namespace Coalesce.Domain
         }
 
         [DefaultDataSource]
-        [KernelPlugin("")]
+        [SemanticKernel("")]
         public class DefaultSource : StandardDataSource<Company, AppDbContext>
         {
             public DefaultSource(CrudContext<AppDbContext> context) : base(context) { }

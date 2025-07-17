@@ -114,4 +114,4 @@ The chat agent is configured with:
 
 ### Usage
 
-Once configured, users can access the AI chat through the included Vue component. The chat agent can be extended with additional functionality by applying the [`KernelPlugin`](/modeling/model-components/attributes/kernel-plugin.md) attribute to your entities, methods, and data sources to expose them as AI-callable functions.
+Once configured, users can access the AI chat through the included Vue component. The chat agent can be extended with additional functionality by applying the [`SemanticKernel`](/modeling/model-components/attributes/kernel-plugin.md) attribute to your entities, methods, and data sources to expose them as AI-callable functions.

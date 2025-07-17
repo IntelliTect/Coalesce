@@ -11,7 +11,7 @@ using IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext;
 namespace IntelliTect.Coalesce.Tests.TargetClasses
 {
     [Coalesce]
-    [KernelPlugin("StandaloneDto", DeleteEnabled = true, SaveEnabled = true)]
+    [SemanticKernel("StandaloneDto", DeleteEnabled = true, SaveEnabled = true)]
     public class CaseDtoStandalone : IClassDto<Case, TestDbContext.AppDbContext>
     {
         [Key]

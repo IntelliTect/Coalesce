@@ -16,7 +16,7 @@ namespace Coalesce.Domain
 {
     [Edit(PermissionLevel = SecurityPermissionLevels.AllowAll)]
     [Table("Person")]
-    [KernelPlugin(
+    [SemanticKernel(
         Description = "A person.",
         SaveEnabled = true,
         DeleteEnabled = true
@@ -146,7 +146,7 @@ namespace Coalesce.Domain
 
 #nullable restore
 
-        
+
 
         /// <summary>
         /// Sets the FirstName to the given text.
@@ -278,7 +278,7 @@ namespace Coalesce.Domain
 
         [Coalesce]
         [Execute(HttpMethod = HttpMethod.Patch)]
-        [KernelPlugin("Changes a person's first name, and optionally assigns a title if they don't yet have one.")]
+        [SemanticKernel("Changes a person's first name, and optionally assigns a title if they don't yet have one.")]
         public ItemResult<Person> ChangeFirstName(AppDbContext db, string firstName, Titles? title)
         {
             this.FirstName = firstName;
@@ -338,7 +338,7 @@ namespace Coalesce.Domain
         /// Gets people matching the criteria, paginated by parameter 'page'.
         /// </summary>
         [Coalesce]
-        [KernelPlugin("Finds people whose birthday falls on a given month, and/or people with a specific email domain.")]
+        [SemanticKernel("Finds people whose birthday falls on a given month, and/or people with a specific email domain.")]
         public static ListResult<Person> SearchPeople(AppDbContext db, PersonCriteria criteria, int page, [Inject] IWeatherService weather)
         {
             const int pageSize = 10;
@@ -360,12 +360,12 @@ namespace Coalesce.Domain
             return new ListResult<Person>(query, page, pageSize);
         }
 
-        [KernelPlugin("test description")]
+        [SemanticKernel("test description")]
         [Coalesce, DefaultDataSource]
         public class WithoutCases(CrudContext<AppDbContext> context) : StandardDataSource<Person, AppDbContext>(context)
         {
             [Coalesce]
-            [KernelPlugin("A set of parameters that are ignored entirely.")]
+            [SemanticKernel("A set of parameters that are ignored entirely.")]
             public PersonCriteria? PersonCriteria { get; set; }
 
             public override IQueryable<Person> GetQuery(IDataSourceParameters parameters)

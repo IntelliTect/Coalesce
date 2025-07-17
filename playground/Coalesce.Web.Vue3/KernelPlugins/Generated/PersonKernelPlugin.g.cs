@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace Coalesce.Web.Vue3.KernelPlugins;
 #pragma warning disable CS1998
@@ -21,8 +22,11 @@ public class PersonKernelPlugin(CrudContext<Coalesce.Domain.AppDbContext> contex
     protected Coalesce.Domain.AppDbContext Db => context.DbContext;
 
     [KernelFunction("save_person")]
-    [Description("Creates a new Person or Updates an existing Person. Only provide value of the fields that need to be changed.")]
-    public async Task<string> SavePerson(PersonParameter dto)
+    [Description("Creates a new Person or Updates an existing Person.")]
+    public async Task<string> SavePerson(
+        [Description("The values to update. Only provide value of the fields that need to be changed.")]
+        PersonParameter dto
+    )
     {
         if (!_isScoped) return await InvokeScoped<string>(SavePerson, dto);
         return await Json(async () =>

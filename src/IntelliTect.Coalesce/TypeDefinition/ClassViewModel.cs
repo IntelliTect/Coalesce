@@ -234,7 +234,7 @@ namespace IntelliTect.Coalesce.TypeDefinition
             Methods.Where(m => m.IsClientMethod);
 
         public IEnumerable<MethodViewModel> KernelMethods =>
-            Methods.Where(m => m.HasAttribute<KernelPluginAttribute>());
+            Methods.Where(m => m.HasAttribute<SemanticKernelAttribute>());
 
         internal IEnumerable<TypeViewModel> ClientNestedTypes =>
             RawNestedTypes.Where(t => !t.IsInternalUse);

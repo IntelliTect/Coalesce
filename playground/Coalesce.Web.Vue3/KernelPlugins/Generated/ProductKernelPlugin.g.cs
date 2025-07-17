@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace Coalesce.Web.Vue3.KernelPlugins;
 #pragma warning disable CS1998

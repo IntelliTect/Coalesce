@@ -74,7 +74,7 @@ services.AddSwaggerGen(c =>
 
 services.AddScoped<IWeatherService, WeatherService>();
 
-foreach (var pluginType in Assembly.GetExecutingAssembly().GetTypes().Where(t => t.BaseType?.Name == "KernelPluginBase`1"))
+foreach (var pluginType in Assembly.GetExecutingAssembly().GetTypes().Where(t => t.BaseType?.Name == "SemanticKernelBase`1"))
     services.AddScoped(sp => KernelPluginFactory.CreateFromType(pluginType, pluginType.Name, sp));
 services.AddScoped<AIAgentService>();
 services.AddAzureOpenAIChatCompletion(

@@ -40,7 +40,7 @@ namespace Coalesce.Web.Vue3.Api
         [Authorize]
         [Consumes("application/x-www-form-urlencoded", "multipart/form-data")]
         public virtual async Task<ItemResult<ChatResponseResponse>> ChatAgent(
-            [FromForm(Name = "cancellationToken")] System.Threading.CancellationToken cancellationToken,
+            System.Threading.CancellationToken cancellationToken,
             [FromForm(Name = "history")] string history,
             [FromForm(Name = "prompt")] string prompt)
         {

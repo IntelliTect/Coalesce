@@ -10,7 +10,7 @@
         public string Name { get; set; }
 
         [Coalesce]
-        [KernelPlugin("SameMethodNameAsMethodOnDifferentType")]
+        [SemanticKernel("SameMethodNameAsMethodOnDifferentType")]
         public CaseDtoStandalone SameMethodNameAsMethodOnDifferentType(CaseDtoStandalone input) => input;
     }
 }

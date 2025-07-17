@@ -2,19 +2,19 @@
 using System.Diagnostics.CodeAnalysis;
 
 namespace IntelliTect.Coalesce
-{    
+{
     /// <summary>
     /// Configures Semantic Kernel function generation for entities, data sources, data source parameters, and methods.
     /// </summary>
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Parameter, AllowMultiple = false)]
-    public class KernelPluginAttribute : Attribute
+    public class SemanticKernelAttribute : Attribute
     {
-        public KernelPluginAttribute()
+        public SemanticKernelAttribute()
         {
         }
 
         [SetsRequiredMembers]
-        public KernelPluginAttribute(string description)
+        public SemanticKernelAttribute(string description)
         {
             Description = description;
         }

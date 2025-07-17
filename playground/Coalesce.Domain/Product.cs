@@ -34,7 +34,7 @@ namespace Coalesce.Domain
         [NotMapped]
         public object Unknown { get; set; } = "unknown value";
 
-        [DefaultDataSource, KernelPlugin("")]
+        [DefaultDataSource, SemanticKernel("")]
         public class DefaultSource(CrudContext<AppDbContext> context) : StandardDataSource<Product, AppDbContext>(context)
         {
         }

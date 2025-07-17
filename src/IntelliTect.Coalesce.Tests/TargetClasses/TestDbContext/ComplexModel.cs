@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
 {
-    [KernelPlugin("ComplexModel", DeleteEnabled = true, SaveEnabled = true)]
+    [SemanticKernel("ComplexModel", DeleteEnabled = true, SaveEnabled = true)]
     public class ComplexModel
     {
         [Coalesce]
@@ -207,7 +207,7 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
 
 #nullable enable
 
-        [KernelPlugin("ComplexModel Many Params")]
+        [SemanticKernel("ComplexModel Many Params")]
         [Coalesce, Execute]
         public string MethodWithOptionalParams(
             // Required:
@@ -288,7 +288,7 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         public void MethodWithMultiFileParameterListConcreteParam(List<FileParameter> files) { }
 
         [Coalesce, Execute]
-        [KernelPlugin("ComplexModel Static")]
+        [SemanticKernel("ComplexModel Static")]
         public static string[] MethodWithStringArrayParameterAndReturn(string[] strings)
         {
             return strings;
@@ -331,11 +331,11 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
 
         [ControllerAction(Method = HttpMethod.Get)]
         [Coalesce]
-        [KernelPlugin("MethodWithOptionalCancellationToken")]
+        [SemanticKernel("MethodWithOptionalCancellationToken")]
         public Task MethodWithOptionalCancellationToken(string q, CancellationToken cancellationToken = default) => Task.CompletedTask;
 
         [Coalesce]
-        [KernelPlugin("PostWithImplicitDiParameters")]
+        [SemanticKernel("PostWithImplicitDiParameters")]
         public Task PostWithImplicitDiParameters(
             ExternalTypeWithDtoProp input,
             CancellationToken cancellationToken,
@@ -353,12 +353,12 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         public CaseDtoStandalone CustomDto(CaseDtoStandalone input) => input;
 
         [Coalesce]
-        [KernelPlugin("SameMethodNameAsMethodOnDifferentType")]
+        [SemanticKernel("SameMethodNameAsMethodOnDifferentType")]
         public CaseDtoStandalone SameMethodNameAsMethodOnDifferentType(CaseDtoStandalone input) => input;
 
         [Coalesce]
         [ControllerAction(Method = HttpMethod.Post)]
-        [KernelPlugin("HasTopLevelParamWithSameNameAsObjectProp")]
+        [SemanticKernel("HasTopLevelParamWithSameNameAsObjectProp")]
         public static ItemResult HasTopLevelParamWithSameNameAsObjectProp(
             int complexModelId,
             ComplexModel model) => true;

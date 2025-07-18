@@ -10,7 +10,7 @@ The [Vue](https://vuejs.org/) stack for Coalesce provides [a set of components](
 
 ## Setup 
 
-All Coalesce projects should be started from the template described in [Getting Started with Vue](/stacks/vue/getting-started.md), and will therefore have all the setup completed for you.
+All Coalesce projects should be started from [Coalesce project template](/stacks/vue/getting-started.md), and will therefore have all the setup completed for you.
 
 If for whatever reason you find yourself adding Coalesce to an existing project, use the template as a reference for what configuration needs to be added to your project.
 

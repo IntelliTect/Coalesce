@@ -7,6 +7,7 @@ import "./style.scss";
 import CodeTabs from "../components/CodeTabs.vue";
 import Prop from "../components/Prop.vue";
 import SiteFooter from "../components/SiteFooter.vue";
+import Beta from "../components/Beta.vue";
 
 export default {
   extends: DefaultTheme,
@@ -21,5 +22,6 @@ export default {
     app.component("CodeTabs", CodeTabs);
     app.component("Prop", Prop);
     app.component("SiteFooter", SiteFooter);
+    app.component("Beta", Beta);
   },
 } satisfies Theme;

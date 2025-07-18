@@ -51,6 +51,7 @@ Or, if the above is not feasible, at least [create a new service scope](https://
 
 
 ## AI Chat
+<Beta/> 
 
 The AI Chat feature adds Microsoft Semantic Kernel integration with Azure OpenAI to provide an AI-powered chat assistant in your application. This feature includes a pre-configured chat agent service and a Vue component for user interaction.
 
@@ -75,7 +76,7 @@ When launching with the Aspire AppHost, Azure OpenAI will configure and provisio
 
 If there's an existing resource you'd rather use instead of provisioning a new resource, see the documentation for [Connecting to an existing Azure OpenAI service](https://learn.microsoft.com/en-us/dotnet/aspire/azureai/azureai-openai-integration?tabs=package-reference#connect-to-an-existing-azure-openai-service).
 
-For more details on Aspire Azure OpenAI integration, see the [official documentation](https://learn.microsoft.com/en-us/dotnet/aspire/azureai/azureai-openai-integration).
+For more details on Aspire's Azure OpenAI integration, see the [official documentation](https://learn.microsoft.com/en-us/dotnet/aspire/azureai/azureai-openai-integration).
 
 #### Manual Configuration (Without Aspire)
 
@@ -99,19 +100,17 @@ dotnet user-secrets set "ConnectionStrings:OpenAI" "Endpoint=https://your-resour
 
 ### Implementation
 
-The AI Chat feature includes:
+The AI Chat template option includes:
 
-- **AIAgentService**: A Coalesce service that handles chat interactions using Semantic Kernel agents
-- **Chat History Protection**: Chat history is encrypted using ASP.NET Core Data Protection to prevent tampering
-- **Token Management**: Automatic history reduction when token limits are approached
-- **Error Handling**: Graceful handling of rate limiting and other Azure OpenAI service errors
+- **AIAgentService.cs**: A Coalesce service that handles chat interactions using Semantic Kernel agents
+- **AIChat.vue**: A front-end chat interface for interacting with the AI agent.
 
 The chat agent is configured with:
 - Automatic function calling capabilities
 - Chat history summarization to manage token limits
 - Built-in error handling for rate limits and service unavailability
-- Data protection for chat history persistence
+- Tamper-proof chat history for maintaining context in a conversation
 
 ### Usage
 
-Once configured, users can access the AI chat through the included Vue component. The chat agent can be extended with additional functionality by applying the [`SemanticKernel`](/modeling/model-components/attributes/kernel-plugin.md) attribute to your entities, methods, and data sources to expose them as AI-callable functions.
+Once configured, users can access the AI chat through the included Vue component. The chat agent can be extended with additional functionality by applying the [`SemanticKernel`](/modeling/model-components/attributes/semantic-kernel.md) attribute to your entities, methods, and data sources to expose them as AI-callable functions.

@@ -11,11 +11,13 @@ To this end, there are three different methods of defining models that support C
  All of these support the following:
 
 - Generated API Controllers with `/get`, `/list`, `/count`, `/save` endpoints (`/bulkSave` unavailable for Standalone Entities).
-- [Custom Methods](/modeling/model-components/methods.md)
-- [TypeScript ViewModels](/stacks/vue/layers/viewmodels.md#viewmodels) and [TypeScript ListViewModels](/stacks/vue/layers/viewmodels.md#listviewmodels)
-- [Data Sources](/modeling/model-components/data-sources.md) and [Behaviors](/modeling/model-components/behaviors.md)
-- [Semantic Kernel plugins](/modeling/model-components/attributes/semantic-kernel.md) for CRUD operations (save/delete) when annotated with `[SemanticKernel]` (and get/list operations via annotating one of the type's data sources.)
-- Admin pages
+- A wide variety of supported C# [Property Types](/modeling/model-components/properties.md)
+- Field-level customization via [Attributes](/modeling/model-components/attributes.md)
+- [Custom Methods](/modeling/model-components/methods.md) for operations that go beyond simple CRUD.
+- [Data Sources](/modeling/model-components/data-sources.md) and [Behaviors](/modeling/model-components/behaviors.md) to customize read operations and create/update/delete operations, respectively.
+- Generated [TypeScript ViewModels](/stacks/vue/layers/viewmodels.md#viewmodels) and [TypeScript ListViewModels](/stacks/vue/layers/viewmodels.md#listviewmodels)
+- Generated [Semantic Kernel plugins](/modeling/model-components/attributes/semantic-kernel.md) for CRUD operations
+- [Admin pages](/stacks/vue/overview.md#admin-views) with full CRUD support
 
 
 ## EF Entity Models

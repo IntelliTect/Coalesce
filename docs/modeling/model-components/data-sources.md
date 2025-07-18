@@ -49,9 +49,6 @@ All data sources are instantiated using dependency injection and your applicatio
 
 ## Consuming Data Sources
 
-<CodeTabs>
-<template #vue>
-
 The [ViewModels](/stacks/vue/layers/viewmodels.md#viewmodels) and [ListViewModels](/stacks/vue/layers/viewmodels.md#listviewmodels) each have a property called `$dataSource`. This property accepts an instance of a [DataSource](/stacks/vue/layers/models.md) class generated in the [Model Layer](/stacks/vue/layers/models.md).
 
 ```ts
@@ -67,10 +64,9 @@ list.$dataSource = new Person.DataSources.NamesStartingWith();
 list.$load(1);
 ```
 
-</template>
-</CodeTabs>
-
 ### Semantic Kernel (AI)
+
+<Beta/> 
 
 Data sources can be exposed as [Semantic Kernel plugins](/modeling/model-components/attributes/semantic-kernel.md) by applying the `[SemanticKernel]` attribute. This will generate the data source's get and list functionality into kernel functions that can be invoked by an LLM. When the attribute is placed on a [parameter](#custom-parameters), it provides a description of that parameter to the LLM.
 

@@ -1,8 +1,10 @@
-# [SemanticKernel]
+# [SemanticKernel] 
+
+<Beta />
 
 `IntelliTect.Coalesce.SemanticKernelAttribute`
 
-Enables and configures [Microsoft Semantic Kernel](https://learn.microsoft.com/en-us/semantic-kernel/overview/) plugin generation for CRUD models, data sources, and custom methods. When applied, Coalesce generates Semantic Kernel [plugin classes](https://learn.microsoft.com/en-us/semantic-kernel/concepts/plugins/?pivots=programming-language-csharp) that expose your application's functionality as AI-callable functions.
+Enables and configures the generation of [Microsoft Semantic Kernel](https://learn.microsoft.com/en-us/semantic-kernel/overview/) plugins for CRUD models, data sources, and custom methods. These generated [plugin classes](https://learn.microsoft.com/en-us/semantic-kernel/concepts/plugins/?pivots=programming-language-csharp) expose your application's functionality as functions that are callable by AI agents and other LLM applications.
 
 This attribute can be applied to:
 - **[Data Sources](/modeling/model-components/data-sources.md)**: Exposes data source operations (get, list) as Semantic Kernel functions
@@ -11,7 +13,7 @@ This attribute can be applied to:
   - **Method Parameters**: Provides semantic descriptions for parameters on custom methods
 - **[CRUD Models](/modeling/model-types/crud.md)**: Generates CUD operations (save, delete) as Semantic Kernel functions
 
-Coalesce itself does not directly provide the means to consume these kernel plugins. However, the project template does have an [option](/topics/template-features.md#ai-chat) to include a simple AI Chat assistant as an introduction to consuming Semantic Kernel plugins and functions. For other use cases, consult the [Semantic Kernel](https://learn.microsoft.com/en-us/semantic-kernel/overview/) documentation.
+Coalesce itself does not directly provide the means to consume these kernel plugins. However, the project template has an [option](/topics/template-features.md#ai-chat) to include a simple AI Chat assistant as an introduction to consuming Semantic Kernel plugins and functions. For other use cases, consult the [Semantic Kernel](https://learn.microsoft.com/en-us/semantic-kernel/overview/) documentation.
 
 ## Example Usage
 
@@ -83,7 +85,7 @@ public class Person
 Generated kernel plugins are automatically registered in your dependency injection container when using the Coalesce template. If you did not use the [AI Chat](/topics/template-features.md#ai-chat) option of the Coalesce template (which already includes the following code), you can register your plugins like so in Program.cs:
 
 ```csharp
-// Automatic registration in Program.cs (template-generated code)
+// Dynamic registration in Program.cs (template-generated code)
 foreach (var pluginType in Assembly.GetExecutingAssembly().GetTypes()
     .Where(t => t.BaseType?.Name == "KernelPluginBase`1"))
 {

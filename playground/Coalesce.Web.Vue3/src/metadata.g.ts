@@ -2452,14 +2452,6 @@ export const Product = domain.types.Product = {
   methods: {
   },
   dataSources: {
-    defaultSource: {
-      type: "dataSource",
-      name: "DefaultSource" as const,
-      displayName: "Default Source",
-      isDefault: true,
-      props: {
-      },
-    },
   },
 }
 export const StandaloneReadCreate = domain.types.StandaloneReadCreate = {

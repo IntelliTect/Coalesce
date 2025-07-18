@@ -22,7 +22,7 @@ public class CompanyKernelPlugin(CrudContext<Coalesce.Domain.AppDbContext> conte
     protected Coalesce.Domain.AppDbContext Db => context.DbContext;
 
     [KernelFunction("get_company")]
-    [Description("Gets a Company by its Id value. .")]
+    [Description("Gets a Company by its Id value.")]
     public async Task<string> GetCompany(
         int id)
     {
@@ -32,14 +32,14 @@ public class CompanyKernelPlugin(CrudContext<Coalesce.Domain.AppDbContext> conte
         {
             if (!GeneratedForClassViewModel.SecurityInfo.IsReadAllowed(User)) return "Unauthorized.";
 
-            var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Company, Coalesce.Domain.Company>("DefaultSource");
-            var dataSourceParams = new DataSourceParameters { DataSource = "DefaultSource" };
-            return await dataSource.GetMappedItemAsync<CompanyResponse>(id, dataSourceParams);
+            var _dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Company, Coalesce.Domain.Company>("DefaultSource");
+            var _dataSourceParams = new DataSourceParameters { DataSource = "DefaultSource" };
+            return await _dataSource.GetMappedItemAsync<CompanyResponse>(id, _dataSourceParams);
         });
     }
 
     [KernelFunction("list_company")]
-    [Description("Lists Company records. .")]
+    [Description("Lists Company records.")]
     public async Task<string> ListCompany(
         [Description("Search within properties Name,LogoUrl")]
         string search,
@@ -59,13 +59,13 @@ public class CompanyKernelPlugin(CrudContext<Coalesce.Domain.AppDbContext> conte
             var _dataSource = (Coalesce.Domain.Company.DefaultSource)dataSourceFactory.GetDataSource<Coalesce.Domain.Company, Coalesce.Domain.Company>("DefaultSource");
             MappingContext _mappingContext = new(context);
 
-            var listParams = new ListParameters { DataSource = "DefaultSource", Search = search, Page = page, Fields = string.Join(',', fields), PageSize = 100 };
+            var _listParams = new ListParameters { DataSource = "DefaultSource", Search = search, Page = page, Fields = string.Join(',', fields), PageSize = 100 };
             if (countOnly)
             {
-                var result = await _dataSource.GetCountAsync(listParams);
+                var result = await _dataSource.GetCountAsync(_listParams);
                 return new ListResult<CompanyResponse>(result) { TotalCount = result.Object };
             }
-            return await _dataSource.GetMappedListAsync<CompanyResponse>(listParams);
+            return await _dataSource.GetMappedListAsync<CompanyResponse>(_listParams);
         });
     }
 }

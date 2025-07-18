@@ -899,7 +899,6 @@ export interface ProductViewModel extends $models.Product {
   unknown: unknown | null;
 }
 export class ProductViewModel extends ViewModel<$models.Product, $apiClients.ProductApiClient, number> implements $models.Product  {
-  static DataSources = $models.Product.DataSources;
   
   constructor(initialData?: DeepPartial<$models.Product> | null) {
     super($metadata.Product, new $apiClients.ProductApiClient(), initialData)
@@ -908,7 +907,6 @@ export class ProductViewModel extends ViewModel<$models.Product, $apiClients.Pro
 defineProps(ProductViewModel, $metadata.Product)
 
 export class ProductListViewModel extends ListViewModel<$models.Product, $apiClients.ProductApiClient, ProductViewModel> {
-  static DataSources = $models.Product.DataSources;
   
   constructor() {
     super($metadata.Product, new $apiClients.ProductApiClient())

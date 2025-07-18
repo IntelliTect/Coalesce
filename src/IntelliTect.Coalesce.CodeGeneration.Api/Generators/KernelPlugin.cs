@@ -1,4 +1,5 @@
-﻿using IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators;
+﻿using IntelliTect.Coalesce.Api.DataSources;
+using IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators;
 using IntelliTect.Coalesce.CodeGeneration.Generation;
 using IntelliTect.Coalesce.Models;
 using IntelliTect.Coalesce.TypeDefinition;
@@ -9,7 +10,9 @@ using System.Linq;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators;
 
-public record ParameterInfo(string TypeName, string Name, string Description = null, string DefaultValue = null);
+#nullable enable
+
+public record ParameterInfo(string TypeName, string Name, string? Description = null, string? DefaultValue = null);
 
 public class KernelPlugin(GeneratorServices services) : ApiService(services)
 {
@@ -88,8 +91,18 @@ public class KernelPlugin(GeneratorServices services) : ApiService(services)
         WriteSaveFunction(b);
         WriteDeleteFunction(b);
 
-        var dataSources = Model.ClientDataSources(Model.ReflectionRepository).Where(ds => ds.HasAttribute<SemanticKernelAttribute>()).ToList();
+        var dataSources = Model.ClientDataSources(Model.ReflectionRepository!).Where(ds => ds.HasAttribute<SemanticKernelAttribute>()).ToList();
         var hasMultipleDataSources = dataSources.Count > 1;
+
+        if (
+            Model.GetAttribute<SemanticKernelAttribute>()?.GetValue(a => a.DefaultDataSourceEnabled) == true &&
+            !dataSources.Any(ds => ds.IsDefaultDataSource)
+        )
+        {
+            hasMultipleDataSources |= dataSources.Count == 1;
+            WriteDataSourceGetItemFunction(b, null, hasMultipleDataSources);
+            WriteDataSourceListFunction(b, null, hasMultipleDataSources);
+        }
 
         foreach (var ds in dataSources)
         {
@@ -184,41 +197,75 @@ public class KernelPlugin(GeneratorServices services) : ApiService(services)
 
     // future: add flags to KPA to enable/disable specific actions (read, list, ...?)
 
-    private void WriteDataSourceGetItemFunction(CSharpCodeBuilder b, ClassViewModel ds, bool hasMultipleDataSources)
+    private void WriteDataSourceGetItemFunction(CSharpCodeBuilder b, ClassViewModel? ds, bool hasMultipleDataSources)
     {
-        var description = ds.GetAttributeValue<SemanticKernelAttribute>(kp => kp.Description);
+        string? description;
+        string dsName;
+        List<PropertyViewModel> dsParameters;
 
-        var pkVar = Model.PrimaryKey.JsonName;
-        var dsNameString = ds.Name.QuotedStringLiteralForCSharp();
+        if (ds is null)
+        {
+            description = Model.GetAttributeValue<SemanticKernelAttribute>(kp => kp.Description);
+            dsName = DataSourceFactory.DefaultSourceName;
+            dsParameters = [];
+        }
+        else
+        {
+            description = ds.GetAttributeValue<SemanticKernelAttribute>(kp => kp.Description);
+            dsName = ds.Name;
+            dsParameters = ds.DataSourceParameters.ToList();
+        }
 
+        var pkVar = Model.PrimaryKey!.JsonName;
         var parameters = new List<ParameterInfo>
         {
             new ParameterInfo(Model.PrimaryKey.Type.FullyQualifiedName, pkVar)
         };
 
-        var methodName = hasMultipleDataSources ? $"Get{Model.Name}{ds.Name}" : $"Get{Model.Name}";
+        var methodName = hasMultipleDataSources ? $"Get{Model.Name}{dsName}" : $"Get{Model.Name}";
 
+        var descriptionAttrPart = string.IsNullOrWhiteSpace(description) ? "" : " " + description.TrimEnd('.', ' ') + ".";
         using var _ = WriteKernelMethodSignature(b, methodName,
-            $"Gets a {Model.DisplayName} by its {Model.PrimaryKey.Name} value. {description}.", parameters);
+            $"Gets a {Model.DisplayName} by its {Model.PrimaryKey.Name} value.{descriptionAttrPart}", parameters);
 
         b.Line("if (!GeneratedForClassViewModel.SecurityInfo.IsReadAllowed(User)) return \"Unauthorized.\";");
         b.Line();
 
-        b.Line($"var dataSource = dataSourceFactory.GetDataSource<{Model.BaseViewModel.FullyQualifiedName}, {Model.FullyQualifiedName}>({dsNameString});");
-        b.Line($"var dataSourceParams = new DataSourceParameters {{ DataSource = {dsNameString}}};");
-        b.Line($"return await dataSource.GetMappedItemAsync<{Model.ResponseDtoTypeName}>({pkVar}, dataSourceParams);");
+        if (ds is null)
+        {
+            b.Line($"var _dataSource = dataSourceFactory.GetDefaultDataSource<{Model.BaseViewModel.FullyQualifiedName}, {Model.FullyQualifiedName}>();");
+        }
+        else
+        {
+            b.Line($"var _dataSource = dataSourceFactory.GetDataSource<{Model.BaseViewModel.FullyQualifiedName}, {Model.FullyQualifiedName}>({dsName.QuotedStringLiteralForCSharp()});");
+        }
+
+        b.Line($"var _dataSourceParams = new DataSourceParameters {{ DataSource = {dsName.QuotedStringLiteralForCSharp()}}};");
+        b.Line($"return await _dataSource.GetMappedItemAsync<{Model.ResponseDtoTypeName}>({pkVar}, _dataSourceParams);");
     }
 
-    private void WriteDataSourceListFunction(CSharpCodeBuilder b, ClassViewModel ds, bool hasMultipleDataSources)
+    private void WriteDataSourceListFunction(CSharpCodeBuilder b, ClassViewModel? ds, bool hasMultipleDataSources)
     {
-        var description = ds.GetAttributeValue<SemanticKernelAttribute>(kp => kp.Description);
+        string? description;
+        string dsName;
+        List<PropertyViewModel> dsParameters;
 
-        var dsNameString = ds.Name.QuotedStringLiteralForCSharp();
-
-        // Create parameter info records for the data source parameters
-        var dataSourceParameters = ds.DataSourceParameters.Select(p =>
+        if (ds is null)
         {
-            string desc = p.GetAttributeValue<SemanticKernelAttribute>(a => a.Description) ?? p.Description;
+            description = Model.GetAttributeValue<SemanticKernelAttribute>(kp => kp.Description);
+            dsName = DataSourceFactory.DefaultSourceName;
+            dsParameters = [];
+        }
+        else
+        {
+            description = ds.GetAttributeValue<SemanticKernelAttribute>(kp => kp.Description);
+            dsName = ds.Name;
+            dsParameters = ds.DataSourceParameters.ToList();
+        }
+
+        var dataSourceParameters = dsParameters.Select(p =>
+        {
+            string? desc = p.GetAttributeValue<SemanticKernelAttribute>(a => a.Description) ?? p.Description;
             return new ParameterInfo(
                 p.Type.NullableTypeForDto(true, null, dontEmitNullable: true),
                 p.JsonName,
@@ -227,47 +274,55 @@ public class KernelPlugin(GeneratorServices services) : ApiService(services)
             );
         }).ToList();
 
-        // Add standard list parameters
         var allParameters = new List<ParameterInfo>
         {
-            new ParameterInfo("string", "search", "Search within properties " + string.Join(",", Model.SearchProperties().Select(p => p.Property.Name))),
-            new ParameterInfo("int", "page", "Provide values greater than 1 to query subsequent pages of data"),
-            new ParameterInfo("bool", "countOnly", "Provide true if you only need a count of results."),
-            new ParameterInfo("string[]", "fields", "Leave empty if you need whole objects, or provide any of these field names to trim the response: " + string.Join(",", Model.ClientProperties.Select(p => p.Name)))
+            new("string", "search", "Search within properties " + string.Join(",", Model.SearchProperties().Select(p => p.Property.Name))),
+            new("int", "page", "Provide values greater than 1 to query subsequent pages of data"),
+            new("bool", "countOnly", "Provide true if you only need a count of results."),
+            new("string[]", "fields", "Leave empty if you need whole objects, or provide any of these field names to trim the response: " + string.Join(",", Model.ClientProperties.Select(p => p.Name)))
         };
         allParameters.AddRange(dataSourceParameters);
 
-        var methodName = hasMultipleDataSources ? $"List{Model.Name}{ds.Name}" : $"List{Model.Name}";
-
-        using var _ = WriteKernelMethodSignature(b, methodName,
-            $"Lists {Model.DisplayName} records. {description}.", allParameters);
-
+        var methodName = hasMultipleDataSources ? $"List{Model.Name}{dsName}" : $"List{Model.Name}";
         var resultType = $"ListResult<{Model.ResponseDtoTypeName}>";
+
+        var descriptionAttrPart = string.IsNullOrWhiteSpace(description) ? "" : " " + description.TrimEnd('.', ' ') + ".";
+        using var _ = WriteKernelMethodSignature(b, methodName,
+            $"Lists {Model.DisplayName} records.{descriptionAttrPart}", allParameters);
+
         b.Line($"if (!GeneratedForClassViewModel.SecurityInfo.IsReadAllowed(User)) return new {resultType}(errorMessage: \"Unauthorized.\");");
         b.Line();
 
-        b.Line($"var _dataSource = ({ds.Type.FullyQualifiedName})dataSourceFactory.GetDataSource<{Model.BaseViewModel.FullyQualifiedName}, {Model.FullyQualifiedName}>({dsNameString});");
+        if (ds is null)
+        {
+            b.Line($"var _dataSource = dataSourceFactory.GetDefaultDataSource<{Model.BaseViewModel.FullyQualifiedName}, {Model.FullyQualifiedName}>();");
+        }
+        else
+        {
+            b.Line($"var _dataSource = ({ds.Type.FullyQualifiedName})dataSourceFactory.GetDataSource<{Model.BaseViewModel.FullyQualifiedName}, {Model.FullyQualifiedName}>({dsName.QuotedStringLiteralForCSharp()});");
+        }
         b.Line("MappingContext _mappingContext = new(context);");
-        foreach (var param in ds.DataSourceParameters)
+        foreach (var param in dsParameters)
         {
             b.Line($"_dataSource.{param.Name} = {param.JsonName}{param.MapToModelChain("_mappingContext")};");
         }
         b.Line();
 
-        if (ds.DataSourceParameters.Any())
+        if (dsParameters.Any())
         {
             b.Line("if (ItemResult.FromValidation(_dataSource) is { WasSuccessful: false } _validationResult)");
             b.Indented($"return new {resultType}(_validationResult);");
             b.Line();
         }
 
-        b.Line($"var listParams = new ListParameters {{ DataSource = {dsNameString}, Search = search, Page = page, Fields = string.Join(',', fields), PageSize = 100 }};");
+        b.Line($"var _listParams = new ListParameters {{ DataSource = {dsName.QuotedStringLiteralForCSharp()}, Search = search, Page = page, Fields = string.Join(',', fields), PageSize = 100 }};");
         using (b.Block("if (countOnly)"))
         {
-            b.Line("var result = await _dataSource.GetCountAsync(listParams);");
+            b.Line("var result = await _dataSource.GetCountAsync(_listParams);");
             b.Line($"return new {resultType}(result) {{ TotalCount = result.Object }};");
         }
-        b.Line($"return await _dataSource.GetMappedListAsync<{Model.ResponseDtoTypeName}>(listParams);");
+
+        b.Line($"return await _dataSource.GetMappedListAsync<{Model.ResponseDtoTypeName}>(_listParams);");
     }
 
     private void WriteSaveFunction(CSharpCodeBuilder b)
@@ -314,11 +369,10 @@ public class KernelPlugin(GeneratorServices services) : ApiService(services)
         var kpa = Model.GetAttribute<SemanticKernelAttribute>();
         if (kpa?.GetValue(a => a.DeleteEnabled) != true) return;
 
-        var pkVar = Model.PrimaryKey.JsonName;
-
+        var pkVar = Model.PrimaryKey!.JsonName;
         var parameters = new List<ParameterInfo>
         {
-            new ParameterInfo(Model.PrimaryKey.Type.FullyQualifiedName, pkVar)
+            new(Model.PrimaryKey.Type.FullyQualifiedName, pkVar)
         };
 
         using var _ = WriteKernelMethodSignature(b, $"Delete{Model.Name}",
@@ -339,13 +393,13 @@ public class KernelPlugin(GeneratorServices services) : ApiService(services)
         return param.Type.Name.GetValidCSharpIdentifier();
     }
 
-    protected IDisposable WriteKernelMethodSignature(CSharpCodeBuilder b, string methodName, string description, List<ParameterInfo> parameters)
+    protected IDisposable WriteKernelMethodSignature(CSharpCodeBuilder b, string methodName, string? description, List<ParameterInfo> parameters)
     {
         var functionName = methodName.ToSnakeCase();
 
         b.Line();
         b.Line($"[KernelFunction(\"{functionName}\")]");
-        b.Line($"[Description({description.QuotedStringLiteralForCSharp()})]");
+        if (description is not null) b.Line($"[Description({description.QuotedStringLiteralForCSharp()})]");
 
         b.Append($"public async Task<string> {methodName}(");
 

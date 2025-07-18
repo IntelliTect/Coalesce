@@ -62,7 +62,7 @@ public class PersonKernelPlugin(CrudContext<Coalesce.Domain.AppDbContext> contex
     }
 
     [KernelFunction("get_person_names_starting_with_a_with_cases")]
-    [Description("Gets a Person by its PersonId value. Retrieves people whose first name start with 'A', and their cases..")]
+    [Description("Gets a Person by its PersonId value. Retrieves people whose first name start with 'A', and their cases.")]
     public async Task<string> GetPersonNamesStartingWithAWithCases(
         int personId)
     {
@@ -72,14 +72,14 @@ public class PersonKernelPlugin(CrudContext<Coalesce.Domain.AppDbContext> contex
         {
             if (!GeneratedForClassViewModel.SecurityInfo.IsReadAllowed(User)) return "Unauthorized.";
 
-            var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Person, Coalesce.Domain.Person>("NamesStartingWithAWithCases");
-            var dataSourceParams = new DataSourceParameters { DataSource = "NamesStartingWithAWithCases" };
-            return await dataSource.GetMappedItemAsync<PersonResponse>(personId, dataSourceParams);
+            var _dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Person, Coalesce.Domain.Person>("NamesStartingWithAWithCases");
+            var _dataSourceParams = new DataSourceParameters { DataSource = "NamesStartingWithAWithCases" };
+            return await _dataSource.GetMappedItemAsync<PersonResponse>(personId, _dataSourceParams);
         });
     }
 
     [KernelFunction("list_person_names_starting_with_a_with_cases")]
-    [Description("Lists Person records. Retrieves people whose first name start with 'A', and their cases..")]
+    [Description("Lists Person records. Retrieves people whose first name start with 'A', and their cases.")]
     public async Task<string> ListPersonNamesStartingWithAWithCases(
         [Description("Search within properties FirstName,LastName")]
         string search,
@@ -105,18 +105,18 @@ public class PersonKernelPlugin(CrudContext<Coalesce.Domain.AppDbContext> contex
             if (ItemResult.FromValidation(_dataSource) is { WasSuccessful: false } _validationResult)
                 return new ListResult<PersonResponse>(_validationResult);
 
-            var listParams = new ListParameters { DataSource = "NamesStartingWithAWithCases", Search = search, Page = page, Fields = string.Join(',', fields), PageSize = 100 };
+            var _listParams = new ListParameters { DataSource = "NamesStartingWithAWithCases", Search = search, Page = page, Fields = string.Join(',', fields), PageSize = 100 };
             if (countOnly)
             {
-                var result = await _dataSource.GetCountAsync(listParams);
+                var result = await _dataSource.GetCountAsync(_listParams);
                 return new ListResult<PersonResponse>(result) { TotalCount = result.Object };
             }
-            return await _dataSource.GetMappedListAsync<PersonResponse>(listParams);
+            return await _dataSource.GetMappedListAsync<PersonResponse>(_listParams);
         });
     }
 
     [KernelFunction("get_person_without_cases")]
-    [Description("Gets a Person by its PersonId value. .")]
+    [Description("Gets a Person by its PersonId value.")]
     public async Task<string> GetPersonWithoutCases(
         int personId)
     {
@@ -126,14 +126,14 @@ public class PersonKernelPlugin(CrudContext<Coalesce.Domain.AppDbContext> contex
         {
             if (!GeneratedForClassViewModel.SecurityInfo.IsReadAllowed(User)) return "Unauthorized.";
 
-            var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Person, Coalesce.Domain.Person>("WithoutCases");
-            var dataSourceParams = new DataSourceParameters { DataSource = "WithoutCases" };
-            return await dataSource.GetMappedItemAsync<PersonResponse>(personId, dataSourceParams);
+            var _dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Person, Coalesce.Domain.Person>("WithoutCases");
+            var _dataSourceParams = new DataSourceParameters { DataSource = "WithoutCases" };
+            return await _dataSource.GetMappedItemAsync<PersonResponse>(personId, _dataSourceParams);
         });
     }
 
     [KernelFunction("list_person_without_cases")]
-    [Description("Lists Person records. .")]
+    [Description("Lists Person records.")]
     public async Task<string> ListPersonWithoutCases(
         [Description("Search within properties FirstName,LastName")]
         string search,
@@ -159,13 +159,13 @@ public class PersonKernelPlugin(CrudContext<Coalesce.Domain.AppDbContext> contex
             if (ItemResult.FromValidation(_dataSource) is { WasSuccessful: false } _validationResult)
                 return new ListResult<PersonResponse>(_validationResult);
 
-            var listParams = new ListParameters { DataSource = "WithoutCases", Search = search, Page = page, Fields = string.Join(',', fields), PageSize = 100 };
+            var _listParams = new ListParameters { DataSource = "WithoutCases", Search = search, Page = page, Fields = string.Join(',', fields), PageSize = 100 };
             if (countOnly)
             {
-                var result = await _dataSource.GetCountAsync(listParams);
+                var result = await _dataSource.GetCountAsync(_listParams);
                 return new ListResult<PersonResponse>(result) { TotalCount = result.Object };
             }
-            return await _dataSource.GetMappedListAsync<PersonResponse>(listParams);
+            return await _dataSource.GetMappedListAsync<PersonResponse>(_listParams);
         });
     }
 

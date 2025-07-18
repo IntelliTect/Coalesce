@@ -15,6 +15,10 @@ namespace Coalesce.Domain
     [Edit(Roles = "Admin")]
     [Description("A product that can be purchased.")]
     [Index(nameof(UniqueId), IsUnique = true)]
+    [SemanticKernel(
+        "A product is a piece of software that is supported by a company.",
+        DefaultDataSourceEnabled = true
+    )]
     public class Product
     {
         public int ProductId { get; set; }
@@ -33,11 +37,6 @@ namespace Coalesce.Domain
 
         [NotMapped]
         public object Unknown { get; set; } = "unknown value";
-
-        [DefaultDataSource, SemanticKernel("")]
-        public class DefaultSource(CrudContext<AppDbContext> context) : StandardDataSource<Product, AppDbContext>(context)
-        {
-        }
     }
 
     public class ProductDetails

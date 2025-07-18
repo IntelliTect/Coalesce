@@ -2,6 +2,7 @@
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
     <DotnetCliToolTargetFramework>net9.0</DotnetCliToolTargetFramework>
+    <UserSecretsId>8474a2d7-c044-4e5e-81dd-55e78596f186</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
@@ -11,35 +12,41 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="9.5.0" />
     <PackageReference Include="Microsoft.Extensions.ServiceDiscovery" Version="9.3.0" />
-    
+
     <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.12.0" />
     <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.12.0" />
     <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.12.0" />
     <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.12.0" />
     <PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.12.0" />
     <PackageReference Include="OpenTelemetry.Instrumentation.SqlClient" Version="1.12.0-beta.1" />
-    
+
     <PackageReference Include="IntelliTect.Coalesce.Vue" Version="$(CoalesceVersion)" />
-    
-    <!--#if (OpenAPI) -->
+
+    <!--#if
+    (OpenAPI) -->
     <PackageReference Include="IntelliTect.Coalesce.Swashbuckle" Version="$(CoalesceVersion)" />
     <PackageReference Include="Scalar.AspNetCore" Version="1.2.37" />
     <!--#endif -->
-    <!--#if (AppInsights) -->
+    <!--#if
+    (AppInsights) -->
     <PackageReference Include="Azure.Monitor.OpenTelemetry.AspNetCore" Version="1.3.0" />
     <!--#endif -->
-    <!--#if (MicrosoftAuth) -->
+    <!--#if
+    (MicrosoftAuth) -->
     <PackageReference Include="Microsoft.AspNetCore.Authentication.MicrosoftAccount" Version="9.0.0" />
     <!--#endif -->
-    <!--#if (GoogleAuth) -->
+    <!--#if
+    (GoogleAuth) -->
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="9.0.0" />
     <!--#endif -->
-    <!--#if (Hangfire) -->
+    <!--#if
+    (Hangfire) -->
     <PackageReference Include="Hangfire.SqlServer" Version="1.8.20" />
     <PackageReference Include="Hangfire.AspNetCore" Version="1.8.20" />
     <PackageReference Include="OpenTelemetry.Instrumentation.Hangfire" Version="1.9.0-beta.1" />
     <!--#endif -->
-    <!--#if (AIChat) -->
+    <!--#if
+    (AIChat) -->
     <PackageReference Include="Aspire.Azure.AI.OpenAI" Version="9.3.1-preview.1.25305.6" />
     <!--#endif -->
   </ItemGroup>

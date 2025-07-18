@@ -30,8 +30,10 @@ using Hangfire;
 using Hangfire.SqlServer;
 using Microsoft.AspNetCore.Authorization;
 using System.Reflection;
+#if AIChat
 using Microsoft.SemanticKernel;
 using Coalesce.Starter.Vue.Data.Services;
+#endif
 #endif
 
 var builder = WebApplication.CreateBuilder(new WebApplicationOptions
@@ -128,7 +130,7 @@ services.AddHangfireServer(c =>
 // Dynamically register all Coalesce-generated kernel plugins
 foreach (var pluginType in Assembly.GetExecutingAssembly().GetTypes().Where(t => t.BaseType?.Name == "KernelPluginBase`1"))
     services.AddScoped(sp => KernelPluginFactory.CreateFromType(pluginType, pluginType.Name, sp));
-    
+
 services.AddScoped<AIAgentService>();
 builder.AddAzureOpenAIClient(connectionName: "OpenAI").AddChatClient(deploymentName: "chat");
 services.AddAzureOpenAIChatCompletion(deploymentName: "chat");

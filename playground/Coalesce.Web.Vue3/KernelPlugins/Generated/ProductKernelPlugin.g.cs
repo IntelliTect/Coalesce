@@ -22,7 +22,7 @@ public class ProductKernelPlugin(CrudContext<Coalesce.Domain.AppDbContext> conte
     protected Coalesce.Domain.AppDbContext Db => context.DbContext;
 
     [KernelFunction("get_product")]
-    [Description("Gets a Product by its ProductId value. .")]
+    [Description("Gets a Product by its ProductId value. A product is a piece of software that is supported by a company.")]
     public async Task<string> GetProduct(
         int productId)
     {
@@ -32,14 +32,14 @@ public class ProductKernelPlugin(CrudContext<Coalesce.Domain.AppDbContext> conte
         {
             if (!GeneratedForClassViewModel.SecurityInfo.IsReadAllowed(User)) return "Unauthorized.";
 
-            var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Product, Coalesce.Domain.Product>("DefaultSource");
-            var dataSourceParams = new DataSourceParameters { DataSource = "DefaultSource" };
-            return await dataSource.GetMappedItemAsync<ProductResponse>(productId, dataSourceParams);
+            var _dataSource = dataSourceFactory.GetDefaultDataSource<Coalesce.Domain.Product, Coalesce.Domain.Product>();
+            var _dataSourceParams = new DataSourceParameters { DataSource = "Default" };
+            return await _dataSource.GetMappedItemAsync<ProductResponse>(productId, _dataSourceParams);
         });
     }
 
     [KernelFunction("list_product")]
-    [Description("Lists Product records. .")]
+    [Description("Lists Product records. A product is a piece of software that is supported by a company.")]
     public async Task<string> ListProduct(
         [Description("Search within properties Name")]
         string search,
@@ -56,16 +56,16 @@ public class ProductKernelPlugin(CrudContext<Coalesce.Domain.AppDbContext> conte
         {
             if (!GeneratedForClassViewModel.SecurityInfo.IsReadAllowed(User)) return new ListResult<ProductResponse>(errorMessage: "Unauthorized.");
 
-            var _dataSource = (Coalesce.Domain.Product.DefaultSource)dataSourceFactory.GetDataSource<Coalesce.Domain.Product, Coalesce.Domain.Product>("DefaultSource");
+            var _dataSource = dataSourceFactory.GetDefaultDataSource<Coalesce.Domain.Product, Coalesce.Domain.Product>();
             MappingContext _mappingContext = new(context);
 
-            var listParams = new ListParameters { DataSource = "DefaultSource", Search = search, Page = page, Fields = string.Join(',', fields), PageSize = 100 };
+            var _listParams = new ListParameters { DataSource = "Default", Search = search, Page = page, Fields = string.Join(',', fields), PageSize = 100 };
             if (countOnly)
             {
-                var result = await _dataSource.GetCountAsync(listParams);
+                var result = await _dataSource.GetCountAsync(_listParams);
                 return new ListResult<ProductResponse>(result) { TotalCount = result.Object };
             }
-            return await _dataSource.GetMappedListAsync<ProductResponse>(listParams);
+            return await _dataSource.GetMappedListAsync<ProductResponse>(_listParams);
         });
     }
 }

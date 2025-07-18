@@ -4,29 +4,31 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.DataProtection.EntityFrameworkCore" Version="9.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.DataProtection.EntityFrameworkCore"
+      Version="9.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.0" />
 
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    
+
     <PackageReference Include="IntelliTect.Coalesce" Version="$(CoalesceVersion)" />
-    <!--#if (AuditLogs) -->
+    <!--#if(AuditLogs) -->
     <PackageReference Include="IntelliTect.Coalesce.AuditLogging" Version="$(CoalesceVersion)" />
     <!--#endif -->
-    <!--#if (EmailAzure) -->
+
+    <!--#if(EmailAzure) -->
     <PackageReference Include="Azure.Communication.Email" Version="1.0.1" />
     <!--#endif -->
-    <!--#if (EmailSendGrid) -->
+    <!--#if(EmailSendGrid) -->
     <PackageReference Include="SendGrid" Version="9.29.3" />
     <!--#endif -->
-    <!--#if (Hangfire) -->
+    <!--#if(Hangfire) -->
     <PackageReference Include="Hangfire.Core" Version="1.8.20" />
     <!--#endif -->
-    <!--#if (AIChat) -->
+    <!--#if(AIChat) -->
     <PackageReference Include="Microsoft.SemanticKernel" Version="1.60.0" />
     <PackageReference Include="Microsoft.SemanticKernel.Agents.Core" Version="1.60.0" />
     <!--#endif -->

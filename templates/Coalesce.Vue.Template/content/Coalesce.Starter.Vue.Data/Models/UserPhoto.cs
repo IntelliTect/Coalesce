@@ -13,4 +13,8 @@ public class UserPhoto
     public User? User { get; set; }
 
     public required byte[] Content { get; set; }
+
+#if (!TrackingBase)
+    public DateTimeOffset ModifiedOn { get; set; }
+#endif
 }

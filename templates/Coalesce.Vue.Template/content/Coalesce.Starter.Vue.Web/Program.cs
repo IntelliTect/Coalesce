@@ -29,8 +29,8 @@ using Coalesce.Starter.Vue.Data.Communication;
 using Hangfire;
 using Hangfire.SqlServer;
 using Microsoft.AspNetCore.Authorization;
-using System.Reflection;
 #if AIChat
+using System.Reflection;
 using Microsoft.SemanticKernel;
 using Coalesce.Starter.Vue.Data.Services;
 #endif

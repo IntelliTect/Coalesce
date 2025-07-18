@@ -121,7 +121,7 @@
 <script setup lang="ts">
 import { ref, nextTick, watch, useTemplateRef } from "vue";
 import { useEdgeResize } from "@/composables/useEdgeResize";
-import { AIAgentServiceViewModel, PersonListViewModel } from "@/viewmodels.g";
+import { AIAgentServiceViewModel } from "@/viewmodels.g";
 
 type CallableEndpointKeys = {
   [K in keyof AIAgentServiceViewModel]: AIAgentServiceViewModel[K] extends {

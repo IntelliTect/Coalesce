@@ -315,7 +315,7 @@ public class KernelPlugin(GeneratorServices services) : ApiService(services)
             b.Line();
         }
 
-        b.Line($"var _listParams = new ListParameters {{ DataSource = {dsName.QuotedStringLiteralForCSharp()}, Search = search, Page = page, Fields = string.Join(',', fields), PageSize = 100 }};");
+        b.Line($"var _listParams = new ListParameters {{ DataSource = {dsName.QuotedStringLiteralForCSharp()}, Search = search, Page = page, Fields = string.Join(',', fields), PageSize = 25 }};");
         using (b.Block("if (countOnly)"))
         {
             b.Line("var result = await _dataSource.GetCountAsync(_listParams);");

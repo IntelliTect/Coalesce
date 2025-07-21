@@ -64,11 +64,19 @@ namespace IntelliTect.Coalesce.Validation
                 }
                 else
                 {
-                    assert.IsNotNull(model.DbContext, 
-                        "Cannot determine the DbContext that provides this type. " 
+                    assert.IsNotNull(model.DbContext,
+                        "Cannot determine the DbContext that provides this type. "
                         + (model.IsCustomDto ? "Try using IClassDto<T, TDbContext> for this type instead." : "")
                     );
                 }
+
+                assert.IsTrue(
+                    model.GetAttribute<SemanticKernelAttribute>() is not { } ska ||
+                    ska.GetValue(a => a.SaveEnabled) == true ||
+                    ska.GetValue(a => a.DeleteEnabled) == true ||
+                    ska.GetValue(a => a.DefaultDataSourceEnabled) == true,
+                    "SemanticKernelAttribute on a model class must have at least one 'Enabled' property set."
+                );
 
                 assert.IsTrue(
                     dataSources.Count(s => s.IsDefaultDataSource) <= 1,
@@ -167,7 +175,7 @@ namespace IntelliTect.Coalesce.Validation
 
                             case PropertyRole.CollectionNavigation:
                                 assert.IsTrue(
-                                    prop.InverseProperty == null || prop.InverseProperty.IsPOCO, 
+                                    prop.InverseProperty == null || prop.InverseProperty.IsPOCO,
                                     "The inverse property of a collection navigation should reference the corresponding reference navigation on the other side of the relationship.");
 
                                 assert.IsNotNull(prop.ForeignKeyProperty, "Could not find the foreign key of the navigation property");
@@ -191,7 +199,7 @@ namespace IntelliTect.Coalesce.Validation
                     // data source is implementing security rules but is in fact not
                     // being enforced as a default.
                     assert.IsTrue(
-                        source.IsDefaultDataSource 
+                        source.IsDefaultDataSource
                         || (model.IsStandaloneEntity && dataSources.Count() == 1) // A lone datasource for a standalone entity is also treated as the default.
                         || source.ClientTypeName.IndexOf(DataSourceFactory.DefaultSourceName, StringComparison.InvariantCultureIgnoreCase) == -1,
                         $"Data sources can't contain {DataSourceFactory.DefaultSourceName} in their name unless they're marked with {nameof(DefaultDataSourceAttribute)}"
@@ -219,7 +227,7 @@ namespace IntelliTect.Coalesce.Validation
                             // If the name and name w/o async are different, this method has "Async" at the end.
                             // Assert that there isn't also a method that exists without "Async" at the end,
                             // as this will cause name conflicts caused by the fact that we drop "Async" from method names.
-                            assert.IsNull(model.MethodByName(method.NameWithoutAsync), 
+                            assert.IsNull(model.MethodByName(method.NameWithoutAsync),
                                 "Do not expose both an async and non-async version of the same method. Prefer the async version.");
                         }
 
@@ -229,7 +237,7 @@ namespace IntelliTect.Coalesce.Validation
                                 method.GetAttributeValue<ControllerActionAttribute>(a => a.VaryByProperty) != null ||
 #pragma warning restore CS0618 // Type or member is obsolete
                                 method.GetAttributeValue<ExecuteAttribute>(a => a.VaryByProperty) != null
-                            ) && 
+                            ) &&
                             method.VaryByProperty == null,
                             $"{nameof(ExecuteAttribute.VaryByProperty)} is only applicable to HTTP GET model instance methods, " +
                             $"and must reference a property on the parent instance."

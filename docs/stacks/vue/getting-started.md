@@ -92,6 +92,7 @@ The structure of the Web project follows the conventions of both ASP.NET Core an
 - `/wwwroot` - Target for Vite's compiled output. This directory is excluded from git.
 - `/Api/Generated` - Output target for Coalesce's generated API Controllers.
 - `/Models/Generated` - Output target for Coalesce's [generated DTOs](/stacks/agnostic/dtos.md).
+- `/KernelPlugins/Generated` <Beta/> - Output target for Coalesce's generated [Semantic Kernel plugins](/modeling/model-components/attributes/semantic-kernel.md). 
 - `/Controllers/HomeController.cs` - Controller that serves the root page of your Vue SPA, both in development and production. Some customizations can be added here.
 - `/ProgramServiceDefaults.cs` - [.NET Aspire Service Defaults configuration](https://learn.microsoft.com/en-us/dotnet/aspire/fundamentals/service-defaults), including Open Telemetry configuration, health checks, and resiliency configuration. Since Coalesce projects typically only have one .NET service (the web application), this file is not in a separate project. If your solution grows beyond that, you're encouraged to split this out of the Web project.
 

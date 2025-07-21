@@ -467,15 +467,30 @@ export class ZipCodeApiClient extends ModelApiClient<$models.ZipCode> {
 }
 
 
+export class AIAgentServiceApiClient extends ServiceApiClient<typeof $metadata.AIAgentService> {
+  constructor() { super($metadata.AIAgentService) }
+  
+  /** A chat agent that directly uses all kernel plugin tools. */
+  public chatAgent(history: string | null, prompt: string | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<$models.ChatResponse>> {
+    const $method = this.$metadata.methods.chatAgent
+    const $params =  {
+      history,
+      prompt,
+    }
+    return this.$invoke($method, $params, $config)
+  }
+  
+}
+
+
 export class WeatherServiceApiClient extends ServiceApiClient<typeof $metadata.WeatherService> {
   constructor() { super($metadata.WeatherService) }
   
-  public getWeather(location: $models.Location | null, dateTime?: Date | null, conditions?: $models.SkyConditions | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<$models.WeatherData>> {
+  public getWeather(location: $models.Location | null, dateTime?: Date | null, $config?: AxiosRequestConfig): AxiosPromise<ItemResult<$models.WeatherData>> {
     const $method = this.$metadata.methods.getWeather
     const $params =  {
       location,
       dateTime,
-      conditions,
     }
     return this.$invoke($method, $params, $config)
   }

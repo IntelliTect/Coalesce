@@ -1,14 +1,22 @@
+using Azure.Identity;
 using Coalesce.Domain;
+using Coalesce.Domain.Services;
 using Coalesce.Domain.WebShared;
+using Coalesce.Web.Vue3.KernelPlugins;
 using IntelliTect.Coalesce;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Console;
+using Microsoft.Extensions.Options;
 using Microsoft.Net.Http.Headers;
 using Microsoft.OpenApi.Models;
+using Microsoft.SemanticKernel;
 using Scalar.AspNetCore;
+using System.ClientModel;
+using System.Reflection;
 using System.Security.Claims;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -28,6 +36,7 @@ builder.Logging
 
 builder.Configuration
     .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+    .AddUserSecrets<Program>()
     .AddEnvironmentVariables();
 
 #region Configure Services
@@ -62,6 +71,17 @@ services.AddSwaggerGen(c =>
     c.AddCoalesce();
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
 });
+
+services.AddScoped<IWeatherService, WeatherService>();
+
+foreach (var pluginType in Assembly.GetExecutingAssembly().GetTypes().Where(t => t.BaseType?.Name == "KernelPluginBase`1"))
+    services.AddScoped(sp => KernelPluginFactory.CreateFromType(pluginType, pluginType.Name, sp));
+services.AddScoped<AIAgentService>();
+services.AddAzureOpenAIChatCompletion(
+    deploymentName: builder.Configuration["Azure:OpenAI:Deployment"]!,
+    endpoint: builder.Configuration["Azure:OpenAI:Endpoint"]!,
+    apiKey: builder.Configuration["Azure:OpenAI:Key"]!
+);
 
 
 services.AddAuthentication(DemoMiddleware.AuthenticationScheme).AddCookie(DemoMiddleware.AuthenticationScheme);

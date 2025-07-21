@@ -1,11 +1,6 @@
 ﻿using IntelliTect.Coalesce.CodeGeneration.Generation;
-using IntelliTect.Coalesce.TypeDefinition;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators;
 using IntelliTect.Coalesce.Utilities;
-using System.Linq;
 
 namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
 {
@@ -15,11 +10,10 @@ namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
 
         public override void BuildOutput(CSharpCodeBuilder b)
         {
-            ClassViewModel model = Model;
-            string namespaceName = WriteNamespaces(b);
+            WriteNamespaces(b);
 
             b.Line();
-            using (b.Block($"namespace {namespaceName}.Api"))
+            using (b.Block($"namespace {GetAreaNamespace()}.Api"))
             {
                 WriteControllerRouteAttribute(b);
                 /* No controller-level security annotation is applied - all security for service controllers is on a per-action basis. */

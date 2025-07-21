@@ -11,9 +11,20 @@ var sqlDb = OperatingSystem.IsWindows() && OSArchitecture != Architecture.Arm64
     // Fall back to a container
     : builder.AddSqlServer("sql").WithLifetime(ContainerLifetime.Persistent).AddDatabase(nameof(Coalesce_Starter_Vue_Web));
 
+#if AIChat
+// https://learn.microsoft.com/en-us/dotnet/aspire/azureai/azureai-openai-integration
+var openAi = builder.AddAzureOpenAI("OpenAI");
+openAi.AddDeployment(name: "chat", modelName: "gpt-4.1", modelVersion: "2025-04-14")
+      .WithProperties(c => c.SkuName = "GlobalStandard");
+
+#endif
 var app = builder.AddProject<Coalesce_Starter_Vue_Web>("app")
     .WithReference(sqlDb, "DefaultConnection")
     .WaitFor(sqlDb)
+#if AIChat
+    .WithReference(openAi)
+    .WaitFor(openAi)
+#endif
     .WithHttpHealthCheck("/health")
     .WithExternalHttpEndpoints();
 

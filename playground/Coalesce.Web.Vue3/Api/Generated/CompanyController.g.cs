@@ -106,6 +106,7 @@ namespace Coalesce.Web.Vue3.Api
             [FromForm(Name = "companyParam")] CompanyParameter companyParam,
             [FromForm(Name = "name")] string name)
         {
+            var _method = GeneratedForClassViewModel!.MethodByName("ConflictingParameterNames");
             var _params = new
             {
                 Id = id,
@@ -122,8 +123,7 @@ namespace Coalesce.Web.Vue3.Api
             var item = itemResult.Object;
             if (Context.Options.ValidateAttributesForMethods)
             {
-                var _validationResult = ItemResult.FromParameterValidation(
-                    GeneratedForClassViewModel!.MethodByName("ConflictingParameterNames"), _params, HttpContext.RequestServices);
+                var _validationResult = ItemResult.FromParameterValidation(_method, _params, ServiceProvider);
                 if (!_validationResult.WasSuccessful) return _validationResult;
             }
 
@@ -154,6 +154,7 @@ namespace Coalesce.Web.Vue3.Api
             [FromBody] ConflictingParameterNamesParameters _params
         )
         {
+            var _method = GeneratedForClassViewModel!.MethodByName("ConflictingParameterNames");
             var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Company, Coalesce.Domain.Company>("Default");
             var itemResult = await dataSource.GetItemAsync(_params.Id, new DataSourceParameters());
             if (!itemResult.WasSuccessful)
@@ -163,8 +164,7 @@ namespace Coalesce.Web.Vue3.Api
             var item = itemResult.Object;
             if (Context.Options.ValidateAttributesForMethods)
             {
-                var _validationResult = ItemResult.FromParameterValidation(
-                    GeneratedForClassViewModel!.MethodByName("ConflictingParameterNames"), _params, HttpContext.RequestServices);
+                var _validationResult = ItemResult.FromParameterValidation(_method, _params, ServiceProvider);
                 if (!_validationResult.WasSuccessful) return _validationResult;
             }
 
@@ -186,6 +186,7 @@ namespace Coalesce.Web.Vue3.Api
         public virtual ItemResult<System.Collections.Generic.ICollection<CompanyResponse>> GetCertainItems(
             [FromForm(Name = "isDeleted")] bool isDeleted = false)
         {
+            var _method = GeneratedForClassViewModel!.MethodByName("GetCertainItems");
             var _params = new
             {
                 IsDeleted = isDeleted
@@ -193,8 +194,7 @@ namespace Coalesce.Web.Vue3.Api
 
             if (Context.Options.ValidateAttributesForMethods)
             {
-                var _validationResult = ItemResult.FromParameterValidation(
-                    GeneratedForClassViewModel!.MethodByName("GetCertainItems"), _params, HttpContext.RequestServices);
+                var _validationResult = ItemResult.FromParameterValidation(_method, _params, ServiceProvider);
                 if (!_validationResult.WasSuccessful) return new ItemResult<System.Collections.Generic.ICollection<CompanyResponse>>(_validationResult);
             }
 
@@ -224,10 +224,10 @@ namespace Coalesce.Web.Vue3.Api
             [FromBody] GetCertainItemsParameters _params
         )
         {
+            var _method = GeneratedForClassViewModel!.MethodByName("GetCertainItems");
             if (Context.Options.ValidateAttributesForMethods)
             {
-                var _validationResult = ItemResult.FromParameterValidation(
-                    GeneratedForClassViewModel!.MethodByName("GetCertainItems"), _params, HttpContext.RequestServices);
+                var _validationResult = ItemResult.FromParameterValidation(_method, _params, ServiceProvider);
                 if (!_validationResult.WasSuccessful) return new ItemResult<System.Collections.Generic.ICollection<CompanyResponse>>(_validationResult);
             }
 

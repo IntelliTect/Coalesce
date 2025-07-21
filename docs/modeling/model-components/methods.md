@@ -493,3 +493,36 @@ For any other storage mechanism, implementations are similar to the database sto
 For downloads, prefer directly providing the underlying `Stream` to the `IFile` versus wrapping a `byte[]` in a `MemoryStream`. This will reduce server memory usage and garbage collector churn.
 
 For cloud storage providers where complex security logic is not needed, consider having clients consume the URL of the cloud resource directly rather than passing the file content through your own server.
+
+
+## Semantic Kernel (AI)
+
+<Beta/> 
+
+Methods can be exposed as [Semantic Kernel plugins](/modeling/model-components/attributes/semantic-kernel.md) by applying the `[SemanticKernel]` attribute, resulting in a generated function that is ready to be called by an LLM. This works for instance methods, static methods, and service methods.
+
+When the attribute is placed on a [parameter](#parameters), it provides a description of that parameter to the LLM.
+
+```c#
+public class Person
+{
+    public int PersonId { get; set; }
+    public string FirstName { get; set; }
+    public string? Title { get; set; }
+
+    [SemanticKernel("Changes a person's first name, and optionally assigns a title.")]
+    public string Rename(
+      string newFirstName,
+      [SemanticKernel("A new title for the person. Provide null to leave the title unchanged.")]
+      string? newTitle = null
+    ) 
+    {
+        FirstName = newFirstName;
+        if (newTitle != null)
+        {
+            Title = newTitle;
+        }
+        return $"Hello, {FirstName}!";
+    }
+}
+```

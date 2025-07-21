@@ -42,20 +42,28 @@ There are a couple of extra options which are only available as CLI parameters t
 
 ## Generated Code
 
-Coalesce will generate a full vertical stack of code for you:
+When you run `dotnet coalesce`, Coalesce will generate a full vertical stack of code for you:
 
 ### Backend C#
 
 #### API Controllers
 For each of your [CRUD Models](/modeling/model-types/crud.md) and [Services](/modeling/model-types/services.md), an API controller is created in the ``/Api/Generated`` directory of your web project. These controllers provide a number of endpoints for interacting with your data.
 
-These controllers can be secured at a high level using [Security Attributes](/modeling/model-components/attributes/security-attribute.md), and when applicable to the type, with [Data Sources](/modeling/model-components/data-sources.md) and [Behaviors](/modeling/model-components/behaviors.md).
+These controllers can be secured at a high level using [Security Attributes](/modeling/model-components/attributes/security-attribute.md), or for more granularity and customization, with [Data Sources](/modeling/model-components/data-sources.md) and [Behaviors](/modeling/model-components/behaviors.md).
 
 #### C# DTOs
-For each of your [Entity Models](/modeling/model-types/entities.md) and [Standalone Entities](/modeling/model-types/standalone-entities.md), a C# DTO class is created. These classes are used to hold the data that will be serialized and sent to the client, as well as data that has been received from the client before it has been mapped back to your EF POCO class.
+For each of your [Entity Models](/modeling/model-types/entities.md) and [Standalone Entities](/modeling/model-types/standalone-entities.md), a C# DTO class is created. These classes are used to hold the data that will be serialized and sent to the client, as well as data that has been received from the client before it has been mapped back to your EF POCO class. These classes enable property-level security trimming, sparse updates, accurate OpenAPI definitions, and more.
 
 See [Generated C# DTOs](/stacks/agnostic/dtos.md) for more information.
 
+#### Semantic Kernel Plugins
+
+<Beta/> 
+
+For models, methods, and data sources annotated with the [[SemanticKernel]](/modeling/model-components/attributes/semantic-kernel.md) attribute, plugin classes are generated in the `/KernelPlugins/Generated` directory. These plugins expose your application's functionality as AI-callable functions that can be used with Microsoft Semantic Kernel for building AI-powered features.
+
 ### Frontend - Vue
 
-An overview of the Vue generated code can be found at [Vue Overview](/stacks/vue/overview.md).
+For your frontend Vue application, Coalesce generates TypeScript models, API clients, and feature-rich ViewModels that provide complete type safety and seamless integration with your backend. This includes reactive data models, CRUD operations, and validation that automatically stays in sync with your C# models.
+
+An more in-depth look at the Vue generated code can be found at [Vue Overview](/stacks/vue/overview.md).

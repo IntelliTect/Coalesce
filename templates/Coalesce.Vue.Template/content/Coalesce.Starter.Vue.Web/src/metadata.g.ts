@@ -887,6 +887,31 @@ export const Widget = domain.types.Widget = {
   dataSources: {
   },
 }
+export const ChatResponse = domain.types.ChatResponse = {
+  name: "ChatResponse" as const,
+  displayName: "Chat Response",
+  type: "object",
+  props: {
+    response: {
+      name: "response",
+      displayName: "Response",
+      type: "string",
+      role: "value",
+      rules: {
+        required: val => (val != null && val !== '') || "Response is required.",
+      }
+    },
+    history: {
+      name: "history",
+      displayName: "History",
+      type: "string",
+      role: "value",
+      rules: {
+        required: val => (val != null && val !== '') || "History is required.",
+      }
+    },
+  },
+}
 export const UserInfo = domain.types.UserInfo = {
   name: "UserInfo" as const,
   displayName: "User Info",
@@ -957,6 +982,44 @@ export const UserInfo = domain.types.UserInfo = {
     },
   },
 }
+export const AIAgentService = domain.services.AIAgentService = {
+  name: "AIAgentService",
+  displayName: "AI Agent Service",
+  type: "service",
+  controllerRoute: "AIAgentService",
+  methods: {
+    chatAgent: {
+      name: "chatAgent",
+      displayName: "Chat Agent",
+      transportType: "item",
+      httpMethod: "POST",
+      params: {
+        history: {
+          name: "history",
+          displayName: "History",
+          type: "string",
+          role: "value",
+        },
+        prompt: {
+          name: "prompt",
+          displayName: "Prompt",
+          type: "string",
+          role: "value",
+          rules: {
+            required: val => (val != null && val !== '') || "Prompt is required.",
+          }
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "object",
+        get typeDef() { return (domain.types.ChatResponse as ObjectType & { name: "ChatResponse" }) },
+        role: "value",
+      },
+    },
+  },
+}
 export const SecurityService = domain.services.SecurityService = {
   name: "SecurityService",
   displayName: "Security Service",
@@ -990,6 +1053,7 @@ interface AppDomain extends Domain {
   types: {
     AuditLog: typeof AuditLog
     AuditLogProperty: typeof AuditLogProperty
+    ChatResponse: typeof ChatResponse
     Role: typeof Role
     Tenant: typeof Tenant
     User: typeof User
@@ -998,6 +1062,7 @@ interface AppDomain extends Domain {
     Widget: typeof Widget
   }
   services: {
+    AIAgentService: typeof AIAgentService
     SecurityService: typeof SecurityService
   }
 }

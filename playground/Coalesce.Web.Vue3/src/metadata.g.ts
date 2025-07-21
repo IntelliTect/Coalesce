@@ -51,28 +51,6 @@ export const Genders = domain.enums.Genders = {
   },
   ]),
 }
-export const SkyConditions = domain.enums.SkyConditions = {
-  name: "SkyConditions" as const,
-  displayName: "Sky Conditions",
-  type: "enum",
-  ...getEnumMeta<"Cloudy"|"PartyCloudy"|"Sunny">([
-  {
-    value: 0,
-    strValue: "Cloudy",
-    displayName: "Cloudy",
-  },
-  {
-    value: 1,
-    strValue: "PartyCloudy",
-    displayName: "Party Cloudy",
-  },
-  {
-    value: 2,
-    strValue: "Sunny",
-    displayName: "Sunny",
-  },
-  ]),
-}
 export const Statuses = domain.enums.Statuses = {
   name: "Statuses" as const,
   displayName: "Statuses",
@@ -2692,6 +2670,31 @@ export const CaseSummary = domain.types.CaseSummary = {
     },
   },
 }
+export const ChatResponse = domain.types.ChatResponse = {
+  name: "ChatResponse" as const,
+  displayName: "Chat Response",
+  type: "object",
+  props: {
+    response: {
+      name: "response",
+      displayName: "Response",
+      type: "string",
+      role: "value",
+      rules: {
+        required: val => (val != null && val !== '') || "Response is required.",
+      }
+    },
+    history: {
+      name: "history",
+      displayName: "History",
+      type: "string",
+      role: "value",
+      rules: {
+        required: val => (val != null && val !== '') || "History is required.",
+      }
+    },
+  },
+}
 export const DevTeam = domain.types.DevTeam = {
   name: "DevTeam" as const,
   displayName: "Dev Team",
@@ -2921,6 +2924,44 @@ export const WeatherData = domain.types.WeatherData = {
     },
   },
 }
+export const AIAgentService = domain.services.AIAgentService = {
+  name: "AIAgentService",
+  displayName: "AI Agent Service",
+  type: "service",
+  controllerRoute: "AIAgentService",
+  methods: {
+    chatAgent: {
+      name: "chatAgent",
+      displayName: "Chat Agent",
+      transportType: "item",
+      httpMethod: "POST",
+      params: {
+        history: {
+          name: "history",
+          displayName: "History",
+          type: "string",
+          role: "value",
+        },
+        prompt: {
+          name: "prompt",
+          displayName: "Prompt",
+          type: "string",
+          role: "value",
+          rules: {
+            required: val => (val != null && val !== '') || "Prompt is required.",
+          }
+        },
+      },
+      return: {
+        name: "$return",
+        displayName: "Result",
+        type: "object",
+        get typeDef() { return (domain.types.ChatResponse as ObjectType & { name: "ChatResponse" }) },
+        role: "value",
+      },
+    },
+  },
+}
 export const WeatherService = domain.services.WeatherService = {
   name: "WeatherService",
   displayName: "Weather Service",
@@ -2950,13 +2991,6 @@ export const WeatherService = domain.services.WeatherService = {
           dateKind: "datetime",
           role: "value",
         },
-        conditions: {
-          name: "conditions",
-          displayName: "Conditions",
-          type: "enum",
-          get typeDef() { return SkyConditions },
-          role: "value",
-        },
       },
       return: {
         name: "$return",
@@ -2973,7 +3007,6 @@ interface AppDomain extends Domain {
   enums: {
     AuditEntryState: typeof AuditEntryState
     Genders: typeof Genders
-    SkyConditions: typeof SkyConditions
     Statuses: typeof Statuses
     Titles: typeof Titles
   }
@@ -2991,6 +3024,7 @@ interface AppDomain extends Domain {
     CaseProduct: typeof CaseProduct
     CaseStandalone: typeof CaseStandalone
     CaseSummary: typeof CaseSummary
+    ChatResponse: typeof ChatResponse
     Company: typeof Company
     DevTeam: typeof DevTeam
     Location: typeof Location
@@ -3009,6 +3043,7 @@ interface AppDomain extends Domain {
     ZipCode: typeof ZipCode
   }
   services: {
+    AIAgentService: typeof AIAgentService
     WeatherService: typeof WeatherService
   }
 }

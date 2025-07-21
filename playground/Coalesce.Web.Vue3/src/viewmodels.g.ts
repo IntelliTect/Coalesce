@@ -1003,14 +1003,34 @@ export class ZipCodeListViewModel extends ListViewModel<$models.ZipCode, $apiCli
 }
 
 
+export class AIAgentServiceViewModel extends ServiceViewModel<typeof $metadata.AIAgentService, $apiClients.AIAgentServiceApiClient> {
+  
+  /** A chat agent that directly uses all kernel plugin tools. */
+  public get chatAgent() {
+    const chatAgent = this.$apiClient.$makeCaller(
+      this.$metadata.methods.chatAgent,
+      (c, history: string | null, prompt: string | null) => c.chatAgent(history, prompt),
+      () => ({history: null as string | null, prompt: null as string | null, }),
+      (c, args) => c.chatAgent(args.history, args.prompt))
+    
+    Object.defineProperty(this, 'chatAgent', {value: chatAgent});
+    return chatAgent
+  }
+  
+  constructor() {
+    super($metadata.AIAgentService, new $apiClients.AIAgentServiceApiClient())
+  }
+}
+
+
 export class WeatherServiceViewModel extends ServiceViewModel<typeof $metadata.WeatherService, $apiClients.WeatherServiceApiClient> {
   
   public get getWeather() {
     const getWeather = this.$apiClient.$makeCaller(
       this.$metadata.methods.getWeather,
-      (c, location: $models.Location | null, dateTime?: Date | null, conditions?: $models.SkyConditions | null) => c.getWeather(location, dateTime, conditions),
-      () => ({location: null as $models.Location | null, dateTime: null as Date | null, conditions: null as $models.SkyConditions | null, }),
-      (c, args) => c.getWeather(args.location, args.dateTime, args.conditions))
+      (c, location: $models.Location | null, dateTime?: Date | null) => c.getWeather(location, dateTime),
+      () => ({location: null as $models.Location | null, dateTime: null as Date | null, }),
+      (c, args) => c.getWeather(args.location, args.dateTime))
     
     Object.defineProperty(this, 'getWeather', {value: getWeather});
     return getWeather
@@ -1066,6 +1086,7 @@ const listViewModelTypeLookup = ListViewModel.typeLookup = {
   ZipCode: ZipCodeListViewModel,
 }
 const serviceViewModelTypeLookup = ServiceViewModel.typeLookup = {
+  AIAgentService: AIAgentServiceViewModel,
   WeatherService: WeatherServiceViewModel,
 }
 

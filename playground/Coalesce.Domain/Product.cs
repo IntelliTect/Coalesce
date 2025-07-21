@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using IntelliTect.Coalesce;
 using IntelliTect.Coalesce.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,6 +15,10 @@ namespace Coalesce.Domain
     [Edit(Roles = "Admin")]
     [Description("A product that can be purchased.")]
     [Index(nameof(UniqueId), IsUnique = true)]
+    [SemanticKernel(
+        "A product is a piece of software that is supported by a company.",
+        DefaultDataSourceEnabled = true
+    )]
     public class Product
     {
         public int ProductId { get; set; }

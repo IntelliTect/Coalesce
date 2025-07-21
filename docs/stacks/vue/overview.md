@@ -5,7 +5,7 @@ The `Vue` stack for Coalesce has been designed from the ground up to be used to 
 
 ## Getting Started
 
-Check out [Getting Started with Vue](/stacks/vue/getting-started.md) to learn how to get a new Coalesce Vue project up and running.
+Check out the [Coalesce project template](/stacks/vue/getting-started.md) to learn how to get a new Coalesce Vue project up and running.
 
 ## TypeScript Layers
 
@@ -60,5 +60,5 @@ Both the generated code and [coalesce-vue](https://www.npmjs.com/package/coalesc
 
 The Vue.js stack for Coalesce provides some high level components that provide functionality of whole pages like [c-admin-table-page](/stacks/vue/coalesce-vue-vuetify/components/c-admin-table-page.md) and [c-admin-editor-page](/stacks/vue/coalesce-vue-vuetify/components/c-admin-editor-page.md). 
 
-The template described in [Getting Started with Vue](/stacks/vue/getting-started.md) comes with routes already in place for these page-level components. For example, ``/admin/Person`` for a table, ``/admin/Person/edit`` to create a new ``Person``, and ``/admin/Person/edit/:id`` to edit a ``Person``.
+The [Coalesce project template](/stacks/vue/getting-started.md) comes with routes already in place for these page-level components. For example, ``/admin/Person`` for a table, ``/admin/Person/edit`` to create a new ``Person``, and ``/admin/Person/edit/:id`` to edit a ``Person``.
 

@@ -283,6 +283,7 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
     }
 
     [Coalesce]
+    [SemanticKernel("ParameterTestsSource")]
     public class ParameterTestsSource(CrudContext<AppDbContext> context) : StandardDataSource<Person, AppDbContext>(context)
     {
         [Coalesce]
@@ -312,6 +313,7 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
     }
 
     [Coalesce]
+    [SemanticKernel("ParameterTestsSourceSubclass")]
     public class ParameterTestsSourceSubclass(CrudContext<AppDbContext> context) : ParameterTestsSource(context)
     {
     }

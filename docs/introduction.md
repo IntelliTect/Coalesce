@@ -33,6 +33,7 @@ description: Documentation home page for IntelliTect.Coalesce
 Designed to help you quickly build amazing web applications, Coalesce is a rapid-development, code generation-based web application framework created by [IntelliTect](https://intellitect.com) and built on top of:
 
 <table>
+<tbody>
 <tr>
   <td>
     <a href="https://learn.microsoft.com/en-us/aspnet/core/introduction-to-aspnet-core"><img class=ext-logo src=/net-logo.svg></a>
@@ -55,6 +56,7 @@ Designed to help you quickly build amazing web applications, Coalesce is a rapid
   <td><a href="https://vitejs.dev/"><img class=ext-logo src=/vite-logo.svg></a></td>
   <td>Vite is the development and build tooling for your frontend Vue code, enabling lightning-fast single-page application development. Coalesce integrates ASP.NET Core and Vite together, streamlining local development to require nothing more than a <code>dotnet run</code> or a single-click launch in your IDE.</td>
 </tr>
+</tbody>
 </table>
 
 ## What do I do?
@@ -77,6 +79,7 @@ monotonous to build:
 - APIs to interact with your models via endpoints like List, Get, Save, and more.
 - Out-of-the-box [Vue Components](/stacks/vue/coalesce-vue-vuetify/overview.md) for common controls like dates, selecting objects via drop downs, enums, etc. Dropdowns support searching and paging automatically.
 - A complete set of admin pages are provided, allowing you to read, create, edit, and delete data straight away without writing any additional code.
+- <Beta/> [Semantic Kernel plugins](/modeling/model-components/attributes/semantic-kernel.md) that enable interaction with your application through an AI chat assistant or other LLM-based tool.
 
 ## Getting Started
 

@@ -103,6 +103,7 @@ namespace Coalesce.Web.Vue3.Api
         public virtual ItemResult<System.Collections.Generic.ICollection<string>> GetCaseTitles(
             [FromForm(Name = "search")] string search)
         {
+            var _method = GeneratedForClassViewModel!.MethodByName("GetCaseTitles");
             var _params = new
             {
                 Search = search
@@ -110,8 +111,7 @@ namespace Coalesce.Web.Vue3.Api
 
             if (Context.Options.ValidateAttributesForMethods)
             {
-                var _validationResult = ItemResult.FromParameterValidation(
-                    GeneratedForClassViewModel!.MethodByName("GetCaseTitles"), _params, HttpContext.RequestServices);
+                var _validationResult = ItemResult.FromParameterValidation(_method, _params, ServiceProvider);
                 if (!_validationResult.WasSuccessful) return new ItemResult<System.Collections.Generic.ICollection<string>>(_validationResult);
             }
 
@@ -139,10 +139,10 @@ namespace Coalesce.Web.Vue3.Api
             [FromBody] GetCaseTitlesParameters _params
         )
         {
+            var _method = GeneratedForClassViewModel!.MethodByName("GetCaseTitles");
             if (Context.Options.ValidateAttributesForMethods)
             {
-                var _validationResult = ItemResult.FromParameterValidation(
-                    GeneratedForClassViewModel!.MethodByName("GetCaseTitles"), _params, HttpContext.RequestServices);
+                var _validationResult = ItemResult.FromParameterValidation(_method, _params, ServiceProvider);
                 if (!_validationResult.WasSuccessful) return new ItemResult<System.Collections.Generic.ICollection<string>>(_validationResult);
             }
 
@@ -162,6 +162,7 @@ namespace Coalesce.Web.Vue3.Api
         [Authorize]
         public virtual ItemResult<System.Collections.Generic.ICollection<CaseResponse>> GetSomeCases()
         {
+            var _method = GeneratedForClassViewModel!.MethodByName("GetSomeCases");
             IncludeTree includeTree = null;
             var _mappingContext = new MappingContext(Context);
             var _methodResult = Coalesce.Domain.Case.GetSomeCases(
@@ -179,6 +180,7 @@ namespace Coalesce.Web.Vue3.Api
         [Authorize]
         public virtual ItemResult<int> GetAllOpenCasesCount()
         {
+            var _method = GeneratedForClassViewModel!.MethodByName("GetAllOpenCasesCount");
             var _methodResult = Coalesce.Domain.Case.GetAllOpenCasesCount(
                 Db
             );
@@ -194,6 +196,7 @@ namespace Coalesce.Web.Vue3.Api
         [Authorize]
         public virtual ItemResult RandomizeDatesAndStatus()
         {
+            var _method = GeneratedForClassViewModel!.MethodByName("RandomizeDatesAndStatus");
             Coalesce.Domain.Case.RandomizeDatesAndStatus(
                 Db
             );
@@ -212,6 +215,7 @@ namespace Coalesce.Web.Vue3.Api
             [FromForm(Name = "id")] int id,
             Microsoft.AspNetCore.Http.IFormFile @file)
         {
+            var _method = GeneratedForClassViewModel!.MethodByName("UploadImage");
             var _params = new
             {
                 Id = id,
@@ -227,8 +231,7 @@ namespace Coalesce.Web.Vue3.Api
             var item = itemResult.Object;
             if (Context.Options.ValidateAttributesForMethods)
             {
-                var _validationResult = ItemResult.FromParameterValidation(
-                    GeneratedForClassViewModel!.MethodByName("UploadImage"), _params, HttpContext.RequestServices);
+                var _validationResult = ItemResult.FromParameterValidation(_method, _params, ServiceProvider);
                 if (!_validationResult.WasSuccessful) return _validationResult;
             }
 
@@ -257,6 +260,7 @@ namespace Coalesce.Web.Vue3.Api
             [FromBody] UploadImageParameters _params
         )
         {
+            var _method = GeneratedForClassViewModel!.MethodByName("UploadImage");
             var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Case, Coalesce.Domain.Case>("Default");
             var itemResult = await dataSource.GetItemAsync(_params.Id, new DataSourceParameters());
             if (!itemResult.WasSuccessful)
@@ -266,8 +270,7 @@ namespace Coalesce.Web.Vue3.Api
             var item = itemResult.Object;
             if (Context.Options.ValidateAttributesForMethods)
             {
-                var _validationResult = ItemResult.FromParameterValidation(
-                    GeneratedForClassViewModel!.MethodByName("UploadImage"), _params, HttpContext.RequestServices);
+                var _validationResult = ItemResult.FromParameterValidation(_method, _params, ServiceProvider);
                 if (!_validationResult.WasSuccessful) return _validationResult;
             }
 
@@ -289,6 +292,7 @@ namespace Coalesce.Web.Vue3.Api
             [FromQuery] int id,
             [FromQuery] byte[] etag)
         {
+            var _method = GeneratedForClassViewModel!.MethodByName("DownloadImage");
             var _params = new
             {
                 Id = id,
@@ -344,6 +348,7 @@ namespace Coalesce.Web.Vue3.Api
             [FromForm(Name = "id")] int id,
             Microsoft.AspNetCore.Http.IFormFile @file)
         {
+            var _method = GeneratedForClassViewModel!.MethodByName("UploadAndDownload");
             var _params = new
             {
                 Id = id,
@@ -359,8 +364,7 @@ namespace Coalesce.Web.Vue3.Api
             var item = itemResult.Object;
             if (Context.Options.ValidateAttributesForMethods)
             {
-                var _validationResult = ItemResult.FromParameterValidation(
-                    GeneratedForClassViewModel!.MethodByName("UploadAndDownload"), _params, HttpContext.RequestServices);
+                var _validationResult = ItemResult.FromParameterValidation(_method, _params, ServiceProvider);
                 if (!_validationResult.WasSuccessful) return new ItemResult<IntelliTect.Coalesce.Models.IFile>(_validationResult);
             }
 
@@ -394,6 +398,7 @@ namespace Coalesce.Web.Vue3.Api
             [FromBody] UploadAndDownloadParameters _params
         )
         {
+            var _method = GeneratedForClassViewModel!.MethodByName("UploadAndDownload");
             var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Case, Coalesce.Domain.Case>("Default");
             var itemResult = await dataSource.GetItemAsync(_params.Id, new DataSourceParameters());
             if (!itemResult.WasSuccessful)
@@ -403,8 +408,7 @@ namespace Coalesce.Web.Vue3.Api
             var item = itemResult.Object;
             if (Context.Options.ValidateAttributesForMethods)
             {
-                var _validationResult = ItemResult.FromParameterValidation(
-                    GeneratedForClassViewModel!.MethodByName("UploadAndDownload"), _params, HttpContext.RequestServices);
+                var _validationResult = ItemResult.FromParameterValidation(_method, _params, ServiceProvider);
                 if (!_validationResult.WasSuccessful) return new ItemResult<IntelliTect.Coalesce.Models.IFile>(_validationResult);
             }
 
@@ -432,6 +436,7 @@ namespace Coalesce.Web.Vue3.Api
             [FromForm(Name = "id")] int id,
             System.Collections.Generic.ICollection<Microsoft.AspNetCore.Http.IFormFile> files)
         {
+            var _method = GeneratedForClassViewModel!.MethodByName("UploadImages");
             var _params = new
             {
                 Id = id,
@@ -447,14 +452,13 @@ namespace Coalesce.Web.Vue3.Api
             var item = itemResult.Object;
             if (Context.Options.ValidateAttributesForMethods)
             {
-                var _validationResult = ItemResult.FromParameterValidation(
-                    GeneratedForClassViewModel!.MethodByName("UploadImages"), _params, HttpContext.RequestServices);
+                var _validationResult = ItemResult.FromParameterValidation(_method, _params, ServiceProvider);
                 if (!_validationResult.WasSuccessful) return _validationResult;
             }
 
             await item.UploadImages(
                 Db,
-                _params.Files.Cast<IntelliTect.Coalesce.Models.IFile>().ToList()
+                _params.Files?.Cast<IntelliTect.Coalesce.Models.IFile>()?.ToList()
             );
             var _result = new ItemResult();
             return _result;
@@ -477,6 +481,7 @@ namespace Coalesce.Web.Vue3.Api
             [FromBody] UploadImagesParameters _params
         )
         {
+            var _method = GeneratedForClassViewModel!.MethodByName("UploadImages");
             var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Case, Coalesce.Domain.Case>("Default");
             var itemResult = await dataSource.GetItemAsync(_params.Id, new DataSourceParameters());
             if (!itemResult.WasSuccessful)
@@ -486,14 +491,13 @@ namespace Coalesce.Web.Vue3.Api
             var item = itemResult.Object;
             if (Context.Options.ValidateAttributesForMethods)
             {
-                var _validationResult = ItemResult.FromParameterValidation(
-                    GeneratedForClassViewModel!.MethodByName("UploadImages"), _params, HttpContext.RequestServices);
+                var _validationResult = ItemResult.FromParameterValidation(_method, _params, ServiceProvider);
                 if (!_validationResult.WasSuccessful) return _validationResult;
             }
 
             await item.UploadImages(
                 Db,
-                _params.Files.Cast<IntelliTect.Coalesce.Models.IFile>().ToList()
+                _params.Files?.Cast<IntelliTect.Coalesce.Models.IFile>()?.ToList()
             );
             var _result = new ItemResult();
             return _result;
@@ -510,6 +514,7 @@ namespace Coalesce.Web.Vue3.Api
             [FromForm(Name = "id")] int id,
             [FromForm(Name = "file")] byte[] @file)
         {
+            var _method = GeneratedForClassViewModel!.MethodByName("UploadByteArray");
             var _params = new
             {
                 Id = id,
@@ -525,8 +530,7 @@ namespace Coalesce.Web.Vue3.Api
             var item = itemResult.Object;
             if (Context.Options.ValidateAttributesForMethods)
             {
-                var _validationResult = ItemResult.FromParameterValidation(
-                    GeneratedForClassViewModel!.MethodByName("UploadByteArray"), _params, HttpContext.RequestServices);
+                var _validationResult = ItemResult.FromParameterValidation(_method, _params, ServiceProvider);
                 if (!_validationResult.WasSuccessful) return _validationResult;
             }
 
@@ -555,6 +559,7 @@ namespace Coalesce.Web.Vue3.Api
             [FromBody] UploadByteArrayParameters _params
         )
         {
+            var _method = GeneratedForClassViewModel!.MethodByName("UploadByteArray");
             var dataSource = dataSourceFactory.GetDataSource<Coalesce.Domain.Case, Coalesce.Domain.Case>("Default");
             var itemResult = await dataSource.GetItemAsync(_params.Id, new DataSourceParameters());
             if (!itemResult.WasSuccessful)
@@ -564,8 +569,7 @@ namespace Coalesce.Web.Vue3.Api
             var item = itemResult.Object;
             if (Context.Options.ValidateAttributesForMethods)
             {
-                var _validationResult = ItemResult.FromParameterValidation(
-                    GeneratedForClassViewModel!.MethodByName("UploadByteArray"), _params, HttpContext.RequestServices);
+                var _validationResult = ItemResult.FromParameterValidation(_method, _params, ServiceProvider);
                 if (!_validationResult.WasSuccessful) return _validationResult;
             }
 
@@ -584,6 +588,7 @@ namespace Coalesce.Web.Vue3.Api
         [Authorize]
         public virtual ItemResult<CaseSummaryResponse> GetCaseSummary()
         {
+            var _method = GeneratedForClassViewModel!.MethodByName("GetCaseSummary");
             IncludeTree includeTree = null;
             var _mappingContext = new MappingContext(Context);
             var _methodResult = Coalesce.Domain.Case.GetCaseSummary(

@@ -6,21 +6,26 @@
     <IsPackable>false</IsPackable>
     <Nullable>enable</Nullable>
   </PropertyGroup>
-  
+
   <ItemGroup>
     <ProjectReference Include="..\..\src\IntelliTect.Coalesce\IntelliTect.Coalesce.csproj" />
-    <ProjectReference Include="..\..\src\IntelliTect.Coalesce.AuditLogging\IntelliTect.Coalesce.AuditLogging.csproj" />
+    <ProjectReference
+      Include="..\..\src\IntelliTect.Coalesce.AuditLogging\IntelliTect.Coalesce.AuditLogging.csproj" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.SemanticKernel" />
+    <PackageReference Include="Microsoft.SemanticKernel.Agents.Core" />
+
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" />
 
     <PackageReference Include="GenFu" />
     <PackageReference Include="Bogus" />
 
-    <!-- Necessary because GenFu has a hard dep against NETStandard.Library 1.6, which screws up a lot of things. -->
+    <!-- Necessary because GenFu has a hard dep against NETStandard.Library 1.6, which screws up a
+    lot of things. -->
     <PackageReference Include="NETStandard.Library" />
   </ItemGroup>
-  
+
 </Project>

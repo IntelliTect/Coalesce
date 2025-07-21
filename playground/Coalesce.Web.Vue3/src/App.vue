@@ -32,7 +32,7 @@
         <v-list>
           <v-list-item
             v-for="t in Object.values($metadata.types).filter(
-              (t) => t.type == 'model'
+              (t) => t.type == 'model',
             )"
             :to="'/admin/' + t.name"
             :title="t.displayName"
@@ -47,6 +47,8 @@
         <!-- https://stackoverflow.com/questions/52847979/what-is-router-view-key-route-fullpath -->
         <component ref="routerView" :is="Component" :key="$route.path" />
       </router-view>
+
+      <AIChat title="OmniTool" endpoint="chatAgent" class="right-0" />
     </v-main>
   </v-app>
 </template>
@@ -55,6 +57,7 @@
 import { computed } from "vue";
 import { useTheme } from "vuetify";
 import $metadata from "@/metadata.g";
+import AIChat from "@/components/AIChat.vue";
 
 const theme = useTheme();
 const darkMode = computed({

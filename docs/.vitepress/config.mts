@@ -39,13 +39,13 @@ function getComponentCategory(item: (typeof vuetifyComponents)[0]) {
   return item.text.startsWith("c-admin")
     ? "admin"
     : [
-        "c-display",
-        "c-loader-status",
-        "c-list-range-display",
-        "c-table",
-      ].includes(item.text)
-    ? "display"
-    : "input";
+          "c-display",
+          "c-loader-status",
+          "c-list-range-display",
+          "c-table",
+        ].includes(item.text)
+      ? "display"
+      : "input";
 }
 
 const attributes = fs
@@ -209,6 +209,7 @@ export default defineConfig({
           autoTitle("/topics/audit-logging"),
           autoTitle("/topics/upgrading"),
           autoTitle("/topics/coalesce-swashbuckle"),
+          autoTitle("/topics/template-features"),
 
           autoTitle("/stacks/vue/vue2-to-vue3"),
           {

@@ -1,12 +1,5 @@
 using System.Diagnostics;
-using System.Linq;
-using System.Text.RegularExpressions;
-using IntelliTect.Coalesce.Api.DataSources;
-using IntelliTect.Coalesce.TypeDefinition;
-using IntelliTect.Coalesce.Utilities;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 
 namespace Coalesce.Web.Vue.Controllers

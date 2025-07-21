@@ -329,8 +329,12 @@ public class ExternalLoginModel(
             else
             {
                 photo.Content = content;
-                photo.SetTracking(user.Id);
             }
+#if TrackingBase
+            photo.SetTracking(user.Id);
+#else
+            photo.ModifiedOn = DateTimeOffset.Now;
+#endif
             user.PhotoHash = MD5.HashData(content);
         }
         catch { /* Failure is non-critical */ }

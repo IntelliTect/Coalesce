@@ -74,6 +74,7 @@ namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
         public ICollection<CaseProduct> CaseProducts { get; set; }
 
         [Coalesce]
+        [SemanticKernel("MethodWithJsReservedParamName")]
         public string MethodWithJsReservedParamName(
             Case @case, string function, int var, bool async, string await,
             string[] arguments, string implements, bool delete, bool @true

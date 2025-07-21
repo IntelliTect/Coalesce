@@ -278,6 +278,31 @@ export class Widget {
 }
 
 
+export interface ChatResponse extends Model<typeof metadata.ChatResponse> {
+  response: string | null
+  history: string | null
+}
+export class ChatResponse {
+  
+  /** Mutates the input object and its descendants into a valid ChatResponse implementation. */
+  static convert(data?: Partial<ChatResponse>): ChatResponse {
+    return convertToModel<ChatResponse>(data || {}, metadata.ChatResponse) 
+  }
+  
+  /** Maps the input object and its descendants to a new, valid ChatResponse implementation. */
+  static map(data?: Partial<ChatResponse>): ChatResponse {
+    return mapToModel<ChatResponse>(data || {}, metadata.ChatResponse) 
+  }
+  
+  static [Symbol.hasInstance](x: any) { return x?.$metadata === metadata.ChatResponse; }
+  
+  /** Instantiate a new ChatResponse, optionally basing it on the given data. */
+  constructor(data?: Partial<ChatResponse> | {[k: string]: any}) {
+    Object.assign(this, ChatResponse.map(data || {}));
+  }
+}
+
+
 export interface UserInfo extends Model<typeof metadata.UserInfo> {
   id: string | null
   userName: string | null
@@ -318,6 +343,7 @@ declare module "coalesce-vue/lib/model" {
   interface ModelTypeLookup {
     AuditLog: AuditLog
     AuditLogProperty: AuditLogProperty
+    ChatResponse: ChatResponse
     Role: Role
     Tenant: Tenant
     User: User

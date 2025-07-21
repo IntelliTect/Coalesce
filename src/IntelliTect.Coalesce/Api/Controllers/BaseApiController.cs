@@ -42,6 +42,8 @@ namespace IntelliTect.Coalesce.Api.Controllers
         /// </summary>
         protected CrudContext Context { get; }
 
+        protected IServiceProvider? ServiceProvider => HttpContext.RequestServices;
+
         /// <summary>
         /// For generated controllers, the type that the controller was generated for.
         /// For custom IClassDtos, this is the DTO type. Otherwise, this is the entity type.
@@ -114,7 +116,7 @@ namespace IntelliTect.Coalesce.Api.Controllers
 
             if (kind == SaveKind.Create && !GeneratedForClassViewModel.SecurityInfo.IsCreateAllowed(User))
             {
-                Response.StatusCode = User.Identity?.IsAuthenticated == true 
+                Response.StatusCode = User.Identity?.IsAuthenticated == true
                     ? (int)HttpStatusCode.Forbidden
                     : (int)HttpStatusCode.Unauthorized;
                 return $"Creation of {GeneratedForClassViewModel.DisplayName} items not allowed.";
@@ -199,7 +201,7 @@ namespace IntelliTect.Coalesce.Api.Controllers
                         }
 
                         if (root is null &&
-                            item.Root && 
+                            item.Root &&
                             item.Type.Equals(GeneratedForClassViewModel?.ClientTypeName, StringComparison.OrdinalIgnoreCase)
                         )
                         {
@@ -235,35 +237,35 @@ namespace IntelliTect.Coalesce.Api.Controllers
                             var item = itemsToSave[i];
 
                             if (item.Refs is not null) foreach (var reference in item.Refs)
-                            {
-                                if (reference.Key == item.PrimaryRefName)
                                 {
-                                    // This is the reference identifier for this entity.
-                                    // It doesn't need to resolve to anything, so skip it.
-                                    continue;
-                                }
+                                    if (reference.Key == item.PrimaryRefName)
+                                    {
+                                        // This is the reference identifier for this entity.
+                                        // It doesn't need to resolve to anything, so skip it.
+                                        continue;
+                                    }
 
-                                var referencedModelProp = item.DeclaredForClassViewModel.PropertyByName(reference.Key);
-                                var referencedDtoProp = item.ParamDtoClassViewModel.PropertyByName(reference.Key);
-                                if (referencedDtoProp is null || referencedModelProp is not { Role: PropertyRole.ForeignKey, IsClientWritable: true })
-                                {
-                                    // Ignore invalid refs. We only need to resolve writable foreign keys.
-                                    continue;
-                                }
+                                    var referencedModelProp = item.DeclaredForClassViewModel.PropertyByName(reference.Key);
+                                    var referencedDtoProp = item.ParamDtoClassViewModel.PropertyByName(reference.Key);
+                                    if (referencedDtoProp is null || referencedModelProp is not { Role: PropertyRole.ForeignKey, IsClientWritable: true })
+                                    {
+                                        // Ignore invalid refs. We only need to resolve writable foreign keys.
+                                        continue;
+                                    }
 
-                                // This is a FK reference to another entity in the operation.
-                                // See if we can resolve it.
-                                var principalItem = dto.RefsLookup.GetValueOrDefault(reference.Value);
-                                var principalKey = principalItem?.PrimaryKey;
-                                if (principalKey is null)
-                                {
-                                    // Can't resolve this entity yet.
-                                    goto nextItem;
-                                }
+                                    // This is a FK reference to another entity in the operation.
+                                    // See if we can resolve it.
+                                    var principalItem = dto.RefsLookup.GetValueOrDefault(reference.Value);
+                                    var principalKey = principalItem?.PrimaryKey;
+                                    if (principalKey is null)
+                                    {
+                                        // Can't resolve this entity yet.
+                                        goto nextItem;
+                                    }
 
-                                // Update the DTO with the new FK.
-                                referencedDtoProp.PropertyInfo.SetValue(item.Data, principalKey);
-                            }
+                                    // Update the DTO with the new FK.
+                                    referencedDtoProp.PropertyInfo.SetValue(item.Data, principalKey);
+                                }
 
                             // If we made it here, there were no refs preventing a save.
                             // Save the entity. This will update `item.Dto`/`item.Data`
@@ -277,7 +279,7 @@ namespace IntelliTect.Coalesce.Api.Controllers
                             itemsToSave.RemoveAt(i);
                             i--;
 
-                            nextItem:;
+                        nextItem:;
                         }
 
                         if (iterationStartCount == itemsToSave.Count)
@@ -313,7 +315,7 @@ namespace IntelliTect.Coalesce.Api.Controllers
                     }
 
                     var refMap = dto.Save
-                        .Where(i => i.PrimaryRef.HasValue)    
+                        .Where(i => i.PrimaryRef.HasValue)
                         .ToDictionary(i => i.PrimaryRef!.Value, i => i.PrimaryKey);
                     if (root?.PrimaryKey is null)
                     {

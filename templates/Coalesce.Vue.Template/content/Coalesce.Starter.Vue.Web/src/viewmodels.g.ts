@@ -288,6 +288,26 @@ export class WidgetListViewModel extends ListViewModel<$models.Widget, $apiClien
 }
 
 
+export class AIAgentServiceViewModel extends ServiceViewModel<typeof $metadata.AIAgentService, $apiClients.AIAgentServiceApiClient> {
+  
+  /** A chat agent that directly uses all kernel plugin tools. */
+  public get chatAgent() {
+    const chatAgent = this.$apiClient.$makeCaller(
+      this.$metadata.methods.chatAgent,
+      (c, history: string | null, prompt: string | null) => c.chatAgent(history, prompt),
+      () => ({history: null as string | null, prompt: null as string | null, }),
+      (c, args) => c.chatAgent(args.history, args.prompt))
+    
+    Object.defineProperty(this, 'chatAgent', {value: chatAgent});
+    return chatAgent
+  }
+  
+  constructor() {
+    super($metadata.AIAgentService, new $apiClients.AIAgentServiceApiClient())
+  }
+}
+
+
 export class SecurityServiceViewModel extends ServiceViewModel<typeof $metadata.SecurityService, $apiClients.SecurityServiceApiClient> {
   
   public get whoAmI() {
@@ -326,6 +346,7 @@ const listViewModelTypeLookup = ListViewModel.typeLookup = {
   Widget: WidgetListViewModel,
 }
 const serviceViewModelTypeLookup = ServiceViewModel.typeLookup = {
+  AIAgentService: AIAgentServiceViewModel,
   SecurityService: SecurityServiceViewModel,
 }
 

@@ -115,6 +115,12 @@ namespace IntelliTect.Coalesce.Utilities
             return returnedString.ToString();
         }
 
+        /// <summary>
+        /// Converts a PascalCase string to snake_case.
+        /// </summary>
+        [return: System.Diagnostics.CodeAnalysis.NotNullIfNotNull("input")]
+        public static string? ToSnakeCase(this string? str) => str?.ToProperCase().Replace(' ', '_').ToLower();
+
         [return: System.Diagnostics.CodeAnalysis.NotNullIfNotNull("str")]
         public static string? EscapeStringLiteralForLinqDynamic(this string? str) => str?
             .Replace(@"\", @"\\")

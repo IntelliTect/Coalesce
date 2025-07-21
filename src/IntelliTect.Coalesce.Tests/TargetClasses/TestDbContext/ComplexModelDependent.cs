@@ -10,6 +10,7 @@
         public string Name { get; set; }
 
         [Coalesce]
+        [SemanticKernel("SameMethodNameAsMethodOnDifferentType")]
         public CaseDtoStandalone SameMethodNameAsMethodOnDifferentType(CaseDtoStandalone input) => input;
     }
 }

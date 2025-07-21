@@ -10,6 +10,7 @@
 
 ## Features
 
+- Added support for generating Semantic Kernel plugins from CRUD models and custom methods via the new `[SemanticKernel]` attribute. Semantic Kernel is a Microsoft framework that allows you to create AI Agents that can call tool functions provided by your application. This feature is in beta and may undergo breaking changes in non-major releases.
 - All endpoints with bodies are now send as JSON instead of form data, with the exception of endpoints that have file parameter(s) and no other non-scalar parameters.
 - Coalesce's Vite middleware (`UseViteDevelopmentServer`) now checks if your installed NPM packages match what's defined in package.json and package-lock.json, presenting an in-browser warning if they do not. This helps avoid forgetting to reinstall packages after pulling down changes in multi-developer projects.
 - Const fields in C#, if annotated with `[Coalesce]`, are now emitted into generated TypeScript.

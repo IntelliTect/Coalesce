@@ -6,9 +6,9 @@ Behaves the same as [c-display](/stacks/vue/coalesce-vue-vuetify/components/c-di
 
 <!-- MARKER:summary-end -->
 
-Links for collections are resolved from [vue-router](https://router.vuejs.org/) with a route name of ``coalesce-admin-list``, a ``type`` route param containing the name of the collection's type, and a query parameter ``filter.<foreign key name>`` with a value of the primary key of the owner of the collection. This route is expected to resolve to a [c-admin-table-page](/stacks/vue/coalesce-vue-vuetify/components/c-admin-table-page.md), which is setup by default by the template outlined in [Getting Started with Vue](/stacks/vue/getting-started.md).
+Links for collections are resolved from [vue-router](https://router.vuejs.org/) with a route name of ``coalesce-admin-list``, a ``type`` route param containing the name of the collection's type, and a query parameter ``filter.<foreign key name>`` with a value of the primary key of the owner of the collection. This route is expected to resolve to a [c-admin-table-page](/stacks/vue/coalesce-vue-vuetify/components/c-admin-table-page.md), which is setup by default by the [Coalesce project template](/stacks/vue/getting-started.md).
 
-Links for single models are resolved from [vue-router](https://router.vuejs.org/) with a route name of ``coalesce-admin-item``, a ``type`` route param containing the name of the model's type, and a ``id`` route param containing the object's primary key. This route is expected to resolve to a [c-admin-editor-page](/stacks/vue/coalesce-vue-vuetify/components/c-admin-editor-page.md), which is setup by default by the template outlined in [Getting Started with Vue](/stacks/vue/getting-started.md).
+Links for single models are resolved from [vue-router](https://router.vuejs.org/) with a route name of ``coalesce-admin-item``, a ``type`` route param containing the name of the model's type, and a ``id`` route param containing the object's primary key. This route is expected to resolve to a [c-admin-editor-page](/stacks/vue/coalesce-vue-vuetify/components/c-admin-editor-page.md), which is setup by default by the [Coalesce project template](/stacks/vue/getting-started.md).
 
 
 ## Examples

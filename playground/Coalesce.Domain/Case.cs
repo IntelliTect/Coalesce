@@ -256,8 +256,6 @@ namespace Coalesce.Domain
         [Coalesce]
         public static CaseSummary GetCaseSummary(AppDbContext db)
         {
-            int[] a = [1, 2, 3, 4, 5, 6, 7, 8];
-
             return CaseSummary.GetCaseSummary(db);
         }
 
@@ -266,7 +264,7 @@ namespace Coalesce.Domain
             public bool UserCanRead(IMappingContext context, string propertyName, Case model)
             {
                 // Nonsense arbitrary logic
-                return db.Cases.Any() && propertyName != null;
+                return propertyName != null && db is not null;
             }
 
             public bool UserCanWrite(IMappingContext context, string propertyName, Case? model, object? incomingValue)

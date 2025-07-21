@@ -45,7 +45,7 @@ public class ProductDataSource : StandardDataSource<Product, AppDbContext>
 {
     public ProductDataSource(CrudContext<AppDbContext> context) : base(context) { }
 
-    [SemanticKernel("Filter by product category")]
+    [Coalesce, SemanticKernel("Filter by product category")]
     public string Category { get; set; }
 }
 ```
@@ -55,6 +55,7 @@ public class ProductDataSource : StandardDataSource<Product, AppDbContext>
 ```csharp
 public class Person
 {
+    // Can also annotate with [Coalesce] to expose via HTTP.
     [SemanticKernel("Changes a person's first name, and optionally assigns a title if they don't yet have one.")]
     public ItemResult<Person> ChangeFirstName(AppDbContext db, string firstName, Titles? title)
     {

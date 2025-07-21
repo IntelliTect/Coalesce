@@ -2,97 +2,93 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 #nullable enable
 
-namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
+namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext;
+
+public class StringIdentity
 {
-    public class StringIdentity
-    {
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public string StringIdentityId { get; set; } = null!;
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public string StringIdentityId { get; set; } = null!;
 
-        public string? ParentId { get; set; }
-        // Arbitrary reference navigation (optional)
-        public StringIdentity Parent { get; set; } = null!;
+    public string? ParentId { get; set; }
+    // Arbitrary reference navigation (optional)
+    public StringIdentity Parent { get; set; } = null!;
 
-        public string ParentReqId { get; set; } = null!;
-        // Arbitrary reference navigation (req)
-        public StringIdentity? ParentReq { get; set; }
+    public string ParentReqId { get; set; } = null!;
+    // Arbitrary reference navigation (req)
+    public StringIdentity? ParentReq { get; set; }
 
-        // Artbirary collection navigation
-        [InverseProperty(nameof(Parent))]
-        public ICollection<StringIdentity> Children { get; set; } = null!;
-    }
+    // Artbirary collection navigation
+    [InverseProperty(nameof(Parent))]
+    public ICollection<StringIdentity> Children { get; set; } = null!;
+}
 
 
 #nullable disable
 
-    public partial class StringIdentityDtoGen : SparseDto, IGeneratedParameterDto<StringIdentity>
+public partial class StringIdentityDtoGen : SparseDto, IGeneratedParameterDto<StringIdentity>
+{
+    public StringIdentityDtoGen() { }
+
+    private string _StringIdentityId;
+    private string _ParentId;
+    private string _ParentReqId;
+    private StringIdentityDtoGen _Parent;
+    private StringIdentityDtoGen _ParentReq;
+    private ICollection<StringIdentityDtoGen> _Children;
+
+    public string StringIdentityId
     {
-        public StringIdentityDtoGen() { }
+        get => _StringIdentityId;
+        set { _StringIdentityId = value; Changed(nameof(StringIdentityId)); }
+    }
 
-        private string _StringIdentityId;
-        private string _ParentId;
-        private string _ParentReqId;
-        private StringIdentityDtoGen _Parent;
-        private StringIdentityDtoGen _ParentReq;
-        private ICollection<StringIdentityDtoGen> _Children;
+    public string ParentId
+    {
+        get => _ParentId;
+        set { _ParentId = value; Changed(nameof(ParentId)); }
+    }
 
-        public string StringIdentityId
-        {
-            get => _StringIdentityId;
-            set { _StringIdentityId = value; Changed(nameof(StringIdentityId)); }
-        }
+    public StringIdentityDtoGen Parent
+    {
+        get => _Parent;
+        set { _Parent = value; Changed(nameof(Parent)); }
+    }
 
-        public string ParentId
-        {
-            get => _ParentId;
-            set { _ParentId = value; Changed(nameof(ParentId)); }
-        }
+    public string ParentReqId
+    {
+        get => _ParentReqId;
+        set { _ParentReqId = value; Changed(nameof(ParentReqId)); }
+    }
 
-        public StringIdentityDtoGen Parent
-        {
-            get => _Parent;
-            set { _Parent = value; Changed(nameof(Parent)); }
-        }
+    public StringIdentityDtoGen ParentReq
+    {
+        get => _ParentReq;
+        set { _ParentReq = value; Changed(nameof(ParentReq)); }
+    }
 
-        public string ParentReqId
-        {
-            get => _ParentReqId;
-            set { _ParentReqId = value; Changed(nameof(ParentReqId)); }
-        }
+    public ICollection<StringIdentityDtoGen> Children
+    {
+        get => _Children;
+        set { _Children = value; Changed(nameof(Children)); }
+    }
 
-        public StringIdentityDtoGen ParentReq
-        {
-            get => _ParentReq;
-            set { _ParentReq = value; Changed(nameof(ParentReq)); }
-        }
+    /// <summary>
+    /// Map from the current DTO instance to the domain object.
+    /// </summary>
+    public void MapTo(StringIdentity entity, IMappingContext context)
+        => throw new NotImplementedException(
+            "This 'generated dto' is actually hand-written for these tests. Mapping methods are unused.");
 
-        public ICollection<StringIdentityDtoGen> Children
-        {
-            get => _Children;
-            set { _Children = value; Changed(nameof(Children)); }
-        }
-
-        /// <summary>
-        /// Map from the current DTO instance to the domain object.
-        /// </summary>
-        public void MapTo(StringIdentity entity, IMappingContext context)
-            => throw new NotImplementedException(
-                "This 'generated dto' is actually hand-written for these tests. Mapping methods are unused.");
-
-        /// <summary>
-        /// Map from the current DTO instance to a new instance of the domain object.
-        /// </summary>
-        public StringIdentity MapToNew(IMappingContext context)
-        {
-            var entity = new StringIdentity();
-            MapTo(entity, context);
-            return entity;
-        }
+    /// <summary>
+    /// Map from the current DTO instance to a new instance of the domain object.
+    /// </summary>
+    public StringIdentity MapToNew(IMappingContext context)
+    {
+        var entity = new StringIdentity();
+        MapTo(entity, context);
+        return entity;
     }
 }

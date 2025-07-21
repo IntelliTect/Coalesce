@@ -8,100 +8,99 @@ using System.Linq;
 using Microsoft.Build.Evaluation;
 using Microsoft.VisualStudio.Web.CodeGeneration.Contracts.ProjectModel;
 
-namespace IntelliTect.Coalesce.CodeGeneration.Analysis.MsBuild
+namespace IntelliTect.Coalesce.CodeGeneration.Analysis.MsBuild;
+
+public static class ProjectReferenceInformationProvider
 {
-    public static class ProjectReferenceInformationProvider
+    public static IEnumerable<ProjectReferenceInformation> GetProjectReferenceInformation(
+        string rootProjectPath,
+        IEnumerable<string> projectReferences)
     {
-        public static IEnumerable<ProjectReferenceInformation> GetProjectReferenceInformation(
-            string rootProjectPath,
-            IEnumerable<string> projectReferences)
+        var projectReferenceInformation = new List<ProjectReferenceInformation>();
+        if (projectReferences == null)
         {
-            var projectReferenceInformation = new List<ProjectReferenceInformation>();
-            if (projectReferences == null)
-            {
-                return projectReferenceInformation;
-            }
-
-            var referencePaths = new Queue<string>(
-                projectReferences.Select(path => EnsurePathRooted(path, Path.GetDirectoryName(rootProjectPath))));
-            var addedProjects = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
-            {
-                rootProjectPath
-            };
-
-            var rootProjDir = Path.GetDirectoryName(rootProjectPath);
-            while (referencePaths.Count > 0)
-            {
-                var currentProjectPath = referencePaths.Dequeue();
-
-                if (addedProjects.Contains(currentProjectPath))
-                {
-                    //Already added, skip.
-                    continue;
-                }
-
-                addedProjects.Add(currentProjectPath);
-                // If the project is already loaded, it just returns the loaded project.
-                // If it is not already loaded, it will load using global properties, toolsets etc. and return.
-                var currentProject = ProjectCollection.GlobalProjectCollection.LoadProject(currentProjectPath);
-                if (currentProject == null)
-                {
-                    continue;
-                }
-
-                var referenceInfo = GetProjectInformation(currentProject);
-                projectReferenceInformation.Add(referenceInfo);
-
-                var currentProjectReferences = GetProjectReferences(currentProject);
-                foreach (var prjRef in currentProjectReferences)
-                {
-                    referencePaths.Enqueue(prjRef);
-                }
-            }
-
             return projectReferenceInformation;
         }
 
-        private static string EnsurePathRooted(string targetPath, string basePath)
+        var referencePaths = new Queue<string>(
+            projectReferences.Select(path => EnsurePathRooted(path, Path.GetDirectoryName(rootProjectPath))));
+        var addedProjects = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
         {
-            if (string.IsNullOrEmpty(targetPath))
+            rootProjectPath
+        };
+
+        var rootProjDir = Path.GetDirectoryName(rootProjectPath);
+        while (referencePaths.Count > 0)
+        {
+            var currentProjectPath = referencePaths.Dequeue();
+
+            if (addedProjects.Contains(currentProjectPath))
             {
-                throw new ArgumentNullException(nameof(targetPath));
+                //Already added, skip.
+                continue;
             }
-            return Path.IsPathRooted(targetPath)
-                ? Path.GetFullPath(targetPath)
-                : Path.GetFullPath(Path.Combine(basePath, targetPath));
-        }
 
-        private static IEnumerable<string> GetProjectReferences(Project project)
-        {
-            return project.GetItems("ProjectReference")
-                .Select(i => i.EvaluatedInclude)
-                .Select(path => EnsurePathRooted(path, project.DirectoryPath));
-        }
-
-        private static ProjectReferenceInformation GetProjectInformation(Project project)
-        {
-            var compileItems = project.GetItems("Compile").Select(i => i.EvaluatedInclude);
-            var fullPath = project.FullPath;
-            var name = project.GetProperty("ProjectName")
-                ?.EvaluatedValue
-                ?? Path.GetFileNameWithoutExtension(fullPath);
-
-            var assemblyPath = project.GetProperty("TargetPath")
-                ?.EvaluatedValue;
-
-            var assemblyName = string.IsNullOrEmpty(assemblyPath)
-                ? name
-                : Path.GetFileNameWithoutExtension(assemblyPath);
-
-            return new ProjectReferenceInformation()
+            addedProjects.Add(currentProjectPath);
+            // If the project is already loaded, it just returns the loaded project.
+            // If it is not already loaded, it will load using global properties, toolsets etc. and return.
+            var currentProject = ProjectCollection.GlobalProjectCollection.LoadProject(currentProjectPath);
+            if (currentProject == null)
             {
-                ProjectName = name,
-                AssemblyName = assemblyName,
-                CompilationItems = compileItems,
-                FullPath = fullPath
-            };
+                continue;
+            }
+
+            var referenceInfo = GetProjectInformation(currentProject);
+            projectReferenceInformation.Add(referenceInfo);
+
+            var currentProjectReferences = GetProjectReferences(currentProject);
+            foreach (var prjRef in currentProjectReferences)
+            {
+                referencePaths.Enqueue(prjRef);
+            }
         }
+
+        return projectReferenceInformation;
+    }
+
+    private static string EnsurePathRooted(string targetPath, string basePath)
+    {
+        if (string.IsNullOrEmpty(targetPath))
+        {
+            throw new ArgumentNullException(nameof(targetPath));
+        }
+        return Path.IsPathRooted(targetPath)
+            ? Path.GetFullPath(targetPath)
+            : Path.GetFullPath(Path.Combine(basePath, targetPath));
+    }
+
+    private static IEnumerable<string> GetProjectReferences(Project project)
+    {
+        return project.GetItems("ProjectReference")
+            .Select(i => i.EvaluatedInclude)
+            .Select(path => EnsurePathRooted(path, project.DirectoryPath));
+    }
+
+    private static ProjectReferenceInformation GetProjectInformation(Project project)
+    {
+        var compileItems = project.GetItems("Compile").Select(i => i.EvaluatedInclude);
+        var fullPath = project.FullPath;
+        var name = project.GetProperty("ProjectName")
+            ?.EvaluatedValue
+            ?? Path.GetFileNameWithoutExtension(fullPath);
+
+        var assemblyPath = project.GetProperty("TargetPath")
+            ?.EvaluatedValue;
+
+        var assemblyName = string.IsNullOrEmpty(assemblyPath)
+            ? name
+            : Path.GetFileNameWithoutExtension(assemblyPath);
+
+        return new ProjectReferenceInformation()
+        {
+            ProjectName = name,
+            AssemblyName = assemblyName,
+            CompilationItems = compileItems,
+            FullPath = fullPath
+        };
     }
 }

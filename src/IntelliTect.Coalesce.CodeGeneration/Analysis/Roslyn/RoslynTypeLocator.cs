@@ -8,278 +8,275 @@ using System.IO;
 using IntelliTect.Coalesce.TypeDefinition;
 using IntelliTect.Coalesce.CodeGeneration.Analysis.Base;
 using Microsoft.VisualStudio.Web.CodeGeneration.Utils;
-using System.Threading.Tasks;
-using System.Collections.Concurrent;
 using Microsoft.CodeAnalysis.CSharp;
 
-namespace IntelliTect.Coalesce.CodeGeneration.Analysis.Roslyn
+namespace IntelliTect.Coalesce.CodeGeneration.Analysis.Roslyn;
+
+public class RoslynTypeLocator : TypeLocator
 {
-    public class RoslynTypeLocator : TypeLocator
+    private readonly Workspace _projectWorkspace;
+    private readonly RoslynProjectContext _projectContext;
+
+    private Compilation _compilation;
+
+    public RoslynTypeLocator(Workspace projectWorkspace, RoslynProjectContext projectContext)
     {
-        private readonly Workspace _projectWorkspace;
-        private readonly RoslynProjectContext _projectContext;
+        _projectWorkspace = projectWorkspace ?? throw new ArgumentNullException(nameof(projectWorkspace));
+        _projectContext = projectContext;
+    }
 
-        private Compilation _compilation;
+    private Compilation GetProjectCompilation()
+    {
+        if (_compilation != null) return _compilation;
 
-        public RoslynTypeLocator(Workspace projectWorkspace, RoslynProjectContext projectContext)
+        var projectFileName = Path.GetFileName(_projectContext.ProjectFilePath);
+        var project = _projectWorkspace.CurrentSolution.Projects
+            .SingleOrDefault(p => Path.GetFileName(p.FilePath) == projectFileName);
+
+        if (project == null)
         {
-            _projectWorkspace = projectWorkspace ?? throw new ArgumentNullException(nameof(projectWorkspace));
-            _projectContext = projectContext;
+            throw new FileNotFoundException($"Couldn't find project in workspace with project file name {projectFileName}");
         }
 
-        private Compilation GetProjectCompilation()
+        var parseOptions = ((CSharpParseOptions)project.ParseOptions)
+            .WithPreprocessorSymbols(_projectContext.MsBuildProjectContext.DefineConstants.Split(new[] { ';', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries));
+
+        if (_projectContext.LangVersion != null)
         {
-            if (_compilation != null) return _compilation;
-
-            var projectFileName = Path.GetFileName(_projectContext.ProjectFilePath);
-            var project = _projectWorkspace.CurrentSolution.Projects
-                .SingleOrDefault(p => Path.GetFileName(p.FilePath) == projectFileName);
-
-            if (project == null)
-            {
-                throw new FileNotFoundException($"Couldn't find project in workspace with project file name {projectFileName}");
-            }
-
-            var parseOptions = ((CSharpParseOptions)project.ParseOptions)
-                .WithPreprocessorSymbols(_projectContext.MsBuildProjectContext.DefineConstants.Split(new[] { ';', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries));
-
-            if (_projectContext.LangVersion != null)
-            {
-                parseOptions = parseOptions.WithLanguageVersion(_projectContext.LangVersion.Value);
-            }
-
-            var compilationOptions = (CSharpCompilationOptions)project.CompilationOptions;
-            if (Enum.TryParse(_projectContext.MsBuildProjectContext.Nullable, true, out NullableContextOptions nullable))
-            {
-                compilationOptions = compilationOptions.WithNullableContextOptions(nullable);
-            }
-
-            _compilation = project
-                .WithParseOptions(parseOptions)
-                .WithCompilationOptions(compilationOptions)
-                .WithMetadataReferences(_projectContext.GetMetadataReferences())
-                .GetCompilationAsync().Result;
-
-            return _compilation;
+            parseOptions = parseOptions.WithLanguageVersion(_projectContext.LangVersion.Value);
         }
 
-        public IEnumerable<string> GetDiagnostics()
+        var compilationOptions = (CSharpCompilationOptions)project.CompilationOptions;
+        if (Enum.TryParse(_projectContext.MsBuildProjectContext.Nullable, true, out NullableContextOptions nullable))
         {
-            var compilation = GetProjectCompilation();
-
-            var diagnostics = _compilation
-                .GetParseDiagnostics()
-                .Concat(_compilation.GetDeclarationDiagnostics());
-
-            HashSet<string> ignored = [
-                "CS8795" // Partial method '' must have an implementation part because it has accessibility modifiers. (regex source generators).
-            ];
-
-            return diagnostics
-                .Where(d => d.Severity == DiagnosticSeverity.Error && !ignored.Contains(d.Descriptor.Id))
-                .Select(d => d.ToString());
+            compilationOptions = compilationOptions.WithNullableContextOptions(nullable);
         }
 
-        private List<INamedTypeSymbol> _allTypes;
+        _compilation = project
+            .WithParseOptions(parseOptions)
+            .WithCompilationOptions(compilationOptions)
+            .WithMetadataReferences(_projectContext.GetMetadataReferences())
+            .GetCompilationAsync().Result;
 
-        public List<INamedTypeSymbol> GetAllTypes()
+        return _compilation;
+    }
+
+    public IEnumerable<string> GetDiagnostics()
+    {
+        var compilation = GetProjectCompilation();
+
+        var diagnostics = _compilation
+            .GetParseDiagnostics()
+            .Concat(_compilation.GetDeclarationDiagnostics());
+
+        HashSet<string> ignored = [
+            "CS8795" // Partial method '' must have an implementation part because it has accessibility modifiers. (regex source generators).
+        ];
+
+        return diagnostics
+            .Where(d => d.Severity == DiagnosticSeverity.Error && !ignored.Contains(d.Descriptor.Id))
+            .Select(d => d.ToString());
+    }
+
+    private List<INamedTypeSymbol> _allTypes;
+
+    public List<INamedTypeSymbol> GetAllTypes()
+    {
+        if (_allTypes != null) return _allTypes;
+        
+        var compilation = GetProjectCompilation();
+
+        var visitor = new SymbolDiscoveryVisitor();
+        compilation.Assembly.GlobalNamespace.Accept(visitor);
+        return _allTypes = visitor.Discovered;
+    }
+
+    private class SymbolDiscoveryVisitor : SymbolVisitor
+    {
+        public List<INamedTypeSymbol> Discovered { get; } = new List<INamedTypeSymbol>();
+
+        public override void VisitNamespace(INamespaceSymbol symbol)
         {
-            if (_allTypes != null) return _allTypes;
-            
-            var compilation = GetProjectCompilation();
-
-            var visitor = new SymbolDiscoveryVisitor();
-            compilation.Assembly.GlobalNamespace.Accept(visitor);
-            return _allTypes = visitor.Discovered;
+            foreach (var member in symbol.GetMembers()) member.Accept(this);
         }
 
-        private class SymbolDiscoveryVisitor : SymbolVisitor
+        public override void VisitNamedType(INamedTypeSymbol symbol)
         {
-            public List<INamedTypeSymbol> Discovered { get; } = new List<INamedTypeSymbol>();
-
-            public override void VisitNamespace(INamespaceSymbol symbol)
-            {
-                foreach (var member in symbol.GetMembers()) member.Accept(this);
-            }
-
-            public override void VisitNamedType(INamedTypeSymbol symbol)
-            {
-                Discovered.Add(symbol);
-                foreach (var childSymbol in symbol.GetTypeMembers()) childSymbol.Accept(this);
-            }
+            Discovered.Add(symbol);
+            foreach (var childSymbol in symbol.GetTypeMembers()) childSymbol.Accept(this);
         }
+    }
 
-        /*
-         * This is currently quite flawed - getting missing method exceptions for methods that clearly exist
-         * when trying to instantiate types in the loaded assembly.
-         * The intent behind this was to instantiate the DbContext to get EF's model metadata and use that
-         * for code generation, since its going to be more correct & consistent than our guesses about the data model.
-         
-        public Assembly GetAssembly()
+    /*
+     * This is currently quite flawed - getting missing method exceptions for methods that clearly exist
+     * when trying to instantiate types in the loaded assembly.
+     * The intent behind this was to instantiate the DbContext to get EF's model metadata and use that
+     * for code generation, since its going to be more correct & consistent than our guesses about the data model.
+     
+    public Assembly GetAssembly()
+    {
+        //return null;
+        var projectFileName = Path.GetFileName(_projectContext.ProjectFilePath);
+        var project = _projectWorkspace.CurrentSolution.Projects
+            .SingleOrDefault(p => Path.GetFileName(p.FilePath) == projectFileName);
+        
+        using (var assemblyStream = new MemoryStream())
         {
-            //return null;
-            var projectFileName = Path.GetFileName(_projectContext.ProjectFilePath);
-            var project = _projectWorkspace.CurrentSolution.Projects
-                .SingleOrDefault(p => Path.GetFileName(p.FilePath) == projectFileName);
-            
-            using (var assemblyStream = new MemoryStream())
+            using (var pdbStream = new MemoryStream())
             {
-                using (var pdbStream = new MemoryStream())
+                var result = GetProjectCompilation().Emit(
+                    assemblyStream,
+                    pdbStream);
+
+                if (!result.Success)
                 {
-                    var result = GetProjectCompilation().Emit(
-                        assemblyStream,
-                        pdbStream);
+                    throw new TypeLoadException($"Couldn't emit assembly for project {_projectContext.ProjectFilePath}");
+                }
 
-                    if (!result.Success)
+                assemblyStream.Seek(0, SeekOrigin.Begin);
+                pdbStream.Seek(0, SeekOrigin.Begin);
+
+                //var domain = AppDomain.CreateDomain($"{_projectContext.ProjectFilePath}-compilation");
+                //domain.ExecuteAssembly(project.OutputFilePath);
+                //foreach (var file in _projectContext.CompilationAssemblies)
+                //{
+                //    try
+                //    {
+                //        domain.Load(AssemblyName.GetAssemblyName(file.ResolvedPath));
+                //    }
+                //    catch { }
+                //}
+
+                AppDomain.CurrentDomain.AssemblyLoad += (sender, args) => Console.WriteLine(args.LoadedAssembly.ToString());
+
+                AppDomain.CurrentDomain.AssemblyResolve += (sender, args) =>
+                {
+                    var name = new AssemblyName(args.Name);
+                    var match = _projectContext.CompilationAssemblies.FirstOrDefault(a => AssemblyName.GetAssemblyName(a.ResolvedPath).Name == name.Name);
+                    if (match != null)
                     {
-                        throw new TypeLoadException($"Couldn't emit assembly for project {_projectContext.ProjectFilePath}");
+                        return Assembly.LoadFrom(match.ResolvedPath);
                     }
+                    return null;
+                };
 
-                    assemblyStream.Seek(0, SeekOrigin.Begin);
-                    pdbStream.Seek(0, SeekOrigin.Begin);
+                var assembly = Assembly.Load(assemblyStream.ToArray(), pdbStream.ToArray());
+                //var assembly = Assembly.LoadFrom(project.OutputFilePath);
+                var contextType = assembly.GetType("Intellitect.Myriad.Data.AppDbContext");
+                var instance = Activator.CreateInstance(contextType);
 
-                    //var domain = AppDomain.CreateDomain($"{_projectContext.ProjectFilePath}-compilation");
-                    //domain.ExecuteAssembly(project.OutputFilePath);
-                    //foreach (var file in _projectContext.CompilationAssemblies)
-                    //{
-                    //    try
-                    //    {
-                    //        domain.Load(AssemblyName.GetAssemblyName(file.ResolvedPath));
-                    //    }
-                    //    catch { }
-                    //}
-
-                    AppDomain.CurrentDomain.AssemblyLoad += (sender, args) => Console.WriteLine(args.LoadedAssembly.ToString());
-
-                    AppDomain.CurrentDomain.AssemblyResolve += (sender, args) =>
-                    {
-                        var name = new AssemblyName(args.Name);
-                        var match = _projectContext.CompilationAssemblies.FirstOrDefault(a => AssemblyName.GetAssemblyName(a.ResolvedPath).Name == name.Name);
-                        if (match != null)
-                        {
-                            return Assembly.LoadFrom(match.ResolvedPath);
-                        }
-                        return null;
-                    };
-
-                    var assembly = Assembly.Load(assemblyStream.ToArray(), pdbStream.ToArray());
-                    //var assembly = Assembly.LoadFrom(project.OutputFilePath);
-                    var contextType = assembly.GetType("Intellitect.Myriad.Data.AppDbContext");
-                    var instance = Activator.CreateInstance(contextType);
-
-                    return assembly;
-                }
+                return assembly;
             }
         }
-        */
+    }
+    */
 
-        public static RoslynTypeLocator FromProjectContext(RoslynProjectContext project)
+    public static RoslynTypeLocator FromProjectContext(RoslynProjectContext project)
+    {
+        var workspace = new RoslynWorkspace(project.MsBuildProjectContext, project.MsBuildProjectContext.Configuration);
+
+        workspace.WorkspaceFailed += (object sender, WorkspaceDiagnosticEventArgs e) =>
         {
-            var workspace = new RoslynWorkspace(project.MsBuildProjectContext, project.MsBuildProjectContext.Configuration);
-
-            workspace.WorkspaceFailed += (object sender, WorkspaceDiagnosticEventArgs e) =>
+            if (e.Diagnostic.Kind == WorkspaceDiagnosticKind.Failure)
             {
-                if (e.Diagnostic.Kind == WorkspaceDiagnosticKind.Failure)
+
+                // NB: Ultimately an InvalidCast happens with the TypeScript FindConfigFilesTask (compiled 
+                //     against v4.0 of Microsoft.Build) trying to cast to a ITask in Microsoft.Build v15.0 
+                //     Therefore we must ignore an empty error message.
+                Debug.WriteLine(e.Diagnostic.Message);
+                if (!e.Diagnostic.Message.Contains(
+                    "Unable to cast object of type 'Microsoft.CodeAnalysis.BuildTasks.Csc' to type 'Microsoft.Build.Framework.ITask'."))
                 {
-
-                    // NB: Ultimately an InvalidCast happens with the TypeScript FindConfigFilesTask (compiled 
-                    //     against v4.0 of Microsoft.Build) trying to cast to a ITask in Microsoft.Build v15.0 
-                    //     Therefore we must ignore an empty error message.
-                    Debug.WriteLine(e.Diagnostic.Message);
-                    if (!e.Diagnostic.Message.Contains(
-                        "Unable to cast object of type 'Microsoft.CodeAnalysis.BuildTasks.Csc' to type 'Microsoft.Build.Framework.ITask'."))
-                    {
-                        throw new InvalidProjectFileException(e.Diagnostic.Message);
-                    }
+                    throw new InvalidProjectFileException(e.Diagnostic.Message);
                 }
-            };
+            }
+        };
 
-            return new RoslynTypeLocator(workspace, project);
+        return new RoslynTypeLocator(workspace, project);
+    }
+
+    public override TypeViewModel FindType(string typeName, bool throwWhenNotFound = true)
+    {
+        if (string.IsNullOrEmpty(typeName))
+        {
+            throw new ArgumentNullException(nameof(typeName));
         }
 
-        public override TypeViewModel FindType(string typeName, bool throwWhenNotFound = true)
+        var candidateModelTypes = GetAllTypes()
+            .Where(type => string.Equals(type.Name, typeName, StringComparison.Ordinal))
+            .ToList();
+
+        int count = candidateModelTypes.Count;
+        if (count == 0)
         {
-            if (string.IsNullOrEmpty(typeName))
+            if (throwWhenNotFound)
             {
-                throw new ArgumentNullException(nameof(typeName));
+                throw new ArgumentException(string.Format("A type with the name {0} does not exist", typeName));
             }
-
-            var candidateModelTypes = GetAllTypes()
-                .Where(type => string.Equals(type.Name, typeName, StringComparison.Ordinal))
-                .ToList();
-
-            int count = candidateModelTypes.Count;
-            if (count == 0)
-            {
-                if (throwWhenNotFound)
-                {
-                    throw new ArgumentException(string.Format("A type with the name {0} does not exist", typeName));
-                }
-                return null;
-            }
-
-            if (count > 1)
-            {
-                throw new ArgumentException(string.Format(
-                    "Multiple types matching the name {0} exist:{1}, please use a fully qualified name",
-                    typeName,
-                    string.Join(",", candidateModelTypes.Select(t => t.Name).ToArray())));
-            }
-
-            return new SymbolTypeViewModel(candidateModelTypes[0]);
+            return null;
         }
 
-        public override IEnumerable<TypeViewModel> FindDerivedTypes(string typeName, bool throwWhenNotFound = true)
+        if (count > 1)
         {
-            bool HasBaseType(INamedTypeSymbol type) =>
-                type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat).EndsWith(typeName) || (type.BaseType != null && HasBaseType(type.BaseType));
-
-            return GetAllTypes()
-                .Where(type => HasBaseType(type))
-                .Select(t => new SymbolTypeViewModel(t));
+            throw new ArgumentException(string.Format(
+                "Multiple types matching the name {0} exist:{1}, please use a fully qualified name",
+                typeName,
+                string.Join(",", candidateModelTypes.Select(t => t.Name).ToArray())));
         }
 
-        private class TypeSymbolEqualityComparer : IEqualityComparer<ITypeSymbol>
+        return new SymbolTypeViewModel(candidateModelTypes[0]);
+    }
+
+    public override IEnumerable<TypeViewModel> FindDerivedTypes(string typeName, bool throwWhenNotFound = true)
+    {
+        bool HasBaseType(INamedTypeSymbol type) =>
+            type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat).EndsWith(typeName) || (type.BaseType != null && HasBaseType(type.BaseType));
+
+        return GetAllTypes()
+            .Where(type => HasBaseType(type))
+            .Select(t => new SymbolTypeViewModel(t));
+    }
+
+    private class TypeSymbolEqualityComparer : IEqualityComparer<ITypeSymbol>
+    {
+        public bool Equals(ITypeSymbol x, ITypeSymbol y)
         {
-            public bool Equals(ITypeSymbol x, ITypeSymbol y)
+            if (Object.ReferenceEquals(x, y))
             {
-                if (Object.ReferenceEquals(x, y))
-                {
-                    return true;
-                }
-
-                if (x is null || y is null)
-                {
-                    return false;
-                }
-
-                //Check for namespace to be the same.
-                var isNamespaceEqual = (Object.ReferenceEquals(x.ContainingNamespace, y.ContainingNamespace)
-                        || ((x.ContainingNamespace != null && y.ContainingNamespace != null)
-                            && (x.ContainingNamespace.Name == y.ContainingNamespace.Name)));
-                //Check for assembly to be the same.
-                var isAssemblyEqual = (object.ReferenceEquals(x.ContainingAssembly, y.ContainingAssembly)
-                        || ((x.ContainingAssembly != null && y.ContainingAssembly != null)
-                            && (x.ContainingAssembly.Name == y.ContainingAssembly.Name)));
-
-                return x.Name == y.Name
-                    && isNamespaceEqual
-                    && isAssemblyEqual;
-
+                return true;
             }
 
-            public int GetHashCode(ITypeSymbol obj)
+            if (x is null || y is null)
             {
-                if (obj is null)
-                {
-                    return 0;
-                }
-                var hashName = obj.Name?.GetHashCode() ?? 0;
-                var hashNamespace = obj.ContainingNamespace?.Name == null ? 0 : obj.ContainingNamespace.Name.GetHashCode();
-                var hashAssembly = obj.ContainingAssembly?.Name == null ? 0 : obj.ContainingAssembly.Name.GetHashCode();
-
-                return hashName ^ hashNamespace ^ hashAssembly;
+                return false;
             }
+
+            //Check for namespace to be the same.
+            var isNamespaceEqual = (Object.ReferenceEquals(x.ContainingNamespace, y.ContainingNamespace)
+                    || ((x.ContainingNamespace != null && y.ContainingNamespace != null)
+                        && (x.ContainingNamespace.Name == y.ContainingNamespace.Name)));
+            //Check for assembly to be the same.
+            var isAssemblyEqual = (object.ReferenceEquals(x.ContainingAssembly, y.ContainingAssembly)
+                    || ((x.ContainingAssembly != null && y.ContainingAssembly != null)
+                        && (x.ContainingAssembly.Name == y.ContainingAssembly.Name)));
+
+            return x.Name == y.Name
+                && isNamespaceEqual
+                && isAssemblyEqual;
+
+        }
+
+        public int GetHashCode(ITypeSymbol obj)
+        {
+            if (obj is null)
+            {
+                return 0;
+            }
+            var hashName = obj.Name?.GetHashCode() ?? 0;
+            var hashNamespace = obj.ContainingNamespace?.Name == null ? 0 : obj.ContainingNamespace.Name.GetHashCode();
+            var hashAssembly = obj.ContainingAssembly?.Name == null ? 0 : obj.ContainingAssembly.Name.GetHashCode();
+
+            return hashName ^ hashNamespace ^ hashAssembly;
         }
     }
 }

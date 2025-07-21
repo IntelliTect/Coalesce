@@ -5,96 +5,95 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace IntelliTect.Coalesce
+namespace IntelliTect.Coalesce;
+
+public class StandardDataSource<T, TContext> : StandardDataSource<T>, IEntityFrameworkDataSource<T, TContext>
+    where T : class
+    where TContext : DbContext
 {
-    public class StandardDataSource<T, TContext> : StandardDataSource<T>, IEntityFrameworkDataSource<T, TContext>
-        where T : class
-        where TContext : DbContext
+    /// <summary>
+    /// Contains contextual information about the request.
+    /// </summary>
+    public new CrudContext<TContext> Context => (CrudContext<TContext>)base.Context;
+
+    /// <summary>
+    /// The DbContext from the <see cref="CrudContext{TContext}"/> for the data source.
+    /// </summary>
+    public TContext Db => Context.DbContext;
+
+    /// <summary>
+    /// When ListParameters.Includes is this value, the default behavior of including
+    /// all immediate relations of an object when making a request will be skipped.
+    /// </summary>
+    public const string NoDefaultIncludesString = "none";
+
+    public StandardDataSource(CrudContext<TContext> context) : base(context)
     {
-        /// <summary>
-        /// Contains contextual information about the request.
-        /// </summary>
-        public new CrudContext<TContext> Context => (CrudContext<TContext>)base.Context;
+        // Ensure that the DbContext is in the ReflectionRepository.
+        // We do this so that unit tests will work without having to always do this manually.
+        // Cost is very low.
+        Context.ReflectionRepository.GetOrAddType(typeof(TContext));
+    }
 
-        /// <summary>
-        /// The DbContext from the <see cref="CrudContext{TContext}"/> for the data source.
-        /// </summary>
-        public TContext Db => Context.DbContext;
+    /// <summary>
+    /// Get the initial query that will be compounded upon with various other
+    /// clauses in order to ultimately retrieve the final resulting data.
+    /// </summary>
+    /// <returns>The initial query.</returns>
+    public override Task<IQueryable<T>> GetQueryAsync(IDataSourceParameters parameters) => Task.FromResult(GetQuery(parameters));
 
-        /// <summary>
-        /// When ListParameters.Includes is this value, the default behavior of including
-        /// all immediate relations of an object when making a request will be skipped.
-        /// </summary>
-        public const string NoDefaultIncludesString = "none";
+    /// <summary>
+    /// Get the initial query that will be compounded upon with various other
+    /// clauses in order to ultimately retrieve the final resulting data.
+    /// </summary>
+    /// <returns>The initial query.</returns>
+    public virtual IQueryable<T> GetQuery(IDataSourceParameters parameters)
+    {
+        IQueryable<T> query = Db.Set<T>();
 
-        public StandardDataSource(CrudContext<TContext> context) : base(context)
+        if (!string.Equals(parameters.Includes, NoDefaultIncludesString, StringComparison.OrdinalIgnoreCase))
         {
-            // Ensure that the DbContext is in the ReflectionRepository.
-            // We do this so that unit tests will work without having to always do this manually.
-            // Cost is very low.
-            Context.ReflectionRepository.GetOrAddType(typeof(TContext));
+            query = query.IncludeChildren(this.Context.ReflectionRepository);
         }
 
-        /// <summary>
-        /// Get the initial query that will be compounded upon with various other
-        /// clauses in order to ultimately retrieve the final resulting data.
-        /// </summary>
-        /// <returns>The initial query.</returns>
-        public override Task<IQueryable<T>> GetQueryAsync(IDataSourceParameters parameters) => Task.FromResult(GetQuery(parameters));
+        return query;
+    }
 
-        /// <summary>
-        /// Get the initial query that will be compounded upon with various other
-        /// clauses in order to ultimately retrieve the final resulting data.
-        /// </summary>
-        /// <returns>The initial query.</returns>
-        public virtual IQueryable<T> GetQuery(IDataSourceParameters parameters)
+    /// <summary>
+    /// Allows overriding of whether or not queries will run using EF Core Async methods.
+    /// </summary>
+    /// <param name="query"></param>
+    protected virtual bool CanEvalQueryAsynchronously(IQueryable<T> query)
+    {
+        // Do not use a straight " is IAsyncQueryProvider " check,
+        // as this type changed namespace in EF 5 and so cannot be compatible
+        // with both EF 2 and EF 5 at the same time.
+
+        return query.Provider.GetType().GetInterface("IAsyncQueryProvider") != null;
+    }
+
+    public override Task<int> GetListTotalCountAsync(IQueryable<T> query, IFilterParameters parameters)
+    {
+        if (parameters is IListParameters lp && lp.NoCount == true)
         {
-            IQueryable<T> query = Db.Set<T>();
-
-            if (!string.Equals(parameters.Includes, NoDefaultIncludesString, StringComparison.OrdinalIgnoreCase))
-            {
-                query = query.IncludeChildren(this.Context.ReflectionRepository);
-            }
-
-            return query;
+            return Task.FromResult(-1);
         }
 
-        /// <summary>
-        /// Allows overriding of whether or not queries will run using EF Core Async methods.
-        /// </summary>
-        /// <param name="query"></param>
-        protected virtual bool CanEvalQueryAsynchronously(IQueryable<T> query)
-        {
-            // Do not use a straight " is IAsyncQueryProvider " check,
-            // as this type changed namespace in EF 5 and so cannot be compatible
-            // with both EF 2 and EF 5 at the same time.
+        var canUseAsync = CanEvalQueryAsynchronously(query);
+        return canUseAsync ? query.CountAsync(GetEffectiveCancellationToken(parameters)) : Task.FromResult(query.Count());
+    }
 
-            return query.Provider.GetType().GetInterface("IAsyncQueryProvider") != null;
-        }
+    protected override Task<T?> EvaluateItemQueryAsync(object id, IQueryable<T> query, CancellationToken cancellationToken = default)
+    {
+        var canUseAsync = CanEvalQueryAsynchronously(query);
+        return canUseAsync
+            ? query.FindItemAsync(id, Context.ReflectionRepository, cancellationToken)
+            : Task.FromResult(query.FindItem(id, Context.ReflectionRepository));
+    }
 
-        public override Task<int> GetListTotalCountAsync(IQueryable<T> query, IFilterParameters parameters)
-        {
-            if (parameters is IListParameters lp && lp.NoCount == true)
-            {
-                return Task.FromResult(-1);
-            }
-
-            var canUseAsync = CanEvalQueryAsynchronously(query);
-            return canUseAsync ? query.CountAsync(GetEffectiveCancellationToken(parameters)) : Task.FromResult(query.Count());
-        }
-
-        protected override Task<T?> EvaluateItemQueryAsync(object id, IQueryable<T> query, CancellationToken cancellationToken = default)
-        {
-            var canUseAsync = CanEvalQueryAsynchronously(query);
-            return canUseAsync
-                ? query.FindItemAsync(id, Context.ReflectionRepository, cancellationToken)
-                : Task.FromResult(query.FindItem(id, Context.ReflectionRepository));
-        }
-
-        protected override Task<List<T>> EvaluateListQueryAsync(IQueryable<T> query, CancellationToken cancellationToken = default)
-        {
-            var canUseAsync = CanEvalQueryAsynchronously(query);
-            return canUseAsync ? query.ToListAsync(cancellationToken) : Task.FromResult(query.ToList());
-        }
+    protected override Task<List<T>> EvaluateListQueryAsync(IQueryable<T> query, CancellationToken cancellationToken = default)
+    {
+        var canUseAsync = CanEvalQueryAsynchronously(query);
+        return canUseAsync ? query.ToListAsync(cancellationToken) : Task.FromResult(query.ToList());
     }
 }

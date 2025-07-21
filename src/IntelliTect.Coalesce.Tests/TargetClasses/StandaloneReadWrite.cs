@@ -1,61 +1,57 @@
-﻿using IntelliTect.Coalesce;
-using IntelliTect.Coalesce.DataAnnotations;
+﻿using IntelliTect.Coalesce.DataAnnotations;
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace IntelliTect.Coalesce.Tests.TargetClasses
+namespace IntelliTect.Coalesce.Tests.TargetClasses;
+
+[Coalesce, StandaloneEntity]
+[SemanticKernel("StandaloneReadWrite", DeleteEnabled = true, SaveEnabled = true)]
+public class StandaloneReadWrite
 {
-    [Coalesce, StandaloneEntity]
-    [SemanticKernel("StandaloneReadWrite", DeleteEnabled = true, SaveEnabled = true)]
-    public class StandaloneReadWrite
+    public int Id { get; set; }
+
+    [Search(SearchMethod = SearchAttribute.SearchMethods.Contains), ListText]
+    public string Name { get; set; } = "";
+
+    [DefaultOrderBy]
+    public DateTimeOffset Date { get; set; }
+
+    private static int nextId = 0;
+    private static ConcurrentDictionary<int, StandaloneReadWrite> backingStore = new ConcurrentDictionary<int, StandaloneReadWrite>();
+    public class DefaultSource : StandardDataSource<StandaloneReadWrite>
     {
-        public int Id { get; set; }
+        public DefaultSource(CrudContext context) : base(context) { }
 
-        [Search(SearchMethod = SearchAttribute.SearchMethods.Contains), ListText]
-        public string Name { get; set; } = "";
+        public override Task<IQueryable<StandaloneReadWrite>> GetQueryAsync(IDataSourceParameters parameters)
+            => Task.FromResult(backingStore.Values.AsQueryable());
+    }
 
-        [DefaultOrderBy]
-        public DateTimeOffset Date { get; set; }
+    public class Behaviors : StandardBehaviors<StandaloneReadWrite>
+    {
+        public Behaviors(CrudContext context) : base(context) { }
 
-        private static int nextId = 0;
-        private static ConcurrentDictionary<int, StandaloneReadWrite> backingStore = new ConcurrentDictionary<int, StandaloneReadWrite>();
-        public class DefaultSource : StandardDataSource<StandaloneReadWrite>
+        public override Task ExecuteDeleteAsync(StandaloneReadWrite item)
         {
-            public DefaultSource(CrudContext context) : base(context) { }
-
-            public override Task<IQueryable<StandaloneReadWrite>> GetQueryAsync(IDataSourceParameters parameters)
-                => Task.FromResult(backingStore.Values.AsQueryable());
+            backingStore.TryRemove(item.Id, out _);
+            return Task.CompletedTask;
         }
 
-        public class Behaviors : StandardBehaviors<StandaloneReadWrite>
+        public override Task ExecuteSaveAsync(SaveKind kind, StandaloneReadWrite oldItem, StandaloneReadWrite item)
         {
-            public Behaviors(CrudContext context) : base(context) { }
-
-            public override Task ExecuteDeleteAsync(StandaloneReadWrite item)
+            if (kind == SaveKind.Create)
+            {
+                item.Id = Interlocked.Increment(ref nextId);
+                backingStore.TryAdd(item.Id, item);
+            }
+            else
             {
                 backingStore.TryRemove(item.Id, out _);
-                return Task.CompletedTask;
+                backingStore.TryAdd(item.Id, item);
             }
-
-            public override Task ExecuteSaveAsync(SaveKind kind, StandaloneReadWrite oldItem, StandaloneReadWrite item)
-            {
-                if (kind == SaveKind.Create)
-                {
-                    item.Id = Interlocked.Increment(ref nextId);
-                    backingStore.TryAdd(item.Id, item);
-                }
-                else
-                {
-                    backingStore.TryRemove(item.Id, out _);
-                    backingStore.TryAdd(item.Id, item);
-                }
-                return Task.CompletedTask;
-            }
+            return Task.CompletedTask;
         }
     }
 }

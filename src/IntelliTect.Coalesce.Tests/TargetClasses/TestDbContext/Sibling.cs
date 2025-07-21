@@ -1,13 +1,12 @@
-﻿namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext
+﻿namespace IntelliTect.Coalesce.Tests.TargetClasses.TestDbContext;
+
+public class Sibling
 {
-    public class Sibling
-    {
-        public int SiblingId { get; set; }
+    public int SiblingId { get; set; }
 
-        public int PersonId { get; set; }
-        public Person Person { get; set; }
+    public int PersonId { get; set; }
+    public Person Person { get; set; }
 
-        public int PersonTwoId { get; set; }
-        public Person PersonTwo { get; set; }
-    }
+    public int PersonTwoId { get; set; }
+    public Person PersonTwo { get; set; }
 }

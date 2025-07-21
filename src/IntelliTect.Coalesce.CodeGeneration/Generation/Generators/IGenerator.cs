@@ -1,56 +1,52 @@
-﻿using IntelliTect.Coalesce.CodeGeneration.Analysis.Base;
-using IntelliTect.Coalesce.CodeGeneration.Templating;
-using IntelliTect.Coalesce.TypeDefinition;
+﻿using IntelliTect.Coalesce.TypeDefinition;
 using Newtonsoft.Json.Linq;
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 
-namespace IntelliTect.Coalesce.CodeGeneration.Generation
+namespace IntelliTect.Coalesce.CodeGeneration.Generation;
+
+public interface IGenerator
 {
-    public interface IGenerator
-    {
-        string DefaultOutputPath { get; set; }
+    string DefaultOutputPath { get; set; }
 
-        string EffectiveOutputPath { get; }
+    string EffectiveOutputPath { get; }
 
-        bool IsDisabled { get; }
+    bool IsDisabled { get; }
 
-        Task GenerateAsync();
+    Task GenerateAsync();
 
-        void Configure(JObject obj);
-        void ActionPerformed();
-    }
+    void Configure(JObject obj);
+    void ActionPerformed();
+}
 
-    public interface IGenerator<TModel> : IGenerator
-    {
-        TModel Model { get; set; }
-    }
+public interface IGenerator<TModel> : IGenerator
+{
+    TModel Model { get; set; }
+}
 
-    public interface ICompositeGenerator : IGenerator
-    {
-        IEnumerable<IGenerator> GetGenerators();
+public interface ICompositeGenerator : IGenerator
+{
+    IEnumerable<IGenerator> GetGenerators();
 
-        IEnumerable<ICleaner> GetCleaners();
-    }
+    IEnumerable<ICleaner> GetCleaners();
+}
 
-    public interface ICompositeGenerator<TModel> : IGenerator<TModel>, ICompositeGenerator
-    {
-        // Composite interface - no additional members; just shorthand for the two sub-interfaces.
-    }
+public interface ICompositeGenerator<TModel> : IGenerator<TModel>, ICompositeGenerator
+{
+    // Composite interface - no additional members; just shorthand for the two sub-interfaces.
+}
 
-    public interface IRootGenerator : ICompositeGenerator<ReflectionRepository>
-    {
-        // Nothing special about this right now, but there may be in the future.
-    }
+public interface IRootGenerator : ICompositeGenerator<ReflectionRepository>
+{
+    // Nothing special about this right now, but there may be in the future.
+}
 
-    public interface IFileGenerator : IGenerator
-    {
-        Task<Stream> GetOutputAsync();
-    }
+public interface IFileGenerator : IGenerator
+{
+    Task<Stream> GetOutputAsync();
+}
 
-    public interface IFileGenerator<TModel> : IGenerator<TModel>, IFileGenerator
-    {
-    }
+public interface IFileGenerator<TModel> : IGenerator<TModel>, IFileGenerator
+{
 }

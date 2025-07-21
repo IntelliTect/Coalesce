@@ -1,20 +1,19 @@
 ﻿using IntelliTect.Coalesce.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Coalesce.Domain
+namespace Coalesce.Domain;
+
+[Table("CaseProduct")]
+public class CaseProduct
 {
-    [Table("CaseProduct")]
-    public class CaseProduct
-    {
-        public int CaseProductId { get; set; }
-        public int CaseId { get; set; }
+    public int CaseProductId { get; set; }
+    public int CaseId { get; set; }
 
-        [Search]
-        public Case Case { get; set; } = null!;
+    [Search]
+    public Case Case { get; set; } = null!;
 
-        public int ProductId { get; set; }
+    public int ProductId { get; set; }
 
-        [Search]
-        public Product Product { get; set; } = null!;
-    }
+    [Search]
+    public Product Product { get; set; } = null!;
 }

@@ -1,25 +1,22 @@
 ﻿using Microsoft.EntityFrameworkCore.Migrations;
-using System;
-using System.Collections.Generic;
 
-namespace Coalesce.Domain.Migrations
+namespace Coalesce.Domain.Migrations;
+
+public partial class AddCompanyIsDeletedFlag : Migration
 {
-    public partial class AddCompanyIsDeletedFlag : Migration
+    protected override void Up(MigrationBuilder migrationBuilder)
     {
-        protected override void Up(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.AddColumn<bool>(
-                name: "IsDeleted",
-                table: "Company",
-                nullable: false,
-                defaultValue: false);
-        }
+        migrationBuilder.AddColumn<bool>(
+            name: "IsDeleted",
+            table: "Company",
+            nullable: false,
+            defaultValue: false);
+    }
 
-        protected override void Down(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.DropColumn(
-                name: "IsDeleted",
-                table: "Company");
-        }
+    protected override void Down(MigrationBuilder migrationBuilder)
+    {
+        migrationBuilder.DropColumn(
+            name: "IsDeleted",
+            table: "Company");
     }
 }

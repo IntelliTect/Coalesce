@@ -1,16 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace IntelliTect.Coalesce.TypeDefinition.Enums
+namespace IntelliTect.Coalesce.TypeDefinition.Enums;
+
+[Flags]
+public enum PropertyRole
 {
-    [Flags]
-    public enum PropertyRole
-    {
-        Value,
-        ReferenceNavigation,
-        CollectionNavigation,
-        PrimaryKey,
-        ForeignKey,
-    }
+    Value,
+    ReferenceNavigation,
+    CollectionNavigation,
+    PrimaryKey,
+    ForeignKey,
 }

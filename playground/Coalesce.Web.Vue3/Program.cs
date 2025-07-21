@@ -1,26 +1,13 @@
-using Azure.Identity;
 using Coalesce.Domain;
 using Coalesce.Domain.Services;
 using Coalesce.Domain.WebShared;
-using Coalesce.Web.Vue3.KernelPlugins;
 using IntelliTect.Coalesce;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Console;
-using Microsoft.Extensions.Options;
-using Microsoft.Net.Http.Headers;
 using Microsoft.OpenApi.Models;
 using Microsoft.SemanticKernel;
 using Scalar.AspNetCore;
-using System.ClientModel;
 using System.Reflection;
-using System.Security.Claims;
-using System.Text.Json;
-using System.Text.Json.Serialization;
-using System.Text.RegularExpressions;
 
 var builder = WebApplication.CreateBuilder(new WebApplicationOptions
 {

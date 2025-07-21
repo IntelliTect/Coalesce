@@ -1,88 +1,83 @@
 ﻿using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
-namespace IntelliTect.Coalesce.CodeGeneration.Utilities
+namespace IntelliTect.Coalesce.CodeGeneration.Utilities;
+
+public class SimpleConsoleLoggerProvider : ILoggerProvider
 {
-    public class SimpleConsoleLoggerProvider : ILoggerProvider
-    {
-        public void Dispose() { }
+    public void Dispose() { }
 
-        public ILogger CreateLogger(string categoryName)
+    public ILogger CreateLogger(string categoryName)
+    {
+        return new SimpleConsoleLogger(categoryName);
+    }
+
+
+    public class SimpleConsoleLogger : ILogger
+    {
+
+        private readonly string _categoryName;
+        private static readonly object sync = new object();
+
+        private static readonly Dictionary<LogLevel, ConsoleColor> colorLevelMap = new Dictionary<LogLevel, ConsoleColor>
         {
-            return new SimpleConsoleLogger(categoryName);
+            { LogLevel.Trace, ConsoleColor.DarkGray },
+            { LogLevel.Debug, ConsoleColor.Gray },
+            { LogLevel.Information, ConsoleColor.DarkGreen },
+            { LogLevel.Warning, ConsoleColor.Yellow },
+            { LogLevel.Error, ConsoleColor.Red },
+            { LogLevel.Critical, ConsoleColor.Red },
+        };
+
+        public SimpleConsoleLogger(string categoryName)
+        {
+            _categoryName = categoryName;
         }
 
-
-        public class SimpleConsoleLogger : ILogger
+        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
         {
-
-            private readonly string _categoryName;
-            private static readonly object sync = new object();
-
-            private static readonly Dictionary<LogLevel, ConsoleColor> colorLevelMap = new Dictionary<LogLevel, ConsoleColor>
+            if (!IsEnabled(logLevel))
             {
-                { LogLevel.Trace, ConsoleColor.DarkGray },
-                { LogLevel.Debug, ConsoleColor.Gray },
-                { LogLevel.Information, ConsoleColor.DarkGreen },
-                { LogLevel.Warning, ConsoleColor.Yellow },
-                { LogLevel.Error, ConsoleColor.Red },
-                { LogLevel.Critical, ConsoleColor.Red },
-            };
-
-            public SimpleConsoleLogger(string categoryName)
-            {
-                _categoryName = categoryName;
+                return;
             }
 
-            public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
+            var levelString = logLevel == LogLevel.Information ? "Info" : logLevel.ToString();
+
+            lock (sync)
             {
-                if (!IsEnabled(logLevel))
+                Console.ForegroundColor = ConsoleColor.DarkGray;
+                Console.Write("[");
+                Console.ForegroundColor = colorLevelMap[logLevel];
+                Console.Write(levelString.ToLower()[0]);
+                Console.ForegroundColor = ConsoleColor.DarkGray;
+                Console.Write(":");
+                Console.ForegroundColor = ConsoleColor.DarkCyan;
+                Console.Write($"{ApplicationTimer.Stopwatch.ElapsedMilliseconds / 1000d:0.000}");
+                Console.ForegroundColor = ConsoleColor.DarkGray;
+                Console.Write("] ");
+                if (logLevel == LogLevel.Information)
                 {
-                    return;
-                }
-
-                var levelString = logLevel == LogLevel.Information ? "Info" : logLevel.ToString();
-
-                lock (sync)
-                {
-                    Console.ForegroundColor = ConsoleColor.DarkGray;
-                    Console.Write("[");
-                    Console.ForegroundColor = colorLevelMap[logLevel];
-                    Console.Write(levelString.ToLower()[0]);
-                    Console.ForegroundColor = ConsoleColor.DarkGray;
-                    Console.Write(":");
-                    Console.ForegroundColor = ConsoleColor.DarkCyan;
-                    Console.Write($"{ApplicationTimer.Stopwatch.ElapsedMilliseconds / 1000d:0.000}");
-                    Console.ForegroundColor = ConsoleColor.DarkGray;
-                    Console.Write("] ");
-                    if (logLevel == LogLevel.Information)
-                    {
-                        Console.ResetColor();
-                    }
-                    else
-                    {
-                        Console.ForegroundColor = colorLevelMap[logLevel];
-                    }
-                    Console.WriteLine(formatter(state, exception));
                     Console.ResetColor();
-                    Console.Out.Flush();
                 }
+                else
+                {
+                    Console.ForegroundColor = colorLevelMap[logLevel];
+                }
+                Console.WriteLine(formatter(state, exception));
+                Console.ResetColor();
+                Console.Out.Flush();
             }
+        }
 
-            public bool IsEnabled(LogLevel logLevel)
-            {
-                return true;
-            }
+        public bool IsEnabled(LogLevel logLevel)
+        {
+            return true;
+        }
 
-            public IDisposable BeginScope<TState>(TState state)
-            {
-                return null;
-            }
+        public IDisposable BeginScope<TState>(TState state)
+        {
+            return null;
         }
     }
 }

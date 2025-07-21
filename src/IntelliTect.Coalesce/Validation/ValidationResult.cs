@@ -1,30 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿namespace IntelliTect.Coalesce.Validation;
 
-namespace IntelliTect.Coalesce.Validation
+internal class ValidationResult
 {
-    internal class ValidationResult
+    public bool WasSuccessful { get; set; }
+    public bool IsWarning { get; set; }
+    public string? Area { get; set; }
+    public string? Message { get; set; }
+
+    public bool IsError => !WasSuccessful && !IsWarning;
+
+    public override string ToString()
     {
-        public bool WasSuccessful { get; set; }
-        public bool IsWarning { get; set; }
-        public string? Area { get; set; }
-        public string? Message { get; set; }
-
-        public bool IsError => !WasSuccessful && !IsWarning;
-
-        public override string ToString()
+        if (WasSuccessful)
         {
-            if (WasSuccessful)
-            {
-                return $"  Success: {Area}: {Message}";
-            }
-            if (IsWarning)
-            {
-                return $"-- Warning: {Area}: {Message}";
-            }
-            return $"** Failure: {Area}: {Message}";
+            return $"  Success: {Area}: {Message}";
         }
+        if (IsWarning)
+        {
+            return $"-- Warning: {Area}: {Message}";
+        }
+        return $"** Failure: {Area}: {Message}";
     }
 }

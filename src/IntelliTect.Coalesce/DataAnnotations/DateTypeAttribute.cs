@@ -1,28 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿namespace IntelliTect.Coalesce.DataAnnotations;
 
-namespace IntelliTect.Coalesce.DataAnnotations
+/// <summary>
+/// Allows specifying the type of date to contain. 
+/// </summary>
+[System.AttributeUsage(System.AttributeTargets.Property)]
+public class DateTypeAttribute : System.Attribute
 {
-    /// <summary>
-    /// Allows specifying the type of date to contain. 
-    /// </summary>
-    [System.AttributeUsage(System.AttributeTargets.Property)]
-    public class DateTypeAttribute : System.Attribute
+    public enum DateTypes
     {
-        public enum DateTypes
-        {
-            DateTime = 0,
-            DateOnly = 1,
-            TimeOnly = 2,
-        }
+        DateTime = 0,
+        DateOnly = 1,
+        TimeOnly = 2,
+    }
 
-        public DateTypes DateType { get; set; }
+    public DateTypes DateType { get; set; }
 
-        public DateTypeAttribute(DateTypes dateType = DateTypes.DateTime)
-        {
-            this.DateType = dateType;
-        }
+    public DateTypeAttribute(DateTypes dateType = DateTypes.DateTime)
+    {
+        this.DateType = dateType;
     }
 }

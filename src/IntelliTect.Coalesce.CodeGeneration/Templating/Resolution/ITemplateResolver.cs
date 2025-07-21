@@ -1,7 +1,6 @@
-﻿namespace IntelliTect.Coalesce.CodeGeneration.Templating.Resolution
+﻿namespace IntelliTect.Coalesce.CodeGeneration.Templating.Resolution;
+
+public interface ITemplateResolver
 {
-    public interface ITemplateResolver
-    {
-        IResolvedTemplate Resolve(TemplateDescriptor descriptor);
-    }
+    IResolvedTemplate Resolve(TemplateDescriptor descriptor);
 }

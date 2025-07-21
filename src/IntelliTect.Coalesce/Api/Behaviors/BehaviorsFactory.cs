@@ -3,71 +3,68 @@ using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
-namespace IntelliTect.Coalesce.Api.Behaviors
+namespace IntelliTect.Coalesce.Api.Behaviors;
+
+public class BehaviorsFactory : IBehaviorsFactory
 {
-    public class BehaviorsFactory : IBehaviorsFactory
+    private readonly IServiceProvider serviceProvider;
+    private readonly ReflectionRepository reflectionRepository;
+
+    public BehaviorsFactory(IServiceProvider serviceProvider, ReflectionRepository reflectionRepository)
     {
-        private readonly IServiceProvider serviceProvider;
-        private readonly ReflectionRepository reflectionRepository;
+        this.serviceProvider = serviceProvider;
+        this.reflectionRepository = reflectionRepository;
+    }
 
-        public BehaviorsFactory(IServiceProvider serviceProvider, ReflectionRepository reflectionRepository)
+    /// <summary>
+    /// Defines all marker interfaces for defaults, along with their default concrete implementation.
+    /// </summary>
+    internal static readonly Dictionary<Type, Type> DefaultTypes = new Dictionary<Type, Type>
+    {
+        { typeof(IEntityFrameworkBehaviors<,>), typeof(StandardBehaviors<,>) }
+        // Future: may be other kinds of defaults (non-EF)
+    };
+
+    protected Type GetDefaultBehaviorsType(ClassViewModel servedType)
+    {
+        // If other kinds of default are handled here in the future, add them to the collection above.
+
+        var tContext = reflectionRepository.EntityUsages[servedType].First().Context;
+        return typeof(IEntityFrameworkBehaviors<,>).MakeGenericType(
+            servedType.Type.TypeInfo,
+            tContext.ClassViewModel.Type.TypeInfo
+        );
+    }
+
+    public object GetDefaultBehaviors(ClassViewModel servedType)
+    {
+        var behaviorsType = GetDefaultBehaviorsType(servedType);
+        return ActivatorUtilities.GetServiceOrCreateInstance(serviceProvider, behaviorsType);
+    }
+
+
+    public Type GetBehaviorsType(ClassViewModel servedType, ClassViewModel declaredFor)
+    {
+        var behaviorsClassViewModel = reflectionRepository.GetBehaviorsDeclaredFor(declaredFor);
+
+        if (behaviorsClassViewModel == null)
         {
-            this.serviceProvider = serviceProvider;
-            this.reflectionRepository = reflectionRepository;
+            return GetDefaultBehaviorsType(servedType);
         }
-
-        /// <summary>
-        /// Defines all marker interfaces for defaults, along with their default concrete implementation.
-        /// </summary>
-        internal static readonly Dictionary<Type, Type> DefaultTypes = new Dictionary<Type, Type>
+        else
         {
-            { typeof(IEntityFrameworkBehaviors<,>), typeof(StandardBehaviors<,>) }
-            // Future: may be other kinds of defaults (non-EF)
-        };
-
-        protected Type GetDefaultBehaviorsType(ClassViewModel servedType)
-        {
-            // If other kinds of default are handled here in the future, add them to the collection above.
-
-            var tContext = reflectionRepository.EntityUsages[servedType].First().Context;
-            return typeof(IEntityFrameworkBehaviors<,>).MakeGenericType(
-                servedType.Type.TypeInfo,
-                tContext.ClassViewModel.Type.TypeInfo
-            );
-        }
-
-        public object GetDefaultBehaviors(ClassViewModel servedType)
-        {
-            var behaviorsType = GetDefaultBehaviorsType(servedType);
-            return ActivatorUtilities.GetServiceOrCreateInstance(serviceProvider, behaviorsType);
-        }
-
-
-        public Type GetBehaviorsType(ClassViewModel servedType, ClassViewModel declaredFor)
-        {
-            var behaviorsClassViewModel = reflectionRepository.GetBehaviorsDeclaredFor(declaredFor);
-
-            if (behaviorsClassViewModel == null)
-            {
-                return GetDefaultBehaviorsType(servedType);
-            }
-            else
-            {
-                return behaviorsClassViewModel.Type.TypeInfo;
-            }
-        }
-
-        public IBehaviors<TServed> GetBehaviors<TServed>(ClassViewModel declaredFor)
-            where TServed : class
-            => (IBehaviors<TServed>)GetBehaviors(reflectionRepository.GetClassViewModel<TServed>()!, declaredFor);
-
-        public object GetBehaviors(ClassViewModel servedType, ClassViewModel declaredFor)
-        {
-            var behaviorsType = GetBehaviorsType(servedType, declaredFor);
-            return ActivatorUtilities.GetServiceOrCreateInstance(serviceProvider, behaviorsType);
+            return behaviorsClassViewModel.Type.TypeInfo;
         }
     }
 
+    public IBehaviors<TServed> GetBehaviors<TServed>(ClassViewModel declaredFor)
+        where TServed : class
+        => (IBehaviors<TServed>)GetBehaviors(reflectionRepository.GetClassViewModel<TServed>()!, declaredFor);
+
+    public object GetBehaviors(ClassViewModel servedType, ClassViewModel declaredFor)
+    {
+        var behaviorsType = GetBehaviorsType(servedType, declaredFor);
+        return ActivatorUtilities.GetServiceOrCreateInstance(serviceProvider, behaviorsType);
+    }
 }

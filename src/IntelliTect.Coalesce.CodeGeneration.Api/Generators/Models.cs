@@ -1,33 +1,28 @@
-﻿using IntelliTect.Coalesce.CodeGeneration.Api.Generators;
-using IntelliTect.Coalesce.CodeGeneration.Generation;
+﻿using IntelliTect.Coalesce.CodeGeneration.Generation;
 using IntelliTect.Coalesce.TypeDefinition;
-using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text;
 
-namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
+namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators;
+
+public class Models : CompositeGenerator<ReflectionRepository>
 {
-    public class Models : CompositeGenerator<ReflectionRepository>
+    public Models(CompositeGeneratorServices services) : base(services) { }
+
+    public override IEnumerable<ICleaner> GetCleaners()
     {
-        public Models(CompositeGeneratorServices services) : base(services) { }
+        yield return Cleaner<DirectoryCleaner>()
+            .AppendTargetPath("Generated");
+    }
 
-        public override IEnumerable<ICleaner> GetCleaners()
+    public override IEnumerable<IGenerator> GetGenerators()
+    {
+        foreach (var model in this.Model.Entities.Union(Model.ExternalTypes))
         {
-            yield return Cleaner<DirectoryCleaner>()
-                .AppendTargetPath("Generated");
-        }
-
-        public override IEnumerable<IGenerator> GetGenerators()
-        {
-            foreach (var model in this.Model.Entities.Union(Model.ExternalTypes))
-            {
-                yield return Generator<ClassDto>()
-                    .WithModel(model)
-                    .AppendOutputPath($"Generated/{model.ClientTypeName}Dto.g.cs");
-                
-            }
+            yield return Generator<ClassDto>()
+                .WithModel(model)
+                .AppendOutputPath($"Generated/{model.ClientTypeName}Dto.g.cs");
+            
         }
     }
 }

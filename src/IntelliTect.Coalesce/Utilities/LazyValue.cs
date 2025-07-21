@@ -1,24 +1,23 @@
 ﻿using System;
 
-namespace IntelliTect.Coalesce.Utilities
+namespace IntelliTect.Coalesce.Utilities;
+
+internal struct LazyValue<T>
 {
-    internal struct LazyValue<T>
+    bool HasValue;
+    T Value;
+
+    public T GetValue(Func<T> getter)
     {
-        bool HasValue;
-        T Value;
+        if (HasValue) return Value;
+        Value = getter();
+        HasValue = true;
+        return Value;
+    }
 
-        public T GetValue(Func<T> getter)
-        {
-            if (HasValue) return Value;
-            Value = getter();
-            HasValue = true;
-            return Value;
-        }
-
-        public void Reset()
-        {
-            HasValue = false;
-            Value = default!;
-        }
+    public void Reset()
+    {
+        HasValue = false;
+        Value = default!;
     }
 }

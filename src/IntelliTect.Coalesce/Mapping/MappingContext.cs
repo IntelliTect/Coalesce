@@ -5,107 +5,104 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
-using System.Text;
 using System.Text.Json.Serialization;
-using System.Text.Json.Serialization.Metadata;
 
-namespace IntelliTect.Coalesce.Mapping
+namespace IntelliTect.Coalesce.Mapping;
+
+public class MappingContext : IMappingContext
 {
-    public class MappingContext : IMappingContext
+    public ClaimsPrincipal User { get; }
+
+    public string? Includes { get; }
+
+    public IServiceProvider? Services { get; }
+
+    private Dictionary<(object, IncludeTree?, Type), object> _mappedObjects { get; } = new();
+    private Dictionary<string, bool>? _roleCache;
+    private Dictionary<Type, IPropertyRestriction>? _restrictionCache;
+    private Dictionary<Type, Type>? _responseDtoTypes;
+
+    public MappingContext(
+        ClaimsPrincipal? user = null, 
+        string? includes = null,
+        IServiceProvider? services = null
+    )
     {
-        public ClaimsPrincipal User { get; }
+        User = user ?? new ClaimsPrincipal();
+        Includes = includes;
+        Services = services;
+    }
 
-        public string? Includes { get; }
+    public MappingContext(CrudContext context, string? includes = null)
+        : this(context.User, includes, context.ServiceProvider) { }
 
-        public IServiceProvider? Services { get; }
+    public bool IsInRoleCached(string role)
+    {
+        _roleCache ??= new();
+        if (_roleCache.TryGetValue(role, out bool inRole)) return inRole;
 
-        private Dictionary<(object, IncludeTree?, Type), object> _mappedObjects { get; } = new();
-        private Dictionary<string, bool>? _roleCache;
-        private Dictionary<Type, IPropertyRestriction>? _restrictionCache;
-        private Dictionary<Type, Type>? _responseDtoTypes;
+        return _roleCache[role] = User?.IsInRole(role) ?? false;
+    }
 
-        public MappingContext(
-            ClaimsPrincipal? user = null, 
-            string? includes = null,
-            IServiceProvider? services = null
-        )
+    public void AddMapping(object sourceObject, IncludeTree? includeTree, object mappedObject)
+    {
+        _mappedObjects[(sourceObject, includeTree, mappedObject.GetType())] = mappedObject;
+    }
+
+    public bool TryGetMapping<TDto>(
+        object sourceObject,
+        IncludeTree? includeTree,
+        [System.Diagnostics.CodeAnalysis.NotNullWhen(true)]
+        out TDto? mappedObject
+    )
+        where TDto : class
+    {
+        if (!_mappedObjects.TryGetValue((sourceObject, includeTree, typeof(TDto)), out object? existingMapped))
         {
-            User = user ?? new ClaimsPrincipal();
-            Includes = includes;
-            Services = services;
+            mappedObject = default;
+            return false; 
         }
+        mappedObject = (TDto)existingMapped;
+        return true;
+    }
 
-        public MappingContext(CrudContext context, string? includes = null)
-            : this(context.User, includes, context.ServiceProvider) { }
+    public IPropertyRestriction GetPropertyRestriction(Type type)
+    {
+        _restrictionCache ??= new();
+        if (_restrictionCache.TryGetValue(type, out var restriction)) return restriction;
 
-        public bool IsInRoleCached(string role)
-        {
-            _roleCache ??= new();
-            if (_roleCache.TryGetValue(role, out bool inRole)) return inRole;
+        restriction = Services is {} 
+            ? (IPropertyRestriction)ActivatorUtilities.GetServiceOrCreateInstance(Services, type) 
+            : (IPropertyRestriction)Activator.CreateInstance(type)!;
 
-            return _roleCache[role] = User?.IsInRole(role) ?? false;
-        }
+        _restrictionCache.Add(type, restriction);
 
-        public void AddMapping(object sourceObject, IncludeTree? includeTree, object mappedObject)
-        {
-            _mappedObjects[(sourceObject, includeTree, mappedObject.GetType())] = mappedObject;
-        }
+        return restriction;
+    }
 
-        public bool TryGetMapping<TDto>(
-            object sourceObject,
-            IncludeTree? includeTree,
-            [System.Diagnostics.CodeAnalysis.NotNullWhen(true)]
-            out TDto? mappedObject
-        )
-            where TDto : class
-        {
-            if (!_mappedObjects.TryGetValue((sourceObject, includeTree, typeof(TDto)), out object? existingMapped))
-            {
-                mappedObject = default;
-                return false; 
-            }
-            mappedObject = (TDto)existingMapped;
-            return true;
-        }
+    /// <summary>
+    /// Find the exact response DTO type to use for the given entity.
+    /// Chooses the derived type that was generated for the entity if there is one,
+    /// rather than <typeparamref name="TDto"/> which might be a base DTO type.
+    /// </summary>
+    public Type GetResponseDtoType<TDto, T>(T entity)
+        where T : class
+        where TDto : class, IResponseDto<T>, new()
+    {
+        Type entityType = entity.GetType();
+        _responseDtoTypes ??= [];
 
-        public IPropertyRestriction GetPropertyRestriction(Type type)
-        {
-            _restrictionCache ??= new();
-            if (_restrictionCache.TryGetValue(type, out var restriction)) return restriction;
+        if (_responseDtoTypes.TryGetValue(entityType, out Type? ret)) return ret;
 
-            restriction = Services is {} 
-                ? (IPropertyRestriction)ActivatorUtilities.GetServiceOrCreateInstance(Services, type) 
-                : (IPropertyRestriction)Activator.CreateInstance(type)!;
+        var candidates = typeof(TDto).GetAttributes<JsonDerivedTypeAttribute>()
+            .Select(c => c.Instance.DerivedType);
+        Type exactDtoType = typeof(IResponseDto<>).MakeGenericType(entityType);
+        var chosen = candidates
+            .FirstOrDefault(c => c.IsAssignableTo(exactDtoType))
+            ?? typeof(TDto);
 
-            _restrictionCache.Add(type, restriction);
+        _responseDtoTypes.TryAdd(entityType, chosen);
 
-            return restriction;
-        }
-
-        /// <summary>
-        /// Find the exact response DTO type to use for the given entity.
-        /// Chooses the derived type that was generated for the entity if there is one,
-        /// rather than <typeparamref name="TDto"/> which might be a base DTO type.
-        /// </summary>
-        public Type GetResponseDtoType<TDto, T>(T entity)
-            where T : class
-            where TDto : class, IResponseDto<T>, new()
-        {
-            Type entityType = entity.GetType();
-            _responseDtoTypes ??= [];
-
-            if (_responseDtoTypes.TryGetValue(entityType, out Type? ret)) return ret;
-
-            var candidates = typeof(TDto).GetAttributes<JsonDerivedTypeAttribute>()
-                .Select(c => c.Instance.DerivedType);
-            Type exactDtoType = typeof(IResponseDto<>).MakeGenericType(entityType);
-            var chosen = candidates
-                .FirstOrDefault(c => c.IsAssignableTo(exactDtoType))
-                ?? typeof(TDto);
-
-            _responseDtoTypes.TryAdd(entityType, chosen);
-
-            return chosen;
-        }
+        return chosen;
     }
 }

@@ -2,29 +2,28 @@
 
 #nullable disable
 
-namespace Coalesce.Domain.Migrations
+namespace Coalesce.Domain.Migrations;
+
+/// <inheritdoc />
+public partial class AddUniqueIndex : Migration
 {
     /// <inheritdoc />
-    public partial class AddUniqueIndex : Migration
+    protected override void Up(MigrationBuilder migrationBuilder)
     {
-        /// <inheritdoc />
-        protected override void Up(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.Sql("UPDATE Product SET ProductUniqueId = NEWID()");
+        migrationBuilder.Sql("UPDATE Product SET ProductUniqueId = NEWID()");
 
-            migrationBuilder.CreateIndex(
-                name: "IX_Product_ProductUniqueId",
-                table: "Product",
-                column: "ProductUniqueId",
-                unique: true);
-        }
+        migrationBuilder.CreateIndex(
+            name: "IX_Product_ProductUniqueId",
+            table: "Product",
+            column: "ProductUniqueId",
+            unique: true);
+    }
 
-        /// <inheritdoc />
-        protected override void Down(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.DropIndex(
-                name: "IX_Product_ProductUniqueId",
-                table: "Product");
-        }
+    /// <inheritdoc />
+    protected override void Down(MigrationBuilder migrationBuilder)
+    {
+        migrationBuilder.DropIndex(
+            name: "IX_Product_ProductUniqueId",
+            table: "Product");
     }
 }

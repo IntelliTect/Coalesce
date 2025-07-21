@@ -7,81 +7,80 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text.Json.Serialization;
 
-namespace Coalesce.Web.Vue3.Models
+namespace Coalesce.Web.Vue3.Models;
+
+public partial class StandaloneReadCreateParameter : SparseDto, IGeneratedParameterDto<Coalesce.Domain.StandaloneReadCreate>
 {
-    public partial class StandaloneReadCreateParameter : SparseDto, IGeneratedParameterDto<Coalesce.Domain.StandaloneReadCreate>
+    public StandaloneReadCreateParameter() { }
+
+    private int? _Id;
+    private string _Name;
+    private System.DateTimeOffset? _Date;
+
+    public int? Id
     {
-        public StandaloneReadCreateParameter() { }
-
-        private int? _Id;
-        private string _Name;
-        private System.DateTimeOffset? _Date;
-
-        public int? Id
-        {
-            get => _Id;
-            set { _Id = value; Changed(nameof(Id)); }
-        }
-        public string Name
-        {
-            get => _Name;
-            set { _Name = value; Changed(nameof(Name)); }
-        }
-        public System.DateTimeOffset? Date
-        {
-            get => _Date;
-            set { _Date = value; Changed(nameof(Date)); }
-        }
-
-        /// <summary>
-        /// Map from the current DTO instance to the domain object.
-        /// </summary>
-        public void MapTo(Coalesce.Domain.StandaloneReadCreate entity, IMappingContext context)
-        {
-            var includes = context.Includes;
-
-            if (ShouldMapTo(nameof(Id))) entity.Id = (Id ?? entity.Id);
-            if (ShouldMapTo(nameof(Name))) entity.Name = Name;
-            if (ShouldMapTo(nameof(Date))) entity.Date = (Date ?? entity.Date);
-        }
-
-        /// <summary>
-        /// Map from the current DTO instance to a new instance of the domain object.
-        /// </summary>
-        public Coalesce.Domain.StandaloneReadCreate MapToNew(IMappingContext context)
-        {
-            var entity = new Coalesce.Domain.StandaloneReadCreate();
-            MapTo(entity, context);
-            return entity;
-        }
-
-        public Coalesce.Domain.StandaloneReadCreate MapToModelOrNew(Coalesce.Domain.StandaloneReadCreate obj, IMappingContext context)
-        {
-            if (obj is null) return MapToNew(context);
-            MapTo(obj, context);
-            return obj;
-        }
+        get => _Id;
+        set { _Id = value; Changed(nameof(Id)); }
+    }
+    public string Name
+    {
+        get => _Name;
+        set { _Name = value; Changed(nameof(Name)); }
+    }
+    public System.DateTimeOffset? Date
+    {
+        get => _Date;
+        set { _Date = value; Changed(nameof(Date)); }
     }
 
-    public partial class StandaloneReadCreateResponse : IGeneratedResponseDto<Coalesce.Domain.StandaloneReadCreate>
+    /// <summary>
+    /// Map from the current DTO instance to the domain object.
+    /// </summary>
+    public void MapTo(Coalesce.Domain.StandaloneReadCreate entity, IMappingContext context)
     {
-        public StandaloneReadCreateResponse() { }
+        var includes = context.Includes;
 
-        public int? Id { get; set; }
-        public string Name { get; set; }
-        public System.DateTimeOffset? Date { get; set; }
+        if (ShouldMapTo(nameof(Id))) entity.Id = (Id ?? entity.Id);
+        if (ShouldMapTo(nameof(Name))) entity.Name = Name;
+        if (ShouldMapTo(nameof(Date))) entity.Date = (Date ?? entity.Date);
+    }
 
-        /// <summary>
-        /// Map from the domain object to the properties of the current DTO instance.
-        /// </summary>
-        public void MapFrom(Coalesce.Domain.StandaloneReadCreate obj, IMappingContext context, IncludeTree tree = null)
-        {
-            if (obj == null) return;
-            var includes = context.Includes;
+    /// <summary>
+    /// Map from the current DTO instance to a new instance of the domain object.
+    /// </summary>
+    public Coalesce.Domain.StandaloneReadCreate MapToNew(IMappingContext context)
+    {
+        var entity = new Coalesce.Domain.StandaloneReadCreate();
+        MapTo(entity, context);
+        return entity;
+    }
 
-            this.Id = obj.Id;
-            this.Name = obj.Name;
-            this.Date = obj.Date;
-        }
+    public Coalesce.Domain.StandaloneReadCreate MapToModelOrNew(Coalesce.Domain.StandaloneReadCreate obj, IMappingContext context)
+    {
+        if (obj is null) return MapToNew(context);
+        MapTo(obj, context);
+        return obj;
+    }
+}
+
+public partial class StandaloneReadCreateResponse : IGeneratedResponseDto<Coalesce.Domain.StandaloneReadCreate>
+{
+    public StandaloneReadCreateResponse() { }
+
+    public int? Id { get; set; }
+    public string Name { get; set; }
+    public System.DateTimeOffset? Date { get; set; }
+
+    /// <summary>
+    /// Map from the domain object to the properties of the current DTO instance.
+    /// </summary>
+    public void MapFrom(Coalesce.Domain.StandaloneReadCreate obj, IMappingContext context, IncludeTree tree = null)
+    {
+        if (obj == null) return;
+        var includes = context.Includes;
+
+        this.Id = obj.Id;
+        this.Name = obj.Name;
+        this.Date = obj.Date;
     }
 }

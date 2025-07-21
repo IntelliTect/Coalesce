@@ -1,37 +1,28 @@
-﻿using System;
-using System.IO;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.IO;
 using System.Threading.Tasks;
-using IntelliTect.Coalesce.CodeGeneration.Templating;
-using IntelliTect.Coalesce.CodeGeneration.Templating.Resolution;
-using IntelliTect.Coalesce.CodeGeneration.Configuration;
-using IntelliTect.Coalesce.CodeGeneration.Utilities;
-using Microsoft.Extensions.Logging;
 using System.Text;
 
-namespace IntelliTect.Coalesce.CodeGeneration.Generation
+namespace IntelliTect.Coalesce.CodeGeneration.Generation;
+
+public abstract class StringBuilderFileGenerator<TModel> : FileGenerator, IFileGenerator<TModel>
 {
-    public abstract class StringBuilderFileGenerator<TModel> : FileGenerator, IFileGenerator<TModel>
+    public StringBuilderFileGenerator(GeneratorServices services) : base(services) { }
+
+    public TModel Model { get; set; }
+
+    public abstract Task<string> BuildOutputAsync();
+
+    public sealed override async Task<Stream> GetOutputAsync()
     {
-        public StringBuilderFileGenerator(GeneratorServices services) : base(services) { }
+        return new MemoryStream(Encoding.UTF8.GetBytes(await BuildOutputAsync()));
+    }
 
-        public TModel Model { get; set; }
-
-        public abstract Task<string> BuildOutputAsync();
-
-        public sealed override async Task<Stream> GetOutputAsync()
+    public override string ToString()
+    {
+        if (EffectiveOutputPath != null)
         {
-            return new MemoryStream(Encoding.UTF8.GetBytes(await BuildOutputAsync()));
+            return $"{GetType().FullName} => {EffectiveOutputPath}";
         }
-
-        public override string ToString()
-        {
-            if (EffectiveOutputPath != null)
-            {
-                return $"{GetType().FullName} => {EffectiveOutputPath}";
-            }
-            return GetType().FullName;
-        }
+        return GetType().FullName;
     }
 }

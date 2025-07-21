@@ -1,37 +1,33 @@
-﻿using System.Security.Claims;
-using IntelliTect.Coalesce.TypeDefinition;
-using System.Collections.Concurrent;
-using System;
+﻿using System;
 
-namespace IntelliTect.Coalesce.Mapping
+namespace IntelliTect.Coalesce.Mapping;
+
+public static class Mapper
 {
-    public static class Mapper
+    [return: System.Diagnostics.CodeAnalysis.NotNullIfNotNull("obj")]
+    public static TDto? MapToDto<T, TDto>(this T? obj, IMappingContext context, IncludeTree? tree = null)
+        where T : class
+        where TDto : class, IResponseDto<T>, new()
     {
-        [return: System.Diagnostics.CodeAnalysis.NotNullIfNotNull("obj")]
-        public static TDto? MapToDto<T, TDto>(this T? obj, IMappingContext context, IncludeTree? tree = null)
-            where T : class
-            where TDto : class, IResponseDto<T>, new()
-        {
-            if (obj == null) return default;
+        if (obj == null) return default;
 
-            // See if we already mapped this object:
-            if (context.TryGetMapping(obj, tree, out TDto? existing)) return existing;
+        // See if we already mapped this object:
+        if (context.TryGetMapping(obj, tree, out TDto? existing)) return existing;
 
-            var realDtoType = context.GetResponseDtoType<TDto, T>(obj);
+        var realDtoType = context.GetResponseDtoType<TDto, T>(obj);
 
-            TDto dto = (TDto)Activator.CreateInstance(realDtoType)!;
-            context.AddMapping(obj, tree, dto);
-            dto.MapFrom(obj, context, tree);
+        TDto dto = (TDto)Activator.CreateInstance(realDtoType)!;
+        context.AddMapping(obj, tree, dto);
+        dto.MapFrom(obj, context, tree);
 
-            return dto;
-        }
+        return dto;
+    }
 
-        public static T MapToModel<T, TDto>(this TDto dto, T entity, IMappingContext context)
-            where T : class
-            where TDto : class, IParameterDto<T>, new()
-        {
-            dto.MapTo(entity, context);
-            return entity;
-        }
+    public static T MapToModel<T, TDto>(this TDto dto, T entity, IMappingContext context)
+        where T : class
+        where TDto : class, IParameterDto<T>, new()
+    {
+        dto.MapTo(entity, context);
+        return entity;
     }
 }

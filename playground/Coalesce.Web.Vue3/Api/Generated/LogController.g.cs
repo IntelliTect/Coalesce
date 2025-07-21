@@ -19,49 +19,48 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 
-namespace Coalesce.Web.Vue3.Api
+namespace Coalesce.Web.Vue3.Api;
+
+[Route("api/Log")]
+[Authorize]
+[ServiceFilter(typeof(IApiActionFilter))]
+public partial class LogController
+    : BaseApiController<Coalesce.Domain.Log, LogParameter, LogResponse, Coalesce.Domain.AppDbContext>
 {
-    [Route("api/Log")]
-    [Authorize]
-    [ServiceFilter(typeof(IApiActionFilter))]
-    public partial class LogController
-        : BaseApiController<Coalesce.Domain.Log, LogParameter, LogResponse, Coalesce.Domain.AppDbContext>
+    public LogController(CrudContext<Coalesce.Domain.AppDbContext> context) : base(context)
     {
-        public LogController(CrudContext<Coalesce.Domain.AppDbContext> context) : base(context)
-        {
-            GeneratedForClassViewModel = context.ReflectionRepository.GetClassViewModel<Coalesce.Domain.Log>();
-        }
-
-        [HttpGet("get/{id}")]
-        [Authorize]
-        public virtual Task<ItemResult<LogResponse>> Get(
-            int id,
-            [FromQuery] DataSourceParameters parameters,
-            IDataSource<Coalesce.Domain.Log> dataSource)
-            => GetImplementation(id, parameters, dataSource);
-
-        [HttpGet("list")]
-        [Authorize]
-        public virtual Task<ListResult<LogResponse>> List(
-            [FromQuery] ListParameters parameters,
-            IDataSource<Coalesce.Domain.Log> dataSource)
-            => ListImplementation(parameters, dataSource);
-
-        [HttpGet("count")]
-        [Authorize]
-        public virtual Task<ItemResult<int>> Count(
-            [FromQuery] FilterParameters parameters,
-            IDataSource<Coalesce.Domain.Log> dataSource)
-            => CountImplementation(parameters, dataSource);
-
-        [HttpPost("bulkSave")]
-        [Authorize]
-        public virtual Task<ItemResult<LogResponse>> BulkSave(
-            [FromBody] BulkSaveRequest dto,
-            [FromQuery] DataSourceParameters parameters,
-            IDataSource<Coalesce.Domain.Log> dataSource,
-            [FromServices] IDataSourceFactory dataSourceFactory,
-            [FromServices] IBehaviorsFactory behaviorsFactory)
-            => BulkSaveImplementation(dto, parameters, dataSource, dataSourceFactory, behaviorsFactory);
+        GeneratedForClassViewModel = context.ReflectionRepository.GetClassViewModel<Coalesce.Domain.Log>();
     }
+
+    [HttpGet("get/{id}")]
+    [Authorize]
+    public virtual Task<ItemResult<LogResponse>> Get(
+        int id,
+        [FromQuery] DataSourceParameters parameters,
+        IDataSource<Coalesce.Domain.Log> dataSource)
+        => GetImplementation(id, parameters, dataSource);
+
+    [HttpGet("list")]
+    [Authorize]
+    public virtual Task<ListResult<LogResponse>> List(
+        [FromQuery] ListParameters parameters,
+        IDataSource<Coalesce.Domain.Log> dataSource)
+        => ListImplementation(parameters, dataSource);
+
+    [HttpGet("count")]
+    [Authorize]
+    public virtual Task<ItemResult<int>> Count(
+        [FromQuery] FilterParameters parameters,
+        IDataSource<Coalesce.Domain.Log> dataSource)
+        => CountImplementation(parameters, dataSource);
+
+    [HttpPost("bulkSave")]
+    [Authorize]
+    public virtual Task<ItemResult<LogResponse>> BulkSave(
+        [FromBody] BulkSaveRequest dto,
+        [FromQuery] DataSourceParameters parameters,
+        IDataSource<Coalesce.Domain.Log> dataSource,
+        [FromServices] IDataSourceFactory dataSourceFactory,
+        [FromServices] IBehaviorsFactory behaviorsFactory)
+        => BulkSaveImplementation(dto, parameters, dataSource, dataSourceFactory, behaviorsFactory);
 }

@@ -14,62 +14,61 @@ using System.Reflection;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace IntelliTect.Coalesce.CodeGeneration.Tests.OpenApi
+namespace IntelliTect.Coalesce.CodeGeneration.Tests.OpenApi;
+
+[CollectionDefinition(OpenApiFixture.Collection)]
+public class OpenApiFixtureCollection : ICollectionFixture<OpenApiFixture> { }
+
+public class OpenApiFixture
 {
-    [CollectionDefinition(OpenApiFixture.Collection)]
-    public class OpenApiFixtureCollection : ICollectionFixture<OpenApiFixture> { }
+    public const string Collection = "OpenApi";
 
-    public class OpenApiFixture
+    public OpenApiFixture()
     {
-        public const string Collection = "OpenApi";
+        Assembly assembly = CodeGenTestBase.WebAssembly.Value;
 
-        public OpenApiFixture()
-        {
-            Assembly assembly = CodeGenTestBase.WebAssembly.Value;
-
-            var hostBuilder = new HostBuilder()
-                .ConfigureWebHost(webHost =>
+        var hostBuilder = new HostBuilder()
+            .ConfigureWebHost(webHost =>
+            {
+                webHost.UseTestServer();
+                webHost.ConfigureServices(services =>
                 {
-                    webHost.UseTestServer();
-                    webHost.ConfigureServices(services =>
+                    services.AddCoalesce<AppDbContext>();
+                    services.AddMvc()
+                        // Add our dynamic assembly that contains our generated controllers and DTOs
+                        .AddApplicationPart(assembly);
+                    services.AddOpenApi();
+                });
+                webHost.Configure(app =>
+                {
+                    app.UseRouting();
+                    app.UseEndpoints(b =>
                     {
-                        services.AddCoalesce<AppDbContext>();
-                        services.AddMvc()
-                            // Add our dynamic assembly that contains our generated controllers and DTOs
-                            .AddApplicationPart(assembly);
-                        services.AddOpenApi();
-                    });
-                    webHost.Configure(app =>
-                    {
-                        app.UseRouting();
-                        app.UseEndpoints(b =>
-                        {
-                            b.MapOpenApi();
-                        });
+                        b.MapOpenApi();
                     });
                 });
+            });
 
-            App = hostBuilder.Start();
-        }
+        App = hostBuilder.Start();
+    }
 
-        public IHost App { get; }
+    public IHost App { get; }
 
-        public async Task<OpenApiDocument> GetDocumentAsync()
-        {
-            var client = App.GetTestClient();
+    public async Task<OpenApiDocument> GetDocumentAsync()
+    {
+        var client = App.GetTestClient();
 
-            var openApiDoc = await client.GetAsync("/openapi/v1.json");
-            Assert.Equal(HttpStatusCode.OK, openApiDoc.StatusCode);
+        var openApiDoc = await client.GetAsync("/openapi/v1.json");
+        Assert.Equal(HttpStatusCode.OK, openApiDoc.StatusCode);
 
-            // OpenApiDocument cannot be parsed directly with a JSON deserializer,
-            // as it is a midly non-normalized format that requires special rules to understand.
-            var openApiDocument = new OpenApiStreamReader()
-                .Read(await openApiDoc.Content.ReadAsStreamAsync(), out var diagnostic);
-            Assert.NotNull(openApiDocument);
-            Assert.Empty(diagnostic.Errors);
-            Assert.Empty(diagnostic.Warnings);
-            return openApiDocument;
-        }
+        // OpenApiDocument cannot be parsed directly with a JSON deserializer,
+        // as it is a midly non-normalized format that requires special rules to understand.
+        var openApiDocument = new OpenApiStreamReader()
+            .Read(await openApiDoc.Content.ReadAsStreamAsync(), out var diagnostic);
+        Assert.NotNull(openApiDocument);
+        Assert.Empty(diagnostic.Errors);
+        Assert.Empty(diagnostic.Warnings);
+        return openApiDocument;
     }
 }
 #endif

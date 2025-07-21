@@ -1,19 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿namespace IntelliTect.Coalesce;
 
-namespace IntelliTect.Coalesce
+public enum SortDirection
 {
-    public enum SortDirection
-    {
-        /// <summary>
-        /// Ascending
-        /// </summary>
-        Asc = 1,
+    /// <summary>
+    /// Ascending
+    /// </summary>
+    Asc = 1,
 
-        /// <summary>
-        /// Descending
-        /// </summary>
-        Desc = 2,
-    }
+    /// <summary>
+    /// Descending
+    /// </summary>
+    Desc = 2,
 }

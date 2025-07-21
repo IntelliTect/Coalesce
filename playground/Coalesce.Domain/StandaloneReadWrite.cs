@@ -2,101 +2,98 @@
 using IntelliTect.Coalesce.DataAnnotations;
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Coalesce.Domain
+namespace Coalesce.Domain;
+
+
+[Coalesce, StandaloneEntity]
+public class StandaloneReadWrite
 {
+    public int Id { get; set; }
 
-    [Coalesce, StandaloneEntity]
-    public class StandaloneReadWrite
+    [Search(SearchMethod = SearchAttribute.SearchMethods.Contains), ListText]
+    public string Name { get; set; } = "";
+
+    [DefaultOrderBy]
+    public DateTimeOffset Date { get; set; }
+
+    private static int nextId = 0;
+    private static ConcurrentDictionary<int, StandaloneReadWrite> backingStore = new ConcurrentDictionary<int, StandaloneReadWrite>();
+    public class DefaultSource : StandardDataSource<StandaloneReadWrite>
     {
-        public int Id { get; set; }
+        public DefaultSource(CrudContext context) : base(context) { }
 
-        [Search(SearchMethod = SearchAttribute.SearchMethods.Contains), ListText]
-        public string Name { get; set; } = "";
-
-        [DefaultOrderBy]
-        public DateTimeOffset Date { get; set; }
-
-        private static int nextId = 0;
-        private static ConcurrentDictionary<int, StandaloneReadWrite> backingStore = new ConcurrentDictionary<int, StandaloneReadWrite>();
-        public class DefaultSource : StandardDataSource<StandaloneReadWrite>
-        {
-            public DefaultSource(CrudContext context) : base(context) { }
-
-            public override Task<IQueryable<StandaloneReadWrite>> GetQueryAsync(IDataSourceParameters parameters)
-                => Task.FromResult(backingStore.Values.AsQueryable());
-        }
-
-        public class Behaviors : StandardBehaviors<StandaloneReadWrite>
-        {
-            public Behaviors(CrudContext context) : base(context) { }
-
-            public override Task ExecuteDeleteAsync(StandaloneReadWrite item)
-            {
-                backingStore.TryRemove(item.Id, out _);
-                return Task.CompletedTask;
-            }
-
-            public override Task ExecuteSaveAsync(SaveKind kind, StandaloneReadWrite? oldItem, StandaloneReadWrite item)
-            {
-                if (kind == SaveKind.Create)
-                {
-                    item.Id = Interlocked.Increment(ref nextId);
-                    backingStore.TryAdd(item.Id, item);
-                }
-                else
-                {
-                    backingStore.TryRemove(item.Id, out _);
-                    backingStore.TryAdd(item.Id, item);
-                }
-                return Task.CompletedTask;
-            }
-        }
+        public override Task<IQueryable<StandaloneReadWrite>> GetQueryAsync(IDataSourceParameters parameters)
+            => Task.FromResult(backingStore.Values.AsQueryable());
     }
 
-    [Coalesce, StandaloneEntity]
-    [Edit(PermissionLevel = SecurityPermissionLevels.DenyAll)]
-    public class StandaloneReadCreate
+    public class Behaviors : StandardBehaviors<StandaloneReadWrite>
     {
-        public int Id { get; set; }
+        public Behaviors(CrudContext context) : base(context) { }
 
-        [Search(SearchMethod = SearchAttribute.SearchMethods.Contains), ListText]
-        public string Name { get; set; } = "";
-
-        [DefaultOrderBy]
-        public DateTimeOffset Date { get; set; }
-
-        private static int nextId = 0;
-        private static ConcurrentDictionary<int, StandaloneReadCreate> backingStore = new ConcurrentDictionary<int, StandaloneReadCreate>();
-        public class DefaultSource : StandardDataSource<StandaloneReadCreate>
+        public override Task ExecuteDeleteAsync(StandaloneReadWrite item)
         {
-            public DefaultSource(CrudContext context) : base(context) { }
-
-            public override Task<IQueryable<StandaloneReadCreate>> GetQueryAsync(IDataSourceParameters parameters)
-                => Task.FromResult(backingStore.Values.AsQueryable());
+            backingStore.TryRemove(item.Id, out _);
+            return Task.CompletedTask;
         }
 
-        public class Behaviors : StandardBehaviors<StandaloneReadCreate>
+        public override Task ExecuteSaveAsync(SaveKind kind, StandaloneReadWrite? oldItem, StandaloneReadWrite item)
         {
-            public Behaviors(CrudContext context) : base(context) { }
-
-            public override Task ExecuteDeleteAsync(StandaloneReadCreate item)
-            {
-                backingStore.TryRemove(item.Id, out _);
-                return Task.CompletedTask;
-            }
-
-            public override Task ExecuteSaveAsync(SaveKind kind, StandaloneReadCreate? oldItem, StandaloneReadCreate item)
+            if (kind == SaveKind.Create)
             {
                 item.Id = Interlocked.Increment(ref nextId);
                 backingStore.TryAdd(item.Id, item);
-                return Task.CompletedTask;
             }
+            else
+            {
+                backingStore.TryRemove(item.Id, out _);
+                backingStore.TryAdd(item.Id, item);
+            }
+            return Task.CompletedTask;
+        }
+    }
+}
+
+[Coalesce, StandaloneEntity]
+[Edit(PermissionLevel = SecurityPermissionLevels.DenyAll)]
+public class StandaloneReadCreate
+{
+    public int Id { get; set; }
+
+    [Search(SearchMethod = SearchAttribute.SearchMethods.Contains), ListText]
+    public string Name { get; set; } = "";
+
+    [DefaultOrderBy]
+    public DateTimeOffset Date { get; set; }
+
+    private static int nextId = 0;
+    private static ConcurrentDictionary<int, StandaloneReadCreate> backingStore = new ConcurrentDictionary<int, StandaloneReadCreate>();
+    public class DefaultSource : StandardDataSource<StandaloneReadCreate>
+    {
+        public DefaultSource(CrudContext context) : base(context) { }
+
+        public override Task<IQueryable<StandaloneReadCreate>> GetQueryAsync(IDataSourceParameters parameters)
+            => Task.FromResult(backingStore.Values.AsQueryable());
+    }
+
+    public class Behaviors : StandardBehaviors<StandaloneReadCreate>
+    {
+        public Behaviors(CrudContext context) : base(context) { }
+
+        public override Task ExecuteDeleteAsync(StandaloneReadCreate item)
+        {
+            backingStore.TryRemove(item.Id, out _);
+            return Task.CompletedTask;
+        }
+
+        public override Task ExecuteSaveAsync(SaveKind kind, StandaloneReadCreate? oldItem, StandaloneReadCreate item)
+        {
+            item.Id = Interlocked.Increment(ref nextId);
+            backingStore.TryAdd(item.Id, item);
+            return Task.CompletedTask;
         }
     }
 }

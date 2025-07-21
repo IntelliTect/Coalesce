@@ -1,23 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Runtime.Serialization;
-using System.Text;
 
-namespace IntelliTect.Coalesce.CodeGeneration.Analysis
-{
+namespace IntelliTect.Coalesce.CodeGeneration.Analysis;
+
 #pragma warning disable RCS1194 // Implement exception constructors.
-    public class ProjectAnalysisException : Exception
+public class ProjectAnalysisException : Exception
 #pragma warning restore RCS1194 // Implement exception constructors.
+{
+    public ProjectAnalysisException()
     {
-        public ProjectAnalysisException()
-        {
-        }
-
-        public ProjectAnalysisException(string message, ICollection<string> outputLines) : base(message)
-        {
-            OutputLines = outputLines;
-        }
-
-        public ICollection<string> OutputLines { get; }
     }
+
+    public ProjectAnalysisException(string message, ICollection<string> outputLines) : base(message)
+    {
+        OutputLines = outputLines;
+    }
+
+    public ICollection<string> OutputLines { get; }
 }

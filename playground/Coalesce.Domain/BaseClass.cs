@@ -1,14 +1,13 @@
-﻿namespace Coalesce.Domain
+﻿namespace Coalesce.Domain;
+
+public class BaseClass
 {
-    public class BaseClass
-    {
-        public int Id { get; set; }
+    public int Id { get; set; }
 
-        public string? BaseClassString { get; set; }
-    }
+    public string? BaseClassString { get; set; }
+}
 
-    public class BaseClassDerived : BaseClass
-    {
-        public string? DerivedClassString { get; set; }
-    }
+public class BaseClassDerived : BaseClass
+{
+    public string? DerivedClassString { get; set; }
 }

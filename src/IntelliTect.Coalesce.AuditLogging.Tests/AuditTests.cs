@@ -1,5 +1,4 @@
 using IntelliTect.Coalesce.DataAnnotations;
-using IntelliTect.Coalesce.Utilities;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Data.Sqlite;

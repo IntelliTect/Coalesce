@@ -8,171 +8,170 @@ using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.EntityFrameworkCore.Storage.Internal;
 using System;
 
-namespace Coalesce.Domain.Migrations
+namespace Coalesce.Domain.Migrations;
+
+[DbContext(typeof(AppDbContext))]
+[Migration("20180116002515_AddTimeSpan")]
+partial class AddTimeSpan
 {
-    [DbContext(typeof(AppDbContext))]
-    [Migration("20180116002515_AddTimeSpan")]
-    partial class AddTimeSpan
+    protected override void BuildTargetModel(ModelBuilder modelBuilder)
     {
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
-        {
 #pragma warning disable 612, 618
-            modelBuilder
-                .HasAnnotation("ProductVersion", "2.0.1-rtm-125")
-                .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+        modelBuilder
+            .HasAnnotation("ProductVersion", "2.0.1-rtm-125")
+            .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-            modelBuilder.Entity("Coalesce.Domain.Case", b =>
-                {
-                    b.Property<int>("CaseKey")
-                        .ValueGeneratedOnAdd();
+        modelBuilder.Entity("Coalesce.Domain.Case", b =>
+            {
+                b.Property<int>("CaseKey")
+                    .ValueGeneratedOnAdd();
 
-                    b.Property<int?>("AssignedToId");
+                b.Property<int?>("AssignedToId");
 
-                    b.Property<byte[]>("Attachment");
+                b.Property<byte[]>("Attachment");
 
-                    b.Property<string>("Description");
+                b.Property<string>("Description");
 
-                    b.Property<int?>("DevTeamAssignedId");
+                b.Property<int?>("DevTeamAssignedId");
 
-                    b.Property<TimeSpan>("Duration");
+                b.Property<TimeSpan>("Duration");
 
-                    b.Property<DateTimeOffset>("OpenedAt");
+                b.Property<DateTimeOffset>("OpenedAt");
 
-                    b.Property<int?>("ReportedById");
+                b.Property<int?>("ReportedById");
 
-                    b.Property<string>("Severity");
+                b.Property<string>("Severity");
 
-                    b.Property<int>("Status");
+                b.Property<int>("Status");
 
-                    b.Property<string>("Title");
+                b.Property<string>("Title");
 
-                    b.HasKey("CaseKey");
+                b.HasKey("CaseKey");
 
-                    b.HasIndex("AssignedToId");
+                b.HasIndex("AssignedToId");
 
-                    b.HasIndex("ReportedById");
+                b.HasIndex("ReportedById");
 
-                    b.ToTable("Case");
-                });
+                b.ToTable("Case");
+            });
 
-            modelBuilder.Entity("Coalesce.Domain.CaseProduct", b =>
-                {
-                    b.Property<int>("CaseProductId")
-                        .ValueGeneratedOnAdd();
+        modelBuilder.Entity("Coalesce.Domain.CaseProduct", b =>
+            {
+                b.Property<int>("CaseProductId")
+                    .ValueGeneratedOnAdd();
 
-                    b.Property<int>("CaseId");
+                b.Property<int>("CaseId");
 
-                    b.Property<int>("ProductId");
+                b.Property<int>("ProductId");
 
-                    b.HasKey("CaseProductId");
+                b.HasKey("CaseProductId");
 
-                    b.HasIndex("CaseId");
+                b.HasIndex("CaseId");
 
-                    b.HasIndex("ProductId");
+                b.HasIndex("ProductId");
 
-                    b.ToTable("CaseProduct");
-                });
+                b.ToTable("CaseProduct");
+            });
 
-            modelBuilder.Entity("Coalesce.Domain.Company", b =>
-                {
-                    b.Property<int>("CompanyId")
-                        .ValueGeneratedOnAdd();
+        modelBuilder.Entity("Coalesce.Domain.Company", b =>
+            {
+                b.Property<int>("CompanyId")
+                    .ValueGeneratedOnAdd();
 
-                    b.Property<string>("Address1");
+                b.Property<string>("Address1");
 
-                    b.Property<string>("Address2");
+                b.Property<string>("Address2");
 
-                    b.Property<string>("City");
+                b.Property<string>("City");
 
-                    b.Property<string>("Name");
+                b.Property<string>("Name");
 
-                    b.Property<string>("State");
+                b.Property<string>("State");
 
-                    b.Property<string>("ZipCode");
+                b.Property<string>("ZipCode");
 
-                    b.HasKey("CompanyId");
+                b.HasKey("CompanyId");
 
-                    b.ToTable("Company");
-                });
+                b.ToTable("Company");
+            });
 
-            modelBuilder.Entity("Coalesce.Domain.Person", b =>
-                {
-                    b.Property<int>("PersonId")
-                        .ValueGeneratedOnAdd();
+        modelBuilder.Entity("Coalesce.Domain.Person", b =>
+            {
+                b.Property<int>("PersonId")
+                    .ValueGeneratedOnAdd();
 
-                    b.Property<DateTime?>("BirthDate");
+                b.Property<DateTime?>("BirthDate");
 
-                    b.Property<int>("CompanyId");
+                b.Property<int>("CompanyId");
 
-                    b.Property<string>("Email");
+                b.Property<string>("Email");
 
-                    b.Property<string>("FirstName")
-                        .HasMaxLength(75);
+                b.Property<string>("FirstName")
+                    .HasMaxLength(75);
 
-                    b.Property<int>("Gender");
+                b.Property<int>("Gender");
 
-                    b.Property<DateTime?>("LastBath");
+                b.Property<DateTime?>("LastBath");
 
-                    b.Property<string>("LastName")
-                        .HasMaxLength(100);
+                b.Property<string>("LastName")
+                    .HasMaxLength(100);
 
-                    b.Property<DateTimeOffset?>("NextUpgrade");
+                b.Property<DateTimeOffset?>("NextUpgrade");
 
-                    b.Property<byte[]>("ProfilePic");
+                b.Property<byte[]>("ProfilePic");
 
-                    b.Property<int>("Title");
+                b.Property<int>("Title");
 
-                    b.HasKey("PersonId");
+                b.HasKey("PersonId");
 
-                    b.HasIndex("CompanyId");
+                b.HasIndex("CompanyId");
 
-                    b.ToTable("Person");
-                });
+                b.ToTable("Person");
+            });
 
-            modelBuilder.Entity("Coalesce.Domain.Product", b =>
-                {
-                    b.Property<int>("ProductId")
-                        .ValueGeneratedOnAdd();
+        modelBuilder.Entity("Coalesce.Domain.Product", b =>
+            {
+                b.Property<int>("ProductId")
+                    .ValueGeneratedOnAdd();
 
-                    b.Property<string>("Name");
+                b.Property<string>("Name");
 
-                    b.HasKey("ProductId");
+                b.HasKey("ProductId");
 
-                    b.ToTable("Product");
-                });
+                b.ToTable("Product");
+            });
 
-            modelBuilder.Entity("Coalesce.Domain.Case", b =>
-                {
-                    b.HasOne("Coalesce.Domain.Person", "AssignedTo")
-                        .WithMany("CasesAssigned")
-                        .HasForeignKey("AssignedToId");
+        modelBuilder.Entity("Coalesce.Domain.Case", b =>
+            {
+                b.HasOne("Coalesce.Domain.Person", "AssignedTo")
+                    .WithMany("CasesAssigned")
+                    .HasForeignKey("AssignedToId");
 
-                    b.HasOne("Coalesce.Domain.Person", "ReportedBy")
-                        .WithMany("CasesReported")
-                        .HasForeignKey("ReportedById");
-                });
+                b.HasOne("Coalesce.Domain.Person", "ReportedBy")
+                    .WithMany("CasesReported")
+                    .HasForeignKey("ReportedById");
+            });
 
-            modelBuilder.Entity("Coalesce.Domain.CaseProduct", b =>
-                {
-                    b.HasOne("Coalesce.Domain.Case", "Case")
-                        .WithMany("CaseProducts")
-                        .HasForeignKey("CaseId")
-                        .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity("Coalesce.Domain.CaseProduct", b =>
+            {
+                b.HasOne("Coalesce.Domain.Case", "Case")
+                    .WithMany("CaseProducts")
+                    .HasForeignKey("CaseId")
+                    .OnDelete(DeleteBehavior.Cascade);
 
-                    b.HasOne("Coalesce.Domain.Product", "Product")
-                        .WithMany()
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
+                b.HasOne("Coalesce.Domain.Product", "Product")
+                    .WithMany()
+                    .HasForeignKey("ProductId")
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
 
-            modelBuilder.Entity("Coalesce.Domain.Person", b =>
-                {
-                    b.HasOne("Coalesce.Domain.Company", "Company")
-                        .WithMany("Employees")
-                        .HasForeignKey("CompanyId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
+        modelBuilder.Entity("Coalesce.Domain.Person", b =>
+            {
+                b.HasOne("Coalesce.Domain.Company", "Company")
+                    .WithMany("Employees")
+                    .HasForeignKey("CompanyId")
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
 #pragma warning restore 612, 618
-        }
     }
 }

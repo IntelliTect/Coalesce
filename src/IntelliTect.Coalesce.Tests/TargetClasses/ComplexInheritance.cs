@@ -1,39 +1,37 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Text;
 
-namespace IntelliTect.Coalesce.Tests.TargetClasses
+namespace IntelliTect.Coalesce.Tests.TargetClasses;
+
+// IEnumerable is technically duplicated here.
+// We specify it explicitly, and IEnumerable<> also implements IEnumerable.
+public class ComplexInheritance : IEnumerable<object>, IEnumerable, IAmInheritedMultipleTimes<string>, IAmInheritedMultipleTimes<int>
 {
-    // IEnumerable is technically duplicated here.
-    // We specify it explicitly, and IEnumerable<> also implements IEnumerable.
-    public class ComplexInheritance : IEnumerable<object>, IEnumerable, IAmInheritedMultipleTimes<string>, IAmInheritedMultipleTimes<int>
+    public IEnumerator<object> GetEnumerator()
     {
-        public IEnumerator<object> GetEnumerator()
-        {
-            throw new NotImplementedException();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            throw new NotImplementedException();
-        }
+        throw new NotImplementedException();
     }
 
-    public class ComplexInheritanceDerived : ComplexInheritance, IAmInheritedMultipleTimes<ComplexInheritanceDerived> { }
-
-    public interface IAmInheritedMultipleTimes<T> : IHaveMultipleTypes<IAmSimple, long, decimal>
+    IEnumerator IEnumerable.GetEnumerator()
     {
-
+        throw new NotImplementedException();
     }
+}
 
-    public interface IHaveMultipleTypes<T1, T2, T3>
-    {
+public class ComplexInheritanceDerived : ComplexInheritance, IAmInheritedMultipleTimes<ComplexInheritanceDerived> { }
 
-    }
+public interface IAmInheritedMultipleTimes<T> : IHaveMultipleTypes<IAmSimple, long, decimal>
+{
 
-    public interface IAmSimple
-    {
+}
 
-    }
+public interface IHaveMultipleTypes<T1, T2, T3>
+{
+
+}
+
+public interface IAmSimple
+{
+
 }

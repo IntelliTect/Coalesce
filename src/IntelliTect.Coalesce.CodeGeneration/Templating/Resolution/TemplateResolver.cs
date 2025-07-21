@@ -1,23 +1,18 @@
 ﻿using IntelliTect.Coalesce.CodeGeneration.Configuration;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
-namespace IntelliTect.Coalesce.CodeGeneration.Templating.Resolution
+namespace IntelliTect.Coalesce.CodeGeneration.Templating.Resolution;
+
+public class TemplateResolver : ITemplateResolver
 {
-    public class TemplateResolver : ITemplateResolver
+    public TemplateResolver(CoalesceConfiguration config)
     {
-        public TemplateResolver(CoalesceConfiguration config)
-        {
-            Config = config;
-        }
+        Config = config;
+    }
 
-        public CoalesceConfiguration Config { get; }
+    public CoalesceConfiguration Config { get; }
 
-        public IResolvedTemplate Resolve(TemplateDescriptor descriptor)
-        {
-            return new ResolvedManifestResourceTemplate(descriptor);
-        }
+    public IResolvedTemplate Resolve(TemplateDescriptor descriptor)
+    {
+        return new ResolvedManifestResourceTemplate(descriptor);
     }
 }

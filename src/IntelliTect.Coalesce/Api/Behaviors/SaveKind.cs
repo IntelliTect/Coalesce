@@ -1,8 +1,7 @@
-﻿namespace IntelliTect.Coalesce
+﻿namespace IntelliTect.Coalesce;
+
+public enum SaveKind
 {
-    public enum SaveKind
-    {
-        Create,
-        Update,
-    }
+    Create,
+    Update,
 }

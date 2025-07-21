@@ -1,26 +1,25 @@
 ﻿using System;
 
-namespace IntelliTect.Coalesce.DataAnnotations
+namespace IntelliTect.Coalesce.DataAnnotations;
+
+/// <summary>
+/// Specify that this property is only used on specific views of the content.
+/// </summary>
+[AttributeUsage(AttributeTargets.Property)]
+public class DtoExcludesAttribute : Attribute
 {
     /// <summary>
-    /// Specify that this property is only used on specific views of the content.
+    /// Comma-delimited list of content views this property should be excluded from.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Property)]
-    public class DtoExcludesAttribute : Attribute
+    public string ContentViews { get; set; } = "";
+
+    public DtoExcludesAttribute(  )
     {
-        /// <summary>
-        /// Comma-delimited list of content views this property should be excluded from.
-        /// </summary>
-        public string ContentViews { get; set; } = "";
+        
+    }
 
-        public DtoExcludesAttribute(  )
-        {
-            
-        }
-
-        public DtoExcludesAttribute(string contentViews)
-        {
-            ContentViews = contentViews;
-        }
+    public DtoExcludesAttribute(string contentViews)
+    {
+        ContentViews = contentViews;
     }
 }

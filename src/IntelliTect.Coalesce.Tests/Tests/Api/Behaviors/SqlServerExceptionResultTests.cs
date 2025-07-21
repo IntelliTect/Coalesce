@@ -5,7 +5,6 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
 using System.Reflection;
-using Xunit;
 
 namespace IntelliTect.Coalesce.Tests.Tests.Api.Behaviors;
 

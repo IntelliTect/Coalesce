@@ -2,56 +2,55 @@
 using IntelliTect.Coalesce.CodeGeneration.Api.BaseGenerators;
 using IntelliTect.Coalesce.Utilities;
 
-namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators
+namespace IntelliTect.Coalesce.CodeGeneration.Api.Generators;
+
+public class ServiceApiController : ApiController
 {
-    public class ServiceApiController : ApiController
+    public ServiceApiController(GeneratorServices services) : base(services) { }
+
+    public override void BuildOutput(CSharpCodeBuilder b)
     {
-        public ServiceApiController(GeneratorServices services) : base(services) { }
+        WriteNamespaces(b);
 
-        public override void BuildOutput(CSharpCodeBuilder b)
+        b.Line();
+        using (b.Block($"namespace {GetAreaNamespace()}.Api"))
         {
-            WriteNamespaces(b);
-
-            b.Line();
-            using (b.Block($"namespace {GetAreaNamespace()}.Api"))
+            WriteControllerRouteAttribute(b);
+            /* No controller-level security annotation is applied - all security for service controllers is on a per-action basis. */
+            b.Line("[ServiceFilter(typeof(IApiActionFilter))]");
+            using (b.Block($"public partial class {Model.ApiControllerClassName} : BaseApiController"))
             {
-                WriteControllerRouteAttribute(b);
-                /* No controller-level security annotation is applied - all security for service controllers is on a per-action basis. */
-                b.Line("[ServiceFilter(typeof(IApiActionFilter))]");
-                using (b.Block($"public partial class {Model.ApiControllerClassName} : BaseApiController"))
-                {
-                    WriteClassContents(b);
-                }
+                WriteClassContents(b);
             }
         }
+    }
 
-        private void WriteClassContents(CSharpCodeBuilder b)
+    private void WriteClassContents(CSharpCodeBuilder b)
+    {
+        b.Line($"protected {Model.FullyQualifiedName} Service {{ get; }}");
+        b.Line();
+        using (b.Block($"public {Model.ApiControllerClassName}(CrudContext context, {Model.FullyQualifiedName} service) : base(context)"))
         {
-            b.Line($"protected {Model.FullyQualifiedName} Service {{ get; }}");
-            b.Line();
-            using (b.Block($"public {Model.ApiControllerClassName}(CrudContext context, {Model.FullyQualifiedName} service) : base(context)"))
+            b.Line($"GeneratedForClassViewModel = context.ReflectionRepository.GetClassViewModel<{Model.FullyQualifiedName}>();");
+            b.Line("Service = service;");
+        }
+
+        foreach (var method in Model.ClientMethods)
+        {
+            using (WriteControllerActionSignature(b, method))
             {
-                b.Line($"GeneratedForClassViewModel = context.ReflectionRepository.GetClassViewModel<{Model.FullyQualifiedName}>();");
-                b.Line("Service = service;");
+                WriteMethodInvocation(b, method, "Service");
+
+                WriteMethodResultProcessBlock(b, method);
             }
 
-            foreach (var method in Model.ClientMethods)
+            if (method.HasHttpRequestBody)
             {
-                using (WriteControllerActionSignature(b, method))
+                using (WriteControllerActionJsonSignature(b, method))
                 {
                     WriteMethodInvocation(b, method, "Service");
 
                     WriteMethodResultProcessBlock(b, method);
-                }
-
-                if (method.HasHttpRequestBody)
-                {
-                    using (WriteControllerActionJsonSignature(b, method))
-                    {
-                        WriteMethodInvocation(b, method, "Service");
-
-                        WriteMethodResultProcessBlock(b, method);
-                    }
                 }
             }
         }

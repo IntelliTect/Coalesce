@@ -2,27 +2,26 @@
 
 #nullable disable
 
-namespace Coalesce.Domain.Migrations
+namespace Coalesce.Domain.Migrations;
+
+/// <inheritdoc />
+public partial class AddCollectionOfStrings : Migration
 {
     /// <inheritdoc />
-    public partial class AddCollectionOfStrings : Migration
+    protected override void Up(MigrationBuilder migrationBuilder)
     {
-        /// <inheritdoc />
-        protected override void Up(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.AddColumn<string>(
-                name: "ArbitraryCollectionOfStrings",
-                table: "Person",
-                type: "nvarchar(max)",
-                nullable: true);
-        }
+        migrationBuilder.AddColumn<string>(
+            name: "ArbitraryCollectionOfStrings",
+            table: "Person",
+            type: "nvarchar(max)",
+            nullable: true);
+    }
 
-        /// <inheritdoc />
-        protected override void Down(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.DropColumn(
-                name: "ArbitraryCollectionOfStrings",
-                table: "Person");
-        }
+    /// <inheritdoc />
+    protected override void Down(MigrationBuilder migrationBuilder)
+    {
+        migrationBuilder.DropColumn(
+            name: "ArbitraryCollectionOfStrings",
+            table: "Person");
     }
 }

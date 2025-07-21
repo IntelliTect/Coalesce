@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Linq;
 
-namespace IntelliTect.Coalesce.Mapping.IncludeTrees
+namespace IntelliTect.Coalesce.Mapping.IncludeTrees;
+
+public interface IIncludedSeparatelyQueryable<out TEntity, out TProperty> : IQueryable<TEntity>
 {
-    public interface IIncludedSeparatelyQueryable<out TEntity, out TProperty> : IQueryable<TEntity>
-    {
-    }
 }

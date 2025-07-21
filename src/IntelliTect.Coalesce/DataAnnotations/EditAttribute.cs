@@ -1,34 +1,32 @@
-﻿using IntelliTect.Coalesce.Helpers;
-using System;
+﻿using System;
 
-namespace IntelliTect.Coalesce.DataAnnotations
+namespace IntelliTect.Coalesce.DataAnnotations;
+
+/// <summary>
+/// <para>
+/// When placed on an entity or custom <see cref="IClassDto{T}"/> class exposed by Coalesce,
+/// controls the permissions for modifying existing instances of the model via the /save or /bulkSave endpoints.
+/// </para>
+/// <para>
+/// When placed on a property exposed by Coalesce, controls the roles that are allowed
+/// to send data from the client to the server for that property for any purpose,
+/// including the /save and /bulkSave APIs, and method parameters. 
+/// </para>
+/// </summary>    
+[AttributeUsage(AttributeTargets.Property | AttributeTargets.Class)]
+public class EditAttribute : SecurityAttribute
 {
-    /// <summary>
-    /// <para>
-    /// When placed on an entity or custom <see cref="IClassDto{T}"/> class exposed by Coalesce,
-    /// controls the permissions for modifying existing instances of the model via the /save or /bulkSave endpoints.
-    /// </para>
-    /// <para>
-    /// When placed on a property exposed by Coalesce, controls the roles that are allowed
-    /// to send data from the client to the server for that property for any purpose,
-    /// including the /save and /bulkSave APIs, and method parameters. 
-    /// </para>
-    /// </summary>    
-    [AttributeUsage(AttributeTargets.Property | AttributeTargets.Class)]
-    public class EditAttribute : SecurityAttribute
+    public EditAttribute()
     {
-        public EditAttribute()
-        {
-        }
+    }
 
-        public EditAttribute(SecurityPermissionLevels permissionLevel)
-        {
-            PermissionLevel = permissionLevel;
-        }
+    public EditAttribute(SecurityPermissionLevels permissionLevel)
+    {
+        PermissionLevel = permissionLevel;
+    }
 
-        public EditAttribute(params string[] roles)
-        {
-            Roles = string.Join(",", roles);
-        }
+    public EditAttribute(params string[] roles)
+    {
+        Roles = string.Join(",", roles);
     }
 }

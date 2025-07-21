@@ -1,19 +1,15 @@
 ﻿using IntelliTect.Coalesce.DataAnnotations;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Text;
 
-namespace Coalesce.Domain
+namespace Coalesce.Domain;
+
+public class ZipCode
 {
-    public class ZipCode
-    {
-        [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.None)]
-        [ListText]
-        public string Zip { get; set; } = null!;
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.None)]
+    [ListText]
+    public string Zip { get; set; } = null!;
 
-        public string State { get; set; } = null!;
-    }
+    public string State { get; set; } = null!;
 }

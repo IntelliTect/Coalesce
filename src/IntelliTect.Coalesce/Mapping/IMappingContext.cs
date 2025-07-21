@@ -1,34 +1,32 @@
 ﻿using IntelliTect.Coalesce.DataAnnotations;
 using System;
-using System.Collections.Generic;
 using System.Security.Claims;
 
-namespace IntelliTect.Coalesce
+namespace IntelliTect.Coalesce;
+
+public interface IMappingContext
 {
-    public interface IMappingContext
-    {
-        string? Includes { get; }
-        ClaimsPrincipal User { get; }
+    string? Includes { get; }
+    ClaimsPrincipal User { get; }
 
-        bool IsInRoleCached(string role);
+    bool IsInRoleCached(string role);
 
-        void AddMapping(object sourceObject, IncludeTree? includeTree, object mappedObject);
+    void AddMapping(object sourceObject, IncludeTree? includeTree, object mappedObject);
 
-        bool TryGetMapping<TDto>(
-            object sourceObject,
-            IncludeTree? includeTree,
-            [System.Diagnostics.CodeAnalysis.NotNullWhen(true)]
-            out TDto? mappedObject
-        )
-            where TDto : class;
+    bool TryGetMapping<TDto>(
+        object sourceObject,
+        IncludeTree? includeTree,
+        [System.Diagnostics.CodeAnalysis.NotNullWhen(true)]
+        out TDto? mappedObject
+    )
+        where TDto : class;
 
-        IPropertyRestriction GetPropertyRestriction(Type type);
-        TRestriction GetPropertyRestriction<TRestriction>()
-            where TRestriction : IPropertyRestriction
-            => (TRestriction)GetPropertyRestriction(typeof(TRestriction));
+    IPropertyRestriction GetPropertyRestriction(Type type);
+    TRestriction GetPropertyRestriction<TRestriction>()
+        where TRestriction : IPropertyRestriction
+        => (TRestriction)GetPropertyRestriction(typeof(TRestriction));
 
-        Type GetResponseDtoType<TDto, T>(T entity)
-            where TDto : class, IResponseDto<T>, new()
-            where T : class;
-    }
+    Type GetResponseDtoType<TDto, T>(T entity)
+        where TDto : class, IResponseDto<T>, new()
+        where T : class;
 }

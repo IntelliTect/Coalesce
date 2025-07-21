@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace IntelliTect.Coalesce
+namespace IntelliTect.Coalesce;
+
+public interface ITimeZoneResolver
 {
-    public interface ITimeZoneResolver
-    {
-        TimeZoneInfo GetTimeZoneInfo();
-    }
+    TimeZoneInfo GetTimeZoneInfo();
 }

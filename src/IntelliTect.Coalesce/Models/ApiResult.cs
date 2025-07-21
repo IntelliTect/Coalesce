@@ -1,31 +1,30 @@
-﻿namespace IntelliTect.Coalesce.Models
+﻿namespace IntelliTect.Coalesce.Models;
+
+public class ApiResult
 {
-    public class ApiResult
+    public bool WasSuccessful { get; set; } = true;
+
+    public string? Message { get; set; }
+
+    /// <summary>
+    /// Controls the shape of the DTO mapping of the result object.
+    /// </summary>
+    [System.Text.Json.Serialization.JsonIgnore]
+    [System.Runtime.Serialization.IgnoreDataMember] // for newtonsoft
+    public IncludeTree? IncludeTree { get; set; }
+
+    public ApiResult() { }
+
+    public ApiResult(bool wasSuccessful, string? message = null) 
     {
-        public bool WasSuccessful { get; set; } = true;
+        WasSuccessful = wasSuccessful;
+        Message = message;
+    }
 
-        public string? Message { get; set; }
+    public ApiResult(string? errorMessage) : this(false, errorMessage) { }
 
-        /// <summary>
-        /// Controls the shape of the DTO mapping of the result object.
-        /// </summary>
-        [System.Text.Json.Serialization.JsonIgnore]
-        [System.Runtime.Serialization.IgnoreDataMember] // for newtonsoft
-        public IncludeTree? IncludeTree { get; set; }
-
-        public ApiResult() { }
-
-        public ApiResult(bool wasSuccessful, string? message = null) 
-        {
-            WasSuccessful = wasSuccessful;
-            Message = message;
-        }
-
-        public ApiResult(string? errorMessage) : this(false, errorMessage) { }
-
-        public ApiResult(ApiResult result) : this(result.WasSuccessful, result.Message)
-        {
-            IncludeTree = result.IncludeTree;
-        }
+    public ApiResult(ApiResult result) : this(result.WasSuccessful, result.Message)
+    {
+        IncludeTree = result.IncludeTree;
     }
 }

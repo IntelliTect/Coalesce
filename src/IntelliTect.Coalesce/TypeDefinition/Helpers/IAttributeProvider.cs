@@ -5,145 +5,143 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
 
-namespace IntelliTect.Coalesce.TypeDefinition
+namespace IntelliTect.Coalesce.TypeDefinition;
+
+public abstract class AttributeViewModel<TAttribute>
+    where TAttribute : Attribute
 {
-    public abstract class AttributeViewModel<TAttribute>
-        where TAttribute : Attribute
+    public ReflectionRepository ReflectionRepository { get; }
+
+    public abstract TypeViewModel Type { get; }
+
+    protected AttributeViewModel(ReflectionRepository? reflectionRepository)
     {
-        public ReflectionRepository ReflectionRepository { get; }
+        ReflectionRepository = reflectionRepository ?? ReflectionRepository.Global;
+    }
 
-        public abstract TypeViewModel Type { get; }
-
-        protected AttributeViewModel(ReflectionRepository? reflectionRepository)
+    public T? GetValue<T>(string valueName)
+        where T : struct
+    {
+        var result = GetValue(valueName);
+        if (result == null)
         {
-            ReflectionRepository = reflectionRepository ?? ReflectionRepository.Global;
+            return null;
         }
+        return new T?((T)result);
+    }
 
-        public T? GetValue<T>(string valueName)
-            where T : struct
+    public string? GetValue(Expression<Func<TAttribute, string?>> propertyExpression)
+    {
+        return GetValue(propertyExpression.GetExpressedProperty().Name) as string;
+    }
+
+    public T? GetValue<T>(Expression<Func<TAttribute, T?>> propertyExpression)
+        where T : class
+    {
+        return GetValue(propertyExpression.GetExpressedProperty().Name) as T;
+    }
+
+    public T? GetValue<T>(
+        Expression<Func<TAttribute, T>> propertyExpression,
+        Expression<Func<TAttribute, bool>>? hasValueExpression = null
+    )
+        where T : struct
+    {
+        // In reflection contexts, for attributes that can have "unset" as a value that means null,
+        // we have to check this state with an additional property. E.g. ExecuteAttribute.ValidateAttributes.
+        // In symbol contexts, the absence of syntax that assigns a value to the property implies this "unset" state.
+        if (hasValueExpression is not null)
         {
-            var result = GetValue(valueName);
-            if (result == null)
+            // `hasValue` will always be non-null in reflection contexts,
+            // and always null in symbol contexts where the HasValue property won't ever be set.
+            var hasValue = GetValue<bool>(hasValueExpression.GetExpressedProperty().Name);
+            if (hasValue == false)
             {
                 return null;
             }
-            return new T?((T)result);
         }
 
-        public string? GetValue(Expression<Func<TAttribute, string?>> propertyExpression)
-        {
-            return GetValue(propertyExpression.GetExpressedProperty().Name) as string;
-        }
 
-        public T? GetValue<T>(Expression<Func<TAttribute, T?>> propertyExpression)
-            where T : class
-        {
-            return GetValue(propertyExpression.GetExpressedProperty().Name) as T;
-        }
-
-        public T? GetValue<T>(
-            Expression<Func<TAttribute, T>> propertyExpression,
-            Expression<Func<TAttribute, bool>>? hasValueExpression = null
-        )
-            where T : struct
-        {
-            // In reflection contexts, for attributes that can have "unset" as a value that means null,
-            // we have to check this state with an additional property. E.g. ExecuteAttribute.ValidateAttributes.
-            // In symbol contexts, the absence of syntax that assigns a value to the property implies this "unset" state.
-            if (hasValueExpression is not null)
-            {
-                // `hasValue` will always be non-null in reflection contexts,
-                // and always null in symbol contexts where the HasValue property won't ever be set.
-                var hasValue = GetValue<bool>(hasValueExpression.GetExpressedProperty().Name);
-                if (hasValue == false)
-                {
-                    return null;
-                }
-            }
-
-
-            return GetValue<T>(propertyExpression.GetExpressedProperty().Name);
-        }
-
-        public abstract object? GetValue(string valueName);
+        return GetValue<T>(propertyExpression.GetExpressedProperty().Name);
     }
 
-    public interface IAttributeProvider
+    public abstract object? GetValue(string valueName);
+}
+
+public interface IAttributeProvider
+{
+    IEnumerable<AttributeViewModel<TAttribute>> GetAttributes<TAttribute>() where TAttribute : Attribute;
+}
+
+public static class AttributeExtensions
+{
+    public static IEnumerable<AttributeViewModel<TAttribute>> GetAttributes<TAttribute>(this IAttributeProvider obj)
+        where TAttribute : Attribute
+        => obj.GetAttributes<TAttribute>();
+
+    public static AttributeViewModel<TAttribute>? GetAttribute<TAttribute>(this IAttributeProvider obj) 
+        where TAttribute : Attribute
+        => obj.GetAttributes<TAttribute>().FirstOrDefault();
+
+    public static bool HasAttribute<TAttribute>(this IAttributeProvider obj)
+        where TAttribute : Attribute
     {
-        IEnumerable<AttributeViewModel<TAttribute>> GetAttributes<TAttribute>() where TAttribute : Attribute;
+        return obj.GetAttributes<TAttribute>().Any();
     }
 
-    public static class AttributeExtensions
+    public static object? GetAttributeValue<TAttribute>(this IAttributeProvider obj, string valueName)
+        where TAttribute : Attribute
+        => obj.GetAttribute<TAttribute>()?.GetValue(valueName);
+
+    public static T? GetAttributeValue<TAttribute, T>(this IAttributeProvider obj, string valueName)
+        where TAttribute : Attribute
+        where T : struct
+        => obj.GetAttribute<TAttribute>()?.GetValue<T>(valueName);
+
+    public static T? GetAttributeValue<TAttribute, T>(
+        this IAttributeProvider obj,
+        Expression<Func<TAttribute, T>> propertyExpression,
+        Expression<Func<TAttribute, bool>>? hasValueExpression = null
+    )
+        where TAttribute : Attribute
+        where T : struct
+        => obj.GetAttribute<TAttribute>()?.GetValue<T>(propertyExpression, hasValueExpression);
+
+    public static string? GetAttributeValue<TAttribute>(this IAttributeProvider obj, Expression<Func<TAttribute, string?>> propertyExpression)
+        where TAttribute : Attribute
+        => obj.GetAttribute<TAttribute>()?.GetValue(propertyExpression);
+
+    public static (bool Exists, string? Message) GetValidationAttribute<TAttribute>(this IAttributeProvider obj)
+        where TAttribute : ValidationAttribute
     {
-        public static IEnumerable<AttributeViewModel<TAttribute>> GetAttributes<TAttribute>(this IAttributeProvider obj)
-            where TAttribute : Attribute
-            => obj.GetAttributes<TAttribute>();
-
-        public static AttributeViewModel<TAttribute>? GetAttribute<TAttribute>(this IAttributeProvider obj) 
-            where TAttribute : Attribute
-            => obj.GetAttributes<TAttribute>().FirstOrDefault();
-
-        public static bool HasAttribute<TAttribute>(this IAttributeProvider obj)
-            where TAttribute : Attribute
+        if (!obj.HasAttribute<TAttribute>())
         {
-            return obj.GetAttributes<TAttribute>().Any();
+            return (false, null);
         }
 
-        public static object? GetAttributeValue<TAttribute>(this IAttributeProvider obj, string valueName)
-            where TAttribute : Attribute
-            => obj.GetAttribute<TAttribute>()?.GetValue(valueName);
+        return (true, obj.GetAttributeValue<TAttribute>(a => a.ErrorMessage) ?? "");
+    }
 
-        public static T? GetAttributeValue<TAttribute, T>(this IAttributeProvider obj, string valueName)
-            where TAttribute : Attribute
-            where T : struct
-            => obj.GetAttribute<TAttribute>()?.GetValue<T>(valueName);
-
-        public static T? GetAttributeValue<TAttribute, T>(
-            this IAttributeProvider obj,
-            Expression<Func<TAttribute, T>> propertyExpression,
-            Expression<Func<TAttribute, bool>>? hasValueExpression = null
-        )
-            where TAttribute : Attribute
-            where T : struct
-            => obj.GetAttribute<TAttribute>()?.GetValue<T>(propertyExpression, hasValueExpression);
-
-        public static string? GetAttributeValue<TAttribute>(this IAttributeProvider obj, Expression<Func<TAttribute, string?>> propertyExpression)
-            where TAttribute : Attribute
-            => obj.GetAttribute<TAttribute>()?.GetValue(propertyExpression);
-
-        public static (bool Exists, string? Message) GetValidationAttribute<TAttribute>(this IAttributeProvider obj)
-            where TAttribute : ValidationAttribute
+    public static (bool Exists, T? Value, string? Message) GetValidationAttribute<TAttribute, T>(
+        this IAttributeProvider obj, 
+        Expression<Func<TAttribute, T>> propertyExpression
+    )
+        where TAttribute : ValidationAttribute
+        where T : struct
+    {
+        if (obj.GetValidationAttribute<TAttribute>() is not (true, string message))
         {
-            if (!obj.HasAttribute<TAttribute>())
-            {
-                return (false, null);
-            }
-
-            return (true, obj.GetAttributeValue<TAttribute>(a => a.ErrorMessage) ?? "");
+            return (false, null, null);
         }
 
-        public static (bool Exists, T? Value, string? Message) GetValidationAttribute<TAttribute, T>(
-            this IAttributeProvider obj, 
-            Expression<Func<TAttribute, T>> propertyExpression
-        )
-            where TAttribute : ValidationAttribute
-            where T : struct
-        {
-            if (obj.GetValidationAttribute<TAttribute>() is not (true, string message))
-            {
-                return (false, null, null);
-            }
+        return (true, obj.GetAttributeValue(propertyExpression), message);
+    }
 
-            return (true, obj.GetAttributeValue(propertyExpression), message);
-        }
-
-        public static TypeViewModel? GetAttributeValue<TAttribute>(this IAttributeProvider obj, Expression<Func<TAttribute, Type?>> propertyExpression)
-            where TAttribute : Attribute
-        {
-            var value = obj.GetAttributeValue<TAttribute>(propertyExpression.GetExpressedProperty().Name);
-            return value as TypeViewModel;
-        }
+    public static TypeViewModel? GetAttributeValue<TAttribute>(this IAttributeProvider obj, Expression<Func<TAttribute, Type?>> propertyExpression)
+        where TAttribute : Attribute
+    {
+        var value = obj.GetAttributeValue<TAttribute>(propertyExpression.GetExpressedProperty().Name);
+        return value as TypeViewModel;
     }
 }

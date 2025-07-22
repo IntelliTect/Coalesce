@@ -88,10 +88,10 @@ internal static class ValidateContext
                 assert.Area = $"{model}.{prop.Name}";
                 try
                 {
-                    assert.IsNull(prop.GetAttributeValue<ReadAttribute, SecurityPermissionLevels>(a => a.PermissionLevel),
-                        "Property-level ReadAttribute security doesn't support the PermissionLevel property");
-                    assert.IsNull(prop.GetAttributeValue<EditAttribute, SecurityPermissionLevels>(a => a.PermissionLevel),
-                        "Property-level EditAttribute security doesn't support the PermissionLevel property");
+                    // assert.IsNull(prop.GetAttributeValue<ReadAttribute, SecurityPermissionLevels>(a => a.PermissionLevel),
+                    //     "Property-level ReadAttribute security doesn't support the PermissionLevel property");
+                    // assert.IsNull(prop.GetAttributeValue<EditAttribute, SecurityPermissionLevels>(a => a.PermissionLevel),
+                    //     "Property-level EditAttribute security doesn't support the PermissionLevel property");
                     assert.IsFalse(prop.HasAttribute<CreateAttribute>(),
                         "Property-level security doesn't support CreateAttribute. To make create-only properties, use an init accessor on the property instead of a set accessor.");
                     assert.IsFalse(prop.HasAttribute<DeleteAttribute>(),

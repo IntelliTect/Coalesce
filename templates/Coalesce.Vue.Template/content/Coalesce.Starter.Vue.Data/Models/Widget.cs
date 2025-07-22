@@ -15,7 +15,6 @@ public class Widget
 {
     public int WidgetId { get; set; }
 
-    [Edit(PermissionLevel = SecurityPermissionLevels.AllowAll)]
     public required string Name { get; set; }
 
     public required WidgetCategory Category { get; set; }

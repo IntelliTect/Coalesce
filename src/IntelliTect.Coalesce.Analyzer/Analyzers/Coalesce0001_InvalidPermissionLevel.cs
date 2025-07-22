@@ -5,7 +5,7 @@ public class Coalesce0001_InvalidPermissionLevel : DiagnosticAnalyzer
     private static readonly DiagnosticDescriptor _Rule = new(
         id: "COALESCE0001",
         title: "Invalid PermissionLevel usage on property security attributes",
-        messageFormat: "Property-level {0} attributes should not set PermissionLevel",
+        messageFormat: "Property-level {0} does not support PermissionLevel",
         category: "Usage",
         defaultSeverity: DiagnosticSeverity.Error,
         isEnabledByDefault: true,
@@ -44,8 +44,8 @@ public class Coalesce0001_InvalidPermissionLevel : DiagnosticAnalyzer
             // Check if PermissionLevel is being set
             if (HasPermissionLevelArgument(attributeData))
             {
-                var attributeName = attributeTypeName.Replace("Attribute", "");
-                var diagnostic = Diagnostic.Create(_Rule, propertySymbol.Locations[0], attributeName);
+                var location = attributeData.ApplicationSyntaxReference?.GetSyntax().GetLocation() ?? propertySymbol.Locations[0];
+                var diagnostic = Diagnostic.Create(_Rule, location, attributeTypeName);
                 context.ReportDiagnostic(diagnostic);
             }
         }

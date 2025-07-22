@@ -13,8 +13,7 @@
 
   <ItemGroup>
     <ProjectReference
-      Include="..\IntelliTect.Coalesce.Analyzer\IntelliTect.Coalesce.Analyzer.csproj"
-      ReferenceOutputAssembly="False" OutputItemType="Analyzer" />
+      Include="..\IntelliTect.Coalesce.Analyzer\IntelliTect.Coalesce.Analyzer.csproj" />
   </ItemGroup>
 
   <ItemGroup>

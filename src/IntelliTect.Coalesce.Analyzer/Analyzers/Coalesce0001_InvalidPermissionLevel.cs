@@ -15,12 +15,7 @@ public class Coalesce0001_InvalidPermissionLevel : DiagnosticAnalyzer
 
     public override void Initialize(AnalysisContext context)
     {
-        if (context is null)
-        {
-            throw new ArgumentNullException(nameof(context));
-        }
-
-        context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.Analyze | GeneratedCodeAnalysisFlags.ReportDiagnostics);
+        context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
         context.RegisterSymbolAction(AnalyzeProperty, SymbolKind.Property);
     }

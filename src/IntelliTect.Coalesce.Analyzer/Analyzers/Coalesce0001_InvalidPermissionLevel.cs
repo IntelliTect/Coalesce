@@ -5,9 +5,9 @@ public class Coalesce0001_InvalidPermissionLevel : DiagnosticAnalyzer
     private static readonly DiagnosticDescriptor _Rule = new(
         id: "COALESCE0001",
         title: "Invalid PermissionLevel usage on property security attributes",
-        messageFormat: "Property-level {0} attributes should not set PermissionLevel - use roles instead",
+        messageFormat: "Property-level {0} attributes should not set PermissionLevel",
         category: "Usage",
-        defaultSeverity: DiagnosticSeverity.Warning,
+        defaultSeverity: DiagnosticSeverity.Error,
         isEnabledByDefault: true,
         description: "PermissionLevel is only valid for class-level security attributes. For property-level security, use the Roles property to specify role-based access control.");
 

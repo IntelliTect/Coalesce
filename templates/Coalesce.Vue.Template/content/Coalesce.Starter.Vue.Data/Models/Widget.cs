@@ -15,7 +15,7 @@ public class Widget
 {
     public int WidgetId { get; set; }
 
-    [Read(PermissionLevel = SecurityPermissionLevels.DenyAll)]
+    [Edit(PermissionLevel = SecurityPermissionLevels.DenyAll)]
     public required string Name { get; set; }
 
     public required WidgetCategory Category { get; set; }

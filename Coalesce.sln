@@ -65,6 +65,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IntelliTect.Coalesce.AuditL
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IntelliTect.Coalesce.Core", "src\IntelliTect.Coalesce.Core\IntelliTect.Coalesce.Core.csproj", "{73679FEC-0CDE-97DA-5148-ECB5D5F4C3DD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IntelliTect.Coalesce.Analyzer", "src\IntelliTect.Coalesce.Analyzer\IntelliTect.Coalesce.Analyzer.csproj", "{B1D70B23-D3ED-9112-F499-4F983128321A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -135,6 +137,10 @@ Global
 		{73679FEC-0CDE-97DA-5148-ECB5D5F4C3DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{73679FEC-0CDE-97DA-5148-ECB5D5F4C3DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{73679FEC-0CDE-97DA-5148-ECB5D5F4C3DD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B1D70B23-D3ED-9112-F499-4F983128321A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B1D70B23-D3ED-9112-F499-4F983128321A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B1D70B23-D3ED-9112-F499-4F983128321A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B1D70B23-D3ED-9112-F499-4F983128321A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -156,6 +162,7 @@ Global
 		{0CCC382C-C626-4C42-905A-7AC1963A4E6B} = {18165BA2-31FA-4D8E-94BE-AAD008D6BCEB}
 		{0808FD33-DA45-4270-82F3-3AE6C66F1D0A} = {CCBE3CC2-7DA3-4BA1-96A1-7BAAF8533D58}
 		{73679FEC-0CDE-97DA-5148-ECB5D5F4C3DD} = {18165BA2-31FA-4D8E-94BE-AAD008D6BCEB}
+		{B1D70B23-D3ED-9112-F499-4F983128321A} = {18165BA2-31FA-4D8E-94BE-AAD008D6BCEB}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {00AED75F-9188-45D1-9D31-5486D4464AF2}

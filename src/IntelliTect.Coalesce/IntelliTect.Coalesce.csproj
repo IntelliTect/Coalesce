@@ -11,11 +11,11 @@
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
 
-  <!-- <ItemGroup>
+  <ItemGroup>
     <ProjectReference
-      Include="..\IntelliTect.Coalesce.Analyzers\IntelliTect.Coalesce.Analyzers.csproj"
+      Include="..\IntelliTect.Coalesce.Analyzer\IntelliTect.Coalesce.Analyzer.csproj"
       ReferenceOutputAssembly="False" OutputItemType="Analyzer" />
-  </ItemGroup> -->
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore" />

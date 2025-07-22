@@ -1,9 +1,9 @@
 
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
-public class InvalidSecurityAttributeUsage : DiagnosticAnalyzer
+public class Coalesce0001_InvalidPermissionLevel : DiagnosticAnalyzer
 {
     private static readonly DiagnosticDescriptor _Rule = new(
-        id: "COALESCE0202",
+        id: "COALESCE0001",
         title: "Invalid PermissionLevel usage on property security attributes",
         messageFormat: "Property-level {0} attributes should not set PermissionLevel - use roles instead",
         category: "Usage",

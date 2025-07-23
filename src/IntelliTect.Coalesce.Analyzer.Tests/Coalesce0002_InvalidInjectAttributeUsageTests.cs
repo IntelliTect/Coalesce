@@ -20,6 +20,20 @@ public class Coalesce0002_InvalidInjectAttributeUsageTests : CSharpAnalyzerVerif
     }
 
     [Fact]
+    public async Task InjectAttributeOnSemanticKernelMethod_NoWarning()
+    {
+        await VerifyAnalyzerAsync("""
+            public class TestService
+            {
+                [SemanticKernel]
+                public void TestMethod([Inject] IServiceProvider serviceProvider)
+                {
+                }
+            }
+            """);
+    }
+
+    [Fact]
     public async Task InjectAttributeOnServiceInterfaceMethod_NoWarning()
     {
         await VerifyAnalyzerAsync("""

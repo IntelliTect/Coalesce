@@ -6,7 +6,7 @@ public class Coalesce0002_InvalidInjectAttributeUsage : DiagnosticAnalyzer
     private static readonly DiagnosticDescriptor _Rule = new(
         id: "COALESCE0002",
         title: "Invalid InjectAttribute usage",
-        messageFormat: "InjectAttribute is only valid on parameters of Coalesce client methods - either methods marked with [Coalesce] attribute or methods on interfaces marked with [Service] attribute",
+        messageFormat: "InjectAttribute is only valid on parameters of Coalesce client methods - either methods marked with [Coalesce] or [SemanticKernel] attributes, or methods on interfaces marked with [Service] attribute",
         category: "Usage",
         defaultSeverity: DiagnosticSeverity.Warning,
         isEnabledByDefault: true);
@@ -50,8 +50,8 @@ public class Coalesce0002_InvalidInjectAttributeUsage : DiagnosticAnalyzer
 
     private static bool IsValidCoalesceMethod(IMethodSymbol methodSymbol)
     {
-        // Check if method has [Coalesce] attribute
-        if (HasCoalesceAttribute(methodSymbol))
+        // Check if method has [Coalesce] or [SemanticKernel] attribute
+        if (HasExposedAttribute(methodSymbol))
             return true;
 
         // Check if method is on an interface marked with [Service]
@@ -76,10 +76,10 @@ public class Coalesce0002_InvalidInjectAttributeUsage : DiagnosticAnalyzer
         return false;
     }
 
-    private static bool HasCoalesceAttribute(IMethodSymbol methodSymbol)
+    private static bool HasExposedAttribute(IMethodSymbol methodSymbol)
     {
         return methodSymbol.GetAttributes().Any(attr =>
-            attr.AttributeClass?.Name == "CoalesceAttribute" &&
+            attr.AttributeClass?.Name is "CoalesceAttribute" or "SemanticKernelAttribute" &&
             attr.AttributeClass?.ContainingNamespace?.ToDisplayString() == "IntelliTect.Coalesce");
     }
 

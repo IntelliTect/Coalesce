@@ -11,9 +11,9 @@ public class Coalesce0004_InvalidCoalesceAttributeUsage : DiagnosticAnalyzer
     private static readonly DiagnosticDescriptor _Rule = new(
         id: "COALESCE0004",
         title: "Invalid CoalesceAttribute usage on unsupported type",
-        messageFormat: "CoalesceAttribute only functions on types that inherit from DbContext, implement IDataSource<T>, IBehaviors<T>, IClassDto<T>, or are marked with [Service] or [StandaloneEntity]",
+        messageFormat: "CoalesceAttribute can only expose types that inherit from DbContext, implement IDataSource<T>, IBehaviors<T>, IClassDto<T>, or are marked with [Service] or [StandaloneEntity]",
         category: "Usage",
-        defaultSeverity: DiagnosticSeverity.Error,
+        defaultSeverity: DiagnosticSeverity.Warning,
         isEnabledByDefault: true,
         description: "The [Coalesce] attribute should only be applied to types that are supported by the Coalesce framework.");
 

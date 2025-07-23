@@ -1,3 +1,4 @@
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Operations;
 
@@ -37,7 +38,7 @@ public class Coalesce1001_SimplifyItemResult : DiagnosticAnalyzer
         if (!IsItemResultType(type)) return;
 
         // Get the syntax node for location reporting
-        var syntaxNode = objectCreation.Syntax as ObjectCreationExpressionSyntax;
+        var syntaxNode = objectCreation.Syntax as BaseObjectCreationExpressionSyntax;
         if (syntaxNode == null) return;
 
         // Don't suggest simplification in non-target-typed contexts where it wouldn't be beneficial
@@ -53,8 +54,8 @@ public class Coalesce1001_SimplifyItemResult : DiagnosticAnalyzer
 
     private class VirtualItemResult
     {
-        public bool? WasSuccessful { get; set; }
-        public string? Message { get; set; }
+        public ExpressionSyntax? WasSuccessfulExpression { get; set; }
+        public ExpressionSyntax? MessageExpression { get; set; }
         public ExpressionSyntax? ObjectExpression { get; set; }
         public ITypeSymbol? ObjectType { get; set; }
         public bool HasOnlyRelevantProperties { get; set; }
@@ -73,11 +74,11 @@ public class Coalesce1001_SimplifyItemResult : DiagnosticAnalyzer
             switch (arg.Parameter?.Name)
             {
                 case "wasSuccessful":
-                    result.WasSuccessful = GetLiteralValue<bool?>(arg.Value);
+                    result.WasSuccessfulExpression = (arg.Syntax as ArgumentSyntax)?.Expression;
                     break;
                 case "message":
                 case "errorMessage":
-                    result.Message = GetLiteralValue<string>(arg.Value);
+                    result.MessageExpression = (arg.Syntax as ArgumentSyntax)?.Expression;
                     break;
                 case "obj":
                     result.ObjectExpression = (arg.Syntax as ArgumentSyntax)?.Expression;
@@ -97,11 +98,11 @@ public class Coalesce1001_SimplifyItemResult : DiagnosticAnalyzer
             switch (propRef.Property.Name)
             {
                 case "WasSuccessful":
-                    result.WasSuccessful = GetLiteralValue<bool?>(assignment.Value);
+                    result.WasSuccessfulExpression = assignment.Value.Syntax as ExpressionSyntax;
                     break;
 
                 case "Message":
-                    result.Message = GetLiteralValue<string>(assignment.Value);
+                    result.MessageExpression = assignment.Value.Syntax as ExpressionSyntax;
                     break;
 
                 case "Object":
@@ -121,7 +122,7 @@ public class Coalesce1001_SimplifyItemResult : DiagnosticAnalyzer
 
     private static void AnalyzeVirtualItemResult(
         OperationAnalysisContext context,
-        ObjectCreationExpressionSyntax objectCreation,
+        BaseObjectCreationExpressionSyntax objectCreation,
         ITypeSymbol type,
         VirtualItemResult virtualResult)
     {
@@ -129,33 +130,35 @@ public class Coalesce1001_SimplifyItemResult : DiagnosticAnalyzer
         if (!virtualResult.HasOnlyRelevantProperties) return;
 
         // Case 1: Can simplify to boolean (true or false)
-        if (virtualResult.ObjectExpression == null && virtualResult.Message == null)
+        if (virtualResult.ObjectExpression == null &&
+            virtualResult.WasSuccessfulExpression is not null &&
+            (virtualResult.MessageExpression == null || IsNullLiteral(virtualResult.MessageExpression)))
         {
-            var boolValue = virtualResult.WasSuccessful == true ? "true" : "false";
-            if (virtualResult.WasSuccessful.HasValue)
+            var diagnostic = CreateDiagnosticWithSimplifiedExpression(objectCreation, virtualResult.WasSuccessfulExpression);
+            context.ReportDiagnostic(diagnostic);
+            return;
+        }
+
+        // Case 2: Can simplify to string error message
+        var wasSuccessfulValue = GetBooleanValueFromExpression(virtualResult.WasSuccessfulExpression);
+        if (
+            (virtualResult.WasSuccessfulExpression == null || (wasSuccessfulValue is false)) &&
+            virtualResult.ObjectExpression == null &&
+            !IsItemResultOfString(type))
+        {
+            if (virtualResult.MessageExpression != null && !IsNullLiteral(virtualResult.MessageExpression))
             {
-                var diagnostic = CreateDiagnosticWithSimplifiedExpression(objectCreation, boolValue);
+                // Expression message (e.g., literal string, interpolated string, variable)
+                var diagnostic = CreateDiagnosticWithSimplifiedExpression(objectCreation, virtualResult.MessageExpression);
                 context.ReportDiagnostic(diagnostic);
                 return;
             }
         }
 
-        // Case 2: Can simplify to string error message
-        if (virtualResult.WasSuccessful is null or false &&
-            virtualResult.Message != null &&
-            virtualResult.ObjectExpression == null &&
-            !IsItemResultOfString(type))
-        {
-            var simplifiedExpression = $"\"{virtualResult.Message}\"";
-            var diagnostic = CreateDiagnosticWithSimplifiedExpression(objectCreation, simplifiedExpression);
-            context.ReportDiagnostic(diagnostic);
-            return;
-        }
-
         // Case 3: Can simplify to object value
         if (virtualResult.ObjectExpression != null &&
-            (virtualResult.WasSuccessful != false) &&
-            (virtualResult.Message == null))
+            (virtualResult.WasSuccessfulExpression == null || (wasSuccessfulValue is true)) &&
+            (virtualResult.MessageExpression == null || IsNullLiteral(virtualResult.MessageExpression)))
         {
             var genericType = (INamedTypeSymbol)type;
             var typeArgument = genericType.TypeArguments[0];
@@ -170,8 +173,7 @@ public class Coalesce1001_SimplifyItemResult : DiagnosticAnalyzer
             // Check type compatibility
             if (context.Compilation.HasImplicitConversion(virtualResult.ObjectType, typeArgument))
             {
-                var objText = virtualResult.ObjectExpression.ToString();
-                var diagnostic = CreateDiagnosticWithSimplifiedExpression(objectCreation, objText);
+                var diagnostic = CreateDiagnosticWithSimplifiedExpression(objectCreation, virtualResult.ObjectExpression);
                 context.ReportDiagnostic(diagnostic);
             }
         }
@@ -179,24 +181,23 @@ public class Coalesce1001_SimplifyItemResult : DiagnosticAnalyzer
 
     private static bool IsItemResultType(ITypeSymbol type)
     {
-        return type.ContainingNamespace?.ToDisplayString() == "IntelliTect.Coalesce.Models" &&
-               (type.Name == "ItemResult" ||
-                (type is INamedTypeSymbol { IsGenericType: true } namedType &&
-                 namedType.ConstructedFrom.Name == "ItemResult"));
+        return type.Name == "ItemResult" &&
+            type.ContainingNamespace?.ToDisplayString() == "IntelliTect.Coalesce.Models";
     }
 
     private static Diagnostic CreateDiagnosticWithSimplifiedExpression(
-        ObjectCreationExpressionSyntax objectCreation,
-        string simplifiedExpression)
+        BaseObjectCreationExpressionSyntax objectCreation,
+        ExpressionSyntax simplifiedExpression)
     {
+        var simplifiedText = simplifiedExpression.ToString();
         var properties = ImmutableDictionary.CreateBuilder<string, string?>();
-        properties.Add("SimplifiedExpression", simplifiedExpression);
+        properties.Add("SimplifiedExpression", simplifiedText);
 
         return Diagnostic.Create(
             _Rule,
             objectCreation.GetLocation(),
             properties.ToImmutable(),
-            simplifiedExpression);
+            simplifiedText);
     }
 
     private static bool IsItemResultOfString(ITypeSymbol type)
@@ -205,13 +206,20 @@ public class Coalesce1001_SimplifyItemResult : DiagnosticAnalyzer
                namedType.TypeArguments[0].SpecialType == SpecialType.System_String;
     }
 
-    private static T? GetLiteralValue<T>(IOperation operation)
+    private static bool? GetBooleanValueFromExpression(ExpressionSyntax? expression)
     {
-        return operation switch
+        return expression switch
         {
-            ILiteralOperation literal when literal.ConstantValue.HasValue && literal.ConstantValue.Value is T boolValue => boolValue,
-            _ => default
+            LiteralExpressionSyntax literal when literal.Token.IsKind(SyntaxKind.TrueKeyword) => true,
+            LiteralExpressionSyntax literal when literal.Token.IsKind(SyntaxKind.FalseKeyword) => false,
+            _ => null
         };
+    }
+
+    private static bool IsNullLiteral(ExpressionSyntax? expression)
+    {
+        return expression is LiteralExpressionSyntax literal &&
+               literal.Token.IsKind(SyntaxKind.NullKeyword);
     }
 
     private static bool ShouldSuggestSimplification(IObjectCreationOperation objectCreation)

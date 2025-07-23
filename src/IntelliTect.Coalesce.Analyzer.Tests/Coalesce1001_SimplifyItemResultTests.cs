@@ -25,6 +25,28 @@ public class Coalesce1001_SimplifyItemResultTests : CSharpAnalyzerVerifier<Coale
     }
 
     [Fact]
+    public async Task ItemResult_BooleanConstructorTargetTypedNew_True_ReportsInfo()
+    {
+        await VerifyAnalyzerAndCodeFixAsync<Coalesce1001_SimplifyItemResultCodeFixProvider>("""
+            public class TestClass
+            {
+                public ItemResult GetResult()
+                {
+                    return {|COALESCE1001:new(true)|};
+                }
+            }
+            """, """
+            public class TestClass
+            {
+                public ItemResult GetResult()
+                {
+                    return true;
+                }
+            }
+            """);
+    }
+
+    [Fact]
     public async Task ItemResult_PropertyInitializer_True_ReportsInfo()
     {
         await VerifyAnalyzerAndCodeFixAsync<Coalesce1001_SimplifyItemResultCodeFixProvider>("""
@@ -120,7 +142,7 @@ public class Coalesce1001_SimplifyItemResultTests : CSharpAnalyzerVerifier<Coale
             {
                 public ItemResult GetResult()
                 {
-                    return {|COALESCE1001:new ItemResult { WasSuccessful = false, Message = "Error message" }|};
+                    return {|COALESCE1001:new ItemResult { WasSuccessful = false, Message = $"Error message: {42}" }|};
                 }
             }
             """, """
@@ -128,7 +150,7 @@ public class Coalesce1001_SimplifyItemResultTests : CSharpAnalyzerVerifier<Coale
             {
                 public ItemResult GetResult()
                 {
-                    return "Error message";
+                    return $"Error message: {42}";
                 }
             }
             """);
@@ -455,34 +477,49 @@ public class Coalesce1001_SimplifyItemResultTests : CSharpAnalyzerVerifier<Coale
             }
             """);
     }
-
     [Fact]
-    public async Task ItemResult_WithVariable_NoWarning()
+    public async Task ItemResult_WithVariable_ReportsInfo()
     {
-        // Don't suggest simplification for variables
-        await VerifyAnalyzerAsync("""
+        await VerifyAnalyzerAndCodeFixAsync<Coalesce1001_SimplifyItemResultCodeFixProvider>("""
             public class TestClass
             {
                 public ItemResult GetResult()
                 {
                     bool success = true;
-                    return new ItemResult(success);
+                    return {|COALESCE1001:new ItemResult(success)|};
+                }
+            }
+            """, """
+            public class TestClass
+            {
+                public ItemResult GetResult()
+                {
+                    bool success = true;
+                    return success;
                 }
             }
             """);
     }
 
     [Fact]
-    public async Task ItemResult_WithVariableString_NoWarning()
+    public async Task ItemResult_WithVariableString_ReportsInfo()
     {
-        // Don't suggest simplification for variables
-        await VerifyAnalyzerAsync("""
+        await VerifyAnalyzerAndCodeFixAsync<Coalesce1001_SimplifyItemResultCodeFixProvider>("""
             public class TestClass
             {
                 public ItemResult GetResult()
                 {
                     string message = "Error";
-                    return new ItemResult(message);
+                    return {|COALESCE1001:new ItemResult(message)|};
+                }
+            }
+            """, """
+            public class TestClass
+            {
+                public ItemResult GetResult()
+                {
+                    string message = "Error";
+                    return message;
                 }
             }
             """);

@@ -23,21 +23,11 @@ public class Coalesce1001_SimplifyItemResultCodeFixProvider : CodeFixProvider
         if (diagnostic == null) return;
 
         var diagnosticSpan = diagnostic.Location.SourceSpan;
-        var objectCreation = root.FindNode(diagnosticSpan) as ObjectCreationExpressionSyntax;
+        var objectCreation = root.FindNode(diagnosticSpan) as BaseObjectCreationExpressionSyntax;
         if (objectCreation == null) return;
 
         // Extract the simplified expression from the diagnostic properties
         var simplifiedExpression = diagnostic.Properties.GetValueOrDefault("SimplifiedExpression");
-
-        if (string.IsNullOrEmpty(simplifiedExpression))
-        {
-            // Fallback: try to extract from the first argument if available
-            if (objectCreation.ArgumentList?.Arguments.Count > 0)
-            {
-                var firstArg = objectCreation.ArgumentList.Arguments[0];
-                simplifiedExpression = firstArg.Expression.ToString();
-            }
-        }
 
         if (string.IsNullOrEmpty(simplifiedExpression)) return;
 
@@ -51,7 +41,7 @@ public class Coalesce1001_SimplifyItemResultCodeFixProvider : CodeFixProvider
 
     private static async Task<Document> SimplifyItemResultAsync(
         Document document,
-        ObjectCreationExpressionSyntax objectCreation,
+        BaseObjectCreationExpressionSyntax objectCreation,
         string simplifiedExpression,
         CancellationToken cancellationToken)
     {

@@ -12,6 +12,15 @@
     <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
   </PropertyGroup>
 
+  <!-- 
+
+  FOR IMMEDIATE TESTING OF THE ANALYZER IN OTHER PROJECTS, ADD THE FOLLOWING:
+    <ItemGroup>
+      <Analyzer
+  Include="D:\Coalesce\src\IntelliTect.Coalesce.Analyzer\bin\Release\netstandard2.0\IntelliTect.Coalesce.Analyzer.dll"
+  />
+    </ItemGroup>
+  -->
   <ItemGroup>
     <Using Include="Microsoft.CodeAnalysis" />
     <Using Include="Microsoft.CodeAnalysis.Diagnostics" />

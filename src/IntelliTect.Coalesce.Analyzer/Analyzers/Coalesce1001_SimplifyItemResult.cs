@@ -45,6 +45,9 @@ public class Coalesce1001_SimplifyItemResult : DiagnosticAnalyzer
         var syntaxNode = objectCreation.Syntax as ObjectCreationExpressionSyntax;
         if (syntaxNode == null) return;
 
+        // Don't suggest simplification in non-target-typed contexts where it wouldn't be beneficial
+        if (!ShouldSuggestSimplification(objectCreation)) return;
+
         // Create virtual representation of the ItemResult
         var virtualResult = CreateVirtualItemResult(context, objectCreation, type);
         if (virtualResult == null) return;
@@ -69,38 +72,17 @@ public class Coalesce1001_SimplifyItemResult : DiagnosticAnalyzer
     {
         var result = new VirtualItemResult { HasOnlyRelevantProperties = true };
 
-        // Process constructor arguments
-        if (objectCreation.Arguments.Length > 0)
-        {
-            if (!ProcessConstructorArguments(context, objectCreation.Arguments, result))
-                return null;
-        }
 
-        // Process object initializer
-        if (objectCreation.Initializer != null)
-        {
-            if (!ProcessObjectInitializer(context, objectCreation.Initializer, result))
-                return null;
-        }
-
-        return result;
-    }
-
-    private static bool ProcessConstructorArguments(
-        OperationAnalysisContext context,
-        ImmutableArray<IArgumentOperation> arguments,
-        VirtualItemResult result)
-    {
-        foreach (var arg in arguments)
+        foreach (var arg in objectCreation.Arguments)
         {
             switch (arg.Parameter?.Name)
             {
                 case "wasSuccessful":
-                    result.WasSuccessful = GetBooleanLiteralValue(arg.Value);
+                    result.WasSuccessful = GetLiteralValue<bool?>(arg.Value);
                     break;
                 case "message":
                 case "errorMessage":
-                    result.Message = GetStringLiteralValue(arg.Value);
+                    result.Message = GetLiteralValue<string>(arg.Value);
                     break;
                 case "obj":
                     result.ObjectExpression = (arg.Syntax as ArgumentSyntax)?.Expression;
@@ -112,30 +94,19 @@ public class Coalesce1001_SimplifyItemResult : DiagnosticAnalyzer
             }
         }
 
-        return true;
-    }
 
-    private static bool ProcessObjectInitializer(
-        OperationAnalysisContext context,
-        IObjectOrCollectionInitializerOperation initializer,
-        VirtualItemResult result)
-    {
-        var assignments = initializer.Initializers.OfType<IAssignmentOperation>().ToList();
-        if (assignments.Count == 0) return false;
-
-        foreach (var assignment in assignments)
+        foreach (var assignment in objectCreation.Initializer?.Initializers.OfType<IAssignmentOperation>() ?? [])
         {
             if (assignment.Target is not IPropertyReferenceOperation propRef) continue;
 
-            var propName = propRef.Property.Name;
-            switch (propName)
+            switch (propRef.Property.Name)
             {
                 case "WasSuccessful":
-                    result.WasSuccessful = GetBooleanLiteralValue(assignment.Value);
+                    result.WasSuccessful = GetLiteralValue<bool?>(assignment.Value);
                     break;
 
                 case "Message":
-                    result.Message = GetStringLiteralValue(assignment.Value);
+                    result.Message = GetLiteralValue<string>(assignment.Value);
                     break;
 
                 case "Object":
@@ -150,7 +121,7 @@ public class Coalesce1001_SimplifyItemResult : DiagnosticAnalyzer
             }
         }
 
-        return true;
+        return result;
     }
 
     private static void AnalyzeVirtualItemResult(
@@ -188,7 +159,6 @@ public class Coalesce1001_SimplifyItemResult : DiagnosticAnalyzer
 
         // Case 3: Can simplify to object value
         if (virtualResult.ObjectExpression != null &&
-            IsGenericItemResult(type) &&
             (virtualResult.WasSuccessful != false) &&
             (virtualResult.Message == null))
         {
@@ -240,39 +210,37 @@ public class Coalesce1001_SimplifyItemResult : DiagnosticAnalyzer
                namedType.TypeArguments[0].SpecialType == SpecialType.System_String;
     }
 
-    private static bool IsGenericItemResult(ITypeSymbol type)
-    {
-        return type is INamedTypeSymbol { IsGenericType: true } namedType &&
-               namedType.ConstructedFrom.Name == "ItemResult" &&
-               namedType.ContainingNamespace?.ToDisplayString() == "IntelliTect.Coalesce.Models";
-    }
-
-    private static bool? GetBooleanLiteralValue(IOperation operation)
+    private static T? GetLiteralValue<T>(IOperation operation)
     {
         return operation switch
         {
-            ILiteralOperation literal when literal.ConstantValue.HasValue && literal.ConstantValue.Value is bool boolValue => boolValue,
-            _ => null
+            ILiteralOperation literal when literal.ConstantValue.HasValue && literal.ConstantValue.Value is T boolValue => boolValue,
+            _ => default
         };
     }
 
-    private static string? GetStringLiteralValue(IOperation operation)
+    private static bool ShouldSuggestSimplification(IObjectCreationOperation objectCreation)
     {
-        return operation switch
+        // Check the parent operation to determine if we should suggest simplification
+        var parent = objectCreation.Parent;
+
+        // Check if this is within a variable initializer that uses var
+        if (parent is IVariableInitializerOperation initializer &&
+            initializer.Parent is IVariableDeclaratorOperation varOp &&
+            varOp.Parent?.Syntax is VariableDeclarationSyntax varDecl &&
+            varDecl.Type.IsVar)
         {
-            ILiteralOperation literal when literal.ConstantValue.HasValue && literal.ConstantValue.Value is string stringValue => stringValue,
-            _ => null
+            return false;
+        }
+
+        return parent switch
+        {
+            // Don't suggest when the ItemResult is used as an argument to another method
+            // where implicit conversion might not work if the target method is generic
+            IArgumentOperation => false,
+
+            // For all other cases, suggest simplification
+            _ => true
         };
     }
-
-    private static bool IsNullOrDefault(IOperation operation)
-    {
-        return operation switch
-        {
-            ILiteralOperation literal when literal.ConstantValue.HasValue && literal.ConstantValue.Value == null => true,
-            IDefaultValueOperation => true,
-            _ => false
-        };
-    }
-
 }

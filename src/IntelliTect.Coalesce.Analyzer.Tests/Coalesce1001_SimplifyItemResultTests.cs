@@ -592,4 +592,32 @@ public class Coalesce1001_SimplifyItemResultTests : CSharpAnalyzerVerifier<Coale
             }
             """);
     }
+
+    [Fact]
+    public async Task NonTargetTypedExpression_NoWarning()
+    {
+        await VerifyAnalyzerAsync("""
+            public class TestClass
+            {
+                public void GetResult()
+                {
+                    var result = new ItemResult<int>(42);
+                }
+            }
+            """);
+    }
+
+    [Fact]
+    public async Task WrappedNonTargetTypedExpression_NoWarning()
+    {
+        await VerifyAnalyzerAsync("""
+            public class TestClass
+            {
+                public Task GetResult()
+                {
+                    return Task.FromResult(new ItemResult<int>(42));
+                }
+            }
+            """);
+    }
 }

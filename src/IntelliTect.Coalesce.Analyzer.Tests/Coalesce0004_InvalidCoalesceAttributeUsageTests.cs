@@ -1,6 +1,6 @@
 namespace IntelliTect.Coalesce.Analyzer.Tests;
 
-public class Coalesce0004_InvalidCoalesceAttributeUsageTests : CSharpAnalyzerVerifier<Coalesce0004_InvalidCoalesceAttributeUsage>
+public class Coalesce0004_InvalidCoalesceAttributeUsageTests : CSharpAnalyzerVerifier<AttributeUsageAnalyzer>
 {
     [Fact]
     public async Task CoalesceAttributeOnDbContext_NoError()

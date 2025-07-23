@@ -1,4 +1,9 @@
 
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Diagnostics;
+using System.Collections.Immutable;
+using IntelliTect.Coalesce.Core.Extensions;
+
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public class Coalesce0001_InvalidPermissionLevel : DiagnosticAnalyzer
 {
@@ -24,22 +29,18 @@ public class Coalesce0001_InvalidPermissionLevel : DiagnosticAnalyzer
     {
         var propertySymbol = (IPropertySymbol)context.Symbol;
 
-        foreach (var attributeData in propertySymbol.GetAttributes())
+        var securityAttributes = propertySymbol.GetAttributesByName(
+            "IntelliTect.Coalesce.DataAnnotations.ReadAttribute",
+            "IntelliTect.Coalesce.DataAnnotations.EditAttribute");
+
+        foreach (var attributeData in securityAttributes)
         {
-            var attributeType = attributeData.AttributeClass;
-            var attributeTypeName = attributeType?.Name;
-            var attributeNamespace = attributeType?.ContainingNamespace?.ToDisplayString();
-
-            if (attributeNamespace != "IntelliTect.Coalesce.DataAnnotations")
-                continue;
-
-            if (attributeTypeName != "ReadAttribute" && attributeTypeName != "EditAttribute")
-                continue;
+            var attributeTypeName = attributeData.AttributeClass?.Name;
 
             // Check if PermissionLevel is being set
             if (HasPermissionLevelArgument(attributeData))
             {
-                var location = attributeData.ApplicationSyntaxReference?.GetSyntax().GetLocation() ?? propertySymbol.Locations[0];
+                var location = attributeData.GetLocation() ?? propertySymbol.Locations[0];
                 var diagnostic = Diagnostic.Create(_Rule, location, attributeTypeName);
                 context.ReportDiagnostic(diagnostic);
             }

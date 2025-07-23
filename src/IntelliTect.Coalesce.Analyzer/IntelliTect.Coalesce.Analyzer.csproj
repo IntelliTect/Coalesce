@@ -25,6 +25,7 @@
     <Using Include="Microsoft.CodeAnalysis" />
     <Using Include="Microsoft.CodeAnalysis.Diagnostics" />
     <Using Include="System.Collections.Immutable" />
+    <Using Include="IntelliTect.Coalesce.Core.Extensions" />
   </ItemGroup>
 
   <ItemGroup>

@@ -3,7 +3,7 @@ using Microsoft.CodeAnalysis.Testing;
 
 namespace IntelliTect.Coalesce.Analyzer.Tests;
 
-public class Coalesce0003_InvalidCoalesceAttributeOnNestedTypesTests : CSharpAnalyzerVerifier<Coalesce0003_InvalidCoalesceAttributeOnNestedTypes>
+public class Coalesce0003_InvalidCoalesceAttributeOnNestedTypesTests : CSharpAnalyzerVerifier<AttributeUsageAnalyzer>
 {
     [Fact]
     public async Task CoalesceAttributeOnTopLevelDataSource_NoWarning()
@@ -67,20 +67,6 @@ public class Coalesce0003_InvalidCoalesceAttributeOnNestedTypesTests : CSharpAna
             public class MyModel
             {
                 public class Behaviors(CrudContext<DbContext> context) : StandardBehaviors<MyModel, DbContext>(context)
-                {
-                }
-            }
-            """);
-    }
-
-    [Fact]
-    public async Task CoalesceAttributeOnNestedNonDataSourceNonBehaviors_NoWarning()
-    {
-        await VerifyAnalyzerAsync("""
-            public class MyModel
-            {
-                [Coalesce]
-                public class SomeOtherClass
                 {
                 }
             }

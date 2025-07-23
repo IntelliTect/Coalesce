@@ -2,7 +2,7 @@ using IntelliTect.Coalesce.Analyzer.Analyzers;
 
 namespace IntelliTect.Coalesce.Analyzer.Tests;
 
-public class Coalesce0005_UnexposedSecondaryAttributeTests : CSharpAnalyzerVerifier<Coalesce0005_UnexposedSecondaryAttribute>
+public class Coalesce0005_UnexposedSecondaryAttributeTests : CSharpAnalyzerVerifier<AttributeUsageAnalyzer>
 {
     [Fact]
     public async Task ServiceWithCoalesceAttribute_NoError()

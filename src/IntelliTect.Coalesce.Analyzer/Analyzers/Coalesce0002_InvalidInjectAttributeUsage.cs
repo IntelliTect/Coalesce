@@ -1,3 +1,5 @@
+using IntelliTect.Coalesce.Core.Extensions;
+
 namespace IntelliTect.Coalesce.Analyzer.Analyzers;
 
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
@@ -24,28 +26,17 @@ public class Coalesce0002_InvalidInjectAttributeUsage : DiagnosticAnalyzer
     {
         var parameterSymbol = (IParameterSymbol)context.Symbol;
 
-        // Check if parameter has InjectAttribute
-        if (!HasInjectAttribute(parameterSymbol))
-            return;
+        var injectAttr = parameterSymbol.GetAttributeByName("IntelliTect.Coalesce.DataAnnotations.InjectAttribute");
+        if (injectAttr is null) return;
 
-        var containingMethod = parameterSymbol.ContainingSymbol as IMethodSymbol;
-        if (containingMethod == null)
+        if (parameterSymbol.ContainingSymbol is not IMethodSymbol containingMethod)
             return;
 
         // Check if the method is a valid Coalesce client method
         if (!IsValidCoalesceMethod(containingMethod))
         {
-            var location = GetParameterLocation(parameterSymbol, context);
-            var diagnostic = Diagnostic.Create(_Rule, location);
-            context.ReportDiagnostic(diagnostic);
+            context.ReportDiagnostic(Diagnostic.Create(_Rule, injectAttr.GetLocation()));
         }
-    }
-
-    private static bool HasInjectAttribute(IParameterSymbol parameterSymbol)
-    {
-        return parameterSymbol.GetAttributes().Any(attr =>
-            attr.AttributeClass?.Name == "InjectAttribute" &&
-            attr.AttributeClass?.ContainingNamespace?.ToDisplayString() == "IntelliTect.Coalesce.DataAnnotations");
     }
 
     private static bool IsValidCoalesceMethod(IMethodSymbol methodSymbol)
@@ -78,31 +69,13 @@ public class Coalesce0002_InvalidInjectAttributeUsage : DiagnosticAnalyzer
 
     private static bool HasExposedAttribute(IMethodSymbol methodSymbol)
     {
-        return methodSymbol.GetAttributes().Any(attr =>
-            attr.AttributeClass?.Name is "CoalesceAttribute" or "SemanticKernelAttribute" &&
-            attr.AttributeClass?.ContainingNamespace?.ToDisplayString() == "IntelliTect.Coalesce");
+        return methodSymbol.GetAttributesByName(
+            "IntelliTect.Coalesce.CoalesceAttribute",
+            "IntelliTect.Coalesce.SemanticKernelAttribute").Any();
     }
 
     private static bool HasServiceAttribute(ITypeSymbol typeSymbol)
     {
-        return typeSymbol.GetAttributes().Any(attr =>
-            attr.AttributeClass?.Name == "ServiceAttribute" &&
-            attr.AttributeClass?.ContainingNamespace?.ToDisplayString() == "IntelliTect.Coalesce");
-    }
-
-    private static Location GetParameterLocation(IParameterSymbol parameterSymbol, SymbolAnalysisContext context)
-    {
-        // Try to get the location of the InjectAttribute specifically
-        var injectAttr = parameterSymbol.GetAttributes().FirstOrDefault(attr =>
-            attr.AttributeClass?.Name == "InjectAttribute" &&
-            attr.AttributeClass?.ContainingNamespace?.ToDisplayString() == "IntelliTect.Coalesce.DataAnnotations");
-
-        if (injectAttr?.ApplicationSyntaxReference != null)
-        {
-            return injectAttr.ApplicationSyntaxReference.GetSyntax().GetLocation();
-        }
-
-        // Fall back to parameter location
-        return parameterSymbol.Locations.FirstOrDefault() ?? Location.None;
+        return typeSymbol.GetAttributeByName("IntelliTect.Coalesce.ServiceAttribute") != null;
     }
 }

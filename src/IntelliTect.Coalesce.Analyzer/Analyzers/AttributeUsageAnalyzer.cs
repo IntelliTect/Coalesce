@@ -12,7 +12,7 @@ public class AttributeUsageAnalyzer : DiagnosticAnalyzer
     public static readonly DiagnosticDescriptor InvalidInjectAttributeUsageRule = new(
         id: "COALESCE0002",
         title: "Invalid InjectAttribute usage",
-        messageFormat: "InjectAttribute is only valid on parameters of Coalesce client methods - either methods marked with [Coalesce] or [SemanticKernel] attributes, or methods on interfaces marked with [Service] attribute",
+        messageFormat: "InjectAttribute is only valid on parameters of Coalesce client methods",
         category: "Usage",
         defaultSeverity: DiagnosticSeverity.Warning,
         isEnabledByDefault: true,
@@ -63,7 +63,24 @@ public class AttributeUsageAnalyzer : DiagnosticAnalyzer
         isEnabledByDefault: true,
         description: "IFile parameters on Coalesce-exposed methods should specify allowed file types using the [FileType] attribute to improve default user experience.");
 
-    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(InvalidInjectAttributeUsageRule, InvalidCoalesceUsageOnNestedTypesRule, InvalidCoalesceUsageRule, UnexposedSecondaryAttributeForTypesRule, UnexposedSecondaryAttributeForMethodsRule, MissingFileTypeAttributeRule);
+    public static readonly DiagnosticDescriptor InvalidSemanticKernelAttributeUsageRule = new(
+        id: "COALESCE0007",
+        title: "Invalid SemanticKernelAttribute usage on service or behavior type",
+        messageFormat: "SemanticKernelAttribute is not valid on {0}",
+        category: "Usage",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "SemanticKernelAttribute should not be used on service types or behavior types.");
+
+    public static readonly DiagnosticDescriptor GenericInvalidAttributeUsageRule = new(
+        id: "COALESCE0008",
+        title: "Invalid attribute usage",
+        messageFormat: "{0} has no effect in this location",
+        category: "Usage",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true);
+
+    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(InvalidInjectAttributeUsageRule, InvalidCoalesceUsageOnNestedTypesRule, InvalidCoalesceUsageRule, UnexposedSecondaryAttributeForTypesRule, UnexposedSecondaryAttributeForMethodsRule, MissingFileTypeAttributeRule, InvalidSemanticKernelAttributeUsageRule, GenericInvalidAttributeUsageRule);
 
     public override void Initialize(AnalysisContext context)
     {
@@ -78,6 +95,23 @@ public class AttributeUsageAnalyzer : DiagnosticAnalyzer
         var typeSymbol = (INamedTypeSymbol)context.Symbol;
 
         var coalesceAttr = typeSymbol.GetAttributeByName("IntelliTect.Coalesce.CoalesceAttribute");
+        var semanticKernelAttr = typeSymbol.GetAttributeByName("IntelliTect.Coalesce.SemanticKernelAttribute");
+
+        // COALESCE0007: Check for SemanticKernelAttribute on services or IBehaviors
+        if (semanticKernelAttr is not null)
+        {
+            var isService = typeSymbol.GetAttributeByName("IntelliTect.Coalesce.ServiceAttribute") is not null;
+            var isBehavior = typeSymbol.InheritsFromOrImplements("IntelliTect.Coalesce.IBehaviors`1");
+
+            if (isService || isBehavior)
+            {
+                if (semanticKernelAttr.GetLocation() is Location location)
+                {
+                    var typeDescription = isService ? "services" : "behaviors";
+                    context.ReportDiagnostic(Diagnostic.Create(InvalidSemanticKernelAttributeUsageRule, location, typeDescription));
+                }
+            }
+        }
 
         if (coalesceAttr is null)
         {
@@ -145,6 +179,25 @@ public class AttributeUsageAnalyzer : DiagnosticAnalyzer
         // Skip special methods like property getters/setters, event accessors, operators, etc., but allow constructors
         if (methodSymbol.MethodKind is not (MethodKind.Ordinary or MethodKind.Constructor))
             return;
+
+        // COALESCE0008: Check for general useless attributes inside crud strategies
+        if (methodSymbol.GetAttributesByName(
+                "IntelliTect.Coalesce.CoalesceAttribute",
+                "IntelliTect.Coalesce.SemanticKernelAttribute",
+                "IntelliTect.Coalesce.DataAnnotations.ExecuteAttribute",
+                "IntelliTect.Coalesce.DataAnnotations.HiddenAttribute",
+                "IntelliTect.Coalesce.DataAnnotations.InternalUseAttribute",
+                "IntelliTect.Coalesce.DataAnnotations.LoadFromDataSourceAttribute"
+            ).FirstOrDefault() is var badAttrInsideCrudStrategy &&
+            methodSymbol.ContainingType.InheritsFromOrImplements(
+                "IntelliTect.Coalesce.IDataSource`1",
+                "IntelliTect.Coalesce.IBehaviors`1"
+            ) &&
+            badAttrInsideCrudStrategy?.GetLocation() is Location attrLocation
+        )
+        {
+            context.ReportDiagnostic(Diagnostic.Create(GenericInvalidAttributeUsageRule, attrLocation, badAttrInsideCrudStrategy.AttributeClass!.Name));
+        }
 
         if (IsValidCoalesceMethod(methodSymbol))
         {

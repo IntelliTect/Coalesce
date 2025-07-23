@@ -1,4 +1,5 @@
 using Microsoft.CodeAnalysis;
+using System;
 using System.Collections.Generic;
 
 namespace IntelliTect.Coalesce.Core.Extensions;
@@ -21,9 +22,9 @@ public static class NamedTypeSymbolExtensions
     /// <c>true</c> if the type inherits from any of the specified base classes or implements any of the specified interfaces; 
     /// otherwise, <c>false</c>.
     /// </returns>
-    public static bool InheritsFromOrImplements(this INamedTypeSymbol typeSymbol, params string[] typesToCheck)
+    public static bool InheritsFromOrImplements(this INamedTypeSymbol typeSymbol, params ReadOnlySpan<string> typesToCheck)
     {
-        if (typesToCheck == null || typesToCheck.Length == 0)
+        if (typesToCheck.Length == 0)
             return false;
 
         // Check inheritance chain
@@ -59,16 +60,16 @@ public static class NamedTypeSymbolExtensions
     /// Each should be in the format "Namespace.TypeName" (e.g., "IntelliTect.Coalesce.CoalesceAttribute").
     /// </param>
     /// <returns>A collection of matching attributes.</returns>
-    public static IEnumerable<AttributeData> GetAttributesByName(this ISymbol symbol, params string[] attributeTypeNames)
+    public static IEnumerable<AttributeData> GetAttributesByName(this ISymbol symbol, params IReadOnlyCollection<string> attributeTypeNames)
     {
-        if (attributeTypeNames == null || attributeTypeNames.Length == 0)
+        if (attributeTypeNames == null || attributeTypeNames.Count == 0)
             yield break;
 
         var attributes = symbol.GetAttributes();
         for (int i = 0; i < attributes.Length; i++)
         {
             var attr = attributes[i];
-            if (attr.AttributeClass is { } attrClass && TypeMatches(attrClass, attributeTypeNames))
+            if (attr.AttributeClass is { } attrClass && TypeMatches(attrClass, [.. attributeTypeNames]))
             {
                 yield return attr;
             }
@@ -84,9 +85,9 @@ public static class NamedTypeSymbolExtensions
     /// Each should be in the format "Namespace.TypeName" (e.g., "IntelliTect.Coalesce.CoalesceAttribute").
     /// </param>
     /// <returns>The first matching attribute, or null if none found.</returns>
-    public static AttributeData? GetAttributeByName(this ISymbol symbol, params string[] attributeTypeNames)
+    public static AttributeData? GetAttributeByName(this ISymbol symbol, params ReadOnlySpan<string> attributeTypeNames)
     {
-        if (attributeTypeNames == null || attributeTypeNames.Length == 0)
+        if (attributeTypeNames.Length == 0)
             return null;
 
         var attributes = symbol.GetAttributes();
@@ -108,7 +109,7 @@ public static class NamedTypeSymbolExtensions
     /// <param name="typeSymbol">The type symbol to check.</param>
     /// <param name="typesToCheck">The array of type names to check against.</param>
     /// <returns>True if the type matches any of the specified names.</returns>
-    private static bool TypeMatches(INamedTypeSymbol typeSymbol, string[] typesToCheck)
+    private static bool TypeMatches(INamedTypeSymbol typeSymbol, ReadOnlySpan<string> typesToCheck)
     {
         if (typeSymbol?.ContainingNamespace == null)
             return false;
@@ -157,7 +158,8 @@ public static class NamedTypeSymbolExtensions
 
         while (current != null && !current.IsGlobalNamespace)
         {
-            var nameLength = current.Name.Length;
+            var currentName = current.Name;
+            var nameLength = currentName.Length;
 
             // Check if we have enough characters left
             if (currentIndex < nameLength)
@@ -169,7 +171,7 @@ public static class NamedTypeSymbolExtensions
             // Check if the part matches
             for (int i = 0; i < nameLength; i++)
             {
-                if (fullTypeName[currentIndex + i] != current.Name[i])
+                if (fullTypeName[currentIndex + i] != currentName[i])
                     return false;
             }
 

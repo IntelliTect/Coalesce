@@ -1,0 +1,159 @@
+using IntelliTect.Coalesce.Analyzer.Analyzers;
+
+namespace IntelliTect.Coalesce.Analyzer.Tests;
+
+public class Coalesce0005_UnexposedSecondaryAttributeTests : CSharpAnalyzerVerifier<Coalesce0005_UnexposedSecondaryAttribute>
+{
+    [Fact]
+    public async Task ServiceWithCoalesceAttribute_NoError()
+    {
+        await VerifyAnalyzerAsync("""
+            [Coalesce, Service]
+            public class PersonService
+            {
+            }
+            """);
+    }
+
+    [Fact]
+    public async Task StandaloneEntityWithCoalesceAttribute_NoError()
+    {
+        await VerifyAnalyzerAsync("""
+            [Coalesce, StandaloneEntity]
+            public class Person
+            {
+                public int Id { get; set; }
+            }
+            """);
+    }
+
+    [Fact]
+    public async Task ExecuteAttributeWithCoalesceAttribute_NoError()
+    {
+        await VerifyAnalyzerAsync("""
+            public class PersonService
+            {
+                [Coalesce, Execute]
+                public void DoSomething() { }
+            }
+            """);
+    }
+
+    [Fact]
+    public async Task ExecuteAttributeWithSemanticKernelAttribute_NoError()
+    {
+        await VerifyAnalyzerAsync("""
+            public class PersonService
+            {
+                [SemanticKernel, Execute]
+                public void DoSomething() { }
+            }
+            """);
+    }
+
+    [Fact]
+    public async Task ExecuteAttributeOnServiceClass_NoError()
+    {
+        await VerifyAnalyzerAsync("""
+            [Coalesce, Service]
+            public class PersonService
+            {
+                [Execute]
+                public void DoSomething() { }
+            }
+            """);
+    }
+
+    [Fact]
+    public async Task ServiceClassAlone_ReportsError()
+    {
+        await VerifyAnalyzerAndCodeFixAsync<Coalesce0005_UnexposedSecondaryAttributeCodeFixProvider>("""
+            [{|COALESCE0005:Service|}]
+            public class PersonService
+            {
+            }
+            """, """
+            [Coalesce, Service]
+            public class PersonService
+            {
+            }
+            """);
+    }
+
+    [Fact]
+    public async Task StandaloneEntityWithoutCoalesceOrSemanticKernel_ReportsError()
+    {
+        await VerifyAnalyzerAndCodeFixAsync<Coalesce0005_UnexposedSecondaryAttributeCodeFixProvider>("""
+            [{|COALESCE0005:StandaloneEntity|}]
+            public class Person
+            {
+                public int Id { get; set; }
+            }
+            """, """
+            [Coalesce, StandaloneEntity]
+            public class Person
+            {
+                public int Id { get; set; }
+            }
+            """);
+    }
+
+    [Fact]
+    public async Task ExecuteAttributeOnSimpleMethod_ReportsError()
+    {
+        await VerifyAnalyzerAndCodeFixAsync<Coalesce0005_UnexposedSecondaryAttributeCodeFixProvider>("""
+            public class TestService
+            {
+                [{|COALESCE0006:Execute|}]
+                public void DoSomething() { }
+            }
+            """, """
+            public class TestService
+            {
+                [Coalesce, Execute]
+                public void DoSomething() { }
+            }
+            """);
+    }
+
+    [Fact]
+    public async Task ServiceWithExistingAttributes_AddsCoalesceFirst()
+    {
+        await VerifyAnalyzerAndCodeFixAsync<Coalesce0005_UnexposedSecondaryAttributeCodeFixProvider>("""
+            [Obsolete]
+            [{|COALESCE0005:StandaloneEntity|}]
+            public class PersonService
+            {
+            }
+            """, """
+            [Obsolete]
+            [Coalesce, StandaloneEntity]
+            public class PersonService
+            {
+            }
+            """);
+    }
+
+    [Fact]
+    public async Task RegularClassWithoutSpecialAttributes_NoError()
+    {
+        await VerifyAnalyzerAsync("""
+            public class RegularClass
+            {
+                public void DoSomething() { }
+            }
+            """);
+    }
+
+    [Fact]
+    public async Task RegularMethodWithoutExecuteAttribute_NoError()
+    {
+        await VerifyAnalyzerAsync("""
+            public class RegularClass
+            {
+                [Obsolete]
+                public void DoSomething() { }
+            }
+            """);
+    }
+}

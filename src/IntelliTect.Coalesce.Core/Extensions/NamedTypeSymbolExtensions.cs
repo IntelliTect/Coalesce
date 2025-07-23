@@ -27,6 +27,12 @@ public static class NamedTypeSymbolExtensions
         if (typesToCheck.Length == 0)
             return false;
 
+        // Check if the type itself matches
+        if (TypeMatches(typeSymbol, typesToCheck))
+        {
+            return true;
+        }
+
         // Check inheritance chain
         var current = typeSymbol.BaseType;
         while (current is not null)

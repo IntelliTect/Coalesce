@@ -54,7 +54,16 @@ public class AttributeUsageAnalyzer : DiagnosticAnalyzer
         isEnabledByDefault: true,
         description: "Methods marked with [Execute] require either [Coalesce] or [SemanticKernel] attribute to be properly processed by the Coalesce framework.");
 
-    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(InvalidInjectAttributeUsageRule, InvalidCoalesceUsageOnNestedTypesRule, InvalidCoalesceUsageRule, UnexposedSecondaryAttributeForTypesRule, UnexposedSecondaryAttributeForMethodsRule);
+    public static readonly DiagnosticDescriptor MissingFileTypeAttributeRule = new(
+        id: "COALESCE0201",
+        title: "Consider adding FileTypeAttribute to IFile parameter",
+        messageFormat: "Consider adding [FileType] attribute to specify allowed file types for this IFile parameter",
+        category: "Usage",
+        defaultSeverity: DiagnosticSeverity.Info,
+        isEnabledByDefault: true,
+        description: "IFile parameters on Coalesce-exposed methods should specify allowed file types using the [FileType] attribute to improve default user experience.");
+
+    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(InvalidInjectAttributeUsageRule, InvalidCoalesceUsageOnNestedTypesRule, InvalidCoalesceUsageRule, UnexposedSecondaryAttributeForTypesRule, UnexposedSecondaryAttributeForMethodsRule, MissingFileTypeAttributeRule);
 
     public override void Initialize(AnalysisContext context)
     {
@@ -80,8 +89,7 @@ public class AttributeUsageAnalyzer : DiagnosticAnalyzer
             if (targetAttr?.GetLocation() is Location attrLocation)
             {
                 var attributeName = targetAttr.AttributeClass?.Name?.Replace("Attribute", "") ?? "Unknown";
-                var diagnostic = Diagnostic.Create(UnexposedSecondaryAttributeForTypesRule, attrLocation, $"[{attributeName}]");
-                context.ReportDiagnostic(diagnostic);
+                context.ReportDiagnostic(Diagnostic.Create(UnexposedSecondaryAttributeForTypesRule, attrLocation, $"[{attributeName}]"));
             }
         }
         else if (!coalesceAttr.ConstructorArguments.Any() && !coalesceAttr.NamedArguments.Any())
@@ -93,8 +101,7 @@ public class AttributeUsageAnalyzer : DiagnosticAnalyzer
             {
                 if (coalesceAttr.GetLocation() is Location location)
                 {
-                    var diagnostic = Diagnostic.Create(InvalidCoalesceUsageRule, location);
-                    context.ReportDiagnostic(diagnostic);
+                    context.ReportDiagnostic(Diagnostic.Create(InvalidCoalesceUsageRule, location));
                 }
             }
 
@@ -107,8 +114,7 @@ public class AttributeUsageAnalyzer : DiagnosticAnalyzer
             {
                 if (coalesceAttr.GetLocation() is Location location)
                 {
-                    var diagnostic = Diagnostic.Create(InvalidCoalesceUsageOnNestedTypesRule, location);
-                    context.ReportDiagnostic(diagnostic);
+                    context.ReportDiagnostic(Diagnostic.Create(InvalidCoalesceUsageOnNestedTypesRule, location));
                 }
             }
         }
@@ -142,6 +148,18 @@ public class AttributeUsageAnalyzer : DiagnosticAnalyzer
 
         if (IsValidCoalesceMethod(methodSymbol))
         {
+            // Check for IFile parameters without FileType attribute
+            foreach (var parameter in methodSymbol.Parameters)
+            {
+                if (parameter.Type is INamedTypeSymbol namedType &&
+                    namedType.InheritsFromOrImplements("IntelliTect.Coalesce.Models.IFile") &&
+                    parameter.GetAttributeByName("IntelliTect.Coalesce.DataAnnotations.FileTypeAttribute") is null &&
+                    parameter.Locations.FirstOrDefault() is Location paramLocation
+                )
+                {
+                    context.ReportDiagnostic(Diagnostic.Create(MissingFileTypeAttributeRule, paramLocation));
+                }
+            }
             return;
         }
 
@@ -158,8 +176,7 @@ public class AttributeUsageAnalyzer : DiagnosticAnalyzer
             var injectAttr = parameter.GetAttributeByName("IntelliTect.Coalesce.DataAnnotations.InjectAttribute");
             if (injectAttr is not null && injectAttr.GetLocation() is Location location2)
             {
-                var diagnostic = Diagnostic.Create(InvalidInjectAttributeUsageRule, location2);
-                context.ReportDiagnostic(diagnostic);
+                context.ReportDiagnostic(Diagnostic.Create(InvalidInjectAttributeUsageRule, location2));
             }
         }
 

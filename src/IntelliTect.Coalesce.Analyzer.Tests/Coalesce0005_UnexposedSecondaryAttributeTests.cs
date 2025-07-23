@@ -52,13 +52,20 @@ public class Coalesce0005_UnexposedSecondaryAttributeTests : CSharpAnalyzerVerif
     }
 
     [Fact]
-    public async Task ExecuteAttributeOnServiceClass_NoError()
+    public async Task ExecuteAttributeOnServiceClass_ReportsError()
     {
-        await VerifyAnalyzerAsync("""
+        await VerifyAnalyzerAndCodeFixAsync<Coalesce0005_UnexposedSecondaryAttributeCodeFixProvider>("""
             [Coalesce, Service]
             public class PersonService
             {
-                [Execute]
+                [{|COALESCE0006:Execute|}]
+                public void DoSomething() { }
+            }
+            """, """
+            [Coalesce, Service]
+            public class PersonService
+            {
+                [Coalesce, Execute]
                 public void DoSomething() { }
             }
             """);

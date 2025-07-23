@@ -49,20 +49,14 @@ public class Coalesce0002_InvalidInjectAttributeUsageCodeFixProvider : CodeFixPr
         if (attributeList.Attributes.Count == 1)
         {
             // Remove the entire attribute list if it only contains the Inject attribute
-            newRoot = root.RemoveNode(attributeList, SyntaxRemoveOptions.KeepNoTrivia);
+            newRoot = root.RemoveNode(attributeList, SyntaxRemoveOptions.KeepLeadingTrivia);
         }
         else
         {
-            // Remove only the Inject attribute from the list
-            var newAttributeList = attributeList.RemoveNode(injectAttribute, SyntaxRemoveOptions.KeepNoTrivia);
-            if (newAttributeList != null)
-            {
-                newRoot = root.ReplaceNode(attributeList, newAttributeList);
-            }
-            else
-            {
-                newRoot = root.RemoveNode(attributeList, SyntaxRemoveOptions.KeepNoTrivia);
-            }
+            // Remove only the Inject attribute from the list, handling commas properly
+            var newAttributes = attributeList.Attributes.Remove(injectAttribute);
+            var newAttributeList = attributeList.WithAttributes(newAttributes);
+            newRoot = root.ReplaceNode(attributeList, newAttributeList);
         }
 
         return document.WithSyntaxRoot(newRoot ?? root);

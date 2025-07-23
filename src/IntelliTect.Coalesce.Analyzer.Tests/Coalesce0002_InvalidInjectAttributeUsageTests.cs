@@ -3,7 +3,7 @@ using Microsoft.CodeAnalysis.Testing;
 
 namespace IntelliTect.Coalesce.Analyzer.Tests;
 
-public class Coalesce0002_InvalidInjectAttributeUsageTests : CSharpAnalyzerVerifier<Coalesce0002_InvalidInjectAttributeUsage>
+public class Coalesce0002_InvalidInjectAttributeUsageTests : CSharpAnalyzerVerifier<AttributeUsageAnalyzer>
 {
     [Fact]
     public async Task InjectAttributeOnCoalesceMethod_NoWarning()
@@ -166,6 +166,32 @@ public class Coalesce0002_InvalidInjectAttributeUsageTests : CSharpAnalyzerVerif
             public class TestClass
             {
                 public void TestMethod([Inject] string parameter)
+                {
+                }
+            }
+            """);
+    }
+
+    [Fact]
+    public async Task InjectAttributeOnConstructorParameter_ReportsWarning()
+    {
+        await VerifyAnalyzerAndCodeFixAsync<Coalesce0002_InvalidInjectAttributeUsageCodeFixProvider>("""
+            public class Person
+            {
+                public int Id { get; set; }
+                public class PersonBehaviors(
+                    [{|COALESCE0002:Inject|}] CrudContext<DbContext> context
+                ) : StandardBehaviors<Person, DbContext>(context)
+                {
+                }
+            }
+            """, """
+            public class Person
+            {
+                public int Id { get; set; }
+                public class PersonBehaviors(
+                    CrudContext<DbContext> context
+                ) : StandardBehaviors<Person, DbContext>(context)
                 {
                 }
             }

@@ -9,6 +9,15 @@ namespace IntelliTect.Coalesce.Analyzer.Analyzers;
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public class AttributeUsageAnalyzer : DiagnosticAnalyzer
 {
+    public static readonly DiagnosticDescriptor InvalidInjectAttributeUsageRule = new(
+        id: "COALESCE0002",
+        title: "Invalid InjectAttribute usage",
+        messageFormat: "InjectAttribute is only valid on parameters of Coalesce client methods - either methods marked with [Coalesce] or [SemanticKernel] attributes, or methods on interfaces marked with [Service] attribute",
+        category: "Usage",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "InjectAttribute can only be used on parameters of methods that are exposed by the Coalesce framework.");
+
     public static readonly DiagnosticDescriptor InvalidCoalesceUsageOnNestedTypesRule = new(
         id: "COALESCE0003",
         title: "Invalid CoalesceAttribute usage on nested data source or behavior",
@@ -30,22 +39,22 @@ public class AttributeUsageAnalyzer : DiagnosticAnalyzer
     public static readonly DiagnosticDescriptor UnexposedSecondaryAttributeForTypesRule = new(
         id: "COALESCE0005",
         title: "Unexposed secondary attribute",
-        messageFormat: "{0} attribute must be accompanied by [Coalesce] to be exposed by the framework",
+        messageFormat: "{0} attribute must be accompanied by [Coalesce] to be exposed by the Coalesce framework",
         category: "Usage",
         defaultSeverity: DiagnosticSeverity.Warning,
         isEnabledByDefault: true,
-        description: "Types marked with [Service] or [StandaloneEntity] require [Coalesce] attribute to be properly processed by the framework.");
+        description: "Types marked with [Service] or [StandaloneEntity] require [Coalesce] attribute to be properly processed by the Coalesce framework.");
 
     public static readonly DiagnosticDescriptor UnexposedSecondaryAttributeForMethodsRule = new(
         id: "COALESCE0006",
         title: "Unexposed secondary attribute",
-        messageFormat: "{0} attribute must be accompanied by either [Coalesce] or [SemanticKernel] to be exposed by the framework",
+        messageFormat: "{0} attribute must be accompanied by either [Coalesce] or [SemanticKernel] to be exposed by the Coalesce framework",
         category: "Usage",
         defaultSeverity: DiagnosticSeverity.Warning,
         isEnabledByDefault: true,
-        description: "Methods marked with [Execute] require either [Coalesce] or [SemanticKernel] attribute to be properly processed by the framework.");
+        description: "Methods marked with [Execute] require either [Coalesce] or [SemanticKernel] attribute to be properly processed by the Coalesce framework.");
 
-    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(InvalidCoalesceUsageOnNestedTypesRule, InvalidCoalesceUsageRule, UnexposedSecondaryAttributeForTypesRule, UnexposedSecondaryAttributeForMethodsRule);
+    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(InvalidInjectAttributeUsageRule, InvalidCoalesceUsageOnNestedTypesRule, InvalidCoalesceUsageRule, UnexposedSecondaryAttributeForTypesRule, UnexposedSecondaryAttributeForMethodsRule);
 
     public override void Initialize(AnalysisContext context)
     {
@@ -127,35 +136,69 @@ public class AttributeUsageAnalyzer : DiagnosticAnalyzer
     {
         var methodSymbol = (IMethodSymbol)context.Symbol;
 
-        // Skip special methods like constructors, property getters/setters, etc.
-        if (methodSymbol.MethodKind != MethodKind.Ordinary)
+        // Skip special methods like property getters/setters, event accessors, operators, etc., but allow constructors
+        if (methodSymbol.MethodKind is not (MethodKind.Ordinary or MethodKind.Constructor))
             return;
 
-        var executeAttr = methodSymbol.GetAttributeByName("IntelliTect.Coalesce.DataAnnotations.ExecuteAttribute");
-
-        if (executeAttr == null) return;
-
-        // Check if the method has [Coalesce] or [SemanticKernel] attribute
-        var hasCoalesceOrSemanticKernel = methodSymbol.GetAttributesByName(
-            "IntelliTect.Coalesce.CoalesceAttribute",
-            "IntelliTect.Coalesce.SemanticKernelAttribute").Any();
-
-        if (hasCoalesceOrSemanticKernel) return;
-
-        // Check if the containing type has [Service] attribute or [Coalesce] attribute (which makes Execute valid)
-        if (methodSymbol.ContainingType != null)
+        if (IsValidCoalesceMethod(methodSymbol))
         {
-            var typeHasServiceOrCoalesce = methodSymbol.ContainingType.GetAttributesByName(
-                "IntelliTect.Coalesce.ServiceAttribute",
-                "IntelliTect.Coalesce.CoalesceAttribute").Any();
-
-            if (typeHasServiceOrCoalesce) return;
+            return;
         }
 
-        var location = executeAttr.GetLocation();
-        if (location is null) return;
+        var executeAttr = methodSymbol.GetAttributeByName("IntelliTect.Coalesce.DataAnnotations.ExecuteAttribute");
+        if (executeAttr is not null && executeAttr.GetLocation() is Location location)
+        {
+            var diagnostic = Diagnostic.Create(UnexposedSecondaryAttributeForMethodsRule, location, "[Execute]");
+            context.ReportDiagnostic(diagnostic);
+        }
 
-        var diagnostic = Diagnostic.Create(UnexposedSecondaryAttributeForMethodsRule, location, "[Execute]");
-        context.ReportDiagnostic(diagnostic);
+        // Analyze parameters for InjectAttribute usage
+        foreach (var parameter in methodSymbol.Parameters)
+        {
+            var injectAttr = parameter.GetAttributeByName("IntelliTect.Coalesce.DataAnnotations.InjectAttribute");
+            if (injectAttr is not null && injectAttr.GetLocation() is Location location2)
+            {
+                var diagnostic = Diagnostic.Create(InvalidInjectAttributeUsageRule, location2);
+                context.ReportDiagnostic(diagnostic);
+            }
+        }
+
+    }
+
+    private static bool IsValidCoalesceMethod(IMethodSymbol methodSymbol)
+    {
+        // Check if method has [Coalesce] or [SemanticKernel] attribute
+        if (methodSymbol.GetAttributesByName(
+            "IntelliTect.Coalesce.CoalesceAttribute",
+            "IntelliTect.Coalesce.SemanticKernelAttribute").Any())
+        {
+            return true;
+        }
+
+        // Check if method is on an interface marked with [Service]
+        var containingType = methodSymbol.ContainingType;
+        if (
+            containingType != null &&
+            containingType.TypeKind == TypeKind.Interface &&
+            containingType.GetAttributeByName("IntelliTect.Coalesce.ServiceAttribute") != null)
+        {
+            return true;
+        }
+
+        // Check if method implements an interface method that would be valid
+        if (containingType != null && containingType.TypeKind == TypeKind.Class)
+        {
+            foreach (var interfaceType in containingType.AllInterfaces)
+            {
+                var interfaceMethod = interfaceType.GetMembers(methodSymbol.Name)
+                    .OfType<IMethodSymbol>()
+                    .FirstOrDefault(m => methodSymbol.ContainingType.FindImplementationForInterfaceMember(m)?.Equals(methodSymbol, SymbolEqualityComparer.Default) == true);
+
+                if (interfaceMethod != null && IsValidCoalesceMethod(interfaceMethod))
+                    return true;
+            }
+        }
+
+        return false;
     }
 }

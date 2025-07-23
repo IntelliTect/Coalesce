@@ -16,9 +16,8 @@
 
   FOR IMMEDIATE TESTING OF THE ANALYZER IN OTHER PROJECTS, ADD THE FOLLOWING:
     <ItemGroup>
-      <Analyzer
-  Include="D:\Coalesce\src\IntelliTect.Coalesce.Analyzer\bin\Release\netstandard2.0\IntelliTect.Coalesce.Analyzer.dll"
-  />
+      <Analyzer Include="D:\Coalesce\src\IntelliTect.Coalesce.Analyzer\bin\Release\netstandard2.0\IntelliTect.Coalesce.Core.dll" />
+      <Analyzer Include="D:\Coalesce\src\IntelliTect.Coalesce.Analyzer\bin\Release\netstandard2.0\IntelliTect.Coalesce.Analyzer.dll" />
     </ItemGroup>
   -->
   <ItemGroup>
